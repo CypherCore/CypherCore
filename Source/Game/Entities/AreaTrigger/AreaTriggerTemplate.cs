@@ -239,9 +239,9 @@ namespace Game.Entities
                         if (PolygonDatas.Height <= 0.0f)
                             PolygonDatas.Height = 1.0f;
 
-                        foreach (Vector2 vertice in PolygonVertices)
+                        foreach (var vertice in PolygonVertices)
                         {
-                            float pointDist = vertice.GetLength();
+                            var pointDist = vertice.GetLength();
 
                             if (pointDist > MaxSearchRadius)
                                 MaxSearchRadius = pointDist;

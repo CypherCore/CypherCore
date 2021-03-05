@@ -30,17 +30,17 @@ namespace Game.Chat.Commands
         {
             static bool HandleAddDisables(StringArguments args, CommandHandler handler, DisableType disableType)
             {
-                uint entry = args.NextUInt32();
+                var entry = args.NextUInt32();
                 if (entry == 0)
                     return false;
 
-                uint flags = args.NextUInt32();
+                var flags = args.NextUInt32();
 
-                string disableComment = args.NextString("");
+                var disableComment = args.NextString("");
                 if (string.IsNullOrEmpty(disableComment))
                     return false;
 
-                string disableTypeStr = "";
+                var disableTypeStr = "";
                 switch (disableType)
                 {
                     case DisableType.Spell:
@@ -127,10 +127,10 @@ namespace Game.Chat.Commands
                         break;
                 }
 
-                PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_DISABLES);
+                var stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_DISABLES);
                 stmt.AddValue(0, entry);
                 stmt.AddValue(1, disableType);
-                SQLResult result = DB.World.Query(stmt);
+                var result = DB.World.Query(stmt);
                 if (!result.IsEmpty())
                 {
                     handler.SendSysMessage("This {0} (Id: {1}) is already disabled.", disableTypeStr, entry);
@@ -227,10 +227,10 @@ namespace Game.Chat.Commands
         {
             static bool HandleRemoveDisables(StringArguments args, CommandHandler handler, DisableType disableType)
             {
-                if (!uint.TryParse(args.NextString(), out uint entry) || entry == 0)
+                if (!uint.TryParse(args.NextString(), out var entry) || entry == 0)
                     return false;
 
-                string disableTypeStr = "";
+                var disableTypeStr = "";
                 switch (disableType)
                 {
                     case DisableType.Spell:
@@ -259,10 +259,10 @@ namespace Game.Chat.Commands
                         break;
                 }
 
-                PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_DISABLES);
+                var stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_DISABLES);
                 stmt.AddValue(0, entry);
                 stmt.AddValue(1, disableType);
-                SQLResult result = DB.World.Query(stmt);
+                var result = DB.World.Query(stmt);
                 if (result.IsEmpty())
                 {
                     handler.SendSysMessage("This {0} (Id: {1}) is not disabled.", disableTypeStr, entry);

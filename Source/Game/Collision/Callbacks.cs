@@ -39,8 +39,8 @@ namespace Game.Collision
 
         public void Invoke(MeshTriangle tri, out AxisAlignedBox value)
         {
-            Vector3 lo = vertices[(int)tri.idx0];
-            Vector3 hi = lo;
+            var lo = vertices[(int)tri.idx0];
+            var hi = lo;
 
             lo = (lo.Min(vertices[(int)tri.idx1])).Min(vertices[(int)tri.idx2]);
             hi = (hi.Max(vertices[(int)tri.idx1])).Max(vertices[(int)tri.idx2]);
@@ -88,7 +88,7 @@ namespace Game.Collision
         }
         public override bool Invoke(Ray ray, uint entry, ref float distance, bool pStopAtFirstHit)
         {
-            bool result = models[(int)entry].IntersectRay(ray, ref distance, pStopAtFirstHit);
+            var result = models[(int)entry].IntersectRay(ray, ref distance, pStopAtFirstHit);
             if (result) hit = true;
             return hit;
         }
@@ -106,7 +106,7 @@ namespace Game.Collision
         }
         public override bool Invoke(Ray ray, uint entry, ref float distance, bool pStopAtFirstHit)
         {
-            bool result = IntersectTriangle(triangles[(int)entry], vertices, ray, ref distance);
+            var result = IntersectTriangle(triangles[(int)entry], vertices, ray, ref distance);
             if (result)
                 hit = true;
 
@@ -119,10 +119,10 @@ namespace Game.Collision
 
             // See RTR2 ch. 13.7 for the algorithm.
 
-            Vector3 e1 = points[(int)tri.idx1] - points[(int)tri.idx0];
-            Vector3 e2 = points[(int)tri.idx2] - points[(int)tri.idx0];
-            Vector3 p = new Vector3(ray.Direction.cross(e2));
-            float a = e1.dot(p);
+            var e1 = points[(int)tri.idx1] - points[(int)tri.idx0];
+            var e2 = points[(int)tri.idx2] - points[(int)tri.idx0];
+            var p = new Vector3(ray.Direction.cross(e2));
+            var a = e1.dot(p);
 
             if (Math.Abs(a) < EPS)
             {
@@ -130,9 +130,9 @@ namespace Game.Collision
                 return false;
             }
 
-            float f = 1.0f / a;
-            Vector3 s = new Vector3(ray.Origin - points[(int)tri.idx0]);
-            float u = f * s.dot(p);
+            var f = 1.0f / a;
+            var s = new Vector3(ray.Origin - points[(int)tri.idx0]);
+            var u = f * s.dot(p);
 
             if ((u < 0.0f) || (u > 1.0f))
             {
@@ -140,8 +140,8 @@ namespace Game.Collision
                 return false;
             }
 
-            Vector3 q = new Vector3(s.cross(e1));
-            float v = f * ray.Direction.dot(q);
+            var q = new Vector3(s.cross(e1));
+            var v = f * ray.Direction.dot(q);
 
             if ((v < 0.0f) || ((u + v) > 1.0f))
             {
@@ -149,7 +149,7 @@ namespace Game.Collision
                 return false;
             }
 
-            float t = f * e2.dot(q);
+            var t = f * e2.dot(q);
 
             if ((t > 0.0f) && (t < distance))
             {
@@ -178,7 +178,7 @@ namespace Game.Collision
         {
             if (prims[entry] == null)
                 return false;
-            bool result = prims[entry].IntersectRay(ray, ref distance, pStopAtFirstHit, flags);
+            var result = prims[entry].IntersectRay(ray, ref distance, pStopAtFirstHit, flags);
             if (result)
                 hit = true;
             return result;

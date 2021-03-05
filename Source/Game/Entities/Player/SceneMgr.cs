@@ -39,7 +39,7 @@ namespace Game.Entities
 
         public uint PlayScene(uint sceneId, Position position = null)
         {
-            SceneTemplate sceneTemplate = Global.ObjectMgr.GetSceneTemplate(sceneId);
+            var sceneTemplate = Global.ObjectMgr.GetSceneTemplate(sceneId);
             return PlaySceneByTemplate(sceneTemplate, position);
         }
 
@@ -48,7 +48,7 @@ namespace Game.Entities
             if (sceneTemplate == null)
                 return 0;
 
-            SceneScriptPackageRecord entry = CliDB.SceneScriptPackageStorage.LookupByKey(sceneTemplate.ScenePackageId);
+            var entry = CliDB.SceneScriptPackageStorage.LookupByKey(sceneTemplate.ScenePackageId);
             if (entry == null)
                 return 0;
 
@@ -56,12 +56,12 @@ namespace Game.Entities
             if (position == null)
                 position = GetPlayer();
 
-            uint sceneInstanceID = GetNewStandaloneSceneInstanceID();
+            var sceneInstanceID = GetNewStandaloneSceneInstanceID();
 
             if (_isDebuggingScenes)
                 GetPlayer().SendSysMessage(CypherStrings.CommandSceneDebugPlay, sceneInstanceID, sceneTemplate.ScenePackageId, sceneTemplate.PlaybackFlags);
 
-            PlayScene playScene = new PlayScene();
+            var playScene = new PlayScene();
             playScene.SceneID = sceneTemplate.SceneId;
             playScene.PlaybackFlags = (uint)sceneTemplate.PlaybackFlags;
             playScene.SceneInstanceID = sceneInstanceID;
@@ -81,7 +81,7 @@ namespace Game.Entities
 
         public uint PlaySceneByPackageId(uint sceneScriptPackageId, SceneFlags playbackflags = SceneFlags.Unk16, Position position = null)
         {
-            SceneTemplate sceneTemplate = new SceneTemplate();
+            var sceneTemplate = new SceneTemplate();
             sceneTemplate.SceneId = 0;
             sceneTemplate.ScenePackageId = sceneScriptPackageId;
             sceneTemplate.PlaybackFlags = playbackflags;
@@ -96,7 +96,7 @@ namespace Game.Entities
             if (removeFromMap)
                 RemoveSceneInstanceId(sceneInstanceID);
 
-            CancelScene cancelScene = new CancelScene();
+            var cancelScene = new CancelScene();
             cancelScene.SceneInstanceID = sceneInstanceID;
             GetPlayer().SendPacket(cancelScene);
         }
@@ -109,7 +109,7 @@ namespace Game.Entities
             if (_isDebuggingScenes)
                 GetPlayer().SendSysMessage(CypherStrings.CommandSceneDebugTrigger, sceneInstanceID, triggerName);
 
-            SceneTemplate sceneTemplate = GetSceneTemplateFromInstanceId(sceneInstanceID);
+            var sceneTemplate = GetSceneTemplateFromInstanceId(sceneInstanceID);
             Global.ScriptMgr.OnSceneTrigger(GetPlayer(), sceneInstanceID, sceneTemplate, triggerName);
         }
 
@@ -121,7 +121,7 @@ namespace Game.Entities
             if (_isDebuggingScenes)
                 GetPlayer().SendSysMessage(CypherStrings.CommandSceneDebugCancel, sceneInstanceID);
 
-            SceneTemplate sceneTemplate = GetSceneTemplateFromInstanceId(sceneInstanceID);
+            var sceneTemplate = GetSceneTemplateFromInstanceId(sceneInstanceID);
 
             // Must be done before removing aura
             RemoveSceneInstanceId(sceneInstanceID);
@@ -143,7 +143,7 @@ namespace Game.Entities
             if (_isDebuggingScenes)
                 GetPlayer().SendSysMessage(CypherStrings.CommandSceneDebugComplete, sceneInstanceID);
 
-            SceneTemplate sceneTemplate = GetSceneTemplateFromInstanceId(sceneInstanceID);
+            var sceneTemplate = GetSceneTemplateFromInstanceId(sceneInstanceID);
 
             // Must be done before removing aura
             RemoveSceneInstanceId(sceneInstanceID);
@@ -174,25 +174,25 @@ namespace Game.Entities
 
         public void CancelSceneBySceneId(uint sceneId)
         {
-            List<uint> instancesIds = new List<uint>();
+            var instancesIds = new List<uint>();
 
             foreach (var pair in _scenesByInstance)
                 if (pair.Value.SceneId == sceneId)
                     instancesIds.Add(pair.Key);
 
-            foreach (uint sceneInstanceID in instancesIds)
+            foreach (var sceneInstanceID in instancesIds)
                 CancelScene(sceneInstanceID);
         }
 
         public void CancelSceneByPackageId(uint sceneScriptPackageId)
         {
-            List<uint> instancesIds = new List<uint>();
+            var instancesIds = new List<uint>();
 
             foreach (var sceneTemplate in _scenesByInstance)
                 if (sceneTemplate.Value.ScenePackageId == sceneScriptPackageId)
                     instancesIds.Add(sceneTemplate.Key);
 
-            foreach (uint sceneInstanceID in instancesIds)
+            foreach (var sceneInstanceID in instancesIds)
                 CancelScene(sceneInstanceID);
         }
 

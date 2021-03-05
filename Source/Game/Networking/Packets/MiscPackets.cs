@@ -200,7 +200,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteInt32(Data.Count);
 
-            foreach (Record data in Data)
+            foreach (var data in Data)
             {
                 _worldPacket.WriteUInt32(data.Type);
                 _worldPacket.WriteUInt32(data.Quantity);
@@ -529,7 +529,7 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
 
             _worldPacket.WriteInt32(CemeteryID.Count);
-            foreach (uint cemetery in CemeteryID)
+            foreach (var cemetery in CemeteryID)
                 _worldPacket.WriteUInt32(cemetery);
         }
 
@@ -711,10 +711,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(Level);
             _worldPacket.WriteUInt32(HealthDelta);
 
-            foreach (int power in PowerDelta)
+            foreach (var power in PowerDelta)
                 _worldPacket.WriteInt32(power);
 
-            foreach (int stat in StatDelta)
+            foreach (var stat in StatDelta)
                 _worldPacket.WriteInt32(stat);
 
             _worldPacket.WriteInt32(NumNewTalents);
@@ -796,15 +796,15 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(Client);
             Phaseshift.Write(_worldPacket);
             _worldPacket.WriteInt32(VisibleMapIDs.Count * 2);           // size in bytes
-            foreach (ushort visibleMapId in VisibleMapIDs)
+            foreach (var visibleMapId in VisibleMapIDs)
                 _worldPacket.WriteUInt16(visibleMapId);                   // Active terrain swap map id
 
             _worldPacket.WriteInt32(PreloadMapIDs.Count * 2);           // size in bytes
-            foreach (ushort preloadMapId in PreloadMapIDs)
+            foreach (var preloadMapId in PreloadMapIDs)
                 _worldPacket.WriteUInt16(preloadMapId);                            // Inactive terrain swap map id
 
             _worldPacket.WriteInt32(UiMapPhaseIDs.Count * 2);   // size in bytes
-            foreach (ushort uiMapPhaseId in UiMapPhaseIDs)
+            foreach (var uiMapPhaseId in UiMapPhaseIDs)
                 _worldPacket.WriteUInt16(uiMapPhaseId);          // UI map id, WorldMapArea.db2, controls map display
         }
 
@@ -968,12 +968,12 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint count = _worldPacket.ReadUInt32();
+            var count = _worldPacket.ReadUInt32();
             for (byte i = 0; i < count && i < PlayerConst.MaxCUFProfiles; i++)
             {
-                CUFProfile cufProfile = new CUFProfile();
+                var cufProfile = new CUFProfile();
 
-                byte strLen = _worldPacket.ReadBits<byte>(7);
+                var strLen = _worldPacket.ReadBits<byte>(7);
 
                 // Bool Options
                 for (byte option = 0; option < (int)CUFBoolOptions.BoolOptionsCount; option++)
@@ -1011,7 +1011,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteInt32(CUFProfiles.Count);
 
-            foreach (CUFProfile cufProfile in CUFProfiles)
+            foreach (var cufProfile in CUFProfiles)
             {
                 _worldPacket.WriteBits(cufProfile.ProfileName.GetByteCount(), 7);
 
@@ -1403,7 +1403,7 @@ namespace Game.Networking.Packets
             data.WriteUInt32(PhaseShiftFlags);
             data.WriteInt32(Phases.Count);
             data.WritePackedGuid(PersonalGUID);
-            foreach (PhaseShiftDataPhase phaseShiftDataPhase in Phases)
+            foreach (var phaseShiftDataPhase in Phases)
                 phaseShiftDataPhase.Write(data);
         }
 

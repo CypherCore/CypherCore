@@ -37,7 +37,7 @@ namespace Game.Entities
 
             if (input != null)
             {
-                int block = 0;
+                var block = 0;
                 for (; block < input.Length; ++block)
                     if ((_blocks[block] = input[block]) != 0)
                         _blocksMask[GetBlockIndex(block)] |= (uint)GetBlockFlag(block);
@@ -69,7 +69,7 @@ namespace Game.Entities
 
         public void Reset(int index)
         {
-            int blockIndex = GetBlockIndex(index);
+            var blockIndex = GetBlockIndex(index);
             if ((_blocks[blockIndex] &= ~(uint)GetBlockFlag(index)) == 0)
                 _blocksMask[GetBlockIndex(blockIndex)] &= ~(uint)GetBlockFlag(blockIndex);
         }
@@ -82,37 +82,37 @@ namespace Game.Entities
 
         public void Set(int index)
         {
-            int blockIndex = GetBlockIndex(index);
+            var blockIndex = GetBlockIndex(index);
             _blocks[blockIndex] |= (uint)GetBlockFlag(index);
             _blocksMask[GetBlockIndex(blockIndex)] |= (uint)GetBlockFlag(blockIndex);
         }
 
         public void SetAll()
         {
-            for (int i = 0; i < _blocksMaskCount; ++i)
+            for (var i = 0; i < _blocksMaskCount; ++i)
                 _blocksMask[i] = 0xFFFFFFFF;
-            for (int i = 0; i < _blockCount; ++i)
+            for (var i = 0; i < _blockCount; ++i)
                 _blocks[i] = 0xFFFFFFFF;
 
             if ((_blocksMaskCount % 32) != 0)
             {
-                int unused = 32 - (_blocksMaskCount % 32);
+                var unused = 32 - (_blocksMaskCount % 32);
                 _blocksMask[_blocksMaskCount - 1] &= (0xFFFFFFFF >> unused);
             }
 
             if ((_blockCount % 32) != 0)
             {
-                int unused = 32 - (_blockCount % 32);
+                var unused = 32 - (_blockCount % 32);
                 _blocks[_blockCount - 1] &= (0xFFFFFFFF >> unused);
             }
         }
 
         public void AND(UpdateMask right)
         {
-            for (int i = 0; i < _blocksMaskCount; ++i)
+            for (var i = 0; i < _blocksMaskCount; ++i)
                 _blocksMask[i] &= right._blocksMask[i];
 
-            for (int i = 0; i < _blockCount; ++i)
+            for (var i = 0; i < _blockCount; ++i)
             {
                 if (!Convert.ToBoolean(_blocks[i] &= right._blocks[i]))
                     _blocksMask[GetBlockIndex(i)] &= ~(uint)GetBlockFlag(i);
@@ -121,23 +121,23 @@ namespace Game.Entities
 
         public void OR(UpdateMask right)
         {
-            for (int i = 0; i < _blocksMaskCount; ++i)
+            for (var i = 0; i < _blocksMaskCount; ++i)
                 _blocksMask[i] |= right._blocksMask[i];
 
-            for (int i = 0; i < _blockCount; ++i)
+            for (var i = 0; i < _blockCount; ++i)
                 _blocks[i] |= right._blocks[i];
         }
 
         public static UpdateMask operator &(UpdateMask left, UpdateMask right)
         {
-            UpdateMask result = left;
+            var result = left;
             result.AND(right);
             return result;
         }
 
         public static UpdateMask operator |(UpdateMask left, UpdateMask right)
         {
-            UpdateMask result = left;
+            var result = left;
             result.OR(right);
             return result;
         }

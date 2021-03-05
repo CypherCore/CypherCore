@@ -95,7 +95,7 @@ namespace Scripts.Spells.Warrior
 
         void HandleDummy(uint effIndex)
         {
-            uint spellId = SpellIds.ChargeEffect;
+            var spellId = SpellIds.ChargeEffect;
             if (GetCaster().HasAura(SpellIds.GlyphOfTheBlazingTrail))
                 spellId = SpellIds.ChargeEffectBlazingTrail;
 
@@ -118,8 +118,8 @@ namespace Scripts.Spells.Warrior
             {
                 for (uint i = 0; i < 5; ++i)
                 {
-                    int timeOffset = (int)(6 * i * aurEff.GetPeriod() / 25);
-                    Vector4 loc = GetTarget().MoveSpline.ComputePosition(timeOffset);
+                    var timeOffset = (int)(6 * i * aurEff.GetPeriod() / 25);
+                    var loc = GetTarget().MoveSpline.ComputePosition(timeOffset);
                     GetTarget().SendPlaySpellVisual(new Vector3(loc.X, loc.Y, loc.Z), 0.0f, Misc.SpellVisualBlazingCharge, 0, 0, 1.0f, true);
                 }
             }
@@ -142,8 +142,8 @@ namespace Scripts.Spells.Warrior
 
         void HandleCharge(uint effIndex)
         {
-            Unit caster = GetCaster();
-            Unit target = GetHitUnit();
+            var caster = GetCaster();
+            var target = GetHitUnit();
             caster.CastCustomSpell(SpellIds.ChargePauseRageDecay, SpellValueMod.BasePoint0, 0, caster, true);
             caster.CastSpell(target, SpellIds.ChargeRootEffect, true);
             caster.CastSpell(target, SpellIds.ChargeSlowEffect, true);
@@ -165,7 +165,7 @@ namespace Scripts.Spells.Warrior
 
         void HandleOnHit()
         {
-            Unit target = GetHitUnit();
+            var target = GetHitUnit();
             if (target)
                 GetCaster().CastSpell(target, SpellIds.ColossusSmashEffect, true);
         }
@@ -186,7 +186,7 @@ namespace Scripts.Spells.Warrior
 
         SpellCastResult CheckElevation()
         {
-            WorldLocation dest = GetExplTargetDest();
+            var dest = GetExplTargetDest();
             if (dest != null)
             {
                 if (GetCaster().HasUnitMovementFlag(MovementFlag.Root))
@@ -194,12 +194,12 @@ namespace Scripts.Spells.Warrior
 
                 if (GetCaster().GetMap().Instanceable())
                 {
-                    float range = GetSpellInfo().GetMaxRange(true, GetCaster()) * 1.5f;
+                    var range = GetSpellInfo().GetMaxRange(true, GetCaster()) * 1.5f;
 
-                    PathGenerator generatedPath = new PathGenerator(GetCaster());
+                    var generatedPath = new PathGenerator(GetCaster());
                     generatedPath.SetPathLengthLimit(range);
 
-                    bool result = generatedPath.CalculatePath(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ(), false, true);
+                    var result = generatedPath.CalculatePath(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ(), false, true);
                     if (generatedPath.GetPathType().HasAnyFlag(PathType.Short))
                         return SpellCastResult.OutOfRange;
                     else if (!result || generatedPath.GetPathType().HasAnyFlag(PathType.NoPath))
@@ -222,7 +222,7 @@ namespace Scripts.Spells.Warrior
 
         void HandleDummy(uint effIndex)
         {
-            WorldLocation dest = GetHitDest();
+            var dest = GetHitDest();
             if (dest != null)
                 GetCaster().CastSpell(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ(), SpellIds.HeroicLeapJump, true);
         }
@@ -269,7 +269,7 @@ namespace Scripts.Spells.Warrior
 
         void HandleAfterCast()
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             caster.CastSpell(caster, SpellIds.ImpendingVictoryHeal, true);
             caster.RemoveAurasDueToSpell(SpellIds.Victorious);
         }
@@ -309,8 +309,8 @@ namespace Scripts.Spells.Warrior
         {
             PreventDefaultAction();
 
-            Unit target = eventInfo.GetActionTarget();
-            int bp0 = (int)MathFunctions.CalculatePct(target.GetMaxHealth(), GetSpellInfo().GetEffect(1).CalcValue());
+            var target = eventInfo.GetActionTarget();
+            var bp0 = (int)MathFunctions.CalculatePct(target.GetMaxHealth(), GetSpellInfo().GetEffect(1).CalcValue());
             target.CastCustomSpell(SpellIds.Stoicism, SpellValueMod.BasePoint0, bp0, (Unit)null, true);
         }
 
@@ -330,7 +330,7 @@ namespace Scripts.Spells.Warrior
 
         void HandleDummy(uint effIndex)
         {
-            Unit target = GetHitUnit();
+            var target = GetHitUnit();
             if (target)
                 GetCaster().CastSpell(target, SpellIds.MortalWounds, true);
         }
@@ -356,7 +356,7 @@ namespace Scripts.Spells.Warrior
 
         void HandleScript(uint effIndex)
         {
-            int basePoints0 = (int)(GetHitUnit().CountPctFromMaxHealth(GetEffectValue()));
+            var basePoints0 = (int)(GetHitUnit().CountPctFromMaxHealth(GetEffectValue()));
 
             GetCaster().CastCustomSpell(GetHitUnit(), SpellIds.RallyingCry, basePoints0, 0, 0, true);
         }
@@ -436,7 +436,7 @@ namespace Scripts.Spells.Warrior
         void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             // Remove cooldown on Colossus Smash
-            Player player = GetTarget().ToPlayer();
+            var player = GetTarget().ToPlayer();
             if (player)
                 player.GetSpellHistory().ResetCooldown(SpellIds.ColossusSmash, true);
         }
@@ -465,10 +465,10 @@ namespace Scripts.Spells.Warrior
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            DamageInfo damageInfo = eventInfo.GetDamageInfo();
+            var damageInfo = eventInfo.GetDamageInfo();
             if (damageInfo != null)
             {
-                SpellInfo spellInfo = damageInfo.GetSpellInfo();
+                var spellInfo = damageInfo.GetSpellInfo();
                 if (spellInfo != null && (spellInfo.Id == SpellIds.BladestormPeriodicWhirlwind || (spellInfo.Id == SpellIds.Execute && !_procTarget.HasAuraState(AuraStateType.HealthLess20Percent))))
                 {
                     // If triggered by Execute (while target is not under 20% hp) or Bladestorm deals normalized weapon damage
@@ -476,7 +476,7 @@ namespace Scripts.Spells.Warrior
                 }
                 else
                 {
-                    int damage = (int)damageInfo.GetDamage();
+                    var damage = (int)damageInfo.GetDamage();
                     GetTarget().CastCustomSpell(SpellIds.SweepingStrikesExtraAttack1, SpellValueMod.BasePoint0, damage, _procTarget, true, null, aurEff);
                 }
             }
@@ -501,11 +501,11 @@ namespace Scripts.Spells.Warrior
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            Unit target = eventInfo.GetActionTarget();
+            var target = eventInfo.GetActionTarget();
             //Get the Remaining Damage from the aura (if exist)
-            int remainingDamage = (int)target.GetRemainingPeriodicAmount(target.GetGUID(), SpellIds.TraumaEffect, AuraType.PeriodicDamage);
+            var remainingDamage = (int)target.GetRemainingPeriodicAmount(target.GetGUID(), SpellIds.TraumaEffect, AuraType.PeriodicDamage);
             //Get 25% of damage from the spell casted (Slam & Whirlwind) plus Remaining Damage from Aura
-            int damage = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()) / Global.SpellMgr.GetSpellInfo(SpellIds.TraumaEffect, GetCastDifficulty()).GetMaxTicks()) + remainingDamage;
+            var damage = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()) / Global.SpellMgr.GetSpellInfo(SpellIds.TraumaEffect, GetCastDifficulty()).GetMaxTicks()) + remainingDamage;
             GetCaster().CastCustomSpell(SpellIds.TraumaEffect, SpellValueMod.BasePoint0, damage, target, true);
         }
 
@@ -523,7 +523,7 @@ namespace Scripts.Spells.Warrior
             if (eventInfo.GetActionTarget().HealthBelowPct(20))
                 return true;
 
-            DamageInfo damageInfo = eventInfo.GetDamageInfo();
+            var damageInfo = eventInfo.GetDamageInfo();
             if (damageInfo != null && damageInfo.GetDamage() != 0)
                 if (GetTarget().HealthBelowPctDamaged(20, damageInfo.GetDamage()))
                     return true;
@@ -569,7 +569,7 @@ namespace Scripts.Spells.Warrior
 
         void HandleHeal()
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
 
             caster.CastSpell(caster, SpellIds.VictoriousRushHeal, true);
             caster.RemoveAurasDueToSpell(SpellIds.Victorious);

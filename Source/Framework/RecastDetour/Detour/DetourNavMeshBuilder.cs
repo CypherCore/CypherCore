@@ -117,11 +117,11 @@ public static partial class Detour
         public int FromBytes(byte[] array, int start)
         {
             firstLink = BitConverter.ToUInt32(array, start); start += sizeof(uint);
-            for (int i = 0; i < DT_VERTS_PER_POLYGON; ++i)
+            for (var i = 0; i < DT_VERTS_PER_POLYGON; ++i)
             {
                 verts[i] = BitConverter.ToUInt16(array, start); start += sizeof(ushort);
             }
-            for (int i = 0; i < DT_VERTS_PER_POLYGON; ++i)
+            for (var i = 0; i < DT_VERTS_PER_POLYGON; ++i)
             {
                 neis[i] = BitConverter.ToUInt16(array, start); start += sizeof(ushort);
             }
@@ -133,14 +133,14 @@ public static partial class Detour
 
         public byte[] ToBytes()
         {
-            List<byte> bytes = new List<byte>();
+            var bytes = new List<byte>();
 
             bytes.AddRange(BitConverter.GetBytes(firstLink));
-            for (int i = 0; i < DT_VERTS_PER_POLYGON; ++i)
+            for (var i = 0; i < DT_VERTS_PER_POLYGON; ++i)
             {
                 bytes.AddRange(BitConverter.GetBytes(verts[i]));
             }
-            for (int i = 0; i < DT_VERTS_PER_POLYGON; ++i)
+            for (var i = 0; i < DT_VERTS_PER_POLYGON; ++i)
             {
                 bytes.AddRange(BitConverter.GetBytes(neis[i]));
             }
@@ -196,7 +196,7 @@ public static partial class Detour
 
         public byte[] ToBytes()
         {
-            List<byte> bytes = new List<byte>();
+            var bytes = new List<byte>();
 
             bytes.AddRange(BitConverter.GetBytes(vertBase));
             bytes.AddRange(BitConverter.GetBytes(triBase));
@@ -232,7 +232,7 @@ public static partial class Detour
 
         public byte[] ToBytes()
         {
-            List<byte> bytes = new List<byte>();
+            var bytes = new List<byte>();
 
             bytes.AddRange(BitConverter.GetBytes(polyRef));
             bytes.AddRange(BitConverter.GetBytes(next));
@@ -256,11 +256,11 @@ public static partial class Detour
 
         public int FromBytes(byte[] array, int start)
         {
-            for (int j = 0; j < bmin.Length; ++j)
+            for (var j = 0; j < bmin.Length; ++j)
             {
                 bmin[j] = BitConverter.ToUInt16(array, start); start += sizeof(ushort);
             }
-            for (int j = 0; j < bmax.Length; ++j)
+            for (var j = 0; j < bmax.Length; ++j)
             {
                 bmax[j] = BitConverter.ToUInt16(array, start); start += sizeof(ushort);
             }
@@ -270,12 +270,12 @@ public static partial class Detour
 
         public byte[] ToBytes()
         {
-            List<byte> bytes = new List<byte>();
-            for (int j = 0; j < bmin.Length; ++j)
+            var bytes = new List<byte>();
+            for (var j = 0; j < bmin.Length; ++j)
             {
                 bytes.AddRange(BitConverter.GetBytes(bmin[j]));
             }
-            for (int j = 0; j < bmax.Length; ++j)
+            for (var j = 0; j < bmax.Length; ++j)
             {
                 bytes.AddRange(BitConverter.GetBytes(bmax[j]));
             }
@@ -312,7 +312,7 @@ public static partial class Detour
 
         public int FromBytes(byte[] array, int start)
         {
-            for (int i = 0; i < 6; ++i)
+            for (var i = 0; i < 6; ++i)
             {
                 pos[i] = BitConverter.ToSingle(array, start); start += sizeof(float);
             }
@@ -326,8 +326,8 @@ public static partial class Detour
 
         public byte[] ToBytes()
         {
-            List<byte> bytes = new List<byte>();
-            for (int i = 0; i < 6; ++i)
+            var bytes = new List<byte>();
+            for (var i = 0; i < 6; ++i)
             {
                 bytes.AddRange(BitConverter.GetBytes(pos[i]));
             }
@@ -397,11 +397,11 @@ public static partial class Detour
             walkableRadius = BitConverter.ToSingle(array, start); start += sizeof(float);
             walkableClimb = BitConverter.ToSingle(array, start); start += sizeof(float);
 
-            for (int i = 0; i < 3; ++i)
+            for (var i = 0; i < 3; ++i)
             {
                 bmin[i] = BitConverter.ToSingle(array, start); start += sizeof(float);
             }
-            for (int i = 0; i < 3; ++i)
+            for (var i = 0; i < 3; ++i)
             {
                 bmax[i] = BitConverter.ToSingle(array, start); start += sizeof(float);
             }
@@ -412,7 +412,7 @@ public static partial class Detour
 
         public byte[] ToBytes()
         {
-            List<byte> bytes = new List<byte>();
+            var bytes = new List<byte>();
 
             bytes.AddRange(BitConverter.GetBytes(magic));
             bytes.AddRange(BitConverter.GetBytes(version));
@@ -434,11 +434,11 @@ public static partial class Detour
             bytes.AddRange(BitConverter.GetBytes(walkableHeight));
             bytes.AddRange(BitConverter.GetBytes(walkableRadius));
             bytes.AddRange(BitConverter.GetBytes(walkableClimb));
-            for (int i = 0; i < 3; ++i)
+            for (var i = 0; i < 3; ++i)
             {
                 bytes.AddRange(BitConverter.GetBytes(bmin[i]));
             }
-            for (int i = 0; i < 3; ++i)
+            for (var i = 0; i < 3; ++i)
             {
                 bytes.AddRange(BitConverter.GetBytes(bmax[i]));
             }
@@ -475,9 +475,9 @@ public static partial class Detour
             header = new dtMeshHeader();
             start = header.FromBytes(array, start);
 
-            int count = header.vertCount * 3;
+            var count = header.vertCount * 3;
             verts = new float[count];
-            int c = 0;
+            var c = 0;
             for (; c < count; ++c)
             {
                 verts[c] = BitConverter.ToSingle(array, start);
@@ -485,49 +485,49 @@ public static partial class Detour
             }
             count = header.polyCount;
             polys = new dtPoly[count];
-            for (int i = 0; i < count; ++i)
+            for (var i = 0; i < count; ++i)
             {
                 polys[i] = new dtPoly();
                 start = polys[i].FromBytes(array, start);
             }
             count = header.maxLinkCount;
             links = new dtLink[count];
-            for (int i = 0; i < count; ++i)
+            for (var i = 0; i < count; ++i)
             {
                 links[i] = new dtLink();
                 start = links[i].FromBytes(array, start);
             }
             count = header.detailMeshCount;
             detailMeshes = new dtPolyDetail[count];
-            for (int i = 0; i < count; ++i)
+            for (var i = 0; i < count; ++i)
             {
                 detailMeshes[i] = new dtPolyDetail();
                 start = detailMeshes[i].FromBytes(array, start);
             }
             count = header.detailVertCount * 3;
             detailVerts = new float[count];
-            for (int i = 0; i < count; ++i)
+            for (var i = 0; i < count; ++i)
             {
                 detailVerts[i] = BitConverter.ToSingle(array, start);
                 start += sizeof(float);
             }
             count = header.detailTriCount * 4;
             detailTris = new byte[count];
-            for (int i = 0; i < count; ++i)
+            for (var i = 0; i < count; ++i)
             {
                 detailTris[i] = array[start + i];
             }
             start += count;
             count = header.bvNodeCount;
             bvTree = new dtBVNode[count];
-            for (int i = 0; i < count; ++i)
+            for (var i = 0; i < count; ++i)
             {
                 bvTree[i] = new dtBVNode();
                 start = bvTree[i].FromBytes(array, start);
             }
             count = header.offMeshConCount;
             offMeshCons = new dtOffMeshConnection[count];
-            for (int i = 0; i < count; ++i)
+            for (var i = 0; i < count; ++i)
             {
                 offMeshCons[i] = new dtOffMeshConnection();
                 start = offMeshCons[i].FromBytes(array, start);
@@ -537,38 +537,38 @@ public static partial class Detour
 
         public byte[] ToBytes()
         {
-            List<byte> bytes = new List<byte>();
+            var bytes = new List<byte>();
 
             bytes.AddRange(header.ToBytes());
-            for (int i = 0; i < polys.Length; ++i)
+            for (var i = 0; i < polys.Length; ++i)
             {
                 bytes.AddRange(polys[i].ToBytes());
             }
-            for (int i = 0; i < verts.Length; ++i)
+            for (var i = 0; i < verts.Length; ++i)
             {
                 bytes.AddRange(BitConverter.GetBytes(verts[i]));
             }
-            for (int i = 0; i < links.Length; ++i)
+            for (var i = 0; i < links.Length; ++i)
             {
                 bytes.AddRange(links[i].ToBytes());
             }
-            for (int i = 0; i < detailMeshes.Length; ++i)
+            for (var i = 0; i < detailMeshes.Length; ++i)
             {
                 bytes.AddRange(detailMeshes[i].ToBytes());
             }
-            for (int i = 0; i < detailVerts.Length; ++i)
+            for (var i = 0; i < detailVerts.Length; ++i)
             {
                 bytes.AddRange(BitConverter.GetBytes(detailVerts[i]));
             }
-            for (int i = 0; i < detailTris.Length; ++i)
+            for (var i = 0; i < detailTris.Length; ++i)
             {
                 bytes.Add(detailTris[i]);
             }
-            for (int i = 0; i < bvTree.Length; ++i)
+            for (var i = 0; i < bvTree.Length; ++i)
             {
                 bytes.AddRange(bvTree[i].ToBytes());
             }
-            for (int i = 0; i < offMeshCons.Length; ++i)
+            for (var i = 0; i < offMeshCons.Length; ++i)
             {
                 bytes.AddRange(offMeshCons[i].ToBytes());
             }
@@ -645,8 +645,8 @@ public static partial class Detour
         ///
         public dtNavMeshParams Clone()
         {
-            dtNavMeshParams copy = new dtNavMeshParams();
-            for (int i = 0; i < orig.Length; ++i)
+            var copy = new dtNavMeshParams();
+            for (var i = 0; i < orig.Length; ++i)
             {
                 copy.orig[i] = orig[i];
             }
@@ -814,10 +814,10 @@ public static partial class Detour
         bmax[1] = items[imin].bmax[1];
         bmax[2] = items[imin].bmax[2];
 
-        for (int i = imin + 1; i < imax; ++i)
+        for (var i = imin + 1; i < imax; ++i)
         {
             //const BVItem& it = items[i];
-            BVItem it = items[i];
+            var it = items[i];
             if (it.bmin[0] < bmin[0]) bmin[0] = it.bmin[0];
             if (it.bmin[1] < bmin[1]) bmin[1] = it.bmin[1];
             if (it.bmin[2] < bmin[2]) bmin[2] = it.bmin[2];
@@ -830,8 +830,8 @@ public static partial class Detour
 
     public static int longestAxis(ushort x, ushort y, ushort z)
     {
-        int axis = 0;
-        ushort maxVal = x;
+        var axis = 0;
+        var maxVal = x;
         if (y > maxVal)
         {
             axis = 1;
@@ -847,10 +847,10 @@ public static partial class Detour
 
     public static void subdivide(BVItem[] items, int nitems, int imin, int imax, ref int curNode, dtBVNode[] nodes)
     {
-        int inum = imax - imin;
-        int icur = curNode;
+        var inum = imax - imin;
+        var icur = curNode;
 
-        dtBVNode node = nodes[curNode++];
+        var node = nodes[curNode++];
 
         if (inum == 1)
         {
@@ -870,7 +870,7 @@ public static partial class Detour
             // Split
             calcExtends(items, nitems, imin, imax, node.bmin, node.bmax);
 
-            int axis = longestAxis((ushort)(node.bmax[0] - node.bmin[0]),
+            var axis = longestAxis((ushort)(node.bmax[0] - node.bmin[0]),
                                    (ushort)(node.bmax[1] - node.bmin[1]),
                                    (ushort)(node.bmax[2] - node.bmin[2]));
 
@@ -893,14 +893,14 @@ public static partial class Detour
                 Array.Sort(items, imin, inum, new BVItemCompareZ());
             }
 
-            int isplit = imin + inum / 2;
+            var isplit = imin + inum / 2;
 
             // Left
             subdivide(items, nitems, imin, isplit, ref curNode, nodes);
             // Right
             subdivide(items, nitems, isplit, imax, ref curNode, nodes);
 
-            int iescape = curNode - icur;
+            var iescape = curNode - icur;
             // Negative index means escape.
             node.i = -iescape;
         }
@@ -909,26 +909,26 @@ public static partial class Detour
     public static int createBVTree(dtNavMeshCreateParams createParams, dtBVNode[] nodes, int nnodes)
     {
         // Build tree
-        float quantFactor = 1 / createParams.cs;
-        BVItem[] items = new BVItem[createParams.polyCount];//(BVItem*)dtAlloc(sizeof(BVItem)*npolys, DT_ALLOC_TEMP);
+        var quantFactor = 1 / createParams.cs;
+        var items = new BVItem[createParams.polyCount];//(BVItem*)dtAlloc(sizeof(BVItem)*npolys, DT_ALLOC_TEMP);
         dtcsArrayItemsCreate(items);
-        for (int i = 0; i < createParams.polyCount; i++)
+        for (var i = 0; i < createParams.polyCount; i++)
         {
-            BVItem it = items[i];
+            var it = items[i];
             it.i = i;
             // Calc polygon bounds. Use detail meshes if available.
             if (createParams.detailMeshes != null)
             {
-                int vb = (int)createParams.detailMeshes[i * 4 + 0];
-                int ndv = (int)createParams.detailMeshes[i * 4 + 1];
-                float[] bmin = new float[3];
-                float[] bmax = new float[3];
+                var vb = (int)createParams.detailMeshes[i * 4 + 0];
+                var ndv = (int)createParams.detailMeshes[i * 4 + 1];
+                var bmin = new float[3];
+                var bmax = new float[3];
 
-                float[] dv = createParams.detailVerts[(vb * 3)..];
+                var dv = createParams.detailVerts[(vb * 3)..];
                 dtVcopy(bmin, dv);
                 dtVcopy(bmax, dv);
 
-                for (int j = 1; j < ndv; j++)
+                for (var j = 1; j < ndv; j++)
                 {
                     dtVmin(bmin, dv[(j * 3)..]);
                     dtVmax(bmax, dv[(j * 3)..]);
@@ -945,17 +945,17 @@ public static partial class Detour
             }
             else
             {
-                ushort[] p = createParams.polys[(i * createParams.nvp * 2)..];
+                var p = createParams.polys[(i * createParams.nvp * 2)..];
                 it.bmin[0] = it.bmax[0] = createParams.verts[p[0] * 3 + 0];
                 it.bmin[1] = it.bmax[1] = createParams.verts[p[0] * 3 + 1];
                 it.bmin[2] = it.bmax[2] = createParams.verts[p[0] * 3 + 2];
 
-                for (int j = 1; j < createParams.nvp; ++j)
+                for (var j = 1; j < createParams.nvp; ++j)
                 {
                     if (p[j] == MESH_NULL_IDX) break;
-                    ushort x = createParams.verts[p[j] * 3 + 0];
-                    ushort y = createParams.verts[p[j] * 3 + 1];
-                    ushort z = createParams.verts[p[j] * 3 + 2];
+                    var x = createParams.verts[p[j] * 3 + 0];
+                    var y = createParams.verts[p[j] * 3 + 1];
+                    var z = createParams.verts[p[j] * 3 + 2];
 
                     if (x < it.bmin[0]) it.bmin[0] = x;
                     if (y < it.bmin[1]) it.bmin[1] = y;
@@ -971,7 +971,7 @@ public static partial class Detour
             }
         }
 
-        int curNode = 0;
+        var curNode = 0;
         subdivide(items, createParams.polyCount, 0, createParams.polyCount, ref curNode, nodes);
 
         //dtFree(items);
@@ -1035,13 +1035,13 @@ public static partial class Detour
         if (createParams.polyCount == 0 || createParams.polys == null)
             return false;
 
-        int nvp = createParams.nvp;
+        var nvp = createParams.nvp;
 
         // Classify off-mesh connection points. We store only the connections
         // whose start point is inside the tile.
         byte[] offMeshConClass = null;
-        int storedOffMeshConCount = 0;
-        int offMeshConLinkCount = 0;
+        var storedOffMeshConCount = 0;
+        var offMeshConLinkCount = 0;
 
         if (createParams.offMeshConCount > 0)
         {
@@ -1051,43 +1051,43 @@ public static partial class Detour
                 return false;
 
             // Find tight heigh bounds, used for culling out off-mesh start locations.
-            float hmin = float.MaxValue;
-            float hmax = -float.MaxValue;
+            var hmin = float.MaxValue;
+            var hmax = -float.MaxValue;
 
             if (createParams.detailVerts != null && createParams.detailVertsCount != 0)
             {
-                for (int i = 0; i < createParams.detailVertsCount; ++i)
+                for (var i = 0; i < createParams.detailVertsCount; ++i)
                 {
-                    float h = createParams.detailVerts[i * 3 + 1];
+                    var h = createParams.detailVerts[i * 3 + 1];
                     hmin = Math.Min(hmin, h);
                     hmax = Math.Max(hmax, h);
                 }
             }
             else
             {
-                for (int i = 0; i < createParams.vertCount; ++i)
+                for (var i = 0; i < createParams.vertCount; ++i)
                 {
                     //ushort* iv = &createParams.verts[i*3];
-                    float h = createParams.bmin[1] + createParams.verts[i * 3 + 1] * createParams.ch;
+                    var h = createParams.bmin[1] + createParams.verts[i * 3 + 1] * createParams.ch;
                     hmin = Math.Min(hmin, h);
                     hmax = Math.Max(hmax, h);
                 }
             }
             hmin -= createParams.walkableClimb;
             hmax += createParams.walkableClimb;
-            float[] bmin = new float[3];//, bmax[3];
-            float[] bmax = new float[3];
+            var bmin = new float[3];//, bmax[3];
+            var bmax = new float[3];
             dtVcopy(bmin, createParams.bmin);
             dtVcopy(bmax, createParams.bmax);
             bmin[1] = hmin;
             bmax[1] = hmax;
 
-            for (int i = 0; i < createParams.offMeshConCount; ++i)
+            for (var i = 0; i < createParams.offMeshConCount; ++i)
             {
                 //const float* p0 = &createParams.offMeshConVerts[(i*2+0)*3];
                 //const float* p1 = &createParams.offMeshConVerts[(i*2+1)*3];
-                int p0Start = (i * 2 + 0) * 3;
-                int p1Start = (i * 2 + 1) * 3;
+                var p0Start = (i * 2 + 0) * 3;
+                var p1Start = (i * 2 + 1) * 3;
                 offMeshConClass[i * 2 + 0] = classifyOffMeshPoint(createParams.offMeshConVerts, p0Start, bmin, bmax);
                 offMeshConClass[i * 2 + 1] = classifyOffMeshPoint(createParams.offMeshConVerts, p1Start, bmin, bmax);
 
@@ -1112,46 +1112,46 @@ public static partial class Detour
         }
 
         // Off-mesh connectionss are stored as polygons, adjust values.
-        int totPolyCount = createParams.polyCount + storedOffMeshConCount;
-        int totVertCount = createParams.vertCount + storedOffMeshConCount * 2;
+        var totPolyCount = createParams.polyCount + storedOffMeshConCount;
+        var totVertCount = createParams.vertCount + storedOffMeshConCount * 2;
 
         // Find portal edges which are at tile borders.
-        int edgeCount = 0;
-        int portalCount = 0;
-        for (int i = 0; i < createParams.polyCount; ++i)
+        var edgeCount = 0;
+        var portalCount = 0;
+        for (var i = 0; i < createParams.polyCount; ++i)
         {
             //const ushort* p = &createParams.polys[i*2*nvp];
-            int pStart = i * 2 * nvp;
-            for (int j = 0; j < nvp; ++j)
+            var pStart = i * 2 * nvp;
+            for (var j = 0; j < nvp; ++j)
             {
                 if (createParams.polys[pStart + j] == MESH_NULL_IDX) break;
                 edgeCount++;
 
                 if ((createParams.polys[pStart + nvp + j] & 0x8000) != 0)
                 {
-                    ushort dir = (ushort)(createParams.polys[pStart + nvp + j] & 0xf);
+                    var dir = (ushort)(createParams.polys[pStart + nvp + j] & 0xf);
                     if (dir != 0xf)
                         portalCount++;
                 }
             }
         }
 
-        int maxLinkCount = edgeCount + portalCount * 2 + offMeshConLinkCount * 2;
+        var maxLinkCount = edgeCount + portalCount * 2 + offMeshConLinkCount * 2;
 
         // Find unique detail vertices.
-        int uniqueDetailVertCount = 0;
-        int detailTriCount = 0;
+        var uniqueDetailVertCount = 0;
+        var detailTriCount = 0;
         if (createParams.detailMeshes != null)
         {
             // Has detail mesh, count unique detail vertex count and use input detail tri count.
             detailTriCount = createParams.detailTriCount;
-            for (int i = 0; i < createParams.polyCount; ++i)
+            for (var i = 0; i < createParams.polyCount; ++i)
             {
                 //const ushort* p = &createParams.polys[i*nvp*2];
-                int pStart = i * nvp * 2;
-                int ndv = (int)createParams.detailMeshes[i * 4 + 1];
-                int nv = 0;
-                for (int j = 0; j < nvp; ++j)
+                var pStart = i * nvp * 2;
+                var ndv = (int)createParams.detailMeshes[i * 4 + 1];
+                var nv = 0;
+                for (var j = 0; j < nvp; ++j)
                 {
                     if (createParams.polys[pStart + j] == MESH_NULL_IDX)
                         break;
@@ -1166,12 +1166,12 @@ public static partial class Detour
             // No input detail mesh, build detail mesh from nav polys.
             uniqueDetailVertCount = 0; // No extra detail verts.
             detailTriCount = 0;
-            for (int i = 0; i < createParams.polyCount; ++i)
+            for (var i = 0; i < createParams.polyCount; ++i)
             {
                 //const ushort* p = &createParams.polys[i*nvp*2];
-                int pStart = i * nvp * 2;
-                int nv = 0;
-                for (int j = 0; j < nvp; ++j)
+                var pStart = i * nvp * 2;
+                var nv = 0;
+                for (var j = 0; j < nvp; ++j)
                 {
                     if (createParams.polys[pStart + j] == MESH_NULL_IDX) break;
                     nv++;
@@ -1220,7 +1220,7 @@ public static partial class Detour
 	    */
 
         outTile.header = new dtMeshHeader();
-        dtMeshHeader header = outTile.header;
+        var header = outTile.header;
         // Store header
         header.magic = DT_NAVMESH_MAGIC;
         header.version = DT_NAVMESH_VERSION;
@@ -1244,8 +1244,8 @@ public static partial class Detour
         header.offMeshConCount = storedOffMeshConCount;
         header.bvNodeCount = createParams.buildBvTree ? createParams.polyCount * 2 : 0;
 
-        int offMeshVertsBase = createParams.vertCount;
-        int offMeshPolyBase = createParams.polyCount;
+        var offMeshVertsBase = createParams.vertCount;
+        var offMeshPolyBase = createParams.polyCount;
 
         outTile.links = new dtLink[header.maxLinkCount];
         dtcsArrayItemsCreate(outTile.links);
@@ -1255,28 +1255,28 @@ public static partial class Detour
         //const int vertsSize = dtAlign4(sizeof(float)*3*totVertCount);
         //float* navVerts = (float*)d; d += vertsSize;
         outTile.verts = new float[totVertCount * 3];
-        float[] navVerts = outTile.verts;
-        for (int i = 0; i < createParams.vertCount; ++i)
+        var navVerts = outTile.verts;
+        for (var i = 0; i < createParams.vertCount; ++i)
         {
             //const ushort* iv = &createParams.verts[i*3];
             //float* v = &navVerts[i*3];
-            int ivIndex = i * 3;
-            int vIndex = i * 3;
+            var ivIndex = i * 3;
+            var vIndex = i * 3;
             navVerts[vIndex + 0] = createParams.bmin[0] + createParams.verts[ivIndex + 0] * createParams.cs;
             navVerts[vIndex + 1] = createParams.bmin[1] + createParams.verts[ivIndex + 1] * createParams.ch;
             navVerts[vIndex + 2] = createParams.bmin[2] + createParams.verts[ivIndex + 2] * createParams.cs;
         }
         // Off-mesh link vertices.
-        int n = 0;
-        for (int i = 0; i < createParams.offMeshConCount; ++i)
+        var n = 0;
+        for (var i = 0; i < createParams.offMeshConCount; ++i)
         {
             // Only store connections which start from this tile.
             if (offMeshConClass[i * 2 + 0] == 0xff)
             {
                 //const float* linkv = &createParams.offMeshConVerts[i*2*3];
                 //float* v = &navVerts[(offMeshVertsBase + n*2)*3];
-                int linkVStart = i * 2 * 3;
-                int vStart = (offMeshVertsBase + n * 2) * 3;
+                var linkVStart = i * 2 * 3;
+                var vStart = (offMeshVertsBase + n * 2) * 3;
                 dtVcopy(navVerts, vStart + 0, createParams.offMeshConVerts, linkVStart + 0);
                 dtVcopy(navVerts, vStart + 3, createParams.offMeshConVerts, linkVStart + 3);
                 n++;
@@ -1287,23 +1287,23 @@ public static partial class Detour
         // Mesh polys
         //const ushort* src = createParams.polys;
         //ushort[] src = createParams.polys;
-        int srcIndex = 0;
+        var srcIndex = 0;
         //const int polysSize = dtAlign4(sizeof(dtPoly)*totPolyCount);
         //dtPoly* navPolys = (dtPoly*)d; d += polysSize;
         outTile.polys = new dtPoly[totPolyCount];
         dtcsArrayItemsCreate(outTile.polys);
         //outTile.offMeshCons ??
-        dtPoly[] navPolys = outTile.polys;
+        var navPolys = outTile.polys;
         //outTile.
-        for (int i = 0; i < createParams.polyCount; ++i)
+        for (var i = 0; i < createParams.polyCount; ++i)
         {
             //dtPoly* p = &navPolys[i];
-            dtPoly p = navPolys[i];
+            var p = navPolys[i];
             p.vertCount = 0;
             p.flags = createParams.polyFlags[i];
             p.setArea(createParams.polyAreas[i]);
             p.setType((byte)dtPolyTypes.DT_POLYTYPE_GROUND);
-            for (int j = 0; j < nvp; ++j)
+            for (var j = 0; j < nvp; ++j)
             {
                 if (createParams.polys[srcIndex + j] == MESH_NULL_IDX)
                     break;
@@ -1311,7 +1311,7 @@ public static partial class Detour
                 if ((createParams.polys[srcIndex + nvp + j] & 0x8000) != 0)
                 {
                     // Border or portal edge.
-                    ushort dir = (ushort)(createParams.polys[srcIndex + nvp + j] & 0xf);
+                    var dir = (ushort)(createParams.polys[srcIndex + nvp + j] & 0xf);
                     if (dir == 0xf) // Border
                         p.neis[j] = 0;
                     else if (dir == 0) // Portal x-
@@ -1335,12 +1335,12 @@ public static partial class Detour
         }
         // Off-mesh connection vertices.
         n = 0;
-        for (int i = 0; i < createParams.offMeshConCount; ++i)
+        for (var i = 0; i < createParams.offMeshConCount; ++i)
         {
             // Only store connections which start from this tile.
             if (offMeshConClass[i * 2 + 0] == 0xff)
             {
-                dtPoly p = navPolys[offMeshPolyBase + n];
+                var p = navPolys[offMeshPolyBase + n];
                 p.vertCount = 2;
                 p.verts[0] = (ushort)(offMeshVertsBase + n * 2 + 0);
                 p.verts[1] = (ushort)(offMeshVertsBase + n * 2 + 1);
@@ -1357,23 +1357,23 @@ public static partial class Detour
         //const int detailMeshesSize = dtAlign4(sizeof(dtPolyDetail)*createParams.polyCount);
         //dtPolyDetail* navDMeshes = (dtPolyDetail*)d; d += detailMeshesSize;
         outTile.detailMeshes = new dtPolyDetail[createParams.polyCount];
-        dtPolyDetail[] navDMeshes = outTile.detailMeshes;
+        var navDMeshes = outTile.detailMeshes;
         dtcsArrayItemsCreate(navDMeshes);
 
         outTile.detailVerts = new float[3 * uniqueDetailVertCount];
-        float[] navDVerts = outTile.detailVerts;
+        var navDVerts = outTile.detailVerts;
 
         outTile.detailTris = new byte[4 * detailTriCount];
-        byte[] navDTris = outTile.detailTris;
+        var navDTris = outTile.detailTris;
 
         if (createParams.detailMeshes != null)
         {
             ushort vbase = 0;
-            for (int i = 0; i < createParams.polyCount; ++i)
+            for (var i = 0; i < createParams.polyCount; ++i)
             {
-                dtPolyDetail dtl = navDMeshes[i];
-                int vb = (int)createParams.detailMeshes[i * 4 + 0];
-                int ndv = (int)createParams.detailMeshes[i * 4 + 1];
+                var dtl = navDMeshes[i];
+                var vb = (int)createParams.detailMeshes[i * 4 + 0];
+                var ndv = (int)createParams.detailMeshes[i * 4 + 1];
                 int nv = navPolys[i].vertCount;
                 dtl.vertBase = (uint)vbase;
                 dtl.vertCount = (byte)(ndv - nv);
@@ -1383,7 +1383,7 @@ public static partial class Detour
                 if (ndv - nv != 0)
                 {
                     //memcpy(&navDVerts[vbase*3], &createParams.detailVerts[(vb+nv)*3], sizeof(float)*3*(ndv-nv));
-                    for (int j = 0; j < 3 * (ndv - nv); ++j)
+                    for (var j = 0; j < 3 * (ndv - nv); ++j)
                     {
                         navDVerts[j + vbase * 3] = createParams.detailVerts[j + (vb + nv) * 3];
                     }
@@ -1392,7 +1392,7 @@ public static partial class Detour
             }
             // Store triangles.
             //memcpy(navDTris, createParams.detailTris, sizeof(byte)*4*createParams.detailTriCount);
-            for (int j = 0; j < 4 * createParams.detailTriCount; ++j)
+            for (var j = 0; j < 4 * createParams.detailTriCount; ++j)
             {
                 navDTris[j] = createParams.detailTris[j];
             }
@@ -1400,20 +1400,20 @@ public static partial class Detour
         else
         {
             // Create dummy detail mesh by triangulating polys.
-            int tbase = 0;
-            for (int i = 0; i < createParams.polyCount; ++i)
+            var tbase = 0;
+            for (var i = 0; i < createParams.polyCount; ++i)
             {
-                dtPolyDetail dtl = navDMeshes[i];
+                var dtl = navDMeshes[i];
                 int nv = navPolys[i].vertCount;
                 dtl.vertBase = 0;
                 dtl.vertCount = 0;
                 dtl.triBase = (uint)tbase;
                 dtl.triCount = (byte)(nv - 2);
                 // Triangulate polygon (local indices).
-                for (int j = 2; j < nv; ++j)
+                for (var j = 2; j < nv; ++j)
                 {
                     //byte* t = &navDTris[tbase*4];
-                    int tIndex = tbase * 4;
+                    var tIndex = tbase * 4;
                     navDTris[tIndex + 0] = 0;
                     navDTris[tIndex + 1] = (byte)(j - 1);
                     navDTris[tIndex + 2] = (byte)j;
@@ -1429,14 +1429,14 @@ public static partial class Detour
         }
 
         //createParams.buildBvTree ? dtAlign4(sizeof(dtBVNode)*createParams.polyCount*2) : 0;
-        int bvTreeNodeCout = createParams.buildBvTree ? createParams.polyCount * 2 : 0;
+        var bvTreeNodeCout = createParams.buildBvTree ? createParams.polyCount * 2 : 0;
         outTile.bvTree = new dtBVNode[bvTreeNodeCout];
         dtcsArrayItemsCreate(outTile.bvTree);
-        dtBVNode[] navBvtree = outTile.bvTree;
+        var navBvtree = outTile.bvTree;
 
         //const int offMeshConsSize = dtAlign4(sizeof(dtOffMeshConnection)*storedOffMeshConCount);
         outTile.offMeshCons = new dtOffMeshConnection[storedOffMeshConCount];
-        dtOffMeshConnection[] offMeshCons = outTile.offMeshCons;
+        var offMeshCons = outTile.offMeshCons;
         // Store and create BVtree.
         // TODO: take detail mesh into account! use byte per bbox extent?
         if (createParams.buildBvTree)
@@ -1446,16 +1446,16 @@ public static partial class Detour
 
         // Store Off-Mesh connections.
         n = 0;
-        for (int i = 0; i < createParams.offMeshConCount; ++i)
+        for (var i = 0; i < createParams.offMeshConCount; ++i)
         {
             // Only store connections which start from this tile.
             if (offMeshConClass[i * 2 + 0] == 0xff)
             {
-                dtOffMeshConnection con = offMeshCons[n];
+                var con = offMeshCons[n];
                 con.poly = (ushort)(offMeshPolyBase + n);
                 // Copy connection end-points.
                 //float[] endPts = createParams.offMeshConVerts[i*2*3];
-                int endPtsStart = i * 2 * 3;
+                var endPtsStart = i * 2 * 3;
                 dtVcopy(con.pos, 0, createParams.offMeshConVerts, endPtsStart + 0);
                 dtVcopy(con.pos, 3, createParams.offMeshConVerts, endPtsStart + 3);
                 con.rad = createParams.offMeshConRad[i];

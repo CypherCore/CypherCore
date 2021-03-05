@@ -46,7 +46,7 @@ namespace Scripts.Spells.Monk
 
         void OnTick(AuraEffect aurEff)
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster)
                 if (caster.HasAura(SpellIds.StanceOfTheSpiritedCrane))
                     caster.CastSpell(caster, SpellIds.CracklingJadeLightningChiProc, TriggerCastFlags.FullMask);
@@ -74,7 +74,7 @@ namespace Scripts.Spells.Monk
             if (eventInfo.GetActor().HasAura(SpellIds.CracklingJadeLightningChannel, GetTarget().GetGUID()))
                 return false;
 
-            Spell currentChanneledSpell = GetTarget().GetCurrentSpell(CurrentSpellTypes.Channeled);
+            var currentChanneledSpell = GetTarget().GetCurrentSpell(CurrentSpellTypes.Channeled);
             if (!currentChanneledSpell || currentChanneledSpell.GetSpellInfo().Id != SpellIds.CracklingJadeLightningChannel)
                 return false;
 
@@ -110,8 +110,8 @@ namespace Scripts.Spells.Monk
         {
             if (GetExplTargetUnit().GetEntry() != BlackOxStatusEntry)
             {
-                SpellInfo singleTarget = Global.SpellMgr.GetSpellInfo(SpellIds.ProvokeSingleTarget, GetCastDifficulty());
-                SpellCastResult singleTargetExplicitResult = singleTarget.CheckExplicitTarget(GetCaster(), GetExplTargetUnit());
+                var singleTarget = Global.SpellMgr.GetSpellInfo(SpellIds.ProvokeSingleTarget, GetCastDifficulty());
+                var singleTargetExplicitResult = singleTarget.CheckExplicitTarget(GetCaster(), GetExplTargetUnit());
                 if (singleTargetExplicitResult != SpellCastResult.SpellCastOk)
                     return singleTargetExplicitResult;
             }

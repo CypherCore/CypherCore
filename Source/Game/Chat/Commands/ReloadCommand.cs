@@ -214,10 +214,10 @@ namespace Game.Chat
             uint entry;
             while ((entry = args.NextUInt32()) != 0)
             {
-                PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_CREATURE_TEMPLATE);
+                var stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_CREATURE_TEMPLATE);
                 stmt.AddValue(0, entry);
                 stmt.AddValue(1, 0);
-                SQLResult result = DB.World.Query(stmt);
+                var result = DB.World.Query(stmt);
 
                 if (result.IsEmpty())
                 {
@@ -225,7 +225,7 @@ namespace Game.Chat
                     continue;
                 }
 
-                CreatureTemplate cInfo = Global.ObjectMgr.GetCreatureTemplate(entry);
+                var cInfo = Global.ObjectMgr.GetCreatureTemplate(entry);
                 if (cInfo == null)
                 {
                     handler.SendSysMessage(CypherStrings.CommandCreaturestorageNotfound, entry);

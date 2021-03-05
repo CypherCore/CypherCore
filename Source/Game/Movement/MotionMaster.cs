@@ -48,7 +48,7 @@ namespace Game.Movement
         {
             while (!Empty())
             {
-                IMovementGenerator curr = Top();
+                var curr = Top();
                 Pop();
                 if (curr != null)
                     DirectDelete(curr);
@@ -61,7 +61,7 @@ namespace Game.Movement
         {
             if (_owner.IsTypeId(TypeId.Unit))
             {
-                IMovementGenerator movement = AISelector.SelectMovementAI(_owner.ToCreature());
+                var movement = AISelector.SelectMovementAI(_owner.ToCreature());
                 StartMovement(movement ?? staticIdleMovement, MovementSlot.Idle);
             }
             else
@@ -162,7 +162,7 @@ namespace Game.Movement
             if (Empty())
                 return;
 
-            IMovementGenerator movement = Top();
+            var movement = Top();
             if (movement == null)
                 return;
 
@@ -177,7 +177,7 @@ namespace Game.Movement
             if (_owner.MoveSpline.Finalized())
                 return false;
 
-            Vector3 dest = _owner.MoveSpline.FinalDestination();
+            var dest = _owner.MoveSpline.FinalDestination();
             x = dest.X;
             y = dest.Y;
             z = dest.Z;
@@ -200,7 +200,7 @@ namespace Game.Movement
             }
             else if (_owner.IsTypeId(TypeId.Unit) && !_owner.ToCreature().GetCharmerOrOwnerGUID().IsEmpty())
             {
-                Unit target = _owner.ToCreature().GetCharmerOrOwner();
+                var target = _owner.ToCreature().GetCharmerOrOwner();
                 if (target)
                     StartMovement(new FollowMovementGenerator<Creature>(target, SharedConst.PetFollowDist, SharedConst.PetFollowAngle), MovementSlot.Active);
             }
@@ -274,18 +274,18 @@ namespace Game.Movement
 
         public void MoveCloserAndStop(uint id, Unit target, float distance)
         {
-            float distanceToTravel = _owner.GetExactDist2d(target) - distance;
+            var distanceToTravel = _owner.GetExactDist2d(target) - distance;
             if (distanceToTravel > 0.0f)
             {
-                float angle = _owner.GetAngle(target);
-                float destx = _owner.GetPositionX() + distanceToTravel * (float)Math.Cos(angle);
-                float desty = _owner.GetPositionY() + distanceToTravel * (float)Math.Sin(angle);
+                var angle = _owner.GetAngle(target);
+                var destx = _owner.GetPositionX() + distanceToTravel * (float)Math.Cos(angle);
+                var desty = _owner.GetPositionY() + distanceToTravel * (float)Math.Sin(angle);
                 MovePoint(id, destx, desty, target.GetPositionZ());
             }
             else
             {
                 // we are already close enough. We just need to turn toward the target without changing position.
-                MoveSplineInit init = new MoveSplineInit(_owner);
+                var init = new MoveSplineInit(_owner);
                 init.MoveTo(_owner.GetPositionX(), _owner.GetPositionY(), _owner.GetPositionZMinusOffset());
                 init.SetFacing(target);
                 init.Launch();
@@ -298,7 +298,7 @@ namespace Game.Movement
             float x, y, z;
             pos.GetPosition(out x, out y, out z);
 
-            MoveSplineInit init = new MoveSplineInit(_owner);
+            var init = new MoveSplineInit(_owner);
             init.MoveTo(x, y, z);
             init.SetAnimation(AnimType.ToGround);
             init.Launch();
@@ -310,7 +310,7 @@ namespace Game.Movement
             float x, y, z;
             pos.GetPosition(out x, out y, out z);
 
-            MoveSplineInit init = new MoveSplineInit(_owner);
+            var init = new MoveSplineInit(_owner);
             init.MoveTo(x, y, z);
             init.SetAnimation(AnimType.ToFly);
             init.Launch();
@@ -330,12 +330,12 @@ namespace Game.Movement
 
         public void MoveCharge(PathGenerator path, float speed = SPEED_CHARGE, Unit target = null, SpellEffectExtraData spellEffectExtraData = null)
         {
-            Vector3 dest = path.GetActualEndPosition();
+            var dest = path.GetActualEndPosition();
 
             MoveCharge(dest.X, dest.Y, dest.Z, SPEED_CHARGE, EventId.ChargePrepath);
 
             // Charge movement is not started when using EVENT_CHARGE_PREPATH
-            MoveSplineInit init = new MoveSplineInit(_owner);
+            var init = new MoveSplineInit(_owner);
             init.MovebyPath(path.GetPath());
             init.SetVelocity(speed);
             if (target != null)
@@ -355,13 +355,13 @@ namespace Game.Movement
                 return;
 
             float x, y, z;
-            float moveTimeHalf = (float)(speedZ / gravity);
-            float dist = 2 * moveTimeHalf * speedXY;
-            float max_height = -MoveSpline.ComputeFallElevation(moveTimeHalf, false, -speedZ);
+            var moveTimeHalf = (float)(speedZ / gravity);
+            var dist = 2 * moveTimeHalf * speedXY;
+            var max_height = -MoveSpline.ComputeFallElevation(moveTimeHalf, false, -speedZ);
 
             _owner.GetNearPoint(_owner, out x, out y, out z, _owner.GetCombatReach(), dist, _owner.GetAngle(srcX, srcY) + MathFunctions.PI);
 
-            MoveSplineInit init = new MoveSplineInit(_owner);
+            var init = new MoveSplineInit(_owner);
             init.MoveTo(x, y, z);
             init.SetParabolic(max_height, 0);
             init.SetOrientationFixed(true);
@@ -381,8 +381,8 @@ namespace Game.Movement
 
             float x, y, z;
 
-            float moveTimeHalf = (float)(speedZ / gravity);
-            float dist = 2 * moveTimeHalf * speedXY;
+            var moveTimeHalf = (float)(speedZ / gravity);
+            var dist = 2 * moveTimeHalf * speedXY;
             _owner.GetClosePoint(out x, out y, out z, _owner.GetCombatReach(), dist, angle);
             MoveJump(x, y, z, 0.0f, speedXY, speedZ);
         }
@@ -399,10 +399,10 @@ namespace Game.Movement
             if (speedXY < 0.01f)
                 return;
 
-            float moveTimeHalf = (float)(speedZ / gravity);
-            float max_height = -MoveSpline.ComputeFallElevation(moveTimeHalf, false, -speedZ);
+            var moveTimeHalf = (float)(speedZ / gravity);
+            var max_height = -MoveSpline.ComputeFallElevation(moveTimeHalf, false, -speedZ);
 
-            MoveSplineInit init = new MoveSplineInit(_owner);
+            var init = new MoveSplineInit(_owner);
             init.MoveTo(x, y, z, false);
             init.SetParabolic(max_height, 0);
             init.SetVelocity(speedXY);
@@ -413,7 +413,7 @@ namespace Game.Movement
             init.Launch();
 
             uint arrivalSpellId = 0;
-            ObjectGuid arrivalSpellTargetGuid = ObjectGuid.Empty;
+            var arrivalSpellTargetGuid = ObjectGuid.Empty;
             if (arrivalCast != null)
             {
                 arrivalSpellId = arrivalCast.SpellId;
@@ -425,15 +425,15 @@ namespace Game.Movement
 
         public void MoveCirclePath(float x, float y, float z, float radius, bool clockwise, byte stepCount)
         {
-            float step = 2 * MathFunctions.PI / stepCount * (clockwise ? -1.0f : 1.0f);
-            Position pos = new Position(x, y, z, 0.0f);
-            float angle = pos.GetAngle(_owner.GetPositionX(), _owner.GetPositionY());
+            var step = 2 * MathFunctions.PI / stepCount * (clockwise ? -1.0f : 1.0f);
+            var pos = new Position(x, y, z, 0.0f);
+            var angle = pos.GetAngle(_owner.GetPositionX(), _owner.GetPositionY());
 
-            MoveSplineInit init = new MoveSplineInit(_owner);
+            var init = new MoveSplineInit(_owner);
             init.args.path = new Vector3[stepCount];
             for (byte i = 0; i < stepCount; angle += step, ++i)
             {
-                Vector3 point = new Vector3();
+                var point = new Vector3();
                 point.X = (float)(x + radius * Math.Cos(angle));
                 point.Y = (float)(y + radius * Math.Sin(angle));
 
@@ -462,7 +462,7 @@ namespace Game.Movement
 
         void MoveSmoothPath(uint pointId, Vector3[] pathPoints, int pathSize, bool walk = false, bool fly = false)
         {
-            MoveSplineInit init = new MoveSplineInit(_owner);
+            var init = new MoveSplineInit(_owner);
             if (fly)
             {
                 init.SetFly();
@@ -484,13 +484,13 @@ namespace Game.Movement
 
         public void MoveAlongSplineChain(uint pointId, uint dbChainId, bool walk)
         {
-            Creature owner = _owner.ToCreature();
+            var owner = _owner.ToCreature();
             if (!owner)
             {
                 Log.outError(LogFilter.Misc, "MotionMaster.MoveAlongSplineChain: non-creature {0} tried to walk along DB spline chain. Ignoring.", _owner.GetGUID().ToString());
                 return;
             }
-            List<SplineChainLink> chain = Global.ScriptMgr.GetSplineChain(owner, (byte)dbChainId);
+            var chain = Global.ScriptMgr.GetSplineChain(owner, (byte)dbChainId);
             if (chain.Empty())
             {
                 Log.outError(LogFilter.Misc, "MotionMaster.MoveAlongSplineChain: creature with entry {0} tried to walk along non-existing spline chain with DB id {1}.", owner.GetEntry(), dbChainId);
@@ -518,7 +518,7 @@ namespace Game.Movement
         public void MoveFall(uint id = 0)
         {
             // use larger distance for vmap height search than in most other cases
-            float tz = _owner.GetMap().GetHeight(_owner.GetPhaseShift(), _owner.GetPositionX(), _owner.GetPositionY(), _owner.GetPositionZ(), true, MapConst.MaxFallDistance);
+            var tz = _owner.GetMap().GetHeight(_owner.GetPhaseShift(), _owner.GetPositionX(), _owner.GetPositionY(), _owner.GetPositionZ(), true, MapConst.MaxFallDistance);
             if (tz <= MapConst.InvalidHeight)
                 return;
 
@@ -535,7 +535,7 @@ namespace Game.Movement
                 return;
             }
 
-            MoveSplineInit init = new MoveSplineInit(_owner);
+            var init = new MoveSplineInit(_owner);
             init.MoveTo(_owner.GetPositionX(), _owner.GetPositionY(), tz, false);
             init.SetFall();
             init.Launch();
@@ -570,7 +570,7 @@ namespace Game.Movement
                 if (path < CliDB.TaxiPathNodesByPath.Count)
                 {
                     Log.outDebug(LogFilter.Server, "{0} taxi to (Path {1} node {2})", _owner.GetName(), path, pathnode);
-                    FlightPathMovementGenerator mgen = new FlightPathMovementGenerator();
+                    var mgen = new FlightPathMovementGenerator();
                     mgen.LoadPath(_owner.ToPlayer());
                     StartMovement(mgen, MovementSlot.Controlled);
                 }
@@ -648,7 +648,7 @@ namespace Game.Movement
 
         void StartMovement(IMovementGenerator m, MovementSlot slot)
         {
-            IMovementGenerator curr = _slot[(int)slot];
+            var curr = _slot[(int)slot];
             if (curr != null)
             {
                 _slot[(int)slot] = null; // in case a new one is generated in this slot during directdelete
@@ -676,7 +676,7 @@ namespace Game.Movement
         {
             while (Size() > 1)
             {
-                IMovementGenerator curr = Top();
+                var curr = Top();
                 Pop();
                 if (curr != null)
                     DirectDelete(curr);
@@ -693,7 +693,7 @@ namespace Game.Movement
 
         void DirectClean(MovementSlot slot)
         {
-            IMovementGenerator motion = GetMotionSlot(slot);
+            var motion = GetMotionSlot(slot);
             if (motion != null)
             {
                 _slot[(int)slot] = null;
@@ -713,7 +713,7 @@ namespace Game.Movement
         {
             while (Size() > 1)
             {
-                IMovementGenerator curr = Top();
+                var curr = Top();
                 Pop();
                 if (curr != null)
                     DelayedDelete(curr);
@@ -722,7 +722,7 @@ namespace Game.Movement
 
         void DelayedClean(MovementSlot slot)
         {
-            IMovementGenerator motion = GetMotionSlot(slot);
+            var motion = GetMotionSlot(slot);
             if (motion != null)
             {
                 _slot[(int)slot] = null;
@@ -737,7 +737,7 @@ namespace Game.Movement
         {
             if (Size() > 1)
             {
-                IMovementGenerator curr = Top();
+                var curr = Top();
                 Pop();
                 DirectDelete(curr);
             }
@@ -757,7 +757,7 @@ namespace Game.Movement
         {
             if (Size() > 1)
             {
-                IMovementGenerator curr = Top();
+                var curr = Top();
                 Pop();
                 DelayedDelete(curr);
             }
@@ -783,7 +783,7 @@ namespace Game.Movement
 
         void ClearExpireList()
         {
-            for (int i = 0; i < _expireList.Count; ++i)
+            for (var i = 0; i < _expireList.Count; ++i)
                 DirectDelete(_expireList[i]);
 
             _expireList.Clear();

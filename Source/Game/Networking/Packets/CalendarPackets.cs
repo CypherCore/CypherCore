@@ -270,7 +270,7 @@ namespace Game.Networking.Packets
             ModeratorID = _worldPacket.ReadUInt64();
             ClubID = _worldPacket.ReadUInt64();
 
-            ushort nameLen = _worldPacket.ReadBits<ushort>(9);
+            var nameLen = _worldPacket.ReadBits<ushort>(9);
             Creating = _worldPacket.HasBit();
             IsSignUp = _worldPacket.HasBit();
 
@@ -741,9 +741,9 @@ namespace Game.Networking.Packets
             Status = data.ReadUInt8();
             Moderator = data.ReadUInt8();
 
-            bool hasUnused801_1 = data.HasBit();
-            bool hasUnused801_2 = data.HasBit();
-            bool hasUnused801_3 = data.HasBit();
+            var hasUnused801_1 = data.HasBit();
+            var hasUnused801_2 = data.HasBit();
+            var hasUnused801_3 = data.HasBit();
 
             if (hasUnused801_1)
                 Unused801_1.Set(data.ReadPackedGuid());
@@ -772,12 +772,12 @@ namespace Game.Networking.Packets
             Flags = data.ReadUInt32();
             var InviteCount = data.ReadUInt32();
 
-            byte titleLength = data.ReadBits<byte>(8);
-            ushort descriptionLength = data.ReadBits<ushort>(11);
+            var titleLength = data.ReadBits<byte>(8);
+            var descriptionLength = data.ReadBits<ushort>(11);
 
             for (var i = 0; i < InviteCount; ++i)
             {
-                CalendarAddEventInviteInfo invite = new CalendarAddEventInviteInfo();
+                var invite = new CalendarAddEventInviteInfo();
                 invite.Read(data);
                 Invites[i] = invite;
             }
@@ -808,8 +808,8 @@ namespace Game.Networking.Packets
             Time = data.ReadPackedTime();
             Flags = data.ReadUInt32();
 
-            byte titleLen = data.ReadBits<byte>(8);
-            ushort descLen = data.ReadBits<ushort>(11);
+            var titleLen = data.ReadBits<byte>(8);
+            var descLen = data.ReadBits<ushort>(11);
 
             Title = data.ReadString(titleLen);
             Description = data.ReadString(descLen);

@@ -116,7 +116,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteInt32(Stats.Display.CreatureDisplay.Count);
                 _worldPacket.WriteFloat(Stats.Display.TotalProbability);
 
-                foreach (CreatureXDisplay display in Stats.Display.CreatureDisplay)
+                foreach (var display in Stats.Display.CreatureDisplay)
                 {
                     _worldPacket.WriteUInt32(display.CreatureDisplayID);
                     _worldPacket.WriteFloat(display.Scale);
@@ -181,7 +181,7 @@ namespace Game.Networking.Packets
             if (Allow)
             {
                 _worldPacket.WriteInt32(Pages.Count);
-                foreach (PageTextInfo pageText in Pages)
+                foreach (var pageText in Pages)
                     pageText.Write(_worldPacket);
             }
         }
@@ -277,12 +277,12 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(Allow);
             _worldPacket.FlushBits();
 
-            ByteBuffer statsData = new ByteBuffer();
+            var statsData = new ByteBuffer();
             if (Allow)
             {
                 statsData.WriteUInt32(Stats.Type);
                 statsData.WriteUInt32(Stats.DisplayID);
-                for (int i = 0; i < 4; i++)
+                for (var i = 0; i < 4; i++)
                     statsData.WriteCString(Stats.Name[i]);
 
                 statsData.WriteCString(Stats.IconName);
@@ -294,7 +294,7 @@ namespace Game.Networking.Packets
 
                 statsData.WriteFloat(Stats.Size);
                 statsData.WriteUInt8((byte)Stats.QuestItems.Count);
-                foreach (uint questItem in Stats.QuestItems)
+                foreach (var questItem in Stats.QuestItems)
                     statsData.WriteUInt32(questItem);
 
                 statsData.WriteUInt32(Stats.ContentTuningId);
@@ -421,9 +421,9 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(QuestPOIDataStats.Count);
             _worldPacket.WriteInt32(QuestPOIDataStats.Count);
 
-            bool useCache = WorldConfig.GetBoolValue(WorldCfg.CacheDataQueries);
+            var useCache = WorldConfig.GetBoolValue(WorldCfg.CacheDataQueries);
 
-            foreach (QuestPOIData questPOIData in QuestPOIDataStats)
+            foreach (var questPOIData in QuestPOIDataStats)
             {
                 if (useCache)
                     _worldPacket.WriteBytes(questPOIData.QueryDataBuffer);
@@ -441,7 +441,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint questCount = _worldPacket.ReadUInt32();
+            var questCount = _worldPacket.ReadUInt32();
             QuestCompletionNPCs = new uint[questCount];
 
             for (uint i = 0; i < questCount; ++i)
@@ -603,7 +603,7 @@ namespace Game.Networking.Packets
     {
         public bool Initialize(ObjectGuid guid, Player player = null)
         {
-            CharacterCacheEntry characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByGuid(guid);
+            var characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByGuid(guid);
             if (characterInfo == null)
                 return false;
 
@@ -619,14 +619,14 @@ namespace Game.Networking.Packets
                 ClassID = player.GetClass();
                 Level = (byte)player.GetLevel();
 
-                DeclinedName names = player.GetDeclinedNames();
+                var names = player.GetDeclinedNames();
                 if (names != null)
                     DeclinedNames = names;
             }
             else
             {
-                uint accountId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(guid);
-                uint bnetAccountId = Global.BNetAccountMgr.GetIdByGameAccount(accountId);
+                var accountId = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(guid);
+                var bnetAccountId = Global.BNetAccountMgr.GetIdByGameAccount(accountId);
 
                 AccountID = ObjectGuid.Create(HighGuid.WowAccount, accountId);
                 BnetAccountID = ObjectGuid.Create(HighGuid.BNetAccount, bnetAccountId);

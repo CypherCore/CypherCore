@@ -45,26 +45,26 @@ namespace Game.DataStorage
         {
             _header = header;
 
-            SQLResult result = DB.Hotfix.Query(DB.Hotfix.GetPreparedStatement(preparedStatement));
+            var result = DB.Hotfix.Query(DB.Hotfix.GetPreparedStatement(preparedStatement));
             if (!result.IsEmpty())
             {
                 do
                 {
                     var obj = new T();
 
-                    int dbIndex = 0;
+                    var dbIndex = 0;
                     var fields = typeof(T).GetFields();
                     foreach (var f in typeof(T).GetFields())
                     {
-                        Type type = f.FieldType;
+                        var type = f.FieldType;
 
                         if (type.IsArray)
                         {
-                            Type arrayElementType = type.GetElementType();
+                            var arrayElementType = type.GetElementType();
                             if (arrayElementType.IsEnum)
                                 arrayElementType = arrayElementType.GetEnumUnderlyingType();
 
-                            Array array = (Array)f.GetValue(obj);
+                            var array = (Array)f.GetValue(obj);
                             switch (Type.GetTypeCode(arrayElementType))
                             {
                                 case TypeCode.SByte:
@@ -100,9 +100,9 @@ namespace Game.DataStorage
                                 case TypeCode.Object:
                                     if (arrayElementType == typeof(Vector3))
                                     {
-                                        float[] values = ReadArray<float>(result, dbIndex, array.Length * 3);
+                                        var values = ReadArray<float>(result, dbIndex, array.Length * 3);
 
-                                        Vector3[] vectors = new Vector3[array.Length];
+                                        var vectors = new Vector3[array.Length];
                                         for (var i = 0; i < array.Length; ++i)
                                             vectors[i] = new Vector3(values[(i * 3)..(3 + (i * 3))]);
 
@@ -153,13 +153,13 @@ namespace Game.DataStorage
                                     f.SetValue(obj, result.Read<float>(dbIndex++));
                                     break;
                                 case TypeCode.String:
-                                    string str = result.Read<string>(dbIndex++);
+                                    var str = result.Read<string>(dbIndex++);
                                     f.SetValue(obj, str);
                                     break;
                                 case TypeCode.Object:
                                     if (type == typeof(LocalizedString))
                                     {
-                                        LocalizedString locString = new LocalizedString();
+                                        var locString = new LocalizedString();
                                         locString[Global.WorldMgr.GetDefaultDbcLocale()] = result.Read<string>(dbIndex++);
 
                                         f.SetValue(obj, locString);
@@ -201,15 +201,15 @@ namespace Game.DataStorage
                 if (Global.WorldMgr.GetDefaultDbcLocale() == locale || !availableDb2Locales[(int)locale])
                     continue;
 
-                PreparedStatement stmt = DB.Hotfix.GetPreparedStatement(preparedStatementLocale);
+                var stmt = DB.Hotfix.GetPreparedStatement(preparedStatementLocale);
                 stmt.AddValue(0, locale.ToString());
-                SQLResult localeResult = DB.Hotfix.Query(stmt);
+                var localeResult = DB.Hotfix.Query(stmt);
                 if (localeResult.IsEmpty())
                     continue;
 
                 do
                 {
-                    int index = 0;
+                    var index = 0;
                     var obj = this.LookupByKey(localeResult.Read<uint>(index++));
                     if (obj == null)
                         continue;
@@ -219,7 +219,7 @@ namespace Game.DataStorage
                         if (f.FieldType != typeof(LocalizedString))
                             continue;
 
-                        LocalizedString locString = (LocalizedString)f.GetValue(obj);
+                        var locString = (LocalizedString)f.GetValue(obj);
                         locString[locale] = localeResult.Read<string>(index++);
                     }
                 } while (localeResult.NextRow());
@@ -228,8 +228,8 @@ namespace Game.DataStorage
 
         TValue[] ReadArray<TValue>(SQLResult result, int dbIndex, int arrayLength)
         {
-            TValue[] values = new TValue[arrayLength];
-            for (int i = 0; i < arrayLength; ++i)
+            var values = new TValue[arrayLength];
+            for (var i = 0; i < arrayLength; ++i)
                 values[i] = result.Read<TValue>(dbIndex + i);
 
             return values;
@@ -242,7 +242,7 @@ namespace Game.DataStorage
 
         public void WriteRecord(uint id, Locale locale, ByteBuffer buffer)
         {
-            T entry = this.LookupByKey(id);
+            var entry = this.LookupByKey(id);
 
             foreach (var fieldInfo in entry.GetType().GetFields())
             {
@@ -295,7 +295,7 @@ namespace Game.DataStorage
                         switch (type.Name)
                         {
                             case "LocalizedString":
-                                LocalizedString locStr = (LocalizedString)fieldInfo.GetValue(entry);
+                                var locStr = (LocalizedString)fieldInfo.GetValue(entry);
                                 if (!locStr.HasString(locale))
                                 {
                                     locale = 0;
@@ -306,19 +306,19 @@ namespace Game.DataStorage
                                     }
                                 }
 
-                                string str = locStr[locale];
+                                var str = locStr[locale];
                                 buffer.WriteCString(str);
                                 break;
                             case "Vector2":
-                                Vector2 vector2 = (Vector2)fieldInfo.GetValue(entry);
+                                var vector2 = (Vector2)fieldInfo.GetValue(entry);
                                 buffer.WriteVector2(vector2);
                                 break;
                             case "Vector3":
-                                Vector3 vector3 = (Vector3)fieldInfo.GetValue(entry);
+                                var vector3 = (Vector3)fieldInfo.GetValue(entry);
                                 buffer.WriteVector3(vector3);
                                 break;
                             case "FlagArray128":
-                                FlagArray128 flagArray128 = (FlagArray128)fieldInfo.GetValue(entry);
+                                var flagArray128 = (FlagArray128)fieldInfo.GetValue(entry);
                                 buffer.WriteUInt32(flagArray128[0]);
                                 buffer.WriteUInt32(flagArray128[1]);
                                 buffer.WriteUInt32(flagArray128[2]);

@@ -240,7 +240,7 @@ namespace Framework.GameMath
         {
             if (obj is Plane)
             {
-                Plane p = (Plane)obj;
+                var p = (Plane)obj;
                 return (_normal == p.Normal) && (_const == p.Constant);
             }
             return false;

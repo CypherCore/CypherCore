@@ -161,7 +161,7 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
 
     public Player GetPlayer(Map m, ObjectGuid guid)
     {
-        Player player = _players.LookupByKey(guid);
+        var player = _players.LookupByKey(guid);
         if (player)
             if (player.IsInWorld && player.GetMap() == m)
                 return player;
@@ -189,12 +189,12 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
     // ACCESS LIKE THAT IS NOT THREAD SAFE
     public Player FindPlayer(ObjectGuid guid)
     {
-        Player player = FindConnectedPlayer(guid);
+        var player = FindConnectedPlayer(guid);
         return player && player.IsInWorld ? player : null;
     }
     public Player FindPlayerByName(string name)
     {
-        Player player = PlayerNameMapHolder.Find(name);
+        var player = PlayerNameMapHolder.Find(name);
         if (!player || !player.IsInWorld)
             return null;
 
@@ -202,7 +202,7 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
     }
     public Player FindPlayerByLowGUID(ulong lowguid)
     {
-        ObjectGuid guid = ObjectGuid.Create(HighGuid.Player, lowguid);
+        var guid = ObjectGuid.Create(HighGuid.Player, lowguid);
         return FindPlayer(guid);
     }
     // this returns Player even if he is not in world, for example teleporting

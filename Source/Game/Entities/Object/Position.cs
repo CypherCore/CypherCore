@@ -139,8 +139,8 @@ namespace Game.Entities
         {
             retOffset = new Position();
 
-            float dx = endPos.GetPositionX() - GetPositionX();
-            float dy = endPos.GetPositionY() - GetPositionY();
+            var dx = endPos.GetPositionX() - GetPositionX();
+            var dy = endPos.GetPositionY() - GetPositionY();
 
             retOffset.posX = (float)(dx * Math.Cos(GetOrientation()) + dy * Math.Sin(GetOrientation()));
             retOffset.posY = (float)(dy * Math.Cos(GetOrientation()) - dx * Math.Sin(GetOrientation()));
@@ -150,7 +150,7 @@ namespace Game.Entities
 
         public Position GetPositionWithOffset(Position offset)
         {
-            Position ret = this;
+            var ret = this;
             ret.RelocateOffset(offset);
             return ret;
         }
@@ -161,7 +161,7 @@ namespace Game.Entities
             // to emulate negative numbers
             if (o < 0)
             {
-                float mod = o * -1;
+                var mod = o * -1;
                 mod = mod % (2.0f * MathFunctions.PI);
                 mod = -mod + 2.0f * MathFunctions.PI;
                 return mod;
@@ -179,15 +179,15 @@ namespace Game.Entities
         }
         public float GetExactDistSq(float x, float y, float z)
         {
-            float dz = posZ - z;
+            var dz = posZ - z;
 
             return GetExactDist2dSq(x, y) + dz * dz;
         }
         public float GetExactDistSq(Position pos)
         {
-            float dx = posX - pos.posX;
-            float dy = posY - pos.posY;
-            float dz = posZ - pos.posZ;
+            var dx = posX - pos.posX;
+            var dy = posY - pos.posY;
+            var dz = posZ - pos.posZ;
 
             return dx * dx + dy * dy + dz * dz;
         }
@@ -201,25 +201,25 @@ namespace Game.Entities
         }
         public float GetExactDist2dSq(float x, float y)
         {
-            float dx = posX - x;
-            float dy = posY - y;
+            var dx = posX - x;
+            var dy = posY - y;
 
             return dx * dx + dy * dy;
         }
         public float GetExactDist2dSq(Position pos)
         {
-            float dx = posX - pos.posX;
-            float dy = posY - pos.posY;
+            var dx = posX - pos.posX;
+            var dy = posY - pos.posY;
 
             return dx * dx + dy * dy;
         }
 
         public float GetAngle(float x, float y)
         {
-            float dx = x - GetPositionX();
-            float dy = y - GetPositionY();
+            var dx = x - GetPositionX();
+            var dy = y - GetPositionY();
 
-            float ang = (float)Math.Atan2(dy, dx);
+            var ang = (float)Math.Atan2(dy, dx);
             ang = ang >= 0 ? ang : 2 * MathFunctions.PI + ang;
             return ang;
         }
@@ -260,20 +260,20 @@ namespace Game.Entities
             // is-in-cube check and we have to calculate only one point instead of 4
 
             // 2PI = 360*, keep in mind that ingame orientation is counter-clockwise
-            double rotation = 2 * Math.PI - center.GetOrientation();
-            double sinVal = Math.Sin(rotation);
-            double cosVal = Math.Cos(rotation);
+            var rotation = 2 * Math.PI - center.GetOrientation();
+            var sinVal = Math.Sin(rotation);
+            var cosVal = Math.Cos(rotation);
 
-            float BoxDistX = GetPositionX() - center.GetPositionX();
-            float BoxDistY = GetPositionY() - center.GetPositionY();
+            var BoxDistX = GetPositionX() - center.GetPositionX();
+            var BoxDistY = GetPositionY() - center.GetPositionY();
 
-            float rotX = (float)(center.GetPositionX() + BoxDistX * cosVal - BoxDistY * sinVal);
-            float rotY = (float)(center.GetPositionY() + BoxDistY * cosVal + BoxDistX * sinVal);
+            var rotX = (float)(center.GetPositionX() + BoxDistX * cosVal - BoxDistY * sinVal);
+            var rotY = (float)(center.GetPositionY() + BoxDistY * cosVal + BoxDistX * sinVal);
 
             // box edges are parallel to coordiante axis, so we can treat every dimension independently :D
-            float dz = GetPositionZ() - center.GetPositionZ();
-            float dx = rotX - center.GetPositionX();
-            float dy = rotY - center.GetPositionY();
+            var dz = GetPositionZ() - center.GetPositionZ();
+            var dx = rotX - center.GetPositionX();
+            var dy = rotY - center.GetPositionY();
             if ((Math.Abs(dx) > xradius) || (Math.Abs(dy) > yradius) || (Math.Abs(dz) > zradius))
                 return false;
 
@@ -282,7 +282,7 @@ namespace Game.Entities
 
         public bool IsWithinDoubleVerticalCylinder(Position center, float radius, float height)
         {
-            float verticalDelta = GetPositionZ() - center.GetPositionZ();
+            var verticalDelta = GetPositionZ() - center.GetPositionZ();
             return IsInDist2d(center, radius) && Math.Abs(verticalDelta) <= height;
         }
 
@@ -295,7 +295,7 @@ namespace Game.Entities
             // move arc to range 0.. 2*pi
             arc = NormalizeOrientation(arc);
 
-            float angle = GetAngle(obj);
+            var angle = GetAngle(obj);
             angle -= GetOrientation();
 
             // move angle to range -pi ... +pi
@@ -303,8 +303,8 @@ namespace Game.Entities
             if (angle > MathFunctions.PI)
                 angle -= 2.0f * MathFunctions.PI;
 
-            float lborder = -1 * (arc / border);                        // in range -pi..0
-            float rborder = (arc / border);                             // in range 0..pi
+            var lborder = -1 * (arc / border);                        // in range -pi..0
+            var rborder = (arc / border);                             // in range 0..pi
             return ((angle >= lborder) && (angle <= rborder));
         }
 
@@ -314,24 +314,24 @@ namespace Game.Entities
                 return false;
 
             width += objSize;
-            float angle = GetRelativeAngle(pos);
+            var angle = GetRelativeAngle(pos);
             return Math.Abs(Math.Sin(angle)) * GetExactDist2d(pos.GetPositionX(), pos.GetPositionY()) < width;
         }
 
         public void GetSinCos(float x, float y, out float vsin, out float vcos)
         {
-            float dx = GetPositionX() - x;
-            float dy = GetPositionY() - y;
+            var dx = GetPositionX() - x;
+            var dy = GetPositionY() - y;
 
             if (Math.Abs(dx) < 0.001f && Math.Abs(dy) < 0.001f)
             {
-                float angle = (float)RandomHelper.NextDouble() * MathFunctions.TwoPi;
+                var angle = (float)RandomHelper.NextDouble() * MathFunctions.TwoPi;
                 vcos = (float)Math.Cos(angle);
                 vsin = (float)Math.Sin(angle);
             }
             else
             {
-                float dist = (float)Math.Sqrt((dx * dx) + (dy * dy));
+                var dist = (float)Math.Sqrt((dx * dx) + (dy * dy));
                 vcos = dx / dist;
                 vsin = dy / dist;
             }

@@ -28,16 +28,16 @@ namespace Game.Arenas
 
         public override void StartingEventCloseDoors()
         {
-            for (int i = NagrandArenaObjectTypes.Door1; i <= NagrandArenaObjectTypes.Door4; ++i)
+            for (var i = NagrandArenaObjectTypes.Door1; i <= NagrandArenaObjectTypes.Door4; ++i)
                 SpawnBGObject(i, BattlegroundConst.RespawnImmediately);
         }
 
         public override void StartingEventOpenDoors()
         {
-            for (int i = NagrandArenaObjectTypes.Door1; i <= NagrandArenaObjectTypes.Door4; ++i)
+            for (var i = NagrandArenaObjectTypes.Door1; i <= NagrandArenaObjectTypes.Door4; ++i)
                 DoorOpen(i);
 
-            for (int i = NagrandArenaObjectTypes.Buff1; i <= NagrandArenaObjectTypes.Buff2; ++i)
+            for (var i = NagrandArenaObjectTypes.Buff1; i <= NagrandArenaObjectTypes.Buff2; ++i)
                 SpawnBGObject(i, 60);
         }
 
@@ -65,7 +65,7 @@ namespace Game.Arenas
 
         public override bool SetupBattleground()
         {
-            bool result = true;
+            var result = true;
             result &= AddObject(NagrandArenaObjectTypes.Door1, NagrandArenaObjects.Door1, 4031.854f, 2966.833f, 12.6462f, -2.648788f, 0, 0, 0.9697962f, -0.2439165f, BattlegroundConst.RespawnImmediately);
             result &= AddObject(NagrandArenaObjectTypes.Door2, NagrandArenaObjects.Door2, 4081.179f, 2874.97f, 12.39171f, 0.4928045f, 0, 0, 0.2439165f, 0.9697962f, BattlegroundConst.RespawnImmediately);
             result &= AddObject(NagrandArenaObjectTypes.Door3, NagrandArenaObjects.Door3, 4023.709f, 2981.777f, 10.70117f, -2.648788f, 0, 0, 0.9697962f, -0.2439165f, BattlegroundConst.RespawnImmediately);

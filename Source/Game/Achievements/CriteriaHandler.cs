@@ -77,15 +77,15 @@ namespace Game.Achievements
 
             Log.outDebug(LogFilter.Achievement, "UpdateCriteria({0}, {1}, {2}, {3}) {4}", type, type, miscValue1, miscValue2, miscValue3, GetOwnerInfo());
 
-            List<Criteria> criteriaList = GetCriteriaByType(type, (uint)miscValue1);
-            foreach (Criteria criteria in criteriaList)
+            var criteriaList = GetCriteriaByType(type, (uint)miscValue1);
+            foreach (var criteria in criteriaList)
             {
-                List<CriteriaTree> trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.Id);
+                var trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.Id);
                 if (!CanUpdateCriteria(criteria, trees, miscValue1, miscValue2, miscValue3, unit, referencePlayer))
                     continue;
 
                 // requirements not found in the dbc
-                CriteriaDataSet data = Global.CriteriaMgr.GetCriteriaDataSet(criteria);
+                var data = Global.CriteriaMgr.GetCriteriaDataSet(criteria);
                 if (data != null)
                     if (!data.Meets(referencePlayer, unit, (uint)miscValue1, (uint)miscValue2))
                         continue;
@@ -197,8 +197,8 @@ namespace Game.Achievements
                         break;
                     case CriteriaTypes.CompleteDailyQuestDaily:
                         {
-                            long nextDailyResetTime = Global.WorldMgr.GetNextDailyQuestsResetTime();
-                            CriteriaProgress progress = GetCriteriaProgress(criteria);
+                            var nextDailyResetTime = Global.WorldMgr.GetNextDailyQuestsResetTime();
+                            var progress = GetCriteriaProgress(criteria);
 
                             if (miscValue1 == 0) // Login case.
                             {
@@ -238,7 +238,7 @@ namespace Game.Achievements
                                 var rewQuests = referencePlayer.GetRewardedQuests();
                                 foreach (var id in rewQuests)
                                 {
-                                    Quest quest = Global.ObjectMgr.GetQuestTemplate(id);
+                                    var quest = Global.ObjectMgr.GetQuestTemplate(id);
                                     if (quest != null && quest.QuestSortID >= 0 && quest.QuestSortID == criteria.Entry.Asset)
                                         ++counter;
                                 }
@@ -266,7 +266,7 @@ namespace Game.Achievements
                         break;
                     case CriteriaTypes.GainReputation:
                         {
-                            int reputation = referencePlayer.GetReputationMgr().GetReputation(criteria.Entry.Asset);
+                            var reputation = referencePlayer.GetReputationMgr().GetReputation(criteria.Entry.Asset);
                             if (reputation > 0)
                                 SetCriteriaProgress(criteria, (uint)reputation, referencePlayer);
                             break;
@@ -316,7 +316,7 @@ namespace Game.Achievements
                         break;
                     case CriteriaTypes.HighestPersonalRating:
                         {
-                            uint reqTeamType = criteria.Entry.Asset;
+                            var reqTeamType = criteria.Entry.Asset;
 
                             if (miscValue1 != 0)
                             {
@@ -330,15 +330,15 @@ namespace Game.Achievements
 
                                 for (byte arena_slot = 0; arena_slot < SharedConst.MaxArenaSlot; ++arena_slot)
                                 {
-                                    uint teamId = referencePlayer.GetArenaTeamId(arena_slot);
+                                    var teamId = referencePlayer.GetArenaTeamId(arena_slot);
                                     if (teamId == 0)
                                         continue;
 
-                                    ArenaTeam team = Global.ArenaTeamMgr.GetArenaTeamById(teamId);
+                                    var team = Global.ArenaTeamMgr.GetArenaTeamById(teamId);
                                     if (team == null || team.GetArenaType() != reqTeamType)
                                         continue;
 
-                                    ArenaTeamMember member = team.GetMember(referencePlayer.GetGUID());
+                                    var member = team.GetMember(referencePlayer.GetGUID());
                                     if (member != null)
                                     {
                                         SetCriteriaProgress(criteria, member.PersonalRating, referencePlayer, ProgressType.Highest);
@@ -447,7 +447,7 @@ namespace Game.Achievements
                         break;                                   // Not implemented yet :(
                 }
 
-                foreach (CriteriaTree tree in trees)
+                foreach (var tree in trees)
                 {
                     if (IsCompletedCriteriaTree(tree))
                         CompletedCriteriaTree(tree, referencePlayer);
@@ -467,7 +467,7 @@ namespace Game.Achievements
                     // Time is up, remove timer and reset progress
                     if (value <= timeDiff)
                     {
-                        CriteriaTree criteriaTree = Global.CriteriaMgr.GetCriteriaTree(key);
+                        var criteriaTree = Global.CriteriaMgr.GetCriteriaTree(key);
                         if (criteriaTree.Criteria != null)
                             RemoveCriteriaProgress(criteriaTree.Criteria);
 
@@ -483,15 +483,15 @@ namespace Game.Achievements
 
         public void StartCriteriaTimer(CriteriaTimedTypes type, uint entry, uint timeLost = 0)
         {
-            List<Criteria> criteriaList = Global.CriteriaMgr.GetTimedCriteriaByType(type);
-            foreach (Criteria criteria in criteriaList)
+            var criteriaList = Global.CriteriaMgr.GetTimedCriteriaByType(type);
+            foreach (var criteria in criteriaList)
             {
                 if (criteria.Entry.StartAsset != entry)
                     continue;
 
-                List<CriteriaTree> trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.Id);
-                bool canStart = false;
-                foreach (CriteriaTree tree in trees)
+                var trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.Id);
+                var canStart = false;
+                foreach (var tree in trees)
                 {
                     if (!_timeCriteriaTrees.ContainsKey(tree.Id) && !IsCompletedCriteriaTree(tree))
                     {
@@ -514,15 +514,15 @@ namespace Game.Achievements
 
         public void RemoveCriteriaTimer(CriteriaTimedTypes type, uint entry)
         {
-            List<Criteria> criteriaList = Global.CriteriaMgr.GetTimedCriteriaByType(type);
-            foreach (Criteria criteria in criteriaList)
+            var criteriaList = Global.CriteriaMgr.GetTimedCriteriaByType(type);
+            foreach (var criteria in criteriaList)
             {
                 if (criteria.Entry.StartAsset != entry)
                     continue;
 
-                List<CriteriaTree> trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.Id);
+                var trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.Id);
                 // Remove the timer from all trees
-                foreach (CriteriaTree tree in trees)
+                foreach (var tree in trees)
                     _timeCriteriaTrees.Remove(tree.Id);
 
                 // remove progress
@@ -545,8 +545,8 @@ namespace Game.Achievements
                 if (trees.Empty())
                     return;
 
-                bool hasTreeForTimed = false;
-                foreach (CriteriaTree tree in trees)
+                var hasTreeForTimed = false;
+                foreach (var tree in trees)
                 {
                     var timedIter = _timeCriteriaTrees.LookupByKey(tree.Id);
                     if (timedIter != 0)
@@ -562,7 +562,7 @@ namespace Game.Achievements
 
             Log.outDebug(LogFilter.Achievement, "SetCriteriaProgress({0}, {1}) for {2}", criteria.Id, changeValue, GetOwnerInfo());
 
-            CriteriaProgress progress = GetCriteriaProgress(criteria);
+            var progress = GetCriteriaProgress(criteria);
             if (progress == null)
             {
                 // not create record for 0 counter but allow it for timed criteria
@@ -585,7 +585,7 @@ namespace Game.Achievements
                     case ProgressType.Accumulate:
                         {
                             // avoid overflow
-                            ulong max_value = ulong.MaxValue;
+                            var max_value = ulong.MaxValue;
                             newValue = max_value - progress.Counter > changeValue ? progress.Counter + changeValue : max_value;
                             break;
                         }
@@ -611,7 +611,7 @@ namespace Game.Achievements
             {
                 Cypher.Assert(trees != null);
 
-                foreach (CriteriaTree tree in trees)
+                foreach (var tree in trees)
                 {
                     var timedIter = _timeCriteriaTrees.LookupByKey(tree.Id);
                     if (timedIter != 0)
@@ -655,7 +655,7 @@ namespace Game.Achievements
                 case CriteriaTreeOperator.SinglerNotCompleted:
                     return tree.Criteria == null || !IsCompletedCriteria(tree.Criteria, requiredCount);
                 case CriteriaTreeOperator.All:
-                    foreach (CriteriaTree node in tree.Children)
+                    foreach (var node in tree.Children)
                         if (!IsCompletedCriteriaTree(node))
                             return false;
                     return true;
@@ -666,7 +666,7 @@ namespace Game.Achievements
                         {
                             if (criteriaTree.Criteria != null)
                             {
-                                CriteriaProgress criteriaProgress = GetCriteriaProgress(criteriaTree.Criteria);
+                                var criteriaProgress = GetCriteriaProgress(criteriaTree.Criteria);
                                 if (criteriaProgress != null)
                                     progress += criteriaProgress.Counter;
                             }
@@ -680,7 +680,7 @@ namespace Game.Achievements
                         {
                             if (criteriaTree.Criteria != null)
                             {
-                                CriteriaProgress criteriaProgress = GetCriteriaProgress(criteriaTree.Criteria);
+                                var criteriaProgress = GetCriteriaProgress(criteriaTree.Criteria);
                                 if (criteriaProgress != null)
                                     if (criteriaProgress.Counter > progress)
                                         progress = criteriaProgress.Counter;
@@ -691,11 +691,11 @@ namespace Game.Achievements
                 case CriteriaTreeOperator.CountDirectChildren:
                     {
                         ulong progress = 0;
-                        foreach (CriteriaTree node in tree.Children)
+                        foreach (var node in tree.Children)
                         {
                             if (node.Criteria != null)
                             {
-                                CriteriaProgress criteriaProgress = GetCriteriaProgress(node.Criteria);
+                                var criteriaProgress = GetCriteriaProgress(node.Criteria);
                                 if (criteriaProgress != null)
                                     if (criteriaProgress.Counter >= 1)
                                         if (++progress >= requiredCount)
@@ -708,7 +708,7 @@ namespace Game.Achievements
                 case CriteriaTreeOperator.Any:
                     {
                         ulong progress = 0;
-                        foreach (CriteriaTree node in tree.Children)
+                        foreach (var node in tree.Children)
                             if (IsCompletedCriteriaTree(node))
                                 if (++progress >= requiredCount)
                                     return true;
@@ -722,7 +722,7 @@ namespace Game.Achievements
                         {
                             if (criteriaTree.Criteria != null)
                             {
-                                CriteriaProgress criteriaProgress = GetCriteriaProgress(criteriaTree.Criteria);
+                                var criteriaProgress = GetCriteriaProgress(criteriaTree.Criteria);
                                 if (criteriaProgress != null)
                                     progress += criteriaProgress.Counter * criteriaTree.Entry.Amount;
                             }
@@ -756,7 +756,7 @@ namespace Game.Achievements
 
         bool IsCompletedCriteria(Criteria criteria, ulong requiredAmount)
         {
-            CriteriaProgress progress = GetCriteriaProgress(criteria);
+            var progress = GetCriteriaProgress(criteria);
             if (progress == null)
                 return false;
 
@@ -858,8 +858,8 @@ namespace Game.Achievements
                 return false;
             }
 
-            bool treeRequirementPassed = false;
-            foreach (CriteriaTree tree in trees)
+            var treeRequirementPassed = false;
+            foreach (var tree in trees)
             {
                 if (!CanUpdateCriteriaTree(criteria, tree, referencePlayer))
                     continue;
@@ -996,7 +996,7 @@ namespace Game.Achievements
                 case CriteriaTypes.CompleteQuestsInZone:
                     if (miscValue1 != 0)
                     {
-                        Quest quest = Global.ObjectMgr.GetQuestTemplate((uint)miscValue1);
+                        var quest = Global.ObjectMgr.GetQuestTemplate((uint)miscValue1);
                         if (quest == null || quest.QuestSortID != criteria.Entry.Asset)
                             return false;
                     }
@@ -1012,7 +1012,7 @@ namespace Game.Achievements
                         if (miscValue1 == 0)
                             return false;
 
-                        Map map = referencePlayer.IsInWorld ? referencePlayer.GetMap() : Global.MapMgr.FindMap(referencePlayer.GetMapId(), referencePlayer.GetInstanceId());
+                        var map = referencePlayer.IsInWorld ? referencePlayer.GetMap() : Global.MapMgr.FindMap(referencePlayer.GetMapId(), referencePlayer.GetInstanceId());
                         if (!map || !map.IsDungeon())
                             return false;
 
@@ -1043,7 +1043,7 @@ namespace Game.Achievements
                             if (!referencePlayer.GetQuestRewardStatus(criteria.Entry.Asset))
                                 return false;
                         }
-                        CriteriaDataSet data = Global.CriteriaMgr.GetCriteriaDataSet(criteria);
+                        var data = Global.CriteriaMgr.GetCriteriaDataSet(criteria);
                         if (data != null)
                             if (!data.Meets(referencePlayer, unit))
                                 return false;
@@ -1081,25 +1081,25 @@ namespace Game.Achievements
                     break;
                 case CriteriaTypes.ExploreArea:
                     {
-                        WorldMapOverlayRecord worldOverlayEntry = CliDB.WorldMapOverlayStorage.LookupByKey(criteria.Entry.Asset);
+                        var worldOverlayEntry = CliDB.WorldMapOverlayStorage.LookupByKey(criteria.Entry.Asset);
                         if (worldOverlayEntry == null)
                             break;
 
-                        bool matchFound = false;
-                        for (int j = 0; j < SharedConst.MaxWorldMapOverlayArea; ++j)
+                        var matchFound = false;
+                        for (var j = 0; j < SharedConst.MaxWorldMapOverlayArea; ++j)
                         {
-                            AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(worldOverlayEntry.AreaID[j]);
+                            var area = CliDB.AreaTableStorage.LookupByKey(worldOverlayEntry.AreaID[j]);
                             if (area == null)
                                 break;
 
                             if (area.AreaBit < 0)
                                 continue;
 
-                            int playerIndexOffset = (int)((uint)area.AreaBit / 64);
+                            var playerIndexOffset = (int)((uint)area.AreaBit / 64);
                             if (playerIndexOffset >= PlayerConst.ExploredZonesSize)
                                 continue;
 
-                            ulong mask = 1ul << (int)((uint)area.AreaBit % 64);
+                            var mask = 1ul << (int)((uint)area.AreaBit % 64);
                             if (Convert.ToBoolean(referencePlayer.m_activePlayerData.ExploredZones[playerIndexOffset] & mask))
                             {
                                 matchFound = true;
@@ -1127,7 +1127,7 @@ namespace Game.Achievements
                         if (miscValue1 == 0 || miscValue2 != criteria.Entry.Asset)
                             return false;
 
-                        ItemTemplate proto = Global.ObjectMgr.GetItemTemplate((uint)miscValue1);
+                        var proto = Global.ObjectMgr.GetItemTemplate((uint)miscValue1);
                         if (proto == null)
                             return false;
                         break;
@@ -1166,7 +1166,7 @@ namespace Game.Achievements
                     {
                         if (miscValue1 == 0)
                             return false;
-                        ItemTemplate proto = Global.ObjectMgr.GetItemTemplate((uint)miscValue1);
+                        var proto = Global.ObjectMgr.GetItemTemplate((uint)miscValue1);
                         if (proto == null || proto.GetQuality() < ItemQuality.Epic)
                             return false;
                         break;
@@ -1221,14 +1221,14 @@ namespace Game.Achievements
                 case ModifierTreeOperator.SingleFalse:
                     return tree.Entry.Type != 0 && !ModifierSatisfied(tree.Entry, miscValue1, miscValue2, unit, referencePlayer);
                 case ModifierTreeOperator.All:
-                    foreach (ModifierTreeNode node in tree.Children)
+                    foreach (var node in tree.Children)
                         if (!ModifierTreeSatisfied(node, miscValue1, miscValue2, unit, referencePlayer))
                             return false;
                     return true;
                 case ModifierTreeOperator.Some:
                     {
-                        sbyte requiredAmount = Math.Max(tree.Entry.Amount, (sbyte)1);
-                        foreach (ModifierTreeNode node in tree.Children)
+                        var requiredAmount = Math.Max(tree.Entry.Amount, (sbyte)1);
+                        foreach (var node in tree.Children)
                             if (ModifierTreeSatisfied(node, miscValue1, miscValue2, unit, referencePlayer))
                                 if (--requiredAmount == 0)
                                     return true;
@@ -1244,22 +1244,22 @@ namespace Game.Achievements
 
         bool ModifierSatisfied(ModifierTreeRecord modifier, ulong miscValue1, ulong miscValue2, Unit unit, Player referencePlayer)
         {
-            uint reqValue = modifier.Asset;
-            int secondaryAsset = modifier.SecondaryAsset;
+            var reqValue = modifier.Asset;
+            var secondaryAsset = modifier.SecondaryAsset;
             int tertiaryAsset = modifier.TertiaryAsset;
 
             switch ((CriteriaAdditionalCondition)modifier.Type)
             {
                 case CriteriaAdditionalCondition.SourceDrunkValue: // 1
                     {
-                        uint inebriation = (uint)Math.Min(Math.Max(referencePlayer.GetDrunkValue(), referencePlayer.m_playerData.FakeInebriation), 100);
+                        var inebriation = (uint)Math.Min(Math.Max(referencePlayer.GetDrunkValue(), referencePlayer.m_playerData.FakeInebriation), 100);
                         if (inebriation < reqValue)
                             return false;
                         break;
                     }
                 case CriteriaAdditionalCondition.SourcePlayerCondition: // 2
                     {
-                        PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(reqValue);
+                        var playerCondition = CliDB.PlayerConditionStorage.LookupByKey(reqValue);
                         if (playerCondition == null || !ConditionManager.IsPlayerMeetingCondition(referencePlayer, playerCondition))
                             return false;
                         break;
@@ -1267,7 +1267,7 @@ namespace Game.Achievements
                 case CriteriaAdditionalCondition.ItemLevel: // 3
                     {
                         // miscValue1 is itemid
-                        ItemTemplate item = Global.ObjectMgr.GetItemTemplate((uint)miscValue1);
+                        var item = Global.ObjectMgr.GetItemTemplate((uint)miscValue1);
                         if (item == null || item.GetBaseItemLevel() < reqValue)
                             return false;
                         break;
@@ -1315,7 +1315,7 @@ namespace Game.Achievements
                 case CriteriaAdditionalCondition.ItemQualityMin: // 14
                     {
                         // miscValue1 is itemid
-                        ItemTemplate item = Global.ObjectMgr.GetItemTemplate((uint)miscValue1);
+                        var item = Global.ObjectMgr.GetItemTemplate((uint)miscValue1);
                         if (item == null || (uint)item.GetQuality() < reqValue)
                             return false;
                         break;
@@ -1323,7 +1323,7 @@ namespace Game.Achievements
                 case CriteriaAdditionalCondition.ItemQualityEquals: // 15
                     {
                         // miscValue1 is itemid
-                        ItemTemplate item = Global.ObjectMgr.GetItemTemplate((uint)miscValue1);
+                        var item = Global.ObjectMgr.GetItemTemplate((uint)miscValue1);
                         if (item == null || (uint)item.GetQuality() != reqValue)
                             return false;
                         break;
@@ -1352,7 +1352,7 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.MapDifficultyOld: // 20
                     {
-                        DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(referencePlayer.GetMap().GetDifficultyID());
+                        var difficulty = CliDB.DifficultyStorage.LookupByKey(referencePlayer.GetMap().GetDifficultyID());
                         if (difficulty == null || difficulty.OldEnumValue == -1 || difficulty.OldEnumValue != reqValue)
                             return false;
                         break;
@@ -1367,7 +1367,7 @@ namespace Game.Achievements
                     break;
                 case CriteriaAdditionalCondition.ArenaType: // 24
                     {
-                        Battleground bg = referencePlayer.GetBattleground();
+                        var bg = referencePlayer.GetBattleground();
                         if (!bg || !bg.IsArena() || bg.GetArenaType() != (ArenaTypes)reqValue)
                             return false;
                         break;
@@ -1418,7 +1418,7 @@ namespace Game.Achievements
                         return false;
                     break;
                 case CriteriaAdditionalCondition.BattlePetTeamLevel: // 34
-                    foreach (BattlePetSlot slot in referencePlayer.GetSession().GetBattlePetMgr().GetSlots())
+                    foreach (var slot in referencePlayer.GetSession().GetBattlePetMgr().GetSlots())
                         if (slot.Pet.Level != reqValue)
                             return false;
                     break;
@@ -1444,8 +1444,8 @@ namespace Game.Achievements
                     break;
                 case CriteriaAdditionalCondition.SourceZone: // 41
                     {
-                        uint zoneId = referencePlayer.GetAreaId();
-                        AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(zoneId);
+                        var zoneId = referencePlayer.GetAreaId();
+                        var areaEntry = CliDB.AreaTableStorage.LookupByKey(zoneId);
                         if (areaEntry != null)
                             if (areaEntry.Flags[0].HasAnyFlag(AreaFlags.Unk9))
                                 zoneId = areaEntry.ParentAreaID;
@@ -1457,8 +1457,8 @@ namespace Game.Achievements
                     {
                         if (!unit)
                             return false;
-                        uint zoneId = unit.GetAreaId();
-                        AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(zoneId);
+                        var zoneId = unit.GetAreaId();
+                        var areaEntry = CliDB.AreaTableStorage.LookupByKey(zoneId);
                         if (areaEntry != null)
                             if (areaEntry.Flags[0].HasAnyFlag(AreaFlags.Unk9))
                                 zoneId = areaEntry.ParentAreaID;
@@ -1519,7 +1519,7 @@ namespace Game.Achievements
                         if (unit == null || !unit.IsPlayer())
                             return false;
 
-                        PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(reqValue);
+                        var playerCondition = CliDB.PlayerConditionStorage.LookupByKey(reqValue);
                         if (playerCondition == null || !ConditionManager.IsPlayerMeetingCondition(unit.ToPlayer(), playerCondition))
                             return false;
                         break;
@@ -1549,13 +1549,13 @@ namespace Game.Achievements
                         return false;
                     break;
                 case CriteriaAdditionalCondition.WorldStateExpression: // 67
-                    WorldStateExpressionRecord worldStateExpression = CliDB.WorldStateExpressionStorage.LookupByKey(reqValue);
+                    var worldStateExpression = CliDB.WorldStateExpressionStorage.LookupByKey(reqValue);
                     if (worldStateExpression != null)
                         return ConditionManager.IsPlayerMeetingExpression(referencePlayer, worldStateExpression);
                     return false;
                 case CriteriaAdditionalCondition.MapDifficulty: // 68
                     {
-                        DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(referencePlayer.GetMap().GetDifficultyID());
+                        var difficulty = CliDB.DifficultyStorage.LookupByKey(referencePlayer.GetMap().GetDifficultyID());
                         if (difficulty == null || difficulty.Id != reqValue)
                             return false;
                         break;
@@ -1577,13 +1577,13 @@ namespace Game.Achievements
                         return false;
                     break;
                 case CriteriaAdditionalCondition.ModifierTree: // 73
-                    ModifierTreeNode nextModifierTree = Global.CriteriaMgr.GetModifierTree(reqValue);
+                    var nextModifierTree = Global.CriteriaMgr.GetModifierTree(reqValue);
                     if (nextModifierTree != null)
                         return ModifierTreeSatisfied(nextModifierTree, miscValue1, miscValue2, unit, referencePlayer);
                     return false;
                 case CriteriaAdditionalCondition.ScenarioId: // 74
                     {
-                        Scenario scenario = referencePlayer.GetScenario();
+                        var scenario = referencePlayer.GetScenario();
                         if (scenario == null)
                             return false;
 
@@ -1597,7 +1597,7 @@ namespace Game.Achievements
                     break;
                 case CriteriaAdditionalCondition.ScenarioStepIndex: // 82
                     {
-                        Scenario scenario = referencePlayer.GetScenario();
+                        var scenario = referencePlayer.GetScenario();
                         if (scenario == null)
                             return false;
 
@@ -1671,7 +1671,7 @@ namespace Game.Achievements
                         return false;
                     break;
                 case CriteriaAdditionalCondition.RewardedQuest: // 110
-                    uint questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(reqValue);
+                    var questBit = Global.DB2Mgr.GetQuestUniqueBitFlag(reqValue);
                     if (questBit != 0)
                         if ((referencePlayer.m_activePlayerData.QuestCompleted[((int)questBit - 1) >> 6] & (1ul << (((int)questBit - 1) & 63))) == 0)
                             return false;
@@ -1682,14 +1682,14 @@ namespace Game.Achievements
                     break;
                 case CriteriaAdditionalCondition.ExploredArea: // 113
                     {
-                        AreaTableRecord areaTable = CliDB.AreaTableStorage.LookupByKey(reqValue);
+                        var areaTable = CliDB.AreaTableStorage.LookupByKey(reqValue);
                         if (areaTable == null)
                             return false;
 
                         if (areaTable.AreaBit <= 0)
                             break; // success
 
-                        int playerIndexOffset = areaTable.AreaBit / 64;
+                        var playerIndexOffset = areaTable.AreaBit / 64;
                         if (playerIndexOffset >= PlayerConst.ExploredZonesSize)
                             break;
 
@@ -1703,15 +1703,15 @@ namespace Game.Achievements
                     break;
                 case CriteriaAdditionalCondition.SourcePvpFactionIndex: // 116
                     {
-                        ChrRacesRecord race = CliDB.ChrRacesStorage.LookupByKey(referencePlayer.GetRace());
+                        var race = CliDB.ChrRacesStorage.LookupByKey(referencePlayer.GetRace());
                         if (race == null)
                             return false;
 
-                        FactionTemplateRecord faction = CliDB.FactionTemplateStorage.LookupByKey(race.FactionID);
+                        var faction = CliDB.FactionTemplateStorage.LookupByKey(race.FactionID);
                         if (faction == null)
                             return false;
 
-                        int factionIndex = -1;
+                        var factionIndex = -1;
                         if (faction.FactionGroup.HasAnyFlag((byte)FactionMasks.Horde))
                             factionIndex = 0;
                         else if (faction.FactionGroup.HasAnyFlag((byte)FactionMasks.Alliance))
@@ -1748,18 +1748,18 @@ namespace Game.Achievements
                     break;
                 case CriteriaAdditionalCondition.GarrisonLevelAbove: // 126
                     {
-                        Garrison garrison = referencePlayer.GetGarrison();
+                        var garrison = referencePlayer.GetGarrison();
                         if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)secondaryAsset || garrison.GetSiteLevel().GarrLevel < reqValue)
                             return false;
                         break;
                     }
                 case CriteriaAdditionalCondition.GarrisonFollowersAboveLevel: // 127
                     {
-                        Garrison garrison = referencePlayer.GetGarrison();
+                        var garrison = referencePlayer.GetGarrison();
                         if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)tertiaryAsset)
                             return false;
 
-                        uint followerCount = garrison.CountFollowers(follower =>
+                        var followerCount = garrison.CountFollowers(follower =>
                         {
                             return follower.PacketInfo.FollowerLevel >= secondaryAsset;
                         });
@@ -1770,11 +1770,11 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.GarrisonFollowersAboveQuality: // 128
                     {
-                        Garrison garrison = referencePlayer.GetGarrison();
+                        var garrison = referencePlayer.GetGarrison();
                         if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)tertiaryAsset)
                             return false;
 
-                        uint followerCount = garrison.CountFollowers(follower =>
+                        var followerCount = garrison.CountFollowers(follower =>
                         {
                             return follower.PacketInfo.Quality >= secondaryAsset;
                         });
@@ -1785,11 +1785,11 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.GarrisonFollowerAboveLevelWithAbility: // 129
                     {
-                        Garrison garrison = referencePlayer.GetGarrison();
+                        var garrison = referencePlayer.GetGarrison();
                         if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)tertiaryAsset)
                             return false;
 
-                        uint followerCount = garrison.CountFollowers(follower =>
+                        var followerCount = garrison.CountFollowers(follower =>
                         {
                             return follower.PacketInfo.FollowerLevel >= reqValue && follower.HasAbility((uint)secondaryAsset);
                         });
@@ -1800,15 +1800,15 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.GarrisonFollowerAboveLevelWithTrait: // 130
                     {
-                        Garrison garrison = referencePlayer.GetGarrison();
+                        var garrison = referencePlayer.GetGarrison();
                         if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)tertiaryAsset)
                             return false;
 
-                        GarrAbilityRecord traitEntry = CliDB.GarrAbilityStorage.LookupByKey(secondaryAsset);
+                        var traitEntry = CliDB.GarrAbilityStorage.LookupByKey(secondaryAsset);
                         if (traitEntry == null || !traitEntry.Flags.HasAnyFlag(GarrisonAbilityFlags.Trait))
                             return false;
 
-                        uint followerCount = garrison.CountFollowers(follower =>
+                        var followerCount = garrison.CountFollowers(follower =>
                         {
                             return follower.PacketInfo.FollowerLevel >= reqValue && follower.HasAbility((uint)secondaryAsset);
                         });
@@ -1819,13 +1819,13 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.GarrisonFollowerWithAbilityInBuilding: // 131
                     {
-                        Garrison garrison = referencePlayer.GetGarrison();
+                        var garrison = referencePlayer.GetGarrison();
                         if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)tertiaryAsset)
                             return false;
 
-                        uint followerCount = garrison.CountFollowers(follower =>
+                        var followerCount = garrison.CountFollowers(follower =>
                         {
-                            GarrBuildingRecord followerBuilding = CliDB.GarrBuildingStorage.LookupByKey(follower.PacketInfo.CurrentBuildingID);
+                            var followerBuilding = CliDB.GarrBuildingStorage.LookupByKey(follower.PacketInfo.CurrentBuildingID);
                             if (followerBuilding == null)
                                 return false;
 
@@ -1838,17 +1838,17 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.GarrisonFollowerWithTraitInBuilding: // 132
                     {
-                        Garrison garrison = referencePlayer.GetGarrison();
+                        var garrison = referencePlayer.GetGarrison();
                         if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)tertiaryAsset)
                             return false;
 
-                        GarrAbilityRecord traitEntry = CliDB.GarrAbilityStorage.LookupByKey(reqValue);
+                        var traitEntry = CliDB.GarrAbilityStorage.LookupByKey(reqValue);
                         if (traitEntry == null || !traitEntry.Flags.HasAnyFlag(GarrisonAbilityFlags.Trait))
                             return false;
 
-                        uint followerCount = garrison.CountFollowers(follower =>
+                        var followerCount = garrison.CountFollowers(follower =>
                         {
-                            GarrBuildingRecord followerBuilding = CliDB.GarrBuildingStorage.LookupByKey(follower.PacketInfo.CurrentBuildingID);
+                            var followerBuilding = CliDB.GarrBuildingStorage.LookupByKey(follower.PacketInfo.CurrentBuildingID);
                             if (followerBuilding == null)
                                 return false;
 
@@ -1861,16 +1861,16 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.GarrisonFollowerAboveLevelInBuilding: // 133
                     {
-                        Garrison garrison = referencePlayer.GetGarrison();
+                        var garrison = referencePlayer.GetGarrison();
                         if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)tertiaryAsset)
                             return false;
 
-                        uint followerCount = garrison.CountFollowers(follower =>
+                        var followerCount = garrison.CountFollowers(follower =>
                         {
                             if (follower.PacketInfo.FollowerLevel < reqValue)
                                 return false;
 
-                            GarrBuildingRecord followerBuilding = CliDB.GarrBuildingStorage.LookupByKey(follower.PacketInfo.CurrentBuildingID);
+                            var followerBuilding = CliDB.GarrBuildingStorage.LookupByKey(follower.PacketInfo.CurrentBuildingID);
                             if (followerBuilding == null)
                                 return false;
 
@@ -1882,16 +1882,16 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.GarrisonBuildingAboveLevel: // 134
                     {
-                        Garrison garrison = referencePlayer.GetGarrison();
+                        var garrison = referencePlayer.GetGarrison();
                         if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)tertiaryAsset)
                             return false;
 
-                        foreach (Garrison.Plot plot in garrison.GetPlots())
+                        foreach (var plot in garrison.GetPlots())
                         {
                             if (!plot.BuildingInfo.PacketInfo.HasValue)
                                 continue;
 
-                            GarrBuildingRecord building = CliDB.GarrBuildingStorage.LookupByKey(plot.BuildingInfo.PacketInfo.Value.GarrBuildingID);
+                            var building = CliDB.GarrBuildingStorage.LookupByKey(plot.BuildingInfo.PacketInfo.Value.GarrBuildingID);
                             if (building == null || building.UpgradeLevel < reqValue || building.BuildingType != secondaryAsset)
                                 continue;
 
@@ -1901,11 +1901,11 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.GarrisonBlueprint: // 135
                     {
-                        GarrBuildingRecord blueprintBuilding = CliDB.GarrBuildingStorage.LookupByKey(reqValue);
+                        var blueprintBuilding = CliDB.GarrBuildingStorage.LookupByKey(reqValue);
                         if (blueprintBuilding == null)
                             return false;
 
-                        Garrison garrison = referencePlayer.GetGarrison();
+                        var garrison = referencePlayer.GetGarrison();
                         if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)blueprintBuilding.GarrTypeID)
                             return false;
 
@@ -1915,15 +1915,15 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.GarrisonBuildingInactive: // 140
                     {
-                        GarrBuildingRecord building = CliDB.GarrBuildingStorage.LookupByKey(reqValue);
+                        var building = CliDB.GarrBuildingStorage.LookupByKey(reqValue);
                         if (building == null)
                             return false;
 
-                        Garrison garrison = referencePlayer.GetGarrison();
+                        var garrison = referencePlayer.GetGarrison();
                         if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)tertiaryAsset)
                             return false;
 
-                        foreach (Garrison.Plot plot in garrison.GetPlots())
+                        foreach (var plot in garrison.GetPlots())
                         {
                             if (!plot.BuildingInfo.PacketInfo.HasValue || plot.BuildingInfo.PacketInfo.Value.GarrBuildingID != reqValue)
                                 continue;
@@ -1934,16 +1934,16 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.GarrisonBuildingEqualLevel: // 142
                     {
-                        Garrison garrison = referencePlayer.GetGarrison();
+                        var garrison = referencePlayer.GetGarrison();
                         if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)tertiaryAsset)
                             return false;
 
-                        foreach (Garrison.Plot plot in garrison.GetPlots())
+                        foreach (var plot in garrison.GetPlots())
                         {
                             if (!plot.BuildingInfo.PacketInfo.HasValue)
                                 continue;
 
-                            GarrBuildingRecord building = CliDB.GarrBuildingStorage.LookupByKey(plot.BuildingInfo.PacketInfo.Value.GarrBuildingID);
+                            var building = CliDB.GarrBuildingStorage.LookupByKey(plot.BuildingInfo.PacketInfo.Value.GarrBuildingID);
                             if (building == null || building.UpgradeLevel != reqValue || building.BuildingType != secondaryAsset)
                                 continue;
 
@@ -1953,13 +1953,13 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.GarrisonFollowerWithAbility: // 143
                     {
-                        Garrison garrison = referencePlayer.GetGarrison();
+                        var garrison = referencePlayer.GetGarrison();
                         if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)secondaryAsset)
                             return false;
 
                         if (miscValue1 != 0)
                         {
-                            Garrison.Follower follower = garrison.GetFollower(miscValue1);
+                            var follower = garrison.GetFollower(miscValue1);
                             if (follower == null)
                                 return false;
 
@@ -1968,7 +1968,7 @@ namespace Game.Achievements
                         }
                         else
                         {
-                            uint followerCount = garrison.CountFollowers(follower =>
+                            var followerCount = garrison.CountFollowers(follower =>
                             {
                                 return follower.HasAbility(reqValue);
                             });
@@ -1980,23 +1980,23 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.GarrisonFollowerWithTrait: // 144
                     {
-                        GarrAbilityRecord traitEntry = CliDB.GarrAbilityStorage.LookupByKey(reqValue);
+                        var traitEntry = CliDB.GarrAbilityStorage.LookupByKey(reqValue);
                         if (traitEntry == null || !traitEntry.Flags.HasAnyFlag(GarrisonAbilityFlags.Trait))
                             return false;
 
-                        Garrison garrison = referencePlayer.GetGarrison();
+                        var garrison = referencePlayer.GetGarrison();
                         if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)secondaryAsset)
                             return false;
 
                         if (miscValue1 != 0)
                         {
-                            Garrison.Follower follower = garrison.GetFollower(miscValue1);
+                            var follower = garrison.GetFollower(miscValue1);
                             if (follower == null || !follower.HasAbility(reqValue))
                                 return false;
                         }
                         else
                         {
-                            uint followerCount = garrison.CountFollowers(follower =>
+                            var followerCount = garrison.CountFollowers(follower =>
                             {
                                 return follower.HasAbility(reqValue);
                             });
@@ -2008,19 +2008,19 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.GarrisonFollowerAboveQualityWod: // 145
                     {
-                        Garrison garrison = referencePlayer.GetGarrison();
+                        var garrison = referencePlayer.GetGarrison();
                         if (garrison == null || garrison.GetGarrisonType() != GarrisonType.Garrison)
                             return false;
 
                         if (miscValue1 != 0)
                         {
-                            Garrison.Follower follower = garrison.GetFollower(miscValue1);
+                            var follower = garrison.GetFollower(miscValue1);
                             if (follower == null || follower.PacketInfo.Quality < reqValue)
                                 return false;
                         }
                         else
                         {
-                            uint followerCount = garrison.CountFollowers(follower =>
+                            var followerCount = garrison.CountFollowers(follower =>
                             {
                                 return follower.PacketInfo.Quality >= reqValue;
                             });
@@ -2032,19 +2032,19 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.GarrisonFollowerEqualLevel: // 146
                     {
-                        Garrison garrison = referencePlayer.GetGarrison();
+                        var garrison = referencePlayer.GetGarrison();
                         if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)secondaryAsset)
                             return false;
 
                         if (miscValue1 != 0)
                         {
-                            Garrison.Follower follower = garrison.GetFollower(miscValue1);
+                            var follower = garrison.GetFollower(miscValue1);
                             if (follower == null || follower.PacketInfo.FollowerLevel < reqValue)
                                 return false;
                         }
                         else
                         {
-                            uint followerCount = garrison.CountFollowers(follower =>
+                            var followerCount = garrison.CountFollowers(follower =>
                             {
                                 return follower.PacketInfo.FollowerLevel >= reqValue;
                             });
@@ -2057,7 +2057,7 @@ namespace Game.Achievements
                 case CriteriaAdditionalCondition.BattlePetSpeciesInTeam: // 151
                     {
                         uint count = 0;
-                        foreach (BattlePetSlot slot in referencePlayer.GetSession().GetBattlePetMgr().GetSlots())
+                        foreach (var slot in referencePlayer.GetSession().GetBattlePetMgr().GetSlots())
                             if (slot.Pet.Species == secondaryAsset)
                                 ++count;
 
@@ -2068,9 +2068,9 @@ namespace Game.Achievements
                 case CriteriaAdditionalCondition.BattlePetFamilyInTeam: // 152
                     {
                         uint count = 0;
-                        foreach (BattlePetSlot slot in referencePlayer.GetSession().GetBattlePetMgr().GetSlots())
+                        foreach (var slot in referencePlayer.GetSession().GetBattlePetMgr().GetSlots())
                         {
-                            BattlePetSpeciesRecord species = CliDB.BattlePetSpeciesStorage.LookupByKey(slot.Pet.Species);
+                            var species = CliDB.BattlePetSpeciesStorage.LookupByKey(slot.Pet.Species);
                             if (species != null)
                                 if (species.PetTypeEnum == secondaryAsset)
                                     ++count;
@@ -2082,19 +2082,19 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.GarrisonFollowerId: // 157
                     {
-                        Garrison garrison = referencePlayer.GetGarrison();
+                        var garrison = referencePlayer.GetGarrison();
                         if (garrison == null)
                             return false;
 
                         if (miscValue1 != 0)
                         {
-                            Garrison.Follower follower = garrison.GetFollower(miscValue1);
+                            var follower = garrison.GetFollower(miscValue1);
                             if (follower == null || follower.PacketInfo.GarrFollowerID != reqValue)
                                 return false;
                         }
                         else
                         {
-                            uint followerCount = garrison.CountFollowers(follower =>
+                            var followerCount = garrison.CountFollowers(follower =>
                             {
                                 return follower.PacketInfo.GarrFollowerID == reqValue;
                             });
@@ -2106,19 +2106,19 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.GarrisonFollowerAboveItemLevel: // 168
                     {
-                        Garrison garrison = referencePlayer.GetGarrison();
+                        var garrison = referencePlayer.GetGarrison();
                         if (garrison == null)
                             return false;
 
                         if (miscValue1 != 0)
                         {
-                            Garrison.Follower follower = garrison.GetFollower(miscValue1);
+                            var follower = garrison.GetFollower(miscValue1);
                             if (follower == null || follower.PacketInfo.GarrFollowerID != reqValue)
                                 return false;
                         }
                         else
                         {
-                            uint followerCount = garrison.CountFollowers(follower =>
+                            var followerCount = garrison.CountFollowers(follower =>
                             {
                                 return follower.GetItemLevel() >= reqValue;
                             });
@@ -2130,11 +2130,11 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.GarrisonFollowersAboveItemLevel: // 169
                     {
-                        Garrison garrison = referencePlayer.GetGarrison();
+                        var garrison = referencePlayer.GetGarrison();
                         if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)tertiaryAsset)
                             return false;
 
-                        uint followerCount = garrison.CountFollowers(follower =>
+                        var followerCount = garrison.CountFollowers(follower =>
                         {
                             return follower.GetItemLevel() >= secondaryAsset;
                         });
@@ -2148,7 +2148,7 @@ namespace Game.Achievements
 
                 case CriteriaAdditionalCondition.GarrisonLevelEqual: // 170
                     {
-                        Garrison garrison = referencePlayer.GetGarrison();
+                        var garrison = referencePlayer.GetGarrison();
                         if (garrison == null || garrison.GetGarrisonType() != GarrisonType.Garrison || garrison.GetSiteLevel().GarrLevel != reqValue)
                             return false;
                         break;
@@ -2159,11 +2159,11 @@ namespace Game.Achievements
                     break;
                 case CriteriaAdditionalCondition.GarrisonFollowersLevelEqual: // 175
                     {
-                        Garrison garrison = referencePlayer.GetGarrison();
+                        var garrison = referencePlayer.GetGarrison();
                         if (garrison == null || garrison.GetGarrisonType() != (GarrisonType)tertiaryAsset)
                             return false;
 
-                        uint followerCount = garrison.CountFollowers(follower =>
+                        var followerCount = garrison.CountFollowers(follower =>
                         {
                             return follower.PacketInfo.FollowerLevel >= secondaryAsset;
                         });
@@ -2174,16 +2174,16 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.GarrisonFollowerIdInBuilding: // 176
                     {
-                        Garrison garrison = referencePlayer.GetGarrison();
+                        var garrison = referencePlayer.GetGarrison();
                         if (garrison == null || garrison.GetGarrisonType() != GarrisonType.Garrison)
                             return false;
 
-                        uint followerCount = garrison.CountFollowers(follower =>
+                        var followerCount = garrison.CountFollowers(follower =>
                         {
                             if (follower.PacketInfo.GarrFollowerID != reqValue)
                                 return false;
 
-                            GarrBuildingRecord followerBuilding = CliDB.GarrBuildingStorage.LookupByKey(follower.PacketInfo.CurrentBuildingID);
+                            var followerBuilding = CliDB.GarrBuildingStorage.LookupByKey(follower.PacketInfo.CurrentBuildingID);
                             if (followerBuilding == null)
                                 return false;
 
@@ -2196,7 +2196,7 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.WorldPvpArea: // 179
                     {
-                        BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(referencePlayer.GetZoneId());
+                        var bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(referencePlayer.GetZoneId());
                         if (bf == null || bf.GetBattleId() != reqValue)
                             return false;
                         break;
@@ -2204,13 +2204,13 @@ namespace Game.Achievements
 
                 case CriteriaAdditionalCondition.GarrisonFollowersItemLevelAbove: // 184
                     {
-                        Garrison garrison = referencePlayer.GetGarrison();
+                        var garrison = referencePlayer.GetGarrison();
                         if (garrison == null)
                             return false;
 
-                        uint followerCount = garrison.CountFollowers(follower =>
+                        var followerCount = garrison.CountFollowers(follower =>
                         {
-                            GarrFollowerRecord garrFollower = CliDB.GarrFollowerStorage.LookupByKey(follower.PacketInfo.GarrFollowerID);
+                            var garrFollower = CliDB.GarrFollowerStorage.LookupByKey(follower.PacketInfo.GarrFollowerID);
                             if (garrFollower == null)
                                 return false;
 
@@ -2244,19 +2244,19 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.QuestInfoId: // 206
                     {
-                        Quest quest = Global.ObjectMgr.GetQuestTemplate((uint)miscValue1);
+                        var quest = Global.ObjectMgr.GetQuestTemplate((uint)miscValue1);
                         if (quest == null || quest.Id != reqValue)
                             return false;
                         break;
                     }
                 case CriteriaAdditionalCondition.ArtifactAppearanceSetUsed: // 208
                     {
-                        for (byte slot = EquipmentSlot.MainHand; slot <= EquipmentSlot.Ranged; ++slot)
+                        for (var slot = EquipmentSlot.MainHand; slot <= EquipmentSlot.Ranged; ++slot)
                         {
-                            Item artifact = referencePlayer.GetItemByPos(InventorySlots.Bag0, slot);
+                            var artifact = referencePlayer.GetItemByPos(InventorySlots.Bag0, slot);
                             if (artifact != null)
                             {
-                                ArtifactAppearanceRecord artifactAppearance = CliDB.ArtifactAppearanceStorage.LookupByKey(artifact.GetModifier(ItemModifier.ArtifactAppearanceId));
+                                var artifactAppearance = CliDB.ArtifactAppearanceStorage.LookupByKey(artifact.GetModifier(ItemModifier.ArtifactAppearanceId));
                                 if (artifactAppearance != null)
                                     if (artifactAppearance.ArtifactAppearanceSetID == reqValue)
                                         return true;
@@ -2270,7 +2270,7 @@ namespace Game.Achievements
                     break;
                 case CriteriaAdditionalCondition.ScenarioType: // 211
                     {
-                        Scenario scenario = referencePlayer.GetScenario();
+                        var scenario = referencePlayer.GetScenario();
                         if (scenario == null)
                             return false;
 
@@ -2284,7 +2284,7 @@ namespace Game.Achievements
                     break;
                 case CriteriaAdditionalCondition.AchievementGloballyIncompleted: // 231
                     {
-                        AchievementRecord achievement = CliDB.AchievementStorage.LookupByKey(secondaryAsset);
+                        var achievement = CliDB.AchievementStorage.LookupByKey(secondaryAsset);
                         if (achievement == null)
                             return false;
 
@@ -2294,8 +2294,8 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.MainHandVisibleSubclass: // 232
                     {
-                        uint itemSubclass = (uint)ItemSubClassWeapon.Fist;
-                        ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(referencePlayer.m_playerData.VisibleItems[EquipmentSlot.MainHand].ItemID);
+                        var itemSubclass = (uint)ItemSubClassWeapon.Fist;
+                        var itemTemplate = Global.ObjectMgr.GetItemTemplate(referencePlayer.m_playerData.VisibleItems[EquipmentSlot.MainHand].ItemID);
                         if (itemTemplate != null)
                             itemSubclass = itemTemplate.GetSubClass();
                         if (itemSubclass != reqValue)
@@ -2304,8 +2304,8 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.OffHandVisibleSubclass: // 233
                     {
-                        uint itemSubclass = (uint)ItemSubClassWeapon.Fist;
-                        ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(referencePlayer.m_playerData.VisibleItems[EquipmentSlot.OffHand].ItemID);
+                        var itemSubclass = (uint)ItemSubClassWeapon.Fist;
+                        var itemTemplate = Global.ObjectMgr.GetItemTemplate(referencePlayer.m_playerData.VisibleItems[EquipmentSlot.OffHand].ItemID);
                         if (itemTemplate != null)
                             itemSubclass = itemTemplate.GetSubClass();
                         if (itemSubclass != reqValue)
@@ -2314,18 +2314,18 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.AzeriteItemLevel: // 235
                     {
-                        Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
+                        var heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
                         if (!heartOfAzeroth || heartOfAzeroth.ToAzeriteItem().GetLevel() < reqValue)
                             return false;
                         break;
                     }
                 case CriteriaAdditionalCondition.SourceDisplayRace: // 252
                     {
-                        CreatureDisplayInfoRecord creatureDisplayInfo = CliDB.CreatureDisplayInfoStorage.LookupByKey(referencePlayer.GetDisplayId());
+                        var creatureDisplayInfo = CliDB.CreatureDisplayInfoStorage.LookupByKey(referencePlayer.GetDisplayId());
                         if (creatureDisplayInfo == null)
                             return false;
 
-                        CreatureDisplayInfoExtraRecord creatureDisplayInfoExtra = CliDB.CreatureDisplayInfoExtraStorage.LookupByKey(creatureDisplayInfo.ExtendedDisplayInfoID);
+                        var creatureDisplayInfoExtra = CliDB.CreatureDisplayInfoExtraStorage.LookupByKey(creatureDisplayInfo.ExtendedDisplayInfoID);
                         if (creatureDisplayInfoExtra == null)
                             return false;
 
@@ -2337,11 +2337,11 @@ namespace Game.Achievements
                     {
                         if (!unit)
                             return false;
-                        CreatureDisplayInfoRecord creatureDisplayInfo = CliDB.CreatureDisplayInfoStorage.LookupByKey(unit.GetDisplayId());
+                        var creatureDisplayInfo = CliDB.CreatureDisplayInfoStorage.LookupByKey(unit.GetDisplayId());
                         if (creatureDisplayInfo == null)
                             return false;
 
-                        CreatureDisplayInfoExtraRecord creatureDisplayInfoExtra = CliDB.CreatureDisplayInfoExtraStorage.LookupByKey(creatureDisplayInfo.ExtendedDisplayInfoID);
+                        var creatureDisplayInfoExtra = CliDB.CreatureDisplayInfoExtraStorage.LookupByKey(creatureDisplayInfo.ExtendedDisplayInfoID);
                         if (creatureDisplayInfoExtra == null)
                             return false;
 
@@ -2367,13 +2367,13 @@ namespace Game.Achievements
                     break;
                 case CriteriaAdditionalCondition.UnlockedAzeriteEssenceRankLower: // 259
                     {
-                        Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
+                        var heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
                         if (heartOfAzeroth != null)
                         {
-                            AzeriteItem azeriteItem = heartOfAzeroth.ToAzeriteItem();
+                            var azeriteItem = heartOfAzeroth.ToAzeriteItem();
                             if (azeriteItem != null)
                             {
-                                foreach (UnlockedAzeriteEssence essence in azeriteItem.m_azeriteItemData.UnlockedEssences)
+                                foreach (var essence in azeriteItem.m_azeriteItemData.UnlockedEssences)
                                     if (essence.AzeriteEssenceID == reqValue && essence.Rank < secondaryAsset)
                                         return true;
                             }
@@ -2382,13 +2382,13 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.UnlockedAzeriteEssenceRankEqual: // 260
                     {
-                        Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
+                        var heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
                         if (heartOfAzeroth != null)
                         {
-                            AzeriteItem azeriteItem = heartOfAzeroth.ToAzeriteItem();
+                            var azeriteItem = heartOfAzeroth.ToAzeriteItem();
                             if (azeriteItem != null)
                             {
-                                foreach (UnlockedAzeriteEssence essence in azeriteItem.m_azeriteItemData.UnlockedEssences)
+                                foreach (var essence in azeriteItem.m_azeriteItemData.UnlockedEssences)
                                     if (essence.AzeriteEssenceID == reqValue && essence.Rank == secondaryAsset)
                                         return true;
                             }
@@ -2397,13 +2397,13 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.UnlockedAzeriteEssenceRankGreater: // 261
                     {
-                        Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
+                        var heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
                         if (heartOfAzeroth != null)
                         {
-                            AzeriteItem azeriteItem = heartOfAzeroth.ToAzeriteItem();
+                            var azeriteItem = heartOfAzeroth.ToAzeriteItem();
                             if (azeriteItem != null)
                             {
-                                foreach (UnlockedAzeriteEssence essence in azeriteItem.m_azeriteItemData.UnlockedEssences)
+                                foreach (var essence in azeriteItem.m_azeriteItemData.UnlockedEssences)
                                     if (essence.AzeriteEssenceID == reqValue && essence.Rank > secondaryAsset)
                                         return true;
                             }
@@ -2416,7 +2416,7 @@ namespace Game.Achievements
                     break;
                 case CriteriaAdditionalCondition.SourceSpecializationRole: // 263
                     {
-                        ChrSpecializationRecord spec = CliDB.ChrSpecializationStorage.LookupByKey(referencePlayer.GetPrimarySpecialization());
+                        var spec = CliDB.ChrSpecializationStorage.LookupByKey(referencePlayer.GetPrimarySpecialization());
                         if (spec == null || spec.Role != reqValue)
                             return false;
                         break;
@@ -2427,16 +2427,16 @@ namespace Game.Achievements
                     break;
                 case CriteriaAdditionalCondition.SelectedAzeriteEssenceRankLower: // 266
                     {
-                        Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
+                        var heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
                         if (heartOfAzeroth != null)
                         {
-                            AzeriteItem azeriteItem = heartOfAzeroth.ToAzeriteItem();
+                            var azeriteItem = heartOfAzeroth.ToAzeriteItem();
                             if (azeriteItem != null)
                             {
-                                SelectedAzeriteEssences selectedEssences = azeriteItem.GetSelectedAzeriteEssences();
+                                var selectedEssences = azeriteItem.GetSelectedAzeriteEssences();
                                 if (selectedEssences != null)
                                 {
-                                    foreach (UnlockedAzeriteEssence essence in azeriteItem.m_azeriteItemData.UnlockedEssences)
+                                    foreach (var essence in azeriteItem.m_azeriteItemData.UnlockedEssences)
                                         if (essence.AzeriteEssenceID == selectedEssences.AzeriteEssenceID[(int)reqValue] && essence.Rank < secondaryAsset)
                                             return true;
                                 }
@@ -2446,16 +2446,16 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.SelectedAzeriteEssenceRankGreater: // 267
                     {
-                        Item heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
+                        var heartOfAzeroth = referencePlayer.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
                         if (heartOfAzeroth != null)
                         {
-                            AzeriteItem azeriteItem = heartOfAzeroth.ToAzeriteItem();
+                            var azeriteItem = heartOfAzeroth.ToAzeriteItem();
                             if (azeriteItem != null)
                             {
-                                SelectedAzeriteEssences selectedEssences = azeriteItem.GetSelectedAzeriteEssences();
+                                var selectedEssences = azeriteItem.GetSelectedAzeriteEssences();
                                 if (selectedEssences != null)
                                 {
-                                    foreach (UnlockedAzeriteEssence essence in azeriteItem.m_azeriteItemData.UnlockedEssences)
+                                    foreach (var essence in azeriteItem.m_azeriteItemData.UnlockedEssences)
                                         if (essence.AzeriteEssenceID == selectedEssences.AzeriteEssenceID[(int)reqValue] && essence.Rank > secondaryAsset)
                                             return true;
                                 }
@@ -2465,7 +2465,7 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.SourceLevelInRangeCt: // 268
                     {
-                        uint level = referencePlayer.GetLevel();
+                        var level = referencePlayer.GetLevel();
                         var levels = Global.DB2Mgr.GetContentTuningData(reqValue, 0);
                         if (levels.HasValue)
                         {
@@ -2480,7 +2480,7 @@ namespace Game.Achievements
                         if (!unit)
                             return false;
 
-                        uint level = unit.GetLevel();
+                        var level = unit.GetLevel();
                         var levels = Global.DB2Mgr.GetContentTuningData(reqValue, 0);
                         if (levels.HasValue)
                         {
@@ -2492,7 +2492,7 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.SourceLevelGreaterCt: // 272
                     {
-                        uint level = referencePlayer.GetLevel();
+                        var level = referencePlayer.GetLevel();
                         var levels = Global.DB2Mgr.GetContentTuningData(reqValue, 0);
                         if (levels.HasValue)
                             return secondaryAsset != 0 ? level >= levels.Value.MinLevelWithDelta : level >= levels.Value.MinLevel;
@@ -2503,7 +2503,7 @@ namespace Game.Achievements
                         if (!unit)
                             return false;
 
-                        uint level = unit.GetLevel();
+                        var level = unit.GetLevel();
                         var levels = Global.DB2Mgr.GetContentTuningData(reqValue, 0);
                         if (levels.HasValue)
                             return secondaryAsset != 0 ? level >= levels.Value.MinLevelWithDelta : level >= levels.Value.MinLevel;
@@ -2511,7 +2511,7 @@ namespace Game.Achievements
                     }
                 case CriteriaAdditionalCondition.MapOrCosmeticMap: // 280
                     {
-                        MapRecord map = referencePlayer.GetMap().GetEntry();
+                        var map = referencePlayer.GetMap().GetEntry();
                         if (map.Id != reqValue && map.CosmeticParentMapID != reqValue)
                             return false;
                         break;
@@ -2527,9 +2527,9 @@ namespace Game.Achievements
                 case CriteriaAdditionalCondition.SourceAreaOrZoneInGroup: // 293
                     {
                         var areas = Global.DB2Mgr.GetAreasForGroup(reqValue);
-                        AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(referencePlayer.GetAreaId());
+                        var area = CliDB.AreaTableStorage.LookupByKey(referencePlayer.GetAreaId());
                         if (area != null)
-                            foreach (uint areaInGroup in areas)
+                            foreach (var areaInGroup in areas)
                                 if (areaInGroup == area.Id || areaInGroup == area.ParentAreaID)
                                     return true;
                         return false;
@@ -2544,20 +2544,20 @@ namespace Game.Achievements
                     break;
                 case CriteriaAdditionalCondition.SourceRuneforgeLegendaryKnown: // 303
                     {
-                        int block = (int)reqValue / 32;
+                        var block = (int)reqValue / 32;
                         if (block >= referencePlayer.m_activePlayerData.RuneforgePowers.Size())
                             return false;
 
-                        uint bit = reqValue % 32;
+                        var bit = reqValue % 32;
                         return (referencePlayer.m_activePlayerData.RuneforgePowers[block] & (1u << (int)bit)) != 0;
                     }
                 case CriteriaAdditionalCondition.ShapeshiftFormCustomizationDisplay: // 308
                     {
-                        ShapeshiftFormModelData formModelData = Global.DB2Mgr.GetShapeshiftFormModelData(referencePlayer.GetRace(), referencePlayer.GetNativeSex(), (ShapeShiftForm)secondaryAsset);
+                        var formModelData = Global.DB2Mgr.GetShapeshiftFormModelData(referencePlayer.GetRace(), referencePlayer.GetNativeSex(), (ShapeShiftForm)secondaryAsset);
                         if (formModelData == null)
                             return false;
 
-                        uint formChoice = referencePlayer.GetCustomizationChoice(formModelData.OptionID);
+                        var formChoice = referencePlayer.GetCustomizationChoice(formModelData.OptionID);
                         var choiceIndex = formModelData.Choices.FindIndex(choice => { return choice.Id == formChoice; });
                         if (choiceIndex == -1)
                             return false;
@@ -2604,7 +2604,7 @@ namespace Game.Achievements
 
         public void LoadCriteriaModifiersTree()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             if (CliDB.ModifierTreeStorage.Empty())
             {
@@ -2615,7 +2615,7 @@ namespace Game.Achievements
             // Load modifier tree nodes
             foreach (var tree in CliDB.ModifierTreeStorage.Values)
             {
-                ModifierTreeNode node = new ModifierTreeNode();
+                var node = new ModifierTreeNode();
                 node.Entry = tree;
                 _criteriaModifiers[node.Entry.Id] = node;
             }
@@ -2623,7 +2623,7 @@ namespace Game.Achievements
             // Build tree
             foreach (var treeNode in _criteriaModifiers.Values)
             {
-                ModifierTreeNode parentNode = _criteriaModifiers.LookupByKey(treeNode.Entry.Parent);
+                var parentNode = _criteriaModifiers.LookupByKey(treeNode.Entry.Parent);
                 if (parentNode != null)
                     parentNode.Children.Add(treeNode);
             }
@@ -2633,7 +2633,7 @@ namespace Game.Achievements
 
         T GetEntry<T>(Dictionary<uint, T> map, CriteriaTreeRecord tree) where T : new()
         {
-            CriteriaTreeRecord cur = tree;
+            var cur = tree;
             var obj = map.LookupByKey(tree.Id);
             while (obj == null)
             {
@@ -2655,24 +2655,24 @@ namespace Game.Achievements
 
         public void LoadCriteriaList()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
-            Dictionary<uint /*criteriaTreeID*/, AchievementRecord> achievementCriteriaTreeIds = new Dictionary<uint, AchievementRecord>();
-            foreach (AchievementRecord achievement in CliDB.AchievementStorage.Values)
+            var achievementCriteriaTreeIds = new Dictionary<uint, AchievementRecord>();
+            foreach (var achievement in CliDB.AchievementStorage.Values)
                 if (achievement.CriteriaTree != 0)
                     achievementCriteriaTreeIds[achievement.CriteriaTree] = achievement;
 
-            Dictionary<uint, ScenarioStepRecord> scenarioCriteriaTreeIds = new Dictionary<uint, ScenarioStepRecord>();
-            foreach (ScenarioStepRecord scenarioStep in CliDB.ScenarioStepStorage.Values)
+            var scenarioCriteriaTreeIds = new Dictionary<uint, ScenarioStepRecord>();
+            foreach (var scenarioStep in CliDB.ScenarioStepStorage.Values)
             {
                 if (scenarioStep.CriteriaTreeId != 0)
                     scenarioCriteriaTreeIds[scenarioStep.CriteriaTreeId] = scenarioStep;
             }
 
-            Dictionary<uint /*criteriaTreeID*/, QuestObjective> questObjectiveCriteriaTreeIds = new Dictionary<uint, QuestObjective>();
+            var questObjectiveCriteriaTreeIds = new Dictionary<uint, QuestObjective>();
             foreach (var pair in Global.ObjectMgr.GetQuestTemplates())
             {
-                foreach (QuestObjective objective in pair.Value.Objectives)
+                foreach (var objective in pair.Value.Objectives)
                 {
                     if (objective.Type != QuestObjectiveType.CriteriaTree)
                         continue;
@@ -2683,16 +2683,16 @@ namespace Game.Achievements
             }
 
             // Load criteria tree nodes
-            foreach (CriteriaTreeRecord tree in CliDB.CriteriaTreeStorage.Values)
+            foreach (var tree in CliDB.CriteriaTreeStorage.Values)
             {
                 // Find linked achievement
-                AchievementRecord achievement = GetEntry(achievementCriteriaTreeIds, tree);
-                ScenarioStepRecord scenarioStep = GetEntry(scenarioCriteriaTreeIds, tree);
-                QuestObjective questObjective = GetEntry(questObjectiveCriteriaTreeIds, tree);
+                var achievement = GetEntry(achievementCriteriaTreeIds, tree);
+                var scenarioStep = GetEntry(scenarioCriteriaTreeIds, tree);
+                var questObjective = GetEntry(questObjectiveCriteriaTreeIds, tree);
                 if (achievement == null && scenarioStep == null && questObjective == null)
                     continue;
 
-                CriteriaTree criteriaTree = new CriteriaTree();
+                var criteriaTree = new CriteriaTree();
                 criteriaTree.Id = tree.Id;
                 criteriaTree.Achievement = achievement;
                 criteriaTree.ScenarioStep = scenarioStep;
@@ -2705,7 +2705,7 @@ namespace Game.Achievements
             // Build tree
             foreach (var pair in _criteriaTrees)
             {
-                CriteriaTree parent = _criteriaTrees.LookupByKey(pair.Value.Entry.Parent);
+                var parent = _criteriaTrees.LookupByKey(pair.Value.Entry.Parent);
                 if (parent != null)
                     parent.Children.Add(pair.Value);
 
@@ -2721,7 +2721,7 @@ namespace Game.Achievements
             uint guildCriterias = 0;
             uint scenarioCriterias = 0;
             uint questObjectiveCriterias = 0;
-            foreach (CriteriaRecord criteriaEntry in CliDB.CriteriaStorage.Values)
+            foreach (var criteriaEntry in CliDB.CriteriaStorage.Values)
             {
                 Cypher.Assert(criteriaEntry.Type < CriteriaTypes.TotalTypes,
                     $"CRITERIA_TYPE_TOTAL must be greater than or equal to {criteriaEntry.Type + 1} but is currently equal to {CriteriaTypes.TotalTypes}");
@@ -2732,18 +2732,18 @@ namespace Game.Achievements
                 if (treeList.Empty())
                     continue;
 
-                Criteria criteria = new Criteria();
+                var criteria = new Criteria();
                 criteria.Id = criteriaEntry.Id;
                 criteria.Entry = criteriaEntry;
                 criteria.Modifier = _criteriaModifiers.LookupByKey(criteriaEntry.ModifierTreeId);
 
                 _criteria[criteria.Id] = criteria;
 
-                foreach (CriteriaTree tree in treeList)
+                foreach (var tree in treeList)
                 {
                     tree.Criteria = criteria;
 
-                    AchievementRecord achievement = tree.Achievement;
+                    var achievement = tree.Achievement;
                     if (achievement != null)
                     {
                         if (achievement.Flags.HasAnyFlag(AchievementFlags.Guild))
@@ -2777,7 +2777,7 @@ namespace Game.Achievements
                             {
                                 if (worldOverlayEntry.AreaID[j] != 0)
                                 {
-                                    bool valid = true;
+                                    var valid = true;
                                     for (byte i = 0; i < j; ++i)
                                         if (worldOverlayEntry.AreaID[j] == worldOverlayEntry.AreaID[i])
                                             valid = false;
@@ -2819,11 +2819,11 @@ namespace Game.Achievements
 
         public void LoadCriteriaData()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             _criteriaDataMap.Clear();                              // need for reload case
 
-            SQLResult result = DB.World.Query("SELECT criteria_id, type, value1, value2, ScriptName FROM criteria_data");
+            var result = DB.World.Query("SELECT criteria_id, type, value1, value2, ScriptName FROM criteria_data");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 additional criteria data. DB table `criteria_data` is empty.");
@@ -2833,17 +2833,17 @@ namespace Game.Achievements
             uint count = 0;
             do
             {
-                uint criteria_id = result.Read<uint>(0);
+                var criteria_id = result.Read<uint>(0);
 
-                Criteria criteria = GetCriteria(criteria_id);
+                var criteria = GetCriteria(criteria_id);
                 if (criteria == null)
                 {
                     Log.outError(LogFilter.Sql, "Table `criteria_data` contains data for non-existing criteria (Entry: {0}). Ignored.", criteria_id);
                     continue;
                 }
 
-                CriteriaDataType dataType = (CriteriaDataType)result.Read<byte>(1);
-                string scriptName = result.Read<string>(4);
+                var dataType = (CriteriaDataType)result.Read<byte>(1);
+                var scriptName = result.Read<string>(4);
                 uint scriptId = 0;
                 if (!scriptName.IsEmpty())
                 {
@@ -2853,13 +2853,13 @@ namespace Game.Achievements
                         scriptId = Global.ObjectMgr.GetScriptId(scriptName);
                 }
 
-                CriteriaData data = new CriteriaData(dataType, result.Read<uint>(2), result.Read<uint>(3), scriptId);
+                var data = new CriteriaData(dataType, result.Read<uint>(2), result.Read<uint>(3), scriptId);
 
                 if (!data.IsValid(criteria))
                     continue;
 
                 // this will allocate empty data set storage
-                CriteriaDataSet dataSet = new CriteriaDataSet();
+                var dataSet = new CriteriaDataSet();
                 dataSet.SetCriteriaId(criteria_id);
 
                 // add real data only for not NONE data types
@@ -2997,7 +2997,7 @@ namespace Game.Achievements
 
         public static void WalkCriteriaTree(CriteriaTree tree, Action<CriteriaTree> func)
         {
-            foreach (CriteriaTree node in tree.Children)
+            foreach (var node in tree.Children)
                 WalkCriteriaTree(node, func);
 
             func(tree);
@@ -3166,14 +3166,14 @@ namespace Game.Achievements
                 case CriteriaDataType.SAura:
                 case CriteriaDataType.TAura:
                     {
-                        SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(Aura.SpellId, Difficulty.None);
+                        var spellEntry = Global.SpellMgr.GetSpellInfo(Aura.SpellId, Difficulty.None);
                         if (spellEntry == null)
                         {
                             Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type {2} has wrong spell id in value1 ({3}), ignored.",
                                 criteria.Id, criteria.Entry.Type, DataType, Aura.SpellId);
                             return false;
                         }
-                        SpellEffectInfo effect = spellEntry.GetEffect(Aura.EffectIndex);
+                        var effect = spellEntry.GetEffect(Aura.EffectIndex);
                         if (effect == null)
                         {
                             Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type {2} has wrong spell effect index in value2 ({3}), ignored.",
@@ -3382,25 +3382,25 @@ namespace Game.Achievements
                     return Global.GameEventMgr.IsEventActive((ushort)GameEvent.Id);
                 case CriteriaDataType.BgLossTeamScore:
                     {
-                        Battleground bg = source.GetBattleground();
+                        var bg = source.GetBattleground();
                         if (!bg)
                             return false;
 
-                        int score = (int)bg.GetTeamScore(source.GetTeam() == Team.Alliance ? Framework.Constants.TeamId.Horde : Framework.Constants.TeamId.Alliance);
+                        var score = (int)bg.GetTeamScore(source.GetTeam() == Team.Alliance ? Framework.Constants.TeamId.Horde : Framework.Constants.TeamId.Alliance);
                         return score >= BattlegroundScore.Min && score <= BattlegroundScore.Max;
                     }
                 case CriteriaDataType.InstanceScript:
                     {
                         if (!source.IsInWorld)
                             return false;
-                        Map map = source.GetMap();
+                        var map = source.GetMap();
                         if (!map.IsDungeon())
                         {
                             Log.outError(LogFilter.Achievement, "Achievement system call AchievementCriteriaDataType.InstanceScript ({0}) for achievement criteria {1} for non-dungeon/non-raid map {2}",
                                 CriteriaDataType.InstanceScript, criteriaId, map.GetId());
                             return false;
                         }
-                        InstanceScript instance = ((InstanceMap)map).GetInstanceScript();
+                        var instance = ((InstanceMap)map).GetInstanceScript();
                         if (instance == null)
                         {
                             Log.outError(LogFilter.Achievement, "Achievement system call criteria_data_INSTANCE_SCRIPT ({0}) for achievement criteria {1} for map {2} but map does not have a instance script",
@@ -3411,10 +3411,10 @@ namespace Game.Achievements
                     }
                 case CriteriaDataType.SEquippedItem:
                     {
-                        Criteria entry = Global.CriteriaMgr.GetCriteria(criteriaId);
+                        var entry = Global.CriteriaMgr.GetCriteria(criteriaId);
 
-                        uint itemId = entry.Entry.Type == CriteriaTypes.EquipEpicItem ? miscValue2 : miscValue1;
-                        ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemId);
+                        var itemId = entry.Entry.Type == CriteriaTypes.EquipEpicItem ? miscValue2 : miscValue1;
+                        var itemTemplate = Global.ObjectMgr.GetItemTemplate(itemId);
                         if (itemTemplate == null)
                             return false;
                         return itemTemplate.GetBaseItemLevel() >= EquippedItem.ItemLevel && (uint)itemTemplate.GetQuality() >= EquippedItem.ItemQuality;
@@ -3423,7 +3423,7 @@ namespace Game.Achievements
                     return source.GetMapId() == MapId.Id;
                 case CriteriaDataType.SKnownTitle:
                     {
-                        CharTitlesRecord titleInfo = CliDB.CharTitlesStorage.LookupByKey(KnownTitle.Id);
+                        var titleInfo = CliDB.CharTitlesStorage.LookupByKey(KnownTitle.Id);
                         if (titleInfo != null)
                             return source && source.HasTitle(titleInfo.MaskID);
 
@@ -3431,7 +3431,7 @@ namespace Game.Achievements
                     }
                 case CriteriaDataType.SItemQuality:
                     {
-                        ItemTemplate pProto = Global.ObjectMgr.GetItemTemplate(miscValue1);
+                        var pProto = Global.ObjectMgr.GetItemTemplate(miscValue1);
                         if (pProto == null)
                             return false;
                         return (uint)pProto.GetQuality() == itemQuality.Quality;

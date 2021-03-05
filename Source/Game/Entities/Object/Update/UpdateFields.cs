@@ -78,14 +78,14 @@ namespace Game.Entities
 
         uint GetViewerDependentDynamicFlags(uint dynamicFlags, WorldObject obj, Player receiver)
         {
-            UnitDynFlags unitDynFlags = (UnitDynFlags)dynamicFlags;
+            var unitDynFlags = (UnitDynFlags)dynamicFlags;
 
-            Unit unit = obj.ToUnit();
+            var unit = obj.ToUnit();
             if (unit != null)
             {
                 unitDynFlags &= ~UnitDynFlags.Tapped;
 
-                Creature creature = obj.ToCreature();
+                var creature = obj.ToCreature();
                 if (creature != null)
                 {
                     if (creature.HasLootRecipient() && !creature.IsTappedBy(receiver))
@@ -102,7 +102,7 @@ namespace Game.Entities
             }
             else
             {
-                GameObject gameObject = obj.ToGameObject();
+                var gameObject = obj.ToGameObject();
                 if (gameObject != null)
                 {
                     GameObjectDynamicLowFlags dynFlags = 0;
@@ -127,10 +127,10 @@ namespace Game.Entities
                         case GameObjectTypes.Transport:
                         case GameObjectTypes.MapObjTransport:
                             {
-                                uint transportPeriod = gameObject.GetTransportPeriod();
+                                var transportPeriod = gameObject.GetTransportPeriod();
                                 if (transportPeriod != 0)
                                 {
-                                    float timer = (float)(gameObject.GetGoValue().Transport.PathProgress % transportPeriod);
+                                    var timer = (float)(gameObject.GetGoValue().Transport.PathProgress % transportPeriod);
                                     pathProgress = (ushort)(timer / (float)transportPeriod * 65535.0f);
                                 }
                                 break;

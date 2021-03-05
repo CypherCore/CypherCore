@@ -95,17 +95,17 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt16((ushort)((byte)CommandState | (Flag << 16)));
             _worldPacket.WriteUInt8((byte)ReactState);
 
-            foreach (uint actionButton in ActionButtons)
+            foreach (var actionButton in ActionButtons)
                 _worldPacket.WriteUInt32(actionButton);
 
             _worldPacket.WriteInt32(Actions.Count);
             _worldPacket.WriteInt32(Cooldowns.Count);
             _worldPacket.WriteInt32(SpellHistory.Count);
 
-            foreach (uint action in Actions)
+            foreach (var action in Actions)
                 _worldPacket.WriteUInt32(action);
 
-            foreach (PetSpellCooldown cooldown in Cooldowns)
+            foreach (var cooldown in Cooldowns)
             {
                 _worldPacket.WriteUInt32(cooldown.SpellID);
                 _worldPacket.WriteUInt32(cooldown.Duration);
@@ -114,7 +114,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteUInt16(cooldown.Category);
             }
 
-            foreach (PetSpellHistory history in SpellHistory)
+            foreach (var history in SpellHistory)
             {
                 _worldPacket.WriteUInt32(history.CategoryID);
                 _worldPacket.WriteUInt32(history.RecoveryTime);
@@ -147,7 +147,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(StableMaster);
 
             _worldPacket.WriteInt32(Pets.Count);
-            foreach (PetStableInfo pet in Pets)
+            foreach (var pet in Pets)
             {
                 _worldPacket.WriteUInt32(pet.PetSlot);
                 _worldPacket.WriteUInt32(pet.PetNumber);
@@ -183,7 +183,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteInt32(Spells.Count);
-            foreach (uint spell in Spells)
+            foreach (var spell in Spells)
                 _worldPacket.WriteUInt32(spell);
         }
 
@@ -197,7 +197,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteInt32(Spells.Count);
-            foreach (uint spell in Spells)
+            foreach (var spell in Spells)
                 _worldPacket.WriteUInt32(spell);
         }
 
@@ -220,10 +220,10 @@ namespace Game.Networking.Packets
 
             if (RenameData.HasDeclinedNames)
             {
-                for (int i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
+                for (var i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
                     _worldPacket.WriteBits(RenameData.DeclinedNames.name[i].GetByteCount(), 7);
 
-                for (int i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
+                for (var i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
                     _worldPacket.WriteString(RenameData.DeclinedNames.name[i]);
             }
 
@@ -243,17 +243,17 @@ namespace Game.Networking.Packets
             RenameData.PetGUID = _worldPacket.ReadPackedGuid();
             RenameData.PetNumber = _worldPacket.ReadInt32();
 
-            uint nameLen = _worldPacket.ReadBits<uint>(8);
+            var nameLen = _worldPacket.ReadBits<uint>(8);
 
             RenameData.HasDeclinedNames = _worldPacket.HasBit();
             if (RenameData.HasDeclinedNames)
             {
                 RenameData.DeclinedNames = new DeclinedName();
-                uint[] count = new uint[SharedConst.MaxDeclinedNameCases];
-                for (int i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
+                var count = new uint[SharedConst.MaxDeclinedNameCases];
+                for (var i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
                     count[i] = _worldPacket.ReadBits<uint>(7);
 
-                for (int i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
+                for (var i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
                     RenameData.DeclinedNames.name[i] = _worldPacket.ReadString(count[i]);
             }
 

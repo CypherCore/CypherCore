@@ -75,8 +75,8 @@ namespace Game.Entities
 
                 if (!m_cinematicCamera.Empty())
                 {
-                    FlyByCamera firstCamera = m_cinematicCamera.FirstOrDefault();
-                    Position pos = new Position(firstCamera.locations.X, firstCamera.locations.Y, firstCamera.locations.Z, firstCamera.locations.W);
+                    var firstCamera = m_cinematicCamera.FirstOrDefault();
+                    var pos = new Position(firstCamera.locations.X, firstCamera.locations.Y, firstCamera.locations.Z, firstCamera.locations.W);
                     if (!pos.IsPositionValid())
                         return;
 
@@ -105,7 +105,7 @@ namespace Game.Entities
             m_activeCinematicCameraIndex = -1;
             if (m_CinematicObject)
             {
-                WorldObject vpObject = player.GetViewpoint();
+                var vpObject = player.GetViewpoint();
                 if (vpObject)
                     if (vpObject == m_CinematicObject)
                         player.SetViewpoint(m_CinematicObject, false);
@@ -119,13 +119,13 @@ namespace Game.Entities
             if (m_activeCinematic == null || m_activeCinematicCameraIndex == -1 || m_cinematicCamera == null || m_cinematicCamera.Count == 0)
                 return;
 
-            Position lastPosition = new Position();
+            var lastPosition = new Position();
             uint lastTimestamp = 0;
-            Position nextPosition = new Position();
+            var nextPosition = new Position();
             uint nextTimestamp = 0;
 
             // Obtain direction of travel
-            foreach (FlyByCamera cam in m_cinematicCamera)
+            foreach (var cam in m_cinematicCamera)
             {
                 if (cam.timeStamp > m_cinematicDiff)
                 {
@@ -136,13 +136,13 @@ namespace Game.Entities
                 lastPosition = new Position(cam.locations.X, cam.locations.Y, cam.locations.Z, cam.locations.W);
                 lastTimestamp = cam.timeStamp;
             }
-            float angle = lastPosition.GetAngle(nextPosition);
+            var angle = lastPosition.GetAngle(nextPosition);
             angle -= lastPosition.GetOrientation();
             if (angle < 0)
                 angle += 2 * MathFunctions.PI;
 
             // Look for position around 2 second ahead of us.
-            int workDiff = (int)m_cinematicDiff;
+            var workDiff = (int)m_cinematicDiff;
 
             // Modify result based on camera direction (Humans for example, have the camera point behind)
             workDiff += (int)((2 * Time.InMilliseconds) * Math.Cos(angle));
@@ -157,7 +157,7 @@ namespace Game.Entities
                 workDiff = (int)m_cinematicDiff;
 
             // Obtain the previous and next waypoint based on timestamp
-            foreach (FlyByCamera cam in m_cinematicCamera)
+            foreach (var cam in m_cinematicCamera)
             {
                 if (cam.timeStamp >= workDiff)
                 {
@@ -174,12 +174,12 @@ namespace Game.Entities
                 workDiff = (int)nextTimestamp;
 
             // Interpolate the position for this moment in time (or the adjusted moment in time)
-            uint timeDiff = nextTimestamp - lastTimestamp;
-            uint interDiff = (uint)(workDiff - lastTimestamp);
-            float xDiff = nextPosition.posX - lastPosition.posX;
-            float yDiff = nextPosition.posY - lastPosition.posY;
-            float zDiff = nextPosition.posZ - lastPosition.posZ;
-            Position interPosition = new Position(lastPosition.posX + (xDiff * ((float)interDiff / timeDiff)), lastPosition.posY +
+            var timeDiff = nextTimestamp - lastTimestamp;
+            var interDiff = (uint)(workDiff - lastTimestamp);
+            var xDiff = nextPosition.posX - lastPosition.posX;
+            var yDiff = nextPosition.posY - lastPosition.posY;
+            var zDiff = nextPosition.posZ - lastPosition.posZ;
+            var interPosition = new Position(lastPosition.posX + (xDiff * ((float)interDiff / timeDiff)), lastPosition.posY +
                 (yDiff * ((float)interDiff / timeDiff)), lastPosition.posZ + (zDiff * ((float)interDiff / timeDiff)));
 
             // Advance (at speed) to this position. The remote sight object is used

@@ -346,7 +346,7 @@ namespace Game.Entities
     {
         public void SetRuneState(byte index, bool set = true)
         {
-            bool foundRune = CooldownOrder.Contains(index);
+            var foundRune = CooldownOrder.Contains(index);
             if (set)
             {
                 RuneState |= (byte)(1 << index);                      // usable
@@ -378,7 +378,7 @@ namespace Game.Entities
         public uint GetAction() { return (uint)(packedData & 0x00000000FFFFFFFF); }
         public void SetActionAndType(ulong action, ActionButtonType type)
         {
-            ulong newData = action | ((ulong)type << 56);
+            var newData = action | ((ulong)type << 56);
             if (newData != packedData || uState == ActionButtonUpdateState.Deleted)
             {
                 packedData = newData;
@@ -580,7 +580,7 @@ namespace Game.Entities
         }
         public ulong GetUlongOptionValue()
         {
-            uint[] array = new uint[1];
+            var array = new uint[1];
             BoolOptions.CopyTo(array, 0);
             return (ulong)array[0];
         }

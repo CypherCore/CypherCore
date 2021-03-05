@@ -38,16 +38,16 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string namePart = args.NextString().ToLower();
+            var namePart = args.NextString().ToLower();
 
-            bool found = false;
+            var found = false;
             uint count = 0;
 
             // Search in AreaTable.dbc
             foreach (var areaEntry in CliDB.AreaTableStorage.Values)
             {
-                Locale locale = handler.GetSessionDbcLocale();
-                string name = areaEntry.AreaName[locale];
+                var locale = handler.GetSessionDbcLocale();
+                var name = areaEntry.AreaName[locale];
                 if (string.IsNullOrEmpty(name))
                     continue;
 
@@ -77,7 +77,7 @@ namespace Game.Chat
                     }
 
                     // send area in "id - [name]" format
-                    string ss = "";
+                    var ss = "";
                     if (handler.GetSession() != null)
                         ss += areaEntry.Id + " - |cffffffff|Harea:" + areaEntry.Id + "|h[" + name + "]|h|r";
                     else
@@ -102,22 +102,22 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string namePart = args.NextString().ToLower();
+            var namePart = args.NextString().ToLower();
 
-            bool found = false;
+            var found = false;
             uint count = 0;
 
             var ctc = Global.ObjectMgr.GetCreatureTemplates();
             foreach (var template in ctc)
             {
-                uint id = template.Value.Entry;
-                byte localeIndex = handler.GetSessionDbLocaleIndex();
-                CreatureLocale creatureLocale = Global.ObjectMgr.GetCreatureLocale(id);
+                var id = template.Value.Entry;
+                var localeIndex = handler.GetSessionDbLocaleIndex();
+                var creatureLocale = Global.ObjectMgr.GetCreatureLocale(id);
                 if (creatureLocale != null)
                 {
                     if (creatureLocale.Name.Length > localeIndex && !string.IsNullOrEmpty(creatureLocale.Name[localeIndex]))
                     {
-                        string name = creatureLocale.Name[localeIndex];
+                        var name = creatureLocale.Name[localeIndex];
 
                         if (name.Like(namePart))
                         {
@@ -140,7 +140,7 @@ namespace Game.Chat
                     }
                 }
 
-                string _name = template.Value.Name;
+                var _name = template.Value.Name;
                 if (string.IsNullOrEmpty(_name))
                     continue;
 
@@ -174,9 +174,9 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string namePart = args.NextString().ToLower();
+            var namePart = args.NextString().ToLower();
 
-            bool found = false;
+            var found = false;
             uint count = 0;
 
             var events = Global.GameEventMgr.GetEventMap();
@@ -184,9 +184,9 @@ namespace Game.Chat
 
             for (ushort id = 0; id < events.Length; ++id)
             {
-                GameEventData eventData = events[id];
+                var eventData = events[id];
 
-                string descr = eventData.description;
+                var descr = eventData.description;
                 if (string.IsNullOrEmpty(descr))
                     continue;
 
@@ -198,7 +198,7 @@ namespace Game.Chat
                         return true;
                     }
 
-                    string active = activeEvents.Contains(id) ? handler.GetCypherString(CypherStrings.Active) : "";
+                    var active = activeEvents.Contains(id) ? handler.GetCypherString(CypherStrings.Active) : "";
 
                     if (handler.GetSession() != null)
                         handler.SendSysMessage(CypherStrings.EventEntryListChat, id, id, eventData.description, active);
@@ -223,20 +223,20 @@ namespace Game.Chat
                 return false;
 
             // Can be NULL at console call
-            Player target = handler.GetSelectedPlayer();
+            var target = handler.GetSelectedPlayer();
 
-            string namePart = args.NextString().ToLower();
+            var namePart = args.NextString().ToLower();
 
-            bool found = false;
+            var found = false;
             uint count = 0;
 
 
             foreach (var factionEntry in CliDB.FactionStorage.Values)
             {
-                FactionState factionState = target ? target.GetReputationMgr().GetState(factionEntry) : null;
+                var factionState = target ? target.GetReputationMgr().GetState(factionEntry) : null;
 
-                Locale locale = handler.GetSessionDbcLocale();
-                string name = factionEntry.Name[locale];
+                var locale = handler.GetSessionDbcLocale();
+                var name = factionEntry.Name[locale];
                 if (string.IsNullOrEmpty(name))
                     continue;
 
@@ -267,7 +267,7 @@ namespace Game.Chat
 
                     // send faction in "id - [faction] rank reputation [visible] [at war] [own team] [unknown] [invisible] [inactive]" format
                     // or              "id - [faction] [no reputation]" format
-                    StringBuilder ss = new StringBuilder();
+                    var ss = new StringBuilder();
                     if (handler.GetSession() != null)
                         ss.AppendFormat("{0} - |cffffffff|Hfaction:{0}|h[{1}]|h|r", factionEntry.Id, name);
                     else
@@ -275,8 +275,8 @@ namespace Game.Chat
 
                     if (factionState != null) // and then target != NULL also
                     {
-                        uint index = target.GetReputationMgr().GetReputationRankStrIndex(factionEntry);
-                        string rankName = handler.GetCypherString((CypherStrings)index);
+                        var index = target.GetReputationMgr().GetReputationRankStrIndex(factionEntry);
+                        var rankName = handler.GetCypherString((CypherStrings)index);
 
                         ss.AppendFormat(" {0}|h|r ({1})", rankName, target.GetReputationMgr().GetReputation(factionEntry));
 
@@ -315,16 +315,16 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string namePart = args.NextString("");
+            var namePart = args.NextString("");
 
-            bool found = false;
+            var found = false;
             uint count = 0;
 
             // Search in ItemSparse
             var its = Global.ObjectMgr.GetItemTemplates();
             foreach (var template in its.Values)
             {
-                string name = template.GetName(handler.GetSessionDbcLocale());
+                var name = template.GetName(handler.GetSessionDbcLocale());
                 if (string.IsNullOrEmpty(name))
                     continue;
 
@@ -358,16 +358,16 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string namePart = args.NextString().ToLower();
+            var namePart = args.NextString().ToLower();
 
-            bool found = false;
+            var found = false;
             uint count = 0;
 
             // Search in ItemSet.dbc
             foreach (var set in CliDB.ItemSetStorage.Values)
             {
-                Locale locale = handler.GetSessionDbcLocale();
-                string name = set.Name[locale];
+                var locale = handler.GetSessionDbcLocale();
+                var name = set.Name[locale];
                 if (name.IsEmpty())
                     continue;
 
@@ -418,22 +418,22 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string namePart = args.NextString();
+            var namePart = args.NextString();
 
-            bool found = false;
+            var found = false;
             uint count = 0;
 
             var gotc = Global.ObjectMgr.GetGameObjectTemplates();
             foreach (var template in gotc.Values)
             {
-                byte localeIndex = handler.GetSessionDbLocaleIndex();
+                var localeIndex = handler.GetSessionDbLocaleIndex();
 
-                GameObjectLocale objectLocalte = Global.ObjectMgr.GetGameObjectLocale(template.entry);
+                var objectLocalte = Global.ObjectMgr.GetGameObjectLocale(template.entry);
                 if (objectLocalte != null)
                 {
                     if (objectLocalte.Name.Length > localeIndex && !string.IsNullOrEmpty(objectLocalte.Name[localeIndex]))
                     {
-                        string name = objectLocalte.Name[localeIndex];
+                        var name = objectLocalte.Name[localeIndex];
 
                         if (name.Like(namePart))
                         {
@@ -456,7 +456,7 @@ namespace Game.Chat
                     }
                 }
 
-                string _name = template.name;
+                var _name = template.name;
                 if (string.IsNullOrEmpty(_name))
                     continue;
 
@@ -491,11 +491,11 @@ namespace Game.Chat
                 return false;
 
             // can be NULL at console call
-            Player target = handler.GetSelectedPlayer();
+            var target = handler.GetSelectedPlayer();
 
-            string namePart = args.NextString().ToLower();
+            var namePart = args.NextString().ToLower();
 
-            bool found = false;
+            var found = false;
             uint count = 0;
 
             var qTemplates = Global.ObjectMgr.GetQuestTemplates();
@@ -504,13 +504,13 @@ namespace Game.Chat
                 int localeIndex = handler.GetSessionDbLocaleIndex();
                 if (localeIndex >= 0)
                 {
-                    byte ulocaleIndex = (byte)localeIndex;
-                    QuestTemplateLocale questLocale = Global.ObjectMgr.GetQuestLocale(qInfo.Id);
+                    var ulocaleIndex = (byte)localeIndex;
+                    var questLocale = Global.ObjectMgr.GetQuestLocale(qInfo.Id);
                     if (questLocale != null)
                     {
                         if (questLocale.LogTitle.Length > ulocaleIndex && !string.IsNullOrEmpty(questLocale.LogTitle[ulocaleIndex]))
                         {
-                            string title = questLocale.LogTitle[ulocaleIndex];
+                            var title = questLocale.LogTitle[ulocaleIndex];
 
                             if (title.Like(namePart))
                             {
@@ -520,11 +520,11 @@ namespace Game.Chat
                                     return true;
                                 }
 
-                                string statusStr = "";
+                                var statusStr = "";
 
                                 if (target)
                                 {
-                                    QuestStatus status = target.GetQuestStatus(qInfo.Id);
+                                    var status = target.GetQuestStatus(qInfo.Id);
 
                                     switch (status)
                                     {
@@ -544,13 +544,13 @@ namespace Game.Chat
 
                                 if (handler.GetSession() != null)
                                 {
-                                    int maxLevel = 0;
+                                    var maxLevel = 0;
                                     var questLevels = Global.DB2Mgr.GetContentTuningData(qInfo.ContentTuningId, handler.GetSession().GetPlayer().m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
                                     if (questLevels.HasValue)
                                         maxLevel = questLevels.Value.MaxLevel;
 
-                                    int scalingFactionGroup = 0;
-                                    ContentTuningRecord contentTuning = CliDB.ContentTuningStorage.LookupByKey(qInfo.ContentTuningId);
+                                    var scalingFactionGroup = 0;
+                                    var contentTuning = CliDB.ContentTuningStorage.LookupByKey(qInfo.ContentTuningId);
                                     if (contentTuning != null)
                                         scalingFactionGroup = contentTuning.GetScalingFactionGroup();
 
@@ -572,7 +572,7 @@ namespace Game.Chat
                     }
                 }
 
-                string _title = qInfo.LogTitle;
+                var _title = qInfo.LogTitle;
                 if (string.IsNullOrEmpty(_title))
                     continue;
 
@@ -584,11 +584,11 @@ namespace Game.Chat
                         return true;
                     }
 
-                    string statusStr = "";
+                    var statusStr = "";
 
                     if (target)
                     {
-                        QuestStatus status = target.GetQuestStatus(qInfo.Id);
+                        var status = target.GetQuestStatus(qInfo.Id);
 
                         switch (status)
                         {
@@ -608,13 +608,13 @@ namespace Game.Chat
 
                     if (handler.GetSession() != null)
                     {
-                        int maxLevel = 0;
+                        var maxLevel = 0;
                         var questLevels = Global.DB2Mgr.GetContentTuningData(qInfo.ContentTuningId, handler.GetSession().GetPlayer().m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
                         if (questLevels.HasValue)
                             maxLevel = questLevels.Value.MaxLevel;
 
-                        int scalingFactionGroup = 0;
-                        ContentTuningRecord contentTuning = CliDB.ContentTuningStorage.LookupByKey(qInfo.ContentTuningId);
+                        var scalingFactionGroup = 0;
+                        var contentTuning = CliDB.ContentTuningStorage.LookupByKey(qInfo.ContentTuningId);
                         if (contentTuning != null)
                             scalingFactionGroup = contentTuning.GetScalingFactionGroup();
 
@@ -645,17 +645,17 @@ namespace Game.Chat
                 return false;
 
             // can be NULL in console call
-            Player target = handler.GetSelectedPlayer();
+            var target = handler.GetSelectedPlayer();
 
-            string namePart = args.NextString();
+            var namePart = args.NextString();
 
-            bool found = false;
+            var found = false;
             uint count = 0;
             // Search in SkillLine.dbc
             foreach (var skillInfo in CliDB.SkillLineStorage.Values)
             {
-                Locale locale = handler.GetSessionDbcLocale();
-                string name = skillInfo.DisplayName[locale];
+                var locale = handler.GetSessionDbcLocale();
+                var name = skillInfo.DisplayName[locale];
                 if (string.IsNullOrEmpty(name))
                     continue;
 
@@ -684,8 +684,8 @@ namespace Game.Chat
                         return true;
                     }
 
-                    string valStr = "";
-                    string knownStr = "";
+                    var valStr = "";
+                    var knownStr = "";
                     if (target && target.HasSkill((SkillType)skillInfo.Id))
                     {
                         knownStr = handler.GetCypherString(CypherStrings.Known);
@@ -694,7 +694,7 @@ namespace Game.Chat
                         uint permValue = target.GetSkillPermBonusValue(skillInfo.Id);
                         uint tempValue = target.GetSkillTempBonusValue(skillInfo.Id);
 
-                        string valFormat = handler.GetCypherString(CypherStrings.SkillValues);
+                        var valFormat = handler.GetCypherString(CypherStrings.SkillValues);
                         valStr = string.Format(valFormat, curValue, maxValue, permValue, tempValue);
                     }
 
@@ -721,16 +721,16 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string namePart = args.NextString();
+            var namePart = args.NextString();
 
-            bool found = false;
+            var found = false;
             uint count = 0;
-            Locale locale = handler.GetSessionDbcLocale();
+            var locale = handler.GetSessionDbcLocale();
 
             // Search in TaxiNodes.dbc
             foreach (var nodeEntry in CliDB.TaxiNodesStorage.Values)
             {
-                string name = nodeEntry.Name[locale];
+                var name = nodeEntry.Name[locale];
                 if (string.IsNullOrEmpty(name))
                     continue;
 
@@ -770,11 +770,11 @@ namespace Game.Chat
                 return false;
             }
 
-            string namePart = args.NextString().ToLower();
+            var namePart = args.NextString().ToLower();
 
-            StringBuilder reply = new StringBuilder();
+            var reply = new StringBuilder();
             uint count = 0;
-            bool limitReached = false;
+            var limitReached = false;
 
             foreach (var tele in Global.ObjectMgr.gameTeleStorage)
             {
@@ -811,24 +811,24 @@ namespace Game.Chat
                 return false;
 
             // can be NULL in console call
-            Player target = handler.GetSelectedPlayer();
+            var target = handler.GetSelectedPlayer();
 
             // title name have single string arg for player name
-            string targetName = target ? target.GetName() : "NAME";
+            var targetName = target ? target.GetName() : "NAME";
 
-            string namePart = args.NextString();
+            var namePart = args.NextString();
 
             uint counter = 0;                                     // Counter for figure out that we found smth.
             // Search in CharTitles.dbc
             foreach (var titleInfo in CliDB.CharTitlesStorage.Values)
             {
-                for (Gender gender = Gender.Male; gender <= Gender.Female; ++gender)
+                for (var gender = Gender.Male; gender <= Gender.Female; ++gender)
                 {
                     if (target && target.GetGender() != gender)
                         continue;
 
-                    Locale locale = handler.GetSessionDbcLocale();
-                    string name = gender == Gender.Male ? titleInfo.Name[locale]: titleInfo.Name1[locale];
+                    var locale = handler.GetSessionDbcLocale();
+                    var name = gender == Gender.Male ? titleInfo.Name[locale]: titleInfo.Name1[locale];
                     if (string.IsNullOrEmpty(name))
                         continue;
 
@@ -857,12 +857,12 @@ namespace Game.Chat
                             return true;
                         }
 
-                        string knownStr = target && target.HasTitle(titleInfo) ? handler.GetCypherString(CypherStrings.Known) : "";
+                        var knownStr = target && target.HasTitle(titleInfo) ? handler.GetCypherString(CypherStrings.Known) : "";
 
-                        string activeStr = target && target.m_playerData.PlayerTitle == titleInfo.MaskID
+                        var activeStr = target && target.m_playerData.PlayerTitle == titleInfo.MaskID
                             ? handler.GetCypherString(CypherStrings.Active) : "";
 
-                        string titleNameStr = string.Format(name.ConvertFormatSyntax(), targetName);
+                        var titleNameStr = string.Format(name.ConvertFormatSyntax(), targetName);
 
                         // send title in "id (idx:idx) - [namedlink locale]" format
                         if (handler.GetSession() != null)
@@ -887,15 +887,15 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string namePart = args.NextString();
+            var namePart = args.NextString();
 
             uint counter = 0;
 
             // search in Map.dbc
             foreach (var mapInfo in CliDB.MapStorage.Values)
             {
-                Locale locale = handler.GetSessionDbcLocale();
-                string name = mapInfo.MapName[locale];
+                var locale = handler.GetSessionDbcLocale();
+                var name = mapInfo.MapName[locale];
                 if (string.IsNullOrEmpty(name))
                     continue;
 
@@ -924,7 +924,7 @@ namespace Game.Chat
                         return true;
                     }
 
-                    StringBuilder ss = new StringBuilder();
+                    var ss = new StringBuilder();
                     ss.Append(mapInfo.Id + " - [" + name + ']');
 
                     if (mapInfo.IsContinent())
@@ -968,7 +968,7 @@ namespace Game.Chat
                 int limit;
                 string limitStr;
 
-                Player target = handler.GetSelectedPlayer();
+                var target = handler.GetSelectedPlayer();
                 if (args.Empty())
                 {
                     // NULL only if used from console
@@ -986,7 +986,7 @@ namespace Game.Chat
                         limit = -1;
                 }
 
-                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BY_IP);
+                var stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_BY_IP);
                 stmt.AddValue(0, ip);
                 return LookupPlayerSearchCommand(DB.Login.Query(stmt), limit, handler);
             }
@@ -997,12 +997,12 @@ namespace Game.Chat
                 if (args.Empty())
                     return false;
 
-                string account = args.NextString();
-                string limitStr = args.NextString();
-                if (!int.TryParse(limitStr, out int limit))
+                var account = args.NextString();
+                var limitStr = args.NextString();
+                if (!int.TryParse(limitStr, out var limit))
                     limit = -1;
 
-                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_LIST_BY_NAME);
+                var stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_LIST_BY_NAME);
                 stmt.AddValue(0, account);
                 return LookupPlayerSearchCommand(DB.Login.Query(stmt), limit, handler);
             }
@@ -1013,12 +1013,12 @@ namespace Game.Chat
                 if (args.Empty())
                     return false;
 
-                string email = args.NextString();
-                string limitStr = args.NextString();
-                if (!int.TryParse(limitStr, out int limit))
+                var email = args.NextString();
+                var limitStr = args.NextString();
+                if (!int.TryParse(limitStr, out var limit))
                     limit = -1;
 
-                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_LIST_BY_EMAIL);
+                var stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_LIST_BY_EMAIL);
                 stmt.AddValue(0, email);
                 return LookupPlayerSearchCommand(DB.Login.Query(stmt), limit, handler);
             }
@@ -1031,7 +1031,7 @@ namespace Game.Chat
                     return false;
                 }
 
-                int counter = 0;
+                var counter = 0;
                 uint count = 0;
                 do
                 {
@@ -1040,12 +1040,12 @@ namespace Game.Chat
                         handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxlookup);
                         return true;
                     }
-                    uint accountId = result.Read<uint>(0);
-                    string accountName = result.Read<string>(1);
+                    var accountId = result.Read<uint>(0);
+                    var accountName = result.Read<string>(1);
 
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_GUID_NAME_BY_ACC);
+                    var stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_GUID_NAME_BY_ACC);
                     stmt.AddValue(0, accountId);
-                    SQLResult result2 = DB.Characters.Query(stmt);
+                    var result2 = DB.Characters.Query(stmt);
 
                     if (!result2.IsEmpty())
                     {
@@ -1053,8 +1053,8 @@ namespace Game.Chat
 
                         do
                         {
-                            ObjectGuid guid = ObjectGuid.Create(HighGuid.Player, result2.Read<ulong>(0));
-                            string name = result2.Read<string>(1);
+                            var guid = ObjectGuid.Create(HighGuid.Player, result2.Read<ulong>(0));
+                            var name = result2.Read<string>(1);
 
                             handler.SendSysMessage(CypherStrings.LookupPlayerCharacter, name, guid.ToString());
                             ++counter;
@@ -1083,21 +1083,21 @@ namespace Game.Chat
                     return false;
 
                 // can be NULL at console call
-                Player target = handler.GetSelectedPlayer();
+                var target = handler.GetSelectedPlayer();
 
-                string namePart = args.NextString();
+                var namePart = args.NextString();
 
-                bool found = false;
+                var found = false;
                 uint count = 0;
 
                 // Search in SpellName.dbc
-                foreach (SpellNameRecord spellName in CliDB.SpellNameStorage.Values)
+                foreach (var spellName in CliDB.SpellNameStorage.Values)
                 {
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellName.Id, Difficulty.None);
+                    var spellInfo = Global.SpellMgr.GetSpellInfo(spellName.Id, Difficulty.None);
                     if (spellInfo != null)
                     {
-                        Locale locale = handler.GetSessionDbcLocale();
-                        string name = spellInfo.SpellName[locale];
+                        var locale = handler.GetSessionDbcLocale();
+                        var name = spellInfo.SpellName[locale];
                         if (name.IsEmpty())
                             continue;
 
@@ -1126,22 +1126,22 @@ namespace Game.Chat
                                 return true;
                             }
 
-                            bool known = target && target.HasSpell(spellInfo.Id);
-                            SpellEffectInfo effect = spellInfo.GetEffect(0);
-                            bool learn = (effect.Effect == SpellEffectName.LearnSpell);
+                            var known = target && target.HasSpell(spellInfo.Id);
+                            var effect = spellInfo.GetEffect(0);
+                            var learn = (effect.Effect == SpellEffectName.LearnSpell);
 
-                            SpellInfo learnSpellInfo = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, spellInfo.Difficulty);
+                            var learnSpellInfo = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, spellInfo.Difficulty);
 
-                            bool talent = spellInfo.HasAttribute(SpellCustomAttributes.IsTalent);
-                            bool passive = spellInfo.IsPassive();
-                            bool active = target && target.HasAura(spellInfo.Id);
+                            var talent = spellInfo.HasAttribute(SpellCustomAttributes.IsTalent);
+                            var passive = spellInfo.IsPassive();
+                            var active = target && target.HasAura(spellInfo.Id);
 
                             // unit32 used to prevent interpreting public byte as char at output
                             // find rank of learned spell for learning spell, or talent rank
                             uint rank = learn && learnSpellInfo != null ? learnSpellInfo.GetRank() : spellInfo.GetRank();
 
                             // send spell in "id - [name, rank N] [talent] [passive] [learn] [known]" format
-                            StringBuilder ss = new StringBuilder();
+                            var ss = new StringBuilder();
                             if (handler.GetSession() != null)
                                 ss.Append(spellInfo.Id + " - |cffffffff|Hspell:" + spellInfo.Id + "|h[" + name);
                             else
@@ -1185,37 +1185,37 @@ namespace Game.Chat
                     return false;
 
                 // can be NULL at console call
-                Player target = handler.GetSelectedPlayer();
+                var target = handler.GetSelectedPlayer();
 
-                uint id = args.NextUInt32();
+                var id = args.NextUInt32();
 
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(id, Difficulty.None);
+                var spellInfo = Global.SpellMgr.GetSpellInfo(id, Difficulty.None);
                 if (spellInfo != null)
                 {
-                    Locale locale = handler.GetSessionDbcLocale();
-                    string name = spellInfo.SpellName[locale];
+                    var locale = handler.GetSessionDbcLocale();
+                    var name = spellInfo.SpellName[locale];
                     if (string.IsNullOrEmpty(name))
                     {
                         handler.SendSysMessage(CypherStrings.CommandNospellfound);
                         return true;
                     }
 
-                    bool known = target && target.HasSpell(id);
-                    SpellEffectInfo effect = spellInfo.GetEffect(0);
-                    bool learn = (effect.Effect == SpellEffectName.LearnSpell);
+                    var known = target && target.HasSpell(id);
+                    var effect = spellInfo.GetEffect(0);
+                    var learn = (effect.Effect == SpellEffectName.LearnSpell);
 
-                    SpellInfo learnSpellInfo = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, Difficulty.None);
+                    var learnSpellInfo = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, Difficulty.None);
 
-                    bool talent = spellInfo.HasAttribute(SpellCustomAttributes.IsTalent);
-                    bool passive = spellInfo.IsPassive();
-                    bool active = target && target.HasAura(id);
+                    var talent = spellInfo.HasAttribute(SpellCustomAttributes.IsTalent);
+                    var passive = spellInfo.IsPassive();
+                    var active = target && target.HasAura(id);
 
                     // unit32 used to prevent interpreting public byte as char at output
                     // find rank of learned spell for learning spell, or talent rank
                     uint rank = learn && learnSpellInfo != null ? learnSpellInfo.GetRank() : spellInfo.GetRank();
 
                     // send spell in "id - [name, rank N] [talent] [passive] [learn] [known]" format
-                    StringBuilder ss = new StringBuilder();
+                    var ss = new StringBuilder();
                     if (handler.GetSession() != null)
                         ss.Append(id + " - |cffffffff|Hspell:" + id + "|h[" + name);
                     else

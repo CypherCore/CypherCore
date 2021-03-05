@@ -34,7 +34,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.UseItem)]
         void HandleUseItem(UseItem packet)
         {
-            Player user = GetPlayer();
+            var user = GetPlayer();
 
             // ignore for remote control state
             if (user.m_unitMovedByMe != user)
@@ -53,7 +53,7 @@ namespace Game
                 return;
             }
 
-            ItemTemplate proto = item.GetTemplate();
+            var proto = item.GetTemplate();
             if (proto == null)
             {
                 user.SendEquipError(InventoryResult.ItemNotFound, item);
@@ -90,9 +90,9 @@ namespace Game
 
             if (user.IsInCombat())
             {
-                foreach (ItemEffectRecord effect in item.GetEffects())
+                foreach (var effect in item.GetEffects())
                 {
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)effect.SpellID, user.GetMap().GetDifficultyID());
+                    var spellInfo = Global.SpellMgr.GetSpellInfo((uint)effect.SpellID, user.GetMap().GetDifficultyID());
                     if (spellInfo != null)
                     {
                         if (!spellInfo.CanBeUsedInCombat())
@@ -115,7 +115,7 @@ namespace Game
                 }
             }
 
-            SpellCastTargets targets = new SpellCastTargets(user, packet.Cast);
+            var targets = new SpellCastTargets(user, packet.Cast);
 
             // Note: If script stop casting it must send appropriate data to client to prevent stuck item in gray state.
             if (!Global.ScriptMgr.OnItemUse(user, item, targets, packet.Cast.CastID))
@@ -128,7 +128,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.OpenItem)]
         void HandleOpenItem(OpenItem packet)
         {
-            Player player = GetPlayer();
+            var player = GetPlayer();
 
             // ignore for remote control state
             if (player.m_unitMovedByMe != player)
@@ -148,7 +148,7 @@ namespace Game
                 return;
             }
 
-            ItemTemplate proto = item.GetTemplate();
+            var proto = item.GetTemplate();
             if (proto == null)
             {
                 player.SendEquipError(InventoryResult.ItemNotFound, item);
@@ -165,10 +165,10 @@ namespace Game
             }
 
             // locked item
-            uint lockId = proto.GetLockID();
+            var lockId = proto.GetLockID();
             if (lockId != 0)
             {
-                LockRecord lockInfo = CliDB.LockStorage.LookupByKey(lockId);
+                var lockInfo = CliDB.LockStorage.LookupByKey(lockId);
                 if (lockInfo == null)
                 {
                     player.SendEquipError(InventoryResult.ItemLocked, item);
@@ -186,7 +186,7 @@ namespace Game
 
             if (item.HasItemFlag(ItemFieldFlags.Wrapped))// wrapped?
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_GIFT_BY_ITEM);
+                var stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_GIFT_BY_ITEM);
                 stmt.AddValue(0, item.GetGUID().GetCounter());
                 _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt)
                     .WithCallback(result => HandleOpenWrappedItemCallback(item.GetPos(), item.GetGUID(), result)));
@@ -214,10 +214,10 @@ namespace Game
                 return;
             }
 
-            SQLTransaction trans = new SQLTransaction();
+            var trans = new SQLTransaction();
 
-            uint entry = result.Read<uint>(0);
-            uint flags = result.Read<uint>(1);
+            var entry = result.Read<uint>(0);
+            var flags = result.Read<uint>(1);
 
             item.SetGiftCreator(ObjectGuid.Empty);
             item.SetEntry(entry);
@@ -227,7 +227,7 @@ namespace Game
 
             GetPlayer().SaveInventoryAndGoldToDB(trans);
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GIFT);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GIFT);
             stmt.AddValue(0, itemGuid.GetCounter());
             trans.Append(stmt);
 
@@ -237,7 +237,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GameObjUse)]
         void HandleGameObjectUse(GameObjUse packet)
         {
-            GameObject obj = GetPlayer().GetGameObjectIfCanInteractWith(packet.Guid);
+            var obj = GetPlayer().GetGameObjectIfCanInteractWith(packet.Guid);
             if (obj)
             {
                 // ignore for remote control state
@@ -256,7 +256,7 @@ namespace Game
             if (GetPlayer().m_unitMovedByMe != GetPlayer())
                 return;
 
-            GameObject go = GetPlayer().GetGameObjectIfCanInteractWith(packet.Guid);
+            var go = GetPlayer().GetGameObjectIfCanInteractWith(packet.Guid);
             if (go)
             {
                 if (go.GetAI().GossipHello(GetPlayer()))
@@ -270,11 +270,11 @@ namespace Game
         void HandleCastSpell(CastSpell cast)
         {
             // ignore for remote control state (for player case)
-            Unit mover = GetPlayer().m_unitMovedByMe;
+            var mover = GetPlayer().m_unitMovedByMe;
             if (mover != GetPlayer() && mover.IsTypeId(TypeId.Player))
                 return;
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(cast.Cast.SpellID, mover.GetMap().GetDifficultyID());
+            var spellInfo = Global.SpellMgr.GetSpellInfo(cast.Cast.SpellID, mover.GetMap().GetDifficultyID());
             if (spellInfo == null)
             {
                 Log.outError(LogFilter.Network, "WORLD: unknown spell id {0}", cast.Cast.SpellID);
@@ -284,7 +284,7 @@ namespace Game
             if (spellInfo.IsPassive())
                 return;
 
-            Unit caster = mover;
+            var caster = mover;
             if (caster.IsTypeId(TypeId.Unit) && !caster.ToCreature().HasSpell(spellInfo.Id))
             {
                 // If the vehicle creature does not have the spell but it allows the passenger to cast own spells
@@ -313,12 +313,12 @@ namespace Game
                 return;
 
             // client provided targets
-            SpellCastTargets targets = new SpellCastTargets(caster, cast.Cast);
+            var targets = new SpellCastTargets(caster, cast.Cast);
 
             // auto-selection buff level base at target level (in spellInfo)
             if (targets.GetUnitTarget() != null)
             {
-                SpellInfo actualSpellInfo = spellInfo.GetAuraRankForLevel(targets.GetUnitTarget().GetLevelForTarget(caster));
+                var actualSpellInfo = spellInfo.GetAuraRankForLevel(targets.GetUnitTarget().GetLevelForTarget(caster));
 
                 // if rank not found then function return NULL but in explicit cast case original spell can be casted and later failed with appropriate error message
                 if (actualSpellInfo != null)
@@ -328,9 +328,9 @@ namespace Game
             if (cast.Cast.MoveUpdate.HasValue)
                 HandleMovementOpcode(ClientOpcodes.MoveStop, cast.Cast.MoveUpdate.Value);
 
-            Spell spell = new Spell(caster, spellInfo, TriggerCastFlags.None, ObjectGuid.Empty, false);
+            var spell = new Spell(caster, spellInfo, TriggerCastFlags.None, ObjectGuid.Empty, false);
 
-            SpellPrepare spellPrepare = new SpellPrepare();
+            var spellPrepare = new SpellPrepare();
             spellPrepare.ClientCastID = cast.Cast.CastID;
             spellPrepare.ServerCastID = spell.m_castId;
             SendPacket(spellPrepare);
@@ -351,7 +351,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.CancelAura)]
         void HandleCancelAura(CancelAura cancelAura)
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(cancelAura.SpellID, _player.GetMap().GetDifficultyID());
+            var spellInfo = Global.SpellMgr.GetSpellInfo(cancelAura.SpellID, _player.GetMap().GetDifficultyID());
             if (spellInfo == null)
                 return;
 
@@ -362,7 +362,7 @@ namespace Game
             // channeled spell case (it currently casted then)
             if (spellInfo.IsChanneled())
             {
-                Spell curSpell = GetPlayer().GetCurrentSpell(CurrentSpellTypes.Channeled);
+                var curSpell = GetPlayer().GetCurrentSpell(CurrentSpellTypes.Channeled);
                 if (curSpell != null)
                     if (curSpell.GetSpellInfo().Id == cancelAura.SpellID)
                         GetPlayer().InterruptSpell(CurrentSpellTypes.Channeled);
@@ -383,7 +383,7 @@ namespace Game
         {
             GetPlayer().RemoveAurasByType(AuraType.ModScale, aurApp =>
             {
-                SpellInfo spellInfo = aurApp.GetBase().GetSpellInfo();
+                var spellInfo = aurApp.GetBase().GetSpellInfo();
                 return !spellInfo.HasAttribute(SpellAttr0.CantCancel) && spellInfo.IsPositive() && !spellInfo.IsPassive();
             });
         }
@@ -393,7 +393,7 @@ namespace Game
         {
             GetPlayer().RemoveAurasByType(AuraType.Mounted, aurApp =>
             {
-                SpellInfo spellInfo = aurApp.GetBase().GetSpellInfo();
+                var spellInfo = aurApp.GetBase().GetSpellInfo();
                 return !spellInfo.HasAttribute(SpellAttr0.CantCancel) && spellInfo.IsPositive() && !spellInfo.IsPassive();
             });
         }
@@ -441,7 +441,7 @@ namespace Game
         void HandleCancelChanneling(CancelChannelling cancelChanneling)
         {
             // ignore for remote control state (for player case)
-            Unit mover = _player.m_unitMovedByMe;
+            var mover = _player.m_unitMovedByMe;
             if (mover != _player && mover.IsTypeId(TypeId.Player))
                 return;
 
@@ -455,7 +455,7 @@ namespace Game
             if (GetPlayer().m_unitMovedByMe != GetPlayer())
                 return;
 
-            byte slotId = totemDestroyed.Slot;
+            var slotId = totemDestroyed.Slot;
             slotId += (int)SummonSlot.Totem;
 
             if (slotId >= SharedConst.MaxTotemSlot)
@@ -464,7 +464,7 @@ namespace Game
             if (GetPlayer().m_SummonSlot[slotId].IsEmpty())
                 return;
 
-            Creature totem = ObjectAccessor.GetCreature(GetPlayer(), _player.m_SummonSlot[slotId]);
+            var totem = ObjectAccessor.GetCreature(GetPlayer(), _player.m_SummonSlot[slotId]);
             if (totem != null && totem.IsTotem())// && totem.GetGUID() == packet.TotemGUID)  Unknown why blizz doesnt send the guid when you right click it.
                 totem.ToTotem().UnSummon();
         }
@@ -479,7 +479,7 @@ namespace Game
             if (!selfResSpells.Contains(selfRes.SpellId))
                 return;
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(selfRes.SpellId, _player.GetMap().GetDifficultyID());
+            var spellInfo = Global.SpellMgr.GetSpellInfo(selfRes.SpellId, _player.GetMap().GetDifficultyID());
             if (spellInfo != null)
                 _player.CastSpell(_player, spellInfo, false, null);
 
@@ -504,10 +504,10 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GetMirrorImageData)]
         void HandleMirrorImageDataRequest(GetMirrorImageData packet)
         {
-            ObjectGuid guid = packet.UnitGUID;
+            var guid = packet.UnitGUID;
 
             // Get unit for which data is needed by client
-            Unit unit = Global.ObjAccessor.GetUnit(GetPlayer(), guid);
+            var unit = Global.ObjAccessor.GetUnit(GetPlayer(), guid);
             if (!unit)
                 return;
 
@@ -515,14 +515,14 @@ namespace Game
                 return;
 
             // Get creator of the unit (SPELL_AURA_CLONE_CASTER does not stack)
-            Unit creator = unit.GetAuraEffectsByType(AuraType.CloneCaster).FirstOrDefault().GetCaster();
+            var creator = unit.GetAuraEffectsByType(AuraType.CloneCaster).FirstOrDefault().GetCaster();
             if (!creator)
                 return;
 
-            Player player = creator.ToPlayer();
+            var player = creator.ToPlayer();
             if (player)
             {
-                MirrorImageComponentedData mirrorImageComponentedData = new MirrorImageComponentedData();
+                var mirrorImageComponentedData = new MirrorImageComponentedData();
                 mirrorImageComponentedData.UnitGUID = guid;
                 mirrorImageComponentedData.DisplayID = (int)creator.GetDisplayId();
                 mirrorImageComponentedData.RaceID = (byte)creator.GetRace();
@@ -537,7 +537,7 @@ namespace Game
                     mirrorImageComponentedData.Customizations.Add(chrCustomizationChoice);
                 }
 
-                Guild guild = player.GetGuild();
+                var guild = player.GetGuild();
                 mirrorImageComponentedData.GuildGUID = (guild ? guild.GetGUID() : ObjectGuid.Empty);
 
                 byte[] itemSlots =
@@ -572,7 +572,7 @@ namespace Game
             }
             else
             {
-                MirrorImageCreatureData data = new MirrorImageCreatureData();
+                var data = new MirrorImageCreatureData();
                 data.UnitGUID = guid;
                 data.DisplayID = (int)creator.GetDisplayId();
                 SendPacket(data);
@@ -582,11 +582,11 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MissileTrajectoryCollision)]
         void HandleMissileTrajectoryCollision(MissileTrajectoryCollision packet)
         {
-            Unit caster = Global.ObjAccessor.GetUnit(_player, packet.Target);
+            var caster = Global.ObjAccessor.GetUnit(_player, packet.Target);
             if (caster == null)
                 return;
 
-            Spell spell = caster.FindCurrentSpellBySpellId(packet.SpellID);
+            var spell = caster.FindCurrentSpellBySpellId(packet.SpellID);
             if (spell == null || !spell.m_targets.HasDst())
                 return;
 
@@ -597,7 +597,7 @@ namespace Game
             // we changed dest, recalculate flight time
             spell.RecalculateDelayMomentForDst();
 
-            NotifyMissileTrajectoryCollision data = new NotifyMissileTrajectoryCollision();
+            var data = new NotifyMissileTrajectoryCollision();
             data.Caster = packet.Target;
             data.CastID = packet.CastID;
             data.CollisionPos = packet.CollisionPos;
@@ -607,12 +607,12 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.UpdateMissileTrajectory)]
         void HandleUpdateMissileTrajectory(UpdateMissileTrajectory packet)
         {
-            Unit caster = Global.ObjAccessor.GetUnit(GetPlayer(), packet.Guid);
-            Spell spell = caster ? caster.GetCurrentSpell(CurrentSpellTypes.Generic) : null;
+            var caster = Global.ObjAccessor.GetUnit(GetPlayer(), packet.Guid);
+            var spell = caster ? caster.GetCurrentSpell(CurrentSpellTypes.Generic) : null;
             if (!spell || spell.m_spellInfo.Id != packet.SpellID || !spell.m_targets.HasDst() || !spell.m_targets.HasSrc())
                 return;
 
-            Position pos = spell.m_targets.GetSrcPos();
+            var pos = spell.m_targets.GetSrcPos();
             pos.Relocate(packet.FirePos);
             spell.m_targets.ModSrc(pos);
 

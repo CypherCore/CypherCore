@@ -171,7 +171,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint textLen = _worldPacket.ReadBits<uint>(11);
+            var textLen = _worldPacket.ReadBits<uint>(11);
             MotdText = _worldPacket.ReadString(textLen);
         }
 
@@ -228,7 +228,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint nameLen = _worldPacket.ReadBits<uint>(9);
+            var nameLen = _worldPacket.ReadBits<uint>(9);
             Name = _worldPacket.ReadString(nameLen);
         }
 
@@ -405,7 +405,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteInt32(Entry.Count);
 
-            foreach (GuildEventEntry entry in Entry)
+            foreach (var entry in Entry)
             {
                 _worldPacket.WritePackedGuid(entry.PlayerGUID);
                 _worldPacket.WritePackedGuid(entry.OtherGUID);
@@ -546,7 +546,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(NumTabs);
             _worldPacket.WriteInt32(Tab.Count);
 
-            foreach (GuildRankTabPermissions tab in Tab)
+            foreach (var tab in Tab)
             {
                 _worldPacket.WriteInt32(tab.Flags);
                 _worldPacket.WriteInt32(tab.WithdrawItemLimit);
@@ -584,7 +584,7 @@ namespace Game.Networking.Packets
             }
 
             _worldPacket.ResetBitPos();
-            uint rankNameLen = _worldPacket.ReadBits<uint>(7);
+            var rankNameLen = _worldPacket.ReadBits<uint>(7);
 
             RankName = _worldPacket.ReadString(rankNameLen);
 
@@ -607,7 +607,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint nameLen = _worldPacket.ReadBits<uint>(7);
+            var nameLen = _worldPacket.ReadBits<uint>(7);
             _worldPacket.ResetBitPos();
 
             RankOrder = _worldPacket.ReadInt32();
@@ -713,7 +713,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint textLen = _worldPacket.ReadBits<uint>(11);
+            var textLen = _worldPacket.ReadBits<uint>(11);
             InfoText = _worldPacket.ReadString(textLen);
         }
 
@@ -728,7 +728,7 @@ namespace Game.Networking.Packets
         {
             NoteeGUID = _worldPacket.ReadPackedGuid();
 
-            uint noteLen = _worldPacket.ReadBits<uint>(8);
+            var noteLen = _worldPacket.ReadBits<uint>(8);
             IsPublic = _worldPacket.HasBit();
 
             Note = _worldPacket.ReadString(noteLen);
@@ -822,7 +822,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint nameLen = _worldPacket.ReadBits<uint>(7);
+            var nameLen = _worldPacket.ReadBits<uint>(7);
             NewName = _worldPacket.ReadString(nameLen);
         }
 
@@ -943,8 +943,8 @@ namespace Game.Networking.Packets
             BankTab = _worldPacket.ReadUInt8();
 
             _worldPacket.ResetBitPos();
-            uint nameLen = _worldPacket.ReadBits<uint>(7);
-            uint iconLen = _worldPacket.ReadBits<uint>(9);
+            var nameLen = _worldPacket.ReadBits<uint>(7);
+            var iconLen = _worldPacket.ReadBits<uint>(9);
 
             Name = _worldPacket.ReadString(nameLen);
             Icon = _worldPacket.ReadString(iconLen);
@@ -1038,7 +1038,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(FullUpdate);
             _worldPacket.FlushBits();
 
-            foreach (GuildBankTabInfo tab in TabInfo)
+            foreach (var tab in TabInfo)
             {
                 _worldPacket.WriteInt32(tab.TabIndex);
                 _worldPacket.WriteBits(tab.Name.GetByteCount(), 7);
@@ -1048,7 +1048,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteString(tab.Icon);
             }
 
-            foreach (GuildBankItemInfo item in ItemInfo)
+            foreach (var item in ItemInfo)
             {
                 _worldPacket.WriteInt32(item.Slot);
                 _worldPacket.WriteInt32(item.Count);
@@ -1063,7 +1063,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteBit(item.Locked);
                 _worldPacket.FlushBits();
 
-                foreach (ItemGemData socketEnchant in item.SocketEnchant)
+                foreach (var socketEnchant in item.SocketEnchant)
                     socketEnchant.Write(_worldPacket);
             }
         }
@@ -1142,7 +1142,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(WeeklyBonusMoney.HasValue);
             _worldPacket.FlushBits();
 
-            foreach (GuildBankLogEntry logEntry in Entry)
+            foreach (var logEntry in Entry)
             {
                 _worldPacket.WritePackedGuid(logEntry.PlayerGUID);
                 _worldPacket.WriteUInt32(logEntry.TimeOffset);
@@ -1277,7 +1277,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint nameLen = _worldPacket.ReadBits<uint>(9);
+            var nameLen = _worldPacket.ReadBits<uint>(9);
             NewMasterName = _worldPacket.ReadString(nameLen);
         }
 
@@ -1297,16 +1297,16 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            for (int i = 0; i < GuildConst.ChallengesTypes; ++i)
+            for (var i = 0; i < GuildConst.ChallengesTypes; ++i)
                 _worldPacket.WriteInt32(CurrentCount[i]);
 
-            for (int i = 0; i < GuildConst.ChallengesTypes; ++i)
+            for (var i = 0; i < GuildConst.ChallengesTypes; ++i)
                 _worldPacket.WriteInt32(MaxCount[i]);
 
-            for (int i = 0; i < GuildConst.ChallengesTypes; ++i)
+            for (var i = 0; i < GuildConst.ChallengesTypes; ++i)
                 _worldPacket.WriteInt32(MaxLevelGold[i]);
 
-            for (int i = 0; i < GuildConst.ChallengesTypes; ++i)
+            for (var i = 0; i < GuildConst.ChallengesTypes; ++i)
                 _worldPacket.WriteInt32(Gold[i]);
         }
 
@@ -1356,7 +1356,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint count = _worldPacket.ReadUInt32();
+            var count = _worldPacket.ReadUInt32();
 
             for (uint i = 0; i < count; ++i)
                 AchievementIDs.Add(_worldPacket.ReadUInt32());
@@ -1557,7 +1557,7 @@ namespace Game.Networking.Packets
             data.WritePackedGuid(MemberGuid);
             data.WriteInt32(MemberList.Count);
 
-            foreach (ObjectGuid memberGuid in MemberList)
+            foreach (var memberGuid in MemberList)
                 data.WritePackedGuid(memberGuid);
 
             data.WriteBit(Item.HasValue);

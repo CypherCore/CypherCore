@@ -37,12 +37,12 @@ namespace Game.Entities
         public void UpdateHonorFields()
         {
             // called when rewarding honor and at each save
-            long now = Time.UnixTime;
-            long today = (Time.UnixTime / Time.Day) * Time.Day;
+            var now = Time.UnixTime;
+            var today = (Time.UnixTime / Time.Day) * Time.Day;
 
             if (m_lastHonorUpdateTime < today)
             {
-                long yesterday = today - Time.Day;
+                var yesterday = today - Time.Day;
 
                 // update yesterday's contribution
                 if (m_lastHonorUpdateTime >= yesterday)
@@ -79,7 +79,7 @@ namespace Game.Entities
             if (HasAura(BattlegroundConst.SpellAuraPlayerInactive))
                 return false;
 
-            ObjectGuid victim_guid = ObjectGuid.Empty;
+            var victim_guid = ObjectGuid.Empty;
             uint victim_rank = 0;
 
             // need call before fields update to have chance move yesterday data to appropriate fields before today data change.
@@ -98,15 +98,15 @@ namespace Game.Entities
                     return false;
 
                 victim_guid = victim.GetGUID();
-                Player plrVictim = victim.ToPlayer();
+                var plrVictim = victim.ToPlayer();
                 if (plrVictim)
                 {
                     if (GetTeam() == plrVictim.GetTeam() && !Global.WorldMgr.IsFFAPvPRealm())
                         return false;
 
-                    byte k_level = (byte)GetLevel();
-                    byte k_grey = (byte)Formulas.GetGrayLevel(k_level);
-                    byte v_level = (byte)victim.GetLevelForTarget(this);
+                    var k_level = (byte)GetLevel();
+                    var k_grey = (byte)Formulas.GetGrayLevel(k_level);
+                    var v_level = (byte)victim.GetLevelForTarget(this);
 
                     if (v_level <= k_grey)
                         return false;
@@ -173,7 +173,7 @@ namespace Game.Entities
             // victim_rank [1..4]  HK: <dishonored rank>
             // victim_rank [5..19] HK: <alliance\horde rank>
             // victim_rank [0, 20+] HK: <>
-            PvPCredit data = new PvPCredit();
+            var data = new PvPCredit();
             data.Honor = honor;
             data.OriginalHonor = honor;
             data.Target = victim_guid;
@@ -185,7 +185,7 @@ namespace Game.Entities
 
             if (InBattleground() && honor > 0)
             {
-                Battleground bg = GetBattleground();
+                var bg = GetBattleground();
                 if (bg != null)
                 {
                     bg.UpdatePlayerScore(this, ScoreType.BonusHonor, (uint)honor, false); //false: prevent looping
@@ -200,14 +200,14 @@ namespace Game.Entities
                 if (victim.IsTypeId(TypeId.Player))
                 {
                     // Check if allowed to receive it in current map
-                    int MapType = WorldConfig.GetIntValue(WorldCfg.PvpTokenMapType);
+                    var MapType = WorldConfig.GetIntValue(WorldCfg.PvpTokenMapType);
                     if ((MapType == 1 && !InBattleground() && !IsFFAPvP())
                         || (MapType == 2 && !IsFFAPvP())
                         || (MapType == 3 && !InBattleground()))
                         return true;
 
-                    uint itemId = WorldConfig.GetUIntValue(WorldCfg.PvpTokenId);
-                    uint count = WorldConfig.GetUIntValue(WorldCfg.PvpTokenCount);
+                    var itemId = WorldConfig.GetUIntValue(WorldCfg.PvpTokenId);
+                    var count = WorldConfig.GetUIntValue(WorldCfg.PvpTokenCount);
 
                     if (AddItem(itemId, count))
                         SendSysMessage("You have been awarded a token for slaying another player.");
@@ -242,18 +242,18 @@ namespace Game.Entities
             if (rewardPackEntry == null)
                 return;
 
-            CharTitlesRecord charTitlesEntry = CliDB.CharTitlesStorage.LookupByKey(rewardPackEntry.CharTitleID);
+            var charTitlesEntry = CliDB.CharTitlesStorage.LookupByKey(rewardPackEntry.CharTitleID);
             if (charTitlesEntry != null)
                 SetTitle(charTitlesEntry);
 
             ModifyMoney(rewardPackEntry.Money);
 
             var rewardCurrencyTypes = Global.DB2Mgr.GetRewardPackCurrencyTypesByRewardID(rewardPackEntry.Id);
-            foreach (RewardPackXCurrencyTypeRecord currency in rewardCurrencyTypes)
+            foreach (var currency in rewardCurrencyTypes)
                 ModifyCurrency((CurrencyTypes)currency.CurrencyTypeID, currency.Quantity);
 
             var rewardPackXItems = Global.DB2Mgr.GetRewardPackItemsByRewardID(rewardPackEntry.Id);
-            foreach (RewardPackXItemRecord rewardPackXItem in rewardPackXItems)
+            foreach (var rewardPackXItem in rewardPackXItems)
                 AddItem(rewardPackXItem.ItemID, rewardPackXItem.ItemQuantity);
         }
 
@@ -261,8 +261,8 @@ namespace Game.Entities
         {
             uint currentHonorXP = m_activePlayerData.Honor;
             uint nextHonorLevelXP = m_activePlayerData.HonorNextLevel;
-            uint newHonorXP = currentHonorXP + xp;
-            uint honorLevel = GetHonorLevel();
+            var newHonorXP = currentHonorXP + xp;
+            var honorLevel = GetHonorLevel();
 
             if (xp < 1 || GetLevel() < PlayerConst.LevelMinHonor || IsMaxHonorLevel())
                 return;
@@ -283,7 +283,7 @@ namespace Game.Entities
 
         void SetHonorLevel(byte level)
         {
-            byte oldHonorLevel = (byte)GetHonorLevel();
+            var oldHonorLevel = (byte)GetHonorLevel();
             if (level == oldHonorLevel)
                 return;
 
@@ -317,7 +317,7 @@ namespace Game.Entities
                 RemovePvpTalent(talentInfo);
             }
 
-            SQLTransaction trans = new SQLTransaction();
+            var trans = new SQLTransaction();
             _SaveTalents(trans);
             _SaveSpells(trans);
             DB.Characters.CommitTransaction(trans);
@@ -334,7 +334,7 @@ namespace Game.Entities
             if (IsDead())
                 return TalentLearnResult.FailedCantDoThatRightNow;
 
-            PvpTalentRecord talentInfo = CliDB.PvpTalentStorage.LookupByKey(talentID);
+            var talentInfo = CliDB.PvpTalentStorage.LookupByKey(talentID);
             if (talentInfo == null)
                 return TalentLearnResult.FailedUnknown;
 
@@ -347,7 +347,7 @@ namespace Game.Entities
             if (Global.DB2Mgr.GetRequiredLevelForPvpTalentSlot(slot, GetClass()) > GetLevel())
                 return TalentLearnResult.FailedUnknown;
 
-            PvpTalentCategoryRecord talentCategory = CliDB.PvpTalentCategoryStorage.LookupByKey(talentInfo.PvpTalentCategoryID);
+            var talentCategory = CliDB.PvpTalentCategoryStorage.LookupByKey(talentInfo.PvpTalentCategoryID);
             if (talentCategory != null)
                 if (!Convert.ToBoolean(talentCategory.TalentSlotMask & (1 << slot)))
                     return TalentLearnResult.FailedUnknown;
@@ -356,7 +356,7 @@ namespace Game.Entities
             if (HasPvpTalent(talentID, GetActiveTalentGroup()))
                 return TalentLearnResult.FailedUnknown;
 
-            PvpTalentRecord talent = CliDB.PvpTalentStorage.LookupByKey(GetPvpTalentMap(GetActiveTalentGroup())[slot]);
+            var talent = CliDB.PvpTalentStorage.LookupByKey(GetPvpTalentMap(GetActiveTalentGroup())[slot]);
             if (talent != null)
             {
                 if (!HasPlayerFlag(PlayerFlags.Resting) && !HasUnitFlag2(UnitFlags2.AllowChangingTalents))
@@ -380,7 +380,7 @@ namespace Game.Entities
         bool AddPvpTalent(PvpTalentRecord talent, byte activeTalentGroup, byte slot)
         {
             //ASSERT(talent);
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talent.SpellID, Difficulty.None);
+            var spellInfo = Global.SpellMgr.GetSpellInfo(talent.SpellID, Difficulty.None);
             if (spellInfo == null)
             {
                 Log.outError(LogFilter.Spells, $"Player.AddPvpTalent: Spell (ID: {talent.SpellID}) does not exist.");
@@ -407,7 +407,7 @@ namespace Game.Entities
 
         void RemovePvpTalent(PvpTalentRecord talent)
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talent.SpellID, Difficulty.None);
+            var spellInfo = Global.SpellMgr.GetSpellInfo(talent.SpellID, Difficulty.None);
             if (spellInfo == null)
                 return;
 
@@ -429,9 +429,9 @@ namespace Game.Entities
         public void TogglePvpTalents(bool enable)
         {
             var pvpTalents = GetPvpTalentMap(GetActiveTalentGroup());
-            foreach (uint pvpTalentId in pvpTalents)
+            foreach (var pvpTalentId in pvpTalents)
             {
-                PvpTalentRecord pvpTalentInfo = CliDB.PvpTalentStorage.LookupByKey(pvpTalentId);
+                var pvpTalentInfo = CliDB.PvpTalentStorage.LookupByKey(pvpTalentId);
                 if (pvpTalentInfo != null)
                 {
                     if (enable)
@@ -458,7 +458,7 @@ namespace Game.Entities
             CastSpell(this, PlayerConst.SpellPvpRulesEnabled);
             if (!dueToCombat)
             {
-                Aura aura = GetAura(PlayerConst.SpellPvpRulesEnabled);
+                var aura = GetAura(PlayerConst.SpellPvpRulesEnabled);
                 if (aura != null)
                 {
                     aura.SetMaxDuration(-1);
@@ -482,7 +482,7 @@ namespace Game.Entities
             }
             else
             {
-                Aura aura = GetAura(PlayerConst.SpellPvpRulesEnabled);
+                var aura = GetAura(PlayerConst.SpellPvpRulesEnabled);
                 if (aura != null)
                     aura.SetDuration(aura.GetSpellInfo().GetMaxDuration());
             }
@@ -503,7 +503,7 @@ namespace Game.Entities
             if (InBattleground())
                 return true;
 
-            AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(areaID);
+            var area = CliDB.AreaTableStorage.LookupByKey(areaID);
             if (area != null)
             {
                 do
@@ -650,8 +650,8 @@ namespace Game.Entities
             // It is possible to call this method with a null pointer, only skipping faction check.
             if (gameobject)
             {
-                FactionTemplateRecord playerFaction = GetFactionTemplateEntry();
-                FactionTemplateRecord faction = CliDB.FactionTemplateStorage.LookupByKey(gameobject.GetFaction());
+                var playerFaction = GetFactionTemplateEntry();
+                var faction = CliDB.FactionTemplateStorage.LookupByKey(gameobject.GetFaction());
 
                 if (playerFaction != null && faction != null && !playerFaction.IsFriendlyTo(faction))
                     return false;
@@ -700,7 +700,7 @@ namespace Game.Entities
                 // If map is dungeon find linked graveyard
                 if (GetMap().IsDungeon())
                 {
-                    WorldSafeLocsEntry entry = Global.ObjectMgr.GetClosestGraveYard(this, GetTeam(), this);
+                    var entry = Global.ObjectMgr.GetClosestGraveYard(this, GetTeam(), this);
                     if (entry != null)
                         m_bgData.joinPos = entry.Loc;
                     else
@@ -728,7 +728,7 @@ namespace Game.Entities
 
         public void LeaveBattleground(bool teleportToEntryPoint = true)
         {
-            Battleground bg = GetBattleground();
+            var bg = GetBattleground();
             if (bg)
             {
                 bg.RemovePlayerAtLeave(GetGUID(), teleportToEntryPoint, true);
@@ -786,9 +786,9 @@ namespace Game.Entities
         /// <param name="reporter"></param>
         public void ReportedAfkBy(Player reporter)
         {
-            ReportPvPPlayerAFKResult reportAfkResult = new ReportPvPPlayerAFKResult();
+            var reportAfkResult = new ReportPvPPlayerAFKResult();
             reportAfkResult.Offender = GetGUID();
-            Battleground bg = GetBattleground();
+            var bg = GetBattleground();
             // Battleground also must be in progress!
             if (!bg || bg != reporter.GetBattleground() || GetTeam() != reporter.GetTeam() || bg.GetStatus() != BattlegroundStatus.InProgress)
             {
@@ -821,7 +821,7 @@ namespace Game.Entities
             m_IsBGRandomWinner = isWinner;
             if (m_IsBGRandomWinner)
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_BATTLEGROUND_RANDOM);
+                var stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_BATTLEGROUND_RANDOM);
                 stmt.AddValue(0, GetGUID().GetCounter());
                 DB.Characters.Execute(stmt);
             }
@@ -830,12 +830,12 @@ namespace Game.Entities
         public bool GetBGAccessByLevel(BattlegroundTypeId bgTypeId)
         {
             // get a template bg instead of running one
-            Battleground bg = Global.BattlegroundMgr.GetBattlegroundTemplate(bgTypeId);
+            var bg = Global.BattlegroundMgr.GetBattlegroundTemplate(bgTypeId);
             if (!bg)
                 return false;
 
             // limit check leel to dbc compatible level range
-            uint level = GetLevel();
+            var level = GetLevel();
             if (level > WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
                 level = WorldConfig.GetUIntValue(WorldCfg.MaxPlayerLevel);
 
@@ -871,11 +871,11 @@ namespace Game.Entities
             // Send misc stuff that needs to be sent on every login, like the battle timers.
             if (WorldConfig.GetBoolValue(WorldCfg.WintergraspEnable))
             {
-                BattleField wg = Global.BattleFieldMgr.GetBattlefieldByBattleId(1);//Wintergrasp battle
+                var wg = Global.BattleFieldMgr.GetBattlefieldByBattleId(1);//Wintergrasp battle
                 if (wg != null)
                 {
                     SendUpdateWorldState(3801, (uint)(wg.IsWarTime() ? 0 : 1));
-                    uint timer = wg.IsWarTime() ? 0 : (wg.GetTimer() / 1000); // 0 - Time to next battle
+                    var timer = wg.IsWarTime() ? 0 : (wg.GetTimer() / 1000); // 0 - Time to next battle
                     SendUpdateWorldState(4354, (uint)(Time.UnixTime + timer));
                 }
             }
@@ -895,16 +895,16 @@ namespace Game.Entities
 
         public static void LeaveAllArenaTeams(ObjectGuid guid)
         {
-            CharacterCacheEntry characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByGuid(guid);
+            var characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByGuid(guid);
             if (characterInfo == null)
                 return;
 
             for (byte i = 0; i < SharedConst.MaxArenaSlot; ++i)
             {
-                uint arenaTeamId = characterInfo.ArenaTeamId[i];
+                var arenaTeamId = characterInfo.ArenaTeamId[i];
                 if (arenaTeamId != 0)
                 {
-                    ArenaTeam arenaTeam = Global.ArenaTeamMgr.GetArenaTeamById(arenaTeamId);
+                    var arenaTeam = Global.ArenaTeamMgr.GetArenaTeamById(arenaTeamId);
                     if (arenaTeam != null)
                         arenaTeam.DelMember(guid, true);
                 }

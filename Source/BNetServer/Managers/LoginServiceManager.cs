@@ -32,14 +32,14 @@ namespace BNetServer
 
         public void Initialize()
         {
-            int port = ConfigMgr.GetDefaultValue("LoginREST.Port", 8081);
+            var port = ConfigMgr.GetDefaultValue("LoginREST.Port", 8081);
             if (port < 0 || port > 0xFFFF)
             {
                 Log.outError(LogFilter.Network, $"Specified login service port ({port}) out of allowed range (1-65535), defaulting to 8081");
                 port = 8081;
             }
 
-            string configuredAddress = ConfigMgr.GetDefaultValue("LoginREST.ExternalAddress", "127.0.0.1");
+            var configuredAddress = ConfigMgr.GetDefaultValue("LoginREST.ExternalAddress", "127.0.0.1");
             IPAddress address;
             if (!IPAddress.TryParse(configuredAddress, out address))
             {
@@ -82,7 +82,7 @@ namespace BNetServer
 
             certificate = new X509Certificate2("BNetServer.pfx");
 
-            Assembly currentAsm = Assembly.GetExecutingAssembly();
+            var currentAsm = Assembly.GetExecutingAssembly();
             foreach (var type in currentAsm.GetTypes())
             {
                 foreach (var methodInfo in type.GetMethods(BindingFlags.Instance | BindingFlags.NonPublic))

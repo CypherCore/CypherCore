@@ -46,12 +46,12 @@ namespace Game
         {
             Log.outDebug(LogFilter.Warden, "Send module to client");
 
-            uint sizeLeft = _module.CompressedSize;
-            int pos = 0;
+            var sizeLeft = _module.CompressedSize;
+            var pos = 0;
             uint burstSize;
             while (sizeLeft > 0)
             {
-                WardenModuleTransfer transfer = new WardenModuleTransfer();
+                var transfer = new WardenModuleTransfer();
 
                 burstSize = sizeLeft < 500 ? sizeLeft : 500u;
                 transfer.Command = WardenOpcodes.Smsg_ModuleCache;
@@ -60,7 +60,7 @@ namespace Game
                 sizeLeft -= burstSize;
                 pos += (int)burstSize;
 
-                Warden3DataServer packet = new Warden3DataServer();
+                var packet = new Warden3DataServer();
                 packet.Data = EncryptData(transfer.Write());
                 _session.SendPacket(packet);
             }
@@ -71,14 +71,14 @@ namespace Game
             Log.outDebug(LogFilter.Warden, "Request module");
 
             // Create packet structure
-            WardenModuleUse request = new WardenModuleUse();
+            var request = new WardenModuleUse();
             request.Command = WardenOpcodes.Smsg_ModuleUse;
 
             request.ModuleId = _module.Id;
             request.ModuleKey = _module.Key;
             request.Size = _module.CompressedSize;
 
-            Warden3DataServer packet = new Warden3DataServer();
+            var packet = new Warden3DataServer();
             packet.Data = EncryptData(request.Write());
             _session.SendPacket(packet);
         }
@@ -87,13 +87,13 @@ namespace Game
         {
             if (_initialized)
             {
-                uint currentTimestamp = GameTime.GetGameTimeMS();
-                uint diff = currentTimestamp - _previousTimestamp;
+                var currentTimestamp = GameTime.GetGameTimeMS();
+                var diff = currentTimestamp - _previousTimestamp;
                 _previousTimestamp = currentTimestamp;
 
                 if (_dataSent)
                 {
-                    uint maxClientResponseDelay = WorldConfig.GetUIntValue(WorldCfg.WardenClientResponseDelay);
+                    var maxClientResponseDelay = WorldConfig.GetUIntValue(WorldCfg.WardenClientResponseDelay);
                     if (maxClientResponseDelay > 0)
                     {
                         // Kick player if client response delays more than set in config
@@ -132,7 +132,7 @@ namespace Game
 
         public bool IsValidCheckSum(uint checksum, byte[] data, ushort length)
         {
-            uint newChecksum = BuildChecksum(data, length);
+            var newChecksum = BuildChecksum(data, length);
 
             if (checksum != newChecksum)
             {
@@ -148,7 +148,7 @@ namespace Game
 
         public uint BuildChecksum(byte[] data, uint length)
         {
-            SHA1 sha = SHA1.Create();
+            var sha = SHA1.Create();
 
             var hash = sha.ComputeHash(data, 0, (int)length);
             uint checkSum = 0;
@@ -176,10 +176,10 @@ namespace Game
                     return "Kick";
                 case WardenActions.Ban:
                     {
-                        string duration = WorldConfig.GetIntValue(WorldCfg.WardenClientBanDuration) + "s";
+                        var duration = WorldConfig.GetIntValue(WorldCfg.WardenClientBanDuration) + "s";
                         string accountName;
                         Global.AccountMgr.GetName(_session.GetAccountId(), out accountName);
-                        string banReason = "Warden Anticheat Violation";
+                        var banReason = "Warden Anticheat Violation";
                         // Check can be NULL, for example if the client sent a wrong signature in the warden packet (CHECKSUM FAIL)
                         if (check != null)
                             banReason += ": " + check.Comment + " (CheckId: " + check.CheckId + ")";

@@ -28,7 +28,7 @@ namespace Game.Networking
     {
         public static void Initialize()
         {
-            Assembly currentAsm = Assembly.GetExecutingAssembly();
+            var currentAsm = Assembly.GetExecutingAssembly();
             foreach (var type in currentAsm.GetTypes())
             {
                 foreach (var methodInfo in type.GetMethods(BindingFlags.Instance | BindingFlags.NonPublic))
@@ -145,7 +145,7 @@ namespace Game.Networking
         {
             // create first delegate. It is not fine because its 
             // signature contains unknown types T and P1
-            Action<WorldSession, P1> d = (Action<WorldSession, P1>)method.CreateDelegate(typeof(Action<WorldSession, P1>));
+            var d = (Action<WorldSession, P1>)method.CreateDelegate(typeof(Action<WorldSession, P1>));
             // create another delegate having necessary signature. 
             // It encapsulates first delegate with a closure
             return delegate (WorldSession target, ClientPacket p) { d(target, (P1)p); };
@@ -177,7 +177,7 @@ namespace Game.Networking
 
         public override bool Process(WorldPacket packet)
         {
-            PacketHandler opHandle = PacketManager.GetHandler((ClientOpcodes)packet.GetOpcode());
+            var opHandle = PacketManager.GetHandler((ClientOpcodes)packet.GetOpcode());
             //check if packet handler is supposed to be safe
             if (opHandle.ProcessingPlace == PacketProcessing.Inplace)
                 return true;
@@ -186,7 +186,7 @@ namespace Game.Networking
             if (opHandle.ProcessingPlace == PacketProcessing.ThreadUnsafe)
                 return false;
 
-            Player player = m_pSession.GetPlayer();
+            var player = m_pSession.GetPlayer();
             if (!player)
                 return false;
 
@@ -201,7 +201,7 @@ namespace Game.Networking
 
         public override bool Process(WorldPacket packet)
         {
-            PacketHandler opHandle = PacketManager.GetHandler((ClientOpcodes)packet.GetOpcode());
+            var opHandle = PacketManager.GetHandler((ClientOpcodes)packet.GetOpcode());
             //check if packet handler is supposed to be safe
             if (opHandle.ProcessingPlace == PacketProcessing.Inplace)
                 return true;
@@ -211,7 +211,7 @@ namespace Game.Networking
                 return true;
 
             //no player attached? . our client! ^^
-            Player player = m_pSession.GetPlayer();
+            var player = m_pSession.GetPlayer();
             if (!player)
                 return true;
 

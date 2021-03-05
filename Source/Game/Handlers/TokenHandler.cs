@@ -26,7 +26,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.CommerceTokenGetLog)]
         void HandleCommerceTokenGetLog(CommerceTokenGetLog commerceTokenGetLog)
         {
-            CommerceTokenGetLogResponse response = new CommerceTokenGetLogResponse();
+            var response = new CommerceTokenGetLogResponse();
 
             // @todo: fix 6.x implementation
             response.UnkInt = commerceTokenGetLog.UnkInt;
@@ -38,7 +38,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.CommerceTokenGetMarketPrice)]
         void HandleCommerceTokenGetMarketPrice(CommerceTokenGetMarketPrice commerceTokenGetMarketPrice)
         {
-            CommerceTokenGetMarketPriceResponse response = new CommerceTokenGetMarketPriceResponse();
+            var response = new CommerceTokenGetMarketPriceResponse();
 
             // @todo: 6.x fix implementation
             response.CurrentMarketPrice = 300000000;

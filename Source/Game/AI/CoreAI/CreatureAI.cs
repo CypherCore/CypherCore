@@ -55,7 +55,7 @@ namespace Game.AI
             if (!creature.CanHaveThreatList())
                 return;
 
-            Map map = creature.GetMap();
+            var map = creature.GetMap();
             if (!map.IsDungeon())                                  //use IsDungeon instead of Instanceable, in case Battlegrounds will be instantiated
             {
                 Log.outError(LogFilter.Server, "DoZoneInCombat call for map that isn't an instance (creature entry = {0})", creature.IsTypeId(TypeId.Unit) ? creature.ToCreature().GetEntry() : 0);
@@ -64,15 +64,15 @@ namespace Game.AI
 
             if (!creature.HasReactState(ReactStates.Passive) && creature.GetVictim() == null)
             {
-                Unit nearTarget = creature.SelectNearestTarget(maxRangeToNearestTarget);
+                var nearTarget = creature.SelectNearestTarget(maxRangeToNearestTarget);
                 if (nearTarget != null)
                     creature.GetAI().AttackStart(nearTarget);
                 else if (creature.IsSummon())
                 {
-                    Unit summoner = creature.ToTempSummon().GetSummoner();
+                    var summoner = creature.ToTempSummon().GetSummoner();
                     if (summoner != null)
                     {
-                        Unit target = summoner.GetAttackerForHelper();
+                        var target = summoner.GetAttackerForHelper();
                         if (target == null && summoner.CanHaveThreatList() && !summoner.GetThreatManager().IsThreatListEmpty())
                             target = summoner.GetThreatManager().GetHostilTarget();
                         if (target != null && (creature.IsFriendlyTo(summoner) || creature.IsHostileTo(target)))
@@ -169,7 +169,7 @@ namespace Game.AI
 
             if (me.GetVehicle() == null) // otherwise me will be in evade mode forever
             {
-                Unit owner = me.GetCharmerOrOwner();
+                var owner = me.GetCharmerOrOwner();
                 if (owner != null)
                 {
                     me.GetMotionMaster().Clear(false);
@@ -213,7 +213,7 @@ namespace Game.AI
                     me.SetReactState(ReactStates.Aggressive);
             }
 
-            Unit victim = me.SelectVictim();
+            var victim = me.SelectVictim();
             if (victim != null)
             {
                 if (!me.IsFocusing(null, true) && victim != me.GetVictim())
@@ -230,7 +230,7 @@ namespace Game.AI
 
             if (!me.HasReactState(ReactStates.Passive))
             {
-                Unit victim = me.SelectVictim();
+                var victim = me.SelectVictim();
                 if (victim != null)
                     if (!me.IsFocusing(null, true) && victim != me.GetVictim())
                         AttackStart(victim);
@@ -276,11 +276,11 @@ namespace Game.AI
             if (_boundary.Empty())
                 return CypherStrings.CreatureMovementNotBounded;
 
-            List<KeyValuePair<int, int>> Q = new List<KeyValuePair<int, int>>();
-            List<KeyValuePair<int, int>> alreadyChecked = new List<KeyValuePair<int, int>>();
-            List<KeyValuePair<int, int>> outOfBounds = new List<KeyValuePair<int, int>>();
+            var Q = new List<KeyValuePair<int, int>>();
+            var alreadyChecked = new List<KeyValuePair<int, int>>();
+            var outOfBounds = new List<KeyValuePair<int, int>>();
 
-            Position startPosition = owner.GetPosition();
+            var startPosition = owner.GetPosition();
             if (!CheckBoundary(startPosition)) // fall back to creature position
             {
                 startPosition = me.GetPosition();
@@ -291,14 +291,14 @@ namespace Game.AI
                         return CypherStrings.CreatureNoInteriorPointFound;
                 }
             }
-            float spawnZ = startPosition.GetPositionZ() + SharedConst.BoundaryVisualizeSpawnHeight;
+            var spawnZ = startPosition.GetPositionZ() + SharedConst.BoundaryVisualizeSpawnHeight;
 
-            bool boundsWarning = false;
+            var boundsWarning = false;
             Q.Add(new KeyValuePair<int, int>(0, 0));
             while (!Q.Empty())
             {
                 var front = Q.First();
-                bool hasOutOfBoundsNeighbor = false;
+                var hasOutOfBoundsNeighbor = false;
                 foreach (var off in new List<KeyValuePair<int, int>>() { new KeyValuePair<int, int>(1, 0), new KeyValuePair<int, int>(0, 1), new KeyValuePair<int, int>(-1, 0), new KeyValuePair<int, int>(0, -1) })
                 {
                     var next = new KeyValuePair<int, int>(front.Key + off.Key, front.Value + off.Value);
@@ -309,7 +309,7 @@ namespace Game.AI
                     }
                     if (!alreadyChecked.Contains(next)) // never check a coordinate twice
                     {
-                        Position nextPos = new Position(startPosition.GetPositionX() + next.Key * SharedConst.BoundaryVisualizeStepSize, startPosition.GetPositionY() + next.Value * SharedConst.BoundaryVisualizeStepSize, startPosition.GetPositionZ());
+                        var nextPos = new Position(startPosition.GetPositionX() + next.Key * SharedConst.BoundaryVisualizeStepSize, startPosition.GetPositionY() + next.Value * SharedConst.BoundaryVisualizeStepSize, startPosition.GetPositionZ());
                         if (CheckBoundary(nextPos))
                             Q.Add(next);
                         else
@@ -328,7 +328,7 @@ namespace Game.AI
                 if (fill || hasOutOfBoundsNeighbor)
                 {
                     var pos = new Position(startPosition.GetPositionX() + front.Key * SharedConst.BoundaryVisualizeStepSize, startPosition.GetPositionY() + front.Value * SharedConst.BoundaryVisualizeStepSize, spawnZ);
-                    TempSummon point = owner.SummonCreature(SharedConst.BoundaryVisualizeCreature, pos, TempSummonType.TimedDespawn, (uint)(duration * Time.InMilliseconds));
+                    var point = owner.SummonCreature(SharedConst.BoundaryVisualizeCreature, pos, TempSummonType.TimedDespawn, (uint)(duration * Time.InMilliseconds));
                     if (point)
                     {
                         point.SetObjectScale(SharedConst.BoundaryVisualizeCreatureScale);
@@ -371,20 +371,20 @@ namespace Game.AI
 
         public Creature DoSummon(uint entry, WorldObject obj, float radius = 5.0f, uint despawnTime = 30000, TempSummonType summonType = TempSummonType.CorpseTimedDespawn)
         {
-            Position pos = obj.GetRandomNearPosition(radius);
+            var pos = obj.GetRandomNearPosition(radius);
             return me.SummonCreature(entry, pos, summonType, despawnTime);
         }
 
         public Creature DoSummonFlyer(uint entry, WorldObject obj, float flightZ, float radius = 5.0f, uint despawnTime = 30000, TempSummonType summonType = TempSummonType.CorpseTimedDespawn)
         {
-            Position pos = obj.GetRandomNearPosition(radius);
+            var pos = obj.GetRandomNearPosition(radius);
             pos.posZ += flightZ;
             return me.SummonCreature(entry, pos, summonType, despawnTime);
         }
 
         public static bool IsInBounds(List<AreaBoundary> boundary, Position pos)
         {
-            foreach (AreaBoundary areaBoundary in boundary)
+            foreach (var areaBoundary in boundary)
                 if (!areaBoundary.IsWithinBoundary(pos))
                     return false;
 

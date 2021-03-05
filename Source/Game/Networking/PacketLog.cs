@@ -29,8 +29,8 @@ public class PacketLog
 
     static PacketLog()
     {
-        string logsDir = AppContext.BaseDirectory + ConfigMgr.GetDefaultValue("LogsDir", "");
-        string logname = ConfigMgr.GetDefaultValue("PacketLogFile", "");
+        var logsDir = AppContext.BaseDirectory + ConfigMgr.GetDefaultValue("LogsDir", "");
+        var logname = ConfigMgr.GetDefaultValue("PacketLogFile", "");
         if (!string.IsNullOrEmpty(logname))
         {
             FullPath = logsDir + @"\" + logname;
@@ -63,13 +63,13 @@ public class PacketLog
                 writer.Write(Time.GetMSTime());
 
                 writer.Write(20);
-                byte[] SocketIPBytes = new byte[16];
+                var SocketIPBytes = new byte[16];
                 if (endPoint.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
                     Buffer.BlockCopy(endPoint.Address.GetAddressBytes(), 0, SocketIPBytes, 0, 4);
                 else
                     Buffer.BlockCopy(endPoint.Address.GetAddressBytes(), 0, SocketIPBytes, 0, 16);
 
-                int size = data.Length;
+                var size = data.Length;
                 if (isClientPacket)
                     size -= 2;
 

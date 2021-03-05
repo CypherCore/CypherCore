@@ -48,9 +48,9 @@ namespace Game.Chat
 
         public static Channel GetChannelForPlayerByNamePart(string namePart, Player playerSearcher)
         {
-            foreach (Channel channel in playerSearcher.GetJoinedChannels())
+            foreach (var channel in playerSearcher.GetJoinedChannels())
             {
-                string chanName = channel.GetName(playerSearcher.GetSession().GetSessionDbcLocale());
+                var chanName = channel.GetName(playerSearcher.GetSession().GetSessionDbcLocale());
                 if (chanName.ToLower().Equals(namePart.ToLower()))
                     return channel;
             }
@@ -62,12 +62,12 @@ namespace Game.Chat
         {
             if (channelId != 0) // builtin
             {
-                ObjectGuid channelGuid = CreateBuiltinChannelGuid(channelId, zoneEntry);
+                var channelGuid = CreateBuiltinChannelGuid(channelId, zoneEntry);
                 var channel = _channels.LookupByKey(channelGuid);
                 if (channel != null)
                     return channel;
 
-                Channel newChannel = new Channel(channelGuid, channelId, _team, zoneEntry);
+                var newChannel = new Channel(channelGuid, channelId, _team, zoneEntry);
                 _channels[channelGuid] = newChannel;
                 return newChannel;
             }
@@ -77,7 +77,7 @@ namespace Game.Chat
                 if (channel != null)
                     return channel;
 
-                Channel newChannel = new Channel(CreateCustomChannelGuid(), name, _team);
+                var newChannel = new Channel(CreateCustomChannelGuid(), name, _team);
                 _customChannels[name.ToLower()] = newChannel;
                 return newChannel;
             }
@@ -101,7 +101,7 @@ namespace Game.Chat
 
             if (result == null && notify)
             {
-                string channelName = name;
+                var channelName = name;
                 Channel.GetChannelName(ref channelName, channelId, player.GetSession().GetSessionDbcLocale(), zoneEntry);
 
                 SendNotOnChannelNotify(player, channelName);
@@ -112,7 +112,7 @@ namespace Game.Chat
 
         public void LeftChannel(string name)
         {
-            string channelName = name.ToLower();
+            var channelName = name.ToLower();
 
             var channel = _customChannels.LookupByKey(channelName);
             if (channel == null)
@@ -135,7 +135,7 @@ namespace Game.Chat
 
         public static void SendNotOnChannelNotify(Player player, string name)
         {
-            ChannelNotify notify = new ChannelNotify();
+            var notify = new ChannelNotify();
             notify.Type = ChatNotify.NotMemberNotice;
             notify.Channel = name;
             player.SendPacket(notify);
@@ -148,7 +148,7 @@ namespace Game.Chat
             high |= (ulong)Global.WorldMgr.GetRealmId().Index << 42;
             high |= (ulong)(_team == Team.Alliance ? 3 : 5) << 4;
 
-            ObjectGuid channelGuid = new ObjectGuid();
+            var channelGuid = new ObjectGuid();
             channelGuid.SetRawValue(high, _guidGenerator.Generate());
             return channelGuid;
         }
@@ -156,8 +156,8 @@ namespace Game.Chat
         ObjectGuid CreateBuiltinChannelGuid(uint channelId, AreaTableRecord zoneEntry = null)
         {
 
-            ChatChannelsRecord channelEntry = CliDB.ChatChannelsStorage.LookupByKey(channelId);
-            uint zoneId = zoneEntry != null ? zoneEntry.Id : 0;
+            var channelEntry = CliDB.ChatChannelsStorage.LookupByKey(channelId);
+            var zoneId = zoneEntry != null ? zoneEntry.Id : 0;
             if (channelEntry.Flags.HasAnyFlag(ChannelDBCFlags.Global | ChannelDBCFlags.CityOnly))
                 zoneId = 0;
 
@@ -171,7 +171,7 @@ namespace Game.Chat
             high |= (ulong)(zoneId) << 10;
             high |= (ulong)(_team == Team.Alliance ? 3 : 5) << 4;
 
-            ObjectGuid channelGuid = new ObjectGuid();
+            var channelGuid = new ObjectGuid();
             channelGuid.SetRawValue(high, channelId);
             return channelGuid;
         }

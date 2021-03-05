@@ -67,7 +67,7 @@ namespace Scripts.World.NpcGuard
             _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
             {
                 // Find a spell that targets friendly and applies an aura (these are generally buffs)
-                SpellInfo spellInfo = SelectSpell(me, 0, 0, SelectTargetType.AnyFriend, 0, 0, SelectEffect.Aura);
+                var spellInfo = SelectSpell(me, 0, 0, SelectTargetType.AnyFriend, 0, 0, SelectEffect.Aura);
                 if (spellInfo != null)
                     DoCast(me, spellInfo.Id);
 
@@ -125,7 +125,7 @@ namespace Scripts.World.NpcGuard
 
             _combatScheduler.Schedule(TimeSpan.FromSeconds(1), task =>
             {
-                Unit victim = me.GetVictim();
+                var victim = me.GetVictim();
                 if (!me.IsAttackReady() || !me.IsWithinMeleeRange(victim))
                 {
                     task.Repeat();
@@ -133,7 +133,7 @@ namespace Scripts.World.NpcGuard
                 }
                 if (RandomHelper.randChance(20))
                 {
-                    SpellInfo spellInfo = SelectSpell(me.GetVictim(), 0, 0, SelectTargetType.AnyEnemy, 0, SharedConst.NominalMeleeRange, SelectEffect.DontCare);
+                    var spellInfo = SelectSpell(me.GetVictim(), 0, 0, SelectTargetType.AnyEnemy, 0, SharedConst.NominalMeleeRange, SelectEffect.DontCare);
                     if (spellInfo != null)
                     {
                         me.ResetAttackTimer();
@@ -151,7 +151,7 @@ namespace Scripts.World.NpcGuard
             });
             _combatScheduler.Schedule(TimeSpan.FromSeconds(5), task =>
             {
-                bool healing = false;
+                var healing = false;
                 SpellInfo spellInfo = null;
 
                 // Select a healing spell if less than 30% hp and Only 33% of the time
@@ -219,14 +219,14 @@ namespace Scripts.World.NpcGuard
         {
             _scheduler.Schedule(TimeSpan.FromSeconds(5), task =>
             {
-                Unit temp = me.GetVictim();
+                var temp = me.GetVictim();
                 if (temp && temp.IsTypeId(TypeId.Player))
                 {
                     DoCast(temp, me.GetEntry() == CreatureIds.AldorVindicator ? SpellIds.BanishedShattrathS : SpellIds.BanishedShattrathA);
-                    ObjectGuid playerGUID = temp.GetGUID();
+                    var playerGUID = temp.GetGUID();
                     task.Schedule(TimeSpan.FromSeconds(9), task =>
                     {
-                        Unit temp = Global.ObjAccessor.GetUnit(me, playerGUID);
+                        var temp = Global.ObjAccessor.GetUnit(me, playerGUID);
                         if (temp)
                         {
                             temp.CastSpell(temp, SpellIds.Exile, true);

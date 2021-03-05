@@ -69,10 +69,10 @@ namespace Game.Loots
         {
             Log.outInfo(LogFilter.ServerLoading, "Loading creature loot templates...");
 
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             List<uint> lootIdSet, lootIdSetUsed = new List<uint>();
-            uint count = Creature.LoadAndCollectLootIds(out lootIdSet);
+            var count = Creature.LoadAndCollectLootIds(out lootIdSet);
 
             // Remove real entries and check loot existence
             var ctc = Global.ObjectMgr.GetCreatureTemplates();
@@ -107,14 +107,14 @@ namespace Game.Loots
         {
             Log.outInfo(LogFilter.ServerLoading, "Loading disenchanting loot templates...");
 
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             List<uint> lootIdSet, lootIdSetUsed = new List<uint>();
-            uint count = Disenchant.LoadAndCollectLootIds(out lootIdSet);
+            var count = Disenchant.LoadAndCollectLootIds(out lootIdSet);
 
             foreach (var disenchant in CliDB.ItemDisenchantLootStorage.Values)
             {
-                uint lootid = disenchant.Id;
+                var lootid = disenchant.Id;
                 if (!lootIdSet.Contains(lootid))
                     Disenchant.ReportNonExistingId(lootid, disenchant.Id);
                 else
@@ -137,10 +137,10 @@ namespace Game.Loots
         {
             Log.outInfo(LogFilter.ServerLoading, "Loading fishing loot templates...");
 
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             List<uint> lootIdSet;
-            uint count = Fishing.LoadAndCollectLootIds(out lootIdSet);
+            var count = Fishing.LoadAndCollectLootIds(out lootIdSet);
 
             // remove real entries and check existence loot
             foreach (var areaEntry in CliDB.AreaTableStorage.Values)
@@ -160,10 +160,10 @@ namespace Game.Loots
         {
             Log.outInfo(LogFilter.ServerLoading, "Loading gameobject loot templates...");
 
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             List<uint> lootIdSet, lootIdSetUsed = new List<uint>();
-            uint count = Gameobject.LoadAndCollectLootIds(out lootIdSet);
+            var count = Gameobject.LoadAndCollectLootIds(out lootIdSet);
 
             // remove real entries and check existence loot
             var gotc = Global.ObjectMgr.GetGameObjectTemplates();
@@ -195,10 +195,10 @@ namespace Game.Loots
         {
             Log.outInfo(LogFilter.ServerLoading, "Loading item loot templates...");
 
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             List<uint> lootIdSet;
-            uint count = Items.LoadAndCollectLootIds(out lootIdSet);
+            var count = Items.LoadAndCollectLootIds(out lootIdSet);
 
             // remove real entries and check existence loot
             var its = Global.ObjectMgr.GetItemTemplates();
@@ -219,10 +219,10 @@ namespace Game.Loots
         {
             Log.outInfo(LogFilter.ServerLoading, "Loading milling loot templates...");
 
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             List<uint> lootIdSet;
-            uint count = Milling.LoadAndCollectLootIds(out lootIdSet);
+            var count = Milling.LoadAndCollectLootIds(out lootIdSet);
 
             // remove real entries and check existence loot
             var its = Global.ObjectMgr.GetItemTemplates();
@@ -248,11 +248,11 @@ namespace Game.Loots
         {
             Log.outInfo(LogFilter.ServerLoading, "Loading pickpocketing loot templates...");
 
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             List<uint> lootIdSet;
-            List<uint> lootIdSetUsed = new List<uint>();
-            uint count = Pickpocketing.LoadAndCollectLootIds(out lootIdSet);
+            var lootIdSetUsed = new List<uint>();
+            var count = Pickpocketing.LoadAndCollectLootIds(out lootIdSet);
 
             // Remove real entries and check loot existence
             var ctc = Global.ObjectMgr.GetCreatureTemplates();
@@ -284,10 +284,10 @@ namespace Game.Loots
         {
             Log.outInfo(LogFilter.ServerLoading, "Loading prospecting loot templates...");
 
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             List<uint> lootIdSet;
-            uint count = Prospecting.LoadAndCollectLootIds(out lootIdSet);
+            var count = Prospecting.LoadAndCollectLootIds(out lootIdSet);
 
             // remove real entries and check existence loot
             var its = Global.ObjectMgr.GetItemTemplates();
@@ -313,10 +313,10 @@ namespace Game.Loots
         {
             Log.outInfo(LogFilter.ServerLoading, "Loading mail loot templates...");
 
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             List<uint> lootIdSet;
-            uint count = Mail.LoadAndCollectLootIds(out lootIdSet);
+            var count = Mail.LoadAndCollectLootIds(out lootIdSet);
 
             // remove real entries and check existence loot
             foreach (var mail in CliDB.MailTemplateStorage.Values)
@@ -336,11 +336,11 @@ namespace Game.Loots
         {
             Log.outInfo(LogFilter.ServerLoading, "Loading skinning loot templates...");
 
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             List<uint> lootIdSet;
-            List<uint> lootIdSetUsed = new List<uint>();
-            uint count = Skinning.LoadAndCollectLootIds(out lootIdSet);
+            var lootIdSetUsed = new List<uint>();
+            var count = Skinning.LoadAndCollectLootIds(out lootIdSet);
 
             // remove real entries and check existence loot
             var ctc = Global.ObjectMgr.GetCreatureTemplates();
@@ -373,15 +373,15 @@ namespace Game.Loots
             // TODO: change this to use MiscValue from spell effect as id instead of spell id
             Log.outInfo(LogFilter.ServerLoading, "Loading spell loot templates...");
 
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             List<uint> lootIdSet;
-            uint count = Spell.LoadAndCollectLootIds(out lootIdSet);
+            var count = Spell.LoadAndCollectLootIds(out lootIdSet);
 
             // remove real entries and check existence loot
-            foreach (SpellNameRecord spellNameEntry in CliDB.SpellNameStorage.Values)
+            foreach (var spellNameEntry in CliDB.SpellNameStorage.Values)
             {
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellNameEntry.Id, Difficulty.None);
+                var spellInfo = Global.SpellMgr.GetSpellInfo(spellNameEntry.Id, Difficulty.None);
                 if (spellInfo == null)
                     continue;
 
@@ -415,7 +415,7 @@ namespace Game.Loots
         {
             Log.outInfo(LogFilter.ServerLoading, "Loading reference loot templates...");
 
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             List<uint> lootIdSet;
             Reference.LoadAndCollectLootIds(out lootIdSet);
@@ -475,7 +475,7 @@ namespace Game.Loots
 
             ItemTemplate pProto = Global.ObjectMgr.GetItemTemplate(itemid);
 
-            float qualityModifier = pProto != null && rate ? WorldConfig.GetFloatValue(qualityToRate[(int)pProto.GetQuality()]) : 1.0f;
+            var qualityModifier = pProto != null && rate ? WorldConfig.GetFloatValue(qualityToRate[(int)pProto.GetQuality()]) : 1.0f;
 
             return RandomHelper.randChance(chance * qualityModifier);
         }
@@ -557,7 +557,7 @@ namespace Game.Loots
 
         public uint LoadAndCollectLootIds(out List<uint> lootIdSet)
         {
-            uint count = LoadLootTable();
+            var count = LoadLootTable();
             lootIdSet = new List<uint>();
 
             foreach (var tab in m_LootTemplates)
@@ -614,7 +614,7 @@ namespace Game.Loots
         {
             foreach (var pair in m_LootTemplates)
             {
-                List<Condition> empty = new List<Condition>();
+                var empty = new List<Condition>();
                 pair.Value.CopyConditions(empty);
             }
         }
@@ -638,22 +638,22 @@ namespace Game.Loots
             Clear();
 
             //                                            0     1      2        3         4             5          6        7         8
-            SQLResult result = DB.World.Query("SELECT Entry, Item, Reference, Chance, QuestRequired, LootMode, GroupId, MinCount, MaxCount FROM {0}", GetName());
+            var result = DB.World.Query("SELECT Entry, Item, Reference, Chance, QuestRequired, LootMode, GroupId, MinCount, MaxCount FROM {0}", GetName());
             if (result.IsEmpty())
                 return 0;
 
             uint count = 0;
             do
             {
-                uint entry = result.Read<uint>(0);
-                uint item = result.Read<uint>(1);
-                uint reference = result.Read<uint>(2);
-                float chance = result.Read<float>(3);
-                bool needsquest = result.Read<bool>(4);
-                ushort lootmode = result.Read<ushort>(5);
-                byte groupid = result.Read<byte>(6);
-                byte mincount = result.Read<byte>(7);
-                byte maxcount = result.Read<byte>(8);
+                var entry = result.Read<uint>(0);
+                var item = result.Read<uint>(1);
+                var reference = result.Read<uint>(2);
+                var chance = result.Read<float>(3);
+                var needsquest = result.Read<bool>(4);
+                var lootmode = result.Read<ushort>(5);
+                var groupid = result.Read<byte>(6);
+                var mincount = result.Read<byte>(7);
+                var maxcount = result.Read<byte>(8);
 
                 if (groupid >= 1 << 7)                                     // it stored in 7 bit field
                 {
@@ -661,7 +661,7 @@ namespace Game.Loots
                     return 0;
                 }
 
-                LootStoreItem storeitem = new LootStoreItem(item, reference, chance, needsquest, lootmode, groupid, mincount, maxcount);
+                var storeitem = new LootStoreItem(item, reference, chance, needsquest, lootmode, groupid, mincount, maxcount);
 
                 if (!storeitem.IsValid(this, entry))            // Validity checks
                     continue;
@@ -732,11 +732,11 @@ namespace Game.Loots
 
                 if (item.reference > 0)                            // References processing
                 {
-                    LootTemplate Referenced = LootStorage.Reference.GetLootFor(item.reference);
+                    var Referenced = LootStorage.Reference.GetLootFor(item.reference);
                     if (Referenced == null)
                         continue;                                       // Error message already printed at loading stage
 
-                    uint maxcount = (uint)(item.maxcount * WorldConfig.GetFloatValue(WorldCfg.RateDropItemReferencedAmount));
+                    var maxcount = (uint)(item.maxcount * WorldConfig.GetFloatValue(WorldCfg.RateDropItemReferencedAmount));
                     for (uint loop = 0; loop < maxcount; ++loop)      // Ref multiplicator
                         Referenced.Process(loot, rate, lootMode, item.groupid);
                 }
@@ -894,7 +894,7 @@ namespace Game.Loots
                     if (group == null)
                         continue;
 
-                    LootStoreItemList itemList = group.GetExplicitlyChancedItemList();
+                    var itemList = group.GetExplicitlyChancedItemList();
                     if (!itemList.Empty())
                     {
                         foreach (var i in itemList)
@@ -973,7 +973,7 @@ namespace Game.Loots
 
             public void Process(Loot loot, ushort lootMode)
             {
-                LootStoreItem item = Roll(loot, lootMode);
+                var item = Roll(loot, lootMode);
                 if (item != null)
                     loot.AddItem(item);
             }
@@ -989,7 +989,7 @@ namespace Game.Loots
             }
             float TotalChance()
             {
-                float result = RawTotalChance();
+                var result = RawTotalChance();
 
                 if (!EqualChanced.Empty() && result < 100.0f)
                     return 100.0f;
@@ -999,7 +999,7 @@ namespace Game.Loots
 
             public void Verify(LootStore lootstore, uint id, byte group_id = 0)
             {
-                float chance = RawTotalChance();
+                var chance = RawTotalChance();
                 if (chance > 101.0f)                                    // @todo replace with 100% when DBs will be ready
                     Log.outError(LogFilter.Sql, "Table '{0}' entry {1} group {2} has total chance > 100% ({3})", lootstore.GetName(), id, group_id, chance);
 
@@ -1047,12 +1047,12 @@ namespace Game.Loots
 
             LootStoreItem Roll(Loot loot, ushort lootMode)
             {
-                LootStoreItemList possibleLoot = ExplicitlyChanced;
+                var possibleLoot = ExplicitlyChanced;
                 possibleLoot.RemoveAll(new LootGroupInvalidSelector(loot, lootMode).Check);
 
                 if (!possibleLoot.Empty())                             // First explicitly chanced entries are checked
                 {
-                    float roll = (float)RandomHelper.randChance();
+                    var roll = (float)RandomHelper.randChance();
 
                     foreach (var item in possibleLoot)   // check each explicitly chanced entry in the template and modify its chance based on quality.
                     {

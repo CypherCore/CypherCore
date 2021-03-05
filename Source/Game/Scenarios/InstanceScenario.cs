@@ -45,7 +45,7 @@ namespace Game.Scenarios
             if (_criteriaProgress.Empty())
                 return;
 
-            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(_map.GetDifficultyID());
+            var difficultyEntry = CliDB.DifficultyStorage.LookupByKey(_map.GetDifficultyID());
             if (difficultyEntry == null || difficultyEntry.Flags.HasAnyFlag(DifficultyFlags.ChallengeMode)) // Map should have some sort of "CanSave" boolean that returns whether or not the map is savable. (Challenge modes cannot be saved for example)
                 return;
 
@@ -56,13 +56,13 @@ namespace Game.Scenarios
                 return;
             }
 
-            SQLTransaction trans = new SQLTransaction();
+            var trans = new SQLTransaction();
             foreach (var iter in _criteriaProgress)
             {
                 if (!iter.Value.Changed)
                     continue;
 
-                Criteria criteria = Global.CriteriaMgr.GetCriteria(iter.Key);
+                var criteria = Global.CriteriaMgr.GetCriteria(iter.Key);
                 switch (criteria.Entry.Type)
                 {
                     // Blizzard only appears to store creature kills
@@ -74,7 +74,7 @@ namespace Game.Scenarios
 
                 if (iter.Value.Counter != 0)
                 {
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_SCENARIO_INSTANCE_CRITERIA);
+                    var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_SCENARIO_INSTANCE_CRITERIA);
                     stmt.AddValue(0, id);
                     stmt.AddValue(1, iter.Key);
                     trans.Append(stmt);
@@ -95,23 +95,23 @@ namespace Game.Scenarios
 
         void LoadInstanceData(uint instanceId)
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_SCENARIO_INSTANCE_CRITERIA_FOR_INSTANCE);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_SCENARIO_INSTANCE_CRITERIA_FOR_INSTANCE);
             stmt.AddValue(0, instanceId);
 
-            SQLResult result = DB.Characters.Query(stmt);
+            var result = DB.Characters.Query(stmt);
             if (!result.IsEmpty())
             {
-                SQLTransaction trans = new SQLTransaction();
-                long now = Time.UnixTime;
+                var trans = new SQLTransaction();
+                var now = Time.UnixTime;
 
-                List<CriteriaTree> criteriaTrees = new List<CriteriaTree>();
+                var criteriaTrees = new List<CriteriaTree>();
                 do
                 {
-                    uint id = result.Read<uint>(0);
-                    ulong counter = result.Read<ulong>(1);
+                    var id = result.Read<uint>(0);
+                    var counter = result.Read<ulong>(1);
                     long date = result.Read<uint>(2);
 
-                    Criteria criteria = Global.CriteriaMgr.GetCriteria(id);
+                    var criteria = Global.CriteriaMgr.GetCriteria(id);
                     if (criteria == null)
                     {
                         // Removing non-existing criteria data for all instances
@@ -138,10 +138,10 @@ namespace Game.Scenarios
 
                     SetCriteriaProgress(criteria, counter, null, ProgressType.Set);
 
-                    List<CriteriaTree> trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.Id);
+                    var trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(criteria.Id);
                     if (trees != null)
                     {
-                        foreach (CriteriaTree tree in trees)
+                        foreach (var tree in trees)
                             criteriaTrees.Add(tree);
                     }
                 }
@@ -149,9 +149,9 @@ namespace Game.Scenarios
 
                 DB.Characters.CommitTransaction(trans);
 
-                foreach (CriteriaTree tree in criteriaTrees)
+                foreach (var tree in criteriaTrees)
                 {
-                    ScenarioStepRecord step = tree.ScenarioStep;
+                    var step = tree.ScenarioStep;
                     if (step == null)
                         continue;
 

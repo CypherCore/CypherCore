@@ -36,7 +36,7 @@ namespace Framework.IO
 			if(buf==null) return 1;
 
 			// split Adler-32 into component sums
-			uint sum2=(adler>>16)&0xffff;
+			var sum2=(adler>>16)&0xffff;
 			adler&=0xffff;
 
 			//uint ind=0; // index in buf
@@ -68,7 +68,7 @@ namespace Framework.IO
 			while(len>=NMAX)
 			{
 				len-=NMAX;
-				uint n=NMAX/16;				// NMAX is divisible by 16
+				var n=NMAX/16;				// NMAX is divisible by 16
 				do
 				{
 					// 16 sums unrolled
@@ -141,9 +141,9 @@ namespace Framework.IO
 
 		public static uint adler32_combine_(uint adler1, uint adler2, uint len2)
 		{ // the derivation of this formula is left as an exercise for the reader
-			uint rem=len2%BASE;
-			uint sum1=adler1&0xffff;
-			uint sum2=(rem*sum1)%BASE;
+			var rem=len2%BASE;
+			var sum1=adler1&0xffff;
+			var sum2=(rem*sum1)%BASE;
 			sum1+=(adler2&0xffff)+BASE-1;
 			sum2+=((adler1>>16)&0xffff)+((adler2>>16)&0xffff)+BASE-rem;
 			if(sum1>=BASE) sum1-=BASE;

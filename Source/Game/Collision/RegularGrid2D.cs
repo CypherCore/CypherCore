@@ -29,20 +29,20 @@ namespace Game.Collision
 
         public RegularGrid2D()
         {
-            for (int x = 0; x < CELL_NUMBER; ++x)
+            for (var x = 0; x < CELL_NUMBER; ++x)
                 nodes[x] = new Node[CELL_NUMBER];
         }
 
         public virtual void Insert(T value)
         {
-            AxisAlignedBox bounds = value.GetBounds();
-            Cell low = Cell.ComputeCell(bounds.Lo.X, bounds.Lo.Y);
-            Cell high = Cell.ComputeCell(bounds.Hi.X, bounds.Hi.Y);
-            for (int x = low.x; x <= high.x; ++x)
+            var bounds = value.GetBounds();
+            var low = Cell.ComputeCell(bounds.Lo.X, bounds.Lo.Y);
+            var high = Cell.ComputeCell(bounds.Hi.X, bounds.Hi.Y);
+            for (var x = low.x; x <= high.x; ++x)
             {
-                for (int y = low.y; y <= high.y; ++y)
+                for (var y = low.y; y <= high.y; ++y)
                 {
-                    Node node = GetGrid(x, y);
+                    var node = GetGrid(x, y);
                     node.Insert(value);
                     memberTable.Add(value, node);
                 }
@@ -57,11 +57,11 @@ namespace Game.Collision
 
         public virtual void Balance()
         {
-            for (int x = 0; x < CELL_NUMBER; ++x)
+            for (var x = 0; x < CELL_NUMBER; ++x)
             {
-                for (int y = 0; y < CELL_NUMBER; ++y)
+                for (var y = 0; y < CELL_NUMBER; ++y)
                 {
-                    Node n = nodes[x][y];
+                    var n = nodes[x][y];
                     if (n != null)
                         n.Balance();
                 }
@@ -89,7 +89,7 @@ namespace Game.Collision
 
             public static Cell ComputeCell(float fx, float fy)
             {
-                Cell c = new Cell();
+                var c = new Cell();
                 c.x = (int)(fx * (1.0f / CELL_SIZE) + (CELL_NUMBER / 2f));
                 c.y = (int)(fy * (1.0f / CELL_SIZE) + (CELL_NUMBER / 2f));
                 return c;
@@ -113,21 +113,21 @@ namespace Game.Collision
 
         public void IntersectRay(Ray ray, WorkerCallback intersectCallback, ref float max_dist, Vector3 end)
         {
-            Cell cell = Cell.ComputeCell(ray.Origin.X, ray.Origin.Y);
+            var cell = Cell.ComputeCell(ray.Origin.X, ray.Origin.Y);
             if (!cell.IsValid())
                 return;
 
-            Cell last_cell = Cell.ComputeCell(end.X, end.Y);
+            var last_cell = Cell.ComputeCell(end.X, end.Y);
 
             if (cell == last_cell)
             {
-                Node node = nodes[cell.x][cell.y];
+                var node = nodes[cell.x][cell.y];
                 if (node != null)
                     node.IntersectRay(ray, intersectCallback, ref max_dist);
                 return;
             }
 
-            float voxel = CELL_SIZE;
+            var voxel = CELL_SIZE;
             float kx_inv = ray.invDirection().X, bx = ray.Origin.X;
             float ky_inv = ray.invDirection().Y, by = ray.Origin.Y;
 
@@ -136,34 +136,34 @@ namespace Game.Collision
             if (kx_inv >= 0)
             {
                 stepX = 1;
-                float x_border = (cell.x + 1) * voxel;
+                var x_border = (cell.x + 1) * voxel;
                 tMaxX = (x_border - bx) * kx_inv;
             }
             else
             {
                 stepX = -1;
-                float x_border = (cell.x - 1) * voxel;
+                var x_border = (cell.x - 1) * voxel;
                 tMaxX = (x_border - bx) * kx_inv;
             }
 
             if (ky_inv >= 0)
             {
                 stepY = 1;
-                float y_border = (cell.y + 1) * voxel;
+                var y_border = (cell.y + 1) * voxel;
                 tMaxY = (y_border - by) * ky_inv;
             }
             else
             {
                 stepY = -1;
-                float y_border = (cell.y - 1) * voxel;
+                var y_border = (cell.y - 1) * voxel;
                 tMaxY = (y_border - by) * ky_inv;
             }
 
-            float tDeltaX = voxel * Math.Abs(kx_inv);
-            float tDeltaY = voxel * Math.Abs(ky_inv);
+            var tDeltaX = voxel * Math.Abs(kx_inv);
+            var tDeltaY = voxel * Math.Abs(ky_inv);
             do
             {
-                Node node = nodes[cell.x][cell.y];
+                var node = nodes[cell.x][cell.y];
                 if (node != null)
                 {
                     node.IntersectRay(ray, intersectCallback, ref max_dist);
@@ -185,11 +185,11 @@ namespace Game.Collision
 
         public void IntersectPoint(Vector3 point, WorkerCallback intersectCallback)
         {
-            Cell cell = Cell.ComputeCell(point.X, point.Y);
+            var cell = Cell.ComputeCell(point.X, point.Y);
             if (!cell.IsValid())
                 return;
 
-            Node node = nodes[cell.x][cell.y];
+            var node = nodes[cell.x][cell.y];
             if (node != null)
                 node.IntersectPoint(point, intersectCallback);
         }
@@ -197,11 +197,11 @@ namespace Game.Collision
         // Optimized verson of intersectRay function for rays with vertical directions
         public void IntersectZAllignedRay(Ray ray, WorkerCallback intersectCallback, ref float max_dist)
         {
-            Cell cell = Cell.ComputeCell(ray.Origin.X, ray.Origin.Y);
+            var cell = Cell.ComputeCell(ray.Origin.X, ray.Origin.Y);
             if (!cell.IsValid())
                 return;
 
-            Node node = nodes[cell.x][cell.y];
+            var node = nodes[cell.x][cell.y];
             if (node != null)
                 node.IntersectRay(ray, intersectCallback, ref max_dist);
         }

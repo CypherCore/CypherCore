@@ -39,21 +39,21 @@ namespace Game.Chat
             handler.SendSysMessage("mmap path:");
 
             // units
-            Player player = handler.GetPlayer();
-            Unit target = handler.GetSelectedUnit();
+            var player = handler.GetPlayer();
+            var target = handler.GetSelectedUnit();
             if (player == null || target == null)
             {
                 handler.SendSysMessage("Invalid target/source selection.");
                 return true;
             }
 
-            string para = args.NextString();
+            var para = args.NextString();
 
-            bool useStraightPath = false;
+            var useStraightPath = false;
             if (para.Equals("true"))
                 useStraightPath = true;
 
-            bool useStraightLine = false;
+            var useStraightLine = false;
             if (para.Equals("line"))
                 useStraightLine = true;
 
@@ -62,9 +62,9 @@ namespace Game.Chat
             player.GetPosition(out x, out y, out z);
 
             // path
-            PathGenerator path = new PathGenerator(target);
+            var path = new PathGenerator(target);
             path.SetUseStraightPath(useStraightPath);
-            bool result = path.CalculatePath(x, y, z, false, useStraightLine);
+            var result = path.CalculatePath(x, y, z, false, useStraightLine);
 
             var pointPath = path.GetPath();
             handler.SendSysMessage("{0}'s path to {1}:", target.GetName(), player.GetName());
@@ -94,10 +94,10 @@ namespace Game.Chat
             handler.SendSysMessage("mmap tileloc:");
 
             // grid tile location
-            Player player = handler.GetPlayer();
+            var player = handler.GetPlayer();
 
-            int gx = (int)(32 - player.GetPositionX() / MapConst.SizeofGrids);
-            int gy = (int)(32 - player.GetPositionY() / MapConst.SizeofGrids);
+            var gx = (int)(32 - player.GetPositionX() / MapConst.SizeofGrids);
+            var gy = (int)(32 - player.GetPositionY() / MapConst.SizeofGrids);
 
             float x, y, z;
             player.GetPosition(out x, out y, out z);
@@ -106,27 +106,27 @@ namespace Game.Chat
             handler.SendSysMessage("gridloc [{0}, {1}]", gx, gy);
 
             // calculate navmesh tile location
-            uint terrainMapId = PhasingHandler.GetTerrainMapId(player.GetPhaseShift(), player.GetMap(), x, y);
-            Detour.dtNavMesh navmesh = Global.MMapMgr.GetNavMesh(terrainMapId);
-            Detour.dtNavMeshQuery navmeshquery = Global.MMapMgr.GetNavMeshQuery(terrainMapId, player.GetInstanceId());
+            var terrainMapId = PhasingHandler.GetTerrainMapId(player.GetPhaseShift(), player.GetMap(), x, y);
+            var navmesh = Global.MMapMgr.GetNavMesh(terrainMapId);
+            var navmeshquery = Global.MMapMgr.GetNavMeshQuery(terrainMapId, player.GetInstanceId());
             if (navmesh == null || navmeshquery == null)
             {
                 handler.SendSysMessage("NavMesh not loaded for current map.");
                 return true;
             }
 
-            float[] min = navmesh.getParams().orig;
+            var min = navmesh.getParams().orig;
             float[] location = { y, z, x };
             float[] extents = { 3.0f, 5.0f, 3.0f };
 
-            int tilex = (int)((y - min[0]) / MapConst.SizeofGrids);
-            int tiley = (int)((x - min[2]) / MapConst.SizeofGrids);
+            var tilex = (int)((y - min[0]) / MapConst.SizeofGrids);
+            var tiley = (int)((x - min[2]) / MapConst.SizeofGrids);
 
             handler.SendSysMessage("Calc   [{0:D2}, {1:D2}]", tilex, tiley);
 
             // navmesh poly . navmesh tile location
-            Detour.dtQueryFilter filter = new Detour.dtQueryFilter();
-            float[] nothing = new float[3];
+            var filter = new Detour.dtQueryFilter();
+            var nothing = new float[3];
             ulong polyRef = 0;
             if (Detour.dtStatusFailed(navmeshquery.findNearestPoly(location, extents, filter, ref polyRef, ref nothing)))
             {
@@ -138,8 +138,8 @@ namespace Game.Chat
                 handler.SendSysMessage("Dt     [??, ??] (invalid poly, probably no tile loaded)");
             else
             {
-                Detour.dtMeshTile tile = new Detour.dtMeshTile();
-                Detour.dtPoly poly = new Detour.dtPoly();
+                var tile = new Detour.dtMeshTile();
+                var poly = new Detour.dtPoly();
                 if (Detour.dtStatusSucceed(navmesh.getTileAndPolyByRef(polyRef, ref tile, ref poly)))
                 {
                     if (tile != null)
@@ -157,10 +157,10 @@ namespace Game.Chat
         [Command("loadedtiles", RBACPermissions.CommandMmapLoadedtiles)]
         static bool LoadedTilesCommand(StringArguments args, CommandHandler handler)
         {
-            Player player = handler.GetSession().GetPlayer();
-            uint terrainMapId = PhasingHandler.GetTerrainMapId(player.GetPhaseShift(), player.GetMap(), player.GetPositionX(), player.GetPositionY());
-            Detour.dtNavMesh navmesh = Global.MMapMgr.GetNavMesh(terrainMapId);
-            Detour.dtNavMeshQuery navmeshquery = Global.MMapMgr.GetNavMeshQuery(terrainMapId, handler.GetPlayer().GetInstanceId());
+            var player = handler.GetSession().GetPlayer();
+            var terrainMapId = PhasingHandler.GetTerrainMapId(player.GetPhaseShift(), player.GetMap(), player.GetPositionX(), player.GetPositionY());
+            var navmesh = Global.MMapMgr.GetNavMesh(terrainMapId);
+            var navmeshquery = Global.MMapMgr.GetNavMeshQuery(terrainMapId, handler.GetPlayer().GetInstanceId());
             if (navmesh == null || navmeshquery == null)
             {
                 handler.SendSysMessage("NavMesh not loaded for current map.");
@@ -169,9 +169,9 @@ namespace Game.Chat
 
             handler.SendSysMessage("mmap loadedtiles:");
 
-            for (int i = 0; i < navmesh.getMaxTiles(); ++i)
+            for (var i = 0; i < navmesh.getMaxTiles(); ++i)
             {
-                Detour.dtMeshTile tile = navmesh.getTile(i);
+                var tile = navmesh.getTile(i);
                 if (tile.header == null)
                     continue;
 
@@ -183,13 +183,13 @@ namespace Game.Chat
         [Command("stats", RBACPermissions.CommandMmapStats)]
         static bool HandleMmapStatsCommand(StringArguments args, CommandHandler handler)
         {
-            Player player = handler.GetSession().GetPlayer();
-            uint terrainMapId = PhasingHandler.GetTerrainMapId(player.GetPhaseShift(), player.GetMap(), player.GetPositionX(), player.GetPositionY());
+            var player = handler.GetSession().GetPlayer();
+            var terrainMapId = PhasingHandler.GetTerrainMapId(player.GetPhaseShift(), player.GetMap(), player.GetPositionX(), player.GetPositionY());
             handler.SendSysMessage("mmap stats:");
             handler.SendSysMessage("  global mmap pathfinding is {0}abled", Global.DisableMgr.IsPathfindingEnabled(player.GetMapId()) ? "En" : "Dis");
             handler.SendSysMessage(" {0} maps loaded with {1} tiles overall", Global.MMapMgr.GetLoadedMapsCount(), Global.MMapMgr.GetLoadedTilesCount());
 
-            Detour.dtNavMesh navmesh = Global.MMapMgr.GetNavMesh(terrainMapId);
+            var navmesh = Global.MMapMgr.GetNavMesh(terrainMapId);
             if (navmesh == null)
             {
                 handler.SendSysMessage("NavMesh not loaded for current map.");
@@ -197,14 +197,14 @@ namespace Game.Chat
             }
 
             uint tileCount = 0;
-            int nodeCount = 0;
-            int polyCount = 0;
-            int vertCount = 0;
-            int triCount = 0;
-            int triVertCount = 0;
-            for (int i = 0; i < navmesh.getMaxTiles(); ++i)
+            var nodeCount = 0;
+            var polyCount = 0;
+            var vertCount = 0;
+            var triCount = 0;
+            var triVertCount = 0;
+            for (var i = 0; i < navmesh.getMaxTiles(); ++i)
             {
-                Detour.dtMeshTile tile = navmesh.getTile(i);
+                var tile = navmesh.getTile(i);
                 if (tile == null)
                     continue;
 
@@ -227,11 +227,11 @@ namespace Game.Chat
         [Command("testarea", RBACPermissions.CommandMmapTestarea)]
         static bool TestArea(StringArguments args, CommandHandler handler)
         {
-            float radius = 40.0f;
+            var radius = 40.0f;
             WorldObject obj = handler.GetPlayer();
 
             // Get Creatures
-            List<Unit> creatureList = new List<Unit>();
+            var creatureList = new List<Unit>();
 
             var go_check = new AnyUnitInObjectRangeCheck(obj, radius);
             var go_search = new UnitListSearcher(obj, creatureList, go_check);
@@ -242,18 +242,18 @@ namespace Game.Chat
                 handler.SendSysMessage("Found {0} Creatures.", creatureList.Count);
 
                 uint paths = 0;
-                uint uStartTime = Time.GetMSTime();
+                var uStartTime = Time.GetMSTime();
 
                 float gx, gy, gz;
                 obj.GetPosition(out gx, out gy, out gz);
                 foreach (var creature in creatureList)
                 {
-                    PathGenerator path = new PathGenerator(creature);
+                    var path = new PathGenerator(creature);
                     path.CalculatePath(gx, gy, gz);
                     ++paths;
                 }
 
-                uint uPathLoadTime = Time.GetMSTimeDiffToNow(uStartTime);
+                var uPathLoadTime = Time.GetMSTimeDiffToNow(uStartTime);
                 handler.SendSysMessage("Generated {0} paths in {1} ms", paths, uPathLoadTime);
             }
             else

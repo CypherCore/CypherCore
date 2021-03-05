@@ -31,11 +31,11 @@ namespace Game
         BattlenetRpcErrorCode HandleProcessClientRequest(ClientRequest request, ClientResponse response)
         {
             Bgs.Protocol.Attribute command = null;
-            Dictionary<string, Bgs.Protocol.Variant> Params = new Dictionary<string, Bgs.Protocol.Variant>();
+            var Params = new Dictionary<string, Bgs.Protocol.Variant>();
 
-            for (int i = 0; i < request.Attribute.Count; ++i)
+            for (var i = 0; i < request.Attribute.Count; ++i)
             {
-                Bgs.Protocol.Attribute attr = request.Attribute[i];
+                var attr = request.Attribute[i];
                 Params[attr.Name] = attr.Value;
                 if (attr.Name.Contains("Command_"))
                     command = attr;
@@ -69,7 +69,7 @@ namespace Game
 
         BattlenetRpcErrorCode HandleRealmListRequest(Dictionary<string, Bgs.Protocol.Variant> Params, ClientResponse response)
         {
-            string subRegionId = "";
+            var subRegionId = "";
             var subRegion = Params.LookupByKey("Command_RealmListRequest_v1_b9");
             if (subRegion != null)
                 subRegionId = subRegion.StringValue;
@@ -78,7 +78,7 @@ namespace Game
             if (compressed.Empty())
                 return BattlenetRpcErrorCode.UtilServerFailedToSerializeResponse;
 
-            Bgs.Protocol.Attribute attribute = new Bgs.Protocol.Attribute();
+            var attribute = new Bgs.Protocol.Attribute();
             attribute.Name = "Param_RealmList";
             attribute.Value = new Bgs.Protocol.Variant();
             attribute.Value.BlobValue = ByteString.CopyFrom(compressed);
@@ -87,7 +87,7 @@ namespace Game
             var realmCharacterCounts = new RealmCharacterCountList();
             foreach (var characterCount in GetRealmCharacterCounts())
             {
-                RealmCharacterCountEntry countEntry = new RealmCharacterCountEntry();
+                var countEntry = new RealmCharacterCountEntry();
                 countEntry.WowRealmAddress = (int)characterCount.Key;
                 countEntry.Count = characterCount.Value;
                 realmCharacterCounts.Counts.Add(countEntry);

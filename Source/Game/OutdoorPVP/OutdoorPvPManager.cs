@@ -31,10 +31,10 @@ namespace Game.PvP
 
         public void InitOutdoorPvP()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             //                                             0       1
-            SQLResult result = DB.World.Query("SELECT TypeId, ScriptName FROM outdoorpvp_template");
+            var result = DB.World.Query("SELECT TypeId, ScriptName FROM outdoorpvp_template");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 outdoor PvP definitions. DB table `outdoorpvp_template` is empty.");
@@ -56,7 +56,7 @@ namespace Game.PvP
                     continue;
                 }
 
-                OutdoorPvPTypes realTypeId = (OutdoorPvPTypes)typeId;
+                var realTypeId = (OutdoorPvPTypes)typeId;
                 OutdoorPvPScriptIds[realTypeId] = Global.ObjectMgr.GetScriptId(result.Read<string>(1));
 
                 ++count;
@@ -64,7 +64,7 @@ namespace Game.PvP
             while (result.NextRow());
 
             OutdoorPvP pvp;
-            for (OutdoorPvPTypes outdoorPvpType = OutdoorPvPTypes.HellfirePeninsula; outdoorPvpType < OutdoorPvPTypes.Max; ++outdoorPvpType)
+            for (var outdoorPvpType = OutdoorPvPTypes.HellfirePeninsula; outdoorPvpType < OutdoorPvPTypes.Max; ++outdoorPvpType)
             {
                 if (!OutdoorPvPScriptIds.ContainsKey(outdoorPvpType))
                 {
@@ -214,7 +214,7 @@ namespace Game.PvP
 
         public string GetDefenseMessage(uint zoneId, uint id, Locale locale)
         {
-            BroadcastTextRecord bct = CliDB.BroadcastTextStorage.LookupByKey(id);
+            var bct = CliDB.BroadcastTextStorage.LookupByKey(id);
             if (bct != null)
                 return Global.DB2Mgr.GetBroadcastTextValue(bct, locale);
 

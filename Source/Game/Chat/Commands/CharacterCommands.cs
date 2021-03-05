@@ -40,23 +40,23 @@ namespace Game.Chat
             if (!handler.ExtractPlayerTarget(args, out target))
                 return false;
 
-            Locale loc = handler.GetSessionDbcLocale();
-            string targetName = target.GetName();
-            string knownStr = handler.GetCypherString(CypherStrings.Known);
+            var loc = handler.GetSessionDbcLocale();
+            var targetName = target.GetName();
+            var knownStr = handler.GetCypherString(CypherStrings.Known);
 
             // Search in CharTitles.dbc
             foreach (var titleInfo in CliDB.CharTitlesStorage.Values)
             {
                 if (target.HasTitle(titleInfo))
                 {
-                    string name = (target.GetGender() == Gender.Male ? titleInfo.Name : titleInfo.Name1)[handler.GetSessionDbcLocale()];
+                    var name = (target.GetGender() == Gender.Male ? titleInfo.Name : titleInfo.Name1)[handler.GetSessionDbcLocale()];
                     if (string.IsNullOrEmpty(name))
                         continue;
 
-                    string activeStr = target.m_playerData.PlayerTitle == titleInfo.MaskID
+                    var activeStr = target.m_playerData.PlayerTitle == titleInfo.MaskID
                     ? handler.GetCypherString(CypherStrings.Active) : "";
 
-                    string titleNameStr = string.Format(name.ConvertFormatSyntax(), targetName);
+                    var titleNameStr = string.Format(name.ConvertFormatSyntax(), targetName);
 
                     // send title in "id (idx:idx) - [namedlink locale]" format
                     if (handler.GetSession() != null)
@@ -79,12 +79,12 @@ namespace Game.Chat
             if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
                 return false;
 
-            string newNameStr = args.NextString();
+            var newNameStr = args.NextString();
 
             if (!string.IsNullOrEmpty(newNameStr))
             {
                 string playerOldName;
-                string newName = newNameStr;
+                var newName = newNameStr;
 
                 if (target)
                 {
@@ -115,7 +115,7 @@ namespace Game.Chat
                     return false;
                 }
 
-                WorldSession session = handler.GetSession();
+                var session = handler.GetSession();
                 if (session != null)
                 {
                     if (!session.HasPermission(RBACPermissions.SkipCheckCharacterCreationReservedname) && Global.ObjectMgr.IsReservedName(newName))
@@ -125,9 +125,9 @@ namespace Game.Chat
                     }
                 }
 
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHECK_NAME);
+                var stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHECK_NAME);
                 stmt.AddValue(0, newName);
-                SQLResult result = DB.Characters.Query(stmt);
+                var result = DB.Characters.Query(stmt);
                 if (!result.IsEmpty())
                 {
                     handler.SendSysMessage(CypherStrings.RenamePlayerAlreadyExists, newName);
@@ -158,7 +158,7 @@ namespace Game.Chat
 
                 handler.SendSysMessage(CypherStrings.RenamePlayerWithNewName, playerOldName, newName);
 
-                Player player = handler.GetPlayer();
+                var player = handler.GetPlayer();
                 if (player)
                     Log.outCommand(session.GetAccountId(), "GM {0} (Account: {1}) forced rename {2} to player {3} (Account: {4})", player.GetName(), session.GetAccountId(), newName, playerOldName, Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(targetGuid));
                 else
@@ -181,10 +181,10 @@ namespace Game.Chat
                     if (handler.HasLowerSecurity(null, targetGuid))
                         return false;
 
-                    string oldNameLink = handler.PlayerLink(targetName);
+                    var oldNameLink = handler.PlayerLink(targetName);
                     handler.SendSysMessage(CypherStrings.RenamePlayerGuid, oldNameLink, targetGuid.ToString());
 
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
+                    var stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
                     stmt.AddValue(0, AtLoginFlags.Rename);
                     stmt.AddValue(1, targetGuid.GetCounter());
                     DB.Characters.Execute(stmt);
@@ -216,9 +216,9 @@ namespace Game.Chat
             if (!handler.ExtractPlayerTarget(new StringArguments(nameStr), out target, out targetGuid, out targetName))
                 return false;
 
-            int oldlevel = (int)(target ? target.GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(targetGuid));
+            var oldlevel = (int)(target ? target.GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(targetGuid));
 
-            if (!int.TryParse(levelStr, out int newlevel))
+            if (!int.TryParse(levelStr, out var newlevel))
                 newlevel = oldlevel;
 
             if (newlevel < 1)
@@ -230,7 +230,7 @@ namespace Game.Chat
             HandleCharacterLevel(target, targetGuid, oldlevel, newlevel, handler);
             if (handler.GetSession() == null || handler.GetSession().GetPlayer() != target)      // including player == NULL
             {
-                string nameLink = handler.PlayerLink(targetName);
+                var nameLink = handler.PlayerLink(targetName);
                 handler.SendSysMessage(CypherStrings.YouChangeLvl, nameLink, newlevel);
             }
 
@@ -247,7 +247,7 @@ namespace Game.Chat
             if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
                 return false;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
             stmt.AddValue(0, AtLoginFlags.Customize);
             if (target)
             {
@@ -257,7 +257,7 @@ namespace Game.Chat
             }
             else
             {
-                string oldNameLink = handler.PlayerLink(targetName);
+                var oldNameLink = handler.PlayerLink(targetName);
                 stmt.AddValue(1, targetGuid.GetCounter());
                 handler.SendSysMessage(CypherStrings.CustomizePlayerGuid, oldNameLink, targetGuid.ToString());
             }
@@ -280,19 +280,19 @@ namespace Game.Chat
             if (!handler.ExtractPlayerTarget(new StringArguments(playerNameStr), out _, out targetGuid, out targetName))
                 return false;
 
-            CharacterCacheEntry characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByGuid(targetGuid);
+            var characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByGuid(targetGuid);
             if (characterInfo == null)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
                 return false;
             }
 
-            uint oldAccountId = characterInfo.AccountId;
-            uint newAccountId = oldAccountId;
+            var oldAccountId = characterInfo.AccountId;
+            var newAccountId = oldAccountId;
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_ID_BY_NAME);
+            var stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_ID_BY_NAME);
             stmt.AddValue(0, accountName);
-            SQLResult result = DB.Login.Query(stmt);
+            var result = DB.Login.Query(stmt);
             if (!result.IsEmpty())
                 newAccountId = result.Read<uint>(0);
             else
@@ -305,7 +305,7 @@ namespace Game.Chat
             if (newAccountId == oldAccountId)
                 return true;
 
-            uint charCount = Global.AccountMgr.GetCharactersCount(newAccountId);
+            var charCount = Global.AccountMgr.GetCharactersCount(newAccountId);
             if (charCount != 0)
             {
                 if (charCount >= WorldConfig.GetIntValue(WorldCfg.CharactersPerRealm))
@@ -327,11 +327,11 @@ namespace Game.Chat
 
             handler.SendSysMessage(CypherStrings.ChangeAccountSuccess, targetName, accountName);
 
-            string logString = $"changed ownership of player {targetName} ({targetGuid}) from account {oldAccountId} to account {newAccountId}";
-            WorldSession session = handler.GetSession();
+            var logString = $"changed ownership of player {targetName} ({targetGuid}) from account {oldAccountId} to account {newAccountId}";
+            var session = handler.GetSession();
             if (session != null)
             {
-                Player player = session.GetPlayer();
+                var player = session.GetPlayer();
                 if (player != null)
                     Log.outCommand(session.GetAccountId(), $"GM {player.GetName()} (Account: {session.GetAccountId()}) {logString}");
             }
@@ -349,7 +349,7 @@ namespace Game.Chat
             if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
                 return false;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
             stmt.AddValue(0, AtLoginFlags.ChangeFaction);
             if (target)
             {
@@ -359,7 +359,7 @@ namespace Game.Chat
             }
             else
             {
-                string oldNameLink = handler.PlayerLink(targetName);
+                var oldNameLink = handler.PlayerLink(targetName);
                 handler.SendSysMessage(CypherStrings.CustomizePlayerGuid, oldNameLink, targetGuid.ToString());
                 stmt.AddValue(1, targetGuid.GetCounter());
             }
@@ -377,7 +377,7 @@ namespace Game.Chat
             if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
                 return false;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
             stmt.AddValue(0, AtLoginFlags.ChangeRace);
             if (target)
             {
@@ -388,7 +388,7 @@ namespace Game.Chat
             }
             else
             {
-                string oldNameLink = handler.PlayerLink(targetName);
+                var oldNameLink = handler.PlayerLink(targetName);
                 // @todo add text into database
                 handler.SendSysMessage(CypherStrings.CustomizePlayerGuid, oldNameLink, targetGuid.ToString());
                 stmt.AddValue(1, targetGuid.GetCounter());
@@ -405,17 +405,17 @@ namespace Game.Chat
             if (!handler.ExtractPlayerTarget(args, out target))
                 return false;
 
-            Locale loc = handler.GetSessionDbcLocale();
+            var loc = handler.GetSessionDbcLocale();
 
             var targetFSL = target.GetReputationMgr().GetStateList();
             foreach (var pair in targetFSL)
             {
-                FactionState faction = pair.Value;
-                FactionRecord factionEntry = CliDB.FactionStorage.LookupByKey(faction.Id);
-                string factionName = factionEntry != null ? factionEntry.Name[loc] : "#Not found#";
-                ReputationRank rank = target.GetReputationMgr().GetRank(factionEntry);
-                string rankName = handler.GetCypherString(ReputationMgr.ReputationRankStrIndex[(int)rank]);
-                StringBuilder ss = new StringBuilder();
+                var faction = pair.Value;
+                var factionEntry = CliDB.FactionStorage.LookupByKey(faction.Id);
+                var factionName = factionEntry != null ? factionEntry.Name[loc] : "#Not found#";
+                var rank = target.GetReputationMgr().GetRank(factionEntry);
+                var rankName = handler.GetCypherString(ReputationMgr.ReputationRankStrIndex[(int)rank]);
+                var ss = new StringBuilder();
                 if (handler.GetSession() != null)
                     ss.AppendFormat("{0} - |cffffffff|Hfaction:{0}|h[{1} {2}]|h|r", faction.Id, factionName, loc);
                 else
@@ -448,7 +448,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string characterName = args.NextString();
+            var characterName = args.NextString();
             if (string.IsNullOrEmpty(characterName))
                 return false;
 
@@ -458,7 +458,7 @@ namespace Game.Chat
             ObjectGuid characterGuid;
             uint accountId;
 
-            Player player = Global.ObjAccessor.FindPlayerByName(characterName);
+            var player = Global.ObjAccessor.FindPlayerByName(characterName);
             if (player)
             {
                 characterGuid = player.GetGUID();
@@ -495,7 +495,7 @@ namespace Game.Chat
                 if (args.Empty())
                     return false;
 
-                List<DeletedInfo> foundList = new List<DeletedInfo>();
+                var foundList = new List<DeletedInfo>();
                 if (!GetDeletedCharacterInfoList(foundList, args.NextString()))
                     return false;
 
@@ -518,7 +518,7 @@ namespace Game.Chat
             [Command("list", RBACPermissions.CommandCharacterDeletedList, true)]
             static bool HandleCharacterDeletedListCommand(StringArguments args, CommandHandler handler)
             {
-                List<DeletedInfo> foundList = new List<DeletedInfo>();
+                var foundList = new List<DeletedInfo>();
                 if (!GetDeletedCharacterInfoList(foundList, args.NextString()))
                     return false;
 
@@ -541,11 +541,11 @@ namespace Game.Chat
                 if (args.Empty())
                     return false;
 
-                string searchString = args.NextString();
-                string newCharName = args.NextString();
-                uint newAccount = args.NextUInt32();
+                var searchString = args.NextString();
+                var newCharName = args.NextString();
+                var newAccount = args.NextUInt32();
 
-                List<DeletedInfo> foundList = new List<DeletedInfo>();
+                var foundList = new List<DeletedInfo>();
                 if (!GetDeletedCharacterInfoList(foundList, searchString))
                     return false;
 
@@ -566,7 +566,7 @@ namespace Game.Chat
                 }
                 else if (foundList.Count == 1 && ObjectManager.NormalizePlayerName(ref newCharName))
                 {
-                    DeletedInfo delInfo = foundList[0];
+                    var delInfo = foundList[0];
 
                     // update name
                     delInfo.name = newCharName;
@@ -589,9 +589,9 @@ namespace Game.Chat
             [Command("old", RBACPermissions.CommandCharacterDeletedOld, true)]
             static bool HandleCharacterDeletedOldCommand(StringArguments args, CommandHandler handler)
             {
-                int keepDays = WorldConfig.GetIntValue(WorldCfg.ChardeleteKeepDays);
+                var keepDays = WorldConfig.GetIntValue(WorldCfg.ChardeleteKeepDays);
 
-                string daysStr = args.NextString();
+                var daysStr = args.NextString();
                 if (!daysStr.IsEmpty())
                 {
                     if (!daysStr.IsNumber())
@@ -618,7 +618,7 @@ namespace Game.Chat
                     // search by GUID
                     if (searchString.IsNumber())
                     {
-                        if (!ulong.TryParse(searchString, out ulong guid))
+                        if (!ulong.TryParse(searchString, out var guid))
                             return false;
 
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_DEL_INFO_BY_GUID);
@@ -673,7 +673,7 @@ namespace Game.Chat
 
                 foreach (var info in foundList)
                 {
-                    string dateStr = Time.UnixTimeToDateTime(info.deleteDate).ToShortDateString();
+                    var dateStr = Time.UnixTimeToDateTime(info.deleteDate).ToShortDateString();
 
                     if (!handler.GetSession())
                         handler.SendSysMessage(CypherStrings.CharacterDeletedListLineConsole,
@@ -697,7 +697,7 @@ namespace Game.Chat
                 }
 
                 // check character count
-                uint charcount = Global.AccountMgr.GetCharactersCount(delInfo.accountId);
+                var charcount = Global.AccountMgr.GetCharactersCount(delInfo.accountId);
                 if (charcount >= WorldConfig.GetIntValue(WorldCfg.CharactersPerRealm))
                 {
                     handler.SendSysMessage(CypherStrings.CharacterDeletedSkipFull, delInfo.name, delInfo.guid.ToString(), delInfo.accountId);
@@ -710,7 +710,7 @@ namespace Game.Chat
                     return;
                 }
 
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_RESTORE_DELETE_INFO);
+                var stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_RESTORE_DELETE_INFO);
                 stmt.AddValue(0, delInfo.name);
                 stmt.AddValue(1, delInfo.accountId);
                 stmt.AddValue(2, delInfo.guid.GetCounter());
@@ -749,11 +749,11 @@ namespace Game.Chat
             if (!handler.ExtractPlayerTarget(new StringArguments(nameStr), out target, out targetGuid, out targetName))
                 return false;
 
-            int oldlevel = (int)(target ? target.GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(targetGuid));
-            if (!int.TryParse(levelStr, out int addlevel))
+            var oldlevel = (int)(target ? target.GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(targetGuid));
+            if (!int.TryParse(levelStr, out var addlevel))
                 addlevel = 1;
 
-            int newlevel = oldlevel + addlevel;
+            var newlevel = oldlevel + addlevel;
             if (newlevel < 1)
                 newlevel = 1;
 
@@ -764,7 +764,7 @@ namespace Game.Chat
 
             if (handler.GetSession() == null || handler.GetSession().GetPlayer() != target)      // including chr == NULL
             {
-                string nameLink = handler.PlayerLink(targetName);
+                var nameLink = handler.PlayerLink(targetName);
                 handler.SendSysMessage(CypherStrings.YouChangeLvl, nameLink, newlevel);
             }
 
@@ -792,7 +792,7 @@ namespace Game.Chat
             else
             {
                 // Update level and reset XP, everything else will be updated at login
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_LEVEL);
+                var stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_LEVEL);
                 stmt.AddValue(0, newLevel);
                 stmt.AddValue(1, playerGuid.GetCounter());
                 DB.Characters.Execute(stmt);

@@ -82,13 +82,13 @@ namespace Game.Entities
 
                             UnitAI newAI = null;
                             // first, we check if the creature's own AI specifies an override playerai for its owned players
-                            Unit charmer = GetCharmer();
+                            var charmer = GetCharmer();
                             if (charmer)
                             {
-                                Creature creatureCharmer = charmer.ToCreature();
+                                var creatureCharmer = charmer.ToCreature();
                                 if (creatureCharmer)
                                 {
-                                    PlayerAI charmAI = creatureCharmer.IsAIEnabled ? creatureCharmer.GetAI().GetAIForCharmedPlayer(ToPlayer()) : null;
+                                    var charmAI = creatureCharmer.IsAIEnabled ? creatureCharmer.GetAI().GetAIForCharmedPlayer(ToPlayer()) : null;
                                     if (charmAI != null)
                                         newAI = charmAI;
                                 }
@@ -153,7 +153,7 @@ namespace Game.Entities
                 // Can only have one pet. If a new one is summoned, dismiss the old one.
                 if (minion.IsGuardianPet())
                 {
-                    Guardian oldPet = GetGuardianPet();
+                    var oldPet = GetGuardianPet();
                     if (oldPet)
                     {
                         if (oldPet != minion && (oldPet.IsPet() || minion.IsPet() || oldPet.GetEntry() != minion.GetEntry()))
@@ -181,7 +181,7 @@ namespace Game.Entities
                 if (minion.m_Properties != null && minion.m_Properties.Title == SummonTitle.Companion)
                 {
                     SetCritterGUID(minion.GetGUID());
-                    Player thisPlayer = ToPlayer();
+                    var thisPlayer = ToPlayer();
                     if (thisPlayer != null)
                         minion.SetBattlePetCompanionGUID(thisPlayer.m_activePlayerData.SummonedBattlePetGUID);
                 }
@@ -195,7 +195,7 @@ namespace Game.Entities
                         minion.SetSpeedRate(i, m_speed_rate[(int)i]);
 
                 // Send infinity cooldown - client does that automatically but after relog cooldown needs to be set again
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(minion.m_unitData.CreatedBySpell, GetMap().GetDifficultyID());
+                var spellInfo = Global.SpellMgr.GetSpellInfo(minion.m_unitData.CreatedBySpell, GetMap().GetDifficultyID());
                 if (spellInfo != null && spellInfo.IsCooldownStartedOnEvent())
                     GetSpellHistory().StartCooldown(spellInfo, 0, null, true);
             }
@@ -223,10 +223,10 @@ namespace Game.Entities
                 else if (minion.IsTotem())
                 {
                     // All summoned by totem minions must disappear when it is removed.
-                    SpellInfo spInfo = Global.SpellMgr.GetSpellInfo(minion.ToTotem().GetSpell(), GetMap().GetDifficultyID());
+                    var spInfo = Global.SpellMgr.GetSpellInfo(minion.ToTotem().GetSpell(), GetMap().GetDifficultyID());
                     if (spInfo != null)
                     {
-                        foreach (SpellEffectInfo effect in spInfo.GetEffects())
+                        foreach (var effect in spInfo.GetEffects())
                         {
                             if (effect == null || effect.Effect != SpellEffectName.Summon)
                                 continue;
@@ -236,7 +236,7 @@ namespace Game.Entities
                     }
                 }
 
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(minion.m_unitData.CreatedBySpell, GetMap().GetDifficultyID());
+                var spellInfo = Global.SpellMgr.GetSpellInfo(minion.m_unitData.CreatedBySpell, GetMap().GetDifficultyID());
                 // Remove infinity cooldown
                 if (spellInfo != null && spellInfo.IsCooldownStartedOnEvent())
                     GetSpellHistory().SendCooldownEvent(spellInfo);
@@ -316,7 +316,7 @@ namespace Game.Entities
             CombatStop(); // @todo CombatStop(true) may cause crash (interrupt spells)
             GetThreatManager().ClearAllThreat();
 
-            Player playerCharmer = charmer.ToPlayer();
+            var playerCharmer = charmer.ToPlayer();
 
             // Charmer stop charming
             if (playerCharmer)
@@ -352,7 +352,7 @@ namespace Game.Entities
 
             if (IsTypeId(TypeId.Unit))
             {
-                IMovementGenerator movementGenerator = GetMotionMaster().GetMotionSlot(MovementSlot.Idle);
+                var movementGenerator = GetMotionMaster().GetMotionSlot(MovementSlot.Idle);
                 if (movementGenerator != null)
                     movementGenerator.Pause(0);
 
@@ -364,7 +364,7 @@ namespace Game.Entities
             }
             else
             {
-                Player player = ToPlayer();
+                var player = ToPlayer();
                 if (player)
                 {
                     if (player.IsAFK())
@@ -419,7 +419,7 @@ namespace Game.Entities
                     case CharmType.Charm:
                         if (IsTypeId(TypeId.Unit) && charmer.GetClass() == Class.Warlock)
                         {
-                            CreatureTemplate cinfo = ToCreature().GetCreatureTemplate();
+                            var cinfo = ToCreature().GetCreatureTemplate();
                             if (cinfo != null && cinfo.CreatureType == CreatureType.Demon)
                             {
                                 // to prevent client crash
@@ -477,7 +477,7 @@ namespace Game.Entities
             ///@todo Handle SLOT_IDLE motion resume
             GetMotionMaster().InitDefault();
 
-            Creature creature = ToCreature();
+            var creature = ToCreature();
             if (creature)
             {
                 // Creature will restore its old AI on next update
@@ -498,7 +498,7 @@ namespace Game.Entities
 
             charmer.SetCharm(this, false);
 
-            Player playerCharmer = charmer.ToPlayer();
+            var playerCharmer = charmer.ToPlayer();
             if (playerCharmer)
             {
                 switch (type)
@@ -518,7 +518,7 @@ namespace Game.Entities
                     case CharmType.Charm:
                         if (IsTypeId(TypeId.Unit) && charmer.GetClass() == Class.Warlock)
                         {
-                            CreatureTemplate cinfo = ToCreature().GetCreatureTemplate();
+                            var cinfo = ToCreature().GetCreatureTemplate();
                             if (cinfo != null && cinfo.CreatureType == CreatureType.Demon)
                             {
                                 SetClass((Class)cinfo.UnitClass);
@@ -534,7 +534,7 @@ namespace Game.Entities
                 }
             }
 
-            Player player = ToPlayer();
+            var player = ToPlayer();
             if (player)
             {
                 if (charmer.IsTypeId(TypeId.Unit)) // charmed by a creature, this means we had PlayerAI
@@ -556,7 +556,7 @@ namespace Game.Entities
         {
             for (var i = 0; i < m_Controlled.Count; ++i)
             {
-                Unit unit = m_Controlled[i];
+                var unit = m_Controlled[i];
                 if (unit.GetEntry() == entry && unit.IsSummon()) // minion, actually
                     Minions.Add(unit.ToTempSummon());
             }
@@ -566,7 +566,7 @@ namespace Game.Entities
         {
             for (var i = 0; i < m_Controlled.Count; ++i)
             {
-                Unit unit = m_Controlled[i];
+                var unit = m_Controlled[i];
                 if (unit.GetEntry() == entry && unit.IsTypeId(TypeId.Unit)
                     && unit.ToCreature().IsSummon()) // minion, actually
                     unit.ToTempSummon().UnSummon();
@@ -622,7 +622,7 @@ namespace Game.Entities
                 else
                     Log.outFatal(LogFilter.Unit, "Unit {0} is being uncharmed, but it has another charmer {1}", charm.GetEntry(), charm.GetCharmerGUID());
 
-                Player player = charm.GetCharmerOrOwnerPlayerOrPlayerItself();
+                var player = charm.GetCharmerOrOwnerPlayerOrPlayerItself();
                 if (charm.IsTypeId(TypeId.Player))
                 {
                     charm.m_ControlledByPlayer = true;
@@ -656,10 +656,10 @@ namespace Game.Entities
         public Unit GetFirstControlled()
         {
             // Sequence: charmed, pet, other guardians
-            Unit unit = GetCharm();
+            var unit = GetCharm();
             if (!unit)
             {
-                ObjectGuid guid = GetMinionGUID();
+                var guid = GetMinionGUID();
                 if (!guid.IsEmpty())
                     unit = Global.ObjAccessor.GetUnit(this, guid);
             }
@@ -683,7 +683,7 @@ namespace Game.Entities
 
             while (!m_Controlled.Empty())
             {
-                Unit target = m_Controlled.First();
+                var target = m_Controlled.First();
                 m_Controlled.RemoveAt(0);
                 if (target.GetCharmerGUID() == GetGUID())
                     target.RemoveCharmAuras();
@@ -702,11 +702,11 @@ namespace Game.Entities
 
         public void SendPetActionFeedback(PetActionFeedback msg, uint spellId)
         {
-            Unit owner = GetOwner();
+            var owner = GetOwner();
             if (!owner || !owner.IsTypeId(TypeId.Player))
                 return;
 
-            PetActionFeedbackPacket petActionFeedback = new PetActionFeedbackPacket();
+            var petActionFeedback = new PetActionFeedbackPacket();
             petActionFeedback.SpellID = spellId;
             petActionFeedback.Response = msg;
             owner.ToPlayer().SendPacket(petActionFeedback);
@@ -714,11 +714,11 @@ namespace Game.Entities
 
         public void SendPetTalk(PetTalk pettalk)
         {
-            Unit owner = GetOwner();
+            var owner = GetOwner();
             if (!owner || !owner.IsTypeId(TypeId.Player))
                 return;
 
-            PetActionSound petActionSound = new PetActionSound();
+            var petActionSound = new PetActionSound();
             petActionSound.UnitGUID = GetGUID();
             petActionSound.Action = pettalk;
             owner.ToPlayer().SendPacket(petActionSound);
@@ -726,11 +726,11 @@ namespace Game.Entities
 
         public void SendPetAIReaction(ObjectGuid guid)
         {
-            Unit owner = GetOwner();
+            var owner = GetOwner();
             if (!owner || !owner.IsTypeId(TypeId.Player))
                 return;
 
-            AIReaction packet = new AIReaction();
+            var packet = new AIReaction();
             packet.UnitGUID = guid;
             packet.Reaction = AiReaction.Hostile;
 
@@ -742,12 +742,12 @@ namespace Game.Entities
             if (!IsTypeId(TypeId.Player))
                 return null;
 
-            Pet pet = new Pet(ToPlayer(), PetType.Hunter);
+            var pet = new Pet(ToPlayer(), PetType.Hunter);
 
             if (!pet.CreateBaseAtCreature(creatureTarget))
                 return null;
 
-            uint level = creatureTarget.GetLevelForTarget(this) + 5 < GetLevel() ? (GetLevel() - 5) : creatureTarget.GetLevelForTarget(this);
+            var level = creatureTarget.GetLevelForTarget(this) + 5 < GetLevel() ? (GetLevel() - 5) : creatureTarget.GetLevelForTarget(this);
 
             InitTamedPet(pet, level, spell_id);
 
@@ -759,11 +759,11 @@ namespace Game.Entities
             if (!IsTypeId(TypeId.Player))
                 return null;
 
-            CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(creatureEntry);
+            var creatureInfo = Global.ObjectMgr.GetCreatureTemplate(creatureEntry);
             if (creatureInfo == null)
                 return null;
 
-            Pet pet = new Pet(ToPlayer(), PetType.Hunter);
+            var pet = new Pet(ToPlayer(), PetType.Hunter);
 
             if (!pet.CreateBaseAtCreatureInfo(creatureInfo, this) || !InitTamedPet(pet, GetLevel(), spell_id))
                 return null;

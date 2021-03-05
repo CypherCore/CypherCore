@@ -36,26 +36,26 @@ namespace Game.AI
 
         public void LoadFromDB()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             for (byte i = 0; i < (int)SmartScriptType.Max; i++)
                 mEventMap[i].Clear();  //Drop Existing SmartAI List
 
-            PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_SMART_SCRIPTS);
-            SQLResult result = DB.World.Query(stmt);
+            var stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_SMART_SCRIPTS);
+            var result = DB.World.Query(stmt);
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 SmartAI scripts. DB table `smartai_scripts` is empty.");
                 return;
             }
 
-            int count = 0;
+            var count = 0;
             do
             {
-                SmartScriptHolder temp = new SmartScriptHolder();
+                var temp = new SmartScriptHolder();
 
                 temp.entryOrGuid = result.Read<int>(0);
-                SmartScriptType source_type = (SmartScriptType)result.Read<byte>(1);
+                var source_type = (SmartScriptType)result.Read<byte>(1);
                 if (source_type >= SmartScriptType.Max)
                 {
                     Log.outError(LogFilter.Sql, "SmartAIMgr.LoadSmartAI: invalid source_type ({0}), skipped loading.", source_type);
@@ -140,14 +140,14 @@ namespace Game.AI
                     {
                         case SmartScriptType.Creature:
                             {
-                                CreatureData creature = Global.ObjectMgr.GetCreatureData((ulong)-temp.entryOrGuid);
+                                var creature = Global.ObjectMgr.GetCreatureData((ulong)-temp.entryOrGuid);
                                 if (creature == null)
                                 {
                                     Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: Creature guid ({-temp.entryOrGuid}) does not exist, skipped loading.");
                                     continue;
                                 }
 
-                                CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(creature.Id);
+                                var creatureInfo = Global.ObjectMgr.GetCreatureTemplate(creature.Id);
                                 if (creatureInfo == null)
                                 {
                                     Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: Creature entry ({creature.Id}) guid ({-temp.entryOrGuid}) does not exist, skipped loading.");
@@ -163,14 +163,14 @@ namespace Game.AI
                             }
                         case SmartScriptType.GameObject:
                             {
-                                GameObjectData gameObject = Global.ObjectMgr.GetGameObjectData((ulong)-temp.entryOrGuid);
+                                var gameObject = Global.ObjectMgr.GetGameObjectData((ulong)-temp.entryOrGuid);
                                 if (gameObject == null)
                                 {
                                     Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: GameObject guid ({-temp.entryOrGuid}) does not exist, skipped loading.");
                                     continue;
                                 }
 
-                                GameObjectTemplate gameObjectInfo = Global.ObjectMgr.GetGameObjectTemplate(gameObject.Id);
+                                var gameObjectInfo = Global.ObjectMgr.GetGameObjectTemplate(gameObject.Id);
                                 if (gameObjectInfo == null)
                                 {
                                     Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: GameObject entry ({gameObject.Id}) guid ({-temp.entryOrGuid}) does not exist, skipped loading.");
@@ -317,12 +317,12 @@ namespace Game.AI
 
         public void LoadWaypointFromDB()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             _waypointStore.Clear();
 
-            PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_SMARTAI_WP);
-            SQLResult result = DB.World.Query(stmt);
+            var stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_SMARTAI_WP);
+            var result = DB.World.Query(stmt);
 
             if (result.IsEmpty())
             {
@@ -338,11 +338,11 @@ namespace Game.AI
 
             do
             {
-                uint entry = result.Read<uint>(0);
-                uint id = result.Read<uint>(1);
-                float x = result.Read<float>(2);
-                float y = result.Read<float>(3);
-                float z = result.Read<float>(4);
+                var entry = result.Read<uint>(0);
+                var id = result.Read<uint>(1);
+                var x = result.Read<float>(2);
+                var y = result.Read<float>(3);
+                var z = result.Read<float>(4);
 
                 if (lastEntry != entry)
                 {
@@ -358,7 +358,7 @@ namespace Game.AI
                 if (!_waypointStore.ContainsKey(entry))
                     _waypointStore[entry] = new WaypointPath();
 
-                WaypointPath path = _waypointStore[entry];
+                var path = _waypointStore[entry];
                 path.id = entry;
                 path.nodes.Add(new WaypointNode(id, x, y, z));
 
@@ -532,7 +532,7 @@ namespace Game.AI
                     case SmartEvents.SpellHitTarget:
                         if (e.Event.spellHit.spell != 0)
                         {
-                            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(e.Event.spellHit.spell, Difficulty.None);
+                            var spellInfo = Global.SpellMgr.GetSpellInfo(e.Event.spellHit.spell, Difficulty.None);
                             if (spellInfo == null)
                             {
                                 Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent Spell entry {4}, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.Event.spellHit.spell);
@@ -970,8 +970,8 @@ namespace Game.AI
                         if (!IsSpellValid(e, e.Action.cast.spell))
                             return false;
 
-                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(e.Action.cast.spell, Difficulty.None);
-                        foreach (SpellEffectInfo effect in spellInfo.GetEffects())
+                        var spellInfo = Global.SpellMgr.GetSpellInfo(e.Action.cast.spell, Difficulty.None);
+                        foreach (var effect in spellInfo.GetEffects())
                         {
                             if (effect != null && (effect.IsEffect(SpellEffectName.KillCredit) || effect.IsEffect(SpellEffectName.KillCredit2)))
                             {
@@ -995,7 +995,7 @@ namespace Game.AI
                     break;
                 case SmartActions.CallAreaexploredoreventhappens:
                 case SmartActions.CallGroupeventhappens:
-                    Quest qid = Global.ObjectMgr.GetQuestTemplate(e.Action.quest.questId);
+                    var qid = Global.ObjectMgr.GetQuestTemplate(e.Action.quest.questId);
                     if (qid != null)
                     {
                         if (!qid.HasSpecialFlag(QuestSpecialFlags.ExplorationOrEvent))
@@ -1138,7 +1138,7 @@ namespace Game.AI
                     break;
                 case SmartActions.WpStart:
                     {
-                        WaypointPath path = GetPath(e.Action.wpStart.pathID);
+                        var path = GetPath(e.Action.wpStart.pathID);
                         if (path == null || path.nodes.Empty())
                         {
                             Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent WaypointPath id {e.Action.wpStart.pathID}, skipped.");
@@ -1181,7 +1181,7 @@ namespace Game.AI
                     break;
                 case SmartActions.GameEventStop:
                     {
-                        uint eventId = e.Action.gameEventStop.id;
+                        var eventId = e.Action.gameEventStop.id;
 
                         var events = Global.GameEventMgr.GetEventMap();
                         if (eventId < 1 || eventId >= events.Length)
@@ -1190,7 +1190,7 @@ namespace Game.AI
                             return false;
                         }
 
-                        GameEventData eventData = events[eventId];
+                        var eventData = events[eventId];
                         if (!eventData.IsValid())
                         {
                             Log.outError(LogFilter.Sql, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent event, eventId {4}, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.Action.gameEventStop.id);
@@ -1200,7 +1200,7 @@ namespace Game.AI
                     }
                 case SmartActions.GameEventStart:
                     {
-                        uint eventId = e.Action.gameEventStart.id;
+                        var eventId = e.Action.gameEventStart.id;
 
                         var events = Global.GameEventMgr.GetEventMap();
                         if (eventId < 1 || eventId >= events.Length)
@@ -1209,7 +1209,7 @@ namespace Game.AI
                             return false;
                         }
 
-                        GameEventData eventData = events[eventId];
+                        var eventData = events[eventId];
                         if (!eventData.IsValid())
                         {
                             Log.outError(LogFilter.Sql, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent event, eventId {4}, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), e.Action.gameEventStart.id);
@@ -1221,7 +1221,7 @@ namespace Game.AI
                     {
                         if (e.GetScriptType() == SmartScriptType.Creature)
                         {
-                            sbyte equipId = (sbyte)e.Action.equip.entry;
+                            var equipId = (sbyte)e.Action.equip.entry;
 
                             if (equipId != 0 && Global.ObjectMgr.GetEquipmentInfo((uint)e.entryOrGuid, equipId) == null)
                             {
@@ -1250,8 +1250,8 @@ namespace Game.AI
                     }
                 case SmartActions.SetIngamePhaseId:
                     {
-                        uint phaseId = e.Action.ingamePhaseId.id;
-                        uint apply = e.Action.ingamePhaseId.apply;
+                        var phaseId = e.Action.ingamePhaseId.id;
+                        var apply = e.Action.ingamePhaseId.apply;
 
                         if (apply != 0 && apply != 1)
                         {
@@ -1268,8 +1268,8 @@ namespace Game.AI
                     }
                 case SmartActions.SetIngamePhaseGroup:
                     {
-                        uint phaseGroup = e.Action.ingamePhaseGroup.groupId;
-                        uint apply = e.Action.ingamePhaseGroup.apply;
+                        var phaseGroup = e.Action.ingamePhaseGroup.groupId;
+                        var apply = e.Action.ingamePhaseGroup.apply;
 
                         if (apply != 0 && apply != 1)
                         {
@@ -1457,8 +1457,8 @@ namespace Game.AI
                     default:
                         if (e.entryOrGuid < 0)
                         {
-                            ulong guid = (ulong)-e.entryOrGuid;
-                            CreatureData data = Global.ObjectMgr.GetCreatureData(guid);
+                            var guid = (ulong)-e.entryOrGuid;
+                            var data = Global.ObjectMgr.GetCreatureData(guid);
                             if (data == null)
                             {
                                 Log.outError(LogFilter.Sql, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} using non-existent Creature guid {4}, skipped.", e.entryOrGuid, e.GetScriptType(), e.event_id, e.GetActionType(), guid);
@@ -1583,7 +1583,7 @@ namespace Game.AI
 
         public List<SmartScriptHolder> GetScript(int entry, SmartScriptType type)
         {
-            List<SmartScriptHolder> temp = new List<SmartScriptHolder>();
+            var temp = new List<SmartScriptHolder>();
             if (mEventMap[(uint)type].ContainsKey(entry))
             {
                 foreach (var holder in mEventMap[(uint)type][entry])

@@ -33,10 +33,10 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.BattlePetSetBattleSlot)]
         void HandleBattlePetSetBattleSlot(BattlePetSetBattleSlot battlePetSetBattleSlot)
         {
-            BattlePetMgr.BattlePet pet = GetBattlePetMgr().GetPet(battlePetSetBattleSlot.PetGuid);
+            var pet = GetBattlePetMgr().GetPet(battlePetSetBattleSlot.PetGuid);
             if (pet != null)
             {
-                BattlePetSlot slot = GetBattlePetMgr().GetSlot(battlePetSetBattleSlot.Slot);
+                var slot = GetBattlePetMgr().GetSlot(battlePetSetBattleSlot.Slot);
                 if (slot != null)
                     slot.Pet = pet.PacketInfo;
             }
@@ -45,7 +45,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.BattlePetModifyName)]
         void HandleBattlePetModifyName(BattlePetModifyName battlePetModifyName)
         {
-            BattlePetMgr.BattlePet pet = GetBattlePetMgr().GetPet(battlePetModifyName.PetGuid);
+            var pet = GetBattlePetMgr().GetPet(battlePetModifyName.PetGuid);
             if (pet != null)
             {
                 pet.PacketInfo.Name = battlePetModifyName.Name;

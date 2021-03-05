@@ -241,8 +241,8 @@ namespace Framework.GameMath
         /// </remarks>
         public static Matrix3 Parse(string value)
         {
-            Regex r = new Regex(regularExp, RegexOptions.Singleline | RegexOptions.IgnorePatternWhitespace);
-            Match m = r.Match(value);
+            var r = new Regex(regularExp, RegexOptions.Singleline | RegexOptions.IgnorePatternWhitespace);
+            var m = r.Match(value);
             if (m.Success)
             {
                 return new Matrix3(
@@ -280,8 +280,8 @@ namespace Framework.GameMath
         /// </remarks>
         public static bool TryParse(string value, out Matrix3 result)
         {
-            Regex r = new Regex(regularExp, RegexOptions.Singleline);
-            Match m = r.Match(value);
+            var r = new Regex(regularExp, RegexOptions.Singleline);
+            var m = r.Match(value);
             if (m.Success)
             {
                 result = new Matrix3(
@@ -519,7 +519,7 @@ namespace Framework.GameMath
         /// <returns>A new <see cref="Matrix3"/> instance containing the transposed matrix.</returns>
         public static Matrix3 Transpose(Matrix3 m)
         {
-            Matrix3 t = new Matrix3(m);
+            var t = new Matrix3(m);
             t.Transpose();
             return t;
         }
@@ -530,22 +530,22 @@ namespace Framework.GameMath
 
             fCos = (float)Math.Cos(fYAngle);
             fSin = (float)Math.Sin(fYAngle);
-            Matrix3 kZMat = new Matrix3(fCos, -fSin, 0.0f, fSin, fCos, 0.0f, 0.0f, 0.0f, 1.0f);
+            var kZMat = new Matrix3(fCos, -fSin, 0.0f, fSin, fCos, 0.0f, 0.0f, 0.0f, 1.0f);
 
             fCos = (float)Math.Cos(fPAngle);
             fSin = (float)Math.Sin(fPAngle);
-            Matrix3 kYMat = new Matrix3(fCos, 0.0f, fSin, 0.0f, 1.0f, 0.0f, -fSin, 0.0f, fCos);
+            var kYMat = new Matrix3(fCos, 0.0f, fSin, 0.0f, 1.0f, 0.0f, -fSin, 0.0f, fCos);
 
             fCos = (float)Math.Cos(fRAngle);
             fSin = (float)Math.Sin(fRAngle);
-            Matrix3 kXMat = new Matrix3(1.0f, 0.0f, 0.0f, 0.0f, fCos, -fSin, 0.0f, fSin, fCos);
+            var kXMat = new Matrix3(1.0f, 0.0f, 0.0f, 0.0f, fCos, -fSin, 0.0f, fSin, fCos);
 
             return (kZMat * (kYMat * kXMat));
         }
 
         public Matrix3 inverse(float fTolerance = (float)1e-06)
         {
-            Matrix3 kInverse = Matrix3.Zero;
+            var kInverse = Matrix3.Zero;
             inverse(ref kInverse, fTolerance);
             return kInverse;
         }
@@ -573,7 +573,7 @@ namespace Framework.GameMath
                               M12 * M21;
 
 
-            float fDet =
+            var fDet =
                 M11 * rkInverse.M11 +
                 M12 * rkInverse.M21 +
                 M13 * rkInverse.M31;
@@ -581,7 +581,7 @@ namespace Framework.GameMath
             if (Math.Abs(fDet) <= fTolerance)
                 return false;
 
-            float fInvDet = (float)(1.0 / fDet);
+            var fInvDet = (float)(1.0 / fDet);
 
             rkInverse.M11 *= fInvDet;
             rkInverse.M12 *= fInvDet;
@@ -619,7 +619,7 @@ namespace Framework.GameMath
         {
             if (obj is Matrix3)
             {
-                Matrix3 m = (Matrix3)obj;
+                var m = (Matrix3)obj;
                 return
                     (_m11 == m.M11) && (_m12 == m.M12) && (_m13 == m.M13) &&
                     (_m21 == m.M21) && (_m22 == m.M22) && (_m23 == m.M23) &&

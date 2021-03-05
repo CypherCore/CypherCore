@@ -80,11 +80,11 @@ namespace Game.Networking.Packets
             Info.SendMoney = _worldPacket.ReadInt64();
             Info.Cod = _worldPacket.ReadInt64();
 
-            uint targetLength = _worldPacket.ReadBits<uint>(9);
-            uint subjectLength = _worldPacket.ReadBits<uint>(9);
-            uint bodyLength = _worldPacket.ReadBits<uint>(11);
+            var targetLength = _worldPacket.ReadBits<uint>(9);
+            var subjectLength = _worldPacket.ReadBits<uint>(9);
+            var bodyLength = _worldPacket.ReadBits<uint>(11);
 
-            uint count = _worldPacket.ReadBits<uint>(5);
+            var count = _worldPacket.ReadBits<uint>(5);
 
             Info.Target = _worldPacket.ReadString(targetLength);
             Info.Subject = _worldPacket.ReadString(subjectLength);
@@ -330,11 +330,11 @@ namespace Game.Networking.Packets
             }
 
             byte i = 0;
-            foreach (SocketedGem gemData in item.m_itemData.Gems)
+            foreach (var gemData in item.m_itemData.Gems)
             {
                 if (gemData.ItemId != 0)
                 {
-                    ItemGemData gem = new ItemGemData();
+                    var gem = new ItemGemData();
                     gem.Slot = i;
                     gem.Item = new ItemInstance(gemData);
                     Gems.Add(gem);
@@ -357,10 +357,10 @@ namespace Game.Networking.Packets
             data.WriteBit(Unlocked);
             data.FlushBits();
 
-            foreach (ItemGemData gem in Gems)
+            foreach (var gem in Gems)
                 gem.Write(data);
 
-            foreach (ItemEnchantData en in Enchants)
+            foreach (var en in Enchants)
                 en.Write(data);
         }
 
@@ -407,7 +407,7 @@ namespace Game.Networking.Packets
 
             for (byte i = 0; i < mail.items.Count; i++)
             {
-                Item item = player.GetMItem(mail.items[i].item_guid);
+                var item = player.GetMItem(mail.items[i].item_guid);
                 if (item)
                     Attachments.Add(new MailAttachedItem(item, i));
             }

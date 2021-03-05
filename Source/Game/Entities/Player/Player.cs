@@ -168,7 +168,7 @@ namespace Game.Entities
 
             SetName(createInfo.Name);
 
-            PlayerInfo info = Global.ObjectMgr.GetPlayerInfo(createInfo.RaceId, createInfo.ClassId);
+            var info = Global.ObjectMgr.GetPlayerInfo(createInfo.RaceId, createInfo.ClassId);
             if (info == null)
             {
                 Log.outError(LogFilter.Player, "PlayerCreate: Possible hacking-attempt: Account {0} tried creating a character named '{1}' with an invalid race/class pair ({2}/{3}) - refusing to do so.",
@@ -196,7 +196,7 @@ namespace Game.Entities
             SetMap(Global.MapMgr.CreateMap(info.MapId, this));
             UpdatePositionData();
 
-            PowerType powertype = cEntry.DisplayPower;
+            var powertype = cEntry.DisplayPower;
 
             SetObjectScale(1.0f);
 
@@ -266,7 +266,7 @@ namespace Game.Entities
             foreach (var action in info.action)
             {
                 // create new button
-                ActionButton ab = new ActionButton();
+                var ab = new ActionButton();
 
                 // set data
                 ab.SetActionAndType(action.action, (ActionButtonType)action.type);
@@ -275,20 +275,20 @@ namespace Game.Entities
             }
 
             // original items
-            foreach (PlayerCreateInfoItem initialItem in info.item)
+            foreach (var initialItem in info.item)
                 StoreNewItemInBestSlots(initialItem.item_id, initialItem.item_amount);
 
             // bags and main-hand weapon must equipped at this moment
             // now second pass for not equipped (offhand weapon/shield if it attempt equipped before main-hand weapon)
-            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
-            for (byte i = InventorySlots.ItemStart; i < inventoryEnd; i++)
+            var inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+            for (var i = InventorySlots.ItemStart; i < inventoryEnd; i++)
             {
-                Item pItem = GetItemByPos(InventorySlots.Bag0, i);
+                var pItem = GetItemByPos(InventorySlots.Bag0, i);
                 if (pItem != null)
                 {
                     ushort eDest;
                     // equip offhand weapon/shield if it attempt equipped before main-hand weapon
-                    InventoryResult msg = CanEquipItem(ItemConst.NullSlot, out eDest, pItem, false);
+                    var msg = CanEquipItem(ItemConst.NullSlot, out eDest, pItem, false);
                     if (msg == InventoryResult.Ok)
                     {
                         RemoveItem(InventorySlots.Bag0, i, true);
@@ -297,7 +297,7 @@ namespace Game.Entities
                     // move other items to more appropriate slots
                     else
                     {
-                        List<ItemPosCount> sDest = new List<ItemPosCount>();
+                        var sDest = new List<ItemPosCount>();
                         msg = CanStoreItem(ItemConst.NullBag, ItemConst.NullSlot, sDest, pItem, false);
                         if (msg == InventoryResult.Ok)
                         {
@@ -309,7 +309,7 @@ namespace Game.Entities
             }
             // all item positions resolved
 
-            ChrSpecializationRecord defaultSpec = Global.DB2Mgr.GetDefaultChrSpecializationForClass(GetClass());
+            var defaultSpec = Global.DB2Mgr.GetDefaultChrSpecializationForClass(GetClass());
             if (defaultSpec != null)
             {
                 SetActiveTalentGroup(defaultSpec.OrderIndex);

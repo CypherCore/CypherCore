@@ -30,7 +30,7 @@ namespace Game.Chat.Commands
             if (handler.GetSession() == null || !handler.GetSession().GetPlayer())
                 return false;
 
-            string argstr = args.NextString();
+            var argstr = args.NextString();
             if (args.Empty())
                 argstr = (handler.GetSession().GetPlayer().GetCommandStatus(PlayerCommandStates.God)) ? "off" : "on";
 
@@ -56,7 +56,7 @@ namespace Game.Chat.Commands
             if (handler.GetSession() == null || !handler.GetSession().GetPlayer())
                 return false;
 
-            string argstr = args.NextString();
+            var argstr = args.NextString();
 
             if (args.Empty())
                 argstr = (handler.GetSession().GetPlayer().GetCommandStatus(PlayerCommandStates.Casttime)) ? "off" : "on";
@@ -83,7 +83,7 @@ namespace Game.Chat.Commands
             if (handler.GetSession() == null || !handler.GetSession().GetPlayer())
                 return false;
 
-            string argstr = args.NextString();
+            var argstr = args.NextString();
 
             if (args.Empty())
                 argstr = (handler.GetSession().GetPlayer().GetCommandStatus(PlayerCommandStates.Cooldown)) ? "off" : "on";
@@ -110,7 +110,7 @@ namespace Game.Chat.Commands
             if (handler.GetSession() == null || !handler.GetSession().GetPlayer())
                 return false;
 
-            string argstr = args.NextString();
+            var argstr = args.NextString();
 
             if (args.Empty())
                 argstr = (handler.GetSession().GetPlayer().GetCommandStatus(PlayerCommandStates.Power)) ? "off" : "on";
@@ -134,10 +134,10 @@ namespace Game.Chat.Commands
         [Command("status", RBACPermissions.CommandCheatStatus)]
         static bool HandleCheatStatus(StringArguments args, CommandHandler handler)
         {
-            Player player = handler.GetSession().GetPlayer();
+            var player = handler.GetSession().GetPlayer();
 
-            string enabled = "ON";
-            string disabled = "OFF";
+            var enabled = "ON";
+            var disabled = "OFF";
 
             handler.SendSysMessage(CypherStrings.CommandCheatStatus);
             handler.SendSysMessage(CypherStrings.CommandCheatGod, player.GetCommandStatus(PlayerCommandStates.God) ? enabled : disabled);
@@ -155,9 +155,9 @@ namespace Game.Chat.Commands
             if (handler.GetSession() == null || !handler.GetSession().GetPlayer())
                 return false;
 
-            string argstr = args.NextString();
+            var argstr = args.NextString();
 
-            Player target = handler.GetSession().GetPlayer();
+            var target = handler.GetSession().GetPlayer();
             if (args.Empty())
                 argstr = (target.GetCommandStatus(PlayerCommandStates.Waterwalk)) ? "off" : "on";
 
@@ -182,9 +182,9 @@ namespace Game.Chat.Commands
         [Command("taxi", RBACPermissions.CommandCheatTaxi)]
         static bool HandleTaxiCheatCommand(StringArguments args, CommandHandler handler)
         {
-            string argstr = args.NextString();
+            var argstr = args.NextString();
 
-            Player chr = handler.GetSelectedPlayer();
+            var chr = handler.GetSelectedPlayer();
             if (!chr)
                 chr = handler.GetSession().GetPlayer();
             else if (handler.HasLowerSecurity(chr, ObjectGuid.Empty)) // check online security
@@ -221,8 +221,8 @@ namespace Game.Chat.Commands
             if (args.Empty())
                 return false;
 
-            int flag = args.NextInt32();
-            Player chr = handler.GetSelectedPlayer();
+            var flag = args.NextInt32();
+            var chr = handler.GetSelectedPlayer();
             if (!chr)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);

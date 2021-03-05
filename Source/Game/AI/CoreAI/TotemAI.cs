@@ -47,11 +47,11 @@ namespace Game.AI
                 return;
 
             // Get spell range
-            float max_range = spellInfo.GetMaxRange(false);
+            var max_range = spellInfo.GetMaxRange(false);
 
             // SPELLMOD_RANGE not applied in this place just because not existence range mods for attacking totems
 
-            Unit victim = !i_victimGuid.IsEmpty() ? Global.ObjAccessor.GetUnit(me, i_victimGuid) : null;
+            var victim = !i_victimGuid.IsEmpty() ? Global.ObjAccessor.GetUnit(me, i_victimGuid) : null;
 
             // Search victim if no, not attackable, or out of range, or friendly (possible in case duel end)
             if (victim == null || !victim.IsTargetableForAttack() || !me.IsWithinDistInMap(victim, max_range) ||

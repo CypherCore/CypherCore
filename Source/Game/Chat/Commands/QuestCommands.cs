@@ -30,7 +30,7 @@ namespace Game.Chat
         [Command("add", RBACPermissions.CommandQuestAdd)]
         static bool Add(StringArguments args, CommandHandler handler)
         {
-            Player player = handler.GetSelectedPlayer();
+            var player = handler.GetSelectedPlayer();
             if (!player)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
@@ -39,11 +39,11 @@ namespace Game.Chat
 
             // .addquest #entry'
             // number or [name] Shift-click form |color|Hquest:quest_id:quest_level:min_level:max_level:scaling_faction|h[name]|h|r
-            string cId = handler.ExtractKeyFromLink(args, "Hquest");
-            if (!uint.TryParse(cId, out uint entry))
+            var cId = handler.ExtractKeyFromLink(args, "Hquest");
+            if (!uint.TryParse(cId, out var entry))
                 return false;
 
-            Quest quest = Global.ObjectMgr.GetQuestTemplate(entry);
+            var quest = Global.ObjectMgr.GetQuestTemplate(entry);
             if (quest == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandQuestNotfound, entry);
@@ -70,7 +70,7 @@ namespace Game.Chat
         [Command("complete", RBACPermissions.CommandQuestComplete)]
         static bool Complete(StringArguments args, CommandHandler handler)
         {
-            Player player = handler.GetSelectedPlayer();
+            var player = handler.GetSelectedPlayer();
             if (!player)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
@@ -79,11 +79,11 @@ namespace Game.Chat
 
             // .quest complete #entry
             // number or [name] Shift-click form |color|Hquest:quest_id:quest_level:min_level:max_level:scaling_faction|h[name]|h|r
-            string cId = handler.ExtractKeyFromLink(args, "Hquest");
-            if (!uint.TryParse(cId, out uint entry))
+            var cId = handler.ExtractKeyFromLink(args, "Hquest");
+            if (!uint.TryParse(cId, out var entry))
                 return false;
 
-            Quest quest = Global.ObjectMgr.GetQuestTemplate(entry);
+            var quest = Global.ObjectMgr.GetQuestTemplate(entry);
 
             // If player doesn't have the quest
             if (quest == null || player.GetQuestStatus(entry) == QuestStatus.None)
@@ -92,44 +92,44 @@ namespace Game.Chat
                 return false;
             }
 
-            for (int i = 0; i < quest.Objectives.Count; ++i)
+            for (var i = 0; i < quest.Objectives.Count; ++i)
             {
-                QuestObjective obj = quest.Objectives[i];
+                var obj = quest.Objectives[i];
 
                 switch (obj.Type)
                 {
                     case QuestObjectiveType.Item:
                         {
-                            uint curItemCount = player.GetItemCount((uint)obj.ObjectID, true);
-                            List<ItemPosCount> dest = new List<ItemPosCount>();
-                            InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, (uint)obj.ObjectID, (uint)(obj.Amount - curItemCount));
+                            var curItemCount = player.GetItemCount((uint)obj.ObjectID, true);
+                            var dest = new List<ItemPosCount>();
+                            var msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, (uint)obj.ObjectID, (uint)(obj.Amount - curItemCount));
                             if (msg == InventoryResult.Ok)
                             {
-                                Item item = player.StoreNewItem(dest, (uint)obj.ObjectID, true);
+                                var item = player.StoreNewItem(dest, (uint)obj.ObjectID, true);
                                 player.SendNewItem(item, (uint)(obj.Amount - curItemCount), true, false);
                             }
                             break;
                         }
                     case QuestObjectiveType.Monster:
                         {
-                            CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate((uint)obj.ObjectID);
+                            var creatureInfo = Global.ObjectMgr.GetCreatureTemplate((uint)obj.ObjectID);
                             if (creatureInfo != null)
-                                for (int z = 0; z < obj.Amount; ++z)
+                                for (var z = 0; z < obj.Amount; ++z)
                                     player.KilledMonster(creatureInfo, ObjectGuid.Empty);
                             break;
                         }
                     case QuestObjectiveType.GameObject:
                         {
-                            for (int z = 0; z < obj.Amount; ++z)
+                            for (var z = 0; z < obj.Amount; ++z)
                                 player.KillCreditGO((uint)obj.ObjectID);
                             break;
                         }
                     case QuestObjectiveType.MinReputation:
                         {
-                            int curRep = player.GetReputationMgr().GetReputation((uint)obj.ObjectID);
+                            var curRep = player.GetReputationMgr().GetReputation((uint)obj.ObjectID);
                             if (curRep < obj.Amount)
                             {
-                                FactionRecord factionEntry = CliDB.FactionStorage.LookupByKey(obj.ObjectID);
+                                var factionEntry = CliDB.FactionStorage.LookupByKey(obj.ObjectID);
                                 if (factionEntry != null)
                                     player.GetReputationMgr().SetReputation(factionEntry, obj.Amount);
                             }
@@ -137,10 +137,10 @@ namespace Game.Chat
                         }
                     case QuestObjectiveType.MaxReputation:
                         {
-                            int curRep = player.GetReputationMgr().GetReputation((uint)obj.ObjectID);
+                            var curRep = player.GetReputationMgr().GetReputation((uint)obj.ObjectID);
                             if (curRep > obj.Amount)
                             {
-                                FactionRecord factionEntry = CliDB.FactionStorage.LookupByKey(obj.ObjectID);
+                                var factionEntry = CliDB.FactionStorage.LookupByKey(obj.ObjectID);
                                 if (factionEntry != null)
                                     player.GetReputationMgr().SetReputation(factionEntry, obj.Amount);
                             }
@@ -162,7 +162,7 @@ namespace Game.Chat
         [Command("remove", RBACPermissions.CommandQuestRemove)]
         static bool Remove(StringArguments args, CommandHandler handler)
         {
-            Player player = handler.GetSelectedPlayer();
+            var player = handler.GetSelectedPlayer();
             if (!player)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
@@ -171,23 +171,23 @@ namespace Game.Chat
 
             // .removequest #entry'
             // number or [name] Shift-click form |color|Hquest:quest_id:quest_level:min_level:max_level:scaling_faction|h[name]|h|r
-            string cId = handler.ExtractKeyFromLink(args, "Hquest");
-            if (!uint.TryParse(cId, out uint entry))
+            var cId = handler.ExtractKeyFromLink(args, "Hquest");
+            if (!uint.TryParse(cId, out var entry))
                 return false;
 
-            Quest quest = Global.ObjectMgr.GetQuestTemplate(entry);
+            var quest = Global.ObjectMgr.GetQuestTemplate(entry);
             if (quest == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandQuestNotfound, entry);
                 return false;
             }
 
-            QuestStatus oldStatus = player.GetQuestStatus(entry);
+            var oldStatus = player.GetQuestStatus(entry);
 
             // remove all quest entries for 'entry' from quest log
             for (byte slot = 0; slot < SharedConst.MaxQuestLogSize; ++slot)
             {
-                uint logQuest = player.GetQuestSlotQuestId(slot);
+                var logQuest = player.GetQuestSlotQuestId(slot);
                 if (logQuest == entry)
                 {
                     player.SetQuestSlot(slot, 0);
@@ -216,7 +216,7 @@ namespace Game.Chat
         [Command("reward", RBACPermissions.CommandQuestReward)]
         static bool Reward(StringArguments args, CommandHandler handler)
         {
-            Player player = handler.GetSelectedPlayer();
+            var player = handler.GetSelectedPlayer();
             if (!player)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
@@ -225,11 +225,11 @@ namespace Game.Chat
 
             // .quest reward #entry
             // number or [name] Shift-click form |color|Hquest:quest_id:quest_level:min_level:max_level:scaling_faction|h[name]|h|r
-            string cId = handler.ExtractKeyFromLink(args, "Hquest");
-            if (!uint.TryParse(cId, out uint entry))
+            var cId = handler.ExtractKeyFromLink(args, "Hquest");
+            if (!uint.TryParse(cId, out var entry))
                 return false;
 
-            Quest quest = Global.ObjectMgr.GetQuestTemplate(entry);
+            var quest = Global.ObjectMgr.GetQuestTemplate(entry);
 
             // If player doesn't have the quest
             if (quest == null || player.GetQuestStatus(entry) != QuestStatus.Complete)

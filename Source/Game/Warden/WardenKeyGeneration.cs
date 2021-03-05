@@ -24,7 +24,7 @@ namespace Game
     {
         public SHA1Randx(byte[] buff)
         {
-            int halfSize = buff.Length / 2;
+            var halfSize = buff.Length / 2;
             Span<byte> span = buff;
 
             sh = SHA1.Create();

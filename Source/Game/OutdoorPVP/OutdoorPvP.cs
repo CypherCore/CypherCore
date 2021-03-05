@@ -64,7 +64,7 @@ namespace Game.PvP
 
         public virtual bool Update(uint diff)
         {
-            bool objective_changed = false;
+            var objective_changed = false;
             foreach (var pair in m_capturePoints)
             {
                 if (pair.Value.Update(diff))
@@ -77,7 +77,7 @@ namespace Game.PvP
         {
             if (m_sendUpdate)
             {
-                for (int i = 0; i < 2; ++i)
+                for (var i = 0; i < 2; ++i)
                 {
                     foreach (var guid in m_players[i])
                     {
@@ -91,12 +91,12 @@ namespace Game.PvP
 
         public virtual void HandleKill(Player killer, Unit killed)
         {
-            Group group = killer.GetGroup();
+            var group = killer.GetGroup();
             if (group)
             {
                 for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                 {
-                    Player groupGuy = refe.GetSource();
+                    var groupGuy = refe.GetSource();
 
                     if (!groupGuy)
                         continue;
@@ -181,7 +181,7 @@ namespace Game.PvP
         void BroadcastPacket(ServerPacket packet)
         {
             // This is faster than sWorld.SendZoneMessage
-            for (int team = 0; team < 2; ++team)
+            for (var team = 0; team < 2; ++team)
             {
                 foreach (var guid in m_players[team])
                 {
@@ -228,7 +228,7 @@ namespace Game.PvP
             if (go.GetGoType() != GameObjectTypes.ControlZone)
                 return;
 
-            OPvPCapturePoint cp = GetCapturePoint(go.GetSpawnId());
+            var cp = GetCapturePoint(go.GetSpawnId());
             if (cp != null)
                 cp.m_capturePoint = go;
         }
@@ -238,14 +238,14 @@ namespace Game.PvP
             if (go.GetGoType() != GameObjectTypes.ControlZone)
                 return;
 
-            OPvPCapturePoint cp = GetCapturePoint(go.GetSpawnId());
+            var cp = GetCapturePoint(go.GetSpawnId());
             if (cp != null)
                 cp.m_capturePoint = null;
         }
 
         public void SendDefenseMessage(uint zoneId, uint id)
         {
-            DefenseMessageBuilder builder = new DefenseMessageBuilder(zoneId, id);
+            var builder = new DefenseMessageBuilder(zoneId, id);
             var localizer = new LocalizedPacketDo(builder);
             BroadcastWorker(localizer, zoneId);
         }
@@ -296,9 +296,9 @@ namespace Game.PvP
         // Hack to store map because this code is just shit
         public void SetMapFromZone(uint zone)
         {
-            AreaTableRecord areaTable = CliDB.AreaTableStorage.LookupByKey(zone);
+            var areaTable = CliDB.AreaTableStorage.LookupByKey(zone);
             Cypher.Assert(areaTable != null);
-            Map map = Global.MapMgr.CreateBaseMap(areaTable.ContinentID);
+            var map = Global.MapMgr.CreateBaseMap(areaTable.ContinentID);
             Cypher.Assert(!map.Instanceable());
             m_map = map;
         }
@@ -432,7 +432,7 @@ namespace Game.PvP
                 Log.outDebug(LogFilter.Outdoorpvp, "opvp creature type {0} was already deleted", type);
                 return false;
             }
-            ulong spawnId = m_Creatures[type];
+            var spawnId = m_Creatures[type];
 
             var bounds = PvP.GetMap().GetCreatureBySpawnIdStore().LookupByKey(spawnId);
             foreach (var creature in bounds)
@@ -446,7 +446,7 @@ namespace Game.PvP
             Log.outDebug(LogFilter.Outdoorpvp, "deleting opvp creature type {0}", type);
 
             // delete respawn time for this creature
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CREATURE_RESPAWN);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CREATURE_RESPAWN);
             stmt.AddValue(0, spawnId);
             stmt.AddValue(1, PvP.GetMap().GetId());
             stmt.AddValue(2, 0);  // instance id, always 0 for world maps
@@ -463,7 +463,7 @@ namespace Game.PvP
             if (!m_Objects.ContainsKey(type))
                 return false;
 
-            ulong spawnId = m_Objects[type];
+            var spawnId = m_Objects[type];
             var bounds = PvP.GetMap().GetGameObjectBySpawnIdStore().LookupByKey(spawnId);
             foreach (var gameobject in bounds)
             {
@@ -510,7 +510,7 @@ namespace Game.PvP
 
             float radius = m_capturePoint.GetGoInfo().ControlZone.radius;
 
-            for (int team = 0; team < 2; ++team)
+            for (var team = 0; team < 2; ++team)
             {
                 foreach (var playerGuid in m_activePlayers[team].ToList())
                 {
@@ -521,7 +521,7 @@ namespace Game.PvP
                 }
             }
 
-            List<Unit> players = new List<Unit>();
+            var players = new List<Unit>();
             var checker = new AnyPlayerInObjectRangeCheck(m_capturePoint, radius);
             var searcher = new PlayerListSearcher(m_capturePoint, players, checker);
             Cell.VisitWorldObjects(m_capturePoint, searcher, radius);
@@ -536,12 +536,12 @@ namespace Game.PvP
             }
 
             // get the difference of numbers
-            float fact_diff = (float)(m_activePlayers[0].Count - m_activePlayers[1].Count) * diff / 1000;
+            var fact_diff = (float)(m_activePlayers[0].Count - m_activePlayers[1].Count) * diff / 1000;
             if (fact_diff == 0.0f)
                 return false;
 
             Team Challenger = 0;
-            float maxDiff = m_maxSpeed * diff;
+            var maxDiff = m_maxSpeed * diff;
 
             if (fact_diff < 0)
             {
@@ -566,8 +566,8 @@ namespace Game.PvP
                 Challenger = Team.Alliance;
             }
 
-            float oldValue = m_value;
-            uint oldTeam = m_team;
+            var oldValue = m_value;
+            var oldTeam = m_team;
 
             OldState = State;
 
@@ -623,7 +623,7 @@ namespace Game.PvP
 
         public void SendUpdateWorldState(uint field, uint value)
         {
-            for (int team = 0; team < 2; ++team)
+            for (var team = 0; team < 2; ++team)
             {
                 // send to all players present in the area
                 foreach (var guid in m_activePlayers[team])
@@ -738,9 +738,9 @@ namespace Game.PvP
 
         public override ServerPacket Invoke(Locale locale = Locale.enUS)
         {
-            string text = Global.OutdoorPvPMgr.GetDefenseMessage(_zoneId, _id, locale);
+            var text = Global.OutdoorPvPMgr.GetDefenseMessage(_zoneId, _id, locale);
 
-            DefenseMessage defenseMessage = new DefenseMessage();
+            var defenseMessage = new DefenseMessage();
             defenseMessage.ZoneID = _zoneId;
             defenseMessage.MessageText = text;
             return defenseMessage;

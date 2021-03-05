@@ -113,8 +113,8 @@ namespace Scripts.Spells.Hunter
 
         void HandleDummy(uint effIndex)
         {
-            Unit caster = GetCaster();
-            int healthModSpellBasePoints0 = (int)caster.CountPctFromMaxHealth(30);
+            var caster = GetCaster();
+            var healthModSpellBasePoints0 = (int)caster.CountPctFromMaxHealth(30);
             caster.CastCustomSpell(caster, SpellIds.PetLastStandTriggered, healthModSpellBasePoints0, 0, 0, true, null);
         }
 
@@ -140,13 +140,13 @@ namespace Scripts.Spells.Hunter
 
         SpellCastResult DoCheckCast()
         {
-            Guardian pet = GetCaster().ToPlayer().GetGuardianPet();
+            var pet = GetCaster().ToPlayer().GetGuardianPet();
             if (pet == null || !pet.IsPet() || !pet.IsAlive())
                 return SpellCastResult.NoPet;
 
             // Do a mini Spell::CheckCasterAuras on the pet, no other way of doing this
-            SpellCastResult result = SpellCastResult.SpellCastOk;
-            UnitFlags unitflag = (UnitFlags)(uint)pet.m_unitData.Flags;
+            var result = SpellCastResult.SpellCastOk;
+            var unitflag = (UnitFlags)(uint)pet.m_unitData.Flags;
             if (!pet.GetCharmerGUID().IsEmpty())
                 result = SpellCastResult.Charmed;
             else if (unitflag.HasAnyFlag(UnitFlags.Stunned))
@@ -159,7 +159,7 @@ namespace Scripts.Spells.Hunter
             if (result != SpellCastResult.SpellCastOk)
                 return result;
 
-            Unit target = GetExplTargetUnit();
+            var target = GetExplTargetUnit();
             if (!target)
                 return SpellCastResult.BadTargets;
 
@@ -257,8 +257,8 @@ namespace Scripts.Spells.Hunter
 
         void HandleScript(uint effIndex)
         {
-            Unit caster = GetCaster();
-            Unit owner = caster.GetOwner();
+            var caster = GetCaster();
+            var owner = caster.GetOwner();
             if (owner)
             {
                 if (!caster.HasAura(SpellIds.PetHeartOfThePhoenixDebuff))
@@ -285,7 +285,7 @@ namespace Scripts.Spells.Hunter
 
         bool CheckProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            DamageInfo damageInfo = eventInfo.GetDamageInfo();
+            var damageInfo = eventInfo.GetDamageInfo();
             if (damageInfo == null || !Convert.ToBoolean((int)damageInfo.GetSchoolMask() & aurEff.GetMiscValue()))
                 return false;
 
@@ -299,7 +299,7 @@ namespace Scripts.Spells.Hunter
         {
             PreventDefaultAction();
 
-            int damage = (int)MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount());
+            var damage = (int)MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount());
             eventInfo.GetActor().CastCustomSpell(SpellIds.RoarOfSacrificeTriggered, SpellValueMod.BasePoint0, damage, GetCaster(), TriggerCastFlags.FullMask, null, aurEff);
         }
 
@@ -321,7 +321,7 @@ namespace Scripts.Spells.Hunter
 
         void HandleDummy(uint effIndex)
         {
-            Player caster = GetCaster().ToPlayer();
+            var caster = GetCaster().ToPlayer();
             // break auto Shot and varhit
             caster.InterruptSpell(CurrentSpellTypes.AutoRepeat);
             caster.AttackStop();
@@ -365,14 +365,14 @@ namespace Scripts.Spells.Hunter
     {
         SpellCastResult CheckCast()
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (!caster.IsTypeId(TypeId.Player))
                 return SpellCastResult.DontReport;
 
             if (!GetExplTargetUnit())
                 return SpellCastResult.BadImplicitTargets;
 
-            Creature target = GetExplTargetUnit().ToCreature();
+            var target = GetExplTargetUnit().ToCreature();
             if (target)
             {
                 if (target.GetLevel() > caster.GetLevel())
@@ -418,7 +418,7 @@ namespace Scripts.Spells.Hunter
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            Unit caster = eventInfo.GetActor();
+            var caster = eventInfo.GetActor();
 
             caster.CastSpell(caster.ToPlayer().GetPet(), SpellIds.T94PGreatness, true, null, aurEff);
         }

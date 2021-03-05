@@ -90,7 +90,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                WorldObject obj = objs[i];
+                var obj = objs[i];
 
                 vis_guids.Remove(obj.GetGUID());
                 i_player.UpdateVisibilityOf(obj, i_data, i_visibleNow);
@@ -101,7 +101,7 @@ namespace Game.Maps
         {
             // at this moment i_clientGUIDs have guids that not iterate at grid level checks
             // but exist one case when this possible and object not out of range: transports
-            Transport transport = i_player.GetTransport();
+            var transport = i_player.GetTransport();
             if (transport)
             {
                 foreach (var obj in transport.GetPassengers())
@@ -174,7 +174,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                Player player = objs[i];
+                var player = objs[i];
                 if (player.GetGUID() == i_object.GetGUID())
                     return;
 
@@ -195,7 +195,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                Creature creature = objs[i];
+                var creature = objs[i];
                 if (creature.HasSharedVision())
                 {
                     foreach (var visionPlayer in creature.GetSharedVisionList())
@@ -209,11 +209,11 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                DynamicObject dynamicObject = objs[i];
+                var dynamicObject = objs[i];
                 Unit caster = dynamicObject.GetCaster();
                 if (caster)
                 {
-                    Player pl = caster.ToPlayer();
+                    var pl = caster.ToPlayer();
                     if (pl && pl.seerView == dynamicObject)
                         pl.UpdateVisibilityOf(i_object);
                 }
@@ -233,7 +233,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                Player player = objs[i];
+                var player = objs[i];
                 vis_guids.Remove(player.GetGUID());
 
                 i_player.UpdateVisibilityOf(player, i_data, i_visibleNow);
@@ -249,11 +249,11 @@ namespace Game.Maps
         {
             base.Visit(objs);
 
-            bool relocated_for_ai = (i_player == i_player.seerView);
+            var relocated_for_ai = (i_player == i_player.seerView);
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                Creature creature = objs[i];
+                var creature = objs[i];
                 vis_guids.Remove(creature.GetGUID());
 
                 i_player.UpdateVisibilityOf(creature, i_data, i_visibleNow);
@@ -275,7 +275,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                Player player = objs[i];
+                var player = objs[i];
                 if (!player.seerView.IsNeedNotify(NotifyFlags.VisibilityChanged))
                     player.UpdateVisibilityOf(i_creature);
 
@@ -290,7 +290,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                Creature creature = objs[i];
+                var creature = objs[i];
                 CreatureUnitRelocationWorker(i_creature, creature);
 
                 if (!creature.IsNeedNotify(NotifyFlags.VisibilityChanged))
@@ -315,8 +315,8 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                Player player = objs[i];
-                WorldObject viewPoint = player.seerView;
+                var player = objs[i];
+                var viewPoint = player.seerView;
 
                 if (!viewPoint.IsNeedNotify(NotifyFlags.VisibilityChanged))
                     continue;
@@ -335,11 +335,11 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                Creature creature = objs[i];
+                var creature = objs[i];
                 if (!creature.IsNeedNotify(NotifyFlags.VisibilityChanged))
                     continue;
 
-                CreatureRelocationNotifier relocate = new CreatureRelocationNotifier(creature);
+                var relocate = new CreatureRelocationNotifier(creature);
 
                 var c2world_relocation = new Visitor(relocate, GridMapTypeMask.AllWorld);
                 var c2grid_relocation = new Visitor(relocate, GridMapTypeMask.AllGrid);
@@ -367,7 +367,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                Creature creature = objs[i];
+                var creature = objs[i];
                 CreatureUnitRelocationWorker(creature, i_unit);
                 if (isCreature)
                     CreatureUnitRelocationWorker(i_unit.ToCreature(), creature);
@@ -393,7 +393,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                Player player = objs[i];
+                var player = objs[i];
                 if (!player.IsInPhase(i_source))
                     continue;
 
@@ -417,7 +417,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                Creature creature = objs[i];
+                var creature = objs[i];
                 if (!creature.IsInPhase(i_source))
                     continue;
 
@@ -438,7 +438,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                DynamicObject dynamicObject = objs[i];
+                var dynamicObject = objs[i];
                 if (!dynamicObject.IsInPhase(i_source))
                     continue;
 
@@ -449,7 +449,7 @@ namespace Game.Maps
                 Unit caster = dynamicObject.GetCaster();
                 if (caster)
                 {
-                    Player player = caster.ToPlayer();
+                    var player = caster.ToPlayer();
                     if (player && player.seerView == dynamicObject)
                         SendPacket(player);
                 }
@@ -492,7 +492,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                Player player = objs[i];
+                var player = objs[i];
                 if (!player.IsInPhase(i_source))
                     continue;
 
@@ -516,7 +516,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                Creature creature = objs[i];
+                var creature = objs[i];
                 if (!creature.IsInPhase(i_source))
                     continue;
 
@@ -537,7 +537,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                DynamicObject dynamicObject = objs[i];
+                var dynamicObject = objs[i];
                 if (!dynamicObject.IsInPhase(i_source))
                     continue;
 
@@ -548,7 +548,7 @@ namespace Game.Maps
                 if (caster != null)
                 {
                     // Send packet back to the caster if the caster has vision of dynamic object
-                    Player player = caster.ToPlayer();
+                    var player = caster.ToPlayer();
                     if (player && player.seerView == dynamicObject)
                         SendPacket(player);
                 }
@@ -576,7 +576,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                WorldObject obj = objs[i];
+                var obj = objs[i];
 
                 if (obj.IsTypeId(TypeId.Player) || obj.IsTypeId(TypeId.Corpse))
                     return;
@@ -601,7 +601,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                Player player = objs[i];
+                var player = objs[i];
                 if (player.IsInPhase(_searcher))
                     action.Invoke(player);
             }
@@ -623,7 +623,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                Creature creature = objs[i];
+                var creature = objs[i];
                 if (creature.IsInPhase(_searcher))
                     Do.Invoke(creature);
             }
@@ -645,7 +645,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                GameObject gameObject = objs[i];
+                var gameObject = objs[i];
                 if (gameObject.IsInPhase(_searcher))
                     Do.Invoke(gameObject);
             }
@@ -671,7 +671,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                GameObject gameObject = objs[i];
+                var gameObject = objs[i];
                 if (gameObject.IsInPhase(_searcher))
                     i_do.Invoke(gameObject);
             }
@@ -684,7 +684,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                Player player = objs[i];
+                var player = objs[i];
                 if (player.IsInPhase(_searcher))
                     i_do.Invoke(player);
             }
@@ -697,7 +697,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                Creature creature = objs[i];
+                var creature = objs[i];
                 if (creature.IsInPhase(_searcher))
                     i_do.Invoke(creature);
             }
@@ -710,7 +710,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                Corpse corpse = objs[i];
+                var corpse = objs[i];
                 if (corpse.IsInPhase(_searcher))
                     i_do.Invoke(corpse);
             }
@@ -723,7 +723,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                DynamicObject dynamicObject = objs[i];
+                var dynamicObject = objs[i];
                 if (dynamicObject.IsInPhase(_searcher))
                     i_do.Invoke(dynamicObject);
             }
@@ -736,7 +736,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                AreaTrigger areaTrigger = objs[i];
+                var areaTrigger = objs[i];
                 if (areaTrigger.IsInPhase(_searcher))
                     i_do.Invoke(areaTrigger);
             }
@@ -749,7 +749,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                Conversation conversation = objs[i];
+                var conversation = objs[i];
                 if (conversation.IsInPhase(_searcher))
                     i_do.Invoke(conversation);
             }
@@ -766,7 +766,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                Player player = objs[i];
+                var player = objs[i];
                 player.ResetAllNotifies();
             }
         }
@@ -775,7 +775,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                Creature creature = objs[i];
+                var creature = objs[i];
                 creature.ResetAllNotifies();
             }
         }
@@ -793,7 +793,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                Player player = objs[i];
+                var player = objs[i];
                 BuildPacket(player);
 
                 if (!player.GetSharedVisionList().Empty())
@@ -808,7 +808,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                Creature creature = objs[i];
+                var creature = objs[i];
                 if (!creature.GetSharedVisionList().Empty())
                 {
                     foreach (var visionPlayer in creature.GetSharedVisionList())
@@ -821,7 +821,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                DynamicObject dynamicObject = objs[i];
+                var dynamicObject = objs[i];
 
                 ObjectGuid guid = dynamicObject.GetCasterGUID();
                 if (guid.IsPlayer())
@@ -863,7 +863,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                Player player = objs[i];
+                var player = objs[i];
                 if (player.IsInPhase(i_searcher) && player.IsWithinDist(i_searcher, i_dist))
                     Do.Invoke(player);
             }
@@ -917,8 +917,8 @@ namespace Game.Maps
 
         public void Invoke(Player player)
         {
-            Locale loc_idx = player.GetSession().GetSessionDbLocaleIndex();
-            int cache_idx = (int)loc_idx + 1;
+            var loc_idx = player.GetSession().GetSessionDbLocaleIndex();
+            var cache_idx = (int)loc_idx + 1;
             ServerPacket data;
 
             // create if not cached yet
@@ -950,9 +950,9 @@ namespace Game.Maps
 
         public void Invoke(Player p)
         {
-            Locale loc_idx = p.GetSession().GetSessionDbLocaleIndex();
-            int cache_idx = (int)loc_idx + 1;
-            List<ServerPacket> data_list = new List<ServerPacket>();
+            var loc_idx = p.GetSession().GetSessionDbLocaleIndex();
+            var cache_idx = (int)loc_idx + 1;
+            var data_list = new List<ServerPacket>();
 
             // create if not cached yet
             if (i_data_cache.Count < cache_idx + 1 || i_data_cache[cache_idx].Empty())
@@ -1010,7 +1010,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                GameObject gameObject = objs[i];
+                var gameObject = objs[i];
                 if (!gameObject.IsInPhase(_searcher))
                     continue;
 
@@ -1033,7 +1033,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                Player player = objs[i];
+                var player = objs[i];
                 if (!player.IsInPhase(_searcher))
                     continue;
 
@@ -1056,7 +1056,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                Creature creature = objs[i];
+                var creature = objs[i];
                 if (!creature.IsInPhase(_searcher))
                     continue;
 
@@ -1079,7 +1079,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                Corpse corpse = objs[i];
+                var corpse = objs[i];
                 if (!corpse.IsInPhase(_searcher))
                     continue;
 
@@ -1102,7 +1102,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                DynamicObject dynamicObject = objs[i];
+                var dynamicObject = objs[i];
                 if (!dynamicObject.IsInPhase(_searcher))
                     continue;
 
@@ -1125,7 +1125,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                AreaTrigger areaTrigger = objs[i];
+                var areaTrigger = objs[i];
                 if (!areaTrigger.IsInPhase(_searcher))
                     continue;
 
@@ -1148,7 +1148,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                Conversation conversation = objs[i];
+                var conversation = objs[i];
                 if (!conversation.IsInPhase(_searcher))
                     continue;
 
@@ -1183,7 +1183,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                GameObject gameObject = objs[i];
+                var gameObject = objs[i];
                 if (!gameObject.IsInPhase(_searcher))
                     continue;
 
@@ -1199,7 +1199,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                Player player = objs[i];
+                var player = objs[i];
                 if (!player.IsInPhase(_searcher))
                     continue;
 
@@ -1215,7 +1215,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                Creature creature = objs[i];
+                var creature = objs[i];
                 if (!creature.IsInPhase(_searcher))
                     continue;
 
@@ -1231,7 +1231,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                Corpse corpse = objs[i];
+                var corpse = objs[i];
                 if (!corpse.IsInPhase(_searcher))
                     continue;
 
@@ -1247,7 +1247,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                DynamicObject dynamicObject = objs[i];
+                var dynamicObject = objs[i];
                 if (!dynamicObject.IsInPhase(_searcher))
                     continue;
 
@@ -1263,7 +1263,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                AreaTrigger areaTrigger = objs[i];
+                var areaTrigger = objs[i];
                 if (!areaTrigger.IsInPhase(_searcher))
                     continue;
 
@@ -1279,7 +1279,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                Conversation conversation = objs[i];
+                var conversation = objs[i];
                 if (!conversation.IsInPhase(_searcher))
                     continue;
 
@@ -1312,7 +1312,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                Player player = objs[i];
+                var player = objs[i];
                 if (i_check.Invoke(player))
                     i_objects.Add(player);
             }
@@ -1325,7 +1325,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                Creature creature = objs[i];
+                var creature = objs[i];
                 if (i_check.Invoke(creature))
                     i_objects.Add(creature);
             }
@@ -1338,7 +1338,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                Corpse corpse = objs[i];
+                var corpse = objs[i];
                 if (i_check.Invoke(corpse))
                     i_objects.Add(corpse);
             }
@@ -1351,7 +1351,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                GameObject gameObject = objs[i];
+                var gameObject = objs[i];
                 if (i_check.Invoke(gameObject))
                     i_objects.Add(gameObject);
             }
@@ -1364,7 +1364,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                DynamicObject dynamicObject = objs[i];
+                var dynamicObject = objs[i];
                 if (i_check.Invoke(dynamicObject))
                     i_objects.Add(dynamicObject);
             }
@@ -1377,7 +1377,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                AreaTrigger areaTrigger = objs[i];
+                var areaTrigger = objs[i];
                 if (i_check.Invoke(areaTrigger))
                     i_objects.Add(areaTrigger);
             }
@@ -1390,7 +1390,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                Conversation conversation = objs[i];
+                var conversation = objs[i];
                 if (i_check.Invoke(conversation))
                     i_objects.Add(conversation);
             }
@@ -1418,7 +1418,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                GameObject gameObject = objs[i];
+                var gameObject = objs[i];
                 if (!gameObject.IsInPhase(_searcher))
                     continue;
 
@@ -1448,7 +1448,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                GameObject gameObject = objs[i];
+                var gameObject = objs[i];
                 if (!gameObject.IsInPhase(_searcher))
                     continue;
 
@@ -1476,7 +1476,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                GameObject gameObject = objs[i];
+                var gameObject = objs[i];
                 if (gameObject.IsInPhase(_searcher))
                     if (i_check.Invoke(gameObject))
                         i_objects.Add(gameObject);
@@ -1500,7 +1500,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                Player player = objs[i];
+                var player = objs[i];
                 if (!player.IsInPhase(_searcher))
                     continue;
 
@@ -1516,7 +1516,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                Creature creature = objs[i];
+                var creature = objs[i];
                 if (!creature.IsInPhase(_searcher))
                     continue;
 
@@ -1546,7 +1546,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                Player player = objs[i];
+                var player = objs[i];
                 if (!player.IsInPhase(_searcher))
                     continue;
 
@@ -1559,7 +1559,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                Creature creature = objs[i];
+                var creature = objs[i];
                 if (!creature.IsInPhase(_searcher))
                     continue;
 
@@ -1587,7 +1587,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                Player player = objs[i];
+                var player = objs[i];
                 if (player.IsInPhase(_searcher))
                     if (i_check.Invoke(player))
                         i_objects.Add(player);
@@ -1598,7 +1598,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                Creature creature = objs[i];
+                var creature = objs[i];
                 if (creature.IsInPhase(_searcher))
                     if (i_check.Invoke(creature))
                         i_objects.Add(creature);
@@ -1626,7 +1626,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                Creature creature = objs[i];
+                var creature = objs[i];
                 if (!creature.IsInPhase(_searcher))
                     continue;
 
@@ -1656,7 +1656,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                Creature creature = objs[i];
+                var creature = objs[i];
                 if (!creature.IsInPhase(_searcher))
                     continue;
 
@@ -1684,7 +1684,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                Creature creature = objs[i];
+                var creature = objs[i];
                 if (creature.IsInPhase(_searcher))
                     if (i_check.Invoke(creature))
                         i_objects.Add(creature);
@@ -1712,7 +1712,7 @@ namespace Game.Maps
 
             for (var i = 0; i < objs.Count; ++i)
             {
-                Player player = objs[i];
+                var player = objs[i];
                 if (!player.IsInPhase(_searcher))
                     continue;
 
@@ -1742,7 +1742,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                Player player = objs[i];
+                var player = objs[i];
                 if (!player.IsInPhase(_searcher))
                     continue;
 
@@ -1770,7 +1770,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                Player player = objs[i];
+                var player = objs[i];
                 if (player.IsInPhase(_searcher))
                     if (i_check.Invoke(player))
                         i_objects.Add(player);
@@ -1953,7 +1953,7 @@ namespace Game.Maps
             if (!u.IsAlive())
                 return false;
 
-            float searchRadius = i_range;
+            var searchRadius = i_range;
             if (i_incOwnRadius)
                 searchRadius += i_obj.GetCombatReach();
             if (i_incTargetRadius)
@@ -2008,7 +2008,7 @@ namespace Game.Maps
             if (!u.IsAlive())
                 return false;
 
-            float searchRadius = _range;
+            var searchRadius = _range;
             if (i_incOwnRadius)
                 searchRadius += _source.GetCombatReach();
             if (i_incTargetRadius)
@@ -2088,7 +2088,7 @@ namespace Game.Maps
 
             if (_spellInfo == null)
             {
-                DynamicObject dynObj = i_obj.ToDynamicObject();
+                var dynObj = i_obj.ToDynamicObject();
                 if (dynObj)
                     _spellInfo = dynObj.GetSpellInfo();
             }
@@ -2106,7 +2106,7 @@ namespace Game.Maps
             if (!i_funit._IsValidAttackTarget(u, _spellInfo, i_obj.GetTypeId() == TypeId.DynamicObject ? i_obj : null))
                 return false;
 
-            float searchRadius = i_range;
+            var searchRadius = i_range;
             if (i_incOwnRadius)
                 searchRadius += i_obj.GetCombatReach();
             if (i_incTargetRadius)
@@ -2606,7 +2606,7 @@ namespace Game.Maps
             if (!go.IsSpawned())
                 return false;
 
-            float dist = go.GetGoInfo().GetSpellFocusRadius() / 2.0f;
+            var dist = go.GetGoInfo().GetSpellFocusRadius() / 2.0f;
 
             return go.IsWithinDistInMap(i_unit, dist);
         }
@@ -2720,15 +2720,15 @@ namespace Game.Maps
 
         public virtual bool Invoke(T obj)
         {
-            Player player = obj.ToPlayer();
+            var player = obj.ToPlayer();
             if (player)
                 return !player.IsAlive() && !player.HasAuraType(AuraType.Ghost) && i_searchObj.IsWithinDistInMap(player, i_range);
 
-            Creature creature = obj.ToCreature();
+            var creature = obj.ToCreature();
             if (creature)
                 return !creature.IsAlive() && i_searchObj.IsWithinDistInMap(creature, i_range);
 
-            Corpse corpse = obj.ToCorpse();
+            var corpse = obj.ToCorpse();
             if (corpse)
                 return corpse.GetCorpseType() != CorpseType.Bones && i_searchObj.IsWithinDistInMap(corpse, i_range);
 
@@ -2764,7 +2764,7 @@ namespace Game.Maps
             if (obj.IsTypeId(TypeId.Player))
                 return false;
 
-            Creature creature = obj.ToCreature();
+            var creature = obj.ToCreature();
             if (creature)
                 return !creature.IsPet();
 

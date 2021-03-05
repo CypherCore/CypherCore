@@ -45,8 +45,8 @@ namespace Game.Scripting
 
         public bool ValidateSpellInfo(params uint[] spellIds)
         {
-            bool allValid = true;
-            foreach (uint spellId in spellIds)
+            var allValid = true;
+            foreach (var spellId in spellIds)
             {
                 if (!Global.SpellMgr.HasSpellInfo(spellId, Difficulty.None))
                 {
@@ -193,7 +193,7 @@ namespace Game.Scripting
 
             public override bool CheckEffect(SpellInfo spellEntry, uint effIndex)
             {
-                SpellEffectInfo effect = spellEntry.GetEffect(effIndex);
+                var effect = spellEntry.GetEffect(effIndex);
                 if (effect == null)
                     return false;
 
@@ -257,14 +257,14 @@ namespace Game.Scripting
                 if (_targetType == 0)
                     return false;
 
-                SpellEffectInfo effect = spellEntry.GetEffect(effIndex);
+                var effect = spellEntry.GetEffect(effIndex);
                 if (effect == null)
                     return false;
 
                 if (effect.TargetA.GetTarget() != _targetType && effect.TargetB.GetTarget() != _targetType)
                     return false;
 
-                SpellImplicitTargetInfo targetInfo = new SpellImplicitTargetInfo(_targetType);
+                var targetInfo = new SpellImplicitTargetInfo(_targetType);
                 switch (targetInfo.GetSelectionCategory())
                 {
                     case SpellTargetSelectionCategories.Channel: // SINGLE
@@ -392,7 +392,7 @@ namespace Game.Scripting
         {
             m_spell = spell;
             _PrepareScriptCall((SpellScriptHookType)SpellScriptState.Loading);
-            bool load = Load();
+            var load = Load();
             _FinishScriptCall();
             return load;
         }
@@ -808,7 +808,7 @@ namespace Game.Scripting
 
             public override bool CheckEffect(SpellInfo spellEntry, uint effIndex)
             {
-                SpellEffectInfo effect = spellEntry.GetEffect(effIndex);
+                var effect = spellEntry.GetEffect(effIndex);
                 if (effect == null)
                     return false;
 
@@ -1115,7 +1115,7 @@ namespace Game.Scripting
         {
             m_aura = aura;
             _PrepareScriptCall((AuraScriptHookType)SpellScriptState.Loading, null);
-            bool load = Load();
+            var load = Load();
             _FinishScriptCall();
             return load;
         }
@@ -1128,7 +1128,7 @@ namespace Game.Scripting
         }
         public void _FinishScriptCall()
         {
-            ScriptStateStore stateStore = m_scriptStates.Peek();
+            var stateStore = m_scriptStates.Peek();
             m_currentScriptState = stateStore._currentScriptState;
             m_auraApplication = stateStore._auraApplication;
             m_defaultActionPrevented = stateStore._defaultActionPrevented;

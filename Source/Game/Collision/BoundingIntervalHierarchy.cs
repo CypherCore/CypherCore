@@ -46,10 +46,10 @@ namespace Game.Collision
             tempTree.Add(0);
 
             // seed bbox
-            AABound gridBox = new AABound();
+            var gridBox = new AABound();
             gridBox.lo = bounds.Lo;
             gridBox.hi = bounds.Hi;
-            AABound nodeBox = gridBox;
+            var nodeBox = gridBox;
             // seed subdivide function
             Subdivide(0, (int)(dat.numPrims - 1), tempTree, dat, gridBox, nodeBox, 0, 1, stats);
         }
@@ -67,14 +67,14 @@ namespace Game.Collision
             int axis = -1, prevAxis, rightOrig;
             float clipL = float.NaN, clipR = float.NaN, prevClip = float.NaN;
             float split = float.NaN, prevSplit;
-            bool wasLeft = true;
+            var wasLeft = true;
             while (true)
             {
                 prevAxis = axis;
                 prevSplit = split;
                 // perform quick consistency checks
-                Vector3 d = gridBox.hi - gridBox.lo;
-                for (int i = 0; i < 3; i++)
+                var d = gridBox.hi - gridBox.lo;
+                for (var i = 0; i < 3; i++)
                 {
                     if (nodeBox.hi[i] < gridBox.lo[i] || nodeBox.lo[i] > gridBox.hi[i])
                         Log.outError(LogFilter.Server, "Reached tree area in error - discarding node with: {0} objects", right - left + 1);
@@ -86,14 +86,14 @@ namespace Game.Collision
                 clipL = float.NegativeInfinity;
                 clipR = float.PositiveInfinity;
                 rightOrig = right; // save this for later
-                float nodeL = float.PositiveInfinity;
-                float nodeR = float.NegativeInfinity;
-                for (int i = left; i <= right; )
+                var nodeL = float.PositiveInfinity;
+                var nodeR = float.NegativeInfinity;
+                for (var i = left; i <= right; )
                 {
-                    int obj = (int)dat.indices[i];
-                    float minb = dat.primBound[obj].Lo[axis];
-                    float maxb = dat.primBound[obj].Hi[axis];
-                    float center = (minb + maxb) * 0.5f;
+                    var obj = (int)dat.indices[i];
+                    var minb = dat.primBound[obj].Lo[axis];
+                    var maxb = dat.primBound[obj].Hi[axis];
+                    var center = (minb + maxb) * 0.5f;
                     if (center <= split)
                     {
                         // stay left
@@ -104,7 +104,7 @@ namespace Game.Collision
                     else
                     {
                         // move to the right most
-                        int t = (int)dat.indices[i];
+                        var t = (int)dat.indices[i];
                         dat.indices[i] = dat.indices[right];
                         dat.indices[right] = (uint)t;
                         right--;
@@ -117,13 +117,13 @@ namespace Game.Collision
                 // check for empty space
                 if (nodeL > nodeBox.lo[axis] && nodeR < nodeBox.hi[axis])
                 {
-                    float nodeBoxW = nodeBox.hi[axis] - nodeBox.lo[axis];
-                    float nodeNewW = nodeR - nodeL;
+                    var nodeBoxW = nodeBox.hi[axis] - nodeBox.lo[axis];
+                    var nodeNewW = nodeR - nodeL;
                     // node box is too big compare to space occupied by primitives?
                     if (1.3f * nodeNewW < nodeBoxW)
                     {
                         stats.UpdateBVH2();
-                        int nextIndex1 = tempTree.Count;
+                        var nextIndex1 = tempTree.Count;
                         // allocate child
                         tempTree.Add(0);
                         tempTree.Add(0);
@@ -192,7 +192,7 @@ namespace Game.Collision
                     {
                         // second time through - lets create the previous split
                         // since it produced empty space
-                        int nextIndex0 = tempTree.Count;
+                        var nextIndex0 = tempTree.Count;
                         // allocate child node
                         tempTree.Add(0);
                         tempTree.Add(0);
@@ -225,10 +225,10 @@ namespace Game.Collision
                 }
             }
             // compute index of child nodes
-            int nextIndex = tempTree.Count;
+            var nextIndex = tempTree.Count;
             // allocate left node
-            int nl = right - left + 1;
-            int nr = rightOrig - (right + 1) + 1;
+            var nl = right - left + 1;
+            var nr = rightOrig - (right + 1) + 1;
             if (nl > 0)
             {
                 tempTree.Add(0);
@@ -250,10 +250,10 @@ namespace Game.Collision
             tempTree[nodeIndex + 1] = FloatToRawIntBits(clipL);
             tempTree[nodeIndex + 2] = FloatToRawIntBits(clipR);
             // prepare L/R child boxes
-            AABound gridBoxL = gridBox;
-            AABound gridBoxR = gridBox;
-            AABound nodeBoxL = nodeBox;
-            AABound nodeBoxR = nodeBox;
+            var gridBoxL = gridBox;
+            var gridBoxR = gridBox;
+            var nodeBoxL = nodeBox;
+            var nodeBoxR = nodeBox;
             gridBoxL.hi[axis] = gridBoxR.lo[axis] = split;
             nodeBoxL.hi[axis] = clipL;
             nodeBoxR.lo[axis] = clipR;
@@ -274,7 +274,7 @@ namespace Game.Collision
             var hi = reader.Read<Vector3>();
             bounds = new AxisAlignedBox(lo, hi);
 
-            uint treeSize = reader.ReadUInt32();
+            var treeSize = reader.ReadUInt32();
             tree = reader.ReadArray<uint>(treeSize);
 
             var count = reader.ReadUInt32();
@@ -297,18 +297,18 @@ namespace Game.Collision
             dat.indices = new uint[dat.numPrims];
             dat.primBound = new AxisAlignedBox[dat.numPrims];
             bounds = primitives[0].GetBounds();
-            for (int i = 0; i < dat.numPrims; ++i)
+            for (var i = 0; i < dat.numPrims; ++i)
             {
                 dat.indices[i] = (uint)i;
                 dat.primBound[i] = primitives[i].GetBounds();
                 bounds.merge(dat.primBound[i]);
             }
-            List<uint> tempTree = new List<uint>();
-            BuildStats stats = new BuildStats();
+            var tempTree = new List<uint>();
+            var stats = new BuildStats();
             BuildHierarchy(tempTree, dat, stats);
 
             objects = new uint[dat.numPrims];
-            for (int i = 0; i < dat.numPrims; ++i)
+            for (var i = 0; i < dat.numPrims; ++i)
                 objects[i] = dat.indices[i];
 
             tree = tempTree.ToArray();
@@ -318,18 +318,18 @@ namespace Game.Collision
 
         public void IntersectRay(Ray r, WorkerCallback intersectCallback, ref float maxDist, bool stopAtFirst = false)
         {
-            float intervalMin = -1.0f;
-            float intervalMax = -1.0f;
-            Vector3 org = r.Origin;
-            Vector3 dir = r.Direction;
-            Vector3 invDir = new Vector3();
-            for (int i = 0; i < 3; ++i)
+            var intervalMin = -1.0f;
+            var intervalMax = -1.0f;
+            var org = r.Origin;
+            var dir = r.Direction;
+            var invDir = new Vector3();
+            for (var i = 0; i < 3; ++i)
             {
                 invDir[i] = 1.0f / dir[i];
                 if (MathFunctions.fuzzyNe(dir[i], 0.0f))
                 {
-                    float t1 = (bounds.Lo[i] - org[i]) * invDir[i];
-                    float t2 = (bounds.Hi[i] - org[i]) * invDir[i];
+                    var t1 = (bounds.Lo[i] - org[i]) * invDir[i];
+                    var t2 = (bounds.Hi[i] - org[i]) * invDir[i];
                     if (t1 > t2)
                         MathFunctions.Swap<float>(ref t1, ref t2);
                     if (t1 > intervalMin)
@@ -348,13 +348,13 @@ namespace Game.Collision
             intervalMin = Math.Max(intervalMin, 0.0f);
             intervalMax = Math.Min(intervalMax, maxDist);
 
-            uint[] offsetFront = new uint[3];
-            uint[] offsetBack = new uint[3];
-            uint[] offsetFront3 = new uint[3];
-            uint[] offsetBack3 = new uint[3];
+            var offsetFront = new uint[3];
+            var offsetBack = new uint[3];
+            var offsetFront3 = new uint[3];
+            var offsetBack3 = new uint[3];
             // compute custom offsets from direction sign bit
 
-            for (int i = 0; i < 3; ++i)
+            for (var i = 0; i < 3; ++i)
             {
                 offsetFront[i] = FloatToRawIntBits(dir[i]) >> 31;
                 offsetBack[i] = offsetFront[i] ^ 1;
@@ -366,29 +366,29 @@ namespace Game.Collision
                 ++offsetBack[i];
             }
 
-            StackNode[] stack = new StackNode[64];
-            int stackPos = 0;
-            int node = 0;
+            var stack = new StackNode[64];
+            var stackPos = 0;
+            var node = 0;
 
             while (true)
             {
                 while (true)
                 {
-                    uint tn = tree[node];
-                    uint axis = (uint)(tn & (3 << 30)) >> 30;
-                    bool BVH2 = Convert.ToBoolean(tn & (1 << 29));
-                    int offset = (int)(tn & ~(7 << 29));
+                    var tn = tree[node];
+                    var axis = (uint)(tn & (3 << 30)) >> 30;
+                    var BVH2 = Convert.ToBoolean(tn & (1 << 29));
+                    var offset = (int)(tn & ~(7 << 29));
                     if (!BVH2)
                     {
                         if (axis < 3)
                         {
                             // "normal" interior node
-                            float tf = (IntBitsToFloat(tree[(int)(node + offsetFront[axis])]) - org[axis]) * invDir[axis];
-                            float tb = (IntBitsToFloat(tree[(int)(node + offsetBack[axis])]) - org[axis]) * invDir[axis];
+                            var tf = (IntBitsToFloat(tree[(int)(node + offsetFront[axis])]) - org[axis]) * invDir[axis];
+                            var tb = (IntBitsToFloat(tree[(int)(node + offsetBack[axis])]) - org[axis]) * invDir[axis];
                             // ray passes between clip zones
                             if (tf < intervalMin && tb > intervalMax)
                                 break;
-                            int back = (int)(offset + offsetBack3[axis]);
+                            var back = (int)(offset + offsetBack3[axis]);
                             node = back;
                             // ray passes through far node only
                             if (tf < intervalMin)
@@ -416,10 +416,10 @@ namespace Game.Collision
                         else
                         {
                             // leaf - test some objects
-                            int n = (int)tree[node + 1];
+                            var n = (int)tree[node + 1];
                             while (n > 0)
                             {
-                                bool hit = intersectCallback.Invoke(r, objects[offset], ref maxDist, stopAtFirst);
+                                var hit = intersectCallback.Invoke(r, objects[offset], ref maxDist, stopAtFirst);
                                 if (stopAtFirst && hit) 
                                     return;
                                 --n;
@@ -432,8 +432,8 @@ namespace Game.Collision
                     {
                         if (axis > 2)
                             return; // should not happen
-                        float tf = (IntBitsToFloat(tree[(int)(node + offsetFront[axis])]) - org[axis]) * invDir[axis];
-                        float tb = (IntBitsToFloat(tree[(int)(node + offsetBack[axis])]) - org[axis]) * invDir[axis];
+                        var tf = (IntBitsToFloat(tree[(int)(node + offsetFront[axis])]) - org[axis]) * invDir[axis];
+                        var tb = (IntBitsToFloat(tree[(int)(node + offsetBack[axis])]) - org[axis]) * invDir[axis];
                         node = offset;
                         intervalMin = (tf >= intervalMin) ? tf : intervalMin;
                         intervalMax = (tb <= intervalMax) ? tb : intervalMax;
@@ -464,29 +464,29 @@ namespace Game.Collision
             if (!bounds.contains(p))
                 return;
 
-            StackNode[] stack = new StackNode[64];
-            int stackPos = 0;
-            int node = 0;
+            var stack = new StackNode[64];
+            var stackPos = 0;
+            var node = 0;
 
             while (true)
             {
                 while (true)
                 {
-                    uint tn = tree[node];
-                    uint axis = (uint)(tn & (3 << 30)) >> 30;
-                    bool BVH2 = Convert.ToBoolean(tn & (1 << 29));
-                    int offset = (int)(tn & ~(7 << 29));
+                    var tn = tree[node];
+                    var axis = (uint)(tn & (3 << 30)) >> 30;
+                    var BVH2 = Convert.ToBoolean(tn & (1 << 29));
+                    var offset = (int)(tn & ~(7 << 29));
                     if (!BVH2)
                     {
                         if (axis < 3)
                         {
                             // "normal" interior node
-                            float tl = IntBitsToFloat(tree[node + 1]);
-                            float tr = IntBitsToFloat(tree[node + 2]);
+                            var tl = IntBitsToFloat(tree[node + 1]);
+                            var tr = IntBitsToFloat(tree[node + 2]);
                             // point is between clip zones
                             if (tl < p[(int)axis] && tr > p[axis])
                                 break;
-                            int right = offset + 3;
+                            var right = offset + 3;
                             node = right;
                             // point is in right node only
                             if (tl < p[(int)axis])
@@ -508,7 +508,7 @@ namespace Game.Collision
                         else
                         {
                             // leaf - test some objects
-                            uint n = tree[node + 1];
+                            var n = tree[node + 1];
                             while (n > 0)
                             {
                                 intersectCallback.Invoke(p, objects[offset]); // !!!
@@ -522,8 +522,8 @@ namespace Game.Collision
                     {
                         if (axis > 2)
                             return; // should not happen
-                        float tl = IntBitsToFloat(tree[node + 1]);
-                        float tr = IntBitsToFloat(tree[node + 2]);
+                        var tl = IntBitsToFloat(tree[node + 1]);
+                        var tr = IntBitsToFloat(tree[node + 2]);
                         node = offset;
                         if (tl > p[axis] || tr < p[axis])
                             break;
@@ -585,7 +585,7 @@ namespace Game.Collision
                 maxDepth = -1;
                 numBVH2 = 0;
 
-                for (int i = 0; i < 6; ++i)
+                for (var i = 0; i < 6; ++i)
                     numLeavesN[i] = 0;
             }
 
@@ -600,7 +600,7 @@ namespace Game.Collision
                 minObjects = Math.Min(n, minObjects);
                 maxObjects = Math.Max(n, maxObjects);
                 sumObjects += n;
-                int nl = Math.Min(n, 5);
+                var nl = Math.Min(n, 5);
                 ++numLeavesN[nl];
             }
         }
@@ -621,13 +621,13 @@ namespace Game.Collision
 
         uint FloatToRawIntBits(float f)
         {
-            FloatToIntConverter converter = new FloatToIntConverter();
+            var converter = new FloatToIntConverter();
             converter.FloatValue = f;
             return converter.IntValue;
         }
         float IntBitsToFloat(uint i)
         {
-            FloatToIntConverter converter = new FloatToIntConverter();
+            var converter = new FloatToIntConverter();
             converter.IntValue = i;
             return converter.FloatValue;
         }

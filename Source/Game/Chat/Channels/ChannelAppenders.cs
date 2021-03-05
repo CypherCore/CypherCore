@@ -41,9 +41,9 @@ namespace Game.Chat
         public override ServerPacket Invoke(Locale locale = Locale.enUS)
         {
             // LocalizedPacketDo sends client DBC locale, we need to get available to server locale
-            Locale localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
+            var localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
 
-            ChannelNotify data = new ChannelNotify();
+            var data = new ChannelNotify();
             data.Type = _modifier.GetNotificationType();
             data.Channel = _source.GetName(localeIdx);
             _modifier.Append(data);
@@ -63,9 +63,9 @@ namespace Game.Chat
 
         public override ServerPacket Invoke(Locale locale = Locale.enUS)
         {
-            Locale localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
+            var localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
 
-            ChannelNotifyJoined notify = new ChannelNotifyJoined();
+            var notify = new ChannelNotifyJoined();
             //notify.ChannelWelcomeMsg = "";
             notify.ChatChannelID = (int)_source.GetChannelId();
             //notify.InstanceID = 0;
@@ -88,9 +88,9 @@ namespace Game.Chat
 
         public override ServerPacket Invoke(Locale locale = Locale.enUS)
         {
-            Locale localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
+            var localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
 
-            ChannelNotifyLeft notify = new ChannelNotifyLeft();
+            var notify = new ChannelNotifyLeft();
             notify.Channel = _source.GetName(localeIdx);
             notify.ChatChannelID = _source.GetChannelId();
             notify.Suspended = _suspended;
@@ -113,10 +113,10 @@ namespace Game.Chat
 
         public override ServerPacket Invoke(Locale locale = Locale.enUS)
         {
-            Locale localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
+            var localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
 
-            ChatPkt packet = new ChatPkt();
-            Player player = Global.ObjAccessor.FindConnectedPlayer(_guid);
+            var packet = new ChatPkt();
+            var player = Global.ObjAccessor.FindConnectedPlayer(_guid);
             if (player)
                 packet.Initialize(ChatMsg.Channel, _lang, player, player, _what, 0, _source.GetName(localeIdx));
             else
@@ -148,10 +148,10 @@ namespace Game.Chat
 
         public override ServerPacket Invoke(Locale locale = Locale.enUS)
         {
-            Locale localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
+            var localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
 
-            ChatPkt packet = new ChatPkt();
-            Player player = Global.ObjAccessor.FindConnectedPlayer(_guid);
+            var packet = new ChatPkt();
+            var player = Global.ObjAccessor.FindConnectedPlayer(_guid);
             if (player)
                 packet.Initialize(ChatMsg.Channel, _lang, player, player, _what, 0, _source.GetName(localeIdx), Locale.enUS, _prefix);
             else
@@ -181,9 +181,9 @@ namespace Game.Chat
 
         public override ServerPacket Invoke(Locale locale = Locale.enUS)
         {
-            Locale localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
+            var localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
 
-            UserlistAdd userlistAdd = new UserlistAdd();
+            var userlistAdd = new UserlistAdd();
             userlistAdd.AddedUserGUID = _guid;
             userlistAdd.ChannelFlags = _source.GetFlags();
             userlistAdd.UserFlags = _source.GetPlayerFlags(_guid);
@@ -206,9 +206,9 @@ namespace Game.Chat
 
         public override ServerPacket Invoke(Locale locale = Locale.enUS)
         {
-            Locale localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
+            var localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
 
-            UserlistUpdate userlistUpdate = new UserlistUpdate();
+            var userlistUpdate = new UserlistUpdate();
             userlistUpdate.UpdatedUserGUID = _guid;
             userlistUpdate.ChannelFlags = _source.GetFlags();
             userlistUpdate.UserFlags = _source.GetPlayerFlags(_guid);
@@ -231,9 +231,9 @@ namespace Game.Chat
 
         public override ServerPacket Invoke(Locale locale = Locale.enUS)
         {
-            Locale localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
+            var localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
 
-            UserlistRemove userlistRemove = new UserlistRemove();
+            var userlistRemove = new UserlistRemove();
             userlistRemove.RemovedUserGUID = _guid;
             userlistRemove.ChannelFlags = _source.GetFlags();
             userlistRemove.ChannelID = _source.GetChannelId();
@@ -401,7 +401,7 @@ namespace Game.Chat
             _ownerGuid = ownerGuid;
             _ownerName = "";
 
-            CharacterCacheEntry characterCacheEntry = Global.CharacterCacheStorage.GetCharacterCacheByGuid(_ownerGuid);
+            var characterCacheEntry = Global.CharacterCacheStorage.GetCharacterCacheByGuid(_ownerGuid);
             if (characterCacheEntry != null)
                 _ownerName = characterCacheEntry.Name;
         }

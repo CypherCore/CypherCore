@@ -89,7 +89,7 @@ namespace Game.Networking.Packets
             Digest = _worldPacket.ReadBytes(24);
 
             UseIPv6 = _worldPacket.HasBit();
-            uint realmJoinTicketSize = _worldPacket.ReadUInt32();
+            var realmJoinTicketSize = _worldPacket.ReadUInt32();
             if (realmJoinTicketSize != 0)
                 RealmJoinTicket = _worldPacket.ReadString(realmJoinTicketSize);
         }
@@ -172,7 +172,7 @@ namespace Game.Networking.Packets
                 if(SuccessInfo.Value.ExpansionTrialExpiration.HasValue)
                     _worldPacket.WriteInt32(SuccessInfo.Value.ExpansionTrialExpiration.Value);
 
-                foreach (VirtualRealmInfo virtualRealm in SuccessInfo.Value.VirtualRealms)
+                foreach (var virtualRealm in SuccessInfo.Value.VirtualRealms)
                     virtualRealm.Write(_worldPacket);
 
                 foreach (var templat in SuccessInfo.Value.Templates)
@@ -264,7 +264,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            ByteBuffer whereBuffer = new ByteBuffer();
+            var whereBuffer = new ByteBuffer();
             whereBuffer.WriteUInt8((byte)Payload.Where.Type);
 
             switch (Payload.Where.Type)
@@ -282,7 +282,7 @@ namespace Game.Networking.Packets
                     break;
             }
 
-            Sha256 hash = new Sha256();
+            var hash = new Sha256();
             hash.Process(whereBuffer.GetData(), (int)whereBuffer.GetSize());
             hash.Process((uint)Payload.Where.Type);
             hash.Finish(BitConverter.GetBytes(Payload.Port));
@@ -380,7 +380,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            HmacSha256 hash = new HmacSha256(EncryptionKey);
+            var hash = new HmacSha256(EncryptionKey);
             hash.Process(BitConverter.GetBytes(Enabled), 1);
             hash.Finish(EnableEncryptionSeed, 16);
 

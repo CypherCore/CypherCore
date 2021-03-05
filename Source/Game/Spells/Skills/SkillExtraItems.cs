@@ -26,12 +26,12 @@ namespace Game.Spells
         // loads the extra item creation info from DB
         public static void LoadSkillExtraItemTable()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             SkillExtraItemStorage.Clear();                            // need for reload
 
             //                                             0               1                       2                    3
-            SQLResult result = DB.World.Query("SELECT spellId, requiredSpecialization, additionalCreateChance, additionalMaxNum FROM skill_extra_item_template");
+            var result = DB.World.Query("SELECT spellId, requiredSpecialization, additionalCreateChance, additionalMaxNum FROM skill_extra_item_template");
 
             if (result.IsEmpty())
             {
@@ -42,7 +42,7 @@ namespace Game.Spells
             uint count = 0;
             do
             {
-                uint spellId = result.Read<uint>(0);
+                var spellId = result.Read<uint>(0);
 
                 if (!Global.SpellMgr.HasSpellInfo(spellId, Framework.Constants.Difficulty.None))
                 {
@@ -50,28 +50,28 @@ namespace Game.Spells
                     continue;
                 }
 
-                uint requiredSpecialization = result.Read<uint>(1);
+                var requiredSpecialization = result.Read<uint>(1);
                 if (!Global.SpellMgr.HasSpellInfo(requiredSpecialization, Framework.Constants.Difficulty.None))
                 {
                     Log.outError(LogFilter.Sql, "Skill specialization {0} have not existed required specialization spell id {1} in `skill_extra_item_template`!", spellId, requiredSpecialization);
                     continue;
                 }
 
-                float additionalCreateChance = result.Read<float>(2);
+                var additionalCreateChance = result.Read<float>(2);
                 if (additionalCreateChance <= 0.0f)
                 {
                     Log.outError(LogFilter.Sql, "Skill specialization {0} has too low additional create chance in `skill_extra_item_template`!", spellId);
                     continue;
                 }
 
-                byte additionalMaxNum = result.Read<byte>(3);
+                var additionalMaxNum = result.Read<byte>(3);
                 if (additionalMaxNum == 0)
                 {
                     Log.outError(LogFilter.Sql, "Skill specialization {0} has 0 max number of extra items in `skill_extra_item_template`!", spellId);
                     continue;
                 }
 
-                SkillExtraItemEntry skillExtraItemEntry = new SkillExtraItemEntry();
+                var skillExtraItemEntry = new SkillExtraItemEntry();
                 skillExtraItemEntry.requiredSpecialization = requiredSpecialization;
                 skillExtraItemEntry.additionalCreateChance = additionalCreateChance;
                 skillExtraItemEntry.additionalMaxNum = additionalMaxNum;
@@ -128,12 +128,12 @@ namespace Game.Spells
         // loads the perfection proc info from DB
         public static void LoadSkillPerfectItemTable()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             SkillPerfectItemStorage.Clear(); // reload capability
 
             //                                                  0               1                      2                  3
-            SQLResult result = DB.World.Query("SELECT spellId, requiredSpecialization, perfectCreateChance, perfectItemType FROM skill_perfect_item_template");
+            var result = DB.World.Query("SELECT spellId, requiredSpecialization, perfectCreateChance, perfectItemType FROM skill_perfect_item_template");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 spell perfection definitions. DB table `skill_perfect_item_template` is empty.");
@@ -143,28 +143,28 @@ namespace Game.Spells
             uint count = 0;
             do
             {
-                uint spellId = result.Read<uint>(0);
+                var spellId = result.Read<uint>(0);
                 if (!Global.SpellMgr.HasSpellInfo(spellId, Framework.Constants.Difficulty.None))
                 {
                     Log.outError(LogFilter.Sql, "Skill perfection data for spell {0} has non-existent spell id in `skill_perfect_item_template`!", spellId);
                     continue;
                 }
 
-                uint requiredSpecialization = result.Read<uint>(1);
+                var requiredSpecialization = result.Read<uint>(1);
                 if (!Global.SpellMgr.HasSpellInfo(requiredSpecialization, Framework.Constants.Difficulty.None))
                 {
                     Log.outError(LogFilter.Sql, "Skill perfection data for spell {0} has non-existent required specialization spell id {1} in `skill_perfect_item_template`!", spellId, requiredSpecialization);
                     continue;
                 }
 
-                float perfectCreateChance = result.Read<float>(2);
+                var perfectCreateChance = result.Read<float>(2);
                 if (perfectCreateChance <= 0.0f)
                 {
                     Log.outError(LogFilter.Sql, "Skill perfection data for spell {0} has impossibly low proc chance in `skill_perfect_item_template`!", spellId);
                     continue;
                 }
 
-                uint perfectItemType = result.Read<uint>(3);
+                var perfectItemType = result.Read<uint>(3);
                 if (Global.ObjectMgr.GetItemTemplate(perfectItemType) == null)
                 {
                     Log.outError(LogFilter.Sql, "Skill perfection data for spell {0} references non-existent perfect item id {1} in `skill_perfect_item_template`!", spellId, perfectItemType);

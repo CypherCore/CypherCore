@@ -27,7 +27,7 @@ namespace Game
     {
         public void SendPartyResult(PartyOperation operation, string member, PartyResult res, uint val = 0)
         {
-            PartyCommandResult packet = new PartyCommandResult();
+            var packet = new PartyCommandResult();
 
             packet.Name = member;
             packet.Command = (byte)operation;
@@ -41,7 +41,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.PartyInvite)]
         void HandlePartyInvite(PartyInviteClient packet)
         {
-            Player invitingPlayer = GetPlayer();
+            var invitingPlayer = GetPlayer();
             Player invitedPlayer = Global.ObjAccessor.FindPlayerByName(packet.TargetName);
 
             // no player
@@ -95,14 +95,14 @@ namespace Game
                 return;
             }
 
-            Group group = invitingPlayer.GetGroup();
+            var group = invitingPlayer.GetGroup();
             if (group != null && group.IsBGGroup())
                 group = invitingPlayer.GetOriginalGroup();
 
             if (group == null)
                 group = invitingPlayer.GetGroupInvite();
 
-            Group group2 = invitedPlayer.GetGroup();
+            var group2 = invitedPlayer.GetGroup();
             if (group2 != null && group2.IsBGGroup())
                 group2 = invitedPlayer.GetOriginalGroup();
 
@@ -173,7 +173,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.PartyInviteResponse)]
         void HandlePartyInviteResponse(PartyInviteResponse packet)
         {
-            Group group = GetPlayer().GetGroupInvite();
+            var group = GetPlayer().GetGroupInvite();
             if (!group)
                 return;
 
@@ -232,7 +232,7 @@ namespace Game
                     return;
 
                 // report
-                GroupDecline decline = new GroupDecline(GetPlayer().GetName());
+                var decline = new GroupDecline(GetPlayer().GetName());
                 leader.SendPacket(decline);
             }
         }
@@ -248,14 +248,14 @@ namespace Game
                 return;
             }
 
-            PartyResult res = GetPlayer().CanUninviteFromGroup(packet.TargetGUID);
+            var res = GetPlayer().CanUninviteFromGroup(packet.TargetGUID);
             if (res != PartyResult.Ok)
             {
                 SendPartyResult(PartyOperation.UnInvite, "", res);
                 return;
             }
 
-            Group grp = GetPlayer().GetGroup();
+            var grp = GetPlayer().GetGroup();
             // grp is checked already above in CanUninviteFromGroup()
             Cypher.Assert(grp);
 
@@ -278,7 +278,7 @@ namespace Game
         void HandleSetPartyLeader(SetPartyLeader packet)
         {
             Player player = Global.ObjAccessor.FindConnectedPlayer(packet.TargetGUID);
-            Group group = GetPlayer().GetGroup();
+            var group = GetPlayer().GetGroup();
 
             if (!group || !player)
                 return;
@@ -294,10 +294,10 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SetRole, Processing = PacketProcessing.Inplace)]
         void HandleSetRole(SetRole packet)
         {
-            RoleChangedInform roleChangedInform = new RoleChangedInform();
+            var roleChangedInform = new RoleChangedInform();
 
-            Group group = GetPlayer().GetGroup();
-            byte oldRole = (byte)(group ? group.GetLfgRoles(packet.TargetGUID) : 0);
+            var group = GetPlayer().GetGroup();
+            var oldRole = (byte)(group ? group.GetLfgRoles(packet.TargetGUID) : 0);
             if (oldRole == packet.Role)
                 return;
 
@@ -319,8 +319,8 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.LeaveGroup)]
         void HandleLeaveGroup(LeaveGroup packet)
         {
-            Group grp = GetPlayer().GetGroup();
-            Group grpInvite = GetPlayer().GetGroupInvite();
+            var grp = GetPlayer().GetGroup();
+            var grpInvite = GetPlayer().GetGroupInvite();
             if (grp == null && grpInvite == null)
                 return;
 
@@ -349,7 +349,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SetLootMethod)]
         void HandleSetLootMethod(SetLootMethod packet)
         {
-            Group group = GetPlayer().GetGroup();
+            var group = GetPlayer().GetGroup();
             if (!group)
                 return;
 
@@ -384,7 +384,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.LootRoll)]
         void HandleLootRoll(LootRoll packet)
         {
-            Group group = GetPlayer().GetGroup();
+            var group = GetPlayer().GetGroup();
             if (!group)
                 return;
 
@@ -407,7 +407,7 @@ namespace Game
             if (!GetPlayer().GetGroup())
                 return;
 
-            MinimapPing minimapPing = new MinimapPing();
+            var minimapPing = new MinimapPing();
             minimapPing.Sender = GetPlayer().GetGUID();
             minimapPing.PositionX = packet.PositionX;
             minimapPing.PositionY = packet.PositionY;
@@ -426,7 +426,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.UpdateRaidTarget)]
         void HandleUpdateRaidTarget(UpdateRaidTarget packet)
         {
-            Group group = GetPlayer().GetGroup();
+            var group = GetPlayer().GetGroup();
             if (!group)
                 return;
 
@@ -451,7 +451,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ConvertRaid)]
         void HandleConvertRaid(ConvertRaid packet)
         {
-            Group group = GetPlayer().GetGroup();
+            var group = GetPlayer().GetGroup();
             if (!group)
                 return;
 
@@ -475,7 +475,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.RequestPartyJoinUpdates)]
         void HandleRequestPartyJoinUpdates(RequestPartyJoinUpdates packet)
         {
-            Group group = GetPlayer().GetGroup();
+            var group = GetPlayer().GetGroup();
             if (!group)
                 return;
 
@@ -487,14 +487,14 @@ namespace Game
         void HandleChangeSubGroup(ChangeSubGroup packet)
         {
             // we will get correct for group here, so we don't have to check if group is BG raid
-            Group group = GetPlayer().GetGroup();
+            var group = GetPlayer().GetGroup();
             if (!group)
                 return;
 
             if (packet.NewSubGroup >= MapConst.MaxRaidSubGroups)
                 return;
 
-            ObjectGuid senderGuid = GetPlayer().GetGUID();
+            var senderGuid = GetPlayer().GetGUID();
             if (!group.IsLeader(senderGuid) && !group.IsAssistant(senderGuid))
                 return;
 
@@ -507,11 +507,11 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SwapSubGroups, Processing = PacketProcessing.ThreadUnsafe)]
         void HandleSwapSubGroups(SwapSubGroups packet)
         {
-            Group group = GetPlayer().GetGroup();
+            var group = GetPlayer().GetGroup();
             if (!group)
                 return;
 
-            ObjectGuid senderGuid = GetPlayer().GetGUID();
+            var senderGuid = GetPlayer().GetGUID();
             if (!group.IsLeader(senderGuid) && !group.IsAssistant(senderGuid))
                 return;
 
@@ -521,7 +521,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SetAssistantLeader)]
         void HandleSetAssistantLeader(SetAssistantLeader packet)
         {
-            Group group = GetPlayer().GetGroup();
+            var group = GetPlayer().GetGroup();
             if (!group)
                 return;
 
@@ -534,11 +534,11 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SetPartyAssignment)]
         void HandleSetPartyAssignment(SetPartyAssignment packet)
         {
-            Group group = GetPlayer().GetGroup();
+            var group = GetPlayer().GetGroup();
             if (!group)
                 return;
 
-            ObjectGuid senderGuid = GetPlayer().GetGUID();
+            var senderGuid = GetPlayer().GetGUID();
             if (!group.IsLeader(senderGuid) && !group.IsAssistant(senderGuid))
                 return;
 
@@ -560,7 +560,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.DoReadyCheck)]
         void HandleDoReadyCheckOpcode(DoReadyCheck packet)
         {
-            Group group = GetPlayer().GetGroup();
+            var group = GetPlayer().GetGroup();
             if (!group)
                 return;
 
@@ -575,7 +575,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ReadyCheckResponse, Processing = PacketProcessing.Inplace)]
         void HandleReadyCheckResponseOpcode(ReadyCheckResponseClient packet)
         {
-            Group group = GetPlayer().GetGroup();
+            var group = GetPlayer().GetGroup();
             if (!group)
                 return;
 
@@ -586,7 +586,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.RequestPartyMemberStats)]
         void HandleRequestPartyMemberStats(RequestPartyMemberStats packet)
         {
-            PartyMemberFullState partyMemberStats = new PartyMemberFullState();
+            var partyMemberStats = new PartyMemberFullState();
 
             Player player = Global.ObjAccessor.FindConnectedPlayer(packet.TargetGUID);
             if (!player)
@@ -624,15 +624,15 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.InitiateRolePoll)]
         void HandleInitiateRolePoll(InitiateRolePoll packet)
         {
-            Group group = GetPlayer().GetGroup();
+            var group = GetPlayer().GetGroup();
             if (!group)
                 return;
 
-            ObjectGuid guid = GetPlayer().GetGUID();
+            var guid = GetPlayer().GetGUID();
             if (!group.IsLeader(guid) && !group.IsAssistant(guid))
                 return;
 
-            RolePollInform rolePollInform = new RolePollInform();
+            var rolePollInform = new RolePollInform();
             rolePollInform.From = guid;
             rolePollInform.PartyIndex = packet.PartyIndex;
             group.BroadcastPacket(rolePollInform, true);
@@ -641,7 +641,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SetEveryoneIsAssistant)]
         void HandleSetEveryoneIsAssistant(SetEveryoneIsAssistant packet)
         {
-            Group group = GetPlayer().GetGroup();
+            var group = GetPlayer().GetGroup();
             if (!group)
                 return;
 
@@ -654,7 +654,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ClearRaidMarker)]
         void HandleClearRaidMarker(ClearRaidMarker packet)
         {
-            Group group = GetPlayer().GetGroup();
+            var group = GetPlayer().GetGroup();
             if (!group)
                 return;
 

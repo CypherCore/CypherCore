@@ -37,33 +37,33 @@ namespace Game.Chat.Commands
             if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
                 return false;
 
-            string tail1 = args.NextString("");
+            var tail1 = args.NextString("");
             if (string.IsNullOrEmpty(tail1))
                 return false;
 
-            string subject = handler.ExtractQuotedArg(tail1);
+            var subject = handler.ExtractQuotedArg(tail1);
             if (string.IsNullOrEmpty(subject))
                 return false;
 
-            string tail2 = args.NextString("");
+            var tail2 = args.NextString("");
             if (string.IsNullOrEmpty(tail2))
                 return false;
 
-            string text = handler.ExtractQuotedArg(tail2);
+            var text = handler.ExtractQuotedArg(tail2);
             if (string.IsNullOrEmpty(text))
                 return false;
 
             // from console show not existed sender
-            MailSender sender = new MailSender(MailMessageType.Normal, handler.GetSession() ? handler.GetSession().GetPlayer().GetGUID().GetCounter() : 0, MailStationery.Gm);
+            var sender = new MailSender(MailMessageType.Normal, handler.GetSession() ? handler.GetSession().GetPlayer().GetGUID().GetCounter() : 0, MailStationery.Gm);
 
             // @todo Fix poor design
-            SQLTransaction trans = new SQLTransaction();
+            var trans = new SQLTransaction();
             new MailDraft(subject, text)
                 .SendMailTo(trans, new MailReceiver(target, targetGuid.GetCounter()), sender);
 
             DB.Characters.CommitTransaction(trans);
 
-            string nameLink = handler.PlayerLink(targetName);
+            var nameLink = handler.PlayerLink(targetName);
             handler.SendSysMessage(CypherStrings.MailSent, nameLink);
             return true;
         }
@@ -78,47 +78,47 @@ namespace Game.Chat.Commands
             if (!handler.ExtractPlayerTarget(args, out receiver, out receiverGuid, out receiverName))
                 return false;
 
-            string tail1 = args.NextString("");
+            var tail1 = args.NextString("");
             if (string.IsNullOrEmpty(tail1))
                 return false;
 
-            string subject = handler.ExtractQuotedArg(tail1);
+            var subject = handler.ExtractQuotedArg(tail1);
             if (string.IsNullOrEmpty(subject))
                 return false;
 
-            string tail2 = args.NextString("");
+            var tail2 = args.NextString("");
             if (string.IsNullOrEmpty(tail2))
                 return false;
 
-            string text = handler.ExtractQuotedArg(tail2);
+            var text = handler.ExtractQuotedArg(tail2);
             if (string.IsNullOrEmpty(text))
                 return false;
 
             // extract items
-            List<KeyValuePair<uint, uint>> items = new List<KeyValuePair<uint, uint>>();
+            var items = new List<KeyValuePair<uint, uint>>();
 
             // get all tail string
-            StringArguments tail = new StringArguments(args.NextString(""));
+            var tail = new StringArguments(args.NextString(""));
 
             // get from tail next item str
             StringArguments itemStr;
             while (!(itemStr = new StringArguments(tail.NextString(" "))).Empty())
             {
                 // parse item str
-                string itemIdStr = itemStr.NextString(":");
-                string itemCountStr = itemStr.NextString(" ");
+                var itemIdStr = itemStr.NextString(":");
+                var itemCountStr = itemStr.NextString(" ");
 
-                if (!uint.TryParse(itemIdStr, out uint itemId) || itemId == 0)
+                if (!uint.TryParse(itemIdStr, out var itemId) || itemId == 0)
                     return false;
 
-                ItemTemplate item_proto = Global.ObjectMgr.GetItemTemplate(itemId);
+                var item_proto = Global.ObjectMgr.GetItemTemplate(itemId);
                 if (item_proto == null)
                 {
                     handler.SendSysMessage(CypherStrings.CommandItemidinvalid, itemId);
                     return false;
                 }
 
-                if (string.IsNullOrEmpty(itemCountStr) || !uint.TryParse(itemCountStr, out uint itemCount))
+                if (string.IsNullOrEmpty(itemCountStr) || !uint.TryParse(itemCountStr, out var itemCount))
                     itemCount = 1;
 
                 if (itemCount < 1 || (item_proto.GetMaxCount() > 0 && itemCount > item_proto.GetMaxCount()))
@@ -143,16 +143,16 @@ namespace Game.Chat.Commands
             }
 
             // from console show not existed sender
-            MailSender sender = new MailSender(MailMessageType.Normal, handler.GetSession() ? handler.GetSession().GetPlayer().GetGUID().GetCounter() : 0, MailStationery.Gm);
+            var sender = new MailSender(MailMessageType.Normal, handler.GetSession() ? handler.GetSession().GetPlayer().GetGUID().GetCounter() : 0, MailStationery.Gm);
 
             // fill mail
-            MailDraft draft = new MailDraft(subject, text);
+            var draft = new MailDraft(subject, text);
 
-            SQLTransaction trans = new SQLTransaction();
+            var trans = new SQLTransaction();
 
             foreach (var pair in items)
             {
-                Item item = Item.CreateItem(pair.Key, pair.Value, ItemContext.None, handler.GetSession() ? handler.GetSession().GetPlayer() : null);
+                var item = Item.CreateItem(pair.Key, pair.Value, ItemContext.None, handler.GetSession() ? handler.GetSession().GetPlayer() : null);
                 if (item)
                 {
                     item.SaveToDB(trans);                               // save for prevent lost at next mail load, if send fail then item will deleted
@@ -163,7 +163,7 @@ namespace Game.Chat.Commands
             draft.SendMailTo(trans, new MailReceiver(receiver, receiverGuid.GetCounter()), sender);
             DB.Characters.CommitTransaction(trans);
 
-            string nameLink = handler.PlayerLink(receiverName);
+            var nameLink = handler.PlayerLink(receiverName);
             handler.SendSysMessage(CypherStrings.MailSent, nameLink);
             return true;
         }
@@ -179,32 +179,32 @@ namespace Game.Chat.Commands
             if (!handler.ExtractPlayerTarget(args, out receiver, out receiverGuid, out receiverName))
                 return false;
 
-            string tail1 = args.NextString("");
+            var tail1 = args.NextString("");
             if (string.IsNullOrEmpty(tail1))
                 return false;
 
-            string subject = handler.ExtractQuotedArg(tail1);
+            var subject = handler.ExtractQuotedArg(tail1);
             if (string.IsNullOrEmpty(subject))
                 return false;
 
-            string tail2 = args.NextString("");
+            var tail2 = args.NextString("");
             if (string.IsNullOrEmpty(tail2))
                 return false;
 
-            string text = handler.ExtractQuotedArg(tail2);
+            var text = handler.ExtractQuotedArg(tail2);
             if (string.IsNullOrEmpty(text))
                 return false;
 
-            if (!long.TryParse(args.NextString(""), out long money))
+            if (!long.TryParse(args.NextString(""), out var money))
                 money = 0;
 
             if (money <= 0)
                 return false;
 
             // from console show not existed sender
-            MailSender sender = new MailSender(MailMessageType.Normal, handler.GetSession() ? handler.GetSession().GetPlayer().GetGUID().GetCounter() : 0, MailStationery.Gm);
+            var sender = new MailSender(MailMessageType.Normal, handler.GetSession() ? handler.GetSession().GetPlayer().GetGUID().GetCounter() : 0, MailStationery.Gm);
 
-            SQLTransaction trans = new SQLTransaction();
+            var trans = new SQLTransaction();
 
             new MailDraft(subject, text)
                 .AddMoney((uint)money)
@@ -212,7 +212,7 @@ namespace Game.Chat.Commands
 
             DB.Characters.CommitTransaction(trans);
 
-            string nameLink = handler.PlayerLink(receiverName);
+            var nameLink = handler.PlayerLink(receiverName);
             handler.SendSysMessage(CypherStrings.MailSent, nameLink);
             return true;
         }
@@ -225,7 +225,7 @@ namespace Game.Chat.Commands
             if (!handler.ExtractPlayerTarget(args, out player))
                 return false;
 
-            string msgStr = args.NextString("");
+            var msgStr = args.NextString("");
             if (string.IsNullOrEmpty(msgStr))
                 return false;
 
@@ -241,7 +241,7 @@ namespace Game.Chat.Commands
             player.GetSession().SendNotification("|cffff0000[Message from administrator]:|r");
 
             // Confirmation message
-            string nameLink = handler.GetNameLink(player);
+            var nameLink = handler.GetNameLink(player);
             handler.SendSysMessage(CypherStrings.Sendmessage, nameLink, msgStr);
 
             return true;

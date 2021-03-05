@@ -82,7 +82,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteInt32(Post.Count);
-            foreach (LFGuildBrowseData guildData in Post)
+            foreach (var guildData in Post)
                 guildData.Write(_worldPacket);
         }
 
@@ -116,7 +116,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteInt32(NumRemaining);
             _worldPacket.WriteInt32(Application.Count);
-            foreach (LFGuildApplicationData application in Application)
+            foreach (var application in Application)
                 application.Write(_worldPacket);
         }
 
@@ -166,7 +166,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteInt32(Recruits.Count);
             _worldPacket.WriteUInt32((uint)UpdateTime);
-            foreach (LFGuildRecruitData recruit in Recruits)
+            foreach (var recruit in Recruits)
                 recruit.Write(_worldPacket);
         }
 

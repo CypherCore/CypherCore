@@ -64,10 +64,10 @@ namespace Game.DataStorage
 
             if (entry.Faction != 0)
             {
-                for (int i = 0; i < 4; ++i)
+                for (var i = 0; i < 4; ++i)
                     if (Enemies[i] == entry.Faction)
                         return false;
-                for (int i = 0; i < 4; ++i)
+                for (var i = 0; i < 4; ++i)
                     if (Friend[i] == entry.Faction)
                         return true;
             }
@@ -80,10 +80,10 @@ namespace Game.DataStorage
 
             if (entry.Faction != 0)
             {
-                for (int i = 0; i < 4; ++i)
+                for (var i = 0; i < 4; ++i)
                     if (Enemies[i] == entry.Faction)
                         return true;
-                for (int i = 0; i < 4; ++i)
+                for (var i = 0; i < 4; ++i)
                     if (Friend[i] == entry.Faction)
                         return false;
             }
@@ -92,7 +92,7 @@ namespace Game.DataStorage
         public bool IsHostileToPlayers() { return (EnemyGroup & (byte)FactionMasks.Player) != 0; }
         public bool IsNeutralToAll()
         {
-            for (int i = 0; i < 4; ++i)
+            for (var i = 0; i < 4; ++i)
                 if (Enemies[i] != 0)
                     return false;
             return EnemyGroup == 0 && FriendGroup == 0;

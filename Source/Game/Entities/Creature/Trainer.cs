@@ -31,20 +31,20 @@ namespace Game.Entities
 
         public void SendSpells(Creature npc, Player player, Locale locale)
         {
-            float reputationDiscount = player.GetReputationPriceDiscount(npc);
+            var reputationDiscount = player.GetReputationPriceDiscount(npc);
 
-            TrainerList trainerList = new TrainerList();
+            var trainerList = new TrainerList();
             trainerList.TrainerGUID = npc.GetGUID();
             trainerList.TrainerType = (int)_type;
             trainerList.TrainerID = (int)_id;
             trainerList.Greeting = GetGreeting(locale);
 
-            foreach (TrainerSpell trainerSpell in _spells)
+            foreach (var trainerSpell in _spells)
             {
                 if (!player.IsSpellFitByClassAndRace(trainerSpell.SpellId))
                     continue;
 
-                TrainerListSpell trainerListSpell = new TrainerListSpell();
+                var trainerListSpell = new TrainerListSpell();
                 trainerListSpell.SpellID = trainerSpell.SpellId;
                 trainerListSpell.MoneyCost = (uint)(trainerSpell.MoneyCost * reputationDiscount);
                 trainerListSpell.ReqSkillLine = trainerSpell.ReqSkillLine;
@@ -60,15 +60,15 @@ namespace Game.Entities
 
         public void TeachSpell(Creature npc, Player player, uint spellId)
         {
-            TrainerSpell trainerSpell = GetSpell(spellId);
+            var trainerSpell = GetSpell(spellId);
             if (trainerSpell == null || !CanTeachSpell(player, trainerSpell))
             {
                 SendTeachFailure(npc, player, spellId, TrainerFailReason.Unavailable);
                 return;
             }
 
-            float reputationDiscount = player.GetReputationPriceDiscount(npc);
-            long moneyCost = (long)(trainerSpell.MoneyCost * reputationDiscount);
+            var reputationDiscount = player.GetReputationPriceDiscount(npc);
+            var moneyCost = (long)(trainerSpell.MoneyCost * reputationDiscount);
             if (!player.HasEnoughMoney(moneyCost))
             {
                 SendTeachFailure(npc, player, spellId, TrainerFailReason.NotEnoughMoney);
@@ -94,11 +94,11 @@ namespace Game.Entities
 
         bool CanTeachSpell(Player player, TrainerSpell trainerSpell)
         {
-            TrainerSpellState state = GetSpellState(player, trainerSpell);
+            var state = GetSpellState(player, trainerSpell);
             if (state != TrainerSpellState.Available)
                 return false;
 
-            SpellInfo trainerSpellInfo = Global.SpellMgr.GetSpellInfo(trainerSpell.SpellId, Difficulty.None);
+            var trainerSpellInfo = Global.SpellMgr.GetSpellInfo(trainerSpell.SpellId, Difficulty.None);
             if (trainerSpellInfo.IsPrimaryProfessionFirstRank() && player.GetFreePrimaryProfessionPoints() == 0)
                 return false;
 
@@ -118,7 +118,7 @@ namespace Game.Entities
             if (trainerSpell.ReqSkillLine != 0 && player.GetBaseSkillValue((SkillType)trainerSpell.ReqSkillLine) < trainerSpell.ReqSkillRank)
                 return TrainerSpellState.Unavailable;
 
-            foreach (uint reqAbility in trainerSpell.ReqAbility)
+            foreach (var reqAbility in trainerSpell.ReqAbility)
                 if (reqAbility != 0 && !player.HasSpell(reqAbility))
                     return TrainerSpellState.Unavailable;
 
@@ -127,9 +127,9 @@ namespace Game.Entities
                 return TrainerSpellState.Unavailable;
 
             // check ranks
-            bool hasLearnSpellEffect = false;
-            bool knowsAllLearnedSpells = true;
-            foreach (SpellEffectInfo spellEffect in Global.SpellMgr.GetSpellInfo(trainerSpell.SpellId, Difficulty.None).GetEffects())
+            var hasLearnSpellEffect = false;
+            var knowsAllLearnedSpells = true;
+            foreach (var spellEffect in Global.SpellMgr.GetSpellInfo(trainerSpell.SpellId, Difficulty.None).GetEffects())
             {
                 if (spellEffect == null || !spellEffect.IsEffect(SpellEffectName.LearnSpell))
                     continue;
@@ -147,7 +147,7 @@ namespace Game.Entities
 
         void SendTeachFailure(Creature npc, Player player, uint spellId, TrainerFailReason reason)
         {
-            TrainerBuyFailed trainerBuyFailed = new TrainerBuyFailed();
+            var trainerBuyFailed = new TrainerBuyFailed();
             trainerBuyFailed.TrainerGUID = npc.GetGUID();
             trainerBuyFailed.SpellID = spellId;
             trainerBuyFailed.TrainerFailedReason = reason;

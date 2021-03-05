@@ -37,7 +37,7 @@ namespace Game.DataStorage
 
         public static DB6Storage<T> Read<T>(BitSet availableDb2Locales, string db2Path, string fileName, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale, ref uint loadedFileCount) where T : new()
         {
-            DB6Storage<T> storage = new DB6Storage<T>();
+            var storage = new DB6Storage<T>();
 
             if (!File.Exists(db2Path + fileName))
             {
@@ -45,7 +45,7 @@ namespace Game.DataStorage
                 return storage;
             }
 
-            DBReader reader = new DBReader();
+            var reader = new DBReader();
             using (var stream = new FileStream(db2Path + fileName, FileMode.Open))
             {
                 if (!reader.Load(stream))
@@ -103,7 +103,7 @@ namespace Game.DataStorage
 
                 // pallet data
                 PalletData = new Value32[ColumnMeta.Length][];
-                for (int i = 0; i < ColumnMeta.Length; i++)
+                for (var i = 0; i < ColumnMeta.Length; i++)
                 {
                     if (ColumnMeta[i].CompressionType == DB2ColumnCompression.Pallet || ColumnMeta[i].CompressionType == DB2ColumnCompression.PalletArray)
                     {
@@ -114,21 +114,21 @@ namespace Game.DataStorage
                 // common data
                 CommonData = new Dictionary<int, Value32>[ColumnMeta.Length];
 
-                for (int i = 0; i < ColumnMeta.Length; i++)
+                for (var i = 0; i < ColumnMeta.Length; i++)
                 {
                     if (ColumnMeta[i].CompressionType == DB2ColumnCompression.Common)
                     {
-                        Dictionary<int, Value32> commonValues = new Dictionary<int, Value32>();
+                        var commonValues = new Dictionary<int, Value32>();
                         CommonData[i] = commonValues;
 
-                        for (int j = 0; j < ColumnMeta[i].AdditionalDataSize / 8; j++)
+                        for (var j = 0; j < ColumnMeta[i].AdditionalDataSize / 8; j++)
                             commonValues[reader.ReadInt32()] = reader.Read<Value32>();
                     }
                 }
 
                 long previousStringTableSize = 0;
                 long previousRecordCount = 0;
-                for (int sectionIndex = 0; sectionIndex < Header.SectionsCount; sectionIndex++)
+                for (var sectionIndex = 0; sectionIndex < Header.SectionsCount; sectionIndex++)
                 {
                     if (sections[sectionIndex].TactKeyLookup != 0)// && !hasTactKeyFunc(sections[sectionIndex].TactKeyLookup))
                     {
@@ -152,9 +152,9 @@ namespace Game.DataStorage
                         // string data
                         stringsTable = new Dictionary<long, string>();
 
-                        for (int i = 0; i < sections[sectionIndex].StringTableSize;)
+                        for (var i = 0; i < sections[sectionIndex].StringTableSize;)
                         {
-                            long oldPos = reader.BaseStream.Position;
+                            var oldPos = reader.BaseStream.Position;
 
                             stringsTable[i + previousStringTableSize] = reader.ReadCString();
 
@@ -173,13 +173,13 @@ namespace Game.DataStorage
                     Array.Resize(ref recordsData, recordsData.Length + 8); // pad with extra zeros so we don't crash when reading
 
                     // index data
-                    int[] indexData = reader.ReadArray<int>((uint)(sections[sectionIndex].IndexDataSize / 4));
-                    bool isIndexEmpty = Header.HasIndexTable() && indexData.Count(i => i == 0) == sections[sectionIndex].NumRecords;
+                    var indexData = reader.ReadArray<int>((uint)(sections[sectionIndex].IndexDataSize / 4));
+                    var isIndexEmpty = Header.HasIndexTable() && indexData.Count(i => i == 0) == sections[sectionIndex].NumRecords;
 
                     // duplicate rows data
-                    Dictionary<int, int> copyData = new Dictionary<int, int>();
+                    var copyData = new Dictionary<int, int>();
 
-                    for (int i = 0; i < sections[sectionIndex].NumCopyRecords; i++)
+                    for (var i = 0; i < sections[sectionIndex].NumCopyRecords; i++)
                         copyData[reader.ReadInt32()] = reader.ReadInt32();
 
                     if (sections[sectionIndex].NumSparseRecords > 0)
@@ -198,7 +198,7 @@ namespace Game.DataStorage
                         };
 
                         refData.Entries = new Dictionary<int, int>();
-                        ReferenceEntry[] entries = reader.ReadArray<ReferenceEntry>((uint)refData.NumRecords);
+                        var entries = reader.ReadArray<ReferenceEntry>((uint)refData.NumRecords);
                         foreach (var entry in entries)
                             if (!refData.Entries.ContainsKey(entry.Index))
                                 refData.Entries[entry.Index] = entry.Id;
@@ -214,7 +214,7 @@ namespace Game.DataStorage
                     if (sections[sectionIndex].NumSparseRecords > 0)
                     {
                         // TODO: use this shit
-                        int[] sparseIndexData = reader.ReadArray<int>((uint)sections[sectionIndex].NumSparseRecords);
+                        var sparseIndexData = reader.ReadArray<int>((uint)sections[sectionIndex].NumSparseRecords);
 
                         if (Header.HasIndexTable() && indexData.Length != sparseIndexData.Length)
                             throw new Exception("indexData.Length != sparseIndexData.Length");
@@ -222,9 +222,9 @@ namespace Game.DataStorage
                         //indexData = sparseIndexData;
                     }
 
-                    BitReader bitReader = new BitReader(recordsData);
+                    var bitReader = new BitReader(recordsData);
 
-                    for (int i = 0; i < sections[sectionIndex].NumRecords; ++i)
+                    for (var i = 0; i < sections[sectionIndex].NumRecords; ++i)
                     {
                         bitReader.Position = 0;
                         if (Header.HasOffsetTable())
@@ -232,10 +232,10 @@ namespace Game.DataStorage
                         else
                             bitReader.Offset = i * (int)Header.RecordSize;
 
-                        bool hasRef = refData.Entries.TryGetValue(i, out int refId);
+                        var hasRef = refData.Entries.TryGetValue(i, out var refId);
 
-                        long recordIndex = i + previousRecordCount;
-                        long recordOffset =  (recordIndex * Header.RecordSize) - (Header.RecordCount * Header.RecordSize);
+                        var recordIndex = i + previousRecordCount;
+                        var recordOffset =  (recordIndex * Header.RecordSize) - (Header.RecordCount * Header.RecordSize);
 
                         var rec = new WDC3Row(this, bitReader, (int)recordOffset, Header.HasIndexTable() ? (isIndexEmpty ? i : indexData[i]) : -1, hasRef ? refId : -1, stringsTable);
                         _records.Add(rec.Id, rec);
@@ -299,7 +299,7 @@ namespace Game.DataStorage
                 Id = id;
             else
             {
-                int idFieldIndex = reader.Header.IdIndex;
+                var idFieldIndex = reader.Header.IdIndex;
                 _data.Position = _columnMeta[idFieldIndex].RecordOffset;
 
                 Id = GetFieldValue<int>(idFieldIndex);
@@ -313,7 +313,7 @@ namespace Game.DataStorage
             switch (columnMeta.CompressionType)
             {
                 case DB2ColumnCompression.None:
-                    int bitSize = 32 - _fieldMeta[fieldIndex].Bits;
+                    var bitSize = 32 - _fieldMeta[fieldIndex].Bits;
                     if (bitSize > 0)
                         return _data.Read<T>(bitSize);
                     else
@@ -323,13 +323,13 @@ namespace Game.DataStorage
                 case DB2ColumnCompression.SignedImmediate:
                     return _data.ReadSigned<T>(columnMeta.Immediate.BitWidth);
                 case DB2ColumnCompression.Common:
-                    if (_commonData[fieldIndex].TryGetValue(Id, out Value32 val))
+                    if (_commonData[fieldIndex].TryGetValue(Id, out var val))
                         return val.As<T>();
                     else
                         return columnMeta.Common.DefaultValue.As<T>();
                 case DB2ColumnCompression.Pallet:
                 case DB2ColumnCompression.PalletArray: //need for SummonProperties.db2
-                    uint palletIndex = _data.Read<uint>(columnMeta.Pallet.BitWidth);
+                    var palletIndex = _data.Read<uint>(columnMeta.Pallet.BitWidth);
                     return _palletData[fieldIndex][palletIndex].As<T>();
             }
             throw new Exception(string.Format("Unexpected compression type {0}", _columnMeta[fieldIndex].CompressionType));
@@ -342,11 +342,11 @@ namespace Game.DataStorage
             switch (columnMeta.CompressionType)
             {
                 case DB2ColumnCompression.None:
-                    int bitSize = 32 - _fieldMeta[fieldIndex].Bits;
+                    var bitSize = 32 - _fieldMeta[fieldIndex].Bits;
 
-                    T[] arr1 = new T[arraySize];
+                    var arr1 = new T[arraySize];
 
-                    for (int i = 0; i < arr1.Length; i++)
+                    for (var i = 0; i < arr1.Length; i++)
                     {
                         if (bitSize > 0)
                             arr1[i] = _data.Read<T>(bitSize);
@@ -356,30 +356,30 @@ namespace Game.DataStorage
 
                     return arr1;
                 case DB2ColumnCompression.Immediate:
-                    T[] arr2 = new T[arraySize];
+                    var arr2 = new T[arraySize];
 
-                    for (int i = 0; i < arr2.Length; i++)
+                    for (var i = 0; i < arr2.Length; i++)
                         arr2[i] = _data.Read<T>(columnMeta.Immediate.BitWidth);
 
                     return arr2;
                 case DB2ColumnCompression.SignedImmediate:
-                    T[] arr4 = new T[arraySize];
+                    var arr4 = new T[arraySize];
 
-                    for (int i = 0; i < arr4.Length; i++)
+                    for (var i = 0; i < arr4.Length; i++)
                         arr4[i] = _data.ReadSigned<T>(columnMeta.Immediate.BitWidth);
 
                     return arr4;
                 case DB2ColumnCompression.PalletArray:
-                    int cardinality = columnMeta.Pallet.Cardinality;
+                    var cardinality = columnMeta.Pallet.Cardinality;
 
                     if (arraySize != cardinality)
                         throw new Exception("Struct missmatch for pallet array field?");
 
-                    uint palletArrayIndex = _data.Read<uint>(columnMeta.Pallet.BitWidth);
+                    var palletArrayIndex = _data.Read<uint>(columnMeta.Pallet.BitWidth);
 
-                    T[] arr3 = new T[cardinality];
+                    var arr3 = new T[cardinality];
 
-                    for (int i = 0; i < arr3.Length; i++)
+                    for (var i = 0; i < arr3.Length; i++)
                         arr3[i] = _palletData[fieldIndex][i + cardinality * (int)palletArrayIndex].As<T>();
 
                     return arr3;
@@ -392,12 +392,12 @@ namespace Game.DataStorage
             _data.Position = 0;
             _data.Offset = _dataOffset;
 
-            int fieldIndex = 0;
-            T obj = new T();
+            var fieldIndex = 0;
+            var obj = new T();
 
             foreach (var f in typeof(T).GetFields())
             {
-                Type type = f.FieldType;
+                var type = f.FieldType;
 
                 if (f.Name == "Id" && !_dataHasId)
                 {
@@ -414,11 +414,11 @@ namespace Game.DataStorage
 
                 if (type.IsArray)
                 {
-                    Type arrayElementType = type.GetElementType();
+                    var arrayElementType = type.GetElementType();
                     if (arrayElementType.IsEnum)
                         arrayElementType = arrayElementType.GetEnumUnderlyingType();
 
-                    Array atr = (Array)f.GetValue(obj);
+                    var atr = (Array)f.GetValue(obj);
                     switch (Type.GetTypeCode(arrayElementType))
                     {
                         case TypeCode.SByte:
@@ -449,20 +449,20 @@ namespace Game.DataStorage
                             f.SetValue(obj, GetFieldValueArray<float>(fieldIndex, atr.Length));
                             break;
                         case TypeCode.String:
-                            string[] array = new string[atr.Length];
+                            var array = new string[atr.Length];
 
                             if (_stringsTable == null)
                             {
-                                for (int i = 0; i < array.Length; i++)
+                                for (var i = 0; i < array.Length; i++)
                                     array[i] = _data.ReadCString();
                             }
                             else
                             {
                                 var pos = _recordsOffset + (_data.Position >> 3);
 
-                                int[] strIdx = GetFieldValueArray<int>(fieldIndex, atr.Length);
+                                var strIdx = GetFieldValueArray<int>(fieldIndex, atr.Length);
 
-                                for (int i = 0; i < array.Length; i++)
+                                for (var i = 0; i < array.Length; i++)
                                     array[i] = _stringsTable.LookupByKey(pos + i * 4 + strIdx[i]);
                             }
 
@@ -471,9 +471,9 @@ namespace Game.DataStorage
                         case TypeCode.Object:
                             if (arrayElementType == typeof(Vector3))
                             {
-                                float[] pos = GetFieldValueArray<float>(fieldIndex, atr.Length * 3);
+                                var pos = GetFieldValueArray<float>(fieldIndex, atr.Length * 3);
 
-                                Vector3[] vectors = new Vector3[atr.Length];
+                                var vectors = new Vector3[atr.Length];
                                 for (var i = 0; i < atr.Length; ++i)
                                     vectors[i] = new Vector3(pos[i * 3], pos[(i * 3) + 1], pos[(i * 3) + 2]);
 
@@ -526,14 +526,14 @@ namespace Game.DataStorage
                             else
                             {
                                 var pos = _recordsOffset + (_data.Position >> 3);
-                                int ofs = GetFieldValue<int>(fieldIndex);
+                                var ofs = GetFieldValue<int>(fieldIndex);
                                 f.SetValue(obj, _stringsTable.LookupByKey(pos + ofs));
                             }
                             break;
                         case TypeCode.Object:
                             if (type == typeof(LocalizedString))
                             {
-                                LocalizedString localized = new LocalizedString();
+                                var localized = new LocalizedString();
                                 if (_stringsTable == null)
                                 {
                                     localized[Locale.enUS] = _data.ReadCString();
@@ -541,7 +541,7 @@ namespace Game.DataStorage
                                 else
                                 {
                                     var pos = _recordsOffset + (_data.Position >> 3);
-                                    int ofs = GetFieldValue<int>(fieldIndex);
+                                    var ofs = GetFieldValue<int>(fieldIndex);
                                     localized[Locale.enUS] = _stringsTable.LookupByKey(pos + ofs);
                                 }
 
@@ -549,17 +549,17 @@ namespace Game.DataStorage
                             }
                             else if (type == typeof(Vector2))
                             {
-                                float[] pos = GetFieldValueArray<float>(fieldIndex, 2);
+                                var pos = GetFieldValueArray<float>(fieldIndex, 2);
                                 f.SetValue(obj, new Vector2(pos));
                             }
                             else if (type == typeof(Vector3))
                             {
-                                float[] pos = GetFieldValueArray<float>(fieldIndex, 3);
+                                var pos = GetFieldValueArray<float>(fieldIndex, 3);
                                 f.SetValue(obj, new Vector3(pos));
                             }
                             else if (type == typeof(FlagArray128))
                             {
-                                uint[] flags = GetFieldValueArray<uint>(fieldIndex, 4);
+                                var flags = GetFieldValueArray<uint>(fieldIndex, 4);
                                 f.SetValue(obj, new FlagArray128(flags));
                             }
                             break;
@@ -622,7 +622,7 @@ namespace Game.DataStorage
         {
             get
             {
-                int value = (32 - Bits) >> 3;
+                var value = (32 - Bits) >> 3;
                 return (value < 0 ? Math.Abs(value) + 4 : value);
             }
         }
@@ -631,7 +631,7 @@ namespace Game.DataStorage
         {
             get
             {
-                int bitSize = 32 - Bits;
+                var bitSize = 32 - Bits;
                 if (bitSize < 0)
                     bitSize = (bitSize * -1) + 32;
                 return bitSize;

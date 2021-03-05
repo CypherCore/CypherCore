@@ -47,7 +47,7 @@ namespace WorldServer
                 ExitNow();
 
             // Server startup begin
-            uint startupBegin = Time.GetMSTime();
+            var startupBegin = Time.GetMSTime();
 
             // set server offline (not connectable)
             DB.Login.DirectExecute("UPDATE realmlist SET flag = (flag & ~{0}) | {1} WHERE id = '{2}'", (uint)RealmFlags.VersionMismatch, (uint)RealmFlags.Offline, Global.WorldMgr.GetRealm().Id.Index);
@@ -57,10 +57,10 @@ namespace WorldServer
             Global.WorldMgr.SetInitialWorldSettings();
 
             // Launch the worldserver listener socket
-            int worldPort = WorldConfig.GetIntValue(WorldCfg.PortWorld);
-            string worldListener = ConfigMgr.GetDefaultValue("BindIP", "0.0.0.0");
+            var worldPort = WorldConfig.GetIntValue(WorldCfg.PortWorld);
+            var worldListener = ConfigMgr.GetDefaultValue("BindIP", "0.0.0.0");
 
-            int networkThreads = ConfigMgr.GetDefaultValue("Network.Threads", 1);
+            var networkThreads = ConfigMgr.GetDefaultValue("Network.Threads", 1);
             if (networkThreads <= 0)
             {
                 Log.outError(LogFilter.Server, "Network.Threads must be greater than 0");
@@ -83,7 +83,7 @@ namespace WorldServer
             //- Launch CliRunnable thread
             if (ConfigMgr.GetDefaultValue("Console.Enable", true))
             {
-                Thread commandThread = new Thread(CommandManager.InitConsole);
+                var commandThread = new Thread(CommandManager.InitConsole);
                 commandThread.Start();
             }
 
@@ -91,7 +91,7 @@ namespace WorldServer
             GC.WaitForPendingFinalizers();
             GC.Collect();
 
-            uint startupDuration = Time.GetMSTimeDiffToNow(startupBegin);
+            var startupDuration = Time.GetMSTimeDiffToNow(startupBegin);
             Log.outInfo(LogFilter.Server, "World initialized in {0} minutes {1} seconds", (startupDuration / 60000), ((startupDuration % 60000) / 1000));
 
             WorldUpdateLoop();
@@ -128,7 +128,7 @@ namespace WorldServer
         static bool StartDB()
         {
             // Load databases
-            DatabaseLoader loader = new DatabaseLoader(DatabaseTypeFlags.All);
+            var loader = new DatabaseLoader(DatabaseTypeFlags.All);
             loader.AddDatabase(DB.Login, "Login");
             loader.AddDatabase(DB.Characters, "Character");
             loader.AddDatabase(DB.World, "World");
@@ -167,17 +167,17 @@ namespace WorldServer
 
         static void WorldUpdateLoop()
         {
-            uint realPrevTime = Time.GetMSTime();
+            var realPrevTime = Time.GetMSTime();
 
             while (!Global.WorldMgr.IsStopped)
             {
                 var realCurrTime = Time.GetMSTime();
 
-                uint diff = Time.GetMSTimeDiff(realPrevTime, realCurrTime);
+                var diff = Time.GetMSTimeDiff(realPrevTime, realCurrTime);
                 Global.WorldMgr.Update(diff);
                 realPrevTime = realCurrTime;
 
-                uint executionTimeDiff = Time.GetMSTimeDiffToNow(realCurrTime);
+                var executionTimeDiff = Time.GetMSTimeDiffToNow(realCurrTime);
 
                 // we know exactly how long it took to update the world, if the update took less than WORLD_SLEEP_CONST, sleep for WORLD_SLEEP_CONST - world update time
                 if (executionTimeDiff < WorldSleep)

@@ -64,9 +64,9 @@ namespace Game.Scenarios
         {
             _scenarioDBData.Clear();
 
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
-            SQLResult result = DB.World.Query("SELECT map, difficulty, scenario_A, scenario_H FROM scenarios");
+            var result = DB.World.Query("SELECT map, difficulty, scenario_A, scenario_H FROM scenarios");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 scenarios. DB table `scenarios` is empty!");
@@ -75,17 +75,17 @@ namespace Game.Scenarios
 
             do
             {
-                uint mapId = result.Read<uint>(0);
-                byte difficulty = result.Read<byte>(1);
+                var mapId = result.Read<uint>(0);
+                var difficulty = result.Read<byte>(1);
 
-                uint scenarioAllianceId = result.Read<uint>(2);
+                var scenarioAllianceId = result.Read<uint>(2);
                 if (scenarioAllianceId > 0 && !_scenarioData.ContainsKey(scenarioAllianceId))
                 {
                     Log.outError(LogFilter.Sql, "ScenarioMgr.LoadDBData: DB Table `scenarios`, column scenario_A contained an invalid scenario (Id: {0})!", scenarioAllianceId);
                     continue;
                 }
 
-                uint scenarioHordeId = result.Read<uint>(3);
+                var scenarioHordeId = result.Read<uint>(3);
                 if (scenarioHordeId > 0 && !_scenarioData.ContainsKey(scenarioHordeId))
                 {
                     Log.outError(LogFilter.Sql, "ScenarioMgr.LoadDBData: DB Table `scenarios`, column scenario_H contained an invalid scenario (Id: {0})!", scenarioHordeId);
@@ -95,7 +95,7 @@ namespace Game.Scenarios
                 if (scenarioHordeId == 0)
                     scenarioHordeId = scenarioAllianceId;
 
-                ScenarioDBData data = new ScenarioDBData();
+                var data = new ScenarioDBData();
                 data.MapID = mapId;
                 data.DifficultyID = difficulty;
                 data.Scenario_A = scenarioAllianceId;
@@ -111,16 +111,16 @@ namespace Game.Scenarios
         {
             _scenarioData.Clear();
 
-            Dictionary<uint, Dictionary<byte, ScenarioStepRecord>> scenarioSteps = new Dictionary<uint, Dictionary<byte, ScenarioStepRecord>>();
+            var scenarioSteps = new Dictionary<uint, Dictionary<byte, ScenarioStepRecord>>();
             uint deepestCriteriaTreeSize = 0;
 
-            foreach (ScenarioStepRecord step in CliDB.ScenarioStepStorage.Values)
+            foreach (var step in CliDB.ScenarioStepStorage.Values)
             {
                 if (!scenarioSteps.ContainsKey(step.ScenarioID))
                     scenarioSteps[step.ScenarioID] = new Dictionary<byte, ScenarioStepRecord>();
 
                 scenarioSteps[step.ScenarioID][step.OrderIndex] = step;
-                CriteriaTree tree = Global.CriteriaMgr.GetCriteriaTree(step.CriteriaTreeId);
+                var tree = Global.CriteriaMgr.GetCriteriaTree(step.CriteriaTreeId);
                 if (tree != null)
                 {
                     uint criteriaTreeSize = 0;
@@ -134,9 +134,9 @@ namespace Game.Scenarios
 
             //ASSERT(deepestCriteriaTreeSize < MAX_ALLOWED_SCENARIO_POI_QUERY_SIZE, "MAX_ALLOWED_SCENARIO_POI_QUERY_SIZE must be at least {0}", deepestCriteriaTreeSize + 1);
 
-            foreach (ScenarioRecord scenario in CliDB.ScenarioStorage.Values)
+            foreach (var scenario in CliDB.ScenarioStorage.Values)
             {
-                ScenarioData data = new ScenarioData();
+                var data = new ScenarioData();
                 data.Entry = scenario;
                 data.Steps = scenarioSteps.LookupByKey(scenario.Id);
                 _scenarioData[scenario.Id] = data;
@@ -145,34 +145,34 @@ namespace Game.Scenarios
 
         public void LoadScenarioPOI()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             _scenarioPOIStore.Clear(); // need for reload case
 
             uint count = 0;
 
             //                                         0               1          2     3      4        5         6      7              8                  9
-            SQLResult result = DB.World.Query("SELECT CriteriaTreeID, BlobIndex, Idx1, MapID, UiMapID, Priority, Flags, WorldEffectID, PlayerConditionID, NavigationPlayerConditionID FROM scenario_poi ORDER BY CriteriaTreeID, Idx1");
+            var result = DB.World.Query("SELECT CriteriaTreeID, BlobIndex, Idx1, MapID, UiMapID, Priority, Flags, WorldEffectID, PlayerConditionID, NavigationPlayerConditionID FROM scenario_poi ORDER BY CriteriaTreeID, Idx1");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 scenario POI definitions. DB table `scenario_poi` is empty.");
                 return;
             }
 
-            List<Vector2>[][] POIs = new List<Vector2>[0][];
-            Dictionary<uint, MultiMap<int, ScenarioPOIPoint>> allPoints = new Dictionary<uint, MultiMap<int, ScenarioPOIPoint>>();
+            var POIs = new List<Vector2>[0][];
+            var allPoints = new Dictionary<uint, MultiMap<int, ScenarioPOIPoint>>();
 
             //                                               0               1    2  3  4
-            SQLResult pointsResult = DB.World.Query("SELECT CriteriaTreeID, Idx1, X, Y, Z FROM scenario_poi_points ORDER BY CriteriaTreeID DESC, Idx1, Idx2");
+            var pointsResult = DB.World.Query("SELECT CriteriaTreeID, Idx1, X, Y, Z FROM scenario_poi_points ORDER BY CriteriaTreeID DESC, Idx1, Idx2");
             if (!pointsResult.IsEmpty())
             {
                 do
                 {
-                    uint CriteriaTreeID = pointsResult.Read<uint>(0);
-                    int Idx1 = pointsResult.Read<int>(1);
-                    int X = pointsResult.Read<int>(2);
-                    int Y = pointsResult.Read<int>(3);
-                    int Z = pointsResult.Read<int>(4);
+                    var CriteriaTreeID = pointsResult.Read<uint>(0);
+                    var Idx1 = pointsResult.Read<int>(1);
+                    var X = pointsResult.Read<int>(2);
+                    var Y = pointsResult.Read<int>(3);
+                    var Z = pointsResult.Read<int>(4);
 
                     if (!allPoints.ContainsKey(CriteriaTreeID))
                         allPoints[CriteriaTreeID] = new MultiMap<int, ScenarioPOIPoint>();
@@ -184,16 +184,16 @@ namespace Game.Scenarios
 
             do
             {
-                uint criteriaTreeID = result.Read<uint>(0);
-                int blobIndex = result.Read<int>(1);
-                int idx1 = result.Read<int>(2);
-                int mapID = result.Read<int>(3);
-                int uiMapID = result.Read<int>(4);
-                int priority = result.Read<int>(5);
-                int flags = result.Read<int>(6);
-                int worldEffectID = result.Read<int>(7);
-                int playerConditionID = result.Read<int>(8);
-                int navigationPlayerConditionID = result.Read<int>(9);
+                var criteriaTreeID = result.Read<uint>(0);
+                var blobIndex = result.Read<int>(1);
+                var idx1 = result.Read<int>(2);
+                var mapID = result.Read<int>(3);
+                var uiMapID = result.Read<int>(4);
+                var priority = result.Read<int>(5);
+                var flags = result.Read<int>(6);
+                var worldEffectID = result.Read<int>(7);
+                var playerConditionID = result.Read<int>(8);
+                var navigationPlayerConditionID = result.Read<int>(9);
 
                 if (Global.CriteriaMgr.GetCriteriaTree(criteriaTreeID) == null)
                     Log.outError(LogFilter.Sql, $"`scenario_poi` CriteriaTreeID ({criteriaTreeID}) Idx1 ({idx1}) does not correspond to a valid criteria tree");

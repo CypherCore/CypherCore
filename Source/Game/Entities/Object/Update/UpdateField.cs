@@ -46,7 +46,7 @@ namespace Game.Entities
         {
             _changesMask.Reset(updateData.Bit);
 
-            IHasChangesMask hasChangesMask = (IHasChangesMask)updateField._value;
+            var hasChangesMask = (IHasChangesMask)updateField._value;
             if (hasChangesMask != null)
                 hasChangesMask.ClearChangesMask();
         }
@@ -174,10 +174,10 @@ namespace Game.Entities
             if (_values.Count > 32)
             {
                 if (data.HasUnfinishedBitPack())
-                    for (int block = 0; block < _values.Count / 32; ++block)
+                    for (var block = 0; block < _values.Count / 32; ++block)
                         data.WriteBits(_updateMask[block], 32);
                 else
-                    for (int block = 0; block < _values.Count / 32; ++block)
+                    for (var block = 0; block < _values.Count / 32; ++block)
                         data.WriteUInt32(_updateMask[block]);
             }
 
@@ -203,7 +203,7 @@ namespace Game.Entities
 
             if (value is IHasChangesMask)
             {
-                IHasChangesMask hasChanges = (IHasChangesMask)value;
+                var hasChanges = (IHasChangesMask)value;
                 if (hasChanges != null)
                     hasChanges.GetUpdateMask().SetAll();
             }
@@ -214,11 +214,11 @@ namespace Game.Entities
         public void InsertValue(int index, T value)
         {
             _values.Insert(index, value);
-            for (int i = index; i < _values.Count; ++i)
+            for (var i = index; i < _values.Count; ++i)
             {
                 MarkChanged(i);
                 // also mark all fields of value as changed
-                IHasChangesMask hasChangesMask = (IHasChangesMask)_values[i];
+                var hasChangesMask = (IHasChangesMask)_values[i];
                 if (hasChangesMask != null)
                     hasChangesMask.GetUpdateMask().SetAll();
             }
@@ -228,11 +228,11 @@ namespace Game.Entities
         {
             // remove by shifting entire container - client might rely on values being sorted for certain fields
             _values.RemoveAt(index);
-            for (int i = index; i < _values.Count; ++i)
+            for (var i = index; i < _values.Count; ++i)
             {
                 MarkChanged(i);
                 // also mark all fields of value as changed
-                IHasChangesMask hasChanges = (IHasChangesMask)_values[i];
+                var hasChanges = (IHasChangesMask)_values[i];
                 if (hasChanges != null)
                     hasChanges.GetUpdateMask().SetAll();
             }
@@ -250,7 +250,7 @@ namespace Game.Entities
 
         public void MarkChanged(int index)
         {
-            int block = UpdateMask.GetBlockIndex(index);
+            var block = UpdateMask.GetBlockIndex(index);
             if (block >= _updateMask.Count)
                 _updateMask.Add(0);
 
@@ -259,7 +259,7 @@ namespace Game.Entities
 
         public void ClearChanged(int index)
         {
-            int block = UpdateMask.GetBlockIndex(index);
+            var block = UpdateMask.GetBlockIndex(index);
             if (block >= _updateMask.Count)
                 _updateMask.Add(0);
 
@@ -361,7 +361,7 @@ namespace Game.Entities
         {
             if (typeof(IHasChangesMask).IsAssignableFrom(typeof(U)))
             {
-                for (int i = 0; i < updateField.GetSize(); ++i)
+                for (var i = 0; i < updateField.GetSize(); ++i)
                     ((IHasChangesMask)updateField[i]).ClearChangesMask();
             }
         }
@@ -370,7 +370,7 @@ namespace Game.Entities
         {
             if (typeof(IHasChangesMask).IsAssignableFrom(typeof(U)))
             {
-                for (int i = 0; i < updateField.Size(); ++i)
+                for (var i = 0; i < updateField.Size(); ++i)
                     ((IHasChangesMask)updateField[i]).ClearChangesMask();
 
                 updateField.ClearChangesMask();
@@ -430,10 +430,10 @@ namespace Game.Entities
             if (size > 32)
             {
                 if (data.HasUnfinishedBitPack())
-                    for (int block = 0; block < size / 32; ++block)
+                    for (var block = 0; block < size / 32; ++block)
                         data.WriteBits(0xFFFFFFFFu, 32);
                 else
-                    for (int block = 0; block < size / 32; ++block)
+                    for (var block = 0; block < size / 32; ++block)
                         data.WriteUInt32(0xFFFFFFFFu);
             }
             else if (size == 32)

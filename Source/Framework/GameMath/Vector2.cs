@@ -147,8 +147,8 @@ namespace Framework.GameMath
         /// <returns>A <see cref="Vector2"/> that represents the vector specified by the <paramref name="value"/> parameter.</returns>
         public static Vector2 Parse(string value)
         {
-            Regex r = new Regex(@"\((?<x>.*),(?<y>.*)\)", RegexOptions.Singleline);
-            Match m = r.Match(value);
+            var r = new Regex(@"\((?<x>.*),(?<y>.*)\)", RegexOptions.Singleline);
+            var m = r.Match(value);
             if (m.Success)
             {
                 return new Vector2(
@@ -173,8 +173,8 @@ namespace Framework.GameMath
         /// <returns><see langword="true"/> if value was converted successfully; otherwise, <see langword="false"/>.</returns>
         public static bool TryParse(string value, out Vector2 result)
         {
-            Regex r = new Regex(@"\((?<x>.*),(?<y>.*)\)", RegexOptions.Singleline);
-            Match m = r.Match(value);
+            var r = new Regex(@"\((?<x>.*),(?<y>.*)\)", RegexOptions.Singleline);
+            var m = r.Match(value);
             if (m.Success)
             {
                 result = new Vector2(
@@ -488,7 +488,7 @@ namespace Framework.GameMath
         /// </summary>
         public void Normalize()
         {
-            float length = GetLength();
+            var length = GetLength();
             if (length == 0)
             {
                 throw new DivideByZeroException("Trying to normalize a vector with length of zero.");
@@ -558,7 +558,7 @@ namespace Framework.GameMath
         {
             if (obj is Vector2)
             {
-                Vector2 v = (Vector2)obj;
+                var v = (Vector2)obj;
                 return (_x == v.X) && (_y == v.Y);
             }
             return false;
@@ -819,7 +819,7 @@ namespace Framework.GameMath
         /// <returns>An array of single-precision floating point values.</returns>
         public static explicit operator float[] (Vector2 vector)
         {
-            float[] array = new float[2];
+            var array = new float[2];
             array[0] = vector.X;
             array[1] = vector.Y;
             return array;
@@ -831,7 +831,7 @@ namespace Framework.GameMath
         /// <returns>A <see cref="System.Collections.Generic.List{T}"/> of single-precision floating point values.</returns>
         public static explicit operator List<float>(Vector2 vector)
         {
-            List<float> list = new List<float>();
+            var list = new List<float>();
             list.Add(vector.X);
             list.Add(vector.Y);
 
@@ -844,7 +844,7 @@ namespace Framework.GameMath
         /// <returns>A <see cref="System.Collections.Generic.LinkedList{T}"/> of single-precision floating point values.</returns>
         public static explicit operator LinkedList<float>(Vector2 vector)
         {
-            LinkedList<float> list = new LinkedList<float>();
+            var list = new LinkedList<float>();
             list.AddLast(vector.X);
             list.AddLast(vector.Y);
 
@@ -897,7 +897,7 @@ namespace Framework.GameMath
         {
             if ((destinationType == typeof(string)) && (value is Vector2))
             {
-                Vector2 v = (Vector2)value;
+                var v = (Vector2)value;
                 return v.ToString();
             }
 
@@ -937,7 +937,7 @@ namespace Framework.GameMath
         /// <returns>A <see cref="TypeConverter.StandardValuesCollection"/> that holds a standard set of valid values, or a null reference (Nothing in Visual Basic) if the data type does not support a standard set of values.</returns>
         public override System.ComponentModel.TypeConverter.StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
         {
-            StandardValuesCollection svc =
+            var svc =
                 new StandardValuesCollection(new object[3] { Vector2.Zero, Vector2.XAxis, Vector2.YAxis });
 
             return svc;

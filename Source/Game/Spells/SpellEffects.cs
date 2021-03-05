@@ -76,13 +76,13 @@ namespace Game.Spells
             if (!unitTarget.IsInWorld)
                 return;
 
-            Player target = unitTarget.ToPlayer();
+            var target = unitTarget.ToPlayer();
 
             if (target.IsResurrectRequested())       // already have one active request
                 return;
 
-            int health = damage;
-            int mana = effectInfo.MiscValue;
+            var health = damage;
+            var mana = effectInfo.MiscValue;
             ExecuteLogEffectResurrect(effIndex, target);
             target.SetResurrectRequestData(m_caster, (uint)health, (uint)mana, 0);
             SendResurrectRequest(target);

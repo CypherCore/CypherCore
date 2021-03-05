@@ -28,19 +28,19 @@ namespace Game.Arenas
 
         public override void StartingEventCloseDoors()
         {
-            for (int i = BladeEdgeObjectTypes.Door1; i <= BladeEdgeObjectTypes.Door4; ++i)
+            for (var i = BladeEdgeObjectTypes.Door1; i <= BladeEdgeObjectTypes.Door4; ++i)
                 SpawnBGObject(i, BattlegroundConst.RespawnImmediately);
 
-            for (int i = BladeEdgeObjectTypes.Buff1; i <= BladeEdgeObjectTypes.Buff2; ++i)
+            for (var i = BladeEdgeObjectTypes.Buff1; i <= BladeEdgeObjectTypes.Buff2; ++i)
                 SpawnBGObject(i, BattlegroundConst.RespawnOneDay);
         }
 
         public override void StartingEventOpenDoors()
         {
-            for (int i = BladeEdgeObjectTypes.Door1; i <= BladeEdgeObjectTypes.Door4; ++i)
+            for (var i = BladeEdgeObjectTypes.Door1; i <= BladeEdgeObjectTypes.Door4; ++i)
                 DoorOpen(i);
 
-            for (int i = BladeEdgeObjectTypes.Buff1; i <= BladeEdgeObjectTypes.Buff2; ++i)
+            for (var i = BladeEdgeObjectTypes.Buff1; i <= BladeEdgeObjectTypes.Buff2; ++i)
                 SpawnBGObject(i, 60);
         }
 
@@ -68,7 +68,7 @@ namespace Game.Arenas
 
         public override bool SetupBattleground()
         {
-            bool result = true;
+            var result = true;
             result &= AddObject(BladeEdgeObjectTypes.Door1, BladeEfgeGameObjects.Door1, 6287.277f, 282.1877f, 3.810925f, -2.260201f, 0, 0, 0.9044551f, -0.4265689f, BattlegroundConst.RespawnImmediately);
             result &= AddObject(BladeEdgeObjectTypes.Door2, BladeEfgeGameObjects.Door2, 6189.546f, 241.7099f, 3.101481f, 0.8813917f, 0, 0, 0.4265689f, 0.9044551f, BattlegroundConst.RespawnImmediately);
             result &= AddObject(BladeEdgeObjectTypes.Door3, BladeEfgeGameObjects.Door3, 6299.116f, 296.5494f, 3.308032f, 0.8813917f, 0, 0, 0.4265689f, 0.9044551f, BattlegroundConst.RespawnImmediately);

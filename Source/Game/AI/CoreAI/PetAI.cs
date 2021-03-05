@@ -40,7 +40,7 @@ namespace Game.AI
                 return true;
 
             // dont allow pets to follow targets far away from owner
-            Unit owner = me.GetCharmerOrOwner();
+            var owner = me.GetCharmerOrOwner();
             if (owner)
                 if (owner.GetExactDist(me) >= (owner.GetVisibilityRange() - 10.0f))
                     return true;
@@ -72,7 +72,7 @@ namespace Game.AI
             if (!me.IsAlive() || me.GetCharmInfo() == null)
                 return;
 
-            Unit owner = me.GetCharmerOrOwner();
+            var owner = me.GetCharmerOrOwner();
 
             if (m_updateAlliesTimer <= diff)
                 // UpdateAllies self set update timer
@@ -115,7 +115,7 @@ namespace Game.AI
                     // Stay - Only pick from pet or owner targets / attackers so targets won't run by
                     //   while chasing our owner. Don't do auto select.
                     // All other cases (ie: defensive) - Targets are assigned by DamageTaken(), OwnerAttackedBy(), OwnerAttacked(), etc.
-                    Unit nextTarget = SelectNextTarget(me.HasReactState(ReactStates.Aggressive));
+                    var nextTarget = SelectNextTarget(me.HasReactState(ReactStates.Aggressive));
 
                     if (nextTarget)
                         AttackStart(nextTarget);
@@ -129,15 +129,15 @@ namespace Game.AI
             // Autocast (casted only in combat or persistent spells in any state)
             if (!me.HasUnitState(UnitState.Casting))
             {
-                List<Tuple<Unit, Spell>> targetSpellStore = new List<Tuple<Unit, Spell>>();
+                var targetSpellStore = new List<Tuple<Unit, Spell>>();
 
                 for (byte i = 0; i < me.GetPetAutoSpellSize(); ++i)
                 {
-                    uint spellID = me.GetPetAutoSpellOnPos(i);
+                    var spellID = me.GetPetAutoSpellOnPos(i);
                     if (spellID == 0)
                         continue;
 
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellID, me.GetMap().GetDifficultyID());
+                    var spellInfo = Global.SpellMgr.GetSpellInfo(spellID, me.GetMap().GetDifficultyID());
                     if (spellInfo == null)
                         continue;
 
@@ -157,12 +157,12 @@ namespace Game.AI
                                 continue;
                         }
 
-                        Spell spell = new Spell(me, spellInfo, TriggerCastFlags.None);
-                        bool spellUsed = false;
+                        var spell = new Spell(me, spellInfo, TriggerCastFlags.None);
+                        var spellUsed = false;
 
                         // Some spells can target enemy or friendly (DK Ghoul's Leap)
                         // Check for enemy first (pet then owner)
-                        Unit target = me.GetAttackerForHelper();
+                        var target = me.GetAttackerForHelper();
                         if (!target && owner)
                             target = owner.GetAttackerForHelper();
 
@@ -187,7 +187,7 @@ namespace Game.AI
                         {
                             foreach (var tar in m_AllySet)
                             {
-                                Unit ally = Global.ObjAccessor.GetUnit(me, tar);
+                                var ally = Global.ObjAccessor.GetUnit(me, tar);
 
                                 //only buff targets that are in combat, unless the spell can only be cast while out of combat
                                 if (!ally)
@@ -208,7 +208,7 @@ namespace Game.AI
                     }
                     else if (me.GetVictim() && CanAIAttack(me.GetVictim()) && spellInfo.CanBeUsedInCombat())
                     {
-                        Spell spell = new Spell(me, spellInfo, TriggerCastFlags.None);
+                        var spell = new Spell(me, spellInfo, TriggerCastFlags.None);
                         if (spell.CanAutoCast(me.GetVictim()))
                             targetSpellStore.Add(Tuple.Create(me.GetVictim(), spell));
                         else
@@ -219,14 +219,14 @@ namespace Game.AI
                 //found units to cast on to
                 if (!targetSpellStore.Empty())
                 {
-                    int index = RandomHelper.IRand(0, targetSpellStore.Count - 1);
+                    var index = RandomHelper.IRand(0, targetSpellStore.Count - 1);
                     var tss = targetSpellStore[index];
 
-                    (Unit target, Spell spell) = tss;
+                    (var target, var spell) = tss;
 
                     targetSpellStore.RemoveAt(index);
 
-                    SpellCastTargets targets = new SpellCastTargets();
+                    var targets = new SpellCastTargets();
                     targets.SetUnitTarget(target);
 
                     spell.Prepare(targets);
@@ -247,12 +247,12 @@ namespace Game.AI
         {
             m_updateAlliesTimer = 10 * Time.InMilliseconds;                 // update friendly targets every 10 seconds, lesser checks increase performance
 
-            Unit owner = me.GetCharmerOrOwner();
+            var owner = me.GetCharmerOrOwner();
             if (!owner)
                 return;
 
             Group group = null;
-            Player player = owner.ToPlayer();
+            var player = owner.ToPlayer();
             if (player)
                 group = player.GetGroup();
 
@@ -268,9 +268,9 @@ namespace Game.AI
             m_AllySet.Add(me.GetGUID());
             if (group)                                              //add group
             {
-                for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
+                for (var refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                 {
-                    Player target = refe.GetSource();
+                    var target = refe.GetSource();
                     if (!target || !target.IsInMap(owner) || !group.SameSubGroup(owner.ToPlayer(), target))
                         continue;
 
@@ -299,7 +299,7 @@ namespace Game.AI
             me.InterruptNonMeleeSpells(false);
 
             // Before returning to owner, see if there are more things to attack
-            Unit nextTarget = SelectNextTarget(false);
+            var nextTarget = SelectNextTarget(false);
             if (nextTarget)
                 AttackStart(nextTarget);
             else
@@ -381,7 +381,7 @@ namespace Game.AI
                 return null;
 
             // Check pet attackers first so we don't drag a bunch of targets to the owner
-            Unit myAttacker = me.GetAttackerForHelper();
+            var myAttacker = me.GetAttackerForHelper();
             if (myAttacker)
                 if (!myAttacker.HasBreakableByDamageCrowdControlAura())
                     return myAttacker;
@@ -391,14 +391,14 @@ namespace Game.AI
                 return null;
 
             // Check owner attackers
-            Unit ownerAttacker = me.GetCharmerOrOwner().GetAttackerForHelper();
+            var ownerAttacker = me.GetCharmerOrOwner().GetAttackerForHelper();
             if (ownerAttacker)
                 if (!ownerAttacker.HasBreakableByDamageCrowdControlAura())
                     return ownerAttacker;
 
             // Check owner victim
             // 3.0.2 - Pets now start attacking their owners victim in defensive mode as soon as the hunter does
-            Unit ownerVictim = me.GetCharmerOrOwner().GetVictim();
+            var ownerVictim = me.GetCharmerOrOwner().GetVictim();
             if (ownerVictim)
                 return ownerVictim;
 
@@ -409,7 +409,7 @@ namespace Game.AI
             {
                 if (!me.GetCharmInfo().IsReturning() || me.GetCharmInfo().IsFollowing() || me.GetCharmInfo().IsAtStay())
                 {
-                    Unit nearTarget = me.SelectNearestHostileUnitInAggroRange(true);
+                    var nearTarget = me.SelectNearestHostileUnitInAggroRange(true);
                     if (nearTarget)
                         return nearTarget;
                 }
@@ -464,7 +464,7 @@ namespace Game.AI
             if (me.Attack(target, true))
             {
                 // properly fix fake combat after pet is sent to attack
-                Unit owner = me.GetOwner();
+                var owner = me.GetOwner();
                 if (owner != null)
                     owner.AddUnitFlag(UnitFlags.PetInCombat);
 
@@ -476,7 +476,7 @@ namespace Game.AI
 
                 if (chase)
                 {
-                    bool oldCmdAttack = me.GetCharmInfo().IsCommandAttack(); // This needs to be reset after other flags are cleared
+                    var oldCmdAttack = me.GetCharmInfo().IsCommandAttack(); // This needs to be reset after other flags are cleared
                     ClearCharmInfoFlags();
                     me.GetCharmInfo().SetIsCommandAttack(oldCmdAttack); // For passive pets commanded to attack so they will use spells
                     me.GetMotionMaster().Clear();
@@ -565,7 +565,7 @@ namespace Game.AI
             {
                 // Check if our owner selected this target and clicked "attack"
                 Unit ownerTarget;
-                Player owner = me.GetCharmerOrOwner().ToPlayer();
+                var owner = me.GetCharmerOrOwner().ToPlayer();
                 if (owner)
                     ownerTarget = owner.GetSelectedUnit();
                 else
@@ -617,7 +617,7 @@ namespace Game.AI
         {
             // Quick access to set all flags to FALSE
 
-            CharmInfo ci = me.GetCharmInfo();
+            var ci = me.GetCharmInfo();
 
             if (ci != null)
             {

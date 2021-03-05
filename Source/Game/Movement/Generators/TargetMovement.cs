@@ -65,21 +65,21 @@ namespace Game.Movement
             }
 
 
-            bool targetMoved = false;
+            var targetMoved = false;
             _timer.Update((int)diff);
             if (_timer.Passed())
             {
                 _timer.Reset(100);
 
-                float distance = owner.GetCombatReach() + WorldConfig.GetFloatValue(WorldCfg.RateTargetPosRecalculationRange);
+                var distance = owner.GetCombatReach() + WorldConfig.GetFloatValue(WorldCfg.RateTargetPosRecalculationRange);
                 if (owner.IsPet() && (owner.GetCharmerOrOwnerGUID() == GetTarget().GetGUID()))
                     distance = 1.0f; // pet following owner
 
-                Vector3 destination = owner.MoveSpline.FinalDestination();
+                var destination = owner.MoveSpline.FinalDestination();
                 if (owner.MoveSpline.onTransport)
                 {
                     float o = 0;
-                    ITransport transport = owner.GetDirectTransport();
+                    var transport = owner.GetDirectTransport();
                     if (transport != null)
                         transport.CalculatePassengerPosition(ref destination.X, ref destination.Y, ref destination.Z, ref o);
                 }
@@ -152,8 +152,8 @@ namespace Game.Movement
                 }
                 else
                 {
-                    float distance = _offset + 1.0f;
-                    float size = owner.GetCombatReach();
+                    var distance = _offset + 1.0f;
+                    var size = owner.GetCombatReach();
 
                     if (owner.IsPet() && GetTarget().GetTypeId() == TypeId.Player)
                     {
@@ -180,9 +180,9 @@ namespace Game.Movement
                 _path = new PathGenerator(owner);
 
             // allow pets to use shortcut if no path found when following their master
-            bool forceDest = owner.IsTypeId(TypeId.Unit) && owner.IsPet() && owner.HasUnitState(UnitState.Follow);
+            var forceDest = owner.IsTypeId(TypeId.Unit) && owner.IsPet() && owner.HasUnitState(UnitState.Follow);
 
-            bool result = _path.CalculatePath(x, y, z, forceDest);
+            var result = _path.CalculatePath(x, y, z, forceDest);
             if (!result && Convert.ToBoolean(_path.GetPathType() & PathType.NoPath))
             {
                 // Can't reach target
@@ -201,7 +201,7 @@ namespace Game.Movement
             if (owner.IsTypeId(TypeId.Unit))
                 owner.ToCreature().SetCannotReachTarget(false);
 
-            MoveSplineInit init = new MoveSplineInit(owner);
+            var init = new MoveSplineInit(owner);
             init.MovebyPath(_path.GetPath());
             init.SetWalk(EnableWalking());
             // Using the same condition for facing target as the one that is used for SetInFront on movement end

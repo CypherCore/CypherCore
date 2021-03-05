@@ -68,20 +68,20 @@ namespace Game.Chat.Commands
             if (args.Empty())
                 return false;
 
-            Player player = handler.GetSelectedPlayer();
+            var player = handler.GetSelectedPlayer();
             if (!player)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;
             }
 
-            if (!uint.TryParse(args.NextString(), out uint time) || time == 0)
+            if (!uint.TryParse(args.NextString(), out var time) || time == 0)
             {
                 handler.SendSysMessage(CypherStrings.BadValue);
                 return false;
             }
 
-            Aura aura = player.AddAura(isInstance ? Spells.LFGDundeonDeserter : Spells.BGDeserter, player);
+            var aura = player.AddAura(isInstance ? Spells.LFGDundeonDeserter : Spells.BGDeserter, player);
             if (aura == null)
             {
                 handler.SendSysMessage(CypherStrings.BadValue);
@@ -94,7 +94,7 @@ namespace Game.Chat.Commands
 
         static bool HandleDeserterRemove(StringArguments args, CommandHandler handler, bool isInstance)
         {
-            Player player = handler.GetSelectedPlayer();
+            var player = handler.GetSelectedPlayer();
             if (!player)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);

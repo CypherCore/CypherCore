@@ -57,7 +57,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(GossipOptions.Count);
             _worldPacket.WriteInt32(GossipText.Count);
 
-            foreach (ClientGossipOptions options in GossipOptions)
+            foreach (var options in GossipOptions)
             {
                 _worldPacket.WriteInt32(options.ClientOption);
                 _worldPacket.WriteUInt8(options.OptionNPC);
@@ -79,7 +79,7 @@ namespace Game.Networking.Packets
                     _worldPacket.WriteInt32(options.SpellID.Value);
             }
 
-            foreach (ClientGossipText text in GossipText)
+            foreach (var text in GossipText)
                 text.Write(_worldPacket);
         }
 
@@ -101,7 +101,7 @@ namespace Game.Networking.Packets
             GossipID = _worldPacket.ReadUInt32();
             GossipIndex = _worldPacket.ReadUInt32();
 
-            uint length = _worldPacket.ReadBits<uint>(8);
+            var length = _worldPacket.ReadBits<uint>(8);
             PromotionCode = _worldPacket.ReadString(length);
         }
 
@@ -128,7 +128,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt8(Reason);
             _worldPacket.WriteInt32(Items.Count);
 
-            foreach (VendorItemPkt item in Items)
+            foreach (var item in Items)
                 item.Write(_worldPacket);
         }
 
@@ -148,7 +148,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(TrainerID);
 
             _worldPacket.WriteInt32(Spells.Count);
-            foreach (TrainerListSpell spell in Spells)
+            foreach (var spell in Spells)
             {
                 _worldPacket.WriteUInt32(spell.SpellID);
                 _worldPacket.WriteUInt32(spell.MoneyCost);
@@ -313,7 +313,7 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteInt32(Items.Count);
-            foreach (TreasureItem treasureItem in Items)
+            foreach (var treasureItem in Items)
                 treasureItem.Write(data);
         }
     }

@@ -115,12 +115,12 @@ public static class Time
 
     public static string secsToTimeString(ulong timeInSecs, bool shortText = false, bool hoursOnly = false)
     {
-        ulong secs = timeInSecs % Minute;
-        ulong minutes = timeInSecs % Hour / Minute;
-        ulong hours = timeInSecs % Day / Hour;
-        ulong days = timeInSecs / Day;
+        var secs = timeInSecs % Minute;
+        var minutes = timeInSecs % Hour / Minute;
+        var hours = timeInSecs % Day / Hour;
+        var days = timeInSecs / Day;
 
-        string ss = "";
+        var ss = "";
         if (days != 0)
             ss += days + (shortText ? "d" : " Day(s) ");
         if (hours != 0 || hoursOnly)
@@ -138,8 +138,8 @@ public static class Time
 
     public static uint TimeStringToSecs(string timestring)
     {
-        int secs = 0;
-        int buffer = 0;
+        var secs = 0;
+        var buffer = 0;
         int multiplier;
 
         foreach (var c in timestring)
@@ -179,9 +179,9 @@ public static class Time
 
     public static string GetTimeString(long time)
     {
-        long days = time / Day;
-        long hours = (time % Day) / Hour;
-        long minute = (time % Hour) / Minute;
+        var days = time / Day;
+        var hours = (time % Day) / Hour;
+        var minute = (time % Hour) / Minute;
 
         return $"Days: {days} Hours: {hours} Minutes: {minute}";
     }
@@ -203,7 +203,7 @@ public static class Time
         GC.Collect();
 
         watch.Start();
-        for (int i = 0; i < iterations; i++)
+        for (var i = 0; i < iterations; i++)
         {
             func();
         }

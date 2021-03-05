@@ -46,25 +46,25 @@ public class RealmManager : Singleton<RealmManager>
     void LoadBuildInfo()
     {
         //                                         0             1             2              3              4      5              6
-        SQLResult result = DB.Login.Query("SELECT majorVersion, minorVersion, bugfixVersion, hotfixVersion, build, win64AuthSeed, mac64AuthSeed FROM build_info ORDER BY build ASC");
+        var result = DB.Login.Query("SELECT majorVersion, minorVersion, bugfixVersion, hotfixVersion, build, win64AuthSeed, mac64AuthSeed FROM build_info ORDER BY build ASC");
         if (!result.IsEmpty())
         {
             do
             {
-                RealmBuildInfo build = new RealmBuildInfo();
+                var build = new RealmBuildInfo();
                 build.MajorVersion = result.Read<uint>(0);
                 build.MinorVersion = result.Read<uint>(1);
                 build.BugfixVersion = result.Read<uint>(2);
-                string hotfixVersion = result.Read<string>(3);
+                var hotfixVersion = result.Read<string>(3);
                 if (!hotfixVersion.IsEmpty() && hotfixVersion.Length < build.HotfixVersion.Length)
                     build.HotfixVersion = hotfixVersion.ToCharArray();
 
                 build.Build = result.Read<uint>(4);
-                string win64AuthSeedHexStr = result.Read<string>(5);
+                var win64AuthSeedHexStr = result.Read<string>(5);
                 if (!win64AuthSeedHexStr.IsEmpty() && win64AuthSeedHexStr.Length == build.Win64AuthSeed.Length * 2)
                     build.Win64AuthSeed = win64AuthSeedHexStr.ToByteArray();
 
-                string mac64AuthSeedHexStr = result.Read<string>(6);
+                var mac64AuthSeedHexStr = result.Read<string>(6);
                 if (!mac64AuthSeedHexStr.IsEmpty() && mac64AuthSeedHexStr.Length == build.Mac64AuthSeed.Length * 2)
                     build.Mac64AuthSeed = mac64AuthSeedHexStr.ToByteArray();
 
@@ -90,9 +90,9 @@ public class RealmManager : Singleton<RealmManager>
 
     void UpdateRealms(object source, ElapsedEventArgs e)
     {
-        PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_REALMLIST);
-        SQLResult result = DB.Login.Query(stmt);
-        Dictionary<RealmId, string> existingRealms = new Dictionary<RealmId, string>();
+        var stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_REALMLIST);
+        var result = DB.Login.Query(stmt);
+        var existingRealms = new Dictionary<RealmId, string>();
         foreach (var p in _realms)
             existingRealms[p.Key] = p.Value.Name;
 
@@ -104,13 +104,13 @@ public class RealmManager : Singleton<RealmManager>
             do
             {
                 var realm = new Realm();
-                uint realmId = result.Read<uint>(0);
+                var realmId = result.Read<uint>(0);
                 realm.Name = result.Read<string>(1);
                 realm.ExternalAddress = IPAddress.Parse(result.Read<string>(2));
                 realm.LocalAddress = IPAddress.Parse(result.Read<string>(3));
                 realm.LocalSubnetMask = IPAddress.Parse(result.Read<string>(4));
                 realm.Port = result.Read<ushort>(5);
-                RealmType realmType = (RealmType)result.Read<byte>(6);
+                var realmType = (RealmType)result.Read<byte>(6);
                 if (realmType == RealmType.FFAPVP)
                     realmType = RealmType.PVP;
                 if (realmType >= RealmType.MaxType)
@@ -119,12 +119,12 @@ public class RealmManager : Singleton<RealmManager>
                 realm.Type = (byte)realmType;
                 realm.Flags = (RealmFlags)result.Read<byte>(7);
                 realm.Timezone = result.Read<byte>(8);
-                AccountTypes allowedSecurityLevel = (AccountTypes)result.Read<byte>(9);
+                var allowedSecurityLevel = (AccountTypes)result.Read<byte>(9);
                 realm.AllowedSecurityLevel = (allowedSecurityLevel <= AccountTypes.Administrator ? allowedSecurityLevel : AccountTypes.Administrator);
                 realm.PopulationLevel = result.Read<float>(10);
                 realm.Build = result.Read<uint>(11);
-                byte region = result.Read<byte>(12);
-                byte battlegroup = result.Read<byte>(13);
+                var region = result.Read<byte>(12);
+                var battlegroup = result.Read<byte>(13);
 
                 realm.Id = new RealmId(region, battlegroup, realmId);
 
@@ -164,13 +164,13 @@ public class RealmManager : Singleton<RealmManager>
 
     public uint GetMinorMajorBugfixVersionForBuild(uint build)
     {
-        RealmBuildInfo buildInfo = _builds.FirstOrDefault(p => p.Build < build);
+        var buildInfo = _builds.FirstOrDefault(p => p.Build < build);
         return buildInfo != null ? (buildInfo.MajorVersion * 10000 + buildInfo.MinorVersion * 100 + buildInfo.BugfixVersion) : 0;
     }
 
     public void WriteSubRegions(Bgs.Protocol.GameUtilities.V1.GetAllValuesForAttributeResponse response)
     {
-        foreach (string subRegion in GetSubRegions())
+        foreach (var subRegion in GetSubRegions())
         {
             var variant = new Bgs.Protocol.Variant();
             variant.StringValue = subRegion;
@@ -180,8 +180,8 @@ public class RealmManager : Singleton<RealmManager>
 
     public byte[] GetRealmEntryJSON(RealmId id, uint build)
     {
-        byte[] compressed = new byte[0];
-        Realm realm = GetRealm(id);
+        var compressed = new byte[0];
+        var realm = GetRealm(id);
         if (realm != null)
         {
             if (!realm.Flags.HasAnyFlag(RealmFlags.Offline) && realm.Build == build)
@@ -192,8 +192,8 @@ public class RealmManager : Singleton<RealmManager>
                 realmEntry.PopulationState = Math.Max((int)realm.PopulationLevel, 1);
                 realmEntry.CfgCategoriesID = realm.Timezone;
 
-                ClientVersion version = new ClientVersion();
-                RealmBuildInfo buildInfo = GetBuildInfo(realm.Build);
+                var version = new ClientVersion();
+                var buildInfo = GetBuildInfo(realm.Build);
                 if (buildInfo != null)
                 {
                     version.Major = (int)buildInfo.MajorVersion;
@@ -231,17 +231,17 @@ public class RealmManager : Singleton<RealmManager>
             if (realm.Value.Id.GetSubRegionAddress() != subRegion)
                 continue;
 
-            RealmFlags flag = realm.Value.Flags;
+            var flag = realm.Value.Flags;
             if (realm.Value.Build != build)
                 flag |= RealmFlags.VersionMismatch;
 
-            RealmListUpdate realmListUpdate = new RealmListUpdate();
+            var realmListUpdate = new RealmListUpdate();
             realmListUpdate.Update.WowRealmAddress = (int)realm.Value.Id.GetAddress();
             realmListUpdate.Update.CfgTimezonesID = 1;
             realmListUpdate.Update.PopulationState = (realm.Value.Flags.HasAnyFlag(RealmFlags.Offline) ? 0 : Math.Max((int)realm.Value.PopulationLevel, 1));
             realmListUpdate.Update.CfgCategoriesID = realm.Value.Timezone;
 
-            RealmBuildInfo buildInfo = GetBuildInfo(realm.Value.Build);
+            var buildInfo = GetBuildInfo(realm.Value.Build);
             if (buildInfo != null)
             {
                 realmListUpdate.Update.Version.Major = (int)buildInfo.MajorVersion;
@@ -273,14 +273,14 @@ public class RealmManager : Singleton<RealmManager>
 
     public BattlenetRpcErrorCode JoinRealm(uint realmAddress, uint build, IPAddress clientAddress, byte[] clientSecret, Locale locale, string os, string accountName, Bgs.Protocol.GameUtilities.V1.ClientResponse response)
     {
-        Realm realm = GetRealm(new RealmId(realmAddress));
+        var realm = GetRealm(new RealmId(realmAddress));
         if (realm != null)
         {
             if (realm.Flags.HasAnyFlag(RealmFlags.Offline) || realm.Build != build)
                 return BattlenetRpcErrorCode.UserServerNotPermittedOnRealm;
 
-            RealmListServerIPAddresses serverAddresses = new RealmListServerIPAddresses();
-            AddressFamily addressFamily = new AddressFamily();
+            var serverAddresses = new RealmListServerIPAddresses();
+            var addressFamily = new AddressFamily();
             addressFamily.Id = 1;
 
             var address = new Address();
@@ -289,12 +289,12 @@ public class RealmManager : Singleton<RealmManager>
             addressFamily.Addresses.Add(address);
             serverAddresses.Families.Add(addressFamily);
 
-            byte[] compressed = Json.Deflate("JSONRealmListServerIPAddresses", serverAddresses);
+            var compressed = Json.Deflate("JSONRealmListServerIPAddresses", serverAddresses);
 
-            byte[] serverSecret = new byte[0].GenerateRandomKey(32);
-            byte[] keyData = clientSecret.ToArray().Combine(serverSecret);
+            var serverSecret = new byte[0].GenerateRandomKey(32);
+            var keyData = clientSecret.ToArray().Combine(serverSecret);
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_BNET_GAME_ACCOUNT_LOGIN_INFO);
+            var stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_BNET_GAME_ACCOUNT_LOGIN_INFO);
             stmt.AddValue(0, keyData);
             stmt.AddValue(1, clientAddress.ToString());
             stmt.AddValue(2, locale);
@@ -302,7 +302,7 @@ public class RealmManager : Singleton<RealmManager>
             stmt.AddValue(4, accountName);
             DB.Login.DirectExecute(stmt);
 
-            Bgs.Protocol.Attribute attribute = new Bgs.Protocol.Attribute();
+            var attribute = new Bgs.Protocol.Attribute();
             attribute.Name = "Param_RealmJoinTicket";
             attribute.Value = new Bgs.Protocol.Variant();
             attribute.Value.BlobValue = Google.Protobuf.ByteString.CopyFrom(accountName, System.Text.Encoding.UTF8);

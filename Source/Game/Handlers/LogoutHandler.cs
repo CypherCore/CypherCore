@@ -27,16 +27,16 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.LogoutRequest)]
         void HandleLogoutRequest(LogoutRequest packet)
         {
-            Player pl = GetPlayer();
+            var pl = GetPlayer();
             if (!GetPlayer().GetLootGUID().IsEmpty())
                 GetPlayer().SendLootReleaseAll();
 
-            bool instantLogout = (pl.HasPlayerFlag(PlayerFlags.Resting) && !pl.IsInCombat() ||
-                pl.IsInFlight() || HasPermission(RBACPermissions.InstantLogout));
+            var instantLogout = (pl.HasPlayerFlag(PlayerFlags.Resting) && !pl.IsInCombat() ||
+                                 pl.IsInFlight() || HasPermission(RBACPermissions.InstantLogout));
 
-            bool canLogoutInCombat = pl.HasPlayerFlag(PlayerFlags.Resting);
+            var canLogoutInCombat = pl.HasPlayerFlag(PlayerFlags.Resting);
 
-            int reason = 0;
+            var reason = 0;
             if (pl.IsInCombat() && !canLogoutInCombat)
                 reason = 1;
             else if (pl.IsFalling())
@@ -44,7 +44,7 @@ namespace Game
             else if (pl.duel != null || pl.HasAura(9454)) // is dueling or frozen by GM via freeze command
                 reason = 2;                                         // FIXME - Need the correct value
 
-            LogoutResponse logoutResponse = new LogoutResponse();
+            var logoutResponse = new LogoutResponse();
             logoutResponse.LogoutResult = reason;
             logoutResponse.Instant = instantLogout;
             SendPacket(logoutResponse);

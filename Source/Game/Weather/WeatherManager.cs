@@ -28,13 +28,13 @@ namespace Game
 
         public void LoadWeatherData()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             uint count = 0;
 
-            SQLResult result = DB.World.Query("SELECT zone, spring_rain_chance, spring_snow_chance, spring_storm_chance," +
-                "summer_rain_chance, summer_snow_chance, summer_storm_chance, fall_rain_chance, fall_snow_chance, fall_storm_chance," +
-                "winter_rain_chance, winter_snow_chance, winter_storm_chance, ScriptName FROM game_weather");
+            var result = DB.World.Query("SELECT zone, spring_rain_chance, spring_snow_chance, spring_storm_chance," +
+                                        "summer_rain_chance, summer_snow_chance, summer_storm_chance, fall_rain_chance, fall_snow_chance, fall_storm_chance," +
+                                        "winter_rain_chance, winter_snow_chance, winter_storm_chance, ScriptName FROM game_weather");
 
             if (result.IsEmpty())
             {
@@ -44,9 +44,9 @@ namespace Game
 
             do
             {
-                uint zone_id = result.Read<uint>(0);
+                var zone_id = result.Read<uint>(0);
 
-                WeatherData wzc = new WeatherData();
+                var wzc = new WeatherData();
 
                 for (byte season = 0; season < 4; ++season)
                 {
@@ -141,18 +141,18 @@ namespace Game
             // 30% - weather gets better (if not fine) or change weather type
             // 30% - weather worsens (if not fine)
             // 10% - radical change (if not fine)
-            uint u = RandomHelper.URand(0, 99);
+            var u = RandomHelper.URand(0, 99);
 
             if (u < 30)
                 return false;
 
             // remember old values
-            WeatherType old_type = m_type;
-            float old_grade = m_grade;
+            var old_type = m_type;
+            var old_grade = m_grade;
 
-            long gtime = GameTime.GetGameTime();
+            var gtime = GameTime.GetGameTime();
             var ltime = Time.UnixTimeToDateTime(gtime).ToLocalTime();
-            uint season = (uint)((ltime.DayOfYear - 78 + 365) / 91) % 4;
+            var season = (uint)((ltime.DayOfYear - 78 + 365) / 91) % 4;
 
             string[] seasonName = { "spring", "summer", "fall", "winter" };
 
@@ -193,7 +193,7 @@ namespace Game
                     if (m_grade > 0.6666667f)
                     {
                         // Severe change, but how severe?
-                        uint rnd = RandomHelper.URand(0, 99);
+                        var rnd = RandomHelper.URand(0, 99);
                         if (rnd < 50)
                         {
                             m_grade -= 0.6666667f;
@@ -206,10 +206,10 @@ namespace Game
             }
 
             // At this point, only weather that isn't doing anything remains but that have weather data
-            uint chance1 = m_weatherChances.data[season].rainChance;
-            uint chance2 = chance1 + m_weatherChances.data[season].snowChance;
-            uint chance3 = chance2 + m_weatherChances.data[season].stormChance;
-            uint rn = RandomHelper.URand(1, 100);
+            var chance1 = m_weatherChances.data[season].rainChance;
+            var chance2 = chance1 + m_weatherChances.data[season].snowChance;
+            var chance3 = chance2 + m_weatherChances.data[season].stormChance;
+            var rn = RandomHelper.URand(1, 100);
             if (rn <= chance1)
                 m_type = WeatherType.Rain;
             else if (rn <= chance2)
@@ -249,7 +249,7 @@ namespace Game
 
         public void SendWeatherUpdateToPlayer(Player player)
         {
-            WeatherPkt weather = new WeatherPkt(GetWeatherState(), m_grade);
+            var weather = new WeatherPkt(GetWeatherState(), m_grade);
             player.SendPacket(weather);
         }
 
@@ -260,7 +260,7 @@ namespace Game
 
         public bool UpdateWeather()
         {
-            Player player = Global.WorldMgr.FindPlayerInZone(m_zone);
+            var player = Global.WorldMgr.FindPlayerInZone(m_zone);
             if (player == null)
                 return false;
 
@@ -270,9 +270,9 @@ namespace Game
             else if (m_grade < 0)
                 m_grade = 0.0001f;
 
-            WeatherState state = GetWeatherState();
+            var state = GetWeatherState();
 
-            WeatherPkt weather = new WeatherPkt(state, m_grade);
+            var weather = new WeatherPkt(state, m_grade);
 
             //- Returns false if there were no players found to update
             if (!Global.WorldMgr.SendZoneMessage(m_zone, weather))

@@ -54,13 +54,13 @@ namespace Game.Networking.Packets
             if (DisabledClassesMask.HasValue)
                 _worldPacket.WriteUInt32(DisabledClassesMask.Value);
 
-            foreach (UnlockedConditionalAppearance unlockedConditionalAppearance in UnlockedConditionalAppearances)
+            foreach (var unlockedConditionalAppearance in UnlockedConditionalAppearances)
                 unlockedConditionalAppearance.Write(_worldPacket);
 
-            foreach (CharacterInfo charInfo in Characters)
+            foreach (var charInfo in Characters)
                 charInfo.Write(_worldPacket);
 
-            foreach (RaceUnlock raceUnlock in RaceUnlockData)
+            foreach (var raceUnlock in RaceUnlockData)
                 raceUnlock.Write(_worldPacket);
         }
 
@@ -92,12 +92,12 @@ namespace Game.Networking.Packets
                 MapId = fields.Read<uint>(7);
                 PreloadPos = new Vector3(fields.Read<float>(8), fields.Read<float>(9), fields.Read<float>(10));
 
-                ulong guildId = fields.Read<ulong>(11);
+                var guildId = fields.Read<ulong>(11);
                 if (guildId != 0)
                     GuildGuid = ObjectGuid.Create(HighGuid.Guild, guildId);
 
-                PlayerFlags playerFlags = (PlayerFlags)fields.Read<uint>(12);
-                AtLoginFlags atLoginFlags = (AtLoginFlags)fields.Read<ushort>(13);
+                var playerFlags = (PlayerFlags)fields.Read<uint>(12);
+                var atLoginFlags = (AtLoginFlags)fields.Read<ushort>(13);
 
                 if (atLoginFlags.HasAnyFlag(AtLoginFlags.Resurrect))
                     playerFlags &= ~PlayerFlags.Ghost;
@@ -141,7 +141,7 @@ namespace Game.Networking.Packets
                 ProfessionIds[0] = 0;
                 ProfessionIds[1] = 0;
 
-                StringArguments equipment = new StringArguments(fields.Read<string>(17));
+                var equipment = new StringArguments(fields.Read<string>(17));
                 ListPosition = fields.Read<byte>(19);
                 LastPlayedTime = fields.Read<uint>(20);
 
@@ -197,7 +197,7 @@ namespace Game.Networking.Packets
                 data.WriteInt32(MailSenderTypes.Count);
                 data.WriteUInt32(OverrideSelectScreenFileDataID);
 
-                foreach (ChrCustomizationChoice customization in Customizations)
+                foreach (var customization in Customizations)
                 {
                     data.WriteUInt32(customization.ChrCustomizationOptionID);
                     data.WriteUInt32(customization.ChrCustomizationChoiceID);
@@ -211,12 +211,12 @@ namespace Game.Networking.Packets
                 data.WriteBit(BoostInProgress);
                 data.WriteBits(unkWod61x, 5);
 
-                foreach (string str in MailSenders)
+                foreach (var str in MailSenders)
                     data.WriteBits(str.GetByteCount() + 1, 6);
 
                 data.FlushBits();
 
-                foreach (string str in MailSenders)
+                foreach (var str in MailSenders)
                     if (!str.IsEmpty())
                         data.WriteCString(str);
 
@@ -351,8 +351,8 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             CreateInfo = new CharacterCreateInfo();
-            uint nameLength = _worldPacket.ReadBits<uint>(6);
-            bool hasTemplateSet = _worldPacket.HasBit();
+            var nameLength = _worldPacket.ReadBits<uint>(6);
+            var hasTemplateSet = _worldPacket.HasBit();
             CreateInfo.IsTrialBoost = _worldPacket.HasBit();
             CreateInfo.UseNPE = _worldPacket.HasBit();
 
@@ -497,7 +497,7 @@ namespace Game.Networking.Packets
 
             RaceOrFactionChangeInfo.FactionChange = _worldPacket.HasBit();
 
-            uint nameLength = _worldPacket.ReadBits<uint>(6);
+            var nameLength = _worldPacket.ReadBits<uint>(6);
 
             RaceOrFactionChangeInfo.Guid = _worldPacket.ReadPackedGuid();
             RaceOrFactionChangeInfo.SexID = (Gender)_worldPacket.ReadUInt8();
@@ -542,7 +542,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteInt32(Display.Value.Customizations.Count);
                 _worldPacket.WriteString(Display.Value.Name);
 
-                foreach (ChrCustomizationChoice customization in Display.Value.Customizations)
+                foreach (var customization in Display.Value.Customizations)
                 {
                     _worldPacket.WriteUInt32(customization.ChrCustomizationOptionID);
                     _worldPacket.WriteUInt32(customization.ChrCustomizationChoiceID);
@@ -599,7 +599,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint count = _worldPacket.ReadBits<uint>(9);
+            var count = _worldPacket.ReadBits<uint>(9);
             for (var i = 0; i < count && i < WorldConfig.GetIntValue(WorldCfg.CharactersPerRealm); ++i)
             {
                 ReorderInfo reorderInfo;
@@ -1007,7 +1007,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(CharGUID);
             _worldPacket.WriteUInt8(SexID);
             _worldPacket.WriteInt32(Customizations.Count);
-            foreach (ChrCustomizationChoice customization in Customizations)
+            foreach (var customization in Customizations)
             {
                 _worldPacket.WriteUInt32(customization.ChrCustomizationOptionID);
                 _worldPacket.WriteUInt32(customization.ChrCustomizationChoiceID);
@@ -1049,7 +1049,7 @@ namespace Game.Networking.Packets
         {
             Player = _worldPacket.ReadPackedGuid();
 
-            byte[] stringLengths = new byte[SharedConst.MaxDeclinedNameCases];
+            var stringLengths = new byte[SharedConst.MaxDeclinedNameCases];
 
             for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
                 stringLengths[i] = _worldPacket.ReadBits<byte>(7);

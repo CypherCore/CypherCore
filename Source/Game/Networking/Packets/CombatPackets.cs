@@ -103,7 +103,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(UnitGUID);
             _worldPacket.WriteInt32(ThreatList.Count);
-            foreach (ThreatInfo threatInfo in ThreatList)
+            foreach (var threatInfo in ThreatList)
             {
                 _worldPacket.WritePackedGuid(threatInfo.UnitGUID);
                 _worldPacket.WriteInt64(threatInfo.Threat);
@@ -123,7 +123,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(UnitGUID);
             _worldPacket.WritePackedGuid(HighestThreatGUID);
             _worldPacket.WriteInt32(ThreatList.Count);
-            foreach (ThreatInfo threatInfo in ThreatList)
+            foreach (var threatInfo in ThreatList)
             {
                 _worldPacket.WritePackedGuid(threatInfo.UnitGUID);
                 _worldPacket.WriteInt64(threatInfo.Threat);

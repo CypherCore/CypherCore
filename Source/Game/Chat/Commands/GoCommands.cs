@@ -36,32 +36,32 @@ namespace Game.Chat.Commands
             if (args.Empty())
                 return false;
 
-            Player player = handler.GetSession().GetPlayer();
+            var player = handler.GetSession().GetPlayer();
 
             // "id" or number or [name] Shift-click form |color|Hcreature_entry:creature_id|h[name]|h|r
-            string param1 = handler.ExtractKeyFromLink(args, "Hcreature");
+            var param1 = handler.ExtractKeyFromLink(args, "Hcreature");
             if (param1.IsEmpty())
                 return false;
 
-            string whereClause = "";
+            var whereClause = "";
 
             // User wants to teleport to the NPC's template entry
             if (param1.Equals("id"))
             {
                 // Get the "creature_template.entry"
                 // number or [name] Shift-click form |color|Hcreature_entry:creature_id|h[name]|h|r
-                string id = handler.ExtractKeyFromLink(args, "Hcreature_entry");
+                var id = handler.ExtractKeyFromLink(args, "Hcreature_entry");
                 if (id.IsEmpty())
                     return false;
 
-                if (!uint.TryParse(id, out uint entry))
+                if (!uint.TryParse(id, out var entry))
                     return false;
 
                 whereClause += "WHERE id = '" + entry + '\'';
             }
             else
             {
-                ulong.TryParse(param1, out ulong guidLow);
+                ulong.TryParse(param1, out var guidLow);
                 if (guidLow != 0)
                 {
                     whereClause += "WHERE guid = '" + guidLow + '\'';
@@ -73,17 +73,17 @@ namespace Game.Chat.Commands
                 }
             }
 
-            SQLResult result = DB.World.Query("SELECT position_x, position_y, position_z, orientation, map FROM creature {0}", whereClause);
+            var result = DB.World.Query("SELECT position_x, position_y, position_z, orientation, map FROM creature {0}", whereClause);
             if (result.IsEmpty())
             {
                 handler.SendSysMessage(CypherStrings.CommandGocreatnotfound);
                 return false;
             }
 
-            float x = result.Read<float>(0);
-            float y = result.Read<float>(1);
-            float z = result.Read<float>(2);
-            float o = result.Read<float>(3);
+            var x = result.Read<float>(0);
+            var y = result.Read<float>(1);
+            var z = result.Read<float>(2);
+            var o = result.Read<float>(3);
             uint mapId = result.Read<ushort>(4);
 
             if (result.NextRow())
@@ -113,16 +113,16 @@ namespace Game.Chat.Commands
         [Command("graveyard", RBACPermissions.CommandGoGraveyard)]
         static bool HandleGoGraveyardCommand(StringArguments args, CommandHandler handler)
         {
-            Player player = handler.GetSession().GetPlayer();
+            var player = handler.GetSession().GetPlayer();
 
             if (args.Empty())
                 return false;
 
-            uint graveyardId = args.NextUInt32();
+            var graveyardId = args.NextUInt32();
             if (graveyardId == 0)
                 return false;
 
-            WorldSafeLocsEntry gy = Global.ObjectMgr.GetWorldSafeLoc(graveyardId);
+            var gy = Global.ObjectMgr.GetWorldSafeLoc(graveyardId);
             if (gy == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandGraveyardnoexist, graveyardId);
@@ -156,20 +156,20 @@ namespace Game.Chat.Commands
             if (args.Empty())
                 return false;
 
-            Player player = handler.GetSession().GetPlayer();
+            var player = handler.GetSession().GetPlayer();
 
-            if (!float.TryParse(args.NextString(), out float gridX))
+            if (!float.TryParse(args.NextString(), out var gridX))
                 return false;
 
-            if (!float.TryParse(args.NextString(), out float gridY))
+            if (!float.TryParse(args.NextString(), out var gridY))
                 return false;
 
-            if (!uint.TryParse(args.NextString(), out uint mapId))
+            if (!uint.TryParse(args.NextString(), out var mapId))
                 mapId = player.GetMapId();
 
             // center of grid
-            float x = (gridX - MapConst.CenterGridId + 0.5f) * MapConst.SizeofGrids;
-            float y = (gridY - MapConst.CenterGridId + 0.5f) * MapConst.SizeofGrids;
+            var x = (gridX - MapConst.CenterGridId + 0.5f) * MapConst.SizeofGrids;
+            var y = (gridY - MapConst.CenterGridId + 0.5f) * MapConst.SizeofGrids;
 
             if (!GridDefines.IsValidMapCoord(mapId, x, y))
             {
@@ -187,8 +187,8 @@ namespace Game.Chat.Commands
             else
                 player.SaveRecallPosition();
 
-            Map map = Global.MapMgr.CreateBaseMap(mapId);
-            float z = Math.Max(map.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), map.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
+            var map = Global.MapMgr.CreateBaseMap(mapId);
+            var z = Math.Max(map.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), map.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
 
             player.TeleportTo(mapId, x, y, z, player.GetOrientation());
             return true;
@@ -201,18 +201,18 @@ namespace Game.Chat.Commands
             if (args.Empty())
                 return false;
 
-            Player player = handler.GetSession().GetPlayer();
+            var player = handler.GetSession().GetPlayer();
 
             // number or [name] Shift-click form |color|Hgameobject:go_guid|h[name]|h|r
-            string id = handler.ExtractKeyFromLink(args, "Hgameobject");
+            var id = handler.ExtractKeyFromLink(args, "Hgameobject");
             if (string.IsNullOrEmpty(id))
                 return false;
 
-            if (!ulong.TryParse(id, out ulong guidLow) || guidLow == 0)
+            if (!ulong.TryParse(id, out var guidLow) || guidLow == 0)
                 return false;
 
             // by DB guid
-            GameObjectData goData = Global.ObjectMgr.GetGameObjectData(guidLow);
+            var goData = Global.ObjectMgr.GetGameObjectData(guidLow);
             if (goData == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandGoobjnotfound);
@@ -245,13 +245,13 @@ namespace Game.Chat.Commands
             if (args.Empty())
                 return false;
 
-            Player player = handler.GetSession().GetPlayer();
+            var player = handler.GetSession().GetPlayer();
 
-            string id = handler.ExtractKeyFromLink(args, "Hquest");
+            var id = handler.ExtractKeyFromLink(args, "Hquest");
             if (string.IsNullOrEmpty(id))
                 return false;
 
-            if (!uint.TryParse(id, out uint questID) || questID == 0)
+            if (!uint.TryParse(id, out var questID) || questID == 0)
                 return false;
 
             if (Global.ObjectMgr.GetQuestTemplate(questID) == null)
@@ -295,7 +295,7 @@ namespace Game.Chat.Commands
             else
                 player.SaveRecallPosition();
 
-            Map map = Global.MapMgr.CreateBaseMap(mapId);
+            var map = Global.MapMgr.CreateBaseMap(mapId);
             z = Math.Max(map.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), map.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
 
             player.TeleportTo(mapId, x, y, z, 0.0f);
@@ -305,19 +305,19 @@ namespace Game.Chat.Commands
         [Command("taxinode", RBACPermissions.CommandGoTaxinode)]
         static bool HandleGoTaxinodeCommand(StringArguments args, CommandHandler handler)
         {
-            Player player = handler.GetSession().GetPlayer();
+            var player = handler.GetSession().GetPlayer();
 
             if (args.Empty())
                 return false;
 
-            string id = handler.ExtractKeyFromLink(args, "Htaxinode");
+            var id = handler.ExtractKeyFromLink(args, "Htaxinode");
             if (string.IsNullOrEmpty(id))
                 return false;
 
-            if (!uint.TryParse(id, out uint nodeId) || nodeId == 0)
+            if (!uint.TryParse(id, out var nodeId) || nodeId == 0)
                 return false;
 
-            TaxiNodesRecord node = CliDB.TaxiNodesStorage.LookupByKey(nodeId);
+            var node = CliDB.TaxiNodesStorage.LookupByKey(nodeId);
             if (node == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandGotaxinodenotfound, nodeId);
@@ -348,16 +348,16 @@ namespace Game.Chat.Commands
         [Command("trigger", RBACPermissions.CommandGoTrigger)]
         static bool HandleGoTriggerCommand(StringArguments args, CommandHandler handler)
         {
-            Player player = handler.GetSession().GetPlayer();
+            var player = handler.GetSession().GetPlayer();
 
             if (args.Empty())
                 return false;
 
-            uint areaTriggerId = args.NextUInt32();
+            var areaTriggerId = args.NextUInt32();
             if (areaTriggerId == 0)
                 return false;
 
-            AreaTriggerRecord at = CliDB.AreaTriggerStorage.LookupByKey(areaTriggerId);
+            var at = CliDB.AreaTriggerStorage.LookupByKey(areaTriggerId);
             if (at == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandGoareatrnotfound, areaTriggerId);
@@ -391,23 +391,23 @@ namespace Game.Chat.Commands
             if (args.Empty())
                 return false;
 
-            Player player = handler.GetSession().GetPlayer();
+            var player = handler.GetSession().GetPlayer();
 
-            if (!float.TryParse(args.NextString(), out float x))
+            if (!float.TryParse(args.NextString(), out var x))
                 return false;
 
-            if (!float.TryParse(args.NextString(),out float y))
+            if (!float.TryParse(args.NextString(),out var y))
                 return false;
 
             // prevent accept wrong numeric args
             if (x == 0.0f || y == 0.0f)
                 return false;
 
-            string idStr = handler.ExtractKeyFromLink(args, "Harea");       // string or [name] Shift-click form |color|Harea:area_id|h[name]|h|r
-            if (!uint.TryParse(idStr, out uint areaId))
+            var idStr = handler.ExtractKeyFromLink(args, "Harea");       // string or [name] Shift-click form |color|Harea:area_id|h[name]|h|r
+            if (!uint.TryParse(idStr, out var areaId))
                 areaId = player.GetZoneId();
 
-            AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(areaId);
+            var areaEntry = CliDB.AreaTableStorage.LookupByKey(areaId);
             if (x < 0 || x > 100 || y < 0 || y > 100 || areaEntry == null)
             {
                 handler.SendSysMessage(CypherStrings.InvalidZoneCoord, x, y, areaId);
@@ -415,10 +415,10 @@ namespace Game.Chat.Commands
             }
 
             // update to parent zone if exist (client map show only zones without parents)
-            AreaTableRecord zoneEntry = areaEntry.ParentAreaID != 0 ? CliDB.AreaTableStorage.LookupByKey(areaEntry.ParentAreaID) : areaEntry;
+            var zoneEntry = areaEntry.ParentAreaID != 0 ? CliDB.AreaTableStorage.LookupByKey(areaEntry.ParentAreaID) : areaEntry;
             Cypher.Assert(zoneEntry != null);
 
-            Map map = Global.MapMgr.CreateBaseMap(zoneEntry.ContinentID);
+            var map = Global.MapMgr.CreateBaseMap(zoneEntry.ContinentID);
 
             if (map.Instanceable())
             {
@@ -447,7 +447,7 @@ namespace Game.Chat.Commands
             else
                 player.SaveRecallPosition();
 
-            float z = Math.Max(map.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), map.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
+            var z = Math.Max(map.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), map.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
 
             player.TeleportTo(zoneEntry.ContinentID, x, y, z, player.GetOrientation());
             return true;
@@ -460,20 +460,20 @@ namespace Game.Chat.Commands
             if (args.Empty())
                 return false;
 
-            Player player = handler.GetSession().GetPlayer();
+            var player = handler.GetSession().GetPlayer();
 
-            if (!float.TryParse(args.NextString(), out float x))
+            if (!float.TryParse(args.NextString(), out var x))
                 return false;
 
-            if (!float.TryParse(args.NextString(), out float y))
+            if (!float.TryParse(args.NextString(), out var y))
                 return false;
 
-            string goZ = args.NextString();
+            var goZ = args.NextString();
 
-            if (!uint.TryParse(args.NextString(), out uint mapId))
+            if (!uint.TryParse(args.NextString(), out var mapId))
                 mapId = player.GetMapId();
 
-            if (!float.TryParse(args.NextString(), out float ort))
+            if (!float.TryParse(args.NextString(), out var ort))
                 ort =  player.GetOrientation();
 
             float z;
@@ -495,7 +495,7 @@ namespace Game.Chat.Commands
                     handler.SendSysMessage(CypherStrings.InvalidTargetCoord, x, y, mapId);
                     return false;
                 }
-                Map map = Global.MapMgr.CreateBaseMap(mapId);
+                var map = Global.MapMgr.CreateBaseMap(mapId);
                 z = Math.Max(map.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), map.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
             }
 
@@ -536,18 +536,18 @@ namespace Game.Chat.Commands
             if (args.Empty())
                 return false;
 
-            uint ticketId = args.NextUInt32();
+            var ticketId = args.NextUInt32();
             if (ticketId == 0)
                 return false;
 
-            T ticket = Global.SupportMgr.GetTicket<T>(ticketId);
+            var ticket = Global.SupportMgr.GetTicket<T>(ticketId);
             if (ticket == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandTicketnotexist);
                 return true;
             }
 
-            Player player = handler.GetSession().GetPlayer();
+            var player = handler.GetSession().GetPlayer();
             if (player.IsInFlight())
             {
                 player.GetMotionMaster().MovementExpired();
@@ -566,12 +566,12 @@ namespace Game.Chat.Commands
             if (args.Empty())
                 return false;
 
-            Player player = handler.GetSession().GetPlayer();
+            var player = handler.GetSession().GetPlayer();
 
-            string goX = args.NextString();
-            string goY = args.NextString();
-            string goZ = args.NextString();
-            string port = args.NextString();
+            var goX = args.NextString();
+            var goY = args.NextString();
+            var goZ = args.NextString();
+            var port = args.NextString();
 
             float x, y, z, o;
             player.GetPosition(out x, out y, out z, out o);

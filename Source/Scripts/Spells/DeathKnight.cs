@@ -85,10 +85,10 @@ namespace Scripts.Spells.DeathKnight
     {
         bool CheckProc(ProcEventInfo eventInfo)
         {
-            Unit caster = eventInfo.GetActor();
+            var caster = eventInfo.GetActor();
             if (caster)
             {
-                Player player = caster.ToPlayer();
+                var player = caster.ToPlayer();
                 if (!player || caster.GetClass() != Class.Deathknight)
                     return false;
 
@@ -146,17 +146,17 @@ namespace Scripts.Spells.DeathKnight
 
             if (!GetTarget().HasAura(SpellIds.VolatileShielding))
             {
-                int bp = (int)(2 * absorbAmount * 100 / maxHealth);
+                var bp = (int)(2 * absorbAmount * 100 / maxHealth);
                 GetTarget().CastCustomSpell(SpellIds.RunicPowerEnergize, SpellValueMod.BasePoint0, bp, GetTarget(), true, null, aurEff);
             }
         }
 
         void HandleEffectRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            AuraEffect volatileShielding = GetTarget().GetAuraEffect(SpellIds.VolatileShielding, 1);
+            var volatileShielding = GetTarget().GetAuraEffect(SpellIds.VolatileShielding, 1);
             if (volatileShielding != null)
             {
-                int damage = (int)MathFunctions.CalculatePct(absorbedAmount, volatileShielding.GetAmount());
+                var damage = (int)MathFunctions.CalculatePct(absorbedAmount, volatileShielding.GetAmount());
                 GetTarget().CastCustomSpell(SpellIds.VolatileShieldingDamage, SpellValueMod.BasePoint0, damage, null, TriggerCastFlags.FullMask, null, volatileShielding);
             }
         }
@@ -184,7 +184,7 @@ namespace Scripts.Spells.DeathKnight
 
         SpellCastResult CheckCast()
         {
-            Unit owner = GetCaster().GetOwner();
+            var owner = GetCaster().GetOwner();
             if (owner)
                 if (owner.HasAura(SpellIds.GlyphOfFoulMenagerie))
                     return SpellCastResult.SpellCastOk;
@@ -237,12 +237,12 @@ namespace Scripts.Spells.DeathKnight
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (!caster)
                 return;
 
             Unit drw = null;
-            foreach (Unit controlled in caster.m_Controlled)
+            foreach (var controlled in caster.m_Controlled)
             {
                 if (controlled.GetEntry() == CreatureIds.DancingRuneWeapon)
                 {
@@ -254,16 +254,16 @@ namespace Scripts.Spells.DeathKnight
             if (!drw || !drw.GetVictim())
                 return;
 
-            SpellInfo spellInfo = eventInfo.GetSpellInfo();
+            var spellInfo = eventInfo.GetSpellInfo();
             if (spellInfo == null)
                 return;
 
-            DamageInfo damageInfo = eventInfo.GetDamageInfo();
+            var damageInfo = eventInfo.GetDamageInfo();
             if (damageInfo == null || damageInfo.GetDamage() == 0)
                 return;
 
-            int amount = (int)damageInfo.GetDamage() / 2;
-            SpellNonMeleeDamage log = new SpellNonMeleeDamage(drw, drw.GetVictim(), spellInfo, new SpellCastVisual(spellInfo.GetSpellXSpellVisualId(drw), 0), spellInfo.GetSchoolMask());
+            var amount = (int)damageInfo.GetDamage() / 2;
+            var log = new SpellNonMeleeDamage(drw, drw.GetVictim(), spellInfo, new SpellCastVisual(spellInfo.GetSpellXSpellVisualId(drw), 0), spellInfo.GetSchoolMask());
             log.damage = (uint)amount;
             drw.DealDamage(drw.GetVictim(), (uint)amount, null, DamageEffectType.SpellDirect, spellInfo.GetSchoolMask(), spellInfo, true);
             drw.SendSpellNonMeleeDamageLog(log);
@@ -287,7 +287,7 @@ namespace Scripts.Spells.DeathKnight
         {
             if (GetCaster().HasAura(SpellIds.TighteningGrasp))
             {
-                WorldLocation pos = GetExplTargetDest();
+                var pos = GetExplTargetDest();
                 if (pos != null)
                     GetCaster().CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), SpellIds.TighteningGraspSlow, true);
             }
@@ -303,7 +303,7 @@ namespace Scripts.Spells.DeathKnight
     {
         void HandleDummyTick(AuraEffect aurEff)
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster)
                 caster.CastSpell(GetTarget(), SpellIds.DeathAndDecayDamage, true, null, aurEff);
         }
@@ -324,9 +324,9 @@ namespace Scripts.Spells.DeathKnight
 
         void HandleDummy(uint effIndex)
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             caster.CastSpell(GetHitUnit(), SpellIds.DeathCoilDamage, true);
-            AuraEffect unholyAura = caster.GetAuraEffect(SpellIds.Unholy, 6);
+            var unholyAura = caster.GetAuraEffect(SpellIds.Unholy, 6);
             if (unholyAura != null) // can be any effect, just here to send SpellFailedDontReport on failure
                 caster.CastSpell(caster, SpellIds.UnholyVigor, true, null, unholyAura);
         }
@@ -354,7 +354,7 @@ namespace Scripts.Spells.DeathKnight
         void HandleScript(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
-            Unit target = GetHitUnit();
+            var target = GetHitUnit();
             if (target)
                 target.CastSpell(target, (uint)GetEffectValue(), false);
         }
@@ -376,7 +376,7 @@ namespace Scripts.Spells.DeathKnight
 
         SpellCastResult CheckCast()
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             // Death Grip should not be castable while jumping/falling
             if (caster.HasUnitState(UnitState.Jumping) || caster.HasUnitMovementFlag(MovementFlag.Falling))
                 return SpellCastResult.Moving;
@@ -404,7 +404,7 @@ namespace Scripts.Spells.DeathKnight
     {
         void HandleCalcAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster)
                 amount = (int)caster.CountPctFromMaxHealth(amount);
         }
@@ -425,12 +425,12 @@ namespace Scripts.Spells.DeathKnight
 
         void HandleHeal(uint effIndex)
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             //Todo: heal = std::min(10% health, 20% of all damage taken in last 5 seconds)
-            int heal = (int)MathFunctions.CalculatePct(caster.GetMaxHealth(), GetSpellInfo().GetEffect(4).CalcValue());
+            var heal = (int)MathFunctions.CalculatePct(caster.GetMaxHealth(), GetSpellInfo().GetEffect(4).CalcValue());
             caster.CastCustomSpell(SpellIds.DeathStrikeHeal, SpellValueMod.BasePoint0, heal, caster, true);
 
-            AuraEffect aurEff = caster.GetAuraEffect(SpellIds.BloodShieldMastery, 0);
+            var aurEff = caster.GetAuraEffect(SpellIds.BloodShieldMastery, 0);
             if (aurEff != null)
                 caster.CastCustomSpell(SpellIds.BloodShieldAbsorb, SpellValueMod.BasePoint0, MathFunctions.CalculatePct(heal, aurEff.GetAmount()), caster);
 
@@ -484,7 +484,7 @@ namespace Scripts.Spells.DeathKnight
 
         void Suicide(uint effIndex)
         {
-            Unit unitTarget = GetHitUnit();
+            var unitTarget = GetHitUnit();
             if (unitTarget)
             {
                 // Corpse Explosion (Suicide)
@@ -510,7 +510,7 @@ namespace Scripts.Spells.DeathKnight
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster)
                 caster.CastSpell(eventInfo.GetProcTarget(), SpellIds.MarkOfBloodHeal, true);
         }
@@ -556,7 +556,7 @@ namespace Scripts.Spells.DeathKnight
 
         SpellCastResult CheckCast()
         {
-            Unit owner = GetCaster().GetOwner();
+            var owner = GetCaster().GetOwner();
             if (owner)
                 if (owner.HasAura(SpellIds.GlyphOfTheGeist))
                     return SpellCastResult.SpellCastOk;
@@ -580,7 +580,7 @@ namespace Scripts.Spells.DeathKnight
 
         SpellCastResult CheckCast()
         {
-            Unit owner = GetCaster().GetOwner();
+            var owner = GetCaster().GetOwner();
             if (owner)
                 if (owner.HasAura(SpellIds.GlyphOfTheSkeleton))
                     return SpellCastResult.SpellCastOk;
@@ -604,7 +604,7 @@ namespace Scripts.Spells.DeathKnight
 
         bool CheckProc(ProcEventInfo eventInfo)
         {
-            SpellInfo spellInfo = eventInfo.GetSpellInfo();
+            var spellInfo = eventInfo.GetSpellInfo();
             if (spellInfo == null)
                 return false;
 
@@ -634,7 +634,7 @@ namespace Scripts.Spells.DeathKnight
 
         void HandleDummy(uint effIndex)
         {
-            uint spellId = SpellIds.RaiseDeadSummon;
+            var spellId = SpellIds.RaiseDeadSummon;
             if (GetCaster().HasAura(SpellIds.SludgeBelcher))
                 spellId = SpellIds.SludgeBelcherSummon;
 

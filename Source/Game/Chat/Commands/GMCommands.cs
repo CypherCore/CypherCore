@@ -28,7 +28,7 @@ namespace Game.Chat
         [Command("", RBACPermissions.CommandGm)]
         static bool HandleGMCommand(StringArguments args, CommandHandler handler)
         {
-            Player _player = handler.GetSession().GetPlayer();
+            var _player = handler.GetSession().GetPlayer();
 
             if (args.Empty())
             {
@@ -36,7 +36,7 @@ namespace Game.Chat
                 return true;
             }
 
-            string param = args.NextString();
+            var param = args.NextString();
             if (param == "on")
             {
                 _player.SetGameMaster(true);
@@ -59,7 +59,7 @@ namespace Game.Chat
         [Command("chat", RBACPermissions.CommandGmChat)]
         static bool HandleGMChatCommand(StringArguments args, CommandHandler handler)
         {
-            WorldSession session = handler.GetSession();
+            var session = handler.GetSession();
             if (session != null)
             {
                 if (args.Empty())
@@ -71,7 +71,7 @@ namespace Game.Chat
                     return true;
                 }
 
-                string param = args.NextString();
+                var param = args.NextString();
 
                 if (param == "on")
                 {
@@ -98,11 +98,11 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            Player target = handler.GetSelectedPlayer();
+            var target = handler.GetSelectedPlayer();
             if (target == null)
                 target = handler.GetPlayer();
 
-            string arg = args.NextString().ToLower();
+            var arg = args.NextString().ToLower();
 
             if (arg == "on")
             { 
@@ -126,13 +126,13 @@ namespace Game.Chat
         [Command("ingame", RBACPermissions.CommandGmIngame, true)]
         static bool HandleGMListIngameCommand(StringArguments args, CommandHandler handler)
         {
-            bool first = true;
-            bool footer = false;
+            var first = true;
+            var footer = false;
 
             var m = Global.ObjAccessor.GetPlayers();
             foreach (var pl in m)
             {
-                AccountTypes accountType = pl.GetSession().GetSecurity();
+                var accountType = pl.GetSession().GetSecurity();
                 if ((pl.IsGameMaster() ||
                     (pl.GetSession().HasPermission(RBACPermissions.CommandsAppearInGmList) &&
                      accountType <= (AccountTypes)WorldConfig.GetIntValue(WorldCfg.GmLevelInGmList))) &&
@@ -145,10 +145,10 @@ namespace Game.Chat
                         handler.SendSysMessage(CypherStrings.GmsOnSrv);
                         handler.SendSysMessage("========================");
                     }
-                    int size = pl.GetName().Length;
-                    byte security = (byte)accountType;
-                    int max = ((16 - size) / 2);
-                    int max2 = max;
+                    var size = pl.GetName().Length;
+                    var security = (byte)accountType;
+                    var max = ((16 - size) / 2);
+                    var max2 = max;
                     if ((max + max2 + size) == 16)
                         max2 = max - 1;
                     if (handler.GetSession() != null)
@@ -168,10 +168,10 @@ namespace Game.Chat
         static bool HandleGMListFullCommand(StringArguments args, CommandHandler handler)
         {
             // Get the accounts with GM Level >0
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_GM_ACCOUNTS);
+            var stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_GM_ACCOUNTS);
             stmt.AddValue(0, AccountTypes.Moderator);
             stmt.AddValue(1, Global.WorldMgr.GetRealm().Id.Index);
-            SQLResult result = DB.Login.Query(stmt);
+            var result = DB.Login.Query(stmt);
 
             if (!result.IsEmpty())
             {
@@ -180,13 +180,13 @@ namespace Game.Chat
                 // Cycle through them. Display username and GM level
                 do
                 {
-                    string name = result.Read<string>(0);
-                    byte security = result.Read<byte>(1);
-                    int max = (16 - name.Length) / 2;
-                    int max2 = max;
+                    var name = result.Read<string>(0);
+                    var security = result.Read<byte>(1);
+                    var max = (16 - name.Length) / 2;
+                    var max2 = max;
                     if ((max + max2 + name.Length) == 16)
                         max2 = max - 1;
-                    string padding = "";
+                    var padding = "";
                     if (handler.GetSession() != null)
                         handler.SendSysMessage("|    {0} GMLevel {1}", name, security);
                     else
@@ -202,7 +202,7 @@ namespace Game.Chat
         [Command("visible", RBACPermissions.CommandGmVisible)]
         static bool HandleGMVisibleCommand(StringArguments args, CommandHandler handler)
         {
-            Player _player = handler.GetSession().GetPlayer();
+            var _player = handler.GetSession().GetPlayer();
 
             if (args.Empty())
             {
@@ -211,7 +211,7 @@ namespace Game.Chat
             }
 
             uint VISUAL_AURA = 37800;
-            string param = args.NextString();
+            var param = args.NextString();
 
             if (param == "on")
             {

@@ -44,7 +44,7 @@ namespace Game.Movement
 
             owner.AddUnitState(UnitState.RoamingMove);
 
-            MoveSplineInit init = new MoveSplineInit(owner);
+            var init = new MoveSplineInit(owner);
             init.MoveTo(_destination.GetPositionX(), _destination.GetPositionY(), _destination.GetPositionZ());
             if (_orientation)
                 init.SetFacing(_destination.GetOrientation());
@@ -96,7 +96,7 @@ namespace Game.Movement
 
                 owner.AddUnitState(UnitState.RoamingMove);
 
-                MoveSplineInit init = new MoveSplineInit(owner);
+                var init = new MoveSplineInit(owner);
                 init.MoveTo(_destination.GetPositionX(), _destination.GetPositionY(), _destination.GetPositionZ());
                 if (_orientation)
                     init.SetFacing(_destination.GetOrientation());

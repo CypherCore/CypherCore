@@ -83,12 +83,12 @@ namespace Framework.GameMath
             // Find the index of the largest diagonal component
             // These ? operations hopefully compile to conditional
             // move instructions instead of branches.
-            int i = (rot[1, 1] > rot[0, 0]) ? 2 : 1;
+            var i = (rot[1, 1] > rot[0, 0]) ? 2 : 1;
             i = (rot[2, 2] > rot[i, i]) ? 2 : i;
 
             // Find the indices of the other elements
-            int j = plus1mod3[i];
-            int k = plus1mod3[j];
+            var j = plus1mod3[i];
+            var k = plus1mod3[j];
 
             // If we attempted to pre-normalize and trusted the matrix to be
             // perfectly orthonormal, the result would be:
@@ -103,14 +103,14 @@ namespace Framework.GameMath
             // fixes any poorly normalized input.  Multiply all elements by 2*c in the above, giving:
 
             // nc2 = -c^2
-            double nc2 = ((rot[j, j] + rot[k, k]) - rot[i, i]) - 1.0;
+            var nc2 = ((rot[j, j] + rot[k, k]) - rot[i, i]) - 1.0;
             this[i] = (float)nc2;
             W = (rot[j, k] - rot[k, j]);
             this[j] = -(rot[i, j] + rot[j, i]);
             this[k] = -(rot[i, k] + rot[k, i]);
 
             // We now have the correct result with the wrong magnitude, so normalize it:
-            float s = (float)Math.Sqrt(X * X + Y * Y + Z * Z + W * W);
+            var s = (float)Math.Sqrt(X * X + Y * Y + Z * Z + W * W);
             if (s > 0.00001f)
             {
                 s = 1.0f / s;
@@ -261,8 +261,8 @@ namespace Framework.GameMath
         /// <returns>A <see cref="Quaternion"/> that represents the vector specified by the <paramref name="value"/> parameter.</returns>
         public static Quaternion Parse(string value)
         {
-            Regex r = new Regex(@"\((?<w>.*),(?<x>.*),(?<y>.*),(?<z>.*)\)", RegexOptions.None);
-            Match m = r.Match(value);
+            var r = new Regex(@"\((?<w>.*),(?<x>.*),(?<y>.*),(?<z>.*)\)", RegexOptions.None);
+            var m = r.Match(value);
             if (m.Success)
             {
                 return new Quaternion(
@@ -289,8 +289,8 @@ namespace Framework.GameMath
         /// <returns><see langword="true"/> if value was converted successfully; otherwise, <see langword="false"/>.</returns>
         public static bool TryParse(string value, out Quaternion result)
         {
-            Regex r = new Regex(@"\((?<x>.*),(?<y>.*),(?<z>.*),(?<w>.*)\)", RegexOptions.None);
-            Match m = r.Match(value);
+            var r = new Regex(@"\((?<x>.*),(?<y>.*),(?<z>.*),(?<w>.*)\)", RegexOptions.None);
+            var m = r.Match(value);
             if (m.Success)
             {
                 result = new Quaternion(
@@ -365,7 +365,7 @@ namespace Framework.GameMath
         /// <returns>A new <see cref="Quaternion"/> containing the result.</returns>
         public static Quaternion Multiply(Quaternion left, Quaternion right)
         {
-            Quaternion result = new Quaternion();
+            var result = new Quaternion();
             result.X = left.W * right.X + left.X * right.W + left.Y * right.Z - left.Z * right.Y;
             result.Y = left.W * right.Y + left.Y * right.W + left.Z * right.X - left.X * right.Z;
             result.Z = left.W * right.Z + left.Z * right.W + left.X * right.Y - left.Y * right.X;
@@ -394,7 +394,7 @@ namespace Framework.GameMath
         /// <returns>A <see cref="Quaternion"/> instance to hold the result.</returns>
         public static Quaternion Multiply(Quaternion quaternion, float scalar)
         {
-            Quaternion result = new Quaternion(quaternion);
+            var result = new Quaternion(quaternion);
             result.X *= scalar;
             result.Y *= scalar;
             result.Z *= scalar;
@@ -429,7 +429,7 @@ namespace Framework.GameMath
                 throw new DivideByZeroException("Dividing quaternion by zero");
             }
 
-            Quaternion result = new Quaternion(quaternion);
+            var result = new Quaternion(quaternion);
             result.X /= scalar;
             result.Y /= scalar;
             result.Z /= scalar;
@@ -475,7 +475,7 @@ namespace Framework.GameMath
 
         public Quaternion ToUnit()
         {
-            Quaternion copyOfThis = this;
+            var copyOfThis = this;
             copyOfThis.unitize();
             return copyOfThis;
         }
@@ -508,16 +508,16 @@ namespace Framework.GameMath
         /// <returns>The quaternion's logarithm.</returns>
         public static Quaternion Log(Quaternion quaternion)
         {
-            Quaternion result = new Quaternion(0, 0, 0, 0);
+            var result = new Quaternion(0, 0, 0, 0);
 
             if (Math.Abs(quaternion.W) < 1.0)
             {
-                float angle = (float)System.Math.Acos(quaternion.W);
-                float sin = (float)System.Math.Sin(angle);
+                var angle = (float)System.Math.Acos(quaternion.W);
+                var sin = (float)System.Math.Sin(angle);
 
                 if (Math.Abs(sin) >= 0)
                 {
-                    float coeff = angle / sin;
+                    var coeff = angle / sin;
                     result.X = coeff * quaternion.X;
                     result.Y = coeff * quaternion.Y;
                     result.Z = coeff * quaternion.Z;
@@ -539,14 +539,14 @@ namespace Framework.GameMath
         /// <returns>The quaternion's exponent.</returns>
         public Quaternion Exp(Quaternion quaternion)
         {
-            Quaternion result = new Quaternion(0, 0, 0, 0);
+            var result = new Quaternion(0, 0, 0, 0);
 
-            float angle = (float)System.Math.Sqrt(quaternion.X * quaternion.X + quaternion.Y * quaternion.Y + quaternion.Z * quaternion.Z);
-            float sin = (float)System.Math.Sin(angle);
+            var angle = (float)System.Math.Sqrt(quaternion.X * quaternion.X + quaternion.Y * quaternion.Y + quaternion.Z * quaternion.Z);
+            var sin = (float)System.Math.Sin(angle);
 
             if (Math.Abs(sin) > 0)
             {
-                float coeff = angle / sin;
+                var coeff = angle / sin;
                 result.X = coeff * quaternion.X;
                 result.Y = coeff * quaternion.Y;
                 result.Z = coeff * quaternion.Z;
@@ -568,10 +568,10 @@ namespace Framework.GameMath
         /// </summary>
         public void Inverse()
         {
-            float norm = ModulusSquared;
+            var norm = ModulusSquared;
             if (norm > 0)
             {
-                float invNorm = 1.0f / norm;
+                var invNorm = 1.0f / norm;
                 _w *= invNorm;
                 _x *= -invNorm;
                 _y *= -invNorm;
@@ -587,7 +587,7 @@ namespace Framework.GameMath
         /// </summary>
         public void Normalize()
         {
-            float norm = Modulus;
+            var norm = Modulus;
             if (norm == 0)
             {
                 throw new DivideByZeroException("Trying to normalize a quaternion with modulus of zero.");
@@ -647,7 +647,7 @@ namespace Framework.GameMath
         {
             if (obj is Quaternion)
             {
-                Quaternion quaternion = (Quaternion)obj;
+                var quaternion = (Quaternion)obj;
                 return (_w == quaternion.W) && (_x == quaternion.X) && (_y == quaternion.Y) && (_z == quaternion.Z);
             }
             return false;
@@ -813,7 +813,7 @@ namespace Framework.GameMath
         /// <remarks>The array is [w, x, y, z].</remarks>
         public static explicit operator double[] (Quaternion quaternion)
         {
-            double[] doubles = new double[4];
+            var doubles = new double[4];
             doubles[1] = quaternion.X;
             doubles[2] = quaternion.Y;
             doubles[3] = quaternion.Z;

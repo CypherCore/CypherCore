@@ -36,16 +36,16 @@ namespace Game
             if (!item)
                 return;
 
-            AzeriteItem azeriteItem = item.ToAzeriteItem();
+            var azeriteItem = item.ToAzeriteItem();
             if (!azeriteItem || !azeriteItem.CanUseEssences())
                 return;
 
-            AzeriteItemMilestonePowerRecord milestonePower = CliDB.AzeriteItemMilestonePowerStorage.LookupByKey(azeriteEssenceUnlockMilestone.AzeriteItemMilestonePowerID);
+            var milestonePower = CliDB.AzeriteItemMilestonePowerStorage.LookupByKey(azeriteEssenceUnlockMilestone.AzeriteItemMilestonePowerID);
             if (milestonePower == null || milestonePower.RequiredLevel > azeriteItem.GetLevel())
                 return;
 
             // check that all previous milestones are unlocked
-            foreach (AzeriteItemMilestonePowerRecord previousMilestone in Global.DB2Mgr.GetAzeriteItemMilestonePowers())
+            foreach (var previousMilestone in Global.DB2Mgr.GetAzeriteItemMilestonePowers())
             {
                 if (previousMilestone == milestonePower)
                     break;
@@ -62,7 +62,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.AzeriteEssenceActivateEssence)]
         void HandleAzeriteEssenceActivateEssence(AzeriteEssenceActivateEssence azeriteEssenceActivateEssence)
         {
-            ActivateEssenceFailed activateEssenceResult = new ActivateEssenceFailed();
+            var activateEssenceResult = new ActivateEssenceFailed();
             activateEssenceResult.AzeriteEssenceID = azeriteEssenceActivateEssence.AzeriteEssenceID;
 
             Item item = _player.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.InEquipment);
@@ -74,7 +74,7 @@ namespace Game
                 return;
             }
 
-            AzeriteItem azeriteItem = item.ToAzeriteItem();
+            var azeriteItem = item.ToAzeriteItem();
             if (azeriteItem == null || !azeriteItem.CanUseEssences())
             {
                 activateEssenceResult.Reason = AzeriteEssenceActivateResult.ConditionFailed;
@@ -89,12 +89,12 @@ namespace Game
                 return;
             }
 
-            SelectedAzeriteEssences selectedEssences = azeriteItem.GetSelectedAzeriteEssences();
+            var selectedEssences = azeriteItem.GetSelectedAzeriteEssences();
             // essence is already in that slot, nothing to do
             if (selectedEssences != null && selectedEssences.AzeriteEssenceID[azeriteEssenceActivateEssence.Slot] == azeriteEssenceActivateEssence.AzeriteEssenceID)
                 return;
 
-            uint rank = azeriteItem.GetEssenceRank(azeriteEssenceActivateEssence.AzeriteEssenceID);
+            var rank = azeriteItem.GetEssenceRank(azeriteEssenceActivateEssence.AzeriteEssenceID);
             if (rank == 0)
             {
                 activateEssenceResult.Reason = AzeriteEssenceActivateResult.EssenceNotUnlocked;
@@ -130,8 +130,8 @@ namespace Game
             if (selectedEssences != null)
             {
                 // need to remove selected essence from another slot if selected
-                int removeEssenceFromSlot = -1;
-                for (int slot = 0; slot < SharedConst.MaxAzeriteEssenceSlot; ++slot)
+                var removeEssenceFromSlot = -1;
+                for (var slot = 0; slot < SharedConst.MaxAzeriteEssenceSlot; ++slot)
                     if (azeriteEssenceActivateEssence.Slot != slot && selectedEssences.AzeriteEssenceID[slot] == azeriteEssenceActivateEssence.AzeriteEssenceID)
                         removeEssenceFromSlot = slot;
 
@@ -140,7 +140,7 @@ namespace Game
                 {
                     for (uint essenceRank = 1; essenceRank <= rank; ++essenceRank)
                     {
-                        AzeriteEssencePowerRecord azeriteEssencePower = Global.DB2Mgr.GetAzeriteEssencePower(selectedEssences.AzeriteEssenceID[0], essenceRank);
+                        var azeriteEssencePower = Global.DB2Mgr.GetAzeriteEssencePower(selectedEssences.AzeriteEssenceID[0], essenceRank);
                         if (_player.GetSpellHistory().HasCooldown(azeriteEssencePower.MajorPowerDescription))
                         {
                             activateEssenceResult.Reason = AzeriteEssenceActivateResult.CantRemoveEssence;
@@ -195,16 +195,16 @@ namespace Game
             if (item == null)
                 return;
 
-            AzeritePowerRecord azeritePower = CliDB.AzeritePowerStorage.LookupByKey(azeriteEmpoweredItemSelectPower.AzeritePowerID);
+            var azeritePower = CliDB.AzeritePowerStorage.LookupByKey(azeriteEmpoweredItemSelectPower.AzeritePowerID);
             if (azeritePower == null)
                 return;
 
-            AzeriteEmpoweredItem azeriteEmpoweredItem = item.ToAzeriteEmpoweredItem();
+            var azeriteEmpoweredItem = item.ToAzeriteEmpoweredItem();
             if (azeriteEmpoweredItem == null)
                 return;
 
             // Validate tier
-            int actualTier = azeriteEmpoweredItem.GetTierForAzeritePower(_player.GetClass(), azeriteEmpoweredItemSelectPower.AzeritePowerID);
+            var actualTier = azeriteEmpoweredItem.GetTierForAzeritePower(_player.GetClass(), azeriteEmpoweredItemSelectPower.AzeritePowerID);
             if (azeriteEmpoweredItemSelectPower.Tier > SharedConst.MaxAzeriteEmpoweredTier || azeriteEmpoweredItemSelectPower.Tier != actualTier)
                 return;
 
@@ -213,7 +213,7 @@ namespace Game
             if (heartOfAzeroth == null)
                 return;
 
-            AzeriteItem azeriteItem = heartOfAzeroth.ToAzeriteItem();
+            var azeriteItem = heartOfAzeroth.ToAzeriteItem();
             if (azeriteItem != null)
                 azeriteLevel = azeriteItem.GetEffectiveLevel();
 
@@ -222,11 +222,11 @@ namespace Game
                 return;
 
             // tiers are ordered backwards, you first select the highest one
-            for (int i = actualTier + 1; i < azeriteEmpoweredItem.GetMaxAzeritePowerTier(); ++i)
+            for (var i = actualTier + 1; i < azeriteEmpoweredItem.GetMaxAzeritePowerTier(); ++i)
                 if (azeriteEmpoweredItem.GetSelectedAzeritePower(i) == 0)
                     return;
 
-            bool activateAzeritePower = azeriteEmpoweredItem.IsEquipped() && heartOfAzeroth.IsEquipped();
+            var activateAzeritePower = azeriteEmpoweredItem.IsEquipped() && heartOfAzeroth.IsEquipped();
             if (azeritePower.ItemBonusListID != 0 && activateAzeritePower)
                 _player._ApplyItemMods(azeriteEmpoweredItem, azeriteEmpoweredItem.GetSlot(), false);
 

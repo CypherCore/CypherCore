@@ -76,11 +76,11 @@ namespace Game.DataStorage
                 if (player.GetMap() == null || player.GetSession().PlayerLoading())
                     continue;
 
-                string playerName = player.GetName();
-                string guildName = Global.GuildMgr.GetGuildNameById((uint)player.GetGuildId());
+                var playerName = player.GetName();
+                var guildName = Global.GuildMgr.GetGuildNameById((uint)player.GetGuildId());
 
-                Guild guild = player.GetGuild();
-                ObjectGuid guildGuid = ObjectGuid.Empty;
+                var guild = player.GetGuild();
+                var guildGuid = ObjectGuid.Empty;
 
                 if (guild)
                     guildGuid = guild.GetGUID();

@@ -22,11 +22,11 @@ namespace BNetServer.Networking
                 return BattlenetRpcErrorCode.Denied;
 
             Bgs.Protocol.Attribute command = null;
-            Dictionary<string, Variant> Params = new Dictionary<string, Variant>();
+            var Params = new Dictionary<string, Variant>();
 
-            for (int i = 0; i < request.Attribute.Count; ++i)
+            for (var i = 0; i < request.Attribute.Count; ++i)
             {
-                Bgs.Protocol.Attribute attr = request.Attribute[i];
+                var attr = request.Attribute[i];
                 Params[attr.Name] = attr.Value;
                 if (attr.Name.Contains("Command_"))
                     command = attr;
@@ -65,7 +65,7 @@ namespace BNetServer.Networking
 
         BattlenetRpcErrorCode GetRealmListTicket(Dictionary<string, Variant> Params, ClientResponse response)
         {
-            Variant identity = Params.LookupByKey("Param_Identity");
+            var identity = Params.LookupByKey("Param_Identity");
             if (identity != null)
             {
                 var realmListTicketIdentity = Json.CreateObject<RealmListTicketIdentity>(identity.BlobValue.ToStringUtf8(), true);
@@ -82,13 +82,13 @@ namespace BNetServer.Networking
             else if (gameAccountInfo.IsBanned)
                 return BattlenetRpcErrorCode.GameAccountSuspended;
 
-            bool clientInfoOk = false;
-            Variant clientInfo = Params.LookupByKey("Param_ClientInfo");
+            var clientInfoOk = false;
+            var clientInfo = Params.LookupByKey("Param_ClientInfo");
             if (clientInfo != null)
             {
                 var realmListTicketClientInformation = Json.CreateObject<RealmListTicketClientInformation>(clientInfo.BlobValue.ToStringUtf8(), true);
                 clientInfoOk = true;
-                int i = 0;
+                var i = 0;
                 foreach (byte b in realmListTicketClientInformation.Info.Secret)
                     clientSecret[i++] = b;
             }
@@ -96,7 +96,7 @@ namespace BNetServer.Networking
             if (!clientInfoOk)
                 return BattlenetRpcErrorCode.WowServicesDeniedRealmListTicket;
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UpdBnetLastLoginInfo);
+            var stmt = DB.Login.GetPreparedStatement(LoginStatements.UpdBnetLastLoginInfo);
             stmt.AddValue(0, GetRemoteIpEndPoint().ToString());
             stmt.AddValue(1, Enum.Parse(typeof(Locale), locale));
             stmt.AddValue(2, os);
@@ -115,7 +115,7 @@ namespace BNetServer.Networking
 
         BattlenetRpcErrorCode GetLastCharPlayed(Dictionary<string, Variant> Params, ClientResponse response)
         {
-            Variant subRegion = Params.LookupByKey("Command_LastCharPlayedRequest_v1_b9");
+            var subRegion = Params.LookupByKey("Command_LastCharPlayedRequest_v1_b9");
             if (subRegion != null)
             {
                 var lastPlayerChar = gameAccountInfo.LastPlayedCharacters.LookupByKey(subRegion.StringValue);
@@ -161,8 +161,8 @@ namespace BNetServer.Networking
             if (gameAccountInfo == null)
                 return BattlenetRpcErrorCode.UserServerBadWowAccount;
 
-            string subRegionId = "";
-            Variant subRegion = Params.LookupByKey("Command_RealmListRequest_v1_b9");
+            var subRegionId = "";
+            var subRegion = Params.LookupByKey("Command_RealmListRequest_v1_b9");
             if (subRegion != null)
                 subRegionId = subRegion.StringValue;
 
@@ -197,7 +197,7 @@ namespace BNetServer.Networking
 
         BattlenetRpcErrorCode JoinRealm(Dictionary<string, Variant> Params, ClientResponse response)
         {
-            Variant realmAddress = Params.LookupByKey("Param_RealmAddress");
+            var realmAddress = Params.LookupByKey("Param_RealmAddress");
             if (realmAddress != null)
                 return Global.RealmMgr.JoinRealm((uint)realmAddress.UintValue, build, GetRemoteIpEndPoint().Address, clientSecret, (Locale)Enum.Parse(typeof(Locale), locale), os, gameAccountInfo.Name, response);
 

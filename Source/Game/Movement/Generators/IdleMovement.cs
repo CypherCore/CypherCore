@@ -75,7 +75,7 @@ namespace Game.Movement
 
         public override bool Update(Unit owner, uint diff)
         {
-            float angle = owner.GetOrientation();
+            var angle = owner.GetOrientation();
             angle += diff * MathFunctions.TwoPi / _maxDuration * (_direction == RotateDirection.Left ? 1.0f : -1.0f);
             angle = MathFunctions.wrap(angle, 0.0f, MathFunctions.TwoPi);
 
@@ -138,7 +138,7 @@ namespace Game.Movement
             // If this is a creature, then return orientation to original position (for idle movement creatures)
             if (owner.IsTypeId(TypeId.Unit))
             {
-                float angle = owner.ToCreature().GetHomePosition().GetOrientation();
+                var angle = owner.ToCreature().GetHomePosition().GetOrientation();
                 owner.SetFacingTo(angle);
             }
         }

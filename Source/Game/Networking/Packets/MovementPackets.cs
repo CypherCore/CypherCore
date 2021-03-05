@@ -37,8 +37,8 @@ namespace Game.Networking.Packets
             transportInfo.seat = data.ReadInt8();                 // VehicleSeatIndex
             transportInfo.time = data.ReadUInt32();                 // MoveTime
 
-            bool hasPrevTime = data.HasBit();
-            bool hasVehicleId = data.HasBit();
+            var hasPrevTime = data.HasBit();
+            var hasVehicleId = data.HasBit();
 
             if (hasPrevTime)
                 transportInfo.prevTime = data.ReadUInt32();         // PrevMoveTime
@@ -49,8 +49,8 @@ namespace Game.Networking.Packets
 
         public static void WriteTransportInfo(WorldPacket data, MovementInfo.TransportInfo transportInfo)
         {
-            bool hasPrevTime = transportInfo.prevTime != 0;
-            bool hasVehicleId = transportInfo.vehicleId != 0;
+            var hasPrevTime = transportInfo.prevTime != 0;
+            var hasVehicleId = transportInfo.vehicleId != 0;
 
             data.WritePackedGuid(transportInfo.guid);                 // Transport Guid
             data.WriteFloat(transportInfo.pos.GetPositionX());
@@ -76,18 +76,18 @@ namespace Game.Networking.Packets
             var movementInfo = new MovementInfo();
             movementInfo.Guid = data.ReadPackedGuid();
             movementInfo.Time = data.ReadUInt32();
-            float x = data.ReadFloat();
-            float y = data.ReadFloat();
-            float z = data.ReadFloat();
-            float o = data.ReadFloat();
+            var x = data.ReadFloat();
+            var y = data.ReadFloat();
+            var z = data.ReadFloat();
+            var o = data.ReadFloat();
 
             movementInfo.Pos.Relocate(x, y, z, o);
             movementInfo.Pitch = data.ReadFloat();
             movementInfo.SplineElevation = data.ReadFloat();
 
-            uint removeMovementForcesCount = data.ReadUInt32();
+            var removeMovementForcesCount = data.ReadUInt32();
 
-            uint moveIndex = data.ReadUInt32();
+            var moveIndex = data.ReadUInt32();
 
             for (uint i = 0; i < removeMovementForcesCount; ++i)
             {
@@ -99,9 +99,9 @@ namespace Game.Networking.Packets
             movementInfo.SetMovementFlags((MovementFlag)data.ReadBits<uint>(30));
             movementInfo.SetMovementFlags2((MovementFlag2)data.ReadBits<uint>(18));
 
-            bool hasTransport = data.HasBit();
-            bool hasFall = data.HasBit();
-            bool hasSpline = data.HasBit(); // todo 6.x read this infos
+            var hasTransport = data.HasBit();
+            var hasFall = data.HasBit();
+            var hasSpline = data.HasBit(); // todo 6.x read this infos
 
             data.ReadBit(); // HeightChangeFailed
             data.ReadBit(); // RemoteTimeValid
@@ -116,7 +116,7 @@ namespace Game.Networking.Packets
 
                 // ResetBitReader
 
-                bool hasFallDirection = data.HasBit();
+                var hasFallDirection = data.HasBit();
                 if (hasFallDirection)
                 {
                     movementInfo.jump.sinAngle = data.ReadFloat();
@@ -130,10 +130,10 @@ namespace Game.Networking.Packets
 
         public static void WriteMovementInfo(WorldPacket data, MovementInfo movementInfo)
         {
-            bool hasTransportData = !movementInfo.transport.guid.IsEmpty();
-            bool hasFallDirection = movementInfo.HasMovementFlag(MovementFlag.Falling | MovementFlag.FallingFar);
-            bool hasFallData = hasFallDirection || movementInfo.jump.fallTime != 0;
-            bool hasSpline = false; // todo 6.x send this infos
+            var hasTransportData = !movementInfo.transport.guid.IsEmpty();
+            var hasFallDirection = movementInfo.HasMovementFlag(MovementFlag.Falling | MovementFlag.FallingFar);
+            var hasFallData = hasFallDirection || movementInfo.jump.fallTime != 0;
+            var hasSpline = false; // todo 6.x send this infos
 
             data.WritePackedGuid(movementInfo.Guid);
             data.WriteUInt32(movementInfo.Time);
@@ -193,7 +193,7 @@ namespace Game.Networking.Packets
             else
                 data.WriteVector3(Vector3.Zero);
 
-            bool hasSplineMove = data.WriteBit(!moveSpline.Finalized() && !moveSpline.splineIsFacingOnly);
+            var hasSplineMove = data.WriteBit(!moveSpline.Finalized() && !moveSpline.splineIsFacingOnly);
             data.FlushBits();
 
             if (hasSplineMove)
@@ -204,7 +204,7 @@ namespace Game.Networking.Packets
                 data.WriteFloat(1.0f);                                  // DurationModifier
                 data.WriteFloat(1.0f);                                  // NextDurationModifier
                 data.WriteBits((byte)moveSpline.facing.type, 2);        // Face
-                bool hasFadeObjectTime = data.WriteBit(moveSpline.splineflags.HasFlag(SplineFlag.FadeObject) && moveSpline.effect_start_time < moveSpline.Duration());
+                var hasFadeObjectTime = data.WriteBit(moveSpline.splineflags.HasFlag(SplineFlag.FadeObject) && moveSpline.effect_start_time < moveSpline.Duration());
                 data.WriteBits(moveSpline.GetPath().Length, 16);
                 data.WriteBit(false);                                       // HasSplineFilter
                 data.WriteBit(moveSpline.spell_effect_extra.HasValue);  // HasSpellEffectExtraData
@@ -294,22 +294,22 @@ namespace Game.Networking.Packets
             data.WriteVector3(movementForce.Origin);
             if (movementForce.Type == 1 && objectPosition != null) // gravity
             {
-                Vector3 direction = Vector3.Zero;
+                var direction = Vector3.Zero;
                 if (movementForce.Magnitude != 0.0f)
                 {
-                    Position tmp = new Position(movementForce.Origin.X - objectPosition.GetPositionX(),
+                    var tmp = new Position(movementForce.Origin.X - objectPosition.GetPositionX(),
                         movementForce.Origin.Y - objectPosition.GetPositionY(),
                         movementForce.Origin.Z - objectPosition.GetPositionZ());
-                    float lengthSquared = tmp.GetExactDistSq(0.0f, 0.0f, 0.0f);
+                    var lengthSquared = tmp.GetExactDistSq(0.0f, 0.0f, 0.0f);
                     if (lengthSquared > 0.0f)
                     {
-                        float mult = 1.0f / (float)Math.Sqrt(lengthSquared) * movementForce.Magnitude;
+                        var mult = 1.0f / (float)Math.Sqrt(lengthSquared) * movementForce.Magnitude;
                         tmp.posX *= mult;
                         tmp.posY *= mult;
                         tmp.posZ *= mult;
-                        float minLengthSquared = (tmp.GetPositionX() * tmp.GetPositionX() * 0.04f) +
-                            (tmp.GetPositionY() * tmp.GetPositionY() * 0.04f) +
-                            (tmp.GetPositionZ() * tmp.GetPositionZ() * 0.04f);
+                        var minLengthSquared = (tmp.GetPositionX() * tmp.GetPositionX() * 0.04f) +
+                                               (tmp.GetPositionY() * tmp.GetPositionY() * 0.04f) +
+                                               (tmp.GetPositionZ() * tmp.GetPositionZ() * 0.04f);
                         if (lengthSquared > minLengthSquared)
                             direction = new Vector3(tmp.posX, tmp.posY, tmp.posZ);
                     }
@@ -361,9 +361,9 @@ namespace Game.Networking.Packets
         public void InitializeSplineData(MoveSpline moveSpline)
         {
             SplineData.Id = moveSpline.GetId();
-            MovementSpline movementSpline = SplineData.Move;
+            var movementSpline = SplineData.Move;
 
-            MoveSplineFlag splineFlags = moveSpline.splineflags;
+            var splineFlags = moveSpline.splineflags;
             splineFlags.SetUnsetFlag(SplineFlag.Cyclic, moveSpline.IsCyclic());
             movementSpline.Flags = (uint)(splineFlags.Flags & ~SplineFlag.MaskNoMonsterMove);
             movementSpline.Face = moveSpline.facing.type;
@@ -401,20 +401,20 @@ namespace Game.Networking.Packets
                 movementSpline.SpellEffectExtraData.Value.JumpGravity = moveSpline.vertical_acceleration;
             }
 
-            Spline spline = moveSpline.spline;
-            Vector3[] array = spline.GetPoints();
+            var spline = moveSpline.spline;
+            var array = spline.GetPoints();
 
             if (splineFlags.HasFlag(SplineFlag.UncompressedPath))
             {
                 if (!splineFlags.HasFlag(SplineFlag.Cyclic))
                 {
-                    int count = spline.GetPointCount() - 3;
+                    var count = spline.GetPointCount() - 3;
                     for (uint i = 0; i < count; ++i)
                         movementSpline.Points.Add(array[i + 2]);
                 }
                 else
                 {
-                    int count = spline.GetPointCount() - 3;
+                    var count = spline.GetPointCount() - 3;
                     movementSpline.Points.Add(array[1]);
                     for (uint i = 0; i < count; ++i)
                         movementSpline.Points.Add(array[i + 1]);
@@ -422,17 +422,17 @@ namespace Game.Networking.Packets
             }
             else
             {
-                int lastIdx = spline.GetPointCount() - 3;
-                Span<Vector3> realPath = new Span<Vector3>(spline.GetPoints()).Slice(1);
+                var lastIdx = spline.GetPointCount() - 3;
+                var realPath = new Span<Vector3>(spline.GetPoints()).Slice(1);
 
                 movementSpline.Points.Add(realPath[lastIdx]);
 
                 if (lastIdx > 1)
                 {
-                    Vector3 middle = (realPath[0] + realPath[lastIdx]) / 2.0f;
+                    var middle = (realPath[0] + realPath[lastIdx]) / 2.0f;
 
                     // first and last points already appended
-                    for (int i = 1; i < lastIdx; ++i)
+                    for (var i = 1; i < lastIdx; ++i)
                         movementSpline.PackedDeltas.Add(middle - realPath[i]);
                 }
             }
@@ -660,7 +660,7 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
 
             if (MovementForces != null)
-                foreach (MovementForce force in MovementForces)
+                foreach (var force in MovementForces)
                     force.Write(_worldPacket);
 
             if (WalkSpeed.HasValue)
@@ -1098,7 +1098,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(MoverGUID);
             _worldPacket.WriteInt32(StateChanges.Count);
-            foreach (MoveStateChange stateChange in StateChanges)
+            foreach (var stateChange in StateChanges)
                 stateChange.Write(_worldPacket);
         }
 
@@ -1355,10 +1355,10 @@ namespace Game.Networking.Packets
                     break;
             }
 
-            foreach (Vector3 pos in Points)
+            foreach (var pos in Points)
                 data.WriteVector3(pos);
 
-            foreach (Vector3 pos in PackedDeltas)
+            foreach (var pos in PackedDeltas)
                 data.WritePackXYZ(pos);
 
             if (SpellEffectExtraData.HasValue)

@@ -109,7 +109,7 @@ namespace Game.Maps
             else if(!IsGarrison())
             {
                 InstanceBind pBind = player.GetBoundInstance(GetId(), player.GetDifficultyID(GetEntry()));
-                InstanceSave pSave = pBind != null ? pBind.save : null;
+                var pSave = pBind != null ? pBind.save : null;
 
                 // priority:
                 // 1. player's permanent bind
@@ -125,7 +125,7 @@ namespace Game.Maps
                     }
 
                     InstanceBind groupBind = null;
-                    Group group = player.GetGroup();
+                    var group = player.GetGroup();
                     // use the player's difficulty setting (it may not be the same as the group's)
                     if (group)
                     {
@@ -176,7 +176,7 @@ namespace Game.Maps
             lock (_mapLock)
             {
                 // make sure we have a valid map id
-                MapRecord entry = CliDB.MapStorage.LookupByKey(GetId());
+                var entry = CliDB.MapStorage.LookupByKey(GetId());
                 if (entry == null)
                 {
                     Log.outError(LogFilter.Maps, "CreateInstance: no record for map {0}", GetId());
@@ -194,15 +194,15 @@ namespace Game.Maps
 
                 Log.outDebug(LogFilter.Maps, "MapInstanced.CreateInstance: {0} map instance {1} for {2} created with difficulty {3}", save != null ? "" : "new ", InstanceId, GetId(), difficulty);
 
-                InstanceMap map = new InstanceMap(GetId(), GetGridExpiry(), InstanceId, difficulty, this);
+                var map = new InstanceMap(GetId(), GetGridExpiry(), InstanceId, difficulty, this);
                 Cypher.Assert(map.IsDungeon());
 
                 map.LoadRespawnTimes();
                 map.LoadCorpseData();
 
-                bool load_data = save != null;
+                var load_data = save != null;
                 map.CreateInstanceData(load_data);
-                InstanceScenario instanceScenario = Global.ScenarioMgr.CreateInstanceScenario(map, teamId);
+                var instanceScenario = Global.ScenarioMgr.CreateInstanceScenario(map, teamId);
                 if (instanceScenario != null)
                     map.SetInstanceScenario(instanceScenario);
 
@@ -220,7 +220,7 @@ namespace Game.Maps
             {
                 Log.outDebug(LogFilter.Maps, "MapInstanced.CreateBattleground: map bg {0} for {1} created.", InstanceId, GetId());
 
-                BattlegroundMap map = new BattlegroundMap(GetId(), (uint)GetGridExpiry(), InstanceId, this, Difficulty.None);
+                var map = new BattlegroundMap(GetId(), (uint)GetGridExpiry(), InstanceId, this, Difficulty.None);
                 Cypher.Assert(map.IsBattlegroundOrArena());
                 map.SetBG(bg);
                 bg.SetBgMap(map);
@@ -234,7 +234,7 @@ namespace Game.Maps
         {
             lock (_mapLock)
             {
-                GarrisonMap map = new GarrisonMap(GetId(), GetGridExpiry(), instanceId, this, owner.GetGUID());
+                var map = new GarrisonMap(GetId(), GetGridExpiry(), instanceId, this, owner.GetGUID());
                 Cypher.Assert(map.IsGarrison());
 
                 m_InstancedMaps[instanceId] = map;

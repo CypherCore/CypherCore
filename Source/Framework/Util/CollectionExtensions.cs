@@ -56,7 +56,7 @@ namespace System.Collections.Generic
         public static TValue LookupByKey<TKey, TValue>(this IDictionary<TKey, TValue> dict, object key)
         {
             TValue val;
-            TKey newkey = (TKey)Convert.ChangeType(key, typeof(TKey));
+            var newkey = (TKey)Convert.ChangeType(key, typeof(TKey));
             return dict.TryGetValue(newkey, out val) ? val : default;
         }
         public static TValue LookupByKey<TKey, TValue>(this IDictionary<TKey, TValue> dict, TKey key)
@@ -74,7 +74,7 @@ namespace System.Collections.Generic
 
         public static bool ContainsKey<TKey, TValue>(this IDictionary<TKey, TValue> dict, object key)
         {
-            TKey newkey = (TKey)Convert.ChangeType(key, typeof(TKey));
+            var newkey = (TKey)Convert.ChangeType(key, typeof(TKey));
             return dict.ContainsKey(newkey);
         }
 
@@ -93,14 +93,14 @@ namespace System.Collections.Generic
             //
             // Swaps elements in an array. Doesn't need to return a reference.
             //
-            T temp = array[position1]; // Copy the first position's element
+            var temp = array[position1]; // Copy the first position's element
             array[position1] = array[position2]; // Assign to the second element
             array[position2] = temp; // Assign to the first element
         }
 
         public static void Resize<T>(this List<T> list, uint size)
         {
-            int cur = list.Count;
+            var cur = list.Count;
             if (size < cur)
                 list.RemoveRange((int)size, cur - (int)size);
             else
@@ -112,7 +112,7 @@ namespace System.Collections.Generic
 
         public static void RandomResize<T>(this IList<T> list, uint size)
         {
-            int listSize = list.Count;
+            var listSize = list.Count;
 
             while (listSize > size)
             {
@@ -146,9 +146,9 @@ namespace System.Collections.Generic
 
         public static T SelectRandomElementByWeight<T>(this IEnumerable<T> sequence, Func<T, float> weightSelector)
         {
-            float totalWeight = sequence.Sum(weightSelector);
+            var totalWeight = sequence.Sum(weightSelector);
             // The weight we are after...
-            float itemWeightIndex = (float)RandomHelper.NextDouble() * totalWeight;
+            var itemWeightIndex = (float)RandomHelper.NextDouble() * totalWeight;
             float currentWeightIndex = 0;
 
             foreach (var item in from weightedItem in sequence select new { Value = weightedItem, Weight = weightSelector(weightedItem) })
@@ -171,7 +171,7 @@ namespace System.Collections.Generic
 
         public static uint[] ToBlockRange(this BitSet array)
         {
-            uint[] blockValues = new uint[array.Length / 32 + 1];
+            var blockValues = new uint[array.Length / 32 + 1];
             array.CopyTo(blockValues, 0);
             return blockValues;
         }

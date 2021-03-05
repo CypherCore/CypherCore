@@ -33,18 +33,18 @@ namespace Game.DataStorage
             _conversationLineTemplateStorage.Clear();
             _conversationTemplateStorage.Clear();
 
-            Dictionary<uint, ConversationActorTemplate[]> actorsByConversation = new Dictionary<uint, ConversationActorTemplate[]>();
-            Dictionary<uint, ulong[]> actorGuidsByConversation = new Dictionary<uint, ulong[]>();
+            var actorsByConversation = new Dictionary<uint, ConversationActorTemplate[]>();
+            var actorGuidsByConversation = new Dictionary<uint, ulong[]>();
 
-            SQLResult actorTemplates = DB.World.Query("SELECT Id, CreatureId, CreatureModelId FROM conversation_actor_template");
+            var actorTemplates = DB.World.Query("SELECT Id, CreatureId, CreatureModelId FROM conversation_actor_template");
             if (!actorTemplates.IsEmpty())
             {
-                uint oldMSTime = Time.GetMSTime();
+                var oldMSTime = Time.GetMSTime();
 
                 do
                 {
-                    uint id = actorTemplates.Read<uint>(0);
-                    ConversationActorTemplate conversationActor = new ConversationActorTemplate();
+                    var id = actorTemplates.Read<uint>(0);
+                    var conversationActor = new ConversationActorTemplate();
                     conversationActor.Id = id;
                     conversationActor.CreatureId = actorTemplates.Read<uint>(1);
                     conversationActor.CreatureModelId = actorTemplates.Read<uint>(2);
@@ -60,14 +60,14 @@ namespace Game.DataStorage
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Conversation actor templates. DB table `conversation_actor_template` is empty.");
             }
 
-            SQLResult lineTemplates = DB.World.Query("SELECT Id, StartTime, UiCameraID, ActorIdx, Flags FROM conversation_line_template");
+            var lineTemplates = DB.World.Query("SELECT Id, StartTime, UiCameraID, ActorIdx, Flags FROM conversation_line_template");
             if (!lineTemplates.IsEmpty())
             {
-                uint oldMSTime = Time.GetMSTime();
+                var oldMSTime = Time.GetMSTime();
 
                 do
                 {
-                    uint id = lineTemplates.Read<uint>(0);
+                    var id = lineTemplates.Read<uint>(0);
 
                     if (!CliDB.ConversationLineStorage.ContainsKey(id))
                     {
@@ -75,7 +75,7 @@ namespace Game.DataStorage
                         continue;
                     }
 
-                    ConversationLineTemplate conversationLine = new ConversationLineTemplate();
+                    var conversationLine = new ConversationLineTemplate();
                     conversationLine.Id = id;
                     conversationLine.StartTime = lineTemplates.Read<uint>(1);
                     conversationLine.UiCameraID = lineTemplates.Read<uint>(2);
@@ -93,18 +93,18 @@ namespace Game.DataStorage
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Conversation line templates. DB table `conversation_line_template` is empty.");
             }
 
-            SQLResult actorResult = DB.World.Query("SELECT ConversationId, ConversationActorId, ConversationActorGuid, Idx FROM conversation_actors");
+            var actorResult = DB.World.Query("SELECT ConversationId, ConversationActorId, ConversationActorGuid, Idx FROM conversation_actors");
             if (!actorResult.IsEmpty())
             {
-                uint oldMSTime = Time.GetMSTime();
+                var oldMSTime = Time.GetMSTime();
                 uint count = 0;
 
                 do
                 {
-                    uint conversationId = actorResult.Read<uint>(0);
-                    uint actorId = actorResult.Read<uint>(1);
-                    ulong actorGuid = actorResult.Read<ulong>(2);
-                    ushort idx = actorResult.Read<ushort>(3);
+                    var conversationId = actorResult.Read<uint>(0);
+                    var actorId = actorResult.Read<uint>(1);
+                    var actorGuid = actorResult.Read<ulong>(2);
+                    var idx = actorResult.Read<ushort>(3);
 
                     if (actorId != 0 && actorGuid != 0)
                     {
@@ -113,13 +113,13 @@ namespace Game.DataStorage
                     }
                     if (actorId != 0)
                     {
-                        ConversationActorTemplate conversationActorTemplate = _conversationActorTemplateStorage.LookupByKey(actorId);
+                        var conversationActorTemplate = _conversationActorTemplateStorage.LookupByKey(actorId);
                         if (conversationActorTemplate != null)
                         {
                             if (!actorsByConversation.ContainsKey(conversationId))
                                 actorsByConversation[conversationId] = new ConversationActorTemplate[idx + 1];
 
-                            ConversationActorTemplate[] actors = actorsByConversation[conversationId];
+                            var actors = actorsByConversation[conversationId];
                             if (actors.Length <= idx)
                                 Array.Resize(ref actors, idx + 1);
 
@@ -131,7 +131,7 @@ namespace Game.DataStorage
                     }
                     else if (actorGuid != 0)
                     {
-                        CreatureData creData = Global.ObjectMgr.GetCreatureData(actorGuid);
+                        var creData = Global.ObjectMgr.GetCreatureData(actorGuid);
                         if (creData != null)
                         {
                             if (!actorGuidsByConversation.ContainsKey(conversationId))
@@ -158,14 +158,14 @@ namespace Game.DataStorage
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Conversation actors. DB table `conversation_actors` is empty.");
             }
 
-            SQLResult templateResult = DB.World.Query("SELECT Id, FirstLineId, LastLineEndTime, TextureKitId, ScriptName FROM conversation_template");
+            var templateResult = DB.World.Query("SELECT Id, FirstLineId, LastLineEndTime, TextureKitId, ScriptName FROM conversation_template");
             if (!templateResult.IsEmpty())
             {
-                uint oldMSTime = Time.GetMSTime();
+                var oldMSTime = Time.GetMSTime();
 
                 do
                 {
-                    ConversationTemplate conversationTemplate = new ConversationTemplate();
+                    var conversationTemplate = new ConversationTemplate();
                     conversationTemplate.Id = templateResult.Read<uint>(0);
                     conversationTemplate.FirstLineId = templateResult.Read<uint>(1);
                     conversationTemplate.LastLineEndTime = templateResult.Read<uint>(2);
@@ -175,13 +175,13 @@ namespace Game.DataStorage
                     conversationTemplate.Actors = actorsByConversation.TryGetValue(conversationTemplate.Id, out var actors) ? actors.ToList() : null;
                     conversationTemplate.ActorGuids = actorGuidsByConversation.TryGetValue(conversationTemplate.Id, out var actorGuids) ? actorGuids.ToList() : null;
 
-                    ConversationLineRecord currentConversationLine = CliDB.ConversationLineStorage.LookupByKey(conversationTemplate.FirstLineId);
+                    var currentConversationLine = CliDB.ConversationLineStorage.LookupByKey(conversationTemplate.FirstLineId);
                     if (currentConversationLine == null)
                         Log.outError(LogFilter.Sql, "Table `conversation_template` references an invalid line (ID: {0}) for Conversation {1}, skipped", conversationTemplate.FirstLineId, conversationTemplate.Id);
 
                     while (currentConversationLine != null)
                     {
-                        ConversationLineTemplate conversationLineTemplate = _conversationLineTemplateStorage.LookupByKey(currentConversationLine.Id);
+                        var conversationLineTemplate = _conversationLineTemplateStorage.LookupByKey(currentConversationLine.Id);
                         if (conversationLineTemplate != null)
                             conversationTemplate.Lines.Add(conversationLineTemplate);
                         else

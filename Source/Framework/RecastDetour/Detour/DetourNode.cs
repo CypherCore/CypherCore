@@ -91,11 +91,11 @@ public partial class Detour
             Debug.Assert(m_next != null);
             Debug.Assert(m_first != null);
 
-            for (int i = 0; i < hashSize; ++i)
+            for (var i = 0; i < hashSize; ++i)
             {
                 m_first[i] = DT_NULL_IDX;
             }
-            for (int i = 0; i < m_maxNodes; ++i)
+            for (var i = 0; i < m_maxNodes; ++i)
             {
                 m_next[i] = DT_NULL_IDX;
             }
@@ -103,7 +103,7 @@ public partial class Detour
 
         public void clear()
         {
-            for (int i = 0; i < m_hashSize; ++i)
+            for (var i = 0; i < m_hashSize; ++i)
             {
                 m_first[i] = DT_NULL_IDX;
             }
@@ -154,8 +154,8 @@ public partial class Detour
 
         public dtNode findNode(dtPolyRef id)
         {
-            uint bucket = (uint)(dtHashRef(id) & (m_hashSize - 1));
-            dtNodeIndex i = m_first[bucket];
+            var bucket = (uint)(dtHashRef(id) & (m_hashSize - 1));
+            var i = m_first[bucket];
             while (i != DT_NULL_IDX)
             {
                 if (m_nodes[i].id == id)
@@ -167,8 +167,8 @@ public partial class Detour
 
         public dtNode getNode(dtPolyRef id, byte state = 0)
         {
-            uint bucket = (uint)(dtHashRef(id) & (m_hashSize - 1));
-            dtNodeIndex i = m_first[bucket];
+            var bucket = (uint)(dtHashRef(id) & (m_hashSize - 1));
+            var i = m_first[bucket];
             dtNode node = null;
             while (i != DT_NULL_IDX)
             {
@@ -228,7 +228,7 @@ public partial class Detour
 
         public dtNode pop()
         {
-            dtNode result = m_heap[0];
+            var result = m_heap[0];
             m_size--;
             trickleDown(0, m_heap[m_size]);
             return result;
@@ -242,7 +242,7 @@ public partial class Detour
 
         public void modify(dtNode node)
         {
-            for (int i = 0; i < m_size; ++i)
+            for (var i = 0; i < m_size; ++i)
             {
                 if (m_heap[i] == node)
                 {
@@ -271,7 +271,7 @@ public partial class Detour
 
         public void bubbleUp(int i, dtNode node)
         {
-            int parent = (i - 1) / 2;
+            var parent = (i - 1) / 2;
             // note: (index > 0) means there is a parent
             while ((i > 0) && (m_heap[parent].total > node.total))
             {
@@ -284,7 +284,7 @@ public partial class Detour
 
         public void trickleDown(int i, dtNode node)
         {
-            int child = (i * 2) + 1;
+            var child = (i * 2) + 1;
             while (child < m_size)
             {
                 if (((child + 1) < m_size) &&

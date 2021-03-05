@@ -31,10 +31,10 @@ namespace Game.Entities
 
         public int Compare(WorldObject objA, WorldObject objB)
         {
-            Unit a = objA.ToUnit();
-            Unit b = objB.ToUnit();
-            float rA = a != null ? a.GetPowerPct(m_power) : 0.0f;
-            float rB = b != null ? b.GetPowerPct(m_power) : 0.0f;
+            var a = objA.ToUnit();
+            var b = objB.ToUnit();
+            var rA = a != null ? a.GetPowerPct(m_power) : 0.0f;
+            var rB = b != null ? b.GetPowerPct(m_power) : 0.0f;
             return Convert.ToInt32(m_ascending ? rA < rB : rA > rB);
         }
 
@@ -51,10 +51,10 @@ namespace Game.Entities
 
         public int Compare(WorldObject objA, WorldObject objB)
         {
-            Unit a = objA.ToUnit();
-            Unit b = objB.ToUnit();
-            float rA = a.GetMaxHealth() != 0 ? a.GetHealth() / (float)a.GetMaxHealth() : 0.0f;
-            float rB = b.GetMaxHealth() != 0 ? b.GetHealth() / (float)b.GetMaxHealth() : 0.0f;
+            var a = objA.ToUnit();
+            var b = objB.ToUnit();
+            var rA = a.GetMaxHealth() != 0 ? a.GetHealth() / (float)a.GetMaxHealth() : 0.0f;
+            var rB = b.GetMaxHealth() != 0 ? b.GetHealth() / (float)b.GetMaxHealth() : 0.0f;
             return Convert.ToInt32(m_ascending ? rA < rB : rA > rB);
         }
 

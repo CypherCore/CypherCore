@@ -101,7 +101,7 @@ namespace Game.AI
 
                 if (me.IsHostileTo(who))
                 {
-                    float fAttackRadius = me.GetAttackDistance(who);
+                    var fAttackRadius = me.GetAttackDistance(who);
                     if (me.IsWithinDistInMap(who, fAttackRadius) && me.IsWithinLOSInMap(who))
                     {
                         if (!me.GetVictim())
@@ -128,15 +128,15 @@ namespace Game.AI
                 return;
 
             // @todo need a better check for quests with time limit.
-            Player player = GetLeaderForFollower();
+            var player = GetLeaderForFollower();
             if (player)
             {
-                Group group = player.GetGroup();
+                var group = player.GetGroup();
                 if (group)
                 {
-                    for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
+                    for (var groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
                     {
-                        Player member = groupRef.GetSource();
+                        var member = groupRef.GetSource();
                         if (member)
                             if (member.IsInMap(player))
                                 member.FailQuest(m_pQuestForFollow.Id);
@@ -200,9 +200,9 @@ namespace Game.AI
                         return;
                     }
 
-                    bool bIsMaxRangeExceeded = true;
+                    var bIsMaxRangeExceeded = true;
 
-                    Player player = GetLeaderForFollower();
+                    var player = GetLeaderForFollower();
                     if (player)
                     {
                         if (HasFollowState(FollowState.Returning))
@@ -214,12 +214,12 @@ namespace Game.AI
                             return;
                         }
 
-                        Group group = player.GetGroup();
+                        var group = player.GetGroup();
                         if (group)
                         {
-                            for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
+                            for (var groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
                             {
-                                Player member = groupRef.GetSource();
+                                var member = groupRef.GetSource();
                                 if (member && me.IsWithinDistInMap(member, 100.0f))
                                 {
                                     bIsMaxRangeExceeded = false;
@@ -316,19 +316,19 @@ namespace Game.AI
 
         Player GetLeaderForFollower()
         {
-            Player player = Global.ObjAccessor.GetPlayer(me, m_uiLeaderGUID);
+            var player = Global.ObjAccessor.GetPlayer(me, m_uiLeaderGUID);
             if (player)
             {
                 if (player.IsAlive())
                     return player;
                 else
                 {
-                    Group group = player.GetGroup();
+                    var group = player.GetGroup();
                     if (group)
                     {
-                        for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
+                        for (var groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
                         {
-                            Player member = groupRef.GetSource();
+                            var member = groupRef.GetSource();
                             if (member &&  me.IsWithinDistInMap(member, 100.0f) && member.IsAlive())
                             {
                                 Log.outDebug(LogFilter.Scripts, "FollowerAI GetLeader changed and returned new leader.");

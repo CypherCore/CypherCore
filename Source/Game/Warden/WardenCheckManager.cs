@@ -29,7 +29,7 @@ namespace Game
 
         public void LoadWardenChecks()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             // Check if Warden is enabled by config before loading anything
             if (!WorldConfig.GetBoolValue(WorldCfg.WardenEnabled))
@@ -39,7 +39,7 @@ namespace Game
             }
 
             //                              0    1     2     3        4       5      6      7
-            SQLResult result = DB.World.Query("SELECT id, type, data, result, address, length, str, comment FROM warden_checks ORDER BY id ASC");
+            var result = DB.World.Query("SELECT id, type, data, result, address, length, str, comment FROM warden_checks ORDER BY id ASC");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Warden checks. DB table `warden_checks` is empty!");
@@ -49,16 +49,16 @@ namespace Game
             uint count = 0;
             do
             {
-                ushort id = result.Read<ushort>(0);
-                WardenCheckType checkType = (WardenCheckType)result.Read<byte>(1);
-                string data = result.Read<string>(2);
-                string checkResult = result.Read<string>(3);
-                uint address = result.Read<uint>(4);
-                byte length = result.Read<byte>(5);
-                string str = result.Read<string>(6);
-                string comment = result.Read<string>(7);
+                var id = result.Read<ushort>(0);
+                var checkType = (WardenCheckType)result.Read<byte>(1);
+                var data = result.Read<string>(2);
+                var checkResult = result.Read<string>(3);
+                var address = result.Read<uint>(4);
+                var length = result.Read<byte>(5);
+                var str = result.Read<string>(6);
+                var comment = result.Read<string>(7);
 
-                WardenCheck wardenCheck = new WardenCheck();
+                var wardenCheck = new WardenCheck();
                 wardenCheck.Type = checkType;
                 wardenCheck.CheckId = id;
 
@@ -87,7 +87,7 @@ namespace Game
 
                 if (checkType == WardenCheckType.MPQ || checkType == WardenCheckType.Memory)
                 {
-                    BigInteger Result = new BigInteger(checkResult.ToByteArray());
+                    var Result = new BigInteger(checkResult.ToByteArray());
                     CheckResultStore[id] = Result;
                 }
 
@@ -105,7 +105,7 @@ namespace Game
 
         public void LoadWardenOverrides()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             // Check if Warden is enabled by config before loading anything
             if (!WorldConfig.GetBoolValue(WorldCfg.WardenEnabled))
@@ -115,7 +115,7 @@ namespace Game
             }
 
             //                                               0        1
-            SQLResult result = DB.Characters.Query("SELECT wardenId, action FROM warden_action");
+            var result = DB.Characters.Query("SELECT wardenId, action FROM warden_action");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Warden action overrides. DB table `warden_action` is empty!");
@@ -125,8 +125,8 @@ namespace Game
             uint count = 0;
             do
             {
-                ushort checkId = result.Read<ushort>(0);
-                WardenActions action = (WardenActions)result.Read<byte>(1);
+                var checkId = result.Read<ushort>(0);
+                var action = (WardenActions)result.Read<byte>(1);
 
                 // Check if action value is in range (0-2, see WardenActions enum)
                 if (action > WardenActions.Ban)

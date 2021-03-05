@@ -35,11 +35,11 @@ namespace Game.Entities
             if (!mapEntry.IsRaid())
                 return m_dungeonDifficulty;
 
-            MapDifficultyRecord defaultDifficulty = Global.DB2Mgr.GetDefaultMapDifficulty(mapEntry.Id);
+            var defaultDifficulty = Global.DB2Mgr.GetDefaultMapDifficulty(mapEntry.Id);
             if (defaultDifficulty == null)
                 return m_legacyRaidDifficulty;
 
-            DifficultyRecord difficulty = CliDB.DifficultyStorage.LookupByKey(defaultDifficulty.DifficultyID);
+            var difficulty = CliDB.DifficultyStorage.LookupByKey(defaultDifficulty.DifficultyID);
             if (difficulty == null || difficulty.Flags.HasAnyFlag(DifficultyFlags.Legacy))
                 return m_legacyRaidDifficulty;
 
@@ -54,7 +54,7 @@ namespace Game.Entities
 
         public static Difficulty CheckLoadedDungeonDifficultyID(Difficulty difficulty)
         {
-            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficulty);
+            var difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficulty);
             if (difficultyEntry == null)
                 return Difficulty.Normal;
 
@@ -68,7 +68,7 @@ namespace Game.Entities
         }
         public static Difficulty CheckLoadedRaidDifficultyID(Difficulty difficulty)
         {
-            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficulty);
+            var difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficulty);
             if (difficultyEntry == null)
                 return Difficulty.NormalRaid;
 
@@ -82,7 +82,7 @@ namespace Game.Entities
         }
         public static Difficulty CheckLoadedLegacyRaidDifficultyID(Difficulty difficulty)
         {
-            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficulty);
+            var difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficulty);
             if (difficultyEntry == null)
                 return Difficulty.Raid10N;
 
@@ -97,7 +97,7 @@ namespace Game.Entities
 
         public void SendRaidGroupOnlyMessage(RaidGroupReason reason, int delay)
         {
-            RaidGroupOnly raidGroupOnly = new RaidGroupOnly();
+            var raidGroupOnly = new RaidGroupOnly();
             raidGroupOnly.Delay = delay;
             raidGroupOnly.Reason = reason;
 
@@ -110,8 +110,8 @@ namespace Game.Entities
             // so apply them accordingly
             m_areaUpdateId = newArea;
 
-            AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(newArea);
-            bool oldFFAPvPArea = pvpInfo.IsInFFAPvPArea;
+            var area = CliDB.AreaTableStorage.LookupByKey(newArea);
+            var oldFFAPvPArea = pvpInfo.IsInFFAPvPArea;
             pvpInfo.IsInFFAPvPArea = area != null && area.Flags[0].HasAnyFlag(AreaFlags.Arena);
             UpdatePvPState(true);
 
@@ -139,7 +139,7 @@ namespace Game.Entities
             else
                 RemovePvpFlag(UnitPVPStateFlags.Sanctuary);
 
-            AreaFlags areaRestFlag = (GetTeam() == Team.Alliance) ? AreaFlags.RestZoneAlliance : AreaFlags.RestZoneHorde;
+            var areaRestFlag = (GetTeam() == Team.Alliance) ? AreaFlags.RestZoneAlliance : AreaFlags.RestZoneHorde;
             if (area != null && area.Flags[0].HasAnyFlag(areaRestFlag))
                 _restMgr.SetRestFlag(RestFlag.FactionArea);
             else
@@ -155,7 +155,7 @@ namespace Game.Entities
             if (!IsInWorld)
                 return;
 
-            uint oldZone = m_zoneUpdateId;
+            var oldZone = m_zoneUpdateId;
             m_zoneUpdateId = newZone;
             m_zoneUpdateTimer = 1 * Time.InMilliseconds;
 
@@ -173,7 +173,7 @@ namespace Game.Entities
             {
                 SetGroupUpdateFlag(GroupUpdateFlags.Full);
 
-                Pet pet = GetPet();
+                var pet = GetPet();
                 if (pet)
                     pet.SetGroupUpdateFlag(GroupUpdatePetFlags.Full);
             }
@@ -181,7 +181,7 @@ namespace Game.Entities
             // zone changed, so area changed as well, update it
             UpdateArea(newArea);
 
-            AreaTableRecord zone = CliDB.AreaTableStorage.LookupByKey(newZone);
+            var zone = CliDB.AreaTableStorage.LookupByKey(newZone);
             if (zone == null)
                 return;
 
@@ -223,7 +223,7 @@ namespace Game.Entities
                 Global.OutdoorPvPMgr.HandlePlayerEnterZone(this, newZone);
                 Global.BattleFieldMgr.HandlePlayerEnterZone(this, newZone);
                 SendInitWorldStates(newZone, newArea);              // only if really enters to new zone, not just area change, works strange...
-                Guild guild = GetGuild();
+                var guild = GetGuild();
                 if (guild)
                     guild.UpdateMemberData(this, GuildMemberData.ZoneId, newZone);
             }
@@ -231,7 +231,7 @@ namespace Game.Entities
 
         public void UpdateHostileAreaState(AreaTableRecord area)
         {
-            ZonePVPTypeOverride overrideZonePvpType = GetOverrideZonePVPType();
+            var overrideZonePvpType = GetOverrideZonePVPType();
 
             pvpInfo.IsInHostileArea = false;
 
@@ -251,7 +251,7 @@ namespace Game.Entities
                             pvpInfo.IsInHostileArea = Global.WorldMgr.IsPvPRealm();
                         else
                         {
-                            FactionTemplateRecord factionTemplate = GetFactionTemplateEntry();
+                            var factionTemplate = GetFactionTemplateEntry();
                             if (factionTemplate == null || factionTemplate.FriendGroup.HasAnyFlag(area.FactionGroupMask))
                                 pvpInfo.IsInHostileArea = false;
                             else if (factionTemplate.EnemyGroup.HasAnyFlag(area.FactionGroupMask))
@@ -289,7 +289,7 @@ namespace Game.Entities
         public InstanceBind GetBoundInstance(uint mapid, Difficulty difficulty, bool withExpired = false)
         {
             // some instances only have one difficulty
-            MapDifficultyRecord mapDiff = Global.DB2Mgr.GetDownscaledMapDifficultyData(mapid, ref difficulty);
+            var mapDiff = Global.DB2Mgr.GetDownscaledMapDifficultyData(mapid, ref difficulty);
             if (mapDiff == null)
                 return null;
 
@@ -308,15 +308,15 @@ namespace Game.Entities
 
         public InstanceSave GetInstanceSave(uint mapid)
         {
-            MapRecord mapEntry = CliDB.MapStorage.LookupByKey(mapid);
-            InstanceBind pBind = GetBoundInstance(mapid, GetDifficultyID(mapEntry));
-            InstanceSave pSave = pBind?.save;
+            var mapEntry = CliDB.MapStorage.LookupByKey(mapid);
+            var pBind = GetBoundInstance(mapid, GetDifficultyID(mapEntry));
+            var pSave = pBind?.save;
             if (pBind == null || !pBind.perm)
             {
-                Group group = GetGroup();
+                var group = GetGroup();
                 if (group)
                 {
-                    InstanceBind groupBind = group.GetBoundInstance(GetDifficultyID(mapEntry), mapid);
+                    var groupBind = group.GetBoundInstance(GetDifficultyID(mapEntry), mapid);
                     if (groupBind != null)
                         pSave = groupBind.save;
                 }
@@ -342,7 +342,7 @@ namespace Game.Entities
             {
                 if (!unload)
                 {
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_INSTANCE_BY_INSTANCE_GUID);
+                    var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_INSTANCE_BY_INSTANCE_GUID);
 
                     stmt.AddValue(0, GetGUID().GetCounter());
                     stmt.AddValue(1, pair.Value.save.GetInstanceId());
@@ -362,7 +362,7 @@ namespace Game.Entities
         {
             if (save != null)
             {
-                InstanceBind bind = new InstanceBind();
+                var bind = new InstanceBind();
                 if (m_boundInstances.ContainsKey(save.GetDifficultyID()) && m_boundInstances[save.GetDifficultyID()].ContainsKey(save.GetMapId()))
                     bind = m_boundInstances[save.GetDifficultyID()][save.GetMapId()];
 
@@ -434,11 +434,11 @@ namespace Game.Entities
 
         public void BindToInstance()
         {
-            InstanceSave mapSave = Global.InstanceSaveMgr.GetInstanceSave(_pendingBindId);
+            var mapSave = Global.InstanceSaveMgr.GetInstanceSave(_pendingBindId);
             if (mapSave == null) //it seems sometimes mapSave is NULL, but I did not check why
                 return;
 
-            InstanceSaveCreated data = new InstanceSaveCreated();
+            var data = new InstanceSaveCreated();
             data.Gm = IsGameMaster();
             SendPacket(data);
             if (!IsGameMaster())
@@ -456,16 +456,16 @@ namespace Game.Entities
 
         public void SendRaidInfo()
         {
-            InstanceInfoPkt instanceInfo = new InstanceInfoPkt();
+            var instanceInfo = new InstanceInfoPkt();
 
-            long now = Time.UnixTime;
+            var now = Time.UnixTime;
             foreach (var difficultyDic in m_boundInstances.Values)
             {
                 foreach (var instanceBind in difficultyDic.Values)
                 {
                     if (instanceBind.perm)
                     {
-                        InstanceSave save = instanceBind.save;
+                        var save = instanceBind.save;
 
                         InstanceLock lockInfos;
                         lockInfos.InstanceID = save.GetInstanceId();
@@ -477,10 +477,10 @@ namespace Game.Entities
                             lockInfos.TimeRemaining = (int)(Global.InstanceSaveMgr.GetSubsequentResetTime(save.GetMapId(), save.GetDifficultyID(), save.GetResetTime()) - now);
 
                         lockInfos.CompletedMask = 0;
-                        Map map = Global.MapMgr.FindMap(save.GetMapId(), save.GetInstanceId());
+                        var map = Global.MapMgr.FindMap(save.GetMapId(), save.GetInstanceId());
                         if (map != null)
                         {
-                            InstanceScript instanceScript = ((InstanceMap)map).GetInstanceScript();
+                            var instanceScript = ((InstanceMap)map).GetInstanceScript();
                             if (instanceScript != null)
                                 lockInfos.CompletedMask = instanceScript.GetCompletedEncounterMask();
                         }
@@ -507,12 +507,12 @@ namespace Game.Entities
                 uint missingQuest = 0;
                 uint missingAchievement = 0;
 
-                MapRecord mapEntry = CliDB.MapStorage.LookupByKey(target_map);
+                var mapEntry = CliDB.MapStorage.LookupByKey(target_map);
                 if (mapEntry == null)
                     return false;
 
-                Difficulty target_difficulty = GetDifficultyID(mapEntry);
-                MapDifficultyRecord mapDiff = Global.DB2Mgr.GetDownscaledMapDifficultyData(target_map, ref target_difficulty);
+                var target_difficulty = GetDifficultyID(mapEntry);
+                var mapDiff = Global.DB2Mgr.GetDownscaledMapDifficultyData(target_map, ref target_difficulty);
                 if (!WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreLevel))
                 {
                     var mapDifficultyConditions = Global.DB2Mgr.GetMapDifficultyConditions(mapDiff.Id);
@@ -556,8 +556,8 @@ namespace Game.Entities
                     else if (GetTeam() == Team.Horde && ar.quest_H != 0 && !GetQuestRewardStatus(ar.quest_H))
                         missingQuest = ar.quest_H;
 
-                    Player leader = this;
-                    ObjectGuid leaderGuid = GetGroup() != null ? GetGroup().GetLeaderGUID() : GetGUID();
+                    var leader = this;
+                    var leaderGuid = GetGroup() != null ? GetGroup().GetLeaderGUID() : GetGUID();
                     if (leaderGuid != GetGUID())
                         leader = Global.ObjAccessor.FindPlayer(leaderGuid);
 
@@ -601,7 +601,7 @@ namespace Game.Entities
                 return true;
 
             // non-instances are always valid
-            Map map = GetMap();
+            var map = GetMap();
             if (!map || !map.IsDungeon())
                 return true;
 
@@ -610,11 +610,11 @@ namespace Game.Entities
                 if (!GetGroup() || !GetGroup().IsRaidGroup())
                     return false;
 
-            Group group = GetGroup();
+            var group = GetGroup();
             if (group)
             {
                 // check if player's group is bound to this instance
-                InstanceBind bind = group.GetBoundInstance(map.GetDifficultyID(), map.GetId());
+                var bind = group.GetBoundInstance(map.GetDifficultyID(), map.GetId());
                 if (bind == null || bind.save == null || bind.save.GetInstanceId() != map.GetInstanceId())
                     return false;
 
@@ -637,7 +637,7 @@ namespace Game.Entities
                     return false;
 
                 // check if the player is bound to this instance
-                InstanceBind bind = GetBoundInstance(map.GetId(), map.GetDifficultyID());
+                var bind = GetBoundInstance(map.GetId(), map.GetDifficultyID());
                 if (bind == null || bind.save == null || bind.save.GetInstanceId() != map.GetInstanceId())
                     return false;
             }
@@ -660,14 +660,14 @@ namespace Game.Entities
 
         public void SendDungeonDifficulty(int forcedDifficulty = -1)
         {
-            DungeonDifficultySet dungeonDifficultySet = new DungeonDifficultySet();
+            var dungeonDifficultySet = new DungeonDifficultySet();
             dungeonDifficultySet.DifficultyID = forcedDifficulty == -1 ? (int)GetDungeonDifficultyID() : forcedDifficulty;
             SendPacket(dungeonDifficultySet);
         }
 
         public void SendRaidDifficulty(bool legacy, int forcedDifficulty = -1)
         {
-            RaidDifficultySet raidDifficultySet = new RaidDifficultySet();
+            var raidDifficultySet = new RaidDifficultySet();
             raidDifficultySet.DifficultyID = forcedDifficulty == -1 ? (int)(legacy ? GetLegacyRaidDifficultyID() : GetRaidDifficultyID()) : forcedDifficulty;
             raidDifficultySet.Legacy = legacy;
             SendPacket(raidDifficultySet);
@@ -684,7 +684,7 @@ namespace Game.Entities
             // method can be INSTANCE_RESET_ALL, INSTANCE_RESET_CHANGE_DIFFICULTY, INSTANCE_RESET_GROUP_JOIN
 
             // we assume that when the difficulty changes, all instances that can be reset will be
-            Difficulty difficulty = GetDungeonDifficultyID();
+            var difficulty = GetDungeonDifficultyID();
             if (isRaid)
             {
                 if (!isLegacy)
@@ -699,8 +699,8 @@ namespace Game.Entities
 
             foreach (var pair in difficultyDic)
             {
-                InstanceSave p = pair.Value.save;
-                MapRecord entry = CliDB.MapStorage.LookupByKey(difficulty);
+                var p = pair.Value.save;
+                var entry = CliDB.MapStorage.LookupByKey(difficulty);
                 if (entry == null || entry.IsRaid() != isRaid || !p.CanReset())
                     continue;
 
@@ -712,7 +712,7 @@ namespace Game.Entities
                 }
 
                 // if the map is loaded, reset it
-                Map map = Global.MapMgr.FindMap(p.GetMapId(), p.GetInstanceId());
+                var map = Global.MapMgr.FindMap(p.GetMapId(), p.GetInstanceId());
                 if (map != null && map.IsDungeon())
                     if (!map.ToInstanceMap().Reset(method))
                         continue;
@@ -731,14 +731,14 @@ namespace Game.Entities
 
         public void SendResetInstanceSuccess(uint MapId)
         {
-            InstanceReset data = new InstanceReset();
+            var data = new InstanceReset();
             data.MapID = MapId;
             SendPacket(data);
         }
 
         public void SendResetInstanceFailed(ResetFailedReason reason, uint MapId)
         {
-            InstanceResetFailed data = new InstanceResetFailed();
+            var data = new InstanceResetFailed();
             data.MapID = MapId;
             data.ResetFailedReason = reason;
             SendPacket(data);
@@ -746,7 +746,7 @@ namespace Game.Entities
 
         public void SendTransferAborted(uint mapid, TransferAbortReason reason, byte arg = 0, uint mapDifficultyXConditionID = 0)
         {
-            TransferAborted transferAborted = new TransferAborted();
+            var transferAborted = new TransferAborted();
             transferAborted.MapID = mapid;
             transferAborted.Arg = arg;
             transferAborted.TransfertAbort = reason;
@@ -769,12 +769,12 @@ namespace Game.Entities
             else
                 type = InstanceResetWarningType.WarningMinSoon;
 
-            RaidInstanceMessage raidInstanceMessage = new RaidInstanceMessage();
+            var raidInstanceMessage = new RaidInstanceMessage();
             raidInstanceMessage.Type = type;
             raidInstanceMessage.MapID = mapid;
             raidInstanceMessage.DifficultyID = difficulty;
 
-            InstanceBind bind = GetBoundInstance(mapid, difficulty);
+            var bind = GetBoundInstance(mapid, difficulty);
             if (bind != null)
                 raidInstanceMessage.Locked = bind.perm;
             else

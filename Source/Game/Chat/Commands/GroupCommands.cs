@@ -43,9 +43,9 @@ namespace Game.Chat
             if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
                 return false;
 
-            Group group = target.GetGroup();
+            var group = target.GetGroup();
 
-            string nameLink = handler.GetNameLink(target);
+            var nameLink = handler.GetNameLink(target);
 
             if (!group)
             {
@@ -53,17 +53,17 @@ namespace Game.Chat
                 return false;
             }
 
-            Player gmPlayer = handler.GetSession().GetPlayer();
-            Map gmMap = gmPlayer.GetMap();
-            bool toInstance = gmMap.Instanceable();
-            bool onlyLocalSummon = false;
+            var gmPlayer = handler.GetSession().GetPlayer();
+            var gmMap = gmPlayer.GetMap();
+            var toInstance = gmMap.Instanceable();
+            var onlyLocalSummon = false;
 
             // make sure people end up on our instance of the map, disallow far summon if intended destination is different from actual destination
             // note: we could probably relax this further by checking permanent saves and the like, but eh
             // :close enough:
             if (toInstance)
             {
-                Player groupLeader = Global.ObjAccessor.GetPlayer(gmMap, group.GetLeaderGUID());
+                var groupLeader = Global.ObjAccessor.GetPlayer(gmMap, group.GetLeaderGUID());
                 if (!groupLeader || (groupLeader.GetMapId() != gmMap.GetId()) || (groupLeader.GetInstanceId() != gmMap.GetInstanceId()))
                 {
                     handler.SendSysMessage(CypherStrings.PartialGroupSummon);
@@ -71,9 +71,9 @@ namespace Game.Chat
                 }
             }
 
-            for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
+            for (var refe = group.GetFirstMember(); refe != null; refe = refe.Next())
             {
-                Player player = refe.GetSource();
+                var player = refe.GetSource();
 
                 if (!player || player == gmPlayer || player.GetSession() == null)
                     continue;
@@ -82,7 +82,7 @@ namespace Game.Chat
                 if (handler.HasLowerSecurity(player, ObjectGuid.Empty))
                     continue;
 
-                string plNameLink = handler.GetNameLink(player);
+                var plNameLink = handler.GetNameLink(player);
 
                 if (player.IsBeingTeleported())
                 {
@@ -92,7 +92,7 @@ namespace Game.Chat
 
                 if (toInstance)
                 {
-                    Map playerMap = player.GetMap();
+                    var playerMap = player.GetMap();
 
                     if ((onlyLocalSummon || (playerMap.Instanceable() && playerMap.GetId() == gmMap.GetId())) && // either no far summon allowed or we're in the same map as player (no map switch)
                         ((playerMap.GetId() != gmMap.GetId()) || (playerMap.GetInstanceId() != gmMap.GetInstanceId()))) // so we need to be in the same map and instance of the map, otherwise skip
@@ -156,7 +156,7 @@ namespace Game.Chat
         {
             Player player;
             Group group;
-            string nameStr = args.NextString();
+            var nameStr = args.NextString();
 
             if (!handler.GetPlayerGroupAndGUIDByName(nameStr, out player, out group, out _))
                 return false;
@@ -177,7 +177,7 @@ namespace Game.Chat
             Player player;
             Group group;
             ObjectGuid guid;
-            string nameStr = args.NextString();
+            var nameStr = args.NextString();
 
             if (!handler.GetPlayerGroupAndGUIDByName(nameStr, out player, out group, out guid))
                 return false;
@@ -202,8 +202,8 @@ namespace Game.Chat
             Player playerTarget;
             Group groupSource;
             Group groupTarget;
-            string nameplgrStr = args.NextString();
-            string nameplStr = args.NextString();
+            var nameplgrStr = args.NextString();
+            var nameplStr = args.NextString();
 
             if (!handler.GetPlayerGroupAndGUIDByName(nameplgrStr, out playerSource, out groupSource, out _, true))
                 return false;
@@ -242,11 +242,11 @@ namespace Game.Chat
             Player playerTarget;
             ObjectGuid guidTarget;
             string nameTarget;
-            string zoneName = "";
+            var zoneName = "";
             string onlineState;
 
             // Parse the guid to uint32...
-            ObjectGuid parseGUID = ObjectGuid.Create(HighGuid.Player, args.NextUInt64());
+            var parseGUID = ObjectGuid.Create(HighGuid.Player, args.NextUInt64());
 
             // ... and try to extract a player out of it.
             if (Global.CharacterCacheStorage.GetCharacterNameByGuid(parseGUID, out nameTarget))
@@ -268,9 +268,9 @@ namespace Game.Chat
             // If not, we extract it from the SQL.
             if (!groupTarget)
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_GROUP_MEMBER);
+                var stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_GROUP_MEMBER);
                 stmt.AddValue(0, guidTarget.GetCounter());
-                SQLResult resultGroup = DB.Characters.Query(stmt);
+                var resultGroup = DB.Characters.Query(stmt);
                 if (!resultGroup.IsEmpty())
                     groupTarget = Global.GroupMgr.GetGroupByDbStoreId(resultGroup.Read<uint>(0));
             }
@@ -293,7 +293,7 @@ namespace Game.Chat
             foreach (var slot in members)
             {
                 // Check for given flag and assign it to that iterator
-                string flags = "";
+                var flags = "";
                 if (slot.flags.HasAnyFlag(GroupMemberFlags.Assistant))
                     flags = "Assistant";
 
@@ -315,18 +315,18 @@ namespace Game.Chat
                     flags = "None";
 
                 // Check if iterator is online. If is...
-                Player p = Global.ObjAccessor.FindPlayer(slot.guid);
-                string phases = "";
+                var p = Global.ObjAccessor.FindPlayer(slot.guid);
+                var phases = "";
                 if (p && p.IsInWorld)
                 {
                     // ... than, it prints information like "is online", where he is, etc...
                     onlineState = "online";
                     phases = PhasingHandler.FormatPhases(p.GetPhaseShift());
 
-                    AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(p.GetAreaId());
+                    var area = CliDB.AreaTableStorage.LookupByKey(p.GetAreaId());
                     if (area != null)
                     {
-                        AreaTableRecord zone = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
+                        var zone = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
                         if (zone != null)
                             zoneName = zone.AreaName[handler.GetSessionDbcLocale()];
                     }

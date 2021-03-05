@@ -93,7 +93,7 @@ namespace Game.Movement
                 return;
 
             Cypher.Assert(_currentNode < _path.nodes.Count, $"WaypointMovementGenerator.OnArrived: tried to reference a node id ({_currentNode}) which is not included in path ({_path.id})");
-            WaypointNode waypoint = _path.nodes.ElementAt((int)_currentNode);
+            var waypoint = _path.nodes.ElementAt((int)_currentNode);
             if (waypoint.delay != 0)
             {
                 creature.ClearUnitState(UnitState.RoamingMove);
@@ -132,24 +132,24 @@ namespace Game.Movement
                 return true;
             }
 
-            bool transportPath = creature.GetTransport() != null;
+            var transportPath = creature.GetTransport() != null;
 
             if (_isArrivalDone)
             {
                 Cypher.Assert(_currentNode < _path.nodes.Count, $"WaypointMovementGenerator.StartMove: tried to reference a node id ({_currentNode}) which is not included in path ({_path.id})");
-                WaypointNode lastWaypoint = _path.nodes.ElementAt(_currentNode);
+                var lastWaypoint = _path.nodes.ElementAt(_currentNode);
                 if ((_currentNode == _path.nodes.Count - 1) && !_repeating) // If that's our last waypoint
                 {
-                    float x = lastWaypoint.x;
-                    float y = lastWaypoint.y;
-                    float z = lastWaypoint.z;
-                    float o = creature.GetOrientation();
+                    var x = lastWaypoint.x;
+                    var y = lastWaypoint.y;
+                    var z = lastWaypoint.z;
+                    var o = creature.GetOrientation();
 
                     if (!transportPath)
                         creature.SetHomePosition(x, y, z, o);
                     else
                     {
-                        Transport trans = creature.GetTransport();
+                        var trans = creature.GetTransport();
                         if (trans)
                         {
                             o -= trans.GetOrientation();
@@ -178,24 +178,24 @@ namespace Game.Movement
             }
 
             Cypher.Assert(_currentNode < _path.nodes.Count, $"WaypointMovementGenerator.StartMove: tried to reference a node id ({_currentNode}) which is not included in path ({_path.id})");
-            WaypointNode waypoint = _path.nodes.ElementAt(_currentNode);
-            Position formationDest = new Position(waypoint.x, waypoint.y, waypoint.z, (waypoint.orientation != 0 && waypoint.delay != 0) ? waypoint.orientation : 0.0f);
+            var waypoint = _path.nodes.ElementAt(_currentNode);
+            var formationDest = new Position(waypoint.x, waypoint.y, waypoint.z, (waypoint.orientation != 0 && waypoint.delay != 0) ? waypoint.orientation : 0.0f);
 
             _isArrivalDone = false;
             _recalculateSpeed = false;
 
             creature.AddUnitState(UnitState.RoamingMove);
 
-            MoveSplineInit init = new MoveSplineInit(creature);
+            var init = new MoveSplineInit(creature);
 
             //! If creature is on transport, we assume waypoints set in DB are already transport offsets
             if (transportPath)
             {
                 init.DisableTransportPathTransformations();
-                ITransport trans = creature.GetDirectTransport();
+                var trans = creature.GetDirectTransport();
                 if (trans != null)
                 {
-                    float orientation = formationDest.GetOrientation();
+                    var orientation = formationDest.GetOrientation();
                     trans.CalculatePassengerPosition(ref formationDest.posX, ref formationDest.posY, ref formationDest.posZ, ref orientation);
                     formationDest.SetOrientation(orientation);
                 }
@@ -297,7 +297,7 @@ namespace Game.Movement
                 return false;
 
             Cypher.Assert(_currentNode < _path.nodes.Count, $"WaypointMovementGenerator.GetResetPos: tried to reference a node id ({_currentNode}) which is not included in path ({_path.id})");
-            WaypointNode waypoint = _path.nodes.ElementAt(_currentNode);
+            var waypoint = _path.nodes.ElementAt(_currentNode);
 
             x = waypoint.x;
             y = waypoint.y;

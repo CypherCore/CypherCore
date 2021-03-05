@@ -482,7 +482,7 @@ namespace Scripts.World.NpcSpecial
                 Log.outError(LogFilter.Sql, "TCSR: Creature template entry {0} has ScriptName npc_air_force_bots, but it's not handled by that script", creature.GetEntry());
             else
             {
-                CreatureTemplate spawnedTemplate = Global.ObjectMgr.GetCreatureTemplate(SpawnAssoc.spawnedCreatureEntry);
+                var spawnedTemplate = Global.ObjectMgr.GetCreatureTemplate(SpawnAssoc.spawnedCreatureEntry);
                 if (spawnedTemplate == null)
                 {
                     Log.outError(LogFilter.Sql, "TCSR: Creature template entry {0} does not exist in DB, which is required by npc_air_force_bots", SpawnAssoc.spawnedCreatureEntry);
@@ -514,7 +514,7 @@ namespace Scripts.World.NpcSpecial
 
         Creature GetSummonedGuard()
         {
-            Creature creature = ObjectAccessor.GetCreature(me, SpawnedGUID);
+            var creature = ObjectAccessor.GetCreature(me, SpawnedGUID);
             if (creature && creature.IsAlive())
                 return creature;
 
@@ -528,13 +528,13 @@ namespace Scripts.World.NpcSpecial
 
             if (me.IsValidAttackTarget(who))
             {
-                Player playerTarget = who.ToPlayer();
+                var playerTarget = who.ToPlayer();
 
                 // airforce guards only spawn for players
                 if (!playerTarget)
                     return;
 
-                Creature lastSpawnedGuard = SpawnedGUID.IsEmpty() ? null : GetSummonedGuard();
+                var lastSpawnedGuard = SpawnedGUID.IsEmpty() ? null : GetSummonedGuard();
 
                 // prevent calling Unit::GetUnit at next MoveInLineOfSight call - speedup
                 if (!lastSpawnedGuard)
@@ -547,7 +547,7 @@ namespace Scripts.World.NpcSpecial
                             if (!who.IsWithinDistInMap(me, Misc.RangeGuardsMark))
                                 return;
 
-                            Aura markAura = who.GetAura(SpellIds.GuardsMark);
+                            var markAura = who.GetAura(SpellIds.GuardsMark);
                             if (markAura != null)
                             {
                                 // the target wasn't able to move out of our range within 25 seconds
@@ -761,7 +761,7 @@ namespace Scripts.World.NpcSpecial
 
         ObjectGuid DoSearchForTargets(ObjectGuid lastTargetGUID)
         {
-            List<Creature> targets = new List<Creature>();
+            var targets = new List<Creature>();
             me.GetCreatureListWithEntryInGrid(targets, CreatureIds.TorchTossingTargetBunny, 60.0f);
             targets.RemoveAll(creature => creature.GetGUID() == lastTargetGUID);
 
@@ -778,7 +778,7 @@ namespace Scripts.World.NpcSpecial
         {
             if (_targetTimer < diff)
             {
-                Unit target = Global.ObjAccessor.GetUnit(me, DoSearchForTargets(_lastTargetGUID));
+                var target = Global.ObjAccessor.GetUnit(me, DoSearchForTargets(_lastTargetGUID));
                 if (target)
                     target.CastSpell(target, SpellIds.TargetIndicator, true);
 
@@ -820,7 +820,7 @@ namespace Scripts.World.NpcSpecial
                     return;
                 }
 
-                GameObject go = me.FindNearestGameObject(GameobjectIds.RibbonPole, 10.0f);
+                var go = me.FindNearestGameObject(GameobjectIds.RibbonPole, 10.0f);
                 if (go)
                     me.CastSpell(go, SpellIds.RedFireRing, true);
 
@@ -854,7 +854,7 @@ namespace Scripts.World.NpcSpecial
         bool checkNearbyPlayers()
         {
             // Returns true if no nearby player has aura "Test Ribbon Pole Channel".
-            List<Unit> players = new List<Unit>();
+            var players = new List<Unit>();
             var check = new UnitAuraCheck<Player>(true, SpellIds.RibbonDanceCosmetic);
             var searcher = new PlayerListSearcher(me, players, check);
             Cell.VisitWorldObjects(me, searcher, 10.0f);
@@ -929,7 +929,7 @@ namespace Scripts.World.NpcSpecial
 
         public void PatientDied(Position point)
         {
-            Player player = Global.ObjAccessor.GetPlayer(me, PlayerGUID);
+            var player = Global.ObjAccessor.GetPlayer(me, PlayerGUID);
             if (player && ((player.GetQuestStatus(6624) == QuestStatus.Incomplete) || (player.GetQuestStatus(6622) == QuestStatus.Incomplete)))
             {
                 ++PatientDiedCount;
@@ -966,7 +966,7 @@ namespace Scripts.World.NpcSpecial
                         {
                             foreach (var guid in Patients)
                             {
-                                Creature patient = ObjectAccessor.GetCreature(me, guid);
+                                var patient = ObjectAccessor.GetCreature(me, guid);
                                 if (patient)
                                     patient.SetDeathState(DeathState.JustDied);
                             }
@@ -1089,7 +1089,7 @@ namespace Scripts.World.NpcSpecial
             //to make them lay with face down
             me.SetStandState(UnitStandStateType.Dead);
 
-            uint mobId = me.GetEntry();
+            var mobId = me.GetEntry();
 
             switch (mobId)
             {                                                   //lower max health
@@ -1112,7 +1112,7 @@ namespace Scripts.World.NpcSpecial
 
         public override void SpellHit(Unit caster, SpellInfo spell)
         {
-            Player player = caster.ToPlayer();
+            var player = caster.ToPlayer();
             if (!player || !me.IsAlive() || spell.Id != 20804)
                 return;
 
@@ -1120,7 +1120,7 @@ namespace Scripts.World.NpcSpecial
             {
                 if (!DoctorGUID.IsEmpty())
                 {
-                    Creature doctor = ObjectAccessor.GetCreature(me, DoctorGUID);
+                    var doctor = ObjectAccessor.GetCreature(me, DoctorGUID);
                     if (doctor)
                         ((npc_doctor)doctor.GetAI()).PatientSaved(me, player, Coord);
                 }
@@ -1137,7 +1137,7 @@ namespace Scripts.World.NpcSpecial
 
             Talk(TextIds.SayDoc);
 
-            uint mobId = me.GetEntry();
+            var mobId = me.GetEntry();
             me.SetWalk(false);
 
             switch (mobId)
@@ -1170,7 +1170,7 @@ namespace Scripts.World.NpcSpecial
 
                 if (!DoctorGUID.IsEmpty())
                 {
-                    Creature doctor = ObjectAccessor.GetCreature((me), DoctorGUID);
+                    var doctor = ObjectAccessor.GetCreature((me), DoctorGUID);
                     if (doctor)
                         ((npc_doctor)doctor.GetAI()).PatientDied(Coord);
                 }
@@ -1244,7 +1244,7 @@ namespace Scripts.World.NpcSpecial
                 if (IsHealed && CanRun)
                     return;
 
-                Player player = caster.ToPlayer();
+                var player = caster.ToPlayer();
                 if (player)
                 {
                     if (quest != 0 && player.GetQuestStatus(quest) == QuestStatus.Incomplete)
@@ -1280,7 +1280,7 @@ namespace Scripts.World.NpcSpecial
             {
                 if (RunAwayTimer <= diff)
                 {
-                    Unit unit = Global.ObjAccessor.GetUnit(me, CasterGUID);
+                    var unit = Global.ObjAccessor.GetUnit(me, CasterGUID);
                     if (unit)
                     {
                         switch (me.GetEntry())
@@ -1412,8 +1412,8 @@ namespace Scripts.World.NpcSpecial
 
         public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
         {
-            uint sender = player.PlayerTalkClass.GetGossipOptionSender(gossipListId);
-            uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
+            var sender = player.PlayerTalkClass.GetGossipOptionSender(gossipListId);
+            var action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
             player.PlayerTalkClass.ClearMenus();
             uint spellId = 0;
             switch (sender)
@@ -1551,13 +1551,13 @@ namespace Scripts.World.NpcSpecial
             {
                 _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
                 {
-                    long now = Time.UnixTime;
+                    var now = Time.UnixTime;
                     foreach (var pair in _damageTimes.ToList())
                     {
                         // If unit has not dealt damage to training dummy for 5 seconds, Remove him from combat
                         if (pair.Value < now - 5)
                         {
-                            Unit unit = Global.ObjAccessor.GetUnit(me, pair.Key);
+                            var unit = Global.ObjAccessor.GetUnit(me, pair.Key);
                             if (unit)
                                 unit.GetHostileRefManager().DeleteReference(me);
 
@@ -1647,7 +1647,7 @@ namespace Scripts.World.NpcSpecial
 
         public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
         {
-            uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
+            var action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
             player.PlayerTalkClass.ClearMenus();
 
             switch (action)
@@ -1706,7 +1706,7 @@ namespace Scripts.World.NpcSpecial
 
         public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
         {
-            uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
+            var action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
             player.PlayerTalkClass.ClearMenus();
 
             switch (action)
@@ -1770,10 +1770,10 @@ namespace Scripts.World.NpcSpecial
 
             if (isCluster())
             {
-                GameObject launcher1 = GetClosestGameObjectWithEntry(me, GameobjectIds.ClusterLauncher1, 0.5f);
-                GameObject launcher2 = GetClosestGameObjectWithEntry(me, GameobjectIds.ClusterLauncher2, 0.5f);
-                GameObject launcher3 = GetClosestGameObjectWithEntry(me, GameobjectIds.ClusterLauncher3, 0.5f);
-                GameObject launcher4 = GetClosestGameObjectWithEntry(me, GameobjectIds.ClusterLauncher4, 0.5f);
+                var launcher1 = GetClosestGameObjectWithEntry(me, GameobjectIds.ClusterLauncher1, 0.5f);
+                var launcher2 = GetClosestGameObjectWithEntry(me, GameobjectIds.ClusterLauncher2, 0.5f);
+                var launcher3 = GetClosestGameObjectWithEntry(me, GameobjectIds.ClusterLauncher3, 0.5f);
+                var launcher4 = GetClosestGameObjectWithEntry(me, GameobjectIds.ClusterLauncher4, 0.5f);
 
                 if (launcher1)
                     launcher = launcher1;
@@ -1786,9 +1786,9 @@ namespace Scripts.World.NpcSpecial
             }
             else
             {
-                GameObject launcher1 = GetClosestGameObjectWithEntry(me, GameobjectIds.FireworkLauncher1, 0.5f);
-                GameObject launcher2 = GetClosestGameObjectWithEntry(me, GameobjectIds.FireworkLauncher2, 0.5f);
-                GameObject launcher3 = GetClosestGameObjectWithEntry(me, GameobjectIds.FireworkLauncher3, 0.5f);
+                var launcher1 = GetClosestGameObjectWithEntry(me, GameobjectIds.FireworkLauncher1, 0.5f);
+                var launcher2 = GetClosestGameObjectWithEntry(me, GameobjectIds.FireworkLauncher2, 0.5f);
+                var launcher3 = GetClosestGameObjectWithEntry(me, GameobjectIds.FireworkLauncher3, 0.5f);
 
                 if (launcher1)
                     launcher = launcher1;
@@ -1881,7 +1881,7 @@ namespace Scripts.World.NpcSpecial
                     break;
             }
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
+            var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
             if (spellInfo != null && spellInfo.GetEffect(0).Effect == SpellEffectName.SummonObjectWild)
                 return (uint)spellInfo.GetEffect(0).MiscValue;
 
@@ -1890,7 +1890,7 @@ namespace Scripts.World.NpcSpecial
 
         public override void Reset()
         {
-            GameObject launcher = FindNearestLauncher();
+            var launcher = FindNearestLauncher();
             if (launcher)
             {
                 launcher.SendCustomAnim(Misc.AnimGoLaunchFirework);
@@ -1925,7 +1925,7 @@ namespace Scripts.World.NpcSpecial
                 if (me.GetEntry() == CreatureIds.ClusterElune)
                     DoCast(SpellIds.LunarFortune);
 
-                float displacement = 0.7f;
+                var displacement = 0.7f;
                 for (byte i = 0; i < 4; i++)
                     me.SummonGameObject(GetFireworkGameObjectId(), me.GetPositionX() + (i % 2 == 0 ? displacement : -displacement), me.GetPositionY() + (i > 1 ? displacement : -displacement), me.GetPositionZ() + 4.0f, me.GetOrientation(), Quaternion.fromEulerAnglesZYX(me.GetOrientation(), 0.0f, 0.0f), 1);
             }
@@ -1961,7 +1961,7 @@ namespace Scripts.World.NpcSpecial
         public override void Reset()
         {
             Initialize();
-            Unit owner = me.GetOwner();
+            var owner = me.GetOwner();
             if (owner)
                 me.GetMotionMaster().MoveFollow(owner, SharedConst.PetFollowDist, SharedConst.PetFollowAngle);
         }
@@ -1971,7 +1971,7 @@ namespace Scripts.World.NpcSpecial
         public override void DoAction(int param)
         {
             inLove = true;
-            Unit owner = me.GetOwner();
+            var owner = me.GetOwner();
             if (owner)
                 owner.CastSpell(owner, SpellIds.SpringFling, true);
         }
@@ -1982,7 +1982,7 @@ namespace Scripts.World.NpcSpecial
             {
                 if (jumpTimer <= diff)
                 {
-                    Unit rabbit = Global.ObjAccessor.GetUnit(me, rabbitGUID);
+                    var rabbit = Global.ObjAccessor.GetUnit(me, rabbitGUID);
                     if (rabbit)
                         DoCast(rabbit, SpellIds.SpringRabbitJump);
                     jumpTimer = RandomHelper.URand(5000, 10000);
@@ -2000,7 +2000,7 @@ namespace Scripts.World.NpcSpecial
             {
                 if (searchTimer <= diff)
                 {
-                    Creature rabbit = me.FindNearestCreature(CreatureIds.SpringRabbit, 10.0f);
+                    var rabbit = me.FindNearestCreature(CreatureIds.SpringRabbit, 10.0f);
                     if (rabbit)
                     {
                         if (rabbit == me || rabbit.HasAura(SpellIds.SpringRabbitInLove))
@@ -2036,7 +2036,7 @@ namespace Scripts.World.NpcSpecial
 
                 _scheduler.Schedule(TimeSpan.FromSeconds(3), task =>
                 {
-                    Player owner = Global.ObjAccessor.GetPlayer(me, summonerGUID);
+                    var owner = Global.ObjAccessor.GetPlayer(me, summonerGUID);
                     if (owner)
                         Global.CreatureTextMgr.SendChat(me, 0, owner, owner.GetGroup() ? ChatMsg.MonsterParty : ChatMsg.MonsterWhisper, Language.Addon, CreatureTextRange.Normal);
                 });
@@ -2074,7 +2074,7 @@ namespace Scripts.World.NpcSpecial
 
         GameObject VerifyTarget()
         {
-            GameObject target = ObjectAccessor.GetGameObject(me, _target);
+            var target = ObjectAccessor.GetGameObject(me, _target);
             if (target)
                 return target;
 
@@ -2091,7 +2091,7 @@ namespace Scripts.World.NpcSpecial
                     _timer -= diff;
                 else
                 {
-                    GameObject target = me.FindNearestGameObject(GameobjectIds.ToyTrain, 15.0f);
+                    var target = me.FindNearestGameObject(GameobjectIds.ToyTrain, 15.0f);
                     if (target)
                     {
                         _isSearching = false;
@@ -2109,7 +2109,7 @@ namespace Scripts.World.NpcSpecial
                 {
                     case TrainWrecker.EventDoJump:
                         {
-                            GameObject target = VerifyTarget();
+                            var target = VerifyTarget();
                             if (target)
                                 me.GetMotionMaster().MoveJump(target, 5.0f, 10.0f, TrainWrecker.MoveidJump);
                             _nextAction = 0;
@@ -2117,7 +2117,7 @@ namespace Scripts.World.NpcSpecial
                         break;
                     case TrainWrecker.EventDoFacing:
                         {
-                            GameObject target = VerifyTarget();
+                            var target = VerifyTarget();
                             if (target)
                             {
                                 me.SetFacingTo(target.GetOrientation());
@@ -2137,7 +2137,7 @@ namespace Scripts.World.NpcSpecial
                                 break;
                             }
 
-                            GameObject target = VerifyTarget();
+                            var target = VerifyTarget();
                             if (target)
                             {
                                 me.CastSpell(target, SpellIds.WreckTrain, false);
@@ -2192,10 +2192,10 @@ namespace Scripts.World.NpcSpecial
         {
             _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
             {
-                Aura ownerTired = me.GetOwner().GetAura(SpellIds.TiredPlayer);
+                var ownerTired = me.GetOwner().GetAura(SpellIds.TiredPlayer);
                 if (ownerTired != null)
                 {
-                    Aura squireTired = me.AddAura(IsArgentSquire() ? SpellIds.AuraTiredS : SpellIds.AuraTiredG, me);
+                    var squireTired = me.AddAura(IsArgentSquire() ? SpellIds.AuraTiredS : SpellIds.AuraTiredG, me);
                     if (squireTired != null)
                         squireTired.SetDuration(ownerTired.GetDuration());
                 }
@@ -2215,7 +2215,7 @@ namespace Scripts.World.NpcSpecial
                 case GossipMenus.OptionIdBank:
                     {
                         me.AddNpcFlag(NPCFlags.Banker);
-                        uint _bankAura = IsArgentSquire() ? SpellIds.AuraBankS : SpellIds.AuraBankG;
+                        var _bankAura = IsArgentSquire() ? SpellIds.AuraBankS : SpellIds.AuraBankG;
                         if (!me.HasAura(_bankAura))
                             DoCastSelf(_bankAura);
 
@@ -2226,7 +2226,7 @@ namespace Scripts.World.NpcSpecial
                 case GossipMenus.OptionIdShop:
                     {
                         me.AddNpcFlag(NPCFlags.Vendor);
-                        uint _shopAura = IsArgentSquire() ? SpellIds.AuraShopS : SpellIds.AuraShopG;
+                        var _shopAura = IsArgentSquire() ? SpellIds.AuraShopS : SpellIds.AuraShopG;
                         if (!me.HasAura(_shopAura))
                             DoCastSelf(_shopAura);
 
@@ -2239,7 +2239,7 @@ namespace Scripts.World.NpcSpecial
                         me.AddNpcFlag(NPCFlags.Mailbox);
                         player.GetSession().SendShowMailBox(me.GetGUID());
 
-                        uint _mailAura = IsArgentSquire() ? SpellIds.AuraPostmanS : SpellIds.AuraPostmanG;
+                        var _mailAura = IsArgentSquire() ? SpellIds.AuraPostmanS : SpellIds.AuraPostmanG;
                         if (!me.HasAura(_mailAura))
                             DoCastSelf(_mailAura);
 
@@ -2277,10 +2277,10 @@ namespace Scripts.World.NpcSpecial
 
         public override void PassengerBoarded(Unit who, sbyte seatId, bool apply)
         {
-            float x = 0.0f;
-            float y = 0.0f;
-            float z = 0.0f;
-            float o = 0.0f;
+            var x = 0.0f;
+            var y = 0.0f;
+            var z = 0.0f;
+            var o = 0.0f;
 
             switch ((SeatIds)seatId)
             {
@@ -2309,7 +2309,7 @@ namespace Scripts.World.NpcSpecial
                     break;
                 case SeatIds.FoodHolder:
                 case SeatIds.PlateHolder:
-                    Vehicle holders = who.GetVehicleKit();
+                    var holders = who.GetVehicleKit();
                     if (holders)
                         holders.InstallAllAccessories(true);
                     return;
@@ -2317,13 +2317,13 @@ namespace Scripts.World.NpcSpecial
                     break;
             }
 
-            MoveSplineInit init = new MoveSplineInit(who);
+            var init = new MoveSplineInit(who);
             init.DisableTransportPathTransformations();
             init.MoveTo(x, y, z, false);
             init.SetFacing(o);
             init.Launch();
             who.m_Events.AddEvent(new CastFoodSpell(who, SpellIds.ChairSpells[who.GetEntry()]), who.m_Events.CalculateTime(1000));
-            Creature creature = who.ToCreature();
+            var creature = who.ToCreature();
             if (creature)
                 creature.SetDisplayFromModel(0);
         }

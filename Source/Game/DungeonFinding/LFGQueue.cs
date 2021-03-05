@@ -32,7 +32,7 @@ namespace Game.DungeonFinding
                 return "";
 
             // need the guids in order to avoid duplicates
-            StringBuilder val = new StringBuilder();
+            var val = new StringBuilder();
             guids.Sort();
             var it = guids.First();
             val.Append(it);
@@ -48,7 +48,7 @@ namespace Game.DungeonFinding
 
         public static string GetRolesString(LfgRoles roles)
         {
-            StringBuilder rolesstr = new StringBuilder();
+            var rolesstr = new StringBuilder();
 
             if (roles.HasAnyFlag(LfgRoles.Tank))
                 rolesstr.Append("Tank");
@@ -82,7 +82,7 @@ namespace Game.DungeonFinding
 
         public static string ConcatenateDungeons(List<uint> dungeons)
         {
-            string str = "";
+            var str = "";
             if (!dungeons.Empty())
             {
                 foreach (var it in dungeons)
@@ -144,7 +144,7 @@ namespace Game.DungeonFinding
             RemoveFromCurrentQueue(guid);
             RemoveFromCompatibles(guid);
 
-            string sguid = guid.ToString();
+            var sguid = guid.ToString();
 
             var itDelete = QueueDataStore.LastOrDefault().Key;
             foreach (var key in QueueDataStore.Keys.ToList())
@@ -204,35 +204,35 @@ namespace Game.DungeonFinding
 
         public void UpdateWaitTimeAvg(int waitTime, uint dungeonId)
         {
-            LfgWaitTime wt = waitTimesAvgStore[dungeonId];
-            uint old_number = wt.number++;
+            var wt = waitTimesAvgStore[dungeonId];
+            var old_number = wt.number++;
             wt.time = (int)((wt.time * old_number + waitTime) / wt.number);
         }
 
         public void UpdateWaitTimeTank(int waitTime, uint dungeonId)
         {
-            LfgWaitTime wt = waitTimesTankStore[dungeonId];
-            uint old_number = wt.number++;
+            var wt = waitTimesTankStore[dungeonId];
+            var old_number = wt.number++;
             wt.time = (int)((wt.time * old_number + waitTime) / wt.number);
         }
 
         public void UpdateWaitTimeHealer(int waitTime, uint dungeonId)
         {
-            LfgWaitTime wt = waitTimesHealerStore[dungeonId];
-            uint old_number = wt.number++;
+            var wt = waitTimesHealerStore[dungeonId];
+            var old_number = wt.number++;
             wt.time = (int)((wt.time * old_number + waitTime) / wt.number);
         }
 
         public void UpdateWaitTimeDps(int waitTime, uint dungeonId)
         {
-            LfgWaitTime wt = waitTimesDpsStore[dungeonId];
-            uint old_number = wt.number++;
+            var wt = waitTimesDpsStore[dungeonId];
+            var old_number = wt.number++;
             wt.time = (int)((wt.time * old_number + waitTime) / wt.number);
         }
 
         void RemoveFromCompatibles(ObjectGuid guid)
         {
-            string strGuid = guid.ToString();
+            var strGuid = guid.ToString();
 
             Log.outDebug(LogFilter.Lfg, "RemoveFromCompatibles: Removing [{0}]", guid);
             foreach (var itNext in CompatibleMapStore.ToList())
@@ -276,17 +276,17 @@ namespace Game.DungeonFinding
         public byte FindGroups()
         {
             byte proposals = 0;
-            List<ObjectGuid> firstNew = new List<ObjectGuid>();
+            var firstNew = new List<ObjectGuid>();
             while (!newToQueueStore.Empty())
             {
-                ObjectGuid frontguid = newToQueueStore.First();
+                var frontguid = newToQueueStore.First();
                 Log.outDebug(LogFilter.Lfg, "FindGroups: checking [{0}] newToQueue({1}), currentQueue({2})", frontguid, newToQueueStore.Count, currentQueueStore.Count);
                 firstNew.Clear();
                 firstNew.Add(frontguid);
                 RemoveFromNewQueue(frontguid);
 
-                List<ObjectGuid> temporalList = new List<ObjectGuid>(currentQueueStore);
-                LfgCompatibility compatibles = FindNewGroups(firstNew, temporalList);
+                var temporalList = new List<ObjectGuid>(currentQueueStore);
+                var compatibles = FindNewGroups(firstNew, temporalList);
 
                 if (compatibles == LfgCompatibility.Match)
                     ++proposals;
@@ -298,8 +298,8 @@ namespace Game.DungeonFinding
 
         LfgCompatibility FindNewGroups(List<ObjectGuid> check, List<ObjectGuid> all)
         {
-            string strGuids = ConcatenateGuids(check);
-            LfgCompatibility compatibles = GetCompatibles(strGuids);
+            var strGuids = ConcatenateGuids(check);
+            var compatibles = GetCompatibles(strGuids);
 
             Log.outDebug(LogFilter.Lfg, "FindNewGroup: ({0}): {1} - all({2})", strGuids, GetCompatibleString(compatibles), ConcatenateGuids(all));
             if (compatibles == LfgCompatibility.Pending) // Not previously cached, calculate
@@ -320,7 +320,7 @@ namespace Game.DungeonFinding
             {
                 check.Add(all.First());
                 all.RemoveAt(0);
-                LfgCompatibility subcompatibility = FindNewGroups(check, all);
+                var subcompatibility = FindNewGroups(check, all);
                 if (subcompatibility == LfgCompatibility.Match)
                     return LfgCompatibility.Match;
                 check.RemoveAt(check.Count - 1);
@@ -330,11 +330,11 @@ namespace Game.DungeonFinding
 
         LfgCompatibility CheckCompatibility(List<ObjectGuid> check)
         {
-            string strGuids = ConcatenateGuids(check);
-            LfgProposal proposal = new LfgProposal();
+            var strGuids = ConcatenateGuids(check);
+            var proposal = new LfgProposal();
             List<uint> proposalDungeons;
-            Dictionary<ObjectGuid, ObjectGuid> proposalGroups = new Dictionary<ObjectGuid, ObjectGuid>();
-            Dictionary<ObjectGuid, LfgRoles> proposalRoles = new Dictionary<ObjectGuid, LfgRoles>();
+            var proposalGroups = new Dictionary<ObjectGuid, ObjectGuid>();
+            var proposalRoles = new Dictionary<ObjectGuid, LfgRoles>();
 
             // Check for correct size
             if (check.Count > MapConst.MaxGroupSize || check.Empty())
@@ -346,11 +346,11 @@ namespace Game.DungeonFinding
             // Check all-but-new compatiblitity
             if (check.Count > 2)
             {
-                ObjectGuid frontGuid = check.First();
+                var frontGuid = check.First();
                 check.RemoveAt(0);
 
                 // Check all-but-new compatibilities (New, A, B, C, D) -. check(A, B, C, D)
-                LfgCompatibility child_compatibles = CheckCompatibility(check);
+                var child_compatibles = CheckCompatibility(check);
                 if (child_compatibles < LfgCompatibility.WithLessPlayers) // Group not compatible
                 {
                     Log.outDebug(LogFilter.Lfg, "CheckCompatibility: ({0}) child {1} not compatibles", strGuids, ConcatenateGuids(check));
@@ -397,7 +397,7 @@ namespace Game.DungeonFinding
                 var guid = check.First();
                 var itQueue = QueueDataStore.LookupByKey(guid);
 
-                LfgCompatibilityData data = new LfgCompatibilityData(LfgCompatibility.WithLessPlayers);
+                var data = new LfgCompatibilityData(LfgCompatibility.WithLessPlayers);
                 data.roles = itQueue.roles;
                 Global.LFGMgr.CheckGroupRoles(data.roles);
 
@@ -425,10 +425,10 @@ namespace Game.DungeonFinding
             {
                 foreach (var it in check)
                 {
-                    Dictionary<ObjectGuid, LfgRoles> roles = QueueDataStore[it].roles;
+                    var roles = QueueDataStore[it].roles;
                     foreach (var rolePair in roles)
                     {
-                        KeyValuePair<ObjectGuid, LfgRoles> itPlayer = new KeyValuePair<ObjectGuid, LfgRoles>();
+                        var itPlayer = new KeyValuePair<ObjectGuid, LfgRoles>();
                         foreach (var _player in proposalRoles)
                         {
                             itPlayer = _player;
@@ -442,7 +442,7 @@ namespace Game.DungeonFinding
                     }
                 }
 
-                byte playersize = (byte)(numPlayers - proposalRoles.Count);
+                var playersize = (byte)(numPlayers - proposalRoles.Count);
                 if (playersize != 0)
                 {
                     Log.outDebug(LogFilter.Lfg, "CheckCompatibility: ({0}) not compatible, {1} players are ignoring each other", strGuids, playersize);
@@ -450,7 +450,7 @@ namespace Game.DungeonFinding
                     return LfgCompatibility.HasIgnores;
                 }
                 StringBuilder o;
-                Dictionary<ObjectGuid, LfgRoles> debugRoles = proposalRoles;
+                var debugRoles = proposalRoles;
                 if (!Global.LFGMgr.CheckGroupRoles(proposalRoles))
                 {
                     o = new StringBuilder();
@@ -471,9 +471,9 @@ namespace Game.DungeonFinding
                     if (guid == itguid)
                         continue;
 
-                    List<uint> dungeons = QueueDataStore[itguid].dungeons;
+                    var dungeons = QueueDataStore[itguid].dungeons;
                     o.AppendFormat(", {0}: ({1})", guid, Global.LFGMgr.ConcatenateDungeons(dungeons));
-                    List<uint> temporal = proposalDungeons.Intersect(dungeons).ToList();
+                    var temporal = proposalDungeons.Intersect(dungeons).ToList();
                     proposalDungeons = temporal;
                 }
 
@@ -486,8 +486,8 @@ namespace Game.DungeonFinding
             }
             else
             {
-                ObjectGuid gguid = check.First();
-                LfgQueueData queue = QueueDataStore[gguid];
+                var gguid = check.First();
+                var queue = QueueDataStore[gguid];
                 proposalDungeons = queue.dungeons;
                 proposalRoles = queue.roles;
                 Global.LFGMgr.CheckGroupRoles(proposalRoles);          // assing new roles
@@ -497,7 +497,7 @@ namespace Game.DungeonFinding
             if (numPlayers != MapConst.MaxGroupSize)
             {
                 Log.outDebug(LogFilter.Lfg, "CheckCompatibility: ({0}) Compatibles but not enough players({1})", strGuids, numPlayers);
-                LfgCompatibilityData data = new LfgCompatibilityData(LfgCompatibility.WithLessPlayers);
+                var data = new LfgCompatibilityData(LfgCompatibility.WithLessPlayers);
                 data.roles = proposalRoles;
 
                 foreach (var guid in check)
@@ -510,7 +510,7 @@ namespace Game.DungeonFinding
                 return LfgCompatibility.WithLessPlayers;
             }
 
-            ObjectGuid _guid = check.First();
+            var _guid = check.First();
             proposal.queues = check;
             proposal.isNew = numLfgGroups != 1 || Global.LFGMgr.GetOldState(_guid) != LfgState.Dungeon;
 
@@ -527,7 +527,7 @@ namespace Game.DungeonFinding
             proposal.leader = ObjectGuid.Empty;
             proposal.dungeonId = proposalDungeons.SelectRandom();
 
-            bool leader = false;
+            var leader = false;
             foreach (var rolePair in proposalRoles)
             {
                 // Assing new leader
@@ -541,7 +541,7 @@ namespace Game.DungeonFinding
                     proposal.leader = rolePair.Key;
 
                 // Assing player data and roles
-                LfgProposalPlayer data = new LfgProposalPlayer();
+                var data = new LfgProposalPlayer();
                 data.role = rolePair.Value;
                 data.group = proposalGroups.LookupByKey(rolePair.Key);
                 if (!proposal.isNew && !data.group.IsEmpty() && data.group == proposal.group) // Player from existing group, autoaccept
@@ -569,11 +569,11 @@ namespace Game.DungeonFinding
             Log.outDebug(LogFilter.Lfg, "Updating queue timers...");
             foreach (var itQueue in QueueDataStore)
             {
-                LfgQueueData queueinfo = itQueue.Value;
-                uint dungeonId = queueinfo.dungeons.FirstOrDefault();
-                uint queuedTime = (uint)(currTime - queueinfo.joinTime);
-                LfgRoles role = LfgRoles.None;
-                int waitTime = -1;
+                var queueinfo = itQueue.Value;
+                var dungeonId = queueinfo.dungeons.FirstOrDefault();
+                var queuedTime = (uint)(currTime - queueinfo.joinTime);
+                var role = LfgRoles.None;
+                var waitTime = -1;
 
                 if (!waitTimesTankStore.ContainsKey(dungeonId))
                     waitTimesTankStore[dungeonId] = new LfgWaitTime();
@@ -584,10 +584,10 @@ namespace Game.DungeonFinding
                 if (!waitTimesAvgStore.ContainsKey(dungeonId))
                     waitTimesAvgStore[dungeonId] = new LfgWaitTime();
 
-                int wtTank = waitTimesTankStore[dungeonId].time;
-                int wtHealer = waitTimesHealerStore[dungeonId].time;
-                int wtDps = waitTimesDpsStore[dungeonId].time;
-                int wtAvg = waitTimesAvgStore[dungeonId].time;
+                var wtTank = waitTimesTankStore[dungeonId].time;
+                var wtHealer = waitTimesHealerStore[dungeonId].time;
+                var wtDps = waitTimesDpsStore[dungeonId].time;
+                var wtAvg = waitTimesAvgStore[dungeonId].time;
 
                 foreach (var itPlayer in queueinfo.roles)
                     role |= itPlayer.Value;
@@ -615,10 +615,10 @@ namespace Game.DungeonFinding
                 if (string.IsNullOrEmpty(queueinfo.bestCompatible))
                     FindBestCompatibleInQueue(itQueue.Key, itQueue.Value);
 
-                LfgQueueStatusData queueData = new LfgQueueStatusData(queueId, dungeonId, waitTime, wtAvg, wtTank, wtHealer, wtDps, queuedTime, queueinfo.tanks, queueinfo.healers, queueinfo.dps);
+                var queueData = new LfgQueueStatusData(queueId, dungeonId, waitTime, wtAvg, wtTank, wtHealer, wtDps, queuedTime, queueinfo.tanks, queueinfo.healers, queueinfo.dps);
                 foreach (var itPlayer in queueinfo.roles)
                 {
-                    ObjectGuid pguid = itPlayer.Key;
+                    var pguid = itPlayer.Key;
                     Global.LFGMgr.SendLfgQueueStatus(pguid, queueData);
                 }
             }
@@ -641,7 +641,7 @@ namespace Game.DungeonFinding
 
             for (byte i = 0; i < 2; ++i)
             {
-                List<ObjectGuid> queue = i != 0 ? newToQueueStore : currentQueueStore;
+                var queue = i != 0 ? newToQueueStore : currentQueueStore;
                 foreach (var guid in queue)
                 {
                     if (guid.IsParty())
@@ -659,7 +659,7 @@ namespace Game.DungeonFinding
 
         public string DumpCompatibleInfo(bool full = false)
         {
-            string str = "Compatible Map size: " + CompatibleMapStore.Count + "\n";
+            var str = "Compatible Map size: " + CompatibleMapStore.Count + "\n";
             if (full)
             {
                 foreach (var pair in CompatibleMapStore)
@@ -681,9 +681,9 @@ namespace Game.DungeonFinding
 
         public void UpdateBestCompatibleInQueue(ObjectGuid guid, LfgQueueData queueData, string key, Dictionary<ObjectGuid, LfgRoles> roles)
         {
-            byte storedSize = (byte)(string.IsNullOrEmpty(queueData.bestCompatible) ? 0 : queueData.bestCompatible.Count(p => p == '|') + 1);
+            var storedSize = (byte)(string.IsNullOrEmpty(queueData.bestCompatible) ? 0 : queueData.bestCompatible.Count(p => p == '|') + 1);
 
-            byte size = (byte)(key.Count(p => p == '|') + 1);
+            var size = (byte)(key.Count(p => p == '|') + 1);
 
             if (size <= storedSize)
                 return;
@@ -697,7 +697,7 @@ namespace Game.DungeonFinding
             queueData.dps = SharedConst.LFGDPSNeeded;
             foreach (var it in roles)
             {
-                LfgRoles role = it.Value;
+                var role = it.Value;
                 if (role.HasAnyFlag(LfgRoles.Tank))
                     --queueData.tanks;
                 else if (role.HasAnyFlag(LfgRoles.Healer))

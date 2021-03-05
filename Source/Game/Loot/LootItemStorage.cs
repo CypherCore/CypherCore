@@ -31,24 +31,24 @@ namespace Game.Loots
 
         public void LoadStorageFromDB()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
             _lootItemStorage.Clear();
             uint count = 0;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_ITEMCONTAINER_ITEMS);
-            SQLResult result = DB.Characters.Query(stmt);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_ITEMCONTAINER_ITEMS);
+            var result = DB.Characters.Query(stmt);
             if (!result.IsEmpty())
             {
                 do
                 {
-                    ulong key = result.Read<ulong>(0);
+                    var key = result.Read<ulong>(0);
                     var itr = _lootItemStorage.LookupByKey(key);
                     if (!_lootItemStorage.ContainsKey(key))
                         _lootItemStorage[key] = new StoredLootContainer(key);
 
-                    StoredLootContainer storedContainer = _lootItemStorage[key];
+                    var storedContainer = _lootItemStorage[key];
 
-                    LootItem lootItem = new LootItem();
+                    var lootItem = new LootItem();
                     lootItem.itemid = result.Read<uint>(1);
                     lootItem.count = result.Read<byte>(2);
                     lootItem.follow_loot_rules = result.Read<bool>(3);
@@ -59,7 +59,7 @@ namespace Game.Loots
                     lootItem.needs_quest = result.Read<bool>(8);
                     lootItem.randomBonusListId = result.Read<uint>(9);
                     lootItem.context = (ItemContext)result.Read<byte>(10);
-                    StringArray bonusLists = new StringArray(result.Read<string>(11), ' ');
+                    var bonusLists = new StringArray(result.Read<string>(11), ' ');
 
                     foreach (string str in bonusLists)
                         lootItem.BonusListIDs.Add(uint.Parse(str));
@@ -81,11 +81,11 @@ namespace Game.Loots
                 count = 0;
                 do
                 {
-                    ulong key = result.Read<ulong>(0);
+                    var key = result.Read<ulong>(0);
                     if (!_lootItemStorage.ContainsKey(key))  
                          _lootItemStorage.TryAdd(key, new StoredLootContainer(key));
 
-                    StoredLootContainer storedContainer = _lootItemStorage[key];
+                    var storedContainer = _lootItemStorage[key];
                     storedContainer.AddMoney(result.Read<uint>(1), null);
 
                     ++count;
@@ -99,19 +99,19 @@ namespace Game.Loots
 
         public bool LoadStoredLoot(Item item, Player player)
         {
-            Loot loot = item.loot;
+            var loot = item.loot;
             if (!_lootItemStorage.ContainsKey(loot.containerID.GetCounter()))
                 return false;
 
             var container = _lootItemStorage[loot.containerID.GetCounter()];
             loot.gold = container.GetMoney();
 
-            LootTemplate lt = LootStorage.Items.GetLootFor(item.GetEntry());
+            var lt = LootStorage.Items.GetLootFor(item.GetEntry());
             if (lt != null)
             {
                 foreach (var storedItemPair in container.GetLootItems())
                 {
-                    LootItem li = new LootItem();
+                    var li = new LootItem();
                     li.itemid = storedItemPair.Key;
                     li.count = (byte)storedItemPair.Value.Count;
                     li.follow_loot_rules = storedItemPair.Value.FollowRules;
@@ -156,8 +156,8 @@ namespace Game.Loots
         {
             _lootItemStorage.TryRemove(containerId, out _);
 
-            SQLTransaction trans = new SQLTransaction();
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_ITEMS);
+            var trans = new SQLTransaction();
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_ITEMS);
             stmt.AddValue(0, containerId);
             trans.Append(stmt);
 
@@ -188,17 +188,17 @@ namespace Game.Loots
                 return;
             }
 
-            StoredLootContainer container = new StoredLootContainer(loot.containerID.GetCounter());
+            var container = new StoredLootContainer(loot.containerID.GetCounter());
 
-            SQLTransaction trans = new SQLTransaction();
+            var trans = new SQLTransaction();
             if (loot.gold != 0)
                 container.AddMoney(loot.gold, trans);
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_ITEMS);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_ITEMS);
             stmt.AddValue(0, loot.containerID.GetCounter());
             trans.Append(stmt);
 
-            foreach (LootItem li in loot.items)
+            foreach (var li in loot.items)
             {
                 // Conditions are not checked when loot is generated, it is checked when loot is sent to a player.
                 // For items that are lootable, loot is saved to the DB immediately, that means that loot can be
@@ -237,7 +237,7 @@ namespace Game.Loots
             if (trans == null)
                 return;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ITEMCONTAINER_ITEMS);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ITEMCONTAINER_ITEMS);
 
             // container_id, item_id, item_count, follow_rules, ffa, blocked, counted, under_threshold, needs_quest, rnd_prop, rnd_suffix
             stmt.AddValue(0, _containerId);
@@ -252,9 +252,9 @@ namespace Game.Loots
             stmt.AddValue(9, lootItem.randomBonusListId);
             stmt.AddValue(10, (uint)lootItem.context);
 
-            foreach (uint token in lootItem.BonusListIDs)
+            foreach (var token in lootItem.BonusListIDs)
             {
-                StringBuilder bonusListIDs = new StringBuilder();
+                var bonusListIDs = new StringBuilder();
                 foreach (int bonusListID in lootItem.BonusListIDs)
                     bonusListIDs.Append(bonusListID + ' ');
 
@@ -269,7 +269,7 @@ namespace Game.Loots
             if (trans == null)
                 return;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_MONEY);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_MONEY);
             stmt.AddValue(0, _containerId);
             trans.Append(stmt);
 
@@ -283,7 +283,7 @@ namespace Game.Loots
         {
             _money = 0;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_MONEY);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_MONEY);
             stmt.AddValue(0, _containerId);
             DB.Characters.Execute(stmt);
         }
@@ -301,7 +301,7 @@ namespace Game.Loots
             }
 
             // Deletes a single item associated with an openable item from the DB
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_ITEM);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_ITEM);
             stmt.AddValue(0, _containerId);
             stmt.AddValue(1, itemId);
             stmt.AddValue(2, count);

@@ -65,11 +65,11 @@ namespace Scripts.Spells.Warlock
             if (missInfo != SpellMissInfo.Immune)
                 return;
 
-            Unit target = GetHitUnit();
+            var target = GetHitUnit();
             if (target)
             {
                 // Casting Banish on a banished target will Remove applied aura
-                Aura banishAura = target.GetAura(GetSpellInfo().Id, GetCaster().GetGUID());
+                var banishAura = target.GetAura(GetSpellInfo().Id, GetCaster().GetGUID());
                 if (banishAura != null)
                     banishAura.Remove();
             }
@@ -86,7 +86,7 @@ namespace Scripts.Spells.Warlock
     {
         void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
         {
-            AuraEffect auraEffect = GetEffect(1);
+            var auraEffect = GetEffect(1);
             if (auraEffect == null || !GetTargetApplication().HasEffect(1))
             {
                 PreventDefaultAction();
@@ -94,7 +94,7 @@ namespace Scripts.Spells.Warlock
             }
 
             // You take ${$s2/3}% reduced damage
-            float damageReductionPct = (float)auraEffect.GetAmount() / 3;
+            var damageReductionPct = (float)auraEffect.GetAmount() / 3;
             // plus a random amount of up to ${$s2/3}% additional reduced damage
             damageReductionPct += RandomHelper.FRand(0.0f, damageReductionPct);
 
@@ -145,14 +145,14 @@ namespace Scripts.Spells.Warlock
 
         void HandleDummyTick(AuraEffect aurEff)
         {
-            GameObject circle = GetTarget().GetGameObject(GetId());
+            var circle = GetTarget().GetGameObject(GetId());
             if (circle)
             {
                 // Here we check if player is in demonic circle teleport range, if so add
                 // WARLOCK_DEMONIC_CIRCLE_ALLOW_CAST; allowing him to cast the WARLOCK_DEMONIC_CIRCLE_TELEPORT.
                 // If not in range Remove the WARLOCK_DEMONIC_CIRCLE_ALLOW_CAST.
 
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.DemonicCircleTeleport, GetCastDifficulty());
+                var spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.DemonicCircleTeleport, GetCastDifficulty());
 
                 if (GetTarget().IsWithinDist(circle, spellInfo.GetMaxRange(true)))
                 {
@@ -176,10 +176,10 @@ namespace Scripts.Spells.Warlock
     {
         void HandleTeleport(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            Player player = GetTarget().ToPlayer();
+            var player = GetTarget().ToPlayer();
             if (player)
             {
-                GameObject circle = player.GetGameObject(SpellIds.DemonicCircleSummon);
+                var circle = player.GetGameObject(SpellIds.DemonicCircleSummon);
                 if (circle)
                 {
                     player.NearTeleportTo(circle.GetPositionX(), circle.GetPositionY(), circle.GetPositionZ(), circle.GetOrientation());
@@ -204,16 +204,16 @@ namespace Scripts.Spells.Warlock
 
         void OnSuccessfulDispel(uint effIndex)
         {
-            SpellEffectInfo effect = GetSpellInfo().GetEffect(1);
+            var effect = GetSpellInfo().GetEffect(1);
             if (effect != null)
             {
-                Unit caster = GetCaster();
-                int heal_amount = effect.CalcValue(caster);
+                var caster = GetCaster();
+                var heal_amount = effect.CalcValue(caster);
 
                 caster.CastCustomSpell(caster, SpellIds.DevourMagicHeal, heal_amount, 0, 0, true);
 
                 // Glyph of Felhunter
-                Unit owner = caster.GetOwner();
+                var owner = caster.GetOwner();
                 if (owner)
                     if (owner.GetAura(SpellIds.GlyphOfDemonTraining) != null)
                         owner.CastCustomSpell(owner, SpellIds.DevourMagicHeal, heal_amount, 0, 0, true);
@@ -231,10 +231,10 @@ namespace Scripts.Spells.Warlock
     {
         void HandleAfterHit()
         {
-            Aura aura = GetHitAura();
+            var aura = GetHitAura();
             if (aura != null)
             {
-                AuraEffect aurEff = aura.GetEffect(1);
+                var aurEff = aura.GetEffect(1);
                 if (aurEff != null)
                     aurEff.SetAmount(MathFunctions.CalculatePct(aurEff.GetAmount(), GetHitDamage()));
             }
@@ -251,11 +251,11 @@ namespace Scripts.Spells.Warlock
     {
         void ApplyEffect(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (!caster)
                 return;
 
-            Unit target = GetTarget();
+            var target = GetTarget();
             if (caster.HasAura(SpellIds.ImprovedHealthFunnelR2))
                 target.CastSpell(target, SpellIds.ImprovedHealthFunnelBuffR2, true);
             else if (caster.HasAura(SpellIds.ImprovedHealthFunnelR1))
@@ -264,24 +264,24 @@ namespace Scripts.Spells.Warlock
 
         void RemoveEffect(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            Unit target = GetTarget();
+            var target = GetTarget();
             target.RemoveAurasDueToSpell(SpellIds.ImprovedHealthFunnelBuffR1);
             target.RemoveAurasDueToSpell(SpellIds.ImprovedHealthFunnelBuffR2);
         }
 
         void OnPeriodic(AuraEffect aurEff)
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (!caster)
                 return;
             //! HACK for self damage, is not blizz :/
-            uint damage = (uint)caster.CountPctFromMaxHealth(aurEff.GetBaseAmount());
+            var damage = (uint)caster.CountPctFromMaxHealth(aurEff.GetBaseAmount());
 
-            Player modOwner = caster.GetSpellModOwner();
+            var modOwner = caster.GetSpellModOwner();
             if (modOwner)
                 modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.Cost, ref damage);
 
-            SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(caster, caster, GetSpellInfo(), GetAura().GetSpellVisual(), GetSpellInfo().SchoolMask, GetAura().GetCastGUID());
+            var damageInfo = new SpellNonMeleeDamage(caster, caster, GetSpellInfo(), GetAura().GetSpellVisual(), GetSpellInfo().SchoolMask, GetAura().GetCastGUID());
             damageInfo.periodicLog = true;
             damageInfo.damage = damage;
             caster.DealSpellDamage(damageInfo, false);
@@ -301,7 +301,7 @@ namespace Scripts.Spells.Warlock
     {
         void HandleOnHit()
         {
-            int heal = (int)MathFunctions.CalculatePct(GetCaster().GetCreateHealth(), GetHitHeal());
+            var heal = (int)MathFunctions.CalculatePct(GetCaster().GetCreateHealth(), GetHitHeal());
             SetHitHeal(heal);
         }
 
@@ -321,8 +321,8 @@ namespace Scripts.Spells.Warlock
 
         void HandleScriptEffect(uint effIndex)
         {
-            Unit caster = GetCaster();
-            Unit target = GetHitUnit();
+            var caster = GetCaster();
+            var target = GetHitUnit();
             if (target)
             {
                 if (caster.GetOwner() && caster.GetOwner().HasAura(SpellIds.GlyphOfSuccubus))
@@ -366,11 +366,11 @@ namespace Scripts.Spells.Warlock
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            DamageInfo damageInfo = eventInfo.GetDamageInfo();
+            var damageInfo = eventInfo.GetDamageInfo();
             if (damageInfo == null || damageInfo.GetDamage() == 0)
                 return;
 
-            int amount = (int)(aurEff.GetAmount() - damageInfo.GetDamage());
+            var amount = (int)(aurEff.GetAmount() - damageInfo.GetDamage());
             if (amount > 0)
             {
                 aurEff.SetAmount(amount);
@@ -380,7 +380,7 @@ namespace Scripts.Spells.Warlock
 
             Remove();
 
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (!caster)
                 return;
 
@@ -410,11 +410,11 @@ namespace Scripts.Spells.Warlock
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            DamageInfo damageInfo = eventInfo.GetDamageInfo();
+            var damageInfo = eventInfo.GetDamageInfo();
             if (damageInfo == null || damageInfo.GetDamage() == 0)
                 return;
 
-            int amount = aurEff.GetAmount() - (int)damageInfo.GetDamage();
+            var amount = aurEff.GetAmount() - (int)damageInfo.GetDamage();
             if (amount > 0)
             {
                 aurEff.SetAmount(amount);
@@ -423,7 +423,7 @@ namespace Scripts.Spells.Warlock
 
             Remove();
 
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (!caster)
                 return;
 
@@ -475,25 +475,25 @@ namespace Scripts.Spells.Warlock
     {
         void HandleHit(uint effIndex)
         {
-            Unit swapVictim = GetCaster();
-            Unit warlock = GetHitUnit();
+            var swapVictim = GetCaster();
+            var warlock = GetHitUnit();
             if (!warlock || !swapVictim)
                 return;
 
             var appliedAuras = swapVictim.GetAppliedAuras();
             spell_warl_soul_swap_override swapSpellScript = null;
-            Aura swapOverrideAura = warlock.GetAura(SpellIds.SoulSwapOverride);
+            var swapOverrideAura = warlock.GetAura(SpellIds.SoulSwapOverride);
             if (swapOverrideAura != null)
                 swapSpellScript = swapOverrideAura.GetScript<spell_warl_soul_swap_override>("spell_warl_soul_swap_override");
 
             if (swapSpellScript == null)
                 return;
 
-            FlagArray128 classMask = GetEffectInfo().SpellClassMask;
+            var classMask = GetEffectInfo().SpellClassMask;
 
             foreach (var itr in appliedAuras)
             {
-                SpellInfo spellProto = itr.Value.GetBase().GetSpellInfo();
+                var spellProto = itr.Value.GetBase().GetSpellInfo();
                 if (itr.Value.GetBase().GetCaster() == warlock)
                     if (spellProto.SpellFamilyName == SpellFamilyNames.Warlock && (spellProto.SpellFamilyFlags & classMask))
                         swapSpellScript.AddDot(itr.Key);
@@ -518,12 +518,12 @@ namespace Scripts.Spells.Warlock
 
         SpellCastResult CheckCast()
         {
-            Unit currentTarget = GetExplTargetUnit();
+            var currentTarget = GetExplTargetUnit();
             Unit swapTarget = null;
-            Aura swapOverride = GetCaster().GetAura(SpellIds.SoulSwapOverride);
+            var swapOverride = GetCaster().GetAura(SpellIds.SoulSwapOverride);
             if (swapOverride != null)
             {
-                spell_warl_soul_swap_override swapScript = swapOverride.GetScript<spell_warl_soul_swap_override>("spell_warl_soul_swap_override");
+                var swapScript = swapOverride.GetScript<spell_warl_soul_swap_override>("spell_warl_soul_swap_override");
                 if (swapScript != null)
                     swapTarget = swapScript.GetOriginalSwapSource();
             }
@@ -538,14 +538,14 @@ namespace Scripts.Spells.Warlock
         void onEffectHit(uint effIndex)
         {
             GetCaster().CastSpell(GetCaster(), SpellIds.SoulSwapModCost, true);
-            bool hasGlyph = GetCaster().HasAura(SpellIds.GlyphOfSoulSwap);
+            var hasGlyph = GetCaster().HasAura(SpellIds.GlyphOfSoulSwap);
 
-            List<uint> dotList = new List<uint>();
+            var dotList = new List<uint>();
             Unit swapSource = null;
-            Aura swapOverride = GetCaster().GetAura(SpellIds.SoulSwapOverride);
+            var swapOverride = GetCaster().GetAura(SpellIds.SoulSwapOverride);
             if (swapOverride != null)
             {
-                spell_warl_soul_swap_override swapScript = swapOverride.GetScript<spell_warl_soul_swap_override>("spell_warl_soul_swap_override");
+                var swapScript = swapOverride.GetScript<spell_warl_soul_swap_override>("spell_warl_soul_swap_override");
                 if (swapScript == null)
                     return;
                 dotList = swapScript.GetDotList();
@@ -586,8 +586,8 @@ namespace Scripts.Spells.Warlock
 
         void HandleDummy(uint effIndex)
         {
-            Unit caster = GetCaster();
-            Unit target = GetHitUnit();
+            var caster = GetCaster();
+            var target = GetHitUnit();
             if (target)
                 if (target.CanHaveThreatList() && target.GetThreatManager().GetThreat(caster) > 0.0f)
                     caster.CastSpell(target, SpellIds.Soulshatter, true);
@@ -616,7 +616,7 @@ namespace Scripts.Spells.Warlock
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            Unit caster = eventInfo.GetActor();
+            var caster = eventInfo.GetActor();
             caster.CastSpell(caster, _triggerSpell, true, null, aurEff);
         }
 
@@ -638,13 +638,13 @@ namespace Scripts.Spells.Warlock
 
         void HandleDispel(DispelInfo dispelInfo)
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster)
             {
-                AuraEffect aurEff = GetEffect(1);
+                var aurEff = GetEffect(1);
                 if (aurEff != null)
                 {
-                    int damage = aurEff.GetAmount() * 9;
+                    var damage = aurEff.GetAmount() * 9;
                     // backfire damage and silence
                     caster.CastCustomSpell(dispelInfo.GetDispeller(), SpellIds.UnstableAfflictionDispel, damage, 0, 0, true, null, aurEff);
                 }
@@ -662,18 +662,18 @@ namespace Scripts.Spells.Warlock
     {
         void HandleDummyTick(AuraEffect aurEff)
         {
-            List<AreaTrigger> rainOfFireAreaTriggers = GetTarget().GetAreaTriggers(SpellIds.RainOfFire);
-            List<ObjectGuid> targetsInRainOfFire = new List<ObjectGuid>();
+            var rainOfFireAreaTriggers = GetTarget().GetAreaTriggers(SpellIds.RainOfFire);
+            var targetsInRainOfFire = new List<ObjectGuid>();
 
-            foreach (AreaTrigger rainOfFireAreaTrigger in rainOfFireAreaTriggers)
+            foreach (var rainOfFireAreaTrigger in rainOfFireAreaTriggers)
             {
                 var insideTargets = rainOfFireAreaTrigger.GetInsideUnits();
                 targetsInRainOfFire.AddRange(insideTargets);
             }
 
-            foreach (ObjectGuid insideTargetGuid in targetsInRainOfFire)
+            foreach (var insideTargetGuid in targetsInRainOfFire)
             {
-                Unit insideTarget = Global.ObjAccessor.GetUnit(GetTarget(), insideTargetGuid);
+                var insideTarget = Global.ObjAccessor.GetUnit(GetTarget(), insideTargetGuid);
                 if (insideTarget)
                     if (!GetTarget().IsFriendlyTo(insideTarget))
                         GetTarget().CastSpell(insideTarget, SpellIds.RainOfFireDamage, true);

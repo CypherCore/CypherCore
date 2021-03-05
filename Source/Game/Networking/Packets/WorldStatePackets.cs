@@ -31,7 +31,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(SubareaID);
 
             _worldPacket.WriteInt32(Worldstates.Count);
-            foreach (WorldStateInfo wsi in Worldstates)
+            foreach (var wsi in Worldstates)
             {
                 _worldPacket.WriteUInt32(wsi.VariableID);
                 _worldPacket.WriteInt32(wsi.Value);

@@ -78,15 +78,15 @@ namespace Scripts.Spells.Priest
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            Unit caster = eventInfo.GetActor();
+            var caster = eventInfo.GetActor();
             if (caster == eventInfo.GetProcTarget())
                 return;
 
-            HealInfo healInfo = eventInfo.GetHealInfo();
+            var healInfo = eventInfo.GetHealInfo();
             if (healInfo == null || healInfo.GetHeal() == 0)
                 return;
 
-            int amount = (int)MathFunctions.CalculatePct(healInfo.GetHeal(), 10);
+            var amount = (int)MathFunctions.CalculatePct(healInfo.GetHeal(), 10);
             caster.CastCustomSpell(SpellIds.OracularHeal, SpellValueMod.BasePoint0, amount, caster, true, null, aurEff);
         }
 
@@ -113,11 +113,11 @@ namespace Scripts.Spells.Priest
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            DamageInfo damageInfo = eventInfo.GetDamageInfo();
-            int heal = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
+            var damageInfo = eventInfo.GetDamageInfo();
+            var heal = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
             _appliedAtonements.RemoveAll(targetGuid =>
             {
-                Unit target = Global.ObjAccessor.GetUnit(GetTarget(), targetGuid);
+                var target = Global.ObjAccessor.GetUnit(GetTarget(), targetGuid);
                 if (target)
                 {
                     if (target.GetExactDist(GetTarget()) < GetSpellInfo().GetEffect(1).CalcValue())
@@ -156,10 +156,10 @@ namespace Scripts.Spells.Priest
 
         void HandleOnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster)
             {
-                Aura atonement = caster.GetAura(SpellIds.Atonement);
+                var atonement = caster.GetAura(SpellIds.Atonement);
                 if (atonement != null)
                 {
                     var script = atonement.GetScript<spell_pri_atonement>("spell_pri_atonement");
@@ -171,10 +171,10 @@ namespace Scripts.Spells.Priest
 
         void HandleOnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster)
             {
-                Aura atonement = caster.GetAura(SpellIds.Atonement);
+                var atonement = caster.GetAura(SpellIds.Atonement);
                 if (atonement != null)
                 {
                     var script = atonement.GetScript<spell_pri_atonement>("spell_pri_atonement");
@@ -199,7 +199,7 @@ namespace Scripts.Spells.Priest
         {
             targets.RemoveAll(obj =>
             {
-                Unit target = obj.ToUnit();
+                var target = obj.ToUnit();
                 if (target)
                     return !GetCaster().IsInRaidWith(target);
 
@@ -246,11 +246,11 @@ namespace Scripts.Spells.Priest
 
         void Absorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
         {
-            Unit target = GetTarget();
+            var target = GetTarget();
             if (dmgInfo.GetDamage() < target.GetHealth())
                 return;
 
-            int healAmount = (int)target.CountPctFromMaxHealth((int)healPct);
+            var healAmount = (int)target.CountPctFromMaxHealth((int)healPct);
             // Remove the aura now, we don't want 40% healing bonus
             Remove(AuraRemoveMode.EnemySpell);
             target.CastCustomSpell(target, SpellIds.GuardianSpiritHeal, healAmount, 0, 0, true);
@@ -275,7 +275,7 @@ namespace Scripts.Spells.Priest
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            Unit caster = eventInfo.GetActor();
+            var caster = eventInfo.GetActor();
             if (eventInfo.GetSpellTypeMask().HasAnyFlag(ProcFlagsSpellType.Heal))
                 caster.CastSpell((Unit)null, SpellIds.DivineBlessing, true);
 
@@ -300,9 +300,9 @@ namespace Scripts.Spells.Priest
 
         void HandleEffectDummy(uint effIndex)
         {
-            Position destPos = GetHitDest().GetPosition();
+            var destPos = GetHitDest().GetPosition();
 
-            SpellCastTargets targets = new SpellCastTargets();
+            var targets = new SpellCastTargets();
             targets.SetDst(destPos);
             targets.SetUnitTarget(GetCaster());
             GetHitUnit().CastSpell(targets, Global.SpellMgr.GetSpellInfo((uint)GetEffectValue(), GetCastDifficulty()), null);
@@ -344,7 +344,7 @@ namespace Scripts.Spells.Priest
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            SpellInfo firstRankSpellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.PenanceR1, Difficulty.None);
+            var firstRankSpellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.PenanceR1, Difficulty.None);
             if (firstRankSpellInfo == null)
                 return false;
 
@@ -352,7 +352,7 @@ namespace Scripts.Spells.Priest
             if (!spellInfo.IsRankOf(firstRankSpellInfo))
                 return false;
 
-            byte rank = spellInfo.GetRank();
+            var rank = spellInfo.GetRank();
             if (Global.SpellMgr.GetSpellWithRank(SpellIds.PenanceR1Damage, rank, true) == 0)
                 return false;
             if (Global.SpellMgr.GetSpellWithRank(SpellIds.PenanceR1Heal, rank, true) == 0)
@@ -363,14 +363,14 @@ namespace Scripts.Spells.Priest
 
         void HandleDummy(uint effIndex)
         {
-            Unit caster = GetCaster();
-            Unit target = GetHitUnit();
+            var caster = GetCaster();
+            var target = GetHitUnit();
             if (target)
             {
                 if (!target.IsAlive())
                     return;
 
-                byte rank = GetSpellInfo().GetRank();
+                var rank = GetSpellInfo().GetRank();
 
                 if (caster.IsFriendlyTo(target))
                     caster.CastSpell(target, Global.SpellMgr.GetSpellWithRank(SpellIds.PenanceR1Heal, rank), false);
@@ -381,8 +381,8 @@ namespace Scripts.Spells.Priest
 
         SpellCastResult CheckCast()
         {
-            Player caster = GetCaster().ToPlayer();
-            Unit target = GetExplTargetUnit();
+            var caster = GetCaster().ToPlayer();
+            var target = GetExplTargetUnit();
             if (target)
             {
                 if (!caster.IsFriendlyTo(target))
@@ -420,12 +420,12 @@ namespace Scripts.Spells.Priest
         {
             canBeRecalculated = false;
 
-            Player player = GetCaster().ToPlayer();
+            var player = GetCaster().ToPlayer();
             if (player)
             {
-                int playerMastery = (int)player.GetRatingBonusValue(CombatRating.Mastery);
-                int playerSpellPower = player.SpellBaseDamageBonusDone(SpellSchoolMask.Holy);
-                int playerVersatileDamage = (int)player.GetRatingBonusValue(CombatRating.VersatilityDamageDone);
+                var playerMastery = (int)player.GetRatingBonusValue(CombatRating.Mastery);
+                var playerSpellPower = player.SpellBaseDamageBonusDone(SpellSchoolMask.Holy);
+                var playerVersatileDamage = (int)player.GetRatingBonusValue(CombatRating.VersatilityDamageDone);
 
                 //Formula taken from SpellWork
                 amount = (int)((playerSpellPower * 5.5f) + playerMastery) * (1 + playerVersatileDamage);
@@ -434,8 +434,8 @@ namespace Scripts.Spells.Priest
 
         void HandleOnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            Unit caster = GetCaster();
-            Unit target = GetTarget();
+            var caster = GetCaster();
+            var target = GetTarget();
             if (!caster)
                 return;
 
@@ -454,7 +454,7 @@ namespace Scripts.Spells.Priest
         void HandleOnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             GetTarget().RemoveAura(SpellIds.StrengthOfSoulEffect);
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster)
                 if (GetTargetApplication().GetRemoveMode() == AuraRemoveMode.EnemySpell && caster.HasAura(SpellIds.ShieldDisciplinePassive))
                     caster.CastSpell(caster, SpellIds.ShieldDisciplineEnergize, true);
@@ -489,8 +489,8 @@ namespace Scripts.Spells.Priest
 
         void HandleEffectDummy(uint effIndex)
         {
-            uint basePoints = GetCaster().SpellHealingBonusDone(GetHitUnit(), _spellInfoHeal, (uint)_healEffectDummy.CalcValue(GetCaster()), DamageEffectType.Heal, _healEffectDummy);
-            Dictionary<SpellValueMod, int> values = new Dictionary<SpellValueMod, int>();
+            var basePoints = GetCaster().SpellHealingBonusDone(GetHitUnit(), _spellInfoHeal, (uint)_healEffectDummy.CalcValue(GetCaster()), DamageEffectType.Heal, _healEffectDummy);
+            var values = new Dictionary<SpellValueMod, int>();
             values.Add(SpellValueMod.AuraStack, (byte)GetEffectValue());
             values.Add(SpellValueMod.BasePoint0, (int)basePoints);
             GetCaster().CastCustomSpell(SpellIds.PrayerOfMendingAura, values, GetHitUnit(), TriggerCastFlags.FullMask);
@@ -514,8 +514,8 @@ namespace Scripts.Spells.Priest
         {
             // Caster: player (priest) that cast the Prayer of Mending
             // Target: player that currently has Prayer of Mending aura on him
-            Unit target = GetTarget();
-            Unit caster = GetCaster();
+            var target = GetTarget();
+            var caster = GetCaster();
             if (caster != null)
             {
                 // Cast the spell to heal the owner
@@ -558,8 +558,8 @@ namespace Scripts.Spells.Priest
         void OnTargetSelect(List<WorldObject> targets)
         {
             // Find the best target - prefer players over pets
-            bool foundPlayer = false;
-            foreach (WorldObject worldObject in targets)
+            var foundPlayer = false;
+            foreach (var worldObject in targets)
             {
                 if (worldObject.IsPlayer())
                 {
@@ -574,7 +574,7 @@ namespace Scripts.Spells.Priest
             // choose one random target from targets
             if (targets.Count > 1)
             {
-                WorldObject selected = targets.SelectRandom();
+                var selected = targets.SelectRandom();
                 targets.Clear();
                 targets.Add(selected);
             }
@@ -582,13 +582,13 @@ namespace Scripts.Spells.Priest
 
         void HandleJump(uint effIndex)
         {
-            Unit origCaster = GetOriginalCaster(); // the one that started the prayer of mending chain
-            Unit target = GetHitUnit(); // the target we decided the aura should jump to
+            var origCaster = GetOriginalCaster(); // the one that started the prayer of mending chain
+            var target = GetHitUnit(); // the target we decided the aura should jump to
 
             if (origCaster)
             {
-                uint basePoints = origCaster.SpellHealingBonusDone(target, _spellInfoHeal, (uint)_healEffectDummy.CalcValue(origCaster), DamageEffectType.Heal, _healEffectDummy);
-                Dictionary<SpellValueMod, int> values = new Dictionary<SpellValueMod, int>();
+                var basePoints = origCaster.SpellHealingBonusDone(target, _spellInfoHeal, (uint)_healEffectDummy.CalcValue(origCaster), DamageEffectType.Heal, _healEffectDummy);
+                var values = new Dictionary<SpellValueMod, int>();
                 values.Add(SpellValueMod.AuraStack, (byte)GetEffectValue());
                 values.Add(SpellValueMod.BasePoint0, (int)basePoints);
                 origCaster.CastCustomSpell(SpellIds.PrayerOfMendingAura, values, target, TriggerCastFlags.FullMask);
@@ -612,7 +612,7 @@ namespace Scripts.Spells.Priest
 
         void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
         {
-            Unit target = GetTarget();
+            var target = GetTarget();
             if (dmgInfo.GetDamage() >= target.GetHealth())
             {
                 target.CastSpell(target, SpellIds.SpiritOfRedemption, TriggerCastFlags.FullMask, null, aurEff);
@@ -659,10 +659,10 @@ namespace Scripts.Spells.Priest
 
         bool CheckProc(ProcEventInfo eventInfo)
         {
-            HealInfo healInfo = eventInfo.GetHealInfo();
+            var healInfo = eventInfo.GetHealInfo();
             if (healInfo != null)
             {
-                Unit healTarget = healInfo.GetTarget();
+                var healTarget = healInfo.GetTarget();
                 if (healTarget)
                     // @todo: fix me later if (healInfo.GetEffectiveHeal())
                     if (healTarget.GetHealth() >= healTarget.GetMaxHealth())
@@ -697,17 +697,17 @@ namespace Scripts.Spells.Priest
         {
             PreventDefaultAction();
 
-            HealInfo healInfo = eventInfo.GetHealInfo();
+            var healInfo = eventInfo.GetHealInfo();
             if (healInfo == null || healInfo.GetHeal() == 0)
                 return;
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.BlessedHealing, GetCastDifficulty());
-            int amount = (int)MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
+            var spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.BlessedHealing, GetCastDifficulty());
+            var amount = (int)MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
             amount /= (int)spellInfo.GetMaxTicks();
 
             // Add remaining ticks to healing done
-            Unit caster = eventInfo.GetActor();
-            Unit target = eventInfo.GetProcTarget();
+            var caster = eventInfo.GetActor();
+            var target = eventInfo.GetProcTarget();
             amount += (int)target.GetRemainingPeriodicAmount(caster.GetGUID(), SpellIds.BlessedHealing, AuraType.PeriodicHeal);
 
             caster.CastCustomSpell(SpellIds.BlessedHealing, SpellValueMod.BasePoint0, amount, target, true, null, aurEff);
@@ -737,12 +737,12 @@ namespace Scripts.Spells.Priest
         void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            DamageInfo damageInfo = eventInfo.GetDamageInfo();
+            var damageInfo = eventInfo.GetDamageInfo();
             if (damageInfo == null || damageInfo.GetDamage() == 0)
                 return;
 
-            int selfHeal = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
-            int teamHeal = selfHeal / 2;
+            var selfHeal = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
+            var teamHeal = selfHeal / 2;
 
             GetTarget().CastCustomSpell(null, SpellIds.VampiricEmbraceHeal, teamHeal, selfHeal, 0, true, null, aurEff);
         }
@@ -780,16 +780,16 @@ namespace Scripts.Spells.Priest
 
         void HandleDispel(DispelInfo dispelInfo)
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster)
             {
-                Unit target = GetUnitOwner();
+                var target = GetUnitOwner();
                 if (target)
                 {
-                    AuraEffect aurEff = GetEffect(1);
+                    var aurEff = GetEffect(1);
                     if (aurEff != null)
                     {
-                        int damage = aurEff.GetAmount() * 8;
+                        var damage = aurEff.GetAmount() * 8;
                         // backfire damage
                         caster.CastCustomSpell(target, SpellIds.VampiricTouchDispel, damage, 0, 0, true, null, aurEff);
                     }
@@ -826,8 +826,8 @@ namespace Scripts.Spells.Priest
 
         void HandleEffectDummy(uint effIndex)
         {
-            Position destPos = GetHitDest().GetPosition();
-            float radius = GetEffectInfo().CalcRadius();
+            var destPos = GetHitDest().GetPosition();
+            var radius = GetEffectInfo().CalcRadius();
 
             // Caster is prioritary
             if (GetCaster().IsWithinDist2d(destPos, radius))
@@ -836,7 +836,7 @@ namespace Scripts.Spells.Priest
             }
             else
             {
-                SpellCastTargets targets = new SpellCastTargets();
+                var targets = new SpellCastTargets();
                 targets.SetDst(destPos);
                 GetCaster().CastSpell(targets, Global.SpellMgr.GetSpellInfo(SpellIds.AngelicFeatherAreatrigger, GetCastDifficulty()), null);
             }
@@ -860,10 +860,10 @@ namespace Scripts.Spells.Priest
             // Called when the AreaTrigger has just been initialized, just before added to map
             public override void OnInitialize()
             {
-                Unit caster = at.GetCaster();
+                var caster = at.GetCaster();
                 if (caster)
                 {
-                    List<AreaTrigger> areaTriggers = caster.GetAreaTriggers(SpellIds.AngelicFeatherAreatrigger);
+                    var areaTriggers = caster.GetAreaTriggers(SpellIds.AngelicFeatherAreatrigger);
 
                     if (areaTriggers.Count >= 3)
                         areaTriggers.First().SetDuration(0);
@@ -872,7 +872,7 @@ namespace Scripts.Spells.Priest
 
             public override void OnUnitEnter(Unit unit)
             {
-                Unit caster = at.GetCaster();
+                var caster = at.GetCaster();
                 if (caster)
                 {
                     if (caster.IsFriendlyTo(unit))

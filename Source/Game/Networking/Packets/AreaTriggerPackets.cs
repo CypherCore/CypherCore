@@ -102,7 +102,7 @@ namespace Game.Networking.Packets
             data.WriteBits(Points.Count, 16);
             data.FlushBits();
 
-            foreach (Vector3 point in Points)
+            foreach (var point in Points)
                 data.WriteVector3(point);
         }
 

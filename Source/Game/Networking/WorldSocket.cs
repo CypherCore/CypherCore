@@ -85,9 +85,9 @@ namespace Game.Networking
 
         public override void Accept()
         {
-            string ip_address = GetRemoteIpAddress().ToString();
+            var ip_address = GetRemoteIpAddress().ToString();
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SelIpInfo);
+            var stmt = DB.Login.GetPreparedStatement(LoginStatements.SelIpInfo);
             stmt.AddValue(0, ip_address);
             stmt.AddValue(1, BitConverter.ToUInt32(GetRemoteIpAddress().Address.GetAddressBytes(), 0));
 
@@ -98,7 +98,7 @@ namespace Game.Networking
         {
             if (!result.IsEmpty())
             {
-                bool banned = false;
+                var banned = false;
                 do
                 {
                     if (result.Read<ulong>(0) != 0)
@@ -120,7 +120,7 @@ namespace Game.Networking
 
             AsyncReadWithCallback(InitializeHandler);
 
-            ByteBuffer packet = new ByteBuffer();
+            var packet = new ByteBuffer();
             packet.WriteString(ServerConnectionInitialize);
             packet.WriteString("\n");
             AsyncWrite(packet.GetData());
@@ -139,7 +139,7 @@ namespace Game.Networking
                 if (_packetBuffer.GetRemainingSpace() > 0)
                 {
                     // need to receive the header
-                    int readHeaderSize = Math.Min(args.BytesTransferred, _packetBuffer.GetRemainingSpace());
+                    var readHeaderSize = Math.Min(args.BytesTransferred, _packetBuffer.GetRemainingSpace());
                     _packetBuffer.Write(args.Buffer, 0, readHeaderSize);
 
                     if (_packetBuffer.GetRemainingSpace() > 0)
@@ -149,15 +149,15 @@ namespace Game.Networking
                         return;
                     }
 
-                    ByteBuffer buffer = new ByteBuffer(_packetBuffer.GetData());
-                    string initializer = buffer.ReadString((uint)ClientConnectionInitialize.Length);
+                    var buffer = new ByteBuffer(_packetBuffer.GetData());
+                    var initializer = buffer.ReadString((uint)ClientConnectionInitialize.Length);
                     if (initializer != ClientConnectionInitialize)
                     {
                         CloseSocket();
                         return;
                     }
 
-                    byte terminator = buffer.ReadUInt8();
+                    var terminator = buffer.ReadUInt8();
                     if (terminator != '\n')
                     {
                         CloseSocket();
@@ -190,13 +190,13 @@ namespace Game.Networking
             if (!IsOpen())
                 return;
 
-            int currentReadIndex = 0;
+            var currentReadIndex = 0;
             while (currentReadIndex < args.BytesTransferred)
             {
                 if (_headerBuffer.GetRemainingSpace() > 0)
                 {
                     // need to receive the header
-                    int readHeaderSize = Math.Min(args.BytesTransferred - currentReadIndex, _headerBuffer.GetRemainingSpace());
+                    var readHeaderSize = Math.Min(args.BytesTransferred - currentReadIndex, _headerBuffer.GetRemainingSpace());
                     _headerBuffer.Write(args.Buffer, currentReadIndex, readHeaderSize);
                     currentReadIndex += readHeaderSize;
 
@@ -215,7 +215,7 @@ namespace Game.Networking
                 if (_packetBuffer.GetRemainingSpace() > 0)
                 {
                     // need more data in the payload
-                    int readDataSize = Math.Min(args.BytesTransferred - currentReadIndex, _packetBuffer.GetRemainingSpace());
+                    var readDataSize = Math.Min(args.BytesTransferred - currentReadIndex, _packetBuffer.GetRemainingSpace());
                     _packetBuffer.Write(args.Buffer, currentReadIndex, readDataSize);
                     currentReadIndex += readDataSize;
 
@@ -224,7 +224,7 @@ namespace Game.Networking
                 }
 
                 // just received fresh new payload
-                ReadDataHandlerResult result = ReadData();
+                var result = ReadData();
                 _headerBuffer.Reset();
                 if (result != ReadDataHandlerResult.Ok)
                 {
@@ -240,7 +240,7 @@ namespace Game.Networking
 
         bool ReadHeader()
         {
-            PacketHeader header = new PacketHeader();
+            var header = new PacketHeader();
             header.Read(_headerBuffer.GetData());
 
             if (!header.IsValidSize())
@@ -255,7 +255,7 @@ namespace Game.Networking
 
         ReadDataHandlerResult ReadData()
         {
-            PacketHeader header = new PacketHeader();
+            var header = new PacketHeader();
             header.Read(_headerBuffer.GetData());
 
             if (!_worldCrypt.Decrypt(_packetBuffer.GetData(), header.Tag))
@@ -264,7 +264,7 @@ namespace Game.Networking
                 return ReadDataHandlerResult.Error;
             }
 
-            WorldPacket packet = new WorldPacket(_packetBuffer.GetData());
+            var packet = new WorldPacket(_packetBuffer.GetData());
             _packetBuffer.Reset();
 
             if (packet.GetOpcode() >= (int)ClientOpcodes.Max)
@@ -276,11 +276,11 @@ namespace Game.Networking
 
             PacketLog.Write(packet.GetData(), packet.GetOpcode(), GetRemoteIpAddress(), _connectType, true);
 
-            ClientOpcodes opcode = (ClientOpcodes)packet.GetOpcode();
+            var opcode = (ClientOpcodes)packet.GetOpcode();
             switch (opcode)
             {
                 case ClientOpcodes.Ping:
-                    Ping ping = new Ping(packet);
+                    var ping = new Ping(packet);
                     ping.Read();
                     if (!HandlePing(ping))
                         return ReadDataHandlerResult.Error;
@@ -292,7 +292,7 @@ namespace Game.Networking
                         return ReadDataHandlerResult.Error;
                     }
 
-                    AuthSession authSession = new AuthSession(packet);
+                    var authSession = new AuthSession(packet);
                     authSession.Read();
                     HandleAuthSession(authSession);
                     return ReadDataHandlerResult.WaitingForQuery;
@@ -303,7 +303,7 @@ namespace Game.Networking
                         return ReadDataHandlerResult.Error;
                     }
 
-                    AuthContinuedSession authContinuedSession = new AuthContinuedSession(packet);
+                    var authContinuedSession = new AuthContinuedSession(packet);
                     authContinuedSession.Read();
                     HandleAuthContinuedSession(authContinuedSession);
                     return ReadDataHandlerResult.WaitingForQuery;
@@ -317,7 +317,7 @@ namespace Game.Networking
                     SetNoDelay(false);
                     break;
                 case ClientOpcodes.ConnectToFailed:
-                    ConnectToFailed connectToFailed = new ConnectToFailed(packet);
+                    var connectToFailed = new ConnectToFailed(packet);
                     connectToFailed.Read();
                     HandleConnectToFailed(connectToFailed);
                     break;
@@ -360,19 +360,19 @@ namespace Game.Networking
             packet.WritePacketData();
 
             var data = packet.GetData();
-            ServerOpcodes opcode = packet.GetOpcode();
+            var opcode = packet.GetOpcode();
             PacketLog.Write(data, (uint)opcode, GetRemoteIpAddress(), _connectType, false);
 
-            ByteBuffer buffer = new ByteBuffer();
+            var buffer = new ByteBuffer();
 
-            int packetSize = data.Length;
+            var packetSize = data.Length;
             if (packetSize > 0x400 && _worldCrypt.IsInitialized)
             {
                 buffer.WriteInt32(packetSize + 2);
                 buffer.WriteUInt32(ZLib.adler32(ZLib.adler32(0x9827D8F1, BitConverter.GetBytes((ushort)opcode), 2), data, (uint)packetSize));
 
                 byte[] compressedData;
-                uint compressedSize = CompressPacket(data, opcode, out compressedData);
+                var compressedSize = CompressPacket(data, opcode, out compressedData);
                 buffer.WriteUInt32(ZLib.adler32(0x9827D8F1, compressedData, compressedSize)); 
                 buffer.WriteBytes(compressedData, compressedSize);
 
@@ -389,11 +389,11 @@ namespace Game.Networking
 
             data = buffer.GetData();
 
-            PacketHeader header = new PacketHeader();
+            var header = new PacketHeader();
             header.Size = packetSize;
             _worldCrypt.Encrypt(ref data, ref header.Tag);
 
-            ByteBuffer byteBuffer = new ByteBuffer();
+            var byteBuffer = new ByteBuffer();
             header.Write(byteBuffer);
             byteBuffer.WriteBytes(data);
 
@@ -408,9 +408,9 @@ namespace Game.Networking
 
         public uint CompressPacket(byte[] data, ServerOpcodes opcode, out byte[] outData)
         {
-            byte[] uncompressedData = BitConverter.GetBytes((ushort)opcode).Combine(data);
+            var uncompressedData = BitConverter.GetBytes((ushort)opcode).Combine(data);
 
-            uint bufferSize = ZLib.deflateBound(_compressionStream, (uint)data.Length);
+            var bufferSize = ZLib.deflateBound(_compressionStream, (uint)data.Length);
             outData = new byte[bufferSize];
 
             _compressionStream.next_out = 0;
@@ -421,7 +421,7 @@ namespace Game.Networking
             _compressionStream.avail_in = (uint)uncompressedData.Length;
             _compressionStream.in_buf = uncompressedData;
 
-            int z_res = ZLib.deflate(_compressionStream, 2);
+            var z_res = ZLib.deflate(_compressionStream, 2);
             if (z_res != 0)
             {
                 Log.outError(LogFilter.Network, "Can't compress packet data (zlib: deflate) Error code: {0} msg: {1}", z_res, _compressionStream.msg);
@@ -451,7 +451,7 @@ namespace Game.Networking
 
         void HandleSendAuthSession()
         {
-            AuthChallenge challenge = new AuthChallenge();
+            var challenge = new AuthChallenge();
             challenge.Challenge = _serverChallenge;
             challenge.DosChallenge = new byte[32].GenerateRandomKey(32);
             challenge.DosZeroBits = 1;
@@ -462,7 +462,7 @@ namespace Game.Networking
         void HandleAuthSession(AuthSession authSession)
         {
             // Get the account information from the realmd database
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_INFO_BY_NAME);
+            var stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_INFO_BY_NAME);
             stmt.AddValue(0, Global.WorldMgr.GetRealm().Id.Index);
             stmt.AddValue(1, authSession.RealmJoinTicket);
 
@@ -479,7 +479,7 @@ namespace Game.Networking
                 return;
             }
 
-            RealmBuildInfo buildInfo = Global.RealmMgr.GetBuildInfo(Global.WorldMgr.GetRealm().Build);
+            var buildInfo = Global.RealmMgr.GetBuildInfo(Global.WorldMgr.GetRealm().Build);
             if (buildInfo == null)
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.BadVersion);
@@ -488,12 +488,12 @@ namespace Game.Networking
                 return;
             }
 
-            AccountInfo account = new AccountInfo(result.GetFields());
+            var account = new AccountInfo(result.GetFields());
 
             // For hook purposes, we get Remoteaddress at this point.
             var address = GetRemoteIpAddress();
 
-            Sha256 digestKeyHash = new Sha256();
+            var digestKeyHash = new Sha256();
             digestKeyHash.Process(account.game.SessionKey, account.game.SessionKey.Length);
             if (account.game.OS == "Wn64")
                 digestKeyHash.Finish(buildInfo.Win64AuthSeed);
@@ -506,7 +506,7 @@ namespace Game.Networking
                 return;
             }
 
-            HmacSha256 hmac = new HmacSha256(digestKeyHash.Digest);
+            var hmac = new HmacSha256(digestKeyHash.Digest);
             hmac.Process(authSession.LocalChallenge, authSession.LocalChallenge.Count);
             hmac.Process(_serverChallenge, 16);
             hmac.Finish(AuthCheckSeed, 16);
@@ -519,10 +519,10 @@ namespace Game.Networking
                 return;
             }
 
-            Sha256 keyData = new Sha256();
+            var keyData = new Sha256();
             keyData.Finish(account.game.SessionKey);
 
-            HmacSha256 sessionKeyHmac = new HmacSha256(keyData.Digest);
+            var sessionKeyHmac = new HmacSha256(keyData.Digest);
             sessionKeyHmac.Process(_serverChallenge, 16);
             sessionKeyHmac.Process(authSession.LocalChallenge, authSession.LocalChallenge.Count);
             sessionKeyHmac.Finish(SessionKeySeed, 16);
@@ -531,7 +531,7 @@ namespace Game.Networking
             var sessionKeyGenerator = new SessionKeyGenerator(sessionKeyHmac.Digest, 32);
             sessionKeyGenerator.Generate(_sessionKey, 40);
 
-            HmacSha256 encryptKeyGen = new HmacSha256(_sessionKey);
+            var encryptKeyGen = new HmacSha256(_sessionKey);
             encryptKeyGen.Process(authSession.LocalChallenge, authSession.LocalChallenge.Count);
             encryptKeyGen.Process(_serverChallenge, 16);
             encryptKeyGen.Finish(EncryptionKeySeed, 16);
@@ -540,7 +540,7 @@ namespace Game.Networking
             Buffer.BlockCopy(encryptKeyGen.Digest, 0, _encryptKey, 0, 16);
 
             // As we don't know if attempted login process by ip works, we update last_attempt_ip right away
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_LAST_ATTEMPT_IP);
+            var stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_LAST_ATTEMPT_IP);
             stmt.AddValue(0, address.Address.ToString());
             stmt.AddValue(1, authSession.RealmJoinTicket);
 
@@ -571,7 +571,7 @@ namespace Game.Networking
             }
 
             // Must be done before WorldSession is created
-            bool wardenActive = WorldConfig.GetBoolValue(WorldCfg.WardenEnabled);
+            var wardenActive = WorldConfig.GetBoolValue(WorldCfg.WardenEnabled);
             if (wardenActive && account.game.OS != "Win" && account.game.OS != "Wn64" && account.game.OS != "Mc64")
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.Denied);
@@ -602,7 +602,7 @@ namespace Game.Networking
                 }
             }
 
-            long mutetime = account.game.MuteTime;
+            var mutetime = account.game.MuteTime;
             //! Negative mutetime indicates amount of seconds to be muted effective on next login - which is now.
             if (mutetime < 0)
             {
@@ -623,7 +623,7 @@ namespace Game.Networking
             }
 
             // Check locked state for server
-            AccountTypes allowedAccountType = Global.WorldMgr.GetPlayerSecurityLimit();
+            var allowedAccountType = Global.WorldMgr.GetPlayerSecurityLimit();
             if (allowedAccountType > AccountTypes.Player && account.game.Security < allowedAccountType)
             {
                 SendAuthResponseError(BattlenetRpcErrorCode.ServerIsPrivate);
@@ -661,7 +661,7 @@ namespace Game.Networking
 
         void HandleAuthContinuedSession(AuthContinuedSession authSession)
         {
-            ConnectToKey key = new ConnectToKey();
+            var key = new ConnectToKey();
             _key = key.Raw = authSession.Key;
 
             _connectType = key.connectionType;
@@ -672,8 +672,8 @@ namespace Game.Networking
                 return;
             }
 
-            uint accountId = key.AccountId;
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_INFO_CONTINUED_SESSION);
+            var accountId = key.AccountId;
+            var stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_INFO_CONTINUED_SESSION);
             stmt.AddValue(0, accountId);
 
             _queryProcessor.AddCallback(DB.Login.AsyncQuery(stmt).WithCallback(HandleAuthContinuedSessionCallback, authSession));
@@ -688,14 +688,14 @@ namespace Game.Networking
                 return;
             }
 
-            ConnectToKey key = new ConnectToKey();
+            var key = new ConnectToKey();
             _key = key.Raw = authSession.Key;
 
-            uint accountId = key.AccountId;
-            string login = result.Read<string>(0);
+            var accountId = key.AccountId;
+            var login = result.Read<string>(0);
             _sessionKey = result.Read<byte[]>(1);
 
-            HmacSha256 hmac = new HmacSha256(_sessionKey);
+            var hmac = new HmacSha256(_sessionKey);
             hmac.Process(BitConverter.GetBytes(authSession.Key), 8);
             hmac.Process(authSession.LocalChallenge, authSession.LocalChallenge.Length);
             hmac.Process(_serverChallenge, 16);
@@ -708,7 +708,7 @@ namespace Game.Networking
                 return;
             }
 
-            HmacSha256 encryptKeyGen = new HmacSha256(_sessionKey);
+            var encryptKeyGen = new HmacSha256(_sessionKey);
             encryptKeyGen.Process(authSession.LocalChallenge, authSession.LocalChallenge.Length);
             encryptKeyGen.Process(_serverChallenge, 16);
             encryptKeyGen.Finish(EncryptionKeySeed, 16);
@@ -770,7 +770,7 @@ namespace Game.Networking
 
         public void SendAuthResponseError(BattlenetRpcErrorCode code)
         {
-            AuthResponse response = new AuthResponse();
+            var response = new AuthResponse();
             response.SuccessInfo.HasValue = false;
             response.WaitInfo.HasValue = false;
             response.Result = code;
@@ -783,15 +783,15 @@ namespace Game.Networking
                 _LastPingTime = Time.UnixTime; // for 1st ping
             else
             {
-                long now = Time.UnixTime;
-                long diff = now - _LastPingTime;
+                var now = Time.UnixTime;
+                var diff = now - _LastPingTime;
                 _LastPingTime = now;
 
                 if (diff < 27)
                 {
                     ++_OverSpeedPings;
 
-                    uint maxAllowed = WorldConfig.GetUIntValue(WorldCfg.MaxOverspeedPings);
+                    var maxAllowed = WorldConfig.GetUIntValue(WorldCfg.MaxOverspeedPings);
                     if (maxAllowed != 0 && _OverSpeedPings > maxAllowed)
                     {
                         lock (_worldSessionLock)

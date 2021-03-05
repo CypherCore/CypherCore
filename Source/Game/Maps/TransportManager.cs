@@ -38,9 +38,9 @@ namespace Game.Maps
 
         public void LoadTransportTemplates()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
-            SQLResult result = DB.World.Query("SELECT entry FROM gameobject_template WHERE type = 15 ORDER BY entry ASC");
+            var result = DB.World.Query("SELECT entry FROM gameobject_template WHERE type = 15 ORDER BY entry ASC");
 
             if (result.IsEmpty())
             {
@@ -52,7 +52,7 @@ namespace Game.Maps
 
             do
             {
-                uint entry = result.Read<uint>(0);
+                var entry = result.Read<uint>(0);
                 GameObjectTemplate goInfo = Global.ObjectMgr.GetGameObjectTemplate(entry);
                 if (goInfo == null)
                 {
@@ -70,7 +70,7 @@ namespace Game.Maps
                     continue;
 
                 // paths are generated per template, saves us from generating it again in case of instanced transports
-                TransportTemplate transport = new TransportTemplate();
+                var transport = new TransportTemplate();
                 transport.entry = entry;
                 GeneratePath(goInfo, transport);
 
@@ -89,21 +89,21 @@ namespace Game.Maps
 
         public void LoadTransportAnimationAndRotation()
         {
-            foreach (TransportAnimationRecord anim in CliDB.TransportAnimationStorage.Values)
+            foreach (var anim in CliDB.TransportAnimationStorage.Values)
                 AddPathNodeToTransport(anim.TransportID, anim.TimeIndex, anim);
 
-            foreach (TransportRotationRecord rot in CliDB.TransportRotationStorage.Values)
+            foreach (var rot in CliDB.TransportRotationStorage.Values)
                 AddPathRotationToTransport(rot.GameObjectsID, rot.TimeIndex, rot);
         }
 
         void GeneratePath(GameObjectTemplate goInfo, TransportTemplate transport)
         {
-            uint pathId = goInfo.MoTransport.taxiPathID;
+            var pathId = goInfo.MoTransport.taxiPathID;
             var path = CliDB.TaxiPathNodesByPath[pathId];
-            List<KeyFrame> keyFrames = transport.keyFrames;
-            List<Vector3> splinePath = new List<Vector3>();
-            List<Vector3> allPoints = new List<Vector3>();
-            bool mapChange = false;
+            var keyFrames = transport.keyFrames;
+            var splinePath = new List<Vector3>();
+            var allPoints = new List<Vector3>();
+            var mapChange = false;
 
             for (uint i = 0; i < path.Length; ++i)
                 allPoints.Add(new Vector3(path[i].Loc.X, path[i].Loc.Y, path[i].Loc.Z));
@@ -113,8 +113,8 @@ namespace Game.Maps
             allPoints.Add(allPoints.Last().lerp(allPoints[allPoints.Count - 2], -0.2f));
             allPoints.Add(allPoints.Last().lerp(allPoints[allPoints.Count - 2], -1.0f));
 
-            SplineRawInitializer initer = new SplineRawInitializer(allPoints);
-            Spline orientationSpline = new Spline();
+            var initer = new SplineRawInitializer(allPoints);
+            var orientationSpline = new Spline();
             orientationSpline.InitSplineCustom(initer);
             orientationSpline.InitLengths();
 
@@ -130,7 +130,7 @@ namespace Game.Maps
                     }
                     else
                     {
-                        KeyFrame k = new KeyFrame(node_i);
+                        var k = new KeyFrame(node_i);
                         Vector3 h;
                         orientationSpline.Evaluate_Derivative((int)(i + 1), 0.0f, out h);
                         k.InitialOrientation = Position.NormalizeOrientation((float)Math.Atan2(h.Y, h.X) + MathFunctions.PI);
@@ -177,13 +177,13 @@ namespace Game.Maps
 
             float speed = goInfo.MoTransport.moveSpeed;
             float accel = goInfo.MoTransport.accelRate;
-            float accel_dist = 0.5f * speed * speed / accel;
+            var accel_dist = 0.5f * speed * speed / accel;
 
             transport.accelTime = speed / accel;
             transport.accelDist = accel_dist;
 
-            int firstStop = -1;
-            int lastStop = -1;
+            var firstStop = -1;
+            var lastStop = -1;
 
             // first cell is arrived at by teleportation :S
             keyFrames[0].DistFromPrev = 0;
@@ -196,17 +196,17 @@ namespace Game.Maps
 
             // find the rest of the distances between key points
             // Every path segment has its own spline
-            int start = 0;
-            for (int i = 1; i < keyFrames.Count; ++i)
+            var start = 0;
+            for (var i = 1; i < keyFrames.Count; ++i)
             {
                 if (keyFrames[i - 1].Teleport || i + 1 == keyFrames.Count)
                 {
-                    int extra = !keyFrames[i - 1].Teleport ? 1 : 0;
-                    Spline spline = new Spline();
+                    var extra = !keyFrames[i - 1].Teleport ? 1 : 0;
+                    var spline = new Spline();
                     Span<Vector3> span = splinePath.ToArray();
                     spline.InitSpline(span.Slice(start), i - start + extra, Spline.EvaluationMode.Catmullrom);
                     spline.InitLengths();
-                    for (int j = start; j < i + extra; ++j)
+                    for (var j = start; j < i + extra; ++j)
                     {
                         keyFrames[j].Index = (uint)(j - start + 1);
                         keyFrames[j].DistFromPrev = spline.Length(j - start, j + 1 - start);
@@ -242,10 +242,10 @@ namespace Game.Maps
             // at stopping keyframes, we define distSinceStop == 0,
             // and distUntilStop is to the next stopping keyframe.
             // this is required to properly handle cases of two stopping frames in a row (yes they do exist)
-            float tmpDist = 0.0f;
-            for (int i = 0; i < keyFrames.Count; ++i)
+            var tmpDist = 0.0f;
+            for (var i = 0; i < keyFrames.Count; ++i)
             {
-                int j = (i + lastStop) % keyFrames.Count;
+                var j = (i + lastStop) % keyFrames.Count;
                 if (keyFrames[j].IsStopFrame() || j == lastStop)
                     tmpDist = 0.0f;
                 else
@@ -254,24 +254,24 @@ namespace Game.Maps
             }
 
             tmpDist = 0.0f;
-            for (int i = (keyFrames.Count - 1); i >= 0; i--)
+            for (var i = (keyFrames.Count - 1); i >= 0; i--)
             {
-                int j = (i + firstStop) % keyFrames.Count;
+                var j = (i + firstStop) % keyFrames.Count;
                 tmpDist += keyFrames[(j + 1) % keyFrames.Count].DistFromPrev;
                 keyFrames[j].DistUntilStop = tmpDist;
                 if (keyFrames[j].IsStopFrame() || j == firstStop)
                     tmpDist = 0.0f;
             }
 
-            for (int i = 0; i < keyFrames.Count; ++i)
+            for (var i = 0; i < keyFrames.Count; ++i)
             {
-                float total_dist = keyFrames[i].DistSinceStop + keyFrames[i].DistUntilStop;
+                var total_dist = keyFrames[i].DistSinceStop + keyFrames[i].DistUntilStop;
                 if (total_dist < 2 * accel_dist) // won't reach full speed
                 {
                     if (keyFrames[i].DistSinceStop < keyFrames[i].DistUntilStop) // is still accelerating
                     {
                         // calculate accel+brake time for this short segment
-                        float segment_time = 2.0f * (float)Math.Sqrt((keyFrames[i].DistUntilStop + keyFrames[i].DistSinceStop) / accel);
+                        var segment_time = 2.0f * (float)Math.Sqrt((keyFrames[i].DistUntilStop + keyFrames[i].DistSinceStop) / accel);
                         // substract acceleration time
                         keyFrames[i].TimeTo = segment_time - (float)Math.Sqrt(2 * keyFrames[i].DistSinceStop / accel);
                     }
@@ -281,7 +281,7 @@ namespace Game.Maps
                 else if (keyFrames[i].DistSinceStop < accel_dist) // still accelerating (but will reach full speed)
                 {
                     // calculate accel + cruise + brake time for this long segment
-                    float segment_time = (keyFrames[i].DistUntilStop + keyFrames[i].DistSinceStop) / speed + (speed / accel);
+                    var segment_time = (keyFrames[i].DistUntilStop + keyFrames[i].DistSinceStop) / speed + (speed / accel);
                     // substract acceleration time
                     keyFrames[i].TimeTo = segment_time - (float)Math.Sqrt(2 * keyFrames[i].DistSinceStop / accel);
                 }
@@ -292,10 +292,10 @@ namespace Game.Maps
             }
 
             // calculate tFrom times from tTo times
-            float segmentTime = 0.0f;
-            for (int i = 0; i < keyFrames.Count; ++i)
+            var segmentTime = 0.0f;
+            for (var i = 0; i < keyFrames.Count; ++i)
             {
-                int j = (i + lastStop) % keyFrames.Count;
+                var j = (i + lastStop) % keyFrames.Count;
                 if (keyFrames[j].IsStopFrame() || j == lastStop)
                     segmentTime = keyFrames[j].TimeTo;
                 keyFrames[j].TimeFrom = segmentTime - keyFrames[j].TimeTo;
@@ -303,14 +303,14 @@ namespace Game.Maps
 
             // calculate path times
             keyFrames[0].ArriveTime = 0;
-            float curPathTime = 0.0f;
+            var curPathTime = 0.0f;
             if (keyFrames[0].IsStopFrame())
             {
                 curPathTime = keyFrames[0].Node.Delay;
                 keyFrames[0].DepartureTime = (uint)(curPathTime * Time.InMilliseconds);
             }
 
-            for (int i = 1; i < keyFrames.Count; ++i)
+            for (var i = 1; i < keyFrames.Count; ++i)
             {
                 curPathTime += keyFrames[i - 1].TimeTo;
                 if (keyFrames[i].IsStopFrame())
@@ -339,7 +339,7 @@ namespace Game.Maps
 
         public void AddPathNodeToTransport(uint transportEntry, uint timeSeg, TransportAnimationRecord node)
         {
-            TransportAnimation animNode = new TransportAnimation();
+            var animNode = new TransportAnimation();
             if (animNode.TotalTime < timeSeg)
                 animNode.TotalTime = timeSeg;
 
@@ -356,7 +356,7 @@ namespace Game.Maps
                 // SetZoneScript() is called after adding to map, so fetch the script using map
                 if (map.IsDungeon())
                 {
-                    InstanceScript instance = ((InstanceMap)map).GetInstanceScript();
+                    var instance = ((InstanceMap)map).GetInstanceScript();
                     if (instance != null)
                         entry = instance.GetGameObjectEntry(0, entry);
                 }
@@ -365,7 +365,7 @@ namespace Game.Maps
                     return null;
             }
 
-            TransportTemplate tInfo = GetTransportTemplate(entry);
+            var tInfo = GetTransportTemplate(entry);
             if (tInfo == null)
             {
                 Log.outError(LogFilter.Sql, "Transport {0} will not be loaded, `transport_template` missing", entry);
@@ -373,24 +373,24 @@ namespace Game.Maps
             }
 
             // create transport...
-            Transport trans = new Transport();
+            var trans = new Transport();
 
             // ...at first waypoint
-            TaxiPathNodeRecord startNode = tInfo.keyFrames.First().Node;
+            var startNode = tInfo.keyFrames.First().Node;
             uint mapId = startNode.ContinentID;
-            float x = startNode.Loc.X;
-            float y = startNode.Loc.Y;
-            float z = startNode.Loc.Z;
-            float o = tInfo.keyFrames.First().InitialOrientation;
+            var x = startNode.Loc.X;
+            var y = startNode.Loc.Y;
+            var z = startNode.Loc.Z;
+            var o = tInfo.keyFrames.First().InitialOrientation;
 
             // initialize the gameobject base
-            ulong guidLow = guid != 0 ? guid : map.GenerateLowGuid(HighGuid.Transport);
+            var guidLow = guid != 0 ? guid : map.GenerateLowGuid(HighGuid.Transport);
             if (!trans.Create(guidLow, entry, mapId, x, y, z, o, 255))
                 return null;
 
             PhasingHandler.InitDbPhaseShift(trans.GetPhaseShift(), phaseUseFlags, phaseId, phaseGroupId);
 
-            MapRecord mapEntry = CliDB.MapStorage.LookupByKey(mapId);
+            var mapEntry = CliDB.MapStorage.LookupByKey(mapId);
             if (mapEntry != null)
             {
                 if (mapEntry.Instanceable() != tInfo.inInstance)
@@ -417,20 +417,20 @@ namespace Game.Maps
             if (_transportTemplates.Empty())
                 return;
 
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
-            SQLResult result = DB.World.Query("SELECT guid, entry, phaseUseFlags, phaseid, phasegroup FROM transports");
+            var result = DB.World.Query("SELECT guid, entry, phaseUseFlags, phaseid, phasegroup FROM transports");
 
             uint count = 0;
             if (!result.IsEmpty())
             {
                 do
                 {
-                    ulong guid = result.Read<ulong>(0);
-                    uint entry = result.Read<uint>(1);
-                    PhaseUseFlagsValues phaseUseFlags = (PhaseUseFlagsValues)result.Read<byte>(2);
-                    uint phaseId = result.Read<uint>(3);
-                    uint phaseGroupId = result.Read<uint>(4);
+                    var guid = result.Read<ulong>(0);
+                    var entry = result.Read<uint>(1);
+                    var phaseUseFlags = (PhaseUseFlagsValues)result.Read<byte>(2);
+                    var phaseId = result.Read<uint>(3);
+                    var phaseGroupId = result.Read<uint>(4);
 
                     if (Convert.ToBoolean(phaseUseFlags & ~PhaseUseFlagsValues.All))
                     {
@@ -469,7 +469,7 @@ namespace Game.Maps
                         }
                     }
 
-                    TransportTemplate tInfo = GetTransportTemplate(entry);
+                    var tInfo = GetTransportTemplate(entry);
                     if (tInfo != null)
                         if (!tInfo.inInstance)
                             if (CreateTransport(entry, guid, null, phaseUseFlags, phaseId, phaseGroupId))

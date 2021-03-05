@@ -88,7 +88,7 @@ namespace Framework.Database
                 using (var Connection = _connectionInfo.GetConnection())
                 {
                     Connection.Open();
-                    using (MySqlCommand cmd = Connection.CreateCommand())
+                    using (var cmd = Connection.CreateCommand())
                     {
                         cmd.CommandText = stmt.CommandText;
                         foreach (var parameter in stmt.Parameters)
@@ -113,7 +113,7 @@ namespace Framework.Database
 
         public void Execute(PreparedStatement stmt)
         {
-            PreparedStatementTask task = new PreparedStatementTask(stmt);
+            var task = new PreparedStatementTask(stmt);
             _queue.Push(task);
         }
 
@@ -134,10 +134,10 @@ namespace Framework.Database
         {
             try
             {
-                MySqlConnection Connection = _connectionInfo.GetConnection();
+                var Connection = _connectionInfo.GetConnection();
                 Connection.Open();
 
-                MySqlCommand cmd = Connection.CreateCommand();
+                var cmd = Connection.CreateCommand();
                 cmd.CommandText = stmt.CommandText;
                 foreach (var parameter in stmt.Parameters)
                     cmd.Parameters.AddWithValue("@" + parameter.Key, parameter.Value);
@@ -153,18 +153,18 @@ namespace Framework.Database
 
         public QueryCallback AsyncQuery(PreparedStatement stmt)
         {
-            PreparedStatementTask task = new PreparedStatementTask(stmt, true);
+            var task = new PreparedStatementTask(stmt, true);
             // Store future result before enqueueing - task might get already processed and deleted before returning from this method
-            Task<SQLResult> result = task.GetFuture();
+            var result = task.GetFuture();
             _queue.Push(task);
             return new QueryCallback(result);
         }
 
         public Task<SQLQueryHolder<R>> DelayQueryHolder<R>(SQLQueryHolder<R> holder)
         {
-            SQLQueryHolderTask<R> task = new SQLQueryHolderTask<R>(holder);
+            var task = new SQLQueryHolderTask<R>(holder);
             // Store future result before enqueueing - task might get already processed and deleted before returning from this method
-            Task<SQLQueryHolder<R>> result = task.GetFuture();
+            var result = task.GetFuture();
             _queue.Push(task);
             return result;
         }
@@ -176,8 +176,8 @@ namespace Framework.Database
 
         public void PrepareStatement(T statement, string sql)
         {
-            StringBuilder sb = new StringBuilder();
-            int index = 0;
+            var sb = new StringBuilder();
+            var index = 0;
             for (var i = 0; i < sql.Length; i++)
             {
                 if (sql[i].Equals('?'))
@@ -201,7 +201,7 @@ namespace Framework.Database
                 using (var Connection = _connectionInfo.GetConnectionNoDatabase())
                 {
                     Connection.Open();
-                    using (MySqlCommand cmd = Connection.CreateCommand())
+                    using (var cmd = Connection.CreateCommand())
                     {
                         cmd.CommandText = sql;
                         cmd.ExecuteNonQuery();
@@ -220,7 +220,7 @@ namespace Framework.Database
         {
             try
             {
-                string query = File.ReadAllText(path);
+                var query = File.ReadAllText(path);
                 if (query.IsEmpty())
                     return false;
 
@@ -230,7 +230,7 @@ namespace Framework.Database
                 using (var connection = _connectionInfo.GetConnection())
                 {
                     connection.Open();
-                    using (MySqlCommand cmd = connection.CreateCommand())
+                    using (var cmd = connection.CreateCommand())
                     {
                         cmd.CommandTimeout = 120;
                         cmd.CommandText = query;
@@ -258,8 +258,8 @@ namespace Framework.Database
 
         public TransactionCallback AsyncCommitTransaction(SQLTransaction transaction)
         {
-            TransactionWithResultTask task = new TransactionWithResultTask(transaction);
-            Task<bool> result = task.GetFuture();
+            var task = new TransactionWithResultTask(transaction);
+            var result = task.GetFuture();
             _queue.Push(task);
             return new TransactionCallback(result);
         }
@@ -268,10 +268,10 @@ namespace Framework.Database
         {
             using (var Connection = _connectionInfo.GetConnection())
             {
-                string query = "";
+                var query = "";
 
                 Connection.Open();
-                using (MySqlTransaction trans = Connection.BeginTransaction())
+                using (var trans = Connection.BeginTransaction())
                 {
                     try
                     {
@@ -301,11 +301,11 @@ namespace Framework.Database
 
         MySqlErrorCode HandleMySQLException(MySqlException ex, string query = "", Dictionary<int, object> parameters = null)
         {
-            MySqlErrorCode code = (MySqlErrorCode)ex.Number;
+            var code = (MySqlErrorCode)ex.Number;
             if (ex.InnerException is MySqlException)
                 code = (MySqlErrorCode)((MySqlException)ex.InnerException).Number;
 
-            StringBuilder stringBuilder = new StringBuilder($"SqlException: MySqlErrorCode: {code} Message: {ex.Message} SqlQuery: {query} ");
+            var stringBuilder = new StringBuilder($"SqlException: MySqlErrorCode: {code} Message: {ex.Message} SqlQuery: {query} ");
             if (parameters != null)
             {
                 stringBuilder.Append("Parameters: ");

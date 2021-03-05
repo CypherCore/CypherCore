@@ -27,11 +27,11 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.DbQueryBulk, Processing = PacketProcessing.Inplace, Status = SessionStatus.Authed)]
         void HandleDBQueryBulk(DBQueryBulk dbQuery)
         {
-            IDB2Storage store = Global.DB2Mgr.GetStorage(dbQuery.TableHash);
+            var store = Global.DB2Mgr.GetStorage(dbQuery.TableHash);
 
-            foreach (DBQueryBulk.DBQueryRecord record in dbQuery.Queries)
+            foreach (var record in dbQuery.Queries)
             {
-                DBReply dbReply = new DBReply();
+                var dbReply = new DBReply();
                 dbReply.TableHash = dbQuery.TableHash;
                 dbReply.RecordID = record.RecordID;
 
@@ -42,7 +42,7 @@ namespace Game
                     store.WriteRecord(record.RecordID, GetSessionDbcLocale(), dbReply.Data);
 
                     var optionalDataEntries = Global.DB2Mgr.GetHotfixOptionalData(dbQuery.TableHash, record.RecordID, GetSessionDbcLocale());
-                    foreach (HotfixOptionalData optionalData in optionalDataEntries)
+                    foreach (var optionalData in optionalDataEntries)
                     {
                         dbReply.Data.WriteUInt32(optionalData.Key);
                         dbReply.Data.WriteBytes(optionalData.Data);
@@ -68,24 +68,24 @@ namespace Game
         {
             var hotfixes = Global.DB2Mgr.GetHotfixData();
 
-            HotfixConnect hotfixQueryResponse = new HotfixConnect();
-            foreach (HotfixRecord hotfixRecord in hotfixQuery.Hotfixes)
+            var hotfixQueryResponse = new HotfixConnect();
+            foreach (var hotfixRecord in hotfixQuery.Hotfixes)
             {
                 var serverHotfixIndex = hotfixes.IndexOf(hotfixRecord);
                 if (serverHotfixIndex != -1)
                 {
-                    HotfixConnect.HotfixData hotfixData = new HotfixConnect.HotfixData();
+                    var hotfixData = new HotfixConnect.HotfixData();
                     hotfixData.Record = hotfixes[serverHotfixIndex];
                     if (hotfixData.Record.HotfixStatus == HotfixRecord.Status.Valid)
                     {
                         var storage = Global.DB2Mgr.GetStorage(hotfixRecord.TableHash);
                         if (storage != null && storage.HasRecord((uint)hotfixRecord.RecordID))
                         {
-                            uint pos = hotfixQueryResponse.HotfixContent.GetSize();
+                            var pos = hotfixQueryResponse.HotfixContent.GetSize();
                             storage.WriteRecord((uint)hotfixRecord.RecordID, GetSessionDbcLocale(), hotfixQueryResponse.HotfixContent);
 
                             var optionalDataEntries = Global.DB2Mgr.GetHotfixOptionalData(hotfixRecord.TableHash, (uint)hotfixRecord.RecordID, GetSessionDbcLocale());
-                            foreach (HotfixOptionalData optionalData in optionalDataEntries)
+                            foreach (var optionalData in optionalDataEntries)
                             {
                                 hotfixQueryResponse.HotfixContent.WriteUInt32(optionalData.Key);
                                 hotfixQueryResponse.HotfixContent.WriteBytes(optionalData.Data);
@@ -95,7 +95,7 @@ namespace Game
                         }
                         else
                         {
-                            byte[] blobData = Global.DB2Mgr.GetHotfixBlobData(hotfixRecord.TableHash, hotfixRecord.RecordID, GetSessionDbcLocale());
+                            var blobData = Global.DB2Mgr.GetHotfixBlobData(hotfixRecord.TableHash, hotfixRecord.RecordID, GetSessionDbcLocale());
                             if (blobData != null)
                             {
                                 hotfixData.Size = (uint)blobData.Length;

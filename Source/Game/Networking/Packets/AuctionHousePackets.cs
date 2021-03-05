@@ -45,7 +45,7 @@ namespace Game.Networking.Packets
             MinLevel = _worldPacket.ReadUInt8();
             MaxLevel = _worldPacket.ReadUInt8();
             Filters = (AuctionHouseFilterMask)_worldPacket.ReadUInt32();
-            uint knownPetSize = _worldPacket.ReadUInt32();
+            var knownPetSize = _worldPacket.ReadUInt32();
             MaxPetLevel = _worldPacket.ReadInt8();
             for (var i = 0; i < knownPetSize; ++i)
                 KnownPets[i] = _worldPacket.ReadUInt8();
@@ -53,9 +53,9 @@ namespace Game.Networking.Packets
             if (_worldPacket.HasBit())
                 TaintedBy.HasValue = true;
 
-            uint nameLength = _worldPacket.ReadBits<uint>(8);
-            uint itemClassFilterCount = _worldPacket.ReadBits<uint>(3);
-            uint sortSize = _worldPacket.ReadBits<uint>(2);
+            var nameLength = _worldPacket.ReadBits<uint>(8);
+            var itemClassFilterCount = _worldPacket.ReadBits<uint>(3);
+            var sortSize = _worldPacket.ReadBits<uint>(2);
 
             for (var i = 0; i < sortSize; ++i)
                 Sorts[i] = new AuctionSortDef(_worldPacket);
@@ -135,8 +135,8 @@ namespace Game.Networking.Packets
              Offset = _worldPacket.ReadUInt32();
             TaintedBy.HasValue = _worldPacket.HasBit();
 
-            uint auctionIDCount = _worldPacket.ReadBits<uint>(7);
-            uint sortCount = _worldPacket.ReadBits<uint>(2);
+            var auctionIDCount = _worldPacket.ReadBits<uint>(7);
+            var sortCount = _worldPacket.ReadBits<uint>(2);
 
             for (var i = 0; i < sortCount; ++i)
                 Sorts[i] = new AuctionSortDef(_worldPacket);
@@ -163,8 +163,8 @@ namespace Game.Networking.Packets
             Auctioneer = _worldPacket.ReadPackedGuid();
             TaintedBy.HasValue = _worldPacket.HasBit();
 
-            uint bucketKeysCount = _worldPacket.ReadBits<uint>(7);
-            uint sortCount = _worldPacket.ReadBits<uint>(2);
+            var bucketKeysCount = _worldPacket.ReadBits<uint>(7);
+            var sortCount = _worldPacket.ReadBits<uint>(2);
 
             for (var i = 0; i < sortCount; ++i)
                 Sorts[i] = new AuctionSortDef(_worldPacket);
@@ -195,7 +195,7 @@ namespace Game.Networking.Packets
             Unknown830 = _worldPacket.ReadInt8();
             TaintedBy.HasValue = _worldPacket.HasBit();
 
-            uint sortCount = _worldPacket.ReadBits<uint>(2);
+            var sortCount = _worldPacket.ReadBits<uint>(2);
             for (var i = 0; i < sortCount; ++i)
                 Sorts[i] = new AuctionSortDef(_worldPacket);
 
@@ -227,7 +227,7 @@ namespace Game.Networking.Packets
             if (_worldPacket.HasBit())
                 TaintedBy.HasValue = true;
 
-            uint sortCount = _worldPacket.ReadBits<uint>(2);
+            var sortCount = _worldPacket.ReadBits<uint>(2);
 
             for (var i = 0; i < sortCount; ++i)
                 Sorts[i] = new AuctionSortDef(_worldPacket);
@@ -252,7 +252,7 @@ namespace Game.Networking.Packets
             Offset = _worldPacket.ReadUInt32();
             TaintedBy.HasValue = _worldPacket.HasBit();
 
-            uint sortCount = _worldPacket.ReadBits<uint>(2);
+            var sortCount = _worldPacket.ReadBits<uint>(2);
 
             for (var i = 0; i < sortCount; ++i)
                 Sorts[i] = new AuctionSortDef(_worldPacket);
@@ -343,7 +343,7 @@ namespace Game.Networking.Packets
             UnitPrice = _worldPacket.ReadUInt64();
             RunTime = _worldPacket.ReadUInt32();
             TaintedBy.HasValue = _worldPacket.HasBit();
-            uint itemCount = _worldPacket.ReadBits<uint>(6);
+            var itemCount = _worldPacket.ReadBits<uint>(6);
 
             if (TaintedBy.HasValue)
                 TaintedBy.Value.Read(_worldPacket);
@@ -372,7 +372,7 @@ namespace Game.Networking.Packets
             RunTime = _worldPacket.ReadUInt32();
 
             TaintedBy.HasValue = _worldPacket.HasBit();
-            uint itemCount = _worldPacket.ReadBits<uint>(6);
+            var itemCount = _worldPacket.ReadBits<uint>(6);
 
             if (TaintedBy.HasValue)
                 TaintedBy.Value.Read(_worldPacket);
@@ -519,7 +519,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(HasMoreResults);
             _worldPacket.FlushBits();
 
-            foreach (AuctionItem item in Items)
+            foreach (var item in Items)
                 item.Write(_worldPacket);
         }
     }
@@ -545,7 +545,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(HasMoreResults);
             _worldPacket.FlushBits();
 
-            foreach (BucketInfo bucketInfo in Buckets)
+            foreach (var bucketInfo in Buckets)
                 bucketInfo.Write(_worldPacket);
         }
     }
@@ -563,7 +563,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBits(Items.Count, 7);
             _worldPacket.FlushBits();
 
-            foreach (AuctionFavoriteInfo favoriteInfo in Items)
+            foreach (var favoriteInfo in Items)
                 favoriteInfo.Write(_worldPacket);
         }
     }
@@ -592,7 +592,7 @@ namespace Game.Networking.Packets
 
             BucketKey.Write(_worldPacket);
 
-            foreach (AuctionItem item in Items)
+            foreach (var item in Items)
                 item.Write(_worldPacket);
         }
     }
@@ -614,10 +614,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(HasMoreResults);
             _worldPacket.FlushBits();
 
-            foreach (AuctionItem item in Items)
+            foreach (var item in Items)
                 item.Write(_worldPacket);
 
-            foreach (AuctionItem item in SoldItems)
+            foreach (var item in SoldItems)
                 item.Write(_worldPacket);
         }
     }
@@ -674,7 +674,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(ChangeNumberTombstone);
             _worldPacket.WriteInt32(Items.Count);
 
-            foreach (AuctionItem item in Items)
+            foreach (var item in Items)
                 item.Write(_worldPacket);
         }
     }
@@ -769,7 +769,7 @@ namespace Game.Networking.Packets
         public AuctionListFilterClass(WorldPacket data)
         {
             ItemClass = data.ReadInt32();
-            uint subClassFilterCount = data.ReadBits<uint>(5);
+            var subClassFilterCount = data.ReadBits<uint>(5);
 
             for (var i =  0; i < subClassFilterCount; ++i)
                 SubClassFilters[i] = new AuctionListFilterSubClass(data);
@@ -960,7 +960,7 @@ namespace Game.Networking.Packets
             data.WriteInt32(DurationLeft);
             data.WriteUInt8(DeleteReason);
 
-            foreach (ItemEnchantData enchant in Enchantments)
+            foreach (var enchant in Enchantments)
                 enchant.Write(data);
 
             if (MinBid.HasValue)
@@ -991,7 +991,7 @@ namespace Game.Networking.Packets
                     data.WriteUInt64(BidAmount.Value);
             }
 
-            foreach (ItemGemData gem in Gems)
+            foreach (var gem in Gems)
                 gem.Write(data);
 
             if (AuctionBucketKey.HasValue)

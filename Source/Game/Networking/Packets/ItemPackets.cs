@@ -610,7 +610,7 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             ItemGuid = _worldPacket.ReadPackedGuid();
-            for (int i = 0; i < ItemConst.MaxGemSockets; ++i)
+            for (var i = 0; i < ItemConst.MaxGemSockets; ++i)
                 GemItem[i] = _worldPacket.ReadPackedGuid();
         }
 
@@ -684,19 +684,19 @@ namespace Game.Networking.Packets
         {
             data.WriteUInt8((byte)Context);
             data.WriteInt32(BonusListIDs.Count);
-            foreach (uint bonusID in BonusListIDs)
+            foreach (var bonusID in BonusListIDs)
                 data.WriteUInt32(bonusID);
         }
 
         public void Read(WorldPacket data)
         {
             Context = (ItemContext)data.ReadUInt8();
-            uint bonusListIdSize = data.ReadUInt32();
+            var bonusListIdSize = data.ReadUInt32();
 
             BonusListIDs = new List<uint>();
-            for (uint i = 0u; i < bonusListIdSize; ++i)
+            for (var i = 0u; i < bonusListIdSize; ++i)
             {
-                uint bonusId = data.ReadUInt32();
+                var bonusId = data.ReadUInt32();
                 BonusListIDs.Add(bonusId);
             }
         }
@@ -810,7 +810,7 @@ namespace Game.Networking.Packets
             data.WriteBits(Values.Count, 6);
             data.FlushBits();
 
-            foreach (ItemMod itemMod in Values)
+            foreach (var itemMod in Values)
                 itemMod.Write(data);
         }
 
@@ -900,9 +900,9 @@ namespace Game.Networking.Packets
         {
             ItemID = gem.ItemId;
 
-            ItemBonuses bonus = new ItemBonuses();
+            var bonus = new ItemBonuses();
             bonus.Context = (ItemContext)(byte)gem.Context;
-            foreach (ushort bonusListId in gem.BonusListIDs)
+            foreach (var bonusListId in gem.BonusListIDs)
                 if (bonusListId != 0)
                     bonus.BonusListIDs.Add(bonusListId);
 
@@ -1019,9 +1019,9 @@ namespace Game.Networking.Packets
         public InvUpdate(WorldPacket data)
         {
             Items = new List<InvItem>();
-            int size = data.ReadBits<int>(2);
+            var size = data.ReadBits<int>(2);
             data.ResetBitPos();
-            for (int i = 0; i < size; ++i)
+            for (var i = 0; i < size; ++i)
             {
                 var item = new InvItem
                 {
@@ -1070,10 +1070,10 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteUInt64(Money);
-            for (int i = 0; i < 5; ++i)
+            for (var i = 0; i < 5; ++i)
                 Items[i].Write(data);
 
-            for (int i = 0; i < 5; ++i)
+            for (var i = 0; i < 5; ++i)
                 Currencies[i].Write(data);
         }
 

@@ -282,16 +282,16 @@ namespace Framework.IO
 
 			public deflate_state Clone()
 			{
-				deflate_state ret=(deflate_state)MemberwiseClone();
+				var ret=(deflate_state)MemberwiseClone();
 
 				ret.dyn_ltree=new ct_data[HEAP_SIZE];
-				for(int i=0; i<HEAP_SIZE; i++) ret.dyn_ltree[i]=new ct_data(dyn_ltree[i]);
+				for(var i=0; i<HEAP_SIZE; i++) ret.dyn_ltree[i]=new ct_data(dyn_ltree[i]);
 				
 				ret.dyn_dtree=new ct_data[2*D_CODES+1];
-				for(int i=0; i<(2*D_CODES+1); i++) ret.dyn_dtree[i]=new ct_data(dyn_dtree[i]);
+				for(var i=0; i<(2*D_CODES+1); i++) ret.dyn_dtree[i]=new ct_data(dyn_dtree[i]);
 
 				ret.bl_tree=new ct_data[2*BL_CODES+1];
-				for(int i=0; i<(2*BL_CODES+1); i++) ret.bl_tree[i]=new ct_data(bl_tree[i]);
+				for(var i=0; i<(2*BL_CODES+1); i++) ret.bl_tree[i]=new ct_data(bl_tree[i]);
 
 				ret.bl_count=new ushort[MAX_BITS+1]; bl_count.CopyTo(ret.bl_count, 0);
 				ret.heap=new int[2*L_CODES+1]; heap.CopyTo(ret.heap, 0);
@@ -504,7 +504,7 @@ namespace Framework.IO
 
 			if(level==Z_DEFAULT_COMPRESSION) level=6;
 
-			int wrap=1;
+			var wrap=1;
 
 			if(windowBits<0)
 			{ // suppress zlib wrapper
@@ -612,13 +612,13 @@ namespace Framework.IO
 
 		public static int deflateSetDictionary(z_stream strm, byte[] dictionary, uint dictLength)
 		{
-			uint length=dictLength;
+			var length=dictLength;
 			uint n;
 			uint hash_head=0;
 
 			if(strm==null||strm.state==null||dictionary==null) return Z_STREAM_ERROR;
 
-			deflate_state s=strm.state as deflate_state;
+			var s=strm.state as deflate_state;
 			if(s==null||s.wrap==2||(s.wrap==1&&s.status!=INIT_STATE))
 				return Z_STREAM_ERROR;
 
@@ -626,7 +626,7 @@ namespace Framework.IO
 
 			if(length<MIN_MATCH) return Z_OK;
 
-			int dictionary_ind=0;
+			var dictionary_ind=0;
 			if(length>s.w_size)
 			{
 				length=s.w_size;
@@ -673,7 +673,7 @@ namespace Framework.IO
 			strm.total_in=strm.total_out=0;
 			strm.msg=null;
 
-			deflate_state s=(deflate_state)strm.state;
+			var s=(deflate_state)strm.state;
 			s.pending=0;
 			s.pending_out=0;
 
@@ -713,7 +713,7 @@ namespace Framework.IO
 		public static int deflateSetHeader(z_stream strm, gz_header head)
 		{
 			if(strm==null||strm.state==null) return Z_STREAM_ERROR;
-			deflate_state s=(deflate_state)strm.state;
+			var s=(deflate_state)strm.state;
 			if(s.wrap!=2) return Z_STREAM_ERROR;
 			s.gzhead=head;
 			return Z_OK;
@@ -734,7 +734,7 @@ namespace Framework.IO
 		public static int deflatePrime(z_stream strm, int bits, int value)
 		{
 			if(strm==null||strm.state==null) return Z_STREAM_ERROR;
-			deflate_state s=(deflate_state)strm.state;
+			var s=(deflate_state)strm.state;
 			s.bi_valid=bits;
 			s.bi_buf=(ushort)(value&((1<<bits)-1));
 			return Z_OK;
@@ -760,13 +760,13 @@ namespace Framework.IO
 		public static int deflateParams(z_stream strm, int level, int strategy)
 		{
 			if(strm==null||strm.state==null) return Z_STREAM_ERROR;
-			deflate_state s=(deflate_state)strm.state;
+			var s=(deflate_state)strm.state;
 
 			if(level==Z_DEFAULT_COMPRESSION) level=6;
 			if(level<0||level>9||strategy<0||strategy>Z_FIXED) return Z_STREAM_ERROR;
 
-			compress_func func=configuration_table[s.level].func;
-			int err=Z_OK;
+			var func=configuration_table[s.level].func;
+			var err=Z_OK;
 
 			if((strategy!=s.strategy||func!=configuration_table[level].func)&&strm.total_in!=0) // Flush the last buffer:
 				err=deflate(strm, Z_BLOCK);
@@ -798,7 +798,7 @@ namespace Framework.IO
 		public static int deflateTune(z_stream strm, uint good_length, uint max_lazy, int nice_length, uint max_chain)
 		{
 			if(strm==null||strm.state==null) return Z_STREAM_ERROR;
-			deflate_state s=(deflate_state)strm.state;
+			var s=(deflate_state)strm.state;
 			s.good_match=good_length;
 			s.max_lazy_match=max_lazy;
 			s.nice_match=nice_length;
@@ -831,13 +831,13 @@ namespace Framework.IO
 		public static uint deflateBound(z_stream strm, uint sourceLen)
 		{
 			// conservative upper bound for compressed data
-			uint complen=sourceLen+((sourceLen+7)>>3)+((sourceLen+63)>>6)+5;
+			var complen=sourceLen+((sourceLen+7)>>3)+((sourceLen+63)>>6)+5;
 
 			// if can't get parameters, return conservative bound plus zlib wrapper
 			if(strm==null||strm.state==null) return complen+6;
 
 			// compute wrapper length
-			deflate_state s=(deflate_state)strm.state;
+			var s=(deflate_state)strm.state;
 			uint wraplen;
 			byte[] str;
 			switch(s.wrap)
@@ -854,7 +854,7 @@ namespace Framework.IO
 					{
 						if(s.gzhead.extra!=null) wraplen+=2+s.gzhead.extra_len;
 						str=s.gzhead.name;
-						int str_ind=0;
+						var str_ind=0;
 						if(str!=null)
 						{
 							do
@@ -902,8 +902,8 @@ namespace Framework.IO
 		// (See also read_buf()).
 		static void flush_pending(z_stream strm)
 		{
-			deflate_state s=(deflate_state)strm.state;
-			uint len=s.pending;
+			var s=(deflate_state)strm.state;
+			var len=s.pending;
 
 			if(len>strm.avail_out) len=strm.avail_out;
 			if(len==0) return;
@@ -1003,7 +1003,7 @@ namespace Framework.IO
 		public static int deflate(z_stream strm, int flush)
 		{
 			if(strm==null||strm.state==null||flush>Z_BLOCK||flush<0) return Z_STREAM_ERROR;
-			deflate_state s=(deflate_state)strm.state;
+			var s=(deflate_state)strm.state;
 
 			if(strm.out_buf==null||(strm.in_buf==null&&strm.avail_in!=0)||(s.status==FINISH_STATE&&flush!=Z_FINISH))
 			{
@@ -1018,7 +1018,7 @@ namespace Framework.IO
 			}
 
 			s.strm=strm; // just in case
-		    int old_flush = s.last_flush;// value of flush param for previous deflate call
+		    var old_flush = s.last_flush;// value of flush param for previous deflate call
 			s.last_flush=flush;
 
 			// Write the header
@@ -1065,7 +1065,7 @@ namespace Framework.IO
 				}
 				else
 				{
-					uint header=(Z_DEFLATED+((s.w_bits-8)<<4))<<8;
+					var header=(Z_DEFLATED+((s.w_bits-8)<<4))<<8;
 					uint level_flags;
 
 					if(s.strategy>=Z_HUFFMAN_ONLY||s.level<2) level_flags=0;
@@ -1093,7 +1093,7 @@ namespace Framework.IO
 			{
 				if(s.gzhead.extra!=null)
 				{
-					uint beg=s.pending;  // start of bytes to update crc
+					var beg=s.pending;  // start of bytes to update crc
 
 					while(s.gzindex<(s.gzhead.extra_len&0xffff))
 					{
@@ -1120,7 +1120,7 @@ namespace Framework.IO
 			{
 				if(s.gzhead.name!=null)
 				{
-					uint beg=s.pending;  // start of bytes to update crc
+					var beg=s.pending;  // start of bytes to update crc
 					byte val;
 
 					do
@@ -1152,7 +1152,7 @@ namespace Framework.IO
 			{
 				if(s.gzhead.comment!=null)
 				{
-					uint beg=s.pending;  // start of bytes to update crc
+					var beg=s.pending;  // start of bytes to update crc
 					byte val;
 
 					do
@@ -1227,7 +1227,7 @@ namespace Framework.IO
 			// Start a new block or continue the current one.
 			if(strm.avail_in!=0||s.lookahead!=0||(flush!=Z_NO_FLUSH&&s.status!=FINISH_STATE))
 			{
-				block_state bstate=s.strategy==Z_HUFFMAN_ONLY?deflate_huff(s, flush):(s.strategy==Z_RLE?deflate_rle(s, flush):configuration_table[s.level].func(s, flush));
+				var bstate=s.strategy==Z_HUFFMAN_ONLY?deflate_huff(s, flush):(s.strategy==Z_RLE?deflate_rle(s, flush):configuration_table[s.level].func(s, flush));
 
 				if(bstate==block_state.finish_started||bstate==block_state.finish_done) s.status=FINISH_STATE;
 				if(bstate==block_state.need_more||bstate==block_state.finish_started)
@@ -1254,7 +1254,7 @@ namespace Framework.IO
 							s.head[s.hash_size-1]=NIL; // forget history
 
 							//was memset((byte*)s.head, 0, (uint)(s.hash_size-1)*sizeof(*s.head));
-							for(int i=0; i<s.hash_size-1; i++) s.head[i]=0;
+							for(var i=0; i<s.hash_size-1; i++) s.head[i]=0;
 
 							if(s.lookahead==0)
 							{
@@ -1317,8 +1317,8 @@ namespace Framework.IO
 		{
 			if(strm==null||strm.state==null) return Z_STREAM_ERROR;
 
-			deflate_state s=(deflate_state)strm.state;
-			int status=s.status;
+			var s=(deflate_state)strm.state;
+			var status=s.status;
 			if(status!=INIT_STATE&& status!=EXTRA_STATE&& status!=NAME_STATE&& status!=COMMENT_STATE&&
 				status!=HCRC_STATE&& status!=BUSY_STATE&&status!=FINISH_STATE) return Z_STREAM_ERROR;
 
@@ -1358,7 +1358,7 @@ namespace Framework.IO
 		{
 			if(source==null||dest==null||source.state==null) return Z_STREAM_ERROR;
 
-			deflate_state ss=(deflate_state)source.state;
+			var ss=(deflate_state)source.state;
 
 			//was memcpy(dest, source, sizeof(z_stream));
 			source.CopyTo(dest);
@@ -1425,14 +1425,14 @@ namespace Framework.IO
 
 		static int read_buf(z_stream strm, byte[] buf, int buf_ind, uint size)
 		{
-			uint len=strm.avail_in;
+			var len=strm.avail_in;
 
 			if(len>size) len=size;
 			if(len==0) return 0;
 
 			strm.avail_in-=len;
 
-			deflate_state s=(deflate_state)strm.state;
+			var s=(deflate_state)strm.state;
 
 			if(s.wrap==1) strm.adler=adler32(strm.adler, strm.in_buf, (uint)strm.next_in, len);
 			else if(s.wrap==2) strm.adler=crc32(strm.adler, strm.in_buf, strm.next_in, len);
@@ -1454,7 +1454,7 @@ namespace Framework.IO
 			s.head[s.hash_size-1]=NIL;
 
 			//was memset((byte*)s.head, 0, (uint)(s.hash_size-1)*sizeof(*s.head));
-			for(int i=0; i<(s.hash_size-1); i++) s.head[i]=0;
+			for(var i=0; i<(s.hash_size-1); i++) s.head[i]=0;
 
 			// Set the default configuration parameters:
 			s.max_lazy_match=configuration_table[s.level].max_lazy;
@@ -1480,21 +1480,21 @@ namespace Framework.IO
 		// OUT assertion: the match length is not greater than s.lookahead.
 		static uint longest_match(deflate_state s, uint cur_match)
 		{
-			uint chain_length=s.max_chain_length;	// max hash chain length
-			byte[] scan=s.window;					// current string
-			int scan_ind=(int)s.strstart;
+			var chain_length=s.max_chain_length;	// max hash chain length
+			var scan=s.window;					// current string
+			var scan_ind=(int)s.strstart;
 			int len;								// length of current match
-			int best_len=(int)s.prev_length;		// best match length so far
-			int nice_match=s.nice_match;			// stop if match long enough
-			uint limit=s.strstart>(uint)(s.w_size-MIN_LOOKAHEAD)?s.strstart-(uint)(s.w_size-MIN_LOOKAHEAD):NIL;
+			var best_len=(int)s.prev_length;		// best match length so far
+			var nice_match=s.nice_match;			// stop if match long enough
+			var limit=s.strstart>(uint)(s.w_size-MIN_LOOKAHEAD)?s.strstart-(uint)(s.w_size-MIN_LOOKAHEAD):NIL;
 			// Stop when cur_match becomes <= limit. To simplify the code,
 			// we prevent matches with the string of window index 0.
-			ushort[] prev=s.prev;
-			uint wmask=s.w_mask;
+			var prev=s.prev;
+			var wmask=s.w_mask;
 
-			int strend_ind=(int)s.strstart+MAX_MATCH;
-			byte scan_end1=scan[scan_ind+best_len-1];
-			byte scan_end=scan[scan_ind+best_len];
+			var strend_ind=(int)s.strstart+MAX_MATCH;
+			var scan_end1=scan[scan_ind+best_len-1];
+			var scan_end=scan[scan_ind+best_len];
 
 			// The code is optimized for HASH_BITS >= 8 and MAX_MATCH-2 multiple of 16.
 			// It is easy to get rid of this optimization if necessary.
@@ -1509,11 +1509,11 @@ namespace Framework.IO
 
 			//Assert((uint)s.strstart <= s.window_size-MIN_LOOKAHEAD, "need lookahead");
 
-			byte[] match=s.window;
+			var match=s.window;
 			do
 			{
 				//Assert(cur_match<s.strstart, "no future");
-				int match_ind=(int)cur_match;
+				var match_ind=(int)cur_match;
 
 				// Skip to next match if the match length cannot increase
 				// or if the match length is less than 2.  Note that the checks below
@@ -1568,9 +1568,9 @@ namespace Framework.IO
 		// Optimized version for FASTEST only
 	    static uint longest_match_fast(deflate_state s, uint cur_match)
 	    {
-	        byte[] scan = s.window;
-	        int scan_ind = (int) s.strstart; // current string
-	        int strend_ind = (int) s.strstart + MAX_MATCH;
+	        var scan = s.window;
+	        var scan_ind = (int) s.strstart; // current string
+	        var strend_ind = (int) s.strstart + MAX_MATCH;
 
 	        // The code is optimized for HASH_BITS >= 8 and MAX_MATCH-2 multiple of 16.
 	        // It is easy to get rid of this optimization if necessary.
@@ -1580,8 +1580,8 @@ namespace Framework.IO
 
 	        //Assert(cur_match < s.strstart, "no future");
 
-	        byte[] match = s.window;
-	        int match_ind = (int) cur_match;
+	        var match = s.window;
+	        var match_ind = (int) cur_match;
 
 	        // Return failure if the match length is less than 2:
 	        if (match[match_ind] != scan[scan_ind] || match[match_ind + 1] != scan[scan_ind + 1]) return MIN_MATCH - 1;
@@ -1607,7 +1607,7 @@ namespace Framework.IO
 
 	        //Assert(scan_ind <= (uint)(s.window_size-1), "wild scan");
 
-	        int len = MAX_MATCH - (int) (strend_ind - scan_ind);// length of current match
+	        var len = MAX_MATCH - (int) (strend_ind - scan_ind);// length of current match
 
 	        if (len < MIN_MATCH) return MIN_MATCH - 1;
 
@@ -1628,7 +1628,7 @@ namespace Framework.IO
 		{
 			uint n, m;
 			uint more;    // Amount of free space at the end of the window.
-			uint wsize=s.w_size;
+			var wsize=s.w_size;
 
 			do
 			{
@@ -1651,7 +1651,7 @@ namespace Framework.IO
 					// later. (Using level 0 permanently is not an optimal usage of
 					// zlib, so we don't care about this pathological case.)
 					n=s.hash_size;
-					uint p=n;
+					var p=n;
 					do
 					{
 						m=s.head[--p];
@@ -1706,7 +1706,7 @@ namespace Framework.IO
 			// routines allow scanning to strstart + MAX_MATCH, ignoring lookahead.
 			if(s.high_water<s.window_size)
 			{
-				uint curr=s.strstart+s.lookahead;
+				var curr=s.strstart+s.lookahead;
 				uint init;
 
 				if(s.high_water<curr)
@@ -1715,7 +1715,7 @@ namespace Framework.IO
 					// bytes or up to end of window, whichever is less.
 					init=s.window_size-curr;
 					if(init>WIN_INIT) init=WIN_INIT;
-					for(int i=0; i<init; i++) s.window[curr+i]=0;
+					for(var i=0; i<init; i++) s.window[curr+i]=0;
 					s.high_water=curr+init;
 				}
 				else if(s.high_water<curr+WIN_INIT)
@@ -1725,7 +1725,7 @@ namespace Framework.IO
 					// to end of window, whichever is less.
 					init=curr+WIN_INIT-s.high_water;
 					if(init>s.window_size-s.high_water) init=s.window_size-s.high_water;
-					for(int i=0; i<init; i++) s.window[s.high_water+i]=0;
+					for(var i=0; i<init; i++) s.window[s.high_water+i]=0;
 					s.high_water+=init;
 				}
 			}
@@ -1879,8 +1879,8 @@ namespace Framework.IO
 				{
 					//was _tr_tally_dist(s, s.strstart - s.match_start, s.match_length - MIN_MATCH, bflush);
 					{
-						byte len=(byte)(s.match_length-MIN_MATCH);
-						ushort dist=(ushort)(s.strstart-s.match_start);
+						var len=(byte)(s.match_length-MIN_MATCH);
+						var dist=(ushort)(s.strstart-s.match_start);
 						s.d_buf[s.last_lit]=dist;
 						s.l_buf[s.last_lit++]=len;
 						dist--;
@@ -1928,7 +1928,7 @@ namespace Framework.IO
 
 					//was _tr_tally_lit (s, s.window[s.strstart], bflush);
 					{
-						byte cc=s.window[s.strstart];
+						var cc=s.window[s.strstart];
 						s.d_buf[s.last_lit]=0;
 						s.l_buf[s.last_lit++]=cc;
 						s.dyn_ltree[cc].Freq++;
@@ -2021,13 +2021,13 @@ namespace Framework.IO
 				// match is not better, output the previous match:
 				if(s.prev_length>=MIN_MATCH&&s.match_length<=s.prev_length)
 				{
-					uint max_insert=s.strstart+s.lookahead-MIN_MATCH;
+					var max_insert=s.strstart+s.lookahead-MIN_MATCH;
 					// Do not insert strings in hash table beyond this.
 
 					//was _tr_tally_dist(s, s.strstart -1 - s.prev_match, s.prev_length - MIN_MATCH, bflush);
 					{
-						byte len=(byte)(s.prev_length-MIN_MATCH);
-						ushort dist=(ushort)(s.strstart-1-s.prev_match);
+						var len=(byte)(s.prev_length-MIN_MATCH);
+						var dist=(ushort)(s.strstart-1-s.prev_match);
 						s.d_buf[s.last_lit]=dist;
 						s.l_buf[s.last_lit++]=len;
 						dist--;
@@ -2076,7 +2076,7 @@ namespace Framework.IO
 
 					//was _tr_tally_lit(s, s.window[s.strstart-1], bflush);
 					{
-						byte cc=s.window[s.strstart-1];
+						var cc=s.window[s.strstart-1];
 						s.d_buf[s.last_lit]=0;
 						s.l_buf[s.last_lit++]=cc;
 						s.dyn_ltree[cc].Freq++;
@@ -2112,7 +2112,7 @@ namespace Framework.IO
 
 				//was _tr_tally_lit(s, s.window[s.strstart-1], bflush);
 				{
-					byte cc=s.window[s.strstart-1];
+					var cc=s.window[s.strstart-1];
 					s.d_buf[s.last_lit]=0;
 					s.l_buf[s.last_lit++]=cc;
 					s.dyn_ltree[cc].Freq++;
@@ -2180,7 +2180,7 @@ namespace Framework.IO
 				{
 					//was _tr_tally_dist(s, 1, s.match_length-MIN_MATCH, bflush);
 					{
-						byte len=(byte)(s.match_length-MIN_MATCH);
+						var len=(byte)(s.match_length-MIN_MATCH);
 						ushort dist=1;
 						s.d_buf[s.last_lit]=dist;
 						s.l_buf[s.last_lit++]=len;
@@ -2200,7 +2200,7 @@ namespace Framework.IO
 					//Tracevv((stderr,"%c", s.window[s.strstart]));
 					//was _tr_tally_lit(s, s.window[s.strstart], bflush);
 					{
-						byte cc=s.window[s.strstart];
+						var cc=s.window[s.strstart];
 						s.d_buf[s.last_lit]=0;
 						s.l_buf[s.last_lit++]=cc;
 						s.dyn_ltree[cc].Freq++;
@@ -2260,7 +2260,7 @@ namespace Framework.IO
 
 				//was _tr_tally_lit(s, s.window[s.strstart], bflush);
 				{
-					byte cc=s.window[s.strstart];
+					var cc=s.window[s.strstart];
 					s.d_buf[s.last_lit]=0;
 					s.l_buf[s.last_lit++]=cc;
 					s.dyn_ltree[cc].Freq++;

@@ -146,7 +146,7 @@ namespace Scripts.World.EmeraldDragons
 
             _scheduler.Update(diff);
 
-            Unit target = SelectTarget(SelectAggroTarget.MaxThreat, 0, -50.0f, true);
+            var target = SelectTarget(SelectAggroTarget.MaxThreat, 0, -50.0f, true);
             if (target)
                 DoCast(target, SpellIds.SummonPlayer);
 
@@ -182,7 +182,7 @@ namespace Scripts.World.EmeraldDragons
             if (_roamTimer == 0)
             {
                 // Chase target, but don't attack - otherwise just roam around
-                Unit target = SelectTarget(SelectAggroTarget.Random, 0, 0.0f, true);
+                var target = SelectTarget(SelectAggroTarget.Random, 0, 0.0f, true);
                 if (target)
                 {
                     _roamTimer = RandomHelper.URand(15000, 30000);
@@ -298,7 +298,7 @@ namespace Scripts.World.EmeraldDragons
         {
             if (spell.Id == SpellIds.DrawSpirit && target.IsTypeId(TypeId.Player))
             {
-                Position targetPos = target.GetPosition();
+                var targetPos = target.GetPosition();
                 me.SummonCreature(CreatureIds.SpiritShade, targetPos, TempSummonType.TimedDespawnOutOfCombat, 50000);
             }
         }
@@ -493,7 +493,7 @@ namespace Scripts.World.EmeraldDragons
         {
             targets.RemoveAll(obj =>
             {
-                Unit unit = obj.ToUnit();
+                var unit = obj.ToUnit();
                 if (unit)
                     return unit.HasAura(SpellIds.Sleep);
                 return true;
@@ -519,7 +519,7 @@ namespace Scripts.World.EmeraldDragons
             targets.RemoveAll(obj =>
             {
                 // return those not tagged or already under the influence of Aura of Nature
-                Unit unit = obj.ToUnit();
+                var unit = obj.ToUnit();
                 if (unit)
                     return !(unit.HasAura(SpellIds.MarkOfNature) && !unit.HasAura(SpellIds.AuraOfNature));
 

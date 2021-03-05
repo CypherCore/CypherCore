@@ -33,7 +33,7 @@ public class Singleton<T> where T : class
                 {
                     if (instance == null)
                     {
-                        ConstructorInfo constructorInfo = typeof(T).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, Type.EmptyTypes, null);
+                        var constructorInfo = typeof(T).GetConstructor(BindingFlags.NonPublic | BindingFlags.Instance, null, Type.EmptyTypes, null);
                         instance = (T)constructorInfo.Invoke(new object[0]);
                     }
                 }

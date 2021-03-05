@@ -113,7 +113,7 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Header.Read(_worldPacket);
-            uint noteLength = _worldPacket.ReadBits<uint>(24);
+            var noteLength = _worldPacket.ReadBits<uint>(24);
             IsSuggestion = _worldPacket.HasBit();
 
             if (noteLength != 0)
@@ -132,15 +132,15 @@ namespace Game.Networking.Packets
             ChatLog.Read(_worldPacket);
             ComplaintType = _worldPacket.ReadBits<byte>(5);
 
-            uint noteLength = _worldPacket.ReadBits<uint>(10);
-            bool hasMailInfo = _worldPacket.HasBit();
-            bool hasCalendarInfo = _worldPacket.HasBit();
-            bool hasPetInfo = _worldPacket.HasBit();
-            bool hasGuildInfo = _worldPacket.HasBit();
-            bool hasLFGListSearchResult = _worldPacket.HasBit();
-            bool hasLFGListApplicant = _worldPacket.HasBit();
-            bool hasClubMessage = _worldPacket.HasBit();
-            bool hasClubFinderResult = _worldPacket.HasBit();
+            var noteLength = _worldPacket.ReadBits<uint>(10);
+            var hasMailInfo = _worldPacket.HasBit();
+            var hasCalendarInfo = _worldPacket.HasBit();
+            var hasPetInfo = _worldPacket.HasBit();
+            var hasGuildInfo = _worldPacket.HasBit();
+            var hasLFGListSearchResult = _worldPacket.HasBit();
+            var hasLFGListApplicant = _worldPacket.HasBit();
+            var hasClubMessage = _worldPacket.HasBit();
+            var hasClubFinderResult = _worldPacket.HasBit();
 
             _worldPacket.ResetBitPos();
 
@@ -241,7 +241,7 @@ namespace Game.Networking.Packets
         {
             public void Read(WorldPacket data)
             {
-                uint linesCount = data.ReadUInt32();
+                var linesCount = data.ReadUInt32();
                 ReportLineIndex.HasValue = data.HasBit();
                 data.ResetBitPos();
 
@@ -263,11 +263,11 @@ namespace Game.Networking.Packets
                 Timestamp = data.ReadInt32();
                 AuthorGUID = data.ReadPackedGuid();
 
-                bool hasClubID = data.HasBit();
-                bool hasChannelGUID = data.HasBit();
-                bool hasRealmAddress = data.HasBit();
-                bool hasSlashCmd = data.HasBit();
-                uint textLength = data.ReadBits<uint>(12);
+                var hasClubID = data.HasBit();
+                var hasChannelGUID = data.HasBit();
+                var hasRealmAddress = data.HasBit();
+                var hasSlashCmd = data.HasBit();
+                var textLength = data.ReadBits<uint>(12);
 
                 if (hasClubID)
                 {
@@ -320,7 +320,7 @@ namespace Game.Networking.Packets
 
             public void Read(WorldPacket data)
             {
-                uint linesCount = data.ReadUInt32();
+                var linesCount = data.ReadUInt32();
                 data.ResetBitPos();
 
                 for (uint i = 0; i < linesCount; i++)
@@ -337,8 +337,8 @@ namespace Game.Networking.Packets
             public void Read(WorldPacket data)
             {
                 MailID = data.ReadInt32();
-                uint bodyLength = data.ReadBits<uint>(13);
-                uint subjectLength = data.ReadBits<uint>(9);
+                var bodyLength = data.ReadBits<uint>(13);
+                var subjectLength = data.ReadBits<uint>(9);
 
                 MailBody = data.ReadString(bodyLength);
                 MailSubject = data.ReadString(subjectLength);
@@ -381,7 +381,7 @@ namespace Game.Networking.Packets
         {
             public void Read(WorldPacket data)
             {
-                byte nameLength = data.ReadBits<byte>(8);
+                var nameLength = data.ReadBits<byte>(8);
                 GuildID = data.ReadPackedGuid();
 
                 GuildName = data.ReadString(nameLength);
@@ -405,9 +405,9 @@ namespace Game.Networking.Packets
                 ListingCreatorGuid = data.ReadPackedGuid();
                 Unknown735 = data.ReadPackedGuid();
 
-                byte titleLength = data.ReadBits<byte>(8);
-                byte descriptionLength = data.ReadBits<byte>(11);
-                byte voiceChatLength = data.ReadBits<byte>(8);
+                var titleLength = data.ReadBits<byte>(8);
+                var descriptionLength = data.ReadBits<byte>(11);
+                var voiceChatLength = data.ReadBits<byte>(8);
 
                 Title = data.ReadString(titleLength);
                 Description = data.ReadString(descriptionLength);
@@ -544,8 +544,8 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Type = _worldPacket.ReadBit();
-            uint diagLen = _worldPacket.ReadBits<uint>(12);
-            uint textLen = _worldPacket.ReadBits<uint>(10);
+            var diagLen = _worldPacket.ReadBits<uint>(12);
+            var textLen = _worldPacket.ReadBits<uint>(10);
             DiagInfo = _worldPacket.ReadString(diagLen);
             Text = _worldPacket.ReadString(textLen);
         }

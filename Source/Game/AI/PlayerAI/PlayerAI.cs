@@ -444,9 +444,9 @@ namespace Game.AI
                 case Class.Hunter:
                     {
                         // check if we have a ranged weapon equipped
-                        Item rangedSlot = who.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.Ranged);
+                        var rangedSlot = who.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.Ranged);
 
-                        ItemTemplate rangedTemplate = rangedSlot ? rangedSlot.GetTemplate() : null;
+                        var rangedTemplate = rangedSlot ? rangedSlot.GetTemplate() : null;
                         if (rangedTemplate != null)
                             if (Convert.ToBoolean((1 << (int)rangedTemplate.GetSubClass()) & (int)ItemSubClassWeapon.MaskRanged))
                                 return true;
@@ -487,14 +487,14 @@ namespace Game.AI
             if (knownRank == 0)
                 return null;
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(knownRank, me.GetMap().GetDifficultyID());
+            var spellInfo = Global.SpellMgr.GetSpellInfo(knownRank, me.GetMap().GetDifficultyID());
             if (spellInfo == null)
                 return null;
 
             if (me.GetSpellHistory().HasGlobalCooldown(spellInfo))
                 return null;
 
-            Spell spell = new Spell(me, spellInfo, TriggerCastFlags.None);
+            var spell = new Spell(me, spellInfo, TriggerCastFlags.None);
             if (spell.CanAutoCast(target))
                 return Tuple.Create(spell, target);
 
@@ -536,7 +536,7 @@ namespace Game.AI
                 totalWeights += wSpell.Item2;
 
             Tuple<Spell, Unit> selected = null;
-            uint randNum = RandomHelper.URand(0, totalWeights - 1);
+            var randNum = RandomHelper.URand(0, totalWeights - 1);
             foreach (var wSpell in spells)
             {
                 if (selected != null)
@@ -560,14 +560,14 @@ namespace Game.AI
 
         void VerifyAndPushSpellCast<T>(List<Tuple<Tuple<Spell, Unit>, uint>> spells, uint spellId, T target, uint weight) where T : Unit
         {
-            Tuple<Spell, Unit> spell = VerifySpellCast(spellId, target);
+            var spell = VerifySpellCast(spellId, target);
             if (spell != null)
                 spells.Add(Tuple.Create(spell, weight));
         }
 
         public void DoCastAtTarget(Tuple<Spell, Unit> spell)
         {
-            SpellCastTargets targets = new SpellCastTargets();
+            var targets = new SpellCastTargets();
             targets.SetUnitTarget(spell.Item2);
             spell.Item1.Prepare(targets);
         }
@@ -580,14 +580,14 @@ namespace Game.AI
             if (!me.IsAttackReady(WeaponAttackType.RangedAttack))
                 return;
 
-            Unit victim = me.GetVictim();
+            var victim = me.GetVictim();
             if (!victim)
                 return;
 
             uint rangedAttackSpell = 0;
 
-            Item rangedItem = me.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.Ranged);
-            ItemTemplate rangedTemplate = rangedItem ? rangedItem.GetTemplate() : null;
+            var rangedItem = me.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.Ranged);
+            var rangedTemplate = rangedItem ? rangedItem.GetTemplate() : null;
             if (rangedTemplate != null)
             {
                 switch ((ItemSubClassWeapon)rangedTemplate.GetSubClass())
@@ -623,14 +623,14 @@ namespace Game.AI
 
         void CancelAllShapeshifts()
         {
-            List<AuraEffect> shapeshiftAuras = me.GetAuraEffectsByType(AuraType.ModShapeshift);
-            List<Aura> removableShapeshifts = new List<Aura>();
-            foreach (AuraEffect auraEff in shapeshiftAuras)
+            var shapeshiftAuras = me.GetAuraEffectsByType(AuraType.ModShapeshift);
+            var removableShapeshifts = new List<Aura>();
+            foreach (var auraEff in shapeshiftAuras)
             {
-                Aura aura = auraEff.GetBase();
+                var aura = auraEff.GetBase();
                 if (aura == null)
                     continue;
-                SpellInfo auraInfo = aura.GetSpellInfo();
+                var auraInfo = aura.GetSpellInfo();
                 if (auraInfo == null)
                     continue;
                 if (auraInfo.HasAttribute(SpellAttr0.CantCancel))
@@ -640,7 +640,7 @@ namespace Game.AI
                 removableShapeshifts.Add(aura);
             }
 
-            foreach (Aura aura in removableShapeshifts)
+            foreach (var aura in removableShapeshifts)
                 me.RemoveOwnedAura(aura, AuraRemoveMode.Cancel);
         }
 
@@ -692,7 +692,7 @@ namespace Game.AI
             if (!me.IsValidAttackTarget(who) || who.HasBreakableByDamageCrowdControlAura())
                 return false;
 
-            Unit charmer = me.GetCharmer();
+            var charmer = me.GetCharmer();
             if (charmer != null)
                 if (!charmer.IsValidAttackTarget(who))
                     return false;
@@ -702,7 +702,7 @@ namespace Game.AI
 
         public override Unit SelectAttackTarget()
         {
-            Unit charmer = me.GetCharmer();
+            var charmer = me.GetCharmer();
             if (charmer)
                 return charmer.IsAIEnabled ? charmer.GetAI().SelectTarget(SelectAggroTarget.Random, 0, new ValidTargetSelectPredicate(this)) : charmer.GetVictim();
             return null;
@@ -710,7 +710,7 @@ namespace Game.AI
 
         Tuple<Spell, Unit> SelectAppropriateCastForSpec()
         {
-            List<Tuple<Tuple<Spell, Unit>, uint>> spells = new List<Tuple<Tuple<Spell, Unit>, uint>>();
+            var spells = new List<Tuple<Tuple<Spell, Unit>, uint>>();
             /*
             switch (me.getClass())
             {
@@ -1238,7 +1238,7 @@ namespace Game.AI
 
         public override void UpdateAI(uint diff)
         {
-            Creature charmer = GetCharmer();
+            var charmer = GetCharmer();
             if (!charmer)
                 return;
 
@@ -1258,7 +1258,7 @@ namespace Game.AI
 
             if (charmer.IsEngaged())
             {
-                Unit target = me.GetVictim();
+                var target = me.GetVictim();
                 if (!target || !CanAIAttack(target))
                 {
                     target = SelectAttackTarget();
@@ -1292,7 +1292,7 @@ namespace Game.AI
 
                 if (me.IsStopped() && !me.HasUnitState(UnitState.CannotTurn))
                 {
-                    float targetAngle = me.GetAngle(target);
+                    var targetAngle = me.GetAngle(target);
                     if (_forceFacing || Math.Abs(me.GetOrientation() - targetAngle) > 0.4f)
                     {
                         me.SetFacingTo(targetAngle);
@@ -1308,7 +1308,7 @@ namespace Game.AI
                     {
                         if (IsRangedAttacker())
                         { // chase to zero if the target isn't in line of sight
-                            bool inLOS = me.IsWithinLOSInMap(target);
+                            var inLOS = me.IsWithinLOSInMap(target);
                             if (_chaseCloser != !inLOS)
                             {
                                 _chaseCloser = !inLOS;
@@ -1318,7 +1318,7 @@ namespace Game.AI
                                     AttackStartCaster(target, CASTER_CHASE_DISTANCE);
                             }
                         }
-                        Tuple<Spell, Unit> shouldCast = SelectAppropriateCastForSpec();
+                        var shouldCast = SelectAppropriateCastForSpec();
                         if (shouldCast != null)
                             DoCastAtTarget(shouldCast);
                         _castCheckTimer = 500;

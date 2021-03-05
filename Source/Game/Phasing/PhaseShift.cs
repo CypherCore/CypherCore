@@ -45,7 +45,7 @@ namespace Game
 
         public bool AddPhase(uint phaseId, PhaseFlags flags, List<Condition> areaConditions, int references = 1)
         {
-            bool newPhase = false;
+            var newPhase = false;
 
             if (!Phases.ContainsKey(phaseId))
             {
@@ -153,14 +153,14 @@ namespace Game
             if (Flags.HasFlag(PhaseShiftFlags.Inverse) && other.Flags.HasFlag(PhaseShiftFlags.Inverse))
                 return true;
 
-            PhaseFlags excludePhasesWithFlag = PhaseFlags.None;
+            var excludePhasesWithFlag = PhaseFlags.None;
             if (Flags.HasFlag(PhaseShiftFlags.NoCosmetic) && other.Flags.HasFlag(PhaseShiftFlags.NoCosmetic))
                 excludePhasesWithFlag = PhaseFlags.Cosmetic;
 
             if (!Flags.HasFlag(PhaseShiftFlags.Inverse) && !other.Flags.HasFlag(PhaseShiftFlags.Inverse))
             {
-                ObjectGuid ownerGuid = PersonalGuid;
-                ObjectGuid otherPersonalGuid = other.PersonalGuid;
+                var ownerGuid = PersonalGuid;
+                var otherPersonalGuid = other.PersonalGuid;
                 return Phases.Intersect(other.Phases, (myPhase, otherPhase) => !myPhase.Value.Flags.HasAnyFlag(excludePhasesWithFlag) && (!myPhase.Value.Flags.HasFlag(PhaseFlags.Personal) || ownerGuid == otherPersonalGuid)).Any();
             }
 
@@ -216,7 +216,7 @@ namespace Game
 
         public void UpdateUnphasedFlag()
         {
-            PhaseShiftFlags unphasedFlag = !Flags.HasAnyFlag(PhaseShiftFlags.Inverse) ? PhaseShiftFlags.Unphased : PhaseShiftFlags.InverseUnphased;
+            var unphasedFlag = !Flags.HasAnyFlag(PhaseShiftFlags.Inverse) ? PhaseShiftFlags.Unphased : PhaseShiftFlags.InverseUnphased;
             Flags &= ~(!Flags.HasFlag(PhaseShiftFlags.Inverse) ? PhaseShiftFlags.InverseUnphased : PhaseShiftFlags.Unphased);
             if (NonCosmeticReferences != 0 && DefaultReferences == 0)
                 Flags &= ~unphasedFlag;

@@ -48,7 +48,7 @@ public class Log
             loggers.Clear();
             appenders.Clear();
 
-            byte id = NextAppenderId();
+            var id = NextAppenderId();
 
             var appender = new ConsoleAppender(id, "Console", LogLevel.Debug, AppenderFlags.None);
             appenders[id] = appender;
@@ -76,11 +76,11 @@ public class Log
         if (level < lowestLogLevel)
             return false;
 
-        Logger logger = GetLoggerByType(type);
+        var logger = GetLoggerByType(type);
         if (logger == null)
             return false;
 
-        LogLevel logLevel = logger.getLogLevel();
+        var logLevel = logger.getLogLevel();
         return logLevel != LogLevel.Disabled && logLevel <= level;
     }
 
@@ -149,13 +149,13 @@ public class Log
         var msg = new LogMessage(LogLevel.Info, LogFilter.Commands, string.Format(text, args));
         msg.dynamicName = accountId.ToString();
 
-        Logger logger = GetLoggerByType(LogFilter.Commands);
+        var logger = GetLoggerByType(LogFilter.Commands);
         logger.write(msg);
     }
 
     static void outMessage(LogFilter type, LogLevel level, string text, params object[] args)
     {
-        Logger logger = GetLoggerByType(type);
+        var logger = GetLoggerByType(type);
         logger.write(new LogMessage(level, type, string.Format(text, args)));
     }
 
@@ -169,9 +169,9 @@ public class Log
         if (string.IsNullOrEmpty(appenderName))
             return;
 
-        string options = ConfigMgr.GetDefaultValue(appenderName, "");
+        var options = ConfigMgr.GetDefaultValue(appenderName, "");
         var tokens = new StringArray(options, ',');
-        string name = appenderName.Substring(9);
+        var name = appenderName.Substring(9);
 
         if (tokens.Length < 2)
         {
@@ -179,9 +179,9 @@ public class Log
             return;
         }
 
-        AppenderFlags flags = AppenderFlags.None;
-        AppenderType type = (AppenderType)uint.Parse(tokens[0]);
-        LogLevel level = (LogLevel)uint.Parse(tokens[1]);
+        var flags = AppenderFlags.None;
+        var type = (AppenderType)uint.Parse(tokens[0]);
+        var level = (LogLevel)uint.Parse(tokens[1]);
 
         if (level > LogLevel.Fatal)
         {
@@ -192,7 +192,7 @@ public class Log
         if (tokens.Length > 2)
             flags = (AppenderFlags)uint.Parse(tokens[2]);
 
-        byte id = NextAppenderId();
+        var id = NextAppenderId();
         switch (type)
         {
             case AppenderType.Console:
@@ -236,9 +236,9 @@ public class Log
         if (string.IsNullOrEmpty(appenderName))
             return;
 
-        string name = appenderName.Substring(7);
+        var name = appenderName.Substring(7);
 
-        string options = ConfigMgr.GetDefaultValue(appenderName, "");
+        var options = ConfigMgr.GetDefaultValue(appenderName, "");
         if (string.IsNullOrEmpty(options))
         {
             Console.WriteLine("Log.CreateLoggerFromConfig: Missing config option Logger.{0}", name);
@@ -246,14 +246,14 @@ public class Log
         }
         var tokens = new StringArray(options, ',');
 
-        LogFilter type = name.ToEnum<LogFilter>();        
+        var type = name.ToEnum<LogFilter>();        
         if (loggers.ContainsKey(type))
         {
             Console.WriteLine("Error while configuring Logger {0}. Already defined", name);
             return;
         }
 
-        LogLevel level = (LogLevel)uint.Parse(tokens[0]);
+        var level = (LogLevel)uint.Parse(tokens[0]);
         if (level > LogLevel.Fatal)
         {
             Console.WriteLine("Log.CreateLoggerFromConfig: Wrong Log Level {0} for logger {1}", type, name);
@@ -263,14 +263,14 @@ public class Log
         if (level < lowestLogLevel)
             lowestLogLevel = level;
 
-        Logger logger = new Logger(name, level);
+        var logger = new Logger(name, level);
 
-        int i = 0;
+        var i = 0;
         var ss = new StringArray(tokens[1], ' ');
         while (i < ss.Length)
         {
             var str = ss[i++];
-            Appender appender = GetAppenderByName(str);
+            var appender = GetAppenderByName(str);
             if (appender == null)
                 Console.WriteLine("Error while configuring Appender {0} in Logger {1}. Appender does not exist", str, name);
             else
@@ -290,9 +290,9 @@ public class Log
         if (loggers.ContainsKey(type))
             return loggers[type];
 
-        string typeString = type.ToString();
+        var typeString = type.ToString();
 
-        int index = 1;
+        var index = 1;
         for (; index < typeString.Length - 1; ++index)
         {
             if (char.IsUpper(typeString[index]))
@@ -312,7 +312,7 @@ public class Log
 
     public static bool SetLogLevel(string name, string newLevelc, bool isLogger = true)
     {
-        LogLevel newLevel = (LogLevel)uint.Parse(newLevelc);
+        var newLevel = (LogLevel)uint.Parse(newLevelc);
         if (newLevel < 0)
             return false;
 
@@ -332,7 +332,7 @@ public class Log
         }
         else
         {
-            Appender appender = GetAppenderByName(name);
+            var appender = GetAppenderByName(name);
             if (appender == null)
                 return false;
 

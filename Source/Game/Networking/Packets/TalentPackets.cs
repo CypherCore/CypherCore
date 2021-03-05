@@ -40,7 +40,7 @@ namespace Game.Networking.Packets
                 foreach (var talentID in talentGroupInfo.TalentIDs)
                     _worldPacket.WriteUInt16(talentID);
 
-                foreach (PvPTalent talent in talentGroupInfo.PvPTalents)
+                foreach (var talent in talentGroupInfo.PvPTalents)
                     talent.Write(_worldPacket);
             }
         }
@@ -68,8 +68,8 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint count = _worldPacket.ReadBits<uint>(6);
-            for (int i = 0; i < count; ++i)
+            var count = _worldPacket.ReadBits<uint>(6);
+            for (var i = 0; i < count; ++i)
                 Talents[i] = _worldPacket.ReadUInt16();
         }
 
@@ -132,7 +132,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteInt32(Glyphs.Count);
-            foreach (GlyphBinding glyph in Glyphs)
+            foreach (var glyph in Glyphs)
                 glyph.Write(_worldPacket);
 
             _worldPacket.WriteBit(IsFullUpdate);
@@ -149,8 +149,8 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint size = _worldPacket.ReadUInt32();
-            for (int i = 0; i < size; ++i)
+            var size = _worldPacket.ReadUInt32();
+            for (var i = 0; i < size; ++i)
                 Talents[i] = new PvPTalent(_worldPacket);
         }
 

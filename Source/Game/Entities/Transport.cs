@@ -91,7 +91,7 @@ namespace Game.Entities
 
             _Create(ObjectGuid.Create(HighGuid.Transport, guidlow));
 
-            GameObjectTemplate goinfo = Global.ObjectMgr.GetGameObjectTemplate(entry);
+            var goinfo = Global.ObjectMgr.GetGameObjectTemplate(entry);
 
             if (goinfo == null)
             {
@@ -102,7 +102,7 @@ namespace Game.Entities
             m_goInfo = goinfo;
             m_goTemplateAddon = Global.ObjectMgr.GetGameObjectTemplateAddon(entry);
 
-            TransportTemplate tInfo = Global.TransportMgr.GetTransportTemplate(entry);
+            var tInfo = Global.TransportMgr.GetTransportTemplate(entry);
             if (tInfo == null)
             {
                 Log.outError(LogFilter.Sql, "Transport {0} (name: {1}) will not be created, missing `transport_template` entry.", entry, goinfo.name);
@@ -142,7 +142,7 @@ namespace Game.Entities
             UnloadStaticPassengers();
             while (!_passengers.Empty())
             {
-                WorldObject obj = _passengers.FirstOrDefault();
+                var obj = _passengers.FirstOrDefault();
                 RemovePassenger(obj);
             }
 
@@ -151,7 +151,7 @@ namespace Game.Entities
 
         public override void Update(uint diff)
         {
-            int positionUpdateDelay = 200;
+            var positionUpdateDelay = 200;
 
             if (GetAI() != null)
                 GetAI().UpdateAI(diff);
@@ -164,8 +164,8 @@ namespace Game.Entities
             if (IsMoving() || !_pendingStop)
                 m_goValue.Transport.PathProgress += diff;
 
-            uint timer = m_goValue.Transport.PathProgress % GetTransportPeriod();
-            bool justStopped = false;
+            var timer = m_goValue.Transport.PathProgress % GetTransportPeriod();
+            var justStopped = false;
 
             // Set current waypoint
             // Desired outcome: _currentFrame.DepartureTime < timer < _nextFrame.ArriveTime
@@ -241,7 +241,7 @@ namespace Game.Entities
                 _positionChangeTimer.Reset(positionUpdateDelay);
                 if (IsMoving())
                 {
-                    float t = !justStopped ? CalculateSegmentPos(timer * 0.001f) : 1.0f;
+                    var t = !justStopped ? CalculateSegmentPos(timer * 0.001f) : 1.0f;
                     Vector3 pos, dir;
                     _currentFrame.Spline.Evaluate_Percent((int)_currentFrame.Index, t, out pos);
                     _currentFrame.Spline.Evaluate_Derivative((int)_currentFrame.Index, t, out dir);
@@ -257,7 +257,7 @@ namespace Game.Entities
                      3. transport moves from active to inactive grid
                      4. the grid that transport is currently in unloads
                      */
-                    bool gridActive = GetMap().IsGridLoaded(GetPositionX(), GetPositionY());
+                    var gridActive = GetMap().IsGridLoaded(GetPositionX(), GetPositionY());
 
                     if (_staticPassengers.Empty() && gridActive) // 2.
                         LoadStaticPassengers();
@@ -289,7 +289,7 @@ namespace Game.Entities
                 passenger.SetTransport(this);
                 passenger.m_movementInfo.transport.guid = GetGUID();
 
-                Player player = passenger.ToPlayer();
+                var player = passenger.ToPlayer();
                 if (player)
                     Global.ScriptMgr.OnAddPassenger(this, player);
             }
@@ -297,7 +297,7 @@ namespace Game.Entities
 
         public void RemovePassenger(WorldObject passenger)
         {
-            bool erased = _passengers.Remove(passenger);
+            var erased = _passengers.Remove(passenger);
 
             if (erased || _staticPassengers.Remove(passenger))
             {
@@ -305,7 +305,7 @@ namespace Game.Entities
                 passenger.m_movementInfo.transport.Reset();
                 Log.outDebug(LogFilter.Transport, "Object {0} removed from transport {1}.", passenger.GetName(), GetName());
 
-                Player plr = passenger.ToPlayer();
+                var plr = passenger.ToPlayer();
                 if (plr != null)
                 {
                     Global.ScriptMgr.OnRemovePassenger(this, plr);
@@ -316,9 +316,9 @@ namespace Game.Entities
 
         public Creature CreateNPCPassenger(ulong guid, CreatureData data)
         {
-            Map map = GetMap();
+            var map = GetMap();
 
-            Creature creature = Creature.CreateCreatureFromDB(guid, map, false, true);
+            var creature = Creature.CreateCreatureFromDB(guid, map, false, true);
             if (!creature)
                 return null;
 
@@ -357,9 +357,9 @@ namespace Game.Entities
 
         GameObject CreateGOPassenger(ulong guid, GameObjectData data)
         {
-            Map map = GetMap();
+            var map = GetMap();
 
-            GameObject go = CreateGameObjectFromDB(guid, map, false);
+            var go = CreateGameObjectFromDB(guid, map, false);
             if (!go)
                 return null;
 
@@ -392,11 +392,11 @@ namespace Game.Entities
 
         public TempSummon SummonPassenger(uint entry, Position pos, TempSummonType summonType, SummonPropertiesRecord properties = null, uint duration = 0, Unit summoner = null, uint spellId = 0, uint vehId = 0)
         {
-            Map map = GetMap();
+            var map = GetMap();
             if (map == null)
                 return null;
 
-            UnitTypeMask mask = UnitTypeMask.Summon;
+            var mask = UnitTypeMask.Summon;
             if (properties != null)
             {
                 switch (properties.Control)
@@ -511,8 +511,8 @@ namespace Game.Entities
 
         public void UpdatePosition(float x, float y, float z, float o)
         {
-            bool newActive = GetMap().IsGridLoaded(x, y);
-            Cell oldCell = new Cell(GetPositionX(), GetPositionY());
+            var newActive = GetMap().IsGridLoaded(x, y);
+            var oldCell = new Cell(GetPositionX(), GetPositionY());
 
             Relocate(x, y, z, o);
             StationaryPosition.SetOrientation(o);
@@ -537,7 +537,7 @@ namespace Game.Entities
 
         void LoadStaticPassengers()
         {
-            uint mapId = (uint)GetGoInfo().MoTransport.SpawnMap;
+            var mapId = (uint)GetGoInfo().MoTransport.SpawnMap;
             var cells = Global.ObjectMgr.GetMapObjectGuids(mapId, (byte)GetMap().GetDifficultyID());
             if (cells == null)
                 return;
@@ -557,7 +557,7 @@ namespace Game.Entities
         {
             while (!_staticPassengers.Empty())
             {
-                WorldObject obj = _staticPassengers.First();
+                var obj = _staticPassengers.First();
                 obj.AddObjectToRemoveList();   // also removes from _staticPassengers
             }
         }
@@ -586,14 +586,14 @@ namespace Game.Entities
 
         float CalculateSegmentPos(float now)
         {
-            KeyFrame frame = _currentFrame;
+            var frame = _currentFrame;
             float speed = GetGoInfo().MoTransport.moveSpeed;
             float accel = GetGoInfo().MoTransport.accelRate;
-            float timeSinceStop = frame.TimeFrom + (now - (1.0f / Time.InMilliseconds) * frame.DepartureTime);
-            float timeUntilStop = frame.TimeTo - (now - (1.0f / Time.InMilliseconds) * frame.DepartureTime);
+            var timeSinceStop = frame.TimeFrom + (now - (1.0f / Time.InMilliseconds) * frame.DepartureTime);
+            var timeUntilStop = frame.TimeTo - (now - (1.0f / Time.InMilliseconds) * frame.DepartureTime);
             float segmentPos, dist;
-            float accelTime = _transportInfo.accelTime;
-            float accelDist = _transportInfo.accelDist;
+            var accelTime = _transportInfo.accelTime;
+            var accelDist = _transportInfo.accelDist;
             // calculate from nearest stop, less confusing calculation...
             if (timeSinceStop < timeUntilStop)
             {
@@ -617,7 +617,7 @@ namespace Game.Entities
 
         bool TeleportTransport(uint newMapid, float x, float y, float z, float o)
         {
-            Map oldMap = GetMap();
+            var oldMap = GetMap();
 
             if (oldMap.GetId() != newMapid)
             {
@@ -635,7 +635,7 @@ namespace Game.Entities
                     if (obj.IsTypeId(TypeId.Player))
                     {
                         // will be relocated in UpdatePosition of the vehicle
-                        Unit veh = obj.ToUnit().GetVehicleBase();
+                        var veh = obj.ToUnit().GetVehicleBase();
                         if (veh)
                             if (veh.GetTransport() == this)
                                 continue;
@@ -660,7 +660,7 @@ namespace Game.Entities
             var nextFrame = GetKeyFrames()[_nextFrame];
 
             _delayedTeleport = false;
-            Map newMap = Global.MapMgr.CreateBaseMap(nextFrame.Node.ContinentID);
+            var newMap = Global.MapMgr.CreateBaseMap(nextFrame.Node.ContinentID);
             GetMap().RemoveFromMap(this, false);
             SetMap(newMap);
 
@@ -669,7 +669,7 @@ namespace Game.Entities
                   z = nextFrame.Node.Loc.Z,
                   o = nextFrame.InitialOrientation;
 
-            foreach(WorldObject obj in _passengers.ToList())
+            foreach(var obj in _passengers.ToList())
             {
                 float destX, destY, destZ, destO;
                 obj.m_movementInfo.transport.pos.GetPosition(out destX, out destY, out destZ, out destO);
@@ -705,7 +705,7 @@ namespace Game.Entities
 
                 // if passenger is on vehicle we have to assume the vehicle is also on transport
                 // and its the vehicle that will be updating its passengers
-                Unit unit = passenger.ToUnit();
+                var unit = passenger.ToUnit();
                 if (unit)
                     if (unit.GetVehicle() != null)
                         continue;
@@ -719,7 +719,7 @@ namespace Game.Entities
                 {
                     case TypeId.Unit:
                         {
-                            Creature creature = passenger.ToCreature();
+                            var creature = passenger.ToCreature();
                             GetMap().CreatureRelocation(creature, x, y, z, o, false);
                             creature.GetTransportHomePosition(out x, out y, out z, out o);
                             CalculatePassengerPosition(ref x, ref y, ref z, ref o);
@@ -749,7 +749,7 @@ namespace Game.Entities
 
                 if (unit != null)
                 {
-                    Vehicle vehicle = unit.GetVehicleKit();
+                    var vehicle = unit.GetVehicleKit();
                     if (vehicle != null)
                         vehicle.RelocatePassengers();
                 }
@@ -758,7 +758,7 @@ namespace Game.Entities
 
         void DoEventIfAny(KeyFrame node, bool departure)
         {
-            uint eventid = departure ? node.Node.DepartureEventID : node.Node.ArrivalEventID;
+            var eventid = departure ? node.Node.DepartureEventID : node.Node.ArrivalEventID;
             if (eventid != 0)
             {
                 Log.outDebug(LogFilter.Scripts, "Taxi {0} event {1} of node {2} of {3} path", departure ? "departure" : "arrival", eventid, node.Node.NodeIndex, GetName());

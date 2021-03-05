@@ -151,20 +151,20 @@ namespace Game.Loots
             if (proto == null)
                 return;
 
-            uint count = RandomHelper.URand(item.mincount, item.maxcount);
-            uint stacks = (uint)(count / proto.GetMaxStackSize() + (Convert.ToBoolean(count % proto.GetMaxStackSize()) ? 1 : 0));
+            var count = RandomHelper.URand(item.mincount, item.maxcount);
+            var stacks = (uint)(count / proto.GetMaxStackSize() + (Convert.ToBoolean(count % proto.GetMaxStackSize()) ? 1 : 0));
 
-            List<LootItem> lootItems = item.needs_quest ? quest_items : items;
-            uint limit = (uint)(item.needs_quest ? SharedConst.MaxNRQuestItems : SharedConst.MaxNRLootItems);
+            var lootItems = item.needs_quest ? quest_items : items;
+            var limit = (uint)(item.needs_quest ? SharedConst.MaxNRQuestItems : SharedConst.MaxNRLootItems);
 
             for (uint i = 0; i < stacks && lootItems.Count < limit; ++i)
             {
-                LootItem generatedLoot = new LootItem(item);
+                var generatedLoot = new LootItem(item);
                 generatedLoot.context = _itemContext;
                 generatedLoot.count = (byte)Math.Min(count, proto.GetMaxStackSize());
                 if (_itemContext != 0)
                 {
-                    List<uint> bonusListIDs = Global.DB2Mgr.GetDefaultItemBonusTree(generatedLoot.itemid, _itemContext);
+                    var bonusListIDs = Global.DB2Mgr.GetDefaultItemBonusTree(generatedLoot.itemid, _itemContext);
                     generatedLoot.BonusListIDs.AddRange(bonusListIDs);
                 }
                 lootItems.Add(generatedLoot);
@@ -197,7 +197,7 @@ namespace Game.Loots
             if (lootOwner == null)
                 return false;
 
-            LootTemplate tab = store.GetLootFor(lootId);
+            var tab = store.GetLootFor(lootId);
             if (tab == null)
             {
                 if (!noEmptyError)
@@ -210,14 +210,14 @@ namespace Game.Loots
             tab.Process(this, store.IsRatesAllowed(), (byte)lootMode);          // Processing is done there, callback via Loot.AddItem()
 
             // Setting access rights for group loot case
-            Group group = lootOwner.GetGroup();
+            var group = lootOwner.GetGroup();
             if (!personal && group != null)
             {
                 roundRobinPlayer = lootOwner.GetGUID();
 
                 for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                 {
-                    Player player = refe.GetSource();
+                    var player = refe.GetSource();
                     if (player)   // should actually be looted object instead of lootOwner but looter has to be really close so doesnt really matter
                         if (player.IsInMap(lootOwner))
                             FillNotNormalLootFor(player, player.IsAtGroupRewardDistance(lootOwner));
@@ -240,7 +240,7 @@ namespace Game.Loots
 
         void FillNotNormalLootFor(Player player, bool presentAtLooting)
         {
-            ObjectGuid plguid = player.GetGUID();
+            var plguid = player.GetGUID();
 
             var questItemList = PlayerQuestItems.LookupByKey(plguid);
             if (questItemList.Empty())
@@ -259,9 +259,9 @@ namespace Game.Loots
                 return;
 
             // Process currency items
-            uint max_slot = GetMaxSlotInLootFor(player);
+            var max_slot = GetMaxSlotInLootFor(player);
             LootItem item = null;
-            int itemsSize = items.Count;
+            var itemsSize = items.Count;
             for (byte i = 0; i < max_slot; ++i)
             {
                 if (i < items.Count)
@@ -281,11 +281,11 @@ namespace Game.Loots
 
         List<NotNormalLootItem> FillFFALoot(Player player)
         {
-            List<NotNormalLootItem> ql = new List<NotNormalLootItem>();
+            var ql = new List<NotNormalLootItem>();
 
             for (byte i = 0; i < items.Count; ++i)
             {
-                LootItem item = items[i];
+                var item = items[i];
                 if (!item.is_looted && item.freeforall && item.AllowedForPlayer(player))
                 {
                     ql.Add(new NotNormalLootItem(i));
@@ -305,11 +305,11 @@ namespace Game.Loots
             if (items.Count == SharedConst.MaxNRLootItems)
                 return null;
 
-            List<NotNormalLootItem> ql = new List<NotNormalLootItem>();
+            var ql = new List<NotNormalLootItem>();
 
             for (byte i = 0; i < quest_items.Count; ++i)
             {
-                LootItem item = quest_items[i];
+                var item = quest_items[i];
 
                 if (!item.is_looted && (item.AllowedForPlayer(player) || (item.follow_loot_rules && player.GetGroup() && ((player.GetGroup().GetLootMethod() == LootMethod.MasterLoot
                     && player.GetGroup().GetMasterLooterGuid() == player.GetGUID()) || player.GetGroup().GetLootMethod() != LootMethod.MasterLoot))))
@@ -338,11 +338,11 @@ namespace Game.Loots
 
         List<NotNormalLootItem> FillNonQuestNonFFAConditionalLoot(Player player, bool presentAtLooting)
         {
-            List<NotNormalLootItem> ql = new List<NotNormalLootItem>();
+            var ql = new List<NotNormalLootItem>();
 
             for (byte i = 0; i < items.Count; ++i)
             {
-                LootItem item = items[i];
+                var item = items[i];
                 if (!item.is_looted && !item.freeforall && item.AllowedForPlayer(player))
                 {
                     if (presentAtLooting)
@@ -369,7 +369,7 @@ namespace Game.Loots
         {
             // notify all players that are looting this that the item was removed
             // convert the index to the slot the player sees
-            for (int i = 0; i < PlayersLooting.Count; ++i)
+            for (var i = 0; i < PlayersLooting.Count; ++i)
             {
                 Player player = Global.ObjAccessor.FindPlayer(PlayersLooting[i]);
                 if (player != null)
@@ -444,14 +444,14 @@ namespace Game.Loots
             conditem = null;
 
             LootItem item = null;
-            bool is_looted = true;
+            var is_looted = true;
             if (lootSlot >= items.Count)
             {
-                int questSlot = (int)(lootSlot - items.Count);
+                var questSlot = (int)(lootSlot - items.Count);
                 var questItems = PlayerQuestItems.LookupByKey(player.GetGUID());
                 if (!questItems.Empty())
                 {
-                    NotNormalLootItem qitem2 = questItems[questSlot];
+                    var qitem2 = questItems[questSlot];
                     if (qitem2 != null)
                     {
                         qitem = qitem2;
@@ -473,7 +473,7 @@ namespace Game.Loots
                         {
                             if (c.index == lootSlot)
                             {
-                                NotNormalLootItem ffaitem2 = c;
+                                var ffaitem2 = c;
                                 ffaitem = ffaitem2;
                                 is_looted = ffaitem2.is_looted;
                                 break;
@@ -490,7 +490,7 @@ namespace Game.Loots
                         {
                             if (iter.index == lootSlot)
                             {
-                                NotNormalLootItem conditem2 = iter;
+                                var conditem2 = iter;
                                 conditem = conditem2;
                                 is_looted = conditem2.is_looted;
                                 break;
@@ -519,7 +519,7 @@ namespace Game.Loots
             if (gold != 0)
                 return true;
 
-            foreach (LootItem item in items)
+            foreach (var item in items)
                 if (!item.is_looted && !item.freeforall && item.conditions.Empty())
                     return true;
 
@@ -535,7 +535,7 @@ namespace Game.Loots
             {
                 foreach (var qi in q_list)
                 {
-                    LootItem item = quest_items[qi.index];
+                    var item = quest_items[qi.index];
                     if (!qi.is_looted && !item.is_looted)
                         return true;
                 }
@@ -547,7 +547,7 @@ namespace Game.Loots
             {
                 foreach (var fi in ffa_list)
                 {
-                    LootItem item = items[fi.index];
+                    var item = items[fi.index];
                     if (!fi.is_looted && !item.is_looted)
                         return true;
                 }
@@ -559,7 +559,7 @@ namespace Game.Loots
             {
                 foreach (var ci in conditional_list)
                 {
-                    LootItem item = items[ci.index];
+                    var item = items[ci.index];
                     if (!ci.is_looted && !item.is_looted)
                         return true;
                 }
@@ -641,7 +641,7 @@ namespace Game.Loots
                                     // item shall not be displayed.
                                     continue;
 
-                                LootItemData lootItem = new LootItemData();
+                                var lootItem = new LootItemData();
                                 lootItem.LootListID = (byte)(i + 1);
                                 lootItem.UIType = slot_type;
                                 lootItem.Quantity = items[i].count;
@@ -658,7 +658,7 @@ namespace Game.Loots
                         {
                             if (!items[i].is_looted && !items[i].freeforall && items[i].conditions.Empty() && items[i].AllowedForPlayer(viewer))
                             {
-                                LootItemData lootItem = new LootItemData();
+                                var lootItem = new LootItemData();
                                 lootItem.LootListID = (byte)(i + 1);
                                 lootItem.UIType = (permission == PermissionTypes.Owner ? LootSlotType.Owner : LootSlotType.AllowLoot);
                                 lootItem.Quantity = items[i].count;
@@ -672,18 +672,18 @@ namespace Game.Loots
                     return;
             }
 
-            LootSlotType slotType = permission == PermissionTypes.Owner ? LootSlotType.Owner : LootSlotType.AllowLoot;
+            var slotType = permission == PermissionTypes.Owner ? LootSlotType.Owner : LootSlotType.AllowLoot;
             var lootPlayerQuestItems = GetPlayerQuestItems();
             var q_list = lootPlayerQuestItems.LookupByKey(viewer.GetGUID());
             if (!q_list.Empty())
             {
                 for (var i = 0; i < q_list.Count; ++i)
                 {
-                    NotNormalLootItem qi = q_list[i];
-                    LootItem item = quest_items[qi.index];
+                    var qi = q_list[i];
+                    var item = quest_items[qi.index];
                     if (!qi.is_looted && !item.is_looted)
                     {
-                        LootItemData lootItem = new LootItemData();
+                        var lootItem = new LootItemData();
                         lootItem.LootListID = (byte)(items.Count + i + 1);
                         lootItem.Quantity = item.count;
                         lootItem.Loot = new ItemInstance(item);
@@ -718,10 +718,10 @@ namespace Game.Loots
             {
                 foreach (var fi in ffa_list)
                 {
-                    LootItem item = items[fi.index];
+                    var item = items[fi.index];
                     if (!fi.is_looted && !item.is_looted)
                     {
-                        LootItemData lootItem = new LootItemData();
+                        var lootItem = new LootItemData();
                         lootItem.LootListID = (byte)(fi.index + 1);
                         lootItem.UIType = slotType;
                         lootItem.Quantity = item.count;
@@ -737,10 +737,10 @@ namespace Game.Loots
             {
                 foreach (var ci in conditional_list)
                 {
-                    LootItem item = items[ci.index];
+                    var item = items[ci.index];
                     if (!ci.is_looted && !item.is_looted)
                     {
-                        LootItemData lootItem = new LootItemData();
+                        var lootItem = new LootItemData();
                         lootItem.LootListID = (byte)(ci.index + 1);
                         lootItem.Quantity = item.count;
                         lootItem.Loot = new ItemInstance(item);

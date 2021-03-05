@@ -39,28 +39,28 @@ namespace Game.DataStorage
 
         public T Read<T>(int numBits) where T : unmanaged
         {
-            ulong result = Unsafe.As<byte, ulong>(ref Data[Offset + (Position >> 3)]) << (64 - numBits - (Position & 7)) >> (64 - numBits);
+            var result = Unsafe.As<byte, ulong>(ref Data[Offset + (Position >> 3)]) << (64 - numBits - (Position & 7)) >> (64 - numBits);
             Position += numBits;
             return Unsafe.As<ulong, T>(ref result);
         }
 
         public T ReadSigned<T>(int numBits) where T : unmanaged
         {
-            ulong result = Unsafe.As<byte, ulong>(ref Data[Offset + (Position >> 3)]) << (64 - numBits - (Position & 7)) >> (64 - numBits);
+            var result = Unsafe.As<byte, ulong>(ref Data[Offset + (Position >> 3)]) << (64 - numBits - (Position & 7)) >> (64 - numBits);
             Position += numBits;
-            ulong signedShift = (1UL << (numBits - 1));
+            var signedShift = (1UL << (numBits - 1));
             result = (signedShift ^ result) - signedShift;
             return Unsafe.As<ulong, T>(ref result);
         }
 
         public string ReadCString()
         {
-            int start = Position;
+            var start = Position;
 
             while (Data[Offset + (Position >> 3)] != 0)
                 Position += 8;
 
-            string result = Encoding.UTF8.GetString(Data, Offset + (start >> 3), (Position - start) >> 3);
+            var result = Encoding.UTF8.GetString(Data, Offset + (start >> 3), (Position - start) >> 3);
             Position += 8;
             return result;
         }

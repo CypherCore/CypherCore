@@ -90,7 +90,7 @@ namespace Game.AI
             if (HasEscortState(SmartEscortState.Escorting))
                 return false;
 
-            WaypointPath path = Global.SmartAIMgr.GetPath(entry);
+            var path = Global.SmartAIMgr.GetPath(entry);
             if (path == null || path.nodes.Empty())
             {
                 GetScript().SetPathId(0);
@@ -100,7 +100,7 @@ namespace Game.AI
             _path = new WaypointPath();
             _path.id = path.id;
             _path.nodes.AddRange(path.nodes);
-            foreach (WaypointNode waypoint in _path.nodes)
+            foreach (var waypoint in _path.nodes)
             {
                 GridDefines.NormalizeMapCoord(ref waypoint.x);
                 GridDefines.NormalizeMapCoord(ref waypoint.y);
@@ -197,24 +197,24 @@ namespace Game.AI
                 _escortNPCFlags = 0;
             }
 
-            List<WorldObject> targets = GetScript().GetStoredTargetList(SharedConst.SmartEscortTargets, me);
+            var targets = GetScript().GetStoredTargetList(SharedConst.SmartEscortTargets, me);
             if (targets != null && mEscortQuestID != 0)
             {
                 if (targets.Count == 1 && GetScript().IsPlayer(targets.First()))
                 {
-                    Player player = targets.First().ToPlayer();
+                    var player = targets.First().ToPlayer();
                     if (!fail && player.IsAtGroupRewardDistance(me) && player.GetCorpse() == null)
                         player.GroupEventHappens(mEscortQuestID, me);
 
                     if (fail)
                         player.FailQuest(mEscortQuestID);
 
-                    Group group = player.GetGroup();
+                    var group = player.GetGroup();
                     if (group)
                     {
-                        for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
+                        for (var groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
                         {
-                            Player groupGuy = groupRef.GetSource();
+                            var groupGuy = groupRef.GetSource();
                             if (!groupGuy.IsInMap(player))
                                 continue;
 
@@ -231,7 +231,7 @@ namespace Game.AI
                     {
                         if (GetScript().IsPlayer(obj))
                         {
-                            Player player = obj.ToPlayer();
+                            var player = obj.ToPlayer();
                             if (!fail && player.IsAtGroupRewardDistance(me) && player.GetCorpse() == null)
                                 player.AreaExploredOrEventHappens(mEscortQuestID);
                             else if (fail)
@@ -310,16 +310,16 @@ namespace Game.AI
                 float checkDist = me.GetInstanceScript() != null ? SMART_ESCORT_MAX_PLAYER_DIST * 2 : SMART_ESCORT_MAX_PLAYER_DIST;
                 if (targets.Count == 1 && GetScript().IsPlayer(targets.First()))
                 {
-                    Player player = targets.First().ToPlayer();
+                    var player = targets.First().ToPlayer();
                     if (me.GetDistance(player) <= checkDist)
                         return true;
 
-                    Group group = player.GetGroup();
+                    var group = player.GetGroup();
                     if (group)
                     {
-                        for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
+                        for (var groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
                         {
-                            Player groupGuy = groupRef.GetSource();
+                            var groupGuy = groupRef.GetSource();
                             if (groupGuy.IsInMap(player) && me.GetDistance(groupGuy) <= checkDist)
                                 return true;
                         }
@@ -432,7 +432,7 @@ namespace Game.AI
 
             SetRun(mRun);
 
-            Unit owner = me.GetCharmerOrOwner();
+            var owner = me.GetCharmerOrOwner();
             if (owner != null)
             {
                 me.GetMotionMaster().MoveFollow(owner, SharedConst.PetFollowDist, SharedConst.PetFollowAngle);
@@ -445,7 +445,7 @@ namespace Game.AI
             }
             else
             {
-                Unit target = !mFollowGuid.IsEmpty() ? Global.ObjAccessor.GetUnit(me, mFollowGuid) : null;
+                var target = !mFollowGuid.IsEmpty() ? Global.ObjAccessor.GetUnit(me, mFollowGuid) : null;
                 if (target)
                 {
                     me.GetMotionMaster().MoveFollow(target, mFollowDist, mFollowAngle);
@@ -553,7 +553,7 @@ namespace Game.AI
             GetScript().OnReset();
             GetScript().ProcessEventsFor(SmartEvents.ReachedHome);
 
-            CreatureGroup formation = me.GetFormation();
+            var formation = me.GetFormation();
             if (formation == null || formation.GetLeader() == me || !formation.IsFormed())
             {
                 if (me.GetMotionMaster().GetMotionSlotType(MovementSlot.Idle) != MovementGeneratorType.Waypoint && me.GetWaypointPath() != 0)
@@ -695,7 +695,7 @@ namespace Game.AI
                 else
                     me.SetWalk(!mRun);
 
-                Unit charmer = me.GetCharmer();
+                var charmer = me.GetCharmer();
                 if (charmer)
                     AttackStart(charmer);
             }
@@ -836,7 +836,7 @@ namespace Game.AI
             if (!complete)
                 return;
 
-            Player player = Global.ObjAccessor.GetPlayer(me, mFollowGuid);
+            var player = Global.ObjAccessor.GetPlayer(me, mFollowGuid);
             if (player != null)
             {
                 if (mFollowCreditType == 0)
@@ -877,15 +877,15 @@ namespace Game.AI
 
             if (mConditionsTimer <= diff)
             {
-                Vehicle vehicleKit = me.GetVehicleKit();
+                var vehicleKit = me.GetVehicleKit();
                 if (vehicleKit != null)
                 {
                     foreach (var pair in vehicleKit.Seats)
                     {
-                        Unit passenger = Global.ObjAccessor.GetUnit(me, pair.Value.Passenger.Guid);
+                        var passenger = Global.ObjAccessor.GetUnit(me, pair.Value.Passenger.Guid);
                         if (passenger != null)
                         {
-                            Player player = passenger.ToPlayer();
+                            var player = passenger.ToPlayer();
                             if (player != null)
                             {
                                 if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.CreatureTemplateVehicle, me.GetEntry(), player, me))

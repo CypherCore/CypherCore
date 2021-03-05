@@ -40,9 +40,9 @@ namespace Game
         {
             // Pool templates
             {
-                uint oldMSTime = Time.GetMSTime();
+                var oldMSTime = Time.GetMSTime();
 
-                SQLResult result = DB.World.Query("SELECT entry, max_limit FROM pool_template");
+                var result = DB.World.Query("SELECT entry, max_limit FROM pool_template");
                 if (result.IsEmpty())
                 {
                     mPoolTemplate.Clear();
@@ -53,9 +53,9 @@ namespace Game
                 uint count = 0;
                 do
                 {
-                    uint pool_id = result.Read<uint>(0);
+                    var pool_id = result.Read<uint>(0);
 
-                    PoolTemplateData pPoolTemplate = new PoolTemplateData();
+                    var pPoolTemplate = new PoolTemplateData();
                     pPoolTemplate.MaxLimit = result.Read<uint>(1);
                     mPoolTemplate[pool_id] = pPoolTemplate;
                     ++count;
@@ -69,10 +69,10 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Creatures Pooling Data...");
             {
-                uint oldMSTime = Time.GetMSTime();
+                var oldMSTime = Time.GetMSTime();
 
                 //                                                 1       2         3
-                SQLResult result = DB.World.Query("SELECT guid, pool_entry, chance FROM pool_creature");
+                var result = DB.World.Query("SELECT guid, pool_entry, chance FROM pool_creature");
 
                 if (result.IsEmpty())
                 {
@@ -83,9 +83,9 @@ namespace Game
                     uint count = 0;
                     do
                     {
-                        ulong guid = result.Read<ulong>(0);
-                        uint pool_id = result.Read<uint>(1);
-                        float chance = result.Read<float>(2);
+                        var guid = result.Read<ulong>(0);
+                        var pool_id = result.Read<uint>(1);
+                        var chance = result.Read<float>(2);
 
                         CreatureData data = Global.ObjectMgr.GetCreatureData(guid);
                         if (data == null)
@@ -103,13 +103,13 @@ namespace Game
                             Log.outError(LogFilter.Sql, "`pool_creature` has an invalid chance ({0}) for creature guid ({1}) in pool id ({2}), skipped.", chance, guid, pool_id);
                             continue;
                         }
-                        PoolTemplateData pPoolTemplate = mPoolTemplate[pool_id];
-                        PoolObject plObject = new PoolObject(guid, chance);
+                        var pPoolTemplate = mPoolTemplate[pool_id];
+                        var plObject = new PoolObject(guid, chance);
 
                         if (!mPoolCreatureGroups.ContainsKey(pool_id))
                             mPoolCreatureGroups[pool_id] = new PoolGroup<Creature>();
 
-                        PoolGroup<Creature> cregroup = mPoolCreatureGroups[pool_id];
+                        var cregroup = mPoolCreatureGroups[pool_id];
                         cregroup.SetPoolId(pool_id);
                         cregroup.AddEntry(plObject, pPoolTemplate.MaxLimit);
 
@@ -126,10 +126,10 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Gameobject Pooling Data...");
             {
-                uint oldMSTime = Time.GetMSTime();
+                var oldMSTime = Time.GetMSTime();
 
                 //                                                 1        2         3
-                SQLResult result = DB.World.Query("SELECT guid, pool_entry, chance FROM pool_gameobject");
+                var result = DB.World.Query("SELECT guid, pool_entry, chance FROM pool_gameobject");
 
                 if (result.IsEmpty())
                 {
@@ -140,9 +140,9 @@ namespace Game
                     uint count = 0;
                     do
                     {
-                        ulong guid = result.Read<ulong>(0);
-                        uint pool_id = result.Read<uint>(1);
-                        float chance = result.Read<float>(2);
+                        var guid = result.Read<ulong>(0);
+                        var pool_id = result.Read<uint>(1);
+                        var chance = result.Read<float>(2);
 
                         GameObjectData data = Global.ObjectMgr.GetGameObjectData(guid);
                         if (data == null)
@@ -173,13 +173,13 @@ namespace Game
                             continue;
                         }
 
-                        PoolTemplateData pPoolTemplate = mPoolTemplate[pool_id];
-                        PoolObject plObject = new PoolObject(guid, chance);
+                        var pPoolTemplate = mPoolTemplate[pool_id];
+                        var plObject = new PoolObject(guid, chance);
 
                         if (!mPoolGameobjectGroups.ContainsKey(pool_id))
                             mPoolGameobjectGroups[pool_id] = new PoolGroup<GameObject>();
 
-                        PoolGroup<GameObject> gogroup = mPoolGameobjectGroups[pool_id];
+                        var gogroup = mPoolGameobjectGroups[pool_id];
                         gogroup.SetPoolId(pool_id);
                         gogroup.AddEntry(plObject, pPoolTemplate.MaxLimit);
 
@@ -196,10 +196,10 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Mother Pooling Data...");
             {
-                uint oldMSTime = Time.GetMSTime();
+                var oldMSTime = Time.GetMSTime();
 
                 //                                                  1        2            3
-                SQLResult result = DB.World.Query("SELECT pool_id, mother_pool, chance FROM pool_pool");
+                var result = DB.World.Query("SELECT pool_id, mother_pool, chance FROM pool_pool");
 
                 if (result.IsEmpty())
                 {
@@ -210,9 +210,9 @@ namespace Game
                     uint count = 0;
                     do
                     {
-                        uint child_pool_id = result.Read<uint>(0);
-                        uint mother_pool_id = result.Read<uint>(1);
-                        float chance = result.Read<float>(2);
+                        var child_pool_id = result.Read<uint>(0);
+                        var mother_pool_id = result.Read<uint>(1);
+                        var chance = result.Read<float>(2);
 
                         if (!mPoolTemplate.ContainsKey(mother_pool_id))
                         {
@@ -234,13 +234,13 @@ namespace Game
                             Log.outError(LogFilter.Sql, "`pool_pool` has an invalid chance ({0}) for pool id ({1}) in mother pool id ({2}), skipped.", chance, child_pool_id, mother_pool_id);
                             continue;
                         }
-                        PoolTemplateData pPoolTemplateMother = mPoolTemplate[mother_pool_id];
-                        PoolObject plObject = new PoolObject(child_pool_id, chance);
+                        var pPoolTemplateMother = mPoolTemplate[mother_pool_id];
+                        var plObject = new PoolObject(child_pool_id, chance);
 
                         if (!mPoolPoolGroups.ContainsKey(mother_pool_id))
                             mPoolPoolGroups[mother_pool_id] = new PoolGroup<Pool>();
 
-                        PoolGroup<Pool> plgroup = mPoolPoolGroups[mother_pool_id];
+                        var plgroup = mPoolPoolGroups[mother_pool_id];
                         plgroup.SetPoolId(mother_pool_id);
                         plgroup.AddEntry(plObject, pPoolTemplateMother.MaxLimit);
 
@@ -255,10 +255,10 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Quest Pooling Data...");
             {
-                uint oldMSTime = Time.GetMSTime();
+                var oldMSTime = Time.GetMSTime();
 
-                PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_QUEST_POOLS);
-                SQLResult result = DB.World.Query(stmt);
+                var stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_QUEST_POOLS);
+                var result = DB.World.Query(stmt);
 
                 if (result.IsEmpty())
                 {
@@ -269,12 +269,12 @@ namespace Game
                     List<uint> creBounds;
                     List<uint> goBounds;
 
-                    Dictionary<uint, QuestTypes> poolTypeMap = new Dictionary<uint, QuestTypes>();
+                    var poolTypeMap = new Dictionary<uint, QuestTypes>();
                     uint count = 0;
                     do
                     {
-                        uint entry = result.Read<uint>(0);
-                        uint pool_id = result.Read<uint>(1);
+                        var entry = result.Read<uint>(0);
+                        var pool_id = result.Read<uint>(1);
 
                         if (!poolTypeMap.ContainsKey(pool_id))
                             poolTypeMap[pool_id] = 0;
@@ -301,7 +301,7 @@ namespace Game
                         if (poolTypeMap[pool_id] == QuestTypes.None)
                             poolTypeMap[pool_id] = quest.IsDaily() ? QuestTypes.Daily : QuestTypes.Weekly;
 
-                        QuestTypes currType = quest.IsDaily() ? QuestTypes.Daily : QuestTypes.Weekly;
+                        var currType = quest.IsDaily() ? QuestTypes.Daily : QuestTypes.Weekly;
 
                         if (poolTypeMap[pool_id] != currType)
                         {
@@ -319,13 +319,13 @@ namespace Game
                             continue;
                         }
 
-                        PoolTemplateData pPoolTemplate = mPoolTemplate[pool_id];
-                        PoolObject plObject = new PoolObject(entry, 0.0f);
+                        var pPoolTemplate = mPoolTemplate[pool_id];
+                        var plObject = new PoolObject(entry, 0.0f);
 
                         if (!mPoolQuestGroups.ContainsKey(pool_id))
                             mPoolQuestGroups[pool_id] = new PoolGroup<Quest>();
 
-                        PoolGroup<Quest> questgroup = mPoolQuestGroups[pool_id];
+                        var questgroup = mPoolQuestGroups[pool_id];
                         questgroup.SetPoolId(pool_id);
                         questgroup.AddEntry(plObject, pPoolTemplate.MaxLimit);
 
@@ -341,11 +341,11 @@ namespace Game
             // The initialize method will spawn all pools not in an event and not in another pool, this is why there is 2 left joins with 2 null checks
             Log.outInfo(LogFilter.ServerLoading, "Starting objects pooling system...");
             {
-                uint oldMSTime = Time.GetMSTime();
+                var oldMSTime = Time.GetMSTime();
 
-                SQLResult result = DB.World.Query("SELECT DISTINCT pool_template.entry, pool_pool.pool_id, pool_pool.mother_pool FROM pool_template" +
-                    " LEFT JOIN game_event_pool ON pool_template.entry=game_event_pool.pool_entry" +
-                    " LEFT JOIN pool_pool ON pool_template.entry=pool_pool.pool_id WHERE game_event_pool.pool_entry IS NULL");
+                var result = DB.World.Query("SELECT DISTINCT pool_template.entry, pool_pool.pool_id, pool_pool.mother_pool FROM pool_template" +
+                                            " LEFT JOIN game_event_pool ON pool_template.entry=game_event_pool.pool_entry" +
+                                            " LEFT JOIN pool_pool ON pool_template.entry=pool_pool.pool_id WHERE game_event_pool.pool_entry IS NULL");
 
                 if (result.IsEmpty())
                 {
@@ -356,8 +356,8 @@ namespace Game
                     uint count = 0;
                     do
                     {
-                        uint pool_entry = result.Read<uint>(0);
-                        uint pool_pool_id = result.Read<uint>(1);
+                        var pool_entry = result.Read<uint>(0);
+                        var pool_pool_id = result.Read<uint>(1);
 
                         if (!CheckPool(pool_entry))
                         {
@@ -387,13 +387,13 @@ namespace Game
 
         public void SaveQuestsToDB()
         {
-            SQLTransaction trans = new SQLTransaction();
+            var trans = new SQLTransaction();
 
             foreach (var questPoolGroup in mPoolQuestGroups.Values)
             {
                 if (questPoolGroup.IsEmpty())
                     continue;
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_QUEST_POOL_SAVE);
+                var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_QUEST_POOL_SAVE);
                 stmt.AddValue(0, questPoolGroup.GetPoolId());
                 trans.Append(stmt);
             }
@@ -402,7 +402,7 @@ namespace Game
             {
                 if (IsSpawnedObject<Quest>(pair.Key))
                 {
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_QUEST_POOL_SAVE);
+                    var stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_QUEST_POOL_SAVE);
                     stmt.AddValue(0, pair.Value);
                     stmt.AddValue(1, pair.Key);
                     trans.Append(stmt);
@@ -511,7 +511,7 @@ namespace Game
 
         public void UpdatePool<T>(uint pool_id, ulong db_guid_or_pool_id)
         {
-            uint motherpoolid = IsPartOfAPool<Pool>(pool_id);
+            var motherpoolid = IsPartOfAPool<Pool>(pool_id);
             if (motherpoolid != 0)
                 SpawnPool<Pool>(motherpoolid, pool_id);
             else
@@ -596,7 +596,7 @@ namespace Game
             if (EqualChanced.Empty())
             {
                 float chance = 0;
-                for (int i = 0; i < ExplicitlyChanced.Count; ++i)
+                for (var i = 0; i < ExplicitlyChanced.Count; ++i)
                     chance += ExplicitlyChanced[i].chance;
                 if (chance != 100 && chance != 0)
                     return false;
@@ -606,7 +606,7 @@ namespace Game
 
         public void DespawnObject(ActivePoolData spawns, ulong guid = 0)
         {
-            for (int i = 0; i < EqualChanced.Count; ++i)
+            for (var i = 0; i < EqualChanced.Count; ++i)
             {
                 // if spawned
                 if (spawns.IsActiveObject<T>(EqualChanced[i].guid))
@@ -619,7 +619,7 @@ namespace Game
                 }
             }
 
-            for (int i = 0; i < ExplicitlyChanced.Count; ++i)
+            for (var i = 0; i < ExplicitlyChanced.Count; ++i)
             {
                 // spawned
                 if (spawns.IsActiveObject<T>(ExplicitlyChanced[i].guid))
@@ -749,7 +749,7 @@ namespace Game
                 return;
             }
 
-            int count = (int)(limit - spawns.GetActiveObjectCount(poolId));
+            var count = (int)(limit - spawns.GetActiveObjectCount(poolId));
 
             // If triggered from some object respawn this object is still marked as spawned
             // and also counted into m_SpawnedPoolAmount so we need increase count to be
@@ -760,7 +760,7 @@ namespace Game
             // This will try to spawn the rest of pool, not guaranteed
             if (count > 0)
             {
-                List<PoolObject> rolledObjects = new List<PoolObject>();
+                var rolledObjects = new List<PoolObject>();
 
                 // roll objects to be spawned
                 if (!ExplicitlyChanced.Empty())
@@ -768,9 +768,9 @@ namespace Game
                     while (count != 0 && ExplicitlyChanced.Count > rolledObjects.Count)
                     {
                         --count;
-                        float roll = (float)RandomHelper.randChance();
+                        var roll = (float)RandomHelper.randChance();
 
-                        foreach (PoolObject obj in ExplicitlyChanced)
+                        foreach (var obj in ExplicitlyChanced)
                         {
                             roll -= obj.chance;
                             // Triggering object is marked as spawned at this time and can be also rolled (respawn case)
@@ -799,7 +799,7 @@ namespace Game
                 }
 
                 // try to spawn rolled objects
-                foreach (PoolObject obj in rolledObjects)
+                foreach (var obj in rolledObjects)
                 {
                     if (spawns.IsActiveObject<T>(obj.guid))
                         continue;
@@ -828,17 +828,17 @@ namespace Game
             // load state from db
             if (triggerFrom == 0)
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_POOL_QUEST_SAVE);
+                var stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_POOL_QUEST_SAVE);
                 stmt.AddValue(0, poolId);
-                SQLResult result = DB.Characters.Query(stmt);
+                var result = DB.Characters.Query(stmt);
 
                 if (!result.IsEmpty())
                 {
                     do
                     {
-                        uint questId = result.Read<uint>(0);
+                        var questId = result.Read<uint>(0);
                         spawns.ActivateObject<Quest>(questId, poolId);
-                        PoolObject tempObj = new PoolObject(questId, 0.0f);
+                        var tempObj = new PoolObject(questId, 0.0f);
                         Spawn1Object(tempObj);
                         --limit;
                     } while (result.NextRow() && limit != 0);
@@ -846,8 +846,8 @@ namespace Game
                 }
             }
 
-            List<ulong> currentQuests = spawns.GetActiveQuests();
-            List<ulong> newQuests = new List<ulong>();
+            var currentQuests = spawns.GetActiveQuests();
+            var newQuests = new List<ulong>();
 
             // always try to select different quests
             foreach (var poolObject in EqualChanced)
@@ -863,7 +863,7 @@ namespace Game
             // recycle minimal amount of quests if possible count is lower than limit
             while (limit > newQuests.Count && !currentQuests.Empty())
             {
-                ulong questId = currentQuests.SelectRandom();
+                var questId = currentQuests.SelectRandom();
                 newQuests.Add(questId);
                 currentQuests.Remove(questId);
             }
@@ -874,9 +874,9 @@ namespace Game
             // activate <limit> random quests
             do
             {
-                ulong questId = newQuests.SelectRandom();
+                var questId = newQuests.SelectRandom();
                 spawns.ActivateObject<Quest>(questId, poolId);
-                PoolObject tempObj = new PoolObject(questId, 0.0f);
+                var tempObj = new PoolObject(questId, 0.0f);
                 Spawn1Object(tempObj);
                 newQuests.Remove(questId);
                 --limit;
@@ -918,7 +918,7 @@ namespace Game
                             // We use current coords to unspawn, not spawn coords since creature can have changed grid
                             if (map != null && !map.Instanceable() && map.IsGridLoaded(data.spawnPoint))
                             {
-                                GameObject go = GameObject.CreateGameObjectFromDB(obj.guid, map, false);
+                                var go = GameObject.CreateGameObjectFromDB(obj.guid, map, false);
                                 if (go)
                                 {
                                     if (go.IsSpawnedByDefault())
@@ -1044,7 +1044,7 @@ namespace Game
                     return;
             }
 
-            uint val = mSpawnedPools[pool_id];
+            var val = mSpawnedPools[pool_id];
             if (val > 0)
                 --val;
         }

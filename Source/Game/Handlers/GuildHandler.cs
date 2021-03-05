@@ -28,7 +28,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.QueryGuildInfo, Status = SessionStatus.Authed)]
         void HandleGuildQuery(QueryGuildInfo query)
         {
-            Guild guild = Global.GuildMgr.GetGuildByGuid(query.GuildGuid);
+            var guild = Global.GuildMgr.GetGuildByGuid(query.GuildGuid);
             if (guild)
             {
                 if (guild.IsMember(query.PlayerGuid))
@@ -38,7 +38,7 @@ namespace Game
                 }
             }
 
-            QueryGuildInfoResponse response = new QueryGuildInfoResponse();
+            var response = new QueryGuildInfoResponse();
             response.GuildGUID = query.GuildGuid;
             response.PlayerGuid = query.PlayerGuid;
             SendPacket(response);
@@ -50,7 +50,7 @@ namespace Game
             if (!ObjectManager.NormalizePlayerName(ref packet.Name))
                 return;
 
-            Guild guild = GetPlayer().GetGuild();
+            var guild = GetPlayer().GetGuild();
             if (guild)
                 guild.HandleInviteMember(this, packet.Name);
         }
@@ -58,7 +58,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildOfficerRemoveMember)]
         void HandleGuildOfficerRemoveMember(GuildOfficerRemoveMember packet)
         {
-            Guild guild = GetPlayer().GetGuild();
+            var guild = GetPlayer().GetGuild();
             if (guild)
                 guild.HandleRemoveMember(this, packet.Removee);
         }
@@ -68,7 +68,7 @@ namespace Game
         {
             if (GetPlayer().GetGuildId() == 0)
             {
-                Guild guild = Global.GuildMgr.GetGuildById(GetPlayer().GetGuildIdInvited());
+                var guild = Global.GuildMgr.GetGuildById(GetPlayer().GetGuildIdInvited());
                 if (guild)
                     guild.HandleAcceptMember(this);
             }
@@ -84,7 +84,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildGetRoster)]
         void HandleGuildGetRoster(GuildGetRoster packet)
         {
-            Guild guild = GetPlayer().GetGuild();
+            var guild = GetPlayer().GetGuild();
             if (guild)
                 guild.HandleRoster(this);
             else
@@ -94,7 +94,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildPromoteMember)]
         void HandleGuildPromoteMember(GuildPromoteMember packet)
         {
-            Guild guild = GetPlayer().GetGuild();
+            var guild = GetPlayer().GetGuild();
             if (guild)
                 guild.HandleUpdateMemberRank(this, packet.Promotee, false);
         }
@@ -102,7 +102,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildDemoteMember)]
         void HandleGuildDemoteMember(GuildDemoteMember packet)
         {
-            Guild guild = GetPlayer().GetGuild();
+            var guild = GetPlayer().GetGuild();
             if (guild)
                 guild.HandleUpdateMemberRank(this, packet.Demotee, true);
         }
@@ -110,9 +110,9 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildAssignMemberRank)]
         void HandleGuildAssignRank(GuildAssignMemberRank packet)
         {
-            ObjectGuid setterGuid = GetPlayer().GetGUID();
+            var setterGuid = GetPlayer().GetGUID();
 
-            Guild guild = GetPlayer().GetGuild();
+            var guild = GetPlayer().GetGuild();
             if (guild)
                 guild.HandleSetMemberRank(this, packet.Member, setterGuid, (byte)packet.RankOrder);
         }
@@ -120,7 +120,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildLeave)]
         void HandleGuildLeave(GuildLeave packet)
         {
-            Guild guild = GetPlayer().GetGuild();
+            var guild = GetPlayer().GetGuild();
             if (guild)
                 guild.HandleLeaveMember(this);
         }
@@ -128,7 +128,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildDelete)]
         void HandleGuildDisband(GuildDelete packet)
         {
-            Guild guild = GetPlayer().GetGuild();
+            var guild = GetPlayer().GetGuild();
             if (guild)
                 guild.HandleDelete(this);
         }
@@ -136,7 +136,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildUpdateMotdText)]
         void HandleGuildUpdateMotdText(GuildUpdateMotdText packet)
         {
-            Guild guild = GetPlayer().GetGuild();
+            var guild = GetPlayer().GetGuild();
             if (guild)
                 guild.HandleSetMOTD(this, packet.MotdText);
         }
@@ -144,7 +144,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildSetMemberNote)]
         void HandleGuildSetMemberNote(GuildSetMemberNote packet)
         {
-            Guild guild = GetPlayer().GetGuild();
+            var guild = GetPlayer().GetGuild();
             if (guild)
                 guild.HandleSetMemberNote(this, packet.Note, packet.NoteeGUID, packet.IsPublic);
         }
@@ -152,7 +152,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildGetRanks)]
         void HandleGuildGetRanks(GuildGetRanks packet)
         {
-            Guild guild = Global.GuildMgr.GetGuildByGuid(packet.GuildGUID);
+            var guild = Global.GuildMgr.GetGuildByGuid(packet.GuildGUID);
             if (guild)
                 if (guild.IsMember(GetPlayer().GetGUID()))
                     guild.SendGuildRankInfo(this);
@@ -161,7 +161,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildAddRank)]
         void HandleGuildAddRank(GuildAddRank packet)
         {
-            Guild guild = GetPlayer().GetGuild();
+            var guild = GetPlayer().GetGuild();
             if (guild)
                 guild.HandleAddNewRank(this, packet.Name);
         }
@@ -169,7 +169,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildDeleteRank)]
         void HandleGuildDeleteRank(GuildDeleteRank packet)
         {
-            Guild guild = GetPlayer().GetGuild();
+            var guild = GetPlayer().GetGuild();
             if (guild)
                 guild.HandleRemoveRank(this, (byte)packet.RankOrder);
         }
@@ -177,7 +177,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildUpdateInfoText)]
         void HandleGuildUpdateInfoText(GuildUpdateInfoText packet)
         {
-            Guild guild = GetPlayer().GetGuild();
+            var guild = GetPlayer().GetGuild();
             if (guild)
                 guild.HandleSetInfo(this, packet.InfoText);
         }
@@ -185,7 +185,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SaveGuildEmblem)]
         void HandleSaveGuildEmblem(SaveGuildEmblem packet)
         {
-            Guild.EmblemInfo emblemInfo = new Guild.EmblemInfo();
+            var emblemInfo = new Guild.EmblemInfo();
             emblemInfo.ReadPacket(packet);
 
             if (GetPlayer().GetNPCIfCanInteractWith(packet.Vendor, NPCFlags.TabardDesigner, NPCFlags2.None))
@@ -200,7 +200,7 @@ namespace Game
                     return;
                 }
 
-                Guild guild = GetPlayer().GetGuild();
+                var guild = GetPlayer().GetGuild();
                 if (guild)
                     guild.HandleSetEmblem(this, emblemInfo);
                 else
@@ -213,7 +213,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildEventLogQuery)]
         void HandleGuildEventLogQuery(GuildEventLogQuery packet)
         {
-            Guild guild = GetPlayer().GetGuild();
+            var guild = GetPlayer().GetGuild();
             if (guild)
                 guild.SendEventLog(this);
         }
@@ -221,7 +221,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildBankRemainingWithdrawMoneyQuery)]
         void HandleGuildBankMoneyWithdrawn(GuildBankRemainingWithdrawMoneyQuery packet)
         {
-            Guild guild = GetPlayer().GetGuild();
+            var guild = GetPlayer().GetGuild();
             if (guild)
                 guild.SendMoneyInfo(this);
         }
@@ -229,7 +229,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildPermissionsQuery)]
         void HandleGuildPermissionsQuery(GuildPermissionsQuery packet)
         {
-            Guild guild = GetPlayer().GetGuild();
+            var guild = GetPlayer().GetGuild();
             if (guild)
                 guild.SendPermissions(this);
         }
@@ -237,11 +237,11 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildBankActivate)]
         void HandleGuildBankActivate(GuildBankActivate packet)
         {
-            GameObject go = GetPlayer().GetGameObjectIfCanInteractWith(packet.Banker, GameObjectTypes.GuildBank);
+            var go = GetPlayer().GetGameObjectIfCanInteractWith(packet.Banker, GameObjectTypes.GuildBank);
             if (go == null)
                 return;
 
-            Guild guild = GetPlayer().GetGuild();
+            var guild = GetPlayer().GetGuild();
             if (guild == null)
             {
                 Guild.SendCommandResult(this, GuildCommandType.ViewTab, GuildCommandError.PlayerNotInGuild);
@@ -256,7 +256,7 @@ namespace Game
         {
             if (GetPlayer().GetGameObjectIfCanInteractWith(packet.Banker, GameObjectTypes.GuildBank))
             {
-                Guild guild = GetPlayer().GetGuild();
+                var guild = GetPlayer().GetGuild();
                 if (guild)
                     guild.SendBankList(this, packet.Tab, packet.FullUpdate);
             }
@@ -269,7 +269,7 @@ namespace Game
             {
                 if (packet.Money != 0 && GetPlayer().HasEnoughMoney(packet.Money))
                 {
-                    Guild guild = GetPlayer().GetGuild();
+                    var guild = GetPlayer().GetGuild();
                     if (guild)
                         guild.HandleMemberDepositMoney(this, packet.Money);
                 }
@@ -281,7 +281,7 @@ namespace Game
         {
             if (packet.Money != 0 && GetPlayer().GetGameObjectIfCanInteractWith(packet.Banker, GameObjectTypes.GuildBank))
             {
-                Guild guild = GetPlayer().GetGuild();
+                var guild = GetPlayer().GetGuild();
                 if (guild)
                     guild.HandleMemberWithdrawMoney(this, packet.Money);
             }
@@ -293,7 +293,7 @@ namespace Game
             if (!GetPlayer().GetGameObjectIfCanInteractWith(packet.Banker, GameObjectTypes.GuildBank))
                 return;
 
-            Guild guild = GetPlayer().GetGuild();
+            var guild = GetPlayer().GetGuild();
             if (!guild)
                 return;
 
@@ -317,7 +317,7 @@ namespace Game
         {
             if (packet.Banker.IsEmpty() || GetPlayer().GetGameObjectIfCanInteractWith(packet.Banker, GameObjectTypes.GuildBank))
             {
-                Guild guild = GetPlayer().GetGuild();
+                var guild = GetPlayer().GetGuild();
                 if (guild)
                     guild.HandleBuyBankTab(this, packet.BankTab);
             }
@@ -330,7 +330,7 @@ namespace Game
             {
                 if (GetPlayer().GetGameObjectIfCanInteractWith(packet.Banker, GameObjectTypes.GuildBank))
                 {
-                    Guild guild = GetPlayer().GetGuild();
+                    var guild = GetPlayer().GetGuild();
                     if (guild)
                         guild.HandleSetBankTabInfo(this, packet.BankTab, packet.Name, packet.Icon);
                 }
@@ -340,7 +340,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildBankLogQuery)]
         void HandleGuildBankLogQuery(GuildBankLogQuery packet)
         {
-            Guild guild = GetPlayer().GetGuild();
+            var guild = GetPlayer().GetGuild();
             if (guild)
                 guild.SendBankLog(this, (byte)packet.Tab);
         }
@@ -348,7 +348,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildBankTextQuery)]
         void HandleGuildBankTextQuery(GuildBankTextQuery packet)
         {
-            Guild guild = GetPlayer().GetGuild();
+            var guild = GetPlayer().GetGuild();
             if (guild)
                 guild.SendBankTabText(this, (byte)packet.Tab);
         }
@@ -356,7 +356,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildBankSetTabText)]
         void HandleGuildBankSetTabText(GuildBankSetTabText packet)
         {
-            Guild guild = GetPlayer().GetGuild();
+            var guild = GetPlayer().GetGuild();
             if (guild)
                 guild.SetBankTabText((byte)packet.Tab, packet.TabText);
         }
@@ -364,11 +364,11 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildSetRankPermissions)]
         void HandleGuildSetRankPermissions(GuildSetRankPermissions packet)
         {
-            Guild guild = GetPlayer().GetGuild();
+            var guild = GetPlayer().GetGuild();
             if (!guild)
                 return;
 
-            Guild.GuildBankRightsAndSlots[] rightsAndSlots = new Guild.GuildBankRightsAndSlots[GuildConst.MaxBankTabs];
+            var rightsAndSlots = new Guild.GuildBankRightsAndSlots[GuildConst.MaxBankTabs];
             for (byte tabId = 0; tabId < GuildConst.MaxBankTabs; ++tabId)
                 rightsAndSlots[tabId] = new Guild.GuildBankRightsAndSlots(tabId, (sbyte)packet.TabFlags[tabId], (int)packet.TabWithdrawItemLimit[tabId]);
 
@@ -378,7 +378,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.RequestGuildPartyState)]
         void HandleGuildRequestPartyState(RequestGuildPartyState packet)
         {
-            Guild guild = Global.GuildMgr.GetGuildByGuid(packet.GuildGUID);
+            var guild = Global.GuildMgr.GetGuildByGuid(packet.GuildGUID);
             if (guild)
                 guild.HandleGuildPartyRequest(this);
         }
@@ -386,7 +386,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildChangeNameRequest)]
         void HandleGuildChallengeUpdateRequest(GuildChallengeUpdateRequest packet)
         {
-            Guild guild = GetPlayer().GetGuild();
+            var guild = GetPlayer().GetGuild();
             if (guild)
                 guild.HandleGuildRequestChallengeUpdate(this);
         }
@@ -407,12 +407,12 @@ namespace Game
             {
                 var rewards = Global.GuildMgr.GetGuildRewards();
 
-                GuildRewardList rewardList = new GuildRewardList();
+                var rewardList = new GuildRewardList();
                 rewardList.Version = (uint)Time.UnixTime;
 
-                for (int i = 0; i < rewards.Count; i++)
+                for (var i = 0; i < rewards.Count; i++)
                 {
-                    GuildRewardItem rewardItem = new GuildRewardItem();
+                    var rewardItem = new GuildRewardItem();
                     rewardItem.ItemID = rewards[i].ItemID;
                     rewardItem.RaceMask = (uint)rewards[i].RaceMask;
                     rewardItem.MinGuildLevel = 0;
@@ -429,7 +429,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildQueryNews, Processing = PacketProcessing.Inplace)]
         void HandleGuildQueryNews(GuildQueryNews packet)
         {
-            Guild guild = GetPlayer().GetGuild();
+            var guild = GetPlayer().GetGuild();
             if (guild)
                 if (guild.GetGUID() == packet.GuildGUID)
                     guild.SendNewsUpdate(this);
@@ -438,7 +438,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildNewsUpdateSticky)]
         void HandleGuildNewsUpdateSticky(GuildNewsUpdateSticky packet)
         {
-            Guild guild = GetPlayer().GetGuild();
+            var guild = GetPlayer().GetGuild();
             if (guild)
                 guild.HandleNewsSetSticky(this, (uint)packet.NewsID, packet.Sticky);
         }
@@ -446,7 +446,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildReplaceGuildMaster)]
         void HandleGuildReplaceGuildMaster(GuildReplaceGuildMaster replaceGuildMaster)
         {
-            Guild guild = GetPlayer().GetGuild();
+            var guild = GetPlayer().GetGuild();
             if (guild)
                 guild.HandleSetNewGuildMaster(this, "", true);
         }
@@ -454,7 +454,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildSetGuildMaster)]
         void HandleGuildSetGuildMaster(GuildSetGuildMaster packet)
         {
-            Guild guild = GetPlayer().GetGuild();
+            var guild = GetPlayer().GetGuild();
             if (guild)
                 guild.HandleSetNewGuildMaster(this, packet.NewMasterName, false);
         }
@@ -462,7 +462,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildSetAchievementTracking)]
         void HandleGuildSetAchievementTracking(GuildSetAchievementTracking packet)
         {
-            Guild guild = GetPlayer().GetGuild();
+            var guild = GetPlayer().GetGuild();
             if (guild)
                 guild.HandleSetAchievementTracking(this, packet.AchievementIDs);
         }
@@ -470,7 +470,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GuildGetAchievementMembers)]
         void HandleGuildGetAchievementMembers(GuildGetAchievementMembers getAchievementMembers)
         {
-            Guild guild = GetPlayer().GetGuild();
+            var guild = GetPlayer().GetGuild();
             if (guild)
                 guild.HandleGetAchievementMembers(this, getAchievementMembers.AchievementID);
         }

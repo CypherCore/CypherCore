@@ -26,15 +26,15 @@ namespace Game.Entities
     {
         Player GetNextRandomRaidMember(float radius)
         {
-            Group group = GetGroup();
+            var group = GetGroup();
             if (!group)
                 return null;
 
-            List<Player> nearMembers = new List<Player>();
+            var nearMembers = new List<Player>();
 
-            for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
+            for (var refe = group.GetFirstMember(); refe != null; refe = refe.Next())
             {
-                Player Target = refe.GetSource();
+                var Target = refe.GetSource();
 
                 // IsHostileTo check duel and controlled by enemy
                 if (Target && Target != this && IsWithinDistInMap(Target, radius) &&
@@ -45,23 +45,23 @@ namespace Game.Entities
             if (nearMembers.Empty())
                 return null;
 
-            int randTarget = RandomHelper.IRand(0, nearMembers.Count - 1);
+            var randTarget = RandomHelper.IRand(0, nearMembers.Count - 1);
             return nearMembers[randTarget];
         }
 
         public PartyResult CanUninviteFromGroup(ObjectGuid guidMember = default)
         {
-            Group grp = GetGroup();
+            var grp = GetGroup();
             if (!grp)
                 return PartyResult.NotInGroup;
 
             if (grp.IsLFGGroup())
             {
-                ObjectGuid gguid = grp.GetGUID();
+                var gguid = grp.GetGUID();
                 if (Global.LFGMgr.GetKicksLeft(gguid) == 0)
                     return PartyResult.PartyLfgBootLimit;
 
-                LfgState state = Global.LFGMgr.GetState(gguid);
+                var state = Global.LFGMgr.GetState(gguid);
                 if (Global.LFGMgr.IsVoteKickActive(gguid))
                     return PartyResult.PartyLfgBootInProgress;
 
@@ -75,7 +75,7 @@ namespace Game.Entities
                     return PartyResult.PartyLfgBootLootRolls;
 
                 // @todo Should also be sent when anyone has recently left combat, with an aprox ~5 seconds timer.
-                for (GroupReference refe = grp.GetFirstMember(); refe != null; refe = refe.Next())
+                for (var refe = grp.GetFirstMember(); refe != null; refe = refe.Next())
                     if (refe.GetSource() && refe.GetSource().IsInMap(this) && refe.GetSource().IsInCombat())
                         return PartyResult.PartyLfgBootInCombat;
 
@@ -108,7 +108,7 @@ namespace Game.Entities
         {
             if (Global.LFGMgr.SelectedRandomLfgDungeon(GetGUID()))
             {
-                Map map = GetMap();
+                var map = GetMap();
                 return Global.LFGMgr.InLfgDungeonMap(GetGUID(), map.GetId(), map.GetDifficultyID());
             }
 
@@ -129,7 +129,7 @@ namespace Game.Entities
         {
             //remove existing reference
             m_group.Unlink();
-            Group group = GetOriginalGroup();
+            var group = GetOriginalGroup();
             if (group)
             {
                 m_group.Link(group, this);
@@ -173,7 +173,7 @@ namespace Game.Entities
 
         public void ResetGroupUpdateSequenceIfNeeded(Group group)
         {
-            GroupCategory category = group.GetGroupCategory();
+            var category = group.GetGroupCategory();
             // Rejoining the last group should not reset the sequence
             if (m_groupUpdateSequences[(int)category].GroupGuid != group.GetGUID())
             {
@@ -247,7 +247,7 @@ namespace Game.Entities
 
         public void UninviteFromGroup()
         {
-            Group group = GetGroupInvite();
+            var group = GetGroupInvite();
             if (!group)
                 return;
 
@@ -278,13 +278,13 @@ namespace Game.Entities
         {
             if (m_groupUpdateMask == GroupUpdateFlags.None)
                 return;
-            Group group = GetGroup();
+            var group = GetGroup();
             if (group)
                 group.UpdatePlayerOutOfRange(this);
 
             m_groupUpdateMask = GroupUpdateFlags.None;
 
-            Pet pet = GetPet();
+            var pet = GetPet();
             if (pet)
                 pet.ResetGroupUpdateFlag();
         }

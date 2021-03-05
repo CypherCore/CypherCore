@@ -390,8 +390,8 @@ namespace Game.Scripting
 
         public override bool OnTrigger(Player player, AreaTriggerRecord trigger, bool entered)
         {
-            uint triggerId = trigger.Id;
-            InstanceScript instance = player.GetInstanceScript();
+            var triggerId = trigger.Id;
+            var instance = player.GetInstanceScript();
             if (instance != null)
             {
                 if (instance.IsAreaTriggerDone(triggerId))
@@ -409,7 +409,7 @@ namespace Game.Scripting
 
         void ResetAreaTriggerDone(Player player, AreaTriggerRecord trigger)
         {
-            InstanceScript instance = player.GetInstanceScript();
+            var instance = player.GetInstanceScript();
             if (instance != null)
                 ResetAreaTriggerDone(instance, trigger.Id);
         }

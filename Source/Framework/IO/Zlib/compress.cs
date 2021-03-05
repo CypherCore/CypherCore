@@ -26,11 +26,11 @@ namespace Framework.IO
     {
         public static byte[] Compress(byte[] data)
         {
-            ByteBuffer buffer = new ByteBuffer();
+            var buffer = new ByteBuffer();
             buffer.WriteUInt8(0x78);
             buffer.WriteUInt8(0x9c);
 
-            uint adler32 = ZLib.adler32(1, data, (uint)data.Length);// Adler32(1, data, (uint)data.Length);
+            var adler32 = ZLib.adler32(1, data, (uint)data.Length);// Adler32(1, data, (uint)data.Length);
             var ms = new MemoryStream();
             using (var deflateStream = new DeflateStream(ms, CompressionMode.Compress))
             {
@@ -45,14 +45,14 @@ namespace Framework.IO
 
         public static byte[] Decompress(byte[] data, uint unpackedSize)
         {
-            byte[] decompressData = new byte[unpackedSize];
+            var decompressData = new byte[unpackedSize];
             using (var deflateStream = new DeflateStream(new MemoryStream(data, 2, data.Length - 6), CompressionMode.Decompress))
             {
                 var decompressed = new MemoryStream();
                 deflateStream.CopyTo(decompressed);
 
                 decompressed.Seek(0, SeekOrigin.Begin);
-                for (int i = 0; i < unpackedSize; i++)
+                for (var i = 0; i < unpackedSize; i++)
                     decompressData[i] = (byte)decompressed.ReadByte();
             }
 

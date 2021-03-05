@@ -43,7 +43,7 @@ namespace Game.AI
         {
             foreach (var id in spells)
             {
-                AISpellInfoType info = GetAISpellInfo(id, me.GetMap().GetDifficultyID());
+                var info = GetAISpellInfo(id, me.GetMap().GetDifficultyID());
                 if (info.condition == AICondition.Die)
                     me.CastSpell(killer, id, true);
             }
@@ -53,7 +53,7 @@ namespace Game.AI
         {
             foreach (var id in spells)
             {
-                AISpellInfoType info = GetAISpellInfo(id, me.GetMap().GetDifficultyID());
+                var info = GetAISpellInfo(id, me.GetMap().GetDifficultyID());
                 if (info.condition == AICondition.Aggro)
                     me.CastSpell(victim, id, false);
                 else if (info.condition == AICondition.Combat)
@@ -71,11 +71,11 @@ namespace Game.AI
             if (me.HasUnitState(UnitState.Casting))
                 return;
 
-            uint spellId = _events.ExecuteEvent();
+            var spellId = _events.ExecuteEvent();
             if (spellId != 0)
             {
                 DoCast(spellId);
-                AISpellInfoType info = GetAISpellInfo(spellId, me.GetMap().GetDifficultyID());
+                var info = GetAISpellInfo(spellId, me.GetMap().GetDifficultyID());
                 _events.ScheduleEvent(spellId, info.cooldown + RandomHelper.Rand32() % info.cooldown);
             }
             else
@@ -118,7 +118,7 @@ namespace Game.AI
             m_attackDist = 30.0f;
             foreach (var id in spells)
             {
-                AISpellInfoType info = GetAISpellInfo(id, me.GetMap().GetDifficultyID());
+                var info = GetAISpellInfo(id, me.GetMap().GetDifficultyID());
                 if (info.condition == AICondition.Combat && m_attackDist > info.maxRange)
                     m_attackDist = info.maxRange;
             }
@@ -137,16 +137,16 @@ namespace Game.AI
             if (spells.Empty())
                 return;
 
-            int spell = (int)(RandomHelper.Rand32() % spells.Count);
+            var spell = (int)(RandomHelper.Rand32() % spells.Count);
             uint count = 0;
             foreach (var id in spells)
             {
-                AISpellInfoType info = GetAISpellInfo(id, me.GetMap().GetDifficultyID());
+                var info = GetAISpellInfo(id, me.GetMap().GetDifficultyID());
                 if (info.condition == AICondition.Aggro)
                     me.CastSpell(victim, id, false);
                 else if (info.condition == AICondition.Combat)
                 {
-                    uint cooldown = info.realCooldown;
+                    var cooldown = info.realCooldown;
                     if (count == spell)
                     {
                         DoCast(spells[spell]);
@@ -173,12 +173,12 @@ namespace Game.AI
             if (me.HasUnitState(UnitState.Casting))
                 return;
 
-            uint spellId = _events.ExecuteEvent();
+            var spellId = _events.ExecuteEvent();
             if (spellId != 0)
             {
                 DoCast(spellId);
-                uint casttime = (uint)me.GetCurrentSpellCastTime(spellId);
-                AISpellInfoType info = GetAISpellInfo(spellId, me.GetMap().GetDifficultyID());
+                var casttime = (uint)me.GetCurrentSpellCastTime(spellId);
+                var info = GetAISpellInfo(spellId, me.GetMap().GetDifficultyID());
                 _events.ScheduleEvent(spellId, (casttime != 0 ? casttime : 500) + info.realCooldown);
             }
         }
@@ -331,15 +331,15 @@ namespace Game.AI
 
             if (m_ConditionsTimer <= diff)
             {
-                Vehicle vehicleKit = me.GetVehicleKit();
+                var vehicleKit = me.GetVehicleKit();
                 if (vehicleKit)
                 {
                     foreach (var pair in vehicleKit.Seats)
                     {
-                        Unit passenger = Global.ObjAccessor.GetUnit(me, pair.Value.Passenger.Guid);
+                        var passenger = Global.ObjAccessor.GetUnit(me, pair.Value.Passenger.Guid);
                         if (passenger)
                         {
-                            Player player = passenger.ToPlayer();
+                            var player = passenger.ToPlayer();
                             if (player)
                             {
                                 if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.CreatureTemplateVehicle, me.GetEntry(), player, me))

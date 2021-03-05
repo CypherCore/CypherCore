@@ -55,7 +55,7 @@ namespace Game
             FlagsEx = (QuestFlagsEx)fields.Read<uint>(22);
             FlagsEx2 = (QuestFlagsEx2)fields.Read<uint>(23);
 
-            for (int i = 0; i < SharedConst.QuestItemDropCount; ++i)
+            for (var i = 0; i < SharedConst.QuestItemDropCount; ++i)
             {
                 RewardItemId[i] = fields.Read<uint>(24 + i * 4);
                 RewardItemCount[i] = fields.Read<uint>(25 + i * 4);
@@ -66,7 +66,7 @@ namespace Game
                     ++_rewItemsCount;
             }
 
-            for (int i = 0; i < SharedConst.QuestRewardChoicesCount; ++i)
+            for (var i = 0; i < SharedConst.QuestRewardChoicesCount; ++i)
             {
                 RewardChoiceItemId[i] = fields.Read<uint>(40 + i * 3);
                 RewardChoiceItemCount[i] = fields.Read<uint>(41 + i * 3);
@@ -90,7 +90,7 @@ namespace Game
             QuestGiverPortraitMount = fields.Read<uint>(67);
             QuestTurnInPortrait = fields.Read<uint>(68);
 
-            for (int i = 0; i < SharedConst.QuestRewardReputationsCount; ++i)
+            for (var i = 0; i < SharedConst.QuestRewardReputationsCount; ++i)
             {
                 RewardFactionId[i] = fields.Read<uint>(69 + i * 4);
                 RewardFactionValue[i] = fields.Read<int>(70 + i * 4);
@@ -100,7 +100,7 @@ namespace Game
 
             RewardReputationMask = fields.Read<uint>(89);
 
-            for (int i = 0; i < SharedConst.QuestRewardCurrencyCount; ++i)
+            for (var i = 0; i < SharedConst.QuestRewardCurrencyCount; ++i)
             {
                 RewardCurrencyId[i] = fields.Read<uint>(90 + i * 2);
                 RewardCurrencyCount[i] = fields.Read<uint>(91 + i * 2);
@@ -132,8 +132,8 @@ namespace Game
 
         public void LoadRewardDisplaySpell(SQLFields fields)
         {
-            uint spellId = fields.Read<uint>(1);
-            uint playerConditionId = fields.Read<uint>(2);
+            var spellId = fields.Read<uint>(1);
+            var playerConditionId = fields.Read<uint>(2);
 
             if (!Global.SpellMgr.HasSpellInfo(spellId, Difficulty.None))
             {
@@ -152,15 +152,15 @@ namespace Game
 
         public void LoadRewardChoiceItems(SQLFields fields)
         {
-            for (int i = 0; i < SharedConst.QuestRewardChoicesCount; ++i)
+            for (var i = 0; i < SharedConst.QuestRewardChoicesCount; ++i)
                 RewardChoiceItemType[i] = (LootItemType)fields.Read<byte>(1 + i);
         }
 
         public void LoadQuestDetails(SQLFields fields)
         {
-            for (int i = 0; i < SharedConst.QuestEmoteCount; ++i)
+            for (var i = 0; i < SharedConst.QuestEmoteCount; ++i)
             {
-                ushort emoteId = fields.Read<ushort>(1 + i);
+                var emoteId = fields.Read<ushort>(1 + i);
                 if (!CliDB.EmotesStorage.ContainsKey(emoteId))
                 {
                     Log.outError(LogFilter.Sql, "Table `quest_details` has non-existing Emote{0} ({1}) set for quest {2}. Skipped.", 1 + i, emoteId, fields.Read<uint>(0));
@@ -169,7 +169,7 @@ namespace Game
                 DetailsEmote[i] = emoteId;
             }
 
-            for (int i = 0; i < SharedConst.QuestEmoteCount; ++i)
+            for (var i = 0; i < SharedConst.QuestEmoteCount; ++i)
                 DetailsEmoteDelay[i] = fields.Read<uint>(5 + i);
         }
 
@@ -191,9 +191,9 @@ namespace Game
 
         public void LoadQuestOfferReward(SQLFields fields)
         {
-            for (int i = 0; i < SharedConst.QuestEmoteCount; ++i)
+            for (var i = 0; i < SharedConst.QuestEmoteCount; ++i)
             {
-                ushort emoteId = fields.Read<ushort>(1 + i);
+                var emoteId = fields.Read<ushort>(1 + i);
                 if (!CliDB.EmotesStorage.ContainsKey(emoteId))
                 {
                     Log.outError(LogFilter.Sql, "Table `quest_offer_reward` has non-existing Emote{0} ({1}) set for quest {2}. Skipped.", 1 + i, emoteId, fields.Read<uint>(0));
@@ -202,7 +202,7 @@ namespace Game
                 OfferRewardEmote[i] = emoteId;
             }
 
-            for (int i = 0; i < SharedConst.QuestEmoteCount; ++i)
+            for (var i = 0; i < SharedConst.QuestEmoteCount; ++i)
                 OfferRewardEmoteDelay[i] = fields.Read<uint>(5 + i);
 
             OfferRewardText = fields.Read<string>(9);
@@ -239,7 +239,7 @@ namespace Game
 
         public void LoadQuestObjective(SQLFields fields)
         {
-            QuestObjective obj = new QuestObjective();  
+            var obj = new QuestObjective();  
             obj.QuestID = fields.Read<uint>(0);
             obj.Id = fields.Read<uint>(1);
             obj.Type = (QuestObjectiveType)fields.Read<byte>(2);
@@ -256,13 +256,13 @@ namespace Game
 
         public void LoadQuestObjectiveVisualEffect(SQLFields fields)
         {
-            uint objID = fields.Read<uint>(1);
+            var objID = fields.Read<uint>(1);
 
-            foreach (QuestObjective obj in Objectives)
+            foreach (var obj in Objectives)
             {
                 if (obj.Id == objID)
                 {
-                    byte effectIndex = fields.Read<byte>(3);
+                    var effectIndex = fields.Read<byte>(3);
                     if (obj.VisualEffects == null)
                         obj.VisualEffects = new int[effectIndex + 1];
 
@@ -279,18 +279,18 @@ namespace Game
         {
             if (player)
             {
-                uint questLevel = (uint)player.GetQuestLevel(this);
-                QuestXPRecord questXp = CliDB.QuestXPStorage.LookupByKey(questLevel);
+                var questLevel = (uint)player.GetQuestLevel(this);
+                var questXp = CliDB.QuestXPStorage.LookupByKey(questLevel);
                 if (questXp == null || RewardXPDifficulty >= 10)
                     return 0;
 
-                int diffFactor = (int)(2 * (questLevel - player.GetLevel()) + 12);
+                var diffFactor = (int)(2 * (questLevel - player.GetLevel()) + 12);
                 if (diffFactor < 1)
                     diffFactor = 1;
                 else if (diffFactor > 10)
                     diffFactor = 10;
 
-                uint xp = (uint)(diffFactor * questXp.Difficulty[RewardXPDifficulty] * RewardXPMultiplier / 10);
+                var xp = (uint)(diffFactor * questXp.Difficulty[RewardXPDifficulty] * RewardXPMultiplier / 10);
                 if (player.GetLevel() >= Global.ObjectMgr.GetMaxLevelForExpansion(PlayerConst.CurrentExpansion - 1) && player.GetSession().GetExpansion() == PlayerConst.CurrentExpansion && Expansion < (int)PlayerConst.CurrentExpansion)
                     xp = (uint)(xp / 9.0f);
 
@@ -298,7 +298,7 @@ namespace Game
 
                 if (WorldConfig.GetUIntValue(WorldCfg.MinQuestScaledXpRatio) != 0)
                 {
-                    uint minScaledXP = RoundXPValue((uint)(questXp.Difficulty[RewardXPDifficulty] * RewardXPMultiplier)) * WorldConfig.GetUIntValue(WorldCfg.MinQuestScaledXpRatio) / 100;
+                    var minScaledXP = RoundXPValue((uint)(questXp.Difficulty[RewardXPDifficulty] * RewardXPMultiplier)) * WorldConfig.GetUIntValue(WorldCfg.MinQuestScaledXpRatio) / 100;
                     xp = Math.Max(minScaledXP, xp);
                 }
 
@@ -310,7 +310,7 @@ namespace Game
 
         public uint MoneyValue(Player player)
         {
-            QuestMoneyRewardRecord money = CliDB.QuestMoneyRewardStorage.LookupByKey(player.GetQuestLevel(this));
+            var money = CliDB.QuestMoneyRewardStorage.LookupByKey(player.GetQuestLevel(this));
             if (money != null)
                 return (uint)(money.Difficulty[RewardMoneyDifficulty] * RewardMoneyMultiplier);
             else
@@ -319,7 +319,7 @@ namespace Game
 
         public QuestTagType? GetQuestTag()
         {
-            QuestInfoRecord questInfo = CliDB.QuestInfoStorage.LookupByKey(QuestInfoID);
+            var questInfo = CliDB.QuestInfoStorage.LookupByKey(QuestInfoID);
             if (questInfo != null)
                 return (QuestTagType)questInfo.Type;
 
@@ -337,9 +337,9 @@ namespace Game
             rewards.FactionFlags = RewardReputationMask;
 
             var displaySpellIndex = 0;
-            foreach (QuestRewardDisplaySpell displaySpell in RewardDisplaySpell)
+            foreach (var displaySpell in RewardDisplaySpell)
             {
-                PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(displaySpell.PlayerConditionId);
+                var playerCondition = CliDB.PlayerConditionStorage.LookupByKey(displaySpell.PlayerConditionId);
                 if (playerCondition != null)
                     if (!ConditionManager.IsPlayerMeetingCondition(player, playerCondition))
                         continue;
@@ -354,7 +354,7 @@ namespace Game
             rewards.NumSkillUps = RewardSkillPoints;
             rewards.TreasurePickerID = (uint)TreasurePickerID;
 
-            for (int i = 0; i < SharedConst.QuestRewardChoicesCount; ++i)
+            for (var i = 0; i < SharedConst.QuestRewardChoicesCount; ++i)
             {
                 rewards.ChoiceItems[i].LootItemType = RewardChoiceItemType[i];
                 rewards.ChoiceItems[i].Item = new ItemInstance();
@@ -362,13 +362,13 @@ namespace Game
                 rewards.ChoiceItems[i].Quantity = RewardChoiceItemCount[i];
             }
 
-            for (int i = 0; i < SharedConst.QuestRewardItemCount; ++i)
+            for (var i = 0; i < SharedConst.QuestRewardItemCount; ++i)
             {
                 rewards.ItemID[i] = RewardItemId[i];
                 rewards.ItemQty[i] = RewardItemCount[i];
             }
 
-            for (int i = 0; i < SharedConst.QuestRewardReputationsCount; ++i)
+            for (var i = 0; i < SharedConst.QuestRewardReputationsCount; ++i)
             {
                 rewards.FactionID[i] = RewardFactionId[i];
                 rewards.FactionOverride[i] = RewardFactionOverride[i];
@@ -376,7 +376,7 @@ namespace Game
                 rewards.FactionCapIn[i] = RewardFactionCapIn[i];
             }
 
-            for (int i = 0; i < SharedConst.QuestRewardCurrencyCount; ++i)
+            for (var i = 0; i < SharedConst.QuestRewardCurrencyCount; ++i)
             {
                 rewards.CurrencyID[i] = RewardCurrencyId[i];
                 rewards.CurrencyQty[i] = RewardCurrencyCount[i];
@@ -478,7 +478,7 @@ namespace Game
             QueryData.Info.RewardMoneyDifficulty = RewardMoneyDifficulty;
             QueryData.Info.RewardMoneyMultiplier = RewardMoneyMultiplier;
             QueryData.Info.RewardBonusMoney = RewardBonusMoney;
-            foreach (QuestRewardDisplaySpell displaySpell in RewardDisplaySpell)
+            foreach (var displaySpell in RewardDisplaySpell)
                 QueryData.Info.RewardDisplaySpell.Add(new QuestCompleteDisplaySpell(displaySpell.SpellId, displaySpell.PlayerConditionId));
 
             QueryData.Info.RewardSpell = RewardSpell;
@@ -542,10 +542,10 @@ namespace Game
             QueryData.Info.ManagedWorldStateID = ManagedWorldStateID;
             QueryData.Info.QuestSessionBonus = 0; //GetQuestSessionBonus(); // this is only sent while quest session is active
 
-            foreach (QuestObjective questObjective in Objectives)
+            foreach (var questObjective in Objectives)
                 QueryData.Info.Objectives.Add(questObjective);
 
-            for (int i = 0; i < SharedConst.QuestRewardCurrencyCount; ++i)
+            for (var i = 0; i < SharedConst.QuestRewardCurrencyCount; ++i)
             {
                 QueryData.Info.RewardCurrencyID[i] = RewardCurrencyId[i];
                 QueryData.Info.RewardCurrencyQty[i] = RewardCurrencyCount[i];

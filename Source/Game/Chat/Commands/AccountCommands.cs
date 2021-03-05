@@ -34,12 +34,12 @@ namespace Game.Chat
                 return false;
 
             // GM Level
-            AccountTypes securityLevel = handler.GetSession().GetSecurity();
+            var securityLevel = handler.GetSession().GetSecurity();
             handler.SendSysMessage(CypherStrings.AccountLevel, securityLevel);
 
             // Security level required
-            WorldSession session = handler.GetSession();
-            bool hasRBAC = (session.HasPermission(RBACPermissions.EmailConfirmForPassChange) ? true : false);
+            var session = handler.GetSession();
+            var hasRBAC = (session.HasPermission(RBACPermissions.EmailConfirmForPassChange) ? true : false);
             uint pwConfig = 0; // 0 - PW_NONE, 1 - PW_EMAIL, 2 - PW_RBAC
 
             handler.SendSysMessage(CypherStrings.AccountSecType, (pwConfig == 0 ? "Lowest level: No Email input required." :
@@ -54,11 +54,11 @@ namespace Game.Chat
             if (session.HasPermission(RBACPermissions.MayCheckOwnEmail))
             {
                 string emailoutput;
-                uint accountId = session.GetAccountId();
+                var accountId = session.GetAccountId();
 
-                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.GET_EMAIL_BY_ID);
+                var stmt = DB.Login.GetPreparedStatement(LoginStatements.GET_EMAIL_BY_ID);
                 stmt.AddValue(0, accountId);
-                SQLResult result = DB.Login.Query(stmt);
+                var result = DB.Login.Query(stmt);
 
                 if (!result.IsEmpty())
                 {
@@ -79,16 +79,16 @@ namespace Game.Chat
                 return false;
             }
 
-            uint accountId = handler.GetSession().GetAccountId();
+            var accountId = handler.GetSession().GetAccountId();
 
-            int expansion = args.NextInt32(); //get int anyway (0 if error)
+            var expansion = args.NextInt32(); //get int anyway (0 if error)
             if (expansion < 0 || expansion > WorldConfig.GetIntValue(WorldCfg.Expansion))
             {
                 handler.SendSysMessage(CypherStrings.ImproperValue);
                 return false;
             }
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_EXPANSION);
+            var stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_EXPANSION);
             stmt.AddValue(0, expansion);
             stmt.AddValue(1, accountId);
             DB.Login.Execute(stmt);
@@ -105,7 +105,7 @@ namespace Game.Chat
 
             var accountName = args.NextString().ToUpper();
             var password = args.NextString();
-            string email = "";
+            var email = "";
 
             if (string.IsNullOrEmpty(accountName) || string.IsNullOrEmpty(password))
                 return false;
@@ -116,7 +116,7 @@ namespace Game.Chat
                 return false;
             }
 
-            AccountOpResult result = Global.AccountMgr.CreateAccount(accountName, password, email);
+            var result = Global.AccountMgr.CreateAccount(accountName, password, email);
             switch (result)
             {
                 case AccountOpResult.Ok:
@@ -155,12 +155,12 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string accountName = args.NextString();
+            var accountName = args.NextString();
 
             if (string.IsNullOrEmpty(accountName))
                 return false;
 
-            uint accountId = Global.AccountMgr.GetId(accountName);
+            var accountId = Global.AccountMgr.GetId(accountName);
             if (accountId == 0)
             {
                 handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
@@ -170,7 +170,7 @@ namespace Game.Chat
             if (handler.HasLowerSecurityAccount(null, accountId, true))
                 return false;
 
-            AccountOpResult result = Global.AccountMgr.DeleteAccount(accountId);
+            var result = Global.AccountMgr.DeleteAccount(accountId);
             switch (result)
             {
                 case AccountOpResult.Ok:
@@ -199,10 +199,10 @@ namespace Game.Chat
                 return false;
             }
 
-            string oldEmail = args.NextString();
-            string password = args.NextString();
-            string email = args.NextString();
-            string emailConfirmation = args.NextString();
+            var oldEmail = args.NextString();
+            var password = args.NextString();
+            var email = args.NextString();
+            var emailConfirmation = args.NextString();
 
             if (string.IsNullOrEmpty(oldEmail) || string.IsNullOrEmpty(password)
                 || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(emailConfirmation))
@@ -246,7 +246,7 @@ namespace Game.Chat
             }
 
 
-            AccountOpResult result = Global.AccountMgr.ChangeEmail(handler.GetSession().GetAccountId(), email);
+            var result = Global.AccountMgr.ChangeEmail(handler.GetSession().GetAccountId(), email);
             switch (result)
             {
                 case AccountOpResult.Ok:
@@ -278,13 +278,13 @@ namespace Game.Chat
             }
 
             // First, we check config. What security type (sec type) is it ? Depending on it, the command branches out
-            uint pwConfig = WorldConfig.GetUIntValue(WorldCfg.AccPasschangesec); // 0 - PW_NONE, 1 - PW_EMAIL, 2 - PW_RBAC
+            var pwConfig = WorldConfig.GetUIntValue(WorldCfg.AccPasschangesec); // 0 - PW_NONE, 1 - PW_EMAIL, 2 - PW_RBAC
 
             // Command is supposed to be: .account password [$oldpassword] [$newpassword] [$newpasswordconfirmation] [$emailconfirmation]
-            string oldPassword = args.NextString();       // This extracts [$oldpassword]
-            string newPassword = args.NextString();              // This extracts [$newpassword]
-            string passwordConfirmation = args.NextString();     // This extracts [$newpasswordconfirmation]
-            string emailConfirmation = args.NextString();  // This defines the emailConfirmation variable, which is optional depending on sec type.
+            var oldPassword = args.NextString();       // This extracts [$oldpassword]
+            var newPassword = args.NextString();              // This extracts [$newpassword]
+            var passwordConfirmation = args.NextString();     // This extracts [$newpasswordconfirmation]
+            var emailConfirmation = args.NextString();  // This defines the emailConfirmation variable, which is optional depending on sec type.
 
             //Is any of those variables missing for any reason ? We return false.
             if (string.IsNullOrEmpty(oldPassword) || string.IsNullOrEmpty(newPassword)
@@ -326,7 +326,7 @@ namespace Game.Chat
             }
 
             // Changes password and prints result.
-            AccountOpResult result = Global.AccountMgr.ChangePassword(handler.GetSession().GetAccountId(), newPassword);
+            var result = Global.AccountMgr.ChangePassword(handler.GetSession().GetAccountId(), newPassword);
             switch (result)
             {
                 case AccountOpResult.Ok:
@@ -350,9 +350,9 @@ namespace Game.Chat
         static bool HandleAccountOnlineListCommand(StringArguments args, CommandHandler handler)
         {
             // Get the list of accounts ID logged to the realm
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_ONLINE);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_ONLINE);
 
-            SQLResult result = DB.Characters.Query(stmt);
+            var result = DB.Characters.Query(stmt);
 
             if (result.IsEmpty())
             {
@@ -368,14 +368,14 @@ namespace Game.Chat
             // Cycle through accounts
             do
             {
-                string name = result.Read<string>(0);
-                uint account = result.Read<uint>(1);
+                var name = result.Read<string>(0);
+                var account = result.Read<uint>(1);
 
                 // Get the username, last IP and GM level of each account
                 // No SQL injection. account is uint32.
                 stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_INFO);
                 stmt.AddValue(0, account);
-                SQLResult resultLogin = DB.Login.Query(stmt);
+                var resultLogin = DB.Login.Query(stmt);
 
                 if (!resultLogin.IsEmpty())
                 {
@@ -402,8 +402,8 @@ namespace Game.Chat
                     return false;
 
                 // Get the command line arguments
-                string account = args.NextString();
-                string exp = args.NextString();
+                var account = args.NextString();
+                var exp = args.NextString();
 
                 if (string.IsNullOrEmpty(account))
                     return false;
@@ -413,7 +413,7 @@ namespace Game.Chat
 
                 if (string.IsNullOrEmpty(exp))
                 {
-                    Player player = handler.GetSelectedPlayer();
+                    var player = handler.GetSelectedPlayer();
                     if (!player)
                         return false;
 
@@ -440,13 +440,13 @@ namespace Game.Chat
                     handler.HasLowerSecurityAccount(null, accountId, true))
                     return false;
 
-                if (!byte.TryParse(exp, out byte expansion))
+                if (!byte.TryParse(exp, out var expansion))
                     return false;
 
                 if (expansion > WorldConfig.GetIntValue(WorldCfg.Expansion))
                     return false;
 
-                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_EXPANSION);
+                var stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_EXPANSION);
 
                 stmt.AddValue(0, expansion);
                 stmt.AddValue(1, accountId);
@@ -473,14 +473,14 @@ namespace Game.Chat
                 }
 
                 // Get the command line arguments
-                string accountName = args.NextString();
-                string password = args.NextString();
-                string passwordConfirmation = args.NextString();
+                var accountName = args.NextString();
+                var password = args.NextString();
+                var passwordConfirmation = args.NextString();
 
                 if (string.IsNullOrEmpty(accountName) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(passwordConfirmation))
                     return false;
 
-                uint targetAccountId = Global.AccountMgr.GetId(accountName);
+                var targetAccountId = Global.AccountMgr.GetId(accountName);
                 if (targetAccountId == 0)
                 {
                     handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
@@ -498,7 +498,7 @@ namespace Game.Chat
                     return false;
                 }
 
-                AccountOpResult result = Global.AccountMgr.ChangePassword(targetAccountId, password);
+                var result = Global.AccountMgr.ChangePassword(targetAccountId, password);
                 switch (result)
                 {
                     case AccountOpResult.Ok:
@@ -526,12 +526,12 @@ namespace Game.Chat
                     return false;
                 }
 
-                string accountName = "";
+                var accountName = "";
 
-                string arg1 = args.NextString();
-                string arg2 = args.NextString();
-                string arg3 = args.NextString();
-                bool isAccountNameGiven = true;
+                var arg1 = args.NextString();
+                var arg2 = args.NextString();
+                var arg3 = args.NextString();
+                var isAccountNameGiven = true;
 
                 if (string.IsNullOrEmpty(arg3))
                 {
@@ -554,7 +554,7 @@ namespace Game.Chat
                 }
 
                 // Check for invalid specified GM level.
-                if (!uint.TryParse(isAccountNameGiven ? arg2 : arg1, out uint securityLevel))
+                if (!uint.TryParse(isAccountNameGiven ? arg2 : arg1, out var securityLevel))
                     return false;
 
                 if (securityLevel > (uint)AccountTypes.Console)
@@ -564,8 +564,8 @@ namespace Game.Chat
                 }
 
                 // command.getSession() == NULL only for console
-                uint accountId = (isAccountNameGiven) ? Global.AccountMgr.GetId(accountName) : handler.GetSelectedPlayer().GetSession().GetAccountId();
-                if (!int.TryParse(isAccountNameGiven ? arg3 : arg2, out int realmID))
+                var accountId = (isAccountNameGiven) ? Global.AccountMgr.GetId(accountName) : handler.GetSelectedPlayer().GetSession().GetAccountId();
+                if (!int.TryParse(isAccountNameGiven ? arg3 : arg2, out var realmID))
                     return false;
 
                 AccountTypes playerSecurity;
@@ -576,7 +576,7 @@ namespace Game.Chat
 
                 // can set security level only for target with less security and to less security that we have
                 // This is also reject self apply in fact
-                AccountTypes targetSecurity = Global.AccountMgr.GetSecurity(accountId, realmID);
+                var targetSecurity = Global.AccountMgr.GetSecurity(accountId, realmID);
                 if (targetSecurity >= playerSecurity || (AccountTypes)securityLevel >= playerSecurity)
                 {
                     handler.SendSysMessage(CypherStrings.YoursSecurityIsLow);
@@ -590,7 +590,7 @@ namespace Game.Chat
                     stmt.AddValue(0, accountId);
                     stmt.AddValue(1, securityLevel);
 
-                    SQLResult result = DB.Login.Query(stmt);
+                    var result = DB.Login.Query(stmt);
 
                     if (!result.IsEmpty())
                     {
@@ -606,7 +606,7 @@ namespace Game.Chat
                     return false;
                 }
 
-                RBACData rbac = isAccountNameGiven ? null : handler.GetSelectedPlayer().GetSession().GetRBACData();
+                var rbac = isAccountNameGiven ? null : handler.GetSelectedPlayer().GetSession().GetRBACData();
                 Global.AccountMgr.UpdateAccountAccess(rbac, accountId, (byte)securityLevel, realmID);
                 handler.SendSysMessage(CypherStrings.YouChangeSecurity, accountName, securityLevel);
                 return true;
@@ -622,9 +622,9 @@ namespace Game.Chat
                         return false;
 
                     // Get the command line arguments
-                    string accountName = args.NextString();
-                    string email = args.NextString();
-                    string emailConfirmation = args.NextString();
+                    var accountName = args.NextString();
+                    var email = args.NextString();
+                    var emailConfirmation = args.NextString();
 
                     if (string.IsNullOrEmpty(accountName) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(emailConfirmation))
                     {
@@ -632,7 +632,7 @@ namespace Game.Chat
                         return false;
                     }
 
-                    uint targetAccountId = Global.AccountMgr.GetId(accountName);
+                    var targetAccountId = Global.AccountMgr.GetId(accountName);
                     if (targetAccountId == 0)
                     {
                         handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
@@ -650,7 +650,7 @@ namespace Game.Chat
                         return false;
                     }
 
-                    AccountOpResult result = Global.AccountMgr.ChangeEmail(targetAccountId, email);
+                    var result = Global.AccountMgr.ChangeEmail(targetAccountId, email);
                     switch (result)
                     {
                         case AccountOpResult.Ok:
@@ -683,9 +683,9 @@ namespace Game.Chat
                         return false;
 
                     // Get the command line arguments
-                    string accountName = args.NextString();
-                    string email = args.NextString();
-                    string emailConfirmation = args.NextString();
+                    var accountName = args.NextString();
+                    var email = args.NextString();
+                    var emailConfirmation = args.NextString();
 
                     if (string.IsNullOrEmpty(accountName) || string.IsNullOrEmpty(email) || string.IsNullOrEmpty(emailConfirmation))
                     {
@@ -693,7 +693,7 @@ namespace Game.Chat
                         return false;
                     }
 
-                    uint targetAccountId = Global.AccountMgr.GetId(accountName);
+                    var targetAccountId = Global.AccountMgr.GetId(accountName);
                     if (targetAccountId == 0)
                     {
                         handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
@@ -711,7 +711,7 @@ namespace Game.Chat
                         return false;
                     }
 
-                    AccountOpResult result = Global.AccountMgr.ChangeRegEmail(targetAccountId, email);
+                    var result = Global.AccountMgr.ChangeRegEmail(targetAccountId, email);
                     switch (result)
                     {
                         case AccountOpResult.Ok:
@@ -746,7 +746,7 @@ namespace Game.Chat
                     return false;
                 }
 
-                string param = args.NextString();
+                var param = args.NextString();
                 if (!param.IsEmpty())
                 {
                     if (param == "on")
@@ -775,7 +775,7 @@ namespace Game.Chat
                     }
                     else if (param == "off")
                     {
-                        PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_ACCOUNT_LOCK_COUNTRY);
+                        var stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_ACCOUNT_LOCK_COUNTRY);
                         stmt.AddValue(0, "00");
                         stmt.AddValue(1, handler.GetSession().GetAccountId());
                         DB.Login.Execute(stmt);
@@ -796,10 +796,10 @@ namespace Game.Chat
                     return false;
                 }
 
-                string param = args.NextString();
+                var param = args.NextString();
                 if (!string.IsNullOrEmpty(param))
                 {
-                    PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_ACCOUNT_LOCK);
+                    var stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_ACCOUNT_LOCK);
 
                     if (param == "on")
                     {

@@ -86,22 +86,22 @@ namespace Game.Entities
             // 5. Credit instance encounter.
             // 6. Update guild achievements.
             // 7. Credit scenario criterias
-            Creature victim = _victim.ToCreature();
+            var victim = _victim.ToCreature();
             if (victim != null)
             {
                 if (victim.IsDungeonBoss())
                 {
-                    InstanceScript instance = _victim.GetInstanceScript();
+                    var instance = _victim.GetInstanceScript();
                     if (instance != null)
                         instance.UpdateEncounterStateForKilledCreature(_victim.GetEntry(), _victim);
                 }
 
-                uint guildId = victim.GetMap().GetOwnerGuildId();
+                var guildId = victim.GetMap().GetOwnerGuildId();
                 var guild = Global.GuildMgr.GetGuildById(guildId);
                 if (guild != null)
                     guild.UpdateCriteria(CriteriaTypes.KillCreature, victim.GetEntry(), 1, 0, victim, _killer);
 
-                Scenario scenario = victim.GetScenario();
+                var scenario = victim.GetScenario();
                 if (scenario != null)
                     scenario.UpdateCriteria(CriteriaTypes.KillCreature, victim.GetEntry(), 1, 0, victim, _killer);
             }
@@ -112,14 +112,14 @@ namespace Game.Entities
             if (_group)
             {
                 // 2. In case when player is in group, initialize variables necessary for group calculations:
-                for (GroupReference refe = _group.GetFirstMember(); refe != null; refe = refe.Next())
+                for (var refe = _group.GetFirstMember(); refe != null; refe = refe.Next())
                 {
-                    Player member = refe.GetSource();
+                    var member = refe.GetSource();
                     if (member)
                     {
                         if (_killer == member || (member.IsAtGroupRewardDistance(_victim) && member.IsAlive()))
                         {
-                            uint lvl = member.GetLevel();
+                            var lvl = member.GetLevel();
                             // 2.1. _count - number of alive group members within reward distance;
                             ++_count;
                             // 2.2. _sumLevel - sum of levels of alive group members within reward distance;
@@ -129,7 +129,7 @@ namespace Game.Entities
                                 _maxLevel = (byte)lvl;
                             // 2.4. _maxNotGrayMember - maximum level of alive group member within reward distance,
                             //      for whom victim is not gray;
-                            uint grayLevel = Formulas.GetGrayLevel(lvl);
+                            var grayLevel = Formulas.GetGrayLevel(lvl);
                             if (_victim.GetLevelForTarget(member) > grayLevel && (!_maxNotGrayMember || _maxNotGrayMember.GetLevel() < lvl))
                                 _maxNotGrayMember = member;
                         }
@@ -163,7 +163,7 @@ namespace Game.Entities
 
         void _RewardXP(Player player, float rate)
         {
-            uint xp = _xp;
+            var xp = _xp;
             if (_group)
             {
                 // 4.2.1. If player is in group, adjust XP:
@@ -185,7 +185,7 @@ namespace Game.Entities
 
                 // 4.2.3. Give XP to player.
                 player.GiveXP(xp, _victim, _groupRate);
-                Pet pet = player.GetPet();
+                var pet = player.GetPet();
                 if (pet)
                     // 4.2.4. If player has pet, reward pet with XP (100% for single player, 50% for group case).
                     pet.GivePetXP(_group ? xp / 2 : xp);
@@ -204,7 +204,7 @@ namespace Game.Entities
             // 4.4. Give kill credit (player must not be in group, or he must be alive or without corpse).
             if (!_group || player.IsAlive() || player.GetCorpse() == null)
             {
-                Creature target = _victim.ToCreature();
+                var target = _victim.ToCreature();
                 if (target != null)
                 {
                     player.KilledMonster(target.GetCreatureTemplate(), target.GetGUID());
@@ -228,7 +228,7 @@ namespace Game.Entities
             // Give reputation and kill credit only in PvE.
             if (!_isPvP || _isBattleground)
             {
-                float rate = _group ? _groupRate * player.GetLevel() / _sumLevel : 1.0f;
+                var rate = _group ? _groupRate * player.GetLevel() / _sumLevel : 1.0f;
                 if (_xp != 0)
                     // 4.2. Give XP.
                     _RewardXP(player, rate);
@@ -254,17 +254,17 @@ namespace Game.Entities
                 // (Battlegroundrewards only XP, that's why).
                 if (!_isBattleground || _xp != 0)
                 {
-                    bool isDungeon = !_isPvP && CliDB.MapStorage.LookupByKey(_killer.GetMapId()).IsDungeon();
+                    var isDungeon = !_isPvP && CliDB.MapStorage.LookupByKey(_killer.GetMapId()).IsDungeon();
                     if (!_isBattleground)
                     {
                         // 3.1.2. Alter group rate if group is in raid (not for Battlegrounds).
-                        bool isRaid = !_isPvP && CliDB.MapStorage.LookupByKey(_killer.GetMapId()).IsRaid() && _group.IsRaidGroup();
+                        var isRaid = !_isPvP && CliDB.MapStorage.LookupByKey(_killer.GetMapId()).IsRaid() && _group.IsRaidGroup();
                         _groupRate = Formulas.XPInGroupRate(_count, isRaid);
                     }
                     // 3.1.3. Reward each group member (even dead or corpse) within reward distance.
-                    for (GroupReference refe = _group.GetFirstMember(); refe != null; refe = refe.Next())
+                    for (var refe = _group.GetFirstMember(); refe != null; refe = refe.Next())
                     {
-                        Player member = refe.GetSource();
+                        var member = refe.GetSource();
                         if (member)
                         {
                             // Killer may not be at reward distance, check directly

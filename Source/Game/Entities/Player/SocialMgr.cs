@@ -43,7 +43,7 @@ namespace Game.Entities
             friendInfo.Level = 0;
             friendInfo.Class = 0;
 
-            Player target = Global.ObjAccessor.FindPlayer(friendGUID);
+            var target = Global.ObjAccessor.FindPlayer(friendGUID);
             if (!target)
                 return;
 
@@ -83,10 +83,10 @@ namespace Game.Entities
 
         public void SendFriendStatus(Player player, FriendsResult result, ObjectGuid friendGuid, bool broadcast = false)
         {
-            FriendInfo fi = new FriendInfo();
+            var fi = new FriendInfo();
             GetFriendInfo(player, friendGuid, fi);
 
-            FriendStatusPkt friendStatus = new FriendStatusPkt();
+            var friendStatus = new FriendStatusPkt();
             friendStatus.Initialize(friendGuid, result, fi);
 
             if (broadcast)
@@ -100,17 +100,17 @@ namespace Game.Entities
             if (!player)
                 return;
 
-            AccountTypes gmSecLevel = (AccountTypes)WorldConfig.GetIntValue(WorldCfg.GmLevelInWhoList);
+            var gmSecLevel = (AccountTypes)WorldConfig.GetIntValue(WorldCfg.GmLevelInWhoList);
             foreach (var pair in _socialMap)
             {
                 var info = pair.Value._playerSocialMap.LookupByKey(player.GetGUID());
                 if (info != null && info.Flags.HasAnyFlag(SocialFlag.Friend))
                 {
-                    Player target = Global.ObjAccessor.FindPlayer(pair.Key);
+                    var target = Global.ObjAccessor.FindPlayer(pair.Key);
                     if (!target || !target.IsInWorld)
                         continue;
 
-                    WorldSession session = target.GetSession();
+                    var session = target.GetSession();
                     if (!session.HasPermission(RBACPermissions.WhoSeeAllSecLevels) && player.GetSession().GetSecurity() > gmSecLevel)
                         continue;
 
@@ -125,16 +125,16 @@ namespace Game.Entities
 
         public PlayerSocial LoadFromDB(SQLResult result, ObjectGuid guid)
         {
-            PlayerSocial social = new PlayerSocial();
+            var social = new PlayerSocial();
             social.SetPlayerGUID(guid);
 
             if (!result.IsEmpty())
             {
                 do
                 {
-                    ObjectGuid friendGuid = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(0));
-                    ObjectGuid friendAccountGuid = ObjectGuid.Create(HighGuid.WowAccount, result.Read<uint>(1));
-                    SocialFlag flags = (SocialFlag)result.Read<byte>(2);
+                    var friendGuid = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(0));
+                    var friendAccountGuid = ObjectGuid.Create(HighGuid.WowAccount, result.Read<uint>(1));
+                    var flags = (SocialFlag)result.Read<byte>(2);
 
                     social._playerSocialMap[friendGuid] = new FriendInfo(friendAccountGuid, flags, result.Read<string>(3));
                 }
@@ -175,7 +175,7 @@ namespace Game.Entities
             {
                 friendInfo.Flags |= flag;
 
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHARACTER_SOCIAL_FLAGS);
+                var stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHARACTER_SOCIAL_FLAGS);
                 stmt.AddValue(0, friendInfo.Flags);
                 stmt.AddValue(1, GetPlayerGUID().GetCounter());
                 stmt.AddValue(2, friendGuid.GetCounter());
@@ -183,11 +183,11 @@ namespace Game.Entities
             }
             else
             {
-                FriendInfo fi = new FriendInfo();
+                var fi = new FriendInfo();
                 fi.Flags |= flag;
                 _playerSocialMap[friendGuid] = fi;
 
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHARACTER_SOCIAL);
+                var stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHARACTER_SOCIAL);
                 stmt.AddValue(0, GetPlayerGUID().GetCounter());
                 stmt.AddValue(1, friendGuid.GetCounter());
                 stmt.AddValue(2, flag);
@@ -206,7 +206,7 @@ namespace Game.Entities
 
             if (friendInfo.Flags == 0)
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_SOCIAL);
+                var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_SOCIAL);
                 stmt.AddValue(0, GetPlayerGUID().GetCounter());
                 stmt.AddValue(1, friendGuid.GetCounter());
                 DB.Characters.Execute(stmt);
@@ -215,7 +215,7 @@ namespace Game.Entities
             }
             else
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHARACTER_SOCIAL_FLAGS);
+                var stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHARACTER_SOCIAL_FLAGS);
                 stmt.AddValue(0, friendInfo.Flags);
                 stmt.AddValue(1, GetPlayerGUID().GetCounter());
                 stmt.AddValue(2, friendGuid.GetCounter());
@@ -228,7 +228,7 @@ namespace Game.Entities
             if (!_playerSocialMap.ContainsKey(friendGuid))                     // not exist
                 return;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHARACTER_SOCIAL_NOTE);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHARACTER_SOCIAL_NOTE);
             stmt.AddValue(0, note);
             stmt.AddValue(1, GetPlayerGUID().GetCounter());
             stmt.AddValue(2, friendGuid.GetCounter());
@@ -242,7 +242,7 @@ namespace Game.Entities
             if (!player)
                 return;
 
-            ContactList contactList = new ContactList();
+            var contactList = new ContactList();
             contactList.Flags = flags;
 
             foreach (var v in _playerSocialMap)

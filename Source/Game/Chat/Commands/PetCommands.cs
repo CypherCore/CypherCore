@@ -28,8 +28,8 @@ namespace Game.Chat
         [Command("create", RBACPermissions.CommandPetCreate)]
         static bool HandlePetCreateCommand(StringArguments args, CommandHandler handler)
         {
-            Player player = handler.GetSession().GetPlayer();
-            Creature creatureTarget = handler.GetSelectedCreature();
+            var player = handler.GetSession().GetPlayer();
+            var creatureTarget = handler.GetSelectedCreature();
 
             if (!creatureTarget || creatureTarget.IsPet() || creatureTarget.IsTypeId(TypeId.Player))
             {
@@ -37,7 +37,7 @@ namespace Game.Chat
                 return false;
             }
 
-            CreatureTemplate creatureTemplate = creatureTarget.GetCreatureTemplate();
+            var creatureTemplate = creatureTarget.GetCreatureTemplate();
             // Creatures with family CreatureFamily.None crashes the server
             if (creatureTemplate.Family == CreatureFamily.None)
             {
@@ -52,7 +52,7 @@ namespace Game.Chat
             }
 
             // Everything looks OK, create new pet
-            Pet pet = new Pet(player, PetType.Hunter);
+            var pet = new Pet(player, PetType.Hunter);
             if (!pet.CreateBaseAtCreature(creatureTarget))
             {
                 handler.SendSysMessage("Error 1");
@@ -99,14 +99,14 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            Pet pet = GetSelectedPlayerPetOrOwn(handler);
+            var pet = GetSelectedPlayerPetOrOwn(handler);
             if (!pet)
             {
                 handler.SendSysMessage(CypherStrings.SelectPlayerOrPet);
                 return false;
             }
 
-            uint spellId = handler.ExtractSpellIdFromLink(args);
+            var spellId = handler.ExtractSpellIdFromLink(args);
             if (spellId == 0 || !Global.SpellMgr.HasSpellInfo(spellId, Difficulty.None))
                 return false;
 
@@ -118,7 +118,7 @@ namespace Game.Chat
             }
 
             // Check if spell is valid
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
+            var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
             if (spellInfo == null || !Global.SpellMgr.IsSpellValid(spellInfo))
             {
                 handler.SendSysMessage(CypherStrings.CommandSpellBroken, spellId);
@@ -137,14 +137,14 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            Pet pet = GetSelectedPlayerPetOrOwn(handler);
+            var pet = GetSelectedPlayerPetOrOwn(handler);
             if (!pet)
             {
                 handler.SendSysMessage(CypherStrings.SelectPlayerOrPet);
                 return false;
             }
 
-            uint spellId = handler.ExtractSpellIdFromLink(args);
+            var spellId = handler.ExtractSpellIdFromLink(args);
 
             if (pet.HasSpell(spellId))
                 pet.RemoveSpell(spellId, false);
@@ -157,15 +157,15 @@ namespace Game.Chat
         [Command("level", RBACPermissions.CommandPetLevel)]
         static bool HandlePetLevelCommand(StringArguments args, CommandHandler handler)
         {
-            Pet pet = GetSelectedPlayerPetOrOwn(handler);
-            Player owner = pet ? pet.GetOwner() : null;
+            var pet = GetSelectedPlayerPetOrOwn(handler);
+            var owner = pet ? pet.GetOwner() : null;
             if (!pet || !owner)
             {
                 handler.SendSysMessage(CypherStrings.SelectPlayerOrPet);
                 return false;
             }
 
-            int level = args.NextInt32();
+            var level = args.NextInt32();
             if (level == 0)
                 level = (int)(owner.GetLevel() - pet.GetLevel());
             if (level == 0 || level < -SharedConst.StrongMaxLevel || level > SharedConst.StrongMaxLevel)
@@ -174,7 +174,7 @@ namespace Game.Chat
                 return false;
             }
 
-            int newLevel = (int)pet.GetLevel() + level;
+            var newLevel = (int)pet.GetLevel() + level;
             if (newLevel < 1)
                 newLevel = 1;
             else if (newLevel > owner.GetLevel())
@@ -186,7 +186,7 @@ namespace Game.Chat
 
         static Pet GetSelectedPlayerPetOrOwn(CommandHandler handler)
         {
-            Unit target = handler.GetSelectedUnit();
+            var target = handler.GetSelectedUnit();
             if (target)
             {
                 if (target.IsTypeId(TypeId.Player))
@@ -196,7 +196,7 @@ namespace Game.Chat
                 return null;
             }
 
-            Player player = handler.GetSession().GetPlayer();
+            var player = handler.GetSession().GetPlayer();
             return player ? player.GetPet() : null;
         }
     }

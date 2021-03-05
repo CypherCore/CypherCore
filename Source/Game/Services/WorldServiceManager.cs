@@ -34,7 +34,7 @@ namespace Game.Services
         {
             serviceHandlers = new ConcurrentDictionary<(uint ServiceHash, uint MethodId), WorldServiceHandler>();
 
-            Assembly currentAsm = Assembly.GetExecutingAssembly();
+            var currentAsm = Assembly.GetExecutingAssembly();
             foreach (var type in currentAsm.GetTypes())
             {
                 foreach (var methodInfo in type.GetMethods(BindingFlags.Instance | BindingFlags.NonPublic))

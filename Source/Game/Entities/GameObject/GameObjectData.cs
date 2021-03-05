@@ -574,7 +574,7 @@ namespace Game.Entities
             QueryData.GameObjectID = entry;
             QueryData.Allow = true;
 
-            GameObjectStats stats = new GameObjectStats();
+            var stats = new GameObjectStats();
             stats.Type = (uint)type;
             stats.DisplayID = displayId;
 
@@ -586,12 +586,12 @@ namespace Game.Entities
             stats.Size = size;
 
             var items = Global.ObjectMgr.GetGameObjectQuestItemList(entry);
-            foreach (uint item in items)
+            foreach (var item in items)
                 stats.QuestItems.Add(item);
 
             unsafe
             {
-                for (int i = 0; i < SharedConst.MaxGOData; i++)
+                for (var i = 0; i < SharedConst.MaxGOData; i++)
                     stats.Data[i] = Raw.data[i];
             }
 

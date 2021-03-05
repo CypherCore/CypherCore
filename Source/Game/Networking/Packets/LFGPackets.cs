@@ -244,7 +244,7 @@ namespace Game.Networking.Packets
             foreach (var slot in JoinSlots)
                 _worldPacket.WriteUInt32(slot);
 
-            foreach (ulong bgQueueID in BgQueueIDs)
+            foreach (var bgQueueID in BgQueueIDs)
                 _worldPacket.WriteUInt64(bgQueueID);
 
             _worldPacket.WriteBit(IsBeginning);
@@ -278,13 +278,13 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(BlackList.Count);
             _worldPacket.WriteInt32(BlackListNames.Count);
 
-            foreach (LFGBlackListPkt blackList in BlackList)
+            foreach (var blackList in BlackList)
                 blackList.Write(_worldPacket);
 
-            foreach (string str in BlackListNames)
+            foreach (var str in BlackListNames)
                 _worldPacket.WriteBits(str.GetByteCount() + 1, 24);
 
-            foreach (string str in BlackListNames)
+            foreach (var str in BlackListNames)
                 if (!str.IsEmpty())
                     _worldPacket.WriteCString(str);
         }
@@ -308,7 +308,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(AvgWaitTimeMe);
             _worldPacket.WriteUInt32(AvgWaitTime);
 
-            for (int i = 0; i < 3; i++)
+            for (var i = 0; i < 3; i++)
             {
                 _worldPacket.WriteUInt32(AvgWaitTimeByRole[i]);
                 _worldPacket.WriteUInt8(LastNeeded[i]);
@@ -478,7 +478,7 @@ namespace Game.Networking.Packets
             if (PlayerGuid.HasValue)
                 data.WritePackedGuid(PlayerGuid.Value);
 
-            foreach (LFGBlackListSlot slot in Slot)
+            foreach (var slot in Slot)
                 slot.Write(data);
         }
     }
@@ -655,7 +655,7 @@ namespace Game.Networking.Packets
             if (PlayerGuid.HasValue)
                 data.WritePackedGuid(PlayerGuid.Value);
 
-            foreach (LFGBlackListSlot slot in Slot)
+            foreach (var slot in Slot)
                 slot.Write(data);
         }
 

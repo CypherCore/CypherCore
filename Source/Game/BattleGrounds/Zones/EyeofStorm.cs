@@ -111,7 +111,7 @@ namespace Game.BattleGrounds.Zones
             SpawnBGObject(EotSObjectTypes.DoorA, BattlegroundConst.RespawnImmediately);
             SpawnBGObject(EotSObjectTypes.DoorH, BattlegroundConst.RespawnImmediately);
 
-            for (int i = EotSObjectTypes.ABannerFelReaverCenter; i < EotSObjectTypes.Max; ++i)
+            for (var i = EotSObjectTypes.ABannerFelReaverCenter; i < EotSObjectTypes.Max; ++i)
                 SpawnBGObject(i, BattlegroundConst.RespawnOneDay);
         }
 
@@ -120,13 +120,13 @@ namespace Game.BattleGrounds.Zones
             SpawnBGObject(EotSObjectTypes.DoorA, BattlegroundConst.RespawnOneDay);
             SpawnBGObject(EotSObjectTypes.DoorH, BattlegroundConst.RespawnOneDay);
 
-            for (int i = EotSObjectTypes.NBannerFelReaverLeft; i <= EotSObjectTypes.FlagNetherstorm; ++i)
+            for (var i = EotSObjectTypes.NBannerFelReaverLeft; i <= EotSObjectTypes.FlagNetherstorm; ++i)
                 SpawnBGObject(i, BattlegroundConst.RespawnImmediately);
 
-            for (int i = 0; i < EotSPoints.PointsMax; ++i)
+            for (var i = 0; i < EotSPoints.PointsMax; ++i)
             {
                 //randomly spawn buff
-                byte buff = (byte)RandomHelper.URand(0, 2);
+                var buff = (byte)RandomHelper.URand(0, 2);
                 SpawnBGObject(EotSObjectTypes.SpeedbuffFelReaver + buff + i * 3, BattlegroundConst.RespawnImmediately);
             }
 
@@ -136,7 +136,7 @@ namespace Game.BattleGrounds.Zones
 
         void AddPoints(Team Team, uint Points)
         {
-            int team_index = GetTeamIndexByTeamId(Team);
+            var team_index = GetTeamIndexByTeamId(Team);
             m_TeamScores[team_index] += Points;
             m_HonorScoreTics[team_index] += Points;
             if (m_HonorScoreTics[team_index] >= m_HonorTics)
@@ -174,7 +174,7 @@ namespace Game.BattleGrounds.Zones
                     byte j = 0;
                     while (j < m_PlayersNearPoint[EotSPoints.PointsMax].Count)
                     {
-                        Player player = Global.ObjAccessor.FindPlayer(m_PlayersNearPoint[EotSPoints.PointsMax][j]);
+                        var player = Global.ObjAccessor.FindPlayer(m_PlayersNearPoint[EotSPoints.PointsMax][j]);
                         if (!player)
                         {
                             Log.outError(LogFilter.Battleground, "BattlegroundEY:CheckSomeoneJoinedPoint: Player ({0}) could not be found!", m_PlayersNearPoint[EotSPoints.PointsMax][j].ToString());
@@ -215,7 +215,7 @@ namespace Game.BattleGrounds.Zones
                     byte j = 0;
                     while (j < m_PlayersNearPoint[i].Count)
                     {
-                        Player player = Global.ObjAccessor.FindPlayer(m_PlayersNearPoint[i][j]);
+                        var player = Global.ObjAccessor.FindPlayer(m_PlayersNearPoint[i][j]);
                         if (!player)
                         {
                             Log.outError(LogFilter.Battleground, "BattlegroundEY:CheckSomeoneLeftPoint Player ({0}) could not be found!", m_PlayersNearPoint[i][j].ToString());
@@ -249,7 +249,7 @@ namespace Game.BattleGrounds.Zones
                 if (!m_PlayersNearPoint[point].Empty())
                 {
                     //count new point bar status:
-                    int pointDelta = (int)(m_CurrentPointPlayersCount[2 * point]) - (int)(m_CurrentPointPlayersCount[2 * point + 1]);
+                    var pointDelta = (int)(m_CurrentPointPlayersCount[2 * point]) - (int)(m_CurrentPointPlayersCount[2 * point + 1]);
                     MathFunctions.RoundToInterval(ref pointDelta, -(int)EotSProgressBarConsts.PointMaxCapturersCount, EotSProgressBarConsts.PointMaxCapturersCount);
                     m_PointBarStatus[point] += pointDelta;
 
@@ -271,7 +271,7 @@ namespace Game.BattleGrounds.Zones
 
                     for (byte i = 0; i < m_PlayersNearPoint[point].Count; ++i)
                     {
-                        Player player = Global.ObjAccessor.FindPlayer(m_PlayersNearPoint[point][i]);
+                        var player = Global.ObjAccessor.FindPlayer(m_PlayersNearPoint[point][i]);
                         if (player)
                         {
                             player.SendUpdateWorldState(EotSWorldStateIds.ProgressBarStatus, (uint)m_PointBarStatus[point]);
@@ -296,7 +296,7 @@ namespace Game.BattleGrounds.Zones
                     }
                 }
 
-                BattlegroundPointCaptureStatus captureStatus = GetPointCaptureStatus(point);
+                var captureStatus = GetPointCaptureStatus(point);
                 if (m_LastPointCaptureStatus[point] != captureStatus)
                 {
                     UpdateWorldState(EotSMisc.m_PointsIconStruct[point].WorldStateAllianceStatusBarIcon, (uint)(captureStatus == BattlegroundPointCaptureStatus.AllianceControlled ? 2 : (captureStatus == BattlegroundPointCaptureStatus.AllianceCapturing ? 1 : 0)));
@@ -308,7 +308,7 @@ namespace Game.BattleGrounds.Zones
 
         void UpdateTeamScore(int team)
         {
-            uint score = GetTeamScore(team);
+            var score = GetTeamScore(team);
             if (score >= EotSScoreIds.MaxTeamScore)
             {
                 score = EotSScoreIds.MaxTeamScore;
@@ -378,9 +378,9 @@ namespace Game.BattleGrounds.Zones
         public override void RemovePlayer(Player player, ObjectGuid guid, Team team)
         {
             // sometimes flag aura not removed :(
-            for (int j = EotSPoints.PointsMax; j >= 0; --j)
+            for (var j = EotSPoints.PointsMax; j >= 0; --j)
             {
-                for (int i = 0; i < m_PlayersNearPoint[j].Count; ++i)
+                for (var i = 0; i < m_PlayersNearPoint[j].Count; ++i)
                     if (m_PlayersNearPoint[j][i] == guid)
                         m_PlayersNearPoint[j].RemoveAt(i);
             }
@@ -509,9 +509,9 @@ namespace Game.BattleGrounds.Zones
             }
 
             //buffs
-            for (int i = 0; i < EotSPoints.PointsMax; ++i)
+            for (var i = 0; i < EotSPoints.PointsMax; ++i)
             {
-                AreaTriggerRecord at = CliDB.AreaTriggerStorage.LookupByKey(m_Points_Trigger[i]);
+                var at = CliDB.AreaTriggerStorage.LookupByKey(m_Points_Trigger[i]);
                 if (at == null)
                 {
                     Log.outError(LogFilter.Battleground, "BattlegroundEY: Unknown trigger: {0}", m_Points_Trigger[i]);
@@ -524,7 +524,7 @@ namespace Game.BattleGrounds.Zones
                     Log.outError(LogFilter.Battleground, "BattlegroundEY: Could not spawn Speedbuff Fel Reaver.");
             }
 
-            WorldSafeLocsEntry sg = Global.ObjectMgr.GetWorldSafeLoc(EotSGaveyardIds.MainAlliance);
+            var sg = Global.ObjectMgr.GetWorldSafeLoc(EotSGaveyardIds.MainAlliance);
             if (sg == null || !AddSpiritGuide(EotSCreaturesTypes.SpiritMainAlliance, sg.Loc.GetPositionX(), sg.Loc.GetPositionY(), sg.Loc.GetPositionZ(), 3.124139f, TeamId.Alliance))
             {
                 Log.outError(LogFilter.Sql, "BatteGroundEY: Failed to spawn spirit guide. The battleground was not created.");
@@ -558,7 +558,7 @@ namespace Game.BattleGrounds.Zones
             m_DroppedFlagGUID.Clear();
             m_PointAddingTimer = 0;
             m_TowerCapCheckTimer = 0;
-            bool isBGWeekend = Global.BattlegroundMgr.IsBGWeekend(GetTypeID());
+            var isBGWeekend = Global.BattlegroundMgr.IsBGWeekend(GetTypeID());
             m_HonorTics = (isBGWeekend) ? EotSMisc.EYWeekendHonorTicks : EotSMisc.NotEYWeekendHonorTicks;
 
             for (byte i = 0; i < EotSPoints.PointsMax; ++i)
@@ -593,7 +593,7 @@ namespace Game.BattleGrounds.Zones
         {
             RespawnFlag(true);
 
-            GameObject obj = GetBgMap().GetGameObject(GetDroppedFlagGUID());
+            var obj = GetBgMap().GetGameObject(GetDroppedFlagGUID());
             if (obj)
                 obj.Delete();
             else
@@ -685,7 +685,7 @@ namespace Game.BattleGrounds.Zones
                 return;
 
             //Natural point
-            Team Team = m_PointOwnedByTeam[Point];
+            var Team = m_PointOwnedByTeam[Point];
 
             if (Team == 0)
                 return;
@@ -732,7 +732,7 @@ namespace Game.BattleGrounds.Zones
             if (GetStatus() != BattlegroundStatus.InProgress)
                 return;
 
-            Team Team = player.GetTeam();
+            var Team = player.GetTeam();
 
             SpawnBGObject(EotSMisc.m_CapturingPointTypes[Point].DespawnNeutralObjectType, BattlegroundConst.RespawnOneDay);
             SpawnBGObject(EotSMisc.m_CapturingPointTypes[Point].DespawnNeutralObjectType + 1, BattlegroundConst.RespawnOneDay);
@@ -766,7 +766,7 @@ namespace Game.BattleGrounds.Zones
             if (!BgCreatures[Point].IsEmpty())
                 DelCreature(Point);
 
-            WorldSafeLocsEntry sg = Global.ObjectMgr.GetWorldSafeLoc(EotSMisc.m_CapturingPointTypes[Point].GraveYardId);
+            var sg = Global.ObjectMgr.GetWorldSafeLoc(EotSMisc.m_CapturingPointTypes[Point].GraveYardId);
             if (sg == null || !AddSpiritGuide(Point, sg.Loc.GetPositionX(), sg.Loc.GetPositionY(), sg.Loc.GetPositionZ(), 3.124139f, GetTeamIndexByTeamId(Team)))
                 Log.outError(LogFilter.Battleground, "BatteGroundEY: Failed to spawn spirit guide. point: {0}, team: {1}, graveyard_id: {2}",
                     Point, Team, EotSMisc.m_CapturingPointTypes[Point].GraveYardId);
@@ -779,7 +779,7 @@ namespace Game.BattleGrounds.Zones
             if (Point >= EotSPoints.PointsMax)
                 return;
 
-            Creature trigger = GetBGCreature(Point + 6);//0-5 spirit guides
+            var trigger = GetBGCreature(Point + 6);//0-5 spirit guides
             if (!trigger)
                 trigger = AddCreature(SharedConst.WorldTrigger, Point + 6, EotSMisc.TriggerPositions[Point], GetTeamIndexByTeamId(Team));
 
@@ -820,7 +820,7 @@ namespace Game.BattleGrounds.Zones
             m_FlagsTimer = EotSMisc.FlagRespawnTime;
             m_FlagCapturedBgObjectType = BgObjectType;
 
-            int team_id = player.GetTeam() == Team.Alliance ? TeamId.Alliance : TeamId.Horde;
+            var team_id = player.GetTeam() == Team.Alliance ? TeamId.Alliance : TeamId.Horde;
             if (m_TeamPointsCount[team_id] > 0)
                 AddPoints(player.GetTeam(), EotSMisc.FlagPoints[m_TeamPointsCount[team_id] - 1]);
 
@@ -888,7 +888,7 @@ namespace Game.BattleGrounds.Zones
 
             for (byte point = 0; point < EotSPoints.PointsMax; ++point)
             {
-                BattlegroundPointCaptureStatus captureStatus = GetPointCaptureStatus(point);
+                var captureStatus = GetPointCaptureStatus(point);
                 packet.AddState(EotSMisc.m_PointsIconStruct[point].WorldStateAllianceStatusBarIcon, captureStatus == BattlegroundPointCaptureStatus.AllianceControlled ? 2 : (captureStatus == BattlegroundPointCaptureStatus.AllianceCapturing ? 1 : 0));
                 packet.AddState(EotSMisc.m_PointsIconStruct[point].WorldStateHordeStatusBarIcon, captureStatus == BattlegroundPointCaptureStatus.HordeControlled ? 2 : (captureStatus == BattlegroundPointCaptureStatus.HordeCapturing ? 1 : 0));
             }
@@ -908,20 +908,20 @@ namespace Game.BattleGrounds.Zones
                 default: return null;
             }
 
-            WorldSafeLocsEntry entry = Global.ObjectMgr.GetWorldSafeLoc(g_id);
-            WorldSafeLocsEntry nearestEntry = entry;
+            var entry = Global.ObjectMgr.GetWorldSafeLoc(g_id);
+            var nearestEntry = entry;
             if (entry == null)
             {
                 Log.outError(LogFilter.Battleground, "BattlegroundEY: The main team graveyard could not be found. The graveyard system will not be operational!");
                 return null;
             }
 
-            float plr_x = player.GetPositionX();
-            float plr_y = player.GetPositionY();
-            float plr_z = player.GetPositionZ();
+            var plr_x = player.GetPositionX();
+            var plr_y = player.GetPositionY();
+            var plr_z = player.GetPositionZ();
 
-            float distance = (entry.Loc.GetPositionX() - plr_x) * (entry.Loc.GetPositionX() - plr_x) + (entry.Loc.GetPositionY() - plr_y) * (entry.Loc.GetPositionY() - plr_y) + (entry.Loc.GetPositionZ() - plr_z) * (entry.Loc.GetPositionZ() - plr_z);
-            float nearestDistance = distance;
+            var distance = (entry.Loc.GetPositionX() - plr_x) * (entry.Loc.GetPositionX() - plr_x) + (entry.Loc.GetPositionY() - plr_y) * (entry.Loc.GetPositionY() - plr_y) + (entry.Loc.GetPositionZ() - plr_z) * (entry.Loc.GetPositionZ() - plr_z);
+            var nearestDistance = distance;
 
             for (byte i = 0; i < EotSPoints.PointsMax; ++i)
             {
@@ -953,7 +953,7 @@ namespace Game.BattleGrounds.Zones
         public override bool IsAllNodesControlledByTeam(Team team)
         {
             uint count = 0;
-            for (int i = 0; i < EotSPoints.PointsMax; ++i)
+            for (var i = 0; i < EotSPoints.PointsMax; ++i)
                 if (m_PointOwnedByTeam[i] == team && m_PointState[i] == EotSPointState.UnderControl)
                     ++count;
 

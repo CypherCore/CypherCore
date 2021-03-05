@@ -81,7 +81,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBits(Items.Count, 8);
             _worldPacket.FlushBits();
 
-            foreach (VoidItem voidItem in Items)
+            foreach (var voidItem in Items)
                 voidItem.Write(_worldPacket);
         }
 
@@ -120,10 +120,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBits(RemovedItems.Count, 4);
             _worldPacket.FlushBits();
 
-            foreach (VoidItem addedItem in AddedItems)
+            foreach (var addedItem in AddedItems)
                 addedItem.Write(_worldPacket);
 
-            foreach (ObjectGuid removedItem in RemovedItems)
+            foreach (var removedItem in RemovedItems)
                 _worldPacket.WritePackedGuid(removedItem);
         }
 

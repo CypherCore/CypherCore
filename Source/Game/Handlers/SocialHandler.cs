@@ -32,7 +32,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.Who, Processing = PacketProcessing.ThreadSafe)]
         void HandleWho(WhoRequestPkt whoRequest)
         {
-            WhoRequest request = whoRequest.Request;
+            var request = whoRequest.Request;
 
             // zones count, client limit = 10 (2.0.10)
             // can't be received from real client or broken packet
@@ -63,13 +63,13 @@ namespace Game
 
             var team = GetPlayer().GetTeam();
 
-            uint gmLevelInWhoList = WorldConfig.GetUIntValue(WorldCfg.GmLevelInWhoList);
+            var gmLevelInWhoList = WorldConfig.GetUIntValue(WorldCfg.GmLevelInWhoList);
 
-            WhoResponsePkt response = new WhoResponsePkt();
+            var response = new WhoResponsePkt();
             response.RequestID = whoRequest.RequestID;
 
-            List<WhoListPlayerInfo> whoList = Global.WhoListStorageMgr.GetWhoList();
-            foreach (WhoListPlayerInfo target in whoList)
+            var whoList = Global.WhoListStorageMgr.GetWhoList();
+            foreach (var target in whoList)
             {
                 // player can see member of other team only if CONFIG_ALLOW_TWO_SIDE_WHO_LIST
                 if (target.Team != team && !HasPermission(RBACPermissions.TwoSideWhoList))
@@ -85,7 +85,7 @@ namespace Game
                         continue;
 
                 // check if target's level is in level range
-                uint lvl = target.Level;
+                var lvl = target.Level;
                 if (lvl < request.MinLevel || lvl > request.MaxLevel)
                     continue;
 
@@ -103,23 +103,23 @@ namespace Game
                         continue;
                 }
 
-                string wTargetName = target.PlayerName.ToLower();
+                var wTargetName = target.PlayerName.ToLower();
                 if (!(request.Name.IsEmpty() || wTargetName.Equals(request.Name)))
                     continue;
 
-                string wTargetGuildName = target.GuildName.ToLower();
+                var wTargetGuildName = target.GuildName.ToLower();
                 if (!request.Guild.IsEmpty() && !wTargetGuildName.Equals(request.Guild))
                     continue;
 
                 if (!request.Words.Empty())
                 {
-                    string aname = "";
-                    AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(target.ZoneId);
+                    var aname = "";
+                    var areaEntry = CliDB.AreaTableStorage.LookupByKey(target.ZoneId);
                     if (areaEntry != null)
                         aname = areaEntry.AreaName[GetSessionDbcLocale()].ToLower();
 
-                    bool show = false;
-                    for (int i = 0; i < request.Words.Count; ++i)
+                    var show = false;
+                    for (var i = 0; i < request.Words.Count; ++i)
                     {
                         if (!string.IsNullOrEmpty(request.Words[i]))
                         {
@@ -137,7 +137,7 @@ namespace Game
                         continue;
                 }
 
-                WhoEntry whoEntry = new WhoEntry();
+                var whoEntry = new WhoEntry();
                 if (!whoEntry.PlayerData.Initialize(target.Guid, null))
                     continue;
 
@@ -183,29 +183,29 @@ namespace Game
                 return;
             }
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_WHOIS);
+            var stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_WHOIS);
             stmt.AddValue(0, player.GetSession().GetAccountId());
 
-            SQLResult result = DB.Login.Query(stmt);
+            var result = DB.Login.Query(stmt);
             if (result.IsEmpty())
             {
                 SendNotification(CypherStrings.AccountForPlayerNotFound, packet.CharName);
                 return;
             }
 
-            string acc = result.Read<string>(0);
+            var acc = result.Read<string>(0);
             if (string.IsNullOrEmpty(acc))
                 acc = "Unknown";
 
-            string email = result.Read<string>(1);
+            var email = result.Read<string>(1);
             if (string.IsNullOrEmpty(email))
                 email = "Unknown";
 
-            string lastip = result.Read<string>(2);
+            var lastip = result.Read<string>(2);
             if (string.IsNullOrEmpty(lastip))
                 lastip = "Unknown";
 
-            WhoIsResponse response = new WhoIsResponse();
+            var response = new WhoIsResponse();
             response.AccountName = packet.CharName + "'s " + "account is " + acc + ", e-mail: " + email + ", last ip: " + lastip;
             SendPacket(response);
         }
@@ -223,14 +223,14 @@ namespace Game
                 return;
 
             FriendsResult friendResult = FriendsResult.NotFound;
-            ObjectGuid friendGuid = Global.CharacterCacheStorage.GetCharacterGuidByName(packet.Name);
+            var friendGuid = Global.CharacterCacheStorage.GetCharacterGuidByName(packet.Name);
             if (!friendGuid.IsEmpty())
             {
-                CharacterCacheEntry characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByGuid(friendGuid);
+                var characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByGuid(friendGuid);
                 if (characterInfo != null)
                 {
-                    Team team = Player.TeamForRace(characterInfo.RaceId);
-                    uint friendAccountId = characterInfo.AccountId;
+                    var team = Player.TeamForRace(characterInfo.RaceId);
+                    var friendAccountId = characterInfo.AccountId;
 
                     if (HasPermission(RBACPermissions.AllowGmFriend) || Global.AccountMgr.IsPlayerAccount(Global.AccountMgr.GetSecurity(friendAccountId, (int)Global.WorldMgr.GetRealm().Id.Index)))
                     {
@@ -275,7 +275,7 @@ namespace Game
             if (!ObjectManager.NormalizePlayerName(ref packet.Name))
                 return;
 
-            ObjectGuid IgnoreGuid = Global.CharacterCacheStorage.GetCharacterGuidByName(packet.Name);
+            var IgnoreGuid = Global.CharacterCacheStorage.GetCharacterGuidByName(packet.Name);
             FriendsResult ignoreResult = FriendsResult.IgnoreNotFound;
             if (IgnoreGuid.IsEmpty())
             {

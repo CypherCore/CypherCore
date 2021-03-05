@@ -100,31 +100,31 @@ namespace Game.Entities
 
         public uint GetArmor(uint itemLevel)
         {
-            ItemQuality quality = GetQuality() != ItemQuality.Heirloom ? GetQuality() : ItemQuality.Rare;
+            var quality = GetQuality() != ItemQuality.Heirloom ? GetQuality() : ItemQuality.Rare;
             if (quality > ItemQuality.Artifact)
                 return 0;
 
             // all items but shields
             if (GetClass() != ItemClass.Armor || GetSubClass() != (uint)ItemSubClassArmor.Shield)
             {
-                ItemArmorQualityRecord armorQuality = CliDB.ItemArmorQualityStorage.LookupByKey(itemLevel);
-                ItemArmorTotalRecord armorTotal = CliDB.ItemArmorTotalStorage.LookupByKey(itemLevel);
+                var armorQuality = CliDB.ItemArmorQualityStorage.LookupByKey(itemLevel);
+                var armorTotal = CliDB.ItemArmorTotalStorage.LookupByKey(itemLevel);
                 if (armorQuality == null || armorTotal == null)
                     return 0;
 
-                InventoryType inventoryType = GetInventoryType();
+                var inventoryType = GetInventoryType();
                 if (inventoryType == InventoryType.Robe)
                     inventoryType = InventoryType.Chest;
 
-                ArmorLocationRecord location = CliDB.ArmorLocationStorage.LookupByKey(inventoryType);
+                var location = CliDB.ArmorLocationStorage.LookupByKey(inventoryType);
                 if (location == null)
                     return 0;
 
                 if (GetSubClass() < (uint)ItemSubClassArmor.Cloth || GetSubClass() > (uint)ItemSubClassArmor.Plate)
                     return 0;
 
-                float total = 1.0f;
-                float locationModifier = 1.0f;
+                var total = 1.0f;
+                var locationModifier = 1.0f;
                 switch ((ItemSubClassArmor)GetSubClass())
                 {
                     case ItemSubClassArmor.Cloth:
@@ -151,7 +151,7 @@ namespace Game.Entities
             }
 
             // shields
-            ItemArmorShieldRecord shield = CliDB.ItemArmorShieldStorage.LookupByKey(itemLevel);
+            var shield = CliDB.ItemArmorShieldStorage.LookupByKey(itemLevel);
             if (shield == null)
                 return 0;
 
@@ -160,11 +160,11 @@ namespace Game.Entities
 
         public float GetDPS(uint itemLevel)
         {
-            ItemQuality quality = GetQuality() != ItemQuality.Heirloom ? GetQuality() : ItemQuality.Rare;
+            var quality = GetQuality() != ItemQuality.Heirloom ? GetQuality() : ItemQuality.Rare;
             if (GetClass() != ItemClass.Weapon || quality > ItemQuality.Artifact)
                 return 0.0f;
 
-            float dps = 0.0f;
+            var dps = 0.0f;
             switch (GetInventoryType())
             {
                 case InventoryType.Ammo:
@@ -214,10 +214,10 @@ namespace Game.Entities
         public void GetDamage(uint itemLevel, out float minDamage, out float maxDamage)
         {
             minDamage = maxDamage = 0.0f;
-            float dps = GetDPS(itemLevel);
+            var dps = GetDPS(itemLevel);
             if (dps > 0.0f)
             {
-                float avgDamage = dps * GetDelay() * 0.001f;
+                var avgDamage = dps * GetDelay() * 0.001f;
                 minDamage = (GetDmgVariance() * -0.5f + 1.0f) * avgDamage;
                 maxDamage = (float)Math.Floor(avgDamage * (GetDmgVariance() * 0.5f + 1.0f) + 0.5f);
             }
@@ -228,17 +228,17 @@ namespace Game.Entities
             if (GetFlags().HasAnyFlag(ItemFlags.IsBoundToAccount) && alwaysAllowBoundToAccount)
                 return true;
 
-            uint spec = player.GetLootSpecId();
+            var spec = player.GetLootSpecId();
             if (spec == 0)
                 spec = player.GetPrimarySpecialization();
             if (spec == 0)
                 spec = player.GetDefaultSpecId();
 
-            ChrSpecializationRecord chrSpecialization = CliDB.ChrSpecializationStorage.LookupByKey(spec);
+            var chrSpecialization = CliDB.ChrSpecializationStorage.LookupByKey(spec);
             if (chrSpecialization == null)
                 return false;
 
-            int levelIndex = 0;
+            var levelIndex = 0;
             if (player.GetLevel() >= 110)
                 levelIndex = 2;
             else if (player.GetLevel() > 40)

@@ -88,7 +88,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint titleLen = _worldPacket.ReadBits<uint>(7);
+            var titleLen = _worldPacket.ReadBits<uint>(7);
 
             Unit = _worldPacket.ReadPackedGuid();
             Title = _worldPacket.ReadString(titleLen);
@@ -125,7 +125,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(PetitionID);
 
             _worldPacket.WriteInt32(Signatures.Count);
-            foreach (PetitionSignature signature in Signatures)
+            foreach (var signature in Signatures)
             {
                 _worldPacket.WritePackedGuid(signature.Signer);
                 _worldPacket.WriteInt32(signature.Choice);
@@ -261,7 +261,7 @@ namespace Game.Networking.Packets
             PetitionGuid = _worldPacket.ReadPackedGuid();
 
             _worldPacket.ResetBitPos();
-            uint nameLen = _worldPacket.ReadBits<uint>(7);
+            var nameLen = _worldPacket.ReadBits<uint>(7);
 
             NewGuildName = _worldPacket.ReadString(nameLen);
         }

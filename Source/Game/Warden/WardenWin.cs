@@ -32,7 +32,7 @@ namespace Game
         {
             _session = session;
             // Generate Warden Key
-            SHA1Randx WK = new SHA1Randx(k.ToByteArray());
+            var WK = new SHA1Randx(k.ToByteArray());
             WK.Generate(_inputKey, 16);
             WK.Generate(_outputKey, 16);
 
@@ -55,9 +55,9 @@ namespace Game
 
         public override ClientWardenModule GetModuleForClient()
         {
-            ClientWardenModule mod = new ClientWardenModule();
+            var mod = new ClientWardenModule();
 
-            uint length = (uint)WardenModuleWin.Module.Length;
+            var length = (uint)WardenModuleWin.Module.Length;
 
             // data assign
             mod.CompressedSize = length;
@@ -65,7 +65,7 @@ namespace Game
             mod.Key = WardenModuleWin.ModuleKey;
 
             // md5 hash
-            System.Security.Cryptography.MD5 ctx = System.Security.Cryptography.MD5.Create();
+            var ctx = System.Security.Cryptography.MD5.Create();
             ctx.Initialize();
             ctx.TransformBlock(mod.CompressedData, 0, mod.CompressedData.Length, mod.CompressedData, 0);
             ctx.TransformBlock(mod.Id, 0, mod.Id.Length, mod.Id, 0);
@@ -78,7 +78,7 @@ namespace Game
             Log.outDebug(LogFilter.Warden, "Initialize module");
 
             // Create packet structure
-            WardenInitModuleRequest Request = new WardenInitModuleRequest();
+            var Request = new WardenInitModuleRequest();
             Request.Command1 = WardenOpcodes.Smsg_ModuleInitialize;
             Request.Size1 = 20;
             Request.Unk1 = 1;
@@ -109,7 +109,7 @@ namespace Game
             Request.Function3_set = 1;
             Request.CheckSumm3 = BuildChecksum(BitConverter.GetBytes(Request.Unk5), 8);
 
-            Warden3DataServer packet = new Warden3DataServer();
+            var packet = new Warden3DataServer();
             packet.Data = EncryptData(Request.Write());
             _session.SendPacket(packet);
         }
@@ -119,11 +119,11 @@ namespace Game
             Log.outDebug(LogFilter.Warden, "Request hash");
 
             // Create packet structure
-            WardenHashRequest Request = new WardenHashRequest();
+            var Request = new WardenHashRequest();
             Request.Command = WardenOpcodes.Smsg_HashRequest;
             Request.Seed = _seed;
 
-            Warden3DataServer packet = new Warden3DataServer();
+            var packet = new Warden3DataServer();
             packet.Data = EncryptData(Request.Write());
             _session.SendPacket(packet);
         }
@@ -184,7 +184,7 @@ namespace Game
                 _currentChecks.Add(id);
             }
 
-            ByteBuffer buffer = new ByteBuffer();
+            var buffer = new ByteBuffer();
             buffer.WriteUInt8((byte)WardenOpcodes.Smsg_CheatChecksRequest);
 
             for (uint i = 0; i < WorldConfig.GetUIntValue(WorldCfg.WardenNumOtherChecks); ++i)
@@ -215,7 +215,7 @@ namespace Game
                 }
             }
 
-            byte xorByte = _inputKey[0];
+            var xorByte = _inputKey[0];
 
             // Add TIMING_CHECK
             buffer.WriteUInt8(0x00);
@@ -260,9 +260,9 @@ namespace Game
                         }
                     case WardenCheckType.Module:
                         {
-                            uint seed = RandomHelper.Rand32();
+                            var seed = RandomHelper.Rand32();
                             buffer.WriteUInt32(seed);
-                            HmacHash hmac = new HmacHash(BitConverter.GetBytes(seed));
+                            var hmac = new HmacHash(BitConverter.GetBytes(seed));
                             hmac.Finish(wd.Str);
                             buffer.WriteBytes(hmac.Digest);
                             break;
@@ -282,13 +282,13 @@ namespace Game
             }
             buffer.WriteUInt8(xorByte);
 
-            Warden3DataServer packet = new Warden3DataServer();
+            var packet = new Warden3DataServer();
             packet.Data = EncryptData(buffer.GetData());
             _session.SendPacket(packet);
 
             _dataSent = true;
 
-            string stream = "Sent check id's: ";
+            var stream = "Sent check id's: ";
             foreach (var checkId in _currentChecks)
                 stream += checkId + " ";
 
@@ -302,8 +302,8 @@ namespace Game
             _dataSent = false;
             _clientResponseTimer = 0;
 
-            ushort Length = buff.ReadUInt16();
-            uint Checksum = buff.ReadUInt32();
+            var Length = buff.ReadUInt16();
+            var Checksum = buff.ReadUInt32();
 
             if (!IsValidCheckSum(Checksum, buff.GetData(), Length))
             {
@@ -313,7 +313,7 @@ namespace Game
 
             // TIMING_CHECK
             {
-                byte result = buff.ReadUInt8();
+                var result = buff.ReadUInt8();
                 // @todo test it.
                 if (result == 0x00)
                 {
@@ -321,10 +321,10 @@ namespace Game
                     return;
                 }
 
-                uint newClientTicks = buff.ReadUInt32();
+                var newClientTicks = buff.ReadUInt32();
 
-                uint ticksNow = GameTime.GetGameTimeMS();
-                uint ourTicks = newClientTicks + (ticksNow - _serverTicks);
+                var ticksNow = GameTime.GetGameTimeMS();
+                var ourTicks = newClientTicks + (ticksNow - _serverTicks);
 
                 Log.outDebug(LogFilter.Warden, "ServerTicks {0}", ticksNow);         // Now
                 Log.outDebug(LogFilter.Warden, "RequestTicks {0}", _serverTicks);    // At request
@@ -347,7 +347,7 @@ namespace Game
                 {
                     case WardenCheckType.Memory:
                         {
-                            byte Mem_Result = buff.ReadUInt8();
+                            var Mem_Result = buff.ReadUInt8();
 
                             if (Mem_Result != 0)
                             {
@@ -394,7 +394,7 @@ namespace Game
                         }
                     case WardenCheckType.LuaStr:
                         {
-                            byte Lua_Result = buff.ReadUInt8();
+                            var Lua_Result = buff.ReadUInt8();
 
                             if (Lua_Result != 0)
                             {
@@ -403,7 +403,7 @@ namespace Game
                                 continue;
                             }
 
-                            byte luaStrLen = buff.ReadUInt8();
+                            var luaStrLen = buff.ReadUInt8();
                             if (luaStrLen != 0)
                                 Log.outDebug(LogFilter.Warden, "Lua string: {0}", buff.ReadString(luaStrLen));
 
@@ -412,7 +412,7 @@ namespace Game
                         }
                     case WardenCheckType.MPQ:
                         {
-                            byte Mpq_Result = buff.ReadUInt8();
+                            var Mpq_Result = buff.ReadUInt8();
 
                             if (Mpq_Result != 0)
                             {
@@ -438,12 +438,12 @@ namespace Game
 
             if (checkFailed > 0)
             {
-                WardenCheck check = Global.WardenCheckMgr.GetWardenDataById(checkFailed);
+                var check = Global.WardenCheckMgr.GetWardenDataById(checkFailed);
                 Log.outWarn(LogFilter.Warden, "{0} failed Warden check {1}. Action: {2}", _session.GetPlayerInfo(), checkFailed, Penalty(check));
             }
 
             // Set hold off timer, minimum timer should at least be 1 second
-            uint holdOff = WorldConfig.GetUIntValue(WorldCfg.WardenClientCheckHoldoff);
+            var holdOff = WorldConfig.GetUIntValue(WorldCfg.WardenClientCheckHoldoff);
             _checkTimer = (holdOff < 1 ? 1 : holdOff) * Time.InMilliseconds;
         }
 

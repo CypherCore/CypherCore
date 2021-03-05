@@ -271,7 +271,7 @@ namespace Game.Entities
             if (m_block != 0)
                 m_hitMask |= ProcFlagsHit.Block;
 
-            bool damageNullified = dmgInfo.HitInfo.HasAnyFlag(HitInfo.FullAbsorb | HitInfo.FullResist) || m_hitMask.HasAnyFlag(ProcFlagsHit.Immune | ProcFlagsHit.FullBlock);
+            var damageNullified = dmgInfo.HitInfo.HasAnyFlag(HitInfo.FullAbsorb | HitInfo.FullResist) || m_hitMask.HasAnyFlag(ProcFlagsHit.Immune | ProcFlagsHit.FullBlock);
             switch (dmgInfo.hitOutCome)
             {
                 case MeleeHitOutcome.Miss:
@@ -598,7 +598,7 @@ namespace Game.Entities
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                Player player = objs[i];
+                var player = objs[i];
                 if (!IsInRangeHelper(player))
                     continue;
 
@@ -619,7 +619,7 @@ namespace Game.Entities
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                Creature creature = objs[i];
+                var creature = objs[i];
                 if (!IsInRangeHelper(creature))
                     continue;
 
@@ -636,15 +636,15 @@ namespace Game.Entities
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                DynamicObject dynamicObject = objs[i];
+                var dynamicObject = objs[i];
                 if (!IsInRangeHelper(dynamicObject))
                     continue;
 
-                Unit caster = dynamicObject.GetCaster();
+                var caster = dynamicObject.GetCaster();
                 if (caster)
                 {
                     // Send packet back to the caster if the caster has vision of dynamic object
-                    Player player = caster.ToPlayer();
+                    var player = caster.ToPlayer();
                     if (player && player.seerView == dynamicObject)
                         SendPacket(player);
                 }

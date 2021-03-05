@@ -31,7 +31,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.QuestGiverStatusQuery, Processing = PacketProcessing.Inplace)]
         void HandleQuestgiverStatusQuery(QuestGiverStatusQuery packet)
         {
-            QuestGiverStatus questStatus = QuestGiverStatus.None;
+            var questStatus = QuestGiverStatus.None;
 
             var questgiver = Global.ObjAccessor.GetObjectByTypeMask(GetPlayer(), packet.QuestGiverGUID, TypeMask.Unit | TypeMask.GameObject);
             if (!questgiver)
@@ -61,7 +61,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.QuestGiverHello)]
         void HandleQuestgiverHello(QuestGiverHello packet)
         {
-            Creature creature = GetPlayer().GetNPCIfCanInteractWith(packet.QuestGiverGUID, NPCFlags.QuestGiver, NPCFlags2.None);
+            var creature = GetPlayer().GetNPCIfCanInteractWith(packet.QuestGiverGUID, NPCFlags.QuestGiver, NPCFlags2.None);
             if (creature == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleQuestgiverHello - {0} not found or you can't interact with him.", packet.QuestGiverGUID.ToString());
@@ -106,7 +106,7 @@ namespace Game
                 return;
             }
 
-            Player playerQuestObject = obj.ToPlayer();
+            var playerQuestObject = obj.ToPlayer();
             if (playerQuestObject)
             {
                 if ((_player.GetPlayerSharingQuest().IsEmpty() && _player.GetPlayerSharingQuest() != packet.QuestGiverGUID) || !playerQuestObject.CanShareQuest(packet.QuestID))
@@ -167,7 +167,7 @@ namespace Game
                         {
                             for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                             {
-                                Player player = refe.GetSource();
+                                var player = refe.GetSource();
 
                                 if (!player || player == _player)     // not self
                                     continue;
@@ -229,7 +229,7 @@ namespace Game
                 _player.PlayerTalkClass.SendQuestQueryResponse(quest);
             else
             {
-                QueryQuestInfoResponse response = new QueryQuestInfoResponse();
+                var response = new QueryQuestInfoResponse();
                 response.QuestID = packet.QuestID;
                 SendPacket(response);
             }
@@ -254,7 +254,7 @@ namespace Game
                             return;
                         }
 
-                        bool itemValid = false;
+                        var itemValid = false;
                         for (uint i = 0; i < quest.GetRewChoiceItemsCount(); ++i)
                         {
                             if (quest.RewardChoiceItemId[i] != 0 && quest.RewardChoiceItemType[i] == LootItemType.Item && quest.RewardChoiceItemId[i] == packet.Choice.Item.ItemID)
@@ -312,7 +312,7 @@ namespace Game
                             return;
                         }
 
-                        bool currencyValid = false;
+                        var currencyValid = false;
                         for (uint i = 0; i < quest.GetRewChoiceItemsCount(); ++i)
                         {
                             if (quest.RewardChoiceItemId[i] != 0 && quest.RewardChoiceItemType[i] == LootItemType.Currency && quest.RewardChoiceItemId[i] == packet.Choice.Item.ItemID)
@@ -360,7 +360,7 @@ namespace Game
                     case TypeId.Player:
                         {
                             //For AutoSubmition was added plr case there as it almost same exclute AI script cases.
-                            Unit unitQGiver = obj.ToUnit();
+                            var unitQGiver = obj.ToUnit();
                             // Send next quest
                             Quest nextQuest = _player.GetNextQuest(packet.QuestGiverGUID, quest);
                             if (nextQuest != null)
@@ -383,7 +383,7 @@ namespace Game
                         }
                     case TypeId.GameObject:
                         {
-                            GameObject questGiver = obj.ToGameObject();
+                            var questGiver = obj.ToGameObject();
                             // Send next quest
                             Quest nextQuest = _player.GetNextQuest(packet.QuestGiverGUID, quest);
                             if (nextQuest != null)
@@ -413,7 +413,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.QuestGiverRequestReward)]
         void HandleQuestgiverRequestReward(QuestGiverRequestReward packet)
         {
-            WorldObject obj = Global.ObjAccessor.GetObjectByTypeMask(GetPlayer(), packet.QuestGiverGUID, TypeMask.Unit | TypeMask.GameObject);
+            var obj = Global.ObjAccessor.GetObjectByTypeMask(GetPlayer(), packet.QuestGiverGUID, TypeMask.Unit | TypeMask.GameObject);
             if (obj == null || !obj.HasInvolvedQuest(packet.QuestID))
                 return;
 
@@ -514,7 +514,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.QuestGiverCompleteQuest)]
         void HandleQuestgiverCompleteQuest(QuestGiverCompleteQuest packet)
         {
-            bool autoCompleteMode = packet.FromScript; // 0 - standart complete quest mode with npc, 1 - auto-complete mode
+            var autoCompleteMode = packet.FromScript; // 0 - standart complete quest mode with npc, 1 - auto-complete mode
 
             Quest quest = Global.ObjectMgr.GetQuestTemplate(packet.QuestID);
             if (quest == null)
@@ -597,9 +597,9 @@ namespace Game
             if (quest == null)
                 return;
 
-            Player sender = GetPlayer();
+            var sender = GetPlayer();
 
-            Group group = sender.GetGroup();
+            var group = sender.GetGroup();
             if (!group)
             {
                 sender.SendPushToPartyResponse(sender, QuestPushReason.NotInParty);
@@ -608,7 +608,7 @@ namespace Game
 
             for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
             {
-                Player receiver = refe.GetSource();
+                var receiver = refe.GetSource();
 
                 if (!receiver || receiver == sender)
                     continue;
@@ -689,7 +689,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.RequestWorldQuestUpdate)]
         void HandleRequestWorldQuestUpdate(RequestWorldQuestUpdate packet)
         {
-            WorldQuestUpdateResponse response = new WorldQuestUpdateResponse();
+            var response = new WorldQuestUpdateResponse();
 
             // @todo: 7.x Has to be implemented
             //response.WorldQuestUpdates.push_back(WorldPackets::Quest::WorldQuestUpdateInfo(lastUpdate, questID, timer, variableID, value));
@@ -742,7 +742,7 @@ namespace Game
 
                 foreach (PlayerChoiceResponseRewardItem item in reward.Items)
                 {
-                    List<ItemPosCount> dest = new List<ItemPosCount>();
+                    var dest = new List<ItemPosCount>();
                     if (_player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, item.Id, (uint)item.Quantity) == InventoryResult.Ok)
                     {
                         Item newItem = _player.StoreNewItem(dest, item.Id, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(item.Id), null, ItemContext.QuestReward, item.BonusListIDs);

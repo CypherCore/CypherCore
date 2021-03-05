@@ -60,13 +60,13 @@ namespace Game.Spells
             {
                 if ((m_caster.GetClassMask() & (uint)Class.ClassMaskWandUsers) != 0 && m_caster.IsTypeId(TypeId.Player))
                 {
-                    Item pItem = m_caster.ToPlayer().GetWeaponForAttack(WeaponAttackType.RangedAttack);
+                    var pItem = m_caster.ToPlayer().GetWeaponForAttack(WeaponAttackType.RangedAttack);
                     if (pItem != null)
                         m_spellSchoolMask = (SpellSchoolMask)(1 << (int)pItem.GetTemplate().GetDamageType());
                 }
             }
 
-            Player modOwner = caster.GetSpellModOwner();
+            var modOwner = caster.GetSpellModOwner();
             if (modOwner != null)
                 modOwner.ApplySpellMod(info, SpellModOp.StackAmount, ref m_spellValue.AuraStackAmount, this);
 

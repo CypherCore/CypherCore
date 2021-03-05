@@ -55,7 +55,7 @@ namespace Scripts.World.Achievements
 
         public override bool OnCheck(Player source, Unit target)
         {
-            Battleground bg = source.GetBattleground();
+            var bg = source.GetBattleground();
             if (bg)
                 return bg.CheckAchievementCriteriaMeet((uint)BattlegroundCriteriaId.ResilientVictory, source, target);
 
@@ -70,7 +70,7 @@ namespace Scripts.World.Achievements
 
         public override bool OnCheck(Player source, Unit target)
         {
-            Battleground bg = source.GetBattleground();
+            var bg = source.GetBattleground();
             if (bg)
                 return bg.IsAllNodesControlledByTeam(source.GetTeam());
 
@@ -85,7 +85,7 @@ namespace Scripts.World.Achievements
 
         public override bool OnCheck(Player source, Unit target)
         {
-            Battleground bg = source.GetBattleground();
+            var bg = source.GetBattleground();
             if (bg)
                 return bg.CheckAchievementCriteriaMeet((uint)BattlegroundCriteriaId.SaveTheDay, source, target);
 
@@ -114,7 +114,7 @@ namespace Scripts.World.Achievements
 
         public override bool OnCheck(Player source, Unit target)
         {
-            Creature vehicle = source.GetVehicleCreatureBase();
+            var vehicle = source.GetVehicleCreatureBase();
             if (vehicle)
             {
                 if (vehicle.GetEntry() == ICCreatures.GlaiveThrowerH || vehicle.GetEntry() == ICCreatures.GlaiveThrowerA)
@@ -132,7 +132,7 @@ namespace Scripts.World.Achievements
 
         public override bool OnCheck(Player source, Unit target)
         {
-            Creature vehicle = source.GetVehicleCreatureBase();
+            var vehicle = source.GetVehicleCreatureBase();
             if (vehicle)
             {
                 if (vehicle.GetEntry() == ICCreatures.KeepCannon)
@@ -150,7 +150,7 @@ namespace Scripts.World.Achievements
 
         public override bool OnCheck(Player source, Unit target)
         {
-            Creature vehicle = source.GetVehicleCreatureBase();
+            var vehicle = source.GetVehicleCreatureBase();
             if (vehicle)
             {
                 if (vehicle.GetEntry() == VehicleIds.AntiPersonnalCannon)
@@ -193,7 +193,7 @@ namespace Scripts.World.Achievements
             if (!target)
                 return false;
 
-            Player victim = target.ToPlayer();
+            var victim = target.ToPlayer();
             if (victim)
                 if (victim.IsMounted())
                     return true;
@@ -209,7 +209,7 @@ namespace Scripts.World.Achievements
 
         public override bool OnCheck(Player source, Unit target)
         {
-            Battleground bg = source.GetBattleground();
+            var bg = source.GetBattleground();
             if (bg)
                 return bg.CheckAchievementCriteriaMeet((uint)BattlegroundCriteriaId.EverythingCounts, source, target);
 
@@ -224,7 +224,7 @@ namespace Scripts.World.Achievements
 
         public override bool OnCheck(Player source, Unit target)
         {
-            Battleground bg = source.GetBattleground();
+            var bg = source.GetBattleground();
             if (bg)
                 return bg.CheckAchievementCriteriaMeet((uint)BattlegroundCriteriaId.AvPerfection, source, target);
 
@@ -239,7 +239,7 @@ namespace Scripts.World.Achievements
 
         public override bool OnCheck(Player source, Unit target)
         {
-            Battleground bg = source.GetBattleground();
+            var bg = source.GetBattleground();
             if (bg)
                 return bg.CheckAchievementCriteriaMeet((uint)BattlegroundCriteriaId.DefenseOfTheAncients, source, target);
 
@@ -257,12 +257,12 @@ namespace Scripts.World.Achievements
             if (!player)
                 return false;
 
-            bool checkArea = player.GetAreaId() == AreaIds.AreaArgentTournamentFields ||
-                                player.GetAreaId() == AreaIds.AreaRingOfAspirants ||
-                                player.GetAreaId() == AreaIds.AreaRingOfArgentValiants ||
-                                player.GetAreaId() == AreaIds.AreaRingOfAllianceValiants ||
-                                player.GetAreaId() == AreaIds.AreaRingOfHordeValiants ||
-                                player.GetAreaId() == AreaIds.AreaRingOfChampions;
+            var checkArea = player.GetAreaId() == AreaIds.AreaArgentTournamentFields ||
+                            player.GetAreaId() == AreaIds.AreaRingOfAspirants ||
+                            player.GetAreaId() == AreaIds.AreaRingOfArgentValiants ||
+                            player.GetAreaId() == AreaIds.AreaRingOfAllianceValiants ||
+                            player.GetAreaId() == AreaIds.AreaRingOfHordeValiants ||
+                            player.GetAreaId() == AreaIds.AreaRingOfChampions;
 
             return checkArea && player.duel != null && player.duel.isMounted;
         }
@@ -275,7 +275,7 @@ namespace Scripts.World.Achievements
 
         public override bool OnCheck(Player source, Unit target)
         {
-            Battleground bg = source.GetBattleground();
+            var bg = source.GetBattleground();
             if (bg)
                 return bg.CheckAchievementCriteriaMeet((uint)BattlegroundCriteriaId.NotEvenAScratch, source, target);
 

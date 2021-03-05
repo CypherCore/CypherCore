@@ -18,9 +18,9 @@ namespace Game.Cache
         public void LoadCharacterCacheStorage()
         {
             _characterCacheStore.Clear();
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
-            SQLResult result = DB.Characters.Query("SELECT guid, name, account, race, gender, class, level, deleteDate FROM characters");
+            var result = DB.Characters.Query("SELECT guid, name, account, race, gender, class, level, deleteDate FROM characters");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "No character name data loaded, empty query");
@@ -67,7 +67,7 @@ namespace Game.Cache
             if (characterCacheEntry == null)
                 return;
 
-            string oldName = characterCacheEntry.Name;
+            var oldName = characterCacheEntry.Name;
             characterCacheEntry.Name = name;
 
             if (gender.HasValue)
@@ -76,7 +76,7 @@ namespace Game.Cache
             if (race.HasValue)
                 characterCacheEntry.RaceId = (Race)race.Value;
 
-            InvalidatePlayer invalidatePlayer = new InvalidatePlayer();
+            var invalidatePlayer = new InvalidatePlayer();
             invalidatePlayer.Guid = guid;
             Global.WorldMgr.SendGlobalMessage(invalidatePlayer);
 

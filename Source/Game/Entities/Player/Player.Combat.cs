@@ -32,10 +32,10 @@ namespace Game.Entities
         {
             for (WeaponAttackType weaponAttackType = 0; weaponAttackType < WeaponAttackType.Max; ++weaponAttackType)
             {
-                Item tmpitem = GetWeaponForAttack(weaponAttackType, true);
+                var tmpitem = GetWeaponForAttack(weaponAttackType, true);
                 if (tmpitem != null && !tmpitem.IsBroken())
                 {
-                    ItemTemplate proto = tmpitem.GetTemplate();
+                    var proto = tmpitem.GetTemplate();
                     if (proto.GetDelay() != 0)
                         SetBaseAttackTime(weaponAttackType, proto.GetDelay());
                 }
@@ -53,15 +53,15 @@ namespace Game.Entities
         {
             if (pRewardSource == null)
                 return;
-            ObjectGuid creature_guid = pRewardSource.IsTypeId(TypeId.Unit) ? pRewardSource.GetGUID() : ObjectGuid.Empty;
+            var creature_guid = pRewardSource.IsTypeId(TypeId.Unit) ? pRewardSource.GetGUID() : ObjectGuid.Empty;
 
             // prepare data for near group iteration
-            Group group = GetGroup();
+            var group = GetGroup();
             if (group)
             {
-                for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
+                for (var refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                 {
-                    Player player = refe.GetSource();
+                    var player = refe.GetSource();
                     if (!player)
                         continue;
 
@@ -83,7 +83,7 @@ namespace Game.Entities
         public uint GetArmorProficiency() { return m_ArmorProficiency; }
         public void SendProficiency(ItemClass itemClass, uint itemSubclassMask)
         {
-            SetProficiency packet = new SetProficiency();
+            var packet = new SetProficiency();
             packet.ProficiencyMask = itemSubclassMask;
             packet.ProficiencyClass = (byte)itemClass;
             SendPacket(packet);
@@ -93,11 +93,11 @@ namespace Game.Entities
 
         float GetRatingMultiplier(CombatRating cr)
         {
-            GtCombatRatingsRecord Rating = CliDB.CombatRatingsGameTable.GetRow(GetLevel());
+            var Rating = CliDB.CombatRatingsGameTable.GetRow(GetLevel());
             if (Rating == null)
                 return 1.0f;
 
-            float value = GetGameTableColumnForCombatRating(Rating, cr);
+            var value = GetGameTableColumnForCombatRating(Rating, cr);
             if (value == 0)
                 return 1.0f;                                        // By default use minimum coefficient (not must be called)
 
@@ -105,7 +105,7 @@ namespace Game.Entities
         }
         public float GetRatingBonusValue(CombatRating cr)
         {
-            float baseResult = ApplyRatingDiminishing(cr, m_activePlayerData.CombatRatings[(int)cr] * GetRatingMultiplier(cr));
+            var baseResult = ApplyRatingDiminishing(cr, m_activePlayerData.CombatRatings[(int)cr] * GetRatingMultiplier(cr));
             if (cr != CombatRating.ResiliencePlayerDamage)
                 return baseResult;
             return (float)(1.0f - Math.Pow(0.99f, baseResult)) * 100.0f;
@@ -220,7 +220,7 @@ namespace Game.Entities
         
         public float GetExpertiseDodgeOrParryReduction(WeaponAttackType attType)
         {
-            float baseExpertise = 7.5f;
+            var baseExpertise = 7.5f;
             switch (attType)
             {
                 case WeaponAttackType.BaseAttack:
@@ -253,7 +253,7 @@ namespace Game.Entities
             if (!CanTitanGrip())
                 return;
 
-            bool apply = IsUsingTwoHandedWeaponInOneHand();
+            var apply = IsUsingTwoHandedWeaponInOneHand();
             if (apply)
             {
                 if (!HasAura(m_titanGripPenaltySpellId))
@@ -265,11 +265,11 @@ namespace Game.Entities
 
         bool IsTwoHandUsed()
         {
-            Item mainItem = GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
+            var mainItem = GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
             if (!mainItem)
                 return false;
 
-            ItemTemplate itemTemplate = mainItem.GetTemplate();
+            var itemTemplate = mainItem.GetTemplate();
             return (itemTemplate.GetInventoryType() == InventoryType.Weapon2Hand && !CanTitanGrip()) ||
                 itemTemplate.GetInventoryType() == InventoryType.Ranged ||
                 (itemTemplate.GetInventoryType() == InventoryType.RangedRight && itemTemplate.GetClass() == ItemClass.Weapon && (ItemSubClassWeapon)itemTemplate.GetSubClass() != ItemSubClassWeapon.Wand);
@@ -277,11 +277,11 @@ namespace Game.Entities
 
         bool IsUsingTwoHandedWeaponInOneHand()
         {
-            Item offItem = GetItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
+            var offItem = GetItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
             if (offItem && offItem.GetTemplate().GetInventoryType() == InventoryType.Weapon2Hand)
                 return true;
 
-            Item mainItem = GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
+            var mainItem = GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
             if (!mainItem || mainItem.GetTemplate().GetInventoryType() == InventoryType.Weapon2Hand)
                 return false;
 
@@ -293,16 +293,16 @@ namespace Game.Entities
 
         public void _ApplyWeaponDamage(uint slot, Item item, bool apply)
         {
-            ItemTemplate proto = item.GetTemplate();
-            WeaponAttackType attType = WeaponAttackType.BaseAttack;
-            float damage = 0.0f;
+            var proto = item.GetTemplate();
+            var attType = WeaponAttackType.BaseAttack;
+            var damage = 0.0f;
 
             if (slot == EquipmentSlot.MainHand && (proto.GetInventoryType() == InventoryType.Ranged || proto.GetInventoryType() == InventoryType.RangedRight))
                 attType = WeaponAttackType.RangedAttack;
             else if (slot == EquipmentSlot.OffHand)
                 attType = WeaponAttackType.OffAttack;
 
-            uint itemLevel = item.GetItemLevel(this);
+            var itemLevel = item.GetItemLevel(this);
             float minDamage, maxDamage;
             proto.GetDamage(itemLevel, out minDamage, out maxDamage);
 
@@ -318,11 +318,11 @@ namespace Game.Entities
                 SetBaseWeaponDamage(attType, WeaponDamageRange.MaxDamage, damage);
             }
 
-            SpellShapeshiftFormRecord shapeshift = CliDB.SpellShapeshiftFormStorage.LookupByKey(GetShapeshiftForm());
+            var shapeshift = CliDB.SpellShapeshiftFormStorage.LookupByKey(GetShapeshiftForm());
             if (proto.GetDelay() != 0 && !(shapeshift != null && shapeshift.CombatRoundTime != 0))
                 SetBaseAttackTime(attType, apply ? proto.GetDelay() : SharedConst.BaseAttackTime);
 
-            int weaponBasedAttackPower = apply ? (int)(proto.GetDPS(itemLevel) * 6.0f) : 0;
+            var weaponBasedAttackPower = apply ? (int)(proto.GetDPS(itemLevel) * 6.0f) : 0;
             switch (attType)
             {
                 case WeaponAttackType.BaseAttack:
@@ -344,8 +344,8 @@ namespace Game.Entities
 
         public override float GetBlockPercent(uint attackerLevel)
         {
-            float blockArmor = (float)m_activePlayerData.ShieldBlock;
-            float armorConstant = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.ArmorConstant, attackerLevel, -2, 0, Class.None);
+            var blockArmor = (float)m_activePlayerData.ShieldBlock;
+            var armorConstant = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.ArmorConstant, attackerLevel, -2, 0, Class.None);
 
             if ((blockArmor + armorConstant) == 0)
                 return 0;
@@ -399,7 +399,7 @@ namespace Game.Entities
                 return;
 
             ObjectGuid duelFlagGUID = m_playerData.DuelArbiter;
-            GameObject obj = GetMap().GetGameObject(duelFlagGUID);
+            var obj = GetMap().GetGameObject(duelFlagGUID);
             if (!obj)
                 return;
 
@@ -437,7 +437,7 @@ namespace Game.Entities
 
             Log.outDebug(LogFilter.Player, "Duel Complete {0} {1}", GetName(), duel.opponent.GetName());
 
-            DuelComplete duelCompleted = new DuelComplete();
+            var duelCompleted = new DuelComplete();
             duelCompleted.Started = type != DuelCompleteType.Interrupted;
             SendPacket(duelCompleted);
 
@@ -446,7 +446,7 @@ namespace Game.Entities
 
             if (type != DuelCompleteType.Interrupted)
             {
-                DuelWinner duelWinner = new DuelWinner();
+                var duelWinner = new DuelWinner();
                 duelWinner.BeatenName = (type == DuelCompleteType.Won ? duel.opponent.GetName() : GetName());
                 duelWinner.WinnerName = (type == DuelCompleteType.Won ? GetName() : duel.opponent.GetName());
                 duelWinner.BeatenVirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
@@ -488,7 +488,7 @@ namespace Game.Entities
                         duel.opponent.CastSpell(duel.opponent, 52994, true);
 
                     // Honor points after duel (the winner) - ImpConfig
-                    int amount = WorldConfig.GetIntValue(WorldCfg.HonorAfterDuel);
+                    var amount = WorldConfig.GetIntValue(WorldCfg.HonorAfterDuel);
                     if (amount != 0)
                         duel.opponent.RewardHonor(null, 1, amount);
 
@@ -502,7 +502,7 @@ namespace Game.Entities
                 duel.opponent.CastSpell(duel.opponent, 52852, true);
 
             //Remove Duel Flag object
-            GameObject obj = GetMap().GetGameObject(m_playerData.DuelArbiter);
+            var obj = GetMap().GetGameObject(m_playerData.DuelArbiter);
             if (obj)
                 duel.initiator.RemoveGameObject(obj, true);
 
@@ -510,7 +510,7 @@ namespace Game.Entities
             var itsAuras = duel.opponent.GetAppliedAuras();
             foreach (var pair in itsAuras)
             {
-                Aura aura = pair.Value.GetBase();
+                var aura = pair.Value.GetBase();
                 if (!pair.Value.IsPositive() && aura.GetCasterGUID() == GetGUID() && aura.GetApplyTime() >= duel.startTime)
                     duel.opponent.RemoveAura(pair);
             }
@@ -518,7 +518,7 @@ namespace Game.Entities
             var myAuras = GetAppliedAuras();
             foreach (var pair in myAuras)
             {
-                Aura aura = pair.Value.GetBase();
+                var aura = pair.Value.GetBase();
                 if (!pair.Value.IsPositive() && aura.GetCasterGUID() == duel.opponent.GetGUID() && aura.GetApplyTime() >= duel.startTime)
                     RemoveAura(pair);
             }
@@ -576,15 +576,15 @@ namespace Game.Entities
                 AddUnitState(UnitState.AttackPlayer);
                 AddPlayerFlag(PlayerFlags.ContestedPVP);
                 // call MoveInLineOfSight for nearby contested guards
-                AIRelocationNotifier notifier = new AIRelocationNotifier(this);
+                var notifier = new AIRelocationNotifier(this);
                 Cell.VisitWorldObjects(this, notifier, GetVisibilityRange());
             }
-            foreach (Unit unit in m_Controlled)
+            foreach (var unit in m_Controlled)
             {
                 if (!unit.HasUnitState(UnitState.AttackPlayer))
                 {
                     unit.AddUnitState(UnitState.AttackPlayer);
-                    AIRelocationNotifier notifier = new AIRelocationNotifier(unit);
+                    var notifier = new AIRelocationNotifier(unit);
                     Cell.VisitWorldObjects(this, notifier, GetVisibilityRange());
                 }
             }

@@ -89,7 +89,7 @@ namespace Scripts.Spells.Shaman
         void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            int bp0 = MathFunctions.CalculatePct((int)eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount());
+            var bp0 = MathFunctions.CalculatePct((int)eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount());
             if (bp0 != 0)
                 eventInfo.GetActor().CastCustomSpell(SpellIds.AncestralGuidanceHeal, SpellValueMod.BasePoint0, bp0, eventInfo.GetActor(), true, null, aurEff);
         }
@@ -137,7 +137,7 @@ namespace Scripts.Spells.Shaman
 
         void ApplyDebuff()
         {
-            Unit target = GetHitUnit();
+            var target = GetHitUnit();
             if (target)
                 target.CastSpell(target, SpellIds.Sated, true);
         }
@@ -168,7 +168,7 @@ namespace Scripts.Spells.Shaman
             if (_targetsHit >= 2)
                 GetCaster().CastSpell(GetCaster(), SpellIds.CrashLightningCleave, true);
 
-            AuraEffect gatheringStorms = GetCaster().GetAuraEffect(SpellIds.GatheringStorms, 0);
+            var gatheringStorms = GetCaster().GetAuraEffect(SpellIds.GatheringStorms, 0);
             if (gatheringStorms != null)
                 GetCaster().CastCustomSpell(SpellIds.GatheringStormsBuff, SpellValueMod.BasePoint0, (int)(gatheringStorms.GetAmount() * _targetsHit), GetCaster(), true);
         }
@@ -250,13 +250,13 @@ namespace Scripts.Spells.Shaman
         void HandleEffectPeriodic(AuraEffect aurEff)
         {
             PreventDefaultAction();
-            Aura aura = GetCaster().GetAura(SpellIds.EarthenRagePassive);
+            var aura = GetCaster().GetAura(SpellIds.EarthenRagePassive);
             if (aura != null)
             {
                 var earthen_rage_script = aura.GetScript<spell_sha_earthen_rage_passive>("spell_sha_earthen_rage_passive");
                 if (earthen_rage_script != null)
                 {
-                    Unit procTarget = Global.ObjAccessor.GetUnit(GetCaster(), earthen_rage_script.GetProcTargetGuid());
+                    var procTarget = Global.ObjAccessor.GetUnit(GetCaster(), earthen_rage_script.GetProcTargetGuid());
                     if (procTarget)
                         GetTarget().CastSpell(procTarget, SpellIds.EarthenRageDamage, true);
 
@@ -285,8 +285,8 @@ namespace Scripts.Spells.Shaman
 
         void TriggerBuff()
         {
-            Player caster = GetCaster().ToPlayer();
-            uint spellId = RandomHelper.RAND(SpellIds.ElementalBlastCrit, SpellIds.ElementalBlastHaste, SpellIds.ElementalBlastMastery);
+            var caster = GetCaster().ToPlayer();
+            var spellId = RandomHelper.RAND(SpellIds.ElementalBlastCrit, SpellIds.ElementalBlastHaste, SpellIds.ElementalBlastMastery);
 
             caster.CastSpell(caster, spellId, TriggerCastFlags.FullMask);
         }
@@ -309,8 +309,8 @@ namespace Scripts.Spells.Shaman
         {
             PreventDefaultAction();
 
-            Unit attacker = eventInfo.GetActor();
-            int damage = (int)(attacker.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * 0.12f / 2600 * attacker.GetBaseAttackTime(WeaponAttackType.BaseAttack));
+            var attacker = eventInfo.GetActor();
+            var damage = (int)(attacker.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * 0.12f / 2600 * attacker.GetBaseAttackTime(WeaponAttackType.BaseAttack));
             attacker.CastCustomSpell(SpellIds.FlametongueAttack, SpellValueMod.BasePoint0, damage, eventInfo.GetActionTarget(), TriggerCastFlags.FullMask, null, aurEff);
         }
 
@@ -356,7 +356,7 @@ namespace Scripts.Spells.Shaman
 
         void ApplyDebuff()
         {
-            Unit target = GetHitUnit();
+            var target = GetHitUnit();
             if (target)
                 target.CastSpell(target, SpellIds.Exhaustion, true);
         }
@@ -430,7 +430,7 @@ namespace Scripts.Spells.Shaman
             var m = costs.Find(cost => cost.Power == PowerType.Mana);
             if (m != null)
             {
-                int mana = MathFunctions.CalculatePct(m.Amount, 35);
+                var mana = MathFunctions.CalculatePct(m.Amount, 35);
                 if (mana > 0)
                     GetTarget().CastCustomSpell(SpellIds.ItemManaSurge, SpellValueMod.BasePoint0, mana, GetTarget(), true, null, aurEff);
             }
@@ -454,7 +454,7 @@ namespace Scripts.Spells.Shaman
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            SpellInfo spellInfo = eventInfo.GetSpellInfo();
+            var spellInfo = eventInfo.GetSpellInfo();
             if (spellInfo == null)
                 return;
 
@@ -503,7 +503,7 @@ namespace Scripts.Spells.Shaman
         void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            Player target = GetTarget().ToPlayer();
+            var target = GetTarget().ToPlayer();
             if (target)
                 target.GetSpellHistory().ModifyCooldown(SpellIds.ElementalMastery, -aurEff.GetAmount());
         }
@@ -520,7 +520,7 @@ namespace Scripts.Spells.Shaman
         void DiminishHaste(AuraEffect aurEff)
         {
             PreventDefaultAction();
-            AuraEffect hasteBuff = GetEffect(0);
+            var hasteBuff = GetEffect(0);
             if (hasteBuff != null)
                 hasteBuff.ChangeAmount(hasteBuff.GetAmount() - aurEff.GetAmount());
         }
@@ -541,10 +541,10 @@ namespace Scripts.Spells.Shaman
 
         void HandleScript(uint effIndex)
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster)
             {
-                Unit target = GetExplTargetUnit();
+                var target = GetExplTargetUnit();
                 if (target)
                     if (caster.HasAura(SpellIds.PathOfFlamesTalent))
                         caster.CastSpell(target, SpellIds.PathOfFlamesSpread, true);
@@ -617,13 +617,13 @@ namespace Scripts.Spells.Shaman
 
         void HandleScript(uint effIndex)
         {
-            Unit mainTarget = GetExplTargetUnit();
+            var mainTarget = GetExplTargetUnit();
             if (mainTarget)
             {
-                Aura flameShock = mainTarget.GetAura(SpellIds.FlameShockMaelstrom, GetCaster().GetGUID());
+                var flameShock = mainTarget.GetAura(SpellIds.FlameShockMaelstrom, GetCaster().GetGUID());
                 if (flameShock != null)
                 {
-                    Aura newAura = GetCaster().AddAura(SpellIds.FlameShockMaelstrom, GetHitUnit());
+                    var newAura = GetCaster().AddAura(SpellIds.FlameShockMaelstrom, GetHitUnit());
                     if (newAura != null)
                     {
                         newAura.SetDuration(flameShock.GetDuration());
@@ -651,8 +651,8 @@ namespace Scripts.Spells.Shaman
         void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            int basePoints0 = -aurEff.GetAmount();
-            int basePoints1 = aurEff.GetAmount();
+            var basePoints0 = -aurEff.GetAmount();
+            var basePoints1 = aurEff.GetAmount();
 
             GetTarget().CastCustomSpell(GetTarget(), SpellIds.TidalWaves, basePoints0, basePoints1, 0, true, null, aurEff);
         }
@@ -676,8 +676,8 @@ namespace Scripts.Spells.Shaman
             PreventDefaultAction();
 
             uint spellId;
-            Unit caster = eventInfo.GetActor();
-            Unit target = eventInfo.GetProcTarget();
+            var caster = eventInfo.GetActor();
+            var target = eventInfo.GetProcTarget();
 
             switch (target.GetClass())
             {
@@ -723,17 +723,17 @@ namespace Scripts.Spells.Shaman
         {
             PreventDefaultAction();
 
-            DamageInfo damageInfo = eventInfo.GetDamageInfo();
+            var damageInfo = eventInfo.GetDamageInfo();
             if (damageInfo == null || damageInfo.GetDamage() == 0)
                 return;
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.Electrified, GetCastDifficulty());
-            int amount = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
+            var spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.Electrified, GetCastDifficulty());
+            var amount = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
             amount /= (int)spellInfo.GetMaxTicks();
 
             // Add remaining ticks to damage done
-            Unit caster = eventInfo.GetActor();
-            Unit target = eventInfo.GetProcTarget();
+            var caster = eventInfo.GetActor();
+            var target = eventInfo.GetProcTarget();
             amount += (int)target.GetRemainingPeriodicAmount(caster.GetGUID(), SpellIds.Electrified, AuraType.PeriodicDamage);
 
             caster.CastCustomSpell(SpellIds.Electrified, SpellValueMod.BasePoint0, amount, target, true, null, aurEff);
@@ -757,17 +757,17 @@ namespace Scripts.Spells.Shaman
         {
             PreventDefaultAction();
 
-            DamageInfo damageInfo = eventInfo.GetDamageInfo();
+            var damageInfo = eventInfo.GetDamageInfo();
             if (damageInfo == null || damageInfo.GetDamage() == 0)
                 return;
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.LavaBurstBonusDamage, GetCastDifficulty());
-            int amount = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
+            var spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.LavaBurstBonusDamage, GetCastDifficulty());
+            var amount = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
             amount /= (int)spellInfo.GetMaxTicks();
 
             // Add remaining ticks to damage done
-            Unit caster = eventInfo.GetActor();
-            Unit target = eventInfo.GetProcTarget();
+            var caster = eventInfo.GetActor();
+            var target = eventInfo.GetProcTarget();
             amount += (int)target.GetRemainingPeriodicAmount(caster.GetGUID(), SpellIds.LavaBurstBonusDamage, AuraType.PeriodicDamage);
 
             caster.CastCustomSpell(SpellIds.LavaBurstBonusDamage, SpellValueMod.BasePoint0, amount, target, true, null, aurEff);
@@ -786,18 +786,18 @@ namespace Scripts.Spells.Shaman
         {
             PreventDefaultAction();
 
-            Unit caster = eventInfo.GetActor();
-            Unit target = eventInfo.GetProcTarget();
+            var caster = eventInfo.GetActor();
+            var target = eventInfo.GetProcTarget();
 
             // try to find spell Flame Shock on the target
-            AuraEffect flameShock = target.GetAuraEffect(AuraType.PeriodicDamage, SpellFamilyNames.Shaman, new FlagArray128(0x10000000), caster.GetGUID());
+            var flameShock = target.GetAuraEffect(AuraType.PeriodicDamage, SpellFamilyNames.Shaman, new FlagArray128(0x10000000), caster.GetGUID());
             if (flameShock == null)
                 return;
 
-            Aura flameShockAura = flameShock.GetBase();
+            var flameShockAura = flameShock.GetBase();
 
-            int maxDuration = flameShockAura.GetMaxDuration();
-            int newDuration = flameShockAura.GetDuration() + aurEff.GetAmount() * Time.InMilliseconds;
+            var maxDuration = flameShockAura.GetMaxDuration();
+            var newDuration = flameShockAura.GetDuration() + aurEff.GetAmount() * Time.InMilliseconds;
 
             flameShockAura.SetDuration(newDuration);
             // is it blizzlike to change max duration for FS?
@@ -823,17 +823,17 @@ namespace Scripts.Spells.Shaman
         {
             PreventDefaultAction();
 
-            HealInfo healInfo = eventInfo.GetHealInfo();
+            var healInfo = eventInfo.GetHealInfo();
             if (healInfo == null || healInfo.GetHeal() == 0)
                 return;
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.ChainedHeal, GetCastDifficulty());
-            int amount = (int)MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
+            var spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.ChainedHeal, GetCastDifficulty());
+            var amount = (int)MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
             amount /= (int)spellInfo.GetMaxTicks();
 
             // Add remaining ticks to healing done
-            Unit caster = eventInfo.GetActor();
-            Unit target = eventInfo.GetProcTarget();
+            var caster = eventInfo.GetActor();
+            var target = eventInfo.GetProcTarget();
             amount += (int)target.GetRemainingPeriodicAmount(caster.GetGUID(), SpellIds.ChainedHeal, AuraType.PeriodicHeal);
 
             caster.CastCustomSpell(SpellIds.ChainedHeal, SpellValueMod.BasePoint0, amount, target, true, null, aurEff);

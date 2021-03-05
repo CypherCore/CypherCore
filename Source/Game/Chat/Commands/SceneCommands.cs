@@ -31,14 +31,14 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            Player target = handler.GetSelectedPlayerOrSelf();
+            var target = handler.GetSelectedPlayerOrSelf();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
                 return false;
             }
 
-            uint id = args.NextUInt32();
+            var id = args.NextUInt32();
 
             if (!CliDB.SceneScriptPackageStorage.HasRecord(id))
                 return false;
@@ -50,7 +50,7 @@ namespace Game.Chat
         [Command("debug", RBACPermissions.CommandSceneDebug)]
         static bool HandleDebugSceneCommand(StringArguments args, CommandHandler handler)
         {
-            Player player = handler.GetSession().GetPlayer();
+            var player = handler.GetSession().GetPlayer();
             if (player)
             {
                 player.GetSceneMgr().ToggleDebugSceneMode();
@@ -66,8 +66,8 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            uint sceneId = args.NextUInt32();
-            Player target = handler.GetSelectedPlayerOrSelf();
+            var sceneId = args.NextUInt32();
+            var target = handler.GetSelectedPlayerOrSelf();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
@@ -87,11 +87,11 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            uint scenePackageId = args.NextUInt32();
-            if (!uint.TryParse(args.NextString(""), out uint flags))
+            var scenePackageId = args.NextUInt32();
+            if (!uint.TryParse(args.NextString(""), out var flags))
                 flags = (uint)SceneFlags.Unk16;
 
-            Player target = handler.GetSelectedPlayerOrSelf();
+            var target = handler.GetSelectedPlayerOrSelf();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);

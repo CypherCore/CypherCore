@@ -36,17 +36,17 @@ namespace Game.Conditions
         public bool Meets(ConditionSourceInfo sourceInfo)
         {
             Cypher.Assert(ConditionTarget < SharedConst.MaxConditionTargets);
-            WorldObject obj = sourceInfo.mConditionTargets[ConditionTarget];
+            var obj = sourceInfo.mConditionTargets[ConditionTarget];
             // object not present, return false
             if (obj == null)
             {
                 Log.outDebug(LogFilter.Condition, "Condition object not found for condition (Entry: {0} Type: {1} Group: {2})", SourceEntry, SourceType, SourceGroup);
                 return false;
             }
-            bool condMeets = false;
+            var condMeets = false;
 
-            Player player = obj.ToPlayer();
-            Unit unit = obj.ToUnit();
+            var player = obj.ToPlayer();
+            var unit = obj.ToUnit();
 
             switch (ConditionType)
             {
@@ -62,7 +62,7 @@ namespace Game.Conditions
                     {
                         // don't allow 0 items (it's checked during table load)
                         Cypher.Assert(ConditionValue2 != 0);
-                        bool checkBank = ConditionValue3 != 0 ? true : false;
+                        var checkBank = ConditionValue3 != 0 ? true : false;
                         condMeets = player.HasItemCount(ConditionValue1, ConditionValue2, checkBank);
                     }
                     break;
@@ -112,21 +112,21 @@ namespace Game.Conditions
                 case ConditionTypes.QuestTaken:
                     if (player != null)
                     {
-                        QuestStatus status = player.GetQuestStatus(ConditionValue1);
+                        var status = player.GetQuestStatus(ConditionValue1);
                         condMeets = (status == QuestStatus.Incomplete);
                     }
                     break;
                 case ConditionTypes.QuestComplete:
                     if (player != null)
                     {
-                        QuestStatus status = player.GetQuestStatus(ConditionValue1);
+                        var status = player.GetQuestStatus(ConditionValue1);
                         condMeets = (status == QuestStatus.Complete && !player.GetQuestRewardStatus(ConditionValue1));
                     }
                     break;
                 case ConditionTypes.QuestNone:
                     if (player != null)
                     {
-                        QuestStatus status = player.GetQuestStatus(ConditionValue1);
+                        var status = player.GetQuestStatus(ConditionValue1);
                         condMeets = (status == QuestStatus.None);
                     }
                     break;
@@ -138,7 +138,7 @@ namespace Game.Conditions
                         var map = obj.GetMap();
                         if (map.IsDungeon())
                         {
-                            InstanceScript instance = ((InstanceMap)map).GetInstanceScript();
+                            var instance = ((InstanceMap)map).GetInstanceScript();
                             if (instance != null)
                             {
                                 switch ((InstanceInfo)ConditionValue3)
@@ -205,10 +205,10 @@ namespace Game.Conditions
                     break;
                 case ConditionTypes.RelationTo:
                     {
-                        WorldObject toObject = sourceInfo.mConditionTargets[ConditionValue1];
+                        var toObject = sourceInfo.mConditionTargets[ConditionValue1];
                         if (toObject != null)
                         {
-                            Unit toUnit = toObject.ToUnit();
+                            var toUnit = toObject.ToUnit();
                             if (toUnit != null && unit != null)
                             {
                                 switch ((RelationType)ConditionValue2)
@@ -238,10 +238,10 @@ namespace Game.Conditions
                     }
                 case ConditionTypes.ReactionTo:
                     {
-                        WorldObject toObject = sourceInfo.mConditionTargets[ConditionValue1];
+                        var toObject = sourceInfo.mConditionTargets[ConditionValue1];
                         if (toObject != null)
                         {
-                            Unit toUnit = toObject.ToUnit();
+                            var toUnit = toObject.ToUnit();
                             if (toUnit != null && unit != null)
                                 condMeets = Convert.ToBoolean((1 << (int)unit.GetReactionTo(toUnit)) & ConditionValue2);
                         }
@@ -249,7 +249,7 @@ namespace Game.Conditions
                     }
                 case ConditionTypes.DistanceTo:
                     {
-                        WorldObject toObject = sourceInfo.mConditionTargets[ConditionValue1];
+                        var toObject = sourceInfo.mConditionTargets[ConditionValue1];
                         if (toObject != null)
                             condMeets = MathFunctions.CompareValues((ComparisionType)ConditionValue3, obj.GetDistance(toObject), ConditionValue2);
                         break;
@@ -282,14 +282,14 @@ namespace Game.Conditions
                     break;
                 case ConditionTypes.CreatureType:
                     {
-                        Creature creature = obj.ToCreature();
+                        var creature = obj.ToCreature();
                         if (creature)
                             condMeets = (uint)creature.GetCreatureTemplate().CreatureType == ConditionValue1;
                         break;
                     }
                 case ConditionTypes.RealmAchievement:
                     {
-                        AchievementRecord achievement = CliDB.AchievementStorage.LookupByKey(ConditionValue1);
+                        var achievement = CliDB.AchievementStorage.LookupByKey(ConditionValue1);
                         if (achievement != null && Global.AchievementMgr.IsRealmCompleted(achievement))
                             condMeets = true;
                         break;
@@ -330,7 +330,7 @@ namespace Game.Conditions
                     {
                         if (player)
                         {
-                            Pet pet = player.GetPet();
+                            var pet = player.GetPet();
                             if (pet)
                                 condMeets = (((1 << (int)pet.GetPetType()) & ConditionValue1) != 0);
                         }
@@ -361,7 +361,7 @@ namespace Game.Conditions
                     {
                         if (player)
                         {
-                            QuestObjective questObj = Global.ObjectMgr.GetQuestObjective(ConditionValue1);
+                            var questObj = Global.ObjectMgr.GetQuestObjective(ConditionValue1);
                             if (questObj == null)
                                 break;
 
@@ -385,7 +385,7 @@ namespace Game.Conditions
             if (!condMeets)
                 sourceInfo.mLastFailedCondition = this;
 
-            bool script = Global.ScriptMgr.OnConditionCheck(this, sourceInfo); // Returns true by default.
+            var script = Global.ScriptMgr.OnConditionCheck(this, sourceInfo); // Returns true by default.
             return condMeets && script;
         }
 
@@ -521,7 +521,7 @@ namespace Game.Conditions
 
         public string ToString(bool ext = false)
         {
-            StringBuilder ss = new StringBuilder();
+            var ss = new StringBuilder();
             ss.AppendFormat("[Condition SourceType: {0}", SourceType);
             if (SourceType < ConditionSourceType.Max)
                 ss.AppendFormat(" ({0})", Global.ConditionMgr.StaticSourceTypeData[(int)SourceType]);

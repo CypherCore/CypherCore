@@ -26,7 +26,7 @@ namespace Game.Mails
     {
         public void AddItem(ulong itemGuidLow, uint item_template)
         {
-            MailItemInfo mii = new MailItemInfo();
+            var mii = new MailItemInfo();
             mii.item_guid = itemGuidLow;
             mii.item_template = item_template;
             items.Add(mii);

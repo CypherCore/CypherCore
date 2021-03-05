@@ -105,8 +105,8 @@ namespace Framework.GameMath
         /// <returns>A <see cref="Ray"/> that represents the vector specified by the <paramref name="s"/> parameter.</returns>
         public static Ray Parse(string s)
         {
-            Regex r = new Regex(@"\((?<origin>\([^\)]*\)), (?<direction>\([^\)]*\))\)", RegexOptions.None);
-            Match m = r.Match(s);
+            var r = new Regex(@"\((?<origin>\([^\)]*\)), (?<direction>\([^\)]*\))\)", RegexOptions.None);
+            var m = r.Match(s);
             if (m.Success)
             {
                 return new Ray(
@@ -153,7 +153,7 @@ namespace Framework.GameMath
         {
             if (obj is Ray)
             {
-                Ray r = (Ray)obj;
+                var r = (Ray)obj;
                 return ((_origin == r.Origin) && (_direction == r.Direction));
             }
             return false;
@@ -195,9 +195,9 @@ namespace Framework.GameMath
         public Vector3 intersection(Plane plane)
         {
             float d;
-            Vector3 normal = plane.Normal;
+            var normal = plane.Normal;
             plane.getEquation(ref normal, out d);
-            float rate = Direction.dot(normal);
+            var rate = Direction.dot(normal);
 
             if (rate >= 0.0f)
             {
@@ -205,16 +205,16 @@ namespace Framework.GameMath
             }
             else
             {
-                float t = -(d + Origin.dot(normal)) / rate;
+                var t = -(d + Origin.dot(normal)) / rate;
                 return Origin + Direction * t;
             }
         }
 
         public float intersectionTime(AxisAlignedBox box)
         {
-            Vector3 dummy = Vector3.Zero;
+            var dummy = Vector3.Zero;
             bool inside;
-            float time = CollisionDetection.collisionTimeForMovingPointFixedAABox(_origin, _direction, box, ref dummy, out inside);
+            var time = CollisionDetection.collisionTimeForMovingPointFixedAABox(_origin, _direction, box, ref dummy, out inside);
 
             if (float.IsInfinity(time) && inside)
                 return 0.0f;
@@ -272,7 +272,7 @@ namespace Framework.GameMath
         {
             if ((destinationType == typeof(string)) && (value is Ray))
             {
-                Ray r = (Ray)value;
+                var r = (Ray)value;
                 return r.ToString();
             }
 

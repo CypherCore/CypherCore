@@ -45,7 +45,7 @@ namespace System.Collections.Generic
             {
                 _interalStorage.Add(key, new List<TValue>());
             }
-            foreach (TValue value in valueList)
+            foreach (var value in valueList)
             {
                 _interalStorage[key].Add(value);
             }
@@ -70,7 +70,7 @@ namespace System.Collections.Generic
             if (!ContainsKey(item.Key))
                 return false;
 
-            bool val = _interalStorage[item.Key].Remove(item.Value);
+            var val = _interalStorage[item.Key].Remove(item.Value);
 
             if (!val)
                 return false;
@@ -86,7 +86,7 @@ namespace System.Collections.Generic
             if (!ContainsKey(key))
                 return false;
 
-            bool val = _interalStorage[key].Remove(value);
+            var val = _interalStorage[key].Remove(value);
             if (!val)
                 return false;
 
@@ -125,7 +125,7 @@ namespace System.Collections.Generic
 
         public List<TValue> LookupByKey(object key)
         {
-            TKey newkey = (TKey)Convert.ChangeType(key, typeof(TKey));
+            var newkey = (TKey)Convert.ChangeType(key, typeof(TKey));
             if (_interalStorage.ContainsKey(newkey))
                 return _interalStorage[newkey];
 
@@ -181,7 +181,7 @@ namespace System.Collections.Generic
         {
             get
             {
-                List<TValue> retVal = new List<TValue>();
+                var retVal = new List<TValue>();
                 foreach (var item in _interalStorage)
                 {
                     retVal.AddRange(item.Value);
@@ -194,7 +194,7 @@ namespace System.Collections.Generic
         {
             get
             {
-                List<KeyValuePair<TKey, TValue>> retVal = new List<KeyValuePair<TKey, TValue>>();
+                var retVal = new List<KeyValuePair<TKey, TValue>>();
                 foreach (var pair in _interalStorage)
                 {
                     foreach (var value in pair.Value)
@@ -220,8 +220,8 @@ namespace System.Collections.Generic
             if (arrayIndex >= array.Length || Count > array.Length - arrayIndex)
                 array = new KeyValuePair<TKey, TValue>[Count];
 
-            int index = arrayIndex;
-            foreach (KeyValuePair<TKey, TValue> pair in this)
+            var index = arrayIndex;
+            foreach (var pair in this)
                 array[index++] = new KeyValuePair<TKey, TValue>(pair.Key, pair.Value);
 
         }
@@ -230,7 +230,7 @@ namespace System.Collections.Generic
         {
             get
             {
-                int count = 0;
+                var count = 0;
                 foreach (var item in _interalStorage)
                 {
                     count += item.Value.Count;
@@ -288,7 +288,7 @@ namespace System.Collections.Generic
             {
                 _interalStorage.Add(key, new List<TValue>());
             }
-            foreach (TValue value in valueList)
+            foreach (var value in valueList)
             {
                 _interalStorage[key].Add(value);
             }
@@ -313,7 +313,7 @@ namespace System.Collections.Generic
             if (!ContainsKey(item.Key))
                 return false;
 
-            bool val = _interalStorage[item.Key].Remove(item.Value);
+            var val = _interalStorage[item.Key].Remove(item.Value);
 
             if (!val)
                 return false;
@@ -329,7 +329,7 @@ namespace System.Collections.Generic
             if (!ContainsKey(key))
                 return false;
 
-            bool val = _interalStorage[key].Remove(value);
+            var val = _interalStorage[key].Remove(value);
 
             if (!val)
                 return false;
@@ -369,7 +369,7 @@ namespace System.Collections.Generic
 
         public List<TValue> LookupByKey(object key)
         {
-            TKey newkey = (TKey)Convert.ChangeType(key, typeof(TKey));
+            var newkey = (TKey)Convert.ChangeType(key, typeof(TKey));
             if (_interalStorage.ContainsKey(newkey))
                 return _interalStorage[newkey];
 
@@ -424,7 +424,7 @@ namespace System.Collections.Generic
         {
             get
             {
-                List<TValue> retVal = new List<TValue>();
+                var retVal = new List<TValue>();
                 foreach (var item in _interalStorage)
                 {
                     retVal.AddRange(item.Value);
@@ -437,7 +437,7 @@ namespace System.Collections.Generic
         {
             get
             {
-                List<KeyValuePair<TKey, TValue>> retVal = new List<KeyValuePair<TKey, TValue>>();
+                var retVal = new List<KeyValuePair<TKey, TValue>>();
                 foreach (var pair in _interalStorage)
                 {
                     foreach (var value in pair.Value)
@@ -463,8 +463,8 @@ namespace System.Collections.Generic
             if (arrayIndex >= array.Length || Count > array.Length - arrayIndex)
                 array = new KeyValuePair<TKey, TValue>[Count];
 
-            int index = arrayIndex;
-            foreach (KeyValuePair<TKey, TValue> pair in this)
+            var index = arrayIndex;
+            foreach (var pair in this)
                 array[index++] = new KeyValuePair<TKey, TValue>(pair.Key, pair.Value);
 
         }
@@ -473,7 +473,7 @@ namespace System.Collections.Generic
         {
             get
             {
-                int count = 0;
+                var count = 0;
                 foreach (var item in _interalStorage)
                 {
                     count += item.Value.Count;

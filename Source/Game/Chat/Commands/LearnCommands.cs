@@ -31,7 +31,7 @@ namespace Game.Chat.Commands
         [Command("", RBACPermissions.CommandLearn)]
         static bool HandleLearnCommand(StringArguments args, CommandHandler handler)
         {
-            Player targetPlayer = handler.GetSelectedPlayerOrSelf();
+            var targetPlayer = handler.GetSelectedPlayerOrSelf();
 
             if (!targetPlayer)
             {
@@ -40,14 +40,14 @@ namespace Game.Chat.Commands
             }
 
             // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-            uint spell = handler.ExtractSpellIdFromLink(args);
+            var spell = handler.ExtractSpellIdFromLink(args);
             if (spell == 0 || !Global.SpellMgr.HasSpellInfo(spell, Difficulty.None))
                 return false;
 
-            string all = args.NextString();
-            bool allRanks = !string.IsNullOrEmpty(all) && all == "all";
+            var all = args.NextString();
+            var allRanks = !string.IsNullOrEmpty(all) && all == "all";
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell, Difficulty.None);
+            var spellInfo = Global.SpellMgr.GetSpellInfo(spell, Difficulty.None);
             if (spellInfo == null || !Global.SpellMgr.IsSpellValid(spellInfo, handler.GetSession().GetPlayer()))
             {
                 handler.SendSysMessage(CypherStrings.CommandSpellBroken, spell);
@@ -80,7 +80,7 @@ namespace Game.Chat.Commands
             {
                 foreach (var skillSpell in Global.SpellMgr.GetSkillLineAbilityMapBounds((uint)SkillType.Internal))
                 {
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(skillSpell.Spell, Difficulty.None);
+                    var spellInfo = Global.SpellMgr.GetSpellInfo(skillSpell.Spell, Difficulty.None);
                     if (spellInfo == null || !Global.SpellMgr.IsSpellValid(spellInfo, handler.GetSession().GetPlayer(), false))
                         continue;
 
@@ -142,7 +142,7 @@ namespace Game.Chat.Commands
                 //  Learns all recipes of specified profession and sets skill to max
                 //  Example: .learn all_recipes enchanting
 
-                Player target = handler.GetSelectedPlayer();
+                var target = handler.GetSelectedPlayer();
                 if (!target)
                 {
                     handler.SendSysMessage(CypherStrings.PlayerNotFound);
@@ -153,9 +153,9 @@ namespace Game.Chat.Commands
                     return false;
 
                 // converting string that we try to find to lower case
-                string namePart = args.NextString().ToLower();
+                var namePart = args.NextString().ToLower();
 
-                string name = "";
+                var name = "";
                 uint skillId = 0;
                 foreach (var skillInfo in CliDB.SkillLineStorage.Values)
                 {
@@ -164,7 +164,7 @@ namespace Game.Chat.Commands
                         skillInfo.CanLink == 0)                            // only prof with recipes have set
                         continue;
 
-                    Locale locale = handler.GetSessionDbcLocale();
+                    var locale = handler.GetSessionDbcLocale();
                     name = skillInfo.DisplayName[locale];
                     if (string.IsNullOrEmpty(name))
                         continue;
@@ -198,7 +198,7 @@ namespace Game.Chat.Commands
 
                 HandleLearnSkillRecipesHelper(target, skillId);
 
-                ushort maxLevel = target.GetPureMaxSkillValue((SkillType)skillId);
+                var maxLevel = target.GetPureMaxSkillValue((SkillType)skillId);
                 target.SetSkill(skillId, target.GetSkillStep((SkillType)skillId), maxLevel, maxLevel);
                 handler.SendSysMessage(CypherStrings.CommandLearnAllRecipes, name);
                 return true;
@@ -206,7 +206,7 @@ namespace Game.Chat.Commands
 
             static void HandleLearnSkillRecipesHelper(Player player, uint skillId)
             {
-                uint classmask = player.GetClassMask();
+                var classmask = player.GetClassMask();
 
                 foreach (var skillLine in CliDB.SkillLineAbilityStorage.Values)
                 {
@@ -226,7 +226,7 @@ namespace Game.Chat.Commands
                     if (skillLine.ClassMask != 0 && (skillLine.ClassMask & classmask) == 0)
                         continue;
 
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(skillLine.Spell, Difficulty.None);
+                    var spellInfo = Global.SpellMgr.GetSpellInfo(skillLine.Spell, Difficulty.None);
                     if (spellInfo == null || !Global.SpellMgr.IsSpellValid(spellInfo, player, false))
                         continue;
 
@@ -248,14 +248,14 @@ namespace Game.Chat.Commands
                 [Command("spells", RBACPermissions.CommandLearnAllMySpells)]
                 static bool HandleLearnAllMySpellsCommand(StringArguments args, CommandHandler handler)
                 {
-                    ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey(handler.GetSession().GetPlayer().GetClass());
+                    var classEntry = CliDB.ChrClassesStorage.LookupByKey(handler.GetSession().GetPlayer().GetClass());
                     if (classEntry == null)
                         return true;
                     uint family = classEntry.SpellClassSet;
 
                     foreach (var entry in CliDB.SkillLineAbilityStorage.Values)
                     {
-                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(entry.Spell, Difficulty.None);
+                        var spellInfo = Global.SpellMgr.GetSpellInfo(entry.Spell, Difficulty.None);
                         if (spellInfo == null)
                             continue;
 
@@ -285,15 +285,15 @@ namespace Game.Chat.Commands
                 [Command("talents", RBACPermissions.CommandLearnAllMyTalents)]
                 static bool HandleLearnAllMyTalentsCommand(StringArguments args, CommandHandler handler)
                 {
-                    Player player = handler.GetSession().GetPlayer();
-                    uint playerClass = (uint)player.GetClass();
+                    var player = handler.GetSession().GetPlayer();
+                    var playerClass = (uint)player.GetClass();
 
                     foreach (var talentInfo in CliDB.TalentStorage.Values)
                     {
                         if (playerClass != talentInfo.ClassID)
                             continue;
 
-                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID, Difficulty.None);
+                        var spellInfo = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID, Difficulty.None);
                         if (spellInfo == null || !Global.SpellMgr.IsSpellValid(spellInfo, handler.GetSession().GetPlayer(), false))
                             continue;
 
@@ -318,14 +318,14 @@ namespace Game.Chat.Commands
                 return false;
 
             // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r
-            uint spellId = handler.ExtractSpellIdFromLink(args);
+            var spellId = handler.ExtractSpellIdFromLink(args);
             if (spellId == 0)
                 return false;
 
-            string allStr = args.NextString();
-            bool allRanks = !string.IsNullOrEmpty(allStr) && allStr == "all";
+            var allStr = args.NextString();
+            var allRanks = !string.IsNullOrEmpty(allStr) && allStr == "all";
 
-            Player target = handler.GetSelectedPlayer();
+            var target = handler.GetSelectedPlayer();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);

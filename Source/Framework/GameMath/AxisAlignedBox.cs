@@ -125,7 +125,7 @@ namespace Framework.GameMath
         /// <returns>An array of <see cref="Vector3"/> containing the box vertices.</returns> 
         public Vector3[] ComputeVertices()
         {
-            Vector3[] vertices = new Vector3[8];
+            var vertices = new Vector3[8];
 
             vertices[0] = _lo;
             vertices[1] = new Vector3(_hi.X, _lo.Y, _lo.Z);
@@ -161,7 +161,7 @@ namespace Framework.GameMath
         {
             if (obj is AxisAlignedBox)
             {
-                AxisAlignedBox box = (AxisAlignedBox)obj;
+                var box = (AxisAlignedBox)obj;
                 return (_lo == box.Lo) && (_hi == box.Hi);
             }
             return false;
@@ -250,7 +250,7 @@ namespace Framework.GameMath
         public Vector3 corner(int index)
         {
             // default constructor inits all components to 0
-            Vector3 v = new Vector3();
+            var v = new Vector3();
 
             switch (index)
             {
@@ -311,7 +311,7 @@ namespace Framework.GameMath
 
         public static AxisAlignedBox operator +(AxisAlignedBox box, Vector3 v)
         {
-            AxisAlignedBox outt = new AxisAlignedBox();
+            var outt = new AxisAlignedBox();
             outt.Lo = box.Lo + v;
             outt.Hi = box.Hi + v;
             return outt;

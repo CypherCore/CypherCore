@@ -56,18 +56,18 @@ namespace Game.Mails
 
             m_mailTemplateItemsNeed = false;
 
-            Loot mailLoot = new Loot();
+            var mailLoot = new Loot();
 
             // can be empty
             mailLoot.FillLoot(m_mailTemplateId, LootStorage.Mail, receiver, true, true, LootModes.Default, ItemContext.None);
 
-            uint max_slot = mailLoot.GetMaxSlotInLootFor(receiver);
+            var max_slot = mailLoot.GetMaxSlotInLootFor(receiver);
             for (uint i = 0; m_items.Count < SharedConst.MaxMailItems && i < max_slot; ++i)
             {
-                LootItem lootitem = mailLoot.LootItemInSlot(i, receiver);
+                var lootitem = mailLoot.LootItemInSlot(i, receiver);
                 if (lootitem != null)
                 {
-                    Item item = Item.CreateItem(lootitem.itemid, lootitem.count, lootitem.context, receiver);
+                    var item = Item.CreateItem(lootitem.itemid, lootitem.count, lootitem.context, receiver);
                     if (item != null)
                     {
                         item.SaveToDB(trans);                           // save for prevent lost at next mail load, if send fail then item will deleted
@@ -90,7 +90,7 @@ namespace Game.Mails
 
         public void SendReturnToSender(uint senderAcc, ulong senderGuid, ulong receiver_guid, SQLTransaction trans)
         {
-            ObjectGuid receiverGuid = ObjectGuid.Create(HighGuid.Player, receiver_guid);
+            var receiverGuid = ObjectGuid.Create(HighGuid.Player, receiver_guid);
             Player receiver = Global.ObjAccessor.FindPlayer(receiverGuid);
 
             uint rc_account = 0;
@@ -104,7 +104,7 @@ namespace Game.Mails
             }
 
             // prepare mail and send in other case
-            bool needItemDelay = false;
+            var needItemDelay = false;
 
             if (!m_items.Empty())
             {
@@ -116,7 +116,7 @@ namespace Game.Mails
                 {
                     item.SaveToDB(trans);                      // item not in inventory and can be save standalone
                     // owner in data will set at mail receive and item extracting
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ITEM_OWNER);
+                    var stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ITEM_OWNER);
                     stmt.AddValue(0, receiver_guid);
                     stmt.AddValue(1, item.GetGUID().GetCounter());
                     trans.Append(stmt);
@@ -124,7 +124,7 @@ namespace Game.Mails
             }
 
             // If theres is an item, there is a one hour delivery delay.
-            uint deliver_delay = needItemDelay ? WorldConfig.GetUIntValue(WorldCfg.MailDeliveryDelay) : 0;
+            var deliver_delay = needItemDelay ? WorldConfig.GetUIntValue(WorldCfg.MailDeliveryDelay) : 0;
 
             // will delete item or place to receiver mail list
             SendMailTo(trans, new MailReceiver(receiver, receiver_guid), new MailSender(MailMessageType.Normal, senderGuid), MailCheckMask.Returned, deliver_delay);
@@ -136,7 +136,7 @@ namespace Game.Mails
         }
         public void SendMailTo(SQLTransaction trans, MailReceiver receiver, MailSender sender, MailCheckMask checkMask = MailCheckMask.None, uint deliver_delay = 0)
         {
-            Player pReceiver = receiver.GetPlayer();               // can be NULL
+            var pReceiver = receiver.GetPlayer();               // can be NULL
             Player pSender = sender.GetMailMessageType() == MailMessageType.Normal ? Global.ObjAccessor.FindPlayer(ObjectGuid.Create(HighGuid.Player, sender.GetSenderId())) : null;
 
             if (pReceiver != null)
@@ -144,7 +144,7 @@ namespace Game.Mails
 
             uint mailId = Global.ObjectMgr.GenerateMailID();
 
-            long deliver_time = Time.UnixTime + deliver_delay;
+            var deliver_time = Time.UnixTime + deliver_delay;
 
             //expire time if COD 3 days, if no COD 30 days, if auction sale pending 1 hour
             uint expire_delay;
@@ -159,11 +159,11 @@ namespace Game.Mails
                 else
                     expire_delay = (uint)(pSender != null && pSender.IsGameMaster() ? 90 * Time.Day : 30 * Time.Day);
 
-            long expire_time = deliver_time + expire_delay;
+            var expire_time = deliver_time + expire_delay;
 
             // Add to DB
             byte index = 0;
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_MAIL);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_MAIL);
             stmt.AddValue(index, mailId);
             stmt.AddValue(++index, (byte)sender.GetMailMessageType());
             stmt.AddValue(++index, (sbyte)sender.GetStationery());
@@ -196,7 +196,7 @@ namespace Game.Mails
 
                 if (pReceiver.IsMailsLoaded())
                 {
-                    Mail m = new Mail();
+                    var m = new Mail();
                     m.messageID = mailId;
                     m.mailTemplateId = GetMailTemplateId();
                     m.subject = GetSubject();

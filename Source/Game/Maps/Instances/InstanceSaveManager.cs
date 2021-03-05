@@ -33,11 +33,11 @@ namespace Game.Maps
 
         public InstanceSave AddInstanceSave(uint mapId, uint instanceId, Difficulty difficulty, long resetTime, uint entranceId, bool canReset, bool load = false)
         {
-            InstanceSave old_save = GetInstanceSave(instanceId);
+            var old_save = GetInstanceSave(instanceId);
             if (old_save != null)
                 return old_save;
 
-            MapRecord entry = CliDB.MapStorage.LookupByKey(mapId);
+            var entry = CliDB.MapStorage.LookupByKey(mapId);
             if (entry == null)
             {
                 Log.outError(LogFilter.Server, "InstanceSaveManager.AddInstanceSave: wrong mapid = {0}, instanceid = {1}!", mapId, instanceId);
@@ -50,7 +50,7 @@ namespace Game.Maps
                 return null;
             }
 
-            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficulty);
+            var difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficulty);
             if (difficultyEntry == null || difficultyEntry.InstanceType != entry.InstanceType)
             {
                 Log.outError(LogFilter.Server, "InstanceSaveManager.AddInstanceSave: mapid = {0}, instanceid = {1}, wrong dificalty {2}!", mapId, instanceId, difficulty);
@@ -79,7 +79,7 @@ namespace Game.Maps
 
             Log.outDebug(LogFilter.Maps, "InstanceSaveManager.AddInstanceSave: mapid = {0}, instanceid = {1}", mapId, instanceId);
 
-            InstanceSave save = new InstanceSave(mapId, instanceId, difficulty, entranceId, resetTime, canReset);
+            var save = new InstanceSave(mapId, instanceId, difficulty, entranceId, resetTime, canReset);
             if (!load)
                 save.SaveToDB();
 
@@ -94,9 +94,9 @@ namespace Game.Maps
 
         public void DeleteInstanceFromDB(uint instanceid)
         {
-            SQLTransaction trans = new SQLTransaction();
+            var trans = new SQLTransaction();
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_INSTANCE_BY_INSTANCE);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_INSTANCE_BY_INSTANCE);
             stmt.AddValue(0, instanceid);
             trans.Append(stmt);
 
@@ -122,10 +122,10 @@ namespace Game.Maps
             if (instanceSave != null)
             {
                 // save the resettime for normal instances only when they get unloaded
-                long resettime = instanceSave.GetResetTimeForDB();
+                var resettime = instanceSave.GetResetTimeForDB();
                 if (resettime != 0)
                 {
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_INSTANCE_RESETTIME);
+                    var stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_INSTANCE_RESETTIME);
                     stmt.AddValue(0, resettime);
                     stmt.AddValue(1, InstanceId);
                     DB.Characters.Execute(stmt);
@@ -138,14 +138,14 @@ namespace Game.Maps
 
         public void UnloadInstanceSave(uint InstanceId)
         {
-            InstanceSave save = GetInstanceSave(InstanceId);
+            var save = GetInstanceSave(InstanceId);
             if (save != null)
                 save.UnloadIfEmpty();
         }
 
         public void LoadInstances()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             // Delete expired instances (Instance related spawns are removed in the following cleanup queries)
             DB.Characters.DirectExecute("DELETE i FROM instance i LEFT JOIN instance_reset ir ON mapid = map AND i.difficulty = ir.difficulty " +
@@ -179,29 +179,29 @@ namespace Game.Maps
 
         void LoadResetTimes()
         {
-            long now = Time.UnixTime;
-            long today = (now / Time.Day) * Time.Day;
+            var now = Time.UnixTime;
+            var today = (now / Time.Day) * Time.Day;
 
             // NOTE: Use DirectPExecute for tables that will be queried later
 
             // get the current reset times for normal instances (these may need to be updated)
             // these are only kept in memory for InstanceSaves that are loaded later
             // resettime = 0 in the DB for raid/heroic instances so those are skipped
-            Dictionary<uint, Tuple<uint, long>> instResetTime = new Dictionary<uint, Tuple<uint, long>>();
+            var instResetTime = new Dictionary<uint, Tuple<uint, long>>();
 
             // index instance ids by map/difficulty pairs for fast reset warning send
-            MultiMap<uint, uint> mapDiffResetInstances = new MultiMap<uint, uint>();
+            var mapDiffResetInstances = new MultiMap<uint, uint>();
 
-            SQLResult result = DB.Characters.Query("SELECT id, map, difficulty, resettime FROM instance ORDER BY id ASC");
+            var result = DB.Characters.Query("SELECT id, map, difficulty, resettime FROM instance ORDER BY id ASC");
             if (!result.IsEmpty())
             {
                 do
                 {
-                    uint instanceId = result.Read<uint>(0);
+                    var instanceId = result.Read<uint>(0);
 
                     // Mark instance id as being used
                     Global.MapMgr.RegisterInstanceId(instanceId);
-                    long resettime = result.Read<long>(3);
+                    var resettime = result.Read<long>(3);
                     if (resettime != 0)
                     {
                         uint mapid = result.Read<ushort>(1);
@@ -220,21 +220,21 @@ namespace Game.Maps
             }
 
             // load the global respawn times for raid/heroic instances
-            uint diff = (uint)(WorldConfig.GetIntValue(WorldCfg.InstanceResetTimeHour) * Time.Hour);
+            var diff = (uint)(WorldConfig.GetIntValue(WorldCfg.InstanceResetTimeHour) * Time.Hour);
             result = DB.Characters.Query("SELECT mapid, difficulty, resettime FROM instance_reset");
             if (!result.IsEmpty())
             {
                 do
                 {
                     uint mapid = result.Read<ushort>(0);
-                    Difficulty difficulty = (Difficulty)result.Read<byte>(1);
-                    long oldresettime = result.Read<long>(2);
+                    var difficulty = (Difficulty)result.Read<byte>(1);
+                    var oldresettime = result.Read<long>(2);
 
-                    MapDifficultyRecord mapDiff = Global.DB2Mgr.GetMapDifficultyData(mapid, difficulty);
+                    var mapDiff = Global.DB2Mgr.GetMapDifficultyData(mapid, difficulty);
                     if (mapDiff == null)
                     {
                         Log.outError(LogFilter.Server, "InstanceSaveManager.LoadResetTimes: invalid mapid({0})/difficulty({1}) pair in instance_reset!", mapid, difficulty);
-                        PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GLOBAL_INSTANCE_RESETTIME);
+                        var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GLOBAL_INSTANCE_RESETTIME);
                         stmt.AddValue(0, mapid);
                         stmt.AddValue(1, (byte)difficulty);
                         DB.Characters.DirectExecute(stmt);
@@ -242,10 +242,10 @@ namespace Game.Maps
                     }
 
                     // update the reset time if the hour in the configs changes
-                    long newresettime = (oldresettime / Time.Day) * Time.Day + diff;
+                    var newresettime = (oldresettime / Time.Day) * Time.Day + diff;
                     if (oldresettime != newresettime)
                     {
-                        PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_GLOBAL_INSTANCE_RESETTIME);
+                        var stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_GLOBAL_INSTANCE_RESETTIME);
                         stmt.AddValue(0, newresettime);
                         stmt.AddValue(1, mapid);
                         stmt.AddValue(2, (byte)difficulty);
@@ -260,27 +260,27 @@ namespace Game.Maps
             // add the global reset times to the priority queue
             foreach (var mapDifficultyPair in Global.DB2Mgr.GetMapDifficulties())
             {
-                uint mapid = mapDifficultyPair.Key;
+                var mapid = mapDifficultyPair.Key;
 
                 foreach (var difficultyPair in mapDifficultyPair.Value)
                 {
-                    Difficulty difficulty = (Difficulty)difficultyPair.Key;
-                    MapDifficultyRecord mapDiff = difficultyPair.Value;
+                    var difficulty = (Difficulty)difficultyPair.Key;
+                    var mapDiff = difficultyPair.Value;
                     if (mapDiff.GetRaidDuration() == 0)
                         continue;
 
                     // the reset_delay must be at least one day
-                    uint period = (uint)(((mapDiff.GetRaidDuration() * WorldConfig.GetFloatValue(WorldCfg.RateInstanceResetTime)) / Time.Day) * Time.Day);
+                    var period = (uint)(((mapDiff.GetRaidDuration() * WorldConfig.GetFloatValue(WorldCfg.RateInstanceResetTime)) / Time.Day) * Time.Day);
                     if (period < Time.Day)
                         period = Time.Day;
 
-                    long t = GetResetTimeFor(mapid, difficulty);
+                    var t = GetResetTimeFor(mapid, difficulty);
                     if (t == 0)
                     {
                         // initialize the reset time
                         t = today + period + diff;
 
-                        PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_GLOBAL_INSTANCE_RESETTIME);
+                        var stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_GLOBAL_INSTANCE_RESETTIME);
                         stmt.AddValue(0, mapid);
                         stmt.AddValue(1, (byte)difficulty);
                         stmt.AddValue(2, t);
@@ -294,7 +294,7 @@ namespace Game.Maps
                         t = (t / Time.Day) * Time.Day;
                         t += ((today - t) / period + 1) * period + diff;
 
-                        PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_GLOBAL_INSTANCE_RESETTIME);
+                        var stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_GLOBAL_INSTANCE_RESETTIME);
                         stmt.AddValue(0, t);
                         stmt.AddValue(1, mapid);
                         stmt.AddValue(2, (byte)difficulty);
@@ -321,7 +321,7 @@ namespace Game.Maps
 
         public long GetSubsequentResetTime(uint mapid, Difficulty difficulty, long resetTime)
         {
-            MapDifficultyRecord mapDiff = Global.DB2Mgr.GetMapDifficultyData(mapid, difficulty);
+            var mapDiff = Global.DB2Mgr.GetMapDifficultyData(mapid, difficulty);
             if (mapDiff == null || mapDiff.GetRaidDuration() == 0)
             {
                 Log.outError(LogFilter.Misc, "InstanceSaveManager.GetSubsequentResetTime: not valid difficulty or no reset delay for map {0}", mapid);
@@ -380,16 +380,16 @@ namespace Game.Maps
 
         public void Update()
         {
-            long now = Time.UnixTime;
+            var now = Time.UnixTime;
 
             while (!m_resetTimeQueue.Empty())
             {
                 var pair = m_resetTimeQueue.First();
-                long time = pair.Key;
+                var time = pair.Key;
                 if (time >= now)
                     break;
 
-                InstResetEvent Event = pair.Value;
+                var Event = pair.Value;
                 if (Event.type == 0)
                 {
                     // for individual normal instances, max creature respawn + X hours
@@ -399,7 +399,7 @@ namespace Game.Maps
                 else
                 {
                     // global reset/warning for a certain map
-                    long resetTime = GetResetTimeFor(Event.mapid, Event.difficulty);
+                    var resetTime = GetResetTimeFor(Event.mapid, Event.difficulty);
                     _ResetOrWarnAll(Event.mapid, Event.difficulty, Event.type != 4, resetTime);
                     if (Event.type != 4)
                     {
@@ -418,9 +418,9 @@ namespace Game.Maps
             // do not allow UnbindInstance to automatically unload the InstanceSaves
             lock_instLists = true;
 
-            bool shouldDelete = true;
+            var shouldDelete = true;
             var pList = pair.Value.m_playerList;
-            List<Player> temp = new List<Player>(); // list of expired binds that should be unbound
+            var temp = new List<Player>(); // list of expired binds that should be unbound
             foreach (var player in pList)
             {
                 InstanceBind bind = player.GetBoundInstance(pair.Value.GetMapId(), pair.Value.GetDifficultyID());
@@ -441,7 +441,7 @@ namespace Game.Maps
             var gList = pair.Value.m_groupList;
             while (!gList.Empty())
             {
-                Group group = gList.First();
+                var group = gList.First();
                 group.UnbindInstance(pair.Value.GetMapId(), pair.Value.GetDifficultyID(), true);
             }
 
@@ -454,7 +454,7 @@ namespace Game.Maps
         void _ResetInstance(uint mapid, uint instanceId)
         {
             Log.outDebug(LogFilter.Maps, "InstanceSaveMgr._ResetInstance {0}, {1}", mapid, instanceId);
-            Map map = Global.MapMgr.CreateBaseMap(mapid);
+            var map = Global.MapMgr.CreateBaseMap(mapid);
             if (!map.Instanceable())
                 return;
 
@@ -464,7 +464,7 @@ namespace Game.Maps
 
             DeleteInstanceFromDB(instanceId);                       // even if save not loaded
 
-            Map iMap = ((MapInstanced)map).FindInstanceMap(instanceId);
+            var iMap = ((MapInstanced)map).FindInstanceMap(instanceId);
 
             if (iMap != null && iMap.IsDungeon())
                 ((InstanceMap)iMap).Reset(InstanceResetMethod.RespawnDelay);
@@ -484,24 +484,24 @@ namespace Game.Maps
         void _ResetOrWarnAll(uint mapid, Difficulty difficulty, bool warn, long resetTime)
         {
             // global reset for all instances of the given map
-            MapRecord mapEntry = CliDB.MapStorage.LookupByKey(mapid);
+            var mapEntry = CliDB.MapStorage.LookupByKey(mapid);
             if (!mapEntry.Instanceable())
                 return;
 
             Log.outDebug(LogFilter.Misc, "InstanceSaveManager.ResetOrWarnAll: Processing map {0} ({1}) on difficulty {2} (warn? {3})", mapEntry.MapName[Global.WorldMgr.GetDefaultDbcLocale()], mapid, difficulty, warn);
-            long now = Time.UnixTime;
+            var now = Time.UnixTime;
 
             if (!warn)
             {
                 // calculate the next reset time
-                long next_reset = GetSubsequentResetTime(mapid, difficulty, resetTime);
+                var next_reset = GetSubsequentResetTime(mapid, difficulty, resetTime);
                 if (next_reset == 0)
                     return;
 
                 // delete them from the DB, even if not loaded
-                SQLTransaction trans = new SQLTransaction();
+                var trans = new SQLTransaction();
 
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_EXPIRED_CHAR_INSTANCE_BY_MAP_DIFF);
+                var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_EXPIRED_CHAR_INSTANCE_BY_MAP_DIFF);
                 stmt.AddValue(0, mapid);
                 stmt.AddValue(1, (byte)difficulty);
                 trans.Append(stmt);
@@ -543,13 +543,13 @@ namespace Game.Maps
             }
 
             // note: this isn't fast but it's meant to be executed very rarely
-            Map map = Global.MapMgr.CreateBaseMap(mapid);          // _not_ include difficulty
+            var map = Global.MapMgr.CreateBaseMap(mapid);          // _not_ include difficulty
             var instMaps = ((MapInstanced)map).GetInstancedMaps();
             uint timeLeft;
 
             foreach (var pair in instMaps)
             {
-                Map map2 = pair.Value;
+                var map2 = pair.Value;
                 if (!map2.IsDungeon())
                     continue;
 
@@ -656,14 +656,14 @@ namespace Game.Maps
         public void SaveToDB()
         {
             // save instance data too
-            string data = "";
+            var data = "";
             uint completedEncounters = 0;
 
-            Map map = Global.MapMgr.FindMap(GetMapId(), m_instanceid);
+            var map = Global.MapMgr.FindMap(GetMapId(), m_instanceid);
             if (map != null)
             {
                 Cypher.Assert(map.IsDungeon());
-                InstanceScript instanceScript = ((InstanceMap)map).GetInstanceScript();
+                var instanceScript = ((InstanceMap)map).GetInstanceScript();
                 if (instanceScript != null)
                 {
                     data = instanceScript.GetSaveData();
@@ -671,12 +671,12 @@ namespace Game.Maps
                     m_entranceId = instanceScript.GetEntranceLocation();
                 }
 
-                InstanceScenario scenario = map.ToInstanceMap().GetInstanceScenario();
+                var scenario = map.ToInstanceMap().GetInstanceScenario();
                 if (scenario != null)
                     scenario.SaveToDB();
             }
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_INSTANCE_SAVE);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_INSTANCE_SAVE);
             stmt.AddValue(0, m_instanceid);
             stmt.AddValue(1, GetMapId());
             stmt.AddValue(2, GetResetTimeForDB());
@@ -690,7 +690,7 @@ namespace Game.Maps
         public long GetResetTimeForDB()
         {
             // only save the reset time for normal instances
-            MapRecord entry = CliDB.MapStorage.LookupByKey(GetMapId());
+            var entry = CliDB.MapStorage.LookupByKey(GetMapId());
             if (entry == null || entry.InstanceType == MapTypes.Raid || GetDifficultyID() == Difficulty.Heroic)
                 return 0;
             else

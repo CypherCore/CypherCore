@@ -45,13 +45,13 @@ namespace Game.DungeonFinding
                 return;
 
             // Temporal: Trying to determine when group data and LFG data gets desynched
-            ObjectGuid guid = player.GetGUID();
-            ObjectGuid gguid = Global.LFGMgr.GetGroup(guid);
+            var guid = player.GetGUID();
+            var gguid = Global.LFGMgr.GetGroup(guid);
 
-            Group group = player.GetGroup();
+            var group = player.GetGroup();
             if (group)
             {
-                ObjectGuid gguid2 = group.GetGUID();
+                var gguid2 = group.GetGUID();
                 if (gguid != gguid2)
                 {
                     Log.outError(LogFilter.Lfg, "{0} on group {1} but LFG has group {2} saved... Fixing.", player.GetSession().GetPlayerInfo(), gguid2.ToString(), gguid.ToString());
@@ -65,11 +65,11 @@ namespace Game.DungeonFinding
 
         public override void OnMapChanged(Player player)
         {
-            Map map = player.GetMap();
+            var map = player.GetMap();
 
             if (Global.LFGMgr.InLfgDungeonMap(player.GetGUID(), map.GetId(), map.GetDifficultyID()))
             {
-                Group group = player.GetGroup();
+                var group = player.GetGroup();
                 // This function is also called when players log in
                 // if for some reason the LFG system recognises the player as being in a LFG dungeon,
                 // but the player was loaded without a valid group, we'll teleport to homebind to prevent
@@ -84,9 +84,9 @@ namespace Game.DungeonFinding
                     return;
                 }
 
-                for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
+                for (var refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                 {
-                    Player member = refe.GetSource();
+                    var member = refe.GetSource();
                     if (member)
                         player.GetSession().SendNameQuery(member.GetGUID());
                 }
@@ -96,7 +96,7 @@ namespace Game.DungeonFinding
             }
             else
             {
-                Group group = player.GetGroup();
+                var group = player.GetGroup();
                 if (group && group.GetMembersCount() == 1)
                 {
                     Global.LFGMgr.LeaveLfg(group.GetGUID());
@@ -120,8 +120,8 @@ namespace Game.DungeonFinding
             if (!Global.LFGMgr.IsOptionEnabled(LfgOptions.EnableDungeonFinder | LfgOptions.EnableRaidBrowser))
                 return;
 
-            ObjectGuid gguid = group.GetGUID();
-            ObjectGuid leader = group.GetLeaderGUID();
+            var gguid = group.GetGUID();
+            var leader = group.GetLeaderGUID();
 
             if (leader == guid)
             {
@@ -130,8 +130,8 @@ namespace Game.DungeonFinding
             }
             else
             {
-                LfgState gstate = Global.LFGMgr.GetState(gguid);
-                LfgState state = Global.LFGMgr.GetState(guid);
+                var gstate = Global.LFGMgr.GetState(gguid);
+                var state = Global.LFGMgr.GetState(guid);
                 Log.outDebug(LogFilter.Lfg, "LFGScripts.OnAddMember [{0}]: added [{1} leader {2}] gstate: {3}, state: {4}", gguid, guid, leader, gstate, state);
 
                 if (state == LfgState.Queued)
@@ -150,22 +150,22 @@ namespace Game.DungeonFinding
             if (!Global.LFGMgr.IsOptionEnabled(LfgOptions.EnableDungeonFinder | LfgOptions.EnableRaidBrowser))
                 return;
 
-            ObjectGuid gguid = group.GetGUID();
+            var gguid = group.GetGUID();
             Log.outDebug(LogFilter.Lfg, "LFGScripts.OnRemoveMember [{0}]: remove [{1}] Method: {2} Kicker: {3} Reason: {4}", gguid, guid, method, kicker, reason);
 
-            bool isLFG = group.IsLFGGroup();
+            var isLFG = group.IsLFGGroup();
 
             if (isLFG && method == RemoveMethod.Kick)        // Player have been kicked
             {
                 // @todo - Update internal kick cooldown of kicker
-                string str_reason = "";
+                var str_reason = "";
                 if (!string.IsNullOrEmpty(reason))
                     str_reason = reason;
                 Global.LFGMgr.InitBoot(gguid, kicker, guid, str_reason);
                 return;
             }
 
-            LfgState state = Global.LFGMgr.GetState(gguid);
+            var state = Global.LFGMgr.GetState(gguid);
 
             // If group is being formed after proposal success do nothing more
             if (state == LfgState.Proposal && method == RemoveMethod.Default)
@@ -178,9 +178,9 @@ namespace Game.DungeonFinding
 
             Global.LFGMgr.LeaveLfg(guid);
             Global.LFGMgr.SetGroup(guid, ObjectGuid.Empty);
-            byte players = Global.LFGMgr.RemovePlayerFromGroup(gguid, guid);
+            var players = Global.LFGMgr.RemovePlayerFromGroup(gguid, guid);
 
-            Player player = Global.ObjAccessor.FindPlayer(guid);
+            var player = Global.ObjAccessor.FindPlayer(guid);
             if (player)
             {
                 if (method == RemoveMethod.Leave && state == LfgState.Dungeon &&
@@ -196,7 +196,7 @@ namespace Game.DungeonFinding
 
             if (isLFG && state != LfgState.FinishedDungeon) // Need more players to finish the dungeon
             {
-                Player leader = Global.ObjAccessor.FindPlayer(Global.LFGMgr.GetLeader(gguid));
+                var leader = Global.ObjAccessor.FindPlayer(Global.LFGMgr.GetLeader(gguid));
                 if (leader)
                     leader.GetSession().SendLfgOfferContinue(Global.LFGMgr.GetDungeon(gguid, false));
             }
@@ -207,7 +207,7 @@ namespace Game.DungeonFinding
             if (!Global.LFGMgr.IsOptionEnabled(LfgOptions.EnableDungeonFinder | LfgOptions.EnableRaidBrowser))
                 return;
 
-            ObjectGuid gguid = group.GetGUID();
+            var gguid = group.GetGUID();
             Log.outDebug(LogFilter.Lfg, "LFGScripts.OnDisband {0}", gguid);
 
             Global.LFGMgr.RemoveGroupData(gguid);
@@ -218,7 +218,7 @@ namespace Game.DungeonFinding
             if (!Global.LFGMgr.IsOptionEnabled(LfgOptions.EnableDungeonFinder | LfgOptions.EnableRaidBrowser))
                 return;
 
-            ObjectGuid gguid = group.GetGUID();
+            var gguid = group.GetGUID();
 
             Log.outDebug(LogFilter.Lfg, "LFGScripts.OnChangeLeader {0}: old {0} new {0}", gguid, newLeaderGuid, oldLeaderGuid);
             Global.LFGMgr.SetLeader(gguid, newLeaderGuid);
@@ -229,8 +229,8 @@ namespace Game.DungeonFinding
             if (!Global.LFGMgr.IsOptionEnabled(LfgOptions.EnableDungeonFinder | LfgOptions.EnableRaidBrowser))
                 return;
 
-            ObjectGuid gguid = group.GetGUID();
-            ObjectGuid leader = group.GetLeaderGUID();
+            var gguid = group.GetGUID();
+            var leader = group.GetLeaderGUID();
             Log.outDebug(LogFilter.Lfg, "LFGScripts.OnInviteMember {0}: invite {0} leader {0}", gguid, guid, leader);
             // No gguid ==  new group being formed
             // No leader == after group creation first invite is new leader

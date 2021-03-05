@@ -33,8 +33,8 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string name = "Console";
-            WorldSession session = handler.GetSession();
+            var name = "Console";
+            var session = handler.GetSession();
             if (session)
                 name = session.GetPlayer().GetName();
 
@@ -48,8 +48,8 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string name = "Console";
-            WorldSession session = handler.GetSession();
+            var name = "Console";
+            var session = handler.GetSession();
             if (session)
                 name = session.GetPlayer().GetName();
 
@@ -63,7 +63,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string str = handler.GetParsedString(CypherStrings.Systemmessage, args.NextString(""));
+            var str = handler.GetParsedString(CypherStrings.Systemmessage, args.NextString(""));
             Global.WorldMgr.SendServerMessage(ServerMessageType.String, str);
             return true;
         }
@@ -84,7 +84,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string str = handler.GetCypherString(CypherStrings.GlobalNotify);
+            var str = handler.GetCypherString(CypherStrings.GlobalNotify);
             str += args.NextString("");
 
             Global.WorldMgr.SendGlobalMessage(new PrintNotification(str));
@@ -98,7 +98,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string str = handler.GetCypherString(CypherStrings.GmNotify);
+            var str = handler.GetCypherString(CypherStrings.GmNotify);
             str += args.NextString("");
 
             Global.WorldMgr.SendGlobalGMMessage(new PrintNotification(str));
@@ -115,7 +115,7 @@ namespace Game.Chat
                 return true;
             }
 
-            string argStr = args.NextString();
+            var argStr = args.NextString();
             // whisper on
             if (argStr == "on")
             {
@@ -136,10 +136,10 @@ namespace Game.Chat
 
             if (argStr == "remove")
             {
-                string name = args.NextString();
+                var name = args.NextString();
                 if (ObjectManager.NormalizePlayerName(ref name))
                 {
-                    Player player = Global.ObjAccessor.FindPlayerByName(name);
+                    var player = Global.ObjAccessor.FindPlayerByName(name);
                     if (player)
                     {
                         handler.GetSession().GetPlayer().RemoveFromWhisperWhiteList(player.GetGUID());
@@ -170,8 +170,8 @@ namespace Game.Chat
                 if (args.Empty())
                     return false;
 
-                string channelStr = args.NextString();
-                string argStr = args.NextString("");
+                var channelStr = args.NextString();
+                var argStr = args.NextString("");
 
                 if (channelStr.IsEmpty() || argStr.IsEmpty())
                     return false;
@@ -196,10 +196,10 @@ namespace Game.Chat
                     }
                 }
 
-                Player player = handler.GetSession().GetPlayer();
+                var player = handler.GetSession().GetPlayer();
                 Channel channel = null;
 
-                ChannelManager cMgr = ChannelManager.ForTeam(player.GetTeam());
+                var cMgr = ChannelManager.ForTeam(player.GetTeam());
                 if (cMgr != null)
                     channel = cMgr.GetChannel(channelId, channelStr, player, false, zoneEntry);
 
@@ -207,7 +207,7 @@ namespace Game.Chat
                 {
                     if (channel != null)
                         channel.SetOwnership(true);
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHANNEL_OWNERSHIP);
+                    var stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHANNEL_OWNERSHIP);
                     stmt.AddValue(0, 1);
                     stmt.AddValue(1, channelStr);
                     DB.Characters.Execute(stmt);
@@ -217,7 +217,7 @@ namespace Game.Chat
                 {
                     if (channel != null)
                         channel.SetOwnership(false);
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHANNEL_OWNERSHIP);
+                    var stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHANNEL_OWNERSHIP);
                     stmt.AddValue(0, 0);
                     stmt.AddValue(1, channelStr);
                     DB.Characters.Execute(stmt);

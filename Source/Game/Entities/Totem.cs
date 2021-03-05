@@ -53,12 +53,12 @@ namespace Game.Entities
         public override void InitStats(uint duration)
         {
             // client requires SMSG_TOTEM_CREATED to be sent before adding to world and before removing old totem
-            Player owner = GetOwner().ToPlayer();
+            var owner = GetOwner().ToPlayer();
             if (owner)
             {
                 if (m_Properties.Slot >= (int)SummonSlot.Totem && m_Properties.Slot < SharedConst.MaxTotemSlot)
                 {
-                    TotemCreated packet = new TotemCreated();
+                    var packet = new TotemCreated();
                     packet.Totem = GetGUID();
                     packet.Slot = (byte)(m_Properties.Slot - (int)SummonSlot.Totem);
                     packet.Duration = duration;
@@ -67,7 +67,7 @@ namespace Game.Entities
                 }
 
                 // set display id depending on caster's race
-                uint totemDisplayId = Global.SpellMgr.GetModelForTotem(m_unitData.CreatedBySpell, owner.GetRace());
+                var totemDisplayId = Global.SpellMgr.GetModelForTotem(m_unitData.CreatedBySpell, owner.GetRace());
                 if (totemDisplayId != 0)
                     SetDisplayId(totemDisplayId);
             }
@@ -75,7 +75,7 @@ namespace Game.Entities
             base.InitStats(duration);
 
             // Get spell cast by totem
-            SpellInfo totemSpell = Global.SpellMgr.GetSpellInfo(GetSpell(), GetMap().GetDifficultyID());
+            var totemSpell = Global.SpellMgr.GetSpellInfo(GetSpell(), GetMap().GetDifficultyID());
             if (totemSpell != null)
                 if (totemSpell.CalcCastTime() != 0)   // If spell has cast time -> its an active totem
                     m_type = TotemType.Active;
@@ -119,21 +119,21 @@ namespace Game.Entities
             GetOwner().RemoveAurasDueToSpell(GetSpell(), GetGUID());
 
             // remove aura all party members too
-            Player owner = GetOwner().ToPlayer();
+            var owner = GetOwner().ToPlayer();
             if (owner != null)
             {
                 owner.SendAutoRepeatCancel(this);
 
-                SpellInfo spell = Global.SpellMgr.GetSpellInfo(m_unitData.CreatedBySpell, GetMap().GetDifficultyID());
+                var spell = Global.SpellMgr.GetSpellInfo(m_unitData.CreatedBySpell, GetMap().GetDifficultyID());
                 if (spell != null)
                     GetSpellHistory().SendCooldownEvent(spell, 0, null, false);
 
-                Group group = owner.GetGroup();
+                var group = owner.GetGroup();
                 if (group)
                 {
-                    for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
+                    for (var refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                     {
-                        Player target = refe.GetSource();
+                        var target = refe.GetSource();
                         if (target && target.IsInMap(owner) && group.SameSubGroup(owner, target))
                             target.RemoveAurasDueToSpell(GetSpell(), GetGUID());
                     }
@@ -149,7 +149,7 @@ namespace Game.Entities
             if (GetEntry() == 5925)
                 return false;
 
-            SpellEffectInfo effect = spellInfo.GetEffect(index);
+            var effect = spellInfo.GetEffect(index);
             if (effect == null)
                 return true;
 

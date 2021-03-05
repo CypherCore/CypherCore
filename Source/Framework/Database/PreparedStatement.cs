@@ -59,7 +59,7 @@ namespace Framework.Database
         {
             if (_needsResult)
             {
-                SQLResult result = mySqlBase.Query(m_stmt);
+                var result = mySqlBase.Query(m_stmt);
                 if (result == null)
                 {
                     m_result.SetResult(new SQLResult());

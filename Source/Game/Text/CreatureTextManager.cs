@@ -36,13 +36,13 @@ namespace Game
 
         public void LoadCreatureTexts()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             mTextMap.Clear(); // for reload case
             //all currently used temp texts are NOT reset
 
-            PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_CREATURE_TEXT);
-            SQLResult result = DB.World.Query(stmt);
+            var stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_CREATURE_TEXT);
+            var result = DB.World.Query(stmt);
 
             if (result.IsEmpty())
             {
@@ -55,7 +55,7 @@ namespace Game
 
             do
             {
-                CreatureTextEntry temp = new CreatureTextEntry();
+                var temp = new CreatureTextEntry();
 
                 temp.creatureId = result.Read<uint>(0);
                 temp.groupId = result.Read<byte>(1);
@@ -127,22 +127,22 @@ namespace Game
 
         public void LoadCreatureTextLocales()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             mLocaleTextMap.Clear(); // for reload case
 
-            SQLResult result = DB.World.Query("SELECT CreatureId, GroupId, ID, Locale, Text FROM creature_text_locale");
+            var result = DB.World.Query("SELECT CreatureId, GroupId, ID, Locale, Text FROM creature_text_locale");
 
             if (result.IsEmpty())
                 return;
 
             do
             {
-                uint creatureId = result.Read<uint>(0);
+                var creatureId = result.Read<uint>(0);
                 uint groupId = result.Read<byte>(1);
                 uint id = result.Read<byte>(2);
-                string localeName = result.Read<string>(3);
-                Locale locale = localeName.ToEnum<Locale>();
+                var localeName = result.Read<string>(3);
+                var locale = localeName.ToEnum<Locale>();
                 if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
                     continue;
 
@@ -150,7 +150,7 @@ namespace Game
                 if (!mLocaleTextMap.ContainsKey(key))
                     mLocaleTextMap[key] = new CreatureTextLocale();
 
-                CreatureTextLocale data = mLocaleTextMap[key];
+                var data = mLocaleTextMap[key];
                 ObjectManager.AddLocaleString(result.Read<string>(4), locale, data.Text);
 
             } while (result.NextRow());
@@ -178,7 +178,7 @@ namespace Game
                 return 0;
             }
 
-            List<CreatureTextEntry> tempGroup = new List<CreatureTextEntry>();
+            var tempGroup = new List<CreatureTextEntry>();
             var repeatGroup = source.GetTextRepeatGroup(textGroup);
 
             foreach (var entry in textGroupContainer)
@@ -193,17 +193,17 @@ namespace Game
 
             var textEntry = tempGroup.SelectRandomElementByWeight(t => t.probability);
 
-            ChatMsg finalType = (msgType == ChatMsg.Addon) ? textEntry.type : msgType;
-            Language finalLang = (language == Language.Addon) ? textEntry.lang : language;
-            uint finalSound = textEntry.sound;
+            var finalType = (msgType == ChatMsg.Addon) ? textEntry.type : msgType;
+            var finalLang = (language == Language.Addon) ? textEntry.lang : language;
+            var finalSound = textEntry.sound;
             if (sound != 0)
                 finalSound = sound;
             else
             {
-                BroadcastTextRecord bct = CliDB.BroadcastTextStorage.LookupByKey(textEntry.BroadcastTextId);
+                var bct = CliDB.BroadcastTextStorage.LookupByKey(textEntry.BroadcastTextId);
                 if (bct != null)
                 {
-                    uint broadcastTextSoundId = bct.SoundEntriesID[source.GetGender() == Gender.Female ? 1 : 0];
+                    var broadcastTextSoundId = bct.SoundEntriesID[source.GetGender() == Gender.Female ? 1 : 0];
                     if (broadcastTextSoundId != 0)
                         finalSound = broadcastTextSoundId;
                 }
@@ -224,12 +224,12 @@ namespace Game
 
             if (srcPlr)
             {
-                PlayerTextBuilder builder = new PlayerTextBuilder(source, finalSource, finalSource.GetGender(), finalType, textEntry.groupId, textEntry.id, finalLang, whisperTarget);
+                var builder = new PlayerTextBuilder(source, finalSource, finalSource.GetGender(), finalType, textEntry.groupId, textEntry.id, finalLang, whisperTarget);
                 SendChatPacket(finalSource, builder, finalType, whisperTarget, range, team, gmOnly);
             }
             else
             {
-                CreatureTextBuilder builder = new CreatureTextBuilder(finalSource, finalSource.GetGender(), finalType, textEntry.groupId, textEntry.id, finalLang, whisperTarget);
+                var builder = new CreatureTextBuilder(finalSource, finalSource.GetGender(), finalType, textEntry.groupId, textEntry.id, finalLang, whisperTarget);
                 SendChatPacket(finalSource, builder, finalType, whisperTarget, range, team, gmOnly);
             }
 
@@ -239,7 +239,7 @@ namespace Game
 
         float GetRangeForChatType(ChatMsg msgType)
         {
-            float dist = WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay);
+            var dist = WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay);
             switch (msgType)
             {
                 case ChatMsg.MonsterYell:
@@ -266,7 +266,7 @@ namespace Game
 
         void SendNonChatPacket(WorldObject source, ServerPacket data, ChatMsg msgType, WorldObject whisperTarget, CreatureTextRange range, Team team, bool gmOnly)
         {
-            float dist = GetRangeForChatType(msgType);
+            var dist = GetRangeForChatType(msgType);
 
             switch (msgType)
             {
@@ -274,10 +274,10 @@ namespace Game
                     if (!whisperTarget)
                         return;
 
-                    Player whisperPlayer = whisperTarget.ToPlayer();
+                    var whisperPlayer = whisperTarget.ToPlayer();
                     if (whisperPlayer)
                     {
-                        Group group = whisperPlayer.GetGroup();
+                        var group = whisperPlayer.GetGroup();
                         if (group)
                             group.BroadcastWorker(player => player.SendPacket(data));
                     }
@@ -303,7 +303,7 @@ namespace Game
             {
                 case CreatureTextRange.Area:
                     {
-                        uint areaId = source.GetAreaId();
+                        var areaId = source.GetAreaId();
                         var players = source.GetMap().GetPlayers();
                         foreach (var pl in players)
                             if (pl.GetAreaId() == areaId && (team == 0 || pl.GetTeam() == team) && (!gmOnly || pl.IsGameMaster()))
@@ -312,7 +312,7 @@ namespace Game
                     }
                 case CreatureTextRange.Zone:
                     {
-                        uint zoneId = source.GetZoneId();
+                        var zoneId = source.GetZoneId();
                         var players = source.GetMap().GetPlayers();
                         foreach (var pl in players)
                             if (pl.GetZoneId() == zoneId && (team == 0 || pl.GetTeam() == team) && (!gmOnly || pl.IsGameMaster()))
@@ -332,7 +332,7 @@ namespace Game
                         var smap = Global.WorldMgr.GetAllSessions();
                         foreach (var session in smap)
                         {
-                            Player player = session.GetPlayer();
+                            var player = session.GetPlayer();
                             if (player != null)
                                 if ((team == 0 || player.GetTeam() == team) && (!gmOnly || player.IsGameMaster()))
                                     player.SendPacket(data);
@@ -401,8 +401,8 @@ namespace Game
             if (locale >= Locale.Total)
                 locale = Locale.enUS;
 
-            string baseText = "";
-            BroadcastTextRecord bct = CliDB.BroadcastTextStorage.LookupByKey(creatureTextEntry.BroadcastTextId);
+            var baseText = "";
+            var bct = CliDB.BroadcastTextStorage.LookupByKey(creatureTextEntry.BroadcastTextId);
 
             if (bct != null)
                 baseText = Global.DB2Mgr.GetBroadcastTextValue(bct, locale, gender);
@@ -449,7 +449,7 @@ namespace Game
             {
                 case CreatureTextRange.Area:
                     {
-                        uint areaId = source.GetAreaId();
+                        var areaId = source.GetAreaId();
                         var players = source.GetMap().GetPlayers();
                         foreach (var pl in players)
                             if (pl.GetAreaId() == areaId && (team == 0 || pl.GetTeam() == team) && (!gmOnly || pl.IsGameMaster()))
@@ -458,7 +458,7 @@ namespace Game
                     }
                 case CreatureTextRange.Zone:
                     {
-                        uint zoneId = source.GetZoneId();
+                        var zoneId = source.GetZoneId();
                         var players = source.GetMap().GetPlayers();
                         foreach (var pl in players)
                             if (pl.GetZoneId() == zoneId && (team == 0 || pl.GetTeam() == team) && (!gmOnly || pl.IsGameMaster()))
@@ -478,7 +478,7 @@ namespace Game
                         var smap = Global.WorldMgr.GetAllSessions();
                         foreach (var session in smap)
                         {
-                            Player player = session.GetPlayer();
+                            var player = session.GetPlayer();
                             if (player != null)
                                 if ((team == 0 || player.GetTeam() == team) && (!gmOnly || player.IsGameMaster()))
                                     localizer.Invoke(player);
@@ -490,7 +490,7 @@ namespace Game
                     break;
             }
 
-            float dist = GetRangeForChatType(msgType);
+            var dist = GetRangeForChatType(msgType);
             var worker = new PlayerDistWorker(source, dist, localizer);
             Cell.VisitWorldObjects(source, worker, dist);
         }
@@ -595,7 +595,7 @@ namespace Game
 
         public void Invoke(Player player)
         {
-            Locale loc_idx = player.GetSession().GetSessionDbLocaleIndex();
+            var loc_idx = player.GetSession().GetSessionDbLocaleIndex();
             ServerPacket messageTemplate;
 
             // create if not cached yet
@@ -607,7 +607,7 @@ namespace Game
             else
                 messageTemplate = _packetCache[loc_idx];
 
-            ChatPkt message = (ChatPkt)messageTemplate;
+            var message = (ChatPkt)messageTemplate;
             switch (_msgType)
             {
                 case ChatMsg.MonsterWhisper:
@@ -641,7 +641,7 @@ namespace Game
 
         public override ServerPacket Invoke(Locale locale = Locale.enUS)
         {
-            string text = Global.CreatureTextMgr.GetLocalizedChatString(_source.GetEntry(), _gender, _textGroup, _textId, locale);
+            var text = Global.CreatureTextMgr.GetLocalizedChatString(_source.GetEntry(), _gender, _textGroup, _textId, locale);
             var packet = new ChatPkt();
             packet.Initialize(_msgType, _language, _source, _target, text, 0, "", locale);
             return packet;
@@ -672,7 +672,7 @@ namespace Game
 
         public override ServerPacket Invoke(Locale loc_idx = Locale.enUS)
         {
-            string text = Global.CreatureTextMgr.GetLocalizedChatString(_source.GetEntry(), _gender, _textGroup, _textId, loc_idx);
+            var text = Global.CreatureTextMgr.GetLocalizedChatString(_source.GetEntry(), _gender, _textGroup, _textId, loc_idx);
             var packet = new ChatPkt();
             packet.Initialize(_msgType, _language, _talker, _target, text, 0, "", loc_idx);
             return packet;

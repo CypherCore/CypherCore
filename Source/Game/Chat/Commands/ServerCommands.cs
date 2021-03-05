@@ -49,14 +49,14 @@ namespace Game.Chat
         [Command("info", RBACPermissions.CommandServerInfo, true)]
         static bool HandleServerInfoCommand(StringArguments args, CommandHandler handler)
         {
-            uint playersNum = Global.WorldMgr.GetPlayerCount();
-            uint maxPlayersNum = Global.WorldMgr.GetMaxPlayerCount();
-            int activeClientsNum = Global.WorldMgr.GetActiveSessionCount();
-            int queuedClientsNum = Global.WorldMgr.GetQueuedSessionCount();
-            uint maxActiveClientsNum = Global.WorldMgr.GetMaxActiveSessionCount();
-            uint maxQueuedClientsNum = Global.WorldMgr.GetMaxQueuedSessionCount();
-            string uptime = Time.secsToTimeString(GameTime.GetUptime());
-            uint updateTime = Global.WorldMgr.GetWorldUpdateTime().GetLastUpdateTime();
+            var playersNum = Global.WorldMgr.GetPlayerCount();
+            var maxPlayersNum = Global.WorldMgr.GetMaxPlayerCount();
+            var activeClientsNum = Global.WorldMgr.GetActiveSessionCount();
+            var queuedClientsNum = Global.WorldMgr.GetQueuedSessionCount();
+            var maxActiveClientsNum = Global.WorldMgr.GetMaxActiveSessionCount();
+            var maxQueuedClientsNum = Global.WorldMgr.GetMaxQueuedSessionCount();
+            var uptime = Time.secsToTimeString(GameTime.GetUptime());
+            var updateTime = Global.WorldMgr.GetWorldUpdateTime().GetLastUpdateTime();
 
             handler.SendSysMessage(CypherStrings.ConnectedPlayers, playersNum, maxPlayersNum);
             handler.SendSysMessage(CypherStrings.ConnectedUsers, activeClientsNum, maxActiveClientsNum, queuedClientsNum, maxQueuedClientsNum);
@@ -72,7 +72,7 @@ namespace Game.Chat
         [Command("motd", RBACPermissions.CommandServerMotd, true)]
         static bool HandleServerMotdCommand(StringArguments args, CommandHandler handler)
         {
-            string motd = "";
+            var motd = "";
             foreach (var line in Global.WorldMgr.GetMotd())
                 motd += line;
 
@@ -85,7 +85,7 @@ namespace Game.Chat
         {
             if (!args.Empty())
             {
-                string paramStr = args.NextString();
+                var paramStr = args.NextString();
                 if (string.IsNullOrEmpty(paramStr))
                     return false;
 
@@ -108,7 +108,7 @@ namespace Game.Chat
                         Global.WorldMgr.LoadDBAllowedSecurityLevel();
                         break;
                     default:
-                        if (!int.TryParse(paramStr, out int value))
+                        if (!int.TryParse(paramStr, out var value))
                             return false;
 
                         if (value < 0)
@@ -119,8 +119,8 @@ namespace Game.Chat
                 }
             }
 
-            uint playerAmountLimit = Global.WorldMgr.GetPlayerAmountLimit();
-            AccountTypes allowedAccountType = Global.WorldMgr.GetPlayerSecurityLimit();
+            var playerAmountLimit = Global.WorldMgr.GetPlayerAmountLimit();
+            var allowedAccountType = Global.WorldMgr.GetPlayerSecurityLimit();
             string secName;
             switch (allowedAccountType)
             {
@@ -148,7 +148,7 @@ namespace Game.Chat
         static bool IsOnlyUser(WorldSession mySession)
         {
             // check if there is any session connected from a different address
-            string myAddr = mySession ? mySession.GetRemoteAddress() : "";
+            var myAddr = mySession ? mySession.GetRemoteAddress() : "";
             var sessions = Global.WorldMgr.GetAllSessions();
             foreach (var session in sessions)
                 if (session && myAddr != session.GetRemoteAddress())
@@ -179,7 +179,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string delayStr = args.NextString();
+            var delayStr = args.NextString();
             if (delayStr.IsEmpty())
                 return false;
 
@@ -198,8 +198,8 @@ namespace Game.Chat
                     return false;
             }
 
-            string reason = "";
-            string exitCodeStr = "";
+            var reason = "";
+            var exitCodeStr = "";
             string nextToken;
             while (!(nextToken = args.NextString()).IsEmpty())
             {
@@ -213,7 +213,7 @@ namespace Game.Chat
                 }
             }
 
-            int exitCode = (int)defaultExitCode;
+            var exitCode = (int)defaultExitCode;
             if (!exitCodeStr.IsEmpty())
                 if (!ParseExitCode(exitCodeStr, out exitCode))
                     return false;
@@ -242,7 +242,7 @@ namespace Game.Chat
             [Command("cancel", RBACPermissions.CommandServerIdlerestartCancel, true)]
             static bool HandleServerShutDownCancelCommand(StringArguments args, CommandHandler handler)
             {
-                uint timer = Global.WorldMgr.ShutdownCancel();
+                var timer = Global.WorldMgr.ShutdownCancel();
                 if (timer != 0)
                     handler.SendSysMessage(CypherStrings.ShutdownCancelled, timer);
                 return true;
@@ -261,7 +261,7 @@ namespace Game.Chat
             [Command("cancel", RBACPermissions.CommandServerIdleshutdownCancel, true)]
             static bool HandleServerShutDownCancelCommand(StringArguments args, CommandHandler handler)
             {
-                uint timer = Global.WorldMgr.ShutdownCancel();
+                var timer = Global.WorldMgr.ShutdownCancel();
                 if (timer != 0)
                     handler.SendSysMessage(CypherStrings.ShutdownCancelled, timer);
 
@@ -281,7 +281,7 @@ namespace Game.Chat
             [Command("cancel", RBACPermissions.CommandServerRestartCancel, true)]
             static bool HandleServerShutDownCancelCommand(StringArguments args, CommandHandler handler)
             {
-                uint timer = Global.WorldMgr.ShutdownCancel();
+                var timer = Global.WorldMgr.ShutdownCancel();
                 if (timer != 0)
                     handler.SendSysMessage(CypherStrings.ShutdownCancelled, timer);
 
@@ -307,7 +307,7 @@ namespace Game.Chat
             [Command("cancel", RBACPermissions.CommandServerShutdownCancel, true)]
             static bool HandleServerShutDownCancelCommand(StringArguments args, CommandHandler handler)
             {
-                uint timer = Global.WorldMgr.ShutdownCancel();
+                var timer = Global.WorldMgr.ShutdownCancel();
                 if (timer != 0)
                     handler.SendSysMessage(CypherStrings.ShutdownCancelled, timer);
 
@@ -330,11 +330,11 @@ namespace Game.Chat
                 if (args.Empty())
                     return false;
 
-                string newTimeStr = args.NextString();
+                var newTimeStr = args.NextString();
                 if (newTimeStr.IsEmpty())
                     return false;
 
-                if (!int.TryParse(newTimeStr, out int newTime) || newTime < 0)
+                if (!int.TryParse(newTimeStr, out var newTime) || newTime < 0)
                     return false;
 
                 //Global.WorldMgr.SetRecordDiffInterval(newTime);
@@ -349,9 +349,9 @@ namespace Game.Chat
                 if (args.Empty())
                     return false;
 
-                string type = args.NextString();
-                string name = args.NextString();
-                string level = args.NextString();
+                var type = args.NextString();
+                var name = args.NextString();
+                var level = args.NextString();
 
                 if (type.IsEmpty() || name.IsEmpty() || level.IsEmpty() || (type[0] != 'a' && type[0] != 'l'))
                     return false;
@@ -370,7 +370,7 @@ namespace Game.Chat
             [Command("closed", RBACPermissions.CommandServerSetClosed, true)]
             static bool SetClosed(StringArguments args, CommandHandler handler)
             {
-                string arg1 = args.NextString();
+                var arg1 = args.NextString();
                 if (arg1.Equals("on"))
                 {
                     handler.SendSysMessage(CypherStrings.WorldClosed);

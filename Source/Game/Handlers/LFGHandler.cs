@@ -43,10 +43,10 @@ namespace Game
                 return;
             }
 
-            List<uint> newDungeons = new List<uint>();
-            foreach (uint slot in dfJoin.Slots)
+            var newDungeons = new List<uint>();
+            foreach (var slot in dfJoin.Slots)
             {
-                uint dungeon = slot & 0x00FFFFFF;
+                var dungeon = slot & 0x00FFFFFF;
                 if (CliDB.LFGDungeonsStorage.ContainsKey(dungeon))
                     newDungeons.Add(dungeon);
             }
@@ -59,7 +59,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.DfLeave)]
         void HandleLfgLeave(DFLeave dfLeave)
         {
-            Group group = GetPlayer().GetGroup();
+            var group = GetPlayer().GetGroup();
 
             Log.outDebug(LogFilter.Lfg, "CMSG_DF_LEAVE {0} in group: {1} sent guid {2}.", GetPlayerInfo(), group ? 1 : 0, dfLeave.Ticket.RequesterGuid.ToString());
 
@@ -78,8 +78,8 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.DfSetRoles)]
         void HandleLfgSetRoles(DFSetRoles dfSetRoles)
         {
-            ObjectGuid guid = GetPlayer().GetGUID();
-            Group group = GetPlayer().GetGroup();
+            var guid = GetPlayer().GetGUID();
+            var group = GetPlayer().GetGroup();
             if (!group)
             {
                 Log.outDebug(LogFilter.Lfg, "CMSG_DF_SET_ROLES {0} Not in group",
@@ -94,7 +94,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.DfBootPlayerVote)]
         void HandleLfgSetBootVote(DFBootPlayerVote dfBootPlayerVote)
         {
-            ObjectGuid guid = GetPlayer().GetGUID();
+            var guid = GetPlayer().GetGUID();
             Log.outDebug(LogFilter.Lfg, "CMSG_LFG_SET_BOOT_VOTE {0} agree: {1}", GetPlayerInfo(), dfBootPlayerVote.Vote ? 1 : 0);
             Global.LFGMgr.UpdateBoot(guid, dfBootPlayerVote.Vote);
         }
@@ -123,8 +123,8 @@ namespace Game
             if (!GetPlayer().IsUsingLfg())
                 return;
 
-            ObjectGuid guid = GetPlayer().GetGUID();
-            LfgUpdateData updateData = Global.LFGMgr.GetLfgStatus(guid);
+            var guid = GetPlayer().GetGUID();
+            var updateData = Global.LFGMgr.GetLfgStatus(guid);
 
             if (GetPlayer().GetGroup())
             {
@@ -143,11 +143,11 @@ namespace Game
         public void SendLfgPlayerLockInfo()
         {
             // Get Random dungeons that can be done at a certain level and expansion
-            uint level = GetPlayer().GetLevel();
-            uint contentTuningReplacementConditionMask = GetPlayer().m_playerData.CtrOptions.GetValue().ContentTuningConditionMask;
+            var level = GetPlayer().GetLevel();
+            var contentTuningReplacementConditionMask = GetPlayer().m_playerData.CtrOptions.GetValue().ContentTuningConditionMask;
             var randomDungeons = Global.LFGMgr.GetRandomAndSeasonalDungeons(level, (uint)GetExpansion(), contentTuningReplacementConditionMask);
 
-            LfgPlayerInfo lfgPlayerInfo = new LfgPlayerInfo();
+            var lfgPlayerInfo = new LfgPlayerInfo();
 
             // Get player locked Dungeons
             foreach (var locked in Global.LFGMgr.GetLockedDungeons(_player.GetGUID()))
@@ -172,7 +172,7 @@ namespace Game
                 playerDungeonInfo.CompletedMask = 0;
                 playerDungeonInfo.EncounterMask = 0;
 
-                LfgReward reward = Global.LFGMgr.GetRandomDungeonReward(slot, level);
+                var reward = Global.LFGMgr.GetRandomDungeonReward(slot, level);
                 if (reward != null)
                 {
                     Quest quest = Global.ObjectMgr.GetQuestTemplate(reward.firstQuest);
@@ -188,14 +188,14 @@ namespace Game
                             playerDungeonInfo.Rewards.RewardXP = _player.GetQuestXPReward(quest);
                             for (byte i = 0; i < SharedConst.QuestRewardItemCount; ++i)
                             {
-                                uint itemId = quest.RewardItemId[i];
+                                var itemId = quest.RewardItemId[i];
                                 if (itemId != 0)
                                     playerDungeonInfo.Rewards.Item.Add(new LfgPlayerQuestRewardItem(itemId, quest.RewardItemCount[i]));
                             }
 
                             for (byte i = 0; i < SharedConst.QuestRewardCurrencyCount; ++i)
                             {
-                                uint curencyId = quest.RewardCurrencyId[i];
+                                var curencyId = quest.RewardCurrencyId[i];
                                 if (curencyId != 0)
                                     playerDungeonInfo.Rewards.Currency.Add(new LfgPlayerQuestRewardCurrency(curencyId, quest.RewardCurrencyCount[i]));
                             }
@@ -211,25 +211,25 @@ namespace Game
 
         public void SendLfgPartyLockInfo()
         {
-            ObjectGuid guid = GetPlayer().GetGUID();
-            Group group = GetPlayer().GetGroup();
+            var guid = GetPlayer().GetGUID();
+            var group = GetPlayer().GetGroup();
             if (!group)
                 return;
 
-            LfgPartyInfo lfgPartyInfo = new LfgPartyInfo();
+            var lfgPartyInfo = new LfgPartyInfo();
 
             // Get the Locked dungeons of the other party members
             for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
             {
-                Player plrg = refe.GetSource();
+                var plrg = refe.GetSource();
                 if (!plrg)
                     continue;
 
-                ObjectGuid pguid = plrg.GetGUID();
+                var pguid = plrg.GetGUID();
                 if (pguid == guid)
                     continue;
 
-                LFGBlackList lfgBlackList = new LFGBlackList();
+                var lfgBlackList = new LFGBlackList();
                 lfgBlackList.PlayerGuid.Set(pguid);
                 foreach (var locked in Global.LFGMgr.GetLockedDungeons(pguid))
                     lfgBlackList.Slot.Add(new LFGBlackListSlot(locked.Key, (uint)locked.Value.lockStatus, locked.Value.requiredItemLevel, (int)locked.Value.currentItemLevel, 0));
@@ -243,8 +243,8 @@ namespace Game
 
         public void SendLfgUpdateStatus(LfgUpdateData updateData, bool party)
         {
-            bool join = false;
-            bool queued = false;
+            var join = false;
+            var queued = false;
 
             switch (updateData.updateType)
             {
@@ -267,9 +267,9 @@ namespace Game
                     break;
             }
 
-            LFGUpdateStatus lfgUpdateStatus = new LFGUpdateStatus();
+            var lfgUpdateStatus = new LFGUpdateStatus();
 
-            RideTicket ticket = Global.LFGMgr.GetTicket(_player.GetGUID());
+            var ticket = Global.LFGMgr.GetTicket(_player.GetGUID());
             if (ticket != null)
                 lfgUpdateStatus.Ticket = ticket;
 
@@ -293,7 +293,7 @@ namespace Game
 
         public void SendLfgRoleChosen(ObjectGuid guid, LfgRoles roles)
         {
-            RoleChosen roleChosen = new RoleChosen();
+            var roleChosen = new RoleChosen();
             roleChosen.Player = guid;
             roleChosen.RoleMask = roles;
             roleChosen.Accepted = roles > 0;
@@ -302,7 +302,7 @@ namespace Game
 
         public void SendLfgRoleCheckUpdate(LfgRoleCheck roleCheck)
         {
-            List<uint> dungeons = new List<uint>();
+            var dungeons = new List<uint>();
             if (roleCheck.rDungeonId != 0)
                 dungeons.Add(roleCheck.rDungeonId);
             else
@@ -310,7 +310,7 @@ namespace Game
 
             Log.outDebug(LogFilter.Lfg, "SMSG_LFG_ROLE_CHECK_UPDATE {0}", GetPlayerInfo());
 
-            LFGRoleCheckUpdate lfgRoleCheckUpdate = new LFGRoleCheckUpdate();
+            var lfgRoleCheckUpdate = new LFGRoleCheckUpdate();
             lfgRoleCheckUpdate.PartyIndex = 127;
             lfgRoleCheckUpdate.RoleCheckStatus = (byte)roleCheck.state;
             lfgRoleCheckUpdate.IsBeginning = roleCheck.state == LfgRoleCheckState.Initialiting;
@@ -322,7 +322,7 @@ namespace Game
             if (!roleCheck.roles.Empty())
             {
                 // Leader info MUST be sent 1st :S
-                byte roles = (byte)roleCheck.roles.Find(roleCheck.leader).Value;
+                var roles = (byte)roleCheck.roles.Find(roleCheck.leader).Value;
                 lfgRoleCheckUpdate.Members.Add(new LFGRoleCheckUpdateMember(roleCheck.leader, roles, Global.CharacterCacheStorage.GetCharacterCacheByGuid(roleCheck.leader).Level, roles > 0));
 
                 foreach (var it in roleCheck.roles)
@@ -340,9 +340,9 @@ namespace Game
 
         public void SendLfgJoinResult(LfgJoinResultData joinData)
         {
-            LFGJoinResult lfgJoinResult = new LFGJoinResult();
+            var lfgJoinResult = new LFGJoinResult();
 
-            RideTicket ticket = Global.LFGMgr.GetTicket(GetPlayer().GetGUID());
+            var ticket = Global.LFGMgr.GetTicket(GetPlayer().GetGUID());
             if (ticket != null)
                 lfgJoinResult.Ticket = ticket;
 
@@ -378,9 +378,9 @@ namespace Game
                 GetPlayerInfo(), Global.LFGMgr.GetState(GetPlayer().GetGUID()), queueData.dungeonId, queueData.waitTime, queueData.waitTimeAvg,
                 queueData.waitTimeTank, queueData.waitTimeHealer, queueData.waitTimeDps, queueData.queuedTime, queueData.tanks, queueData.healers, queueData.dps);
 
-            LFGQueueStatus lfgQueueStatus = new LFGQueueStatus();
+            var lfgQueueStatus = new LFGQueueStatus();
 
-            RideTicket ticket = Global.LFGMgr.GetTicket(GetPlayer().GetGUID());
+            var ticket = Global.LFGMgr.GetTicket(GetPlayer().GetGUID());
             if (ticket != null)
                 lfgQueueStatus.Ticket = ticket;
             lfgQueueStatus.Slot = queueData.queueId;
@@ -405,7 +405,7 @@ namespace Game
             Log.outDebug(LogFilter.Lfg, "SMSG_LFG_PLAYER_REWARD {0} rdungeonEntry: {1}, sdungeonEntry: {2}, done: {3}",
                 GetPlayerInfo(), rewardData.rdungeonEntry, rewardData.sdungeonEntry, rewardData.done);
 
-            LFGPlayerReward lfgPlayerReward = new LFGPlayerReward();
+            var lfgPlayerReward = new LFGPlayerReward();
             lfgPlayerReward.QueuedSlot = rewardData.rdungeonEntry;
             lfgPlayerReward.ActualSlot = rewardData.sdungeonEntry;
             lfgPlayerReward.RewardMoney = GetPlayer().GetQuestMoneyReward(rewardData.quest);
@@ -413,14 +413,14 @@ namespace Game
 
             for (byte i = 0; i < SharedConst.QuestRewardItemCount; ++i)
             {
-                uint itemId = rewardData.quest.RewardItemId[i];
+                var itemId = rewardData.quest.RewardItemId[i];
                 if (itemId != 0)
                     lfgPlayerReward.Rewards.Add(new LFGPlayerRewards(itemId, rewardData.quest.RewardItemCount[i], 0, false));
             }
 
             for (byte i = 0; i < SharedConst.QuestRewardCurrencyCount; ++i)
             {
-                uint currencyId = rewardData.quest.RewardCurrencyId[i];
+                var currencyId = rewardData.quest.RewardCurrencyId[i];
                 if (currencyId != 0)
                     lfgPlayerReward.Rewards.Add(new LFGPlayerRewards(currencyId, rewardData.quest.RewardCurrencyCount[i], 0, true));
             }
@@ -430,10 +430,10 @@ namespace Game
 
         public void SendLfgBootProposalUpdate(LfgPlayerBoot boot)
         {
-            LfgAnswer playerVote = boot.votes.LookupByKey(GetPlayer().GetGUID());
+            var playerVote = boot.votes.LookupByKey(GetPlayer().GetGUID());
             byte votesNum = 0;
             byte agreeNum = 0;
-            uint secsleft = (uint)((boot.cancelTime - Time.UnixTime) / 1000);
+            var secsleft = (uint)((boot.cancelTime - Time.UnixTime) / 1000);
             foreach (var it in boot.votes)
             {
                 if (it.Value != LfgAnswer.Pending)
@@ -446,7 +446,7 @@ namespace Game
             Log.outDebug(LogFilter.Lfg, "SMSG_LFG_BOOT_PROPOSAL_UPDATE {0} inProgress: {1} - didVote: {2} - agree: {3} - victim: {4} votes: {5} - agrees: {6} - left: {7} - needed: {8} - reason {9}",
                 GetPlayerInfo(), boot.inProgress, playerVote != LfgAnswer.Pending, playerVote == LfgAnswer.Agree, boot.victim.ToString(), votesNum, agreeNum, secsleft, SharedConst.LFGKickVotesNeeded, boot.reason);
 
-            LfgBootPlayer lfgBootPlayer = new LfgBootPlayer();
+            var lfgBootPlayer = new LfgBootPlayer();
             lfgBootPlayer.Info.VoteInProgress = boot.inProgress;                                 // Vote in progress
             lfgBootPlayer.Info.VotePassed = agreeNum >= SharedConst.LFGKickVotesNeeded;    // Did succeed
             lfgBootPlayer.Info.MyVoteCompleted = playerVote != LfgAnswer.Pending;           // Did Vote
@@ -462,24 +462,24 @@ namespace Game
 
         public void SendLfgProposalUpdate(LfgProposal proposal)
         {
-            ObjectGuid playerGuid = GetPlayer().GetGUID();
-            ObjectGuid guildGuid = proposal.players.LookupByKey(playerGuid).group;
-            bool silent = !proposal.isNew && guildGuid == proposal.group;
-            uint dungeonEntry = proposal.dungeonId;
+            var playerGuid = GetPlayer().GetGUID();
+            var guildGuid = proposal.players.LookupByKey(playerGuid).group;
+            var silent = !proposal.isNew && guildGuid == proposal.group;
+            var dungeonEntry = proposal.dungeonId;
 
             Log.outDebug(LogFilter.Lfg, "SMSG_LFG_PROPOSAL_UPDATE {0} state: {1}", GetPlayerInfo(), proposal.state);
 
             // show random dungeon if player selected random dungeon and it's not lfg group
             if (!silent)
             {
-                List<uint> playerDungeons = Global.LFGMgr.GetSelectedDungeons(playerGuid);
+                var playerDungeons = Global.LFGMgr.GetSelectedDungeons(playerGuid);
                 if (!playerDungeons.Contains(proposal.dungeonId))
                     dungeonEntry = playerDungeons.First();
             }
 
-            LFGProposalUpdate lfgProposalUpdate = new LFGProposalUpdate();
+            var lfgProposalUpdate = new LFGProposalUpdate();
 
-            RideTicket ticket = Global.LFGMgr.GetTicket(GetPlayer().GetGUID());
+            var ticket = Global.LFGMgr.GetTicket(GetPlayer().GetGUID());
             if (ticket != null)
                 lfgProposalUpdate.Ticket = ticket;
             lfgProposalUpdate.InstanceID = 0;

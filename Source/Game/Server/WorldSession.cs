@@ -143,7 +143,7 @@ namespace Game
                     if (bgQueueTypeId != default)
                     {
                         _player.RemoveBattlegroundQueueId(bgQueueTypeId);
-                        BattlegroundQueue queue = Global.BattlegroundMgr.GetBattlegroundQueue(bgQueueTypeId);
+                        var queue = Global.BattlegroundMgr.GetBattlegroundQueue(bgQueueTypeId);
                         queue.RemovePlayer(_player.GetGUID(), true);
                     }
                 }
@@ -154,7 +154,7 @@ namespace Game
                     HandleMoveWorldportAck();
 
                 // If the player is in a guild, update the guild roster and broadcast a logout message to other guild members
-                Guild guild = Global.GuildMgr.GetGuildById(_player.GetGuildId());
+                var guild = Global.GuildMgr.GetGuildById(_player.GetGuildId());
                 if (guild)
                     guild.HandleMemberLogout(this);
 
@@ -170,7 +170,7 @@ namespace Game
                 {
                     for (uint j = InventorySlots.BuyBackStart; j < InventorySlots.BuyBackEnd; ++j)
                     {
-                        uint eslot = j - InventorySlots.BuyBackStart;
+                        var eslot = j - InventorySlots.BuyBackStart;
                         _player.SetInvSlot(j, ObjectGuid.Empty);
                         _player.SetBuybackPrice(eslot, 0);
                         _player.SetBuybackTimestamp(eslot, 0);
@@ -210,7 +210,7 @@ namespace Game
                 GetPlayer().CleanupsBeforeDelete();
                 Log.outInfo(LogFilter.Player, $"Account: {GetAccountId()} (IP: {GetRemoteAddress()}) Logout Character:[{_player.GetName()}] ({_player.GetGUID()}) Level: {_player.GetLevel()}, XP: {_player.GetXP()}/{_player.GetXPForNextLevel()} ({_player.GetXPForNextLevel() - _player.GetXP()} left)");
 
-                Map map = GetPlayer().GetMap();
+                var map = GetPlayer().GetMap();
                 if (map != null)
                     map.RemovePlayerFromMap(GetPlayer(), true);
 
@@ -218,11 +218,11 @@ namespace Game
 
                 //! Send the 'logout complete' packet to the client
                 //! Client will respond by sending 3x CMSG_CANCEL_TRADE, which we currently dont handle
-                LogoutComplete logoutComplete = new LogoutComplete();
+                var logoutComplete = new LogoutComplete();
                 SendPacket(logoutComplete);
 
                 //! Since each account can only have one online character at any given time, ensure all characters for active account are marked as offline
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ACCOUNT_ONLINE);
+                var stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ACCOUNT_ONLINE);
                 stmt.AddValue(0, GetAccountId());
                 DB.Characters.Execute(stmt);
             }
@@ -249,7 +249,7 @@ namespace Game
 
             WorldPacket firstDelayedPacket = null;
             uint processedPackets = 0;
-            long currentTime = Time.UnixTime;
+            var currentTime = Time.UnixTime;
 
             WorldPacket packet;
             //Check for any packets they was not recived yet.
@@ -332,7 +332,7 @@ namespace Game
 
             if (updater.ProcessUnsafe())
             {
-                long currTime = Time.UnixTime;
+                var currTime = Time.UnixTime;
                 // If necessary, log the player out
                 if (ShouldLogOut(currTime) && m_playerLoading.IsEmpty())
                     LogoutPlayer(true);
@@ -388,7 +388,7 @@ namespace Game
                 return;
             }
 
-            ConnectionType conIdx = packet.GetConnection();
+            var conIdx = packet.GetConnection();
             if (conIdx != ConnectionType.Instance && PacketManager.IsInstanceOnlyOpcode(packet.GetOpcode()))
             {
                 Log.outError(LogFilter.Network, "Prevented sending of instance only opcode {0} with connection type {1} to {2}", packet.GetOpcode(), packet.GetConnection(), GetPlayerInfo());
@@ -446,8 +446,8 @@ namespace Game
             if (!tutorialsChanged.HasAnyFlag(TutorialsFlag.Changed))
                 return;
 
-            bool hasTutorialsInDB = tutorialsChanged.HasAnyFlag(TutorialsFlag.LoadedFromDB);
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(hasTutorialsInDB ? CharStatements.UPD_TUTORIALS : CharStatements.INS_TUTORIALS);
+            var hasTutorialsInDB = tutorialsChanged.HasAnyFlag(TutorialsFlag.LoadedFromDB);
+            var stmt = DB.Characters.GetPreparedStatement(hasTutorialsInDB ? CharStatements.UPD_TUTORIALS : CharStatements.INS_TUTORIALS);
             for (var i = 0; i < SharedConst.MaxAccountTutorialValues; ++i)
                 stmt.AddValue(i, tutorials[i]);
             stmt.AddValue(SharedConst.MaxAccountTutorialValues, GetAccountId());
@@ -468,7 +468,7 @@ namespace Game
             _instanceConnectKey.connectionType = ConnectionType.Instance;
             _instanceConnectKey.Key = RandomHelper.URand(0, 0x7FFFFFFF);
 
-            ConnectTo connectTo = new ConnectTo();
+            var connectTo = new ConnectTo();
             connectTo.Key = _instanceConnectKey.Raw;
             connectTo.Serial = serial;
             connectTo.Payload.Port = (ushort)WorldConfig.GetIntValue(WorldCfg.PortInstance);
@@ -490,7 +490,7 @@ namespace Game
 
         void LoadAccountData(SQLResult result, AccountDataTypes mask)
         {
-            for (int i = 0; i < (int)AccountDataTypes.Max; ++i)
+            for (var i = 0; i < (int)AccountDataTypes.Max; ++i)
                 if (Convert.ToBoolean((int)mask & (1 << i)))
                     _accountData[i] = new AccountData();
 
@@ -526,7 +526,7 @@ namespace Game
         {
             if (Convert.ToBoolean((1 << (int)type) & (int)AccountDataTypes.GlobalCacheMask))
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_ACCOUNT_DATA);
+                var stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_ACCOUNT_DATA);
                 stmt.AddValue(0, GetAccountId());
                 stmt.AddValue(1, type);
                 stmt.AddValue(2, time);
@@ -539,7 +539,7 @@ namespace Game
                 if (m_GUIDLow == 0)
                     return;
 
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_PLAYER_ACCOUNT_DATA);
+                var stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_PLAYER_ACCOUNT_DATA);
                 stmt.AddValue(0, m_GUIDLow);
                 stmt.AddValue(1, type);
                 stmt.AddValue(2, time);
@@ -553,7 +553,7 @@ namespace Game
 
         public void SendTutorialsData()
         {
-            TutorialFlags packet = new TutorialFlags();
+            var packet = new TutorialFlags();
             Array.Copy(tutorials, packet.TutorialData, (int)AccountDataTypes.Max);
             SendPacket(packet);
         }
@@ -570,7 +570,7 @@ namespace Game
 
         public void SendNotification(string str, params object[] args)
         {
-            string message = string.Format(str, args);
+            var message = string.Format(str, args);
             if (!string.IsNullOrEmpty(message))
             {
                 SendPacket(new PrintNotification(message));
@@ -592,7 +592,7 @@ namespace Game
 
         public string GetPlayerInfo()
         {
-            StringBuilder ss = new StringBuilder();
+            var ss = new StringBuilder();
             ss.Append("[Player: ");
             if (!m_playerLoading.IsEmpty())
                 ss.AppendFormat("Logging in: {0}, ", m_playerLoading.ToString());
@@ -697,8 +697,8 @@ namespace Game
 
         public void LoadPermissions()
         {
-            uint id = GetAccountId();
-            AccountTypes secLevel = GetSecurity();
+            var id = GetAccountId();
+            var secLevel = GetSecurity();
 
             Log.outDebug(LogFilter.Rbac, "WorldSession.LoadPermissions [AccountId: {0}, Name: {1}, realmId: {2}, secLevel: {3}]",
                 id, _accountName, Global.WorldMgr.GetRealm().Id.Index, secLevel);
@@ -709,8 +709,8 @@ namespace Game
 
         public QueryCallback LoadPermissionsAsync()
         {
-            uint id = GetAccountId();
-            AccountTypes secLevel = GetSecurity();
+            var id = GetAccountId();
+            var secLevel = GetSecurity();
 
             Log.outDebug(LogFilter.Rbac, "WorldSession.LoadPermissions [AccountId: {0}, Name: {1}, realmId: {2}, secLevel: {3}]",
                 id, _accountName, Global.WorldMgr.GetRealm().Id.Index, secLevel);
@@ -721,10 +721,10 @@ namespace Game
 
         public void InitializeSession()
         {
-            AccountInfoQueryHolderPerRealm realmHolder = new AccountInfoQueryHolderPerRealm();
+            var realmHolder = new AccountInfoQueryHolderPerRealm();
             realmHolder.Initialize(GetAccountId(), GetBattlenetAccountId());
 
-            AccountInfoQueryHolder holder = new AccountInfoQueryHolder();
+            var holder = new AccountInfoQueryHolder();
             holder.Initialize(GetAccountId(), GetBattlenetAccountId());
 
             _realmAccountLoginCallback = DB.Characters.DelayQueryHolder(realmHolder);
@@ -754,7 +754,7 @@ namespace Game
             SendAvailableHotfixes();
             SendTutorialsData();
 
-            SQLResult result = holder.GetResult(AccountInfoQueryLoad.GlobalRealmCharacterCounts);
+            var result = holder.GetResult(AccountInfoQueryLoad.GlobalRealmCharacterCounts);
             if (!result.IsEmpty())
             {
                 do
@@ -764,7 +764,7 @@ namespace Game
                 } while (result.NextRow());
             }
 
-            ConnectionStatus bnetConnected = new ConnectionStatus();
+            var bnetConnected = new ConnectionStatus();
             bnetConnected.State = 1;
             SendPacket(bnetConnected);
 
@@ -784,7 +784,7 @@ namespace Game
             if (_RBACData == null)
                 LoadPermissions();
 
-            bool hasPermission = _RBACData.HasPermission(permission);
+            var hasPermission = _RBACData.HasPermission(permission);
             Log.outDebug(LogFilter.Rbac, "WorldSession:HasPermission [AccountId: {0}, Name: {1}, realmId: {2}]",
                            _RBACData.GetId(), _RBACData.GetName(), Global.WorldMgr.GetRealm().Id.Index);
 
@@ -957,7 +957,7 @@ namespace Game
             if (!_PacketThrottlingMap.ContainsKey(packet.GetOpcode()))
                 _PacketThrottlingMap[packet.GetOpcode()] = new PacketCounter();
 
-            PacketCounter packetCounter = _PacketThrottlingMap[packet.GetOpcode()];
+            var packetCounter = _PacketThrottlingMap[packet.GetOpcode()];
             if (packetCounter.lastReceiveTime != time)
             {
                 packetCounter.lastReceiveTime = time;
@@ -979,9 +979,9 @@ namespace Game
                     Log.outInfo(LogFilter.Network, "AntiDOS: Player kicked!");
                     return false;
                 case Policy.Ban:
-                    BanMode bm = (BanMode)WorldConfig.GetIntValue(WorldCfg.PacketSpoofBanmode);
-                    uint duration = WorldConfig.GetUIntValue(WorldCfg.PacketSpoofBanduration); // in seconds
-                    string nameOrIp = "";
+                    var bm = (BanMode)WorldConfig.GetIntValue(WorldCfg.PacketSpoofBanmode);
+                    var duration = WorldConfig.GetUIntValue(WorldCfg.PacketSpoofBanduration); // in seconds
+                    var nameOrIp = "";
                     switch (bm)
                     {
                         case BanMode.Character: // not supported, ban account
@@ -1027,7 +1027,7 @@ namespace Game
     {
         public void Initialize(uint accountId, uint battlenetAccountId)
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_ACCOUNT_DATA);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_ACCOUNT_DATA);
             stmt.AddValue(0, accountId);
             SetQuery(AccountInfoQueryLoad.GlobalAccountDataIndexPerRealm, stmt);
 
@@ -1041,7 +1041,7 @@ namespace Game
     {
         public void Initialize(uint accountId, uint battlenetAccountId)
         {
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_TOYS);
+            var stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_TOYS);
             stmt.AddValue(0, battlenetAccountId);
             SetQuery(AccountInfoQueryLoad.GlobalAccountToys, stmt);
 

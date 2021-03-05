@@ -106,7 +106,7 @@ namespace Game.Movement
         }
         void InitLinear(Vector3[] controls, int count, bool cyclic, int cyclic_point)
         {
-            int real_size = count + 1;
+            var real_size = count + 1;
 
             Array.Resize(ref points, real_size);
             Array.Copy(controls, points, count);
@@ -123,12 +123,12 @@ namespace Game.Movement
         }
         void InitCatmullRom(Span<Vector3> controls, int count, bool cyclic, int cyclic_point)
         {
-            int real_size = count + (cyclic ? (1 + 2) : (1 + 1));
+            var real_size = count + (cyclic ? (1 + 2) : (1 + 1));
 
             points = new Vector3[real_size];
 
-            int lo_index = 1;
-            int high_index = lo_index + count - 1;
+            var lo_index = 1;
+            var high_index = lo_index + count - 1;
 
             Array.Copy(controls.ToArray(), 0, points, lo_index, count);
 
@@ -155,8 +155,8 @@ namespace Game.Movement
         }
         void InitBezier3(Span<Vector3> controls, int count, bool cyclic, int cyclic_point)
         {
-            int c = (int)(count / 3u * 3u);
-            int t = (int)(c / 3u);
+            var c = (int)(count / 3u * 3u);
+            var t = (int)(c / 3u);
 
             Array.Resize(ref points, c);
             Array.Copy(controls.ToArray(), points, c);
@@ -224,10 +224,10 @@ namespace Game.Movement
         float SegLengthCatmullRom(int index)
         {
             Vector3 nextPos;
-            Span<Vector3> p = points.AsSpan(index - 1);
-            Vector3 curPos = nextPos = p[1];
+            var p = points.AsSpan(index - 1);
+            var curPos = nextPos = p[1];
 
-            int i = 1;
+            var i = 1;
             double length = 0;
             while (i <= 3)
             {
@@ -243,12 +243,12 @@ namespace Game.Movement
             index *= (int)3u;
 
             Vector3 nextPos;
-            Span<Vector3> p = points.AsSpan(index);
+            var p = points.AsSpan(index);
 
             C_Evaluate(p, 0.0f, s_Bezier3Coeffs, out nextPos);
-            Vector3 curPos = nextPos;
+            var curPos = nextPos;
 
-            int i = 1;
+            var i = 1;
             double length = 0;
             while (i <= 3)
             {
@@ -264,7 +264,7 @@ namespace Game.Movement
         public void ComputeIndex(float t, ref int index, ref float u)
         {
             //ASSERT(t >= 0.f && t <= 1.f);
-            int length_ = (int)(t * Length());
+            var length_ = (int)(t * Length());
             index = ComputeIndexInBounds(length_);
             //ASSERT(index < index_hi);
             u = (length_ - Length(index)) / (float)Length(index, index + 1);
@@ -289,8 +289,8 @@ namespace Game.Movement
                     i = (hi + lo) / 2;
                 }*/
 
-            int i = index_lo;
-            int N = index_hi;
+            var i = index_lo;
+            var N = index_hi;
             while (i + 1 < N && lengths[i + 1] < length_)
                 ++i;
 
@@ -302,16 +302,16 @@ namespace Game.Movement
 
         void C_Evaluate(Span<Vector3> vertice, float t, Matrix4 matr, out Vector3 result)
         {
-            Vector4 tvec = new Vector4(t * t * t, t * t, t, 1.0f);
-            Vector4 weights = (tvec * matr);
+            var tvec = new Vector4(t * t * t, t * t, t, 1.0f);
+            var weights = (tvec * matr);
 
             result = vertice[0] * weights[0] + vertice[1] * weights[1]
                    + vertice[2] * weights[2] + vertice[3] * weights[3];
         }
         void C_Evaluate_Derivative(Span<Vector3> vertice, float t, Matrix4 matr, out Vector3 result)
         {
-            Vector4 tvec = new Vector4(3.0f * t * t, 2.0f * t, 1.0f, 0.0f);
-            Vector4 weights = (tvec * matr);
+            var tvec = new Vector4(3.0f * t * t, 2.0f * t, 1.0f, 0.0f);
+            var weights = (tvec * matr);
 
             result = vertice[0] * weights[0] + vertice[1] * weights[1]
                    + vertice[2] * weights[2] + vertice[3] * weights[3];
@@ -327,7 +327,7 @@ namespace Game.Movement
 
         public void InitLengths(IInitializer cacher)
         {
-            int i = index_lo;
+            var i = index_lo;
             Array.Resize(ref lengths, index_hi+1);
             int prev_length = 0, new_length = 0;
             while (i < index_hi)
@@ -343,8 +343,8 @@ namespace Game.Movement
 
         public void InitLengths()
         {
-            int i = index_lo;
-            int length = 0;
+            var i = index_lo;
+            var length = 0;
             Array.Resize(ref lengths, index_hi + 1);
             while (i < index_hi)
             {

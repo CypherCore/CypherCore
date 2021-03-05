@@ -64,7 +64,7 @@ namespace Game.Collision
             if (!File.Exists(fname))
                 return LoadResult.FileNotFound;
 
-            using (BinaryReader reader = new BinaryReader(new FileStream(fname, FileMode.Open, FileAccess.Read)))
+            using (var reader = new BinaryReader(new FileStream(fname, FileMode.Open, FileAccess.Read)))
             {
                 var magic = reader.ReadStringFromChars(8);
                 if (magic != MapConst.VMapMagic)
@@ -83,10 +83,10 @@ namespace Game.Collision
                 if (reader.ReadStringFromChars(4) != "SIDX")
                     return LoadResult.ReadFromFileFailed;
 
-                uint spawnIndicesSize = reader.ReadUInt32();
+                var spawnIndicesSize = reader.ReadUInt32();
                 for (uint i = 0; i < spawnIndicesSize; ++i)
                 {
-                    uint spawnId = reader.ReadUInt32();
+                    var spawnId = reader.ReadUInt32();
                     iSpawnIndices[spawnId] = i;
                 }
             }
@@ -114,34 +114,34 @@ namespace Game.Collision
                 return LoadResult.ReadFromFileFailed;
             }
 
-            LoadResult result = LoadResult.FileNotFound;
+            var result = LoadResult.FileNotFound;
 
-            TileFileOpenResult fileResult = OpenMapTileFile(VMapManager.VMapPath, iMapID, tileX, tileY, vm);
+            var fileResult = OpenMapTileFile(VMapManager.VMapPath, iMapID, tileX, tileY, vm);
             if (fileResult.File != null)
             {
                 result = LoadResult.Success;
-                using (BinaryReader reader = new BinaryReader(fileResult.File))
+                using (var reader = new BinaryReader(fileResult.File))
                 {
                     if (reader.ReadStringFromChars(8) != MapConst.VMapMagic)
                         result = LoadResult.VersionMismatch;
 
                     if (result == LoadResult.Success)
                     {
-                        uint numSpawns = reader.ReadUInt32();
+                        var numSpawns = reader.ReadUInt32();
                         for (uint i = 0; i < numSpawns && result == LoadResult.Success; ++i)
                         {
                             // read model spawns
-                            if (ModelSpawn.ReadFromFile(reader, out ModelSpawn spawn))
+                            if (ModelSpawn.ReadFromFile(reader, out var spawn))
                             {
                                 // acquire model instance
-                                WorldModel model = vm.AcquireModelInstance(spawn.name, spawn.flags);
+                                var model = vm.AcquireModelInstance(spawn.name, spawn.flags);
                                 if (model == null)
                                     Log.outError(LogFilter.Server, "StaticMapTree.LoadMapTile() : could not acquire WorldModel [{0}, {1}]", tileX, tileY);
 
                                 // update tree
                                 if (iSpawnIndices.ContainsKey(spawn.Id))
                                 {
-                                    uint referencedVal = iSpawnIndices[spawn.Id];
+                                    var referencedVal = iSpawnIndices[spawn.Id];
                                     if (!iLoadedSpawns.ContainsKey(referencedVal))
                                     {
                                         if (referencedVal >= iNTreeValues)
@@ -185,7 +185,7 @@ namespace Game.Collision
 
         public void UnloadMapTile(uint tileX, uint tileY, VMapManager vm)
         {
-            uint tileID = PackTileID(tileX, tileY);
+            var tileID = PackTileID(tileX, tileY);
             if (!iLoadedTiles.ContainsKey(tileID))
             {
                 Log.outError(LogFilter.Server, "StaticMapTree.UnloadMapTile() : trying to unload non-loaded tile - Map:{0} X:{1} Y:{2}", iMapID, tileX, tileY);
@@ -193,16 +193,16 @@ namespace Game.Collision
             }
             if (iLoadedTiles[tileID]) // file associated with tile
             {
-                TileFileOpenResult fileResult = OpenMapTileFile(VMapManager.VMapPath, iMapID, tileX, tileY, vm);
+                var fileResult = OpenMapTileFile(VMapManager.VMapPath, iMapID, tileX, tileY, vm);
                 if (fileResult.File != null)
                 {
-                    using (BinaryReader reader = new BinaryReader(fileResult.File))
+                    using (var reader = new BinaryReader(fileResult.File))
                     {
-                        bool result = true;
+                        var result = true;
                         if (reader.ReadStringFromChars(8) != MapConst.VMapMagic)
                             result = false;
 
-                        uint numSpawns = reader.ReadUInt32();
+                        var numSpawns = reader.ReadUInt32();
                         for (uint i = 0; i < numSpawns && result; ++i)
                         {
                             // read model spawns
@@ -216,7 +216,7 @@ namespace Game.Collision
                                 // update tree
                                 if (iSpawnIndices.ContainsKey(spawn.Id))
                                 {
-                                    uint referencedNode = iSpawnIndices[spawn.Id];
+                                    var referencedNode = iSpawnIndices[spawn.Id];
                                     if (!iLoadedSpawns.ContainsKey(referencedNode))
                                         Log.outError(LogFilter.Server, "StaticMapTree.UnloadMapTile() : trying to unload non-referenced model '{0}' (ID:{1})", spawn.name, spawn.Id);
                                     else if (--iLoadedSpawns[referencedNode] == 0)
@@ -240,7 +240,7 @@ namespace Game.Collision
 
         static TileFileOpenResult OpenMapTileFile(string vmapPath, uint mapID, uint tileX, uint tileY, VMapManager vm)
         {
-            TileFileOpenResult result = new TileFileOpenResult();
+            var result = new TileFileOpenResult();
             result.Name = vmapPath + GetTileFileName(mapID, tileX, tileY);
 
             if (File.Exists(result.Name))
@@ -250,7 +250,7 @@ namespace Game.Collision
                 return result;
             }
 
-            int parentMapId = vm.GetParentMapId(mapID);
+            var parentMapId = vm.GetParentMapId(mapID);
             while (parentMapId != -1)
             {
                 result.Name = vmapPath + GetTileFileName((uint)parentMapId, tileX, tileY);
@@ -269,21 +269,21 @@ namespace Game.Collision
 
         public static LoadResult CanLoadMap(string vmapPath, uint mapID, uint tileX, uint tileY, VMapManager vm)
         {
-            string fullname = vmapPath + VMapManager.GetMapFileName(mapID);
+            var fullname = vmapPath + VMapManager.GetMapFileName(mapID);
             if (!File.Exists(fullname))
                 return LoadResult.FileNotFound;
 
-            using (BinaryReader reader = new BinaryReader(new FileStream(fullname, FileMode.Open, FileAccess.Read)))
+            using (var reader = new BinaryReader(new FileStream(fullname, FileMode.Open, FileAccess.Read)))
             {
                 if (reader.ReadStringFromChars(8) != MapConst.VMapMagic)
                     return LoadResult.VersionMismatch;
             }
 
-            FileStream stream = OpenMapTileFile(vmapPath, mapID, tileX, tileY, vm).File;
+            var stream = OpenMapTileFile(vmapPath, mapID, tileX, tileY, vm).File;
             if (stream == null)
                 return LoadResult.FileNotFound;
 
-            using (BinaryReader reader = new BinaryReader(stream))
+            using (var reader = new BinaryReader(stream))
             {
                 if (reader.ReadStringFromChars(8) != MapConst.VMapMagic)
                     return LoadResult.VersionMismatch;
@@ -304,7 +304,7 @@ namespace Game.Collision
             rootId = 0;
             groupId = 0;
 
-            AreaInfoCallback intersectionCallBack = new AreaInfoCallback(iTreeValues);
+            var intersectionCallBack = new AreaInfoCallback(iTreeValues);
             iTree.IntersectPoint(pos, intersectionCallBack);
             if (intersectionCallBack.aInfo.result)
             {
@@ -320,17 +320,17 @@ namespace Game.Collision
 
         public bool GetLocationInfo(Vector3 pos, LocationInfo info)
         {
-            LocationInfoCallback intersectionCallBack = new LocationInfoCallback(iTreeValues, info);
+            var intersectionCallBack = new LocationInfoCallback(iTreeValues, info);
             iTree.IntersectPoint(pos, intersectionCallBack);
             return intersectionCallBack.result;
         }
 
         public float GetHeight(Vector3 pPos, float maxSearchDist)
         {
-            float height = float.PositiveInfinity;
-            Vector3 dir = new Vector3(0, 0, -1);
-            Ray ray = new Ray(pPos, dir);   // direction with length of 1
-            float maxDist = maxSearchDist;
+            var height = float.PositiveInfinity;
+            var dir = new Vector3(0, 0, -1);
+            var ray = new Ray(pPos, dir);   // direction with length of 1
+            var maxDist = maxSearchDist;
             if (GetIntersectionTime(ray, ref maxDist, false, ModelIgnoreFlags.Nothing))
                 height = pPos.Z - maxDist;
 
@@ -338,8 +338,8 @@ namespace Game.Collision
         }
         bool GetIntersectionTime(Ray pRay, ref float pMaxDist, bool pStopAtFirstHit, ModelIgnoreFlags ignoreFlags)
         {
-            float distance = pMaxDist;
-            MapRayCallback intersectionCallBack = new MapRayCallback(iTreeValues, ignoreFlags);
+            var distance = pMaxDist;
+            var intersectionCallBack = new MapRayCallback(iTreeValues, ignoreFlags);
             iTree.IntersectRay(pRay, intersectionCallBack, ref distance, pStopAtFirstHit);
             if (intersectionCallBack.DidHit())
                 pMaxDist = distance;
@@ -349,7 +349,7 @@ namespace Game.Collision
         public bool GetObjectHitPos(Vector3 pPos1, Vector3 pPos2, out Vector3 pResultHitPos, float pModifyDist)
         {
             bool result;
-            float maxDist = (pPos2 - pPos1).magnitude();
+            var maxDist = (pPos2 - pPos1).magnitude();
             // valid map coords should *never ever* produce float overflow, but this would produce NaNs too
             Cypher.Assert(maxDist < float.MaxValue);
             // prevent NaN values which can cause BIH intersection to enter infinite loop
@@ -358,9 +358,9 @@ namespace Game.Collision
                 pResultHitPos = pPos2;
                 return false;
             }
-            Vector3 dir = (pPos2 - pPos1) / maxDist;              // direction with length of 1
-            Ray ray = new Ray(pPos1, dir);
-            float dist = maxDist;
+            var dir = (pPos2 - pPos1) / maxDist;              // direction with length of 1
+            var ray = new Ray(pPos1, dir);
+            var dist = maxDist;
             if (GetIntersectionTime(ray, ref dist, false, ModelIgnoreFlags.Nothing))
             {
                 pResultHitPos = pPos1 + dir * dist;
@@ -391,7 +391,7 @@ namespace Game.Collision
 
         public bool IsInLineOfSight(Vector3 pos1, Vector3 pos2, ModelIgnoreFlags ignoreFlags)
         {
-            float maxDist = (pos2 - pos1).magnitude();
+            var maxDist = (pos2 - pos1).magnitude();
             // return false if distance is over max float, in case of cheater teleporting to the end of the universe
             if (maxDist == float.MaxValue ||
                 maxDist == float.PositiveInfinity)
@@ -403,7 +403,7 @@ namespace Game.Collision
             if (maxDist < 1e-10f)
                 return true;
             // direction with length of 1
-            Ray ray = new Ray(pos1, (pos2 - pos1) / maxDist);
+            var ray = new Ray(pos1, (pos2 - pos1) / maxDist);
             if (GetIntersectionTime(ray, ref maxDist, true, ignoreFlags))
                 return false;
 

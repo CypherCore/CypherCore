@@ -41,7 +41,7 @@ namespace BNetServer.Networking
 
             var endpoint = Global.LoginServiceMgr.GetAddressForClient(GetRemoteIpEndPoint().Address);
 
-            ChallengeExternalRequest externalChallenge = new ChallengeExternalRequest();
+            var externalChallenge = new ChallengeExternalRequest();
             externalChallenge.PayloadType = "web_auth_url";            
             externalChallenge.Payload = ByteString.CopyFromUtf8($"https://{endpoint.Address}:{endpoint.Port}/bnetserver/login/");
 
@@ -55,10 +55,10 @@ namespace BNetServer.Networking
             if (verifyWebCredentialsRequest.WebCredentials.IsEmpty)
                 return BattlenetRpcErrorCode.Denied;
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SelBnetAccountInfo);
+            var stmt = DB.Login.GetPreparedStatement(LoginStatements.SelBnetAccountInfo);
             stmt.AddValue(0, verifyWebCredentialsRequest.WebCredentials.ToStringUtf8());
 
-            SQLResult result = DB.Login.Query(stmt);
+            var result = DB.Login.Query(stmt);
             if (result.IsEmpty())
                 return BattlenetRpcErrorCode.Denied;
 
@@ -70,7 +70,7 @@ namespace BNetServer.Networking
             stmt = DB.Login.GetPreparedStatement(LoginStatements.SelBnetCharacterCountsByAccountId);
             stmt.AddValue(0, accountInfo.Id);
 
-            SQLResult characterCountsResult = DB.Login.Query(stmt);
+            var characterCountsResult = DB.Login.Query(stmt);
             if (!characterCountsResult.IsEmpty())
             {
                 do
@@ -84,14 +84,14 @@ namespace BNetServer.Networking
             stmt = DB.Login.GetPreparedStatement(LoginStatements.SelBnetLastPlayerCharacters);
             stmt.AddValue(0, accountInfo.Id);
 
-            SQLResult lastPlayerCharactersResult = DB.Login.Query(stmt);
+            var lastPlayerCharactersResult = DB.Login.Query(stmt);
             if (!lastPlayerCharactersResult.IsEmpty())
             {
                 do
                 {
                     var realmId = new RealmId(lastPlayerCharactersResult.Read<byte>(1), lastPlayerCharactersResult.Read<byte>(2), lastPlayerCharactersResult.Read<uint>(3));
 
-                    LastPlayedCharacterInfo lastPlayedCharacter = new LastPlayedCharacterInfo();
+                    var lastPlayedCharacter = new LastPlayedCharacterInfo();
                     lastPlayedCharacter.RealmId = realmId;
                     lastPlayedCharacter.CharacterName = lastPlayerCharactersResult.Read<string>(4);
                     lastPlayedCharacter.CharacterGUID = lastPlayerCharactersResult.Read<ulong>(5);
@@ -102,7 +102,7 @@ namespace BNetServer.Networking
                 } while (lastPlayerCharactersResult.NextRow());
             }
 
-            string ip_address = GetRemoteIpEndPoint().ToString();
+            var ip_address = GetRemoteIpEndPoint().ToString();
 
             // If the IP is 'locked', check that the player comes indeed from the correct IP address
             if (accountInfo.IsLockedToIP)
@@ -141,14 +141,14 @@ namespace BNetServer.Networking
                 }
             }
 
-            LogonResult logonResult = new LogonResult();
+            var logonResult = new LogonResult();
             logonResult.ErrorCode = 0;
             logonResult.AccountId = new EntityId();
             logonResult.AccountId.Low = accountInfo.Id;
             logonResult.AccountId.High = 0x100000000000000;
             foreach (var pair in accountInfo.GameAccounts)
             {
-                EntityId gameAccountId = new EntityId();
+                var gameAccountId = new EntityId();
                 gameAccountId.Low = pair.Value.Id;
                 gameAccountId.High = 0x200000200576F57;
                 logonResult.GameAccountId.Add(gameAccountId);

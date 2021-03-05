@@ -238,7 +238,7 @@ namespace Framework.Dynamic
                     _eventMap.Remove(pair);
                 else
                 {
-                    uint eventId = (pair.Value & 0x0000FFFF);
+                    var eventId = (pair.Value & 0x0000FFFF);
                     _lastEvent = pair.Value; // include phase/group
                     _eventMap.Remove(pair);
                     return eventId;
@@ -282,7 +282,7 @@ namespace Framework.Dynamic
         {
             if (group == 0 || group > 8 || Empty())
                 return;
-            MultiMap<uint, uint> delayed = new MultiMap<uint, uint>();
+            var delayed = new MultiMap<uint, uint>();
 
             foreach (var pair in _eventMap.KeyValueList)
             {

@@ -51,13 +51,13 @@ namespace Game.Chat
                     }
                 }
 
-                PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_COMMANDS);
-                SQLResult result = DB.World.Query(stmt);
+                var stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_COMMANDS);
+                var result = DB.World.Query(stmt);
                 if (!result.IsEmpty())
                 {
                     do
                     {
-                        string name = result.Read<string>(0);
+                        var name = result.Read<string>(0);
                         SetDataForCommandInTable(GetCommands(), name, result.Read<uint>(1), result.Read<string>(2), name);
                     }
                     while (result.NextRow());
@@ -71,8 +71,8 @@ namespace Game.Chat
 
         static bool SetDataForCommandInTable(ICollection<ChatCommand> table, string text, uint permission, string help, string fullcommand)
         {
-            StringArguments args = new StringArguments(text);
-            string cmd = args.NextString().ToLower();
+            var args = new StringArguments(text);
+            var cmd = args.NextString().ToLower();
 
             foreach (var command in table)
             {
@@ -165,7 +165,7 @@ namespace Game.Chat
 
             foreach (var method in type.GetMethods(BindingFlags.Static | BindingFlags.NonPublic))
             {
-                CommandAttribute commandAttribute = method.GetCustomAttribute<CommandAttribute>(false);
+                var commandAttribute = method.GetCustomAttribute<CommandAttribute>(false);
                 if (commandAttribute == null)
                     continue;
 

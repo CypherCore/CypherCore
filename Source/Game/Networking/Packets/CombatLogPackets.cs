@@ -138,7 +138,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(SpellID);
             _worldPacket.WriteInt32(Effects.Count);
 
-            foreach (SpellLogEffect effect in Effects)
+            foreach (var effect in Effects)
             {
                 _worldPacket.WriteInt32(effect.Effect);
 
@@ -149,7 +149,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteInt32(effect.TradeSkillTargets.Count);
                 _worldPacket.WriteInt32(effect.FeedPetTargets.Count);
 
-                foreach (SpellLogEffectPowerDrainParams powerDrainTarget in effect.PowerDrainTargets)
+                foreach (var powerDrainTarget in effect.PowerDrainTargets)
                 {
                     _worldPacket.WritePackedGuid(powerDrainTarget.Victim);
                     _worldPacket.WriteUInt32(powerDrainTarget.Points);
@@ -157,27 +157,27 @@ namespace Game.Networking.Packets
                     _worldPacket.WriteFloat(powerDrainTarget.Amplitude);
                 }
 
-                foreach (SpellLogEffectExtraAttacksParams extraAttacksTarget in effect.ExtraAttacksTargets)
+                foreach (var extraAttacksTarget in effect.ExtraAttacksTargets)
                 {
                     _worldPacket.WritePackedGuid(extraAttacksTarget.Victim);
                     _worldPacket.WriteUInt32(extraAttacksTarget.NumAttacks);
                 }
 
-                foreach (SpellLogEffectDurabilityDamageParams durabilityDamageTarget in effect.DurabilityDamageTargets)
+                foreach (var durabilityDamageTarget in effect.DurabilityDamageTargets)
                 {
                     _worldPacket.WritePackedGuid(durabilityDamageTarget.Victim);
                     _worldPacket.WriteInt32(durabilityDamageTarget.ItemID);
                     _worldPacket.WriteInt32(durabilityDamageTarget.Amount);
                 }
 
-                foreach (SpellLogEffectGenericVictimParams genericVictimTarget in effect.GenericVictimTargets)
+                foreach (var genericVictimTarget in effect.GenericVictimTargets)
                     _worldPacket.WritePackedGuid(genericVictimTarget.Victim);
 
-                foreach (SpellLogEffectTradeSkillItemParams tradeSkillTarget in effect.TradeSkillTargets)
+                foreach (var tradeSkillTarget in effect.TradeSkillTargets)
                     _worldPacket.WriteInt32(tradeSkillTarget.ItemID);
 
 
-                foreach (SpellLogEffectFeedPetParams feedPetTarget in effect.FeedPetTargets)
+                foreach (var feedPetTarget in effect.FeedPetTargets)
                     _worldPacket.WriteInt32(feedPetTarget.ItemID);
             }
 
@@ -428,7 +428,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(Caster);
             _worldPacket.WriteInt32(Entries.Count);
 
-            foreach (SpellLogMissEntry missEntry in Entries)
+            foreach (var missEntry in Entries)
                 missEntry.Write(_worldPacket);
         }
 
@@ -522,7 +522,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            WorldPacket attackRoundInfo = new WorldPacket();
+            var attackRoundInfo = new WorldPacket();
             attackRoundInfo.WriteUInt32((uint)hitInfo);
             attackRoundInfo.WritePackedGuid(AttackerGUID);
             attackRoundInfo.WritePackedGuid(VictimGUID);

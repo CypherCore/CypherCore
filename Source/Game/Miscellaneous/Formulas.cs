@@ -26,7 +26,7 @@ namespace Game
     {
         public static float HKHonorAtLevelF(uint level, float multiplier = 1.0f)
         {
-            float honor = multiplier * level * 1.55f;
+            var honor = multiplier * level * 1.55f;
             Global.ScriptMgr.OnHonorCalculation(honor, level, multiplier);
             return honor;
         }
@@ -45,7 +45,7 @@ namespace Game
             else if (pl_level < 35)
             {
                 byte count = 0;
-                for (int i = 15; i <= pl_level; ++i)
+                for (var i = 15; i <= pl_level; ++i)
                     if (i % 5 == 0) ++count;
 
                 level = (uint)((pl_level - 7) - (count - 1));
@@ -113,12 +113,12 @@ namespace Game
         {
             uint baseGain;
 
-            GtXpRecord xpPlayer = CliDB.XpGameTable.GetRow(pl_level);
-            GtXpRecord xpMob = CliDB.XpGameTable.GetRow(mob_level);
+            var xpPlayer = CliDB.XpGameTable.GetRow(pl_level);
+            var xpMob = CliDB.XpGameTable.GetRow(mob_level);
 
             if (mob_level >= pl_level)
             {
-                uint nLevelDiff = mob_level - pl_level;
+                var nLevelDiff = mob_level - pl_level;
                 if (nLevelDiff > 4)
                     nLevelDiff = 4;
 
@@ -126,10 +126,10 @@ namespace Game
             }
             else
             {
-                uint gray_level = GetGrayLevel(pl_level);
+                var gray_level = GetGrayLevel(pl_level);
                 if (mob_level > gray_level)
                 {
-                    uint ZD = GetZeroDifference(pl_level);
+                    var ZD = GetZeroDifference(pl_level);
                     baseGain = (uint)Math.Round(xpMob.PerKill * ((1 - ((pl_level - mob_level) / ZD)) * (xpMob.Divisor / xpPlayer.Divisor)));
                 }
                 else
@@ -139,7 +139,7 @@ namespace Game
             if (WorldConfig.GetIntValue(WorldCfg.MinCreatureScaledXpRatio) != 0 && pl_level != mob_level)
             {
                 // Use mob level instead of player level to avoid overscaling on gain in a min is enforced
-                uint baseGainMin = BaseGain(pl_level, pl_level) * WorldConfig.GetUIntValue(WorldCfg.MinCreatureScaledXpRatio) / 100;
+                var baseGainMin = BaseGain(pl_level, pl_level) * WorldConfig.GetUIntValue(WorldCfg.MinCreatureScaledXpRatio) / 100;
                 baseGain = Math.Max(baseGainMin, baseGain);
             }
 
@@ -149,12 +149,12 @@ namespace Game
 
         public static uint XPGain(Player player, Unit u, bool isBattleGround = false)
         {
-            Creature creature = u.ToCreature();
+            var creature = u.ToCreature();
             uint gain = 0;
 
             if (!creature || creature.CanGiveExperience())
             {
-                float xpMod = 1.0f;
+                var xpMod = 1.0f;
 
                 gain = BaseGain(player.GetLevel(), u.GetLevelForTarget(player));
 

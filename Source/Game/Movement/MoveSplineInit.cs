@@ -70,10 +70,10 @@ namespace Game.Movement
 
         public int Launch()
         {
-            MoveSpline move_spline = unit.MoveSpline;
+            var move_spline = unit.MoveSpline;
 
-            bool transport = !unit.GetTransGUID().IsEmpty();
-            Vector4 real_position = new Vector4();            
+            var transport = !unit.GetTransGUID().IsEmpty();
+            var real_position = new Vector4();            
             // there is a big chance that current position is unknown if current state is not finalized, need compute it
             // this also allows calculate spline position and update map position in much greater intervals
             // Don't compute for transport movement if the unit is in a motion between two transports
@@ -102,7 +102,7 @@ namespace Game.Movement
             args.initialOrientation = real_position.W;
             move_spline.onTransport = !unit.GetTransGUID().IsEmpty();
 
-            MovementFlag moveFlags = unit.m_movementInfo.GetMovementFlags();
+            var moveFlags = unit.m_movementInfo.GetMovementFlags();
             if (!args.flags.HasFlag(SplineFlag.Backward))
                 moveFlags = (moveFlags & ~MovementFlag.Backward) | MovementFlag.Forward;
             else
@@ -130,7 +130,7 @@ namespace Game.Movement
             unit.m_movementInfo.SetMovementFlags(moveFlags);
             move_spline.Initialize(args);
 
-            MonsterMove packet = new MonsterMove();
+            var packet = new MonsterMove();
             packet.MoverGUID = unit.GetGUID();
             packet.Pos = new Vector3(real_position.X, real_position.Y, real_position.Z);
             packet.InitializeSplineData(move_spline);
@@ -146,14 +146,14 @@ namespace Game.Movement
 
         public void Stop()
         {
-            MoveSpline move_spline = unit.MoveSpline;
+            var move_spline = unit.MoveSpline;
 
             // No need to stop if we are not moving
             if (move_spline.Finalized())
                 return;
 
-            bool transport = !unit.GetTransGUID().IsEmpty();
-            Vector4 loc = new Vector4();
+            var transport = !unit.GetTransGUID().IsEmpty();
+            var loc = new Vector4();
             if (move_spline.onTransport == transport)
                 loc = move_spline.ComputePosition();
             else
@@ -175,7 +175,7 @@ namespace Game.Movement
             move_spline.onTransport = transport;
             move_spline.Initialize(args);
 
-            MonsterMove packet = new MonsterMove();
+            var packet = new MonsterMove();
             packet.MoverGUID = unit.GetGUID();
             packet.Pos = new Vector3(loc.X, loc.Y, loc.Z);
             packet.SplineData.StopDistanceTolerance = 2;
@@ -201,8 +201,8 @@ namespace Game.Movement
         {
             if (args.TransformForTransport)
             {
-                Unit vehicle = unit.GetVehicleBase();
-                Transport transport = unit.GetTransport();
+                var vehicle = unit.GetVehicleBase();
+                var transport = unit.GetTransport();
                 if (vehicle != null)
                     angle -= vehicle.Orientation;
                 else if (transport != null)
@@ -217,8 +217,8 @@ namespace Game.Movement
         {
             if (generatePath)
             {
-                PathGenerator path = new PathGenerator(unit);
-                bool result = path.CalculatePath(dest.X, dest.Y, dest.Z, forceDestination);
+                var path = new PathGenerator(unit);
+                var result = path.CalculatePath(dest.X, dest.Y, dest.Z, forceDestination);
                 if (result && !Convert.ToBoolean(path.GetPathType() & PathType.NoPath))
                 {
                     MovebyPath(path.GetPath());
@@ -228,7 +228,7 @@ namespace Game.Movement
 
             args.path_Idx_offset = 0;
             args.path = new Vector3[2];
-            TransportPathTransform transform = new TransportPathTransform(unit, args.TransformForTransport);
+            var transform = new TransportPathTransform(unit, args.TransformForTransport);
             args.path[1] = transform.Calc(dest);
         }
 
@@ -264,7 +264,7 @@ namespace Game.Movement
         {
             args.path_Idx_offset = path_offset;
             args.path = new Vector3[controls.Length];
-            TransportPathTransform transform = new TransportPathTransform(unit, args.TransformForTransport);
+            var transform = new TransportPathTransform(unit, args.TransformForTransport);
             for (var i = 0; i < controls.Length; i++)
                 args.path[i] = transform.Calc(controls[i]);
 
@@ -292,8 +292,8 @@ namespace Game.Movement
 
         public void SetFacing(Vector3 spot)
         {
-            TransportPathTransform transform = new TransportPathTransform(unit, args.TransformForTransport);
-            Vector3 finalSpot = transform.Calc(spot);
+            var transform = new TransportPathTransform(unit, args.TransformForTransport);
+            var finalSpot = transform.Calc(spot);
             args.facing.f = new Vector3(finalSpot.X, finalSpot.Y, finalSpot.Z);
             args.facing.type = MonsterMoveType.FacingSpot;
         }
@@ -321,15 +321,15 @@ namespace Game.Movement
         }
         public Vector3 Calc(Vector3 input)
         {
-            float x = input.X;
-            float y = input.Y;
-            float z = input.Z;
+            var x = input.X;
+            var y = input.Y;
+            var z = input.Z;
             if (_transformForTransport)
             {
-                ITransport transport = _owner.GetDirectTransport();
+                var transport = _owner.GetDirectTransport();
                 if (transport != null)
                 {
-                    float unused = 0.0f; // need reference
+                    var unused = 0.0f; // need reference
                     transport.CalculatePassengerOffset(ref x, ref y, ref z, ref unused);
                 }
             }

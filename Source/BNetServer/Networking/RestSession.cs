@@ -51,8 +51,8 @@ namespace BNetServer.Networking
 
         public void HandleLoginRequest(HttpHeader request)
         {
-            LogonData loginForm = Json.CreateObject<LogonData>(request.Content);
-            LogonResult loginResult = new LogonResult();
+            var loginForm = Json.CreateObject<LogonData>(request.Content);
+            var loginResult = new LogonResult();
             if (loginForm == null)
             {
                 loginResult.AuthenticationState = "LOGIN";
@@ -62,10 +62,10 @@ namespace BNetServer.Networking
                 return;
             }
 
-            string login = "";
-            string password = "";
+            var login = "";
+            var password = "";
 
-            for (int i = 0; i < loginForm.Inputs.Count; ++i)
+            for (var i = 0; i < loginForm.Inputs.Count; ++i)
             {
                 switch (loginForm.Inputs[i].Id)
                 {
@@ -78,24 +78,24 @@ namespace BNetServer.Networking
                 }
             }
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SelBnetAuthentication);
+            var stmt = DB.Login.GetPreparedStatement(LoginStatements.SelBnetAuthentication);
             stmt.AddValue(0, login);
 
-            SQLResult result = DB.Login.Query(stmt);
+            var result = DB.Login.Query(stmt);
             if (!result.IsEmpty())
             {
-                uint accountId = result.Read<uint>(0);
-                string pass_hash = result.Read<string>(1);
-                uint failedLogins = result.Read<uint>(2);
-                string loginTicket = result.Read<string>(3);
-                uint loginTicketExpiry = result.Read<uint>(4);
-                bool isBanned = result.Read<ulong>(5) != 0;
+                var accountId = result.Read<uint>(0);
+                var pass_hash = result.Read<string>(1);
+                var failedLogins = result.Read<uint>(2);
+                var loginTicket = result.Read<string>(3);
+                var loginTicketExpiry = result.Read<uint>(4);
+                var isBanned = result.Read<ulong>(5) != 0;
 
                 if (CalculateShaPassHash(login.ToUpper(), password.ToUpper()) == pass_hash)
                 {
                     if (loginTicket.IsEmpty() || loginTicketExpiry < Time.UnixTime)
                     {
-                        byte[] ticket = new byte[0].GenerateRandomKey(20);
+                        var ticket = new byte[0].GenerateRandomKey(20);
                         loginTicket = "TC-" + ticket.ToHexString();
                     }
 
@@ -109,14 +109,14 @@ namespace BNetServer.Networking
                 }
                 else if (!isBanned)
                 {
-                    uint maxWrongPassword = ConfigMgr.GetDefaultValue("WrongPass.MaxCount", 0u);
+                    var maxWrongPassword = ConfigMgr.GetDefaultValue("WrongPass.MaxCount", 0u);
 
                     if (ConfigMgr.GetDefaultValue("WrongPass.Logging", false))
                         Log.outDebug(LogFilter.Network, $"[{request.Host}, Account {login}, Id {accountId}] Attempted to connect with wrong password!");
 
                     if (maxWrongPassword != 0)
                     {
-                        SQLTransaction trans = new SQLTransaction();
+                        var trans = new SQLTransaction();
                         stmt = DB.Login.GetPreparedStatement(LoginStatements.UpdBnetFailedLogins);
                         stmt.AddValue(0, accountId);
                         trans.Append(stmt);
@@ -127,8 +127,8 @@ namespace BNetServer.Networking
 
                         if (failedLogins >= maxWrongPassword)
                         {
-                            BanMode banType = ConfigMgr.GetDefaultValue("WrongPass.BanType", BanMode.IP);
-                            int banTime = ConfigMgr.GetDefaultValue("WrongPass.BanTime", 600);
+                            var banType = ConfigMgr.GetDefaultValue("WrongPass.BanType", BanMode.IP);
+                            var banTime = ConfigMgr.GetDefaultValue("WrongPass.BanTime", 600);
 
                             if (banType == BanMode.Account)
                             {
@@ -172,7 +172,7 @@ namespace BNetServer.Networking
 
         string CalculateShaPassHash(string name, string password)
         {
-            SHA256 sha256 = SHA256.Create();
+            var sha256 = SHA256.Create();
             var email = sha256.ComputeHash(Encoding.UTF8.GetBytes(name));
             return sha256.ComputeHash(Encoding.UTF8.GetBytes(email.ToHexString() + ":" + password)).ToHexString(true);
         }

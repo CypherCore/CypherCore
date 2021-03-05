@@ -30,7 +30,7 @@ namespace Game.Networking.Packets
         {
             TableHash = _worldPacket.ReadUInt32();
 
-            uint count = _worldPacket.ReadBits<uint>(13);
+            var count = _worldPacket.ReadBits<uint>(13);
             for (uint i = 0; i < count; ++i)
             {
                 Queries.Add(new DBQueryRecord(_worldPacket.ReadUInt32()));
@@ -87,7 +87,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(VirtualRealmAddress);
             _worldPacket.WriteUInt32(HotfixCount);
 
-            foreach (HotfixRecord hotfixRecord in Hotfixes)
+            foreach (var hotfixRecord in Hotfixes)
                 hotfixRecord.Write(_worldPacket);
         }
 
@@ -105,10 +105,10 @@ namespace Game.Networking.Packets
             ClientBuild = _worldPacket.ReadUInt32();
             DataBuild = _worldPacket.ReadUInt32();
 
-            uint hotfixCount = _worldPacket.ReadUInt32();
+            var hotfixCount = _worldPacket.ReadUInt32();
             for (var i = 0; i < hotfixCount; ++i)
             {
-                HotfixRecord hotfixRecord = new HotfixRecord();
+                var hotfixRecord = new HotfixRecord();
                 hotfixRecord.Read(_worldPacket);
                 Hotfixes.Add(hotfixRecord);
             }
@@ -126,7 +126,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteInt32(Hotfixes.Count);
-            foreach (HotfixData hotfix in Hotfixes)
+            foreach (var hotfix in Hotfixes)
                 hotfix.Write(_worldPacket);
 
             _worldPacket.WriteUInt32(HotfixContent.GetSize());

@@ -40,9 +40,9 @@ namespace Game.Entities
 
         public static void LoadMountDefinitions()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
-            SQLResult result = DB.World.Query("SELECT spellId, otherFactionSpellId FROM mount_definitions");
+            var result = DB.World.Query("SELECT spellId, otherFactionSpellId FROM mount_definitions");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 mount definitions. DB table `mount_definitions` is empty.");
@@ -51,8 +51,8 @@ namespace Game.Entities
 
             do
             {
-                uint spellId = result.Read<uint>(0);
-                uint otherFactionSpellId = result.Read<uint>(1);
+                var spellId = result.Read<uint>(0);
+                var otherFactionSpellId = result.Read<uint>(1);
 
                 if (Global.DB2Mgr.GetMount(spellId) == null)
                 {
@@ -102,7 +102,7 @@ namespace Game.Entities
 
             do
             {
-                uint itemId = result.Read<uint>(0);
+                var itemId = result.Read<uint>(0);
                 _toys.Add(itemId, GetToyFlags(result.Read<bool>(1), result.Read<bool>(2)));
             } while (result.NextRow());
         }
@@ -151,7 +151,7 @@ namespace Game.Entities
 
         ToyFlags GetToyFlags(bool isFavourite, bool hasFanfare)
         {
-            ToyFlags flags = ToyFlags.None;
+            var flags = ToyFlags.None;
             if (isFavourite)
                 flags |= ToyFlags.Favorite;
 
@@ -176,10 +176,10 @@ namespace Game.Entities
 
             do
             {
-                uint itemId = result.Read<uint>(0);
-                HeirloomPlayerFlags flags = (HeirloomPlayerFlags)result.Read<uint>(1);
+                var itemId = result.Read<uint>(0);
+                var flags = (HeirloomPlayerFlags)result.Read<uint>(1);
 
-                HeirloomRecord heirloom = Global.DB2Mgr.GetHeirloomByItemId(itemId);
+                var heirloom = Global.DB2Mgr.GetHeirloomByItemId(itemId);
                 if (heirloom == null)
                     continue;
 
@@ -243,11 +243,11 @@ namespace Game.Entities
 
         public void UpgradeHeirloom(uint itemId, uint castItem)
         {
-            Player player = _owner.GetPlayer();
+            var player = _owner.GetPlayer();
             if (!player)
                 return;
 
-            HeirloomRecord heirloom = Global.DB2Mgr.GetHeirloomByItemId(itemId);
+            var heirloom = Global.DB2Mgr.GetHeirloomByItemId(itemId);
             if (heirloom == null)
                 return;
 
@@ -255,7 +255,7 @@ namespace Game.Entities
             if (data == null)
                 return;
 
-            HeirloomPlayerFlags flags = data.flags;
+            var flags = data.flags;
             uint bonusId = 0;
 
             if (heirloom.UpgradeItemID[0] == castItem)
@@ -279,12 +279,12 @@ namespace Game.Entities
                 bonusId = heirloom.UpgradeItemBonusListID[3];
             }
 
-            foreach (Item item in player.GetItemListByEntry(itemId, true))
+            foreach (var item in player.GetItemListByEntry(itemId, true))
                 item.AddBonuses(bonusId);
 
             // Get heirloom offset to update only one part of dynamic field
             List<uint> heirlooms = player.m_activePlayerData.Heirlooms;
-            int offset = heirlooms.IndexOf(itemId);
+            var offset = heirlooms.IndexOf(itemId);
 
             player.SetHeirloomFlags(offset, (uint)flags);
             data.flags = flags;
@@ -293,12 +293,12 @@ namespace Game.Entities
 
         public void CheckHeirloomUpgrades(Item item)
         {
-            Player player = _owner.GetPlayer();
+            var player = _owner.GetPlayer();
             if (!player)
                 return;
 
             // Check already owned heirloom for upgrade kits
-            HeirloomRecord heirloom = Global.DB2Mgr.GetHeirloomByItemId(item.GetEntry());
+            var heirloom = Global.DB2Mgr.GetHeirloomByItemId(item.GetEntry());
             if (heirloom != null)
             {
                 var data = _heirlooms.LookupByKey(item.GetEntry());
@@ -306,7 +306,7 @@ namespace Game.Entities
                     return;
 
                 // Check for heirloom pairs (normal - heroic, heroic - mythic)
-                uint heirloomItemId = heirloom.StaticUpgradedItemID;
+                var heirloomItemId = heirloom.StaticUpgradedItemID;
                 uint newItemId = 0;
                 HeirloomRecord heirloomDiff;
                 while ((heirloomDiff = Global.DB2Mgr.GetHeirloomByItemId(heirloomItemId)) != null)
@@ -314,7 +314,7 @@ namespace Game.Entities
                     if (player.GetItemByEntry(heirloomDiff.ItemID))
                         newItemId = heirloomDiff.ItemID;
 
-                    HeirloomRecord heirloomSub = Global.DB2Mgr.GetHeirloomByItemId(heirloomDiff.StaticUpgradedItemID);
+                    var heirloomSub = Global.DB2Mgr.GetHeirloomByItemId(heirloomDiff.StaticUpgradedItemID);
                     if (heirloomSub != null)
                     {
                         heirloomItemId = heirloomSub.ItemID;
@@ -327,7 +327,7 @@ namespace Game.Entities
                 if (newItemId != 0)
                 {
                     List<uint> heirlooms = player.m_activePlayerData.Heirlooms;
-                    int offset = heirlooms.IndexOf(item.GetEntry());
+                    var offset = heirlooms.IndexOf(item.GetEntry());
 
                     player.SetHeirloom(offset, newItemId);
                     player.SetHeirloomFlags(offset, 0);
@@ -339,7 +339,7 @@ namespace Game.Entities
                 }
 
                 List<uint> bonusListIDs = item.m_itemData.BonusListIDs;
-                foreach (uint bonusId in bonusListIDs)
+                foreach (var bonusId in bonusListIDs)
                 {
                     if (bonusId != data.bonusId)
                     {
@@ -387,8 +387,8 @@ namespace Game.Entities
 
             do
             {
-                uint mountSpellId = result.Read<uint>(0);
-                MountStatusFlags flags = (MountStatusFlags)result.Read<byte>(1);
+                var mountSpellId = result.Read<uint>(0);
+                var flags = (MountStatusFlags)result.Read<byte>(1);
 
                 if (Global.DB2Mgr.GetMount(mountSpellId) == null)
                     continue;
@@ -401,7 +401,7 @@ namespace Game.Entities
         {
             foreach (var mount in _mounts)
             {
-                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.REP_ACCOUNT_MOUNTS);
+                var stmt = DB.Login.GetPreparedStatement(LoginStatements.REP_ACCOUNT_MOUNTS);
                 stmt.AddValue(0, _owner.GetBattlenetAccountId());
                 stmt.AddValue(1, mount.Key);
                 stmt.AddValue(2, mount.Value);
@@ -411,11 +411,11 @@ namespace Game.Entities
 
         public bool AddMount(uint spellId, MountStatusFlags flags, bool factionMount = false, bool learned = false)
         {
-            Player player = _owner.GetPlayer();
+            var player = _owner.GetPlayer();
             if (!player)
                 return false;
 
-            MountRecord mount = Global.DB2Mgr.GetMount(spellId);
+            var mount = Global.DB2Mgr.GetMount(spellId);
             if (mount == null)
                 return false;
 
@@ -428,7 +428,7 @@ namespace Game.Entities
             // Mount condition only applies to using it, should still learn it.
             if (mount.PlayerConditionID != 0)
             {
-                PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(mount.PlayerConditionID);
+                var playerCondition = CliDB.PlayerConditionStorage.LookupByKey(mount.PlayerConditionID);
                 if (playerCondition != null && !ConditionManager.IsPlayerMeetingCondition(player, playerCondition))
                     return false;
             }
@@ -459,11 +459,11 @@ namespace Game.Entities
 
         void SendSingleMountUpdate(uint spellId, MountStatusFlags mountStatusFlags)
         {
-            Player player = _owner.GetPlayer();
+            var player = _owner.GetPlayer();
             if (!player)
                 return;
 
-            AccountMountUpdate mountUpdate = new AccountMountUpdate();
+            var mountUpdate = new AccountMountUpdate();
             mountUpdate.IsFullUpdate = false;
             mountUpdate.Mounts.Add(spellId, mountStatusFlags);
             player.SendPacket(mountUpdate);
@@ -471,8 +471,8 @@ namespace Game.Entities
 
         public void LoadItemAppearances()
         {
-            Player owner = _owner.GetPlayer();
-            foreach (uint blockValue in _appearances.ToBlockRange())
+            var owner = _owner.GetPlayer();
+            foreach (var blockValue in _appearances.ToBlockRange())
                 owner.AddTransmogBlock(blockValue);
 
             foreach (var value in _temporaryAppearances.Keys)
@@ -483,10 +483,10 @@ namespace Game.Entities
         {
             if (!knownAppearances.IsEmpty())
             {
-                uint[] blocks = new uint[1];
+                var blocks = new uint[1];
                 do
                 {
-                    ushort blobIndex = knownAppearances.Read<ushort>(0);
+                    var blobIndex = knownAppearances.Read<ushort>(0);
                     if (blobIndex >= blocks.Length)
                         Array.Resize(ref blocks, blobIndex + 1);
 
@@ -520,9 +520,9 @@ namespace Game.Entities
                 168664  // Hidden Boots
             };
 
-            foreach (uint hiddenItem in hiddenAppearanceItems)
+            foreach (var hiddenItem in hiddenAppearanceItems)
             {
-               ItemModifiedAppearanceRecord hiddenAppearance = Global.DB2Mgr.GetItemModifiedAppearance(hiddenItem, 0);
+               var hiddenAppearance = Global.DB2Mgr.GetItemModifiedAppearance(hiddenItem, 0);
                 //ASSERT(hiddenAppearance);
                 if (_appearances.Length <= hiddenAppearance.Id)
                     _appearances.Length = (int)hiddenAppearance.Id + 1;
@@ -535,7 +535,7 @@ namespace Game.Entities
         {
             PreparedStatement stmt;
             ushort blockIndex = 0;
-            foreach (uint blockValue in _appearances.ToBlockRange())
+            foreach (var blockValue in _appearances.ToBlockRange())
             {
                 if (blockValue != 0) // this table is only appended/bits are set (never cleared) so don't save empty blocks
                 {
@@ -595,7 +595,7 @@ namespace Game.Entities
             if (!item.IsSoulBound())
                 return;
 
-            ItemModifiedAppearanceRecord itemModifiedAppearance = item.GetItemModifiedAppearance();
+            var itemModifiedAppearance = item.GetItemModifiedAppearance();
             if (!CanAddAppearance(itemModifiedAppearance))
                 return;
 
@@ -610,7 +610,7 @@ namespace Game.Entities
 
         public void AddItemAppearance(uint itemId, uint appearanceModId = 0)
         {
-            ItemModifiedAppearanceRecord itemModifiedAppearance = Global.DB2Mgr.GetItemModifiedAppearance(itemId, appearanceModId);
+            var itemModifiedAppearance = Global.DB2Mgr.GetItemModifiedAppearance(itemId, appearanceModId);
             if (!CanAddAppearance(itemModifiedAppearance))
                 return;
 
@@ -628,7 +628,7 @@ namespace Game.Entities
             if (!CliDB.ItemSearchNameStorage.ContainsKey(itemModifiedAppearance.ItemID))
                 return false;
 
-            ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemModifiedAppearance.ItemID);
+            var itemTemplate = Global.ObjectMgr.GetItemTemplate(itemModifiedAppearance.ItemID);
             if (itemTemplate == null)
                 return false;
 
@@ -702,10 +702,10 @@ namespace Game.Entities
         //todo  check this
         void AddItemAppearance(ItemModifiedAppearanceRecord itemModifiedAppearance)
         {
-            Player owner = _owner.GetPlayer();
+            var owner = _owner.GetPlayer();
             if (_appearances.Count <= itemModifiedAppearance.Id)
             {
-                uint numBlocks = (uint)(_appearances.Count << 2);
+                var numBlocks = (uint)(_appearances.Count << 2);
                 _appearances.Length = (int)itemModifiedAppearance.Id + 1;
                 numBlocks = (uint)(_appearances.Count << 2) - numBlocks;
                 while (numBlocks-- != 0)
@@ -713,8 +713,8 @@ namespace Game.Entities
             }
 
             _appearances.Set((int)itemModifiedAppearance.Id, true);
-            uint blockIndex = itemModifiedAppearance.Id / 32;
-            uint bitIndex = itemModifiedAppearance.Id % 32;
+            var blockIndex = itemModifiedAppearance.Id / 32;
+            var bitIndex = itemModifiedAppearance.Id % 32;
             owner.AddTransmogFlag((int)blockIndex, 1u << (int)bitIndex);
             var temporaryAppearance = _temporaryAppearances.LookupByKey(itemModifiedAppearance.Id);
             if (!temporaryAppearance.Empty())
@@ -723,16 +723,16 @@ namespace Game.Entities
                 _temporaryAppearances.Remove(itemModifiedAppearance.Id);
             }
 
-            ItemRecord item = CliDB.ItemStorage.LookupByKey(itemModifiedAppearance.ItemID);
+            var item = CliDB.ItemStorage.LookupByKey(itemModifiedAppearance.ItemID);
             if (item != null)
             {
-                int transmogSlot = Item.ItemTransmogrificationSlots[(int)item.inventoryType];
+                var transmogSlot = Item.ItemTransmogrificationSlots[(int)item.inventoryType];
                 if (transmogSlot >= 0)
                     _owner.GetPlayer().UpdateCriteria(CriteriaTypes.AppearanceUnlockedBySlot, (ulong)transmogSlot, 1);
             }
 
             var sets = Global.DB2Mgr.GetTransmogSetsForItemModifiedAppearance(itemModifiedAppearance.Id);
-            foreach (TransmogSetRecord set in sets)
+            foreach (var set in sets)
                 if (IsSetCompleted(set.Id))
                     _owner.GetPlayer().UpdateCriteria(CriteriaTypes.TransmogSetUnlocked, set.TransmogSetGroupID);
         }
@@ -748,7 +748,7 @@ namespace Game.Entities
 
         public void RemoveTemporaryAppearance(Item item)
         {
-            ItemModifiedAppearanceRecord itemModifiedAppearance = item.GetItemModifiedAppearance();
+            var itemModifiedAppearance = item.GetItemModifiedAppearance();
             if (itemModifiedAppearance == null)
                 return;
 
@@ -782,7 +782,7 @@ namespace Game.Entities
 
         public List<uint> GetAppearanceIds()
         {
-            List<uint> appearances = new List<uint>();
+            var appearances = new List<uint>();
             foreach (int id in _appearances)
                 appearances.Add(CliDB.ItemModifiedAppearanceStorage.LookupByKey(id).ItemAppearanceID);
 
@@ -813,7 +813,7 @@ namespace Game.Entities
 
             _favoriteAppearances[itemModifiedAppearanceId] = apperanceState;
 
-            AccountTransmogUpdate accountTransmogUpdate = new AccountTransmogUpdate();
+            var accountTransmogUpdate = new AccountTransmogUpdate();
             accountTransmogUpdate.IsFullUpdate = false;
             accountTransmogUpdate.IsSetFavorite = apply;
             accountTransmogUpdate.FavoriteAppearances.Add(itemModifiedAppearanceId);
@@ -823,7 +823,7 @@ namespace Game.Entities
 
         public void SendFavoriteAppearances()
         {
-            AccountTransmogUpdate accountTransmogUpdate = new AccountTransmogUpdate();
+            var accountTransmogUpdate = new AccountTransmogUpdate();
             accountTransmogUpdate.IsFullUpdate = true;
             foreach (var pair in _favoriteAppearances)
                 if (pair.Value != FavoriteAppearanceState.Removed)
@@ -838,9 +838,9 @@ namespace Game.Entities
             if (items.Empty())
                 return;
 
-            foreach (TransmogSetItemRecord item in items)
+            foreach (var item in items)
             {
-                ItemModifiedAppearanceRecord itemModifiedAppearance = CliDB.ItemModifiedAppearanceStorage.LookupByKey(item.ItemModifiedAppearanceID);
+                var itemModifiedAppearance = CliDB.ItemModifiedAppearanceStorage.LookupByKey(item.ItemModifiedAppearanceID);
                 if (itemModifiedAppearance == null)
                     continue;
 
@@ -854,25 +854,25 @@ namespace Game.Entities
             if (transmogSetItems.Empty())
                 return false;
 
-            int[] knownPieces = new int[EquipmentSlot.End];
+            var knownPieces = new int[EquipmentSlot.End];
             for (var i = 0; i < EquipmentSlot.End; ++i)
                 knownPieces[i] = -1;
 
-            foreach (TransmogSetItemRecord transmogSetItem in transmogSetItems)
+            foreach (var transmogSetItem in transmogSetItems)
             {
-                ItemModifiedAppearanceRecord itemModifiedAppearance = CliDB.ItemModifiedAppearanceStorage.LookupByKey(transmogSetItem.ItemModifiedAppearanceID);
+                var itemModifiedAppearance = CliDB.ItemModifiedAppearanceStorage.LookupByKey(transmogSetItem.ItemModifiedAppearanceID);
                 if (itemModifiedAppearance == null)
                     continue;
 
-                ItemRecord item = CliDB.ItemStorage.LookupByKey(itemModifiedAppearance.ItemID);
+                var item = CliDB.ItemStorage.LookupByKey(itemModifiedAppearance.ItemID);
                 if (item == null)
                     continue;
 
-                int transmogSlot = Item.ItemTransmogrificationSlots[(int)item.inventoryType];
+                var transmogSlot = Item.ItemTransmogrificationSlots[(int)item.inventoryType];
                 if (transmogSlot < 0 || knownPieces[transmogSlot] == 1)
                     continue;
 
-                (var hasAppearance, bool isTemporary) = HasItemAppearance(transmogSetItem.ItemModifiedAppearanceID);
+                (var hasAppearance, var isTemporary) = HasItemAppearance(transmogSetItem.ItemModifiedAppearanceID);
 
                 knownPieces[transmogSlot] = (hasAppearance && !isTemporary) ? 1 : 0;
             }

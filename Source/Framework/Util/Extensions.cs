@@ -30,8 +30,8 @@ namespace System
     {
         public static bool HasAnyFlag<T>(this T value, T flag) where T : struct
         {
-            long lValue = Convert.ToInt64(value);
-            long lFlag = Convert.ToInt64(flag);
+            var lValue = Convert.ToInt64(value);
+            var lFlag = Convert.ToInt64(flag);
             return (lValue & lFlag) != 0;
         }
 
@@ -48,9 +48,9 @@ namespace System
             str = str.Replace(" ", String.Empty);
 
             var res = new byte[str.Length / 2];
-            for (int i = 0; i < res.Length; ++i)
+            for (var i = 0; i < res.Length; ++i)
             {
-                string temp = String.Concat(str[i * 2], str[i * 2 + 1]);
+                var temp = String.Concat(str[i * 2], str[i * 2 + 1]);
                 res[i] = Convert.ToByte(temp, 16);
             }
             return res;
@@ -71,7 +71,7 @@ namespace System
             var random = new Random((int)((uint)(Guid.NewGuid().GetHashCode() ^ 1 >> 89 << 2 ^ 42)).LeftRotate(13));
             var key = new byte[length];
 
-            for (int i = 0; i < length; i++)
+            for (var i = 0; i < length; i++)
             {
                 int randValue;
 
@@ -88,7 +88,7 @@ namespace System
 
         public static bool Compare(this byte[] b, byte[] b2)
         {
-            for (int i = 0; i < b2.Length; i++)
+            for (var i = 0; i < b2.Length; i++)
                 if (b[i] != b2[i])
                     return false;
 
@@ -129,7 +129,7 @@ namespace System
 
         public static void Swap<T>(ref T left, ref T right)
         {
-            T temp = left;
+            var temp = left;
             left = right;
             right = temp;
         }
@@ -141,14 +141,14 @@ namespace System
 
             var size = Marshal.SizeOf(typeof(T));
             var ptr = Marshal.AllocHGlobal(size);
-            byte[] array = new byte[size];
+            var array = new byte[size];
 
             Marshal.StructureToPtr(obj, ptr, true);
             Marshal.Copy(ptr, array, 0, size);
 
             Marshal.FreeHGlobal(ptr);
 
-            uint[] result = new uint[size / 4];
+            var result = new uint[size / 4];
             Buffer.BlockCopy(array, 0, result, 0, array.Length);
 
             return result;
@@ -156,7 +156,7 @@ namespace System
 
         public static List<T> DeserializeObjects<T>(this ICollection<uint> data)
         {
-            List<T> list = new List<T>();
+            var list = new List<T>();
 
             if (data.Count == 0)
                 return list;
@@ -164,7 +164,7 @@ namespace System
             if (typeof(T).GetCustomAttribute<StructLayoutAttribute>() == null)
                 return list;
 
-            byte[] result = new byte[data.Count * sizeof(uint)];
+            var result = new byte[data.Count * sizeof(uint)];
             Buffer.BlockCopy(data.ToArray(), 0, result, 0, result.Length);
 
             var typeSize = Marshal.SizeOf(typeof(T));
@@ -198,10 +198,10 @@ namespace System
 
         public static string ConvertFormatSyntax(this string str)
         {
-            string pattern = @"(%\W*\d*[a-zA-Z]*)";
+            var pattern = @"(%\W*\d*[a-zA-Z]*)";
             
-            int count = 0;
-            string result = Regex.Replace(str, pattern, m => string.Concat("{", count++, "}"));
+            var count = 0;
+            var result = Regex.Replace(str, pattern, m => string.Concat("{", count++, "}"));
 
             return result;
         }
@@ -230,7 +230,7 @@ namespace System
         public static string ReadCString(this BinaryReader reader)
         {
             byte num;
-            List<byte> temp = new List<byte>();
+            var temp = new List<byte>();
 
             while ((num = reader.ReadByte()) != 0)
                 temp.Add(num);
@@ -251,11 +251,11 @@ namespace System
 
         public static T[] ReadArray<T>(this BinaryReader reader, uint size) where T : struct
         {
-            int numBytes = Unsafe.SizeOf<T>() * (int)size;
+            var numBytes = Unsafe.SizeOf<T>() * (int)size;
 
-            byte[] source = reader.ReadBytes(numBytes);
+            var source = reader.ReadBytes(numBytes);
 
-            T[] result = new T[source.Length / Unsafe.SizeOf<T>()];
+            var result = new T[source.Length / Unsafe.SizeOf<T>()];
 
             if (source.Length > 0)
             {
@@ -270,7 +270,7 @@ namespace System
 
         public static T Read<T>(this BinaryReader reader) where T : struct
         {
-            byte[] result = reader.ReadBytes(Unsafe.SizeOf<T>());
+            var result = reader.ReadBytes(Unsafe.SizeOf<T>());
 
             return Unsafe.ReadUnaligned<T>(ref result[0]);
         }

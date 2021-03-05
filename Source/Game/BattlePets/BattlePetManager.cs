@@ -33,7 +33,7 @@ namespace Game.BattlePets
             _owner = owner;
             for (byte i = 0; i < SharedConst.MaxPetBattleSlots; ++i)
             {
-                BattlePetSlot slot = new BattlePetSlot();
+                var slot = new BattlePetSlot();
                 slot.Index = i;
                 _slots.Add(slot);
             }
@@ -41,7 +41,7 @@ namespace Game.BattlePets
 
         public static void Initialize()
         {
-            SQLResult result = DB.Login.Query("SELECT MAX(guid) FROM battle_pets");
+            var result = DB.Login.Query("SELECT MAX(guid) FROM battle_pets");
             if (!result.IsEmpty())
                 Global.ObjectMgr.GetGenerator(HighGuid.BattlePet).Set(result.Read<ulong>(0) + 1);
 
@@ -67,7 +67,7 @@ namespace Game.BattlePets
 
         static void LoadAvailablePetBreeds()
         {
-            SQLResult result = DB.World.Query("SELECT speciesId, breedId FROM battle_pet_breeds");
+            var result = DB.World.Query("SELECT speciesId, breedId FROM battle_pet_breeds");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 battle pet breeds. DB table `battle_pet_breeds` is empty.");
@@ -77,8 +77,8 @@ namespace Game.BattlePets
             uint count = 0;
             do
             {
-                uint speciesId = result.Read<uint>(0);
-                ushort breedId = result.Read<ushort>(1);
+                var speciesId = result.Read<uint>(0);
+                var breedId = result.Read<ushort>(1);
 
                 if (!CliDB.BattlePetSpeciesStorage.ContainsKey(speciesId))
                 {
@@ -97,7 +97,7 @@ namespace Game.BattlePets
 
         static void LoadDefaultPetQualities()
         {
-            SQLResult result = DB.World.Query("SELECT speciesId, quality FROM battle_pet_quality");
+            var result = DB.World.Query("SELECT speciesId, quality FROM battle_pet_quality");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 battle pet qualities. DB table `battle_pet_quality` is empty.");
@@ -106,8 +106,8 @@ namespace Game.BattlePets
 
             do
             {
-                uint speciesId = result.Read<uint>(0);
-                byte quality = result.Read<byte>(1);
+                var speciesId = result.Read<uint>(0);
+                var quality = result.Read<byte>(1);
 
                 if (!CliDB.BattlePetSpeciesStorage.ContainsKey(speciesId))
                 {
@@ -146,9 +146,9 @@ namespace Game.BattlePets
             {
                 do
                 {
-                    uint species = petsResult.Read<uint>(1);
+                    var species = petsResult.Read<uint>(1);
 
-                    BattlePetSpeciesRecord speciesEntry = CliDB.BattlePetSpeciesStorage.LookupByKey(species);
+                    var speciesEntry = CliDB.BattlePetSpeciesStorage.LookupByKey(species);
                     if (speciesEntry != null)
                     {
                         if (GetPetCount(species) >= SharedConst.MaxBattlePetsPerSpecies)
@@ -157,7 +157,7 @@ namespace Game.BattlePets
                             continue;
                         }
 
-                        BattlePet pet = new BattlePet();
+                        var pet = new BattlePet();
                         pet.PacketInfo.Guid = ObjectGuid.Create(HighGuid.BattlePet, petsResult.Read<ulong>(0));
                         pet.PacketInfo.Species = species;
                         pet.PacketInfo.Breed = petsResult.Read<ushort>(2);
@@ -273,11 +273,11 @@ namespace Game.BattlePets
 
         public void AddPet(uint species, uint creatureId, ushort breed, byte quality, ushort level = 1)
         {
-            BattlePetSpeciesRecord battlePetSpecies = CliDB.BattlePetSpeciesStorage.LookupByKey(species);
+            var battlePetSpecies = CliDB.BattlePetSpeciesStorage.LookupByKey(species);
             if (battlePetSpecies == null) // should never happen
                 return;
 
-            BattlePet pet = new BattlePet();
+            var pet = new BattlePet();
             pet.PacketInfo.Guid = ObjectGuid.Create(HighGuid.BattlePet, Global.ObjectMgr.GetGenerator(HighGuid.BattlePet).Generate());
             pet.PacketInfo.Species = species;
             pet.PacketInfo.CreatureID = creatureId;
@@ -293,7 +293,7 @@ namespace Game.BattlePets
 
             _pets[pet.PacketInfo.Guid.GetCounter()] = pet;
 
-            List<BattlePet> updates = new List<BattlePet>();
+            var updates = new List<BattlePet>();
             updates.Add(pet);
             SendUpdates(updates, true);
 
@@ -302,7 +302,7 @@ namespace Game.BattlePets
 
         public void RemovePet(ObjectGuid guid)
         {
-            BattlePet pet = GetPet(guid);
+            var pet = GetPet(guid);
             if (pet == null)
                 return;
 
@@ -326,7 +326,7 @@ namespace Game.BattlePets
 
             _slots[slot].Locked = false;
 
-            PetBattleSlotUpdates updates = new PetBattleSlotUpdates();
+            var updates = new PetBattleSlotUpdates();
             updates.Slots.Add(_slots[slot]);
             updates.AutoSlotted = false; // what's this?
             updates.NewSlot = true; // causes the "new slot unlocked" bubble to appear
@@ -345,16 +345,16 @@ namespace Game.BattlePets
 
         public void CageBattlePet(ObjectGuid guid)
         {
-            BattlePet pet = GetPet(guid);
+            var pet = GetPet(guid);
             if (pet == null)
                 return;
 
-            List<ItemPosCount> dest = new List<ItemPosCount>();
+            var dest = new List<ItemPosCount>();
 
             if (_owner.GetPlayer().CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, SharedConst.BattlePetCageItemId, 1) != InventoryResult.Ok)
                 return;
 
-            Item item = _owner.GetPlayer().StoreNewItem(dest, SharedConst.BattlePetCageItemId, true);
+            var item = _owner.GetPlayer().StoreNewItem(dest, SharedConst.BattlePetCageItemId, true);
             if (!item)
                 return;
 
@@ -368,7 +368,7 @@ namespace Game.BattlePets
 
             RemovePet(guid);
 
-            BattlePetDeleted deletePet = new BattlePetDeleted();
+            var deletePet = new BattlePetDeleted();
             deletePet.PetGuid = guid;
             _owner.SendPacket(deletePet);
         }
@@ -377,7 +377,7 @@ namespace Game.BattlePets
         {
             // TODO: After each Pet Battle, any injured companion will automatically
             // regain 50 % of the damage that was taken during combat
-            List<BattlePet> updates = new List<BattlePet>();
+            var updates = new List<BattlePet>();
 
             foreach (var pet in _pets.Values)
             {
@@ -397,11 +397,11 @@ namespace Game.BattlePets
 
         public void SummonPet(ObjectGuid guid)
         {
-            BattlePet pet = GetPet(guid);
+            var pet = GetPet(guid);
             if (pet == null)
                 return;
 
-            BattlePetSpeciesRecord speciesEntry = CliDB.BattlePetSpeciesStorage.LookupByKey(pet.PacketInfo.Species);
+            var speciesEntry = CliDB.BattlePetSpeciesStorage.LookupByKey(pet.PacketInfo.Species);
             if (speciesEntry == null)
                 return;
 
@@ -414,8 +414,8 @@ namespace Game.BattlePets
 
         public void DismissPet()
         {
-            Player ownerPlayer = _owner.GetPlayer();
-            Creature pet = ObjectAccessor.GetCreatureOrPetOrVehicle(ownerPlayer, ownerPlayer.GetCritterGUID());
+            var ownerPlayer = _owner.GetPlayer();
+            var pet = ObjectAccessor.GetCreatureOrPetOrVehicle(ownerPlayer, ownerPlayer.GetCritterGUID());
             if (pet && ownerPlayer.m_activePlayerData.SummonedBattlePetGUID == pet.GetBattlePetCompanionGUID())
             {
                 pet.DespawnOrUnsummon();
@@ -425,7 +425,7 @@ namespace Game.BattlePets
 
         public void SendJournal()
         {
-            BattlePetJournal battlePetJournal = new BattlePetJournal();
+            var battlePetJournal = new BattlePetJournal();
             battlePetJournal.Trap = _trapLevel;
 
             foreach (var pet in _pets)
@@ -438,7 +438,7 @@ namespace Game.BattlePets
 
         void SendUpdates(List<BattlePet> pets, bool petAdded)
         {
-            BattlePetUpdates updates = new BattlePetUpdates();
+            var updates = new BattlePetUpdates();
             foreach (var pet in pets)
                 updates.Pets.Add(pet.PacketInfo);
 
@@ -448,7 +448,7 @@ namespace Game.BattlePets
 
         public void SendError(BattlePetError error, uint creatureId)
         {
-            BattlePetErrorPacket battlePetError = new BattlePetErrorPacket();
+            var battlePetError = new BattlePetErrorPacket();
             battlePetError.Result = error;
             battlePetError.CreatureID = creatureId;
             _owner.SendPacket(battlePetError);

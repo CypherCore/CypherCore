@@ -65,7 +65,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteInt32(QuestGiver.Count);
-            foreach (QuestGiverInfo questGiver in QuestGiver)
+            foreach (var questGiver in QuestGiver)
             {
                 _worldPacket.WritePackedGuid(questGiver.Guid);
                 _worldPacket.WriteUInt32((uint)questGiver.Status);
@@ -197,7 +197,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteInt32(Info.ManagedWorldStateID);
                 _worldPacket.WriteInt32(Info.QuestSessionBonus);
 
-                foreach (QuestCompleteDisplaySpell rewardDisplaySpell in Info.RewardDisplaySpell)
+                foreach (var rewardDisplaySpell in Info.RewardDisplaySpell)
                     rewardDisplaySpell.Write(_worldPacket);
 
                 _worldPacket.WriteBits(Info.LogTitle.GetByteCount(), 9);
@@ -212,7 +212,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteBit(Info.ReadyForTranslation);
                 _worldPacket.FlushBits();
 
-                foreach (QuestObjective questObjective in Info.Objectives)
+                foreach (var questObjective in Info.Objectives)
                 {
                     _worldPacket.WriteUInt32(questObjective.Id);
                     _worldPacket.WriteUInt8((byte)questObjective.Type);
@@ -440,16 +440,16 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(QuestStartItemID);
             _worldPacket.WriteInt32(QuestSessionBonus);
 
-            foreach (uint spell in LearnSpells)
+            foreach (var spell in LearnSpells)
                 _worldPacket.WriteUInt32(spell);
 
-            foreach (QuestDescEmote emote in DescEmotes)
+            foreach (var emote in DescEmotes)
             {
                 _worldPacket.WriteUInt32(emote.Type);
                 _worldPacket.WriteUInt32(emote.Delay);
             }
 
-            foreach (QuestObjectiveSimple obj in Objectives)
+            foreach (var obj in Objectives)
             {
                 _worldPacket.WriteUInt32(obj.Id);
                 _worldPacket.WriteInt32(obj.ObjectID);
@@ -527,13 +527,13 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(Currency.Count);
             _worldPacket.WriteInt32(StatusFlags);
 
-            foreach (QuestObjectiveCollect obj in Collect)
+            foreach (var obj in Collect)
             {
                 _worldPacket.WriteUInt32(obj.ObjectID);
                 _worldPacket.WriteInt32(obj.Amount);
                 _worldPacket.WriteUInt32(obj.Flags);
             }
-            foreach (QuestCurrency cur in Currency)
+            foreach (var cur in Currency)
             {
                 _worldPacket.WriteUInt32(cur.CurrencyID);
                 _worldPacket.WriteInt32(cur.Amount);
@@ -636,7 +636,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBits(Greeting.GetByteCount(), 11);
             _worldPacket.FlushBits();
 
-            foreach (ClientGossipText gossip in QuestDataText)
+            foreach (var gossip in QuestDataText)
                 gossip.Write(_worldPacket);
 
             _worldPacket.WriteString(Greeting);
@@ -815,7 +815,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteInt32(WorldQuestUpdates.Count);
 
-            foreach (WorldQuestUpdateInfo worldQuestUpdate in WorldQuestUpdates)
+            foreach (var worldQuestUpdate in WorldQuestUpdates)
             {
                 _worldPacket.WriteInt32(worldQuestUpdate.LastUpdate);
                 _worldPacket.WriteUInt32(worldQuestUpdate.QuestID);
@@ -845,7 +845,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(KeepOpenAfterChoice);
             _worldPacket.FlushBits();
 
-            foreach (PlayerChoiceResponse response in Responses)
+            foreach (var response in Responses)
                 response.Write(_worldPacket);
 
             _worldPacket.WriteString(Question);
@@ -1055,7 +1055,7 @@ namespace Game.Networking.Packets
             data.WriteUInt32(ChoiceItemCount);
             data.WriteUInt32(ItemCount);
 
-            for (int i = 0; i < SharedConst.QuestRewardItemCount; ++i)
+            for (var i = 0; i < SharedConst.QuestRewardItemCount; ++i)
             {
                 data.WriteUInt32(ItemID[i]);
                 data.WriteUInt32(ItemQty[i]);
@@ -1069,7 +1069,7 @@ namespace Game.Networking.Packets
             data.WriteUInt32(Title);
             data.WriteUInt32(FactionFlags);
 
-            for (int i = 0; i < SharedConst.QuestRewardReputationsCount; ++i)
+            for (var i = 0; i < SharedConst.QuestRewardReputationsCount; ++i)
             {
                 data.WriteUInt32(FactionID[i]);
                 data.WriteInt32(FactionValue[i]);
@@ -1082,7 +1082,7 @@ namespace Game.Networking.Packets
 
             data.WriteUInt32(SpellCompletionID);
 
-            for (int i = 0; i < SharedConst.QuestRewardCurrencyCount; ++i)
+            for (var i = 0; i < SharedConst.QuestRewardCurrencyCount; ++i)
             {
                 data.WriteUInt32(CurrencyID[i]);
                 data.WriteUInt32(CurrencyQty[i]);
@@ -1124,7 +1124,7 @@ namespace Game.Networking.Packets
             data.WriteUInt32(SuggestedPartyMembers);
 
             data.WriteInt32(Emotes.Count);
-            foreach (QuestDescEmote emote in Emotes)
+            foreach (var emote in Emotes)
             {
                 data.WriteUInt32(emote.Type);
                 data.WriteUInt32(emote.Delay);
@@ -1231,16 +1231,16 @@ namespace Game.Networking.Packets
             data.WriteInt32(Factions.Count);
             data.WriteInt32(ItemChoices.Count);
 
-            foreach (PlayerChoiceResponseRewardEntry item in Items)
+            foreach (var item in Items)
                 item.Write(data);
 
-            foreach (PlayerChoiceResponseRewardEntry currency in Currencies)
+            foreach (var currency in Currencies)
                 currency.Write(data);
 
-            foreach (PlayerChoiceResponseRewardEntry faction in Factions)
+            foreach (var faction in Factions)
                 faction.Write(data);
 
-            foreach (PlayerChoiceResponseRewardEntry itemChoice in ItemChoices)
+            foreach (var itemChoice in ItemChoices)
                 itemChoice.Write(data);
         }
 

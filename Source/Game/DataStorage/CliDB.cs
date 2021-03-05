@@ -29,14 +29,14 @@ namespace Game.DataStorage
     {
         public static BitSet LoadStores(string dataPath, Locale defaultLocale)
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
-            string db2Path = dataPath + "/dbc";
+            var db2Path = dataPath + "/dbc";
 
-            BitSet availableDb2Locales = new BitSet((int)Locale.Total);
+            var availableDb2Locales = new BitSet((int)Locale.Total);
             foreach (var dir in Directory.GetDirectories(db2Path))
             {
-                Locale locale = Path.GetFileName(dir).ToEnum<Locale>();
+                var locale = Path.GetFileName(dir).ToEnum<Locale>();
                 if (SharedConst.IsValidLocale(locale))
                     availableDb2Locales[(int)locale] = true;
             }
@@ -323,11 +323,11 @@ namespace Game.DataStorage
                 TaxiPathSetBySource[entry.FromTaxiNode][entry.ToTaxiNode] = new TaxiPathBySourceAndDestination(entry.Id, entry.Cost);
             }
 
-            uint pathCount = TaxiPathStorage.Keys.Max() + 1;
+            var pathCount = TaxiPathStorage.Keys.Max() + 1;
 
             // Calculate path nodes count
-            uint[] pathLength = new uint[pathCount];                           // 0 and some other indexes not used
-            foreach (TaxiPathNodeRecord entry in TaxiPathNodeStorage.Values)
+            var pathLength = new uint[pathCount];                           // 0 and some other indexes not used
+            foreach (var entry in TaxiPathNodeStorage.Values)
                 if (pathLength[entry.PathID] < entry.NodeIndex + 1)
                     pathLength[entry.PathID] = entry.NodeIndex + 1u;
 
@@ -345,8 +345,8 @@ namespace Game.DataStorage
                     continue;
 
                 // valid taxi network node
-                uint field = (node.Id - 1) / 8;
-                byte submask = (byte)(1 << (int)((node.Id - 1) % 8));
+                var field = (node.Id - 1) / 8;
+                var submask = (byte)(1 << (int)((node.Id - 1) % 8));
 
                 TaxiNodesMask[field] |= submask;
                 if (node.Flags.HasAnyFlag(TaxiNodeFlags.Horde))
@@ -382,9 +382,9 @@ namespace Game.DataStorage
 
         public static void LoadGameTables(string dataPath)
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
-            string gtPath = dataPath + "/gt/";
+            var gtPath = dataPath + "/gt/";
 
             uint loadedFileCount = 0;
             GameTable<T> ReadGameTable<T>(string fileName) where T : new()

@@ -326,7 +326,7 @@ namespace Game.DataStorage
 
         public int GetScalingFactionGroup()
         {
-            ContentTuningFlag flags = GetFlags();
+            var flags = GetFlags();
             if (flags.HasFlag(ContentTuningFlag.Horde))
                 return 5;
 

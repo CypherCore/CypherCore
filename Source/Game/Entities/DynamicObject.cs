@@ -106,7 +106,7 @@ namespace Game.Entities
             if (IsWorldObject())
                 SetActive(true);    //must before add to map to be put in world container
 
-            Transport transport = caster.GetTransport();
+            var transport = caster.GetTransport();
             if (transport)
             {
                 float x, y, z, o;
@@ -135,7 +135,7 @@ namespace Game.Entities
             Cypher.Assert(_caster != null);
             Cypher.Assert(_caster.GetMap() == GetMap());
 
-            bool expired = false;
+            var expired = false;
 
             if (_aura != null)
             {
@@ -207,7 +207,7 @@ namespace Game.Entities
 
         public void SetCasterViewpoint()
         {
-            Player caster = _caster.ToPlayer();
+            var caster = _caster.ToPlayer();
             if (caster != null)
             {
                 caster.SetViewpoint(this, true);
@@ -217,7 +217,7 @@ namespace Game.Entities
 
         void RemoveCasterViewpoint()
         {
-            Player caster = _caster.ToPlayer();
+            var caster = _caster.ToPlayer();
             if (caster != null)
             {
                 caster.SetViewpoint(this, false);
@@ -248,8 +248,8 @@ namespace Game.Entities
 
         public override void BuildValuesCreate(WorldPacket data, Player target)
         {
-            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new WorldPacket();
+            var flags = GetUpdateFieldFlagsFor(target);
+            var buffer = new WorldPacket();
 
             buffer.WriteUInt8((byte)flags);
             m_objectData.WriteCreate(buffer, flags, this, target);
@@ -261,8 +261,8 @@ namespace Game.Entities
 
         public override void BuildValuesUpdate(WorldPacket data, Player target)
         {
-            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new WorldPacket();
+            var flags = GetUpdateFieldFlagsFor(target);
+            var buffer = new WorldPacket();
 
             buffer.WriteUInt32(m_values.GetChangedObjectTypeMask());
             if (m_values.HasChanged(TypeId.Object))
@@ -277,14 +277,14 @@ namespace Game.Entities
 
         void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedDynamicObjectMask, Player target)
         {
-            UpdateMask valuesMask = new UpdateMask((int)TypeId.Max);
+            var valuesMask = new UpdateMask((int)TypeId.Max);
             if (requestedObjectMask.IsAnySet())
                 valuesMask.Set((int)TypeId.Object);
 
             if (requestedDynamicObjectMask.IsAnySet())
                 valuesMask.Set((int)TypeId.DynamicObject);
 
-            WorldPacket buffer = new WorldPacket();
+            var buffer = new WorldPacket();
             buffer.WriteUInt32(valuesMask.GetBlock(0));
 
             if (valuesMask[(int)TypeId.Object])
@@ -293,7 +293,7 @@ namespace Game.Entities
             if (valuesMask[(int)TypeId.DynamicObject])
                 m_dynamicObjectData.WriteUpdate(buffer, requestedDynamicObjectMask, true, this, target);
 
-            WorldPacket buffer1 = new WorldPacket();
+            var buffer1 = new WorldPacket();
             buffer1.WriteUInt8((byte)UpdateType.Values);
             buffer1.WritePackedGuid(GetGUID());
             buffer1.WriteUInt32(buffer.GetSize());

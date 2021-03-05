@@ -113,7 +113,7 @@ namespace Game.Entities
 
         public void UpdatePositionData()
         {
-            PositionFullTerrainStatus data = new PositionFullTerrainStatus();
+            var data = new PositionFullTerrainStatus();
             GetMap().GetFullTerrainStatusForPosition(_phaseShift, GetPositionX(), GetPositionY(), GetPositionZ(), data);
             ProcessPositionDataChanged(data);
         }
@@ -135,10 +135,10 @@ namespace Game.Entities
             if (!target)
                 return;
 
-            UpdateType updateType = UpdateType.CreateObject;
-            TypeId tempObjectType = ObjectTypeId;
-            TypeMask tempObjectTypeMask = ObjectTypeMask;
-            CreateObjectBits flags = m_updateFlag;
+            var updateType = UpdateType.CreateObject;
+            var tempObjectType = ObjectTypeId;
+            var tempObjectTypeMask = ObjectTypeMask;
+            var flags = m_updateFlag;
 
             if (target == this)
             {
@@ -160,7 +160,7 @@ namespace Game.Entities
                     break;
                 case HighGuid.Creature:
                 case HighGuid.Vehicle:
-                    TempSummon summon = ToUnit().ToTempSummon();
+                    var summon = ToUnit().ToTempSummon();
                     if (summon)
                         if (summon.GetSummonerGUID().IsPlayer())
                             updateType = UpdateType.CreateObject2;
@@ -195,12 +195,12 @@ namespace Game.Entities
                     }
                 }
             }
-            Unit unit = ToUnit();
+            var unit = ToUnit();
             if (unit)
                 if (unit.GetVictim())
                     flags.CombatVictim = true;
 
-            WorldPacket buffer = new WorldPacket();
+            var buffer = new WorldPacket();
             buffer.WriteUInt8((byte)updateType);
             buffer.WritePackedGuid(GetGUID());
             buffer.WriteUInt8((byte)tempObjectType);
@@ -213,7 +213,7 @@ namespace Game.Entities
         public void SendUpdateToPlayer(Player player)
         {
             // send create update to player
-            UpdateData upd = new UpdateData(player.GetMapId());
+            var upd = new UpdateData(player.GetMapId());
             UpdateObject packet;
 
             if (player.HaveAtClient(this))
@@ -227,7 +227,7 @@ namespace Game.Entities
 
         public void BuildValuesUpdateBlockForPlayer(UpdateData data, Player target)
         {
-            WorldPacket buffer = new WorldPacket();
+            var buffer = new WorldPacket();
             buffer.WriteUInt8((byte)UpdateType.Values);
             buffer.WritePackedGuid(GetGUID());
 
@@ -238,7 +238,7 @@ namespace Game.Entities
 
         public void BuildValuesUpdateBlockForPlayerWithFlag(UpdateData data, UpdateFieldFlag flags, Player target)
         {
-            WorldPacket buffer = new WorldPacket();
+            var buffer = new WorldPacket();
             buffer.WriteUInt8((byte)UpdateType.Values);
             buffer.WritePackedGuid(GetGUID());
 
@@ -259,7 +259,7 @@ namespace Game.Entities
 
         public virtual void DestroyForPlayer(Player target)
         {
-            UpdateData updateData = new UpdateData(target.GetMapId());
+            var updateData = new UpdateData(target.GetMapId());
             BuildDestroyUpdateBlock(updateData);
             UpdateObject packet;
             updateData.BuildPacket(out packet);
@@ -268,9 +268,9 @@ namespace Game.Entities
 
         public void BuildMovementUpdate(WorldPacket data, CreateObjectBits flags)
         {
-            int PauseTimesCount = 0;
+            var PauseTimesCount = 0;
 
-            GameObject go = ToGameObject();
+            var go = ToGameObject();
             if (go)
             {
                 if (go.GetGoType() == GameObjectTypes.Transport)
@@ -299,10 +299,10 @@ namespace Game.Entities
 
             if (flags.MovementUpdate)
             {
-                Unit unit = ToUnit();
-                bool HasFallDirection = unit.HasUnitMovementFlag(MovementFlag.Falling);
-                bool HasFall = HasFallDirection || unit.m_movementInfo.jump.fallTime != 0;
-                bool HasSpline = unit.IsSplineEnabled();
+                var unit = ToUnit();
+                var HasFallDirection = unit.HasUnitMovementFlag(MovementFlag.Falling);
+                var HasFall = HasFallDirection || unit.m_movementInfo.jump.fallTime != 0;
+                var HasSpline = unit.IsSplineEnabled();
 
                 data.WritePackedGuid(GetGUID());                                         // MoverGUID
 
@@ -355,7 +355,7 @@ namespace Game.Entities
                 data.WriteFloat(unit.GetSpeed(UnitMoveType.TurnRate));
                 data.WriteFloat(unit.GetSpeed(UnitMoveType.PitchRate));
 
-                MovementForces movementForces = unit.GetMovementForces();
+                var movementForces = unit.GetMovementForces();
                 if (movementForces != null)
                 {
                     data.WriteInt32(movementForces.GetForces().Count);
@@ -371,7 +371,7 @@ namespace Game.Entities
                 data.FlushBits();
 
                 if (movementForces != null)
-                    foreach (MovementForce force in movementForces.GetForces())
+                    foreach (var force in movementForces.GetForces())
                         MovementExtensions.WriteMovementForceWithDirection(force, data, unit);
 
                 // HasMovementSpline - marks that spline data is present in packet
@@ -383,7 +383,7 @@ namespace Game.Entities
 
             if (flags.Stationary)
             {
-                WorldObject self = this;
+                var self = this;
                 data.WriteFloat(self.GetStationaryX());
                 data.WriteFloat(self.GetStationaryY());
                 data.WriteFloat(self.GetStationaryZ());
@@ -395,7 +395,7 @@ namespace Game.Entities
 
             if (flags.ServerTime)
             {
-                GameObject go1 = ToGameObject();
+                var go1 = ToGameObject();
                 /** @TODO Use IsTransport() to also handle type 11 (TRANSPORT)
                     Currently grid objects are not updated if there are no nearby players,
                     this causes clients to receive different PathProgress
@@ -409,7 +409,7 @@ namespace Game.Entities
 
             if (flags.Vehicle)
             {
-                Unit unit = ToUnit();
+                var unit = ToUnit();
                 data.WriteUInt32(unit.GetVehicleKit().GetVehicleInfo().Id); // RecID
                 data.WriteFloat(unit.GetOrientation());                         // InitialRawFacing
             }
@@ -426,48 +426,48 @@ namespace Game.Entities
 
             if (go)
             {
-                for (int i = 0; i < PauseTimesCount; ++i)
+                for (var i = 0; i < PauseTimesCount; ++i)
                     data.WriteUInt32(go.GetGoValue().Transport.StopFrames[i]);
             }
 
             if (flags.MovementTransport)
             {
-                WorldObject self = this;
+                var self = this;
                 MovementExtensions.WriteTransportInfo(data, self.m_movementInfo.transport);
             }
 
             if (flags.AreaTrigger)
             {
-                AreaTrigger areaTrigger = ToAreaTrigger();
-                AreaTriggerMiscTemplate areaTriggerMiscTemplate = areaTrigger.GetMiscTemplate();
-                AreaTriggerTemplate areaTriggerTemplate = areaTrigger.GetTemplate();
+                var areaTrigger = ToAreaTrigger();
+                var areaTriggerMiscTemplate = areaTrigger.GetMiscTemplate();
+                var areaTriggerTemplate = areaTrigger.GetTemplate();
 
                 data.WriteUInt32(areaTrigger.GetTimeSinceCreated());
 
                 data.WriteVector3(areaTrigger.GetRollPitchYaw());
 
-                bool hasAbsoluteOrientation = areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasAbsoluteOrientation);
-                bool hasDynamicShape = areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasDynamicShape);
-                bool hasAttached = areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasAttached);
-                bool hasFaceMovementDir = areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasFaceMovementDir);
-                bool hasFollowsTerrain = areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasFollowsTerrain);
-                bool hasUnk1 = areaTriggerTemplate.HasFlag(AreaTriggerFlags.Unk1);
-                bool hasTargetRollPitchYaw = areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasTargetRollPitchYaw);
-                bool hasScaleCurveID = areaTriggerMiscTemplate.ScaleCurveId != 0;
-                bool hasMorphCurveID = areaTriggerMiscTemplate.MorphCurveId != 0;
-                bool hasFacingCurveID = areaTriggerMiscTemplate.FacingCurveId != 0;
-                bool hasMoveCurveID = areaTriggerMiscTemplate.MoveCurveId != 0;
-                bool hasAnimation = areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasAnimID);
-                bool hasUnk3 = areaTriggerTemplate.HasFlag(AreaTriggerFlags.Unk3);
-                bool hasAnimKitID = areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasAnimKitID);
-                bool hasAnimProgress = false;
-                bool hasAreaTriggerSphere = areaTriggerTemplate.IsSphere();
-                bool hasAreaTriggerBox = areaTriggerTemplate.IsBox();
-                bool hasAreaTriggerPolygon = areaTriggerTemplate.IsPolygon();
-                bool hasAreaTriggerCylinder = areaTriggerTemplate.IsCylinder();
-                bool hasAreaTriggerSpline = areaTrigger.HasSplines();
-                bool hasOrbit = areaTrigger.HasOrbit();
-                bool hasMovementScript = false;
+                var hasAbsoluteOrientation = areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasAbsoluteOrientation);
+                var hasDynamicShape = areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasDynamicShape);
+                var hasAttached = areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasAttached);
+                var hasFaceMovementDir = areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasFaceMovementDir);
+                var hasFollowsTerrain = areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasFollowsTerrain);
+                var hasUnk1 = areaTriggerTemplate.HasFlag(AreaTriggerFlags.Unk1);
+                var hasTargetRollPitchYaw = areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasTargetRollPitchYaw);
+                var hasScaleCurveID = areaTriggerMiscTemplate.ScaleCurveId != 0;
+                var hasMorphCurveID = areaTriggerMiscTemplate.MorphCurveId != 0;
+                var hasFacingCurveID = areaTriggerMiscTemplate.FacingCurveId != 0;
+                var hasMoveCurveID = areaTriggerMiscTemplate.MoveCurveId != 0;
+                var hasAnimation = areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasAnimID);
+                var hasUnk3 = areaTriggerTemplate.HasFlag(AreaTriggerFlags.Unk3);
+                var hasAnimKitID = areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasAnimKitID);
+                var hasAnimProgress = false;
+                var hasAreaTriggerSphere = areaTriggerTemplate.IsSphere();
+                var hasAreaTriggerBox = areaTriggerTemplate.IsBox();
+                var hasAreaTriggerPolygon = areaTriggerTemplate.IsPolygon();
+                var hasAreaTriggerCylinder = areaTriggerTemplate.IsCylinder();
+                var hasAreaTriggerSpline = areaTrigger.HasSplines();
+                var hasOrbit = areaTrigger.HasOrbit();
+                var hasMovementScript = false;
 
                 data.WriteBit(hasAbsoluteOrientation);
                 data.WriteBit(hasDynamicShape);
@@ -582,10 +582,10 @@ namespace Game.Entities
 
             if (flags.GameObject)
             {
-                bool bit8 = false;
+                var bit8 = false;
                 uint Int1 = 0;
 
-                GameObject gameObject = ToGameObject();
+                var gameObject = ToGameObject();
 
                 data.WriteUInt32(gameObject.GetWorldEffectID());
 
@@ -716,8 +716,8 @@ namespace Game.Entities
 
             if (flags.ActivePlayer)
             {
-                bool HasSceneInstanceIDs = false;
-                bool HasRuneState = ToUnit().GetPowerIndex(PowerType.Runes) != (int)PowerType.Max;
+                var HasSceneInstanceIDs = false;
+                var HasRuneState = ToUnit().GetPowerIndex(PowerType.Runes) != (int)PowerType.Max;
 
                 data.WriteBit(HasSceneInstanceIDs);
                 data.WriteBit(HasRuneState);
@@ -730,9 +730,9 @@ namespace Game.Entities
                 //}
                 if (HasRuneState)
                 {
-                    Player player = ToPlayer();
+                    var player = ToPlayer();
                     float baseCd = player.GetRuneBaseCooldown();
-                    uint maxRunes = (uint)player.GetMaxPower(PowerType.Runes);
+                    var maxRunes = (uint)player.GetMaxPower(PowerType.Runes);
 
                     data.WriteUInt8((byte)((1 << (int)maxRunes) - 1u));
                     data.WriteUInt8(player.GetRunesState());
@@ -744,7 +744,7 @@ namespace Game.Entities
 
             if (flags.Conversation)
             {
-                Conversation self = ToConversation();
+                var self = ToConversation();
                 if (data.WriteBit(self.GetTextureKitId() != 0))
                     data.WriteUInt32(self.GetTextureKitId());
                 data.FlushBits();
@@ -753,7 +753,7 @@ namespace Game.Entities
 
         public void DoWithSuppressingObjectUpdates(Action action)
         {
-            bool wasUpdatedBeforeAction = m_objectUpdated;
+            var wasUpdatedBeforeAction = m_objectUpdated;
             action();
             if (m_objectUpdated && !wasUpdatedBeforeAction)
             {
@@ -980,7 +980,7 @@ namespace Game.Entities
             if (!IsInWorld)
                 return;
 
-            Map map = GetMap();
+            var map = GetMap();
             if (map == null)
                 return;
 
@@ -1016,7 +1016,7 @@ namespace Game.Entities
             if (IsInWorld)
                 RemoveFromWorld();
 
-            Transport transport = GetTransport();
+            var transport = GetTransport();
             if (transport)
                 transport.RemovePassenger(this);
         }
@@ -1041,7 +1041,7 @@ namespace Game.Entities
 
         public InstanceScript GetInstanceScript()
         {
-            Map map = GetMap();
+            var map = GetMap();
             return map.IsDungeon() ? ((InstanceMap)map).GetInstanceScript() : null;
         }
 
@@ -1054,7 +1054,7 @@ namespace Game.Entities
 
                 return GetMap().GetVisibilityRange();
             }
-            Creature thisCreature = ToCreature();
+            var thisCreature = ToCreature();
             if (thisCreature != null)
                 return thisCreature.m_SightDistance;
 
@@ -1111,17 +1111,17 @@ namespace Game.Entities
             if (obj.IsAlwaysVisibleFor(this) || CanAlwaysSee(obj))
                 return true;
 
-            bool corpseVisibility = false;
+            var corpseVisibility = false;
             if (distanceCheck)
             {
-                bool corpseCheck = false;
-                Player thisPlayer = ToPlayer();
+                var corpseCheck = false;
+                var thisPlayer = ToPlayer();
                 if (thisPlayer != null)
                 {
                     if (thisPlayer.IsDead() && thisPlayer.GetHealth() > 0 && // Cheap way to check for ghost state
                     !Convert.ToBoolean(obj.m_serverSideVisibility.GetValue(ServerSideVisibilityType.Ghost) & m_serverSideVisibility.GetValue(ServerSideVisibilityType.Ghost) & (uint)GhostVisibilityType.Ghost))
                     {
-                        Corpse corpse = thisPlayer.GetCorpse();
+                        var corpse = thisPlayer.GetCorpse();
                         if (corpse != null)
                         {
                             corpseCheck = true;
@@ -1131,30 +1131,30 @@ namespace Game.Entities
                         }
                     }
 
-                    Unit target = obj.ToUnit();
+                    var target = obj.ToUnit();
                     if (target)
                     {
                         // Don't allow to detect vehicle accessories if you can't see vehicle
-                        Unit vehicle = target.GetVehicleBase();
+                        var vehicle = target.GetVehicleBase();
                         if (vehicle)
                             if (!thisPlayer.HaveAtClient(vehicle))
                                 return false;
                     }
                 }
 
-                WorldObject viewpoint = this;
-                Player player = ToPlayer();
+                var viewpoint = this;
+                var player = ToPlayer();
                 if (player != null)
                 {
                     viewpoint = player.GetViewpoint();
 
-                    Creature creature = obj.ToCreature();
+                    var creature = obj.ToCreature();
                     if (creature)
                         if (TempSummon.IsPersonalSummonOfAnotherPlayer(creature, GetGUID()))
                             return false;
                 }
 
-                GameObject go = obj.ToGameObject();
+                var go = obj.ToGameObject();
                 if ( go != null)
                     if (go.IsVisibleByUnitOnly() && GetGUID() != go.GetVisibleByUnitOnly())
                         return false;
@@ -1180,10 +1180,10 @@ namespace Game.Entities
             if (!corpseVisibility && !Convert.ToBoolean(obj.m_serverSideVisibility.GetValue(ServerSideVisibilityType.Ghost) & m_serverSideVisibilityDetect.GetValue(ServerSideVisibilityType.Ghost)))
             {
                 // Alive players can see dead players in some cases, but other objects can't do that
-                Player thisPlayer = ToPlayer();
+                var thisPlayer = ToPlayer();
                 if (thisPlayer != null)
                 {
-                    Player objPlayer = obj.ToPlayer();
+                    var objPlayer = obj.ToPlayer();
                     if (objPlayer != null)
                     {
                         if (thisPlayer.GetTeam() != objPlayer.GetTeam() || !thisPlayer.IsGroupVisibleFor(objPlayer))
@@ -1214,13 +1214,13 @@ namespace Game.Entities
 
         bool CanDetect(WorldObject obj, bool ignoreStealth, bool checkAlert = false)
         {
-            WorldObject seer = this;
+            var seer = this;
 
             // Pets don't have detection, they use the detection of their masters
-            Unit thisUnit = ToUnit();
+            var thisUnit = ToUnit();
             if (thisUnit != null)
             {
-                Unit controller = thisUnit.GetCharmerOrOwner();
+                var controller = thisUnit.GetCharmerOrOwner();
                 if (controller != null)
                     seer = controller;
             }
@@ -1239,19 +1239,19 @@ namespace Game.Entities
 
         bool CanDetectInvisibilityOf(WorldObject obj)
         {
-            uint mask = obj.m_invisibility.GetFlags() & m_invisibilityDetect.GetFlags();
+            var mask = obj.m_invisibility.GetFlags() & m_invisibilityDetect.GetFlags();
 
             // Check for not detected types
             if (mask != obj.m_invisibility.GetFlags())
                 return false;
 
-            for (int i = 0; i < (int)InvisibilityType.Max; ++i)
+            for (var i = 0; i < (int)InvisibilityType.Max; ++i)
             {
                 if (!Convert.ToBoolean(mask & (1 << i)))
                     continue;
 
-                int objInvisibilityValue = obj.m_invisibility.GetValue((InvisibilityType)i);
-                int ownInvisibilityDetectValue = m_invisibilityDetect.GetValue((InvisibilityType)i);
+                var objInvisibilityValue = obj.m_invisibility.GetValue((InvisibilityType)i);
+                var ownInvisibilityDetectValue = m_invisibilityDetect.GetValue((InvisibilityType)i);
 
                 // Too low value to detect
                 if (ownInvisibilityDetectValue < objInvisibilityValue)
@@ -1270,10 +1270,10 @@ namespace Game.Entities
             if (obj.m_stealth.GetFlags() == 0)
                 return true;
 
-            float distance = GetExactDist(obj);
-            float combatReach = 0.0f;
+            var distance = GetExactDist(obj);
+            var combatReach = 0.0f;
 
-            Unit unit = ToUnit();
+            var unit = ToUnit();
             if (unit != null)
                 combatReach = unit.GetCombatReach();
 
@@ -1283,8 +1283,8 @@ namespace Game.Entities
             if (!HasInArc(MathFunctions.PI, obj))
                 return false;
 
-            GameObject go = obj.ToGameObject();
-            for (int i = 0; i < (int)StealthType.Max; ++i)
+            var go = obj.ToGameObject();
+            for (var i = 0; i < (int)StealthType.Max; ++i)
             {
                 if (!Convert.ToBoolean(obj.m_stealth.GetFlags() & (1 << i)))
                     continue;
@@ -1293,7 +1293,7 @@ namespace Game.Entities
                     return true;
 
                 // Starting points
-                int detectionValue = 30;
+                var detectionValue = 30;
 
                 // Level difference: 5 point / level, starting from level 1.
                 // There may be spells for this and the starting points too, but
@@ -1304,7 +1304,7 @@ namespace Game.Entities
                 detectionValue += m_stealthDetect.GetValue((StealthType)i);
                 if (go != null)
                 {
-                    Unit owner = go.GetOwner();
+                    var owner = go.GetOwner();
                     if (owner != null)
                         detectionValue -= (int)(owner.GetLevelForTarget(this) - 1) * 5;
                 }
@@ -1312,7 +1312,7 @@ namespace Game.Entities
                 detectionValue -= obj.m_stealth.GetValue((StealthType)i);
 
                 // Calculate max distance
-                float visibilityRange = detectionValue * 0.3f + combatReach;
+                var visibilityRange = detectionValue * 0.3f + combatReach;
 
                 // If this unit is an NPC then player detect range doesn't apply
                 if (unit && unit.IsTypeId(TypeId.Player) && visibilityRange > SharedConst.MaxPlayerStealthDetectRange)
@@ -1323,7 +1323,7 @@ namespace Game.Entities
                     visibilityRange += (visibilityRange * 0.08f) + 1.5f;
 
                 // If checking for alert, and creature's visibility range is greater than aggro distance, No alert
-                Unit tunit = obj.ToUnit();
+                var tunit = obj.ToUnit();
                 if (checkAlert && unit && unit.ToCreature() && visibilityRange >= unit.ToCreature().GetAttackDistance(tunit) + unit.ToCreature().m_CombatDistance)
                     return false;
 
@@ -1342,7 +1342,7 @@ namespace Game.Entities
 
         public virtual void SendMessageToSetInRange(ServerPacket data, float dist, bool self)
         {
-            MessageDistDeliverer notifier = new MessageDistDeliverer(this, data, dist);
+            var notifier = new MessageDistDeliverer(this, data, dist);
             Cell.VisitWorldObjects(this, notifier, dist);
         }
 
@@ -1383,7 +1383,7 @@ namespace Game.Entities
 
         public void AddObjectToRemoveList()
         {
-            Map map = GetMap();
+            var map = GetMap();
             if (map == null)
             {
                 Log.outError(LogFilter.Server, "Object (TypeId: {0} Entry: {1} GUID: {2}) at attempt add to move list not have valid map (Id: {3}).", GetTypeId(), GetEntry(), GetGUID().ToString(), GetMapId());
@@ -1395,14 +1395,14 @@ namespace Game.Entities
 
         public void SetZoneScript()
         {
-            Map map = GetMap();
+            var map = GetMap();
             if (map != null)
             {
                 if (map.IsDungeon())
                     m_zoneScript = ((InstanceMap)map).GetInstanceScript();
                 else if (!map.IsBattlegroundOrArena())
                 {
-                    BattleField bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(GetZoneId());
+                    var bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(GetZoneId());
                     if (bf != null)
                         m_zoneScript = bf;
                     else
@@ -1415,7 +1415,7 @@ namespace Game.Entities
         {
             if (IsInWorld)
             {
-                InstanceMap instanceMap = GetMap().ToInstanceMap();
+                var instanceMap = GetMap().ToInstanceMap();
                 if (instanceMap != null)
                     return instanceMap.GetInstanceScenario();
             }
@@ -1436,10 +1436,10 @@ namespace Game.Entities
 
         public TempSummon SummonCreature(uint entry, Position pos, TempSummonType despawnType = TempSummonType.ManualDespawn, uint despawnTime = 0, uint vehId = 0, bool visibleBySummonerOnly = false)
         {
-            Map map = GetMap();
+            var map = GetMap();
             if (map != null)
             {
-                TempSummon summon = map.SummonCreature(entry, pos, null, despawnTime, ToUnit(), 0, vehId, visibleBySummonerOnly);
+                var summon = map.SummonCreature(entry, pos, null, despawnTime, ToUnit(), 0, vehId, visibleBySummonerOnly);
                 if (summon != null)
                 {
                     summon.SetTempSummonType(despawnType);
@@ -1458,7 +1458,7 @@ namespace Game.Entities
                 ang = GetOrientation();
             }
 
-            Position pos = new Position(x, y, z, ang);
+            var pos = new Position(x, y, z, ang);
             return SummonGameObject(entry, pos, rotation, respawnTime);
         }
 
@@ -1467,15 +1467,15 @@ namespace Game.Entities
             if (!IsInWorld)
                 return null;
 
-            GameObjectTemplate goinfo = Global.ObjectMgr.GetGameObjectTemplate(entry);
+            var goinfo = Global.ObjectMgr.GetGameObjectTemplate(entry);
             if (goinfo == null)
             {
                 Log.outError(LogFilter.Sql, "Gameobject template {0} not found in database!", entry);
                 return null;
             }
 
-            Map map = GetMap();
-            GameObject go = GameObject.CreateGameObject(entry, map, pos, rotation, 255, GameObjectState.Ready);
+            var map = GetMap();
+            var go = GameObject.CreateGameObject(entry, map, pos, rotation, 255, GameObjectState.Ready);
             if (!go)
                 return null;
 
@@ -1493,7 +1493,7 @@ namespace Game.Entities
 
         public Creature SummonTrigger(float x, float y, float z, float ang, uint duration, CreatureAI AI = null)
         {
-            TempSummonType summonType = (duration == 0) ? TempSummonType.DeadDespawn : TempSummonType.TimedDespawn;
+            var summonType = (duration == 0) ? TempSummonType.DeadDespawn : TempSummonType.TimedDespawn;
             Creature summon = SummonCreature(SharedConst.WorldTrigger, x, y, z, ang, summonType, duration);
             if (summon == null)
                 return null;
@@ -1527,7 +1527,7 @@ namespace Game.Entities
 
             foreach (var tempSummonData in data)
             {
-                TempSummon summon = SummonCreature(tempSummonData.entry, tempSummonData.pos, tempSummonData.type, tempSummonData.time);
+                var summon = SummonCreature(tempSummonData.entry, tempSummonData.pos, tempSummonData.type, tempSummonData.time);
                 if (summon)
                     list.Add(summon);
             }
@@ -1586,7 +1586,7 @@ namespace Game.Entities
 
         public List<Unit> GetPlayerListInGrid(float maxSearchRange)
         {
-            List<Unit> playerList = new List<Unit>();
+            var playerList = new List<Unit>();
             var checker = new AnyPlayerInObjectRangeCheck(this, maxSearchRange);
             var searcher = new PlayerListSearcher(this, playerList, checker);
 
@@ -1611,7 +1611,7 @@ namespace Game.Entities
 
         public void PlayDistanceSound(uint soundId, Player target = null)
         {
-            PlaySpeakerBoxSound playSpeakerBoxSound = new PlaySpeakerBoxSound(GetGUID(), soundId);
+            var playSpeakerBoxSound = new PlaySpeakerBoxSound(GetGUID(), soundId);
             if (target != null)
                 target.SendPacket(playSpeakerBoxSound);
             else
@@ -1620,7 +1620,7 @@ namespace Game.Entities
 
         public void PlayDirectSound(uint soundId, Player target = null, uint broadcastTextId = 0)
         {
-            PlaySound sound = new PlaySound(GetGUID(), soundId, broadcastTextId);
+            var sound = new PlaySound(GetGUID(), soundId, broadcastTextId);
             if (target)
                 target.SendPacket(sound);
             else
@@ -1640,7 +1640,7 @@ namespace Game.Entities
             if (!IsInWorld)
                 return;
 
-            List<Unit> targets = new List<Unit>();
+            var targets = new List<Unit>();
             var check = new AnyPlayerInObjectRangeCheck(this, GetVisibilityRange(), false);
             var searcher = new PlayerListSearcher(this, targets, check);
 
@@ -1787,9 +1787,9 @@ namespace Game.Entities
 
         public float GetDistanceZ(WorldObject obj)
         {
-            float dz = Math.Abs(GetPositionZ() - obj.GetPositionZ());
-            float sizefactor = GetCombatReach() + obj.GetCombatReach();
-            float dist = dz - sizefactor;
+            var dz = Math.Abs(GetPositionZ() - obj.GetPositionZ());
+            var sizefactor = GetCombatReach() + obj.GetCombatReach();
+            var dist = dz - sizefactor;
             return (dist > 0 ? dist : 0);
         }
 
@@ -1798,7 +1798,7 @@ namespace Game.Entities
             float sizefactor = 0;
             sizefactor += incOwnRadius ? GetCombatReach() : 0.0f;
             sizefactor += incTargetRadius ? obj.GetCombatReach() : 0.0f;
-            float maxdist = dist2compare + sizefactor;
+            var maxdist = dist2compare + sizefactor;
 
             Position thisOrTransport = this;
             Position objOrObjTransport = obj;
@@ -1818,31 +1818,31 @@ namespace Game.Entities
 
         public float GetDistance(WorldObject obj)
         {
-            float d = GetExactDist(obj.GetPosition()) - GetCombatReach() - obj.GetCombatReach();
+            var d = GetExactDist(obj.GetPosition()) - GetCombatReach() - obj.GetCombatReach();
             return d > 0.0f ? d : 0.0f;
         }
 
         public float GetDistance(Position pos)
         {
-            float d = GetExactDist(pos) - GetCombatReach();
+            var d = GetExactDist(pos) - GetCombatReach();
             return d > 0.0f ? d : 0.0f;
         }
 
         public float GetDistance(float x, float y, float z)
         {
-            float d = GetExactDist(x, y, z) - GetCombatReach();
+            var d = GetExactDist(x, y, z) - GetCombatReach();
             return d > 0.0f ? d : 0.0f;
         }
 
         public float GetDistance2d(WorldObject obj)
         {
-            float d = GetExactDist2d(obj.GetPosition()) - GetCombatReach() - obj.GetCombatReach();
+            var d = GetExactDist2d(obj.GetPosition()) - GetCombatReach() - obj.GetCombatReach();
             return d > 0.0f ? d : 0.0f;
         }
 
         public float GetDistance2d(float x, float y)
         {
-            float d = GetExactDist2d(x, y) - GetCombatReach();
+            var d = GetExactDist2d(x, y) - GetCombatReach();
             return d > 0.0f ? d : 0.0f;
         }
 
@@ -1923,16 +1923,16 @@ namespace Game.Entities
 
         Position GetHitSpherePointFor(Position dest)
         {
-            Vector3 vThis = new Vector3(GetPositionX(), GetPositionY(), GetPositionZ());
-            Vector3 vObj = new Vector3(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ());
-            Vector3 contactPoint = vThis + (vObj - vThis).directionOrZero() * Math.Min(dest.GetExactDist(GetPosition()), GetCombatReach());
+            var vThis = new Vector3(GetPositionX(), GetPositionY(), GetPositionZ());
+            var vObj = new Vector3(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ());
+            var contactPoint = vThis + (vObj - vThis).directionOrZero() * Math.Min(dest.GetExactDist(GetPosition()), GetCombatReach());
 
             return new Position(contactPoint.X, contactPoint.Y, contactPoint.Z, GetAngle(contactPoint.X, contactPoint.Y));
         }
 
         void GetHitSpherePointFor(Position dest, out float x, out float y, out float z)
         {
-            Position pos = GetHitSpherePointFor(dest);
+            var pos = GetHitSpherePointFor(dest);
             x = pos.GetPositionX();
             y = pos.GetPositionY();
             z = pos.GetPositionZ();
@@ -1940,21 +1940,21 @@ namespace Game.Entities
 
         public bool GetDistanceOrder(WorldObject obj1, WorldObject obj2, bool is3D = true)
         {
-            float dx1 = GetPositionX() - obj1.GetPositionX();
-            float dy1 = GetPositionY() - obj1.GetPositionY();
-            float distsq1 = dx1 * dx1 + dy1 * dy1;
+            var dx1 = GetPositionX() - obj1.GetPositionX();
+            var dy1 = GetPositionY() - obj1.GetPositionY();
+            var distsq1 = dx1 * dx1 + dy1 * dy1;
             if (is3D)
             {
-                float dz1 = GetPositionZ() - obj1.GetPositionZ();
+                var dz1 = GetPositionZ() - obj1.GetPositionZ();
                 distsq1 += dz1 * dz1;
             }
 
-            float dx2 = GetPositionX() - obj2.GetPositionX();
-            float dy2 = GetPositionY() - obj2.GetPositionY();
-            float distsq2 = dx2 * dx2 + dy2 * dy2;
+            var dx2 = GetPositionX() - obj2.GetPositionX();
+            var dy2 = GetPositionY() - obj2.GetPositionY();
+            var distsq2 = dx2 * dx2 + dy2 * dy2;
             if (is3D)
             {
-                float dz2 = GetPositionZ() - obj2.GetPositionZ();
+                var dz2 = GetPositionZ() - obj2.GetPositionZ();
                 distsq2 += dz2 * dz2;
             }
 
@@ -1963,26 +1963,26 @@ namespace Game.Entities
 
         public bool IsInRange(WorldObject obj, float minRange, float maxRange, bool is3D = true)
         {
-            float dx = GetPositionX() - obj.GetPositionX();
-            float dy = GetPositionY() - obj.GetPositionY();
-            float distsq = dx * dx + dy * dy;
+            var dx = GetPositionX() - obj.GetPositionX();
+            var dy = GetPositionY() - obj.GetPositionY();
+            var distsq = dx * dx + dy * dy;
             if (is3D)
             {
-                float dz = GetPositionZ() - obj.GetPositionZ();
+                var dz = GetPositionZ() - obj.GetPositionZ();
                 distsq += dz * dz;
             }
 
-            float sizefactor = GetCombatReach() + obj.GetCombatReach();
+            var sizefactor = GetCombatReach() + obj.GetCombatReach();
 
             // check only for real range
             if (minRange > 0.0f)
             {
-                float mindist = minRange + sizefactor;
+                var mindist = minRange + sizefactor;
                 if (distsq < mindist * mindist)
                     return false;
             }
 
-            float maxdist = maxRange + sizefactor;
+            var maxdist = maxRange + sizefactor;
             return distsq < maxdist * maxdist;
         }
 
@@ -1992,7 +1992,7 @@ namespace Game.Entities
         }
         bool IsInBetween(Position pos1, Position pos2, float size)
         {
-            float dist = GetExactDist2d(pos1);
+            var dist = GetExactDist2d(pos1);
 
             // not using sqrt() for performance
             if ((dist * dist) >= pos1.GetExactDist2dSq(pos2))
@@ -2001,7 +2001,7 @@ namespace Game.Entities
             if (size == 0)
                 size = GetCombatReach() / 2;
 
-            float angle = pos1.GetAngle(pos2);
+            var angle = pos1.GetAngle(pos2);
 
             // not using sqrt() for performance
             return (size * size) >= GetExactDist2dSq(pos1.GetPositionX() + (float)Math.Cos(angle) * dist, pos1.GetPositionY() + (float)Math.Sin(angle) * dist);
@@ -2026,8 +2026,8 @@ namespace Game.Entities
             }
 
             // angle to face `obj` to `this`
-            float angle = (float)RandomHelper.NextDouble() * (2 * MathFunctions.PI);
-            float new_dist = (float)RandomHelper.NextDouble() + (float)RandomHelper.NextDouble();
+            var angle = (float)RandomHelper.NextDouble() * (2 * MathFunctions.PI);
+            var new_dist = (float)RandomHelper.NextDouble() + (float)RandomHelper.NextDouble();
             new_dist = distance * (new_dist > 1 ? new_dist - 2 : new_dist);
 
             rand_x = (float)(pos.posX + new_dist * Math.Cos(angle));
@@ -2048,7 +2048,7 @@ namespace Game.Entities
 
         public void UpdateGroundPositionZ(float x, float y, ref float z)
         {
-            float new_z = GetMap().GetHeight(GetPhaseShift(), x, y, z, true);
+            var new_z = GetMap().GetHeight(GetPhaseShift(), x, y, z, true);
             if (new_z > MapConst.InvalidHeight)
                 z = new_z + 0.05f;                                   // just to be sure that we are not a few pixel under the surface
         }
@@ -2067,9 +2067,9 @@ namespace Game.Entities
                         // non swim unit must be at ground (mostly speedup, because it don't must be in water and water level check less fast
                         if (!ToCreature().CanFly())
                         {
-                            bool canSwim = ToCreature().CanSwim();
-                            float ground_z = z;
-                            float max_z = canSwim
+                            var canSwim = ToCreature().CanSwim();
+                            var ground_z = z;
+                            var max_z = canSwim
                                 ? GetMap().GetWaterOrGroundLevel(GetPhaseShift(), x, y, z, ref ground_z, !ToUnit().HasAuraType(AuraType.WaterWalk))
                                 : ((ground_z = GetMap().GetHeight(GetPhaseShift(), x, y, z, true)));
                             if (max_z > MapConst.InvalidHeight)
@@ -2082,7 +2082,7 @@ namespace Game.Entities
                         }
                         else
                         {
-                            float ground_z = GetMap().GetHeight(GetPhaseShift(), x, y, z, true);
+                            var ground_z = GetMap().GetHeight(GetPhaseShift(), x, y, z, true);
                             if (z < ground_z)
                                 z = ground_z;
                         }
@@ -2093,8 +2093,8 @@ namespace Game.Entities
                         // for server controlled moves playr work same as creature (but it can always swim)
                         if (!ToPlayer().CanFly())
                         {
-                            float ground_z = z;
-                            float max_z = GetMap().GetWaterOrGroundLevel(GetPhaseShift(), x, y, z, ref ground_z, !ToUnit().HasAuraType(AuraType.WaterWalk));
+                            var ground_z = z;
+                            var max_z = GetMap().GetWaterOrGroundLevel(GetPhaseShift(), x, y, z, ref ground_z, !ToUnit().HasAuraType(AuraType.WaterWalk));
                             if (max_z > MapConst.InvalidHeight)
                             {
                                 if (z > max_z)
@@ -2105,7 +2105,7 @@ namespace Game.Entities
                         }
                         else
                         {
-                            float ground_z = GetMap().GetHeight(GetPhaseShift(), x, y, z, true);
+                            var ground_z = GetMap().GetHeight(GetPhaseShift(), x, y, z, true);
                             if (z < ground_z)
                                 z = ground_z;
                         }
@@ -2113,7 +2113,7 @@ namespace Game.Entities
                     }
                 default:
                     {
-                        float ground_z = GetMap().GetHeight(GetPhaseShift(), x, y, z, true);
+                        var ground_z = GetMap().GetHeight(GetPhaseShift(), x, y, z, true);
                         if (ground_z > MapConst.InvalidHeight)
                             z = ground_z;
                         break;
@@ -2145,12 +2145,12 @@ namespace Game.Entities
                 return;
 
             // remember first point
-            float first_x = x;
-            float first_y = y;
-            float first_z = z;
+            var first_x = x;
+            var first_y = y;
+            var first_z = z;
 
             // loop in a circle to look for a point in LoS using small steps
-            for (float angle = MathFunctions.PI / 8; angle < Math.PI * 2; angle += MathFunctions.PI / 8)
+            for (var angle = MathFunctions.PI / 8; angle < Math.PI * 2; angle += MathFunctions.PI / 8)
             {
                 GetNearPoint2D(out x, out y, distance2d + searcher_size, absAngle + angle);
                 z = GetPositionZ();
@@ -2201,8 +2201,8 @@ namespace Game.Entities
         public void MovePosition(ref Position pos, float dist, float angle)
         {
             angle += GetOrientation();
-            float destx = pos.posX + dist * (float)Math.Cos(angle);
-            float desty = pos.posY + dist * (float)Math.Sin(angle);
+            var destx = pos.posX + dist * (float)Math.Cos(angle);
+            var desty = pos.posY + dist * (float)Math.Sin(angle);
 
             // Prevent invalid coordinates here, position is unchanged
             if (!GridDefines.IsValidMapCoord(destx, desty, pos.posZ))
@@ -2211,11 +2211,11 @@ namespace Game.Entities
                 return;
             }
 
-            float ground = GetMap().GetHeight(GetPhaseShift(), destx, desty, MapConst.MaxHeight, true);
-            float floor = GetMap().GetHeight(GetPhaseShift(), destx, desty, pos.posZ, true);
-            float destz = Math.Abs(ground - pos.posZ) <= Math.Abs(floor - pos.posZ) ? ground : floor;
+            var ground = GetMap().GetHeight(GetPhaseShift(), destx, desty, MapConst.MaxHeight, true);
+            var floor = GetMap().GetHeight(GetPhaseShift(), destx, desty, pos.posZ, true);
+            var destz = Math.Abs(ground - pos.posZ) <= Math.Abs(floor - pos.posZ) ? ground : floor;
 
-            float step = dist / 10.0f;
+            var step = dist / 10.0f;
 
             for (byte j = 0; j < 10; ++j)
             {
@@ -2244,19 +2244,19 @@ namespace Game.Entities
 
         float NormalizeZforCollision(WorldObject obj, float x, float y, float z)
         {
-            float ground = obj.GetMap().GetHeight(obj.GetPhaseShift(), x, y, MapConst.MaxHeight, true);
-            float floor = obj.GetMap().GetHeight(obj.GetPhaseShift(), x, y, z + 2.0f, true);
-            float helper = Math.Abs(ground - z) <= Math.Abs(floor - z) ? ground : floor;
+            var ground = obj.GetMap().GetHeight(obj.GetPhaseShift(), x, y, MapConst.MaxHeight, true);
+            var floor = obj.GetMap().GetHeight(obj.GetPhaseShift(), x, y, z + 2.0f, true);
+            var helper = Math.Abs(ground - z) <= Math.Abs(floor - z) ? ground : floor;
             if (z > helper) // must be above ground
             {
-                Unit unit = obj.ToUnit();
+                var unit = obj.ToUnit();
                 if (unit)
                 {
                     if (unit.CanFly())
                         return z;
                 }
                 LiquidData liquid_status;
-                ZLiquidStatus res = obj.GetMap().GetLiquidStatus(obj.GetPhaseShift(), x, y, z, MapConst.MapAllLiquidTypes, out liquid_status);
+                var res = obj.GetMap().GetLiquidStatus(obj.GetPhaseShift(), x, y, z, MapConst.MapAllLiquidTypes, out liquid_status);
                 if (res != 0 && liquid_status.level > helper) // water must be above ground
                 {
                     if (liquid_status.level > z) // z is underwater
@@ -2271,8 +2271,8 @@ namespace Game.Entities
         public void MovePositionToFirstCollision(ref Position pos, float dist, float angle)
         {
             angle += GetOrientation();
-            float destx = pos.posX + dist * (float)Math.Cos(angle);
-            float desty = pos.posY + dist * (float)Math.Sin(angle);
+            var destx = pos.posX + dist * (float)Math.Cos(angle);
+            var desty = pos.posY + dist * (float)Math.Sin(angle);
 
             // Prevent invalid coordinates here, position is unchanged
             if (!GridDefines.IsValidMapCoord(destx, desty))
@@ -2281,8 +2281,8 @@ namespace Game.Entities
                 return;
             }
 
-            float destz = NormalizeZforCollision(this, destx, desty, pos.GetPositionZ());
-            bool col = Global.VMapMgr.GetObjectHitPos(PhasingHandler.GetTerrainMapId(GetPhaseShift(), GetMap(), pos.posX, pos.posY), pos.posX, pos.posY, pos.posZ + 0.5f, destx, desty, destz + 0.5f, out destx, out desty, out destz, -0.5f);
+            var destz = NormalizeZforCollision(this, destx, desty, pos.GetPositionZ());
+            var col = Global.VMapMgr.GetObjectHitPos(PhasingHandler.GetTerrainMapId(GetPhaseShift(), GetMap(), pos.posX, pos.posY), pos.posX, pos.posY, pos.posZ + 0.5f, destx, desty, destz + 0.5f, out destx, out desty, out destz, -0.5f);
 
             // collision occured
             if (col)
@@ -2304,7 +2304,7 @@ namespace Game.Entities
                 dist = (float)Math.Sqrt((pos.posX - destx) * (pos.posX - destx) + (pos.posY - desty) * (pos.posY - desty));
             }
 
-            float step = dist / 10.0f;
+            var step = dist / 10.0f;
 
             for (byte j = 0; j < 10; ++j)
             {

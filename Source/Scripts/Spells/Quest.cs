@@ -301,7 +301,7 @@ namespace Scripts.Spells.Quest
 
         void HandleDummy(uint effIndex)
         {
-            Creature creatureTarget = GetHitCreature();
+            var creatureTarget = GetHitCreature();
             if (creatureTarget)
             {
                 if (!creatureTarget.IsPet() && creatureTarget.GetEntry() == _originalEntry)
@@ -341,7 +341,7 @@ namespace Scripts.Spells.Quest
         void HandleEffectPeriodic(AuraEffect aurEff)
         {
             PreventDefaultAction();
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster)
                 caster.CastSpell(caster, SpellIds.ThaumaturgyChannel, false);
         }
@@ -369,8 +369,8 @@ namespace Scripts.Spells.Quest
 
         void HandleDummy(uint effIndex)
         {
-            Unit caster = GetCaster();
-            uint spellId = RandomHelper.randChance(50) ? SpellIds.CreateResonatingSkull : SpellIds.CreateBoneDust;
+            var caster = GetCaster();
+            var spellId = RandomHelper.randChance(50) ? SpellIds.CreateResonatingSkull : SpellIds.CreateBoneDust;
             caster.CastSpell(caster, spellId, true, null);
         }
 
@@ -393,10 +393,10 @@ namespace Scripts.Spells.Quest
 
         void HandleDummy(uint effIndex)
         {
-            Player caster = GetCaster().ToPlayer();
+            var caster = GetCaster().ToPlayer();
             if (GetCastItem())
             {
-                Creature creatureTarget = GetHitCreature();
+                var creatureTarget = GetHitCreature();
                 if (creatureTarget)
                 {
                     uint newEntry = 0;
@@ -433,7 +433,7 @@ namespace Scripts.Spells.Quest
     {
         void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            Unit target = GetTarget();
+            var target = GetTarget();
             target.AddUnitFlag(UnitFlags.ImmuneToPc);
             target.AddUnitState(UnitState.Root);
         }
@@ -461,7 +461,7 @@ namespace Scripts.Spells.Quest
 
         void HandleDummy(uint effIndex)
         {
-            Unit target = GetHitUnit();
+            var target = GetHitUnit();
             if (target)
                 if (target.IsTypeId(TypeId.Unit) && target.HasAura(SpellIds.ForceShieldArcanePurpleX3))
                     // Make sure nobody else is channeling the same target
@@ -486,7 +486,7 @@ namespace Scripts.Spells.Quest
 
         void HandleDummy(uint effIndex)
         {
-            Unit target = GetHitUnit();
+            var target = GetHitUnit();
             if (target)
                 if (target.IsTypeId(TypeId.Unit))
                     target.RemoveAurasDueToSpell(SpellIds.ForceShieldArcanePurpleX3);
@@ -510,12 +510,12 @@ namespace Scripts.Spells.Quest
 
         void HandleDummy(uint effIndex)
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
 
-            Unit unitTarget = GetHitUnit();
+            var unitTarget = GetHitUnit();
             if (unitTarget)
             {
-                uint spellId = SpellIds.SummonArcanePrisonerMale;
+                var spellId = SpellIds.SummonArcanePrisonerMale;
                 if (Convert.ToBoolean(RandomHelper.Rand32() % 2))
                     spellId = SpellIds.SummonArcanePrisonerFemale;
                 caster.CastSpell(caster, spellId, true);
@@ -547,10 +547,10 @@ namespace Scripts.Spells.Quest
 
         void HandleDummy(uint effIndex)
         {
-            Item castItem = GetCastItem();
-            Unit caster = GetCaster();
+            var castItem = GetCastItem();
+            var caster = GetCaster();
 
-            Creature target = GetHitCreature();
+            var target = GetHitCreature();
             if (target)
             {
                 uint spellId;
@@ -593,7 +593,7 @@ namespace Scripts.Spells.Quest
     {
         void HandleDummy(uint effIndex)
         {
-            Creature creatureTarget = GetHitCreature();
+            var creatureTarget = GetHitCreature();
             if (creatureTarget)
             {
                 uint uiNewEntry = 0;
@@ -632,7 +632,7 @@ namespace Scripts.Spells.Quest
 
         void HandleDummy(uint effIndex)
         {
-            uint spellId = SpellIds.BananasFallToGround;
+            var spellId = SpellIds.BananasFallToGround;
             switch (RandomHelper.URand(0, 3))
             {
                 case 1:
@@ -661,12 +661,12 @@ namespace Scripts.Spells.Quest
     {
         void HandleDummy(uint effIndex)
         {
-            uint reqAuraId = (uint)GetSpellInfo().GetEffect(1).CalcValue();
+            var reqAuraId = (uint)GetSpellInfo().GetEffect(1).CalcValue();
 
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster.HasAuraEffect(reqAuraId, 0))
             {
-                uint spellId = (uint)GetSpellInfo().GetEffect(0).CalcValue();
+                var spellId = (uint)GetSpellInfo().GetEffect(0).CalcValue();
                 caster.CastSpell(caster, spellId, true, null);
             }
         }
@@ -684,14 +684,14 @@ namespace Scripts.Spells.Quest
     {
         void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster)
             {
-                Unit target = GetTarget();
+                var target = GetTarget();
                 // Already in fire
                 if (target.HasAura(SpellIds.Ablaze))
                     return;
-                Player player = caster.GetCharmerOrOwnerPlayerOrPlayerItself();
+                var player = caster.GetCharmerOrOwnerPlayerOrPlayerItself();
                 if (player)
                 {
                     switch (target.GetEntry())
@@ -734,9 +734,9 @@ namespace Scripts.Spells.Quest
 
         void HandleDummy(uint effIndex)
         {
-            Player caster = GetCaster().ToPlayer();
+            var caster = GetCaster().ToPlayer();
 
-            Creature target = GetHitCreature();
+            var target = GetHitCreature();
             if (target)
             {
                 caster.CastSpell(caster, SpellIds.TriggerAidOfTheEarthen, true, null);
@@ -762,7 +762,7 @@ namespace Scripts.Spells.Quest
         void HandleScript(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
-            Player target = GetHitPlayer();
+            var target = GetHitPlayer();
             if (target)
             {
                 target.CastSpell(target, target.GetGender() == Gender.Male ? SpellIds.MaleDisguise : SpellIds.FemaleDisguise, true);
@@ -782,7 +782,7 @@ namespace Scripts.Spells.Quest
     {
         void HandleDummy(uint effIndex)
         {
-            Creature target = GetHitCreature();
+            var target = GetHitCreature();
             if (target)
             {
                 if (target.HasAura(SpellIds.PermanentFeignDeath))
@@ -814,9 +814,9 @@ namespace Scripts.Spells.Quest
 
         void HandleDummy(uint effIndex)
         {
-            Player caster = GetCaster().ToPlayer();
+            var caster = GetCaster().ToPlayer();
 
-            Creature target = GetHitCreature();
+            var target = GetHitCreature();
             if (target)
             {
                 target.DespawnOrUnsummon();
@@ -840,8 +840,8 @@ namespace Scripts.Spells.Quest
 
         void HandleDummy(uint effIndex)
         {
-            Player caster = GetCaster().ToPlayer();
-            Creature target = GetHitCreature();
+            var caster = GetCaster().ToPlayer();
+            var target = GetHitCreature();
             if (target != null)
             {
                 if (!target.HasAura(SpellIds.Flames))
@@ -869,9 +869,9 @@ namespace Scripts.Spells.Quest
 
         void HandleScript(uint effIndex)
         {
-            Player caster = GetCaster().ToPlayer();
+            var caster = GetCaster().ToPlayer();
 
-            Creature target = GetHitCreature();
+            var target = GetHitCreature();
             if (target)
             {
                 caster.KilledMonsterCredit(CreatureIds.ShardKillCredit);
@@ -897,10 +897,10 @@ namespace Scripts.Spells.Quest
     {
         void HandleDummy(uint effIndex)
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster.IsVehicle())
             {
-                Unit player = caster.GetVehicleKit().GetPassenger(0);
+                var player = caster.GetVehicleKit().GetPassenger(0);
                 if (player)
                     player.ToPlayer().KilledMonsterCredit(CreatureIds.KingOfTheMountaintKc);
             }
@@ -922,7 +922,7 @@ namespace Scripts.Spells.Quest
 
         void HandleScriptEffect(uint effIndex)
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             caster.CastSpell(caster, RandomHelper.RAND(SpellIds.SummonAngryKvaldir, SpellIds.SummonNorthSeaMako, SpellIds.SummonNorthSeaThresher, SpellIds.SummonNorthSeaBlueShark));
         }
 
@@ -943,7 +943,7 @@ namespace Scripts.Spells.Quest
 
         void HandleDummy(uint effIndex)
         {
-            Player caster = GetCaster().ToPlayer();
+            var caster = GetCaster().ToPlayer();
             if (RandomHelper.randChance(66))
                 caster.AddItem(Misc.ItemIdRedSnapper, 1);
             else
@@ -970,7 +970,7 @@ namespace Scripts.Spells.Quest
     {
         void HandleSummon()
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
 
             if (RandomHelper.randChance(80))
                 caster.CastSpell(caster, SpellIds.SummonDeepJormungar, true);
@@ -1010,10 +1010,10 @@ namespace Scripts.Spells.Quest
         void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             // player must cast kill credit and do emote text, according to sniff
-            Player target = GetTarget().ToPlayer();
+            var target = GetTarget().ToPlayer();
             if (target)
             {
-                Creature trigger = target.FindNearestCreature(CreatureIds.IceSpikeBunny, 25.0f);
+                var trigger = target.FindNearestCreature(CreatureIds.IceSpikeBunny, 25.0f);
                 if (trigger)
                 {
                     Global.CreatureTextMgr.SendChat(trigger, Misc.Say1, target, ChatMsg.Addon, Language.Addon, Game.CreatureTextRange.Normal, 0, Team.Other, false, target);
@@ -1034,15 +1034,15 @@ namespace Scripts.Spells.Quest
     {
         void HandleDummy(uint effIndex)
         {
-            Creature unitTarget = GetHitCreature();
+            var unitTarget = GetHitCreature();
             if (unitTarget)
             {
-                Unit caster = GetCaster();
+                var caster = GetCaster();
                 if (caster)
                 {
                     if (caster.IsTypeId(TypeId.Unit))
                     {
-                        Unit owner = caster.GetOwner();
+                        var owner = caster.GetOwner();
                         if (owner)
                         {
                             switch (unitTarget.GetEntry())
@@ -1073,7 +1073,7 @@ namespace Scripts.Spells.Quest
     {
         void HandleDummy(uint effIndex)
         {
-            Creature target = GetHitCreature();
+            var target = GetHitCreature();
             if (target)
                 target.CastSpell(GetCaster(), SpellIds.BunnyCreditBeam, false);
         }
@@ -1089,7 +1089,7 @@ namespace Scripts.Spells.Quest
     {
         void HandleScript(uint effIndex)
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             switch (caster.GetAreaId())
             {
                 case Misc.AreaIdBittertidelake:
@@ -1135,16 +1135,16 @@ namespace Scripts.Spells.Quest
         {
             if (GetHitCreature())
             {
-                Unit caster = GetOriginalCaster();
+                var caster = GetOriginalCaster();
                 if (caster)
                 {
-                    Vehicle vehicle = caster.GetVehicleKit();
+                    var vehicle = caster.GetVehicleKit();
                     if (vehicle)
                     {
-                        Unit passenger = vehicle.GetPassenger(0);
+                        var passenger = vehicle.GetPassenger(0);
                         if (passenger)
                         {
-                            Player player = passenger.ToPlayer();
+                            var player = passenger.ToPlayer();
                             if (player)
                                 player.KilledMonsterCredit(CreatureIds.WyrmrestTempleCredit);
                         }
@@ -1165,7 +1165,7 @@ namespace Scripts.Spells.Quest
     {
         void HandleScript(uint effIndex)
         {
-            Creature defender = GetHitCreature();
+            var defender = GetHitCreature();
             if (defender)
                 defender.GetAI().Talk(Misc.WhisperOnHitByForceWhisper, defender.GetCharmerOrOwner());
         }
@@ -1182,7 +1182,7 @@ namespace Scripts.Spells.Quest
     {
         void HandleTriggerSpell(AuraEffect aurEff)
         {
-            Unit target = GetTarget();
+            var target = GetTarget();
             if (target)
                 // On trigger proccing
                 target.CastSpell(target, SpellIds.AggroCheck);
@@ -1200,7 +1200,7 @@ namespace Scripts.Spells.Quest
     {
         void HandleDummy(uint effIndex)
         {
-            Player playerTarget = GetHitPlayer();
+            var playerTarget = GetHitPlayer();
             if (playerTarget)
                 // Check if found player target is on fly mount or using flying form
                 if (playerTarget.HasAuraType(AuraType.Fly) || playerTarget.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed))
@@ -1219,7 +1219,7 @@ namespace Scripts.Spells.Quest
     {
         void HandleEffectPeriodic(AuraEffect aurEff)
         {
-            Unit target = GetTarget();
+            var target = GetTarget();
             if (target)
                 // On each tick cast Choose Loc to trigger summon
                 target.CastSpell(target, SpellIds.ChooseLoc);
@@ -1237,11 +1237,11 @@ namespace Scripts.Spells.Quest
     {
         void HandleDummy(uint effIndex)
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             // Check for player that is in 65 y range
-            List<Unit> playerList = new List<Unit>();
-            AnyPlayerInObjectRangeCheck checker = new AnyPlayerInObjectRangeCheck(caster, 65.0f);
-            PlayerListSearcher searcher = new PlayerListSearcher(caster, playerList, checker);
+            var playerList = new List<Unit>();
+            var checker = new AnyPlayerInObjectRangeCheck(caster, 65.0f);
+            var searcher = new PlayerListSearcher(caster, playerList, checker);
             Cell.VisitWorldObjects(caster, searcher, 65.0f);
             foreach (Player player in playerList)
             {
@@ -1265,7 +1265,7 @@ namespace Scripts.Spells.Quest
     {
         SpellCastResult CheckRequirement()
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             // This spell will be cast only if caster has one of these auras
             if (!(caster.HasAuraType(AuraType.Fly) || caster.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed)))
                 return SpellCastResult.CantDoThatRightNow;
@@ -1291,7 +1291,7 @@ namespace Scripts.Spells.Quest
             if (GetHitAura() != null && GetHitAura().GetStackAmount() >= GetSpellInfo().StackAmount)
             {
                 GetHitUnit().CastSpell((Unit)null, SpellIds.SummonGorgedLurkingBasilisk, true);
-                Creature basilisk = GetHitUnit().ToCreature();
+                var basilisk = GetHitUnit().ToCreature();
                 if (basilisk)
                     basilisk.DespawnOrUnsummon();
             }
@@ -1310,7 +1310,7 @@ namespace Scripts.Spells.Quest
         void SetDest(ref SpellDestination dest)
         {
             // Adjust effect summon position
-            Position offset = new Position(0.0f, 0.0f, 20.0f, 0.0f);
+            var offset = new Position(0.0f, 0.0f, 20.0f, 0.0f);
             dest.RelocateOffset(offset);
         }
 
@@ -1370,7 +1370,7 @@ namespace Scripts.Spells.Quest
         void SetDest(ref SpellDestination dest)
         {
             // Adjust effect summon position
-            Position offset = new Position(0.0f, 0.0f, 20.0f, 0.0f);
+            var offset = new Position(0.0f, 0.0f, 20.0f, 0.0f);
             dest.RelocateOffset(offset);
         }
 
@@ -1387,7 +1387,7 @@ namespace Scripts.Spells.Quest
         void SetDest(ref SpellDestination dest)
         {
             // Adjust effect summon position
-            Position offset = new Position(0.0f, 0.0f, 2.5f, 0.0f);
+            var offset = new Position(0.0f, 0.0f, 2.5f, 0.0f);
             dest.RelocateOffset(offset);
         }
 
@@ -1412,12 +1412,12 @@ namespace Scripts.Spells.Quest
 
         void HandleScript(uint effIndex)
         {
-            Player player = GetHitPlayer();
+            var player = GetHitPlayer();
             if (player)
             {
                 if (RandomHelper.randChance(50))
                 {
-                    Creature creature = GetCaster().ToCreature();
+                    var creature = GetCaster().ToCreature();
                     player.CastSpell(creature, SpellIds.BearFlankFail);
                     creature.GetAI().Talk(0, player);
                 }
@@ -1442,7 +1442,7 @@ namespace Scripts.Spells.Quest
 
         void HandleEffectDummy(uint effIndex)
         {
-            WorldLocation pos = GetExplTargetDest();
+            var pos = GetExplTargetDest();
             if (pos != null)
                 GetCaster().CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), (uint)GetEffectValue(), true);
         }
@@ -1472,10 +1472,10 @@ namespace Scripts.Spells.Quest
             Unit creature = GetHitCreature();
             if (creature)
             {
-                Unit charmer = GetCaster().GetCharmerOrOwner();
+                var charmer = GetCaster().GetCharmerOrOwner();
                 if (charmer)
                 {
-                    Player player = charmer.ToPlayer();
+                    var player = charmer.ToPlayer();
                     if (player)
                     {
                         if (player.GetQuestStatus(Misc.QuestIdBurstAtTheSeams) == QuestStatus.Incomplete)
@@ -1487,7 +1487,7 @@ namespace Scripts.Spells.Quest
                             creature.CastSpell(creature, SpellIds.BurstAtTheSeamsDmg2, true);
 
                             player.CastSpell(player, SpellIds.DrakkariSkullcrusherCredit, true);
-                            ushort count = player.GetReqKillOrCastCurrentCount(Misc.QuestIdBurstAtTheSeams, (int)CreatureIds.DrakkariChieftaink);
+                            var count = player.GetReqKillOrCastCurrentCount(Misc.QuestIdBurstAtTheSeams, (int)CreatureIds.DrakkariChieftaink);
                             if ((count % 20) == 0)
                                 player.CastSpell(player, SpellIds.SummonDrakkariChieftain, true);
                         }
@@ -1534,10 +1534,10 @@ namespace Scripts.Spells.Quest
     {
         void ModDest(ref SpellDestination dest)
         {
-            float dist = GetSpellInfo().GetEffect(0).CalcRadius(GetCaster());
-            float angle = RandomHelper.FRand(0.75f, 1.25f) * MathFunctions.PI;
+            var dist = GetSpellInfo().GetEffect(0).CalcRadius(GetCaster());
+            var angle = RandomHelper.FRand(0.75f, 1.25f) * MathFunctions.PI;
 
-            Position pos = GetCaster().GetNearPosition(dist, angle);
+            var pos = GetCaster().GetNearPosition(dist, angle);
             dest.Relocate(pos);
         }
 
@@ -1593,7 +1593,7 @@ namespace Scripts.Spells.Quest
     {
         void HandleDummy(uint effIndex)
         {
-            Player player = GetCaster().GetCharmerOrOwner().ToPlayer();
+            var player = GetCaster().GetCharmerOrOwner().ToPlayer();
             if (player)
             {
                 player.StopCastingCharm();
@@ -1615,7 +1615,7 @@ namespace Scripts.Spells.Quest
         void HandleEffectPeriodic(AuraEffect aurEff)
         {
             PreventDefaultAction();
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster)
                 caster.CastSpell(caster, GetSpellInfo().GetEffect(aurEff.GetEffIndex()).TriggerSpell, true, null, aurEff);
         }
@@ -1669,10 +1669,10 @@ namespace Scripts.Spells.Quest
     {
         void HandleScript(uint effIndex)
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster.IsVehicle())
             {
-                Unit passenger = caster.GetVehicleKit().GetPassenger(1);
+                var passenger = caster.GetVehicleKit().GetPassenger(1);
                 if (passenger)
                 {
                     passenger.ExitVehicle();
@@ -1697,10 +1697,10 @@ namespace Scripts.Spells.Quest
 
         void HandleDummy(uint effIndex)
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster.IsVehicle())
             {
-                Unit passenger = caster.GetVehicleKit().GetPassenger(0);
+                var passenger = caster.GetVehicleKit().GetPassenger(0);
                 if (passenger)
                     passenger.CastSpell(passenger, SpellIds.IllidanKillCredit, true);
             }
@@ -1723,7 +1723,7 @@ namespace Scripts.Spells.Quest
 
         void HandleScriptEffect(uint effIndex)
         {
-            Player player = GetHitPlayer();
+            var player = GetHitPlayer();
             if (player)
                 player.CastSpell(player, SpellIds.TotemOfTheEarthenRing, TriggerCastFlags.FullMask); // ignore reagent cost, consumed by quest
         }
@@ -1748,7 +1748,7 @@ namespace Scripts.Spells.Quest
             if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Expire)
                 return;
 
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster)
                 caster.CastSpell(caster, RandomHelper.URand(SpellIds.SummonSandGnome, SpellIds.SummonBoneSlicer), true);
         }
@@ -1770,8 +1770,8 @@ namespace Scripts.Spells.Quest
 
         void HandleDummyEffect()
         {
-            Unit caster = GetCaster();
-            Creature injuredStormwindInfantry = caster.FindNearestCreature(CreatureIds.InjuredStormwindInfantry, 5.0f, true);
+            var caster = GetCaster();
+            var injuredStormwindInfantry = caster.FindNearestCreature(CreatureIds.InjuredStormwindInfantry, 5.0f, true);
             if (injuredStormwindInfantry)
             {
                 injuredStormwindInfantry.SetCreatorGUID(caster.GetGUID());
@@ -1790,7 +1790,7 @@ namespace Scripts.Spells.Quest
     {
         void HandleDummyEffect()
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             caster.SetHealth(caster.CountPctFromMaxHealth(RandomHelper.IRand(3, 5) * 10));
         }
 
@@ -1805,7 +1805,7 @@ namespace Scripts.Spells.Quest
     {
         void HandleScript(uint effIndex)
         {
-            Creature caster = GetCaster().ToCreature();
+            var caster = GetCaster().ToCreature();
             GetHitUnit().ExitVehicle();
 
             if (caster)

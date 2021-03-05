@@ -53,10 +53,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(AELooting);
             _worldPacket.FlushBits();
 
-            foreach (LootItemData item in Items)
+            foreach (var item in Items)
                 item.Write(_worldPacket);
 
-            foreach (LootCurrency currency in Currencies)
+            foreach (var currency in Currencies)
             {
                 _worldPacket.WriteUInt32(currency.CurrencyID);
                 _worldPacket.WriteUInt32(currency.Quantity);
@@ -85,7 +85,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint Count = _worldPacket.ReadUInt32();
+            var Count = _worldPacket.ReadUInt32();
 
             for (uint i = 0; i < Count; ++i)
             {
@@ -108,12 +108,12 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint Count = _worldPacket.ReadUInt32();
+            var Count = _worldPacket.ReadUInt32();
             Target = _worldPacket.ReadPackedGuid();
 
-            for (int i = 0; i < Count; ++i)
+            for (var i = 0; i < Count; ++i)
             {
-                LootRequest lootRequest = new LootRequest();
+                var lootRequest = new LootRequest();
                 lootRequest.Object = _worldPacket.ReadPackedGuid();
                 lootRequest.LootListID = _worldPacket.ReadUInt8();
                 Loot[i] = lootRequest;

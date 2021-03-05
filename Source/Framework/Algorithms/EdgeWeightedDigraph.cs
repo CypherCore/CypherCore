@@ -21,7 +21,7 @@ namespace Framework.Collections
             NumberOfVertices = vertices;
             NumberOfEdges = 0;
             _adjacent = new LinkedList<DirectedEdge>[NumberOfVertices];
-            for (int v = 0; v < NumberOfVertices; v++)
+            for (var v = 0; v < NumberOfVertices; v++)
             {
                 _adjacent[v] = new LinkedList<DirectedEdge>();
             }
@@ -63,9 +63,9 @@ namespace Framework.Collections
         /// <returns>IEnumerable of of all directed edges in the edge-weighted digraph</returns>
         public IEnumerable<DirectedEdge> Edges()
         {
-            for (int v = 0; v < NumberOfVertices; v++)
+            for (var v = 0; v < NumberOfVertices; v++)
             {
-                foreach (DirectedEdge edge in _adjacent[v])
+                foreach (var edge in _adjacent[v])
                 {
                     yield return edge;
                 }
@@ -91,10 +91,10 @@ namespace Framework.Collections
         {
             var formattedString = new StringBuilder();
             formattedString.AppendFormat("{0} vertices, {1} edges {2}", NumberOfVertices, NumberOfEdges, Environment.NewLine);
-            for (int v = 0; v < NumberOfVertices; v++)
+            for (var v = 0; v < NumberOfVertices; v++)
             {
                 formattedString.AppendFormat("{0}: ", v);
-                foreach (DirectedEdge edge in _adjacent[v])
+                foreach (var edge in _adjacent[v])
                 {
                     formattedString.AppendFormat("{0} ", edge.To);
                 }

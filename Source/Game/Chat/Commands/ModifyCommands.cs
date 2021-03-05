@@ -31,8 +31,8 @@ namespace Game.Chat
         [Command("hp", RBACPermissions.CommandModifyHp)]
         static bool HandleModifyHPCommand(StringArguments args, CommandHandler handler)
         {
-            Player target = handler.GetSelectedPlayerOrSelf();
-            if (CheckModifyResources(args, handler, target, out int hp, out int hpmax))
+            var target = handler.GetSelectedPlayerOrSelf();
+            if (CheckModifyResources(args, handler, target, out var hp, out var hpmax))
             {
                 NotifyModification(handler, target, CypherStrings.YouChangeHp, CypherStrings.YoursHpChanged, hp, hpmax);
                 target.SetMaxHealth((uint)hpmax);
@@ -46,7 +46,7 @@ namespace Game.Chat
         static bool HandleModifyManaCommand(StringArguments args, CommandHandler handler)
         {
             int mana, manamax;
-            Player target = handler.GetSelectedPlayerOrSelf();
+            var target = handler.GetSelectedPlayerOrSelf();
 
             if (CheckModifyResources(args, handler, target, out mana, out manamax))
             {
@@ -63,7 +63,7 @@ namespace Game.Chat
         static bool HandleModifyEnergyCommand(StringArguments args, CommandHandler handler)
         {
             int energy, energymax;
-            Player target = handler.GetSelectedPlayerOrSelf();
+            var target = handler.GetSelectedPlayerOrSelf();
             byte energyMultiplier = 10;
             if (CheckModifyResources(args, handler, target, out energy, out energymax, energyMultiplier))
             {
@@ -79,7 +79,7 @@ namespace Game.Chat
         static bool HandleModifyRageCommand(StringArguments args, CommandHandler handler)
         {
             int rage, ragemax;
-            Player target = handler.GetSelectedPlayerOrSelf();
+            var target = handler.GetSelectedPlayerOrSelf();
             byte rageMultiplier = 10;
             if (CheckModifyResources(args, handler, target, out rage, out ragemax, rageMultiplier))
             {
@@ -95,7 +95,7 @@ namespace Game.Chat
         static bool HandleModifyRunicPowerCommand(StringArguments args, CommandHandler handler)
         {
             int rune, runemax;
-            Player target = handler.GetSelectedPlayerOrSelf();
+            var target = handler.GetSelectedPlayerOrSelf();
             byte runeMultiplier = 10;
             if (CheckModifyResources(args, handler, target, out rune, out runemax, runeMultiplier))
             {
@@ -110,32 +110,32 @@ namespace Game.Chat
         [Command("faction", RBACPermissions.CommandModifyFaction)]
         static bool HandleModifyFactionCommand(StringArguments args, CommandHandler handler)
         {
-            string pfactionid = handler.ExtractKeyFromLink(args, "Hfaction");
+            var pfactionid = handler.ExtractKeyFromLink(args, "Hfaction");
 
-            Creature target = handler.GetSelectedCreature();
+            var target = handler.GetSelectedCreature();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.SelectCreature);
                 return false;
             }
 
-            if (!uint.TryParse(pfactionid, out uint factionid))
+            if (!uint.TryParse(pfactionid, out var factionid))
             {
-                uint _factionid = target.GetFaction();
+                var _factionid = target.GetFaction();
                 uint _flag = target.m_unitData.Flags;
-                ulong _npcflag = (ulong)target.m_unitData.NpcFlags[0] << 32 | target.m_unitData.NpcFlags[1];
+                var _npcflag = (ulong)target.m_unitData.NpcFlags[0] << 32 | target.m_unitData.NpcFlags[1];
                 uint _dyflag = target.m_objectData.DynamicFlags;
                 handler.SendSysMessage(CypherStrings.CurrentFaction, target.GetGUID().ToString(), _factionid, _flag, _npcflag, _dyflag);
                 return true;
             }
 
-            if (!uint.TryParse(args.NextString(), out uint flag))
+            if (!uint.TryParse(args.NextString(), out var flag))
                 flag = target.m_unitData.Flags;
 
-            if (!ulong.TryParse(args.NextString(), out ulong npcflag))
+            if (!ulong.TryParse(args.NextString(), out var npcflag))
                 npcflag = (ulong)target.m_unitData.NpcFlags[0] << 32 | target.m_unitData.NpcFlags[1];
 
-            if (!uint.TryParse(args.NextString(), out uint dyflag))
+            if (!uint.TryParse(args.NextString(), out var dyflag))
                 dyflag = target.m_objectData.DynamicFlags;
 
             if (!CliDB.FactionTemplateStorage.ContainsKey(factionid))
@@ -161,22 +161,22 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            byte spellflatid = args.NextByte();
+            var spellflatid = args.NextByte();
             if (spellflatid == 0)
                 return false;
 
-            byte op = args.NextByte();
+            var op = args.NextByte();
             if (op == 0)
                 return false;
 
-            ushort val = args.NextUInt16();
+            var val = args.NextUInt16();
             if (val == 0)
                 return false;
 
-            if (!ushort.TryParse(args.NextString(), out ushort mark))
+            if (!ushort.TryParse(args.NextString(), out var mark))
                 mark = 65535;
 
-            Player target = handler.GetSelectedPlayerOrSelf();
+            var target = handler.GetSelectedPlayerOrSelf();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
@@ -191,8 +191,8 @@ namespace Game.Chat
             if (handler.NeedReportToTarget(target))
                 target.SendSysMessage(CypherStrings.YoursSpellflatidChanged, handler.GetNameLink(), spellflatid, val, mark);
 
-            SetSpellModifier packet = new SetSpellModifier(ServerOpcodes.SetFlatSpellModifier);
-            SpellModifierInfo spellMod = new SpellModifierInfo();
+            var packet = new SetSpellModifier(ServerOpcodes.SetFlatSpellModifier);
+            var spellMod = new SpellModifierInfo();
             spellMod.ModIndex = op;
             SpellModifierData modData;
             modData.ClassIndex = spellflatid;
@@ -211,11 +211,11 @@ namespace Game.Chat
         static bool HandleModifyScaleCommand(StringArguments args, CommandHandler handler)
         {
             float Scale;
-            Unit target = handler.GetSelectedUnit();
+            var target = handler.GetSelectedUnit();
             if (CheckModifySpeed(args, handler, target, out Scale, 0.1f, 10.0f, false))
             {
                 NotifyModification(handler, target, CypherStrings.YouChangeSize, CypherStrings.YoursSizeChanged, Scale);
-                Creature creatureTarget = target.ToCreature();
+                var creatureTarget = target.ToCreature();
                 if (creatureTarget)
                     creatureTarget.SetDisplayId(creatureTarget.GetDisplayId(), Scale);
                 else
@@ -231,7 +231,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            if (!uint.TryParse(args.NextString(), out uint mount))
+            if (!uint.TryParse(args.NextString(), out var mount))
                 return false;
 
             if (!CliDB.CreatureDisplayInfoStorage.HasRecord(mount))
@@ -240,7 +240,7 @@ namespace Game.Chat
                 return false;
             }
 
-            Player target = handler.GetSelectedPlayerOrSelf();
+            var target = handler.GetSelectedPlayerOrSelf();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
@@ -265,7 +265,7 @@ namespace Game.Chat
         [Command("money", RBACPermissions.CommandModifyMoney)]
         static bool HandleModifyMoneyCommand(StringArguments args, CommandHandler handler)
         {
-            Player target = handler.GetSelectedPlayerOrSelf();
+            var target = handler.GetSelectedPlayerOrSelf();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
@@ -276,12 +276,12 @@ namespace Game.Chat
             if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
                 return false;
 
-            long moneyToAdd = args.NextInt64();
-            ulong targetMoney = target.GetMoney();
+            var moneyToAdd = args.NextInt64();
+            var targetMoney = target.GetMoney();
 
             if (moneyToAdd < 0)
             {
-                long newmoney = (long)targetMoney + moneyToAdd;
+                var newmoney = (long)targetMoney + moneyToAdd;
 
                 Log.outDebug(LogFilter.ChatSystem, Global.ObjectMgr.GetCypherString(CypherStrings.CurrentMoney), targetMoney, moneyToAdd, newmoney);
                 if (newmoney <= 0)
@@ -294,7 +294,7 @@ namespace Game.Chat
                 }
                 else
                 {
-                    ulong moneyToAddMsg = (ulong)(moneyToAdd * -1);
+                    var moneyToAddMsg = (ulong)(moneyToAdd * -1);
                     if (newmoney > (long)PlayerConst.MaxMoneyAmount)
                         newmoney = (long)PlayerConst.MaxMoneyAmount;
 
@@ -328,7 +328,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            Player target = handler.GetSelectedPlayerOrSelf();
+            var target = handler.GetSelectedPlayerOrSelf();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
@@ -339,7 +339,7 @@ namespace Game.Chat
             if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
                 return false;
 
-            int amount = args.NextInt32();
+            var amount = args.NextInt32();
 
             //target.ModifyCurrency(CurrencyTypes.HonorPoints, amount, true, true);
             handler.SendSysMessage("NOT IMPLEMENTED: {0} honor NOT added.", amount);
@@ -354,11 +354,11 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            byte drunklevel = args.NextByte();
+            var drunklevel = args.NextByte();
             if (drunklevel > 100)
                 drunklevel = 100;
 
-            Player target = handler.GetSelectedPlayerOrSelf();
+            var target = handler.GetSelectedPlayerOrSelf();
             if (target)
                 target.SetDrunkValue(drunklevel);
 
@@ -371,7 +371,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            Player target = handler.GetSelectedPlayerOrSelf();
+            var target = handler.GetSelectedPlayerOrSelf();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
@@ -382,35 +382,35 @@ namespace Game.Chat
             if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
                 return false;
 
-            string factionTxt = handler.ExtractKeyFromLink(args, "Hfaction");
+            var factionTxt = handler.ExtractKeyFromLink(args, "Hfaction");
             if (string.IsNullOrEmpty(factionTxt))
                 return false;
 
-            if (!uint.TryParse(factionTxt, out uint factionId))
+            if (!uint.TryParse(factionTxt, out var factionId))
                 return false;
 
-            string rankTxt = args.NextString();
-            if (factionId == 0 || !int.TryParse(rankTxt, out int amount))
+            var rankTxt = args.NextString();
+            if (factionId == 0 || !int.TryParse(rankTxt, out var amount))
                 return false;
 
             if ((amount == 0) && !(amount < 0) && !rankTxt.IsNumber())
             {
-                string rankStr = rankTxt.ToLower();
+                var rankStr = rankTxt.ToLower();
 
-                int r = 0;
+                var r = 0;
                 amount = -42000;
                 for (; r < (int)ReputationRank.Max; ++r)
                 {
-                    string rank = handler.GetCypherString(ReputationMgr.ReputationRankStrIndex[r]);
+                    var rank = handler.GetCypherString(ReputationMgr.ReputationRankStrIndex[r]);
                     if (string.IsNullOrEmpty(rank))
                         continue;
 
                     if (rank.Equals(rankStr))
                     {
-                        string deltaTxt = args.NextString();
+                        var deltaTxt = args.NextString();
                         if (!string.IsNullOrEmpty(deltaTxt))
                         {
-                            if (!int.TryParse(deltaTxt, out int delta) || delta < 0 || (delta > ReputationMgr.PointsInRank[r] - 1))
+                            if (!int.TryParse(deltaTxt, out var delta) || delta < 0 || (delta > ReputationMgr.PointsInRank[r] - 1))
                             {
                                 handler.SendSysMessage(CypherStrings.CommandFactionDelta, (ReputationMgr.PointsInRank[r] - 1));
                                 return false;
@@ -428,7 +428,7 @@ namespace Game.Chat
                 }
             }
 
-            FactionRecord factionEntry = CliDB.FactionStorage.LookupByKey(factionId);
+            var factionEntry = CliDB.FactionStorage.LookupByKey(factionId);
             if (factionEntry == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandFactionUnknown, factionId);
@@ -454,8 +454,8 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            uint phaseId = args.NextUInt32();
-            uint visibleMapId = args.NextUInt32();
+            var phaseId = args.NextUInt32();
+            var visibleMapId = args.NextUInt32();
 
             if (phaseId != 0 && !CliDB.PhaseStorage.ContainsKey(phaseId))
             {
@@ -463,11 +463,11 @@ namespace Game.Chat
                 return false;
             }
 
-            Unit target = handler.GetSelectedUnit();
+            var target = handler.GetSelectedUnit();
 
             if (visibleMapId != 0)
             {
-                MapRecord visibleMap = CliDB.MapStorage.LookupByKey(visibleMapId);
+                var visibleMap = CliDB.MapStorage.LookupByKey(visibleMapId);
                 if (visibleMap == null || visibleMap.ParentMapID != target.GetMapId())
                 {
                     handler.SendSysMessage(CypherStrings.PhaseNotfound);
@@ -497,7 +497,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            Player target = handler.GetSelectedPlayerOrSelf();
+            var target = handler.GetSelectedPlayerOrSelf();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
@@ -507,11 +507,11 @@ namespace Game.Chat
             if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
                 return false;
 
-            string powerTypeToken = args.NextString();
+            var powerTypeToken = args.NextString();
             if (powerTypeToken.IsEmpty())
                 return false;
 
-            PowerTypeRecord powerType = Global.DB2Mgr.GetPowerTypeByName(powerTypeToken);
+            var powerType = Global.DB2Mgr.GetPowerTypeByName(powerTypeToken);
             if (powerType == null)
             {
                 handler.SendSysMessage(CypherStrings.InvalidPowerName);
@@ -524,7 +524,7 @@ namespace Game.Chat
                 return false;
             }
 
-            int powerAmount = args.NextInt32();
+            var powerAmount = args.NextInt32();
             if (powerAmount < 1)
             {
                 handler.SendSysMessage(CypherStrings.BadValue);
@@ -544,7 +544,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            uint anim_id = args.NextUInt32();
+            var anim_id = args.NextUInt32();
             handler.GetSession().GetPlayer().SetEmoteState((Emote)anim_id);
 
             return true;
@@ -556,18 +556,18 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            Player target = handler.GetSelectedPlayerOrSelf();
+            var target = handler.GetSelectedPlayerOrSelf();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
                 return false;
             }
 
-            PlayerInfo info = Global.ObjectMgr.GetPlayerInfo(target.GetRace(), target.GetClass());
+            var info = Global.ObjectMgr.GetPlayerInfo(target.GetRace(), target.GetClass());
             if (info == null)
                 return false;
 
-            string gender_str = args.NextString();
+            var gender_str = args.NextString();
             Gender gender;
 
             if (gender_str == "male")            // MALE
@@ -601,26 +601,26 @@ namespace Game.Chat
             Global.CharacterCacheStorage.UpdateCharacterGender(target.GetGUID(), (byte)gender);
 
             // Generate random customizations
-            List<ChrCustomizationChoice> customizations = new List<ChrCustomizationChoice>();
+            var customizations = new List<ChrCustomizationChoice>();
 
             var options = Global.DB2Mgr.GetCustomiztionOptions(target.GetRace(), gender);
-            WorldSession worldSession = target.GetSession();
-            foreach (ChrCustomizationOptionRecord option in options)
+            var worldSession = target.GetSession();
+            foreach (var option in options)
             {
-                ChrCustomizationReqRecord optionReq = CliDB.ChrCustomizationReqStorage.LookupByKey(option.ChrCustomizationReqID);
+                var optionReq = CliDB.ChrCustomizationReqStorage.LookupByKey(option.ChrCustomizationReqID);
                 if (optionReq != null && !worldSession.MeetsChrCustomizationReq(optionReq, target.GetClass(), false, customizations))
                     continue;
 
                 // Loop over the options until the first one fits
                 var choicesForOption = Global.DB2Mgr.GetCustomiztionChoices(option.Id);
-                foreach (ChrCustomizationChoiceRecord choiceForOption in choicesForOption)
+                foreach (var choiceForOption in choicesForOption)
                 {
                     var choiceReq = CliDB.ChrCustomizationReqStorage.LookupByKey(choiceForOption.ChrCustomizationReqID);
                     if (choiceReq != null && !worldSession.MeetsChrCustomizationReq(choiceReq, target.GetClass(), false, customizations))
                         continue;
 
-                    ChrCustomizationChoiceRecord choiceEntry = choicesForOption[0];
-                    ChrCustomizationChoice choice = new ChrCustomizationChoice();
+                    var choiceEntry = choicesForOption[0];
+                    var choice = new ChrCustomizationChoice();
                     choice.ChrCustomizationOptionID = option.Id;
                     choice.ChrCustomizationChoiceID = choiceEntry.Id;
                     customizations.Add(choice);
@@ -644,7 +644,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            Player target = handler.GetSelectedPlayerOrSelf();
+            var target = handler.GetSelectedPlayerOrSelf();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
@@ -652,11 +652,11 @@ namespace Game.Chat
                 return false;
             }
 
-            uint currencyId = args.NextUInt32();
+            var currencyId = args.NextUInt32();
             if (!CliDB.CurrencyTypesStorage.ContainsKey(currencyId))
                 return false;
 
-            uint amount = args.NextUInt32();
+            var amount = args.NextUInt32();
             if (amount == 0)
                 return false;
 
@@ -671,9 +671,9 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            uint display_id = args.NextUInt32();
+            var display_id = args.NextUInt32();
 
-            Unit target = handler.GetSelectedUnit();
+            var target = handler.GetSelectedUnit();
             if (!target)
                 target = handler.GetSession().GetPlayer();
 
@@ -689,7 +689,7 @@ namespace Game.Chat
         [CommandNonGroup("demorph", RBACPermissions.CommandDemorph)]
         static bool HandleDeMorphCommand(StringArguments args, CommandHandler handler)
         {
-            Unit target = handler.GetSelectedUnit();
+            var target = handler.GetSelectedUnit();
             if (!target)
                 target = handler.GetSession().GetPlayer();
 
@@ -708,7 +708,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            int xp = args.NextInt32();
+            var xp = args.NextInt32();
 
             if (xp < 1)
             {
@@ -716,7 +716,7 @@ namespace Game.Chat
                 return false;
             }
 
-            Player target = handler.GetSelectedPlayerOrSelf();
+            var target = handler.GetSelectedPlayerOrSelf();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
@@ -744,7 +744,7 @@ namespace Game.Chat
             static bool HandleModifyASpeedCommand(StringArguments args, CommandHandler handler)
             {
                 float allSpeed;
-                Player target = handler.GetSelectedPlayerOrSelf();
+                var target = handler.GetSelectedPlayerOrSelf();
                 if (CheckModifySpeed(args, handler, target, out allSpeed, 0.1f, 50.0f))
                 {
                     NotifyModification(handler, target, CypherStrings.YouChangeAspeed, CypherStrings.YoursAspeedChanged, allSpeed);
@@ -761,7 +761,7 @@ namespace Game.Chat
             static bool HandleModifySwimCommand(StringArguments args, CommandHandler handler)
             {
                 float swimSpeed;
-                Player target = handler.GetSelectedPlayerOrSelf();
+                var target = handler.GetSelectedPlayerOrSelf();
                 if (CheckModifySpeed(args, handler, target, out swimSpeed, 0.1f, 50.0f))
                 {
                     NotifyModification(handler, target, CypherStrings.YouChangeSwimSpeed, CypherStrings.YoursSwimSpeedChanged, swimSpeed);
@@ -775,7 +775,7 @@ namespace Game.Chat
             static bool HandleModifyBWalkCommand(StringArguments args, CommandHandler handler)
             {
                 float backSpeed;
-                Player target = handler.GetSelectedPlayerOrSelf();
+                var target = handler.GetSelectedPlayerOrSelf();
                 if (CheckModifySpeed(args, handler, target, out backSpeed, 0.1f, 50.0f))
                 {
                     NotifyModification(handler, target, CypherStrings.YouChangeBackSpeed, CypherStrings.YoursBackSpeedChanged, backSpeed);
@@ -789,7 +789,7 @@ namespace Game.Chat
             static bool HandleModifyFlyCommand(StringArguments args, CommandHandler handler)
             {
                 float flySpeed;
-                Player target = handler.GetSelectedPlayerOrSelf();
+                var target = handler.GetSelectedPlayerOrSelf();
                 if (CheckModifySpeed(args, handler, target, out flySpeed, 0.1f, 50.0f, false))
                 {
                     NotifyModification(handler, target, CypherStrings.YouChangeFlySpeed, CypherStrings.YoursFlySpeedChanged, flySpeed);
@@ -803,7 +803,7 @@ namespace Game.Chat
             static bool HandleModifyWalkSpeedCommand(StringArguments args, CommandHandler handler)
             {
                 float Speed;
-                Player target = handler.GetSelectedPlayerOrSelf();
+                var target = handler.GetSelectedPlayerOrSelf();
                 if (CheckModifySpeed(args, handler, target, out Speed, 0.1f, 50.0f))
                 {
                     NotifyModification(handler, target, CypherStrings.YouChangeSpeed, CypherStrings.YoursSpeedChanged, Speed);
@@ -816,7 +816,7 @@ namespace Game.Chat
 
         static void NotifyModification(CommandHandler handler, Unit target, CypherStrings resourceMessage, CypherStrings resourceReportMessage, params object[] args)
         {
-            Player player = target.ToPlayer();
+            var player = target.ToPlayer();
             if (player)
             {
                 handler.SendSysMessage(resourceMessage, new object[] { handler.GetNameLink(player) }.Combine(args));
@@ -877,7 +877,7 @@ namespace Game.Chat
                 return false;
             }
 
-            Player player = target.ToPlayer();
+            var player = target.ToPlayer();
             if (player)
             {
                 // check online security

@@ -28,7 +28,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.AttackSwing, Processing = PacketProcessing.Inplace)]
         void HandleAttackSwing(AttackSwing packet)
         {
-            Unit enemy = Global.ObjAccessor.GetUnit(GetPlayer(), packet.Victim);
+            var enemy = Global.ObjAccessor.GetUnit(GetPlayer(), packet.Victim);
             if (!enemy)
             {
                 // stop attack state at client
@@ -46,7 +46,7 @@ namespace Game
             //! Client explicitly checks the following before sending CMSG_ATTACKSWING packet,
             //! so we'll place the same check here. Note that it might be possible to reuse this snippet
             //! in other places as well.
-            Vehicle vehicle = GetPlayer().GetVehicle();
+            var vehicle = GetPlayer().GetVehicle();
             if (vehicle)
             {
                 VehicleSeatRecord seat = vehicle.GetSeatForPassenger(GetPlayer());

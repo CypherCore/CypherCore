@@ -47,7 +47,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBits(Contacts.Count, 8);
             _worldPacket.FlushBits();
 
-            foreach (ContactInfo contact in Contacts)
+            foreach (var contact in Contacts)
                 contact.Write(_worldPacket);
         }
 
@@ -106,8 +106,8 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint nameLength = _worldPacket.ReadBits<uint>(9);
-            uint noteslength = _worldPacket.ReadBits<uint>(10);
+            var nameLength = _worldPacket.ReadBits<uint>(9);
+            var noteslength = _worldPacket.ReadBits<uint>(10);
             Name = _worldPacket.ReadString(nameLength);
             Notes = _worldPacket.ReadString(noteslength);
         }

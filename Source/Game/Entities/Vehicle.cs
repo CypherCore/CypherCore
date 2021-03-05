@@ -41,7 +41,7 @@ namespace Game.Entities
                 uint seatId = _vehicleInfo.SeatID[i];
                 if (seatId != 0)
                 {
-                    VehicleSeatRecord veSeat = CliDB.VehicleSeatStorage.LookupByKey(seatId);
+                    var veSeat = CliDB.VehicleSeatStorage.LookupByKey(seatId);
                     if (veSeat != null)
                     {
                         Seats.Add((sbyte)i, new VehicleSeat(veSeat));
@@ -72,7 +72,7 @@ namespace Game.Entities
         {
             if (_me.IsTypeId(TypeId.Unit))
             {
-                PowerDisplayRecord powerDisplay = CliDB.PowerDisplayStorage.LookupByKey(_vehicleInfo.PowerDisplayID[0]);
+                var powerDisplay = CliDB.PowerDisplayStorage.LookupByKey(_vehicleInfo.PowerDisplayID[0]);
                 if (powerDisplay != null)
                     _me.SetPowerType((PowerType)powerDisplay.ActualType);
                 else if (_me.GetClass() == Class.Rogue)
@@ -89,7 +89,7 @@ namespace Game.Entities
             if (GetBase().IsTypeId(TypeId.Player) || !evading)
                 RemoveAllPassengers();   // We might have aura's saved in the DB with now invalid casters - remove
 
-            List<VehicleAccessory> accessories = Global.ObjectMgr.GetVehicleAccessoryList(this);
+            var accessories = Global.ObjectMgr.GetVehicleAccessoryList(this);
             if (accessories == null)
                 return;
 
@@ -194,11 +194,11 @@ namespace Game.Entities
             // This will properly "reset" the pending join process for the passenger.
             {
                 // Update vehicle in every pending join event - Abort may be called after vehicle is deleted
-                Vehicle eventVehicle = _status != Status.UnInstalling ? this : null;
+                var eventVehicle = _status != Status.UnInstalling ? this : null;
 
                 while (!_pendingJoinEvents.Empty())
                 {
-                    VehicleJoinEvent e = _pendingJoinEvents.First();
+                    var e = _pendingJoinEvents.First();
                     e.ScheduleAbort();
                     e.Target = eventVehicle;
                     _pendingJoinEvents.Remove(_pendingJoinEvents.First());
@@ -258,7 +258,7 @@ namespace Game.Entities
 
             Log.outDebug(LogFilter.Vehicle, "Vehicle ({0}, Entry {1}): installing accessory (Entry: {2}) on seat: {3}", _me.GetGUID().ToString(), GetCreatureEntry(), entry, seatId);
 
-            TempSummon accessory = _me.SummonCreature(entry, _me, (TempSummonType)type, summonTime);
+            var accessory = _me.SummonCreature(entry, _me, (TempSummonType)type, summonTime);
             Cypher.Assert(accessory);
 
             if (minion)
@@ -288,10 +288,10 @@ namespace Game.Entities
             // While the validity of the following may be arguable, it is possible that when such a passenger
             // exits the vehicle will dismiss. That's why the actual adding the passenger to the vehicle is scheduled
             // asynchronously, so it can be cancelled easily in case the vehicle is uninstalled meanwhile.
-            VehicleJoinEvent e = new VehicleJoinEvent(this, unit);
+            var e = new VehicleJoinEvent(this, unit);
             unit.m_Events.AddEvent(e, unit.m_Events.CalculateTime(0));
 
-            KeyValuePair<sbyte, VehicleSeat> seat = new KeyValuePair<sbyte, VehicleSeat>();
+            var seat = new KeyValuePair<sbyte, VehicleSeat>();
             if (seatId < 0) // no specific seat requirement
             {
                 foreach (var _seat in Seats)
@@ -323,7 +323,7 @@ namespace Game.Entities
                 _pendingJoinEvents.Add(e);
                 if (!seat.Value.IsEmpty())
                 {
-                    Unit passenger = Global.ObjAccessor.GetUnit(GetBase(), seat.Value.Passenger.Guid);
+                    var passenger = Global.ObjAccessor.GetUnit(GetBase(), seat.Value.Passenger.Guid);
                     Cypher.Assert(passenger != null);
                     passenger.ExitVehicle();
                 }
@@ -382,12 +382,12 @@ namespace Game.Entities
         {
             Cypher.Assert(_me.GetMap() != null);
 
-            List<Tuple<Unit, Position>> seatRelocation = new List<Tuple<Unit, Position>>();
+            var seatRelocation = new List<Tuple<Unit, Position>>();
 
             // not sure that absolute position calculation is correct, it must depend on vehicle pitch angle
             foreach (var pair in Seats)
             {
-                Unit passenger = Global.ObjAccessor.GetUnit(GetBase(), pair.Value.Passenger.Guid);
+                var passenger = Global.ObjAccessor.GetUnit(GetBase(), pair.Value.Passenger.Guid);
                 if (passenger != null)
                 {
                     Cypher.Assert(passenger.IsInWorld);
@@ -415,7 +415,7 @@ namespace Game.Entities
 
         void InitMovementInfoForBase()
         {
-            VehicleFlags vehicleFlags = (VehicleFlags)GetVehicleInfo().Flags;
+            var vehicleFlags = (VehicleFlags)GetVehicleInfo().Flags;
 
             if (vehicleFlags.HasAnyFlag(VehicleFlags.NoStrafe))
                 _me.AddUnitMovementFlag2(MovementFlag2.NoStrafe);
@@ -511,7 +511,7 @@ namespace Game.Entities
 
         public TimeSpan GetDespawnDelay()
         {
-            VehicleTemplate vehicleTemplate = Global.ObjectMgr.GetVehicleTemplate(this);
+            var vehicleTemplate = Global.ObjectMgr.GetVehicleTemplate(this);
             if (vehicleTemplate != null)
                 return vehicleTemplate.DespawnDelay;
 
@@ -595,9 +595,9 @@ namespace Game.Entities
             Passenger.InterruptNonMeleeSpells(false);
             Passenger.RemoveAurasByType(AuraType.Mounted);
 
-            VehicleSeatRecord veSeat = Seat.Value.SeatInfo;
+            var veSeat = Seat.Value.SeatInfo;
 
-            Player player = Passenger.ToPlayer();
+            var player = Passenger.ToPlayer();
             if (player != null)
             {
                 // drop flag
@@ -631,14 +631,14 @@ namespace Game.Entities
             Passenger.SetControlled(true, UnitState.Root);         // SMSG_FORCE_ROOT - In some cases we send SMSG_SPLINE_MOVE_ROOT here (for creatures)
             // also adds MOVEMENTFLAG_ROOT
 
-            MoveSplineInit init = new MoveSplineInit(Passenger);
+            var init = new MoveSplineInit(Passenger);
             init.DisableTransportPathTransformations();
             init.MoveTo(veSeat.AttachmentOffset.X, veSeat.AttachmentOffset.Y, veSeat.AttachmentOffset.Z, false, true);
             init.SetFacing(0.0f);
             init.SetTransportEnter();
             init.Launch();
 
-            Creature creature = Target.GetBase().ToCreature();
+            var creature = Target.GetBase().ToCreature();
             if (creature != null)
             {
                 if (creature.IsAIEnabled)

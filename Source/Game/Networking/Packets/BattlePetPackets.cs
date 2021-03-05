@@ -123,13 +123,13 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             PetGuid = _worldPacket.ReadPackedGuid();
-            uint nameLength = _worldPacket.ReadBits<uint>(7);
+            var nameLength = _worldPacket.ReadBits<uint>(7);
 
             if (_worldPacket.HasBit())
             {
                 Declined = new DeclinedName();
 
-                byte[] declinedNameLengths = new byte[SharedConst.MaxDeclinedNameCases];
+                var declinedNameLengths = new byte[SharedConst.MaxDeclinedNameCases];
 
                 for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
                     declinedNameLengths[i] = _worldPacket.ReadBits<byte>(7);

@@ -96,8 +96,8 @@ namespace Scripts.World.ItemScripts
 
         public override bool OnUse(Player player, Item item, SpellCastTargets targets, ObjectGuid castId)
         {
-            uint itemId = item.GetEntry();
-            bool disabled = false;
+            var itemId = item.GetEntry();
+            var disabled = false;
 
             //for special scripts
             switch (itemId)
@@ -111,7 +111,7 @@ namespace Scripts.World.ItemScripts
                         disabled = true;
                     break;
                 case 34475:
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.ArcaneCharges, player.GetMap().GetDifficultyID());
+                    var spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.ArcaneCharges, player.GetMap().GetDifficultyID());
                     if (spellInfo != null)
                         Spell.SendCastResult(player, spellInfo, default, castId, SpellCastResult.NotOnGround);
                     break;
@@ -188,8 +188,8 @@ namespace Scripts.World.ItemScripts
 
         public override bool OnExpire(Player player, ItemTemplate pItemProto)
         {
-            List<ItemPosCount> dest = new List<ItemPosCount>();
-            InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, 39883, 1); // Cracked Egg
+            var dest = new List<ItemPosCount>();
+            var msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, 39883, 1); // Cracked Egg
             if (msg == InventoryResult.Ok)
                 player.StoreNewItem(dest, 39883, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(39883));
 
@@ -204,8 +204,8 @@ namespace Scripts.World.ItemScripts
 
         public override bool OnExpire(Player player, ItemTemplate pItemProto)
         {
-            List<ItemPosCount> dest = new List<ItemPosCount>();
-            InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, 44718, 1); // Ripe Disgusting Jar
+            var dest = new List<ItemPosCount>();
+            var msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, 44718, 1); // Ripe Disgusting Jar
             if (msg == InventoryResult.Ok)
                 player.StoreNewItem(dest, 44718, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(44718));
 
@@ -234,9 +234,9 @@ namespace Scripts.World.ItemScripts
             if (go.FindNearestCreature(CreatureIds.NesingwaryTrapper, 10.0f, true) || go.FindNearestCreature(CreatureIds.NesingwaryTrapper, 10.0f, false) || go.FindNearestGameObject(GameObjectIds.HighQualityFur, 2.0f))
                 return true;
 
-            go.GetClosePoint(out float x, out float y, out float z, go.GetCombatReach() / 3, 7.0f);
+            go.GetClosePoint(out var x, out var y, out var z, go.GetCombatReach() / 3, 7.0f);
             go.SummonGameObject(GameObjectIds.HighQualityFur, go, Quaternion.fromEulerAnglesZYX(go.GetOrientation(), 0.0f, 0.0f), 1);
-            TempSummon summon = player.SummonCreature(CreatureIds.NesingwaryTrapper, x, y, z, go.GetOrientation(), TempSummonType.DeadDespawn, 1000);
+            var summon = player.SummonCreature(CreatureIds.NesingwaryTrapper, x, y, z, go.GetOrientation(), TempSummonType.DeadDespawn, 1000);
             if (summon)
             {
                 summon.SetVisible(false);
@@ -259,7 +259,7 @@ namespace Scripts.World.ItemScripts
 
             if (!player.GetTransport() || player.GetAreaId() != Misc.AreaIdShatteredStraits)
             {
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.PetrovBomb, Difficulty.None);
+                var spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.PetrovBomb, Difficulty.None);
                 if (spellInfo != null)
                     Spell.SendCastResult(player, spellInfo, default, castId, SpellCastResult.NotHere);
 
@@ -280,13 +280,13 @@ namespace Scripts.World.ItemScripts
             if (player.GetQuestStatus(QuestIds.CannotHelpThemselves) != QuestStatus.Incomplete)
                 return false;
 
-            Creature pMammoth = player.FindNearestCreature(CreatureIds.TrappedMammothCalf, 5.0f);
+            var pMammoth = player.FindNearestCreature(CreatureIds.TrappedMammothCalf, 5.0f);
             if (!pMammoth)
                 return false;
 
             foreach (var id in GameObjectIds.MammothTraps)
             {
-                GameObject pTrap = player.FindNearestGameObject(id, 11.0f);
+                var pTrap = player.FindNearestGameObject(id, 11.0f);
                 if (pTrap)
                 {
                     pMammoth.GetAI().DoAction(1);
@@ -331,8 +331,8 @@ namespace Scripts.World.ItemScripts
             if (victim.GetLevel() > 60)
             {
                 // gives ~0.1% proc chance at lvl 70
-                float lvlPenaltyFactor = 9.93f;
-                float failureChance = (victim.GetLevelForTarget(player) - 60) * lvlPenaltyFactor;
+                var lvlPenaltyFactor = 9.93f;
+                var failureChance = (victim.GetLevelForTarget(player) - 60) * lvlPenaltyFactor;
 
                 // base ppm chance was already rolled, only roll success chance
                 return !RandomHelper.randChance(failureChance);

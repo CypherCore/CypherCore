@@ -27,7 +27,7 @@ namespace Game.Chat.Commands
         [Command("update", RBACPermissions.CommandHonorUpdate)]
         static bool HandleHonorUpdateCommand(StringArguments args, CommandHandler handler)
         {
-            Player target = handler.GetSelectedPlayer();
+            var target = handler.GetSelectedPlayer();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
@@ -51,7 +51,7 @@ namespace Game.Chat.Commands
                 if (args.Empty())
                     return false;
 
-                Player target = handler.GetSelectedPlayer();
+                var target = handler.GetSelectedPlayer();
                 if (!target)
                 {
                     handler.SendSysMessage(CypherStrings.PlayerNotFound);
@@ -62,7 +62,7 @@ namespace Game.Chat.Commands
                 if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
                     return false;
 
-                int amount = args.NextInt32();
+                var amount = args.NextInt32();
                 target.RewardHonor(null, 1, amount);
                 return true;
             }
@@ -70,7 +70,7 @@ namespace Game.Chat.Commands
             [Command("kill", RBACPermissions.CommandHonorAddKill)]
             static bool HandleHonorAddKillCommand(StringArguments args, CommandHandler handler)
             {
-                Unit target = handler.GetSelectedUnit();
+                var target = handler.GetSelectedUnit();
                 if (!target)
                 {
                     handler.SendSysMessage(CypherStrings.PlayerNotFound);
@@ -78,7 +78,7 @@ namespace Game.Chat.Commands
                 }
 
                 // check online security
-                Player player = target.ToPlayer();
+                var player = target.ToPlayer();
                 if (player)
                     if (handler.HasLowerSecurity(player, ObjectGuid.Empty))
                         return false;

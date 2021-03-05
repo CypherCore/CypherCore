@@ -69,11 +69,11 @@ namespace Game.Entities
             if (CriteriaManager.IsGroupCriteriaType(type))
                 return;
 
-            Scenario scenario = GetScenario();
+            var scenario = GetScenario();
             if (scenario != null)
                 scenario.UpdateCriteria(type, miscValue1, miscValue2, miscValue3, unit, this);
 
-            Guild guild = Global.GuildMgr.GetGuildById(GetGuildId());
+            var guild = Global.GuildMgr.GetGuildById(GetGuildId());
             if (guild)
                 guild.UpdateCriteria(type, miscValue1, miscValue2, miscValue3, unit, this);
         }

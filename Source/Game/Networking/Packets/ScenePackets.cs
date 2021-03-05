@@ -63,7 +63,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint len = _worldPacket.ReadBits<uint>(6);
+            var len = _worldPacket.ReadBits<uint>(6);
             SceneInstanceID = _worldPacket.ReadUInt32();
             _Event = _worldPacket.ReadString(len);
         }

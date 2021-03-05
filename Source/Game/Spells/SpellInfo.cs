@@ -36,7 +36,7 @@ namespace Game.Spells
             Id = spellName.Id;
             Difficulty = difficulty;
 
-            foreach (SpellEffectRecord spellEffect in data.Effects)
+            foreach (var spellEffect in data.Effects)
             {
                 if (spellEffect == null)
                     continue;
@@ -46,7 +46,7 @@ namespace Game.Spells
 
             SpellName = spellName.Name;
 
-            SpellMiscRecord _misc = data.Misc;
+            var _misc = data.Misc;
             if (_misc != null)
             {
                 Attributes = (SpellAttr0)_misc.Attributes[0];
@@ -83,7 +83,7 @@ namespace Game.Spells
                 _visuals = visuals;
 
             // SpellScalingEntry
-            SpellScalingRecord _scaling = data.Scaling;
+            var _scaling = data.Scaling;
             if (_scaling != null)
             {
                 Scaling._Class = _scaling.Class;
@@ -93,10 +93,10 @@ namespace Game.Spells
             }
 
             // SpellAuraOptionsEntry
-            SpellAuraOptionsRecord _options = data.AuraOptions;
+            var _options = data.AuraOptions;
             if (_options != null)
             {
-                SpellProcsPerMinuteRecord _ppm = CliDB.SpellProcsPerMinuteStorage.LookupByKey(_options.SpellProcsPerMinuteID);
+                var _ppm = CliDB.SpellProcsPerMinuteStorage.LookupByKey(_options.SpellProcsPerMinuteID);
                 ProcFlags = (ProcFlags)_options.ProcTypeMask[0];
                 ProcChance = _options.ProcChance;
                 ProcCharges = (uint)_options.ProcCharges;
@@ -107,7 +107,7 @@ namespace Game.Spells
             }
 
             // SpellAuraRestrictionsEntry
-            SpellAuraRestrictionsRecord _aura = data.AuraRestrictions;
+            var _aura = data.AuraRestrictions;
             if (_aura != null)
             {
                 CasterAuraState = (AuraStateType)_aura.CasterAuraState;
@@ -122,7 +122,7 @@ namespace Game.Spells
 
             RequiredAreasID = -1;
             // SpellCastingRequirementsEntry
-            SpellCastingRequirementsRecord _castreq = data.CastingRequirements;
+            var _castreq = data.CastingRequirements;
             if (_castreq != null)
             {
                 RequiresSpellFocus = _castreq.RequiresSpellFocus;
@@ -131,7 +131,7 @@ namespace Game.Spells
             }
 
             // SpellCategoriesEntry
-            SpellCategoriesRecord _categorie = data.Categories;
+            var _categorie = data.Categories;
             if (_categorie != null)
             {
                 CategoryId = _categorie.Category;
@@ -145,7 +145,7 @@ namespace Game.Spells
 
             // SpellClassOptionsEntry
             SpellFamilyFlags = new FlagArray128();
-            SpellClassOptionsRecord _class = data.ClassOptions;
+            var _class = data.ClassOptions;
             if (_class != null)
             {
                 SpellFamilyName = (SpellFamilyNames)_class.SpellClassSet;
@@ -153,7 +153,7 @@ namespace Game.Spells
             }
 
             // SpellCooldownsEntry
-            SpellCooldownsRecord _cooldowns = data.Cooldowns;
+            var _cooldowns = data.Cooldowns;
             if (_cooldowns != null)
             {
                 RecoveryTime = _cooldowns.RecoveryTime;
@@ -165,7 +165,7 @@ namespace Game.Spells
             EquippedItemSubClassMask = 0;
             EquippedItemInventoryTypeMask = 0;
             // SpellEquippedItemsEntry
-            SpellEquippedItemsRecord _equipped = data.EquippedItems;
+            var _equipped = data.EquippedItems;
             if (_equipped != null)
             {
                 EquippedItemClass = (ItemClass)_equipped.EquippedItemClass;
@@ -174,7 +174,7 @@ namespace Game.Spells
             }
 
             // SpellInterruptsEntry
-            SpellInterruptsRecord _interrupt = data.Interrupts;
+            var _interrupt = data.Interrupts;
             if (_interrupt != null)
             {
                 InterruptFlags = (SpellInterruptFlags)_interrupt.InterruptFlags;
@@ -183,7 +183,7 @@ namespace Game.Spells
             }
 
             // SpellLevelsEntry
-            SpellLevelsRecord _levels = data.Levels;
+            var _levels = data.Levels;
             if (_levels != null)
             {
                 MaxLevel = _levels.MaxLevel;
@@ -195,7 +195,7 @@ namespace Game.Spells
             PowerCosts = data.Powers;
 
             // SpellReagentsEntry
-            SpellReagentsRecord _reagents = data.Reagents;
+            var _reagents = data.Reagents;
             for (var i = 0; i < SpellConst.MaxReagents; ++i)
             {
                 Reagent[i] = _reagents != null ? _reagents.Reagent[i] : 0;
@@ -203,7 +203,7 @@ namespace Game.Spells
             }
 
             // SpellShapeshiftEntry
-            SpellShapeshiftRecord _shapeshift = data.Shapeshift;
+            var _shapeshift = data.Shapeshift;
             if (_shapeshift != null)
             {
                 Stances = MathFunctions.MakePair64(_shapeshift.ShapeshiftMask[0], _shapeshift.ShapeshiftMask[1]);
@@ -211,7 +211,7 @@ namespace Game.Spells
             }
 
             // SpellTargetRestrictionsEntry
-            SpellTargetRestrictionsRecord _target = data.TargetRestrictions;
+            var _target = data.TargetRestrictions;
             if (_target != null)
             {
                 targets = (SpellCastTargetFlags)_target.Targets;
@@ -223,7 +223,7 @@ namespace Game.Spells
             }
 
             // SpellTotemsEntry
-            SpellTotemsRecord _totem = data.Totems;
+            var _totem = data.Totems;
             for (var i = 0; i < 2; ++i)
             {
                 TotemCategory[i] = _totem != null ? _totem.RequiredTotemCategoryID[i] : 0u;

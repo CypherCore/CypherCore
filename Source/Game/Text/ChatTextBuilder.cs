@@ -44,7 +44,7 @@ namespace Game.Chat
 
         public override ServerPacket Invoke(Locale locale)
         {
-            BroadcastTextRecord bct = CliDB.BroadcastTextStorage.LookupByKey(_textId);
+            var bct = CliDB.BroadcastTextStorage.LookupByKey(_textId);
             var packet = new ChatPkt();
             packet.Initialize(_msgType, bct != null ? (Language)bct.LanguageID : Language.Universal, _source, _target, bct != null ? Global.DB2Mgr.GetBroadcastTextValue(bct, locale, _gender) : "", _achievementId, "", locale);
             return packet;
@@ -96,7 +96,7 @@ namespace Game.Chat
 
         public override ServerPacket Invoke(Locale locale)
         {
-            ChatPkt packet = new ChatPkt();
+            var packet = new ChatPkt();
 
             string text = Global.ObjectMgr.GetCypherString(_textId, locale);
 

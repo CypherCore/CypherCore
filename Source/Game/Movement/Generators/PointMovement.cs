@@ -52,7 +52,7 @@ namespace Game.Movement
 
             owner.AddUnitState(UnitState.RoamingMove);
 
-            MoveSplineInit init = new MoveSplineInit(owner);
+            var init = new MoveSplineInit(owner);
             init.MoveTo(_destination.GetPositionX(), _destination.GetPositionY(), _destination.GetPositionZ(), _generatePath);
             if (_speed > 0.0f)
                 init.SetVelocity(_speed);
@@ -66,7 +66,7 @@ namespace Game.Movement
             init.Launch();
 
             // Call for creature group update
-            Creature creature = owner.ToCreature();
+            var creature = owner.ToCreature();
             if (creature != null)
                 creature.SignalFormationMovement(_destination, _movementId);
         }
@@ -99,14 +99,14 @@ namespace Game.Movement
 
                 owner.AddUnitState(UnitState.RoamingMove);
 
-                MoveSplineInit init = new MoveSplineInit(owner);
+                var init = new MoveSplineInit(owner);
                 init.MoveTo(_destination.GetPositionX(), _destination.GetPositionY(), _destination.GetPositionZ(), _generatePath);
                 if (_speed > 0.0f) // Default value for point motion type is 0.0, if 0.0 spline will use GetSpeed on unit
                     init.SetVelocity(_speed);
                 init.Launch();
 
                 // Call for creature group update
-                Creature creature = owner.ToCreature();
+                var creature = owner.ToCreature();
                 if (creature != null)
                     creature.SignalFormationMovement(_destination, _movementId);
             }

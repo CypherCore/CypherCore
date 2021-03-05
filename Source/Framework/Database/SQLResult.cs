@@ -52,7 +52,7 @@ namespace Framework.Database
 
         public T[] ReadValues<T>(int startIndex, int numColumns)
         {
-            T[] values = new T[numColumns];
+            var values = new T[numColumns];
             for (var c = 0; c < numColumns; ++c)
                 values[c] = Read<T>(startIndex + c);
 
@@ -76,7 +76,7 @@ namespace Framework.Database
 
         public SQLFields GetFields()
         {
-            object[] values = new object[_reader.FieldCount];
+            var values = new object[_reader.FieldCount];
             _reader.GetValues(values);
             return new SQLFields(values);
         }
@@ -115,7 +115,7 @@ namespace Framework.Database
 
         public T[] ReadValues<T>(int startIndex, int numColumns)
         {
-            T[] values = new T[numColumns];
+            var values = new T[numColumns];
             for (var c = 0; c < numColumns; ++c)
                 values[c] = Read<T>(startIndex + c);
 

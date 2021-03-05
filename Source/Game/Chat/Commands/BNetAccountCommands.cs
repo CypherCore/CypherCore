@@ -32,8 +32,8 @@ namespace Game.Chat.Commands
                 return false;
 
             // Parse the command line arguments
-            string accountName = args.NextString();
-            string password = args.NextString();
+            var accountName = args.NextString();
+            var password = args.NextString();
             if (string.IsNullOrEmpty(accountName) || string.IsNullOrEmpty(password))
                 return false;
 
@@ -43,7 +43,7 @@ namespace Game.Chat.Commands
                 return false;
             }
 
-            if (!bool.TryParse(args.NextString(), out bool createGameAccount))
+            if (!bool.TryParse(args.NextString(), out var createGameAccount))
                 createGameAccount = true;
 
             string gameAccountName;
@@ -87,19 +87,19 @@ namespace Game.Chat.Commands
                 return false;
             }
 
-            string bnetAccountName = args.NextString();
-            uint accountId = Global.BNetAccountMgr.GetId(bnetAccountName);
+            var bnetAccountName = args.NextString();
+            var accountId = Global.BNetAccountMgr.GetId(bnetAccountName);
             if (accountId == 0)
             {
                 handler.SendSysMessage(CypherStrings.AccountNotExist, bnetAccountName);
                 return false;
             }
 
-            byte index = (byte)(Global.BNetAccountMgr.GetMaxIndex(accountId) + 1);
-            string accountName = accountId.ToString() + '#' + index;
+            var index = (byte)(Global.BNetAccountMgr.GetMaxIndex(accountId) + 1);
+            var accountName = accountId.ToString() + '#' + index;
 
             // Generate random hex string for password, these accounts must not be logged on with GRUNT
-            byte[] randPassword = new byte[0].GenerateRandomKey(8);
+            var randPassword = new byte[0].GenerateRandomKey(8);
             switch (Global.AccountMgr.CreateAccount(accountName, randPassword.ToHexString(), bnetAccountName, accountId, index))
             {
                 case AccountOpResult.Ok:
@@ -140,8 +140,8 @@ namespace Game.Chat.Commands
                 return false;
             }
 
-            string bnetAccountName = args.NextString();
-            string gameAccountName = args.NextString();
+            var bnetAccountName = args.NextString();
+            var gameAccountName = args.NextString();
 
             switch (Global.BNetAccountMgr.LinkWithGameAccount(bnetAccountName, gameAccountName))
             {
@@ -167,16 +167,16 @@ namespace Game.Chat.Commands
             if (args.Empty())
                 return false;
 
-            string battlenetAccountName = args.NextString();
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BNET_GAME_ACCOUNT_LIST);
+            var battlenetAccountName = args.NextString();
+            var stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BNET_GAME_ACCOUNT_LIST);
             stmt.AddValue(0, battlenetAccountName);
 
-            SQLResult accountList = DB.Login.Query(stmt);
+            var accountList = DB.Login.Query(stmt);
             if (!accountList.IsEmpty())
             {
                 var formatDisplayName = new Func<string, string>(name =>
                 {
-                    int index = name.IndexOf('#');
+                    var index = name.IndexOf('#');
                     if (index > 0)
                         return "WoW" + name.Substring(++index);
                     else
@@ -209,9 +209,9 @@ namespace Game.Chat.Commands
             }
 
             // Command is supposed to be: .account password [$oldpassword] [$newpassword] [$newpasswordconfirmation] [$emailconfirmation]
-            string oldPassword = args.NextString();       // This extracts [$oldpassword]
-            string newPassword = args.NextString();              // This extracts [$newpassword]
-            string passwordConfirmation = args.NextString();     // This extracts [$newpasswordconfirmation]
+            var oldPassword = args.NextString();       // This extracts [$oldpassword]
+            var newPassword = args.NextString();              // This extracts [$newpassword]
+            var passwordConfirmation = args.NextString();     // This extracts [$newpasswordconfirmation]
 
             //Is any of those variables missing for any reason ? We return false.
             if (string.IsNullOrEmpty(oldPassword) || string.IsNullOrEmpty(newPassword) || string.IsNullOrEmpty(passwordConfirmation))
@@ -238,7 +238,7 @@ namespace Game.Chat.Commands
             }
 
             // Changes password and prints result.
-            AccountOpResult result = Global.BNetAccountMgr.ChangePassword(handler.GetSession().GetBattlenetAccountId(), newPassword);
+            var result = Global.BNetAccountMgr.ChangePassword(handler.GetSession().GetBattlenetAccountId(), newPassword);
             switch (result)
             {
                 case AccountOpResult.Ok:
@@ -266,7 +266,7 @@ namespace Game.Chat.Commands
                 return false;
             }
 
-            string gameAccountName = args.NextString();
+            var gameAccountName = args.NextString();
             switch (Global.BNetAccountMgr.UnlinkGameAccount(gameAccountName))
             {
                 case AccountOpResult.Ok:
@@ -297,7 +297,7 @@ namespace Game.Chat.Commands
                     return false;
                 }
 
-                string param = args.NextString();
+                var param = args.NextString();
                 if (!string.IsNullOrEmpty(param))
                 {
                     if (param == "on")
@@ -324,7 +324,7 @@ namespace Game.Chat.Commands
                     }
                     else if (param == "off")
                     {
-                        PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_BNET_ACCOUNT_LOCK_CONTRY);
+                        var stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_BNET_ACCOUNT_LOCK_CONTRY);
                         stmt.AddValue(0, "00");
                         stmt.AddValue(1, handler.GetSession().GetBattlenetAccountId());
                         DB.Login.Execute(stmt);
@@ -346,11 +346,11 @@ namespace Game.Chat.Commands
                     return false;
                 }
 
-                string param = args.NextString();
+                var param = args.NextString();
 
                 if (!string.IsNullOrEmpty(param))
                 {
-                    PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_BNET_ACCOUNT_LOCK);
+                    var stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_BNET_ACCOUNT_LOCK);
                     if (param == "on")
                     {
                         stmt.AddValue(0, true);                                     // locked
@@ -385,14 +385,14 @@ namespace Game.Chat.Commands
                 }
 
                 // Get the command line arguments
-                string accountName = args.NextString();
-                string password = args.NextString();
-                string passwordConfirmation = args.NextString();
+                var accountName = args.NextString();
+                var password = args.NextString();
+                var passwordConfirmation = args.NextString();
 
                 if (string.IsNullOrEmpty(accountName) || string.IsNullOrEmpty(password) || string.IsNullOrEmpty(passwordConfirmation))
                     return false;
 
-                uint targetAccountId = Global.BNetAccountMgr.GetId(accountName);
+                var targetAccountId = Global.BNetAccountMgr.GetId(accountName);
                 if (targetAccountId == 0)
                 {
                     handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
@@ -405,7 +405,7 @@ namespace Game.Chat.Commands
                     return false;
                 }
 
-                AccountOpResult result = Global.BNetAccountMgr.ChangePassword(targetAccountId, password);
+                var result = Global.BNetAccountMgr.ChangePassword(targetAccountId, password);
                 switch (result)
                 {
                     case AccountOpResult.Ok:

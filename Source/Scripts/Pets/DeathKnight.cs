@@ -44,12 +44,12 @@ namespace Scripts.Pets
             public override void InitializeAI()
             {
                 base.InitializeAI();
-                ObjectGuid ownerGuid = me.GetOwnerGUID();
+                var ownerGuid = me.GetOwnerGUID();
                 if (ownerGuid.IsEmpty())
                     return;
 
                 // Find victim of Summon Gargoyle spell
-                List<Unit> targets = new List<Unit>();
+                var targets = new List<Unit>();
                 var u_check = new AnyUnfriendlyUnitInObjectRangeCheck(me, me, 30.0f);
                 var searcher = new UnitListSearcher(me, targets, u_check);
                 Cell.VisitAllObjects(me, searcher, 30.0f);
@@ -66,7 +66,7 @@ namespace Scripts.Pets
             public override void JustDied(Unit killer)
             {
                 // Stop Feeding Gargoyle when it dies
-                Unit owner = me.GetOwner();
+                var owner = me.GetOwner();
                 if (owner)
                     owner.RemoveAurasDueToSpell(SpellIds.SummonGargoyle2);
             }
@@ -77,7 +77,7 @@ namespace Scripts.Pets
                 if (spell.Id != SpellIds.DismissGargoyle || !me.IsAlive())
                     return;
 
-                Unit owner = me.GetOwner();
+                var owner = me.GetOwner();
                 if (!owner || owner != source)
                     return;
 
@@ -93,9 +93,9 @@ namespace Scripts.Pets
                 me.SetCanFly(true);
                 me.SetSpeedRate(UnitMoveType.Flight, 0.75f);
                 me.SetSpeedRate(UnitMoveType.Run, 0.75f);
-                float x = me.GetPositionX() + 20 * (float)Math.Cos(me.GetOrientation());
-                float y = me.GetPositionY() + 20 * (float)Math.Sin(me.GetOrientation());
-                float z = me.GetPositionZ() + 40;
+                var x = me.GetPositionX() + 20 * (float)Math.Cos(me.GetOrientation());
+                var y = me.GetPositionY() + 20 * (float)Math.Sin(me.GetOrientation());
+                var z = me.GetPositionZ() + 40;
                 me.GetMotionMaster().Clear(false);
                 me.GetMotionMaster().MovePoint(0, x, y, z);
 
@@ -115,7 +115,7 @@ namespace Scripts.Pets
             {
                 if (!target)
                     return false;
-                Unit owner = me.GetOwner();
+                var owner = me.GetOwner();
                 if (owner && !target.IsInCombatWith(owner))
                     return false;
                 return base.CanAIAttack(target);

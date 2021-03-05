@@ -56,10 +56,10 @@ namespace Game.Arenas
             EmblemColor = emblemColor;
             BorderStyle = borderStyle;
             BorderColor = borderColor;
-            ulong captainLowGuid = captainGuid.GetCounter();
+            var captainLowGuid = captainGuid.GetCounter();
 
             // Save arena team to db
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ARENA_TEAM);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ARENA_TEAM);
             stmt.AddValue(0, teamId);
             stmt.AddValue(1, TeamName);
             stmt.AddValue(2, captainLowGuid);
@@ -90,7 +90,7 @@ namespace Game.Arenas
 
             // Get player name and class either from db or character cache
             CharacterCacheEntry characterInfo;
-            Player player = Global.ObjAccessor.FindPlayer(playerGuid);
+            var player = Global.ObjAccessor.FindPlayer(playerGuid);
             if (player)
             {
                 playerClass = player.GetClass();
@@ -120,10 +120,10 @@ namespace Game.Arenas
                 personalRating = 1000;
 
             // Try to get player's match maker rating from db and fall back to config setting if not found
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MATCH_MAKER_RATING);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MATCH_MAKER_RATING);
             stmt.AddValue(0, playerGuid.GetCounter());
             stmt.AddValue(1, GetSlot());
-            SQLResult result = DB.Characters.Query(stmt);
+            var result = DB.Characters.Query(stmt);
 
             uint matchMakerRating;
             if (!result.IsEmpty())
@@ -136,7 +136,7 @@ namespace Game.Arenas
             //Player.RemovePetitionsAndSigns(playerGuid, GetArenaType());
 
             // Feed data to the struct
-            ArenaTeamMember newMember = new ArenaTeamMember();
+            var newMember = new ArenaTeamMember();
             newMember.Name = playerName;
             newMember.Guid = playerGuid;
             newMember.Class = (byte)playerClass;
@@ -201,17 +201,17 @@ namespace Game.Arenas
             if (result.IsEmpty())
                 return false;
 
-            bool captainPresentInTeam = false;
+            var captainPresentInTeam = false;
 
             do
             {
-                uint arenaTeamId = result.Read<uint>(0);
+                var arenaTeamId = result.Read<uint>(0);
 
                 // We loaded all members for this arena_team already, break cycle
                 if (arenaTeamId > teamId)
                     break;
 
-                ArenaTeamMember newMember = new ArenaTeamMember();
+                var newMember = new ArenaTeamMember();
                 newMember.Guid = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(1));
                 newMember.WeekGames = result.Read<ushort>(2);
                 newMember.WeekWins = result.Read<ushort>(3);
@@ -256,7 +256,7 @@ namespace Game.Arenas
                 return false;
 
             TeamName = name;
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ARENA_TEAM_NAME);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ARENA_TEAM_NAME);
             stmt.AddValue(0, TeamName);
             stmt.AddValue(1, GetId());
             DB.Characters.Execute(stmt);
@@ -266,7 +266,7 @@ namespace Game.Arenas
         public void SetCaptain(ObjectGuid guid)
         {
             // Disable remove/promote buttons
-            Player oldCaptain = Global.ObjAccessor.FindPlayer(GetCaptain());
+            var oldCaptain = Global.ObjAccessor.FindPlayer(GetCaptain());
             if (oldCaptain)
                 oldCaptain.SetArenaTeamInfoField(GetSlot(), ArenaTeamInfoType.Member, 1);
 
@@ -274,13 +274,13 @@ namespace Game.Arenas
             CaptainGuid = guid;
 
             // Update database
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ARENA_TEAM_CAPTAIN);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ARENA_TEAM_CAPTAIN);
             stmt.AddValue(0, guid.GetCounter());
             stmt.AddValue(1, GetId());
             DB.Characters.Execute(stmt);
 
             // Enable remove/promote buttons
-            Player newCaptain = Global.ObjAccessor.FindPlayer(guid);
+            var newCaptain = Global.ObjAccessor.FindPlayer(guid);
             if (newCaptain)
             {
                 newCaptain.SetArenaTeamInfoField(GetSlot(), ArenaTeamInfoType.Member, 0);
@@ -307,7 +307,7 @@ namespace Game.Arenas
             }
 
             // Remove arena team info from player data
-            Player player = Global.ObjAccessor.FindPlayer(guid);
+            var player = Global.ObjAccessor.FindPlayer(guid);
             if (player)
             {
                 // delete all info regarding this team
@@ -319,7 +319,7 @@ namespace Game.Arenas
             // Only used for single member deletion, for arena team disband we use a single query for more efficiency
             if (cleanDb)
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ARENA_TEAM_MEMBER);
+                var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ARENA_TEAM_MEMBER);
                 stmt.AddValue(0, GetId());
                 stmt.AddValue(1, guid.GetCounter());
                 DB.Characters.Execute(stmt);
@@ -331,7 +331,7 @@ namespace Game.Arenas
             // Broadcast update
             if (session != null)
             {
-                Player player = session.GetPlayer();
+                var player = session.GetPlayer();
                 if (player)
                     Log.outDebug(LogFilter.Arena, "Player: {0} [GUID: {1}] disbanded arena team type: {2} [Id: {3}, Name: {4}].", player.GetName(), player.GetGUID().ToString(), GetArenaType(), GetId(), GetName());
             }
@@ -341,9 +341,9 @@ namespace Game.Arenas
                 DelMember(Members.FirstOrDefault().Guid, false);
 
             // Update database
-            SQLTransaction trans = new SQLTransaction();
+            var trans = new SQLTransaction();
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ARENA_TEAM);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ARENA_TEAM);
             stmt.AddValue(0, teamId);
             trans.Append(stmt);
 
@@ -364,9 +364,9 @@ namespace Game.Arenas
                 DelMember(Members.First().Guid, false);
 
             // Update database
-            SQLTransaction trans = new SQLTransaction();
+            var trans = new SQLTransaction();
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ARENA_TEAM);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ARENA_TEAM);
             stmt.AddValue(0, teamId);
             trans.Append(stmt);
 
@@ -399,7 +399,7 @@ namespace Game.Arenas
             // Updates arena team stats for every member of the team (not only the ones who participated!)
             foreach (var member in Members)
             {
-                Player player = Global.ObjAccessor.FindPlayer(member.Guid);
+                var player = Global.ObjAccessor.FindPlayer(member.Guid);
                 if (player)
                     SendStats(player.GetSession());
             }
@@ -409,7 +409,7 @@ namespace Game.Arenas
         {
             foreach (var member in Members)
             {
-                Player player = Global.ObjAccessor.FindPlayer(member.Guid);
+                var player = Global.ObjAccessor.FindPlayer(member.Guid);
                 if (player)
                     player.SendPacket(packet);
             }
@@ -493,9 +493,9 @@ namespace Game.Arenas
         {
             // 'Chance' calculation - to beat the opponent
             // This is a simulation. Not much info on how it really works
-            float chance = GetChanceAgainst(ownRating, opponentRating);
-            float won_mod = (won) ? 1.0f : 0.0f;
-            float mod = won_mod - chance;
+            var chance = GetChanceAgainst(ownRating, opponentRating);
+            var won_mod = (won) ? 1.0f : 0.0f;
+            var mod = won_mod - chance;
 
             // Work in progress:
             /*
@@ -519,7 +519,7 @@ namespace Game.Arenas
         {
             // 'Chance' calculation - to beat the opponent
             // This is a simulation. Not much info on how it really works
-            float chance = GetChanceAgainst(ownRating, opponentRating);
+            var chance = GetChanceAgainst(ownRating, opponentRating);
 
             // Calculate the rating modification
             float mod;
@@ -529,7 +529,7 @@ namespace Game.Arenas
             {
                 if (ownRating < 1300)
                 {
-                    float win_rating_modifier1 = WorldConfig.GetFloatValue(WorldCfg.ArenaWinRatingModifier1);
+                    var win_rating_modifier1 = WorldConfig.GetFloatValue(WorldCfg.ArenaWinRatingModifier1);
 
                     if (ownRating < 1000)
                         mod = win_rating_modifier1 * (1.0f - chance);
@@ -557,7 +557,7 @@ namespace Game.Arenas
                 // Check if rating related achivements are met
                 foreach (var member in Members)
                 {
-                    Player player = Global.ObjAccessor.FindPlayer(member.Guid);
+                    var player = Global.ObjAccessor.FindPlayer(member.Guid);
                     if (player)
                         player.UpdateCriteria(CriteriaTypes.HighestTeamRating, stats.Rating, type);
                 }
@@ -580,7 +580,7 @@ namespace Game.Arenas
         {
             // Called when the team has won
             // Change in Matchmaker rating
-            int mod = GetMatchmakerRatingMod(ownMMRating, opponentMMRating, true);
+            var mod = GetMatchmakerRatingMod(ownMMRating, opponentMMRating, true);
 
             // Change in Team Rating
             ratingChange = GetRatingMod(stats.Rating, opponentMMRating, true);
@@ -600,7 +600,7 @@ namespace Game.Arenas
         {
             // Called when the team has lost
             // Change in Matchmaker Rating
-            int mod = GetMatchmakerRatingMod(ownMMRating, opponentMMRating, false);
+            var mod = GetMatchmakerRatingMod(ownMMRating, opponentMMRating, false);
 
             // Change in Team Rating
             ratingChange = GetRatingMod(stats.Rating, opponentMMRating, false);
@@ -620,7 +620,7 @@ namespace Game.Arenas
                 if (member.Guid == player.GetGUID())
                 {
                     // Update personal rating
-                    int mod = GetRatingMod(member.PersonalRating, againstMatchmakerRating, false);
+                    var mod = GetRatingMod(member.PersonalRating, againstMatchmakerRating, false);
                     member.ModifyPersonalRating(player, mod, GetArenaType());
 
                     // Update matchmaker rating
@@ -646,7 +646,7 @@ namespace Game.Arenas
                 if (member.Guid == guid)
                 {
                     // update personal rating
-                    int mod = GetRatingMod(member.PersonalRating, againstMatchmakerRating, false);
+                    var mod = GetRatingMod(member.PersonalRating, againstMatchmakerRating, false);
                     member.ModifyPersonalRating(null, mod, GetArenaType());
 
                     // update matchmaker rating
@@ -668,7 +668,7 @@ namespace Game.Arenas
                 if (member.Guid == player.GetGUID())
                 {
                     // update personal rating
-                    int mod = GetRatingMod(member.PersonalRating, againstMatchmakerRating, true);
+                    var mod = GetRatingMod(member.PersonalRating, againstMatchmakerRating, true);
                     member.ModifyPersonalRating(player, mod, GetArenaType());
 
                     // update matchmaker rating
@@ -692,9 +692,9 @@ namespace Game.Arenas
             // Save team and member stats to db
             // Called after a match has ended or when calculating arena_points
 
-            SQLTransaction trans = new SQLTransaction();
+            var trans = new SQLTransaction();
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ARENA_TEAM_STATS);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ARENA_TEAM_STATS);
             stmt.AddValue(0, stats.Rating);
             stmt.AddValue(1, stats.WeekGames);
             stmt.AddValue(2, stats.WeekWins);
@@ -754,7 +754,7 @@ namespace Game.Arenas
         {
             foreach (var member in Members)
             {
-                Player player = Global.ObjAccessor.FindPlayer(member.Guid);
+                var player = Global.ObjAccessor.FindPlayer(member.Guid);
                 if (player)
                     if (player.GetMap().IsBattleArena())
                         return true;

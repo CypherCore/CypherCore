@@ -39,7 +39,7 @@ namespace Game.Chat.Commands
                 path_number = args.NextString();
 
             uint point = 0;
-            Creature target = handler.GetSelectedCreature();
+            var target = handler.GetSelectedCreature();
 
             PreparedStatement stmt;
 
@@ -50,9 +50,9 @@ namespace Game.Chat.Commands
                 else
                 {
                     stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_MAX_ID);
-                    SQLResult result1 = DB.World.Query(stmt);
+                    var result1 = DB.World.Query(stmt);
 
-                    uint maxpathid = result1.Read<uint>(0);
+                    var maxpathid = result1.Read<uint>(0);
                     pathid = maxpathid + 1;
                     handler.SendSysMessage("|cff00ff00New path started.|r");
                 }
@@ -74,12 +74,12 @@ namespace Game.Chat.Commands
 
             stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_MAX_POINT);
             stmt.AddValue(0, pathid);
-            SQLResult result = DB.World.Query(stmt);
+            var result = DB.World.Query(stmt);
 
             if (result.IsEmpty())
                 point = result.Read<uint>(0);
 
-            Player player = handler.GetSession().GetPlayer();
+            var player = handler.GetSession().GetPlayer();
 
             stmt = DB.World.GetPreparedStatement(WorldStatements.INS_WAYPOINT_DATA);
             stmt.AddValue(0, pathid);
@@ -100,14 +100,14 @@ namespace Game.Chat.Commands
             if (args.Empty())
                 return false;
 
-            string show = args.NextString();
+            var show = args.NextString();
             PreparedStatement stmt;
 
             // Check
             if ((show != "add") && (show != "mod") && (show != "del") && (show != "listid"))
                 return false;
 
-            string arg_id = args.NextString();
+            var arg_id = args.NextString();
             uint id;
             if (show == "add")
             {
@@ -118,7 +118,7 @@ namespace Game.Chat.Commands
                 {
                     stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_SCRIPT_ID_BY_GUID);
                     stmt.AddValue(0, id);
-                    SQLResult result = DB.World.Query(stmt);
+                    var result = DB.World.Query(stmt);
 
                     if (result.IsEmpty())
                     {
@@ -134,7 +134,7 @@ namespace Game.Chat.Commands
                 else
                 {
                     stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_SCRIPTS_MAX_ID);
-                    SQLResult result = DB.World.Query(stmt);
+                    var result = DB.World.Query(stmt);
                     id = result.Read<uint>(0);
 
                     stmt = DB.World.GetPreparedStatement(WorldStatements.INS_WAYPOINT_SCRIPT);
@@ -164,7 +164,7 @@ namespace Game.Chat.Commands
 
                 stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_SCRIPT_BY_ID);
                 stmt.AddValue(0, id);
-                SQLResult result = DB.World.Query(stmt);
+                var result = DB.World.Query(stmt);
 
                 if (result.IsEmpty())
                 {
@@ -205,7 +205,7 @@ namespace Game.Chat.Commands
 
                 stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_SCRIPT_ID_BY_GUID);
                 stmt.AddValue(0, id);
-                SQLResult result = DB.World.Query(stmt);
+                var result = DB.World.Query(stmt);
 
                 if (!result.IsEmpty())
                 {
@@ -235,7 +235,7 @@ namespace Game.Chat.Commands
                     return true;
                 }
 
-                string arg_string = args.NextString();
+                var arg_string = args.NextString();
                 if (string.IsNullOrEmpty(arg_string))
                 {
                     handler.SendSysMessage("|cffff33ffERROR: No argument present.|r");
@@ -250,7 +250,7 @@ namespace Game.Chat.Commands
                     return true;
                 }
 
-                string arg_3 = args.NextString();
+                var arg_3 = args.NextString();
                 if (string.IsNullOrEmpty(arg_3))
                 {
                     handler.SendSysMessage("|cffff33ffERROR: No additional argument present.|r");
@@ -259,7 +259,7 @@ namespace Game.Chat.Commands
 
                 if (arg_string == "setid")
                 {
-                    if (!uint.TryParse(arg_3, out uint newid))
+                    if (!uint.TryParse(arg_3, out var newid))
                         return false;
                     handler.SendSysMessage("|cff00ff00Wp Event: Waypoint script guid: {0}|r|cff00ffff id changed: |r|cff00ff00{1}|r", newid, id);
 
@@ -275,7 +275,7 @@ namespace Game.Chat.Commands
                 {
                     stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_SCRIPT_ID_BY_GUID);
                     stmt.AddValue(0, id);
-                    SQLResult result = DB.World.Query(stmt);
+                    var result = DB.World.Query(stmt);
 
                     if (result.IsEmpty())
                     {
@@ -285,7 +285,7 @@ namespace Game.Chat.Commands
 
                     if (arg_string == "posx")
                     {
-                        if (!float.TryParse(arg_3, out float arg3))
+                        if (!float.TryParse(arg_3, out var arg3))
                             return false;
 
                         stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_SCRIPT_X);
@@ -298,7 +298,7 @@ namespace Game.Chat.Commands
                     }
                     else if (arg_string == "posy")
                     {
-                        if (!float.TryParse(arg_3, out float arg3))
+                        if (!float.TryParse(arg_3, out var arg3))
                             return false;
 
                         stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_SCRIPT_Y);
@@ -311,7 +311,7 @@ namespace Game.Chat.Commands
                     }
                     else if (arg_string == "posz")
                     {
-                        if (!float.TryParse(arg_3, out float arg3))
+                        if (!float.TryParse(arg_3, out var arg3))
                             return false;
 
                         stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_SCRIPT_Z);
@@ -324,7 +324,7 @@ namespace Game.Chat.Commands
                     }
                     else if (arg_string == "orientation")
                     {
-                        if (!float.TryParse(arg_3, out float arg3))
+                        if (!float.TryParse(arg_3, out var arg3))
                             return false;
 
                         stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_WAYPOINT_SCRIPT_O);
@@ -337,7 +337,7 @@ namespace Game.Chat.Commands
                     }
                     else if (arg_string == "dataint")
                     {
-                        if (!uint.TryParse(arg_3, out uint arg3))
+                        if (!uint.TryParse(arg_3, out var arg3))
                             return false;
 
                         DB.World.Execute("UPDATE waypoint_scripts SET {0}='{1}' WHERE guid='{2}'", arg_string, arg3, id); // Query can't be a prepared statement
@@ -362,10 +362,10 @@ namespace Game.Chat.Commands
                 return false;
 
             // optional
-            string path_number = args.NextString();
+            var path_number = args.NextString();
 
             uint pathid;
-            Creature target = handler.GetSelectedCreature();
+            var target = handler.GetSelectedCreature();
 
             // Did player provide a path_id?
             if (string.IsNullOrEmpty(path_number))
@@ -389,11 +389,11 @@ namespace Game.Chat.Commands
                 return true;
             }
 
-            ulong guidLow = target.GetSpawnId();
+            var guidLow = target.GetSpawnId();
 
-            PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_CREATURE_ADDON_BY_GUID);
+            var stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_CREATURE_ADDON_BY_GUID);
             stmt.AddValue(0, guidLow);
-            SQLResult result = DB.World.Query(stmt);
+            var result = DB.World.Query(stmt);
 
             if (!result.IsEmpty())
             {
@@ -431,7 +431,7 @@ namespace Game.Chat.Commands
                 return false;
 
             // first arg: add del text emote spell waittime move
-            string show = args.NextString();
+            var show = args.NextString();
             if (string.IsNullOrEmpty(show))
             {
                 return false;
@@ -450,7 +450,7 @@ namespace Game.Chat.Commands
             // . variable lowguid is filled with the GUID of the NPC
             uint pathid;
             uint point;
-            Creature target = handler.GetSelectedCreature();
+            var target = handler.GetSelectedCreature();
 
             // User did select a visual waypoint?
             if (!target || target.GetEntry() != 1)
@@ -460,9 +460,9 @@ namespace Game.Chat.Commands
             }
 
             // Check the creature
-            PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_BY_WPGUID);
+            var stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_BY_WPGUID);
             stmt.AddValue(0, target.GetSpawnId());
-            SQLResult result = DB.World.Query(stmt);
+            var result = DB.World.Query(stmt);
 
             if (result.IsEmpty())
             {
@@ -472,7 +472,7 @@ namespace Game.Chat.Commands
                 // some difficulties.
                 // Here we search for all waypoints that only differ in one from 1 thousand
                 // See also: http://dev.mysql.com/doc/refman/5.0/en/problems-with-float.html
-                string maxDiff = "0.01";
+                var maxDiff = "0.01";
 
                 stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_BY_POS);
                 stmt.AddValue(0, target.GetPositionX());
@@ -499,7 +499,7 @@ namespace Game.Chat.Commands
 
             // We have the waypoint number and the GUID of the "master npc"
             // Text is enclosed in "<>", all other arguments not
-            string arg_str = args.NextString();
+            var arg_str = args.NextString();
 
             // Check for argument
             if (show != "del" && show != "move" && arg_str == null)
@@ -533,8 +533,8 @@ namespace Game.Chat.Commands
             {
                 handler.SendSysMessage("|cff00ff00DEBUG: wp move, PathID: |r|cff00ffff{0}|r", pathid);
 
-                Player chr = handler.GetSession().GetPlayer();
-                Map map = chr.GetMap();
+                var chr = handler.GetSession().GetPlayer();
+                var map = chr.GetMap();
                 // What to do:
                 // Move the visual spawnpoint
                 // Respawn the owner of the waypoints
@@ -542,7 +542,7 @@ namespace Game.Chat.Commands
                 target.AddObjectToRemoveList();
 
                 // re-create
-                Creature creature = Creature.CreateCreature(1, map, chr.GetPosition());
+                var creature = Creature.CreateCreature(1, map, chr.GetPosition());
                 if (!creature)
                 {
                     handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, 1);
@@ -552,7 +552,7 @@ namespace Game.Chat.Commands
                 PhasingHandler.InheritPhaseShift(creature, chr);
                 creature.SaveToDB(map.GetId(), new List<Difficulty>() { map.GetDifficultyID() });
 
-                ulong dbGuid = creature.GetSpawnId();
+                var dbGuid = creature.GetSpawnId();
 
                 // current "wpCreature" variable is deleted and created fresh new, otherwise old values might trigger asserts or cause undefined behavior
                 creature.CleanupsBeforeDelete();
@@ -600,7 +600,7 @@ namespace Game.Chat.Commands
             if (args.Empty())
                 return false;
 
-            uint id = args.NextUInt32();
+            var id = args.NextUInt32();
 
             if (id == 0)
                 return false;
@@ -617,15 +617,15 @@ namespace Game.Chat.Commands
                 return false;
 
             // first arg: on, off, first, last
-            string show = args.NextString();
+            var show = args.NextString();
             if (string.IsNullOrEmpty(show))
                 return false;
 
             // second arg: GUID (optional, if a creature is selected)
-            string guid_str = args.NextString();
+            var guid_str = args.NextString();
 
             uint pathid;
-            Creature target = handler.GetSelectedCreature();
+            var target = handler.GetSelectedCreature();
 
             // Did player provide a PathID?
 
@@ -664,9 +664,9 @@ namespace Game.Chat.Commands
                     return false;
                 }
 
-                PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_ALL_BY_WPGUID);
+                var stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_ALL_BY_WPGUID);
                 stmt.AddValue(0, target.GetSpawnId());
-                SQLResult result = DB.World.Query(stmt);
+                var result = DB.World.Query(stmt);
 
                 if (result.IsEmpty())
                 {
@@ -678,11 +678,11 @@ namespace Game.Chat.Commands
                 do
                 {
                     pathid = result.Read<uint>(0);
-                    uint point = result.Read<uint>(1);
-                    uint delay = result.Read<uint>(2);
-                    uint flag = result.Read<uint>(3);
-                    uint ev_id = result.Read<uint>(4);
-                    uint ev_chance = result.Read<uint>(5);
+                    var point = result.Read<uint>(1);
+                    var delay = result.Read<uint>(2);
+                    var flag = result.Read<uint>(3);
+                    var ev_id = result.Read<uint>(4);
+                    var ev_chance = result.Read<uint>(5);
 
                     handler.SendSysMessage("|cff00ff00Show info: for current point: |r|cff00ffff{0}|r|cff00ff00, Path ID: |r|cff00ffff{1}|r", point, pathid);
                     handler.SendSysMessage("|cff00ff00Show info: delay: |r|cff00ffff{0}|r", delay);
@@ -697,9 +697,9 @@ namespace Game.Chat.Commands
 
             if (show == "on")
             {
-                PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_POS_BY_ID);
+                var stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_POS_BY_ID);
                 stmt.AddValue(0, pathid);
-                SQLResult result = DB.World.Query(stmt);
+                var result = DB.World.Query(stmt);
 
                 if (result.IsEmpty())
                 {
@@ -712,16 +712,16 @@ namespace Game.Chat.Commands
                 // Delete all visuals for this NPC
                 stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_WPGUID_BY_ID);
                 stmt.AddValue(0, pathid);
-                SQLResult result2 = DB.World.Query(stmt);
+                var result2 = DB.World.Query(stmt);
 
                 if (!result2.IsEmpty())
                 {
-                    bool hasError = false;
+                    var hasError = false;
                     do
                     {
-                        ulong wpguid = result2.Read<ulong>(0);
+                        var wpguid = result2.Read<ulong>(0);
 
-                        Creature creature = handler.GetCreatureFromPlayerMapByDbGuid(wpguid);
+                        var creature = handler.GetCreatureFromPlayerMapByDbGuid(wpguid);
                         if (!creature)
                         {
                             handler.SendSysMessage(CypherStrings.WaypointNotremoved, wpguid);
@@ -751,18 +751,18 @@ namespace Game.Chat.Commands
 
                 do
                 {
-                    uint point = result.Read<uint>(0);
-                    float x = result.Read<float>(1);
-                    float y = result.Read<float>(2);
-                    float z = result.Read<float>(3);
+                    var point = result.Read<uint>(0);
+                    var x = result.Read<float>(1);
+                    var y = result.Read<float>(2);
+                    var z = result.Read<float>(3);
 
                     uint id = 1;
 
-                    Player chr = handler.GetSession().GetPlayer();
-                    Map map = chr.GetMap();
-                    Position pos = new Position(x, y, z, chr.GetOrientation());
+                    var chr = handler.GetSession().GetPlayer();
+                    var map = chr.GetMap();
+                    var pos = new Position(x, y, z, chr.GetOrientation());
 
-                    Creature creature = Creature.CreateCreature(id, map, pos);
+                    var creature = Creature.CreateCreature(id, map, pos);
                     if (!creature)
                     {
                         handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, id);
@@ -772,7 +772,7 @@ namespace Game.Chat.Commands
                     PhasingHandler.InheritPhaseShift(creature, chr);
                     creature.SaveToDB(map.GetId(), new List<Difficulty>() { map.GetDifficultyID() });
 
-                    ulong dbGuid = creature.GetSpawnId();
+                    var dbGuid = creature.GetSpawnId();
 
                     // current "wpCreature" variable is deleted and created fresh new, otherwise old values might trigger asserts or cause undefined behavior
                     creature.CleanupsBeforeDelete();
@@ -810,9 +810,9 @@ namespace Game.Chat.Commands
             {
                 handler.SendSysMessage("|cff00ff00DEBUG: wp first, pathid: {0}|r", pathid);
 
-                PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_POS_FIRST_BY_ID);
+                var stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_POS_FIRST_BY_ID);
                 stmt.AddValue(0, pathid);
-                SQLResult result = DB.World.Query(stmt);
+                var result = DB.World.Query(stmt);
 
                 if (result.IsEmpty())
                 {
@@ -820,15 +820,15 @@ namespace Game.Chat.Commands
                     return false;
                 }
 
-                float x = result.Read<float>(0);
-                float y = result.Read<float>(1);
-                float z = result.Read<float>(2);
+                var x = result.Read<float>(0);
+                var y = result.Read<float>(1);
+                var z = result.Read<float>(2);
 
-                Player chr = handler.GetSession().GetPlayer();
-                Map map = chr.GetMap();
-                Position pos = new Position(x, y, z, chr.GetOrientation());
+                var chr = handler.GetSession().GetPlayer();
+                var map = chr.GetMap();
+                var pos = new Position(x, y, z, chr.GetOrientation());
 
-                Creature creature = Creature.CreateCreature(1, map, pos);
+                var creature = Creature.CreateCreature(1, map, pos);
                 if (!creature)
                 {
                     handler.SendSysMessage(CypherStrings.WaypointVpNotcreated, 1);
@@ -838,7 +838,7 @@ namespace Game.Chat.Commands
                 PhasingHandler.InheritPhaseShift(creature, chr);
                 creature.SaveToDB(map.GetId(), new List<Difficulty>() { map.GetDifficultyID() });
 
-                ulong dbGuid = creature.GetSpawnId();
+                var dbGuid = creature.GetSpawnId();
 
                 // current "creature" variable is deleted and created fresh new, otherwise old values might trigger asserts or cause undefined behavior
                 creature.CleanupsBeforeDelete();
@@ -864,9 +864,9 @@ namespace Game.Chat.Commands
             {
                 handler.SendSysMessage("|cff00ff00DEBUG: wp last, PathID: |r|cff00ffff{0}|r", pathid);
 
-                PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_POS_LAST_BY_ID);
+                var stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_POS_LAST_BY_ID);
                 stmt.AddValue(0, pathid);
-                SQLResult result = DB.World.Query(stmt);
+                var result = DB.World.Query(stmt);
 
                 if (result.IsEmpty())
                 {
@@ -874,16 +874,16 @@ namespace Game.Chat.Commands
                     return false;
                 }
 
-                float x = result.Read<float>(0);
-                float y = result.Read<float>(1);
-                float z = result.Read<float>(2);
-                float o = result.Read<float>(3);
+                var x = result.Read<float>(0);
+                var y = result.Read<float>(1);
+                var z = result.Read<float>(2);
+                var o = result.Read<float>(3);
 
-                Player chr = handler.GetSession().GetPlayer();
-                Map map = chr.GetMap();
-                Position pos = new Position(x, y, z, o);
+                var chr = handler.GetSession().GetPlayer();
+                var map = chr.GetMap();
+                var pos = new Position(x, y, z, o);
 
-                Creature creature = Creature.CreateCreature(1, map, pos);
+                var creature = Creature.CreateCreature(1, map, pos);
                 if (!creature)
                 {
                     handler.SendSysMessage(CypherStrings.WaypointNotcreated, 1);
@@ -893,7 +893,7 @@ namespace Game.Chat.Commands
                 PhasingHandler.InheritPhaseShift(creature, chr);
                 creature.SaveToDB(map.GetId(), new List<Difficulty>() { map.GetDifficultyID() });
 
-                ulong dbGuid = creature.GetSpawnId();
+                var dbGuid = creature.GetSpawnId();
 
                 // current "creature" variable is deleted and created fresh new, otherwise old values might trigger asserts or cause undefined behavior
                 creature.CleanupsBeforeDelete();
@@ -917,21 +917,21 @@ namespace Game.Chat.Commands
 
             if (show == "off")
             {
-                PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_CREATURE_BY_ID);
+                var stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_CREATURE_BY_ID);
                 stmt.AddValue(0, 1);
-                SQLResult result = DB.World.Query(stmt);
+                var result = DB.World.Query(stmt);
 
                 if (result.IsEmpty())
                 {
                     handler.SendSysMessage(CypherStrings.WaypointVpNotfound);    
                     return false;
                 }
-                bool hasError = false;
+                var hasError = false;
                 do
                 {
-                    ulong lowguid = result.Read<ulong>(0);
+                    var lowguid = result.Read<ulong>(0);
 
-                    Creature creature = handler.GetCreatureFromPlayerMapByDbGuid(lowguid);
+                    var creature = handler.GetCreatureFromPlayerMapByDbGuid(lowguid);
                     if (!creature)
                     {
                         handler.SendSysMessage(CypherStrings.WaypointNotremoved, lowguid);
@@ -973,28 +973,28 @@ namespace Game.Chat.Commands
         [Command("unload", RBACPermissions.CommandWpUnload)]
         static bool HandleWpUnLoadCommand(StringArguments args, CommandHandler handler)
         {
-            Creature target = handler.GetSelectedCreature();
+            var target = handler.GetSelectedCreature();
             if (!target)
             {
                 handler.SendSysMessage("|cff33ffffYou must select a target.|r");
                 return true;
             }
 
-            ulong guidLow = target.GetSpawnId();
+            var guidLow = target.GetSpawnId();
             if (guidLow == 0)
             {
                 handler.SendSysMessage("|cffff33ffTarget is not saved to DB.|r");
                 return true;
             }
 
-            CreatureAddon addon = Global.ObjectMgr.GetCreatureAddon(guidLow);
+            var addon = Global.ObjectMgr.GetCreatureAddon(guidLow);
             if (addon == null || addon.path_id == 0)
             {
                 handler.SendSysMessage("|cffff33ffTarget does not have a loaded path.|r");
                 return true;
             }
 
-            PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_CREATURE_ADDON);
+            var stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_CREATURE_ADDON);
             stmt.AddValue(0, guidLow);
             DB.World.Execute(stmt);
 

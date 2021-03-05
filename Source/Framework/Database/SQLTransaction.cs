@@ -33,7 +33,7 @@ namespace Framework.Database
 
         public void Append(PreparedStatement stmt)
         {
-            MySqlCommand cmd = new MySqlCommand(stmt.CommandText);
+            var cmd = new MySqlCommand(stmt.CommandText);
             foreach (var parameter in stmt.Parameters)
                 cmd.Parameters.AddWithValue("@" + parameter.Key, parameter.Value);
 
@@ -55,7 +55,7 @@ namespace Framework.Database
 
         public virtual bool Execute<T>(MySqlBase<T> mySqlBase)
         {
-            MySqlErrorCode errorCode = TryExecute(mySqlBase);
+            var errorCode = TryExecute(mySqlBase);
             if (errorCode == MySqlErrorCode.None)
                 return true;
 
@@ -89,7 +89,7 @@ namespace Framework.Database
 
         public override bool Execute<T>(MySqlBase<T> mySqlBase)
         {
-            MySqlErrorCode errorCode = TryExecute(mySqlBase);
+            var errorCode = TryExecute(mySqlBase);
             if (errorCode == MySqlErrorCode.None)
             {
                 m_result.SetResult(true);

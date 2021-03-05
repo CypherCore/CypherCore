@@ -48,7 +48,7 @@ namespace Game.Chat
             ObjectGuid guidTarget;
             string nameTarget;
 
-            ObjectGuid parseGUID = ObjectGuid.Create(HighGuid.Player, args.NextUInt64());
+            var parseGUID = ObjectGuid.Create(HighGuid.Player, args.NextUInt64());
             if (Global.CharacterCacheStorage.GetCharacterNameByGuid(parseGUID, out nameTarget))
             {
                 playerTarget = Global.ObjAccessor.FindPlayer(parseGUID);
@@ -62,9 +62,9 @@ namespace Game.Chat
                 groupTarget = playerTarget.GetGroup();
             else
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_GROUP_MEMBER);
+                var stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_GROUP_MEMBER);
                 stmt.AddValue(0, guidTarget.GetCounter());
-                SQLResult resultGroup = DB.Characters.Query(stmt);
+                var resultGroup = DB.Characters.Query(stmt);
                 if (!resultGroup.IsEmpty())
                     groupTarget = Global.GroupMgr.GetGroupByDbStoreId(resultGroup.Read<uint>(0));
             }
@@ -75,12 +75,12 @@ namespace Game.Chat
                 return false;
             }
 
-            ObjectGuid guid = groupTarget.GetGUID();
+            var guid = groupTarget.GetGUID();
             handler.SendSysMessage(CypherStrings.LfgGroupInfo, groupTarget.IsLFGGroup(), Global.LFGMgr.GetState(guid), Global.LFGMgr.GetDungeon(guid));
 
             foreach (var slot in groupTarget.GetMemberSlots())
             {
-                Player p = Global.ObjAccessor.FindPlayer(slot.guid);
+                var p = Global.ObjAccessor.FindPlayer(slot.guid);
                 if (p)
                     GetPlayerInfo(handler, p);
                 else
@@ -93,8 +93,8 @@ namespace Game.Chat
         [Command("options", RBACPermissions.CommandLfgOptions, true)]
         static bool HandleLfgOptionsCommand(StringArguments args, CommandHandler handler)
         {
-            string str = args.NextString();
-            int options = -1;
+            var str = args.NextString();
+            var options = -1;
             if (!string.IsNullOrEmpty(str))
             {
                 if (!int.TryParse(str, out options) || options < -1)
@@ -130,7 +130,7 @@ namespace Game.Chat
             if (!player)
                 return;
 
-            ObjectGuid guid = player.GetGUID();
+            var guid = player.GetGUID();
             var dungeons = Global.LFGMgr.GetSelectedDungeons(guid);
 
             handler.SendSysMessage(CypherStrings.LfgPlayerInfo, player.GetName(), Global.LFGMgr.GetState(guid), dungeons.Count, LFGQueue.ConcatenateDungeons(dungeons),

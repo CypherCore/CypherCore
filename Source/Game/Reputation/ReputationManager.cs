@@ -39,7 +39,7 @@ namespace Game
 
         ReputationRank ReputationToRank(int standing)
         {
-            int limit = Reputation_Cap + 1;
+            var limit = Reputation_Cap + 1;
             for (var rank = ReputationRank.Max - 1; rank >= ReputationRank.Min; --rank)
             {
                 limit -= PointsInRank[(int)rank];
@@ -68,7 +68,7 @@ namespace Game
             if (factionEntry == null)
                 return false;
 
-            FactionState factionState = GetState(factionEntry);
+            var factionState = GetState(factionEntry);
             if (factionState != null)
                 return (factionState.Flags.HasAnyFlag(FactionFlags.AtWar));
             return false;
@@ -91,8 +91,8 @@ namespace Game
             if (factionEntry == null)
                 return 0;
 
-            long raceMask = SharedConst.GetMaskForRace(_player.GetRace());
-            uint classMask = _player.GetClassMask();
+            var raceMask = SharedConst.GetMaskForRace(_player.GetRace());
+            var classMask = _player.GetClassMask();
             for (var i = 0; i < 4; i++)
             {
                 if ((Convert.ToBoolean(factionEntry.ReputationRaceMask[i] & raceMask) ||
@@ -112,7 +112,7 @@ namespace Game
             if (factionEntry == null)
                 return 0;
 
-            FactionState state = GetState(factionEntry);
+            var state = GetState(factionEntry);
             if (state != null)
                 return GetBaseReputation(factionEntry) + state.Standing;
 
@@ -121,13 +121,13 @@ namespace Game
 
         public ReputationRank GetRank(FactionRecord factionEntry)
         {
-            int reputation = GetReputation(factionEntry);
+            var reputation = GetReputation(factionEntry);
             return ReputationToRank(reputation);
         }
 
         ReputationRank GetBaseRank(FactionRecord factionEntry)
         {
-            int reputation = GetBaseReputation(factionEntry);
+            var reputation = GetBaseReputation(factionEntry);
             return ReputationToRank(reputation);
         }
 
@@ -149,9 +149,9 @@ namespace Game
             if (factionEntry == null)
                 return 0;
 
-            long raceMask = SharedConst.GetMaskForRace(_player.GetRace());
-            uint classMask = _player.GetClassMask();
-            for (int i = 0; i < 4; i++)
+            var raceMask = SharedConst.GetMaskForRace(_player.GetRace());
+            var classMask = _player.GetClassMask();
+            for (var i = 0; i < 4; i++)
             {
                 if ((Convert.ToBoolean(factionEntry.ReputationRaceMask[i] & raceMask) ||
                     (factionEntry.ReputationRaceMask[i] == 0 &&
@@ -165,7 +165,7 @@ namespace Game
 
         public void SendForceReactions()
         {
-            SetForcedReactions setForcedReactions = new SetForcedReactions();
+            var setForcedReactions = new SetForcedReactions();
 
             foreach (var pair in _forcedReactions)
             {
@@ -180,7 +180,7 @@ namespace Game
 
         public void SendState(FactionState faction)
         {
-            SetFactionStanding setFactionStanding = new SetFactionStanding();
+            var setFactionStanding = new SetFactionStanding();
             setFactionStanding.ReferAFriendBonus = 0.0f;
             setFactionStanding.BonusFromAchievementSystem = 0.0f;
             if (faction != null)
@@ -204,7 +204,7 @@ namespace Game
 
         public void SendInitialReputations()
         {
-            InitializeFactions initFactions = new InitializeFactions();
+            var initFactions = new InitializeFactions();
 
             foreach (var pair in _factions)
             {
@@ -223,7 +223,7 @@ namespace Game
                 return;
 
             //make faction visible / not visible in reputation list at client
-            SetFactionVisible packet = new SetFactionVisible(visible);
+            var packet = new SetFactionVisible(visible);
             packet.FactionIndex = faction.ReputationListID;
             _player.SendPacket(packet);
         }
@@ -241,7 +241,7 @@ namespace Game
             {
                 if (factionEntry.CanHaveReputation())
                 {
-                    FactionState newFaction = new FactionState();
+                    var newFaction = new FactionState();
                     newFaction.Id = factionEntry.Id;
                     newFaction.ReputationListID = (uint)factionEntry.ReputationIndex;
                     newFaction.Standing = 0;
@@ -272,7 +272,7 @@ namespace Game
         public bool SetReputation(FactionRecord factionEntry, int standing, bool incremental, bool spillOverOnly, bool noSpillover)
         {
             Global.ScriptMgr.OnPlayerReputationChange(_player, factionEntry.Id, standing, incremental);
-            bool res = false;
+            var res = false;
             if (!noSpillover)
             {
                 // if spillover definition exists in DB, override DBC
@@ -286,7 +286,7 @@ namespace Game
                             if (_player.GetReputationRank(repTemplate.faction[i]) <= (ReputationRank)repTemplate.faction_rank[i])
                             {
                                 // bonuses are already given, so just modify standing by rate
-                                int spilloverRep = (int)(standing * repTemplate.faction_rate[i]);
+                                var spilloverRep = (int)(standing * repTemplate.faction_rate[i]);
                                 SetOneFactionReputation(CliDB.FactionStorage.LookupByKey(repTemplate.faction[i]), spilloverRep, incremental);
                             }
                         }
@@ -301,7 +301,7 @@ namespace Game
                     if (flist == null && factionEntry.ParentFactionID != 0 && factionEntry.ParentFactionMod[1] != 0.0f)
                     {
                         spillOverRepOut *= factionEntry.ParentFactionMod[1];
-                        FactionRecord parent = CliDB.FactionStorage.LookupByKey(factionEntry.ParentFactionID);
+                        var parent = CliDB.FactionStorage.LookupByKey(factionEntry.ParentFactionID);
                         if (parent != null)
                         {
                             var parentState = _factions.LookupByKey(parent.ReputationIndex);
@@ -321,12 +321,12 @@ namespace Game
                         // Spillover to affiliated factions
                         foreach (var id in flist)
                         {
-                            FactionRecord factionEntryCalc = CliDB.FactionStorage.LookupByKey(id);
+                            var factionEntryCalc = CliDB.FactionStorage.LookupByKey(id);
                             if (factionEntryCalc != null)
                             {
                                 if (factionEntryCalc == factionEntry || GetRank(factionEntryCalc) > (ReputationRank)factionEntryCalc.ParentFactionMod[0])
                                     continue;
-                                int spilloverRep = (int)(spillOverRepOut * factionEntryCalc.ParentFactionMod[0]);
+                                var spilloverRep = (int)(spillOverRepOut * factionEntryCalc.ParentFactionMod[0]);
                                 if (spilloverRep != 0 || !incremental)
                                     res = SetOneFactionReputation(factionEntryCalc, spilloverRep, incremental);
                             }
@@ -354,7 +354,7 @@ namespace Game
             var factionState = _factions.LookupByKey((uint)factionEntry.ReputationIndex);
             if (factionState != null)
             {
-                int BaseRep = GetBaseReputation(factionEntry);
+                var BaseRep = GetBaseReputation(factionEntry);
 
                 if (incremental)
                 {
@@ -368,8 +368,8 @@ namespace Game
                 else if (standing < Reputation_Bottom)
                     standing = Reputation_Bottom;
 
-                ReputationRank old_rank = ReputationToRank(factionState.Standing + BaseRep);
-                ReputationRank new_rank = ReputationToRank(standing);
+                var old_rank = ReputationToRank(factionState.Standing + BaseRep);
+                var new_rank = ReputationToRank(standing);
 
                 factionState.Standing = standing - BaseRep;
                 factionState.needSend = true;
@@ -520,12 +520,12 @@ namespace Game
                         faction.Standing = result.Read<int>(1);
 
                         // update counters
-                        int BaseRep = GetBaseReputation(factionEntry);
-                        ReputationRank old_rank = ReputationToRank(BaseRep);
-                        ReputationRank new_rank = ReputationToRank(BaseRep + faction.Standing);
+                        var BaseRep = GetBaseReputation(factionEntry);
+                        var old_rank = ReputationToRank(BaseRep);
+                        var new_rank = ReputationToRank(BaseRep + faction.Standing);
                         UpdateRankCounters(old_rank, new_rank);
 
-                        FactionFlags dbFactionFlags = (FactionFlags)result.Read<uint>(2);
+                        var dbFactionFlags = (FactionFlags)result.Read<uint>(2);
 
                         if (Convert.ToBoolean(dbFactionFlags & FactionFlags.Visible))
                             SetVisible(faction);                    // have internal checks for forced invisibility
@@ -563,7 +563,7 @@ namespace Game
             {
                 if (factionState.needSave)
                 {
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_REPUTATION_BY_FACTION);
+                    var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_REPUTATION_BY_FACTION);
                     stmt.AddValue(0, _player.GetGUID().GetCounter());
                     stmt.AddValue(1, factionState.Id);
                     trans.Append(stmt);
@@ -629,10 +629,10 @@ namespace Game
             if (factionEntry == null)
                 return 0;
 
-            ulong raceMask = (ulong)SharedConst.GetMaskForRace(race);
-            uint classMask = (1u << ((int)playerClass - 1));
+            var raceMask = (ulong)SharedConst.GetMaskForRace(race);
+            var classMask = (1u << ((int)playerClass - 1));
 
-            for (int i = 0; i < 4; i++)
+            for (var i = 0; i < 4; i++)
             {
                 if ((factionEntry.ReputationClassMask[i] == 0 || factionEntry.ReputationClassMask[i].HasAnyFlag((short)classMask))
                     && (factionEntry.ReputationRaceMask[i] == 0 || factionEntry.ReputationRaceMask[i].HasAnyFlag((uint)raceMask)))

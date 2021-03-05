@@ -23,7 +23,7 @@ namespace Framework.GameMath
     {
         public static float collisionTimeForMovingPointFixedAABox(Vector3 origin, Vector3 dir, AxisAlignedBox box, ref Vector3 location, out bool Inside)
         {
-            Vector3 normal = Vector3.Zero;
+            var normal = Vector3.Zero;
             if (collisionLocationForMovingPointFixedAABox(origin, dir, box, ref location, out Inside, ref normal))
             {
                 return (location - origin).magnitude();
@@ -36,12 +36,12 @@ namespace Framework.GameMath
         public static bool collisionLocationForMovingPointFixedAABox(Vector3 origin, Vector3 dir, AxisAlignedBox box, ref Vector3 location, out bool Inside, ref Vector3 normal)
         {
             Inside = true;
-            Vector3 MinB = box.Lo;
-            Vector3 MaxB = box.Hi;
-            Vector3 MaxT = new Vector3(-1.0f, -1.0f, -1.0f);
+            var MinB = box.Lo;
+            var MaxB = box.Hi;
+            var MaxT = new Vector3(-1.0f, -1.0f, -1.0f);
 
             // Find candidate planes.
-            for (int i = 0; i < 3; ++i)
+            for (var i = 0; i < 3; ++i)
             {
                 if (origin[i] < MinB[i])
                 {
@@ -75,7 +75,7 @@ namespace Framework.GameMath
             }
 
             // Get largest of the maxT's for final choice of intersection
-            int WhichPlane = 0;
+            var WhichPlane = 0;
             if (MaxT[1] > MaxT[WhichPlane])
             {
                 WhichPlane = 1;
@@ -93,7 +93,7 @@ namespace Framework.GameMath
                 return false;
             }
 
-            for (int i = 0; i < 3; ++i)
+            for (var i = 0; i < 3; ++i)
             {
                 if (i != WhichPlane)
                 {

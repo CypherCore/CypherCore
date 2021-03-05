@@ -55,20 +55,20 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(LifetimeHK);
             _worldPacket.WriteUInt32(HonorLevel);
 
-            for (int i = 0; i < Glyphs.Count; ++i)
+            for (var i = 0; i < Glyphs.Count; ++i)
                 _worldPacket.WriteUInt16(Glyphs[i]);
 
-            for (int i = 0; i < Talents.Count; ++i)
+            for (var i = 0; i < Talents.Count; ++i)
                 _worldPacket.WriteUInt16(Talents[i]);
 
-            for (int i = 0; i < PvpTalents.Count; ++i)
+            for (var i = 0; i < PvpTalents.Count; ++i)
                 _worldPacket.WriteUInt16(PvpTalents[i]);
 
             _worldPacket.WriteBit(GuildData.HasValue);
             _worldPacket.WriteBit(AzeriteLevel.HasValue);
             _worldPacket.FlushBits();
 
-            foreach (PVPBracketData bracket in Bracket)
+            foreach (var bracket in Bracket)
                 bracket.Write(_worldPacket);
 
             if (GuildData.HasValue)
@@ -139,17 +139,17 @@ namespace Game.Networking.Packets
 
             for (EnchantmentSlot enchant = 0; enchant < EnchantmentSlot.Max; ++enchant)
             {
-                uint enchId = item.GetEnchantmentId(enchant);
+                var enchId = item.GetEnchantmentId(enchant);
                 if (enchId != 0)
                     Enchants.Add(new InspectEnchantData(enchId, (byte)enchant));
             }
 
             byte i = 0;
-            foreach (SocketedGem gemData in item.m_itemData.Gems)
+            foreach (var gemData in item.m_itemData.Gems)
             {
                 if (gemData.ItemId != 0)
                 {
-                    ItemGemData gem = new ItemGemData();
+                    var gem = new ItemGemData();
                     gem.Slot = i;
                     gem.Item = new ItemInstance(gemData);
                     Gems.Add(gem);
@@ -157,15 +157,15 @@ namespace Game.Networking.Packets
                 ++i;
             }
 
-            AzeriteItem azeriteItem = item.ToAzeriteItem();
+            var azeriteItem = item.ToAzeriteItem();
             if (azeriteItem != null)
             {
-                SelectedAzeriteEssences essences = azeriteItem.GetSelectedAzeriteEssences();
+                var essences = azeriteItem.GetSelectedAzeriteEssences();
                 if (essences != null)
                 {
                     for (byte slot = 0; slot < essences.AzeriteEssenceID.GetSize(); ++slot)
                     {
-                        AzeriteEssenceData essence = new AzeriteEssenceData();
+                        var essence = new AzeriteEssenceData();
                         essence.Index = slot;
                         essence.AzeriteEssenceID = essences.AzeriteEssenceID[slot];
                         if (essence.AzeriteEssenceID != 0)
@@ -266,7 +266,7 @@ namespace Game.Networking.Packets
                 data.WriteUInt32(customization.ChrCustomizationChoiceID);
             }
 
-            foreach (InspectItemData item in Items)
+            foreach (var item in Items)
                 item.Write(data);
         }
     }

@@ -97,7 +97,7 @@ namespace Game.Entities
         {
             m_loading = true;
 
-            ulong ownerid = owner.GetGUID().GetCounter();
+            var ownerid = owner.GetGUID().GetCounter();
 
             PreparedStatement stmt;
 
@@ -133,7 +133,7 @@ namespace Game.Entities
                 stmt.AddValue(2, PetSaveMode.LastStableSlot);
             }
 
-            SQLResult result = DB.Characters.Query(stmt);
+            var result = DB.Characters.Query(stmt);
             if (result.IsEmpty())
             {
                 m_loading = false;
@@ -145,29 +145,29 @@ namespace Game.Entities
             if (petEntry == 0)
                 return false;
 
-            uint summonSpellId = result.Read<uint>(14);
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(summonSpellId, owner.GetMap().GetDifficultyID());
+            var summonSpellId = result.Read<uint>(14);
+            var spellInfo = Global.SpellMgr.GetSpellInfo(summonSpellId, owner.GetMap().GetDifficultyID());
 
-            bool isTemporarySummon = spellInfo != null && spellInfo.GetDuration() > 0;
+            var isTemporarySummon = spellInfo != null && spellInfo.GetDuration() > 0;
             if (current && isTemporarySummon)
                 return false;
 
-            PetType petType = (PetType)result.Read<byte>(15);
+            var petType = (PetType)result.Read<byte>(15);
             if (petType == PetType.Hunter)
             {
-                CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(petEntry);
+                var creatureInfo = Global.ObjectMgr.GetCreatureTemplate(petEntry);
                 if (creatureInfo == null || !creatureInfo.IsTameable(owner.CanTameExoticPets()))
                     return false;
             }
 
-            uint petId = result.Read<uint>(0);
+            var petId = result.Read<uint>(0);
             if (current && owner.IsPetNeedBeTemporaryUnsummoned())
             {
                 owner.SetTemporaryUnsummonedPetNumber(petId);
                 return false;
             }
 
-            Map map = owner.GetMap();
+            var map = owner.GetMap();
             if (!Create(map.GenerateLowGuid(HighGuid.Pet), map, petEntry))
                 return false;
 
@@ -248,8 +248,8 @@ namespace Game.Entities
                 SetFullPower(PowerType.Mana);
             else
             {
-                uint savedhealth = result.Read<uint>(10);
-                uint savedmana = result.Read<uint>(11);
+                var savedhealth = result.Read<uint>(10);
+                var savedmana = result.Read<uint>(11);
                 if (savedhealth == 0 && GetPetType() == PetType.Hunter)
                     SetDeathState(DeathState.JustDied);
                 else
@@ -284,8 +284,8 @@ namespace Game.Entities
             // @todo pets should be summoned from real cast instead of just faking it?
             if (summonSpellId != 0)
             {
-                SpellGo spellGo = new SpellGo();
-                SpellCastData castData = spellGo.Cast;
+                var spellGo = new SpellGo();
+                var castData = spellGo.Cast;
 
                 castData.CasterGUID = owner.GetGUID();
                 castData.CasterUnit = owner.GetGUID();
@@ -299,7 +299,7 @@ namespace Game.Entities
             owner.SetMinion(this, true);
             map.AddToMap(ToCreature());
 
-            uint timediff = (uint)(Time.UnixTime - result.Read<uint>(13));
+            var timediff = (uint)(Time.UnixTime - result.Read<uint>(13));
             _LoadAuras(timediff);
 
             // load action bar, if data broken will fill later by default spells.
@@ -319,8 +319,8 @@ namespace Game.Entities
 
             Log.outDebug(LogFilter.Pet, "New Pet has guid {0}", GetGUID().ToString());
 
-            ushort specId = result.Read<ushort>(16);
-            ChrSpecializationRecord petSpec = CliDB.ChrSpecializationStorage.LookupByKey(specId);
+            var specId = result.Read<ushort>(16);
+            var petSpec = CliDB.ChrSpecializationStorage.LookupByKey(specId);
             if (petSpec != null)
                 specId = (ushort)Global.DB2Mgr.GetChrSpecializationByIndex(owner.HasAuraType(AuraType.OverridePetSpecs) ? Class.Max : 0, petSpec.OrderIndex).Id;
 
@@ -376,7 +376,7 @@ namespace Game.Entities
             if (!GetOwnerGUID().IsPlayer())
                 return;
 
-            Player owner = GetOwner();
+            var owner = GetOwner();
             if (owner == null)
                 return;
 
@@ -392,10 +392,10 @@ namespace Game.Entities
                 mode = PetSaveMode.NotInSlot;
             }
 
-            uint curhealth = (uint)GetHealth();
-            int curmana = GetPower(PowerType.Mana);
+            var curhealth = (uint)GetHealth();
+            var curmana = GetPower(PowerType.Mana);
 
-            SQLTransaction trans = new SQLTransaction();
+            var trans = new SQLTransaction();
             // save auras before possibly removing them    
             _SaveAuras(trans);
 
@@ -410,11 +410,11 @@ namespace Game.Entities
             // current/stable/not_in_slot
             if (mode >= PetSaveMode.AsCurrent)
             {
-                ulong ownerLowGUID = GetOwnerGUID().GetCounter();
+                var ownerLowGUID = GetOwnerGUID().GetCounter();
                 trans = new SQLTransaction();
 
                 // remove current data
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_PET_BY_ID);
+                var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_PET_BY_ID);
                 stmt.AddValue(0, GetCharmInfo().GetPetNumber());
                 trans.Append(stmt);
 
@@ -471,9 +471,9 @@ namespace Game.Entities
 
         public static void DeleteFromDB(uint guidlow)
         {
-            SQLTransaction trans = new SQLTransaction();
+            var trans = new SQLTransaction();
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_PET_BY_ID);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_PET_BY_ID);
             stmt.AddValue(0, guidlow);
             trans.Append(stmt);
 
@@ -544,7 +544,7 @@ namespace Game.Entities
                 case DeathState.Alive:
                     {
                         // unsummon pet that lost owner
-                        Player owner = GetOwner();
+                        var owner = GetOwner();
                         if (owner == null || (!IsWithinDistInMap(owner, GetMap().GetVisibilityRange()) && !IsPossessed()) || (IsControlled() && owner.GetPetGUID().IsEmpty()))
                         {
                             Remove(PetSaveMode.NotInSlot, true);
@@ -621,8 +621,8 @@ namespace Game.Entities
             if (!IsAlive())
                 return;
 
-            uint maxlevel = Math.Min(WorldConfig.GetUIntValue(WorldCfg.MaxPlayerLevel), GetOwner().GetLevel());
-            uint petlevel = GetLevel();
+            var maxlevel = Math.Min(WorldConfig.GetUIntValue(WorldCfg.MaxPlayerLevel), GetOwner().GetLevel());
+            var petlevel = GetLevel();
 
             // If pet is detected to be at, or above(?) the players level, don't hand out XP
             if (petlevel >= maxlevel)
@@ -630,7 +630,7 @@ namespace Game.Entities
 
             uint nextLvlXP = m_unitData.PetNextLevelExperience;
             uint curXP = m_unitData.PetExperience;
-            uint newXP = curXP + xp;
+            var newXP = curXP + xp;
 
             // Check how much XP the pet should receive, and hand off have any left from previous levelups
             while (newXP >= nextLvlXP && petlevel < maxlevel)
@@ -678,7 +678,7 @@ namespace Game.Entities
                 return false;
             }
 
-            CreatureTemplate cinfo = GetCreatureTemplate();
+            var cinfo = GetCreatureTemplate();
             if (cinfo == null)
             {
                 Log.outError(LogFilter.Pet, "CreateBaseAtCreature() failed, creatureInfo is missing!");
@@ -686,7 +686,7 @@ namespace Game.Entities
             }
 
             SetDisplayId(creature.GetDisplayId());
-            CreatureFamilyRecord cFamily = CliDB.CreatureFamilyStorage.LookupByKey(cinfo.Family);
+            var cFamily = CliDB.CreatureFamilyStorage.LookupByKey(cinfo.Family);
             if (cFamily != null)
                 SetName(cFamily.Name[GetOwner().GetSession().GetSessionDbcLocale()]);
             else
@@ -700,7 +700,7 @@ namespace Game.Entities
             if (!CreateBaseAtTamed(cinfo, owner.GetMap()))
                 return false;
 
-            CreatureFamilyRecord cFamily = CliDB.CreatureFamilyStorage.LookupByKey(cinfo.Family);
+            var cFamily = CliDB.CreatureFamilyStorage.LookupByKey(cinfo.Family);
             if (cFamily != null)
                 SetName(cFamily.Name[GetOwner().GetSession().GetSessionDbcLocale()]);
 
@@ -737,16 +737,16 @@ namespace Game.Entities
             if (item.FoodType == 0)
                 return false;
 
-            CreatureTemplate cInfo = GetCreatureTemplate();
+            var cInfo = GetCreatureTemplate();
             if (cInfo == null)
                 return false;
 
-            CreatureFamilyRecord cFamily = CliDB.CreatureFamilyStorage.LookupByKey(cInfo.Family);
+            var cFamily = CliDB.CreatureFamilyStorage.LookupByKey(cInfo.Family);
             if (cFamily == null)
                 return false;
 
             uint diet = cFamily.PetFoodMask;
-            uint FoodMask = (uint)(1 << ((int)item.FoodType - 1));
+            var FoodMask = (uint)(1 << ((int)item.FoodType - 1));
             return diet.HasAnyFlag(FoodMask);
         }
 
@@ -768,21 +768,21 @@ namespace Game.Entities
 
         void _LoadSpellCooldowns()
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_SPELL_COOLDOWN);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_SPELL_COOLDOWN);
             stmt.AddValue(0, GetCharmInfo().GetPetNumber());
-            SQLResult cooldownsResult = DB.Characters.Query(stmt);
+            var cooldownsResult = DB.Characters.Query(stmt);
 
             stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_SPELL_CHARGES);
-            SQLResult chargesResult = DB.Characters.Query(stmt);
+            var chargesResult = DB.Characters.Query(stmt);
 
             GetSpellHistory().LoadFromDB<Pet>(cooldownsResult, chargesResult);
         }
 
         void _LoadSpells()
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_SPELL);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_SPELL);
             stmt.AddValue(0, GetCharmInfo().GetPetNumber());
-            SQLResult result = DB.Characters.Query(stmt);
+            var result = DB.Characters.Query(stmt);
 
             if (!result.IsEmpty())
             {
@@ -844,13 +844,13 @@ namespace Game.Entities
         {
             Log.outDebug(LogFilter.Pet, "Loading auras for {0}", GetGUID().ToString());
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_AURA_EFFECT);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_AURA_EFFECT);
             stmt.AddValue(0, GetCharmInfo().GetPetNumber());
 
-            ObjectGuid casterGuid = new ObjectGuid();
-            ObjectGuid itemGuid = new ObjectGuid();
-            Dictionary<AuraKey, AuraLoadEffectInfo> effectInfo = new Dictionary<AuraKey, AuraLoadEffectInfo>();
-            SQLResult result = DB.Characters.Query(stmt);
+            var casterGuid = new ObjectGuid();
+            var itemGuid = new ObjectGuid();
+            var effectInfo = new Dictionary<AuraKey, AuraLoadEffectInfo>();
+            var result = DB.Characters.Query(stmt);
             if (!result.IsEmpty())
             {
                 do
@@ -862,7 +862,7 @@ namespace Game.Entities
                         if (casterGuid.IsEmpty())
                             casterGuid = GetGUID();
 
-                        AuraKey key = new AuraKey(casterGuid, itemGuid, result.Read<uint>(1), result.Read<uint>(2));
+                        var key = new AuraKey(casterGuid, itemGuid, result.Read<uint>(1), result.Read<uint>(2));
                         if (!effectInfo.ContainsKey(key))
                             effectInfo[key] = new AuraLoadEffectInfo();
 
@@ -885,15 +885,15 @@ namespace Game.Entities
                     if (casterGuid.IsEmpty())
                         casterGuid = GetGUID();
 
-                    AuraKey key = new AuraKey(casterGuid, itemGuid, result.Read<uint>(1), result.Read<uint>(2));
-                    uint recalculateMask = result.Read<uint>(3);
-                    Difficulty difficulty = (Difficulty)result.Read<byte>(4);
-                    byte stackCount = result.Read<byte>(5);
-                    int maxDuration = result.Read<int>(6);
-                    int remainTime = result.Read<int>(7);
-                    byte remainCharges = result.Read<byte>(8);
+                    var key = new AuraKey(casterGuid, itemGuid, result.Read<uint>(1), result.Read<uint>(2));
+                    var recalculateMask = result.Read<uint>(3);
+                    var difficulty = (Difficulty)result.Read<byte>(4);
+                    var stackCount = result.Read<byte>(5);
+                    var maxDuration = result.Read<int>(6);
+                    var remainTime = result.Read<int>(7);
+                    var remainCharges = result.Read<byte>(8);
 
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(key.SpellId, difficulty);
+                    var spellInfo = Global.SpellMgr.GetSpellInfo(key.SpellId, difficulty);
                     if (spellInfo == null)
                     {
                         Log.outError(LogFilter.Pet, "Pet._LoadAuras: Unknown aura (spellid {0}), ignore.", key.SpellId);
@@ -925,8 +925,8 @@ namespace Game.Entities
                         remainCharges = 0;
 
                     var info = effectInfo[key];
-                    ObjectGuid castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, GetMapId(), spellInfo.Id, GetMap().GenerateLowGuid(HighGuid.Cast));
-                    Aura aura = Aura.TryCreate(spellInfo, castId, key.EffectMask, this, null, difficulty, info.BaseAmounts, null, casterGuid);
+                    var castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, GetMapId(), spellInfo.Id, GetMap().GenerateLowGuid(HighGuid.Cast));
+                    var aura = Aura.TryCreate(spellInfo, castId, key.EffectMask, this, null, difficulty, info.BaseAmounts, null, casterGuid);
                     if (aura != null)
                     {
                         if (!aura.CanBeSaved())
@@ -945,7 +945,7 @@ namespace Game.Entities
 
         void _SaveAuras(SQLTransaction trans)
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PET_AURA_EFFECTS);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PET_AURA_EFFECTS);
             stmt.AddValue(0, GetCharmInfo().GetPetNumber());
             trans.Append(stmt);
 
@@ -963,7 +963,7 @@ namespace Game.Entities
                     continue;
 
                 uint recalculateMask;
-                AuraKey key = aura.GenerateKey(out recalculateMask);
+                var key = aura.GenerateKey(out recalculateMask);
 
                 // don't save guid of caster in case we are caster of the spell - guid for pet is generated every pet load, so it won't match saved guid anyways
                 if (key.Caster == GetGUID())
@@ -983,7 +983,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, aura.GetCharges());
                 trans.Append(stmt);
 
-                foreach (AuraEffect effect in aura.GetAuraEffects())
+                foreach (var effect in aura.GetAuraEffects())
                 {
                     if (effect != null)
                     {
@@ -1004,7 +1004,7 @@ namespace Game.Entities
 
         bool AddSpell(uint spellId, ActiveStates active = ActiveStates.Decide, PetSpellState state = PetSpellState.New, PetSpellType type = PetSpellType.Normal)
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
+            var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
             if (spellInfo == null)
             {
                 // do pet spell book cleanup
@@ -1012,7 +1012,7 @@ namespace Game.Entities
                 {
                     Log.outError(LogFilter.Pet, "addSpell: Non-existed in SpellStore spell #{0} request, deleting for all pets in `pet_spell`.", spellId);
 
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_INVALID_PET_SPELL);
+                    var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_INVALID_PET_SPELL);
 
                     stmt.AddValue(0, spellId);
 
@@ -1046,7 +1046,7 @@ namespace Game.Entities
                 }
             }
 
-            PetSpell newspell = new PetSpell();
+            var newspell = new PetSpell();
             newspell.state = state;
             newspell.type = type;
 
@@ -1068,7 +1068,7 @@ namespace Game.Entities
                     if (pair.Value.state == PetSpellState.Removed)
                         continue;
 
-                    SpellInfo oldRankSpellInfo = Global.SpellMgr.GetSpellInfo(pair.Key, Difficulty.None);
+                    var oldRankSpellInfo = Global.SpellMgr.GetSpellInfo(pair.Key, Difficulty.None);
 
                     if (oldRankSpellInfo == null)
                         continue;
@@ -1114,7 +1114,7 @@ namespace Game.Entities
 
             if (!m_loading)
             {
-                PetLearnedSpells packet = new PetLearnedSpells();
+                var packet = new PetLearnedSpells();
                 packet.Spells.Add(spellId);
                 GetOwner().SendPacket(packet);
                 GetOwner().PetSpellInitialize();
@@ -1124,9 +1124,9 @@ namespace Game.Entities
 
         void LearnSpells(List<uint> spellIds)
         {
-            PetLearnedSpells packet = new PetLearnedSpells();
+            var packet = new PetLearnedSpells();
 
-            foreach (uint spell in spellIds)
+            foreach (var spell in spellIds)
             {
                 if (!AddSpell(spell))
                     continue;
@@ -1140,7 +1140,7 @@ namespace Game.Entities
 
         void InitLevelupSpellsForLevel()
         {
-            uint level = GetLevel();
+            var level = GetLevel();
             var levelupSpells = GetCreatureTemplate().Family != 0 ? Global.SpellMgr.GetPetLevelupSpellList(GetCreatureTemplate().Family) : null;
             if (levelupSpells != null)
             {
@@ -1157,12 +1157,12 @@ namespace Game.Entities
             }
 
             // default spells (can be not learned if pet level (as owner level decrease result for example) less first possible in normal game)
-            PetDefaultSpellsEntry defSpells = Global.SpellMgr.GetPetDefaultSpellsEntry((int)GetEntry());
+            var defSpells = Global.SpellMgr.GetPetDefaultSpellsEntry((int)GetEntry());
             if (defSpells != null)
             {
                 for (byte i = 0; i < SharedConst.MaxCreatureSpellDataSlots; ++i)
                 {
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(defSpells.spellid[i], Difficulty.None);
+                    var spellInfo = Global.SpellMgr.GetSpellInfo(defSpells.spellid[i], Difficulty.None);
                     if (spellInfo == null)
                         continue;
 
@@ -1182,7 +1182,7 @@ namespace Game.Entities
             {
                 if (!m_loading)
                 {
-                    PetUnlearnedSpells packet = new PetUnlearnedSpells();
+                    var packet = new PetUnlearnedSpells();
                     packet.Spells.Add(spellId);
                     GetOwner().SendPacket(packet);
                 }
@@ -1193,9 +1193,9 @@ namespace Game.Entities
 
         void UnlearnSpells(List<uint> spellIds, bool learnPrev, bool clearActionBar)
         {
-            PetUnlearnedSpells packet = new PetUnlearnedSpells();
+            var packet = new PetUnlearnedSpells();
 
-            foreach (uint spell in spellIds)
+            foreach (var spell in spellIds)
             {
                 if (!RemoveSpell(spell, learnPrev, clearActionBar))
                     continue;
@@ -1225,7 +1225,7 @@ namespace Game.Entities
 
             if (learnPrev)
             {
-                uint prev_id = Global.SpellMgr.GetPrevSpellInChain(spellId);
+                var prev_id = Global.SpellMgr.GetPrevSpellInChain(spellId);
                 if (prev_id != 0)
                     LearnSpell(prev_id);
                 else
@@ -1252,7 +1252,7 @@ namespace Game.Entities
         {
             for (byte i = 0; i < SharedConst.ActionBarIndexMax; ++i)
             {
-                UnitActionBarEntry ab = GetCharmInfo().GetActionBarEntry(i);
+                var ab = GetCharmInfo().GetActionBarEntry(i);
                 if (ab != null)
                     if (ab.GetAction() != 0 && ab.IsActionBarForSpell())
                     {
@@ -1260,7 +1260,7 @@ namespace Game.Entities
                             GetCharmInfo().SetActionBar(i, 0, ActiveStates.Passive);
                         else if (ab.GetActiveState() == ActiveStates.Enabled)
                         {
-                            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(ab.GetAction(), Difficulty.None);
+                            var spellInfo = Global.SpellMgr.GetSpellInfo(ab.GetAction(), Difficulty.None);
                             if (spellInfo != null)
                                 ToggleAutocast(spellInfo, true);
                         }
@@ -1371,11 +1371,11 @@ namespace Game.Entities
         // Get all passive spells in our skill line
         void LearnPetPassives()
         {
-            CreatureTemplate cInfo = GetCreatureTemplate();
+            var cInfo = GetCreatureTemplate();
             if (cInfo == null)
                 return;
 
-            CreatureFamilyRecord cFamily = CliDB.CreatureFamilyStorage.LookupByKey(cInfo.Family);
+            var cFamily = CliDB.CreatureFamilyStorage.LookupByKey(cInfo.Family);
             if (cFamily == null)
                 return;
 
@@ -1392,7 +1392,7 @@ namespace Game.Entities
 
         void CastPetAuras(bool current)
         {
-            Player owner = GetOwner();
+            var owner = GetOwner();
 
             if (!IsPermanentPetFor(owner))
                 return;
@@ -1408,13 +1408,13 @@ namespace Game.Entities
 
         public void CastPetAura(PetAura aura)
         {
-            uint auraId = aura.GetAura(GetEntry());
+            var auraId = aura.GetAura(GetEntry());
             if (auraId == 0)
                 return;
 
             if (auraId == 35696)                                      // Demonic Knowledge
             {
-                int basePoints = MathFunctions.CalculatePct(aura.GetDamage(), GetStat(Stats.Stamina) + GetStat(Stats.Intellect));
+                var basePoints = MathFunctions.CalculatePct(aura.GetDamage(), GetStat(Stats.Stamina) + GetStat(Stats.Intellect));
                 CastCustomSpell(this, auraId, basePoints, 0, 0, true);
             }
             else
@@ -1423,7 +1423,7 @@ namespace Game.Entities
 
         bool IsPetAura(Aura aura)
         {
-            Player owner = GetOwner();
+            var owner = GetOwner();
 
             // if the owner has that pet aura, return true
             foreach (var petAura in owner.m_petAuras)
@@ -1437,7 +1437,7 @@ namespace Game.Entities
         void LearnSpellHighRank(uint spellid)
         {
             LearnSpell(spellid);
-            uint next = Global.SpellMgr.GetNextSpellInChain(spellid);
+            var next = Global.SpellMgr.GetNextSpellInChain(spellid);
             if (next != 0)
                 LearnSpellHighRank(next);
         }
@@ -1517,14 +1517,14 @@ namespace Game.Entities
 
         void LearnSpecializationSpells()
         {
-            List<uint> learnedSpells = new List<uint>();
+            var learnedSpells = new List<uint>();
 
-            List<SpecializationSpellsRecord> specSpells = Global.DB2Mgr.GetSpecializationSpells(m_petSpecialization);
+            var specSpells = Global.DB2Mgr.GetSpecializationSpells(m_petSpecialization);
             if (specSpells != null)
             {
                 foreach (var specSpell in specSpells)
                 {
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(specSpell.SpellID, Difficulty.None);
+                    var spellInfo = Global.SpellMgr.GetSpellInfo(specSpell.SpellID, Difficulty.None);
                     if (spellInfo == null || spellInfo.SpellLevel > GetLevel())
                         continue;
 
@@ -1537,14 +1537,14 @@ namespace Game.Entities
 
         void RemoveSpecializationSpells(bool clearActionBar)
         {
-            List<uint> unlearnedSpells = new List<uint>();
+            var unlearnedSpells = new List<uint>();
 
             for (uint i = 0; i < PlayerConst.MaxSpecializations; ++i)
             {
-                ChrSpecializationRecord specialization = Global.DB2Mgr.GetChrSpecializationByIndex(0, i);
+                var specialization = Global.DB2Mgr.GetChrSpecializationByIndex(0, i);
                 if (specialization != null)
                 {
-                    List<SpecializationSpellsRecord> specSpells = Global.DB2Mgr.GetSpecializationSpells(specialization.Id);
+                    var specSpells = Global.DB2Mgr.GetSpecializationSpells(specialization.Id);
                     if (specSpells != null)
                     {
                         foreach (var specSpell in specSpells)
@@ -1552,10 +1552,10 @@ namespace Game.Entities
                     }
                 }
 
-                ChrSpecializationRecord specialization1 = Global.DB2Mgr.GetChrSpecializationByIndex(Class.Max, i);
+                var specialization1 = Global.DB2Mgr.GetChrSpecializationByIndex(Class.Max, i);
                 if (specialization1 != null)
                 {
-                    List<SpecializationSpellsRecord> specSpells = Global.DB2Mgr.GetSpecializationSpells(specialization1.Id);
+                    var specSpells = Global.DB2Mgr.GetSpecializationSpells(specialization1.Id);
                     if (specSpells != null)
                     {
                         foreach (var specSpell in specSpells)
@@ -1588,14 +1588,14 @@ namespace Game.Entities
             CleanupActionBar();
             GetOwner().PetSpellInitialize();
 
-            SetPetSpecialization setPetSpecialization = new SetPetSpecialization();
+            var setPetSpecialization = new SetPetSpecialization();
             setPetSpecialization.SpecID = m_petSpecialization;
             GetOwner().SendPacket(setPetSpecialization);
         }
 
         string GenerateActionBarData()
         {
-            StringBuilder ss = new StringBuilder();
+            var ss = new StringBuilder();
 
             for (byte i = SharedConst.ActionBarIndexStart; i < SharedConst.ActionBarIndexEnd; ++i)
             {

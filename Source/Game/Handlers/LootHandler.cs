@@ -33,18 +33,18 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.LootItem)]
         void HandleAutostoreLootItem(LootItemPkt packet)
         {
-            Player player = GetPlayer();
+            var player = GetPlayer();
             AELootResult aeResult = player.GetAELootView().Count > 1 ? new AELootResult() : null;
 
             // @todo Implement looting by LootObject guid
-            foreach (LootRequest req in packet.Loot)
+            foreach (var req in packet.Loot)
             {
                 Loot loot = null;
                 ObjectGuid lguid = player.GetLootWorldObjectGUID(req.Object);
 
                 if (lguid.IsGameObject())
                 {
-                    GameObject go = player.GetMap().GetGameObject(lguid);
+                    var go = player.GetMap().GetGameObject(lguid);
 
                     // not check distance for GO in case owned GO (fishing bobber case, for example) or Fishing hole GO
                     if (!go || ((go.GetOwnerGUID() != player.GetGUID() && go.GetGoType() != GameObjectTypes.FishingHole) && !go.IsWithinDistInMap(player, SharedConst.InteractionDistance)))
@@ -69,7 +69,7 @@ namespace Game
                 }
                 else if (lguid.IsCorpse())
                 {
-                    Corpse bones = ObjectAccessor.GetCorpse(player, lguid);
+                    var bones = ObjectAccessor.GetCorpse(player, lguid);
                     if (!bones)
                     {
                         player.SendLootRelease(lguid);
@@ -80,9 +80,9 @@ namespace Game
                 }
                 else
                 {
-                    Creature creature = player.GetMap().GetCreature(lguid);
+                    var creature = player.GetMap().GetCreature(lguid);
 
-                    bool lootAllowed = creature && creature.IsAlive() == (player.GetClass() == Class.Rogue && creature.loot.loot_type == LootType.Pickpocketing);
+                    var lootAllowed = creature && creature.IsAlive() == (player.GetClass() == Class.Rogue && creature.loot.loot_type == LootType.Pickpocketing);
                     if (!lootAllowed || !creature.IsWithinDistInMap(player, AELootCreatureCheck.LootDistance))
                     {
                         player.SendLootError(req.Object, lguid, lootAllowed ? LootError.TooFar : LootError.DidntKill);
@@ -114,19 +114,19 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.LootMoney)]
         void HandleLootMoney(LootMoney lootMoney)
         {
-            Player player = GetPlayer();
+            var player = GetPlayer();
 
             foreach (var lootView in player.GetAELootView())
             {
                 ObjectGuid guid = lootView.Value;
                 Loot loot = null;
-                bool shareMoney = true;
+                var shareMoney = true;
 
                 switch (guid.GetHigh())
                 {
                     case HighGuid.GameObject:
                         {
-                            GameObject go = player.GetMap().GetGameObject(guid);
+                            var go = player.GetMap().GetGameObject(guid);
 
                             // do not check distance for GO if player is the owner of it (ex. fishing bobber)
                             if (go && ((go.GetOwnerGUID() == player.GetGUID() || go.IsWithinDistInMap(player, SharedConst.InteractionDistance))))
@@ -136,7 +136,7 @@ namespace Game
                         }
                     case HighGuid.Corpse:                               // remove insignia ONLY in BG
                         {
-                            Corpse bones = ObjectAccessor.GetCorpse(player, guid);
+                            var bones = ObjectAccessor.GetCorpse(player, guid);
 
                             if (bones && bones.IsWithinDistInMap(player, SharedConst.InteractionDistance))
                             {
@@ -159,8 +159,8 @@ namespace Game
                     case HighGuid.Creature:
                     case HighGuid.Vehicle:
                         {
-                            Creature creature = player.GetMap().GetCreature(guid);
-                            bool lootAllowed = creature && creature.IsAlive() == (player.GetClass() == Class.Rogue && creature.loot.loot_type == LootType.Pickpocketing);
+                            var creature = player.GetMap().GetCreature(guid);
+                            var lootAllowed = creature && creature.IsAlive() == (player.GetClass() == Class.Rogue && creature.loot.loot_type == LootType.Pickpocketing);
                             if (lootAllowed && creature.IsWithinDistInMap(player, AELootCreatureCheck.LootDistance))
                             {
                                 loot = creature.loot;
@@ -182,12 +182,12 @@ namespace Game
                 if (shareMoney && player.GetGroup() != null)      //item, pickpocket and players can be looted only single player
                 {
 
-                    Group group = player.GetGroup();
+                    var group = player.GetGroup();
 
-                    List<Player> playersNear = new List<Player>();
+                    var playersNear = new List<Player>();
                     for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                     {
-                        Player member = refe.GetSource();
+                        var member = refe.GetSource();
                         if (!member)
                             continue;
 
@@ -195,16 +195,16 @@ namespace Game
                             playersNear.Add(member);
                     }
 
-                    ulong goldPerPlayer = (ulong)(loot.gold / playersNear.Count);
+                    var goldPerPlayer = (ulong)(loot.gold / playersNear.Count);
 
                     foreach (var pl in playersNear)
                     {
-                        ulong goldMod = MathFunctions.CalculatePct(goldPerPlayer, pl.GetTotalAuraModifierByMiscValue(AuraType.ModMoneyGain, 1));
+                        var goldMod = MathFunctions.CalculatePct(goldPerPlayer, pl.GetTotalAuraModifierByMiscValue(AuraType.ModMoneyGain, 1));
 
                         pl.ModifyMoney((long)(goldPerPlayer + goldMod));
                         pl.UpdateCriteria(CriteriaTypes.LootMoney, goldPerPlayer);
 
-                        LootMoneyNotify packet = new LootMoneyNotify();
+                        var packet = new LootMoneyNotify();
                         packet.Money = goldPerPlayer;
                         packet.MoneyMod = goldMod;
                         packet.SoleLooter = playersNear.Count <= 1 ? true : false;
@@ -218,7 +218,7 @@ namespace Game
                     player.ModifyMoney((long)(loot.gold + goldMod));
                     player.UpdateCriteria(CriteriaTypes.LootMoney, loot.gold);
 
-                    LootMoneyNotify packet = new LootMoneyNotify();
+                    var packet = new LootMoneyNotify();
                     packet.Money = loot.gold;
                     packet.MoneyMod = goldMod;
                     packet.SoleLooter = true; // "You loot..."
@@ -272,9 +272,9 @@ namespace Game
             if (!GetPlayer().IsAlive() || !packet.Unit.IsCreatureOrVehicle())
                 return;
 
-            List<Creature> corpses = new List<Creature>();
-            AELootCreatureCheck check = new AELootCreatureCheck(_player, packet.Unit);
-            CreatureListSearcher searcher = new CreatureListSearcher(_player, corpses, check);
+            var corpses = new List<Creature>();
+            var check = new AELootCreatureCheck(_player, packet.Unit);
+            var searcher = new CreatureListSearcher(_player, corpses, check);
             Cell.VisitGridObjects(_player, searcher, AELootCreatureCheck.LootDistance);
 
             if (!corpses.Empty())
@@ -287,7 +287,7 @@ namespace Game
                 // main target
                 SendPacket(new AELootTargetsAck());
 
-                foreach (Creature creature in corpses)
+                foreach (var creature in corpses)
                 {
                     GetPlayer().SendLoot(creature.GetGUID(), LootType.Corpse, true);
                     SendPacket(new AELootTargetsAck());
@@ -310,7 +310,7 @@ namespace Game
 
         public void DoLootRelease(ObjectGuid lguid)
         {
-            Player player = GetPlayer();
+            var player = GetPlayer();
             Loot loot;
 
             if (player.GetLootGUID() == lguid)
@@ -324,7 +324,7 @@ namespace Game
 
             if (lguid.IsGameObject())
             {
-                GameObject go = player.GetMap().GetGameObject(lguid);
+                var go = player.GetMap().GetGameObject(lguid);
 
                 // not check distance for GO in case owned GO (fishing bobber case, for example) or Fishing hole GO
                 if (!go || ((go.GetOwnerGUID() != player.GetGUID() && go.GetGoType() != GameObjectTypes.FishingHole) && !go.IsWithinDistInMap(player, SharedConst.InteractionDistance)))
@@ -364,7 +364,7 @@ namespace Game
             }
             else if (lguid.IsCorpse())        // ONLY remove insignia at BG
             {
-                Corpse corpse = ObjectAccessor.GetCorpse(player, lguid);
+                var corpse = ObjectAccessor.GetCorpse(player, lguid);
                 if (!corpse || !corpse.IsWithinDistInMap(player, SharedConst.InteractionDistance))
                     return;
 
@@ -382,7 +382,7 @@ namespace Game
                 if (!pItem)
                     return;
 
-                ItemTemplate proto = pItem.GetTemplate();
+                var proto = pItem.GetTemplate();
 
                 // destroy only 5 items from stack in case prospecting and milling
                 if (proto.GetFlags().HasAnyFlag(ItemFlags.IsProspectable | ItemFlags.IsMillable))
@@ -390,7 +390,7 @@ namespace Game
                     pItem.m_lootGenerated = false;
                     pItem.loot.Clear();
 
-                    uint count = pItem.GetCount();
+                    var count = pItem.GetCount();
 
                     // >=5 checked in spell code, but will work for cheating cases also with removing from another stacks.
                     if (count > 5)
@@ -407,9 +407,9 @@ namespace Game
             }
             else
             {
-                Creature creature = player.GetMap().GetCreature(lguid);
+                var creature = player.GetMap().GetCreature(lguid);
 
-                bool lootAllowed = creature && creature.IsAlive() == (player.GetClass() == Class.Rogue && creature.loot.loot_type == LootType.Pickpocketing);
+                var lootAllowed = creature && creature.IsAlive() == (player.GetClass() == Class.Rogue && creature.loot.loot_type == LootType.Pickpocketing);
                 if (!lootAllowed || !creature.IsWithinDistInMap(player, AELootCreatureCheck.LootDistance))
                     return;
 
@@ -431,7 +431,7 @@ namespace Game
                     {
                         loot.roundRobinPlayer.Clear();
 
-                        Group group = player.GetGroup();
+                        var group = player.GetGroup();
                         if (group)
                         {
                             if (group.GetLootMethod() != LootMethod.MasterLoot)
@@ -459,7 +459,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MasterLootItem)]
         void HandleLootMasterGive(MasterLootItem masterLootItem)
         {
-            AELootResult aeResult = new AELootResult();
+            var aeResult = new AELootResult();
 
             if (GetPlayer().GetGroup() == null || GetPlayer().GetGroup().GetLooterGuid() != GetPlayer().GetGUID() || GetPlayer().GetGroup().GetLootMethod() != LootMethod.MasterLoot)
             {
@@ -468,14 +468,14 @@ namespace Game
             }
 
             // player on other map
-            Player target = Global.ObjAccessor.GetPlayer(_player, masterLootItem.Target);
+            var target = Global.ObjAccessor.GetPlayer(_player, masterLootItem.Target);
             if (!target)
             {
                 GetPlayer().SendLootError(ObjectGuid.Empty, ObjectGuid.Empty, LootError.PlayerNotFound);
                 return;
             }
 
-            foreach (LootRequest req in masterLootItem.Loot)
+            foreach (var req in masterLootItem.Loot)
             {
                 Loot loot = null;
                 ObjectGuid lootguid = _player.GetLootWorldObjectGUID(req.Object);
@@ -489,7 +489,7 @@ namespace Game
 
                 if (GetPlayer().GetLootGUID().IsCreatureOrVehicle())
                 {
-                    Creature creature = GetPlayer().GetMap().GetCreature(lootguid);
+                    var creature = GetPlayer().GetMap().GetCreature(lootguid);
                     if (!creature)
                         return;
 
@@ -497,7 +497,7 @@ namespace Game
                 }
                 else if (GetPlayer().GetLootGUID().IsGameObject())
                 {
-                    GameObject pGO = GetPlayer().GetMap().GetGameObject(lootguid);
+                    var pGO = GetPlayer().GetMap().GetGameObject(lootguid);
                     if (!pGO)
                         return;
 
@@ -507,16 +507,16 @@ namespace Game
                 if (loot == null)
                     return;
 
-                byte slotid = (byte)(req.LootListID - 1);
+                var slotid = (byte)(req.LootListID - 1);
                 if (slotid >= loot.items.Count + loot.quest_items.Count)
                 {
                     Log.outDebug(LogFilter.Loot, $"MasterLootItem: Player {GetPlayer().GetName()} might be using a hack! (slot {slotid}, size {loot.items.Count})");
                     return;
                 }
 
-                LootItem item = slotid >= loot.items.Count ? loot.quest_items[slotid - loot.items.Count] : loot.items[slotid];
+                var item = slotid >= loot.items.Count ? loot.quest_items[slotid - loot.items.Count] : loot.items[slotid];
 
-                List<ItemPosCount> dest = new List<ItemPosCount>();
+                var dest = new List<ItemPosCount>();
                 InventoryResult msg = target.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, item.itemid, item.count);
                 if (item.follow_loot_rules && !item.AllowedForPlayer(target))
                     msg = InventoryResult.CantEquipEver;
@@ -559,7 +559,7 @@ namespace Game
         {
             if (packet.SpecID != 0)
             {
-                ChrSpecializationRecord chrSpec = CliDB.ChrSpecializationStorage.LookupByKey(packet.SpecID);
+                var chrSpec = CliDB.ChrSpecializationStorage.LookupByKey(packet.SpecID);
                 if (chrSpec != null)
                 {
                     if (chrSpec.ClassID == (uint)GetPlayer().GetClass())

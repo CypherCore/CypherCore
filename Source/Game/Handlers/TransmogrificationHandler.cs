@@ -30,7 +30,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.TransmogrifyItems)]
         void HandleTransmogrifyItems(TransmogrifyItems transmogrifyItems)
         {
-            Player player = GetPlayer();
+            var player = GetPlayer();
 
             // Validate
             if (!player.GetNPCIfCanInteractWith(transmogrifyItems.Npc, NPCFlags.Transmogrifier, NPCFlags2.None))
@@ -40,12 +40,12 @@ namespace Game
             }
 
             long cost = 0;
-            Dictionary<Item, uint[]> transmogItems = new Dictionary<Item, uint[]>();// new Dictionary<Item, Tuple<uint, uint>>();
-            Dictionary<Item, uint> illusionItems = new Dictionary<Item, uint>();
+            var transmogItems = new Dictionary<Item, uint[]>();// new Dictionary<Item, Tuple<uint, uint>>();
+            var illusionItems = new Dictionary<Item, uint>();
 
-            List<Item> resetAppearanceItems = new List<Item>();
-            List<Item> resetIllusionItems = new List<Item>();
-            List<uint> bindAppearances = new List<uint>();
+            var resetAppearanceItems = new List<Item>();
+            var resetIllusionItems = new List<Item>();
+            var bindAppearances = new List<uint>();
 
             bool validateAndStoreTransmogItem(Item itemTransmogrified, uint itemModifiedAppearanceId, bool isSecondary)
             {
@@ -97,7 +97,7 @@ namespace Game
                 return true;
             };
 
-            foreach (TransmogrifyItem transmogItem in transmogrifyItems.Items)
+            foreach (var transmogItem in transmogrifyItems.Items)
             {
                 // slot of the transmogrified item
                 if (transmogItem.Slot >= EquipmentSlot.End)
@@ -136,7 +136,7 @@ namespace Game
                         return;
                     }
 
-                    SpellItemEnchantmentRecord illusion = CliDB.SpellItemEnchantmentStorage.LookupByKey(transmogItem.SpellItemEnchantmentID);
+                    var illusion = CliDB.SpellItemEnchantmentStorage.LookupByKey(transmogItem.SpellItemEnchantmentID);
                     if (illusion == null)
                     {
                         Log.outDebug(LogFilter.Network, "WORLD: HandleTransmogrifyItems - {0}, Name: {1} tried to transmogrify illusion using invalid enchant ({2}).", player.GetGUID().ToString(), player.GetName(), transmogItem.SpellItemEnchantmentID);
@@ -149,7 +149,7 @@ namespace Game
                         return;
                     }
 
-                    PlayerConditionRecord condition = CliDB.PlayerConditionStorage.LookupByKey(illusion.TransmogUseConditionID);
+                    var condition = CliDB.PlayerConditionStorage.LookupByKey(illusion.TransmogUseConditionID);
                     if (condition != null)
                     {
                         if (!ConditionManager.IsPlayerMeetingCondition(player, condition))
@@ -183,7 +183,7 @@ namespace Game
             // Everything is fine, proceed
             foreach (var transmogPair in transmogItems)
             {
-                Item transmogrified = transmogPair.Key;
+                var transmogrified = transmogPair.Key;
 
                 if (!transmogrifyItems.CurrentSpecOnly)
                 {
@@ -232,7 +232,7 @@ namespace Game
 
             foreach (var illusionPair in illusionItems)
             {
-                Item transmogrified = illusionPair.Key;
+                var transmogrified = illusionPair.Key;
 
                 if (!transmogrifyItems.CurrentSpecOnly)
                 {
@@ -262,7 +262,7 @@ namespace Game
                 transmogrified.SetState(ItemUpdateState.Changed, player);
             }
 
-            foreach (Item item in resetAppearanceItems)
+            foreach (var item in resetAppearanceItems)
             {
                 if (!transmogrifyItems.CurrentSpecOnly)
                 {
@@ -307,7 +307,7 @@ namespace Game
                 player.SetVisibleItemSlot(item.GetSlot(), item);
             }
 
-            foreach (Item item in resetIllusionItems)
+            foreach (var item in resetIllusionItems)
             {
                 if (!transmogrifyItems.CurrentSpecOnly)
                 {
@@ -336,10 +336,10 @@ namespace Game
                 player.SetVisibleItemSlot(item.GetSlot(), item);
             }
 
-            foreach (uint itemModifedAppearanceId in bindAppearances)
+            foreach (var itemModifedAppearanceId in bindAppearances)
             {
                 var itemsProvidingAppearance = GetCollectionMgr().GetItemsProvidingTemporaryAppearance(itemModifedAppearanceId);
-                foreach (ObjectGuid itemGuid in itemsProvidingAppearance)
+                foreach (var itemGuid in itemsProvidingAppearance)
                 {
                     Item item = player.GetItemByGuid(itemGuid);
                     if (item)

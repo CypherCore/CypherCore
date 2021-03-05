@@ -429,14 +429,14 @@ namespace Scripts.World.GameObjects
         public override bool GossipHello(Player player)
         {
             me.UseDoorOrButton();
-            int Random = (int)(RandomHelper.Rand32() % (CreatureIds.PrisonEntry.Length / sizeof(uint)));
+            var Random = (int)(RandomHelper.Rand32() % (CreatureIds.PrisonEntry.Length / sizeof(uint)));
 
             Creature creature = player.SummonCreature(CreatureIds.PrisonEntry[Random], me.GetPositionX(), me.GetPositionY(), me.GetPositionZ(), me.GetAngle(player), TempSummonType.TimedDespawnOutOfCombat, 30000);
             if (creature)
             {
                 if (!creature.IsHostileTo(player))
                 {
-                    FactionTemplateRecord pFaction = creature.GetFactionTemplateEntry();
+                    var pFaction = creature.GetFactionTemplateEntry();
                     if (pFaction != null)
                     {
                         uint spellId = 0;
@@ -483,7 +483,7 @@ namespace Scripts.World.GameObjects
         public override bool GossipHello(Player player)
         {
             me.UseDoorOrButton();
-            int Random = (int)(RandomHelper.Rand32() % CreatureIds.StasisEntry.Length / sizeof(uint));
+            var Random = (int)(RandomHelper.Rand32() % CreatureIds.StasisEntry.Length / sizeof(uint));
 
             player.SummonCreature(CreatureIds.StasisEntry[Random], me.GetPositionX(), me.GetPositionY(), me.GetPositionZ(), me.GetAngle(player), TempSummonType.TimedDespawnOutOfCombat, 30000);
 
@@ -528,7 +528,7 @@ namespace Scripts.World.GameObjects
         {
             uint birdEntryId = 0;
 
-            me.GetClosePoint(out float fX, out float fY, out float fZ, me.GetCombatReach(), SharedConst.InteractionDistance);
+            me.GetClosePoint(out var fX, out var fY, out var fZ, me.GetCombatReach(), SharedConst.InteractionDistance);
 
             switch (me.GetEntry())
             {
@@ -617,7 +617,7 @@ namespace Scripts.World.GameObjects
 
         public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
         {
-            uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
+            var action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
             player.ClearGossipMenu();
             switch (action)
             {
@@ -661,7 +661,7 @@ namespace Scripts.World.GameObjects
 
         public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
         {
-            uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
+            var action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
             player.ClearGossipMenu();
             switch (action)
             {
@@ -737,7 +737,7 @@ namespace Scripts.World.GameObjects
         public override bool GossipHello(Player player)
         {
             me.UseDoorOrButton();
-            Creature pNearestPrisoner = me.FindNearestCreature(CreatureIds.ScourgePrisoner, 5.0f, true);
+            var pNearestPrisoner = me.FindNearestCreature(CreatureIds.ScourgePrisoner, 5.0f, true);
             if (pNearestPrisoner)
             {
                 player.KilledMonsterCredit(CreatureIds.ScourgePrisoner, pNearestPrisoner.GetGUID());
@@ -787,7 +787,7 @@ namespace Scripts.World.GameObjects
         public override bool GossipHello(Player player)
         {
             me.UseDoorOrButton();
-            Creature pPrisoner = me.FindNearestCreature(CreatureIds.EbonBladePrisonerHuman, 5.0f, true);
+            var pPrisoner = me.FindNearestCreature(CreatureIds.EbonBladePrisonerHuman, 5.0f, true);
             if (!pPrisoner)
             {
                 pPrisoner = me.FindNearestCreature(CreatureIds.EbonBladePrisonerTroll, 5.0f, true);
@@ -859,7 +859,7 @@ namespace Scripts.World.GameObjects
 
         public override bool GossipHello(Player player)
         {
-            Unit owner = me.GetOwner();
+            var owner = me.GetOwner();
             if (!owner || !owner.IsTypeId(TypeId.Player) || !player.IsInSameRaidWith(owner.ToPlayer()))
                 return true;
             return false;
@@ -877,7 +877,7 @@ namespace Scripts.World.GameObjects
             if (player.GetQuestStatus(QuestIds.PrisonersOfWyrmskull) != QuestStatus.Incomplete)
                 return true;
 
-            Creature pPrisoner = me.FindNearestCreature(CreatureIds.PrisonerPriest, 2.0f);
+            var pPrisoner = me.FindNearestCreature(CreatureIds.PrisonerPriest, 2.0f);
             if (!pPrisoner)
             {
                 pPrisoner = me.FindNearestCreature(CreatureIds.PrisonerMage, 2.0f);
@@ -906,7 +906,7 @@ namespace Scripts.World.GameObjects
 
         public override bool GossipHello(Player player)
         {
-            QuestStatus status = player.GetQuestStatus(QuestIds.DoingYourDuty);
+            var status = player.GetQuestStatus(QuestIds.DoingYourDuty);
             if (status == QuestStatus.Incomplete || status == QuestStatus.Complete || status == QuestStatus.Rewarded)
             {
                 player.AddGossipItem(GossipOptionIcon.Chat, GossipConst.GossipUseOuthouse, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
@@ -920,12 +920,12 @@ namespace Scripts.World.GameObjects
 
         public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
         {
-            uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
+            var action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
             player.ClearGossipMenu();
             if (action == eTradeskill.GossipActionInfoDef + 1)
             {
                 player.CloseGossipMenu();
-                Creature target = ScriptedAI.GetClosestCreatureWithEntry(player, CreatureIds.OuthouseBunny, 3.0f);
+                var target = ScriptedAI.GetClosestCreatureWithEntry(player, CreatureIds.OuthouseBunny, 3.0f);
                 if (target)
                 {
                     target.GetAI().SetData(1, (uint)player.GetGender());
@@ -981,9 +981,9 @@ namespace Scripts.World.GameObjects
             me.UseDoorOrButton();
             if (player.GetQuestStatus(QuestIds.MissingFriends) == QuestStatus.Incomplete)
             {
-                List<Creature> childrenList = new List<Creature>();
+                var childrenList = new List<Creature>();
                 me.GetCreatureListWithEntryInGrid(childrenList, CreatureIds.CaptiveChild, SharedConst.InteractionDistance);
-                foreach (Creature creature in childrenList)
+                foreach (var creature in childrenList)
                 {
                     player.KilledMonsterCredit(CreatureIds.CaptiveChild, creature.GetGUID());
                     creature.DespawnOrUnsummon(5000);
@@ -1036,7 +1036,7 @@ namespace Scripts.World.GameObjects
 
         public override bool GossipHello(Player player)
         {
-            Creature creature = me.FindNearestCreature(CreatureIds.PoleRibbonBunny, 10.0f);
+            var creature = me.FindNearestCreature(CreatureIds.PoleRibbonBunny, 10.0f);
             if (creature)
             {
                 creature.GetAI().DoAction(0);
@@ -1139,7 +1139,7 @@ namespace Scripts.World.GameObjects
                             }
                             break;
                         case AreaIds.Shattrath:
-                            List<Unit> playersNearby = me.GetPlayerListInGrid(me.GetVisibilityRange());
+                            var playersNearby = me.GetPlayerListInGrid(me.GetVisibilityRange());
                             foreach (Player player in playersNearby)
                             {
                                 if (player.GetTeamId() == TeamId.Horde)
@@ -1298,7 +1298,7 @@ namespace Scripts.World.GameObjects
             if (eventId == Misc.GameEventHourlyBells && start)
             {
                 var localTm = Time.UnixTimeToDateTime(GameTime.GetGameTime()).ToLocalTime();
-                int _rings = (localTm.Hour - 1) % 12 + 1;
+                var _rings = (localTm.Hour - 1) % 12 + 1;
 
                 for (var i = 0; i < _rings; ++i)
                     _scheduler.Schedule(TimeSpan.FromSeconds(i * 4 + 1), task => me.PlayDirectSound(_soundId));

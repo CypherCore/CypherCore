@@ -37,7 +37,7 @@ namespace Game.Entities
         public void Initialize()
         {
             //todo needs alot of support for threadsafe.
-            int num_threads = WorldConfig.GetIntValue(WorldCfg.Numthreads);
+            var num_threads = WorldConfig.GetIntValue(WorldCfg.Numthreads);
             // Start mtmaps if needed.
             if (num_threads > 0)
                 m_updater = new MapUpdater(WorldConfig.GetIntValue(WorldCfg.Numthreads));
@@ -56,7 +56,7 @@ namespace Game.Entities
 
         public Map CreateBaseMap(uint id)
         {
-            Map map = FindBaseMap(id);
+            var map = FindBaseMap(id);
             if (map == null)
             {
                 var entry = CliDB.MapStorage.LookupByKey(id);
@@ -89,7 +89,7 @@ namespace Game.Entities
 
             i_maps[mapEntry.Id] = map;
 
-            foreach (uint childMapId in _parentMapData[mapEntry.Id])
+            foreach (var childMapId in _parentMapData[mapEntry.Id])
                 map.AddChildTerrainMap(CreateBaseMap_i(CliDB.MapStorage.LookupByKey(childMapId)));
 
             if (!mapEntry.Instanceable())
@@ -103,7 +103,7 @@ namespace Game.Entities
 
         public Map FindBaseNonInstanceMap(uint mapId)
         {
-            Map map = FindBaseMap(mapId);
+            var map = FindBaseMap(mapId);
             if (map != null && map.Instanceable())
                 return null;
             return map;
@@ -111,7 +111,7 @@ namespace Game.Entities
 
         public Map CreateMap(uint id, Player player, uint loginInstanceId = 0)
         {
-            Map m = CreateBaseMap(id);
+            var m = CreateBaseMap(id);
 
             if (m != null && m.Instanceable())
                 m = ((MapInstanced)m).CreateInstanceForPlayer(id, player, loginInstanceId);
@@ -121,7 +121,7 @@ namespace Game.Entities
 
         public Map FindMap(uint mapid, uint instanceId)
         {
-            Map map = FindBaseMap(mapid);
+            var map = FindBaseMap(mapid);
             if (map == null)
                 return null;
 
@@ -133,7 +133,7 @@ namespace Game.Entities
 
         public EnterState PlayerCannotEnter(uint mapid, Player player, bool loginCheck = false)
         {
-            MapRecord entry = CliDB.MapStorage.LookupByKey(mapid);
+            var entry = CliDB.MapStorage.LookupByKey(mapid);
             if (entry == null)
                 return EnterState.CannotEnterNoEntry;
 
@@ -146,7 +146,7 @@ namespace Game.Entities
 
             Difficulty targetDifficulty = player.GetDifficultyID(entry);
             // Get the highest available difficulty if current setting is higher than the instance allows
-            MapDifficultyRecord mapDiff = Global.DB2Mgr.GetDownscaledMapDifficultyData(entry.Id, ref targetDifficulty);
+            var mapDiff = Global.DB2Mgr.GetDownscaledMapDifficultyData(entry.Id, ref targetDifficulty);
             if (mapDiff == null)
                 return EnterState.CannotEnterDifficultyUnavailable;
 
@@ -154,9 +154,9 @@ namespace Game.Entities
             if (player.IsGameMaster())
                 return EnterState.CanEnter;
 
-            string mapName = entry.MapName[Global.WorldMgr.GetDefaultDbcLocale()];
+            var mapName = entry.MapName[Global.WorldMgr.GetDefaultDbcLocale()];
 
-            Group group = player.GetGroup();
+            var group = player.GetGroup();
             if (entry.IsRaid() && entry.Expansion() >= (Expansion)WorldConfig.GetIntValue(WorldCfg.Expansion)) // can only enter in a raid group but raids from old expansion don't need a group
                 if ((!group || !group.IsRaidGroup()) && WorldConfig.GetBoolValue(WorldCfg.InstanceIgnoreRaid))
                     return EnterState.CannotEnterNotInRaid;
@@ -166,7 +166,7 @@ namespace Game.Entities
                 if (player.HasCorpse())
                 {
                     // let enter in ghost mode in instance that connected to inner instance with corpse
-                    uint corpseMap = player.GetCorpseLocation().GetMapId();
+                    var corpseMap = player.GetCorpseLocation().GetMapId();
                     do
                     {
                         if (corpseMap == mapid)
@@ -191,10 +191,10 @@ namespace Game.Entities
                 InstanceBind boundInstance = group.GetBoundInstance(entry);
                 if (boundInstance != null && boundInstance.save != null)
                 {
-                    Map boundMap = FindMap(mapid, boundInstance.save.GetInstanceId());
+                    var boundMap = FindMap(mapid, boundInstance.save.GetInstanceId());
                     if (boundMap != null)
                     {
-                        EnterState denyReason = boundMap.CannotEnter(player);
+                        var denyReason = boundMap.CannotEnter(player);
                         if (denyReason != 0)
                             return denyReason;
                     }
@@ -246,17 +246,17 @@ namespace Game.Entities
 
         public bool ExistMapAndVMap(uint mapid, float x, float y)
         {
-            GridCoord p = GridDefines.ComputeGridCoord(x, y);
+            var p = GridDefines.ComputeGridCoord(x, y);
 
-            uint gx = (MapConst.MaxGrids - 1) - p.X_coord;
-            uint gy = (MapConst.MaxGrids - 1) - p.Y_coord;
+            var gx = (MapConst.MaxGrids - 1) - p.X_coord;
+            var gy = (MapConst.MaxGrids - 1) - p.Y_coord;
 
             return Map.ExistMap(mapid, gx, gy) && Map.ExistVMap(mapid, gx, gy);
         }
 
         public bool IsValidMAP(uint mapid, bool startUp)
         {
-            MapRecord mEntry = CliDB.MapStorage.LookupByKey(mapid);
+            var mEntry = CliDB.MapStorage.LookupByKey(mapid);
 
             if (startUp)
                 return mEntry != null ? true : false;
@@ -288,7 +288,7 @@ namespace Game.Entities
                 uint ret = 0;
                 foreach (var pair in i_maps)
                 {
-                    Map map = pair.Value;
+                    var map = pair.Value;
                     if (!map.Instanceable())
                         continue;
                     var maps = ((MapInstanced)map).GetInstancedMaps();
@@ -307,7 +307,7 @@ namespace Game.Entities
                 uint ret = 0;
                 foreach (var pair in i_maps)
                 {
-                    Map map = pair.Value;
+                    var map = pair.Value;
                     if (!map.Instanceable())
                         continue;
                     var maps = ((MapInstanced)map).GetInstancedMaps();
@@ -323,7 +323,7 @@ namespace Game.Entities
         {
             _nextInstanceId = 1;
 
-            SQLResult result = DB.Characters.Query("SELECT IFNULL(MAX(id), 0) FROM instance");
+            var result = DB.Characters.Query("SELECT IFNULL(MAX(id), 0) FROM instance");
             if (!result.IsEmpty())
                 _freeInstanceIds = new BitSet(result.Read<int>(0) + 2, true); // make space for one extra to be able to access [_nextInstanceId] index in case all slots are taken
             else
@@ -352,12 +352,12 @@ namespace Game.Entities
                 return _nextInstanceId;
             }
 
-            uint newInstanceId = _nextInstanceId;
+            var newInstanceId = _nextInstanceId;
             Cypher.Assert(newInstanceId < _freeInstanceIds.Length);
             _freeInstanceIds[(int)newInstanceId] = false;
 
             // Find the lowest available id starting from the current NextInstanceId (which should be the lowest according to the logic in FreeInstanceId()
-            int nextFreeId = -1;
+            var nextFreeId = -1;
             for (var i = (int)_nextInstanceId++; i < _freeInstanceIds.Length; i++)
             {
                 if (_freeInstanceIds[i])
@@ -414,19 +414,19 @@ namespace Game.Entities
 
         uint GetAreaId(PhaseShift phaseShift, uint mapid, float x, float y, float z)
         {
-            Map m = CreateBaseMap(mapid);
+            var m = CreateBaseMap(mapid);
             return m.GetAreaId(phaseShift, x, y, z);
         }
 
         public uint GetZoneId(PhaseShift phaseShift, uint mapid, float x, float y, float z)
         {
-            Map m = CreateBaseMap(mapid);
+            var m = CreateBaseMap(mapid);
             return m.GetZoneId(phaseShift, x, y, z);
         }
 
         public void GetZoneAndAreaId(PhaseShift phaseShift, out uint zoneid, out uint areaid, uint mapid, float x, float y, float z)
         {
-            Map m = CreateBaseMap(mapid);
+            var m = CreateBaseMap(mapid);
             m.GetZoneAndAreaId(phaseShift, out zoneid, out areaid, x, y, z);
         }
 
@@ -446,7 +446,7 @@ namespace Game.Entities
             {
                 foreach (var map in i_maps.Values)
                 {
-                    MapInstanced mapInstanced = map.ToMapInstanced();
+                    var mapInstanced = map.ToMapInstanced();
                     if (mapInstanced)
                     {
                         var instances = mapInstanced.GetInstancedMaps();
@@ -466,7 +466,7 @@ namespace Game.Entities
                 var map = i_maps.LookupByKey(mapId);
                 if (map != null)
                 {
-                    MapInstanced mapInstanced = map.ToMapInstanced();
+                    var mapInstanced = map.ToMapInstanced();
                     if (mapInstanced)
                     {
                         var instances = mapInstanced.GetInstancedMaps();

@@ -100,14 +100,14 @@ namespace Scripts.World.DuelReset
             // remove cooldowns on spells that have < 10 min Cd > 30 sec and has no onHold
             player.GetSpellHistory().ResetCooldowns(pair =>
             {
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(pair.Key, Difficulty.None);
-                uint remainingCooldown = player.GetSpellHistory().GetRemainingCooldown(spellInfo);
-                uint totalCooldown = spellInfo.RecoveryTime;
-                uint categoryCooldown = spellInfo.CategoryRecoveryTime;
+                var spellInfo = Global.SpellMgr.GetSpellInfo(pair.Key, Difficulty.None);
+                var remainingCooldown = player.GetSpellHistory().GetRemainingCooldown(spellInfo);
+                var totalCooldown = spellInfo.RecoveryTime;
+                var categoryCooldown = spellInfo.CategoryRecoveryTime;
 
                 player.ApplySpellMod(spellInfo, SpellModOp.Cooldown, ref totalCooldown, null);
 
-                int cooldownMod = player.GetTotalAuraModifier(AuraType.ModCooldown);
+                var cooldownMod = player.GetTotalAuraModifier(AuraType.ModCooldown);
                 if (cooldownMod != 0)
                     totalCooldown += (uint)(cooldownMod * Time.InMilliseconds);
 
@@ -124,7 +124,7 @@ namespace Scripts.World.DuelReset
             }, true);
 
             // pet cooldowns
-            Pet pet = player.GetPet();
+            var pet = player.GetPet();
             if (pet)
                 pet.GetSpellHistory().ResetAllCooldowns();
         }

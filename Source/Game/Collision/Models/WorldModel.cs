@@ -93,13 +93,13 @@ namespace Game.Collision
             }
 
             liqHeight = 0f;
-            float tx_f = (pos.X - iCorner.X) / MapConst.LiquidTileSize;
-            uint tx = (uint)tx_f;
+            var tx_f = (pos.X - iCorner.X) / MapConst.LiquidTileSize;
+            var tx = (uint)tx_f;
             if (tx_f < 0.0f || tx >= iTilesX)
                 return false;
 
-            float ty_f = (pos.Y - iCorner.Y) / MapConst.LiquidTileSize;
-            uint ty = (uint)ty_f;
+            var ty_f = (pos.Y - iCorner.Y) / MapConst.LiquidTileSize;
+            var ty = (uint)ty_f;
             if (ty_f < 0.0f || ty >= iTilesY)
                 return false;
 
@@ -109,20 +109,20 @@ namespace Game.Collision
                 return false;
 
             // (dx, dy) coordinates inside tile, in [0, 1]^2
-            float dx = tx_f - tx;
-            float dy = ty_f - ty;
+            var dx = tx_f - tx;
+            var dy = ty_f - ty;
 
-            uint rowOffset = iTilesX + 1;
+            var rowOffset = iTilesX + 1;
             if (dx > dy) // case (a)
             {
-                float sx = iHeight[tx + 1 + ty * rowOffset] - iHeight[tx + ty * rowOffset];
-                float sy = iHeight[tx + 1 + (ty + 1) * rowOffset] - iHeight[tx + 1 + ty * rowOffset];
+                var sx = iHeight[tx + 1 + ty * rowOffset] - iHeight[tx + ty * rowOffset];
+                var sy = iHeight[tx + 1 + (ty + 1) * rowOffset] - iHeight[tx + 1 + ty * rowOffset];
                 liqHeight = iHeight[tx + ty * rowOffset] + dx * sx + dy * sy;
             }
             else // case (b)
             {
-                float sx = iHeight[tx + 1 + (ty + 1) * rowOffset] - iHeight[tx + (ty + 1) * rowOffset];
-                float sy = iHeight[tx + (ty + 1) * rowOffset] - iHeight[tx + ty * rowOffset];
+                var sx = iHeight[tx + 1 + (ty + 1) * rowOffset] - iHeight[tx + (ty + 1) * rowOffset];
+                var sy = iHeight[tx + (ty + 1) * rowOffset] - iHeight[tx + ty * rowOffset];
                 liqHeight = iHeight[tx + ty * rowOffset] + dx * sx + dy * sy;
             }
             return true;
@@ -130,7 +130,7 @@ namespace Game.Collision
 
         public static WmoLiquid ReadFromFile(BinaryReader reader)
         {
-            WmoLiquid liquid = new WmoLiquid();
+            var liquid = new WmoLiquid();
 
             liquid.iTilesX = reader.ReadUInt32();
             liquid.iTilesY = reader.ReadUInt32();
@@ -139,7 +139,7 @@ namespace Game.Collision
 
             if (liquid.iTilesX != 0 && liquid.iTilesY != 0)
             {
-                uint size = (liquid.iTilesX + 1) * (liquid.iTilesY + 1);
+                var size = (liquid.iTilesX + 1) * (liquid.iTilesY + 1);
                 liquid.iHeight = reader.ReadArray<float>(size);
 
                 size = liquid.iTilesX * liquid.iTilesY;
@@ -214,8 +214,8 @@ namespace Game.Collision
             if (reader.ReadStringFromChars(4) != "VERT")
                 return false;
 
-            uint chunkSize = reader.ReadUInt32();
-            uint count = reader.ReadUInt32();
+            var chunkSize = reader.ReadUInt32();
+            var count = reader.ReadUInt32();
             if (count == 0)
                 return false;
 
@@ -254,7 +254,7 @@ namespace Game.Collision
             if (triangles.Empty())
                 return false;
 
-            GModelRayCallback callback = new GModelRayCallback(triangles, vertices);
+            var callback = new GModelRayCallback(triangles, vertices);
             meshTree.IntersectRay(ray, callback, ref distance, stopAtFirstHit);
             return callback.hit;
         }
@@ -265,10 +265,10 @@ namespace Game.Collision
             if (triangles.Empty() || !iBound.contains(pos))
                 return false;
 
-            Vector3 rPos = pos - 0.1f * down;
-            float dist = float.PositiveInfinity;
-            Ray ray = new Ray(rPos, down);
-            bool hit = IntersectRay(ray, ref dist, false);
+            var rPos = pos - 0.1f * down;
+            var dist = float.PositiveInfinity;
+            var ray = new Ray(rPos, down);
+            var hit = IntersectRay(ray, ref dist, false);
             if (hit)
                 z_dist = dist - 0.1f;
             return hit;
@@ -326,7 +326,7 @@ namespace Game.Collision
             if (groupModels.Count == 1)
                 return groupModels[0].IntersectRay(ray, ref distance, stopAtFirstHit);
 
-            WModelRayCallBack isc = new WModelRayCallBack(groupModels);
+            var isc = new WModelRayCallBack(groupModels);
             groupTree.IntersectRay(ray, isc, ref distance, stopAtFirstHit);
             return isc.hit;
         }
@@ -337,7 +337,7 @@ namespace Game.Collision
             if (groupModels.Empty())
                 return false;
 
-            WModelAreaCallback callback = new WModelAreaCallback(groupModels, down);
+            var callback = new WModelAreaCallback(groupModels, down);
             groupTree.IntersectPoint(p, callback);
             if (callback.hit != null)
             {
@@ -357,7 +357,7 @@ namespace Game.Collision
             if (groupModels.Empty())
                 return false;
 
-            WModelAreaCallback callback = new WModelAreaCallback(groupModels, down);
+            var callback = new WModelAreaCallback(groupModels, down);
             groupTree.IntersectPoint(p, callback);
             if (callback.hit != null)
             {
@@ -378,7 +378,7 @@ namespace Game.Collision
                     return false;
             }
 
-            using (BinaryReader reader = new BinaryReader(new FileStream(filename, FileMode.Open, FileAccess.Read)))
+            using (var reader = new BinaryReader(new FileStream(filename, FileMode.Open, FileAccess.Read)))
             {
                 if (reader.ReadStringFromChars(8) != MapConst.VMapMagic)
                     return false;
@@ -393,10 +393,10 @@ namespace Game.Collision
                 if (reader.ReadStringFromChars(4) != "GMOD")
                     return false;
 
-                uint count = reader.ReadUInt32();
+                var count = reader.ReadUInt32();
                 for (var i = 0; i < count; ++i)
                 {
-                    GroupModel group = new GroupModel();
+                    var group = new GroupModel();
                     group.ReadFromFile(reader);
                     groupModels.Add(group);
                 }

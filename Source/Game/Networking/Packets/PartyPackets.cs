@@ -57,8 +57,8 @@ namespace Game.Networking.Packets
             ProposedRoles = _worldPacket.ReadUInt32();
             TargetGUID = _worldPacket.ReadPackedGuid();
 
-            uint targetNameLen = _worldPacket.ReadBits<uint>(9);
-            uint targetRealmLen = _worldPacket.ReadBits<uint>(9);
+            var targetNameLen = _worldPacket.ReadBits<uint>(9);
+            var targetRealmLen = _worldPacket.ReadBits<uint>(9);
 
             TargetName = _worldPacket.ReadString(targetNameLen);
             TargetRealm = _worldPacket.ReadString(targetRealmLen);
@@ -110,7 +110,7 @@ namespace Game.Networking.Packets
 
             _worldPacket.WriteString(InviterName);
 
-            foreach (int LfgSlot in LfgSlots)
+            foreach (var LfgSlot in LfgSlots)
                 _worldPacket.WriteInt32(LfgSlot);
         }
 
@@ -147,7 +147,7 @@ namespace Game.Networking.Packets
 
             Accept = _worldPacket.HasBit();
 
-            bool hasRolesDesired = _worldPacket.HasBit();
+            var hasRolesDesired = _worldPacket.HasBit();
             if (hasRolesDesired)
                 RolesDesired.Set(_worldPacket.ReadUInt32());
         }
@@ -166,7 +166,7 @@ namespace Game.Networking.Packets
             PartyIndex = _worldPacket.ReadUInt8();
             TargetGUID = _worldPacket.ReadPackedGuid();
 
-            byte reasonLen = _worldPacket.ReadBits<byte>(8);
+            var reasonLen = _worldPacket.ReadBits<byte>(8);
             Reason = _worldPacket.ReadString(reasonLen);
         }
 
@@ -288,16 +288,16 @@ namespace Game.Networking.Packets
                 MemberStats.VehicleSeat = player.GetVehicle().GetVehicleInfo().SeatID[player.m_movementInfo.transport.seat];
 
             // Auras
-            foreach (AuraApplication aurApp in player.GetVisibleAuras())
+            foreach (var aurApp in player.GetVisibleAuras())
             {
-                PartyMemberAuraStates aura = new PartyMemberAuraStates();
+                var aura = new PartyMemberAuraStates();
                 aura.SpellID = (int)aurApp.GetBase().GetId();
                 aura.ActiveFlags = aurApp.GetEffectMask();
                 aura.Flags = (byte)aurApp.GetFlags();
 
                 if (aurApp.GetFlags().HasAnyFlag(AuraFlags.Scalable))
                 {
-                    foreach (AuraEffect aurEff in aurApp.GetBase().GetAuraEffects())
+                    foreach (var aurEff in aurApp.GetBase().GetAuraEffects())
                     {
                         if (aurEff == null)
                             continue;
@@ -316,7 +316,7 @@ namespace Game.Networking.Packets
             // Pet
             if (player.GetPet())
             {
-                Pet pet = player.GetPet();
+                var pet = player.GetPet();
 
                 MemberStats.PetStats.HasValue = true;
 
@@ -327,9 +327,9 @@ namespace Game.Networking.Packets
                 MemberStats.PetStats.Value.CurrentHealth = (int)pet.GetHealth();
                 MemberStats.PetStats.Value.MaxHealth = (int)pet.GetMaxHealth();
 
-                foreach (AuraApplication aurApp in pet.GetVisibleAuras())
+                foreach (var aurApp in pet.GetVisibleAuras())
                 {
-                    PartyMemberAuraStates aura = new PartyMemberAuraStates();
+                    var aura = new PartyMemberAuraStates();
 
                     aura.SpellID = (int)aurApp.GetBase().GetId();
                     aura.ActiveFlags = aurApp.GetEffectMask();
@@ -337,7 +337,7 @@ namespace Game.Networking.Packets
 
                     if (aurApp.GetFlags().HasAnyFlag(AuraFlags.Scalable))
                     {
-                        foreach (AuraEffect aurEff in aurApp.GetBase().GetAuraEffects())
+                        foreach (var aurEff in aurApp.GetBase().GetAuraEffects())
                         {
                             if (aurEff == null)
                                 continue;
@@ -845,7 +845,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBits(RaidMarkers.Count, 4);
             _worldPacket.FlushBits();
 
-            foreach (RaidMarker raidMarker in RaidMarkers)
+            foreach (var raidMarker in RaidMarkers)
             {
                 _worldPacket.WritePackedGuid(raidMarker.TransportGUID);
                 _worldPacket.WriteUInt32(raidMarker.Location.GetMapId());
@@ -900,7 +900,7 @@ namespace Game.Networking.Packets
             data.WriteInt32(List.Count);
             data.WritePackedGuid(PersonalGUID);
 
-            foreach (PartyMemberPhase phase in List)
+            foreach (var phase in List)
                 phase.Write(data);
         }
 
@@ -922,7 +922,7 @@ namespace Game.Networking.Packets
             data.WriteUInt16(Flags);
             data.WriteUInt32(ActiveFlags);
             data.WriteInt32(Points.Count);
-            foreach (float points in Points)
+            foreach (var points in Points)
                 data.WriteFloat(points);
         }
     }
@@ -995,7 +995,7 @@ namespace Game.Networking.Packets
             Phases.Write(data);
             ChromieTime.Write(data);
 
-            foreach (PartyMemberAuraStates aura in Auras)
+            foreach (var aura in Auras)
                 aura.Write(data);
 
             data.WriteBit(PetStats.HasValue);

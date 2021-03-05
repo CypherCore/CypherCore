@@ -93,7 +93,7 @@ namespace Game.Entities
 
         public byte[] GetRawValue()
         {
-            byte[] temp = new byte[16];
+            var temp = new byte[16];
             var hiBytes = BitConverter.GetBytes(_high);
             var lowBytes = BitConverter.GetBytes(_low);
             for (var i = 0; i < temp.Length / 2; ++i)
@@ -188,7 +188,7 @@ namespace Game.Entities
 
         public override string ToString()
         {
-            string str = $"GUID Full: 0x{_high + _low}, Type: {GetHigh()}";
+            var str = $"GUID Full: 0x{_high + _low}, Type: {GetHigh()}";
             if (HasEntry())
                 str += (IsPet() ? " Pet number: " : " Entry: ") + GetEntry() + " ";
 

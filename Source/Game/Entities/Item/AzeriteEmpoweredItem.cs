@@ -49,7 +49,7 @@ namespace Game.Entities
 
         public override void SaveToDB(SQLTransaction trans)
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_EMPOWERED);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_EMPOWERED);
             stmt.AddValue(0, GetGUID().GetCounter());
             trans.Append(stmt);
 
@@ -59,7 +59,7 @@ namespace Game.Entities
                 case ItemUpdateState.Changed:
                     stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_ITEM_INSTANCE_AZERITE_EMPOWERED);
                     stmt.AddValue(0, GetGUID().GetCounter());
-                    for (int i = 0; i < SharedConst.MaxAzeriteEmpoweredTier; ++i)
+                    for (var i = 0; i < SharedConst.MaxAzeriteEmpoweredTier; ++i)
                         stmt.AddValue(1 + i, m_azeriteEmpoweredItemData.Selections[i]);
 
                     trans.Append(stmt);
@@ -72,12 +72,12 @@ namespace Game.Entities
         public void LoadAzeriteEmpoweredItemData(Player owner, AzeriteEmpoweredData azeriteEmpoweredItem)
         {
             InitAzeritePowerData();
-            bool needSave = false;
+            var needSave = false;
             if (m_azeritePowers != null)
             {
-                for (int i = SharedConst.MaxAzeriteEmpoweredTier; --i >= 0;)
+                for (var i = SharedConst.MaxAzeriteEmpoweredTier; --i >= 0;)
                 {
-                    int selection = azeriteEmpoweredItem.SelectedAzeritePowers[i];
+                    var selection = azeriteEmpoweredItem.SelectedAzeritePowers[i];
                     if (GetTierForAzeritePower(owner.GetClass(), selection) != i)
                     {
                         needSave = true;
@@ -92,8 +92,8 @@ namespace Game.Entities
 
             if (needSave)
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ITEM_INSTANCE_AZERITE_EMPOWERED);
-                for (int i = 0; i < SharedConst.MaxAzeriteEmpoweredTier; ++i)
+                var stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ITEM_INSTANCE_AZERITE_EMPOWERED);
+                for (var i = 0; i < SharedConst.MaxAzeriteEmpoweredTier; ++i)
                     stmt.AddValue(i, m_azeriteEmpoweredItemData.Selections[i]);
 
                 stmt.AddValue(5, GetGUID().GetCounter());
@@ -103,7 +103,7 @@ namespace Game.Entities
 
         public static new void DeleteFromDB(SQLTransaction trans, ulong itemGuid)
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_EMPOWERED);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_EMPOWERED);
             stmt.AddValue(0, itemGuid);
             DB.Characters.ExecuteOrAppend(trans, stmt);
         }
@@ -142,17 +142,17 @@ namespace Game.Entities
 
         void ClearSelectedAzeritePowers()
         {
-            for (int i = 0; i < SharedConst.MaxAzeriteEmpoweredTier; ++i)
+            for (var i = 0; i < SharedConst.MaxAzeriteEmpoweredTier; ++i)
                 SetUpdateFieldValue(ref m_values.ModifyValue(m_azeriteEmpoweredItemData).ModifyValue(m_azeriteEmpoweredItemData.Selections, i), 0);
 
             _bonusData = new BonusData(GetTemplate());
-            foreach (uint bonusListID in (List<uint>)m_itemData.BonusListIDs)
+            foreach (var bonusListID in (List<uint>)m_itemData.BonusListIDs)
                 _bonusData.AddBonusList(bonusListID);
         }
 
         public long GetRespecCost()
         {
-            Player owner = GetOwner();
+            var owner = GetOwner();
             if (owner != null)
                 return (long)(MoneyConstants.Gold * Global.DB2Mgr.GetCurveValueAt((uint)Curves.AzeriteEmpoweredItemRespecCost, (float)owner.GetNumRespecs()));
 
@@ -161,8 +161,8 @@ namespace Game.Entities
 
         public override void BuildValuesCreate(WorldPacket data, Player target)
         {
-            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new WorldPacket();
+            var flags = GetUpdateFieldFlagsFor(target);
+            var buffer = new WorldPacket();
 
             buffer.WriteUInt8((byte)flags);
             m_objectData.WriteCreate(buffer, flags, this, target);
@@ -175,8 +175,8 @@ namespace Game.Entities
 
         public override void BuildValuesUpdate(WorldPacket data, Player target)
         {
-            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new WorldPacket();
+            var flags = GetUpdateFieldFlagsFor(target);
+            var buffer = new WorldPacket();
 
             if (m_values.HasChanged(TypeId.Object))
                 m_objectData.WriteUpdate(buffer, flags, this, target);
@@ -194,8 +194,8 @@ namespace Game.Entities
 
         void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedItemMask, UpdateMask requestedAzeriteEmpoweredItemMask, Player target)
         {
-            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            UpdateMask valuesMask = new UpdateMask((int)TypeId.Max);
+            var flags = GetUpdateFieldFlagsFor(target);
+            var valuesMask = new UpdateMask((int)TypeId.Max);
             if (requestedObjectMask.IsAnySet())
                 valuesMask.Set((int)TypeId.Object);
 
@@ -206,7 +206,7 @@ namespace Game.Entities
             if (requestedAzeriteEmpoweredItemMask.IsAnySet())
                 valuesMask.Set((int)TypeId.AzeriteEmpoweredItem);
 
-            WorldPacket buffer = new WorldPacket();
+            var buffer = new WorldPacket();
             buffer.WriteUInt32(valuesMask.GetBlock(0));
 
             if (valuesMask[(int)TypeId.Object])
@@ -218,7 +218,7 @@ namespace Game.Entities
             if (valuesMask[(int)TypeId.AzeriteEmpoweredItem])
                 m_azeriteEmpoweredItemData.WriteUpdate(buffer, requestedAzeriteEmpoweredItemMask, true, this, target);
 
-            WorldPacket buffer1 = new WorldPacket();
+            var buffer1 = new WorldPacket();
             buffer1.WriteUInt8((byte)UpdateType.Values);
             buffer1.WritePackedGuid(GetGUID());
             buffer1.WriteUInt32(buffer.GetSize());

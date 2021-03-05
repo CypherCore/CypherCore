@@ -39,8 +39,8 @@ namespace Game.Guilds
         {
             Log.outInfo(LogFilter.ServerLoading, "Loading guild finder guild-related settings...");
             //                                                           0                1             2                  3             4           5             6         7
-            SQLResult result = DB.Characters.Query("SELECT gfgs.guildId, gfgs.availability, gfgs.classRoles, gfgs.interests, gfgs.level, gfgs.listed, gfgs.comment, c.race " +
-                "FROM guild_finder_guild_settings gfgs LEFT JOIN guild_member gm ON gm.guildid=gfgs.guildId LEFT JOIN characters c ON c.guid = gm.guid LIMIT 1");
+            var result = DB.Characters.Query("SELECT gfgs.guildId, gfgs.availability, gfgs.classRoles, gfgs.interests, gfgs.level, gfgs.listed, gfgs.comment, c.race " +
+                                             "FROM guild_finder_guild_settings gfgs LEFT JOIN guild_member gm ON gm.guildid=gfgs.guildId LEFT JOIN characters c ON c.guid = gm.guid LIMIT 1");
 
             if (result.IsEmpty())
             {
@@ -49,24 +49,24 @@ namespace Game.Guilds
             }
 
             uint count = 0;
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
             do
             {
-                ObjectGuid guildId = ObjectGuid.Create(HighGuid.Guild, result.Read<ulong>(0));
-                byte availability = result.Read<byte>(1);
-                byte classRoles = result.Read<byte>(2);
-                byte interests = result.Read<byte>(3);
-                byte level = result.Read<byte>(4);
-                bool listed = (result.Read<byte>(5) != 0);
-                string comment = result.Read<string>(6);
+                var guildId = ObjectGuid.Create(HighGuid.Guild, result.Read<ulong>(0));
+                var availability = result.Read<byte>(1);
+                var classRoles = result.Read<byte>(2);
+                var interests = result.Read<byte>(3);
+                var level = result.Read<byte>(4);
+                var listed = (result.Read<byte>(5) != 0);
+                var comment = result.Read<string>(6);
 
                 uint guildTeam = TeamId.Alliance;
-                ChrRacesRecord raceEntry = CliDB.ChrRacesStorage.LookupByKey(result.Read<byte>(7));
+                var raceEntry = CliDB.ChrRacesStorage.LookupByKey(result.Read<byte>(7));
                 if (raceEntry != null)
                     if (raceEntry.Alliance == 1)
                         guildTeam = TeamId.Horde;
 
-                LFGuildSettings settings = new LFGuildSettings(listed, guildTeam, guildId, classRoles, availability, interests, level, comment);
+                var settings = new LFGuildSettings(listed, guildTeam, guildId, classRoles, availability, interests, level, comment);
                 _guildSettings[guildId] = settings;
 
                 ++count;
@@ -79,7 +79,7 @@ namespace Game.Guilds
         {
             Log.outInfo(LogFilter.ServerLoading, "Loading guild finder membership requests...");
             //                                                      0         1           2            3           4         5         6
-            SQLResult result = DB.Characters.Query("SELECT guildId, playerGuid, availability, classRole, interests, comment, submitTime FROM guild_finder_applicant");
+            var result = DB.Characters.Query("SELECT guildId, playerGuid, availability, classRole, interests, comment, submitTime FROM guild_finder_applicant");
 
             if (result.IsEmpty())
             {
@@ -88,18 +88,18 @@ namespace Game.Guilds
             }
 
             uint count = 0;
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
             do
             {
-                ObjectGuid guildId = ObjectGuid.Create(HighGuid.Guild, result.Read<ulong>(0));
-                ObjectGuid playerId = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(1));
-                byte availability = result.Read<byte>(2);
-                byte classRoles = result.Read<byte>(3);
-                byte interests = result.Read<byte>(4);
-                string comment = result.Read<string>(5);
-                uint submitTime = result.Read<uint>(6);
+                var guildId = ObjectGuid.Create(HighGuid.Guild, result.Read<ulong>(0));
+                var playerId = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(1));
+                var availability = result.Read<byte>(2);
+                var classRoles = result.Read<byte>(3);
+                var interests = result.Read<byte>(4);
+                var comment = result.Read<string>(5);
+                var submitTime = result.Read<uint>(6);
 
-                MembershipRequest request = new MembershipRequest(playerId, guildId, availability, classRoles, interests, comment, submitTime);
+                var request = new MembershipRequest(playerId, guildId, availability, classRoles, interests, comment, submitTime);
 
                 if (!_membershipRequestsByGuild.ContainsKey(guildId))
                     _membershipRequestsByGuild[guildId] = new Dictionary<ObjectGuid, MembershipRequest>();
@@ -127,8 +127,8 @@ namespace Game.Guilds
                 _membershipRequestsByPlayer[request.GetPlayerGUID()] = new Dictionary<ObjectGuid, MembershipRequest>();
             _membershipRequestsByPlayer[request.GetPlayerGUID()][guildGuid] = request;
 
-            SQLTransaction trans = new SQLTransaction();
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_GUILD_FINDER_APPLICANT);
+            var trans = new SQLTransaction();
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_GUILD_FINDER_APPLICANT);
             stmt.AddValue(0, request.GetGuildGuid().GetCounter());
             stmt.AddValue(1, request.GetPlayerGUID().GetCounter());
             stmt.AddValue(2, request.GetAvailability());
@@ -140,12 +140,12 @@ namespace Game.Guilds
             DB.Characters.CommitTransaction(trans);
 
             // Notify the applicant his submittion has been added
-            Player player = Global.ObjAccessor.FindPlayer(request.GetPlayerGUID());
+            var player = Global.ObjAccessor.FindPlayer(request.GetPlayerGUID());
             if (player)
                 SendMembershipRequestListUpdate(player);
 
             // Notify the guild master and officers the list changed
-            Guild guild = Global.GuildMgr.GetGuildById(guildGuid.GetCounter());
+            var guild = Global.GuildMgr.GetGuildById(guildGuid.GetCounter());
             if (guild)
                 SendApplicantListUpdate(guild);
         }
@@ -156,17 +156,17 @@ namespace Game.Guilds
             if (playerDic == null)
                 return;
             
-            SQLTransaction trans = new SQLTransaction();
+            var trans = new SQLTransaction();
             foreach (var guid in playerDic.Keys)
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GUILD_FINDER_APPLICANT);
+                var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GUILD_FINDER_APPLICANT);
                 stmt.AddValue(0, guid.GetCounter());
                 stmt.AddValue(1, playerId.GetCounter());
                 trans.Append(stmt);
 
 
                 // Notify the guild master and officers the list changed
-                Guild guild = Global.GuildMgr.GetGuildByGuid(guid);
+                var guild = Global.GuildMgr.GetGuildByGuid(guid);
                 if (guild)
                     SendApplicantListUpdate(guild);
 
@@ -201,8 +201,8 @@ namespace Game.Guilds
                     _membershipRequestsByPlayer.Remove(playerId);
             }
 
-            SQLTransaction trans = new SQLTransaction();
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GUILD_FINDER_APPLICANT);
+            var trans = new SQLTransaction();
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GUILD_FINDER_APPLICANT);
             stmt.AddValue(0, guildId.GetCounter());
             stmt.AddValue(1, playerId.GetCounter());
             trans.Append(stmt);
@@ -210,19 +210,19 @@ namespace Game.Guilds
             DB.Characters.CommitTransaction(trans);
 
             // Notify the applicant his submittion has been removed
-            Player player = Global.ObjAccessor.FindPlayer(playerId);
+            var player = Global.ObjAccessor.FindPlayer(playerId);
             if (player)
                 SendMembershipRequestListUpdate(player);
 
             // Notify the guild master and officers the list changed
-            Guild guild = Global.GuildMgr.GetGuildByGuid(guildId);
+            var guild = Global.GuildMgr.GetGuildByGuid(guildId);
             if (guild)
                 SendApplicantListUpdate(guild);
         }
 
         public List<MembershipRequest> GetAllMembershipRequestsForPlayer(ObjectGuid playerGuid)
         {
-            List<MembershipRequest> resultSet = new List<MembershipRequest>();
+            var resultSet = new List<MembershipRequest>();
             var playerDic = _membershipRequestsByPlayer.LookupByKey(playerGuid);
             if (playerDic == null)
                 return resultSet;
@@ -240,7 +240,7 @@ namespace Game.Guilds
 
         public List<LFGuildSettings> GetGuildsMatchingSetting(LFGuildPlayer settings, uint faction)
         {
-            List<LFGuildSettings> resultSet = new List<LFGuildSettings>();
+            var resultSet = new List<LFGuildSettings>();
             foreach (var guildSettings in _guildSettings.Values)
             {
                 if (!guildSettings.IsListed())
@@ -280,9 +280,9 @@ namespace Game.Guilds
         {
             _guildSettings[guildGuid] = settings;
 
-            SQLTransaction trans = new SQLTransaction();
+            var trans = new SQLTransaction();
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_GUILD_FINDER_GUILD_SETTINGS);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_GUILD_FINDER_GUILD_SETTINGS);
             stmt.AddValue(0, settings.GetGUID().GetCounter());
             stmt.AddValue(1, settings.GetAvailability());
             stmt.AddValue(2, settings.GetClassRoles());
@@ -297,7 +297,7 @@ namespace Game.Guilds
 
         public void DeleteGuild(ObjectGuid guildId)
         {
-            SQLTransaction trans = new SQLTransaction();
+            var trans = new SQLTransaction();
             PreparedStatement stmt;
             var guildDic = _membershipRequestsByGuild.LookupByKey(guildId);
             if (guildDic != null)
@@ -318,7 +318,7 @@ namespace Game.Guilds
                     }
 
                     // Notify the applicant his submition has been removed
-                    Player player = Global.ObjAccessor.FindPlayer(guid);
+                    var player = Global.ObjAccessor.FindPlayer(guid);
                     if (player)
                         SendMembershipRequestListUpdate(player);
                 }                
@@ -334,18 +334,18 @@ namespace Game.Guilds
             _guildSettings.Remove(guildId);
 
             // Notify the guild master the list changed (even if he's not a GM any more, not sure if needed)
-            Guild guild = Global.GuildMgr.GetGuildById(guildId.GetCounter());
+            var guild = Global.GuildMgr.GetGuildById(guildId.GetCounter());
             if (guild)
                 SendApplicantListUpdate(guild);
         }
 
         void SendApplicantListUpdate(Guild guild)
         {
-            LFGuildApplicantListChanged applicantListChanged = new LFGuildApplicantListChanged();
+            var applicantListChanged = new LFGuildApplicantListChanged();
 
             guild.BroadcastPacketToRank(applicantListChanged, GuildDefaultRanks.Officer);
 
-            Player player = Global.ObjAccessor.FindPlayer(guild.GetLeaderGUID());
+            var player = Global.ObjAccessor.FindPlayer(guild.GetLeaderGUID());
             if (player)
                 player.SendPacket(applicantListChanged);
         }

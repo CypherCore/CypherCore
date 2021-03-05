@@ -84,11 +84,11 @@ namespace Game.Combat
 
         public void DoAddThreat(Unit victim, float threat)
         {
-            uint redirectThreadPct = victim.GetRedirectThreatPercent();
-            Unit redirectTarget = victim.GetRedirectThreatTarget();
+            var redirectThreadPct = victim.GetRedirectThreatPercent();
+            var redirectTarget = victim.GetRedirectThreatTarget();
 
             // If victim is personnal spawn, redirect all aggro to summoner
-            TempSummon tempSummonVictim = victim.ToTempSummon();
+            var tempSummonVictim = victim.ToTempSummon();
             if (tempSummonVictim)
             {
                 if (tempSummonVictim.IsVisibleBySummonerOnly())
@@ -109,7 +109,7 @@ namespace Game.Combat
             {
                 if (redirectTarget != null)
                 {
-                    float redirectThreat = MathFunctions.CalculatePct(threat, redirectThreadPct);
+                    var redirectThreat = MathFunctions.CalculatePct(threat, redirectThreadPct);
                     threat -= redirectThreat;
                     if (IsValidProcess(redirectTarget, GetOwner()))
                         AddThreat(redirectTarget, redirectThreat);
@@ -128,7 +128,7 @@ namespace Game.Combat
 
             if (reff == null) // there was no ref => create a new one
             {
-                bool isFirst = threatContainer.Empty();
+                var isFirst = threatContainer.Empty();
 
                 // threat has to be 0 here
                 var hostileRef = new HostileReference(victim, this, 0);
@@ -149,15 +149,15 @@ namespace Game.Combat
         public Unit GetHostilTarget()
         {
             threatContainer.Update();
-            HostileReference nextVictim = threatContainer.SelectNextVictim(GetOwner().ToCreature(), getCurrentVictim());
+            var nextVictim = threatContainer.SelectNextVictim(GetOwner().ToCreature(), getCurrentVictim());
             SetCurrentVictim(nextVictim);
             return GetCurrentVictim() != null ? GetCurrentVictim() : null;
         }
 
         public float GetThreat(Unit victim, bool alsoSearchOfflineList = false)
         {
-            float threat = 0.0f;
-            HostileReference refe = threatContainer.GetReferenceByTarget(victim);
+            var threat = 0.0f;
+            var refe = threatContainer.GetReferenceByTarget(victim);
             if (refe == null && alsoSearchOfflineList)
                 refe = threatOfflineContainer.GetReferenceByTarget(victim);
             if (refe != null)
@@ -167,7 +167,7 @@ namespace Game.Combat
 
         void TauntApply(Unit taunter)
         {
-            HostileReference refe = threatContainer.GetReferenceByTarget(taunter);
+            var refe = threatContainer.GetReferenceByTarget(taunter);
             if (GetCurrentVictim() != null && refe != null && (refe.GetThreat() < getCurrentVictim().GetThreat()))
             {
                 if (refe.GetTempThreatModifier() == 0.0f) // Ok, temp threat is unused
@@ -177,7 +177,7 @@ namespace Game.Combat
 
         void TauntFadeOut(Unit taunter)
         {
-            HostileReference refe = threatContainer.GetReferenceByTarget(taunter);
+            var refe = threatContainer.GetReferenceByTarget(taunter);
             if (refe != null)
                 refe.ResetTempThreat();
         }
@@ -195,7 +195,7 @@ namespace Game.Combat
         {
             threatRefStatusChangeEvent.SetThreatManager(this);     // now we can set the threat manager
 
-            HostileReference hostilRef = threatRefStatusChangeEvent.GetReference();
+            var hostilRef = threatRefStatusChangeEvent.GetReference();
 
             switch (threatRefStatusChangeEvent.GetEventType())
             {
@@ -346,11 +346,11 @@ namespace Game.Combat
                         threat *= threatEntry.pctMod;
 
                 // Energize is not affected by Mods
-                foreach (SpellEffectInfo effect in threatSpell.GetEffects())
+                foreach (var effect in threatSpell.GetEffects())
                     if (effect != null && (effect.Effect == SpellEffectName.Energize || effect.ApplyAuraName == AuraType.PeriodicEnergize))
                         return threat;
 
-                Player modOwner = hatedUnit.GetSpellModOwner();
+                var modOwner = hatedUnit.GetSpellModOwner();
                 if (modOwner != null)
                     modOwner.ApplySpellMod(threatSpell, SpellModOp.Threat, ref threat);
             }
@@ -423,7 +423,7 @@ namespace Game.Combat
             if (victim == null)
                 return null;
 
-            ObjectGuid guid = victim.GetGUID();
+            var guid = victim.GetGUID();
             foreach (var reff in threatList)
             {
                 if (reff != null && reff.GetUnitGuid() == guid)
@@ -443,7 +443,7 @@ namespace Game.Combat
 
         public void ModifyThreatByPercent(Unit victim, int percent)
         {
-            HostileReference refe = GetReferenceByTarget(victim);
+            var refe = GetReferenceByTarget(victim);
             if (refe != null)
                 refe.AddThreatPercent(percent);
         }
@@ -459,8 +459,8 @@ namespace Game.Combat
         public HostileReference SelectNextVictim(Creature attacker, HostileReference currentVictim)
         {
             HostileReference currentRef = null;
-            bool found = false;
-            bool noPriorityTargetFound = false;
+            var found = false;
+            var noPriorityTargetFound = false;
 
             for (var i = 0; i < threatList.Count; i++)
             {
@@ -469,7 +469,7 @@ namespace Game.Combat
 
                 currentRef = threatList[i];
 
-                Unit target = currentRef.GetTarget();
+                var target = currentRef.GetTarget();
                 Cypher.Assert(target);                                     // if the ref has status online the target must be there !
 
                 // some units are prefered in comparison to others

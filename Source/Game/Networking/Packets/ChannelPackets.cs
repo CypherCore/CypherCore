@@ -37,7 +37,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(Members.Count);
             _worldPacket.WriteString(Channel);
 
-            foreach (ChannelPlayer player in Members)
+            foreach (var player in Members)
             {
                 _worldPacket.WritePackedGuid(player.Guid);
                 _worldPacket.WriteUInt32(player.VirtualRealmAddress);
@@ -263,8 +263,8 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint channelNameLength = _worldPacket.ReadBits<uint>(7);
-            uint nameLength = _worldPacket.ReadBits<uint>(9);
+            var channelNameLength = _worldPacket.ReadBits<uint>(7);
+            var nameLength = _worldPacket.ReadBits<uint>(9);
             ChannelName = _worldPacket.ReadString(channelNameLength);
             Name = _worldPacket.ReadString(nameLength);
         }
@@ -279,8 +279,8 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint channelNameLength = _worldPacket.ReadBits<uint>(7);
-            uint passwordLength = _worldPacket.ReadBits<uint>(7);
+            var channelNameLength = _worldPacket.ReadBits<uint>(7);
+            var passwordLength = _worldPacket.ReadBits<uint>(7);
             ChannelName = _worldPacket.ReadString(channelNameLength);
             Password = _worldPacket.ReadString(passwordLength);
         }
@@ -298,8 +298,8 @@ namespace Game.Networking.Packets
             ChatChannelId = _worldPacket.ReadInt32();
             CreateVoiceSession = _worldPacket.HasBit();
             Internal = _worldPacket.HasBit();
-            uint channelLength = _worldPacket.ReadBits<uint>(7);
-            uint passwordLength = _worldPacket.ReadBits<uint>(7);
+            var channelLength = _worldPacket.ReadBits<uint>(7);
+            var passwordLength = _worldPacket.ReadBits<uint>(7);
             ChannelName = _worldPacket.ReadString(channelLength);
             Password = _worldPacket.ReadString(passwordLength);
         }

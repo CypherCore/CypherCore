@@ -56,7 +56,7 @@ namespace Game
         {
             foreach (var session in m_sessions)
             {
-                Player player = session.Value.GetPlayer();
+                var player = session.Value.GetPlayer();
                 if (player == null)
                     continue;
 
@@ -98,8 +98,8 @@ namespace Game
             // Lock this only to prevent multiple maps triggering at the same time
             lock (_guidAlertLock)
             {
-                long gameTime = GameTime.GetGameTime();
-                long today = (gameTime / Time.Day) * Time.Day;
+                var gameTime = GameTime.GetGameTime();
+                var today = (gameTime / Time.Day) * Time.Day;
 
                 // Check if our window to restart today has passed. 5 mins until quiet time
                 while (gameTime >= (today + (WorldConfig.GetIntValue(WorldCfg.RespawnRestartQuietTime) * Time.Hour) - 1810))
@@ -194,7 +194,7 @@ namespace Game
             }
 
             // decrease session counts only at not reconnection case
-            bool decrease_session = true;
+            var decrease_session = true;
 
             // if session already exist, prepare to it deleting at next world update
             // NOTE - KickPlayer() should be called on "old" in RemoveSession()
@@ -210,9 +210,9 @@ namespace Game
 
             m_sessions[s.GetAccountId()] = s;
 
-            int Sessions = GetActiveAndQueuedSessionCount();
-            uint pLimit = GetPlayerAmountLimit();
-            int QueueSize = GetQueuedSessionCount(); //number of players in the queue
+            var Sessions = GetActiveAndQueuedSessionCount();
+            var pLimit = GetPlayerAmountLimit();
+            var QueueSize = GetQueuedSessionCount(); //number of players in the queue
 
             //so we don't count the user trying to
             //login as a session and queue the socket that we are using
@@ -246,10 +246,10 @@ namespace Game
             if (!linkInfo.Item1.IsOpen())
                 return;
 
-            ConnectToKey key = new ConnectToKey();
+            var key = new ConnectToKey();
             key.Raw = linkInfo.Item2;
 
-            WorldSession session = FindSession(key.AccountId);
+            var session = FindSession(key.AccountId);
             if (!session || session.GetConnectToInstanceKey() != linkInfo.Item2)
             {
                 linkInfo.Item1.SendAuthResponseError(BattlenetRpcErrorCode.TimedOut);
@@ -309,12 +309,12 @@ namespace Game
         bool RemoveQueuedPlayer(WorldSession sess)
         {
             // sessions count including queued to remove (if removed_session set)
-            int sessions = GetActiveSessionCount();
+            var sessions = GetActiveSessionCount();
 
             uint position = 1;
 
             // search to remove and count skipped positions
-            bool found = false;
+            var found = false;
 
             foreach (var iter in m_QueuedPlayer)
             {
@@ -340,7 +340,7 @@ namespace Game
             // accept first in queue
             if ((m_playerLimit == 0 || sessions < m_playerLimit) && !m_QueuedPlayer.Empty())
             {
-                WorldSession pop_sess = m_QueuedPlayer.First();
+                var pop_sess = m_QueuedPlayer.First();
                 pop_sess.InitializeSession();
 
                 m_QueuedPlayer.RemoveAt(0);
@@ -390,8 +390,8 @@ namespace Game
             Global.ObjectMgr.LoadCypherStrings();
 
             // not send custom type REALM_FFA_PVP to realm list
-            RealmType server_type = IsFFAPvPRealm() ? RealmType.PVP : (RealmType)WorldConfig.GetIntValue(WorldCfg.GameType);
-            uint realm_zone = WorldConfig.GetUIntValue(WorldCfg.RealmZone);
+            var server_type = IsFFAPvPRealm() ? RealmType.PVP : (RealmType)WorldConfig.GetIntValue(WorldCfg.GameType);
+            var realm_zone = WorldConfig.GetUIntValue(WorldCfg.RealmZone);
 
             DB.Login.Execute("UPDATE realmlist SET icon = {0}, timezone = {1} WHERE id = '{2}'", (byte)server_type, realm_zone, _realm.Id.Index);      // One-time query
 
@@ -422,8 +422,8 @@ namespace Game
             //Load weighted graph on taxi nodes path
             Global.TaxiPathGraph.Initialize();
 
-            MultiMap<uint, uint> mapData = new MultiMap<uint, uint>();
-            foreach (MapRecord mapEntry in CliDB.MapStorage.Values)
+            var mapData = new MultiMap<uint, uint>();
+            foreach (var mapEntry in CliDB.MapStorage.Values)
             {
                 if (mapEntry.ParentMapID != -1)
                 {
@@ -477,7 +477,7 @@ namespace Game
             Global.InstanceSaveMgr.LoadInstances();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Localization strings...");
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
             Global.ObjectMgr.LoadCreatureLocales();
             Global.ObjectMgr.LoadGameObjectLocales();
             Global.ObjectMgr.LoadQuestTemplateLocale();
@@ -966,7 +966,7 @@ namespace Game
             //one second is 1000 -(tested on win system)
             // @todo Get rid of magic numbers
             var localTime = Time.UnixTimeToDateTime(GameTime.GetGameTime()).ToLocalTime();
-            int CleanOldMailsTime = WorldConfig.GetIntValue(WorldCfg.CleanOldMailTime);
+            var CleanOldMailsTime = WorldConfig.GetIntValue(WorldCfg.CleanOldMailTime);
             mail_timer = ((((localTime.Hour + (24 - CleanOldMailsTime)) % 24) * Time.Hour * Time.InMilliseconds) / m_timers[WorldTimers.Auctions].GetInterval());
             //1440
             mail_timer_expires = ((Time.Day * Time.InMilliseconds) / (m_timers[(int)WorldTimers.Auctions].GetInterval()));
@@ -1161,7 +1161,7 @@ namespace Game
             _guidWarningMsg = WorldConfig.GetDefaultValue("Respawn.WarningMessage", "There will be an unscheduled server restart at 03:00. The server will be available again shortly after.");
             _alertRestartReason = WorldConfig.GetDefaultValue("Respawn.AlertRestartReason", "Urgent Maintenance");
 
-            string dataPath = ConfigMgr.GetDefaultValue("DataDir", "./");
+            var dataPath = ConfigMgr.GetDefaultValue("DataDir", "./");
             if (reload)
             {
                 if (dataPath != _dataPath)
@@ -1175,9 +1175,9 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, @"WORLD: MMap data directory is: {0}\mmaps", _dataPath);
 
-            bool EnableIndoor = ConfigMgr.GetDefaultValue("vmap.EnableIndoorCheck", true);
-            bool EnableLOS = ConfigMgr.GetDefaultValue("vmap.EnableLOS", true);
-            bool EnableHeight = ConfigMgr.GetDefaultValue("vmap.EnableHeight", true);
+            var EnableIndoor = ConfigMgr.GetDefaultValue("vmap.EnableIndoorCheck", true);
+            var EnableLOS = ConfigMgr.GetDefaultValue("vmap.EnableLOS", true);
+            var EnableHeight = ConfigMgr.GetDefaultValue("vmap.EnableHeight", true);
 
             if (!EnableHeight)
                 Log.outError(LogFilter.ServerLoading, "VMap height checking Disabled! Creatures movements and other various things WILL be broken! Expect no support.");
@@ -1191,14 +1191,14 @@ namespace Game
 
         public void LoadAutobroadcasts()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             m_Autobroadcasts.Clear();
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_AUTOBROADCAST);
+            var stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_AUTOBROADCAST);
             stmt.AddValue(0, _realm.Id.Index);
 
-            SQLResult result = DB.Login.Query(stmt);
+            var result = DB.Login.Query(stmt);
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 autobroadcasts definitions. DB table `autobroadcast` is empty for this realm!");
@@ -1207,7 +1207,7 @@ namespace Game
 
             do
             {
-                byte id = result.Read<byte>(0);
+                var id = result.Read<byte>(0);
 
                 m_Autobroadcasts[id] = new Autobroadcast(result.Read<string>(2), result.Read<byte>(1));
 
@@ -1220,7 +1220,7 @@ namespace Game
         {
             ///- Update the game time and check for shutdown time
             _UpdateGameTime();
-            long currentGameTime = GameTime.GetGameTime();
+            var currentGameTime = GameTime.GetGameTime();
 
             _worldUpdateTime.UpdateWithDiff(diff);
 
@@ -1315,12 +1315,12 @@ namespace Game
             // <li> Update uptime table
             if (m_timers[WorldTimers.UpTime].Passed())
             {
-                uint tmpDiff = GameTime.GetUptime();
-                uint maxOnlinePlayers = GetMaxPlayerCount();
+                var tmpDiff = GameTime.GetUptime();
+                var maxOnlinePlayers = GetMaxPlayerCount();
 
                 m_timers[WorldTimers.UpTime].Reset();
 
-                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_UPTIME_PLAYERS);
+                var stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_UPTIME_PLAYERS);
 
                 stmt.AddValue(0, tmpDiff);
                 stmt.AddValue(1, maxOnlinePlayers);
@@ -1337,7 +1337,7 @@ namespace Game
                 {
                     m_timers[WorldTimers.CleanDB].Reset();
 
-                    PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_OLD_LOGS);
+                    var stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_OLD_LOGS);
                     stmt.AddValue(0, WorldConfig.GetIntValue(WorldCfg.LogdbCleartime));
                     stmt.AddValue(1, 0);
                     stmt.AddValue(2, GetRealm().Id.Index);
@@ -1452,7 +1452,7 @@ namespace Game
                     continue;
 
                 // Player should be in world
-                Player player = session.GetPlayer();
+                var player = session.GetPlayer();
                 if (player == null || !player.IsInWorld)
                     continue;
 
@@ -1465,7 +1465,7 @@ namespace Game
         // Send a System Message to all players (except self if mentioned)
         public void SendWorldText(CypherStrings string_id, params object[] args)
         {
-            WorldWorldTextBuilder wt_builder = new WorldWorldTextBuilder((uint)string_id, args);
+            var wt_builder = new WorldWorldTextBuilder((uint)string_id, args);
             var wt_do = new LocalizedPacketListDo(wt_builder);
             foreach (var session in m_sessions.Values)
             {
@@ -1488,7 +1488,7 @@ namespace Game
                     continue;
 
                 // Player should be in world
-                Player player = session.GetPlayer();
+                var player = session.GetPlayer();
                 if (!player || !player.IsInWorld)
                     continue;
 
@@ -1499,7 +1499,7 @@ namespace Game
         // Send a packet to all players (or players selected team) in the zone (except self if mentioned)
         public bool SendZoneMessage(uint zone, ServerPacket packet, WorldSession self = null, uint team = 0)
         {
-            bool foundPlayerToSend = false;
+            var foundPlayerToSend = false;
             foreach (var session in m_sessions.Values)
             {
                 if (session != null && session.GetPlayer() && session.GetPlayer().IsInWorld &&
@@ -1516,7 +1516,7 @@ namespace Game
         // Send a System Message to all players in the zone (except self if mentioned)
         public void SendZoneText(uint zone, string text, WorldSession self = null, uint team = 0)
         {
-            ChatPkt data = new ChatPkt();
+            var data = new ChatPkt();
             data.Initialize(ChatMsg.System, Language.Universal, null, null, text);
             SendZoneMessage(zone, data, self, team);
         }
@@ -1541,7 +1541,7 @@ namespace Game
         /// Ban an account or ban an IP address, duration will be parsed using TimeStringToSecs if it is positive, otherwise permban
         public BanReturn BanAccount(BanMode mode, string nameOrIP, string duration, string reason, string author)
         {
-            uint duration_secs = Time.TimeStringToSecs(duration);
+            var duration_secs = Time.TimeStringToSecs(duration);
             return BanAccount(mode, nameOrIP, duration_secs, reason, author);
         }
 
@@ -1595,10 +1595,10 @@ namespace Game
             }
 
             // Disconnect all affected players (for IP it can be several)
-            SQLTransaction trans = new SQLTransaction();
+            var trans = new SQLTransaction();
             do
             {
-                uint account = resultAccounts.Read<uint>(0);
+                var account = resultAccounts.Read<uint>(0);
 
                 if (mode != BanMode.IP)
                 {
@@ -1615,7 +1615,7 @@ namespace Game
                     trans.Append(stmt);
                 }
 
-                WorldSession sess = FindSession(account);
+                var sess = FindSession(account);
                 if (sess)
                 {
                     if (sess.GetPlayerName() != author)
@@ -1663,7 +1663,7 @@ namespace Game
             Player pBanned = Global.ObjAccessor.FindConnectedPlayerByName(name);
             ObjectGuid guid;
 
-            uint duration_secs = Time.TimeStringToSecs(duration);
+            var duration_secs = Time.TimeStringToSecs(duration);
 
             // Pick a player to ban if not online
             if (!pBanned)
@@ -1676,10 +1676,10 @@ namespace Game
                 guid = pBanned.GetGUID();
 
             //Use transaction in order to ensure the order of the queries
-            SQLTransaction trans = new SQLTransaction();
+            var trans = new SQLTransaction();
 
             // make sure there is only one active ban
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHARACTER_BAN);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHARACTER_BAN);
             stmt.AddValue(0, guid.GetCounter());
             trans.Append(stmt);
 
@@ -1713,7 +1713,7 @@ namespace Game
             else
                 guid = pBanned.GetGUID();
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHARACTER_BAN);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHARACTER_BAN);
             stmt.AddValue(0, guid.GetCounter());
             DB.Characters.Execute(stmt);
             return true;
@@ -1722,10 +1722,10 @@ namespace Game
         void _UpdateGameTime()
         {
             // update the time
-            long lastGameTime = GameTime.GetGameTime();
+            var lastGameTime = GameTime.GetGameTime();
             GameTime.UpdateGameTimers();
 
-            uint elapsed = (uint)(GameTime.GetGameTime() - lastGameTime);
+            var elapsed = (uint)(GameTime.GetGameTime() - lastGameTime);
 
             //- if there is a shutdown timer
             if (!IsStopped && m_ShutdownTimer > 0 && elapsed > 0)
@@ -1793,7 +1793,7 @@ namespace Game
                 if (!reason.IsEmpty())
                     str += " - " + reason;
 
-                ServerMessageType msgid = m_ShutdownMask.HasAnyFlag(ShutdownMask.Restart) ? ServerMessageType.RestartTime : ServerMessageType.ShutdownTime;
+                var msgid = m_ShutdownMask.HasAnyFlag(ShutdownMask.Restart) ? ServerMessageType.RestartTime : ServerMessageType.ShutdownTime;
 
                 SendServerMessage(msgid, str, player);
                 Log.outDebug(LogFilter.Server, "Server is {0} in {1}", (m_ShutdownMask.HasAnyFlag(ShutdownMask.Restart) ? "restart" : "shuttingdown"), str);
@@ -1806,9 +1806,9 @@ namespace Game
             if (m_ShutdownTimer == 0 || IsStopped)
                 return 0;
 
-            ServerMessageType msgid = m_ShutdownMask.HasAnyFlag(ShutdownMask.Restart) ? ServerMessageType.RestartCancelled : ServerMessageType.ShutdownCancelled;
+            var msgid = m_ShutdownMask.HasAnyFlag(ShutdownMask.Restart) ? ServerMessageType.RestartCancelled : ServerMessageType.ShutdownCancelled;
 
-            uint oldTimer = m_ShutdownTimer;
+            var oldTimer = m_ShutdownTimer;
             m_ShutdownMask = 0;
             m_ShutdownTimer = 0;
             m_ExitCode = (byte)ShutdownExitCode.Shutdown;                       // to default value
@@ -1822,7 +1822,7 @@ namespace Game
 
         public void SendServerMessage(ServerMessageType messageID, string stringParam = "", Player player = null)
         {
-            ChatServerMessage packet = new ChatServerMessage();
+            var packet = new ChatServerMessage();
             packet.MessageID = (int)messageID;
             if (messageID <= ServerMessageType.String)
                 packet.StringParam = stringParam;
@@ -1847,8 +1847,8 @@ namespace Game
             // Then send an update signal to remaining ones
             foreach (var pair in m_sessions)
             {
-                WorldSession session = pair.Value;
-                WorldSessionFilter updater = new WorldSessionFilter(session);
+                var session = pair.Value;
+                var updater = new WorldSessionFilter(session);
                 if (!session.Update(diff, updater))    // As interval = 0
                 {
                     if (!RemoveQueuedPlayer(session) && session != null && WorldConfig.GetIntValue(WorldCfg.IntervalDisconnectTolerance) != 0)
@@ -1868,7 +1868,7 @@ namespace Game
 
             var pair = m_Autobroadcasts.SelectRandomElementByWeight(autoPair => autoPair.Value.Weight);
 
-            uint abcenter = WorldConfig.GetUIntValue(WorldCfg.AutoBroadcastCenter);
+            var abcenter = WorldConfig.GetUIntValue(WorldCfg.AutoBroadcastCenter);
 
             if (abcenter == 0)
                 SendWorldText(CypherStrings.AutoBroadcast, pair.Value.Message);
@@ -1885,7 +1885,7 @@ namespace Game
 
         public void UpdateRealmCharCount(uint accountId)
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_COUNT);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_COUNT);
             stmt.AddValue(0, accountId);
             _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt).WithCallback(_UpdateRealmCharCount));
         }
@@ -1894,12 +1894,12 @@ namespace Game
         { 
             if (!result.IsEmpty())
             {
-                uint Id = result.Read<uint>(0);
-                uint charCount = result.Read<uint>(1);
+                var Id = result.Read<uint>(0);
+                var charCount = result.Read<uint>(1);
 
-                SQLTransaction trans = new SQLTransaction();
+                var trans = new SQLTransaction();
 
-                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_REALM_CHARACTERS_BY_REALM);
+                var stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_REALM_CHARACTERS_BY_REALM);
                 stmt.AddValue(0, Id);
                 stmt.AddValue(1, _realm.Id.Index);
                 trans.Append(stmt);
@@ -1917,7 +1917,7 @@ namespace Game
         void InitWeeklyQuestResetTime()
         {
             long wstime = GetWorldState(WorldStates.WeeklyQuestResetTime);
-            long curtime = Time.UnixTime;
+            var curtime = Time.UnixTime;
             m_NextWeeklyQuestReset = wstime < curtime ? curtime : wstime;
         }
 
@@ -1927,7 +1927,7 @@ namespace Game
 
             if (loading)
             {
-                SQLResult result = DB.Characters.Query("SELECT MAX(time) FROM character_queststatus_daily");
+                var result = DB.Characters.Query("SELECT MAX(time) FROM character_queststatus_daily");
                 if (!result.IsEmpty())
                 {
                     mostRecentQuestTime = result.Read<uint>(0);
@@ -1936,13 +1936,13 @@ namespace Game
 
 
             // FIX ME: client not show day start time
-            long curTime = Time.UnixTime;
+            var curTime = Time.UnixTime;
 
             // current day reset time
-            long curDayResetTime = Time.GetNextResetUnixTime(WorldConfig.GetIntValue(WorldCfg.DailyQuestResetTimeHour));
+            var curDayResetTime = Time.GetNextResetUnixTime(WorldConfig.GetIntValue(WorldCfg.DailyQuestResetTimeHour));
 
             // last reset time before current moment
-            long resetTime = (curTime < curDayResetTime) ? curDayResetTime - Time.Day : curDayResetTime;
+            var resetTime = (curTime < curDayResetTime) ? curDayResetTime - Time.Day : curDayResetTime;
 
             // need reset (if we have quest time before last reset time (not processed by some reason)
             if (mostRecentQuestTime != 0 && mostRecentQuestTime <= resetTime)
@@ -1954,7 +1954,7 @@ namespace Game
         void InitMonthlyQuestResetTime()
         {
             long wstime = GetWorldState(WorldStates.MonthlyQuestResetTime);
-            long curtime = Time.UnixTime;
+            var curtime = Time.UnixTime;
             m_NextMonthlyQuestReset = wstime < curtime ? curtime : wstime;
         }
 
@@ -1965,10 +1965,10 @@ namespace Game
                 m_NextRandomBGReset = Time.UnixTime;         // game time not yet init
 
             // generate time by config
-            long curTime = Time.UnixTime;
+            var curTime = Time.UnixTime;
 
             // current day reset time
-            long nextDayResetTime = Time.GetNextResetUnixTime(WorldConfig.GetIntValue(WorldCfg.RandomBgResetHour));
+            var nextDayResetTime = Time.GetNextResetUnixTime(WorldConfig.GetIntValue(WorldCfg.RandomBgResetHour));
 
             // next reset time before current moment
             if (curTime >= nextDayResetTime)
@@ -1987,7 +1987,7 @@ namespace Game
             if (gtime == 0)
                 m_NextGuildReset = Time.UnixTime;         // game time not yet init
 
-            long curTime = Time.UnixTime;
+            var curTime = Time.UnixTime;
             var nextDayResetTime = Time.GetNextResetUnixTime(WorldConfig.GetIntValue(WorldCfg.GuildResetHour));
 
             if (curTime >= nextDayResetTime)
@@ -2007,7 +2007,7 @@ namespace Game
                 m_NextCurrencyReset = Time.UnixTime;         // game time not yet init
 
             // generate time by config
-            long curTime = Time.UnixTime;
+            var curTime = Time.UnixTime;
 
             var nextWeekResetTime = Time.GetNextResetUnixTime(WorldConfig.GetIntValue(WorldCfg.CurrencyResetDay), WorldConfig.GetIntValue(WorldCfg.CurrencyResetHour));
 
@@ -2026,7 +2026,7 @@ namespace Game
         {
             Log.outInfo(LogFilter.Server, "Daily quests reset for all characters.");
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_RESET_CHARACTER_QUESTSTATUS_DAILY);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_RESET_CHARACTER_QUESTSTATUS_DAILY);
             DB.Characters.Execute(stmt);
 
             stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHARACTER_GARRISON_FOLLOWER_ACTIVATIONS);
@@ -2055,9 +2055,9 @@ namespace Game
 
         public void LoadDBAllowedSecurityLevel()
         {
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_REALMLIST_SECURITY_LEVEL);
+            var stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_REALMLIST_SECURITY_LEVEL);
             stmt.AddValue(0, _realm.Id.Index);
-            SQLResult result = DB.Login.Query(stmt);
+            var result = DB.Login.Query(stmt);
 
             if (!result.IsEmpty())
                 SetPlayerSecurityLimit((AccountTypes)result.Read<byte>(0));
@@ -2065,8 +2065,8 @@ namespace Game
 
         public void SetPlayerSecurityLimit(AccountTypes accountType)
         {
-            AccountTypes security = accountType < AccountTypes.Console ? accountType : AccountTypes.Player;
-            bool update = security > m_allowedSecurityLevel;
+            var security = accountType < AccountTypes.Console ? accountType : AccountTypes.Player;
+            var update = security > m_allowedSecurityLevel;
             m_allowedSecurityLevel = security;
             if (update)
                 KickAllLess(m_allowedSecurityLevel);
@@ -2076,7 +2076,7 @@ namespace Game
         {
             Log.outInfo(LogFilter.Server, "Weekly quests reset for all characters.");
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_RESET_CHARACTER_QUESTSTATUS_WEEKLY);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_RESET_CHARACTER_QUESTSTATUS_WEEKLY);
             DB.Characters.Execute(stmt);
 
             foreach (var session in m_sessions.Values)
@@ -2094,20 +2094,20 @@ namespace Game
         {
             Log.outInfo(LogFilter.Server, "Monthly quests reset for all characters.");
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_RESET_CHARACTER_QUESTSTATUS_MONTHLY);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_RESET_CHARACTER_QUESTSTATUS_MONTHLY);
             DB.Characters.Execute(stmt);
 
             foreach (var session in m_sessions.Values)
                 if (session.GetPlayer() != null)
                     session.GetPlayer().ResetMonthlyQuestStatus();
 
-            long curTime = Time.UnixTime;
+            var curTime = Time.UnixTime;
 
             // current day reset time
-            long curDayResetTime = Time.GetNextResetUnixTime(30, 1, 0);
+            var curDayResetTime = Time.GetNextResetUnixTime(30, 1, 0);
 
             // last reset time before current moment
-            long nextMonthResetTime = (curTime < curDayResetTime) ? curDayResetTime - Time.Day : curDayResetTime;
+            var nextMonthResetTime = (curTime < curDayResetTime) ? curDayResetTime - Time.Day : curDayResetTime;
 
             // plan next reset time
             m_NextMonthlyQuestReset = (curTime >= nextMonthResetTime) ? nextMonthResetTime + Time.Month : nextMonthResetTime;
@@ -2117,7 +2117,7 @@ namespace Game
 
         public void ResetEventSeasonalQuests(ushort event_id)
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_RESET_CHARACTER_QUESTSTATUS_SEASONAL_BY_EVENT);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_RESET_CHARACTER_QUESTSTATUS_SEASONAL_BY_EVENT);
             stmt.AddValue(0, event_id);
             DB.Characters.Execute(stmt);
 
@@ -2130,7 +2130,7 @@ namespace Game
         {
             Log.outInfo(LogFilter.Server, "Random BG status reset for all characters.");
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_BATTLEGROUND_RANDOM_ALL);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_BATTLEGROUND_RANDOM_ALL);
             DB.Characters.Execute(stmt);
 
             foreach (var session in m_sessions.Values)
@@ -2163,7 +2163,7 @@ namespace Game
         {
             var DBVersion = "Unknown world database.";
 
-            SQLResult result = DB.World.Query("SELECT db_version, cache_id FROM version LIMIT 1");
+            var result = DB.World.Query("SELECT db_version, cache_id FROM version LIMIT 1");
             if (!result.IsEmpty())
             {
                 DBVersion = result.Read<string>(0);
@@ -2188,9 +2188,9 @@ namespace Game
 
         void LoadWorldStates()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
-            SQLResult result = DB.Characters.Query("SELECT entry, value FROM worldstates");
+            var result = DB.Characters.Query("SELECT entry, value FROM worldstates");
 
             if (result.IsEmpty())
             {
@@ -2299,7 +2299,7 @@ namespace Game
 
         public uint GetConfigMaxSkillValue()
         {
-            int lvl = WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel);
+            var lvl = WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel);
             return (uint)(lvl > 60 ? 300 + ((lvl - 60) * 75) / 10 : lvl * 5);
         }
 
@@ -2310,7 +2310,7 @@ namespace Game
 
         public bool IsPvPRealm()
         {
-            RealmType realmtype = (RealmType)WorldConfig.GetIntValue(WorldCfg.GameType);
+            var realmtype = (RealmType)WorldConfig.GetIntValue(WorldCfg.GameType);
             return (realmtype == RealmType.PVP
                 || realmtype == RealmType.RPPVP
                 || realmtype == RealmType.FFAPVP);
@@ -2324,7 +2324,7 @@ namespace Game
 
         public bool LoadRealmInfo()
         {
-            SQLResult result = DB.Login.Query("SELECT id, name, address, localAddress, localSubnetMask, port, icon, flag, timezone, allowedSecurityLevel, population, gamebuild, Region, Battlegroup FROM realmlist WHERE id = {0}", _realm.Id.Index);
+            var result = DB.Login.Query("SELECT id, name, address, localAddress, localSubnetMask, port, icon, flag, timezone, allowedSecurityLevel, population, gamebuild, Region, Battlegroup FROM realmlist WHERE id = {0}", _realm.Id.Index);
             if (result.IsEmpty())
                 return false;
 
@@ -2520,7 +2520,7 @@ namespace Game
             if (i_args != null)
                 text = string.Format(text, i_args);
 
-            ChatPkt messageChat = new ChatPkt();
+            var messageChat = new ChatPkt();
 
             var lines = new StringArray(text, "\n");
             for (var i = 0; i < lines.Length; ++i)

@@ -35,11 +35,11 @@ namespace Game.Chat
             if (!handler.ExtractPlayerTarget(args[0] != '"' ? args : null, out target))
                 return false;
 
-            string name = handler.ExtractQuotedArg(args.NextString());
+            var name = handler.ExtractQuotedArg(args.NextString());
             if (string.IsNullOrEmpty(name))
                 return false;
 
-            byte type = args.NextByte();
+            var type = args.NextByte();
             if (type == 0)
                 return false;
 
@@ -57,7 +57,7 @@ namespace Game.Chat
                     return false;
                 }
 
-                ArenaTeam arena = new ArenaTeam();
+                var arena = new ArenaTeam();
 
                 if (!arena.Create(target.GetGUID(), type, name, 4293102085, 101, 4293253939, 4, 4284049911))
                 {
@@ -83,11 +83,11 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            uint teamId = args.NextUInt32();
+            var teamId = args.NextUInt32();
             if (teamId == 0)
                 return false;
 
-            ArenaTeam arena = Global.ArenaTeamMgr.GetArenaTeamById(teamId);
+            var arena = Global.ArenaTeamMgr.GetArenaTeamById(teamId);
 
             if (arena == null)
             {
@@ -101,7 +101,7 @@ namespace Game.Chat
                 return false;
             }
 
-            string name = arena.GetName();
+            var name = arena.GetName();
             arena.Disband();
             if (handler.GetSession() != null)
                 Log.outDebug(LogFilter.Arena, "GameMaster: {0} [GUID: {1}] disbanded arena team type: {2} [Id: {3}].",
@@ -119,21 +119,21 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string oldArenaStr = handler.ExtractQuotedArg(args.NextString());
+            var oldArenaStr = handler.ExtractQuotedArg(args.NextString());
             if (string.IsNullOrEmpty(oldArenaStr))
             {
                 handler.SendSysMessage(CypherStrings.BadValue);
                 return false;
             }
 
-            string newArenaStr = handler.ExtractQuotedArg(args.NextString());
+            var newArenaStr = handler.ExtractQuotedArg(args.NextString());
             if (string.IsNullOrEmpty(newArenaStr))
             {
                 handler.SendSysMessage(CypherStrings.BadValue);
                 return false;
             }
 
-            ArenaTeam arena = Global.ArenaTeamMgr.GetArenaTeamByName(oldArenaStr);
+            var arena = Global.ArenaTeamMgr.GetArenaTeamByName(oldArenaStr);
             if (arena == null)
             {
                 handler.SendSysMessage(CypherStrings.AreanErrorNameNotFound, oldArenaStr);
@@ -180,7 +180,7 @@ namespace Game.Chat
             if (string.IsNullOrEmpty(idStr))
                 return false;
 
-            if (!uint.TryParse(idStr, out uint teamId) || teamId == 0)
+            if (!uint.TryParse(idStr, out var teamId) || teamId == 0)
                 return false;
 
             Player target;
@@ -188,7 +188,7 @@ namespace Game.Chat
             if (!handler.ExtractPlayerTarget(new StringArguments(nameStr), out target, out targetGuid))
                 return false;
 
-            ArenaTeam arena = Global.ArenaTeamMgr.GetArenaTeamById(teamId);
+            var arena = Global.ArenaTeamMgr.GetArenaTeamById(teamId);
 
             if (arena == null)
             {
@@ -243,11 +243,11 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            uint teamId = args.NextUInt32();
+            var teamId = args.NextUInt32();
             if (teamId == 0)
                 return false;
 
-            ArenaTeam arena = Global.ArenaTeamMgr.GetArenaTeamById(teamId);
+            var arena = Global.ArenaTeamMgr.GetArenaTeamById(teamId);
 
             if (arena == null)
             {
@@ -268,9 +268,9 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string name = args.NextString().ToLower();
+            var name = args.NextString().ToLower();
 
-            bool found = false;
+            var found = false;
             foreach (var arena in Global.ArenaTeamMgr.GetArenaTeamMap().Values)
             {
                 if (arena.GetName() == name)

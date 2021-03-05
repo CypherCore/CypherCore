@@ -34,14 +34,14 @@ namespace Framework.Database
 
         public bool Populate()
         {
-            SQLResult result = _database.Query("SHOW TABLES");
+            var result = _database.Query("SHOW TABLES");
             if (!result.IsEmpty() && !result.IsEmpty())
                 return true;
 
             Log.outInfo(LogFilter.SqlUpdates, $"Database {_database.GetDatabaseName()} is empty, auto populating it...");
 
-            string path = GetSourceDirectory();
-            string fileName = "Unknown";
+            var path = GetSourceDirectory();
+            var fileName = "Unknown";
             switch (_database.GetType().Name)
             {
                 case "LoginDatabase":
@@ -77,7 +77,7 @@ namespace Framework.Database
         {
             Log.outInfo(LogFilter.SqlUpdates, $"Updating {_database.GetDatabaseName()} database...");
 
-            string sourceDirectory = GetSourceDirectory();
+            var sourceDirectory = GetSourceDirectory();
 
             if (!Directory.Exists(sourceDirectory))
             {
@@ -88,10 +88,10 @@ namespace Framework.Database
             var availableFiles = GetFileList();
             var appliedFiles = ReceiveAppliedFiles();
 
-            bool redundancyChecks = ConfigMgr.GetDefaultValue("Updates.Redundancy", true);
-            bool archivedRedundancy = ConfigMgr.GetDefaultValue("Updates.Redundancy", true);
+            var redundancyChecks = ConfigMgr.GetDefaultValue("Updates.Redundancy", true);
+            var archivedRedundancy = ConfigMgr.GetDefaultValue("Updates.Redundancy", true);
 
-            UpdateResult result = new UpdateResult();
+            var result = new UpdateResult();
 
             // Count updates
             foreach (var entry in appliedFiles)
@@ -127,9 +127,9 @@ namespace Framework.Database
                 }
 
                 // Calculate hash
-                string hash = CalculateHash(availableQuery.path);
+                var hash = CalculateHash(availableQuery.path);
 
-                UpdateMode mode = UpdateMode.Apply;
+                var mode = UpdateMode.Apply;
 
                 // Update is not in our applied list
                 if (applied == null)
@@ -193,7 +193,7 @@ namespace Framework.Database
                 }
 
                 uint speed = 0;
-                AppliedFileEntry file = new AppliedFileEntry(availableQuery.GetFileName(), hash, availableQuery.state, 0);
+                var file = new AppliedFileEntry(availableQuery.GetFileName(), hash, availableQuery.state, 0);
 
                 switch (mode)
                 {
@@ -215,8 +215,8 @@ namespace Framework.Database
             // Cleanup up orphaned entries if enabled
             if (!appliedFiles.Empty())
             {
-                int cleanDeadReferencesMaxCount = ConfigMgr.GetDefaultValue("Updates.CleanDeadRefMaxCount", 3);
-                bool doCleanup = (cleanDeadReferencesMaxCount < 0) || (appliedFiles.Count <= cleanDeadReferencesMaxCount);
+                var cleanDeadReferencesMaxCount = ConfigMgr.GetDefaultValue("Updates.CleanDeadRefMaxCount", 3);
+                var doCleanup = (cleanDeadReferencesMaxCount < 0) || (appliedFiles.Count <= cleanDeadReferencesMaxCount);
 
                 foreach (var entry in appliedFiles)
                 {
@@ -234,7 +234,7 @@ namespace Framework.Database
                 }
             }
 
-            string info = $"Containing {result.recent} new and {result.archived} archived updates.";
+            var info = $"Containing {result.recent} new and {result.archived} archived updates.";
 
             if (result.updated == 0)
                 Log.outInfo(LogFilter.SqlUpdates, $"{_database.GetDatabaseName()} database is up-to-date! {info}");
@@ -252,7 +252,7 @@ namespace Framework.Database
         uint ApplyTimedFile(string path)
         {
             // Benchmark query speed
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             // Update database
             if (!_database.ApplyFile(path))
@@ -264,7 +264,7 @@ namespace Framework.Database
 
         void UpdateEntry(AppliedFileEntry entry, uint speed)
         {
-            string update = $"REPLACE INTO `updates` (`name`, `hash`, `state`, `speed`) VALUES (\"{entry.Name}\", \"{entry.Hash}\", \'{entry.State}\', {speed})";
+            var update = $"REPLACE INTO `updates` (`name`, `hash`, `state`, `speed`) VALUES (\"{entry.Name}\", \"{entry.Hash}\", \'{entry.State}\', {speed})";
 
             // Update database
             _database.Execute(update);
@@ -274,7 +274,7 @@ namespace Framework.Database
         {
             // Delete target if it exists
             {
-                string update = $"DELETE FROM `updates` WHERE `name`=\"{to}\"";
+                var update = $"DELETE FROM `updates` WHERE `name`=\"{to}\"";
 
                 // Update database
                 _database.Execute(update);
@@ -282,7 +282,7 @@ namespace Framework.Database
 
             // Rename
             {
-                string update = $"UPDATE `updates` SET `name`=\"{to}\" WHERE `name`=\"{from}\"";
+                var update = $"UPDATE `updates` SET `name`=\"{to}\" WHERE `name`=\"{from}\"";
 
                 // Update database
                 _database.Execute(update);
@@ -294,8 +294,8 @@ namespace Framework.Database
             if (storage.Empty())
                 return;
 
-            int remaining = storage.Count;
-            string update = "DELETE FROM `updates` WHERE `name` IN(";
+            var remaining = storage.Count;
+            var update = "DELETE FROM `updates` WHERE `name` IN(";
 
             foreach (var entry in storage)
             {
@@ -312,7 +312,7 @@ namespace Framework.Database
 
         void UpdateState(string name, State state)
         {
-            string update = $"UPDATE `updates` SET `state`=\'{state}\' WHERE `name`=\"{name}\"";
+            var update = $"UPDATE `updates` SET `state`=\'{state}\' WHERE `name`=\"{name}\"";
 
             // Update database
             _database.Execute(update);
@@ -320,15 +320,15 @@ namespace Framework.Database
 
         List<FileEntry> GetFileList()
         {
-            List<FileEntry> fileList = new List<FileEntry>();
+            var fileList = new List<FileEntry>();
 
-            SQLResult result = _database.Query("SELECT `path`, `state` FROM `updates_include`");
+            var result = _database.Query("SELECT `path`, `state` FROM `updates_include`");
             if (result.IsEmpty())
                 return fileList;
 
             do
             {
-                string path = result.Read<string>(0);
+                var path = result.Read<string>(0);
                 if (path[0] == '$')
                     path = GetSourceDirectory() + path.Substring(1);
 
@@ -338,7 +338,7 @@ namespace Framework.Database
                     continue;
                 }
 
-                State state = result.Read<string>(1).ToEnum<State>();
+                var state = result.Read<string>(1).ToEnum<State>();
                 fileList.AddRange(GetFilesFromDirectory(path, state));
 
                 Log.outDebug(LogFilter.SqlUpdates, $"Added applied file \"{path}\" from remote.");
@@ -350,15 +350,15 @@ namespace Framework.Database
 
         Dictionary<string, AppliedFileEntry> ReceiveAppliedFiles()
         {
-            Dictionary<string, AppliedFileEntry> map = new Dictionary<string, AppliedFileEntry>();
+            var map = new Dictionary<string, AppliedFileEntry>();
 
-            SQLResult result = _database.Query("SELECT `name`, `hash`, `state`, UNIX_TIMESTAMP(`timestamp`) FROM `updates` ORDER BY `name` ASC");
+            var result = _database.Query("SELECT `name`, `hash`, `state`, UNIX_TIMESTAMP(`timestamp`) FROM `updates` ORDER BY `name` ASC");
             if (result.IsEmpty())
                 return map;
 
             do
             {
-                AppliedFileEntry entry = new AppliedFileEntry(result.Read<string>(0), result.Read<string>(1), result.Read<string>(2).ToEnum<State>(), result.Read<ulong>(3));
+                var entry = new AppliedFileEntry(result.Read<string>(0), result.Read<string>(1), result.Read<string>(2).ToEnum<State>(), result.Read<ulong>(3));
                 map.Add(entry.Name, entry);
             }
             while (result.NextRow());
@@ -368,14 +368,14 @@ namespace Framework.Database
 
         IEnumerable<FileEntry> GetFilesFromDirectory(string directory, State state)
         {
-            Queue<string> queue = new Queue<string>();
+            var queue = new Queue<string>();
             queue.Enqueue(directory);
             while (queue.Count > 0)
             {
                 directory = queue.Dequeue();
                 try
                 {
-                    foreach (string subDir in Directory.GetDirectories(directory))
+                    foreach (var subDir in Directory.GetDirectories(directory))
                     {
                         queue.Enqueue(subDir);
                     }
@@ -385,8 +385,8 @@ namespace Framework.Database
                     Console.Error.WriteLine(ex);
                 }
 
-                string[] files = Directory.GetFiles(directory, "*.sql");
-                for (int i = 0; i < files.Length; i++)
+                var files = Directory.GetFiles(directory, "*.sql");
+                for (var i = 0; i < files.Length; i++)
                 {
                     yield return new FileEntry(files[i], state);
                 }
@@ -397,7 +397,7 @@ namespace Framework.Database
         {
             using (SHA1 sha1 = new SHA1Managed())
             {
-                string text = File.ReadAllText(fileName).Replace("\r", "");
+                var text = File.ReadAllText(fileName).Replace("\r", "");
                 return sha1.ComputeHash(Encoding.UTF8.GetBytes(text)).ToHexString();
             }
         }

@@ -121,13 +121,13 @@ namespace Game.Arenas
                 {
                     // if the player was a match participant, calculate rating
 
-                    ArenaTeam winnerArenaTeam = Global.ArenaTeamMgr.GetArenaTeamById(GetArenaTeamIdForTeam(GetOtherTeam(bgPlayer.Team)));
-                    ArenaTeam loserArenaTeam = Global.ArenaTeamMgr.GetArenaTeamById(GetArenaTeamIdForTeam(bgPlayer.Team));
+                    var winnerArenaTeam = Global.ArenaTeamMgr.GetArenaTeamById(GetArenaTeamIdForTeam(GetOtherTeam(bgPlayer.Team)));
+                    var loserArenaTeam = Global.ArenaTeamMgr.GetArenaTeamById(GetArenaTeamIdForTeam(bgPlayer.Team));
 
                     // left a rated match while the encounter was in progress, consider as loser
                     if (winnerArenaTeam != null && loserArenaTeam != null && winnerArenaTeam != loserArenaTeam)
                     {
-                        Player player = _GetPlayer(guid, bgPlayer.OfflineRemoveTime != 0, "Arena.RemovePlayerAtLeave");
+                        var player = _GetPlayer(guid, bgPlayer.OfflineRemoveTime != 0, "Arena.RemovePlayerAtLeave");
                         if (player)
                             loserArenaTeam.MemberLost(player, GetArenaMatchmakerRating(GetOtherTeam(bgPlayer.Team)));
                         else
@@ -155,18 +155,18 @@ namespace Game.Arenas
             {
                 uint loserTeamRating = 0;
                 uint loserMatchmakerRating = 0;
-                int loserChange = 0;
-                int loserMatchmakerChange = 0;
+                var loserChange = 0;
+                var loserMatchmakerChange = 0;
                 uint winnerTeamRating = 0;
                 uint winnerMatchmakerRating = 0;
-                int winnerChange = 0;
-                int winnerMatchmakerChange = 0;
-                bool guildAwarded = false;
+                var winnerChange = 0;
+                var winnerMatchmakerChange = 0;
+                var guildAwarded = false;
 
                 // In case of arena draw, follow this logic:
                 // winnerArenaTeam => ALLIANCE, loserArenaTeam => HORDE
-                ArenaTeam winnerArenaTeam = Global.ArenaTeamMgr.GetArenaTeamById(GetArenaTeamIdForTeam(winner == 0 ? Team.Alliance : winner));
-                ArenaTeam loserArenaTeam = Global.ArenaTeamMgr.GetArenaTeamById(GetArenaTeamIdForTeam(winner == 0 ? Team.Horde : GetOtherTeam(winner)));
+                var winnerArenaTeam = Global.ArenaTeamMgr.GetArenaTeamById(GetArenaTeamIdForTeam(winner == 0 ? Team.Alliance : winner));
+                var loserArenaTeam = Global.ArenaTeamMgr.GetArenaTeamById(GetArenaTeamIdForTeam(winner == 0 ? Team.Horde : GetOtherTeam(winner)));
 
                 if (winnerArenaTeam != null && loserArenaTeam != null && winnerArenaTeam != loserArenaTeam)
                 {
@@ -191,8 +191,8 @@ namespace Game.Arenas
 
                         // bg team that the client expects is different to TeamId
                         // alliance 1, horde 0
-                        byte winnerTeam = (byte)(winner == Team.Alliance ? BattlegroundTeamId.Alliance : BattlegroundTeamId.Horde);
-                        byte loserTeam = (byte)(winner == Team.Alliance ? BattlegroundTeamId.Horde : BattlegroundTeamId.Alliance);
+                        var winnerTeam = (byte)(winner == Team.Alliance ? BattlegroundTeamId.Alliance : BattlegroundTeamId.Horde);
+                        var loserTeam = (byte)(winner == Team.Alliance ? BattlegroundTeamId.Horde : BattlegroundTeamId.Alliance);
 
                         _arenaTeamScores[winnerTeam].Assign(winnerTeamRating, (uint)(winnerTeamRating + winnerChange), winnerMatchmakerRating, GetArenaMatchmakerRating(winner));
                         _arenaTeamScores[loserTeam].Assign(loserTeamRating, (uint)(loserTeamRating + loserChange), loserMatchmakerRating, GetArenaMatchmakerRating(GetOtherTeam(winner)));
@@ -204,7 +204,7 @@ namespace Game.Arenas
                         {
                             foreach (var score in PlayerScores)
                             {
-                                Player player = Global.ObjAccessor.FindPlayer(score.Key);
+                                var player = Global.ObjAccessor.FindPlayer(score.Key);
                                 if (player)
                                 {
                                     Log.outDebug(LogFilter.Arena, "Statistics match Type: {0} for {1} (GUID: {2}, Team: {3}, IP: {4}): {5}",
@@ -224,10 +224,10 @@ namespace Game.Arenas
                         loserArenaTeam.FinishGame(SharedConst.ArenaTimeLimitPointsLoss);
                     }
 
-                    uint aliveWinners = GetAlivePlayersCountByTeam(winner);
+                    var aliveWinners = GetAlivePlayersCountByTeam(winner);
                     foreach (var pair in GetPlayers())
                     {
-                        Team team = pair.Value.Team;
+                        var team = pair.Value.Team;
 
                         if (pair.Value.OfflineRemoveTime != 0)
                         {
@@ -244,7 +244,7 @@ namespace Game.Arenas
                             continue;
                         }
 
-                        Player player = _GetPlayer(pair.Key, pair.Value.OfflineRemoveTime != 0, "Arena.EndBattleground");
+                        var player = _GetPlayer(pair.Key, pair.Value.OfflineRemoveTime != 0, "Arena.EndBattleground");
                         if (!player)
                             continue;
 
@@ -252,7 +252,7 @@ namespace Game.Arenas
                         if (team == winner)
                         {
                             // update achievement BEFORE personal rating update
-                            uint rating = player.GetArenaPersonalRating(winnerArenaTeam.GetSlot());
+                            var rating = player.GetArenaPersonalRating(winnerArenaTeam.GetSlot());
                             player.UpdateCriteria(CriteriaTypes.WinRatedArena, rating != 0 ? rating : 1);
                             player.UpdateCriteria(CriteriaTypes.WinRatedArena, GetMapId());
 
@@ -266,7 +266,7 @@ namespace Game.Arenas
                                 ulong guildId = GetBgMap().GetOwnerGuildId(player.GetBGTeam());
                                 if (guildId != 0)
                                 {
-                                    Guild guild = Global.GuildMgr.GetGuildById(guildId);
+                                    var guild = Global.GuildMgr.GetGuildById(guildId);
                                     if (guild)
                                         guild.UpdateCriteria(CriteriaTypes.WinRatedArena, Math.Max(winnerArenaTeam.GetRating(), 1), 0, 0, null, player);
                                 }

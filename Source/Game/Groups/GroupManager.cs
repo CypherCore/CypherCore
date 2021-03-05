@@ -34,9 +34,9 @@ namespace Game.Groups
 
         public uint GenerateNewGroupDbStoreId()
         {
-            uint newStorageId = NextGroupDbStoreId;
+            var newStorageId = NextGroupDbStoreId;
 
-            for (uint i = ++NextGroupDbStoreId; i < 0xFFFFFFFF; ++i)
+            for (var i = ++NextGroupDbStoreId; i < 0xFFFFFFFF; ++i)
             {
                 if ((i < GroupDbStore.Count && GroupDbStore[i] == null) || i >= GroupDbStore.Count)
                 {
@@ -61,7 +61,7 @@ namespace Game.Groups
 
         public void FreeGroupDbStoreId(Group group)
         {
-            uint storageId = group.GetDbStoreId();
+            var storageId = group.GetDbStoreId();
 
             if (storageId < NextGroupDbStoreId)
                 NextGroupDbStoreId = storageId;
@@ -102,7 +102,7 @@ namespace Game.Groups
         public void LoadGroups()
         {
             {
-                uint oldMSTime = Time.GetMSTime();
+                var oldMSTime = Time.GetMSTime();
 
                 // Delete all groups whose leader does not exist
                 DB.Characters.DirectExecute("DELETE FROM groups WHERE leaderGuid NOT IN (SELECT guid FROM characters)");
@@ -110,9 +110,9 @@ namespace Game.Groups
                 DB.Characters.DirectExecute("DELETE FROM groups WHERE guid NOT IN (SELECT guid FROM group_member GROUP BY guid HAVING COUNT(guid) > 1)");
 
                 //                                                    0              1           2             3                 4      5          6      7         8       9
-                SQLResult result = DB.Characters.Query("SELECT g.leaderGuid, g.lootMethod, g.looterGuid, g.lootThreshold, g.icon1, g.icon2, g.icon3, g.icon4, g.icon5, g.icon6" +
-                    //  10         11          12         13              14                  15                     16             17          18         19
-                    ", g.icon7, g.icon8, g.groupType, g.difficulty, g.raiddifficulty, g.legacyRaidDifficulty, g.masterLooterGuid, g.guid, lfg.dungeon, lfg.state FROM groups g LEFT JOIN lfg_data lfg ON lfg.guid = g.guid ORDER BY g.guid ASC");
+                var result = DB.Characters.Query("SELECT g.leaderGuid, g.lootMethod, g.looterGuid, g.lootThreshold, g.icon1, g.icon2, g.icon3, g.icon4, g.icon5, g.icon6" +
+                                                 //  10         11          12         13              14                  15                     16             17          18         19
+                                                 ", g.icon7, g.icon8, g.groupType, g.difficulty, g.raiddifficulty, g.legacyRaidDifficulty, g.masterLooterGuid, g.guid, lfg.dungeon, lfg.state FROM groups g LEFT JOIN lfg_data lfg ON lfg.guid = g.guid ORDER BY g.guid ASC");
                 if (result.IsEmpty())
                 {
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 group definitions. DB table `groups` is empty!");
@@ -122,12 +122,12 @@ namespace Game.Groups
                 uint count = 0;
                 do
                 {
-                    Group group = new Group();
+                    var group = new Group();
                     group.LoadGroupFromDB(result.GetFields());
                     AddGroup(group);
 
                     // Get the ID used for storing the group in the database and register it in the pool.
-                    uint storageId = group.GetDbStoreId();
+                    var storageId = group.GetDbStoreId();
 
                     RegisterGroupDbStoreId(storageId, group);
 
@@ -144,7 +144,7 @@ namespace Game.Groups
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Group members...");
             {
-                uint oldMSTime = Time.GetMSTime();
+                var oldMSTime = Time.GetMSTime();
 
                 // Delete all rows from group_member or group_instance with no group
                 DB.Characters.DirectExecute("DELETE FROM group_member WHERE guid NOT IN (SELECT guid FROM groups)");
@@ -153,7 +153,7 @@ namespace Game.Groups
                 DB.Characters.DirectExecute("DELETE FROM group_member WHERE memberGuid NOT IN (SELECT guid FROM characters)");
 
                 //                                                0        1           2            3       4
-                SQLResult result = DB.Characters.Query("SELECT guid, memberGuid, memberFlags, subgroup, roles FROM group_member ORDER BY guid");
+                var result = DB.Characters.Query("SELECT guid, memberGuid, memberFlags, subgroup, roles FROM group_member ORDER BY guid");
                 if (result.IsEmpty())
                 {
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 group members. DB table `group_member` is empty!");
@@ -164,7 +164,7 @@ namespace Game.Groups
 
                 do
                 {
-                    Group group = GetGroupByDbStoreId(result.Read<uint>(0));
+                    var group = GetGroupByDbStoreId(result.Read<uint>(0));
 
                     if (group)
                         group.LoadMemberFromDB(result.Read<uint>(1), result.Read<byte>(2), result.Read<byte>(3), (LfgRoles)result.Read<byte>(4));
@@ -180,13 +180,13 @@ namespace Game.Groups
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Group instance saves...");
             {
-                uint oldMSTime = Time.GetMSTime();
+                var oldMSTime = Time.GetMSTime();
 
                 //                                                 0       1       2            3            4             5            6
-                SQLResult result = DB.Characters.Query("SELECT gi.guid, i.map, gi.instance, gi.permanent, i.difficulty, i.resettime, i.entranceId, " +
-                    //           7
-                    "(SELECT COUNT(1) FROM character_instance ci LEFT JOIN groups g ON ci.guid = g.leaderGuid WHERE ci.instance = gi.instance AND ci.permanent = 1 LIMIT 1) " +
-                    "FROM group_instance gi LEFT JOIN instance i ON gi.instance = i.id ORDER BY guid");
+                var result = DB.Characters.Query("SELECT gi.guid, i.map, gi.instance, gi.permanent, i.difficulty, i.resettime, i.entranceId, " +
+                                                 //           7
+                                                 "(SELECT COUNT(1) FROM character_instance ci LEFT JOIN groups g ON ci.guid = g.leaderGuid WHERE ci.instance = gi.instance AND ci.permanent = 1 LIMIT 1) " +
+                                                 "FROM group_instance gi LEFT JOIN instance i ON gi.instance = i.id ORDER BY guid");
 
                 if (result.IsEmpty())
                 {
@@ -197,10 +197,10 @@ namespace Game.Groups
                 uint count = 0;
                 do
                 {
-                    Group group = GetGroupByDbStoreId(result.Read<uint>(0));
+                    var group = GetGroupByDbStoreId(result.Read<uint>(0));
                     // group will never be NULL (we have run consistency sql's before loading)
 
-                    MapRecord mapEntry = CliDB.MapStorage.LookupByKey(result.Read<ushort>(1));
+                    var mapEntry = CliDB.MapStorage.LookupByKey(result.Read<ushort>(1));
                     if (mapEntry == null || !mapEntry.IsDungeon())
                     {
                         Log.outError(LogFilter.Sql, "Incorrect entry in group_instance table : no dungeon map {0}", result.Read<ushort>(1));
@@ -208,11 +208,11 @@ namespace Game.Groups
                     }
 
                     uint diff = result.Read<byte>(4);
-                    DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(diff);
+                    var difficultyEntry = CliDB.DifficultyStorage.LookupByKey(diff);
                     if (difficultyEntry == null || difficultyEntry.InstanceType != mapEntry.InstanceType)
                         continue;
 
-                    InstanceSave save = Global.InstanceSaveMgr.AddInstanceSave(mapEntry.Id, result.Read<uint>(2), (Difficulty)diff, result.Read<uint>(5), result.Read<uint>(6), result.Read<ulong>(7) == 0, true);
+                    var save = Global.InstanceSaveMgr.AddInstanceSave(mapEntry.Id, result.Read<uint>(2), (Difficulty)diff, result.Read<uint>(5), result.Read<uint>(6), result.Read<ulong>(7) == 0, true);
                     group.BindToInstance(save, result.Read<bool>(3), true);
                     ++count;
                 }

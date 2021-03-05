@@ -47,7 +47,7 @@ namespace Game.Scripting
         //Initialization
         public void Initialize()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             LoadDatabase();
 
@@ -69,7 +69,7 @@ namespace Game.Scripting
                 return;
             }
 
-            Assembly assembly = Assembly.LoadFile(AppContext.BaseDirectory + "Scripts.dll");
+            var assembly = Assembly.LoadFile(AppContext.BaseDirectory + "Scripts.dll");
             if (assembly == null)
             {
                 Log.outError(LogFilter.ServerLoading, "Error Loading Scripts.dll, Only Core Scripts are loaded.");
@@ -91,10 +91,10 @@ namespace Game.Scripting
                     foreach (var attribute in attributes)
                     {
                         var genericType = type;
-                        string name = type.Name;
+                        var name = type.Name;
 
-                        bool validArgs = true;
-                        int i = 0;
+                        var validArgs = true;
+                        var i = 0;
                         foreach (var constructor in constructors)
                         {
                             var parameters = constructor.GetParameters();
@@ -189,7 +189,7 @@ namespace Game.Scripting
 
         void LoadScriptWaypoints()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             // Drop Existing Waypoint list
             _waypointStore.Clear();
@@ -197,7 +197,7 @@ namespace Game.Scripting
             ulong entryCount = 0;
 
             // Load Waypoints
-            SQLResult result = DB.World.Query("SELECT COUNT(entry) FROM script_waypoint GROUP BY entry");
+            var result = DB.World.Query("SELECT COUNT(entry) FROM script_waypoint GROUP BY entry");
             if (!result.IsEmpty())
                 entryCount = result.Read<uint>(0);
 
@@ -216,12 +216,12 @@ namespace Game.Scripting
 
             do
             {
-                uint entry = result.Read<uint>(0);
-                uint id = result.Read<uint>(1);
-                float x = result.Read<float>(2);
-                float y = result.Read<float>(3);
-                float z = result.Read<float>(4);
-                uint waitTime = result.Read<uint>(5);
+                var entry = result.Read<uint>(0);
+                var id = result.Read<uint>(1);
+                var x = result.Read<float>(2);
+                var y = result.Read<float>(3);
+                var z = result.Read<float>(4);
+                var waitTime = result.Read<uint>(5);
 
                 CreatureTemplate info = Global.ObjectMgr.GetCreatureTemplate(entry);
                 if (info == null)
@@ -236,7 +236,7 @@ namespace Game.Scripting
                 if (!_waypointStore.ContainsKey(entry))
                     _waypointStore[entry] = new WaypointPath();
 
-                WaypointPath path = _waypointStore[entry];
+                var path = _waypointStore[entry];
                 path.id = entry;
                 path.nodes.Add(new WaypointNode(id, x, y, z, 0.0f, waitTime));
 
@@ -250,14 +250,14 @@ namespace Game.Scripting
 
         void LoadScriptSplineChains()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             m_mSplineChainsMap.Clear();
 
             //                                                     0       1        2             3               4
-            SQLResult resultMeta = DB.World.Query("SELECT entry, chainId, splineId, expectedDuration, msUntilNext FROM script_spline_chain_meta ORDER BY entry asc, chainId asc, splineId asc");
+            var resultMeta = DB.World.Query("SELECT entry, chainId, splineId, expectedDuration, msUntilNext FROM script_spline_chain_meta ORDER BY entry asc, chainId asc, splineId asc");
             //                                                  0       1         2       3   4  5  6
-            SQLResult resultWP = DB.World.Query("SELECT entry, chainId, splineId, wpId, x, y, z FROM script_spline_chain_waypoints ORDER BY entry asc, chainId asc, splineId asc, wpId asc");
+            var resultWP = DB.World.Query("SELECT entry, chainId, splineId, wpId, x, y, z FROM script_spline_chain_waypoints ORDER BY entry asc, chainId asc, splineId asc, wpId asc");
             if (resultMeta.IsEmpty() || resultWP.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded spline chain data for 0 chains, consisting of 0 splines with 0 waypoints. DB tables `script_spline_chain_meta` and `script_spline_chain_waypoints` are empty.");
@@ -267,9 +267,9 @@ namespace Game.Scripting
                 uint chainCount = 0, splineCount = 0, wpCount = 0;
                 do
                 {
-                    uint entry = resultMeta.Read<uint>(0);
-                    ushort chainId = resultMeta.Read<ushort>(1);
-                    byte splineId = resultMeta.Read<byte>(2);
+                    var entry = resultMeta.Read<uint>(0);
+                    var chainId = resultMeta.Read<ushort>(1);
+                    var splineId = resultMeta.Read<byte>(2);
 
                     var key = Tuple.Create(entry, chainId);
                     if (!m_mSplineChainsMap.ContainsKey(key))
@@ -292,13 +292,13 @@ namespace Game.Scripting
 
                 do
                 {
-                    uint entry = resultWP.Read<uint>(0);
-                    ushort chainId = resultWP.Read<ushort>(1);
-                    byte splineId = resultWP.Read<byte>(2);
-                    byte wpId = resultWP.Read<byte>(3);
-                    float posX = resultWP.Read<float>(4);
-                    float posY = resultWP.Read<float>(5);
-                    float posZ = resultWP.Read<float>(6);
+                    var entry = resultWP.Read<uint>(0);
+                    var chainId = resultWP.Read<ushort>(1);
+                    var splineId = resultWP.Read<byte>(2);
+                    var wpId = resultWP.Read<byte>(3);
+                    var posX = resultWP.Read<float>(4);
+                    var posY = resultWP.Read<float>(5);
+                    var posZ = resultWP.Read<float>(6);
                     var chain = m_mSplineChainsMap.LookupByKey(Tuple.Create(entry, chainId));
                     if (chain == null)
                     {
@@ -311,7 +311,7 @@ namespace Game.Scripting
                         Log.outWarn(LogFilter.ServerLoading, "Creature #{0} has waypoint data for spline ({1},{2}). The specified chain does not have a spline with this index - entry skipped.", entry, chainId, splineId);
                         continue;
                     }
-                    SplineChainLink spline = chain[splineId];
+                    var spline = chain[splineId];
                     if (wpId != spline.Points.Count)
                     {
                         Log.outWarn(LogFilter.ServerLoading, "Creature #{0} has orphaned waypoint data in spline ({1},{2}) at index {3}. Skipped.", entry, chainId, splineId, wpId);
@@ -361,7 +361,7 @@ namespace Game.Scripting
         {
             foreach (DictionaryEntry entry in ScriptStorage)
             {
-                IScriptRegistry scriptRegistry = (IScriptRegistry)entry.Value;
+                var scriptRegistry = (IScriptRegistry)entry.Value;
                 scriptRegistry.Unload();
             }
 
@@ -384,7 +384,7 @@ namespace Game.Scripting
                 if (tmpscript == null)
                     continue;
 
-                SpellScript script = tmpscript.GetSpellScript();
+                var script = tmpscript.GetSpellScript();
                 if (script == null)
                     continue;
 
@@ -412,7 +412,7 @@ namespace Game.Scripting
                 if (tmpscript == null)
                     continue;
 
-                AuraScript script = tmpscript.GetAuraScript();
+                var script = tmpscript.GetAuraScript();
                 if (script == null)
                     continue;
 
@@ -690,10 +690,10 @@ namespace Game.Scripting
 
             // find out which template we'd be using
             CreatureTemplate actTemplate = null;
-            DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(map.GetDifficultyID());
+            var difficultyEntry = CliDB.DifficultyStorage.LookupByKey(map.GetDifficultyID());
             while (actTemplate == null && difficultyEntry != null)
             {
-                int idx = CreatureTemplate.DifficultyIDToDifficultyEntryIndex(difficultyEntry.Id);
+                var idx = CreatureTemplate.DifficultyIDToDifficultyEntryIndex(difficultyEntry.Id);
                 if (idx == -1)
                     break;
 
@@ -712,7 +712,7 @@ namespace Game.Scripting
             if (actTemplate == null)
                 actTemplate = baseTemplate;
 
-            uint scriptId = baseTemplate.ScriptID;
+            var scriptId = baseTemplate.ScriptID;
             if (cData != null && cData.ScriptId != 0)
                 scriptId = cData.ScriptId;
 
@@ -1105,31 +1105,31 @@ namespace Game.Scripting
         // UnitScript
         public void OnHeal(Unit healer, Unit reciever, ref uint gain)
         {
-            uint dmg = gain;
+            var dmg = gain;
             ForEach<UnitScript>(p => p.OnHeal(healer, reciever, ref dmg));
             gain = dmg;
         }
         public void OnDamage(Unit attacker, Unit victim, ref uint damage)
         {
-            uint dmg = damage;
+            var dmg = damage;
             ForEach<UnitScript>(p => p.OnDamage(attacker, victim, ref dmg));
             damage = dmg;
         }
         public void ModifyPeriodicDamageAurasTick(Unit target, Unit attacker, ref uint damage)
         {
-            uint dmg = damage;
+            var dmg = damage;
             ForEach<UnitScript>(p => p.ModifyPeriodicDamageAurasTick(target, attacker, ref dmg));
             damage = dmg;
         }
         public void ModifyMeleeDamage(Unit target, Unit attacker, ref uint damage)
         {
-            uint dmg = damage;
+            var dmg = damage;
             ForEach<UnitScript>(p => p.ModifyMeleeDamage(target, attacker, ref dmg));
             damage = dmg;
         }
         public void ModifySpellDamageTaken(Unit target, Unit attacker, ref int damage, SpellInfo spellInfo)
         {
-            int dmg = damage;
+            var dmg = damage;
             ForEach<UnitScript>(p => p.ModifySpellDamageTaken(target, attacker, ref dmg, spellInfo));
             ForEach<PlayerScript>(p => p.ModifySpellDamageTaken(target, attacker, ref dmg, spellInfo));
             damage = dmg;
@@ -1292,7 +1292,7 @@ namespace Game.Scripting
             if (id != 0)
             {
                 // Try to find an existing script.
-                bool existing = false;
+                var existing = false;
                 foreach (var it in ScriptMap)
                 {
                     if (it.Value.GetName() == script.GetName())

@@ -32,18 +32,18 @@ namespace Scripts.World.NpcInnkeeper
     {
         public const string LocaleTrickOrTreat0 = "Trick or Treat!";
         public const string LocaleTrickOrTreat2 = "Des bonbons ou des blagues!";
-        public const string LocaleTrickOrTreat3 = "Süßes oder Saures!";
-        public const string LocaleTrickOrTreat6 = "¡Truco o trato!";
+        public const string LocaleTrickOrTreat3 = "SÃ¼ÃŸes oder Saures!";
+        public const string LocaleTrickOrTreat6 = "Â¡Truco o trato!";
 
         public const string LocaleInnkeeper0 = "Make this inn my home.";
         public const string LocaleInnkeeper2 = "Faites de cette auberge votre foyer.";
-        public const string LocaleInnkeeper3 = "Ich möchte dieses Gasthaus zu meinem Heimatort machen.";
+        public const string LocaleInnkeeper3 = "Ich mÃ¶chte dieses Gasthaus zu meinem Heimatort machen.";
         public const string LocaleInnkeeper6 = "Fija tu hogar en esta taberna.";
 
         public const string LocaleVendor0 = "I want to browse your goods.";
         public const string LocaleVendor2 = "Je voudrais regarder vos articles.";
         public const string LocaleVendor3 = "Ich sehe mich nur mal um.";
-        public const string LocaleVendor6 = "Quiero ver tus mercancías.";
+        public const string LocaleVendor6 = "Quiero ver tus mercancÃ­as.";
     }
 
     [Script]
@@ -126,7 +126,7 @@ namespace Scripts.World.NpcInnkeeper
 
         public override bool GossipSelect(Player player, uint menuId, uint gossipListId)
         {
-            uint action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
+            var action = player.PlayerTalkClass.GetGossipOptionAction(gossipListId);
             player.ClearGossipMenu();
             if (action == eTradeskill.GossipActionInfoDef + 1 && Global.GameEventMgr.IsHolidayActive(HolidayIds.HallowsEnd) && !player.HasAura(SpellIds.TrickOrTreated))
             {

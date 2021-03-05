@@ -32,7 +32,7 @@ namespace Game.Networking.Packets
 
             for (var i = 0; i < itemsCount; ++i)
             {
-                TransmogrifyItem item = new TransmogrifyItem();
+                var item = new TransmogrifyItem();
                 item.Read(_worldPacket);
                 Items[i] = item;
             }
@@ -56,7 +56,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(FavoriteAppearances.Count);
             _worldPacket.WriteInt32(NewAppearances.Count);
 
-            foreach (uint itemModifiedAppearanceId in FavoriteAppearances)
+            foreach (var itemModifiedAppearanceId in FavoriteAppearances)
                 _worldPacket.WriteUInt32(itemModifiedAppearanceId);
 
             foreach (var newAppearance in NewAppearances)

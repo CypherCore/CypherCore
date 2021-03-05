@@ -94,15 +94,15 @@ namespace Game.Entities
         public void SaveToDB()
         {
             // prevent DB data inconsistence problems and duplicates
-            SQLTransaction trans = new SQLTransaction();
+            var trans = new SQLTransaction();
             DeleteFromDB(trans);
 
-            StringBuilder items = new StringBuilder();
+            var items = new StringBuilder();
             for (var i = 0; i < EquipmentSlot.End; ++i)
                 items.Append($"{m_corpseData.Items[i]} ");
 
             byte index = 0;
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CORPSE);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CORPSE);
             stmt.AddValue(index++, GetOwnerGUID().GetCounter());                            // guid
             stmt.AddValue(index++, GetPositionX());                                         // posX
             stmt.AddValue(index++, GetPositionY());                                         // posY
@@ -150,7 +150,7 @@ namespace Game.Entities
 
         public static void DeleteFromDB(ObjectGuid ownerGuid, SQLTransaction trans)
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CORPSE);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CORPSE);
             stmt.AddValue(0, ownerGuid.GetCounter());
             DB.Characters.ExecuteOrAppend(trans, stmt);
 
@@ -168,17 +168,17 @@ namespace Game.Entities
             //        0     1     2     3            4      5          6          7     8      9       10     11        12    13          14          15
             // SELECT posX, posY, posZ, orientation, mapId, displayId, itemCache, race, class, gender, flags, dynFlags, time, corpseType, instanceId, guid FROM corpse WHERE mapId = ? AND instanceId = ?
 
-                        float posX = field.Read<float>(0);
-            float posY = field.Read<float>(1);
-            float posZ = field.Read<float>(2);
-            float o = field.Read<float>(3);
-            ushort mapId = field.Read<ushort>(4);
+                        var posX = field.Read<float>(0);
+            var posY = field.Read<float>(1);
+            var posZ = field.Read<float>(2);
+            var o = field.Read<float>(3);
+            var mapId = field.Read<ushort>(4);
 
             _Create(ObjectGuid.Create(HighGuid.Corpse, mapId, 0, guid));
 
             SetObjectScale(1.0f);
             SetDisplayId(field.Read<uint>(5));
-            StringArray items = new StringArray(field.Read<string>(6), ' ');
+            var items = new StringArray(field.Read<string>(6), ' ');
             for (uint index = 0; index < EquipmentSlot.End; ++index)
                 SetItem(index, uint.Parse(items[(int)index]));
 
@@ -192,7 +192,7 @@ namespace Game.Entities
 
             m_time = field.Read<uint>(12);
 
-            uint instanceId = field.Read<uint>(14);
+            var instanceId = field.Read<uint>(14);
 
             // place
             SetLocationInstanceId(instanceId);
@@ -224,8 +224,8 @@ namespace Game.Entities
 
         public override void BuildValuesCreate(WorldPacket data, Player target)
         {
-            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new WorldPacket();
+            var flags = GetUpdateFieldFlagsFor(target);
+            var buffer = new WorldPacket();
 
             m_objectData.WriteCreate(buffer, flags, this, target);
             m_corpseData.WriteCreate(buffer, flags, this, target);
@@ -237,8 +237,8 @@ namespace Game.Entities
 
         public override void BuildValuesUpdate(WorldPacket data, Player target)
         {
-            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new WorldPacket();
+            var flags = GetUpdateFieldFlagsFor(target);
+            var buffer = new WorldPacket();
 
             buffer.WriteUInt32(m_values.GetChangedObjectTypeMask());
             if (m_values.HasChanged(TypeId.Object))
@@ -253,14 +253,14 @@ namespace Game.Entities
 
         void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedCorpseMask, Player target)
         {
-            UpdateMask valuesMask = new UpdateMask((int)TypeId.Max);
+            var valuesMask = new UpdateMask((int)TypeId.Max);
             if (requestedObjectMask.IsAnySet())
                 valuesMask.Set((int)TypeId.Object);
 
             if (requestedCorpseMask.IsAnySet())
                 valuesMask.Set((int)TypeId.Corpse);
 
-            WorldPacket buffer = new WorldPacket();
+            var buffer = new WorldPacket();
             buffer.WriteUInt32(valuesMask.GetBlock(0));
 
             if (valuesMask[(int)TypeId.Object])
@@ -269,7 +269,7 @@ namespace Game.Entities
             if (valuesMask[(int)TypeId.Corpse])
                 m_corpseData.WriteUpdate(buffer, requestedCorpseMask, true, this, target);
 
-            WorldPacket buffer1 = new WorldPacket();
+            var buffer1 = new WorldPacket();
             buffer1.WriteUInt8((byte)UpdateType.Values);
             buffer1.WritePackedGuid(GetGUID());
             buffer1.WriteUInt32(buffer.GetSize());

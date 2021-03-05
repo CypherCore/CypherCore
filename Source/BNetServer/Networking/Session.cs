@@ -40,13 +40,13 @@ namespace BNetServer.Networking
 
         public override void Accept()
         {
-            string ipAddress = GetRemoteIpEndPoint().ToString();
+            var ipAddress = GetRemoteIpEndPoint().ToString();
             Log.outInfo(LogFilter.Network, $"{GetClientInfo()} Connection Accepted.");
 
             // Verify that this IP is not in the ip_banned table
             DB.Login.Execute(DB.Login.GetPreparedStatement(LoginStatements.DelExpiredIpBans));
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SelIpInfo);
+            var stmt = DB.Login.GetPreparedStatement(LoginStatements.SelIpInfo);
             stmt.AddValue(0, ipAddress);
             stmt.AddValue(1, BitConverter.ToUInt32(GetRemoteIpEndPoint().Address.GetAddressBytes(), 0));
 
@@ -54,7 +54,7 @@ namespace BNetServer.Networking
             {
                 if (!result.IsEmpty())
                 {
-                    bool banned = false;
+                    var banned = false;
                     do
                     {
                         if (result.Read<ulong>(0) != 0)
@@ -125,12 +125,12 @@ namespace BNetServer.Networking
 
         public async void SendResponse(uint token, IMessage response)
         {
-            Header header = new Header();
+            var header = new Header();
             header.Token = token;
             header.ServiceId = 0xFE;
             header.Size = (uint)response.CalculateSize();
 
-            ByteBuffer buffer = new ByteBuffer();
+            var buffer = new ByteBuffer();
             buffer.WriteBytes(GetHeaderSize(header), 2);
             buffer.WriteBytes(header.ToByteArray());
             buffer.WriteBytes(response.ToByteArray());
@@ -140,12 +140,12 @@ namespace BNetServer.Networking
 
         public async void SendResponse(uint token, BattlenetRpcErrorCode status)
         {
-            Header header = new Header();
+            var header = new Header();
             header.Token = token;
             header.Status = (uint)status;
             header.ServiceId = 0xFE;
 
-            ByteBuffer buffer = new ByteBuffer();
+            var buffer = new ByteBuffer();
             buffer.WriteBytes(GetHeaderSize(header), 2);
             buffer.WriteBytes(header.ToByteArray());
 
@@ -154,14 +154,14 @@ namespace BNetServer.Networking
 
         public async void SendRequest(uint serviceHash, uint methodId, IMessage request)
         {
-            Header header = new Header();
+            var header = new Header();
             header.ServiceId = 0;
             header.ServiceHash = serviceHash;
             header.MethodId = methodId;
             header.Size = (uint)request.CalculateSize();
             header.Token = requestToken++;
 
-            ByteBuffer buffer = new ByteBuffer();
+            var buffer = new ByteBuffer();
             buffer.WriteBytes(GetHeaderSize(header), 2);
             buffer.WriteBytes(header.ToByteArray());
             buffer.WriteBytes(request.ToByteArray());
@@ -172,7 +172,7 @@ namespace BNetServer.Networking
         public byte[] GetHeaderSize(Header header)
         {
             var size = (ushort)header.CalculateSize();
-            byte[] bytes = new byte[2];
+            var bytes = new byte[2];
             bytes[0] = (byte)((size >> 8) & 0xff);
             bytes[1] = (byte)(size & 0xff);
 
@@ -184,7 +184,7 @@ namespace BNetServer.Networking
 
         public string GetClientInfo()
         {
-            string stream = '[' + GetRemoteIpEndPoint().ToString();
+            var stream = '[' + GetRemoteIpEndPoint().ToString();
             if (accountInfo != null && !accountInfo.Login.IsEmpty())
                 stream += ", Account: " + accountInfo.Login;
 
@@ -258,7 +258,7 @@ namespace BNetServer.Networking
             IsBanned = IsPermanenetlyBanned || UnbanDate > Time.UnixTime;
             SecurityLevel = (AccountTypes)fields.Read<byte>(startColumn + 4);
 
-            int hashPos = Name.IndexOf('#');
+            var hashPos = Name.IndexOf('#');
             if (hashPos != -1)
                 DisplayName = "WoW" + Name.Substring(hashPos + 1);
             else

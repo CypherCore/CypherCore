@@ -44,7 +44,7 @@ namespace Scripts.Pets
             {
                 _victimGUID.Clear();
 
-                Unit owner = me.GetOwner();
+                var owner = me.GetOwner();
                 if (owner)
                     me.GetMotionMaster().MoveFollow(owner, 0.0f, 0.0f);
             }
@@ -56,7 +56,7 @@ namespace Scripts.Pets
             public override void ReceiveEmote(Player player, TextEmotes emote)
             {
                 me.HandleEmoteCommand((Emote)emote);
-                Unit owner = me.GetOwner();
+                var owner = me.GetOwner();
                 if (emote != TextEmotes.Kiss || !owner || !owner.IsTypeId(TypeId.Player) ||
                     owner.ToPlayer().GetTeam() != player.GetTeam())
                 {
@@ -67,7 +67,7 @@ namespace Scripts.Pets
 
                 if (!_victimGUID.IsEmpty())
                 {
-                    Player victim = Global.ObjAccessor.GetPlayer(me, _victimGUID);
+                    var victim = Global.ObjAccessor.GetPlayer(me, _victimGUID);
                     if (victim)
                         victim.RemoveAura(SpellIds.FeelingFroggy);
                 }

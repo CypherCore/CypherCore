@@ -42,7 +42,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32((uint)Result);
             _worldPacket.WriteInt32(AuctionableTokenAuctionableList.Count);
 
-            foreach (AuctionableTokenAuctionable auctionableTokenAuctionable in AuctionableTokenAuctionableList)
+            foreach (var auctionableTokenAuctionable in AuctionableTokenAuctionableList)
             {
                 _worldPacket.WriteUInt64(auctionableTokenAuctionable.UnkInt1);
                 _worldPacket.WriteUInt32(auctionableTokenAuctionable.UnkInt2);

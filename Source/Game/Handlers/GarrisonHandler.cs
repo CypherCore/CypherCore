@@ -27,7 +27,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GetGarrisonInfo)]
         void HandleGetGarrisonInfo(GetGarrisonInfo getGarrisonInfo)
         {
-            Garrison garrison = _player.GetGarrison();
+            var garrison = _player.GetGarrison();
             if (garrison != null)
                 garrison.SendInfo();
         }
@@ -38,7 +38,7 @@ namespace Game
             if (!_player.GetNPCIfCanInteractWith(garrisonPurchaseBuilding.NpcGUID, NPCFlags.None, NPCFlags2.GarrisonArchitect))
                 return;
 
-            Garrison garrison = _player.GetGarrison();
+            var garrison = _player.GetGarrison();
             if (garrison != null)
                 garrison.PlaceBuilding(garrisonPurchaseBuilding.PlotInstanceID, garrisonPurchaseBuilding.BuildingID);
         }
@@ -49,7 +49,7 @@ namespace Game
             if (!_player.GetNPCIfCanInteractWith(garrisonCancelConstruction.NpcGUID, NPCFlags.None, NPCFlags2.GarrisonArchitect))
                 return;
 
-            Garrison garrison = _player.GetGarrison();
+            var garrison = _player.GetGarrison();
             if (garrison != null)
                 garrison.CancelBuildingConstruction(garrisonCancelConstruction.PlotInstanceID);
         }
@@ -57,7 +57,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GarrisonRequestBlueprintAndSpecializationData)]
         void HandleGarrisonRequestBlueprintAndSpecializationData(GarrisonRequestBlueprintAndSpecializationData garrisonRequestBlueprintAndSpecializationData)
         {
-            Garrison garrison = _player.GetGarrison();
+            var garrison = _player.GetGarrison();
             if (garrison != null)
                 garrison.SendBlueprintAndSpecializationData();
         }
@@ -65,7 +65,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.GarrisonGetMapData)]
         void HandleGarrisonGetMapData(GarrisonGetMapData garrisonGetMapData)
         {
-            Garrison garrison = _player.GetGarrison();
+            var garrison = _player.GetGarrison();
             if (garrison != null)
                 garrison.SendMapData(_player);
         }

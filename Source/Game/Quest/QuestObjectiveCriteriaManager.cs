@@ -54,9 +54,9 @@ namespace Game
 
         public static void DeleteFromDB(ObjectGuid guid)
         {
-            SQLTransaction trans = new SQLTransaction();
+            var trans = new SQLTransaction();
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_QUESTSTATUS_OBJECTIVES_CRITERIA);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_QUESTSTATUS_OBJECTIVES_CRITERIA);
             stmt.AddValue(0, guid.GetCounter());
             trans.Append(stmt);
 
@@ -73,7 +73,7 @@ namespace Game
             {
                 do
                 {
-                    uint objectiveId = objectiveResult.Read<uint>(0);
+                    var objectiveId = objectiveResult.Read<uint>(0);
 
                     QuestObjective objective = Global.ObjectMgr.GetQuestObjective(objectiveId);
                     if (objective == null)
@@ -86,20 +86,20 @@ namespace Game
 
             if (!criteriaResult.IsEmpty())
             {
-                long now = Time.UnixTime;
+                var now = Time.UnixTime;
                 do
                 {
-                    uint criteriaId = criteriaResult.Read<uint>(0);
-                    ulong counter = criteriaResult.Read<ulong>(1);
+                    var criteriaId = criteriaResult.Read<uint>(0);
+                    var counter = criteriaResult.Read<ulong>(1);
                     long date = criteriaResult.Read<uint>(2);
 
-                    Criteria criteria = Global.CriteriaMgr.GetCriteria(criteriaId);
+                    var criteria = Global.CriteriaMgr.GetCriteria(criteriaId);
                     if (criteria == null)
                     {
                         // Removing non-existing criteria data for all characters
                         Log.outError(LogFilter.Player, $"Non-existing quest objective criteria {criteriaId} data has been removed from the table `character_queststatus_objectives_criteria_progress`.");
 
-                        PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_INVALID_QUEST_PROGRESS_CRITERIA);
+                        var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_INVALID_QUEST_PROGRESS_CRITERIA);
                         stmt.AddValue(0, criteriaId);
                         DB.Characters.Execute(stmt);
 
@@ -109,7 +109,7 @@ namespace Game
                     if (criteria.Entry.StartTimer != 0 && date + criteria.Entry.StartTimer < now)
                         continue;
 
-                    CriteriaProgress progress = new CriteriaProgress();
+                    var progress = new CriteriaProgress();
                     progress.Counter = counter;
                     progress.Date = date;
                     progress.Changed = false;
@@ -121,13 +121,13 @@ namespace Game
 
         public void SaveToDB(SQLTransaction trans)
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_QUESTSTATUS_OBJECTIVES_CRITERIA);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_QUESTSTATUS_OBJECTIVES_CRITERIA);
             stmt.AddValue(0, _owner.GetGUID().GetCounter());
             trans.Append(stmt);
 
             if (!_completedObjectives.Empty())
             {
-                foreach (uint completedObjectiveId in _completedObjectives)
+                foreach (var completedObjectiveId in _completedObjectives)
                 {
                     stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHAR_QUESTSTATUS_OBJECTIVES_CRITERIA);
                     stmt.AddValue(0, _owner.GetGUID().GetCounter());
@@ -172,11 +172,11 @@ namespace Game
                 return;
 
             var playerCriteriaList = Global.CriteriaMgr.GetCriteriaByFailEvent(condition, (int)failAsset);
-            foreach (Criteria playerCriteria in playerCriteriaList)
+            foreach (var playerCriteria in playerCriteriaList)
             {
                 var trees = Global.CriteriaMgr.GetCriteriaTreesByCriteria(playerCriteria.Id);
-                bool allComplete = true;
-                foreach (CriteriaTree tree in trees)
+                var allComplete = true;
+                foreach (var tree in trees)
                 {
                     // don't update already completed criteria if not forced
                     if (!(IsCompletedCriteriaTree(tree) && !evenIfCriteriaComplete))
@@ -195,7 +195,7 @@ namespace Game
 
         public void ResetCriteriaTree(uint criteriaTreeId)
         {
-            CriteriaTree tree = Global.CriteriaMgr.GetCriteriaTree(criteriaTreeId);
+            var tree = Global.CriteriaMgr.GetCriteriaTree(criteriaTreeId);
             if (tree == null)
                 return;
 
@@ -209,7 +209,7 @@ namespace Game
         {
             foreach (var pair in _criteriaProgress)
             {
-                CriteriaUpdate criteriaUpdate = new CriteriaUpdate();
+                var criteriaUpdate = new CriteriaUpdate();
 
                 criteriaUpdate.CriteriaID = pair.Key;
                 criteriaUpdate.Quantity = pair.Value.Counter;
@@ -242,7 +242,7 @@ namespace Game
 
         public override void SendCriteriaUpdate(Criteria criteria, CriteriaProgress progress, uint timeElapsed, bool timedCompleted)
         {
-            CriteriaUpdate criteriaUpdate = new CriteriaUpdate();
+            var criteriaUpdate = new CriteriaUpdate();
 
             criteriaUpdate.CriteriaID = criteria.Id;
             criteriaUpdate.Quantity = progress.Counter;
@@ -260,14 +260,14 @@ namespace Game
 
         public override void SendCriteriaProgressRemoved(uint criteriaId)
         {
-            CriteriaDeleted criteriaDeleted = new CriteriaDeleted();
+            var criteriaDeleted = new CriteriaDeleted();
             criteriaDeleted.CriteriaID = criteriaId;
             SendPacket(criteriaDeleted);
         }
 
         public override bool CanUpdateCriteriaTree(Criteria criteria, CriteriaTree tree, Player referencePlayer)
         {
-            QuestObjective objective = tree.QuestObjective;
+            var objective = tree.QuestObjective;
             if (objective == null)
                 return false;
 
@@ -295,7 +295,7 @@ namespace Game
 
         public override bool CanCompleteCriteriaTree(CriteriaTree tree)
         {
-            QuestObjective objective = tree.QuestObjective;
+            var objective = tree.QuestObjective;
             if (objective == null)
                 return false;
 
@@ -304,7 +304,7 @@ namespace Game
 
         public override void CompletedCriteriaTree(CriteriaTree tree, Player referencePlayer)
         {
-            QuestObjective objective = tree.QuestObjective;
+            var objective = tree.QuestObjective;
             if (objective == null)
                 return;
 

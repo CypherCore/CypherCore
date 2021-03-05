@@ -32,7 +32,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.TabardVendorActivate)]
         void HandleTabardVendorActivate(Hello packet)
         {
-            Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.TabardDesigner, NPCFlags2.None);
+            var unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.TabardDesigner, NPCFlags2.None);
             if (!unit)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleTabardVendorActivateOpcode - {0} not found or you can not interact with him.", packet.Unit.ToString());
@@ -48,7 +48,7 @@ namespace Game
 
         public void SendTabardVendorActivate(ObjectGuid guid)
         {
-            PlayerTabardVendorActivate packet = new PlayerTabardVendorActivate();
+            var packet = new PlayerTabardVendorActivate();
             packet.Vendor = guid;
             SendPacket(packet);
         }
@@ -56,7 +56,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.TrainerList)]
         void HandleTrainerList(Hello packet)
         {
-            Creature npc = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Trainer, NPCFlags2.None);
+            var npc = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Trainer, NPCFlags2.None);
             if (!npc)
             {
                 Log.outDebug(LogFilter.Network, $"WorldSession.SendTrainerList - {packet.Unit} not found or you can not interact with him.");
@@ -92,7 +92,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.TrainerBuySpell)]
         void HandleTrainerBuySpell(TrainerBuySpell packet)
         {
-            Creature npc = _player.GetNPCIfCanInteractWith(packet.TrainerGUID, NPCFlags.Trainer, NPCFlags2.None);
+            var npc = _player.GetNPCIfCanInteractWith(packet.TrainerGUID, NPCFlags.Trainer, NPCFlags2.None);
             if (npc == null)
             {
                 Log.outDebug(LogFilter.Network, $"WORLD: HandleTrainerBuySpell - {packet.TrainerGUID} not found or you can not interact with him.");
@@ -119,7 +119,7 @@ namespace Game
 
         void SendTrainerBuyFailed(ObjectGuid trainerGUID, uint spellID, TrainerFailReason trainerFailedReason)
         {
-            TrainerBuyFailed trainerBuyFailed = new TrainerBuyFailed();
+            var trainerBuyFailed = new TrainerBuyFailed();
             trainerBuyFailed.TrainerGUID = trainerGUID;
             trainerBuyFailed.SpellID = spellID;                             // should be same as in packet from client
             trainerBuyFailed.TrainerFailedReason = trainerFailedReason;     // 1 == "Not enough money for trainer service." 0 == "Trainer service %d unavailable."
@@ -129,7 +129,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.TalkToGossip)]
         void HandleGossipHello(Hello packet)
         {
-            Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Gossip, NPCFlags2.None);
+            var unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Gossip, NPCFlags2.None);
             if (unit == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleGossipHello - {0} not found or you can not interact with him.", packet.Unit.ToString());
@@ -249,7 +249,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SpiritHealerActivate)]
         void HandleSpiritHealerActivate(SpiritHealerActivate packet)
         {
-            Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Healer, NPCFlags.SpiritHealer, NPCFlags2.None);
+            var unit = GetPlayer().GetNPCIfCanInteractWith(packet.Healer, NPCFlags.SpiritHealer, NPCFlags2.None);
             if (!unit)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleSpiritHealerActivateOpcode - {0} not found or you can not interact with him.", packet.Healer.ToString());
@@ -271,7 +271,7 @@ namespace Game
 
             // get corpse nearest graveyard
             WorldSafeLocsEntry corpseGrave = null;
-            WorldLocation corpseLocation = GetPlayer().GetCorpseLocation();
+            var corpseLocation = GetPlayer().GetCorpseLocation();
             if (GetPlayer().HasCorpse())
             {
                 corpseGrave = Global.ObjectMgr.GetClosestGraveYard(corpseLocation, GetPlayer().GetTeam(), GetPlayer());
@@ -296,7 +296,7 @@ namespace Game
             if (!GetPlayer().IsInWorld || !GetPlayer().IsAlive())
                 return;
 
-            Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Innkeeper, NPCFlags2.None);
+            var unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Innkeeper, NPCFlags2.None);
             if (!unit)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleBinderActivate - {0} not found or you can not interact with him.", packet.Unit.ToString());
@@ -343,7 +343,7 @@ namespace Game
 
         public void SendStablePet(ObjectGuid guid)
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_SLOTS_DETAIL);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_SLOTS_DETAIL);
             stmt.AddValue(0, guid.GetCounter());
             stmt.AddValue(1, PetSaveMode.FirstStableSlot);
             stmt.AddValue(2, PetSaveMode.LastStableSlot);
@@ -356,10 +356,10 @@ namespace Game
             if (!GetPlayer())
                 return;
 
-            PetStableList packet = new PetStableList();
+            var packet = new PetStableList();
             packet.StableMaster = guid;
 
-            Pet pet = GetPlayer().GetPet();
+            var pet = GetPlayer().GetPet();
 
             uint petSlot = 0;
             // not let move dead pet in slot
@@ -403,7 +403,7 @@ namespace Game
 
         void SendPetStableResult(StableResult result)
         {
-            PetStableResult petStableResult = new PetStableResult();
+            var petStableResult = new PetStableResult();
             petStableResult.Result = result;
             SendPacket(petStableResult);
         }
@@ -411,7 +411,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.RepairItem)]
         void HandleRepairItem(RepairItem packet)
         {
-            Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.NpcGUID, NPCFlags.Repair, NPCFlags2.None);
+            var unit = GetPlayer().GetNPCIfCanInteractWith(packet.NpcGUID, NPCFlags.Repair, NPCFlags2.None);
             if (!unit)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleRepairItemOpcode - {0} not found or you can not interact with him.", packet.NpcGUID.ToString());
@@ -423,7 +423,7 @@ namespace Game
                 GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
 
             // reputation discount
-            float discountMod = GetPlayer().GetReputationPriceDiscount(unit);
+            var discountMod = GetPlayer().GetReputationPriceDiscount(unit);
 
             if (!packet.ItemGUID.IsEmpty())
             {
@@ -451,7 +451,7 @@ namespace Game
 
         public void SendListInventory(ObjectGuid vendorGuid)
         {
-            Creature vendor = GetPlayer().GetNPCIfCanInteractWith(vendorGuid, NPCFlags.Vendor, NPCFlags2.None);
+            var vendor = GetPlayer().GetNPCIfCanInteractWith(vendorGuid, NPCFlags.Vendor, NPCFlags2.None);
             if (vendor == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: SendListInventory - {0} not found or you can not interact with him.", vendorGuid.ToString());
@@ -467,23 +467,23 @@ namespace Game
             vendor.PauseMovement(WorldConfig.GetUIntValue(WorldCfg.CreatureStopForPlayer));
             vendor.SetHomePosition(vendor.GetPosition());
 
-            VendorItemData vendorItems = vendor.GetVendorItems();
-            int rawItemCount = vendorItems != null ? vendorItems.GetItemCount() : 0;
+            var vendorItems = vendor.GetVendorItems();
+            var rawItemCount = vendorItems != null ? vendorItems.GetItemCount() : 0;
 
-            VendorInventory packet = new VendorInventory();
+            var packet = new VendorInventory();
             packet.Vendor = vendor.GetGUID();
 
-            float discountMod = GetPlayer().GetReputationPriceDiscount(vendor);
+            var discountMod = GetPlayer().GetReputationPriceDiscount(vendor);
             byte count = 0;
             for (uint slot = 0; slot < rawItemCount; ++slot)
             {
-                VendorItem vendorItem = vendorItems.GetItem(slot);
+                var vendorItem = vendorItems.GetItem(slot);
                 if (vendorItem == null)
                     continue;
 
-                VendorItemPkt item = new VendorItemPkt();
+                var item = new VendorItemPkt();
 
-                PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(vendorItem.PlayerConditionId);
+                var playerCondition = CliDB.PlayerConditionStorage.LookupByKey(vendorItem.PlayerConditionId);
                 if (playerCondition != null)
                     if (!ConditionManager.IsPlayerMeetingCondition(_player, playerCondition))
                         item.PlayerConditionFailed = (int)playerCondition.Id;
@@ -494,7 +494,7 @@ namespace Game
                     if (itemTemplate == null)
                         continue;
 
-                    int leftInStock = vendorItem.maxcount == 0 ? -1 : (int)vendor.GetVendorItemCurrentCount(vendorItem);
+                    var leftInStock = vendorItem.maxcount == 0 ? -1 : (int)vendor.GetVendorItemCurrentCount(vendorItem);
                     if (!GetPlayer().IsGameMaster())
                     {
                         if (!Convert.ToBoolean(itemTemplate.GetAllowableClass() & GetPlayer().GetClassMask()) && itemTemplate.GetBonding() == ItemBondingType.OnAcquire)
@@ -514,9 +514,9 @@ namespace Game
                         continue;
                     }
 
-                    int price = (int)(vendorItem.IsGoldRequired(itemTemplate) ? Math.Floor(itemTemplate.GetBuyPrice() * discountMod) : 0);
+                    var price = (int)(vendorItem.IsGoldRequired(itemTemplate) ? Math.Floor(itemTemplate.GetBuyPrice() * discountMod) : 0);
 
-                    int priceMod = GetPlayer().GetTotalAuraModifier(AuraType.ModVendorItemsPrices);
+                    var priceMod = GetPlayer().GetTotalAuraModifier(AuraType.ModVendorItemsPrices);
                     if (priceMod != 0)
                         price -= MathFunctions.CalculatePct(price, priceMod);
 
@@ -541,7 +541,7 @@ namespace Game
                 }
                 else if (vendorItem.Type == ItemVendorType.Currency)
                 {
-                    CurrencyTypesRecord currencyTemplate = CliDB.CurrencyTypesStorage.LookupByKey(vendorItem.item);
+                    var currencyTemplate = CliDB.CurrencyTypesStorage.LookupByKey(vendorItem.item);
                     if (currencyTemplate == null)
                         continue;
 

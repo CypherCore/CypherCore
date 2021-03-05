@@ -51,20 +51,20 @@ namespace Framework.Database
 
         public bool InvokeIfReady()
         {
-            QueryCallbackData callback = _callbacks.Peek();
+            var callback = _callbacks.Peek();
 
             while (true)
             {
                 if (_result != null && _result.Wait(0))
                 {
-                    Task<SQLResult> f = _result;
-                    Action<QueryCallback, SQLResult> cb = callback._result;
+                    var f = _result;
+                    var cb = callback._result;
                     _result = null;
 
                     cb(this, f.Result);
 
                     _callbacks.Dequeue();
-                    bool hasNext = _result != null;
+                    var hasNext = _result != null;
                     if (_callbacks.Count == 0)
                     {
                         Cypher.Assert(!hasNext);

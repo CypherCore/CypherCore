@@ -32,7 +32,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            Unit target = handler.GetSelectedUnit();
+            var target = handler.GetSelectedUnit();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
@@ -40,14 +40,14 @@ namespace Game.Chat
             }
 
             // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-            uint spellId = handler.ExtractSpellIdFromLink(args);
+            var spellId = handler.ExtractSpellIdFromLink(args);
             if (spellId == 0)
                 return false;
 
             if (!CheckSpellExistsAndIsValid(handler, spellId))
                 return false;         
 
-            string triggeredStr = args.NextString();
+            var triggeredStr = args.NextString();
             if (!string.IsNullOrEmpty(triggeredStr))
             {
                 if (triggeredStr != "triggered")
@@ -61,7 +61,7 @@ namespace Game.Chat
         [Command("back", RBACPermissions.CommandCastBack)]
         static bool HandleCastBackCommand(StringArguments args, CommandHandler handler)
         {
-            Creature caster = handler.GetSelectedCreature();
+            var caster = handler.GetSelectedCreature();
             if (!caster)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
@@ -69,21 +69,21 @@ namespace Game.Chat
             }
 
             // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-            uint spellId = handler.ExtractSpellIdFromLink(args);
+            var spellId = handler.ExtractSpellIdFromLink(args);
             if (spellId == 0)
                 return false;
 
             if (CheckSpellExistsAndIsValid(handler, spellId))
                 return false;
 
-            string triggeredStr = args.NextString();
+            var triggeredStr = args.NextString();
             if (!string.IsNullOrEmpty(triggeredStr))
             {
                 if (triggeredStr != "triggered")
                     return false;
             }
 
-            bool triggered = (triggeredStr != null);
+            var triggered = (triggeredStr != null);
 
             caster.CastSpell(handler.GetSession().GetPlayer(), spellId, triggered);
 
@@ -97,23 +97,23 @@ namespace Game.Chat
                 return false;
 
             // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-            uint spellId = handler.ExtractSpellIdFromLink(args);
+            var spellId = handler.ExtractSpellIdFromLink(args);
             if (spellId == 0)
                 return false;
 
             if (CheckSpellExistsAndIsValid(handler, spellId))
                 return false;
 
-            float dist = args.NextSingle();
+            var dist = args.NextSingle();
 
-            string triggeredStr = args.NextString();
+            var triggeredStr = args.NextString();
             if (!string.IsNullOrEmpty(triggeredStr))
             {
                 if (triggeredStr != "triggered")
                     return false;
             }
 
-            bool triggered = (triggeredStr != null);
+            var triggered = (triggeredStr != null);
 
             float x, y, z;
             handler.GetSession().GetPlayer().GetClosePoint(out x, out y, out z, dist);
@@ -129,7 +129,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            Unit target = handler.GetSelectedUnit();
+            var target = handler.GetSelectedUnit();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
@@ -137,7 +137,7 @@ namespace Game.Chat
             }
 
             // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-            uint spellId = handler.ExtractSpellIdFromLink(args);
+            var spellId = handler.ExtractSpellIdFromLink(args);
             if (spellId == 0)
                 return false;
 
@@ -152,7 +152,7 @@ namespace Game.Chat
         [Command("target", RBACPermissions.CommandCastTarget)]
         static bool HandleCastTargetCommad(StringArguments args, CommandHandler handler)
         {
-            Creature caster = handler.GetSelectedCreature();
+            var caster = handler.GetSelectedCreature();
             if (!caster)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
@@ -166,21 +166,21 @@ namespace Game.Chat
             }
 
             // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-            uint spellId = handler.ExtractSpellIdFromLink(args);
+            var spellId = handler.ExtractSpellIdFromLink(args);
             if (spellId == 0)
                 return false;
 
             if (CheckSpellExistsAndIsValid(handler, spellId))
                 return false;
 
-            string triggeredStr = args.NextString();
+            var triggeredStr = args.NextString();
             if (!string.IsNullOrEmpty(triggeredStr))
             {
                 if (triggeredStr != "triggered")
                     return false;
             }
 
-            bool triggered = (triggeredStr != null);
+            var triggered = (triggeredStr != null);
 
             caster.CastSpell(caster.GetVictim(), spellId, triggered);
 
@@ -190,7 +190,7 @@ namespace Game.Chat
         [Command("dest", RBACPermissions.CommandCastDest)]
         static bool HandleCastDestCommand(StringArguments args, CommandHandler handler)
         {
-            Unit caster = handler.GetSelectedUnit();
+            var caster = handler.GetSelectedUnit();
             if (!caster)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
@@ -198,28 +198,28 @@ namespace Game.Chat
             }
 
             // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-            uint spellId = handler.ExtractSpellIdFromLink(args);
+            var spellId = handler.ExtractSpellIdFromLink(args);
             if (spellId == 0)
                 return false;
 
             if (CheckSpellExistsAndIsValid(handler, spellId))
                 return false;
 
-            float x = args.NextSingle();
-            float y = args.NextSingle();
-            float z = args.NextSingle();
+            var x = args.NextSingle();
+            var y = args.NextSingle();
+            var z = args.NextSingle();
 
             if (x == 0f || y == 0f || z == 0f)
                 return false;
 
-            string triggeredStr = args.NextString();
+            var triggeredStr = args.NextString();
             if (!string.IsNullOrEmpty(triggeredStr))
             {
                 if (triggeredStr != "triggered")
                     return false;
             }
 
-            bool triggered = (triggeredStr != null);
+            var triggered = (triggeredStr != null);
 
             caster.CastSpell(x, y, z, spellId, triggered);
 
@@ -228,7 +228,7 @@ namespace Game.Chat
 
         static bool CheckSpellExistsAndIsValid(CommandHandler handler, uint spellId)
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
+            var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
             if (spellInfo == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandNospellfound);

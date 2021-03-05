@@ -106,15 +106,15 @@ namespace Game.AI
             if (!HasEscortState(EscortState.Escorting) || _playerGUID.IsEmpty() || _escortQuest == null)
                 return;
 
-            Player player = GetPlayerForEscort();
+            var player = GetPlayerForEscort();
             if (player)
             {
-                Group group = player.GetGroup();
+                var group = player.GetGroup();
                 if (group)
                 {
-                    for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
+                    for (var groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
                     {
-                        Player member = groupRef.GetSource();
+                        var member = groupRef.GetSource();
                         if (member)
                             if (member.IsInMap(player))
                                 member.FailQuest(_escortQuest.Id);
@@ -170,15 +170,15 @@ namespace Game.AI
 
         bool IsPlayerOrGroupInRange()
         {
-            Player player = GetPlayerForEscort();
+            var player = GetPlayerForEscort();
             if (player)
             {
-                Group group = player.GetGroup();
+                var group = player.GetGroup();
                 if (group)
                 {
-                    for (GroupReference groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
+                    for (var groupRef = group.GetFirstMember(); groupRef != null; groupRef = groupRef.Next())
                     {
-                        Player member = groupRef.GetSource();
+                        var member = groupRef.GetSource();
                         if (member)
                             if (me.IsWithinDistInMap(member, GetMaxPlayerDistance()))
                                 return true;
@@ -212,7 +212,7 @@ namespace Game.AI
                                 Log.outDebug(LogFilter.Scripts, "EscortAI.UpdateAI: reached end of waypoints, despawning at end");
                                 if (_returnToStart)
                                 {
-                                    Position respawnPosition = new Position();
+                                    var respawnPosition = new Position();
                                     float orientation;
                                     me.GetRespawnPosition(out respawnPosition.posX, out respawnPosition.posY, out respawnPosition.posZ, out orientation);
                                     respawnPosition.SetOrientation(orientation);
@@ -238,7 +238,7 @@ namespace Game.AI
                         else if (_resume)
                         {
                             _resume = false;
-                            IMovementGenerator movementGenerator = me.GetMotionMaster().GetMotionSlot(MovementSlot.Idle);
+                            var movementGenerator = me.GetMotionMaster().GetMotionSlot(MovementSlot.Idle);
                             if (movementGenerator != null)
                                 movementGenerator.Resume(0);
                         }
@@ -258,8 +258,8 @@ namespace Game.AI
                     {
                         Log.outDebug(LogFilter.Scripts, "EscortAI failed because player/group was to far away or not found");
 
-                        bool isEscort = false;
-                        CreatureData creatureData = me.GetCreatureData();
+                        var isEscort = false;
+                        var creatureData = me.GetCreatureData();
                         if (creatureData != null)
                             isEscort = (WorldConfig.GetBoolValue(WorldCfg.RespawnDynamicEscortNpc) && creatureData.spawnGroupData.flags.HasAnyFlag(SpawnGroupFlags.EscortQuestNpc));
 
@@ -319,7 +319,7 @@ namespace Game.AI
             else if (moveType == MovementGeneratorType.Waypoint)
             {
                 Cypher.Assert(Id < _path.nodes.Count, $"EscortAI.MovementInform: referenced movement id ({Id}) points to non-existing node in loaded path");
-                WaypointNode waypoint = _path.nodes[(int)Id];
+                var waypoint = _path.nodes[(int)Id];
 
                 Log.outDebug(LogFilter.Scripts, $"EscortAI.MovementInform: waypoint node {waypoint.id} reached");
 
@@ -338,7 +338,7 @@ namespace Game.AI
             GridDefines.NormalizeMapCoord(ref x);
             GridDefines.NormalizeMapCoord(ref y);
 
-            WaypointNode waypoint = new WaypointNode();
+            var waypoint = new WaypointNode();
             waypoint.id = id;
             waypoint.x = x;
             waypoint.y = y;
@@ -355,13 +355,13 @@ namespace Game.AI
 
         void FillPointMovementListForCreature()
         {
-            WaypointPath path = Global.WaypointMgr.GetPath(me.GetEntry());
+            var path = Global.WaypointMgr.GetPath(me.GetEntry());
             if (path == null)
                 return;
 
-            foreach (WaypointNode value in path.nodes)
+            foreach (var value in path.nodes)
             {
-                WaypointNode node = value;
+                var node = value;
                 GridDefines.NormalizeMapCoord(ref node.x);
                 GridDefines.NormalizeMapCoord(ref node.y);
                 node.moveType = _running ? WaypointMoveType.Run : WaypointMoveType.Walk;
@@ -384,13 +384,13 @@ namespace Game.AI
         public void Start(bool isActiveAttacker = true, bool run = false, ObjectGuid playerGUID = default, Quest quest = null, bool instantRespawn = false, bool canLoopPath = false, bool resetWaypoints = true)
         {
             // Queue respawn from the point it starts
-            Map map = me.GetMap();
+            var map = me.GetMap();
             if (map != null)
             {
-                CreatureData cdata = me.GetCreatureData();
+                var cdata = me.GetCreatureData();
                 if (cdata != null)
                 {
-                    SpawnGroupTemplateData groupdata = cdata.spawnGroupData;
+                    var groupdata = cdata.spawnGroupData;
                     if (groupdata != null)
                     {
                         if (WorldConfig.GetBoolValue(WorldCfg.RespawnDynamicEscortNpc) && groupdata.flags.HasAnyFlag(SpawnGroupFlags.EscortQuestNpc) && map.GetCreatureRespawnTime(me.GetSpawnId()) == 0)
@@ -463,7 +463,7 @@ namespace Game.AI
             if (on)
             {
                 AddEscortState(EscortState.Paused);
-                IMovementGenerator movementGenerator = me.GetMotionMaster().GetMotionSlot(MovementSlot.Idle);
+                var movementGenerator = me.GetMotionMaster().GetMotionSlot(MovementSlot.Idle);
                 if (movementGenerator != null)
                     movementGenerator.Pause(0);
             }

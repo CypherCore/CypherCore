@@ -38,8 +38,8 @@ namespace Game
                 return;
             }
 
-            ushort src = (ushort)((splitItem.FromPackSlot << 8) | splitItem.FromSlot);
-            ushort dst = (ushort)((splitItem.ToPackSlot << 8) | splitItem.ToSlot);
+            var src = (ushort)((splitItem.FromPackSlot << 8) | splitItem.FromSlot);
+            var dst = (ushort)((splitItem.ToPackSlot << 8) | splitItem.ToSlot);
 
             if (src == dst)
                 return;
@@ -99,8 +99,8 @@ namespace Game
                 return;
             }
 
-            ushort src = (ushort)((InventorySlots.Bag0 << 8) | swapInvItem.Slot1);
-            ushort dst = (ushort)((InventorySlots.Bag0 << 8) | swapInvItem.Slot2);
+            var src = (ushort)((InventorySlots.Bag0 << 8) | swapInvItem.Slot1);
+            var dst = (ushort)((InventorySlots.Bag0 << 8) | swapInvItem.Slot2);
 
             GetPlayer().SwapItem(src, dst);
         }
@@ -113,8 +113,8 @@ namespace Game
                 return;
 
             Item item = GetPlayer().GetItemByGuid(packet.Item);
-            ushort dstPos = (ushort)(packet.ItemDstSlot | (InventorySlots.Bag0 << 8));
-            ushort srcPos = (ushort)(packet.Inv.Items[0].Slot | (packet.Inv.Items[0].ContainerSlot << 8));
+            var dstPos = (ushort)(packet.ItemDstSlot | (InventorySlots.Bag0 << 8));
+            var srcPos = (ushort)(packet.Inv.Items[0].Slot | (packet.Inv.Items[0].ContainerSlot << 8));
 
             if (item == null || item.GetPos() != srcPos || srcPos == dstPos)
                 return;
@@ -131,8 +131,8 @@ namespace Game
                 return;
             }
 
-            ushort src = (ushort)((swapItem.ContainerSlotA << 8) | swapItem.SlotA);
-            ushort dst = (ushort)((swapItem.ContainerSlotB << 8) | swapItem.SlotB);
+            var src = (ushort)((swapItem.ContainerSlotA << 8) | swapItem.SlotA);
+            var dst = (ushort)((swapItem.ContainerSlotB << 8) | swapItem.SlotB);
 
             var pl = GetPlayer();
 
@@ -190,7 +190,7 @@ namespace Game
                 return;
             }
 
-            ushort src = srcItem.GetPos();
+            var src = srcItem.GetPos();
             if (dest == src)                                           // prevent equip in same slot, only at cheat
                 return;
 
@@ -216,8 +216,8 @@ namespace Game
             }
             else                                                    // have currently equipped item, not simple case
             {
-                byte dstbag = dstItem.GetBagSlot();
-                byte dstslot = dstItem.GetSlot();
+                var dstbag = dstItem.GetBagSlot();
+                var dstslot = dstItem.GetSlot();
 
                 msg = pl.CanUnequipItem(dest, !srcItem.IsBag());
                 if (msg != InventoryResult.Ok)
@@ -229,7 +229,7 @@ namespace Game
                 if (!dstItem.HasItemFlag(ItemFieldFlags.Child))
                 {
                     // check dest.src move possibility
-                    List<ItemPosCount> sSrc = new List<ItemPosCount>();
+                    var sSrc = new List<ItemPosCount>();
                     ushort eSrc = 0;
                     if (pl.IsInventoryPos(src))
                     {
@@ -309,7 +309,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.DestroyItem)]
         void HandleDestroyItem(DestroyItem destroyItem)
         {
-            ushort pos = (ushort)((destroyItem.ContainerId << 8) | destroyItem.SlotNum);
+            var pos = (ushort)((destroyItem.ContainerId << 8) | destroyItem.SlotNum);
 
             // prevent drop unequipable items (in combat, for example) and non-empty bags
             if (Player.IsEquipmentPos(pos) || Player.IsBagPos(pos))
@@ -337,7 +337,7 @@ namespace Game
 
             if (destroyItem.Count != 0)
             {
-                uint i_count = destroyItem.Count;
+                var i_count = destroyItem.Count;
                 _player.DestroyItemCount(pItem, ref i_count, true);
             }
             else
@@ -353,7 +353,7 @@ namespace Game
                 InventoryResult msg = _player.CanUseItem(item);
                 if (msg == InventoryResult.Ok)
                 {
-                    ReadItemResultOK packet = new ReadItemResultOK();
+                    var packet = new ReadItemResultOK();
                     packet.Item = item.GetGUID();
                     SendPacket(packet);
                 }
@@ -382,7 +382,7 @@ namespace Game
 
             var pl = GetPlayer();
 
-            Creature creature = pl.GetNPCIfCanInteractWith(packet.VendorGUID, NPCFlags.Vendor, NPCFlags2.None);
+            var creature = pl.GetNPCIfCanInteractWith(packet.VendorGUID, NPCFlags.Vendor, NPCFlags2.None);
             if (creature == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleSellItemOpcode - {0} not found or you can not interact with him.", packet.VendorGUID.ToString());
@@ -437,7 +437,7 @@ namespace Game
                     }
                 }
 
-                ItemTemplate pProto = pItem.GetTemplate();
+                var pProto = pItem.GetTemplate();
                 if (pProto != null)
                 {
                     if (pProto.GetSellPrice() > 0)
@@ -455,7 +455,7 @@ namespace Game
 
                         if (packet.Amount < pItem.GetCount())               // need split items
                         {
-                            Item pNewItem = pItem.CloneItem(packet.Amount, pl);
+                            var pNewItem = pItem.CloneItem(packet.Amount, pl);
                             if (pNewItem == null)
                             {
                                 Log.outError(LogFilter.Network, "WORLD: HandleSellItemOpcode - could not create clone of item {0}; count = {1}", pItem.GetEntry(), packet.Amount);
@@ -493,7 +493,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.BuyBackItem)]
         void HandleBuybackItem(BuyBackItem packet)
         {
-            Creature creature = _player.GetNPCIfCanInteractWith(packet.VendorGUID, NPCFlags.Vendor, NPCFlags2.None);
+            var creature = _player.GetNPCIfCanInteractWith(packet.VendorGUID, NPCFlags.Vendor, NPCFlags2.None);
             if (creature == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleBuybackItem - {0} not found or you can not interact with him.", packet.VendorGUID.ToString());
@@ -508,14 +508,14 @@ namespace Game
             Item pItem = _player.GetItemFromBuyBackSlot(packet.Slot);
             if (pItem != null)
             {
-                uint price = _player.m_activePlayerData.BuybackPrice[(int)(packet.Slot - InventorySlots.BuyBackStart)];
+                var price = _player.m_activePlayerData.BuybackPrice[(int)(packet.Slot - InventorySlots.BuyBackStart)];
                 if (!_player.HasEnoughMoney(price))
                 {
                     _player.SendBuyError(BuyResult.NotEnoughtMoney, creature, pItem.GetEntry());
                     return;
                 }
 
-                List<ItemPosCount> dest = new List<ItemPosCount>();
+                var dest = new List<ItemPosCount>();
                 InventoryResult msg = _player.CanStoreItem(ItemConst.NullBag, ItemConst.NullSlot, dest, pItem, false);
                 if (msg == InventoryResult.Ok)
                 {
@@ -545,7 +545,7 @@ namespace Game
                 case ItemVendorType.Item:
                     Item bagItem = GetPlayer().GetItemByGuid(packet.ContainerGUID);
 
-                    byte bag = ItemConst.NullBag;
+                    var bag = ItemConst.NullBag;
                     if (bagItem != null && bagItem.IsBag())
                         bag = bagItem.GetSlot();
                     else if (packet.ContainerGUID == GetPlayer().GetGUID()) // The client sends the player guid when trying to store an item in the default backpack
@@ -581,7 +581,7 @@ namespace Game
                 return;
             }
 
-            ushort src = item.GetPos();
+            var src = item.GetPos();
             InventoryResult msg;
             // check unequip potability for equipped items and bank bags
             if (Player.IsEquipmentPos(src) || Player.IsBagPos(src))
@@ -594,7 +594,7 @@ namespace Game
                 }
             }
 
-            List<ItemPosCount> dest = new List<ItemPosCount>();
+            var dest = new List<ItemPosCount>();
             msg = GetPlayer().CanStoreItem(packet.ContainerSlotB, ItemConst.NullSlot, dest, item, false);
             if (msg != InventoryResult.Ok)
             {
@@ -616,7 +616,7 @@ namespace Game
 
         public void SendEnchantmentLog(ObjectGuid owner, ObjectGuid caster, ObjectGuid itemGuid, uint itemId, uint enchantId, uint enchantSlot)
         {
-            EnchantmentLog packet = new EnchantmentLog(); 
+            var packet = new EnchantmentLog(); 
             packet.Owner = owner;
             packet.Caster = caster;
             packet.ItemGUID = itemGuid;
@@ -629,7 +629,7 @@ namespace Game
 
         public void SendItemEnchantTimeUpdate(ObjectGuid Playerguid, ObjectGuid Itemguid, uint slot, uint Duration)
         {
-            ItemEnchantTimeUpdate data = new ItemEnchantTimeUpdate();
+            var data = new ItemEnchantTimeUpdate();
             data.ItemGuid = Itemguid;
             data.DurationLeft = Duration;
             data.Slot = slot;
@@ -647,11 +647,11 @@ namespace Game
             }
 
             // Gift
-            byte giftContainerSlot = packet.Inv.Items[0].ContainerSlot;
-            byte giftSlot = packet.Inv.Items[0].Slot;
+            var giftContainerSlot = packet.Inv.Items[0].ContainerSlot;
+            var giftSlot = packet.Inv.Items[0].Slot;
             // Item
-            byte itemContainerSlot = packet.Inv.Items[1].ContainerSlot;
-            byte itemSlot = packet.Inv.Items[1].Slot;
+            var itemContainerSlot = packet.Inv.Items[1].ContainerSlot;
+            var itemSlot = packet.Inv.Items[1].Slot;
 
             Item gift = GetPlayer().GetItemByPos(giftContainerSlot, giftSlot);
             if (!gift)
@@ -716,9 +716,9 @@ namespace Game
                 return;
             }
 
-            SQLTransaction trans = new SQLTransaction();
+            var trans = new SQLTransaction();
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHAR_GIFT);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHAR_GIFT);
             stmt.AddValue(0, item.GetOwnerGUID().GetCounter());
             stmt.AddValue(1, item.GetGUID().GetCounter());
             stmt.AddValue(2, item.GetEntry());
@@ -780,20 +780,20 @@ namespace Game
             if (!itemTarget)                                         //missing item to socket
                 return;
 
-            ItemTemplate itemProto = itemTarget.GetTemplate();
+            var itemProto = itemTarget.GetTemplate();
             if (itemProto == null)
                 return;
 
             //this slot is excepted when applying / removing meta gem bonus
-            byte slot = itemTarget.IsEquipped() ? itemTarget.GetSlot() : ItemConst.NullSlot;
+            var slot = itemTarget.IsEquipped() ? itemTarget.GetSlot() : ItemConst.NullSlot;
 
-            Item[] gems = new Item[ItemConst.MaxGemSockets];
-            ItemDynamicFieldGems[] gemData = new ItemDynamicFieldGems[ItemConst.MaxGemSockets];
-            GemPropertiesRecord[] gemProperties = new GemPropertiesRecord[ItemConst.MaxGemSockets];
-            SocketedGem[] oldGemData = new SocketedGem[ItemConst.MaxGemSockets];
+            var gems = new Item[ItemConst.MaxGemSockets];
+            var gemData = new ItemDynamicFieldGems[ItemConst.MaxGemSockets];
+            var gemProperties = new GemPropertiesRecord[ItemConst.MaxGemSockets];
+            var oldGemData = new SocketedGem[ItemConst.MaxGemSockets];
 
 
-            for (int i = 0; i < ItemConst.MaxGemSockets; ++i)
+            for (var i = 0; i < ItemConst.MaxGemSockets; ++i)
             {
                 Item gem = _player.GetItemByGuid(socketGems.GemItem[i]);
                 if (gem)
@@ -801,7 +801,7 @@ namespace Game
                     gems[i] = gem;
                     gemData[i].ItemId = gem.GetEntry();
                     gemData[i].Context = (byte)gem.m_itemData.Context;
-                    for (int b = 0; b < ((List<uint>)gem.m_itemData.BonusListIDs).Count && b < 16; ++b)
+                    for (var b = 0; b < ((List<uint>)gem.m_itemData.BonusListIDs).Count && b < 16; ++b)
                         gemData[i].BonusListIDs[b] = (ushort)((List<uint>)gem.m_itemData.BonusListIDs)[b];
 
                     gemProperties[i] = CliDB.GemPropertiesStorage.LookupByKey(gem.GetTemplate().GetGemProperties());
@@ -841,18 +841,18 @@ namespace Game
             }
 
             // check unique-equipped conditions
-            for (int i = 0; i < ItemConst.MaxGemSockets; ++i)
+            for (var i = 0; i < ItemConst.MaxGemSockets; ++i)
             {
                 if (!gems[i])
                     continue;
 
                 // continue check for case when attempt add 2 similar unique equipped gems in one item.
-                ItemTemplate iGemProto = gems[i].GetTemplate();
+                var iGemProto = gems[i].GetTemplate();
 
                 // unique item (for new and already placed bit removed enchantments
                 if (iGemProto.GetFlags().HasAnyFlag(ItemFlags.UniqueEquippable))
                 {
-                    for (int j = 0; j < ItemConst.MaxGemSockets; ++j)
+                    for (var j = 0; j < ItemConst.MaxGemSockets; ++j)
                     {
                         if (i == j)                                    // skip self
                             continue;
@@ -877,14 +877,14 @@ namespace Game
                 }
 
                 // unique limit type item
-                int limit_newcount = 0;
+                var limit_newcount = 0;
                 if (iGemProto.GetItemLimitCategory() != 0)
                 {
-                    ItemLimitCategoryRecord limitEntry = CliDB.ItemLimitCategoryStorage.LookupByKey(iGemProto.GetItemLimitCategory());
+                    var limitEntry = CliDB.ItemLimitCategoryStorage.LookupByKey(iGemProto.GetItemLimitCategory());
                     if (limitEntry != null)
                     {
                         // NOTE: limitEntry.mode is not checked because if item has limit then it is applied in equip case
-                        for (int j = 0; j < ItemConst.MaxGemSockets; ++j)
+                        for (var j = 0; j < ItemConst.MaxGemSockets; ++j)
                         {
                             if (gems[j])
                             {
@@ -922,7 +922,7 @@ namespace Game
                 }
             }
 
-            bool SocketBonusActivated = itemTarget.GemsFitSockets();    //save state of socketbonus
+            var SocketBonusActivated = itemTarget.GemsFitSockets();    //save state of socketbonus
             GetPlayer().ToggleMetaGemsActive(slot, false);             //turn off all metagems (except for the target item)
 
             //if a meta gem is being equipped, all information has to be written to the item before testing if the conditions for the gem are met
@@ -935,8 +935,8 @@ namespace Game
             {
                 if (gems[i])
                 {
-                    uint gemScalingLevel = _player.GetLevel();
-                    uint fixedLevel = gems[i].GetModifier(ItemModifier.TimewalkerLevel);
+                    var gemScalingLevel = _player.GetLevel();
+                    var fixedLevel = gems[i].GetModifier(ItemModifier.TimewalkerLevel);
                     if (fixedLevel != 0)
                         gemScalingLevel = fixedLevel;
 
@@ -963,7 +963,7 @@ namespace Game
                     _player._ApplyItemMods(childItem, childItem.GetSlot(), true);
             }
 
-            bool SocketBonusToBeActivated = itemTarget.GemsFitSockets();//current socketbonus state
+            var SocketBonusToBeActivated = itemTarget.GemsFitSockets();//current socketbonus state
             if (SocketBonusActivated ^ SocketBonusToBeActivated)     //if there was a change...
             {
                 GetPlayer().ApplyEnchantment(itemTarget, EnchantmentSlot.Bonus, false);
@@ -1034,11 +1034,11 @@ namespace Game
             if (bankerGUID.IsEmpty())
                 bankerGUID = m_currentBankerGUID;
 
-            bool isUsingBankCommand = (bankerGUID == GetPlayer().GetGUID() && bankerGUID == m_currentBankerGUID);
+            var isUsingBankCommand = (bankerGUID == GetPlayer().GetGUID() && bankerGUID == m_currentBankerGUID);
 
             if (!isUsingBankCommand)
             {
-                Creature creature = GetPlayer().GetNPCIfCanInteractWith(bankerGUID, NPCFlags.Banker, NPCFlags2.None);
+                var creature = GetPlayer().GetNPCIfCanInteractWith(bankerGUID, NPCFlags.Banker, NPCFlags2.None);
                 if (!creature)
                     return false;
             }
@@ -1056,7 +1056,7 @@ namespace Game
             if (item.GetBonus().EffectCount < 2)
                 return;
 
-            uint spellToLearn = (uint)item.GetEffect(1).SpellID;
+            var spellToLearn = (uint)item.GetEffect(1).SpellID;
 
             var entry = Global.SpellMgr.GetBattlePetSpecies(spellToLearn);
             if (entry != null)

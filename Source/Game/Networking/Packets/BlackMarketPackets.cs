@@ -71,7 +71,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(LastUpdateID);
             _worldPacket.WriteInt32(Items.Count);
 
-            foreach (BlackMarketItem item in Items)
+            foreach (var item in Items)
                 item.Write(_worldPacket);
         }
 

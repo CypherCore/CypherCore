@@ -23,7 +23,7 @@ namespace Framework.Cryptography
     {
         public SessionKeyGenerator(byte[] buff, int size)
         {
-            int halfSize = size / 2;
+            var halfSize = size / 2;
 
             sh = SHA256.Create();
             sh.TransformFinalBlock(buff, 0, halfSize);

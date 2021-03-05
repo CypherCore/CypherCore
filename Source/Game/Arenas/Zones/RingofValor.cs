@@ -32,7 +32,7 @@ namespace Game.Arenas
 
         public override bool SetupBattleground()
         {
-            bool result = true;
+            var result = true;
             result &= AddObject(RingofValorObjectTypes.Elevator1, RingofValorGameObjects.Elevator1, 763.536377f, -294.535767f, 0.505383f, 3.141593f, 0, 0, 0, 0);
             result &= AddObject(RingofValorObjectTypes.Elevator2, RingofValorGameObjects.Elevator2, 763.506348f, -273.873352f, 0.505383f, 0.000000f, 0, 0, 0, 0);
             if (!result)
@@ -160,7 +160,7 @@ namespace Game.Arenas
         void TogglePillarCollision(bool enable)
         {
             // Toggle visual pillars, pulley, gear, and collision based on previous state
-            for (int i = RingofValorObjectTypes.Pilar1; i <= RingofValorObjectTypes.Gear2; ++i)
+            for (var i = RingofValorObjectTypes.Pilar1; i <= RingofValorObjectTypes.Gear2; ++i)
             {
                 if (enable)
                     DoorOpen(i);
@@ -178,18 +178,18 @@ namespace Game.Arenas
 
             for (byte i = RingofValorObjectTypes.Pilar1; i <= RingofValorObjectTypes.PilarCollision4; ++i)
             {
-                GameObject go = GetBGObject(i);
+                var go = GetBGObject(i);
                 if (go)
                 {
                     if (i >= RingofValorObjectTypes.PilarCollision1)
                     {
-                        GameObjectState state = ((go.GetGoInfo().Door.startOpen != 0) == enable) ? GameObjectState.Active : GameObjectState.Ready;
+                        var state = ((go.GetGoInfo().Door.startOpen != 0) == enable) ? GameObjectState.Active : GameObjectState.Ready;
                         go.SetGoState(state);
                     }
 
                     foreach (var guid in GetPlayers().Keys)
                     {
-                        Player player = Global.ObjAccessor.FindPlayer(guid);
+                        var player = Global.ObjAccessor.FindPlayer(guid);
                         if (player)
                             go.SendUpdateToPlayer(player);
                     }

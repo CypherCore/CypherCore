@@ -116,7 +116,7 @@ namespace Game.Entities
         }
         public CreatureModel GetFirstValidModel()
         {
-            foreach (CreatureModel model in Models)
+            foreach (var model in Models)
                 if (model.CreatureDisplayID != 0)
                     return model;
 
@@ -125,7 +125,7 @@ namespace Game.Entities
 
         public CreatureModel GetModelWithDisplayId(uint displayId)
         {
-            foreach (CreatureModel model in Models)
+            foreach (var model in Models)
                 if (displayId == model.CreatureDisplayID)
                     return model;
 
@@ -134,9 +134,9 @@ namespace Game.Entities
 
         public CreatureModel GetFirstInvisibleModel()
         {
-            foreach (CreatureModel model in Models)
+            foreach (var model in Models)
             {
-                CreatureModelInfo modelInfo = Global.ObjectMgr.GetCreatureModelInfo(model.CreatureDisplayID);
+                var modelInfo = Global.ObjectMgr.GetCreatureModelInfo(model.CreatureDisplayID);
                 if (modelInfo != null && modelInfo.IsTrigger)
                     return model;
             }
@@ -146,9 +146,9 @@ namespace Game.Entities
 
         public CreatureModel GetFirstVisibleModel()
         {
-            foreach (CreatureModel model in Models)
+            foreach (var model in Models)
             {
-                CreatureModelInfo modelInfo = Global.ObjectMgr.GetCreatureModelInfo(model.CreatureDisplayID);
+                var modelInfo = Global.ObjectMgr.GetCreatureModelInfo(model.CreatureDisplayID);
                 if (modelInfo != null && !modelInfo.IsTrigger)
                     return model;
             }
@@ -234,7 +234,7 @@ namespace Game.Entities
             QueryData.CreatureID = Entry;
             QueryData.Allow = true;
 
-            CreatureStats stats = new CreatureStats();
+            var stats = new CreatureStats();
             stats.Leader = RacialLeader;
 
             stats.Name[0] = Name;
@@ -434,7 +434,7 @@ namespace Game.Entities
         }
         public bool RemoveItem(uint item_id, ItemVendorType type)
         {
-            int i = m_items.RemoveAll(p => p.item == item_id && p.Type == type);
+            var i = m_items.RemoveAll(p => p.item == item_id && p.Type == type);
             if (i == 0)
                 return false;
             else

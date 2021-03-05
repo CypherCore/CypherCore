@@ -38,7 +38,7 @@ namespace Game.Movement
             _navMeshQuery = null;
             Log.outDebug(LogFilter.Maps, "PathGenerator:PathGenerator for {0}", _sourceUnit.GetGUID().ToString());
 
-            uint mapId = PhasingHandler.GetTerrainMapId(_sourceUnit.GetPhaseShift(), _sourceUnit.GetMap(), _sourceUnit.GetPositionX(), _sourceUnit.GetPositionY());
+            var mapId = PhasingHandler.GetTerrainMapId(_sourceUnit.GetPhaseShift(), _sourceUnit.GetMap(), _sourceUnit.GetPositionX(), _sourceUnit.GetPositionY());
             if (Global.DisableMgr.IsPathfindingEnabled(_sourceUnit.GetMapId()))
             {
                 _navMesh = Global.MMapMgr.GetNavMesh(mapId);
@@ -55,10 +55,10 @@ namespace Game.Movement
             if (!GridDefines.IsValidMapCoord(destX, destY, destZ) || !GridDefines.IsValidMapCoord(x, y, z))
                 return false;
 
-            Vector3 dest = new Vector3(destX, destY, destZ);
+            var dest = new Vector3(destX, destY, destZ);
             SetEndPosition(dest);
 
-            Vector3 start = new Vector3(x, y, z);
+            var start = new Vector3(x, y, z);
             SetStartPosition(start);
 
             _forceDestination = forceDest;
@@ -87,17 +87,17 @@ namespace Game.Movement
                 return 0;
 
             ulong nearestPoly = 0;
-            float minDist2d = float.MaxValue;
-            float minDist3d = 0.0f;
+            var minDist2d = float.MaxValue;
+            var minDist3d = 0.0f;
 
             for (uint i = 0; i < polyPathSize; ++i)
             {
-                float[] closestPoint = new float[3];
-                bool posOverPoly = false;
+                var closestPoint = new float[3];
+                var posOverPoly = false;
                 if (Detour.dtStatusFailed(_navMeshQuery.closestPointOnPoly(polyPath[i], point, closestPoint, ref posOverPoly)))
                     continue;
 
-                float d = Detour.dtVdist2DSqr(point, closestPoint);
+                var d = Detour.dtVdist2DSqr(point, closestPoint);
                 if (d < minDist2d)
                 {
                     minDist2d = d;
@@ -119,7 +119,7 @@ namespace Game.Movement
             // first we check the current path
             // if the current path doesn't contain the current poly,
             // we need to use the expensive navMesh.findNearestPoly
-            ulong polyRef = GetPathPolyByPosition(_pathPolyRefs, _polyLength, point, ref distance);
+            var polyRef = GetPathPolyByPosition(_pathPolyRefs, _polyLength, point, ref distance);
             if (polyRef != 0)
                 return polyRef;
 
@@ -156,8 +156,8 @@ namespace Game.Movement
             float[] startPoint = { startPos.Y, startPos.Z, startPos.X };
             float[] endPoint = { endPos.Y, endPos.Z, endPos.X };
 
-            ulong startPoly = GetPolyByLocation(startPoint, ref distToStartPoly);
-            ulong endPoly = GetPolyByLocation(endPoint, ref distToEndPoly);
+            var startPoly = GetPolyByLocation(startPoint, ref distToStartPoly);
+            var endPoly = GetPolyByLocation(endPoint, ref distToEndPoly);
 
             // we have a hole in our mesh
             // make shortcut path and mark it as NOPATH ( with flying and swimming exception )
@@ -166,15 +166,15 @@ namespace Game.Movement
             {
                 Log.outDebug(LogFilter.Maps, "++ BuildPolyPath . (startPoly == 0 || endPoly == 0)\n");
                 BuildShortcut();
-                bool path = _sourceUnit.IsTypeId(TypeId.Unit) && _sourceUnit.ToCreature().CanFly();
+                var path = _sourceUnit.IsTypeId(TypeId.Unit) && _sourceUnit.ToCreature().CanFly();
 
-                bool waterPath = _sourceUnit.IsTypeId(TypeId.Unit) && _sourceUnit.ToCreature().CanSwim();
+                var waterPath = _sourceUnit.IsTypeId(TypeId.Unit) && _sourceUnit.ToCreature().CanSwim();
                 if (waterPath)
                 {
                     // Check both start and end points, if they're both in water, then we can *safely* let the creature move
                     for (uint i = 0; i < _pathPoints.Length; ++i)
                     {
-                        ZLiquidStatus status = _sourceUnit.GetMap().GetLiquidStatus(_sourceUnit.GetPhaseShift(), _pathPoints[i].X, _pathPoints[i].Y, _pathPoints[i].Z, MapConst.MapAllLiquidTypes);
+                        var status = _sourceUnit.GetMap().GetLiquidStatus(_sourceUnit.GetPhaseShift(), _pathPoints[i].X, _pathPoints[i].Y, _pathPoints[i].Z, MapConst.MapAllLiquidTypes);
                         // One of the points is not in the water, cancel movement.
                         if (status == ZLiquidStatus.NoWater)
                         {
@@ -189,17 +189,17 @@ namespace Game.Movement
             }
 
             // we may need a better number here
-            bool farFromPoly = (distToStartPoly > 7.0f || distToEndPoly > 7.0f);
+            var farFromPoly = (distToStartPoly > 7.0f || distToEndPoly > 7.0f);
             if (farFromPoly)
             {
                 Log.outDebug(LogFilter.Maps, "++ BuildPolyPath . farFromPoly distToStartPoly={0:F3} distToEndPoly={1:F3}\n", distToStartPoly, distToEndPoly);
 
-                bool buildShotrcut = false;
+                var buildShotrcut = false;
                 if (_sourceUnit.IsTypeId(TypeId.Unit))
                 {
-                    Creature owner = _sourceUnit.ToCreature();
+                    var owner = _sourceUnit.ToCreature();
 
-                    Vector3 p = (distToStartPoly > 7.0f) ? startPos : endPos;
+                    var p = (distToStartPoly > 7.0f) ? startPos : endPos;
                     if (_sourceUnit.GetMap().IsUnderWater(_sourceUnit.GetPhaseShift(), p.X, p.Y, p.Z))
                     {
                         Log.outDebug(LogFilter.Maps, "++ BuildPolyPath . underWater case\n");
@@ -222,9 +222,9 @@ namespace Game.Movement
                 }
                 else
                 {
-                    float[] closestPoint = new float[3];
+                    var closestPoint = new float[3];
                     // we may want to use closestPointOnPolyBoundary instead
-                    bool posOverPoly = false;
+                    var posOverPoly = false;
                     if (Detour.dtStatusSucceed(_navMeshQuery.closestPointOnPoly(endPoly, endPoint, closestPoint, ref posOverPoly)))
                     {
                         Detour.dtVcopy(endPoint, closestPoint);
@@ -255,8 +255,8 @@ namespace Game.Movement
 
             // look for startPoly/endPoly in current path
             // @todo we can merge it with getPathPolyByPosition() loop
-            bool startPolyFound = false;
-            bool endPolyFound = false;
+            var startPolyFound = false;
+            var endPolyFound = false;
             uint pathStartIndex = 0;
             uint pathEndIndex = 0;
 
@@ -314,14 +314,14 @@ namespace Game.Movement
 
                 // take ~80% of the original length
                 // @todo play with the values here
-                uint prefixPolyLength = (uint)(_polyLength * 0.8f + 0.5f);
+                var prefixPolyLength = (uint)(_polyLength * 0.8f + 0.5f);
                 Array.Copy(_pathPolyRefs, pathStartIndex, _pathPolyRefs, 0, prefixPolyLength);
 
-                ulong suffixStartPoly = _pathPolyRefs[prefixPolyLength - 1];
+                var suffixStartPoly = _pathPolyRefs[prefixPolyLength - 1];
 
                 // we need any point on our suffix start poly to generate poly-path, so we need last poly in prefix data
-                float[] suffixEndPoint = new float[3];
-                bool posOverPoly = false;
+                var suffixEndPoint = new float[3];
+                var posOverPoly = false;
                 if (Detour.dtStatusFailed(_navMeshQuery.closestPointOnPoly(suffixStartPoly, endPoint, suffixEndPoint, ref posOverPoly)))
                 {
                     // we can hit offmesh connection as last poly - closestPointOnPoly() don't like that
@@ -339,13 +339,13 @@ namespace Game.Movement
 
                 // generate suffix
                 uint suffixPolyLength = 0;
-                ulong[] tempPolyRefs = new ulong[_pathPolyRefs.Length];
+                var tempPolyRefs = new ulong[_pathPolyRefs.Length];
 
                 uint dtResult;
                 if (_straightLine)
                 {
                     float hit = 0;
-                    float[] hitNormal = new float[3];
+                    var hitNormal = new float[3];
 
                     dtResult = _navMeshQuery.raycast(
                         suffixStartPoly,
@@ -410,7 +410,7 @@ namespace Game.Movement
                 if (_straightLine)
                 {
                     float hit = 0;
-                    float[] hitNormal = new float[3];
+                    var hitNormal = new float[3];
 
                     dtResult = _navMeshQuery.raycast(
                                     startPoly,
@@ -466,9 +466,9 @@ namespace Game.Movement
 
         void BuildPointPath(float[] startPoint, float[] endPoint)
         {
-            float[] pathPoints = new float[74 * 3];
-            int pointCount = 0;
-            uint dtResult = Detour.DT_FAILURE;
+            var pathPoints = new float[74 * 3];
+            var pointCount = 0;
+            var dtResult = Detour.DT_FAILURE;
 
             if (_straightLine)
             {
@@ -477,11 +477,11 @@ namespace Game.Movement
                 Array.Copy(startPoint, pathPoints, 3); // first point
 
                 // path has to be split into polygons with dist SMOOTH_PATH_STEP_SIZE between them
-                Vector3 startVec = new Vector3(startPoint[0], startPoint[1], startPoint[2]);
-                Vector3 endVec = new Vector3(endPoint[0], endPoint[1], endPoint[2]);
-                Vector3 diffVec = (endVec - startVec);
-                Vector3 prevVec = startVec;
-                float len = diffVec.GetLength();
+                var startVec = new Vector3(startPoint[0], startPoint[1], startPoint[2]);
+                var endVec = new Vector3(endPoint[0], endPoint[1], endPoint[2]);
+                var diffVec = (endVec - startVec);
+                var prevVec = startVec;
+                var len = diffVec.GetLength();
                 diffVec *= 4.0f / len;
                 while (len > 4.0f)
                 {
@@ -571,14 +571,14 @@ namespace Game.Movement
 
         uint FixupCorridor(ulong[] path, uint npath, uint maxPath, ulong[] visited, int nvisited)
         {
-            int furthestPath = -1;
-            int furthestVisited = -1;
+            var furthestPath = -1;
+            var furthestVisited = -1;
 
             // Find furthest common polygon.
-            for (int i = (int)npath - 1; i >= 0; --i)
+            for (var i = (int)npath - 1; i >= 0; --i)
             {
-                bool found = false;
-                for (int j = (int)nvisited - 1; j >= 0; --j)
+                var found = false;
+                for (var j = (int)nvisited - 1; j >= 0; --j)
                 {
                     if (path[i] == visited[j])
                     {
@@ -598,9 +598,9 @@ namespace Game.Movement
             // Concatenate paths.
 
             // Adjust beginning of the buffer to include the visited.
-            uint req = (uint)(nvisited - furthestVisited);
-            uint orig = (uint)((furthestPath + 1) < npath ? furthestPath + 1 : (int)npath);
-            uint size = npath > orig ? npath - orig : 0;
+            var req = (uint)(nvisited - furthestVisited);
+            var orig = (uint)((furthestPath + 1) < npath ? furthestPath + 1 : (int)npath);
+            var size = npath > orig ? npath - orig : 0;
             if (req + size > maxPath)
                 size = maxPath - req;
 
@@ -621,11 +621,11 @@ namespace Game.Movement
             steerPosFlag = 0;
 
             // Find steer target.
-            float[] steerPath = new float[3 * 3];
-            byte[] steerPathFlags = new byte[3];
-            ulong[] steerPathPolys = new ulong[3];
-            int nsteerPath = 0;
-            uint dtResult = _navMeshQuery.findStraightPath(startPos, endPos, path, (int)pathSize, steerPath, steerPathFlags, steerPathPolys, ref nsteerPath, 3, 0);
+            var steerPath = new float[3 * 3];
+            var steerPathFlags = new byte[3];
+            var steerPathPolys = new ulong[3];
+            var nsteerPath = 0;
+            var dtResult = _navMeshQuery.findStraightPath(startPos, endPos, path, (int)pathSize, steerPath, steerPathFlags, steerPathPolys, ref nsteerPath, 3, 0);
             if (nsteerPath == 0 || Detour.dtStatusFailed(dtResult))
                 return false;
 
@@ -655,15 +655,15 @@ namespace Game.Movement
         uint FindSmoothPath(float[] startPos, float[] endPos, ulong[] polyPath, uint polyPathSize, out float[] smoothPath, out int smoothPathSize, uint maxSmoothPathSize)
         {
             smoothPathSize = 0;
-            int nsmoothPath = 0;
+            var nsmoothPath = 0;
             smoothPath = new float[74 * 3];
 
-            ulong[] polys = new ulong[74];
+            var polys = new ulong[74];
             Array.Copy(polyPath, polys, polyPathSize);
-            uint npolys = polyPathSize;
+            var npolys = polyPathSize;
 
-            float[] iterPos = new float[3];
-            float[] targetPos = new float[3];
+            var iterPos = new float[3];
+            var targetPos = new float[3];
             if (Detour.dtStatusFailed(_navMeshQuery.closestPointOnPolyBoundary(polys[0], startPos, iterPos)))
                 return Detour.DT_FAILURE;
 
@@ -685,28 +685,28 @@ namespace Game.Movement
                 if (!GetSteerTarget(iterPos, targetPos, 0.3f, polys, npolys, out steerPos, out steerPosFlag, out steerPosRef))
                     break;
 
-                bool endOfPath = steerPosFlag.HasAnyFlag(Detour.dtStraightPathFlags.DT_STRAIGHTPATH_END);
-                bool offMeshConnection = steerPosFlag.HasAnyFlag(Detour.dtStraightPathFlags.DT_STRAIGHTPATH_OFFMESH_CONNECTION);
+                var endOfPath = steerPosFlag.HasAnyFlag(Detour.dtStraightPathFlags.DT_STRAIGHTPATH_END);
+                var offMeshConnection = steerPosFlag.HasAnyFlag(Detour.dtStraightPathFlags.DT_STRAIGHTPATH_OFFMESH_CONNECTION);
 
                 // Find movement delta.
-                float[] delta = new float[3];
+                var delta = new float[3];
                 Detour.dtVsub(delta, steerPos, iterPos);
-                float len = (float)Math.Sqrt(Detour.dtVdot(delta, delta));
+                var len = (float)Math.Sqrt(Detour.dtVdot(delta, delta));
                 // If the steer target is end of path or off-mesh link, do not move past the location.
                 if ((endOfPath || offMeshConnection) && len < 4.0f)
                     len = 1.0f;
                 else
                     len = 4.0f / len;
 
-                float[] moveTgt = new float[3];
+                var moveTgt = new float[3];
                 Detour.dtVmad(moveTgt, iterPos, delta, len);
 
                 // Move
-                float[] result = new float[3];
-                int MAX_VISIT_POLY = 16;
-                ulong[] visited = new ulong[MAX_VISIT_POLY];
+                var result = new float[3];
+                var MAX_VISIT_POLY = 16;
+                var visited = new ulong[MAX_VISIT_POLY];
 
-                int nvisited = 0;
+                var nvisited = 0;
                 _navMeshQuery.moveAlongSurface(polys[0], iterPos, moveTgt, _filter, result, visited, ref nvisited, MAX_VISIT_POLY);
                 npolys = FixupCorridor(polys, npolys, 74, visited, nvisited);
 
@@ -730,7 +730,7 @@ namespace Game.Movement
                 {
                     // Advance the path up to and over the off-mesh connection.
                     ulong prevRef = 0;
-                    ulong polyRef = polys[0];
+                    var polyRef = polys[0];
                     uint npos = 0;
                     while (npos < npolys && polyRef != steerPosRef)
                     {
@@ -739,14 +739,14 @@ namespace Game.Movement
                         npos++;
                     }
 
-                    for (uint i = npos; i < npolys; ++i)
+                    for (var i = npos; i < npolys; ++i)
                         polys[i - npos] = polys[i];
 
                     npolys -= npos;
 
                     // Handle the connection.
-                    float[] connectionStartPos = new float[3];
-                    float[] connectionEndPos = new float[3];
+                    var connectionStartPos = new float[3];
+                    var connectionEndPos = new float[3];
                     if (Detour.dtStatusSucceed(_navMesh.getOffMeshConnectionPolyEndPoints(prevRef, polyRef, connectionStartPos, connectionEndPos)))
                     {
                         if (nsmoothPath < maxSmoothPathSize)
@@ -806,7 +806,7 @@ namespace Game.Movement
 
             if (_sourceUnit.IsTypeId(TypeId.Unit))
             {
-                Creature creature = _sourceUnit.ToCreature();
+                var creature = _sourceUnit.ToCreature();
                 if (creature.CanWalk())
                     includeFlags |= NavTerrainFlag.Ground;
 
@@ -829,7 +829,7 @@ namespace Game.Movement
             // forcefully into terrain they can't normally move in
             if (_sourceUnit.IsInWater() || _sourceUnit.IsUnderWater())
             {
-                NavTerrainFlag includedFlags = (NavTerrainFlag)_filter.getIncludeFlags();
+                var includedFlags = (NavTerrainFlag)_filter.getIncludeFlags();
                 includedFlags |= GetNavTerrain(_sourceUnit.GetPositionX(), _sourceUnit.GetPositionY(), _sourceUnit.GetPositionZ());
 
                 _filter.setIncludeFlags((ushort)includedFlags);
@@ -839,7 +839,7 @@ namespace Game.Movement
         NavTerrainFlag GetNavTerrain(float x, float y, float z)
         {
             LiquidData data;
-            ZLiquidStatus liquidStatus = _sourceUnit.GetMap().GetLiquidStatus(_sourceUnit.GetPhaseShift(), x, y, z, MapConst.MapAllLiquidTypes, out data);
+            var liquidStatus = _sourceUnit.GetMap().GetLiquidStatus(_sourceUnit.GetPhaseShift(), x, y, z, MapConst.MapAllLiquidTypes, out data);
             if (liquidStatus == ZLiquidStatus.NoWater)
                 return NavTerrainFlag.Ground;
 
@@ -859,7 +859,7 @@ namespace Game.Movement
 
         bool InRange(Vector3 p1, Vector3 p2, float r, float h)
         {
-            Vector3 d = p1 - p2;
+            var d = p1 - p2;
             return (d.X * d.X + d.Y * d.Y) < r * r && Math.Abs(d.Z) < h;
         }
 
@@ -879,16 +879,16 @@ namespace Game.Movement
             if (_pathPoints.Length < 2) // path building failure
                 return;
 
-            int i = _pathPoints.Length;
-            Vector3 nextVec = _pathPoints[--i];
+            var i = _pathPoints.Length;
+            var nextVec = _pathPoints[--i];
             while (i > 0)
             {
-                Vector3 currVec = _pathPoints[--i];
-                Vector3 diffVec = (nextVec - currVec);
-                float len = diffVec.GetLength();
+                var currVec = _pathPoints[--i];
+                var diffVec = (nextVec - currVec);
+                var len = diffVec.GetLength();
                 if (len > dist)
                 {
-                    float step = dist / len;
+                    var step = dist / len;
                     // same as nextVec
                     _pathPoints[i + 1] -= diffVec * step;
                     _sourceUnit.UpdateAllowedPositionZ(_pathPoints[i + 1].X, _pathPoints[i + 1].Y, ref _pathPoints[i + 1].Z);
@@ -936,9 +936,9 @@ namespace Game.Movement
 
         bool InRangeYZX(float[] v1, float[] v2, float r, float h)
         {
-            float dx = v2[0] - v1[0];
-            float dy = v2[1] - v1[1]; // elevation
-            float dz = v2[2] - v1[2];
+            var dx = v2[0] - v1[0];
+            var dy = v2[1] - v1[1]; // elevation
+            var dz = v2[2] - v1[2];
             return (dx * dx + dz * dz) < r * r && Math.Abs(dy) < h;
         }
 

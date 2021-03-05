@@ -46,7 +46,7 @@ namespace Scripts.Spells.Rogue
 
         void HandleDummy(uint effIndex)
         {
-            Aura aura = GetCaster().GetAura(SpellIds.KillingSpree);
+            var aura = GetCaster().GetAura(SpellIds.KillingSpree);
             if (aura != null)
             {
                 var script = aura.GetScript<spell_rog_killing_spree_AuraScript>(nameof(spell_rog_killing_spree_AuraScript));
@@ -79,8 +79,8 @@ namespace Scripts.Spells.Rogue
         {
             while (!_targets.Empty())
             {
-                ObjectGuid guid = _targets.SelectRandom();
-                Unit target = Global.ObjAccessor.GetUnit(GetTarget(), guid);
+                var guid = _targets.SelectRandom();
+                var target = Global.ObjAccessor.GetUnit(GetTarget(), guid);
                 if (target)
                 {
                     GetTarget().CastSpell(target, SpellIds.KillingSpreeTeleport, true);
@@ -117,8 +117,8 @@ namespace Scripts.Spells.Rogue
     {
         void CalculateDamage(uint effIndex)
         {
-            int damagePerCombo = (int)(GetCaster().GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * 0.559f);
-            AuraEffect t5 = GetCaster().GetAuraEffect(SpellIds.T52pSetBonus, 0);
+            var damagePerCombo = (int)(GetCaster().GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * 0.559f);
+            var t5 = GetCaster().GetAuraEffect(SpellIds.T52pSetBonus, 0);
             if (t5 != null)
                 damagePerCombo += t5.GetAmount();
 
@@ -136,8 +136,8 @@ namespace Scripts.Spells.Rogue
     {
         void CalculateDamage(uint effIndex)
         {
-            int damagePerCombo = (int)(GetCaster().GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * 0.417f);
-            AuraEffect t5 = GetCaster().GetAuraEffect(SpellIds.T52pSetBonus, 0);
+            var damagePerCombo = (int)(GetCaster().GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * 0.417f);
+            var t5 = GetCaster().GetAuraEffect(SpellIds.T52pSetBonus, 0);
             if (t5 != null)
                 damagePerCombo += t5.GetAmount();
 

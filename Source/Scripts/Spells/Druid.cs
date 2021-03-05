@@ -100,26 +100,26 @@ namespace Scripts.Spells.Druid
 
         void HandleHitTargetBurn(uint effIndex)
         {
-            int newValue = (int)((float)GetEffectValue() * _damageMultiplier);
+            var newValue = (int)((float)GetEffectValue() * _damageMultiplier);
             SetEffectValue(newValue);
         }
 
         void HandleHitTargetDmg(uint effIndex)
         {
-            int newValue = (int)((float)GetHitDamage() * (1.0f + _damageMultiplier));
+            var newValue = (int)((float)GetHitDamage() * (1.0f + _damageMultiplier));
             SetHitDamage(newValue);
         }
 
         void HandleLaunchTarget(uint effIndex)
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
 
-            int maxExtraConsumedPower = GetEffectValue();
+            var maxExtraConsumedPower = GetEffectValue();
 
-            AuraEffect auraEffect = caster.GetAuraEffect(SpellIds.IncarnationKingOfTheJungle, 1);
+            var auraEffect = caster.GetAuraEffect(SpellIds.IncarnationKingOfTheJungle, 1);
             if (auraEffect != null)
             {
-                float multiplier = 1.0f + (float)auraEffect.GetAmount() / 100.0f;
+                var multiplier = 1.0f + (float)auraEffect.GetAmount() / 100.0f;
                 maxExtraConsumedPower = (int)((float)maxExtraConsumedPower * multiplier);
                 SetEffectValue(maxExtraConsumedPower);
             }
@@ -140,7 +140,7 @@ namespace Scripts.Spells.Druid
     {
         SpellCastResult CheckCast()
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster.IsInDisallowedMountForm())
                 return SpellCastResult.NotShapeshift;
 
@@ -163,7 +163,7 @@ namespace Scripts.Spells.Druid
 
         bool CheckProc(ProcEventInfo eventInfo)
         {
-            Unit target = eventInfo.GetActor();
+            var target = eventInfo.GetActor();
 
             switch (target.GetShapeshiftForm())
             {
@@ -184,7 +184,7 @@ namespace Scripts.Spells.Druid
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            Unit target = eventInfo.GetActor();
+            var target = eventInfo.GetActor();
             uint triggerspell;
 
             switch (target.GetShapeshiftForm())
@@ -234,7 +234,7 @@ namespace Scripts.Spells.Druid
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo procInfo)
         {
-            Unit owner = GetTarget();
+            var owner = GetTarget();
             owner.CastSpell(owner, SpellIds.GoreProc);
             owner.GetSpellHistory().ResetCooldown(SpellIds.Mangle, true);
         }
@@ -274,7 +274,7 @@ namespace Scripts.Spells.Druid
     {
         void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster)
                 amount = MathFunctions.CalculatePct(caster.GetCreatePowers(PowerType.Mana), amount) / aurEff.GetTotalTicks();
             else
@@ -298,7 +298,7 @@ namespace Scripts.Spells.Druid
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            SpellInfo spellInfo = eventInfo.GetSpellInfo();
+            var spellInfo = eventInfo.GetSpellInfo();
             if (spellInfo == null)
                 return;
 
@@ -352,8 +352,8 @@ namespace Scripts.Spells.Druid
 
             // final heal
             uint stack = GetStackAmount();
-            uint healAmount = (uint)aurEff.GetAmount();
-            Unit caster = GetCaster();
+            var healAmount = (uint)aurEff.GetAmount();
+            var caster = GetCaster();
             if (caster != null)
             {
                 healAmount = caster.SpellHealingBonusDone(GetTarget(), GetSpellInfo(), healAmount, DamageEffectType.Heal, aurEff.GetSpellEffectInfo(), stack);
@@ -366,7 +366,7 @@ namespace Scripts.Spells.Druid
                 var spellPowerCost = spellPowerCostList.Find(cost => cost.Power == PowerType.Mana);
                 if (spellPowerCost != null)
                 {
-                    int returnMana = spellPowerCost.Amount * (int)stack / 2;
+                    var returnMana = spellPowerCost.Amount * (int)stack / 2;
                     caster.CastCustomSpell(caster, SpellIds.LifebloomEnergize, returnMana, 0, 0, true, null, aurEff, GetCasterGUID());
                 }
                 return;
@@ -377,15 +377,15 @@ namespace Scripts.Spells.Druid
 
         void HandleDispel(DispelInfo dispelInfo)
         {
-            Unit target = GetUnitOwner();
+            var target = GetUnitOwner();
             if (target != null)
             {
-                AuraEffect aurEff = GetEffect(1);
+                var aurEff = GetEffect(1);
                 if (aurEff != null)
                 {
                     // final heal
-                    uint healAmount = (uint)aurEff.GetAmount();
-                    Unit caster = GetCaster();
+                    var healAmount = (uint)aurEff.GetAmount();
+                    var caster = GetCaster();
                     if (caster != null)
                     {
                         healAmount = caster.SpellHealingBonusDone(target, GetSpellInfo(), healAmount, DamageEffectType.Heal, aurEff.GetSpellEffectInfo(), dispelInfo.GetRemovedCharges());
@@ -397,7 +397,7 @@ namespace Scripts.Spells.Druid
                         var spellPowerCost = spellPowerCostList.Find(cost => cost.Power == PowerType.Mana);
                         if (spellPowerCost != null)
                         {
-                            int returnMana = spellPowerCost.Amount * dispelInfo.GetRemovedCharges() / 2;
+                            var returnMana = spellPowerCost.Amount * dispelInfo.GetRemovedCharges() / 2;
                             caster.CastCustomSpell(caster, SpellIds.LifebloomEnergize, returnMana, 0, 0, true, null, null, GetCasterGUID());
                         }
                         return;
@@ -426,7 +426,7 @@ namespace Scripts.Spells.Druid
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            int amount = (int)MathFunctions.CalculatePct(eventInfo.GetHealInfo().GetHeal(), aurEff.GetAmount());
+            var amount = (int)MathFunctions.CalculatePct(eventInfo.GetHealInfo().GetHeal(), aurEff.GetAmount());
             GetTarget().CastCustomSpell(SpellIds.LivingSeedProc, SpellValueMod.BasePoint0, amount, eventInfo.GetProcTarget(), true, null, aurEff);
         }
 
@@ -480,7 +480,7 @@ namespace Scripts.Spells.Druid
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            Unit target = GetTarget();
+            var target = GetTarget();
             if (target.HasAura(SpellIds.BalanceT10Bonus))
                 target.CastSpell((Unit)null, SpellIds.BalanceT10BonusProc, true, null);
         }
@@ -496,7 +496,7 @@ namespace Scripts.Spells.Druid
     {
         void UpdateAmount(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            Player target = GetTarget().ToPlayer();
+            var target = GetTarget().ToPlayer();
             if (target != null)
                 target.UpdateAttackPowerAndDamage();
         }
@@ -534,7 +534,7 @@ namespace Scripts.Spells.Druid
     {
         public override bool Load()
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             return caster != null && caster.IsTypeId(TypeId.Player);
         }
 
@@ -542,14 +542,14 @@ namespace Scripts.Spells.Druid
         {
             canBeRecalculated = false;
 
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster != null)
             {
                 // 0.01 * $AP * cp
-                byte cp = caster.ToPlayer().GetComboPoints();
+                var cp = caster.ToPlayer().GetComboPoints();
 
                 // Idol of Feral Shadows. Can't be handled as SpellMod due its dependency from CPs
-                AuraEffect idol = caster.GetAuraEffect(SpellIds.IdolOfFeralShadows, 0);
+                var idol = caster.GetAuraEffect(SpellIds.IdolOfFeralShadows, 0);
                 if (idol != null)
                     amount += cp * idol.GetAmount();
                 // Idol of Worship. Can't be handled as SpellMod due its dependency from CPs
@@ -571,7 +571,7 @@ namespace Scripts.Spells.Druid
     {
         SpellCastResult CheckCast()
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster.GetShapeshiftForm() != ShapeShiftForm.CatForm)
                 return SpellCastResult.OnlyShapeshift;
 
@@ -594,7 +594,7 @@ namespace Scripts.Spells.Druid
 
         void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            Unit target = GetTarget();
+            var target = GetTarget();
             target.CastSpell(target, SpellIds.SavageRoar, true, null, aurEff, GetCasterGUID());
         }
 
@@ -674,11 +674,11 @@ namespace Scripts.Spells.Druid
 
         void HandleDummy(uint effIndex)
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             // Shapeshifting into an animal form or mounting cancels the effect
             if (caster.GetCreatureType() == CreatureType.Beast || caster.IsMounted())
             {
-                SpellInfo spellInfo = GetTriggeringSpell();
+                var spellInfo = GetTriggeringSpell();
                 if (spellInfo != null)
                     caster.RemoveAurasDueToSpell(spellInfo.Id);
                 return;
@@ -717,7 +717,7 @@ namespace Scripts.Spells.Druid
     {
         SpellCastResult CheckCast()
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (!caster.IsInFeralForm())
                 return SpellCastResult.OnlyShapeshift;
 
@@ -740,7 +740,7 @@ namespace Scripts.Spells.Druid
 
         void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            Unit target = GetTarget();
+            var target = GetTarget();
             target.CastSpell(target, SpellIds.SurvivalInstincts, true);
         }
 
@@ -760,7 +760,7 @@ namespace Scripts.Spells.Druid
 
         void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
-            Player caster = GetCaster().ToPlayer();
+            var caster = GetCaster().ToPlayer();
             if (caster != null)
                 if (caster.GetSkillValue(SkillType.Riding) >= 375)
                     amount = 310;
@@ -803,17 +803,17 @@ namespace Scripts.Spells.Druid
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            Spell spell = eventInfo.GetProcSpell();
+            var spell = eventInfo.GetProcSpell();
             if (spell == null)
                 return;
 
-            Unit caster = eventInfo.GetActor();
+            var caster = eventInfo.GetActor();
             var spellPowerCostList = spell.GetPowerCost();
             var spellPowerCost = spellPowerCostList.First(cost => cost.Power == PowerType.Mana);
             if (spellPowerCost == null)
                 return;
 
-            int amount = MathFunctions.CalculatePct(spellPowerCost.Amount, aurEff.GetAmount());
+            var amount = MathFunctions.CalculatePct(spellPowerCost.Amount, aurEff.GetAmount());
             caster.CastCustomSpell(SpellIds.Exhilarate, SpellValueMod.BasePoint0, amount, null, true, null, aurEff);
         }
 
@@ -856,15 +856,15 @@ namespace Scripts.Spells.Druid
         {
             PreventDefaultAction();
 
-            DamageInfo damageInfo = eventInfo.GetDamageInfo();
+            var damageInfo = eventInfo.GetDamageInfo();
             if (damageInfo == null || damageInfo.GetDamage() == 0)
                 return;
 
-            Unit caster = eventInfo.GetActor();
-            Unit target = eventInfo.GetProcTarget();
+            var caster = eventInfo.GetActor();
+            var target = eventInfo.GetProcTarget();
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.Languish, GetCastDifficulty());
-            int amount = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
+            var spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.Languish, GetCastDifficulty());
+            var amount = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
             amount /= (int)spellInfo.GetMaxTicks();
             // Add remaining ticks to damage done
             amount += (int)target.GetRemainingPeriodicAmount(caster.GetGUID(), SpellIds.Languish, AuraType.PeriodicDamage);
@@ -896,7 +896,7 @@ namespace Scripts.Spells.Druid
             else
             {
                 targets.Remove(GetExplTargetUnit());
-                List<Unit> tempTargets = new List<Unit>();
+                var tempTargets = new List<Unit>();
                 foreach (var obj in targets)
                     if (obj.IsTypeId(TypeId.Player) && GetCaster().IsInRaidWith(obj.ToUnit()))
                         tempTargets.Add(obj.ToUnit());
@@ -908,7 +908,7 @@ namespace Scripts.Spells.Druid
                     return;
                 }
 
-                Unit target = tempTargets.SelectRandom();
+                var target = tempTargets.SelectRandom();
                 targets.Clear();
                 targets.Add(target);
             }
@@ -930,15 +930,15 @@ namespace Scripts.Spells.Druid
 
         bool CheckProc(ProcEventInfo eventInfo)
         {
-            SpellInfo spellInfo = eventInfo.GetSpellInfo();
+            var spellInfo = eventInfo.GetSpellInfo();
             if (spellInfo == null || spellInfo.Id == SpellIds.RejuvenationT10Proc)
                 return false;
 
-            HealInfo healInfo = eventInfo.GetHealInfo();
+            var healInfo = eventInfo.GetHealInfo();
             if (healInfo == null || healInfo.GetHeal() == 0)
                 return false;
 
-            Player caster = eventInfo.GetActor().ToPlayer();
+            var caster = eventInfo.GetActor().ToPlayer();
             if (!caster)
                 return false;
 
@@ -949,7 +949,7 @@ namespace Scripts.Spells.Druid
         {
             PreventDefaultAction();
 
-            int amount = (int)eventInfo.GetHealInfo().GetHeal();
+            var amount = (int)eventInfo.GetHealInfo().GetHeal();
             eventInfo.GetActor().CastCustomSpell(SpellIds.RejuvenationT10Proc, SpellValueMod.BasePoint0, amount, null, true, null, aurEff);
         }
 
@@ -965,14 +965,14 @@ namespace Scripts.Spells.Druid
     {
         SpellCastResult CheckCast()
         {
-            Player player = GetCaster().ToPlayer();
+            var player = GetCaster().ToPlayer();
             if (!player)
                 return SpellCastResult.CustomError;
 
             if (player.GetSkillValue(SkillType.Riding) < 75)
                 return SpellCastResult.ApprenticeRidingRequirement;
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(player.IsInWater() ? SpellIds.FormAquatic : SpellIds.FormStag, GetCastDifficulty());
+            var spellInfo = Global.SpellMgr.GetSpellInfo(player.IsInWater() ? SpellIds.FormAquatic : SpellIds.FormStag, GetCastDifficulty());
             return spellInfo.CheckLocation(player.GetMapId(), player.GetZoneId(), player.GetAreaId(), player);
         }
 
@@ -997,10 +997,10 @@ namespace Scripts.Spells.Druid
 
         void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            Player player = GetTarget().ToPlayer();
+            var player = GetTarget().ToPlayer();
 
             // Outdoor check already passed - Travel Form (dummy) has SPELL_ATTR0_OUTDOORS_ONLY attribute.
-            uint triggeredSpellId = GetFormSpellId(player, GetCastDifficulty(), false);
+            var triggeredSpellId = GetFormSpellId(player, GetCastDifficulty(), false);
 
             player.AddAura(triggeredSpellId, player);
         }
@@ -1022,7 +1022,7 @@ namespace Scripts.Spells.Druid
 
         static SpellCastResult CheckLocationForForm(Player targetPlayer, Difficulty difficulty, bool requireOutdoors, uint spellId)
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, difficulty);
+            var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, difficulty);
 
             if (requireOutdoors && !targetPlayer.GetMap().IsOutdoors(targetPlayer.GetPhaseShift(), targetPlayer.GetPositionX(), targetPlayer.GetPositionY(), targetPlayer.GetPositionZ()))
                 return SpellCastResult.OnlyOutdoors;
@@ -1086,7 +1086,7 @@ namespace Scripts.Spells.Druid
             if (triggeredSpellId == m_scriptSpellId)
                 return;
 
-            Player player = GetTarget().ToPlayer();
+            var player = GetTarget().ToPlayer();
 
             if (triggeredSpellId != 0) // Apply new form
                 player.AddAura(triggeredSpellId, player);
@@ -1108,7 +1108,7 @@ namespace Scripts.Spells.Druid
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            SpellEffectInfo effectInfo = spellInfo.GetEffect(2);
+            var effectInfo = spellInfo.GetEffect(2);
             if (effectInfo == null || effectInfo.IsEffect() || effectInfo.CalcValue() <= 0)
                 return false;
             return true;
@@ -1118,14 +1118,14 @@ namespace Scripts.Spells.Druid
         {
             targets.RemoveAll(obj =>
             {
-                Unit target = obj.ToUnit();
+                var target = obj.ToUnit();
                 if (target)
                     return !GetCaster().IsInRaidWith(target);
 
                 return true;
             });
 
-            int maxTargets = GetSpellInfo().GetEffect(2).CalcValue(GetCaster());
+            var maxTargets = GetSpellInfo().GetEffect(2).CalcValue(GetCaster());
 
             if (targets.Count > maxTargets)
             {
@@ -1159,7 +1159,7 @@ namespace Scripts.Spells.Druid
 
         void HandleTickUpdate(AuraEffect aurEff)
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (!caster)
                 return;
 
@@ -1167,8 +1167,8 @@ namespace Scripts.Spells.Druid
             float damage = caster.CalculateSpellDamage(GetUnitOwner(), GetSpellInfo(), aurEff.GetEffIndex());
 
             // Wild Growth = first tick gains a 6% bonus, reduced by 2% each tick
-            float reduction = 2.0f;
-            AuraEffect bonus = caster.GetAuraEffect(SpellIds.RestorationT102PBonus, 0);
+            var reduction = 2.0f;
+            var bonus = caster.GetAuraEffect(SpellIds.RestorationT102PBonus, 0);
             if (bonus != null)
                 reduction -= MathFunctions.CalculatePct(reduction, bonus.GetAmount());
             reduction *= (aurEff.GetTickNumber() - 1);

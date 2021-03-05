@@ -249,7 +249,7 @@ namespace Framework.IO
                 return false;
 
             //get starting position of string to return:
-            int startingposition = activeposition;
+            var startingposition = activeposition;
 
             //read until next delimiter:
             do
@@ -263,7 +263,7 @@ namespace Framework.IO
 
         bool Match(string pattern, out Match m)
         {
-            Regex r = new Regex(pattern);
+            var r = new Regex(pattern);
             m = r.Match(activestring);
             return m.Success;
         }

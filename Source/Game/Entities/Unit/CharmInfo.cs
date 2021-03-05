@@ -52,7 +52,7 @@ namespace Game.Entities
         {
             if (_unit.IsTypeId(TypeId.Unit))
             {
-                Creature creature = _unit.ToCreature();
+                var creature = _unit.ToCreature();
                 if (creature)
                     creature.SetReactState(_oldReactState);
             }
@@ -105,8 +105,8 @@ namespace Game.Entities
 
                 for (byte i = 0; i < SharedConst.MaxCreatureSpells; ++i)
                 {
-                    uint spellId = _unit.ToCreature().m_spells[i];
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, _unit.GetMap().GetDifficultyID());
+                    var spellId = _unit.ToCreature().m_spells[i];
+                    var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, _unit.GetMap().GetDifficultyID());
                     if (spellInfo != null)
                     {
                         if (spellInfo.IsPassive())
@@ -132,8 +132,8 @@ namespace Game.Entities
 
             for (uint x = 0; x < SharedConst.MaxSpellCharm; ++x)
             {
-                uint spellId = _unit.ToCreature().m_spells[x];
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, _unit.GetMap().GetDifficultyID());
+                var spellId = _unit.ToCreature().m_spells[x];
+                var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, _unit.GetMap().GetDifficultyID());
 
                 if (spellInfo == null)
                 {
@@ -150,7 +150,7 @@ namespace Game.Entities
                 {
                     _charmspells[x].SetActionAndType(spellId, ActiveStates.Disabled);
 
-                    ActiveStates newstate = ActiveStates.Passive;
+                    var newstate = ActiveStates.Passive;
 
                     if (!spellInfo.IsAutocastable())
                         newstate = ActiveStates.Passive;
@@ -172,13 +172,13 @@ namespace Game.Entities
 
         public bool AddSpellToActionBar(SpellInfo spellInfo, ActiveStates newstate = ActiveStates.Decide, int preferredSlot = 0)
         {
-            uint spell_id = spellInfo.Id;
-            uint first_id = spellInfo.GetFirstRankSpell().Id;
+            var spell_id = spellInfo.Id;
+            var first_id = spellInfo.GetFirstRankSpell().Id;
 
             // new spell rank can be already listed
             for (byte i = 0; i < SharedConst.ActionBarIndexMax; ++i)
             {
-                uint action = PetActionBar[i].GetAction();
+                var action = PetActionBar[i].GetAction();
                 if (action != 0)
                 {
                     if (PetActionBar[i].IsActionBarForSpell() && Global.SpellMgr.GetFirstSpellInChain(action) == first_id)
@@ -192,7 +192,7 @@ namespace Game.Entities
             // or use empty slot in other case
             for (byte i = 0; i < SharedConst.ActionBarIndexMax; ++i)
             {
-                byte j = (byte)((preferredSlot + i) % SharedConst.ActionBarIndexMax);
+                var j = (byte)((preferredSlot + i) % SharedConst.ActionBarIndexMax);
                 if (PetActionBar[j].GetAction() == 0 && PetActionBar[j].IsActionBarForSpell())
                 {
                     SetActionBar(j, spell_id, newstate == ActiveStates.Decide ? spellInfo.IsAutocastable() ? ActiveStates.Disabled : ActiveStates.Passive : newstate);
@@ -204,11 +204,11 @@ namespace Game.Entities
 
         public bool RemoveSpellFromActionBar(uint spell_id)
         {
-            uint first_id = Global.SpellMgr.GetFirstSpellInChain(spell_id);
+            var first_id = Global.SpellMgr.GetFirstSpellInChain(spell_id);
 
             for (byte i = 0; i < SharedConst.ActionBarIndexMax; ++i)
             {
-                uint action = PetActionBar[i].GetAction();
+                var action = PetActionBar[i].GetAction();
                 if (action != 0)
                 {
                     if (PetActionBar[i].IsActionBarForSpell() && Global.SpellMgr.GetFirstSpellInChain(action) == first_id)
@@ -252,15 +252,15 @@ namespace Game.Entities
             byte index = 0;
             for (byte i = 0; i < tokens.Length && index < SharedConst.ActionBarIndexEnd; ++i, ++index)
             {
-                ActiveStates type = tokens[i++].ToEnum<ActiveStates>();
-                uint.TryParse(tokens[i], out uint action);
+                var type = tokens[i++].ToEnum<ActiveStates>();
+                uint.TryParse(tokens[i], out var action);
 
                 PetActionBar[index].SetActionAndType(action, type);
 
                 // check correctness
                 if (PetActionBar[index].IsActionBarForSpell())
                 {
-                    SpellInfo spelInfo = Global.SpellMgr.GetSpellInfo(PetActionBar[index].GetAction(), _unit.GetMap().GetDifficultyID());
+                    var spelInfo = Global.SpellMgr.GetSpellInfo(PetActionBar[index].GetAction(), _unit.GetMap().GetDifficultyID());
                     if (spelInfo == null)
                         SetActionBar(index, 0, ActiveStates.Passive);
                     else if (!spelInfo.IsAutocastable())
@@ -271,7 +271,7 @@ namespace Game.Entities
 
         public void BuildActionBar(WorldPacket data)
         {
-            for (int i = 0; i < SharedConst.ActionBarIndexMax; ++i)
+            for (var i = 0; i < SharedConst.ActionBarIndexMax; ++i)
                 data.WriteUInt32(PetActionBar[i].packedData);
         }
 
@@ -310,12 +310,12 @@ namespace Game.Entities
         public void SaveStayPosition()
         {
             //! At this point a new spline destination is enabled because of Unit.StopMoving()
-            Vector3 stayPos = _unit.MoveSpline.FinalDestination();
+            var stayPos = _unit.MoveSpline.FinalDestination();
 
             if (_unit.MoveSpline.onTransport)
             {
                 float o = 0;
-                ITransport transport = _unit.GetDirectTransport();
+                var transport = _unit.GetDirectTransport();
                 if (transport != null)
                     transport.CalculatePassengerPosition(ref stayPos.X, ref stayPos.Y, ref stayPos.Z, ref o);
             }
@@ -406,7 +406,7 @@ namespace Game.Entities
 
         public bool IsActionBarForSpell()
         {
-            ActiveStates Type = GetActiveState();
+            var Type = GetActiveState();
             return Type == ActiveStates.Disabled || Type == ActiveStates.Enabled || Type == ActiveStates.Passive;
         }
 

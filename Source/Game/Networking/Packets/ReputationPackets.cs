@@ -59,7 +59,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteInt32(Reactions.Count);
-            foreach (ForcedReaction reaction in Reactions)
+            foreach (var reaction in Reactions)
                 reaction.Write(_worldPacket);
         }
 
@@ -76,7 +76,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteFloat(BonusFromAchievementSystem);
 
             _worldPacket.WriteInt32(Faction.Count);
-            foreach (FactionStandingData factionStanding in Faction)
+            foreach (var factionStanding in Faction)
                 factionStanding.Write(_worldPacket);
 
             _worldPacket.WriteBit(ShowVisual);

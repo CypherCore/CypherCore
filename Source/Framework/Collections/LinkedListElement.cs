@@ -99,7 +99,7 @@ namespace Framework.Collections
             if (_iSize == 0)
             {
                 uint result = 0;
-                LinkedListElement e = GetFirstElement();
+                var e = GetFirstElement();
                 while (e != null)
                 {
                     ++result;

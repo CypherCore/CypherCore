@@ -73,8 +73,8 @@ namespace Game.Chat
 
         public bool ExecuteCommandInTable(ICollection<ChatCommand> table, string text, string fullcmd)
         {
-            StringArguments args = new StringArguments(text);
-            string cmd = args.NextString();
+            var args = new StringArguments(text);
+            var cmd = args.NextString();
 
             foreach (var command in table)
             {
@@ -84,7 +84,7 @@ namespace Game.Chat
                 if (!HasStringAbbr(command.Name, cmd))
                     continue;
 
-                bool match = false;
+                var match = false;
                 if (command.Name.Length > cmd.Length)
                 {
                     foreach (var command2 in table)
@@ -104,7 +104,7 @@ namespace Game.Chat
 
                 if (!command.ChildCommands.Empty())
                 {
-                    string arg = args.NextString("");
+                    var arg = args.NextString("");
                     if (!ExecuteCommandInTable(command.ChildCommands, arg, fullcmd))
                     {
                         if (_session != null && !_session.HasPermission(RBACPermissions.CommandsNotifyCommandNotFoundError))
@@ -131,20 +131,20 @@ namespace Game.Chat
                     if (GetSession() == null) // ignore console
                         return true;
 
-                    Player player = GetPlayer();
+                    var player = GetPlayer();
                     if (!Global.AccountMgr.IsPlayerAccount(GetSession().GetSecurity()))
                     {
-                        ObjectGuid guid = player.GetTarget();
-                        uint areaId = player.GetAreaId();
-                        string areaName = "Unknown";
-                        string zoneName = "Unknown";
+                        var guid = player.GetTarget();
+                        var areaId = player.GetAreaId();
+                        var areaName = "Unknown";
+                        var zoneName = "Unknown";
 
-                        AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(areaId);
+                        var area = CliDB.AreaTableStorage.LookupByKey(areaId);
                         if (area != null)
                         {
                             var locale = GetSessionDbcLocale();
                             areaName = area.AreaName[locale];
-                            AreaTableRecord zone = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
+                            var zone = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
                             if (zone != null)
                                 zoneName = zone.AreaName[locale];
                         }
@@ -170,10 +170,10 @@ namespace Game.Chat
 
         public bool ShowHelpForCommand(ICollection<ChatCommand> table, string text)
         {
-            StringArguments args = new StringArguments(text);
+            var args = new StringArguments(text);
             if (!args.Empty())
             {
-                string cmd = args.NextString();
+                var cmd = args.NextString();
                 foreach (var command in table)
                 {
                     // must be available (ignore handler existence for show command with possible available subcommands)
@@ -184,7 +184,7 @@ namespace Game.Chat
                         continue;
 
                     // have subcommand
-                    string subcmd = !cmd.IsEmpty() ? args.NextString() : "";
+                    var subcmd = !cmd.IsEmpty() ? args.NextString() : "";
                     if (!command.ChildCommands.Empty() && !subcmd.IsEmpty())
                     {
                         if (ShowHelpForCommand(command.ChildCommands, subcmd))
@@ -228,7 +228,7 @@ namespace Game.Chat
 
         public bool ShowHelpForSubCommands(ICollection<ChatCommand> table, string cmd, string subcmd)
         {
-            string list = "";
+            var list = "";
             foreach (var command in table)
             {
                 // must be available (ignore handler existence for show command with possible available subcommands)
@@ -294,14 +294,14 @@ namespace Game.Chat
 
             if (args[1] == 'c')
             {
-                string check = args.NextString("|");
+                var check = args.NextString("|");
                 if (string.IsNullOrEmpty(check))
                     return null;
             }
             else
                 args.NextChar();
 
-            string cLinkType = args.NextString(":");
+            var cLinkType = args.NextString(":");
             if (string.IsNullOrEmpty(cLinkType))
                 return null;
 
@@ -309,7 +309,7 @@ namespace Game.Chat
             {
                 if (cLinkType == linkType[i])
                 {
-                    string cKey = args.NextString(":|");       // extract key
+                    var cKey = args.NextString(":|");       // extract key
 
                     something1 = args.NextString(":|");      // extract something
 
@@ -327,8 +327,8 @@ namespace Game.Chat
 
         public void ExtractOptFirstArg(StringArguments args, out string arg1, out string arg2)
         {
-            string p1 = args.NextString();
-            string p2 = args.NextString();
+            var p1 = args.NextString();
+            var p2 = args.NextString();
 
             if (string.IsNullOrEmpty(p2))
             {
@@ -342,11 +342,11 @@ namespace Game.Chat
 
         public GameTele ExtractGameTeleFromLink(StringArguments args)
         {
-            string cId = ExtractKeyFromLink(args, "Htele");
+            var cId = ExtractKeyFromLink(args, "Htele");
             if (string.IsNullOrEmpty(cId))
                 return null;
 
-            if (uint.TryParse(cId, out uint id))
+            if (uint.TryParse(cId, out var id))
                 return Global.ObjectMgr.GetGameTele(id);
 
             return Global.ObjectMgr.GetGameTele(cId);
@@ -365,7 +365,7 @@ namespace Game.Chat
         string ExtractPlayerNameFromLink(StringArguments args)
         {
             // |color|Hplayer:name|h[name]|h|r
-            string name = ExtractKeyFromLink(args, "Hplayer");
+            var name = ExtractKeyFromLink(args, "Hplayer");
             if (name.IsEmpty())
                 return "";
 
@@ -391,7 +391,7 @@ namespace Game.Chat
 
             if (!args.Empty())
             {
-                string name = ExtractPlayerNameFromLink(args);
+                var name = ExtractPlayerNameFromLink(args);
                 if (string.IsNullOrEmpty(name))
                 {
                     SendSysMessage(CypherStrings.PlayerNotFound);
@@ -400,7 +400,7 @@ namespace Game.Chat
                 }
 
                 player = Global.ObjAccessor.FindPlayerByName(name);
-                ObjectGuid guid = player == null ? Global.CharacterCacheStorage.GetCharacterGuidByName(name) : ObjectGuid.Empty;
+                var guid = player == null ? Global.CharacterCacheStorage.GetCharacterGuidByName(name) : ObjectGuid.Empty;
 
                 playerGuid = player != null ? player.GetGUID() : guid;
                 playerName = player != null || !guid.IsEmpty() ? name : "";
@@ -434,7 +434,7 @@ namespace Game.Chat
             // |color|Hcreature:creature_guid|h[name]|h|r
             // |color|Hgameobject:go_guid|h[name]|h|r
             // |color|Hplayer:name|h[name]|h|r
-            string idS = ExtractKeyFromLink(args, guidKeys, out type);
+            var idS = ExtractKeyFromLink(args, guidKeys, out type);
             if (string.IsNullOrEmpty(idS))
                 return 0;
 
@@ -446,11 +446,11 @@ namespace Game.Chat
                         if (!ObjectManager.NormalizePlayerName(ref idS))
                             return 0;
 
-                        Player player = Global.ObjAccessor.FindPlayerByName(idS);
+                        var player = Global.ObjAccessor.FindPlayerByName(idS);
                         if (player)
                             return player.GetGUID().GetCounter();
 
-                        ObjectGuid guid = Global.CharacterCacheStorage.GetCharacterGuidByName(idS);
+                        var guid = Global.CharacterCacheStorage.GetCharacterGuidByName(idS);
                         if (guid.IsEmpty())
                             return 0;
 
@@ -459,14 +459,14 @@ namespace Game.Chat
                 case 1:
                     {
                         guidHigh = HighGuid.Creature;
-                        if (!ulong.TryParse(idS, out ulong lowguid))
+                        if (!ulong.TryParse(idS, out var lowguid))
                             return 0;
                         return lowguid;
                     }
                 case 2:
                     {
                         guidHigh = HighGuid.GameObject;
-                        if (!ulong.TryParse(idS, out ulong lowguid))
+                        if (!ulong.TryParse(idS, out var lowguid))
                             return 0;
                         return lowguid;
                     }
@@ -491,11 +491,11 @@ namespace Game.Chat
             // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r
             // number or [name] Shift-click form |color|Htalent:talent_id, rank|h[name]|h|r
             // number or [name] Shift-click form |color|Htrade:spell_id, skill_id, max_value, cur_value|h[name]|h|r
-            string idS = ExtractKeyFromLink(args, spellKeys, out int type, out string param1Str);
+            var idS = ExtractKeyFromLink(args, spellKeys, out var type, out var param1Str);
             if (string.IsNullOrEmpty(idS))
                 return 0;
 
-            if (!uint.TryParse(idS, out uint id))
+            if (!uint.TryParse(idS, out var id))
                 return 0;               
 
             switch (type)
@@ -505,7 +505,7 @@ namespace Game.Chat
                 case 1:
                     {
                         // talent
-                        TalentRecord talentEntry = CliDB.TalentStorage.LookupByKey(id);
+                        var talentEntry = CliDB.TalentStorage.LookupByKey(id);
                         if (talentEntry == null)
                             return 0;
 
@@ -516,10 +516,10 @@ namespace Game.Chat
                     return id;
                 case 4:
                     {
-                        if (!uint.TryParse(param1Str, out uint glyph_prop_id))
+                        if (!uint.TryParse(param1Str, out var glyph_prop_id))
                             glyph_prop_id = 0;
 
-                        GlyphPropertiesRecord glyphPropEntry = CliDB.GlyphPropertiesStorage.LookupByKey(glyph_prop_id);
+                        var glyphPropEntry = CliDB.GlyphPropertiesStorage.LookupByKey(glyph_prop_id);
                         if (glyphPropEntry == null)
                             return 0;
 
@@ -536,7 +536,7 @@ namespace Game.Chat
             if (_session == null)
                 return null;
 
-            ObjectGuid selected = _session.GetPlayer().GetTarget();
+            var selected = _session.GetPlayer().GetTarget();
 
             if (selected.IsEmpty())
                 return _session.GetPlayer();
@@ -548,7 +548,7 @@ namespace Game.Chat
             if (_session == null)
                 return null;
 
-            Unit selected = _session.GetPlayer().GetSelectedUnit();
+            var selected = _session.GetPlayer().GetSelectedUnit();
             if (selected)
                 return selected;
 
@@ -559,7 +559,7 @@ namespace Game.Chat
             if (_session == null)
                 return null;
 
-            ObjectGuid selected = _session.GetPlayer().GetTarget();
+            var selected = _session.GetPlayer().GetTarget();
 
             if (selected.IsEmpty())
                 return GetNearbyGameObject();
@@ -578,12 +578,12 @@ namespace Game.Chat
             if (_session == null)
                 return null;
 
-            ObjectGuid selected = _session.GetPlayer().GetTarget();
+            var selected = _session.GetPlayer().GetTarget();
             if (selected.IsEmpty())
                 return _session.GetPlayer();
 
             // first try with selected target
-            Player targetPlayer = Global.ObjAccessor.FindConnectedPlayer(selected);
+            var targetPlayer = Global.ObjAccessor.FindConnectedPlayer(selected);
             // if the target is not a player, then return self
             if (!targetPlayer)
                 targetPlayer = _session.GetPlayer();
@@ -625,9 +625,9 @@ namespace Game.Chat
             if (_session == null)
                 return null;
 
-            Player pl = _session.GetPlayer();
-            NearestGameObjectCheck check = new NearestGameObjectCheck(pl);
-            GameObjectLastSearcher searcher = new GameObjectLastSearcher(pl, check);
+            var pl = _session.GetPlayer();
+            var check = new NearestGameObjectCheck(pl);
+            var searcher = new GameObjectLastSearcher(pl, check);
             Cell.VisitGridObjects(pl, searcher, MapConst.SizeofGrids);
             return searcher.GetTarget();
         }
@@ -646,7 +646,7 @@ namespace Game.Chat
         }
         public virtual bool NeedReportToTarget(Player chr)
         {
-            Player pl = _session.GetPlayer();
+            var pl = _session.GetPlayer();
             return pl != chr && pl.IsVisibleGloballyFor(chr);
         }
         public bool HasLowerSecurity(Player target, ObjectGuid guid, bool strong = false)
@@ -705,7 +705,7 @@ namespace Game.Chat
                 if (part.IsEmpty())
                     return false;
 
-                int partIndex = 0;
+                var partIndex = 0;
                 while (true)
                 {
                     if (partIndex >= part.Length)
@@ -764,7 +764,7 @@ namespace Game.Chat
             if (escapeCharacters)
                 str.Replace("|", "||");
 
-            ChatPkt messageChat = new ChatPkt();
+            var messageChat = new ChatPkt();
 
             var lines = new StringArray(str, "\n", "\r");
             for (var i = 0; i < lines.Length; ++i)
@@ -782,7 +782,7 @@ namespace Game.Chat
         public void SendGlobalSysMessage(string str)
         {
             // Chat output
-            ChatPkt data = new ChatPkt();
+            var data = new ChatPkt();
             data.Initialize(ChatMsg.System, Language.Universal, null, null, str);
             Global.WorldMgr.SendGlobalMessage(data);
         }
@@ -790,7 +790,7 @@ namespace Game.Chat
         public void SendGlobalGMSysMessage(string str)
         {
             // Chat output
-            ChatPkt data = new ChatPkt();
+            var data = new ChatPkt();
             data.Initialize(ChatMsg.System, Language.Universal, null, null, str);
             Global.WorldMgr.SendGlobalGMMessage(data);
         }
@@ -893,7 +893,7 @@ namespace Game.Chat
 
         void Send(string msg)
         {
-            ChatPkt chat = new ChatPkt();
+            var chat = new ChatPkt();
             chat.Initialize(ChatMsg.Whisper, Language.Addon, GetSession().GetPlayer(), GetSession().GetPlayer(), msg, 0, "", Locale.enUS, PREFIX);
             GetSession().SendPacket(chat);
         }
@@ -919,16 +919,16 @@ namespace Game.Chat
             if (!hadAck)
                 SendAck();
 
-            StringBuilder msg = new StringBuilder("m");
+            var msg = new StringBuilder("m");
             msg.Append(echo, 0, 4);
-            string body = str;
+            var body = str;
             if (escapeCharacters)
                 body.Replace("|", "||");
 
             int pos, lastpos;
             for (lastpos = 0, pos = body.IndexOf('\n', lastpos); pos != -1; lastpos = pos + 1, pos = body.IndexOf('\n', lastpos))
             {
-                StringBuilder line = msg;
+                var line = msg;
                 line.Append(body, lastpos, pos - lastpos);
                 Send(line.ToString());
             }

@@ -143,7 +143,7 @@ namespace Scripts.World.Areatriggers
 
         public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger, bool entered)
         {
-            GameObject go = player.FindNearestGameObject(GameObjectIds.CoilfangWaterfall, 35.0f);
+            var go = player.FindNearestGameObject(GameObjectIds.CoilfangWaterfall, 35.0f);
             if (go)
                 if (go.GetLootState() == LootState.Ready)
                     go.UseDoorOrButton();
@@ -319,7 +319,7 @@ namespace Scripts.World.Areatriggers
 
         public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger, bool entered)
         {
-            uint triggerId = areaTrigger.Id;
+            var triggerId = areaTrigger.Id;
             // Second trigger happened too early after first, skip for now
             if (GameTime.GetGameTime() - _triggerTimes[triggerId] < Misc.AreatriggerTalkCooldown)
                 return false;
@@ -327,12 +327,12 @@ namespace Scripts.World.Areatriggers
             switch (triggerId)
             {
                 case AreaTriggerIds.BrewfestDurotar:
-                    Creature tapper = player.FindNearestCreature(CreatureIds.TapperSwindlekeg, 20.0f);
+                    var tapper = player.FindNearestCreature(CreatureIds.TapperSwindlekeg, 20.0f);
                     if (tapper)
                         tapper.GetAI().Talk(TextIds.SayWelcome, player);
                     break;
                 case AreaTriggerIds.BrewfestDunMorogh:
-                    Creature ipfelkofer = player.FindNearestCreature(CreatureIds.IpfelkoferIronkeg, 20.0f);
+                    var ipfelkofer = player.FindNearestCreature(CreatureIds.IpfelkoferIronkeg, 20.0f);
                     if (ipfelkofer)
                         ipfelkofer.GetAI().Talk(TextIds.SayWelcome, player);
                     break;
@@ -419,11 +419,11 @@ namespace Scripts.World.Areatriggers
             if (player.GetQuestStatus(QuestIds.TheLonesomeWatcher) != QuestStatus.Incomplete)
                 return false;
 
-            Creature stormforgedMonitor = ObjectAccessor.GetCreature(player, stormforgedMonitorGUID);
+            var stormforgedMonitor = ObjectAccessor.GetCreature(player, stormforgedMonitorGUID);
             if (stormforgedMonitor)
                 return false;
 
-            Creature stormforgedEradictor = ObjectAccessor.GetCreature(player, stormforgedEradictorGUID);
+            var stormforgedEradictor = ObjectAccessor.GetCreature(player, stormforgedEradictorGUID);
             if (stormforgedEradictor)
                 return false;
 

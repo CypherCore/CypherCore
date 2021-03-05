@@ -26,7 +26,7 @@ namespace Game.DataStorage
     {
         internal static GameTable<T> Read<T>(string path, string fileName, ref uint loadedFileCount) where T : new()
         {
-            GameTable<T> storage = new GameTable<T>();
+            var storage = new GameTable<T>();
 
             if (!File.Exists(path + fileName))
             {
@@ -35,14 +35,14 @@ namespace Game.DataStorage
             }
             using (var reader = new StreamReader(path + fileName))
             {
-                string headers = reader.ReadLine();
+                var headers = reader.ReadLine();
                 if (headers.IsEmpty())
                 {
                     Log.outError(LogFilter.ServerLoading, "GameTable file {0} is empty.", fileName);
                     return storage;
                 }
 
-                List<T> data = new List<T>();
+                var data = new List<T>();
                 data.Add(new T()); // row id 0, unused
 
                 string line;
@@ -59,7 +59,7 @@ namespace Game.DataStorage
                         var field = fields[fieldIndex];
                         if (field.FieldType.IsArray)
                         {
-                            Array array = (Array)field.GetValue(obj);
+                            var array = (Array)field.GetValue(obj);
                             for (var i = 0; i < array.Length; ++i)
                                 array.SetValue(float.Parse(values[valueIndex++]), i);
                         }

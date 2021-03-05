@@ -208,7 +208,7 @@ namespace Game.Entities
 
             foreach (var app in GetOwnedAuras())
             {
-                Aura i_aura = app.Value;
+                var i_aura = app.Value;
                 if (i_aura == null)
                     continue;
 
@@ -233,7 +233,7 @@ namespace Game.Entities
             {
                 for (var i = 0; i < m_gameObj.Count; ++i)
                 {
-                    GameObject go = m_gameObj[i];
+                    var go = m_gameObj[i];
                     if (!go.IsSpawned())
                     {
                         go.SetOwnerGUID(ObjectGuid.Empty);
@@ -249,14 +249,14 @@ namespace Game.Entities
 
         public void HandleEmoteCommand(Emote anim_id)
         {
-            EmoteMessage packet = new EmoteMessage();
+            var packet = new EmoteMessage();
             packet.Guid = GetGUID();
             packet.EmoteID = (int)anim_id;
             SendMessageToSet(packet, true);
         }
         public void SendDurabilityLoss(Player receiver, uint percent)
         {
-            DurabilityDamageDeath packet = new DurabilityDamageDeath();
+            var packet = new DurabilityDamageDeath();
             packet.Percent = percent;
             receiver.SendPacket(packet);
         }
@@ -268,14 +268,14 @@ namespace Game.Entities
 
         public bool IsDisallowedMountForm(uint spellId, ShapeShiftForm form, uint displayId)
         {
-            SpellInfo transformSpellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
+            var transformSpellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
             if (transformSpellInfo != null)
                 if (transformSpellInfo.HasAttribute(SpellAttr0.CastableWhileMounted))
                     return false;
 
             if (form != 0)
             {
-                SpellShapeshiftFormRecord shapeshift = CliDB.SpellShapeshiftFormStorage.LookupByKey(form);
+                var shapeshift = CliDB.SpellShapeshiftFormStorage.LookupByKey(form);
                 if (shapeshift == null)
                     return true;
 
@@ -285,16 +285,16 @@ namespace Game.Entities
             if (displayId == GetNativeDisplayId())
                 return false;
 
-            CreatureDisplayInfoRecord display = CliDB.CreatureDisplayInfoStorage.LookupByKey(displayId);
+            var display = CliDB.CreatureDisplayInfoStorage.LookupByKey(displayId);
             if (display == null)
                 return true;
 
-            CreatureDisplayInfoExtraRecord displayExtra = CliDB.CreatureDisplayInfoExtraStorage.LookupByKey(display.ExtendedDisplayInfoID);
+            var displayExtra = CliDB.CreatureDisplayInfoExtraStorage.LookupByKey(display.ExtendedDisplayInfoID);
             if (displayExtra == null)
                 return true;
 
-            CreatureModelDataRecord model = CliDB.CreatureModelDataStorage.LookupByKey(display.ModelID);
-            ChrRacesRecord race = CliDB.ChrRacesStorage.LookupByKey(displayExtra.DisplayRaceID);
+            var model = CliDB.CreatureModelDataStorage.LookupByKey(display.ModelID);
+            var race = CliDB.ChrRacesStorage.LookupByKey(displayExtra.DisplayRaceID);
 
             if (model != null && !Convert.ToBoolean(model.Flags & 0x80))
                 if (race != null && !Convert.ToBoolean(race.Flags & 0x4))
@@ -305,7 +305,7 @@ namespace Game.Entities
 
         public void SendClearTarget()
         {
-            BreakTarget breakTarget = new BreakTarget();
+            var breakTarget = new BreakTarget();
             breakTarget.UnitGUID = GetGUID();
             SendMessageToSet(breakTarget, false);
         }
@@ -365,8 +365,8 @@ namespace Game.Entities
             if (!target)
                 return;
 
-            Locale locale = target.GetSession().GetSessionDbLocaleIndex();
-            ChatPkt data = new ChatPkt();
+            var locale = target.GetSession().GetSessionDbLocaleIndex();
+            var data = new ChatPkt();
             data.Initialize(isBossWhisper ? ChatMsg.RaidBossWhisper : ChatMsg.MonsterWhisper, Language.Universal, this, target, text, 0, "", locale);
             target.SendPacket(data);
         }
@@ -405,15 +405,15 @@ namespace Game.Entities
             if (!target)
                 return;
 
-            BroadcastTextRecord bct = CliDB.BroadcastTextStorage.LookupByKey(textId);
+            var bct = CliDB.BroadcastTextStorage.LookupByKey(textId);
             if (bct == null)
             {
                 Log.outError(LogFilter.Unit, "Unit.Whisper: `broadcast_text` was not {0} found", textId);
                 return;
             }
 
-            Locale locale = target.GetSession().GetSessionDbLocaleIndex();
-            ChatPkt data = new ChatPkt();
+            var locale = target.GetSession().GetSessionDbLocaleIndex();
+            var data = new ChatPkt();
             data.Initialize(isBossWhisper ? ChatMsg.RaidBossWhisper : ChatMsg.MonsterWhisper, Language.Universal, this, target, Global.DB2Mgr.GetBroadcastTextValue(bct, locale, GetGender()), 0, "", locale);
             target.SendPacket(data);
         }
@@ -426,7 +426,7 @@ namespace Game.Entities
             {
                 base.UpdateObjectVisibility(true);
                 // call MoveInLineOfSight for nearby creatures
-                AIRelocationNotifier notifier = new AIRelocationNotifier(this);
+                var notifier = new AIRelocationNotifier(this);
                 Cell.VisitAllObjects(this, notifier, GetVisibilityRange());
             }
         }
@@ -459,7 +459,7 @@ namespace Game.Entities
                 {
                     Log.outFatal(LogFilter.Unit, "Unit {0} has charmer guid when removed from world", GetEntry());
                 }
-                Unit owner = GetOwner();
+                var owner = GetOwner();
                 if (owner != null)
                 {
                     if (owner.m_Controlled.Contains(this))
@@ -513,10 +513,10 @@ namespace Game.Entities
         }
         public Creature GetVehicleCreatureBase()
         {
-            Unit veh = GetVehicleBase();
+            var veh = GetVehicleBase();
             if (veh != null)
             {
-                Creature c = veh.ToCreature();
+                var c = veh.ToCreature();
                 if (c != null)
                     return c;
             }
@@ -524,7 +524,7 @@ namespace Game.Entities
         }
         public ITransport GetDirectTransport()
         {
-            Vehicle veh = GetVehicle();
+            var veh = GetVehicle();
             if (veh != null)
                 return veh;
             return GetTransport();
@@ -551,7 +551,7 @@ namespace Game.Entities
 
         List<DynamicObject> GetDynObjects(uint spellId)
         {
-            List<DynamicObject> dynamicobjects = new List<DynamicObject>();
+            var dynamicobjects = new List<DynamicObject>();
             foreach (var obj in m_dynObj)
                 if (obj.GetSpellId() == spellId)
                     dynamicobjects.Add(obj);
@@ -582,7 +582,7 @@ namespace Game.Entities
 
         List<GameObject> GetGameObjects(uint spellId)
         {
-            List<GameObject> gameobjects = new List<GameObject>();
+            var gameobjects = new List<GameObject>();
             foreach (var obj in m_gameObj)
                 if (obj.GetSpellId() == spellId)
                     gameobjects.Add(obj);
@@ -600,7 +600,7 @@ namespace Game.Entities
 
             if (gameObj.GetSpellId() != 0)
             {
-                SpellInfo createBySpell = Global.SpellMgr.GetSpellInfo(gameObj.GetSpellId(), GetMap().GetDifficultyID());
+                var createBySpell = Global.SpellMgr.GetSpellInfo(gameObj.GetSpellId(), GetMap().GetDifficultyID());
                 // Need disable spell use for owner
                 if (createBySpell != null && createBySpell.HasAttribute(SpellAttr0.DisabledWhileActive))
                     // note: item based cooldowns and cooldown spell mods with charges ignored (unknown existing cases)
@@ -628,12 +628,12 @@ namespace Game.Entities
             }
 
             // GO created by some spell
-            uint spellid = gameObj.GetSpellId();
+            var spellid = gameObj.GetSpellId();
             if (spellid != 0)
             {
                 RemoveAurasDueToSpell(spellid);
 
-                SpellInfo createBySpell = Global.SpellMgr.GetSpellInfo(spellid, GetMap().GetDifficultyID());
+                var createBySpell = Global.SpellMgr.GetSpellInfo(spellid, GetMap().GetDifficultyID());
                 // Need activate spell use for owner
                 if (createBySpell != null && createBySpell.IsCooldownStartedOnEvent())
                     // note: item based cooldowns and cooldown spell mods with charges ignored (unknown existing cases)
@@ -703,7 +703,7 @@ namespace Game.Entities
 
         AreaTrigger GetAreaTrigger(uint spellId)
         {
-            List<AreaTrigger> areaTriggers = GetAreaTriggers(spellId);
+            var areaTriggers = GetAreaTriggers(spellId);
             return areaTriggers.Empty() ? null : areaTriggers[0];
         }
 
@@ -719,7 +719,7 @@ namespace Game.Entities
 
             for (var i = 0; i < m_areaTrigger.Count; ++i)
             {
-                AreaTrigger areaTrigger = m_areaTrigger[i];
+                var areaTrigger = m_areaTrigger[i];
                 if (areaTrigger.GetSpellId() == spellId)
                     areaTrigger.Remove();
             }
@@ -730,7 +730,7 @@ namespace Game.Entities
             if (m_areaTrigger.Empty())
                 return;
 
-            foreach (AreaTrigger areaTrigger in m_areaTrigger)
+            foreach (var areaTrigger in m_areaTrigger)
             {
                 if (areaTrigger.GetAuraEffect() == aurEff)
                 {
@@ -784,10 +784,10 @@ namespace Game.Entities
 
         public Guardian GetGuardianPet()
         {
-            ObjectGuid pet_guid = GetPetGUID();
+            var pet_guid = GetPetGUID();
             if (!pet_guid.IsEmpty())
             {
-                Creature pet = ObjectAccessor.GetCreatureOrPetOrVehicle(this, pet_guid);
+                var pet = ObjectAccessor.GetCreatureOrPetOrVehicle(this, pet_guid);
                 if (pet != null)
                     if (pet.HasUnitTypeMask(UnitTypeMask.Guardian))
                         return (Guardian)pet;
@@ -801,7 +801,7 @@ namespace Game.Entities
 
         public Unit SelectNearbyTarget(Unit exclude = null, float dist = SharedConst.NominalMeleeRange)
         {
-            List<Unit> targets = new List<Unit>();
+            var targets = new List<Unit>();
             var u_check = new AnyUnfriendlyUnitInObjectRangeCheck(this, this, dist);
             var searcher = new UnitListSearcher(this, targets, u_check);
             Cell.VisitAllObjects(this, searcher, dist);
@@ -855,7 +855,7 @@ namespace Game.Entities
             if (aurApp.HasRemoveMode())
                 return;
 
-            Player player = ToPlayer();
+            var player = ToPlayer();
             if (player != null)
             {
                 if (vehicle.GetBase().IsTypeId(TypeId.Player) && player.IsInCombat())
@@ -929,9 +929,9 @@ namespace Game.Entities
                 return;
 
             // This should be done before dismiss, because there may be some aura removal
-            Vehicle vehicle = m_vehicle.RemovePassenger(this);
+            var vehicle = m_vehicle.RemovePassenger(this);
 
-            Player player = ToPlayer();
+            var player = ToPlayer();
 
             // If the player is on mounted duel and exits the mount, he should immediatly lose the duel
             if (player && player.duel != null && player.duel.isMounted)
@@ -951,9 +951,9 @@ namespace Game.Entities
             if (player != null)
                 player.SetFallInformation(0, GetPositionZ());
 
-            float height = pos.GetPositionZ();
+            var height = pos.GetPositionZ();
 
-            MoveSplineInit init = new MoveSplineInit(this);
+            var init = new MoveSplineInit(this);
 
             // Creatures without inhabit type air should begin falling after exiting the vehicle
             if (IsTypeId(TypeId.Unit) && !ToCreature().CanFly() && height > GetMap().GetWaterOrGroundLevel(GetPhaseShift(), pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), ref height) + 0.1f)
@@ -984,14 +984,14 @@ namespace Game.Entities
 
         void SendCancelOrphanSpellVisual(uint id)
         {
-            CancelOrphanSpellVisual cancelOrphanSpellVisual = new CancelOrphanSpellVisual();
+            var cancelOrphanSpellVisual = new CancelOrphanSpellVisual();
             cancelOrphanSpellVisual.SpellVisualID = id;
             SendMessageToSet(cancelOrphanSpellVisual, true);
         }
 
         void SendPlayOrphanSpellVisual(ObjectGuid target, uint spellVisualId, float travelSpeed, bool speedAsTime = false, bool withSourceOrientation = false)
         {
-            PlayOrphanSpellVisual playOrphanSpellVisual = new PlayOrphanSpellVisual();
+            var playOrphanSpellVisual = new PlayOrphanSpellVisual();
             playOrphanSpellVisual.SourceLocation = GetPosition();
             if (withSourceOrientation)
                 playOrphanSpellVisual.SourceRotation = new Vector3(0.0f, 0.0f, GetOrientation());
@@ -1005,7 +1005,7 @@ namespace Game.Entities
 
         void SendPlayOrphanSpellVisual(Vector3 targetLocation, uint spellVisualId, float travelSpeed, bool speedAsTime = false, bool withSourceOrientation = false)
         {
-            PlayOrphanSpellVisual playOrphanSpellVisual = new PlayOrphanSpellVisual();
+            var playOrphanSpellVisual = new PlayOrphanSpellVisual();
             playOrphanSpellVisual.SourceLocation = GetPosition();
             if (withSourceOrientation)
                 playOrphanSpellVisual.SourceRotation = new Vector3(0.0f, 0.0f, GetOrientation());
@@ -1019,7 +1019,7 @@ namespace Game.Entities
 
         void SendCancelSpellVisual(uint id)
         {
-            CancelSpellVisual cancelSpellVisual = new CancelSpellVisual();
+            var cancelSpellVisual = new CancelSpellVisual();
             cancelSpellVisual.Source = GetGUID();
             cancelSpellVisual.SpellVisualID = id;
             SendMessageToSet(cancelSpellVisual, true);
@@ -1027,7 +1027,7 @@ namespace Game.Entities
 
         public void SendPlaySpellVisual(ObjectGuid targetGuid, uint spellVisualId, uint missReason, uint reflectStatus, float travelSpeed, bool speedAsTime = false)
         {
-            PlaySpellVisual playSpellVisual = new PlaySpellVisual();
+            var playSpellVisual = new PlaySpellVisual();
             playSpellVisual.Source = GetGUID();
             playSpellVisual.Target = targetGuid; // exclusive with TargetPosition
             playSpellVisual.SpellVisualID = spellVisualId;
@@ -1040,7 +1040,7 @@ namespace Game.Entities
 
         public void SendPlaySpellVisual(Vector3 targetPosition, float launchDelay, uint spellVisualId, uint missReason, uint reflectStatus, float travelSpeed, bool speedAsTime = false)
         {
-            PlaySpellVisual playSpellVisual = new PlaySpellVisual();
+            var playSpellVisual = new PlaySpellVisual();
             playSpellVisual.Source = GetGUID();
             playSpellVisual.TargetPosition = targetPosition; // exclusive with Target
             playSpellVisual.LaunchDelay = launchDelay;
@@ -1054,7 +1054,7 @@ namespace Game.Entities
 
         void SendCancelSpellVisualKit(uint id)
         {
-            CancelSpellVisualKit cancelSpellVisualKit = new CancelSpellVisualKit();
+            var cancelSpellVisualKit = new CancelSpellVisualKit();
             cancelSpellVisualKit.Source = GetGUID();
             cancelSpellVisualKit.SpellVisualKitID = id;
             SendMessageToSet(cancelSpellVisualKit, true);
@@ -1062,7 +1062,7 @@ namespace Game.Entities
 
         public void SendPlaySpellVisualKit(uint id, uint type, uint duration)
         {
-            PlaySpellVisualKit playSpellVisualKit = new PlaySpellVisualKit();
+            var playSpellVisualKit = new PlaySpellVisualKit();
             playSpellVisualKit.Unit = GetGUID();
             playSpellVisualKit.KitRecID = id;
             playSpellVisualKit.KitType = type;
@@ -1072,10 +1072,10 @@ namespace Game.Entities
 
         void CancelSpellMissiles(uint spellId, bool reverseMissile = false)
         {
-            bool hasMissile = false;
+            var hasMissile = false;
             foreach (var pair in m_Events.GetEvents())
             {
-                Spell spell = Spell.ExtractSpellFromEvent(pair.Value);
+                var spell = Spell.ExtractSpellFromEvent(pair.Value);
                 if (spell != null)
                 {
                     if (spell.GetSpellInfo().Id == spellId)
@@ -1088,7 +1088,7 @@ namespace Game.Entities
 
             if (hasMissile)
             {
-                MissileCancel packet = new MissileCancel();
+                var packet = new MissileCancel();
                 packet.OwnerGUID = GetGUID();
                 packet.SpellID = spellId;
                 packet.Reverse = reverseMissile;
@@ -1103,7 +1103,7 @@ namespace Game.Entities
                 if (m_SummonSlot[i].IsEmpty())
                     continue;
 
-                Creature OldTotem = GetMap().GetCreature(m_SummonSlot[i]);
+                var OldTotem = GetMap().GetCreature(m_SummonSlot[i]);
                 if (OldTotem != null)
                     if (OldTotem.IsSummon())
                         OldTotem.ToTempSummon().UnSummon();
@@ -1120,7 +1120,7 @@ namespace Game.Entities
 
         public bool IsPossessing()
         {
-            Unit u = GetCharm();
+            var u = GetCharm();
             if (u != null)
                 return u.IsPossessed();
             else
@@ -1128,10 +1128,10 @@ namespace Game.Entities
         }
         public Unit GetCharm()
         {
-            ObjectGuid charm_guid = GetCharmGUID();
+            var charm_guid = GetCharmGUID();
             if (!charm_guid.IsEmpty())
             {
-                Unit pet = Global.ObjAccessor.GetUnit(this, charm_guid);
+                var pet = Global.ObjAccessor.GetUnit(this, charm_guid);
                 if (pet != null)
                     return pet;
 
@@ -1153,15 +1153,15 @@ namespace Game.Entities
 
             if (IsTypeId(TypeId.Unit) || !ToPlayer().GetSession().PlayerLogout())
             {
-                HostileRefManager refManager = GetHostileRefManager();
-                HostileReference refe = refManager.GetFirst();
+                var refManager = GetHostileRefManager();
+                var refe = refManager.GetFirst();
 
                 while (refe != null)
                 {
-                    Unit unit = refe.GetSource().GetOwner();
+                    var unit = refe.GetSource().GetOwner();
                     if (unit != null)
                     {
-                        Creature creature = unit.ToCreature();
+                        var creature = unit.ToCreature();
                         if (creature != null)
                             refManager.SetOnlineOfflineState(creature, creature.IsInPhase(this));
                     }
@@ -1172,8 +1172,8 @@ namespace Game.Entities
                 // modify threat lists for new phasemask
                 if (!IsTypeId(TypeId.Player))
                 {
-                    List<HostileReference> threatList = GetThreatManager().GetThreatList();
-                    List<HostileReference> offlineThreatList = GetThreatManager().GetOfflineThreatList();
+                    var threatList = GetThreatManager().GetThreatList();
+                    var offlineThreatList = GetThreatManager().GetOfflineThreatList();
 
                     // merge expects sorted lists
                     threatList.Sort();
@@ -1182,7 +1182,7 @@ namespace Game.Entities
 
                     foreach (var host in threatList)
                     {
-                        Unit unit = host.GetTarget();
+                        var unit = host.GetTarget();
                         if (unit != null)
                             unit.GetHostileRefManager().SetOnlineOfflineState(ToCreature(), unit.IsInPhase(this));
                     }
@@ -1203,26 +1203,26 @@ namespace Game.Entities
                     break;
             }
 
-            Player thisPlayer = ToPlayer();
+            var thisPlayer = ToPlayer();
             if (thisPlayer != null)
             {
-                Aura artifactAura = GetAura(PlayerConst.ArtifactsAllWeaponsGeneralWeaponEquippedPassive);
+                var artifactAura = GetAura(PlayerConst.ArtifactsAllWeaponsGeneralWeaponEquippedPassive);
                 if (artifactAura != null)
                 {
                     Item artifact = ToPlayer().GetItemByGuid(artifactAura.GetCastItemGUID());
                     if (artifact != null)
                     {
-                        ArtifactAppearanceRecord artifactAppearance = CliDB.ArtifactAppearanceStorage.LookupByKey(artifact.GetModifier(ItemModifier.ArtifactAppearanceId));
+                        var artifactAppearance = CliDB.ArtifactAppearanceStorage.LookupByKey(artifact.GetModifier(ItemModifier.ArtifactAppearanceId));
                         if (artifactAppearance != null)
                             if ((ShapeShiftForm)artifactAppearance.OverrideShapeshiftFormID == form)
                                 return artifactAppearance.OverrideShapeshiftDisplayID;
                     }
                 }
 
-                ShapeshiftFormModelData formModelData = Global.DB2Mgr.GetShapeshiftFormModelData(GetRace(), thisPlayer.GetNativeSex(), form);
+                var formModelData = Global.DB2Mgr.GetShapeshiftFormModelData(GetRace(), thisPlayer.GetNativeSex(), form);
                 if (formModelData != null)
                 {
-                    bool useRandom = false;
+                    var useRandom = false;
                     switch (form)
                     {
                         case ShapeShiftForm.CatForm:
@@ -1246,13 +1246,13 @@ namespace Game.Entities
 
                     if (useRandom)
                     {
-                        List<uint> displayIds = new List<uint>();
+                        var displayIds = new List<uint>();
                         for (var i = 0; i < formModelData.Choices.Count; ++i)
                         {
-                            ChrCustomizationDisplayInfoRecord displayInfo = formModelData.Displays[i];
+                            var displayInfo = formModelData.Displays[i];
                             if (displayInfo != null)
                             {
-                                ChrCustomizationReqRecord choiceReq = CliDB.ChrCustomizationReqStorage.LookupByKey(formModelData.Choices[i].ChrCustomizationReqID);
+                                var choiceReq = CliDB.ChrCustomizationReqStorage.LookupByKey(formModelData.Choices[i].ChrCustomizationReqID);
                                 if (choiceReq == null || thisPlayer.GetSession().MeetsChrCustomizationReq(choiceReq, GetClass(), false, thisPlayer.m_playerData.Customizations))
                                     displayIds.Add(displayInfo.DisplayID);
                             }
@@ -1263,7 +1263,7 @@ namespace Game.Entities
                     }
                     else
                     {
-                        uint formChoice = thisPlayer.GetCustomizationChoice(formModelData.OptionID);
+                        var formChoice = thisPlayer.GetCustomizationChoice(formModelData.OptionID);
                         if (formChoice != 0)
                         {
                             var choiceIndex = formModelData.Choices.FindIndex(choice =>
@@ -1273,7 +1273,7 @@ namespace Game.Entities
 
                             if (choiceIndex != -1)
                             {
-                                ChrCustomizationDisplayInfoRecord displayInfo = formModelData.Displays[choiceIndex];
+                                var displayInfo = formModelData.Displays[choiceIndex];
                                 if (displayInfo != null)
                                     return displayInfo.DisplayID;
                             }
@@ -1292,7 +1292,7 @@ namespace Game.Entities
             }
 
             uint modelid = 0;
-            SpellShapeshiftFormRecord formEntry = CliDB.SpellShapeshiftFormStorage.LookupByKey(form);
+            var formEntry = CliDB.SpellShapeshiftFormStorage.LookupByKey(form);
             if (formEntry != null && formEntry.CreatureDisplayID[0] != 0)
             {
                 // Take the alliance modelid as default
@@ -1362,7 +1362,7 @@ namespace Game.Entities
                 SetEmoteState(Emote.OneshotNone);
 
                 // players in instance don't have ZoneScript, but they have InstanceScript
-                ZoneScript zoneScript = GetZoneScript() != null ? GetZoneScript() : GetInstanceScript();
+                var zoneScript = GetZoneScript() != null ? GetZoneScript() : GetInstanceScript();
                 if (zoneScript != null)
                     zoneScript.OnUnitDeath(this);
             }
@@ -1401,10 +1401,10 @@ namespace Game.Entities
 
         public int CalcSpellDuration(SpellInfo spellProto)
         {
-            sbyte comboPoints = (sbyte)(m_playerMovingMe != null ? m_playerMovingMe.GetComboPoints() : 0);
+            var comboPoints = (sbyte)(m_playerMovingMe != null ? m_playerMovingMe.GetComboPoints() : 0);
 
-            int minduration = spellProto.GetDuration();
-            int maxduration = spellProto.GetMaxDuration();
+            var minduration = spellProto.GetDuration();
+            var maxduration = spellProto.GetMaxDuration();
 
             int duration;
 
@@ -1429,20 +1429,20 @@ namespace Game.Entities
             // cut duration only of negative effects
             if (!positive)
             {
-                uint mechanic = spellProto.GetSpellMechanicMaskByEffectMask(effectMask);
+                var mechanic = spellProto.GetSpellMechanicMaskByEffectMask(effectMask);
 
                 int durationMod;
-                int durationMod_always = 0;
-                int durationMod_not_stack = 0;
+                var durationMod_always = 0;
+                var durationMod_not_stack = 0;
 
                 for (byte i = 1; i <= (int)Mechanics.Enraged; ++i)
                 {
                     if (!Convert.ToBoolean(mechanic & 1 << i))
                         continue;
                     // Find total mod value (negative bonus)
-                    int new_durationMod_always = target.GetTotalAuraModifierByMiscValue(AuraType.MechanicDurationMod, i);
+                    var new_durationMod_always = target.GetTotalAuraModifierByMiscValue(AuraType.MechanicDurationMod, i);
                     // Find max mod (negative bonus)
-                    int new_durationMod_not_stack = target.GetMaxNegativeAuraModifierByMiscValue(AuraType.MechanicDurationModNotStack, i);
+                    var new_durationMod_not_stack = target.GetMaxNegativeAuraModifierByMiscValue(AuraType.MechanicDurationModNotStack, i);
                     // Check if mods applied before were weaker
                     if (new_durationMod_always < durationMod_always)
                         durationMod_always = new_durationMod_always;
@@ -1484,7 +1484,7 @@ namespace Game.Entities
                        Global.SpellMgr.IsSpellMemberOfSpellGroup(spellProto.Id, SpellGroup.ElixirBattle) ||
                        Global.SpellMgr.IsSpellMemberOfSpellGroup(spellProto.Id, SpellGroup.ElixirGuardian)))
                     {
-                        SpellEffectInfo effect = spellProto.GetEffect(0);
+                        var effect = spellProto.GetEffect(0);
                         if (target.HasAura(53042) && effect != null && target.HasSpell(effect.TriggerSpell))
                             duration *= 2;
                     }
@@ -1506,17 +1506,17 @@ namespace Game.Entities
             // aura mustn't be already applied on target
             Cypher.Assert(!aura.IsAppliedOnTarget(GetGUID()), "Unit._CreateAuraApplication: aura musn't be applied on target");
 
-            SpellInfo aurSpellInfo = aura.GetSpellInfo();
-            uint aurId = aurSpellInfo.Id;
+            var aurSpellInfo = aura.GetSpellInfo();
+            var aurId = aurSpellInfo.Id;
 
             // ghost spell check, allow apply any auras at player loading in ghost mode (will be cleanup after load)
             if (!IsAlive() && !aurSpellInfo.IsDeathPersistent() &&
                 (!IsTypeId(TypeId.Player) || !ToPlayer().GetSession().PlayerLoading()))
                 return null;
 
-            Unit caster = aura.GetCaster();
+            var caster = aura.GetCaster();
 
-            AuraApplication aurApp = new AuraApplication(this, caster, aura, effMask);
+            var aurApp = new AuraApplication(this, caster, aura, effMask);
             m_appliedAuras.Add(aurId, aurApp);
 
             if (aurSpellInfo.HasAnyAuraInterruptFlag())
@@ -1525,7 +1525,7 @@ namespace Game.Entities
                 AddInterruptMask(aurSpellInfo.AuraInterruptFlags);
             }
 
-            AuraStateType aState = aura.GetSpellInfo().GetAuraState();
+            var aState = aura.GetSpellInfo().GetAuraState();
             if (aState != 0)
                 m_auraStateAuras.Add(aState, aurApp);
 
@@ -1534,13 +1534,13 @@ namespace Game.Entities
         }
         public void AddInterruptMask(uint[] mask)
         {
-            for (int i = 0; i < m_interruptMask.Length; ++i)
+            for (var i = 0; i < m_interruptMask.Length; ++i)
                 m_interruptMask[i] |= mask[i];
         }
 
         void _UpdateAutoRepeatSpell()
         {
-            SpellInfo autoRepeatSpellInfo = m_currentSpells[CurrentSpellTypes.AutoRepeat].m_spellInfo;
+            var autoRepeatSpellInfo = m_currentSpells[CurrentSpellTypes.AutoRepeat].m_spellInfo;
 
             // check "realtime" interrupts
             // don't cancel spells which are affected by a SPELL_AURA_CAST_WHILE_WALKING effect
@@ -1563,7 +1563,7 @@ namespace Game.Entities
             if (IsAttackReady(WeaponAttackType.RangedAttack))
             {
                 // Check if able to cast
-                SpellCastResult result = m_currentSpells[CurrentSpellTypes.AutoRepeat].CheckCast(true);
+                var result = m_currentSpells[CurrentSpellTypes.AutoRepeat].CheckCast(true);
                 if (result != SpellCastResult.SpellCastOk)
                 {
                     if (autoRepeatSpellInfo.Id != 75)
@@ -1575,7 +1575,7 @@ namespace Game.Entities
                 }
 
                 // we want to shoot
-                Spell spell = new Spell(this, autoRepeatSpellInfo, TriggerCastFlags.FullMask);
+                var spell = new Spell(this, autoRepeatSpellInfo, TriggerCastFlags.FullMask);
                 spell.Prepare(m_currentSpells[CurrentSpellTypes.AutoRepeat].m_targets);
 
                 // all went good, reset attack
@@ -1585,7 +1585,7 @@ namespace Game.Entities
 
         public void UpdateDisplayPower()
         {
-            PowerType displayPower = PowerType.Mana;
+            var displayPower = PowerType.Mana;
             switch (GetShapeshiftForm())
             {
                 case ShapeShiftForm.Ghoul:
@@ -1604,21 +1604,21 @@ namespace Game.Entities
                         var powerTypeAuras = GetAuraEffectsByType(AuraType.ModPowerDisplay);
                         if (!powerTypeAuras.Empty())
                         {
-                            AuraEffect powerTypeAura = powerTypeAuras.First();
+                            var powerTypeAura = powerTypeAuras.First();
                             displayPower = (PowerType)powerTypeAura.GetMiscValue();
                         }
                         else if (GetTypeId() == TypeId.Player)
                         {
-                            ChrClassesRecord cEntry = CliDB.ChrClassesStorage.LookupByKey(GetClass());
+                            var cEntry = CliDB.ChrClassesStorage.LookupByKey(GetClass());
                             if (cEntry != null && cEntry.DisplayPower < PowerType.Max)
                                 displayPower = cEntry.DisplayPower;
                         }
                         else if (GetTypeId() == TypeId.Unit)
                         {
-                            Vehicle vehicle = GetVehicleKit();
+                            var vehicle = GetVehicleKit();
                             if (vehicle)
                             {
-                                PowerDisplayRecord powerDisplay = CliDB.PowerDisplayStorage.LookupByKey(vehicle.GetVehicleInfo().PowerDisplayID[0]);
+                                var powerDisplay = CliDB.PowerDisplayStorage.LookupByKey(vehicle.GetVehicleInfo().PowerDisplayID[0]);
                                 if (powerDisplay != null)
                                     displayPower = (PowerType)powerDisplay.ActualType;
                                 else if (GetClass() == Class.Rogue)
@@ -1626,7 +1626,7 @@ namespace Game.Entities
                             }
                             else
                             {
-                                Pet pet = ToPet();
+                                var pet = ToPet();
                                 if (pet)
                                 {
                                     if (pet.GetPetType() == PetType.Hunter) // Hunter pets have focus
@@ -1645,15 +1645,15 @@ namespace Game.Entities
 
         public FactionTemplateRecord GetFactionTemplateEntry()
         {
-            FactionTemplateRecord entry = CliDB.FactionTemplateStorage.LookupByKey(GetFaction());
+            var entry = CliDB.FactionTemplateStorage.LookupByKey(GetFaction());
             if (entry == null)
             {
-                Player player = ToPlayer();
+                var player = ToPlayer();
                 if (player != null)
                     Log.outError(LogFilter.Unit, "Player {0} has invalid faction (faction template id) #{1}", player.GetName(), GetFaction());
                 else
                 {
-                    Creature creature = ToCreature();
+                    var creature = ToCreature();
                     if (creature != null)
                         Log.outError(LogFilter.Unit, "Creature (template id: {0}) has invalid faction (faction template id) #{1}", creature.GetCreatureTemplate().Entry, GetFaction());
                     else
@@ -1665,7 +1665,7 @@ namespace Game.Entities
 
         public bool IsInFeralForm()
         {
-            ShapeShiftForm form = GetShapeshiftForm();
+            var form = GetShapeshiftForm();
             return form == ShapeShiftForm.CatForm || form == ShapeShiftForm.BearForm || form == ShapeShiftForm.DireBearForm || form == ShapeShiftForm.GhostWolf;
         }
         public bool IsControlledByPlayer() { return m_ControlledByPlayer; }
@@ -1680,7 +1680,7 @@ namespace Game.Entities
 
         public uint GetCreatureTypeMask()
         {
-            uint creatureType = (uint)GetCreatureType();
+            var creatureType = (uint)GetCreatureType();
             return (uint)(creatureType >= 1 ? (1 << (int)(creatureType - 1)) : 0);
         }
 
@@ -1698,7 +1698,7 @@ namespace Game.Entities
                 return;
             }
 
-            PlayOneShotAnimKit packet = new PlayOneShotAnimKit();
+            var packet = new PlayOneShotAnimKit();
             packet.Unit = GetGUID();
             packet.AnimKitID = animKitId;
             SendMessageToSet(packet, true);
@@ -1714,7 +1714,7 @@ namespace Game.Entities
 
             _aiAnimKitId = animKitId;
 
-            SetAIAnimKit data = new SetAIAnimKit();
+            var data = new SetAIAnimKit();
             data.Unit = GetGUID();
             data.AnimKitID = animKitId;
             SendMessageToSet(data, true);
@@ -1732,7 +1732,7 @@ namespace Game.Entities
 
             _movementAnimKitId = animKitId;
 
-            SetMovementAnimKit data = new SetMovementAnimKit();
+            var data = new SetMovementAnimKit();
             data.Unit = GetGUID();
             data.AnimKitID = animKitId;
             SendMessageToSet(data, true);
@@ -1750,7 +1750,7 @@ namespace Game.Entities
 
             _meleeAnimKitId = animKitId;
 
-            SetMeleeAnimKit data = new SetMeleeAnimKit();
+            var data = new SetMeleeAnimKit();
             data.Unit = GetGUID();
             data.AnimKitID = animKitId;
             SendMessageToSet(data, true);
@@ -1790,7 +1790,7 @@ namespace Game.Entities
         {
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Level), lvl);
 
-            Player player = ToPlayer();
+            var player = ToPlayer();
             if (player != null)
             {
                 if (player.GetGroup())
@@ -1816,7 +1816,7 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.DisplayID), modelId);
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.DisplayScale), displayScale);
             // Set Gender by modelId
-            CreatureModelInfo minfo = Global.ObjectMgr.GetCreatureModelInfo(modelId);
+            var minfo = Global.ObjectMgr.GetCreatureModelInfo(modelId);
             if (minfo != null)
                 SetGender((Gender)minfo.gender);
         }
@@ -1830,7 +1830,7 @@ namespace Game.Entities
                 // iterate over already applied transform auras - from newest to oldest
                 foreach (var eff in transforms)
                 {
-                    AuraApplication aurApp = eff.GetBase().GetApplicationOfTarget(GetGUID());
+                    var aurApp = eff.GetBase().GetApplicationOfTarget(GetGUID());
                     if (aurApp != null)
                     {
                         if (handledAura == null)
@@ -1839,7 +1839,7 @@ namespace Game.Entities
                                 handledAura = eff;
                             else
                             {
-                                CreatureTemplate ci = Global.ObjectMgr.GetCreatureTemplate((uint)eff.GetMiscValue());
+                                var ci = Global.ObjectMgr.GetCreatureTemplate((uint)eff.GetMiscValue());
                                 if (ci != null)
                                     if (!IsDisallowedMountForm(eff.GetId(), ShapeShiftForm.None, ObjectManager.ChooseDisplayId(ci).CreatureDisplayID))
                                         handledAura = eff;
@@ -1868,7 +1868,7 @@ namespace Game.Entities
             else if (!shapeshiftAura.Empty()) // we've found shapeshift
             {
                 // only one such aura possible at a time
-                uint modelId = GetModelForForm(GetShapeshiftForm(), shapeshiftAura[0].GetId());
+                var modelId = GetModelForForm(GetShapeshiftForm(), shapeshiftAura[0].GetId());
                 if (modelId != 0)
                 {
                     if (!ignorePositiveAurasPreventingMounting || !IsDisallowedMountForm(0, GetShapeshiftForm(), modelId))
@@ -1898,7 +1898,7 @@ namespace Game.Entities
 
         public virtual Unit GetOwner()
         {
-            ObjectGuid ownerid = GetOwnerGUID();
+            var ownerid = GetOwnerGUID();
             if (!ownerid.IsEmpty())
                 return Global.ObjAccessor.GetUnit(this, ownerid);
 
@@ -1917,11 +1917,11 @@ namespace Game.Entities
                 return;
 
             // Update owner dependent fields
-            Player player = Global.ObjAccessor.GetPlayer(this, owner);
+            var player = Global.ObjAccessor.GetPlayer(this, owner);
             if (player == null || !player.HaveAtClient(this)) // if player cannot see this unit yet, he will receive needed data with create object
                 return;
 
-            UpdateData udata = new UpdateData(GetMapId());
+            var udata = new UpdateData(GetMapId());
             UpdateObject packet;
             BuildValuesUpdateBlockForPlayerWithFlag(udata, UpdateFieldFlag.Owner, player);
             udata.BuildPacket(out packet);
@@ -1947,7 +1947,7 @@ namespace Game.Entities
         }
         public ObjectGuid GetCharmerOrOwnerOrOwnGUID()
         {
-            ObjectGuid guid = GetCharmerOrOwnerGUID();
+            var guid = GetCharmerOrOwnerGUID();
             if (!guid.IsEmpty())
                 return guid;
 
@@ -1955,14 +1955,14 @@ namespace Game.Entities
         }
         public Unit GetCharmer()
         {
-            ObjectGuid charmerid = GetCharmerGUID();
+            var charmerid = GetCharmerGUID();
             if (!charmerid.IsEmpty())
                 return Global.ObjAccessor.GetUnit(this, charmerid);
             return null;
         }
         public Unit GetCharmerOrOwnerOrSelf()
         {
-            Unit u = GetCharmerOrOwner();
+            var u = GetCharmerOrOwner();
             if (u != null)
                 return u;
 
@@ -1970,7 +1970,7 @@ namespace Game.Entities
         }
         public Player GetCharmerOrOwnerPlayerOrPlayerItself()
         {
-            ObjectGuid guid = GetCharmerOrOwnerGUID();
+            var guid = GetCharmerOrOwnerGUID();
             if (guid.IsPlayer())
                 return Global.ObjAccessor.FindPlayer(guid);
 
@@ -2029,7 +2029,7 @@ namespace Game.Entities
         {
             if (IsTypeId(TypeId.Player))
             {
-                ShapeShiftForm form = GetShapeshiftForm();
+                var form = GetShapeshiftForm();
                 var ssEntry = CliDB.SpellShapeshiftFormStorage.LookupByKey((uint)form);
                 if (ssEntry != null && ssEntry.CreatureType > 0)
                     return (CreatureType)ssEntry.CreatureType;
@@ -2044,7 +2044,7 @@ namespace Game.Entities
             if (GetCharmerOrOwnerGUID().IsEmpty())
                 return IsTypeId(TypeId.Player) ? ToPlayer() : null;
 
-            Unit owner = GetCharmerOrOwner();
+            var owner = GetCharmerOrOwner();
             if (owner != null)
                 return owner.GetCharmerOrOwnerPlayerOrPlayerItself();
             return null;
@@ -2087,18 +2087,18 @@ namespace Game.Entities
                 return true;
 
             // Always seen by owner
-            ObjectGuid guid = GetCharmerOrOwnerGUID();
+            var guid = GetCharmerOrOwnerGUID();
             if (!guid.IsEmpty())
                 if (seer.GetGUID() == guid)
                     return true;
 
-            Player seerPlayer = seer.ToPlayer();
+            var seerPlayer = seer.ToPlayer();
             if (seerPlayer != null)
             {
-                Unit owner = GetOwner();
+                var owner = GetOwner();
                 if (owner != null)
                 {
-                    Player ownerPlayer = owner.ToPlayer();
+                    var ownerPlayer = owner.ToPlayer();
                     if (ownerPlayer)
                         if (ownerPlayer.IsGroupVisibleFor(seerPlayer))
                             return true;
@@ -2143,8 +2143,8 @@ namespace Game.Entities
             {
                 if (target.HasUnitFlag(UnitFlags.PvpAttackable))
                 {
-                    Player selfPlayerOwner = GetAffectingPlayer();
-                    Player targetPlayerOwner = target.GetAffectingPlayer();
+                    var selfPlayerOwner = GetAffectingPlayer();
+                    var targetPlayerOwner = target.GetAffectingPlayer();
 
                     if (selfPlayerOwner != null && targetPlayerOwner != null)
                     {
@@ -2206,14 +2206,14 @@ namespace Game.Entities
             if (targetFactionTemplateEntry == null)
                 return ReputationRank.Neutral;
 
-            Player targetPlayerOwner = target.GetAffectingPlayer();
+            var targetPlayerOwner = target.GetAffectingPlayer();
             if (targetPlayerOwner != null)
             {
                 // check contested flags
                 if (Convert.ToBoolean(factionTemplateEntry.Flags & (uint)FactionTemplateFlags.ContestedGuard)
                     && targetPlayerOwner.HasPlayerFlag(PlayerFlags.ContestedPVP))
                     return ReputationRank.Hostile;
-                ReputationRank repRank = targetPlayerOwner.GetReputationMgr().GetForcedRankIfAny(factionTemplateEntry);
+                var repRank = targetPlayerOwner.GetReputationMgr().GetForcedRankIfAny(factionTemplateEntry);
                 if (repRank != ReputationRank.None)
                     return repRank;
                 if (!target.HasUnitFlag2(UnitFlags2.IgnoreReputation))
@@ -2257,14 +2257,14 @@ namespace Game.Entities
             {
                 if (HasUnitTypeMask(UnitTypeMask.Minion))
                 {
-                    Unit owner = GetOwner();
+                    var owner = GetOwner();
                     if (owner)
                     {
                         SetFaction(owner.GetFaction());
                         return;
                     }
                 }
-                CreatureTemplate cinfo = ToCreature().GetCreatureTemplate();
+                var cinfo = ToCreature().GetCreatureTemplate();
                 if (cinfo != null)  // normal creature
                     SetFaction(cinfo.Faction);
             }
@@ -2275,8 +2275,8 @@ namespace Game.Entities
             if (this == unit)
                 return true;
 
-            Unit u1 = GetCharmerOrOwnerOrSelf();
-            Unit u2 = unit.GetCharmerOrOwnerOrSelf();
+            var u1 = GetCharmerOrOwnerOrSelf();
+            var u2 = unit.GetCharmerOrOwnerOrSelf();
             if (u1 == u2)
                 return true;
 
@@ -2294,8 +2294,8 @@ namespace Game.Entities
             if (this == unit)
                 return true;
 
-            Unit u1 = GetCharmerOrOwnerOrSelf();
-            Unit u2 = unit.GetCharmerOrOwnerOrSelf();
+            var u1 = GetCharmerOrOwnerOrSelf();
+            var u2 = unit.GetCharmerOrOwnerOrSelf();
             if (u1 == u2)
                 return true;
 
@@ -2316,7 +2316,7 @@ namespace Game.Entities
 
         public bool IsSitState()
         {
-            UnitStandStateType s = GetStandState();
+            var s = GetStandState();
             return
                 s == UnitStandStateType.SitChair || s == UnitStandStateType.SitLowChair ||
                 s == UnitStandStateType.SitMediumChair || s == UnitStandStateType.SitHighChair ||
@@ -2325,7 +2325,7 @@ namespace Game.Entities
 
         public bool IsStandState()
         {
-            UnitStandStateType s = GetStandState();
+            var s = GetStandState();
             return !IsSitState() && s != UnitStandStateType.Sleep && s != UnitStandStateType.Kneel;
         }
 
@@ -2338,7 +2338,7 @@ namespace Game.Entities
 
             if (IsTypeId(TypeId.Player))
             {
-                StandStateUpdate packet = new StandStateUpdate(state, animKitId);
+                var packet = new StandStateUpdate(state, animKitId);
                 ToPlayer().SendPacket(packet);
             }
         }
@@ -2349,7 +2349,7 @@ namespace Game.Entities
 
             if (notifyClient)
             {
-                SetAnimTier setAnimTier = new SetAnimTier();
+                var setAnimTier = new SetAnimTier();
                 setAnimTier.Unit = GetGUID();
                 setAnimTier.Tier = (int)animTier;
                 SendMessageToSet(setAnimTier, true);
@@ -2386,7 +2386,7 @@ namespace Game.Entities
                 if (effIndex != -1)
                 {
                     // bleeding effects are not reduced by armor
-                    SpellEffectInfo effect = spellInfo.GetEffect((uint)effIndex);
+                    var effect = spellInfo.GetEffect((uint)effIndex);
                     if (effect != null)
                     {
                         if (effect.ApplyAuraName == AuraType.PeriodicDamage || effect.Effect == SpellEffectName.SchoolDamage)
@@ -2400,7 +2400,7 @@ namespace Game.Entities
 
         public override UpdateFieldFlag GetUpdateFieldFlagsFor(Player target)
         {
-            UpdateFieldFlag flags = UpdateFieldFlag.None;
+            var flags = UpdateFieldFlag.None;
             if (target == this || GetOwnerGUID() == target.GetGUID())
                 flags |= UpdateFieldFlag.Owner;
 
@@ -2413,8 +2413,8 @@ namespace Game.Entities
 
         public override void BuildValuesCreate(WorldPacket data, Player target)
         {
-            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new WorldPacket();
+            var flags = GetUpdateFieldFlagsFor(target);
+            var buffer = new WorldPacket();
 
             buffer.WriteUInt8((byte)flags);
             m_objectData.WriteCreate(buffer, flags, this, target);
@@ -2426,8 +2426,8 @@ namespace Game.Entities
 
         public override void BuildValuesUpdate(WorldPacket data, Player target)
         {
-            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new WorldPacket();
+            var flags = GetUpdateFieldFlagsFor(target);
+            var buffer = new WorldPacket();
 
             buffer.WriteUInt32(m_values.GetChangedObjectTypeMask());
             if (m_values.HasChanged(TypeId.Object))
@@ -2442,12 +2442,12 @@ namespace Game.Entities
 
         public override void BuildValuesUpdateWithFlag(WorldPacket data, UpdateFieldFlag flags, Player target)
         {
-            UpdateMask valuesMask = new UpdateMask(14);
+            var valuesMask = new UpdateMask(14);
             valuesMask.Set((int)TypeId.Unit);
 
-            WorldPacket buffer = new WorldPacket();
+            var buffer = new WorldPacket();
 
-            UpdateMask mask = new UpdateMask(191);
+            var mask = new UpdateMask(191);
             m_unitData.AppendAllowedFieldsMaskForFlag(mask, flags);
             m_unitData.WriteUpdate(buffer, mask, true, this, target);
 
@@ -2458,8 +2458,8 @@ namespace Game.Entities
 
         public void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedUnitMask, Player target)
         {
-            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            UpdateMask valuesMask = new UpdateMask((int)TypeId.Max);
+            var flags = GetUpdateFieldFlagsFor(target);
+            var valuesMask = new UpdateMask((int)TypeId.Max);
             if (requestedObjectMask.IsAnySet())
                 valuesMask.Set((int)TypeId.Object);
 
@@ -2467,7 +2467,7 @@ namespace Game.Entities
             if (requestedUnitMask.IsAnySet())
                 valuesMask.Set((int)TypeId.Unit);
 
-            WorldPacket buffer = new WorldPacket();
+            var buffer = new WorldPacket();
             buffer.WriteUInt32(valuesMask.GetBlock(0));
 
             if (valuesMask[(int)TypeId.Object])
@@ -2476,7 +2476,7 @@ namespace Game.Entities
             if (valuesMask[(int)TypeId.Unit])
                 m_unitData.WriteUpdate(buffer, requestedUnitMask, true, this, target);
 
-            WorldPacket buffer1 = new WorldPacket();
+            var buffer1 = new WorldPacket();
             buffer1.WriteUInt8((byte)UpdateType.Values);
             buffer1.WritePackedGuid(GetGUID());
             buffer1.WriteUInt32(buffer.GetSize());
@@ -2498,7 +2498,7 @@ namespace Game.Entities
             {
                 if (bg.IsArena())
                 {
-                    DestroyArenaUnit destroyArenaUnit = new DestroyArenaUnit();
+                    var destroyArenaUnit = new DestroyArenaUnit();
                     destroyArenaUnit.Guid = GetGUID();
                     target.SendPacket(destroyArenaUnit);
                 }

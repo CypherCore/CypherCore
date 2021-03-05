@@ -483,7 +483,7 @@ namespace Scripts.Spells.Generic
 
         void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            Unit owner = GetUnitOwner();
+            var owner = GetUnitOwner();
             if (owner)
                 if (owner.IsInWater())
                     owner.CastSpell(owner, SpellIds.SpawnBloodPool, true);
@@ -501,7 +501,7 @@ namespace Scripts.Spells.Generic
     {
         void HandleEffectPeriodicUpdate(AuraEffect aurEff)
         {
-            AuraEffect aurEff1 = aurEff.GetBase().GetEffect(1);
+            var aurEff1 = aurEff.GetBase().GetEffect(1);
             if (aurEff1 != null)
                 aurEff1.ChangeAmount(aurEff1.GetAmount() + 5);
             aurEff.SetAmount(100 * (int)aurEff.GetTickNumber());
@@ -524,7 +524,7 @@ namespace Scripts.Spells.Generic
         void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             // Apply model goblin
-            Unit target = GetTarget();
+            var target = GetTarget();
             if (target.IsTypeId(TypeId.Player))
             {
                 if (target.GetGender() == Gender.Male)
@@ -536,7 +536,7 @@ namespace Scripts.Spells.Generic
 
         void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            Unit target = GetTarget();
+            var target = GetTarget();
             if (target.IsTypeId(TypeId.Player))
                 target.RestoreDisplayId();
         }
@@ -578,7 +578,7 @@ namespace Scripts.Spells.Generic
 
         SpellCastResult CheckCast()
         {
-            Unit target = GetExplTargetUnit();
+            var target = GetExplTargetUnit();
             if (target)
             {
                 if (target.HasAura(SpellIds.RecentlyBandaged))
@@ -589,7 +589,7 @@ namespace Scripts.Spells.Generic
 
         void HandleScript()
         {
-            Unit target = GetHitUnit();
+            var target = GetHitUnit();
             if (target)
                 GetCaster().CastSpell(target, SpellIds.RecentlyBandaged, true);
         }
@@ -611,10 +611,10 @@ namespace Scripts.Spells.Generic
 
         bool CheckProc(ProcEventInfo eventInfo)
         {
-            DamageInfo dmgInfo = eventInfo.GetDamageInfo();
+            var dmgInfo = eventInfo.GetDamageInfo();
             if (dmgInfo != null)
             {
-                Unit caster = eventInfo.GetActionTarget();
+                var caster = eventInfo.GetActionTarget();
                 if (caster)
                     if (caster.HealthBelowPctDamaged(35, dmgInfo.GetDamage()))
                         return true;
@@ -627,7 +627,7 @@ namespace Scripts.Spells.Generic
         {
             PreventDefaultAction();
 
-            Unit caster = eventInfo.GetActionTarget();
+            var caster = eventInfo.GetActionTarget();
             caster.CastCustomSpell(SpellIds.BloodReserveHeal, SpellValueMod.BasePoint0, aurEff.GetAmount(), caster, TriggerCastFlags.FullMask, null, aurEff);
             caster.RemoveAura(SpellIds.BloodReserveAura);
         }
@@ -644,10 +644,10 @@ namespace Scripts.Spells.Generic
     {
         void HandleScript(uint effIndex)
         {
-            Player target = GetHitPlayer();
+            var target = GetHitPlayer();
             if (target)
             {
-                Aura aura = GetHitAura();
+                var aura = GetHitAura();
                 if (!(aura != null && aura.GetStackAmount() == 3))
                     return;
 
@@ -657,7 +657,7 @@ namespace Scripts.Spells.Generic
                 aura = target.GetAura(SpellIds.Onguard);
                 if (aura != null)
                 {
-                    Item item = target.GetItemByGuid(aura.GetCastItemGUID());
+                    var item = target.GetItemByGuid(aura.GetCastItemGUID());
                     if (item)
                         target.DestroyItemCount(item.GetEntry(), 1, true);
                 }
@@ -681,7 +681,7 @@ namespace Scripts.Spells.Generic
 
         void HandleScriptEffect(uint effIndex)
         {
-            Unit target = GetHitUnit();
+            var target = GetHitUnit();
 
             switch (effIndex)
             {
@@ -701,7 +701,7 @@ namespace Scripts.Spells.Generic
                             default:
                                 return;
                         }
-                        Unit rider = GetCaster().GetCharmer();
+                        var rider = GetCaster().GetCharmer();
                         if (rider)
                             rider.CastSpell(target, spellId, false);
                         else
@@ -713,17 +713,17 @@ namespace Scripts.Spells.Generic
                         var auras = target.GetAppliedAuras();
                         foreach (var pair in auras)
                         {
-                            Aura aura = pair.Value.GetBase();
+                            var aura = pair.Value.GetBase();
                             if (aura != null)
                             {
                                 if (aura.GetId() == 62552 || aura.GetId() == 62719 || aura.GetId() == 64100 || aura.GetId() == 66482)
                                 {
                                     aura.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
                                     // Remove dummys from rider (Necessary for updating visual shields)
-                                    Unit rider = target.GetCharmer();
+                                    var rider = target.GetCharmer();
                                     if (rider)
                                     {
-                                        Aura defend = rider.GetAura(aura.GetId());
+                                        var defend = rider.GetAura(aura.GetId());
                                         if (defend != null)
                                             defend.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
                                     }
@@ -769,7 +769,7 @@ namespace Scripts.Spells.Generic
 
         void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster)
                 caster.CastSpell(GetTarget(), (uint)GetSpellInfo().GetEffect(2).CalcValue());
         }
@@ -796,8 +796,8 @@ namespace Scripts.Spells.Generic
 
         SpellCastResult CheckIfCorpseNear()
         {
-            Unit caster = GetCaster();
-            float max_range = GetSpellInfo().GetMaxRange(false);
+            var caster = GetCaster();
+            var max_range = GetSpellInfo().GetMaxRange(false);
             // search for nearby enemy corpse in range
             var check = new AnyDeadUnitSpellTargetInRangeCheck<Unit>(caster, max_range, GetSpellInfo(), SpellTargetCheckTypes.Enemy, SpellTargetObjectTypes.CorpseEnemy);
             var searcher = new UnitSearcher(caster, check);
@@ -831,9 +831,9 @@ namespace Scripts.Spells.Generic
 
         void HandleDummy(uint effIndex)
         {
-            int basepoints0 = 100;
-            Unit caster = GetCaster();
-            Unit target = GetHitUnit();
+            var basepoints0 = 100;
+            var caster = GetCaster();
+            var target = GetHitUnit();
             if (target)
                 caster.CastCustomSpell(target, SpellIds.ChaosBlast, basepoints0, 0, 0, true);
         }
@@ -899,8 +899,8 @@ namespace Scripts.Spells.Generic
 
         void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            Unit caster = GetCaster();
-            Unit target = GetTarget();
+            var caster = GetCaster();
+            var target = GetTarget();
             if (!caster)
                 return;
 
@@ -912,10 +912,10 @@ namespace Scripts.Spells.Generic
                     {
                         prevItem = target.GetVirtualItemId(0);
 
-                        Player player = caster.ToPlayer();
+                        var player = caster.ToPlayer();
                         if (player)
                         {
-                            Item mainItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
+                            var mainItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
                             if (mainItem)
                                 target.SetVirtualItem(0, mainItem.GetEntry());
                         }
@@ -928,10 +928,10 @@ namespace Scripts.Spells.Generic
                     {
                         prevItem = target.GetVirtualItemId(1);
 
-                        Player player = caster.ToPlayer();
+                        var player = caster.ToPlayer();
                         if (player)
                         {
-                            Item offItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
+                            var offItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
                             if (offItem)
                                 target.SetVirtualItem(1, offItem.GetEntry());
                         }
@@ -943,10 +943,10 @@ namespace Scripts.Spells.Generic
                     {
                         prevItem = target.GetVirtualItemId(2);
 
-                        Player player = caster.ToPlayer();
+                        var player = caster.ToPlayer();
                         if (player)
                         {
-                            Item rangedItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
+                            var rangedItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
                             if (rangedItem)
                                 target.SetVirtualItem(2, rangedItem.GetEntry());
                         }
@@ -961,7 +961,7 @@ namespace Scripts.Spells.Generic
 
         void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            Unit target = GetTarget();
+            var target = GetTarget();
 
             switch (GetSpellInfo().Id)
             {
@@ -1028,7 +1028,7 @@ namespace Scripts.Spells.Generic
         {
             PreventHitDefaultEffect(effIndex);
 
-            Player target = GetHitPlayer();
+            var target = GetHitPlayer();
             if (target)
             {
                 if (target.GetTeam() == Team.Alliance)
@@ -1049,7 +1049,7 @@ namespace Scripts.Spells.Generic
     {
         void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            Unit target = GetTarget();
+            var target = GetTarget();
             target.AddDynamicFlag(UnitDynFlags.Dead);
             target.AddUnitFlag2(UnitFlags2.FeignDeath);
 
@@ -1059,7 +1059,7 @@ namespace Scripts.Spells.Generic
 
         void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            Unit target = GetTarget();
+            var target = GetTarget();
             target.RemoveDynamicFlag(UnitDynFlags.Dead);
             target.RemoveUnitFlag2(UnitFlags2.FeignDeath);
         }
@@ -1087,12 +1087,12 @@ namespace Scripts.Spells.Generic
 
         void HandleScript(uint effIndex)
         {
-            Player player = GetHitPlayer();
+            var player = GetHitPlayer();
             if (player)
             {
-                Gender gender = player.GetGender();
+                var gender = player.GetGender();
 
-                uint spellId = GetSpellInfo().Id;
+                var spellId = GetSpellInfo().Id;
                 switch (spellId)
                 {
                     case SpellIds.SunreaverTrigger:
@@ -1165,14 +1165,14 @@ namespace Scripts.Spells.Generic
         void HandleScript(uint effIndex)
         {
             // Here the target is the water spout and determines the position where the player is knocked from
-            Unit target = GetHitUnit();
+            var target = GetHitUnit();
             if (target)
             {
-                Player player = GetCaster().ToPlayer();
+                var player = GetCaster().ToPlayer();
                 if (player)
                 {
-                    float horizontalSpeed = 20.0f + (40.0f - GetCaster().GetDistance(target));
-                    float verticalSpeed = 8.0f;
+                    var horizontalSpeed = 20.0f + (40.0f - GetCaster().GetDistance(target));
+                    var verticalSpeed = 8.0f;
                     // This method relies on the Dalaran Sewer map disposition and Water Spout position
                     // What we do is knock the player from a position exactly behind him and at the end of the pipe
                     player.KnockbackFrom(target.GetPositionX(), player.GetPositionY(), horizontalSpeed, verticalSpeed);
@@ -1202,8 +1202,8 @@ namespace Scripts.Spells.Generic
                 return;
 
             _handled = true;
-            Unit caster = GetCaster();
-            InstanceScript instance = caster.GetInstanceScript();
+            var caster = GetCaster();
+            var instance = caster.GetInstanceScript();
             if (instance != null)
                 instance.UpdateEncounterStateForSpellCast(GetSpellInfo().Id, caster);
         }
@@ -1275,7 +1275,7 @@ namespace Scripts.Spells.Generic
         {
             PreventHitDefaultEffect(effIndex);
             uint spellId;
-            Item mainHand = GetCaster().ToPlayer().GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
+            var mainHand = GetCaster().ToPlayer().GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
             if (!mainHand || mainHand.GetTemplate().GetClass() != ItemClass.Weapon || (ItemSubClassWeapon)mainHand.GetTemplate().GetSubClass() != ItemSubClassWeapon.FishingPole)
                 spellId = SpellIds.FishingNoFishingPole;
             else
@@ -1300,8 +1300,8 @@ namespace Scripts.Spells.Generic
 
         void HandleDummy(uint effIndex)
         {
-            Unit caster = GetCaster();
-            int r = RandomHelper.IRand(0, 119);
+            var caster = GetCaster();
+            var r = RandomHelper.IRand(0, 119);
             if (r < 20)                           // Transporter Malfunction - 1/6 polymorph
                 caster.CastSpell(caster, SpellIds.TransporterMalfunctionPolymorph, true);
             else if (r < 100)                     // Evil Twin               - 4/6 evil twin
@@ -1324,7 +1324,7 @@ namespace Scripts.Spells.Generic
             if (!GetCaster())
                 return;
 
-            float heal = 0.0f;
+            var heal = 0.0f;
             switch (GetSpellInfo().SpellFamilyName)
             {
                 case SpellFamilyNames.Mage:
@@ -1346,7 +1346,7 @@ namespace Scripts.Spells.Generic
                     break;
             }
 
-            int healTick = (int)Math.Floor(heal / aurEff.GetTotalTicks());
+            var healTick = (int)Math.Floor(heal / aurEff.GetTotalTicks());
             amount += Math.Max(healTick, 0);
         }
 
@@ -1461,7 +1461,7 @@ namespace Scripts.Spells.Generic
 
         void HandleScriptEffect(uint effIndex)
         {
-            Unit target = GetHitUnit();
+            var target = GetHitUnit();
 
             switch (effIndex)
             {
@@ -1485,7 +1485,7 @@ namespace Scripts.Spells.Generic
                         if (!target.IsCharmedOwnedByPlayerOrPlayer() && RandomHelper.randChance(12.5f))
                             spellId = SpellIds.MissEffect;
 
-                        Unit vehicle = GetCaster().GetVehicleBase();
+                        var vehicle = GetCaster().GetVehicleBase();
                         if (vehicle)
                             vehicle.CastSpell(target, spellId, false);
                         else
@@ -1498,17 +1498,17 @@ namespace Scripts.Spells.Generic
                         var auras = target.GetAppliedAuras();
                         foreach (var pair in auras)
                         {
-                            Aura aura = pair.Value.GetBase();
+                            var aura = pair.Value.GetBase();
                             if (aura != null)
                             {
                                 if (aura.GetId() == 62552 || aura.GetId() == 62719 || aura.GetId() == 64100 || aura.GetId() == 66482)
                                 {
                                     aura.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
                                     // Remove dummys from rider (Necessary for updating visual shields)
-                                    Unit rider = target.GetCharmer();
+                                    var rider = target.GetCharmer();
                                     if (rider)
                                     {
-                                        Aura defend = rider.GetAura(aura.GetId());
+                                        var defend = rider.GetAura(aura.GetId());
                                         if (defend != null)
                                             defend.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
                                     }
@@ -1541,7 +1541,7 @@ namespace Scripts.Spells.Generic
                 default:
                     return;
             }
-            Unit rider = GetCaster().GetCharmer();
+            var rider = GetCaster().GetCharmer();
             if (rider)
                 rider.CastSpell(GetHitUnit(), spellId, false);
             else
@@ -1550,7 +1550,7 @@ namespace Scripts.Spells.Generic
 
         public override void Register()
         {
-            SpellInfo spell = Global.SpellMgr.GetSpellInfo(m_scriptSpellId, Difficulty.None);
+            var spell = Global.SpellMgr.GetSpellInfo(m_scriptSpellId, Difficulty.None);
 
             if (spell.HasEffect(SpellEffectName.ScriptEffect))
                 OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, SpellConst.EffectFirstFound, SpellEffectName.ScriptEffect));
@@ -1596,7 +1596,7 @@ namespace Scripts.Spells.Generic
         void HandleScript(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
-            Unit target = GetHitUnit();
+            var target = GetHitUnit();
             if (target)
             {
                 // 25% chance of casting a random buff
@@ -1633,7 +1633,7 @@ namespace Scripts.Spells.Generic
         void HandleScript(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
-            Unit target = GetHitUnit();
+            var target = GetHitUnit();
             if (target)
             {
                 // 25% chance of casting Nightmare Pollen
@@ -1715,11 +1715,11 @@ namespace Scripts.Spells.Generic
 
         void HandleDummy(uint effIndex)
         {
-            Player player = GetCaster().ToPlayer();
-            uint factionId = (uint)GetEffectInfo(effIndex).CalcValue();
-            int repChange = GetEffectInfo(1).CalcValue();
+            var player = GetCaster().ToPlayer();
+            var factionId = (uint)GetEffectInfo(effIndex).CalcValue();
+            var repChange = GetEffectInfo(1).CalcValue();
 
-            FactionRecord factionEntry = CliDB.FactionStorage.LookupByKey(factionId);
+            var factionEntry = CliDB.FactionStorage.LookupByKey(factionId);
 
             if (factionEntry == null)
                 return;
@@ -1748,11 +1748,11 @@ namespace Scripts.Spells.Generic
 
         void HandleScript(uint effIndex)
         {
-            Unit caster = GetCaster();
-            Player target = GetHitPlayer();
+            var caster = GetCaster();
+            var target = GetHitPlayer();
             if (target)
             {
-                Gender gender = target.GetGender();
+                var gender = target.GetGender();
                 if (gender == Gender.Male)
                     caster.CastSpell(target, SpellIds.OrcDisguiseMale, true);
                 else
@@ -1798,11 +1798,11 @@ namespace Scripts.Spells.Generic
     {
         bool CheckProc(ProcEventInfo eventInfo)
         {
-            DamageInfo damageInfo = eventInfo.GetDamageInfo();
+            var damageInfo = eventInfo.GetDamageInfo();
             if (damageInfo == null || damageInfo.GetDamage() == 0)
                 return false;
 
-            int pct = GetSpellInfo().GetEffect(0).CalcValue();
+            var pct = GetSpellInfo().GetEffect(0).CalcValue();
 
             if (eventInfo.GetActionTarget().HealthBelowPctDamaged(pct, damageInfo.GetDamage()))
                 return true;
@@ -1826,7 +1826,7 @@ namespace Scripts.Spells.Generic
 
         void HandleEffectPeriodic(AuraEffect aurEff)
         {
-            Player target = GetTarget().ToPlayer();
+            var target = GetTarget().ToPlayer();
             if (target)
             {
                 if (target.IsFalling())
@@ -1853,11 +1853,11 @@ namespace Scripts.Spells.Generic
 
         void HandleScript(uint effIndex)
         {
-            Player player = GetCaster().ToPlayer();
+            var player = GetCaster().ToPlayer();
             if (player.GetLastPetNumber() != 0)
             {
-                PetType newPetType = (player.GetClass() == Class.Hunter) ? PetType.Hunter : PetType.Summon;
-                Pet newPet = new Pet(player, newPetType);
+                var newPetType = (player.GetClass() == Class.Hunter) ? PetType.Hunter : PetType.Summon;
+                var newPet = new Pet(player, newPetType);
                 if (newPet.LoadPetFromDB(player, 0, player.GetLastPetNumber(), true))
                 {
                     // revive the pet if it is dead
@@ -1907,11 +1907,11 @@ namespace Scripts.Spells.Generic
 
         void HandleScript(uint effIndex)
         {
-            Player caster = GetCaster().ToPlayer();
-            uint spellId = GetSpellInfo().Id;
+            var caster = GetCaster().ToPlayer();
+            var spellId = GetSpellInfo().Id;
 
             // learn random explicit discovery recipe (if any)
-            uint discoveredSpellId = SkillDiscovery.GetExplicitDiscoverySpell(spellId, caster);
+            var discoveredSpellId = SkillDiscovery.GetExplicitDiscoverySpell(spellId, caster);
             if (discoveredSpellId != 0)
                 caster.LearnSpell(discoveredSpellId, false);
 
@@ -1930,7 +1930,7 @@ namespace Scripts.Spells.Generic
     {
         void TriggerAnimation()
         {
-            Player caster = GetCaster().ToPlayer();
+            var caster = GetCaster().ToPlayer();
 
             switch (caster.GetTeam())
             {
@@ -1954,7 +1954,7 @@ namespace Scripts.Spells.Generic
     {
         void HandleScript(uint effIndex)
         {
-            Unit target = GetHitUnit();
+            var target = GetHitUnit();
             if (target)
             {
                 target.RemoveAurasByType(AuraType.Fly);
@@ -1974,7 +1974,7 @@ namespace Scripts.Spells.Generic
         void RemoveInvalidTargets(List<WorldObject> targets)
         {
             // In arenas Replenishment may only affect the caster
-            Player caster = GetCaster().ToPlayer();
+            var caster = GetCaster().ToPlayer();
             if (caster)
             {
                 if (caster.InArena())
@@ -2071,13 +2071,13 @@ namespace Scripts.Spells.Generic
 
         void HandleMount(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            Unit target = GetTarget();
+            var target = GetTarget();
             PreventDefaultAction();
 
             target.Mount(ModelIds.HiddenMount, 0, 0);
 
             // cast speed aura
-            MountCapabilityRecord mountCapability = CliDB.MountCapabilityStorage.LookupByKey(aurEff.GetAmount());
+            var mountCapability = CliDB.MountCapabilityStorage.LookupByKey(aurEff.GetAmount());
             if (mountCapability != null)
                 target.CastSpell(target, mountCapability.ModSpellAuraID, TriggerCastFlags.FullMask);
         }
@@ -2111,7 +2111,7 @@ namespace Scripts.Spells.Generic
 
         void HandleTransform(uint effIndex)
         {
-            Unit target = GetHitUnit();
+            var target = GetHitUnit();
             PreventHitDefaultEffect(effIndex);
             if (target.HasAuraType(AuraType.WorgenAlteredForm))
                 target.RemoveAurasByType(AuraType.WorgenAlteredForm);
@@ -2157,10 +2157,10 @@ namespace Scripts.Spells.Generic
         void AchievementCredit(uint effIndex)
         {
             // but in effect handling OriginalCaster can become null
-            Unit originalCaster = GetOriginalCaster();
+            var originalCaster = GetOriginalCaster();
             if (originalCaster)
             {
-                GameObject go = GetHitGObj();
+                var go = GetHitGObj();
                 if (go)
                     if (go.GetGoInfo().type == GameObjectTypes.DestructibleBuilding)
                         originalCaster.CastSpell(originalCaster, SpellIds.PlantChargesCreditAchievement, true);
@@ -2199,11 +2199,11 @@ namespace Scripts.Spells.Generic
 
         void HandleDummy(uint effIndex)
         {
-            Player originalCaster = GetOriginalCaster().ToPlayer();
-            Unit target = GetHitUnit();
+            var originalCaster = GetOriginalCaster().ToPlayer();
+            var target = GetHitUnit();
             if (target)
             {
-                SpiritHealerConfirm spiritHealerConfirm = new SpiritHealerConfirm();
+                var spiritHealerConfirm = new SpiritHealerConfirm();
                 spiritHealerConfirm.Unit = target.GetGUID();
                 originalCaster.SendPacket(spiritHealerConfirm);
             }
@@ -2235,7 +2235,7 @@ namespace Scripts.Spells.Generic
         {
             if (GetCaster())
             {
-                Unit owner = GetCaster().GetOwner();
+                var owner = GetCaster().GetOwner();
                 if (owner)
                     owner.CastSpell(owner, _spellId, true);
             }
@@ -2245,7 +2245,7 @@ namespace Scripts.Spells.Generic
         {
             if (GetCaster())
             {
-                Unit owner = GetCaster().GetOwner();
+                var owner = GetCaster().GetOwner();
                 if (owner)
                     if (owner.IsTypeId(TypeId.Player)) // @todo this check is maybe wrong
                         owner.ToPlayer().RemovePet(null, PetSaveMode.NotInSlot, true);
@@ -2312,10 +2312,10 @@ namespace Scripts.Spells.Generic
 
         void HandleScriptEffect(uint effIndex)
         {
-            Unit rider = GetCaster().GetCharmer();
+            var rider = GetCaster().GetCharmer();
             if (rider)
             {
-                Player playerTarget = GetHitPlayer();
+                var playerTarget = GetHitPlayer();
                 if (playerTarget)
                 {
                     if (playerTarget.HasAura(SpellIds.OnTournamentMount) && playerTarget.GetVehicleBase())
@@ -2323,7 +2323,7 @@ namespace Scripts.Spells.Generic
                     return;
                 }
 
-                Unit unitTarget = GetHitUnit();
+                var unitTarget = GetHitUnit();
                 if (unitTarget)
                 {
                     if (unitTarget.GetCharmer() && unitTarget.GetCharmer().IsTypeId(TypeId.Player) && unitTarget.GetCharmer().HasAura(SpellIds.OnTournamentMount))
@@ -2348,7 +2348,7 @@ namespace Scripts.Spells.Generic
 
         void HandleApplyEffect(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster)
                 if (!caster.GetVehicleBase())
                     caster.RemoveAurasDueToSpell(GetId());
@@ -2390,7 +2390,7 @@ namespace Scripts.Spells.Generic
 
         void HandleTrigger()
         {
-            Unit target = GetHitUnit();
+            var target = GetHitUnit();
             if (target)
                 // Blizz seems to just apply aura without bothering to cast
                 GetCaster().AddAura(GetSpellInfo().ExcludeTargetAuraSpell, target);
@@ -2458,7 +2458,7 @@ namespace Scripts.Spells.Generic
         {
             // store stack apply times, so we can pop them while they expire
             _applyTimes.Add(GameTime.GetGameTimeMS());
-            Unit target = GetTarget();
+            var target = GetTarget();
 
             // on stack 15 cast the achievement crediting spell
             if (GetStackAmount() >= 15)
@@ -2490,7 +2490,7 @@ namespace Scripts.Spells.Generic
 
         void HandleScript(uint effIndex)
         {
-            Player player = GetHitPlayer();
+            var player = GetHitPlayer();
             if (player)
             {
                 // player can only have one of these items
@@ -2522,12 +2522,12 @@ namespace Scripts.Spells.Generic
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            DamageInfo damageInfo = eventInfo.GetDamageInfo();
+            var damageInfo = eventInfo.GetDamageInfo();
             if (damageInfo == null || damageInfo.GetDamage() == 0)
                 return;
 
-            Unit caster = eventInfo.GetActor();
-            int bp = (int)(damageInfo.GetDamage() / 2);
+            var caster = eventInfo.GetActor();
+            var bp = (int)(damageInfo.GetDamage() / 2);
             caster.CastCustomSpell(SpellIds.VampiricTouchHeal, SpellValueMod.BasePoint0, bp, caster, true, null, aurEff);
         }
 
@@ -2547,7 +2547,7 @@ namespace Scripts.Spells.Generic
 
         void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             float factor;
             ushort baseItemLevel;
 
@@ -2564,7 +2564,7 @@ namespace Scripts.Spells.Generic
                     break;
             }
 
-            float avgILvl = caster.ToPlayer().GetAverageItemLevel();
+            var avgILvl = caster.ToPlayer().GetAverageItemLevel();
             if (avgILvl < baseItemLevel)
                 return;                     // @todo Research possibility of scaling down
 
@@ -2584,7 +2584,7 @@ namespace Scripts.Spells.Generic
     {
         void HandleDummy(uint effIndex)
         {
-            Creature vendor = GetCaster().ToCreature();
+            var vendor = GetCaster().ToCreature();
             if (vendor)
                 if (vendor.GetEntry() == CreatureIds.AmphitheaterVendor)
                     vendor.GetAI().Talk(TextIds.SayAmphitheaterVendor);
@@ -2637,7 +2637,7 @@ namespace Scripts.Spells.Generic
     {
         void RemoveVehicleAuras()
         {
-            Vehicle vehicle = GetHitUnit().GetVehicleKit();
+            var vehicle = GetHitUnit().GetVehicleKit();
             if (vehicle)
                 vehicle.RemoveAllPassengers();
         }
@@ -2653,7 +2653,7 @@ namespace Scripts.Spells.Generic
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            SpellEffectInfo effect = spellInfo.GetEffect(0);
+            var effect = spellInfo.GetEffect(0);
             if (effect == null || effect.CalcValue() < 1)
                 return false;
             return true;
@@ -2661,10 +2661,10 @@ namespace Scripts.Spells.Generic
 
         void EjectPassenger(uint effIndex)
         {
-            Vehicle vehicle = GetHitUnit().GetVehicleKit();
+            var vehicle = GetHitUnit().GetVehicleKit();
             if (vehicle != null)
             {
-                Unit passenger = vehicle.GetPassenger((sbyte)(GetEffectValue() - 1));
+                var passenger = vehicle.GetPassenger((sbyte)(GetEffectValue() - 1));
                 if (passenger)
                     passenger.ExitVehicle();
             }
@@ -2687,7 +2687,7 @@ namespace Scripts.Spells.Generic
         void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             // Do what was done before to the target in HandleFreezeCommand
-            Player player = GetTarget().ToPlayer();
+            var player = GetTarget().ToPlayer();
             if (player)
             {
                 // stop combat + make player unattackable + duel stop + stop some spells
@@ -2700,7 +2700,7 @@ namespace Scripts.Spells.Generic
                 // if player class = hunter || warlock Remove pet if alive
                 if ((player.GetClass() == Class.Hunter) || (player.GetClass() == Class.Warlock))
                 {
-                    Pet pet = player.GetPet();
+                    var pet = player.GetPet();
                     if (pet)
                     {
                         pet.SavePetToDB(PetSaveMode.AsCurrent);
@@ -2715,7 +2715,7 @@ namespace Scripts.Spells.Generic
         void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             // Do what was done before to the target in HandleUnfreezeCommand
-            Player player = GetTarget().ToPlayer();
+            var player = GetTarget().ToPlayer();
             if (player)
             {
                 // Reset player faction + allow combat + allow duels
@@ -2738,7 +2738,7 @@ namespace Scripts.Spells.Generic
     {
         void HandleScript(uint eff)
         {
-            Creature target = GetHitCreature();
+            var target = GetHitCreature();
             if (!target)
                 return;
 
@@ -3044,10 +3044,10 @@ namespace Scripts.Spells.Generic
     {
         void HandleScript(uint effIndex)
         {
-            Player target = GetHitPlayer();
+            var target = GetHitPlayer();
             if (target)
             {
-                Aura aura = GetHitAura();
+                var aura = GetHitAura();
                 if (aura == null || aura.GetStackAmount() < 10)
                     return;
 
@@ -3066,12 +3066,12 @@ namespace Scripts.Spells.Generic
     {
         void HandleScript(uint effIndex)
         {
-            Unit target = GetHitUnit();
+            var target = GetHitUnit();
             if (target)
             {
                 target.RemoveOwnedAuras(aura =>
                 {
-                    SpellInfo spellInfo = aura.GetSpellInfo();
+                    var spellInfo = aura.GetSpellInfo();
                     return !spellInfo.IsPositive() && !spellInfo.IsPassive();
                 });
             }
@@ -3088,11 +3088,11 @@ namespace Scripts.Spells.Generic
     {
         void HandleEffectPeriodic(AuraEffect aurEff)
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (!caster)
                 return;
 
-            Player owner = caster.GetOwner().ToPlayer();
+            var owner = caster.GetOwner().ToPlayer();
             if (!owner || !owner.HasAchieved(SpellIds.AchievementPonyup))
                 return;
 
@@ -3119,7 +3119,7 @@ namespace Scripts.Spells.Generic
     {
         void HandleScript(uint effIndex)
         {
-            Unit target = GetHitUnit();
+            var target = GetHitUnit();
             if (target)
                 target.SetHealth(target.CountPctFromMaxHealth(25));
         }
@@ -3151,7 +3151,7 @@ namespace Scripts.Spells.Generic
         {
             targets.RemoveAll(target =>
             {
-                Unit unit = target.ToUnit();
+                var unit = target.ToUnit();
                 if (unit)
                     return unit.GetPowerType() != PowerType.Mana;
                 return false;
@@ -3174,7 +3174,7 @@ namespace Scripts.Spells.Generic
 
         void OnPeriodic(AuraEffect aurEff)
         {
-            Unit target = GetTarget();
+            var target = GetTarget();
 
             if (target.GetPower(PowerType.Mana) == 0)
             {

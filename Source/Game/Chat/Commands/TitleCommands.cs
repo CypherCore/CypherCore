@@ -31,17 +31,17 @@ namespace Game.Chat.Commands
         static bool HandleTitlesCurrentCommand(StringArguments args, CommandHandler handler)
         {
             // number or [name] Shift-click form |color|Htitle:title_id|h[name]|h|r
-            string id_p = handler.ExtractKeyFromLink(args, "Htitle");
+            var id_p = handler.ExtractKeyFromLink(args, "Htitle");
             if (string.IsNullOrEmpty(id_p))
                 return false;
 
-            if (!uint.TryParse(id_p, out uint id) || id == 0)
+            if (!uint.TryParse(id_p, out var id) || id == 0)
             {
                 handler.SendSysMessage(CypherStrings.InvalidTitleId, id);
                 return false;
             }
 
-            Player target = handler.GetSelectedPlayer();
+            var target = handler.GetSelectedPlayer();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
@@ -52,14 +52,14 @@ namespace Game.Chat.Commands
             if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
                 return false;
 
-            CharTitlesRecord titleInfo = CliDB.CharTitlesStorage.LookupByKey(id);
+            var titleInfo = CliDB.CharTitlesStorage.LookupByKey(id);
             if (titleInfo == null)
             {
                 handler.SendSysMessage(CypherStrings.InvalidTitleId, id);
                 return false;
             }
 
-            string tNameLink = handler.GetNameLink(target);
+            var tNameLink = handler.GetNameLink(target);
 
             target.SetTitle(titleInfo);                            // to be sure that title now known
             target.SetChosenTitle(titleInfo.MaskID);
@@ -72,17 +72,17 @@ namespace Game.Chat.Commands
         static bool HandleTitlesAddCommand(StringArguments args, CommandHandler handler)
         {
             // number or [name] Shift-click form |color|Htitle:title_id|h[name]|h|r
-            string id_p = handler.ExtractKeyFromLink(args, "Htitle");
+            var id_p = handler.ExtractKeyFromLink(args, "Htitle");
             if (string.IsNullOrEmpty(id_p))
                 return false;
 
-            if (!uint.TryParse(id_p, out uint id) || id == 0)
+            if (!uint.TryParse(id_p, out var id) || id == 0)
             {
                 handler.SendSysMessage(CypherStrings.InvalidTitleId, id);
                 return false;
             }
 
-            Player target = handler.GetSelectedPlayer();
+            var target = handler.GetSelectedPlayer();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
@@ -93,16 +93,16 @@ namespace Game.Chat.Commands
             if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
                 return false;
 
-            CharTitlesRecord titleInfo = CliDB.CharTitlesStorage.LookupByKey(id);
+            var titleInfo = CliDB.CharTitlesStorage.LookupByKey(id);
             if (titleInfo == null)
             {
                 handler.SendSysMessage(CypherStrings.InvalidTitleId, id);
                 return false;
             }
 
-            string tNameLink = handler.GetNameLink(target);
+            var tNameLink = handler.GetNameLink(target);
 
-            string titleNameStr = string.Format((target.GetGender() == Gender.Male ? titleInfo.Name : titleInfo.Name1)[handler.GetSessionDbcLocale()].ConvertFormatSyntax(), target.GetName());
+            var titleNameStr = string.Format((target.GetGender() == Gender.Male ? titleInfo.Name : titleInfo.Name1)[handler.GetSessionDbcLocale()].ConvertFormatSyntax(), target.GetName());
 
             target.SetTitle(titleInfo);
             handler.SendSysMessage(CypherStrings.TitleAddRes, id, titleNameStr, tNameLink);
@@ -114,17 +114,17 @@ namespace Game.Chat.Commands
         static bool HandleTitlesRemoveCommand(StringArguments args, CommandHandler handler)
         {
             // number or [name] Shift-click form |color|Htitle:title_id|h[name]|h|r
-            string id_p = handler.ExtractKeyFromLink(args, "Htitle");
+            var id_p = handler.ExtractKeyFromLink(args, "Htitle");
             if (string.IsNullOrEmpty(id_p))
                 return false;
 
-            if (!uint.TryParse(id_p, out uint id) || id == 0)
+            if (!uint.TryParse(id_p, out var id) || id == 0)
             {
                 handler.SendSysMessage(CypherStrings.InvalidTitleId, id);
                 return false;
             }
 
-            Player target = handler.GetSelectedPlayer();
+            var target = handler.GetSelectedPlayer();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
@@ -135,7 +135,7 @@ namespace Game.Chat.Commands
             if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
                 return false;
 
-            CharTitlesRecord titleInfo = CliDB.CharTitlesStorage.LookupByKey(id);
+            var titleInfo = CliDB.CharTitlesStorage.LookupByKey(id);
             if (titleInfo == null)
             {
                 handler.SendSysMessage(CypherStrings.InvalidTitleId, id);
@@ -144,9 +144,9 @@ namespace Game.Chat.Commands
 
             target.SetTitle(titleInfo, true);
 
-            string tNameLink = handler.GetNameLink(target);
+            var tNameLink = handler.GetNameLink(target);
 
-            string titleNameStr = string.Format((target.GetGender() == Gender.Male ? titleInfo.Name : titleInfo.Name1)[handler.GetSessionDbcLocale()].ConvertFormatSyntax(), target.GetName());
+            var titleNameStr = string.Format((target.GetGender() == Gender.Male ? titleInfo.Name : titleInfo.Name1)[handler.GetSessionDbcLocale()].ConvertFormatSyntax(), target.GetName());
 
             handler.SendSysMessage(CypherStrings.TitleRemoveRes, id, titleNameStr, tNameLink);
 
@@ -169,9 +169,9 @@ namespace Game.Chat.Commands
                 if (args.Empty())
                     return false;
 
-                ulong titles = args.NextUInt64();
+                var titles = args.NextUInt64();
 
-                Player target = handler.GetSelectedPlayer();
+                var target = handler.GetSelectedPlayer();
                 if (!target)
                 {
                     handler.SendSysMessage(CypherStrings.NoCharSelected);
@@ -182,9 +182,9 @@ namespace Game.Chat.Commands
                 if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
                     return false;
 
-                ulong titles2 = titles;
+                var titles2 = titles;
 
-                foreach (CharTitlesRecord tEntry in CliDB.CharTitlesStorage.Values)
+                foreach (var tEntry in CliDB.CharTitlesStorage.Values)
                     titles2 &= ~(1ul << tEntry.MaskID);
 
                 titles &= ~titles2;                                     // remove not existed titles

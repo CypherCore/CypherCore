@@ -51,7 +51,7 @@ namespace Game.SupportSystem
         public virtual string FormatViewMessageString(CommandHandler handler, bool detailed = false) { return ""; }
         public virtual string FormatViewMessageString(CommandHandler handler, string closedName, string assignedToName, string unassignedName, string deletedName)
         {
-            StringBuilder ss = new StringBuilder();
+            var ss = new StringBuilder();
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistguid, _id));
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistname, GetPlayerName()));
 
@@ -77,7 +77,7 @@ namespace Game.SupportSystem
         public Player GetPlayer() { return Global.ObjAccessor.FindConnectedPlayer(_playerGuid); }
         public string GetPlayerName()
         {
-            string name = "";
+            var name = "";
             if (!_playerGuid.IsEmpty())
                 Global.CharacterCacheStorage.GetCharacterNameByGuid(_playerGuid, out name);
 
@@ -139,7 +139,7 @@ namespace Game.SupportSystem
             _pos = new Vector3(fields.Read<float>(++idx), fields.Read<float>(++idx), fields.Read<float>(++idx));
             _facing = fields.Read<float>(++idx);
 
-            long closedBy = fields.Read<long>(++idx);
+            var closedBy = fields.Read<long>(++idx);
             if (closedBy == 0)
                 _closedBy = ObjectGuid.Empty;
             else if (closedBy < 0)
@@ -147,7 +147,7 @@ namespace Game.SupportSystem
             else
                 _closedBy = ObjectGuid.Create(HighGuid.Player, (ulong)closedBy);
 
-            ulong assignedTo = fields.Read<ulong>(++idx);
+            var assignedTo = fields.Read<ulong>(++idx);
             if (assignedTo == 0)
                 _assignedTo = ObjectGuid.Empty;
             else
@@ -159,7 +159,7 @@ namespace Game.SupportSystem
         public override void SaveToDB()
         {
             byte idx = 0;
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_GM_BUG);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_GM_BUG);
             stmt.AddValue(idx, _id);
             stmt.AddValue(++idx, _playerGuid.GetCounter());
             stmt.AddValue(++idx, _note);
@@ -177,16 +177,16 @@ namespace Game.SupportSystem
 
         public override void DeleteFromDB()
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GM_BUG);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GM_BUG);
             stmt.AddValue(0, _id);
             DB.Characters.Execute(stmt);
         }
 
         public override string FormatViewMessageString(CommandHandler handler, bool detailed = false)
         {
-            ulong curTime = (ulong)Time.UnixTime;
+            var curTime = (ulong)Time.UnixTime;
 
-            StringBuilder ss = new StringBuilder();
+            var ss = new StringBuilder();
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistguid, _id));
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistname, GetPlayerName()));
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistagecreate, Time.secsToTimeString(curTime - _createTime, true, false)));
@@ -240,11 +240,11 @@ namespace Game.SupportSystem
             _facing = fields.Read<float>(++idx);
             _targetCharacterGuid = ObjectGuid.Create(HighGuid.Player, fields.Read<ulong>(++idx));
             _complaintType = (GMSupportComplaintType)fields.Read<byte>(++idx);
-            int reportLineIndex = fields.Read<int>(++idx);
+            var reportLineIndex = fields.Read<int>(++idx);
             if (reportLineIndex != -1)
                 _chatLog.ReportLineIndex.Set((uint)reportLineIndex);
 
-            long closedBy = fields.Read<long>(++idx);
+            var closedBy = fields.Read<long>(++idx);
             if (closedBy == 0)
                 _closedBy = ObjectGuid.Empty;
             else if (closedBy < 0)
@@ -252,7 +252,7 @@ namespace Game.SupportSystem
             else
                 _closedBy = ObjectGuid.Create(HighGuid.Player, (ulong)closedBy);
 
-            ulong assignedTo = fields.Read<ulong>(++idx);
+            var assignedTo = fields.Read<ulong>(++idx);
             if (assignedTo == 0)
                 _assignedTo = ObjectGuid.Empty;
             else
@@ -271,7 +271,7 @@ namespace Game.SupportSystem
             var trans = new SQLTransaction();
 
             byte idx = 0;
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_GM_COMPLAINT);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_GM_COMPLAINT);
             stmt.AddValue(idx, _id);
             stmt.AddValue(++idx, _playerGuid.GetCounter());
             stmt.AddValue(++idx, _note);
@@ -310,7 +310,7 @@ namespace Game.SupportSystem
 
         public override void DeleteFromDB()
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GM_COMPLAINT);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GM_COMPLAINT);
             stmt.AddValue(0, _id);
             DB.Characters.Execute(stmt);
 
@@ -321,9 +321,9 @@ namespace Game.SupportSystem
 
         public override string FormatViewMessageString(CommandHandler handler, bool detailed = false)
         {
-            ulong curTime = (ulong)Time.UnixTime;
+            var curTime = (ulong)Time.UnixTime;
 
-            StringBuilder ss = new StringBuilder();
+            var ss = new StringBuilder();
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistguid, _id));
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistname, GetPlayerName()));
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistagecreate, Time.secsToTimeString(curTime - _createTime, true, false)));
@@ -381,7 +381,7 @@ namespace Game.SupportSystem
             _pos = new Vector3(fields.Read<float>(++idx), fields.Read<float>(++idx), fields.Read<float>(++idx));
             _facing = fields.Read<float>(++idx);
 
-            long closedBy = fields.Read<long>(++idx);
+            var closedBy = fields.Read<long>(++idx);
             if (closedBy == 0)
                 _closedBy = ObjectGuid.Empty;
             else if (closedBy < 0)
@@ -389,7 +389,7 @@ namespace Game.SupportSystem
             else
                 _closedBy = ObjectGuid.Create(HighGuid.Player, (ulong)closedBy);
 
-            ulong assignedTo = fields.Read<ulong>(++idx);
+            var assignedTo = fields.Read<ulong>(++idx);
             if (assignedTo == 0)
                 _assignedTo = ObjectGuid.Empty;
             else
@@ -401,7 +401,7 @@ namespace Game.SupportSystem
         public override void SaveToDB()
         {
             byte idx = 0;
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_GM_SUGGESTION);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_GM_SUGGESTION);
             stmt.AddValue(idx, _id);
             stmt.AddValue(++idx, _playerGuid.GetCounter());
             stmt.AddValue(++idx, _note);
@@ -419,16 +419,16 @@ namespace Game.SupportSystem
 
         public override void DeleteFromDB()
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GM_SUGGESTION);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GM_SUGGESTION);
             stmt.AddValue(0, _id);
             DB.Characters.Execute(stmt);
         }
 
         public override string FormatViewMessageString(CommandHandler handler, bool detailed = false)
         {
-            ulong curTime = (ulong)Time.UnixTime;
+            var curTime = (ulong)Time.UnixTime;
 
-            StringBuilder ss = new StringBuilder();
+            var ss = new StringBuilder();
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistguid, _id));
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistname, GetPlayerName()));
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistagecreate, Time.secsToTimeString(curTime - _createTime, true, false)));

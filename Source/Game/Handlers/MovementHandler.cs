@@ -66,8 +66,8 @@ namespace Game
 
         void HandleMovementOpcode(ClientOpcodes opcode, MovementInfo movementInfo)
         {
-            Unit mover = GetPlayer().m_unitMovedByMe;
-            Player plrMover = mover.ToPlayer();
+            var mover = GetPlayer().m_unitMovedByMe;
+            var plrMover = mover.ToPlayer();
 
             if (plrMover && plrMover.IsBeingTeleported())
                 return;
@@ -107,14 +107,14 @@ namespace Game
                 {
                     if (!plrMover.GetTransport())
                     {
-                        Transport transport = plrMover.GetMap().GetTransport(movementInfo.transport.guid);
+                        var transport = plrMover.GetMap().GetTransport(movementInfo.transport.guid);
                         if (transport)
                             transport.AddPassenger(plrMover);
                     }
                     else if (plrMover.GetTransport().GetGUID() != movementInfo.transport.guid)
                     {
                         plrMover.GetTransport().RemovePassenger(plrMover);
-                        Transport transport = plrMover.GetMap().GetTransport(movementInfo.transport.guid);
+                        var transport = plrMover.GetMap().GetTransport(movementInfo.transport.guid);
                         if (transport)
                             transport.AddPassenger(plrMover);
                         else
@@ -124,7 +124,7 @@ namespace Game
 
                 if (!mover.GetTransport() && !mover.GetVehicle())
                 {
-                    GameObject go = mover.GetMap().GetGameObject(movementInfo.transport.guid);
+                    var go = mover.GetMap().GetGameObject(movementInfo.transport.guid);
                     if (!go || go.GetGoType() != GameObjectTypes.Transport)
                         movementInfo.transport.Reset();
                 }
@@ -140,7 +140,7 @@ namespace Game
             if (opcode == ClientOpcodes.MoveFallLand || opcode == ClientOpcodes.MoveStartSwim)
                 mover.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Landing); // Parachutes
 
-            uint mstime = GameTime.GetGameTimeMS();
+            var mstime = GameTime.GetGameTimeMS();
 
             if (m_clientTimeDelay == 0)
                 m_clientTimeDelay = mstime - movementInfo.Time;
@@ -151,7 +151,7 @@ namespace Game
             mover.m_movementInfo = movementInfo;
 
             // Some vehicles allow the passenger to turn by himself
-            Vehicle vehicle = mover.GetVehicle();
+            var vehicle = mover.GetVehicle();
             if (vehicle)
             {
                 VehicleSeatRecord seat = vehicle.GetSeatForPassenger(mover);
@@ -171,7 +171,7 @@ namespace Game
 
             mover.UpdatePosition(movementInfo.Pos);
 
-            MoveUpdate moveUpdate = new MoveUpdate();
+            var moveUpdate = new MoveUpdate();
             moveUpdate.Status = mover.m_movementInfo;
             mover.SendMessageToSet(moveUpdate, GetPlayer());
 
@@ -224,11 +224,11 @@ namespace Game
             if (!GetPlayer().IsBeingTeleportedFar())
                 return;
 
-            bool seamlessTeleport = GetPlayer().IsBeingTeleportedSeamlessly();
+            var seamlessTeleport = GetPlayer().IsBeingTeleportedSeamlessly();
             GetPlayer().SetSemaphoreTeleportFar(false);
 
             // get the teleport destination
-            WorldLocation loc = GetPlayer().GetTeleportDest();
+            var loc = GetPlayer().GetTeleportDest();
 
             // possible errors in the coordinate validity check
             if (!GridDefines.IsValidMapCoord(loc))
@@ -238,15 +238,15 @@ namespace Game
             }
 
             // get the destination map entry, not the current one, this will fix homebind and reset greeting
-            MapRecord mapEntry = CliDB.MapStorage.LookupByKey(loc.GetMapId());
+            var mapEntry = CliDB.MapStorage.LookupByKey(loc.GetMapId());
             InstanceTemplate mInstance = Global.ObjectMgr.GetInstanceTemplate(loc.GetMapId());
 
             // reset instance validity, except if going to an instance inside an instance
             if (!GetPlayer().m_InstanceValid && mInstance == null)
                 GetPlayer().m_InstanceValid = true;
 
-            Map oldMap = GetPlayer().GetMap();
-            Map newMap = Global.MapMgr.CreateMap(loc.GetMapId(), GetPlayer());
+            var oldMap = GetPlayer().GetMap();
+            var newMap = Global.MapMgr.CreateMap(loc.GetMapId(), GetPlayer());
 
             if (GetPlayer().IsInWorld)
             {
@@ -264,7 +264,7 @@ namespace Game
                 return;
             }
 
-            float z = loc.GetPositionZ();
+            var z = loc.GetPositionZ();
             if (GetPlayer().HasUnitMovementFlag(MovementFlag.Hover))
                 z += GetPlayer().m_unitData.HoverHeight;
 
@@ -274,7 +274,7 @@ namespace Game
             GetPlayer().ResetMap();
             GetPlayer().SetMap(newMap);
 
-            ResumeToken resumeToken = new ResumeToken();
+            var resumeToken = new ResumeToken();
             resumeToken.SequenceIndex = _player.m_movementCounter;
             resumeToken.Reason = seamlessTeleport ? 2 : 1u;
             SendPacket(resumeToken);
@@ -321,7 +321,7 @@ namespace Game
             else
             {
                 GetPlayer().UpdateVisibilityForPlayer();
-                Garrison garrison = GetPlayer().GetGarrison();
+                var garrison = GetPlayer().GetGarrison();
                 if (garrison != null)
                     garrison.SendRemoteInfo();
             }
@@ -334,7 +334,7 @@ namespace Game
                     if (!seamlessTeleport)
                     {
                         // short preparations to continue flight
-                        IMovementGenerator movementGenerator = GetPlayer().GetMotionMaster().Top();
+                        var movementGenerator = GetPlayer().GetMotionMaster().Top();
                         movementGenerator.Initialize(GetPlayer());
                     }
                     return;
@@ -355,20 +355,20 @@ namespace Game
                 }
             }
 
-            bool allowMount = !mapEntry.IsDungeon() || mapEntry.IsBattlegroundOrArena();
+            var allowMount = !mapEntry.IsDungeon() || mapEntry.IsBattlegroundOrArena();
             if (mInstance != null)
             {
                 // check if this instance has a reset time and send it to player if so
-                Difficulty diff = newMap.GetDifficultyID();
-                MapDifficultyRecord mapDiff = Global.DB2Mgr.GetMapDifficultyData(mapEntry.Id, diff);
+                var diff = newMap.GetDifficultyID();
+                var mapDiff = Global.DB2Mgr.GetMapDifficultyData(mapEntry.Id, diff);
                 if (mapDiff != null)
                 {
                     if (mapDiff.GetRaidDuration() != 0)
                     {
-                        long timeReset = Global.InstanceSaveMgr.GetResetTimeFor(mapEntry.Id, diff);
+                        var timeReset = Global.InstanceSaveMgr.GetResetTimeFor(mapEntry.Id, diff);
                         if (timeReset != 0)
                         {
-                            uint timeleft = (uint)(timeReset - Time.UnixTime);
+                            var timeleft = (uint)(timeReset - Time.UnixTime);
                             GetPlayer().SendInstanceResetWarning(mapEntry.Id, diff, timeleft, true);
                         }
                     }
@@ -412,16 +412,16 @@ namespace Game
             if (!_player.IsBeingTeleportedFar())
                 return;
 
-            WorldLocation loc = GetPlayer().GetTeleportDest();
+            var loc = GetPlayer().GetTeleportDest();
 
             if (CliDB.MapStorage.LookupByKey(loc.GetMapId()).IsDungeon())
             {
-                UpdateLastInstance updateLastInstance = new UpdateLastInstance();
+                var updateLastInstance = new UpdateLastInstance();
                 updateLastInstance.MapID = loc.GetMapId();
                 SendPacket(updateLastInstance);
             }
 
-            NewWorld packet = new NewWorld();
+            var packet = new NewWorld();
             packet.MapID = loc.GetMapId();
             packet.Loc.Pos = loc;
             packet.Reason = (uint)(!_player.IsBeingTeleportedSeamlessly() ? NewWorldReason.Normal : NewWorldReason.Seamless);
@@ -434,7 +434,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveTeleportAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveTeleportAck(MoveTeleportAck packet)
         {
-            Player plMover = GetPlayer().m_unitMovedByMe.ToPlayer();
+            var plMover = GetPlayer().m_unitMovedByMe.ToPlayer();
 
             if (!plMover || !plMover.IsBeingTeleportedNear())
                 return;
@@ -444,9 +444,9 @@ namespace Game
 
             plMover.SetSemaphoreTeleportNear(false);
 
-            uint old_zone = plMover.GetZoneId();
+            var old_zone = plMover.GetZoneId();
 
-            WorldLocation dest = plMover.GetTeleportDest();
+            var dest = plMover.GetTeleportDest();
 
             plMover.UpdatePosition(dest, true);
             plMover.SetFallInformation(0, GetPlayer().GetPositionZ());
@@ -496,7 +496,7 @@ namespace Game
             // in other cases anti-cheat check can be fail in false case
             UnitMoveType move_type;
 
-            ClientOpcodes opcode = packet.GetOpcode();
+            var opcode = packet.GetOpcode();
             switch (opcode)
             {
                 case ClientOpcodes.MoveForceWalkSpeedChangeAck:
@@ -577,7 +577,7 @@ namespace Game
 
             GetPlayer().m_movementInfo = movementAck.Ack.Status;
 
-            MoveUpdateKnockBack updateKnockBack = new MoveUpdateKnockBack();
+            var updateKnockBack = new MoveUpdateKnockBack();
             updateKnockBack.Status = GetPlayer().m_movementInfo;
             GetPlayer().SendMessageToSet(updateKnockBack, false);
         }
@@ -617,7 +617,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveApplyMovementForceAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveApplyMovementForceAck(MoveApplyMovementForceAck moveApplyMovementForceAck)
         {
-            Unit mover = _player.m_unitMovedByMe;
+            var mover = _player.m_unitMovedByMe;
             Cypher.Assert(mover != null);
             _player.ValidateMovementInfo(moveApplyMovementForceAck.Ack.Status);
 
@@ -630,7 +630,7 @@ namespace Game
 
             moveApplyMovementForceAck.Ack.Status.Time += m_clientTimeDelay;
 
-            MoveUpdateApplyMovementForce updateApplyMovementForce = new MoveUpdateApplyMovementForce();
+            var updateApplyMovementForce = new MoveUpdateApplyMovementForce();
             updateApplyMovementForce.Status = moveApplyMovementForceAck.Ack.Status;
             updateApplyMovementForce.Force = moveApplyMovementForceAck.Force;
             mover.SendMessageToSet(updateApplyMovementForce, false);
@@ -639,7 +639,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveRemoveMovementForceAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveRemoveMovementForceAck(MoveRemoveMovementForceAck moveRemoveMovementForceAck)
         {
-            Unit mover = _player.m_unitMovedByMe;
+            var mover = _player.m_unitMovedByMe;
             Cypher.Assert(mover != null);
             _player.ValidateMovementInfo(moveRemoveMovementForceAck.Ack.Status);
 
@@ -652,7 +652,7 @@ namespace Game
 
             moveRemoveMovementForceAck.Ack.Status.Time += m_clientTimeDelay;
 
-            MoveUpdateRemoveMovementForce updateRemoveMovementForce = new MoveUpdateRemoveMovementForce();
+            var updateRemoveMovementForce = new MoveUpdateRemoveMovementForce();
             updateRemoveMovementForce.Status = moveRemoveMovementForceAck.Ack.Status;
             updateRemoveMovementForce.TriggerGUID = moveRemoveMovementForceAck.ID;
             mover.SendMessageToSet(updateRemoveMovementForce, false);
@@ -661,7 +661,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveSetModMovementForceMagnitudeAck, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveSetModMovementForceMagnitudeAck(MovementSpeedAck setModMovementForceMagnitudeAck)
         {
-            Unit mover = _player.m_unitMovedByMe;
+            var mover = _player.m_unitMovedByMe;
             Cypher.Assert(mover != null);                      // there must always be a mover
             _player.ValidateMovementInfo(setModMovementForceMagnitudeAck.Ack.Status);
 
@@ -678,8 +678,8 @@ namespace Game
                 --_player.m_movementForceModMagnitudeChanges;
                 if (_player.m_movementForceModMagnitudeChanges == 0)
                 {
-                    float expectedModMagnitude = 1.0f;
-                    MovementForces movementForces = mover.GetMovementForces();
+                    var expectedModMagnitude = 1.0f;
+                    var movementForces = mover.GetMovementForces();
                     if (movementForces != null)
                         expectedModMagnitude = movementForces.GetModMagnitude();
 
@@ -694,7 +694,7 @@ namespace Game
 
             setModMovementForceMagnitudeAck.Ack.Status.Time += m_clientTimeDelay;
 
-            MoveUpdateSpeed updateModMovementForceMagnitude = new MoveUpdateSpeed(ServerOpcodes.MoveUpdateModMovementForceMagnitude);
+            var updateModMovementForceMagnitude = new MoveUpdateSpeed(ServerOpcodes.MoveUpdateModMovementForceMagnitude);
             updateModMovementForceMagnitude.Status = setModMovementForceMagnitudeAck.Ack.Status;
             updateModMovementForceMagnitude.Speed = setModMovementForceMagnitudeAck.Speed;
             mover.SendMessageToSet(updateModMovementForceMagnitude, false);
@@ -708,7 +708,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveSplineDone, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveSplineDoneOpcode(MoveSplineDone moveSplineDone)
         {
-            MovementInfo movementInfo = moveSplineDone.Status;
+            var movementInfo = moveSplineDone.Status;
             _player.ValidateMovementInfo(movementInfo);
 
             // in taxi flight packet received in 2 case:
@@ -716,10 +716,10 @@ namespace Game
             // 2) switch from one map to other in case multim-map taxi path
             // we need process only (1)
 
-            uint curDest = GetPlayer().m_taxi.GetTaxiDestination();
+            var curDest = GetPlayer().m_taxi.GetTaxiDestination();
             if (curDest != 0)
             {
-                TaxiNodesRecord curDestNode = CliDB.TaxiNodesStorage.LookupByKey(curDest);
+                var curDestNode = CliDB.TaxiNodesStorage.LookupByKey(curDest);
 
                 // far teleport case
                 if (curDestNode != null && curDestNode.ContinentID != GetPlayer().GetMapId())
@@ -727,10 +727,10 @@ namespace Game
                     if (GetPlayer().GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Flight)
                     {
                         // short preparations to continue flight
-                        FlightPathMovementGenerator flight = (FlightPathMovementGenerator)GetPlayer().GetMotionMaster().Top();
+                        var flight = (FlightPathMovementGenerator)GetPlayer().GetMotionMaster().Top();
 
                         flight.SetCurrentNodeAfterTeleport();
-                        TaxiPathNodeRecord node = flight.GetPath()[(int)flight.GetCurrentNode()];
+                        var node = flight.GetPath()[(int)flight.GetCurrentNode()];
                         flight.SkipCurrentNode();
 
                         GetPlayer().TeleportTo(curDestNode.ContinentID, node.Loc.X, node.Loc.Y, node.Loc.Z, GetPlayer().GetOrientation());

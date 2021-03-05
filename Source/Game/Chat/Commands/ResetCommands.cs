@@ -59,14 +59,14 @@ namespace Game.Chat
 
         static bool HandleResetStatsOrLevelHelper(Player player)
         {
-            ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey(player.GetClass());
+            var classEntry = CliDB.ChrClassesStorage.LookupByKey(player.GetClass());
             if (classEntry == null)
             {
                 Log.outError(LogFilter.Server, "Class {0} not found in DBC (Wrong DBC files?)", player.GetClass());
                 return false;
             }
 
-            PowerType powerType = classEntry.DisplayPower;
+            var powerType = classEntry.DisplayPower;
 
             // reset m_form if no aura
             if (!player.HasAuraType(AuraType.ModShapeshift))
@@ -98,10 +98,10 @@ namespace Game.Chat
             if (!HandleResetStatsOrLevelHelper(target))
                 return false;
 
-            byte oldLevel = (byte)target.GetLevel();
+            var oldLevel = (byte)target.GetLevel();
 
             // set starting level
-            uint startLevel = target.GetStartLevel(target.GetRace(), target.GetClass());
+            var startLevel = target.GetStartLevel(target.GetRace(), target.GetClass());
 
             target._ApplyAllLevelScaleItemMods(false);
             target.SetLevel(startLevel);
@@ -114,7 +114,7 @@ namespace Game.Chat
             target._ApplyAllLevelScaleItemMods(true);
 
             // reset level for pet
-            Pet pet = target.GetPet();
+            var pet = target.GetPet();
             if (pet)
                 pet.SynchronizeLevelWithOwner();
 
@@ -142,7 +142,7 @@ namespace Game.Chat
             }
             else
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
+                var stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
                 stmt.AddValue(0, (ushort)AtLoginFlags.ResetSpells);
                 stmt.AddValue(1, targetGuid.GetCounter());
                 DB.Characters.Execute(stmt);
@@ -222,12 +222,12 @@ namespace Game.Chat
             }
             else if (!targetGuid.IsEmpty())
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
+                var stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
                 stmt.AddValue(0, (ushort)(AtLoginFlags.None | AtLoginFlags.ResetPetTalents));
                 stmt.AddValue(1, targetGuid.GetCounter());
                 DB.Characters.Execute(stmt);
 
-                string nameLink = handler.PlayerLink(targetName);
+                var nameLink = handler.PlayerLink(targetName);
                 handler.SendSysMessage(CypherStrings.ResetTalentsOffline, nameLink);
                 return true;
             }
@@ -242,7 +242,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string caseName = args.NextString();
+            var caseName = args.NextString();
 
             AtLoginFlags atLogin;
 
@@ -267,7 +267,7 @@ namespace Game.Chat
                 return false;
             }
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ALL_AT_LOGIN_FLAGS);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ALL_AT_LOGIN_FLAGS);
             stmt.AddValue(0, (ushort)atLogin);
             DB.Characters.Execute(stmt);
 

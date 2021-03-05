@@ -34,7 +34,7 @@ namespace Game.AI
 
         public override bool CanSeeAlways(WorldObject obj)
         {
-            Unit unit = obj.ToUnit();
+            var unit = obj.ToUnit();
             if (unit != null)
                 if (unit.IsControlledByPlayer() && me.IsEngagedBy(unit))
                     return true;
@@ -63,7 +63,7 @@ namespace Game.AI
 
         public override void JustDied(Unit killer)
         {
-            Player player = killer.GetCharmerOrOwnerPlayerOrPlayerItself();
+            var player = killer.GetCharmerOrOwnerPlayerOrPlayerItself();
             if (player != null)
                 me.SendZoneUnderAttackMessage(player);
         }

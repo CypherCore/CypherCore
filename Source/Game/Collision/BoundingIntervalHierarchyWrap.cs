@@ -53,14 +53,14 @@ namespace Game.Collision
         public void IntersectRay(Ray ray, WorkerCallback intersectCallback, ref float maxDist)
         {
             Balance();
-            MDLCallback temp_cb = new MDLCallback(intersectCallback, m_objects.ToArray(), (uint)m_objects.Count);
+            var temp_cb = new MDLCallback(intersectCallback, m_objects.ToArray(), (uint)m_objects.Count);
             m_tree.IntersectRay(ray, temp_cb, ref maxDist, true);
         }
 
         public void IntersectPoint(Vector3 point, WorkerCallback intersectCallback)
         {
             Balance();
-            MDLCallback callback = new MDLCallback(intersectCallback, m_objects.ToArray(), (uint)m_objects.Count);
+            var callback = new MDLCallback(intersectCallback, m_objects.ToArray(), (uint)m_objects.Count);
             m_tree.IntersectPoint(point, callback);
         }
 
@@ -89,7 +89,7 @@ namespace Game.Collision
                 if (idx >= objects_size)
                     return false;
 
-                T obj = objects[idx];
+                var obj = objects[idx];
                 if (obj != null)
                     return _callback.Invoke(ray, obj, ref maxDist);
                 return false;
@@ -101,7 +101,7 @@ namespace Game.Collision
                 if (idx >= objects_size)
                     return;
 
-                T obj = objects[idx];
+                var obj = objects[idx];
                 if (obj != null)
                     _callback.Invoke(p, obj);
             }

@@ -35,7 +35,7 @@ namespace Game.Entities
         {
             for (byte i = 0; i < ItemConst.MaxBagSize; ++i)
             {
-                Item item = m_bagslot[i];
+                var item = m_bagslot[i];
                 if (item)
                 {
                     if (item.IsInWorld)
@@ -111,7 +111,7 @@ namespace Game.Entities
             if (!base.LoadFromDB(guid, owner_guid, fields, entry))
                 return false;
 
-            ItemTemplate itemProto = GetTemplate(); // checked in Item.LoadFromDB
+            var itemProto = GetTemplate(); // checked in Item.LoadFromDB
             SetBagSize(itemProto.GetContainerSlots());
             // cleanup bag content related item value fields (its will be filled correctly from `character_inventory`)
             for (byte i = 0; i < ItemConst.MaxBagSize; ++i)
@@ -167,15 +167,15 @@ namespace Game.Entities
         {
             base.BuildCreateUpdateBlockForPlayer(data, target);
 
-            for (int i = 0; i < GetBagSize(); ++i)
+            for (var i = 0; i < GetBagSize(); ++i)
                 if (m_bagslot[i] != null)
                     m_bagslot[i].BuildCreateUpdateBlockForPlayer(data, target);
         }
 
         public override void BuildValuesCreate(WorldPacket data, Player target)
         {
-            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new WorldPacket();
+            var flags = GetUpdateFieldFlagsFor(target);
+            var buffer = new WorldPacket();
 
             buffer.WriteUInt8((byte)flags);
             m_objectData.WriteCreate(buffer, flags, this, target);
@@ -188,8 +188,8 @@ namespace Game.Entities
 
         public override void BuildValuesUpdate(WorldPacket data, Player target)
         {
-            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new WorldPacket();
+            var flags = GetUpdateFieldFlagsFor(target);
+            var buffer = new WorldPacket();
 
             buffer.WriteUInt32(m_values.GetChangedObjectTypeMask());
             if (m_values.HasChanged(TypeId.Object))
@@ -207,8 +207,8 @@ namespace Game.Entities
 
         void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedItemMask, UpdateMask requestedContainerMask, Player target)
         {
-            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            UpdateMask valuesMask = new UpdateMask((int)TypeId.Max);
+            var flags = GetUpdateFieldFlagsFor(target);
+            var valuesMask = new UpdateMask((int)TypeId.Max);
             if (requestedObjectMask.IsAnySet())
                 valuesMask.Set((int)TypeId.Object);
 
@@ -219,7 +219,7 @@ namespace Game.Entities
             if (requestedContainerMask.IsAnySet())
                 valuesMask.Set((int)TypeId.Container);
 
-            WorldPacket buffer = new WorldPacket();
+            var buffer = new WorldPacket();
             buffer.WriteUInt32(valuesMask.GetBlock(0));
 
             if (valuesMask[(int)TypeId.Object])
@@ -231,7 +231,7 @@ namespace Game.Entities
             if (valuesMask[(int)TypeId.Container])
                 m_containerData.WriteUpdate(buffer, requestedContainerMask, true, this, target);
 
-            WorldPacket buffer1 = new WorldPacket();
+            var buffer1 = new WorldPacket();
             buffer1.WriteUInt8((byte)UpdateType.Values);
             buffer1.WritePackedGuid(GetGUID());
             buffer1.WriteUInt32(buffer.GetSize());
@@ -284,12 +284,12 @@ namespace Game.Entities
             uint count = 0;
             for (uint i = 0; i < GetBagSize(); ++i)
             {
-                Item pItem = m_bagslot[i];
+                var pItem = m_bagslot[i];
                 if (pItem != null)
                 {
                     if (pItem != skipItem)
                     {
-                        ItemTemplate pProto = pItem.GetTemplate();
+                        var pProto = pItem.GetTemplate();
                         if (pProto != null)
                             if (pProto.GetItemLimitCategory() == limitCategory)
                                 count += m_bagslot[i].GetCount();

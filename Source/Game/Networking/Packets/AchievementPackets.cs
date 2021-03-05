@@ -183,7 +183,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteInt32(Progress.Count);
 
-            foreach (GuildCriteriaProgress progress in Progress)
+            foreach (var progress in Progress)
             {
                 _worldPacket.WriteUInt32(progress.CriteriaID);
                 _worldPacket.WriteUInt32(progress.DateCreated);
@@ -264,7 +264,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteInt32(Earned.Count);
 
-            foreach (EarnedAchievement earned in Earned)
+            foreach (var earned in Earned)
                 earned.Write(_worldPacket);
         }
 
@@ -296,7 +296,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(GuildGUID);
             _worldPacket.WriteUInt32(AchievementID);
             _worldPacket.WriteInt32(Member.Count);
-            foreach (ObjectGuid guid in Member)
+            foreach (var guid in Member)
                 _worldPacket.WritePackedGuid(guid);
         }
 
@@ -370,10 +370,10 @@ namespace Game.Networking.Packets
             data.WriteInt32(Earned.Count);
             data.WriteInt32(Progress.Count);
 
-            foreach (EarnedAchievement earned in Earned)
+            foreach (var earned in Earned)
                 earned.Write(data);
 
-            foreach (CriteriaProgressPkt progress in Progress)
+            foreach (var progress in Progress)
                 progress.Write(data);
         }
 

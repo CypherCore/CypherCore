@@ -37,7 +37,7 @@ namespace Game.Entities
             if (chrClass == Class.Deathknight)
             {
                 var factionMask = Player.TeamForRace(race) == Team.Horde ? CliDB.HordeTaxiNodesMask : CliDB.AllianceTaxiNodesMask;
-                for (int i = 0; i < PlayerConst.TaxiMaskSize; ++i)
+                for (var i = 0; i < PlayerConst.TaxiMaskSize; ++i)
                     m_taximask[i] |= (byte)(CliDB.OldContinentsNodesMask[i] & factionMask[i]);
             }
 
@@ -106,11 +106,11 @@ namespace Game.Entities
         {
             var split = new StringArray(data, ' ');
 
-            int index = 0;
+            var index = 0;
             for (var i = 0; index < PlayerConst.TaxiMaskSize && i != split.Length; ++i, ++index)
             {
                 // load and set bits only for existing taxi nodes
-                if (uint.TryParse(split[i], out uint id))
+                if (uint.TryParse(split[i], out var id))
                     m_taximask[index] = (byte)(CliDB.TaxiNodesMask[index] & id);
             }
         }
@@ -142,7 +142,7 @@ namespace Game.Entities
 
             for (var i = 1; i < stringArray.Length; ++i)
             {
-                if (uint.TryParse(stringArray[i], out uint node))
+                if (uint.TryParse(stringArray[i], out var node))
                     AddTaxiDestination(node);
             }
 
@@ -153,7 +153,7 @@ namespace Game.Entities
             if (m_TaxiDestinations.Count < 2)
                 return false;
 
-            for (int i = 1; i < m_TaxiDestinations.Count; ++i)
+            for (var i = 1; i < m_TaxiDestinations.Count; ++i)
             {
                 uint cost;
                 uint path;
@@ -174,10 +174,10 @@ namespace Game.Entities
             if (m_TaxiDestinations.Empty())
                 return "";
 
-            StringBuilder ss = new StringBuilder();
+            var ss = new StringBuilder();
             ss.Append($"{m_flightMasterFactionId} ");
 
-            for (int i = 0; i < m_TaxiDestinations.Count; ++i)
+            for (var i = 0; i < m_TaxiDestinations.Count; ++i)
                 ss.Append($"{m_TaxiDestinations[i]} ");
 
             return ss.ToString();
@@ -229,14 +229,14 @@ namespace Game.Entities
 
         public bool IsTaximaskNodeKnown(uint nodeidx)
         {
-            uint field = (nodeidx - 1) / 8;
-            uint submask = (uint)(1 << (int)((nodeidx - 1) % 8));
+            var field = (nodeidx - 1) / 8;
+            var submask = (uint)(1 << (int)((nodeidx - 1) % 8));
             return (m_taximask[field] & submask) == submask;
         }
         public bool SetTaximaskNode(uint nodeidx)
         {
-            uint field = (nodeidx - 1) / 8;
-            uint submask = (uint)(1 << (int)((nodeidx - 1) % 8));
+            var field = (nodeidx - 1) / 8;
+            var submask = (uint)(1 << (int)((nodeidx - 1) % 8));
             if ((m_taximask[field] & submask) != submask)
             {
                 m_taximask[field] |= (byte)submask;

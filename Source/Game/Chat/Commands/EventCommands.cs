@@ -30,11 +30,11 @@ namespace Game.Chat
                 return false;
 
             // id or [name] Shift-click form |color|Hgameevent:id|h[name]|h|r
-            string id = handler.ExtractKeyFromLink(args, "Hgameevent");
+            var id = handler.ExtractKeyFromLink(args, "Hgameevent");
             if (string.IsNullOrEmpty(id))
                 return false;
 
-            if (!ushort.TryParse(id, out ushort eventId))
+            if (!ushort.TryParse(id, out var eventId))
                 return false;
 
             var events = Global.GameEventMgr.GetEventMap();
@@ -44,7 +44,7 @@ namespace Game.Chat
                 return false;
             }
 
-            GameEventData eventData = events[eventId];
+            var eventData = events[eventId];
             if (!eventData.IsValid())
             {
                 handler.SendSysMessage(CypherStrings.EventNotExist);
@@ -52,18 +52,18 @@ namespace Game.Chat
             }
 
             var activeEvents = Global.GameEventMgr.GetActiveEventList();
-            bool active = activeEvents.Contains(eventId);
-            string activeStr = active ? Global.ObjectMgr.GetCypherString(CypherStrings.Active) : "";
+            var active = activeEvents.Contains(eventId);
+            var activeStr = active ? Global.ObjectMgr.GetCypherString(CypherStrings.Active) : "";
 
-            string startTimeStr = Time.UnixTimeToDateTime(eventData.start).ToLongDateString();
-            string endTimeStr = Time.UnixTimeToDateTime(eventData.end).ToLongDateString();
+            var startTimeStr = Time.UnixTimeToDateTime(eventData.start).ToLongDateString();
+            var endTimeStr = Time.UnixTimeToDateTime(eventData.end).ToLongDateString();
 
-            uint delay = Global.GameEventMgr.NextCheck(eventId);
-            long nextTime = Time.UnixTime + delay;
-            string nextStr = nextTime >= eventData.start && nextTime < eventData.end ? Time.UnixTimeToDateTime(Time.UnixTime + delay).ToShortTimeString() : "-";
+            var delay = Global.GameEventMgr.NextCheck(eventId);
+            var nextTime = Time.UnixTime + delay;
+            var nextStr = nextTime >= eventData.start && nextTime < eventData.end ? Time.UnixTimeToDateTime(Time.UnixTime + delay).ToShortTimeString() : "-";
 
-            string occurenceStr = Time.secsToTimeString(eventData.occurence * Time.Minute);
-            string lengthStr = Time.secsToTimeString(eventData.length * Time.Minute);
+            var occurenceStr = Time.secsToTimeString(eventData.occurence * Time.Minute);
+            var lengthStr = Time.secsToTimeString(eventData.length * Time.Minute);
 
             handler.SendSysMessage(CypherStrings.EventInfo, eventId, eventData.description, activeStr,
                 startTimeStr, endTimeStr, occurenceStr, lengthStr, nextStr);
@@ -78,11 +78,11 @@ namespace Game.Chat
             var events = Global.GameEventMgr.GetEventMap();
             var activeEvents = Global.GameEventMgr.GetActiveEventList();
 
-            string active = Global.ObjectMgr.GetCypherString(CypherStrings.Active);
+            var active = Global.ObjectMgr.GetCypherString(CypherStrings.Active);
 
             foreach (var eventId in activeEvents)
             {
-                GameEventData eventData = events[eventId];
+                var eventData = events[eventId];
 
                 if (handler.GetSession() != null)
                     handler.SendSysMessage(CypherStrings.EventEntryListChat, eventId, eventId, eventData.description, active);
@@ -105,11 +105,11 @@ namespace Game.Chat
                 return false;
 
             // id or [name] Shift-click form |color|Hgameevent:id|h[name]|h|r
-            string id = handler.ExtractKeyFromLink(args, "Hgameevent");
+            var id = handler.ExtractKeyFromLink(args, "Hgameevent");
             if (string.IsNullOrEmpty(id))
                 return false;
 
-            if (!ushort.TryParse(id, out ushort eventId))
+            if (!ushort.TryParse(id, out var eventId))
                 return false;
 
             var events = Global.GameEventMgr.GetEventMap();
@@ -119,7 +119,7 @@ namespace Game.Chat
                 return false;
             }
 
-            GameEventData eventData = events[eventId];
+            var eventData = events[eventId];
             if (!eventData.IsValid())
             {
                 handler.SendSysMessage(CypherStrings.EventNotExist);
@@ -144,11 +144,11 @@ namespace Game.Chat
                 return false;
 
             // id or [name] Shift-click form |color|Hgameevent:id|h[name]|h|r
-            string id = handler.ExtractKeyFromLink(args, "Hgameevent");
+            var id = handler.ExtractKeyFromLink(args, "Hgameevent");
             if (string.IsNullOrEmpty(id))
                 return false;
 
-            if (!ushort.TryParse(id, out ushort eventId))
+            if (!ushort.TryParse(id, out var eventId))
                 return false;
 
             var events = Global.GameEventMgr.GetEventMap();
@@ -158,7 +158,7 @@ namespace Game.Chat
                 return false;
             }
 
-            GameEventData eventData = events[eventId];
+            var eventData = events[eventId];
             if (!eventData.IsValid())
             {
                 handler.SendSysMessage(CypherStrings.EventNotExist);

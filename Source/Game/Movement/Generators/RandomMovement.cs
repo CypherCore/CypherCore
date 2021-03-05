@@ -91,28 +91,28 @@ namespace Game.Movement
 
             owner.AddUnitState(UnitState.RoamingMove);
 
-            Position position = new Position(_reference);
-            float distance = RandomHelper.FRand(0.0f, 1.0f) * _wanderDistance;
-            float angle = RandomHelper.FRand(0.0f, 1.0f) * MathF.PI * 2.0f;
+            var position = new Position(_reference);
+            var distance = RandomHelper.FRand(0.0f, 1.0f) * _wanderDistance;
+            var angle = RandomHelper.FRand(0.0f, 1.0f) * MathF.PI * 2.0f;
             owner.MovePositionToFirstCollision(ref position, distance, angle);
 
-            uint resetTimer = RandomHelper.randChance(50) ? RandomHelper.URand(5000, 10000) : RandomHelper.URand(1000, 2000);
+            var resetTimer = RandomHelper.randChance(50) ? RandomHelper.URand(5000, 10000) : RandomHelper.URand(1000, 2000);
 
             if (_path == null)
                 _path = new PathGenerator(owner);
 
             _path.SetPathLengthLimit(30.0f);
-            bool result = _path.CalculatePath(position.GetPositionX(), position.GetPositionY(), position.GetPositionZ());
+            var result = _path.CalculatePath(position.GetPositionX(), position.GetPositionY(), position.GetPositionZ());
             if (!result || _path.GetPathType().HasAnyFlag(PathType.NoPath))
             {
                 _timer.Reset(100);
                 return;
             }
 
-            MoveSplineInit init = new MoveSplineInit(owner);
+            var init = new MoveSplineInit(owner);
             init.MovebyPath(_path.GetPath());
             init.SetWalk(true);
-            int traveltime = init.Launch();
+            var traveltime = init.Launch();
             _timer.Reset(traveltime + resetTimer);
 
             // Call for creature group update

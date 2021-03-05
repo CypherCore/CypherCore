@@ -48,20 +48,20 @@ namespace Scripts.Pets
             {
                 _spellTimer = 0;
 
-                CreatureTemplate Info = me.GetCreatureTemplate();
+                var Info = me.GetCreatureTemplate();
 
                 _isViper = Info.Entry == CreatureIds.Viper ? true : false;
 
                 me.SetMaxHealth((uint)(107 * (me.GetLevel() - 40) * 0.025f));
                 // Add delta to make them not all hit the same time
-                uint delta = (RandomHelper.Rand32() % 7) * 100;
+                var delta = (RandomHelper.Rand32() % 7) * 100;
                 me.SetBaseAttackTime(WeaponAttackType.BaseAttack, Info.BaseAttackTime + delta);
                 //me.SetStatFloatValue(UnitFields.RangedAttackPower, (float)Info.AttackPower);
 
                 // Start attacking attacker of owner on first ai update after spawn - move in line of sight may choose better target
                 if (!me.GetVictim() && me.IsSummon())
                 {
-                    Unit owner = me.ToTempSummon().GetSummoner();
+                    var owner = me.ToTempSummon().GetSummoner();
                     if (owner)
                         if (owner.GetAttackerForHelper())
                             AttackStart(owner.GetAttackerForHelper());
@@ -79,7 +79,7 @@ namespace Scripts.Pets
                     if (me.GetDistanceZ(who) > SharedConst.CreatureAttackRangeZ)
                         return;
 
-                    float attackRadius = me.GetAttackDistance(who);
+                    var attackRadius = me.GetAttackDistance(who);
                     if (me.IsWithinDistInMap(who, attackRadius) && me.IsWithinLOSInMap(who))
                     {
                         if ((RandomHelper.Rand32() % 5) == 0)

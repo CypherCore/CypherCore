@@ -208,7 +208,7 @@ namespace Game.Maps
                     {
                         if (GetWorldObjectCountInNGrid<Player>() == 0 && !map.ActiveObjectsNearGrid(this))
                         {
-                            ObjectGridStoper worker = new ObjectGridStoper();
+                            var worker = new ObjectGridStoper();
                             var visitor = new Visitor(worker, GridMapTypeMask.AllGrid);
                             VisitAllGrids(visitor);
                             SetGridState(GridState.Idle);

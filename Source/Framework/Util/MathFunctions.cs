@@ -36,13 +36,13 @@ public static class MathFunctions
             return t;
         }
 
-        float interval = hi - lo;
+        var interval = hi - lo;
         return (float)(t - interval * Math.Floor((t - lo) / interval));
     }
 
     public static void Swap<T>(ref T lhs, ref T rhs)
     {
-        T temp = lhs;
+        var temp = lhs;
         lhs = rhs;
         rhs = temp;
     }
@@ -80,7 +80,7 @@ public static class MathFunctions
 
     static double eps(float a, float b)
     {
-        float aa = Math.Abs(a) + 1.0f;
+        var aa = Math.Abs(a) + 1.0f;
         if (float.IsPositiveInfinity(aa))
             return 0.00001f;
 

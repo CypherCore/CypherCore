@@ -28,7 +28,7 @@ namespace Framework.Algorithms
                 throw new ArgumentNullException("graph", "EdgeWeightedDigraph cannot be null");
             }
 
-            foreach (DirectedEdge edge in graph.Edges())
+            foreach (var edge in graph.Edges())
             {
                 if (edge.Weight < 0)
                 {
@@ -38,7 +38,7 @@ namespace Framework.Algorithms
 
             _distanceTo = new double[graph.NumberOfVertices];
             _edgeTo = new DirectedEdge[graph.NumberOfVertices];
-            for (int v = 0; v < graph.NumberOfVertices; v++)
+            for (var v = 0; v < graph.NumberOfVertices; v++)
             {
                 _distanceTo[v] = double.PositiveInfinity;
             }
@@ -48,8 +48,8 @@ namespace Framework.Algorithms
             _priorityQueue.Insert(sourceVertex, _distanceTo[sourceVertex]);
             while (!_priorityQueue.IsEmpty())
             {
-                int v = _priorityQueue.DeleteMin();
-                foreach (DirectedEdge edge in graph.Adjacent(v))
+                var v = _priorityQueue.DeleteMin();
+                foreach (var edge in graph.Adjacent(v))
                 {
                     Relax(edge);
                 }
@@ -57,8 +57,8 @@ namespace Framework.Algorithms
         }
         private void Relax(DirectedEdge edge)
         {
-            uint v = edge.From;
-            uint w = edge.To;
+            var v = edge.From;
+            var w = edge.To;
             if (_distanceTo[w] > _distanceTo[v] + edge.Weight)
             {
                 _distanceTo[w] = _distanceTo[v] + edge.Weight;
@@ -103,7 +103,7 @@ namespace Framework.Algorithms
                 return null;
             }
             var path = new Stack<DirectedEdge>();
-            for (DirectedEdge edge = _edgeTo[destinationVertex]; edge != null; edge = _edgeTo[edge.From])
+            for (var edge = _edgeTo[destinationVertex]; edge != null; edge = _edgeTo[edge.From])
             {
                 path.Push(edge);
             }
@@ -128,7 +128,7 @@ namespace Framework.Algorithms
             {
                 return false;
             }
-            for (int v = 0; v < graph.NumberOfVertices; v++)
+            for (var v = 0; v < graph.NumberOfVertices; v++)
             {
                 if (v == sourceVertex)
                 {
@@ -139,25 +139,25 @@ namespace Framework.Algorithms
                     return false;
                 }
             }
-            for (int v = 0; v < graph.NumberOfVertices; v++)
+            for (var v = 0; v < graph.NumberOfVertices; v++)
             {
-                foreach (DirectedEdge edge in graph.Adjacent(v))
+                foreach (var edge in graph.Adjacent(v))
                 {
-                    uint w = edge.To;
+                    var w = edge.To;
                     if (_distanceTo[v] + edge.Weight < _distanceTo[w])
                     {
                         return false;
                     }
                 }
             }
-            for (int w = 0; w < graph.NumberOfVertices; w++)
+            for (var w = 0; w < graph.NumberOfVertices; w++)
             {
                 if (_edgeTo[w] == null)
                 {
                     continue;
                 }
-                DirectedEdge edge = _edgeTo[w];
-                uint v = edge.From;
+                var edge = _edgeTo[w];
+                var v = edge.From;
                 if (w != edge.To)
                 {
                     return false;

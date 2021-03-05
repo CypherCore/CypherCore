@@ -34,7 +34,7 @@ namespace Game.Movement
                 return (uint)_path.Count;
 
             uint curMapId = _path[_currentNode].ContinentID;
-            for (int i = _currentNode; i < _path.Count; ++i)
+            for (var i = _currentNode; i < _path.Count; ++i)
             {
                 if (_path[i].ContinentID != curMapId)
                     return (uint)i;
@@ -54,7 +54,7 @@ namespace Game.Movement
             _currentNode = (int)startNode;
             _pointsForPathSwitch.Clear();
             var taxi = player.m_taxi.GetPath();
-            float discount = player.GetReputationPriceDiscount(player.m_taxi.GetFlightMasterFactionTemplate());
+            var discount = player.GetReputationPriceDiscount(player.m_taxi.GetFlightMasterFactionTemplate());
 
             for (int src = 0, dst = 1; dst < taxi.Count; src = dst++)
             {
@@ -66,9 +66,9 @@ namespace Game.Movement
                 var nodes = CliDB.TaxiPathNodesByPath[path];
                 if (!nodes.Empty())
                 {
-                    TaxiPathNodeRecord start = nodes[0];
-                    TaxiPathNodeRecord end = nodes[nodes.Length - 1];
-                    bool passedPreviousSegmentProximityCheck = false;
+                    var start = nodes[0];
+                    var end = nodes[nodes.Length - 1];
+                    var passedPreviousSegmentProximityCheck = false;
                     for (uint i = 0; i < nodes.Length; ++i)
                     {
                         if (passedPreviousSegmentProximityCheck || src == 0 || _path.Empty() || IsNodeIncludedInShortenedPath(_path.Last(), nodes[i]))
@@ -126,12 +126,12 @@ namespace Game.Movement
             owner.AddUnitState(UnitState.InFlight);
             owner.AddUnitFlag(UnitFlags.RemoveClientControl | UnitFlags.TaxiFlight);
 
-            MoveSplineInit init = new MoveSplineInit(owner);
-            uint end = GetPathAtMapEnd();
+            var init = new MoveSplineInit(owner);
+            var end = GetPathAtMapEnd();
             init.args.path = new Vector3[end];
-            for (int i = (int)GetCurrentNode(); i != end; ++i)
+            for (var i = (int)GetCurrentNode(); i != end; ++i)
             {
-                Vector3 vertice = new Vector3(_path[i].Loc.X, _path[i].Loc.Y, _path[i].Loc.Z);
+                var vertice = new Vector3(_path[i].Loc.X, _path[i].Loc.Y, _path[i].Loc.Z);
                 init.args.path[i] = vertice;
             }
             init.SetFirstPointId((int)GetCurrentNode());
@@ -145,10 +145,10 @@ namespace Game.Movement
 
         public override bool DoUpdate(Player player, uint time_diff)
         {
-            uint pointId = (uint)player.MoveSpline.CurrentPathIdx();
+            var pointId = (uint)player.MoveSpline.CurrentPathIdx();
             if (pointId > _currentNode)
             {
-                bool departureEvent = true;
+                var departureEvent = true;
                 do
                 {
                     DoEventIfAny(player, _path[_currentNode], departureEvent);
@@ -183,7 +183,7 @@ namespace Game.Movement
                 return;
 
             uint map0 = _path[_currentNode].ContinentID;
-            for (int i = _currentNode + 1; i < _path.Count; ++i)
+            for (var i = _currentNode + 1; i < _path.Count; ++i)
             {
                 if (_path[i].ContinentID != map0)
                 {
@@ -196,7 +196,7 @@ namespace Game.Movement
 
         void DoEventIfAny(Player player, TaxiPathNodeRecord node, bool departure)
         {
-            uint eventid = departure ? node.DepartureEventID : node.ArrivalEventID;
+            var eventid = departure ? node.DepartureEventID : node.ArrivalEventID;
             if (eventid != 0)
             {
                 Log.outDebug(LogFilter.Scripts, "Taxi {0} event {1} of node {2} of path {3} for player {4}", departure ? "departure" : "arrival", eventid, node.NodeIndex, node.PathID, player.GetName());
@@ -206,7 +206,7 @@ namespace Game.Movement
 
         bool GetResetPos(Player player, out float x, out float y, out float z)
         {
-            TaxiPathNodeRecord node = _path[_currentNode];
+            var node = _path[_currentNode];
             x = node.Loc.X;
             y = node.Loc.Y;
             z = node.Loc.Z;
@@ -215,7 +215,7 @@ namespace Game.Movement
 
         void InitEndGridInfo()
         {
-            int nodeCount = _path.Count;        //! Number of nodes in path.
+            var nodeCount = _path.Count;        //! Number of nodes in path.
             _endMapId = _path[nodeCount - 1].ContinentID; //! MapId of last node
             _preloadTargetNode = (uint)nodeCount - 3;
             _endGridX = _path[nodeCount - 1].Loc.X;
@@ -225,7 +225,7 @@ namespace Game.Movement
         void PreloadEndGrid()
         {
             // used to preload the final grid where the flightmaster is
-            Map endMap = Global.MapMgr.FindBaseNonInstanceMap(_endMapId);
+            var endMap = Global.MapMgr.FindBaseNonInstanceMap(_endMapId);
 
             // Load the grid
             if (endMap != null)

@@ -64,7 +64,7 @@ namespace Game.Entities
             {
                 _isRemoved = true;
 
-                Unit caster = GetCaster();
+                var caster = GetCaster();
                 if (caster)
                     caster._UnregisterAreaTrigger(this);
 
@@ -127,12 +127,12 @@ namespace Game.Entities
                 SetUpdateFieldValue(extraScaleCurve.ModifyValue(extraScaleCurve.StartTimeOffset), GetMiscTemplate().ExtraScale.Structured.StartTimeOffset);
             if (GetMiscTemplate().ExtraScale.Structured.X != 0 || GetMiscTemplate().ExtraScale.Structured.Y != 0)
             {
-                Vector2 point = new Vector2(GetMiscTemplate().ExtraScale.Structured.X, GetMiscTemplate().ExtraScale.Structured.Y);
+                var point = new Vector2(GetMiscTemplate().ExtraScale.Structured.X, GetMiscTemplate().ExtraScale.Structured.Y);
                 SetUpdateFieldValue(ref extraScaleCurve.ModifyValue(extraScaleCurve.Points, 0), point);
             }
             if (GetMiscTemplate().ExtraScale.Structured.Z != 0 || GetMiscTemplate().ExtraScale.Structured.W != 0)
             {
-                Vector2 point = new Vector2(GetMiscTemplate().ExtraScale.Structured.Z, GetMiscTemplate().ExtraScale.Structured.W);
+                var point = new Vector2(GetMiscTemplate().ExtraScale.Structured.Z, GetMiscTemplate().ExtraScale.Structured.W);
                 SetUpdateFieldValue(ref extraScaleCurve.ModifyValue(extraScaleCurve.Points, 1), point);
             }
             unsafe
@@ -153,11 +153,11 @@ namespace Game.Entities
 
             UpdateShape();
 
-            uint timeToTarget = GetMiscTemplate().TimeToTarget != 0 ? GetMiscTemplate().TimeToTarget : m_areaTriggerData.Duration;
+            var timeToTarget = GetMiscTemplate().TimeToTarget != 0 ? GetMiscTemplate().TimeToTarget : m_areaTriggerData.Duration;
 
             if (GetTemplate().HasFlag(AreaTriggerFlags.HasCircularMovement))
             {
-                AreaTriggerOrbitInfo cmi = GetMiscTemplate().OrbitInfo;
+                var cmi = GetMiscTemplate().OrbitInfo;
                 if (target && GetTemplate().HasFlag(AreaTriggerFlags.HasAttached))
                     cmi.PathTarget.Set(target.GetGUID());
                 else
@@ -171,7 +171,7 @@ namespace Game.Entities
             }
 
             // movement on transport of areatriggers on unit is handled by themself
-            Transport transport = m_movementInfo.transport.guid.IsEmpty() ? caster.GetTransport() : null;
+            var transport = m_movementInfo.transport.guid.IsEmpty() ? caster.GetTransport() : null;
             if (transport)
             {
                 float x, y, z, o;
@@ -205,7 +205,7 @@ namespace Game.Entities
 
         public static AreaTrigger CreateAreaTrigger(uint spellMiscId, Unit caster, Unit target, SpellInfo spell, Position pos, int duration, SpellCastVisualField spellVisual, ObjectGuid castId = default, AuraEffect aurEff = null)
         {
-            AreaTrigger at = new AreaTrigger();
+            var at = new AreaTrigger();
             if (!at.Create(spellMiscId, caster, target, spell, pos, duration, spellVisual, castId, aurEff))
                 return null;
 
@@ -214,11 +214,11 @@ namespace Game.Entities
 
         public override bool LoadFromDB(ulong spawnId, Map map, bool addToMap, bool allowDuplicate)
         {
-            AreaTriggerSpawn position = Global.AreaTriggerDataStorage.GetAreaTriggerSpawn(spawnId);
+            var position = Global.AreaTriggerDataStorage.GetAreaTriggerSpawn(spawnId);
             if (position == null)
                 return false;
 
-            AreaTriggerTemplate areaTriggerTemplate = Global.AreaTriggerDataStorage.GetAreaTriggerTemplate(position.Id);
+            var areaTriggerTemplate = Global.AreaTriggerDataStorage.GetAreaTriggerTemplate(position.Id);
             if (areaTriggerTemplate == null)
                 return false;
 
@@ -269,7 +269,7 @@ namespace Game.Entities
                 }
                 else if (GetTemplate().HasFlag(AreaTriggerFlags.HasAttached))
                 {
-                    Unit target = GetTarget();
+                    var target = GetTarget();
                     if (target)
                         GetMap().AreaTriggerRelocation(this, target.GetPositionX(), target.GetPositionY(), target.GetPositionZ(), target.GetOrientation());
                 }
@@ -327,7 +327,7 @@ namespace Game.Entities
 
         void UpdateTargetList()
         {
-            List<Unit> targetList = new List<Unit>();
+            var targetList = new List<Unit>();
 
             switch (GetTemplate().TriggerType)
             {
@@ -367,7 +367,7 @@ namespace Game.Entities
 
         void SearchUnitInSphere(List<Unit> targetList)
         {
-            float radius = GetTemplate().SphereDatas.Radius;
+            var radius = GetTemplate().SphereDatas.Radius;
             if (GetTemplate().HasFlag(AreaTriggerFlags.HasDynamicShape))
             {
                 if (GetMiscTemplate().MorphCurveId != 0)
@@ -392,20 +392,20 @@ namespace Game.Entities
 
             SearchUnits(targetList, GetTemplate().MaxSearchRadius, false);
 
-            float halfExtentsX = extentsX / 2.0f;
-            float halfExtentsY = extentsY / 2.0f;
-            float halfExtentsZ = extentsZ / 2.0f;
+            var halfExtentsX = extentsX / 2.0f;
+            var halfExtentsY = extentsY / 2.0f;
+            var halfExtentsZ = extentsZ / 2.0f;
 
-            float minX = GetPositionX() - halfExtentsX;
-            float maxX = GetPositionX() + halfExtentsX;
+            var minX = GetPositionX() - halfExtentsX;
+            var maxX = GetPositionX() + halfExtentsX;
 
-            float minY = GetPositionY() - halfExtentsY;
-            float maxY = GetPositionY() + halfExtentsY;
+            var minY = GetPositionY() - halfExtentsY;
+            var maxY = GetPositionY() + halfExtentsY;
 
-            float minZ = GetPositionZ() - halfExtentsZ;
-            float maxZ = GetPositionZ() + halfExtentsZ;
+            var minZ = GetPositionZ() - halfExtentsZ;
+            var maxZ = GetPositionZ() + halfExtentsZ;
 
-            AxisAlignedBox box = new AxisAlignedBox(new Vector3(minX, minY, minZ), new Vector3(maxX, maxY, maxZ));
+            var box = new AxisAlignedBox(new Vector3(minX, minY, minZ), new Vector3(maxX, maxY, maxZ));
 
             targetList.RemoveAll(unit => !box.contains(new Vector3(unit.GetPositionX(), unit.GetPositionY(), unit.GetPositionZ())));
         }
@@ -414,9 +414,9 @@ namespace Game.Entities
         {
             SearchUnits(targetList, GetTemplate().MaxSearchRadius, false);
 
-            float height = GetTemplate().PolygonDatas.Height;
-            float minZ = GetPositionZ() - height;
-            float maxZ = GetPositionZ() + height;
+            var height = GetTemplate().PolygonDatas.Height;
+            var minZ = GetPositionZ() - height;
+            var maxZ = GetPositionZ() + height;
 
             targetList.RemoveAll(unit => !CheckIsInPolygon2D(unit) || unit.GetPositionZ() < minZ || unit.GetPositionZ() > maxZ);
         }
@@ -425,21 +425,21 @@ namespace Game.Entities
         {
             SearchUnits(targetList, GetTemplate().MaxSearchRadius, false);
 
-            float height = GetTemplate().CylinderDatas.Height;
-            float minZ = GetPositionZ() - height;
-            float maxZ = GetPositionZ() + height;
+            var height = GetTemplate().CylinderDatas.Height;
+            var minZ = GetPositionZ() - height;
+            var maxZ = GetPositionZ() + height;
 
             targetList.RemoveAll(unit => unit.GetPositionZ() < minZ || unit.GetPositionZ() > maxZ);
         }
 
         void HandleUnitEnterExit(List<Unit> newTargetList)
         {
-            List<ObjectGuid> exitUnits = _insideUnits;
+            var exitUnits = _insideUnits;
             _insideUnits.Clear();
 
-            List<Unit> enteringUnits = new List<Unit>();
+            var enteringUnits = new List<Unit>();
 
-            foreach (Unit unit in newTargetList)
+            foreach (var unit in newTargetList)
             {
                 if (!exitUnits.Remove(unit.GetGUID())) // erase(key_type) returns number of elements erased
                     enteringUnits.Add(unit);
@@ -448,9 +448,9 @@ namespace Game.Entities
             }
 
             // Handle after _insideUnits have been reinserted so we can use GetInsideUnits() in hooks
-            foreach (Unit unit in enteringUnits)
+            foreach (var unit in enteringUnits)
             {
-                Player player = unit.ToPlayer();
+                var player = unit.ToPlayer();
                 if (player)
                     if (player.IsDebugAreaTriggers)
                         player.SendSysMessage(CypherStrings.DebugAreatriggerEntered, GetTemplate().Id);
@@ -460,12 +460,12 @@ namespace Game.Entities
                 _ai.OnUnitEnter(unit);
             }
 
-            foreach (ObjectGuid exitUnitGuid in exitUnits)
+            foreach (var exitUnitGuid in exitUnits)
             {
-                Unit leavingUnit = Global.ObjAccessor.GetUnit(this, exitUnitGuid);
+                var leavingUnit = Global.ObjAccessor.GetUnit(this, exitUnitGuid);
                 if (leavingUnit)
                 {
-                    Player player = leavingUnit.ToPlayer();
+                    var player = leavingUnit.ToPlayer();
                     if (player)
                         if (player.IsDebugAreaTriggers)
                             player.SendSysMessage(CypherStrings.DebugAreatriggerLeft, GetTemplate().Id);
@@ -499,7 +499,7 @@ namespace Game.Entities
 
         void UpdatePolygonOrientation()
         {
-            float newOrientation = GetOrientation();
+            var newOrientation = GetOrientation();
 
             // No need to recalculate, orientation didn't change
             if (MathFunctions.fuzzyEq(_previousCheckOrientation, newOrientation))
@@ -507,13 +507,13 @@ namespace Game.Entities
 
             _polygonVertices = GetTemplate().PolygonVertices;
 
-            float angleSin = (float)Math.Sin(newOrientation);
-            float angleCos = (float)Math.Cos(newOrientation);
+            var angleSin = (float)Math.Sin(newOrientation);
+            var angleCos = (float)Math.Cos(newOrientation);
 
             // This is needed to rotate the vertices, following orientation
             for (var i = 0; i < _polygonVertices.Count; ++i)
             {
-                Vector2 vertice = _polygonVertices[i];
+                var vertice = _polygonVertices[i];
 
                 vertice.X = vertice.X * angleCos - vertice.Y * angleSin;
                 vertice.Y = vertice.Y * angleCos + vertice.X * angleSin;
@@ -524,13 +524,13 @@ namespace Game.Entities
 
         bool CheckIsInPolygon2D(Position pos)
         {
-            float testX = pos.GetPositionX();
-            float testY = pos.GetPositionY();
+            var testX = pos.GetPositionX();
+            var testY = pos.GetPositionY();
 
             //this method uses the ray tracing algorithm to determine if the point is in the polygon
-            bool locatedInPolygon = false;
+            var locatedInPolygon = false;
 
-            for (int vertex = 0; vertex < _polygonVertices.Count; ++vertex)
+            for (var vertex = 0; vertex < _polygonVertices.Count; ++vertex)
             {
                 int nextVertex;
 
@@ -546,15 +546,15 @@ namespace Game.Entities
                     nextVertex = vertex + 1;
                 }
 
-                float vertX_i = GetPositionX() + _polygonVertices[vertex].X;
-                float vertY_i = GetPositionY() + _polygonVertices[vertex].Y;
-                float vertX_j = GetPositionX() + _polygonVertices[nextVertex].X;
-                float vertY_j = GetPositionY() + _polygonVertices[nextVertex].Y;
+                var vertX_i = GetPositionX() + _polygonVertices[vertex].X;
+                var vertY_i = GetPositionY() + _polygonVertices[vertex].Y;
+                var vertX_j = GetPositionX() + _polygonVertices[nextVertex].X;
+                var vertY_j = GetPositionY() + _polygonVertices[nextVertex].Y;
 
                 // following statement checks if testPoint.Y is below Y-coord of i-th vertex
-                bool belowLowY = vertY_i > testY;
+                var belowLowY = vertY_i > testY;
                 // following statement checks if testPoint.Y is below Y-coord of i+1-th vertex
-                bool belowHighY = vertY_j > testY;
+                var belowHighY = vertY_j > testY;
 
                 /* following statement is true if testPoint.Y satisfies either (only one is possible)
                 -.(i).Y < testPoint.Y < (i+1).Y        OR
@@ -567,18 +567,18 @@ namespace Game.Entities
                 to the right from the testpoint will NOT cross the line that connects vertices i and i+1
                 of the polygon
                 */
-                bool withinYsEdges = belowLowY != belowHighY;
+                var withinYsEdges = belowLowY != belowHighY;
 
                 if (withinYsEdges)
                 {
                     // this is the slope of the line that connects vertices i and i+1 of the polygon
-                    float slopeOfLine = (vertX_j - vertX_i) / (vertY_j - vertY_i);
+                    var slopeOfLine = (vertX_j - vertX_i) / (vertY_j - vertY_i);
 
                     // this looks up the x-coord of a point lying on the above line, given its y-coord
-                    float pointOnLine = (slopeOfLine * (testY - vertY_i)) + vertX_i;
+                    var pointOnLine = (slopeOfLine * (testY - vertY_i)) + vertX_i;
 
                     //checks to see if x-coord of testPoint is smaller than the point on the line with the same y-coord
-                    bool isLeftToLine = testX < pointOnLine;
+                    var isLeftToLine = testX < pointOnLine;
 
                     if (isLeftToLine)
                     {
@@ -621,10 +621,10 @@ namespace Game.Entities
 
         void DoActions(Unit unit)
         {
-            Unit caster = IsServerSide() ? unit : GetCaster();
+            var caster = IsServerSide() ? unit : GetCaster();
             if (caster)
             {
-                foreach (AreaTriggerAction action in GetTemplate().Actions)
+                foreach (var action in GetTemplate().Actions)
                 {
                     if (IsServerSide() || UnitFitToActionRequirement(unit, caster, action))
                     {
@@ -637,10 +637,10 @@ namespace Game.Entities
                                 caster.AddAura(action.Param, unit);
                                 break;
                             case AreaTriggerActionTypes.Teleport:
-                                WorldSafeLocsEntry safeLoc = Global.ObjectMgr.GetWorldSafeLoc(action.Param);
+                                var safeLoc = Global.ObjectMgr.GetWorldSafeLoc(action.Param);
                                 if (safeLoc != null)
                                 {
-                                    Player player = caster.ToPlayer();
+                                    var player = caster.ToPlayer();
                                     if (player != null)
                                         player.TeleportTo(safeLoc.Loc);
                                 }
@@ -655,7 +655,7 @@ namespace Game.Entities
 
         void UndoActions(Unit unit)
         {
-            foreach (AreaTriggerAction action in GetTemplate().Actions)
+            foreach (var action in GetTemplate().Actions)
             {
                 if (action.ActionType == AreaTriggerActionTypes.Cast || action.ActionType == AreaTriggerActionTypes.AddAura)
                     unit.RemoveAurasDueToSpell(action.Param, GetCasterGuid());
@@ -664,26 +664,26 @@ namespace Game.Entities
 
         void InitSplineOffsets(List<Vector3> offsets, uint timeToTarget)
         {
-            float angleSin = (float)Math.Sin(GetOrientation());
-            float angleCos = (float)Math.Cos(GetOrientation());
+            var angleSin = (float)Math.Sin(GetOrientation());
+            var angleCos = (float)Math.Cos(GetOrientation());
 
             // This is needed to rotate the spline, following caster orientation
-            List<Vector3> rotatedPoints = new List<Vector3>();
+            var rotatedPoints = new List<Vector3>();
             for (var i = 0; i < offsets.Count; ++i)
             {
-                Vector3 offset = offsets[i];
-                float tempX = offset.X;
-                float tempY = offset.Y;
-                float tempZ = GetPositionZ();
+                var offset = offsets[i];
+                var tempX = offset.X;
+                var tempY = offset.Y;
+                var tempZ = GetPositionZ();
 
                 offset.X = (tempX * angleCos - tempY * angleSin) + GetPositionX();
                 offset.Y = (tempX * angleSin + tempY * angleCos) + GetPositionY();
                 UpdateAllowedPositionZ(offset.X, offset.Y, ref tempZ);
                 offset.Z += tempZ;
 
-                float x = GetPositionX() + (offset.X * angleCos - offset.Y * angleSin);
-                float y = GetPositionY() + (offset.Y * angleCos + offset.X * angleSin);
-                float z = GetPositionZ();
+                var x = GetPositionX() + (offset.X * angleCos - offset.Y * angleSin);
+                var y = GetPositionY() + (offset.Y * angleCos + offset.X * angleSin);
+                var z = GetPositionZ();
 
                 UpdateAllowedPositionZ(x, y, ref z);
                 z += offset.Z;
@@ -715,12 +715,12 @@ namespace Game.Entities
             {
                 if (_reachedDestination)
                 {
-                    AreaTriggerRePath reshapeDest = new AreaTriggerRePath();
+                    var reshapeDest = new AreaTriggerRePath();
                     reshapeDest.TriggerGUID = GetGUID();
                     SendMessageToSet(reshapeDest, true);
                 }
 
-                AreaTriggerRePath reshape = new AreaTriggerRePath();
+                var reshape = new AreaTriggerRePath();
                 reshape.TriggerGUID = GetGUID();
                 reshape.AreaTriggerSpline.HasValue = true;
                 reshape.AreaTriggerSpline.Value.ElapsedTimeForMovement = GetElapsedTimeForMovement();
@@ -751,7 +751,7 @@ namespace Game.Entities
 
             if (IsInWorld)
             {
-                AreaTriggerRePath reshape = new AreaTriggerRePath();
+                var reshape = new AreaTriggerRePath();
                 reshape.TriggerGUID = GetGUID();
                 reshape.AreaTriggerOrbit = _orbitInfo;
 
@@ -771,7 +771,7 @@ namespace Game.Entities
 
             if (_orbitInfo.Value.PathTarget.HasValue)
             {
-                WorldObject center = Global.ObjAccessor.GetWorldObject(this, _orbitInfo.Value.PathTarget.Value);
+                var center = Global.ObjAccessor.GetWorldObject(this, _orbitInfo.Value.PathTarget.Value);
                 if (center)
                     return center;
             }
@@ -784,26 +784,26 @@ namespace Game.Entities
 
         Position CalculateOrbitPosition()
         {
-            Position centerPos = GetOrbitCenterPosition();
+            var centerPos = GetOrbitCenterPosition();
             if (centerPos == null)
                 return GetPosition();
 
-            AreaTriggerOrbitInfo cmi = _orbitInfo.Value;
+            var cmi = _orbitInfo.Value;
 
             // AreaTrigger make exactly "Duration / TimeToTarget" loops during his life time
-            float pathProgress = (float)cmi.ElapsedTimeForMovement / cmi.TimeToTarget;
+            var pathProgress = (float)cmi.ElapsedTimeForMovement / cmi.TimeToTarget;
 
             // We already made one circle and can't loop
             if (!cmi.CanLoop)
                 pathProgress = Math.Min(1.0f, pathProgress);
 
-            float radius = cmi.Radius;
+            var radius = cmi.Radius;
             if (MathFunctions.fuzzyNe(cmi.BlendFromRadius, radius))
             {
-                float blendCurve = (cmi.BlendFromRadius - radius) / radius;
+                var blendCurve = (cmi.BlendFromRadius - radius) / radius;
                 // 4.f Defines four quarters
                 blendCurve = MathFunctions.RoundToInterval(ref blendCurve, 1.0f, 4.0f) / 4.0f;
-                float blendProgress = Math.Min(1.0f, pathProgress / blendCurve);
+                var blendProgress = Math.Min(1.0f, pathProgress / blendCurve);
                 radius = MathFunctions.lerp(cmi.BlendFromRadius, cmi.Radius, blendProgress);
             }
 
@@ -811,10 +811,10 @@ namespace Game.Entities
             if (!cmi.CounterClockwise)
                 pathProgress *= -1;
 
-            float angle = cmi.InitialAngle + 2.0f * (float)Math.PI * pathProgress;
-            float x = centerPos.GetPositionX() + (radius * (float)Math.Cos(angle));
-            float y = centerPos.GetPositionY() + (radius * (float)Math.Sin(angle));
-            float z = centerPos.GetPositionZ() + cmi.ZOffset;
+            var angle = cmi.InitialAngle + 2.0f * (float)Math.PI * pathProgress;
+            var x = centerPos.GetPositionX() + (radius * (float)Math.Cos(angle));
+            var y = centerPos.GetPositionY() + (radius * (float)Math.Sin(angle));
+            var z = centerPos.GetPositionZ() + cmi.ZOffset;
 
             return new Position(x, y, z, angle);
         }
@@ -826,7 +826,7 @@ namespace Game.Entities
 
             _orbitInfo.Value.ElapsedTimeForMovement = (int)(GetElapsedTimeForMovement() - _orbitInfo.Value.StartDelay);
 
-            Position pos = CalculateOrbitPosition();
+            var pos = CalculateOrbitPosition();
 
             GetMap().AreaTriggerRelocation(this, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), pos.GetOrientation());
 
@@ -848,7 +848,7 @@ namespace Game.Entities
                 _reachedDestination = true;
                 _lastSplineIndex = _spline.Last();
 
-                Vector3 lastSplinePosition = _spline.GetPoint(_lastSplineIndex);
+                var lastSplinePosition = _spline.GetPoint(_lastSplineIndex);
                 GetMap().AreaTriggerRelocation(this, lastSplinePosition.X, lastSplinePosition.Y, lastSplinePosition.Z, GetOrientation());
 
                 DebugVisualizePosition();
@@ -858,14 +858,14 @@ namespace Game.Entities
                 return;
             }
 
-            float currentTimePercent = (float)_movementTime / GetTimeToTarget();
+            var currentTimePercent = (float)_movementTime / GetTimeToTarget();
 
             if (currentTimePercent <= 0.0f)
                 return;
 
             if (GetMiscTemplate().MoveCurveId != 0)
             {
-                float progress = Global.DB2Mgr.GetCurveValueAt(GetMiscTemplate().MoveCurveId, currentTimePercent);
+                var progress = Global.DB2Mgr.GetCurveValueAt(GetMiscTemplate().MoveCurveId, currentTimePercent);
                 if (progress < 0.0f || progress > 1.0f)
                 {
                     Log.outError(LogFilter.AreaTrigger, "AreaTrigger (Id: {0}, SpellMiscId: {1}) has wrong progress ({2}) caused by curve calculation (MoveCurveId: {3})",
@@ -875,17 +875,17 @@ namespace Game.Entities
                     currentTimePercent = progress;
             }
 
-            int lastPositionIndex = 0;
+            var lastPositionIndex = 0;
             float percentFromLastPoint = 0;
             _spline.ComputeIndex(currentTimePercent, ref lastPositionIndex, ref percentFromLastPoint);
 
             Vector3 currentPosition;
             _spline.Evaluate_Percent(lastPositionIndex, percentFromLastPoint, out currentPosition);
 
-            float orientation = GetOrientation();
+            var orientation = GetOrientation();
             if (GetTemplate().HasFlag(AreaTriggerFlags.HasFaceMovementDir))
             {
-                Vector3 nextPoint = _spline.GetPoint(lastPositionIndex + 1);
+                var nextPoint = _spline.GetPoint(lastPositionIndex + 1);
                 orientation = GetAngle(nextPoint.X, nextPoint.Y);
             }
 
@@ -903,7 +903,7 @@ namespace Game.Entities
         void AI_Initialize()
         {
             AI_Destroy();
-            AreaTriggerAI ai = Global.ScriptMgr.GetAreaTriggerAI(this);
+            var ai = Global.ScriptMgr.GetAreaTriggerAI(this);
             if (ai == null)
                 ai = new NullAreaTriggerAI(this);
 
@@ -918,8 +918,8 @@ namespace Game.Entities
 
         public override void BuildValuesCreate(WorldPacket data, Player target)
         {
-            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new WorldPacket();
+            var flags = GetUpdateFieldFlagsFor(target);
+            var buffer = new WorldPacket();
 
             buffer.WriteUInt8((byte)flags);
             m_objectData.WriteCreate(buffer, flags, this, target);
@@ -931,8 +931,8 @@ namespace Game.Entities
 
         public override void BuildValuesUpdate(WorldPacket data, Player target)
         {
-            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new WorldPacket();
+            var flags = GetUpdateFieldFlagsFor(target);
+            var buffer = new WorldPacket();
 
             buffer.WriteUInt32(m_values.GetChangedObjectTypeMask());
             if (m_values.HasChanged(TypeId.Object))
@@ -947,14 +947,14 @@ namespace Game.Entities
 
         void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedAreaTriggerMask, Player target)
         {
-            UpdateMask valuesMask = new UpdateMask((int)TypeId.Max);
+            var valuesMask = new UpdateMask((int)TypeId.Max);
             if (requestedObjectMask.IsAnySet())
                 valuesMask.Set((int)TypeId.Object);
 
             if (requestedAreaTriggerMask.IsAnySet())
                 valuesMask.Set((int)TypeId.AreaTrigger);
 
-            WorldPacket buffer = new WorldPacket();
+            var buffer = new WorldPacket();
             buffer.WriteUInt32(valuesMask.GetBlock(0));
 
             if (valuesMask[(int)TypeId.Object])
@@ -963,7 +963,7 @@ namespace Game.Entities
             if (valuesMask[(int)TypeId.AreaTrigger])
                 m_areaTriggerData.WriteUpdate(buffer, requestedAreaTriggerMask, true, this, target);
 
-            WorldPacket buffer1 = new WorldPacket();
+            var buffer1 = new WorldPacket();
             buffer1.WriteUInt8((byte)UpdateType.Values);
             buffer1.WritePackedGuid(GetGUID());
             buffer1.WriteUInt32(buffer.GetSize());
@@ -993,10 +993,10 @@ namespace Game.Entities
         [System.Diagnostics.Conditional("DEBUG")]
         void DebugVisualizePosition()
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster)
             {
-                Player player = caster.ToPlayer();
+                var player = caster.ToPlayer();
                 if (player)
                     if (player.IsDebugAreaTriggers)
                         player.SummonCreature(1, this, TempSummonType.TimedDespawn, GetTimeToTarget());

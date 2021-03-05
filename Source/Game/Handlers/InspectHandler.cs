@@ -29,7 +29,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.Inspect)]
         void HandleInspect(Inspect inspect)
         {
-            Player player = Global.ObjAccessor.GetPlayer(_player, inspect.Target);
+            var player = Global.ObjAccessor.GetPlayer(_player, inspect.Target);
             if (!player)
             {
                 Log.outDebug(LogFilter.Network, "WorldSession.HandleInspectOpcode: Target {0} not found.", inspect.Target.ToString());
@@ -42,7 +42,7 @@ namespace Game
             if (GetPlayer().IsValidAttackTarget(player))
                 return;
 
-            InspectResult inspectResult = new InspectResult();
+            var inspectResult = new InspectResult();
             inspectResult.DisplayInfo.Initialize(player);
 
             if (GetPlayer().CanBeGameMaster() || WorldConfig.GetIntValue(WorldCfg.TalentsInspecting) + (GetPlayer().GetTeamId() == player.GetTeamId() ? 1 : 0) > 1)
@@ -55,7 +55,7 @@ namespace Game
                 }
             }
 
-            Guild guild = Global.GuildMgr.GetGuildById(player.GetGuildId());
+            var guild = Global.GuildMgr.GetGuildById(player.GetGuildId());
             if (guild)
             {
                 inspectResult.GuildData.HasValue = true;
@@ -70,7 +70,7 @@ namespace Game
             Item heartOfAzeroth = player.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
             if (heartOfAzeroth != null)
             {
-                AzeriteItem azeriteItem = heartOfAzeroth.ToAzeriteItem();
+                var azeriteItem = heartOfAzeroth.ToAzeriteItem();
                 if (azeriteItem != null)
                     inspectResult.AzeriteLevel = azeriteItem.GetEffectiveLevel();
             }
@@ -88,7 +88,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.QueryInspectAchievements)]
         void HandleQueryInspectAchievements(QueryInspectAchievements inspect)
         {
-            Player player = Global.ObjAccessor.GetPlayer(_player, inspect.Guid);
+            var player = Global.ObjAccessor.GetPlayer(_player, inspect.Guid);
             if (!player)
             {
                 Log.outDebug(LogFilter.Network, "WorldSession.HandleQueryInspectAchievements: [{0}] inspected unknown Player [{1}]", GetPlayer().GetGUID().ToString(), inspect.Guid.ToString());

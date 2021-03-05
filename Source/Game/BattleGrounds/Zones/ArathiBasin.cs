@@ -83,7 +83,7 @@ namespace Game.BattleGrounds.Zones
                         {
                             m_NodeTimers[node] = 0;
                             // Change from contested to occupied !
-                            int teamIndex = (int)m_Nodes[node] - 1;
+                            var teamIndex = (int)m_Nodes[node] - 1;
                             m_prevNodes[node] = m_Nodes[node];
                             m_Nodes[node] += 2;
                             // burn current contested banner
@@ -107,15 +107,15 @@ namespace Game.BattleGrounds.Zones
                         }
                     }
 
-                    for (int team = 0; team < SharedConst.BGTeamsCount; ++team)
+                    for (var team = 0; team < SharedConst.BGTeamsCount; ++team)
                         if (m_Nodes[node] == team + ABNodeStatus.Occupied)
                             ++team_points[team];
                 }
 
                 // Accumulate points
-                for (int team = 0; team < SharedConst.BGTeamsCount; ++team)
+                for (var team = 0; team < SharedConst.BGTeamsCount; ++team)
                 {
-                    int points = team_points[team];
+                    var points = team_points[team];
                     if (points == 0)
                         continue;
 
@@ -163,7 +163,7 @@ namespace Game.BattleGrounds.Zones
                             UpdateWorldState(ABWorldStates.ResourcesHorde, m_TeamScores[team]);
                         // update achievement flags
                         // we increased m_TeamScores[team] so we just need to check if it is 500 more than other teams resources
-                        int otherTeam = (team + 1) % SharedConst.BGTeamsCount;
+                        var otherTeam = (team + 1) % SharedConst.BGTeamsCount;
                         if (m_TeamScores[team] > m_TeamScores[otherTeam] + 500)
                             m_TeamScores500Disadvantage[otherTeam] = true;
                     }
@@ -180,9 +180,9 @@ namespace Game.BattleGrounds.Zones
         public override void StartingEventCloseDoors()
         {
             // despawn banners, auras and buffs
-            for (int obj = ABObjectTypes.BannerNeutral; obj < ABBattlegroundNodes.DynamicNodesCount * 8; ++obj)
+            for (var obj = ABObjectTypes.BannerNeutral; obj < ABBattlegroundNodes.DynamicNodesCount * 8; ++obj)
                 SpawnBGObject(obj, BattlegroundConst.RespawnOneDay);
-            for (int i = 0; i < ABBattlegroundNodes.DynamicNodesCount * 3; ++i)
+            for (var i = 0; i < ABBattlegroundNodes.DynamicNodesCount * 3; ++i)
                 SpawnBGObject(ABObjectTypes.SpeedbuffStables + i, BattlegroundConst.RespawnOneDay);
 
             // Starting doors
@@ -201,10 +201,10 @@ namespace Game.BattleGrounds.Zones
             // spawn neutral banners
             for (int banner = ABObjectTypes.BannerNeutral, i = 0; i < 5; banner += 8, ++i)
                 SpawnBGObject(banner, BattlegroundConst.RespawnImmediately);
-            for (int i = 0; i < ABBattlegroundNodes.DynamicNodesCount; ++i)
+            for (var i = 0; i < ABBattlegroundNodes.DynamicNodesCount; ++i)
             {
                 //randomly select buff to spawn
-                int buff = RandomHelper.IRand(0, 2);
+                var buff = RandomHelper.IRand(0, 2);
                 SpawnBGObject(ABObjectTypes.SpeedbuffStables + buff + i * 3, BattlegroundConst.RespawnImmediately);
             }
             DoorOpen(ABObjectTypes.GateA);
@@ -271,7 +271,7 @@ namespace Game.BattleGrounds.Zones
                 return;
             }
 
-            int obj = node * 8 + (byte)type + teamIndex;
+            var obj = node * 8 + (byte)type + teamIndex;
 
             SpawnBGObject(obj, BattlegroundConst.RespawnImmediately);
 
@@ -284,7 +284,7 @@ namespace Game.BattleGrounds.Zones
 
         void _DelBanner(byte node, ABNodeStatus type, byte teamIndex)
         {
-            int obj = node * 8 + (byte)type + teamIndex;
+            var obj = node * 8 + (byte)type + teamIndex;
             SpawnBGObject(obj, BattlegroundConst.RespawnOneDay);
 
             // handle aura with banner
@@ -370,7 +370,7 @@ namespace Game.BattleGrounds.Zones
             if (capturedNodes >= 4)
                 CastSpellOnTeam(BattlegroundConst.AbQuestReward4Bases, team);
 
-            Creature trigger = !BgCreatures[node + 7].IsEmpty() ? GetBGCreature(node + 7) : null; // 0-6 spirit guides
+            var trigger = !BgCreatures[node + 7].IsEmpty() ? GetBGCreature(node + 7) : null; // 0-6 spirit guides
             if (!trigger)
                 trigger = AddCreature(SharedConst.WorldTrigger, node + 7, NodePositions[node], GetTeamIndexByTeamId(team));
 
@@ -407,7 +407,7 @@ namespace Game.BattleGrounds.Zones
                 return;
 
             byte node = ABBattlegroundNodes.NodeStables;
-            GameObject obj = GetBgMap().GetGameObject(BgObjects[node * 8 + 7]);
+            var obj = GetBgMap().GetGameObject(BgObjects[node * 8 + 7]);
             while ((node < ABBattlegroundNodes.DynamicNodesCount) && ((!obj) || (!source.IsWithinDistInMap(obj, 10))))
             {
                 ++node;
@@ -420,7 +420,7 @@ namespace Game.BattleGrounds.Zones
                 return;
             }
 
-            int teamIndex = GetTeamIndexByTeamId(source.GetTeam());
+            var teamIndex = GetTeamIndexByTeamId(source.GetTeam());
 
             // Check if player really could use this banner, not cheated
             if (!(m_Nodes[node] == 0 || teamIndex == (int)m_Nodes[node] % 2))
@@ -546,8 +546,8 @@ namespace Game.BattleGrounds.Zones
 
         public override bool SetupBattleground()
         {
-            bool result = true;
-            for (int i = 0; i < ABBattlegroundNodes.DynamicNodesCount; ++i)
+            var result = true;
+            for (var i = 0; i < ABBattlegroundNodes.DynamicNodesCount; ++i)
             {
                 result &= AddObject(ABObjectTypes.BannerNeutral + 8 * i, (uint)(NodeObjectId.Banner0 + i), NodePositions[i], 0, 0, (float)Math.Sin(NodePositions[i].GetOrientation() / 2), (float)Math.Cos(NodePositions[i].GetOrientation() / 2), BattlegroundConst.RespawnOneDay);
                 result &= AddObject(ABObjectTypes.BannerContA + 8 * i, ABObjectIds.BannerContA, NodePositions[i], 0, 0, (float)Math.Sin(NodePositions[i].GetOrientation() / 2), (float)Math.Cos(NodePositions[i].GetOrientation() / 2), BattlegroundConst.RespawnOneDay);
@@ -573,7 +573,7 @@ namespace Game.BattleGrounds.Zones
             }
 
             //buffs
-            for (int i = 0; i < ABBattlegroundNodes.DynamicNodesCount; ++i)
+            for (var i = 0; i < ABBattlegroundNodes.DynamicNodesCount; ++i)
             {
                 result &= AddObject(ABObjectTypes.SpeedbuffStables + 3 * i, Buff_Entries[0], BuffPositions[i][0], BuffPositions[i][1], BuffPositions[i][2], BuffPositions[i][3], 0, 0, (float)Math.Sin(BuffPositions[i][3] / 2), (float)Math.Cos(BuffPositions[i][3] / 2), BattlegroundConst.RespawnOneDay);
                 result &= AddObject(ABObjectTypes.SpeedbuffStables + 3 * i + 1, Buff_Entries[1], BuffPositions[i][0], BuffPositions[i][1], BuffPositions[i][2], BuffPositions[i][3], 0, 0, (float)Math.Sin(BuffPositions[i][3] / 2), (float)Math.Cos(BuffPositions[i][3] / 2), BattlegroundConst.RespawnOneDay);
@@ -603,7 +603,7 @@ namespace Game.BattleGrounds.Zones
             }
 
             m_IsInformedNearVictory = false;
-            bool isBGWeekend = Global.BattlegroundMgr.IsBGWeekend(GetTypeID());
+            var isBGWeekend = Global.BattlegroundMgr.IsBGWeekend(GetTypeID());
             m_HonorTics = (isBGWeekend) ? ABBGWeekendHonorTicks : NotABBGWeekendHonorTicks;
             m_ReputationTics = (isBGWeekend) ? ABBGWeekendReputationTicks : NotABBGWeekendReputationTicks;
 
@@ -632,10 +632,10 @@ namespace Game.BattleGrounds.Zones
 
         public override WorldSafeLocsEntry GetClosestGraveYard(Player player)
         {
-            int teamIndex = GetTeamIndexByTeamId(player.GetTeam());
+            var teamIndex = GetTeamIndexByTeamId(player.GetTeam());
 
             // Is there any occupied node for this team?
-            List<byte> nodes = new List<byte>();
+            var nodes = new List<byte>();
             for (byte i = 0; i < ABBattlegroundNodes.DynamicNodesCount; ++i)
                 if (m_Nodes[i] == ABNodeStatus.Occupied + teamIndex)
                     nodes.Add(i);
@@ -644,16 +644,16 @@ namespace Game.BattleGrounds.Zones
             // If so, select the closest node to place ghost on
             if (!nodes.Empty())
             {
-                float plr_x = player.GetPositionX();
-                float plr_y = player.GetPositionY();
+                var plr_x = player.GetPositionX();
+                var plr_y = player.GetPositionY();
 
-                float mindist = 999999.0f;
+                var mindist = 999999.0f;
                 for (byte i = 0; i < nodes.Count; ++i)
                 {
-                    WorldSafeLocsEntry entry = Global.ObjectMgr.GetWorldSafeLoc(GraveyardIds[nodes[i]]);
+                    var entry = Global.ObjectMgr.GetWorldSafeLoc(GraveyardIds[nodes[i]]);
                     if (entry == null)
                         continue;
-                    float dist = (entry.Loc.GetPositionX() - plr_x) * (entry.Loc.GetPositionX() - plr_x) + (entry.Loc.GetPositionY() - plr_y) * (entry.Loc.GetPositionY() - plr_y);
+                    var dist = (entry.Loc.GetPositionX() - plr_x) * (entry.Loc.GetPositionX() - plr_x) + (entry.Loc.GetPositionY() - plr_y) * (entry.Loc.GetPositionY() - plr_y);
                     if (mindist > dist)
                     {
                         mindist = dist;
@@ -696,7 +696,7 @@ namespace Game.BattleGrounds.Zones
         public override bool IsAllNodesControlledByTeam(Team team)
         {
             uint count = 0;
-            for (int i = 0; i < ABBattlegroundNodes.DynamicNodesCount; ++i)
+            for (var i = 0; i < ABBattlegroundNodes.DynamicNodesCount; ++i)
                 if ((team == Team.Alliance && m_Nodes[i] == ABNodeStatus.AllyOccupied) ||
                     (team == Team.Horde && m_Nodes[i] == ABNodeStatus.HordeOccupied))
                     ++count;

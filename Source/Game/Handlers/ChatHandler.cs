@@ -96,7 +96,7 @@ namespace Game
 
         void HandleChat(ChatMsg type, Language lang, string msg, string target = "")
         {
-            Player sender = GetPlayer();
+            var sender = GetPlayer();
 
             if (lang == Language.Universal && type != ChatMsg.Emote)
             {
@@ -106,7 +106,7 @@ namespace Game
             }
 
             // prevent talking at unknown language (cheating)
-            LanguageDesc langDesc = ObjectManager.GetLanguageDescByID(lang);
+            var langDesc = ObjectManager.GetLanguageDescByID(lang);
             if (langDesc == null)
             {
                 SendNotification(CypherStrings.UnknownLanguage);
@@ -117,7 +117,7 @@ namespace Game
             {
                 // also check SPELL_AURA_COMPREHEND_LANGUAGE (client offers option to speak in that language)
                 var langAuras = sender.GetAuraEffectsByType(AuraType.ComprehendLanguage);
-                bool foundAura = false;
+                var foundAura = false;
                 foreach (var eff in langAuras)
                 {
                     if (eff.GetMiscValue() == (int)lang)
@@ -168,7 +168,7 @@ namespace Game
 
             if (!CanSpeak())
             {
-                string timeStr = Time.secsToTimeString((ulong)(m_muteTime - Time.UnixTime));
+                var timeStr = Time.secsToTimeString((ulong)(m_muteTime - Time.UnixTime));
                 SendNotification(CypherStrings.WaitBeforeSpeaking, timeStr);
                 return;
             }
@@ -228,7 +228,7 @@ namespace Game
                     break;
                 case ChatMsg.Whisper:
                     // @todo implement cross realm whispers (someday)
-                    ExtendedPlayerName extName = ObjectManager.ExtractExtendedPlayerName(target);
+                    var extName = ObjectManager.ExtractExtendedPlayerName(target);
 
                     if (!ObjectManager.NormalizePlayerName(ref extName.Name))
                     {
@@ -269,7 +269,7 @@ namespace Game
                 case ChatMsg.Party:
                     {
                         // if player is in Battleground, he cannot say to Battlegroundmembers by /p
-                        Group group = GetPlayer().GetOriginalGroup();
+                        var group = GetPlayer().GetOriginalGroup();
                         if (!group)
                         {
                             group = GetPlayer().GetGroup();
@@ -282,7 +282,7 @@ namespace Game
 
                         Global.ScriptMgr.OnPlayerChat(GetPlayer(), type, lang, msg, group);
 
-                        ChatPkt data = new ChatPkt();
+                        var data = new ChatPkt();
                         data.Initialize(type, lang, sender, null, msg);
                         group.BroadcastPacket(data, false, group.GetMemberGroup(GetPlayer().GetGUID()));
                     }
@@ -290,7 +290,7 @@ namespace Game
                 case ChatMsg.Guild:
                     if (GetPlayer().GetGuildId() != 0)
                     {
-                        Guild guild = Global.GuildMgr.GetGuildById(GetPlayer().GetGuildId());
+                        var guild = Global.GuildMgr.GetGuildById(GetPlayer().GetGuildId());
                         if (guild)
                         {
                             Global.ScriptMgr.OnPlayerChat(GetPlayer(), type, lang, msg, guild);
@@ -302,7 +302,7 @@ namespace Game
                 case ChatMsg.Officer:
                     if (GetPlayer().GetGuildId() != 0)
                     {
-                        Guild guild = Global.GuildMgr.GetGuildById(GetPlayer().GetGuildId());
+                        var guild = Global.GuildMgr.GetGuildById(GetPlayer().GetGuildId());
                         if (guild)
                         {
                             Global.ScriptMgr.OnPlayerChat(GetPlayer(), type, lang, msg, guild);
@@ -313,7 +313,7 @@ namespace Game
                     break;
                 case ChatMsg.Raid:
                     {
-                        Group group = GetPlayer().GetGroup();
+                        var group = GetPlayer().GetGroup();
                         if (!group || !group.IsRaidGroup() || group.IsBGGroup())
                             return;
 
@@ -322,20 +322,20 @@ namespace Game
 
                         Global.ScriptMgr.OnPlayerChat(GetPlayer(), type, lang, msg, group);
 
-                        ChatPkt data = new ChatPkt();
+                        var data = new ChatPkt();
                         data.Initialize(type, lang, sender, null, msg);
                         group.BroadcastPacket(data, false);
                     }
                     break;
                 case ChatMsg.RaidWarning:
                     {
-                        Group group = GetPlayer().GetGroup();
+                        var group = GetPlayer().GetGroup();
                         if (!group || !(group.IsRaidGroup() || WorldConfig.GetBoolValue(WorldCfg.ChatPartyRaidWarnings)) || !(group.IsLeader(GetPlayer().GetGUID()) || group.IsAssistant(GetPlayer().GetGUID())) || group.IsBGGroup())
                             return;
 
                         Global.ScriptMgr.OnPlayerChat(GetPlayer(), type, lang, msg, group);
 
-                        ChatPkt data = new ChatPkt();
+                        var data = new ChatPkt();
                         //in Battleground, raid warning is sent only to players in Battleground - code is ok
                         data.Initialize(ChatMsg.RaidWarning, lang, sender, null, msg);
                         group.BroadcastPacket(data, false);
@@ -350,7 +350,7 @@ namespace Game
                             return;
                         }
                     }
-                    Channel chn = ChannelManager.GetChannelForPlayerByNamePart(target, sender);
+                    var chn = ChannelManager.GetChannelForPlayerByNamePart(target, sender);
                     if (chn != null)
                     {
                         Global.ScriptMgr.OnPlayerChat(GetPlayer(), type, lang, msg, chn);
@@ -359,7 +359,7 @@ namespace Game
                     break;
                 case ChatMsg.InstanceChat:
                     {
-                        Group group = GetPlayer().GetGroup();
+                        var group = GetPlayer().GetGroup();
                         if (!group)
                             return;
 
@@ -368,7 +368,7 @@ namespace Game
 
                         Global.ScriptMgr.OnPlayerChat(GetPlayer(), type, lang, msg, group);
 
-                        ChatPkt packet = new ChatPkt();
+                        var packet = new ChatPkt();
                         packet.Initialize(type, lang, sender, null, msg);
                         group.BroadcastPacket(packet, false);
                         break;
@@ -393,7 +393,7 @@ namespace Game
 
         void HandleChatAddon(ChatMsg type, string prefix, string text, bool isLogged, string target = "")
         {
-            Player sender = GetPlayer();
+            var sender = GetPlayer();
 
             if (string.IsNullOrEmpty(prefix) || prefix.Length > 16)
                 return;
@@ -411,14 +411,14 @@ namespace Game
                 case ChatMsg.Officer:
                     if (sender.GetGuildId() != 0)
                     {
-                        Guild guild = Global.GuildMgr.GetGuildById(sender.GetGuildId());
+                        var guild = Global.GuildMgr.GetGuildById(sender.GetGuildId());
                         if (guild)
                             guild.BroadcastAddonToGuild(this, type == ChatMsg.Officer, text, prefix, isLogged);
                     }
                     break;
                 case ChatMsg.Whisper:
                     // @todo implement cross realm whispers (someday)
-                    ExtendedPlayerName extName = ObjectManager.ExtractExtendedPlayerName(target);
+                    var extName = ObjectManager.ExtractExtendedPlayerName(target);
 
                     if (!ObjectManager.NormalizePlayerName(ref extName.Name))
                         break;
@@ -435,7 +435,7 @@ namespace Game
                 case ChatMsg.InstanceChat:
                     {
                         Group group = null;
-                        int subGroup = -1;
+                        var subGroup = -1;
                         if (type != ChatMsg.InstanceChat)
                             group = sender.GetOriginalGroup();
 
@@ -449,13 +449,13 @@ namespace Game
                                 subGroup = sender.GetSubGroup();
                         }
 
-                        ChatPkt data = new ChatPkt();
+                        var data = new ChatPkt();
                         data.Initialize(type, isLogged ? Language.AddonLogged : Language.Addon, sender, null, text, 0, "", Locale.enUS, prefix);
                         group.BroadcastAddonMessagePacket(data, prefix, true, subGroup, sender.GetGUID());
                         break;
                     }
                 case ChatMsg.Channel:
-                    Channel chn = ChannelManager.GetChannelForPlayerByNamePart(target, sender);
+                    var chn = ChannelManager.GetChannelForPlayerByNamePart(target, sender);
                     if (chn != null)
                         chn.AddonSay(sender.GetGUID(), prefix, text, isLogged);
                     break;
@@ -469,7 +469,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ChatMessageAfk)]
         void HandleChatMessageAFK(ChatMessageAFK packet)
         {
-            Player sender = GetPlayer();
+            var sender = GetPlayer();
 
             if (sender.IsInCombat())
                 return;
@@ -497,7 +497,7 @@ namespace Game
                 sender.ToggleAFK();
             }
 
-            Guild guild = sender.GetGuild();
+            var guild = sender.GetGuild();
             if (guild != null)
                 guild.SendEventAwayChanged(sender.GetGUID(), sender.IsAFK(), sender.IsDND());
 
@@ -507,7 +507,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ChatMessageDnd)]
         void HandleChatMessageDND(ChatMessageDND packet)
         {
-            Player sender = GetPlayer();
+            var sender = GetPlayer();
 
             if (sender.IsInCombat())
                 return;
@@ -535,7 +535,7 @@ namespace Game
                 sender.ToggleDND();
             }
 
-            Guild guild = sender.GetGuild();
+            var guild = sender.GetGuild();
             if (guild != null)
                 guild.SendEventAwayChanged(sender.GetGUID(), sender.IsAFK(), sender.IsDND());
 
@@ -560,14 +560,14 @@ namespace Game
 
             if (!CanSpeak())
             {
-                string timeStr = Time.secsToTimeString((ulong)(m_muteTime - Time.UnixTime));
+                var timeStr = Time.secsToTimeString((ulong)(m_muteTime - Time.UnixTime));
                 SendNotification(CypherStrings.WaitBeforeSpeaking, timeStr);
                 return;
             }
 
             Global.ScriptMgr.OnPlayerTextEmote(GetPlayer(), (uint)packet.SoundIndex, (uint)packet.EmoteID, packet.Target);
 
-            EmotesTextRecord em = CliDB.EmotesTextStorage.LookupByKey(packet.EmoteID);
+            var em = CliDB.EmotesTextStorage.LookupByKey(packet.EmoteID);
             if (em == null)
                 return;
 
@@ -592,7 +592,7 @@ namespace Game
                     break;
             }
 
-            STextEmote textEmote = new STextEmote();
+            var textEmote = new STextEmote();
             textEmote.SourceGUID = GetPlayer().GetGUID();
             textEmote.SourceAccountGUID = GetAccountGUID();
             textEmote.TargetGUID = packet.Target;
@@ -600,14 +600,14 @@ namespace Game
             textEmote.SoundIndex = packet.SoundIndex;
             GetPlayer().SendMessageToSetInRange(textEmote, WorldConfig.GetFloatValue(WorldCfg.ListenRangeTextemote), true);
 
-            Unit unit = Global.ObjAccessor.GetUnit(GetPlayer(), packet.Target);
+            var unit = Global.ObjAccessor.GetUnit(GetPlayer(), packet.Target);
 
             GetPlayer().UpdateCriteria(CriteriaTypes.DoEmote, (uint)packet.EmoteID, 0, 0, unit);
 
             // Send scripted event call
             if (unit)
             {
-                Creature creature = unit.ToCreature();
+                var creature = unit.ToCreature();
                 if (creature)
                     creature.GetAI().ReceiveEmote(GetPlayer(), (TextEmotes)packet.EmoteID);
             }
@@ -620,7 +620,7 @@ namespace Game
             if (!player || player.GetSession() == null)
                 return;
 
-            ChatPkt data = new ChatPkt();
+            var data = new ChatPkt();
             data.Initialize(ChatMsg.Ignored, Language.Universal, GetPlayer(), GetPlayer(), GetPlayer().GetName());
             player.SendPacket(data);
         }

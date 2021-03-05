@@ -67,7 +67,7 @@ namespace Game.AI
             if (me.HasUnitState(UnitState.Casting))
                 return;
 
-            Unit victim = me.GetVictim();
+            var victim = me.GetVictim();
 
             if (!me.IsWithinMeleeRange(victim))
                 return;
@@ -134,12 +134,12 @@ namespace Game.AI
         /// </summary>
         public Unit SelectTarget(SelectAggroTarget targetType, uint offset, ICheck<Unit> selector)
         {
-            ThreatManager mgr = GetThreatManager();
+            var mgr = GetThreatManager();
             // shortcut: if we ignore the first <offset> elements, and there are at most <offset> elements, then we ignore ALL elements
             if (mgr.GetThreatListSize() <= offset)
                 return null;
 
-            List<Unit> targetList = SelectTargetList((uint)mgr.GetThreatListSize(), targetType, offset, selector);
+            var targetList = SelectTargetList((uint)mgr.GetThreatListSize(), targetType, offset, selector);
 
             // maybe nothing fulfills the predicate
             if (targetList.Empty())
@@ -183,14 +183,14 @@ namespace Game.AI
         {
             var targetList = new List<Unit>();
 
-            ThreatManager mgr = GetThreatManager();
+            var mgr = GetThreatManager();
             // shortcut: we're gonna ignore the first <offset> elements, and there's at most <offset> elements, so we ignore them all - nothing to do here
             if (mgr.GetThreatListSize() <= offset)
                 return targetList;
 
             if (targetType == SelectAggroTarget.MaxDistance || targetType == SelectAggroTarget.MinDistance)
             {
-                foreach (HostileReference refe in mgr.GetThreatList())
+                foreach (var refe in mgr.GetThreatList())
                 {
                     if (!refe.IsOnline())
                         continue;
@@ -200,16 +200,16 @@ namespace Game.AI
             }
             else
             {
-                Unit currentVictim = mgr.GetCurrentVictim();
+                var currentVictim = mgr.GetCurrentVictim();
                 if (currentVictim != null)
                     targetList.Add(currentVictim);
 
-                foreach (HostileReference refe in mgr.GetThreatList())
+                foreach (var refe in mgr.GetThreatList())
                 {
                     if (!refe.IsOnline())
                         continue;
 
-                    Unit thisTarget = refe.GetTarget();
+                    var thisTarget = refe.GetTarget();
                     if (thisTarget != currentVictim)
                         targetList.Add(thisTarget);
                 }
@@ -255,7 +255,7 @@ namespace Game.AI
         {
             Unit target = null;
 
-            AISpellInfoType info = GetAISpellInfo(spellId, me.GetMap().GetDifficultyID());
+            var info = GetAISpellInfo(spellId, me.GetMap().GetDifficultyID());
             switch (info.target)
             {
                 default:
@@ -270,7 +270,7 @@ namespace Game.AI
                         var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, me.GetMap().GetDifficultyID());
                         if (spellInfo != null)
                         {
-                            bool playerOnly = spellInfo.HasAttribute(SpellAttr3.OnlyTargetPlayers);
+                            var playerOnly = spellInfo.HasAttribute(SpellAttr3.OnlyTargetPlayers);
                             target = SelectTarget(SelectAggroTarget.Random, 0, spellInfo.GetMaxRange(false), playerOnly);
                         }
                         break;
@@ -284,10 +284,10 @@ namespace Game.AI
                         var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, me.GetMap().GetDifficultyID());
                         if (spellInfo != null)
                         {
-                            bool playerOnly = spellInfo.HasAttribute(SpellAttr3.OnlyTargetPlayers);
-                            float range = spellInfo.GetMaxRange(false);
+                            var playerOnly = spellInfo.HasAttribute(SpellAttr3.OnlyTargetPlayers);
+                            var range = spellInfo.GetMaxRange(false);
 
-                            DefaultTargetSelector targetSelector = new DefaultTargetSelector(me, range, playerOnly, true, -(int)spellId);
+                            var targetSelector = new DefaultTargetSelector(me, range, playerOnly, true, -(int)spellId);
                             if (!spellInfo.HasAuraInterruptFlag(SpellAuraInterruptFlags.NotVictim)
                             && targetSelector.Invoke(me.GetVictim()))
                                 target = me.GetVictim();
@@ -334,7 +334,7 @@ namespace Game.AI
 
             Global.SpellMgr.ForEachSpellInfo(spellInfo =>
             {
-                AISpellInfoType AIInfo = new AISpellInfoType(); 
+                var AIInfo = new AISpellInfoType(); 
                 if (spellInfo.HasAttribute(SpellAttr0.CastableWhileDead))
                     AIInfo.condition = AICondition.Die;
                 else if (spellInfo.IsPassive() || spellInfo.GetDuration() == -1)
@@ -352,7 +352,7 @@ namespace Game.AI
                 }
                 else
                 {
-                    foreach (SpellEffectInfo effect in spellInfo.GetEffects())
+                    foreach (var effect in spellInfo.GetEffects())
                     {
                         if (effect == null)
                             continue;
@@ -391,7 +391,7 @@ namespace Game.AI
                 AIInfo.Effects = 0;
                 AIInfo.Targets = 0;
 
-                foreach (SpellEffectInfo effect in spellInfo.GetEffects())
+                foreach (var effect in spellInfo.GetEffects())
                 {
                     if (effect == null)
                         continue;
@@ -640,9 +640,9 @@ namespace Game.AI
                 return false;
 
             // copypasta from Spell.CheckRange
-            float minRange = 0.0f;
-            float maxRange = 0.0f;
-            float rangeMod = 0.0f;
+            var minRange = 0.0f;
+            var maxRange = 0.0f;
+            var rangeMod = 0.0f;
             if (_spellInfo.RangeEntry != null)
             {
                 if (_spellInfo.RangeEntry.Flags.HasAnyFlag(SpellRangeFlag.Melee))
@@ -654,7 +654,7 @@ namespace Game.AI
                 }
                 else
                 {
-                    float meleeRange = 0.0f;
+                    var meleeRange = 0.0f;
                     if (_spellInfo.RangeEntry.Flags.HasAnyFlag(SpellRangeFlag.Ranged))
                     {
                         meleeRange = _caster.GetCombatReach() + 4.0f / 3.0f;
@@ -718,7 +718,7 @@ namespace Game.AI
             if (_playerOnly && !target.IsTypeId(TypeId.Player))
                 return false;
 
-            Unit currentVictim = _source.GetThreatManager().GetCurrentVictim();
+            var currentVictim = _source.GetThreatManager().GetCurrentVictim();
             if (currentVictim != null)
                 return target != currentVictim;
 

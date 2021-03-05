@@ -30,7 +30,7 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Language = (Language)_worldPacket.ReadInt32();
-            uint len = _worldPacket.ReadBits<uint>(9);
+            var len = _worldPacket.ReadBits<uint>(9);
             Text = _worldPacket.ReadString(len);
         }
 
@@ -45,8 +45,8 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Language = (Language)_worldPacket.ReadInt32();
-            uint targetLen = _worldPacket.ReadBits<uint>(9);
-            uint textLen = _worldPacket.ReadBits<uint>(9);
+            var targetLen = _worldPacket.ReadBits<uint>(9);
+            var textLen = _worldPacket.ReadBits<uint>(9);
             Target = _worldPacket.ReadString(targetLen);
             Text = _worldPacket.ReadString(textLen);
         }
@@ -63,8 +63,8 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Language = (Language)_worldPacket.ReadInt32();
-            uint targetLen = _worldPacket.ReadBits<uint>(9);
-            uint textLen = _worldPacket.ReadBits<uint>(9);
+            var targetLen = _worldPacket.ReadBits<uint>(9);
+            var textLen = _worldPacket.ReadBits<uint>(9);
             Target = _worldPacket.ReadString(targetLen);
             Text = _worldPacket.ReadString(textLen);
         }
@@ -92,7 +92,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint targetLen = _worldPacket.ReadBits<uint>(9);
+            var targetLen = _worldPacket.ReadBits<uint>(9);
             Params.Read(_worldPacket);
             Target = _worldPacket.ReadString(targetLen);
         }
@@ -107,7 +107,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint len = _worldPacket.ReadBits<uint>(9);
+            var len = _worldPacket.ReadBits<uint>(9);
             Text = _worldPacket.ReadString(len);
         }
 
@@ -120,7 +120,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint len = _worldPacket.ReadBits<uint>(9);
+            var len = _worldPacket.ReadBits<uint>(9);
             Text = _worldPacket.ReadString(len);
         }
 
@@ -133,7 +133,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint len = _worldPacket.ReadBits<uint>(9);
+            var len = _worldPacket.ReadBits<uint>(9);
             Text = _worldPacket.ReadString(len);
         }
 
@@ -179,11 +179,11 @@ namespace Game.Networking.Packets
         {
             SenderGUID = sender.GetGUID();
 
-            Creature creatureSender = sender.ToCreature();
+            var creatureSender = sender.ToCreature();
             if (creatureSender)
                 SenderName = creatureSender.GetName(locale);
 
-            Player playerSender = sender.ToPlayer();
+            var playerSender = sender.ToPlayer();
             if (playerSender)
             {
                 SenderAccountGUID = playerSender.GetSession().GetAccountGUID();
@@ -191,7 +191,7 @@ namespace Game.Networking.Packets
 
                 SenderGuildGUID = ObjectGuid.Create(HighGuid.Guild, playerSender.GetGuildId());
 
-                Group group = playerSender.GetGroup();
+                var group = playerSender.GetGroup();
                 if (group)
                     PartyGUID = group.GetGUID();
             }
@@ -201,7 +201,7 @@ namespace Game.Networking.Packets
         {
             TargetGUID = receiver.GetGUID();
 
-            Creature creatureReceiver = receiver.ToCreature();
+            var creatureReceiver = receiver.ToCreature();
             if (creatureReceiver)
                 TargetName = creatureReceiver.GetName(locale);
         }
@@ -404,9 +404,9 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            int count = _worldPacket.ReadInt32();
+            var count = _worldPacket.ReadInt32();
 
-            for (int i = 0; i < count && i < 64; ++i)
+            for (var i = 0; i < count && i < 64; ++i)
                 Prefixes[i] = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(5));
         }
 
@@ -454,8 +454,8 @@ namespace Game.Networking.Packets
     {
         public void Read(WorldPacket data)
         {
-            uint prefixLen = data.ReadBits<uint>(5);
-            uint textLen = data.ReadBits<uint>(8);
+            var prefixLen = data.ReadBits<uint>(5);
+            var textLen = data.ReadBits<uint>(8);
             IsLogged = data.HasBit();
             Type = (ChatMsg)data.ReadInt32();
             Prefix = data.ReadString(prefixLen);

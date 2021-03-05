@@ -92,7 +92,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteInt32(CategoryCooldowns.Count);
 
-            foreach (CategoryCooldownInfo cooldown in CategoryCooldowns)
+            foreach (var cooldown in CategoryCooldowns)
             {
                 _worldPacket.WriteUInt32(cooldown.Category);
                 _worldPacket.WriteInt32(cooldown.ModCooldown);
@@ -189,7 +189,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteBit(UpdateAll);
             _worldPacket.WriteBits(Auras.Count, 9);
-            foreach (AuraInfo aura in Auras)
+            foreach (var aura in Auras)
                 aura.Write(_worldPacket);
 
             _worldPacket.WritePackedGuid(UnitGUID);
@@ -334,10 +334,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(FavoriteSpellID.Count);
             _worldPacket.WriteUInt32(SpecializationID);
 
-            foreach (uint spell in SpellID)
+            foreach (var spell in SpellID)
                 _worldPacket.WriteUInt32(spell);
 
-            foreach (int spell in FavoriteSpellID)
+            foreach (var spell in FavoriteSpellID)
                 _worldPacket.WriteInt32(spell);
 
             _worldPacket.WriteBit(SuppressMessaging);
@@ -450,7 +450,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteInt32(Modifiers.Count);
-            foreach (SpellModifierInfo spellMod in Modifiers)
+            foreach (var spellMod in Modifiers)
                 spellMod.Write(_worldPacket);
         }
 
@@ -464,7 +464,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteInt32(SpellID.Count);
-            foreach (uint spellId in SpellID)
+            foreach (var spellId in SpellID)
                 _worldPacket.WriteUInt32(spellId);
 
             _worldPacket.WriteBit(SuppressMessaging);
@@ -932,7 +932,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(GuildGUID);
             _worldPacket.WriteInt32(ItemDisplayID.Count);
 
-            foreach (ChrCustomizationChoice customization in Customizations)
+            foreach (var customization in Customizations)
             {
                 _worldPacket.WriteUInt32(customization.ChrCustomizationOptionID);
                 _worldPacket.WriteUInt32(customization.ChrCustomizationChoiceID);
@@ -1055,7 +1055,7 @@ namespace Game.Networking.Packets
             Speed = _worldPacket.ReadFloat();
             FirePos = _worldPacket.ReadVector3();
             ImpactPos = _worldPacket.ReadVector3();
-            bool hasStatus = _worldPacket.HasBit();
+            var hasStatus = _worldPacket.HasBit();
 
             _worldPacket.ResetBitPos();
             if (hasStatus)
@@ -1186,8 +1186,8 @@ namespace Game.Networking.Packets
             SpellPower = spell.GetCaster().SpellBaseDamageBonusDone(SpellSchoolMask.Spell);
             Armor = spell.GetCaster().GetArmor();
             PowerType primaryPowerType = spell.GetCaster().GetPowerType();
-            bool primaryPowerAdded = false;
-            foreach (SpellPowerCost cost in spell.GetPowerCost())
+            var primaryPowerAdded = false;
+            foreach (var cost in spell.GetPowerCost())
             {
                 PowerData.Add(new SpellLogPowerData((int)cost.Power, spell.GetCaster().GetPower(cost.Power), cost.Amount));
                 if (cost.Power == primaryPowerType)
@@ -1207,7 +1207,7 @@ namespace Game.Networking.Packets
             data.WriteBits(PowerData.Count, 9);
             data.FlushBits();
 
-            foreach (SpellLogPowerData powerData in PowerData)
+            foreach (var powerData in PowerData)
             {
                 data.WriteInt32(powerData.PowerType);
                 data.WriteInt32(powerData.Amount);
@@ -1231,8 +1231,8 @@ namespace Game.Networking.Packets
 
         bool GenerateDataCreatureToPlayer(Creature attacker, Player target)
         {
-            CreatureTemplate creatureTemplate = attacker.GetCreatureTemplate();
-            CreatureLevelScaling creatureScaling = creatureTemplate.GetLevelScaling(attacker.GetMap().GetDifficultyID());
+            var creatureTemplate = attacker.GetCreatureTemplate();
+            var creatureScaling = creatureTemplate.GetLevelScaling(attacker.GetMap().GetDifficultyID());
 
             TuningType = ContentTuningType.CreatureToPlayerDamage;
             PlayerLevelDelta = (short)target.m_activePlayerData.ScalingPlayerLevelDelta;
@@ -1248,8 +1248,8 @@ namespace Game.Networking.Packets
 
         bool GenerateDataPlayerToCreature(Player attacker, Creature target)
         {
-            CreatureTemplate creatureTemplate = target.GetCreatureTemplate();
-            CreatureLevelScaling creatureScaling = creatureTemplate.GetLevelScaling(target.GetMap().GetDifficultyID());
+            var creatureTemplate = target.GetCreatureTemplate();
+            var creatureScaling = creatureTemplate.GetLevelScaling(target.GetMap().GetDifficultyID());
 
             TuningType = ContentTuningType.PlayerToCreatureDamage;
             PlayerLevelDelta = (short)attacker.m_activePlayerData.ScalingPlayerLevelDelta;
@@ -1265,9 +1265,9 @@ namespace Game.Networking.Packets
 
         bool GenerateDataCreatureToCreature(Creature attacker, Creature target)
         {
-            Creature accessor = target.HasScalableLevels() ? target : attacker;
-            CreatureTemplate creatureTemplate = accessor.GetCreatureTemplate();
-            CreatureLevelScaling creatureScaling = creatureTemplate.GetLevelScaling(accessor.GetMap().GetDifficultyID());
+            var accessor = target.HasScalableLevels() ? target : attacker;
+            var creatureTemplate = accessor.GetCreatureTemplate();
+            var creatureScaling = creatureTemplate.GetLevelScaling(accessor.GetMap().GetDifficultyID());
 
             TuningType = ContentTuningType.CreatureToCreatureDamage;
             PlayerLevelDelta = 0;
@@ -1282,12 +1282,12 @@ namespace Game.Networking.Packets
 
         public bool GenerateDataForUnits(Unit attacker, Unit target)
         {
-            Player playerAttacker = attacker.ToPlayer();
-            Creature creatureAttacker = attacker.ToCreature();
+            var playerAttacker = attacker.ToPlayer();
+            var creatureAttacker = attacker.ToCreature();
             if (playerAttacker)
             {
-                Player playerTarget = target.ToPlayer();
-                Creature creatureTarget = target.ToCreature();
+                var playerTarget = target.ToPlayer();
+                var creatureTarget = target.ToCreature();
                 if (playerTarget)
                     return GenerateDataPlayerToPlayer(playerAttacker, playerTarget);
                 else if (creatureTarget)
@@ -1298,8 +1298,8 @@ namespace Game.Networking.Packets
             }
             else if (creatureAttacker)
             {
-                Player playerTarget = target.ToPlayer();
-                Creature creatureTarget = target.ToCreature();
+                var playerTarget = target.ToPlayer();
+                var creatureTarget = target.ToCreature();
                 if (playerTarget)
                 {
                     if (creatureAttacker.HasScalableLevels())
@@ -1384,7 +1384,7 @@ namespace Game.Networking.Packets
 
         public static implicit operator SpellCastVisualField(SpellCastVisual spellCastVisual)
         {
-            SpellCastVisualField visual = new SpellCastVisualField();
+            var visual = new SpellCastVisualField();
             visual.SpellXSpellVisualID = spellCastVisual.SpellXSpellVisualID;
             visual.ScriptVisualID = spellCastVisual.ScriptVisualID;
             return visual;
@@ -1500,7 +1500,7 @@ namespace Game.Networking.Packets
             DstLocation.HasValue = data.HasBit();
             Orientation.HasValue = data.HasBit();
             MapID.HasValue = data.HasBit();
-            uint nameLength = data.ReadBits<uint>(7);
+            var nameLength = data.ReadBits<uint>(7);
 
             Unit = data.ReadPackedGuid();
             Item = data.ReadPackedGuid();
@@ -1715,7 +1715,7 @@ namespace Game.Networking.Packets
             data.WriteUInt8(Count);
             data.WriteInt32(Cooldowns.Count);
 
-            foreach (byte cd in Cooldowns)
+            foreach (var cd in Cooldowns)
                 data.WriteUInt8(cd);
         }
 
@@ -1807,27 +1807,27 @@ namespace Game.Networking.Packets
             data.WriteBits(TargetPoints.Count, 16);
             data.FlushBits();
 
-            foreach (SpellMissStatus missStatus in MissStatus)
+            foreach (var missStatus in MissStatus)
                 missStatus.Write(data);
 
             Target.Write(data);
 
-            foreach (ObjectGuid hitTarget in HitTargets)
+            foreach (var hitTarget in HitTargets)
                 data.WritePackedGuid(hitTarget);
 
-            foreach (ObjectGuid missTarget in MissTargets)
+            foreach (var missTarget in MissTargets)
                 data.WritePackedGuid(missTarget);
 
-            foreach (SpellHitStatus hitStatus in HitStatus)
+            foreach (var hitStatus in HitStatus)
                 hitStatus.Write(data);
 
-            foreach (SpellPowerData power in RemainingPower)
+            foreach (var power in RemainingPower)
                 power.Write(data);
 
             if (RemainingRunes.HasValue)
                 RemainingRunes.Value.Write(data);
 
-            foreach (TargetLocation targetLoc in TargetPoints)
+            foreach (var targetLoc in TargetPoints)
                 targetLoc.Write(data);
         }
 
@@ -1876,7 +1876,7 @@ namespace Game.Networking.Packets
         {
             data.WriteUInt8(ModIndex);
             data.WriteInt32(ModifierData.Count);
-            foreach (SpellModifierData modData in ModifierData)
+            foreach (var modData in ModifierData)
                 modData.Write(data);
         }
     }

@@ -113,7 +113,7 @@ namespace Game.BattleGrounds.Zones
                     _flagSpellForceTimer += (int)diff;
                     if (_flagDebuffState == 0 && _flagSpellForceTimer >= 10 * Time.Minute * Time.InMilliseconds)  //10 minutes
                     {
-                        Player player = Global.ObjAccessor.FindPlayer(m_FlagKeepers[0]);
+                        var player = Global.ObjAccessor.FindPlayer(m_FlagKeepers[0]);
                         if (player)
                             player.CastSpell(player, WSGSpellId.FocusedAssault, true);
 
@@ -125,7 +125,7 @@ namespace Game.BattleGrounds.Zones
                     }
                     else if (_flagDebuffState == 1 && _flagSpellForceTimer >= 900000) //15 minutes
                     {
-                        Player player = Global.ObjAccessor.FindPlayer(m_FlagKeepers[0]);
+                        var player = Global.ObjAccessor.FindPlayer(m_FlagKeepers[0]);
                         if (player)
                         {
                             player.RemoveAurasDueToSpell(WSGSpellId.FocusedAssault);
@@ -143,7 +143,7 @@ namespace Game.BattleGrounds.Zones
                 }
                 else
                 {
-                    Player player = Global.ObjAccessor.FindPlayer(m_FlagKeepers[0]);
+                    var player = Global.ObjAccessor.FindPlayer(m_FlagKeepers[0]);
                     if (player)
                     {
                         player.RemoveAurasDueToSpell(WSGSpellId.FocusedAssault);
@@ -165,12 +165,12 @@ namespace Game.BattleGrounds.Zones
 
         public override void StartingEventCloseDoors()
         {
-            for (int i = WSGObjectTypes.DoorA1; i <= WSGObjectTypes.DoorH4; ++i)
+            for (var i = WSGObjectTypes.DoorA1; i <= WSGObjectTypes.DoorH4; ++i)
             {
                 DoorClose(i);
                 SpawnBGObject(i, BattlegroundConst.RespawnImmediately);
             }
-            for (int i = WSGObjectTypes.AFlag; i <= WSGObjectTypes.Berserkbuff2; ++i)
+            for (var i = WSGObjectTypes.AFlag; i <= WSGObjectTypes.Berserkbuff2; ++i)
                 SpawnBGObject(i, BattlegroundConst.RespawnOneDay);
 
             UpdateWorldState(WSGWorldStates.StateTimerActive, 1);
@@ -179,12 +179,12 @@ namespace Game.BattleGrounds.Zones
 
         public override void StartingEventOpenDoors()
         {
-            for (int i = WSGObjectTypes.DoorA1; i <= WSGObjectTypes.DoorA6; ++i)
+            for (var i = WSGObjectTypes.DoorA1; i <= WSGObjectTypes.DoorA6; ++i)
                 DoorOpen(i);
-            for (int i = WSGObjectTypes.DoorH1; i <= WSGObjectTypes.DoorH4; ++i)
+            for (var i = WSGObjectTypes.DoorH1; i <= WSGObjectTypes.DoorH4; ++i)
                 DoorOpen(i);
 
-            for (int i = WSGObjectTypes.AFlag; i <= WSGObjectTypes.Berserkbuff2; ++i)
+            for (var i = WSGObjectTypes.AFlag; i <= WSGObjectTypes.Berserkbuff2; ++i)
                 SpawnBGObject(i, BattlegroundConst.RespawnImmediately);
 
             SpawnBGObject(WSGObjectTypes.DoorA5, BattlegroundConst.RespawnOneDay);
@@ -240,7 +240,7 @@ namespace Game.BattleGrounds.Zones
             SendBroadcastText(WSGBroadcastTexts.FlagsPlaced, ChatMsg.BgSystemNeutral);
             PlaySoundToAll(WSGSound.FlagsRespawned);
 
-            GameObject obj = GetBgMap().GetGameObject(GetDroppedFlagGUID(team));
+            var obj = GetBgMap().GetGameObject(GetDroppedFlagGUID(team));
             if (obj)
                 obj.Delete();
             else
@@ -369,7 +369,7 @@ namespace Game.BattleGrounds.Zones
                 return;
             }
 
-            bool set = false;
+            var set = false;
 
             if (player.GetTeam() == Team.Alliance)
             {
@@ -634,7 +634,7 @@ namespace Game.BattleGrounds.Zones
 
         public override bool SetupBattleground()
         {
-            bool result = true;
+            var result = true;
             result &= AddObject(WSGObjectTypes.AFlag, WSGObjectEntry.AFlag, 1540.423f, 1481.325f, 351.8284f, 3.089233f, 0, 0, 0.9996573f, 0.02617699f, WSGTimerOrScore.FlagRespawnTime / 1000);
             result &= AddObject(WSGObjectTypes.HFlag, WSGObjectEntry.HFlag, 916.0226f, 1434.405f, 345.413f, 0.01745329f, 0, 0, 0.008726535f, 0.9999619f, WSGTimerOrScore.FlagRespawnTime / 1000);
             if (!result)
@@ -674,7 +674,7 @@ namespace Game.BattleGrounds.Zones
                 return false;
             }
 
-            WorldSafeLocsEntry sg = Global.ObjectMgr.GetWorldSafeLoc(WSGGraveyards.MainAlliance);
+            var sg = Global.ObjectMgr.GetWorldSafeLoc(WSGGraveyards.MainAlliance);
             if (sg == null || !AddSpiritGuide(WSGCreatureTypes.SpiritMainAlliance, sg.Loc.GetPositionX(), sg.Loc.GetPositionY(), sg.Loc.GetPositionZ(), 3.124139f, TeamId.Alliance))
             {
                 Log.outError(LogFilter.Sql, "BgWarsongGluch: Failed to spawn Alliance spirit guide! Battleground not created!");
@@ -856,7 +856,7 @@ namespace Game.BattleGrounds.Zones
                 case (uint)BattlegroundCriteriaId.SaveTheDay:
                     if (target)
                     {
-                        Player playerTarget = target.ToPlayer();
+                        var playerTarget = target.ToPlayer();
                         if (playerTarget)
                             return GetFlagState(playerTarget.GetTeam()) == WSGFlagState.OnBase;
                     }

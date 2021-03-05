@@ -28,7 +28,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveDismissVehicle)]
         void HandleMoveDismissVehicle(MoveDismissVehicle packet)
         {
-            ObjectGuid vehicleGUID = GetPlayer().GetCharmGUID();
+            var vehicleGUID = GetPlayer().GetCharmGUID();
             if (vehicleGUID.IsEmpty())                                       // something wrong here...
                 return;
 
@@ -41,7 +41,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.RequestVehiclePrevSeat)]
         void HandleRequestVehiclePrevSeat(RequestVehiclePrevSeat packet)
         {
-            Unit vehicle_base = GetPlayer().GetVehicleBase();
+            var vehicle_base = GetPlayer().GetVehicleBase();
             if (!vehicle_base)
                 return;
 
@@ -59,7 +59,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.RequestVehicleNextSeat)]
         void HandleRequestVehicleNextSeat(RequestVehicleNextSeat packet)
         {
-            Unit vehicle_base = GetPlayer().GetVehicleBase();
+            var vehicle_base = GetPlayer().GetVehicleBase();
             if (!vehicle_base)
                 return;
 
@@ -77,7 +77,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveChangeVehicleSeats)]
         void HandleMoveChangeVehicleSeats(MoveChangeVehicleSeats packet)
         {
-            Unit vehicle_base = GetPlayer().GetVehicleBase();
+            var vehicle_base = GetPlayer().GetVehicleBase();
             if (!vehicle_base)
                 return;
 
@@ -100,10 +100,10 @@ namespace Game
                 GetPlayer().ChangeSeat(-1, packet.DstSeatIndex != 255);
             else
             {
-                Unit vehUnit = Global.ObjAccessor.GetUnit(GetPlayer(), packet.DstVehicle);
+                var vehUnit = Global.ObjAccessor.GetUnit(GetPlayer(), packet.DstVehicle);
                 if (vehUnit)
                 {
-                    Vehicle vehicle = vehUnit.GetVehicleKit();
+                    var vehicle = vehUnit.GetVehicleKit();
                     if (vehicle)
                         if (vehicle.HasEmptySeat((sbyte) packet.DstSeatIndex))
                             vehUnit.HandleSpellClick(GetPlayer(), (sbyte) packet.DstSeatIndex);
@@ -114,7 +114,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.RequestVehicleSwitchSeat)]
         void HandleRequestVehicleSwitchSeat(RequestVehicleSwitchSeat packet)
         {
-            Unit vehicle_base = GetPlayer().GetVehicleBase();
+            var vehicle_base = GetPlayer().GetVehicleBase();
             if (!vehicle_base)
                 return;
 
@@ -130,10 +130,10 @@ namespace Game
                 GetPlayer().ChangeSeat((sbyte)packet.SeatIndex);
             else
             {
-                Unit vehUnit = Global.ObjAccessor.GetUnit(GetPlayer(), packet.Vehicle);
+                var vehUnit = Global.ObjAccessor.GetUnit(GetPlayer(), packet.Vehicle);
                 if (vehUnit)
                 {
-                    Vehicle vehicle = vehUnit.GetVehicleKit();
+                    var vehicle = vehUnit.GetVehicleKit();
                     if (vehicle)
                         if (vehicle.HasEmptySeat((sbyte) packet.SeatIndex))
                             vehUnit.HandleSpellClick(GetPlayer(), (sbyte) packet.SeatIndex);
@@ -144,7 +144,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.RideVehicleInteract)]
         void HandleRideVehicleInteract(RideVehicleInteract packet)
         {
-            Player player = Global.ObjAccessor.GetPlayer(_player, packet.Vehicle);
+            var player = Global.ObjAccessor.GetPlayer(_player, packet.Vehicle);
             if (player)
             {
                 if (!player.GetVehicleKit())
@@ -164,7 +164,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.EjectPassenger)]
         void HandleEjectPassenger(EjectPassenger packet)
         {
-            Vehicle vehicle = GetPlayer().GetVehicleKit();
+            var vehicle = GetPlayer().GetVehicleKit();
             if (!vehicle)
             {
                 Log.outError(LogFilter.Network, "HandleEjectPassenger: {0} is not in a vehicle!", GetPlayer().GetGUID().ToString());
@@ -173,7 +173,7 @@ namespace Game
 
             if (packet.Passenger.IsUnit())
             {
-                Unit unit = Global.ObjAccessor.GetUnit(GetPlayer(), packet.Passenger);
+                var unit = Global.ObjAccessor.GetUnit(GetPlayer(), packet.Passenger);
                 if (!unit)
                 {
                     Log.outError(LogFilter.Network, "{0} tried to eject {1} from vehicle, but the latter was not found in world!", GetPlayer().GetGUID().ToString(), packet.Passenger.ToString());
@@ -201,7 +201,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.RequestVehicleExit)]
         void HandleRequestVehicleExit(RequestVehicleExit packet)
         {
-            Vehicle vehicle = GetPlayer().GetVehicle();
+            var vehicle = GetPlayer().GetVehicle();
             if (vehicle)
             {
                 VehicleSeatRecord seat = vehicle.GetSeatForPassenger(GetPlayer());

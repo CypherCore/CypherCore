@@ -18,7 +18,7 @@ namespace Game.Entities
         public void SetRestBonus(RestTypes restType, float restBonus)
         {
             uint next_level_xp;
-            bool affectedByRaF = false;
+            var affectedByRaF = false;
 
             switch (restType)
             {
@@ -41,7 +41,7 @@ namespace Game.Entities
                     return;
             }
 
-            float rest_bonus_max = next_level_xp * 1.5f / 2;
+            var rest_bonus_max = next_level_xp * 1.5f / 2;
 
             if (restBonus < 0)
                 restBonus = 0;
@@ -51,7 +51,7 @@ namespace Game.Entities
 
             _restBonus[(int)restType] = restBonus;
 
-            uint oldBonus = (uint)_restBonus[(int)restType];
+            var oldBonus = (uint)_restBonus[(int)restType];
             if (oldBonus == restBonus)
                 return;
 
@@ -76,13 +76,13 @@ namespace Game.Entities
             if (_player.GetLevel() >= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))
                 restBonus = 0;
 
-            float totalRestBonus = GetRestBonus(restType) + restBonus;
+            var totalRestBonus = GetRestBonus(restType) + restBonus;
             SetRestBonus(restType, totalRestBonus);
         }
 
         public void SetRestFlag(RestFlag restFlag, uint triggerId = 0)
         {
-            RestFlag oldRestMask = _restFlagMask;
+            var oldRestMask = _restFlagMask;
             _restFlagMask |= restFlag;
 
             if (oldRestMask == 0 && _restFlagMask != 0) // only set flag/time on the first rest state
@@ -97,7 +97,7 @@ namespace Game.Entities
 
         public void RemoveRestFlag(RestFlag restFlag)
         {
-            RestFlag oldRestMask = _restFlagMask;
+            var oldRestMask = _restFlagMask;
             _restFlagMask &= ~restFlag;
 
             if (oldRestMask != 0 && _restFlagMask == 0) // only remove flag/time on the last rest state remove
@@ -109,12 +109,12 @@ namespace Game.Entities
 
         public uint GetRestBonusFor(RestTypes restType, uint xp)
         {
-            uint rested_bonus = (uint)GetRestBonus(restType); // xp for each rested bonus
+            var rested_bonus = (uint)GetRestBonus(restType); // xp for each rested bonus
 
             if (rested_bonus > xp) // max rested_bonus == xp or (r+x) = 200% xp
                 rested_bonus = xp;
 
-            uint rested_loss = rested_bonus;
+            var rested_loss = rested_bonus;
             if (restType == RestTypes.XP)
                MathFunctions.AddPct(ref rested_loss, _player.GetTotalAuraModifier(AuraType.ModRestedXpConsumption));
 
@@ -129,12 +129,12 @@ namespace Game.Entities
         {
             if (RandomHelper.randChance(3) && _restTime > 0) // freeze update
             {
-                long timeDiff = now - _restTime;
+                var timeDiff = now - _restTime;
                 if (timeDiff >= 10)
                 {
                     _restTime = now;
 
-                    float bubble = 0.125f * WorldConfig.GetFloatValue(WorldCfg.RateRestIngame);
+                    var bubble = 0.125f * WorldConfig.GetFloatValue(WorldCfg.RateRestIngame);
                     AddRestBonus(RestTypes.XP, timeDiff * CalcExtraPerSec(RestTypes.XP, bubble));
                 }
             }

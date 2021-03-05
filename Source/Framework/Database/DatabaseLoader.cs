@@ -32,10 +32,10 @@ namespace Framework.Database
 
         public void AddDatabase<T>(MySqlBase<T> database, string baseDBName)
         {
-            bool updatesEnabled = database.IsAutoUpdateEnabled(_updateFlags);
+            var updatesEnabled = database.IsAutoUpdateEnabled(_updateFlags);
             _open.Add(() =>
             {
-                MySqlConnectionInfo connectionObject = new MySqlConnectionInfo
+                var connectionObject = new MySqlConnectionInfo
                 {
                     Host = ConfigMgr.GetDefaultValue(baseDBName + "DatabaseInfo.Host", ""),
                     Port = ConfigMgr.GetDefaultValue(baseDBName + "DatabaseInfo.Port", ""),
@@ -52,12 +52,12 @@ namespace Framework.Database
                     {
                         Log.outInfo(LogFilter.ServerLoading, $"Database \"{connectionObject.Database}\" does not exist, do you want to create it? [yes (default) / no]: ");
 
-                        string answer = Console.ReadLine();
+                        var answer = Console.ReadLine();
                         if (string.IsNullOrEmpty(answer) || answer[0] != 'y')
                             return false;
 
                         Log.outInfo(LogFilter.ServerLoading, $"Creating database \"{connectionObject.Database}\"...");
-                        string sqlString = $"CREATE DATABASE `{connectionObject.Database}` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci";
+                        var sqlString = $"CREATE DATABASE `{connectionObject.Database}` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci";
                         // Try to create the database and connect again if auto setup is enabled
                         if (database.Apply(sqlString) && database.Initialize(connectionObject) == MySqlErrorCode.None)
                             error = MySqlErrorCode.None;

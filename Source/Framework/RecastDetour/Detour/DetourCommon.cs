@@ -22,14 +22,14 @@ public static partial class Detour
     public static void dtClosestPtPointTriangle(float[] closest, float[] p, float[] a, float[] b, float[] c)
     {
         // Check if P in vertex region outside A
-        float[] ab = new float[3];//, ac[3], ap[3];
-        float[] ac = new float[3];
-        float[] ap = new float[3];
+        var ab = new float[3];//, ac[3], ap[3];
+        var ac = new float[3];
+        var ap = new float[3];
         dtVsub(ab, b, a);
         dtVsub(ac, c, a);
         dtVsub(ap, p, a);
-        float d1 = dtVdot(ab, ap);
-        float d2 = dtVdot(ac, ap);
+        var d1 = dtVdot(ab, ap);
+        var d2 = dtVdot(ac, ap);
         if (d1 <= 0.0f && d2 <= 0.0f)
         {
             // barycentric coordinates (1,0,0)
@@ -38,10 +38,10 @@ public static partial class Detour
         }
 
         // Check if P in vertex region outside B
-        float[] bp = new float[3];
+        var bp = new float[3];
         dtVsub(bp, p, b);
-        float d3 = dtVdot(ab, bp);
-        float d4 = dtVdot(ac, bp);
+        var d3 = dtVdot(ab, bp);
+        var d4 = dtVdot(ac, bp);
         if (d3 >= 0.0f && d4 <= d3)
         {
             // barycentric coordinates (0,1,0)
@@ -50,11 +50,11 @@ public static partial class Detour
         }
 
         // Check if P in edge region of AB, if so return projection of P onto AB
-        float vc = d1 * d4 - d3 * d2;
+        var vc = d1 * d4 - d3 * d2;
         if (vc <= 0.0f && d1 >= 0.0f && d3 <= 0.0f)
         {
             // barycentric coordinates (1-v,v,0)
-            float _v = d1 / (d1 - d3);
+            var _v = d1 / (d1 - d3);
             closest[0] = a[0] + _v * ab[0];
             closest[1] = a[1] + _v * ab[1];
             closest[2] = a[2] + _v * ab[2];
@@ -62,10 +62,10 @@ public static partial class Detour
         }
 
         // Check if P in vertex region outside C
-        float[] cp = new float[3];
+        var cp = new float[3];
         dtVsub(cp, p, c);
-        float d5 = dtVdot(ab, cp);
-        float d6 = dtVdot(ac, cp);
+        var d5 = dtVdot(ab, cp);
+        var d6 = dtVdot(ac, cp);
         if (d6 >= 0.0f && d5 <= d6)
         {
             // barycentric coordinates (0,0,1)
@@ -74,11 +74,11 @@ public static partial class Detour
         }
 
         // Check if P in edge region of AC, if so return projection of P onto AC
-        float vb = d5 * d2 - d1 * d6;
+        var vb = d5 * d2 - d1 * d6;
         if (vb <= 0.0f && d2 >= 0.0f && d6 <= 0.0f)
         {
             // barycentric coordinates (1-w,0,w)
-            float _w = d2 / (d2 - d6);
+            var _w = d2 / (d2 - d6);
             closest[0] = a[0] + _w * ac[0];
             closest[1] = a[1] + _w * ac[1];
             closest[2] = a[2] + _w * ac[2];
@@ -86,11 +86,11 @@ public static partial class Detour
         }
 
         // Check if P in edge region of BC, if so return projection of P onto BC
-        float va = d3 * d6 - d5 * d4;
+        var va = d3 * d6 - d5 * d4;
         if (va <= 0.0f && (d4 - d3) >= 0.0f && (d5 - d6) >= 0.0f)
         {
             // barycentric coordinates (0,1-w,w)
-            float _w = (d4 - d3) / ((d4 - d3) + (d5 - d6));
+            var _w = (d4 - d3) / ((d4 - d3) + (d5 - d6));
             closest[0] = b[0] + _w * (c[0] - b[0]);
             closest[1] = b[1] + _w * (c[1] - b[1]);
             closest[2] = b[2] + _w * (c[2] - b[2]);
@@ -98,9 +98,9 @@ public static partial class Detour
         }
 
         // P inside face region. Compute Q through its barycentric coordinates (u,v,w)
-        float denom = 1.0f / (va + vb + vc);
-        float v = vb * denom;
-        float w = vc * denom;
+        var denom = 1.0f / (va + vb + vc);
+        var v = vb * denom;
+        var w = vc * denom;
         closest[0] = a[0] + ab[0] * v + ac[0] * w;
         closest[1] = a[1] + ab[1] * v + ac[1] * w;
         closest[2] = a[2] + ab[2] * v + ac[2] * w;
@@ -115,17 +115,17 @@ public static partial class Detour
         segMin = -1;
         segMax = -1;
 
-        float[] dir = new float[3];
+        var dir = new float[3];
         dtVsub(dir, p1, p0);
 
         for (int i = 0, j = nverts - 1; i < nverts; j = i++)
         {
-            float[] edge = new float[3];
-            float[] diff = new float[3];
+            var edge = new float[3];
+            var diff = new float[3];
             dtVsub(edge, 0, verts, i * 3, verts, j * 3);
             dtVsub(diff, 0, p0, 0, verts, j * 3);
-            float n = dtVperp2D(edge, diff);
-            float d = dtVperp2D(dir, edge);
+            var n = dtVperp2D(edge, diff);
+            var d = dtVperp2D(dir, edge);
             if (Math.Abs(d) < EPS)
             {
                 // S is nearly parallel to this edge
@@ -134,7 +134,7 @@ public static partial class Detour
                 else
                     continue;
             }
-            float t = n / d;
+            var t = n / d;
             if (d < 0)
             {
                 // segment S is entering across this edge
@@ -166,11 +166,11 @@ public static partial class Detour
 
     public static float dtDistancePtSegSqr2D(float[] pt, int ptStart, float[] p, int pStart, float[] q, int qStart, ref float t)
     {
-        float pqx = q[qStart + 0] - p[pStart + 0];
-        float pqz = q[qStart + 2] - p[pStart + 2];
-        float dx = pt[ptStart + 0] - p[pStart + 0];
-        float dz = pt[ptStart + 2] - p[pStart + 2];
-        float d = pqx * pqx + pqz * pqz;
+        var pqx = q[qStart + 0] - p[pStart + 0];
+        var pqz = q[qStart + 2] - p[pStart + 2];
+        var dx = pt[ptStart + 0] - p[pStart + 0];
+        var dz = pt[ptStart + 2] - p[pStart + 2];
+        var d = pqx * pqx + pqz * pqz;
         t = pqx * dx + pqz * dz;
         if (d > 0) t /= d;
         if (t < 0) t = 0;
@@ -190,14 +190,14 @@ public static partial class Detour
         tc[0] = 0.0f;
         tc[1] = 0.0f;
         tc[2] = 0.0f;
-        for (int j = 0; j < nidx; ++j)
+        for (var j = 0; j < nidx; ++j)
         {
-            int vIndex = idx[j] * 3;
+            var vIndex = idx[j] * 3;
             tc[0] += verts[vIndex + 0];
             tc[1] += verts[vIndex + 1];
             tc[2] += verts[vIndex + 2];
         }
-        float s = 1.0f / nidx;
+        var s = 1.0f / nidx;
         tc[0] *= s;
         tc[1] *= s;
         tc[2] *= s;
@@ -211,23 +211,23 @@ public static partial class Detour
     ///  @param[out]	h		The resulting height.
     public static bool dtClosestHeightPointTriangle(float[] p, int pStart, float[] a, int aStart, float[] b, int bStart, float[] c, int cStart, ref float h)
     {
-        float[] v0 = new float[3];
-        float[] v1 = new float[3];
-        float[] v2 = new float[3];
+        var v0 = new float[3];
+        var v1 = new float[3];
+        var v2 = new float[3];
         dtVsub(v0, 0, c, cStart, a, aStart);
         dtVsub(v1, 0, b, bStart, a, aStart);
         dtVsub(v2, 0, p, pStart, a, aStart);
 
-        float dot00 = dtVdot2D(v0, v0);
-        float dot01 = dtVdot2D(v0, v1);
-        float dot02 = dtVdot2D(v0, v2);
-        float dot11 = dtVdot2D(v1, v1);
-        float dot12 = dtVdot2D(v1, v2);
+        var dot00 = dtVdot2D(v0, v0);
+        var dot01 = dtVdot2D(v0, v1);
+        var dot02 = dtVdot2D(v0, v2);
+        var dot11 = dtVdot2D(v1, v1);
+        var dot12 = dtVdot2D(v1, v2);
 
         // Compute barycentric coordinates
-        float invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
-        float u = (dot11 * dot02 - dot01 * dot12) * invDenom;
-        float v = (dot00 * dot12 - dot01 * dot02) * invDenom;
+        var invDenom = 1.0f / (dot00 * dot11 - dot01 * dot01);
+        var u = (dot11 * dot02 - dot01 * dot12) * invDenom;
+        var v = (dot00 * dot12 - dot01 * dot02) * invDenom;
 
         // The (sloppy) epsilon is needed to allow to get height of points which
         // are interpolated along the edges of the triangles.
@@ -255,11 +255,11 @@ public static partial class Detour
     {
         // TODO: Replace pnpoly with triArea2D tests?
         int i, j;
-        bool c = false;
+        var c = false;
         for (i = 0, j = nverts - 1; i < nverts; j = i++)
         {
-            int viIndex = i * 3;
-            int vjIndex = j * 3;
+            var viIndex = i * 3;
+            var vjIndex = j * 3;
             if (((verts[viIndex + 2] > pt[2]) != (verts[vjIndex + 2] > pt[2])) &&
                 (pt[0] < (verts[vjIndex + 0] - verts[viIndex + 0]) * (pt[2] - verts[viIndex + 2]) / (verts[vjIndex + 2] - verts[viIndex + 2]) + verts[viIndex + 0]))
                 c = !c;
@@ -271,11 +271,11 @@ public static partial class Detour
     {
         // TODO: Replace pnpoly with triArea2D tests?
         int i, j;
-        bool c = false;
+        var c = false;
         for (i = 0, j = nverts - 1; i < nverts; j = i++)
         {
-            int vi = i * 3;
-            int vj = j * 3;
+            var vi = i * 3;
+            var vj = j * 3;
             if (((v[vi + 2] > pt[ptStart + 2]) != (v[vj + 2] > pt[ptStart + 2])) &&
                 (pt[ptStart + 0] < (v[vj + 0] - v[vi + 0]) * (pt[ptStart + 2] - v[vi + 2]) / (v[vj + 2] - v[vi + 2]) + v[vi + 0]))
                 c = !c;
@@ -287,9 +287,9 @@ public static partial class Detour
     public static void projectPoly(float[] axis, float[] poly, int npoly, ref float rmin, ref float rmax)
     {
         rmin = rmax = dtVdot2D(axis, poly);
-        for (int i = 1; i < npoly; ++i)
+        for (var i = 1; i < npoly; ++i)
         {
-            float d = dtVdot2D(axis, 0, poly, i * 3);
+            var d = dtVdot2D(axis, 0, poly, i * 3);
             rmin = Math.Min(rmin, d);
             rmax = Math.Max(rmax, d);
         }
@@ -315,9 +315,9 @@ public static partial class Detour
 
         for (int i = 0, j = npolya - 1; i < npolya; j = i++)
         {
-            int vaStart = j * 3;
-            int vbStart = i * 3;
-            float[] n = new float[] { polya[vbStart + 2] - polya[vaStart + 2], 0, -(polya[vbStart + 0] - polya[vaStart + 0]) };
+            var vaStart = j * 3;
+            var vbStart = i * 3;
+            var n = new float[] { polya[vbStart + 2] - polya[vaStart + 2], 0, -(polya[vbStart + 0] - polya[vaStart + 0]) };
             float amin = 0.0f, amax = 0.0f, bmin = 0.0f, bmax = 0.0f;
             projectPoly(n, polya, npolya, ref amin, ref amax);
             projectPoly(n, polyb, npolyb, ref bmin, ref bmax);
@@ -329,9 +329,9 @@ public static partial class Detour
         }
         for (int i = 0, j = npolyb - 1; i < npolyb; j = i++)
         {
-            int vaStart = j * 3;
-            int vbStart = i * 3;
-            float[] n = new float[] { polyb[vbStart + 2] - polyb[vaStart + 2], 0, -(polyb[vbStart + 0] - polyb[vaStart + 0]) };
+            var vaStart = j * 3;
+            var vbStart = i * 3;
+            var n = new float[] { polyb[vbStart + 2] - polyb[vaStart + 2], 0, -(polyb[vbStart + 0] - polyb[vaStart + 0]) };
             float amin = 0.0f, amax = 0.0f, bmin = 0.0f, bmax = 0.0f;
             projectPoly(n, polya, npolya, ref amin, ref amax);
             projectPoly(n, polyb, npolyb, ref bmin, ref bmax);
@@ -349,20 +349,20 @@ public static partial class Detour
     public static void dtRandomPointInConvexPoly(float[] pts, int npts, float[] areas, float s, float t, float[] _out)
     {
         // Calc triangle araes
-        float areasum = 0.0f;
-        for (int i = 2; i < npts; i++)
+        var areasum = 0.0f;
+        for (var i = 2; i < npts; i++)
         {
             areas[i] = dtTriArea2D(pts, 0, pts, (i - 1) * 3, pts, i * 3);
             areasum += Math.Max(0.001f, areas[i]);
         }
         // Find sub triangle weighted by area.
-        float thr = s * areasum;
-        float acc = 0.0f;
-        float u = 1.0f;
-        int tri = npts - 1;
-        for (int i = 2; i < npts; i++)
+        var thr = s * areasum;
+        var acc = 0.0f;
+        var u = 1.0f;
+        var tri = npts - 1;
+        for (var i = 2; i < npts; i++)
         {
-            float dacc = areas[i];
+            var dacc = areas[i];
             if (thr >= acc && thr < (acc + dacc))
             {
                 u = (thr - acc) / dacc;
@@ -372,14 +372,14 @@ public static partial class Detour
             acc += dacc;
         }
 
-        float v = (float)Math.Sqrt(t);
+        var v = (float)Math.Sqrt(t);
 
-        float a = 1 - v;
-        float b = (1 - u) * v;
-        float c = u * v;
-        int paStart = 0;
-        int pbStart = (tri - 1) * 3;
-        int pcStart = tri * 3;
+        var a = 1 - v;
+        var b = (1 - u) * v;
+        var c = u * v;
+        var paStart = 0;
+        var pbStart = (tri - 1) * 3;
+        var pcStart = tri * 3;
 
         _out[0] = a * pts[paStart + 0] + b * pts[pbStart + 0] + c * pts[pcStart + 0];
         _out[1] = a * pts[paStart + 1] + b * pts[pbStart + 1] + c * pts[pcStart + 1];
@@ -393,13 +393,13 @@ public static partial class Detour
 
     public static bool dtIntersectSegSeg2D(float[] ap, float[] aq, float[] bp, float[] bq, ref float s, ref float t)
     {
-        float[] u = new float[3];
-        float[] v = new float[3];
-        float[] w = new float[3];
+        var u = new float[3];
+        var v = new float[3];
+        var w = new float[3];
         dtVsub(u, aq, ap);
         dtVsub(v, bq, bp);
         dtVsub(w, ap, bp);
-        float d = vperpXZ(u, v);
+        var d = vperpXZ(u, v);
         if (Math.Abs(d) < 1e-6f) return false;
         s = vperpXZ(v, w) / d;
         t = vperpXZ(u, w) / d;
@@ -408,13 +408,13 @@ public static partial class Detour
 
     public static bool dtIntersectSegSeg2D(float[] ap, int apStart, float[] aq, int aqStart, float[] bp, int bpStart, float[] bq, int bqStart, ref float s, ref float t)
     {
-        float[] u = new float[3];
-        float[] v = new float[3];
-        float[] w = new float[3];
+        var u = new float[3];
+        var v = new float[3];
+        var w = new float[3];
         dtVsub(u, 0, aq, aqStart, ap, apStart);
         dtVsub(v, 0, bq, bqStart, bp, bpStart);
         dtVsub(w, 0, ap, apStart, bp, bpStart);
-        float d = vperpXZ(u, v);
+        var d = vperpXZ(u, v);
         if (Math.Abs(d) < 1e-6f) return false;
         s = vperpXZ(v, w) / d;
         t = vperpXZ(u, w) / d;
@@ -426,7 +426,7 @@ public static partial class Detour
     ///  @param[in,out]	b	Value B
     static void dtSwap<T>(ref T lhs, ref T rhs)
     {
-        T temp = lhs;
+        var temp = lhs;
         lhs = rhs;
         rhs = temp;
     }
@@ -675,16 +675,16 @@ public static partial class Detour
     // @return The distance between the two points.
     public static float dtVdist(float[] v1, float[] v2)
     {
-        float dx = v2[0] - v1[0];
-        float dy = v2[1] - v1[1];
-        float dz = v2[2] - v1[2];
+        var dx = v2[0] - v1[0];
+        var dy = v2[1] - v1[1];
+        var dz = v2[2] - v1[2];
         return (float)Math.Sqrt(dx * dx + dy * dy + dz * dz);
     }
     public static float dtVdist(float[] v1, int v1Start, float[] v2, int v2Start)
     {
-        float dx = v2[v2Start + 0] - v1[v1Start + 0];
-        float dy = v2[v2Start + 1] - v1[v1Start + 1];
-        float dz = v2[v2Start + 2] - v1[v1Start + 2];
+        var dx = v2[v2Start + 0] - v1[v1Start + 0];
+        var dy = v2[v2Start + 1] - v1[v1Start + 1];
+        var dz = v2[v2Start + 2] - v1[v1Start + 2];
         return (float)Math.Sqrt(dx * dx + dy * dy + dz * dz);
     }
 
@@ -694,16 +694,16 @@ public static partial class Detour
     // @return The square of the distance between the two points.
     public static float dtVdistSqr(float[] v1, float[] v2)
     {
-        float dx = v2[0] - v1[0];
-        float dy = v2[1] - v1[1];
-        float dz = v2[2] - v1[2];
+        var dx = v2[0] - v1[0];
+        var dy = v2[1] - v1[1];
+        var dz = v2[2] - v1[2];
         return dx * dx + dy * dy + dz * dz;
     }
     public static float dtVdistSqr(float[] v1, int v1Start, float[] v2, int v2Start)
     {
-        float dx = v2[v2Start + 0] - v1[v1Start + 0];
-        float dy = v2[v2Start + 1] - v1[v1Start + 1];
-        float dz = v2[v2Start + 2] - v1[v1Start + 2];
+        var dx = v2[v2Start + 0] - v1[v1Start + 0];
+        var dy = v2[v2Start + 1] - v1[v1Start + 1];
+        var dz = v2[v2Start + 2] - v1[v1Start + 2];
         return dx * dx + dy * dy + dz * dz;
     }
 
@@ -715,14 +715,14 @@ public static partial class Detour
     /// The vectors are projected onto the xz-plane, so the y-values are ignored.
     public static float dtVdist2D(float[] v1, float[] v2)
     {
-        float dx = v2[0] - v1[0];
-        float dz = v2[2] - v1[2];
+        var dx = v2[0] - v1[0];
+        var dz = v2[2] - v1[2];
         return (float)Math.Sqrt(dx * dx + dz * dz);
     }
     public static float dtVdist2D(float[] v1, int v1Start, float[] v2, int v2Start)
     {
-        float dx = v2[v2Start + 0] - v1[v1Start + 0];
-        float dz = v2[v2Start + 2] - v1[v1Start + 2];
+        var dx = v2[v2Start + 0] - v1[v1Start + 0];
+        var dz = v2[v2Start + 2] - v1[v1Start + 2];
         return (float)Math.Sqrt(dx * dx + dz * dz);
     }
     /// Derives the square of the distance between the specified points on the xz-plane.
@@ -731,28 +731,28 @@ public static partial class Detour
     // @return The square of the distance between the point on the xz-plane.
     public static float dtVdist2DSqr(float[] v1, float[] v2)
     {
-        float dx = v2[0] - v1[0];
-        float dz = v2[2] - v1[2];
+        var dx = v2[0] - v1[0];
+        var dz = v2[2] - v1[2];
         return dx * dx + dz * dz;
     }
     public static float dtVdist2DSqr(float[] v1, int v1Start, float[] v2, int v2Start)
     {
-        float dx = v2[v2Start + 0] - v1[v1Start + 0];
-        float dz = v2[v2Start + 2] - v1[v1Start + 2];
+        var dx = v2[v2Start + 0] - v1[v1Start + 0];
+        var dz = v2[v2Start + 2] - v1[v1Start + 2];
         return dx * dx + dz * dz;
     }
     /// Normalizes the vector.
     ///  @param[in,out]	v	The vector to normalize. [(x, y, z)]
     public static void dtVnormalize(float[] v)
     {
-        float d = 1.0f / (float)Math.Sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
+        var d = 1.0f / (float)Math.Sqrt(v[0] * v[0] + v[1] * v[1] + v[2] * v[2]);
         v[0] *= d;
         v[1] *= d;
         v[2] *= d;
     }
     public static void dtVnormalize(float[] v, int vStart)
     {
-        float d = 1.0f / (float)Math.Sqrt(v[vStart + 0] * v[vStart + 0] + v[vStart + 1] * v[vStart + 1] + v[vStart + 2] * v[vStart + 2]);
+        var d = 1.0f / (float)Math.Sqrt(v[vStart + 0] * v[vStart + 0] + v[vStart + 1] * v[vStart + 1] + v[vStart + 2] * v[vStart + 2]);
         v[vStart + 0] *= d;
         v[vStart + 1] *= d;
         v[vStart + 2] *= d;
@@ -769,14 +769,14 @@ public static partial class Detour
     {
         const float thrSqrt = (1.0f / 16384.0f);
         const float thr = thrSqrt * thrSqrt;
-        float d = dtVdistSqr(p0, p1);
+        var d = dtVdistSqr(p0, p1);
         return d < thr;
     }
     public static bool dtVequal(float[] p0, int p0Start, float[] p1, int p1Start)
     {
         const float thrSqrt = (1.0f / 16384.0f);
         const float thr = thrSqrt * thrSqrt;
-        float d = dtVdistSqr(p0, p0Start, p1, p1Start);
+        var d = dtVdistSqr(p0, p0Start, p1, p1Start);
         return d < thr;
     }
     /// Derives the dot product of two vectors on the xz-plane. (@p u . @p v)
@@ -859,18 +859,18 @@ public static partial class Detour
     // @return The signed xz-plane area of the triangle.
     public static float dtTriArea2D(float[] a, float[] b, float[] c)
     {
-        float abx = b[0] - a[0];
-        float abz = b[2] - a[2];
-        float acx = c[0] - a[0];
-        float acz = c[2] - a[2];
+        var abx = b[0] - a[0];
+        var abz = b[2] - a[2];
+        var acx = c[0] - a[0];
+        var acz = c[2] - a[2];
         return acx * abz - abx * acz;
     }
     public static float dtTriArea2D(float[] a, int aStart, float[] b, int bStart, float[] c, int cStart)
     {
-        float abx = b[bStart + 0] - a[aStart + 0];
-        float abz = b[bStart + 2] - a[aStart + 2];
-        float acx = c[cStart + 0] - a[aStart + 0];
-        float acz = c[cStart + 2] - a[aStart + 2];
+        var abx = b[bStart + 0] - a[aStart + 0];
+        var abz = b[bStart + 2] - a[aStart + 2];
+        var acx = c[cStart + 0] - a[aStart + 0];
+        var acz = c[cStart + 2] - a[aStart + 2];
         return acx * abz - abx * acz;
     }
     /// Determines if two axis-aligned bounding boxes overlap.
@@ -882,7 +882,7 @@ public static partial class Detour
     // @see dtOverlapBounds
     public static bool dtOverlapQuantBounds(ushort[] amin, ushort[] amax, ushort[] bmin, ushort[] bmax)
     {
-        bool overlap = true;
+        var overlap = true;
         overlap = (amin[0] > bmax[0] || amax[0] < bmin[0]) ? false : overlap;
         overlap = (amin[1] > bmax[1] || amax[1] < bmin[1]) ? false : overlap;
         overlap = (amin[2] > bmax[2] || amax[2] < bmin[2]) ? false : overlap;
@@ -898,7 +898,7 @@ public static partial class Detour
     // @see dtOverlapQuantBounds
     public static bool dtOverlapBounds(float[] amin, float[] amax, float[] bmin, float[] bmax)
     {
-        bool overlap = true;
+        var overlap = true;
         overlap = (amin[0] > bmax[0] || amax[0] < bmin[0]) ? false : overlap;
         overlap = (amin[1] > bmax[1] || amax[1] < bmin[1]) ? false : overlap;
         overlap = (amin[2] > bmax[2] || amax[2] < bmin[2]) ? false : overlap;
@@ -946,42 +946,42 @@ public static partial class Detour
 
     public static void dtSwapEndian(ref ushort v)
     {
-        byte[] bytes = BitConverter.GetBytes(v);
+        var bytes = BitConverter.GetBytes(v);
         System.Array.Reverse(bytes);
         v = BitConverter.ToUInt16(bytes, 0);
     }
 
     public static void dtSwapEndian(ref short v)
     {
-        byte[] bytes = BitConverter.GetBytes(v);
+        var bytes = BitConverter.GetBytes(v);
         System.Array.Reverse(bytes);
         v = BitConverter.ToInt16(bytes, 0);
     }
 
     public static void dtSwapEndian(ref uint v)
     {
-        byte[] bytes = BitConverter.GetBytes(v);
+        var bytes = BitConverter.GetBytes(v);
         System.Array.Reverse(bytes);
         v = BitConverter.ToUInt32(bytes, 0);
     }
 
     public static void dtSwapEndian(ref int v)
     {
-        byte[] bytes = BitConverter.GetBytes(v);
+        var bytes = BitConverter.GetBytes(v);
         System.Array.Reverse(bytes);
         v = BitConverter.ToInt32(bytes, 0);
     }
 
     public static void dtSwapEndian(ref float v)
     {
-        byte[] bytes = BitConverter.GetBytes(v);
+        var bytes = BitConverter.GetBytes(v);
         System.Array.Reverse(bytes);
         v = BitConverter.ToSingle(bytes, 0);
     }
 
     public static void dtcsArrayItemsCreate<T>(T[] array) where T : class, new()
     {
-        for (int i = 0; i < array.Length; ++i)
+        for (var i = 0; i < array.Length; ++i)
         {
             array[i] = new T();
         }

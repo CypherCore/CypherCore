@@ -45,7 +45,7 @@ namespace Game
         {
             TradeData view_trade = trader_data ? GetPlayer().GetTradeData().GetTraderData() : GetPlayer().GetTradeData();
 
-            TradeUpdated tradeUpdated = new TradeUpdated();
+            var tradeUpdated = new TradeUpdated();
             tradeUpdated.WhichPlayer = (byte)(trader_data ? 1 : 0);
             tradeUpdated.ClientStateIndex = view_trade.GetClientStateIndex();
             tradeUpdated.CurrentStateIndex = view_trade.GetServerStateIndex();
@@ -54,10 +54,10 @@ namespace Game
 
             for (byte i = 0; i < (byte)TradeSlots.Count; ++i)
             {
-                Item item = view_trade.GetItem((TradeSlots)i);
+                var item = view_trade.GetItem((TradeSlots)i);
                 if (item)
                 {
-                    TradeUpdated.TradeItem tradeItem = new TradeUpdated.TradeItem();
+                    var tradeItem = new TradeUpdated.TradeItem();
                     tradeItem.Slot = i;
                     tradeItem.Item = new ItemInstance(item);
                     tradeItem.StackCount = (int)item.GetCount();
@@ -65,7 +65,7 @@ namespace Game
                     if (!item.HasItemFlag(ItemFieldFlags.Wrapped))
                     {
                         tradeItem.Unwrapped.HasValue = true;
-                        TradeUpdated.UnwrappedTradeItem unwrappedItem = tradeItem.Unwrapped.Value;
+                        var unwrappedItem = tradeItem.Unwrapped.Value;
                         unwrappedItem.EnchantID = (int)item.GetEnchantmentId(EnchantmentSlot.Perm);
                         unwrappedItem.OnUseEnchantmentID = (int)item.GetEnchantmentId(EnchantmentSlot.Use);
                         unwrappedItem.Creator = item.GetCreator();
@@ -75,11 +75,11 @@ namespace Game
                         unwrappedItem.Durability = item.m_itemData.Durability;
 
                         byte g = 0;
-                        foreach (SocketedGem gemData in item.m_itemData.Gems)
+                        foreach (var gemData in item.m_itemData.Gems)
                         {
                             if (gemData.ItemId != 0)
                             {
-                                ItemGemData gem = new ItemGemData();
+                                var gem = new ItemGemData();
                                 gem.Slot = g;
                                 gem.Item = new ItemInstance(gemData);
                                 tradeItem.Unwrapped.Value.Gems.Add(gem);
@@ -102,8 +102,8 @@ namespace Game
 
             for (byte i = 0; i < (int)TradeSlots.TradedCount; ++i)
             {
-                List<ItemPosCount> traderDst = new List<ItemPosCount>();
-                List<ItemPosCount> playerDst = new List<ItemPosCount>();
+                var traderDst = new List<ItemPosCount>();
+                var playerDst = new List<ItemPosCount>();
                 bool traderCanTrade = (myItems[i] == null || trader.CanStoreItem(ItemConst.NullBag, ItemConst.NullSlot, traderDst, myItems[i], false) == InventoryResult.Ok);
                 bool playerCanTrade = (hisItems[i] == null || GetPlayer().CanStoreItem(ItemConst.NullBag, ItemConst.NullSlot, playerDst, hisItems[i], false) == InventoryResult.Ok);
                 if (traderCanTrade && playerCanTrade)
@@ -184,7 +184,7 @@ namespace Game
             // store items in local list and set 'in-trade' flag
             for (byte i = 0; i < (int)TradeSlots.Count; ++i)
             {
-                Item item = myTrade.GetItem((TradeSlots)i);
+                var item = myTrade.GetItem((TradeSlots)i);
                 if (item)
                 {
                     Log.outDebug(LogFilter.Network, "player trade item {0} bag: {1} slot: {2}", item.GetGUID().ToString(), item.GetBagSlot(), item.GetSlot());
@@ -227,19 +227,19 @@ namespace Game
             if (my_trade == null)
                 return;
 
-            Player trader = my_trade.GetTrader();
+            var trader = my_trade.GetTrader();
 
             TradeData his_trade = trader.GetTradeData();
             if (his_trade == null)
                 return;
 
-            Item[] myItems = new Item[(int)TradeSlots.Count];
-            Item[] hisItems = new Item[(int)TradeSlots.Count];
+            var myItems = new Item[(int)TradeSlots.Count];
+            var hisItems = new Item[(int)TradeSlots.Count];
 
             // set before checks for propertly undo at problems (it already set in to client)
             my_trade.SetAccepted(true);
 
-            TradeStatusPkt info = new TradeStatusPkt();
+            var info = new TradeStatusPkt();
             if (his_trade.GetServerStateIndex() != acceptTrade.StateIndex)
             {
                 info.Status = TradeStatus.StateChanged;
@@ -297,7 +297,7 @@ namespace Game
             // not accept if some items now can't be trade (cheating)
             for (byte i = 0; i < (byte)TradeSlots.Count; ++i)
             {
-                Item item = my_trade.GetItem((TradeSlots)i);
+                var item = my_trade.GetItem((TradeSlots)i);
                 if (item)
                 {
                     if (!item.CanBeTraded(false, true))
@@ -332,17 +332,17 @@ namespace Game
                 SetAcceptTradeMode(my_trade, his_trade, myItems, hisItems);
 
                 Spell my_spell = null;
-                SpellCastTargets my_targets = new SpellCastTargets();
+                var my_targets = new SpellCastTargets();
 
                 Spell his_spell = null;
-                SpellCastTargets his_targets = new SpellCastTargets();
+                var his_targets = new SpellCastTargets();
 
                 // not accept if spell can't be casted now (cheating)
-                uint my_spell_id = my_trade.GetSpell();
+                var my_spell_id = my_trade.GetSpell();
                 if (my_spell_id != 0)
                 {
-                    SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(my_spell_id, _player.GetMap().GetDifficultyID());
-                    Item castItem = my_trade.GetSpellCastItem();
+                    var spellEntry = Global.SpellMgr.GetSpellInfo(my_spell_id, _player.GetMap().GetDifficultyID());
+                    var castItem = my_trade.GetSpellCastItem();
 
                     if (spellEntry == null || !his_trade.GetItem(TradeSlots.NonTraded) ||
                         (my_trade.HasSpellCastItem() && !castItem))
@@ -359,7 +359,7 @@ namespace Game
                     my_targets.SetTradeItemTarget(GetPlayer());
                     my_spell.m_targets = my_targets;
 
-                    SpellCastResult res = my_spell.CheckCast(true);
+                    var res = my_spell.CheckCast(true);
                     if (res != SpellCastResult.SpellCastOk)
                     {
                         my_spell.SendCastResult(res);
@@ -374,11 +374,11 @@ namespace Game
                 }
 
                 // not accept if spell can't be casted now (cheating)
-                uint his_spell_id = his_trade.GetSpell();
+                var his_spell_id = his_trade.GetSpell();
                 if (his_spell_id != 0)
                 {
-                    SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(his_spell_id, trader.GetMap().GetDifficultyID());
-                    Item castItem = his_trade.GetSpellCastItem();
+                    var spellEntry = Global.SpellMgr.GetSpellInfo(his_spell_id, trader.GetMap().GetDifficultyID());
+                    var castItem = his_trade.GetSpellCastItem();
 
                     if (spellEntry == null || !my_trade.GetItem(TradeSlots.NonTraded) || (his_trade.HasSpellCastItem() && !castItem))
                     {
@@ -394,7 +394,7 @@ namespace Game
                     his_targets.SetTradeItemTarget(trader);
                     his_spell.m_targets = his_targets;
 
-                    SpellCastResult res = his_spell.CheckCast(true);
+                    var res = his_spell.CheckCast(true);
                     if (res != SpellCastResult.SpellCastOk)
                     {
                         his_spell.SendCastResult(res);
@@ -415,8 +415,8 @@ namespace Game
                 trader.GetSession().SendTradeStatus(info);
 
                 // test if item will fit in each inventory
-                TradeStatusPkt myCanCompleteInfo = new TradeStatusPkt();
-                TradeStatusPkt hisCanCompleteInfo = new TradeStatusPkt();
+                var myCanCompleteInfo = new TradeStatusPkt();
+                var hisCanCompleteInfo = new TradeStatusPkt();
                 hisCanCompleteInfo.BagResult = trader.CanStoreItems(myItems, (int)TradeSlots.TradedCount, ref hisCanCompleteInfo.ItemID);
                 myCanCompleteInfo.BagResult = GetPlayer().CanStoreItems(hisItems, (int)TradeSlots.TradedCount, ref myCanCompleteInfo.ItemID);
 
@@ -501,7 +501,7 @@ namespace Game
                 trader.SetTradeData(null);
 
                 // desynchronized with the other saves here (SaveInventoryAndGoldToDB() not have own transaction guards)
-                SQLTransaction trans = new SQLTransaction();
+                var trans = new SQLTransaction();
                 GetPlayer().SaveInventoryAndGoldToDB(trans);
                 trader.SaveInventoryAndGoldToDB(trans);
                 DB.Characters.CommitTransaction(trans);
@@ -534,7 +534,7 @@ namespace Game
             if (my_trade == null)
                 return;
 
-            TradeStatusPkt info = new TradeStatusPkt();
+            var info = new TradeStatusPkt();
             my_trade.GetTrader().GetSession().SendTradeStatus(info);
             SendTradeStatus(info);
         }
@@ -544,7 +544,7 @@ namespace Game
             if (PlayerRecentlyLoggedOut() || PlayerLogout())
                 return;
 
-            TradeStatusPkt info = new TradeStatusPkt();
+            var info = new TradeStatusPkt();
             info.Status = TradeStatus.Cancelled;
             SendTradeStatus(info);
         }
@@ -563,7 +563,7 @@ namespace Game
             if (GetPlayer().GetTradeData() != null)
                 return;
 
-            TradeStatusPkt info = new TradeStatusPkt();
+            var info = new TradeStatusPkt();
             if (!GetPlayer().IsAlive())
             {
                 info.Status = TradeStatus.Dead;
@@ -700,7 +700,7 @@ namespace Game
             if (my_trade == null)
                 return;
 
-            TradeStatusPkt info = new TradeStatusPkt();
+            var info = new TradeStatusPkt();
             // invalid slot number
             if (setTradeItem.TradeSlot >= (byte)TradeSlots.Count)
             {
@@ -718,7 +718,7 @@ namespace Game
                 return;
             }
 
-            ObjectGuid iGUID = item.GetGUID();
+            var iGUID = item.GetGUID();
 
             // prevent place single item into many trade slots using cheating and client bugs
             if (my_trade.HasItem(iGUID))

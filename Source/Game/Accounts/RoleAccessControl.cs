@@ -35,7 +35,7 @@ namespace Game.Accounts
         public RBACCommandResult GrantPermission(uint permissionId, int realmId = 0)
         {
             // Check if permission Id exists
-            RBACPermission perm = Global.AccountMgr.GetRBACPermission(permissionId);
+            var perm = Global.AccountMgr.GetRBACPermission(permissionId);
             if (perm == null)
             {
                 Log.outDebug(LogFilter.Rbac, "RBACData.GrantPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Permission does not exists",
@@ -79,7 +79,7 @@ namespace Game.Accounts
         public RBACCommandResult DenyPermission(uint permissionId, int realmId = 0)
         {
             // Check if permission Id exists
-            RBACPermission perm = Global.AccountMgr.GetRBACPermission(permissionId);
+            var perm = Global.AccountMgr.GetRBACPermission(permissionId);
             if (perm == null)
             {
                 Log.outDebug(LogFilter.Rbac, "RBACData.DenyPermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Permission does not exists",
@@ -122,7 +122,7 @@ namespace Game.Accounts
 
         void SavePermission(uint permission, bool granted, int realmId)
         {
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_RBAC_ACCOUNT_PERMISSION);
+            var stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_RBAC_ACCOUNT_PERMISSION);
             stmt.AddValue(0, GetId());
             stmt.AddValue(1, permission);
             stmt.AddValue(2, granted);
@@ -148,7 +148,7 @@ namespace Game.Accounts
             {
                 Log.outDebug(LogFilter.Rbac, "RBACData.RevokePermission [Id: {0} Name: {1}] (Permission {2}, RealmId {3}). Ok and DB updated",
                                GetId(), GetName(), permissionId, realmId);
-                PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_RBAC_ACCOUNT_PERMISSION);
+                var stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_RBAC_ACCOUNT_PERMISSION);
                 stmt.AddValue(0, GetId());
                 stmt.AddValue(1, permissionId);
                 stmt.AddValue(2, realmId);
@@ -169,7 +169,7 @@ namespace Game.Accounts
 
             Log.outDebug(LogFilter.Rbac, "RBACData.LoadFromDB [Id: {0} Name: {1}]: Loading permissions", GetId(), GetName());
             // Load account permissions (granted and denied) that affect current realm
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_RBAC_ACCOUNT_PERMISSIONS);
+            var stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_RBAC_ACCOUNT_PERMISSIONS);
             stmt.AddValue(0, GetId());
             stmt.AddValue(1, GetRealmId());
 
@@ -182,7 +182,7 @@ namespace Game.Accounts
 
             Log.outDebug(LogFilter.Rbac, "RBACData.LoadFromDB [Id: {0} Name: {1}]: Loading permissions", GetId(), GetName());
             // Load account permissions (granted and denied) that affect current realm
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_RBAC_ACCOUNT_PERMISSIONS);
+            var stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_RBAC_ACCOUNT_PERMISSIONS);
             stmt.AddValue(0, GetId());
             stmt.AddValue(1, GetRealmId());
 
@@ -204,7 +204,7 @@ namespace Game.Accounts
             }
 
             // Add default permissions
-            List<uint> permissions = Global.AccountMgr.GetRBACDefaultPermissions(_secLevel);
+            var permissions = Global.AccountMgr.GetRBACDefaultPermissions(_secLevel);
             foreach (var id in permissions)
                 GrantPermission(id);
 
@@ -219,7 +219,7 @@ namespace Game.Accounts
             // Get the list of granted permissions
             _globalPerms = GetGrantedPermissions();
             ExpandPermissions(_globalPerms);
-            List<uint> revoked = GetDeniedPermissions();
+            var revoked = GetDeniedPermissions();
             ExpandPermissions(revoked);
             RemovePermissions(_globalPerms, revoked);
         }
@@ -243,16 +243,16 @@ namespace Game.Accounts
 
         void ExpandPermissions(List<uint> permissions)
         {
-            List<uint> toCheck = new List<uint>(permissions);
+            var toCheck = new List<uint>(permissions);
             permissions.Clear();
 
             while (!toCheck.Empty())
             {
                 // remove the permission from original list
-                uint permissionId = toCheck.FirstOrDefault();
+                var permissionId = toCheck.FirstOrDefault();
                 toCheck.RemoveAt(0);
 
-                RBACPermission permission = Global.AccountMgr.GetRBACPermission(permissionId);
+                var permission = Global.AccountMgr.GetRBACPermission(permissionId);
                 if (permission == null)
                     continue;
 
@@ -260,7 +260,7 @@ namespace Game.Accounts
                 permissions.Add(permissionId);
 
                 // add all linked permissions (that are not already expanded) to the list of permissions to be checked
-                List<uint> linkedPerms = permission.GetLinkedPermissions();
+                var linkedPerms = permission.GetLinkedPermissions();
                 foreach (var id in linkedPerms)
                     if (!permissions.Contains(id))
                         toCheck.Add(id);

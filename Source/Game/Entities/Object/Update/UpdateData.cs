@@ -63,7 +63,7 @@ namespace Game.Entities
             packet.NumObjUpdates = BlockCount;
             packet.MapID = (ushort)MapId;
 
-            WorldPacket buffer = new WorldPacket();
+            var buffer = new WorldPacket();
             if (buffer.WriteBit(!outOfRangeGUIDs.Empty() || !destroyGUIDs.Empty()))
             {
                 buffer.WriteUInt16((ushort)destroyGUIDs.Count);

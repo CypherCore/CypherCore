@@ -26,12 +26,12 @@ namespace Game.Entities
     {
         public static void LoadItemRandomBonusListTemplates()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             _storage.Clear();
 
             //                                         0   1            2
-            SQLResult result = DB.World.Query("SELECT Id, BonusListID, Chance FROM item_random_bonus_list_template");
+            var result = DB.World.Query("SELECT Id, BonusListID, Chance FROM item_random_bonus_list_template");
 
             if (result.IsEmpty())
             {
@@ -42,9 +42,9 @@ namespace Game.Entities
 
             do
             {
-                uint id = result.Read<uint>(0);
-                uint bonusListId = result.Read<uint>(1);
-                float chance = result.Read<float>(2);
+                var id = result.Read<uint>(0);
+                var bonusListId = result.Read<uint>(1);
+                var chance = result.Read<float>(2);
 
                 if (Global.DB2Mgr.GetItemBonusList(bonusListId) == null)
                 {
@@ -61,7 +61,7 @@ namespace Game.Entities
                 if (!_storage.ContainsKey(id))
                     _storage[id] = new RandomBonusListIds();
 
-                RandomBonusListIds ids = _storage[id];
+                var ids = _storage[id];
                 ids.BonusListIDs.Add(bonusListId);
                 ids.Chances.Add(chance);
 
@@ -73,7 +73,7 @@ namespace Game.Entities
 
         public static uint GenerateItemRandomBonusListId(uint item_id)
         {
-            ItemTemplate itemProto = Global.ObjectMgr.GetItemTemplate(item_id);
+            var itemProto = Global.ObjectMgr.GetItemTemplate(item_id);
             if (itemProto == null)
                 return 0;
 
@@ -140,7 +140,7 @@ namespace Game.Entities
                     return 0;
             }
 
-            RandPropPointsRecord randPropPointsEntry = CliDB.RandPropPointsStorage.LookupByKey(itemLevel);
+            var randPropPointsEntry = CliDB.RandPropPointsStorage.LookupByKey(itemLevel);
             if (randPropPointsEntry == null)
                 return 0;
 

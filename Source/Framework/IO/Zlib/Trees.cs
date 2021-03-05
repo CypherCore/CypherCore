@@ -252,8 +252,8 @@ namespace Framework.IO
 		//#define send_code(s, c, tree) send_bits(s, tree[c].Code, tree[c].Len)
 		static void send_code(deflate_state s, int c, ct_data[] tree)
 		{
-			ushort value=tree[c].Code;
-			ushort len=tree[c].Len;
+			var value=tree[c].Code;
+			var len=tree[c].Len;
 			if(s.bi_valid>(int)Buf_size-len)
 			{
 				int val=value;
@@ -300,10 +300,10 @@ namespace Framework.IO
 
 		static void send_bits(deflate_state s, int value, int length)
 		{
-			int len=length;
+			var len=length;
 			if(s.bi_valid>(int)Buf_size-len)
 			{
-				int val=value;
+				var val=value;
 				s.bi_buf|=(ushort)(val<<s.bi_valid);
 				//was put_short(s, s.bi_buf);
 				s.pending_buf[s.pending++]=(byte)(s.bi_buf&0xff);
@@ -346,9 +346,9 @@ namespace Framework.IO
 		static void init_block(deflate_state s)
 		{
 			// Initialize the trees.
-			for(int n=0; n<L_CODES; n++) s.dyn_ltree[n].Freq=0;
-			for(int n=0; n<D_CODES; n++) s.dyn_dtree[n].Freq=0;
-			for(int n=0; n<BL_CODES; n++) s.bl_tree[n].Freq=0;
+			for(var n=0; n<L_CODES; n++) s.dyn_ltree[n].Freq=0;
+			for(var n=0; n<D_CODES; n++) s.dyn_dtree[n].Freq=0;
+			for(var n=0; n<BL_CODES; n++) s.bl_tree[n].Freq=0;
 
 			s.dyn_ltree[END_BLOCK].Freq=1;
 			s.opt_len=s.static_len=0;
@@ -383,8 +383,8 @@ namespace Framework.IO
 		// k:		node to move down
 		static void pqdownheap(deflate_state s, ct_data[] tree, int k)
 		{
-			int v=s.heap[k];
-			int j=k<<1;  // left son of k
+			var v=s.heap[k];
+			var j=k<<1;  // left son of k
 			while(j<=s.heap_len)
 			{
 				// Set j to the smallest of the two sons:
@@ -419,18 +419,18 @@ namespace Framework.IO
 		// desc:	the tree descriptor
 		static void gen_bitlen(deflate_state s, ref tree_desc desc)
 		{
-			ct_data[] tree=desc.dyn_tree;
-			int max_code=desc.max_code;
-			ct_data[] stree=desc.stat_desc.static_tree;
-			int[] extra=desc.stat_desc.extra_bits;
-			int @base=desc.stat_desc.extra_base;
-			int max_length=desc.stat_desc.max_length;
+			var tree=desc.dyn_tree;
+			var max_code=desc.max_code;
+			var stree=desc.stat_desc.static_tree;
+			var extra=desc.stat_desc.extra_bits;
+			var @base=desc.stat_desc.extra_base;
+			var max_length=desc.stat_desc.max_length;
 			int h;			// heap index
 			int n, m;		// iterate over the tree elements
 			int bits;		// bit length
 			int xbits;		// extra bits
 			ushort f;		// frequency
-			int overflow=0;	// number of elements with bit length too large
+			var overflow=0;	// number of elements with bit length too large
 
 			for(bits=0; bits<=MAX_BITS; bits++) s.bl_count[bits]=0;
 
@@ -508,7 +508,7 @@ namespace Framework.IO
 		// bl_count:	number of codes at each bit length
 		static void gen_codes(ct_data[] tree, int max_code, ushort[] bl_count)
 		{
-			ushort[] next_code=new ushort[MAX_BITS+1];	// next code value for each bit length
+			var next_code=new ushort[MAX_BITS+1];	// next code value for each bit length
 			ushort code=0;	// running code value
 			int bits;		// bit index
 			int n;			// code index
@@ -544,11 +544,11 @@ namespace Framework.IO
 		// desc:	the tree descriptor
 		static void build_tree(deflate_state s, ref tree_desc desc)
 		{
-			ct_data[] tree=desc.dyn_tree;
-			ct_data[] stree=desc.stat_desc.static_tree;
-			int elems=desc.stat_desc.elems;
+			var tree=desc.dyn_tree;
+			var stree=desc.stat_desc.static_tree;
+			var elems=desc.stat_desc.elems;
 			int n, m;			// iterate over heap elements
-			int max_code=-1;	// largest code with non zero frequency
+			var max_code=-1;	// largest code with non zero frequency
 			int node;			// new node being created
 
 			// Construct the initial heap, with least frequent element in
@@ -630,12 +630,12 @@ namespace Framework.IO
 		static void scan_tree(deflate_state s, ct_data[] tree, int max_code)
 		{
 			int n;						// iterates over all tree elements
-			int prevlen=-1;				// last emitted length
+			var prevlen=-1;				// last emitted length
 			int curlen;					// length of current code
 			int nextlen=tree[0].Len;	// length of next code
-			int count=0;				// repeat count of the current code
-			int max_count=7;			// max repeat count
-			int min_count=4;			// min repeat count
+			var count=0;				// repeat count of the current code
+			var max_count=7;			// max repeat count
+			var min_count=4;			// min repeat count
 
 			if(nextlen==0) { max_count=138; min_count=3; }
 			tree[max_code+1].Len=(ushort)0xffff; // guard
@@ -669,12 +669,12 @@ namespace Framework.IO
 		static void send_tree(deflate_state s, ct_data[] tree, int max_code)
 		{
 			int n;						// iterates over all tree elements
-			int prevlen=-1;				// last emitted length
+			var prevlen=-1;				// last emitted length
 			int curlen;					// length of current code
 			int nextlen=tree[0].Len;	// length of next code
-			int count=0;				// repeat count of the current code
-			int max_count=7;			// max repeat count
-			int min_count=4;			// min repeat count
+			var count=0;				// repeat count of the current code
+			var max_count=7;			// max repeat count
+			var min_count=4;			// min repeat count
 
 			// tree[max_code+1].Len = -1;
 			// guard already set
@@ -824,7 +824,7 @@ namespace Framework.IO
 		static void _tr_flush_block(deflate_state s, byte[] buf, int buf_ind, uint stored_len, int last)
 		{
 			uint opt_lenb, static_lenb;	// opt_len and static_len in bytes
-			int max_blindex=0;			// index of last bit length code of non zero freq
+			var max_blindex=0;			// index of last bit length code of non zero freq
 
 			// Build the Huffman trees unless a stored block is forced
 			if(s.level>0)

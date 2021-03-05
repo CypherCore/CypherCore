@@ -91,18 +91,18 @@ namespace Framework.Networking
         {
             Log.outDebug(LogFilter.Network, "Network Thread Starting");
 
-            int sleepTime = 10;
+            var sleepTime = 10;
             while (!_stopped)
             {
                 Thread.Sleep(sleepTime);
 
-                uint tickStart = Time.GetMSTime();
+                var tickStart = Time.GetMSTime();
 
                 AddNewSockets();
 
                 for (var i =0; i < _Sockets.Count; ++i)
                 {
-                    TSocketType socket = _Sockets[i];
+                    var socket = _Sockets[i];
                     if (!socket.Update())
                     {
                         if (socket.IsOpen())
@@ -115,7 +115,7 @@ namespace Framework.Networking
                     }
                 }
 
-                uint diff = Time.GetMSTimeDiffToNow(tickStart);
+                var diff = Time.GetMSTimeDiffToNow(tickStart);
                 sleepTime = (int)(diff > 10 ? 0 : 10 - diff);
             }
 

@@ -80,7 +80,7 @@ namespace Scripts.Spells.Mage
         void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
             canBeRecalculated = false;
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster)
                 amount = (int)(caster.SpellBaseHealingBonusDone(GetSpellInfo().GetSchoolMask()) * 7.0f);
         }
@@ -88,8 +88,8 @@ namespace Scripts.Spells.Mage
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            Unit caster = eventInfo.GetDamageInfo().GetVictim();
-            Unit target = eventInfo.GetDamageInfo().GetAttacker();
+            var caster = eventInfo.GetDamageInfo().GetVictim();
+            var target = eventInfo.GetDamageInfo().GetAttacker();
 
             if (caster && target)
                 caster.CastSpell(target, SpellIds.BlazingBarrierTrigger, true);
@@ -107,7 +107,7 @@ namespace Scripts.Spells.Mage
     {
         bool CheckProc(ProcEventInfo eventInfo)
         {
-            SpellInfo spellInfo = eventInfo.GetSpellInfo();
+            var spellInfo = eventInfo.GetSpellInfo();
             if (spellInfo != null)
                 if (spellInfo.GetAllEffectsMechanicMask().HasAnyFlag(((1u << (int)Mechanics.Interrupt) | (1 << (int)Mechanics.Silence))))
                     return true;
@@ -145,7 +145,7 @@ namespace Scripts.Spells.Mage
 
         void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
         {
-            AuraEffect effectInfo = GetEffect(1);
+            var effectInfo = GetEffect(1);
             if (effectInfo == null || !GetTargetApplication().HasEffect(1) ||
                 dmgInfo.GetDamage() < GetTarget().GetHealth() ||
                 dmgInfo.GetDamage() > GetTarget().GetMaxHealth() * 2 ||
@@ -228,10 +228,10 @@ namespace Scripts.Spells.Mage
 
         void HandleDummy(uint effIndex)
         {
-            Player caster = GetCaster().ToPlayer();
+            var caster = GetCaster().ToPlayer();
             if (caster)
             {
-                Group group = caster.GetGroup();
+                var group = caster.GetGroup();
                 if (group)
                     caster.CastSpell(caster, SpellIds.ConjureRefreshmentTable, true);
                 else
@@ -276,15 +276,15 @@ namespace Scripts.Spells.Mage
         void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
             canBeRecalculated = false;
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster)
                 amount += (int)(caster.SpellBaseHealingBonusDone(GetSpellInfo().GetSchoolMask()) * 10.0f);
         }
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            Unit caster = eventInfo.GetDamageInfo().GetVictim();
-            Unit target = eventInfo.GetDamageInfo().GetAttacker();
+            var caster = eventInfo.GetDamageInfo().GetVictim();
+            var target = eventInfo.GetDamageInfo().GetAttacker();
 
             if (caster && target)
                 caster.CastSpell(target, SpellIds.Chilled, true);
@@ -314,22 +314,22 @@ namespace Scripts.Spells.Mage
 
         void HandleOnHit(uint effIndex)
         {
-            Unit caster = GetCaster();
-            Unit target = GetHitUnit();
+            var caster = GetCaster();
+            var target = GetHitUnit();
 
-            int index = _orderedTargets.IndexOf(target.GetGUID());
+            var index = _orderedTargets.IndexOf(target.GetGUID());
 
             if (index == 0 // only primary target triggers these benefits
                 && target.HasAuraState(AuraStateType.Frozen, GetSpellInfo(), caster))
             {
                 // Thermal Void
-                Aura thermalVoid = caster.GetAura(SpellIds.ThermalVoid);
+                var thermalVoid = caster.GetAura(SpellIds.ThermalVoid);
                 if (thermalVoid != null)
                 {
-                    SpellEffectInfo thermalVoidEffect = thermalVoid.GetSpellInfo().GetEffect(0);
+                    var thermalVoidEffect = thermalVoid.GetSpellInfo().GetEffect(0);
                     if (thermalVoidEffect != null)
                     {
-                        Aura icyVeins = caster.GetAura(SpellIds.IcyVeins);
+                        var icyVeins = caster.GetAura(SpellIds.IcyVeins);
                         if (icyVeins != null)
                             icyVeins.SetDuration(icyVeins.GetDuration() + thermalVoidEffect.CalcValue(caster) * Time.InMilliseconds);
                     }
@@ -356,12 +356,12 @@ namespace Scripts.Spells.Mage
     {
         void ApplyDamageMultiplier(uint effIndex)
         {
-            SpellValue spellValue = GetSpellValue();
+            var spellValue = GetSpellValue();
             if ((spellValue.CustomBasePointsMask & (1 << 1)) != 0)
             {
-                int originalDamage = GetHitDamage();
-                float targetIndex = (float)spellValue.EffectBasePoints[1];
-                float multiplier = MathF.Pow(GetEffectInfo().CalcDamageMultiplier(GetCaster(), GetSpell()), targetIndex);
+                var originalDamage = GetHitDamage();
+                var targetIndex = (float)spellValue.EffectBasePoints[1];
+                var multiplier = MathF.Pow(GetEffectInfo().CalcDamageMultiplier(GetCaster(), GetSpell()), targetIndex);
                 SetHitDamage((int)(originalDamage * multiplier));
             }
         }
@@ -389,10 +389,10 @@ namespace Scripts.Spells.Mage
         {
             PreventDefaultAction();
 
-            SpellInfo igniteDot = Global.SpellMgr.GetSpellInfo(SpellIds.Ignite, GetCastDifficulty());
-            int pct = aurEff.GetAmount();
+            var igniteDot = Global.SpellMgr.GetSpellInfo(SpellIds.Ignite, GetCastDifficulty());
+            var pct = aurEff.GetAmount();
 
-            int amount = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), pct) / igniteDot.GetMaxTicks());
+            var amount = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), pct) / igniteDot.GetMaxTicks());
             amount += (int)eventInfo.GetProcTarget().GetRemainingPeriodicAmount(eventInfo.GetActor().GetGUID(), SpellIds.Ignite, AuraType.PeriodicDamage);
             GetTarget().CastCustomSpell(SpellIds.Ignite, SpellValueMod.BasePoint0, amount, eventInfo.GetProcTarget(), true, null, aurEff);
         }
@@ -484,7 +484,7 @@ namespace Scripts.Spells.Mage
             if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Expire)
                 return;
 
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster)
                 caster.CastCustomSpell(SpellIds.LivingBombExplosion, SpellValueMod.BasePoint0, aurEff.GetAmount(), GetTarget(), TriggerCastFlags.FullMask);
         }
@@ -536,7 +536,7 @@ namespace Scripts.Spells.Mage
         void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
             canBeRecalculated = false;
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster)
                 amount += (int)(caster.SpellBaseHealingBonusDone(GetSpellInfo().GetSchoolMask()) * 7.0f);
         }
@@ -557,20 +557,20 @@ namespace Scripts.Spells.Mage
 
         void HandleEffectPeriodic(AuraEffect aurEff)
         {
-            TempSummon ringOfFrost = GetRingOfFrostMinion();
+            var ringOfFrost = GetRingOfFrostMinion();
             if (ringOfFrost)
                 GetTarget().CastSpell(ringOfFrost.GetPositionX(), ringOfFrost.GetPositionY(), ringOfFrost.GetPositionZ(), SpellIds.RingOfFrostFreeze, true);
         }
 
         void Apply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            List<TempSummon> minions = new List<TempSummon>();
+            var minions = new List<TempSummon>();
             GetTarget().GetAllMinionsByEntry(minions, (uint)Global.SpellMgr.GetSpellInfo(SpellIds.RingOfFrostSummon, GetCastDifficulty()).GetEffect(0).MiscValue);
 
             // Get the last summoned RoF, save it and despawn older ones
             foreach (var summon in minions)
             {
-                TempSummon ringOfFrost = GetRingOfFrostMinion();
+                var ringOfFrost = GetRingOfFrostMinion();
                 if (ringOfFrost)
                 {
                     if (summon.GetTimer() > ringOfFrost.GetTimer())
@@ -594,7 +594,7 @@ namespace Scripts.Spells.Mage
 
         TempSummon GetRingOfFrostMinion()
         {
-            Creature creature = ObjectAccessor.GetCreature(GetOwner(), _ringOfFrostGUID);
+            var creature = ObjectAccessor.GetCreature(GetOwner(), _ringOfFrostGUID);
             if (creature)
                 return creature.ToTempSummon();
             return null;
@@ -613,13 +613,13 @@ namespace Scripts.Spells.Mage
 
         void FilterTargets(List<WorldObject> targets)
         {
-            WorldLocation dest = GetExplTargetDest();
-            float outRadius = Global.SpellMgr.GetSpellInfo(SpellIds.RingOfFrostSummon, GetCastDifficulty()).GetEffect(0).CalcRadius();
-            float inRadius = 6.5f;
+            var dest = GetExplTargetDest();
+            var outRadius = Global.SpellMgr.GetSpellInfo(SpellIds.RingOfFrostSummon, GetCastDifficulty()).GetEffect(0).CalcRadius();
+            var inRadius = 6.5f;
 
             targets.RemoveAll(target =>
             {
-                Unit unit = target.ToUnit();
+                var unit = target.ToUnit();
                 if (!unit)
                     return true;
 
@@ -672,7 +672,7 @@ namespace Scripts.Spells.Mage
 
         void ApplyDebuff()
         {
-            Unit target = GetHitUnit();
+            var target = GetHitUnit();
             if (target)
                 target.CastSpell(target, SpellIds.TemporalDisplacement, true);
         }
@@ -694,12 +694,12 @@ namespace Scripts.Spells.Mage
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            DamageInfo damageInfo = eventInfo.GetDamageInfo();
+            var damageInfo = eventInfo.GetDamageInfo();
             if (damageInfo != null)
             {
                 if (damageInfo.GetAttacker() == GetCaster() && damageInfo.GetVictim() == GetTarget())
                 {
-                    uint extra = MathFunctions.CalculatePct(damageInfo.GetDamage(), 25);
+                    var extra = MathFunctions.CalculatePct(damageInfo.GetDamage(), 25);
                     if (extra > 0)
                         aurEff.ChangeAmount(aurEff.GetAmount() + (int)extra);
                 }
@@ -708,11 +708,11 @@ namespace Scripts.Spells.Mage
 
         void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            int amount = aurEff.GetAmount();
+            var amount = aurEff.GetAmount();
             if (amount == 0 || GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Expire)
                 return;
 
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster != null)
                 caster.CastCustomSpell(SpellIds.TouchOfTheMagiExplode, SpellValueMod.BasePoint0, amount, GetTarget(), TriggerCastFlags.FullMask);
         }
@@ -734,7 +734,7 @@ namespace Scripts.Spells.Mage
 
         void HandleChilled()
         {
-            Unit target = GetHitUnit();
+            var target = GetHitUnit();
             if (target)
                 GetCaster().CastSpell(target, SpellIds.Chilled, true);
         }
@@ -755,7 +755,7 @@ namespace Scripts.Spells.Mage
 
         void HandleImprovedFreeze()
         {
-            Unit owner = GetCaster().GetOwner();
+            var owner = GetCaster().GetOwner();
             if (!owner)
                 return;
 

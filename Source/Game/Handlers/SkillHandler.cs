@@ -29,11 +29,11 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.LearnTalents)]
         void HandleLearnTalents(LearnTalents packet)
         {
-            LearnTalentFailed learnTalentFailed = new LearnTalentFailed();
-            bool anythingLearned = false;
+            var learnTalentFailed = new LearnTalentFailed();
+            var anythingLearned = false;
             foreach (uint talentId in packet.Talents)
             {
-                TalentLearnResult result = _player.LearnTalent(talentId, ref learnTalentFailed.SpellID);
+                var result = _player.LearnTalent(talentId, ref learnTalentFailed.SpellID);
                 if (result != 0)
                 {
                     if (learnTalentFailed.Reason == 0)
@@ -55,8 +55,8 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.LearnPvpTalents)]
         void HandleLearnPvpTalents(LearnPvpTalents packet)
         {
-            LearnPvpTalentFailed learnPvpTalentFailed = new LearnPvpTalentFailed();
-            bool anythingLearned = false;
+            var learnPvpTalentFailed = new LearnPvpTalentFailed();
+            var anythingLearned = false;
             foreach (var pvpTalent in packet.Talents)
             {
                 TalentLearnResult result = _player.LearnPvpTalent(pvpTalent.PvPTalentID, pvpTalent.Slot, ref learnPvpTalentFailed.SpellID);
@@ -81,7 +81,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ConfirmRespecWipe)]
         void HandleConfirmRespecWipe(ConfirmRespecWipe confirmRespecWipe)
         {
-            Creature unit = GetPlayer().GetNPCIfCanInteractWith(confirmRespecWipe.RespecMaster, NPCFlags.Trainer, NPCFlags2.None);
+            var unit = GetPlayer().GetNPCIfCanInteractWith(confirmRespecWipe.RespecMaster, NPCFlags.Trainer, NPCFlags2.None);
             if (unit == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleTalentWipeConfirm - {0} not found or you can't interact with him.", confirmRespecWipe.RespecMaster.ToString());
@@ -117,7 +117,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.UnlearnSkill)]
         void HandleUnlearnSkill(UnlearnSkill packet)
         {
-            SkillRaceClassInfoRecord rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(packet.SkillLine, GetPlayer().GetRace(), GetPlayer().GetClass());
+            var rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(packet.SkillLine, GetPlayer().GetRace(), GetPlayer().GetClass());
             if (rcEntry == null || !rcEntry.Flags.HasAnyFlag(SkillRaceClassInfoFlags.Unlearnable))
                 return;
 

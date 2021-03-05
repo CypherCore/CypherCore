@@ -46,9 +46,9 @@ namespace Game.Movement
 
         uint SendPathSpline(Unit me, Span<Vector3> wp)
         {
-            int numWp = wp.Length;
+            var numWp = wp.Length;
             Cypher.Assert(numWp > 1, "Every path must have source & destination");
-            MoveSplineInit init = new MoveSplineInit(me);
+            var init = new MoveSplineInit(me);
             if (numWp > 2)
                 init.MovebyPath(wp.ToArray());
             else
@@ -62,8 +62,8 @@ namespace Game.Movement
             Cypher.Assert(index < _chainSize);
             Log.outDebug(LogFilter.Movement, "{0}: Sending spline for {1}.", me.GetGUID().ToString(), index);
 
-            SplineChainLink thisLink = _chain[index];
-            uint actualDuration = SendPathSpline(me, new Span<Vector3>(thisLink.Points.ToArray()));
+            var thisLink = _chain[index];
+            var actualDuration = SendPathSpline(me, new Span<Vector3>(thisLink.Points.ToArray()));
             if (actualDuration != thisLink.ExpectedDuration)
             {
                 Log.outDebug(LogFilter.Movement, "{0}: Sent spline for {1}, duration is {2} ms. Expected was {3} ms (delta {4} ms). Adjusting.", me.GetGUID().ToString(), index, actualDuration, thisLink.ExpectedDuration, actualDuration - thisLink.ExpectedDuration);
@@ -83,7 +83,7 @@ namespace Game.Movement
                 {
                     if (finished)
                         return;
-                    SplineChainLink thisLink = _chain[_nextIndex];
+                    var thisLink = _chain[_nextIndex];
                     if (_nextFirstWP >= thisLink.Points.Count)
                     {
                         Log.outError(LogFilter.Movement, "{0}: Attempted to resume spline chain from invalid resume state ({1}, {2}).", me.GetGUID().ToString(), _nextIndex, _nextFirstWP);
@@ -119,7 +119,7 @@ namespace Game.Movement
             if (!finished)
                 return;
 
-            Creature cMe = me.ToCreature();
+            var cMe = me.ToCreature();
             if (cMe && cMe.IsAIEnabled)
                 cMe.GetAI().MovementInform(MovementGeneratorType.SplineChain, _id);
         }

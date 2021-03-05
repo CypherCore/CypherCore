@@ -55,7 +55,7 @@ public class Realm : IEquatable<Realm>
                 realmIp = ExternalAddress;
         }
 
-        IPEndPoint endpoint = new IPEndPoint(realmIp, Port);
+        var endpoint = new IPEndPoint(realmIp, Port);
 
         // Return external IP
         return endpoint;

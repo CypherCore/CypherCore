@@ -54,12 +54,12 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            uint areasCount = _worldPacket.ReadBits<uint>(4);
+            var areasCount = _worldPacket.ReadBits<uint>(4);
 
             Request.Read(_worldPacket);
             RequestID = _worldPacket.ReadUInt32();
 
-            for (int i = 0; i < areasCount; ++i)
+            for (var i = 0; i < areasCount; ++i)
                 Areas.Add(_worldPacket.ReadInt32());
         }
 
@@ -108,11 +108,11 @@ namespace Game.Networking.Packets
             RaceFilter = data.ReadInt64();
             ClassFilter = data.ReadInt32();
 
-            uint nameLength = data.ReadBits<uint>(6);
-            uint virtualRealmNameLength = data.ReadBits<uint>(9);
-            uint guildNameLength = data.ReadBits<uint>(7);
-            uint guildVirtualRealmNameLength = data.ReadBits<uint>(9);
-            uint wordsCount = data.ReadBits<uint>(3);
+            var nameLength = data.ReadBits<uint>(6);
+            var virtualRealmNameLength = data.ReadBits<uint>(9);
+            var guildNameLength = data.ReadBits<uint>(7);
+            var guildVirtualRealmNameLength = data.ReadBits<uint>(9);
+            var wordsCount = data.ReadBits<uint>(3);
 
             ShowEnemies = data.HasBit();
             ShowArenaPlayers = data.HasBit();
@@ -120,7 +120,7 @@ namespace Game.Networking.Packets
             ServerInfo.HasValue = data.HasBit();
             data.ResetBitPos();
 
-            for (int i = 0; i < wordsCount; ++i)
+            for (var i = 0; i < wordsCount; ++i)
             {
                 Words.Add(data.ReadString(data.ReadBits<uint>(7)));
                 data.ResetBitPos();

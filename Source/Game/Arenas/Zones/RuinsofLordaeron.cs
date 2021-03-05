@@ -28,7 +28,7 @@ namespace Game.Arenas
 
         public override bool SetupBattleground()
         {
-            bool result = true;
+            var result = true;
             result &= AddObject(RuinsofLordaeronObjectTypes.Door1, RuinsofLordaeronObjectTypes.Door1, 1293.561f, 1601.938f, 31.60557f, -1.457349f, 0, 0, -0.6658813f, 0.7460576f);
             result &= AddObject(RuinsofLordaeronObjectTypes.Door2, RuinsofLordaeronObjectTypes.Door2, 1278.648f, 1730.557f, 31.60557f, 1.684245f, 0, 0, 0.7460582f, 0.6658807f);
             if (!result)
@@ -50,16 +50,16 @@ namespace Game.Arenas
 
         public override void StartingEventCloseDoors()
         {
-            for (int i = RuinsofLordaeronObjectTypes.Door1; i <= RuinsofLordaeronObjectTypes.Door2; ++i)
+            for (var i = RuinsofLordaeronObjectTypes.Door1; i <= RuinsofLordaeronObjectTypes.Door2; ++i)
                 SpawnBGObject(i, BattlegroundConst.RespawnImmediately);
         }
 
         public override void StartingEventOpenDoors()
         {
-            for (int i = RuinsofLordaeronObjectTypes.Door1; i <= RuinsofLordaeronObjectTypes.Door2; ++i)
+            for (var i = RuinsofLordaeronObjectTypes.Door1; i <= RuinsofLordaeronObjectTypes.Door2; ++i)
                 DoorOpen(i);
 
-            for (int i = RuinsofLordaeronObjectTypes.Buff1; i <= RuinsofLordaeronObjectTypes.Buff2; ++i)
+            for (var i = RuinsofLordaeronObjectTypes.Buff1; i <= RuinsofLordaeronObjectTypes.Buff2; ++i)
                 SpawnBGObject(i, 60);
         }
 

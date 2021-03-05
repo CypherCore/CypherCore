@@ -54,8 +54,8 @@ namespace Game.Maps
 
             public double GetDoubleExactDist2dSq(DoublePosition pos)
             {
-                double offX = GetDoublePositionX() - pos.GetDoublePositionX();
-                double offY = GetDoublePositionY() - pos.GetDoublePositionY();
+                var offX = GetDoublePositionX() - pos.GetDoublePositionX();
+                var offY = GetDoublePositionY() - pos.GetDoublePositionY();
                 return (offX * offX) + (offY * offY);
             }
 
@@ -110,8 +110,8 @@ namespace Game.Maps
 
         public override bool IsWithinBoundaryArea(Position pos)
         {
-            double offX = _center.GetDoublePositionX() - pos.GetPositionX();
-            double offY = _center.GetDoublePositionY() - pos.GetPositionY();
+            var offX = _center.GetDoublePositionX() - pos.GetPositionX();
+            var offY = _center.GetDoublePositionY() - pos.GetPositionY();
             return offX * offX + offY * offY <= _radiusSq;
         }
 
@@ -130,8 +130,8 @@ namespace Game.Maps
 
         public override bool IsWithinBoundaryArea(Position pos)
         {
-            double offX = _center.GetDoublePositionX() - pos.GetPositionX();
-            double offY = _center.GetDoublePositionY() - pos.GetPositionY();
+            var offX = _center.GetDoublePositionX() - pos.GetPositionX();
+            var offY = _center.GetDoublePositionY() - pos.GetPositionY();
             return (offX * offX) * _scaleXSq + (offY * offY) <= _radiusYSq;
         }
 
@@ -159,9 +159,9 @@ namespace Game.Maps
         public override bool IsWithinBoundaryArea(Position pos)
         {
             // half-plane signs
-            bool sign1 = ((-_b.GetDoublePositionX() + pos.GetPositionX()) * _aby - (-_b.GetDoublePositionY() + pos.GetPositionY()) * _abx) < 0;
-            bool sign2 = ((-_c.GetDoublePositionX() + pos.GetPositionX()) * _bcy - (-_c.GetDoublePositionY() + pos.GetPositionY()) * _bcx) < 0;
-            bool sign3 = ((-_a.GetDoublePositionX() + pos.GetPositionX()) * _cay - (-_a.GetDoublePositionY() + pos.GetPositionY()) * _cax) < 0;
+            var sign1 = ((-_b.GetDoublePositionX() + pos.GetPositionX()) * _aby - (-_b.GetDoublePositionY() + pos.GetPositionY()) * _abx) < 0;
+            var sign2 = ((-_c.GetDoublePositionX() + pos.GetPositionX()) * _bcy - (-_c.GetDoublePositionY() + pos.GetPositionY()) * _bcx) < 0;
+            var sign3 = ((-_a.GetDoublePositionX() + pos.GetPositionX()) * _cay - (-_a.GetDoublePositionY() + pos.GetPositionY()) * _cax) < 0;
 
             // if all signs are the same, the point is inside the triangle
             return ((sign1 == sign2) && (sign2 == sign3));
@@ -196,10 +196,10 @@ namespace Game.Maps
         public override bool IsWithinBoundaryArea(Position pos)
         {
             // half-plane signs
-            bool sign1 = ((-_b.GetDoublePositionX() + pos.GetPositionX()) * _aby - (-_b.GetDoublePositionY() + pos.GetPositionY()) * _abx) < 0;
-            bool sign2 = ((-_a.GetDoublePositionX() + pos.GetPositionX()) * _day - (-_a.GetDoublePositionY() + pos.GetPositionY()) * _dax) < 0;
-            bool sign3 = ((-_d.GetDoublePositionY() + pos.GetPositionY()) * _abx - (-_d.GetDoublePositionX() + pos.GetPositionX()) * _aby) < 0; // AB = -CD
-            bool sign4 = ((-_c.GetDoublePositionY() + pos.GetPositionY()) * _dax - (-_c.GetDoublePositionX() + pos.GetPositionX()) * _day) < 0; // DA = -BC
+            var sign1 = ((-_b.GetDoublePositionX() + pos.GetPositionX()) * _aby - (-_b.GetDoublePositionY() + pos.GetPositionY()) * _abx) < 0;
+            var sign2 = ((-_a.GetDoublePositionX() + pos.GetPositionX()) * _day - (-_a.GetDoublePositionY() + pos.GetPositionY()) * _dax) < 0;
+            var sign3 = ((-_d.GetDoublePositionY() + pos.GetPositionY()) * _abx - (-_d.GetDoublePositionX() + pos.GetPositionX()) * _aby) < 0; // AB = -CD
+            var sign4 = ((-_c.GetDoublePositionY() + pos.GetPositionY()) * _dax - (-_c.GetDoublePositionX() + pos.GetPositionX()) * _day) < 0; // DA = -BC
 
             // if all signs are equal, the point is inside
             return ((sign1 == sign2) && (sign2 == sign3) && (sign3 == sign4));

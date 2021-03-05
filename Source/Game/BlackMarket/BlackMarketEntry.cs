@@ -38,12 +38,12 @@ namespace Game.BlackMarket
             Chance = fields.Read<float>(6);
 
             var bonusListIDsTok = new StringArray(fields.Read<string>(7), ' ');
-            List<uint> bonusListIDs = new List<uint>();
+            var bonusListIDs = new List<uint>();
             if (!bonusListIDsTok.IsEmpty())
             {
                 foreach (string token in bonusListIDsTok)
                 {
-                    if (uint.TryParse(token, out uint id))
+                    if (uint.TryParse(token, out var id))
                         bonusListIDs.Add(id);
                 }
             }
@@ -116,7 +116,7 @@ namespace Game.BlackMarket
             _marketId = fields.Read<uint>(0);
 
             // Invalid MarketID
-            BlackMarketTemplate templ = Global.BlackMarketMgr.GetTemplateByID(_marketId);
+            var templ = Global.BlackMarketMgr.GetTemplateByID(_marketId);
             if (templ == null)
             {
                 Log.outError(LogFilter.Misc, "Black market auction {0} does not have a valid id.", _marketId);
@@ -140,7 +140,7 @@ namespace Game.BlackMarket
 
         public void SaveToDB(SQLTransaction trans)
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_BLACKMARKET_AUCTIONS);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_BLACKMARKET_AUCTIONS);
 
             stmt.AddValue(0, _marketId);
             stmt.AddValue(1, _currentBid);
@@ -153,7 +153,7 @@ namespace Game.BlackMarket
 
         public void DeleteFromDB(SQLTransaction trans)
         {
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_BLACKMARKET_AUCTIONS);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_BLACKMARKET_AUCTIONS);
             stmt.AddValue(0, _marketId);
             trans.Append(stmt);
         }
@@ -188,7 +188,7 @@ namespace Game.BlackMarket
             player.ModifyMoney(-(long)bid);
 
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_BLACKMARKET_AUCTIONS);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_BLACKMARKET_AUCTIONS);
 
             stmt.AddValue(0, _currentBid);
             stmt.AddValue(1, GetExpirationTime());

@@ -38,13 +38,13 @@ namespace Game.Entities
             if (m_graph != null)
                 return;
 
-            List<Tuple<Tuple<uint, uint>, uint>> edges = new List<Tuple<Tuple<uint, uint>, uint>>();
+            var edges = new List<Tuple<Tuple<uint, uint>, uint>>();
 
             // Initialize here
-            foreach (TaxiPathRecord path in CliDB.TaxiPathStorage.Values)
+            foreach (var path in CliDB.TaxiPathStorage.Values)
             {
-                TaxiNodesRecord from = CliDB.TaxiNodesStorage.LookupByKey(path.FromTaxiNode);
-                TaxiNodesRecord to = CliDB.TaxiNodesStorage.LookupByKey(path.ToTaxiNode);
+                var from = CliDB.TaxiNodesStorage.LookupByKey(path.FromTaxiNode);
+                var to = CliDB.TaxiNodesStorage.LookupByKey(path.ToTaxiNode);
                 if (from != null && to != null && from.Flags.HasAnyFlag(TaxiNodeFlags.Alliance | TaxiNodeFlags.Horde) && to.Flags.HasAnyFlag(TaxiNodeFlags.Alliance | TaxiNodeFlags.Horde))
                     AddVerticeAndEdgeFromNodeInfo(from, to, path.Id, edges);
             }
@@ -52,7 +52,7 @@ namespace Game.Entities
             // create graph
             m_graph = new EdgeWeightedDigraph(m_nodesByVertex.Count);
 
-            for (int j = 0; j < edges.Count; ++j)
+            for (var j = 0; j < edges.Count; ++j)
             {
                 m_graph.AddEdge(new DirectedEdge(edges[j].Item1.Item1, edges[j].Item1.Item2, edges[j].Item2));
             }
@@ -81,26 +81,26 @@ namespace Game.Entities
         {
             if (from.Id != to.Id)
             {
-                uint fromVertexID = CreateVertexFromFromNodeInfoIfNeeded(from);
-                uint toVertexID = CreateVertexFromFromNodeInfoIfNeeded(to);
+                var fromVertexID = CreateVertexFromFromNodeInfoIfNeeded(from);
+                var toVertexID = CreateVertexFromFromNodeInfoIfNeeded(to);
 
-                float totalDist = 0.0f;
-                TaxiPathNodeRecord[] nodes = CliDB.TaxiPathNodesByPath[pathId];
+                var totalDist = 0.0f;
+                var nodes = CliDB.TaxiPathNodesByPath[pathId];
                 if (nodes.Length < 2)
                 {
                     edges.Add(Tuple.Create(Tuple.Create(fromVertexID, toVertexID), 0xFFFFu));
                     return;
                 }
 
-                int last = nodes.Length;
-                int first = 0;
+                var last = nodes.Length;
+                var first = 0;
                 if (nodes.Length > 2)
                 {
                     --last;
                     ++first;
                 }
 
-                for (int i = first + 1; i < last; ++i)
+                for (var i = first + 1; i < last; ++i)
                 {
                     if (nodes[i - 1].Flags.HasAnyFlag(TaxiPathNodeFlags.Teleport))
                         continue;
@@ -117,7 +117,7 @@ namespace Game.Entities
                     totalDist += (float)Math.Sqrt((float)Math.Pow(pos2.X - pos1.X, 2) + (float)Math.Pow(pos2.Y - pos1.Y, 2));
                 }
 
-                uint dist = (uint)(totalDist * 32767.0f);
+                var dist = (uint)(totalDist * 32767.0f);
                 if (dist > 0xFFFF)
                     dist = 0xFFFF;
 
@@ -148,7 +148,7 @@ namespace Game.Entities
             {
                 shortestPath.Clear();
                 // We want to use Dijkstra on this graph
-                DijkstraShortestPath g = new DijkstraShortestPath(m_graph, (int)GetVertexIDFromNodeID(from));
+                var g = new DijkstraShortestPath(m_graph, (int)GetVertexIDFromNodeID(from));
                 var path = g.PathTo((int)GetVertexIDFromNodeID(to));
                 // found a path to the goal
                 shortestPath.Add(from.Id);
@@ -156,11 +156,11 @@ namespace Game.Entities
                 {
                     //todo  test me No clue about this....
                     var To = m_nodesByVertex[(int)edge.To];
-                    TaxiNodeFlags requireFlag = (player.GetTeam() == Team.Alliance) ? TaxiNodeFlags.Alliance : TaxiNodeFlags.Horde;
+                    var requireFlag = (player.GetTeam() == Team.Alliance) ? TaxiNodeFlags.Alliance : TaxiNodeFlags.Horde;
                     if (!To.Flags.HasAnyFlag(requireFlag))
                         continue;
 
-                    PlayerConditionRecord condition = CliDB.PlayerConditionStorage.LookupByKey(To.ConditionID);
+                    var condition = CliDB.PlayerConditionStorage.LookupByKey(To.ConditionID);
                     if (condition != null)
                         if (!ConditionManager.IsPlayerMeetingCondition(player, condition))
                             continue;
@@ -175,9 +175,9 @@ namespace Game.Entities
         //todo test me
         public void GetReachableNodesMask(TaxiNodesRecord from, byte[] mask)
         {
-            DepthFirstSearch depthFirst = new DepthFirstSearch(m_graph, GetVertexIDFromNodeID(from), vertex =>
+            var depthFirst = new DepthFirstSearch(m_graph, GetVertexIDFromNodeID(from), vertex =>
             {
-                TaxiNodesRecord taxiNode = CliDB.TaxiNodesStorage.LookupByKey(GetNodeIDFromVertexID(vertex));
+                var taxiNode = CliDB.TaxiNodesStorage.LookupByKey(GetNodeIDFromVertexID(vertex));
                 if (taxiNode != null)
                     mask[(taxiNode.Id - 1) / 8] |= (byte)(1 << (int)((taxiNode.Id - 1) % 8));
             });

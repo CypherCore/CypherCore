@@ -30,14 +30,14 @@ namespace Game.DataStorage
 
         public void LoadAreaTriggerTemplates()
         {
-            uint oldMSTime = Time.GetMSTime();
-            MultiMap<uint, Vector2> verticesByAreaTrigger = new MultiMap<uint, Vector2>();
-            MultiMap<uint, Vector2> verticesTargetByAreaTrigger = new MultiMap<uint, Vector2>();
-            MultiMap<uint, Vector3> splinesBySpellMisc = new MultiMap<uint, Vector3>();
-            MultiMap<AreaTriggerId, AreaTriggerAction> actionsByAreaTrigger = new MultiMap<AreaTriggerId, AreaTriggerAction>();
+            var oldMSTime = Time.GetMSTime();
+            var verticesByAreaTrigger = new MultiMap<uint, Vector2>();
+            var verticesTargetByAreaTrigger = new MultiMap<uint, Vector2>();
+            var splinesBySpellMisc = new MultiMap<uint, Vector3>();
+            var actionsByAreaTrigger = new MultiMap<AreaTriggerId, AreaTriggerAction>();
 
             //                                                       0         1             2            3           4
-            SQLResult templateActions = DB.World.Query("SELECT AreaTriggerId, IsServerSide, ActionType, ActionParam, TargetType FROM `areatrigger_template_actions`");
+            var templateActions = DB.World.Query("SELECT AreaTriggerId, IsServerSide, ActionType, ActionParam, TargetType FROM `areatrigger_template_actions`");
             if (!templateActions.IsEmpty())
             {
                 do
@@ -81,12 +81,12 @@ namespace Game.DataStorage
             }
 
             //                                           0              1    2         3         4               5
-            SQLResult vertices = DB.World.Query("SELECT AreaTriggerId, Idx, VerticeX, VerticeY, VerticeTargetX, VerticeTargetY FROM `areatrigger_template_polygon_vertices` ORDER BY `AreaTriggerId`, `Idx`");
+            var vertices = DB.World.Query("SELECT AreaTriggerId, Idx, VerticeX, VerticeY, VerticeTargetX, VerticeTargetY FROM `areatrigger_template_polygon_vertices` ORDER BY `AreaTriggerId`, `Idx`");
             if (!vertices.IsEmpty())
             {
                 do
                 {
-                    uint areaTriggerId = vertices.Read<uint>(0);
+                    var areaTriggerId = vertices.Read<uint>(0);
 
                     verticesByAreaTrigger.Add(areaTriggerId, new Vector2(vertices.Read<float>(2), vertices.Read<float>(3)));
 
@@ -103,14 +103,14 @@ namespace Game.DataStorage
             }
 
             //                                         0            1  2  3
-            SQLResult splines = DB.World.Query("SELECT SpellMiscId, X, Y, Z FROM `spell_areatrigger_splines` ORDER BY `SpellMiscId`, `Idx`");
+            var splines = DB.World.Query("SELECT SpellMiscId, X, Y, Z FROM `spell_areatrigger_splines` ORDER BY `SpellMiscId`, `Idx`");
             if (!splines.IsEmpty())
             {
                 do
                 {
-                    uint spellMiscId = splines.Read<uint>(0);
+                    var spellMiscId = splines.Read<uint>(0);
 
-                    Vector3 spline = new Vector3(splines.Read<float>(1), splines.Read<float>(2), splines.Read<float>(3));
+                    var spline = new Vector3(splines.Read<float>(1), splines.Read<float>(2), splines.Read<float>(3));
 
                     splinesBySpellMisc.Add(spellMiscId, spline);
                 }
@@ -122,14 +122,14 @@ namespace Game.DataStorage
             }
 
             //                                            0   1             2     3      4      5      6      7      8      9      10
-            SQLResult templates = DB.World.Query("SELECT Id, IsServerSide, Type, Flags, Data0, Data1, Data2, Data3, Data4, Data5, ScriptName FROM `areatrigger_template`");
+            var templates = DB.World.Query("SELECT Id, IsServerSide, Type, Flags, Data0, Data1, Data2, Data3, Data4, Data5, ScriptName FROM `areatrigger_template`");
             if (!templates.IsEmpty())
             {
                 do
                 {
-                    AreaTriggerTemplate areaTriggerTemplate = new AreaTriggerTemplate();
+                    var areaTriggerTemplate = new AreaTriggerTemplate();
                     areaTriggerTemplate.Id = new(templates.Read<uint>(0), templates.Read<byte>(1) == 1);
-                    AreaTriggerTypes type = (AreaTriggerTypes)templates.Read<byte>(2);
+                    var type = (AreaTriggerTypes)templates.Read<byte>(2);
 
                     if (type >= AreaTriggerTypes.Max)
                     {
@@ -167,15 +167,15 @@ namespace Game.DataStorage
             }
 
             //                                                        0            1              2            3             4             5              6       7          8                  9             10
-            SQLResult areatriggerSpellMiscs = DB.World.Query("SELECT SpellMiscId, AreaTriggerId, MoveCurveId, ScaleCurveId, MorphCurveId, FacingCurveId, AnimId, AnimKitId, DecalPropertiesId, TimeToTarget, TimeToTargetScale FROM `spell_areatrigger`");
+            var areatriggerSpellMiscs = DB.World.Query("SELECT SpellMiscId, AreaTriggerId, MoveCurveId, ScaleCurveId, MorphCurveId, FacingCurveId, AnimId, AnimKitId, DecalPropertiesId, TimeToTarget, TimeToTargetScale FROM `spell_areatrigger`");
             if (!areatriggerSpellMiscs.IsEmpty())
             {
                 do
                 {
-                    AreaTriggerMiscTemplate miscTemplate = new AreaTriggerMiscTemplate();
+                    var miscTemplate = new AreaTriggerMiscTemplate();
                     miscTemplate.MiscId = areatriggerSpellMiscs.Read<uint>(0);
 
-                    uint areatriggerId = areatriggerSpellMiscs.Read<uint>(1);
+                    var areatriggerId = areatriggerSpellMiscs.Read<uint>(1);
                     miscTemplate.Template = GetAreaTriggerTemplate(new AreaTriggerId(areatriggerId, false));
 
                     if (miscTemplate.Template == null)
@@ -219,12 +219,12 @@ namespace Game.DataStorage
             }
 
             //                                                       0            1           2             3                4             5        6                 7
-            SQLResult circularMovementInfos = DB.World.Query("SELECT SpellMiscId, StartDelay, CircleRadius, BlendFromRadius, InitialAngle, ZOffset, CounterClockwise, CanLoop FROM `spell_areatrigger_circular` ORDER BY `SpellMiscId`");
+            var circularMovementInfos = DB.World.Query("SELECT SpellMiscId, StartDelay, CircleRadius, BlendFromRadius, InitialAngle, ZOffset, CounterClockwise, CanLoop FROM `spell_areatrigger_circular` ORDER BY `SpellMiscId`");
             if (!circularMovementInfos.IsEmpty())
             {
                 do
                 {
-                    uint spellMiscId = circularMovementInfos.Read<uint>(0);
+                    var spellMiscId = circularMovementInfos.Read<uint>(0);
 
                     var atSpellMisc = _areaTriggerTemplateSpellMisc.LookupByKey(spellMiscId);
                     if (atSpellMisc == null)
@@ -233,7 +233,7 @@ namespace Game.DataStorage
                         continue;
                     }
 
-                    AreaTriggerOrbitInfo orbitInfo = new AreaTriggerOrbitInfo();
+                    var orbitInfo = new AreaTriggerOrbitInfo();
 
                     orbitInfo.StartDelay = circularMovementInfos.Read<uint>(1);
                     orbitInfo.Radius = circularMovementInfos.Read<float>(2);
@@ -281,15 +281,15 @@ namespace Game.DataStorage
 
         public void LoadAreaTriggerSpawns()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
             // Load area trigger positions (to put them on the server)
             //                                            0        1              2             3      4     5     6     7            8              9        10
-            SQLResult templates = DB.World.Query("SELECT SpawnId, AreaTriggerId, IsServerSide, MapId, PosX, PosY, PosZ, Orientation, PhaseUseFlags, PhaseId, PhaseGroup FROM `areatrigger`");
+            var templates = DB.World.Query("SELECT SpawnId, AreaTriggerId, IsServerSide, MapId, PosX, PosY, PosZ, Orientation, PhaseUseFlags, PhaseId, PhaseGroup FROM `areatrigger`");
             if (!templates.IsEmpty())
             {
                 do
                 {
-                    ulong spawnId = templates.Read<ulong>(0);
+                    var spawnId = templates.Read<ulong>(0);
                     AreaTriggerId areaTriggerId = new(templates.Read<uint>(1), templates.Read<byte>(2) == 1);
                     WorldLocation location = new(templates.Read<uint>(3), templates.Read<float>(4), templates.Read<float>(5), templates.Read<float>(6), templates.Read<float>(7));
 
@@ -305,7 +305,7 @@ namespace Game.DataStorage
                         continue;
                     }
 
-                    AreaTriggerSpawn spawn = new AreaTriggerSpawn();
+                    var spawn = new AreaTriggerSpawn();
                     spawn.SpawnId = spawnId;
                     spawn.Id = areaTriggerId;
                     spawn.Location = new WorldLocation(location);
@@ -315,7 +315,7 @@ namespace Game.DataStorage
                     spawn.PhaseGroup = templates.Read<uint>(10);
 
                     // Add the trigger to a map::cell map, which is later used by GridLoader to query
-                    CellCoord cellCoord = GridDefines.ComputeCellCoord(spawn.Location.GetPositionX(), spawn.Location.GetPositionY());
+                    var cellCoord = GridDefines.ComputeCellCoord(spawn.Location.GetPositionX(), spawn.Location.GetPositionY());
                     if (!_areaTriggerSpawnsByLocation.ContainsKey((spawn.Location.GetMapId(), cellCoord.GetId())))
                         _areaTriggerSpawnsByLocation[(spawn.Location.GetMapId(), cellCoord.GetId())] = new SortedSet<ulong>();
 

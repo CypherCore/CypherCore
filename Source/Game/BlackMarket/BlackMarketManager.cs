@@ -30,12 +30,12 @@ namespace Game.BlackMarket
 
         public void LoadTemplates()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             // Clear in case we are reloading
             _templates.Clear();
 
-            SQLResult result = DB.World.Query("SELECT marketId, sellerNpc, itemEntry, quantity, minBid, duration, chance, bonusListIDs FROM blackmarket_template");
+            var result = DB.World.Query("SELECT marketId, sellerNpc, itemEntry, quantity, minBid, duration, chance, bonusListIDs FROM blackmarket_template");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 black market templates. DB table `blackmarket_template` is empty.");
@@ -44,7 +44,7 @@ namespace Game.BlackMarket
 
             do
             {
-                BlackMarketTemplate templ = new BlackMarketTemplate();
+                var templ = new BlackMarketTemplate();
 
                 if (!templ.LoadFromDB(result.GetFields())) // Add checks
                     continue;
@@ -57,13 +57,13 @@ namespace Game.BlackMarket
 
         public void LoadAuctions()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             // Clear in case we are reloading
             _auctions.Clear();
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_BLACKMARKET_AUCTIONS);
-            SQLResult result = DB.Characters.Query(stmt);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_BLACKMARKET_AUCTIONS);
+            var result = DB.Characters.Query(stmt);
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 black market auctions. DB table `blackmarket_auctions` is empty.");
@@ -72,10 +72,10 @@ namespace Game.BlackMarket
 
             _lastUpdate = Time.UnixTime; //Set update time before loading
 
-            SQLTransaction trans = new SQLTransaction();
+            var trans = new SQLTransaction();
             do
             {
-                BlackMarketEntry auction = new BlackMarketEntry();
+                var auction = new BlackMarketEntry();
 
                 if (!auction.LoadFromDB(result.GetFields()))
                 {
@@ -99,8 +99,8 @@ namespace Game.BlackMarket
 
         public void Update(bool updateTime = false)
         {
-            SQLTransaction trans = new SQLTransaction();
-            long now = Time.UnixTime;
+            var trans = new SQLTransaction();
+            var now = Time.UnixTime;
             foreach (var entry in _auctions.Values)
             {
                 if (entry.IsCompleted() && entry.GetBidder() != 0)
@@ -118,7 +118,7 @@ namespace Game.BlackMarket
 
         public void RefreshAuctions()
         {
-            SQLTransaction trans = new SQLTransaction();
+            var trans = new SQLTransaction();
             // Delete completed auctions
             foreach (var pair in _auctions)
             {
@@ -132,7 +132,7 @@ namespace Game.BlackMarket
             DB.Characters.CommitTransaction(trans);
             trans = new SQLTransaction();
 
-            List<BlackMarketTemplate> templates = new List<BlackMarketTemplate>();
+            var templates = new List<BlackMarketTemplate>();
             foreach (var pair in _templates)
             {
                 if (GetAuctionByID(pair.Value.MarketID) != null)
@@ -145,9 +145,9 @@ namespace Game.BlackMarket
 
             templates.RandomResize(WorldConfig.GetUIntValue(WorldCfg.BlackmarketMaxAuctions));
 
-            foreach (BlackMarketTemplate templat in templates)
+            foreach (var templat in templates)
             {
-                BlackMarketEntry entry = new BlackMarketEntry();
+                var entry = new BlackMarketEntry();
                 entry.Initialize(templat.MarketID, (uint)templat.Duration);
                 entry.SaveToDB(trans);
                 AddAuction(entry);
@@ -168,9 +168,9 @@ namespace Game.BlackMarket
             packet.LastUpdateID = (int)_lastUpdate;
             foreach (var pair in _auctions)
             {
-                BlackMarketTemplate templ = pair.Value.GetTemplate();
+                var templ = pair.Value.GetTemplate();
 
-                BlackMarketItem item = new BlackMarketItem();
+                var item = new BlackMarketItem();
                 item.MarketID = pair.Value.GetMarketId();
                 item.SellerNPC = templ.SellerNPC;
                 item.Item = templ.Item;
@@ -214,10 +214,10 @@ namespace Game.BlackMarket
                 return;
 
             uint bidderAccId;
-            ObjectGuid bidderGuid = ObjectGuid.Create(HighGuid.Player, entry.GetBidder());
-            Player bidder = Global.ObjAccessor.FindConnectedPlayer(bidderGuid);
+            var bidderGuid = ObjectGuid.Create(HighGuid.Player, entry.GetBidder());
+            var bidder = Global.ObjAccessor.FindConnectedPlayer(bidderGuid);
             // data for gm.log
-            string bidderName = "";
+            var bidderName = "";
             bool logGmTrade;
 
             if (bidder)
@@ -239,14 +239,14 @@ namespace Game.BlackMarket
             }
 
             // Create item
-            BlackMarketTemplate templ = entry.GetTemplate();
-            Item item = Item.CreateItem(templ.Item.ItemID, templ.Quantity, ItemContext.BlackMarket);
+            var templ = entry.GetTemplate();
+            var item = Item.CreateItem(templ.Item.ItemID, templ.Quantity, ItemContext.BlackMarket);
             if (!item)
                 return;
 
             if (templ.Item.ItemBonus.HasValue)
             {
-                foreach (uint bonusList in templ.Item.ItemBonus.Value.BonusListIDs)
+                foreach (var bonusList in templ.Item.ItemBonus.Value.BonusListIDs)
                     item.AddBonuses(bonusList);
             }
 
@@ -271,8 +271,8 @@ namespace Game.BlackMarket
 
         public void SendAuctionOutbidMail(BlackMarketEntry entry, SQLTransaction trans)
         {
-            ObjectGuid oldBidder_guid = ObjectGuid.Create(HighGuid.Player, entry.GetBidder());
-            Player oldBidder = Global.ObjAccessor.FindConnectedPlayer(oldBidder_guid);
+            var oldBidder_guid = ObjectGuid.Create(HighGuid.Player, entry.GetBidder());
+            var oldBidder = Global.ObjAccessor.FindConnectedPlayer(oldBidder_guid);
 
             uint oldBidder_accId = 0;
             if (!oldBidder)

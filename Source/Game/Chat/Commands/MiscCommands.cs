@@ -44,7 +44,7 @@ namespace Game.Chat
 
             if (args[0] == '[')                                        // [name] manual form
             {
-                string itemName = args.NextString("]");
+                var itemName = args.NextString("]");
 
                 if (!string.IsNullOrEmpty(itemName))
                 {
@@ -68,7 +68,7 @@ namespace Game.Chat
             }
             else                                                    // item_id or [name] Shift-click form |color|Hitem:item_id:0:0:0|h[name]|h|r
             {
-                string idStr = handler.ExtractKeyFromLink(args, "Hitem");
+                var idStr = handler.ExtractKeyFromLink(args, "Hitem");
                 if (string.IsNullOrEmpty(idStr))
                     return false;
 
@@ -76,11 +76,11 @@ namespace Game.Chat
                     return false;
             }
 
-            int count = args.NextInt32();
+            var count = args.NextInt32();
             if (count == 0)
                 count = 1;
 
-            List<uint> bonusListIDs = new List<uint>();
+            var bonusListIDs = new List<uint>();
             var bonuses = args.NextString();
 
             // semicolon separated bonuslist ids (parse them after all arguments are extracted by strtok!)
@@ -89,20 +89,20 @@ namespace Game.Chat
                 var tokens = new StringArray(bonuses, ';');
                 for (var i = 0; i < tokens.Length; ++i)
                 {
-                    if (uint.TryParse(tokens[i], out uint id))
+                    if (uint.TryParse(tokens[i], out var id))
                         bonusListIDs.Add(id);
                 }
 
             }
 
-            Player player = handler.GetSession().GetPlayer();
-            Player playerTarget = handler.GetSelectedPlayer();
+            var player = handler.GetSession().GetPlayer();
+            var playerTarget = handler.GetSelectedPlayer();
             if (!playerTarget)
                 playerTarget = player;
 
             Log.outDebug(LogFilter.Server, Global.ObjectMgr.GetCypherString(CypherStrings.Additem), itemId, count);
 
-            ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemId);
+            var itemTemplate = Global.ObjectMgr.GetItemTemplate(itemId);
             if (itemTemplate == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandItemidinvalid, itemId);
@@ -121,8 +121,8 @@ namespace Game.Chat
             uint noSpaceForCount = 0;
 
             // check space and find places
-            List<ItemPosCount> dest = new List<ItemPosCount>();
-            InventoryResult msg = playerTarget.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, itemId, (uint)count, out noSpaceForCount);
+            var dest = new List<ItemPosCount>();
+            var msg = playerTarget.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, itemId, (uint)count, out noSpaceForCount);
             if (msg != InventoryResult.Ok)                               // convert to possible store amount
                 count -= (int)noSpaceForCount;
 
@@ -132,14 +132,14 @@ namespace Game.Chat
                 return false;
             }
 
-            Item item = playerTarget.StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(itemId), null, ItemContext.None, bonusListIDs);
+            var item = playerTarget.StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(itemId), null, ItemContext.None, bonusListIDs);
 
             // remove binding (let GM give it to another player later)
             if (player == playerTarget)
             {
                 foreach (var posCount in dest)
                 {
-                    Item item1 = player.GetItemByPos(posCount.pos);
+                    var item1 = player.GetItemByPos(posCount.pos);
                     if (item1)
                         item1.SetBinding(false);
                 }
@@ -164,18 +164,18 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string idStr = handler.ExtractKeyFromLink(args, "Hitemset"); // number or [name] Shift-click form |color|Hitemset:itemset_id|h[name]|h|r
+            var idStr = handler.ExtractKeyFromLink(args, "Hitemset"); // number or [name] Shift-click form |color|Hitemset:itemset_id|h[name]|h|r
             if (string.IsNullOrEmpty(idStr))
                 return false;
 
             // prevent generation all items with itemset field value '0'
-            if (!uint.TryParse(idStr, out uint itemSetId) || itemSetId == 0)
+            if (!uint.TryParse(idStr, out var itemSetId) || itemSetId == 0)
             {
                 handler.SendSysMessage(CypherStrings.NoItemsFromItemsetFound, itemSetId);
                 return false;
             }
 
-            List<uint> bonusListIDs = new List<uint>();
+            var bonusListIDs = new List<uint>();
             var bonuses = args.NextString();
 
             // semicolon separated bonuslist ids (parse them after all arguments are extracted by strtok!)
@@ -184,30 +184,30 @@ namespace Game.Chat
                 var tokens = new StringArray(bonuses, ';');
                 for (var i = 0; i < tokens.Length; ++i)
                 {
-                    if (uint.TryParse(tokens[i], out uint id))
+                    if (uint.TryParse(tokens[i], out var id))
                         bonusListIDs.Add(id);
                 }
             }
 
-            Player player = handler.GetSession().GetPlayer();
-            Player playerTarget = handler.GetSelectedPlayer();
+            var player = handler.GetSession().GetPlayer();
+            var playerTarget = handler.GetSelectedPlayer();
             if (!playerTarget)
                 playerTarget = player;
 
             Log.outDebug(LogFilter.Server, Global.ObjectMgr.GetCypherString(CypherStrings.Additemset), itemSetId);
 
-            bool found = false;
+            var found = false;
             var its = Global.ObjectMgr.GetItemTemplates();
             foreach (var template in its)
             {
                 if (template.Value.GetItemSet() == itemSetId)
                 {
                     found = true;
-                    List<ItemPosCount> dest = new List<ItemPosCount>();
-                    InventoryResult msg = playerTarget.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, template.Value.GetId(), 1);
+                    var dest = new List<ItemPosCount>();
+                    var msg = playerTarget.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, template.Value.GetId(), 1);
                     if (msg == InventoryResult.Ok)
                     {
-                        Item item = playerTarget.StoreNewItem(dest, template.Value.GetId(), true, 0, null, ItemContext.None, bonusListIDs);
+                        var item = playerTarget.StoreNewItem(dest, template.Value.GetId(), true, 0, null, ItemContext.None, bonusListIDs);
 
                         // remove binding (let GM give it to another player later)
                         if (player == playerTarget)
@@ -243,7 +243,7 @@ namespace Game.Chat
             if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
                 return false;
 
-            Player _player = handler.GetSession().GetPlayer();
+            var _player = handler.GetSession().GetPlayer();
             if (target == _player || targetGuid == _player.GetGUID())
             {
                 handler.SendSysMessage(CypherStrings.CantTeleportSelf);
@@ -256,9 +256,9 @@ namespace Game.Chat
                 if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
                     return false;
 
-                string chrNameLink = handler.PlayerLink(targetName);
+                var chrNameLink = handler.PlayerLink(targetName);
 
-                Map map = target.GetMap();
+                var map = target.GetMap();
                 if (map.IsBattlegroundOrArena())
                 {
                     // only allow if gm mode is on
@@ -304,15 +304,15 @@ namespace Game.Chat
 
                     // if the player or the player's group is bound to another instance
                     // the player will not be bound to another one
-                    InstanceBind bind = _player.GetBoundInstance(target.GetMapId(), target.GetDifficultyID(map.GetEntry()));
+                    var bind = _player.GetBoundInstance(target.GetMapId(), target.GetDifficultyID(map.GetEntry()));
                     if (bind == null)
                     {
-                        Group group = _player.GetGroup();
+                        var group = _player.GetGroup();
                         // if no bind exists, create a solo bind
-                        InstanceBind gBind = group ? group.GetBoundInstance(target) : null;                // if no bind exists, create a solo bind
+                        var gBind = group ? group.GetBoundInstance(target) : null;                // if no bind exists, create a solo bind
                         if (gBind == null)
                         {
-                            InstanceSave save = Global.InstanceSaveMgr.GetInstanceSave(target.GetInstanceId());
+                            var save = Global.InstanceSaveMgr.GetInstanceSave(target.GetInstanceId());
                             if (save != null)
                                 _player.BindToInstance(save, !save.CanReset());
                         }
@@ -353,7 +353,7 @@ namespace Game.Chat
                 if (handler.HasLowerSecurity(null, targetGuid))
                     return false;
 
-                string nameLink = handler.PlayerLink(targetName);
+                var nameLink = handler.PlayerLink(targetName);
 
                 handler.SendSysMessage(CypherStrings.AppearingAt, nameLink);
 
@@ -389,7 +389,7 @@ namespace Game.Chat
         [CommandNonGroup("bindsight", RBACPermissions.CommandBindsight)]
         static bool HandleBindSightCommand(StringArguments args, CommandHandler handler)
         {
-            Unit unit = handler.GetSelectedUnit();
+            var unit = handler.GetSelectedUnit();
             if (!unit)
                 return false;
 
@@ -430,14 +430,14 @@ namespace Game.Chat
         [CommandNonGroup("cometome", RBACPermissions.CommandCometome)]
         static bool HandleComeToMeCommand(StringArguments args, CommandHandler handler)
         {
-            Creature caster = handler.GetSelectedCreature();
+            var caster = handler.GetSelectedCreature();
             if (!caster)
             {
                 handler.SendSysMessage(CypherStrings.SelectCreature);
                 return false;
             }
 
-            Player player = handler.GetSession().GetPlayer();
+            var player = handler.GetSession().GetPlayer();
             caster.GetMotionMaster().MovePoint(0, player.GetPositionX(), player.GetPositionY(), player.GetPositionZ());
 
             return true;
@@ -446,7 +446,7 @@ namespace Game.Chat
         [CommandNonGroup("commands", RBACPermissions.CommandCommands, true)]
         static bool HandleCommandsCommand(StringArguments args, CommandHandler handler)
         {
-            string list = "";
+            var list = "";
             foreach (var command in CommandManager.GetCommands())
             {
                 if (handler.IsAvailable(command))
@@ -477,27 +477,27 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string str = args.NextString();
+            var str = args.NextString();
 
             if (str == "go")
             {
-                ulong guidLow = args.NextUInt64();
+                var guidLow = args.NextUInt64();
                 if (guidLow == 0)
                 {
                     handler.SendSysMessage(CypherStrings.BadValue);
                     return false;
                 }
 
-                int damage = args.NextInt32();
+                var damage = args.NextInt32();
                 if (damage == 0)
                 {
                     handler.SendSysMessage(CypherStrings.BadValue);
                     return false;
                 }
-                Player player = handler.GetSession().GetPlayer();
+                var player = handler.GetSession().GetPlayer();
                 if (player)
                 {
-                    GameObject go = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
+                    var go = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
                     if (!go)
                     {
                         handler.SendSysMessage(CypherStrings.CommandObjnotfound, guidLow);
@@ -517,13 +517,13 @@ namespace Game.Chat
                 return true;
             }
 
-            Unit target = handler.GetSelectedUnit();
+            var target = handler.GetSelectedUnit();
             if (!target || handler.GetSession().GetPlayer().GetTarget().IsEmpty())
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
                 return false;
             }
-            Player player_ = target.ToPlayer();
+            var player_ = target.ToPlayer();
             if (player_)
                 if (handler.HasLowerSecurity(player_, ObjectGuid.Empty, false))
                     return false;
@@ -531,17 +531,17 @@ namespace Game.Chat
             if (!target.IsAlive())
                 return true;
 
-            if (!int.TryParse(str, out int damage_int))
+            if (!int.TryParse(str, out var damage_int))
                 return false;
 
             if (damage_int <= 0)
                 return true;
 
-            uint damage_ = (uint)damage_int;
+            var damage_ = (uint)damage_int;
 
-            string schoolStr = args.NextString();
+            var schoolStr = args.NextString();
 
-            Player attacker = handler.GetSession().GetPlayer();
+            var attacker = handler.GetSession().GetPlayer();
 
             // flat melee damage without resistence/etc reduction
             if (string.IsNullOrEmpty(schoolStr))
@@ -552,20 +552,20 @@ namespace Game.Chat
                 return true;
             }
 
-            if (!int.TryParse(schoolStr, out int school) || school >= (int)SpellSchools.Max)
+            if (!int.TryParse(schoolStr, out var school) || school >= (int)SpellSchools.Max)
                 return false;
 
-            SpellSchoolMask schoolmask = (SpellSchoolMask)(1 << school);
+            var schoolmask = (SpellSchoolMask)(1 << school);
 
             if (attacker.IsDamageReducedByArmor(schoolmask))
                 damage_ = attacker.CalcArmorReducedDamage(handler.GetPlayer(), target, damage_, null, WeaponAttackType.BaseAttack);
 
-            string spellStr = args.NextString();
+            var spellStr = args.NextString();
 
             // melee damage by specific school
             if (string.IsNullOrEmpty(spellStr))
             {
-                DamageInfo dmgInfo = new DamageInfo(attacker, target, damage_, null, schoolmask, DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
+                var dmgInfo = new DamageInfo(attacker, target, damage_, null, schoolmask, DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
                 attacker.CalcAbsorbResist(dmgInfo);
 
                 if (dmgInfo.GetDamage() == 0)
@@ -573,8 +573,8 @@ namespace Game.Chat
 
                 damage_ = dmgInfo.GetDamage();
 
-                uint absorb = dmgInfo.GetAbsorb();
-                uint resist = dmgInfo.GetResist();
+                var absorb = dmgInfo.GetAbsorb();
+                var resist = dmgInfo.GetResist();
                 attacker.DealDamageMods(target, ref damage_, ref absorb);
                 attacker.DealDamage(target, damage_, null, DamageEffectType.Direct, schoolmask, null, false);
                 attacker.SendAttackStateUpdate(HitInfo.AffectsVictim, target, schoolmask, damage_, absorb, resist, VictimState.Hit, 0);
@@ -583,15 +583,15 @@ namespace Game.Chat
 
             // non-melee damage
             // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-            uint spellid = handler.ExtractSpellIdFromLink(args);
+            var spellid = handler.ExtractSpellIdFromLink(args);
             if (spellid == 0)
                 return false;
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellid, attacker.GetMap().GetDifficultyID());
+            var spellInfo = Global.SpellMgr.GetSpellInfo(spellid, attacker.GetMap().GetDifficultyID());
             if (spellInfo == null)
                 return false;
 
-            SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(attacker, target, spellInfo, new Networking.Packets.SpellCastVisual(spellInfo.GetSpellXSpellVisualId(attacker), 0), spellInfo.SchoolMask);
+            var damageInfo = new SpellNonMeleeDamage(attacker, target, spellInfo, new Networking.Packets.SpellCastVisual(spellInfo.GetSpellXSpellVisualId(attacker), 0), spellInfo.SchoolMask);
             damageInfo.damage = damage_;
             attacker.DealDamageMods(damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
             target.DealSpellDamage(damageInfo, true);
@@ -611,7 +611,7 @@ namespace Game.Chat
                 return true;
             }
 
-            string argstr = args.NextString();
+            var argstr = args.NextString();
 
             if (argstr == "on")
             {
@@ -634,7 +634,7 @@ namespace Game.Chat
         [CommandNonGroup("die", RBACPermissions.CommandDie)]
         static bool HandleDieCommand(StringArguments args, CommandHandler handler)
         {
-            Unit target = handler.GetSelectedUnit();
+            var target = handler.GetSelectedUnit();
 
             if (!target && handler.GetPlayer().GetTarget().IsEmpty())
             {
@@ -642,7 +642,7 @@ namespace Game.Chat
                 return false;
             }
 
-            Player player = target.ToPlayer();
+            var player = target.ToPlayer();
             if (player)
                 if (handler.HasLowerSecurity(player, ObjectGuid.Empty, false))
                     return false;
@@ -656,7 +656,7 @@ namespace Game.Chat
         [CommandNonGroup("dismount", RBACPermissions.CommandDismount)]
         static bool HandleDismountCommand(StringArguments args, CommandHandler handler)
         {
-            Player player = handler.GetSession().GetPlayer();
+            var player = handler.GetSession().GetPlayer();
 
             // If player is not mounted, so go out :)
             if (!player.IsMounted())
@@ -684,7 +684,7 @@ namespace Game.Chat
             if (!args.Empty())
             {
                 HighGuid guidHigh = 0;
-                ulong guidLow = handler.ExtractLowGuidFromLink(args, ref guidHigh);
+                var guidLow = handler.ExtractLowGuidFromLink(args, ref guidHigh);
                 if (guidLow == 0)
                     return false;
                 switch (guidHigh)
@@ -740,10 +740,10 @@ namespace Game.Chat
         [CommandNonGroup("freeze", RBACPermissions.CommandFreeze)]
         static bool HandleFreezeCommand(StringArguments args, CommandHandler handler)
         {
-            Player player = handler.GetSelectedPlayer(); // Selected player, if any. Might be null.
-            int freezeDuration = 0; // Freeze Duration (in seconds)
-            bool canApplyFreeze = false; // Determines if every possible argument is set so Freeze can be applied
-            bool getDurationFromConfig = false; // If there's no given duration, we'll retrieve the world cfg value later
+            var player = handler.GetSelectedPlayer(); // Selected player, if any. Might be null.
+            var freezeDuration = 0; // Freeze Duration (in seconds)
+            var canApplyFreeze = false; // Determines if every possible argument is set so Freeze can be applied
+            var getDurationFromConfig = false; // If there's no given duration, we'll retrieve the world cfg value later
 
             if (args.Empty())
             {
@@ -754,8 +754,8 @@ namespace Game.Chat
             else
             {
                 // Get the args that we might have (up to 2)
-                string arg1 = args.NextString();
-                string arg2 = args.NextString();
+                var arg1 = args.NextString();
+                var arg2 = args.NextString();
 
                 // Analyze them to see if we got either a playerName or duration or both
                 if (!arg1.IsEmpty())
@@ -772,7 +772,7 @@ namespace Game.Chat
                     {
                         // case 3 or 4: .freeze player duration | .freeze player
                         // find the player
-                        string name = arg1;
+                        var name = arg1;
                         ObjectManager.NormalizePlayerName(ref name);
                         player = Global.ObjAccessor.FindPlayerByName(name);
                         // Check if we have duration set
@@ -814,7 +814,7 @@ namespace Game.Chat
                     // Add the freeze aura and set the proper duration
                     // Player combat status and flags are now handled
                     // in Freeze Spell AuraScript (OnApply)
-                    Aura freeze = player.AddAura(9454, player);
+                    var freeze = player.AddAura(9454, player);
                     if (freeze != null)
                     {
                         if (freezeDuration != 0)
@@ -836,7 +836,7 @@ namespace Game.Chat
             if (!args.Empty())
             {
                 HighGuid guidHigh = 0;
-                ulong guidLow = handler.ExtractLowGuidFromLink(args, ref guidHigh);
+                var guidLow = handler.ExtractLowGuidFromLink(args, ref guidHigh);
                 if (guidLow == 0)
                     return false;
                 switch (guidHigh)
@@ -885,35 +885,35 @@ namespace Game.Chat
                 }
             }
 
-            CellCoord cellCoord = GridDefines.ComputeCellCoord(obj.GetPositionX(), obj.GetPositionY());
-            Cell cell = new Cell(cellCoord);
+            var cellCoord = GridDefines.ComputeCellCoord(obj.GetPositionX(), obj.GetPositionY());
+            var cell = new Cell(cellCoord);
 
             uint zoneId, areaId;
             obj.GetZoneAndAreaId(out zoneId, out areaId);
-            uint mapId = obj.GetMapId();
+            var mapId = obj.GetMapId();
 
-            MapRecord mapEntry = CliDB.MapStorage.LookupByKey(mapId);
-            AreaTableRecord zoneEntry = CliDB.AreaTableStorage.LookupByKey(zoneId);
-            AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(areaId);
+            var mapEntry = CliDB.MapStorage.LookupByKey(mapId);
+            var zoneEntry = CliDB.AreaTableStorage.LookupByKey(zoneId);
+            var areaEntry = CliDB.AreaTableStorage.LookupByKey(areaId);
 
-            float zoneX = obj.GetPositionX();
-            float zoneY = obj.GetPositionY();
+            var zoneX = obj.GetPositionX();
+            var zoneY = obj.GetPositionY();
 
             Global.DB2Mgr.Map2ZoneCoordinates((int)zoneId, ref zoneX, ref zoneY);
 
-            Map map = obj.GetMap();
-            float groundZ = map.GetHeight(obj.GetPhaseShift(), obj.GetPositionX(), obj.GetPositionY(), MapConst.MaxHeight);
-            float floorZ = map.GetHeight(obj.GetPhaseShift(), obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ());
+            var map = obj.GetMap();
+            var groundZ = map.GetHeight(obj.GetPhaseShift(), obj.GetPositionX(), obj.GetPositionY(), MapConst.MaxHeight);
+            var floorZ = map.GetHeight(obj.GetPhaseShift(), obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ());
 
-            GridCoord gridCoord = GridDefines.ComputeGridCoord(obj.GetPositionX(), obj.GetPositionY());
+            var gridCoord = GridDefines.ComputeGridCoord(obj.GetPositionX(), obj.GetPositionY());
 
             // 63? WHY?
-            uint gridX = (MapConst.MaxGrids - 1) - gridCoord.X_coord;
-            uint gridY = (MapConst.MaxGrids - 1) - gridCoord.Y_coord;
+            var gridX = (MapConst.MaxGrids - 1) - gridCoord.X_coord;
+            var gridY = (MapConst.MaxGrids - 1) - gridCoord.Y_coord;
 
-            bool haveMap = Map.ExistMap(mapId, gridX, gridY);
-            bool haveVMap = Map.ExistVMap(mapId, gridX, gridY);
-            bool haveMMap = (Global.DisableMgr.IsPathfindingEnabled(mapId) && Global.MMapMgr.GetNavMesh(handler.GetSession().GetPlayer().GetMapId()) != null);
+            var haveMap = Map.ExistMap(mapId, gridX, gridY);
+            var haveVMap = Map.ExistVMap(mapId, gridX, gridY);
+            var haveMMap = (Global.DisableMgr.IsPathfindingEnabled(mapId) && Global.MMapMgr.GetNavMesh(handler.GetSession().GetPlayer().GetMapId()) != null);
 
             if (haveVMap)
             {
@@ -925,7 +925,7 @@ namespace Game.Chat
             else
                 handler.SendSysMessage(CypherStrings.GpsNoVmap);
 
-            string unknown = handler.GetCypherString(CypherStrings.Unknown);
+            var unknown = handler.GetCypherString(CypherStrings.Unknown);
 
             handler.SendSysMessage(CypherStrings.MapPosition,
                 mapId, (mapEntry != null ? mapEntry.MapName[handler.GetSessionDbcLocale()] : unknown),
@@ -933,7 +933,7 @@ namespace Game.Chat
                 areaId, (areaEntry != null ? areaEntry.AreaName[handler.GetSessionDbcLocale()] : unknown),
                 obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ(), obj.GetOrientation());
 
-            Transport transport = obj.GetTransport();
+            var transport = obj.GetTransport();
             if (transport)
             {
                 handler.SendSysMessage(CypherStrings.TransportPosition, transport.GetGoInfo().MoTransport.SpawnMap, obj.GetTransOffsetX(), obj.GetTransOffsetY(), obj.GetTransOffsetZ(), obj.GetTransOffsetO(),
@@ -944,7 +944,7 @@ namespace Game.Chat
                 zoneX, zoneY, groundZ, floorZ, haveMap, haveVMap, haveMMap);
 
             LiquidData liquidStatus;
-            ZLiquidStatus status = map.GetLiquidStatus(obj.GetPhaseShift(), obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ(), MapConst.MapAllLiquidTypes, out liquidStatus);
+            var status = map.GetLiquidStatus(obj.GetPhaseShift(), obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ(), MapConst.MapAllLiquidTypes, out liquidStatus);
 
             if (liquidStatus != null)
                 handler.SendSysMessage(CypherStrings.LiquidStatus, liquidStatus.level, liquidStatus.depth_level, liquidStatus.entry, liquidStatus.type_flags, status);
@@ -957,7 +957,7 @@ namespace Game.Chat
         [CommandNonGroup("guid", RBACPermissions.CommandGuid)]
         static bool HandleGUIDCommand(StringArguments args, CommandHandler handler)
         {
-            ObjectGuid guid = handler.GetSession().GetPlayer().GetTarget();
+            var guid = handler.GetSession().GetPlayer().GetTarget();
 
             if (guid.IsEmpty())
             {
@@ -972,7 +972,7 @@ namespace Game.Chat
         [CommandNonGroup("help", RBACPermissions.CommandHelp, true)]
         static bool HandleHelpCommand(StringArguments args, CommandHandler handler)
         {
-            string cmd = args.NextString("");
+            var cmd = args.NextString("");
             if (cmd.IsEmpty())
             {
                 handler.ShowHelpForCommand(CommandManager.GetCommands(), "help");
@@ -993,14 +993,14 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            Player playerTarget = handler.GetSelectedPlayer();
+            var playerTarget = handler.GetSelectedPlayer();
             if (!playerTarget)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;
             }
 
-            AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(args.NextUInt32());
+            var area = CliDB.AreaTableStorage.LookupByKey(args.NextUInt32());
             if (area == null)
             {
                 handler.SendSysMessage(CypherStrings.BadValue);
@@ -1013,14 +1013,14 @@ namespace Game.Chat
                 return false;
             }
 
-            uint offset = (uint)area.AreaBit / 64;
+            var offset = (uint)area.AreaBit / 64;
             if (offset >= PlayerConst.ExploredZonesSize)
             {
                 handler.SendSysMessage(CypherStrings.BadValue);
                 return false;
             }
 
-            uint val = (1u << (area.AreaBit % 64));
+            var val = (1u << (area.AreaBit % 64));
             playerTarget.RemoveExploredZones(offset, val);
 
             handler.SendSysMessage(CypherStrings.UnexploreArea);
@@ -1034,8 +1034,8 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            byte srcSlot = args.NextByte();
-            byte dstSlot = args.NextByte();
+            var srcSlot = args.NextByte();
+            var dstSlot = args.NextByte();
 
             if (srcSlot == dstSlot)
                 return true;
@@ -1046,8 +1046,8 @@ namespace Game.Chat
             if (handler.GetSession().GetPlayer().IsValidPos(InventorySlots.Bag0, dstSlot, false))
                 return false;
 
-            ushort src = (ushort)((InventorySlots.Bag0 << 8) | srcSlot);
-            ushort dst = (ushort)((InventorySlots.Bag0 << 8) | dstSlot);
+            var src = (ushort)((InventorySlots.Bag0 << 8) | srcSlot);
+            var dst = (ushort)((InventorySlots.Bag0 << 8) | dstSlot);
 
             handler.GetSession().GetPlayer().SwapItem(src, dst);
 
@@ -1073,8 +1073,8 @@ namespace Game.Chat
             if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
                 return false;
 
-            string kickReason = args.NextString("");
-            string kickReasonStr = "No reason";
+            var kickReason = args.NextString("");
+            var kickReasonStr = "No reason";
             if (kickReason != null)
                 kickReasonStr = kickReason;
 
@@ -1094,11 +1094,11 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            uint graveyardId = args.NextUInt32();
+            var graveyardId = args.NextUInt32();
             if (graveyardId == 0)
                 return false;
 
-            string px2 = args.NextString();
+            var px2 = args.NextString();
             Team team;
             if (string.IsNullOrEmpty(px2))
                 team = 0;
@@ -1109,18 +1109,18 @@ namespace Game.Chat
             else
                 return false;
 
-            WorldSafeLocsEntry graveyard = Global.ObjectMgr.GetWorldSafeLoc(graveyardId);
+            var graveyard = Global.ObjectMgr.GetWorldSafeLoc(graveyardId);
             if (graveyard == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandGraveyardnoexist, graveyardId);
                 return false;
             }
 
-            Player player = handler.GetSession().GetPlayer();
+            var player = handler.GetSession().GetPlayer();
 
-            uint zoneId = player.GetZoneId();
+            var zoneId = player.GetZoneId();
 
-            AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(zoneId);
+            var areaEntry = CliDB.AreaTableStorage.LookupByKey(zoneId);
             if (areaEntry == null || areaEntry.ParentAreaID != 0)
             {
                 handler.SendSysMessage(CypherStrings.CommandGraveyardwrongzone, graveyardId, zoneId);
@@ -1139,8 +1139,8 @@ namespace Game.Chat
         static bool HandleListFreezeCommand(StringArguments args, CommandHandler handler)
         {
             // Get names from DB
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_AURA_FROZEN);
-            SQLResult result = DB.Characters.Query(stmt);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_AURA_FROZEN);
+            var result = DB.Characters.Query(stmt);
             if (result.IsEmpty())
             {
                 handler.SendSysMessage(CypherStrings.CommandNoFrozenPlayers);
@@ -1153,11 +1153,11 @@ namespace Game.Chat
             // Output of the results
             do
             {
-                string player = result.Read<string>(0);
-                int remaintime = result.Read<int>(1);
+                var player = result.Read<string>(0);
+                var remaintime = result.Read<int>(1);
                 // Save the frozen player to update remaining time in case of future .listfreeze uses
                 // before the frozen state expires
-                Player frozen = Global.ObjAccessor.FindPlayerByName(player);
+                var frozen = Global.ObjAccessor.FindPlayerByName(player);
                 if (frozen)
                     frozen.SaveToDB();
                 // Notify the freeze duration
@@ -1175,7 +1175,7 @@ namespace Game.Chat
         [CommandNonGroup("mailbox", RBACPermissions.CommandMailbox)]
         static bool HandleMailBoxCommand(StringArguments args, CommandHandler handler)
         {
-            Player player = handler.GetSession().GetPlayer();
+            var player = handler.GetSession().GetPlayer();
 
             handler.GetSession().SendShowMailBox(player.GetGUID());
             return true;
@@ -1184,7 +1184,7 @@ namespace Game.Chat
         [CommandNonGroup("movegens", RBACPermissions.CommandMovegens)]
         static bool HandleMovegensCommand(StringArguments args, CommandHandler handler)
         {
-            Unit unit = handler.GetSelectedUnit();
+            var unit = handler.GetSelectedUnit();
             if (!unit)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
@@ -1194,13 +1194,13 @@ namespace Game.Chat
 
             handler.SendSysMessage(CypherStrings.MovegensList, (unit.IsTypeId(TypeId.Player) ? "Player" : "Creature"), unit.GetGUID().ToString());
 
-            MotionMaster motionMaster = unit.GetMotionMaster();
+            var motionMaster = unit.GetMotionMaster();
             float x, y, z;
             motionMaster.GetDestination(out x, out y, out z);
 
             for (byte i = 0; i < (int)MovementSlot.Max; ++i)
             {
-                IMovementGenerator movementGenerator = motionMaster.GetMotionSlot(i);
+                var movementGenerator = motionMaster.GetMotionSlot(i);
                 if (movementGenerator == null)
                 {
                     handler.SendSysMessage("Empty");
@@ -1296,8 +1296,8 @@ namespace Game.Chat
             if (string.IsNullOrEmpty(delayStr))
                 return false;
 
-            string muteReason = args.NextString();
-            string muteReasonStr = "No reason";
+            var muteReason = args.NextString();
+            var muteReasonStr = "No reason";
             if (muteReason != null)
                 muteReasonStr = muteReason;
 
@@ -1307,24 +1307,24 @@ namespace Game.Chat
             if (!handler.ExtractPlayerTarget(new StringArguments(nameStr), out target, out targetGuid, out targetName))
                 return false;
 
-            uint accountId = target ? target.GetSession().GetAccountId() : Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(targetGuid);
+            var accountId = target ? target.GetSession().GetAccountId() : Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(targetGuid);
 
             // find only player from same account if any
             if (!target)
             {
-                WorldSession session = Global.WorldMgr.FindSession(accountId);
+                var session = Global.WorldMgr.FindSession(accountId);
                 if (session != null)
                     target = session.GetPlayer();
             }
 
-            if (!uint.TryParse(delayStr, out uint notSpeakTime))
+            if (!uint.TryParse(delayStr, out var notSpeakTime))
                 return false;
 
             // must have strong lesser security level
             if (handler.HasLowerSecurity(target, targetGuid, true))
                 return false;
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_MUTE_TIME);
+            var stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_MUTE_TIME);
             string muteBy;
             if (handler.GetSession() != null)
                 muteBy = handler.GetSession().GetPlayerName();
@@ -1334,10 +1334,10 @@ namespace Game.Chat
             if (target)
             {
                 // Target is online, mute will be in effect right away.
-                long muteTime = Time.UnixTime + notSpeakTime * Time.Minute;
+                var muteTime = Time.UnixTime + notSpeakTime * Time.Minute;
                 target.GetSession().m_muteTime = muteTime;
                 stmt.AddValue(0, muteTime);
-                string nameLink = handler.PlayerLink(targetName);
+                var nameLink = handler.PlayerLink(targetName);
 
                 if (WorldConfig.GetBoolValue(WorldCfg.ShowMuteInWorld))
                 {
@@ -1352,7 +1352,7 @@ namespace Game.Chat
             else
             {
                 // Target is offline, mute will be in effect starting from the next login.
-                int muteTime = -(int)(notSpeakTime * Time.Minute);
+                var muteTime = -(int)(notSpeakTime * Time.Minute);
                 stmt.AddValue(0, muteTime);
             }
 
@@ -1360,7 +1360,7 @@ namespace Game.Chat
             stmt.AddValue(2, muteBy);
             stmt.AddValue(3, accountId);
             DB.Login.Execute(stmt);
-            string nameLink_ = handler.PlayerLink(targetName);
+            var nameLink_ = handler.PlayerLink(targetName);
 
             if (WorldConfig.GetBoolValue(WorldCfg.ShowMuteInWorld) && !target)
                 Global.WorldMgr.SendWorldText(CypherStrings.CommandMutemessageWorld, handler.GetSession().GetPlayerName(), nameLink_, notSpeakTime, muteReasonStr);
@@ -1376,21 +1376,21 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string accountName = args.NextString("");
+            var accountName = args.NextString("");
             if (accountName.IsEmpty())
                 return false;
 
-            uint accountId = Global.AccountMgr.GetId(accountName);
+            var accountId = Global.AccountMgr.GetId(accountName);
             if (accountId == 0)
             {
                 handler.SendSysMessage(CypherStrings.AccountNotExist, accountName);
                 return false;
             }
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_MUTE_INFO);
+            var stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_MUTE_INFO);
             stmt.AddValue(0, accountId);
 
-            SQLResult result = DB.Login.Query(stmt);
+            var result = DB.Login.Query(stmt);
             if (result.IsEmpty())
             {
                 handler.SendSysMessage(CypherStrings.CommandMutehistoryEmpty, accountName);
@@ -1404,7 +1404,7 @@ namespace Game.Chat
                 long sqlTime = result.Read<uint>(0);
 
                 // set it to string
-                string buffer = Time.UnixTimeToDateTime(sqlTime).ToShortTimeString();
+                var buffer = Time.UnixTimeToDateTime(sqlTime).ToShortTimeString();
 
                 handler.SendSysMessage(CypherStrings.CommandMutehistoryOutput, buffer, result.Read<uint>(1), result.Read<string>(2), result.Read<string>(3));
             } while (result.NextRow());
@@ -1415,7 +1415,7 @@ namespace Game.Chat
         [CommandNonGroup("neargrave", RBACPermissions.CommandNeargrave)]
         static bool HandleNearGraveCommand(StringArguments args, CommandHandler handler)
         {
-            string px2 = args.NextString();
+            var px2 = args.NextString();
             Team team;
             if (string.IsNullOrEmpty(px2))
                 team = 0;
@@ -1426,15 +1426,15 @@ namespace Game.Chat
             else
                 return false;
 
-            Player player = handler.GetSession().GetPlayer();
-            uint zone_id = player.GetZoneId();
+            var player = handler.GetSession().GetPlayer();
+            var zone_id = player.GetZoneId();
 
-            WorldSafeLocsEntry graveyard = Global.ObjectMgr.GetClosestGraveYard(player, team, null);
+            var graveyard = Global.ObjectMgr.GetClosestGraveYard(player, team, null);
             if (graveyard != null)
             {
-                uint graveyardId = graveyard.Id;
+                var graveyardId = graveyard.Id;
 
-                GraveYardData data = Global.ObjectMgr.FindGraveYardData(graveyardId, zone_id);
+                var data = Global.ObjectMgr.FindGraveYardData(graveyardId, zone_id);
                 if (data == null)
                 {
                     handler.SendSysMessage(CypherStrings.CommandGraveyarderror, graveyardId);
@@ -1443,7 +1443,7 @@ namespace Game.Chat
 
                 team = (Team)data.team;
 
-                string team_name = handler.GetCypherString(CypherStrings.CommandGraveyardNoteam);
+                var team_name = handler.GetCypherString(CypherStrings.CommandGraveyardNoteam);
 
                 if (team == 0)
                     team_name = handler.GetCypherString(CypherStrings.CommandGraveyardAny);
@@ -1456,7 +1456,7 @@ namespace Game.Chat
             }
             else
             {
-                string team_name = "";
+                var team_name = "";
 
                 if (team == Team.Horde)
                     team_name = handler.GetCypherString(CypherStrings.CommandGraveyardHorde);
@@ -1482,7 +1482,7 @@ namespace Game.Chat
             PreparedStatement stmt;
 
             // To make sure we get a target, we convert our guid to an omniversal...
-            ObjectGuid parseGUID = ObjectGuid.Create(HighGuid.Player, args.NextUInt64());
+            var parseGUID = ObjectGuid.Create(HighGuid.Player, args.NextUInt64());
 
             // ... and make sure we get a target, somehow.
             if (Global.CharacterCacheStorage.GetCharacterNameByGuid(parseGUID, out targetName))
@@ -1527,38 +1527,38 @@ namespace Game.Chat
              */
 
             // Account data print variables
-            string userName = handler.GetCypherString(CypherStrings.Error);
+            var userName = handler.GetCypherString(CypherStrings.Error);
             uint accId;
-            ulong lowguid = targetGuid.GetCounter();
-            string eMail = handler.GetCypherString(CypherStrings.Error);
-            string regMail = handler.GetCypherString(CypherStrings.Error);
+            var lowguid = targetGuid.GetCounter();
+            var eMail = handler.GetCypherString(CypherStrings.Error);
+            var regMail = handler.GetCypherString(CypherStrings.Error);
             uint security = 0;
-            string lastIp = handler.GetCypherString(CypherStrings.Error);
+            var lastIp = handler.GetCypherString(CypherStrings.Error);
             byte locked = 0;
-            string lastLogin = handler.GetCypherString(CypherStrings.Error);
+            var lastLogin = handler.GetCypherString(CypherStrings.Error);
             uint failedLogins = 0;
             uint latency = 0;
-            string OS = handler.GetCypherString(CypherStrings.Unknown);
+            var OS = handler.GetCypherString(CypherStrings.Unknown);
 
             // Mute data print variables
             long muteTime = -1;
-            string muteReason = handler.GetCypherString(CypherStrings.NoReason);
-            string muteBy = handler.GetCypherString(CypherStrings.Unknown);
+            var muteReason = handler.GetCypherString(CypherStrings.NoReason);
+            var muteBy = handler.GetCypherString(CypherStrings.Unknown);
 
             // Ban data print variables
             long banTime = -1;
-            string banType = handler.GetCypherString(CypherStrings.Unknown);
-            string banReason = handler.GetCypherString(CypherStrings.NoReason);
-            string bannedBy = handler.GetCypherString(CypherStrings.Unknown);
+            var banType = handler.GetCypherString(CypherStrings.Unknown);
+            var banReason = handler.GetCypherString(CypherStrings.NoReason);
+            var bannedBy = handler.GetCypherString(CypherStrings.Unknown);
 
             // Character data print variables
             Race raceid;
             Class classid;
             Gender gender;
-            Locale locale = handler.GetSessionDbcLocale();
+            var locale = handler.GetSessionDbcLocale();
             uint totalPlayerTime;
             uint level;
-            string alive = handler.GetCypherString(CypherStrings.Error);
+            var alive = handler.GetCypherString(CypherStrings.Error);
             ulong money;
             uint xp = 0;
             uint xptotal = 0;
@@ -1566,16 +1566,16 @@ namespace Game.Chat
             // Position data print
             uint mapId;
             uint areaId;
-            string areaName = handler.GetCypherString(CypherStrings.Unknown);
-            string zoneName = handler.GetCypherString(CypherStrings.Unknown);
+            var areaName = handler.GetCypherString(CypherStrings.Unknown);
+            var zoneName = handler.GetCypherString(CypherStrings.Unknown);
 
             // Guild data print variables defined so that they exist, but are not necessarily used
             ulong guildId = 0;
             byte guildRankId = 0;
-            string guildName = "";
-            string guildRank = "";
-            string note = "";
-            string officeNote = "";
+            var guildName = "";
+            var guildRank = "";
+            var note = "";
+            var officeNote = "";
 
             // Mail data print is only defined if you have a mail
 
@@ -1608,7 +1608,7 @@ namespace Game.Chat
                 // Query informations from the DB
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_PINFO);
                 stmt.AddValue(0, lowguid);
-                SQLResult result = DB.Characters.Query(stmt);
+                var result = DB.Characters.Query(stmt);
 
                 if (result.IsEmpty())
                     return false;
@@ -1622,8 +1622,8 @@ namespace Game.Chat
                 mapId = result.Read<ushort>(6);
                 areaId = result.Read<ushort>(7);
                 gender = (Gender)result.Read<byte>(8);
-                uint health = result.Read<uint>(9);
-                PlayerFlags playerFlags = (PlayerFlags)result.Read<uint>(10);
+                var health = result.Read<uint>(9);
+                var playerFlags = (PlayerFlags)result.Read<uint>(10);
 
                 if (health == 0 || playerFlags.HasAnyFlag(PlayerFlags.Ghost))
                     alive = handler.GetCypherString(CypherStrings.No);
@@ -1635,7 +1635,7 @@ namespace Game.Chat
             stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_PINFO);
             stmt.AddValue(0, Global.WorldMgr.GetRealm().Id.Index);
             stmt.AddValue(1, accId);
-            SQLResult result0 = DB.Login.Query(stmt);
+            var result0 = DB.Login.Query(stmt);
 
             if (!result0.IsEmpty())
             {
@@ -1667,12 +1667,12 @@ namespace Game.Chat
             }
 
             // Creates a chat link to the character. Returns nameLink
-            string nameLink = handler.PlayerLink(targetName);
+            var nameLink = handler.PlayerLink(targetName);
 
             // Returns banType, banTime, bannedBy, banreason
-            PreparedStatement stmt2 = DB.Login.GetPreparedStatement(LoginStatements.SEL_PINFO_BANS);
+            var stmt2 = DB.Login.GetPreparedStatement(LoginStatements.SEL_PINFO_BANS);
             stmt2.AddValue(0, accId);
-            SQLResult result2 = DB.Login.Query(stmt2);
+            var result2 = DB.Login.Query(stmt2);
             if (result2.IsEmpty())
             {
                 banType = handler.GetCypherString(CypherStrings.Character);
@@ -1691,20 +1691,20 @@ namespace Game.Chat
             // Can be used to query data from Characters database
             stmt2 = DB.Characters.GetPreparedStatement(CharStatements.SEL_PINFO_XP);
             stmt2.AddValue(0, lowguid);
-            SQLResult result4 = DB.Characters.Query(stmt2);
+            var result4 = DB.Characters.Query(stmt2);
 
             if (!result4.IsEmpty())
             {
                 xp = result4.Read<uint>(0); // Used for "current xp" output and "%u XP Left" calculation
-                ulong gguid = result4.Read<ulong>(1); // We check if have a guild for the person, so we might not require to query it at all
+                var gguid = result4.Read<ulong>(1); // We check if have a guild for the person, so we might not require to query it at all
                 xptotal = Global.ObjectMgr.GetXPForLevel(level);
 
                 if (gguid != 0)
                 {
                     // Guild Data - an own query, because it may not happen.
-                    PreparedStatement stmt3 = DB.Characters.GetPreparedStatement(CharStatements.SEL_GUILD_MEMBER_EXTENDED);
+                    var stmt3 = DB.Characters.GetPreparedStatement(CharStatements.SEL_GUILD_MEMBER_EXTENDED);
                     stmt3.AddValue(0, lowguid);
-                    SQLResult result5 = DB.Characters.Query(stmt3);
+                    var result5 = DB.Characters.Query(stmt3);
                     if (!result5.IsEmpty())
                     {
                         guildId = result5.Read<ulong>(0);
@@ -1766,19 +1766,19 @@ namespace Game.Chat
                 PhasingHandler.PrintToChat(handler, target.GetPhaseShift());
 
             // Output XIV. LANG_PINFO_CHR_MONEY
-            ulong gold = money / MoneyConstants.Gold;
-            ulong silv = (money % MoneyConstants.Gold) / MoneyConstants.Silver;
-            ulong copp = (money % MoneyConstants.Gold) % MoneyConstants.Silver;
+            var gold = money / MoneyConstants.Gold;
+            var silv = (money % MoneyConstants.Gold) / MoneyConstants.Silver;
+            var copp = (money % MoneyConstants.Gold) % MoneyConstants.Silver;
             handler.SendSysMessage(CypherStrings.PinfoChrMoney, gold, silv, copp);
 
             // Position data
-            MapRecord map = CliDB.MapStorage.LookupByKey(mapId);
-            AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(areaId);
+            var map = CliDB.MapStorage.LookupByKey(mapId);
+            var area = CliDB.AreaTableStorage.LookupByKey(areaId);
             if (area != null)
             {
                 areaName = area.AreaName[locale];
 
-                AreaTableRecord zone = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
+                var zone = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
                 if (zone != null)
                     zoneName = zone.AreaName[locale];
             }
@@ -1804,13 +1804,13 @@ namespace Game.Chat
 
             // Mail Data - an own query, because it may or may not be useful.
             // SQL: "SELECT SUM(CASE WHEN (checked & 1) THEN 1 ELSE 0 END) AS 'readmail', COUNT(*) AS 'totalmail' FROM mail WHERE `receiver` = ?"
-            PreparedStatement stmt4 = DB.Characters.GetPreparedStatement(CharStatements.SEL_PINFO_MAILS);
+            var stmt4 = DB.Characters.GetPreparedStatement(CharStatements.SEL_PINFO_MAILS);
             stmt4.AddValue(0, lowguid);
-            SQLResult result6 = DB.Characters.Query(stmt4);
+            var result6 = DB.Characters.Query(stmt4);
             if (!result6.IsEmpty())
             {
-                uint readmail = (uint)result6.Read<double>(0);
-                uint totalmail = (uint)result6.Read<ulong>(1);
+                var readmail = (uint)result6.Read<double>(0);
+                var totalmail = (uint)result6.Read<ulong>(1);
 
                 // Output XXI. LANG_INFO_CHR_MAILS if at least one mail is given
                 if (totalmail >= 1)
@@ -1826,7 +1826,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            uint soundId = args.NextUInt32();
+            var soundId = args.NextUInt32();
 
             if (!CliDB.SoundKitStorage.ContainsKey(soundId))
             {
@@ -1834,7 +1834,7 @@ namespace Game.Chat
                 return false;
             }
 
-            uint broadcastTextId = args.NextUInt32();
+            var broadcastTextId = args.NextUInt32();
 
             Global.WorldMgr.SendGlobalMessage(new PlaySound(handler.GetSession().GetPlayer().GetGUID(), soundId, broadcastTextId));
 
@@ -1845,7 +1845,7 @@ namespace Game.Chat
         [CommandNonGroup("possess", RBACPermissions.CommandPossess)]
         static bool HandlePossessCommand(StringArguments args, CommandHandler handler)
         {
-            Unit unit = handler.GetSelectedUnit();
+            var unit = handler.GetSelectedUnit();
             if (!unit)
                 return false;
 
@@ -1858,17 +1858,17 @@ namespace Game.Chat
         {
             if (WorldConfig.GetBoolValue(WorldCfg.BattlegroundStoreStatisticsEnable))
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PVPSTATS_FACTIONS_OVERALL);
-                SQLResult result = DB.Characters.Query(stmt);
+                var stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PVPSTATS_FACTIONS_OVERALL);
+                var result = DB.Characters.Query(stmt);
 
                 if (!result.IsEmpty())
                 {
-                    uint horde_victories = result.Read<uint>(1);
+                    var horde_victories = result.Read<uint>(1);
 
                     if (!(result.NextRow()))
                         return false;
 
-                    uint alliance_victories = result.Read<uint>(1);
+                    var alliance_victories = result.Read<uint>(1);
 
                     handler.SendSysMessage(CypherStrings.Pvpstats, alliance_victories, horde_victories);
                 }
@@ -1935,10 +1935,10 @@ namespace Game.Chat
         [CommandNonGroup("respawn", RBACPermissions.CommandRespawn)]
         static bool HandleRespawnCommand(StringArguments args, CommandHandler handler)
         {
-            Player player = handler.GetSession().GetPlayer();
+            var player = handler.GetSession().GetPlayer();
 
             // accept only explicitly selected target (not implicitly self targeting case)
-            Creature target = !player.GetTarget().IsEmpty() ? handler.GetSelectedCreature() : null;
+            var target = !player.GetTarget().IsEmpty() ? handler.GetSelectedCreature() : null;
             if (target)
             {
                 if (target.IsPet())
@@ -1957,12 +1957,12 @@ namespace Game.Chat
             Cell.VisitGridObjects(player, worker, player.GetGridActivationRange());
 
             // Now handle any that had despawned, but had respawn time logged.
-            List<RespawnInfo> data = new List<RespawnInfo>();
+            var data = new List<RespawnInfo>();
             player.GetMap().GetRespawnInfo(data, SpawnObjectTypeMask.All, 0);
             if (!data.Empty())
             {
-                uint gridId = GridDefines.ComputeGridCoord(player.GetPositionX(), player.GetPositionY()).GetId();
-                foreach (RespawnInfo info in data)
+                var gridId = GridDefines.ComputeGridCoord(player.GetPositionX(), player.GetPositionY()).GetId();
+                foreach (var info in data)
                     if (info.gridId == gridId)
                         player.GetMap().RemoveRespawnTime(info, true);
             }
@@ -2002,12 +2002,12 @@ namespace Game.Chat
         [CommandNonGroup("save", RBACPermissions.CommandSave)]
         static bool HandleSaveCommand(StringArguments args, CommandHandler handler)
         {
-            Player player = handler.GetSession().GetPlayer();
+            var player = handler.GetSession().GetPlayer();
 
             // save GM account without delay and output message
             if (handler.GetSession().HasPermission(RBACPermissions.CommandsSaveWithoutDelay))
             {
-                Player target = handler.GetSelectedPlayer();
+                var target = handler.GetSelectedPlayer();
                 if (target)
                     target.SaveToDB();
                 else
@@ -2017,7 +2017,7 @@ namespace Game.Chat
             }
 
             // save if the player has last been saved over 20 seconds ago
-            uint saveInterval = WorldConfig.GetUIntValue(WorldCfg.IntervalSave);
+            var saveInterval = WorldConfig.GetUIntValue(WorldCfg.IntervalSave);
             if (saveInterval == 0 || (saveInterval > 20 * Time.InMilliseconds && player.GetSaveTimer() <= saveInterval - 20 * Time.InMilliseconds))
                 player.SaveToDB();
 
@@ -2030,14 +2030,14 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            Player playerTarget = handler.GetSelectedPlayer();
+            var playerTarget = handler.GetSelectedPlayer();
             if (!playerTarget)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;
             }
 
-            AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(args.NextUInt32());
+            var area = CliDB.AreaTableStorage.LookupByKey(args.NextUInt32());
             if (area == null)
             {
                 handler.SendSysMessage(CypherStrings.BadValue);
@@ -2050,14 +2050,14 @@ namespace Game.Chat
                 return false;
             }
 
-            uint offset = (uint)area.AreaBit / 64;
+            var offset = (uint)area.AreaBit / 64;
             if (offset >= PlayerConst.ExploredZonesSize)
             {
                 handler.SendSysMessage(CypherStrings.BadValue);
                 return false;
             }
 
-            ulong val = 1ul << (area.AreaBit % 64);
+            var val = 1ul << (area.AreaBit % 64);
             playerTarget.AddExploredZones(offset, val);
 
             handler.SendSysMessage(CypherStrings.ExploreArea);
@@ -2074,7 +2074,7 @@ namespace Game.Chat
             if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
                 return false;
 
-            Player _player = handler.GetSession().GetPlayer();
+            var _player = handler.GetSession().GetPlayer();
             if (target == _player || targetGuid == _player.GetGUID())
             {
                 handler.SendSysMessage(CypherStrings.CantTeleportSelf);
@@ -2084,7 +2084,7 @@ namespace Game.Chat
 
             if (target)
             {
-                string nameLink = handler.PlayerLink(targetName);
+                var nameLink = handler.PlayerLink(targetName);
                 // check online security
                 if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
                     return false;
@@ -2096,7 +2096,7 @@ namespace Game.Chat
                     return false;
                 }
 
-                Map map = _player.GetMap();
+                var map = _player.GetMap();
                 if (map.IsBattlegroundOrArena())
                 {
                     // only allow if gm mode is on
@@ -2118,10 +2118,10 @@ namespace Game.Chat
                 }
                 else if (map.Instanceable())
                 {
-                    Map targetMap = target.GetMap();
+                    var targetMap = target.GetMap();
 
                     Player targetGroupLeader = null;
-                    Group targetGroup = target.GetGroup();
+                    var targetGroup = target.GetGroup();
                     if (targetGroup != null)
                         targetGroupLeader = Global.ObjAccessor.GetPlayer(map, targetGroup.GetLeaderGUID());
 
@@ -2170,7 +2170,7 @@ namespace Game.Chat
                 if (handler.HasLowerSecurity(null, targetGuid))
                     return false;
 
-                string nameLink = handler.PlayerLink(targetName);
+                var nameLink = handler.PlayerLink(targetName);
 
                 handler.SendSysMessage(CypherStrings.Summoning, nameLink, handler.GetCypherString(CypherStrings.Offline));
 
@@ -2184,7 +2184,7 @@ namespace Game.Chat
         [CommandNonGroup("unbindsight", RBACPermissions.CommandUnbindsight)]
         static bool HandleUnbindSightCommand(StringArguments args, CommandHandler handler)
         {
-            Player player = handler.GetSession().GetPlayer();
+            var player = handler.GetSession().GetPlayer();
 
             if (player.IsPossessing())
                 return false;
@@ -2196,9 +2196,9 @@ namespace Game.Chat
         [CommandNonGroup("unfreeze", RBACPermissions.CommandUnfreeze)]
         static bool HandleUnFreezeCommand(StringArguments args, CommandHandler handler)
         {
-            string name = "";
+            var name = "";
             Player player;
-            string targetName = args.NextString(); // Get entered name
+            var targetName = args.NextString(); // Get entered name
 
             if (!string.IsNullOrEmpty(targetName))
             {
@@ -2227,7 +2227,7 @@ namespace Game.Chat
                 if (!string.IsNullOrEmpty(targetName))
                 {
                     // Check for offline players
-                    ObjectGuid guid = Global.CharacterCacheStorage.GetCharacterGuidByName(name);
+                    var guid = Global.CharacterCacheStorage.GetCharacterGuidByName(name);
                     if (guid.IsEmpty())
                     {
                         handler.SendSysMessage(CypherStrings.CommandFreezeWrong);
@@ -2235,7 +2235,7 @@ namespace Game.Chat
                     }
 
                     // If player found: delete his freeze aura    
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_AURA_FROZEN);
+                    var stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_AURA_FROZEN);
                     stmt.AddValue(0, guid.GetCounter());
                     DB.Characters.Execute(stmt);
 
@@ -2262,12 +2262,12 @@ namespace Game.Chat
             if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
                 return false;
 
-            uint accountId = target ? target.GetSession().GetAccountId() : Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(targetGuid);
+            var accountId = target ? target.GetSession().GetAccountId() : Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(targetGuid);
 
             // find only player from same account if any
             if (!target)
             {
-                WorldSession session = Global.WorldMgr.FindSession(accountId);
+                var session = Global.WorldMgr.FindSession(accountId);
                 if (session != null)
                     target = session.GetPlayer();
             }
@@ -2287,7 +2287,7 @@ namespace Game.Chat
                 target.GetSession().m_muteTime = 0;
             }
 
-            PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_MUTE_TIME);
+            var stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_MUTE_TIME);
             stmt.AddValue(0, 0);
             stmt.AddValue(1, "");
             stmt.AddValue(2, "");
@@ -2297,7 +2297,7 @@ namespace Game.Chat
             if (target)
                 target.SendSysMessage(CypherStrings.YourChatEnabled);
 
-            string nameLink = handler.PlayerLink(targetName);
+            var nameLink = handler.PlayerLink(targetName);
 
             handler.SendSysMessage(CypherStrings.YouEnableChat, nameLink);
 
@@ -2307,7 +2307,7 @@ namespace Game.Chat
         [CommandNonGroup("unpossess", RBACPermissions.CommandUnpossess)]
         static bool HandleUnPossessCommand(StringArguments args, CommandHandler handler)
         {
-            Unit unit = handler.GetSelectedUnit();
+            var unit = handler.GetSelectedUnit();
             if (!unit)
                 unit = handler.GetSession().GetPlayer();
 
@@ -2335,8 +2335,8 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string location_str = "inn";
-            string loc = args.NextString();
+            var location_str = "inn";
+            var loc = args.NextString();
             if (string.IsNullOrEmpty(loc))
                 location_str = loc;
 
@@ -2347,9 +2347,9 @@ namespace Game.Chat
 
             if (!player)
             {
-                PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_HOMEBIND);
+                var stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_HOMEBIND);
                 stmt.AddValue(0, targetGUID.GetCounter());
-                SQLResult result = DB.Characters.Query(stmt);
+                var result = DB.Characters.Query(stmt);
                 if (!result.IsEmpty())
                 {
                     Player.SavePositionInDB(new WorldLocation(result.Read<ushort>(0), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), 0.0f), result.Read<ushort>(1), targetGUID);
@@ -2361,14 +2361,14 @@ namespace Game.Chat
 
             if (player.IsInFlight() || player.IsInCombat())
             {
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SPELL_UNSTUCK_ID, Difficulty.None);
+                var spellInfo = Global.SpellMgr.GetSpellInfo(SPELL_UNSTUCK_ID, Difficulty.None);
                 if (spellInfo == null)
                     return false;
 
-                Player caster = handler.GetSession().GetPlayer();
+                var caster = handler.GetSession().GetPlayer();
                 if (caster)
                 {
-                    ObjectGuid castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, player.GetMapId(), SPELL_UNSTUCK_ID, player.GetMap().GenerateLowGuid(HighGuid.Cast));
+                    var castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, player.GetMapId(), SPELL_UNSTUCK_ID, player.GetMap().GenerateLowGuid(HighGuid.Cast));
                     Spell.SendCastResult(caster, spellInfo, new Networking.Packets.SpellCastVisual(SPELL_UNSTUCK_VISUAL, 0), castId, SpellCastResult.CantDoThatRightNow);
                 }
 
@@ -2413,17 +2413,17 @@ namespace Game.Chat
 
             // *Change the weather of a cell            
             //0 to 3, 0: fine, 1: rain, 2: snow, 3: sand
-            if (!uint.TryParse(args.NextString(), out uint type))
+            if (!uint.TryParse(args.NextString(), out var type))
                 return false; 
             
             //0 to 1, sending -1 is instand good weather
-            if (!float.TryParse(args.NextString(), out float grade))
+            if (!float.TryParse(args.NextString(), out var grade))
                 return false;                       
 
-            Player player = handler.GetSession().GetPlayer();
-            uint zoneid = player.GetZoneId();
+            var player = handler.GetSession().GetPlayer();
+            var zoneid = player.GetZoneId();
 
-            Weather weather = player.GetMap().GetOrGenerateZoneDefaultWeather(zoneid);
+            var weather = player.GetMap().GetOrGenerateZoneDefaultWeather(zoneid);
             if (weather == null)
             {
                 handler.SendSysMessage(CypherStrings.NoWeather);
@@ -2444,20 +2444,20 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string idStr = handler.ExtractKeyFromLink(args, "Hachievement");
+            var idStr = handler.ExtractKeyFromLink(args, "Hachievement");
             if (string.IsNullOrEmpty(idStr))
                 return false;
 
-            if (!uint.TryParse(idStr, out uint achievementId) || achievementId == 0)
+            if (!uint.TryParse(idStr, out var achievementId) || achievementId == 0)
                 return false;
 
-            Player target = handler.GetSelectedPlayer();
+            var target = handler.GetSelectedPlayer();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;
             }
-            AchievementRecord achievementEntry = CliDB.AchievementStorage.LookupByKey(achievementId);
+            var achievementEntry = CliDB.AchievementStorage.LookupByKey(achievementId);
             if (achievementEntry != null)
                 target.CompletedAchievement(achievementEntry);
 

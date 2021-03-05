@@ -73,21 +73,21 @@ namespace Game.Maps
 
         public static GridCoord ComputeGridCoord(float x, float y)
         {
-            double x_offset = ((double)x - MapConst.CenterGridOffset) / MapConst.SizeofGrids;
-            double y_offset = ((double)y - MapConst.CenterGridOffset) / MapConst.SizeofGrids;
+            var x_offset = ((double)x - MapConst.CenterGridOffset) / MapConst.SizeofGrids;
+            var y_offset = ((double)y - MapConst.CenterGridOffset) / MapConst.SizeofGrids;
 
-            uint x_val = (uint)(x_offset + MapConst.CenterGridId + 0.5f);
-            uint y_val = (uint)(y_offset + MapConst.CenterGridId + 0.5f);
+            var x_val = (uint)(x_offset + MapConst.CenterGridId + 0.5f);
+            var y_val = (uint)(y_offset + MapConst.CenterGridId + 0.5f);
             return new GridCoord(x_val, y_val);
         }
 
         public static CellCoord ComputeCellCoord(float x, float y)
         {
-            double x_offset = ((double)x - MapConst.CenterGridCellOffset) / MapConst.SizeofCells;
-            double y_offset = ((double)y - MapConst.CenterGridCellOffset) / MapConst.SizeofCells;
+            var x_offset = ((double)x - MapConst.CenterGridCellOffset) / MapConst.SizeofCells;
+            var y_offset = ((double)y - MapConst.CenterGridCellOffset) / MapConst.SizeofCells;
 
-            uint x_val = (uint)(x_offset + MapConst.CenterGridCellId + 0.5f);
-            uint y_val = (uint)(y_offset + MapConst.CenterGridCellId + 0.5f);
+            var x_val = (uint)(x_offset + MapConst.CenterGridCellId + 0.5f);
+            var y_val = (uint)(y_offset + MapConst.CenterGridCellId + 0.5f);
             return new CellCoord(x_val, y_val);
         }
     }

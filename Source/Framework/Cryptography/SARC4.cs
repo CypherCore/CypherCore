@@ -30,11 +30,11 @@ namespace Framework.Cryptography
 
         public void PrepareKey(byte[] key)
         {
-            for (int i = 0; i < 0x100; i++)
+            for (var i = 0; i < 0x100; i++)
                 _s[i] = (byte)i;
 
             var j = 0;
-            for (int i = 0; i < 0x100; i++)
+            for (var i = 0; i < 0x100; i++)
             {
                 j = (byte)((j + key[i % key.Length] + _s[i]) & 255);
 
@@ -47,7 +47,7 @@ namespace Framework.Cryptography
 
         public void ProcessBuffer(byte[] data, int length)
         {
-            for (int i = 0; i < length; i++)
+            for (var i = 0; i < length; i++)
             {
                 _tmp = (byte)((_tmp + 1) % 0x100);
                 _tmp2 = (byte)((_tmp2 + _s[_tmp]) % 0x100);

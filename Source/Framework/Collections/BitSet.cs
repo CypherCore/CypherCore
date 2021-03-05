@@ -30,8 +30,8 @@ namespace System.Collections
             _mArray = new uint[GetArrayLength(length, BitsPerInt32)];
             _mLength = length;
 
-            uint fillValue = defaultValue ? 0xffffffff : 0;
-            for (int i = 0; i < _mArray.Length; i++)
+            var fillValue = defaultValue ? 0xffffffff : 0;
+            for (var i = 0; i < _mArray.Length; i++)
             {
                 _mArray[i] = fillValue;
             }
@@ -67,7 +67,7 @@ namespace System.Collections
                 throw new ArgumentNullException("bits");
             }
 
-            int arrayLength = GetArrayLength(bits._mLength, BitsPerInt32);
+            var arrayLength = GetArrayLength(bits._mLength, BitsPerInt32);
             _mArray = new uint[arrayLength];
             _mLength = bits._mLength;
 
@@ -119,9 +119,9 @@ namespace System.Collections
 
         public void SetAll(bool value)
         {
-            uint fillValue = value ? 0xffffffff : 0u;
-            int ints = GetArrayLength(_mLength, BitsPerInt32);
-            for (int i = 0; i < ints; i++)
+            var fillValue = value ? 0xffffffff : 0u;
+            var ints = GetArrayLength(_mLength, BitsPerInt32);
+            for (var i = 0; i < ints; i++)
             {
                 _mArray[i] = fillValue;
             }
@@ -136,8 +136,8 @@ namespace System.Collections
             if (Length != value.Length)
                 throw new ArgumentException();
 
-            int ints = GetArrayLength(_mLength, BitsPerInt32);
-            for (int i = 0; i < ints; i++)
+            var ints = GetArrayLength(_mLength, BitsPerInt32);
+            for (var i = 0; i < ints; i++)
             {
                 _mArray[i] &= value._mArray[i];
             }
@@ -153,8 +153,8 @@ namespace System.Collections
             if (Length != value.Length)
                 throw new ArgumentException();
 
-            int ints = GetArrayLength(_mLength, BitsPerInt32);
-            for (int i = 0; i < ints; i++)
+            var ints = GetArrayLength(_mLength, BitsPerInt32);
+            for (var i = 0; i < ints; i++)
             {
                 _mArray[i] |= value._mArray[i];
             }
@@ -170,8 +170,8 @@ namespace System.Collections
             if (Length != value.Length)
                 throw new ArgumentException();
 
-            int ints = GetArrayLength(_mLength, BitsPerInt32);
-            for (int i = 0; i < ints; i++)
+            var ints = GetArrayLength(_mLength, BitsPerInt32);
+            for (var i = 0; i < ints; i++)
             {
                 _mArray[i] ^= value._mArray[i];
             }
@@ -182,8 +182,8 @@ namespace System.Collections
 
         public BitSet Not()
         {
-            int ints = GetArrayLength(_mLength, BitsPerInt32);
-            for (int i = 0; i < ints; i++)
+            var ints = GetArrayLength(_mLength, BitsPerInt32);
+            for (var i = 0; i < ints; i++)
             {
                 _mArray[i] = ~_mArray[i];
             }
@@ -205,11 +205,11 @@ namespace System.Collections
                     throw new ArgumentOutOfRangeException("value");
                 }
 
-                int newints = GetArrayLength(value, BitsPerInt32);
+                var newints = GetArrayLength(value, BitsPerInt32);
                 if (newints > _mArray.Length || newints + ShrinkThreshold < _mArray.Length)
                 {
                     // grow or shrink (if wasting more than _ShrinkThreshold ints)
-                    uint[] newarray = new uint[newints];
+                    var newarray = new uint[newints];
                     Array.Copy(_mArray, newarray, newints > _mArray.Length ? _mArray.Length : newints);
                     _mArray = newarray;
                 }
@@ -217,8 +217,8 @@ namespace System.Collections
                 if (value > _mLength)
                 {
                     // clear high bit values in the last int
-                    int last = GetArrayLength(_mLength, BitsPerInt32) - 1;
-                    int bits = _mLength % 32;
+                    var last = GetArrayLength(_mLength, BitsPerInt32) - 1;
+                    var bits = _mLength % 32;
                     if (bits > 0)
                     {
                         _mArray[last] &= (1u << bits) - 1;
@@ -251,12 +251,12 @@ namespace System.Collections
             }
             else if (array is byte[])
             {
-                int arrayLength = GetArrayLength(_mLength, BitsPerByte);
+                var arrayLength = GetArrayLength(_mLength, BitsPerByte);
                 if ((array.Length - index) < arrayLength)
                     throw new ArgumentException();
 
-                byte[] b = (byte[])array;
-                for (int i = 0; i < arrayLength; i++)
+                var b = (byte[])array;
+                for (var i = 0; i < arrayLength; i++)
                     b[index + i] = (byte)((_mArray[i / 4] >> ((i % 4) * 8)) & 0x000000FF); // Shift to bring the required byte to LSB, then mask
             }
             else if (array is bool[])
@@ -264,8 +264,8 @@ namespace System.Collections
                 if (array.Length - index < _mLength)
                     throw new ArgumentException();
 
-                bool[] b = (bool[])array;
-                for (int i = 0; i < _mLength; i++)
+                var b = (bool[])array;
+                for (var i = 0; i < _mLength; i++)
                     b[index + i] = ((_mArray[i / 32] >> (i % 32)) & 0x00000001) != 0;
             }
             else
@@ -282,7 +282,7 @@ namespace System.Collections
 
         public Object Clone()
         {
-            BitSet bitArray = new BitSet(_mArray);
+            var bitArray = new BitSet(_mArray);
             bitArray._version = _version;
             bitArray._mLength = _mLength;
             return bitArray;

@@ -31,7 +31,7 @@ namespace Game
         /// <param name="acceptTime">Time in second that the player have for accept</param>
         public void SendBfInvitePlayerToWar(ulong queueId, uint zoneId, uint acceptTime)
         {
-            BFMgrEntryInvite bfMgrEntryInvite = new BFMgrEntryInvite();
+            var bfMgrEntryInvite = new BFMgrEntryInvite();
             bfMgrEntryInvite.QueueID = queueId;
             bfMgrEntryInvite.AreaID = (int)zoneId;
             bfMgrEntryInvite.ExpireTime = Time.UnixTime + acceptTime;
@@ -45,7 +45,7 @@ namespace Game
         /// <param name="battleState">Battlefield State</param>
         public void SendBfInvitePlayerToQueue(ulong queueId, BattlefieldState battleState)
         {
-            BFMgrQueueInvite bfMgrQueueInvite = new BFMgrQueueInvite();
+            var bfMgrQueueInvite = new BFMgrQueueInvite();
             bfMgrQueueInvite.QueueID = queueId;
             bfMgrQueueInvite.BattleState = battleState;
             SendPacket(bfMgrQueueInvite);
@@ -61,7 +61,7 @@ namespace Game
         /// <param name="loggingIn">on log in send queue status</param>
         public void SendBfQueueInviteResponse(ulong queueId, uint zoneId, BattlefieldState battleStatus, bool canQueue = true, bool loggingIn = false)
         {
-            BFMgrQueueRequestResponse bfMgrQueueRequestResponse = new BFMgrQueueRequestResponse();
+            var bfMgrQueueRequestResponse = new BFMgrQueueRequestResponse();
             bfMgrQueueRequestResponse.QueueID = queueId;
             bfMgrQueueRequestResponse.AreaID = (int)zoneId;
             bfMgrQueueRequestResponse.Result = (sbyte)(canQueue ? 1 : 0);
@@ -78,7 +78,7 @@ namespace Game
         /// <param name="onOffense">Whether player belongs to attacking team or not</param>
         public void SendBfEntered(ulong queueId, bool relocated, bool onOffense)
         {
-            BFMgrEntering bfMgrEntering = new BFMgrEntering();
+            var bfMgrEntering = new BFMgrEntering();
             bfMgrEntering.ClearedAFK = _player.IsAFK();
             bfMgrEntering.Relocated = relocated;
             bfMgrEntering.OnOffense = onOffense;
@@ -95,7 +95,7 @@ namespace Game
         /// <param name="reason">Reason why player left battlefield</param>
         public void SendBfLeaveMessage(ulong queueId, BattlefieldState battleState, bool relocated, BFLeaveReason reason = BFLeaveReason.Exited)
         {
-            BFMgrEjected bfMgrEjected = new BFMgrEjected();
+            var bfMgrEjected = new BFMgrEjected();
             bfMgrEjected.QueueID = queueId;
             bfMgrEjected.Reason = reason;
             bfMgrEjected.BattleState = battleState;
@@ -109,7 +109,7 @@ namespace Game
         //[WorldPacketHandler(ClientOpcodes.BfMgrEntryInviteResponse)]
         void HandleBfEntryInviteResponse(BFMgrEntryInviteResponse bfMgrEntryInviteResponse)
         {
-            BattleField bf = Global.BattleFieldMgr.GetBattlefieldByQueueId(bfMgrEntryInviteResponse.QueueID);
+            var bf = Global.BattleFieldMgr.GetBattlefieldByQueueId(bfMgrEntryInviteResponse.QueueID);
             if (bf == null)
                 return;
 
@@ -131,7 +131,7 @@ namespace Game
         //[WorldPacketHandler(ClientOpcodes.BfMgrQueueInviteResponse)]
         void HandleBfQueueInviteResponse(BFMgrQueueInviteResponse bfMgrQueueInviteResponse)
         {
-            BattleField bf = Global.BattleFieldMgr.GetBattlefieldByQueueId(bfMgrQueueInviteResponse.QueueID);
+            var bf = Global.BattleFieldMgr.GetBattlefieldByQueueId(bfMgrQueueInviteResponse.QueueID);
             if (bf == null)
                 return;
 
@@ -145,7 +145,7 @@ namespace Game
         //[WorldPacketHandler(ClientOpcodes.BfMgrQueueExitRequest)]
         void HandleBfExitRequest(BFMgrQueueExitRequest bfMgrQueueExitRequest)
         {
-            BattleField bf = Global.BattleFieldMgr.GetBattlefieldByQueueId(bfMgrQueueExitRequest.QueueID);
+            var bf = Global.BattleFieldMgr.GetBattlefieldByQueueId(bfMgrQueueExitRequest.QueueID);
             if (bf == null)
                 return;
 

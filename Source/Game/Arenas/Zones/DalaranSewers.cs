@@ -32,16 +32,16 @@ namespace Game.Arenas
 
         public override void StartingEventCloseDoors()
         {
-            for (int i = DalaranSewersObjectTypes.Door1; i <= DalaranSewersObjectTypes.Door2; ++i)
+            for (var i = DalaranSewersObjectTypes.Door1; i <= DalaranSewersObjectTypes.Door2; ++i)
                 SpawnBGObject(i, BattlegroundConst.RespawnImmediately);
         }
 
         public override void StartingEventOpenDoors()
         {
-            for (int i = DalaranSewersObjectTypes.Door1; i <= DalaranSewersObjectTypes.Door2; ++i)
+            for (var i = DalaranSewersObjectTypes.Door1; i <= DalaranSewersObjectTypes.Door2; ++i)
                 DoorOpen(i);
 
-            for (int i = DalaranSewersObjectTypes.Buff1; i <= DalaranSewersObjectTypes.Buff2; ++i)
+            for (var i = DalaranSewersObjectTypes.Buff1; i <= DalaranSewersObjectTypes.Buff2; ++i)
                 SpawnBGObject(i, 60);
 
             _events.ScheduleEvent(DalaranSewersEvents.WaterfallWarning, RandomHelper.URand(DalaranSewersData.WaterfallTimerMin, DalaranSewersData.WaterfallTimerMax));
@@ -55,7 +55,7 @@ namespace Game.Arenas
             // Remove effects of Demonic Circle Summon
             foreach (var pair in GetPlayers())
             {
-                Player player = _GetPlayer(pair, "BattlegroundDS::StartingEventOpenDoors");
+                var player = _GetPlayer(pair, "BattlegroundDS::StartingEventOpenDoors");
                 if (player)
                     player.RemoveAurasDueToSpell(DalaranSewersSpells.DemonicCircle);
             }
@@ -91,7 +91,7 @@ namespace Game.Arenas
 
         public override bool SetupBattleground()
         {
-            bool result = true;
+            var result = true;
             result &= AddObject(DalaranSewersObjectTypes.Door1, DalaranSewersGameObjects.Door1, 1350.95f, 817.2f, 20.8096f, 3.15f, 0, 0, 0.99627f, 0.0862864f, BattlegroundConst.RespawnImmediately);
             result &= AddObject(DalaranSewersObjectTypes.Door2, DalaranSewersGameObjects.Door2, 1232.65f, 764.913f, 20.0729f, 6.3f, 0, 0, 0.0310211f, -0.999519f, BattlegroundConst.RespawnImmediately);
             if (!result)
@@ -153,7 +153,7 @@ namespace Game.Arenas
                     case DalaranSewersEvents.WaterfallKnockback:
                     {
                         // Repeat knockback while the waterfall still active
-                        Creature waterSpout = GetBGCreature(DalaranSewersCreatureTypes.WaterfallKnockback);
+                        var waterSpout = GetBGCreature(DalaranSewersCreatureTypes.WaterfallKnockback);
                         if (waterSpout)
                             waterSpout.CastSpell(waterSpout, DalaranSewersSpells.WaterSpout, true);
                         _events.ScheduleEvent(eventId, DalaranSewersData.WaterfallKnockbackTimer);
@@ -161,9 +161,9 @@ namespace Game.Arenas
                         break;
                     case DalaranSewersEvents.PipeKnockback:
                     {
-                        for (int i = DalaranSewersCreatureTypes.PipeKnockback1; i <= DalaranSewersCreatureTypes.PipeKnockback2; ++i)
+                        for (var i = DalaranSewersCreatureTypes.PipeKnockback1; i <= DalaranSewersCreatureTypes.PipeKnockback2; ++i)
                         {
-                            Creature waterSpout = GetBGCreature(i);
+                            var waterSpout = GetBGCreature(i);
                             if (waterSpout)
                                 waterSpout.CastSpell(waterSpout, DalaranSewersSpells.Flush, true);
                         }

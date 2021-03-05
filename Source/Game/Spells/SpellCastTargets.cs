@@ -89,7 +89,7 @@ namespace Game.Spells
             if (m_targetMask.HasAnyFlag(SpellCastTargetFlags.SourceLocation))
             {
                 data.SrcLocation.HasValue = true;
-                TargetLocation target = new TargetLocation();
+                var target = new TargetLocation();
                 target.Transport = m_src.TransportGUID; // relative position guid here - transport for example
                 if (!m_src.TransportGUID.IsEmpty())
                     target.Location = m_src.TransportOffset;
@@ -102,7 +102,7 @@ namespace Game.Spells
             if (Convert.ToBoolean(m_targetMask & SpellCastTargetFlags.DestLocation))
             {
                 data.DstLocation.HasValue = true;
-                TargetLocation target = new TargetLocation();
+                var target = new TargetLocation();
                 target.Transport = m_dst.TransportGUID; // relative position guid here - transport for example
                 if (!m_dst.TransportGUID.IsEmpty())
                     target.Location = m_dst.TransportOffset;
@@ -352,7 +352,7 @@ namespace Game.Spells
             m_itemTarget = null;
             if (caster is Player)
             {
-                Player player = caster.ToPlayer();
+                var player = caster.ToPlayer();
                 if (m_targetMask.HasAnyFlag(SpellCastTargetFlags.Item))
                     m_itemTarget = player.GetItemByGuid(m_itemTargetGUID);
                 else if (m_targetMask.HasAnyFlag(SpellCastTargetFlags.TradeItem))
@@ -372,7 +372,7 @@ namespace Game.Spells
             // update positions by transport move
             if (HasSrc() && !m_src.TransportGUID.IsEmpty())
             {
-                WorldObject transport = Global.ObjAccessor.GetWorldObject(caster, m_src.TransportGUID);
+                var transport = Global.ObjAccessor.GetWorldObject(caster, m_src.TransportGUID);
                 if (transport != null)
                 {
                     m_src.Position.Relocate(transport.GetPosition());
@@ -382,7 +382,7 @@ namespace Game.Spells
 
             if (HasDst() && !m_dst.TransportGUID.IsEmpty())
             {
-                WorldObject transport = Global.ObjAccessor.GetWorldObject(caster, m_dst.TransportGUID);
+                var transport = Global.ObjAccessor.GetWorldObject(caster, m_dst.TransportGUID);
                 if (transport != null)
                 {
                     m_dst.Position.Relocate(transport.GetPosition());

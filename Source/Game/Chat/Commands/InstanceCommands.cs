@@ -30,11 +30,11 @@ namespace Game.Chat
         [Command("listbinds", RBACPermissions.CommandInstanceListbinds)]
         static bool HandleInstanceListBinds(StringArguments args, CommandHandler handler)
         {
-            Player player = handler.GetSelectedPlayer();
+            var player = handler.GetSelectedPlayer();
             if (!player)
                 player = handler.GetSession().GetPlayer();
 
-            string format = "map: {0} inst: {1} perm: {2} diff: {3} canReset: {4} TTR: {5}";
+            var format = "map: {0} inst: {1} perm: {2} diff: {3} canReset: {4} TTR: {5}";
 
             uint counter = 0;
             foreach (var difficulty in CliDB.DifficultyStorage.Values)
@@ -42,8 +42,8 @@ namespace Game.Chat
                 var binds = player.GetBoundInstances((Difficulty)difficulty.Id);
                 foreach (var pair in binds)
                 {
-                    InstanceSave save = pair.Value.save;
-                    string timeleft = Time.GetTimeString(save.GetResetTime() - Time.UnixTime);
+                    var save = pair.Value.save;
+                    var timeleft = Time.GetTimeString(save.GetResetTime() - Time.UnixTime);
                     handler.SendSysMessage(format, pair.Key, save.GetInstanceId(), pair.Value.perm ? "yes" : "no", save.GetDifficultyID(), save.CanReset() ? "yes" : "no", timeleft);
                     counter++;
                 }
@@ -51,7 +51,7 @@ namespace Game.Chat
             handler.SendSysMessage("player binds: {0}", counter);
 
             counter = 0;
-            Group group = player.GetGroup();
+            var group = player.GetGroup();
             if (group)
             {
                 foreach (var difficulty in CliDB.DifficultyStorage.Values)
@@ -59,8 +59,8 @@ namespace Game.Chat
                     var binds = group.GetBoundInstances((Difficulty)difficulty.Id);
                     foreach (var pair in binds)
                     {
-                        InstanceSave save = pair.Value.save;
-                        string timeleft = Time.GetTimeString(save.GetResetTime() - Time.UnixTime);
+                        var save = pair.Value.save;
+                        var timeleft = Time.GetTimeString(save.GetResetTime() - Time.UnixTime);
                         handler.SendSysMessage(format, pair.Key, save.GetInstanceId(), pair.Value.perm ? "yes" : "no", save.GetDifficultyID(), save.CanReset() ? "yes" : "no", timeleft);
                         counter++;
                     }
@@ -77,12 +77,12 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            Player player = handler.GetSelectedPlayer();
+            var player = handler.GetSelectedPlayer();
             if (!player)
                 player = handler.GetSession().GetPlayer();
 
-            string map = args.NextString();
-            if (!sbyte.TryParse(args.NextString(), out sbyte diff))
+            var map = args.NextString();
+            if (!sbyte.TryParse(args.NextString(), out var diff))
                 diff = -1;
 
             ushort counter = 0;
@@ -99,10 +99,10 @@ namespace Game.Chat
                 var binds = player.GetBoundInstances((Difficulty)difficulty.Id);
                 foreach (var pair in binds)
                 {
-                    InstanceSave save = pair.Value.save;
+                    var save = pair.Value.save;
                     if (pair.Key != player.GetMapId() && (MapId == 0 || MapId == pair.Key) && (diff == -1 || diff == (sbyte)save.GetDifficultyID()))
                     {
-                        string timeleft = Time.GetTimeString(save.GetResetTime() - Time.UnixTime);
+                        var timeleft = Time.GetTimeString(save.GetResetTime() - Time.UnixTime);
                         handler.SendSysMessage("unbinding map: {0} inst: {1} perm: {2} diff: {3} canReset: {4} TTR: {5}", pair.Key, save.GetInstanceId(),
                             pair.Value.perm ? "yes" : "no", save.GetDifficultyID(), save.CanReset() ? "yes" : "no", timeleft);
                         player.UnbindInstance(pair.Key, (Difficulty)difficulty.Id);
@@ -130,8 +130,8 @@ namespace Game.Chat
         [Command("savedata", RBACPermissions.CommandInstanceSavedata)]
         static bool HandleInstanceSaveData(StringArguments args, CommandHandler handler)
         {
-            Player player = handler.GetSession().GetPlayer();
-            InstanceMap map = player.GetMap().ToInstanceMap();
+            var player = handler.GetSession().GetPlayer();
+            var map = player.GetMap().ToInstanceMap();
             if (map == null)
             {
                 handler.SendSysMessage("Map is not a dungeon.");
@@ -155,9 +155,9 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string param1 = args.NextString();
-            string param2 = args.NextString();
-            string param3 = args.NextString();
+            var param1 = args.NextString();
+            var param2 = args.NextString();
+            var param3 = args.NextString();
             Player player = null;
 
             // Character name must be provided when using this from console.
@@ -181,7 +181,7 @@ namespace Game.Chat
                 return false;
             }
 
-            InstanceMap map = player.GetMap().ToInstanceMap();
+            var map = player.GetMap().ToInstanceMap();
             if (map == null)
             {
                 handler.SendSysMessage(CypherStrings.NotDungeon);
@@ -194,11 +194,11 @@ namespace Game.Chat
                 return false;
             }
 
-            if (!uint.TryParse(param1, out uint encounterId))
+            if (!uint.TryParse(param1, out var encounterId))
                 return false;
 
-            EncounterState state = EncounterState.NotStarted;
-            if (int.TryParse(param2, out int param2Value))
+            var state = EncounterState.NotStarted;
+            if (int.TryParse(param2, out var param2Value))
                 state = (EncounterState)param2Value;
 
             // Reject improper values.
@@ -219,8 +219,8 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string param1 = args.NextString();
-            string param2 = args.NextString();
+            var param1 = args.NextString();
+            var param2 = args.NextString();
             Player player = null;
 
             // Character name must be provided when using this from console.
@@ -244,7 +244,7 @@ namespace Game.Chat
                 return false;
             }
 
-            InstanceMap map = player.GetMap().ToInstanceMap();
+            var map = player.GetMap().ToInstanceMap();
             if (map == null)
             {
                 handler.SendSysMessage(CypherStrings.NotDungeon);
@@ -257,7 +257,7 @@ namespace Game.Chat
                 return false;
             }
 
-            if (!uint.TryParse(param1, out uint encounterId))
+            if (!uint.TryParse(param1, out var encounterId))
                 return false;
 
             if (encounterId > map.GetInstanceScript().GetEncounterCount())
@@ -266,7 +266,7 @@ namespace Game.Chat
                 return false;
             }
 
-            EncounterState state = map.GetInstanceScript().GetBossState(encounterId);
+            var state = map.GetInstanceScript().GetBossState(encounterId);
             handler.SendSysMessage(CypherStrings.CommandInstGetBossState, encounterId, state);
             return true;
         }

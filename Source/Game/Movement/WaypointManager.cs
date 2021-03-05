@@ -30,7 +30,7 @@ namespace Game
             var oldMSTime = Time.GetMSTime();
 
             //                                          0    1         2           3          4            5           6        7      8           9
-            SQLResult result = DB.World.Query("SELECT id, point, position_x, position_y, position_z, orientation, move_type, delay, action, action_chance FROM waypoint_data ORDER BY id, point");
+            var result = DB.World.Query("SELECT id, point, position_x, position_y, position_z, orientation, move_type, delay, action, action_chance FROM waypoint_data ORDER BY id, point");
 
             if (result.IsEmpty())
             {
@@ -42,17 +42,17 @@ namespace Game
 
             do
             {
-                uint pathId = result.Read<uint>(0);
+                var pathId = result.Read<uint>(0);
 
-                float x = result.Read<float>(2);
-                float y = result.Read<float>(3);
-                float z = result.Read<float>(4);
-                float o = result.Read<float>(5);
+                var x = result.Read<float>(2);
+                var y = result.Read<float>(3);
+                var z = result.Read<float>(4);
+                var o = result.Read<float>(5);
 
                 GridDefines.NormalizeMapCoord(ref x);
                 GridDefines.NormalizeMapCoord(ref y);
 
-                WaypointNode waypoint = new WaypointNode();
+                var waypoint = new WaypointNode();
                 waypoint.id = result.Read<uint>(1);
                 waypoint.x = x;
                 waypoint.y = y;
@@ -73,7 +73,7 @@ namespace Game
                 if (!_waypointStore.ContainsKey(pathId))
                     _waypointStore[pathId] = new WaypointPath();
 
-                WaypointPath path = _waypointStore[pathId];
+                var path = _waypointStore[pathId];
                 path.id = pathId;
                 path.nodes.Add(waypoint);
 
@@ -87,25 +87,25 @@ namespace Game
         {
             _waypointStore.Remove(id);
 
-            PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_BY_ID);
+            var stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_WAYPOINT_DATA_BY_ID);
             stmt.AddValue(0, id);
-            SQLResult result = DB.World.Query(stmt);
+            var result = DB.World.Query(stmt);
 
             if (result.IsEmpty())
                 return;
 
-            List<WaypointNode> values = new List<WaypointNode>();
+            var values = new List<WaypointNode>();
             do
             {
-                float x = result.Read<float>(1);
-                float y = result.Read<float>(2);
-                float z = result.Read<float>(3);
-                float o = result.Read<float>(4);
+                var x = result.Read<float>(1);
+                var y = result.Read<float>(2);
+                var z = result.Read<float>(3);
+                var o = result.Read<float>(4);
 
                 GridDefines.NormalizeMapCoord(ref x);
                 GridDefines.NormalizeMapCoord(ref y);
 
-                WaypointNode waypoint = new WaypointNode();
+                var waypoint = new WaypointNode();
                 waypoint.id = result.Read<uint>(0);
                 waypoint.x = x;
                 waypoint.y = y;

@@ -28,16 +28,16 @@ namespace Framework.Configuration
     {
         public static bool Load(string fileName)
         {
-            string path = AppContext.BaseDirectory + fileName;
+            var path = AppContext.BaseDirectory + fileName;
             if (!File.Exists(path))
             {
                 Console.WriteLine("{0} doesn't exist!", fileName);
                 return false;
             }
 
-            string[] ConfigContent = File.ReadAllLines(path, Encoding.UTF8);
+            var ConfigContent = File.ReadAllLines(path, Encoding.UTF8);
 
-            int lineCounter = 0;
+            var lineCounter = 0;
             try
             {
                 foreach (var line in ConfigContent)
@@ -61,7 +61,7 @@ namespace Framework.Configuration
 
         public static T GetDefaultValue<T>(string name, T defaultValue)
         {
-            string temp = _configList.LookupByKey(name);
+            var temp = _configList.LookupByKey(name);
 
             var type = typeof(T).IsEnum ? typeof(T).GetEnumUnderlyingType() : typeof(T);
 

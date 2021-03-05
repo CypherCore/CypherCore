@@ -39,7 +39,7 @@ namespace Game.PvP
             SetMapFromZone(HPConst.BuffZones[0]);
 
             // add the zones affected by the pvp buff
-            for (int i = 0; i < HPConst.BuffZones.Length; ++i)
+            for (var i = 0; i < HPConst.BuffZones.Length; ++i)
                 RegisterZone(HPConst.BuffZones[i]);
 
             AddCapturePoint(new HellfirePeninsulaCapturePoint(this, OutdoorPvPHPTowerType.BrokenHill));
@@ -80,7 +80,7 @@ namespace Game.PvP
 
         public override bool Update(uint diff)
         {
-            bool changed = base.Update(diff);
+            var changed = base.Update(diff);
             if (changed)
             {
                 if (m_AllianceTowersControlled == 3)
@@ -105,7 +105,7 @@ namespace Game.PvP
             player.SendUpdateWorldState(OutdoorPvPHPWorldStates.Count_H, 0);
             player.SendUpdateWorldState(OutdoorPvPHPWorldStates.Count_A, 0);
 
-            for (int i = 0; i < (int)OutdoorPvPHPTowerType.Num; ++i)
+            for (var i = 0; i < (int)OutdoorPvPHPTowerType.Num; ++i)
             {
                 player.SendUpdateWorldState(HPConst.Map_N[i], 0);
                 player.SendUpdateWorldState(HPConst.Map_A[i], 0);
@@ -180,13 +180,13 @@ namespace Game.PvP
                     break;
                 case ObjectiveStates.Alliance:
                     field = HPConst.Map_A[m_TowerType];
-                    uint alliance_towers = ((HellfirePeninsulaPvP)PvP).GetAllianceTowersControlled();
+                    var alliance_towers = ((HellfirePeninsulaPvP)PvP).GetAllianceTowersControlled();
                     if (alliance_towers != 0)
                         ((HellfirePeninsulaPvP)PvP).SetAllianceTowersControlled(--alliance_towers);
                     break;
                 case ObjectiveStates.Horde:
                     field = HPConst.Map_H[m_TowerType];
-                    uint horde_towers = ((HellfirePeninsulaPvP)PvP).GetHordeTowersControlled();
+                    var horde_towers = ((HellfirePeninsulaPvP)PvP).GetHordeTowersControlled();
                     if (horde_towers != 0)
                         ((HellfirePeninsulaPvP)PvP).SetHordeTowersControlled(--horde_towers);
                     break;
@@ -211,7 +211,7 @@ namespace Game.PvP
                 field = 0;
             }
             uint artkit = 21;
-            uint artkit2 = HPConst.TowerArtKit_N[m_TowerType];
+            var artkit2 = HPConst.TowerArtKit_N[m_TowerType];
             switch (State)
             {
                 case ObjectiveStates.Neutral:
@@ -222,7 +222,7 @@ namespace Game.PvP
                         field = HPConst.Map_A[m_TowerType];
                         artkit = 2;
                         artkit2 = HPConst.TowerArtKit_A[m_TowerType];
-                        uint alliance_towers = ((HellfirePeninsulaPvP)PvP).GetAllianceTowersControlled();
+                        var alliance_towers = ((HellfirePeninsulaPvP)PvP).GetAllianceTowersControlled();
                         if (alliance_towers < 3)
                             ((HellfirePeninsulaPvP)PvP).SetAllianceTowersControlled(++alliance_towers);
                         PvP.SendDefenseMessage(HPConst.BuffZones[0], HPConst.LangCapture_A[m_TowerType]);
@@ -233,7 +233,7 @@ namespace Game.PvP
                         field = HPConst.Map_H[m_TowerType];
                         artkit = 1;
                         artkit2 = HPConst.TowerArtKit_H[m_TowerType];
-                        uint horde_towers = ((HellfirePeninsulaPvP)PvP).GetHordeTowersControlled();
+                        var horde_towers = ((HellfirePeninsulaPvP)PvP).GetHordeTowersControlled();
                         if (horde_towers < 3)
                             ((HellfirePeninsulaPvP)PvP).SetHordeTowersControlled(++horde_towers);
                         PvP.SendDefenseMessage(HPConst.BuffZones[0], HPConst.LangCapture_H[m_TowerType]);

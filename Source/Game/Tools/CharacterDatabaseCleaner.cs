@@ -35,14 +35,14 @@ namespace Game
 
             Log.outInfo(LogFilter.Server, "Cleaning character database...");
 
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             // check flags which clean ups are necessary
-            SQLResult result = DB.Characters.Query("SELECT value FROM worldstates WHERE entry = {0}", (uint)WorldStates.CleaningFlags);
+            var result = DB.Characters.Query("SELECT value FROM worldstates WHERE entry = {0}", (uint)WorldStates.CleaningFlags);
             if (result.IsEmpty())
                 return;
 
-            CleaningFlags flags = (CleaningFlags)result.Read<uint>(0);
+            var flags = (CleaningFlags)result.Read<uint>(0);
 
             // clean up
             if (flags.HasAnyFlag(CleaningFlags.AchievementProgress))
@@ -74,18 +74,18 @@ namespace Game
 
         static void CheckUnique(string column, string table, CheckFor check)
         {
-            SQLResult result = DB.Characters.Query("SELECT DISTINCT {0} FROM {1}", column, table);
+            var result = DB.Characters.Query("SELECT DISTINCT {0} FROM {1}", column, table);
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.Sql, "Table {0} is empty.", table);
                 return;
             }
 
-            bool found = false;
-            StringBuilder ss = new StringBuilder();
+            var found = false;
+            var ss = new StringBuilder();
             do
             {
-                uint id = result.Read<uint>(0);
+                var id = result.Read<uint>(0);
                 if (!check(id))
                 {
                     if (!found)
@@ -130,7 +130,7 @@ namespace Game
 
         static bool SpellCheck(uint spell_id)
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell_id, Difficulty.None);
+            var spellInfo = Global.SpellMgr.GetSpellInfo(spell_id, Difficulty.None);
             return spellInfo != null && !spellInfo.HasAttribute(SpellCustomAttributes.IsTalent);
         }
 
@@ -141,7 +141,7 @@ namespace Game
 
         static bool TalentCheck(uint talent_id)
         {
-            TalentRecord talentInfo = CliDB.TalentStorage.LookupByKey(talent_id);
+            var talentInfo = CliDB.TalentStorage.LookupByKey(talent_id);
             if (talentInfo == null)
                 return false;
 

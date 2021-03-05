@@ -104,7 +104,7 @@ namespace Game.Networking.Packets
             Size = _worldPacket.ReadUInt32();
             DataType = (AccountDataTypes)_worldPacket.ReadBits<uint>(3);
 
-            uint compressedSize = _worldPacket.ReadUInt32();
+            var compressedSize = _worldPacket.ReadUInt32();
             if (compressedSize != 0)
             {
                 CompressedData = new ByteBuffer(_worldPacket.ReadBytes(compressedSize));

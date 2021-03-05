@@ -107,9 +107,9 @@ namespace Framework.IO
         public string ReadCString()
         {
             ResetBitPos();
-            StringBuilder tmpString = new StringBuilder();
-            char tmpChar = readStream.ReadChar();
-            char tmpEndChar = Convert.ToChar(Encoding.UTF8.GetString(new byte[] { 0 }));
+            var tmpString = new StringBuilder();
+            var tmpChar = readStream.ReadChar();
+            var tmpEndChar = Convert.ToChar(Encoding.UTF8.GetString(new byte[] { 0 }));
 
             while (tmpChar != tmpEndChar)
             {
@@ -149,7 +149,7 @@ namespace Framework.IO
 
         public uint ReadPackedTime()
         {
-            uint packedDate = ReadUInt32();
+            var packedDate = ReadUInt32();
             var time = new DateTime((int)((packedDate >> 24) & 0x1F) + 2000, (int)((packedDate >> 20) & 0xF) + 1, (int)((packedDate >> 14) & 0x3F) + 1, (int)(packedDate >> 6) & 0x1F, (int)(packedDate & 0x3F), 0);
             return (uint)Time.DateTimeToUnixTime(time);
         }
@@ -192,7 +192,7 @@ namespace Framework.IO
 
         public T ReadBits<T>(int bitCount)
         {
-            int value = 0;
+            var value = 0;
 
             for (var i = bitCount - 1; i >= 0; --i)
                 if (HasBit())
@@ -284,7 +284,7 @@ namespace Framework.IO
             if (str.IsEmpty())
                 return;
 
-            byte[] sBytes = Encoding.UTF8.GetBytes(str);
+            var sBytes = Encoding.UTF8.GetBytes(str);
             WriteBytes(sBytes);
         }
 
@@ -354,7 +354,7 @@ namespace Framework.IO
 
         public void WriteBits(object bit, int count)
         {
-            for (int i = count - 1; i >= 0; --i)
+            for (var i = count - 1; i >= 0; --i)
                 WriteBit((Convert.ToUInt32(bit) >> i) & 1);
         }
 
@@ -366,7 +366,7 @@ namespace Framework.IO
 
         public void WritePackedTime()
         {
-            DateTime now = DateTime.Now;
+            var now = DateTime.Now;
             WriteUInt32(Convert.ToUInt32((now.Year - 2000) << 24 | (now.Month - 1) << 20 | (now.Day - 1) << 14 | (int)now.DayOfWeek << 11 | now.Hour << 6 | now.Minute));
         }
         #endregion
@@ -397,13 +397,13 @@ namespace Framework.IO
 
         public byte[] GetData()
         {
-            Stream stream = GetCurrentStream();
+            var stream = GetCurrentStream();
 
             var data = new byte[stream.Length];
 
-            long pos = stream.Position;
+            var pos = stream.Position;
             stream.Seek(0, SeekOrigin.Begin);
-            for (int i = 0; i < data.Length; i++)
+            for (var i = 0; i < data.Length; i++)
                 data[i] = (byte)stream.ReadByte();
 
             stream.Seek(pos, SeekOrigin.Begin);

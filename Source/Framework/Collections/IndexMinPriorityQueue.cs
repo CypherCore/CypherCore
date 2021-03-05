@@ -24,7 +24,7 @@ namespace Framework.Collections
             _keys = new T[_maxSize + 1];
             _pq = new int[_maxSize + 1];
             _qp = new int[_maxSize + 1];
-            for (int i = 0; i < _maxSize; i++)
+            for (var i = 0; i < _maxSize; i++)
             {
                 _qp[i] = -1;
             }
@@ -85,7 +85,7 @@ namespace Framework.Collections
         /// <returns>An index associated with a minimum key that was removed</returns>
         public int DeleteMin()
         {
-            int min = _pq[1];
+            var min = _pq[1];
             Exchange(1, Size--);
             Sink(1);
             _qp[min] = -1;
@@ -139,7 +139,7 @@ namespace Framework.Collections
         /// <param name="index">The index of the key to remove</param>
         public void Delete(int index)
         {
-            int i = _qp[index];
+            var i = _qp[index];
             Exchange(i, Size--);
             Swim(i);
             Sink(i);
@@ -152,7 +152,7 @@ namespace Framework.Collections
         }
         private void Exchange(int i, int j)
         {
-            int swap = _pq[i];
+            var swap = _pq[i];
             _pq[i] = _pq[j];
             _pq[j] = swap;
             _qp[_pq[i]] = i;
@@ -170,7 +170,7 @@ namespace Framework.Collections
         {
             while (2 * k <= Size)
             {
-                int j = 2 * k;
+                var j = 2 * k;
                 if (j < Size && Greater(j, j + 1))
                 {
                     j++;

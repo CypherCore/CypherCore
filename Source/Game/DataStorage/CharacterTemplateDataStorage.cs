@@ -27,18 +27,18 @@ namespace Game.DataStorage
 
         public void LoadCharacterTemplates()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
             _characterTemplateStore.Clear();
 
-            MultiMap<uint, CharacterTemplateClass> characterTemplateClasses = new MultiMap<uint, CharacterTemplateClass>();
-            SQLResult classesResult = DB.World.Query("SELECT TemplateId, FactionGroup, Class FROM character_template_class");
+            var characterTemplateClasses = new MultiMap<uint, CharacterTemplateClass>();
+            var classesResult = DB.World.Query("SELECT TemplateId, FactionGroup, Class FROM character_template_class");
             if (!classesResult.IsEmpty())
             {
                 do
                 {
-                    uint templateId = classesResult.Read<uint>(0);
-                    FactionMasks factionGroup = (FactionMasks)classesResult.Read<byte>(1);
-                    byte classID = classesResult.Read<byte>(2);
+                    var templateId = classesResult.Read<uint>(0);
+                    var factionGroup = (FactionMasks)classesResult.Read<byte>(1);
+                    var classID = classesResult.Read<byte>(2);
 
                     if (!((factionGroup & (FactionMasks.Player | FactionMasks.Alliance)) == (FactionMasks.Player | FactionMasks.Alliance)) &&
                         !((factionGroup & (FactionMasks.Player | FactionMasks.Horde)) == (FactionMasks.Player | FactionMasks.Horde)))
@@ -62,7 +62,7 @@ namespace Game.DataStorage
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 character template classes. DB table `character_template_class` is empty.");
             }
 
-            SQLResult templates = DB.World.Query("SELECT Id, Name, Description, Level FROM character_template");
+            var templates = DB.World.Query("SELECT Id, Name, Description, Level FROM character_template");
             if (templates.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 character templates. DB table `character_template` is empty.");
@@ -71,7 +71,7 @@ namespace Game.DataStorage
 
             do
             {
-                CharacterTemplate templ = new CharacterTemplate();
+                var templ = new CharacterTemplate();
                 templ.TemplateSetId = templates.Read<uint>(0);
                 templ.Name = templates.Read<string>(1);
                 templ.Description = templates.Read<string>(2);

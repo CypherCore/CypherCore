@@ -27,7 +27,7 @@ namespace Game.Entities
     {
         public static void AddCreatureToGroup(uint groupId, Creature member)
         {
-            Map map = member.GetMap();
+            var map = member.GetMap();
             if (!map)
                 return;
 
@@ -43,7 +43,7 @@ namespace Game.Entities
             else
             {
                 Log.outDebug(LogFilter.Unit, "Group not found: {0}. Creating new group.", groupId);
-                CreatureGroup group = new CreatureGroup(groupId);
+                var group = new CreatureGroup(groupId);
                 map.CreatureGroupHolder[groupId] = group;
                 group.AddMember(member);
             }
@@ -56,7 +56,7 @@ namespace Game.Entities
 
             if (group.IsEmpty())
             {
-                Map map = member.GetMap();
+                var map = member.GetMap();
                 if (!map)
                     return;
 
@@ -67,12 +67,12 @@ namespace Game.Entities
 
         public static void LoadCreatureFormations()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             CreatureGroupMap.Clear();
 
             //Get group data
-            SQLResult result = DB.World.Query("SELECT leaderGUID, memberGUID, dist, angle, groupAI, point_1, point_2 FROM creature_formations ORDER BY leaderGUID");
+            var result = DB.World.Query("SELECT leaderGUID, memberGUID, dist, angle, groupAI, point_1, point_2 FROM creature_formations ORDER BY leaderGUID");
 
             if (result.IsEmpty())
             {
@@ -87,7 +87,7 @@ namespace Game.Entities
                 //Load group member data
                 group_member = new FormationInfo();
                 group_member.leaderGUID = result.Read<uint>(0);
-                uint memberGUID = result.Read<uint>(1);
+                var memberGUID = result.Read<uint>(1);
                 group_member.groupAI = result.Read<uint>(4);
                 group_member.point_1 = result.Read<ushort>(5);
                 group_member.point_2 = result.Read<ushort>(6);
@@ -172,7 +172,7 @@ namespace Game.Entities
 
         public void MemberEngagingTarget(Creature member, Unit target)
         {
-            GroupAIFlags groupAI = (GroupAIFlags)FormationMgr.CreatureGroupMap[member.GetSpawnId()].groupAI;
+            var groupAI = (GroupAIFlags)FormationMgr.CreatureGroupMap[member.GetSpawnId()].groupAI;
             if (groupAI == 0)
                 return;
 
@@ -186,7 +186,7 @@ namespace Game.Entities
 
             foreach (var pair in m_members)
             {
-                Creature other = pair.Key;
+                var other = pair.Key;
 
                 // Skip self
                 if (other == member)
@@ -223,14 +223,14 @@ namespace Game.Entities
             if (!m_leader)
                 return;
 
-            float x = destination.GetPositionX();
-            float y = destination.GetPositionY();
-            float z = destination.GetPositionZ();
-            float pathangle = (float)Math.Atan2(m_leader.GetPositionY() - y, m_leader.GetPositionX() - x);
+            var x = destination.GetPositionX();
+            var y = destination.GetPositionY();
+            var z = destination.GetPositionZ();
+            var pathangle = (float)Math.Atan2(m_leader.GetPositionY() - y, m_leader.GetPositionX() - x);
 
             foreach (var pair in m_members)
             {
-                Creature member = pair.Key;
+                var member = pair.Key;
                 if (member == m_leader || !member.IsAlive() || member.GetVictim() || !pair.Value.groupAI.HasAnyFlag((uint)GroupAIFlags.IdleInFormation))
                     continue;
 
@@ -238,12 +238,12 @@ namespace Game.Entities
                     if (m_leader.GetCurrentWaypointInfo().nodeId == pair.Value.point_1 - 1 || m_leader.GetCurrentWaypointInfo().nodeId == pair.Value.point_2 - 1)
                         pair.Value.follow_angle = (float)Math.PI * 2 - pair.Value.follow_angle;
 
-                float angle = pair.Value.follow_angle;
-                float dist = pair.Value.follow_dist;
+                var angle = pair.Value.follow_angle;
+                var dist = pair.Value.follow_dist;
 
-                float dx = x + (float)Math.Cos(angle + pathangle) * dist;
-                float dy = y + (float)Math.Sin(angle + pathangle) * dist;
-                float dz = z;
+                var dx = x + (float)Math.Cos(angle + pathangle) * dist;
+                var dy = y + (float)Math.Sin(angle + pathangle) * dist;
+                var dz = z;
 
                 GridDefines.NormalizeMapCoord(ref dx);
                 GridDefines.NormalizeMapCoord(ref dy);
@@ -251,7 +251,7 @@ namespace Game.Entities
                 if (!member.IsFlying())
                     member.UpdateGroundPositionZ(dx, dy, ref dz);
 
-                Position point = new Position(dx, dy, dz, destination.GetOrientation());
+                var point = new Position(dx, dy, dz, destination.GetOrientation());
 
                 member.GetMotionMaster().MoveFormation(id, point, moveType, !member.IsWithinDist(m_leader, dist + 5.0f), orientation);
                 member.SetHomePosition(dx, dy, dz, pathangle);

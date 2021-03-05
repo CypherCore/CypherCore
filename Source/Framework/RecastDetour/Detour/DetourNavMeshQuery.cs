@@ -60,7 +60,7 @@ public static partial class Detour
         {
             m_includeFlags = 0xffff;
             m_excludeFlags = 0;
-            for (int i = 0; i < DT_MAX_AREAS; ++i)
+            for (var i = 0; i < DT_MAX_AREAS; ++i)
                 m_areaCost[i] = 1.0f;
         }
 
@@ -212,7 +212,7 @@ public static partial class Detour
                 lastBestNodeCost = .0f;
                 startRef = 0;
                 endRef = 0;
-                for (int i = 0; i < 3; ++i)
+                for (var i = 0; i < 3; ++i)
                 {
                     startPos[i] = 0f;
                     endPos[i] = 0f;
@@ -312,16 +312,16 @@ public static partial class Detour
 
             // Randomly pick one tile. Assume that all tiles cover roughly the same area.
             dtMeshTile tile = null;
-            float tsum = 0.0f;
-            for (int i = 0; i < m_nav.getMaxTiles(); i++)
+            var tsum = 0.0f;
+            for (var i = 0; i < m_nav.getMaxTiles(); i++)
             {
-                dtMeshTile curTile = m_nav.getTile(i);
+                var curTile = m_nav.getTile(i);
                 if (curTile == null || curTile.header == null) continue;
 
                 // Choose random tile using reservoi sampling.
                 const float area = 1.0f; // Could be tile area too.
                 tsum += area;
-                float u = frand();
+                var u = frand();
                 if (u * tsum <= area)
                     tile = curTile;
             }
@@ -331,23 +331,23 @@ public static partial class Detour
             // Randomly pick one polygon weighted by polygon area.
             dtPoly poly = null;
             dtPolyRef polyRef = 0;
-            dtPolyRef polyRefBase = m_nav.getPolyRefBase(tile);
+            var polyRefBase = m_nav.getPolyRefBase(tile);
 
-            float areaSum = 0.0f;
-            for (int i = 0; i < tile.header.polyCount; ++i)
+            var areaSum = 0.0f;
+            for (var i = 0; i < tile.header.polyCount; ++i)
             {
-                dtPoly p = tile.polys[i];
+                var p = tile.polys[i];
                 // Do not return off-mesh connection polygons.
                 if (p.getType() != (byte)dtPolyTypes.DT_POLYTYPE_GROUND)
                     continue;
                 // Must pass filter
-                dtPolyRef pRef = polyRefBase | (uint)i;
+                var pRef = polyRefBase | (uint)i;
                 if (!filter.passFilter(pRef, tile, p))
                     continue;
 
                 // Calc area of the polygon.
-                float polyArea = 0.0f;
-                for (int j = 2; j < p.vertCount; ++j)
+                var polyArea = 0.0f;
+                for (var j = 2; j < p.vertCount; ++j)
                 {
                     //float* va = &tile.verts[p.verts[0]*3];
                     //float* vb = &tile.verts[p.verts[j-1]*3];
@@ -358,7 +358,7 @@ public static partial class Detour
 
                 // Choose random polygon weighted by area, using reservoi sampling.
                 areaSum += polyArea;
-                float u = frand();
+                var u = frand();
                 if (u * areaSum <= polyArea)
                 {
                     poly = p;
@@ -371,24 +371,24 @@ public static partial class Detour
 
             // Randomly pick point on polygon.
             //const float* v = &tile.verts[poly.verts[0]*3];
-            int vStart = poly.verts[0] * 3;
-            float[] verts = new float[3 * DT_VERTS_PER_POLYGON];
-            float[] areas = new float[DT_VERTS_PER_POLYGON];
+            var vStart = poly.verts[0] * 3;
+            var verts = new float[3 * DT_VERTS_PER_POLYGON];
+            var areas = new float[DT_VERTS_PER_POLYGON];
             Detour.dtVcopy(verts, 0 * 3, tile.verts, vStart);
-            for (int j = 1; j < poly.vertCount; ++j)
+            for (var j = 1; j < poly.vertCount; ++j)
             {
                 //v = &tile.verts[poly.verts[j]*3];
                 Detour.dtVcopy(verts, j * 3, tile.verts, poly.verts[j] * 3);
             }
 
-            float s = frand();
-            float t = frand();
+            var s = frand();
+            var t = frand();
 
-            float[] pt = new float[3];
+            var pt = new float[3];
             dtRandomPointInConvexPoly(verts, poly.vertCount, areas, s, t, pt);
 
-            float h = 0.0f;
-            dtStatus status = getPolyHeight(polyRef, pt, ref h);
+            var h = 0.0f;
+            var status = getPolyHeight(polyRef, pt, ref h);
             if (dtStatusFailed(status))
                 return status;
             pt[1] = h;
@@ -428,7 +428,7 @@ public static partial class Detour
             m_nodePool.clear();
             m_openList.clear();
 
-            dtNode startNode = m_nodePool.getNode(startRef);
+            var startNode = m_nodePool.getNode(startRef);
             dtVcopy(startNode.pos, centerPos);
             startNode.pidx = 0;
             startNode.cost = 0;
@@ -437,10 +437,10 @@ public static partial class Detour
             startNode.flags = (byte)dtNodeFlags.DT_NODE_OPEN;
             m_openList.push(startNode);
 
-            dtStatus status = DT_SUCCESS;
+            var status = DT_SUCCESS;
 
-            float radiusSqr = dtSqr(radius);
-            float areaSum = 0.0f;
+            var radiusSqr = dtSqr(radius);
+            var areaSum = 0.0f;
 
             dtMeshTile randomTile = null;
             dtPoly randomPoly = null;
@@ -448,7 +448,7 @@ public static partial class Detour
 
             while (!m_openList.empty())
             {
-                dtNode bestNode = m_openList.pop();
+                var bestNode = m_openList.pop();
                 unchecked
                 {
                     bestNode.flags &= (byte)(~dtNodeFlags.DT_NODE_OPEN);
@@ -457,7 +457,7 @@ public static partial class Detour
 
                 // Get poly and tile.
                 // The API input has been cheked already, skip checking internal data.
-                dtPolyRef bestRef = bestNode.id;
+                var bestRef = bestNode.id;
                 dtMeshTile bestTile = null;
                 dtPoly bestPoly = null;
                 m_nav.getTileAndPolyByRefUnsafe(bestRef, ref bestTile, ref bestPoly);
@@ -466,8 +466,8 @@ public static partial class Detour
                 if (bestPoly.getType() == (byte)dtPolyTypes.DT_POLYTYPE_GROUND)
                 {
                     // Calc area of the polygon.
-                    float polyArea = 0.0f;
-                    for (int j = 2; j < bestPoly.vertCount; ++j)
+                    var polyArea = 0.0f;
+                    for (var j = 2; j < bestPoly.vertCount; ++j)
                     {
                         //const float* va = &bestTile.verts[bestPoly.verts[0]*3];
                         //const float* vb = &bestTile.verts[bestPoly.verts[j-1]*3];
@@ -476,7 +476,7 @@ public static partial class Detour
                     }
                     // Choose random polygon weighted by area, using reservoi sampling.
                     areaSum += polyArea;
-                    float u = frand();
+                    var u = frand();
                     if (u * areaSum <= polyArea)
                     {
                         randomTile = bestTile;
@@ -495,10 +495,10 @@ public static partial class Detour
                 if (parentRef != 0)
                     m_nav.getTileAndPolyByRefUnsafe(parentRef, ref parentTile, ref parentPoly);
 
-                for (uint i = bestPoly.firstLink; i != DT_NULL_LINK; i = bestTile.links[i].next)
+                for (var i = bestPoly.firstLink; i != DT_NULL_LINK; i = bestTile.links[i].next)
                 {
-                    dtLink link = bestTile.links[i];
-                    dtPolyRef neighbourRef = link.polyRef;
+                    var link = bestTile.links[i];
+                    var neighbourRef = link.polyRef;
                     // Skip invalid neighbours and do not follow back to parent.
                     if (neighbourRef == 0 || neighbourRef == parentRef)
                         continue;
@@ -513,18 +513,18 @@ public static partial class Detour
                         continue;
 
                     // Find edge and calc distance to the edge.
-                    float[] va = new float[3];//, vb[3];
-                    float[] vb = new float[3];
+                    var va = new float[3];//, vb[3];
+                    var vb = new float[3];
                     if (getPortalPoints(bestRef, bestPoly, bestTile, neighbourRef, neighbourPoly, neighbourTile, va, vb) == 0)
                         continue;
 
                     // If the circle is not touching the next polygon, skip it.
-                    float tseg = .0f;
-                    float distSqr = dtDistancePtSegSqr2D(centerPos, 0, va, 0, vb, 0, ref tseg);
+                    var tseg = .0f;
+                    var distSqr = dtDistancePtSegSqr2D(centerPos, 0, va, 0, vb, 0, ref tseg);
                     if (distSqr > radiusSqr)
                         continue;
 
-                    dtNode neighbourNode = m_nodePool.getNode(neighbourRef);
+                    var neighbourNode = m_nodePool.getNode(neighbourRef);
                     if (neighbourNode == null)
                     {
                         status |= DT_OUT_OF_NODES;
@@ -540,7 +540,7 @@ public static partial class Detour
                         dtVlerp(neighbourNode.pos, va, vb, 0.5f);
                     }
 
-                    float total = bestNode.total + dtVdist(bestNode.pos, neighbourNode.pos);
+                    var total = bestNode.total + dtVdist(bestNode.pos, neighbourNode.pos);
 
                     // The node is already in open list and the new result is worse, skip.
                     if (((neighbourNode.flags & (byte)dtNodeFlags.DT_NODE_OPEN) != 0) && total >= neighbourNode.total)
@@ -571,23 +571,23 @@ public static partial class Detour
 
             // Randomly pick point on polygon.
             //float* v = &randomTile.verts[randomPoly.verts[0]*3];
-            float[] verts = new float[3 * DT_VERTS_PER_POLYGON];
-            float[] areas = new float[DT_VERTS_PER_POLYGON];
+            var verts = new float[3 * DT_VERTS_PER_POLYGON];
+            var areas = new float[DT_VERTS_PER_POLYGON];
             dtVcopy(verts, 0 * 3, randomTile.verts, 0);
-            for (int j = 1; j < randomPoly.vertCount; ++j)
+            for (var j = 1; j < randomPoly.vertCount; ++j)
             {
                 //v = &randomTile.verts[randomPoly.verts[j]*3];
                 dtVcopy(verts, j * 3, randomTile.verts, randomPoly.verts[j] * 3);
             }
 
-            float s = frand();
-            float t = frand();
+            var s = frand();
+            var t = frand();
 
-            float[] pt = new float[3];
+            var pt = new float[3];
             dtRandomPointInConvexPoly(verts, randomPoly.vertCount, areas, s, t, pt);
 
-            float h = 0.0f;
-            dtStatus stat = getPolyHeight(randomPolyRef, pt, ref h);
+            var h = 0.0f;
+            var stat = getPolyHeight(randomPolyRef, pt, ref h);
             if (dtStatusFailed(status))
                 return stat;
             pt[1] = h;
@@ -630,11 +630,11 @@ public static partial class Detour
             {
                 //const float* v0 = &tile.verts[poly.verts[0]*3];
                 //const float* v1 = &tile.verts[poly.verts[1]*3];
-                int v0Start = poly.verts[0] * 3;
-                int v1Start = poly.verts[1] * 3;
-                float d0 = dtVdist(pos, 0, tile.verts, v0Start);
-                float d1 = dtVdist(pos, 0, tile.verts, v1Start);
-                float u = d0 / (d0 + d1);
+                var v0Start = poly.verts[0] * 3;
+                var v1Start = poly.verts[1] * 3;
+                var d0 = dtVdist(pos, 0, tile.verts, v0Start);
+                var d1 = dtVdist(pos, 0, tile.verts, v1Start);
+                var u = d0 / (d0 + d1);
                 dtVlerp(closest, 0, tile.verts, v0Start, tile.verts, v1Start, u);
                 //if (posOverPoly)
                 posOverPoly = false;
@@ -642,14 +642,14 @@ public static partial class Detour
             }
 
             //uint ip = (uint)(poly - tile.polys);
-            dtPolyDetail pd = tile.detailMeshes[ip];
+            var pd = tile.detailMeshes[ip];
 
             // Clamp point to be inside the polygon.
-            float[] verts = new float[DT_VERTS_PER_POLYGON * 3];
-            float[] edged = new float[DT_VERTS_PER_POLYGON];
-            float[] edget = new float[DT_VERTS_PER_POLYGON];
+            var verts = new float[DT_VERTS_PER_POLYGON * 3];
+            var edged = new float[DT_VERTS_PER_POLYGON];
+            var edget = new float[DT_VERTS_PER_POLYGON];
             int nv = poly.vertCount;
-            for (int i = 0; i < nv; ++i)
+            for (var i = 0; i < nv; ++i)
             {
                 dtVcopy(verts, i * 3, tile.verts, poly.verts[i] * 3);
             }
@@ -658,9 +658,9 @@ public static partial class Detour
             if (!dtDistancePtPolyEdgesSqr(pos, 0, verts, nv, edged, edget))
             {
                 // Point is outside the polygon, dtClamp to nearest edge.
-                float dmin = float.MaxValue;
-                int imin = -1;
-                for (int i = 0; i < nv; ++i)
+                var dmin = float.MaxValue;
+                var imin = -1;
+                for (var i = 0; i < nv; ++i)
                 {
                     if (edged[i] < dmin)
                     {
@@ -670,8 +670,8 @@ public static partial class Detour
                 }
                 //const float* va = &verts[imin*3];
                 //const float* vb = &verts[((imin+1)%nv)*3];
-                int vaStart = imin * 3;
-                int vbStart = ((imin + 1) % nv) * 3;
+                var vaStart = imin * 3;
+                var vbStart = ((imin + 1) % nv) * 3;
                 dtVlerp(closest, 0, verts, vaStart, verts, vbStart, edget[imin]);
 
                 //if (posOverPoly)
@@ -684,17 +684,17 @@ public static partial class Detour
             }
 
             // Find height at the location.
-            for (int j = 0; j < pd.triCount; ++j)
+            for (var j = 0; j < pd.triCount; ++j)
             {
                 //byte[] t = &tile.detailTris[(pd.triBase+j)*4];
                 //const float* v[3];
-                int tStart = (int)(pd.triBase + j) * 4;
-                int[] vStarts = new int[3];
-                float[][] vSrc = new float[3][];
-                for (int k = 0; k < 3; ++k)
+                var tStart = (int)(pd.triBase + j) * 4;
+                var vStarts = new int[3];
+                var vSrc = new float[3][];
+                for (var k = 0; k < 3; ++k)
                 {
-                    byte tk = tile.detailTris[tStart + k];
-                    byte vCount = poly.vertCount;
+                    var tk = tile.detailTris[tStart + k];
+                    var vCount = poly.vertCount;
                     if (tk < vCount)
                     {
                         //v[k] = &tile.verts[poly.verts[tile.detailTris[tStart + k]]*3];
@@ -708,7 +708,7 @@ public static partial class Detour
                         vSrc[k] = tile.detailVerts;
                     }
                 }
-                float h = .0f;
+                var h = .0f;
                 if (dtClosestHeightPointTriangle(closest, 0, vSrc[0], vStarts[0], vSrc[1], vStarts[1], vSrc[2], vStarts[2], ref h))
                 {
                     closest[1] = h;
@@ -746,17 +746,17 @@ public static partial class Detour
                 return DT_FAILURE | DT_INVALID_PARAM;
 
             // Collect vertices.
-            float[] verts = new float[DT_VERTS_PER_POLYGON * 3];
-            float[] edged = new float[DT_VERTS_PER_POLYGON];
-            float[] edget = new float[DT_VERTS_PER_POLYGON];
-            int nv = 0;
-            for (int i = 0; i < (int)poly.vertCount; ++i)
+            var verts = new float[DT_VERTS_PER_POLYGON * 3];
+            var edged = new float[DT_VERTS_PER_POLYGON];
+            var edget = new float[DT_VERTS_PER_POLYGON];
+            var nv = 0;
+            for (var i = 0; i < (int)poly.vertCount; ++i)
             {
                 dtVcopy(verts, nv * 3, tile.verts, poly.verts[i] * 3);
                 nv++;
             }
 
-            bool inside = dtDistancePtPolyEdgesSqr(pos, 0, verts, nv, edged, edget);
+            var inside = dtDistancePtPolyEdgesSqr(pos, 0, verts, nv, edged, edget);
             if (inside)
             {
                 // Point is inside the polygon, return the point.
@@ -765,9 +765,9 @@ public static partial class Detour
             else
             {
                 // Point is outside the polygon, dtClamp to nearest edge.
-                float dmin = float.MaxValue;
-                int imin = -1;
-                for (int i = 0; i < nv; ++i)
+                var dmin = float.MaxValue;
+                var imin = -1;
+                for (var i = 0; i < nv; ++i)
                 {
                     if (edged[i] < dmin)
                     {
@@ -777,8 +777,8 @@ public static partial class Detour
                 }
                 //const float* va = &verts[imin*3];
                 //const float* vb = &verts[((imin+1)%nv)*3];
-                int vaStart = imin * 3;
-                int vbStart = ((imin + 1) % nv) * 3;
+                var vaStart = imin * 3;
+                var vbStart = ((imin + 1) % nv) * 3;
                 dtVlerp(closest, 0, verts, vaStart, verts, vbStart, edget[imin]);
             }
 
@@ -809,11 +809,11 @@ public static partial class Detour
             {
                 //const float* v0 = &tile.verts[poly.verts[0]*3];
                 //const float* v1 = &tile.verts[poly.verts[1]*3];
-                int v0Start = poly.verts[0] * 3;
-                int v1Start = poly.verts[1] * 3;
-                float d0 = dtVdist2D(pos, 0, tile.verts, v0Start);
-                float d1 = dtVdist2D(pos, 0, tile.verts, v1Start);
-                float u = d0 / (d0 + d1);
+                var v0Start = poly.verts[0] * 3;
+                var v1Start = poly.verts[1] * 3;
+                var d0 = dtVdist2D(pos, 0, tile.verts, v0Start);
+                var d1 = dtVdist2D(pos, 0, tile.verts, v1Start);
+                var u = d0 / (d0 + d1);
                 //if (height)
                 height = tile.verts[v0Start + 1] + (tile.verts[v1Start + 1] - tile.verts[v0Start + 1]) * u;
                 return DT_SUCCESS;
@@ -821,16 +821,16 @@ public static partial class Detour
             else
             {
                 //const uint ip = (uint)(poly - tile.polys);
-                dtPolyDetail pd = tile.detailMeshes[ip];
-                for (int j = 0; j < pd.triCount; ++j)
+                var pd = tile.detailMeshes[ip];
+                for (var j = 0; j < pd.triCount; ++j)
                 {
                     //byte[] t =  tile.detailTris[(pd.triBase+j)*4] ;
                     //float* v[3];
-                    int tStart = (int)(pd.triBase + j) * 4;
-                    int[] vStarts = new int[3];
-                    float[][] vSrc = new float[3][];
+                    var tStart = (int)(pd.triBase + j) * 4;
+                    var vStarts = new int[3];
+                    var vSrc = new float[3][];
 
-                    for (int k = 0; k < 3; ++k)
+                    for (var k = 0; k < 3; ++k)
                     {
                         if (tile.detailTris[tStart + k] < poly.vertCount)
                         {
@@ -845,7 +845,7 @@ public static partial class Detour
                             vSrc[k] = tile.detailVerts;
                         }
                     }
-                    float h = .0f;
+                    var h = .0f;
                     if (dtClosestHeightPointTriangle(pos, 0, vSrc[0], vStarts[0], vSrc[1], vStarts[1], vSrc[2], vStarts[2], ref h))
                     {
                         //if (height)
@@ -884,9 +884,9 @@ public static partial class Detour
 
             nearestRef = 0;
 
-            dtFindNearestPolyQuery query = new dtFindNearestPolyQuery(this, center);
+            var query = new dtFindNearestPolyQuery(this, center);
 
-            dtStatus status = queryPolygons(center, halfExtents, filter, query);
+            var status = queryPolygons(center, halfExtents, filter, query);
             if (dtStatusFailed(status))
                 return status;
 
@@ -905,29 +905,29 @@ public static partial class Detour
             Debug.Assert(m_nav != null);
 
             const int batchSize = 32;
-            dtPolyRef[] polyRefs = new dtPolyRef[batchSize];
-            dtPoly[] polys = new dtPoly[batchSize];
-            int n = 0;
+            var polyRefs = new dtPolyRef[batchSize];
+            var polys = new dtPoly[batchSize];
+            var n = 0;
 
             if (tile.bvTree != null)
             {
-                dtBVNode node = tile.bvTree[0];
+                var node = tile.bvTree[0];
                 //dtBVNode* end = &tile.bvTree[tile.header.bvNodeCount];
-                int endIndex = tile.header.bvNodeCount;
-                float[] tbmin = tile.header.bmin;
-                float[] tbmax = tile.header.bmax;
-                float qfac = tile.header.bvQuantFactor;
+                var endIndex = tile.header.bvNodeCount;
+                var tbmin = tile.header.bmin;
+                var tbmax = tile.header.bmax;
+                var qfac = tile.header.bvQuantFactor;
 
                 // Calculate quantized box
-                ushort[] bmin = new ushort[3];
-                ushort[] bmax = new ushort[3];
+                var bmin = new ushort[3];
+                var bmax = new ushort[3];
                 // dtClamp query box to world box.
-                float minx = dtClamp(qmin[0], tbmin[0], tbmax[0]) - tbmin[0];
-                float miny = dtClamp(qmin[1], tbmin[1], tbmax[1]) - tbmin[1];
-                float minz = dtClamp(qmin[2], tbmin[2], tbmax[2]) - tbmin[2];
-                float maxx = dtClamp(qmax[0], tbmin[0], tbmax[0]) - tbmin[0];
-                float maxy = dtClamp(qmax[1], tbmin[1], tbmax[1]) - tbmin[1];
-                float maxz = dtClamp(qmax[2], tbmin[2], tbmax[2]) - tbmin[2];
+                var minx = dtClamp(qmin[0], tbmin[0], tbmax[0]) - tbmin[0];
+                var miny = dtClamp(qmin[1], tbmin[1], tbmax[1]) - tbmin[1];
+                var minz = dtClamp(qmin[2], tbmin[2], tbmax[2]) - tbmin[2];
+                var maxx = dtClamp(qmax[0], tbmin[0], tbmax[0]) - tbmin[0];
+                var maxy = dtClamp(qmax[1], tbmin[1], tbmax[1]) - tbmin[1];
+                var maxz = dtClamp(qmax[2], tbmin[2], tbmax[2]) - tbmin[2];
                 // Quantize
                 bmin[0] = (ushort)((int)(qfac * minx) & 0xfffe);
                 bmin[1] = (ushort)((int)(qfac * miny) & 0xfffe);
@@ -937,18 +937,18 @@ public static partial class Detour
                 bmax[2] = (ushort)((int)(qfac * maxz + 1) | 1);
 
                 // Traverse tree
-                dtPolyRef polyRefBase = m_nav.getPolyRefBase(tile);
-                int nodeIndex = 0;
+                var polyRefBase = m_nav.getPolyRefBase(tile);
+                var nodeIndex = 0;
                 while (nodeIndex < endIndex)
                 {
                     node = tile.bvTree[nodeIndex];
 
-                    bool overlap = dtOverlapQuantBounds(bmin, bmax, node.bmin, node.bmax);
-                    bool isLeafNode = node.i >= 0;
+                    var overlap = dtOverlapQuantBounds(bmin, bmax, node.bmin, node.bmax);
+                    var isLeafNode = node.i >= 0;
 
                     if (isLeafNode && overlap)
                     {
-                        dtPolyRef polyRef = polyRefBase | (uint)node.i;
+                        var polyRef = polyRefBase | (uint)node.i;
                         if (filter.passFilter(polyRef, tile, tile.polys[node.i]))
                         {
                             polyRefs[n] = polyRef;
@@ -972,32 +972,32 @@ public static partial class Detour
                     }
                     else
                     {
-                        int escapeIndex = -node.i;
+                        var escapeIndex = -node.i;
                         nodeIndex += escapeIndex;
                     }
                 }
             }
             else
             {
-                float[] bmin = new float[3];
-                float[] bmax = new float[3];
-                dtPolyRef polyRefBase = m_nav.getPolyRefBase(tile);
-                for (int i = 0; i < tile.header.polyCount; ++i)
+                var bmin = new float[3];
+                var bmax = new float[3];
+                var polyRefBase = m_nav.getPolyRefBase(tile);
+                for (var i = 0; i < tile.header.polyCount; ++i)
                 {
-                    dtPoly p = tile.polys[i];
+                    var p = tile.polys[i];
                     // Do not return off-mesh connection polygons.
                     if (p.getType() == (byte)dtPolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
                         continue;
                     // Must pass filter
-                    dtPolyRef polyRef = polyRefBase | (uint)i;
+                    var polyRef = polyRefBase | (uint)i;
                     if (!filter.passFilter(polyRef, tile, p))
                         continue;
                     // Calc polygon bounds.
                     //const float* v = &tile.verts[p.verts[0]*3];
-                    int vStart = p.verts[0] * 3;
+                    var vStart = p.verts[0] * 3;
                     dtVcopy(bmin, 0, tile.verts, vStart);
                     dtVcopy(bmax, 0, tile.verts, vStart);
-                    for (int j = 1; j < p.vertCount; ++j)
+                    for (var j = 1; j < p.vertCount; ++j)
                     {
                         //v = &tile.verts[p.verts[j]*3];
                         vStart = p.verts[j] * 3;
@@ -1049,8 +1049,8 @@ public static partial class Detour
         {
             Debug.Assert(m_nav != null);
 
-            float[] bmin = new float[3];
-            float[] bmax = new float[3];
+            var bmin = new float[3];
+            var bmax = new float[3];
             dtVsub(bmin, center, halfExtents);
             dtVadd(bmax, center, halfExtents);
 
@@ -1059,15 +1059,15 @@ public static partial class Detour
             m_nav.calcTileLoc(bmin, ref minx, ref miny);
             m_nav.calcTileLoc(bmax, ref maxx, ref maxy);
 
-            int MAX_NEIS = 32;
-            dtMeshTile[] neis = new dtMeshTile[MAX_NEIS];
+            var MAX_NEIS = 32;
+            var neis = new dtMeshTile[MAX_NEIS];
 
-            for (int y = miny; y <= maxy; ++y)
+            for (var y = miny; y <= maxy; ++y)
             {
-                for (int x = minx; x <= maxx; ++x)
+                for (var x = minx; x <= maxx; ++x)
                 {
-                    int nneis = m_nav.getTilesAt(x, y, neis, MAX_NEIS);
-                    for (int j = 0; j < nneis; ++j)
+                    var nneis = m_nav.getTilesAt(x, y, neis, MAX_NEIS);
+                    for (var j = 0; j < nneis; ++j)
                     {
                         queryPolygonsInTile(neis[j], bmin, bmax, filter, query);
                     }
@@ -1124,7 +1124,7 @@ public static partial class Detour
             m_nodePool.clear();
             m_openList.clear();
 
-            dtNode startNode = m_nodePool.getNode(startRef);
+            var startNode = m_nodePool.getNode(startRef);
             dtVcopy(startNode.pos, startPos);
             startNode.pidx = 0;
             startNode.cost = 0;
@@ -1133,15 +1133,15 @@ public static partial class Detour
             startNode.flags = (byte)dtNodeFlags.DT_NODE_OPEN;
             m_openList.push(startNode);
 
-            dtNode lastBestNode = startNode;
-            float lastBestNodeCost = startNode.total;
+            var lastBestNode = startNode;
+            var lastBestNodeCost = startNode.total;
 
-            bool outOfNodes = false;
+            var outOfNodes = false;
 
             while (!m_openList.empty())
             {
                 // Remove node from open list and put it in closed list.
-                dtNode bestNode = m_openList.pop();
+                var bestNode = m_openList.pop();
                 unchecked
                 {
                     bestNode.flags &= (byte)(~dtNodeFlags.DT_NODE_OPEN);
@@ -1157,7 +1157,7 @@ public static partial class Detour
 
                 // Get current poly and tile.
                 // The API input has been cheked already, skip checking internal data.
-                dtPolyRef bestRef = bestNode.id;
+                var bestRef = bestNode.id;
                 dtMeshTile bestTile = null;
                 dtPoly bestPoly = null;
                 m_nav.getTileAndPolyByRefUnsafe(bestRef, ref bestTile, ref bestPoly);
@@ -1171,9 +1171,9 @@ public static partial class Detour
                 if (parentRef != 0)
                     m_nav.getTileAndPolyByRefUnsafe(parentRef, ref parentTile, ref parentPoly);
 
-                for (uint i = bestPoly.firstLink; i != DT_NULL_LINK; i = bestTile.links[i].next)
+                for (var i = bestPoly.firstLink; i != DT_NULL_LINK; i = bestTile.links[i].next)
                 {
-                    dtPolyRef neighbourRef = bestTile.links[i].polyRef;
+                    var neighbourRef = bestTile.links[i].polyRef;
 
                     // Skip invalid ids and do not expand back to where we came from.
                     if (neighbourRef == 0 || neighbourRef == parentRef)
@@ -1193,7 +1193,7 @@ public static partial class Detour
                     if (bestTile.links[i].side != 0xff)
                         crossSide = (byte)(bestTile.links[i].side >> 1);
 
-                    dtNode neighbourNode = m_nodePool.getNode(neighbourRef, crossSide);
+                    var neighbourNode = m_nodePool.getNode(neighbourRef, crossSide);
                     if (neighbourNode == null)
                     {
                         outOfNodes = true;
@@ -1216,11 +1216,11 @@ public static partial class Detour
                     if (neighbourRef == endRef)
                     {
                         // Cost
-                        float curCost = filter.getCost(bestNode.pos, neighbourNode.pos,
+                        var curCost = filter.getCost(bestNode.pos, neighbourNode.pos,
                                                               parentRef, parentTile, parentPoly,
                                                               bestRef, bestTile, bestPoly,
                                                               neighbourRef, neighbourTile, neighbourPoly);
-                        float endCost = filter.getCost(neighbourNode.pos, endPos,
+                        var endCost = filter.getCost(neighbourNode.pos, endPos,
                                                               bestRef, bestTile, bestPoly,
                                                               neighbourRef, neighbourTile, neighbourPoly,
                                                               0, null, null);
@@ -1231,7 +1231,7 @@ public static partial class Detour
                     else
                     {
                         // Cost
-                        float curCost = filter.getCost(bestNode.pos, neighbourNode.pos,
+                        var curCost = filter.getCost(bestNode.pos, neighbourNode.pos,
                                                               parentRef, parentTile, parentPoly,
                                                               bestRef, bestTile, bestPoly,
                                                               neighbourRef, neighbourTile, neighbourPoly);
@@ -1239,7 +1239,7 @@ public static partial class Detour
                         heuristic = dtVdist(neighbourNode.pos, endPos) * H_SCALE;
                     }
 
-                    float total = cost + heuristic;
+                    var total = cost + heuristic;
 
                     // The node is already in open list and the new result is worse, skip.
                     if ((neighbourNode.flags & (byte)dtNodeFlags.DT_NODE_OPEN) != 0 && total >= neighbourNode.total)
@@ -1279,7 +1279,7 @@ public static partial class Detour
                 }
             }
 
-            dtStatus status = getPathToNode(lastBestNode, path, ref pathCount, maxPath);
+            var status = getPathToNode(lastBestNode, path, ref pathCount, maxPath);
 
             if (lastBestNode.id != endRef)
                 status |= DT_PARTIAL_RESULT;
@@ -1293,8 +1293,8 @@ public static partial class Detour
         dtStatus getPathToNode(dtNode endNode, dtPolyRef[] path, ref uint pathCount, int maxPath)
         {
             // Find the length of the entire path.
-            dtNode curNode = endNode;
-            int length = 0;
+            var curNode = endNode;
+            var length = 0;
             do
             {
                 length++;
@@ -1312,7 +1312,7 @@ public static partial class Detour
             }
 
             // Write path
-            for (int i = writeCount - 1; i >= 0; i--)
+            for (var i = writeCount - 1; i >= 0; i--)
             {
                 //dtAssert(curNode);
 
@@ -1384,8 +1384,8 @@ public static partial class Detour
             {
                 // limiting to several times the character radius yields nice results. It is not sensitive 
                 // so it is enough to compute it from the first tile.
-                dtMeshTile tile = m_nav.getTileByRef(startRef);
-                float agentRadius = tile.header.walkableRadius;
+                var tile = m_nav.getTileByRef(startRef);
+                var agentRadius = tile.header.walkableRadius;
                 m_query.raycastLimitSqr = dtSqr(agentRadius * 50.0f); //DT_RAY_CAST_LIMIT_PROPORTIONS;
             }
 
@@ -1398,7 +1398,7 @@ public static partial class Detour
             m_nodePool.clear();
             m_openList.clear();
 
-            dtNode startNode = m_nodePool.getNode(startRef);
+            var startNode = m_nodePool.getNode(startRef);
             dtVcopy(startNode.pos, startPos);
             startNode.pidx = 0;
             startNode.cost = 0;
@@ -1430,16 +1430,16 @@ public static partial class Detour
                 return DT_FAILURE;
             }
 
-            dtRaycastHit rayHit = new dtRaycastHit();
+            var rayHit = new dtRaycastHit();
             rayHit.maxPath = 0;
 
-            int iter = 0;
+            var iter = 0;
             while (iter < maxIter && !m_openList.empty())
             {
                 iter++;
 
                 // Remove node from open list and put it in closed list.
-                dtNode bestNode = m_openList.pop();
+                var bestNode = m_openList.pop();
                 bestNode.dtcsClearFlag(dtNodeFlags.DT_NODE_OPEN);
                 bestNode.dtcsSetFlag(dtNodeFlags.DT_NODE_CLOSED);
 
@@ -1447,7 +1447,7 @@ public static partial class Detour
                 if (bestNode.id == m_query.endRef)
                 {
                     m_query.lastBestNode = bestNode;
-                    dtStatus details = m_query.status & DT_STATUS_DETAIL_MASK;
+                    var details = m_query.status & DT_STATUS_DETAIL_MASK;
                     m_query.status = DT_SUCCESS | details;
                     //if (doneIters)
                     doneIters = iter;
@@ -1456,7 +1456,7 @@ public static partial class Detour
 
                 // Get current poly and tile.
                 // The API input has been cheked already, skip checking internal data.
-                dtPolyRef bestRef = bestNode.id;
+                var bestRef = bestNode.id;
                 dtMeshTile bestTile = null;
                 dtPoly bestPoly = null;
                 if (dtStatusFailed(m_nav.getTileAndPolyByRef(bestRef, ref bestTile, ref bestPoly)))
@@ -1483,7 +1483,7 @@ public static partial class Detour
                 }
                 if (parentRef != 0)
                 {
-                    bool invalidParent = dtStatusFailed(m_nav.getTileAndPolyByRef(parentRef, ref parentTile, ref parentPoly));
+                    var invalidParent = dtStatusFailed(m_nav.getTileAndPolyByRef(parentRef, ref parentTile, ref parentPoly));
                     if (invalidParent || (grandpaRef != 0 && !m_nav.isValidPolyRef(grandpaRef)))
                     {
                         // The polygon has disappeared during the sliced query, fail.
@@ -1495,16 +1495,16 @@ public static partial class Detour
                 }
 
                 // decide whether to test raycast to previous nodes
-                bool tryLOS = false;
+                var tryLOS = false;
                 if ((m_query.options & (int)dtFindPathOptions.DT_FINDPATH_ANY_ANGLE) != 0)
                 {
                     if ((parentRef != 0) && (dtVdistSqr(parentNode.pos, bestNode.pos) < m_query.raycastLimitSqr))
                         tryLOS = true;
                 }
 
-                for (uint i = bestPoly.firstLink; i != DT_NULL_LINK; i = bestTile.links[i].next)
+                for (var i = bestPoly.firstLink; i != DT_NULL_LINK; i = bestTile.links[i].next)
                 {
-                    dtPolyRef neighbourRef = bestTile.links[i].polyRef;
+                    var neighbourRef = bestTile.links[i].polyRef;
 
                     // Skip invalid ids and do not expand back to where we came from.
                     if (neighbourRef == 0 || neighbourRef == parentRef)
@@ -1519,7 +1519,7 @@ public static partial class Detour
                     if (!m_query.filter.passFilter(neighbourRef, neighbourTile, neighbourPoly))
                         continue;
 
-                    dtNode neighbourNode = m_nodePool.getNode(neighbourRef);
+                    var neighbourNode = m_nodePool.getNode(neighbourRef);
                     if (neighbourNode == null)
                     {
                         m_query.status |= DT_OUT_OF_NODES;
@@ -1543,7 +1543,7 @@ public static partial class Detour
                     float heuristic = 0;
 
                     // raycast parent
-                    bool foundShortCut = false;
+                    var foundShortCut = false;
                     rayHit.pathCost = rayHit.t = 0;
                     if (tryLOS)
                     {
@@ -1560,7 +1560,7 @@ public static partial class Detour
                     else
                     {
                         // No shortcut found.
-                        float curCost = m_query.filter.getCost(bestNode.pos, neighbourNode.pos,
+                        var curCost = m_query.filter.getCost(bestNode.pos, neighbourNode.pos,
                                                                       parentRef, parentTile, parentPoly,
                                                                     bestRef, bestTile, bestPoly,
                                                                     neighbourRef, neighbourTile, neighbourPoly);
@@ -1570,7 +1570,7 @@ public static partial class Detour
                     // Special case for last node.
                     if (neighbourRef == m_query.endRef)
                     {
-                        float endCost = m_query.filter.getCost(neighbourNode.pos, m_query.endPos,
+                        var endCost = m_query.filter.getCost(neighbourNode.pos, m_query.endPos,
                                                                       bestRef, bestTile, bestPoly,
                                                                       neighbourRef, neighbourTile, neighbourPoly,
                                                                       0, null, null);
@@ -1583,7 +1583,7 @@ public static partial class Detour
                         heuristic = dtVdist(neighbourNode.pos, m_query.endPos) * H_SCALE;
                     }
 
-                    float total = cost + heuristic;
+                    var total = cost + heuristic;
 
                     // The node is already in open list and the new result is worse, skip.
                     if ((neighbourNode.flags & (byte)dtNodeFlags.DT_NODE_OPEN) != 0 && total >= neighbourNode.total)
@@ -1626,7 +1626,7 @@ public static partial class Detour
             // Exhausted all nodes, but could not find path.
             if (m_openList.empty())
             {
-                dtStatus details = m_query.status & DT_STATUS_DETAIL_MASK;
+                var details = m_query.status & DT_STATUS_DETAIL_MASK;
                 m_query.status = DT_SUCCESS | details;
             }
 
@@ -1654,7 +1654,7 @@ public static partial class Detour
                 return DT_FAILURE;
             }
 
-            int n = 0;
+            var n = 0;
 
             if (m_query.startRef == m_query.endRef)
             {
@@ -1670,14 +1670,14 @@ public static partial class Detour
                     m_query.status |= DT_PARTIAL_RESULT;
 
                 dtNode prev = null;
-                dtNode node = m_query.lastBestNode;
-                int prevRay = 0;
+                var node = m_query.lastBestNode;
+                var prevRay = 0;
                 do
                 {
-                    dtNode next = m_nodePool.getNodeAtIdx(node.pidx);
+                    var next = m_nodePool.getNodeAtIdx(node.pidx);
                     node.pidx = m_nodePool.getNodeIdx(prev);
                     prev = node;
-                    int nextRay = node.flags & (byte)dtNodeFlags.DT_NODE_PARENT_DETACHED; // keep track of whether parent is not adjacent (i.e. due to raycast shortcut)
+                    var nextRay = node.flags & (byte)dtNodeFlags.DT_NODE_PARENT_DETACHED; // keep track of whether parent is not adjacent (i.e. due to raycast shortcut)
                     node.flags = (byte)((node.flags & ~(byte)dtNodeFlags.DT_NODE_PARENT_DETACHED) | prevRay); // and store it in the reversed path's node
                     prevRay = nextRay;
                     node = next;
@@ -1688,14 +1688,14 @@ public static partial class Detour
                 node = prev;
                 do
                 {
-                    dtNode next = m_nodePool.getNodeAtIdx(node.pidx);
+                    var next = m_nodePool.getNodeAtIdx(node.pidx);
                     dtStatus status = 0;
                     if ((node.flags & (byte)dtNodeFlags.DT_NODE_PARENT_DETACHED) != 0)
                     {
                         float t = 0;
-                        float[] normal = new float[3];
+                        var normal = new float[3];
                         uint m = 0;
-                        dtPolyRef[] temp = new dtPolyRef[path.Length];
+                        var temp = new dtPolyRef[path.Length];
                         status = raycast(node.id, node.pos, next.pos, m_query.filter, ref t, normal, temp, ref m, maxPath - n);
 
                         for (var i = 0; i < path.Length - n; ++i)
@@ -1723,7 +1723,7 @@ public static partial class Detour
                 while (node != null);
             }
 
-            dtStatus details = m_query.status & DT_STATUS_DETAIL_MASK;
+            var details = m_query.status & DT_STATUS_DETAIL_MASK;
 
             // Reset query.
             //memset(&m_query, 0, sizeof(dtQueryData));
@@ -1760,7 +1760,7 @@ public static partial class Detour
                 return DT_FAILURE;
             }
 
-            int n = 0;
+            var n = 0;
 
             if (m_query.startRef == m_query.endRef)
             {
@@ -1772,7 +1772,7 @@ public static partial class Detour
                 // Find furthest existing node that was visited.
                 dtNode prev = null;
                 dtNode node = null;
-                for (int i = existingSize - 1; i >= 0; --i)
+                for (var i = existingSize - 1; i >= 0; --i)
                 {
                     node = m_nodePool.findNode(existing[i]);
                     if (node != null)
@@ -1787,13 +1787,13 @@ public static partial class Detour
                 }
 
                 // Reverse the path.
-                int prevRay = 0;
+                var prevRay = 0;
                 do
                 {
-                    dtNode next = m_nodePool.getNodeAtIdx(node.pidx);
+                    var next = m_nodePool.getNodeAtIdx(node.pidx);
                     node.pidx = m_nodePool.getNodeIdx(prev);
                     prev = node;
-                    int nextRay = node.flags & (byte)dtNodeFlags.DT_NODE_PARENT_DETACHED; // keep track of whether parent is not adjacent (i.e. due to raycast shortcut)
+                    var nextRay = node.flags & (byte)dtNodeFlags.DT_NODE_PARENT_DETACHED; // keep track of whether parent is not adjacent (i.e. due to raycast shortcut)
                     node.flags = (byte)((node.flags & ~(byte)dtNodeFlags.DT_NODE_PARENT_DETACHED) | prevRay); // and store it in the reversed path's node
                     prevRay = nextRay;
                     node = next;
@@ -1804,14 +1804,14 @@ public static partial class Detour
                 node = prev;
                 do
                 {
-                    dtNode next = m_nodePool.getNodeAtIdx(node.pidx);
+                    var next = m_nodePool.getNodeAtIdx(node.pidx);
                     dtStatus status = 0;
                     if ((node.flags & (byte)dtNodeFlags.DT_NODE_PARENT_DETACHED) != 0)
                     {
                         float t = 0;
-                        float[] normal = new float[3];
+                        var normal = new float[3];
                         uint m = 0;
-                        dtPolyRef[] temp = new dtPolyRef[path.Length - n];
+                        var temp = new dtPolyRef[path.Length - n];
                         status = raycast(node.id, node.pos, next.pos, m_query.filter, ref t, normal, temp, ref m, maxPath - n);
                         for (var i = 0; i < path.Length - n; ++i)
                             path[n + i] = temp[i];
@@ -1838,7 +1838,7 @@ public static partial class Detour
                 while (node != null);
             }
 
-            dtStatus details = m_query.status & DT_STATUS_DETAIL_MASK;
+            var details = m_query.status & DT_STATUS_DETAIL_MASK;
 
             // Reset query.
             //memset(&m_query, 0, sizeof(dtQueryData));
@@ -1889,26 +1889,26 @@ public static partial class Detour
         dtStatus appendPortals(int startIdx, int endIdx, float[] endPos, dtPolyRef[] path, float[] straightPath, byte[] straightPathFlags, dtPolyRef[] straightPathRefs, ref int straightPathCount, int maxStraightPath, int options)
         {
             //float* startPos = &straightPath[(*straightPathCount-1)*3];
-            int startPosStart = (straightPathCount - 1) * 3;
+            var startPosStart = (straightPathCount - 1) * 3;
             // Append or update last vertex
             dtStatus stat = 0;
-            for (int i = startIdx; i < endIdx; i++)
+            for (var i = startIdx; i < endIdx; i++)
             {
                 // Calculate portal
-                dtPolyRef from = path[i];
+                var from = path[i];
                 dtMeshTile fromTile = null;
                 dtPoly fromPoly = null;
                 if (dtStatusFailed(m_nav.getTileAndPolyByRef(from, ref fromTile, ref fromPoly)))
                     return DT_FAILURE | DT_INVALID_PARAM;
 
-                dtPolyRef to = path[i + 1];
+                var to = path[i + 1];
                 dtMeshTile toTile = null;
                 dtPoly toPoly = null;
                 if (dtStatusFailed(m_nav.getTileAndPolyByRef(to, ref toTile, ref toPoly)))
                     return DT_FAILURE | DT_INVALID_PARAM;
 
-                float[] left = new float[3];//, right[3];
-                float[] right = new float[3];
+                var left = new float[3];//, right[3];
+                var right = new float[3];
                 if (dtStatusFailed(getPortalPoints(from, fromPoly, fromTile, to, toPoly, toTile, left, right)))
                     break;
 
@@ -1923,7 +1923,7 @@ public static partial class Detour
                 float s = .0f, t = .0f;
                 if (dtIntersectSegSeg2D(straightPath, startPosStart, endPos, 0, left, 0, right, 0, ref s, ref t))
                 {
-                    float[] pt = new float[3];
+                    var pt = new float[3];
                     dtVlerp(pt, left, right, t);
 
                     stat = appendVertex(pt, 0, path[i + 1],
@@ -1980,11 +1980,11 @@ public static partial class Detour
             dtStatus stat = 0;
 
             // TODO: Should this be callers responsibility?
-            float[] closestStartPos = new float[3];
+            var closestStartPos = new float[3];
             if (dtStatusFailed(closestPointOnPolyBoundary(path[0], startPos, closestStartPos)))
                 return DT_FAILURE | DT_INVALID_PARAM;
 
-            float[] closestEndPos = new float[3];
+            var closestEndPos = new float[3];
             if (dtStatusFailed(closestPointOnPolyBoundary(path[pathSize - 1], endPos, closestEndPos)))
                 return DT_FAILURE | DT_INVALID_PARAM;
 
@@ -1997,26 +1997,26 @@ public static partial class Detour
 
             if (pathSize > 1)
             {
-                float[] portalApex = new float[3];//, portalLeft[3], portalRight[3];
-                float[] portalLeft = new float[3];
-                float[] portalRight = new float[3];
+                var portalApex = new float[3];//, portalLeft[3], portalRight[3];
+                var portalLeft = new float[3];
+                var portalRight = new float[3];
                 dtVcopy(portalApex, closestStartPos);
                 dtVcopy(portalLeft, portalApex);
                 dtVcopy(portalRight, portalApex);
-                int apexIndex = 0;
-                int leftIndex = 0;
-                int rightIndex = 0;
+                var apexIndex = 0;
+                var leftIndex = 0;
+                var rightIndex = 0;
 
                 byte leftPolyType = 0;
                 byte rightPolyType = 0;
 
-                dtPolyRef leftPolyRef = path[0];
-                dtPolyRef rightPolyRef = path[0];
+                var leftPolyRef = path[0];
+                var rightPolyRef = path[0];
 
-                for (int i = 0; i < pathSize; ++i)
+                for (var i = 0; i < pathSize; ++i)
                 {
-                    float[] left = new float[3];//, right[3];
-                    float[] right = new float[3];
+                    var left = new float[3];//, right[3];
+                    var right = new float[3];
                     byte fromType = 0, toType = 0;
 
                     if (i + 1 < pathSize)
@@ -2051,7 +2051,7 @@ public static partial class Detour
                         // If starting really close the portal, advance.
                         if (i == 0)
                         {
-                            float t = 0.0f;
+                            var t = 0.0f;
                             if (dtDistancePtSegSqr2D(portalApex, 0, left, 0, right, 0, ref t) < dtSqr(0.001f))
                                 continue;
                         }
@@ -2096,7 +2096,7 @@ public static partial class Detour
                                 flags = (byte)dtStraightPathFlags.DT_STRAIGHTPATH_END;
                             else if (leftPolyType == (byte)dtPolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
                                 flags = (byte)Detour.dtStraightPathFlags.DT_STRAIGHTPATH_OFFMESH_CONNECTION;
-                            dtPolyRef polyRef = leftPolyRef;
+                            var polyRef = leftPolyRef;
 
                             // Append or update vertex
                             stat = appendVertex(portalApex, flags, polyRef,
@@ -2147,7 +2147,7 @@ public static partial class Detour
                                 flags = (byte)dtStraightPathFlags.DT_STRAIGHTPATH_END;
                             else if (rightPolyType == (byte)dtPolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
                                 flags = (byte)dtStraightPathFlags.DT_STRAIGHTPATH_OFFMESH_CONNECTION;
-                            dtPolyRef polyRef = rightPolyRef;
+                            var polyRef = rightPolyRef;
 
                             // Append or update vertex
                             stat = appendVertex(portalApex, flags, polyRef,
@@ -2230,15 +2230,15 @@ public static partial class Detour
             if (!m_nav.isValidPolyRef(startRef))
                 return DT_FAILURE | DT_INVALID_PARAM;
 
-            dtStatus status = DT_SUCCESS;
+            var status = DT_SUCCESS;
 
             const int MAX_STACK = 48;
-            dtNode[] stack = new dtNode[MAX_STACK];
-            int nstack = 0;
+            var stack = new dtNode[MAX_STACK];
+            var nstack = 0;
 
             m_tinyNodePool.clear();
 
-            dtNode startNode = m_tinyNodePool.getNode(startRef);
+            var startNode = m_tinyNodePool.getNode(startRef);
             startNode.pidx = 0;
             startNode.cost = 0;
             startNode.total = 0;
@@ -2246,37 +2246,37 @@ public static partial class Detour
             startNode.flags = (byte)dtNodeFlags.DT_NODE_CLOSED;
             stack[nstack++] = startNode;
 
-            float[] bestPos = new float[3];
-            float bestDist = float.MaxValue;
+            var bestPos = new float[3];
+            var bestDist = float.MaxValue;
             dtNode bestNode = null;
             dtVcopy(bestPos, startPos);
 
             // Search constraints
-            float[] searchPos = new float[3];//, searchRadSqr;
-            float searchRadSqr = .0f;
+            var searchPos = new float[3];//, searchRadSqr;
+            var searchRadSqr = .0f;
             dtVlerp(searchPos, startPos, endPos, 0.5f);
             searchRadSqr = dtSqr(dtVdist(startPos, endPos) / 2.0f + 0.001f);
 
-            float[] verts = new float[DT_VERTS_PER_POLYGON * 3];
+            var verts = new float[DT_VERTS_PER_POLYGON * 3];
 
             while (nstack != 0)
             {
                 // Pop front.
-                dtNode curNode = stack[0];
-                for (int i = 0; i < nstack - 1; ++i)
+                var curNode = stack[0];
+                for (var i = 0; i < nstack - 1; ++i)
                     stack[i] = stack[i + 1];
                 nstack--;
 
                 // Get poly and tile.
                 // The API input has been cheked already, skip checking internal data.
-                dtPolyRef curRef = curNode.id;
+                var curRef = curNode.id;
                 dtMeshTile curTile = null;
                 dtPoly curPoly = null;
                 m_nav.getTileAndPolyByRefUnsafe(curRef, ref curTile, ref curPoly);
 
                 // Collect vertices.
                 int nverts = curPoly.vertCount;
-                for (int i = 0; i < nverts; ++i)
+                for (var i = 0; i < nverts; ++i)
                 {
                     dtVcopy(verts, i * 3, curTile.verts, curPoly.verts[i] * 3);
                 }
@@ -2294,15 +2294,15 @@ public static partial class Detour
                 {
                     // Find links to neighbours.
                     const int MAX_NEIS = 8;
-                    int nneis = 0;
-                    dtPolyRef[] neis = new dtPolyRef[MAX_NEIS];
+                    var nneis = 0;
+                    var neis = new dtPolyRef[MAX_NEIS];
 
                     if ((curPoly.neis[j] & DT_EXT_LINK) != 0)
                     {
                         // Tile border.
-                        for (uint k = curPoly.firstLink; k != DT_NULL_LINK; k = curTile.links[k].next)
+                        for (var k = curPoly.firstLink; k != DT_NULL_LINK; k = curTile.links[k].next)
                         {
-                            dtLink link = curTile.links[k];
+                            var link = curTile.links[k];
                             if (link.edge == j)
                             {
                                 if (link.polyRef != 0)
@@ -2321,8 +2321,8 @@ public static partial class Detour
                     }
                     else if (curPoly.neis[j] != 0)
                     {
-                        uint idx = (uint)(curPoly.neis[j] - 1);
-                        dtPolyRef polyRef = m_nav.getPolyRefBase(curTile) | idx;
+                        var idx = (uint)(curPoly.neis[j] - 1);
+                        var polyRef = m_nav.getPolyRefBase(curTile) | idx;
                         if (filter.passFilter(polyRef, curTile, curTile.polys[idx]))
                         {
                             // Internal edge, encode id.
@@ -2335,10 +2335,10 @@ public static partial class Detour
                         // Wall edge, calc distance.
                         //const float* vj = &verts[j*3];
                         //const float* vi = &verts[i*3];
-                        int vjStart = j * 3;
-                        int viStart = i * 3;
-                        float tseg = .0f;
-                        float distSqr = dtDistancePtSegSqr2D(endPos, 0, verts, vjStart, verts, viStart, ref tseg);
+                        var vjStart = j * 3;
+                        var viStart = i * 3;
+                        var tseg = .0f;
+                        var distSqr = dtDistancePtSegSqr2D(endPos, 0, verts, vjStart, verts, viStart, ref tseg);
                         if (distSqr < bestDist)
                         {
                             // Update nearest distance.
@@ -2349,10 +2349,10 @@ public static partial class Detour
                     }
                     else
                     {
-                        for (int k = 0; k < nneis; ++k)
+                        for (var k = 0; k < nneis; ++k)
                         {
                             // Skip if no node can be allocated.
-                            dtNode neighbourNode = m_tinyNodePool.getNode(neis[k]);
+                            var neighbourNode = m_tinyNodePool.getNode(neis[k]);
                             if (neighbourNode == null)
                                 continue;
                             // Skip if already visited.
@@ -2361,10 +2361,10 @@ public static partial class Detour
 
                             // Skip the link if it is too far from search constraint.
                             // TODO: Maybe should use getPortalPoints(), but this one is way faster.
-                            int vjStart = j * 3;
-                            int viStart = i * 3;
-                            float tseg = .0f;
-                            float distSqr = dtDistancePtSegSqr2D(searchPos, 0, verts, vjStart, verts, viStart, ref tseg);
+                            var vjStart = j * 3;
+                            var viStart = i * 3;
+                            var tseg = .0f;
+                            var distSqr = dtDistancePtSegSqr2D(searchPos, 0, verts, vjStart, verts, viStart, ref tseg);
                             if (distSqr > searchRadSqr)
                             {
                                 continue;
@@ -2382,15 +2382,15 @@ public static partial class Detour
                 }
             }
 
-            int n = 0;
+            var n = 0;
             if (bestNode != null)
             {
                 // Reverse the path.
                 dtNode prev = null;
-                dtNode node = bestNode;
+                var node = bestNode;
                 do
                 {
-                    dtNode next = m_tinyNodePool.getNodeAtIdx(node.pidx);
+                    var next = m_tinyNodePool.getNodeAtIdx(node.pidx);
                     node.pidx = m_tinyNodePool.getNodeIdx(prev);
                     prev = node;
                     node = next;
@@ -2445,7 +2445,7 @@ public static partial class Detour
         {
             // Find the link that points to the 'to' polygon.
             dtLink link = null;
-            for (uint i = fromPoly.firstLink; i != DT_NULL_LINK; i = fromTile.links[i].next)
+            for (var i = fromPoly.firstLink; i != DT_NULL_LINK; i = fromTile.links[i].next)
             {
                 if (fromTile.links[i].polyRef == to)
                 {
@@ -2460,7 +2460,7 @@ public static partial class Detour
             if (fromPoly.getType() == (byte)dtPolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
             {
                 // Find link that points to first vertex.
-                for (uint i = fromPoly.firstLink; i != DT_NULL_LINK; i = fromTile.links[i].next)
+                for (var i = fromPoly.firstLink; i != DT_NULL_LINK; i = fromTile.links[i].next)
                 {
                     if (fromTile.links[i].polyRef == to)
                     {
@@ -2475,7 +2475,7 @@ public static partial class Detour
 
             if (toPoly.getType() == (byte)dtPolyTypes.DT_POLYTYPE_OFFMESH_CONNECTION)
             {
-                for (uint i = toPoly.firstLink; i != DT_NULL_LINK; i = toTile.links[i].next)
+                for (var i = toPoly.firstLink; i != DT_NULL_LINK; i = toTile.links[i].next)
                 {
                     if (toTile.links[i].polyRef == from)
                     {
@@ -2501,9 +2501,9 @@ public static partial class Detour
                 // Unpack portal limits.
                 if (link.bmin != 0 || link.bmax != 255)
                 {
-                    float s = 1.0f / 255.0f;
-                    float tmin = link.bmin * s;
-                    float tmax = link.bmax * s;
+                    var s = 1.0f / 255.0f;
+                    var tmin = link.bmin * s;
+                    var tmax = link.bmax * s;
                     dtVlerp(left, 0, fromTile.verts, v0 * 3, fromTile.verts, v1 * 3, tmin);
                     dtVlerp(right, 0, fromTile.verts, v0 * 3, fromTile.verts, v1 * 3, tmax);
                 }
@@ -2515,8 +2515,8 @@ public static partial class Detour
         // Returns edge mid point between two polygons.
         dtStatus getEdgeMidPoint(dtPolyRef from, dtPolyRef to, float[] mid)
         {
-            float[] left = new float[3];//, right[3];
-            float[] right = new float[3];
+            var left = new float[3];//, right[3];
+            var right = new float[3];
             byte fromType = 0, toType = 0;
             if (dtStatusFailed(getPortalPoints(from, to, left, right, ref fromType, ref toType)))
                 return DT_FAILURE | DT_INVALID_PARAM;
@@ -2528,8 +2528,8 @@ public static partial class Detour
 
         dtStatus getEdgeMidPoint(dtPolyRef from, dtPoly fromPoly, dtMeshTile fromTile, dtPolyRef to, dtPoly toPoly, dtMeshTile toTile, float[] mid)
         {
-            float[] left = new float[3];//, right[3];
-            float[] right = new float[3];
+            var left = new float[3];//, right[3];
+            var right = new float[3];
             if (dtStatusFailed(getPortalPoints(from, fromPoly, fromTile, to, toPoly, toTile, left, right)))
                 return DT_FAILURE | DT_INVALID_PARAM;
             mid[0] = (left[0] + right[0]) * 0.5f;
@@ -2579,11 +2579,11 @@ public static partial class Detour
         public dtStatus raycast(dtPolyRef startRef, float[] startPos, float[] endPos, dtQueryFilter filter, ref float t, float[] hitNormal, dtPolyRef[] path, ref uint pathCount, int maxPath)
         {
 
-            dtRaycastHit hit = new dtRaycastHit();
+            var hit = new dtRaycastHit();
             hit.path = path;
             hit.maxPath = maxPath;
 
-            dtStatus status = raycast(startRef, startPos, endPos, filter, 0, hit);
+            var status = raycast(startRef, startPos, endPos, filter, 0, hit);
 
             t = hit.t;
             dtVcopy(hitNormal, hit.hitNormal);
@@ -2658,28 +2658,28 @@ public static partial class Detour
             if (prevRef != 0 && !m_nav.isValidPolyRef(prevRef))
                 return DT_FAILURE | DT_INVALID_PARAM;
 
-            float[] dir = new float[3];
-            float[] curPos = new float[3];
-            float[] lastPos = new float[3];
-            float[] verts = new float[DT_VERTS_PER_POLYGON * 3 + 3];
-            int n = 0;
+            var dir = new float[3];
+            var curPos = new float[3];
+            var lastPos = new float[3];
+            var verts = new float[DT_VERTS_PER_POLYGON * 3 + 3];
+            var n = 0;
 
             dtVcopy(curPos, startPos);
             dtVsub(dir, endPos, startPos);
             dtVset(hit.hitNormal, 0, 0, 0);
 
-            dtStatus status = DT_SUCCESS;
+            var status = DT_SUCCESS;
 
-            dtMeshTile prevTile = new dtMeshTile();
+            var prevTile = new dtMeshTile();
             dtMeshTile nextTile;
-            dtPoly prevPoly = new dtPoly();
+            var prevPoly = new dtPoly();
             dtPoly nextPoly;
             dtPolyRef curRef;
 
             // The API input has been checked already, skip checking internal data.
             curRef = startRef;
-            dtMeshTile tile = new dtMeshTile();
-            dtPoly poly = new dtPoly();
+            var tile = new dtMeshTile();
+            var poly = new dtPoly();
             m_nav.getTileAndPolyByRefUnsafe(curRef, ref tile, ref poly);
             nextTile = prevTile = tile;
             nextPoly = prevPoly = poly;
@@ -2691,8 +2691,8 @@ public static partial class Detour
                 // Cast ray against current polygon.
 
                 // Collect vertices.
-                int nv = 0;
-                for (int i = 0; i < (int)poly.vertCount; ++i)
+                var nv = 0;
+                for (var i = 0; i < (int)poly.vertCount; ++i)
                 {
                     dtVcopy(verts, nv * 3, tile.verts, poly.verts[i] * 3);
                     nv++;
@@ -2734,9 +2734,9 @@ public static partial class Detour
                 // Follow neighbours.
                 dtPolyRef nextRef = 0;
 
-                for (uint i = poly.firstLink; i != DT_NULL_LINK; i = tile.links[i].next)
+                for (var i = poly.firstLink; i != DT_NULL_LINK; i = tile.links[i].next)
                 {
-                    dtLink link = tile.links[i];
+                    var link = tile.links[i];
 
                     // Find link which contains this edge.
                     if ((int)link.edge != segMax)
@@ -2776,21 +2776,21 @@ public static partial class Detour
                     int v1 = poly.verts[(link.edge + 1) % poly.vertCount];
                     //const float* left = &tile.verts[v0*3];
                     //const float* right = &tile.verts[v1*3];
-                    int leftStart = v0 * 3;
-                    int rightStart = v1 * 3;
+                    var leftStart = v0 * 3;
+                    var rightStart = v1 * 3;
 
                     // Check that the intersection lies inside the link portal.
                     if (link.side == 0 || link.side == 4)
                     {
                         // Calculate link size.
                         const float s = 1.0f / 255.0f;
-                        float lmin = tile.verts[leftStart + 2] + (tile.verts[rightStart + 2] - tile.verts[leftStart + 2]) * (link.bmin * s);
-                        float lmax = tile.verts[leftStart + 2] + (tile.verts[rightStart + 2] - tile.verts[leftStart + 2]) * (link.bmax * s);
+                        var lmin = tile.verts[leftStart + 2] + (tile.verts[rightStart + 2] - tile.verts[leftStart + 2]) * (link.bmin * s);
+                        var lmax = tile.verts[leftStart + 2] + (tile.verts[rightStart + 2] - tile.verts[leftStart + 2]) * (link.bmax * s);
                         if (lmin > lmax)
                             dtSwap(ref lmin, ref lmax);
 
                         // Find Z intersection.
-                        float z = startPos[2] + (endPos[2] - startPos[2]) * tmax;
+                        var z = startPos[2] + (endPos[2] - startPos[2]) * tmax;
                         if (z >= lmin && z <= lmax)
                         {
                             nextRef = link.polyRef;
@@ -2801,13 +2801,13 @@ public static partial class Detour
                     {
                         // Calculate link size.
                         const float s = 1.0f / 255.0f;
-                        float lmin = tile.verts[leftStart + 0] + (tile.verts[rightStart + 0] - tile.verts[leftStart + 0]) * (link.bmin * s);
-                        float lmax = tile.verts[leftStart + 0] + (tile.verts[rightStart + 0] - tile.verts[leftStart + 0]) * (link.bmax * s);
+                        var lmin = tile.verts[leftStart + 0] + (tile.verts[rightStart + 0] - tile.verts[leftStart + 0]) * (link.bmin * s);
+                        var lmax = tile.verts[leftStart + 0] + (tile.verts[rightStart + 0] - tile.verts[leftStart + 0]) * (link.bmax * s);
                         if (lmin > lmax)
                             dtSwap(ref lmin, ref lmax);
 
                         // Find X intersection.
-                        float x = startPos[0] + (endPos[0] - startPos[0]) * tmax;
+                        var x = startPos[0] + (endPos[0] - startPos[0]) * tmax;
                         if (x >= lmin && x <= lmax)
                         {
                             nextRef = link.polyRef;
@@ -2823,13 +2823,13 @@ public static partial class Detour
                     // and correct the height (since the raycast moves in 2d)
                     dtVcopy(lastPos, curPos);
                     dtVmad(curPos, startPos, dir, hit.t);
-                    int e1Start = segMax * 3;
-                    int e2Start = ((segMax + 1) % nv) * 3;
-                    float[] eDir = new float[3];
-                    float[] diff = new float[3];
+                    var e1Start = segMax * 3;
+                    var e2Start = ((segMax + 1) % nv) * 3;
+                    var eDir = new float[3];
+                    var diff = new float[3];
                     dtVsub(eDir, 0, verts, e2Start, verts, e1Start);
                     dtVsub(diff, 0, curPos, 0, verts, e1Start);
-                    float s = dtSqr(eDir[0]) > dtSqr(eDir[2]) ? diff[0] / eDir[0] : diff[2] / eDir[2];
+                    var s = dtSqr(eDir[0]) > dtSqr(eDir[2]) ? diff[0] / eDir[0] : diff[2] / eDir[2];
                     curPos[1] = verts[e1Start + 1] + eDir[1] * s;
 
                     hit.pathCost += filter.getCost(lastPos, curPos, prevRef, prevTile, prevPoly, curRef, tile, poly, nextRef, nextTile, nextPoly);
@@ -2840,14 +2840,14 @@ public static partial class Detour
                     // No neighbour, we hit a wall.
 
                     // Calculate hit normal.
-                    int a = segMax;
-                    int b = segMax + 1 < nv ? segMax + 1 : 0;
+                    var a = segMax;
+                    var b = segMax + 1 < nv ? segMax + 1 : 0;
                     //const float* va = &verts[a*3];
                     //const float* vb = &verts[b*3];
-                    int vaStart = a * 3;
-                    int vbStart = b * 3;
-                    float dx = verts[vbStart + 0] - verts[vaStart + 0];
-                    float dz = verts[vbStart + 2] - verts[vaStart + 2];
+                    var vaStart = a * 3;
+                    var vbStart = b * 3;
+                    var dx = verts[vbStart + 0] - verts[vaStart + 0];
+                    var dz = verts[vbStart + 2] - verts[vaStart + 2];
                     hit.hitNormal[0] = dz;
                     hit.hitNormal[1] = 0;
                     hit.hitNormal[2] = -dx;
@@ -2931,7 +2931,7 @@ public static partial class Detour
             m_nodePool.clear();
             m_openList.clear();
 
-            dtNode startNode = m_nodePool.getNode(startRef);
+            var startNode = m_nodePool.getNode(startRef);
             dtVcopy(startNode.pos, centerPos);
             startNode.pidx = 0;
             startNode.cost = 0;
@@ -2940,9 +2940,9 @@ public static partial class Detour
             startNode.flags = (byte)dtNodeFlags.DT_NODE_OPEN;
             m_openList.push(startNode);
 
-            dtStatus status = DT_SUCCESS;
+            var status = DT_SUCCESS;
 
-            int n = 0;
+            var n = 0;
             if (n < maxResult)
             {
                 if (resultRef != null)
@@ -2958,11 +2958,11 @@ public static partial class Detour
                 status |= DT_BUFFER_TOO_SMALL;
             }
 
-            float radiusSqr = dtSqr(radius);
+            var radiusSqr = dtSqr(radius);
 
             while (!m_openList.empty())
             {
-                dtNode bestNode = m_openList.pop();
+                var bestNode = m_openList.pop();
                 //bestNode.flags &= ~DT_NODE_OPEN;
                 //bestNode.flags |= DT_NODE_CLOSED;
                 bestNode.dtcsClearFlag(dtNodeFlags.DT_NODE_OPEN);
@@ -2970,7 +2970,7 @@ public static partial class Detour
 
                 // Get poly and tile.
                 // The API input has been cheked already, skip checking internal data.
-                dtPolyRef bestRef = bestNode.id;
+                var bestRef = bestNode.id;
                 dtMeshTile bestTile = null;
                 dtPoly bestPoly = null;
                 m_nav.getTileAndPolyByRefUnsafe(bestRef, ref bestTile, ref bestPoly);
@@ -2984,10 +2984,10 @@ public static partial class Detour
                 if (parentRef != 0)
                     m_nav.getTileAndPolyByRefUnsafe(parentRef, ref parentTile, ref parentPoly);
 
-                for (uint i = bestPoly.firstLink; i != DT_NULL_LINK; i = bestTile.links[i].next)
+                for (var i = bestPoly.firstLink; i != DT_NULL_LINK; i = bestTile.links[i].next)
                 {
-                    dtLink link = bestTile.links[i];
-                    dtPolyRef neighbourRef = link.polyRef;
+                    var link = bestTile.links[i];
+                    var neighbourRef = link.polyRef;
                     // Skip invalid neighbours and do not follow back to parent.
                     if (neighbourRef == 0 || neighbourRef == parentRef)
                         continue;
@@ -3002,18 +3002,18 @@ public static partial class Detour
                         continue;
 
                     // Find edge and calc distance to the edge.
-                    float[] va = new float[3];//, vb[3];
-                    float[] vb = new float[3];
+                    var va = new float[3];//, vb[3];
+                    var vb = new float[3];
                     if (getPortalPoints(bestRef, bestPoly, bestTile, neighbourRef, neighbourPoly, neighbourTile, va, vb) == 0)
                         continue;
 
                     // If the circle is not touching the next polygon, skip it.
-                    float tseg = 0.0f;
-                    float distSqr = dtDistancePtSegSqr2D(centerPos, 0, va, 0, vb, 0, ref tseg);
+                    var tseg = 0.0f;
+                    var distSqr = dtDistancePtSegSqr2D(centerPos, 0, va, 0, vb, 0, ref tseg);
                     if (distSqr > radiusSqr)
                         continue;
 
-                    dtNode neighbourNode = m_nodePool.getNode(neighbourRef);
+                    var neighbourNode = m_nodePool.getNode(neighbourRef);
                     if (neighbourNode == null)
                     {
                         status |= DT_OUT_OF_NODES;
@@ -3027,7 +3027,7 @@ public static partial class Detour
                     if (neighbourNode.flags == 0)
                         dtVlerp(neighbourNode.pos, va, vb, 0.5f);
 
-                    float total = bestNode.total + dtVdist(bestNode.pos, neighbourNode.pos);
+                    var total = bestNode.total + dtVdist(bestNode.pos, neighbourNode.pos);
 
                     // The node is already in open list and the new result is worse, skip.
                     if ((neighbourNode.dtcsTestFlag(dtNodeFlags.DT_NODE_OPEN)) && total >= neighbourNode.total)
@@ -3120,14 +3120,14 @@ public static partial class Detour
             m_nodePool.clear();
             m_openList.clear();
 
-            float[] centerPos = new float[] { 0, 0, 0 };
-            for (int i = 0; i < nverts; ++i)
+            var centerPos = new float[] { 0, 0, 0 };
+            for (var i = 0; i < nverts; ++i)
             {
                 dtVadd(centerPos, 0, centerPos, 0, verts, i * 3);
             }
             dtVscale(centerPos, centerPos, 1.0f / nverts);
 
-            dtNode startNode = m_nodePool.getNode(startRef);
+            var startNode = m_nodePool.getNode(startRef);
             dtVcopy(startNode.pos, centerPos);
             startNode.pidx = 0;
             startNode.cost = 0;
@@ -3136,9 +3136,9 @@ public static partial class Detour
             startNode.flags = (byte)dtNodeFlags.DT_NODE_OPEN;
             m_openList.push(startNode);
 
-            dtStatus status = DT_SUCCESS;
+            var status = DT_SUCCESS;
 
-            int n = 0;
+            var n = 0;
             if (n < maxResult)
             {
                 if (resultRef != null)
@@ -3156,7 +3156,7 @@ public static partial class Detour
 
             while (!m_openList.empty())
             {
-                dtNode bestNode = m_openList.pop();
+                var bestNode = m_openList.pop();
                 //bestNode.flags &= ~DT_NODE_OPEN;
                 //bestNode.flags |= DT_NODE_CLOSED;
                 bestNode.dtcsClearFlag(dtNodeFlags.DT_NODE_OPEN);
@@ -3164,7 +3164,7 @@ public static partial class Detour
 
                 // Get poly and tile.
                 // The API input has been cheked already, skip checking internal data.
-                dtPolyRef bestRef = bestNode.id;
+                var bestRef = bestNode.id;
                 dtMeshTile bestTile = null;
                 dtPoly bestPoly = null;
                 m_nav.getTileAndPolyByRefUnsafe(bestRef, ref bestTile, ref bestPoly);
@@ -3178,10 +3178,10 @@ public static partial class Detour
                 if (parentRef != 0)
                     m_nav.getTileAndPolyByRefUnsafe(parentRef, ref parentTile, ref parentPoly);
 
-                for (uint i = bestPoly.firstLink; i != DT_NULL_LINK; i = bestTile.links[i].next)
+                for (var i = bestPoly.firstLink; i != DT_NULL_LINK; i = bestTile.links[i].next)
                 {
-                    dtLink link = bestTile.links[i];
-                    dtPolyRef neighbourRef = link.polyRef;
+                    var link = bestTile.links[i];
+                    var neighbourRef = link.polyRef;
                     // Skip invalid neighbours and do not follow back to parent.
                     if (neighbourRef == 0 || neighbourRef == parentRef)
                         continue;
@@ -3196,8 +3196,8 @@ public static partial class Detour
                         continue;
 
                     // Find edge and calc distance to the edge.
-                    float[] va = new float[3];//, vb[3];
-                    float[] vb = new float[3];
+                    var va = new float[3];//, vb[3];
+                    var vb = new float[3];
                     if (getPortalPoints(bestRef, bestPoly, bestTile, neighbourRef, neighbourPoly, neighbourTile, va, vb) == 0)
                         continue;
 
@@ -3209,7 +3209,7 @@ public static partial class Detour
                     if (tmin > 1.0f || tmax < 0.0f)
                         continue;
 
-                    dtNode neighbourNode = m_nodePool.getNode(neighbourRef);
+                    var neighbourNode = m_nodePool.getNode(neighbourRef);
                     if (neighbourNode == null)
                     {
                         status |= DT_OUT_OF_NODES;
@@ -3223,7 +3223,7 @@ public static partial class Detour
                     if (neighbourNode.flags == 0)
                         dtVlerp(neighbourNode.pos, va, vb, 0.5f);
 
-                    float total = bestNode.total + dtVdist(bestNode.pos, neighbourNode.pos);
+                    var total = bestNode.total + dtVdist(bestNode.pos, neighbourNode.pos);
 
                     // The node is already in open list and the new result is worse, skip.
                     if ((neighbourNode.dtcsTestFlag(dtNodeFlags.DT_NODE_OPEN)) && total >= neighbourNode.total)
@@ -3310,26 +3310,26 @@ public static partial class Detour
                 return DT_FAILURE | DT_INVALID_PARAM;
 
             const int MAX_STACK = 48;
-            dtNode[] stack = new dtNode[MAX_STACK];
+            var stack = new dtNode[MAX_STACK];
             dtcsArrayItemsCreate(stack);
-            int nstack = 0;
+            var nstack = 0;
 
             m_tinyNodePool.clear();
 
-            dtNode startNode = m_tinyNodePool.getNode(startRef);
+            var startNode = m_tinyNodePool.getNode(startRef);
             startNode.pidx = 0;
             startNode.id = startRef;
             startNode.flags = (byte)dtNodeFlags.DT_NODE_CLOSED;
             stack[nstack++] = startNode;
 
-            float radiusSqr = dtSqr(radius);
+            var radiusSqr = dtSqr(radius);
 
-            float[] pa = new float[DT_VERTS_PER_POLYGON * 3];
-            float[] pb = new float[DT_VERTS_PER_POLYGON * 3];
+            var pa = new float[DT_VERTS_PER_POLYGON * 3];
+            var pb = new float[DT_VERTS_PER_POLYGON * 3];
 
-            dtStatus status = DT_SUCCESS;
+            var status = DT_SUCCESS;
 
-            int n = 0;
+            var n = 0;
             if (n < maxResult)
             {
                 resultRef[n] = startNode.id;
@@ -3345,28 +3345,28 @@ public static partial class Detour
             while (nstack != 0)
             {
                 // Pop front.
-                dtNode curNode = stack[0];
-                for (int i = 0; i < nstack - 1; ++i)
+                var curNode = stack[0];
+                for (var i = 0; i < nstack - 1; ++i)
                     stack[i] = stack[i + 1];
                 nstack--;
 
                 // Get poly and tile.
                 // The API input has been cheked already, skip checking internal data.
-                dtPolyRef curRef = curNode.id;
+                var curRef = curNode.id;
                 dtMeshTile curTile = null;
                 dtPoly curPoly = null;
                 m_nav.getTileAndPolyByRefUnsafe(curRef, ref curTile, ref curPoly);
 
-                for (uint i = curPoly.firstLink; i != DT_NULL_LINK; i = curTile.links[i].next)
+                for (var i = curPoly.firstLink; i != DT_NULL_LINK; i = curTile.links[i].next)
                 {
-                    dtLink link = curTile.links[i];
-                    dtPolyRef neighbourRef = link.polyRef;
+                    var link = curTile.links[i];
+                    var neighbourRef = link.polyRef;
                     // Skip invalid neighbours.
                     if (neighbourRef == 0)
                         continue;
 
                     // Skip if cannot alloca more nodes.
-                    dtNode neighbourNode = m_tinyNodePool.getNode(neighbourRef);
+                    var neighbourNode = m_tinyNodePool.getNode(neighbourRef);
                     if (neighbourNode == null)
                         continue;
                     // Skip visited.
@@ -3387,14 +3387,14 @@ public static partial class Detour
                         continue;
 
                     // Find edge and calc distance to the edge.
-                    float[] va = new float[3];//, vb[3];
-                    float[] vb = new float[3];
+                    var va = new float[3];//, vb[3];
+                    var vb = new float[3];
                     if (getPortalPoints(curRef, curPoly, curTile, neighbourRef, neighbourPoly, neighbourTile, va, vb) == 0)
                         continue;
 
                     // If the circle is not touching the next polygon, skip it.
-                    float tseg = .0f;
-                    float distSqr = dtDistancePtSegSqr2D(centerPos, 0, va, 0, vb, 0, ref tseg);
+                    var tseg = .0f;
+                    var distSqr = dtDistancePtSegSqr2D(centerPos, 0, va, 0, vb, 0, ref tseg);
                     if (distSqr > radiusSqr)
                         continue;
 
@@ -3408,19 +3408,19 @@ public static partial class Detour
 
                     // Collect vertices of the neighbour poly.
                     int npa = neighbourPoly.vertCount;
-                    for (int k = 0; k < npa; ++k)
+                    for (var k = 0; k < npa; ++k)
                     {
                         dtVcopy(pa, k * 3, neighbourTile.verts, neighbourPoly.verts[k] * 3);
                     }
 
-                    bool overlap = false;
-                    for (int j = 0; j < n; ++j)
+                    var overlap = false;
+                    for (var j = 0; j < n; ++j)
                     {
-                        dtPolyRef pastRef = resultRef[j];
+                        var pastRef = resultRef[j];
 
                         // Connected polys do not overlap.
-                        bool connected = false;
-                        for (uint k = curPoly.firstLink; k != DT_NULL_LINK; k = curTile.links[k].next)
+                        var connected = false;
+                        for (var k = curPoly.firstLink; k != DT_NULL_LINK; k = curTile.links[k].next)
                         {
                             if (curTile.links[k].polyRef == pastRef)
                             {
@@ -3438,7 +3438,7 @@ public static partial class Detour
 
                         // Get vertices and test overlap
                         int npb = pastPoly.vertCount;
-                        for (int k = 0; k < npb; ++k)
+                        for (var k = 0; k < npb; ++k)
                         {
                             dtVcopy(pb, k * 3, pastTile.verts, pastPoly.verts[k] * 3);
                         }
@@ -3489,7 +3489,7 @@ public static partial class Detour
             if (nints + 1 > maxInts)
                 return;
             // Find insertion point.
-            int idx = 0;
+            var idx = 0;
             while (idx < nints)
             {
                 if (tmax <= ints[idx].tmin)
@@ -3500,7 +3500,7 @@ public static partial class Detour
             if (nints - idx != 0)
             {
                 //memmove(ints+idx+1, ints+idx, sizeof(dtSegInterval)*(nints-idx));
-                for (int i = 0; i < (nints - idx); ++i)
+                for (var i = 0; i < (nints - idx); ++i)
                 {
                     ints[idx + 1 + i] = ints[idx + i];
                 }
@@ -3543,15 +3543,15 @@ public static partial class Detour
             if (dtStatusFailed(m_nav.getTileAndPolyByRef(polyRef, ref tile, ref poly)))
                 return DT_FAILURE | DT_INVALID_PARAM;
 
-            int n = 0;
+            var n = 0;
             const int MAX_INTERVAL = 16;
-            dtSegInterval[] ints = new dtSegInterval[MAX_INTERVAL];
+            var ints = new dtSegInterval[MAX_INTERVAL];
             dtcsArrayItemsCreate(ints);
             int nints;
 
-            bool storePortals = segmentRefs != null;
+            var storePortals = segmentRefs != null;
 
-            dtStatus status = DT_SUCCESS;
+            var status = DT_SUCCESS;
 
             for (int i = 0, j = (int)poly.vertCount - 1; i < (int)poly.vertCount; j = i++)
             {
@@ -3560,9 +3560,9 @@ public static partial class Detour
                 if ((poly.neis[j] & DT_EXT_LINK) != 0)
                 {
                     // Tile border.
-                    for (uint k = poly.firstLink; k != DT_NULL_LINK; k = tile.links[k].next)
+                    for (var k = poly.firstLink; k != DT_NULL_LINK; k = tile.links[k].next)
                     {
-                        dtLink link = tile.links[k];
+                        var link = tile.links[k];
                         if (link.edge == j)
                         {
                             if (link.polyRef != 0)
@@ -3584,7 +3584,7 @@ public static partial class Detour
                     dtPolyRef neiRef = 0;
                     if (poly.neis[j] != 0)
                     {
-                        uint idx = (uint)(poly.neis[j] - 1);
+                        var idx = (uint)(poly.neis[j] - 1);
                         neiRef = m_nav.getPolyRefBase(tile) | idx;
                         if (!filter.passFilter(neiRef, tile, tile.polys[idx]))
                             neiRef = 0;
@@ -3599,9 +3599,9 @@ public static partial class Detour
                         //const float* vj = &tile.verts[poly.verts[j]*3];
                         //const float* vi = &tile.verts[poly.verts[i]*3];
                         //float* seg = &segmentVerts[n*6];
-                        int vjStart = poly.verts[j] * 3;
-                        int viStart = poly.verts[i] * 3;
-                        int segStart = n * 6;
+                        var vjStart = poly.verts[j] * 3;
+                        var viStart = poly.verts[i] * 3;
+                        var segStart = n * 6;
                         dtVcopy(segmentVerts, segStart, tile.verts, vjStart);
                         dtVcopy(segmentVerts, segStart + 3, tile.verts, viStart);
                         if (segmentRefs != null)
@@ -3623,19 +3623,19 @@ public static partial class Detour
                 // Store segments.
                 //const float* vj = &tile.verts[poly.verts[j]*3];
                 //const float* vi = &tile.verts[poly.verts[i]*3];
-                int vjStart2 = poly.verts[j] * 3;
-                int viStart2 = poly.verts[i] * 3;
-                for (int k = 1; k < nints; ++k)
+                var vjStart2 = poly.verts[j] * 3;
+                var viStart2 = poly.verts[i] * 3;
+                for (var k = 1; k < nints; ++k)
                 {
                     // Portal segment.
                     if (storePortals && ints[k].polyRef != 0)
                     {
-                        float tmin = ints[k].tmin / 255.0f;
-                        float tmax = ints[k].tmax / 255.0f;
+                        var tmin = ints[k].tmin / 255.0f;
+                        var tmax = ints[k].tmax / 255.0f;
                         if (n < maxSegments)
                         {
                             //float* seg = &segmentVerts[n*6];
-                            int segStart = n * 6;
+                            var segStart = n * 6;
                             dtVlerp(segmentVerts, segStart, tile.verts, vjStart2, tile.verts, viStart2, tmin);
                             dtVlerp(segmentVerts, segStart + 3, tile.verts, vjStart2, tile.verts, viStart2, tmax);
                             if (segmentRefs != null)
@@ -3653,12 +3653,12 @@ public static partial class Detour
                     int imax = ints[k].tmin;
                     if (imin != imax)
                     {
-                        float tmin = imin / 255.0f;
-                        float tmax = imax / 255.0f;
+                        var tmin = imin / 255.0f;
+                        var tmax = imax / 255.0f;
                         if (n < maxSegments)
                         {
                             //float* seg = &segmentVerts[n*6];
-                            int segStart = n * 6;
+                            var segStart = n * 6;
                             dtVlerp(segmentVerts, segStart, tile.verts, vjStart2, tile.verts, viStart2, tmin);
                             dtVlerp(segmentVerts, segStart + 3, tile.verts, vjStart2, tile.verts, viStart2, tmax);
                             if (segmentRefs != null)
@@ -3711,7 +3711,7 @@ public static partial class Detour
             m_nodePool.clear();
             m_openList.clear();
 
-            dtNode startNode = m_nodePool.getNode(startRef);
+            var startNode = m_nodePool.getNode(startRef);
             dtVcopy(startNode.pos, centerPos);
             startNode.pidx = 0;
             startNode.cost = 0;
@@ -3720,13 +3720,13 @@ public static partial class Detour
             startNode.flags = (byte)dtNodeFlags.DT_NODE_OPEN;
             m_openList.push(startNode);
 
-            float radiusSqr = dtSqr(maxRadius);
+            var radiusSqr = dtSqr(maxRadius);
 
-            dtStatus status = DT_SUCCESS;
+            var status = DT_SUCCESS;
 
             while (!m_openList.empty())
             {
-                dtNode bestNode = m_openList.pop();
+                var bestNode = m_openList.pop();
                 //bestNode.flags &= ~DT_NODE_OPEN;
                 //bestNode.flags |= DT_NODE_CLOSED;
                 bestNode.dtcsClearFlag(dtNodeFlags.DT_NODE_OPEN);
@@ -3734,7 +3734,7 @@ public static partial class Detour
 
                 // Get poly and tile.
                 // The API input has been cheked already, skip checking internal data.
-                dtPolyRef bestRef = bestNode.id;
+                var bestRef = bestNode.id;
                 dtMeshTile bestTile = null;
                 dtPoly bestPoly = null;
                 m_nav.getTileAndPolyByRefUnsafe(bestRef, ref bestTile, ref bestPoly);
@@ -3755,10 +3755,10 @@ public static partial class Detour
                     if ((bestPoly.neis[j] & DT_EXT_LINK) != 0)
                     {
                         // Tile border.
-                        bool solid = true;
-                        for (uint k = bestPoly.firstLink; k != DT_NULL_LINK; k = bestTile.links[k].next)
+                        var solid = true;
+                        for (var k = bestPoly.firstLink; k != DT_NULL_LINK; k = bestTile.links[k].next)
                         {
-                            dtLink link = bestTile.links[k];
+                            var link = bestTile.links[k];
                             if (link.edge == j)
                             {
                                 if (link.polyRef != 0)
@@ -3777,8 +3777,8 @@ public static partial class Detour
                     else if (bestPoly.neis[j] != 0)
                     {
                         // Internal edge
-                        uint idx = (uint)(bestPoly.neis[j] - 1);
-                        dtPolyRef polyRef = m_nav.getPolyRefBase(bestTile) | idx;
+                        var idx = (uint)(bestPoly.neis[j] - 1);
+                        var polyRef = m_nav.getPolyRefBase(bestTile) | idx;
                         if (filter.passFilter(polyRef, bestTile, bestTile.polys[idx]))
                             continue;
                     }
@@ -3786,10 +3786,10 @@ public static partial class Detour
                     // Calc distance to the edge.
                     //const float* vj = &bestTile.verts[bestPoly.verts[j]*3];
                     //const float* vi = &bestTile.verts[bestPoly.verts[i]*3];
-                    int vjStart = bestPoly.verts[j] * 3;
-                    int viStart = bestPoly.verts[i] * 3;
-                    float tseg = .0f;
-                    float distSqr = dtDistancePtSegSqr2D(centerPos, 0, bestTile.verts, vjStart, bestTile.verts, viStart, ref tseg);
+                    var vjStart = bestPoly.verts[j] * 3;
+                    var viStart = bestPoly.verts[i] * 3;
+                    var tseg = .0f;
+                    var distSqr = dtDistancePtSegSqr2D(centerPos, 0, bestTile.verts, vjStart, bestTile.verts, viStart, ref tseg);
 
                     // Edge is too far, skip.
                     if (distSqr > radiusSqr)
@@ -3803,10 +3803,10 @@ public static partial class Detour
                     hitPos[2] = bestTile.verts[vjStart + 2] + (bestTile.verts[viStart + 2] - bestTile.verts[vjStart + 2]) * tseg;
                 }
 
-                for (uint i = bestPoly.firstLink; i != DT_NULL_LINK; i = bestTile.links[i].next)
+                for (var i = bestPoly.firstLink; i != DT_NULL_LINK; i = bestTile.links[i].next)
                 {
-                    dtLink link = bestTile.links[i];
-                    dtPolyRef neighbourRef = link.polyRef;
+                    var link = bestTile.links[i];
+                    var neighbourRef = link.polyRef;
                     // Skip invalid neighbours and do not follow back to parent.
                     if (neighbourRef != 0 || neighbourRef == parentRef)
                         continue;
@@ -3823,11 +3823,11 @@ public static partial class Detour
                     // Calc distance to the edge.
                     //const float* va = &bestTile.verts[bestPoly.verts[link.edge]*3];
                     //const float* vb = &bestTile.verts[bestPoly.verts[(link.edge+1) % bestPoly.vertCount]*3];
-                    int vaStart = bestPoly.verts[link.edge] * 3;
-                    int vbStart = bestPoly.verts[(link.edge + 1) % bestPoly.vertCount] * 3;
+                    var vaStart = bestPoly.verts[link.edge] * 3;
+                    var vbStart = bestPoly.verts[(link.edge + 1) % bestPoly.vertCount] * 3;
 
-                    float tseg = .0f;
-                    float distSqr = dtDistancePtSegSqr2D(centerPos, 0, bestTile.verts, vaStart, bestTile.verts, vbStart, ref tseg);
+                    var tseg = .0f;
+                    var distSqr = dtDistancePtSegSqr2D(centerPos, 0, bestTile.verts, vaStart, bestTile.verts, vbStart, ref tseg);
 
                     // If the circle is not touching the next polygon, skip it.
                     if (distSqr > radiusSqr)
@@ -3836,7 +3836,7 @@ public static partial class Detour
                     if (!filter.passFilter(neighbourRef, neighbourTile, neighbourPoly))
                         continue;
 
-                    dtNode neighbourNode = m_nodePool.getNode(neighbourRef);
+                    var neighbourNode = m_nodePool.getNode(neighbourRef);
                     if (neighbourNode == null)
                     {
                         status |= DT_OUT_OF_NODES;
@@ -3853,7 +3853,7 @@ public static partial class Detour
                                         neighbourRef, neighbourPoly, neighbourTile, neighbourNode.pos);
                     }
 
-                    float total = bestNode.total + dtVdist(bestNode.pos, neighbourNode.pos);
+                    var total = bestNode.total + dtVdist(bestNode.pos, neighbourNode.pos);
 
                     // The node is already in open list and the new result is worse, skip.
                     if (neighbourNode.dtcsTestFlag(dtNodeFlags.DT_NODE_OPEN) && total >= neighbourNode.total)
@@ -3898,7 +3898,7 @@ public static partial class Detour
         {
             dtMeshTile tile = null;
             dtPoly poly = null;
-            dtStatus status = m_nav.getTileAndPolyByRef(polyRef, ref tile, ref poly);
+            var status = m_nav.getTileAndPolyByRef(polyRef, ref tile, ref poly);
             // If cannot get polygon, assume it does not exists and boundary is invalid.
             if (dtStatusFailed(status))
                 return false;
@@ -3919,7 +3919,7 @@ public static partial class Detour
         bool isInClosedList(dtPolyRef polyRef)
         {
             if (m_nodePool == null) return false;
-            dtNode node = m_nodePool.findNode(polyRef);
+            var node = m_nodePool.findNode(polyRef);
             return node != null && node.dtcsTestFlag(dtNodeFlags.DT_NODE_CLOSED);// .flags & DT_NODE_CLOSED;
         }
 
@@ -3952,12 +3952,12 @@ public static partial class Detour
 
         public void process(dtMeshTile tile, dtPoly[] polys, dtPolyRef[] refs, int count)
         {
-            for (int i = 0; i < count; ++i)
+            for (var i = 0; i < count; ++i)
             {
-                dtPolyRef refe = refs[i];
-                float[] closestPtPoly = new float[3];
-                float[] diff = new float[3];
-                bool posOverPoly = false;
+                var refe = refs[i];
+                var closestPtPoly = new float[3];
+                var diff = new float[3];
+                var posOverPoly = false;
                 float d;
                 m_query.closestPointOnPoly(refe, m_center, closestPtPoly, ref posOverPoly);
 

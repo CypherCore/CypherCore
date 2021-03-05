@@ -189,10 +189,10 @@ namespace Framework.IO
 			if(startIndex<0) throw new ArgumentOutOfRangeException("startIndex", "<0");
 			if(count<0) throw new ArgumentOutOfRangeException("count", "<0");
 
-			long len=startIndex+count;
+			var len=startIndex+count;
 			if(len>bytes.LongLength) throw new ArgumentOutOfRangeException("startIndex+count", ">bytes.Length");
 
-			long ind=startIndex;
+			var ind=startIndex;
 
 			crc=~crc;
 			while(len>=8)
@@ -286,7 +286,7 @@ namespace Framework.IO
 		static uint gf2_matrix_times(uint[] mat, uint vec)
 		{
 			uint sum=0;
-			int ind=0;
+			var ind=0;
 			while(vec!=0)
 			{
 				if((vec&1)!=0) sum^=mat[ind];
@@ -300,7 +300,7 @@ namespace Framework.IO
 
 		static void gf2_matrix_square(uint[] square, uint[] mat)
 		{
-			for(int n=0; n<GF2_DIM; n++) square[n]=gf2_matrix_times(mat, mat[n]);
+			for(var n=0; n<GF2_DIM; n++) square[n]=gf2_matrix_times(mat, mat[n]);
 		}
 
 		// =========================================================================
@@ -318,8 +318,8 @@ namespace Framework.IO
 			// degenerate case (also disallow negative lengths)
 			if(count<=0) return crc1;
 
-			uint[] even=new uint[GF2_DIM];		// even-power-of-two zeros operator
-			uint[] odd=new uint[GF2_DIM];		// odd-power-of-two zeros operator
+			var even=new uint[GF2_DIM];		// even-power-of-two zeros operator
+			var odd=new uint[GF2_DIM];		// odd-power-of-two zeros operator
 
 			// put operator for one zero bit in odd
 			odd[0]=0xedb88320;					// CRC-32 polynomial

@@ -453,7 +453,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            foreach (BracketInfo bracket in Bracket)
+            foreach (var bracket in Bracket)
                 bracket.Write(_worldPacket);
         }
 
@@ -700,7 +700,7 @@ namespace Game.Networking.Packets
             data.WriteUInt8(TeamSize);
             data.WriteUInt32(InstanceID);
 
-            foreach (ulong queueID in QueueID)
+            foreach (var queueID in QueueID)
                 data.WriteUInt64(queueID);
 
             data.WriteBit(RegisteredMatch);

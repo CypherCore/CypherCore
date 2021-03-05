@@ -37,21 +37,21 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string id = handler.ExtractKeyFromLink(args, "Hgameobject");
+            var id = handler.ExtractKeyFromLink(args, "Hgameobject");
             if (string.IsNullOrEmpty(id))
                 return false;
 
-            if (!ulong.TryParse(id, out ulong guidLow) || guidLow == 0)
+            if (!ulong.TryParse(id, out var guidLow) || guidLow == 0)
                 return false;
 
-            GameObject obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
+            var obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
             if (!obj)
             {
                 handler.SendSysMessage(CypherStrings.CommandObjnotfound, guidLow);
                 return false;
             }
 
-            uint autoCloseTime = obj.GetGoInfo().GetAutoCloseTime() != 0 ? 10000u : 0u;
+            var autoCloseTime = obj.GetGoInfo().GetAutoCloseTime() != 0 ? 10000u : 0u;
 
             // Activate
             obj.SetLootState(LootState.Ready);
@@ -65,27 +65,27 @@ namespace Game.Chat
         static bool HandleGameObjectDeleteCommand(StringArguments args, CommandHandler handler)
         {
             // number or [name] Shift-click form |color|Hgameobject:go_guid|h[name]|h|r
-            string id = handler.ExtractKeyFromLink(args, "Hgameobject");
+            var id = handler.ExtractKeyFromLink(args, "Hgameobject");
             if (string.IsNullOrEmpty(id))
                 return false;
 
-            if (!ulong.TryParse(id, out ulong guidLow) || guidLow == 0)
+            if (!ulong.TryParse(id, out var guidLow) || guidLow == 0)
                 return false;
 
-            Player player = handler.GetSession().GetPlayer();
+            var player = handler.GetSession().GetPlayer();
             // force respawn to make sure we find something
             player.GetMap().RemoveRespawnTime(SpawnObjectType.GameObject, guidLow, true);
-            GameObject obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
+            var obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
             if (!obj)
             {
                 handler.SendSysMessage(CypherStrings.CommandObjnotfound, guidLow);
                 return false;
             }
 
-            ObjectGuid ownerGuid = obj.GetOwnerGUID();
+            var ownerGuid = obj.GetOwnerGUID();
             if (!ownerGuid.IsEmpty())
             {
-                Unit owner = Global.ObjAccessor.GetUnit(player, ownerGuid);
+                var owner = Global.ObjAccessor.GetUnit(player, ownerGuid);
                 if (!owner || !ownerGuid.IsPlayer())
                 {
                     handler.SendSysMessage(CypherStrings.CommandDelobjrefercreature, ownerGuid.ToString(), obj.GetGUID().ToString());
@@ -110,14 +110,14 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            bool deleteRespawnTimes = false;
+            var deleteRespawnTimes = false;
             uint groupId = 0;
 
             // Decode arguments
-            string arg = args.NextString();
+            var arg = args.NextString();
             while (!arg.IsEmpty())
             {
-                string thisArg = arg.ToLower();
+                var thisArg = arg.ToLower();
                 if (thisArg == "removerespawntime")
                     deleteRespawnTimes = true;
                 else if (thisArg.IsEmpty() || !thisArg.IsNumber())
@@ -128,7 +128,7 @@ namespace Game.Chat
                 arg = args.NextString();
             }
 
-            Player player = handler.GetSession().GetPlayer();
+            var player = handler.GetSession().GetPlayer();
 
             if (!player.GetMap().SpawnGroupDespawn(groupId, deleteRespawnTimes))
             {
@@ -145,21 +145,21 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            string param1 = handler.ExtractKeyFromLink(args, "Hgameobject_entry");
+            var param1 = handler.ExtractKeyFromLink(args, "Hgameobject_entry");
             if (param1.IsEmpty())
                 return false;
 
             uint entry;
             if (param1.Equals("guid"))
             {
-                string cValue = handler.ExtractKeyFromLink(args, "Hgameobject");
+                var cValue = handler.ExtractKeyFromLink(args, "Hgameobject");
                 if (cValue.IsEmpty())
                     return false;
 
-                if (!ulong.TryParse(cValue, out ulong guidLow))
+                if (!ulong.TryParse(cValue, out var guidLow))
                     return false;
 
-                GameObjectData data = Global.ObjectMgr.GetGameObjectData(guidLow);
+                var data = Global.ObjectMgr.GetGameObjectData(guidLow);
                 if (data == null)
                     return false;
                 entry = data.Id;
@@ -170,7 +170,7 @@ namespace Game.Chat
                     return false;
             }
 
-            GameObjectTemplate gameObjectInfo = Global.ObjectMgr.GetGameObjectTemplate(entry);
+            var gameObjectInfo = Global.ObjectMgr.GetGameObjectTemplate(entry);
             if (gameObjectInfo == null)
                 return false;
 
@@ -180,21 +180,21 @@ namespace Game.Chat
             else if (handler.GetSelectedObject() != null && handler.GetSelectedObject().IsTypeId(TypeId.GameObject))
                 thisGO = handler.GetSelectedObject().ToGameObject();
 
-            GameObjectTypes type = gameObjectInfo.type;
-            uint displayId = gameObjectInfo.displayId;
-            string name = gameObjectInfo.name;
-            uint lootId = gameObjectInfo.GetLootId();
+            var type = gameObjectInfo.type;
+            var displayId = gameObjectInfo.displayId;
+            var name = gameObjectInfo.name;
+            var lootId = gameObjectInfo.GetLootId();
 
             // If we have a real object, send some info about it
             if (thisGO != null)
             {
                 handler.SendSysMessage(CypherStrings.SpawninfoGuidinfo, thisGO.GetGUID().ToString());
                 handler.SendSysMessage(CypherStrings.SpawninfoSpawnidLocation, thisGO.GetSpawnId(), thisGO.GetPositionX(), thisGO.GetPositionY(), thisGO.GetPositionZ());
-                Player player = handler.GetSession().GetPlayer();
+                var player = handler.GetSession().GetPlayer();
                 if (player != null)
                 {
-                    Position playerPos = player.GetPosition();
-                    float dist = thisGO.GetExactDist(playerPos);
+                    var playerPos = player.GetPosition();
+                    var dist = thisGO.GetExactDist(playerPos);
                     handler.SendSysMessage(CypherStrings.SpawninfoDistancefromplayer, dist);
                 }
             }
@@ -202,12 +202,12 @@ namespace Game.Chat
             handler.SendSysMessage(CypherStrings.GoinfoType, type);
             handler.SendSysMessage(CypherStrings.GoinfoLootid, lootId);
             handler.SendSysMessage(CypherStrings.GoinfoDisplayid, displayId);
-            WorldObject obj = handler.GetSelectedObject();
+            var obj = handler.GetSelectedObject();
             if (obj != null)
             {
                 if (obj.IsGameObject() && obj.ToGameObject().GetGameObjectData() != null && obj.ToGameObject().GetGameObjectData().spawnGroupData.groupId != 0)
                 {
-                    SpawnGroupTemplateData groupData = obj.ToGameObject().GetGameObjectData().spawnGroupData;
+                    var groupData = obj.ToGameObject().GetGameObjectData().spawnGroupData;
                     handler.SendSysMessage(CypherStrings.SpawninfoGroupId, groupData.name, groupData.groupId, groupData.flags, obj.GetMap().IsSpawnGroupActive(groupData.groupId));
                 }
                 if (obj.IsGameObject())
@@ -216,11 +216,11 @@ namespace Game.Chat
             handler.SendSysMessage(CypherStrings.GoinfoName, name);
             handler.SendSysMessage(CypherStrings.GoinfoSize, gameObjectInfo.size);
 
-            GameObjectTemplateAddon addon = Global.ObjectMgr.GetGameObjectTemplateAddon(entry);
+            var addon = Global.ObjectMgr.GetGameObjectTemplateAddon(entry);
             if (addon != null)
                 handler.SendSysMessage(CypherStrings.GoinfoAddon, addon.faction, addon.flags);
 
-            GameObjectDisplayInfoRecord modelInfo = CliDB.GameObjectDisplayInfoStorage.LookupByKey(displayId);
+            var modelInfo = CliDB.GameObjectDisplayInfoStorage.LookupByKey(displayId);
             if (modelInfo != null)
                 handler.SendSysMessage(CypherStrings.GoinfoModel, modelInfo.GeoBoxMax.X, modelInfo.GeoBoxMax.Y, modelInfo.GeoBoxMax.Z, modelInfo.GeoBoxMin.X, modelInfo.GeoBoxMin.Y, modelInfo.GeoBoxMin.Z);
 
@@ -231,28 +231,28 @@ namespace Game.Chat
         static bool HandleGameObjectMoveCommand(StringArguments args, CommandHandler handler)
         {
             // number or [name] Shift-click form |color|Hgameobject:go_guid|h[name]|h|r
-            string id = handler.ExtractKeyFromLink(args, "Hgameobject");
+            var id = handler.ExtractKeyFromLink(args, "Hgameobject");
             if (string.IsNullOrEmpty(id))
                 return false;
 
-            if (!ulong.TryParse(id, out ulong guidLow) || guidLow == 0)
+            if (!ulong.TryParse(id, out var guidLow) || guidLow == 0)
                 return false;
 
-            GameObject obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
+            var obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
             if (!obj)
             {
                 handler.SendSysMessage(CypherStrings.CommandObjnotfound, guidLow);
                 return false;
             }
 
-            string toX = args.NextString();
-            string toY = args.NextString();
-            string toZ = args.NextString();
+            var toX = args.NextString();
+            var toY = args.NextString();
+            var toZ = args.NextString();
 
             float x, y, z;
             if (string.IsNullOrEmpty(toX))
             {
-                Player player = handler.GetSession().GetPlayer();
+                var player = handler.GetSession().GetPlayer();
                 player.GetPosition(out x, out y, out z);
             }
             else
@@ -273,7 +273,7 @@ namespace Game.Chat
                 }
             }
 
-            Map map = obj.GetMap();
+            var map = obj.GetMap();
 
             obj.Relocate(x, y, z, obj.GetOrientation());
             obj.SaveToDB();
@@ -296,12 +296,12 @@ namespace Game.Chat
         [Command("near", RBACPermissions.CommandGobjectNear)]
         static bool HandleGameObjectNearCommand(StringArguments args, CommandHandler handler)
         {
-            float distance = args.Empty() ? 10.0f : args.NextSingle();
+            var distance = args.Empty() ? 10.0f : args.NextSingle();
             uint count = 0;
 
-            Player player = handler.GetPlayer();
+            var player = handler.GetPlayer();
 
-            PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_GAMEOBJECT_NEAREST);
+            var stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_GAMEOBJECT_NEAREST);
             stmt.AddValue(0, player.GetPositionX());
             stmt.AddValue(1, player.GetPositionY());
             stmt.AddValue(2, player.GetPositionZ());
@@ -310,20 +310,20 @@ namespace Game.Chat
             stmt.AddValue(5, player.GetPositionY());
             stmt.AddValue(6, player.GetPositionZ());
             stmt.AddValue(7, distance * distance);
-            SQLResult result = DB.World.Query(stmt);
+            var result = DB.World.Query(stmt);
 
             if (!result.IsEmpty())
             {
                 do
                 {
-                    ulong guid = result.Read<ulong>(0);
-                    uint entry = result.Read<uint>(1);
-                    float x = result.Read<float>(2);
-                    float y = result.Read<float>(3);
-                    float z = result.Read<float>(4);
-                    ushort mapId = result.Read<ushort>(5);
+                    var guid = result.Read<ulong>(0);
+                    var entry = result.Read<uint>(1);
+                    var x = result.Read<float>(2);
+                    var y = result.Read<float>(3);
+                    var z = result.Read<float>(4);
+                    var mapId = result.Read<ushort>(5);
 
-                    GameObjectTemplate gameObjectInfo = Global.ObjectMgr.GetGameObjectTemplate(entry);
+                    var gameObjectInfo = Global.ObjectMgr.GetGameObjectTemplate(entry);
                     if (gameObjectInfo == null)
                         continue;
 
@@ -343,15 +343,15 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            bool ignoreRespawn = false;
-            bool force = false;
+            var ignoreRespawn = false;
+            var force = false;
             uint groupId = 0;
 
             // Decode arguments
-            string arg = args.NextString();
+            var arg = args.NextString();
             while (!arg.IsEmpty())
             {
-                string thisArg = arg.ToLower();
+                var thisArg = arg.ToLower();
                 if (thisArg == "ignorerespawn")
                     ignoreRespawn = true;
                 else if (thisArg == "force")
@@ -364,9 +364,9 @@ namespace Game.Chat
                 arg = args.NextString();
             }
 
-            Player player = handler.GetSession().GetPlayer();
+            var player = handler.GetSession().GetPlayer();
 
-            List<WorldObject> creatureList = new List<WorldObject>();
+            var creatureList = new List<WorldObject>();
             if (!player.GetMap().SpawnGroupSpawn(groupId, ignoreRespawn, force, creatureList))
             {
                 handler.SendSysMessage(CypherStrings.SpawngroupBadgroup, groupId);
@@ -374,7 +374,7 @@ namespace Game.Chat
             }
 
             handler.SendSysMessage(CypherStrings.SpawngroupSpawncount, creatureList.Count);
-            foreach (WorldObject obj in creatureList)
+            foreach (var obj in creatureList)
                 handler.SendSysMessage($"{obj.GetName()} ({obj.GetGUID()})");
 
             return true;
@@ -383,18 +383,18 @@ namespace Game.Chat
         [Command("target", RBACPermissions.CommandGobjectTarget)]
         static bool HandleGameObjectTargetCommand(StringArguments args, CommandHandler handler)
         {
-            Player player = handler.GetSession().GetPlayer();
+            var player = handler.GetSession().GetPlayer();
             SQLResult result;
             var activeEventsList = Global.GameEventMgr.GetActiveEventList();
 
             if (!args.Empty())
             {
                 // number or [name] Shift-click form |color|Hgameobject_entry:go_id|h[name]|h|r
-                string idStr = handler.ExtractKeyFromLink(args, "Hgameobject_entry");
+                var idStr = handler.ExtractKeyFromLink(args, "Hgameobject_entry");
                 if (string.IsNullOrEmpty(idStr))
                     return false;
 
-                if (!uint.TryParse(idStr, out uint objectId) || objectId != 0)
+                if (!uint.TryParse(idStr, out var objectId) || objectId != 0)
                     result = DB.World.Query("SELECT guid, id, position_x, position_y, position_z, orientation, map, PhaseId, PhaseGroup, (POW(position_x - '{0}', 2) + POW(position_y - '{1}', 2) + POW(position_z - '{2}', 2)) AS order_ FROM gameobject WHERE map = '{3}' AND id = '{4}' ORDER BY order_ ASC LIMIT 1",
                     player.GetPositionX(), player.GetPositionY(), player.GetPositionZ(), player.GetMapId(), objectId);
                 else
@@ -407,9 +407,9 @@ namespace Game.Chat
             }
             else
             {
-                StringBuilder eventFilter = new StringBuilder();
+                var eventFilter = new StringBuilder();
                 eventFilter.Append(" AND (eventEntry IS NULL ");
-                bool initString = true;
+                var initString = true;
 
                 foreach (var entry in activeEventsList)
                 {
@@ -440,7 +440,7 @@ namespace Game.Chat
                 return true;
             }
 
-            bool found = false;
+            var found = false;
             float x, y, z, o;
             ulong guidLow;
             uint id, phaseId, phaseGroup;
@@ -469,7 +469,7 @@ namespace Game.Chat
                 return false;
             }
 
-            GameObjectTemplate objectInfo = Global.ObjectMgr.GetGameObjectTemplate(id);
+            var objectInfo = Global.ObjectMgr.GetGameObjectTemplate(id);
 
             if (objectInfo == null)
             {
@@ -477,18 +477,18 @@ namespace Game.Chat
                 return false;
             }
 
-            GameObject target = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
+            var target = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
 
             handler.SendSysMessage(CypherStrings.GameobjectDetail, guidLow, objectInfo.name, guidLow, id, x, y, z, mapId, o, phaseId, phaseGroup);
 
             if (target)
             {
-                int curRespawnDelay = (int)(target.GetRespawnTimeEx() - Time.UnixTime);
+                var curRespawnDelay = (int)(target.GetRespawnTimeEx() - Time.UnixTime);
                 if (curRespawnDelay < 0)
                     curRespawnDelay = 0;
 
-                string curRespawnDelayStr = Time.secsToTimeString((uint)curRespawnDelay, true);
-                string defRespawnDelayStr = Time.secsToTimeString(target.GetRespawnDelay(), true);
+                var curRespawnDelayStr = Time.secsToTimeString((uint)curRespawnDelay, true);
+                var defRespawnDelayStr = Time.secsToTimeString(target.GetRespawnDelay(), true);
 
                 handler.SendSysMessage(CypherStrings.CommandRawpawntimes, defRespawnDelayStr, curRespawnDelayStr);
             }
@@ -499,21 +499,21 @@ namespace Game.Chat
         static bool HandleGameObjectTurnCommand(StringArguments args, CommandHandler handler)
         {
             // number or [name] Shift-click form |color|Hgameobject:go_id|h[name]|h|r
-            string id = handler.ExtractKeyFromLink(args, "Hgameobject");
+            var id = handler.ExtractKeyFromLink(args, "Hgameobject");
             if (string.IsNullOrEmpty(id))
                 return false;
 
-            if (!ulong.TryParse(id, out ulong guidLow) || guidLow == 0)
+            if (!ulong.TryParse(id, out var guidLow) || guidLow == 0)
                 return false;
 
-            GameObject obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
+            var obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
             if (!obj)
             {
                 handler.SendSysMessage(CypherStrings.CommandObjnotfound, guidLow);
                 return false;
             }
 
-            string orientation = args.NextString();
+            var orientation = args.NextString();
             float oz = 0.0f, oy = 0.0f, ox = 0.0f;
             if (!orientation.IsEmpty())
             {
@@ -536,11 +536,11 @@ namespace Game.Chat
             }
             else
             {
-                Player player = handler.GetPlayer();
+                var player = handler.GetPlayer();
                 oz = player.GetOrientation();
             }
 
-            Map map = obj.GetMap();
+            var map = obj.GetMap();
 
             obj.Relocate(obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ());
             obj.SetWorldRotationAngles(oz, oy, ox);
@@ -571,16 +571,16 @@ namespace Game.Chat
                     return false;
 
                 // number or [name] Shift-click form |color|Hgameobject_entry:go_id|h[name]|h|r
-                string idStr = handler.ExtractKeyFromLink(args, "Hgameobject_entry");
+                var idStr = handler.ExtractKeyFromLink(args, "Hgameobject_entry");
                 if (string.IsNullOrEmpty(idStr))
                     return false;
 
-                if (!uint.TryParse(idStr, out uint objectId) || objectId == 0)
+                if (!uint.TryParse(idStr, out var objectId) || objectId == 0)
                     return false;
 
-                uint spawntimeSecs = args.NextUInt32();
+                var spawntimeSecs = args.NextUInt32();
 
-                GameObjectTemplate objectInfo = Global.ObjectMgr.GetGameObjectTemplate(objectId);
+                var objectInfo = Global.ObjectMgr.GetGameObjectTemplate(objectId);
                 if (objectInfo == null)
                 {
                     handler.SendSysMessage(CypherStrings.GameobjectNotExist, objectId);
@@ -595,10 +595,10 @@ namespace Game.Chat
                     return false;
                 }
 
-                Player player = handler.GetPlayer();
-                Map map = player.GetMap();
+                var player = handler.GetPlayer();
+                var map = player.GetMap();
 
-                GameObject obj = GameObject.CreateGameObject(objectInfo.entry, map, player, Quaternion.fromEulerAnglesZYX(player.GetOrientation(), 0.0f, 0.0f), 255, GameObjectState.Ready);
+                var obj = GameObject.CreateGameObject(objectInfo.entry, map, player, Quaternion.fromEulerAnglesZYX(player.GetOrientation(), 0.0f, 0.0f), 255, GameObjectState.Ready);
                 if (!obj)
                     return false;
 
@@ -611,7 +611,7 @@ namespace Game.Chat
 
                 // fill the gameobject data and save to the db
                 obj.SaveToDB(map.GetId(), new List<Difficulty>() { map.GetDifficultyID() });
-                ulong spawnId = obj.GetSpawnId();
+                var spawnId = obj.GetSpawnId();
 
                 // this will generate a new guid if the object is in an instance
                 obj = GameObject.CreateGameObjectFromDB(spawnId, map);
@@ -630,19 +630,19 @@ namespace Game.Chat
                 if (args.Empty())
                     return false;
 
-                uint id = args.NextUInt32();
+                var id = args.NextUInt32();
                 if (id == 0)
                     return false;
 
-                Player player = handler.GetPlayer();
+                var player = handler.GetPlayer();
 
-                uint spawntime = args.NextUInt32();
+                var spawntime = args.NextUInt32();
                 uint spawntm = 300;
 
                 if (spawntime != 0)
                     spawntm = spawntime;
 
-                Quaternion rotation = Quaternion.fromEulerAnglesZYX(player.GetOrientation(), 0.0f, 0.0f);
+                var rotation = Quaternion.fromEulerAnglesZYX(player.GetOrientation(), 0.0f, 0.0f);
 
                 if (Global.ObjectMgr.GetGameObjectTemplate(id) == null)
                 {
@@ -700,25 +700,25 @@ namespace Game.Chat
             static bool HandleGameObjectSetStateCommand(StringArguments args, CommandHandler handler)
             {
                 // number or [name] Shift-click form |color|Hgameobject:go_id|h[name]|h|r
-                string id = handler.ExtractKeyFromLink(args, "Hgameobject");
+                var id = handler.ExtractKeyFromLink(args, "Hgameobject");
                 if (string.IsNullOrEmpty(id))
                     return false;
 
-                if (!ulong.TryParse(id, out ulong guidLow) || guidLow == 0)
+                if (!ulong.TryParse(id, out var guidLow) || guidLow == 0)
                     return false;
 
-                GameObject obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
+                var obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
                 if (!obj)
                 {
                     handler.SendSysMessage(CypherStrings.CommandObjnotfound, guidLow);
                     return false;
                 }
 
-                string type = args.NextString();
+                var type = args.NextString();
                 if (string.IsNullOrEmpty(type))
                     return false;
 
-                if (!int.TryParse(type, out int objectType))
+                if (!int.TryParse(type, out var objectType))
                     return false;
 
                 if (objectType < 0)
@@ -730,11 +730,11 @@ namespace Game.Chat
                     return true;
                 }
 
-                string state = args.NextString();
+                var state = args.NextString();
                 if (string.IsNullOrEmpty(state))
                     return false;
 
-                if (!uint.TryParse(state, out uint objectState))
+                if (!uint.TryParse(state, out var objectState))
                     return false;
 
                 switch (objectType)

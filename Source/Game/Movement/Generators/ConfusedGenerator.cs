@@ -67,26 +67,26 @@ namespace Game.Movement
                 // start moving
                 owner.AddUnitState(UnitState.ConfusedMove);
 
-                Position destination = _reference;
-                float distance = (float)(4.0f * RandomHelper.FRand(0.0f, 1.0f) - 2.0f);
-                float angle = RandomHelper.FRand(0.0f, 1.0f) * MathF.PI * 2.0f;
+                var destination = _reference;
+                var distance = (float)(4.0f * RandomHelper.FRand(0.0f, 1.0f) - 2.0f);
+                var angle = RandomHelper.FRand(0.0f, 1.0f) * MathF.PI * 2.0f;
                 owner.MovePositionToFirstCollision(ref destination, distance, angle);
 
                 if (_path == null)
                     _path = new PathGenerator(owner);
 
                 _path.SetPathLengthLimit(30.0f);
-                bool result = _path.CalculatePath(destination.GetPositionX(), destination.GetPositionY(), destination.GetPositionZ());
+                var result = _path.CalculatePath(destination.GetPositionX(), destination.GetPositionY(), destination.GetPositionZ());
                 if (!result || _path.GetPathType().HasAnyFlag(PathType.NoPath))
                 {
                     _timer.Reset(100);
                     return true;
                 }
 
-                MoveSplineInit init = new MoveSplineInit(owner);
+                var init = new MoveSplineInit(owner);
                 init.MovebyPath(_path.GetPath());
                 init.SetWalk(true);
-                int traveltime = init.Launch();
+                var traveltime = init.Launch();
                 _timer.Reset(traveltime + RandomHelper.URand(800, 1500));
             }
 

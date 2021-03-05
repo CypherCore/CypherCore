@@ -56,7 +56,7 @@ namespace Game.Collision
             var result = VMAPLoadResult.Ignored;
             if (IsMapLoadingEnabled())
             {
-                LoadResult parentLoadResult = LoadSingleMap(mapId, x, y);
+                var parentLoadResult = LoadSingleMap(mapId, x, y);
                 if (parentLoadResult == LoadResult.Success || parentLoadResult == LoadResult.FileNotFound)
                 {
                     if (parentLoadResult == LoadResult.Success)
@@ -64,9 +64,9 @@ namespace Game.Collision
                     // else VMAP_LOAD_RESULT_IGNORED
 
                     var childMaps = iChildMapData.LookupByKey(mapId);
-                    foreach (uint childMapId in childMaps)
+                    foreach (var childMapId in childMaps)
                     {
-                        LoadResult childLoadResult = LoadSingleMap(childMapId, x, y);
+                        var childLoadResult = LoadSingleMap(childMapId, x, y);
                         if (childLoadResult != LoadResult.Success && childLoadResult != LoadResult.FileNotFound)
                             result = VMAPLoadResult.Error;
                     }
@@ -83,9 +83,9 @@ namespace Game.Collision
             var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
             if (instanceTree == null)
             {
-                string filename = VMapPath + GetMapFileName(mapId);
-                StaticMapTree newTree = new StaticMapTree(mapId);
-                LoadResult treeInitResult = newTree.InitMap(filename);
+                var filename = VMapPath + GetMapFileName(mapId);
+                var newTree = new StaticMapTree(mapId);
+                var treeInitResult = newTree.InitMap(filename);
                 if (treeInitResult != LoadResult.Success)
                     return treeInitResult;
 
@@ -100,7 +100,7 @@ namespace Game.Collision
         public void UnloadMap(uint mapId, uint x, uint y)
         {
             var childMaps = iChildMapData.LookupByKey(mapId);
-            foreach (uint childMapId in childMaps)
+            foreach (var childMapId in childMaps)
                 UnloadSingleMap(childMapId, x, y);
 
             UnloadSingleMap(mapId, x, y);
@@ -122,7 +122,7 @@ namespace Game.Collision
         public void UnloadMap(uint mapId)
         {
             var childMaps = iChildMapData.LookupByKey(mapId);
-            foreach (uint childMapId in childMaps)
+            foreach (var childMapId in childMaps)
                 UnloadSingleMap(childMapId);
 
             UnloadSingleMap(mapId);
@@ -149,8 +149,8 @@ namespace Game.Collision
             var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
             if (instanceTree != null)
             {
-                Vector3 pos1 = ConvertPositionToInternalRep(x1, y1, z1);
-                Vector3 pos2 = ConvertPositionToInternalRep(x2, y2, z2);
+                var pos1 = ConvertPositionToInternalRep(x1, y1, z1);
+                var pos2 = ConvertPositionToInternalRep(x2, y2, z2);
                 if (pos1 != pos2)
                     return instanceTree.IsInLineOfSight(pos1, pos2, ignoreFlags);
             }
@@ -166,9 +166,9 @@ namespace Game.Collision
                 if (instanceTree != null)
                 {
                     Vector3 resultPos;
-                    Vector3 pos1 = ConvertPositionToInternalRep(x1, y1, z1);
-                    Vector3 pos2 = ConvertPositionToInternalRep(x2, y2, z2);
-                    bool result = instanceTree.GetObjectHitPos(pos1, pos2, out resultPos, modifyDist);
+                    var pos1 = ConvertPositionToInternalRep(x1, y1, z1);
+                    var pos2 = ConvertPositionToInternalRep(x2, y2, z2);
+                    var result = instanceTree.GetObjectHitPos(pos1, pos2, out resultPos, modifyDist);
                     resultPos = ConvertPositionToInternalRep(resultPos.X, resultPos.Y, resultPos.Z);
                     rx = resultPos.X;
                     ry = resultPos.Y;
@@ -191,8 +191,8 @@ namespace Game.Collision
                 var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
                 if (instanceTree != null)
                 {
-                    Vector3 pos = ConvertPositionToInternalRep(x, y, z);
-                    float height = instanceTree.GetHeight(pos, maxSearchDist);
+                    var pos = ConvertPositionToInternalRep(x, y, z);
+                    var height = instanceTree.GetHeight(pos, maxSearchDist);
                     if (float.IsInfinity(height))
                         height = MapConst.VMAPInvalidHeightValue; // No height
 
@@ -214,8 +214,8 @@ namespace Game.Collision
                 var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
                 if (instanceTree != null)
                 {
-                    Vector3 pos = ConvertPositionToInternalRep(x, y, z);
-                    bool result = instanceTree.GetAreaInfo(ref pos, out flags, out adtId, out rootId, out groupId);
+                    var pos = ConvertPositionToInternalRep(x, y, z);
+                    var result = instanceTree.GetAreaInfo(ref pos, out flags, out adtId, out rootId, out groupId);
                     // z is not touched by convertPositionToInternalRep(), so just copy
                     z = pos.Z;
                     return result;
@@ -232,8 +232,8 @@ namespace Game.Collision
                 var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
                 if (instanceTree != null)
                 {
-                    LocationInfo info = new LocationInfo();
-                    Vector3 pos = ConvertPositionToInternalRep(x, y, z);
+                    var info = new LocationInfo();
+                    var pos = ConvertPositionToInternalRep(x, y, z);
                     if (instanceTree.GetLocationInfo(pos, info))
                     {
                         floor = info.ground_Z;
@@ -265,12 +265,12 @@ namespace Game.Collision
             var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
             if (instanceTree != null)
             {
-                LocationInfo info = new LocationInfo();
-                Vector3 pos = ConvertPositionToInternalRep(x, y, z);
+                var info = new LocationInfo();
+                var pos = ConvertPositionToInternalRep(x, y, z);
                 if (instanceTree.GetLocationInfo(pos, info))
                 {
                     data.floorZ = info.ground_Z;
-                    uint liquidType = info.hitModel.GetLiquidType();
+                    var liquidType = info.hitModel.GetLiquidType();
                     float liquidLevel = 0;
                     if (reqLiquidType == 0 || Convert.ToBoolean(Global.DB2Mgr.GetLiquidFlags(liquidType) & reqLiquidType))
                         if (info.hitInstance.GetLiquidLevel(pos, info, ref liquidLevel))
@@ -292,7 +292,7 @@ namespace Game.Collision
                 var model = iLoadedModelFiles.LookupByKey(filename);
                 if (model == null)
                 {
-                    WorldModel worldmodel = new WorldModel();
+                    var worldmodel = new WorldModel();
                     if (!worldmodel.ReadFile(VMapPath + filename))
                     {
                         Log.outError(LogFilter.Server, "VMapManager: could not load '{0}'", filename);
@@ -347,8 +347,8 @@ namespace Game.Collision
 
         Vector3 ConvertPositionToInternalRep(float x, float y, float z)
         {
-            Vector3 pos = new Vector3();
-            float mid = 0.5f * 64.0f * 533.33333333f;
+            var pos = new Vector3();
+            var mid = 0.5f * 64.0f * 533.33333333f;
             pos.X = mid - x;
             pos.Y = mid - y;
             pos.Z = z;

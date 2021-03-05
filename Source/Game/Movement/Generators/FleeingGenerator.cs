@@ -99,12 +99,12 @@ namespace Game.Movement
 
             owner.AddUnitState(UnitState.FleeingMove);
 
-            Position destination = owner.GetPosition();
+            var destination = owner.GetPosition();
             GetPoint(owner, ref destination);
 
             // Add LOS check for target point
-            Position currentPosition = owner.GetPosition();
-            bool isInLOS = Global.VMapMgr.IsInLineOfSight(PhasingHandler.GetTerrainMapId(owner.GetPhaseShift(), owner.GetMap(), currentPosition.posX, currentPosition.posY), currentPosition.posX, currentPosition.posY, currentPosition.posZ + 2.0f, destination.GetPositionX(), destination.GetPositionY(), destination.GetPositionZ() + 2.0f, ModelIgnoreFlags.Nothing);
+            var currentPosition = owner.GetPosition();
+            var isInLOS = Global.VMapMgr.IsInLineOfSight(PhasingHandler.GetTerrainMapId(owner.GetPhaseShift(), owner.GetMap(), currentPosition.posX, currentPosition.posY), currentPosition.posX, currentPosition.posY, currentPosition.posZ + 2.0f, destination.GetPositionX(), destination.GetPositionY(), destination.GetPositionZ() + 2.0f, ModelIgnoreFlags.Nothing);
             if (!isInLOS)
             {
                 _timer.Reset(200);
@@ -115,24 +115,24 @@ namespace Game.Movement
                 _path = new PathGenerator(owner);
 
             _path.SetPathLengthLimit(30.0f);
-            bool result = _path.CalculatePath(destination.GetPositionX(), destination.GetPositionY(), destination.GetPositionZ());
+            var result = _path.CalculatePath(destination.GetPositionX(), destination.GetPositionY(), destination.GetPositionZ());
             if (!result || _path.GetPathType().HasAnyFlag(PathType.NoPath))
             {
                 _timer.Reset(100);
                 return;
             }
 
-            MoveSplineInit init = new MoveSplineInit(owner);
+            var init = new MoveSplineInit(owner);
             init.MovebyPath(_path.GetPath());
             init.SetWalk(false);
-            int traveltime = init.Launch();
+            var traveltime = init.Launch();
             _timer.Reset(traveltime + RandomHelper.URand(800, 1500));
         }
 
         void GetPoint(T owner, ref Position position)
         {
             float casterDistance, casterAngle;
-            Unit fleeTarget = Global.ObjAccessor.GetUnit(owner, _fleeTargetGUID);
+            var fleeTarget = Global.ObjAccessor.GetUnit(owner, _fleeTargetGUID);
             if (fleeTarget != null)
             {
                 casterDistance = fleeTarget.GetDistance(owner);
@@ -189,7 +189,7 @@ namespace Game.Movement
         {
             owner.RemoveUnitFlag(UnitFlags.Fleeing);
             owner.ClearUnitState(UnitState.Fleeing | UnitState.FleeingMove);
-            Unit victim = owner.GetVictim();
+            var victim = owner.GetVictim();
             if (victim != null)
             {
                 if (owner.IsAlive())

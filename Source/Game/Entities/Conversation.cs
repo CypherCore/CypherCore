@@ -87,13 +87,13 @@ namespace Game.Entities
 
         public static Conversation CreateConversation(uint conversationEntry, Unit creator, Position pos, List<ObjectGuid> participants, SpellInfo spellInfo = null)
         {
-            ConversationTemplate conversationTemplate = Global.ConversationDataStorage.GetConversationTemplate(conversationEntry);
+            var conversationTemplate = Global.ConversationDataStorage.GetConversationTemplate(conversationEntry);
             if (conversationTemplate == null)
                 return null;
 
-            ulong lowGuid = creator.GetMap().GenerateLowGuid(HighGuid.Conversation);
+            var lowGuid = creator.GetMap().GenerateLowGuid(HighGuid.Conversation);
 
-            Conversation conversation = new Conversation();
+            var conversation = new Conversation();
             if (!conversation.Create(lowGuid, conversationEntry, creator.GetMap(), creator, pos, participants, spellInfo))
                 return null;
 
@@ -102,7 +102,7 @@ namespace Game.Entities
 
         bool Create(ulong lowGuid, uint conversationEntry, Map map, Unit creator, Position pos, List<ObjectGuid> participants, SpellInfo spellInfo = null)
         {
-            ConversationTemplate conversationTemplate = Global.ConversationDataStorage.GetConversationTemplate(conversationEntry);
+            var conversationTemplate = Global.ConversationDataStorage.GetConversationTemplate(conversationEntry);
             //ASSERT(conversationTemplate);
 
             _creatorGuid = creator.GetGUID();
@@ -125,10 +125,10 @@ namespace Game.Entities
             {
                 for (ushort actorIndex = 0; actorIndex < conversationTemplate.Actors.Count; ++actorIndex)
                 {
-                    ConversationActorTemplate actor = conversationTemplate.Actors[actorIndex];
+                    var actor = conversationTemplate.Actors[actorIndex];
                     if (actor != null)
                     {
-                        ConversationActor actorField = new ConversationActor();
+                        var actorField = new ConversationActor();
                         actorField.CreatureID = actor.CreatureId;
                         actorField.CreatureDisplayInfoID = actor.CreatureModelId;
                         actorField.Type = ConversationActorType.CreatureActor;
@@ -142,7 +142,7 @@ namespace Game.Entities
             {
                 for (ushort actorIndex = 0; actorIndex < conversationTemplate.ActorGuids.Count; ++actorIndex)
                 {
-                    ulong actorGuid = conversationTemplate.ActorGuids[actorIndex];
+                    var actorGuid = conversationTemplate.ActorGuids[actorIndex];
                     if (actorGuid == 0)
                         continue;
 
@@ -156,13 +156,13 @@ namespace Game.Entities
 
             Global.ScriptMgr.OnConversationCreate(this, creator);
 
-            List<ushort> actorIndices = new List<ushort>();
-            List<ConversationLine> lines = new List<ConversationLine>();
-            foreach (ConversationLineTemplate line in conversationTemplate.Lines)
+            var actorIndices = new List<ushort>();
+            var lines = new List<ConversationLine>();
+            foreach (var line in conversationTemplate.Lines)
             {
                 actorIndices.Add(line.ActorIdx);
 
-                ConversationLine lineField = new ConversationLine();
+                var lineField = new ConversationLine();
                 lineField.ConversationLineID = line.Id;
                 lineField.StartTime = line.StartTime;
                 lineField.UiCameraID = line.UiCameraID;
@@ -177,9 +177,9 @@ namespace Game.Entities
             Global.ScriptMgr.OnConversationCreate(this, creator);
 
             // All actors need to be set
-            foreach (ushort actorIndex in actorIndices)
+            foreach (var actorIndex in actorIndices)
             {
-                ConversationActor actor = actorIndex < m_conversationData.Actors.Size() ? m_conversationData.Actors[actorIndex] : null;
+                var actor = actorIndex < m_conversationData.Actors.Size() ? m_conversationData.Actors[actorIndex] : null;
                 if (actor == null || (actor.CreatureID == 0 && actor.ActorGUID.IsEmpty() && actor.NoActorObject == 0))
                 {
                     Log.outError(LogFilter.Conversation, $"Failed to create conversation (Id: {conversationEntry}) due to missing actor (Idx: {actorIndex}).");
@@ -212,8 +212,8 @@ namespace Game.Entities
 
         public override void BuildValuesCreate(WorldPacket data, Player target)
         {
-            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new WorldPacket();
+            var flags = GetUpdateFieldFlagsFor(target);
+            var buffer = new WorldPacket();
 
             m_objectData.WriteCreate(buffer, flags, this, target);
             m_conversationData.WriteCreate(buffer, flags, this, target);
@@ -225,8 +225,8 @@ namespace Game.Entities
 
         public override void BuildValuesUpdate(WorldPacket data, Player target)
         {
-            UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new WorldPacket();
+            var flags = GetUpdateFieldFlagsFor(target);
+            var buffer = new WorldPacket();
 
             buffer.WriteUInt32(m_values.GetChangedObjectTypeMask());
             if (m_values.HasChanged(TypeId.Object))
@@ -241,14 +241,14 @@ namespace Game.Entities
 
         void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedConversationMask, Player target)
         {
-            UpdateMask valuesMask = new UpdateMask((int)TypeId.Max);
+            var valuesMask = new UpdateMask((int)TypeId.Max);
             if (requestedObjectMask.IsAnySet())
                 valuesMask.Set((int)TypeId.Object);
 
             if (requestedConversationMask.IsAnySet())
                 valuesMask.Set((int)TypeId.Conversation);
 
-            WorldPacket buffer = new WorldPacket();
+            var buffer = new WorldPacket();
             buffer.WriteUInt32(valuesMask.GetBlock(0));
 
             if (valuesMask[(int)TypeId.Object])
@@ -257,7 +257,7 @@ namespace Game.Entities
             if (valuesMask[(int)TypeId.Conversation])
                 m_conversationData.WriteUpdate(buffer, requestedConversationMask, true, this, target);
 
-            WorldPacket buffer1 = new WorldPacket();
+            var buffer1 = new WorldPacket();
             buffer1.WriteUInt8((byte)UpdateType.Values);
             buffer1.WritePackedGuid(GetGUID());
             buffer1.WriteUInt32(buffer.GetSize());

@@ -68,14 +68,14 @@ namespace Game.SupportSystem
 
         public void LoadBugTickets()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
             _bugTicketList.Clear();
 
             _lastBugId = 0;
             _openBugTicketCount = 0;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_GM_BUGS);
-            SQLResult result = DB.Characters.Query(stmt);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_GM_BUGS);
+            var result = DB.Characters.Query(stmt);
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 GM bugs. DB table `gm_bug` is empty!");
@@ -85,13 +85,13 @@ namespace Game.SupportSystem
             uint count = 0;
             do
             {
-                BugTicket bug = new BugTicket();
+                var bug = new BugTicket();
                 bug.LoadFromDB(result.GetFields());
 
                 if (!bug.IsClosed())
                     ++_openBugTicketCount;
 
-                uint id = bug.GetId();
+                var id = bug.GetId();
                 if (_lastBugId < id)
                     _lastBugId = id;
 
@@ -104,14 +104,14 @@ namespace Game.SupportSystem
 
         public void LoadComplaintTickets()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
             _complaintTicketList.Clear();
 
             _lastComplaintId = 0;
             _openComplaintTicketCount = 0;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_GM_COMPLAINTS);
-            SQLResult result = DB.Characters.Query(stmt);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_GM_COMPLAINTS);
+            var result = DB.Characters.Query(stmt);
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 GM complaints. DB table `gm_complaint` is empty!");
@@ -123,13 +123,13 @@ namespace Game.SupportSystem
             SQLResult chatLogResult;
             do
             {
-                ComplaintTicket complaint = new ComplaintTicket();
+                var complaint = new ComplaintTicket();
                 complaint.LoadFromDB(result.GetFields());
 
                 if (!complaint.IsClosed())
                     ++_openComplaintTicketCount;
 
-                uint id = complaint.GetId();
+                var id = complaint.GetId();
                 if (_lastComplaintId < id)
                     _lastComplaintId = id;
 
@@ -154,14 +154,14 @@ namespace Game.SupportSystem
 
         public void LoadSuggestionTickets()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
             _suggestionTicketList.Clear();
 
             _lastSuggestionId = 0;
             _openSuggestionTicketCount = 0;
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_GM_SUGGESTIONS);
-            SQLResult result = DB.Characters.Query(stmt);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_GM_SUGGESTIONS);
+            var result = DB.Characters.Query(stmt);
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 GM suggestions. DB table `gm_suggestion` is empty!");
@@ -171,13 +171,13 @@ namespace Game.SupportSystem
             uint count = 0;
             do
             {
-                SuggestionTicket suggestion = new SuggestionTicket();
+                var suggestion = new SuggestionTicket();
                 suggestion.LoadFromDB(result.GetFields());
 
                 if (!suggestion.IsClosed())
                     ++_openSuggestionTicketCount;
 
-                uint id = suggestion.GetId();
+                var id = suggestion.GetId();
                 if (_lastSuggestionId < id)
                     _lastSuggestionId = id;
 
@@ -214,7 +214,7 @@ namespace Game.SupportSystem
 
         public void RemoveTicket<T>(uint ticketId) where T : Ticket
         {
-            T ticket = GetTicket<T>(ticketId);
+            var ticket = GetTicket<T>(ticketId);
             if (ticket != null)
             {
                 ticket.DeleteFromDB();
@@ -236,7 +236,7 @@ namespace Game.SupportSystem
 
         public void CloseTicket<T>(uint ticketId, ObjectGuid closedBy) where T : Ticket
         {
-            T ticket = GetTicket<T>(ticketId);
+            var ticket = GetTicket<T>(ticketId);
             if (ticket != null)
             {
                 ticket.SetClosedBy(closedBy);
@@ -277,7 +277,7 @@ namespace Game.SupportSystem
 
                     _lastComplaintId = 0;
 
-                    SQLTransaction trans = new SQLTransaction();
+                    var trans = new SQLTransaction();
                     trans.Append(DB.Characters.GetPreparedStatement(CharStatements.DEL_ALL_GM_COMPLAINTS));
                     trans.Append(DB.Characters.GetPreparedStatement(CharStatements.DEL_ALL_GM_COMPLAINT_CHATLOGS));
                     DB.Characters.CommitTransaction(trans);

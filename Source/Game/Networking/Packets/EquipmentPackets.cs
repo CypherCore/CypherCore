@@ -53,7 +53,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteUInt32(equipSet.SetID);
                 _worldPacket.WriteUInt32(equipSet.IgnoreMask);
 
-                for (int i = 0; i < EquipmentSlot.End; ++i)
+                for (var i = 0; i < EquipmentSlot.End; ++i)
                 {
                     _worldPacket.WritePackedGuid(equipSet.Pieces[i]);
                     _worldPacket.WriteInt32(equipSet.Appearances[i]);
@@ -106,10 +106,10 @@ namespace Game.Networking.Packets
             Set.Unknown901_1 = _worldPacket.ReadInt32();
             Set.Unknown901_2 = _worldPacket.ReadInt32();
 
-            bool hasSpecIndex = _worldPacket.HasBit();
+            var hasSpecIndex = _worldPacket.HasBit();
 
-            uint setNameLength = _worldPacket.ReadBits<uint>(8);
-            uint setIconLength = _worldPacket.ReadBits<uint>(9);
+            var setNameLength = _worldPacket.ReadBits<uint>(8);
+            var setIconLength = _worldPacket.ReadBits<uint>(9);
 
             if (hasSpecIndex)
                 Set.AssignedSpecIndex = _worldPacket.ReadInt32();

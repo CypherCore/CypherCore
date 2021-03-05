@@ -30,10 +30,10 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ChatJoinChannel)]
         void HandleJoinChannel(JoinChannel packet)
         {
-            AreaTableRecord zone = CliDB.AreaTableStorage.LookupByKey(GetPlayer().GetZoneId());
+            var zone = CliDB.AreaTableStorage.LookupByKey(GetPlayer().GetZoneId());
             if (packet.ChatChannelId != 0)
             {
-                ChatChannelsRecord channel = CliDB.ChatChannelsStorage.LookupByKey(packet.ChatChannelId);
+                var channel = CliDB.ChatChannelsStorage.LookupByKey(packet.ChatChannelId);
                 if (channel == null)
                     return;
 
@@ -47,10 +47,10 @@ namespace Game
             if (packet.ChannelName.IsNumber())
                 return;
 
-            ChannelManager cMgr = ChannelManager.ForTeam(GetPlayer().GetTeam());
+            var cMgr = ChannelManager.ForTeam(GetPlayer().GetTeam());
             if (cMgr != null)
             {
-                Channel channel = cMgr.GetJoinChannel((uint)packet.ChatChannelId, packet.ChannelName, zone);
+                var channel = cMgr.GetJoinChannel((uint)packet.ChatChannelId, packet.ChannelName, zone);
                 if (channel != null)
                     channel.JoinChannel(GetPlayer(), packet.Password);
             }
@@ -62,10 +62,10 @@ namespace Game
             if (string.IsNullOrEmpty(packet.ChannelName) && packet.ZoneChannelID == 0)
                 return;
 
-            AreaTableRecord zone = CliDB.AreaTableStorage.LookupByKey(GetPlayer().GetZoneId());
+            var zone = CliDB.AreaTableStorage.LookupByKey(GetPlayer().GetZoneId());
             if (packet.ZoneChannelID != 0)
             {
-                ChatChannelsRecord channel = CliDB.ChatChannelsStorage.LookupByKey(packet.ZoneChannelID);
+                var channel = CliDB.ChatChannelsStorage.LookupByKey(packet.ZoneChannelID);
                 if (channel == null)
                     return;
 
@@ -73,10 +73,10 @@ namespace Game
                     return;
             }
 
-            ChannelManager cMgr = ChannelManager.ForTeam(GetPlayer().GetTeam());
+            var cMgr = ChannelManager.ForTeam(GetPlayer().GetTeam());
             if (cMgr != null)
             {
-                Channel channel = cMgr.GetChannel((uint)packet.ZoneChannelID, packet.ChannelName, GetPlayer(), true, zone);
+                var channel = cMgr.GetChannel((uint)packet.ZoneChannelID, packet.ChannelName, GetPlayer(), true, zone);
                 if (channel != null)
                     channel.LeaveChannel(GetPlayer(), true);
 
@@ -94,7 +94,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ChatChannelOwner)]
         void HandleChannelCommand(ChannelCommand packet)
         {
-            Channel channel = ChannelManager.GetChannelForPlayerByNamePart(packet.ChannelName, GetPlayer());
+            var channel = ChannelManager.GetChannelForPlayerByNamePart(packet.ChannelName, GetPlayer());
             if (channel == null)
                 return;
 
@@ -136,7 +136,7 @@ namespace Game
             if (!ObjectManager.NormalizePlayerName(ref packet.Name))
                 return;
 
-            Channel channel = ChannelManager.GetChannelForPlayerByNamePart(packet.ChannelName, GetPlayer());
+            var channel = ChannelManager.GetChannelForPlayerByNamePart(packet.ChannelName, GetPlayer());
             if (channel == null)
                 return;
 
@@ -184,7 +184,7 @@ namespace Game
 
             Log.outDebug(LogFilter.ChatSystem, "{0} {1} ChannelName: {2}, Password: {3}", packet.GetOpcode(), GetPlayerInfo(), packet.ChannelName, packet.Password);
 
-            Channel channel = ChannelManager.GetChannelForPlayerByNamePart(packet.ChannelName, GetPlayer());
+            var channel = ChannelManager.GetChannelForPlayerByNamePart(packet.ChannelName, GetPlayer());
             if (channel != null)
                 channel.Password(GetPlayer(), packet.Password);
         }

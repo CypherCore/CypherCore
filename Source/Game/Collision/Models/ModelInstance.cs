@@ -55,15 +55,15 @@ namespace Game.Collision
             spawn.iRot = reader.Read<Vector3>();
             spawn.iScale = reader.ReadSingle();
 
-            bool has_bound = Convert.ToBoolean(spawn.flags & (uint)ModelFlags.HasBound);
+            var has_bound = Convert.ToBoolean(spawn.flags & (uint)ModelFlags.HasBound);
             if (has_bound) // only WMOs have bound in MPQ, only available after computation
             {
-                Vector3 bLow = reader.Read<Vector3>();
-                Vector3 bHigh = reader.Read<Vector3>();
+                var bLow = reader.Read<Vector3>();
+                var bHigh = reader.Read<Vector3>();
                 spawn.iBound = new AxisAlignedBox(bLow, bHigh);
             }
 
-            uint nameLen = reader.ReadUInt32();
+            var nameLen = reader.ReadUInt32();
             spawn.name = reader.ReadString((int)nameLen);
             return true;
         }
@@ -99,15 +99,15 @@ namespace Game.Collision
             if (iModel == null)
                 return false;
 
-            float time = pRay.intersectionTime(iBound);
+            var time = pRay.intersectionTime(iBound);
             if (float.IsInfinity(time))
                 return false;
 
             // child bounds are defined in object space:
-            Vector3 p = iInvRot * (pRay.Origin - iPos) * iInvScale;
-            Ray modRay = new Ray(p, iInvRot * pRay.Direction);
-            float distance = pMaxDist * iInvScale;
-            bool hit = iModel.IntersectRay(modRay, ref distance, pStopAtFirstHit, ignoreFlags);
+            var p = iInvRot * (pRay.Origin - iPos) * iInvScale;
+            var modRay = new Ray(p, iInvRot * pRay.Direction);
+            var distance = pMaxDist * iInvScale;
+            var hit = iModel.IntersectRay(modRay, ref distance, pStopAtFirstHit, ignoreFlags);
             if (hit)
             {
                 distance *= iScale;
@@ -127,16 +127,16 @@ namespace Game.Collision
             if (!iBound.contains(p))
                 return;
             // child bounds are defined in object space:
-            Vector3 pModel = iInvRot * (p - iPos) * iInvScale;
-            Vector3 zDirModel = iInvRot * new Vector3(0.0f, 0.0f, -1.0f);
+            var pModel = iInvRot * (p - iPos) * iInvScale;
+            var zDirModel = iInvRot * new Vector3(0.0f, 0.0f, -1.0f);
             float zDist;
             if (iModel.IntersectPoint(pModel, zDirModel, out zDist, info))
             {
-                Vector3 modelGround = pModel + zDist * zDirModel;
+                var modelGround = pModel + zDist * zDirModel;
                 // Transform back to world space. Note that:
                 // Mat * vec == vec * Mat.transpose()
                 // and for rotation matrices: Mat.inverse() == Mat.transpose()
-                float world_Z = ((modelGround * iInvRot) * iScale + iPos).Z;
+                var world_Z = ((modelGround * iInvRot) * iScale + iPos).Z;
                 if (info.ground_Z < world_Z)
                 {
                     info.ground_Z = world_Z;
@@ -148,7 +148,7 @@ namespace Game.Collision
         public bool GetLiquidLevel(Vector3 p, LocationInfo info, ref float liqHeight)
         {
             // child bounds are defined in object space:
-            Vector3 pModel = iInvRot * (p - iPos) * iInvScale;
+            var pModel = iInvRot * (p - iPos) * iInvScale;
             //Vector3 zDirModel = iInvRot * Vector3(0.f, 0.f, -1.f);
             float zDist;
             if (info.hitModel.GetLiquidLevel(pModel, out zDist))
@@ -172,16 +172,16 @@ namespace Game.Collision
             if (!iBound.contains(p))
                 return false;
             // child bounds are defined in object space:
-            Vector3 pModel = iInvRot * (p - iPos) * iInvScale;
-            Vector3 zDirModel = iInvRot * new Vector3(0.0f, 0.0f, -1.0f);
+            var pModel = iInvRot * (p - iPos) * iInvScale;
+            var zDirModel = iInvRot * new Vector3(0.0f, 0.0f, -1.0f);
             float zDist;
             if (iModel.GetLocationInfo(pModel, zDirModel, out zDist, info))
             {
-                Vector3 modelGround = pModel + zDist * zDirModel;
+                var modelGround = pModel + zDist * zDirModel;
                 // Transform back to world space. Note that:
                 // Mat * vec == vec * Mat.transpose()
                 // and for rotation matrices: Mat.inverse() == Mat.transpose()
-                float world_Z = ((modelGround * iInvRot) * iScale + iPos).Z;
+                var world_Z = ((modelGround * iInvRot) * iScale + iPos).Z;
                 if (info.ground_Z < world_Z) // hm...could it be handled automatically with zDist at intersection?
                 {
                     info.ground_Z = world_Z;

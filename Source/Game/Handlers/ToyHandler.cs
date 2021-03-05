@@ -55,7 +55,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.UseToy)]
         void HandleUseToy(UseToy packet)
         {
-            uint itemId = packet.Cast.Misc[0];
+            var itemId = packet.Cast.Misc[0];
             ItemTemplate item = Global.ObjectMgr.GetItemTemplate(itemId);
             if (item == null)
                 return;
@@ -67,7 +67,7 @@ namespace Game
             if (effect == null)
                 return;
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(packet.Cast.SpellID, Difficulty.None);
+            var spellInfo = Global.SpellMgr.GetSpellInfo(packet.Cast.SpellID, Difficulty.None);
             if (spellInfo == null)
             {
                 Log.outError(LogFilter.Network, "HandleUseToy: unknown spell id: {0} used by Toy Item entry {1}", packet.Cast.SpellID, itemId);
@@ -77,11 +77,11 @@ namespace Game
             if (_player.IsPossessing())
                 return;
 
-            SpellCastTargets targets = new SpellCastTargets(_player, packet.Cast);
+            var targets = new SpellCastTargets(_player, packet.Cast);
 
-            Spell spell = new Spell(_player, spellInfo, TriggerCastFlags.None, ObjectGuid.Empty, false);
+            var spell = new Spell(_player, spellInfo, TriggerCastFlags.None, ObjectGuid.Empty, false);
 
-            SpellPrepare spellPrepare = new SpellPrepare();
+            var spellPrepare = new SpellPrepare();
             spellPrepare.ClientCastID = packet.Cast.CastID;
             spellPrepare.ServerCastID = spell.m_castId;
             SendPacket(spellPrepare);

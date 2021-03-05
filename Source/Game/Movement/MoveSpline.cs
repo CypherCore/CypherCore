@@ -70,7 +70,7 @@ namespace Game.Movement
                 effect_start_time = (int)(Duration() * args.time_perc);
                 if (args.flags.HasFlag(SplineFlag.Parabolic) && effect_start_time < Duration())
                 {
-                    float f_duration = (float)TimeSpan.FromMilliseconds(Duration() - effect_start_time).TotalSeconds;
+                    var f_duration = (float)TimeSpan.FromMilliseconds(Duration() - effect_start_time).TotalSeconds;
                     vertical_acceleration = args.parabolic_amplitude * 8.0f / (f_duration * f_duration);
                 }
             }
@@ -78,7 +78,7 @@ namespace Game.Movement
 
         void InitSpline(MoveSplineInitArgs args)
         {
-            Spline.EvaluationMode[] modes = new Spline.EvaluationMode[2] { Spline.EvaluationMode.Linear, Spline.EvaluationMode.Catmullrom };
+            var modes = new Spline.EvaluationMode[2] { Spline.EvaluationMode.Linear, Spline.EvaluationMode.Catmullrom };
             if (args.flags.HasFlag(SplineFlag.Cyclic))
             {
                 spline.InitCyclicSpline(args.path, args.path.Length, modes[Convert.ToInt32(args.flags.IsSmooth())], 0);
@@ -91,12 +91,12 @@ namespace Game.Movement
             // init spline timestamps
             if (splineflags.HasFlag(SplineFlag.Falling))
             {
-                FallInitializer init = new FallInitializer(spline.GetPoint(spline.First()).Z);
+                var init = new FallInitializer(spline.GetPoint(spline.First()).Z);
                 spline.InitLengths(init);
             }
             else
             {
-                CommonInitializer init = new CommonInitializer(args.velocity);
+                var init = new CommonInitializer(args.velocity);
                 spline.InitLengths(init);
             }
 
@@ -111,7 +111,7 @@ namespace Game.Movement
 
         public int CurrentPathIdx()
         {
-            int point = point_Idx_offset + point_Idx - spline.First() + (Finalized() ? 1 : 0);
+            var point = point_Idx_offset + point_Idx - spline.First() + (Finalized() ? 1 : 0);
             if (IsCyclic())
                 point = point % (spline.Last() - spline.First());
             return point;
@@ -132,13 +132,13 @@ namespace Game.Movement
         }
         public Vector4 ComputePosition(int time_point, int point_index)
         {            
-            float u = 1.0f;
-            int seg_time = spline.Length(point_index, point_index + 1);
+            var u = 1.0f;
+            var seg_time = spline.Length(point_index, point_index + 1);
             if (seg_time > 0)
                 u = (time_point - spline.Length(point_index)) / (float)seg_time;
 
             Vector3 c;
-            float orientation = initialOrientation;
+            var orientation = initialOrientation;
             spline.Evaluate_Percent(point_index, u, out c);
 
             if (splineflags.HasFlag(SplineFlag.Parabolic))
@@ -175,14 +175,14 @@ namespace Game.Movement
         }
         public Vector4 ComputePosition(int time_offset)
         {
-            int time_point = time_passed + time_offset;
+            var time_point = time_passed + time_offset;
             if (time_point >= Duration())
                 return ComputePosition(Duration(), spline.Last() - 1);
             if (time_point <= 0)
                 return ComputePosition(0, spline.First());
 
             // find point_index where spline.length(point_index) < time_point < spline.length(point_index + 1)
-            int point_index = point_Idx;
+            var point_index = point_Idx;
             while (time_point >= spline.Length(point_index + 1))
                 ++point_index;
 
@@ -195,8 +195,8 @@ namespace Game.Movement
         {
             if (time_point > effect_start_time)
             {
-                float t_passedf = MSToSec((uint)(time_point - effect_start_time));
-                float t_durationf = MSToSec((uint)(Duration() - effect_start_time)); //client use not modified duration here
+                var t_passedf = MSToSec((uint)(time_point - effect_start_time));
+                var t_durationf = MSToSec((uint)(Duration() - effect_start_time)); //client use not modified duration here
                 if (spell_effect_extra.HasValue && spell_effect_extra.Value.ParabolicCurveId != 0)
                     t_passedf *= Global.DB2Mgr.GetCurveValueAt(spell_effect_extra.Value.ParabolicCurveId, (float)time_point / Duration());
 
@@ -205,8 +205,8 @@ namespace Game.Movement
         }
         public void ComputeFallElevation(int time_point, ref float el)
         {
-            float z_now = spline.GetPoint(spline.First()).Z - ComputeFallElevation(MSToSec((uint)time_point), false);
-            float final_z = FinalDestination().Z;
+            var z_now = spline.GetPoint(spline.First()).Z - ComputeFallElevation(MSToSec((uint)time_point), false);
+            var final_z = FinalDestination().Z;
             el = Math.Max(z_now, final_z);
         }
         public static float ComputeFallElevation(float t_passed, bool isSafeFall, float start_velocity = 0.0f)
@@ -222,7 +222,7 @@ namespace Game.Movement
             if (start_velocity > termVel)
                 start_velocity = termVel;
 
-            float terminal_time = (float)((isSafeFall ? SharedConst.terminal_safeFall_fallTime : SharedConst.terminal_fallTime) - start_velocity / SharedConst.gravity); // the time that needed to reach terminalVelocity
+            var terminal_time = (float)((isSafeFall ? SharedConst.terminal_safeFall_fallTime : SharedConst.terminal_fallTime) - start_velocity / SharedConst.gravity); // the time that needed to reach terminalVelocity
 
             if (t_passed > terminal_time)
             {
@@ -257,8 +257,8 @@ namespace Game.Movement
                 return UpdateResult.Arrived;
             }
 
-            UpdateResult result = UpdateResult.None;
-            int minimal_diff = Math.Min(ms_time_diff, SegmentTimeElapsed());
+            var result = UpdateResult.None;
+            var minimal_diff = Math.Min(ms_time_diff, SegmentTimeElapsed());
             time_passed += minimal_diff;
             ms_time_diff -= minimal_diff;
 

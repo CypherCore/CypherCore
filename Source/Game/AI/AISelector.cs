@@ -29,7 +29,7 @@ namespace Game.AI
                 return new PetAI(creature);
 
             //scriptname in db
-            CreatureAI scriptedAI = Global.ScriptMgr.GetCreatureAI(creature);
+            var scriptedAI = Global.ScriptMgr.GetCreatureAI(creature);
             if (scriptedAI != null)
                 return scriptedAI;
 
@@ -112,7 +112,7 @@ namespace Game.AI
         public static GameObjectAI SelectGameObjectAI(GameObject go)
         {
             // scriptname in db
-            GameObjectAI scriptedAI = Global.ScriptMgr.GetGameObjectAI(go);
+            var scriptedAI = Global.ScriptMgr.GetGameObjectAI(go);
             if (scriptedAI != null)
                 return scriptedAI;
 

@@ -35,10 +35,10 @@ namespace Game.Arenas
 
         public ArenaTeam GetArenaTeamByName(string arenaTeamName)
         {
-            string search = arenaTeamName.ToLower();
+            var search = arenaTeamName.ToLower();
             foreach (var team in ArenaTeamStorage.Values)
             {
-                string teamName = team.GetName().ToLower();
+                var teamName = team.GetName().ToLower();
                 if (search == teamName)
                     return team;
             }
@@ -76,22 +76,22 @@ namespace Game.Arenas
 
         public void LoadArenaTeams()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             // Clean out the trash before loading anything
             DB.Characters.DirectExecute("DELETE FROM arena_team_member WHERE arenaTeamId NOT IN (SELECT arenaTeamId FROM arena_team)");       // One-time query
 
             //                                                        0        1         2         3          4              5            6            7           8
-            SQLResult result = DB.Characters.Query("SELECT arenaTeamId, name, captainGuid, type, backgroundColor, emblemStyle, emblemColor, borderStyle, borderColor, " +
-                //      9        10        11         12           13       14
-                "rating, weekGames, weekWins, seasonGames, seasonWins, rank FROM arena_team ORDER BY arenaTeamId ASC");
+            var result = DB.Characters.Query("SELECT arenaTeamId, name, captainGuid, type, backgroundColor, emblemStyle, emblemColor, borderStyle, borderColor, " +
+                                             //      9        10        11         12           13       14
+                                             "rating, weekGames, weekWins, seasonGames, seasonWins, rank FROM arena_team ORDER BY arenaTeamId ASC");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 arena teams. DB table `arena_team` is empty!");
                 return;
             }
 
-            SQLResult result2 = DB.Characters.Query(
+            var result2 = DB.Characters.Query(
                 //              0              1           2             3              4                 5          6     7          8                  9
                 "SELECT arenaTeamId, atm.guid, atm.weekGames, atm.weekWins, atm.seasonGames, atm.seasonWins, c.name, class, personalRating, matchMakerRating FROM arena_team_member atm" +
                 " INNER JOIN arena_team ate USING (arenaTeamId) LEFT JOIN characters AS c ON atm.guid = c.guid" +
@@ -101,7 +101,7 @@ namespace Game.Arenas
             uint count = 0;
             do
             {
-                ArenaTeam newArenaTeam = new ArenaTeam();
+                var newArenaTeam = new ArenaTeam();
 
                 if (!newArenaTeam.LoadArenaTeamFromDB(result) || !newArenaTeam.LoadMembersFromDB(result2))
                 {

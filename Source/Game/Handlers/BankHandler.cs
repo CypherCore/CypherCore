@@ -39,7 +39,7 @@ namespace Game
             if (!item)
                 return;
 
-            List<ItemPosCount> dest = new List<ItemPosCount>();
+            var dest = new List<ItemPosCount>();
             InventoryResult msg = GetPlayer().CanBankItem(ItemConst.NullBag, ItemConst.NullSlot, dest, item, false);
             if (msg != InventoryResult.Ok)
             {
@@ -61,7 +61,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.BankerActivate)]
         void HandleBankerActivate(Hello packet)
         {
-            Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Banker, NPCFlags2.None);
+            var unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Banker, NPCFlags2.None);
             if (!unit)
             {
                 Log.outError(LogFilter.Network, "HandleBankerActivate: {0} not found or you can not interact with him.", packet.Unit.ToString());
@@ -89,7 +89,7 @@ namespace Game
 
             if (Player.IsBankPos(packet.Bag, packet.Slot))                 // moving from bank to inventory
             {
-                List<ItemPosCount> dest = new List<ItemPosCount>();
+                var dest = new List<ItemPosCount>();
                 InventoryResult msg = GetPlayer().CanStoreItem(ItemConst.NullBag, ItemConst.NullSlot, dest, item, false);
                 if (msg != InventoryResult.Ok)
                 {
@@ -104,7 +104,7 @@ namespace Game
             }
             else                                                    // moving from inventory to bank
             {
-                List<ItemPosCount> dest = new List<ItemPosCount>();
+                var dest = new List<ItemPosCount>();
                 InventoryResult msg = GetPlayer().CanBankItem(ItemConst.NullBag, ItemConst.NullSlot, dest, item, false);
                 if (msg != InventoryResult.Ok)
                 {
@@ -130,11 +130,11 @@ namespace Game
             // next slot
             ++slot;
 
-            BankBagSlotPricesRecord slotEntry = CliDB.BankBagSlotPricesStorage.LookupByKey(slot);
+            var slotEntry = CliDB.BankBagSlotPricesStorage.LookupByKey(slot);
             if (slotEntry == null)
                 return;
 
-            uint price = slotEntry.Cost;
+            var price = slotEntry.Cost;
             if (!GetPlayer().HasEnoughMoney(price))
                 return;
 
@@ -146,7 +146,7 @@ namespace Game
         public void SendShowBank(ObjectGuid guid)
         {
             m_currentBankerGUID = guid;
-            ShowBank packet = new ShowBank();
+            var packet = new ShowBank();
             packet.Guid = guid;
             SendPacket(packet);
         }

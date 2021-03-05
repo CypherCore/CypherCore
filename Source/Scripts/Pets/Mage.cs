@@ -49,15 +49,15 @@ namespace Scripts.Pets
 
             void Init()
             {
-                Unit owner = me.GetCharmerOrOwner();
+                var owner = me.GetCharmerOrOwner();
 
-                List<Unit> targets = new List<Unit>();
+                var targets = new List<Unit>();
                 var u_check = new AnyUnfriendlyUnitInObjectRangeCheck(me, me, 30.0f);
                 var searcher = new UnitListSearcher(me, targets, u_check);
                 Cell.VisitAllObjects(me, searcher, 40.0f);
 
                 Unit highestThreatUnit = null;
-                float highestThreat = 0.0f;
+                var highestThreat = 0.0f;
                 Unit nearestPlayer = null;
                 foreach (var unit in targets)
                 {
@@ -111,9 +111,9 @@ namespace Scripts.Pets
 
             bool IsInThreatList(Unit target)
             {
-                Unit owner = me.GetCharmerOrOwner();
+                var owner = me.GetCharmerOrOwner();
 
-                List<Unit> targets = new List<Unit>();
+                var targets = new List<Unit>();
                 var u_check = new AnyUnfriendlyUnitInObjectRangeCheck(me, me, 30.0f);
                 var searcher = new UnitListSearcher(me, targets, u_check);
                 Cell.VisitAllObjects(me, searcher, 40.0f);
@@ -141,7 +141,7 @@ namespace Scripts.Pets
             public override void InitializeAI()
             {
                 base.InitializeAI();
-                Unit owner = me.GetOwner();
+                var owner = me.GetOwner();
                 if (!owner)
                     return;
 
@@ -178,11 +178,11 @@ namespace Scripts.Pets
 
             public override void UpdateAI(uint diff)
             {
-                Unit owner = me.GetCharmerOrOwner();
+                var owner = me.GetCharmerOrOwner();
                 if (!owner)
                     return;
 
-                Unit target = owner.GetAttackerForHelper();
+                var target = owner.GetAttackerForHelper();
 
                 _scheduler.Update(diff);
 
@@ -200,7 +200,7 @@ namespace Scripts.Pets
                 if (!target || me.GetVictim() != target)
                 {
                     Unit ownerTarget = null;
-                    Player owner1 = me.GetCharmerOrOwner().ToPlayer();
+                    var owner1 = me.GetCharmerOrOwner().ToPlayer();
                     if (owner1)
                         ownerTarget = owner1.GetSelectedUnit();
 
@@ -237,7 +237,7 @@ namespace Scripts.Pets
                 if (me.IsInEvadeMode() || !me.IsAlive())
                     return;
 
-                Unit owner = me.GetCharmerOrOwner();
+                var owner = me.GetCharmerOrOwner();
 
                 me.CombatStop(true);
                 if (owner && !me.HasUnitState(UnitState.Follow))

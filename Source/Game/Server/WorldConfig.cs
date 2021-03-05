@@ -275,7 +275,7 @@ namespace Game
             Values[WorldCfg.IntervalChangeweather] = GetDefaultValue("ChangeWeatherInterval", 10 * Time.Minute * Time.InMilliseconds);
             if (reload)
             {
-                int val = GetDefaultValue("WorldServerPort", 8085);
+                var val = GetDefaultValue("WorldServerPort", 8085);
                 if (val != (int)Values[WorldCfg.PortWorld])
                     Log.outError(LogFilter.ServerLoading, "WorldServerPort option can't be changed at worldserver.conf reload, using current value ({0}).", Values[WorldCfg.PortWorld]);
 
@@ -322,7 +322,7 @@ namespace Game
 
             if (reload)
             {
-                int val = GetDefaultValue("GameType", 0);
+                var val = GetDefaultValue("GameType", 0);
                 if (val != (int)Values[WorldCfg.GameType])
                     Log.outError(LogFilter.ServerLoading, "GameType option can't be changed at worldserver.conf reload, using current value ({0}).", Values[WorldCfg.GameType]);
             }
@@ -331,7 +331,7 @@ namespace Game
 
             if (reload)
             {
-                int val = (int)GetDefaultValue("RealmZone", RealmZones.Development);
+                var val = (int)GetDefaultValue("RealmZone", RealmZones.Development);
                 if (val != (int)Values[WorldCfg.RealmZone])
                     Log.outError(LogFilter.ServerLoading, "RealmZone option can't be changed at worldserver.conf reload, using current value ({0}).", Values[WorldCfg.RealmZone]);
             }
@@ -404,7 +404,7 @@ namespace Game
 
             if (reload)
             {
-                int val = GetDefaultValue("MaxPlayerLevel", SharedConst.DefaultMaxLevel);
+                var val = GetDefaultValue("MaxPlayerLevel", SharedConst.DefaultMaxLevel);
                 if (val != (int)Values[WorldCfg.MaxPlayerLevel])
                     Log.outError(LogFilter.ServerLoading, "MaxPlayerLevel option can't be changed at config reload, using current value ({0}).", Values[WorldCfg.MaxPlayerLevel]);
             }
@@ -644,7 +644,7 @@ namespace Game
 
             if (reload)
             {
-                int val = GetDefaultValue("Expansion", (int)Expansion.WarlordsOfDraenor);
+                var val = GetDefaultValue("Expansion", (int)Expansion.WarlordsOfDraenor);
                 if (val != (int)Values[WorldCfg.Expansion])
                     Log.outError(LogFilter.ServerLoading, "Expansion option can't be changed at worldserver.conf reload, using current value ({0}).", Values[WorldCfg.Expansion]);
             }
@@ -761,7 +761,7 @@ namespace Game
             Values[WorldCfg.CreaturePickpocketRefill] = GetDefaultValue("Creature.PickPocketRefillDelay", 10 * Time.Minute);
             Values[WorldCfg.CreatureStopForPlayer] = GetDefaultValue("Creature.MovingStopTimeForPlayer", 3 * Time.Minute * Time.InMilliseconds);
 
-            int clientCacheId = GetDefaultValue("ClientCacheVersion", 0);
+            var clientCacheId = GetDefaultValue("ClientCacheVersion", 0);
             if (clientCacheId != 0)
             {
                 // overwrite DB/old value

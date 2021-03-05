@@ -35,9 +35,9 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            Player me = handler.GetPlayer();
+            var me = handler.GetPlayer();
 
-            GameTele tele = handler.ExtractGameTeleFromLink(args);
+            var tele = handler.ExtractGameTeleFromLink(args);
 
             if (tele == null)
             {
@@ -78,11 +78,11 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            Player player = handler.GetSession().GetPlayer();
+            var player = handler.GetSession().GetPlayer();
             if (player == null)
                 return false;
 
-            string name = args.NextString();
+            var name = args.NextString();
 
             if (Global.ObjectMgr.GetGameTele(name) != null)
             {
@@ -90,7 +90,7 @@ namespace Game.Chat
                 return false;
             }
 
-            GameTele tele = new GameTele();
+            var tele = new GameTele();
             tele.posX = player.GetPositionX();
             tele.posY = player.GetPositionY();
             tele.posZ = player.GetPositionZ();
@@ -119,7 +119,7 @@ namespace Game.Chat
                 return false;
 
             // id, or string, or [name] Shift-click form |color|Htele:id|h[name]|h|r
-            GameTele tele = handler.ExtractGameTeleFromLink(args);
+            var tele = handler.ExtractGameTeleFromLink(args);
             if (tele == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandTeleNotfound);
@@ -137,7 +137,7 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            Player target = handler.GetSelectedPlayer();
+            var target = handler.GetSelectedPlayer();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
@@ -149,32 +149,32 @@ namespace Game.Chat
                 return false;
 
             // id, or string, or [name] Shift-click form |color|Htele:id|h[name]|h|r
-            GameTele tele = handler.ExtractGameTeleFromLink(args);
+            var tele = handler.ExtractGameTeleFromLink(args);
             if (tele == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandTeleNotfound);
                 return false;
             }
 
-            MapRecord map = CliDB.MapStorage.LookupByKey(tele.mapId);
+            var map = CliDB.MapStorage.LookupByKey(tele.mapId);
             if (map == null || map.IsBattlegroundOrArena())
             {
                 handler.SendSysMessage(CypherStrings.CannotTeleToBg);
                 return false;
             }
 
-            string nameLink = handler.GetNameLink(target);
+            var nameLink = handler.GetNameLink(target);
 
-            Group grp = target.GetGroup();
+            var grp = target.GetGroup();
             if (!grp)
             {
                 handler.SendSysMessage(CypherStrings.NotInGroup, nameLink);
                 return false;
             }
 
-            for (GroupReference refe = grp.GetFirstMember(); refe != null; refe = refe.Next())
+            for (var refe = grp.GetFirstMember(); refe != null; refe = refe.Next())
             {
-                Player player = refe.GetSource();
+                var player = refe.GetSource();
                 if (!player || !player.GetSession())
                     continue;
 
@@ -182,7 +182,7 @@ namespace Game.Chat
                 if (handler.HasLowerSecurity(player, ObjectGuid.Empty))
                     return false;
 
-                string plNameLink = handler.GetNameLink(player);
+                var plNameLink = handler.GetNameLink(player);
 
                 if (player.IsBeingTeleported())
                 {
@@ -213,11 +213,11 @@ namespace Game.Chat
         [Command("name", RBACPermissions.CommandTeleName, true)]
         static bool HandleTeleNameCommand(StringArguments args, CommandHandler handler)
         {
-            handler.ExtractOptFirstArg(args, out string nameStr, out string teleStr);
+            handler.ExtractOptFirstArg(args, out var nameStr, out var teleStr);
             if (teleStr.IsEmpty())
                 return false;
 
-            if (!handler.ExtractPlayerTarget(new StringArguments(nameStr), out Player target, out ObjectGuid targetGuid, out string targetName))
+            if (!handler.ExtractPlayerTarget(new StringArguments(nameStr), out var target, out var targetGuid, out var targetName))
                 return false;
 
             if (teleStr.Equals("$home"))    // References target's homebind
@@ -226,13 +226,13 @@ namespace Game.Chat
                     target.TeleportTo(target.GetHomebind());
                 else
                 {
-                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_HOMEBIND);
+                    var stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_HOMEBIND);
                     stmt.AddValue(0, targetGuid.GetCounter());
-                    SQLResult result = DB.Characters.Query(stmt);
+                    var result = DB.Characters.Query(stmt);
 
                     if (!result.IsEmpty())
                     {
-                        WorldLocation loc = new WorldLocation(result.Read<ushort>(0), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), 0.0f);
+                        var loc = new WorldLocation(result.Read<ushort>(0), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), 0.0f);
                         uint zoneId = result.Read<ushort>(1);
 
                         Player.SavePositionInDB(loc, zoneId, targetGuid, null);
@@ -243,7 +243,7 @@ namespace Game.Chat
             }
 
             // id, or string, or [name] Shift-click form |color|Htele:id|h[name]|h|r
-            GameTele tele = handler.ExtractGameTeleFromLink(new StringArguments(teleStr));
+            var tele = handler.ExtractGameTeleFromLink(new StringArguments(teleStr));
             if (tele == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandTeleNotfound);
@@ -256,7 +256,7 @@ namespace Game.Chat
                 if (handler.HasLowerSecurity(target, ObjectGuid.Empty))
                     return false;
 
-                string chrNameLink = handler.PlayerLink(targetName);
+                var chrNameLink = handler.PlayerLink(targetName);
 
                 if (target.IsBeingTeleported() == true)
                 {
@@ -286,7 +286,7 @@ namespace Game.Chat
                 if (handler.HasLowerSecurity(null, targetGuid))
                     return false;
 
-                string nameLink = handler.PlayerLink(targetName);
+                var nameLink = handler.PlayerLink(targetName);
 
                 handler.SendSysMessage(CypherStrings.TeleportingTo, nameLink, handler.GetCypherString(CypherStrings.Offline), tele.name);
 

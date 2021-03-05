@@ -28,12 +28,12 @@ namespace Game.Entities
     {
         public void InitTalentForLevel()
         {
-            uint level = GetLevel();
+            var level = GetLevel();
             // talents base at level diff (talents = level - 9 but some can be used already)
             if (level < PlayerConst.MinSpecializationLevel)
                 ResetTalentSpecialization();
 
-            uint talentTiers = Global.DB2Mgr.GetNumTalentsAtLevel(level, GetClass());
+            var talentTiers = Global.DB2Mgr.GetNumTalentsAtLevel(level, GetClass());
             if (level < 15)
             {
                 // Remove all talent points
@@ -43,9 +43,9 @@ namespace Game.Entities
             {
                 if (!GetSession().HasPermission(RBACPermissions.SkipCheckMoreTalentsThanAllowed))
                 {
-                    for (uint t = talentTiers; t < PlayerConst.MaxTalentTiers; ++t)
+                    for (var t = talentTiers; t < PlayerConst.MaxTalentTiers; ++t)
                         for (uint c = 0; c < PlayerConst.MaxTalentColumns; ++c)
-                            foreach (TalentRecord talent in Global.DB2Mgr.GetTalentsByPosition(GetClass(), t, c))
+                            foreach (var talent in Global.DB2Mgr.GetTalentsByPosition(GetClass(), t, c))
                                 RemoveTalent(talent);
                 }
             }
@@ -58,7 +58,7 @@ namespace Game.Entities
 
         public bool AddTalent(TalentRecord talent, byte spec, bool learning)
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talent.SpellID, Difficulty.None);
+            var spellInfo = Global.SpellMgr.GetSpellInfo(talent.SpellID, Difficulty.None);
             if (spellInfo == null)
             {
                 Log.outError(LogFilter.Spells, "Player.AddTalent: Spell (ID: {0}) does not exist.", talent.SpellID);
@@ -84,14 +84,14 @@ namespace Game.Entities
 
         public void RemoveTalent(TalentRecord talent)
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talent.SpellID, Difficulty.None);
+            var spellInfo = Global.SpellMgr.GetSpellInfo(talent.SpellID, Difficulty.None);
             if (spellInfo == null)
                 return;
 
             RemoveSpell(talent.SpellID, true);
 
             // search for spells that the talent teaches and unlearn them
-            foreach (SpellEffectInfo effect in spellInfo.GetEffects())
+            foreach (var effect in spellInfo.GetEffects())
                 if (effect != null && effect.TriggerSpell > 0 && effect.Effect == SpellEffectName.LearnSpell)
                     RemoveSpell(effect.TriggerSpell, true);
 
@@ -115,7 +115,7 @@ namespace Game.Entities
             if (GetPrimarySpecialization() == 0)
                 return TalentLearnResult.FailedNoPrimaryTreeSelected;
 
-            TalentRecord talentInfo = CliDB.TalentStorage.LookupByKey(talentId);
+            var talentInfo = CliDB.TalentStorage.LookupByKey(talentId);
             if (talentInfo == null)
                 return TalentLearnResult.FailedUnknown;
 
@@ -139,7 +139,7 @@ namespace Game.Entities
             // but only 2 out of 3 have SpecID != 0
             // We need to make sure that if player is in one of these defined specs he will not learn the other choice
             TalentRecord bestSlotMatch = null;
-            foreach (TalentRecord talent in Global.DB2Mgr.GetTalentsByPosition(GetClass(), talentInfo.TierID, talentInfo.ColumnIndex))
+            foreach (var talent in Global.DB2Mgr.GetTalentsByPosition(GetClass(), talentInfo.TierID, talentInfo.ColumnIndex))
             {
                 if (talent.SpecID == 0)
                     bestSlotMatch = talent;
@@ -157,7 +157,7 @@ namespace Game.Entities
             // Check if player doesn't have any talent in current tier
             for (uint c = 0; c < PlayerConst.MaxTalentColumns; ++c)
             {
-                foreach (TalentRecord talent in Global.DB2Mgr.GetTalentsByPosition(GetClass(), talentInfo.TierID, c))
+                foreach (var talent in Global.DB2Mgr.GetTalentsByPosition(GetClass(), talentInfo.TierID, c))
                 {
                     if (talent.SpecID != 0 && talent.SpecID != GetPrimarySpecialization())
                         continue;
@@ -179,7 +179,7 @@ namespace Game.Entities
             }
 
             // spell not set in talent.dbc
-            uint spellid = talentInfo.SpellID;
+            var spellid = talentInfo.SpellID;
             if (spellid == 0)
             {
                 Log.outError(LogFilter.Player, "Player.LearnTalent: Talent.dbc has no spellInfo for talent: {0} (spell id = 0)", talentId);
@@ -203,14 +203,14 @@ namespace Game.Entities
         public void ResetTalentSpecialization()
         {
             // Reset only talents that have different spells for each spec
-            Class class_ = GetClass();
+            var class_ = GetClass();
             for (uint t = 0; t < PlayerConst.MaxTalentTiers; ++t)
             {
                 for (uint c = 0; c < PlayerConst.MaxTalentColumns; ++c)
                 {
                     if (Global.DB2Mgr.GetTalentsByPosition(class_, t, c).Count > 1)
                     {
-                        foreach (TalentRecord talent in Global.DB2Mgr.GetTalentsByPosition(class_, t, c))
+                        foreach (var talent in Global.DB2Mgr.GetTalentsByPosition(class_, t, c))
                             RemoveTalent(talent);
                     }
                 }
@@ -218,7 +218,7 @@ namespace Game.Entities
 
             RemoveSpecializationSpells();
 
-            ChrSpecializationRecord defaultSpec = Global.DB2Mgr.GetDefaultChrSpecializationForClass(GetClass());
+            var defaultSpec = Global.DB2Mgr.GetDefaultChrSpecializationForClass(GetClass());
             SetPrimarySpecialization(defaultSpec.Id);
             SetActiveTalentGroup(defaultSpec.OrderIndex);
 
@@ -259,12 +259,12 @@ namespace Game.Entities
             if (IsNonMeleeSpellCast(false))
                 InterruptNonMeleeSpells(false);
 
-            SQLTransaction trans = new SQLTransaction();
+            var trans = new SQLTransaction();
             _SaveActions(trans);
             DB.Characters.CommitTransaction(trans);
 
             // TO-DO: We need more research to know what happens with warlock's reagent
-            Pet pet = GetPet();
+            var pet = GetPet();
             if (pet)
                 RemovePet(pet, PetSaveMode.NotInSlot);
 
@@ -294,14 +294,14 @@ namespace Game.Entities
                 if (talentInfo.SpellID == 0)
                     continue;
 
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID, Difficulty.None);
+                var spellInfo = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID, Difficulty.None);
                 if (spellInfo == null)
                     continue;
 
                 RemoveSpell(talentInfo.SpellID, true);
 
                 // search for spells that the talent teaches and unlearn them
-                foreach (SpellEffectInfo effect in spellInfo.GetEffects())
+                foreach (var effect in spellInfo.GetEffects())
                     if (effect != null && effect.TriggerSpell > 0 && effect.Effect == SpellEffectName.LearnSpell)
                         RemoveSpell(effect.TriggerSpell, true);
 
@@ -311,14 +311,14 @@ namespace Game.Entities
 
             foreach (var talentInfo in CliDB.PvpTalentStorage.Values)
             {
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID, Difficulty.None);
+                var spellInfo = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID, Difficulty.None);
                 if (spellInfo == null)
                     continue;
 
                 RemoveSpell(talentInfo.SpellID, true);
 
                 // search for spells that the talent teaches and unlearn them
-                foreach (SpellEffectInfo effect in spellInfo.GetEffects())
+                foreach (var effect in spellInfo.GetEffects())
                     if (effect != null && effect.TriggerSpell > 0 && effect.Effect == SpellEffectName.LearnSpell)
                         RemoveSpell(effect.TriggerSpell, true);
 
@@ -329,7 +329,7 @@ namespace Game.Entities
             // Remove spec specific spells
             RemoveSpecializationSpells();
 
-            foreach (uint glyphId in GetGlyphs(GetActiveTalentGroup()))
+            foreach (var glyphId in GetGlyphs(GetActiveTalentGroup()))
                 RemoveAurasDueToSpell(CliDB.GlyphPropertiesStorage.LookupByKey(glyphId).SpellID);
 
             SetActiveTalentGroup(spec.OrderIndex);
@@ -354,7 +354,7 @@ namespace Game.Entities
 
             for (byte slot = 0; slot < PlayerConst.MaxPvpTalentSlots; ++slot)
             {
-                PvpTalentRecord talentInfo = CliDB.PvpTalentStorage.LookupByKey(GetPvpTalentMap(GetActiveTalentGroup())[slot]);
+                var talentInfo = CliDB.PvpTalentStorage.LookupByKey(GetPvpTalentMap(GetActiveTalentGroup())[slot]);
                 if (talentInfo == null)
                     continue;
 
@@ -370,7 +370,7 @@ namespace Game.Entities
             {
                 for (uint i = 0; i < PlayerConst.MaxMasterySpells; ++i)
                 {
-                    uint mastery = spec.MasterySpellID[i];
+                    var mastery = spec.MasterySpellID[i];
                     if (mastery != 0)
                         LearnSpell(mastery, false);
                 }
@@ -378,21 +378,21 @@ namespace Game.Entities
 
             InitTalentForLevel();
 
-            PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_ACTIONS_SPEC);
+            var stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_ACTIONS_SPEC);
             stmt.AddValue(0, GetGUID().GetCounter());
             stmt.AddValue(1, GetActiveTalentGroup());
 
-            WorldSession mySess = GetSession();
+            var mySess = GetSession();
             mySess.GetQueryProcessor().AddCallback(DB.Characters.AsyncQuery(stmt).WithCallback(result =>
             {
                 // in case player logs out before db response (player would be deleted in that case)
-                Player thisPlayer = mySess.GetPlayer();
+                var thisPlayer = mySess.GetPlayer();
                 if (thisPlayer != null)
                     thisPlayer.LoadActions(result);
             }));
 
             UpdateDisplayPower();
-            PowerType pw = GetPowerType();
+            var pw = GetPowerType();
             if (pw != PowerType.Mana)
                 SetPower(PowerType.Mana, 0); // Mana must be 0 even if it isn't the active power type.
 
@@ -400,21 +400,21 @@ namespace Game.Entities
             UpdateItemSetAuras(false);
 
             // update visible transmog
-            for (byte i = EquipmentSlot.Start; i < EquipmentSlot.End; ++i)
+            for (var i = EquipmentSlot.Start; i < EquipmentSlot.End; ++i)
             {
                 Item equippedItem = GetItemByPos(InventorySlots.Bag0, i);
                 if (equippedItem)
                     SetVisibleItemSlot(i, equippedItem);
             }
 
-            foreach (uint glyphId in GetGlyphs(spec.OrderIndex))
+            foreach (var glyphId in GetGlyphs(spec.OrderIndex))
                 CastSpell(this, CliDB.GlyphPropertiesStorage.LookupByKey(glyphId).SpellID, true);
 
-            ActiveGlyphs activeGlyphs = new ActiveGlyphs();
-            foreach (uint glyphId in GetGlyphs(spec.OrderIndex))
+            var activeGlyphs = new ActiveGlyphs();
+            foreach (var glyphId in GetGlyphs(spec.OrderIndex))
             {
-                List<uint> bindableSpells = Global.DB2Mgr.GetGlyphBindableSpells(glyphId);
-                foreach (uint bindableSpell in bindableSpells)
+                var bindableSpells = Global.DB2Mgr.GetGlyphBindableSpells(glyphId);
+                foreach (var bindableSpell in bindableSpells)
                     if (HasSpell(bindableSpell) && !m_overrideSpells.ContainsKey(bindableSpell))
                         activeGlyphs.Glyphs.Add(new GlyphBinding(bindableSpell, (ushort)glyphId));
             }
@@ -425,7 +425,7 @@ namespace Game.Entities
             Item item = GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
             if (item != null)
             {
-                AzeriteItem azeriteItem = item.ToAzeriteItem();
+                var azeriteItem = item.ToAzeriteItem();
                 if (azeriteItem != null)
                 {
                     if (azeriteItem.IsEquipped())
@@ -447,7 +447,7 @@ namespace Game.Entities
             }
 
             var shapeshiftAuras = GetAuraEffectsByType(AuraType.ModShapeshift);
-            foreach (AuraEffect aurEff in shapeshiftAuras)
+            foreach (var aurEff in shapeshiftAuras)
             {
                 aurEff.HandleShapeshiftBoosts(this, false);
                 aurEff.HandleShapeshiftBoosts(this, true);
@@ -470,18 +470,18 @@ namespace Game.Entities
                 return 10 * MoneyConstants.Gold;
             else
             {
-                ulong months = (ulong)(GameTime.GetGameTime() - GetTalentResetTime()) / Time.Month;
+                var months = (ulong)(GameTime.GetGameTime() - GetTalentResetTime()) / Time.Month;
                 if (months > 0)
                 {
                     // This cost will be reduced by a rate of 5 gold per month
-                    uint new_cost = (uint)(GetTalentResetCost() - 5 * MoneyConstants.Gold * months);
+                    var new_cost = (uint)(GetTalentResetCost() - 5 * MoneyConstants.Gold * months);
                     // to a minimum of 10 gold.
                     return new_cost < 10 * MoneyConstants.Gold ? 10 * MoneyConstants.Gold : new_cost;
                 }
                 else
                 {
                     // After that it increases in increments of 5 gold
-                    uint new_cost = GetTalentResetCost() + 5 * MoneyConstants.Gold;
+                    var new_cost = GetTalentResetCost() + 5 * MoneyConstants.Gold;
                     // until it hits a cap of 50 gold.
                     if (new_cost > 50 * MoneyConstants.Gold)
                         new_cost = 50 * MoneyConstants.Gold;
@@ -527,7 +527,7 @@ namespace Game.Entities
                 RemoveTalent(talentInfo);
             }            
 
-            SQLTransaction trans = new SQLTransaction();
+            var trans = new SQLTransaction();
             _SaveTalents(trans);
             _SaveSpells(trans);
             DB.Characters.CommitTransaction(trans);
@@ -547,19 +547,19 @@ namespace Game.Entities
 
         public void SendTalentsInfoData()
         {
-            UpdateTalentData packet = new UpdateTalentData();
+            var packet = new UpdateTalentData();
             packet.Info.PrimarySpecialization = GetPrimarySpecialization();
 
             for (byte i = 0; i < PlayerConst.MaxSpecializations; ++i)
             {
-                ChrSpecializationRecord spec = Global.DB2Mgr.GetChrSpecializationByIndex(GetClass(), i);
+                var spec = Global.DB2Mgr.GetChrSpecializationByIndex(GetClass(), i);
                 if (spec == null)
                     continue;
 
                 var talents = GetTalentMap(i);
                 var pvpTalents = GetPvpTalentMap(i);
 
-                UpdateTalentData.TalentGroupInfo groupInfoPkt = new UpdateTalentData.TalentGroupInfo();
+                var groupInfoPkt = new UpdateTalentData.TalentGroupInfo();
                 groupInfoPkt.SpecID = spec.Id;
 
                 foreach (var pair in talents)
@@ -567,14 +567,14 @@ namespace Game.Entities
                     if (pair.Value == PlayerSpellState.Removed)
                         continue;
 
-                    TalentRecord talentInfo = CliDB.TalentStorage.LookupByKey(pair.Key);
+                    var talentInfo = CliDB.TalentStorage.LookupByKey(pair.Key);
                     if (talentInfo == null)
                     {
                         Log.outError(LogFilter.Player, "Player {0} has unknown talent id: {1}", GetName(), pair.Key);
                         continue;
                     }
 
-                    SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID, Difficulty.None);
+                    var spellEntry = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID, Difficulty.None);
                     if (spellEntry == null)
                     {
                         Log.outError(LogFilter.Player, "Player {0} has unknown talent spell: {1}", GetName(), talentInfo.SpellID);
@@ -589,21 +589,21 @@ namespace Game.Entities
                     if (pvpTalents[slot] == 0)
                         continue;
 
-                    PvpTalentRecord talentInfo = CliDB.PvpTalentStorage.LookupByKey(pvpTalents[slot]);
+                    var talentInfo = CliDB.PvpTalentStorage.LookupByKey(pvpTalents[slot]);
                     if (talentInfo == null)
                     {
                         Log.outError(LogFilter.Player, $"Player.SendTalentsInfoData: Player '{GetName()}' ({GetGUID()}) has unknown pvp talent id: {pvpTalents[slot]}");
                         continue;
                     }
 
-                    SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID, Difficulty.None);
+                    var spellEntry = Global.SpellMgr.GetSpellInfo(talentInfo.SpellID, Difficulty.None);
                     if (spellEntry == null)
                     {
                         Log.outError(LogFilter.Player, $"Player.SendTalentsInfoData: Player '{GetName()}' ({GetGUID()}) has unknown pvp talent spell: {talentInfo.SpellID}");
                         continue;
                     }
 
-                    PvPTalent pvpTalent = new PvPTalent();
+                    var pvpTalent = new PvPTalent();
                     pvpTalent.PvPTalentID = (ushort)pvpTalents[slot];
                     pvpTalent.Slot = slot;
                     groupInfoPkt.PvPTalents.Add(pvpTalent);
@@ -621,7 +621,7 @@ namespace Game.Entities
 
         public void SendRespecWipeConfirm(ObjectGuid guid, uint cost)
         {
-            RespecWipeConfirm respecWipeConfirm = new RespecWipeConfirm();
+            var respecWipeConfirm = new RespecWipeConfirm();
             respecWipeConfirm.RespecMaster = guid;
             respecWipeConfirm.Cost = cost;
             respecWipeConfirm.RespecType = SpecResetType.Talents;

@@ -32,7 +32,7 @@ namespace Game
             if (!player)
                 return;
 
-            CanDuelResult response = new CanDuelResult();
+            var response = new CanDuelResult();
             response.TargetGUID = packet.TargetGUID;
             response.Result = player.duel == null;
             SendPacket(response);
@@ -60,8 +60,8 @@ namespace Game
             if (GetPlayer().duel == null)                                  // ignore accept from duel-sender
                 return;
 
-            Player player = GetPlayer();
-            Player plTarget = player.duel.opponent;
+            var player = GetPlayer();
+            var plTarget = player.duel.opponent;
 
             if (player == player.duel.initiator || !plTarget || player == plTarget || player.duel.startTime != 0 || plTarget.duel.startTime != 0)
                 return;
@@ -69,11 +69,11 @@ namespace Game
             Log.outDebug(LogFilter.Network, "Player 1 is: {0} ({1})", player.GetGUID().ToString(), player.GetName());
             Log.outDebug(LogFilter.Network, "Player 2 is: {0} ({1})", plTarget.GetGUID().ToString(), plTarget.GetName());
 
-            long now = Time.UnixTime;
+            var now = Time.UnixTime;
             player.duel.startTimer = now;
             plTarget.duel.startTimer = now;
 
-            DuelCountdown packet = new DuelCountdown(3000);
+            var packet = new DuelCountdown(3000);
 
             player.SendPacket(packet);
             plTarget.SendPacket(packet);

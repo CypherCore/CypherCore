@@ -38,10 +38,10 @@ namespace Game.Combat
         // use for buffs and healing threat functionality
         public void ThreatAssist(Unit victim, float baseThreat, SpellInfo threatSpell = null)
         {
-            float threat = ThreatManager.CalcThreat(victim, Owner, baseThreat, (threatSpell != null ? threatSpell.GetSchoolMask() : SpellSchoolMask.Normal), threatSpell);
+            var threat = ThreatManager.CalcThreat(victim, Owner, baseThreat, (threatSpell != null ? threatSpell.GetSchoolMask() : SpellSchoolMask.Normal), threatSpell);
             threat /= GetSize();
 
-            HostileReference refe = GetFirst();
+            var refe = GetFirst();
             while (refe != null)
             {
                 if (ThreatManager.IsValidProcess(victim, refe.GetSource().GetOwner(), threatSpell))
@@ -53,7 +53,7 @@ namespace Game.Combat
 
         public void AddTempThreat(float threat, bool apply)
         {
-            HostileReference refe = GetFirst();
+            var refe = GetFirst();
             while (refe != null)
             {
                 if (apply)
@@ -70,7 +70,7 @@ namespace Game.Combat
 
         void AddThreatPercent(int percent)
         {
-            HostileReference refe = GetFirst();
+            var refe = GetFirst();
             while (refe != null)
             {
                 refe.AddThreatPercent(percent);
@@ -82,10 +82,10 @@ namespace Game.Combat
         // tell the source to remove them from the list and free the mem
         public void DeleteReferences()
         {
-            HostileReference refe = GetFirst();
+            var refe = GetFirst();
             while (refe != null)
             {
-                HostileReference nextRef = refe.Next();
+                var nextRef = refe.Next();
                 refe.RemoveReference();
                 refe = nextRef;
             }
@@ -94,10 +94,10 @@ namespace Game.Combat
         // Remove specific faction references
         public void DeleteReferencesForFaction(uint faction)
         {
-            HostileReference refe = GetFirst();
+            var refe = GetFirst();
             while (refe != null)
             {
-                HostileReference nextRef = refe.Next();
+                var nextRef = refe.Next();
                 if (refe.GetSource().GetOwner().GetFactionTemplateEntry().Faction == faction)
                 {
                     refe.RemoveReference();
@@ -109,12 +109,12 @@ namespace Game.Combat
         // delete all references out of specified range
         public void DeleteReferencesOutOfRange(float range)
         {
-            HostileReference refe = GetFirst();
+            var refe = GetFirst();
             range = range * range;
             while (refe != null)
             {
-                HostileReference nextRef = refe.Next();
-                Unit owner = refe.GetSource().GetOwner();
+                var nextRef = refe.Next();
+                var owner = refe.GetSource().GetOwner();
                 if (!owner.IsActiveObject() && owner.GetExactDist2dSq(GetOwner()) > range)
                 {
                     refe.RemoveReference();
@@ -127,7 +127,7 @@ namespace Game.Combat
 
         public void UpdateThreatTables()
         {
-            HostileReference refe = GetFirst();
+            var refe = GetFirst();
             while (refe != null)
             {
                 refe.UpdateOnlineStatus();
@@ -137,7 +137,7 @@ namespace Game.Combat
 
         public void SetOnlineOfflineState(bool isOnline)
         {
-            HostileReference refe = GetFirst();
+            var refe = GetFirst();
             while (refe != null)
             {
                 refe.SetOnlineOfflineState(isOnline);
@@ -148,10 +148,10 @@ namespace Game.Combat
         // set state for one reference, defined by Unit
         public void SetOnlineOfflineState(Unit creature, bool isOnline)
         {
-            HostileReference refe = GetFirst();
+            var refe = GetFirst();
             while (refe != null)
             {
-                HostileReference nextRef = refe.Next();
+                var nextRef = refe.Next();
                 if (refe.GetSource().GetOwner() == creature)
                 {
                     refe.SetOnlineOfflineState(isOnline);
@@ -164,10 +164,10 @@ namespace Game.Combat
         // delete one reference, defined by Unit
         public void DeleteReference(Unit creature)
         {
-            HostileReference refe = GetFirst();
+            var refe = GetFirst();
             while (refe != null)
             {
-                HostileReference nextRef = refe.Next();
+                var nextRef = refe.Next();
                 if (refe.GetSource().GetOwner() == creature)
                 {
                     refe.RemoveReference();
@@ -179,10 +179,10 @@ namespace Game.Combat
 
         public void UpdateVisibility()
         {
-            HostileReference refe = GetFirst();
+            var refe = GetFirst();
             while (refe != null)
             {
-                HostileReference nextRef = refe.Next();
+                var nextRef = refe.Next();
                 if (!refe.GetSource().GetOwner().CanSeeOrDetect(GetOwner()))
                 {
                     nextRef = refe.Next();
@@ -238,12 +238,12 @@ namespace Game.Combat
             if (!IsOnline())
                 UpdateOnlineStatus();
 
-            ThreatRefStatusChangeEvent Event = new ThreatRefStatusChangeEvent(UnitEventTypes.ThreatRefThreatChange, this, modThreat);
+            var Event = new ThreatRefStatusChangeEvent(UnitEventTypes.ThreatRefThreatChange, this, modThreat);
             FireStatusChanged(Event);
 
             if (IsValid() && modThreat > 0.0f)
             {
-                Unit victimOwner = GetTarget().GetCharmerOrOwner();
+                var victimOwner = GetTarget().GetCharmerOrOwner();
                 if (victimOwner != null && victimOwner.IsAlive())
                     GetSource().AddThreat(victimOwner, 0.0f);     // create a threat to the owner of a pet, if the pet attacks
             }
@@ -257,12 +257,12 @@ namespace Game.Combat
         // check, if source can reach target and set the status
         public void UpdateOnlineStatus()
         {
-            bool online = false;
-            bool accessible = false;
+            var online = false;
+            var accessible = false;
 
             if (!IsValid())
             {
-                Unit target = Global.ObjAccessor.GetUnit(GetSourceUnit(), GetUnitGuid());
+                var target = Global.ObjAccessor.GetUnit(GetSourceUnit(), GetUnitGuid());
                 if (target != null)
                     Link(target, GetSource());
             }
@@ -278,7 +278,7 @@ namespace Game.Combat
                 && GetTarget().IsInPhase(GetSourceUnit())
                 )
             {
-                Creature creature = GetSourceUnit().ToCreature();
+                var creature = GetSourceUnit().ToCreature();
                 online = GetTarget().IsInAccessiblePlaceFor(creature);
                 if (!online)
                 {
@@ -300,7 +300,7 @@ namespace Game.Combat
                 if (!iOnline)
                     SetAccessibleState(false);                      // if not online that not accessable as well
 
-                ThreatRefStatusChangeEvent Event = new ThreatRefStatusChangeEvent(UnitEventTypes.ThreatRefOnlineStatus, this);
+                var Event = new ThreatRefStatusChangeEvent(UnitEventTypes.ThreatRefOnlineStatus, this);
                 FireStatusChanged(Event);
             }
         }
@@ -311,7 +311,7 @@ namespace Game.Combat
             {
                 iAccessible = isAccessible;
 
-                ThreatRefStatusChangeEvent Event = new ThreatRefStatusChangeEvent(UnitEventTypes.ThreatRefAccessibleStatus, this);
+                var Event = new ThreatRefStatusChangeEvent(UnitEventTypes.ThreatRefAccessibleStatus, this);
                 FireStatusChanged(Event);
             }
         }
@@ -321,7 +321,7 @@ namespace Game.Combat
         {
             Invalidate();
 
-            ThreatRefStatusChangeEvent Event = new ThreatRefStatusChangeEvent(UnitEventTypes.ThreatRefRemoveFromList, this);
+            var Event = new ThreatRefStatusChangeEvent(UnitEventTypes.ThreatRefRemoveFromList, this);
             FireStatusChanged(Event);
         }
 
@@ -366,7 +366,7 @@ namespace Game.Combat
 
             iTempThreatModifier += threat;
 
-            ThreatRefStatusChangeEvent Event = new ThreatRefStatusChangeEvent(UnitEventTypes.ThreatRefThreatChange, this, threat);
+            var Event = new ThreatRefStatusChangeEvent(UnitEventTypes.ThreatRefThreatChange, this, threat);
             FireStatusChanged(Event);
         }
 

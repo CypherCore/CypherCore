@@ -89,7 +89,7 @@ namespace Scripts.Spells.Paladin
 
         void HandleDummy(uint effIndex)
         {
-            Unit unitTarget = GetHitUnit();
+            var unitTarget = GetHitUnit();
             if (unitTarget)
             {
                 uint spell_id;
@@ -110,7 +110,7 @@ namespace Scripts.Spells.Paladin
                     default:
                         return; // ignore for non-healing classes
                 }
-                Unit caster = GetCaster();
+                var caster = GetCaster();
                 caster.CastSpell(caster, spell_id, true);
             }
         }
@@ -133,7 +133,7 @@ namespace Scripts.Spells.Paladin
 
         SpellCastResult CheckForbearance()
         {
-            Unit target = GetExplTargetUnit();
+            var target = GetExplTargetUnit();
             if (!target || target.HasAura(SpellIds.Forbearance))
                 return SpellCastResult.TargetAurastate;
 
@@ -142,7 +142,7 @@ namespace Scripts.Spells.Paladin
 
         void TriggerForbearance()
         {
-            Unit target = GetHitUnit();
+            var target = GetHitUnit();
             if (target)
             {
                 GetCaster().CastSpell(target, SpellIds.Forbearance, true);
@@ -167,7 +167,7 @@ namespace Scripts.Spells.Paladin
 
         void HandleDummy(uint effIndex)
         {
-            Unit target = GetHitUnit();
+            var target = GetHitUnit();
             if (target)
                 GetCaster().CastSpell(target, SpellIds.BlindingLightEffect, true);
         }
@@ -222,7 +222,7 @@ namespace Scripts.Spells.Paladin
 
         void TriggerForbearance()
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             caster.CastSpell(caster, SpellIds.Forbearance, true);
             caster.CastSpell(caster, SpellIds.ImmuneShieldMarker, true);
         }
@@ -245,9 +245,9 @@ namespace Scripts.Spells.Paladin
 
         void HandleOnCast()
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
 
-            uint spellId = SpellIds.DivineSteedHuman;
+            var spellId = SpellIds.DivineSteedHuman;
             switch (caster.GetRace())
             {
                 case Race.Draenei:
@@ -302,7 +302,7 @@ namespace Scripts.Spells.Paladin
 
         bool CheckEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            Spell procSpell = eventInfo.GetProcSpell();
+            var procSpell = eventInfo.GetProcSpell();
             if (procSpell != null)
                 return procSpell.HasPowerTypeCost(PowerType.HolyPower);
 
@@ -311,7 +311,7 @@ namespace Scripts.Spells.Paladin
 
         void HandleEffectProc(AuraEffect aurEff, ProcEventInfo procInfo)
         {
-            int value = aurEff.GetAmount() / 10;
+            var value = aurEff.GetAmount() / 10;
 
             GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.HammerOfJustice, -value);
         }
@@ -355,7 +355,7 @@ namespace Scripts.Spells.Paladin
     {
         void FilterTargets(List<WorldObject> targets)
         {
-            uint maxTargets = GetSpellInfo().MaxAffectedTargets;
+            var maxTargets = GetSpellInfo().MaxAffectedTargets;
 
             if (targets.Count > maxTargets)
             {
@@ -378,7 +378,7 @@ namespace Scripts.Spells.Paladin
 
         public override bool Load()
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster)
             {
                 remainingAmount = (int)caster.GetMaxHealth();
@@ -432,7 +432,7 @@ namespace Scripts.Spells.Paladin
 
         void HandleOnHit()
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster.HasSpell(SpellIds.JudgementProtRetR3))
                 caster.CastSpell(caster, SpellIds.JudementGainHolyPower, TriggerCastFlags.FullMask);
         }
@@ -449,7 +449,7 @@ namespace Scripts.Spells.Paladin
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            SpellInfo firstRankSpellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.HolyShockR1, Difficulty.None);
+            var firstRankSpellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.HolyShockR1, Difficulty.None);
             if (firstRankSpellInfo == null)
                 return false;
 
@@ -457,7 +457,7 @@ namespace Scripts.Spells.Paladin
             if (!spellInfo.IsRankOf(firstRankSpellInfo))
                 return false;
 
-            byte rank = spellInfo.GetRank();
+            var rank = spellInfo.GetRank();
             if (Global.SpellMgr.GetSpellWithRank(SpellIds.HolyShockR1Damage, rank, true) == 0 || Global.SpellMgr.GetSpellWithRank(SpellIds.HolyShockR1Healing, rank, true) == 0)
                 return false;
 
@@ -466,11 +466,11 @@ namespace Scripts.Spells.Paladin
 
         void HandleDummy(uint effIndex)
         {
-            Unit caster = GetCaster();
-            Unit unitTarget = GetHitUnit();
+            var caster = GetCaster();
+            var unitTarget = GetHitUnit();
             if (unitTarget)
             {
-                byte rank = GetSpellInfo().GetRank();
+                var rank = GetSpellInfo().GetRank();
                 if (caster.IsFriendlyTo(unitTarget))
                     caster.CastSpell(unitTarget, Global.SpellMgr.GetSpellWithRank(SpellIds.HolyShockR1Healing, rank), true);
                 else
@@ -480,8 +480,8 @@ namespace Scripts.Spells.Paladin
 
         SpellCastResult CheckCast()
         {
-            Unit caster = GetCaster();
-            Unit target = GetExplTargetUnit();
+            var caster = GetCaster();
+            var target = GetExplTargetUnit();
             if (target)
             {
                 if (!caster.IsFriendlyTo(target))
@@ -537,7 +537,7 @@ namespace Scripts.Spells.Paladin
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            SpellInfo spellInfo = eventInfo.GetSpellInfo();
+            var spellInfo = eventInfo.GetSpellInfo();
             if (spellInfo == null)
                 return;
 
@@ -581,7 +581,7 @@ namespace Scripts.Spells.Paladin
 
         SpellCastResult CheckForbearance()
         {
-            Unit target = GetExplTargetUnit();
+            var target = GetExplTargetUnit();
             if (!target || target.HasAura(SpellIds.Forbearance))
                 return SpellCastResult.TargetAurastate;
 
@@ -590,7 +590,7 @@ namespace Scripts.Spells.Paladin
 
         void TriggerForbearance()
         {
-            Unit target = GetHitUnit();
+            var target = GetHitUnit();
             if (target)
             {
                 GetCaster().CastSpell(target, SpellIds.Forbearance, true);
@@ -627,18 +627,18 @@ namespace Scripts.Spells.Paladin
         {
             PreventDefaultAction();
 
-            HealInfo healInfo = eventInfo.GetHealInfo();
+            var healInfo = eventInfo.GetHealInfo();
             if (healInfo == null || healInfo.GetHeal() == 0)
                 return;
 
-            uint heal = MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
+            var heal = MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
 
             var auras = GetCaster().GetSingleCastAuras();
             foreach (var eff in auras)
             {
                 if (eff.GetId() == SpellIds.BeaconOfLight)
                 {
-                    List<AuraApplication> applications = eff.GetApplicationList();
+                    var applications = eff.GetApplicationList();
                     if (!applications.Empty())
                         eventInfo.GetActor().CastCustomSpell(SpellIds.BeaconOfLightHeal, SpellValueMod.BasePoint0, (int)heal, applications.First().GetTarget(), true);
                     return;
@@ -665,7 +665,7 @@ namespace Scripts.Spells.Paladin
 
         bool CheckEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            SpellInfo procSpell = eventInfo.GetSpellInfo();
+            var procSpell = eventInfo.GetSpellInfo();
             if (procSpell != null)
                 _baseHolyPowerCost = procSpell.CalcPowerCost(PowerType.HolyPower, false, eventInfo.GetActor(), eventInfo.GetSchoolMask());
             else
@@ -676,7 +676,7 @@ namespace Scripts.Spells.Paladin
 
         void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            int value = aurEff.GetAmount() * 100 * _baseHolyPowerCost.Amount;
+            var value = aurEff.GetAmount() * 100 * _baseHolyPowerCost.Amount;
 
             GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.AvengingWrath, -value);
             GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.GuardianOfAcientKings, -value);
@@ -713,7 +713,7 @@ namespace Scripts.Spells.Paladin
     {
         bool CheckEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            Spell procSpell = eventInfo.GetProcSpell();
+            var procSpell = eventInfo.GetProcSpell();
             if (procSpell != null)
                 return procSpell.HasPowerTypeCost(PowerType.HolyPower);
 
@@ -758,8 +758,8 @@ namespace Scripts.Spells.Paladin
             PreventDefaultAction();
 
             uint spellId;
-            Unit caster = eventInfo.GetActor();
-            Unit target = eventInfo.GetProcTarget();
+            var caster = eventInfo.GetActor();
+            var target = eventInfo.GetProcTarget();
 
             switch (target.GetClass())
             {
@@ -805,15 +805,15 @@ namespace Scripts.Spells.Paladin
         {
             PreventDefaultAction();
 
-            HealInfo healInfo = eventInfo.GetHealInfo();
+            var healInfo = eventInfo.GetHealInfo();
             if (healInfo == null || healInfo.GetHeal() == 0)
                 return;
 
-            Unit caster = eventInfo.GetActor();
-            Unit target = eventInfo.GetProcTarget();
+            var caster = eventInfo.GetActor();
+            var target = eventInfo.GetProcTarget();
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.HolyMending, GetCastDifficulty());
-            int amount = (int)MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
+            var spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.HolyMending, GetCastDifficulty());
+            var amount = (int)MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
             amount /= (int)spellInfo.GetMaxTicks();
             // Add remaining ticks to damage done
             amount += (int)target.GetRemainingPeriodicAmount(caster.GetGUID(), SpellIds.HolyMending, AuraType.PeriodicHeal);
@@ -837,7 +837,7 @@ namespace Scripts.Spells.Paladin
 
         void HandleEffectProc(AuraEffect aurEff, ProcEventInfo procInfo)
         {
-            Unit target = GetTarget();
+            var target = GetTarget();
             target.CastCustomSpell(SpellIds.ZealAura, SpellValueMod.AuraStack, aurEff.GetAmount(), target, true);
 
             PreventDefaultAction();

@@ -186,8 +186,8 @@ namespace Framework.GameMath
         /// </remarks>
         public static Matrix2 Parse(string value)
         {
-            Regex r = new Regex(regularExp, RegexOptions.Singleline | RegexOptions.IgnorePatternWhitespace);
-            Match m = r.Match(value);
+            var r = new Regex(regularExp, RegexOptions.Singleline | RegexOptions.IgnorePatternWhitespace);
+            var m = r.Match(value);
             if (m.Success)
             {
                 return new Matrix2(
@@ -219,8 +219,8 @@ namespace Framework.GameMath
         /// </remarks>
         public static bool TryParse(string value, out Matrix2 result)
         {
-            Regex r = new Regex(regularExp, RegexOptions.Singleline);
-            Match m = r.Match(value);
+            var r = new Regex(regularExp, RegexOptions.Singleline);
+            var m = r.Match(value);
             if (m.Success)
             {
                 result = new Matrix2(
@@ -409,7 +409,7 @@ namespace Framework.GameMath
         /// <returns>A new <see cref="Matrix2"/> instance containing the transposed matrix.</returns>
         public static Matrix2 Transpose(Matrix2 m)
         {
-            Matrix2 t = new Matrix2(m);
+            var t = new Matrix2(m);
             t.Transpose();
             return t;
         }
@@ -436,7 +436,7 @@ namespace Framework.GameMath
         {
             if (obj is Matrix2)
             {
-                Matrix2 m = (Matrix2)obj;
+                var m = (Matrix2)obj;
                 return
                     (_m11 == m.M11) && (_m12 == m.M12) &&
                     (_m21 == m.M21) && (_m22 == m.M22);

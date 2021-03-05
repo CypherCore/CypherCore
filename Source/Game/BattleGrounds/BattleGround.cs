@@ -151,7 +151,7 @@ namespace Game.BattleGrounds
 
         void _CheckSafePositions(uint diff)
         {
-            float maxDist = GetStartMaxDist();
+            var maxDist = GetStartMaxDist();
             if (maxDist == 0.0f)
                 return;
 
@@ -162,14 +162,14 @@ namespace Game.BattleGrounds
                 
                 foreach (var guid in GetPlayers().Keys)
                 {
-                    Player player = Global.ObjAccessor.FindPlayer(guid);
+                    var player = Global.ObjAccessor.FindPlayer(guid);
                     if (player)
                     {
                         if (player.IsGameMaster())
                             continue;
 
-                        Position pos = player.GetPosition();
-                        WorldSafeLocsEntry startPos = GetTeamStartPosition(GetTeamIndexByTeamId(player.GetBGTeam()));
+                        var pos = player.GetPosition();
+                        var startPos = GetTeamStartPosition(GetTeamIndexByTeamId(player.GetBGTeam()));
                         if (pos.GetExactDistSq(startPos.Loc) > maxDist)
                         {
                             Log.outDebug(LogFilter.Battleground, $"Battleground: Sending {player.GetName()} back to start location (map: {GetMapId()}) (possible exploit)");
@@ -187,12 +187,12 @@ namespace Game.BattleGrounds
             {
                 m_LastPlayerPositionBroadcast = 0;
 
-                BattlegroundPlayerPositions playerPositions = new BattlegroundPlayerPositions();
+                var playerPositions = new BattlegroundPlayerPositions();
                 for (var i =0; i < _playerPositions.Count; ++i)
                 {
                     var playerPosition = _playerPositions[i];
                     // Update position data if we found player.
-                    Player player = Global.ObjAccessor.GetPlayer(GetBgMap(), playerPosition.Guid);
+                    var player = Global.ObjAccessor.GetPlayer(GetBgMap(), playerPosition.Guid);
                     if (player != null)
                         playerPosition.Pos = player.GetPosition();
 
@@ -235,7 +235,7 @@ namespace Game.BattleGrounds
                     Creature sh = null;
                     foreach (var pair in m_ReviveQueue)
                     {
-                        Player player = Global.ObjAccessor.FindPlayer(pair.Value);
+                        var player = Global.ObjAccessor.FindPlayer(pair.Value);
                         if (!player)
                             continue;
 
@@ -264,7 +264,7 @@ namespace Game.BattleGrounds
             {
                 foreach (var guid in m_ResurrectQueue)
                 {
-                    Player player = Global.ObjAccessor.FindPlayer(guid);
+                    var player = Global.ObjAccessor.FindPlayer(guid);
                     if (!player)
                         continue;
                     player.ResurrectPlayer(1.0f);
@@ -306,7 +306,7 @@ namespace Game.BattleGrounds
             }
             else if (!Global.BattlegroundMgr.IsTesting())
             {
-                uint newtime = m_PrematureCountDownTimer - diff;
+                var newtime = m_PrematureCountDownTimer - diff;
                 // announce every Time.Minute
                 if (newtime > (Time.Minute * Time.InMilliseconds))
                 {
@@ -338,7 +338,7 @@ namespace Game.BattleGrounds
                 m_ResetStatTimer = 0;
                 foreach (var guid in GetPlayers().Keys)
                 {
-                    Player player = Global.ObjAccessor.FindPlayer(guid);
+                    var player = Global.ObjAccessor.FindPlayer(guid);
                     if (player)
                         player.ResetAllPowers();
                 }
@@ -347,16 +347,16 @@ namespace Game.BattleGrounds
             // Send packet every 10 seconds until the 2nd field reach 0
             if (m_CountdownTimer >= 10000)
             {
-                uint countdownMaxForBGType = IsArena() ? BattlegroundConst.ArenaCountdownMax : BattlegroundConst.BattlegroundCountdownMax;
+                var countdownMaxForBGType = IsArena() ? BattlegroundConst.ArenaCountdownMax : BattlegroundConst.BattlegroundCountdownMax;
 
-                StartTimer timer = new StartTimer();
+                var timer = new StartTimer();
                 timer.Type = TimerType.Pvp;
                 timer.TimeRemaining = countdownMaxForBGType - (GetElapsedTime() / 1000);
                 timer.TotalTime = countdownMaxForBGType;
 
                 foreach (var guid in GetPlayers().Keys)
                 {
-                    Player player = Global.ObjAccessor.FindPlayer(guid);
+                    var player = Global.ObjAccessor.FindPlayer(guid);
                     if (player)
                         player.SendPacket(timer);
                 }
@@ -420,7 +420,7 @@ namespace Game.BattleGrounds
                     //todo add arena sound PlaySoundToAll(SOUND_ARENA_START);
                     foreach (var guid in GetPlayers().Keys)
                     {
-                        Player player = Global.ObjAccessor.FindPlayer(guid);
+                        var player = Global.ObjAccessor.FindPlayer(guid);
                         if (player)
                         {
                             // Correctly display EnemyUnitFrame
@@ -433,7 +433,7 @@ namespace Game.BattleGrounds
                                 // remove auras with duration lower than 30s
                                 player.RemoveAppliedAuras(aurApp =>
                                 {
-                                    Aura aura = aurApp.GetBase();
+                                    var aura = aurApp.GetBase();
                                     return !aura.IsPermanent() && aura.GetDuration() <= 30 * Time.InMilliseconds && aurApp.IsPositive()
                                     && !aura.GetSpellInfo().HasAttribute(SpellAttr0.UnaffectedByInvulnerability) && !aura.HasEffectType(AuraType.ModInvisibility);
                                 });
@@ -449,7 +449,7 @@ namespace Game.BattleGrounds
 
                     foreach (var guid in GetPlayers().Keys)
                     {
-                        Player player = Global.ObjAccessor.FindPlayer(guid);
+                        var player = Global.ObjAccessor.FindPlayer(guid);
                         if (player)
                         {
                             player.RemoveAurasDueToSpell(BattlegroundConst.SpellPreparation);
@@ -503,10 +503,10 @@ namespace Game.BattleGrounds
 
         Player _GetPlayerForTeam(Team teamId, KeyValuePair<ObjectGuid, BattlegroundPlayer> pair, string context)
         {
-            Player player = _GetPlayer(pair, context);
+            var player = _GetPlayer(pair, context);
             if (player)
             {
-                Team team = pair.Value.Team;
+                var team = pair.Value.Team;
                 if (team == 0)
                     team = player.GetTeam();
                 if (team != teamId)
@@ -536,7 +536,7 @@ namespace Game.BattleGrounds
         {
             foreach (var pair in m_Players)
             {
-                Player player = _GetPlayer(pair, "SendPacketToAll");
+                var player = _GetPlayer(pair, "SendPacketToAll");
                 if (player)
                     player.SendPacket(packet);
             }
@@ -546,7 +546,7 @@ namespace Game.BattleGrounds
         {
             foreach (var pair in m_Players)
             {
-                Player player = _GetPlayerForTeam(team, pair, "SendPacketToTeam");
+                var player = _GetPlayerForTeam(team, pair, "SendPacketToTeam");
                 if (player)
                 {
                     if (player != except)
@@ -568,8 +568,8 @@ namespace Game.BattleGrounds
                 return;
             }
 
-            BroadcastTextBuilder builder = new BroadcastTextBuilder(null, msgType, id, Gender.Male, target);
-            LocalizedPacketDo localizer = new LocalizedPacketDo(builder);
+            var builder = new BroadcastTextBuilder(null, msgType, id, Gender.Male, target);
+            var localizer = new LocalizedPacketDo(builder);
             BroadcastWorker(localizer);
         }
 
@@ -587,7 +587,7 @@ namespace Game.BattleGrounds
         {
             foreach (var pair in m_Players)
             {
-                Player player = _GetPlayerForTeam(team, pair, "CastSpellOnTeam");
+                var player = _GetPlayerForTeam(team, pair, "CastSpellOnTeam");
                 if (player)
                     player.CastSpell(player, SpellID, true);
             }
@@ -597,7 +597,7 @@ namespace Game.BattleGrounds
         {
             foreach (var pair in m_Players)
             {
-                Player player = _GetPlayerForTeam(team, pair, "RemoveAuraOnTeam");
+                var player = _GetPlayerForTeam(team, pair, "RemoveAuraOnTeam");
                 if (player)
                     player.RemoveAura(SpellID);
             }
@@ -607,7 +607,7 @@ namespace Game.BattleGrounds
         {
             foreach (var pair in m_Players)
             {
-                Player player = _GetPlayerForTeam(team, pair, "RewardHonorToTeam");
+                var player = _GetPlayerForTeam(team, pair, "RewardHonorToTeam");
                 if (player)
                     UpdatePlayerScore(player, ScoreType.BonusHonor, Honor);
             }
@@ -615,17 +615,17 @@ namespace Game.BattleGrounds
 
         public void RewardReputationToTeam(uint faction_id, uint Reputation, Team team)
         {
-            FactionRecord factionEntry = CliDB.FactionStorage.LookupByKey(faction_id);
+            var factionEntry = CliDB.FactionStorage.LookupByKey(faction_id);
             if (factionEntry == null)
                 return;
 
             foreach (var pair in m_Players)
             {
-                Player player = _GetPlayerForTeam(team, pair, "RewardReputationToTeam");
+                var player = _GetPlayerForTeam(team, pair, "RewardReputationToTeam");
                 if (!player)
                     continue;
 
-                uint repGain = Reputation;
+                var repGain = Reputation;
                 MathFunctions.AddPct(ref repGain, player.GetTotalAuraModifier(AuraType.ModReputationGain));
                 MathFunctions.AddPct(ref repGain, player.GetTotalAuraModifierByMiscValue(AuraType.ModFactionReputationGain, (int)faction_id));
                 player.GetReputationMgr().ModifyReputation(factionEntry, (int)repGain);
@@ -634,7 +634,7 @@ namespace Game.BattleGrounds
 
         public void UpdateWorldState(uint variable, uint value, bool hidden = false)
         {
-            UpdateWorldState worldstate = new UpdateWorldState();
+            var worldstate = new UpdateWorldState();
             worldstate.VariableID = variable;
             worldstate.Value = (int)value;
             worldstate.Hidden = hidden;
@@ -643,7 +643,7 @@ namespace Game.BattleGrounds
 
         public void UpdateWorldState(uint variable, bool value, bool hidden = false)
         {
-            UpdateWorldState worldstate = new UpdateWorldState();
+            var worldstate = new UpdateWorldState();
             worldstate.VariableID = variable;
             worldstate.Value = value ? 1 : 0;
             worldstate.Hidden = hidden;
@@ -654,7 +654,7 @@ namespace Game.BattleGrounds
         {
             RemoveFromBGFreeSlotQueue();
 
-            bool guildAwarded = false;
+            var guildAwarded = false;
 
             if (winner == Team.Alliance)
             {
@@ -682,7 +682,7 @@ namespace Game.BattleGrounds
             if (IsBattleground() && WorldConfig.GetBoolValue(WorldCfg.BattlegroundStoreStatisticsEnable))
             {
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PVPSTATS_MAXID);
-                SQLResult result = DB.Characters.Query(stmt);
+                var result = DB.Characters.Query(stmt);
 
                 if (!result.IsEmpty())
                     battlegroundId = result.Read<ulong>(0) + 1;
@@ -699,7 +699,7 @@ namespace Game.BattleGrounds
             //we must set it this way, because end time is sent in packet!
             SetRemainingTime(BattlegroundConst.AutocloseBattleground);
 
-            PVPMatchComplete pvpMatchComplete = new PVPMatchComplete();
+            var pvpMatchComplete = new PVPMatchComplete();
             pvpMatchComplete.Winner = (byte)GetWinner();
             pvpMatchComplete.Duration = (int)Math.Max(0, (GetElapsedTime() - (int)BattlegroundStartTimeIntervals.Delay2m) / Time.InMilliseconds);
             pvpMatchComplete.LogData.HasValue = true;
@@ -708,9 +708,9 @@ namespace Game.BattleGrounds
 
             foreach (var pair in m_Players)
             {
-                Team team = pair.Value.Team;
+                var team = pair.Value.Team;
 
-                Player player = _GetPlayer(pair, "EndBattleground");
+                var player = _GetPlayer(pair, "EndBattleground");
                 if (!player)
                     continue;
 
@@ -734,8 +734,8 @@ namespace Game.BattleGrounds
                 player.RemoveAura(BattlegroundConst.SpellHonorableDefender25y);
                 player.RemoveAura(BattlegroundConst.SpellHonorableDefender60y);
 
-                uint winnerKills = player.GetRandomWinner() ? WorldConfig.GetUIntValue(WorldCfg.BgRewardWinnerHonorLast) : WorldConfig.GetUIntValue(WorldCfg.BgRewardWinnerHonorFirst);
-                uint loserKills = player.GetRandomWinner() ? WorldConfig.GetUIntValue(WorldCfg.BgRewardLoserHonorLast) : WorldConfig.GetUIntValue(WorldCfg.BgRewardLoserHonorFirst);
+                var winnerKills = player.GetRandomWinner() ? WorldConfig.GetUIntValue(WorldCfg.BgRewardWinnerHonorLast) : WorldConfig.GetUIntValue(WorldCfg.BgRewardWinnerHonorFirst);
+                var loserKills = player.GetRandomWinner() ? WorldConfig.GetUIntValue(WorldCfg.BgRewardLoserHonorLast) : WorldConfig.GetUIntValue(WorldCfg.BgRewardLoserHonorFirst);
 
                 if (IsBattleground() && WorldConfig.GetBoolValue(WorldCfg.BattlegroundStoreStatisticsEnable))
                 {
@@ -781,10 +781,10 @@ namespace Game.BattleGrounds
                     if (!guildAwarded)
                     {
                         guildAwarded = true;
-                        uint guildId = GetBgMap().GetOwnerGuildId(player.GetBGTeam());
+                        var guildId = GetBgMap().GetOwnerGuildId(player.GetBGTeam());
                         if (guildId != 0)
                         {
-                            Guild guild = Global.GuildMgr.GetGuildById(guildId);
+                            var guild = Global.GuildMgr.GetGuildById(guildId);
                             if (guild)
                                 guild.UpdateCriteria(CriteriaTypes.WinBg, player.GetMapId(), 0, 0, null, player);
                         }
@@ -815,7 +815,7 @@ namespace Game.BattleGrounds
         public uint GetBonusHonorFromKill(uint kills)
         {
             //variable kills means how many honorable kills you scored (so we need kills * honor_for_one_kill)
-            uint maxLevel = Math.Min(GetMaxLevel(), 80U);
+            var maxLevel = Math.Min(GetMaxLevel(), 80U);
             return Formulas.HKHonorAtLevel(maxLevel, kills);
         }
 
@@ -826,8 +826,8 @@ namespace Game.BattleGrounds
 
         public virtual void RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool SendPacket)
         {
-            Team team = GetPlayerTeam(guid);
-            bool participant = false;
+            var team = GetPlayerTeam(guid);
+            var participant = false;
             // Remove from lists/maps
             var bgPlayer = m_Players.LookupByKey(guid);
             if (bgPlayer != null)
@@ -843,7 +843,7 @@ namespace Game.BattleGrounds
 
             RemovePlayerFromResurrectQueue(guid);
 
-            Player player = Global.ObjAccessor.FindPlayer(guid);
+            var player = Global.ObjAccessor.FindPlayer(guid);
             if (player)
             { 
                 // should remove spirit of redemption
@@ -863,7 +863,7 @@ namespace Game.BattleGrounds
 
             RemovePlayer(player, guid, team);                           // BG subclass specific code
 
-            BattlegroundQueueTypeId bgQueueTypeId = GetQueueId();
+            var bgQueueTypeId = GetQueueId();
 
             if (participant) // if the player was a match participant, remove auras, calc rating, update queue
             {
@@ -890,7 +890,7 @@ namespace Game.BattleGrounds
                 }
 
                 // remove from raid group if player is member
-                Group group = GetBgRaid(team);
+                var group = GetBgRaid(team);
                 if (group)
                 {
                     if (!group.RemoveMember(guid))                // group was disbanded
@@ -905,7 +905,7 @@ namespace Game.BattleGrounds
                     Global.BattlegroundMgr.ScheduleQueueUpdate(0, bgQueueTypeId, GetBracketId());
                 }
                 // Let others know
-                BattlegroundPlayerLeft playerLeft = new BattlegroundPlayerLeft();
+                var playerLeft = new BattlegroundPlayerLeft();
                 playerLeft.Guid = guid;
                 SendPacketToTeam(team, playerLeft, player);
             }
@@ -973,7 +973,7 @@ namespace Game.BattleGrounds
 
         public void TeleportPlayerToExploitLocation(Player player)
         {
-            WorldSafeLocsEntry loc = GetExploitTeleportLocation(player.GetBGTeam());
+            var loc = GetExploitTeleportLocation(player.GetBGTeam());
             if (loc != null)
                 player.TeleportTo(loc.Loc);
         }
@@ -986,10 +986,10 @@ namespace Game.BattleGrounds
 
             // score struct must be created in inherited class
 
-            ObjectGuid guid = player.GetGUID();
-            Team team = player.GetBGTeam();
+            var guid = player.GetGUID();
+            var team = player.GetBGTeam();
 
-            BattlegroundPlayer bp = new BattlegroundPlayer();
+            var bp = new BattlegroundPlayer();
             bp.OfflineRemoveTime = 0;
             bp.Team = team;
             bp.ActiveSpec = (int)player.GetPrimarySpecialization();
@@ -999,11 +999,11 @@ namespace Game.BattleGrounds
 
             UpdatePlayersCountByTeam(team, false);                  // +1 player
 
-            BattlegroundPlayerJoined playerJoined = new BattlegroundPlayerJoined();
+            var playerJoined = new BattlegroundPlayerJoined();
             playerJoined.Guid = player.GetGUID();
             SendPacketToTeam(team, playerJoined, player);
 
-            PVPMatchInitialize pvpMatchInitialize = new PVPMatchInitialize();
+            var pvpMatchInitialize = new PVPMatchInitialize();
             pvpMatchInitialize.MapID = GetMapId();
             switch (GetStatus())
             {
@@ -1056,8 +1056,8 @@ namespace Game.BattleGrounds
                 {
                     player.CastSpell(player, BattlegroundConst.SpellPreparation, true);   // reduces all mana cost of spells.
 
-                    uint countdownMaxForBGType = IsArena() ? BattlegroundConst.ArenaCountdownMax : BattlegroundConst.BattlegroundCountdownMax;
-                    StartTimer timer = new StartTimer();
+                    var countdownMaxForBGType = IsArena() ? BattlegroundConst.ArenaCountdownMax : BattlegroundConst.BattlegroundCountdownMax;
+                    var timer = new StartTimer();
                     timer.Type = TimerType.Pvp;
                     timer.TimeRemaining = countdownMaxForBGType - (GetElapsedTime() / 1000);
                     timer.TotalTime = countdownMaxForBGType;
@@ -1077,8 +1077,8 @@ namespace Game.BattleGrounds
         // this method adds player to his team's bg group, or sets his correct group if player is already in bg group
         public void AddOrSetPlayerToCorrectBgGroup(Player player, Team team)
         {
-            ObjectGuid playerGuid = player.GetGUID();
-            Group group = GetBgRaid(team);
+            var playerGuid = player.GetGUID();
+            var group = GetBgRaid(team);
             if (!group)                                      // first player joined
             {
                 group = new Group();
@@ -1089,13 +1089,13 @@ namespace Game.BattleGrounds
             {
                 if (group.IsMember(playerGuid))
                 {
-                    byte subgroup = group.GetMemberGroup(playerGuid);
+                    var subgroup = group.GetMemberGroup(playerGuid);
                     player.SetBattlegroundOrBattlefieldRaid(group, subgroup);
                 }
                 else
                 {
                     group.AddMember(player);
-                    Group originalGroup = player.GetOriginalGroup();
+                    var originalGroup = player.GetOriginalGroup();
                     if (originalGroup)
                         if (originalGroup.IsLeader(playerGuid))
                         {
@@ -1109,7 +1109,7 @@ namespace Game.BattleGrounds
         // This method should be called when player logs into running Battleground
         public void EventPlayerLoggedIn(Player player)
         {
-            ObjectGuid guid = player.GetGUID();
+            var guid = player.GetGUID();
             // player is correct pointer
             foreach (var id in m_OfflineQueue)
             {
@@ -1128,7 +1128,7 @@ namespace Game.BattleGrounds
         // This method should be called when player logs out from running Battleground
         public void EventPlayerLoggedOut(Player player)
         {
-            ObjectGuid guid = player.GetGUID();
+            var guid = player.GetGUID();
             if (!IsPlayerInBattleground(guid))  // Check if this player really is in Battleground (might be a GM who teleported inside)
                 return;
 
@@ -1209,7 +1209,7 @@ namespace Game.BattleGrounds
                     diff = otherTeamInvitedCount - thisTeamInvitedCount;
 
                 // difference based on max players per team (don't allow inviting more)
-                uint diff2 = (thisTeamInvitedCount < GetMaxPlayersPerTeam()) ? GetMaxPlayersPerTeam() - thisTeamInvitedCount : 0;
+                var diff2 = (thisTeamInvitedCount < GetMaxPlayersPerTeam()) ? GetMaxPlayersPerTeam() - thisTeamInvitedCount : 0;
                 // difference based on players who already entered
                 // default: allow 0
                 uint diff3 = 0;
@@ -1258,7 +1258,7 @@ namespace Game.BattleGrounds
 
                 score.Value.BuildPvPLogPlayerDataPacket(out playerData);
 
-                Player player = Global.ObjAccessor.GetPlayer(GetBgMap(), playerData.PlayerGUID);
+                var player = Global.ObjAccessor.GetPlayer(GetBgMap(), playerData.PlayerGUID);
                 if (player)
                 {
                     playerData.IsInWorld = true;
@@ -1294,7 +1294,7 @@ namespace Game.BattleGrounds
         {
             m_ReviveQueue.Add(npc_guid, player_guid);
 
-            Player player = Global.ObjAccessor.FindPlayer(player_guid);
+            var player = Global.ObjAccessor.FindPlayer(player_guid);
             if (!player)
                 return;
 
@@ -1308,7 +1308,7 @@ namespace Game.BattleGrounds
                 if (pair.Value == player_guid)
                 {
                     m_ReviveQueue.Remove(pair);
-                    Player player = Global.ObjAccessor.FindPlayer(player_guid);
+                    var player = Global.ObjAccessor.FindPlayer(player_guid);
                     if (player)
                         player.RemoveAurasDueToSpell(BattlegroundConst.SpellWaitingForResurrect);
                     return;
@@ -1320,13 +1320,13 @@ namespace Game.BattleGrounds
         public void RelocateDeadPlayers(ObjectGuid guideGuid)
         {
             // Those who are waiting to resurrect at this node are taken to the closest own node's graveyard
-            List<ObjectGuid> ghostList = m_ReviveQueue[guideGuid];
+            var ghostList = m_ReviveQueue[guideGuid];
             if (!ghostList.Empty())
             {
                 WorldSafeLocsEntry closestGrave = null;
                 foreach (var guid in ghostList)
                 {
-                    Player player = Global.ObjAccessor.FindPlayer(guid);
+                    var player = Global.ObjAccessor.FindPlayer(guid);
                     if (!player)
                         continue;
 
@@ -1346,7 +1346,7 @@ namespace Game.BattleGrounds
             if (!map)
                 return false;
 
-            Quaternion rotation = new Quaternion(rotation0, rotation1, rotation2, rotation3);
+            var rotation = new Quaternion(rotation0, rotation1, rotation2, rotation3);
             // Temporally add safety check for bad spawns and send log (object rotations need to be rechecked in sniff)
             if (rotation0 == 0 && rotation1 == 0 && rotation2 == 0 && rotation3 == 0)
             {
@@ -1359,7 +1359,7 @@ namespace Game.BattleGrounds
             // Must be created this way, adding to godatamap would add it to the base map of the instance
             // and when loading it (in go.LoadFromDB()), a new guid would be assigned to the object, and a new object would be created
             // So we must create it specific for this instance
-            GameObject go = GameObject.CreateGameObject(entry, GetBgMap(), new Position(x, y, z, o), rotation, 255, goState);
+            var go = GameObject.CreateGameObject(entry, GetBgMap(), new Position(x, y, z, o), rotation, 255, goState);
             if (!go)
             {
                 Log.outError(LogFilter.Battleground, $"Battleground.AddObject: cannot create gameobject (entry: {entry}) for BG (map: {GetMapId()}, instance id: {m_InstanceID})!");
@@ -1383,7 +1383,7 @@ namespace Game.BattleGrounds
         // It would be nice to correctly implement GO_ACTIVATED state and open/close doors in gameobject code
         public void DoorClose(int type)
         {
-            GameObject obj = GetBgMap().GetGameObject(BgObjects[type]);
+            var obj = GetBgMap().GetGameObject(BgObjects[type]);
             if (obj)
             {
                 // If doors are open, close it
@@ -1399,7 +1399,7 @@ namespace Game.BattleGrounds
 
         public void DoorOpen(int type)
         {
-            GameObject obj = GetBgMap().GetGameObject(BgObjects[type]);
+            var obj = GetBgMap().GetGameObject(BgObjects[type]);
             if (obj)
             {
                 obj.SetLootState(LootState.Activated);
@@ -1414,7 +1414,7 @@ namespace Game.BattleGrounds
             if (BgObjects[type].IsEmpty())
                 return null;
 
-            GameObject obj = GetBgMap().GetGameObject(BgObjects[type]);
+            var obj = GetBgMap().GetGameObject(BgObjects[type]);
             if (!obj)
                 Log.outError(LogFilter.Battleground, $"Battleground.GetBGObject: gameobject (type: {type}, {BgObjects[type]}) not found for BG (map: {GetMapId()}, instance id: {m_InstanceID})!");
 
@@ -1426,7 +1426,7 @@ namespace Game.BattleGrounds
             if (BgCreatures[type].IsEmpty())
                 return null;
 
-            Creature creature = GetBgMap().GetCreature(BgCreatures[type]);
+            var creature = GetBgMap().GetCreature(BgCreatures[type]);
             if (!creature)
                 Log.outError(LogFilter.Battleground, $"Battleground.GetBGCreature: creature (type: {type}, {BgCreatures[type]}) not found for BG (map: {GetMapId()}, instance id: {m_InstanceID})!");
 
@@ -1443,7 +1443,7 @@ namespace Game.BattleGrounds
             Map map = FindBgMap();
             if (map != null)
             {
-                GameObject obj = map.GetGameObject(BgObjects[type]);
+                var obj = map.GetGameObject(BgObjects[type]);
                 if (obj)
                 {
                     if (respawntime != 0)
@@ -1485,9 +1485,9 @@ namespace Game.BattleGrounds
                 return null;
             }
 
-            Position pos = new Position(x, y, z, o);
+            var pos = new Position(x, y, z, o);
 
-            Creature creature = Creature.CreateCreature(entry, map, pos);
+            var creature = Creature.CreateCreature(entry, map, pos);
             if (!creature)
             {
                 Log.outError(LogFilter.Battleground, $"Battleground.AddCreature: cannot create creature (entry: {entry}) for BG (map: {GetMapId()}, instance id: {m_InstanceID})!");
@@ -1517,7 +1517,7 @@ namespace Game.BattleGrounds
             if (BgCreatures[type].IsEmpty())
                 return true;
 
-            Creature creature = GetBgMap().GetCreature(BgCreatures[type]);
+            var creature = GetBgMap().GetCreature(BgCreatures[type]);
             if (creature)
             {
                 creature.AddObjectToRemoveList();
@@ -1535,7 +1535,7 @@ namespace Game.BattleGrounds
             if (BgObjects[type].IsEmpty())
                 return true;
 
-            GameObject obj = GetBgMap().GetGameObject(BgObjects[type]);
+            var obj = GetBgMap().GetGameObject(BgObjects[type]);
             if (obj)
             {
                 obj.SetRespawnTime(0);                                 // not save respawn time
@@ -1550,9 +1550,9 @@ namespace Game.BattleGrounds
 
         public bool AddSpiritGuide(int type, float x, float y, float z, float o, int teamIndex)
         {
-            uint entry = (uint)(teamIndex == TeamId.Alliance ? BattlegroundCreatures.A_SpiritGuide : BattlegroundCreatures.H_SpiritGuide);
+            var entry = (uint)(teamIndex == TeamId.Alliance ? BattlegroundCreatures.A_SpiritGuide : BattlegroundCreatures.H_SpiritGuide);
 
-            Creature creature = AddCreature(entry, type, x, y, z, o);
+            var creature = AddCreature(entry, type, x, y, z, o);
             if (creature)
             {
                 creature.SetDeathState(DeathState.Dead);
@@ -1581,8 +1581,8 @@ namespace Game.BattleGrounds
             if (entry == 0)
                 return;
 
-            CypherStringChatBuilder builder = new CypherStringChatBuilder(null, msgType, entry, source);
-            LocalizedPacketDo localizer = new LocalizedPacketDo(builder);
+            var builder = new CypherStringChatBuilder(null, msgType, entry, source);
+            var localizer = new LocalizedPacketDo(builder);
             BroadcastWorker(localizer);
         }
 
@@ -1591,8 +1591,8 @@ namespace Game.BattleGrounds
             if (entry == 0)
                 return;
 
-            CypherStringChatBuilder builder = new CypherStringChatBuilder(null, msgType, entry, source, args);
-            LocalizedPacketDo localizer = new LocalizedPacketDo(builder);
+            var builder = new CypherStringChatBuilder(null, msgType, entry, source, args);
+            var localizer = new LocalizedPacketDo(builder);
             BroadcastWorker(localizer);
         }
 
@@ -1618,12 +1618,12 @@ namespace Game.BattleGrounds
         // buffs are in their positions when Battleground starts
         public void HandleTriggerBuff(ObjectGuid goGuid)
         {
-            GameObject obj = GetBgMap().GetGameObject(goGuid);
+            var obj = GetBgMap().GetGameObject(goGuid);
             if (!obj || obj.GetGoType() != GameObjectTypes.Trap || !obj.IsSpawned())
                 return;
 
             // Change buff type, when buff is used:
-            int index = BgObjects.Length - 1;
+            var index = BgObjects.Length - 1;
             while (index >= 0 && BgObjects[index] != goGuid)
                 index--;
             if (index < 0)
@@ -1633,8 +1633,8 @@ namespace Game.BattleGrounds
             }
 
             // Randomly select new buff
-            int buff = RandomHelper.IRand(0, 2);
-            uint entry = obj.GetEntry();
+            var buff = RandomHelper.IRand(0, 2);
+            var entry = obj.GetEntry();
             if (m_BuffChange && entry != Buff_Entries[buff])
             {
                 // Despawn current buff
@@ -1671,7 +1671,7 @@ namespace Game.BattleGrounds
 
                 foreach (var guid in m_Players.Keys)
                 {
-                    Player creditedPlayer = Global.ObjAccessor.FindPlayer(guid);
+                    var creditedPlayer = Global.ObjAccessor.FindPlayer(guid);
                     if (!creditedPlayer || creditedPlayer == killer)
                         continue;
 
@@ -1724,7 +1724,7 @@ namespace Game.BattleGrounds
 
             BlockMovement(player);
 
-            PVPMatchStatisticsMessage pvpMatchStatistics = new PVPMatchStatisticsMessage();
+            var pvpMatchStatistics = new PVPMatchStatisticsMessage();
             BuildPvPLogDataPacket(out pvpMatchStatistics.Data);
             player.SendPacket(pvpMatchStatistics);
         }
@@ -1736,7 +1736,7 @@ namespace Game.BattleGrounds
             {
                 if (pair.Value.Team == Team)
                 {
-                    Player player = Global.ObjAccessor.FindPlayer(pair.Key);
+                    var player = Global.ObjAccessor.FindPlayer(pair.Key);
                     if (player && player.IsAlive())
                         ++count;
                 }
@@ -1751,7 +1751,7 @@ namespace Game.BattleGrounds
 
         int GetObjectType(ObjectGuid guid)
         {
-            for (int i = 0; i < BgObjects.Length; ++i)
+            for (var i = 0; i < BgObjects.Length; ++i)
                 if (BgObjects[i] == guid)
                     return i;
             Log.outError(LogFilter.Battleground, $"Battleground.GetObjectType: player used gameobject ({guid}) which is not in internal data for BG (map: {GetMapId()}, instance id: {m_InstanceID}), cheating?");
@@ -1760,7 +1760,7 @@ namespace Game.BattleGrounds
 
         void SetBgRaid(Team team, Group bg_raid)
         {
-            Group old_raid = m_BgRaids[GetTeamIndexByTeamId(team)];
+            var old_raid = m_BgRaids[GetTeamIndexByTeamId(team)];
             if (old_raid)
                 old_raid.SetBattlegroundGroup(null);
             if (bg_raid)
@@ -1777,7 +1777,7 @@ namespace Game.BattleGrounds
         {
             foreach (var guid in GetPlayers().Keys)
             {
-                Player player = Global.ObjAccessor.FindPlayer(guid);
+                var player = Global.ObjAccessor.FindPlayer(guid);
                 if (player)
                     player.StartCriteriaTimer(type, entry);
             }
@@ -2013,7 +2013,7 @@ namespace Game.BattleGrounds
         {
             foreach (var pair in m_Players)
             {
-                Player player = _GetPlayer(pair, "BroadcastWorker");
+                var player = _GetPlayer(pair, "BroadcastWorker");
                 if (player)
                     _do.Invoke(player);
             }

@@ -29,12 +29,12 @@ namespace Game.Spells
     {
         public static void LoadSkillDiscoveryTable()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             SkillDiscoveryStorage.Clear();                            // need for reload
 
             //                                                0        1         2              3
-            SQLResult result = DB.World.Query("SELECT spellId, reqSpell, reqSkillValue, chance FROM skill_discovery_template");
+            var result = DB.World.Query("SELECT spellId, reqSpell, reqSkillValue, chance FROM skill_discovery_template");
 
             if (result.IsEmpty())
             {
@@ -44,15 +44,15 @@ namespace Game.Spells
 
             uint count = 0;
 
-            StringBuilder ssNonDiscoverableEntries = new StringBuilder();
-            List<uint> reportedReqSpells = new List<uint>();
+            var ssNonDiscoverableEntries = new StringBuilder();
+            var reportedReqSpells = new List<uint>();
 
             do
             {
-                uint spellId = result.Read<uint>(0);
-                int reqSkillOrSpell = result.Read<int>(1);
-                uint reqSkillValue = result.Read<uint>(2);
-                float chance = result.Read<float>(3);
+                var spellId = result.Read<uint>(0);
+                var reqSkillOrSpell = result.Read<int>(1);
+                var reqSkillValue = result.Read<uint>(2);
+                var chance = result.Read<float>(3);
 
                 if (chance <= 0)                                    // chance
                 {
@@ -62,8 +62,8 @@ namespace Game.Spells
 
                 if (reqSkillOrSpell > 0)                            // spell case
                 {
-                    uint absReqSkillOrSpell = (uint)reqSkillOrSpell;
-                    SpellInfo reqSpellInfo = Global.SpellMgr.GetSpellInfo(absReqSkillOrSpell, Difficulty.None);
+                    var absReqSkillOrSpell = (uint)reqSkillOrSpell;
+                    var reqSpellInfo = Global.SpellMgr.GetSpellInfo(absReqSkillOrSpell, Difficulty.None);
                     if (reqSpellInfo == null)
                     {
                         if (!reportedReqSpells.Contains(absReqSkillOrSpell))
@@ -118,9 +118,9 @@ namespace Game.Spells
                 Log.outError(LogFilter.Sql, "Some items can't be successfully discovered: have in chance field value < 0.000001 in `skill_discovery_template` DB table . List:\n{0}", ssNonDiscoverableEntries.ToString());
 
             // report about empty data for explicit discovery spells
-            foreach (SpellNameRecord spellNameEntry in CliDB.SpellNameStorage.Values)
+            foreach (var spellNameEntry in CliDB.SpellNameStorage.Values)
             {
-                SpellInfo spellEntry = Global.SpellMgr.GetSpellInfo(spellNameEntry.Id, Difficulty.None);
+                var spellEntry = Global.SpellMgr.GetSpellInfo(spellNameEntry.Id, Difficulty.None);
                 if (spellEntry == null)
                     continue;
 
@@ -144,7 +144,7 @@ namespace Game.Spells
                 return 0;
 
             var bounds = Global.SpellMgr.GetSkillLineAbilityMapBounds(spellId);
-            uint skillvalue = !bounds.Empty() ? (uint)player.GetSkillValue((SkillType)bounds.FirstOrDefault().SkillLine) : 0;
+            var skillvalue = !bounds.Empty() ? (uint)player.GetSkillValue((SkillType)bounds.FirstOrDefault().SkillLine) : 0;
 
             float full_chance = 0;
             foreach (var item_iter in tab)
@@ -152,8 +152,8 @@ namespace Game.Spells
                     if (!player.HasSpell(item_iter.spellId))
                         full_chance += item_iter.chance;
 
-            float rate = full_chance / 100.0f;
-            float roll = (float)RandomHelper.randChance() * rate;                      // roll now in range 0..full_chance
+            var rate = full_chance / 100.0f;
+            var roll = (float)RandomHelper.randChance() * rate;                      // roll now in range 0..full_chance
 
             foreach (var item_iter in tab)
             {
@@ -187,7 +187,7 @@ namespace Game.Spells
 
         public static uint GetSkillDiscoverySpell(uint skillId, uint spellId, Player player)
         {
-            uint skillvalue = skillId != 0 ? (uint)player.GetSkillValue((SkillType)skillId) : 0;
+            var skillvalue = skillId != 0 ? (uint)player.GetSkillValue((SkillType)skillId) : 0;
 
             // check spell case
             var tab = SkillDiscoveryStorage.LookupByKey((int)spellId);

@@ -35,7 +35,7 @@ namespace Game.Garrisons
         {
             base.LoadGridObjects(grid, cell);
 
-            GarrisonGridLoader loader = new GarrisonGridLoader(grid, this, cell);
+            var loader = new GarrisonGridLoader(grid, this, cell);
             loader.LoadN();
         }
 
@@ -44,7 +44,7 @@ namespace Game.Garrisons
             if (_loadingPlayer)
                 return _loadingPlayer.GetGarrison();
 
-            Player owner = Global.ObjAccessor.FindConnectedPlayer(_owner);
+            var owner = Global.ObjAccessor.FindConnectedPlayer(_owner);
             if (owner)
                 return owner.GetGarrison();
 
@@ -63,7 +63,7 @@ namespace Game.Garrisons
             if (player.GetGUID() == _owner)
                 _loadingPlayer = player;
 
-            bool result = base.AddPlayerToMap(player, initPlayer);
+            var result = base.AddPlayerToMap(player, initPlayer);
 
             if (player.GetGUID() == _owner)
                 _loadingPlayer = null;
@@ -109,17 +109,17 @@ namespace Game.Garrisons
 
         public override void Visit(IList<GameObject> objs)
         {
-            ICollection<Garrison.Plot> plots = i_garrison.GetPlots();
+            var plots = i_garrison.GetPlots();
             if (!plots.Empty())
             {
-                CellCoord cellCoord = i_cell.GetCellCoord();
-                foreach (Garrison.Plot plot in plots)
+                var cellCoord = i_cell.GetCellCoord();
+                foreach (var plot in plots)
                 {
-                    Position spawn = plot.PacketInfo.PlotPos;
+                    var spawn = plot.PacketInfo.PlotPos;
                     if (cellCoord != GridDefines.ComputeCellCoord(spawn.GetPositionX(), spawn.GetPositionY()))
                         continue;
 
-                    GameObject go = plot.CreateGameObject(i_map, i_garrison.GetFaction());
+                    var go = plot.CreateGameObject(i_map, i_garrison.GetFaction());
                     if (!go)
                         continue;
 

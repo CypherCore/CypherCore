@@ -29,21 +29,21 @@ namespace Game.Chat
         [CommandNonGroup("cooldown", RBACPermissions.CommandCooldown)]
         static bool HandleCooldownCommand(StringArguments args, CommandHandler handler)
         {
-            Unit target = handler.GetSelectedUnit();
+            var target = handler.GetSelectedUnit();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.PlayerNotFound);
                 return false;
             }
 
-            Player owner = target.GetCharmerOrOwnerPlayerOrPlayerItself();
+            var owner = target.GetCharmerOrOwnerPlayerOrPlayerItself();
             if (!owner)
             {
                 owner = handler.GetSession().GetPlayer();
                 target = owner;
             }
 
-            string nameLink = handler.GetNameLink(owner);
+            var nameLink = handler.GetNameLink(owner);
             if (args.Empty())
             {
                 target.GetSpellHistory().ResetAllCooldowns();
@@ -53,11 +53,11 @@ namespace Game.Chat
             else
             {
                 // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-                uint spellIid = handler.ExtractSpellIdFromLink(args);
+                var spellIid = handler.ExtractSpellIdFromLink(args);
                 if (spellIid == 0)
                     return false;
 
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellIid, target.GetMap().GetDifficultyID());
+                var spellInfo = Global.SpellMgr.GetSpellInfo(spellIid, target.GetMap().GetDifficultyID());
                 if (spellInfo == null)
                 {
                     handler.SendSysMessage(CypherStrings.UnknownSpell, owner == handler.GetSession().GetPlayer() ? handler.GetCypherString(CypherStrings.You) : nameLink);
@@ -74,7 +74,7 @@ namespace Game.Chat
         [CommandNonGroup("aura", RBACPermissions.CommandAura)]
         static bool HandleAuraCommand(StringArguments args, CommandHandler handler)
         {
-            Unit target = handler.GetSelectedUnit();
+            var target = handler.GetSelectedUnit();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
@@ -83,12 +83,12 @@ namespace Game.Chat
             }
 
             // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-            uint spellId = handler.ExtractSpellIdFromLink(args);
+            var spellId = handler.ExtractSpellIdFromLink(args);
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, target.GetMap().GetDifficultyID());
+            var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, target.GetMap().GetDifficultyID());
             if (spellInfo != null)
             {
-                ObjectGuid castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, target.GetMapId(), spellId, target.GetMap().GenerateLowGuid(HighGuid.Cast));
+                var castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, target.GetMapId(), spellId, target.GetMap().GenerateLowGuid(HighGuid.Cast));
                 Aura.TryRefreshStackOrCreate(spellInfo, castId, SpellConst.MaxEffectMask, target, target, target.GetMap().GetDifficultyID());
             }
 
@@ -98,7 +98,7 @@ namespace Game.Chat
         [CommandNonGroup("unaura", RBACPermissions.CommandUnaura)]
         static bool UnAura(StringArguments args, CommandHandler handler)
         {
-            Unit target = handler.GetSelectedUnit();
+            var target = handler.GetSelectedUnit();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
@@ -106,7 +106,7 @@ namespace Game.Chat
                 return false;
             }
 
-            string argstr = args.NextString();
+            var argstr = args.NextString();
             if (argstr == "all")
             {
                 target.RemoveAllAuras();
@@ -114,7 +114,7 @@ namespace Game.Chat
             }
 
             // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
-            uint spellId = handler.ExtractSpellIdFromLink(args);
+            var spellId = handler.ExtractSpellIdFromLink(args);
             if (spellId == 0)
                 return false;
 
@@ -127,40 +127,40 @@ namespace Game.Chat
         static bool SetSkill(StringArguments args, CommandHandler handler)
         {
             // number or [name] Shift-click form |color|Hskill:skill_id|h[name]|h|r
-            string skillStr = handler.ExtractKeyFromLink(args, "Hskill");
+            var skillStr = handler.ExtractKeyFromLink(args, "Hskill");
             if (string.IsNullOrEmpty(skillStr))
                 return false;
 
-            if (!uint.TryParse(skillStr, out uint skill) || skill == 0)
+            if (!uint.TryParse(skillStr, out var skill) || skill == 0)
             {
                 handler.SendSysMessage(CypherStrings.InvalidSkillId, skill);
                 return false;
             }
 
-            uint level = args.NextUInt32();
+            var level = args.NextUInt32();
             if (level == 0)
                 return false;
 
-            Player target = handler.GetSelectedPlayerOrSelf();
+            var target = handler.GetSelectedPlayerOrSelf();
             if (!target)
             {
                 handler.SendSysMessage(CypherStrings.NoCharSelected);
                 return false;
             }
 
-            SkillLineRecord skillLine = CliDB.SkillLineStorage.LookupByKey(skill);
+            var skillLine = CliDB.SkillLineStorage.LookupByKey(skill);
             if (skillLine == null)
             {
                 handler.SendSysMessage(CypherStrings.InvalidSkillId, skill);
                 return false;
             }
 
-            bool targetHasSkill = target.GetSkillValue((SkillType)skill) != 0;
+            var targetHasSkill = target.GetSkillValue((SkillType)skill) != 0;
 
-            ushort maxPureSkill = args.NextUInt16();
+            var maxPureSkill = args.NextUInt16();
             // If our target does not yet have the skill they are trying to add to them, the chosen level also becomes
             // the max level of the new profession.
-            ushort max = maxPureSkill != 0 ? maxPureSkill : targetHasSkill ? target.GetPureMaxSkillValue((SkillType)skill) : (ushort)level;
+            var max = maxPureSkill != 0 ? maxPureSkill : targetHasSkill ? target.GetPureMaxSkillValue((SkillType)skill) : (ushort)level;
 
             if (level == 0 || level > max || max <= 0)
                 return false;

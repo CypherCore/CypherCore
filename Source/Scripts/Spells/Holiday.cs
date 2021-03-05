@@ -164,7 +164,7 @@ namespace Scripts.Spells.Holiday
     {
         void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            Unit target = GetTarget();
+            var target = GetTarget();
             target.SetStandState(UnitStandStateType.Sit);
             target.CastSpell(target, SpellIds.MealPeriodic, false);
         }
@@ -172,8 +172,8 @@ namespace Scripts.Spells.Holiday
         void OnPeriodic(AuraEffect aurEff)
         {
             // Every 5 seconds
-            Unit target = GetTarget();
-            Unit caster = GetCaster();
+            var target = GetTarget();
+            var caster = GetCaster();
 
             // If our player is no longer sit, Remove all auras
             if (target.GetStandState() != UnitStandStateType.Sit)
@@ -186,11 +186,11 @@ namespace Scripts.Spells.Holiday
             target.CastSpell(target, SpellIds.BasketCheck, false); // unknown use, it targets Romantic Basket
             target.CastSpell(target, RandomHelper.RAND(SpellIds.MealEatVisual, SpellIds.DrinkVisual), false);
 
-            bool foundSomeone = false;
+            var foundSomeone = false;
             // For nearby players, check if they have the same aura. If so, cast Romantic Picnic (45123)
             // required by achievement and "hearts" visual
-            List<Unit> playerList = new List<Unit>();
-            AnyPlayerInObjectRangeCheck checker = new AnyPlayerInObjectRangeCheck(target, SharedConst.InteractionDistance * 2);
+            var playerList = new List<Unit>();
+            var checker = new AnyPlayerInObjectRangeCheck(target, SharedConst.InteractionDistance * 2);
             var searcher = new PlayerListSearcher(target, playerList, checker);
             Cell.VisitWorldObjects(target, searcher, SharedConst.InteractionDistance * 2);
             foreach (Player player in playerList)
@@ -229,12 +229,12 @@ namespace Scripts.Spells.Holiday
 
         void HandleScript(uint effIndex)
         {
-            Unit caster = GetCaster();
-            Player target = GetHitPlayer();
+            var caster = GetCaster();
+            var target = GetHitPlayer();
             if (target)
             {
-                Gender gender = target.GetGender();
-                uint spellId = SpellIds.TrickBuff;
+                var gender = target.GetGender();
+                var spellId = SpellIds.TrickBuff;
                 switch (RandomHelper.URand(0, 5))
                 {
                     case 1:
@@ -276,8 +276,8 @@ namespace Scripts.Spells.Holiday
 
         void HandleScript(uint effIndex)
         {
-            Unit caster = GetCaster();
-            Player target = GetHitPlayer();
+            var caster = GetCaster();
+            var target = GetHitPlayer();
             if (target)
             {
                 caster.CastSpell(target, RandomHelper.randChance(50) ? SpellIds.Trick : SpellIds.Treat, true);
@@ -301,7 +301,7 @@ namespace Scripts.Spells.Holiday
 
         void HandleScript(uint effIndex)
         {
-            Unit caster = GetCaster();
+            var caster = GetCaster();
             if (caster.HasAura(SpellIds.TrickyTreatTrigger) && caster.GetAuraCount(SpellIds.TrickyTreatSpeed) > 3 && RandomHelper.randChance(33))
                 caster.CastSpell(caster, SpellIds.UpsetTummy, true);
         }
@@ -323,11 +323,11 @@ namespace Scripts.Spells.Holiday
 
         void HandleScriptEffect()
         {
-            Unit caster = GetCaster();
-            Unit target = GetHitUnit();
+            var caster = GetCaster();
+            var target = GetHitUnit();
 
             uint spellId;
-            bool female = target.GetGender() == Gender.Female;
+            var female = target.GetGender() == Gender.Female;
 
             switch (GetSpellInfo().Id)
             {
@@ -401,10 +401,10 @@ namespace Scripts.Spells.Holiday
 
         void HandleScript(uint effIndex)
         {
-            Player target = GetHitPlayer();
+            var target = GetHitPlayer();
             if (target)
             {
-                uint spellId = RandomHelper.RAND(SpellIds.CreateHolly, SpellIds.CreateMistletoe, SpellIds.CreateSnowflakes);
+                var spellId = RandomHelper.RAND(SpellIds.CreateHolly, SpellIds.CreateMistletoe, SpellIds.CreateSnowflakes);
                 GetCaster().CastSpell(target, spellId, true);
             }
         }
@@ -436,7 +436,7 @@ namespace Scripts.Spells.Holiday
                     SpellIds.Px238WinterWondervoltTransform4
                 };
 
-            Unit target = GetHitUnit();
+            var target = GetHitUnit();
             if (target)
             {
                 for (byte i = 0; i < 4; ++i)
@@ -458,7 +458,7 @@ namespace Scripts.Spells.Holiday
     {
         void OnChange(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            Unit target = GetTarget();
+            var target = GetTarget();
             if (!target.HasAura(SpellIds.RentalRacingRam) && !target.HasAura(SpellIds.SwiftWorkRam))
             {
                 target.RemoveAura(GetId());
@@ -517,7 +517,7 @@ namespace Scripts.Spells.Holiday
     {
         void OnPeriodic(AuraEffect aurEff)
         {
-            Unit target = GetTarget();
+            var target = GetTarget();
             if (target.HasAura(SpellIds.ExhaustedRam))
                 return;
 
@@ -525,14 +525,14 @@ namespace Scripts.Spells.Holiday
             {
                 case SpellIds.RamLevelNeutral:
                     {
-                        Aura aura = target.GetAura(SpellIds.RamFatigue);
+                        var aura = target.GetAura(SpellIds.RamFatigue);
                         if (aura != null)
                             aura.ModStackAmount(-4);
                     }
                     break;
                 case SpellIds.RamTrot: // green
                     {
-                        Aura aura = target.GetAura(SpellIds.RamFatigue);
+                        var aura = target.GetAura(SpellIds.RamFatigue);
                         if (aura != null)
                             aura.ModStackAmount(-2);
                         if (aurEff.GetTickNumber() == 4)
@@ -566,7 +566,7 @@ namespace Scripts.Spells.Holiday
     {
         void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            Unit target = GetTarget();
+            var target = GetTarget();
 
             if (GetStackAmount() == 101)
             {
@@ -605,7 +605,7 @@ namespace Scripts.Spells.Holiday
     {
         void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            Unit target = GetTarget();
+            var target = GetTarget();
             target.CastSpell(target, SpellIds.RamLevelNeutral, true);
         }
 
@@ -639,7 +639,7 @@ namespace Scripts.Spells.Holiday
         {
             PreventHitDefaultEffect(effIndex);
 
-            Aura aura = GetHitUnit().GetAura(SpellIds.SwiftWorkRam);
+            var aura = GetHitUnit().GetAura(SpellIds.SwiftWorkRam);
             if (aura != null)
             {
                 aura.SetDuration(aura.GetDuration() + 30 * Time.InMilliseconds);
@@ -681,7 +681,7 @@ namespace Scripts.Spells.Holiday
 
         void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            Player target = GetTarget().ToPlayer();
+            var target = GetTarget().ToPlayer();
 
             uint BroadcastTextId = 0;
 
@@ -721,7 +721,7 @@ namespace Scripts.Spells.Holiday
 
         void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            Player player = GetTarget().ToPlayer();
+            var player = GetTarget().ToPlayer();
             if (!player)
                 return;
 
@@ -751,7 +751,7 @@ namespace Scripts.Spells.Holiday
 
         void PeriodicTick(AuraEffect aurEff)
         {
-            Unit target = GetTarget();
+            var target = GetTarget();
 
             // check if aura needs to be Removed
             if (!target.FindNearestGameObject(GameobjectIds.RibbonPole, 8.0f) || !target.HasUnitState(UnitState.Casting))
@@ -763,7 +763,7 @@ namespace Scripts.Spells.Holiday
             }
 
             // set xp buff duration
-            Aura aur = target.GetAura(SpellIds.RibbonDance);
+            var aur = target.GetAura(SpellIds.RibbonDance);
             if (aur != null)
             {
                 aur.SetMaxDuration(Math.Min(3600000, aur.GetMaxDuration() + 180000));

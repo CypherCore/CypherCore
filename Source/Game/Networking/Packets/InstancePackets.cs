@@ -41,7 +41,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteInt32(LockList.Count);
 
-            foreach (InstanceLock lockInfos in LockList)
+            foreach (var lockInfos in LockList)
                 lockInfos.Write(_worldPacket);
         }
 

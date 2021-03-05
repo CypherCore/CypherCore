@@ -27,7 +27,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ServerTimeOffsetRequest, Status = SessionStatus.Authed, Processing = PacketProcessing.Inplace)]
         void HandleServerTimeOffsetRequest(ServerTimeOffsetRequest packet)
         {
-            ServerTimeOffset response = new ServerTimeOffset();
+            var response = new ServerTimeOffset();
             response.Time = (uint)Time.UnixTime;
             SendPacket(response);
         }
@@ -42,7 +42,7 @@ namespace Game
 
             Log.outDebug(LogFilter.Network, "Time sync received: counter {0}, client ticks {1}, time since last sync {2}", packet.SequenceIndex, packet.ClientTime, packet.ClientTime - _player.m_timeSyncClient);
 
-            uint ourTicks = packet.ClientTime + (GameTime.GetGameTimeMS() - _player.m_timeSyncServer);
+            var ourTicks = packet.ClientTime + (GameTime.GetGameTimeMS() - _player.m_timeSyncServer);
 
             // diff should be small
             Log.outDebug(LogFilter.Network, "Our ticks: {0}, diff {1}, latency {2}", ourTicks, ourTicks - packet.ClientTime, GetLatency());

@@ -98,7 +98,7 @@ namespace Game.Maps
 
             for (var i = 0; i < i_worldObjects.Count; ++i)
             {
-                WorldObject obj = i_worldObjects[i];
+                var obj = i_worldObjects[i];
                 Cypher.Assert(obj.IsWorldObject());
                 obj.RemoveFromWorld();
                 obj.ResetMap();

@@ -313,8 +313,8 @@ namespace Framework.GameMath
         /// </remarks>
         public static Matrix4 Parse(string value)
         {
-            Regex r = new Regex(regularExp, RegexOptions.Singleline | RegexOptions.IgnorePatternWhitespace);
-            Match m = r.Match(value);
+            var r = new Regex(regularExp, RegexOptions.Singleline | RegexOptions.IgnorePatternWhitespace);
+            var m = r.Match(value);
             if (m.Success)
             {
                 return new Matrix4(
@@ -360,8 +360,8 @@ namespace Framework.GameMath
         /// </remarks>
         public static bool TryParse(string value, out Matrix4 result)
         {
-            Regex r = new Regex(regularExp, RegexOptions.Singleline);
-            Match m = r.Match(value);
+            var r = new Regex(regularExp, RegexOptions.Singleline);
+            var m = r.Match(value);
             if (m.Success)
             {
                 result = new Matrix4(
@@ -661,7 +661,7 @@ namespace Framework.GameMath
         /// <returns>A new <see cref="Matrix4"/> instance containing the transposed matrix.</returns>
         public static Matrix4 Transpose(Matrix4 m)
         {
-            Matrix4 t = new Matrix4(m);
+            var t = new Matrix4(m);
             t.Transpose();
             return t;
         }
@@ -690,7 +690,7 @@ namespace Framework.GameMath
         {
             if (obj is Matrix4)
             {
-                Matrix4 m = (Matrix4)obj;
+                var m = (Matrix4)obj;
                 return
                     (_m11 == m.M11) && (_m12 == m.M12) && (_m13 == m.M13) && (_m14 == m.M14) &&
                     (_m21 == m.M21) && (_m22 == m.M22) && (_m23 == m.M23) && (_m24 == m.M24) &&
@@ -840,10 +840,10 @@ namespace Framework.GameMath
         /// <returns>A new <see cref="Vector4"/> instance containing the result.</returns>
         public static Vector4 operator *(Matrix4 matrix, Vector4 vector)
         {
-            Vector4 result = new Vector4();
-            for (int r = 0; r < 4; ++r)
+            var result = new Vector4();
+            for (var r = 0; r < 4; ++r)
             {
-                for (int c = 0; c < 4; ++c)
+                for (var c = 0; c < 4; ++c)
                 {
                     result[r] += matrix[r, c] * vector[c];
                 }

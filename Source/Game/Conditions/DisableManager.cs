@@ -40,12 +40,12 @@ namespace Game
 
         public void LoadDisables()
         {
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             // reload case
             m_DisableMap.Clear();
 
-            SQLResult result = DB.World.Query("SELECT sourceType, entry, flags, params_0, params_1 FROM disables");
+            var result = DB.World.Query("SELECT sourceType, entry, flags, params_0, params_1 FROM disables");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 disables. DB table `disables` is empty!");
@@ -55,19 +55,19 @@ namespace Game
             uint total_count = 0;
             do
             {
-                DisableType type = (DisableType)result.Read<uint>(0);
+                var type = (DisableType)result.Read<uint>(0);
                 if (type >= DisableType.Max)
                 {
                     Log.outError(LogFilter.Sql, "Invalid type {0} specified in `disables` table, skipped.", type);
                     continue;
                 }
 
-                uint entry = result.Read<uint>(1);
-                byte flags = result.Read<byte>(2);
-                string params_0 = result.Read<string>(3);
-                string params_1 = result.Read<string>(4);
+                var entry = result.Read<uint>(1);
+                var flags = result.Read<byte>(2);
+                var params_0 = result.Read<string>(3);
+                var params_1 = result.Read<string>(4);
 
-                DisableData data = new DisableData();
+                var data = new DisableData();
                 data.flags = flags;
 
                 switch (type)
@@ -90,7 +90,7 @@ namespace Game
                             var array = new StringArray(params_0, ',');
                             for (byte i = 0; i < array.Length;)
                             {
-                                if (uint.TryParse(array[i++], out uint id))
+                                if (uint.TryParse(array[i++], out var id))
                                     data.param0.Add(id);
                             }
                         }
@@ -100,7 +100,7 @@ namespace Game
                             var array = new StringArray(params_1, ',');
                             for (byte i = 0; i < array.Length;)
                             {
-                                if (uint.TryParse(array[i++], out uint id))
+                                if (uint.TryParse(array[i++], out var id))
                                     data.param1.Add(id);
                             }
                         }
@@ -112,13 +112,13 @@ namespace Game
                     case DisableType.Map:
                     case DisableType.LFGMap:
                         {
-                            MapRecord mapEntry = CliDB.MapStorage.LookupByKey(entry);
+                            var mapEntry = CliDB.MapStorage.LookupByKey(entry);
                             if (mapEntry == null)
                             {
                                 Log.outError(LogFilter.Sql, "Map entry {0} from `disables` doesn't exist in dbc, skipped.", entry);
                                 continue;
                             }
-                            bool isFlagInvalid = false;
+                            var isFlagInvalid = false;
                             switch (mapEntry.InstanceType)
                             {
                                 case MapTypes.Common:
@@ -177,7 +177,7 @@ namespace Game
                         break;
                     case DisableType.VMAP:
                         {
-                            MapRecord mapEntry = CliDB.MapStorage.LookupByKey(entry);
+                            var mapEntry = CliDB.MapStorage.LookupByKey(entry);
                             if (mapEntry == null)
                             {
                                 Log.outError(LogFilter.Sql, "Map entry {0} from `disables` doesn't exist in dbc, skipped.", entry);
@@ -217,7 +217,7 @@ namespace Game
                         }
                     case DisableType.MMAP:
                         {
-                            MapRecord mapEntry = CliDB.MapStorage.LookupByKey(entry);
+                            var mapEntry = CliDB.MapStorage.LookupByKey(entry);
                             if (mapEntry == null)
                             {
                                 Log.outError(LogFilter.Sql, "Map entry {0} from `disables` doesn't exist in dbc, skipped.", entry);
@@ -265,12 +265,12 @@ namespace Game
                 return;
             }
 
-            uint oldMSTime = Time.GetMSTime();
+            var oldMSTime = Time.GetMSTime();
 
             // check only quests, rest already done at startup
             foreach (var pair in m_DisableMap[DisableType.Quest])
             {
-                uint entry = pair.Key;
+                var entry = pair.Key;
                 if (Global.ObjectMgr.GetQuestTemplate(entry) == null)
                 {
                     Log.outError(LogFilter.Sql, "Quest entry {0} from `disables` doesn't exist, skipped.", entry);
@@ -298,7 +298,7 @@ namespace Game
             {
                 case DisableType.Spell:
                     {
-                        byte spellFlags = data.flags;
+                        var spellFlags = data.flags;
                         if (unit != null)
                         {
                             if ((spellFlags.HasAnyFlag(DisableFlags.SpellPlayer) && unit.IsTypeId(TypeId.Player)) ||
@@ -306,7 +306,7 @@ namespace Game
                             {
                                 if (spellFlags.HasAnyFlag(DisableFlags.SpellMap))
                                 {
-                                    List<uint> mapIds = data.param0;
+                                    var mapIds = data.param0;
                                     if (mapIds.Contains(unit.GetMapId()))
                                         return true;                                        // Spell is disabled on current map
 
@@ -338,14 +338,14 @@ namespace Game
                     }
                 case DisableType.Map:
                 case DisableType.LFGMap:
-                    Player player = unit.ToPlayer();
+                    var player = unit.ToPlayer();
                     if (player != null)
                     {
-                        MapRecord mapEntry = CliDB.MapStorage.LookupByKey(entry);
+                        var mapEntry = CliDB.MapStorage.LookupByKey(entry);
                         if (mapEntry.IsDungeon())
                         {
-                            byte disabledModes = data.flags;
-                            Difficulty targetDifficulty = player.GetDifficultyID(mapEntry);
+                            var disabledModes = data.flags;
+                            var targetDifficulty = player.GetDifficultyID(mapEntry);
                             Global.DB2Mgr.GetDownscaledMapDifficultyData(entry, ref targetDifficulty);
                             switch (targetDifficulty)
                             {
@@ -368,7 +368,7 @@ namespace Game
                 case DisableType.Quest:
                     if (unit == null)
                         return true;
-                    Player player1 = unit.ToPlayer();
+                    var player1 = unit.ToPlayer();
                     if (player1 != null)
                         if (player1.IsGameMaster())
                             return false;

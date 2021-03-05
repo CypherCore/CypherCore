@@ -48,7 +48,7 @@ namespace Game.Maps
                     var visitor = new Visitor(this, GridMapTypeMask.AllGrid);
                     i_grid.VisitGrid(x, y, visitor);
 
-                    ObjectWorldLoader worker = new ObjectWorldLoader(this);
+                    var worker = new ObjectWorldLoader(this);
                     visitor = new Visitor(worker, GridMapTypeMask.AllWorld);
                     i_grid.VisitGrid(x, y, visitor);
                 }
@@ -58,7 +58,7 @@ namespace Game.Maps
 
         public override void Visit(IList<GameObject> objs)
         {
-            CellCoord cellCoord = i_cell.GetCellCoord();
+            var cellCoord = i_cell.GetCellCoord();
             CellObjectGuids cellguids = Global.ObjectMgr.GetCellObjectGuids(i_map.GetId(), i_map.GetDifficultyID(), cellCoord.GetId());
             if (cellguids == null)
                 return;
@@ -68,7 +68,7 @@ namespace Game.Maps
 
         public override void Visit(IList<Creature> objs)
         {
-            CellCoord cellCoord = i_cell.GetCellCoord();
+            var cellCoord = i_cell.GetCellCoord();
             CellObjectGuids cellguids = Global.ObjectMgr.GetCellObjectGuids(i_map.GetId(), i_map.GetDifficultyID(), cellCoord.GetId());
             if (cellguids == null)
                 return;
@@ -78,8 +78,8 @@ namespace Game.Maps
 
         public override void Visit(IList<AreaTrigger> objs)
         {
-            CellCoord cellCoord = i_cell.GetCellCoord();
-            SortedSet<ulong> areaTriggers = Global.AreaTriggerDataStorage.GetAreaTriggersForMapAndCell(i_map.GetId(), cellCoord.GetId());
+            var cellCoord = i_cell.GetCellCoord();
+            var areaTriggers = Global.AreaTriggerDataStorage.GetAreaTriggersForMapAndCell(i_map.GetId(), cellCoord.GetId());
             if (areaTriggers == null)
                 return;
 
@@ -90,7 +90,7 @@ namespace Game.Maps
         {
             foreach (var guid in guid_set)
             {
-                T obj = new T();
+                var obj = new T();
                 // Don't spawn at all if there's a respawn time
                 if ((obj.IsTypeId(TypeId.Unit) && map.GetCreatureRespawnTime(guid) == 0) || (obj.IsTypeId(TypeId.GameObject) && map.GetGORespawnTime(guid) == 0) || obj.IsTypeId(TypeId.AreaTrigger))
                 {
@@ -100,7 +100,7 @@ namespace Game.Maps
                         CreatureData cdata = Global.ObjectMgr.GetCreatureData(guid);
                         Cypher.Assert(cdata != null, $"Tried to load creature with spawnId {guid}, but no such creature exists.");
 
-                        SpawnGroupTemplateData group = cdata.spawnGroupData;
+                        var group = cdata.spawnGroupData;
                         // If creature in manual spawn group, don't spawn here, unless group is already active.
                         if (!group.flags.HasAnyFlag(SpawnGroupFlags.System))
                         {
@@ -181,11 +181,11 @@ namespace Game.Maps
 
         public override void Visit(IList<Corpse> objs)
         {
-            CellCoord cellCoord = i_cell.GetCellCoord();
+            var cellCoord = i_cell.GetCellCoord();
             var corpses = i_map.GetCorpsesInCell(cellCoord.GetId());
             if (corpses != null)
             {
-                foreach (Corpse corpse in corpses)
+                foreach (var corpse in corpses)
                 {
                     corpse.AddToWorld();
                     var cell = i_grid.GetGridCell(i_cell.GetCellX(), i_cell.GetCellY());
@@ -217,7 +217,7 @@ namespace Game.Maps
             // stop any fights at grid de-activation and remove dynobjects/areatriggers created at cast by creatures
             for (var i = 0; i < objs.Count; ++i)
             {  
-                Creature creature = objs[i];
+                var creature = objs[i];
                 creature.RemoveAllDynObjects();
                 creature.RemoveAllAreaTriggers();
 
@@ -239,7 +239,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                Creature creature = objs[i];
+                var creature = objs[i];
                 // creature in unloading grid can have respawn point in another grid
                 // if it will be unloaded then it will not respawn in original grid until unload/load original grid
                 // move to respawn point to prevent this case. For player view in respawn grid this will be normal respawn.
@@ -251,7 +251,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                GameObject gameObject = objs[i];
+                var gameObject = objs[i];
                 // gameobject in unloading grid can have respawn point in another grid
                 // if it will be unloaded then it will not respawn in original grid until unload/load original grid
                 // move to respawn point to prevent this case. For player view in respawn grid this will be normal respawn.
@@ -267,7 +267,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                WorldObject obj = objs[i];
+                var obj = objs[i];
 
                 if (obj.IsTypeId(TypeId.Player))
                     continue;
@@ -284,7 +284,7 @@ namespace Game.Maps
         {
             for (var i = 0; i < objs.Count; ++i)
             {
-                WorldObject obj = objs[i];
+                var obj = objs[i];
 
                 if (obj.IsTypeId(TypeId.Corpse))
                     continue;

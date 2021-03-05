@@ -38,19 +38,19 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(PickedSteps.Count);
             _worldPacket.WriteInt32(Spells.Count);
 
-            for (int i = 0; i < PickedSteps.Count; ++i)
+            for (var i = 0; i < PickedSteps.Count; ++i)
                 _worldPacket.WriteUInt32(PickedSteps[i]);
 
             _worldPacket.WriteBit(ScenarioComplete);
             _worldPacket.FlushBits();
 
-            foreach (CriteriaProgressPkt progress in CriteriaProgress)
+            foreach (var progress in CriteriaProgress)
                 progress.Write(_worldPacket);
 
-            foreach (BonusObjectiveData bonusObjective in BonusObjectives)
+            foreach (var bonusObjective in BonusObjectives)
                 bonusObjective.Write(_worldPacket);
 
-            foreach (ScenarioSpellUpdate spell in Spells)
+            foreach (var spell in Spells)
                 spell.Write(_worldPacket);
         }
 
@@ -133,12 +133,12 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteInt32(ScenarioPOIDataStats.Count);
 
-            foreach (ScenarioPOIData scenarioPOIData in ScenarioPOIDataStats)
+            foreach (var scenarioPOIData in ScenarioPOIDataStats)
             {
                 _worldPacket.WriteInt32(scenarioPOIData.CriteriaTreeID);
                 _worldPacket.WriteInt32(scenarioPOIData.ScenarioPOIs.Count);
 
-                foreach (ScenarioPOI scenarioPOI in scenarioPOIData.ScenarioPOIs)
+                foreach (var scenarioPOI in scenarioPOIData.ScenarioPOIs)
                 {
                     _worldPacket.WriteInt32(scenarioPOI.BlobIndex);
                     _worldPacket.WriteInt32(scenarioPOI.MapID);

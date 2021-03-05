@@ -69,10 +69,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(Garrisons.Count);
             _worldPacket.WriteInt32(FollowerSoftCaps.Count);
 
-            foreach (FollowerSoftCapInfo followerSoftCapInfo in FollowerSoftCaps)
+            foreach (var followerSoftCapInfo in FollowerSoftCaps)
                 followerSoftCapInfo.Write(_worldPacket);
 
-            foreach (GarrisonInfo garrison in Garrisons)
+            foreach (var garrison in Garrisons)
                 garrison.Write(_worldPacket);
         }
 
@@ -88,7 +88,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteInt32(Sites.Count);
-            foreach (GarrisonRemoteSiteInfo site in Sites)
+            foreach (var site in Sites)
                 site.Write(_worldPacket);
         }
 
@@ -211,11 +211,11 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(BlueprintsKnown != null ? BlueprintsKnown.Count : 0);
             _worldPacket.WriteInt32(SpecializationsKnown != null ? SpecializationsKnown.Count : 0);
             if (BlueprintsKnown != null)
-                foreach (uint blueprint in BlueprintsKnown)
+                foreach (var blueprint in BlueprintsKnown)
                     _worldPacket.WriteUInt32(blueprint);
 
             if (SpecializationsKnown != null)
-                foreach (uint specialization in SpecializationsKnown)
+                foreach (var specialization in SpecializationsKnown)
                     _worldPacket.WriteUInt32(specialization);
         }
 
@@ -238,7 +238,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteInt32(Buildings.Count);
-            foreach (GarrisonBuildingMapData landmark in Buildings)
+            foreach (var landmark in Buildings)
                 landmark.Write(_worldPacket);
         }
 
@@ -525,7 +525,7 @@ namespace Game.Networking.Packets
         {
             data.WriteInt32(Type);
             data.WriteInt32(Entries.Count);
-            foreach (GarrisonCollectionEntry collectionEntry in Entries)
+            foreach (var collectionEntry in Entries)
                 collectionEntry.Write(data);
         }
     }
@@ -551,7 +551,7 @@ namespace Game.Networking.Packets
         {
             data.WriteInt32(Type);
             data.WriteInt32(Events.Count);
-            foreach (GarrisonEventEntry eventEntry in Events)
+            foreach (var eventEntry in Events)
                 eventEntry.Write(data);
         }
     }
@@ -579,53 +579,53 @@ namespace Game.Networking.Packets
             data.WriteUInt32(NumFollowerActivationsRemaining);
             data.WriteUInt32(NumMissionsStartedToday);
 
-            foreach (GarrisonPlotInfo plot in Plots)
+            foreach (var plot in Plots)
                 plot.Write(data);
 
-            foreach (GarrisonMission mission in Missions)
+            foreach (var mission in Missions)
                 mission.Write(data);
 
-            foreach (List<GarrisonMissionReward> missionReward in MissionRewards)
+            foreach (var missionReward in MissionRewards)
                 data.WriteInt32(missionReward.Count);
 
-            foreach (List<GarrisonMissionReward> missionReward in MissionOvermaxRewards)
+            foreach (var missionReward in MissionOvermaxRewards)
                 data.WriteInt32(missionReward.Count);
 
-            foreach (GarrisonMissionBonusAbility areaBonus in MissionAreaBonuses)
+            foreach (var areaBonus in MissionAreaBonuses)
                 areaBonus.Write(data);
 
-            foreach (GarrisonCollection collection in Collections)
+            foreach (var collection in Collections)
                 collection.Write(data);
 
-            foreach (GarrisonEventList eventList in EventLists)
+            foreach (var eventList in EventLists)
                 eventList.Write(data);
 
             foreach (var id in ArchivedMissions)
                 data.WriteInt32(id);
 
-            foreach (GarrisonBuildingInfo building in Buildings)
+            foreach (var building in Buildings)
                 building.Write(data);
 
-            foreach (bool canStartMission in CanStartMission)
+            foreach (var canStartMission in CanStartMission)
                 data.WriteBit(canStartMission);
 
             data.FlushBits();
 
-            foreach (GarrisonFollower follower in Followers)
+            foreach (var follower in Followers)
                 follower.Write(data);
 
-            foreach (GarrisonFollower follower in AutoTroops)
+            foreach (var follower in AutoTroops)
                 follower.Write(data);
 
-            foreach (GarrisonTalent talent in Talents)
+            foreach (var talent in Talents)
                 talent.Write(data);
 
-            foreach (List<GarrisonMissionReward> missionReward in MissionRewards)
-                foreach (GarrisonMissionReward missionRewardItem in missionReward)
+            foreach (var missionReward in MissionRewards)
+                foreach (var missionRewardItem in missionReward)
                     missionRewardItem.Write(data);
 
-            foreach (List<GarrisonMissionReward> missionReward in MissionOvermaxRewards)
-                foreach (GarrisonMissionReward missionRewardItem in missionReward)
+            foreach (var missionReward in MissionOvermaxRewards)
+                foreach (var missionRewardItem in missionReward)
                     missionRewardItem.Write(data);
         }
 
@@ -685,7 +685,7 @@ namespace Game.Networking.Packets
         {
             data.WriteUInt32(GarrSiteLevelID);
             data.WriteInt32(Buildings.Count);
-            foreach (GarrisonRemoteBuildingInfo building in Buildings)
+            foreach (var building in Buildings)
                 building.Write(data);
         }
 

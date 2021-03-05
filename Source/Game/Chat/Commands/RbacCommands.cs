@@ -29,7 +29,7 @@ namespace Game.Chat.Commands
         [Command("list", RBACPermissions.CommandRbacList, true)]
         static bool HandleRBACListPermissionsCommand(StringArguments args, CommandHandler handler)
         {
-            uint id = args.NextUInt32();
+            var id = args.NextUInt32();
 
             if (id == 0)
             {
@@ -40,7 +40,7 @@ namespace Game.Chat.Commands
             }
             else
             {
-                RBACPermission permission = Global.AccountMgr.GetRBACPermission(id);
+                var permission = Global.AccountMgr.GetRBACPermission(id);
                 if (permission == null)
                 {
                     handler.SendSysMessage(CypherStrings.RbacWrongParameterId, id);
@@ -53,7 +53,7 @@ namespace Game.Chat.Commands
                 var permissions = permission.GetLinkedPermissions();
                 foreach (var permissionId in permissions)
                 {
-                    RBACPermission rbacPermission = Global.AccountMgr.GetRBACPermission(permissionId);
+                    var rbacPermission = Global.AccountMgr.GetRBACPermission(permissionId);
                     if (rbacPermission != null)
                         handler.SendSysMessage(CypherStrings.RbacListElement, rbacPermission.GetId(), rbacPermission.GetName());
                 }
@@ -68,12 +68,12 @@ namespace Game.Chat.Commands
             [Command("grant", RBACPermissions.CommandRbacAccPermGrant, true)]
             static bool HandleRBACPermGrantCommand(StringArguments args, CommandHandler handler)
             {
-                RBACCommandData command = ReadParams(args, handler);
+                var command = ReadParams(args, handler);
                 if (command == null)
                     return false;
 
-                RBACCommandResult result = command.rbac.GrantPermission(command.id, command.realmId);
-                RBACPermission permission = Global.AccountMgr.GetRBACPermission(command.id);
+                var result = command.rbac.GrantPermission(command.id, command.realmId);
+                var permission = Global.AccountMgr.GetRBACPermission(command.id);
 
                 switch (result)
                 {
@@ -102,13 +102,13 @@ namespace Game.Chat.Commands
             [Command("deny", RBACPermissions.CommandRbacAccPermDeny, true)]
             static bool HandleRBACPermDenyCommand(StringArguments args, CommandHandler handler)
             {
-                RBACCommandData command = ReadParams(args, handler);
+                var command = ReadParams(args, handler);
 
                 if (command == null)
                     return false;
 
-                RBACCommandResult result = command.rbac.DenyPermission(command.id, command.realmId);
-                RBACPermission  permission = Global.AccountMgr.GetRBACPermission(command.id);
+                var result = command.rbac.DenyPermission(command.id, command.realmId);
+                var  permission = Global.AccountMgr.GetRBACPermission(command.id);
 
                 switch (result)
                 {
@@ -137,13 +137,13 @@ namespace Game.Chat.Commands
             [Command("revoke", RBACPermissions.CommandRbacAccPermRevoke, true)]
             static bool HandleRBACPermRevokeCommand(StringArguments args, CommandHandler handler)
             {
-                RBACCommandData command = ReadParams(args, handler);
+                var command = ReadParams(args, handler);
 
                 if (command == null)
                     return false;
 
-                RBACCommandResult result = command.rbac.RevokePermission(command.id, command.realmId);
-                RBACPermission  permission = Global.AccountMgr.GetRBACPermission(command.id);
+                var result = command.rbac.RevokePermission(command.id, command.realmId);
+                var  permission = Global.AccountMgr.GetRBACPermission(command.id);
 
                 switch (result)
                 {
@@ -168,7 +168,7 @@ namespace Game.Chat.Commands
             [Command("list", RBACPermissions.CommandRbacAccPermList, true)]
             static bool HandleRBACPermListCommand(StringArguments args, CommandHandler handler)
             {
-                RBACCommandData command = ReadParams(args, handler, false);
+                var command = ReadParams(args, handler, false);
 
                 if (command == null)
                     return false;
@@ -181,7 +181,7 @@ namespace Game.Chat.Commands
                 {
                     foreach (var id in granted)
                     {
-                        RBACPermission  permission = Global.AccountMgr.GetRBACPermission(id);
+                        var  permission = Global.AccountMgr.GetRBACPermission(id);
                         handler.SendSysMessage(CypherStrings.RbacListElement, permission.GetId(), permission.GetName());
                     }
                 }
@@ -194,7 +194,7 @@ namespace Game.Chat.Commands
                 {
                     foreach (var id in denied)
                     {
-                        RBACPermission  permission = Global.AccountMgr.GetRBACPermission(id);
+                        var  permission = Global.AccountMgr.GetRBACPermission(id);
                         handler.SendSysMessage(CypherStrings.RbacListElement, permission.GetId(), permission.GetName());
                     }
                 }
@@ -206,7 +206,7 @@ namespace Game.Chat.Commands
                 {
                     foreach (var id in defaultPermissions)
                     {
-                        RBACPermission  permission = Global.AccountMgr.GetRBACPermission(id);
+                        var  permission = Global.AccountMgr.GetRBACPermission(id);
                         handler.SendSysMessage(CypherStrings.RbacListElement, permission.GetId(), permission.GetName());
                     }
                 }
@@ -220,16 +220,16 @@ namespace Game.Chat.Commands
             if (args.Empty())
                 return null;
 
-            string param1 = args.NextString();
-            string param2 = args.NextString();
-            string param3 = args.NextString();
+            var param1 = args.NextString();
+            var param2 = args.NextString();
+            var param3 = args.NextString();
 
-            int realmId = -1;
+            var realmId = -1;
             uint accountId;
             string accountName;
             uint id = 0;
             RBACData rdata = null;
-            bool useSelectedPlayer = false;
+            var useSelectedPlayer = false;
 
             if (checkParams)
             {
@@ -269,7 +269,7 @@ namespace Game.Chat.Commands
 
             if (useSelectedPlayer)
             {
-                Player player = handler.GetSelectedPlayer();
+                var player = handler.GetSelectedPlayer();
                 if (!player)
                     return null;
 
@@ -292,7 +292,7 @@ namespace Game.Chat.Commands
             if (checkParams && handler.HasLowerSecurityAccount(null, accountId, true))
                 return null;
 
-            RBACCommandData data = new RBACCommandData();
+            var data = new RBACCommandData();
 
             if (rdata == null)
             {

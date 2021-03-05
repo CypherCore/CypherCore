@@ -208,15 +208,15 @@ namespace Game.AI
                 return null;
 
             //Using the extended script system we first create a list of viable spells
-            SpellInfo[] apSpell = new SpellInfo[SharedConst.MaxCreatureSpells];
+            var apSpell = new SpellInfo[SharedConst.MaxCreatureSpells];
 
             uint spellCount = 0;
 
             //Check if each spell is viable(set it to null if not)
             for (uint i = 0; i < SharedConst.MaxCreatureSpells; i++)
             {
-                SpellInfo tempSpell = Global.SpellMgr.GetSpellInfo(me.m_spells[i], me.GetMap().GetDifficultyID());
-                AISpellInfoType aiSpell = GetAISpellInfo(me.m_spells[i], me.GetMap().GetDifficultyID());
+                var tempSpell = Global.SpellMgr.GetSpellInfo(me.m_spells[i], me.GetMap().GetDifficultyID());
+                var aiSpell = GetAISpellInfo(me.m_spells[i], me.GetMap().GetDifficultyID());
 
                 //This spell doesn't exist
                 if (tempSpell == null)
@@ -264,7 +264,7 @@ namespace Game.AI
         public void DoTeleportTo(float x, float y, float z, uint time = 0)
         {
             me.Relocate(x, y, z);
-            float speed = me.GetDistance(x, y, z) / (time * 0.001f);
+            var speed = me.GetDistance(x, y, z) / (time * 0.001f);
             me.MonsterMoveWithSpeed(x, y, z, speed);
         }
 
@@ -278,7 +278,7 @@ namespace Game.AI
         {
             if (unit == null)
                 return;
-            Player player = unit.ToPlayer();
+            var player = unit.ToPlayer();
             if (player != null)
                 player.TeleportTo(unit.GetMapId(), x, y, z, o, TeleportToOptions.NotLeaveCombat);
             else
@@ -288,7 +288,7 @@ namespace Game.AI
 
         void DoTeleportAll(float x, float y, float z, float o)
         {
-            Map map = me.GetMap();
+            var map = me.GetMap();
             if (!map.IsDungeon())
                 return;
 
@@ -312,7 +312,7 @@ namespace Game.AI
         //Returns a list of friendly CC'd units within range
         List<Creature> DoFindFriendlyCC(float range)
         {
-            List<Creature> list = new List<Creature>();
+            var list = new List<Creature>();
             var u_check = new FriendlyCCedInRange(me, range);
             var searcher = new CreatureListSearcher(me, list, u_check);
             Cell.VisitAllObjects(me, searcher, range);
@@ -323,7 +323,7 @@ namespace Game.AI
         //Returns a list of all friendly units missing a specific buff within range
         public List<Creature> DoFindFriendlyMissingBuff(float range, uint spellId)
         {
-            List<Creature> list = new List<Creature>();
+            var list = new List<Creature>();
             var u_check = new FriendlyMissingBuffInRange(me, range, spellId);
             var searcher = new CreatureListSearcher(me, list, u_check);
             Cell.VisitAllObjects(me, searcher, range);
@@ -535,7 +535,7 @@ namespace Game.AI
             var threatList = me.GetThreatManager().GetThreatList();
             foreach (var refe in threatList)
             {
-                Unit target = refe.GetTarget();
+                var target = refe.GetTarget();
                 if (target)
                     if (target.IsTypeId(TypeId.Player) && !CheckBoundary(target))
                         target.NearTeleportTo(x, y, z, 0);
@@ -589,7 +589,7 @@ namespace Game.AI
             if (!who)
                 who = me;
 
-            TempSummon whoSummon = who.ToTempSummon();
+            var whoSummon = who.ToTempSummon();
             if (whoSummon)
             {
                 Log.outWarn(LogFilter.ScriptsAi, "_DespawnAtEvade called on a temporary summon.");
@@ -645,7 +645,7 @@ namespace Game.AI
 
         void _EnterCombat()
         {
-            Unit target = SelectTarget(SelectAggroTarget.Random, 0, 0.0f, true);
+            var target = SelectTarget(SelectAggroTarget.Random, 0, 0.0f, true);
             if (target)
                 AttackStart(target);
         }
@@ -653,7 +653,7 @@ namespace Game.AI
         public override void JustSummoned(Creature summon)
         {
             summons.Summon(summon);
-            Unit target = SelectTarget(SelectAggroTarget.Random, 0, 0.0f, true);
+            var target = SelectTarget(SelectAggroTarget.Random, 0, 0.0f, true);
             if (target)
                 summon.GetAI().AttackStart(target);
         }
@@ -712,7 +712,7 @@ namespace Game.AI
         {
             foreach (var id in this)
             {
-                Creature summon = ObjectAccessor.GetCreature(me, id);
+                var summon = ObjectAccessor.GetCreature(me, id);
                 if (summon && summon.IsAIEnabled && (entry == 0 || summon.GetEntry() == entry))
                 {
                     summon.GetAI().DoZoneInCombat(null, maxRangeToNearestTarget);
@@ -724,7 +724,7 @@ namespace Game.AI
         {
             foreach (var id in this)
             {
-                Creature summon = ObjectAccessor.GetCreature(me, id);
+                var summon = ObjectAccessor.GetCreature(me, id);
                 if (!summon)
                     Remove(id);
                 else if (summon.GetEntry() == entry)
@@ -739,7 +739,7 @@ namespace Game.AI
         {
             while (!this.Empty())
             {
-                Creature summon = ObjectAccessor.GetCreature(me, this.FirstOrDefault());
+                var summon = ObjectAccessor.GetCreature(me, this.FirstOrDefault());
                 RemoveAt(0);
                 if (summon)
                     summon.DespawnOrUnsummon();
@@ -770,7 +770,7 @@ namespace Game.AI
         public void DoAction(int info, ICheck<ObjectGuid> predicate, ushort max = 0)
         {
             // We need to use a copy of SummonList here, otherwise original SummonList would be modified
-            List<ObjectGuid> listCopy = new List<ObjectGuid>(this);
+            var listCopy = new List<ObjectGuid>(this);
             listCopy.RandomResize(predicate.Invoke, max);
             DoActionImpl(info, listCopy);
         }
@@ -778,7 +778,7 @@ namespace Game.AI
         public void DoAction(int info, Predicate<ObjectGuid> predicate, ushort max = 0)
         {
             // We need to use a copy of SummonList here, otherwise original SummonList would be modified
-            List<ObjectGuid> listCopy = new List<ObjectGuid>(this);
+            var listCopy = new List<ObjectGuid>(this);
             listCopy.RandomResize(predicate, max);
             DoActionImpl(info, listCopy);
         }
@@ -787,7 +787,7 @@ namespace Game.AI
         {
             foreach (var id in this)
             {
-                Creature summon = ObjectAccessor.GetCreature(me, id);
+                var summon = ObjectAccessor.GetCreature(me, id);
                 if (summon && summon.GetEntry() == entry)
                     return true;
             }
@@ -799,7 +799,7 @@ namespace Game.AI
         {
             foreach (var guid in summons)
             {
-                Creature summon = ObjectAccessor.GetCreature(me, guid);
+                var summon = ObjectAccessor.GetCreature(me, guid);
                 if (summon && summon.IsAIEnabled)
                     summon.GetAI().DoAction(action);
             }

@@ -22,7 +22,7 @@ namespace Game
         public uint GetTimeWeightedAverageUpdateTime()
         {
             uint sum = 0, weightsum = 0;
-            foreach (uint diff in _updateTimeDataTable)
+            foreach (var diff in _updateTimeDataTable)
             {
                 sum += diff * diff;
                 weightsum += diff;
@@ -76,8 +76,8 @@ namespace Game
 
         public void RecordUpdateTimeDuration(string text, uint minUpdateTime)
         {
-            uint thisTime = Time.GetMSTime();
-            uint diff = Time.GetMSTimeDiff(_recordedTime, thisTime);
+            var thisTime = Time.GetMSTime();
+            var diff = Time.GetMSTimeDiff(_recordedTime, thisTime);
 
             if (diff > minUpdateTime)
                 Log.outInfo(LogFilter.Misc, $"Recored Update Time of {text}: {diff}.");

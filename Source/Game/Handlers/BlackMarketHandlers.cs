@@ -29,7 +29,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.BlackMarketOpen)]
         void HandleBlackMarketOpen(BlackMarketOpen blackMarketOpen)
         {
-            Creature unit = GetPlayer().GetNPCIfCanInteractWith(blackMarketOpen.Guid, NPCFlags.BlackMarket, NPCFlags2.BlackMarketView);
+            var unit = GetPlayer().GetNPCIfCanInteractWith(blackMarketOpen.Guid, NPCFlags.BlackMarket, NPCFlags2.BlackMarketView);
             if (!unit)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleBlackMarketHello - {0} not found or you can't interact with him.", blackMarketOpen.Guid.ToString());
@@ -45,7 +45,7 @@ namespace Game
 
         void SendBlackMarketOpenResult(ObjectGuid guid, Creature auctioneer)
         {
-            BlackMarketOpenResult packet = new BlackMarketOpenResult();
+            var packet = new BlackMarketOpenResult();
             packet.Guid = guid;
             packet.Enable = Global.BlackMarketMgr.IsEnabled();
             SendPacket(packet);
@@ -57,14 +57,14 @@ namespace Game
             if (!Global.BlackMarketMgr.IsEnabled())
                 return;
 
-            Creature unit = GetPlayer().GetNPCIfCanInteractWith(blackMarketRequestItems.Guid, NPCFlags.BlackMarket, NPCFlags2.BlackMarketView);
+            var unit = GetPlayer().GetNPCIfCanInteractWith(blackMarketRequestItems.Guid, NPCFlags.BlackMarket, NPCFlags2.BlackMarketView);
             if (!unit)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleBlackMarketRequestItems - {0} not found or you can't interact with him.", blackMarketRequestItems.Guid.ToString());
                 return;
             }
 
-            BlackMarketRequestItemsResult result = new BlackMarketRequestItemsResult();
+            var result = new BlackMarketRequestItemsResult();
             Global.BlackMarketMgr.BuildItemsResponse(result, GetPlayer());
             SendPacket(result);
         }
@@ -75,15 +75,15 @@ namespace Game
             if (!Global.BlackMarketMgr.IsEnabled())
                 return;
 
-            Player player = GetPlayer();
-            Creature unit = player.GetNPCIfCanInteractWith(blackMarketBidOnItem.Guid, NPCFlags.BlackMarket, NPCFlags2.None);
+            var player = GetPlayer();
+            var unit = player.GetNPCIfCanInteractWith(blackMarketBidOnItem.Guid, NPCFlags.BlackMarket, NPCFlags2.None);
             if (!unit)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleBlackMarketBidOnItem - {0} not found or you can't interact with him.", blackMarketBidOnItem.Guid.ToString());
                 return;
             }
 
-            BlackMarketEntry entry = Global.BlackMarketMgr.GetAuctionByID(blackMarketBidOnItem.MarketID);
+            var entry = Global.BlackMarketMgr.GetAuctionByID(blackMarketBidOnItem.MarketID);
             if (entry == null)
             {
                 Log.outDebug(LogFilter.Network, "WORLD: HandleBlackMarketBidOnItem - {0} (name: {1}) tried to bid on a nonexistent auction (MarketId: {2}).", player.GetGUID().ToString(), player.GetName(), blackMarketBidOnItem.MarketID);
@@ -119,7 +119,7 @@ namespace Game
                 return;
             }
 
-            SQLTransaction trans = new SQLTransaction();
+            var trans = new SQLTransaction();
 
             Global.BlackMarketMgr.SendAuctionOutbidMail(entry, trans);
             entry.PlaceBid(blackMarketBidOnItem.BidAmount, player, trans);
@@ -131,7 +131,7 @@ namespace Game
 
         void SendBlackMarketBidOnItemResult(BlackMarketError result, uint marketId, ItemInstance item)
         {
-            BlackMarketBidOnItemResult packet = new BlackMarketBidOnItemResult();
+            var packet = new BlackMarketBidOnItemResult();
 
             packet.MarketID = marketId;
             packet.Item = item;
@@ -142,7 +142,7 @@ namespace Game
 
         public void SendBlackMarketWonNotification(BlackMarketEntry entry, Item item)
         {
-            BlackMarketWon packet = new BlackMarketWon();
+            var packet = new BlackMarketWon();
 
             packet.MarketID = entry.GetMarketId();
             packet.Item = new ItemInstance(item);
@@ -152,7 +152,7 @@ namespace Game
 
         public void SendBlackMarketOutbidNotification(BlackMarketTemplate templ)
         {
-            BlackMarketOutbid packet = new BlackMarketOutbid();
+            var packet = new BlackMarketOutbid();
 
             packet.MarketID = templ.MarketID;
             packet.Item = templ.Item;
