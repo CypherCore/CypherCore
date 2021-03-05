@@ -129,9 +129,9 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            OnEffectLaunchTarget .Add(new EffectHandler(HandleLaunchTarget, 1, SpellEffectName.PowerBurn));
-            OnEffectHitTarget .Add(new EffectHandler(HandleHitTargetBurn, 1, SpellEffectName.PowerBurn));
-            OnEffectHitTarget .Add(new EffectHandler(HandleHitTargetDmg, 0, SpellEffectName.SchoolDamage));
+            OnEffectLaunchTarget.Add(new EffectHandler(HandleLaunchTarget, 1, SpellEffectName.PowerBurn));
+            OnEffectHitTarget.Add(new EffectHandler(HandleHitTargetBurn, 1, SpellEffectName.PowerBurn));
+            OnEffectHitTarget.Add(new EffectHandler(HandleHitTargetDmg, 0, SpellEffectName.SchoolDamage));
         }
     }
 
@@ -241,12 +241,12 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            DoCheckEffectProc .Add(new CheckEffectProcHandler(CheckEffectProc, 0, AuraType.Dummy));
-            OnEffectProc .Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckEffectProc, 0, AuraType.Dummy));
+            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
         }
     }
 
-             // 34246 - Idol of the Emerald Queen
+    // 34246 - Idol of the Emerald Queen
     [Script] // 60779 - Idol of Lush Moss
     class spell_dru_idol_lifebloom : AuraScript
     {
@@ -332,7 +332,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            OnEffectProc .Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
         }
     }
 
@@ -487,7 +487,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            OnEffectProc .Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell));
+            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell));
         }
     }
 
@@ -525,7 +525,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            BeforeCast .Add(new CastHandler(HandleOnCast));
+            BeforeCast.Add(new CastHandler(HandleOnCast));
         }
     }
 
@@ -626,7 +626,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            OnEffectHitTarget .Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 
@@ -823,7 +823,7 @@ namespace Scripts.Spells.Druid
         }
     }
 
-             // 37288 - Mana Restore
+    // 37288 - Mana Restore
     [Script] // 37295 - Mana Restore
     class spell_dru_t4_2p_bonus : AuraScript
     {
@@ -874,7 +874,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            OnEffectProc .Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
         }
     }
 
@@ -916,7 +916,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect .Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaAlly));
+            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(FilterTargets, 0, Targets.UnitDestAreaAlly));
         }
     }
 
@@ -955,85 +955,13 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            DoCheckProc .Add(new CheckProcHandler(CheckProc));
-            OnEffectProc .Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
-        }
-    }
-
-             // 1066 - Aquatic Form
-             // 33943 - Flight Form
-             // 40120 - Swift Flight Form
-    [Script] // 165961 - Stag Form
-    class spell_dru_travel_form_AuraScript : AuraScript
-    {
-        uint triggeredSpellId;
-
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.FormStag, SpellIds.FormAquatic, SpellIds.FormFlight, SpellIds.FormSwiftFlight);
-        }
-
-        public override bool Load()
-        {
-            return GetCaster().GetTypeId() == TypeId.Player;
-        }
-
-        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            // If it stays 0, it Removes Travel Form dummy in AfterRemove.
-            triggeredSpellId = 0;
-
-            // We should only handle aura interrupts.
-            if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Interrupt)
-                return;
-
-            // Check what form is appropriate
-            Player player = GetTarget().ToPlayer();
-            if (player.IsInWater()) // Aquatic form
-                triggeredSpellId = SpellIds.FormAquatic;
-            else if (player.GetSkillValue(SkillType.Riding) >= 225 && CheckLocationForForm(SpellIds.FormFlight) == SpellCastResult.SpellCastOk) // Flight form
-                triggeredSpellId = player.GetSkillValue(SkillType.Riding) >= 300 ? SpellIds.FormSwiftFlight : SpellIds.FormFlight;
-            else if (CheckLocationForForm(SpellIds.FormStag) == SpellCastResult.SpellCastOk) // Stag form
-                triggeredSpellId = SpellIds.FormStag;
-
-            // If chosen form is current aura, just don't Remove it.
-            if (triggeredSpellId == m_scriptSpellId)
-                PreventDefaultAction();
-        }
-
-        void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            if (triggeredSpellId == m_scriptSpellId)
-                return;
-
-            Player player = GetTarget().ToPlayer();
-
-            if (triggeredSpellId != 0) // Apply new form
-                player.AddAura(triggeredSpellId, player);
-            else // If not set, simply Remove Travel Form dummy
-                player.RemoveAura(SpellIds.TravelForm);
-        }
-
-        public override void Register()
-        {
-            OnEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ModShapeshift, AuraEffectHandleModes.Real));
-            AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.ModShapeshift, AuraEffectHandleModes.Real));
-        }
-
-        SpellCastResult CheckLocationForForm(uint spellId)
-        {
-            Player player = GetTarget().ToPlayer();
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetCastDifficulty());
-
-            if (!player.GetMap().IsOutdoors(player.GetPhaseShift(), player.GetPositionX(), player.GetPositionY(), player.GetPositionZ()))
-                return SpellCastResult.OnlyOutdoors;
-
-            return spellInfo.CheckLocation(player.GetMapId(), player.GetZoneId(), player.GetAreaId(), player);
+            DoCheckProc.Add(new CheckProcHandler(CheckProc));
+            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
         }
     }
 
     [Script] // 783 - Travel Form (dummy)
-    class spell_dru_travel_form_dummy_SpellScript : SpellScript
+    class spell_dru_travel_form_dummy : SpellScript
     {
         SpellCastResult CheckCast()
         {
@@ -1069,15 +997,10 @@ namespace Scripts.Spells.Druid
 
         void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            uint triggeredSpellId;
-
             Player player = GetTarget().ToPlayer();
-            if (player.IsInWater()) // Aquatic form
-                triggeredSpellId = SpellIds.FormAquatic;
-            else if (player.GetSkillValue(SkillType.Riding) >= 225 && CheckLocationForForm(SpellIds.FormFlight) == SpellCastResult.SpellCastOk) // Flight form
-                triggeredSpellId = player.GetLevel() >= 71 ? SpellIds.FormSwiftFlight : SpellIds.FormFlight;
-            else // Stag form (riding skill already checked in CheckCast)
-                triggeredSpellId = SpellIds.FormStag;
+
+            // Outdoor check already passed - Travel Form (dummy) has SPELL_ATTR0_OUTDOORS_ONLY attribute.
+            uint triggeredSpellId = GetFormSpellId(player, GetCastDifficulty(), false);
 
             player.AddAura(triggeredSpellId, player);
         }
@@ -1097,12 +1020,84 @@ namespace Scripts.Spells.Druid
             AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
 
-        // Outdoor check already passed - Travel Form (dummy) has SPELL_ATTR0_OUTDOORS_ONLY attribute.
-        SpellCastResult CheckLocationForForm(uint spell)
+        static SpellCastResult CheckLocationForForm(Player targetPlayer, Difficulty difficulty, bool requireOutdoors, uint spellId)
         {
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, difficulty);
+
+            if (requireOutdoors && !targetPlayer.GetMap().IsOutdoors(targetPlayer.GetPhaseShift(), targetPlayer.GetPositionX(), targetPlayer.GetPositionY(), targetPlayer.GetPositionZ()))
+                return SpellCastResult.OnlyOutdoors;
+
+            return spellInfo.CheckLocation(targetPlayer.GetMapId(), targetPlayer.GetZoneId(), targetPlayer.GetAreaId(), targetPlayer);
+        }
+
+        public static uint GetFormSpellId(Player player, Difficulty difficulty, bool requiresOutdoor)
+        {
+            // Check what form is appropriate
+            if (player.IsInWater()) // Aquatic form
+                return SpellIds.FormAquatic;
+
+            if (player.GetSkillValue(SkillType.Riding) >= 225 && CheckLocationForForm(player, difficulty, requiresOutdoor, SpellIds.FormFlight) == SpellCastResult.SpellCastOk) // Flight form
+                return player.GetSkillValue(SkillType.Riding) >= 300 ? SpellIds.FormSwiftFlight : SpellIds.FormFlight;
+
+            if (CheckLocationForForm(player, difficulty, requiresOutdoor, SpellIds.FormStag) == SpellCastResult.SpellCastOk) // Stag form
+                return SpellIds.FormStag;
+
+            return 0;
+        }
+    }
+
+    // 1066 - Aquatic Form
+    // 33943 - Flight Form
+    // 40120 - Swift Flight Form
+    [Script] // 165961 - Stag Form
+    class spell_dru_travel_form_AuraScript : AuraScript
+    {
+        uint triggeredSpellId;
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.FormStag, SpellIds.FormAquatic, SpellIds.FormFlight, SpellIds.FormSwiftFlight);
+        }
+
+        public override bool Load()
+        {
+            return GetCaster().GetTypeId() == TypeId.Player;
+        }
+
+        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            // If it stays 0, it Removes Travel Form dummy in AfterRemove.
+            triggeredSpellId = 0;
+
+            // We should only handle aura interrupts.
+            if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Interrupt)
+                return;
+
+            // Check what form is appropriate
+            triggeredSpellId = spell_dru_travel_form_dummy_AuraScript.GetFormSpellId(GetTarget().ToPlayer(), GetCastDifficulty(), true);
+
+            // If chosen form is current aura, just don't Remove it.
+            if (triggeredSpellId == m_scriptSpellId)
+                PreventDefaultAction();
+        }
+
+        void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            if (triggeredSpellId == m_scriptSpellId)
+                return;
+
             Player player = GetTarget().ToPlayer();
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell, GetCastDifficulty());
-            return spellInfo.CheckLocation(player.GetMapId(), player.GetZoneId(), player.GetAreaId(), player);
+
+            if (triggeredSpellId != 0) // Apply new form
+                player.AddAura(triggeredSpellId, player);
+            else // If not set, simply Remove Travel Form dummy
+                player.RemoveAura(SpellIds.TravelForm);
+        }
+
+        public override void Register()
+        {
+            OnEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ModShapeshift, AuraEffectHandleModes.Real));
+            AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.ModShapeshift, AuraEffectHandleModes.Real));
         }
     }
 
