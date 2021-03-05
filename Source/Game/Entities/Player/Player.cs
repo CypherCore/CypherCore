@@ -1894,9 +1894,9 @@ namespace Game.Entities
         {
             return m_isInWater;
         }
-        public void SetInWater(bool apply)
+        public override void SetInWater(bool inWater)
         {
-            if (m_isInWater == apply)
+            if (m_isInWater == inWater)
                 return;
 
             //define player in water by opcodes
@@ -1904,11 +1904,12 @@ namespace Game.Entities
             //which can't swim and move guid back into ThreatList when
             //on surface.
             // @todo exist also swimming mobs, and function must be symmetric to enter/leave water
-            m_isInWater = apply;
+            m_isInWater = inWater;
 
-            // remove auras that need water/land
-            RemoveAurasWithInterruptFlags((apply ? SpellAuraInterruptFlags.NotAbovewater : SpellAuraInterruptFlags.NotUnderwater));
+            // Call base
+            base.SetInWater(inWater);
 
+            // Update threat tables
             GetHostileRefManager().UpdateThreatTables();
         }
         public void ValidateMovementInfo(MovementInfo mi)

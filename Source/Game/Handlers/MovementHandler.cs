@@ -140,12 +140,6 @@ namespace Game
             if (opcode == ClientOpcodes.MoveFallLand || opcode == ClientOpcodes.MoveStartSwim)
                 mover.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Landing); // Parachutes
 
-            if (plrMover && movementInfo.HasMovementFlag(MovementFlag.Swimming) != plrMover.IsInWater())
-            {
-                // now client not include swimming flag in case jumping under water
-                plrMover.SetInWater(!plrMover.IsInWater() || plrMover.GetMap().IsUnderWater(plrMover.GetPhaseShift(), movementInfo.Pos.posX, movementInfo.Pos.posY, movementInfo.Pos.posZ));
-            }
-
             uint mstime = GameTime.GetGameTimeMS();
 
             if (m_clientTimeDelay == 0)

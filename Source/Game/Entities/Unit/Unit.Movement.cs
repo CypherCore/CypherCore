@@ -783,16 +783,21 @@ namespace Game.Entities
             ProcessTerrainStatusUpdate(data.LiquidStatus, data.LiquidInfo);
         }
 
+        public virtual void SetInWater(bool inWater)
+        {
+            // remove appropriate auras if we are swimming/not swimming respectively
+            if (inWater)
+                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.NotAbovewater);
+            else
+                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.NotUnderwater);
+        }
+
         public virtual void ProcessTerrainStatusUpdate(ZLiquidStatus status, Optional<LiquidData> liquidData)
         {
             if (IsFlying() || !IsControlledByPlayer())
                 return;
 
-            // remove appropriate auras if we are swimming/not swimming respectively
-            if (status.HasAnyFlag(ZLiquidStatus.Swimming))
-                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.NotAbovewater);
-            else
-                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.NotUnderwater);
+            SetInWater(status & ZLiquidStatus.Swimming);
 
             // liquid aura handling
             LiquidTypeRecord curLiquid = null;
