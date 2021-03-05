@@ -243,12 +243,6 @@ namespace Game.Networking
             PacketHeader header = new PacketHeader();
             header.Read(_headerBuffer.GetData());
 
-            if (!header.IsValidSize())
-            {
-                Log.outError(LogFilter.Network, $"WorldSocket.ReadHeaderHandler(): client {GetRemoteIpAddress()} sent malformed packet (size: {header.Size})");
-                return false;
-            }
-
             _packetBuffer.Resize(header.Size);
             return true;
         }
@@ -277,6 +271,13 @@ namespace Game.Networking
             PacketLog.Write(packet.GetData(), packet.GetOpcode(), GetRemoteIpAddress(), _connectType, true);
 
             ClientOpcodes opcode = (ClientOpcodes)packet.GetOpcode();
+
+            if (opcode != ClientOpcodes.HotfixRequest && !header.IsValidSize())
+            {
+                Log.outError(LogFilter.Network, $"WorldSocket.ReadHeaderHandler(): client {GetRemoteIpAddress()} sent malformed packet (size: {header.Size})");
+                return ReadDataHandlerResult.Error;
+            }
+
             switch (opcode)
             {
                 case ClientOpcodes.Ping:
@@ -376,7 +377,7 @@ namespace Game.Networking
                 buffer.WriteUInt32(ZLib.adler32(0x9827D8F1, compressedData, compressedSize)); 
                 buffer.WriteBytes(compressedData, compressedSize);
 
-                packetSize = (ushort)(compressedSize + 12);
+                packetSize = (int)(compressedSize + 12);
                 opcode = ServerOpcodes.CompressedPacket;
 
                 data = buffer.GetData();

@@ -83,7 +83,7 @@ namespace Game.DataStorage
             AzeriteTierUnlockSetStorage = ReadDB2<AzeriteTierUnlockSetRecord> ("AzeriteTierUnlockSet.db2", HotfixStatements.SEL_AZERITE_TIER_UNLOCK_SET);
             AzeriteUnlockMappingStorage = ReadDB2<AzeriteUnlockMappingRecord> ("AzeriteUnlockMapping.db2", HotfixStatements.SEL_AZERITE_UNLOCK_MAPPING);
             BankBagSlotPricesStorage = ReadDB2<BankBagSlotPricesRecord>("BankBagSlotPrices.db2", HotfixStatements.SEL_BANK_BAG_SLOT_PRICES);
-            //BannedAddOnsStorage = ReadDB2<BannedAddOnsRecord>("BannedAddons.db2", HotfixStatements.SEL_BANNED_ADDONS);
+            BannedAddOnsStorage = ReadDB2<BannedAddonsRecord>("BannedAddons.db2", HotfixStatements.SEL_BANNED_ADDONS);
             BarberShopStyleStorage = ReadDB2<BarberShopStyleRecord>("BarberShopStyle.db2", HotfixStatements.SEL_BARBER_SHOP_STYLE, HotfixStatements.SEL_BARBER_SHOP_STYLE_LOCALE);
             BattlePetBreedQualityStorage = ReadDB2<BattlePetBreedQualityRecord>("BattlePetBreedQuality.db2", HotfixStatements.SEL_BATTLE_PET_BREED_QUALITY);
             BattlePetBreedStateStorage = ReadDB2<BattlePetBreedStateRecord>("BattlePetBreedState.db2", HotfixStatements.SEL_BATTLE_PET_BREED_STATE);
@@ -244,7 +244,7 @@ namespace Game.DataStorage
             RewardPackXItemStorage = ReadDB2<RewardPackXItemRecord>("RewardPackXItem.db2", HotfixStatements.SEL_REWARD_PACK_X_ITEM);
             ScenarioStorage = ReadDB2<ScenarioRecord>("Scenario.db2", HotfixStatements.SEL_SCENARIO, HotfixStatements.SEL_SCENARIO_LOCALE);
             ScenarioStepStorage = ReadDB2<ScenarioStepRecord>("ScenarioStep.db2", HotfixStatements.SEL_SCENARIO_STEP, HotfixStatements.SEL_SCENARIO_STEP_LOCALE);
-            //SceneScriptStorage = ReadDB2<SceneScriptRecord>("SceneScript.db2", HotfixStatements.SEL_SCENE_SCRIPT);
+            SceneScriptStorage = ReadDB2<SceneScriptRecord>("SceneScript.db2", HotfixStatements.SEL_SCENE_SCRIPT);
             SceneScriptGlobalTextStorage = ReadDB2<SceneScriptGlobalTextRecord>("SceneScriptGlobalText.db2", HotfixStatements.SEL_SCENE_SCRIPT_GLOBAL_TEXT);
             SceneScriptPackageStorage = ReadDB2<SceneScriptPackageRecord>("SceneScriptPackage.db2", HotfixStatements.SEL_SCENE_SCRIPT_PACKAGE);
             SceneScriptTextStorage = ReadDB2<SceneScriptTextRecord>("SceneScriptText.db2", HotfixStatements.SEL_SCENE_SCRIPT_TEXT);
@@ -442,7 +442,7 @@ namespace Game.DataStorage
         public static DB6Storage<AzeriteTierUnlockSetRecord> AzeriteTierUnlockSetStorage;
         public static DB6Storage<AzeriteUnlockMappingRecord> AzeriteUnlockMappingStorage;
         public static DB6Storage<BankBagSlotPricesRecord> BankBagSlotPricesStorage;
-        //public static DB6Storage<BannedAddOnsRecord> BannedAddOnsStorage;
+        public static DB6Storage<BannedAddonsRecord> BannedAddOnsStorage;
         public static DB6Storage<BarberShopStyleRecord> BarberShopStyleStorage;
         public static DB6Storage<BattlePetBreedQualityRecord> BattlePetBreedQualityStorage;
         public static DB6Storage<BattlePetBreedStateRecord> BattlePetBreedStateStorage;
@@ -603,7 +603,7 @@ namespace Game.DataStorage
         public static DB6Storage<RewardPackXItemRecord> RewardPackXItemStorage;
         public static DB6Storage<ScenarioRecord> ScenarioStorage;
         public static DB6Storage<ScenarioStepRecord> ScenarioStepStorage;
-        //public static DB6Storage<SceneScriptRecord> SceneScriptStorage;
+        public static DB6Storage<SceneScriptRecord> SceneScriptStorage;
         public static DB6Storage<SceneScriptGlobalTextRecord> SceneScriptGlobalTextStorage;
         public static DB6Storage<SceneScriptPackageRecord> SceneScriptPackageStorage;
         public static DB6Storage<SceneScriptTextRecord> SceneScriptTextStorage;

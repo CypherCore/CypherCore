@@ -727,7 +727,6 @@ namespace Game.DataStorage
                         continue;
                     }
                 }
-
                 
                 HotfixRecord hotfixRecord = new HotfixRecord();
                 hotfixRecord.TableHash = tableHash;
