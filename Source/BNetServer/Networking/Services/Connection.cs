@@ -3,8 +3,6 @@
 
 using Bgs.Protocol.Connection.V1;
 using Framework.Constants;
-using System.Collections.Generic;
-using Google.Protobuf;
 using Bgs.Protocol;
 using System.Diagnostics;
 

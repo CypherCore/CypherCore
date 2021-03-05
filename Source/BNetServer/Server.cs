@@ -5,23 +5,16 @@ using BNetServer.Networking;
 using Framework.Configuration;
 using Framework.Database;
 using Framework.Networking;
-using Framework.Web.API;
 using System;
 using System.Globalization;
-using System.Net.Http;
-using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Timers;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Framework.Cryptography;
 
 namespace BNetServer
 {
-    class Server
+    public class Server
     {
-        static void Main()
+        private static void Main()
         {
             //Set Culture
             CultureInfo.DefaultThreadCurrentCulture = CultureInfo.InvariantCulture;

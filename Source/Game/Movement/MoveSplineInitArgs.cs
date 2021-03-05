@@ -18,7 +18,6 @@
 using Framework.Dynamic;
 using Framework.GameMath;
 using Game.Entities;
-using System;
 
 namespace Game.Movement
 {

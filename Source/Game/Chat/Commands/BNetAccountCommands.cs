@@ -19,7 +19,6 @@ using Framework.Constants;
 using Framework.Database;
 using Framework.IO;
 using System;
-using System.Linq;
 
 namespace Game.Chat.Commands
 {

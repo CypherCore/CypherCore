@@ -15,12 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Framework.Constants;
-using Game.Entities;
-using System;
-using System.Collections.Generic;
-using Framework.Dynamic;
-
 namespace Game.Networking.Packets
 {
     public struct AddOnInfo

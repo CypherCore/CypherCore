@@ -9,7 +9,6 @@ using Framework.Database;
 using Google.Protobuf;
 using System;
 using Framework.Realm;
-using System.Net;
 
 namespace BNetServer.Networking
 {

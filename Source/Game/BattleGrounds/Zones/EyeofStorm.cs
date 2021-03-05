@@ -20,7 +20,6 @@ using Framework.Constants;
 using System.Collections.Generic;
 using Game.Networking.Packets;
 using Game.DataStorage;
-using Game.BattleGrounds;
 
 namespace Game.BattleGrounds.Zones
 {
