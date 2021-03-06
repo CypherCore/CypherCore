@@ -310,7 +310,7 @@ namespace Game.Entities
 
     public class PlayerLevelInfo
     {
-        public ushort[] stats = new ushort[(int)Stats.Max];
+        public int[] stats = new int[(int)Stats.Max];
     }
 
     public class PlayerCurrency

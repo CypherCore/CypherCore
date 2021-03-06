@@ -1086,6 +1086,9 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Using {0} DBC Locale", m_defaultDbcLocale);
 
+            // load update time related configs
+            _worldUpdateTime.LoadFromConfig();
+
             Global.WorldMgr.SetPlayerAmountLimit((uint)ConfigMgr.GetDefaultValue("PlayerLimit", 100));
             Global.WorldMgr.SetMotd(ConfigMgr.GetDefaultValue("Motd", "Welcome to a Cypher Core Server."));
 
