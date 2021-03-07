@@ -125,7 +125,7 @@ namespace Game.Chat
             CreatureTemplate cInfo = target.GetCreatureTemplate();
 
             uint faction = target.GetFaction();
-            ulong npcflags = (ulong)target.m_unitData.NpcFlags[0] << 32 | target.m_unitData.NpcFlags[1];
+            ulong npcflags = (ulong)target.m_unitData.NpcFlags[1] << 32 | target.m_unitData.NpcFlags[0];
             uint mechanicImmuneMask = cInfo.MechanicImmuneMask;
             uint displayid = target.GetDisplayId();
             uint nativeid = target.GetNativeDisplayId();
