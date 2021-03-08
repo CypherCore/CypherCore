@@ -397,6 +397,11 @@ namespace Game.Entities
             // Calculate critical bonus
             int crit_bonus = damage;
 
+            // adds additional damage to critBonus (from talents)
+            Player modOwner = GetSpellModOwner();
+            if (modOwner != null)
+                modOwner.ApplySpellMod(spellProto, SpellModOp.CritDamageBonus, ref crit_bonus);
+
             damage += crit_bonus;
 
             damage = (int)(damage * GetTotalAuraMultiplier(AuraType.ModCriticalHealingAmount));
