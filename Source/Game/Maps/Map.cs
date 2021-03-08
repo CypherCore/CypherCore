@@ -402,9 +402,7 @@ namespace Game.Maps
             }
 
             obj.SetCurrentCell(cell);
-
-            if (obj.IsTypeId(TypeId.Unit))
-                obj.ToCreature().m_isTempWorldObject = on;
+            obj.ToCreature().m_isTempWorldObject = on;
         }
 
         void DeleteFromWorld(Player player)
@@ -3015,7 +3013,7 @@ namespace Game.Maps
             Cypher.Assert(obj.GetMapId() == GetId() && obj.GetInstanceId() == GetInstanceId());
             // i_objectsToSwitch is iterated only in Map::RemoveAllObjectsInRemoveList() and it uses
             // the contained objects only if GetTypeId() == TYPEID_UNIT , so we can return in all other cases
-            if (!obj.IsTypeId(TypeId.Unit) && !obj.IsTypeId(TypeId.GameObject))
+            if (!obj.IsTypeId(TypeId.Unit))
                 return;
 
             if (!i_objectsToSwitch.ContainsKey(obj))
@@ -3041,9 +3039,6 @@ namespace Game.Maps
                     {
                         case TypeId.Unit:
                             SwitchGridContainers(obj.ToCreature(), on);
-                            break;
-                        case TypeId.GameObject:
-                            SwitchGridContainers(obj.ToGameObject(), on);
                             break;
                         default:
                             break;
