@@ -86,4 +86,46 @@ namespace Scripts.Smart
             smartScript.ProcessEventsFor(SmartEvents.SceneComplete, player);
         }
     }
+
+    [Script]
+    class SmartQuest : QuestScript
+    {
+        public SmartQuest() : base("SmartQuest") { }
+
+        // Called when a quest status change
+        public override void OnQuestStatusChange(Player player, Quest quest, QuestStatus oldStatus, QuestStatus newStatus)
+        {
+            SmartScript smartScript = new SmartScript();
+            smartScript.OnInitialize(quest);
+            switch (newStatus)
+            {
+                case QuestStatus.Incomplete:
+                    smartScript.ProcessEventsFor(SmartEvents.QuestAccepted, player);
+                    break;
+                case QuestStatus.Complete:
+                    smartScript.ProcessEventsFor(SmartEvents.QuestCompletion, player);
+                    break;
+                case QuestStatus.Failed:
+                    smartScript.ProcessEventsFor(SmartEvents.QuestFail, player);
+                    break;
+                case QuestStatus.Rewarded:
+                    smartScript.ProcessEventsFor(SmartEvents.QuestRewarded, player);
+                    break;
+                case QuestStatus.None:
+                default:
+                    break;
+            }
+        }
+
+        // Called when a quest objective data change
+        public override void OnQuestObjectiveChange(Player player, Quest quest, QuestObjective objective, int oldAmount, int newAmount)
+        {
+            if (player.IsQuestObjectiveComplete(objective))
+            {
+                SmartScript smartScript = new SmartScript();
+                smartScript.OnInitialize(quest);
+                smartScript.ProcessEventsFor(SmartEvents.QuestObjCompletion, player, objective.Id);
+            }
+        }
+    }
 }

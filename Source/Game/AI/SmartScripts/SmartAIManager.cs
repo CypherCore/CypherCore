@@ -101,11 +101,11 @@ namespace Game.AI
                                 }
                                 break;
                             }
-                        case SmartScriptType.Spell:
+                        case SmartScriptType.Quest:
                             {
-                                if (!Global.SpellMgr.HasSpellInfo((uint)temp.entryOrGuid, Difficulty.None))
+                                if (Global.ObjectMgr.GetQuestTemplate((uint)temp.entryOrGuid) == null)
                                 {
-                                    Log.outError(LogFilter.Sql, "SmartAIMgr.LoadSmartAIFromDB: Scene id ({0}) does not exist, skipped loading.", temp.entryOrGuid);
+                                    Log.outError(LogFilter.Sql, $"SmartAIMgr.LoadSmartAIFromDB: Quest id ({temp.entryOrGuid}) does not exist, skipped loading.");
                                     continue;
                                 }
                                 break;
@@ -817,6 +817,18 @@ namespace Game.AI
                             return false;
                         }
                         break;
+                    case SmartEvents.QuestObjCompletion:
+                        if (Global.ObjectMgr.GetQuestObjective(e.Event.questObjective.id) == null)
+                        {
+                            Log.outError(LogFilter.Sql, $"SmartAIMgr: Event SMART_EVENT_QUEST_OBJ_COPLETETION using invalid objective id {e.Event.questObjective.id}, skipped.");
+                            return false;
+                        }
+                        break;
+                    case SmartEvents.QuestAccepted:
+                    case SmartEvents.QuestCompletion:
+                    case SmartEvents.QuestFail:
+                    case SmartEvents.QuestRewarded:
+                        break;
                     case SmartEvents.Link:
                     case SmartEvents.GoLootStateChanged:
                     case SmartEvents.GoEventInform:
@@ -834,11 +846,6 @@ namespace Game.AI
                     case SmartEvents.Evade:
                     case SmartEvents.ReachedHome:
                     case SmartEvents.Reset:
-                    case SmartEvents.QuestAccepted:
-                    case SmartEvents.QuestObjCompletion:
-                    case SmartEvents.QuestCompletion:
-                    case SmartEvents.QuestRewarded:
-                    case SmartEvents.QuestFail:
                     case SmartEvents.JustSummoned:
                     case SmartEvents.WaypointStart:
                     case SmartEvents.WaypointReached:
@@ -1824,6 +1831,9 @@ namespace Game.AI
         public Quest quest;
 
         [FieldOffset(16)]
+        public QuestObjective questObjective;
+
+        [FieldOffset(16)]
         public Emote emote;
 
         [FieldOffset(16)]
@@ -1986,6 +1996,10 @@ namespace Game.AI
         public struct Quest
         {
             public uint questId;
+        }
+        public struct QuestObjective
+        {
+            public uint id;
         }
         public struct Emote
         {

@@ -2879,12 +2879,6 @@ namespace Game.AI
                         }
                         break;
                     }
-                case SmartTargets.SpellTarget:
-                    {
-                        if (spellTemplate != null)
-                            targets.Add(spellTemplate.m_targets.GetUnitTarget());
-                        break;
-                    }
                 case SmartTargets.Position:
                 default:
                     break;
@@ -3077,6 +3071,20 @@ namespace Game.AI
                             ProcessAction(e, unit, var0, var1, bvar, spell, gob);
                         break;
                     }
+                case SmartEvents.QuestAccepted:
+                case SmartEvents.QuestCompletion:
+                case SmartEvents.QuestFail:
+                case SmartEvents.QuestRewarded:
+                    {
+                        ProcessAction(e, unit);
+                        break;
+                    }
+                case SmartEvents.QuestObjCompletion:
+                    {
+                        if (var0 == (e.Event.questObjective.id))
+                            ProcessAction(e, unit);
+                        break;
+                    }
                 //no params
                 case SmartEvents.Aggro:
                 case SmartEvents.Death:
@@ -3087,11 +3095,6 @@ namespace Game.AI
                 case SmartEvents.AiInit:
                 case SmartEvents.TransportAddplayer:
                 case SmartEvents.TransportRemovePlayer:
-                case SmartEvents.QuestAccepted:
-                case SmartEvents.QuestObjCompletion:
-                case SmartEvents.QuestCompletion:
-                case SmartEvents.QuestRewarded:
-                case SmartEvents.QuestFail:
                 case SmartEvents.JustSummoned:
                 case SmartEvents.Reset:
                 case SmartEvents.JustCreated:
@@ -3694,18 +3697,18 @@ namespace Game.AI
             }
         }
 
-        void FillScript(List<SmartScriptHolder> e, WorldObject obj, AreaTriggerRecord at, SceneTemplate scene, Spell spell = null)
+        void FillScript(List<SmartScriptHolder> e, WorldObject obj, AreaTriggerRecord at, SceneTemplate scene, Quest quest)
         {
             if (e.Empty())
             {
                 if (obj != null)
-                    Log.outDebug(LogFilter.ScriptsAi, "SmartScript: EventMap for Entry {0} is empty but is using SmartScript.", obj.GetEntry());
+                    Log.outDebug(LogFilter.ScriptsAi, $"SmartScript: EventMap for Entry {obj.GetEntry()} is empty but is using SmartScript.");
                 if (at != null)
-                    Log.outDebug(LogFilter.ScriptsAi, "SmartScript: EventMap for AreaTrigger {0} is empty but is using SmartScript.", at.Id);
+                    Log.outDebug(LogFilter.ScriptsAi, $"SmartScript: EventMap for AreaTrigger {at.Id} is empty but is using SmartScript.");
                 if (scene != null)
-                    Log.outDebug(LogFilter.ScriptsAi, "SmartScript: EventMap for SceneId {0} is empty but is using SmartScript.", scene.SceneId);
-                if (spell != null)
-                    Log.outDebug(LogFilter.ScriptsAi, "SmartScript: EventMap for SpellId {0} is empty but is using SmartScript.", spell.GetSpellInfo().Id);
+                    Log.outDebug(LogFilter.ScriptsAi, $"SmartScript: EventMap for SceneId {scene.SceneId} is empty but is using SmartScript.");
+                if (quest != null)
+                    Log.outDebug(LogFilter.ScriptsAi, $"SmartScript: EventMap for Quest {quest.Id} is empty but is using SmartScript.");
                 return;
             }
             foreach (var holder in e)
@@ -3753,34 +3756,34 @@ namespace Game.AI
                 e = Global.SmartAIMgr.GetScript(-((int)me.GetSpawnId()), mScriptType);
                 if (e.Empty())
                     e = Global.SmartAIMgr.GetScript((int)me.GetEntry(), mScriptType);
-                FillScript(e, me, null, null);
+                FillScript(e, me, null, null, null);
             }
             else if (go != null)
             {
                 e = Global.SmartAIMgr.GetScript(-((int)go.GetSpawnId()), mScriptType);
                 if (e.Empty())
                     e = Global.SmartAIMgr.GetScript((int)go.GetEntry(), mScriptType);
-                FillScript(e, go, null, null);
+                FillScript(e, go, null, null, null);
             }
             else if (trigger != null)
             {
                 e = Global.SmartAIMgr.GetScript((int)trigger.Id, mScriptType);
-                FillScript(e, null, trigger, null);
+                FillScript(e, null, trigger, null, null);
             }
             else if (areaTrigger != null)
             {
                 e = Global.SmartAIMgr.GetScript((int)areaTrigger.GetEntry(), mScriptType);
-                FillScript(e, areaTrigger, null, null);
+                FillScript(e, areaTrigger, null, null, null);
             }
             else if (sceneTemplate != null)
             {
                 e = Global.SmartAIMgr.GetScript((int)sceneTemplate.SceneId, mScriptType);
-                FillScript(e, null, null, sceneTemplate);
+                FillScript(e, null, null, sceneTemplate, null);
             }
-            else if (spellTemplate != null)
+            else if (quest != null)
             {
-                e = Global.SmartAIMgr.GetScript((int)spellTemplate.GetSpellInfo().Id, mScriptType);
-                FillScript(e, null, null, null, spellTemplate);
+                e = Global.SmartAIMgr.GetScript((int)quest.Id, mScriptType);
+                FillScript(e, null, null, null, quest);
             }
         }
 
@@ -3870,17 +3873,17 @@ namespace Game.AI
             InstallEvents();
         }
 
-        public void OnInitialize(Spell spell)
+        public void OnInitialize(Quest qst)
         {
-            if (spell != null)
+            if (qst != null)
             {
-                mScriptType = SmartScriptType.Spell;
-                spellTemplate = spell;
-                Log.outDebug(LogFilter.ScriptsAi, "SmartScript.OnInitialize: Spell id {0}", spell.GetSpellInfo().Id);
+                mScriptType = SmartScriptType.Quest;
+                quest = qst;
+                Log.outDebug(LogFilter.ScriptsAi, $"SmartScript.OnInitialize: source is Quest with id {qst.Id}");
             }
             else
             {
-                Log.outError(LogFilter.ScriptsAi, "SmartScript.OnInitialize: !WARNING! Initialized Spell is Null.");
+                Log.outError(LogFilter.ScriptsAi, "SmartScript.OnInitialize: !WARNING! Initialized quest is Null.");
                 return;
             }
 
@@ -4207,7 +4210,7 @@ namespace Game.AI
         AreaTriggerRecord trigger;
         AreaTrigger areaTrigger;
         SceneTemplate sceneTemplate;
-        Spell spellTemplate;
+        Quest quest;
         SmartScriptType mScriptType;
         uint mEventPhase;
 

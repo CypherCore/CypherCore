@@ -780,7 +780,7 @@ namespace Game.Scripting
         public virtual void OnSceneComplete(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate) { }
     }
 
-    class QuestScript : ScriptObject
+    public class QuestScript : ScriptObject
     {
         public QuestScript(string name) : base(name)
         {
