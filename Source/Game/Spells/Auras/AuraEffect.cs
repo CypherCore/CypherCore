@@ -4698,6 +4698,64 @@ namespace Game.Spells
             }
         }
 
+        [AuraEffectHandler(AuraType.TriggerSpellOnPowerPct)]
+        void HandleTriggerSpellOnPowerPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real) || !apply)
+                return;
+
+            Unit target = aurApp.GetTarget();
+
+            int effectAmount = GetAmount();
+            uint triggerSpell = GetSpellEffectInfo().TriggerSpell;
+            float powerAmountPct = MathFunctions.GetPctOf(target.GetPower((PowerType)GetMiscValue()), target.GetMaxPower((PowerType)GetMiscValue()));
+
+            switch ((AuraTriggerOnPowerChangeDirection)GetMiscValueB())
+            {
+                case AuraTriggerOnPowerChangeDirection.Gain:
+                    if (powerAmountPct < effectAmount)
+                        return;
+                    break;
+                case AuraTriggerOnPowerChangeDirection.Loss:
+                    if (powerAmountPct > effectAmount)
+                        return;
+                    break;
+                default:
+                    break;
+            }
+
+            target.CastSpell(target, triggerSpell, true);
+        }
+
+        [AuraEffectHandler(AuraType.TriggerSpellOnPowerAmount)]
+        void HandleTriggerSpellOnPowerAmount(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real) || !apply)
+                return;
+
+            Unit target = aurApp.GetTarget();
+
+            int effectAmount = GetAmount();
+            uint triggerSpell = GetSpellEffectInfo().TriggerSpell;
+            float powerAmount = target.GetPower((PowerType)GetMiscValue());
+
+            switch ((AuraTriggerOnPowerChangeDirection)GetMiscValueB())
+            {
+                case AuraTriggerOnPowerChangeDirection.Gain:
+                    if (powerAmount < effectAmount)
+                        return;
+                    break;
+                case AuraTriggerOnPowerChangeDirection.Loss:
+                    if (powerAmount > effectAmount)
+                        return;
+                    break;
+                default:
+                    break;
+            }
+
+            target.CastSpell(target, triggerSpell, true);
+        }
+        
         [AuraEffectHandler(AuraType.OpenStable)]
         void HandleAuraOpenStable(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {

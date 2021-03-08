@@ -603,6 +603,7 @@ namespace Game.Entities
             if (maxPower < val)
                 val = maxPower;
 
+            int oldPower = m_unitData.Power[(int)powerIndex];
             SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Power, (int)powerIndex), val);
 
             if (IsInWorld)
@@ -612,6 +613,8 @@ namespace Game.Entities
                 packet.Powers.Add(new PowerUpdatePower(val, (byte)powerType));
                 SendMessageToSet(packet, IsTypeId(TypeId.Player));
             }
+
+            TriggerOnPowerChangeAuras(powerType, oldPower, val);
 
             // group update
             if (IsTypeId(TypeId.Player))
@@ -657,6 +660,48 @@ namespace Game.Entities
         }
         public virtual uint GetPowerIndex(PowerType powerType) { return 0; }
         public float GetPowerPct(PowerType powerType) { return GetMaxPower(powerType) != 0 ? 100.0f* GetPower(powerType) / GetMaxPower(powerType) : 0.0f; }
+
+        void TriggerOnPowerChangeAuras(PowerType power, int oldVal, int newVal)
+        {
+            var effects = GetAuraEffectsByType(AuraType.TriggerSpellOnPowerPct);
+            var effectsAmount = GetAuraEffectsByType(AuraType.TriggerSpellOnPowerAmount);
+            effects.AddRange(effectsAmount);
+
+            foreach (AuraEffect effect in effects)
+            {
+                if (effect.GetMiscValue() == (int)power)
+                {
+                    uint effectAmount = (uint)effect.GetAmount();
+                    uint triggerSpell = effect.GetSpellEffectInfo().TriggerSpell;
+
+                    float oldValueCheck = oldVal;
+                    float newValueCheck = newVal;
+
+                    if (effect.GetAuraType() == AuraType.TriggerSpellOnPowerPct)
+                    {
+                        int maxPower = GetMaxPower(power);
+                        oldValueCheck = MathFunctions.GetPctOf(oldVal, maxPower);
+                        newValueCheck = MathFunctions.GetPctOf(newVal, maxPower);
+                    }
+
+                    switch ((AuraTriggerOnPowerChangeDirection)effect.GetMiscValueB())
+                    {
+                        case AuraTriggerOnPowerChangeDirection.Gain:
+                            if (oldValueCheck >= effect.GetAmount() || newValueCheck < effectAmount)
+                                continue;
+                            break;
+                        case AuraTriggerOnPowerChangeDirection.Loss:
+                            if (oldValueCheck <= effect.GetAmount() || newValueCheck > effectAmount)
+                                continue;
+                            break;
+                        default:
+                            break;
+                    }
+
+                    CastSpell(this, triggerSpell, true, null, effect);
+                }
+            }
+        }
 
         public void ApplyResilience(Unit victim, ref uint damage)
         {

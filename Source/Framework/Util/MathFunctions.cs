@@ -171,6 +171,11 @@ public static class MathFunctions
         return (ulong)(value * pct / 100.0f);
     }
 
+    public static float GetPctOf(float value, float max)
+    {
+        return value / max * 100.0f;
+    }
+
     public static int RoundToInterval(ref int num, dynamic floor, dynamic ceil)
     {
         return num = (int)Math.Min(Math.Max(num, floor), ceil);

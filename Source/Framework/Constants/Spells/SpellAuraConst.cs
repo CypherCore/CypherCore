@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */﻿
+ */
 
 namespace Framework.Constants
 {
@@ -575,5 +575,11 @@ namespace Framework.Constants
         Immune = 3,
         Level4 = 3,
         TauntImmune = 4
+    }
+
+    public enum AuraTriggerOnPowerChangeDirection
+    {
+        Gain = 0,
+        Loss = 1
     }
 }
