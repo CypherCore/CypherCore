@@ -2260,7 +2260,7 @@ namespace Game.Entities
                         continue;
 
                     AddAura(id, this);
-                    Log.outError(LogFilter.Unit, "Spell: {0} added to creature ({1})", id, GetGUID().ToString());
+                    Log.outDebug(LogFilter.Unit, "Spell: {0} added to creature ({1})", id, GetGUID().ToString());
                 }
             }
             return true;
