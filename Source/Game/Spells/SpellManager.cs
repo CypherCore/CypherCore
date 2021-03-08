@@ -2438,6 +2438,23 @@ namespace Game.Entities
                             break;
                     }
 
+                    switch (effect.ApplyAuraName)
+                    {
+                        case AuraType.OpenStable:    // No point in saving this, since the stable dialog can't be open on aura load anyway.
+                        // Auras that require both caster & target to be in world cannot be saved
+                        case AuraType.ControlVehicle:
+                        case AuraType.BindSight:
+                        case AuraType.ModPossess:
+                        case AuraType.ModPossessPet:
+                        case AuraType.ModCharm:
+                        case AuraType.AoeCharm:
+                        // Controlled by Battleground
+                        case AuraType.BattleGroundPlayerPosition:
+                        case AuraType.BattleGroundPlayerPositionFactional:
+                            spellInfo.AttributesCu |= SpellCustomAttributes.AuraCannotBeSaved;
+                            break;
+                    }
+
                     switch (effect.Effect)
                     {
                         case SpellEffectName.SchoolDamage:

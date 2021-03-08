@@ -1996,10 +1996,11 @@ namespace Framework.Constants
         ReqCasterBehindTarget = 0x20000,
         AllowInflightTarget = 0x40000,
         NeedsAmmoData = 0x80000,
-        BinarySpell = 0x00100000,
-        SchoolmaskNormalWithMagic = 0x00200000,
-        LiquidAura = 0x00400000,
-        IsTalent = 0x00800000
+        BinarySpell = 0x100000,
+        SchoolmaskNormalWithMagic = 0x200000,
+        LiquidAura = 0x400000,
+        IsTalent = 0x800000,
+        AuraCannotBeSaved = 0x1000000
     }
     #endregion
 
