@@ -965,7 +965,7 @@ namespace Game.Spells
         void HandleUnused(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
         }
-        
+
         [AuraEffectHandler(AuraType.ModInvisibilityDetect)]
         void HandleModInvisibilityDetect(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
@@ -1291,7 +1291,7 @@ namespace Game.Spells
                 PhasingHandler.SetAlwaysVisible(target, false, true);
             }
         }
-        
+
         /**********************/
         /***   UNIT MODEL   ***/
         /**********************/
@@ -1946,7 +1946,7 @@ namespace Game.Spells
             if (apply)
                 aurApp.GetTarget().AttackStop();
         }
-        
+
         [AuraEffectHandler(AuraType.ModNoActions)]
         void HandleAuraModNoActions(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
@@ -2104,6 +2104,22 @@ namespace Game.Spells
                 return;
 
             target.ModifySkillBonus(prot, (apply ? points : -points), GetAuraType() == AuraType.ModSkillTalent);
+        }
+
+        [AuraEffectHandler(AuraType.AllowTalentSwapping)]
+        void HandleAuraAllowTalentSwapping(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
+                return;
+
+            Player target = aurApp.GetTarget().ToPlayer();
+            if (target == null)
+                return;
+
+            if (apply)
+                target.AddUnitFlag2(UnitFlags2.AllowChangingTalents);
+            else if (!target.HasAuraType(GetAuraType()))
+                target.RemoveUnitFlag2(UnitFlags2.AllowChangingTalents);
         }
 
         /****************************/
@@ -3497,7 +3513,7 @@ namespace Game.Spells
 
             aurApp.GetTarget().ApplyModManaCostMultiplier(GetAmount() / 100.0f, apply);
         }
-        
+
         [AuraEffectHandler(AuraType.ModPowerDisplay)]
         void HandleAuraModPowerDisplay(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
@@ -4622,7 +4638,7 @@ namespace Game.Spells
             else
                 player.RemoveSpell((uint)GetMiscValue(), false, false, true);
         }
-        
+
         [AuraEffectHandler(AuraType.ComprehendLanguage)]
         void HandleComprehendLanguage(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
@@ -5350,9 +5366,9 @@ namespace Game.Spells
                             damage = (uint)(caster.SpellDamageBonusDone(target, GetSpellInfo(), damage, DamageEffectType.DOT, GetSpellEffectInfo(), GetBase().GetStackAmount()) * caster.SpellDamagePctDone(target, m_spellInfo, DamageEffectType.DOT));
                         damage = target.SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DamageEffectType.DOT, GetSpellEffectInfo(), GetBase().GetStackAmount());
 
-                    // Calculate armor mitigation
-                    if (caster.IsDamageReducedByArmor(GetSpellInfo().GetSchoolMask(), GetSpellInfo(), (sbyte)GetEffIndex()))
-                    {
+                        // Calculate armor mitigation
+                        if (caster.IsDamageReducedByArmor(GetSpellInfo().GetSchoolMask(), GetSpellInfo(), (sbyte)GetEffIndex()))
+                        {
                             uint damageReductedArmor = caster.CalcArmorReducedDamage(caster, target, damage, GetSpellInfo());
                             cleanDamage.mitigated_damage += damage - damageReductedArmor;
                             damage = damageReductedArmor;
@@ -6119,7 +6135,7 @@ namespace Game.Spells
 
             target.UpdatePvPState(true);
         }
-        
+
         [AuraEffectHandler(AuraType.ModOverrideZonePvpType)]
         void HandleModOverrideZonePVPType(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
