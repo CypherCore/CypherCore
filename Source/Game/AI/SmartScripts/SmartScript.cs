@@ -2332,18 +2332,16 @@ namespace Game.AI
                 case SmartActions.CreateConversation:
                     {
                         WorldObject baseObject = GetBaseObject();
-                        if (baseObject != null)
+
+                        foreach (WorldObject target in targets)
                         {
-                            foreach (WorldObject target in targets)
+                            Player playerTarget = target.ToPlayer();
+                            if (playerTarget != null)
                             {
-                                Player playerTarget = target.ToPlayer();
-                                if (playerTarget != null)
-                                {
-                                    Conversation conversation = Conversation.CreateConversation(e.Action.conversation.id, playerTarget,
-                                        playerTarget, new List<ObjectGuid>() { playerTarget.GetGUID() }, null);
-                                    if (!conversation)
-                                        Log.outWarn(LogFilter.ScriptsAi, $"SmartScript.ProcessAction: SMART_ACTION_CREATE_CONVERSATION: id {e.Action.conversation.id}, baseObject {baseObject.GetName()}, target {playerTarget.GetName()} - failed to create");
-                                }
+                                Conversation conversation = Conversation.CreateConversation(e.Action.conversation.id, playerTarget,
+                                    playerTarget, new List<ObjectGuid>() { playerTarget.GetGUID() }, null);
+                                if (!conversation)
+                                    Log.outWarn(LogFilter.ScriptsAi, $"SmartScript.ProcessAction: SMART_ACTION_CREATE_CONVERSATION: id {e.Action.conversation.id}, baseObject {baseObject?.GetName()}, target {playerTarget.GetName()} - failed to create");
                             }
                         }
 
