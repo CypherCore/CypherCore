@@ -175,7 +175,7 @@ namespace Game.Entities
                 }
 
                 if (owner != null && owner.GetPrimarySpecialization() == selectedEssenceData.SpecializationId)
-                    selectedEssences.ModifyValue(selectedEssences.Enabled).SetValue(1);
+                    selectedEssences.ModifyValue(selectedEssences.Enabled).SetValue(true);
 
                 AddDynamicUpdateFieldValue(m_values.ModifyValue(m_azeriteItemData).ModifyValue(m_azeriteItemData.SelectedEssences), selectedEssences);
             }
@@ -377,7 +377,7 @@ namespace Game.Entities
         public SelectedAzeriteEssences GetSelectedAzeriteEssences()
         {
             foreach (SelectedAzeriteEssences essences in m_azeriteItemData.SelectedEssences)
-                if (essences.Enabled != 0)
+                if (essences.Enabled)
                     return essences;
 
             return null;
@@ -387,17 +387,17 @@ namespace Game.Entities
         {
             SelectedAzeriteEssences selectedEssences = new SelectedAzeriteEssences();
             selectedEssences.ModifyValue(selectedEssences.SpecializationID).SetValue(specializationId);
-            selectedEssences.ModifyValue(selectedEssences.Enabled).SetValue(1);
+            selectedEssences.ModifyValue(selectedEssences.Enabled).SetValue(true);
             AddDynamicUpdateFieldValue(m_values.ModifyValue(m_azeriteItemData).ModifyValue(m_azeriteItemData.SelectedEssences), selectedEssences);
         }
 
         public void SetSelectedAzeriteEssences(uint specializationId)
         {
-            int index = m_azeriteItemData.SelectedEssences.FindIndexIf(essences => { return essences.Enabled == 1; });
+            int index = m_azeriteItemData.SelectedEssences.FindIndexIf(essences => { return essences.Enabled; });
             if (index >= 0)
             {
                 SelectedAzeriteEssences selectedEssences = m_values.ModifyValue(m_azeriteItemData).ModifyValue(m_azeriteItemData.SelectedEssences, index);
-                SetUpdateFieldValue(selectedEssences.ModifyValue(selectedEssences.Enabled), 0u);
+                SetUpdateFieldValue(selectedEssences.ModifyValue(selectedEssences.Enabled), false);
             }
 
             index = m_azeriteItemData.SelectedEssences.FindIndexIf(essences =>
@@ -408,7 +408,7 @@ namespace Game.Entities
             if (index >= 0)
             {
                 SelectedAzeriteEssences selectedEssences = m_values.ModifyValue(m_azeriteItemData).ModifyValue(m_azeriteItemData.SelectedEssences, index);
-                SetUpdateFieldValue(selectedEssences.ModifyValue(selectedEssences.Enabled), 1u);
+                SetUpdateFieldValue(selectedEssences.ModifyValue(selectedEssences.Enabled), true);
             }
             else
                 CreateSelectedAzeriteEssences(specializationId);
@@ -417,7 +417,7 @@ namespace Game.Entities
         public void SetSelectedAzeriteEssence(int slot, uint azeriteEssenceId)
         {
             //ASSERT(slot < MAX_AZERITE_ESSENCE_SLOT);
-            int index = m_azeriteItemData.SelectedEssences.FindIndexIf(essences => { return essences.Enabled == 1; });
+            int index = m_azeriteItemData.SelectedEssences.FindIndexIf(essences => { return essences.Enabled; });
             //ASSERT(index >= 0);
             SelectedAzeriteEssences selectedEssences = m_values.ModifyValue(m_azeriteItemData).ModifyValue(m_azeriteItemData.SelectedEssences, index);
             SetUpdateFieldValue(ref selectedEssences.ModifyValue(selectedEssences.AzeriteEssenceID, slot), azeriteEssenceId);

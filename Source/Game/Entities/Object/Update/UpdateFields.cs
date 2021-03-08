@@ -755,8 +755,8 @@ namespace Game.Entities
 
     public class SelectedAzeriteEssences : BaseUpdateData<AzeriteItem>
     {
-        public UpdateField<uint> SpecializationID = new UpdateField<uint>(0, 1);
-        public UpdateField<uint> Enabled = new UpdateField<uint>(0, 2);
+        public UpdateField<bool> Enabled = new UpdateField<bool>(0, 1);
+        public UpdateField<uint> SpecializationID = new UpdateField<uint>(0, 2);
         public UpdateFieldArray<uint> AzeriteEssenceID = new UpdateFieldArray<uint>(4, 3, 4);
 
         public SelectedAzeriteEssences() : base(8) { }
@@ -768,7 +768,7 @@ namespace Game.Entities
                 data.WriteUInt32(AzeriteEssenceID[i]);
             }
             data.WriteUInt32(SpecializationID);
-            data.WriteBits(Enabled, 1);
+            data.WriteBit(Enabled);
             data.FlushBits();
         }
 
@@ -782,16 +782,19 @@ namespace Game.Entities
             if (changesMask.GetBlock(0) != 0)
                 data.WriteBits(changesMask.GetBlock(0), 32);
 
-            data.FlushBits();
             if (changesMask[0])
             {
                 if (changesMask[1])
                 {
-                    data.WriteUInt32(SpecializationID);
+                    data.WriteBit(Enabled);
                 }
+            }
+            data.FlushBits();
+            if (changesMask[0])
+            {
                 if (changesMask[2])
                 {
-                    data.WriteBits(Enabled, 1);
+                    data.WriteUInt32(SpecializationID);
                 }
             }
             if (changesMask[3])
@@ -810,8 +813,8 @@ namespace Game.Entities
 
         public override void ClearChangesMask()
         {
-            ClearChangesMask(SpecializationID);
             ClearChangesMask(Enabled);
+            ClearChangesMask(SpecializationID);
             ClearChangesMask(AzeriteEssenceID);
             _changesMask.ResetAll();
         }
@@ -852,7 +855,6 @@ namespace Game.Entities
             {
                 data.WriteUInt32(UnlockedEssenceMilestones[i]);
             }
-            data.FlushBits();
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
             {
                 data.WriteBit(Enabled);
@@ -2584,7 +2586,6 @@ namespace Game.Entities
             {
                 ArenaCooldowns[i].WriteCreate(data, owner, receiver);
             }
-            data.FlushBits();
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.PartyMember))
             {
                 data.WriteBit((bool)HasQuestSession);
@@ -5353,7 +5354,6 @@ namespace Game.Entities
                 data.WriteVector2(Points[i]);
             }
             data.WriteUInt32(ParameterCurve);
-            data.FlushBits();
             data.WriteBit((bool)OverrideActive);
             data.FlushBits();
         }
@@ -5625,7 +5625,7 @@ namespace Game.Entities
         public uint CreatureID;
         public uint CreatureDisplayInfoID;
         public ObjectGuid ActorGUID;
-        public int Field_18;
+        public int Id;
         public ConversationActorType Type;
         public uint NoActorObject;
 
@@ -5634,7 +5634,7 @@ namespace Game.Entities
             data.WriteUInt32(CreatureID);
             data.WriteUInt32(CreatureDisplayInfoID);
             data.WritePackedGuid(ActorGUID);
-            data.WriteInt32(Field_18);
+            data.WriteInt32(Id);
             data.WriteBits(Type, 1);
             data.WriteBits(NoActorObject, 1);
             data.FlushBits();
@@ -5645,7 +5645,7 @@ namespace Game.Entities
             data.WriteUInt32(CreatureID);
             data.WriteUInt32(CreatureDisplayInfoID);
             data.WritePackedGuid(ActorGUID);
-            data.WriteInt32(Field_18);
+            data.WriteInt32(Id);
             data.WriteBits(Type, 1);
             data.WriteBits(NoActorObject, 1);
             data.FlushBits();
@@ -5657,7 +5657,7 @@ namespace Game.Entities
         public UpdateField<List<ConversationLine>> Lines = new UpdateField<List<ConversationLine>>(0, 1);
         public DynamicUpdateField<ConversationActor> Actors = new DynamicUpdateField<ConversationActor>(0, 2);
         public UpdateField<uint> LastLineEndTime = new UpdateField<uint>(0, 3);
-        public UpdateField<uint> Field_1C = new UpdateField<uint>(0, 4);
+        public UpdateField<uint> Progress = new UpdateField<uint>(0, 4);
 
         public ConversationData() : base(0, TypeId.Conversation, 5) { }
 
@@ -5665,7 +5665,7 @@ namespace Game.Entities
         {
             data.WriteInt32(((List<ConversationLine>)Lines).Count);
             data.WriteUInt32(LastLineEndTime);
-            data.WriteUInt32(Field_1C);
+            data.WriteUInt32(Progress);
             for (int i = 0; i < ((List<ConversationLine>)Lines).Count; ++i)
             {
                 ((List<ConversationLine>)Lines)[i].WriteCreate(data, owner, receiver);
@@ -5728,7 +5728,7 @@ namespace Game.Entities
                 }
                 if (_changesMask[4])
                 {
-                    data.WriteUInt32(Field_1C);
+                    data.WriteUInt32(Progress);
                 }
             }
         }
@@ -5738,7 +5738,7 @@ namespace Game.Entities
             ClearChangesMask(Lines);
             ClearChangesMask(Actors);
             ClearChangesMask(LastLineEndTime);
-            ClearChangesMask(Field_1C);
+            ClearChangesMask(Progress);
             _changesMask.ResetAll();
         }
     }
