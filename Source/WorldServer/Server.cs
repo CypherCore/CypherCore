@@ -40,6 +40,8 @@ namespace WorldServer
 
             Console.CancelKeyPress += (o, e) => Global.WorldMgr.StopNow(ShutdownExitCode.Shutdown);
 
+            AppDomain.CurrentDomain.UnhandledException += UnhandledExceptionHandler;
+
             if (!ConfigMgr.Load(Process.GetCurrentProcess().ProcessName + ".conf"))
                 ExitNow();
 
