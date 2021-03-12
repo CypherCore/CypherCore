@@ -184,7 +184,7 @@ namespace Game.Entities
                         ss.Clear();
 
                         foreach (int bonusListID in (List<uint>)m_itemData.BonusListIDs)
-                            ss.Append(bonusListID + ' ');
+                            ss.Append($"{bonusListID} ");
 
                         stmt.AddValue(++index, ss.ToString());
                         stmt.AddValue(++index, GetGUID().GetCounter());
