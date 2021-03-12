@@ -5080,7 +5080,7 @@ namespace Game.Maps
 
         BitSet i_gridFileExists = new BitSet(MapConst.MaxGrids * MapConst.MaxGrids); // cache what grids are available for this map (not including parent/child maps)
         BitSet marked_cells = new BitSet(MapConst.TotalCellsPerMap * MapConst.TotalCellsPerMap);
-        public Dictionary<uint, CreatureGroup> CreatureGroupHolder = new Dictionary<uint, CreatureGroup>();
+        public Dictionary<ulong, CreatureGroup> CreatureGroupHolder = new Dictionary<ulong, CreatureGroup>();
         internal uint i_InstanceId;
         long i_gridExpiry;
         List<WorldObject> i_objects = new List<WorldObject>();

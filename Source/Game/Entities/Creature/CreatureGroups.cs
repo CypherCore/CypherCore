@@ -25,26 +25,26 @@ namespace Game.Entities
 {
     public class FormationMgr
     {
-        public static void AddCreatureToGroup(uint groupId, Creature member)
+        public static void AddCreatureToGroup(ulong leaderGuid, Creature member)
         {
             Map map = member.GetMap();
             if (!map)
                 return;
 
-            var creatureGroup = map.CreatureGroupHolder.LookupByKey(groupId);
+            var creatureGroup = map.CreatureGroupHolder.LookupByKey(leaderGuid);
 
             //Add member to an existing group
             if (creatureGroup != null)
             {
-                Log.outDebug(LogFilter.Unit, "Group found: {0}, inserting creature GUID: {1}, Group InstanceID {2}", groupId, member.GetGUID().ToString(), member.GetInstanceId());
+                Log.outDebug(LogFilter.Unit, "Group found: {0}, inserting creature GUID: {1}, Group InstanceID {2}", leaderGuid, member.GetGUID().ToString(), member.GetInstanceId());
                 creatureGroup.AddMember(member);
             }
             //Create new group
             else
             {
-                Log.outDebug(LogFilter.Unit, "Group not found: {0}. Creating new group.", groupId);
-                CreatureGroup group = new CreatureGroup(groupId);
-                map.CreatureGroupHolder[groupId] = group;
+                Log.outDebug(LogFilter.Unit, "Group not found: {0}. Creating new group.", leaderGuid);
+                CreatureGroup group = new CreatureGroup(leaderGuid);
+                map.CreatureGroupHolder[leaderGuid] = group;
                 group.AddMember(member);
             }
         }
@@ -86,8 +86,8 @@ namespace Game.Entities
             {
                 //Load group member data
                 group_member = new FormationInfo();
-                group_member.leaderGUID = result.Read<uint>(0);
-                uint memberGUID = result.Read<uint>(1);
+                group_member.leaderGUID = result.Read<ulong>(0);
+                ulong memberGUID = result.Read<ulong>(1);
                 group_member.groupAI = result.Read<uint>(4);
                 group_member.point_1 = result.Read<ushort>(5);
                 group_member.point_2 = result.Read<ushort>(6);
@@ -131,7 +131,7 @@ namespace Game.Entities
 
     public class FormationInfo
     {
-        public uint leaderGUID;
+        public ulong leaderGUID;
         public float follow_dist;
         public float follow_angle;
         public uint groupAI;
@@ -141,7 +141,7 @@ namespace Game.Entities
 
     public class CreatureGroup
     {
-        public CreatureGroup(uint id)
+        public CreatureGroup(ulong id)
         {
             m_groupID = id;
         }
@@ -273,7 +273,7 @@ namespace Game.Entities
         }
 
         public Creature GetLeader() { return m_leader; }
-        public uint GetId() { return m_groupID; }
+        public ulong GetId() { return m_groupID; }
         public bool IsEmpty() { return m_members.Empty(); }
         public bool IsFormed() { return m_Formed; }
         public bool IsLeader(Creature creature) { return m_leader == creature; }
@@ -281,7 +281,7 @@ namespace Game.Entities
         Creature m_leader;
         Dictionary<Creature, FormationInfo> m_members = new Dictionary<Creature, FormationInfo>();
 
-        uint m_groupID;
+        ulong m_groupID;
         bool m_Formed;
     }
 }
