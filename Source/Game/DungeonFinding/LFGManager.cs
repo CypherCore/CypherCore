@@ -809,8 +809,7 @@ namespace Game.DungeonFinding
             List<ObjectGuid> keys = new List<ObjectGuid>(groles.Keys);
             for (int i = 0; i < keys.Count; i++)
             {
-                var it = groles[keys[i]];
-                LfgRoles role = it & ~LfgRoles.Leader;
+                LfgRoles role = groles[keys[i]] & ~LfgRoles.Leader;
                 if (role == LfgRoles.None)
                     return false;
 
@@ -818,10 +817,11 @@ namespace Game.DungeonFinding
                 {
                     if (role != LfgRoles.Damage)
                     {
-                        it -= (byte)LfgRoles.Damage;
+                        groles[keys[i]] -= LfgRoles.Damage;
                         if (CheckGroupRoles(groles))
                             return true;
-                        it += (byte)LfgRoles.Damage;
+
+                        groles[keys[i]] += (byte)LfgRoles.Damage;
                     }
                     else if (damage == SharedConst.LFGDPSNeeded)
                         return false;
@@ -833,10 +833,11 @@ namespace Game.DungeonFinding
                 {
                     if (role != LfgRoles.Healer)
                     {
-                        it -= (byte)LfgRoles.Healer;
+                        groles[keys[i]] -= LfgRoles.Healer;
                         if (CheckGroupRoles(groles))
                             return true;
-                        it += (byte)LfgRoles.Healer;
+
+                        groles[keys[i]] += (byte)LfgRoles.Healer;
                     }
                     else if (healer == SharedConst.LFGHealersNeeded)
                         return false;
@@ -848,10 +849,11 @@ namespace Game.DungeonFinding
                 {
                     if (role != LfgRoles.Tank)
                     {
-                        it -= (byte)LfgRoles.Tank;
+                        groles[keys[i]] -= LfgRoles.Tank;
                         if (CheckGroupRoles(groles))
                             return true;
-                        it += (byte)LfgRoles.Tank;
+
+                        groles[keys[i]] += (byte)LfgRoles.Tank;
                     }
                     else if (tank == SharedConst.LFGTanksNeeded)
                         return false;
