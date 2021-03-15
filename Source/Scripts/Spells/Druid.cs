@@ -29,11 +29,19 @@ namespace Scripts.Spells.Druid
     {
         public const uint BalanceT10Bonus = 70718;
         public const uint BalanceT10BonusProc = 70721;
-        public const uint BlessingOfTheClaw = 28750;
-        public const uint BlessingOfRemulos = 40445;
-        public const uint BlessingOfElune = 40446;
+        public const uint BearForm = 5487;
         public const uint BlessingOfCenarius = 40452;
+        public const uint BlessingOfElune = 40446;
+        public const uint BlessingOfRemulos = 40445;
+        public const uint BlessingOfTheClaw = 28750;
+        public const uint BloodFrenzyAura = 203962;
+        public const uint BloodFrenzyRageGain = 203961;
+        public const uint BramblesDamageAura = 213709;
+        public const uint BramblesPassive = 203953;
+        public const uint BramblesRelect = 203958;
+        public const uint BristlingFurGainRage = 204031;
         public const uint CatForm = 768;
+        public const uint EarthwardenAura = 203975;
         public const uint Exhilarate = 28742;
         public const uint FeralChargeBear = 16979;
         public const uint FeralChargeCat = 49376;
@@ -46,6 +54,7 @@ namespace Scripts.Spells.Druid
         public const uint FormsTrinketMoonkin = 37343;
         public const uint FormsTrinketNone = 37344;
         public const uint FormsTrinketTree = 37342;
+        public const uint GalacticGuardianAura = 213708;
         public const uint GoreProc = 93622;
         public const uint IdolOfFeralShadows = 34241;
         public const uint IdolOfWorship = 60774;
@@ -69,6 +78,118 @@ namespace Scripts.Spells.Druid
         public const uint SunfireDamage = 164815;
         public const uint SurvivalInstincts = 50322;
         public const uint TravelForm = 783;
+        public const uint ThrashBear = 77758;
+        public const uint ThrashBearAura = 192090;
+        public const uint ThrashCat = 106830;
+    }
+
+    abstract class spell_dru_base_transformer : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(GetShapeshiftFormSpell());
+        }
+
+        void HandleOnCast()
+        {
+            // Change into cat form
+            if (GetCaster().GetShapeshiftForm() != GetShapeshiftForm())
+                GetCaster().CastSpell(GetCaster(), GetShapeshiftFormSpell(), true);
+        }
+
+        public override void Register()
+        {
+            BeforeCast.Add(new CastHandler(HandleOnCast));
+        }
+
+        public abstract bool ToCatForm();
+
+        ShapeShiftForm GetShapeshiftForm() { return ToCatForm() ? ShapeShiftForm.CatForm : ShapeShiftForm.BearForm; }
+        uint GetShapeshiftFormSpell() { return ToCatForm() ? SpellIds.CatForm : SpellIds.BearForm; }
+    }
+
+    [Script] // 22812 - Barkskin
+    class spell_dru_barkskin : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.BramblesPassive);
+        }
+
+        void HandlePeriodic(AuraEffect aurEff)
+        {
+            Unit target = GetTarget();
+            if (target.HasAura(SpellIds.BramblesPassive))
+                target.CastSpell(target, SpellIds.BramblesDamageAura, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandlePeriodic, 2, AuraType.PeriodicDummy));
+        }
+    }
+
+    [Script] // 77758 - Berserk
+    class spell_dru_berserk : spell_dru_base_transformer
+    {
+        public override bool ToCatForm() { return false; }
+    }
+
+    [Script] // 203953 - Brambles - SPELL_DRUID_BRAMBLES_PASSIVE
+    class spell_dru_brambles : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.BramblesRelect, SpellIds.BramblesDamageAura);
+        }
+
+        void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
+        {
+            // Prevent Removal
+            PreventDefaultAction();
+        }
+
+        void HandleAfterAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
+        {
+            // reflect back damage to the attacker
+            Unit target = GetTarget();
+            Unit attacker = dmgInfo.GetAttacker();
+            if (attacker != null)
+                target.CastCustomSpell(SpellIds.BramblesRelect, SpellValueMod.BasePoint0, (int)absorbAmount, attacker, TriggerCastFlags.FullMask);
+        }
+
+        public override void Register()
+        {
+            OnEffectAbsorb.Add(new EffectAbsorbHandler(HandleAbsorb, 0));
+            AfterEffectAbsorb.Add(new EffectAbsorbHandler(HandleAfterAbsorb, 0));
+        }
+    }
+
+    [Script] // 155835 - Bristling Fur
+    class spell_dru_bristling_fur : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.BristlingFurGainRage);
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            // BristlingFurRage = 100 * Damage / MaxHealth.
+            DamageInfo damageInfo = eventInfo.GetDamageInfo();
+            if (damageInfo != null)
+            {
+                Unit target = GetTarget();
+                uint rage = (uint)(100.0f * (float)damageInfo.GetDamage() / (float)target.GetMaxHealth());
+                if (rage > 0)
+                    target.CastCustomSpell(SpellIds.BristlingFurGainRage, SpellValueMod.BasePoint0, (int)rage, target, TriggerCastFlags.FullMask);
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+        }
     }
 
     [Script] // 1850 - Dash
@@ -84,6 +205,26 @@ namespace Scripts.Spells.Druid
         public override void Register()
         {
             DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalculateAmount, 0, AuraType.ModIncreaseSpeed));
+        }
+    }
+
+    [Script] // 203974 - Earthwarden
+    class spell_dru_earthwarden : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ThrashCat, SpellIds.ThrashBear, SpellIds.EarthwardenAura);
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            Unit target = GetTarget();
+            target.CastSpell(target, SpellIds.EarthwardenAura, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
         }
     }
 
@@ -219,6 +360,35 @@ namespace Scripts.Spells.Druid
         }
     }
 
+    [Script] // 203964 - Galactic Guardian
+    class spell_dru_galactic_guardian : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.GalacticGuardianAura);
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            DamageInfo damageInfo = eventInfo.GetDamageInfo();
+            if (damageInfo != null)
+            {
+                Unit target = GetTarget();
+
+                // free automatic moonfire on target
+                target.CastSpell(damageInfo.GetVictim(), SpellIds.MoonfireDamage, true);
+
+                // Cast aura
+                target.CastSpell(damageInfo.GetVictim(), SpellIds.GalacticGuardianAura, true);
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+        }
+    }
+
     [Script] // 210706 - Gore
     class spell_dru_gore : AuraScript
     {
@@ -267,6 +437,12 @@ namespace Scripts.Spells.Druid
         {
             DoEffectCalcSpellMod.Add(new EffectCalcSpellModHandler(HandleEffectCalcSpellMod, 0, AuraType.Dummy));
         }
+    }
+
+    [Script] // 99 - Incapacitating Roar
+    class spell_dru_incapacitating_roar : spell_dru_base_transformer
+    {
+        public override bool ToCatForm() { return false; }
     }
 
     [Script] // 29166 - Innervate
@@ -459,6 +635,11 @@ namespace Scripts.Spells.Druid
     [Script] //  8921 - Moonfire
     class spell_dru_moonfire : SpellScript
     {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.MoonfireDamage);
+        }
+
         void HandleOnHit(uint effIndex)
         {
             GetCaster().CastSpell(GetHitUnit(), SpellIds.MoonfireDamage, true);
@@ -509,24 +690,9 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 5215 - Prowl
-    class spell_dru_prowl : SpellScript
+    class spell_dru_prowl : spell_dru_base_transformer
     {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(SpellIds.CatForm);
-        }
-
-        void HandleOnCast()
-        {
-            // Change into cat form
-            if (GetCaster().GetShapeshiftForm() != ShapeShiftForm.CatForm)
-                GetCaster().CastSpell(GetCaster(), SpellIds.CatForm);
-        }
-
-        public override void Register()
-        {
-            BeforeCast.Add(new CastHandler(HandleOnCast));
-        }
+        public override bool ToCatForm() { return true; }
     }
 
     [Script] // 1079 - Rip
@@ -664,6 +830,12 @@ namespace Scripts.Spells.Druid
         }
     }
 
+    [Script] // 106898 - Stampeding Roar
+    class spell_dru_stampeding_roar : spell_dru_base_transformer
+    {
+        public override bool ToCatForm() { return false; }
+    }
+
     [Script] // 50286 - Starfall (Dummy)
     class spell_dru_starfall_dummy : SpellScript
     {
@@ -713,24 +885,6 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 61336 - Survival Instincts
-    class spell_dru_survival_instincts : SpellScript
-    {
-        SpellCastResult CheckCast()
-        {
-            Unit caster = GetCaster();
-            if (!caster.IsInFeralForm())
-                return SpellCastResult.OnlyShapeshift;
-
-            return SpellCastResult.SpellCastOk;
-        }
-
-        public override void Register()
-        {
-            OnCheckCast.Add(new CheckCastHandler(CheckCast));
-        }
-    }
-
-    [Script]
     class spell_dru_survival_instincts_AuraScript : AuraScript
     {
         public override bool Validate(SpellInfo spell)
@@ -896,7 +1050,7 @@ namespace Scripts.Spells.Druid
             else
             {
                 targets.Remove(GetExplTargetUnit());
-                List<Unit> tempTargets = new List<Unit>();
+                List<Unit> tempTargets = new();
                 foreach (var obj in targets)
                     if (obj.IsTypeId(TypeId.Player) && GetCaster().IsInRaidWith(obj.ToUnit()))
                         tempTargets.Add(obj.ToUnit());
@@ -960,6 +1114,133 @@ namespace Scripts.Spells.Druid
         }
     }
 
+    [Script] // 77758 - Thrash
+    class spell_dru_thrash : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ThrashBearAura);
+        }
+
+        void HandleOnHitTarget(uint effIndex)
+        {
+            Unit hitUnit = GetHitUnit();
+            if (hitUnit != null)
+            {
+                Unit caster = GetCaster();
+
+                caster.CastSpell(hitUnit, SpellIds.ThrashBearAura, TriggerCastFlags.FullMask);
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleOnHitTarget, 0, SpellEffectName.SchoolDamage));
+        }
+    }
+
+    [Script] // 192090 - Thrash (Aura) - SPELL_DRUID_THRASH_BEAR_AURA
+    class spell_dru_thrash_AuraScript : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.BloodFrenzyAura, SpellIds.BloodFrenzyRageGain);
+        }
+
+        void HandlePeriodic(AuraEffect aurEff)
+        {
+            Unit caster = GetCaster();
+            if (caster != null)
+                if (caster.HasAura(SpellIds.BloodFrenzyAura))
+                    caster.CastSpell(caster, SpellIds.BloodFrenzyRageGain, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandlePeriodic, 0, AuraType.PeriodicDamage));
+        }
+    }
+
+    // 1066 - Aquatic Form
+    // 33943 - Flight Form
+    // 40120 - Swift Flight Form
+    [Script] // 165961 - Stag Form
+    class spell_dru_travel_form_AuraScript : AuraScript
+    {
+        uint triggeredSpellId;
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.FormStag, SpellIds.FormAquatic, SpellIds.FormFlight, SpellIds.FormSwiftFlight);
+        }
+
+        public override bool Load()
+        {
+            return GetCaster().IsTypeId(TypeId.Player);
+        }
+
+        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            // If it stays 0, it removes Travel Form dummy in AfterRemove.
+            triggeredSpellId = 0;
+
+            // We should only handle aura interrupts.
+            if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Interrupt)
+                return;
+
+            // Check what form is appropriate
+            triggeredSpellId = GetFormSpellId(GetTarget().ToPlayer(), GetCastDifficulty(), true);
+
+            // If chosen form is current aura, just don't remove it.
+            if (triggeredSpellId == m_scriptSpellId)
+                PreventDefaultAction();
+        }
+
+        void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            if (triggeredSpellId == m_scriptSpellId)
+                return;
+
+            Player player = GetTarget().ToPlayer();
+
+            if (triggeredSpellId != 0) // Apply new form
+                player.CastSpell(player, triggeredSpellId, true, null, aurEff);
+            else // If not set, simply remove Travel Form dummy
+                player.RemoveAura(SpellIds.TravelForm);
+        }
+
+        public override void Register()
+        {
+            OnEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ModShapeshift, AuraEffectHandleModes.Real));
+            AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.ModShapeshift, AuraEffectHandleModes.Real));
+        }
+
+        public static uint GetFormSpellId(Player player, Difficulty difficulty, bool requiresOutdoor)
+        {
+            // Check what form is appropriate
+            if (player.IsInWater()) // Aquatic form
+                return SpellIds.FormAquatic;
+
+            if (!player.IsInCombat() && player.GetSkillValue(SkillType.Riding) >= 225 && CheckLocationForForm(player, difficulty, requiresOutdoor, SpellIds.FormFlight) == SpellCastResult.SpellCastOk) // Flight form
+                return player.GetSkillValue(SkillType.Riding) >= 300 ? SpellIds.FormSwiftFlight : SpellIds.FormFlight;
+
+            if (CheckLocationForForm(player, difficulty, requiresOutdoor, SpellIds.FormStag) == SpellCastResult.SpellCastOk) // Stag form
+                return SpellIds.FormStag;
+
+            return 0;
+        }
+
+        static SpellCastResult CheckLocationForForm(Player targetPlayer, Difficulty difficulty, bool requireOutdoors, uint spell_id)
+        {
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell_id, difficulty);
+
+            if (requireOutdoors && !targetPlayer.GetMap().IsOutdoors(targetPlayer.GetPhaseShift(), targetPlayer.GetPositionX(), targetPlayer.GetPositionY(), targetPlayer.GetPositionZ()))
+                return SpellCastResult.OnlyOutdoors;
+
+            return spellInfo.CheckLocation(targetPlayer.GetMapId(), targetPlayer.GetZoneId(), targetPlayer.GetAreaId(), targetPlayer);
+        }
+    }
+
     [Script] // 783 - Travel Form (dummy)
     class spell_dru_travel_form_dummy : SpellScript
     {
@@ -992,7 +1273,7 @@ namespace Scripts.Spells.Druid
 
         public override bool Load()
         {
-            return GetCaster().GetTypeId() == TypeId.Player;
+            return GetCaster().IsTypeId(TypeId.Player);
         }
 
         void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -1000,14 +1281,14 @@ namespace Scripts.Spells.Druid
             Player player = GetTarget().ToPlayer();
 
             // Outdoor check already passed - Travel Form (dummy) has SPELL_ATTR0_OUTDOORS_ONLY attribute.
-            uint triggeredSpellId = GetFormSpellId(player, GetCastDifficulty(), false);
+            uint triggeredSpellId = spell_dru_travel_form_AuraScript.GetFormSpellId(player, GetCastDifficulty(), false);
 
-            player.AddAura(triggeredSpellId, player);
+            player.CastSpell(player, triggeredSpellId, true, null, aurEff);
         }
 
         void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            // No need to check Remove mode, it's safe for auras to Remove each other in AfterRemove hook.
+            // No need to check remove mode, it's safe for auras to remove each other in AfterRemove hook.
             GetTarget().RemoveAura(SpellIds.FormStag);
             GetTarget().RemoveAura(SpellIds.FormAquatic);
             GetTarget().RemoveAura(SpellIds.FormFlight);
@@ -1019,85 +1300,24 @@ namespace Scripts.Spells.Druid
             OnEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
             AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
-
-        static SpellCastResult CheckLocationForForm(Player targetPlayer, Difficulty difficulty, bool requireOutdoors, uint spellId)
-        {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, difficulty);
-
-            if (requireOutdoors && !targetPlayer.GetMap().IsOutdoors(targetPlayer.GetPhaseShift(), targetPlayer.GetPositionX(), targetPlayer.GetPositionY(), targetPlayer.GetPositionZ()))
-                return SpellCastResult.OnlyOutdoors;
-
-            return spellInfo.CheckLocation(targetPlayer.GetMapId(), targetPlayer.GetZoneId(), targetPlayer.GetAreaId(), targetPlayer);
-        }
-
-        public static uint GetFormSpellId(Player player, Difficulty difficulty, bool requiresOutdoor)
-        {
-            // Check what form is appropriate
-            if (player.IsInWater()) // Aquatic form
-                return SpellIds.FormAquatic;
-
-            if (player.GetSkillValue(SkillType.Riding) >= 225 && CheckLocationForForm(player, difficulty, requiresOutdoor, SpellIds.FormFlight) == SpellCastResult.SpellCastOk) // Flight form
-                return player.GetSkillValue(SkillType.Riding) >= 300 ? SpellIds.FormSwiftFlight : SpellIds.FormFlight;
-
-            if (CheckLocationForForm(player, difficulty, requiresOutdoor, SpellIds.FormStag) == SpellCastResult.SpellCastOk) // Stag form
-                return SpellIds.FormStag;
-
-            return 0;
-        }
     }
 
-    // 1066 - Aquatic Form
-    // 33943 - Flight Form
-    // 40120 - Swift Flight Form
-    [Script] // 165961 - Stag Form
-    class spell_dru_travel_form_AuraScript : AuraScript
+    [Script] // 252216 - Tiger Dash
+    class spell_dru_tiger_dash : AuraScript
     {
-        uint triggeredSpellId;
-
-        public override bool Validate(SpellInfo spellInfo)
+        void HandlePeriodic(AuraEffect aurEff)
         {
-            return ValidateSpellInfo(SpellIds.FormStag, SpellIds.FormAquatic, SpellIds.FormFlight, SpellIds.FormSwiftFlight);
-        }
-
-        public override bool Load()
-        {
-            return GetCaster().GetTypeId() == TypeId.Player;
-        }
-
-        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            // If it stays 0, it Removes Travel Form dummy in AfterRemove.
-            triggeredSpellId = 0;
-
-            // We should only handle aura interrupts.
-            if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Interrupt)
-                return;
-
-            // Check what form is appropriate
-            triggeredSpellId = spell_dru_travel_form_dummy_AuraScript.GetFormSpellId(GetTarget().ToPlayer(), GetCastDifficulty(), true);
-
-            // If chosen form is current aura, just don't Remove it.
-            if (triggeredSpellId == m_scriptSpellId)
-                PreventDefaultAction();
-        }
-
-        void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
-        {
-            if (triggeredSpellId == m_scriptSpellId)
-                return;
-
-            Player player = GetTarget().ToPlayer();
-
-            if (triggeredSpellId != 0) // Apply new form
-                player.AddAura(triggeredSpellId, player);
-            else // If not set, simply Remove Travel Form dummy
-                player.RemoveAura(SpellIds.TravelForm);
+            AuraEffect effRunSpeed = GetEffect(0);
+            if (effRunSpeed != null)
+            {
+                int reduction = aurEff.GetAmount();
+                effRunSpeed.ChangeAmount(effRunSpeed.GetAmount() - reduction);
+            }
         }
 
         public override void Register()
         {
-            OnEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ModShapeshift, AuraEffectHandleModes.Real));
-            AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.ModShapeshift, AuraEffectHandleModes.Real));
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandlePeriodic, 1, AuraType.PeriodicDummy));
         }
     }
 
@@ -1163,7 +1383,7 @@ namespace Scripts.Spells.Druid
             if (!caster)
                 return;
 
-            // calculate from base damage, not from aurEff->GetAmount() (already modified)
+            // calculate from base damage, not from aurEff.GetAmount() (already modified)
             float damage = caster.CalculateSpellDamage(GetUnitOwner(), GetSpellInfo(), aurEff.GetEffIndex());
 
             // Wild Growth = first tick gains a 6% bonus, reduced by 2% each tick
