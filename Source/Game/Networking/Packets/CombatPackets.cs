@@ -78,7 +78,7 @@ namespace Game.Networking.Packets
             if (victim)
             {
                 Victim = victim.GetGUID();
-                NowDead = victim.IsDead();
+                NowDead = !victim.IsAlive(); // using isAlive instead of isDead to catch JUST_DIED death states as well
             }
         }
 
