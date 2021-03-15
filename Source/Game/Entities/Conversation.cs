@@ -70,9 +70,20 @@ namespace Game.Entities
         public override void Update(uint diff)
         {
             if (GetDuration() > diff)
+            {
                 _duration -= diff;
+                DoWithSuppressingObjectUpdates(() =>
+                {
+                    // Only sent in CreateObject
+                    ApplyModUpdateFieldValue(m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.Progress), diff, true);
+                    m_conversationData.ClearChanged(m_conversationData.Progress);
+                });
+            }
             else
+            {
                 Remove(); // expired
+                return;
+            }
 
             base.Update(diff);
         }
@@ -110,6 +121,7 @@ namespace Game.Entities
 
             SetMap(map);
             Relocate(pos);
+            RelocateStationaryPosition(pos);
 
             _Create(ObjectGuid.Create(HighGuid.Conversation, GetMapId(), conversationEntry, lowGuid));
             PhasingHandler.InheritPhaseShift(this, creator);
@@ -123,14 +135,14 @@ namespace Game.Entities
 
             if (conversationTemplate.Actors != null)
             {
-                for (ushort actorIndex = 0; actorIndex < conversationTemplate.Actors.Count; ++actorIndex)
+                foreach (var actor in conversationTemplate.Actors)
                 {
-                    ConversationActorTemplate actor = conversationTemplate.Actors[actorIndex];
                     if (actor != null)
                     {
                         ConversationActor actorField = new ConversationActor();
                         actorField.CreatureID = actor.CreatureId;
                         actorField.CreatureDisplayInfoID = actor.CreatureModelId;
+                        actorField.Id = (int)actor.Id;
                         actorField.Type = ConversationActorType.CreatureActor;
 
                         AddDynamicUpdateFieldValue(m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.Actors), actorField);
