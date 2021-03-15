@@ -70,6 +70,24 @@ namespace Framework.Networking
             }
         }
 
+        public async void AsyncAccept<T>() where T : ISocket
+        {
+            try
+            {
+                var socket = await _listener.AcceptSocketAsync();
+                if (socket != null)
+                {
+                    T newSocket = (T)Activator.CreateInstance(typeof(T), socket);
+                    newSocket.Accept();
+
+                    if (!_closed)
+                        AsyncAccept<T>();
+                }
+            }
+            catch (ObjectDisposedException)
+            { }
+        }
+
         public void Close()
         {
             if (_closed)

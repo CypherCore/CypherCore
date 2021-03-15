@@ -2852,7 +2852,7 @@ Network.TcpNodelay = 1
 ###################################################################################################
 
 ###################################################################################################
-# CONSOLE
+# CONSOLE AND REMOTE ACCESS
 #
 #    Console.Enable (NYI)
 #        Description: Enable console.
@@ -2861,6 +2861,34 @@ Network.TcpNodelay = 1
 
 Console.Enable = 1
 
+#
+#    Ra.Enable
+#        Description: Enable remote console (telnet).
+#        Default:     0 - (Disabled)
+#                     1 - (Enabled)
+
+Ra.Enable = 0
+
+#
+#    Ra.IP
+#        Description: Bind remote access to IP/hostname.
+#        Default:     "0.0.0.0" - (Bind to all IPs on the system)
+
+Ra.IP = "0.0.0.0"
+
+#
+#    Ra.Port
+#        Description: TCP port to reach the remote console.
+#        Default:     3443
+
+Ra.Port = 3443
+
+#
+#    Ra.MinLevel
+#        Description: Required security level to use the remote console.
+#        Default:     3
+
+Ra.MinLevel = 3
 #
 ###################################################################################################
 

@@ -402,6 +402,7 @@ public enum LogFilter
     ChatSystem,
     Cheat,
     Commands,
+    CommandsRA,
     Condition,
     Conversation,
     Garrison,

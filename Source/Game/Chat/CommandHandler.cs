@@ -988,4 +988,63 @@ namespace Game.Chat
             return (byte)Global.WorldMgr.GetDefaultDbcLocale();
         }
     }
+
+    public class RemoteAccessHandler : CommandHandler
+    {
+        Action<string> _reportToRA;
+
+        public RemoteAccessHandler(Action<string> reportToRA) : base() 
+        {
+            _reportToRA = reportToRA;
+        }
+
+        public override bool IsAvailable(ChatCommand cmd)
+        {
+            return cmd.AllowConsole;
+        }
+
+        public override bool HasPermission(RBACPermissions permission)
+        {
+            return true;
+        }
+
+        public override void SendSysMessage(string str, bool escapeCharacters)
+        {
+            _sentErrorMessage = true;
+
+            _reportToRA(str);
+        }
+
+        public override bool ParseCommand(string str)
+        {
+            if (str.IsEmpty())
+                return false;
+
+            // Console allows using commands both with and without leading indicator
+            if (str[0] == '.' || str[0] == '!')
+                str = str.Substring(1);
+
+            return _ParseCommands(str);
+        }
+
+        public override string GetNameLink()
+        {
+            return GetCypherString(CypherStrings.ConsoleCommand);
+        }
+
+        public override bool NeedReportToTarget(Player chr)
+        {
+            return true;
+        }
+
+        public override Locale GetSessionDbcLocale()
+        {
+            return Global.WorldMgr.GetDefaultDbcLocale();
+        }
+
+        public override byte GetSessionDbLocaleIndex()
+        {
+            return (byte)Global.WorldMgr.GetDefaultDbcLocale();
+        }
+    }
 }

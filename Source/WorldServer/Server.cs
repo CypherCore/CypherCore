@@ -18,6 +18,7 @@
 using Framework.Configuration;
 using Framework.Constants;
 using Framework.Database;
+using Framework.Networking;
 using Game;
 using Game.Chat;
 using Game.Networking;
@@ -57,6 +58,18 @@ namespace WorldServer
             Global.RealmMgr.Initialize(ConfigMgr.GetDefaultValue("RealmsStateUpdateDelay", 10));
 
             Global.WorldMgr.SetInitialWorldSettings();
+
+            // Start the Remote Access port (acceptor) if enabled
+            if (ConfigMgr.GetDefaultValue("Ra.Enable", false))
+            {
+                int raPort = ConfigMgr.GetDefaultValue("Ra.Port", 3443);
+                string raListener = ConfigMgr.GetDefaultValue("Ra.IP", "0.0.0.0");
+                AsyncAcceptor raAcceptor = new();
+                if (!raAcceptor.Start(raListener, raPort))
+                    Log.outError(LogFilter.Server, "Failed to initialize RemoteAccess Socket Server");
+                else
+                    raAcceptor.AsyncAccept<RASocket>();
+            }
 
             // Launch the worldserver listener socket
             int worldPort = WorldConfig.GetIntValue(WorldCfg.PortWorld);
