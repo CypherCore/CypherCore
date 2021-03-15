@@ -428,7 +428,7 @@ namespace Scripts.Spells.Druid
                 spellMod.op = SpellModOp.Dot;
                 spellMod.type = SpellModType.Flat;
                 spellMod.spellId = GetId();
-                spellMod.mask = GetSpellInfo().GetEffect(aurEff.GetEffIndex()).SpellClassMask;
+                spellMod.mask = aurEff.GetSpellEffectInfo().SpellClassMask;
             }
             spellMod.value = aurEff.GetAmount() / 7;
         }

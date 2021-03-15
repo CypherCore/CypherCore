@@ -5539,7 +5539,7 @@ namespace Game.Spells
                         foundNotMechanic = true;
 
                         // fill up aura mechanic info to send client proper error message
-                        _param1 = (uint)aurEff.GetSpellInfo().GetEffect(aurEff.GetEffIndex()).Mechanic;
+                        _param1 = (uint)aurEff.GetSpellEffectInfo().Mechanic;
                         if (_param1 == 0)
                             _param1 = (uint)aurEff.GetSpellInfo().Mechanic;
 

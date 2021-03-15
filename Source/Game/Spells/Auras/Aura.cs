@@ -154,7 +154,7 @@ namespace Game.Spells
                 _flags |= positiveFound ? AuraFlags.Positive : AuraFlags.Negative;
             }
 
-            bool effectNeedsAmount(AuraEffect effect) => effect != null && (GetEffectsToApply() & (1 << effect.GetEffIndex())) != 0 && Aura.EffectTypeNeedsSendingAmount(effect.GetAuraType());
+            bool effectNeedsAmount(AuraEffect effect) => effect != null && (GetEffectsToApply() & (1 << (int)effect.GetEffIndex())) != 0 && Aura.EffectTypeNeedsSendingAmount(effect.GetAuraType());
 
             if (GetBase().GetSpellInfo().HasAttribute(SpellAttr8.AuraSendAmount) || GetBase().GetAuraEffects().Any(effectNeedsAmount))
                 _flags |= AuraFlags.Scalable;
@@ -343,7 +343,7 @@ namespace Game.Spells
             foreach (SpellEffectInfo effect in GetSpellInfo().GetEffects())
             {
                 if (effect != null && Convert.ToBoolean(effMask & (1 << (int)effect.EffectIndex)))
-                    _effects[effect.EffectIndex] = new AuraEffect(this, effect.EffectIndex, baseAmount != null ? baseAmount[effect.EffectIndex] : (int?)null, caster);
+                    _effects[effect.EffectIndex] = new AuraEffect(this, effect, baseAmount != null ? baseAmount[effect.EffectIndex] : (int?)null, caster);
             }
         }
 
@@ -1057,7 +1057,7 @@ namespace Game.Spells
                     continue;
 
                 effect.SetAmount(amount[effect.GetEffIndex()]);
-                effect.SetCanBeRecalculated(Convert.ToBoolean(recalculateMask & (1 << effect.GetEffIndex())));
+                effect.SetCanBeRecalculated(Convert.ToBoolean(recalculateMask & (1 << (int)effect.GetEffIndex())));
                 effect.CalculatePeriodic(caster, false, true);
                 effect.CalculateSpellMod();
                 effect.RecalculateAmount(caster);
@@ -2350,7 +2350,7 @@ namespace Game.Spells
             uint effMask = 0;
             foreach (AuraEffect effect in GetAuraEffects())
                 if (effect != null)
-                    effMask |= (uint)(1 << effect.GetEffIndex());
+                    effMask |= (uint)(1 << (int)effect.GetEffIndex());
             return effMask;
         }
 

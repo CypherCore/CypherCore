@@ -1610,14 +1610,14 @@ namespace Scripts.Spells.Quest
 
     // 51769 - Emblazon Runeblade
     [Script]
-    class spell_q12619_emblazon_runeblade : AuraScript
+    class spell_q12619_emblazon_runeblade_AuraScript : AuraScript
     {
         void HandleEffectPeriodic(AuraEffect aurEff)
         {
             PreventDefaultAction();
             Unit caster = GetCaster();
             if (caster)
-                caster.CastSpell(caster, GetSpellInfo().GetEffect(aurEff.GetEffIndex()).TriggerSpell, true, null, aurEff);
+                caster.CastSpell(caster, aurEff.GetSpellEffectInfo().TriggerSpell, true, null, aurEff);
         }
 
         public override void Register()
@@ -1628,7 +1628,7 @@ namespace Scripts.Spells.Quest
 
     // 51770 - Emblazon Runeblade
     [Script]
-    class spell_q12619_emblazon_runeblade_effect : SpellScript
+    class spell_q12619_emblazon_runeblade : SpellScript
     {
         void HandleScript(uint effIndex)
         {

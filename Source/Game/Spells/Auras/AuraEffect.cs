@@ -32,14 +32,13 @@ namespace Game.Spells
 {
     public class AuraEffect
     {
-        public AuraEffect(Aura baseAura, uint effIndex, int? baseAmount, Unit caster)
+        public AuraEffect(Aura baseAura, SpellEffectInfo spellEfffectInfo, int? baseAmount, Unit caster)
         {
             auraBase = baseAura;
             m_spellInfo = baseAura.GetSpellInfo();
-            _effectInfo = m_spellInfo.GetEffect(effIndex);
+            _effectInfo = spellEfffectInfo;
             m_baseAmount = baseAmount.HasValue ? baseAmount.Value : _effectInfo.CalcBaseValue(caster, baseAura.GetAuraType() == AuraObjectType.Unit ? baseAura.GetOwner().ToUnit() : null, baseAura.GetCastItemId(), baseAura.GetCastItemLevel());
             m_donePct = 1.0f;
-            m_effIndex = (byte)effIndex;
             m_canBeRecalculated = true;
             m_isPeriodic = false;
 
@@ -873,7 +872,7 @@ namespace Game.Spells
 
         public SpellInfo GetSpellInfo() { return m_spellInfo; }
         public uint GetId() { return m_spellInfo.Id; }
-        public byte GetEffIndex() { return m_effIndex; }
+        public uint GetEffIndex() { return _effectInfo.EffectIndex; }
         public int GetBaseAmount() { return m_baseAmount; }
         public int GetPeriod() { return m_period; }
 
@@ -939,20 +938,18 @@ namespace Game.Spells
         Aura auraBase;
         SpellInfo m_spellInfo;
         SpellEffectInfo _effectInfo;
-        public int m_baseAmount;
+        SpellModifier m_spellmod;
 
+        public int m_baseAmount;
         int m_amount;
         int m_damage;
         float m_critChance;
         float m_donePct;
 
-        SpellModifier m_spellmod;
-
         int m_periodicTimer;
         int m_period;
         uint m_tickNumber;
 
-        byte m_effIndex;
         bool m_canBeRecalculated;
         bool m_isPeriodic;
         #endregion
@@ -4154,7 +4151,7 @@ namespace Game.Spells
             // pet auras
             if (target.GetTypeId() == TypeId.Player && mode.HasAnyFlag(AuraEffectHandleModes.Real))
             {
-                PetAura petSpell = Global.SpellMgr.GetPetAura(GetId(), m_effIndex);
+                PetAura petSpell = Global.SpellMgr.GetPetAura(GetId(), (byte)GetEffIndex());
                 if (petSpell != null)
                 {
                     if (apply)
