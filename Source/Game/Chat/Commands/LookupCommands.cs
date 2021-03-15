@@ -1128,9 +1128,9 @@ namespace Game.Chat
 
                             bool known = target && target.HasSpell(spellInfo.Id);
                             SpellEffectInfo effect = spellInfo.GetEffect(0);
-                            bool learn = (effect.Effect == SpellEffectName.LearnSpell);
+                            bool learn = effect?.Effect == SpellEffectName.LearnSpell;
 
-                            SpellInfo learnSpellInfo = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, spellInfo.Difficulty);
+                            SpellInfo learnSpellInfo = effect != null ? Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, spellInfo.Difficulty) : null;
 
                             bool talent = spellInfo.HasAttribute(SpellCustomAttributes.IsTalent);
                             bool passive = spellInfo.IsPassive();
