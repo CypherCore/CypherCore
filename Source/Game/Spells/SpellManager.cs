@@ -2499,6 +2499,12 @@ namespace Game.Entities
                 {
                     uint spellId = spellsResult.Read<uint>(0);
                     Difficulty difficulty = (Difficulty)spellsResult.Read<uint>(2);
+                    if (CliDB.SpellNameStorage.HasRecord(spellId))
+                    {
+                        Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} is already loaded from file. Overriding existing spells is not allowed.");
+                        continue;
+                    }
+
                     mServersideSpellNames.Add(new (spellId, spellsResult.Read<string>(61)));
 
                     SpellInfo spellInfo = new SpellInfo(mServersideSpellNames.Last().Name, difficulty, spellEffects[(spellId, difficulty)]);
@@ -2573,7 +2579,7 @@ namespace Game.Entities
                     spellInfo.SchoolMask = (SpellSchoolMask)spellsResult.Read<uint>(74);
                     spellInfo.ChargeCategoryId = spellsResult.Read<uint>(75);
 
-                    mSpellInfoMap.Add(spellInfo.Id, spellInfo);
+                    mSpellInfoMap.Add(spellId, spellInfo);
 
                 } while (spellsResult.NextRow());
             }
