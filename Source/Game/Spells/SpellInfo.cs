@@ -2677,7 +2677,7 @@ namespace Game.Spells
 
         public SpellPowerCost CalcPowerCost(PowerType powerType, bool optionalCost, Unit caster, SpellSchoolMask schoolMask, Spell spell = null)
         {
-            var spellPowerRecord = PowerCosts.First(spellPowerEntry => spellPowerEntry?.PowerType == powerType);
+            var spellPowerRecord = PowerCosts.FirstOrDefault(spellPowerEntry => spellPowerEntry?.PowerType == powerType);
             if (spellPowerRecord == null)
                 return null;
 
