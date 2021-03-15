@@ -1680,6 +1680,16 @@ namespace Game.Achievements
                     if (referencePlayer.GetQuestStatus(reqValue) != QuestStatus.Complete)
                         return false;
                     break;
+                case CriteriaAdditionalCondition.CompletedQuestObjective: // 112
+                    {
+                        QuestObjective objective = Global.ObjectMgr.GetQuestObjective(reqValue);
+                        if (objective == null)
+                            return false;
+
+                        if (referencePlayer.GetQuestRewardStatus(objective.QuestID) || !referencePlayer.IsQuestObjectiveComplete(objective))
+                            return false;
+                        break;
+                    }
                 case CriteriaAdditionalCondition.ExploredArea: // 113
                     {
                         AreaTableRecord areaTable = CliDB.AreaTableStorage.LookupByKey(reqValue);

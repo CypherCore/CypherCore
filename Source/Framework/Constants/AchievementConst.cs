@@ -215,7 +215,7 @@ namespace Framework.Constants
         TimeInRange = 109, // Nyi, Packed Time Between Asset And Secondaryasset
         RewardedQuest = 110,
         CompletedQuest = 111,
-        CompletedQuestObjective = 112, // Nyi, Questobjectiveid
+        CompletedQuestObjective = 112, // Questobjectiveid
         ExploredArea = 113,
         ItemCountIncludingBank = 114,
         //Unk115                     = 115, // Nyi
