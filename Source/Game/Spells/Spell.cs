@@ -4570,7 +4570,7 @@ namespace Game.Spells
             {
                 if (m_spellInfo.CasterAuraState != 0 && !m_caster.HasAuraState(m_spellInfo.CasterAuraState, m_spellInfo, m_caster))
                     return SpellCastResult.CasterAurastate;
-                if (m_spellInfo.CasterAuraStateNot != 0 && m_caster.HasAuraState(m_spellInfo.CasterAuraStateNot, m_spellInfo, m_caster))
+                if (m_spellInfo.ExcludeCasterAuraState != 0 && m_caster.HasAuraState(m_spellInfo.ExcludeCasterAuraState, m_spellInfo, m_caster))
                     return SpellCastResult.CasterAurastate;
 
                 // Note: spell 62473 requres casterAuraSpell = triggering spell

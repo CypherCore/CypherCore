@@ -66,13 +66,10 @@ namespace Game.Spells
                 AttributesEx14 = (SpellAttr14)_misc.Attributes[14];
                 CastTimeEntry = CliDB.SpellCastTimesStorage.LookupByKey(_misc.CastingTimeIndex);
                 DurationEntry = CliDB.SpellDurationStorage.LookupByKey(_misc.DurationIndex);
-                RangeIndex = _misc.RangeIndex;
                 RangeEntry = CliDB.SpellRangeStorage.LookupByKey(_misc.RangeIndex);
                 Speed = _misc.Speed;
                 LaunchDelay = _misc.LaunchDelay;
                 SchoolMask = (SpellSchoolMask)_misc.SchoolMask;
-                AttributesCu = 0;
-
                 IconFileDataId = _misc.SpellIconFileDataID;
                 ActiveIconFileDataId = _misc.ActiveIconFileDataID;
                 ContentTuningId = _misc.ContentTuningID;
@@ -96,14 +93,18 @@ namespace Game.Spells
             SpellAuraOptionsRecord _options = data.AuraOptions;
             if (_options != null)
             {
-                SpellProcsPerMinuteRecord _ppm = CliDB.SpellProcsPerMinuteStorage.LookupByKey(_options.SpellProcsPerMinuteID);
                 ProcFlags = (ProcFlags)_options.ProcTypeMask[0];
                 ProcChance = _options.ProcChance;
                 ProcCharges = (uint)_options.ProcCharges;
                 ProcCooldown = _options.ProcCategoryRecovery;
-                ProcBasePPM = _ppm != null ? _ppm.BaseProcRate : 0.0f;
-                ProcPPMMods = Global.DB2Mgr.GetSpellProcsPerMinuteMods(_options.SpellProcsPerMinuteID);
                 StackAmount = _options.CumulativeAura;
+
+                SpellProcsPerMinuteRecord _ppm = CliDB.SpellProcsPerMinuteStorage.LookupByKey(_options.SpellProcsPerMinuteID);
+                if (_ppm != null)
+                {
+                    ProcBasePPM = _ppm.BaseProcRate;
+                    ProcPPMMods = Global.DB2Mgr.GetSpellProcsPerMinuteMods(_ppm.Id);
+                }
             }
 
             // SpellAuraRestrictionsEntry
@@ -112,8 +113,8 @@ namespace Game.Spells
             {
                 CasterAuraState = (AuraStateType)_aura.CasterAuraState;
                 TargetAuraState = (AuraStateType)_aura.TargetAuraState;
-                CasterAuraStateNot = (AuraStateType)_aura.ExcludeCasterAuraState;
-                TargetAuraStateNot = (AuraStateType)_aura.ExcludeTargetAuraState;
+                ExcludeCasterAuraState = (AuraStateType)_aura.ExcludeCasterAuraState;
+                ExcludeTargetAuraState = (AuraStateType)_aura.ExcludeTargetAuraState;
                 CasterAuraSpell = _aura.CasterAuraSpell;
                 TargetAuraSpell = _aura.TargetAuraSpell;
                 ExcludeCasterAuraSpell = _aura.ExcludeCasterAuraSpell;
@@ -196,10 +197,13 @@ namespace Game.Spells
 
             // SpellReagentsEntry
             SpellReagentsRecord _reagents = data.Reagents;
-            for (var i = 0; i < SpellConst.MaxReagents; ++i)
+            if (_reagents != null)
             {
-                Reagent[i] = _reagents != null ? _reagents.Reagent[i] : 0;
-                ReagentCount[i] = _reagents != null ? _reagents.ReagentCount[i] : 0u;
+                for (var i = 0; i < SpellConst.MaxReagents; ++i)
+                {
+                    Reagent[i] = _reagents.Reagent[i];
+                    ReagentCount[i] = _reagents.ReagentCount[i];
+                }
             }
 
             // SpellShapeshiftEntry
@@ -214,7 +218,7 @@ namespace Game.Spells
             SpellTargetRestrictionsRecord _target = data.TargetRestrictions;
             if (_target != null)
             {
-                targets = (SpellCastTargetFlags)_target.Targets;
+                Targets = (SpellCastTargetFlags)_target.Targets;
                 ConeAngle = _target.ConeDegrees;
                 Width = _target.Width;
                 TargetCreatureType = _target.TargetCreatureType;
@@ -224,18 +228,30 @@ namespace Game.Spells
 
             // SpellTotemsEntry
             SpellTotemsRecord _totem = data.Totems;
-            for (var i = 0; i < 2; ++i)
+            if (_totem != null)
             {
-                TotemCategory[i] = _totem != null ? _totem.RequiredTotemCategoryID[i] : 0u;
-                Totem[i] = _totem != null ? _totem.Totem[i] : 0;
+                for (var i = 0; i < 2; ++i)
+                {
+                    TotemCategory[i] = _totem.RequiredTotemCategoryID[i];
+                    Totem[i] = _totem.Totem[i];
+                }
             }
-            ChainEntry = null;
-            ExplicitTargetMask = 0;
 
             _spellSpecific = SpellSpecificType.Normal;
             _auraState = AuraStateType.None;
         }
 
+        public SpellInfo(SpellNameRecord spellName, Difficulty difficulty, List<SpellEffectRecord> effects)
+
+        {
+            Id = spellName.Id;
+            Difficulty = difficulty;
+            SpellName = spellName.Name;
+
+            foreach (SpellEffectRecord spellEffect in effects)
+                _effects[spellEffect.EffectIndex] = new SpellEffectInfo(this, spellEffect);
+        }
+        
         public bool HasEffect(SpellEffectName effect)
         {
             foreach (SpellEffectInfo eff in _effects)
@@ -387,8 +403,8 @@ namespace Game.Spells
                 SpellCastTargetFlags mask = 0;
                 foreach (SpellEffectInfo effect in _effects)
                 {
-                    if (effect != null && (effect.TargetA.GetTarget() != Targets.UnitCaster && effect.TargetA.GetTarget() != Targets.DestCaster
-                        && effect.TargetB.GetTarget() != Targets.UnitCaster && effect.TargetB.GetTarget() != Targets.DestCaster))
+                    if (effect != null && (effect.TargetA.GetTarget() != Framework.Constants.Targets.UnitCaster && effect.TargetA.GetTarget() != Framework.Constants.Targets.DestCaster
+                        && effect.TargetB.GetTarget() != Framework.Constants.Targets.UnitCaster && effect.TargetB.GetTarget() != Framework.Constants.Targets.DestCaster))
                     {
                         mask |= effect.GetProvidedTargetMask();
                     }
@@ -481,7 +497,7 @@ namespace Game.Spells
 
         public bool IsAllowingDeadTarget()
         {
-            if (HasAttribute(SpellAttr2.CanTargetDead) || targets.HasAnyFlag(SpellCastTargetFlags.CorpseAlly | SpellCastTargetFlags.CorpseEnemy | SpellCastTargetFlags.UnitDead))
+            if (HasAttribute(SpellAttr2.CanTargetDead) || Targets.HasAnyFlag(SpellCastTargetFlags.CorpseAlly | SpellCastTargetFlags.CorpseEnemy | SpellCastTargetFlags.UnitDead))
                 return true;
 
             foreach (SpellEffectInfo effect in _effects)
@@ -1115,7 +1131,7 @@ namespace Game.Spells
                 if (TargetAuraState != 0 && !unitTarget.HasAuraState(TargetAuraState, this, caster))
                     return SpellCastResult.TargetAurastate;
 
-                if (TargetAuraStateNot != 0 && unitTarget.HasAuraState(TargetAuraStateNot, this, caster))
+                if (ExcludeTargetAuraState != 0 && unitTarget.HasAuraState(ExcludeTargetAuraState, this, caster))
                     return SpellCastResult.TargetAurastate;
             }
 
@@ -3168,7 +3184,7 @@ namespace Game.Spells
         {
             bool srcSet = false;
             bool dstSet = false;
-            SpellCastTargetFlags targetMask = targets;
+            SpellCastTargetFlags targetMask = Targets;
             // prepare target mask using effect target entries
             foreach (SpellEffectInfo effect in _effects)
             {
@@ -3360,12 +3376,12 @@ namespace Game.Spells
                                     return false;
                                 case AuraType.PeriodicDamage:            // used in positive spells also.
                                                                          // part of negative spell if casted at self (prevent cancel)
-                                    if (effect.TargetA.GetTarget() == Targets.UnitCaster)
+                                    if (effect.TargetA.GetTarget() == Framework.Constants.Targets.UnitCaster)
                                         return false;
                                     break;
                                 case AuraType.ModDecreaseSpeed:         // used in positive spells also
                                                                         // part of positive spell if casted at self
-                                    if (effect.TargetA.GetTarget() != Targets.UnitCaster)
+                                    if (effect.TargetA.GetTarget() != Framework.Constants.Targets.UnitCaster)
                                         return false;
                                     // but not this if this first effect (didn't find better check)
                                     if (HasAttribute(SpellAttr0.Negative1) && effIndex == 0)
@@ -3452,14 +3468,14 @@ namespace Game.Spells
             // non-positive targets
             switch (targetA)
             {
-                case Targets.UnitNearbyEnemy:
-                case Targets.UnitTargetEnemy:
-                case Targets.UnitSrcAreaEnemy:
-                case Targets.UnitDestAreaEnemy:
-                case Targets.UnitConeEnemy24:
-                case Targets.UnitConeEnemy104:
-                case Targets.DestDynobjEnemy:
-                case Targets.DestTargetEnemy:
+                case Framework.Constants.Targets.UnitNearbyEnemy:
+                case Framework.Constants.Targets.UnitTargetEnemy:
+                case Framework.Constants.Targets.UnitSrcAreaEnemy:
+                case Framework.Constants.Targets.UnitDestAreaEnemy:
+                case Framework.Constants.Targets.UnitConeEnemy24:
+                case Framework.Constants.Targets.UnitConeEnemy104:
+                case Framework.Constants.Targets.DestDynobjEnemy:
+                case Framework.Constants.Targets.DestTargetEnemy:
                     return false;
                 default:
                     break;
@@ -3570,7 +3586,6 @@ namespace Game.Spells
 
         public bool HasChannelInterruptFlag(SpellChannelInterruptFlags flag) { return (ChannelInterruptFlags[0] & (uint)flag) != 0; }
 
-
         #region Fields
         public uint Id { get; set; }
         public Difficulty Difficulty { get; set; }
@@ -3596,14 +3611,14 @@ namespace Game.Spells
         public BitSet NegativeEffects { get; set; } = new BitSet(SpellConst.MaxEffects);
         public ulong Stances { get; set; }
         public ulong StancesNot { get; set; }
-        public SpellCastTargetFlags targets { get; set; }
+        public SpellCastTargetFlags Targets { get; set; }
         public uint TargetCreatureType { get; set; }
         public uint RequiresSpellFocus { get; set; }
         public uint FacingCasterFlags { get; set; }
         public AuraStateType CasterAuraState { get; set; }
         public AuraStateType TargetAuraState { get; set; }
-        public AuraStateType CasterAuraStateNot { get; set; }
-        public AuraStateType TargetAuraStateNot { get; set; }
+        public AuraStateType ExcludeCasterAuraState { get; set; }
+        public AuraStateType ExcludeTargetAuraState { get; set; }
         public uint CasterAuraSpell { get; set; }
         public uint TargetAuraSpell { get; set; }
         public uint ExcludeCasterAuraSpell { get; set; }
@@ -3627,18 +3642,17 @@ namespace Game.Spells
         public uint SpellLevel { get; set; }
         public SpellDurationRecord DurationEntry { get; set; }
         public SpellPowerRecord[] PowerCosts = new SpellPowerRecord[SpellConst.MaxPowersPerSpell];
-        public uint RangeIndex { get; set; }
         public SpellRangeRecord RangeEntry { get; set; }
         public float Speed { get; set; }
         public float LaunchDelay { get; set; }
         public uint StackAmount { get; set; }
         public uint[] Totem = new uint[SpellConst.MaxTotems];
+        public uint[] TotemCategory = new uint[SpellConst.MaxTotems];
         public int[] Reagent = new int[SpellConst.MaxReagents];
         public uint[] ReagentCount = new uint[SpellConst.MaxReagents];
         public ItemClass EquippedItemClass { get; set; }
         public int EquippedItemSubClassMask { get; set; }
         public int EquippedItemInventoryTypeMask { get; set; }
-        public uint[] TotemCategory = new uint[SpellConst.MaxTotems];
         public uint IconFileDataId { get; set; }
         public uint ActiveIconFileDataId { get; set; }
         public uint ContentTuningId { get; set; }
@@ -3687,8 +3701,8 @@ namespace Game.Spells
             Effect = (SpellEffectName)effect.Effect;
             ApplyAuraName = (AuraType)effect.EffectAura;
             ApplyAuraPeriod = effect.EffectAuraPeriod;
-            RealPointsPerLevel = effect.EffectRealPointsPerLevel;
             BasePoints = (int)effect.EffectBasePoints;
+            RealPointsPerLevel = effect.EffectRealPointsPerLevel;
             PointsPerResource = effect.EffectPointsPerResource;
             Amplitude = effect.EffectAmplitude;
             ChainAmplitude = effect.EffectChainAmplitude;
@@ -4433,8 +4447,8 @@ namespace Game.Spells
         public SpellEffectName Effect;
         public AuraType ApplyAuraName;
         public uint ApplyAuraPeriod;
-        public float RealPointsPerLevel;
         public int BasePoints;
+        public float RealPointsPerLevel;
         public float PointsPerResource;
         public float Amplitude;
         public float ChainAmplitude;

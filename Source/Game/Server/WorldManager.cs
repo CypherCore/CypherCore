@@ -442,6 +442,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading SpellInfo Storage...");
             Global.SpellMgr.LoadSpellInfoStore();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading serverside spells...");
+            Global.SpellMgr.LoadSpellInfoServerside();
+
             Log.outInfo(LogFilter.ServerLoading, "Loading SpellInfo corrections...");
             Global.SpellMgr.LoadSpellInfoCorrections();
 
