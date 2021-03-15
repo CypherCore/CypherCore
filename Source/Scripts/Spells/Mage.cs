@@ -16,6 +16,7 @@
  */
 
 using Framework.Constants;
+using Framework.Dynamic;
 using Game.Entities;
 using Game.Groups;
 using Game.Maps;
@@ -262,6 +263,40 @@ namespace Scripts.Spells.Mage
         {
             OnEffectProc.Add(new EffectProcHandler(SuppressWarning, 1, AuraType.Dummy));
             AfterProc.Add(new AuraProcHandler(DropFingersOfFrost));
+        }
+    }
+
+    [Script] // 112965 - Fingers of Frost
+    class spell_mage_fingers_of_frost_AuraScript : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.FingersOfFrost);
+        }
+
+        bool CheckFrostboltProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            return eventInfo.GetSpellInfo() != null && eventInfo.GetSpellInfo().IsAffected(SpellFamilyNames.Mage, new FlagArray128(0, 0x2000000, 0, 0))
+                && RandomHelper.randChance(aurEff.GetAmount());
+        }
+
+        bool CheckFrozenOrbProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            return eventInfo.GetSpellInfo() != null && eventInfo.GetSpellInfo().IsAffected(SpellFamilyNames.Mage, new FlagArray128(0, 0, 0x80, 0))
+                && RandomHelper.randChance(aurEff.GetAmount());
+        }
+
+        void Trigger(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            eventInfo.GetActor().CastSpell(GetTarget(), SpellIds.FingersOfFrost, true, null, aurEff);
+        }
+
+        public override void Register()
+        {
+            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckFrostboltProc, 0, AuraType.Dummy));
+            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckFrozenOrbProc, 1, AuraType.Dummy));
+            AfterEffectProc.Add(new EffectProcHandler(Trigger, 0, AuraType.Dummy));
+            AfterEffectProc.Add(new EffectProcHandler(Trigger, 1, AuraType.Dummy));
         }
     }
     
