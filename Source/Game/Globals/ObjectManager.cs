@@ -1679,7 +1679,7 @@ namespace Game
                     }
 
                     if (!valid)
-                        spellScriptsStorage.Remove(pair.Value);
+                        spellScriptsStorage.Remove(script);
                 }
 
                 Dictionary<AuraScriptLoader, uint> AuraScriptLoaders = Global.ScriptMgr.CreateAuraScriptLoaders(script.Key);
@@ -1703,7 +1703,7 @@ namespace Game
                     }
 
                     if (!valid)
-                        spellScriptsStorage.Remove(pair.Value);
+                        spellScriptsStorage.Remove(script);
                 }
                 ++count;
             }
