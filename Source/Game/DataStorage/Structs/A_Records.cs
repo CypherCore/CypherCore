@@ -65,7 +65,7 @@ namespace Game.DataStorage
         public ushort CurrencyType;
         public uint CurrencyQuantity;
         public ushort UiMapID;
-        public int[] BonusPlayerConditionID = new int[2];
+        public uint[] BonusPlayerConditionID = new uint[2];
         public byte[] BonusValue = new byte[2];
     }
 

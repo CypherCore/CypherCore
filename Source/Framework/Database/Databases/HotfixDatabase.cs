@@ -28,9 +28,8 @@ namespace Framework.Database
 
             // AdventureJournal.db2
             PrepareStatement(HotfixStatements.SEL_ADVENTURE_JOURNAL, "SELECT ID, Name, Description, ButtonText, RewardDescription, ContinueDescription, Type, " +
-                "PlayerConditionId, Flags, ButtonActionType, TextureFileDataId, LfgDungeonId, QuestId, BattleMasterListId, PriorityMin, PriorityMax, ItemId, " +
-                "ItemQuantity, CurrencyType, CurrencyQuantity, UiMapId, BonusPlayerConditionId1, BonusPlayerConditionId2, BonusValue1, BonusValue2" +
-                " FROM adventure_journal");
+                "PlayerConditionID, Flags, ButtonActionType, TextureFileDataID, LfgDungeonID, QuestID, BattleMasterListID, PriorityMin, PriorityMax, ItemID, " +
+                "ItemQuantity, CurrencyType, CurrencyQuantity, UiMapID, BonusPlayerConditionID1, BonusPlayerConditionID2, BonusValue1, BonusValue2 FROM adventure_journal");
             PrepareStatement(HotfixStatements.SEL_ADVENTURE_JOURNAL_LOCALE, "SELECT ID, Name_lang, Description_lang, ButtonText_lang, RewardDescription_lang, " +
                 "ContinueDescription_lang FROM adventure_journal_locale WHERE locale = ?");
 
