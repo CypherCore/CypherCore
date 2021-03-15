@@ -133,6 +133,12 @@ namespace Game.DataStorage
                 }
             }
 
+            foreach (var uiDisplay in CliDB.ChrClassUIDisplayStorage.Values)
+            {
+                Cypher.Assert(uiDisplay.ChrClassesID < (byte)Class.Max);
+                _uiDisplayByClass[uiDisplay.ChrClassesID] = uiDisplay;
+            }
+
             var powers = new List<ChrClassesXPowerTypesRecord>();
             foreach (var chrClasses in CliDB.ChrClassesXPowerTypesStorage.Values)
                 powers.Add(chrClasses);
@@ -999,6 +1005,12 @@ namespace Game.DataStorage
             return broadcastText.Text[SharedConst.DefaultLocale];
         }
 
+        public ChrClassUIDisplayRecord GetUiDisplayForClass(Class unitClass)
+        {
+            Cypher.Assert(unitClass < Class.Max);
+            return _uiDisplayByClass[(int)unitClass];
+        }
+        
         public string GetClassName(Class class_, Locale locale = Locale.enUS)
         {
             ChrClassesRecord classEntry = CliDB.ChrClassesStorage.LookupByKey(class_);
@@ -2292,6 +2304,7 @@ namespace Game.DataStorage
         MultiMap<uint, AzeritePowerSetMemberRecord> _azeritePowers = new MultiMap<uint, AzeritePowerSetMemberRecord>();
         Dictionary<(uint azeriteUnlockSetId, ItemContext itemContext), byte[]> _azeriteTierUnlockLevels = new Dictionary<(uint azeriteUnlockSetId, ItemContext itemContext), byte[]>();
         Dictionary<(uint itemId, ItemContext itemContext), AzeriteUnlockMappingRecord> _azeriteUnlockMappings = new Dictionary<(uint itemId, ItemContext itemContext), AzeriteUnlockMappingRecord>();
+        ChrClassUIDisplayRecord[] _uiDisplayByClass = new ChrClassUIDisplayRecord[(int)Class.Max];
         uint[][] _powersByClass = new uint[(int)Class.Max][];
         MultiMap<uint, ChrCustomizationChoiceRecord> _chrCustomizationChoicesByOption = new MultiMap<uint, ChrCustomizationChoiceRecord>();
         Dictionary<Tuple<byte, byte>, ChrModelRecord> _chrModelsByRaceAndGender = new Dictionary<Tuple<byte, byte>, ChrModelRecord>();

@@ -38,6 +38,11 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.AdventureJournalOpenQuest)]
         void HandleAdventureJournalOpenQuest(AdventureJournalOpenQuest openQuest)
         {
+            var uiDisplay = Global.DB2Mgr.GetUiDisplayForClass(_player.GetClass());
+            if (uiDisplay != null)
+                if (!_player.MeetPlayerCondition(uiDisplay.AdvGuidePlayerConditionID))
+                    return;
+
             var adventureJournal = CliDB.AdventureJournalStorage.LookupByKey(openQuest.AdventureJournalID);
             if (adventureJournal == null)
                 return;
@@ -80,6 +85,11 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.AdventureJournalUpdateSuggestions)]
         void HandleAdventureJournalUpdateSuggestions(AdventureJournalUpdateSuggestions updateSuggestions)
         {
+            var uiDisplay = Global.DB2Mgr.GetUiDisplayForClass(_player.GetClass());
+            if (uiDisplay != null)
+                if (!_player.MeetPlayerCondition(uiDisplay.AdvGuidePlayerConditionID))
+                    return;
+
             AdventureJournalDataResponse response = new AdventureJournalDataResponse();
             response.OnLevelUp = updateSuggestions.OnLevelUp;
 

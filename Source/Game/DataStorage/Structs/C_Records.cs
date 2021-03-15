@@ -66,6 +66,14 @@ namespace Game.DataStorage
         public int Ruleset;
     }
 
+    public sealed class ChrClassUIDisplayRecord
+    {
+        public uint Id;
+        public byte ChrClassesID;
+        public uint AdvGuidePlayerConditionID;
+        public uint SplashPlayerConditionID;
+    }
+
     public sealed class ChrClassesRecord
     {
         public LocalizedString Name;

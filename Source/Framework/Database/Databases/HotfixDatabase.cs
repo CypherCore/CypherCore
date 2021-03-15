@@ -199,6 +199,9 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_CHAT_CHANNELS, "SELECT Name, Shortcut, ID, Flags, FactionGroup, Ruleset FROM chat_channels");
             PrepareStatement(HotfixStatements.SEL_CHAT_CHANNELS_LOCALE, "SELECT ID, Name_lang, Shortcut_lang FROM chat_channels_locale WHERE locale = ?");
 
+            // ChrClassUiDisplay.db2
+            PrepareStatement(HotfixStatements.SEL_CHR_CLASS_UI_DISPLAY, "SELECT ID, ChrClassesID, AdvGuidePlayerConditionID, SplashPlayerConditionID FROM chr_class_ui_display");
+
             // ChrClasses.db2
             PrepareStatement(HotfixStatements.SEL_CHR_CLASSES, "SELECT Name, Filename, NameMale, NameFemale, PetNameToken, Description, RoleInfoString, DisabledString, " +
                 "HyphenatedNameMale, HyphenatedNameFemale, ID, CreateScreenFileDataID, SelectScreenFileDataID, IconFileDataID, LowResScreenFileDataID, Flags, " +
@@ -1255,6 +1258,8 @@ namespace Framework.Database
 
         SEL_CHAT_CHANNELS,
         SEL_CHAT_CHANNELS_LOCALE,
+
+        SEL_CHR_CLASS_UI_DISPLAY,
 
         SEL_CHR_CLASSES,
         SEL_CHR_CLASSES_LOCALE,

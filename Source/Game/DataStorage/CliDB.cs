@@ -96,6 +96,7 @@ namespace Game.DataStorage
             CharacterLoadoutStorage = ReadDB2<CharacterLoadoutRecord>("CharacterLoadout.db2", HotfixStatements.SEL_CHARACTER_LOADOUT);
             CharacterLoadoutItemStorage = ReadDB2<CharacterLoadoutItemRecord>("CharacterLoadoutItem.db2", HotfixStatements.SEL_CHARACTER_LOADOUT_ITEM);
             ChatChannelsStorage = ReadDB2<ChatChannelsRecord>("ChatChannels.db2", HotfixStatements.SEL_CHAT_CHANNELS, HotfixStatements.SEL_CHAT_CHANNELS_LOCALE);
+            ChrClassUIDisplayStorage = ReadDB2<ChrClassUIDisplayRecord>("ChrClassUIDisplay.db2", HotfixStatements.SEL_CHR_CLASS_UI_DISPLAY);
             ChrClassesStorage = ReadDB2<ChrClassesRecord>("ChrClasses.db2", HotfixStatements.SEL_CHR_CLASSES, HotfixStatements.SEL_CHR_CLASSES_LOCALE);
             ChrClassesXPowerTypesStorage = ReadDB2<ChrClassesXPowerTypesRecord>("ChrClassesXPowerTypes.db2", HotfixStatements.SEL_CHR_CLASSES_X_POWER_TYPES);
             ChrCustomizationChoiceStorage= ReadDB2<ChrCustomizationChoiceRecord>("ChrCustomizationChoice.db2", HotfixStatements.SEL_CHR_CUSTOMIZATION_CHOICE, HotfixStatements.SEL_CHR_CUSTOMIZATION_CHOICE_LOCALE);
@@ -455,6 +456,7 @@ namespace Game.DataStorage
         public static DB6Storage<CharacterLoadoutRecord> CharacterLoadoutStorage;
         public static DB6Storage<CharacterLoadoutItemRecord> CharacterLoadoutItemStorage;
         public static DB6Storage<ChatChannelsRecord> ChatChannelsStorage;
+        public static DB6Storage<ChrClassUIDisplayRecord> ChrClassUIDisplayStorage;
         public static DB6Storage<ChrClassesRecord> ChrClassesStorage;
         public static DB6Storage<ChrClassesXPowerTypesRecord> ChrClassesXPowerTypesStorage;
         public static DB6Storage<ChrCustomizationChoiceRecord> ChrCustomizationChoiceStorage;
