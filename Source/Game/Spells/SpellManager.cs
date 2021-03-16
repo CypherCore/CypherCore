@@ -2563,7 +2563,7 @@ namespace Game.Entities
                     spellInfo.Speed = spellsResult.Read<float>(54);
                     spellInfo.LaunchDelay = spellsResult.Read<float>(55);
                     spellInfo.StackAmount = spellsResult.Read<uint>(56);
-                    spellInfo.EquippedItemClass = (ItemClass)spellsResult.Read<uint>(57);
+                    spellInfo.EquippedItemClass = (ItemClass)spellsResult.Read<int>(57);
                     spellInfo.EquippedItemSubClassMask = spellsResult.Read<int>(58);
                     spellInfo.EquippedItemInventoryTypeMask = spellsResult.Read<int>(59);
                     spellInfo.ContentTuningId = spellsResult.Read<uint>(60);
@@ -4006,6 +4006,7 @@ namespace Game.Entities
         public ServersideSpellName(uint id, string name)
         {
             Name = new();
+            Name.Name = new LocalizedString();
 
             NameStorage = name;
             Name.Id = id;
