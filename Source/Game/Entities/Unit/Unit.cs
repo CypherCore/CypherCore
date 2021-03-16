@@ -1237,6 +1237,7 @@ namespace Game.Entities
                         case ShapeShiftForm.BearForm:
                             useRandom = HasAura(107059);
                             break; // Glyph of the Ursol Chameleon
+                        case ShapeShiftForm.FlightFormEpic:
                         case ShapeShiftForm.FlightForm:
                             useRandom = HasAura(344342);
                             break; // Glyph of the Aerial Chameleon

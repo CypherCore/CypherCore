@@ -33,7 +33,6 @@ namespace Game.Networking
     public class RASocket : ISocket
     {
         Socket _socket;
-        bool _closed;
         IPAddress _remoteAddress;
         byte[] _receiveBuffer;
 

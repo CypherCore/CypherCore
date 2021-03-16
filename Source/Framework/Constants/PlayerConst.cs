@@ -65,7 +65,7 @@ namespace Framework.Constants
         public const int MaxArtifactTier = 1;
 
         public const int MaxHonorLevel = 500;
-        public const byte LevelMinHonor = 60;
+        public const byte LevelMinHonor = 20;
         public const uint SpellPvpRulesEnabled = 134735;
 
         //Azerite

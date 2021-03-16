@@ -2640,10 +2640,7 @@ namespace Game.Entities
 
             var status = m_QuestStatus.LookupByKey(quest.Id);
             if (status == null)
-            {
-                Log.outError(LogFilter.Player, "GetQuestObjectiveData: player {0} ({1}) doesn't have quest status data for quest {2}", GetName(), GetGUID().ToString(), quest.Id);
                 return 0;
-            }
 
             if (storageIndex >= status.ObjectiveData.Length)
             {
