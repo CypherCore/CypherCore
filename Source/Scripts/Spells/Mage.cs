@@ -246,26 +246,6 @@ namespace Scripts.Spells.Mage
         }
     }
 
-    [Script] // 44544 - Fingers of Frost
-    class spell_mage_fingers_of_frost : AuraScript
-    {
-        void SuppressWarning(AuraEffect aurEff, ProcEventInfo procInfo)
-        {
-            PreventDefaultAction();
-        }
-
-        void DropFingersOfFrost(ProcEventInfo eventInfo)
-        {
-            GetAura().ModStackAmount(-1);
-        }
-
-        public override void Register()
-        {
-            OnEffectProc.Add(new EffectProcHandler(SuppressWarning, 1, AuraType.Dummy));
-            AfterProc.Add(new AuraProcHandler(DropFingersOfFrost));
-        }
-    }
-
     [Script] // 112965 - Fingers of Frost
     class spell_mage_fingers_of_frost_AuraScript : AuraScript
     {

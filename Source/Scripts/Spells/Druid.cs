@@ -83,31 +83,6 @@ namespace Scripts.Spells.Druid
         public const uint ThrashCat = 106830;
     }
 
-    abstract class spell_dru_base_transformer : SpellScript
-    {
-        public override bool Validate(SpellInfo spellInfo)
-        {
-            return ValidateSpellInfo(GetShapeshiftFormSpell());
-        }
-
-        void HandleOnCast()
-        {
-            // Change into cat form
-            if (GetCaster().GetShapeshiftForm() != GetShapeshiftForm())
-                GetCaster().CastSpell(GetCaster(), GetShapeshiftFormSpell(), true);
-        }
-
-        public override void Register()
-        {
-            BeforeCast.Add(new CastHandler(HandleOnCast));
-        }
-
-        public abstract bool ToCatForm();
-
-        ShapeShiftForm GetShapeshiftForm() { return ToCatForm() ? ShapeShiftForm.CatForm : ShapeShiftForm.BearForm; }
-        uint GetShapeshiftFormSpell() { return ToCatForm() ? SpellIds.CatForm : SpellIds.BearForm; }
-    }
-
     [Script] // 22812 - Barkskin
     class spell_dru_barkskin : AuraScript
     {
@@ -130,9 +105,24 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 77758 - Berserk
-    class spell_dru_berserk : spell_dru_base_transformer
+    class spell_dru_berserk : SpellScript
     {
-        public override bool ToCatForm() { return false; }
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.BearForm);
+        }
+
+        void HandleOnCast()
+        {
+            // Change into cat form
+            if (GetCaster().GetShapeshiftForm() != ShapeShiftForm.BearForm)
+                GetCaster().CastSpell(GetCaster(), SpellIds.BearForm, true);
+        }
+
+        public override void Register()
+        {
+            BeforeCast.Add(new CastHandler(HandleOnCast));
+        }
     }
 
     [Script] // 203953 - Brambles - SPELL_DRUID_BRAMBLES_PASSIVE
@@ -440,9 +430,24 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 99 - Incapacitating Roar
-    class spell_dru_incapacitating_roar : spell_dru_base_transformer
+    class spell_dru_incapacitating_roar : SpellScript
     {
-        public override bool ToCatForm() { return false; }
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.BearForm);
+        }
+
+        void HandleOnCast()
+        {
+            // Change into cat form
+            if (GetCaster().GetShapeshiftForm() != ShapeShiftForm.BearForm)
+                GetCaster().CastSpell(GetCaster(), SpellIds.BearForm, true);
+        }
+
+        public override void Register()
+        {
+            BeforeCast.Add(new CastHandler(HandleOnCast));
+        }
     }
 
     [Script] // 29166 - Innervate
@@ -690,9 +695,24 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 5215 - Prowl
-    class spell_dru_prowl : spell_dru_base_transformer
+    class spell_dru_prowl : SpellScript
     {
-        public override bool ToCatForm() { return true; }
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.CatForm);
+        }
+
+        void HandleOnCast()
+        {
+            // Change into cat form
+            if (GetCaster().GetShapeshiftForm() != ShapeShiftForm.CatForm)
+                GetCaster().CastSpell(GetCaster(), SpellIds.CatForm, true);
+        }
+
+        public override void Register()
+        {
+            BeforeCast.Add(new CastHandler(HandleOnCast));
+        }
     }
 
     [Script] // 1079 - Rip
@@ -831,9 +851,24 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 106898 - Stampeding Roar
-    class spell_dru_stampeding_roar : spell_dru_base_transformer
+    class spell_dru_stampeding_roar : SpellScript
     {
-        public override bool ToCatForm() { return false; }
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.BearForm);
+        }
+
+        void HandleOnCast()
+        {
+            // Change into cat form
+            if (GetCaster().GetShapeshiftForm() != ShapeShiftForm.BearForm)
+                GetCaster().CastSpell(GetCaster(), SpellIds.BearForm, true);
+        }
+
+        public override void Register()
+        {
+            BeforeCast.Add(new CastHandler(HandleOnCast));
+        }
     }
 
     [Script] // 50286 - Starfall (Dummy)
