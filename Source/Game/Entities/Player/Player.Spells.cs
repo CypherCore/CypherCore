@@ -488,21 +488,22 @@ namespace Game.Entities
 
         void UpdateEnchantTime(uint time)
         {
-            foreach (var enchat in m_enchantDuration)
+            for (var i = 0; i < m_enchantDuration.Count; ++i)
             {
-                if (enchat.item.GetEnchantmentId(enchat.slot) == 0)
+                var enchantDuration = m_enchantDuration[i];
+                if (enchantDuration.item.GetEnchantmentId(enchantDuration.slot) == 0)
                 {
-                    m_enchantDuration.Remove(enchat);
+                    m_enchantDuration.Remove(enchantDuration);
                 }
-                else if (enchat.leftduration <= time)
+                else if (enchantDuration.leftduration <= time)
                 {
-                    ApplyEnchantment(enchat.item, enchat.slot, false, false);
-                    enchat.item.ClearEnchantment(enchat.slot);
-                    m_enchantDuration.Remove(enchat);
+                    ApplyEnchantment(enchantDuration.item, enchantDuration.slot, false, false);
+                    enchantDuration.item.ClearEnchantment(enchantDuration.slot);
+                    m_enchantDuration.Remove(enchantDuration);
                 }
-                else if (enchat.leftduration > time)
+                else if (enchantDuration.leftduration > time)
                 {
-                    enchat.leftduration -= time;
+                    enchantDuration.leftduration -= time;
                 }
             }
         }
@@ -889,8 +890,9 @@ namespace Game.Entities
             if (slot >= EnchantmentSlot.Max)
                 return;
 
-            foreach (var enchantDuration in m_enchantDuration)
+            for (var i = 0; i < m_enchantDuration.Count; ++i)
             {
+                var enchantDuration = m_enchantDuration[i];
                 if (enchantDuration.item == item && enchantDuration.slot == slot)
                 {
                     enchantDuration.item.SetEnchantmentDuration(enchantDuration.slot, enchantDuration.leftduration, this);
@@ -906,8 +908,9 @@ namespace Game.Entities
         }
         void RemoveEnchantmentDurations(Item item)
         {
-            foreach (var enchantDuration in m_enchantDuration)
+            for (var i = 0; i < m_enchantDuration.Count; ++i)
             {
+                var enchantDuration = m_enchantDuration[i]; 
                 if (enchantDuration.item == item)
                 {
                     // save duration in item
@@ -919,8 +922,9 @@ namespace Game.Entities
 
         void RemoveEnchantmentDurationsReferences(Item item)
         {
-            foreach (var enchantDuration in m_enchantDuration)
+            for (var i = 0; i < m_enchantDuration.Count; ++i)
             {
+                var enchantDuration = m_enchantDuration[i];
                 if (enchantDuration.item == item)
                     m_enchantDuration.Remove(enchantDuration);
             }
@@ -929,8 +933,9 @@ namespace Game.Entities
         public void RemoveArenaEnchantments(EnchantmentSlot slot)
         {
             // remove enchantments from equipped items first to clean up the m_enchantDuration list
-            foreach (var enchantDuration in m_enchantDuration)
+            for (var i = 0; i < m_enchantDuration.Count; ++i)
             {
+                var enchantDuration = m_enchantDuration[i];
                 if (enchantDuration.slot == slot)
                 {
                     if (enchantDuration.item && enchantDuration.item.GetEnchantmentId(slot) != 0)
