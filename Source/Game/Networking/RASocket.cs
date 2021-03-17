@@ -127,7 +127,10 @@ namespace Game.Networking
                 do
                 {
                     int bytes = _socket.Receive(_receiveBuffer);
-                    str = String.Concat(str, Encoding.UTF8.GetString(_receiveBuffer, 0, bytes));
+                    if (bytes == 0)
+                        return "";
+
+                    str = string.Concat(str, Encoding.UTF8.GetString(_receiveBuffer, 0, bytes));
                 }
                 while (!str.Contains("\n"));
 
@@ -195,7 +198,7 @@ namespace Game.Networking
         bool ProcessCommand(string command)
         {
             if (command.Length == 0)
-                return true;
+                return false;
 
             Log.outInfo(LogFilter.CommandsRA, $"Received command: {command}");
 
