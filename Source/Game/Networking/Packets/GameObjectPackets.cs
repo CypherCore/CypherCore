@@ -149,4 +149,20 @@ namespace Game.Networking.Packets
         public ObjectGuid ObjectGUID;
         public int UILink;
     }
+
+    class GameObjectPlaySpellVisual : ServerPacket
+    {
+        public GameObjectPlaySpellVisual() : base(ServerOpcodes.GameObjectPlaySpellVisual) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(ObjectGUID);
+            _worldPacket.WritePackedGuid(ActivatorGUID);
+            _worldPacket.WriteUInt32(SpellVisualID);
+        }
+
+        public ObjectGuid ObjectGUID;
+        public ObjectGuid ActivatorGUID;
+        public uint SpellVisualID;
+    }
 }

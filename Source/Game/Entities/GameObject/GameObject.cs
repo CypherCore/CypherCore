@@ -2659,6 +2659,17 @@ namespace Game.Entities
             SendMessageToSet(activateAnimKit, true);
         }
 
+        void SetSpellVisualId(uint spellVisualId, ObjectGuid activatorGuid = default)
+        {
+            SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.SpellVisualID), spellVisualId);
+
+            GameObjectPlaySpellVisual packet = new();
+            packet.ObjectGUID = GetGUID();
+            packet.ActivatorGUID = activatorGuid;
+            packet.SpellVisualID = spellVisualId;
+            SendMessageToSet(packet, true);
+        }
+
         public override ushort GetAIAnimKitId() { return _animKitId; }
 
         public uint GetWorldEffectID() { return _worldEffectID; }
