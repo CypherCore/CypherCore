@@ -2076,6 +2076,77 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    // 38772 Grievous Wound
+    // 43937 Grievous Wound
+    // 62331 Impale
+    [Script] // 62418 Impale
+    class spell_gen_remove_on_health_pct : AuraScript
+    {
+        void PeriodicTick(AuraEffect aurEff)
+        {
+            // they apply damage so no need to check for ticks here
+
+            if (GetTarget().HealthAbovePct(GetSpellInfo().GetEffect(1).CalcValue()))
+            {
+                Remove(AuraRemoveMode.EnemySpell);
+                PreventDefaultAction();
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicDamage));
+        }
+    }
+
+    // 31956 Grievous Wound
+    // 38801 Grievous Wound
+    // 43093 Grievous Throw
+    // 58517 Grievous Wound
+    [Script] // 59262 Grievous Wound
+    class spell_gen_remove_on_full_health : AuraScript
+    {
+        void PeriodicTick(AuraEffect aurEff)
+        {
+            // if it has only periodic effect, allow 1 tick
+            bool onlyEffect = GetSpellInfo().GetEffects().Length == 1;
+            if (onlyEffect && aurEff.GetTickNumber() <= 1)
+                return;
+
+            if (GetTarget().IsFullHealth())
+            {
+                Remove(AuraRemoveMode.EnemySpell);
+                PreventDefaultAction();
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic .Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicDamage));
+        }
+    }
+
+    // 70292 - Glacial Strike
+    [Script] // 71316 - Glacial Strike
+    class spell_gen_remove_on_full_health_pct : AuraScript
+    {
+        void PeriodicTick(AuraEffect aurEff)
+        {
+            // they apply damage so no need to check for ticks here
+
+            if (GetTarget().IsFullHealth())
+            {
+                Remove(AuraRemoveMode.EnemySpell);
+                PreventDefaultAction();
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic .Add(new EffectPeriodicHandler(PeriodicTick, 2, AuraType.PeriodicDamagePercent));
+        }
+    }
+    
     [Script]
     class spell_gen_replenishment : SpellScript
     {

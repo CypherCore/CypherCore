@@ -5246,40 +5246,6 @@ namespace Game.Spells
                 caster.SpellHitResult(target, GetSpellInfo(), false) != SpellMissInfo.None)
                 return;
 
-            // some auras remove at specific health level or more
-            if (GetAuraType() == AuraType.PeriodicDamage)
-            {
-                switch (GetSpellInfo().Id)
-                {
-                    case 43093:
-                    case 31956:
-                    case 38801:  // Grievous Wound
-                    case 35321:
-                    case 38363:
-                    case 39215:  // Gushing Wound
-                        if (target.IsFullHealth())
-                        {
-                            target.RemoveAurasDueToSpell(GetSpellInfo().Id);
-                            return;
-                        }
-                        break;
-                    case 38772: // Grievous Wound
-                        {
-                            SpellEffectInfo effect = GetSpellInfo().GetEffect(1);
-                            if (effect != null)
-                            {
-                                int percent = effect.CalcValue(caster);
-                                if (!target.HealthBelowPct(percent))
-                                {
-                                    target.RemoveAurasDueToSpell(GetSpellInfo().Id);
-                                    return;
-                                }
-                            }
-                            break;
-                        }
-                }
-            }
-
             CleanDamage cleanDamage = new CleanDamage(0, 0, WeaponAttackType.BaseAttack, MeleeHitOutcome.Normal);
 
             // AOE spells are not affected by the new periodic system.
