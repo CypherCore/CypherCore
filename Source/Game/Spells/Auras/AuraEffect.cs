@@ -125,18 +125,25 @@ namespace Game.Spells
                 amount *= GetBase().GetStackAmount();
             return amount;
         }
+        void ResetPeriodic(bool resetPeriodicTimer = false)
+        {
+            _ticksDone = 0;
+            if (resetPeriodicTimer)
+            {
+                _periodicTimer = _period;
+                // Start periodic on next tick or at aura apply
+                if (!m_spellInfo.HasAttribute(SpellAttr5.StartPeriodicAtApply))
+                    _periodicTimer = 0;
+            }
+        }
         public void CalculatePeriodic(Unit caster, bool resetPeriodicTimer = true, bool load = false)
         {
-            m_period = (int)GetSpellEffectInfo().ApplyAuraPeriod;
+            _period = (int)GetSpellEffectInfo().ApplyAuraPeriod;
 
             // prepare periodics
             switch (GetAuraType())
             {
                 case AuraType.ObsModPower:
-                    // 3 spells have no amplitude set
-                    if (m_period == 0)
-                        m_period = 1 * Time.InMilliseconds;
-                    break;
                 case AuraType.PeriodicDamage:
                 case AuraType.PeriodicHeal:
                 case AuraType.ObsModHealth:
@@ -155,7 +162,7 @@ namespace Game.Spells
                     break;
             }
 
-            GetBase().CallScriptEffectCalcPeriodicHandlers(this, ref m_isPeriodic, ref m_period);
+            GetBase().CallScriptEffectCalcPeriodicHandlers(this, ref m_isPeriodic, ref _period);
 
             if (!m_isPeriodic)
                 return;
@@ -163,42 +170,41 @@ namespace Game.Spells
             Player modOwner = caster != null ? caster.GetSpellModOwner() : null;
 
             // Apply casting time mods
-            if (m_period != 0)
+            if (_period != 0)
             {
                 // Apply periodic time mod
                 if (modOwner != null)
-                    modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.ActivationTime, ref m_period);
+                    modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.ActivationTime, ref _period);
 
                 if (caster != null)
                 {
                     // Haste modifies periodic time of channeled spells
                     if (m_spellInfo.IsChanneled())
-                        caster.ModSpellDurationTime(m_spellInfo, ref m_period);
+                        caster.ModSpellDurationTime(m_spellInfo, ref _period);
                     else if (m_spellInfo.HasAttribute(SpellAttr5.HasteAffectDuration))
-                        m_period = (int)(m_period * caster.m_unitData.ModCastingSpeed);
+                        _period = (int)(_period * caster.m_unitData.ModCastingSpeed);
                 }
             }
+            else // prevent infinite loop on Update
+                m_isPeriodic = false;
 
             if (load) // aura loaded from db
             {
-                m_tickNumber = (uint)(m_period != 0 ? GetBase().GetDuration() / m_period : 0);
-                m_periodicTimer = m_period != 0 ? GetBase().GetDuration() % m_period : 0;
+                if (_period != 0 && !GetBase().IsPermanent())
+                {
+                    uint elapsedTime = (uint)(GetBase().GetMaxDuration() - GetBase().GetDuration());
+                    _ticksDone = elapsedTime / (uint)_period;
+                    _periodicTimer = (int)(elapsedTime % _period);
+                }
+
                 if (m_spellInfo.HasAttribute(SpellAttr5.StartPeriodicAtApply))
-                    ++m_tickNumber;
+                    ++_ticksDone;
             }
             else // aura just created or reapplied
             {
-                m_tickNumber = 0;
-
                 // reset periodic timer on aura create or reapply
                 // we don't reset periodic timers when aura is triggered by proc
-                if (resetPeriodicTimer)
-                {
-                    m_periodicTimer = 0;
-                    // Start periodic on next tick or at aura apply
-                    if (m_period != 0 && !m_spellInfo.HasAttribute(SpellAttr5.StartPeriodicAtApply))
-                        m_periodicTimer += m_period;
-                }
+                ResetPeriodic(resetPeriodicTimer);
             }
         }
         public void CalculateSpellMod()
@@ -397,13 +403,16 @@ namespace Game.Spells
         {
             if (m_isPeriodic && (GetBase().GetDuration() >= 0 || GetBase().IsPassive() || GetBase().IsPermanent()))
             {
-                if (m_periodicTimer > diff)
-                    m_periodicTimer -= (int)diff;
-                else // tick also at m_periodicTimer == 0 to prevent lost last tick in case max m_duration == (max m_periodicTimer)*N
+                _periodicTimer += (int)diff;
+                while (_periodicTimer >= _period)
                 {
-                    ++m_tickNumber;
-                    // update before tick (aura can be removed in TriggerSpell or PeriodicTick calls)
-                    m_periodicTimer += m_period - (int)diff;
+                    _periodicTimer -= _period;
+
+                    if (!GetBase().IsPermanent() && (_ticksDone + 1) > GetTotalTicks())
+                        break;
+
+                    ++_ticksDone;
+
                     UpdatePeriodic(caster);
 
                     GetApplicationList(out List<AuraApplication> effectApplications);
@@ -481,7 +490,7 @@ namespace Game.Spells
                                                 // on 2 tick - 133% (handled in 6 second)
 
                                                 // Apply bonus for 1 - 4 tick
-                                                switch (m_tickNumber)
+                                                switch (_ticksDone)
                                                 {
                                                     case 1:   // 0%
                                                         aurEff.ChangeAmount(0);
@@ -874,7 +883,7 @@ namespace Game.Spells
         public uint GetId() { return m_spellInfo.Id; }
         public uint GetEffIndex() { return _effectInfo.EffectIndex; }
         public int GetBaseAmount() { return m_baseAmount; }
-        public int GetPeriod() { return m_period; }
+        public int GetPeriod() { return _period; }
 
         public int GetMiscValueB() { return GetSpellEffectInfo().MiscValueB; }
         public int GetMiscValue() { return GetSpellEffectInfo().MiscValue; }
@@ -883,8 +892,8 @@ namespace Game.Spells
         public bool HasAmount() { return m_amount != 0; }
         public void SetAmount(int _amount) { m_amount = _amount; m_canBeRecalculated = false; }
 
-        public int GetPeriodicTimer() { return m_periodicTimer; }
-        public void SetPeriodicTimer(int periodicTimer) { m_periodicTimer = periodicTimer; }
+        public int GetPeriodicTimer() { return _periodicTimer; }
+        public void SetPeriodicTimer(int periodicTimer) { _periodicTimer = periodicTimer; }
 
         void RecalculateAmount()
         {
@@ -909,17 +918,10 @@ namespace Game.Spells
         public void SetDonePct(float val) { m_donePct = val; }
         public float GetDonePct() { return m_donePct; }
 
-        public uint GetTickNumber() { return m_tickNumber; }
-        public int GetTotalTicks()
-        {
-            return m_period != 0 ? (GetBase().GetMaxDuration() / m_period) : 1;
-        }
-        public void ResetPeriodic(bool resetPeriodicTimer = false)
-        {
-            if (resetPeriodicTimer)
-                m_periodicTimer = m_period;
-            m_tickNumber = 0;
-        }
+        public void ResetTicks() { _ticksDone = 0; }
+        public uint GetTickNumber() { return _ticksDone; }
+        public uint GetRemainingTicks() { return GetTotalTicks() - _ticksDone; }
+        public uint GetTotalTicks() { return (_period != 0 && !GetBase().IsPermanent()) ? (uint)(GetBase().GetMaxDuration() / _period) : 0u; }
 
         public bool IsPeriodic() { return m_isPeriodic; }
         void SetPeriodic(bool isPeriodic) { m_isPeriodic = isPeriodic; }
@@ -946,9 +948,10 @@ namespace Game.Spells
         float m_critChance;
         float m_donePct;
 
-        int m_periodicTimer;
-        int m_period;
-        uint m_tickNumber;
+        // periodic stuff
+        int _periodicTimer;
+        int _period; // time between consecutive ticks
+        uint _ticksDone; // ticks counter
 
         bool m_canBeRecalculated;
         bool m_isPeriodic;
@@ -5276,14 +5279,14 @@ namespace Game.Spells
                         return;
                     // Negative Energy Periodic
                     case 46284:
-                        target.CastCustomSpell(triggerSpellId, SpellValueMod.MaxTargets, (int)(m_tickNumber / 10 + 1), null, true, null, this);
+                        target.CastCustomSpell(triggerSpellId, SpellValueMod.MaxTargets, (int)(_ticksDone / 10 + 1), null, true, null, this);
                         return;
                     // Poison (Grobbulus)
                     case 28158:
                     case 54362:
                     // Slime Pool (Dreadscale & Acidmaw)
                     case 66882:
-                        target.CastCustomSpell(triggerSpellId, SpellValueMod.RadiusMod, (int)((((float)m_tickNumber / 60) * 0.9f + 0.1f) * 10000 * 2 / 3), null, true, null, this);
+                        target.CastCustomSpell(triggerSpellId, SpellValueMod.RadiusMod, (int)(((_ticksDone / 60.0f) * 0.9f + 0.1f) * 10000.0f * 2.0f / 3.0f), null, true, null, this);
                         return;
                     // Slime Spray - temporary here until preventing default effect works again
                     // added on 9.10.2010
@@ -5443,7 +5446,7 @@ namespace Game.Spells
                                 case 72854: // Unbound Plague
                                 case 72855: // Unbound Plague
                                 case 72856: // Unbound Plague
-                                    damage *= (uint)Math.Pow(1.25f, m_tickNumber);
+                                    damage *= (uint)Math.Pow(1.25f, _ticksDone);
                                     break;
                                 default:
                                     break;

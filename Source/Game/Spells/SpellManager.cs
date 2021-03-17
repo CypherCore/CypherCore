@@ -2431,7 +2431,7 @@ namespace Game.Entities
 
                     if (effect.EffectIndex >= SpellConst.MaxEffects)
                     {
-                        Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has more than 32 effects, effect at index {effect.EffectIndex} skipped");
+                        Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has more than {SpellConst.MaxEffects} effects, effect at index {effect.EffectIndex} skipped");
                         continue;
                     }
 
@@ -2960,6 +2960,30 @@ namespace Game.Entities
 
                 switch (spellInfo.Id)
                 {
+                    case 6727:  // Poison Mushroom
+                    case 7331:  // Healing Aura (TEST) (Rank 1)
+                    /*
+                    30400, // Nether Beam - Perseverance
+                        Blizzlike to have it disabled? DBC says:
+                        "This is currently turned off to increase performance. Enable this to make it fire more frequently."
+                    */
+                    case 34589: // Dangerous Water
+                    case 52562: // Arthas Zombie Catcher
+                    case 57550: // Tirion Aggro
+                    case 65755:
+                        spellInfo.GetEffect(0).ApplyAuraPeriod = 1 * Time.InMilliseconds;
+                        break;
+                    case 24707: // Food
+                    case 26263: // Dim Sum
+                    case 29055: // Refreshing Red Apple
+                    case 37504: // Karazhan - Chess NPC AI, action timer
+                                // first effect has correct amplitude
+                        spellInfo.GetEffect(1).ApplyAuraPeriod = spellInfo.GetEffect(0).ApplyAuraPeriod;
+                        break;
+                    // Vomit
+                    case 43327:
+                        spellInfo.GetEffect(1).ApplyAuraPeriod = 1 * Time.InMilliseconds;
+                        break;
                     case 63026: // Summon Aspirant Test NPC (HACK: Target shouldn't be changed)
                     case 63137: // Summon Valiant Test (HACK: Target shouldn't be changed; summon position should be untied from spell destination)
                         spellInfo.GetEffect(0).TargetA = new SpellImplicitTargetInfo(Targets.DestDb);
@@ -3356,7 +3380,7 @@ namespace Game.Entities
                         break;
                     case 69846: // Frost Bomb
                         spellInfo.Speed = 0.0f;    // This spell's summon happens instantly
-                        break;                    
+                        break;
                     case 70106: // Chilled to the Bone                        
                         spellInfo.AttributesEx3 |= SpellAttr3.NoDoneBonus;
                         spellInfo.AttributesEx6 |= SpellAttr6.NoDonePctDamageMods;
@@ -4001,14 +4025,12 @@ namespace Game.Entities
     struct ServersideSpellName
     {
         public SpellNameRecord Name;
-        public string NameStorage;
 
         public ServersideSpellName(uint id, string name)
         {
             Name = new();
             Name.Name = new LocalizedString();
 
-            NameStorage = name;
             Name.Id = id;
             for (Locale i = 0; i < Locale.Total; ++i)
                 Name.Name[i] = name;

@@ -742,6 +742,14 @@ namespace Game.Spells
 
             if (!m_periodicCosts.Empty())
                 m_timeCla = 1 * Time.InMilliseconds;
+
+            // also reset periodic counters
+            for (byte i = 0; i < SpellConst.MaxEffects; ++i)
+            {
+                AuraEffect aurEff = GetEffect(i);
+                if (aurEff != null)
+                    aurEff.ResetTicks();
+            }
         }
 
         void RefreshTimers(bool resetPeriodicTimer)

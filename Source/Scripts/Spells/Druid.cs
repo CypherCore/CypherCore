@@ -455,9 +455,15 @@ namespace Scripts.Spells.Druid
     {
         void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
+            if (aurEff.GetTotalTicks() == 0)
+            {
+                amount = 0;
+                return;
+            }
+
             Unit caster = GetCaster();
             if (caster)
-                amount = MathFunctions.CalculatePct(caster.GetCreatePowers(PowerType.Mana), amount) / aurEff.GetTotalTicks();
+                amount = MathFunctions.CalculatePct(caster.GetCreatePowers(PowerType.Mana), amount) / (int)aurEff.GetTotalTicks();
             else
                 amount = 0;
         }

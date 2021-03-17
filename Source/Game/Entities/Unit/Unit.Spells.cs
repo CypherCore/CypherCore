@@ -1127,6 +1127,20 @@ namespace Game.Entities
 
             CastSpell(targets, spellInfo, null, triggered ? TriggerCastFlags.FullMask : TriggerCastFlags.None, castItem, triggeredByAura, originalCaster);
         }
+        public void CastSpell(Item item, uint spellId, bool triggered, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default)
+        {
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
+            if (spellInfo == null)
+            {
+                Log.outError(LogFilter.Unit, "CastSpell: unknown spell id {0} by caster: {1}", spellId, GetGUID().ToString());
+                return;
+            }
+            SpellCastTargets targets = new SpellCastTargets();
+            targets.SetItemTarget(item);
+
+            CastSpell(targets, spellInfo, null, triggered ? TriggerCastFlags.FullMask : TriggerCastFlags.None, castItem, triggeredByAura, originalCaster);
+        }
+
 
         public void CastCustomSpell(Unit target, uint spellId, int bp0, int bp1, int bp2, bool triggered, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default)
         {
@@ -2859,11 +2873,12 @@ namespace Game.Entities
         {
             uint amount = 0;
             var periodicAuras = GetAuraEffectsByType(auraType);
-            foreach (var eff in periodicAuras)
+            foreach (var aurEff in periodicAuras)
             {
-                if (eff.GetCasterGUID() != caster || eff.GetId() != spellId || eff.GetEffIndex() != effectIndex || eff.GetTotalTicks() == 0)
+                if (aurEff.GetCasterGUID() != caster || aurEff.GetId() != spellId || aurEff.GetEffIndex() != effectIndex || aurEff.GetTotalTicks() == 0)
                     continue;
-                amount += (uint)((eff.GetAmount() * Math.Max(eff.GetTotalTicks() - eff.GetTickNumber(), 0)) / eff.GetTotalTicks());
+
+                amount += (uint)((aurEff.GetAmount() * aurEff.GetRemainingTicks()) / aurEff.GetTotalTicks());
                 break;
             }
 

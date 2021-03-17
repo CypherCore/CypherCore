@@ -1321,7 +1321,7 @@ namespace Scripts.Spells.Generic
     {
         void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
-            if (!GetCaster())
+            if (!GetCaster() || aurEff.GetTotalTicks() == 0)
                 return;
 
             float heal = 0.0f;
