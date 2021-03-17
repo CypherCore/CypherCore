@@ -33,6 +33,11 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_ADVENTURE_JOURNAL_LOCALE, "SELECT ID, Name_lang, Description_lang, ButtonText_lang, RewardDescription_lang, " +
                 "ContinueDescription_lang FROM adventure_journal_locale WHERE locale = ?");
 
+            // AdventureMapPoi.db2
+            PrepareStatement(HotfixStatements.SEL_ADVENTURE_MAP_POI, "SELECT ID, Title, Description, WorldPositionX, WorldPositionY, Type, PlayerConditionID, QuestID, " +
+                "LfgDungeonID, RewardItemID, UiTextureAtlasMemberID, UiTextureKitID, MapID, AreaTableID FROM adventure_map_poi");
+            PrepareStatement(HotfixStatements.SEL_ADVENTURE_MAP_POI_LOCALE, "SELECT ID, Title_lang, Description_lang FROM adventure_map_poi_locale WHERE locale = ?");
+
             // AnimationData.db2
             PrepareStatement(HotfixStatements.SEL_ANIMATION_DATA, "SELECT ID, BehaviorID, BehaviorTier, Fallback, Flags1, Flags2 FROM animation_data");
 
@@ -1157,6 +1162,9 @@ namespace Framework.Database
 
         SEL_ADVENTURE_JOURNAL,
         SEL_ADVENTURE_JOURNAL_LOCALE,
+
+        SEL_ADVENTURE_MAP_POI,
+        SEL_ADVENTURE_MAP_POI_LOCALE,
 
         SEL_ANIMATION_DATA,
 

@@ -46,10 +46,10 @@ namespace Game.DataStorage
     {
         public uint Id;
         public LocalizedString Name;
-        public LocalizedString Description;
-        public LocalizedString ButtonText;
-        public LocalizedString RewardDescription;
-        public LocalizedString ContinueDescription;
+        public string Description;
+        public string ButtonText;
+        public string RewardDescription;
+        public string ContinueDescription;
         public byte Type;
         public uint PlayerConditionID;
         public byte Flags;
@@ -67,6 +67,23 @@ namespace Game.DataStorage
         public ushort UiMapID;
         public uint[] BonusPlayerConditionID = new uint[2];
         public byte[] BonusValue = new byte[2];
+    }
+
+    public sealed class AdventureMapPOIRecord
+    {
+        public uint Id;
+        public LocalizedString Title;
+        public string Description;
+        public Vector2 WorldPosition;
+        public sbyte Type;
+        public uint PlayerConditionID;
+        public uint QuestID;
+        public uint LfgDungeonID;
+        public int RewardItemID;
+        public uint UiTextureAtlasMemberID;
+        public uint UiTextureKitID;
+        public int MapID;
+        public uint AreaTableID;
     }
 
     public sealed class AnimationDataRecord

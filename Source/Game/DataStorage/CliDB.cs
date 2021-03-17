@@ -52,6 +52,7 @@ namespace Game.DataStorage
 
             AchievementStorage = ReadDB2<AchievementRecord>("Achievement.db2", HotfixStatements.SEL_ACHIEVEMENT, HotfixStatements.SEL_ACHIEVEMENT_LOCALE);
             AdventureJournalStorage = ReadDB2<AdventureJournalRecord>("AdventureJournal.db2", HotfixStatements.SEL_ADVENTURE_JOURNAL, HotfixStatements.SEL_ADVENTURE_JOURNAL_LOCALE);
+            AdventureMapPOIStorage = ReadDB2<AdventureMapPOIRecord>("AdventureMapPOI.db2", HotfixStatements.SEL_ADVENTURE_MAP_POI, HotfixStatements.SEL_ADVENTURE_MAP_POI_LOCALE);
             AnimationDataStorage = ReadDB2<AnimationDataRecord>("AnimationData.db2", HotfixStatements.SEL_ANIMATION_DATA);
             AnimKitStorage = ReadDB2<AnimKitRecord>("AnimKit.db2", HotfixStatements.SEL_ANIM_KIT);
             AreaGroupMemberStorage = ReadDB2<AreaGroupMemberRecord>("AreaGroupMember.db2", HotfixStatements.SEL_AREA_GROUP_MEMBER);
@@ -412,6 +413,7 @@ namespace Game.DataStorage
         #region Main Collections
         public static DB6Storage<AchievementRecord> AchievementStorage;
         public static DB6Storage<AdventureJournalRecord> AdventureJournalStorage;
+        public static DB6Storage<AdventureMapPOIRecord> AdventureMapPOIStorage;
         public static DB6Storage<AnimationDataRecord> AnimationDataStorage;
         public static DB6Storage<AnimKitRecord> AnimKitStorage;
         public static DB6Storage<AreaGroupMemberRecord> AreaGroupMemberStorage;

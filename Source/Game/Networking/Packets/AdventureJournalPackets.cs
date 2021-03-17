@@ -36,18 +36,6 @@ namespace Game.Networking.Packets
         public uint AdventureJournalID;
     }
 
-    class AdventureJournalStartQuest : ClientPacket
-    {
-        public AdventureJournalStartQuest(WorldPacket packet) : base(packet) { }
-
-        public override void Read()
-        {
-            QuestID = _worldPacket.ReadUInt32();
-        }
-
-        public uint QuestID;
-    }
-
     class AdventureJournalUpdateSuggestions : ClientPacket
     {
         public AdventureJournalUpdateSuggestions(WorldPacket packet) : base(packet) { }

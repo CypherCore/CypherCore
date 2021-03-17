@@ -58,30 +58,6 @@ namespace Game
                 _player.PlayerTalkClass.SendQuestGiverQuestDetails(quest, _player.GetGUID(), true, false);
         }
 
-        [WorldPacketHandler(ClientOpcodes.AdventureJournalStartQuest)]
-        void HandleAdventureJournalStartQuest(AdventureJournalStartQuest startQuest)
-        {
-            Quest quest = Global.ObjectMgr.GetQuestTemplate(startQuest.QuestID);
-            if (quest == null)
-                return;
-
-            AdventureJournalRecord adventureJournalEntry = null;
-            foreach (var adventureJournal in CliDB.AdventureJournalStorage.Values)
-            {
-                if (quest.Id == adventureJournal.QuestID)
-                {
-                    adventureJournalEntry = adventureJournal;
-                    break;
-                }
-            }
-
-            if (adventureJournalEntry == null)
-                return;
-
-            if (_player.MeetPlayerCondition(adventureJournalEntry.PlayerConditionID) && _player.CanTakeQuest(quest, true))
-                _player.AddQuestAndCheckCompletion(quest, null);
-        }
-
         [WorldPacketHandler(ClientOpcodes.AdventureJournalUpdateSuggestions)]
         void HandleAdventureJournalUpdateSuggestions(AdventureJournalUpdateSuggestions updateSuggestions)
         {
