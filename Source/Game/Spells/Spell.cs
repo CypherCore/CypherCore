@@ -538,7 +538,7 @@ namespace Game.Spells
                     break;
                 case SpellTargetCheckTypes.Entry:
                 case SpellTargetCheckTypes.Default:
-                    range = m_spellInfo.GetMaxRange(m_spellInfo.IsPositive(), m_caster, this);
+                    range = m_spellInfo.GetMaxRange(IsPositive(), m_caster, this);
                     break;
                 default:
                     Cypher.Assert(false, "Spell.SelectImplicitNearbyTargets: received not implemented selection check type");
@@ -1614,7 +1614,7 @@ namespace Game.Spells
             // Calculate hit result
             if (m_originalCaster != null)
             {
-                targetInfo.missCondition = m_originalCaster.SpellHitResult(target, m_spellInfo, m_canReflect && !(m_spellInfo.IsPositive() && m_caster.IsFriendlyTo(target)));
+                targetInfo.missCondition = m_originalCaster.SpellHitResult(target, m_spellInfo, m_canReflect && !(IsPositive() && m_caster.IsFriendlyTo(target)));
                 if (m_skipCheck && targetInfo.missCondition != SpellMissInfo.Immune)
                     targetInfo.missCondition = SpellMissInfo.None;
             }
@@ -1802,7 +1802,7 @@ namespace Game.Spells
             if (unit.IsAlive() != target.alive)
                 return;
 
-            if (GetState() == SpellState.Delayed && !m_spellInfo.IsPositive() && (GameTime.GetGameTimeMS() - target.timeDelay) <= unit.LastSanctuaryTime)
+            if (GetState() == SpellState.Delayed && !IsPositive() && (GameTime.GetGameTimeMS() - target.timeDelay) <= unit.LastSanctuaryTime)
                 return;                                             // No missinfo in that case
 
             // Get original caster (if exist) and calculate damage/healing from him data
@@ -2016,7 +2016,7 @@ namespace Game.Spells
             m_hitMask |= hitMask;
 
             // spellHitTarget can be null if spell is missed in DoSpellHitOnUnit
-            if (missInfo != SpellMissInfo.Evade && spellHitTarget && !m_caster.IsFriendlyTo(unit) && (!m_spellInfo.IsPositive() || m_spellInfo.HasEffect(SpellEffectName.Dispel)))
+            if (missInfo != SpellMissInfo.Evade && spellHitTarget && !m_caster.IsFriendlyTo(unit) && (!IsPositive() || m_spellInfo.HasEffect(SpellEffectName.Dispel)))
             {
                 m_caster.CombatStart(unit, m_spellInfo.HasInitialAggro());
 
@@ -2103,7 +2103,7 @@ namespace Game.Spells
                     // @todo this cause soul transfer bugged
                     // 63881 - Malady of the Mind jump spell (Yogg-Saron)
                     // 45034 - Curse of Boundless Agony jump spell (Kalecgos)
-                    if (m_spellInfo.HasHitDelay() && unit.IsPlayer() && !m_spellInfo.IsPositive() && m_spellInfo.Id != 63881 && m_spellInfo.Id != 45034)
+                    if (m_spellInfo.HasHitDelay() && unit.IsPlayer() && !IsPositive() && m_spellInfo.Id != 63881 && m_spellInfo.Id != 45034)
                         return SpellMissInfo.Evade;
 
                     // assisting case, healing and resurrection
@@ -2364,7 +2364,7 @@ namespace Game.Spells
             float range = 0;
             if (channelAuraMask != 0)
             {
-                range = m_spellInfo.GetMaxRange(m_spellInfo.IsPositive());
+                range = m_spellInfo.GetMaxRange(IsPositive());
                 Player modOwner = m_caster.GetSpellModOwner();
                 if (modOwner != null)
                     modOwner.ApplySpellMod(m_spellInfo, SpellModOp.Range, ref range, this);
@@ -2908,9 +2908,9 @@ namespace Game.Spells
             if (procAttacker == 0)
             {
                 if (m_spellInfo.DmgClass == SpellDmgClass.Magic)
-                    procAttacker = m_spellInfo.IsPositive() ? ProcFlags.DoneSpellMagicDmgClassPos : ProcFlags.DoneSpellMagicDmgClassNeg;
+                    procAttacker = IsPositive() ? ProcFlags.DoneSpellMagicDmgClassPos : ProcFlags.DoneSpellMagicDmgClassNeg;
                 else
-                    procAttacker = m_spellInfo.IsPositive() ? ProcFlags.DoneSpellNoneDmgClassPos : ProcFlags.DoneSpellNoneDmgClassNeg;
+                    procAttacker = IsPositive() ? ProcFlags.DoneSpellNoneDmgClassPos : ProcFlags.DoneSpellNoneDmgClassNeg;
             }
 
             ProcFlagsHit hitMask = m_hitMask;
@@ -3136,9 +3136,9 @@ namespace Game.Spells
             if (procAttacker == 0)
             {
                 if (m_spellInfo.DmgClass == SpellDmgClass.Magic)
-                    procAttacker = m_spellInfo.IsPositive() ? ProcFlags.DoneSpellMagicDmgClassPos : ProcFlags.DoneSpellMagicDmgClassNeg;
+                    procAttacker = IsPositive() ? ProcFlags.DoneSpellMagicDmgClassPos : ProcFlags.DoneSpellMagicDmgClassNeg;
                 else
-                    procAttacker = m_spellInfo.IsPositive() ? ProcFlags.DoneSpellNoneDmgClassPos : ProcFlags.DoneSpellNoneDmgClassNeg;
+                    procAttacker = IsPositive() ? ProcFlags.DoneSpellNoneDmgClassPos : ProcFlags.DoneSpellNoneDmgClassNeg;
             }
 
             m_originalCaster.ProcSkillsAndAuras(null, procAttacker, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Finish, m_hitMask, this, null, null);
@@ -4380,7 +4380,7 @@ namespace Game.Spells
                     continue;
 
                 // positive spells distribute threat among all units that are in combat with target, like healing
-                if (m_spellInfo.IsPositive())
+                if (IsPositive())
                     target.GetThreatManager().ForwardThreatForAssistingMe(m_caster, threatToAdd, m_spellInfo);
                 // for negative spells threat gets distributed among affected targets
                 else
@@ -4391,7 +4391,7 @@ namespace Game.Spells
                     target.GetThreatManager().AddThreat(m_caster, threatToAdd, m_spellInfo, true);
                 }
             }
-            Log.outDebug(LogFilter.Spells, "Spell {0}, added an additional {1} threat for {2} {3} target(s)", m_spellInfo.Id, threat, m_spellInfo.IsPositive() ? "assisting" : "harming", m_UniqueTargetInfo.Count);
+            Log.outDebug(LogFilter.Spells, "Spell {0}, added an additional {1} threat for {2} {3} target(s)", m_spellInfo.Id, threat, IsPositive() ? "assisting" : "harming", m_UniqueTargetInfo.Count);
         }
 
         void HandleEffects(Unit pUnitTarget, Item pItemTarget, GameObject pGOTarget, uint i, SpellEffectHandleMode mode)
@@ -6708,6 +6708,11 @@ namespace Game.Spells
             return true;
         }
 
+        bool IsPositive()
+        {
+            return m_spellInfo.IsPositive() && (m_triggeredByAuraSpell == null || m_triggeredByAuraSpell.IsPositive());
+        }
+        
         bool IsNeedSendToClient()
         {
             return m_SpellVisual.SpellXSpellVisualID != 0 || m_SpellVisual.ScriptVisualID != 0 || m_spellInfo.IsChanneled() ||
