@@ -1323,7 +1323,7 @@ namespace Game.Entities
                     if (charm.GetTypeId() == TypeId.Unit)
                         charm.AddUnitFlag(UnitFlags.Stunned);
 
-                player.SendMovementSetCollisionHeight(player.GetCollisionHeight(true), UpdateCollisionHeightReason.Mount);
+                player.SendMovementSetCollisionHeight(player.GetCollisionHeight(), UpdateCollisionHeightReason.Mount);
             }
 
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Mount);
@@ -1339,7 +1339,7 @@ namespace Game.Entities
 
             Player thisPlayer = ToPlayer();
             if (thisPlayer != null)
-                thisPlayer.SendMovementSetCollisionHeight(thisPlayer.GetCollisionHeight(false), UpdateCollisionHeightReason.Mount);
+                thisPlayer.SendMovementSetCollisionHeight(thisPlayer.GetCollisionHeight(), UpdateCollisionHeightReason.Mount);
 
             // dismount as a vehicle
             if (IsTypeId(TypeId.Player) && GetVehicleKit() != null)

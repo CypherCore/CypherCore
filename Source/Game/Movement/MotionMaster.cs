@@ -379,11 +379,11 @@ namespace Game.Movement
             if (_owner.IsTypeId(TypeId.Player))
                 return;
 
-            float x, y, z;
-
             float moveTimeHalf = (float)(speedZ / gravity);
             float dist = 2 * moveTimeHalf * speedXY;
-            _owner.GetClosePoint(out x, out y, out z, _owner.GetCombatReach(), dist, angle);
+            _owner.GetNearPoint2D(out float x, out float y, dist, _owner.GetOrientation() + angle);
+            float z = _owner.GetPositionZ() + _owner.GetMidsectionHeight();
+            _owner.UpdateAllowedPositionZ(x, y, ref z);
             MoveJump(x, y, z, 0.0f, speedXY, speedZ);
         }
 

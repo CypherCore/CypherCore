@@ -782,6 +782,32 @@ namespace Game.Entities
 
         public void SetHoverHeight(float hoverHeight) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.HoverHeight), hoverHeight); }
 
+        public override float GetCollisionHeight()
+        {
+            float scaleMod = GetObjectScale(); // 99% sure about this
+
+            if (IsMounted())
+            {
+                var mountDisplayInfo = CliDB.CreatureDisplayInfoStorage.LookupByKey(GetMountDisplayId());
+                if (mountDisplayInfo != null)
+                {
+                    var mountModelData = CliDB.CreatureModelDataStorage.LookupByKey(mountDisplayInfo.ModelID);
+                    if (mountModelData != null)
+                    {
+                        var displayInfo = CliDB.CreatureDisplayInfoStorage.LookupByKey(GetNativeDisplayId());
+                        var modelData = CliDB.CreatureModelDataStorage.LookupByKey(displayInfo.ModelID);
+                        return scaleMod * (mountModelData.MountHeight + modelData.CollisionHeight * 0.5f);
+                    }
+                }
+            }
+
+            //! Dismounting case - use basic default model data
+            var defaultDisplayInfo = CliDB.CreatureDisplayInfoStorage.LookupByKey(GetNativeDisplayId());
+            var defaultModelData = CliDB.CreatureModelDataStorage.LookupByKey(defaultDisplayInfo.ModelID);
+
+            return scaleMod * defaultModelData.CollisionHeight;
+        }
+
         public Guardian GetGuardianPet()
         {
             ObjectGuid pet_guid = GetPetGUID();

@@ -1394,7 +1394,7 @@ namespace Game.Spells
             Player playerTarget = target.ToPlayer();
             if (playerTarget != null)
             {
-                playerTarget.SendMovementSetCollisionHeight(playerTarget.GetCollisionHeight(false), UpdateCollisionHeightReason.Force);
+                playerTarget.SendMovementSetCollisionHeight(playerTarget.GetCollisionHeight(), UpdateCollisionHeightReason.Force);
                 playerTarget.InitDataForForm();
             }
             else

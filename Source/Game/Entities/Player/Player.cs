@@ -4988,39 +4988,6 @@ namespace Game.Entities
             return true;
         }
 
-        public float GetCollisionHeight(bool mounted)
-        {
-            if (mounted)
-            {
-                var mountDisplayInfo = CliDB.CreatureDisplayInfoStorage.LookupByKey(GetMountDisplayId());
-                if (mountDisplayInfo == null)
-                    return GetCollisionHeight(false);
-
-                var mountModelData = CliDB.CreatureModelDataStorage.LookupByKey(mountDisplayInfo.ModelID);
-                if (mountModelData == null)
-                    return GetCollisionHeight(false);
-
-                var displayInfo = CliDB.CreatureDisplayInfoStorage.LookupByKey(GetNativeDisplayId());
-                Cypher.Assert(displayInfo != null);
-                var modelData = CliDB.CreatureModelDataStorage.LookupByKey(displayInfo.ModelID);
-                Cypher.Assert(modelData != null);
-
-                float scaleMod = GetObjectScale(); // 99% sure about this
-
-                return scaleMod * mountModelData.MountHeight + modelData.CollisionHeight * 0.5f;
-            }
-            else
-            {
-                //! Dismounting case - use basic default model data
-                var displayInfo = CliDB.CreatureDisplayInfoStorage.LookupByKey(GetNativeDisplayId());
-                Cypher.Assert(displayInfo != null);
-                var modelData = CliDB.CreatureModelDataStorage.LookupByKey(displayInfo.ModelID);
-                Cypher.Assert(modelData != null);
-
-                return modelData.CollisionHeight;
-            }
-        }
-
         // Used in triggers for check "Only to targets that grant experience or honor" req
         public bool IsHonorOrXPTarget(Unit victim)
         {
@@ -6388,7 +6355,7 @@ namespace Game.Entities
             SetBoundingRadius(scale * SharedConst.DefaultPlayerBoundingRadius);
             SetCombatReach(scale * SharedConst.DefaultPlayerCombatReach);
             if (IsInWorld)
-                SendMovementSetCollisionHeight(scale * GetCollisionHeight(IsMounted()), UpdateCollisionHeightReason.Scale);
+                SendMovementSetCollisionHeight(scale * GetCollisionHeight(), UpdateCollisionHeightReason.Scale);
         }
 
         public uint GetXP() { return m_activePlayerData.XP; }

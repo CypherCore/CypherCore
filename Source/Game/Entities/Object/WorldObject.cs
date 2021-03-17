@@ -1776,6 +1776,9 @@ namespace Game.Entities
         public virtual float GetStationaryZ() { return GetPositionZ(); }
         public virtual float GetStationaryO() { return GetOrientation(); }
 
+        public virtual float GetCollisionHeight() { return 0.0f;    }
+        public float GetMidsectionHeight() { return GetCollisionHeight() / 2.0f; }
+        
         public virtual bool IsNeverVisibleFor(WorldObject seer) { return !IsInWorld; }
         public virtual bool IsAlwaysVisibleFor(WorldObject seer) { return false; }
         public virtual bool IsInvisibleDueToDespawn() { return false; }
@@ -1897,11 +1900,14 @@ namespace Game.Entities
             {
                 float x, y, z;
                 if (IsTypeId(TypeId.Player))
+                {
                     GetPosition(out x, out y, out z);
+                    z += GetMidsectionHeight();
+                }
                 else
                     GetHitSpherePointFor(new Position(ox, oy, oz), out x, out y, out z);
 
-                return GetMap().IsInLineOfSight(GetPhaseShift(), x, y, z + 2.0f, ox, oy, oz + 2.0f, checks, ignoreFlags);
+                return GetMap().IsInLineOfSight(GetPhaseShift(), x, y, z, ox, oy, oz, checks, ignoreFlags);
             }
 
             return true;
@@ -1914,16 +1920,19 @@ namespace Game.Entities
 
             float x, y, z;
             if (obj.IsTypeId(TypeId.Player))
+            {
                 obj.GetPosition(out x, out y, out z);
+                z += GetMidsectionHeight();
+            }
             else
-                obj.GetHitSpherePointFor(GetPosition(), out x, out y, out z);
+                obj.GetHitSpherePointFor(new (GetPositionX(), GetPositionY(), GetPositionZ() + GetMidsectionHeight()), out x, out y, out z);
 
             return IsWithinLOS(x, y, z, checks, ignoreFlags);
         }
 
         Position GetHitSpherePointFor(Position dest)
         {
-            Vector3 vThis = new Vector3(GetPositionX(), GetPositionY(), GetPositionZ());
+            Vector3 vThis = new Vector3(GetPositionX(), GetPositionY(), GetPositionZ() + GetMidsectionHeight());
             Vector3 vObj = new Vector3(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ());
             Vector3 contactPoint = vThis + (vObj - vThis).directionOrZero() * Math.Min(dest.GetExactDist(GetPosition()), GetCombatReach());
 
