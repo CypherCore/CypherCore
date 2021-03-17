@@ -1719,6 +1719,7 @@ namespace Game.Entities
 
         public virtual bool HasQuest(uint questId) { return false; }
         public virtual bool HasInvolvedQuest(uint questId) { return false; }
+        public void SetIsNewObject(bool enable) { _isNewObject = enable; }
 
         public bool IsCreature() { return GetTypeId() == TypeId.Unit; }
         public bool IsPlayer() { return GetTypeId() == TypeId.Player; }
@@ -2352,6 +2353,7 @@ namespace Game.Entities
         protected TypeId ObjectTypeId { get; set; }
         protected CreateObjectBits m_updateFlag;
         ObjectGuid m_guid;
+        bool _isNewObject;
 
         public UpdateFieldHolder m_values;
         public ObjectFieldData m_objectData;

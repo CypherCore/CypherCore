@@ -611,7 +611,9 @@ namespace Game.Maps
 
             //something, such as vehicle, needs to be update immediately
             //also, trigger needs to cast spell, if not update, cannot see visual
+            obj.SetIsNewObject(true);
             obj.UpdateObjectVisibilityOnCreate();
+            obj.SetIsNewObject(false);
             return true;
         }
 
