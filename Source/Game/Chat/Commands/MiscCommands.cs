@@ -656,7 +656,7 @@ namespace Game.Chat
         [CommandNonGroup("dismount", RBACPermissions.CommandDismount)]
         static bool HandleDismountCommand(StringArguments args, CommandHandler handler)
         {
-            Player player = handler.GetSession().GetPlayer();
+            Player player = handler.GetSelectedPlayerOrSelf();
 
             // If player is not mounted, so go out :)
             if (!player.IsMounted())
@@ -667,7 +667,7 @@ namespace Game.Chat
 
             if (player.IsInFlight())
             {
-                handler.SendSysMessage(CypherStrings.YouInFlight);
+                handler.SendSysMessage(CypherStrings.CharInFlight);
                 return false;
             }
 
