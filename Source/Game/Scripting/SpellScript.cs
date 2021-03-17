@@ -769,7 +769,7 @@ namespace Game.Scripting
         public delegate void AuraEffectPeriodicDelegate(AuraEffect aura);
         public delegate void AuraEffectUpdatePeriodicDelegate(AuraEffect aura);
         public delegate void AuraEffectCalcAmountDelegate(AuraEffect aura, ref int amount, ref bool canBeRecalculated);
-        public delegate void AuraEffectCalcPeriodicDelegate(AuraEffect aura, bool isPeriodic, int amplitude);
+        public delegate void AuraEffectCalcPeriodicDelegate(AuraEffect aura, ref bool isPeriodic, ref int amplitude);
         public delegate void AuraEffectCalcSpellModDelegate(AuraEffect aura, ref SpellModifier spellMod);
         public delegate void AuraEffectAbsorbDelegate(AuraEffect aura, DamageInfo damageInfo, ref uint absorbAmount);
         public delegate void AuraEffectSplitDelegate(AuraEffect aura, DamageInfo damageInfo, uint splitAmount);
@@ -869,7 +869,7 @@ namespace Game.Scripting
             }
             public void Call(AuraEffect aurEff, ref bool isPeriodic, ref int periodicTimer)
             {
-                pEffectHandlerScript(aurEff, isPeriodic, periodicTimer);
+                pEffectHandlerScript(aurEff, ref isPeriodic, ref periodicTimer);
             }
 
             AuraEffectCalcPeriodicDelegate pEffectHandlerScript;

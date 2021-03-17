@@ -496,6 +496,94 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    // 430 Drink
+    // 431 Drink
+    // 432 Drink
+    // 1133 Drink
+    // 1135 Drink
+    // 1137 Drink
+    // 10250 Drink
+    // 22734 Drink
+    // 27089 Drink
+    // 34291 Drink
+    // 43182 Drink
+    // 43183 Drink
+    // 46755 Drink
+    // 49472 Drink Coffee
+    // 57073 Drink
+    // 61830 Drink
+    [Script] // 72623 Drink
+    class spell_gen_arena_drink : AuraScript
+    {
+        public override bool Load()
+        {
+            return GetCaster() && GetCaster().IsTypeId(TypeId.Player);
+        }
+
+        void CalcPeriodic(AuraEffect aurEff, ref bool isPeriodic, ref int amplitude)
+        {
+            // Get SPELL_AURA_MOD_POWER_REGEN aura from spell
+            AuraEffect regen = GetAura().GetEffect(0);
+            if (regen == null)
+                return;
+
+            if (regen.GetAuraType() != AuraType.ModPowerRegen)
+            {
+                isPeriodic = false;
+                Log.outError(LogFilter.Spells, $"Aura {GetId()} structure has been changed - first aura is no longer SPELL_AURA_MOD_POWER_REGEN");
+            }
+            else
+            {
+                // default case - not in arena
+                if (!GetCaster().ToPlayer().InArena())
+                {
+                    regen.ChangeAmount(aurEff.GetAmount());
+                    isPeriodic = false;
+                }
+            }
+        }
+
+        void UpdatePeriodic(AuraEffect aurEff)
+        {
+            AuraEffect regen = GetAura().GetEffect(0);
+            if (regen == null)
+                return;
+
+            // **********************************************
+            // This feature used only in arenas
+            // **********************************************
+            // Here need increase mana regen per tick (6 second rule)
+            // on 0 tick -   0  (handled in 2 second)
+            // on 1 tick - 166% (handled in 4 second)
+            // on 2 tick - 133% (handled in 6 second)
+
+            // Apply bonus for 1 - 4 tick
+            switch (aurEff.GetTickNumber())
+            {
+                case 1:   // 0%
+                    regen.ChangeAmount(0);
+                    break;
+                case 2:   // 166%
+                    regen.ChangeAmount(aurEff.GetAmount() * 5 / 3);
+                    break;
+                case 3:   // 133%
+                    regen.ChangeAmount(aurEff.GetAmount() * 4 / 3);
+                    break;
+                default:  // 100% - normal regen
+                    regen.ChangeAmount(aurEff.GetAmount());
+                    // No need to update after 4th tick
+                    aurEff.SetPeriodic(false);
+                    break;
+            }
+        }
+
+        public override void Register()
+        {
+            DoEffectCalcPeriodic.Add(new EffectCalcPeriodicHandler(CalcPeriodic, 1, AuraType.PeriodicDummy));
+            OnEffectUpdatePeriodic.Add(new EffectUpdatePeriodicHandler(UpdatePeriodic, 1, AuraType.PeriodicDummy));
+        }
+    }
+    
     [Script] // 41337 Aura of Anger
     class spell_gen_aura_of_anger : AuraScript
     {
@@ -821,7 +909,27 @@ namespace Scripts.Spells.Generic
         }
     }
 
-    [Script]
+    [Script] // 66020 Chains of Ice
+    class spell_gen_chains_of_ice : AuraScript
+    {
+        void UpdatePeriodic(AuraEffect aurEff)
+        {
+            // Get 0 effect aura
+            AuraEffect slow = GetAura().GetEffect(0);
+            if (slow == null)
+                return;
+
+            int newAmount = Math.Min(slow.GetAmount() + aurEff.GetAmount(), 0);
+            slow.ChangeAmount(newAmount);
+        }
+
+        public override void Register()
+        {
+            OnEffectUpdatePeriodic.Add(new EffectUpdatePeriodicHandler(UpdatePeriodic, 1, AuraType.PeriodicDummy));
+        }
+    }
+
+[Script]
     class spell_gen_chaos_blast : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)

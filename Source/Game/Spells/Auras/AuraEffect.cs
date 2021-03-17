@@ -413,7 +413,7 @@ namespace Game.Spells
 
                     ++_ticksDone;
 
-                    UpdatePeriodic(caster);
+                    GetBase().CallScriptEffectUpdatePeriodicHandlers(this);
 
                     GetApplicationList(out List<AuraApplication> effectApplications);
                     // tick on targets of effects
@@ -422,131 +422,6 @@ namespace Game.Spells
                             PeriodicTick(appt, caster);
                 }
             }
-        }
-        void UpdatePeriodic(Unit caster)
-        {
-            switch (GetAuraType())
-            {
-                case AuraType.PeriodicDummy:
-                    switch (GetSpellInfo().SpellFamilyName)
-                    {
-                        case SpellFamilyNames.Generic:
-                            switch (GetId())
-                            {
-                                // Drink
-                                case 430:
-                                case 431:
-                                case 432:
-                                case 1133:
-                                case 1135:
-                                case 1137:
-                                case 10250:
-                                case 22734:
-                                case 27089:
-                                case 34291:
-                                case 43182:
-                                case 43183:
-                                case 46755:
-                                case 49472: // Drink Coffee
-                                case 57073:
-                                case 61830:
-                                case 69176:
-                                case 72623:
-                                case 80166:
-                                case 80167:
-                                case 87958:
-                                case 87959:
-                                case 92736:
-                                case 92797:
-                                case 92800:
-                                case 92803:
-                                    if (caster == null || !caster.IsTypeId(TypeId.Player))
-                                        return;
-                                    // Get SPELL_AURA_MOD_POWER_REGEN aura from spell
-                                    AuraEffect aurEff = GetBase().GetEffect(0);
-                                    if (aurEff != null)
-                                    {
-                                        if (aurEff.GetAuraType() != AuraType.ModPowerRegen)
-                                        {
-                                            m_isPeriodic = false;
-                                            Log.outError(LogFilter.Spells, "Aura {0} structure has been changed - first aura is no longer SPELL_AURA_MOD_POWER_REGEN", GetId());
-                                        }
-                                        else
-                                        {
-                                            // default case - not in arena
-                                            if (!caster.ToPlayer().InArena())
-                                            {
-                                                aurEff.ChangeAmount(GetAmount());
-                                                m_isPeriodic = false;
-                                            }
-                                            else
-                                            {
-                                                // **********************************************
-                                                // This feature uses only in arenas
-                                                // **********************************************
-                                                // Here need increase mana regen per tick (6 second rule)
-                                                // on 0 tick -   0  (handled in 2 second)
-                                                // on 1 tick - 166% (handled in 4 second)
-                                                // on 2 tick - 133% (handled in 6 second)
-
-                                                // Apply bonus for 1 - 4 tick
-                                                switch (_ticksDone)
-                                                {
-                                                    case 1:   // 0%
-                                                        aurEff.ChangeAmount(0);
-                                                        break;
-                                                    case 2:   // 166%
-                                                        aurEff.ChangeAmount(GetAmount() * 5 / 3);
-                                                        break;
-                                                    case 3:   // 133%
-                                                        aurEff.ChangeAmount(GetAmount() * 4 / 3);
-                                                        break;
-                                                    default:  // 100% - normal regen
-                                                        aurEff.ChangeAmount(GetAmount());
-                                                        // No need to update after 4th tick
-                                                        m_isPeriodic = false;
-                                                        break;
-                                                }
-                                            }
-                                        }
-                                    }
-                                    break;
-                                case 58549: // Tenacity
-                                case 59911: // Tenacity (vehicle)
-                                    GetBase().RefreshDuration();
-                                    break;
-                                default:
-                                    break;
-                            }
-                            break;
-                        case SpellFamilyNames.Mage:
-                            if (GetId() == 55342)// Mirror Image
-                                m_isPeriodic = false;
-                            break;
-                        case SpellFamilyNames.Deathknight:
-                            // Chains of Ice
-                            if (GetSpellInfo().SpellFamilyFlags[1].HasAnyFlag(0x00004000u))
-                            {
-                                // Get 0 effect aura
-                                AuraEffect slow = GetBase().GetEffect(0);
-                                if (slow != null)
-                                {
-                                    int newAmount = slow.GetAmount() + GetAmount();
-                                    if (newAmount > 0)
-                                        newAmount = 0;
-                                    slow.ChangeAmount(newAmount);
-                                }
-                                return;
-                            }
-                            break;
-                        default:
-                            break;
-                    }
-                    break;
-                default:
-                    break;
-            }
-            GetBase().CallScriptEffectUpdatePeriodicHandlers(this);
         }
 
         public bool IsAffectingSpell(SpellInfo spell)
@@ -924,7 +799,7 @@ namespace Game.Spells
         public uint GetTotalTicks() { return (_period != 0 && !GetBase().IsPermanent()) ? (uint)(GetBase().GetMaxDuration() / _period) : 0u; }
 
         public bool IsPeriodic() { return m_isPeriodic; }
-        void SetPeriodic(bool isPeriodic) { m_isPeriodic = isPeriodic; }
+        public void SetPeriodic(bool isPeriodic) { m_isPeriodic = isPeriodic; }
         bool HasSpellClassMask() { return GetSpellEffectInfo().SpellClassMask; }
 
         public SpellEffectInfo GetSpellEffectInfo() { return _effectInfo; }
