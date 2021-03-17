@@ -2729,7 +2729,7 @@ namespace Game.Entities
             switch (op)
             {
                 // special case, if a mod makes spell instant, only consume that mod
-                case SpellModOp.CastingTime:
+                case SpellModOp.ChangeCastTime:
                     {
                         SpellModifier modInstantSpell = null;
                         foreach (SpellModifier mod in m_spellMods[(int)op][(int)SpellModType.Pct])
@@ -2753,7 +2753,7 @@ namespace Game.Entities
                         break;
                     }
                 // special case if two mods apply 100% critical chance, only consume one
-                case SpellModOp.CriticalChance:
+                case SpellModOp.CritChance:
                     {
                         SpellModifier modCritical = null;
                         foreach (SpellModifier mod in m_spellMods[(int)op][(int)SpellModType.Flat])
@@ -2799,7 +2799,7 @@ namespace Game.Entities
                     continue;
 
                 // special case (skip > 10sec spell casts for instant cast setting)
-                if (op == SpellModOp.CastingTime)
+                if (op == SpellModOp.ChangeCastTime)
                 {
                     if (baseValue.CompareTo(10000) > 0 && mod.value <= -100)
                         continue;
@@ -3213,7 +3213,7 @@ namespace Game.Entities
                     }
 
                     // Apply spell mods
-                    ApplySpellMod(spellInfo, SpellModOp.ChanceOfSuccess, ref chance);
+                    ApplySpellMod(spellInfo, SpellModOp.ProcChance, ref chance);
 
                     // Shiv has 100% chance to apply the poison
                     if (FindCurrentSpellBySpellId(5938) != null && e_slot == (byte)EnchantmentSlot.Temp)

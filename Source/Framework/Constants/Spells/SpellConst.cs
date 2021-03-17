@@ -317,50 +317,50 @@ namespace Framework.Constants
 
     public enum SpellModOp
     {
-        Damage = 0,
+        HealingAndDamage = 0,
         Duration = 1,
-        Threat = 2,
-        Effect1 = 3,
-        Charges = 4,
+        Hate = 2,
+        PointsIndex0 = 3,
+        ProcCharges = 4,
         Range = 5,
         Radius = 6,
-        CriticalChance = 7,
-        AllEffects = 8,
-        NotLoseCastingTime = 9,
-        CastingTime = 10,
+        CritChance = 7,
+        Points = 8,
+        ResistPushback = 9,
+        ChangeCastTime = 10,
         Cooldown = 11,
-        Effect2 = 12,
-        IgnoreArmor = 13,
-        Cost = 14,  // Used when SpellPowerEntry.PowerIndex == 0
-        CritDamageBonus = 15,
-        ResistMissChance = 16,
-        JumpTargets = 17,
-        ChanceOfSuccess = 18,
-        ActivationTime = 19,
-        DamageMultiplier = 20,
-        GlobalCooldown = 21,
-        Dot = 22,
-        Effect3 = 23,
-        BonusMultiplier = 24,
-        // Spellmod 25
-        ProcPerMinute = 26,
-        ValueMultiplier = 27,
-        ResistDispelChance = 28,
-        CritDamageBonus2 = 29, //One Not Used Spell
-        SpellCostRefundOnFail = 30,
-        StackAmount = 31,
-        Effect4 = 32,
-        Effect5 = 33,
-        SpellCost2 = 34, // Used when SpellPowerEntry.PowerIndex == 1
-        JumpDistance = 35,
-        // spellmod 36
-        MaxStackAmount = 37,
-        // spellmod 38
-        SpellCost3 = 39,
+        PointsIndex1 = 12,
+        TargetResistance = 13,
+        PowerCost0 = 14, // Used when SpellPowerEntry::PowerIndex == 0
+        CritDamageAndHealing = 15,
+        HitChance = 16,
+        ChainTargets = 17,
+        ProcChance = 18,
+        Period = 19,
+        ChainAmplitude = 20,
+        StartCooldown = 21,
+        PeriodicHealingAndDamage = 22,
+        PointsIndex2 = 23,
+        BonusCoefficient = 24,
+        TriggerDamage = 25, // NYI
+        ProcFrequency = 26,
+        Amplitude = 27,
+        DispelResistance = 28,
+        CrowdDamage = 29, // NYI
+        PowerCostOnMiss = 30,
+        Doses = 31,
+        PointsIndex3 = 32,
+        PointsIndex4 = 33,
+        PowerCost1 = 34, // Used when SpellPowerEntry::PowerIndex == 1
+        ChainJumpDistance = 35,
+        AreaTriggerMaxSummons = 36, // NYI
+        MaxAuraStacks = 37,
+        ProcCooldown = 38,
+        PowerCost2 = 39, // Used when SpellPowerEntry::PowerIndex == 2
 
         Max = 40
     }
-    // Note: SPELLMOD_* values is aura types in fact
+
     public enum SpellModType
     {
         Flat = 0,                            // SPELL_AURA_ADD_FLAT_MODIFIER

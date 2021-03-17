@@ -771,13 +771,13 @@ namespace Game.Entities
             if (spellInfo == null && HaveOffhandWeapon() && !IsInFeralForm())
                 missChance += 19.0f;
 
-            // Spellmod from SPELLMOD_RESIST_MISS_CHANCE
+            // Spellmod from SpellModOp.HitChance
             float resistMissChance = 100.0f;
             if (spellInfo != null)
             {
                 Player modOwner = GetSpellModOwner();
                 if (modOwner != null)
-                    modOwner.ApplySpellMod(spellInfo, SpellModOp.ResistMissChance, ref resistMissChance);
+                    modOwner.ApplySpellMod(spellInfo, SpellModOp.HitChance, ref resistMissChance);
             }
 
             missChance += resistMissChance - 100.0f;

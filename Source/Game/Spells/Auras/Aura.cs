@@ -878,7 +878,7 @@ namespace Game.Spells
             {
                 Player modOwner = caster.GetSpellModOwner();
                 if (modOwner != null)
-                    modOwner.ApplySpellMod(m_spellInfo, SpellModOp.MaxStackAmount, ref maxStackAmount);
+                    modOwner.ApplySpellMod(m_spellInfo, SpellModOp.MaxAuraStacks, ref maxStackAmount);
             }
             return maxStackAmount;
         }
@@ -1025,7 +1025,7 @@ namespace Game.Spells
             {
                 Player modOwner = caster.GetSpellModOwner();
                 if (modOwner != null)
-                    modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.ResistDispelChance, ref resistChance);
+                    modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.DispelResistance, ref resistChance);
             }
 
             resistChance = resistChance < 0 ? 0 : resistChance;
@@ -1652,7 +1652,16 @@ namespace Game.Spells
             }
 
             // cooldowns should be added to the whole aura (see 51698 area aura)
-            AddProcCooldown(now + TimeSpan.FromMilliseconds(procEntry.Cooldown));
+            int procCooldown = (int)procEntry.Cooldown;
+            Unit caster = GetCaster();
+            if (caster != null)
+            {
+                Player modOwner = caster.GetSpellModOwner();
+                if (modOwner != null)
+                    modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.ProcCooldown, ref procCooldown);
+            }
+
+            AddProcCooldown(now + TimeSpan.FromMilliseconds(procCooldown));
 
             SetLastProcSuccessTime(now);
         }
@@ -1807,7 +1816,7 @@ namespace Game.Spells
                 // apply chance modifer aura, applies also to ppm chance (see improved judgement of light spell)
                 Player modOwner = caster.GetSpellModOwner();
                 if (modOwner != null)
-                    modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.ChanceOfSuccess, ref chance);
+                    modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.ProcChance, ref chance);
             }
 
             // proc chance is reduced by an additional 3.333% per level past 60
@@ -2321,7 +2330,7 @@ namespace Game.Spells
             {
                 Player modOwner = caster.GetSpellModOwner();
                 if (modOwner != null)
-                    modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.Charges, ref maxProcCharges);
+                    modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.ProcCharges, ref maxProcCharges);
             }
             return (byte)maxProcCharges;
         }

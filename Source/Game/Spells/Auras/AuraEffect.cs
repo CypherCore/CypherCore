@@ -27,6 +27,7 @@ using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Collections;
 
 namespace Game.Spells
 {
@@ -188,7 +189,7 @@ namespace Game.Spells
             {
                 // Apply periodic time mod
                 if (modOwner != null)
-                    modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.ActivationTime, ref _period);
+                    modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.Period, ref _period);
 
                 if (caster != null)
                 {
@@ -346,70 +347,53 @@ namespace Game.Spells
                 return;
             // reapply some passive spells after add/remove related spellmods
             // Warning: it is a dead loop if 2 auras each other amount-shouldn't happen
+            BitSet recalculateEffectMask = new(SpellConst.MaxEffects);
             switch ((SpellModOp)GetMiscValue())
             {
-                case SpellModOp.AllEffects:
-                case SpellModOp.Effect1:
-                case SpellModOp.Effect2:
-                case SpellModOp.Effect3:
-                case SpellModOp.Effect4:
-                case SpellModOp.Effect5:
-                    {
-                        ObjectGuid guid = target.GetGUID();
-                        foreach (var iter in target.GetAppliedAuras())
-                        {
-                            if (iter.Value == null)
-                                continue;
-                            Aura aura = iter.Value.GetBase();
-                            // only passive and permament auras-active auras should have amount set on spellcast and not be affected
-                            // if aura is casted by others, it will not be affected
-                            if ((aura.IsPassive() || aura.IsPermanent()) && aura.GetCasterGUID() == guid && aura.GetSpellInfo().IsAffectedBySpellMod(m_spellmod))
-                            {
-                                AuraEffect aurEff;
-                                if ((SpellModOp)GetMiscValue() == SpellModOp.AllEffects)
-                                {
-                                    for (byte i = 0; i < SpellConst.MaxEffects; ++i)
-                                    {
-                                        if ((aurEff = aura.GetEffect(i)) != null)
-                                            aurEff.RecalculateAmount();
-                                    }
-                                }
-                                else if ((SpellModOp)GetMiscValue() == SpellModOp.Effect1)
-                                {
-                                    aurEff = aura.GetEffect(0);
-                                    if (aurEff != null)
-                                        aurEff.RecalculateAmount();
-                                }
-                                else if ((SpellModOp)GetMiscValue() == SpellModOp.Effect2)
-                                {
-                                    aurEff = aura.GetEffect(1);
-                                    if (aurEff != null)
-                                        aurEff.RecalculateAmount();
-                                }
-                                else if ((SpellModOp)GetMiscValue() == SpellModOp.Effect3)
-                                {
-                                    aurEff = aura.GetEffect(2);
-                                    if (aurEff != null)
-                                        aurEff.RecalculateAmount();
-                                }
-                                else if ((SpellModOp)GetMiscValue() == SpellModOp.Effect4)
-                                {
-                                    aurEff = aura.GetEffect(3);
-                                    if (aurEff != null)
-                                        aurEff.RecalculateAmount();
-                                }
-                                else if ((SpellModOp)GetMiscValue() == SpellModOp.Effect5)
-                                {
-                                    aurEff = aura.GetEffect(4);
-                                    if (aurEff != null)
-                                        aurEff.RecalculateAmount();
-                                }
-                            }
-                        }
-                    }
+                case SpellModOp.Points:
+                    recalculateEffectMask.SetAll(true);
+                    break;
+                case SpellModOp.PointsIndex0:
+                    recalculateEffectMask.Set(0, true);
+                    break;
+                case SpellModOp.PointsIndex1:
+                    recalculateEffectMask.Set(1, true);
+                    break;
+                case SpellModOp.PointsIndex2:
+                    recalculateEffectMask.Set(2, true);
+                    break;
+                case SpellModOp.PointsIndex3:
+                    recalculateEffectMask.Set(3, true);
+                    break;
+                case SpellModOp.PointsIndex4:
+                    recalculateEffectMask.Set(4, true);
                     break;
                 default:
                     break;
+            }
+
+            if (recalculateEffectMask.Any())
+            {
+                ObjectGuid guid = target.GetGUID();
+                var auras = target.GetAppliedAuras();
+                foreach (var iter in auras)
+                {
+                    Aura aura = iter.Value.GetBase();
+                    // only passive and permament auras-active auras should have amount set on spellcast and not be affected
+                    // if aura is cast by others, it will not be affected
+                    if ((aura.IsPassive() || aura.IsPermanent()) && aura.GetCasterGUID() == guid && aura.GetSpellInfo().IsAffectedBySpellMod(m_spellmod))
+                    {
+                        for (uint i = 0; i < recalculateEffectMask.Count; ++i)
+                        {
+                            if (recalculateEffectMask[(int)i])
+                            {
+                                AuraEffect aurEff = aura.GetEffect(i);
+                                if (aurEff != null)
+                                    aurEff.RecalculateAmount();
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -4910,7 +4894,7 @@ namespace Game.Spells
                         uint weaponDamage = MathFunctions.CalculatePct(caster.CalculateDamage(attackType, false, true), GetAmount());
 
                         // Add melee damage bonuses (also check for negative)
-                        uint damageBonusDone = caster.MeleeDamageBonusDone(target, Math.Max(weaponDamage, 0), attackType, GetSpellInfo());
+                        uint damageBonusDone = caster.MeleeDamageBonusDone(target, Math.Max(weaponDamage, 0), attackType, DamageEffectType.DOT, GetSpellInfo());
 
                         damage = target.MeleeDamageBonusTaken(caster, damageBonusDone, attackType, DamageEffectType.DOT, GetSpellInfo());
                         break;

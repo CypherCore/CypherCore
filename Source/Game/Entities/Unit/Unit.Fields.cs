@@ -286,6 +286,7 @@ namespace Game.Entities
                 case MeleeHitOutcome.Evade:
                     m_hitMask |= ProcFlagsHit.Evade;
                     break;
+                case MeleeHitOutcome.Block:
                 case MeleeHitOutcome.Crushing:
                 case MeleeHitOutcome.Glancing:
                 case MeleeHitOutcome.Normal:
@@ -295,8 +296,6 @@ namespace Game.Entities
                 case MeleeHitOutcome.Crit:
                     if (!damageNullified)
                         m_hitMask |= ProcFlagsHit.Critical;
-                    break;
-                default:
                     break;
             }
         }

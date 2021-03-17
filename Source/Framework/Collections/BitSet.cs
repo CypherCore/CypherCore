@@ -192,6 +192,17 @@ namespace System.Collections
             return this;
         }
 
+        public bool Any()
+        {
+            for (var i  = 0; i < Length; ++i)
+            {
+                if (Get(i))
+                    return true;
+            }
+
+            return false;
+        }
+
         public int Length
         {
             get

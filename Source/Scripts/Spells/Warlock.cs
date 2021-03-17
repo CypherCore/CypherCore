@@ -279,7 +279,7 @@ namespace Scripts.Spells.Warlock
 
             Player modOwner = caster.GetSpellModOwner();
             if (modOwner)
-                modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.Cost, ref damage);
+                modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.PowerCost0, ref damage);
 
             SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(caster, caster, GetSpellInfo(), GetAura().GetSpellVisual(), GetSpellInfo().SchoolMask, GetAura().GetCastGUID());
             damageInfo.periodicLog = true;

@@ -1772,7 +1772,7 @@ namespace Game.Entities
             {
                 Player modOwner = GetSpellModOwner();
                 if (modOwner != null)
-                    modOwner.ApplySpellMod(spellProto, SpellModOp.ProcPerMinute, ref PPM);
+                    modOwner.ApplySpellMod(spellProto, SpellModOp.ProcFrequency, ref PPM);
             }
 
             return (float)Math.Floor((WeaponSpeed * PPM) / 600.0f);   // result is chance in percents (probability = Speed_in_sec * (PPM / 60))
@@ -1916,7 +1916,7 @@ namespace Game.Entities
 
             damage += CalculateDamage(damageInfo.attackType, false, true);
             // Add melee damage bonus
-            damage = MeleeDamageBonusDone(damageInfo.target, damage, damageInfo.attackType);
+            damage = MeleeDamageBonusDone(damageInfo.target, damage, damageInfo.attackType, DamageEffectType.Direct);
             damage = damageInfo.target.MeleeDamageBonusTaken(this, damage, damageInfo.attackType, DamageEffectType.Direct);
 
             // Script Hook For CalculateMeleeDamage -- Allow scripts to change the Damage pre class mitigation calculations
@@ -2737,7 +2737,7 @@ namespace Game.Entities
             {
                 Player modOwner = GetSpellModOwner();
                 if (modOwner != null)
-                    modOwner.ApplySpellMod(spellInfo, SpellModOp.IgnoreArmor, ref armor);
+                    modOwner.ApplySpellMod(spellInfo, SpellModOp.TargetResistance, ref armor);
             }
 
             var resIgnoreAuras = GetAuraEffectsByType(AuraType.ModIgnoreTargetResist);
@@ -2780,7 +2780,7 @@ namespace Game.Entities
             return Math.Max((uint)(damage * (1.0f - mitigation)), 1);
         }
 
-        public uint MeleeDamageBonusDone(Unit victim, uint pdamage, WeaponAttackType attType, SpellInfo spellProto = null)
+        public uint MeleeDamageBonusDone(Unit victim, uint pdamage, WeaponAttackType attType, DamageEffectType damagetype, SpellInfo spellProto = null)
         {
             if (victim == null || pdamage == 0)
                 return 0;
@@ -2874,7 +2874,12 @@ namespace Game.Entities
             {
                 Player modOwner = GetSpellModOwner();
                 if (modOwner != null)
-                    modOwner.ApplySpellMod(spellProto, SpellModOp.Damage, ref tmpDamage);
+                {
+                    if (damagetype == DamageEffectType.DOT)
+                        modOwner.ApplySpellMod(spellProto, SpellModOp.PeriodicHealingAndDamage, ref tmpDamage);
+                    else
+                        modOwner.ApplySpellMod(spellProto, SpellModOp.HealingAndDamage, ref tmpDamage);
+                }
             }
 
             // bonus result can be negative

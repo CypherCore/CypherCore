@@ -2839,13 +2839,13 @@ namespace Game.Spells
                 switch (power.OrderIndex)
                 {
                     case 0:
-                        mod = SpellModOp.Cost;
+                        mod = SpellModOp.PowerCost0;
                         break;
                     case 1:
-                        mod = SpellModOp.SpellCost2;
+                        mod = SpellModOp.PowerCost1;
                         break;
                     case 2:
-                        mod = SpellModOp.SpellCost3;
+                        mod = SpellModOp.PowerCost2;
                         break;
                     default:
                         break;
@@ -3410,7 +3410,9 @@ namespace Game.Spells
                                         // non-positive mods
                                         switch ((SpellModOp)effect.MiscValue)
                                         {
-                                            case SpellModOp.Cost: // dependent from bas point sign (negative . positive)
+                                            case SpellModOp.PowerCost0: // dependent from bas point sign (negative . positive)
+                                            case SpellModOp.PowerCost1:
+                                            case SpellModOp.PowerCost2:
                                                 if (effect.CalcValue() > 0)
                                                 {
                                                     if (!deep)
@@ -3963,7 +3965,7 @@ namespace Game.Spells
             float multiplier = Amplitude;
             Player modOwner = (caster != null ? caster.GetSpellModOwner() : null);
             if (modOwner != null)
-                modOwner.ApplySpellMod(_spellInfo, SpellModOp.ValueMultiplier, ref multiplier, spell);
+                modOwner.ApplySpellMod(_spellInfo, SpellModOp.Amplitude, ref multiplier, spell);
             return multiplier;
         }
 
@@ -3972,7 +3974,7 @@ namespace Game.Spells
             float multiplierPercent = ChainAmplitude * 100.0f;
             Player modOwner = (caster != null ? caster.GetSpellModOwner() : null);
             if (modOwner != null)
-                modOwner.ApplySpellMod(_spellInfo, SpellModOp.DamageMultiplier, ref multiplierPercent, spell);
+                modOwner.ApplySpellMod(_spellInfo, SpellModOp.ChainAmplitude, ref multiplierPercent, spell);
             return multiplierPercent / 100.0f;
         }
 

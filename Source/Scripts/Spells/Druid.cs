@@ -415,7 +415,7 @@ namespace Scripts.Spells.Druid
             if (spellMod == null)
             {
                 spellMod = new SpellModifier(GetAura());
-                spellMod.op = SpellModOp.Dot;
+                spellMod.op = SpellModOp.PeriodicHealingAndDamage;
                 spellMod.type = SpellModType.Flat;
                 spellMod.spellId = GetId();
                 spellMod.mask = aurEff.GetSpellEffectInfo().SpellClassMask;
