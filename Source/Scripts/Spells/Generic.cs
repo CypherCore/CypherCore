@@ -521,6 +521,17 @@ namespace Scripts.Spells.Generic
             return GetCaster() && GetCaster().IsTypeId(TypeId.Player);
         }
 
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            if (!spellInfo.GetEffect(0).IsAura() || spellInfo.GetEffect(0).ApplyAuraName != AuraType.ModPowerRegen)
+            {
+                Log.outError(LogFilter.Spells, "Aura {GetId()} structure has been changed - first aura is no longer SPELL_AURA_MOD_POWER_REGEN");
+                return false;
+            }
+
+            return true;
+        }
+
         void CalcPeriodic(AuraEffect aurEff, ref bool isPeriodic, ref int amplitude)
         {
             // Get SPELL_AURA_MOD_POWER_REGEN aura from spell
@@ -528,20 +539,20 @@ namespace Scripts.Spells.Generic
             if (regen == null)
                 return;
 
-            if (regen.GetAuraType() != AuraType.ModPowerRegen)
-            {
+            // default case - not in arena
+            if (!GetCaster().ToPlayer().InArena())
                 isPeriodic = false;
-                Log.outError(LogFilter.Spells, $"Aura {GetId()} structure has been changed - first aura is no longer SPELL_AURA_MOD_POWER_REGEN");
-            }
-            else
-            {
-                // default case - not in arena
-                if (!GetCaster().ToPlayer().InArena())
-                {
-                    regen.ChangeAmount(aurEff.GetAmount());
-                    isPeriodic = false;
-                }
-            }
+        }
+
+        void CalcAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+        {
+            AuraEffect regen = GetAura().GetEffect(0);
+            if (regen == null)
+                return;
+
+            // default case - not in arena
+            if (!GetCaster().ToPlayer().InArena())
+                regen.ChangeAmount(amount);
         }
 
         void UpdatePeriodic(AuraEffect aurEff)
@@ -581,6 +592,7 @@ namespace Scripts.Spells.Generic
         public override void Register()
         {
             DoEffectCalcPeriodic.Add(new EffectCalcPeriodicHandler(CalcPeriodic, 1, AuraType.PeriodicDummy));
+            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalcAmount, 1, AuraType.PeriodicDummy));
             OnEffectUpdatePeriodic.Add(new EffectUpdatePeriodicHandler(UpdatePeriodic, 1, AuraType.PeriodicDummy));
         }
     }
