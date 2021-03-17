@@ -30,10 +30,10 @@ namespace Game.Entities
 
         public uint m_cinematicDiff;
         public uint m_lastCinematicCheck;
-        CinematicSequencesRecord m_activeCinematic;
+        public CinematicSequencesRecord m_activeCinematic;
         public int m_activeCinematicCameraIndex;
         public uint m_cinematicLength;
-        List<FlyByCamera> m_cinematicCamera;
+        public List<FlyByCamera> m_cinematicCamera;
         Position m_remoteSightPosition;
         TempSummon m_CinematicObject;
 

@@ -335,7 +335,7 @@ namespace Game.Entities
 
             // Update cinematic location, if 500ms have passed and we're doing a cinematic now.
             _cinematicMgr.m_cinematicDiff += diff;
-            if (_cinematicMgr.m_activeCinematicCameraIndex != 0 && Time.GetMSTimeDiffToNow(_cinematicMgr.m_lastCinematicCheck) > 500)
+            if (_cinematicMgr.m_cinematicCamera != null && _cinematicMgr.m_activeCinematic != null && Time.GetMSTimeDiffToNow(_cinematicMgr.m_lastCinematicCheck) > 500)
             {
                 _cinematicMgr.m_lastCinematicCheck = GameTime.GetGameTimeMS();
                 _cinematicMgr.UpdateCinematicLocation(diff);
