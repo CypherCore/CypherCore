@@ -46,6 +46,8 @@ namespace Scripts.Spells.Shaman
         public const uint FlameShock = 8050;
         public const uint FlameShockMaelstrom = 188389;
         public const uint FlametongueAttack = 10444;
+        public const uint FlametongueWeaponEnchant = 334294;
+        public const uint FlametongueWeaponAura = 319778;
         public const uint GatheringStorms = 198299;
         public const uint GatheringStormsBuff = 198300;
         public const uint ItemLightningShield = 23552;
@@ -297,8 +299,43 @@ namespace Scripts.Spells.Shaman
         }
     }
 
-    [Script] // 194084 - Flametongue
-    class spell_sha_flametongue : AuraScript
+    [Script] // 318038 - Flametongue Weapon
+    class spell_sha_flametongue_weapon : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.FlametongueWeaponEnchant);
+        }
+
+        public override bool Load()
+        {
+            Unit caster = GetCaster();
+            return caster != null && caster.IsTypeId(TypeId.Player);
+        }
+
+        void HandleEffectHitTarget(uint index)
+        {
+            Player player = GetCaster().ToPlayer();
+            byte slot = EquipmentSlot.MainHand;
+
+            if (player.GetPrimarySpecialization() == (uint)TalentSpecialization.ShamanEnhancement)
+                slot = EquipmentSlot.OffHand;
+
+            Item targetItem = player.GetItemByPos(InventorySlots.Bag0, slot);
+            if (targetItem == null || !targetItem.GetTemplate().IsRangedWeapon())
+                return;
+
+            GetCaster().CastSpell(targetItem, SpellIds.FlametongueWeaponEnchant, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    [Script] // 319778 - Flametongue
+    class spell_sha_flametongue_weapon_aura : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -711,6 +748,24 @@ namespace Scripts.Spells.Shaman
         }
     }
 
+    [Script] // 28820 - Lightning Shield
+    class spell_sha_t3_8p_bonus : AuraScript
+    {
+        void PeriodicTick(AuraEffect aurEff)
+        {
+            PreventDefaultAction();
+
+            // Need remove self if Lightning Shield not active
+            if (GetTarget().GetAuraEffect(AuraType.ProcTriggerSpell, SpellFamilyNames.Shaman, new FlagArray128(0x400), GetCaster().GetGUID()) == null)
+                Remove();
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic .Add(new EffectPeriodicHandler(PeriodicTick, 1, AuraType.PeriodicTriggerSpell));
+        }
+    }
+    
     [Script] // 64928 - Item - Shaman T8 Elemental 4P Bonus
     class spell_sha_t8_elemental_4p_bonus : AuraScript
     {

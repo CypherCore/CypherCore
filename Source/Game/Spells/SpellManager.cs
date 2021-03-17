@@ -2984,6 +2984,25 @@ namespace Game.Entities
                     case 43327:
                         spellInfo.GetEffect(1).ApplyAuraPeriod = 1 * Time.InMilliseconds;
                         break;
+                    // specific code for cases with no trigger spell provided in field                    
+                    case 23170: // Brood Affliction: Bronze
+                        spellInfo.GetEffect(0).TriggerSpell = 23171;
+                        break;
+                    case 29917: // Feed Captured Animal
+                            spellInfo.GetEffect(0).TriggerSpell = 29916;
+                        break;                    
+                    case 37027: // Remote Toy
+                        spellInfo.GetEffect(0).TriggerSpell = 37029;
+                        break;                    
+                    case 38495: // Eye of Grillok
+                        spellInfo.GetEffect(0).TriggerSpell = 38530;
+                        break;
+                    case 39857: // Tear of Azzinoth Summon Channel - it's not really supposed to do anything, and this only prevents the console spam
+                        spellInfo.GetEffect(0).TriggerSpell = 39856;
+                        break;                    
+                    case 46736:// Personalized Weather
+                        spellInfo.GetEffect(1).TriggerSpell = 46737;
+                        break;
                     case 63026: // Summon Aspirant Test NPC (HACK: Target shouldn't be changed)
                     case 63137: // Summon Valiant Test (HACK: Target shouldn't be changed; summon position should be untied from spell destination)
                         spellInfo.GetEffect(0).TargetA = new SpellImplicitTargetInfo(Targets.DestDb);

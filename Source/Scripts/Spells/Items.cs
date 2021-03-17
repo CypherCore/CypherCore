@@ -20,6 +20,7 @@ using Framework.GameMath;
 using Game.BattleGrounds;
 using Game.DataStorage;
 using Game.Entities;
+using Game.Loots;
 using Game.Scripting;
 using Game.Spells;
 using System;
@@ -32,6 +33,9 @@ namespace Scripts.Spells.Items
     {
         //Aegisofpreservation
         public const uint AegisHeal = 23781;
+
+        //ZezzaksShard
+        public const uint EyeOfGrillok = 38495;
 
         //Alchemiststone
         public const uint AlchemistStoneExtraHeal = 21399;
@@ -527,6 +531,31 @@ namespace Scripts.Spells.Items
         }
     }
 
+    [Script] // 38554 - Absorb Eye of Grillok (31463: Zezzak's Shard)
+    class spell_item_absorb_eye_of_grillok : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.EyeOfGrillok);
+        }
+
+        void PeriodicTick(AuraEffect aurEff)
+        {
+            PreventDefaultAction();
+
+            if (!GetCaster() || !GetTarget().IsTypeId(TypeId.Unit))
+                return;
+
+            GetCaster().CastSpell(GetCaster(), SpellIds.EyeOfGrillok, true, null, aurEff);
+            GetTarget().ToCreature().DespawnOrUnsummon();
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicTriggerSpell));
+        }
+    }
+
     // Item - 13503: Alchemist's Stone
     // Item - 35748: Guardian's Alchemist Stone
     // Item - 35749: Sorcerer's Alchemist Stone
@@ -535,7 +564,6 @@ namespace Scripts.Spells.Items
     // Item - 44322: Mercurial Alchemist Stone
     // Item - 44323: Indestructible Alchemist's Stone
     // Item - 44324: Mighty Alchemist's Stone
-
     [Script] // 17619 - Alchemist Stone
     class spell_item_alchemist_stone : AuraScript
     {
@@ -576,7 +604,6 @@ namespace Scripts.Spells.Items
 
     // Item - 50351: Tiny Abomination in a Jar
     // 71406 - Anger Capacitor
-
     // Item - 50706: Tiny Abomination in a Jar (Heroic)
     // 71545 - Anger Capacitor
     [Script("spell_item_tiny_abomination_in_a_jar", 8)]
@@ -1024,6 +1051,35 @@ namespace Scripts.Spells.Items
         }
     }
 
+    [Script] // 30427 - Extract Gas (23821: Zapthrottle Mote Extractor)
+    class spell_item_extract_gas : AuraScript
+    {
+        void PeriodicTick(AuraEffect aurEff)
+        {
+            PreventDefaultAction();
+
+            // move loot to player inventory and despawn target
+            if (GetCaster() != null && GetCaster().IsTypeId(TypeId.Player) &&
+                GetTarget().IsTypeId(TypeId.Unit) &&
+                GetTarget().ToCreature().GetCreatureTemplate().CreatureType == CreatureType.GasCloud)
+            {
+                Player player = GetCaster().ToPlayer();
+                Creature creature = GetTarget().ToCreature();
+                // missing lootid has been reported on startup - just return
+                if (creature.GetCreatureTemplate().SkinLootId == 0)
+                    return;
+
+                player.AutoStoreLoot(creature.GetCreatureTemplate().SkinLootId, LootStorage.Skinning, ItemContext.None, true);
+                creature.DespawnOrUnsummon();
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicTriggerSpell));
+        }
+    }
+    
     [Script] // 7434 - Fate Rune of Unsurpassed Vigor
     class spell_item_fate_rune_of_unsurpassed_vigor : AuraScript
     {

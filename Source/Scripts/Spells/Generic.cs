@@ -338,6 +338,7 @@ namespace Scripts.Spells.Generic
         public const uint ChampionAlliance = 2782;
         public const uint ChampionHorde = 2788;
     }
+
     struct QuestIds
     {
         //TournamentQuests
@@ -928,8 +929,8 @@ namespace Scripts.Spells.Generic
             OnEffectUpdatePeriodic.Add(new EffectUpdatePeriodicHandler(UpdatePeriodic, 1, AuraType.PeriodicDummy));
         }
     }
-
-[Script]
+    
+    [Script]
     class spell_gen_chaos_blast : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -1689,6 +1690,27 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    [Script] // 46284 - Negative Energy Periodic
+    class spell_gen_negative_energy_periodic : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(spellInfo.GetEffect(0).TriggerSpell);
+        }
+
+        void PeriodicTick(AuraEffect aurEff)
+        {
+            PreventDefaultAction();
+
+            GetTarget().CastCustomSpell(GetSpellInfo().GetEffect(aurEff.GetEffIndex()).TriggerSpell, SpellValueMod.MaxTargets, (int)(aurEff.GetTickNumber() / 10 + 1), null, true, null, aurEff);
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicTriggerSpell));
+        }
+    }
+    
     [Script] // 28702 - Netherbloom
     class spell_gen_netherbloom : SpellScript
     {
@@ -1730,7 +1752,7 @@ namespace Scripts.Spells.Generic
         }
     }
 
-    // 28720 - Nightmare Vine
+    [Script] // 28720 - Nightmare Vine
     class spell_gen_nightmare_vine : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -1756,6 +1778,25 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    [Script] // 27746 -  Nitrous Boost
+    class spell_gen_nitrous_boost : AuraScript
+    {
+        void PeriodicTick(AuraEffect aurEff)
+        {
+            PreventDefaultAction();
+
+            if (GetCaster() != null && GetTarget().GetPower(PowerType.Mana) >= 10)
+                GetTarget().ModifyPower(PowerType.Mana, -10);
+            else
+                Remove();
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic .Add(new EffectPeriodicHandler(PeriodicTick, 1, AuraType.PeriodicTriggerSpell));
+        }
+    }
+    
     [Script] // 27539 - Obsidian Armor
     class spell_gen_obsidian_armor : AuraScript
     {
@@ -1874,7 +1915,7 @@ namespace Scripts.Spells.Generic
         }
     }
 
-    // 35201 - Paralytic Poison
+    [Script] // 35201 - Paralytic Poison
     class spell_gen_paralytic_poison : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -2073,6 +2114,37 @@ namespace Scripts.Spells.Generic
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleScript, 1, SpellEffectName.ScriptEffect));
+        }
+    }
+
+    // 23493 - Restoration
+    [Script] // 24379 - Restoration
+    class spell_gen_restoration : AuraScript
+    {
+        void PeriodicTick(AuraEffect aurEff)
+        {
+            PreventDefaultAction();
+
+            Unit caster = GetCaster();
+            if (caster == null)
+                return;
+
+            uint heal = (uint)caster.CountPctFromMaxHealth(10);
+            HealInfo healInfo = new(caster, GetTarget(), heal, GetSpellInfo(), GetSpellInfo().GetSchoolMask());
+            caster.HealBySpell(healInfo);
+
+            /// @todo: should proc other auras?
+            int mana = caster.GetMaxPower(PowerType.Mana);
+            if (mana != 0)
+            {
+                mana /= 10;
+                caster.EnergizeBySpell(caster, GetId(), mana, PowerType.Mana);
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicTriggerSpell));
         }
     }
 
