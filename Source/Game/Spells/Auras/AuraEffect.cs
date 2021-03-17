@@ -125,15 +125,29 @@ namespace Game.Spells
                 amount *= GetBase().GetStackAmount();
             return amount;
         }
+
+        public uint GetTotalTicks()
+        {
+            uint totalTicks = 0;
+            if (_period != 0 && !GetBase().IsPermanent())
+            {
+                totalTicks = (uint)(GetBase().GetMaxDuration() / _period);
+                if (m_spellInfo.HasAttribute(SpellAttr5.StartPeriodicAtApply))
+                    ++totalTicks;
+            }
+
+            return totalTicks;
+        }
+        
         void ResetPeriodic(bool resetPeriodicTimer = false)
         {
             _ticksDone = 0;
             if (resetPeriodicTimer)
             {
-                _periodicTimer = _period;
+                _periodicTimer = 0;
                 // Start periodic on next tick or at aura apply
-                if (!m_spellInfo.HasAttribute(SpellAttr5.StartPeriodicAtApply))
-                    _periodicTimer = 0;
+                if (m_spellInfo.HasAttribute(SpellAttr5.StartPeriodicAtApply))
+                    _periodicTimer = _period;
             }
         }
         public void CalculatePeriodic(Unit caster, bool resetPeriodicTimer = true, bool load = false)
@@ -401,26 +415,27 @@ namespace Game.Spells
 
         public void Update(uint diff, Unit caster)
         {
-            if (m_isPeriodic && (GetBase().GetDuration() >= 0 || GetBase().IsPassive() || GetBase().IsPermanent()))
+            if (!m_isPeriodic || (GetBase().GetDuration() < 0 && !GetBase().IsPassive() && !GetBase().IsPermanent()))
+                return;
+
+            uint totalTicks = GetTotalTicks();
+
+            _periodicTimer += (int)diff;
+            while (_periodicTimer >= _period)
             {
-                _periodicTimer += (int)diff;
-                while (_periodicTimer >= _period)
-                {
-                    _periodicTimer -= _period;
+                _periodicTimer -= _period;
 
-                    if (!GetBase().IsPermanent() && (_ticksDone + 1) > GetTotalTicks())
-                        break;
+                if (!GetBase().IsPermanent() && (_ticksDone + 1) > totalTicks)
+                    break;
 
-                    ++_ticksDone;
+                ++_ticksDone;
 
-                    GetBase().CallScriptEffectUpdatePeriodicHandlers(this);
+                GetBase().CallScriptEffectUpdatePeriodicHandlers(this);
 
-                    GetApplicationList(out List<AuraApplication> effectApplications);
-                    // tick on targets of effects
-                    foreach (var appt in effectApplications)
-                        if (appt.HasEffect(GetEffIndex()))
-                            PeriodicTick(appt, caster);
-                }
+                GetApplicationList(out List<AuraApplication> effectApplications);
+                // tick on targets of effects
+                foreach (var appt in effectApplications)
+                    PeriodicTick(appt, caster);
             }
         }
 
@@ -796,7 +811,6 @@ namespace Game.Spells
         public void ResetTicks() { _ticksDone = 0; }
         public uint GetTickNumber() { return _ticksDone; }
         public uint GetRemainingTicks() { return GetTotalTicks() - _ticksDone; }
-        public uint GetTotalTicks() { return (_period != 0 && !GetBase().IsPermanent()) ? (uint)(GetBase().GetMaxDuration() / _period) : 0u; }
 
         public bool IsPeriodic() { return m_isPeriodic; }
         public void SetPeriodic(bool isPeriodic) { m_isPeriodic = isPeriodic; }

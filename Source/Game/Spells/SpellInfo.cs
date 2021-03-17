@@ -2652,9 +2652,8 @@ namespace Game.Spells
 
         public uint GetMaxTicks()
         {
+            uint totalTicks = 0;
             int DotDuration = GetDuration();
-            if (DotDuration == 0)
-                return 1;
 
             foreach (SpellEffectInfo effect in _effects)
             {
@@ -2676,14 +2675,19 @@ namespace Game.Spells
                         case AuraType.PeriodicTriggerSpell:
                         case AuraType.PeriodicTriggerSpellWithValue:
                         case AuraType.PeriodicHealthFunnel:
-                            if (effect.ApplyAuraPeriod != 0)
-                                return (uint)(DotDuration / effect.ApplyAuraPeriod);
+                            // skip infinite periodics
+                            if (effect.ApplyAuraPeriod > 0 && DotDuration > 0)
+                            {
+                                totalTicks = (uint)DotDuration / effect.ApplyAuraPeriod;
+                                if (HasAttribute(SpellAttr5.StartPeriodicAtApply))
+                                    ++totalTicks;
+                            }
                             break;
                     }
                 }
             }
 
-            return 6;
+            return totalTicks;
         }
 
         public uint GetRecoveryTime()
