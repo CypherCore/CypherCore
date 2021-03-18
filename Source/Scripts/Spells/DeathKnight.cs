@@ -17,10 +17,12 @@
 
 using Framework.Constants;
 using Game.Entities;
+using Game.Networking.Packets;
 using Game.Scripting;
 using Game.Spells;
+using System;
 using System.Collections.Generic;
-using Game.Networking.Packets;
+using System.Linq;
 
 namespace Scripts.Spells.DeathKnight
 {
@@ -42,6 +44,7 @@ namespace Scripts.Spells.DeathKnight
         public const uint DeathGripDummy = 243912;
         public const uint DeathGripJump = 49575;
         public const uint DeathGripTaunt = 51399;
+        public const uint DeathStrikeEnabler = 89832; //Server Side
         public const uint DeathStrikeHeal = 45470;
         public const uint DeathStrikeOffhand = 66188;
         public const uint FesteringWound = 194310;
@@ -420,22 +423,34 @@ namespace Scripts.Spells.DeathKnight
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.DeathStrikeHeal, SpellIds.BloodShieldMastery, SpellIds.BloodShieldAbsorb, SpellIds.RecentlyUsedDeathStrike, SpellIds.Frost, SpellIds.DeathStrikeOffhand);
+            return ValidateSpellInfo(SpellIds.DeathStrikeEnabler, SpellIds.DeathStrikeHeal, SpellIds.BloodShieldMastery, SpellIds.BloodShieldAbsorb, SpellIds.RecentlyUsedDeathStrike, SpellIds.Frost, SpellIds.DeathStrikeOffhand)
+                && spellInfo.GetEffect(1) != null && spellInfo.GetEffect(2) != null;
         }
 
-        void HandleHeal(uint effIndex)
+        void HandleDummy(uint effIndex)
         {
             Unit caster = GetCaster();
-            //Todo: heal = std::min(10% health, 20% of all damage taken in last 5 seconds)
-            int heal = (int)MathFunctions.CalculatePct(caster.GetMaxHealth(), GetSpellInfo().GetEffect(4).CalcValue());
-            caster.CastCustomSpell(SpellIds.DeathStrikeHeal, SpellValueMod.BasePoint0, heal, caster, true);
 
-            AuraEffect aurEff = caster.GetAuraEffect(SpellIds.BloodShieldMastery, 0);
-            if (aurEff != null)
-                caster.CastCustomSpell(SpellIds.BloodShieldAbsorb, SpellValueMod.BasePoint0, MathFunctions.CalculatePct(heal, aurEff.GetAmount()), caster);
+            AuraEffect enabler = caster.GetAuraEffect(SpellIds.DeathStrikeEnabler, 0, GetCaster().GetGUID());
+            if (enabler != null)
+            {
+                SpellInfo spellInfo = GetSpellInfo();
 
-            if (caster.HasAura(SpellIds.Frost))
-                caster.CastSpell(GetHitUnit(), SpellIds.DeathStrikeOffhand, true);
+                // Heals you for 25% of all damage taken in the last 5 sec,
+                int heal = MathFunctions.CalculatePct(enabler.CalculateAmount(GetCaster()), spellInfo.GetEffect(1).CalcValue(GetCaster()));
+                // minimum 7.0% of maximum health.
+                int pctOfMaxHealth = MathFunctions.CalculatePct(spellInfo.GetEffect(2).CalcValue(GetCaster()), caster.GetMaxHealth());
+                heal = Math.Max(heal, pctOfMaxHealth);
+
+                caster.CastCustomSpell(SpellIds.DeathStrikeHeal, SpellValueMod.BasePoint0, heal, caster, true);
+
+                AuraEffect aurEff = caster.GetAuraEffect(SpellIds.BloodShieldMastery, 0);
+                if (aurEff != null)
+                    caster.CastCustomSpell(SpellIds.BloodShieldAbsorb, SpellValueMod.BasePoint0, MathFunctions.CalculatePct(heal, aurEff.GetAmount()), caster);
+
+                if (caster.HasAura(SpellIds.Frost))
+                    caster.CastSpell(GetHitUnit(), SpellIds.DeathStrikeOffhand, true);
+            }
         }
 
         void TriggerRecentlyUsedDeathStrike()
@@ -445,11 +460,49 @@ namespace Scripts.Spells.DeathKnight
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleHeal, 1, SpellEffectName.WeaponPercentDamage));
+            OnEffectLaunch.Add(new EffectHandler(HandleDummy, 1, SpellEffectName.Dummy));
             AfterCast.Add(new CastHandler(TriggerRecentlyUsedDeathStrike));
         }
     }
 
+    [Script] // 89832 - Death Strike Enabler - SPELL_DK_DEATH_STRIKE_ENABLER
+    class spell_dk_death_strike_enabler : AuraScript
+    {
+        // Amount of seconds we calculate damage over
+        uint[] _damagePerSecond = new uint[5];
+
+        bool CheckProc(ProcEventInfo eventInfo)
+        {
+            return eventInfo.GetDamageInfo() != null;
+        }
+
+        void Update(AuraEffect aurEff)
+        {
+            // Move backwards all datas by one from [23][0][0][0][0] -> [0][23][0][0][0]
+            _damagePerSecond = Enumerable.Range(1, _damagePerSecond.Length).Select(i => _damagePerSecond[i % _damagePerSecond.Length]).ToArray();
+            _damagePerSecond[0] = 0;
+        }
+
+        void HandleCalcAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+        {
+            canBeRecalculated = true;
+            amount = Enumerable.Range(1, _damagePerSecond.Length).Sum();
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            _damagePerSecond[0] += eventInfo.GetDamageInfo().GetDamage();
+        }
+
+        public override void Register()
+        {
+            DoCheckProc.Add(new CheckProcHandler(CheckProc));
+            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.PeriodicDummy));
+            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(HandleCalcAmount, 0, AuraType.PeriodicDummy));
+            OnEffectUpdatePeriodic.Add(new EffectUpdatePeriodicHandler(Update, 0, AuraType.PeriodicDummy));
+        }
+    }
+    
     [Script] // 85948 - Festering Strike
     class spell_dk_festering_strike : SpellScript
     {

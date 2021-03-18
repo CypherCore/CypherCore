@@ -2903,7 +2903,7 @@ namespace Game.Entities
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded spell custom attributes in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
         }
-
+        
         public void LoadSpellInfoCorrections()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -3001,7 +3001,8 @@ namespace Game.Entities
                         spellInfo.GetEffect(0).TriggerSpell = 39856;
                         break;                    
                     case 46736:// Personalized Weather
-                        spellInfo.GetEffect(1).TriggerSpell = 46737;
+                        spellInfo.GetEffect(0).TriggerSpell = 46737;
+                        spellInfo.GetEffect(0).ApplyAuraName = AuraType.PeriodicTriggerSpell;
                         break;
                     case 63026: // Summon Aspirant Test NPC (HACK: Target shouldn't be changed)
                     case 63137: // Summon Valiant Test (HACK: Target shouldn't be changed; summon position should be untied from spell destination)
@@ -3226,6 +3227,10 @@ namespace Game.Entities
                     case 48714:// Compelled
                     case 7853: // The Art of Being a Water Terror: Force Cast on Player
                         spellInfo.RangeEntry = CliDB.SpellRangeStorage.LookupByKey(13); // 50000yd
+                        break;
+                    case 28864:
+                    case 29105:
+                        spellInfo.GetEffect(0).RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards10);
                         break;
                     // VIOLET HOLD SPELLS
                     //
@@ -3732,6 +3737,7 @@ namespace Game.Entities
             switch (type)
             {
                 case AuraType.Dummy:
+                case AuraType.PeriodicDummy:
                 case AuraType.ModConfuse:
                 case AuraType.ModThreat:
                 case AuraType.ModStun:
