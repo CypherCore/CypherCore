@@ -256,6 +256,10 @@ namespace Game.Entities
         {
             switch (type)
             {
+                case GameObjectTypes.Mailbox:
+                    return true;
+                case GameObjectTypes.BarberChair:
+                    return false;
                 case GameObjectTypes.QuestGiver:
                     return QuestGiver.allowMounted != 0;
                 case GameObjectTypes.Text:

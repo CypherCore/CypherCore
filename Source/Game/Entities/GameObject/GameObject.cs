@@ -1355,6 +1355,9 @@ namespace Game.Entities
             Player playerUser = user.ToPlayer();
             if (playerUser != null)
             {
+                if (!m_goInfo.IsUsableMounted())
+                    playerUser.Dismount();
+
                 playerUser.PlayerTalkClass.ClearMenus();
                 if (GetAI().GossipHello(playerUser))
                     return;

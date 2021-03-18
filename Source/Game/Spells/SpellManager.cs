@@ -2584,7 +2584,7 @@ namespace Game.Entities
                 } while (spellsResult.NextRow());
             }
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {mServersideSpellNames} serverside spells {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {mServersideSpellNames.Count} serverside spells {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
         public void LoadSpellInfoCustomAttributes()
