@@ -3240,8 +3240,9 @@ namespace Game.Spells
             unitTarget.GetHostileRefManager().UpdateVisibility();
 
             var attackers = unitTarget.GetAttackers();
-            foreach (var unit in attackers)
+            for (var i = 0; i < attackers.Count; ++i)
             {
+                var unit = attackers[i];
                 if (!unit.CanSeeOrDetect(unitTarget))
                     unit.AttackStop();
             }

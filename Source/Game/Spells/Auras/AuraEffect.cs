@@ -1531,7 +1531,7 @@ namespace Game.Spells
 
         [AuraEffectHandler(AuraType.ModScale)]
         [AuraEffectHandler(AuraType.ModScale2)]
-        public void HandleAuraModScale(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        void HandleAuraModScale(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountSendForClientMask))
                 return;
@@ -5380,7 +5380,7 @@ namespace Game.Spells
                 Log.outError(LogFilter.Spells, "AuraEffect.HandleProcTriggerSpellWithValueAuraProc: Could not trigger spell {0} from aura {1} proc, because the spell does not have an entry in Spell.dbc.", triggerSpellId, GetId());
         }
 
-        public void HandleProcTriggerDamageAuraProc(AuraApplication aurApp, ProcEventInfo eventInfo)
+        void HandleProcTriggerDamageAuraProc(AuraApplication aurApp, ProcEventInfo eventInfo)
         {
             Unit target = aurApp.GetTarget();
             Unit triggerTarget = eventInfo.GetProcTarget();
