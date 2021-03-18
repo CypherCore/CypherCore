@@ -2423,32 +2423,32 @@ namespace Framework.Constants
     {   // (C) used in caster aura state     (T) used in target aura state
         // (c) used in caster aura state-not (t) used in target aura state-not
         None = 0,            // C   |
-        Defense = 1,            // C   |
-        HealthLess20Percent = 2,            // CcT |
-        Berserking = 3,            // C T |
-        Frozen = 4,            //  c t| frozen target
-        Judgement = 5,            // C   |
-        //UNKNOWN6                   = 6,            //     | not used
-        HunterParry = 7,            // C   |
-        //UNKNOWN7                   = 7,            //  c  | creature cheap shot / focused bursts spells
-        //UNKNOWN8                   = 8,            //    t| test spells
-        //UNKNOWN9                   = 9,            //     |
-        WarriorVictoryRush = 10,           // C   | warrior victory rush
-        //UNKNOWN11                  = 11,           // C  t| 60348 - Maelstrom Ready!, test spells
-        FaerieFire = 12,           //  c t|
-        HealthLess35Percent = 13,           // C T |
-        Conflagrate = 14,           //   T |
-        Swiftmend = 15,           //   T |
-        DeadlyPoison = 16,           //   T |
-        Enrage = 17,           // C   |
-        Bleeding = 18,           //    T|
-        Unk19 = 19,           //     |
-        //UNKNOWN20                  = 20,           //  c  | only (45317 Suicide)
-        //UNKNOWN21                  = 21,           //     | not used
-        Unk22 = 22,           // C  t| varius spells (63884, 50240)
-        HealthAbove75Percent = 23,            // C   |
+        Defensive = 1,            // Cctt|
+        Wounded20Percent = 2,            // Cct |
+        Unbalanced = 3,            // Cct | Nyi
+        Frozen = 4,            //  C T|
+        Marked = 5,            // C  T| Nyi
+        Wounded25Percent = 6,            //   T |
+        Defensive2 = 7,            // Cc  | Nyi
+        Banished = 8,            //  C  | Nyi
+        Dazed = 9,            //    T|
+        Victorious = 10,           // C   |
+        Rampage = 11,           //     | Nyi
+        FaerieFire = 12,           //  C T|
+        Wounded35Percent = 13,           // Cct |
+        RaidEncounter2 = 14,           //  Ct |
+        DruidPeriodicHeal = 15,           //   T |
+        RoguePoisoned = 16,           //     |
+        Enraged = 17,           // C   |
+        Bleed = 18,           //   T |
+        Vulnerable = 19,           //     | Nyi
+        ArenaPreparation = 20,           //  C  |
+        WoundHealth20_80 = 21,           //   T |
+        RaidEncounter = 22,           // Cctt|
+        Healthy75Percent = 23,           // C   |
+        WoundHealth35_80 = 24,            //   T |
 
-        PerCasterAuraStateMask = (1 << (Conflagrate - 1)) | (1 << (DeadlyPoison - 1))
+        PerCasterAuraStateMask = (1 << (RaidEncounter2 - 1)) | (1 << (RoguePoisoned - 1))
     }
 
     // target enum name consist of:

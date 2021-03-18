@@ -3986,6 +3986,8 @@ namespace Game.Spells
                     return;
                 target.RemoveUnitFlag(UnitFlags.Preparation);
             }
+
+            target.ModifyAuraState(AuraStateType.ArenaPreparation, apply);
         }
 
         [AuraEffectHandler(AuraType.NoReagentUse)]

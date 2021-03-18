@@ -1354,45 +1354,25 @@ namespace Game.Spells
         {
             _auraState = AuraStateType.None;
 
-            // Seals
-            if (GetSpellSpecific() == SpellSpecificType.Seal)
-                _auraState = AuraStateType.Judgement;
-
-            // Conflagrate aura state on Immolate and Shadowflame
-            if (SpellFamilyName == SpellFamilyNames.Warlock &&
-                // Immolate
-                (SpellFamilyFlags[0].HasAnyFlag(4u) ||
-                // Shadowflame
-                SpellFamilyFlags[2].HasAnyFlag(2u)))
-                _auraState = AuraStateType.Conflagrate;
-
-            // Faerie Fire (druid versions)
-            if (SpellFamilyName == SpellFamilyNames.Druid && SpellFamilyFlags[0].HasAnyFlag(0x400u))
-                _auraState = AuraStateType.FaerieFire;
-
-            // Sting (hunter's pet ability)
+            // Faerie Fire
             if (GetCategory() == 1133)
                 _auraState = AuraStateType.FaerieFire;
 
-            // Victorious
-            if (SpellFamilyName == SpellFamilyNames.Warrior && SpellFamilyFlags[1].HasAnyFlag(0x40000u))
-                _auraState = AuraStateType.WarriorVictoryRush;
-
-            // Swiftmend state on Regrowth & Rejuvenation
-            if (SpellFamilyName == SpellFamilyNames.Druid && SpellFamilyFlags[0].HasAnyFlag(0x50u))
-                _auraState = AuraStateType.Swiftmend;
+            // Swiftmend state on Regrowth, Rejuvenation, Wild Growth
+            if (SpellFamilyName == SpellFamilyNames.Druid && (SpellFamilyFlags[0].HasAnyFlag(0x50u) || SpellFamilyFlags[1].HasAnyFlag(0x4000000u)))
+                _auraState = AuraStateType.DruidPeriodicHeal;
 
             // Deadly poison aura state
             if (SpellFamilyName == SpellFamilyNames.Rogue && SpellFamilyFlags[0].HasAnyFlag(0x10000u))
-                _auraState = AuraStateType.DeadlyPoison;
+                _auraState = AuraStateType.RoguePoisoned;
 
             // Enrage aura state
             if (Dispel == DispelType.Enrage)
-                _auraState = AuraStateType.Enrage;
+                _auraState = AuraStateType.Enraged;
 
             // Bleeding aura state
             if (Convert.ToBoolean(GetAllEffectsMechanicMask() & 1 << (int)Mechanics.Bleed))
-                _auraState = AuraStateType.Bleeding;
+                _auraState = AuraStateType.Bleed;
 
             if (Convert.ToBoolean(GetSchoolMask() & SpellSchoolMask.Frost))
             {
@@ -1403,16 +1383,49 @@ namespace Game.Spells
 
             switch (Id)
             {
+                case 1064: // Dazed
+                    _auraState = AuraStateType.Dazed;
+                    break;
+                case 32216: // Victorious
+                    _auraState = AuraStateType.Victorious;
+                    break;
                 case 71465: // Divine Surge
                 case 50241: // Evasive Charges
-                    _auraState = AuraStateType.Unk22;
+                    _auraState = AuraStateType.RaidEncounter;
                     break;
-                case 9991:  // Touch of Zanzil
-                case 35325: // Glowing Blood
-                case 35328: // Lambent Blood
-                case 35329: // Vibrant Blood
-                case 35331: // Black Blood
-                case 49163: // Perpetual Instability
+                case 6950:   // Faerie Fire
+                case 9806:   // Phantom Strike
+                case 9991:   // Touch of Zanzil
+                case 13424:  // Faerie Fire
+                case 13752:  // Faerie Fire
+                case 16432:  // Plague Mist
+                case 20656:  // Faerie Fire
+                case 25602:  // Faerie Fire
+                case 32129:  // Faerie Fire
+                case 35325:  // Glowing Blood
+                case 35328:  // Lambent Blood
+                case 35329:  // Vibrant Blood
+                case 35331:  // Black Blood
+                case 49163:  // Perpetual Instability
+                case 65863:  // Faerie Fire
+                case 79559:  // Luxscale Light
+                case 82855:  // Dazzling
+                case 102953: // In the Rumpus
+                case 127907: // Phosphorescence
+                case 127913: // Phosphorescence
+                case 129007: // Zijin Sting
+                case 130159: // Fae Touch
+                case 142537: // Spotter Smoke
+                case 168455: // Spotted!
+                case 176905: // Super Sticky Glitter Bomb
+                case 189502: // Marked
+                case 201785: // Intruder Alert!
+                case 201786: // Intruder Alert!
+                case 201935: // Spotted!
+                case 239233: // Smoke Bomb
+                case 319400: // Glitter Burst
+                case 321470: // Dimensional Shifter Mishap
+                case 331134: // Spotted
                     _auraState = AuraStateType.FaerieFire;
                     break;
                 default:

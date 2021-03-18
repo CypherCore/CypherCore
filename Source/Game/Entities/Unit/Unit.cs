@@ -184,9 +184,12 @@ namespace Game.Entities
 
             if (IsAlive())
             {
-                ModifyAuraState(AuraStateType.HealthLess20Percent, HealthBelowPct(20));
-                ModifyAuraState(AuraStateType.HealthLess35Percent, HealthBelowPct(35));
-                ModifyAuraState(AuraStateType.HealthAbove75Percent, HealthAbovePct(75));
+                ModifyAuraState(AuraStateType.Wounded20Percent, HealthBelowPct(20));
+                ModifyAuraState(AuraStateType.Wounded25Percent, HealthBelowPct(25));
+                ModifyAuraState(AuraStateType.Wounded35Percent, HealthBelowPct(35));
+                ModifyAuraState(AuraStateType.WoundHealth20_80, HealthBelowPct(20) || HealthAbovePct(80));
+                ModifyAuraState(AuraStateType.Healthy75Percent, HealthAbovePct(75));
+                ModifyAuraState(AuraStateType.WoundHealth35_80, HealthBelowPct(35) || HealthAbovePct(80));
             }
 
             UpdateSplineMovement(diff);

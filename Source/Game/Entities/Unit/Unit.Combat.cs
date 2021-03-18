@@ -1729,16 +1729,12 @@ namespace Game.Entities
                     switch (reactive)
                     {
                         case ReactiveType.Defense:
-                            if (HasAuraState(AuraStateType.Defense))
-                                ModifyAuraState(AuraStateType.Defense, false);
+                            if (HasAuraState(AuraStateType.Defensive))
+                                ModifyAuraState(AuraStateType.Defensive, false);
                             break;
-                        case ReactiveType.HunterParry:
-                            if (GetClass() == Class.Hunter && HasAuraState(AuraStateType.HunterParry))
-                                ModifyAuraState(AuraStateType.HunterParry, false);
-                            break;
-                        case ReactiveType.OverPower:
-                            if (GetClass() == Class.Warrior && IsTypeId(TypeId.Player))
-                                ToPlayer().ClearComboPoints();
+                        case ReactiveType.Defense2:
+                            if (HasAuraState(AuraStateType.Defensive2))
+                                ModifyAuraState(AuraStateType.Defensive2, false);
                             break;
                     }
                 }
@@ -1836,12 +1832,10 @@ namespace Game.Entities
             for (ReactiveType i = 0; i < ReactiveType.Max; ++i)
                 m_reactiveTimer[i] = 0;
 
-            if (HasAuraState(AuraStateType.Defense))
-                ModifyAuraState(AuraStateType.Defense, false);
-            if (GetClass() == Class.Hunter && HasAuraState(AuraStateType.HunterParry))
-                ModifyAuraState(AuraStateType.HunterParry, false);
-            if (GetClass() == Class.Warrior && IsTypeId(TypeId.Player))
-                ToPlayer().ClearComboPoints();
+            if (HasAuraState(AuraStateType.Defensive))
+                ModifyAuraState(AuraStateType.Defensive, false);
+            if (HasAuraState(AuraStateType.Defensive2))
+                ModifyAuraState(AuraStateType.Defensive2, false);
         }
 
         public virtual bool CanUseAttackType(WeaponAttackType attacktype)

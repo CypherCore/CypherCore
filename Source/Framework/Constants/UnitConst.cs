@@ -343,9 +343,8 @@ namespace Framework.Constants
     public enum ReactiveType
     {
         Defense = 0,
-        HunterParry = 1,
-        OverPower = 2,
-        Max = 3
+        Defense2 = 1,
+        Max = 2
     }
 
     public enum SpellValueMod

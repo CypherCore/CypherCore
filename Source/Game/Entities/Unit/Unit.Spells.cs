@@ -242,7 +242,7 @@ namespace Game.Entities
 
                     // Drain Soul - increased damage for targets under 20% HP
                     if (spellProto.Id == 198590)
-                        if (HasAuraState(AuraStateType.HealthLess20Percent))
+                        if (HasAuraState(AuraStateType.Wounded20Percent))
                             DoneTotalMod *= 2;
                     break;
             }
@@ -1851,39 +1851,21 @@ namespace Game.Entities
                             // Update AURA_STATE on dodge
                             if (GetClass() != Class.Rogue) // skip Rogue Riposte
                             {
-                                ModifyAuraState(AuraStateType.Defense, true);
+                                ModifyAuraState(AuraStateType.Defensive, true);
                                 StartReactiveTimer(ReactiveType.Defense);
                             }
                         }
                         // if victim and parry attack
                         if (hitMask.HasAnyFlag(ProcFlagsHit.Parry))
                         {
-                            // For Hunters only Counterattack (skip Mongoose bite)
-                            if (GetClass() == Class.Hunter)
-                            {
-                                ModifyAuraState(AuraStateType.HunterParry, true);
-                                StartReactiveTimer(ReactiveType.HunterParry);
-                            }
-                            else
-                            {
-                                ModifyAuraState(AuraStateType.Defense, true);
-                                StartReactiveTimer(ReactiveType.Defense);
-                            }
+                            ModifyAuraState(AuraStateType.Defensive, true);
+                            StartReactiveTimer(ReactiveType.Defense);
                         }
                         // if and victim block attack
                         if (hitMask.HasAnyFlag(ProcFlagsHit.Block))
                         {
-                            ModifyAuraState(AuraStateType.Defense, true);
+                            ModifyAuraState(AuraStateType.Defensive, true);
                             StartReactiveTimer(ReactiveType.Defense);
-                        }
-                    }
-                    else // For attacker
-                    {
-                        // Overpower on victim dodge
-                        if (hitMask.HasAnyFlag(ProcFlagsHit.Dodge) && IsPlayer() && GetClass() == Class.Warrior)
-                        {
-                            ToPlayer().AddComboPoints(1);
-                            StartReactiveTimer(ReactiveType.OverPower);
                         }
                     }
                 }
@@ -3888,7 +3870,7 @@ namespace Game.Entities
                             continue;
 
                         SpellInfo spellProto = app.Value.GetBase().GetSpellInfo();
-                        if (app.Value.GetBase().GetCasterGUID() == GetGUID() && spellProto.CasterAuraState == flag && (spellProto.IsPassive() || flag != AuraStateType.Enrage))
+                        if (app.Value.GetBase().GetCasterGUID() == GetGUID() && spellProto.CasterAuraState == flag && (spellProto.IsPassive() || flag != AuraStateType.Enraged))
                             RemoveAura(app);
                     }
                 }

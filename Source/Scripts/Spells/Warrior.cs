@@ -469,7 +469,7 @@ namespace Scripts.Spells.Warrior
             if (damageInfo != null)
             {
                 SpellInfo spellInfo = damageInfo.GetSpellInfo();
-                if (spellInfo != null && (spellInfo.Id == SpellIds.BladestormPeriodicWhirlwind || (spellInfo.Id == SpellIds.Execute && !_procTarget.HasAuraState(AuraStateType.HealthLess20Percent))))
+                if (spellInfo != null && (spellInfo.Id == SpellIds.BladestormPeriodicWhirlwind || (spellInfo.Id == SpellIds.Execute && !_procTarget.HasAuraState(AuraStateType.Wounded20Percent))))
                 {
                     // If triggered by Execute (while target is not under 20% hp) or Bladestorm deals normalized weapon damage
                     GetTarget().CastSpell(_procTarget, SpellIds.SweepingStrikesExtraAttack2, true, null, aurEff);
