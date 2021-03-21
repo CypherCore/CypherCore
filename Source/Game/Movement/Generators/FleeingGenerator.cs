@@ -122,7 +122,7 @@ namespace Game.Movement
                 return;
             }
 
-            MoveSplineInit init = new MoveSplineInit(owner);
+            MoveSplineInit init = new(owner);
             init.MovebyPath(_path.GetPath());
             init.SetWalk(false);
             int traveltime = init.Launch();

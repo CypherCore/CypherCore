@@ -446,7 +446,7 @@ namespace Game.Chat
 
             Player player = handler.GetSession().GetPlayer();
 
-            List<WorldObject> creatureList = new List<WorldObject>();
+            List<WorldObject> creatureList = new();
             if (!player.GetMap().SpawnGroupSpawn(groupId, ignoreRespawn, force, creatureList))
             {
                 handler.SendSysMessage(CypherStrings.SpawngroupBadgroup, groupId);
@@ -719,7 +719,7 @@ namespace Game.Chat
 
                 uint vendor_entry = vendor.GetEntry();
 
-                VendorItem vItem = new VendorItem();
+                VendorItem vItem = new();
                 vItem.item = itemId;
                 vItem.maxcount = maxcount;
                 vItem.incrtime = incrtime;
@@ -807,7 +807,7 @@ namespace Game.Chat
                     return false;
 
                 Player chr = handler.GetSession().GetPlayer();
-                FormationInfo group_member = new FormationInfo();
+                FormationInfo group_member = new();
                 group_member.follow_angle = (creature.GetAngle(chr) - chr.GetOrientation()) * 180 / MathFunctions.PI;
                 group_member.follow_dist = (float)Math.Sqrt(Math.Pow(chr.GetPositionX() - creature.GetPositionX(), 2) + Math.Pow(chr.GetPositionY() - creature.GetPositionY(), 2));
                 group_member.leaderGUID = leaderGUID;

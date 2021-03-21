@@ -39,18 +39,18 @@ namespace Game.Entities
         //Gossip
         public PlayerMenu PlayerTalkClass;
         PlayerSocial m_social;
-        List<Channel> m_channels = new List<Channel>();
-        List<ObjectGuid> WhisperList = new List<ObjectGuid>();
+        List<Channel> m_channels = new();
+        List<ObjectGuid> WhisperList = new();
         public string autoReplyMsg;
 
         //Inventory
-        Dictionary<ulong, EquipmentSetInfo> _equipmentSets = new Dictionary<ulong, EquipmentSetInfo>();
-        public List<ItemSetEffect> ItemSetEff = new List<ItemSetEffect>();
-        List<EnchantDuration> m_enchantDuration = new List<EnchantDuration>();
-        List<Item> m_itemDuration = new List<Item>();
-        List<ObjectGuid> m_itemSoulboundTradeable = new List<ObjectGuid>();
-        List<ObjectGuid> m_refundableItems = new List<ObjectGuid>();
-        public List<Item> ItemUpdateQueue = new List<Item>();
+        Dictionary<ulong, EquipmentSetInfo> _equipmentSets = new();
+        public List<ItemSetEffect> ItemSetEff = new();
+        List<EnchantDuration> m_enchantDuration = new();
+        List<Item> m_itemDuration = new();
+        List<ObjectGuid> m_itemSoulboundTradeable = new();
+        List<ObjectGuid> m_refundableItems = new();
+        public List<Item> ItemUpdateQueue = new();
         VoidStorageItem[] _voidStorageItems = new VoidStorageItem[SharedConst.VoidStorageMaxSlot];
         Item[] m_items = new Item[(int)PlayerSlots.Count];
         uint m_WeaponProficiency;
@@ -69,15 +69,15 @@ namespace Game.Entities
         bool _usePvpItemLevels;
 
         //Groups/Raids
-        GroupReference m_group = new GroupReference();
-        GroupReference m_originalGroup = new GroupReference();
+        GroupReference m_group = new();
+        GroupReference m_originalGroup = new();
         Group m_groupInvite;
         GroupUpdateFlags m_groupUpdateMask;
         bool m_bPassOnGroupLoot;
         GroupUpdateCounter[] m_groupUpdateSequences = new GroupUpdateCounter[2];
 
-        public Dictionary<Difficulty, Dictionary<uint, InstanceBind>> m_boundInstances = new Dictionary<Difficulty, Dictionary<uint, InstanceBind>>();
-        Dictionary<uint, long> _instanceResetTimes = new Dictionary<uint, long>();
+        public Dictionary<Difficulty, Dictionary<uint, InstanceBind>> m_boundInstances = new();
+        Dictionary<uint, long> _instanceResetTimes = new();
         uint _pendingBindId;
         uint _pendingBindTimer;
         public bool m_InstanceValid;
@@ -88,7 +88,7 @@ namespace Game.Entities
         Difficulty m_prevMapDifficulty;
 
         //Movement
-        public PlayerTaxi m_taxi = new PlayerTaxi();
+        public PlayerTaxi m_taxi = new();
         public byte[] m_forced_speed_changes = new byte[(int)UnitMoveType.Max];
         public byte m_movementForceModMagnitudeChanges;
         uint m_lastFallTime;
@@ -113,24 +113,24 @@ namespace Game.Entities
         uint m_lastPotionId;
 
         //Spell
-        Dictionary<uint, PlayerSpell> m_spells = new Dictionary<uint, PlayerSpell>();
-        Dictionary<uint, SkillStatusData> mSkillStatus = new Dictionary<uint, SkillStatusData>();
-        Dictionary<uint, PlayerCurrency> _currencyStorage = new Dictionary<uint, PlayerCurrency>();
+        Dictionary<uint, PlayerSpell> m_spells = new();
+        Dictionary<uint, SkillStatusData> mSkillStatus = new();
+        Dictionary<uint, PlayerCurrency> _currencyStorage = new();
         List<SpellModifier>[][] m_spellMods = new List<SpellModifier>[(int)SpellModOp.Max][];
-        MultiMap<uint, uint> m_overrideSpells = new MultiMap<uint, uint>();
+        MultiMap<uint, uint> m_overrideSpells = new();
         public Spell m_spellModTakingSpell;
         uint m_oldpetspell;
 
         //Mail
-        List<Mail> m_mail = new List<Mail>();
-        Dictionary<ulong, Item> mMitems = new Dictionary<ulong, Item>();
+        List<Mail> m_mail = new();
+        Dictionary<ulong, Item> mMitems = new();
         public byte unReadMails;
         long m_nextMailDelivereTime;
         public bool m_mailsLoaded;
         public bool m_mailsUpdated;
 
         //Pets
-        public List<PetAura> m_petAuras = new List<PetAura>();
+        public List<PetAura> m_petAuras = new();
         public uint m_stableSlots;
         uint m_temporaryUnsummonedPetNumber;
         uint m_lastpetnumber;
@@ -158,15 +158,15 @@ namespace Game.Entities
         uint m_weaponChangeTimer;
 
         //Quest
-        List<uint> m_timedquests = new List<uint>();
-        List<uint> m_weeklyquests = new List<uint>();
-        List<uint> m_monthlyquests = new List<uint>();
-        MultiMap<uint, uint> m_seasonalquests = new MultiMap<uint, uint>();
-        Dictionary<uint, QuestStatusData> m_QuestStatus = new Dictionary<uint, QuestStatusData>();
-        Dictionary<uint, QuestSaveType> m_QuestStatusSave = new Dictionary<uint, QuestSaveType>();
-        List<uint> m_DFQuests = new List<uint>();
-        List<uint> m_RewardedQuests = new List<uint>();
-        Dictionary<uint, QuestSaveType> m_RewardedQuestsSave = new Dictionary<uint, QuestSaveType>();
+        List<uint> m_timedquests = new();
+        List<uint> m_weeklyquests = new();
+        List<uint> m_monthlyquests = new();
+        MultiMap<uint, uint> m_seasonalquests = new();
+        Dictionary<uint, QuestStatusData> m_QuestStatus = new();
+        Dictionary<uint, QuestSaveType> m_QuestStatusSave = new();
+        List<uint> m_DFQuests = new();
+        List<uint> m_RewardedQuests = new();
+        Dictionary<uint, QuestSaveType> m_RewardedQuestsSave = new();
 
         bool m_DailyQuestChanged;
         bool m_WeeklyQuestChanged;
@@ -199,13 +199,13 @@ namespace Game.Entities
         bool m_customizationsChanged;
 
         SpecializationInfo _specializationInfo;
-        public List<ObjectGuid> m_clientGUIDs = new List<ObjectGuid>();
-        public List<ObjectGuid> m_visibleTransports = new List<ObjectGuid>();
+        public List<ObjectGuid> m_clientGUIDs = new();
+        public List<ObjectGuid> m_visibleTransports = new();
         public WorldObject seerView;
         // only changed for direct client control (possess, vehicle etc.), not stuff you control using pet commands
         public Unit m_unitMovedByMe;
         Team m_team;
-        public Stack<uint> m_timeSyncQueue = new Stack<uint>();
+        public Stack<uint> m_timeSyncQueue = new();
         uint m_timeSyncTimer;
         public uint m_timeSyncClient;
         public uint m_timeSyncServer;
@@ -236,7 +236,7 @@ namespace Game.Entities
 
         SceneMgr m_sceneMgr;
 
-        Dictionary<ObjectGuid /*LootObject*/, ObjectGuid /*WorldObject*/> m_AELootView = new Dictionary<ObjectGuid, ObjectGuid>();
+        Dictionary<ObjectGuid /*LootObject*/, ObjectGuid /*WorldObject*/> m_AELootView = new();
 
         CUFProfile[] _CUFProfiles = new CUFProfile[PlayerConst.MaxCUFProfiles];
         float[] m_powerFraction = new float[(int)PowerType.MaxPerClass];
@@ -244,7 +244,7 @@ namespace Game.Entities
 
         ulong m_GuildIdInvited;
         DeclinedName _declinedname;
-        Runes m_runes = new Runes();
+        Runes m_runes = new();
         uint m_hostileReferenceCheckTimer;
         uint m_drunkTimer;
         long m_logintime;
@@ -252,7 +252,7 @@ namespace Game.Entities
         uint m_PlayedTimeTotal;
         uint m_PlayedTimeLevel;
 
-        Dictionary<byte, ActionButton> m_actionButtons = new Dictionary<byte, ActionButton>();
+        Dictionary<byte, ActionButton> m_actionButtons = new();
         ObjectGuid m_playerSharingQuest;
         uint m_sharedQuestId;
         uint m_ingametime;
@@ -272,11 +272,11 @@ namespace Game.Entities
         public uint DisplayId_m;
         public uint DisplayId_f;
 
-        public List<PlayerCreateInfoItem> item = new List<PlayerCreateInfoItem>();
-        public List<uint> customSpells = new List<uint>();
-        public List<uint> castSpells = new List<uint>();
-        public List<PlayerCreateInfoAction> action = new List<PlayerCreateInfoAction>();
-        public List<SkillRaceClassInfoRecord> skills = new List<SkillRaceClassInfoRecord>();
+        public List<PlayerCreateInfoItem> item = new();
+        public List<uint> customSpells = new();
+        public List<uint> castSpells = new();
+        public List<PlayerCreateInfoAction> action = new();
+        public List<SkillRaceClassInfoRecord> skills = new();
 
         public PlayerLevelInfo[] levelInfo = new PlayerLevelInfo[WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel)];
     }
@@ -361,7 +361,7 @@ namespace Game.Entities
             }
         }
 
-        public List<byte> CooldownOrder = new List<byte>();
+        public List<byte> CooldownOrder = new();
         public uint[] Cooldown = new uint[PlayerConst.MaxRunes];
         public byte RuneState;                                        // mask of available runes
     }
@@ -394,7 +394,7 @@ namespace Game.Entities
     public class ResurrectionData
     {
         public ObjectGuid GUID;
-        public WorldLocation Location = new WorldLocation();
+        public WorldLocation Location = new();
         public uint Health;
         public uint Mana;
         public uint Aura;
@@ -471,7 +471,7 @@ namespace Game.Entities
         public uint FixedScalingLevel;
         public uint ArtifactKnowledgeLevel;
         public ItemContext Context;
-        public List<uint> BonusListIDs = new List<uint>();
+        public List<uint> BonusListIDs = new();
     }
 
     public class EquipmentSetInfo
@@ -495,9 +495,9 @@ namespace Game.Entities
             public int AssignedSpecIndex = -1; // Index of character specialization that this set is automatically equipped for
             public string SetName = "";
             public string SetIcon = "";
-            public Array<ObjectGuid> Pieces = new Array<ObjectGuid>(EquipmentSlot.End);
-            public Array<int> Appearances = new Array<int>(EquipmentSlot.End);  // ItemModifiedAppearanceID
-            public Array<int> Enchants = new Array<int>(2);  // SpellItemEnchantmentID
+            public Array<ObjectGuid> Pieces = new(EquipmentSlot.End);
+            public Array<int> Appearances = new(EquipmentSlot.End);  // ItemModifiedAppearanceID
+            public Array<int> Enchants = new(2);  // SpellItemEnchantmentID
             public int Unknown901_1;
             public int Unknown901_2;
         }
@@ -530,7 +530,7 @@ namespace Game.Entities
         //  when player is teleported to BG - (it is Battleground's GUID)
         public BattlegroundTypeId bgTypeID;
 
-        public List<ObjectGuid> bgAfkReporter = new List<ObjectGuid>();
+        public List<ObjectGuid> bgAfkReporter = new();
         public byte bgAfkReportedCount;
         public long bgAfkReportedTimer;
 

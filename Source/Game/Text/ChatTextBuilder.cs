@@ -96,7 +96,7 @@ namespace Game.Chat
 
         public override ServerPacket Invoke(Locale locale)
         {
-            ChatPkt packet = new ChatPkt();
+            ChatPkt packet = new();
 
             string text = Global.ObjectMgr.GetCypherString(_textId, locale);
 

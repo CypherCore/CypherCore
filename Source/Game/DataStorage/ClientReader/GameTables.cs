@@ -26,7 +26,7 @@ namespace Game.DataStorage
     {
         internal static GameTable<T> Read<T>(string path, string fileName, ref uint loadedFileCount) where T : new()
         {
-            GameTable<T> storage = new GameTable<T>();
+            GameTable<T> storage = new();
 
             if (!File.Exists(path + fileName))
             {
@@ -42,7 +42,7 @@ namespace Game.DataStorage
                     return storage;
                 }
 
-                List<T> data = new List<T>();
+                List<T> data = new();
                 data.Add(new T()); // row id 0, unused
 
                 string line;
@@ -92,6 +92,6 @@ namespace Game.DataStorage
 
         public void SetData(List<T> data) { _data = data; }
 
-        List<T> _data = new List<T>();
+        List<T> _data = new();
     }
 }

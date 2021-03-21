@@ -45,7 +45,7 @@ namespace Game.Spells
 
                     int index = (typeof(T) == typeof(Pet) ? 1 : 2);
 
-                    CooldownEntry cooldownEntry = new CooldownEntry();
+                    CooldownEntry cooldownEntry = new();
                     cooldownEntry.SpellId = spellId;
                     cooldownEntry.CooldownEnd = Time.UnixTimeToDateTime(cooldownsResult.Read<uint>(index++));
                     cooldownEntry.ItemId = 0;
@@ -236,7 +236,7 @@ namespace Game.Spells
             DateTime now = GameTime.GetGameTimeSystemPoint();
             foreach (var p in _spellCooldowns)
             {
-                SpellHistoryEntry historyEntry = new SpellHistoryEntry();
+                SpellHistoryEntry historyEntry = new();
                 historyEntry.SpellID = p.Key;
                 historyEntry.ItemID = p.Value.ItemId;
 
@@ -273,7 +273,7 @@ namespace Game.Spells
                     if (cooldownDuration.TotalMilliseconds <= 0)
                         continue;
 
-                    SpellChargeEntry chargeEntry = new SpellChargeEntry();
+                    SpellChargeEntry chargeEntry = new();
                     chargeEntry.Category = key;
                     chargeEntry.NextRecoveryTime = (uint)cooldownDuration.TotalMilliseconds;
                     chargeEntry.ConsumedCharges = (byte)list.Count;
@@ -288,7 +288,7 @@ namespace Game.Spells
 
             foreach (var pair in _spellCooldowns)
             {
-                PetSpellCooldown petSpellCooldown = new PetSpellCooldown();
+                PetSpellCooldown petSpellCooldown = new();
                 petSpellCooldown.SpellID = pair.Key;
                 petSpellCooldown.Category = (ushort)pair.Value.CategoryId;
 
@@ -318,7 +318,7 @@ namespace Game.Spells
                     if (cooldownDuration.TotalMilliseconds <= 0)
                         continue;
 
-                    PetSpellHistory petChargeEntry = new PetSpellHistory();
+                    PetSpellHistory petChargeEntry = new();
                     petChargeEntry.CategoryID = key;
                     petChargeEntry.RecoveryTime = (uint)cooldownDuration.TotalMilliseconds;
                     petChargeEntry.ConsumedCharges = (sbyte)list.Count;
@@ -435,7 +435,7 @@ namespace Game.Spells
                     Player playerOwner = GetPlayerOwner();
                     if (playerOwner)
                     {
-                        SpellCooldownPkt spellCooldown = new SpellCooldownPkt();
+                        SpellCooldownPkt spellCooldown = new();
                         spellCooldown.Caster = _owner.GetGUID();
                         spellCooldown.Flags = SpellCooldownFlags.None;
                         spellCooldown.SpellCooldowns.Add(new SpellCooldownStruct(spellInfo.Id, (uint)cooldown));
@@ -478,7 +478,7 @@ namespace Game.Spells
 
         public void AddCooldown(uint spellId, uint itemId, DateTime cooldownEnd, uint categoryId, DateTime categoryEnd, bool onHold = false)
         {
-            CooldownEntry cooldownEntry = new CooldownEntry();
+            CooldownEntry cooldownEntry = new();
             cooldownEntry.SpellId = spellId;
             cooldownEntry.CooldownEnd = cooldownEnd;
             cooldownEntry.ItemId = itemId;
@@ -516,7 +516,7 @@ namespace Game.Spells
             Player playerOwner = GetPlayerOwner();
             if (playerOwner)
             {
-                ModifyCooldown modifyCooldown = new ModifyCooldown();
+                ModifyCooldown modifyCooldown = new();
                 modifyCooldown.IsPet = _owner != playerOwner;
                 modifyCooldown.SpellID = spellId;
                 modifyCooldown.DeltaTime = (int)offset.TotalMilliseconds;
@@ -535,7 +535,7 @@ namespace Game.Spells
                 Player playerOwner = GetPlayerOwner();
                 if (playerOwner)
                 {
-                    ClearCooldown clearCooldown = new ClearCooldown();
+                    ClearCooldown clearCooldown = new();
                     clearCooldown.IsPet = _owner != playerOwner;
                     clearCooldown.SpellID = spellId;
                     clearCooldown.ClearOnHold = false;
@@ -549,7 +549,7 @@ namespace Game.Spells
 
         public void ResetCooldowns(Func<KeyValuePair<uint, CooldownEntry>, bool> predicate, bool update = false)
         {
-            List<uint> resetCooldowns = new List<uint>();
+            List<uint> resetCooldowns = new();
             foreach (var pair in _spellCooldowns)
             {
                 if (predicate(pair))
@@ -568,7 +568,7 @@ namespace Game.Spells
             Player playerOwner = GetPlayerOwner();
             if (playerOwner)
             {
-                List<uint> cooldowns = new List<uint>();
+                List<uint> cooldowns = new();
                 foreach (var id in _spellCooldowns.Keys)
                     cooldowns.Add(id);
 
@@ -635,7 +635,7 @@ namespace Game.Spells
                 if (Convert.ToBoolean((SpellSchoolMask)(1 << i) & schoolMask))
                     _schoolLockouts[i] = lockoutEnd;
 
-            List<uint> knownSpells = new List<uint>();
+            List<uint> knownSpells = new();
             Player plrOwner = _owner.ToPlayer();
             if (plrOwner)
             {
@@ -658,7 +658,7 @@ namespace Game.Spells
                         knownSpells.Add(creatureOwner.m_spells[i]);
             }
 
-            SpellCooldownPkt spellCooldown = new SpellCooldownPkt();
+            SpellCooldownPkt spellCooldown = new();
             spellCooldown.Caster = _owner.GetGUID();
             spellCooldown.Flags = SpellCooldownFlags.None;
             foreach (uint spellId in knownSpells)
@@ -726,7 +726,7 @@ namespace Game.Spells
                 Player player = GetPlayerOwner();
                 if (player)
                 {
-                    SetSpellCharges setSpellCharges = new SetSpellCharges();
+                    SetSpellCharges setSpellCharges = new();
                     setSpellCharges.Category = chargeCategoryId;
                     if (!chargeList.Empty())
                         setSpellCharges.NextRecoveryTime = (uint)(chargeList.FirstOrDefault().RechargeEnd - GameTime.GetGameTimeSystemPoint()).TotalMilliseconds;
@@ -751,7 +751,7 @@ namespace Game.Spells
                 Player player = GetPlayerOwner();
                 if (player)
                 {
-                    ClearSpellCharges clearSpellCharges = new ClearSpellCharges();
+                    ClearSpellCharges clearSpellCharges = new();
                     clearSpellCharges.IsPet = _owner != player;
                     clearSpellCharges.Category = chargeCategoryId;
                     player.SendPacket(clearSpellCharges);
@@ -766,7 +766,7 @@ namespace Game.Spells
             Player player = GetPlayerOwner();
             if (player)
             {
-                ClearAllSpellCharges clearAllSpellCharges = new ClearAllSpellCharges();
+                ClearAllSpellCharges clearAllSpellCharges = new();
                 clearAllSpellCharges.IsPet = _owner != player;
                 player.SendPacket(clearAllSpellCharges);
             }
@@ -843,7 +843,7 @@ namespace Game.Spells
             Player playerOwner = GetPlayerOwner();
             if (playerOwner)
             {
-                ClearCooldowns clearCooldowns = new ClearCooldowns();
+                ClearCooldowns clearCooldowns = new();
                 clearCooldowns.IsPet = _owner != playerOwner;
                 clearCooldowns.SpellID = cooldowns;
                 playerOwner.SendPacket(clearCooldowns);
@@ -921,7 +921,7 @@ namespace Game.Spells
                 }
 
                 // update the client: restore old cooldowns
-                SpellCooldownPkt spellCooldown = new SpellCooldownPkt();
+                SpellCooldownPkt spellCooldown = new();
                 spellCooldown.Caster = _owner.GetGUID();
                 spellCooldown.Flags = SpellCooldownFlags.IncludeEventCooldowns;
 
@@ -942,12 +942,12 @@ namespace Game.Spells
         }
 
         Unit _owner;
-        Dictionary<uint, CooldownEntry> _spellCooldowns = new Dictionary<uint, CooldownEntry>();
-        Dictionary<uint, CooldownEntry> _spellCooldownsBeforeDuel = new Dictionary<uint, CooldownEntry>();
-        Dictionary<uint, CooldownEntry> _categoryCooldowns = new Dictionary<uint, CooldownEntry>();
+        Dictionary<uint, CooldownEntry> _spellCooldowns = new();
+        Dictionary<uint, CooldownEntry> _spellCooldownsBeforeDuel = new();
+        Dictionary<uint, CooldownEntry> _categoryCooldowns = new();
         DateTime[] _schoolLockouts = new DateTime[(int)SpellSchools.Max];
-        MultiMap<uint, ChargeEntry> _categoryCharges = new MultiMap<uint, ChargeEntry>();
-        Dictionary<uint, DateTime> _globalCooldowns = new Dictionary<uint, DateTime>();
+        MultiMap<uint, ChargeEntry> _categoryCharges = new();
+        Dictionary<uint, DateTime> _globalCooldowns = new();
 
         public class CooldownEntry
         {

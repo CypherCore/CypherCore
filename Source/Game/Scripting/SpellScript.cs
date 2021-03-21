@@ -264,7 +264,7 @@ namespace Game.Scripting
                 if (effect.TargetA.GetTarget() != _targetType && effect.TargetB.GetTarget() != _targetType)
                     return false;
 
-                SpellImplicitTargetInfo targetInfo = new SpellImplicitTargetInfo(_targetType);
+                SpellImplicitTargetInfo targetInfo = new(_targetType);
                 switch (targetInfo.GetSelectionCategory())
                 {
                     case SpellTargetSelectionCategories.Channel: // SINGLE
@@ -445,32 +445,32 @@ namespace Game.Scripting
 
         // SpellScript interface
         // hooks to which you can attach your functions
-        public List<CastHandler> BeforeCast = new List<CastHandler>();
-        public List<CastHandler> OnCast = new List<CastHandler>();
-        public List<CastHandler> AfterCast = new List<CastHandler>();
+        public List<CastHandler> BeforeCast = new();
+        public List<CastHandler> OnCast = new();
+        public List<CastHandler> AfterCast = new();
 
         // where function is SpellCastResult function()
-        public List<CheckCastHandler> OnCheckCast = new List<CheckCastHandler>();
+        public List<CheckCastHandler> OnCheckCast = new();
 
         // where function is void function(uint effIndex)
-        public List<EffectHandler> OnEffectLaunch = new List<EffectHandler>();
-        public List<EffectHandler> OnEffectLaunchTarget = new List<EffectHandler>();
-        public List<EffectHandler> OnEffectHit = new List<EffectHandler>();
-        public List<EffectHandler> OnEffectHitTarget = new List<EffectHandler>();
-        public List<EffectHandler> OnEffectSuccessfulDispel = new List<EffectHandler>();
+        public List<EffectHandler> OnEffectLaunch = new();
+        public List<EffectHandler> OnEffectLaunchTarget = new();
+        public List<EffectHandler> OnEffectHit = new();
+        public List<EffectHandler> OnEffectHitTarget = new();
+        public List<EffectHandler> OnEffectSuccessfulDispel = new();
 
-        public List<BeforeHitHandler> BeforeHit = new List<BeforeHitHandler>();
-        public List<HitHandler> OnHit = new List<HitHandler>();
-        public List<HitHandler> AfterHit = new List<HitHandler>();
+        public List<BeforeHitHandler> BeforeHit = new();
+        public List<HitHandler> OnHit = new();
+        public List<HitHandler> AfterHit = new();
 
         // where function is void function(List<WorldObject> targets)
-        public List<ObjectAreaTargetSelectHandler> OnObjectAreaTargetSelect = new List<ObjectAreaTargetSelectHandler>();
+        public List<ObjectAreaTargetSelectHandler> OnObjectAreaTargetSelect = new();
 
         // where function is void function(ref WorldObject target)
-        public List<ObjectTargetSelectHandler> OnObjectTargetSelect = new List<ObjectTargetSelectHandler>();
+        public List<ObjectTargetSelectHandler> OnObjectTargetSelect = new();
 
         // where function is void function(SpellDestination target)
-        public List<DestinationTargetSelectHandler> OnDestinationTargetSelect = new List<DestinationTargetSelectHandler>();
+        public List<DestinationTargetSelectHandler> OnDestinationTargetSelect = new();
 
         // hooks are executed in following order, at specified event of spell:
         // 1. BeforeCast - executed when spell preparation is finished (when cast bar becomes full) before cast is handled
@@ -1168,7 +1168,7 @@ namespace Game.Scripting
                 _defaultActionPrevented = defaultActionPrevented;
             }
         }
-        Stack<ScriptStateStore> m_scriptStates = new Stack<ScriptStateStore>();
+        Stack<ScriptStateStore> m_scriptStates = new();
 
         // AuraScript interface
         // hooks to which you can attach your functions
@@ -1176,124 +1176,124 @@ namespace Game.Scripting
         // executed when area aura checks if it can be applied on target
         // example: OnEffectApply += AuraEffectApplyFn(class.function);
         // where function is: bool function (Unit target);
-        public List<CheckAreaTargetHandler> DoCheckAreaTarget = new List<CheckAreaTargetHandler>();
+        public List<CheckAreaTargetHandler> DoCheckAreaTarget = new();
 
         // executed when aura is dispelled by a unit
         // example: OnDispel += AuraDispelFn(class.function);
         // where function is: void function (DispelInfo dispelInfo);
-        public List<AuraDispelHandler> OnDispel = new List<AuraDispelHandler>();
+        public List<AuraDispelHandler> OnDispel = new();
 
         // executed after aura is dispelled by a unit
         // example: AfterDispel += AuraDispelFn(class.function);
         // where function is: void function (DispelInfo dispelInfo);
-        public List<AuraDispelHandler> AfterDispel = new List<AuraDispelHandler>();
+        public List<AuraDispelHandler> AfterDispel = new();
 
         // executed when aura effect is applied with specified mode to target
         // should be used when when effect handler preventing/replacing is needed, do not use this hook for triggering spellcasts/removing auras etc - may be unsafe
         // example: OnEffectApply += AuraEffectApplyFn(class.function, EffectIndexSpecifier, EffectAuraNameSpecifier, AuraEffectHandleModes);
         // where function is: void function (AuraEffect aurEff, AuraEffectHandleModes mode);
-        public List<EffectApplyHandler> OnEffectApply = new List<EffectApplyHandler>();
+        public List<EffectApplyHandler> OnEffectApply = new();
 
         // executed after aura effect is applied with specified mode to target
         // example: AfterEffectApply += AuraEffectApplyFn(class.function, EffectIndexSpecifier, EffectAuraNameSpecifier, AuraEffectHandleModes);
         // where function is: void function (AuraEffect aurEff, AuraEffectHandleModes mode);
-        public List<EffectApplyHandler> AfterEffectApply = new List<EffectApplyHandler>();
+        public List<EffectApplyHandler> AfterEffectApply = new();
 
         // executed after aura effect is removed with specified mode from target
         // should be used when when effect handler preventing/replacing is needed, do not use this hook for triggering spellcasts/removing auras etc - may be unsafe
         // example: OnEffectRemove += AuraEffectRemoveFn(class.function, EffectIndexSpecifier, EffectAuraNameSpecifier, AuraEffectHandleModes);
         // where function is: void function (AuraEffect aurEff, AuraEffectHandleModes mode);
-        public List<EffectApplyHandler> OnEffectRemove = new List<EffectApplyHandler>();
+        public List<EffectApplyHandler> OnEffectRemove = new();
 
         // executed when aura effect is removed with specified mode from target
         // example: AfterEffectRemove += AuraEffectRemoveFn(class.function, EffectIndexSpecifier, EffectAuraNameSpecifier, AuraEffectHandleModes);
         // where function is: void function (AuraEffect aurEff, AuraEffectHandleModes mode);
-        public List<EffectApplyHandler> AfterEffectRemove = new List<EffectApplyHandler>();
+        public List<EffectApplyHandler> AfterEffectRemove = new();
 
         // executed when periodic aura effect ticks on target
         // example: OnEffectPeriodic += AuraEffectPeriodicFn(class.function, EffectIndexSpecifier, EffectAuraNameSpecifier);
         // where function is: void function (AuraEffect aurEff);
-        public List<EffectPeriodicHandler> OnEffectPeriodic = new List<EffectPeriodicHandler>();
+        public List<EffectPeriodicHandler> OnEffectPeriodic = new();
 
         // executed when periodic aura effect is updated
         // example: OnEffectUpdatePeriodic += AuraEffectUpdatePeriodicFn(class.function, EffectIndexSpecifier, EffectAuraNameSpecifier);
         // where function is: void function (AuraEffect aurEff);
-        public List<EffectUpdatePeriodicHandler> OnEffectUpdatePeriodic = new List<EffectUpdatePeriodicHandler>();
+        public List<EffectUpdatePeriodicHandler> OnEffectUpdatePeriodic = new();
 
         // executed when aura effect calculates amount
         // example: DoEffectCalcAmount += AuraEffectCalcAmounFn(class.function, EffectIndexSpecifier, EffectAuraNameSpecifier);
         // where function is: void function (AuraEffect aurEff, int& amount, bool& canBeRecalculated);
-        public List<EffectCalcAmountHandler> DoEffectCalcAmount = new List<EffectCalcAmountHandler>();
+        public List<EffectCalcAmountHandler> DoEffectCalcAmount = new();
 
         // executed when aura effect calculates periodic data
         // example: DoEffectCalcPeriodic += AuraEffectCalcPeriodicFn(class.function, EffectIndexSpecifier, EffectAuraNameSpecifier);
         // where function is: void function (AuraEffect aurEff, bool& isPeriodic, int& amplitude);
-        public List<EffectCalcPeriodicHandler> DoEffectCalcPeriodic = new List<EffectCalcPeriodicHandler>();
+        public List<EffectCalcPeriodicHandler> DoEffectCalcPeriodic = new();
 
         // executed when aura effect calculates spellmod
         // example: DoEffectCalcSpellMod += AuraEffectCalcSpellModFn(class.function, EffectIndexSpecifier, EffectAuraNameSpecifier);
         // where function is: void function (AuraEffect aurEff, SpellModifier& spellMod);
-        public List<EffectCalcSpellModHandler> DoEffectCalcSpellMod = new List<EffectCalcSpellModHandler>();
+        public List<EffectCalcSpellModHandler> DoEffectCalcSpellMod = new();
 
         // executed when absorb aura effect is going to reduce damage
         // example: OnEffectAbsorb += AuraEffectAbsorbFn(class.function, EffectIndexSpecifier);
         // where function is: void function (AuraEffect aurEff, DamageInfo& dmgInfo, uint& absorbAmount);
-        public List<EffectAbsorbHandler> OnEffectAbsorb = new List<EffectAbsorbHandler>();
+        public List<EffectAbsorbHandler> OnEffectAbsorb = new();
 
         // executed after absorb aura effect reduced damage to target - absorbAmount is real amount absorbed by aura
         // example: AfterEffectAbsorb += AuraEffectAbsorbFn(class.function, EffectIndexSpecifier);
         // where function is: void function (AuraEffect aurEff, DamageInfo& dmgInfo, uint& absorbAmount);
-        public List<EffectAbsorbHandler> AfterEffectAbsorb = new List<EffectAbsorbHandler>();
+        public List<EffectAbsorbHandler> AfterEffectAbsorb = new();
 
         // executed when mana shield aura effect is going to reduce damage
         // example: OnEffectManaShield += AuraEffectAbsorbFn(class.function, EffectIndexSpecifier);
         // where function is: void function (AuraEffect aurEff, DamageInfo& dmgInfo, uint& absorbAmount);
-        public List<EffectManaShieldHandler> OnEffectManaShield = new List<EffectManaShieldHandler>();
+        public List<EffectManaShieldHandler> OnEffectManaShield = new();
 
         // executed after mana shield aura effect reduced damage to target - absorbAmount is real amount absorbed by aura
         // example: AfterEffectManaShield += AuraEffectAbsorbFn(class.function, EffectIndexSpecifier);
         // where function is: void function (AuraEffect aurEff, DamageInfo& dmgInfo, uint& absorbAmount);
-        public List<EffectManaShieldHandler> AfterEffectManaShield = new List<EffectManaShieldHandler>();
+        public List<EffectManaShieldHandler> AfterEffectManaShield = new();
 
         // executed when the caster of some spell with split dmg aura gets damaged through it
         // example: OnEffectSplit += AuraEffectSplitFn(class.function, EffectIndexSpecifier);
         // where function is: void function (AuraEffect aurEff, DamageInfo& dmgInfo, uint& splitAmount);
-        public List<EffectSplitHandler> OnEffectSplit = new List<EffectSplitHandler>();
+        public List<EffectSplitHandler> OnEffectSplit = new();
 
         // executed when aura checks if it can proc
         // example: DoCheckProc += AuraCheckProcFn(class.function);
         // where function is: bool function (ProcEventInfo& eventInfo);
-        public List<CheckProcHandler> DoCheckProc = new List<CheckProcHandler>();
+        public List<CheckProcHandler> DoCheckProc = new();
 
         // executed when aura effect checks if it can proc the aura
         // example: DoCheckEffectProc += AuraCheckEffectProcFn(class::function, EffectIndexSpecifier, EffectAuraNameSpecifier);
         // where function is bool function (AuraEffect const* aurEff, ProcEventInfo& eventInfo);
-        public List<CheckEffectProcHandler> DoCheckEffectProc = new List<CheckEffectProcHandler>();
+        public List<CheckEffectProcHandler> DoCheckEffectProc = new();
 
         // executed before aura procs (possibility to prevent charge drop/cooldown)
         // example: DoPrepareProc += AuraProcFn(class.function);
         // where function is: void function (ProcEventInfo& eventInfo);
-        public List<AuraProcHandler> DoPrepareProc = new List<AuraProcHandler>();
+        public List<AuraProcHandler> DoPrepareProc = new();
 
         // executed when aura procs
         // example: OnProc += AuraProcFn(class.function);
         // where function is: void function (ProcEventInfo& eventInfo);
-        public List<AuraProcHandler> OnProc = new List<AuraProcHandler>();
+        public List<AuraProcHandler> OnProc = new();
 
         // executed after aura proced
         // example: AfterProc += AuraProcFn(class.function);
         // where function is: void function (ProcEventInfo& eventInfo);
-        public List<AuraProcHandler> AfterProc = new List<AuraProcHandler>();
+        public List<AuraProcHandler> AfterProc = new();
 
         // executed when aura effect procs
         // example: OnEffectProc += AuraEffectProcFn(class.function, EffectIndexSpecifier, EffectAuraNameSpecifier);
         // where function is: void function (AuraEffect aurEff, ProcEventInfo& procInfo);
-        public List<EffectProcHandler> OnEffectProc = new List<EffectProcHandler>();
+        public List<EffectProcHandler> OnEffectProc = new();
 
         // executed after aura effect proced
         // example: AfterEffectProc += AuraEffectProcFn(class.function, EffectIndexSpecifier, EffectAuraNameSpecifier);
         // where function is: void function (AuraEffect aurEff, ProcEventInfo& procInfo);
-        public List<EffectProcHandler> AfterEffectProc = new List<EffectProcHandler>();
+        public List<EffectProcHandler> AfterEffectProc = new();
 
         // AuraScript interface - hook/effect execution manipulators
 

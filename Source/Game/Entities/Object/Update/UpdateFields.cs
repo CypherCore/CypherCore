@@ -28,9 +28,9 @@ namespace Game.Entities
 {
     public class ObjectFieldData : BaseUpdateData<WorldObject>
     {
-        public UpdateField<uint> EntryId = new UpdateField<uint>(0, 1);
-        public UpdateField<uint> DynamicFlags = new UpdateField<uint>(0, 2);
-        public UpdateField<float> Scale = new UpdateField<float>(0, 3);
+        public UpdateField<uint> EntryId = new(0, 1);
+        public UpdateField<uint> DynamicFlags = new(0, 2);
+        public UpdateField<float> Scale = new(0, 3);
 
         public ObjectFieldData() : base(0, TypeId.Object, 4) { }
 
@@ -149,10 +149,10 @@ namespace Game.Entities
 
     public class ItemEnchantment : BaseUpdateData<Item>
     {
-        public UpdateField<uint> ID = new UpdateField<uint>(0, 1);
-        public UpdateField<uint> Duration = new UpdateField<uint>(0, 2);
-        public UpdateField<short> Charges = new UpdateField<short>(0, 3);
-        public UpdateField<ushort> Inactive = new UpdateField<ushort>(0, 4);
+        public UpdateField<uint> ID = new(0, 1);
+        public UpdateField<uint> Duration = new(0, 2);
+        public UpdateField<short> Charges = new(0, 3);
+        public UpdateField<ushort> Inactive = new(0, 4);
 
         public ItemEnchantment() : base(5) { }
 
@@ -224,7 +224,7 @@ namespace Game.Entities
 
     public class ItemModList : BaseUpdateData<Item>
     {
-        public DynamicUpdateField<ItemMod> Values = new DynamicUpdateField<ItemMod>(0, 0);
+        public DynamicUpdateField<ItemMod> Values = new(0, 0);
 
         public ItemModList() : base(1) { }
 
@@ -303,9 +303,9 @@ namespace Game.Entities
 
     public class SocketedGem : BaseUpdateData<Item>
     {
-        public UpdateField<uint> ItemId = new UpdateField<uint>(0, 1);
-        public UpdateField<byte> Context = new UpdateField<byte>(0, 2);
-        public UpdateFieldArray<ushort> BonusListIDs = new UpdateFieldArray<ushort>(16, 3, 4);
+        public UpdateField<uint> ItemId = new(0, 1);
+        public UpdateField<byte> Context = new(0, 2);
+        public UpdateFieldArray<ushort> BonusListIDs = new(16, 3, 4);
 
         public SocketedGem() : base(20) { }
 
@@ -363,27 +363,27 @@ namespace Game.Entities
 
     public class ItemData : BaseUpdateData<Item>
     {
-        public UpdateField<List<uint>> BonusListIDs = new UpdateField<List<uint>>(0, 1);
-        public DynamicUpdateField<ArtifactPower> ArtifactPowers = new DynamicUpdateField<ArtifactPower>(0, 2);
-        public DynamicUpdateField<SocketedGem> Gems = new DynamicUpdateField<SocketedGem>(0, 3);
-        public UpdateField<ObjectGuid> Owner = new UpdateField<ObjectGuid>(0, 4);
-        public UpdateField<ObjectGuid> ContainedIn = new UpdateField<ObjectGuid>(0, 5);
-        public UpdateField<ObjectGuid> Creator = new UpdateField<ObjectGuid>(0, 6);
-        public UpdateField<ObjectGuid> GiftCreator = new UpdateField<ObjectGuid>(0, 7);
-        public UpdateField<uint> StackCount = new UpdateField<uint>(0, 8);
-        public UpdateField<uint> Expiration = new UpdateField<uint>(0, 9);
-        public UpdateField<uint> DynamicFlags = new UpdateField<uint>(0, 10);
-        public UpdateField<uint> Durability = new UpdateField<uint>(0, 11);
-        public UpdateField<uint> MaxDurability = new UpdateField<uint>(0, 12);
-        public UpdateField<uint> CreatePlayedTime = new UpdateField<uint>(0, 13);
-        public UpdateField<int> Context = new UpdateField<int>(0, 14);
-        public UpdateField<int> CreateTime = new UpdateField<int>(0, 15);
-        public UpdateField<ulong> ArtifactXP = new UpdateField<ulong>(0, 16);
-        public UpdateField<byte> ItemAppearanceModID = new UpdateField<byte>(0, 17);
-        public UpdateField<ItemModList> Modifiers = new UpdateField<ItemModList>(0, 18);
-        public UpdateField<uint> DynamicFlags2 = new UpdateField<uint>(0, 19);
-        public UpdateFieldArray<int> SpellCharges = new UpdateFieldArray<int>(5, 20, 21);
-        public UpdateFieldArray<ItemEnchantment> Enchantment = new UpdateFieldArray<ItemEnchantment>(13, 26, 27);
+        public UpdateField<List<uint>> BonusListIDs = new(0, 1);
+        public DynamicUpdateField<ArtifactPower> ArtifactPowers = new(0, 2);
+        public DynamicUpdateField<SocketedGem> Gems = new(0, 3);
+        public UpdateField<ObjectGuid> Owner = new(0, 4);
+        public UpdateField<ObjectGuid> ContainedIn = new(0, 5);
+        public UpdateField<ObjectGuid> Creator = new(0, 6);
+        public UpdateField<ObjectGuid> GiftCreator = new(0, 7);
+        public UpdateField<uint> StackCount = new(0, 8);
+        public UpdateField<uint> Expiration = new(0, 9);
+        public UpdateField<uint> DynamicFlags = new(0, 10);
+        public UpdateField<uint> Durability = new(0, 11);
+        public UpdateField<uint> MaxDurability = new(0, 12);
+        public UpdateField<uint> CreatePlayedTime = new(0, 13);
+        public UpdateField<int> Context = new(0, 14);
+        public UpdateField<int> CreateTime = new(0, 15);
+        public UpdateField<ulong> ArtifactXP = new(0, 16);
+        public UpdateField<byte> ItemAppearanceModID = new(0, 17);
+        public UpdateField<ItemModList> Modifiers = new(0, 18);
+        public UpdateField<uint> DynamicFlags2 = new(0, 19);
+        public UpdateFieldArray<int> SpellCharges = new(5, 20, 21);
+        public UpdateFieldArray<ItemEnchantment> Enchantment = new(13, 26, 27);
 
         public ItemData() : base(0, TypeId.Item, 40) { }
 
@@ -444,7 +444,7 @@ namespace Game.Entities
 
         public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Item owner, Player receiver)
         {
-            UpdateMask allowedMaskForTarget = new UpdateMask(40, new uint[] { 0xFC04E4FFu, 0x000000FFu });
+            UpdateMask allowedMaskForTarget = new(40, new uint[] { 0xFC04E4FFu, 0x000000FFu });
             AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
             WriteUpdate(data, _changesMask & allowedMaskForTarget, false, owner, receiver);
         }
@@ -457,7 +457,7 @@ namespace Game.Entities
 
         public void FilterDisallowedFieldsMaskForFlag(UpdateMask changesMask, UpdateFieldFlag fieldVisibilityFlags)
         {
-            UpdateMask allowedMaskForTarget = new UpdateMask(40, new[] { 0xFC04E4FFu, 0x000000FFu });
+            UpdateMask allowedMaskForTarget = new(40, new[] { 0xFC04E4FFu, 0x000000FFu });
             AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
             changesMask.AND(allowedMaskForTarget);
         }
@@ -636,8 +636,8 @@ namespace Game.Entities
 
     public class ContainerData : BaseUpdateData<Bag>
     {
-        public UpdateField<uint> NumSlots = new UpdateField<uint>(0, 1);
-        public UpdateFieldArray<ObjectGuid> Slots = new UpdateFieldArray<ObjectGuid>(36, 2, 3);
+        public UpdateField<uint> NumSlots = new(0, 1);
+        public UpdateFieldArray<ObjectGuid> Slots = new(36, 2, 3);
 
         public ContainerData() : base(0, TypeId.Container, 39) { }
 
@@ -692,7 +692,7 @@ namespace Game.Entities
 
     public class AzeriteEmpoweredItemData : BaseUpdateData<Item>
     {
-        public UpdateFieldArray<int> Selections = new UpdateFieldArray<int>(5, 0, 1);
+        public UpdateFieldArray<int> Selections = new(5, 0, 1);
 
         public AzeriteEmpoweredItemData() : base(0, TypeId.AzeriteEmpoweredItem, 6) { }
 
@@ -755,9 +755,9 @@ namespace Game.Entities
 
     public class SelectedAzeriteEssences : BaseUpdateData<AzeriteItem>
     {
-        public UpdateField<bool> Enabled = new UpdateField<bool>(0, 1);
-        public UpdateField<uint> SpecializationID = new UpdateField<uint>(0, 2);
-        public UpdateFieldArray<uint> AzeriteEssenceID = new UpdateFieldArray<uint>(4, 3, 4);
+        public UpdateField<bool> Enabled = new(0, 1);
+        public UpdateField<uint> SpecializationID = new(0, 2);
+        public UpdateFieldArray<uint> AzeriteEssenceID = new(4, 3, 4);
 
         public SelectedAzeriteEssences() : base(8) { }
 
@@ -822,15 +822,15 @@ namespace Game.Entities
 
     public class AzeriteItemData : BaseUpdateData<AzeriteItem>
     {
-        public UpdateField<bool> Enabled = new UpdateField<bool>(0, 1);
-        public DynamicUpdateField<UnlockedAzeriteEssence>UnlockedEssences = new DynamicUpdateField<UnlockedAzeriteEssence>(0, 2);
-        public DynamicUpdateField<uint>UnlockedEssenceMilestones = new DynamicUpdateField<uint>(0, 4);
-        public DynamicUpdateField<SelectedAzeriteEssences>SelectedEssences = new DynamicUpdateField<SelectedAzeriteEssences>(0, 3);
-        public UpdateField<ulong> Xp = new UpdateField<ulong>(0, 5);
-        public UpdateField<uint> Level = new UpdateField<uint>(0, 6);
-        public UpdateField<uint> AuraLevel = new UpdateField<uint>(0, 7);
-        public UpdateField<uint> KnowledgeLevel = new UpdateField<uint>(0, 8);
-        public UpdateField<int> DEBUGknowledgeWeek = new UpdateField<int>(0, 9);
+        public UpdateField<bool> Enabled = new(0, 1);
+        public DynamicUpdateField<UnlockedAzeriteEssence>UnlockedEssences = new(0, 2);
+        public DynamicUpdateField<uint>UnlockedEssenceMilestones = new(0, 4);
+        public DynamicUpdateField<SelectedAzeriteEssences>SelectedEssences = new(0, 3);
+        public UpdateField<ulong> Xp = new(0, 5);
+        public UpdateField<uint> Level = new(0, 6);
+        public UpdateField<uint> AuraLevel = new(0, 7);
+        public UpdateField<uint> KnowledgeLevel = new(0, 8);
+        public UpdateField<int> DEBUGknowledgeWeek = new(0, 9);
 
         public AzeriteItemData() : base(10) { }
 
@@ -868,7 +868,7 @@ namespace Game.Entities
 
         public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, AzeriteItem owner, Player receiver)
         {
-            UpdateMask allowedMaskForTarget = new UpdateMask(9, new[] { 0x0000001Du });
+            UpdateMask allowedMaskForTarget = new(9, new[] { 0x0000001Du });
             AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
             WriteUpdate(data, _changesMask & allowedMaskForTarget, false, owner, receiver);
         }
@@ -881,7 +881,7 @@ namespace Game.Entities
 
         public void FilterDisallowedFieldsMaskForFlag(UpdateMask changesMask, UpdateFieldFlag fieldVisibilityFlags)
         {
-            UpdateMask allowedMaskForTarget = new UpdateMask(9, new[] { 0x0000001Du });
+            UpdateMask allowedMaskForTarget = new(9, new[] { 0x0000001Du });
             AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
             changesMask.AND(allowedMaskForTarget);
         }
@@ -1012,7 +1012,7 @@ namespace Game.Entities
     {
         public uint SpellID;
         public uint SpellXSpellVisualID;
-        public SpellCastVisualField SpellVisual = new SpellCastVisualField();
+        public SpellCastVisualField SpellVisual = new();
 
         public void WriteCreate(WorldPacket data, Unit owner, Player receiver)
         {
@@ -1029,10 +1029,10 @@ namespace Game.Entities
 
     public class VisibleItem : BaseUpdateData<Unit>
     {
-        public UpdateField<uint> ItemID = new UpdateField<uint>(0, 1);
-        public UpdateField<int> ItemModifiedAppearanceID = new UpdateField<int>(0, 2);
-        public UpdateField<ushort> ItemAppearanceModID = new UpdateField<ushort>(0, 3);
-        public UpdateField<ushort> ItemVisual = new UpdateField<ushort>(0, 4);
+        public UpdateField<uint> ItemID = new(0, 1);
+        public UpdateField<int> ItemModifiedAppearanceID = new(0, 2);
+        public UpdateField<ushort> ItemAppearanceModID = new(0, 3);
+        public UpdateField<ushort> ItemVisual = new(0, 4);
 
         public VisibleItem() : base(5) { }
 
@@ -1104,134 +1104,134 @@ namespace Game.Entities
 
     public class UnitData : BaseUpdateData<Unit>
     {
-        public UpdateField<List<uint>> StateWorldEffectIDs = new UpdateField<List<uint>>(0, 1);
-        public DynamicUpdateField<PassiveSpellHistory> PassiveSpells = new DynamicUpdateField<PassiveSpellHistory>(0, 2);
-        public DynamicUpdateField<int> WorldEffects = new DynamicUpdateField<int>(0, 3);
-        public DynamicUpdateField<ObjectGuid> ChannelObjects = new DynamicUpdateField<ObjectGuid>(0, 4);
-        public UpdateField<uint> DisplayID = new UpdateField<uint>(0, 5);
-        public UpdateField<uint> StateSpellVisualID = new UpdateField<uint>(0, 6);
-        public UpdateField<uint> StateAnimID = new UpdateField<uint>(0, 7);
-        public UpdateField<uint> StateAnimKitID = new UpdateField<uint>(0, 8);
-        public UpdateField<uint> StateWorldEffectsQuestObjectiveID = new UpdateField<uint>(0, 9);
-        public UpdateField<int> SpellOverrideNameID = new UpdateField<int>(0, 10);
-        public UpdateField<ObjectGuid> Charm = new UpdateField<ObjectGuid>(0, 11);
-        public UpdateField<ObjectGuid> Summon = new UpdateField<ObjectGuid>(0, 12);
-        public UpdateField<ObjectGuid> Critter = new UpdateField<ObjectGuid>(0, 13);
-        public UpdateField<ObjectGuid> CharmedBy = new UpdateField<ObjectGuid>(0, 14);
-        public UpdateField<ObjectGuid> SummonedBy = new UpdateField<ObjectGuid>(0, 15);
-        public UpdateField<ObjectGuid> CreatedBy = new UpdateField<ObjectGuid>(0, 16);
-        public UpdateField<ObjectGuid> DemonCreator = new UpdateField<ObjectGuid>(0, 17);
-        public UpdateField<ObjectGuid> LookAtControllerTarget = new UpdateField<ObjectGuid>(0, 18);
-        public UpdateField<ObjectGuid> Target = new UpdateField<ObjectGuid>(0, 19);
-        public UpdateField<ObjectGuid> BattlePetCompanionGUID = new UpdateField<ObjectGuid>(0, 20);
-        public UpdateField<ulong> BattlePetDBID = new UpdateField<ulong>(0, 21);
-        public UpdateField<UnitChannel> ChannelData = new UpdateField<UnitChannel>(0, 22);
-        public UpdateField<uint> SummonedByHomeRealm = new UpdateField<uint>(0, 23);
-        public UpdateField<byte> Race = new UpdateField<byte>(0, 24);
-        public UpdateField<byte> ClassId = new UpdateField<byte>(0, 25);
-        public UpdateField<byte> PlayerClassId = new UpdateField<byte>(0, 26);
-        public UpdateField<byte> Sex = new UpdateField<byte>(0, 27);
-        public UpdateField<byte> DisplayPower = new UpdateField<byte>(0, 28);
-        public UpdateField<uint> OverrideDisplayPowerID = new UpdateField<uint>(0, 29);
-        public UpdateField<ulong> Health = new UpdateField<ulong>(0, 30);
-        public UpdateField<ulong> MaxHealth = new UpdateField<ulong>(0, 31);
-        public UpdateField<uint> Level = new UpdateField<uint>(32, 33);
-        public UpdateField<int> EffectiveLevel = new UpdateField<int>(32, 34);
-        public UpdateField<uint> ContentTuningID = new UpdateField<uint>(32, 35);
-        public UpdateField<int> ScalingLevelMin = new UpdateField<int>(32, 36);
-        public UpdateField<int> ScalingLevelMax = new UpdateField<int>(32, 37);
-        public UpdateField<int> ScalingLevelDelta = new UpdateField<int>(32, 38);
-        public UpdateField<int> ScalingFactionGroup = new UpdateField<int>(32, 39);
-        public UpdateField<int> ScalingHealthItemLevelCurveID = new UpdateField<int>(32, 40);
-        public UpdateField<int> ScalingDamageItemLevelCurveID = new UpdateField<int>(32, 41);
-        public UpdateField<uint> FactionTemplate = new UpdateField<uint>(32, 42);
-        public UpdateField<uint> Flags = new UpdateField<uint>(32, 43);
-        public UpdateField<uint> Flags2 = new UpdateField<uint>(32, 44);
-        public UpdateField<uint> Flags3 = new UpdateField<uint>(32, 45);
-        public UpdateField<uint> AuraState = new UpdateField<uint>(32, 46);
-        public UpdateField<uint> RangedAttackRoundBaseTime = new UpdateField<uint>(32, 47);
-        public UpdateField<float> BoundingRadius = new UpdateField<float>(32, 48);
-        public UpdateField<float> CombatReach = new UpdateField<float>(32, 49);
-        public UpdateField<float> DisplayScale = new UpdateField<float>(32, 50);
-        public UpdateField<int> CreatureFamily = new UpdateField<int>(32, 51);
-        public UpdateField<int> CreatureType = new UpdateField<int>(32, 52);
-        public UpdateField<uint> NativeDisplayID = new UpdateField<uint>(32, 53);
-        public UpdateField<float> NativeXDisplayScale = new UpdateField<float>(32, 54);
-        public UpdateField<uint> MountDisplayID = new UpdateField<uint>(32, 55);
-        public UpdateField<int> CosmeticMountDisplayID = new UpdateField<int>(32, 56);
-        public UpdateField<float> MinDamage = new UpdateField<float>(32, 57);
-        public UpdateField<float> MaxDamage = new UpdateField<float>(32, 58);
-        public UpdateField<float> MinOffHandDamage = new UpdateField<float>(32, 59);
-        public UpdateField<float> MaxOffHandDamage = new UpdateField<float>(32, 60);
-        public UpdateField<byte> StandState = new UpdateField<byte>(32, 61);
-        public UpdateField<byte> PetTalentPoints = new UpdateField<byte>(32, 62);
-        public UpdateField<byte> VisFlags = new UpdateField<byte>(32, 63);
-        public UpdateField<byte> AnimTier = new UpdateField<byte>(64, 65);
-        public UpdateField<uint> PetNumber = new UpdateField<uint>(64, 66);
-        public UpdateField<uint> PetNameTimestamp = new UpdateField<uint>(64, 67);
-        public UpdateField<uint> PetExperience = new UpdateField<uint>(64, 68);
-        public UpdateField<uint> PetNextLevelExperience = new UpdateField<uint>(64, 69);
-        public UpdateField<float> ModCastingSpeed = new UpdateField<float>(64, 70);
-        public UpdateField<float> ModCastingSpeedNeg = new UpdateField<float>(64, 71);
-        public UpdateField<float> ModSpellHaste = new UpdateField<float>(64, 72);
-        public UpdateField<float> ModHaste = new UpdateField<float>(64, 73);
-        public UpdateField<float> ModRangedHaste = new UpdateField<float>(64, 74);
-        public UpdateField<float> ModHasteRegen = new UpdateField<float>(64, 75);
-        public UpdateField<float> ModTimeRate = new UpdateField<float>(64, 76);
-        public UpdateField<uint> CreatedBySpell = new UpdateField<uint>(64, 77);
-        public UpdateField<int> EmoteState = new UpdateField<int>(64, 78);
-        public UpdateField<uint> BaseMana = new UpdateField<uint>(64, 79);
-        public UpdateField<uint> BaseHealth = new UpdateField<uint>(64, 80);
-        public UpdateField<byte> SheatheState = new UpdateField<byte>(64, 81);
-        public UpdateField<byte> PvpFlags = new UpdateField<byte>(64, 82);
-        public UpdateField<byte> PetFlags = new UpdateField<byte>(64, 83);
-        public UpdateField<byte> ShapeshiftForm = new UpdateField<byte>(64, 84);
-        public UpdateField<int> AttackPower = new UpdateField<int>(64, 85);
-        public UpdateField<int> AttackPowerModPos = new UpdateField<int>(64, 86);
-        public UpdateField<int> AttackPowerModNeg = new UpdateField<int>(64, 87);
-        public UpdateField<float> AttackPowerMultiplier = new UpdateField<float>(64, 88);
-        public UpdateField<int> RangedAttackPower = new UpdateField<int>(64, 89);
-        public UpdateField<int> RangedAttackPowerModPos = new UpdateField<int>(64, 90);
-        public UpdateField<int> RangedAttackPowerModNeg = new UpdateField<int>(64, 91);
-        public UpdateField<float> RangedAttackPowerMultiplier = new UpdateField<float>(64, 92);
-        public UpdateField<int> MainHandWeaponAttackPower = new UpdateField<int>(64, 93);
-        public UpdateField<int> OffHandWeaponAttackPower = new UpdateField<int>(64, 94);
-        public UpdateField<int> RangedWeaponAttackPower = new UpdateField<int>(64, 95);
-        public UpdateField<int> SetAttackSpeedAura = new UpdateField<int>(96, 97);
-        public UpdateField<float> Lifesteal = new UpdateField<float>(96, 98);
-        public UpdateField<float> MinRangedDamage = new UpdateField<float>(96, 99);
-        public UpdateField<float> MaxRangedDamage = new UpdateField<float>(96, 100);
-        public UpdateField<float> ManaCostMultiplier = new UpdateField<float>(96, 101);
-        public UpdateField<float> MaxHealthModifier = new UpdateField<float>(96, 102);
-        public UpdateField<float> HoverHeight = new UpdateField<float>(96, 103);
-        public UpdateField<uint> MinItemLevelCutoff = new UpdateField<uint>(96, 104);
-        public UpdateField<uint> MinItemLevel = new UpdateField<uint>(96, 105);
-        public UpdateField<uint> MaxItemLevel = new UpdateField<uint>(96, 106);
-        public UpdateField<int> AzeriteItemLevel = new UpdateField<int>(96, 107);
-        public UpdateField<int> WildBattlePetLevel = new UpdateField<int>(96, 108);
-        public UpdateField<uint> BattlePetCompanionNameTimestamp = new UpdateField<uint>(96, 109);
-        public UpdateField<int> InteractSpellID = new UpdateField<int>(96, 110);
-        public UpdateField<int> ScaleDuration = new UpdateField<int>(96, 111);
-        public UpdateField<int> LooksLikeMountID = new UpdateField<int>(96, 112);
-        public UpdateField<int> LooksLikeCreatureID = new UpdateField<int>(96, 113);
-        public UpdateField<int> LookAtControllerID = new UpdateField<int>(96, 114);
-        public UpdateField<int> TaxiNodesID = new UpdateField<int>(96, 115);
-        public UpdateField<ObjectGuid> GuildGUID = new UpdateField<ObjectGuid>(96, 116);
-        public UpdateField<ObjectGuid> SkinningOwnerGUID = new UpdateField<ObjectGuid>(96, 117);
-        public UpdateField<uint> SilencedSchoolMask = new UpdateField<uint>(96, 118);
-        public UpdateFieldArray<uint> NpcFlags = new UpdateFieldArray<uint>(2, 119, 120);
-        public UpdateFieldArray<int> Power = new UpdateFieldArray<int>(6, 122, 123);
-        public UpdateFieldArray<uint> MaxPower = new UpdateFieldArray<uint>(6, 122, 129);
-        public UpdateFieldArray<float> PowerRegenFlatModifier = new UpdateFieldArray<float>(6, 122, 135);
-        public UpdateFieldArray<float> PowerRegenInterruptedFlatModifier = new UpdateFieldArray<float>(6, 122, 141);
-        public UpdateFieldArray<VisibleItem> VirtualItems = new UpdateFieldArray<VisibleItem>(3, 147, 148);
-        public UpdateFieldArray<uint> AttackRoundBaseTime = new UpdateFieldArray<uint>(2, 151, 152);
-        public UpdateFieldArray<int> Stats = new UpdateFieldArray<int>(4, 154, 155);
-        public UpdateFieldArray<int> StatPosBuff = new UpdateFieldArray<int>(4, 154, 159);
-        public UpdateFieldArray<int> StatNegBuff = new UpdateFieldArray<int>(4, 154, 163);
-        public UpdateFieldArray<int> Resistances = new UpdateFieldArray<int>(7, 167, 168);
-        public UpdateFieldArray<int> BonusResistanceMods = new UpdateFieldArray<int>(7, 167, 175);
-        public UpdateFieldArray<int> ManaCostModifier = new UpdateFieldArray<int>(7, 167, 182);
+        public UpdateField<List<uint>> StateWorldEffectIDs = new(0, 1);
+        public DynamicUpdateField<PassiveSpellHistory> PassiveSpells = new(0, 2);
+        public DynamicUpdateField<int> WorldEffects = new(0, 3);
+        public DynamicUpdateField<ObjectGuid> ChannelObjects = new(0, 4);
+        public UpdateField<uint> DisplayID = new(0, 5);
+        public UpdateField<uint> StateSpellVisualID = new(0, 6);
+        public UpdateField<uint> StateAnimID = new(0, 7);
+        public UpdateField<uint> StateAnimKitID = new(0, 8);
+        public UpdateField<uint> StateWorldEffectsQuestObjectiveID = new(0, 9);
+        public UpdateField<int> SpellOverrideNameID = new(0, 10);
+        public UpdateField<ObjectGuid> Charm = new(0, 11);
+        public UpdateField<ObjectGuid> Summon = new(0, 12);
+        public UpdateField<ObjectGuid> Critter = new(0, 13);
+        public UpdateField<ObjectGuid> CharmedBy = new(0, 14);
+        public UpdateField<ObjectGuid> SummonedBy = new(0, 15);
+        public UpdateField<ObjectGuid> CreatedBy = new(0, 16);
+        public UpdateField<ObjectGuid> DemonCreator = new(0, 17);
+        public UpdateField<ObjectGuid> LookAtControllerTarget = new(0, 18);
+        public UpdateField<ObjectGuid> Target = new(0, 19);
+        public UpdateField<ObjectGuid> BattlePetCompanionGUID = new(0, 20);
+        public UpdateField<ulong> BattlePetDBID = new(0, 21);
+        public UpdateField<UnitChannel> ChannelData = new(0, 22);
+        public UpdateField<uint> SummonedByHomeRealm = new(0, 23);
+        public UpdateField<byte> Race = new(0, 24);
+        public UpdateField<byte> ClassId = new(0, 25);
+        public UpdateField<byte> PlayerClassId = new(0, 26);
+        public UpdateField<byte> Sex = new(0, 27);
+        public UpdateField<byte> DisplayPower = new(0, 28);
+        public UpdateField<uint> OverrideDisplayPowerID = new(0, 29);
+        public UpdateField<ulong> Health = new(0, 30);
+        public UpdateField<ulong> MaxHealth = new(0, 31);
+        public UpdateField<uint> Level = new(32, 33);
+        public UpdateField<int> EffectiveLevel = new(32, 34);
+        public UpdateField<uint> ContentTuningID = new(32, 35);
+        public UpdateField<int> ScalingLevelMin = new(32, 36);
+        public UpdateField<int> ScalingLevelMax = new(32, 37);
+        public UpdateField<int> ScalingLevelDelta = new(32, 38);
+        public UpdateField<int> ScalingFactionGroup = new(32, 39);
+        public UpdateField<int> ScalingHealthItemLevelCurveID = new(32, 40);
+        public UpdateField<int> ScalingDamageItemLevelCurveID = new(32, 41);
+        public UpdateField<uint> FactionTemplate = new(32, 42);
+        public UpdateField<uint> Flags = new(32, 43);
+        public UpdateField<uint> Flags2 = new(32, 44);
+        public UpdateField<uint> Flags3 = new(32, 45);
+        public UpdateField<uint> AuraState = new(32, 46);
+        public UpdateField<uint> RangedAttackRoundBaseTime = new(32, 47);
+        public UpdateField<float> BoundingRadius = new(32, 48);
+        public UpdateField<float> CombatReach = new(32, 49);
+        public UpdateField<float> DisplayScale = new(32, 50);
+        public UpdateField<int> CreatureFamily = new(32, 51);
+        public UpdateField<int> CreatureType = new(32, 52);
+        public UpdateField<uint> NativeDisplayID = new(32, 53);
+        public UpdateField<float> NativeXDisplayScale = new(32, 54);
+        public UpdateField<uint> MountDisplayID = new(32, 55);
+        public UpdateField<int> CosmeticMountDisplayID = new(32, 56);
+        public UpdateField<float> MinDamage = new(32, 57);
+        public UpdateField<float> MaxDamage = new(32, 58);
+        public UpdateField<float> MinOffHandDamage = new(32, 59);
+        public UpdateField<float> MaxOffHandDamage = new(32, 60);
+        public UpdateField<byte> StandState = new(32, 61);
+        public UpdateField<byte> PetTalentPoints = new(32, 62);
+        public UpdateField<byte> VisFlags = new(32, 63);
+        public UpdateField<byte> AnimTier = new(64, 65);
+        public UpdateField<uint> PetNumber = new(64, 66);
+        public UpdateField<uint> PetNameTimestamp = new(64, 67);
+        public UpdateField<uint> PetExperience = new(64, 68);
+        public UpdateField<uint> PetNextLevelExperience = new(64, 69);
+        public UpdateField<float> ModCastingSpeed = new(64, 70);
+        public UpdateField<float> ModCastingSpeedNeg = new(64, 71);
+        public UpdateField<float> ModSpellHaste = new(64, 72);
+        public UpdateField<float> ModHaste = new(64, 73);
+        public UpdateField<float> ModRangedHaste = new(64, 74);
+        public UpdateField<float> ModHasteRegen = new(64, 75);
+        public UpdateField<float> ModTimeRate = new(64, 76);
+        public UpdateField<uint> CreatedBySpell = new(64, 77);
+        public UpdateField<int> EmoteState = new(64, 78);
+        public UpdateField<uint> BaseMana = new(64, 79);
+        public UpdateField<uint> BaseHealth = new(64, 80);
+        public UpdateField<byte> SheatheState = new(64, 81);
+        public UpdateField<byte> PvpFlags = new(64, 82);
+        public UpdateField<byte> PetFlags = new(64, 83);
+        public UpdateField<byte> ShapeshiftForm = new(64, 84);
+        public UpdateField<int> AttackPower = new(64, 85);
+        public UpdateField<int> AttackPowerModPos = new(64, 86);
+        public UpdateField<int> AttackPowerModNeg = new(64, 87);
+        public UpdateField<float> AttackPowerMultiplier = new(64, 88);
+        public UpdateField<int> RangedAttackPower = new(64, 89);
+        public UpdateField<int> RangedAttackPowerModPos = new(64, 90);
+        public UpdateField<int> RangedAttackPowerModNeg = new(64, 91);
+        public UpdateField<float> RangedAttackPowerMultiplier = new(64, 92);
+        public UpdateField<int> MainHandWeaponAttackPower = new(64, 93);
+        public UpdateField<int> OffHandWeaponAttackPower = new(64, 94);
+        public UpdateField<int> RangedWeaponAttackPower = new(64, 95);
+        public UpdateField<int> SetAttackSpeedAura = new(96, 97);
+        public UpdateField<float> Lifesteal = new(96, 98);
+        public UpdateField<float> MinRangedDamage = new(96, 99);
+        public UpdateField<float> MaxRangedDamage = new(96, 100);
+        public UpdateField<float> ManaCostMultiplier = new(96, 101);
+        public UpdateField<float> MaxHealthModifier = new(96, 102);
+        public UpdateField<float> HoverHeight = new(96, 103);
+        public UpdateField<uint> MinItemLevelCutoff = new(96, 104);
+        public UpdateField<uint> MinItemLevel = new(96, 105);
+        public UpdateField<uint> MaxItemLevel = new(96, 106);
+        public UpdateField<int> AzeriteItemLevel = new(96, 107);
+        public UpdateField<int> WildBattlePetLevel = new(96, 108);
+        public UpdateField<uint> BattlePetCompanionNameTimestamp = new(96, 109);
+        public UpdateField<int> InteractSpellID = new(96, 110);
+        public UpdateField<int> ScaleDuration = new(96, 111);
+        public UpdateField<int> LooksLikeMountID = new(96, 112);
+        public UpdateField<int> LooksLikeCreatureID = new(96, 113);
+        public UpdateField<int> LookAtControllerID = new(96, 114);
+        public UpdateField<int> TaxiNodesID = new(96, 115);
+        public UpdateField<ObjectGuid> GuildGUID = new(96, 116);
+        public UpdateField<ObjectGuid> SkinningOwnerGUID = new(96, 117);
+        public UpdateField<uint> SilencedSchoolMask = new(96, 118);
+        public UpdateFieldArray<uint> NpcFlags = new(2, 119, 120);
+        public UpdateFieldArray<int> Power = new(6, 122, 123);
+        public UpdateFieldArray<uint> MaxPower = new(6, 122, 129);
+        public UpdateFieldArray<float> PowerRegenFlatModifier = new(6, 122, 135);
+        public UpdateFieldArray<float> PowerRegenInterruptedFlatModifier = new(6, 122, 141);
+        public UpdateFieldArray<VisibleItem> VirtualItems = new(3, 147, 148);
+        public UpdateFieldArray<uint> AttackRoundBaseTime = new(2, 151, 152);
+        public UpdateFieldArray<int> Stats = new(4, 154, 155);
+        public UpdateFieldArray<int> StatPosBuff = new(4, 154, 159);
+        public UpdateFieldArray<int> StatNegBuff = new(4, 154, 163);
+        public UpdateFieldArray<int> Resistances = new(7, 167, 168);
+        public UpdateFieldArray<int> BonusResistanceMods = new(7, 167, 175);
+        public UpdateFieldArray<int> ManaCostModifier = new(7, 167, 182);
 
         public UnitData() : base(0, TypeId.Unit, 189) { }
 
@@ -1426,7 +1426,7 @@ namespace Game.Entities
 
         public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Unit owner, Player receiver)
         {
-            UpdateMask allowedMaskForTarget = new UpdateMask(192, new uint[] { 0xFFFFDFFFu, 0xE1FF7FFFu, 0x001EFFFFu, 0xFFFFFF81u, 0x03F8007Fu, 0x00000000u });
+            UpdateMask allowedMaskForTarget = new(192, new uint[] { 0xFFFFDFFFu, 0xE1FF7FFFu, 0x001EFFFFu, 0xFFFFFF81u, 0x03F8007Fu, 0x00000000u });
             AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
             WriteUpdate(data, _changesMask & allowedMaskForTarget, false, owner, receiver);
         }
@@ -1443,7 +1443,7 @@ namespace Game.Entities
 
         public void FilterDisallowedFieldsMaskForFlag(UpdateMask changesMask, UpdateFieldFlag fieldVisibilityFlags)
         {
-            UpdateMask allowedMaskForTarget = new UpdateMask(192, new[] { 0xFFFFDFFFu, 0xE1FF7FFFu, 0x001EFFFFu, 0xFFFFFF81u, 0x03F8007Fu, 0x00000000u });
+            UpdateMask allowedMaskForTarget = new(192, new[] { 0xFFFFDFFFu, 0xE1FF7FFFu, 0x001EFFFFu, 0xFFFFFF81u, 0x03F8007Fu, 0x00000000u });
             AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
             changesMask.AND(allowedMaskForTarget);
         }
@@ -2305,12 +2305,12 @@ namespace Game.Entities
 
     public class QuestLog : BaseUpdateData<Player>
     {
-        public UpdateField<uint> QuestID = new UpdateField<uint>(0, 1);
-        public UpdateField<uint> StateFlags = new UpdateField<uint>(0, 2);
-        public UpdateField<uint> EndTime = new UpdateField<uint>(0, 3);
-        public UpdateField<uint> AcceptTime = new UpdateField<uint>(0, 4);
-        public UpdateField<uint> ObjectiveFlags = new UpdateField<uint>(0, 5);
-        public UpdateFieldArray<ushort> ObjectiveProgress = new UpdateFieldArray<ushort>(24, 6, 7);
+        public UpdateField<uint> QuestID = new(0, 1);
+        public UpdateField<uint> StateFlags = new(0, 2);
+        public UpdateField<uint> EndTime = new(0, 3);
+        public UpdateField<uint> AcceptTime = new(0, 4);
+        public UpdateField<uint> ObjectiveFlags = new(0, 5);
+        public UpdateFieldArray<ushort> ObjectiveProgress = new(24, 6, 7);
 
         public QuestLog() : base(31) { }
 
@@ -2387,13 +2387,13 @@ namespace Game.Entities
 
     public class ArenaCooldown : BaseUpdateData<Player>
     {
-        public UpdateField<int> SpellID = new UpdateField<int>(0, 1);
-        public UpdateField<int> Charges = new UpdateField<int>(0, 2);
-        public UpdateField<uint> Flags = new UpdateField<uint>(0, 3);
-        public UpdateField<uint> StartTime = new UpdateField<uint>(0, 4);
-        public UpdateField<uint> EndTime = new UpdateField<uint>(0, 5);
-        public UpdateField<uint> NextChargeTime = new UpdateField<uint>(0, 6);
-        public UpdateField<byte> MaxCharges = new UpdateField<byte>(0, 7);
+        public UpdateField<int> SpellID = new(0, 1);
+        public UpdateField<int> Charges = new(0, 2);
+        public UpdateField<uint> Flags = new(0, 3);
+        public UpdateField<uint> StartTime = new(0, 4);
+        public UpdateField<uint> EndTime = new(0, 5);
+        public UpdateField<uint> NextChargeTime = new(0, 6);
+        public UpdateField<byte> MaxCharges = new(0, 7);
 
         public ArenaCooldown() : base(8) { }
 
@@ -2486,41 +2486,41 @@ namespace Game.Entities
 
     public class PlayerData : BaseUpdateData<Player>
     {
-        public UpdateField<bool> HasQuestSession = new UpdateField<bool>(0, 1);
-        public UpdateField<bool> HasLevelLink = new UpdateField<bool>(0, 2);
-        public DynamicUpdateField<ChrCustomizationChoice>Customizations = new DynamicUpdateField<ChrCustomizationChoice>(0, 3);
-        public DynamicUpdateField<QuestLog>QuestSessionQuestLog = new DynamicUpdateField<QuestLog>(0, 4);
-        public DynamicUpdateField<ArenaCooldown>ArenaCooldowns = new DynamicUpdateField<ArenaCooldown>(0, 5);
-        public UpdateField<ObjectGuid> DuelArbiter = new UpdateField<ObjectGuid>(0, 6);
-        public UpdateField<ObjectGuid> WowAccount = new UpdateField<ObjectGuid>(0, 7);
-        public UpdateField<ObjectGuid> LootTargetGUID = new UpdateField<ObjectGuid>(0, 8);
-        public UpdateField<uint> PlayerFlags = new UpdateField<uint>(0, 9);
-        public UpdateField<uint> PlayerFlagsEx = new UpdateField<uint>(0, 10);
-        public UpdateField<uint> GuildRankID = new UpdateField<uint>(0, 11);
-        public UpdateField<uint> GuildDeleteDate = new UpdateField<uint>(0, 12);
-        public UpdateField<uint> GuildLevel = new UpdateField<uint>(0, 13);
-        public UpdateField<byte> PartyType = new UpdateField<byte>(0, 14);
-        public UpdateField<byte> NativeSex = new UpdateField<byte>(0, 15);
-        public UpdateField<byte> Inebriation = new UpdateField<byte>(0, 16);
-        public UpdateField<byte> PvpTitle = new UpdateField<byte>(0, 17);
-        public UpdateField<byte> ArenaFaction = new UpdateField<byte>(0, 18);
-        public UpdateField<uint> DuelTeam = new UpdateField<uint>(0, 19);
-        public UpdateField<int> GuildTimeStamp = new UpdateField<int>(0, 20);
-        public UpdateField<uint> PlayerTitle = new UpdateField<uint>(0, 21);
-        public UpdateField<int> FakeInebriation = new UpdateField<int>(0, 22);
-        public UpdateField<uint> VirtualPlayerRealm = new UpdateField<uint>(0, 23);
-        public UpdateField<uint> CurrentSpecID = new UpdateField<uint>(0, 24);
-        public UpdateField<int> TaxiMountAnimKitID = new UpdateField<int>(0, 25);
-        public UpdateField<byte> CurrentBattlePetBreedQuality = new UpdateField<byte>(0, 26);
-        public UpdateField<uint> HonorLevel = new UpdateField<uint>(0, 27);
-        public UpdateField<int> Field_B0 = new UpdateField<int>(0, 28);
-        public UpdateField<int> Field_B4 = new UpdateField<int>(0, 29);
-        public UpdateField<CTROptions> CtrOptions = new UpdateField<CTROptions>(0, 30);
-        public UpdateField<int> CovenantID = new UpdateField<int>(0, 31);
-        public UpdateField<int> SoulbindID = new UpdateField<int>(32, 33);
-        public UpdateFieldArray<QuestLog>QuestLog = new UpdateFieldArray<QuestLog>(125, 34, 35);
-        public UpdateFieldArray<VisibleItem> VisibleItems = new UpdateFieldArray<VisibleItem>(19, 160, 161);
-        public UpdateFieldArray<float>AvgItemLevel = new UpdateFieldArray<float>(4, 180, 181);
+        public UpdateField<bool> HasQuestSession = new(0, 1);
+        public UpdateField<bool> HasLevelLink = new(0, 2);
+        public DynamicUpdateField<ChrCustomizationChoice>Customizations = new(0, 3);
+        public DynamicUpdateField<QuestLog>QuestSessionQuestLog = new(0, 4);
+        public DynamicUpdateField<ArenaCooldown>ArenaCooldowns = new(0, 5);
+        public UpdateField<ObjectGuid> DuelArbiter = new(0, 6);
+        public UpdateField<ObjectGuid> WowAccount = new(0, 7);
+        public UpdateField<ObjectGuid> LootTargetGUID = new(0, 8);
+        public UpdateField<uint> PlayerFlags = new(0, 9);
+        public UpdateField<uint> PlayerFlagsEx = new(0, 10);
+        public UpdateField<uint> GuildRankID = new(0, 11);
+        public UpdateField<uint> GuildDeleteDate = new(0, 12);
+        public UpdateField<uint> GuildLevel = new(0, 13);
+        public UpdateField<byte> PartyType = new(0, 14);
+        public UpdateField<byte> NativeSex = new(0, 15);
+        public UpdateField<byte> Inebriation = new(0, 16);
+        public UpdateField<byte> PvpTitle = new(0, 17);
+        public UpdateField<byte> ArenaFaction = new(0, 18);
+        public UpdateField<uint> DuelTeam = new(0, 19);
+        public UpdateField<int> GuildTimeStamp = new(0, 20);
+        public UpdateField<uint> PlayerTitle = new(0, 21);
+        public UpdateField<int> FakeInebriation = new(0, 22);
+        public UpdateField<uint> VirtualPlayerRealm = new(0, 23);
+        public UpdateField<uint> CurrentSpecID = new(0, 24);
+        public UpdateField<int> TaxiMountAnimKitID = new(0, 25);
+        public UpdateField<byte> CurrentBattlePetBreedQuality = new(0, 26);
+        public UpdateField<uint> HonorLevel = new(0, 27);
+        public UpdateField<int> Field_B0 = new(0, 28);
+        public UpdateField<int> Field_B4 = new(0, 29);
+        public UpdateField<CTROptions> CtrOptions = new(0, 30);
+        public UpdateField<int> CovenantID = new(0, 31);
+        public UpdateField<int> SoulbindID = new(32, 33);
+        public UpdateFieldArray<QuestLog>QuestLog = new(125, 34, 35);
+        public UpdateFieldArray<VisibleItem> VisibleItems = new(19, 160, 161);
+        public UpdateFieldArray<float>AvgItemLevel = new(4, 180, 181);
 
         public PlayerData() : base(0, TypeId.Player, 185) { }
 
@@ -2596,7 +2596,7 @@ namespace Game.Entities
 
         public void WriteUpdate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Player owner, Player receiver)
         {
-            UpdateMask allowedMaskForTarget = new UpdateMask(185, new[] { 0xFFFFFFEDu, 0x00000003u, 0x00000000u, 0x00000000u, 0x00000000u, 0x01FFFFFFu });
+            UpdateMask allowedMaskForTarget = new(185, new[] { 0xFFFFFFEDu, 0x00000003u, 0x00000000u, 0x00000000u, 0x00000000u, 0x01FFFFFFu });
             AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
             WriteUpdate(data, _changesMask & allowedMaskForTarget, false, owner, receiver);
         }
@@ -2609,7 +2609,7 @@ namespace Game.Entities
 
         public void FilterDisallowedFieldsMaskForFlag(UpdateMask changesMask, UpdateFieldFlag fieldVisibilityFlags)
         {
-            UpdateMask allowedMaskForTarget = new UpdateMask(185, new[] { 0xFFFFFFEDu, 0x00000003u, 0x00000000u, 0x00000000u, 0x00000000u, 0x01FFFFFFu });
+            UpdateMask allowedMaskForTarget = new(185, new[] { 0xFFFFFFEDu, 0x00000003u, 0x00000000u, 0x00000000u, 0x00000000u, 0x01FFFFFFu });
             AppendAllowedFieldsMaskForFlag(allowedMaskForTarget, fieldVisibilityFlags);
             changesMask.AND(allowedMaskForTarget);
         }
@@ -2883,13 +2883,13 @@ namespace Game.Entities
 
     public class SkillInfo : BaseUpdateData<Player>
     {
-        public UpdateFieldArray<ushort> SkillLineID = new UpdateFieldArray<ushort>(256, 0, 1);
-        public UpdateFieldArray<ushort> SkillStep = new UpdateFieldArray<ushort>(256, 0, 257);
-        public UpdateFieldArray<ushort> SkillRank = new UpdateFieldArray<ushort>(256, 0, 513);
-        public UpdateFieldArray<ushort> SkillStartingRank = new UpdateFieldArray<ushort>(256, 0, 769);
-        public UpdateFieldArray<ushort> SkillMaxRank = new UpdateFieldArray<ushort>(256, 0, 1025);
-        public UpdateFieldArray<ushort> SkillTempBonus = new UpdateFieldArray<ushort>(256, 0, 1281);
-        public UpdateFieldArray<ushort> SkillPermBonus = new UpdateFieldArray<ushort>(256, 0, 1537);
+        public UpdateFieldArray<ushort> SkillLineID = new(256, 0, 1);
+        public UpdateFieldArray<ushort> SkillStep = new(256, 0, 257);
+        public UpdateFieldArray<ushort> SkillRank = new(256, 0, 513);
+        public UpdateFieldArray<ushort> SkillStartingRank = new(256, 0, 769);
+        public UpdateFieldArray<ushort> SkillMaxRank = new(256, 0, 1025);
+        public UpdateFieldArray<ushort> SkillTempBonus = new(256, 0, 1281);
+        public UpdateFieldArray<ushort> SkillPermBonus = new(256, 0, 1537);
 
         public SkillInfo() : base(1793) { }
 
@@ -2972,8 +2972,8 @@ namespace Game.Entities
 
     public class RestInfo : BaseUpdateData<Player>
     {
-        public UpdateField<uint> Threshold = new UpdateField<uint>(0, 1);
-        public UpdateField<byte> StateID = new UpdateField<byte>(0, 2);
+        public UpdateField<uint> Threshold = new(0, 1);
+        public UpdateField<byte> StateID = new(0, 2);
 
         public RestInfo() : base(3) { }
 
@@ -3015,15 +3015,15 @@ namespace Game.Entities
 
     public class PVPInfo : BaseUpdateData<Player>
     {
-        public UpdateField<uint> Field_0 = new UpdateField<uint>(0, 1);
-        public UpdateField<uint> Field_4 = new UpdateField<uint>(0, 2);
-        public UpdateField<uint> Field_8 = new UpdateField<uint>(0, 3);
-        public UpdateField<uint> Field_C = new UpdateField<uint>(0, 4);
-        public UpdateField<uint> Rating = new UpdateField<uint>(0, 5);
-        public UpdateField<uint> Field_14 = new UpdateField<uint>(0, 6);
-        public UpdateField<uint> Field_18 = new UpdateField<uint>(0, 7);
-        public UpdateField<uint> PvpTierID = new UpdateField<uint>(0, 8);
-        public UpdateField<uint> Field_20 = new UpdateField<uint>(0, 9);
+        public UpdateField<uint> Field_0 = new(0, 1);
+        public UpdateField<uint> Field_4 = new(0, 2);
+        public UpdateField<uint> Field_8 = new(0, 3);
+        public UpdateField<uint> Field_C = new(0, 4);
+        public UpdateField<uint> Rating = new(0, 5);
+        public UpdateField<uint> Field_14 = new(0, 6);
+        public UpdateField<uint> Field_18 = new(0, 7);
+        public UpdateField<uint> PvpTierID = new(0, 8);
+        public UpdateField<uint> Field_20 = new(0, 9);
 
         public PVPInfo() : base(10) { }
 
@@ -3213,7 +3213,7 @@ namespace Game.Entities
 
     public class MultiFloorExplore
     {
-        public List<int> WorldMapOverlayIDs = new List<int>();
+        public List<int> WorldMapOverlayIDs = new();
 
         public void WriteCreate(WorldPacket data, Player owner, Player receiver)
         {
@@ -3255,8 +3255,8 @@ namespace Game.Entities
 
     public class ActivePlayerUnk901 : BaseUpdateData<Player>
     {
-        public UpdateField<ObjectGuid> Field_0 = new UpdateField<ObjectGuid>(0, 1 );
-        public UpdateField<int> Field_10 = new UpdateField<int>(0, 2 );
+        public UpdateField<ObjectGuid> Field_0 = new(0, 1 );
+        public UpdateField<int> Field_10 = new(0, 2 );
 
         public ActivePlayerUnk901() : base(3) { }
 
@@ -3298,8 +3298,8 @@ namespace Game.Entities
 
     public class ReplayedQuest : BaseUpdateData<Player>
     {
-        public UpdateField<int> QuestID = new UpdateField<int>(0, 1);
-        public UpdateField<uint> ReplayTime = new UpdateField<uint>(0, 2);
+        public UpdateField<int> QuestID = new(0, 1);
+        public UpdateField<uint> ReplayTime = new(0, 2);
 
         public ReplayedQuest() : base(3) { }
 
@@ -3341,8 +3341,8 @@ namespace Game.Entities
 
     public class QuestSession : BaseUpdateData<Player>
     {
-        public UpdateField<ObjectGuid> Owner = new UpdateField<ObjectGuid>(0, 1);
-        public UpdateFieldArray<ulong> QuestCompleted = new UpdateFieldArray<ulong>(875, 2, 3);
+        public UpdateField<ObjectGuid> Owner = new(0, 1);
+        public UpdateFieldArray<ulong> QuestCompleted = new(875, 2, 3);
 
         public QuestSession() : base(878) { }
 
@@ -3396,134 +3396,134 @@ namespace Game.Entities
 
     public class ActivePlayerData : BaseUpdateData<Player>
     {
-        public UpdateField<bool> BackpackAutoSortDisabled = new UpdateField<bool>(0, 1);
-        public UpdateField<bool> BankAutoSortDisabled = new UpdateField<bool>(0, 2);
-        public UpdateField<bool> SortBagsRightToLeft = new UpdateField<bool>(0, 3);
-        public UpdateField<bool> InsertItemsLeftToRight = new UpdateField<bool>(0, 4);
-        public UpdateFieldArray<DynamicUpdateField<Research>> Research = new UpdateFieldArray<DynamicUpdateField<Research>>(1, 27, 28);
-        public DynamicUpdateField<ulong> KnownTitles = new DynamicUpdateField<ulong>(0, 5);
-        public DynamicUpdateField<ushort> ResearchSites = new DynamicUpdateField<ushort>(0, 6);
-        public DynamicUpdateField<uint> ResearchSiteProgress = new DynamicUpdateField<uint>(0, 7);
-        public DynamicUpdateField<uint> DailyQuestsCompleted = new DynamicUpdateField<uint>(0, 8);
-        public DynamicUpdateField<int> AvailableQuestLineXQuestIDs = new DynamicUpdateField<int>(0, 9);
-        public DynamicUpdateField<uint> Heirlooms = new DynamicUpdateField<uint>(0, 10);
-        public DynamicUpdateField<uint> HeirloomFlags = new DynamicUpdateField<uint>(0, 11);
-        public DynamicUpdateField<uint> Toys = new DynamicUpdateField<uint>(0, 12);
-        public DynamicUpdateField<uint> ToyFlags = new DynamicUpdateField<uint>(0, 13);
-        public DynamicUpdateField<uint> Transmog = new DynamicUpdateField<uint>(0, 14);
-        public DynamicUpdateField<uint> ConditionalTransmog = new DynamicUpdateField<uint>(0, 15);
-        public DynamicUpdateField<uint> SelfResSpells = new DynamicUpdateField<uint>(0, 16);
-        public DynamicUpdateField<uint> RuneforgePowers = new DynamicUpdateField<uint>(0, 17);
-        public DynamicUpdateField<uint> TransmogIllusions = new DynamicUpdateField<uint>(0, 18);
-        public DynamicUpdateField<SpellPctModByLabel> SpellPctModByLabel = new DynamicUpdateField<SpellPctModByLabel>(0, 20);
-        public DynamicUpdateField<SpellFlatModByLabel> SpellFlatModByLabel = new DynamicUpdateField<SpellFlatModByLabel>(0, 21);
-        public DynamicUpdateField<MawPower> MawPowers = new DynamicUpdateField<MawPower>(0, 22);
-        public DynamicUpdateField<MultiFloorExplore> MultiFloorExploration = new DynamicUpdateField<MultiFloorExplore>(0, 23);
-        public DynamicUpdateField<RecipeProgressionInfo> RecipeProgression = new DynamicUpdateField<RecipeProgressionInfo>(0, 24);
-        public DynamicUpdateField<ReplayedQuest> ReplayedQuests = new DynamicUpdateField<ReplayedQuest>(0, 25);
-        public DynamicUpdateField<int> DisabledSpells = new DynamicUpdateField<int>(0, 26);
-        public DynamicUpdateField<CharacterRestriction> CharacterRestrictions = new DynamicUpdateField<CharacterRestriction>(0, 19);
-        public UpdateField<ObjectGuid> FarsightObject = new UpdateField<ObjectGuid>(0, 29);
-        public UpdateField<ObjectGuid> SummonedBattlePetGUID = new UpdateField<ObjectGuid>(0, 30);
-        public UpdateField<ulong> Coinage = new UpdateField<ulong>(0, 31);
-        public UpdateField<uint> XP = new UpdateField<uint>(0, 32);
-        public UpdateField<uint> NextLevelXP = new UpdateField<uint>(0, 33);
-        public UpdateField<int> TrialXP = new UpdateField<int>(34, 35);
-        public UpdateField<SkillInfo> Skill = new UpdateField<SkillInfo>(34, 36);
-        public UpdateField<uint> CharacterPoints = new UpdateField<uint>(34, 37);
-        public UpdateField<uint> MaxTalentTiers = new UpdateField<uint>(34, 38);
-        public UpdateField<uint> TrackCreatureMask = new UpdateField<uint>(34, 39);
-        public UpdateField<float> MainhandExpertise = new UpdateField<float>(34, 40);
-        public UpdateField<float> OffhandExpertise = new UpdateField<float>(34, 41);
-        public UpdateField<float> RangedExpertise = new UpdateField<float>(34, 42);
-        public UpdateField<float> CombatRatingExpertise = new UpdateField<float>(34, 43);
-        public UpdateField<float> BlockPercentage = new UpdateField<float>(34, 44);
-        public UpdateField<float> DodgePercentage = new UpdateField<float>(34, 45);
-        public UpdateField<float> DodgePercentageFromAttribute = new UpdateField<float>(34, 46);
-        public UpdateField<float> ParryPercentage = new UpdateField<float>(34, 47);
-        public UpdateField<float> ParryPercentageFromAttribute = new UpdateField<float>(34, 48);
-        public UpdateField<float> CritPercentage = new UpdateField<float>(34, 49);
-        public UpdateField<float> RangedCritPercentage = new UpdateField<float>(34, 50);
-        public UpdateField<float> OffhandCritPercentage = new UpdateField<float>(34, 51);
-        public UpdateField<float> SpellCritPercentage = new UpdateField<float>(34, 52);
-        public UpdateField<uint> ShieldBlock = new UpdateField<uint>(34, 53);
-        public UpdateField<float> ShieldBlockCritPercentage = new UpdateField<float>(34, 54);
-        public UpdateField<float> Mastery = new UpdateField<float>(34, 55);
-        public UpdateField<float> Speed = new UpdateField<float>(34, 56);
-        public UpdateField<float> Avoidance = new UpdateField<float>(34, 57);
-        public UpdateField<float> Sturdiness = new UpdateField<float>(34, 58);
-        public UpdateField<int> Versatility = new UpdateField<int>(34, 59);
-        public UpdateField<float> VersatilityBonus = new UpdateField<float>(34, 60);
-        public UpdateField<float> PvpPowerDamage = new UpdateField<float>(34, 61);
-        public UpdateField<float> PvpPowerHealing = new UpdateField<float>(34, 62);
-        public UpdateField<int> ModHealingDonePos = new UpdateField<int>(34, 63);
-        public UpdateField<float> ModHealingPercent = new UpdateField<float>(34, 64);
-        public UpdateField<float> ModPeriodicHealingDonePercent = new UpdateField<float>(34, 65);
-        public UpdateField<float> ModSpellPowerPercent = new UpdateField<float>(66, 67);
-        public UpdateField<float> ModResiliencePercent = new UpdateField<float>(66, 68);
-        public UpdateField<float> OverrideSpellPowerByAPPercent = new UpdateField<float>(66, 69);
-        public UpdateField<float> OverrideAPBySpellPowerPercent = new UpdateField<float>(66, 70);
-        public UpdateField<int> ModTargetResistance = new UpdateField<int>(66, 71);
-        public UpdateField<int> ModTargetPhysicalResistance = new UpdateField<int>(66, 72);
-        public UpdateField<uint> LocalFlags = new UpdateField<uint>(66, 73);
-        public UpdateField<byte> GrantableLevels = new UpdateField<byte>(66, 74);
-        public UpdateField<byte> MultiActionBars = new UpdateField<byte>(66, 75);
-        public UpdateField<byte> LifetimeMaxRank = new UpdateField<byte>(66, 76);
-        public UpdateField<byte> NumRespecs = new UpdateField<byte>(66, 77);
-        public UpdateField<uint> PvpMedals = new UpdateField<uint>(66, 78);
-        public UpdateField<ushort> TodayHonorableKills = new UpdateField<ushort>(66, 79);
-        public UpdateField<ushort> YesterdayHonorableKills = new UpdateField<ushort>(66, 80);
-        public UpdateField<uint> LifetimeHonorableKills = new UpdateField<uint>(66, 81);
-        public UpdateField<uint> WatchedFactionIndex = new UpdateField<uint>(66, 82);
-        public UpdateField<int> MaxLevel = new UpdateField<int>(66, 83);
-        public UpdateField<int> ScalingPlayerLevelDelta = new UpdateField<int>(66, 84);
-        public UpdateField<int> MaxCreatureScalingLevel = new UpdateField<int>(66, 85);
-        public UpdateField<uint> PetSpellPower = new UpdateField<uint>(66, 86);
-        public UpdateField<float> UiHitModifier = new UpdateField<float>(66, 87);
-        public UpdateField<float> UiSpellHitModifier = new UpdateField<float>(66, 88);
-        public UpdateField<int> HomeRealmTimeOffset = new UpdateField<int>(66, 89);
-        public UpdateField<float> ModPetHaste = new UpdateField<float>(66, 90);
-        public UpdateField<sbyte> JailersTowerLevelMax = new UpdateField<sbyte>(66, 91);
-        public UpdateField<sbyte> JailersTowerLevel = new UpdateField<sbyte>(66, 92);
-        public UpdateField<byte> LocalRegenFlags = new UpdateField<byte>(66, 93);
-        public UpdateField<byte> AuraVision = new UpdateField<byte>(66, 94);
-        public UpdateField<byte> NumBackpackSlots = new UpdateField<byte>(66, 95);
-        public UpdateField<uint> OverrideSpellsID = new UpdateField<uint>(66, 96);
-        public UpdateField<ushort> LootSpecID = new UpdateField<ushort>(66, 97);
-        public UpdateField<uint> OverrideZonePVPType = new UpdateField<uint>(98, 99);
-        public UpdateField<ObjectGuid> BnetAccount = new UpdateField<ObjectGuid>(98, 100);
-        public UpdateField<ulong> GuildClubMemberID = new UpdateField<ulong>(98, 101);
-        public UpdateField<uint> Honor = new UpdateField<uint>(98, 102);
-        public UpdateField<uint> HonorNextLevel = new UpdateField<uint>(98, 103);
-        public UpdateField<int> PvpRewardAchieved = new UpdateField<int>(98, 104);
-        public UpdateField<int> PvpTierMaxFromWins = new UpdateField<int>(98, 105);
-        public UpdateField<int> PvpLastWeeksRewardAchieved = new UpdateField<int>(98, 106);
-        public UpdateField<int> PvpLastWeeksTierMaxFromWins = new UpdateField<int>(98, 107);
-        public UpdateField<int> PvpLastWeeksRewardClaimed = new UpdateField<int>(98, 108);
-        public UpdateField<byte> NumBankSlots = new UpdateField<byte>(98, 109);
-        public UpdateField<ActivePlayerUnk901> Field_1410 = new UpdateField<ActivePlayerUnk901>(98, 111);
-        public UpdateField<Optional<QuestSession>> QuestSession = new UpdateField<Optional<QuestSession>>(98, 110);
-        public UpdateField<int> UiChromieTimeExpansionID = new UpdateField<int>(98, 112);
-        public UpdateField<int> TransportServerTime = new UpdateField<int>(98, 113);
-        public UpdateFieldArray<ObjectGuid> InvSlots = new UpdateFieldArray<ObjectGuid>(199, 114, 115);
-        public UpdateFieldArray<uint> TrackResourceMask = new UpdateFieldArray<uint>(2, 314, 315);
-        public UpdateFieldArray<ulong> ExploredZones = new UpdateFieldArray<ulong>(192, 317, 318);
-        public UpdateFieldArray<RestInfo> RestInfo = new UpdateFieldArray<RestInfo>(2, 510, 511);
-        public UpdateFieldArray<int> ModDamageDonePos = new UpdateFieldArray<int>(7, 513, 514);
-        public UpdateFieldArray<int> ModDamageDoneNeg = new UpdateFieldArray<int>(7, 513, 521);
-        public UpdateFieldArray<float> ModDamageDonePercent = new UpdateFieldArray<float>(7, 513, 528);
-        public UpdateFieldArray<float> ModHealingDonePercent = new UpdateFieldArray<float>(7, 513, 535);
-        public UpdateFieldArray<float> WeaponDmgMultipliers = new UpdateFieldArray<float>(3, 542, 543);
-        public UpdateFieldArray<float> WeaponAtkSpeedMultipliers = new UpdateFieldArray<float>(3, 542, 546);
-        public UpdateFieldArray<uint> BuybackPrice = new UpdateFieldArray<uint>(12, 549, 550);
-        public UpdateFieldArray<uint> BuybackTimestamp = new UpdateFieldArray<uint>(12, 549, 562);
-        public UpdateFieldArray<uint> CombatRatings = new UpdateFieldArray<uint>(32, 574, 575);
-        public UpdateFieldArray<PVPInfo> PvpInfo = new UpdateFieldArray<PVPInfo>(6, 607, 608);
-        public UpdateFieldArray<uint> NoReagentCostMask = new UpdateFieldArray<uint>(4, 614, 615);
-        public UpdateFieldArray<uint> ProfessionSkillLine = new UpdateFieldArray<uint>(2, 619, 620);
-        public UpdateFieldArray<uint> BagSlotFlags = new UpdateFieldArray<uint>(4, 622, 623);
-        public UpdateFieldArray<uint> BankBagSlotFlags = new UpdateFieldArray<uint>(7, 627, 628);
-        public UpdateFieldArray<ulong> QuestCompleted = new UpdateFieldArray<ulong>(875, 635, 636);
+        public UpdateField<bool> BackpackAutoSortDisabled = new(0, 1);
+        public UpdateField<bool> BankAutoSortDisabled = new(0, 2);
+        public UpdateField<bool> SortBagsRightToLeft = new(0, 3);
+        public UpdateField<bool> InsertItemsLeftToRight = new(0, 4);
+        public UpdateFieldArray<DynamicUpdateField<Research>> Research = new(1, 27, 28);
+        public DynamicUpdateField<ulong> KnownTitles = new(0, 5);
+        public DynamicUpdateField<ushort> ResearchSites = new(0, 6);
+        public DynamicUpdateField<uint> ResearchSiteProgress = new(0, 7);
+        public DynamicUpdateField<uint> DailyQuestsCompleted = new(0, 8);
+        public DynamicUpdateField<int> AvailableQuestLineXQuestIDs = new(0, 9);
+        public DynamicUpdateField<uint> Heirlooms = new(0, 10);
+        public DynamicUpdateField<uint> HeirloomFlags = new(0, 11);
+        public DynamicUpdateField<uint> Toys = new(0, 12);
+        public DynamicUpdateField<uint> ToyFlags = new(0, 13);
+        public DynamicUpdateField<uint> Transmog = new(0, 14);
+        public DynamicUpdateField<uint> ConditionalTransmog = new(0, 15);
+        public DynamicUpdateField<uint> SelfResSpells = new(0, 16);
+        public DynamicUpdateField<uint> RuneforgePowers = new(0, 17);
+        public DynamicUpdateField<uint> TransmogIllusions = new(0, 18);
+        public DynamicUpdateField<SpellPctModByLabel> SpellPctModByLabel = new(0, 20);
+        public DynamicUpdateField<SpellFlatModByLabel> SpellFlatModByLabel = new(0, 21);
+        public DynamicUpdateField<MawPower> MawPowers = new(0, 22);
+        public DynamicUpdateField<MultiFloorExplore> MultiFloorExploration = new(0, 23);
+        public DynamicUpdateField<RecipeProgressionInfo> RecipeProgression = new(0, 24);
+        public DynamicUpdateField<ReplayedQuest> ReplayedQuests = new(0, 25);
+        public DynamicUpdateField<int> DisabledSpells = new(0, 26);
+        public DynamicUpdateField<CharacterRestriction> CharacterRestrictions = new(0, 19);
+        public UpdateField<ObjectGuid> FarsightObject = new(0, 29);
+        public UpdateField<ObjectGuid> SummonedBattlePetGUID = new(0, 30);
+        public UpdateField<ulong> Coinage = new(0, 31);
+        public UpdateField<uint> XP = new(0, 32);
+        public UpdateField<uint> NextLevelXP = new(0, 33);
+        public UpdateField<int> TrialXP = new(34, 35);
+        public UpdateField<SkillInfo> Skill = new(34, 36);
+        public UpdateField<uint> CharacterPoints = new(34, 37);
+        public UpdateField<uint> MaxTalentTiers = new(34, 38);
+        public UpdateField<uint> TrackCreatureMask = new(34, 39);
+        public UpdateField<float> MainhandExpertise = new(34, 40);
+        public UpdateField<float> OffhandExpertise = new(34, 41);
+        public UpdateField<float> RangedExpertise = new(34, 42);
+        public UpdateField<float> CombatRatingExpertise = new(34, 43);
+        public UpdateField<float> BlockPercentage = new(34, 44);
+        public UpdateField<float> DodgePercentage = new(34, 45);
+        public UpdateField<float> DodgePercentageFromAttribute = new(34, 46);
+        public UpdateField<float> ParryPercentage = new(34, 47);
+        public UpdateField<float> ParryPercentageFromAttribute = new(34, 48);
+        public UpdateField<float> CritPercentage = new(34, 49);
+        public UpdateField<float> RangedCritPercentage = new(34, 50);
+        public UpdateField<float> OffhandCritPercentage = new(34, 51);
+        public UpdateField<float> SpellCritPercentage = new(34, 52);
+        public UpdateField<uint> ShieldBlock = new(34, 53);
+        public UpdateField<float> ShieldBlockCritPercentage = new(34, 54);
+        public UpdateField<float> Mastery = new(34, 55);
+        public UpdateField<float> Speed = new(34, 56);
+        public UpdateField<float> Avoidance = new(34, 57);
+        public UpdateField<float> Sturdiness = new(34, 58);
+        public UpdateField<int> Versatility = new(34, 59);
+        public UpdateField<float> VersatilityBonus = new(34, 60);
+        public UpdateField<float> PvpPowerDamage = new(34, 61);
+        public UpdateField<float> PvpPowerHealing = new(34, 62);
+        public UpdateField<int> ModHealingDonePos = new(34, 63);
+        public UpdateField<float> ModHealingPercent = new(34, 64);
+        public UpdateField<float> ModPeriodicHealingDonePercent = new(34, 65);
+        public UpdateField<float> ModSpellPowerPercent = new(66, 67);
+        public UpdateField<float> ModResiliencePercent = new(66, 68);
+        public UpdateField<float> OverrideSpellPowerByAPPercent = new(66, 69);
+        public UpdateField<float> OverrideAPBySpellPowerPercent = new(66, 70);
+        public UpdateField<int> ModTargetResistance = new(66, 71);
+        public UpdateField<int> ModTargetPhysicalResistance = new(66, 72);
+        public UpdateField<uint> LocalFlags = new(66, 73);
+        public UpdateField<byte> GrantableLevels = new(66, 74);
+        public UpdateField<byte> MultiActionBars = new(66, 75);
+        public UpdateField<byte> LifetimeMaxRank = new(66, 76);
+        public UpdateField<byte> NumRespecs = new(66, 77);
+        public UpdateField<uint> PvpMedals = new(66, 78);
+        public UpdateField<ushort> TodayHonorableKills = new(66, 79);
+        public UpdateField<ushort> YesterdayHonorableKills = new(66, 80);
+        public UpdateField<uint> LifetimeHonorableKills = new(66, 81);
+        public UpdateField<uint> WatchedFactionIndex = new(66, 82);
+        public UpdateField<int> MaxLevel = new(66, 83);
+        public UpdateField<int> ScalingPlayerLevelDelta = new(66, 84);
+        public UpdateField<int> MaxCreatureScalingLevel = new(66, 85);
+        public UpdateField<uint> PetSpellPower = new(66, 86);
+        public UpdateField<float> UiHitModifier = new(66, 87);
+        public UpdateField<float> UiSpellHitModifier = new(66, 88);
+        public UpdateField<int> HomeRealmTimeOffset = new(66, 89);
+        public UpdateField<float> ModPetHaste = new(66, 90);
+        public UpdateField<sbyte> JailersTowerLevelMax = new(66, 91);
+        public UpdateField<sbyte> JailersTowerLevel = new(66, 92);
+        public UpdateField<byte> LocalRegenFlags = new(66, 93);
+        public UpdateField<byte> AuraVision = new(66, 94);
+        public UpdateField<byte> NumBackpackSlots = new(66, 95);
+        public UpdateField<uint> OverrideSpellsID = new(66, 96);
+        public UpdateField<ushort> LootSpecID = new(66, 97);
+        public UpdateField<uint> OverrideZonePVPType = new(98, 99);
+        public UpdateField<ObjectGuid> BnetAccount = new(98, 100);
+        public UpdateField<ulong> GuildClubMemberID = new(98, 101);
+        public UpdateField<uint> Honor = new(98, 102);
+        public UpdateField<uint> HonorNextLevel = new(98, 103);
+        public UpdateField<int> PvpRewardAchieved = new(98, 104);
+        public UpdateField<int> PvpTierMaxFromWins = new(98, 105);
+        public UpdateField<int> PvpLastWeeksRewardAchieved = new(98, 106);
+        public UpdateField<int> PvpLastWeeksTierMaxFromWins = new(98, 107);
+        public UpdateField<int> PvpLastWeeksRewardClaimed = new(98, 108);
+        public UpdateField<byte> NumBankSlots = new(98, 109);
+        public UpdateField<ActivePlayerUnk901> Field_1410 = new(98, 111);
+        public UpdateField<Optional<QuestSession>> QuestSession = new(98, 110);
+        public UpdateField<int> UiChromieTimeExpansionID = new(98, 112);
+        public UpdateField<int> TransportServerTime = new(98, 113);
+        public UpdateFieldArray<ObjectGuid> InvSlots = new(199, 114, 115);
+        public UpdateFieldArray<uint> TrackResourceMask = new(2, 314, 315);
+        public UpdateFieldArray<ulong> ExploredZones = new(192, 317, 318);
+        public UpdateFieldArray<RestInfo> RestInfo = new(2, 510, 511);
+        public UpdateFieldArray<int> ModDamageDonePos = new(7, 513, 514);
+        public UpdateFieldArray<int> ModDamageDoneNeg = new(7, 513, 521);
+        public UpdateFieldArray<float> ModDamageDonePercent = new(7, 513, 528);
+        public UpdateFieldArray<float> ModHealingDonePercent = new(7, 513, 535);
+        public UpdateFieldArray<float> WeaponDmgMultipliers = new(3, 542, 543);
+        public UpdateFieldArray<float> WeaponAtkSpeedMultipliers = new(3, 542, 546);
+        public UpdateFieldArray<uint> BuybackPrice = new(12, 549, 550);
+        public UpdateFieldArray<uint> BuybackTimestamp = new(12, 549, 562);
+        public UpdateFieldArray<uint> CombatRatings = new(32, 574, 575);
+        public UpdateFieldArray<PVPInfo> PvpInfo = new(6, 607, 608);
+        public UpdateFieldArray<uint> NoReagentCostMask = new(4, 614, 615);
+        public UpdateFieldArray<uint> ProfessionSkillLine = new(2, 619, 620);
+        public UpdateFieldArray<uint> BagSlotFlags = new(4, 622, 623);
+        public UpdateFieldArray<uint> BankBagSlotFlags = new(7, 627, 628);
+        public UpdateFieldArray<ulong> QuestCompleted = new(875, 635, 636);
 
         public ActivePlayerData() : base(0, TypeId.ActivePlayer, 1511) { }
 
@@ -4880,26 +4880,26 @@ namespace Game.Entities
 
     public class GameObjectFieldData : BaseUpdateData<GameObject>
     {
-        public UpdateField<List<uint>> StateWorldEffectIDs = new UpdateField<List<uint>>(0, 1);
-        public DynamicUpdateField<int> EnableDoodadSets = new DynamicUpdateField<int>(0, 2);
-        public UpdateField<uint> DisplayID = new UpdateField<uint>(0, 3);
-        public UpdateField<uint> SpellVisualID = new UpdateField<uint>(0, 4);
-        public UpdateField<uint> StateSpellVisualID = new UpdateField<uint>(0, 5);
-        public UpdateField<uint> SpawnTrackingStateAnimID = new UpdateField<uint>(0, 6);
-        public UpdateField<uint> SpawnTrackingStateAnimKitID = new UpdateField<uint>(0, 7);
-        public UpdateField<uint> StateWorldEffectsQuestObjectiveID = new UpdateField<uint>(0, 8);
-        public UpdateField<ObjectGuid> CreatedBy = new UpdateField<ObjectGuid>(0, 9);
-        public UpdateField<ObjectGuid> GuildGUID = new UpdateField<ObjectGuid>(0, 10);
-        public UpdateField<uint> Flags = new UpdateField<uint>(0, 11);
-        public UpdateField<Quaternion> ParentRotation = new UpdateField<Quaternion>(0, 12);
-        public UpdateField<uint> FactionTemplate = new UpdateField<uint>(0, 13);
-        public UpdateField<sbyte> State = new UpdateField<sbyte>(0, 14);
-        public UpdateField<sbyte> TypeID = new UpdateField<sbyte>(0, 15);
-        public UpdateField<byte> PercentHealth = new UpdateField<byte>(0, 16);
-        public UpdateField<uint> ArtKit = new UpdateField<uint>(0, 17);
-        public UpdateField<uint> CustomParam = new UpdateField<uint>(0, 18);
-        public UpdateField<uint> Level = new UpdateField<uint>(0, 19);
-        public UpdateField<uint> AnimGroupInstance = new UpdateField<uint>(0, 20);
+        public UpdateField<List<uint>> StateWorldEffectIDs = new(0, 1);
+        public DynamicUpdateField<int> EnableDoodadSets = new(0, 2);
+        public UpdateField<uint> DisplayID = new(0, 3);
+        public UpdateField<uint> SpellVisualID = new(0, 4);
+        public UpdateField<uint> StateSpellVisualID = new(0, 5);
+        public UpdateField<uint> SpawnTrackingStateAnimID = new(0, 6);
+        public UpdateField<uint> SpawnTrackingStateAnimKitID = new(0, 7);
+        public UpdateField<uint> StateWorldEffectsQuestObjectiveID = new(0, 8);
+        public UpdateField<ObjectGuid> CreatedBy = new(0, 9);
+        public UpdateField<ObjectGuid> GuildGUID = new(0, 10);
+        public UpdateField<uint> Flags = new(0, 11);
+        public UpdateField<Quaternion> ParentRotation = new(0, 12);
+        public UpdateField<uint> FactionTemplate = new(0, 13);
+        public UpdateField<sbyte> State = new(0, 14);
+        public UpdateField<sbyte> TypeID = new(0, 15);
+        public UpdateField<byte> PercentHealth = new(0, 16);
+        public UpdateField<uint> ArtKit = new(0, 17);
+        public UpdateField<uint> CustomParam = new(0, 18);
+        public UpdateField<uint> Level = new(0, 19);
+        public UpdateField<uint> AnimGroupInstance = new(0, 20);
 
         public GameObjectFieldData() : base(0, TypeId.GameObject, 21) { }
 
@@ -5114,12 +5114,12 @@ namespace Game.Entities
 
     public class DynamicObjectData : BaseUpdateData<DynamicObject>
     {
-        public UpdateField<ObjectGuid> Caster = new UpdateField<ObjectGuid>(0, 1);
-        public UpdateField<SpellCastVisualField> SpellVisual = new UpdateField<SpellCastVisualField>(0, 2);
-        public UpdateField<uint> SpellID = new UpdateField<uint>(0, 3);
-        public UpdateField<float> Radius = new UpdateField<float>(0, 4);
-        public UpdateField<uint> CastTime = new UpdateField<uint>(0, 5);
-        public UpdateField<byte> Type = new UpdateField<byte>(0, 6);
+        public UpdateField<ObjectGuid> Caster = new(0, 1);
+        public UpdateField<SpellCastVisualField> SpellVisual = new(0, 2);
+        public UpdateField<uint> SpellID = new(0, 3);
+        public UpdateField<float> Radius = new(0, 4);
+        public UpdateField<uint> CastTime = new(0, 5);
+        public UpdateField<byte> Type = new(0, 6);
 
         public DynamicObjectData() : base(0, TypeId.DynamicObject, 7) { }
 
@@ -5186,19 +5186,19 @@ namespace Game.Entities
 
     public class CorpseData : BaseUpdateData<Corpse>
     {
-        public DynamicUpdateField<ChrCustomizationChoice> Customizations = new DynamicUpdateField<ChrCustomizationChoice>(0, 1);
-        public UpdateField<uint> DynamicFlags = new UpdateField<uint>(0, 2);
-        public UpdateField<ObjectGuid> Owner = new UpdateField<ObjectGuid>(0, 3);
-        public UpdateField<ObjectGuid> PartyGUID = new UpdateField<ObjectGuid>(0, 4);
-        public UpdateField<ObjectGuid> GuildGUID = new UpdateField<ObjectGuid>(0, 5);
-        public UpdateField<uint> DisplayID = new UpdateField<uint>(0, 6);
-        public UpdateField<byte> RaceID = new UpdateField<byte>(0, 7);
-        public UpdateField<byte> Sex = new UpdateField<byte>(0, 8);
-        public UpdateField<byte> Class = new UpdateField<byte>(0, 9);
-        public UpdateField<uint> Flags = new UpdateField<uint>(0, 10);
-        public UpdateField<int> FactionTemplate = new UpdateField<int>(0, 11);
-        public UpdateField<uint> StateSpellVisualKitID = new UpdateField<uint>(0, 12);
-        public UpdateFieldArray<uint> Items = new UpdateFieldArray<uint>(19, 13, 14);
+        public DynamicUpdateField<ChrCustomizationChoice> Customizations = new(0, 1);
+        public UpdateField<uint> DynamicFlags = new(0, 2);
+        public UpdateField<ObjectGuid> Owner = new(0, 3);
+        public UpdateField<ObjectGuid> PartyGUID = new(0, 4);
+        public UpdateField<ObjectGuid> GuildGUID = new(0, 5);
+        public UpdateField<uint> DisplayID = new(0, 6);
+        public UpdateField<byte> RaceID = new(0, 7);
+        public UpdateField<byte> Sex = new(0, 8);
+        public UpdateField<byte> Class = new(0, 9);
+        public UpdateField<uint> Flags = new(0, 10);
+        public UpdateField<int> FactionTemplate = new(0, 11);
+        public UpdateField<uint> StateSpellVisualKitID = new(0, 12);
+        public UpdateFieldArray<uint> Items = new(19, 13, 14);
 
         public CorpseData() : base(0, TypeId.Corpse, 33) { }
 
@@ -5339,10 +5339,10 @@ namespace Game.Entities
 
     public class ScaleCurve : BaseUpdateData<AreaTrigger>
     {
-        public UpdateField<bool> OverrideActive = new UpdateField<bool>(0, 1);
-        public UpdateField<uint> StartTimeOffset = new UpdateField<uint>(0, 2);
-        public UpdateField<uint> ParameterCurve = new UpdateField<uint>(0, 3);
-        public UpdateFieldArray<Vector2> Points = new UpdateFieldArray<Vector2>(2, 4, 5);
+        public UpdateField<bool> OverrideActive = new(0, 1);
+        public UpdateField<uint> StartTimeOffset = new(0, 2);
+        public UpdateField<uint> ParameterCurve = new(0, 3);
+        public UpdateFieldArray<Vector2> Points = new(2, 4, 5);
 
         public ScaleCurve() : base(7) { }
 
@@ -5411,19 +5411,19 @@ namespace Game.Entities
 
     public class AreaTriggerFieldData : BaseUpdateData<AreaTrigger>
     {
-        public UpdateField<ScaleCurve> OverrideScaleCurve = new UpdateField<ScaleCurve>(0, 1);
-        public UpdateField<ScaleCurve> ExtraScaleCurve = new UpdateField<ScaleCurve>(0, 2);
-        public UpdateField<ObjectGuid> Caster = new UpdateField<ObjectGuid>(0, 3);
-        public UpdateField<uint> Duration = new UpdateField<uint>(0, 4);
-        public UpdateField<uint> TimeToTarget = new UpdateField<uint>(0, 5);
-        public UpdateField<uint> TimeToTargetScale = new UpdateField<uint>(0, 6);
-        public UpdateField<uint> TimeToTargetExtraScale = new UpdateField<uint>(0, 7);
-        public UpdateField<uint> SpellID = new UpdateField<uint>(0, 8);
-        public UpdateField<uint> SpellForVisuals = new UpdateField<uint>(0, 9);
-        public UpdateField<SpellCastVisualField> SpellVisual = new UpdateField<SpellCastVisualField>(0, 10);
-        public UpdateField<float> BoundsRadius2D = new UpdateField<float>(0, 11);
-        public UpdateField<uint> DecalPropertiesID = new UpdateField<uint>(0, 12);
-        public UpdateField<ObjectGuid> CreatingEffectGUID = new UpdateField<ObjectGuid>(0, 13);
+        public UpdateField<ScaleCurve> OverrideScaleCurve = new(0, 1);
+        public UpdateField<ScaleCurve> ExtraScaleCurve = new(0, 2);
+        public UpdateField<ObjectGuid> Caster = new(0, 3);
+        public UpdateField<uint> Duration = new(0, 4);
+        public UpdateField<uint> TimeToTarget = new(0, 5);
+        public UpdateField<uint> TimeToTargetScale = new(0, 6);
+        public UpdateField<uint> TimeToTargetExtraScale = new(0, 7);
+        public UpdateField<uint> SpellID = new(0, 8);
+        public UpdateField<uint> SpellForVisuals = new(0, 9);
+        public UpdateField<SpellCastVisualField> SpellVisual = new(0, 10);
+        public UpdateField<float> BoundsRadius2D = new(0, 11);
+        public UpdateField<uint> DecalPropertiesID = new(0, 12);
+        public UpdateField<ObjectGuid> CreatingEffectGUID = new(0, 13);
 
         public AreaTriggerFieldData() : base(0, TypeId.AreaTrigger, 14) { }
 
@@ -5534,10 +5534,10 @@ namespace Game.Entities
 
     public class SceneObjectData : BaseUpdateData<WorldObject>
     {
-        public UpdateField<int> ScriptPackageID = new UpdateField<int>(0, 1);
-        public UpdateField<uint> RndSeedVal = new UpdateField<uint>(0, 2);
-        public UpdateField<ObjectGuid> CreatedBy = new UpdateField<ObjectGuid>(0, 3);
-        public UpdateField<uint> SceneType = new UpdateField<uint>(0, 4);
+        public UpdateField<int> ScriptPackageID = new(0, 1);
+        public UpdateField<uint> RndSeedVal = new(0, 2);
+        public UpdateField<ObjectGuid> CreatedBy = new(0, 3);
+        public UpdateField<uint> SceneType = new(0, 4);
 
         public SceneObjectData() : base(5) { }
 
@@ -5654,10 +5654,10 @@ namespace Game.Entities
 
     public class ConversationData : BaseUpdateData<Conversation>
     {
-        public UpdateField<List<ConversationLine>> Lines = new UpdateField<List<ConversationLine>>(0, 1);
-        public DynamicUpdateField<ConversationActor> Actors = new DynamicUpdateField<ConversationActor>(0, 2);
-        public UpdateField<uint> LastLineEndTime = new UpdateField<uint>(0, 3);
-        public UpdateField<uint> Progress = new UpdateField<uint>(0, 4);
+        public UpdateField<List<ConversationLine>> Lines = new(0, 1);
+        public DynamicUpdateField<ConversationActor> Actors = new(0, 2);
+        public UpdateField<uint> LastLineEndTime = new(0, 3);
+        public UpdateField<uint> Progress = new(0, 4);
 
         public ConversationData() : base(0, TypeId.Conversation, 5) { }
 

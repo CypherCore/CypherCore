@@ -340,7 +340,7 @@ namespace Game.Maps
                 if (!creature.IsNeedNotify(NotifyFlags.VisibilityChanged))
                     continue;
 
-                CreatureRelocationNotifier relocate = new CreatureRelocationNotifier(creature);
+                CreatureRelocationNotifier relocate = new(creature);
 
                 var c2world_relocation = new Visitor(relocate, GridMapTypeMask.AllWorld);
                 var c2grid_relocation = new Visitor(relocate, GridMapTypeMask.AllGrid);
@@ -848,7 +848,7 @@ namespace Game.Maps
 
         Dictionary<Player, UpdateData> updateData;
         WorldObject worldObject;
-        List<ObjectGuid> plr_list = new List<ObjectGuid>();
+        List<ObjectGuid> plr_list = new();
     }
 
     public class PlayerDistWorker : Notifier
@@ -953,7 +953,7 @@ namespace Game.Maps
         {
             Locale loc_idx = p.GetSession().GetSessionDbLocaleIndex();
             int cache_idx = (int)loc_idx + 1;
-            List<ServerPacket> data_list = new List<ServerPacket>();
+            List<ServerPacket> data_list = new();
 
             // create if not cached yet
             if (i_data_cache.Count < cache_idx + 1 || i_data_cache[cache_idx].Empty())
@@ -970,7 +970,7 @@ namespace Game.Maps
         }
 
         MessageBuilder i_builder;
-        MultiMap<int, ServerPacket> i_data_cache = new MultiMap<int, ServerPacket>();
+        MultiMap<int, ServerPacket> i_data_cache = new();
         // 0 = default, i => i-1 locale index
     }
 

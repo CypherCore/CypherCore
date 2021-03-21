@@ -238,7 +238,7 @@ namespace Game.Entities
         {
             if (msTime != 0)
             {
-                ForcedUnsummonDelayEvent pEvent = new ForcedUnsummonDelayEvent(this);
+                ForcedUnsummonDelayEvent pEvent = new(this);
 
                 m_Events.AddEvent(pEvent, m_Events.CalculateTime(msTime));
                 return;

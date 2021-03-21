@@ -238,7 +238,7 @@ namespace Game.Combat
             if (!IsOnline())
                 UpdateOnlineStatus();
 
-            ThreatRefStatusChangeEvent Event = new ThreatRefStatusChangeEvent(UnitEventTypes.ThreatRefThreatChange, this, modThreat);
+            ThreatRefStatusChangeEvent Event = new(UnitEventTypes.ThreatRefThreatChange, this, modThreat);
             FireStatusChanged(Event);
 
             if (IsValid() && modThreat > 0.0f)
@@ -300,7 +300,7 @@ namespace Game.Combat
                 if (!iOnline)
                     SetAccessibleState(false);                      // if not online that not accessable as well
 
-                ThreatRefStatusChangeEvent Event = new ThreatRefStatusChangeEvent(UnitEventTypes.ThreatRefOnlineStatus, this);
+                ThreatRefStatusChangeEvent Event = new(UnitEventTypes.ThreatRefOnlineStatus, this);
                 FireStatusChanged(Event);
             }
         }
@@ -311,7 +311,7 @@ namespace Game.Combat
             {
                 iAccessible = isAccessible;
 
-                ThreatRefStatusChangeEvent Event = new ThreatRefStatusChangeEvent(UnitEventTypes.ThreatRefAccessibleStatus, this);
+                ThreatRefStatusChangeEvent Event = new(UnitEventTypes.ThreatRefAccessibleStatus, this);
                 FireStatusChanged(Event);
             }
         }
@@ -321,7 +321,7 @@ namespace Game.Combat
         {
             Invalidate();
 
-            ThreatRefStatusChangeEvent Event = new ThreatRefStatusChangeEvent(UnitEventTypes.ThreatRefRemoveFromList, this);
+            ThreatRefStatusChangeEvent Event = new(UnitEventTypes.ThreatRefRemoveFromList, this);
             FireStatusChanged(Event);
         }
 
@@ -366,7 +366,7 @@ namespace Game.Combat
 
             iTempThreatModifier += threat;
 
-            ThreatRefStatusChangeEvent Event = new ThreatRefStatusChangeEvent(UnitEventTypes.ThreatRefThreatChange, this, threat);
+            ThreatRefStatusChangeEvent Event = new(UnitEventTypes.ThreatRefThreatChange, this, threat);
             FireStatusChanged(Event);
         }
 

@@ -12,7 +12,7 @@ namespace Game.Entities
         public uint MoneyCost;
         public uint ReqSkillLine;
         public uint ReqSkillRank;
-        public Array<uint> ReqAbility = new Array<uint>(3);
+        public Array<uint> ReqAbility = new(3);
         public byte ReqLevel;
 
         public bool IsCastable() { return Global.SpellMgr.GetSpellInfo(SpellId, Difficulty.None).HasEffect(SpellEffectName.LearnSpell); }
@@ -33,7 +33,7 @@ namespace Game.Entities
         {
             float reputationDiscount = player.GetReputationPriceDiscount(npc);
 
-            TrainerList trainerList = new TrainerList();
+            TrainerList trainerList = new();
             trainerList.TrainerGUID = npc.GetGUID();
             trainerList.TrainerType = (int)_type;
             trainerList.TrainerID = (int)_id;
@@ -44,7 +44,7 @@ namespace Game.Entities
                 if (!player.IsSpellFitByClassAndRace(trainerSpell.SpellId))
                     continue;
 
-                TrainerListSpell trainerListSpell = new TrainerListSpell();
+                TrainerListSpell trainerListSpell = new();
                 trainerListSpell.SpellID = trainerSpell.SpellId;
                 trainerListSpell.MoneyCost = (uint)(trainerSpell.MoneyCost * reputationDiscount);
                 trainerListSpell.ReqSkillLine = trainerSpell.ReqSkillLine;
@@ -147,7 +147,7 @@ namespace Game.Entities
 
         void SendTeachFailure(Creature npc, Player player, uint spellId, TrainerFailReason reason)
         {
-            TrainerBuyFailed trainerBuyFailed = new TrainerBuyFailed();
+            TrainerBuyFailed trainerBuyFailed = new();
             trainerBuyFailed.TrainerGUID = npc.GetGUID();
             trainerBuyFailed.SpellID = spellId;
             trainerBuyFailed.TrainerFailedReason = reason;
@@ -170,6 +170,6 @@ namespace Game.Entities
         uint _id;
         TrainerType _type;
         List<TrainerSpell> _spells;
-        Array<string> _greeting = new Array<string>((int)Locale.Total);
+        Array<string> _greeting = new((int)Locale.Total);
     }
 }

@@ -23,13 +23,15 @@ namespace Game.AI
 {
     public class CombatAI : CreatureAI
     {
+        public List<uint> Spells = new();
+
         public CombatAI(Creature c) : base(c) { }
 
         public override void InitializeAI()
         {
             for (var i = 0; i < SharedConst.MaxCreatureSpells; ++i)
                 if (me.m_spells[i] != 0 && Global.SpellMgr.HasSpellInfo(me.m_spells[i], me.GetMap().GetDifficultyID()))
-                    spells.Add(me.m_spells[i]);
+                    Spells.Add(me.m_spells[i]);
 
             base.InitializeAI();
         }
@@ -41,7 +43,7 @@ namespace Game.AI
 
         public override void JustDied(Unit killer)
         {
-            foreach (var id in spells)
+            foreach (var id in Spells)
             {
                 AISpellInfoType info = GetAISpellInfo(id, me.GetMap().GetDifficultyID());
                 if (info.condition == AICondition.Die)
@@ -51,7 +53,7 @@ namespace Game.AI
 
         public override void EnterCombat(Unit victim)
         {
-            foreach (var id in spells)
+            foreach (var id in Spells)
             {
                 AISpellInfoType info = GetAISpellInfo(id, me.GetMap().GetDifficultyID());
                 if (info.condition == AICondition.Aggro)
@@ -86,8 +88,6 @@ namespace Game.AI
         {
             _events.RescheduleEvent(spellId, unTimeMs);
         }
-
-        public List<uint> spells = new List<uint>();
     }
 
     public class AggressorAI : CreatureAI
@@ -105,41 +105,43 @@ namespace Game.AI
 
     public class CasterAI : CombatAI
     {
+        float _attackDist;
+
         public CasterAI(Creature c)
             : base(c)
         {
-            m_attackDist = SharedConst.MeleeRange;
+            _attackDist = SharedConst.MeleeRange;
         }
 
         public override void InitializeAI()
         {
             base.InitializeAI();
 
-            m_attackDist = 30.0f;
-            foreach (var id in spells)
+            _attackDist = 30.0f;
+            foreach (var id in Spells)
             {
                 AISpellInfoType info = GetAISpellInfo(id, me.GetMap().GetDifficultyID());
-                if (info.condition == AICondition.Combat && m_attackDist > info.maxRange)
-                    m_attackDist = info.maxRange;
+                if (info.condition == AICondition.Combat && _attackDist > info.maxRange)
+                    _attackDist = info.maxRange;
             }
 
-            if (m_attackDist == 30.0f)
-                m_attackDist = SharedConst.MeleeRange;
+            if (_attackDist == 30.0f)
+                _attackDist = SharedConst.MeleeRange;
         }
 
         public override void AttackStart(Unit victim)
         {
-            AttackStartCaster(victim, m_attackDist);
+            AttackStartCaster(victim, _attackDist);
         }
 
         public override void EnterCombat(Unit victim)
         {
-            if (spells.Empty())
+            if (Spells.Empty())
                 return;
 
-            int spell = (int)(RandomHelper.Rand32() % spells.Count);
+            int spell = (int)(RandomHelper.Rand32() % Spells.Count);
             uint count = 0;
-            foreach (var id in spells)
+            foreach (var id in Spells)
             {
                 AISpellInfoType info = GetAISpellInfo(id, me.GetMap().GetDifficultyID());
                 if (info.condition == AICondition.Aggro)
@@ -149,7 +151,7 @@ namespace Game.AI
                     uint cooldown = info.realCooldown;
                     if (count == spell)
                     {
-                        DoCast(spells[spell]);
+                        DoCast(Spells[spell]);
                         cooldown += (uint)me.GetCurrentSpellCastTime(id);
                     }
                     _events.ScheduleEvent(id, cooldown);
@@ -182,23 +184,22 @@ namespace Game.AI
                 _events.ScheduleEvent(spellId, (casttime != 0 ? casttime : 500) + info.realCooldown);
             }
         }
-
-        float m_attackDist;
     }
 
     public class ArcherAI : CreatureAI
     {
-        public ArcherAI(Creature c)
-            : base(c)
+        float _minRange;
+
+        public ArcherAI(Creature c) : base(c)
         {
             if (me.m_spells[0] == 0)
                 Log.outError(LogFilter.ScriptsAi, "ArcherAI set for creature (entry = {0}) with spell1=0. AI will do nothing", me.GetEntry());
 
             var spellInfo = Global.SpellMgr.GetSpellInfo(me.m_spells[0], me.GetMap().GetDifficultyID());
-            m_minRange = spellInfo != null ? spellInfo.GetMinRange(false) : 0;
+            _minRange = spellInfo != null ? spellInfo.GetMinRange(false) : 0;
 
-            if (m_minRange == 0)
-                m_minRange = SharedConst.MeleeRange;
+            if (_minRange == 0)
+                _minRange = SharedConst.MeleeRange;
             me.m_CombatDistance = spellInfo != null ? spellInfo.GetMaxRange(false) : 0;
             me.m_SightDistance = me.m_CombatDistance;
         }
@@ -208,7 +209,7 @@ namespace Game.AI
             if (who == null)
                 return;
 
-            if (me.IsWithinCombatRange(who, m_minRange))
+            if (me.IsWithinCombatRange(who, _minRange))
             {
                 if (me.Attack(who, true) && !who.IsFlying())
                     me.GetMotionMaster().MoveChase(who);
@@ -222,22 +223,23 @@ namespace Game.AI
             if (who.IsFlying())
                 me.GetMotionMaster().MoveIdle();
         }
+
         public override void UpdateAI(uint diff)
         {
             if (!UpdateVictim())
                 return;
 
-            if (!me.IsWithinCombatRange(me.GetVictim(), m_minRange))
+            if (!me.IsWithinCombatRange(me.GetVictim(), _minRange))
                 DoSpellAttackIfReady(me.m_spells[0]);
             else
                 DoMeleeAttackIfReady();
         }
-
-        float m_minRange;
     }
 
     public class TurretAI : CreatureAI
     {
+        float _minRange;
+
         public TurretAI(Creature c)
             : base(c)
         {
@@ -245,7 +247,7 @@ namespace Game.AI
                 Log.outError(LogFilter.Server, "TurretAI set for creature (entry = {0}) with spell1=0. AI will do nothing", me.GetEntry());
 
             var spellInfo = Global.SpellMgr.GetSpellInfo(me.m_spells[0], me.GetMap().GetDifficultyID());
-            m_minRange = spellInfo != null ? spellInfo.GetMinRange(false) : 0;
+            _minRange = spellInfo != null ? spellInfo.GetMinRange(false) : 0;
             me.m_CombatDistance = spellInfo != null ? spellInfo.GetMaxRange(false) : 0;
             me.m_SightDistance = me.m_CombatDistance;
         }
@@ -254,7 +256,7 @@ namespace Game.AI
         {
             // todo use one function to replace it
             if (!me.IsWithinCombatRange(me.GetVictim(), me.m_CombatDistance)
-                || (m_minRange != 0 && me.IsWithinCombatRange(me.GetVictim(), m_minRange)))
+                || (_minRange != 0 && me.IsWithinCombatRange(me.GetVictim(), _minRange)))
                 return false;
             return true;
         }
@@ -272,8 +274,6 @@ namespace Game.AI
 
             DoSpellAttackIfReady(me.m_spells[0]);
         }
-
-        float m_minRange;
     }
 
     public class VehicleAI : CreatureAI
@@ -281,27 +281,32 @@ namespace Game.AI
         const int VEHICLE_CONDITION_CHECK_TIME = 1000;
         const int VEHICLE_DISMISS_TIME = 5000;
 
+        bool _hasConditions;
+        uint _conditionsTimer;
+        bool _doDismiss;
+        uint _dismissTimer;
+
         public VehicleAI(Creature creature) : base(creature)
         {
-            m_ConditionsTimer = VEHICLE_CONDITION_CHECK_TIME;
+            _conditionsTimer = VEHICLE_CONDITION_CHECK_TIME;
             LoadConditions();
-            m_DoDismiss = false;
-            m_DismissTimer = VEHICLE_DISMISS_TIME;
+            _doDismiss = false;
+            _dismissTimer = VEHICLE_DISMISS_TIME;
         }
 
         public override void UpdateAI(uint diff)
         {
             CheckConditions(diff);
 
-            if (m_DoDismiss)
+            if (_doDismiss)
             {
-                if (m_DismissTimer < diff)
+                if (_dismissTimer < diff)
                 {
-                    m_DoDismiss = false;
+                    _doDismiss = false;
                     me.DespawnOrUnsummon();
                 }
                 else
-                    m_DismissTimer -= diff;
+                    _dismissTimer -= diff;
             }
         }
 
@@ -311,25 +316,25 @@ namespace Game.AI
 
         public override void OnCharmed(bool apply)
         {
-            if (!me.GetVehicleKit().IsVehicleInUse() && !apply && m_HasConditions)//was used and has conditions
-                m_DoDismiss = true;//needs reset
+            if (!me.GetVehicleKit().IsVehicleInUse() && !apply && _hasConditions)//was used and has conditions
+                _doDismiss = true;//needs reset
             else if (apply)
-                m_DoDismiss = false;//in use again
+                _doDismiss = false;//in use again
 
-            m_DismissTimer = VEHICLE_DISMISS_TIME;//reset timer
+            _dismissTimer = VEHICLE_DISMISS_TIME;//reset timer
         }
 
         void LoadConditions()
         {
-            m_HasConditions = Global.ConditionMgr.HasConditionsForNotGroupedEntry(ConditionSourceType.CreatureTemplateVehicle, me.GetEntry());
+            _hasConditions = Global.ConditionMgr.HasConditionsForNotGroupedEntry(ConditionSourceType.CreatureTemplateVehicle, me.GetEntry());
         }
 
         void CheckConditions(uint diff)
         {
-            if (!m_HasConditions)
+            if (!_hasConditions)
                 return;
 
-            if (m_ConditionsTimer <= diff)
+            if (_conditionsTimer <= diff)
             {
                 Vehicle vehicleKit = me.GetVehicleKit();
                 if (vehicleKit)
@@ -352,16 +357,11 @@ namespace Game.AI
                     }
                 }
 
-                m_ConditionsTimer = VEHICLE_CONDITION_CHECK_TIME;
+                _conditionsTimer = VEHICLE_CONDITION_CHECK_TIME;
             }
             else
-                m_ConditionsTimer -= diff;
+                _conditionsTimer -= diff;
         }
-
-        bool m_HasConditions;
-        uint m_ConditionsTimer;
-        bool m_DoDismiss;
-        uint m_DismissTimer;
     }
 
     public class ReactorAI : CreatureAI

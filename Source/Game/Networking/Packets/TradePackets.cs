@@ -230,7 +230,7 @@ namespace Game.Networking.Packets
             public bool Lock;
             public uint MaxDurability;
             public uint Durability;
-            public List<ItemGemData> Gems = new List<ItemGemData>();
+            public List<ItemGemData> Gems = new();
         }
 
         public class TradeItem
@@ -249,7 +249,7 @@ namespace Game.Networking.Packets
             }
 
             public byte Slot;
-            public ItemInstance Item = new ItemInstance();
+            public ItemInstance Item = new();
             public int StackCount;
             public ObjectGuid GiftCreator;
             public Optional<UnwrappedTradeItem> Unwrapped;
@@ -259,7 +259,7 @@ namespace Game.Networking.Packets
         public uint CurrentStateIndex;
         public byte WhichPlayer;
         public uint ClientStateIndex;
-        public List<TradeItem> Items = new List<TradeItem>();
+        public List<TradeItem> Items = new();
         public int CurrencyType;
         public uint Id;
         public int ProposedEnchantment;

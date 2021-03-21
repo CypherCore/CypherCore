@@ -80,7 +80,7 @@ namespace Game.Chat
             if (count == 0)
                 count = 1;
 
-            List<uint> bonusListIDs = new List<uint>();
+            List<uint> bonusListIDs = new();
             var bonuses = args.NextString();
 
             // semicolon separated bonuslist ids (parse them after all arguments are extracted by strtok!)
@@ -121,7 +121,7 @@ namespace Game.Chat
             uint noSpaceForCount = 0;
 
             // check space and find places
-            List<ItemPosCount> dest = new List<ItemPosCount>();
+            List<ItemPosCount> dest = new();
             InventoryResult msg = playerTarget.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, itemId, (uint)count, out noSpaceForCount);
             if (msg != InventoryResult.Ok)                               // convert to possible store amount
                 count -= (int)noSpaceForCount;
@@ -175,7 +175,7 @@ namespace Game.Chat
                 return false;
             }
 
-            List<uint> bonusListIDs = new List<uint>();
+            List<uint> bonusListIDs = new();
             var bonuses = args.NextString();
 
             // semicolon separated bonuslist ids (parse them after all arguments are extracted by strtok!)
@@ -203,7 +203,7 @@ namespace Game.Chat
                 if (template.Value.GetItemSet() == itemSetId)
                 {
                     found = true;
-                    List<ItemPosCount> dest = new List<ItemPosCount>();
+                    List<ItemPosCount> dest = new();
                     InventoryResult msg = playerTarget.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, template.Value.GetId(), 1);
                     if (msg == InventoryResult.Ok)
                     {
@@ -565,7 +565,7 @@ namespace Game.Chat
             // melee damage by specific school
             if (string.IsNullOrEmpty(spellStr))
             {
-                DamageInfo dmgInfo = new DamageInfo(attacker, target, damage_, null, schoolmask, DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
+                DamageInfo dmgInfo = new(attacker, target, damage_, null, schoolmask, DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
                 attacker.CalcAbsorbResist(dmgInfo);
 
                 if (dmgInfo.GetDamage() == 0)
@@ -591,7 +591,7 @@ namespace Game.Chat
             if (spellInfo == null)
                 return false;
 
-            SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(attacker, target, spellInfo, new Networking.Packets.SpellCastVisual(spellInfo.GetSpellXSpellVisualId(attacker), 0), spellInfo.SchoolMask);
+            SpellNonMeleeDamage damageInfo = new(attacker, target, spellInfo, new Networking.Packets.SpellCastVisual(spellInfo.GetSpellXSpellVisualId(attacker), 0), spellInfo.SchoolMask);
             damageInfo.damage = damage_;
             attacker.DealDamageMods(damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
             target.DealSpellDamage(damageInfo, true);
@@ -886,7 +886,7 @@ namespace Game.Chat
             }
 
             CellCoord cellCoord = GridDefines.ComputeCellCoord(obj.GetPositionX(), obj.GetPositionY());
-            Cell cell = new Cell(cellCoord);
+            Cell cell = new(cellCoord);
 
             uint zoneId, areaId;
             obj.GetZoneAndAreaId(out zoneId, out areaId);
@@ -1957,7 +1957,7 @@ namespace Game.Chat
             Cell.VisitGridObjects(player, worker, player.GetGridActivationRange());
 
             // Now handle any that had despawned, but had respawn time logged.
-            List<RespawnInfo> data = new List<RespawnInfo>();
+            List<RespawnInfo> data = new();
             player.GetMap().GetRespawnInfo(data, SpawnObjectTypeMask.All, 0);
             if (!data.Empty())
             {

@@ -25,7 +25,7 @@ namespace Game.Entities
 {
     public class UpdateFieldHolder
     {
-        UpdateMask _changesMask = new UpdateMask((int)TypeId.Max);
+        UpdateMask _changesMask = new((int)TypeId.Max);
         WorldObject _owner;
 
         public UpdateFieldHolder(WorldObject owner) { _owner = owner; }

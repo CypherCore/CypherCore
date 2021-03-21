@@ -106,7 +106,7 @@ namespace Game.Networking.Packets
             Ticket.Write(_worldPacket);
         }
 
-        public RideTicket Ticket = new RideTicket();
+        public RideTicket Ticket = new();
     }
 
     public class BattlefieldStatusNeedConfirmation : ServerPacket
@@ -123,7 +123,7 @@ namespace Game.Networking.Packets
 
         public uint Timeout;
         public uint Mapid;
-        public BattlefieldStatusHeader Hdr = new BattlefieldStatusHeader();
+        public BattlefieldStatusHeader Hdr = new();
         public byte Role;
     }
 
@@ -142,7 +142,7 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
         }
 
-        public BattlefieldStatusHeader Hdr = new BattlefieldStatusHeader();
+        public BattlefieldStatusHeader Hdr = new();
         public uint ShutdownTimer;
         public byte ArenaFaction;
         public bool LeftEarly;
@@ -166,7 +166,7 @@ namespace Game.Networking.Packets
         }
 
         public uint AverageWaitTime;
-        public BattlefieldStatusHeader Hdr = new BattlefieldStatusHeader();
+        public BattlefieldStatusHeader Hdr = new();
         public bool AsGroup;
         public bool SuspendedQueue;
         public bool EligibleForMatchmaking;
@@ -188,7 +188,7 @@ namespace Game.Networking.Packets
         public ulong QueueID;
         public ObjectGuid ClientID;
         public int Reason;
-        public RideTicket Ticket = new RideTicket();
+        public RideTicket Ticket = new();
     }
 
     class BattlemasterJoin : ClientPacket
@@ -206,7 +206,7 @@ namespace Game.Networking.Packets
                 QueueIDs[i] = _worldPacket.ReadUInt64();
         }
 
-        public Array<ulong> QueueIDs = new Array<ulong>(1);
+        public Array<ulong> QueueIDs = new(1);
         public byte Roles;
         public int[] BlacklistMap = new int[2];
     }
@@ -242,7 +242,7 @@ namespace Game.Networking.Packets
             AcceptedInvite = _worldPacket.HasBit();
         }
 
-        public RideTicket Ticket = new RideTicket();
+        public RideTicket Ticket = new();
         public bool AcceptedInvite;
     }
 
@@ -282,7 +282,7 @@ namespace Game.Networking.Packets
         public int BattlemasterListID;
         public byte MinLevel;
         public byte MaxLevel;
-        public List<int> Battlefields = new List<int>();    // Players cannot join a specific Battleground instance anymore - this is always empty
+        public List<int> Battlefields = new();    // Players cannot join a specific Battleground instance anymore - this is always empty
         public bool PvpAnywhere;
         public bool HasRandomWinToday;
     }
@@ -373,7 +373,7 @@ namespace Game.Networking.Packets
                 pos.Write(_worldPacket);
         }
 
-        public List<BattlegroundPlayerPosition> FlagCarriers = new List<BattlegroundPlayerPosition>();
+        public List<BattlegroundPlayerPosition> FlagCarriers = new();
     }
 
     class BattlegroundPlayerJoined : ServerPacket
@@ -554,7 +554,7 @@ namespace Game.Networking.Packets
 
     public class PVPMatchStatistics
     {
-        public List<PVPMatchPlayerStatistics> Statistics = new List<PVPMatchPlayerStatistics>();
+        public List<PVPMatchPlayerStatistics> Statistics = new();
         public Optional<RatingData> Ratings;
         public sbyte[] PlayerCount = new sbyte[2];
 
@@ -665,7 +665,7 @@ namespace Game.Networking.Packets
             public Optional<int> RatingChange;
             public Optional<uint> PreMatchMMR;
             public Optional<int> MmrChange;
-            public List<PVPMatchPlayerPVPStat> Stats = new List<PVPMatchPlayerPVPStat>();
+            public List<PVPMatchPlayerPVPStat> Stats = new();
             public int PrimaryTalentTree;
             public int Sex;
             public Race PlayerRace;
@@ -709,7 +709,7 @@ namespace Game.Networking.Packets
         }
 
         public RideTicket Ticket;
-        public List<ulong> QueueID = new List<ulong>();
+        public List<ulong> QueueID = new();
         public byte RangeMin;
         public byte RangeMax;
         public byte TeamSize;

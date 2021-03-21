@@ -133,9 +133,9 @@ namespace Game.Networking.Packets
 
         public uint[] ActionButtons = new uint[10];
 
-        public List<uint> Actions = new List<uint>();
-        public List<PetSpellCooldown> Cooldowns = new List<PetSpellCooldown>();
-        public List<PetSpellHistory> SpellHistory = new List<PetSpellHistory>();
+        public List<uint> Actions = new();
+        public List<PetSpellCooldown> Cooldowns = new();
+        public List<PetSpellHistory> SpellHistory = new();
     }
 
     class PetStableList : ServerPacket
@@ -161,7 +161,7 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid StableMaster;
-        public List<PetStableInfo> Pets = new List<PetStableInfo>();
+        public List<PetStableInfo> Pets = new();
     }
 
     class PetStableResult : ServerPacket
@@ -187,7 +187,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteUInt32(spell);
         }
 
-        public List<uint> Spells = new List<uint>();
+        public List<uint> Spells = new();
     }
 
     class PetUnlearnedSpells : ServerPacket
@@ -201,7 +201,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteUInt32(spell);
         }
 
-        public List<uint> Spells = new List<uint>();
+        public List<uint> Spells = new();
     }
 
     class PetNameInvalid : ServerPacket

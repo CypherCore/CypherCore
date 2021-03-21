@@ -354,7 +354,7 @@ namespace Game.Entities
         Cell currentCell;
         public ObjectCellMoveState _moveState;
 
-        public Position _newPosition = new Position();
+        public Position _newPosition = new();
 
         public WorldLocation(uint mapId = 0xFFFFFFFF, float x = 0, float y = 0, float z = 0, float o = 0)
         {

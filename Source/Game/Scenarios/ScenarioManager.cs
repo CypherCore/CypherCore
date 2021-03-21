@@ -95,7 +95,7 @@ namespace Game.Scenarios
                 if (scenarioHordeId == 0)
                     scenarioHordeId = scenarioAllianceId;
 
-                ScenarioDBData data = new ScenarioDBData();
+                ScenarioDBData data = new();
                 data.MapID = mapId;
                 data.DifficultyID = difficulty;
                 data.Scenario_A = scenarioAllianceId;
@@ -111,7 +111,7 @@ namespace Game.Scenarios
         {
             _scenarioData.Clear();
 
-            Dictionary<uint, Dictionary<byte, ScenarioStepRecord>> scenarioSteps = new Dictionary<uint, Dictionary<byte, ScenarioStepRecord>>();
+            Dictionary<uint, Dictionary<byte, ScenarioStepRecord>> scenarioSteps = new();
             uint deepestCriteriaTreeSize = 0;
 
             foreach (ScenarioStepRecord step in CliDB.ScenarioStepStorage.Values)
@@ -136,7 +136,7 @@ namespace Game.Scenarios
 
             foreach (ScenarioRecord scenario in CliDB.ScenarioStorage.Values)
             {
-                ScenarioData data = new ScenarioData();
+                ScenarioData data = new();
                 data.Entry = scenario;
                 data.Steps = scenarioSteps.LookupByKey(scenario.Id);
                 _scenarioData[scenario.Id] = data;
@@ -160,7 +160,7 @@ namespace Game.Scenarios
             }
 
             List<Vector2>[][] POIs = new List<Vector2>[0][];
-            Dictionary<uint, MultiMap<int, ScenarioPOIPoint>> allPoints = new Dictionary<uint, MultiMap<int, ScenarioPOIPoint>>();
+            Dictionary<uint, MultiMap<int, ScenarioPOIPoint>> allPoints = new();
 
             //                                               0               1    2  3  4
             SQLResult pointsResult = DB.World.Query("SELECT CriteriaTreeID, Idx1, X, Y, Z FROM scenario_poi_points ORDER BY CriteriaTreeID DESC, Idx1, Idx2");
@@ -225,15 +225,15 @@ namespace Game.Scenarios
             return _scenarioPOIStore[CriteriaTreeID];
         }
 
-        Dictionary<uint, ScenarioData> _scenarioData = new Dictionary<uint, ScenarioData>();
-        MultiMap<uint, ScenarioPOI> _scenarioPOIStore = new MultiMap<uint, ScenarioPOI>();
-        Dictionary<Tuple<uint, byte>, ScenarioDBData> _scenarioDBData = new Dictionary<Tuple<uint, byte>, ScenarioDBData>();
+        Dictionary<uint, ScenarioData> _scenarioData = new();
+        MultiMap<uint, ScenarioPOI> _scenarioPOIStore = new();
+        Dictionary<Tuple<uint, byte>, ScenarioDBData> _scenarioDBData = new();
     }
 
     public class ScenarioData
     {
         public ScenarioRecord Entry;
-        public Dictionary<byte, ScenarioStepRecord> Steps = new Dictionary<byte, ScenarioStepRecord>();
+        public Dictionary<byte, ScenarioStepRecord> Steps = new();
     }
 
     class ScenarioDBData
@@ -268,7 +268,7 @@ namespace Game.Scenarios
         public int WorldEffectID;
         public int PlayerConditionID;
         public int NavigationPlayerConditionID;
-        public List<ScenarioPOIPoint> Points = new List<ScenarioPOIPoint>();
+        public List<ScenarioPOIPoint> Points = new();
 
         public ScenarioPOI(int blobIndex, int mapID, int uiMapID, int priority, int flags, int worldEffectID, int playerConditionID, int navigationPlayerConditionID, List<ScenarioPOIPoint> points)
         {

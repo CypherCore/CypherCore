@@ -57,9 +57,9 @@ namespace Game
                 return false;
             }
 
-            using (BinaryReader reader = new BinaryReader(new FileStream(filename, FileMode.Open, FileAccess.Read), Encoding.UTF8))
+            using (BinaryReader reader = new(new FileStream(filename, FileMode.Open, FileAccess.Read), Encoding.UTF8))
             {
-                Detour.dtNavMeshParams Params = new Detour.dtNavMeshParams();
+                Detour.dtNavMeshParams Params = new();
                 Params.orig[0] = reader.ReadSingle();
                 Params.orig[1] = reader.ReadSingle();
                 Params.orig[2] = reader.ReadSingle();
@@ -69,7 +69,7 @@ namespace Game
                 Params.maxTiles = reader.ReadInt32();
                 Params.maxPolys = reader.ReadInt32();
 
-                Detour.dtNavMesh mesh = new Detour.dtNavMesh();
+                Detour.dtNavMesh mesh = new();
                 if (Detour.dtStatusFailed(mesh.init(Params)))
                 {
                     Log.outError(LogFilter.Maps, "MMAP:loadMapData: Failed to initialize dtNavMesh for mmap {0:D4} from file {1}", mapId, filename);
@@ -133,7 +133,7 @@ namespace Game
                 return false;
             }
 
-            using (BinaryReader reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read)))
+            using (BinaryReader reader = new(new FileStream(fileName, FileMode.Open, FileAccess.Read)))
             {
                 MmapTileHeader fileHeader = reader.Read<MmapTileHeader>();
                 if (fileHeader.mmapMagic != MapConst.mmapMagic)
@@ -149,7 +149,7 @@ namespace Game
                 }
 
                 var bytes = reader.ReadBytes((int)fileHeader.size);
-                Detour.dtRawTileData data = new Detour.dtRawTileData();
+                Detour.dtRawTileData data = new();
                 data.FromBytes(bytes, 0);
 
                 ulong tileRef = 0;
@@ -191,7 +191,7 @@ namespace Game
                 return true;
 
             // allocate mesh query
-            Detour.dtNavMeshQuery query = new Detour.dtNavMeshQuery();
+            Detour.dtNavMeshQuery query = new();
             if (Detour.dtStatusFailed(query.init(mmap.navMesh, 1024)))
             {
                 Log.outError(LogFilter.Maps, "MMAP.GetNavMeshQuery: Failed to initialize dtNavMeshQuery for mapId {0:D4} instanceId {1}", mapId, instanceId);
@@ -330,11 +330,11 @@ namespace Game
         public uint GetLoadedTilesCount() { return loadedTiles; }
         public int GetLoadedMapsCount() { return loadedMMaps.Count; }
 
-        Dictionary<uint, MMapData> loadedMMaps = new Dictionary<uint, MMapData>();
+        Dictionary<uint, MMapData> loadedMMaps = new();
         uint loadedTiles;
 
-        MultiMap<uint, uint> childMapData = new MultiMap<uint, uint>();
-        Dictionary<uint, uint> parentMapData = new Dictionary<uint, uint>();
+        MultiMap<uint, uint> childMapData = new();
+        Dictionary<uint, uint> parentMapData = new();
     }
 
     public class MMapData
@@ -344,10 +344,10 @@ namespace Game
             navMesh = mesh;
         }
 
-        public Dictionary<uint, Detour.dtNavMeshQuery> navMeshQueries = new Dictionary<uint, Detour.dtNavMeshQuery>();     // instanceId to query
+        public Dictionary<uint, Detour.dtNavMeshQuery> navMeshQueries = new();     // instanceId to query
 
         public Detour.dtNavMesh navMesh;
-        public Dictionary<uint, ulong> loadedTileRefs = new Dictionary<uint, ulong>(); // maps [map grid coords] to [dtTile]
+        public Dictionary<uint, ulong> loadedTileRefs = new(); // maps [map grid coords] to [dtTile]
     }
 
     public struct MmapTileHeader

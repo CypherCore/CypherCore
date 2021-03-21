@@ -221,7 +221,7 @@ namespace Game.Maps
             if (_instanceSpawnGroups.Empty())
                 return;
 
-            Dictionary<uint, states> newStates = new Dictionary<uint, states>();
+            Dictionary<uint, states> newStates = new();
             foreach (var info in _instanceSpawnGroups)
             {
                 if (!newStates.ContainsKey(info.SpawnGroupId))
@@ -473,7 +473,7 @@ namespace Game.Maps
         {
             OUT_SAVE_INST_DATA();
 
-            StringBuilder saveStream = new StringBuilder();
+            StringBuilder saveStream = new();
 
             WriteSaveDataHeaders(saveStream);
             WriteSaveDataBossStates(saveStream);
@@ -682,7 +682,7 @@ namespace Game.Maps
                     if (unit == null)
                         return;
 
-                    InstanceEncounterEngageUnit encounterEngageMessage = new InstanceEncounterEngageUnit();
+                    InstanceEncounterEngageUnit encounterEngageMessage = new();
                     encounterEngageMessage.Unit = unit.GetGUID();
                     encounterEngageMessage.TargetFramePriority = priority;
                     instance.SendToPlayers(encounterEngageMessage);
@@ -691,7 +691,7 @@ namespace Game.Maps
                     if (!unit)
                         return;
 
-                    InstanceEncounterDisengageUnit encounterDisengageMessage = new InstanceEncounterDisengageUnit();
+                    InstanceEncounterDisengageUnit encounterDisengageMessage = new();
                     encounterDisengageMessage.Unit = unit.GetGUID();
                     instance.SendToPlayers(encounterDisengageMessage);
                     break;
@@ -699,7 +699,7 @@ namespace Game.Maps
                     if (!unit)
                         return;
 
-                    InstanceEncounterChangePriority encounterChangePriorityMessage = new InstanceEncounterChangePriority();
+                    InstanceEncounterChangePriority encounterChangePriorityMessage = new();
                     encounterChangePriorityMessage.Unit = unit.GetGUID();
                     encounterChangePriorityMessage.TargetFramePriority = priority;
                     instance.SendToPlayers(encounterChangePriorityMessage);
@@ -711,7 +711,7 @@ namespace Game.Maps
 
         void SendEncounterStart(uint inCombatResCount = 0, uint maxInCombatResCount = 0, uint inCombatResChargeRecovery = 0, uint nextCombatResChargeTime = 0)
         {
-            InstanceEncounterStart encounterStartMessage = new InstanceEncounterStart();
+            InstanceEncounterStart encounterStartMessage = new();
             encounterStartMessage.InCombatResCount = inCombatResCount;
             encounterStartMessage.MaxInCombatResCount = maxInCombatResCount;
             encounterStartMessage.CombatResChargeRecovery = inCombatResChargeRecovery;
@@ -727,7 +727,7 @@ namespace Game.Maps
 
         public void SendBossKillCredit(uint encounterId)
         {
-            BossKill bossKillCreditMessage = new BossKill();
+            BossKill bossKillCreditMessage = new();
             bossKillCreditMessage.DungeonEncounterID = encounterId;
 
             instance.SendToPlayers(bossKillCreditMessage);
@@ -905,16 +905,16 @@ namespace Game.Maps
         public virtual void WriteSaveDataMore(StringBuilder data) { }
 
         public InstanceMap instance;
-        List<char> headers = new List<char>();
-        Dictionary<uint, BossInfo> bosses = new Dictionary<uint, BossInfo>();
-        MultiMap<uint, DoorInfo> doors = new MultiMap<uint, DoorInfo>();
-        Dictionary<uint, MinionInfo> minions = new Dictionary<uint, MinionInfo>();
-        Dictionary<uint, uint> _creatureInfo = new Dictionary<uint, uint>();
-        Dictionary<uint, uint> _gameObjectInfo = new Dictionary<uint, uint>();
-        Dictionary<uint, ObjectGuid> _objectGuids = new Dictionary<uint, ObjectGuid>();
+        List<char> headers = new();
+        Dictionary<uint, BossInfo> bosses = new();
+        MultiMap<uint, DoorInfo> doors = new();
+        Dictionary<uint, MinionInfo> minions = new();
+        Dictionary<uint, uint> _creatureInfo = new();
+        Dictionary<uint, uint> _gameObjectInfo = new();
+        Dictionary<uint, ObjectGuid> _objectGuids = new();
         uint completedEncounters;
-        List<InstanceSpawnGroupInfo> _instanceSpawnGroups = new List<InstanceSpawnGroupInfo>();
-        List<uint> _activatedAreaTriggers = new List<uint>();
+        List<InstanceSpawnGroupInfo> _instanceSpawnGroups = new();
+        List<uint> _activatedAreaTriggers = new();
         uint _entranceId;
         uint _temporaryEntranceId;
         uint _combatResurrectionTimer;
@@ -984,8 +984,8 @@ namespace Game.Maps
 
         public EncounterState state;
         public List<ObjectGuid>[] door = new List<ObjectGuid>[(int)DoorType.Max];
-        public List<ObjectGuid> minion = new List<ObjectGuid>();
-        public List<AreaBoundary> boundary = new List<AreaBoundary>();
+        public List<ObjectGuid> minion = new();
+        public List<AreaBoundary> boundary = new();
     }
     class DoorInfo
     {

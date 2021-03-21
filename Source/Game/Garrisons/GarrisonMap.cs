@@ -35,7 +35,7 @@ namespace Game.Garrisons
         {
             base.LoadGridObjects(grid, cell);
 
-            GarrisonGridLoader loader = new GarrisonGridLoader(grid, this, cell);
+            GarrisonGridLoader loader = new(grid, this, cell);
             loader.LoadN();
         }
 

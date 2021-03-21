@@ -77,7 +77,7 @@ namespace Game.Networking.Packets
 
         public ObjectGuid GuildGUID;
         public ObjectGuid PlayerGuid;
-        public GuildInfo Info = new GuildInfo();
+        public GuildInfo Info = new();
         public bool HasGuildInfo;
 
         public class GuildInfo
@@ -91,7 +91,7 @@ namespace Game.Networking.Packets
             public uint BorderStyle;
             public uint BorderColor;
             public uint BackgroundColor;
-            public List<RankInfo> Ranks = new List<RankInfo>();
+            public List<RankInfo> Ranks = new();
             public string GuildName = "";
 
             public struct RankInfo
@@ -1362,7 +1362,7 @@ namespace Game.Networking.Packets
                 AchievementIDs.Add(_worldPacket.ReadUInt32());
         }
 
-        public List<uint> AchievementIDs = new List<uint>();
+        public List<uint> AchievementIDs = new();
     }
 
     class GuildNameChanged : ServerPacket
@@ -1504,7 +1504,7 @@ namespace Game.Networking.Packets
 
         public uint ItemID;
         public uint Unk4;
-        public List<uint> AchievementsRequired = new List<uint>();
+        public List<uint> AchievementsRequired = new();
         public ulong RaceMask;
         public int MinGuildLevel;
         public int MinGuildRep;
@@ -1521,7 +1521,7 @@ namespace Game.Networking.Packets
         public int OnUseEnchantmentID;
         public uint Flags;
         public bool Locked;
-        public List<ItemGemData> SocketEnchant = new List<ItemGemData>();
+        public List<ItemGemData> SocketEnchant = new();
     }
 
     public struct GuildBankTabInfo
@@ -1573,7 +1573,7 @@ namespace Game.Networking.Packets
         public int Flags;
         public int[] Data = new int[2];
         public ObjectGuid MemberGuid;
-        public List<ObjectGuid> MemberList = new List<ObjectGuid>();
+        public List<ObjectGuid> MemberList = new();
         public Optional<ItemInstance> Item;
     }
 }

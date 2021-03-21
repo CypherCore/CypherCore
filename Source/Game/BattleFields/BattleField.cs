@@ -471,7 +471,7 @@ namespace Game.BattleFields
 
         public void SendUpdateWorldState(uint variable, uint value, bool hidden = false)
         {
-            UpdateWorldState worldstate = new UpdateWorldState();
+            UpdateWorldState worldstate = new();
             worldstate.VariableID = variable;
             worldstate.Value = (int)value;
             worldstate.Hidden = hidden;
@@ -654,7 +654,7 @@ namespace Game.BattleFields
 
         public void SendAreaSpiritHealerQuery(Player player, ObjectGuid guid)
         {
-            AreaSpiritHealerTime areaSpiritHealerTime = new AreaSpiritHealerTime();
+            AreaSpiritHealerTime areaSpiritHealerTime = new();
             areaSpiritHealerTime.HealerGuid = guid;
             areaSpiritHealerTime.TimeLeft = m_LastResurectTimer;// resurrect every 30 seconds
 
@@ -807,7 +807,7 @@ namespace Game.BattleFields
         protected uint m_DefenderTeam;
 
         // Map of the objectives belonging to this OutdoorPvP
-        Dictionary<uint, BfCapturePoint> m_capturePoints = new Dictionary<uint, BfCapturePoint>();
+        Dictionary<uint, BfCapturePoint> m_capturePoints = new();
 
         // Players info maps
         protected List<ObjectGuid>[] m_players = new List<ObjectGuid>[2];                      // Players in zone
@@ -835,7 +835,7 @@ namespace Game.BattleFields
         uint m_uiKickAfkPlayersTimer;                         // Timer for check Afk in war
 
         // Graveyard variables
-        protected List<BfGraveyard> m_GraveyardList = new List<BfGraveyard>();                          // Vector witch contain the different GY of the battle
+        protected List<BfGraveyard> m_GraveyardList = new();                          // Vector witch contain the different GY of the battle
         uint m_LastResurectTimer;                             // Timer for resurect player every 30 sec
 
         protected uint m_StartGroupingTimer;                            // Timer for invite players in area 15 minute before start battle
@@ -843,8 +843,8 @@ namespace Game.BattleFields
 
         List<ObjectGuid>[] m_Groups = new List<ObjectGuid>[2];                       // Contain different raid group
 
-        Dictionary<int, ulong> m_Data64 = new Dictionary<int, ulong>();
-        protected Dictionary<int, uint> m_Data32 = new Dictionary<int, uint>();
+        Dictionary<int, ulong> m_Data64 = new();
+        protected Dictionary<int, uint> m_Data32 = new();
     }
 
     public class BfGraveyard
@@ -992,7 +992,7 @@ namespace Game.BattleFields
         uint m_ControlTeam;
         uint m_GraveyardId;
         ObjectGuid[] m_SpiritGuide = new ObjectGuid[SharedConst.BGTeamsCount];
-        List<ObjectGuid> m_ResurrectQueue = new List<ObjectGuid>();
+        List<ObjectGuid> m_ResurrectQueue = new();
         protected BattleField m_Bf;
     }
 
@@ -1143,7 +1143,7 @@ namespace Game.BattleFields
                     }
                 }
 
-                List<Unit> players = new List<Unit>();
+                List<Unit> players = new();
                 var checker = new AnyPlayerInObjectRangeCheck(capturePoint, radius);
                 var searcher = new PlayerListSearcher(capturePoint, players, checker);
                 Cell.VisitWorldObjects(capturePoint, searcher, radius);

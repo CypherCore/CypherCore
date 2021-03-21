@@ -298,7 +298,7 @@ namespace Game.BattleGrounds.Zones
                     Player p = Global.ObjAccessor.FindPlayer(pair.Key);
                     if (p)
                     {
-                        UpdateData data = new UpdateData(p.GetMapId());
+                        UpdateData data = new(p.GetMapId());
                         GetBGObject(i).BuildValuesUpdateBlockForPlayer(data, p);
 
                         UpdateObject pkt;
@@ -1029,7 +1029,7 @@ namespace Game.BattleGrounds.Zones
         {
             if (!BgObjects[SAObjectTypes.BoatOne].IsEmpty() || !BgObjects[SAObjectTypes.BoatTwo].IsEmpty())
             {
-                UpdateData transData = new UpdateData(player.GetMapId());
+                UpdateData transData = new(player.GetMapId());
                 if (!BgObjects[SAObjectTypes.BoatOne].IsEmpty())
                     GetBGObject(SAObjectTypes.BoatOne).BuildCreateUpdateBlockForPlayer(transData, player);
 
@@ -1046,7 +1046,7 @@ namespace Game.BattleGrounds.Zones
         {
             if (!BgObjects[SAObjectTypes.BoatOne].IsEmpty() || !BgObjects[SAObjectTypes.BoatTwo].IsEmpty())
             {
-                UpdateData transData = new UpdateData(player.GetMapId());
+                UpdateData transData = new(player.GetMapId());
                 if (!BgObjects[SAObjectTypes.BoatOne].IsEmpty())
                     GetBGObject(SAObjectTypes.BoatOne).BuildOutOfRangeUpdateBlock(transData);
                 if (!BgObjects[SAObjectTypes.BoatTwo].IsEmpty())
@@ -1143,7 +1143,7 @@ namespace Game.BattleGrounds.Zones
         bool SignaledRoundTwoHalfMin;
         // for know if second round has been init
         bool InitSecondRound;
-        Dictionary<uint/*id*/, uint/*timer*/> DemoliserRespawnList = new Dictionary<uint, uint>();
+        Dictionary<uint/*id*/, uint/*timer*/> DemoliserRespawnList = new();
 
         // Achievement: Defense of the Ancients
         bool _gateDestroyed;

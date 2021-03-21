@@ -284,7 +284,7 @@ namespace Game.Entities
             // @todo pets should be summoned from real cast instead of just faking it?
             if (summonSpellId != 0)
             {
-                SpellGo spellGo = new SpellGo();
+                SpellGo spellGo = new();
                 SpellCastData castData = spellGo.Cast;
 
                 castData.CasterGUID = owner.GetGUID();
@@ -395,7 +395,7 @@ namespace Game.Entities
             uint curhealth = (uint)GetHealth();
             int curmana = GetPower(PowerType.Mana);
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             // save auras before possibly removing them    
             _SaveAuras(trans);
 
@@ -471,7 +471,7 @@ namespace Game.Entities
 
         public static void DeleteFromDB(uint guidlow)
         {
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_PET_BY_ID);
             stmt.AddValue(0, guidlow);
@@ -847,9 +847,9 @@ namespace Game.Entities
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_AURA_EFFECT);
             stmt.AddValue(0, GetCharmInfo().GetPetNumber());
 
-            ObjectGuid casterGuid = new ObjectGuid();
-            ObjectGuid itemGuid = new ObjectGuid();
-            Dictionary<AuraKey, AuraLoadEffectInfo> effectInfo = new Dictionary<AuraKey, AuraLoadEffectInfo>();
+            ObjectGuid casterGuid = new();
+            ObjectGuid itemGuid = new();
+            Dictionary<AuraKey, AuraLoadEffectInfo> effectInfo = new();
             SQLResult result = DB.Characters.Query(stmt);
             if (!result.IsEmpty())
             {
@@ -862,7 +862,7 @@ namespace Game.Entities
                         if (casterGuid.IsEmpty())
                             casterGuid = GetGUID();
 
-                        AuraKey key = new AuraKey(casterGuid, itemGuid, result.Read<uint>(1), result.Read<uint>(2));
+                        AuraKey key = new(casterGuid, itemGuid, result.Read<uint>(1), result.Read<uint>(2));
                         if (!effectInfo.ContainsKey(key))
                             effectInfo[key] = new AuraLoadEffectInfo();
 
@@ -885,7 +885,7 @@ namespace Game.Entities
                     if (casterGuid.IsEmpty())
                         casterGuid = GetGUID();
 
-                    AuraKey key = new AuraKey(casterGuid, itemGuid, result.Read<uint>(1), result.Read<uint>(2));
+                    AuraKey key = new(casterGuid, itemGuid, result.Read<uint>(1), result.Read<uint>(2));
                     uint recalculateMask = result.Read<uint>(3);
                     Difficulty difficulty = (Difficulty)result.Read<byte>(4);
                     byte stackCount = result.Read<byte>(5);
@@ -1046,7 +1046,7 @@ namespace Game.Entities
                 }
             }
 
-            PetSpell newspell = new PetSpell();
+            PetSpell newspell = new();
             newspell.state = state;
             newspell.type = type;
 
@@ -1114,7 +1114,7 @@ namespace Game.Entities
 
             if (!m_loading)
             {
-                PetLearnedSpells packet = new PetLearnedSpells();
+                PetLearnedSpells packet = new();
                 packet.Spells.Add(spellId);
                 GetOwner().SendPacket(packet);
                 GetOwner().PetSpellInitialize();
@@ -1124,7 +1124,7 @@ namespace Game.Entities
 
         void LearnSpells(List<uint> spellIds)
         {
-            PetLearnedSpells packet = new PetLearnedSpells();
+            PetLearnedSpells packet = new();
 
             foreach (uint spell in spellIds)
             {
@@ -1182,7 +1182,7 @@ namespace Game.Entities
             {
                 if (!m_loading)
                 {
-                    PetUnlearnedSpells packet = new PetUnlearnedSpells();
+                    PetUnlearnedSpells packet = new();
                     packet.Spells.Add(spellId);
                     GetOwner().SendPacket(packet);
                 }
@@ -1193,7 +1193,7 @@ namespace Game.Entities
 
         void UnlearnSpells(List<uint> spellIds, bool learnPrev, bool clearActionBar)
         {
-            PetUnlearnedSpells packet = new PetUnlearnedSpells();
+            PetUnlearnedSpells packet = new();
 
             foreach (uint spell in spellIds)
             {
@@ -1517,7 +1517,7 @@ namespace Game.Entities
 
         void LearnSpecializationSpells()
         {
-            List<uint> learnedSpells = new List<uint>();
+            List<uint> learnedSpells = new();
 
             List<SpecializationSpellsRecord> specSpells = Global.DB2Mgr.GetSpecializationSpells(m_petSpecialization);
             if (specSpells != null)
@@ -1537,7 +1537,7 @@ namespace Game.Entities
 
         void RemoveSpecializationSpells(bool clearActionBar)
         {
-            List<uint> unlearnedSpells = new List<uint>();
+            List<uint> unlearnedSpells = new();
 
             for (uint i = 0; i < PlayerConst.MaxSpecializations; ++i)
             {
@@ -1588,14 +1588,14 @@ namespace Game.Entities
             CleanupActionBar();
             GetOwner().PetSpellInitialize();
 
-            SetPetSpecialization setPetSpecialization = new SetPetSpecialization();
+            SetPetSpecialization setPetSpecialization = new();
             setPetSpecialization.SpecID = m_petSpecialization;
             GetOwner().SendPacket(setPetSpecialization);
         }
 
         string GenerateActionBarData()
         {
-            StringBuilder ss = new StringBuilder();
+            StringBuilder ss = new();
 
             for (byte i = SharedConst.ActionBarIndexStart; i < SharedConst.ActionBarIndexEnd; ++i)
             {
@@ -1607,8 +1607,8 @@ namespace Game.Entities
 
         public DeclinedName GetDeclinedNames() { return _declinedname; }
 
-        public new Dictionary<uint, PetSpell> m_spells = new Dictionary<uint, PetSpell>();
-        List<uint> m_autospells = new List<uint>();
+        public new Dictionary<uint, PetSpell> m_spells = new();
+        List<uint> m_autospells = new();
         public bool m_removed;
 
         PetType m_petType;

@@ -151,7 +151,7 @@ namespace Game.Groups
 
         public void LoadMemberFromDB(ulong guidLow, byte memberFlags, byte subgroup, LfgRoles roles)
         {
-            MemberSlot member = new MemberSlot();
+            MemberSlot member = new();
             member.guid = ObjectGuid.Create(HighGuid.Player, guidLow);
 
             // skip non-existed member
@@ -339,7 +339,7 @@ namespace Game.Groups
                     return false;
             }
 
-            MemberSlot member = new MemberSlot();
+            MemberSlot member = new();
             member.guid = player.GetGUID();
             member.name = player.GetName();
             member._class = (byte)player.GetClass();
@@ -429,7 +429,7 @@ namespace Game.Groups
 
             {
                 // Broadcast new player group member fields to rest of the group
-                UpdateData groupData = new UpdateData(player.GetMapId());
+                UpdateData groupData = new(player.GetMapId());
                 UpdateObject groupDataPacket;
 
                 // Broadcast group members' fields to player
@@ -446,7 +446,7 @@ namespace Game.Groups
 
                         if (existingMember.HaveAtClient(player))
                         {
-                            UpdateData newData = new UpdateData(player.GetMapId());
+                            UpdateData newData = new(player.GetMapId());
                             UpdateObject newDataPacket;
                             player.BuildValuesUpdateBlockForPlayerWithFlag(newData, UpdateFieldFlag.PartyMember, existingMember);
                             if (newData.HasData())
@@ -632,7 +632,7 @@ namespace Game.Groups
             if (!IsBGGroup() && !IsBFGroup())
             {
                 PreparedStatement stmt;
-                SQLTransaction trans = new SQLTransaction();
+                SQLTransaction trans = new();
 
                 // Remove the groups permanent instance bindings
                 foreach (var difficultyDic in m_boundInstances.Values)
@@ -677,7 +677,7 @@ namespace Game.Groups
             m_leaderName = newLeader.GetName();
             ToggleGroupMemberFlag(slot, GroupMemberFlags.Assistant, false);
 
-            GroupNewLeader groupNewLeader = new GroupNewLeader();
+            GroupNewLeader groupNewLeader = new();
             groupNewLeader.Name = m_leaderName;
             groupNewLeader.PartyIndex = partyIndex;
             BroadcastPacket(groupNewLeader, true);
@@ -768,7 +768,7 @@ namespace Game.Groups
 
             if (!IsBGGroup() && !IsBFGroup())
             {
-                SQLTransaction trans = new SQLTransaction();
+                SQLTransaction trans = new();
 
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GROUP);
                 stmt.AddValue(0, m_dbStoreId);
@@ -796,7 +796,7 @@ namespace Game.Groups
 
         void SendLootStartRollToPlayer(uint countDown, uint mapId, Player p, bool canNeed, Roll r)
         {
-            StartLootRoll startLootRoll = new StartLootRoll();
+            StartLootRoll startLootRoll = new();
             startLootRoll.LootObj = r.GetTarget().GetGUID();
             startLootRoll.MapID = (int)mapId;
             startLootRoll.RollTime = countDown;
@@ -816,7 +816,7 @@ namespace Game.Groups
 
         void SendLootRoll(ObjectGuid playerGuid, int rollNumber, RollType rollType, Roll roll)
         {
-            LootRollBroadcast lootRoll = new LootRollBroadcast();
+            LootRollBroadcast lootRoll = new();
             lootRoll.LootObj = roll.GetTarget().GetGUID();
             lootRoll.Player = playerGuid;
             lootRoll.Roll = rollNumber;
@@ -836,7 +836,7 @@ namespace Game.Groups
 
         void SendLootRollWon(ObjectGuid winnerGuid, int rollNumber, RollType rollType, Roll roll)
         {
-            LootRollWon lootRollWon = new LootRollWon();
+            LootRollWon lootRollWon = new();
             lootRollWon.LootObj = roll.GetTarget().GetGUID();
             lootRollWon.Winner = winnerGuid;
             lootRollWon.Roll = rollNumber;
@@ -857,7 +857,7 @@ namespace Game.Groups
 
         void SendLootAllPassed(Roll roll)
         {
-            LootAllPassed lootAllPassed = new LootAllPassed();
+            LootAllPassed lootAllPassed = new();
             lootAllPassed.LootObj = roll.GetTarget().GetGUID();
             roll.FillPacket(lootAllPassed.Item);
 
@@ -874,7 +874,7 @@ namespace Game.Groups
 
         void SendLootRollsComplete(Roll roll)
         {
-            LootRollsComplete lootRollsComplete = new LootRollsComplete();
+            LootRollsComplete lootRollsComplete = new();
             lootRollsComplete.LootObj = roll.GetTarget().GetGUID();
             lootRollsComplete.LootListID = (byte)(roll.itemSlot + 1);
 
@@ -894,7 +894,7 @@ namespace Game.Groups
         {
             Cypher.Assert(creature);
 
-            LootList lootList = new LootList();
+            LootList lootList = new();
             lootList.Owner = creature.GetGUID();
             lootList.LootObj = creature.loot.GetGUID();
 
@@ -923,7 +923,7 @@ namespace Game.Groups
                 //roll for over-threshold item if it's one-player loot
                 if (item.GetQuality() >= m_lootThreshold)
                 {
-                    Roll r = new Roll(lootItem);
+                    Roll r = new(lootItem);
 
                     for (GroupReference refe = GetFirstMember(); refe != null; refe = refe.Next())
                     {
@@ -994,7 +994,7 @@ namespace Game.Groups
                     continue;
 
                 ItemTemplate item = Global.ObjectMgr.GetItemTemplate(i.itemid);
-                Roll r = new Roll(i);
+                Roll r = new(i);
 
                 for (var refe = GetFirstMember(); refe != null; refe = refe.Next())
                 {
@@ -1050,7 +1050,7 @@ namespace Game.Groups
 
         public void MasterLoot(Loot loot, WorldObject pLootedObject)
         {
-            MasterLootCandidateList masterLootCandidateList = new MasterLootCandidateList();
+            MasterLootCandidateList masterLootCandidateList = new();
             masterLootCandidateList.LootObj = loot.GetGUID();
 
             for (GroupReference refe = GetFirstMember(); refe != null; refe = refe.Next())
@@ -1176,7 +1176,7 @@ namespace Game.Groups
                         {
                             player.UpdateCriteria(CriteriaTypes.RollNeedOnLoot, roll.itemid, maxresul);
 
-                            List<ItemPosCount> dest = new List<ItemPosCount>();
+                            List<ItemPosCount> dest = new();
                             LootItem item = (roll.itemSlot >= roll.GetLoot().items.Count ? roll.GetLoot().quest_items[roll.itemSlot - roll.GetLoot().items.Count] : roll.GetLoot().items[roll.itemSlot]);
                             InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, roll.itemid, item.count);
                             if (msg == InventoryResult.Ok)
@@ -1243,7 +1243,7 @@ namespace Game.Groups
 
                             if (rollVote == RollType.Greed)
                             {
-                                List<ItemPosCount> dest = new List<ItemPosCount>();
+                                List<ItemPosCount> dest = new();
                                 InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, roll.itemid, item.count);
                                 if (msg == InventoryResult.Ok)
                                 {
@@ -1268,13 +1268,13 @@ namespace Game.Groups
 
                                 ItemDisenchantLootRecord disenchant = roll.GetItemDisenchantLoot(player);
 
-                                List<ItemPosCount> dest = new List<ItemPosCount>();
+                                List<ItemPosCount> dest = new();
                                 InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, roll.itemid, item.count);
                                 if (msg == InventoryResult.Ok)
                                     player.AutoStoreLoot(disenchant.Id, LootStorage.Disenchant, ItemContext.None, true);
                                 else // If the player's inventory is full, send the disenchant result in a mail.
                                 {
-                                    Loot loot = new Loot();
+                                    Loot loot = new();
                                     loot.FillLoot(disenchant.Id, LootStorage.Disenchant, player, true);
 
                                     uint max_slot = loot.GetMaxSlotInLootFor(player);
@@ -1320,7 +1320,7 @@ namespace Game.Groups
 
             m_targetIcons[symbol] = target;
 
-            SendRaidTargetUpdateSingle updateSingle = new SendRaidTargetUpdateSingle();
+            SendRaidTargetUpdateSingle updateSingle = new();
             updateSingle.PartyIndex = partyIndex;
             updateSingle.Target = target;
             updateSingle.ChangedBy = changedBy;
@@ -1333,7 +1333,7 @@ namespace Game.Groups
             if (session == null)
                 return;
 
-            SendRaidTargetUpdateAll updateAll = new SendRaidTargetUpdateAll();
+            SendRaidTargetUpdateAll updateAll = new();
             updateAll.PartyIndex = partyIndex;
             for (byte i = 0; i < MapConst.TargetIconsCount; i++)
                 updateAll.TargetIcons.Add(i, m_targetIcons[i]);
@@ -1363,7 +1363,7 @@ namespace Game.Groups
 
                 memberSlot = slot;
             }
-            PartyUpdate partyUpdate = new PartyUpdate();
+            PartyUpdate partyUpdate = new();
 
             partyUpdate.PartyFlags = m_groupFlags;
             partyUpdate.PartyIndex = (byte)m_groupCategory;
@@ -1384,7 +1384,7 @@ namespace Game.Groups
 
                 Player memberPlayer = Global.ObjAccessor.FindConnectedPlayer(member.guid);
 
-                PartyPlayerInfo playerInfos = new PartyPlayerInfo();
+                PartyPlayerInfo playerInfos = new();
 
                 playerInfos.GUID = member.guid;
                 playerInfos.Name = member.name;
@@ -1451,7 +1451,7 @@ namespace Game.Groups
 
         void SendUpdateDestroyGroupToPlayer(Player player)
         {
-            PartyUpdate partyUpdate = new PartyUpdate();
+            PartyUpdate partyUpdate = new();
             partyUpdate.PartyFlags = GroupFlags.Destroyed;
             partyUpdate.PartyIndex = (byte)m_groupCategory;
             partyUpdate.PartyType = GroupType.None;
@@ -1466,7 +1466,7 @@ namespace Game.Groups
             if (!player || !player.IsInWorld)
                 return;
 
-            PartyMemberFullState packet = new PartyMemberFullState();
+            PartyMemberFullState packet = new();
             packet.Initialize(player);
 
             for (GroupReference refe = GetFirstMember(); refe != null; refe = refe.Next())
@@ -1609,7 +1609,7 @@ namespace Game.Groups
             slots[0].group = slots[1].group;
             slots[1].group = tmp;
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             for (byte i = 0; i < 2; i++)
             {
                 // Preserve new sub group in database for non-raid groups
@@ -2181,7 +2181,7 @@ namespace Game.Groups
 
             SetMemberReadyChecked(slot);
 
-            ReadyCheckStarted readyCheckStarted = new ReadyCheckStarted();
+            ReadyCheckStarted readyCheckStarted = new();
             readyCheckStarted.PartyGUID = m_guid;
             readyCheckStarted.PartyIndex = partyIndex;
             readyCheckStarted.InitiatorGUID = starterGuid;
@@ -2199,7 +2199,7 @@ namespace Game.Groups
 
             ResetMemberReadyChecked();
 
-            ReadyCheckCompleted readyCheckCompleted = new ReadyCheckCompleted();
+            ReadyCheckCompleted readyCheckCompleted = new();
             readyCheckCompleted.PartyIndex = 0;
             readyCheckCompleted.PartyGUID = m_guid;
             BroadcastPacket(readyCheckCompleted, false);
@@ -2225,7 +2225,7 @@ namespace Game.Groups
 
         void SetMemberReadyCheck(MemberSlot slot, bool ready)
         {
-            ReadyCheckResponse response = new ReadyCheckResponse();
+            ReadyCheckResponse response = new();
             response.PartyGUID = m_guid;
             response.Player = slot.guid;
             response.IsReady = ready;
@@ -2286,7 +2286,7 @@ namespace Game.Groups
 
         public void SendRaidMarkersChanged(WorldSession session = null, sbyte partyIndex = 0)
         {
-            RaidMarkersChanged packet = new RaidMarkersChanged();
+            RaidMarkersChanged packet = new();
 
             packet.PartyIndex = partyIndex;
             packet.ActiveMarkers = m_activeMarkers;
@@ -2597,9 +2597,9 @@ namespace Game.Groups
                 worker(refe.GetSource());
         }
 
-        List<MemberSlot> m_memberSlots = new List<MemberSlot>();
-        GroupRefManager m_memberMgr = new GroupRefManager();
-        List<Player> m_invitees = new List<Player>();
+        List<MemberSlot> m_memberSlots = new();
+        GroupRefManager m_memberMgr = new();
+        List<Player> m_invitees = new();
         ObjectGuid m_leaderGuid;
         string m_leaderName;
         GroupFlags m_groupFlags;
@@ -2614,8 +2614,8 @@ namespace Game.Groups
         ItemQuality m_lootThreshold;
         ObjectGuid m_looterGuid;
         ObjectGuid m_masterLooterGuid;
-        List<Roll> RollId = new List<Roll>();
-        Dictionary<Difficulty, Dictionary<uint, InstanceBind>> m_boundInstances = new Dictionary<Difficulty, Dictionary<uint, InstanceBind>>();
+        List<Roll> RollId = new();
+        Dictionary<Difficulty, Dictionary<uint, InstanceBind>> m_boundInstances = new();
         byte[] m_subGroupsCounts;
         ObjectGuid m_guid;
         uint m_maxEnchantingLevel;
@@ -2680,8 +2680,8 @@ namespace Game.Groups
             LootItem lootItemInSlot = GetTarget().GetItemInSlot(itemSlot);
             if (lootItemInSlot != null)
             {
-                ItemInstance itemInstance = new ItemInstance(lootItemInSlot);
-                BonusData bonusData = new BonusData(itemInstance);
+                ItemInstance itemInstance = new(lootItemInSlot);
+                BonusData bonusData = new(itemInstance);
                 if (!bonusData.CanDisenchant)
                     return null;
 
@@ -2696,7 +2696,7 @@ namespace Game.Groups
         public uint itemid;
         public uint itemRandomBonusListId;
         public byte itemCount;
-        public Dictionary<ObjectGuid, RollType> playerVote = new Dictionary<ObjectGuid, RollType>();
+        public Dictionary<ObjectGuid, RollType> playerVote = new();
         public byte totalPlayersRolling;
         public byte totalNeed;
         public byte totalGreed;

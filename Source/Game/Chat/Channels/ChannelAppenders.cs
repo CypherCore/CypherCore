@@ -43,7 +43,7 @@ namespace Game.Chat
             // LocalizedPacketDo sends client DBC locale, we need to get available to server locale
             Locale localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
 
-            ChannelNotify data = new ChannelNotify();
+            ChannelNotify data = new();
             data.Type = _modifier.GetNotificationType();
             data.Channel = _source.GetName(localeIdx);
             _modifier.Append(data);
@@ -65,7 +65,7 @@ namespace Game.Chat
         {
             Locale localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
 
-            ChannelNotifyJoined notify = new ChannelNotifyJoined();
+            ChannelNotifyJoined notify = new();
             //notify.ChannelWelcomeMsg = "";
             notify.ChatChannelID = (int)_source.GetChannelId();
             //notify.InstanceID = 0;
@@ -90,7 +90,7 @@ namespace Game.Chat
         {
             Locale localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
 
-            ChannelNotifyLeft notify = new ChannelNotifyLeft();
+            ChannelNotifyLeft notify = new();
             notify.Channel = _source.GetName(localeIdx);
             notify.ChatChannelID = _source.GetChannelId();
             notify.Suspended = _suspended;
@@ -115,7 +115,7 @@ namespace Game.Chat
         {
             Locale localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
 
-            ChatPkt packet = new ChatPkt();
+            ChatPkt packet = new();
             Player player = Global.ObjAccessor.FindConnectedPlayer(_guid);
             if (player)
                 packet.Initialize(ChatMsg.Channel, _lang, player, player, _what, 0, _source.GetName(localeIdx));
@@ -150,7 +150,7 @@ namespace Game.Chat
         {
             Locale localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
 
-            ChatPkt packet = new ChatPkt();
+            ChatPkt packet = new();
             Player player = Global.ObjAccessor.FindConnectedPlayer(_guid);
             if (player)
                 packet.Initialize(ChatMsg.Channel, _lang, player, player, _what, 0, _source.GetName(localeIdx), Locale.enUS, _prefix);
@@ -183,7 +183,7 @@ namespace Game.Chat
         {
             Locale localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
 
-            UserlistAdd userlistAdd = new UserlistAdd();
+            UserlistAdd userlistAdd = new();
             userlistAdd.AddedUserGUID = _guid;
             userlistAdd.ChannelFlags = _source.GetFlags();
             userlistAdd.UserFlags = _source.GetPlayerFlags(_guid);
@@ -208,7 +208,7 @@ namespace Game.Chat
         {
             Locale localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
 
-            UserlistUpdate userlistUpdate = new UserlistUpdate();
+            UserlistUpdate userlistUpdate = new();
             userlistUpdate.UpdatedUserGUID = _guid;
             userlistUpdate.ChannelFlags = _source.GetFlags();
             userlistUpdate.UserFlags = _source.GetPlayerFlags(_guid);
@@ -233,7 +233,7 @@ namespace Game.Chat
         {
             Locale localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
 
-            UserlistRemove userlistRemove = new UserlistRemove();
+            UserlistRemove userlistRemove = new();
             userlistRemove.RemovedUserGUID = _guid;
             userlistRemove.ChannelFlags = _source.GetFlags();
             userlistRemove.ChannelID = _source.GetChannelId();

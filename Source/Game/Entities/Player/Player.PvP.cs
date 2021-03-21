@@ -173,7 +173,7 @@ namespace Game.Entities
             // victim_rank [1..4]  HK: <dishonored rank>
             // victim_rank [5..19] HK: <alliance\horde rank>
             // victim_rank [0, 20+] HK: <>
-            PvPCredit data = new PvPCredit();
+            PvPCredit data = new();
             data.Honor = honor;
             data.OriginalHonor = honor;
             data.Target = victim_guid;
@@ -317,7 +317,7 @@ namespace Game.Entities
                 RemovePvpTalent(talentInfo);
             }
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             _SaveTalents(trans);
             _SaveSpells(trans);
             DB.Characters.CommitTransaction(trans);
@@ -786,7 +786,7 @@ namespace Game.Entities
         /// <param name="reporter"></param>
         public void ReportedAfkBy(Player reporter)
         {
-            ReportPvPPlayerAFKResult reportAfkResult = new ReportPvPPlayerAFKResult();
+            ReportPvPPlayerAFKResult reportAfkResult = new();
             reportAfkResult.Offender = GetGUID();
             Battleground bg = GetBattleground();
             // Battleground also must be in progress!

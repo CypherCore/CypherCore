@@ -27,6 +27,10 @@ namespace Game.AI
 {
     public class UnitAI
     {
+        static Dictionary<(uint id, Difficulty difficulty), AISpellInfoType> _aiSpellInfo = new();
+
+        protected Unit me { get; private set; }
+
         public UnitAI(Unit _unit)
         {
             me = _unit;
@@ -59,7 +63,7 @@ namespace Game.AI
 
         void SortByDistance(List<Unit> targets, bool ascending)
         {
-            targets.Sort(new ObjectDistanceOrderPred(me, true));
+            targets.Sort(new ObjectDistanceOrderPred(me, ascending));
         }
 
         public void DoMeleeAttackIfReady()
@@ -145,18 +149,12 @@ namespace Game.AI
             if (targetList.Empty())
                 return null;
 
-            switch (targetType)
+            return targetType switch
             {
-                case SelectAggroTarget.MaxThreat:
-                case SelectAggroTarget.MinThreat:
-                case SelectAggroTarget.MaxDistance:
-                case SelectAggroTarget.MinDistance:
-                    return targetList[0];
-                case SelectAggroTarget.Random:
-                        return targetList.SelectRandom();
-                default:
-                    return null;
-            }
+                SelectAggroTarget.MaxThreat or SelectAggroTarget.MinThreat or SelectAggroTarget.MaxDistance or SelectAggroTarget.MinDistance => targetList[0],
+                SelectAggroTarget.Random => targetList.SelectRandom(),
+                _ => null,
+            };
         }
 
         /// <summary>
@@ -287,7 +285,7 @@ namespace Game.AI
                             bool playerOnly = spellInfo.HasAttribute(SpellAttr3.OnlyTargetPlayers);
                             float range = spellInfo.GetMaxRange(false);
 
-                            DefaultTargetSelector targetSelector = new DefaultTargetSelector(me, range, playerOnly, true, -(int)spellId);
+                            DefaultTargetSelector targetSelector = new(me, range, playerOnly, true, -(int)spellId);
                             if (!spellInfo.HasAuraInterruptFlag(SpellAuraInterruptFlags.NotVictim)
                             && targetSelector.Invoke(me.GetVictim()))
                                 target = me.GetVictim();
@@ -334,7 +332,7 @@ namespace Game.AI
 
             Global.SpellMgr.ForEachSpellInfo(spellInfo =>
             {
-                AISpellInfoType AIInfo = new AISpellInfoType(); 
+                AISpellInfoType AIInfo = new();
                 if (spellInfo.HasAttribute(SpellAttr0.CastableWhileDead))
                     AIInfo.condition = AICondition.Die;
                 else if (spellInfo.IsPassive() || spellInfo.GetDuration() == -1)
@@ -461,7 +459,7 @@ namespace Game.AI
                         AIInfo.Effects |= 1 << ((int)SelectEffect.Aura - 1);
                 }
 
-                AISpellInfo[(spellInfo.Id, spellInfo.Difficulty)] = AIInfo;
+                _aiSpellInfo[(spellInfo.Id, spellInfo.Difficulty)] = AIInfo;
             });
         }
 
@@ -471,16 +469,16 @@ namespace Game.AI
 
         public virtual void InitializeAI()
         {
-            if (!me.IsDead()) 
+            if (!me.IsDead())
                 Reset();
         }
-        
+
         public virtual void Reset() { }
 
         public virtual void OnCharmed(bool apply) { }
 
         public virtual bool ShouldSparWith(Unit target) { return false; }
-        
+
         public virtual void DoAction(int action) { }
         public virtual uint GetData(uint id = 0) { return 0; }
         public virtual void SetData(uint id, uint value) { }
@@ -491,7 +489,7 @@ namespace Game.AI
         public virtual void DamageTaken(Unit attacker, ref uint damage) { }
         public virtual void HealReceived(Unit by, uint addhealth) { }
         public virtual void HealDone(Unit to, uint addhealth) { }
-        public virtual void SpellInterrupted(uint spellId, uint unTimeMs) {}
+        public virtual void SpellInterrupted(uint spellId, uint unTimeMs) { }
 
         /// <summary>
         /// Called when a player opens a gossip dialog with the creature.
@@ -522,11 +520,10 @@ namespace Game.AI
         }
         public virtual void QuestReward(Player player, Quest quest, LootItemType type, uint opt) { }
 
-
-    /// <summary>
-    /// Called when a game event starts or ends
-    /// </summary>
-    public virtual void OnGameEvent(bool start, ushort eventId) { }
+        /// <summary>
+        /// Called when a game event starts or ends
+        /// </summary>
+        public virtual void OnGameEvent(bool start, ushort eventId) { }
 
         // Called when the dialog status between a player and the creature is requested.
         public virtual QuestGiverStatus GetDialogStatus(Player player) { return QuestGiverStatus.ScriptedDefault; }
@@ -539,14 +536,10 @@ namespace Game.AI
 
         public virtual void WaypointPathEnded(uint nodeId, uint pathId) { }
 
-        public AISpellInfoType GetAISpellInfo(uint spellId, Difficulty difficulty)
+        public static AISpellInfoType GetAISpellInfo(uint spellId, Difficulty difficulty)
         {
-            return AISpellInfo.LookupByKey((spellId, difficulty));
+            return _aiSpellInfo.LookupByKey((spellId, difficulty));
         }
-
-        public static Dictionary<(uint id, Difficulty difficulty), AISpellInfoType> AISpellInfo = new Dictionary<(uint id, Difficulty difficulty), AISpellInfoType>();
-
-        protected Unit me { get; private set; }
     }
     
     public enum SelectAggroTarget
@@ -623,6 +616,9 @@ namespace Game.AI
     // todo Add more checks from Spell.CheckCast
     public class SpellTargetSelector : ICheck<Unit>
     {
+        Unit _caster;
+        SpellInfo _spellInfo;
+
         public SpellTargetSelector(Unit caster, uint spellId)
         {
             _caster = caster;
@@ -694,9 +690,6 @@ namespace Game.AI
 
             return true;
         }
-
-        Unit _caster;
-        SpellInfo _spellInfo;
     }
 
     // Very simple target selector, will just skip main target
@@ -704,6 +697,9 @@ namespace Game.AI
     //       because tank will not be in the temporary list
     public class NonTankTargetSelector : ICheck<Unit>
     {
+        Unit _source;
+        bool _playerOnly;
+
         public NonTankTargetSelector(Unit source, bool playerOnly = true)
         {
             _source = source;
@@ -724,14 +720,16 @@ namespace Game.AI
 
             return target != _source.GetVictim();
         }
-
-        Unit _source;
-        bool _playerOnly;
     }
 
     // Simple selector for units using mana
     class PowerUsersSelector : ICheck<Unit>
     {
+        Unit _me;
+        PowerType _power;
+        float _dist;
+        bool _playerOnly;
+
         public PowerUsersSelector(Unit unit, PowerType power, float dist, bool playerOnly)
         {
             _me = unit;
@@ -759,15 +757,15 @@ namespace Game.AI
 
             return true;
         }
-
-        Unit _me;
-        PowerType _power;
-        float _dist;
-        bool _playerOnly;
     }
 
     class FarthestTargetSelector : ICheck<Unit>
     {
+        Unit _me;
+        float _dist;
+        bool _playerOnly;
+        bool _inLos;
+
         public FarthestTargetSelector(Unit unit, float dist, bool playerOnly, bool inLos)
         {
             _me = unit;
@@ -792,10 +790,5 @@ namespace Game.AI
 
             return true;
         }
-
-        Unit _me;
-        float _dist;
-        bool _playerOnly;
-        bool _inLos;
     }
 }

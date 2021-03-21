@@ -64,7 +64,7 @@ namespace Game
                     if (flags.HasAnyFlag(CalendarFlags.GuildEvent) || flags.HasAnyFlag(CalendarFlags.WithoutInvites))
                         guildID = Global.CharacterCacheStorage.GetCharacterGuildIdByGuid(ownerGUID);
 
-                    CalendarEvent calendarEvent = new CalendarEvent(eventID, ownerGUID, guildID, type, textureID, date, flags, title, description, lockDate);
+                    CalendarEvent calendarEvent = new(eventID, ownerGUID, guildID, type, textureID, date, flags, title, description, lockDate);
                     _events.Add(calendarEvent);
 
                     _maxEventId = Math.Max(_maxEventId, eventID);
@@ -93,7 +93,7 @@ namespace Game
                     CalendarModerationRank rank = (CalendarModerationRank)result.Read<byte>(6);
                     string note = result.Read<string>(7);
 
-                    CalendarInvite invite = new CalendarInvite(inviteId, eventId, invitee, senderGUID, responseTime, status, rank, note);
+                    CalendarInvite invite = new(inviteId, eventId, invitee, senderGUID, responseTime, status, rank, note);
                     _invites.Add(eventId, invite);
 
                     _maxInviteId = Math.Max(_maxInviteId, inviteId);
@@ -148,9 +148,9 @@ namespace Game
 
             SendCalendarEventRemovedAlert(calendarEvent);
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             PreparedStatement stmt;
-            MailDraft mail = new MailDraft(calendarEvent.BuildCalendarMailSubject(remover), calendarEvent.BuildCalendarMailBody());
+            MailDraft mail = new(calendarEvent.BuildCalendarMailSubject(remover), calendarEvent.BuildCalendarMailBody());
 
             var eventInvites = _invites[eventId];
             for (int i = 0; i < eventInvites.Count; ++i)
@@ -196,7 +196,7 @@ namespace Game
             if (calendarInvite == null)
                 return;
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CALENDAR_INVITE);
             stmt.AddValue(0, calendarInvite.InviteId);
             trans.Append(stmt);
@@ -217,7 +217,7 @@ namespace Game
 
         public void UpdateEvent(CalendarEvent calendarEvent)
         {
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_CALENDAR_EVENT);
             stmt.AddValue(0, calendarEvent.EventId);
             stmt.AddValue(1, calendarEvent.OwnerGuid.GetCounter());
@@ -331,7 +331,7 @@ namespace Game
 
         public List<CalendarEvent> GetPlayerEvents(ObjectGuid guid)
         {
-            List<CalendarEvent> events = new List<CalendarEvent>();
+            List<CalendarEvent> events = new();
 
             foreach (var pair in _invites)
             {
@@ -360,7 +360,7 @@ namespace Game
 
         public List<CalendarInvite> GetPlayerInvites(ObjectGuid guid)
         {
-            List<CalendarInvite> invites = new List<CalendarInvite>();
+            List<CalendarInvite> invites = new();
 
             foreach (var calendarEvent in _invites.Values)
             {
@@ -402,7 +402,7 @@ namespace Game
 
             uint level = player ? player.GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(invitee);
 
-            CalendarInviteAdded packet = new CalendarInviteAdded();
+            CalendarInviteAdded packet = new();
             packet.EventID = calendarEvent != null ? calendarEvent.EventId : 0;
             packet.InviteGuid = invitee;
             packet.InviteID = calendarEvent != null ? invite.InviteId : 0;
@@ -427,7 +427,7 @@ namespace Game
 
         public void SendCalendarEventUpdateAlert(CalendarEvent calendarEvent, long originalDate)
         {
-            CalendarEventUpdatedAlert packet = new CalendarEventUpdatedAlert();
+            CalendarEventUpdatedAlert packet = new();
             packet.ClearPending = true; // FIXME
             packet.Date = calendarEvent.Date;
             packet.Description = calendarEvent.Description;
@@ -444,7 +444,7 @@ namespace Game
 
         public void SendCalendarEventStatus(CalendarEvent calendarEvent, CalendarInvite invite)
         {
-            CalendarInviteStatusPacket packet = new CalendarInviteStatusPacket();
+            CalendarInviteStatusPacket packet = new();
             packet.ClearPending = true; // FIXME
             packet.Date = calendarEvent.Date;
             packet.EventID = calendarEvent.EventId;
@@ -458,7 +458,7 @@ namespace Game
 
         void SendCalendarEventRemovedAlert(CalendarEvent calendarEvent)
         {
-            CalendarEventRemovedAlert packet = new CalendarEventRemovedAlert();
+            CalendarEventRemovedAlert packet = new();
             packet.ClearPending = true; // FIXME
             packet.Date = calendarEvent.Date;
             packet.EventID = calendarEvent.EventId;
@@ -468,7 +468,7 @@ namespace Game
 
         void SendCalendarEventInviteRemove(CalendarEvent calendarEvent, CalendarInvite invite, uint flags)
         {
-            CalendarInviteRemoved packet = new CalendarInviteRemoved();
+            CalendarInviteRemoved packet = new();
             packet.ClearPending = true; // FIXME
             packet.EventID = calendarEvent.EventId;
             packet.Flags = flags;
@@ -479,7 +479,7 @@ namespace Game
 
         public void SendCalendarEventModeratorStatusAlert(CalendarEvent calendarEvent, CalendarInvite invite)
         {
-            CalendarModeratorStatus packet = new CalendarModeratorStatus();
+            CalendarModeratorStatus packet = new();
             packet.ClearPending = true; // FIXME
             packet.EventID = calendarEvent.EventId;
             packet.InviteGuid = invite.InviteeGuid;
@@ -490,7 +490,7 @@ namespace Game
 
         void SendCalendarEventInviteAlert(CalendarEvent calendarEvent, CalendarInvite invite)
         {
-            CalendarInviteAlert packet = new CalendarInviteAlert();
+            CalendarInviteAlert packet = new();
             packet.Date = calendarEvent.Date;
             packet.EventID = calendarEvent.EventId;
             packet.EventName = calendarEvent.Title;
@@ -528,7 +528,7 @@ namespace Game
 
             List<CalendarInvite> eventInviteeList = _invites[calendarEvent.EventId];
 
-            CalendarSendEvent packet = new CalendarSendEvent();
+            CalendarSendEvent packet = new();
             packet.Date = calendarEvent.Date;
             packet.Description = calendarEvent.Description;
             packet.EventID = calendarEvent.EventId;
@@ -551,7 +551,7 @@ namespace Game
                 uint inviteeLevel = invitee ? invitee.GetLevel() : Global.CharacterCacheStorage.GetCharacterLevelByGuid(inviteeGuid);
                 ulong inviteeGuildId = invitee ? invitee.GetGuildId() : Global.CharacterCacheStorage.GetCharacterGuildIdByGuid(inviteeGuid);
 
-                CalendarEventInviteInfo inviteInfo = new CalendarEventInviteInfo();
+                CalendarEventInviteInfo inviteInfo = new();
                 inviteInfo.Guid = inviteeGuid;
                 inviteInfo.Level = (byte)inviteeLevel;
                 inviteInfo.Status = calendarInvite.Status;
@@ -572,7 +572,7 @@ namespace Game
             Player player = Global.ObjAccessor.FindPlayer(guid);
             if (player)
             {
-                CalendarInviteRemovedAlert packet = new CalendarInviteRemovedAlert();
+                CalendarInviteRemovedAlert packet = new();
                 packet.Date = calendarEvent.Date;
                 packet.EventID = calendarEvent.EventId;
                 packet.Flags = calendarEvent.Flags;
@@ -594,7 +594,7 @@ namespace Game
             Player player = Global.ObjAccessor.FindPlayer(guid);
             if (player)
             {
-                CalendarCommandResult packet = new CalendarCommandResult();
+                CalendarCommandResult packet = new();
                 packet.Command = 1; // FIXME
                 packet.Result = err;
 
@@ -635,8 +635,8 @@ namespace Game
         List<CalendarEvent> _events;
         MultiMap<ulong, CalendarInvite> _invites;
 
-        List<ulong> _freeEventIds = new List<ulong>();
-        List<ulong> _freeInviteIds = new List<ulong>();
+        List<ulong> _freeEventIds = new();
+        List<ulong> _freeInviteIds = new();
         ulong _maxEventId;
         ulong _maxInviteId;
     }

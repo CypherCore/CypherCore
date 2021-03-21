@@ -194,7 +194,7 @@ namespace Game.Maps
 
                 Log.outDebug(LogFilter.Maps, "MapInstanced.CreateInstance: {0} map instance {1} for {2} created with difficulty {3}", save != null ? "" : "new ", InstanceId, GetId(), difficulty);
 
-                InstanceMap map = new InstanceMap(GetId(), GetGridExpiry(), InstanceId, difficulty, this);
+                InstanceMap map = new(GetId(), GetGridExpiry(), InstanceId, difficulty, this);
                 Cypher.Assert(map.IsDungeon());
 
                 map.LoadRespawnTimes();
@@ -220,7 +220,7 @@ namespace Game.Maps
             {
                 Log.outDebug(LogFilter.Maps, "MapInstanced.CreateBattleground: map bg {0} for {1} created.", InstanceId, GetId());
 
-                BattlegroundMap map = new BattlegroundMap(GetId(), (uint)GetGridExpiry(), InstanceId, this, Difficulty.None);
+                BattlegroundMap map = new(GetId(), (uint)GetGridExpiry(), InstanceId, this, Difficulty.None);
                 Cypher.Assert(map.IsBattlegroundOrArena());
                 map.SetBG(bg);
                 bg.SetBgMap(map);
@@ -234,7 +234,7 @@ namespace Game.Maps
         {
             lock (_mapLock)
             {
-                GarrisonMap map = new GarrisonMap(GetId(), GetGridExpiry(), instanceId, this, owner.GetGUID());
+                GarrisonMap map = new(GetId(), GetGridExpiry(), instanceId, this, owner.GetGUID());
                 Cypher.Assert(map.IsGarrison());
 
                 m_InstancedMaps[instanceId] = map;
@@ -279,7 +279,7 @@ namespace Game.Maps
 
         public Dictionary<uint, Map> GetInstancedMaps() { return m_InstancedMaps; }
 
-        Dictionary<uint, Map> m_InstancedMaps = new Dictionary<uint, Map>();
+        Dictionary<uint, Map> m_InstancedMaps = new();
     }
 
     public class InstanceTemplate

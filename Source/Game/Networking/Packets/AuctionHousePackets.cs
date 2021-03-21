@@ -29,12 +29,12 @@ namespace Game.Networking.Packets
         public byte MinLevel = 1;
         public byte MaxLevel = SharedConst.MaxLevel;
         public AuctionHouseFilterMask Filters;
-        public Array<byte> KnownPets = new Array<byte>(SharedConst.MaxBattlePetSpeciesId / 8 + 1);
+        public Array<byte> KnownPets = new(SharedConst.MaxBattlePetSpeciesId / 8 + 1);
         public sbyte MaxPetLevel;
         public Optional<AddOnInfo> TaintedBy;
         public string Name;
-        public Array<AuctionListFilterClass> ItemClassFilters = new Array<AuctionListFilterClass>(7);
-        public Array<AuctionSortDef> Sorts = new Array<AuctionSortDef>(2);
+        public Array<AuctionListFilterClass> ItemClassFilters = new(7);
+        public Array<AuctionSortDef> Sorts = new(2);
 
         public AuctionBrowseQuery(WorldPacket packet) : base(packet) { }
 
@@ -123,8 +123,8 @@ namespace Game.Networking.Packets
     {
         public ObjectGuid Auctioneer;
         public uint Offset;
-        public List<uint> AuctionItemIDs = new List<uint>();
-        public Array<AuctionSortDef> Sorts = new Array<AuctionSortDef>(2);
+        public List<uint> AuctionItemIDs = new();
+        public Array<AuctionSortDef> Sorts = new(2);
         public Optional<AddOnInfo> TaintedBy;
 
         public AuctionListBiddedItems(WorldPacket packet) : base(packet) { }
@@ -153,8 +153,8 @@ namespace Game.Networking.Packets
     {
         public ObjectGuid Auctioneer;
         public Optional<AddOnInfo> TaintedBy;
-        public Array<AuctionBucketKey> BucketKeys = new Array<AuctionBucketKey>(100);
-        public Array<AuctionSortDef> Sorts = new Array<AuctionSortDef>(2);
+        public Array<AuctionBucketKey> BucketKeys = new(100);
+        public Array<AuctionSortDef> Sorts = new(2);
 
         public AuctionListBucketsByBucketKeys(WorldPacket packet) : base(packet) { }
 
@@ -183,7 +183,7 @@ namespace Game.Networking.Packets
         public uint Offset;
         public sbyte Unknown830;
         public Optional<AddOnInfo> TaintedBy;
-        public Array<AuctionSortDef> Sorts = new Array<AuctionSortDef>(2);
+        public Array<AuctionSortDef> Sorts = new(2);
         public AuctionBucketKey BucketKey;
 
         public AuctionListItemsByBucketKey(WorldPacket packet) : base(packet) { }
@@ -213,7 +213,7 @@ namespace Game.Networking.Packets
         public int SuffixItemNameDescriptionID;
         public uint Offset;
         public Optional<AddOnInfo> TaintedBy;
-        public Array<AuctionSortDef> Sorts = new Array<AuctionSortDef>(2);
+        public Array<AuctionSortDef> Sorts = new(2);
 
         public AuctionListItemsByItemID(WorldPacket packet) : base(packet) { }
 
@@ -242,7 +242,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Auctioneer;
         public uint Offset;
         public Optional<AddOnInfo> TaintedBy;
-        public Array<AuctionSortDef> Sorts = new Array<AuctionSortDef>(2);
+        public Array<AuctionSortDef> Sorts = new(2);
 
         public AuctionListOwnedItems(WorldPacket packet) : base(packet) { }
 
@@ -333,7 +333,7 @@ namespace Game.Networking.Packets
         public ulong UnitPrice;
         public uint RunTime;
         public Optional<AddOnInfo> TaintedBy;
-        public Array<AuctionItemForSale> Items = new Array<AuctionItemForSale>(64);
+        public Array<AuctionItemForSale> Items = new(64);
 
         public AuctionSellCommodity(WorldPacket packet) : base(packet) { }
 
@@ -360,7 +360,7 @@ namespace Game.Networking.Packets
         public ulong MinBid;
         public uint RunTime;
         public Optional<AddOnInfo> TaintedBy;
-        public Array<AuctionItemForSale> Items = new Array<AuctionItemForSale>(1);
+        public Array<AuctionItemForSale> Items = new(1);
 
         public AuctionSellItem(WorldPacket packet) : base(packet) { }
 
@@ -506,7 +506,7 @@ namespace Game.Networking.Packets
 
     public class AuctionListBiddedItemsResult : ServerPacket
     {   
-        public List<AuctionItem> Items = new List<AuctionItem>();
+        public List<AuctionItem> Items = new();
         public uint DesiredDelay;
         public bool HasMoreResults;
 
@@ -526,7 +526,7 @@ namespace Game.Networking.Packets
 
     public class AuctionListBucketsResult : ServerPacket
     {  
-        public List<BucketInfo> Buckets = new List<BucketInfo>();
+        public List<BucketInfo> Buckets = new();
         public uint DesiredDelay;
         public int Unknown830_0;
         public int Unknown830_1;
@@ -553,7 +553,7 @@ namespace Game.Networking.Packets
     class AuctionFavoriteList : ServerPacket
     {    
         public uint DesiredDelay;
-        public List<AuctionFavoriteInfo> Items = new List<AuctionFavoriteInfo>();
+        public List<AuctionFavoriteInfo> Items = new();
 
         public AuctionFavoriteList() : base(ServerOpcodes.AuctionFavoriteList) { }
 
@@ -570,13 +570,13 @@ namespace Game.Networking.Packets
 
     public class AuctionListItemsResult : ServerPacket
     {
-        public List<AuctionItem> Items = new List<AuctionItem>();
+        public List<AuctionItem> Items = new();
         public uint Unknown830;
         public uint TotalCount;
         public uint DesiredDelay;
         public AuctionHouseListType ListType;
         public bool HasMoreResults;
-        public AuctionBucketKey BucketKey = new AuctionBucketKey();
+        public AuctionBucketKey BucketKey = new();
 
         public AuctionListItemsResult() : base(ServerOpcodes.AuctionListItemsResult) { }
 
@@ -599,8 +599,8 @@ namespace Game.Networking.Packets
 
     public class AuctionListOwnedItemsResult : ServerPacket
     {   
-        public List<AuctionItem> Items = new List<AuctionItem>();
-        public List<AuctionItem> SoldItems = new List<AuctionItem>();
+        public List<AuctionItem> Items = new();
+        public List<AuctionItem> SoldItems = new();
         public uint DesiredDelay;
         public bool HasMoreResults;
 
@@ -661,7 +661,7 @@ namespace Game.Networking.Packets
         public uint DesiredDelay;
         public uint ChangeNumberTombstone;
         public uint Result;
-        public List<AuctionItem> Items = new List<AuctionItem>();
+        public List<AuctionItem> Items = new();
 
         public AuctionReplicateResponse() : base(ServerOpcodes.AuctionReplicateResponse) { }
 
@@ -696,8 +696,8 @@ namespace Game.Networking.Packets
     {
         public uint ItemID;
         public ushort ItemLevel;
-        public Optional<ushort> BattlePetSpeciesID = new Optional<ushort>();
-        public Optional<ushort> SuffixItemNameDescriptionID = new Optional<ushort>();
+        public Optional<ushort> BattlePetSpeciesID = new();
+        public Optional<ushort> SuffixItemNameDescriptionID = new();
 
         public AuctionBucketKey() { }
 
@@ -764,7 +764,7 @@ namespace Game.Networking.Packets
     public class AuctionListFilterClass
     {
         public int ItemClass;
-        public Array<AuctionListFilterSubClass> SubClassFilters = new Array<AuctionListFilterSubClass>(31);
+        public Array<AuctionListFilterSubClass> SubClassFilters = new(31);
 
         public AuctionListFilterClass(WorldPacket data)
         {
@@ -861,7 +861,7 @@ namespace Game.Networking.Packets
         public int TotalQuantity;
         public ulong MinPrice;
         public int RequiredLevel;
-        public List<uint> ItemModifiedAppearanceIDs = new List<uint>();
+        public List<uint> ItemModifiedAppearanceIDs = new();
         public Optional<byte> MaxBattlePetQuality;
         public Optional<byte> MaxBattlePetLevel;
         public Optional<byte> BattlePetBreedID;
@@ -909,7 +909,7 @@ namespace Game.Networking.Packets
         public Optional<ItemInstance> Item;
         public int Count;
         public int Charges;
-        public List<ItemEnchantData> Enchantments = new List<ItemEnchantData>();
+        public List<ItemEnchantData> Enchantments = new();
         public uint Flags;
         public uint AuctionID;
         public ObjectGuid Owner;
@@ -926,7 +926,7 @@ namespace Game.Networking.Packets
         public uint EndTime;
         public Optional<ObjectGuid> Bidder;
         public Optional<ulong> BidAmount;
-        public List<ItemGemData> Gems = new List<ItemGemData>();
+        public List<ItemGemData> Gems = new();
         public Optional<AuctionBucketKey> AuctionBucketKey;
 
         public void Write(WorldPacket data)

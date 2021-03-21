@@ -52,7 +52,7 @@ namespace Game
                 GridDefines.NormalizeMapCoord(ref x);
                 GridDefines.NormalizeMapCoord(ref y);
 
-                WaypointNode waypoint = new WaypointNode();
+                WaypointNode waypoint = new();
                 waypoint.id = result.Read<uint>(1);
                 waypoint.x = x;
                 waypoint.y = y;
@@ -94,7 +94,7 @@ namespace Game
             if (result.IsEmpty())
                 return;
 
-            List<WaypointNode> values = new List<WaypointNode>();
+            List<WaypointNode> values = new();
             do
             {
                 float x = result.Read<float>(1);
@@ -105,7 +105,7 @@ namespace Game
                 GridDefines.NormalizeMapCoord(ref x);
                 GridDefines.NormalizeMapCoord(ref y);
 
-                WaypointNode waypoint = new WaypointNode();
+                WaypointNode waypoint = new();
                 waypoint.id = result.Read<uint>(0);
                 waypoint.x = x;
                 waypoint.y = y;
@@ -135,7 +135,7 @@ namespace Game
             return _waypointStore.LookupByKey(id);
         }
 
-        Dictionary<uint, WaypointPath> _waypointStore = new Dictionary<uint, WaypointPath>();
+        Dictionary<uint, WaypointPath> _waypointStore = new();
     }
 
     public class WaypointNode
@@ -171,7 +171,7 @@ namespace Game
             nodes = _nodes;
         }
 
-        public List<WaypointNode> nodes = new List<WaypointNode>();
+        public List<WaypointNode> nodes = new();
         public uint id;
     }
 

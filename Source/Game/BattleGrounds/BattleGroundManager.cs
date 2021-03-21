@@ -85,7 +85,7 @@ namespace Game.BattleGrounds
             // update scheduled queues
             if (!m_QueueUpdateScheduler.Empty())
             {
-                List<ScheduledQueueUpdate> scheduled = new List<ScheduledQueueUpdate>();
+                List<ScheduledQueueUpdate> scheduled = new();
                 Extensions.Swap(ref scheduled, ref m_QueueUpdateScheduler);
 
                 for (byte i = 0; i < scheduled.Count; i++)
@@ -379,7 +379,7 @@ namespace Game.BattleGrounds
                     continue;
                 }
 
-                BattlegroundTemplate bgTemplate = new BattlegroundTemplate();
+                BattlegroundTemplate bgTemplate = new();
                 bgTemplate.Id = bgTypeId;
                 float dist = result.Read<float>(3);
                 bgTemplate.MaxStartDistSq = dist * dist;
@@ -439,7 +439,7 @@ namespace Game.BattleGrounds
             if (bgTemplate == null)
                 return;
 
-            BattlefieldList battlefieldList = new BattlefieldList();
+            BattlefieldList battlefieldList = new();
             battlefieldList.BattlemasterGuid = guid;
             battlefieldList.BattlemasterListID = (int)bgTypeId;
             battlefieldList.MinLevel = bgTemplate.GetMinLevel();
@@ -471,7 +471,7 @@ namespace Game.BattleGrounds
             if (time == 0xFFFFFFFF)
                 time = 0;
 
-            AreaSpiritHealerTime areaSpiritHealerTime = new AreaSpiritHealerTime();
+            AreaSpiritHealerTime areaSpiritHealerTime = new();
             areaSpiritHealerTime.HealerGuid = guid;
             areaSpiritHealerTime.TimeLeft = time;
 
@@ -556,7 +556,7 @@ namespace Game.BattleGrounds
         public void ScheduleQueueUpdate(uint arenaMatchmakerRating, BattlegroundQueueTypeId bgQueueTypeId, BattlegroundBracketId bracket_id)
         {
             //we will use only 1 number created of bgTypeId and bracket_id
-            ScheduledQueueUpdate scheduleId = new ScheduledQueueUpdate(arenaMatchmakerRating, bgQueueTypeId, bracket_id);
+            ScheduledQueueUpdate scheduleId = new(arenaMatchmakerRating, bgQueueTypeId, bracket_id);
             if (!m_QueueUpdateScheduler.Contains(scheduleId))
                 m_QueueUpdateScheduler.Add(scheduleId);
         }
@@ -700,7 +700,7 @@ namespace Game.BattleGrounds
             BattlegroundTemplate bgTemplate = GetBattlegroundTemplateByTypeId(bgTypeId);
             if (bgTemplate != null)
             {
-                Dictionary<BattlegroundTypeId, float> selectionWeights = new Dictionary<BattlegroundTypeId, float>();
+                Dictionary<BattlegroundTypeId, float> selectionWeights = new();
 
                 foreach (var mapId in bgTemplate.BattlemasterEntry.MapId)
                 {
@@ -780,12 +780,12 @@ namespace Game.BattleGrounds
             return _battlegroundMapTemplates.LookupByKey(mapId);
         }
 
-        Dictionary<BattlegroundTypeId, BattlegroundData> bgDataStore = new Dictionary<BattlegroundTypeId, BattlegroundData>();
-        Dictionary<BattlegroundQueueTypeId, BattlegroundQueue> m_BattlegroundQueues = new Dictionary<BattlegroundQueueTypeId, BattlegroundQueue>();
-        MultiMap<BattlegroundQueueTypeId, Battleground> m_BGFreeSlotQueue = new MultiMap<BattlegroundQueueTypeId, Battleground>();
-        Dictionary<uint, BattlegroundTypeId> mBattleMastersMap = new Dictionary<uint, BattlegroundTypeId>();
-        Dictionary<BattlegroundTypeId, BattlegroundTemplate> _battlegroundTemplates = new Dictionary<BattlegroundTypeId, BattlegroundTemplate>();
-        Dictionary<uint, BattlegroundTemplate> _battlegroundMapTemplates = new Dictionary<uint, BattlegroundTemplate>();
+        Dictionary<BattlegroundTypeId, BattlegroundData> bgDataStore = new();
+        Dictionary<BattlegroundQueueTypeId, BattlegroundQueue> m_BattlegroundQueues = new();
+        MultiMap<BattlegroundQueueTypeId, Battleground> m_BGFreeSlotQueue = new();
+        Dictionary<uint, BattlegroundTypeId> mBattleMastersMap = new();
+        Dictionary<BattlegroundTypeId, BattlegroundTemplate> _battlegroundTemplates = new();
+        Dictionary<uint, BattlegroundTemplate> _battlegroundMapTemplates = new();
 
         struct ScheduledQueueUpdate
         {
@@ -820,7 +820,7 @@ namespace Game.BattleGrounds
                 return ArenaMatchmakerRating.GetHashCode() ^ QueueId.GetHashCode() ^ BracketId.GetHashCode();
             }
         }
-        List<ScheduledQueueUpdate> m_QueueUpdateScheduler = new List<ScheduledQueueUpdate>();
+        List<ScheduledQueueUpdate> m_QueueUpdateScheduler = new();
         uint m_NextRatedArenaUpdate;
         uint m_UpdateTimer;
         bool m_ArenaTesting;
@@ -835,7 +835,7 @@ namespace Game.BattleGrounds
                 m_ClientBattlegroundIds[i] = new List<uint>();
         }
 
-        public Dictionary<uint, Battleground> m_Battlegrounds = new Dictionary<uint, Battleground>();
+        public Dictionary<uint, Battleground> m_Battlegrounds = new();
         public List<uint>[] m_ClientBattlegroundIds = new List<uint>[(int)BattlegroundBracketId.Max];
         public Battleground Template;
     }

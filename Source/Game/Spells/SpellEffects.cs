@@ -104,7 +104,7 @@ namespace Game.Spells
             if (m_caster == unitTarget)                              // prevent interrupt message
                 Finish();
 
-            SpellInstakillLog data = new SpellInstakillLog();
+            SpellInstakillLog data = new();
             data.Target = unitTarget.GetGUID();
             data.Caster = m_caster.GetGUID();
             data.SpellID = m_spellInfo.Id;
@@ -127,10 +127,10 @@ namespace Game.Spells
                 unitTarget.ToPlayer().EnvironmentalDamage(EnviromentalDamage.Fire, (uint)damage);
             else
             {
-                DamageInfo damageInfo = new DamageInfo(m_caster, unitTarget, (uint)damage, m_spellInfo, m_spellInfo.GetSchoolMask(), DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
+                DamageInfo damageInfo = new(m_caster, unitTarget, (uint)damage, m_spellInfo, m_spellInfo.GetSchoolMask(), DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
                 m_caster.CalcAbsorbResist(damageInfo);
 
-                SpellNonMeleeDamage log = new SpellNonMeleeDamage(m_caster, unitTarget, m_spellInfo, m_SpellVisual, m_spellInfo.GetSchoolMask(), m_castId);
+                SpellNonMeleeDamage log = new(m_caster, unitTarget, m_spellInfo, m_SpellVisual, m_spellInfo.GetSchoolMask(), m_castId);
                 log.damage = damageInfo.GetDamage();
                 log.originalDamage = (uint)damage;
                 log.absorb = damageInfo.GetAbsorb();
@@ -367,7 +367,7 @@ namespace Game.Spells
                 return;
             }
 
-            SpellCastTargets targets = new SpellCastTargets();
+            SpellCastTargets targets = new();
             if (effectHandleMode == SpellEffectHandleMode.LaunchTarget)
             {
                 if (!spellInfo.NeedsToBeTriggeredByCaster(m_spellInfo))
@@ -385,7 +385,7 @@ namespace Game.Spells
                 targets.SetUnitTarget(m_caster);
             }
 
-            Dictionary<SpellValueMod, int> values = new Dictionary<SpellValueMod, int>();
+            Dictionary<SpellValueMod, int> values = new();
             // set basepoints for trigger with value effect
             if (effectInfo.Effect == SpellEffectName.TriggerSpellWithValue)
             {
@@ -416,7 +416,7 @@ namespace Game.Spells
                 return;
             }
 
-            SpellCastTargets targets = new SpellCastTargets();
+            SpellCastTargets targets = new();
             if (effectHandleMode == SpellEffectHandleMode.HitTarget)
             {
                 if (!spellInfo.NeedsToBeTriggeredByCaster(m_spellInfo))
@@ -434,7 +434,7 @@ namespace Game.Spells
                 targets.SetUnitTarget(m_caster);
             }
 
-            Dictionary<SpellValueMod, int> values = new Dictionary<SpellValueMod, int>();
+            Dictionary<SpellValueMod, int> values = new();
             // set basepoints for trigger with value effect
             if (effectInfo.Effect == SpellEffectName.TriggerMissileSpellWithValue)
             {
@@ -484,7 +484,7 @@ namespace Game.Spells
                 }
             }
 
-            Dictionary<SpellValueMod, int> values = new Dictionary<SpellValueMod, int>();
+            Dictionary<SpellValueMod, int> values = new();
             // set basepoints for trigger with value effect
             if (effectInfo.Effect == SpellEffectName.ForceCastWithValue)
             {
@@ -494,7 +494,7 @@ namespace Game.Spells
                 values.Add(SpellValueMod.BasePoint2, damage);
             }
 
-            SpellCastTargets targets = new SpellCastTargets();
+            SpellCastTargets targets = new();
             targets.SetUnitTarget(m_caster);
 
             unitTarget.CastSpell(targets, spellInfo, values, TriggerCastFlags.FullMask);
@@ -533,7 +533,7 @@ namespace Game.Spells
 
             float speedXY, speedZ;
             CalculateJumpSpeeds(effectInfo, m_caster.GetExactDist2d(unitTarget), out speedXY, out speedZ);
-            JumpArrivalCastArgs arrivalCast = new JumpArrivalCastArgs();
+            JumpArrivalCastArgs arrivalCast = new();
             arrivalCast.SpellId = effectInfo.TriggerSpell;
             arrivalCast.Target = unitTarget.GetGUID();
             m_caster.GetMotionMaster().MoveJump(unitTarget, speedXY, speedZ, EventId.Jump, false, arrivalCast);
@@ -553,7 +553,7 @@ namespace Game.Spells
 
             float speedXY, speedZ;
             CalculateJumpSpeeds(effectInfo, m_caster.GetExactDist2d(destTarget), out speedXY, out speedZ);
-            JumpArrivalCastArgs arrivalCast = new JumpArrivalCastArgs();
+            JumpArrivalCastArgs arrivalCast = new();
             arrivalCast.SpellId = effectInfo.TriggerSpell;
             m_caster.GetMotionMaster().MoveJump(destTarget, speedXY, speedZ, EventId.Jump, !m_targets.GetObjectTargetGUID().IsEmpty(), arrivalCast);
         }
@@ -990,7 +990,7 @@ namespace Game.Spells
                 healthGain = m_caster.SpellHealingBonusDone(m_caster, m_spellInfo, healthGain, DamageEffectType.Heal, effectInfo);
                 healthGain = m_caster.SpellHealingBonusTaken(m_caster, m_spellInfo, healthGain, DamageEffectType.Heal, effectInfo);
 
-                HealInfo healInfo = new HealInfo(m_caster, m_caster, healthGain, m_spellInfo, m_spellSchoolMask);
+                HealInfo healInfo = new(m_caster, m_caster, healthGain, m_spellInfo, m_spellSchoolMask);
                 m_caster.HealBySpell(healInfo);
             }
         }
@@ -1046,7 +1046,7 @@ namespace Game.Spells
             num_to_add *= (uint)items_count;
 
             // can the player store the new item?
-            List<ItemPosCount> dest = new List<ItemPosCount>();
+            List<ItemPosCount> dest = new();
             uint no_space = 0;
             InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, newitemid, num_to_add, out no_space);
             if (msg != InventoryResult.Ok)
@@ -1172,7 +1172,7 @@ namespace Game.Spells
                 // Caster not in world, might be spell triggered from aura removal
                 if (!caster.IsInWorld)
                     return;
-                DynamicObject dynObj = new DynamicObject(false);
+                DynamicObject dynObj = new(false);
                 if (!dynObj.CreateDynamicObject(caster.GetMap().GenerateLowGuid(HighGuid.DynamicObject), caster, m_spellInfo, destTarget, radius, DynamicObjectType.AreaSpell, m_SpellVisual))
                     return;
 
@@ -1479,7 +1479,7 @@ namespace Game.Spells
 
             if (player.IsInventoryPos(pos))
             {
-                List<ItemPosCount> dest = new List<ItemPosCount>();
+                List<ItemPosCount> dest = new();
                 InventoryResult msg = player.CanStoreItem(m_CastItem.GetBagSlot(), m_CastItem.GetSlot(), dest, pNewItem, true);
                 if (msg == InventoryResult.Ok)
                 {
@@ -1502,7 +1502,7 @@ namespace Game.Spells
             }
             else if (Player.IsBankPos(pos))
             {
-                List<ItemPosCount> dest = new List<ItemPosCount>();
+                List<ItemPosCount> dest = new();
                 InventoryResult msg = player.CanBankItem(m_CastItem.GetBagSlot(), m_CastItem.GetSlot(), dest, pNewItem, true);
                 if (msg == InventoryResult.Ok)
                 {
@@ -1804,9 +1804,9 @@ namespace Game.Spells
             int remaining = dispelList.Count;
 
             // Ok if exist some buffs for dispel try dispel it
-            List<DispelableAura> successList = new List<DispelableAura>();
+            List<DispelableAura> successList = new();
 
-            DispelFailed dispelFailed = new DispelFailed();
+            DispelFailed dispelFailed = new();
             dispelFailed.CasterGUID = m_caster.GetGUID();
             dispelFailed.VictimGUID = unitTarget.GetGUID();
             dispelFailed.SpellID = m_spellInfo.Id;
@@ -1851,7 +1851,7 @@ namespace Game.Spells
             if (successList.Empty())
                 return;
 
-            SpellDispellLog spellDispellLog = new SpellDispellLog();
+            SpellDispellLog spellDispellLog = new();
             spellDispellLog.IsBreak = false; // TODO: use me
             spellDispellLog.IsSteal = false;
 
@@ -1941,7 +1941,7 @@ namespace Game.Spells
             if (!m_caster.IsInWorld)
                 return;
 
-            DynamicObject dynObj = new DynamicObject(true);
+            DynamicObject dynObj = new(true);
             if (!dynObj.CreateDynamicObject(m_caster.GetMap().GenerateLowGuid(HighGuid.DynamicObject), m_caster, m_spellInfo, destTarget, radius, DynamicObjectType.FarsightFocus, m_SpellVisual))
                 return;
 
@@ -2734,7 +2734,7 @@ namespace Game.Spells
 
             Map map = target.GetMap();
 
-            Position pos = new Position(x, y, z, target.GetOrientation());
+            Position pos = new(x, y, z, target.GetOrientation());
             Quaternion rotation = Quaternion.fromEulerAnglesZYX(target.GetOrientation(), 0.0f, 0.0f);
             GameObject go = GameObject.CreateGameObject((uint)effectInfo.MiscValue, map, pos, rotation, 255, GameObjectState.Ready);
             if (!go)
@@ -3294,7 +3294,7 @@ namespace Game.Spells
 
             //CREATE DUEL FLAG OBJECT
             Map map = m_caster.GetMap();
-            Position pos = new Position()
+            Position pos = new()
             {
                 posX = m_caster.GetPositionX() + (unitTarget.GetPositionX() - m_caster.GetPositionX()) / 2,
                 posY = m_caster.GetPositionY() + (unitTarget.GetPositionY() - m_caster.GetPositionY()) / 2,
@@ -3322,7 +3322,7 @@ namespace Game.Spells
             //END
 
             // Send request
-            DuelRequested packet = new DuelRequested();
+            DuelRequested packet = new();
             packet.ArbiterGUID = go.GetGUID();
             packet.RequestedByGUID = caster.GetGUID();
             packet.RequestedByWowAccount = caster.GetSession().GetAccountGUID();
@@ -3331,7 +3331,7 @@ namespace Game.Spells
             target.SendPacket(packet);
 
             // create duel-info
-            DuelInfo duel = new DuelInfo();
+            DuelInfo duel = new();
             duel.initiator = caster;
             duel.opponent = target;
             duel.startTime = 0;
@@ -3339,7 +3339,7 @@ namespace Game.Spells
             duel.isMounted = (GetSpellInfo().Id == 62875); // Mounted Duel
             caster.duel = duel;
 
-            DuelInfo duel2 = new DuelInfo();
+            DuelInfo duel2 = new();
             duel2.initiator = caster;
             duel2.opponent = caster;
             duel2.startTime = 0;
@@ -3395,7 +3395,7 @@ namespace Game.Spells
             if (spellInfo == null)
                 return;
 
-            Spell spell = new Spell(player, spellInfo, TriggerCastFlags.FullMask);
+            Spell spell = new(player, spellInfo, TriggerCastFlags.FullMask);
             spell.SendSpellCooldown();
         }
 
@@ -3421,7 +3421,7 @@ namespace Game.Spells
             if (gameObjTarget == null)
                 return;
 
-            ScriptInfo activateCommand = new ScriptInfo();
+            ScriptInfo activateCommand = new();
             activateCommand.command = ScriptCommands.ActivateObject;
 
             // int unk = effectInfo.MiscValue; // This is set for EffectActivateObject spells; needs research
@@ -3467,7 +3467,7 @@ namespace Game.Spells
             if (glyphProperties != null)
                 player.CastSpell(player, glyphProperties.SpellID, true);
 
-            ActiveGlyphs activeGlyphs = new ActiveGlyphs();
+            ActiveGlyphs activeGlyphs = new();
             activeGlyphs.Glyphs.Add(new GlyphBinding(m_misc.SpellId, (ushort)glyphId));
             activeGlyphs.IsFullUpdate = false;
             player.SendPacket(activeGlyphs);
@@ -3641,7 +3641,7 @@ namespace Game.Spells
                 m_caster.GetClosePoint(out x, out y, out z, SharedConst.DefaultPlayerBoundingRadius);
 
             Map map = m_caster.GetMap();
-            Position pos = new Position(x, y, z, m_caster.GetOrientation());
+            Position pos = new(x, y, z, m_caster.GetOrientation());
             Quaternion rotation = Quaternion.fromEulerAnglesZYX(m_caster.GetOrientation(), 0.0f, 0.0f);
             GameObject go = GameObject.CreateGameObject((uint)effectInfo.MiscValue, map, pos, rotation, 255, GameObjectState.Ready);
             if (!go)
@@ -3799,19 +3799,19 @@ namespace Game.Spells
             float dist = m_caster.GetVisibilityRange();
 
             // clear focus
-            BreakTarget breakTarget = new BreakTarget();
+            BreakTarget breakTarget = new();
             breakTarget.UnitGUID = m_caster.GetGUID();
-            MessageDistDelivererToHostile notifierBreak = new MessageDistDelivererToHostile(m_caster, breakTarget, dist);
+            MessageDistDelivererToHostile notifierBreak = new(m_caster, breakTarget, dist);
             Cell.VisitWorldObjects(m_caster, notifierBreak, dist);
 
             // and selection
-            ClearTarget clearTarget = new ClearTarget();
+            ClearTarget clearTarget = new();
             clearTarget.Guid = m_caster.GetGUID();
-            MessageDistDelivererToHostile notifierClear = new MessageDistDelivererToHostile(m_caster, clearTarget, dist);
+            MessageDistDelivererToHostile notifierClear = new(m_caster, clearTarget, dist);
             Cell.VisitWorldObjects(m_caster, notifierClear, dist);
 
             // we should also force pets to remove us from current target
-            List<Unit> attackerSet = new List<Unit>();
+            List<Unit> attackerSet = new();
             foreach (var unit in m_caster.GetAttackers())
                 if (unit.GetTypeId() == TypeId.Unit && !unit.CanHaveThreatList())
                     attackerSet.Add(unit);
@@ -4134,7 +4134,7 @@ namespace Game.Spells
             if (!unitTarget)
                 return;
 
-            Position pos = new Position();
+            Position pos = new();
             if (effectInfo.Effect == SpellEffectName.PullTowardsDest)
             {
                 if (m_targets.HasDst())
@@ -4184,7 +4184,7 @@ namespace Game.Spells
 
             int mechanic = effectInfo.MiscValue;
 
-            List<KeyValuePair<uint, ObjectGuid>> dispel_list = new List<KeyValuePair<uint, ObjectGuid>>();
+            List<KeyValuePair<uint, ObjectGuid>> dispel_list = new();
 
             var auras = unitTarget.GetOwnedAuras();
             foreach (var pair in auras)
@@ -4401,7 +4401,7 @@ namespace Game.Spells
             if (goinfo.type == GameObjectTypes.Ritual)
                 m_caster.GetPosition(out fx, out fy, out fz);
 
-            Position pos = new Position(fx, fy, fz, m_caster.GetOrientation());
+            Position pos = new(fx, fy, fz, m_caster.GetOrientation());
             Quaternion rotation = Quaternion.fromEulerAnglesZYX(m_caster.GetOrientation(), 0.0f, 0.0f);
             GameObject go = GameObject.CreateGameObject(name_id, cMap, pos, rotation, 255, GameObjectState.Ready);
             if (!go)
@@ -4573,7 +4573,7 @@ namespace Game.Spells
             if (unitTarget == null || unitTarget == m_caster)                 // can't steal from self
                 return;
 
-            List<DispelableAura> stealList = new List<DispelableAura>();
+            List<DispelableAura> stealList = new();
 
             // Create dispel mask by dispel type
             uint dispelMask = SpellInfo.GetDispelMask((DispelType)effectInfo.MiscValue);
@@ -4612,9 +4612,9 @@ namespace Game.Spells
             int remaining = stealList.Count;
 
             // Ok if exist some buffs for dispel try dispel it
-            List<Tuple<uint, ObjectGuid>> successList = new List<Tuple<uint, ObjectGuid>>();
+            List<Tuple<uint, ObjectGuid>> successList = new();
 
-            DispelFailed dispelFailed = new DispelFailed();
+            DispelFailed dispelFailed = new();
             dispelFailed.CasterGUID = m_caster.GetGUID();
             dispelFailed.VictimGUID = unitTarget.GetGUID();
             dispelFailed.SpellID = m_spellInfo.Id;
@@ -4647,7 +4647,7 @@ namespace Game.Spells
             if (successList.Empty())
                 return;
 
-            SpellDispellLog spellDispellLog = new SpellDispellLog();
+            SpellDispellLog spellDispellLog = new();
             spellDispellLog.IsBreak = false; // TODO: use me
             spellDispellLog.IsSteal = true;
 
@@ -5117,7 +5117,7 @@ namespace Game.Spells
 
             Player player = unitTarget.ToPlayer();
 
-            WorldLocation homeLoc = new WorldLocation();
+            WorldLocation homeLoc = new();
             uint areaId = player.GetAreaId();
 
             if (effectInfo.MiscValue != 0)
@@ -5137,7 +5137,7 @@ namespace Game.Spells
             Log.outDebug(LogFilter.Spells, "EffectBind: New homebind MapId: {0}, AreaId: {1}, {2}, ", homeLoc.GetMapId(), areaId, homeLoc);
 
             // zone update
-            PlayerBound packet = new PlayerBound(m_caster.GetGUID(), areaId);
+            PlayerBound packet = new(m_caster.GetGUID(), areaId);
             player.SendPacket(packet);
         }
 
@@ -5183,7 +5183,7 @@ namespace Game.Spells
                 m_caster.GetClosePoint(out x, out y, out z, SharedConst.DefaultPlayerBoundingRadius);
 
             Map map = m_caster.GetMap();
-            Position pos = new Position(x, y, z, m_caster.GetOrientation());
+            Position pos = new(x, y, z, m_caster.GetOrientation());
             Quaternion rot = Quaternion.fromEulerAnglesZYX(m_caster.GetOrientation(), 0.0f, 0.0f);
             GameObject go = GameObject.CreateGameObject(goId, map, pos, rot, 255, GameObjectState.Ready);
 
@@ -5362,7 +5362,7 @@ namespace Game.Spells
             if (collectionMgr == null)
                 return;
 
-            List<uint> bonusList = new List<uint>();
+            List<uint> bonusList = new();
             bonusList.Add(collectionMgr.GetHeirloomBonus(m_misc.Data0));
 
             DoCreateItem(effIndex, m_misc.Data0, ItemContext.None, bonusList);
@@ -5607,7 +5607,7 @@ namespace Game.Spells
             if (!unitTarget || unitTarget.GetTypeId() != TypeId.Player)
                 return;
 
-            PvPCredit packet = new PvPCredit();
+            PvPCredit packet = new();
             packet.Honor = damage;
             packet.OriginalHonor = damage;
 

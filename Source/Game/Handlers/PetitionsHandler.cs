@@ -75,7 +75,7 @@ namespace Game
                 return;
             }
 
-            List<ItemPosCount> dest = new List<ItemPosCount>();
+            List<ItemPosCount> dest = new();
             InventoryResult msg = GetPlayer().CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, charterItemID, pProto.GetBuyCount());
             if (msg != InventoryResult.Ok)
             {
@@ -126,7 +126,7 @@ namespace Game
 
         void SendPetitionSigns(Petition petition, Player sendTo)
         {
-            ServerPetitionShowSignatures signaturesPacket = new ServerPetitionShowSignatures();
+            ServerPetitionShowSignatures signaturesPacket = new();
             signaturesPacket.Item = petition.PetitionGuid;
             signaturesPacket.Owner = petition.ownerGuid;
             signaturesPacket.OwnerAccountID = ObjectGuid.Create(HighGuid.WowAccount, Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(petition.ownerGuid));
@@ -134,7 +134,7 @@ namespace Game
 
             foreach (var signature in petition.signatures)
             {
-                ServerPetitionShowSignatures.PetitionSignature signaturePkt = new ServerPetitionShowSignatures.PetitionSignature();
+                ServerPetitionShowSignatures.PetitionSignature signaturePkt = new();
                 signaturePkt.Signer = signature.PlayerGuid;
                 signaturePkt.Choice = 0;
                 signaturesPacket.Signatures.Add(signaturePkt);
@@ -151,7 +151,7 @@ namespace Game
 
         public void SendPetitionQuery(ObjectGuid petitionGuid)
         {
-            QueryPetitionResponse responsePacket = new QueryPetitionResponse();
+            QueryPetitionResponse responsePacket = new();
             responsePacket.PetitionID = (uint)petitionGuid.GetCounter();  // PetitionID (in Trinity always same as GUID_LOPART(petition guid))
 
             Petition petition = Global.PetitionMgr.GetPetition(petitionGuid);
@@ -165,7 +165,7 @@ namespace Game
 
             uint reqSignatures = WorldConfig.GetUIntValue(WorldCfg.MinPetitionSigns);
 
-            PetitionInfo petitionInfo = new PetitionInfo();
+            PetitionInfo petitionInfo = new();
             petitionInfo.PetitionID = (int)petitionGuid.GetCounter();
             petitionInfo.Petitioner = petition.ownerGuid;
             petitionInfo.MinSignatures = reqSignatures;
@@ -206,7 +206,7 @@ namespace Game
             // update petition storage
             petition.UpdateName(packet.NewGuildName);
 
-            PetitionRenameGuildResponse renameResponse = new PetitionRenameGuildResponse();
+            PetitionRenameGuildResponse renameResponse = new();
             renameResponse.PetitionGuid = packet.PetitionGuid;
             renameResponse.NewGuildName = packet.NewGuildName;
             SendPacket(renameResponse);
@@ -252,7 +252,7 @@ namespace Game
             // Client doesn't allow to sign petition two times by one character, but not check sign by another character from same account
             // not allow sign another player from already sign player account
 
-            PetitionSignResults signResult = new PetitionSignResults();
+            PetitionSignResults signResult = new();
             signResult.Player = GetPlayer().GetGUID();
             signResult.Item = packet.PetitionGUID;
 
@@ -366,7 +366,7 @@ namespace Game
             if (GetPlayer().GetGUID() != petition.ownerGuid)
                 return;
 
-            TurnInPetitionResult resultPacket = new TurnInPetitionResult();
+            TurnInPetitionResult resultPacket = new();
 
             // Check if player is already in a guild
             if (GetPlayer().GetGuildId() != 0)
@@ -399,7 +399,7 @@ namespace Game
             GetPlayer().DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
 
             // Create guild
-            Guild guild = new Guild();
+            Guild guild = new();
             if (!guild.Create(GetPlayer(), name))
                 return;
 
@@ -408,7 +408,7 @@ namespace Game
 
             Guild.SendCommandResult(this, GuildCommandType.CreateGuild, GuildCommandError.Success, name);
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
 
             // Add members from signatures
             foreach (var signature in signatures)
@@ -440,10 +440,10 @@ namespace Game
                 return;
             }
 
-            WorldPacket data = new WorldPacket(ServerOpcodes.PetitionShowList);
+            WorldPacket data = new(ServerOpcodes.PetitionShowList);
             data.WritePackedGuid(guid);                                           // npc guid
 
-            ServerPetitionShowList packet = new ServerPetitionShowList();
+            ServerPetitionShowList packet = new();
             packet.Unit = guid;
             packet.Price = WorldConfig.GetUIntValue(WorldCfg.CharterCostGuild);
             SendPacket(packet);

@@ -221,7 +221,7 @@ namespace Game
             if (bg.IsArena())
                 return;
 
-            PVPMatchStatisticsMessage pvpMatchStatistics = new PVPMatchStatisticsMessage();
+            PVPMatchStatisticsMessage pvpMatchStatistics = new();
             bg.BuildPvPLogDataPacket(out pvpMatchStatistics.Data);
             SendPacket(pvpMatchStatistics);
         }
@@ -384,7 +384,7 @@ namespace Game
                         at.SaveToDB();
                     }
                 }
-                BattlefieldStatusNone battlefieldStatus = new BattlefieldStatusNone();
+                BattlefieldStatusNone battlefieldStatus = new();
                 battlefieldStatus.Ticket = battlefieldPort.Ticket;
                 SendPacket(battlefieldStatus);
 
@@ -581,7 +581,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.RequestRatedPvpInfo)]
         void HandleRequestRatedPvpInfo(RequestRatedPvpInfo packet)
         {
-            RatedPvpInfo ratedPvpInfo = new RatedPvpInfo();
+            RatedPvpInfo ratedPvpInfo = new();
             SendPacket(ratedPvpInfo);
         }
 
@@ -589,7 +589,7 @@ namespace Game
         void HandleGetPVPOptionsEnabled(GetPVPOptionsEnabled packet)
         {
             // This packet is completely irrelevant, it triggers PVP_TYPES_ENABLED lua event but that is not handled in interface code as of 6.1.2
-            PVPOptionsEnabled pvpOptionsEnabled = new PVPOptionsEnabled();
+            PVPOptionsEnabled pvpOptionsEnabled = new();
             pvpOptionsEnabled.PugBattlegrounds = true;
             SendPacket(new PVPOptionsEnabled());
         }

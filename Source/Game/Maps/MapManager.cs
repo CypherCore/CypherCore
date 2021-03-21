@@ -484,9 +484,9 @@ namespace Game.Entities
         public void DecreaseScheduledScriptCount(uint count) { _scheduledScripts -= count; }
         public bool IsScriptScheduled() { return _scheduledScripts > 0; }
 
-        Dictionary<uint, Map> i_maps = new Dictionary<uint, Map>();
-        IntervalTimer i_timer = new IntervalTimer();
-        object _mapsLock= new object();
+        Dictionary<uint, Map> i_maps = new();
+        IntervalTimer i_timer = new();
+        object _mapsLock= new();
         uint i_gridCleanUpDelay;
         BitSet _freeInstanceIds;
         uint _nextInstanceId;

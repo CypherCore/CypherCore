@@ -191,8 +191,8 @@ namespace Game.Chat
             if (handler.NeedReportToTarget(target))
                 target.SendSysMessage(CypherStrings.YoursSpellflatidChanged, handler.GetNameLink(), spellflatid, val, mark);
 
-            SetSpellModifier packet = new SetSpellModifier(ServerOpcodes.SetFlatSpellModifier);
-            SpellModifierInfo spellMod = new SpellModifierInfo();
+            SetSpellModifier packet = new(ServerOpcodes.SetFlatSpellModifier);
+            SpellModifierInfo spellMod = new();
             spellMod.ModIndex = op;
             SpellModifierData modData;
             modData.ClassIndex = spellflatid;
@@ -601,7 +601,7 @@ namespace Game.Chat
             Global.CharacterCacheStorage.UpdateCharacterGender(target.GetGUID(), (byte)gender);
 
             // Generate random customizations
-            List<ChrCustomizationChoice> customizations = new List<ChrCustomizationChoice>();
+            List<ChrCustomizationChoice> customizations = new();
 
             var options = Global.DB2Mgr.GetCustomiztionOptions(target.GetRace(), gender);
             WorldSession worldSession = target.GetSession();
@@ -620,7 +620,7 @@ namespace Game.Chat
                         continue;
 
                     ChrCustomizationChoiceRecord choiceEntry = choicesForOption[0];
-                    ChrCustomizationChoice choice = new ChrCustomizationChoice();
+                    ChrCustomizationChoice choice = new();
                     choice.ChrCustomizationOptionID = option.Id;
                     choice.ChrCustomizationChoiceID = choiceEntry.Id;
                     customizations.Add(choice);

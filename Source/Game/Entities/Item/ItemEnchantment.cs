@@ -160,12 +160,12 @@ namespace Game.Entities
             return 0;
         }
 
-        static Dictionary<uint, RandomBonusListIds> _storage = new Dictionary<uint, RandomBonusListIds>();
+        static Dictionary<uint, RandomBonusListIds> _storage = new();
     }
 
     public class RandomBonusListIds
     {
-        public List<uint> BonusListIDs = new List<uint>();
-        public List<double> Chances = new List<double>();
+        public List<uint> BonusListIDs = new();
+        public List<double> Chances = new();
     }
 }

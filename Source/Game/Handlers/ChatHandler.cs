@@ -282,7 +282,7 @@ namespace Game
 
                         Global.ScriptMgr.OnPlayerChat(GetPlayer(), type, lang, msg, group);
 
-                        ChatPkt data = new ChatPkt();
+                        ChatPkt data = new();
                         data.Initialize(type, lang, sender, null, msg);
                         group.BroadcastPacket(data, false, group.GetMemberGroup(GetPlayer().GetGUID()));
                     }
@@ -322,7 +322,7 @@ namespace Game
 
                         Global.ScriptMgr.OnPlayerChat(GetPlayer(), type, lang, msg, group);
 
-                        ChatPkt data = new ChatPkt();
+                        ChatPkt data = new();
                         data.Initialize(type, lang, sender, null, msg);
                         group.BroadcastPacket(data, false);
                     }
@@ -335,7 +335,7 @@ namespace Game
 
                         Global.ScriptMgr.OnPlayerChat(GetPlayer(), type, lang, msg, group);
 
-                        ChatPkt data = new ChatPkt();
+                        ChatPkt data = new();
                         //in Battleground, raid warning is sent only to players in Battleground - code is ok
                         data.Initialize(ChatMsg.RaidWarning, lang, sender, null, msg);
                         group.BroadcastPacket(data, false);
@@ -368,7 +368,7 @@ namespace Game
 
                         Global.ScriptMgr.OnPlayerChat(GetPlayer(), type, lang, msg, group);
 
-                        ChatPkt packet = new ChatPkt();
+                        ChatPkt packet = new();
                         packet.Initialize(type, lang, sender, null, msg);
                         group.BroadcastPacket(packet, false);
                         break;
@@ -449,7 +449,7 @@ namespace Game
                                 subGroup = sender.GetSubGroup();
                         }
 
-                        ChatPkt data = new ChatPkt();
+                        ChatPkt data = new();
                         data.Initialize(type, isLogged ? Language.AddonLogged : Language.Addon, sender, null, text, 0, "", Locale.enUS, prefix);
                         group.BroadcastAddonMessagePacket(data, prefix, true, subGroup, sender.GetGUID());
                         break;
@@ -592,7 +592,7 @@ namespace Game
                     break;
             }
 
-            STextEmote textEmote = new STextEmote();
+            STextEmote textEmote = new();
             textEmote.SourceGUID = GetPlayer().GetGUID();
             textEmote.SourceAccountGUID = GetAccountGUID();
             textEmote.TargetGUID = packet.Target;
@@ -620,7 +620,7 @@ namespace Game
             if (!player || player.GetSession() == null)
                 return;
 
-            ChatPkt data = new ChatPkt();
+            ChatPkt data = new();
             data.Initialize(ChatMsg.Ignored, Language.Universal, GetPlayer(), GetPlayer(), GetPlayer().GetName());
             player.SendPacket(data);
         }

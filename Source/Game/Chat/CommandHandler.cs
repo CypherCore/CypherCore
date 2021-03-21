@@ -73,7 +73,7 @@ namespace Game.Chat
 
         public bool ExecuteCommandInTable(ICollection<ChatCommand> table, string text, string fullcmd)
         {
-            StringArguments args = new StringArguments(text);
+            StringArguments args = new(text);
             string cmd = args.NextString();
 
             foreach (var command in table)
@@ -170,7 +170,7 @@ namespace Game.Chat
 
         public bool ShowHelpForCommand(ICollection<ChatCommand> table, string text)
         {
-            StringArguments args = new StringArguments(text);
+            StringArguments args = new(text);
             if (!args.Empty())
             {
                 string cmd = args.NextString();
@@ -626,8 +626,8 @@ namespace Game.Chat
                 return null;
 
             Player pl = _session.GetPlayer();
-            NearestGameObjectCheck check = new NearestGameObjectCheck(pl);
-            GameObjectLastSearcher searcher = new GameObjectLastSearcher(pl, check);
+            NearestGameObjectCheck check = new(pl);
+            GameObjectLastSearcher searcher = new(pl, check);
             Cell.VisitGridObjects(pl, searcher, MapConst.SizeofGrids);
             return searcher.GetTarget();
         }
@@ -764,7 +764,7 @@ namespace Game.Chat
             if (escapeCharacters)
                 str.Replace("|", "||");
 
-            ChatPkt messageChat = new ChatPkt();
+            ChatPkt messageChat = new();
 
             var lines = new StringArray(str, "\n", "\r");
             for (var i = 0; i < lines.Length; ++i)
@@ -782,7 +782,7 @@ namespace Game.Chat
         public void SendGlobalSysMessage(string str)
         {
             // Chat output
-            ChatPkt data = new ChatPkt();
+            ChatPkt data = new();
             data.Initialize(ChatMsg.System, Language.Universal, null, null, str);
             Global.WorldMgr.SendGlobalMessage(data);
         }
@@ -790,7 +790,7 @@ namespace Game.Chat
         public void SendGlobalGMSysMessage(string str)
         {
             // Chat output
-            ChatPkt data = new ChatPkt();
+            ChatPkt data = new();
             data.Initialize(ChatMsg.System, Language.Universal, null, null, str);
             Global.WorldMgr.SendGlobalGMMessage(data);
         }
@@ -893,7 +893,7 @@ namespace Game.Chat
 
         void Send(string msg)
         {
-            ChatPkt chat = new ChatPkt();
+            ChatPkt chat = new();
             chat.Initialize(ChatMsg.Whisper, Language.Addon, GetSession().GetPlayer(), GetSession().GetPlayer(), msg, 0, "", Locale.enUS, PREFIX);
             GetSession().SendPacket(chat);
         }
@@ -919,7 +919,7 @@ namespace Game.Chat
             if (!hadAck)
                 SendAck();
 
-            StringBuilder msg = new StringBuilder("m");
+            StringBuilder msg = new("m");
             msg.Append(echo, 0, 4);
             string body = str;
             if (escapeCharacters)

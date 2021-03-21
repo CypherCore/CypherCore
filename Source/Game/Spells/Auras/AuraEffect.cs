@@ -1582,7 +1582,7 @@ namespace Game.Spells
 
             if (apply)
             {
-                List<Unit> targets = new List<Unit>();
+                List<Unit> targets = new();
                 var u_check = new AnyUnfriendlyUnitInObjectRangeCheck(target, target, target.GetMap().GetVisibilityRange());
                 var searcher = new UnitListSearcher(target, targets, u_check);
 
@@ -4001,7 +4001,7 @@ namespace Game.Spells
             if (!target.IsTypeId(TypeId.Player))
                 return;
 
-            FlagArray128 mask = new FlagArray128();
+            FlagArray128 mask = new();
             var noReagent = target.GetAuraEffectsByType(AuraType.NoReagentUse);
             foreach (var eff in noReagent)
             {
@@ -4395,7 +4395,7 @@ namespace Game.Spells
             uint noSpaceForCount;
             uint count = (uint)m_amount;
 
-            List<ItemPosCount> dest = new List<ItemPosCount>();
+            List<ItemPosCount> dest = new();
             InventoryResult msg = plCaster.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, GetSpellEffectInfo().ItemType, count, out noSpaceForCount);
             if (msg != InventoryResult.Ok)
             {
@@ -4840,7 +4840,7 @@ namespace Game.Spells
                 caster.SpellHitResult(target, GetSpellInfo(), false) != SpellMissInfo.None)
                 return;
 
-            CleanDamage cleanDamage = new CleanDamage(0, 0, WeaponAttackType.BaseAttack, MeleeHitOutcome.Normal);
+            CleanDamage cleanDamage = new(0, 0, WeaponAttackType.BaseAttack, MeleeHitOutcome.Normal);
 
             // AOE spells are not affected by the new periodic system.
             bool isAreaAura = GetSpellEffectInfo().IsAreaAuraEffect() || GetSpellEffectInfo().IsEffect(SpellEffectName.PersistentAreaAura);
@@ -4928,7 +4928,7 @@ namespace Game.Spells
                 caster.ApplyResilience(target, ref dmg);
             damage = dmg;
 
-            DamageInfo damageInfo = new DamageInfo(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetSchoolMask(), DamageEffectType.DOT, WeaponAttackType.BaseAttack);
+            DamageInfo damageInfo = new(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetSchoolMask(), DamageEffectType.DOT, WeaponAttackType.BaseAttack);
             caster.CalcAbsorbResist(damageInfo);
             damage = damageInfo.GetDamage();
 
@@ -4951,7 +4951,7 @@ namespace Game.Spells
             if (overkill < 0)
                 overkill = 0;
 
-            SpellPeriodicAuraLogInfo pInfo = new SpellPeriodicAuraLogInfo(this, damage, dmg, (uint)overkill, absorb, resist, 0.0f, crit);
+            SpellPeriodicAuraLogInfo pInfo = new(this, damage, dmg, (uint)overkill, absorb, resist, 0.0f, crit);
 
             caster.DealDamage(target, damage, cleanDamage, DamageEffectType.DOT, GetSpellInfo().GetSchoolMask(), GetSpellInfo(), true);
 
@@ -4974,7 +4974,7 @@ namespace Game.Spells
                 caster.SpellHitResult(target, GetSpellInfo(), false) != SpellMissInfo.None)
                 return;
 
-            CleanDamage cleanDamage = new CleanDamage(0, 0, WeaponAttackType.BaseAttack, MeleeHitOutcome.Normal);
+            CleanDamage cleanDamage = new(0, 0, WeaponAttackType.BaseAttack, MeleeHitOutcome.Normal);
 
             bool isAreaAura = GetSpellEffectInfo().IsAreaAuraEffect() || GetSpellEffectInfo().IsEffect(SpellEffectName.PersistentAreaAura);
             // ignore negative values (can be result apply spellmods to aura damage
@@ -5015,14 +5015,14 @@ namespace Game.Spells
                 caster.ApplyResilience(target, ref dmg);
             damage = dmg;
 
-            DamageInfo damageInfo = new DamageInfo(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetSchoolMask(), DamageEffectType.DOT, WeaponAttackType.BaseAttack);
+            DamageInfo damageInfo = new(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetSchoolMask(), DamageEffectType.DOT, WeaponAttackType.BaseAttack);
             caster.CalcAbsorbResist(damageInfo);
 
             uint absorb = damageInfo.GetAbsorb();
             uint resist = damageInfo.GetResist();
 
             // SendSpellNonMeleeDamageLog expects non-absorbed/non-resisted damage
-            SpellNonMeleeDamage log = new SpellNonMeleeDamage(caster, target, GetSpellInfo(), GetBase().GetSpellVisual(), GetSpellInfo().GetSchoolMask(), GetBase().GetCastGUID());
+            SpellNonMeleeDamage log = new(caster, target, GetSpellInfo(), GetBase().GetSpellVisual(), GetSpellInfo().GetSchoolMask(), GetBase().GetCastGUID());
             log.damage = damage;
             log.originalDamage = dmg;
             log.absorb = absorb;
@@ -5052,7 +5052,7 @@ namespace Game.Spells
                 uint heal = (caster.SpellHealingBonusDone(caster, GetSpellInfo(), (uint)(new_damage * gainMultiplier), DamageEffectType.DOT, GetSpellEffectInfo(), GetBase().GetStackAmount()));
                 heal = (caster.SpellHealingBonusTaken(caster, GetSpellInfo(), heal, DamageEffectType.DOT, GetSpellEffectInfo(), GetBase().GetStackAmount()));
 
-                HealInfo healInfo = new HealInfo(caster, caster, heal, GetSpellInfo(), GetSpellInfo().GetSchoolMask());
+                HealInfo healInfo = new(caster, caster, heal, GetSpellInfo(), GetSpellInfo().GetSchoolMask());
                 caster.HealBySpell(healInfo);
 
                 caster.GetThreatManager().ForwardThreatForAssistingMe(caster, healInfo.GetEffectiveHeal() * 0.5f, GetSpellInfo());
@@ -5087,7 +5087,7 @@ namespace Game.Spells
 
             damage = (uint)(damage * gainMultiplier);
 
-            HealInfo healInfo = new HealInfo(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetSchoolMask());
+            HealInfo healInfo = new(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetSchoolMask());
             caster.HealBySpell(healInfo);
             caster.ProcSkillsAndAuras(target, ProcFlags.DonePeriodic, ProcFlags.TakenPeriodic, ProcFlagsSpellType.Heal, ProcFlagsSpellPhase.None, ProcFlagsHit.Normal, null, null, healInfo);
         }
@@ -5155,11 +5155,11 @@ namespace Game.Spells
 
             uint heal = (uint)damage;
 
-            HealInfo healInfo = new HealInfo(caster, target, heal, GetSpellInfo(), GetSpellInfo().GetSchoolMask());
+            HealInfo healInfo = new(caster, target, heal, GetSpellInfo(), GetSpellInfo().GetSchoolMask());
             caster.CalcHealAbsorb(healInfo);
             caster.DealHeal(healInfo);
 
-            SpellPeriodicAuraLogInfo pInfo = new SpellPeriodicAuraLogInfo(this, heal, (uint)damage, heal - healInfo.GetEffectiveHeal(), healInfo.GetAbsorb(), 0, 0.0f, crit);
+            SpellPeriodicAuraLogInfo pInfo = new(this, heal, (uint)damage, heal - healInfo.GetEffectiveHeal(), healInfo.GetAbsorb(), 0, 0.0f, crit);
             target.SendPeriodicAuraLog(pInfo);
 
             target.GetThreatManager().ForwardThreatForAssistingMe(caster, healInfo.GetEffectiveHeal() * 0.5f, GetSpellInfo());
@@ -5199,7 +5199,7 @@ namespace Game.Spells
             int drainedAmount = -target.ModifyPower(powerType, -drainAmount);
             float gainMultiplier = GetSpellEffectInfo().CalcValueMultiplier(caster);
 
-            SpellPeriodicAuraLogInfo pInfo = new SpellPeriodicAuraLogInfo(this, (uint)drainedAmount, (uint)drainAmount, 0, 0, 0, gainMultiplier, false);
+            SpellPeriodicAuraLogInfo pInfo = new(this, (uint)drainedAmount, (uint)drainAmount, 0, 0, 0, gainMultiplier, false);
 
             int gainAmount = (int)(drainedAmount * gainMultiplier);
             int gainedAmount = 0;
@@ -5252,7 +5252,7 @@ namespace Game.Spells
             // ignore negative values (can be result apply spellmods to aura damage
             int amount = Math.Max(m_amount, 0) * target.GetMaxPower(powerType) / 100;
 
-            SpellPeriodicAuraLogInfo pInfo = new SpellPeriodicAuraLogInfo(this, (uint)amount, (uint)amount, 0, 0, 0, 0.0f, false);
+            SpellPeriodicAuraLogInfo pInfo = new(this, (uint)amount, (uint)amount, 0, 0, 0, 0.0f, false);
 
             int gain = target.ModifyPower(powerType, amount);
 
@@ -5281,7 +5281,7 @@ namespace Game.Spells
             // ignore negative values (can be result apply spellmods to aura damage
             int amount = Math.Max(m_amount, 0);
 
-            SpellPeriodicAuraLogInfo pInfo = new SpellPeriodicAuraLogInfo(this, (uint)amount, (uint)amount, 0, 0, 0, 0.0f, false);
+            SpellPeriodicAuraLogInfo pInfo = new(this, (uint)amount, (uint)amount, 0, 0, 0, 0.0f, false);
             int gain = target.ModifyPower(powerType, amount);
 
             if (caster != null)
@@ -5312,7 +5312,7 @@ namespace Game.Spells
 
             SpellInfo spellProto = GetSpellInfo();
             // maybe has to be sent different to client, but not by SMSG_PERIODICAURALOG
-            SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(caster, target, spellProto, GetBase().GetSpellVisual(), spellProto.SchoolMask, GetBase().GetCastGUID());
+            SpellNonMeleeDamage damageInfo = new(caster, target, spellProto, GetBase().GetSpellVisual(), spellProto.SchoolMask, GetBase().GetCastGUID());
             // no SpellDamageBonus for burn mana
             caster.CalculateSpellDamageTaken(damageInfo, (int)(gain * dmgMultiplier), spellProto);
 
@@ -5331,7 +5331,7 @@ namespace Game.Spells
 
             caster.DealSpellDamage(damageInfo, true);
 
-            DamageInfo dotDamageInfo = new DamageInfo(damageInfo, DamageEffectType.DOT, WeaponAttackType.BaseAttack, hitMask);
+            DamageInfo dotDamageInfo = new(damageInfo, DamageEffectType.DOT, WeaponAttackType.BaseAttack, hitMask);
             caster.ProcSkillsAndAuras(target, procAttacker, procVictim, spellTypeMask, ProcFlagsSpellPhase.None, hitMask, null, dotDamageInfo, null);
 
             caster.SendSpellNonMeleeDamageLog(damageInfo);
@@ -5390,7 +5390,7 @@ namespace Game.Spells
                 return;
             }
 
-            SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(target, triggerTarget, GetSpellInfo(), GetBase().GetSpellVisual(), GetSpellInfo().SchoolMask, GetBase().GetCastGUID());
+            SpellNonMeleeDamage damageInfo = new(target, triggerTarget, GetSpellInfo(), GetBase().GetSpellVisual(), GetSpellInfo().SchoolMask, GetBase().GetCastGUID());
             int damage = (int)target.SpellDamageBonusDone(triggerTarget, GetSpellInfo(), (uint)GetAmount(), DamageEffectType.SpellDirect, GetSpellEffectInfo());
             damage = (int)triggerTarget.SpellDamageBonusTaken(target, GetSpellInfo(), (uint)damage, DamageEffectType.SpellDirect, GetSpellEffectInfo());
             target.CalculateSpellDamageTaken(damageInfo, damage, GetSpellInfo());
@@ -5574,7 +5574,7 @@ namespace Game.Spells
             // on unapply we need to search for and remove the summoned creature
             else
             {
-                List<uint> summonedEntries = new List<uint>();
+                List<uint> summonedEntries = new();
                 foreach (var spellEffect in triggerSpellInfo.GetEffects())
                 {
                     if (spellEffect != null && spellEffect.Effect == SpellEffectName.Summon)
@@ -5590,7 +5590,7 @@ namespace Game.Spells
                 // most of the spells have multiple effects with the same summon spell id for multiple spawns, so right now it's safe to assume there's only 1 spawn per effect
                 foreach (uint summonEntry in summonedEntries)
                 {
-                    List<Creature> nearbyEntries = new List<Creature>();
+                    List<Creature> nearbyEntries = new();
                     target.GetCreatureListWithEntryInGrid(nearbyEntries, summonEntry);
                     foreach (var creature in nearbyEntries)
                     {
@@ -5671,7 +5671,7 @@ namespace Game.Spells
 
             if (apply)
             {
-                BattlegroundPlayerPosition playerPosition = new BattlegroundPlayerPosition();
+                BattlegroundPlayerPosition playerPosition = new();
                 playerPosition.Guid = target.GetGUID();
                 playerPosition.ArenaSlot = (sbyte)GetMiscValue();
                 playerPosition.Pos = target.GetPosition();

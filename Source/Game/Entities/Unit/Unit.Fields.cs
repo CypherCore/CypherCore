@@ -49,8 +49,8 @@ namespace Game.Entities
         MovementForces _movementForces;
 
         //Combat
-        protected List<Unit> attackerList = new List<Unit>();
-        Dictionary<ReactiveType, uint> m_reactiveTimer = new Dictionary<ReactiveType, uint>();
+        protected List<Unit> attackerList = new();
+        Dictionary<ReactiveType, uint> m_reactiveTimer = new();
         protected float[][] m_weaponDamage = new float[(int)WeaponAttackType.Max][];
         public float[] m_threatModifier = new float[(int)SpellSchools.Max];
 
@@ -73,8 +73,8 @@ namespace Game.Entities
         public uint ExtraAttacks { get; set; }
 
         //Charm
-        public List<Unit> m_Controlled = new List<Unit>();
-        List<Player> m_sharedVision = new List<Player>();
+        public List<Unit> m_Controlled = new();
+        List<Player> m_sharedVision = new();
         CharmInfo m_charmInfo;
         protected bool m_ControlledByPlayer;
         public ObjectGuid LastCharmerGUID { get; set; }
@@ -83,8 +83,8 @@ namespace Game.Entities
         bool _isWalkingBeforeCharm; // Are we walking before we were charmed?
 
         //Spells 
-        protected Dictionary<CurrentSpellTypes, Spell> m_currentSpells = new Dictionary<CurrentSpellTypes, Spell>((int)CurrentSpellTypes.Max);
-        Dictionary<SpellValueMod, int> CustomSpellValueMod = new Dictionary<SpellValueMod, int>();
+        protected Dictionary<CurrentSpellTypes, Spell> m_currentSpells = new((int)CurrentSpellTypes.Max);
+        Dictionary<SpellValueMod, int> CustomSpellValueMod = new();
         MultiMap<uint, uint>[] m_spellImmune = new MultiMap<uint, uint>[(int)SpellImmunity.Max];
         uint[] m_interruptMask = new uint[2];
         protected int m_procDeep;
@@ -92,16 +92,16 @@ namespace Game.Entities
         SpellHistory _spellHistory;
 
         //Auras
-        List<AuraEffect> AuraEffectList = new List<AuraEffect>();
-        MultiMap<AuraType, AuraEffect> m_modAuras = new MultiMap<AuraType, AuraEffect>();
-        List<Aura> m_removedAuras = new List<Aura>();
-        List<AuraApplication> m_interruptableAuras = new List<AuraApplication>();             // auras which have interrupt mask applied on unit
-        MultiMap<AuraStateType, AuraApplication> m_auraStateAuras = new MultiMap<AuraStateType, AuraApplication>();        // Used for improve performance of aura state checks on aura apply/remove
-        SortedSet<AuraApplication> m_visibleAuras = new SortedSet<AuraApplication>(new VisibleAuraSlotCompare());
-        SortedSet<AuraApplication> m_visibleAurasToUpdate = new SortedSet<AuraApplication>(new VisibleAuraSlotCompare());
-        MultiMap<uint, AuraApplication> m_appliedAuras = new MultiMap<uint, AuraApplication>();
-        MultiMap<uint, Aura> m_ownedAuras = new MultiMap<uint, Aura>();
-        List<Aura> m_scAuras = new List<Aura>();
+        List<AuraEffect> AuraEffectList = new();
+        MultiMap<AuraType, AuraEffect> m_modAuras = new();
+        List<Aura> m_removedAuras = new();
+        List<AuraApplication> m_interruptableAuras = new();             // auras which have interrupt mask applied on unit
+        MultiMap<AuraStateType, AuraApplication> m_auraStateAuras = new();        // Used for improve performance of aura state checks on aura apply/remove
+        SortedSet<AuraApplication> m_visibleAuras = new(new VisibleAuraSlotCompare());
+        SortedSet<AuraApplication> m_visibleAurasToUpdate = new(new VisibleAuraSlotCompare());
+        MultiMap<uint, AuraApplication> m_appliedAuras = new();
+        MultiMap<uint, Aura> m_ownedAuras = new();
+        List<Aura> m_scAuras = new();
         protected float[][] m_auraFlatModifiersGroup = new float[(int)UnitMods.End][];
         protected float[][] m_auraPctModifiersGroup = new float[(int)UnitMods.End][];
         uint m_removedAurasCount;
@@ -110,15 +110,15 @@ namespace Game.Entities
         public UnitData m_unitData;
 
         DiminishingReturn[] m_Diminishing = new DiminishingReturn[(int)DiminishingGroup.Max];
-        protected List<GameObject> m_gameObj = new List<GameObject>();
-        List<AreaTrigger> m_areaTrigger = new List<AreaTrigger>();
-        protected List<DynamicObject> m_dynObj = new List<DynamicObject>();
+        protected List<GameObject> m_gameObj = new();
+        List<AreaTrigger> m_areaTrigger = new();
+        protected List<DynamicObject> m_dynObj = new();
         protected float[] CreateStats = new float[(int)Stats.Max];
         float[] m_floatStatPosBuff = new float[(int)Stats.Max];
         float[] m_floatStatNegBuff = new float[(int)Stats.Max];
         public ObjectGuid[] m_SummonSlot = new ObjectGuid[7];
         public ObjectGuid[] m_ObjectSlot = new ObjectGuid[4];
-        public EventSystem m_Events = new EventSystem();
+        public EventSystem m_Events = new();
         public UnitTypeMask UnitTypeMask { get; set; }
         UnitState m_state;
         protected LiquidTypeRecord _lastLiquid;
@@ -573,7 +573,7 @@ namespace Game.Entities
 
     public class DeclinedName
     {
-        public StringArray name = new StringArray(SharedConst.MaxDeclinedNameCases);
+        public StringArray name = new(SharedConst.MaxDeclinedNameCases);
     }
 
     class CombatLogSender : Notifier

@@ -53,21 +53,21 @@ namespace Game.Collision
         public void IntersectRay(Ray ray, WorkerCallback intersectCallback, ref float maxDist)
         {
             Balance();
-            MDLCallback temp_cb = new MDLCallback(intersectCallback, m_objects.ToArray(), (uint)m_objects.Count);
+            MDLCallback temp_cb = new(intersectCallback, m_objects.ToArray(), (uint)m_objects.Count);
             m_tree.IntersectRay(ray, temp_cb, ref maxDist, true);
         }
 
         public void IntersectPoint(Vector3 point, WorkerCallback intersectCallback)
         {
             Balance();
-            MDLCallback callback = new MDLCallback(intersectCallback, m_objects.ToArray(), (uint)m_objects.Count);
+            MDLCallback callback = new(intersectCallback, m_objects.ToArray(), (uint)m_objects.Count);
             m_tree.IntersectPoint(point, callback);
         }
 
-        BIH m_tree = new BIH();
-        List<T> m_objects = new List<T>();
-        Dictionary<T, uint> m_obj2Idx = new Dictionary<T, uint>();
-        HashSet<T> m_objects_to_push = new HashSet<T>();
+        BIH m_tree = new();
+        List<T> m_objects = new();
+        Dictionary<T, uint> m_obj2Idx = new();
+        HashSet<T> m_objects_to_push = new();
         int unbalanced_times;
 
         public class MDLCallback : WorkerCallback

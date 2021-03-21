@@ -45,7 +45,7 @@ namespace Game
         {
             TradeData view_trade = trader_data ? GetPlayer().GetTradeData().GetTraderData() : GetPlayer().GetTradeData();
 
-            TradeUpdated tradeUpdated = new TradeUpdated();
+            TradeUpdated tradeUpdated = new();
             tradeUpdated.WhichPlayer = (byte)(trader_data ? 1 : 0);
             tradeUpdated.ClientStateIndex = view_trade.GetClientStateIndex();
             tradeUpdated.CurrentStateIndex = view_trade.GetServerStateIndex();
@@ -57,7 +57,7 @@ namespace Game
                 Item item = view_trade.GetItem((TradeSlots)i);
                 if (item)
                 {
-                    TradeUpdated.TradeItem tradeItem = new TradeUpdated.TradeItem();
+                    TradeUpdated.TradeItem tradeItem = new();
                     tradeItem.Slot = i;
                     tradeItem.Item = new ItemInstance(item);
                     tradeItem.StackCount = (int)item.GetCount();
@@ -79,7 +79,7 @@ namespace Game
                         {
                             if (gemData.ItemId != 0)
                             {
-                                ItemGemData gem = new ItemGemData();
+                                ItemGemData gem = new();
                                 gem.Slot = g;
                                 gem.Item = new ItemInstance(gemData);
                                 tradeItem.Unwrapped.Value.Gems.Add(gem);
@@ -102,8 +102,8 @@ namespace Game
 
             for (byte i = 0; i < (int)TradeSlots.TradedCount; ++i)
             {
-                List<ItemPosCount> traderDst = new List<ItemPosCount>();
-                List<ItemPosCount> playerDst = new List<ItemPosCount>();
+                List<ItemPosCount> traderDst = new();
+                List<ItemPosCount> playerDst = new();
                 bool traderCanTrade = (myItems[i] == null || trader.CanStoreItem(ItemConst.NullBag, ItemConst.NullSlot, traderDst, myItems[i], false) == InventoryResult.Ok);
                 bool playerCanTrade = (hisItems[i] == null || GetPlayer().CanStoreItem(ItemConst.NullBag, ItemConst.NullSlot, playerDst, hisItems[i], false) == InventoryResult.Ok);
                 if (traderCanTrade && playerCanTrade)
@@ -239,7 +239,7 @@ namespace Game
             // set before checks for propertly undo at problems (it already set in to client)
             my_trade.SetAccepted(true);
 
-            TradeStatusPkt info = new TradeStatusPkt();
+            TradeStatusPkt info = new();
             if (his_trade.GetServerStateIndex() != acceptTrade.StateIndex)
             {
                 info.Status = TradeStatus.StateChanged;
@@ -332,10 +332,10 @@ namespace Game
                 SetAcceptTradeMode(my_trade, his_trade, myItems, hisItems);
 
                 Spell my_spell = null;
-                SpellCastTargets my_targets = new SpellCastTargets();
+                SpellCastTargets my_targets = new();
 
                 Spell his_spell = null;
-                SpellCastTargets his_targets = new SpellCastTargets();
+                SpellCastTargets his_targets = new();
 
                 // not accept if spell can't be casted now (cheating)
                 uint my_spell_id = my_trade.GetSpell();
@@ -415,8 +415,8 @@ namespace Game
                 trader.GetSession().SendTradeStatus(info);
 
                 // test if item will fit in each inventory
-                TradeStatusPkt myCanCompleteInfo = new TradeStatusPkt();
-                TradeStatusPkt hisCanCompleteInfo = new TradeStatusPkt();
+                TradeStatusPkt myCanCompleteInfo = new();
+                TradeStatusPkt hisCanCompleteInfo = new();
                 hisCanCompleteInfo.BagResult = trader.CanStoreItems(myItems, (int)TradeSlots.TradedCount, ref hisCanCompleteInfo.ItemID);
                 myCanCompleteInfo.BagResult = GetPlayer().CanStoreItems(hisItems, (int)TradeSlots.TradedCount, ref myCanCompleteInfo.ItemID);
 
@@ -501,7 +501,7 @@ namespace Game
                 trader.SetTradeData(null);
 
                 // desynchronized with the other saves here (SaveInventoryAndGoldToDB() not have own transaction guards)
-                SQLTransaction trans = new SQLTransaction();
+                SQLTransaction trans = new();
                 GetPlayer().SaveInventoryAndGoldToDB(trans);
                 trader.SaveInventoryAndGoldToDB(trans);
                 DB.Characters.CommitTransaction(trans);
@@ -534,7 +534,7 @@ namespace Game
             if (my_trade == null)
                 return;
 
-            TradeStatusPkt info = new TradeStatusPkt();
+            TradeStatusPkt info = new();
             my_trade.GetTrader().GetSession().SendTradeStatus(info);
             SendTradeStatus(info);
         }
@@ -544,7 +544,7 @@ namespace Game
             if (PlayerRecentlyLoggedOut() || PlayerLogout())
                 return;
 
-            TradeStatusPkt info = new TradeStatusPkt();
+            TradeStatusPkt info = new();
             info.Status = TradeStatus.Cancelled;
             SendTradeStatus(info);
         }
@@ -563,7 +563,7 @@ namespace Game
             if (GetPlayer().GetTradeData() != null)
                 return;
 
-            TradeStatusPkt info = new TradeStatusPkt();
+            TradeStatusPkt info = new();
             if (!GetPlayer().IsAlive())
             {
                 info.Status = TradeStatus.Dead;
@@ -700,7 +700,7 @@ namespace Game
             if (my_trade == null)
                 return;
 
-            TradeStatusPkt info = new TradeStatusPkt();
+            TradeStatusPkt info = new();
             // invalid slot number
             if (setTradeItem.TradeSlot >= (byte)TradeSlots.Count)
             {

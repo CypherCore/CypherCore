@@ -49,7 +49,7 @@ namespace Game.Misc
                 }
             }
 
-            GossipMenuItem menuItem = new GossipMenuItem();
+            GossipMenuItem menuItem = new();
 
             menuItem.MenuItemIcon = (byte)icon;
             menuItem.Message = message;
@@ -131,7 +131,7 @@ namespace Game.Misc
 
         public void AddGossipMenuItemData(uint optionIndex, uint gossipActionMenuId, uint gossipActionPoi)
         {
-            GossipMenuItemData itemData = new GossipMenuItemData();
+            GossipMenuItemData itemData = new();
 
             itemData.GossipActionMenuId = gossipActionMenuId;
             itemData.GossipActionPoi = gossipActionPoi;
@@ -208,8 +208,8 @@ namespace Game.Misc
             return _menuItems;
         }
 
-        Dictionary<uint, GossipMenuItem> _menuItems = new Dictionary<uint, GossipMenuItem>();
-        Dictionary<uint, GossipMenuItemData> _menuItemData = new Dictionary<uint, GossipMenuItemData>();
+        Dictionary<uint, GossipMenuItem> _menuItems = new();
+        Dictionary<uint, GossipMenuItemData> _menuItemData = new();
         uint _menuId;
         Locale _locale;
     }
@@ -247,14 +247,14 @@ namespace Game.Misc
             _interactionData.Reset();
             _interactionData.SourceGuid = objectGUID;
 
-            GossipMessagePkt packet = new GossipMessagePkt();
+            GossipMessagePkt packet = new();
             packet.GossipGUID = objectGUID;
             packet.GossipID = (int)_gossipMenu.GetMenuId();
             packet.TextID = (int)titleTextId;
 
             foreach (var pair in _gossipMenu.GetMenuItems())
             {
-                ClientGossipOptions opt = new ClientGossipOptions();
+                ClientGossipOptions opt = new();
                 GossipMenuItem item = pair.Value;
                 opt.ClientOption = (int)pair.Key;
                 opt.OptionNPC = item.MenuItemIcon;
@@ -274,7 +274,7 @@ namespace Game.Misc
                 Quest quest = Global.ObjectMgr.GetQuestTemplate(questID);
                 if (quest != null)
                 {
-                    ClientGossipText text = new ClientGossipText();
+                    ClientGossipText text = new();
                     text.QuestID = questID;
                     text.ContentTuningID = quest.ContentTuningId;
                     text.QuestType = item.QuestIcon;
@@ -314,7 +314,7 @@ namespace Game.Misc
                 return;
             }
 
-            GossipPOI packet = new GossipPOI();
+            GossipPOI packet = new();
             packet.Id = pointOfInterest.Id;
             packet.Name = pointOfInterest.Name;
 
@@ -339,7 +339,7 @@ namespace Game.Misc
             ObjectGuid guid = questgiver.GetGUID();
             Locale localeConstant = _session.GetSessionDbLocaleIndex();
 
-            QuestGiverQuestListMessage questList = new QuestGiverQuestListMessage();
+            QuestGiverQuestListMessage questList = new();
             questList.QuestGiverGUID = guid;
 
             QuestGreeting questGreeting = Global.ObjectMgr.GetQuestGreeting(questgiver.GetTypeId(), questgiver.GetEntry());
@@ -365,7 +365,7 @@ namespace Game.Misc
                 Quest quest = Global.ObjectMgr.GetQuestTemplate(questID);
                 if (quest != null)
                 {
-                    ClientGossipText text = new ClientGossipText();
+                    ClientGossipText text = new();
                     text.QuestID = questID;
                     text.ContentTuningID = quest.ContentTuningId;
                     text.QuestType = questMenuItem.QuestIcon;
@@ -399,7 +399,7 @@ namespace Game.Misc
 
         public void SendQuestGiverQuestDetails(Quest quest, ObjectGuid npcGUID, bool autoLaunched, bool displayPopup)
         {
-            QuestGiverQuestDetails packet = new QuestGiverQuestDetails();
+            QuestGiverQuestDetails packet = new();
 
              packet.QuestTitle = quest.LogTitle;
              packet.LogDescription = quest.LogDescription;
@@ -507,7 +507,7 @@ namespace Game.Misc
 
         public void SendQuestGiverOfferReward(Quest quest, ObjectGuid npcGUID, bool autoLaunched)
         {
-            QuestGiverOfferRewardMessage packet = new QuestGiverOfferRewardMessage();
+            QuestGiverOfferRewardMessage packet = new();
 
             packet.QuestTitle = quest.LogTitle;
             packet.RewardText = quest.OfferRewardText;
@@ -534,7 +534,7 @@ namespace Game.Misc
                     ObjectManager.GetLocaleString(questOfferRewardLocale.RewardText, locale, ref packet.RewardText);
             }
 
-            QuestGiverOfferReward offer = new QuestGiverOfferReward();
+            QuestGiverOfferReward offer = new();
 
             quest.BuildQuestRewards(offer.Rewards, _session.GetPlayer());
             offer.QuestGiverGUID = npcGUID;
@@ -575,7 +575,7 @@ namespace Game.Misc
                 return;
             }
 
-            QuestGiverRequestItems packet = new QuestGiverRequestItems();
+            QuestGiverRequestItems packet = new();
 
             packet.QuestTitle = quest.LogTitle;
             packet.CompletionText = quest.RequestItemsText;
@@ -654,10 +654,10 @@ namespace Game.Misc
         public uint GetGossipOptionAction(uint selection) { return _gossipMenu.GetMenuItemAction(selection); }
         public bool IsGossipOptionCoded(uint selection) { return _gossipMenu.IsMenuItemCoded(selection); }
 
-        GossipMenu _gossipMenu = new GossipMenu();
-        QuestMenu _questMenu = new QuestMenu();
+        GossipMenu _gossipMenu = new();
+        QuestMenu _questMenu = new();
         WorldSession _session;
-        InteractionData _interactionData = new InteractionData();
+        InteractionData _interactionData = new();
     }
 
     public class QuestMenu
@@ -667,7 +667,7 @@ namespace Game.Misc
             if (Global.ObjectMgr.GetQuestTemplate(QuestId) == null)
                 return;
 
-            QuestMenuItem questMenuItem = new QuestMenuItem();
+            QuestMenuItem questMenuItem = new();
 
             questMenuItem.QuestId = QuestId;
             questMenuItem.QuestIcon = Icon;
@@ -704,7 +704,7 @@ namespace Game.Misc
             return _questMenuItems.LookupByIndex(index);
         }
 
-        List<QuestMenuItem> _questMenuItems = new List<QuestMenuItem>();
+        List<QuestMenuItem> _questMenuItems = new();
     }
 
     public struct QuestMenuItem
@@ -743,7 +743,7 @@ namespace Game.Misc
 
     public class PageTextLocale
     {
-        public StringArray Text = new StringArray((int)Locale.Total);
+        public StringArray Text = new((int)Locale.Total);
     }
 
     public class GossipMenuItems
@@ -761,7 +761,7 @@ namespace Game.Misc
         public uint BoxMoney;
         public string BoxText;
         public uint BoxBroadcastTextId;
-        public List<Condition> Conditions = new List<Condition>();
+        public List<Condition> Conditions = new();
     }
 
     public class PointOfInterest
@@ -776,13 +776,13 @@ namespace Game.Misc
 
     public class PointOfInterestLocale
     {
-        public StringArray Name = new StringArray((int)Locale.Total); 
+        public StringArray Name = new((int)Locale.Total); 
     }
 
     public class GossipMenus
     {
         public uint MenuId;
         public uint TextId;
-        public List<Condition> Conditions = new List<Condition>();
+        public List<Condition> Conditions = new();
     }
 }

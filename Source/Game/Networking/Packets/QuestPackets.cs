@@ -72,7 +72,7 @@ namespace Game.Networking.Packets
             }
         }
 
-        public List<QuestGiverInfo> QuestGiver = new List<QuestGiverInfo>();
+        public List<QuestGiverInfo> QuestGiver = new();
     }
 
     public class QuestGiverHello : ClientPacket
@@ -246,7 +246,7 @@ namespace Game.Networking.Packets
         }
 
         public bool Allow;
-        public QuestInfo Info = new QuestInfo();
+        public QuestInfo Info = new();
         public uint QuestID;
     }
 
@@ -387,7 +387,7 @@ namespace Game.Networking.Packets
         public bool LaunchGossip;
         public bool LaunchQuest;
         public bool HideChatMessage;
-        public ItemInstance ItemReward = new ItemInstance();
+        public ItemInstance ItemReward = new();
     }
 
     public class QuestGiverCompleteQuest : ClientPacket
@@ -487,10 +487,10 @@ namespace Game.Networking.Packets
         public int QuestPackageID;
         public uint[] QuestFlags = new uint[2];
         public uint SuggestedPartyMembers;
-        public QuestRewards Rewards = new QuestRewards();
-        public List<QuestObjectiveSimple> Objectives = new List<QuestObjectiveSimple>();
-        public List<QuestDescEmote> DescEmotes = new List<QuestDescEmote>();
-        public List<uint> LearnSpells = new List<uint>();
+        public QuestRewards Rewards = new();
+        public List<QuestObjectiveSimple> Objectives = new();
+        public List<QuestDescEmote> DescEmotes = new();
+        public List<uint> LearnSpells = new();
         public uint PortraitTurnIn;
         public uint PortraitGiver;
         public uint PortraitGiverMount;
@@ -557,8 +557,8 @@ namespace Game.Networking.Packets
         public bool AutoLaunched;
         public uint SuggestPartyMembers;
         public int MoneyToGet;
-        public List<QuestObjectiveCollect> Collect = new List<QuestObjectiveCollect>();
-        public List<QuestCurrency> Currency = new List<QuestCurrency>();
+        public List<QuestObjectiveCollect> Collect = new();
+        public List<QuestCurrency> Currency = new();
         public int StatusFlags;
         public uint[] QuestFlags = new uint[2];
         public string QuestTitle = "";
@@ -645,7 +645,7 @@ namespace Game.Networking.Packets
         public ObjectGuid QuestGiverGUID;
         public uint GreetEmoteDelay;
         public uint GreetEmoteType;
-        public List<ClientGossipText> QuestDataText = new List<ClientGossipText>();
+        public List<ClientGossipText> QuestDataText = new();
         public string Greeting = "";
     }
 
@@ -825,7 +825,7 @@ namespace Game.Networking.Packets
             }
         }
 
-        List<WorldQuestUpdateInfo> WorldQuestUpdates = new List<WorldQuestUpdateInfo>();
+        List<WorldQuestUpdateInfo> WorldQuestUpdates = new();
     }
 
     class DisplayPlayerChoice : ServerPacket
@@ -856,7 +856,7 @@ namespace Game.Networking.Packets
         public int UiTextureKitID;
         public uint SoundKitID;
         public string Question;
-        public List<PlayerChoiceResponse> Responses = new List<PlayerChoiceResponse>();
+        public List<PlayerChoiceResponse> Responses = new();
         public bool CloseChoiceFrame;
         public bool HideWarboardHeader;
         public bool KeepOpenAfterChoice;
@@ -944,7 +944,7 @@ namespace Game.Networking.Packets
         public uint RewardMoneyDifficulty;
         public float RewardMoneyMultiplier = 1.0f;
         public uint RewardBonusMoney;
-        public List<QuestCompleteDisplaySpell> RewardDisplaySpell = new List<QuestCompleteDisplaySpell>(); // reward spell, this spell will be displayed (icon)
+        public List<QuestCompleteDisplaySpell> RewardDisplaySpell = new(); // reward spell, this spell will be displayed (icon)
         public uint RewardSpell;
         public uint RewardHonor;
         public float RewardKillHonor;
@@ -985,7 +985,7 @@ namespace Game.Networking.Packets
         public int Expansion;
         public int ManagedWorldStateID;
         public int QuestSessionBonus;
-        public List<QuestObjective> Objectives = new List<QuestObjective>();
+        public List<QuestObjective> Objectives = new();
         public uint[] RewardItems = new uint[SharedConst.QuestRewardItemCount];
         public uint[] RewardAmount = new uint[SharedConst.QuestRewardItemCount];
         public int[] ItemDrop = new int[SharedConst.QuestItemDropCount];
@@ -1142,8 +1142,8 @@ namespace Game.Networking.Packets
         public uint QuestID = 0;
         public bool AutoLaunched = false;
         public uint SuggestedPartyMembers = 0;
-        public QuestRewards Rewards = new QuestRewards();
-        public List<QuestDescEmote> Emotes = new List<QuestDescEmote>();
+        public QuestRewards Rewards = new();
+        public List<QuestDescEmote> Emotes = new();
         public uint[] QuestFlags = new uint[2]; // Flags and FlagsEx
     }
 
@@ -1252,10 +1252,10 @@ namespace Game.Networking.Packets
         public uint HonorPointCount;
         public ulong Money;
         public uint Xp;
-        public List<PlayerChoiceResponseRewardEntry> Items = new List<PlayerChoiceResponseRewardEntry>();
-        public List<PlayerChoiceResponseRewardEntry> Currencies = new List<PlayerChoiceResponseRewardEntry>();
-        public List<PlayerChoiceResponseRewardEntry> Factions = new List<PlayerChoiceResponseRewardEntry>();
-        public List<PlayerChoiceResponseRewardEntry> ItemChoices = new List<PlayerChoiceResponseRewardEntry>();
+        public List<PlayerChoiceResponseRewardEntry> Items = new();
+        public List<PlayerChoiceResponseRewardEntry> Currencies = new();
+        public List<PlayerChoiceResponseRewardEntry> Factions = new();
+        public List<PlayerChoiceResponseRewardEntry> ItemChoices = new();
     }
 
     struct PlayerChoiceResponseMawPower

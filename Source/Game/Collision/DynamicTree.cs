@@ -54,7 +54,7 @@ namespace Game.Collision
         public bool GetIntersectionTime(Ray ray, Vector3 endPos, PhaseShift phaseShift, float maxDist)
         {
             float distance = maxDist;
-            DynamicTreeIntersectionCallback callback = new DynamicTreeIntersectionCallback(phaseShift);
+            DynamicTreeIntersectionCallback callback = new(phaseShift);
             impl.IntersectRay(ray, callback, ref distance, endPos);
             if (callback.DidHit())
                 maxDist = distance;
@@ -74,7 +74,7 @@ namespace Game.Collision
                 return false;
             }
             Vector3 dir = (endPos - startPos) / maxDist;              // direction with length of 1
-            Ray ray = new Ray(startPos, dir);
+            Ray ray = new(startPos, dir);
             float dist = maxDist;
             if (GetIntersectionTime(ray, endPos, phaseShift, dist))
             {
@@ -106,8 +106,8 @@ namespace Game.Collision
             if (!MathFunctions.fuzzyGt(maxDist, 0))
                 return true;
 
-            Ray r = new Ray(startPos, (endPos - startPos) / maxDist);
-            DynamicTreeIntersectionCallback callback = new DynamicTreeIntersectionCallback(phaseShift);
+            Ray r = new(startPos, (endPos - startPos) / maxDist);
+            DynamicTreeIntersectionCallback callback = new(phaseShift);
             impl.IntersectRay(r, callback, ref maxDist, endPos);
 
             return !callback.DidHit();
@@ -115,9 +115,9 @@ namespace Game.Collision
 
         public float GetHeight(float x, float y, float z, float maxSearchDist, PhaseShift phaseShift)
         {
-            Vector3 v = new Vector3(x, y, z + 0.5f);
-            Ray r = new Ray(v, new Vector3(0, 0, -1));
-            DynamicTreeIntersectionCallback callback = new DynamicTreeIntersectionCallback(phaseShift);
+            Vector3 v = new(x, y, z + 0.5f);
+            Ray r = new(v, new Vector3(0, 0, -1));
+            DynamicTreeIntersectionCallback callback = new(phaseShift);
             impl.IntersectZAllignedRay(r, callback, ref maxSearchDist);
 
             if (callback.DidHit())
@@ -133,8 +133,8 @@ namespace Game.Collision
             rootId = 0;
             groupId = 0;
 
-            Vector3 v = new Vector3(x, y, z + 0.5f);
-            DynamicTreeAreaInfoCallback intersectionCallBack = new DynamicTreeAreaInfoCallback(phaseShift);
+            Vector3 v = new(x, y, z + 0.5f);
+            DynamicTreeAreaInfoCallback intersectionCallBack = new(phaseShift);
             impl.IntersectPoint(v, intersectionCallBack);
             if (intersectionCallBack.GetAreaInfo().result)
             {

@@ -77,11 +77,11 @@ namespace Game
             if (_player.IsPossessing())
                 return;
 
-            SpellCastTargets targets = new SpellCastTargets(_player, packet.Cast);
+            SpellCastTargets targets = new(_player, packet.Cast);
 
-            Spell spell = new Spell(_player, spellInfo, TriggerCastFlags.None, ObjectGuid.Empty, false);
+            Spell spell = new(_player, spellInfo, TriggerCastFlags.None, ObjectGuid.Empty, false);
 
-            SpellPrepare spellPrepare = new SpellPrepare();
+            SpellPrepare spellPrepare = new();
             spellPrepare.ClientCastID = packet.Cast.CastID;
             spellPrepare.ServerCastID = spell.m_castId;
             SendPacket(spellPrepare);

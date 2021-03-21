@@ -136,7 +136,7 @@ namespace Game.Arenas
             //Player.RemovePetitionsAndSigns(playerGuid, GetArenaType());
 
             // Feed data to the struct
-            ArenaTeamMember newMember = new ArenaTeamMember();
+            ArenaTeamMember newMember = new();
             newMember.Name = playerName;
             newMember.Guid = playerGuid;
             newMember.Class = (byte)playerClass;
@@ -211,7 +211,7 @@ namespace Game.Arenas
                 if (arenaTeamId > teamId)
                     break;
 
-                ArenaTeamMember newMember = new ArenaTeamMember();
+                ArenaTeamMember newMember = new();
                 newMember.Guid = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(1));
                 newMember.WeekGames = result.Read<ushort>(2);
                 newMember.WeekWins = result.Read<ushort>(3);
@@ -341,7 +341,7 @@ namespace Game.Arenas
                 DelMember(Members.FirstOrDefault().Guid, false);
 
             // Update database
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ARENA_TEAM);
             stmt.AddValue(0, teamId);
@@ -364,7 +364,7 @@ namespace Game.Arenas
                 DelMember(Members.First().Guid, false);
 
             // Update database
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ARENA_TEAM);
             stmt.AddValue(0, teamId);
@@ -692,7 +692,7 @@ namespace Game.Arenas
             // Save team and member stats to db
             // Called after a match has ended or when calculating arena_points
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ARENA_TEAM_STATS);
             stmt.AddValue(0, stats.Rating);
@@ -808,7 +808,7 @@ namespace Game.Arenas
         byte BorderStyle;     // border image id
         uint BorderColor;     // ARGB format
 
-        List<ArenaTeamMember> Members = new List<ArenaTeamMember>();
+        List<ArenaTeamMember> Members = new();
         ArenaTeamStats stats;
     }
 

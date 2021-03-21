@@ -123,7 +123,7 @@ namespace Game
                 uint count = 0;
                 do
                 {
-                    Guild guild = new Guild();
+                    Guild guild = new();
 
                     if (!guild.LoadFromDB(result.GetFields()))
                         continue;
@@ -447,7 +447,7 @@ namespace Game
             uint count = 0;
             do
             {
-                GuildReward reward = new GuildReward();
+                GuildReward reward = new();
 
                 reward.ItemID = result.Read<uint>(0);
                 reward.MinGuildRep = result.Read<byte>(1);
@@ -505,8 +505,8 @@ namespace Game
 
 
         uint NextGuildId;
-        Dictionary<ulong, Guild> GuildStore = new Dictionary<ulong, Guild>();
-        List<GuildReward> guildRewards = new List<GuildReward>();
+        Dictionary<ulong, Guild> GuildStore = new();
+        List<GuildReward> guildRewards = new();
     }
 
     public class GuildReward
@@ -515,6 +515,6 @@ namespace Game
         public byte MinGuildRep;
         public ulong RaceMask;
         public ulong Cost;
-        public List<uint> AchievementsRequired = new List<uint>();
+        public List<uint> AchievementsRequired = new();
     }
 }

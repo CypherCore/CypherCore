@@ -1067,7 +1067,7 @@ namespace Game.Entities
                 return;
             }
 
-            Spell spell = new Spell(this, spellInfo, triggerFlags, originalCaster);
+            Spell spell = new(this, spellInfo, triggerFlags, originalCaster);
 
             if (values != null)
                 foreach (var pair in values)
@@ -1097,7 +1097,7 @@ namespace Game.Entities
         }
         public void CastSpell(Unit victim, SpellInfo spellInfo, TriggerCastFlags triggerFlags = TriggerCastFlags.None, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default)
         {
-            SpellCastTargets targets = new SpellCastTargets();
+            SpellCastTargets targets = new();
             targets.SetUnitTarget(victim);
             CastSpell(targets, spellInfo, null, triggerFlags, castItem, triggeredByAura, originalCaster);
         }
@@ -1109,7 +1109,7 @@ namespace Game.Entities
                 Log.outError(LogFilter.Unit, "CastSpell: unknown spell id {0} by caster: {1}", spellId, GetGUID().ToString());
                 return;
             }
-            SpellCastTargets targets = new SpellCastTargets();
+            SpellCastTargets targets = new();
             targets.SetDst(x, y, z, GetOrientation());
 
             CastSpell(targets, spellInfo, null, triggered ? TriggerCastFlags.FullMask : TriggerCastFlags.None, castItem, triggeredByAura, originalCaster);
@@ -1122,7 +1122,7 @@ namespace Game.Entities
                 Log.outError(LogFilter.Unit, "CastSpell: unknown spell id {0} by caster: {1}", spellId, GetGUID().ToString());
                 return;
             }
-            SpellCastTargets targets = new SpellCastTargets();
+            SpellCastTargets targets = new();
             targets.SetGOTarget(go);
 
             CastSpell(targets, spellInfo, null, triggered ? TriggerCastFlags.FullMask : TriggerCastFlags.None, castItem, triggeredByAura, originalCaster);
@@ -1135,7 +1135,7 @@ namespace Game.Entities
                 Log.outError(LogFilter.Unit, "CastSpell: unknown spell id {0} by caster: {1}", spellId, GetGUID().ToString());
                 return;
             }
-            SpellCastTargets targets = new SpellCastTargets();
+            SpellCastTargets targets = new();
             targets.SetItemTarget(item);
 
             CastSpell(targets, spellInfo, null, triggered ? TriggerCastFlags.FullMask : TriggerCastFlags.None, castItem, triggeredByAura, originalCaster);
@@ -1144,7 +1144,7 @@ namespace Game.Entities
 
         public void CastCustomSpell(Unit target, uint spellId, int bp0, int bp1, int bp2, bool triggered, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default)
         {
-            Dictionary<SpellValueMod, int> values = new Dictionary<SpellValueMod, int>();
+            Dictionary<SpellValueMod, int> values = new();
             if (bp0 != 0)
                 values.Add(SpellValueMod.BasePoint0, bp0);
             if (bp1 != 0)
@@ -1155,13 +1155,13 @@ namespace Game.Entities
         }
         public void CastCustomSpell(uint spellId, SpellValueMod mod, int value, Unit target, bool triggered, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default)
         {
-            Dictionary<SpellValueMod, int> values = new Dictionary<SpellValueMod, int>();
+            Dictionary<SpellValueMod, int> values = new();
             values.Add(mod, value);
             CastCustomSpell(spellId, values, target, triggered ? TriggerCastFlags.FullMask : TriggerCastFlags.None, castItem, triggeredByAura, originalCaster);
         }
         public void CastCustomSpell(uint spellId, SpellValueMod mod, int value, Unit target = null, TriggerCastFlags triggerFlags = TriggerCastFlags.None, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default)
         {
-            Dictionary<SpellValueMod, int> values = new Dictionary<SpellValueMod, int>();
+            Dictionary<SpellValueMod, int> values = new();
             values.Add(mod, value);
             CastCustomSpell(spellId, values, target, triggerFlags, castItem, triggeredByAura, originalCaster);
         }
@@ -1173,7 +1173,7 @@ namespace Game.Entities
                 Log.outError(LogFilter.Unit, "CastSpell: unknown spell id {0} by caster: {1}", spellId, GetGUID().ToString());
                 return;
             }
-            SpellCastTargets targets = new SpellCastTargets();
+            SpellCastTargets targets = new();
             targets.SetUnitTarget(victim);
 
             CastSpell(targets, spellInfo, values, triggerFlags, castItem, triggeredByAura, originalCaster);
@@ -1561,7 +1561,7 @@ namespace Game.Entities
 
         public void SendEnergizeSpellLog(Unit victim, uint spellId, int amount, int overEnergize, PowerType powerType)
         {
-            SpellEnergizeLog data = new SpellEnergizeLog();
+            SpellEnergizeLog data = new();
             data.CasterGUID = GetGUID();
             data.TargetGUID = victim.GetGUID();
             data.SpellID = spellId;
@@ -1907,15 +1907,15 @@ namespace Game.Entities
 
         void TriggerAurasProcOnEvent(CalcDamageInfo damageInfo)
         {
-            DamageInfo dmgInfo = new DamageInfo(damageInfo);
+            DamageInfo dmgInfo = new(damageInfo);
             TriggerAurasProcOnEvent(null, null, damageInfo.target, damageInfo.procAttacker, damageInfo.procVictim, ProcFlagsSpellType.None, ProcFlagsSpellPhase.None, dmgInfo.GetHitMask(), null, dmgInfo, null);
         }
 
         void TriggerAurasProcOnEvent(List<AuraApplication> myProcAuras, List<AuraApplication> targetProcAuras, Unit actionTarget, ProcFlags typeMaskActor, ProcFlags typeMaskActionTarget, ProcFlagsSpellType spellTypeMask, ProcFlagsSpellPhase spellPhaseMask, ProcFlagsHit hitMask, Spell spell, DamageInfo damageInfo, HealInfo healInfo)
         {
             // prepare data for self trigger
-            ProcEventInfo myProcEventInfo = new ProcEventInfo(this, actionTarget, actionTarget, typeMaskActor, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
-            List<Tuple<uint, AuraApplication>> myAurasTriggeringProc = new List<Tuple<uint, AuraApplication>>();
+            ProcEventInfo myProcEventInfo = new(this, actionTarget, actionTarget, typeMaskActor, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
+            List<Tuple<uint, AuraApplication>> myAurasTriggeringProc = new();
             if (typeMaskActor != 0)
             {
                 GetProcAurasTriggeredOnEvent(myAurasTriggeringProc, myProcAuras, myProcEventInfo);
@@ -1926,7 +1926,7 @@ namespace Game.Entities
                 {
                     if (modOwner != this && spell)
                     {
-                        List<AuraApplication> modAuras = new List<AuraApplication>();
+                        List<AuraApplication> modAuras = new();
                         foreach (var itr in modOwner.GetAppliedAuras())
                         {
                             if (spell.m_appliedMods.Contains(itr.Value.GetBase()))
@@ -1938,8 +1938,8 @@ namespace Game.Entities
             }
 
             // prepare data for target trigger
-            ProcEventInfo targetProcEventInfo = new ProcEventInfo(this, actionTarget, this, typeMaskActionTarget, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
-            List<Tuple<uint, AuraApplication>> targetAurasTriggeringProc = new List<Tuple<uint, AuraApplication>>();
+            ProcEventInfo targetProcEventInfo = new(this, actionTarget, this, typeMaskActionTarget, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
+            List<Tuple<uint, AuraApplication>> targetAurasTriggeringProc = new();
             if (typeMaskActionTarget != 0 && actionTarget)
                 actionTarget.GetProcAurasTriggeredOnEvent(targetAurasTriggeringProc, targetProcAuras, targetProcEventInfo);
 
@@ -2314,7 +2314,7 @@ namespace Game.Entities
 
         void SendHealSpellLog(HealInfo healInfo, bool critical = false)
         {
-            SpellHealLog spellHealLog = new SpellHealLog();
+            SpellHealLog spellHealLog = new();
 
             spellHealLog.TargetGUID = healInfo.GetTarget().GetGUID();
             spellHealLog.CasterGUID = healInfo.GetHealer().GetGUID();
@@ -2484,7 +2484,7 @@ namespace Game.Entities
 
             damageInfo.damage = (uint)damage;
             damageInfo.originalDamage = (uint)damage;
-            DamageInfo dmgInfo = new DamageInfo(damageInfo, DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack, ProcFlagsHit.None);
+            DamageInfo dmgInfo = new(damageInfo, DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack, ProcFlagsHit.None);
             CalcAbsorbResist(dmgInfo);
             damageInfo.absorb = dmgInfo.GetAbsorb();
             damageInfo.resist = dmgInfo.GetResist();
@@ -2516,13 +2516,13 @@ namespace Game.Entities
             }
 
             // Call default DealDamage
-            CleanDamage cleanDamage = new CleanDamage(damageInfo.cleanDamage, damageInfo.absorb, WeaponAttackType.BaseAttack, MeleeHitOutcome.Normal);
+            CleanDamage cleanDamage = new(damageInfo.cleanDamage, damageInfo.absorb, WeaponAttackType.BaseAttack, MeleeHitOutcome.Normal);
             DealDamage(victim, damageInfo.damage, cleanDamage, DamageEffectType.SpellDirect, damageInfo.schoolMask, damageInfo.Spell, durabilityLoss);
         }
 
         public void SendSpellNonMeleeDamageLog(SpellNonMeleeDamage log)
         {
-            SpellNonMeleeDamageLog packet = new SpellNonMeleeDamageLog();
+            SpellNonMeleeDamageLog packet = new();
             packet.Me = log.target.GetGUID();
             packet.CasterGUID = log.attacker.GetGUID();
             packet.CastID = log.castId;
@@ -2542,7 +2542,7 @@ namespace Game.Entities
             packet.Periodic = log.periodicLog;
             packet.Flags = (int)log.HitInfo;
 
-            ContentTuningParams contentTuningParams = new ContentTuningParams();
+            ContentTuningParams contentTuningParams = new();
             if (contentTuningParams.GenerateDataForUnits(log.attacker, log.target))
                 packet.ContentTuning.Set(contentTuningParams);
 
@@ -2553,13 +2553,13 @@ namespace Game.Entities
         {
             AuraEffect aura = info.auraEff;
 
-            SpellPeriodicAuraLog data = new SpellPeriodicAuraLog();
+            SpellPeriodicAuraLog data = new();
             data.TargetGUID = GetGUID();
             data.CasterGUID = aura.GetCasterGUID();
             data.SpellID = aura.GetId();
             data.LogData.Initialize(this);
 
-            SpellPeriodicAuraLog.SpellLogEffect spellLogEffect = new SpellPeriodicAuraLog.SpellLogEffect();
+            SpellPeriodicAuraLog.SpellLogEffect spellLogEffect = new();
             spellLogEffect.Effect = (uint)aura.GetAuraType();
             spellLogEffect.Amount = info.damage;
             spellLogEffect.OriginalDamage = (int)info.originalDamage;
@@ -2570,7 +2570,7 @@ namespace Game.Entities
             spellLogEffect.Crit = info.critical;
             // @todo: implement debug info
 
-            ContentTuningParams contentTuningParams = new ContentTuningParams();
+            ContentTuningParams contentTuningParams = new();
             Unit caster = Global.ObjAccessor.GetUnit(this, aura.GetCasterGUID());
             if (caster && contentTuningParams.GenerateDataForUnits(caster, this))
                 spellLogEffect.ContentTuning.Set(contentTuningParams);
@@ -2581,7 +2581,7 @@ namespace Game.Entities
         }
         public void SendSpellMiss(Unit target, uint spellID, SpellMissInfo missInfo)
         {
-            SpellMissLog spellMissLog = new SpellMissLog();
+            SpellMissLog spellMissLog = new();
             spellMissLog.SpellID = spellID;
             spellMissLog.Caster = GetGUID();
             spellMissLog.Entries.Add(new SpellLogMissEntry(target.GetGUID(), (byte)missInfo));
@@ -2590,7 +2590,7 @@ namespace Game.Entities
 
         void SendSpellDamageResist(Unit target, uint spellId)
         {
-            ProcResist procResist = new ProcResist();
+            ProcResist procResist = new();
             procResist.Caster = GetGUID();
             procResist.SpellID = spellId;
             procResist.Target = target.GetGUID();
@@ -2599,7 +2599,7 @@ namespace Game.Entities
 
         public void SendSpellDamageImmune(Unit target, uint spellId, bool isPeriodic)
         {
-            SpellOrDamageImmune spellOrDamageImmune = new SpellOrDamageImmune();
+            SpellOrDamageImmune spellOrDamageImmune = new();
             spellOrDamageImmune.CasterGUID = GetGUID();
             spellOrDamageImmune.VictimGUID = target.GetGUID();
             spellOrDamageImmune.SpellID = spellId;
@@ -2609,7 +2609,7 @@ namespace Game.Entities
 
         public void SendSpellInstakillLog(uint spellId, Unit caster, Unit target = null)
         {
-            SpellInstakillLog spellInstakillLog = new SpellInstakillLog();
+            SpellInstakillLog spellInstakillLog = new();
             spellInstakillLog.Caster = caster.GetGUID();
             spellInstakillLog.Target = target ? target.GetGUID() : caster.GetGUID();
             spellInstakillLog.SpellID = spellId;
@@ -3227,7 +3227,7 @@ namespace Game.Entities
 
         public List<DispelableAura> GetDispellableAuraList(Unit caster, uint dispelMask, bool isReflect = false)
         {
-            List<DispelableAura> dispelList = new List<DispelableAura>();
+            List<DispelableAura> dispelList = new();
 
             var auras = GetOwnedAuras();
             foreach (var pair in auras)
@@ -3547,7 +3547,7 @@ namespace Game.Entities
                 Aura aura = pair.Value;
                 if (aura.GetCasterGUID() == casterGUID)
                 {
-                    DispelInfo dispelInfo = new DispelInfo(dispeller, dispellerSpellId, chargesRemoved);
+                    DispelInfo dispelInfo = new(dispeller, dispellerSpellId, chargesRemoved);
 
                     // Call OnDispel hook on AuraScript
                     aura.CallScriptDispel(dispelInfo);
@@ -4430,7 +4430,7 @@ namespace Game.Entities
 
         public int GetTotalAuraModifier(AuraType auratype, Func<AuraEffect, bool> predicate)
         {
-            Dictionary<SpellGroup, int> sameEffectSpellGroup = new Dictionary<SpellGroup, int>();
+            Dictionary<SpellGroup, int> sameEffectSpellGroup = new();
             int modifier = 0;
 
             var mTotalAuraList = GetAuraEffectsByType(auratype);
@@ -4463,7 +4463,7 @@ namespace Game.Entities
             if (mTotalAuraList.Empty())
                 return 1.0f;
 
-            Dictionary<SpellGroup, int> sameEffectSpellGroup = new Dictionary<SpellGroup, int>();
+            Dictionary<SpellGroup, int> sameEffectSpellGroup = new();
             float multiplier = 1.0f;
 
             foreach (var aurEff in mTotalAuraList)

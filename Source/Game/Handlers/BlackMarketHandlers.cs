@@ -45,7 +45,7 @@ namespace Game
 
         void SendBlackMarketOpenResult(ObjectGuid guid, Creature auctioneer)
         {
-            BlackMarketOpenResult packet = new BlackMarketOpenResult();
+            BlackMarketOpenResult packet = new();
             packet.Guid = guid;
             packet.Enable = Global.BlackMarketMgr.IsEnabled();
             SendPacket(packet);
@@ -64,7 +64,7 @@ namespace Game
                 return;
             }
 
-            BlackMarketRequestItemsResult result = new BlackMarketRequestItemsResult();
+            BlackMarketRequestItemsResult result = new();
             Global.BlackMarketMgr.BuildItemsResponse(result, GetPlayer());
             SendPacket(result);
         }
@@ -119,7 +119,7 @@ namespace Game
                 return;
             }
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
 
             Global.BlackMarketMgr.SendAuctionOutbidMail(entry, trans);
             entry.PlaceBid(blackMarketBidOnItem.BidAmount, player, trans);
@@ -131,7 +131,7 @@ namespace Game
 
         void SendBlackMarketBidOnItemResult(BlackMarketError result, uint marketId, ItemInstance item)
         {
-            BlackMarketBidOnItemResult packet = new BlackMarketBidOnItemResult();
+            BlackMarketBidOnItemResult packet = new();
 
             packet.MarketID = marketId;
             packet.Item = item;
@@ -142,7 +142,7 @@ namespace Game
 
         public void SendBlackMarketWonNotification(BlackMarketEntry entry, Item item)
         {
-            BlackMarketWon packet = new BlackMarketWon();
+            BlackMarketWon packet = new();
 
             packet.MarketID = entry.GetMarketId();
             packet.Item = new ItemInstance(item);
@@ -152,7 +152,7 @@ namespace Game
 
         public void SendBlackMarketOutbidNotification(BlackMarketTemplate templ)
         {
-            BlackMarketOutbid packet = new BlackMarketOutbid();
+            BlackMarketOutbid packet = new();
 
             packet.MarketID = templ.MarketID;
             packet.Item = templ.Item;

@@ -29,7 +29,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.LearnTalents)]
         void HandleLearnTalents(LearnTalents packet)
         {
-            LearnTalentFailed learnTalentFailed = new LearnTalentFailed();
+            LearnTalentFailed learnTalentFailed = new();
             bool anythingLearned = false;
             foreach (uint talentId in packet.Talents)
             {
@@ -55,7 +55,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.LearnPvpTalents)]
         void HandleLearnPvpTalents(LearnPvpTalents packet)
         {
-            LearnPvpTalentFailed learnPvpTalentFailed = new LearnPvpTalentFailed();
+            LearnPvpTalentFailed learnPvpTalentFailed = new();
             bool anythingLearned = false;
             foreach (var pvpTalent in packet.Talents)
             {

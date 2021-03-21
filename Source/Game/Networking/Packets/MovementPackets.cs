@@ -297,7 +297,7 @@ namespace Game.Networking.Packets
                 Vector3 direction = Vector3.Zero;
                 if (movementForce.Magnitude != 0.0f)
                 {
-                    Position tmp = new Position(movementForce.Origin.X - objectPosition.GetPositionX(),
+                    Position tmp = new(movementForce.Origin.X - objectPosition.GetPositionX(),
                         movementForce.Origin.Y - objectPosition.GetPositionY(),
                         movementForce.Origin.Z - objectPosition.GetPositionZ());
                     float lengthSquared = tmp.GetExactDistSq(0.0f, 0.0f, 0.0f);
@@ -591,7 +591,7 @@ namespace Game.Networking.Packets
 
         public uint MapID;
         public uint Reason;
-        public TeleportLocation Loc = new TeleportLocation();
+        public TeleportLocation Loc = new();
         public Position MovementOffset;    // Adjusts all pending movement events by this offset
     }
 
@@ -730,8 +730,8 @@ namespace Game.Networking.Packets
             Force.Read(_worldPacket);
         }
 
-        public MovementAck Ack = new MovementAck();
-        public MovementForce Force = new MovementForce();
+        public MovementAck Ack = new();
+        public MovementForce Force = new();
     }
 
     class MoveRemoveMovementForce : ServerPacket
@@ -760,7 +760,7 @@ namespace Game.Networking.Packets
             ID = _worldPacket.ReadPackedGuid();
         }
 
-        public MovementAck Ack = new MovementAck();
+        public MovementAck Ack = new();
         public ObjectGuid ID;
     }
 
@@ -774,8 +774,8 @@ namespace Game.Networking.Packets
             Force.Write(_worldPacket);
         }
 
-        public MovementInfo Status = new MovementInfo();
-        public MovementForce Force = new MovementForce();
+        public MovementInfo Status = new();
+        public MovementForce Force = new();
     }
 
     class MoveUpdateRemoveMovementForce : ServerPacket
@@ -788,7 +788,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(TriggerGUID);
         }
 
-        public MovementInfo Status = new MovementInfo();
+        public MovementInfo Status = new();
         public ObjectGuid TriggerGUID;
     }
 
@@ -1103,7 +1103,7 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid MoverGUID;
-        public List<MoveStateChange> StateChanges = new List<MoveStateChange>();
+        public List<MoveStateChange> StateChanges = new();
 
         public struct CollisionHeightInfo
         {
@@ -1221,7 +1221,7 @@ namespace Game.Networking.Packets
             data.FlushBits();
         }
 
-        public List<MonsterSplineFilterKey> FilterKeys = new List<MonsterSplineFilterKey>();
+        public List<MonsterSplineFilterKey> FilterKeys = new();
         public byte FilterFlags;
         public float BaseSpeed;
         public short StartOffset;
@@ -1279,7 +1279,7 @@ namespace Game.Networking.Packets
 
     public class MonsterSplineUnknown901
     {    
-        public Array<Inner> Data = new Array<Inner>(16);
+        public Array<Inner> Data = new(16);
 
         public void Write(WorldPacket data)
         {
@@ -1379,13 +1379,13 @@ namespace Game.Networking.Packets
         public int Elapsed;
         public uint MoveTime;
         public uint FadeObjectTime;
-        public List<Vector3> Points = new List<Vector3>(); // Spline path
+        public List<Vector3> Points = new(); // Spline path
         public byte Mode; // Spline mode - actually always 0 in this packet - Catmullrom mode appears only in SMSG_UPDATE_OBJECT. In this packet it is determined by flags
         public bool VehicleExitVoluntary;
         public bool Interpolate;
         public ObjectGuid TransportGUID;
         public sbyte VehicleSeat = -1;
-        public List<Vector3> PackedDeltas = new List<Vector3>();
+        public List<Vector3> PackedDeltas = new();
         public Optional<MonsterSplineFilter> SplineFilter;
         public Optional<MonsterSplineSpellEffectExtraData> SpellEffectExtraData;
         public Optional<MonsterSplineJumpExtraData> JumpExtraData;

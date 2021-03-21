@@ -28,15 +28,15 @@ namespace Game.Entities
 {
     public class CollectionMgr
     {
-        static Dictionary<uint, uint> FactionSpecificMounts = new Dictionary<uint, uint>();
+        static Dictionary<uint, uint> FactionSpecificMounts = new();
 
         WorldSession _owner;
-        Dictionary<uint, ToyFlags> _toys = new Dictionary<uint, ToyFlags>();
-        Dictionary<uint, HeirloomData> _heirlooms = new Dictionary<uint, HeirloomData>();
-        Dictionary<uint, MountStatusFlags> _mounts = new Dictionary<uint, MountStatusFlags>();
+        Dictionary<uint, ToyFlags> _toys = new();
+        Dictionary<uint, HeirloomData> _heirlooms = new();
+        Dictionary<uint, MountStatusFlags> _mounts = new();
         BitSet _appearances;
-        MultiMap<uint, ObjectGuid> _temporaryAppearances = new MultiMap<uint, ObjectGuid>();
-        Dictionary<uint, FavoriteAppearanceState> _favoriteAppearances = new Dictionary<uint, FavoriteAppearanceState>();
+        MultiMap<uint, ObjectGuid> _temporaryAppearances = new();
+        Dictionary<uint, FavoriteAppearanceState> _favoriteAppearances = new();
 
         public static void LoadMountDefinitions()
         {
@@ -463,7 +463,7 @@ namespace Game.Entities
             if (!player)
                 return;
 
-            AccountMountUpdate mountUpdate = new AccountMountUpdate();
+            AccountMountUpdate mountUpdate = new();
             mountUpdate.IsFullUpdate = false;
             mountUpdate.Mounts.Add(spellId, mountStatusFlags);
             player.SendPacket(mountUpdate);
@@ -782,7 +782,7 @@ namespace Game.Entities
 
         public List<uint> GetAppearanceIds()
         {
-            List<uint> appearances = new List<uint>();
+            List<uint> appearances = new();
             foreach (int id in _appearances)
                 appearances.Add(CliDB.ItemModifiedAppearanceStorage.LookupByKey(id).ItemAppearanceID);
 
@@ -813,7 +813,7 @@ namespace Game.Entities
 
             _favoriteAppearances[itemModifiedAppearanceId] = apperanceState;
 
-            AccountTransmogUpdate accountTransmogUpdate = new AccountTransmogUpdate();
+            AccountTransmogUpdate accountTransmogUpdate = new();
             accountTransmogUpdate.IsFullUpdate = false;
             accountTransmogUpdate.IsSetFavorite = apply;
             accountTransmogUpdate.FavoriteAppearances.Add(itemModifiedAppearanceId);
@@ -823,7 +823,7 @@ namespace Game.Entities
 
         public void SendFavoriteAppearances()
         {
-            AccountTransmogUpdate accountTransmogUpdate = new AccountTransmogUpdate();
+            AccountTransmogUpdate accountTransmogUpdate = new();
             accountTransmogUpdate.IsFullUpdate = true;
             foreach (var pair in _favoriteAppearances)
                 if (pair.Value != FavoriteAppearanceState.Removed)

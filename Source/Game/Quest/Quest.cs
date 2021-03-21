@@ -239,7 +239,7 @@ namespace Game
 
         public void LoadQuestObjective(SQLFields fields)
         {
-            QuestObjective obj = new QuestObjective();  
+            QuestObjective obj = new();  
             obj.QuestID = fields.Read<uint>(0);
             obj.Id = fields.Read<uint>(1);
             obj.Type = (QuestObjectiveType)fields.Read<byte>(2);
@@ -618,7 +618,7 @@ namespace Game
         public uint RewardMoneyDifficulty;
         public float RewardMoneyMultiplier;
         public uint RewardBonusMoney;
-        public List<QuestRewardDisplaySpell> RewardDisplaySpell = new List<QuestRewardDisplaySpell>();
+        public List<QuestRewardDisplaySpell> RewardDisplaySpell = new();
         public uint RewardSpell { get; set; }
         public uint RewardHonor;
         public uint RewardKillHonor;
@@ -664,7 +664,7 @@ namespace Game
         public int Expansion;
         public int ManagedWorldStateID;
         public int QuestSessionBonus;
-        public List<QuestObjective> Objectives = new List<QuestObjective>();
+        public List<QuestObjective> Objectives = new();
         public string LogTitle = "";
         public string LogDescription = "";
         public string QuestDescription = "";
@@ -711,7 +711,7 @@ namespace Game
         public QuestSpecialFlags SpecialFlags; // custom flags, not sniffed/WDB
         public uint ScriptId;
 
-        public List<uint> DependentPreviousQuests = new List<uint>();
+        public List<uint> DependentPreviousQuests = new();
         public QueryQuestInfoResponse QueryData;
 
         uint _rewChoiceItemsCount;
@@ -748,35 +748,35 @@ namespace Game
 
     public class QuestGreetingLocale
     {
-        public StringArray Greeting = new StringArray((int)Locale.Total);
+        public StringArray Greeting = new((int)Locale.Total);
     }
 
     public class QuestTemplateLocale
     {
-        public StringArray LogTitle = new StringArray((int)Locale.Total);
-        public StringArray LogDescription = new StringArray((int)Locale.Total);
-        public StringArray QuestDescription = new StringArray((int)Locale.Total);
-        public StringArray AreaDescription = new StringArray((int)Locale.Total);
-        public StringArray PortraitGiverText = new StringArray((int)Locale.Total);
-        public StringArray PortraitGiverName = new StringArray((int)Locale.Total);
-        public StringArray PortraitTurnInText = new StringArray((int)Locale.Total);
-        public StringArray PortraitTurnInName = new StringArray((int)Locale.Total);
-        public StringArray QuestCompletionLog = new StringArray((int)Locale.Total);
+        public StringArray LogTitle = new((int)Locale.Total);
+        public StringArray LogDescription = new((int)Locale.Total);
+        public StringArray QuestDescription = new((int)Locale.Total);
+        public StringArray AreaDescription = new((int)Locale.Total);
+        public StringArray PortraitGiverText = new((int)Locale.Total);
+        public StringArray PortraitGiverName = new((int)Locale.Total);
+        public StringArray PortraitTurnInText = new((int)Locale.Total);
+        public StringArray PortraitTurnInName = new((int)Locale.Total);
+        public StringArray QuestCompletionLog = new((int)Locale.Total);
     }
 
     public class QuestRequestItemsLocale
     {
-        public StringArray CompletionText = new StringArray((int)Locale.Total);
+        public StringArray CompletionText = new((int)Locale.Total);
     }
 
     public class QuestObjectivesLocale
     {
-        public StringArray Description = new StringArray((int)Locale.Total);
+        public StringArray Description = new((int)Locale.Total);
     }
 
     public class QuestOfferRewardLocale
     {
-        public StringArray RewardText = new StringArray((int)Locale.Total);
+        public StringArray RewardText = new((int)Locale.Total);
     }
 
     public struct QuestRewardDisplaySpell

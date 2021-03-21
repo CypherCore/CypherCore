@@ -62,14 +62,14 @@ namespace Game.Entities
         {
             if (!GetThreatManager().IsThreatListEmpty())
             {
-                HighestThreatUpdate packet = new HighestThreatUpdate();
+                HighestThreatUpdate packet = new();
                 packet.UnitGUID = GetGUID();
                 packet.HighestThreatGUID = pHostileReference.GetUnitGuid();
 
                 var refeList = GetThreatManager().GetThreatList();
                 foreach (var refe in refeList)
                 {
-                    ThreatInfo info = new ThreatInfo();
+                    ThreatInfo info = new();
                     info.UnitGUID = refe.GetUnitGuid();
                     info.Threat = (long)refe.GetThreat() * 100;
                     packet.ThreatList.Add(info);
@@ -127,14 +127,14 @@ namespace Game.Entities
 
         public void SendClearThreatList()
         {
-            ThreatClear packet = new ThreatClear();
+            ThreatClear packet = new();
             packet.UnitGUID = GetGUID();
             SendMessageToSet(packet, false);
         }
 
         public void SendRemoveFromThreatList(HostileReference pHostileReference)
         {
-            ThreatRemove packet = new ThreatRemove();
+            ThreatRemove packet = new();
             packet.UnitGUID = GetGUID();
             packet.AboutGUID = pHostileReference.GetUnitGuid();
             SendMessageToSet(packet, false);
@@ -144,12 +144,12 @@ namespace Game.Entities
         {
             if (!GetThreatManager().IsThreatListEmpty())
             {
-                ThreatUpdate packet = new ThreatUpdate();
+                ThreatUpdate packet = new();
                 packet.UnitGUID = GetGUID();
                 var tlist = GetThreatManager().GetThreatList();
                 foreach (var refe in tlist)
                 {
-                    ThreatInfo info = new ThreatInfo();
+                    ThreatInfo info = new();
                     info.UnitGUID = refe.GetUnitGuid();
                     info.Threat = (long)refe.GetThreat() * 100;
                     packet.ThreatList.Add(info);
@@ -224,7 +224,7 @@ namespace Game.Entities
         public void ValidateAttackersAndOwnTarget()
         {
             // iterate attackers
-            List<Unit> toRemove = new List<Unit>();
+            List<Unit> toRemove = new();
             foreach (Unit attacker in GetAttackers())
                 if (!attacker.IsValidAttackTarget(this))
                     toRemove.Add(attacker);
@@ -490,7 +490,7 @@ namespace Game.Entities
         }
         public void SendMeleeAttackStart(Unit victim)
         {
-            AttackStart packet = new AttackStart();
+            AttackStart packet = new();
             packet.Attacker = GetGUID();
             packet.Victim = victim.GetGUID();
             SendMessageToSet(packet, true);
@@ -682,7 +682,7 @@ namespace Game.Entities
 
                     DealMeleeDamage(damageInfo, true);
 
-                    DamageInfo dmgInfo = new DamageInfo(damageInfo);
+                    DamageInfo dmgInfo = new(damageInfo);
                     ProcSkillsAndAuras(damageInfo.target, damageInfo.procAttacker, damageInfo.procVictim, ProcFlagsSpellType.None, ProcFlagsSpellPhase.None, dmgInfo.GetHitMask(), null, dmgInfo, null);
                     Log.outDebug(LogFilter.Unit, "AttackerStateUpdate: {0} attacked {1} for {2} dmg, absorbed {3}, blocked {4}, resisted {5}.",
                         GetGUID().ToString(), victim.GetGUID().ToString(), damageInfo.damage, damageInfo.absorb, damageInfo.blocked_amount, damageInfo.resist);
@@ -720,7 +720,7 @@ namespace Game.Entities
             if (IsTypeId(TypeId.Unit) && !HasUnitFlag(UnitFlags.PlayerControlled))
                 SetFacingToObject(victim, false); // update client side facing to face the target (prevents visual glitches when casting untargeted spells)
 
-            CalcDamageInfo damageInfo = new CalcDamageInfo();
+            CalcDamageInfo damageInfo = new();
             damageInfo.attacker = this;
             damageInfo.target = victim;
             damageInfo.damageSchoolMask = (uint)GetMeleeDamageSchoolMask();
@@ -873,7 +873,7 @@ namespace Game.Entities
             }
 
             // Call default DealDamage
-            CleanDamage cleanDamage = new CleanDamage(damageInfo.cleanDamage, damageInfo.absorb, damageInfo.attackType, damageInfo.hitOutCome);
+            CleanDamage cleanDamage = new(damageInfo.cleanDamage, damageInfo.absorb, damageInfo.attackType, damageInfo.hitOutCome);
             DealDamage(victim, damageInfo.damage, cleanDamage, DamageEffectType.Direct, (SpellSchoolMask)damageInfo.damageSchoolMask, null, durabilityLoss);
 
             // If this is a creature and it attacks from behind it has a probability to daze it's victim
@@ -902,7 +902,7 @@ namespace Game.Entities
 
             if (IsTypeId(TypeId.Player))
             {
-                DamageInfo dmgInfo = new DamageInfo(damageInfo);
+                DamageInfo dmgInfo = new(damageInfo);
                 ToPlayer().CastItemCombatSpell(dmgInfo);
             }
 
@@ -939,13 +939,13 @@ namespace Game.Entities
                         damage = SpellDamageBonusTaken(caster, spellInfo, damage, DamageEffectType.SpellDirect, dmgShield.GetSpellEffectInfo());
                     }
 
-                    DamageInfo damageInfo1 = new DamageInfo(this, victim, damage, spellInfo, spellInfo.GetSchoolMask(), DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
+                    DamageInfo damageInfo1 = new(this, victim, damage, spellInfo, spellInfo.GetSchoolMask(), DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
                     victim.CalcAbsorbResist(damageInfo1);
                     damage = damageInfo1.GetDamage();
 
                     victim.DealDamageMods(this, ref damage);
 
-                    SpellDamageShield damageShield = new SpellDamageShield();
+                    SpellDamageShield damageShield = new();
                     damageShield.Attacker = victim.GetGUID();
                     damageShield.Defender = GetGUID();
                     damageShield.SpellID = spellInfo.Id;
@@ -1249,7 +1249,7 @@ namespace Game.Entities
 
             if (dVal < 0)
             {
-                HealthUpdate packet = new HealthUpdate();
+                HealthUpdate packet = new();
                 packet.Guid = GetGUID();
                 packet.Health = (long)GetHealth();
 
@@ -1287,7 +1287,7 @@ namespace Game.Entities
 
         public void SendAttackStateUpdate(HitInfo HitInfo, Unit target, SpellSchoolMask damageSchoolMask, uint Damage, uint AbsorbDamage, uint Resist, VictimState TargetState, uint BlockedAmount)
         {
-            CalcDamageInfo dmgInfo = new CalcDamageInfo();
+            CalcDamageInfo dmgInfo = new();
             dmgInfo.HitInfo = HitInfo;
             dmgInfo.attacker = this;
             dmgInfo.target = target;
@@ -1302,7 +1302,7 @@ namespace Game.Entities
         }
         public void SendAttackStateUpdate(CalcDamageInfo damageInfo)
         {
-            AttackerStateUpdate packet = new AttackerStateUpdate();
+            AttackerStateUpdate packet = new();
             packet.hitInfo = damageInfo.HitInfo;
             packet.AttackerGUID = damageInfo.attacker.GetGUID();
             packet.VictimGUID = damageInfo.target.GetGUID();
@@ -1311,7 +1311,7 @@ namespace Game.Entities
             int overkill = (int)(damageInfo.damage - damageInfo.target.GetHealth());
             packet.OverDamage = (overkill < 0 ? -1 : overkill);
 
-            SubDamage subDmg = new SubDamage();
+            SubDamage subDmg = new();
             subDmg.SchoolMask = (int)damageInfo.damageSchoolMask;   // School of sub damage
             subDmg.FDamage = damageInfo.damage;                // sub damage
             subDmg.Damage = (int)damageInfo.damage;                 // Sub Damage
@@ -1323,7 +1323,7 @@ namespace Game.Entities
             packet.BlockAmount = (int)damageInfo.blocked_amount;
             packet.LogData.Initialize(damageInfo.attacker);
 
-            ContentTuningParams contentTuningParams = new ContentTuningParams();
+            ContentTuningParams contentTuningParams = new();
             if (contentTuningParams.GenerateDataForUnits(damageInfo.attacker, damageInfo.target))
                 packet.ContentTuning = contentTuningParams;
 
@@ -1431,7 +1431,7 @@ namespace Game.Entities
 
         internal void SendCombatLogMessage(CombatLogServerPacket combatLog)
         {
-            CombatLogSender notifier = new CombatLogSender(this, combatLog, GetVisibilityRange());
+            CombatLogSender notifier = new(this, combatLog, GetVisibilityRange());
             Cell.VisitWorldObjects(this, notifier, GetVisibilityRange());
         }
 
@@ -1464,7 +1464,7 @@ namespace Game.Entities
             // call kill spell proc event (before real die and combat stop to triggering auras removed at death/combat stop)
             if (isRewardAllowed && player != null && player != victim)
             {
-                PartyKillLog partyKillLog = new PartyKillLog();
+                PartyKillLog partyKillLog = new();
                 partyKillLog.Player = player.GetGUID();
                 partyKillLog.Victim = victim.GetGUID();
 
@@ -1495,7 +1495,7 @@ namespace Game.Entities
 
                     if (creature != null)
                     {
-                        LootList lootList = new LootList();
+                        LootList lootList = new();
                         lootList.Owner = creature.GetGUID();
                         lootList.LootObj = creature.loot.GetGUID();
                         player.SendMessageToSet(lootList, true);
@@ -1800,7 +1800,7 @@ namespace Game.Entities
                 return IsWithinDistInMap(pet, radius) ? pet : null;
             }
 
-            List<Unit> nearMembers = new List<Unit>();
+            List<Unit> nearMembers = new();
             // reserve place for players and pets because resizing vector every unit push is unefficient (vector is reallocated then)
 
             for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
@@ -2021,7 +2021,7 @@ namespace Game.Entities
             {
                 damageInfo.procVictim |= ProcFlags.TakenDamage;
                 // Calculate absorb & resists
-                DamageInfo dmgInfo = new DamageInfo(damageInfo);
+                DamageInfo dmgInfo = new(damageInfo);
                 CalcAbsorbResist(dmgInfo);
                 damageInfo.absorb = dmgInfo.GetAbsorb();
                 damageInfo.resist = dmgInfo.GetResist();
@@ -2636,8 +2636,8 @@ namespace Game.Entities
                     uint split_absorb = 0;
                     DealDamageMods(caster, ref splitDamage, ref split_absorb);
 
-                    SpellNonMeleeDamage log = new SpellNonMeleeDamage(this, caster, itr.GetSpellInfo(), itr.GetBase().GetSpellVisual(), damageInfo.GetSchoolMask(), itr.GetBase().GetCastGUID());
-                    CleanDamage cleanDamage = new CleanDamage(splitDamage, 0, WeaponAttackType.BaseAttack, MeleeHitOutcome.Normal);
+                    SpellNonMeleeDamage log = new(this, caster, itr.GetSpellInfo(), itr.GetBase().GetSpellVisual(), damageInfo.GetSchoolMask(), itr.GetBase().GetCastGUID());
+                    CleanDamage cleanDamage = new(splitDamage, 0, WeaponAttackType.BaseAttack, MeleeHitOutcome.Normal);
                     DealDamage(caster, splitDamage, cleanDamage, DamageEffectType.Direct, damageInfo.GetSchoolMask(), itr.GetSpellInfo(), false);
                     log.damage = splitDamage;
                     log.originalDamage = splitDamage;

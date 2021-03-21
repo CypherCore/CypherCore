@@ -95,7 +95,7 @@ namespace Game.Networking
             return _clientPacketTable.ContainsKey(opcode);
         }
 
-        static ConcurrentDictionary<ClientOpcodes, PacketHandler> _clientPacketTable = new ConcurrentDictionary<ClientOpcodes, PacketHandler>();
+        static ConcurrentDictionary<ClientOpcodes, PacketHandler> _clientPacketTable = new();
 
         public static bool IsInstanceOnlyOpcode(ServerOpcodes opcode)
         {

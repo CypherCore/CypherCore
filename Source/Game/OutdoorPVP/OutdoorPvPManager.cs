@@ -224,14 +224,14 @@ namespace Game.PvP
 
         // contains all initiated outdoor pvp events
         // used when initing / cleaning up
-        List<OutdoorPvP> m_OutdoorPvPSet = new List<OutdoorPvP>();
+        List<OutdoorPvP> m_OutdoorPvPSet = new();
 
         // maps the zone ids to an outdoor pvp event
         // used in player event handling
-        Dictionary<uint, OutdoorPvP> m_OutdoorPvPMap = new Dictionary<uint, OutdoorPvP>();
+        Dictionary<uint, OutdoorPvP> m_OutdoorPvPMap = new();
 
         // Holds the outdoor PvP templates
-        Dictionary<OutdoorPvPTypes, uint> OutdoorPvPScriptIds = new Dictionary<OutdoorPvPTypes, uint>();
+        Dictionary<OutdoorPvPTypes, uint> OutdoorPvPScriptIds = new();
 
         // update interval
         uint m_UpdateTimer;

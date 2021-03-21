@@ -42,7 +42,7 @@ namespace Game
             DB.Characters.Execute(stmt);
 
             // get all the data necessary for loading all characters (along with their pets) on the account
-            EnumCharactersQueryHolder holder = new EnumCharactersQueryHolder();
+            EnumCharactersQueryHolder holder = new();
             if (!holder.Initialize(GetAccountId(), WorldConfig.GetBoolValue(WorldCfg.DeclinedNamesUsed), false))
             {
                 HandleCharEnum(holder);
@@ -54,7 +54,7 @@ namespace Game
 
         void HandleCharEnum(EnumCharactersQueryHolder holder)
         {
-            EnumCharactersResult charResult = new EnumCharactersResult();
+            EnumCharactersResult charResult = new();
             charResult.Success = true;
             charResult.IsDeletedCharacters = holder.IsDeletedCharacters();
             charResult.DisabledClassesMask.Set(WorldConfig.GetUIntValue(WorldCfg.CharacterCreatingDisabledClassmask));
@@ -62,13 +62,13 @@ namespace Game
             if (!charResult.IsDeletedCharacters)
                 _legitCharacters.Clear();
 
-            MultiMap<ulong, ChrCustomizationChoice> customizations = new MultiMap<ulong, ChrCustomizationChoice>();
+            MultiMap<ulong, ChrCustomizationChoice> customizations = new();
             SQLResult customizationsResult = holder.GetResult(EnumCharacterQueryLoad.Customizations);
             if (!customizationsResult.IsEmpty())
             {
                 do
                 {
-                    ChrCustomizationChoice choice = new ChrCustomizationChoice();
+                    ChrCustomizationChoice choice = new();
                     choice.ChrCustomizationOptionID = customizationsResult.Read<uint>(1);
                     choice.ChrCustomizationChoiceID = customizationsResult.Read<uint>(2);
                     customizations.Add(customizationsResult.Read<ulong>(0), choice);
@@ -81,7 +81,7 @@ namespace Game
             {
                 do
                 {
-                    EnumCharactersResult.CharacterInfo charInfo = new EnumCharactersResult.CharacterInfo(result.GetFields());
+                    EnumCharactersResult.CharacterInfo charInfo = new(result.GetFields());
 
                     var customizationsForChar = customizations.LookupByKey(charInfo.Guid.GetCounter());
                     if (!customizationsForChar.Empty())
@@ -126,7 +126,7 @@ namespace Game
 
             foreach (var requirement in Global.ObjectMgr.GetRaceUnlockRequirements())
             {
-                EnumCharactersResult.RaceUnlock raceUnlock = new EnumCharactersResult.RaceUnlock();
+                EnumCharactersResult.RaceUnlock raceUnlock = new();
                 raceUnlock.RaceID = requirement.Key;
                 raceUnlock.HasExpansion = (byte)GetAccountExpansion() >= requirement.Value.Expansion;
                 raceUnlock.HasAchievement = requirement.Value.AchievementId != 0 /*|| HasAchievement(requirement.Value.AchievementId)*/;
@@ -140,7 +140,7 @@ namespace Game
         void HandleCharUndeleteEnum(EnumCharacters enumCharacters)
         {
             // get all the data necessary for loading all undeleted characters (along with their pets) on the account
-            EnumCharactersQueryHolder holder = new EnumCharactersQueryHolder();
+            EnumCharactersQueryHolder holder = new();
             if (!holder.Initialize(GetAccountId(), WorldConfig.GetBoolValue(WorldCfg.DeclinedNamesUsed), true))
             {
                 HandleCharEnum(holder);
@@ -152,7 +152,7 @@ namespace Game
 
         void HandleCharUndeleteEnumCallback(SQLResult result)
         {
-            EnumCharactersResult charEnum = new EnumCharactersResult();
+            EnumCharactersResult charEnum = new();
             charEnum.Success = true;
             charEnum.IsDeletedCharacters = true;
             charEnum.DisabledClassesMask.Set(WorldConfig.GetUIntValue(WorldCfg.CharacterCreatingDisabledClassmask));
@@ -161,7 +161,7 @@ namespace Game
             {
                 do
                 {
-                    EnumCharactersResult.CharacterInfo charInfo = new EnumCharactersResult.CharacterInfo(result.GetFields());
+                    EnumCharactersResult.CharacterInfo charInfo = new(result.GetFields());
 
                     Log.outInfo(LogFilter.Network, "Loading undeleted char guid {0} from account {1}.", charInfo.Guid.ToString(), GetAccountId());
 
@@ -508,7 +508,7 @@ namespace Game
                         return;
                     }
 
-                    Player newChar = new Player(this);
+                    Player newChar = new(this);
                     newChar.GetMotionMaster().Initialize();
                     if (!newChar.Create(Global.ObjectMgr.GetGenerator(HighGuid.Player).Generate(), createInfo))
                     {
@@ -524,8 +524,8 @@ namespace Game
 
                     newChar.atLoginFlags = AtLoginFlags.FirstLogin;               // First login
 
-                    SQLTransaction characterTransaction = new SQLTransaction();
-                    SQLTransaction loginTransaction = new SQLTransaction();
+                    SQLTransaction characterTransaction = new();
+                    SQLTransaction loginTransaction = new();
 
                     // Player created, save it now
                     newChar.SaveToDB(loginTransaction, characterTransaction, true);
@@ -648,7 +648,7 @@ namespace Game
                 return;
             }
 
-            GenerateRandomCharacterNameResult result = new GenerateRandomCharacterNameResult();
+            GenerateRandomCharacterNameResult result = new();
             result.Success = true;
             result.Name = Global.DB2Mgr.GetNameGenEntry(packet.Race, packet.Sex);
 
@@ -658,7 +658,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ReorderCharacters, Status = SessionStatus.Authed)]
         void HandleReorderCharacters(ReorderCharacters reorderChars)
         {
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
 
             foreach (var reorderInfo in reorderChars.Entries)
             {
@@ -702,7 +702,7 @@ namespace Game
                 return;
             }
 
-            LoginQueryHolder holder = new LoginQueryHolder(GetAccountId(), m_playerLoading);
+            LoginQueryHolder holder = new(GetAccountId(), m_playerLoading);
             holder.Initialize();
 
             SendPacket(new ResumeComms(ConnectionType.Instance));
@@ -714,7 +714,7 @@ namespace Game
         {
             ObjectGuid playerGuid = holder.GetGuid();
 
-            Player pCurrChar = new Player(this);
+            Player pCurrChar = new(this);
             if (!pCurrChar.LoadFromDB(playerGuid, holder))
             {
                 SetPlayer(null);
@@ -730,14 +730,14 @@ namespace Game
             pCurrChar.GetMotionMaster().Initialize();
             pCurrChar.SendDungeonDifficulty();
 
-            LoginVerifyWorld loginVerifyWorld = new LoginVerifyWorld();
+            LoginVerifyWorld loginVerifyWorld = new();
             loginVerifyWorld.MapID = (int)pCurrChar.GetMapId();
             loginVerifyWorld.Pos = pCurrChar.GetPosition();
             SendPacket(loginVerifyWorld);
 
             LoadAccountData(holder.GetResult(PlayerLoginQueryLoad.AccountData), AccountDataTypes.PerCharacterCacheMask);
 
-            AccountDataTimes accountDataTimes = new AccountDataTimes();
+            AccountDataTimes accountDataTimes = new();
             accountDataTimes.PlayerGuid = playerGuid;
             accountDataTimes.ServerTime = (uint)GameTime.GetGameTime();
             for (AccountDataTypes i = 0; i < AccountDataTypes.Max; ++i)
@@ -747,7 +747,7 @@ namespace Game
 
             SendFeatureSystemStatus();
 
-            MOTD motd = new MOTD();
+            MOTD motd = new();
             motd.Text = Global.WorldMgr.GetMotd();
             SendPacket(motd);
 
@@ -755,7 +755,7 @@ namespace Game
 
             // Send PVPSeason
             {
-                SeasonInfo seasonInfo = new SeasonInfo();
+                SeasonInfo seasonInfo = new();
                 seasonInfo.PreviousSeason = (WorldConfig.GetIntValue(WorldCfg.ArenaSeasonId) - (WorldConfig.GetBoolValue(WorldCfg.ArenaSeasonInProgress) ? 1 : 0));
 
                 if (WorldConfig.GetBoolValue(WorldCfg.ArenaSeasonInProgress))
@@ -855,12 +855,12 @@ namespace Game
             stmt.AddValue(0, pCurrChar.GetGUID().GetCounter());
             GetQueryProcessor().AddCallback(DB.Characters.AsyncQuery(stmt)).WithCallback(favoriteAuctionResult =>
             {
-                AuctionFavoriteList favoriteItems = new AuctionFavoriteList();
+                AuctionFavoriteList favoriteItems = new();
                 if (!favoriteAuctionResult.IsEmpty())
                 {
                     do
                     {
-                        AuctionFavoriteInfo item = new AuctionFavoriteInfo();
+                        AuctionFavoriteInfo item = new();
                         item.Order = favoriteAuctionResult.Read<uint>(0);
                         item.ItemID = favoriteAuctionResult.Read<uint>(1);
                         item.ItemLevel = favoriteAuctionResult.Read<uint>(2);
@@ -1049,7 +1049,7 @@ namespace Game
 
         public void SendFeatureSystemStatus()
         {
-            FeatureSystemStatus features = new FeatureSystemStatus();
+            FeatureSystemStatus features = new();
 
             // START OF DUMMY VALUES
             features.ComplaintStatus = 2;
@@ -1239,7 +1239,7 @@ namespace Game
             }
             atLoginFlags &= ~AtLoginFlags.Rename;
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             ulong lowGuid = renameInfo.Guid.GetCounter();
 
             // Update name and at_login flag in the db
@@ -1298,7 +1298,7 @@ namespace Game
                 packet.DeclinedNames.name[i] = declinedName;
             }
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_DECLINED_NAME);
             stmt.AddValue(0, packet.Player.GetCounter());
@@ -1450,7 +1450,7 @@ namespace Game
             }
 
             PreparedStatement stmt;
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             ulong lowGuid = customizeInfo.CharGUID.GetCounter();
 
             // Customize
@@ -1582,7 +1582,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.UseEquipmentSet)]
         void HandleUseEquipmentSet(UseEquipmentSet useEquipmentSet)
         {
-            ObjectGuid ignoredItemGuid = new ObjectGuid(0x0C00040000000000, 0xFFFFFFFFFFFFFFFF);
+            ObjectGuid ignoredItemGuid = new(0x0C00040000000000, 0xFFFFFFFFFFFFFFFF);
             for (byte i = 0; i < EquipmentSlot.End; ++i)
             {
                 Log.outDebug(LogFilter.Player, "{0}: ContainerSlot: {1}, Slot: {2}", useEquipmentSet.Items[i].Item.ToString(), useEquipmentSet.Items[i].ContainerSlot, useEquipmentSet.Items[i].Slot);
@@ -1604,7 +1604,7 @@ namespace Game
                     if (!uItem)
                         continue;
 
-                    List<ItemPosCount> itemPosCount = new List<ItemPosCount>();
+                    List<ItemPosCount> itemPosCount = new();
                     InventoryResult inventoryResult = GetPlayer().CanStoreItem(ItemConst.NullBag, ItemConst.NullSlot, itemPosCount, uItem, false);
                     if (inventoryResult == InventoryResult.Ok)
                     {
@@ -1629,7 +1629,7 @@ namespace Game
                 GetPlayer().SwapItem(item.GetPos(), dstPos);
             }
 
-            UseEquipmentSetResult result = new UseEquipmentSetResult();
+            UseEquipmentSetResult result = new();
             result.GUID = useEquipmentSet.GUID;
             result.Reason = 0; // 4 - equipment swap failed - inventory is full
             SendPacket(result);
@@ -1761,7 +1761,7 @@ namespace Game
             ulong lowGuid = factionChangeInfo.Guid.GetCounter();
 
             PreparedStatement stmt;
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
 
             // resurrect the character in case he's dead
             Player.OfflineResurrect(factionChangeInfo.Guid, trans);
@@ -2089,7 +2089,7 @@ namespace Game
                     // Title conversion
                     if (!string.IsNullOrEmpty(knownTitlesStr))
                     {
-                        List<uint> knownTitles = new List<uint>();
+                        List<uint> knownTitles = new();
 
                         var tokens = new StringArray(knownTitlesStr, ' ');
                         for (int index = 0; index < tokens.Length; ++index)
@@ -2339,7 +2339,7 @@ namespace Game
             uint zoneId = GetPlayer().GetZoneId();
             uint team = (uint)GetPlayer().GetTeam();
 
-            List<uint> graveyardIds = new List<uint>();
+            List<uint> graveyardIds = new();
             var range = Global.ObjectMgr.GraveYardStorage.LookupByKey(zoneId);
 
             for (uint i = 0; i < range.Count && graveyardIds.Count < 16; ++i) // client max
@@ -2356,7 +2356,7 @@ namespace Game
                 return;
             }
 
-            RequestCemeteryListResponse packet = new RequestCemeteryListResponse();
+            RequestCemeteryListResponse packet = new();
             packet.IsGossipTriggered = false;
 
             foreach (uint id in graveyardIds)
@@ -2439,7 +2439,7 @@ namespace Game
 
         void SendCharCreate(ResponseCodes result, ObjectGuid guid = default)
         {
-            CreateChar response = new CreateChar();
+            CreateChar response = new();
             response.Code = result;
             response.Guid = guid;
 
@@ -2448,7 +2448,7 @@ namespace Game
 
         void SendCharDelete(ResponseCodes result)
         {
-            DeleteChar response = new DeleteChar();
+            DeleteChar response = new();
             response.Code = result;
 
             SendPacket(response);
@@ -2456,7 +2456,7 @@ namespace Game
 
         void SendCharRename(ResponseCodes result, CharacterRenameInfo renameInfo)
         {
-            CharacterRenameResult packet = new CharacterRenameResult();
+            CharacterRenameResult packet = new();
             packet.Result = result;
             packet.Name = renameInfo.NewName;
             if (result == ResponseCodes.Success)
@@ -2469,12 +2469,12 @@ namespace Game
         {
             if (result == ResponseCodes.Success)
             {
-                CharCustomizeSuccess response = new CharCustomizeSuccess(customizeInfo);
+                CharCustomizeSuccess response = new(customizeInfo);
                 SendPacket(response);
             }
             else
             {
-                CharCustomizeFailure failed = new CharCustomizeFailure();
+                CharCustomizeFailure failed = new();
                 failed.Result = (byte)result;
                 failed.CharGUID = customizeInfo.CharGUID;
                 SendPacket(failed);
@@ -2483,7 +2483,7 @@ namespace Game
 
         void SendCharFactionChange(ResponseCodes result, CharRaceOrFactionChangeInfo factionChangeInfo)
         {
-            CharFactionChangeResult packet = new CharFactionChangeResult();
+            CharFactionChangeResult packet = new();
             packet.Result = result;
             packet.Guid = factionChangeInfo.Guid;
 
@@ -2501,7 +2501,7 @@ namespace Game
 
         void SendSetPlayerDeclinedNamesResult(DeclinedNameResult result, ObjectGuid guid)
         {
-            SetPlayerDeclinedNamesResult packet = new SetPlayerDeclinedNamesResult();
+            SetPlayerDeclinedNamesResult packet = new();
             packet.ResultCode = result;
             packet.Player = guid;
 
@@ -2510,7 +2510,7 @@ namespace Game
 
         void SendUndeleteCooldownStatusResponse(uint currentCooldown, uint maxCooldown)
         {
-            UndeleteCooldownStatusResponse response = new UndeleteCooldownStatusResponse();
+            UndeleteCooldownStatusResponse response = new();
             response.OnCooldown = (currentCooldown > 0);
             response.MaxCooldown = maxCooldown;
             response.CurrentCooldown = currentCooldown;
@@ -2520,7 +2520,7 @@ namespace Game
 
         void SendUndeleteCharacterResponse(CharacterUndeleteResult result, CharacterUndeleteInfo undeleteInfo)
         {
-            UndeleteCharacterResponse response = new UndeleteCharacterResponse();
+            UndeleteCharacterResponse response = new();
             response.UndeleteInfo = undeleteInfo;
             response.Result = result;
 

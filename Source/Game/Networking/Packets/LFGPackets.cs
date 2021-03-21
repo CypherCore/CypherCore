@@ -43,7 +43,7 @@ namespace Game.Networking.Packets
         bool Unknown;       // Always false in 7.2.5
         public byte PartyIndex;
         public LfgRoles Roles;
-        public List<uint> Slots = new List<uint>();
+        public List<uint> Slots = new();
     }
 
     class DFLeave : ClientPacket
@@ -55,7 +55,7 @@ namespace Game.Networking.Packets
             Ticket.Read(_worldPacket);
         }
 
-        public RideTicket Ticket = new RideTicket();
+        public RideTicket Ticket = new();
     }
 
     class DFProposalResponse : ClientPacket
@@ -70,7 +70,7 @@ namespace Game.Networking.Packets
             Accepted = _worldPacket.HasBit();
         }
 
-        public RideTicket Ticket = new RideTicket();
+        public RideTicket Ticket = new();
         public ulong InstanceID;
         public uint ProposalID;
         public bool Accepted;
@@ -148,8 +148,8 @@ namespace Game.Networking.Packets
                 dungeonInfo.Write(_worldPacket);
         }
 
-        public LFGBlackList BlackList = new LFGBlackList();
-        public List<LfgPlayerDungeonInfo> Dungeons = new List<LfgPlayerDungeonInfo>();
+        public LFGBlackList BlackList = new();
+        public List<LfgPlayerDungeonInfo> Dungeons = new();
     }
 
     class LfgPartyInfo : ServerPacket
@@ -163,7 +163,7 @@ namespace Game.Networking.Packets
                 blackList.Write(_worldPacket);
         }
 
-        public List<LFGBlackList> Player = new List<LFGBlackList>();
+        public List<LFGBlackList> Player = new();
     }
 
     class LFGUpdateStatus : ServerPacket
@@ -196,12 +196,12 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
         }
 
-        public RideTicket Ticket = new RideTicket();
+        public RideTicket Ticket = new();
         public byte SubType;
         public byte Reason;
-        public List<uint> Slots = new List<uint>();
+        public List<uint> Slots = new();
         public uint RequestedRoles;
-        public List<ObjectGuid> SuspendedPlayers = new List<ObjectGuid>();
+        public List<ObjectGuid> SuspendedPlayers = new();
         public uint QueueMapID;
         public bool NotifyUI;
         public bool IsParty;
@@ -257,10 +257,10 @@ namespace Game.Networking.Packets
 
         public byte PartyIndex;
         public byte RoleCheckStatus;
-        public List<uint> JoinSlots = new List<uint>();
-        public List<ulong> BgQueueIDs = new List<ulong>();
+        public List<uint> JoinSlots = new();
+        public List<ulong> BgQueueIDs = new();
         public int GroupFinderActivityID = 0;
-        public List<LFGRoleCheckUpdateMember> Members = new List<LFGRoleCheckUpdateMember>();
+        public List<LFGRoleCheckUpdateMember> Members = new();
         public bool IsBeginning;
         public bool IsRequeue;
     }
@@ -289,11 +289,11 @@ namespace Game.Networking.Packets
                     _worldPacket.WriteCString(str);
         }
 
-        public RideTicket Ticket = new RideTicket();
+        public RideTicket Ticket = new();
         public byte Result;
         public byte ResultDetail;
-        public List<LFGBlackListPkt> BlackList = new List<LFGBlackListPkt>();
-        public List<string> BlackListNames = new List<string>();
+        public List<LFGBlackListPkt> BlackList = new();
+        public List<string> BlackListNames = new();
     }
 
     class LFGQueueStatus : ServerPacket
@@ -346,7 +346,7 @@ namespace Game.Networking.Packets
         public uint ActualSlot;
         public uint RewardMoney;
         public uint AddedXP;
-        public List<LFGPlayerRewards> Rewards = new List<LFGPlayerRewards>();
+        public List<LFGPlayerRewards> Rewards = new();
     }
 
     class LfgBootPlayer : ServerPacket
@@ -358,7 +358,7 @@ namespace Game.Networking.Packets
             Info.Write(_worldPacket);
         }
 
-        public LfgBootInfo Info = new LfgBootInfo();
+        public LfgBootInfo Info = new();
     }
 
     class LFGProposalUpdate : ServerPacket
@@ -397,7 +397,7 @@ namespace Game.Networking.Packets
         public bool ValidCompletedMask;
         public bool ProposalSilent;
         public bool IsRequeue;
-        public List<LFGProposalUpdatePlayer> Players = new List<LFGProposalUpdatePlayer>();
+        public List<LFGProposalUpdatePlayer> Players = new();
     }
 
     class LfgDisabled : ServerPacket
@@ -469,7 +469,7 @@ namespace Game.Networking.Packets
     public class LFGBlackList
     {     
         public Optional<ObjectGuid> PlayerGuid;
-        public List<LFGBlackListSlot> Slot = new List<LFGBlackListSlot>();
+        public List<LFGBlackListSlot> Slot = new();
 
         public void Write(WorldPacket data)
         {
@@ -561,9 +561,9 @@ namespace Game.Networking.Packets
         public uint Mask;
         public uint RewardMoney;
         public uint RewardXP;
-        public List<LfgPlayerQuestRewardItem> Item = new List<LfgPlayerQuestRewardItem>();
-        public List<LfgPlayerQuestRewardCurrency> Currency = new List<LfgPlayerQuestRewardCurrency>();
-        public List<LfgPlayerQuestRewardCurrency> BonusCurrency = new List<LfgPlayerQuestRewardCurrency>();
+        public List<LfgPlayerQuestRewardItem> Item = new();
+        public List<LfgPlayerQuestRewardCurrency> Currency = new();
+        public List<LfgPlayerQuestRewardCurrency> BonusCurrency = new();
         public Optional<int> RewardSpellID;                              // Only used by SMSG_LFG_PLAYER_INFO
         public Optional<int> Unused1;
         public Optional<ulong> Unused2;
@@ -616,8 +616,8 @@ namespace Game.Networking.Packets
         public uint EncounterMask;
         public bool FirstReward;
         public bool ShortageEligible;
-        public LfgPlayerQuestReward Rewards = new LfgPlayerQuestReward();
-        public List<LfgPlayerQuestReward> ShortageReward = new List<LfgPlayerQuestReward>();
+        public LfgPlayerQuestReward Rewards = new();
+        public List<LfgPlayerQuestReward> ShortageReward = new();
     }
 
     public class LFGRoleCheckUpdateMember
@@ -660,7 +660,7 @@ namespace Game.Networking.Packets
         }
 
         public Optional<ObjectGuid> PlayerGuid;
-        public List<LFGBlackListSlot> Slot = new List<LFGBlackListSlot>();
+        public List<LFGBlackListSlot> Slot = new();
     }
 
     public struct LFGPlayerRewards

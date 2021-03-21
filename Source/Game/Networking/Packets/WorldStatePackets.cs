@@ -52,7 +52,7 @@ namespace Game.Networking.Packets
         public uint SubareaID;
         public uint MapID;
 
-        List<WorldStateInfo> Worldstates = new List<WorldStateInfo>();
+        List<WorldStateInfo> Worldstates = new();
 
         struct WorldStateInfo
         {

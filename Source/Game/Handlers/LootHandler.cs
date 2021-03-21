@@ -184,7 +184,7 @@ namespace Game
 
                     Group group = player.GetGroup();
 
-                    List<Player> playersNear = new List<Player>();
+                    List<Player> playersNear = new();
                     for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                     {
                         Player member = refe.GetSource();
@@ -204,7 +204,7 @@ namespace Game
                         pl.ModifyMoney((long)(goldPerPlayer + goldMod));
                         pl.UpdateCriteria(CriteriaTypes.LootMoney, goldPerPlayer);
 
-                        LootMoneyNotify packet = new LootMoneyNotify();
+                        LootMoneyNotify packet = new();
                         packet.Money = goldPerPlayer;
                         packet.MoneyMod = goldMod;
                         packet.SoleLooter = playersNear.Count <= 1 ? true : false;
@@ -218,7 +218,7 @@ namespace Game
                     player.ModifyMoney((long)(loot.gold + goldMod));
                     player.UpdateCriteria(CriteriaTypes.LootMoney, loot.gold);
 
-                    LootMoneyNotify packet = new LootMoneyNotify();
+                    LootMoneyNotify packet = new();
                     packet.Money = loot.gold;
                     packet.MoneyMod = goldMod;
                     packet.SoleLooter = true; // "You loot..."
@@ -272,9 +272,9 @@ namespace Game
             if (!GetPlayer().IsAlive() || !packet.Unit.IsCreatureOrVehicle())
                 return;
 
-            List<Creature> corpses = new List<Creature>();
-            AELootCreatureCheck check = new AELootCreatureCheck(_player, packet.Unit);
-            CreatureListSearcher searcher = new CreatureListSearcher(_player, corpses, check);
+            List<Creature> corpses = new();
+            AELootCreatureCheck check = new(_player, packet.Unit);
+            CreatureListSearcher searcher = new(_player, corpses, check);
             Cell.VisitGridObjects(_player, searcher, AELootCreatureCheck.LootDistance);
 
             if (!corpses.Empty())
@@ -459,7 +459,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MasterLootItem)]
         void HandleLootMasterGive(MasterLootItem masterLootItem)
         {
-            AELootResult aeResult = new AELootResult();
+            AELootResult aeResult = new();
 
             if (GetPlayer().GetGroup() == null || GetPlayer().GetGroup().GetLooterGuid() != GetPlayer().GetGUID() || GetPlayer().GetGroup().GetLootMethod() != LootMethod.MasterLoot)
             {
@@ -516,7 +516,7 @@ namespace Game
 
                 LootItem item = slotid >= loot.items.Count ? loot.quest_items[slotid - loot.items.Count] : loot.items[slotid];
 
-                List<ItemPosCount> dest = new List<ItemPosCount>();
+                List<ItemPosCount> dest = new();
                 InventoryResult msg = target.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, item.itemid, item.count);
                 if (item.follow_loot_rules && !item.AllowedForPlayer(target))
                     msg = InventoryResult.CantEquipEver;

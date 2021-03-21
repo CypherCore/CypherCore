@@ -75,7 +75,7 @@ namespace Game.Networking.Packets
             }
         }
 
-        public List<GMTicketCase> Cases = new List<GMTicketCase>();
+        public List<GMTicketCase> Cases = new();
 
         public struct GMTicketCase
         {
@@ -252,7 +252,7 @@ namespace Game.Networking.Packets
                     ReportLineIndex.Value = data.ReadUInt32();
             }
 
-            public List<SupportTicketChatLine> Lines = new List<SupportTicketChatLine>();
+            public List<SupportTicketChatLine> Lines = new();
             public Optional<uint> ReportLineIndex;
         }
 
@@ -316,7 +316,7 @@ namespace Game.Networking.Packets
 
         public class SupportTicketHorusChatLog
         {
-            public List<SupportTicketHorusChatLine> Lines = new List<SupportTicketHorusChatLine>();
+            public List<SupportTicketHorusChatLine> Lines = new();
 
             public void Read(WorldPacket data)
             {

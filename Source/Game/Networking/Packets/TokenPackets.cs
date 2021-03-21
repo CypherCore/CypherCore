@@ -54,7 +54,7 @@ namespace Game.Networking.Packets
 
         public uint UnkInt; // send CMSG_UPDATE_WOW_TOKEN_AUCTIONABLE_LIST
         public TokenResult Result;
-        List<AuctionableTokenAuctionable> AuctionableTokenAuctionableList =new List<AuctionableTokenAuctionable>();
+        List<AuctionableTokenAuctionable> AuctionableTokenAuctionableList =new();
 
         struct AuctionableTokenAuctionable
         {

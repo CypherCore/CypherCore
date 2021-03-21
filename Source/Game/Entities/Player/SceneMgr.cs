@@ -26,7 +26,7 @@ namespace Game.Entities
     public class SceneMgr
     {
         Player _player;
-        Dictionary<uint, SceneTemplate> _scenesByInstance = new Dictionary<uint, SceneTemplate>();
+        Dictionary<uint, SceneTemplate> _scenesByInstance = new();
         uint _standaloneSceneInstanceID;
         bool _isDebuggingScenes;
 
@@ -61,7 +61,7 @@ namespace Game.Entities
             if (_isDebuggingScenes)
                 GetPlayer().SendSysMessage(CypherStrings.CommandSceneDebugPlay, sceneInstanceID, sceneTemplate.ScenePackageId, sceneTemplate.PlaybackFlags);
 
-            PlayScene playScene = new PlayScene();
+            PlayScene playScene = new();
             playScene.SceneID = sceneTemplate.SceneId;
             playScene.PlaybackFlags = (uint)sceneTemplate.PlaybackFlags;
             playScene.SceneInstanceID = sceneInstanceID;
@@ -81,7 +81,7 @@ namespace Game.Entities
 
         public uint PlaySceneByPackageId(uint sceneScriptPackageId, SceneFlags playbackflags = SceneFlags.Unk16, Position position = null)
         {
-            SceneTemplate sceneTemplate = new SceneTemplate();
+            SceneTemplate sceneTemplate = new();
             sceneTemplate.SceneId = 0;
             sceneTemplate.ScenePackageId = sceneScriptPackageId;
             sceneTemplate.PlaybackFlags = playbackflags;
@@ -96,7 +96,7 @@ namespace Game.Entities
             if (removeFromMap)
                 RemoveSceneInstanceId(sceneInstanceID);
 
-            CancelScene cancelScene = new CancelScene();
+            CancelScene cancelScene = new();
             cancelScene.SceneInstanceID = sceneInstanceID;
             GetPlayer().SendPacket(cancelScene);
         }
@@ -174,7 +174,7 @@ namespace Game.Entities
 
         public void CancelSceneBySceneId(uint sceneId)
         {
-            List<uint> instancesIds = new List<uint>();
+            List<uint> instancesIds = new();
 
             foreach (var pair in _scenesByInstance)
                 if (pair.Value.SceneId == sceneId)
@@ -186,7 +186,7 @@ namespace Game.Entities
 
         public void CancelSceneByPackageId(uint sceneScriptPackageId)
         {
-            List<uint> instancesIds = new List<uint>();
+            List<uint> instancesIds = new();
 
             foreach (var sceneTemplate in _scenesByInstance)
                 if (sceneTemplate.Value.ScenePackageId == sceneScriptPackageId)

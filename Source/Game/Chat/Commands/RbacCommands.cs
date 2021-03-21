@@ -292,7 +292,7 @@ namespace Game.Chat.Commands
             if (checkParams && handler.HasLowerSecurityAccount(null, accountId, true))
                 return null;
 
-            RBACCommandData data = new RBACCommandData();
+            RBACCommandData data = new();
 
             if (rdata == null)
             {

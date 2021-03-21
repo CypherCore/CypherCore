@@ -32,7 +32,7 @@ namespace Game
         {
             _session = session;
             // Generate Warden Key
-            SHA1Randx WK = new SHA1Randx(k.ToByteArray());
+            SHA1Randx WK = new(k.ToByteArray());
             WK.Generate(_inputKey, 16);
             WK.Generate(_outputKey, 16);
 
@@ -55,7 +55,7 @@ namespace Game
 
         public override ClientWardenModule GetModuleForClient()
         {
-            ClientWardenModule mod = new ClientWardenModule();
+            ClientWardenModule mod = new();
 
             uint length = (uint)WardenModuleWin.Module.Length;
 
@@ -78,7 +78,7 @@ namespace Game
             Log.outDebug(LogFilter.Warden, "Initialize module");
 
             // Create packet structure
-            WardenInitModuleRequest Request = new WardenInitModuleRequest();
+            WardenInitModuleRequest Request = new();
             Request.Command1 = WardenOpcodes.Smsg_ModuleInitialize;
             Request.Size1 = 20;
             Request.Unk1 = 1;
@@ -109,7 +109,7 @@ namespace Game
             Request.Function3_set = 1;
             Request.CheckSumm3 = BuildChecksum(BitConverter.GetBytes(Request.Unk5), 8);
 
-            Warden3DataServer packet = new Warden3DataServer();
+            Warden3DataServer packet = new();
             packet.Data = EncryptData(Request.Write());
             _session.SendPacket(packet);
         }
@@ -119,11 +119,11 @@ namespace Game
             Log.outDebug(LogFilter.Warden, "Request hash");
 
             // Create packet structure
-            WardenHashRequest Request = new WardenHashRequest();
+            WardenHashRequest Request = new();
             Request.Command = WardenOpcodes.Smsg_HashRequest;
             Request.Seed = _seed;
 
-            Warden3DataServer packet = new Warden3DataServer();
+            Warden3DataServer packet = new();
             packet.Data = EncryptData(Request.Write());
             _session.SendPacket(packet);
         }
@@ -184,7 +184,7 @@ namespace Game
                 _currentChecks.Add(id);
             }
 
-            ByteBuffer buffer = new ByteBuffer();
+            ByteBuffer buffer = new();
             buffer.WriteUInt8((byte)WardenOpcodes.Smsg_CheatChecksRequest);
 
             for (uint i = 0; i < WorldConfig.GetUIntValue(WorldCfg.WardenNumOtherChecks); ++i)
@@ -262,7 +262,7 @@ namespace Game
                         {
                             uint seed = RandomHelper.Rand32();
                             buffer.WriteUInt32(seed);
-                            HmacHash hmac = new HmacHash(BitConverter.GetBytes(seed));
+                            HmacHash hmac = new(BitConverter.GetBytes(seed));
                             hmac.Finish(wd.Str);
                             buffer.WriteBytes(hmac.Digest);
                             break;
@@ -282,7 +282,7 @@ namespace Game
             }
             buffer.WriteUInt8(xorByte);
 
-            Warden3DataServer packet = new Warden3DataServer();
+            Warden3DataServer packet = new();
             packet.Data = EncryptData(buffer.GetData());
             _session.SendPacket(packet);
 
@@ -448,8 +448,8 @@ namespace Game
         }
 
         uint _serverTicks;
-        List<ushort> _otherChecksTodo = new List<ushort>();
-        List<ushort> _memChecksTodo = new List<ushort>();
-        List<ushort> _currentChecks = new List<ushort>();
+        List<ushort> _otherChecksTodo = new();
+        List<ushort> _memChecksTodo = new();
+        List<ushort> _currentChecks = new();
     }
 }

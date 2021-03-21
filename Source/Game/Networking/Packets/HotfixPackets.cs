@@ -41,7 +41,7 @@ namespace Game.Networking.Packets
         }
 
         public uint TableHash;
-        public List<DBQueryRecord> Queries = new List<DBQueryRecord>();
+        public List<DBQueryRecord> Queries = new();
 
         public struct DBQueryRecord
         {
@@ -73,7 +73,7 @@ namespace Game.Networking.Packets
         public uint RecordID;
         public HotfixRecord.Status Status = HotfixRecord.Status.Invalid;
 
-        public ByteBuffer Data = new ByteBuffer();
+        public ByteBuffer Data = new();
     }
 
     class AvailableHotfixes : ServerPacket
@@ -111,7 +111,7 @@ namespace Game.Networking.Packets
             uint hotfixCount = _worldPacket.ReadUInt32();
             for (var i = 0; i < hotfixCount; ++i)
             {
-                HotfixRecord hotfixRecord = new HotfixRecord();
+                HotfixRecord hotfixRecord = new();
                 hotfixRecord.Read(_worldPacket);
                 Hotfixes.Add(hotfixRecord);
             }
@@ -119,7 +119,7 @@ namespace Game.Networking.Packets
 
         public uint ClientBuild;
         public uint DataBuild;
-        public List<HotfixRecord> Hotfixes = new List<HotfixRecord>();
+        public List<HotfixRecord> Hotfixes = new();
     }
 
     class HotfixConnect : ServerPacket
@@ -136,8 +136,8 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBytes(HotfixContent);
         }
 
-        public List<HotfixData> Hotfixes = new List<HotfixData>();
-        public ByteBuffer HotfixContent = new ByteBuffer();
+        public List<HotfixData> Hotfixes = new();
+        public ByteBuffer HotfixContent = new();
 
         public class HotfixData
         {
@@ -149,7 +149,7 @@ namespace Game.Networking.Packets
                 data.FlushBits();
             }
 
-            public HotfixRecord Record = new HotfixRecord();
+            public HotfixRecord Record = new();
             public uint Size;
         }
     }

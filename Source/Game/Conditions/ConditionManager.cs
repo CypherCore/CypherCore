@@ -38,7 +38,7 @@ namespace Game
             if (conditions.Empty())
                 return GridMapTypeMask.All;
             //     groupId, typeMask
-            Dictionary<uint, GridMapTypeMask> elseGroupSearcherTypeMasks = new Dictionary<uint, GridMapTypeMask>();
+            Dictionary<uint, GridMapTypeMask> elseGroupSearcherTypeMasks = new();
             foreach (var i in conditions)
             {
                 // no point of having not loaded conditions in list
@@ -75,7 +75,7 @@ namespace Game
         public bool IsObjectMeetToConditionList(ConditionSourceInfo sourceInfo, List<Condition> conditions)
         {
             //     groupId, groupCheckPassed
-            Dictionary<uint, bool> elseGroupStore = new Dictionary<uint, bool>();
+            Dictionary<uint, bool> elseGroupStore = new();
             foreach (var condition in conditions)
             {
                 Log.outDebug(LogFilter.Condition, "ConditionMgr.IsPlayerMeetToConditionList condType: {0} val1: {1}", condition.ConditionType, condition.ConditionValue1);
@@ -119,13 +119,13 @@ namespace Game
 
         public bool IsObjectMeetToConditions(WorldObject obj, List<Condition> conditions)
         {
-            ConditionSourceInfo srcInfo = new ConditionSourceInfo(obj);
+            ConditionSourceInfo srcInfo = new(obj);
             return IsObjectMeetToConditions(srcInfo, conditions);
         }
 
         public bool IsObjectMeetToConditions(WorldObject obj1, WorldObject obj2, List<Condition> conditions)
         {
-            ConditionSourceInfo srcInfo = new ConditionSourceInfo(obj1, obj2);
+            ConditionSourceInfo srcInfo = new(obj1, obj2);
             return IsObjectMeetToConditions(srcInfo, conditions);
         }
 
@@ -184,7 +184,7 @@ namespace Game
 
         public bool IsObjectMeetingNotGroupedConditions(ConditionSourceType sourceType, uint entry, WorldObject target0, WorldObject target1 = null, WorldObject target2 = null)
         {
-            ConditionSourceInfo conditionSource = new ConditionSourceInfo(target0, target1, target2);
+            ConditionSourceInfo conditionSource = new(target0, target1, target2);
             return IsObjectMeetingNotGroupedConditions(sourceType, entry, conditionSource);
         }
 
@@ -206,7 +206,7 @@ namespace Game
                 if (!conditions.Empty())
                 {
                     Log.outDebug(LogFilter.Condition, "GetConditionsForSpellClickEvent: found conditions for SpellClickEvent entry {0} spell {1}", creatureId, spellId);
-                    ConditionSourceInfo sourceInfo = new ConditionSourceInfo(clicker, target);
+                    ConditionSourceInfo sourceInfo = new(clicker, target);
                     return IsObjectMeetToConditions(sourceInfo, conditions);
                 }
             }
@@ -237,7 +237,7 @@ namespace Game
                 if (!conditions.Empty())
                 {
                     Log.outDebug(LogFilter.Condition, "GetConditionsForVehicleSpell: found conditions for Vehicle entry {0} spell {1}", creatureId, spellId);
-                    ConditionSourceInfo sourceInfo = new ConditionSourceInfo(player, vehicle);
+                    ConditionSourceInfo sourceInfo = new(player, vehicle);
                     return IsObjectMeetToConditions(sourceInfo, conditions);
                 }
             }
@@ -253,7 +253,7 @@ namespace Game
                 if (!conditions.Empty())
                 {
                     Log.outDebug(LogFilter.Condition, "GetConditionsForSmartEvent: found conditions for Smart Event entry or guid {0} eventId {1}", entryOrGuid, eventId);
-                    ConditionSourceInfo sourceInfo = new ConditionSourceInfo(unit, baseObject);
+                    ConditionSourceInfo sourceInfo = new(unit, baseObject);
                     return IsObjectMeetToConditions(sourceInfo, conditions);
                 }
             }
@@ -269,7 +269,7 @@ namespace Game
                 if (!conditions.Empty())
                 {
                     Log.outDebug(LogFilter.Condition, "GetConditionsForNpcVendorEvent: found conditions for creature entry {0} item {1}", creatureId, itemId);
-                    ConditionSourceInfo sourceInfo = new ConditionSourceInfo(player, vendor);
+                    ConditionSourceInfo sourceInfo = new(player, vendor);
                     return IsObjectMeetToConditions(sourceInfo, conditions);
                 }
             }
@@ -321,7 +321,7 @@ namespace Game
             uint count = 0;
             do
             {
-                Condition cond = new Condition();
+                Condition cond = new();
                 int iSourceTypeOrReferenceId = result.Read<int>(0);
                 cond.SourceGroup = result.Read<uint>(1);
                 cond.SourceEntry = result.Read<int>(2);
@@ -579,7 +579,7 @@ namespace Game
             Global.SpellMgr.ForEachSpellInfoDifficulty((uint)cond.SourceEntry, spellInfo =>
             {
                 uint conditionEffMask = cond.SourceGroup;
-                List<uint> sharedMasks = new List<uint>();
+                List<uint> sharedMasks = new();
                 for (byte i = 0; i < SpellConst.MaxEffects; ++i)
                 {
                     SpellEffectInfo effect = spellInfo.GetEffect(i);
@@ -2167,7 +2167,7 @@ namespace Game
 
         public static bool IsPlayerMeetingExpression(Player player, WorldStateExpressionRecord expression)
         {
-            ByteBuffer buffer = new ByteBuffer(expression.Expression.ToByteArray());
+            ByteBuffer buffer = new(expression.Expression.ToByteArray());
             if (buffer.GetSize() == 0)
                 return false;
 
@@ -2387,12 +2387,12 @@ namespace Game
             return false;
         }
 
-        Dictionary<ConditionSourceType, MultiMap<uint, Condition>> ConditionStore = new Dictionary<ConditionSourceType, MultiMap<uint, Condition>>();
-        MultiMap<uint, Condition> ConditionReferenceStore = new MultiMap<uint, Condition>();
-        Dictionary<uint, MultiMap<uint, Condition>> VehicleSpellConditionStore = new Dictionary<uint, MultiMap<uint, Condition>>();
-        Dictionary<uint, MultiMap<uint, Condition>> SpellClickEventConditionStore = new Dictionary<uint, MultiMap<uint, Condition>>();
-        Dictionary<uint, MultiMap<uint, Condition>> NpcVendorConditionContainerStore = new Dictionary<uint, MultiMap<uint, Condition>>();
-        Dictionary<Tuple<int, uint>, MultiMap<uint, Condition>> SmartEventConditionStore = new Dictionary<Tuple<int, uint>, MultiMap<uint, Condition>>();
+        Dictionary<ConditionSourceType, MultiMap<uint, Condition>> ConditionStore = new();
+        MultiMap<uint, Condition> ConditionReferenceStore = new();
+        Dictionary<uint, MultiMap<uint, Condition>> VehicleSpellConditionStore = new();
+        Dictionary<uint, MultiMap<uint, Condition>> SpellClickEventConditionStore = new();
+        Dictionary<uint, MultiMap<uint, Condition>> NpcVendorConditionContainerStore = new();
+        Dictionary<Tuple<int, uint>, MultiMap<uint, Condition>> SmartEventConditionStore = new();
 
         public string[] StaticSourceTypeData =
         {

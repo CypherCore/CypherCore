@@ -760,7 +760,7 @@ namespace Game.Chat.Commands
 
                     Player chr = handler.GetSession().GetPlayer();
                     Map map = chr.GetMap();
-                    Position pos = new Position(x, y, z, chr.GetOrientation());
+                    Position pos = new(x, y, z, chr.GetOrientation());
 
                     Creature creature = Creature.CreateCreature(id, map, pos);
                     if (!creature)
@@ -826,7 +826,7 @@ namespace Game.Chat.Commands
 
                 Player chr = handler.GetSession().GetPlayer();
                 Map map = chr.GetMap();
-                Position pos = new Position(x, y, z, chr.GetOrientation());
+                Position pos = new(x, y, z, chr.GetOrientation());
 
                 Creature creature = Creature.CreateCreature(1, map, pos);
                 if (!creature)
@@ -881,7 +881,7 @@ namespace Game.Chat.Commands
 
                 Player chr = handler.GetSession().GetPlayer();
                 Map map = chr.GetMap();
-                Position pos = new Position(x, y, z, o);
+                Position pos = new(x, y, z, o);
 
                 Creature creature = Creature.CreateCreature(1, map, pos);
                 if (!creature)

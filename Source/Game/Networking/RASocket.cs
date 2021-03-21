@@ -209,7 +209,7 @@ namespace Game.Networking
                 return false;
             }
 
-            RemoteAccessHandler cmd = new RemoteAccessHandler(CommandPrint);
+            RemoteAccessHandler cmd = new(CommandPrint);
             cmd.ParseCommand(command);
 
             return true;

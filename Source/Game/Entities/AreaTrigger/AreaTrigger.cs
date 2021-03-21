@@ -127,12 +127,12 @@ namespace Game.Entities
                 SetUpdateFieldValue(extraScaleCurve.ModifyValue(extraScaleCurve.StartTimeOffset), GetMiscTemplate().ExtraScale.Structured.StartTimeOffset);
             if (GetMiscTemplate().ExtraScale.Structured.X != 0 || GetMiscTemplate().ExtraScale.Structured.Y != 0)
             {
-                Vector2 point = new Vector2(GetMiscTemplate().ExtraScale.Structured.X, GetMiscTemplate().ExtraScale.Structured.Y);
+                Vector2 point = new(GetMiscTemplate().ExtraScale.Structured.X, GetMiscTemplate().ExtraScale.Structured.Y);
                 SetUpdateFieldValue(ref extraScaleCurve.ModifyValue(extraScaleCurve.Points, 0), point);
             }
             if (GetMiscTemplate().ExtraScale.Structured.Z != 0 || GetMiscTemplate().ExtraScale.Structured.W != 0)
             {
-                Vector2 point = new Vector2(GetMiscTemplate().ExtraScale.Structured.Z, GetMiscTemplate().ExtraScale.Structured.W);
+                Vector2 point = new(GetMiscTemplate().ExtraScale.Structured.Z, GetMiscTemplate().ExtraScale.Structured.W);
                 SetUpdateFieldValue(ref extraScaleCurve.ModifyValue(extraScaleCurve.Points, 1), point);
             }
             unsafe
@@ -205,7 +205,7 @@ namespace Game.Entities
 
         public static AreaTrigger CreateAreaTrigger(uint spellMiscId, Unit caster, Unit target, SpellInfo spell, Position pos, int duration, SpellCastVisualField spellVisual, ObjectGuid castId = default, AuraEffect aurEff = null)
         {
-            AreaTrigger at = new AreaTrigger();
+            AreaTrigger at = new();
             if (!at.Create(spellMiscId, caster, target, spell, pos, duration, spellVisual, castId, aurEff))
                 return null;
 
@@ -327,7 +327,7 @@ namespace Game.Entities
 
         void UpdateTargetList()
         {
-            List<Unit> targetList = new List<Unit>();
+            List<Unit> targetList = new();
 
             switch (GetTemplate().TriggerType)
             {
@@ -405,7 +405,7 @@ namespace Game.Entities
             float minZ = GetPositionZ() - halfExtentsZ;
             float maxZ = GetPositionZ() + halfExtentsZ;
 
-            AxisAlignedBox box = new AxisAlignedBox(new Vector3(minX, minY, minZ), new Vector3(maxX, maxY, maxZ));
+            AxisAlignedBox box = new(new Vector3(minX, minY, minZ), new Vector3(maxX, maxY, maxZ));
 
             targetList.RemoveAll(unit => !box.contains(new Vector3(unit.GetPositionX(), unit.GetPositionY(), unit.GetPositionZ())));
         }
@@ -437,7 +437,7 @@ namespace Game.Entities
             List<ObjectGuid> exitUnits = _insideUnits;
             _insideUnits.Clear();
 
-            List<Unit> enteringUnits = new List<Unit>();
+            List<Unit> enteringUnits = new();
 
             foreach (Unit unit in newTargetList)
             {
@@ -668,7 +668,7 @@ namespace Game.Entities
             float angleCos = (float)Math.Cos(GetOrientation());
 
             // This is needed to rotate the spline, following caster orientation
-            List<Vector3> rotatedPoints = new List<Vector3>();
+            List<Vector3> rotatedPoints = new();
             for (var i = 0; i < offsets.Count; ++i)
             {
                 Vector3 offset = offsets[i];
@@ -715,12 +715,12 @@ namespace Game.Entities
             {
                 if (_reachedDestination)
                 {
-                    AreaTriggerRePath reshapeDest = new AreaTriggerRePath();
+                    AreaTriggerRePath reshapeDest = new();
                     reshapeDest.TriggerGUID = GetGUID();
                     SendMessageToSet(reshapeDest, true);
                 }
 
-                AreaTriggerRePath reshape = new AreaTriggerRePath();
+                AreaTriggerRePath reshape = new();
                 reshape.TriggerGUID = GetGUID();
                 reshape.AreaTriggerSpline.HasValue = true;
                 reshape.AreaTriggerSpline.Value.ElapsedTimeForMovement = GetElapsedTimeForMovement();
@@ -751,7 +751,7 @@ namespace Game.Entities
 
             if (IsInWorld)
             {
-                AreaTriggerRePath reshape = new AreaTriggerRePath();
+                AreaTriggerRePath reshape = new();
                 reshape.TriggerGUID = GetGUID();
                 reshape.AreaTriggerOrbit = _orbitInfo;
 
@@ -919,7 +919,7 @@ namespace Game.Entities
         public override void BuildValuesCreate(WorldPacket data, Player target)
         {
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new WorldPacket();
+            WorldPacket buffer = new();
 
             buffer.WriteUInt8((byte)flags);
             m_objectData.WriteCreate(buffer, flags, this, target);
@@ -932,7 +932,7 @@ namespace Game.Entities
         public override void BuildValuesUpdate(WorldPacket data, Player target)
         {
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new WorldPacket();
+            WorldPacket buffer = new();
 
             buffer.WriteUInt32(m_values.GetChangedObjectTypeMask());
             if (m_values.HasChanged(TypeId.Object))
@@ -947,14 +947,14 @@ namespace Game.Entities
 
         void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedAreaTriggerMask, Player target)
         {
-            UpdateMask valuesMask = new UpdateMask((int)TypeId.Max);
+            UpdateMask valuesMask = new((int)TypeId.Max);
             if (requestedObjectMask.IsAnySet())
                 valuesMask.Set((int)TypeId.Object);
 
             if (requestedAreaTriggerMask.IsAnySet())
                 valuesMask.Set((int)TypeId.AreaTrigger);
 
-            WorldPacket buffer = new WorldPacket();
+            WorldPacket buffer = new();
             buffer.WriteUInt32(valuesMask.GetBlock(0));
 
             if (valuesMask[(int)TypeId.Object])
@@ -963,7 +963,7 @@ namespace Game.Entities
             if (valuesMask[(int)TypeId.AreaTrigger])
                 m_areaTriggerData.WriteUpdate(buffer, requestedAreaTriggerMask, true, this, target);
 
-            WorldPacket buffer1 = new WorldPacket();
+            WorldPacket buffer1 = new();
             buffer1.WriteUInt8((byte)UpdateType.Values);
             buffer1.WritePackedGuid(GetGUID());
             buffer1.WriteUInt32(buffer.GetSize());
@@ -1054,7 +1054,7 @@ namespace Game.Entities
 
         AreaTriggerMiscTemplate _areaTriggerMiscTemplate;
         AreaTriggerTemplate _areaTriggerTemplate;
-        List<ObjectGuid> _insideUnits = new List<ObjectGuid>();
+        List<ObjectGuid> _insideUnits = new();
 
         AreaTriggerAI _ai;
     }

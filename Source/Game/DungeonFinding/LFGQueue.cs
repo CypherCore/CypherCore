@@ -32,7 +32,7 @@ namespace Game.DungeonFinding
                 return "";
 
             // need the guids in order to avoid duplicates
-            StringBuilder val = new StringBuilder();
+            StringBuilder val = new();
             guids.Sort();
             var it = guids.First();
             val.Append(it);
@@ -48,7 +48,7 @@ namespace Game.DungeonFinding
 
         public static string GetRolesString(LfgRoles roles)
         {
-            StringBuilder rolesstr = new StringBuilder();
+            StringBuilder rolesstr = new();
 
             if (roles.HasAnyFlag(LfgRoles.Tank))
                 rolesstr.Append("Tank");
@@ -276,7 +276,7 @@ namespace Game.DungeonFinding
         public byte FindGroups()
         {
             byte proposals = 0;
-            List<ObjectGuid> firstNew = new List<ObjectGuid>();
+            List<ObjectGuid> firstNew = new();
             while (!newToQueueStore.Empty())
             {
                 ObjectGuid frontguid = newToQueueStore.First();
@@ -285,7 +285,7 @@ namespace Game.DungeonFinding
                 firstNew.Add(frontguid);
                 RemoveFromNewQueue(frontguid);
 
-                List<ObjectGuid> temporalList = new List<ObjectGuid>(currentQueueStore);
+                List<ObjectGuid> temporalList = new(currentQueueStore);
                 LfgCompatibility compatibles = FindNewGroups(firstNew, temporalList);
 
                 if (compatibles == LfgCompatibility.Match)
@@ -331,10 +331,10 @@ namespace Game.DungeonFinding
         LfgCompatibility CheckCompatibility(List<ObjectGuid> check)
         {
             string strGuids = ConcatenateGuids(check);
-            LfgProposal proposal = new LfgProposal();
+            LfgProposal proposal = new();
             List<uint> proposalDungeons;
-            Dictionary<ObjectGuid, ObjectGuid> proposalGroups = new Dictionary<ObjectGuid, ObjectGuid>();
-            Dictionary<ObjectGuid, LfgRoles> proposalRoles = new Dictionary<ObjectGuid, LfgRoles>();
+            Dictionary<ObjectGuid, ObjectGuid> proposalGroups = new();
+            Dictionary<ObjectGuid, LfgRoles> proposalRoles = new();
 
             // Check for correct size
             if (check.Count > MapConst.MaxGroupSize || check.Empty())
@@ -397,7 +397,7 @@ namespace Game.DungeonFinding
                 var guid = check.First();
                 var itQueue = QueueDataStore.LookupByKey(guid);
 
-                LfgCompatibilityData data = new LfgCompatibilityData(LfgCompatibility.WithLessPlayers);
+                LfgCompatibilityData data = new(LfgCompatibility.WithLessPlayers);
                 data.roles = itQueue.roles;
                 Global.LFGMgr.CheckGroupRoles(data.roles);
 
@@ -428,7 +428,7 @@ namespace Game.DungeonFinding
                     Dictionary<ObjectGuid, LfgRoles> roles = QueueDataStore[it].roles;
                     foreach (var rolePair in roles)
                     {
-                        KeyValuePair<ObjectGuid, LfgRoles> itPlayer = new KeyValuePair<ObjectGuid, LfgRoles>();
+                        KeyValuePair<ObjectGuid, LfgRoles> itPlayer = new();
                         foreach (var _player in proposalRoles)
                         {
                             itPlayer = _player;
@@ -497,7 +497,7 @@ namespace Game.DungeonFinding
             if (numPlayers != MapConst.MaxGroupSize)
             {
                 Log.outDebug(LogFilter.Lfg, "CheckCompatibility: ({0}) Compatibles but not enough players({1})", strGuids, numPlayers);
-                LfgCompatibilityData data = new LfgCompatibilityData(LfgCompatibility.WithLessPlayers);
+                LfgCompatibilityData data = new(LfgCompatibility.WithLessPlayers);
                 data.roles = proposalRoles;
 
                 foreach (var guid in check)
@@ -541,7 +541,7 @@ namespace Game.DungeonFinding
                     proposal.leader = rolePair.Key;
 
                 // Assing player data and roles
-                LfgProposalPlayer data = new LfgProposalPlayer();
+                LfgProposalPlayer data = new();
                 data.role = rolePair.Value;
                 data.group = proposalGroups.LookupByKey(rolePair.Key);
                 if (!proposal.isNew && !data.group.IsEmpty() && data.group == proposal.group) // Player from existing group, autoaccept
@@ -615,7 +615,7 @@ namespace Game.DungeonFinding
                 if (string.IsNullOrEmpty(queueinfo.bestCompatible))
                     FindBestCompatibleInQueue(itQueue.Key, itQueue.Value);
 
-                LfgQueueStatusData queueData = new LfgQueueStatusData(queueId, dungeonId, waitTime, wtAvg, wtTank, wtHealer, wtDps, queuedTime, queueinfo.tanks, queueinfo.healers, queueinfo.dps);
+                LfgQueueStatusData queueData = new(queueId, dungeonId, waitTime, wtAvg, wtTank, wtHealer, wtDps, queuedTime, queueinfo.tanks, queueinfo.healers, queueinfo.dps);
                 foreach (var itPlayer in queueinfo.roles)
                 {
                     ObjectGuid pguid = itPlayer.Key;
@@ -708,15 +708,15 @@ namespace Game.DungeonFinding
         }
 
         // Queue
-        Dictionary<ObjectGuid, LfgQueueData> QueueDataStore = new Dictionary<ObjectGuid, LfgQueueData>();
-        Dictionary<string, LfgCompatibilityData> CompatibleMapStore = new Dictionary<string, LfgCompatibilityData>();
+        Dictionary<ObjectGuid, LfgQueueData> QueueDataStore = new();
+        Dictionary<string, LfgCompatibilityData> CompatibleMapStore = new();
 
-        Dictionary<uint, LfgWaitTime> waitTimesAvgStore = new Dictionary<uint, LfgWaitTime>();
-        Dictionary<uint, LfgWaitTime> waitTimesTankStore = new Dictionary<uint, LfgWaitTime>();
-        Dictionary<uint, LfgWaitTime> waitTimesHealerStore = new Dictionary<uint, LfgWaitTime>();
-        Dictionary<uint, LfgWaitTime> waitTimesDpsStore = new Dictionary<uint, LfgWaitTime>();
-        List<ObjectGuid> currentQueueStore = new List<ObjectGuid>();
-        List<ObjectGuid> newToQueueStore = new List<ObjectGuid>();
+        Dictionary<uint, LfgWaitTime> waitTimesAvgStore = new();
+        Dictionary<uint, LfgWaitTime> waitTimesTankStore = new();
+        Dictionary<uint, LfgWaitTime> waitTimesHealerStore = new();
+        Dictionary<uint, LfgWaitTime> waitTimesDpsStore = new();
+        List<ObjectGuid> currentQueueStore = new();
+        List<ObjectGuid> newToQueueStore = new();
     }
 
     public class LfgCompatibilityData

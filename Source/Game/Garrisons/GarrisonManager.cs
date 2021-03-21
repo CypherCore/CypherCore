@@ -175,7 +175,7 @@ namespace Game.Garrisons
             Cypher.Assert(faction< 2);
 
             bool hasForcedExclusiveTrait = false;
-            List<GarrAbilityRecord> result = new List<GarrAbilityRecord>();
+            List<GarrAbilityRecord> result = new();
             uint[] slots = { AbilitiesForQuality[quality, 0], AbilitiesForQuality[quality, 1] };
 
             GarrAbilities garrAbilities = null;
@@ -183,10 +183,10 @@ namespace Game.Garrisons
             if (abilities != null)
                 garrAbilities = abilities;
 
-            List<GarrAbilityRecord> abilityList = new List<GarrAbilityRecord>();
-            List<GarrAbilityRecord> forcedAbilities = new List<GarrAbilityRecord>();
-            List<GarrAbilityRecord> traitList = new List<GarrAbilityRecord>();
-            List<GarrAbilityRecord> forcedTraits = new List<GarrAbilityRecord>();
+            List<GarrAbilityRecord> abilityList = new();
+            List<GarrAbilityRecord> forcedAbilities = new();
+            List<GarrAbilityRecord> traitList = new();
+            List<GarrAbilityRecord> forcedTraits = new();
             if (garrAbilities != null)
             {
                 foreach (GarrAbilityRecord ability in garrAbilities.Counters)
@@ -252,7 +252,7 @@ namespace Game.Garrisons
 
             if (slots[1] > forcedTraits.Count + traitList.Count)
             {
-                List<GarrAbilityRecord> genericTraitsTemp = new List<GarrAbilityRecord>();
+                List<GarrAbilityRecord> genericTraitsTemp = new();
                 foreach (GarrAbilityRecord ability in _garrisonFollowerRandomTraits)
                 {
                     if (ability.Flags.HasAnyFlag(GarrisonAbilityFlags.HordeOnly) && faction != GarrisonFactionIndex.Horde)
@@ -309,7 +309,7 @@ namespace Game.Garrisons
 
         List<GarrAbilityRecord> GetClassSpecAbilities(GarrFollowerRecord follower, uint faction)
         {
-            List<GarrAbilityRecord> abilities = new List<GarrAbilityRecord>();
+            List<GarrAbilityRecord> abilities = new();
             uint classSpecId;
             switch (faction)
             {
@@ -412,7 +412,7 @@ namespace Game.Garrisons
                     continue;
                 }
 
-                FinalizeGarrisonPlotGOInfo info = new FinalizeGarrisonPlotGOInfo();
+                FinalizeGarrisonPlotGOInfo info = new();
                 info.factionInfo[GarrisonFactionIndex.Horde].GameObjectId = hordeGameObjectId;
                 info.factionInfo[GarrisonFactionIndex.Horde].Pos = new Position(result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), result.Read<float>(5));
                 info.factionInfo[GarrisonFactionIndex.Horde].AnimKitId = hordeAnimKitId;
@@ -468,23 +468,23 @@ namespace Game.Garrisons
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} garrison follower class spec abilities in {1}.", count, Time.GetMSTimeDiffToNow(msTime));
         }
 
-        MultiMap<uint, GarrSiteLevelPlotInstRecord> _garrisonPlotInstBySiteLevel = new MultiMap<uint, GarrSiteLevelPlotInstRecord>();
-        Dictionary<uint, Dictionary<uint, GameObjectsRecord>> _garrisonPlots = new Dictionary<uint, Dictionary<uint, GameObjectsRecord>>();
-        MultiMap<uint, uint> _garrisonBuildingsByPlot = new MultiMap<uint, uint>();
-        Dictionary<ulong, uint> _garrisonBuildingPlotInstances = new Dictionary<ulong, uint>();
-        MultiMap<uint, uint> _garrisonBuildingsByType = new MultiMap<uint, uint>();
-        Dictionary<uint, FinalizeGarrisonPlotGOInfo> _finalizePlotGOInfo = new Dictionary<uint, FinalizeGarrisonPlotGOInfo>();
+        MultiMap<uint, GarrSiteLevelPlotInstRecord> _garrisonPlotInstBySiteLevel = new();
+        Dictionary<uint, Dictionary<uint, GameObjectsRecord>> _garrisonPlots = new();
+        MultiMap<uint, uint> _garrisonBuildingsByPlot = new();
+        Dictionary<ulong, uint> _garrisonBuildingPlotInstances = new();
+        MultiMap<uint, uint> _garrisonBuildingsByType = new();
+        Dictionary<uint, FinalizeGarrisonPlotGOInfo> _finalizePlotGOInfo = new();
         Dictionary<uint, GarrAbilities>[] _garrisonFollowerAbilities = new Dictionary<uint, GarrAbilities>[2];
-        MultiMap<uint, GarrAbilityRecord> _garrisonFollowerClassSpecAbilities = new MultiMap<uint, GarrAbilityRecord>();
-        List<GarrAbilityRecord> _garrisonFollowerRandomTraits = new List<GarrAbilityRecord>();
+        MultiMap<uint, GarrAbilityRecord> _garrisonFollowerClassSpecAbilities = new();
+        List<GarrAbilityRecord> _garrisonFollowerRandomTraits = new();
 
         ulong _followerDbIdGenerator = 1;
     }
 
     class GarrAbilities
     {
-        public List<GarrAbilityRecord> Counters = new List<GarrAbilityRecord>();
-        public List<GarrAbilityRecord> Traits = new List<GarrAbilityRecord>();
+        public List<GarrAbilityRecord> Counters = new();
+        public List<GarrAbilityRecord> Traits = new();
     }
 
     public class FinalizeGarrisonPlotGOInfo

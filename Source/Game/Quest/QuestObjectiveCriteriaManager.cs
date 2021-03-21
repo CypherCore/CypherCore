@@ -54,7 +54,7 @@ namespace Game
 
         public static void DeleteFromDB(ObjectGuid guid)
         {
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_QUESTSTATUS_OBJECTIVES_CRITERIA);
             stmt.AddValue(0, guid.GetCounter());
@@ -109,7 +109,7 @@ namespace Game
                     if (criteria.Entry.StartTimer != 0 && date + criteria.Entry.StartTimer < now)
                         continue;
 
-                    CriteriaProgress progress = new CriteriaProgress();
+                    CriteriaProgress progress = new();
                     progress.Counter = counter;
                     progress.Date = date;
                     progress.Changed = false;
@@ -209,7 +209,7 @@ namespace Game
         {
             foreach (var pair in _criteriaProgress)
             {
-                CriteriaUpdate criteriaUpdate = new CriteriaUpdate();
+                CriteriaUpdate criteriaUpdate = new();
 
                 criteriaUpdate.CriteriaID = pair.Key;
                 criteriaUpdate.Quantity = pair.Value.Counter;
@@ -242,7 +242,7 @@ namespace Game
 
         public override void SendCriteriaUpdate(Criteria criteria, CriteriaProgress progress, uint timeElapsed, bool timedCompleted)
         {
-            CriteriaUpdate criteriaUpdate = new CriteriaUpdate();
+            CriteriaUpdate criteriaUpdate = new();
 
             criteriaUpdate.CriteriaID = criteria.Id;
             criteriaUpdate.Quantity = progress.Counter;
@@ -260,7 +260,7 @@ namespace Game
 
         public override void SendCriteriaProgressRemoved(uint criteriaId)
         {
-            CriteriaDeleted criteriaDeleted = new CriteriaDeleted();
+            CriteriaDeleted criteriaDeleted = new();
             criteriaDeleted.CriteriaID = criteriaId;
             SendPacket(criteriaDeleted);
         }
@@ -328,6 +328,6 @@ namespace Game
 
 
         Player _owner;
-        List<uint> _completedObjectives = new List<uint>();
+        List<uint> _completedObjectives = new();
     }
 }

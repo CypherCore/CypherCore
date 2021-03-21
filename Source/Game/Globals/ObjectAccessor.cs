@@ -24,10 +24,10 @@ using System.Collections.Generic;
 
 public class ObjectAccessor : Singleton<ObjectAccessor>
 {
-    object _lockObject = new object();
+    object _lockObject = new();
 
-    Dictionary<ObjectGuid, Player> _players = new Dictionary<ObjectGuid, Player>();
-    Dictionary<ObjectGuid, Transport> _transports = new Dictionary<ObjectGuid, Transport>();
+    Dictionary<ObjectGuid, Player> _players = new();
+    Dictionary<ObjectGuid, Transport> _transports = new();
 
     ObjectAccessor() { }
 
@@ -286,5 +286,5 @@ class PlayerNameMapHolder
         return _playerNameMap.LookupByKey(name);
     }
 
-    static Dictionary<string, Player> _playerNameMap = new Dictionary<string, Player>();
+    static Dictionary<string, Player> _playerNameMap = new();
 }

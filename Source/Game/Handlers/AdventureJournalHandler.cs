@@ -66,7 +66,7 @@ namespace Game
                 if (!_player.MeetPlayerCondition(uiDisplay.AdvGuidePlayerConditionID))
                     return;
 
-            AdventureJournalDataResponse response = new AdventureJournalDataResponse();
+            AdventureJournalDataResponse response = new();
             response.OnLevelUp = updateSuggestions.OnLevelUp;
 
             foreach (var adventureJournal in CliDB.AdventureJournalStorage.Values)

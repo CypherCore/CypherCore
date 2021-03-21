@@ -32,7 +32,7 @@ namespace Game
 
             foreach (DBQueryBulk.DBQueryRecord record in dbQuery.Queries)
             {
-                DBReply dbReply = new DBReply();
+                DBReply dbReply = new();
                 dbReply.TableHash = dbQuery.TableHash;
                 dbReply.RecordID = record.RecordID;
 
@@ -69,13 +69,13 @@ namespace Game
         {
             var hotfixes = Global.DB2Mgr.GetHotfixData();
 
-            HotfixConnect hotfixQueryResponse = new HotfixConnect();
+            HotfixConnect hotfixQueryResponse = new();
             foreach (HotfixRecord hotfixRecord in hotfixQuery.Hotfixes)
             {
                 var serverHotfixIndex = hotfixes.IndexOf(hotfixRecord);
                 if (serverHotfixIndex != -1)
                 {
-                    HotfixConnect.HotfixData hotfixData = new HotfixConnect.HotfixData();
+                    HotfixConnect.HotfixData hotfixData = new();
                     hotfixData.Record = hotfixes[serverHotfixIndex];
                     if (hotfixData.Record.HotfixStatus == HotfixRecord.Status.Valid)
                     {

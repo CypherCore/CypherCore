@@ -55,7 +55,7 @@ namespace Game
                 {
                     uint pool_id = result.Read<uint>(0);
 
-                    PoolTemplateData pPoolTemplate = new PoolTemplateData();
+                    PoolTemplateData pPoolTemplate = new();
                     pPoolTemplate.MaxLimit = result.Read<uint>(1);
                     mPoolTemplate[pool_id] = pPoolTemplate;
                     ++count;
@@ -104,7 +104,7 @@ namespace Game
                             continue;
                         }
                         PoolTemplateData pPoolTemplate = mPoolTemplate[pool_id];
-                        PoolObject plObject = new PoolObject(guid, chance);
+                        PoolObject plObject = new(guid, chance);
 
                         if (!mPoolCreatureGroups.ContainsKey(pool_id))
                             mPoolCreatureGroups[pool_id] = new PoolGroup<Creature>();
@@ -174,7 +174,7 @@ namespace Game
                         }
 
                         PoolTemplateData pPoolTemplate = mPoolTemplate[pool_id];
-                        PoolObject plObject = new PoolObject(guid, chance);
+                        PoolObject plObject = new(guid, chance);
 
                         if (!mPoolGameobjectGroups.ContainsKey(pool_id))
                             mPoolGameobjectGroups[pool_id] = new PoolGroup<GameObject>();
@@ -235,7 +235,7 @@ namespace Game
                             continue;
                         }
                         PoolTemplateData pPoolTemplateMother = mPoolTemplate[mother_pool_id];
-                        PoolObject plObject = new PoolObject(child_pool_id, chance);
+                        PoolObject plObject = new(child_pool_id, chance);
 
                         if (!mPoolPoolGroups.ContainsKey(mother_pool_id))
                             mPoolPoolGroups[mother_pool_id] = new PoolGroup<Pool>();
@@ -269,7 +269,7 @@ namespace Game
                     List<uint> creBounds;
                     List<uint> goBounds;
 
-                    Dictionary<uint, QuestTypes> poolTypeMap = new Dictionary<uint, QuestTypes>();
+                    Dictionary<uint, QuestTypes> poolTypeMap = new();
                     uint count = 0;
                     do
                     {
@@ -320,7 +320,7 @@ namespace Game
                         }
 
                         PoolTemplateData pPoolTemplate = mPoolTemplate[pool_id];
-                        PoolObject plObject = new PoolObject(entry, 0.0f);
+                        PoolObject plObject = new(entry, 0.0f);
 
                         if (!mPoolQuestGroups.ContainsKey(pool_id))
                             mPoolQuestGroups[pool_id] = new PoolGroup<Quest>();
@@ -387,7 +387,7 @@ namespace Game
 
         public void SaveQuestsToDB()
         {
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
 
             foreach (var questPoolGroup in mPoolQuestGroups.Values)
             {
@@ -559,21 +559,21 @@ namespace Game
         public bool IsSpawnedObject<T>(ulong db_guid_or_pool_id) { return mSpawnedData.IsActiveObject<T>(db_guid_or_pool_id); }
 
 
-        public MultiMap<uint, uint> mQuestCreatureRelation = new MultiMap<uint, uint>();
-        public MultiMap<uint, uint> mQuestGORelation = new MultiMap<uint, uint>();
+        public MultiMap<uint, uint> mQuestCreatureRelation = new();
+        public MultiMap<uint, uint> mQuestGORelation = new();
 
-        Dictionary<uint, PoolTemplateData> mPoolTemplate = new Dictionary<uint, PoolTemplateData>();
-        Dictionary<uint, PoolGroup<Creature>> mPoolCreatureGroups = new Dictionary<uint, PoolGroup<Creature>>();
-        Dictionary<uint, PoolGroup<GameObject>> mPoolGameobjectGroups = new Dictionary<uint, PoolGroup<GameObject>>();
-        Dictionary<uint, PoolGroup<Pool>> mPoolPoolGroups = new Dictionary<uint, PoolGroup<Pool>>();
-        Dictionary<uint, PoolGroup<Quest>> mPoolQuestGroups = new Dictionary<uint, PoolGroup<Quest>>();
-        Dictionary<ulong, uint> mCreatureSearchMap = new Dictionary<ulong, uint>();
-        Dictionary<ulong, uint> mGameobjectSearchMap = new Dictionary<ulong, uint>();
-        Dictionary<ulong, uint> mPoolSearchMap = new Dictionary<ulong, uint>();
-        Dictionary<ulong, uint> mQuestSearchMap = new Dictionary<ulong, uint>();
+        Dictionary<uint, PoolTemplateData> mPoolTemplate = new();
+        Dictionary<uint, PoolGroup<Creature>> mPoolCreatureGroups = new();
+        Dictionary<uint, PoolGroup<GameObject>> mPoolGameobjectGroups = new();
+        Dictionary<uint, PoolGroup<Pool>> mPoolPoolGroups = new();
+        Dictionary<uint, PoolGroup<Quest>> mPoolQuestGroups = new();
+        Dictionary<ulong, uint> mCreatureSearchMap = new();
+        Dictionary<ulong, uint> mGameobjectSearchMap = new();
+        Dictionary<ulong, uint> mPoolSearchMap = new();
+        Dictionary<ulong, uint> mQuestSearchMap = new();
 
         // dynamic data
-        ActivePoolData mSpawnedData = new ActivePoolData();
+        ActivePoolData mSpawnedData = new();
     }
 
     public class PoolGroup<T>
@@ -760,7 +760,7 @@ namespace Game
             // This will try to spawn the rest of pool, not guaranteed
             if (count > 0)
             {
-                List<PoolObject> rolledObjects = new List<PoolObject>();
+                List<PoolObject> rolledObjects = new();
 
                 // roll objects to be spawned
                 if (!ExplicitlyChanced.Empty())
@@ -838,7 +838,7 @@ namespace Game
                     {
                         uint questId = result.Read<uint>(0);
                         spawns.ActivateObject<Quest>(questId, poolId);
-                        PoolObject tempObj = new PoolObject(questId, 0.0f);
+                        PoolObject tempObj = new(questId, 0.0f);
                         Spawn1Object(tempObj);
                         --limit;
                     } while (result.NextRow() && limit != 0);
@@ -847,7 +847,7 @@ namespace Game
             }
 
             List<ulong> currentQuests = spawns.GetActiveQuests();
-            List<ulong> newQuests = new List<ulong>();
+            List<ulong> newQuests = new();
 
             // always try to select different quests
             foreach (var poolObject in EqualChanced)
@@ -876,7 +876,7 @@ namespace Game
             {
                 ulong questId = newQuests.SelectRandom();
                 spawns.ActivateObject<Quest>(questId, poolId);
-                PoolObject tempObj = new PoolObject(questId, 0.0f);
+                PoolObject tempObj = new(questId, 0.0f);
                 Spawn1Object(tempObj);
                 newQuests.Remove(questId);
                 --limit;
@@ -971,8 +971,8 @@ namespace Game
         public uint GetPoolId() { return poolId; }
 
         uint poolId;
-        List<PoolObject> ExplicitlyChanced = new List<PoolObject>();
-        List<PoolObject> EqualChanced = new List<PoolObject>();
+        List<PoolObject> ExplicitlyChanced = new();
+        List<PoolObject> EqualChanced = new();
     }
 
     public class ActivePoolData
@@ -1051,10 +1051,10 @@ namespace Game
 
         public List<ulong> GetActiveQuests() { return mActiveQuests; } // a copy of the set
 
-        List<ulong> mSpawnedCreatures = new List<ulong>();
-        List<ulong> mSpawnedGameobjects = new List<ulong>();
-        List<ulong> mActiveQuests = new List<ulong>();
-        Dictionary<ulong, uint> mSpawnedPools = new Dictionary<ulong, uint>();
+        List<ulong> mSpawnedCreatures = new();
+        List<ulong> mSpawnedGameobjects = new();
+        List<ulong> mActiveQuests = new();
+        Dictionary<ulong, uint> mSpawnedPools = new();
     }
 
     public class PoolObject

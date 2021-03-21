@@ -76,7 +76,7 @@ namespace Game.Networking.Packets
         }
 
         public int LastUpdateID;
-        public List<BlackMarketItem> Items = new List<BlackMarketItem>();
+        public List<BlackMarketItem> Items = new();
     }
 
     class BlackMarketBidOnItem : ClientPacket
@@ -93,7 +93,7 @@ namespace Game.Networking.Packets
 
         public ObjectGuid Guid;
         public uint MarketID;
-        public ItemInstance Item = new ItemInstance();
+        public ItemInstance Item = new();
         public ulong BidAmount;
     }
 

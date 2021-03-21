@@ -175,7 +175,7 @@ namespace Game.Entities
         public override void BuildValuesCreate(WorldPacket data, Player target)
         {
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new WorldPacket();
+            WorldPacket buffer = new();
 
             buffer.WriteUInt8((byte)flags);
             m_objectData.WriteCreate(buffer, flags, this, target);
@@ -189,7 +189,7 @@ namespace Game.Entities
         public override void BuildValuesUpdate(WorldPacket data, Player target)
         {
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new WorldPacket();
+            WorldPacket buffer = new();
 
             buffer.WriteUInt32(m_values.GetChangedObjectTypeMask());
             if (m_values.HasChanged(TypeId.Object))
@@ -208,7 +208,7 @@ namespace Game.Entities
         void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedItemMask, UpdateMask requestedContainerMask, Player target)
         {
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            UpdateMask valuesMask = new UpdateMask((int)TypeId.Max);
+            UpdateMask valuesMask = new((int)TypeId.Max);
             if (requestedObjectMask.IsAnySet())
                 valuesMask.Set((int)TypeId.Object);
 
@@ -219,7 +219,7 @@ namespace Game.Entities
             if (requestedContainerMask.IsAnySet())
                 valuesMask.Set((int)TypeId.Container);
 
-            WorldPacket buffer = new WorldPacket();
+            WorldPacket buffer = new();
             buffer.WriteUInt32(valuesMask.GetBlock(0));
 
             if (valuesMask[(int)TypeId.Object])
@@ -231,7 +231,7 @@ namespace Game.Entities
             if (valuesMask[(int)TypeId.Container])
                 m_containerData.WriteUpdate(buffer, requestedContainerMask, true, this, target);
 
-            WorldPacket buffer1 = new WorldPacket();
+            WorldPacket buffer1 = new();
             buffer1.WriteUInt8((byte)UpdateType.Values);
             buffer1.WritePackedGuid(GetGUID());
             buffer1.WriteUInt32(buffer.GetSize());

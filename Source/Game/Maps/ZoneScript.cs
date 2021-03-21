@@ -46,6 +46,6 @@ namespace Game.Maps
 
         public virtual void ProcessEvent(WorldObject obj, uint eventId) { }
 
-        protected EventMap _events = new EventMap();
+        protected EventMap _events = new();
     }
 }

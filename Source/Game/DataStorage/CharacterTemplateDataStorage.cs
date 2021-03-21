@@ -30,7 +30,7 @@ namespace Game.DataStorage
             uint oldMSTime = Time.GetMSTime();
             _characterTemplateStore.Clear();
 
-            MultiMap<uint, CharacterTemplateClass> characterTemplateClasses = new MultiMap<uint, CharacterTemplateClass>();
+            MultiMap<uint, CharacterTemplateClass> characterTemplateClasses = new();
             SQLResult classesResult = DB.World.Query("SELECT TemplateId, FactionGroup, Class FROM character_template_class");
             if (!classesResult.IsEmpty())
             {
@@ -71,7 +71,7 @@ namespace Game.DataStorage
 
             do
             {
-                CharacterTemplate templ = new CharacterTemplate();
+                CharacterTemplate templ = new();
                 templ.TemplateSetId = templates.Read<uint>(0);
                 templ.Name = templates.Read<string>(1);
                 templ.Description = templates.Read<string>(2);
@@ -101,7 +101,7 @@ namespace Game.DataStorage
             return _characterTemplateStore.LookupByKey(templateId);
         }
 
-        Dictionary<uint, CharacterTemplate> _characterTemplateStore = new Dictionary<uint, CharacterTemplate>();
+        Dictionary<uint, CharacterTemplate> _characterTemplateStore = new();
     }
 
     public struct CharacterTemplateClass

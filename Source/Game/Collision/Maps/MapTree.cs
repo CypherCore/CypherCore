@@ -64,7 +64,7 @@ namespace Game.Collision
             if (!File.Exists(fname))
                 return LoadResult.FileNotFound;
 
-            using (BinaryReader reader = new BinaryReader(new FileStream(fname, FileMode.Open, FileAccess.Read)))
+            using (BinaryReader reader = new(new FileStream(fname, FileMode.Open, FileAccess.Read)))
             {
                 var magic = reader.ReadStringFromChars(8);
                 if (magic != MapConst.VMapMagic)
@@ -120,7 +120,7 @@ namespace Game.Collision
             if (fileResult.File != null)
             {
                 result = LoadResult.Success;
-                using (BinaryReader reader = new BinaryReader(fileResult.File))
+                using (BinaryReader reader = new(fileResult.File))
                 {
                     if (reader.ReadStringFromChars(8) != MapConst.VMapMagic)
                         result = LoadResult.VersionMismatch;
@@ -196,7 +196,7 @@ namespace Game.Collision
                 TileFileOpenResult fileResult = OpenMapTileFile(VMapManager.VMapPath, iMapID, tileX, tileY, vm);
                 if (fileResult.File != null)
                 {
-                    using (BinaryReader reader = new BinaryReader(fileResult.File))
+                    using (BinaryReader reader = new(fileResult.File))
                     {
                         bool result = true;
                         if (reader.ReadStringFromChars(8) != MapConst.VMapMagic)
@@ -240,7 +240,7 @@ namespace Game.Collision
 
         static TileFileOpenResult OpenMapTileFile(string vmapPath, uint mapID, uint tileX, uint tileY, VMapManager vm)
         {
-            TileFileOpenResult result = new TileFileOpenResult();
+            TileFileOpenResult result = new();
             result.Name = vmapPath + GetTileFileName(mapID, tileX, tileY);
 
             if (File.Exists(result.Name))
@@ -273,7 +273,7 @@ namespace Game.Collision
             if (!File.Exists(fullname))
                 return LoadResult.FileNotFound;
 
-            using (BinaryReader reader = new BinaryReader(new FileStream(fullname, FileMode.Open, FileAccess.Read)))
+            using (BinaryReader reader = new(new FileStream(fullname, FileMode.Open, FileAccess.Read)))
             {
                 if (reader.ReadStringFromChars(8) != MapConst.VMapMagic)
                     return LoadResult.VersionMismatch;
@@ -283,7 +283,7 @@ namespace Game.Collision
             if (stream == null)
                 return LoadResult.FileNotFound;
 
-            using (BinaryReader reader = new BinaryReader(stream))
+            using (BinaryReader reader = new(stream))
             {
                 if (reader.ReadStringFromChars(8) != MapConst.VMapMagic)
                     return LoadResult.VersionMismatch;
@@ -304,7 +304,7 @@ namespace Game.Collision
             rootId = 0;
             groupId = 0;
 
-            AreaInfoCallback intersectionCallBack = new AreaInfoCallback(iTreeValues);
+            AreaInfoCallback intersectionCallBack = new(iTreeValues);
             iTree.IntersectPoint(pos, intersectionCallBack);
             if (intersectionCallBack.aInfo.result)
             {
@@ -320,7 +320,7 @@ namespace Game.Collision
 
         public bool GetLocationInfo(Vector3 pos, LocationInfo info)
         {
-            LocationInfoCallback intersectionCallBack = new LocationInfoCallback(iTreeValues, info);
+            LocationInfoCallback intersectionCallBack = new(iTreeValues, info);
             iTree.IntersectPoint(pos, intersectionCallBack);
             return intersectionCallBack.result;
         }
@@ -328,8 +328,8 @@ namespace Game.Collision
         public float GetHeight(Vector3 pPos, float maxSearchDist)
         {
             float height = float.PositiveInfinity;
-            Vector3 dir = new Vector3(0, 0, -1);
-            Ray ray = new Ray(pPos, dir);   // direction with length of 1
+            Vector3 dir = new(0, 0, -1);
+            Ray ray = new(pPos, dir);   // direction with length of 1
             float maxDist = maxSearchDist;
             if (GetIntersectionTime(ray, ref maxDist, false, ModelIgnoreFlags.Nothing))
                 height = pPos.Z - maxDist;
@@ -339,7 +339,7 @@ namespace Game.Collision
         bool GetIntersectionTime(Ray pRay, ref float pMaxDist, bool pStopAtFirstHit, ModelIgnoreFlags ignoreFlags)
         {
             float distance = pMaxDist;
-            MapRayCallback intersectionCallBack = new MapRayCallback(iTreeValues, ignoreFlags);
+            MapRayCallback intersectionCallBack = new(iTreeValues, ignoreFlags);
             iTree.IntersectRay(pRay, intersectionCallBack, ref distance, pStopAtFirstHit);
             if (intersectionCallBack.DidHit())
                 pMaxDist = distance;
@@ -359,7 +359,7 @@ namespace Game.Collision
                 return false;
             }
             Vector3 dir = (pPos2 - pPos1) / maxDist;              // direction with length of 1
-            Ray ray = new Ray(pPos1, dir);
+            Ray ray = new(pPos1, dir);
             float dist = maxDist;
             if (GetIntersectionTime(ray, ref dist, false, ModelIgnoreFlags.Nothing))
             {
@@ -403,7 +403,7 @@ namespace Game.Collision
             if (maxDist < 1e-10f)
                 return true;
             // direction with length of 1
-            Ray ray = new Ray(pos1, (pos2 - pos1) / maxDist);
+            Ray ray = new(pos1, (pos2 - pos1) / maxDist);
             if (GetIntersectionTime(ray, ref maxDist, true, ignoreFlags))
                 return false;
 
@@ -413,13 +413,13 @@ namespace Game.Collision
         public int NumLoadedTiles() { return iLoadedTiles.Count; }
 
         uint iMapID;
-        BIH iTree = new BIH();
+        BIH iTree = new();
         ModelInstance[] iTreeValues;
         uint iNTreeValues;
-        Dictionary<uint, uint> iSpawnIndices = new Dictionary<uint, uint>();
+        Dictionary<uint, uint> iSpawnIndices = new();
 
-        Dictionary<uint, bool> iLoadedTiles = new Dictionary<uint, bool>();
-        Dictionary<uint, uint> iLoadedSpawns = new Dictionary<uint, uint>();
+        Dictionary<uint, bool> iLoadedTiles = new();
+        Dictionary<uint, uint> iLoadedSpawns = new();
     }
 
     class TileFileOpenResult

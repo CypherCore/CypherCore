@@ -31,7 +31,7 @@ namespace Game
         BattlenetRpcErrorCode HandleProcessClientRequest(ClientRequest request, ClientResponse response)
         {
             Bgs.Protocol.Attribute command = null;
-            Dictionary<string, Bgs.Protocol.Variant> Params = new Dictionary<string, Bgs.Protocol.Variant>();
+            Dictionary<string, Bgs.Protocol.Variant> Params = new();
 
             for (int i = 0; i < request.Attribute.Count; ++i)
             {
@@ -78,7 +78,7 @@ namespace Game
             if (compressed.Empty())
                 return BattlenetRpcErrorCode.UtilServerFailedToSerializeResponse;
 
-            Bgs.Protocol.Attribute attribute = new Bgs.Protocol.Attribute();
+            Bgs.Protocol.Attribute attribute = new();
             attribute.Name = "Param_RealmList";
             attribute.Value = new Bgs.Protocol.Variant();
             attribute.Value.BlobValue = ByteString.CopyFrom(compressed);
@@ -87,7 +87,7 @@ namespace Game
             var realmCharacterCounts = new RealmCharacterCountList();
             foreach (var characterCount in GetRealmCharacterCounts())
             {
-                RealmCharacterCountEntry countEntry = new RealmCharacterCountEntry();
+                RealmCharacterCountEntry countEntry = new();
                 countEntry.WowRealmAddress = (int)characterCount.Key;
                 countEntry.Count = characterCount.Value;
                 realmCharacterCounts.Counts.Add(countEntry);

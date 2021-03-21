@@ -70,14 +70,14 @@ namespace Game
                 return;
             }
 
-            VoidStorageContents voidStorageContents = new VoidStorageContents();
+            VoidStorageContents voidStorageContents = new();
             for (byte i = 0; i < SharedConst.VoidStorageMaxSlot; ++i)
             {
                 VoidStorageItem item = player.GetVoidStorageItem(i);
                 if (item == null)
                     continue;
 
-                VoidItem voidItem = new VoidItem();
+                VoidItem voidItem = new();
                 voidItem.Guid = ObjectGuid.Create(HighGuid.Item, item.ItemId);
                 voidItem.Creator = item.CreatorGuid;
                 voidItem.Slot = i;
@@ -143,7 +143,7 @@ namespace Game
                 return;
             }
 
-            VoidStorageTransferChanges voidStorageTransferChanges = new VoidStorageTransferChanges();
+            VoidStorageTransferChanges voidStorageTransferChanges = new();
 
             byte depositCount = 0;
             for (int i = 0; i < voidStorageTransfer.Deposits.Length; ++i)
@@ -155,7 +155,7 @@ namespace Game
                     continue;
                 }
 
-                VoidStorageItem itemVS = new VoidStorageItem(Global.ObjectMgr.GenerateVoidStorageItemId(), item.GetEntry(), item.GetCreator(), 
+                VoidStorageItem itemVS = new(Global.ObjectMgr.GenerateVoidStorageItemId(), item.GetEntry(), item.GetCreator(), 
                     item.GetItemRandomBonusListId(), item.GetModifier(ItemModifier.TimewalkerLevel), item.GetModifier(ItemModifier.ArtifactKnowledgeLevel), 
                     item.GetContext(), item.m_itemData.BonusListIDs);
 
@@ -185,7 +185,7 @@ namespace Game
                     continue;
                 }
 
-                List<ItemPosCount> dest = new List<ItemPosCount>();
+                List<ItemPosCount> dest = new();
                 InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, itemVS.ItemEntry, 1);
                 if (msg != InventoryResult.Ok)
                 {
@@ -244,7 +244,7 @@ namespace Game
                 return;
             }
 
-            VoidItemSwapResponse voidItemSwapResponse = new VoidItemSwapResponse();
+            VoidItemSwapResponse voidItemSwapResponse = new();
             voidItemSwapResponse.VoidItemA = swapVoidItem.VoidItemGuid;
             voidItemSwapResponse.VoidItemSlotA = swapVoidItem.DstSlot;
             if (usedDestSlot)

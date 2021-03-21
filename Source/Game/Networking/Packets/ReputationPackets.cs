@@ -63,7 +63,7 @@ namespace Game.Networking.Packets
                 reaction.Write(_worldPacket);
         }
 
-        public List<ForcedReaction> Reactions = new List<ForcedReaction>();
+        public List<ForcedReaction> Reactions = new();
     }
 
     class SetFactionStanding : ServerPacket
@@ -85,7 +85,7 @@ namespace Game.Networking.Packets
 
         public float ReferAFriendBonus;
         public float BonusFromAchievementSystem;
-        public List<FactionStandingData> Faction = new List<FactionStandingData>();
+        public List<FactionStandingData> Faction = new();
         public bool ShowVisual;
     }
 

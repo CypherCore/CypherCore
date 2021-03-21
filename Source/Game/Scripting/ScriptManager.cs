@@ -1259,13 +1259,13 @@ namespace Game.Scripting
         }
 
         uint _ScriptCount;
-        public Dictionary<uint, SpellSummary> spellSummaryStorage = new Dictionary<uint, SpellSummary>();
-        Hashtable ScriptStorage = new Hashtable();
+        public Dictionary<uint, SpellSummary> spellSummaryStorage = new();
+        Hashtable ScriptStorage = new();
 
-        Dictionary<uint, WaypointPath> _waypointStore = new Dictionary<uint, WaypointPath>();
+        Dictionary<uint, WaypointPath> _waypointStore = new();
         
         // creature entry + chain ID
-        MultiMap<Tuple<uint, ushort>, SplineChainLink> m_mSplineChainsMap = new MultiMap<Tuple<uint, ushort>, SplineChainLink>(); // spline chains
+        MultiMap<Tuple<uint, ushort>, SplineChainLink> m_mSplineChainsMap = new(); // spline chains
     }
 
     public interface IScriptRegistry
@@ -1348,7 +1348,7 @@ namespace Game.Scripting
 
         // Counter used for code-only scripts.
         uint _scriptIdCounter;
-        Dictionary<uint, TValue> ScriptMap = new Dictionary<uint, TValue>();
+        Dictionary<uint, TValue> ScriptMap = new();
     }
 
     public class SpellSummary

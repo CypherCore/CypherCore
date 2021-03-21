@@ -24,6 +24,14 @@ namespace Game.Accounts
 {
     public class RBACData
     {
+        uint _id;                                        // Account id
+        string _name;                                 // Account name
+        int _realmId;                                    // RealmId Affected
+        byte _secLevel;                                   // Account SecurityLevel
+        List<uint> _grantedPerms = new();             // Granted permissions
+        List<uint> _deniedPerms = new();              // Denied permissions
+        List<uint> _globalPerms = new();              // Calculated permissions
+
         public RBACData(uint id, string name, int realmId, byte secLevel = 255)
         {
             _id = id;
@@ -224,7 +232,7 @@ namespace Game.Accounts
             RemovePermissions(_globalPerms, revoked);
         }
 
-        void AddPermissions(List<uint> permsFrom, List<uint> permsTo)
+        public void AddPermissions(List<uint> permsFrom, List<uint> permsTo)
         {
             foreach (var id in permsFrom)
                 permsTo.Add(id);
@@ -243,7 +251,7 @@ namespace Game.Accounts
 
         void ExpandPermissions(List<uint> permissions)
         {
-            List<uint> toCheck = new List<uint>(permissions);
+            List<uint> toCheck = new(permissions);
             permissions.Clear();
 
             while (!toCheck.Empty())
@@ -337,18 +345,14 @@ namespace Game.Accounts
         {
             _deniedPerms.Remove(permissionId);
         }
-
-        uint _id;                                        // Account id
-        string _name;                                 // Account name
-        int _realmId;                                    // RealmId Affected
-        byte _secLevel;                                   // Account SecurityLevel
-        List<uint> _grantedPerms = new List<uint>();             // Granted permissions
-        List<uint> _deniedPerms = new List<uint>();              // Denied permissions
-        List<uint> _globalPerms = new List<uint>();              // Calculated permissions
     }
 
     public class RBACPermission
     {
+        uint _id;                                 // id of the object
+        string _name;                             // name of the object
+        List<uint> _perms = new();     // Set of permissions
+
         public RBACPermission(uint id = 0, string name = "")
         {
             _id = id;
@@ -365,12 +369,7 @@ namespace Game.Accounts
         // Adds a new linked Permission
         public void AddLinkedPermission(uint id) { _perms.Add(id); }
         // Removes a linked Permission
-        void RemoveLinkedPermission(uint id) { _perms.Remove(id); }
-
-
-        uint _id;                                 // id of the object
-        string _name;                             // name of the object
-        List<uint> _perms = new List<uint>();     // Set of permissions
+        public void RemoveLinkedPermission(uint id) { _perms.Remove(id); }
     }
 
     public enum RBACCommandResult

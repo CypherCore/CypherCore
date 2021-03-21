@@ -40,12 +40,12 @@ namespace Game
             }
 
             long cost = 0;
-            Dictionary<Item, uint[]> transmogItems = new Dictionary<Item, uint[]>();// new Dictionary<Item, Tuple<uint, uint>>();
-            Dictionary<Item, uint> illusionItems = new Dictionary<Item, uint>();
+            Dictionary<Item, uint[]> transmogItems = new();// new Dictionary<Item, Tuple<uint, uint>>();
+            Dictionary<Item, uint> illusionItems = new();
 
-            List<Item> resetAppearanceItems = new List<Item>();
-            List<Item> resetIllusionItems = new List<Item>();
-            List<uint> bindAppearances = new List<uint>();
+            List<Item> resetAppearanceItems = new();
+            List<Item> resetIllusionItems = new();
+            List<uint> bindAppearances = new();
 
             bool validateAndStoreTransmogItem(Item itemTransmogrified, uint itemModifiedAppearanceId, bool isSecondary)
             {

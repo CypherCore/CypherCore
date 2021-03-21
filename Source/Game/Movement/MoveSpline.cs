@@ -91,12 +91,12 @@ namespace Game.Movement
             // init spline timestamps
             if (splineflags.HasFlag(SplineFlag.Falling))
             {
-                FallInitializer init = new FallInitializer(spline.GetPoint(spline.First()).Z);
+                FallInitializer init = new(spline.GetPoint(spline.First()).Z);
                 spline.InitLengths(init);
             }
             else
             {
-                CommonInitializer init = new CommonInitializer(args.velocity);
+                CommonInitializer init = new(args.velocity);
                 spline.InitLengths(init);
             }
 
@@ -297,9 +297,9 @@ namespace Game.Movement
 
         #region Fields
         public MoveSplineInitArgs InitArgs;
-        public Spline spline = new Spline();
+        public Spline spline = new();
         public FacingInfo facing;
-        public MoveSplineFlag splineflags = new MoveSplineFlag();
+        public MoveSplineFlag splineflags = new();
         public bool onTransport;
         public bool splineIsFacingOnly;
         public uint m_Id;
@@ -392,7 +392,7 @@ namespace Game.Movement
             TimeToNext = msToNext;
         }
 
-        public List<Vector3> Points = new List<Vector3>();
+        public List<Vector3> Points = new();
         public uint ExpectedDuration;
         public uint TimeToNext;
     }
@@ -414,7 +414,7 @@ namespace Game.Movement
         public void Clear() { Chain.Clear(); }
 
         public uint PointID;
-        public List<SplineChainLink> Chain = new List<SplineChainLink>();
+        public List<SplineChainLink> Chain = new();
         public bool IsWalkMode;
         public byte SplineIndex;
         public byte PointIndex;

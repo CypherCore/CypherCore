@@ -38,7 +38,7 @@ namespace Game
                 }
             }
 
-            QueryGuildInfoResponse response = new QueryGuildInfoResponse();
+            QueryGuildInfoResponse response = new();
             response.GuildGUID = query.GuildGuid;
             response.PlayerGuid = query.PlayerGuid;
             SendPacket(response);
@@ -185,7 +185,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SaveGuildEmblem)]
         void HandleSaveGuildEmblem(SaveGuildEmblem packet)
         {
-            Guild.EmblemInfo emblemInfo = new Guild.EmblemInfo();
+            Guild.EmblemInfo emblemInfo = new();
             emblemInfo.ReadPacket(packet);
 
             if (GetPlayer().GetNPCIfCanInteractWith(packet.Vendor, NPCFlags.TabardDesigner, NPCFlags2.None))
@@ -407,12 +407,12 @@ namespace Game
             {
                 var rewards = Global.GuildMgr.GetGuildRewards();
 
-                GuildRewardList rewardList = new GuildRewardList();
+                GuildRewardList rewardList = new();
                 rewardList.Version = (uint)Time.UnixTime;
 
                 for (int i = 0; i < rewards.Count; i++)
                 {
-                    GuildRewardItem rewardItem = new GuildRewardItem();
+                    GuildRewardItem rewardItem = new();
                     rewardItem.ItemID = rewards[i].ItemID;
                     rewardItem.RaceMask = (uint)rewards[i].RaceMask;
                     rewardItem.MinGuildLevel = 0;

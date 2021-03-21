@@ -521,7 +521,7 @@ namespace Game.Conditions
 
         public string ToString(bool ext = false)
         {
-            StringBuilder ss = new StringBuilder();
+            StringBuilder ss = new();
             ss.AppendFormat("[Condition SourceType: {0}", SourceType);
             if (SourceType < ConditionSourceType.Max)
                 ss.AppendFormat(" ({0})", Global.ConditionMgr.StaticSourceTypeData[(int)SourceType]);

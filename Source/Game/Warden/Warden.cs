@@ -51,7 +51,7 @@ namespace Game
             uint burstSize;
             while (sizeLeft > 0)
             {
-                WardenModuleTransfer transfer = new WardenModuleTransfer();
+                WardenModuleTransfer transfer = new();
 
                 burstSize = sizeLeft < 500 ? sizeLeft : 500u;
                 transfer.Command = WardenOpcodes.Smsg_ModuleCache;
@@ -60,7 +60,7 @@ namespace Game
                 sizeLeft -= burstSize;
                 pos += (int)burstSize;
 
-                Warden3DataServer packet = new Warden3DataServer();
+                Warden3DataServer packet = new();
                 packet.Data = EncryptData(transfer.Write());
                 _session.SendPacket(packet);
             }
@@ -71,14 +71,14 @@ namespace Game
             Log.outDebug(LogFilter.Warden, "Request module");
 
             // Create packet structure
-            WardenModuleUse request = new WardenModuleUse();
+            WardenModuleUse request = new();
             request.Command = WardenOpcodes.Smsg_ModuleUse;
 
             request.ModuleId = _module.Id;
             request.ModuleKey = _module.Key;
             request.Size = _module.CompressedSize;
 
-            Warden3DataServer packet = new Warden3DataServer();
+            Warden3DataServer packet = new();
             packet.Data = EncryptData(request.Write());
             _session.SendPacket(packet);
         }

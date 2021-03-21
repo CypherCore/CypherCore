@@ -46,7 +46,7 @@ namespace Game.Collision
             tempTree.Add(0);
 
             // seed bbox
-            AABound gridBox = new AABound();
+            AABound gridBox = new();
             gridBox.lo = bounds.Lo;
             gridBox.hi = bounds.Hi;
             AABound nodeBox = gridBox;
@@ -303,8 +303,8 @@ namespace Game.Collision
                 dat.primBound[i] = primitives[i].GetBounds();
                 bounds.merge(dat.primBound[i]);
             }
-            List<uint> tempTree = new List<uint>();
-            BuildStats stats = new BuildStats();
+            List<uint> tempTree = new();
+            BuildStats stats = new();
             BuildHierarchy(tempTree, dat, stats);
 
             objects = new uint[dat.numPrims];
@@ -322,7 +322,7 @@ namespace Game.Collision
             float intervalMax = -1.0f;
             Vector3 org = r.Origin;
             Vector3 dir = r.Direction;
-            Vector3 invDir = new Vector3();
+            Vector3 invDir = new();
             for (int i = 0; i < 3; ++i)
             {
                 invDir[i] = 1.0f / dir[i];
@@ -621,13 +621,13 @@ namespace Game.Collision
 
         uint FloatToRawIntBits(float f)
         {
-            FloatToIntConverter converter = new FloatToIntConverter();
+            FloatToIntConverter converter = new();
             converter.FloatValue = f;
             return converter.IntValue;
         }
         float IntBitsToFloat(uint i)
         {
-            FloatToIntConverter converter = new FloatToIntConverter();
+            FloatToIntConverter converter = new();
             converter.IntValue = i;
             return converter.FloatValue;
         }

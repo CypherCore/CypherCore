@@ -33,8 +33,8 @@ namespace Game.DataStorage
             _conversationLineTemplateStorage.Clear();
             _conversationTemplateStorage.Clear();
 
-            Dictionary<uint, ConversationActorTemplate[]> actorsByConversation = new Dictionary<uint, ConversationActorTemplate[]>();
-            Dictionary<uint, ulong[]> actorGuidsByConversation = new Dictionary<uint, ulong[]>();
+            Dictionary<uint, ConversationActorTemplate[]> actorsByConversation = new();
+            Dictionary<uint, ulong[]> actorGuidsByConversation = new();
 
             SQLResult actorTemplates = DB.World.Query("SELECT Id, CreatureId, CreatureModelId FROM conversation_actor_template");
             if (!actorTemplates.IsEmpty())
@@ -44,7 +44,7 @@ namespace Game.DataStorage
                 do
                 {
                     uint id = actorTemplates.Read<uint>(0);
-                    ConversationActorTemplate conversationActor = new ConversationActorTemplate();
+                    ConversationActorTemplate conversationActor = new();
                     conversationActor.Id = id;
                     conversationActor.CreatureId = actorTemplates.Read<uint>(1);
                     conversationActor.CreatureModelId = actorTemplates.Read<uint>(2);
@@ -75,7 +75,7 @@ namespace Game.DataStorage
                         continue;
                     }
 
-                    ConversationLineTemplate conversationLine = new ConversationLineTemplate();
+                    ConversationLineTemplate conversationLine = new();
                     conversationLine.Id = id;
                     conversationLine.StartTime = lineTemplates.Read<uint>(1);
                     conversationLine.UiCameraID = lineTemplates.Read<uint>(2);
@@ -165,7 +165,7 @@ namespace Game.DataStorage
 
                 do
                 {
-                    ConversationTemplate conversationTemplate = new ConversationTemplate();
+                    ConversationTemplate conversationTemplate = new();
                     conversationTemplate.Id = templateResult.Read<uint>(0);
                     conversationTemplate.FirstLineId = templateResult.Read<uint>(1);
                     conversationTemplate.LastLineEndTime = templateResult.Read<uint>(2);
@@ -210,9 +210,9 @@ namespace Game.DataStorage
             return _conversationTemplateStorage.LookupByKey(conversationId);
         }
 
-        Dictionary<uint, ConversationTemplate> _conversationTemplateStorage = new Dictionary<uint, ConversationTemplate>();
-        Dictionary<uint, ConversationActorTemplate> _conversationActorTemplateStorage = new Dictionary<uint, ConversationActorTemplate>();
-        Dictionary<uint, ConversationLineTemplate> _conversationLineTemplateStorage = new Dictionary<uint, ConversationLineTemplate>();
+        Dictionary<uint, ConversationTemplate> _conversationTemplateStorage = new();
+        Dictionary<uint, ConversationActorTemplate> _conversationActorTemplateStorage = new();
+        Dictionary<uint, ConversationLineTemplate> _conversationLineTemplateStorage = new();
     }
 
     public class ConversationActorTemplate
@@ -240,9 +240,9 @@ namespace Game.DataStorage
         public uint TextureKitId;    // Background texture
         public uint ScriptId;
 
-        public List<ConversationActorTemplate> Actors = new List<ConversationActorTemplate>();
-        public List<ulong> ActorGuids = new List<ulong>();
-        public List<ConversationLineTemplate> Lines = new List<ConversationLineTemplate>();
+        public List<ConversationActorTemplate> Actors = new();
+        public List<ulong> ActorGuids = new();
+        public List<ConversationLineTemplate> Lines = new();
     }
 
 

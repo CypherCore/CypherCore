@@ -83,10 +83,10 @@ namespace Game.Networking.Packets
                 text.Write(_worldPacket);
         }
 
-        public List<ClientGossipOptions> GossipOptions = new List<ClientGossipOptions>();
+        public List<ClientGossipOptions> GossipOptions = new();
         public int FriendshipFactionID;
         public ObjectGuid GossipGUID;
-        public List<ClientGossipText> GossipText = new List<ClientGossipText>();
+        public List<ClientGossipText> GossipText = new();
         public int TextID;
         public int GossipID;
     }
@@ -133,7 +133,7 @@ namespace Game.Networking.Packets
         }
 
         public byte Reason = 0;
-        public List<VendorItemPkt> Items = new List<VendorItemPkt>();
+        public List<VendorItemPkt> Items = new();
         public ObjectGuid Vendor;
     }
 
@@ -170,7 +170,7 @@ namespace Game.Networking.Packets
         public ObjectGuid TrainerGUID;
         public int TrainerType;
         public int TrainerID = 1;
-        public List<TrainerListSpell> Spells = new List<TrainerListSpell>();
+        public List<TrainerListSpell> Spells = new();
         public string Greeting;
     }
 
@@ -308,7 +308,7 @@ namespace Game.Networking.Packets
 
     public class TreasureLootList
     {
-        public List<TreasureItem> Items = new List<TreasureItem>();
+        public List<TreasureItem> Items = new();
 
         public void Write(WorldPacket data)
         {
@@ -327,7 +327,7 @@ namespace Game.Networking.Packets
         public GossipOptionStatus Status;
         public string Text;
         public string Confirm;
-        public TreasureLootList Treasure = new TreasureLootList();
+        public TreasureLootList Treasure = new();
         public Optional<int> SpellID;
     }
 
@@ -378,7 +378,7 @@ namespace Game.Networking.Packets
 
         public int MuID;
         public int Type;
-        public ItemInstance Item = new ItemInstance();
+        public ItemInstance Item = new();
         public int Quantity = -1;
         public ulong Price;
         public int Durability;

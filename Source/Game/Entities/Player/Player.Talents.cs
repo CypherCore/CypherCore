@@ -259,7 +259,7 @@ namespace Game.Entities
             if (IsNonMeleeSpellCast(false))
                 InterruptNonMeleeSpells(false);
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             _SaveActions(trans);
             DB.Characters.CommitTransaction(trans);
 
@@ -410,7 +410,7 @@ namespace Game.Entities
             foreach (uint glyphId in GetGlyphs(spec.OrderIndex))
                 CastSpell(this, CliDB.GlyphPropertiesStorage.LookupByKey(glyphId).SpellID, true);
 
-            ActiveGlyphs activeGlyphs = new ActiveGlyphs();
+            ActiveGlyphs activeGlyphs = new();
             foreach (uint glyphId in GetGlyphs(spec.OrderIndex))
             {
                 List<uint> bindableSpells = Global.DB2Mgr.GetGlyphBindableSpells(glyphId);
@@ -527,7 +527,7 @@ namespace Game.Entities
                 RemoveTalent(talentInfo);
             }            
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             _SaveTalents(trans);
             _SaveSpells(trans);
             DB.Characters.CommitTransaction(trans);
@@ -547,7 +547,7 @@ namespace Game.Entities
 
         public void SendTalentsInfoData()
         {
-            UpdateTalentData packet = new UpdateTalentData();
+            UpdateTalentData packet = new();
             packet.Info.PrimarySpecialization = GetPrimarySpecialization();
 
             for (byte i = 0; i < PlayerConst.MaxSpecializations; ++i)
@@ -559,7 +559,7 @@ namespace Game.Entities
                 var talents = GetTalentMap(i);
                 var pvpTalents = GetPvpTalentMap(i);
 
-                UpdateTalentData.TalentGroupInfo groupInfoPkt = new UpdateTalentData.TalentGroupInfo();
+                UpdateTalentData.TalentGroupInfo groupInfoPkt = new();
                 groupInfoPkt.SpecID = spec.Id;
 
                 foreach (var pair in talents)
@@ -603,7 +603,7 @@ namespace Game.Entities
                         continue;
                     }
 
-                    PvPTalent pvpTalent = new PvPTalent();
+                    PvPTalent pvpTalent = new();
                     pvpTalent.PvPTalentID = (ushort)pvpTalents[slot];
                     pvpTalent.Slot = slot;
                     groupInfoPkt.PvPTalents.Add(pvpTalent);
@@ -621,7 +621,7 @@ namespace Game.Entities
 
         public void SendRespecWipeConfirm(ObjectGuid guid, uint cost)
         {
-            RespecWipeConfirm respecWipeConfirm = new RespecWipeConfirm();
+            RespecWipeConfirm respecWipeConfirm = new();
             respecWipeConfirm.RespecMaster = guid;
             respecWipeConfirm.Cost = cost;
             respecWipeConfirm.RespecType = SpecResetType.Talents;

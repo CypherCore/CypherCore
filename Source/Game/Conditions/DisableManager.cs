@@ -32,11 +32,11 @@ namespace Game
         public class DisableData
         {
             public byte flags;
-            public List<uint> param0 = new List<uint>();
-            public List<uint> param1 = new List<uint>();
+            public List<uint> param0 = new();
+            public List<uint> param1 = new();
         }
 
-        Dictionary<DisableType, Dictionary<uint, DisableData>> m_DisableMap = new Dictionary<DisableType, Dictionary<uint, DisableData>>();
+        Dictionary<DisableType, Dictionary<uint, DisableData>> m_DisableMap = new();
 
         public void LoadDisables()
         {
@@ -67,7 +67,7 @@ namespace Game
                 string params_0 = result.Read<string>(3);
                 string params_1 = result.Read<string>(4);
 
-                DisableData data = new DisableData();
+                DisableData data = new();
                 data.flags = flags;
 
                 switch (type)

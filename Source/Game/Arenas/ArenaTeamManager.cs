@@ -101,7 +101,7 @@ namespace Game.Arenas
             uint count = 0;
             do
             {
-                ArenaTeam newArenaTeam = new ArenaTeam();
+                ArenaTeam newArenaTeam = new();
 
                 if (!newArenaTeam.LoadArenaTeamFromDB(result) || !newArenaTeam.LoadMembersFromDB(result2))
                 {
@@ -123,6 +123,6 @@ namespace Game.Arenas
         public Dictionary<uint, ArenaTeam> GetArenaTeamMap() { return ArenaTeamStorage; }
 
         uint NextArenaTeamId;
-        Dictionary<uint, ArenaTeam> ArenaTeamStorage = new Dictionary<uint, ArenaTeam>();
+        Dictionary<uint, ArenaTeam> ArenaTeamStorage = new();
     }
 }

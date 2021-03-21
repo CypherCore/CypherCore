@@ -99,14 +99,12 @@ namespace Game.AI
 
         public static IMovementGenerator SelectMovementAI(Creature creature)
         {
-            switch (creature.DefaultMovementType)
+            return creature.DefaultMovementType switch
             {
-                case MovementGeneratorType.Random:
-                    return new RandomMovementGenerator();
-                case MovementGeneratorType.Waypoint:
-                    return new WaypointMovementGenerator();
-            }
-            return null;
+                MovementGeneratorType.Random => new RandomMovementGenerator(),
+                MovementGeneratorType.Waypoint => new WaypointMovementGenerator(),
+                _ => null,
+            };
         }
 
         public static GameObjectAI SelectGameObjectAI(GameObject go)
@@ -116,14 +114,11 @@ namespace Game.AI
             if (scriptedAI != null)
                 return scriptedAI;
 
-            switch (go.GetAIName())
+            return go.GetAIName() switch
             {
-                case "GameObjectAI":
-                default:
-                    return new GameObjectAI(go);
-                case "SmartGameObjectAI":
-                    return new SmartGameObjectAI(go);
-            }
+                "SmartGameObjectAI" => new SmartGameObjectAI(go),
+                _ => new GameObjectAI(go),
+            };
         }
     }
 }

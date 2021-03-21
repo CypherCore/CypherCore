@@ -187,7 +187,7 @@ namespace Game.BattleGrounds
             {
                 m_LastPlayerPositionBroadcast = 0;
 
-                BattlegroundPlayerPositions playerPositions = new BattlegroundPlayerPositions();
+                BattlegroundPlayerPositions playerPositions = new();
                 for (var i =0; i < _playerPositions.Count; ++i)
                 {
                     var playerPosition = _playerPositions[i];
@@ -349,7 +349,7 @@ namespace Game.BattleGrounds
             {
                 uint countdownMaxForBGType = IsArena() ? BattlegroundConst.ArenaCountdownMax : BattlegroundConst.BattlegroundCountdownMax;
 
-                StartTimer timer = new StartTimer();
+                StartTimer timer = new();
                 timer.Type = TimerType.Pvp;
                 timer.TimeRemaining = countdownMaxForBGType - (GetElapsedTime() / 1000);
                 timer.TotalTime = countdownMaxForBGType;
@@ -568,8 +568,8 @@ namespace Game.BattleGrounds
                 return;
             }
 
-            BroadcastTextBuilder builder = new BroadcastTextBuilder(null, msgType, id, Gender.Male, target);
-            LocalizedPacketDo localizer = new LocalizedPacketDo(builder);
+            BroadcastTextBuilder builder = new(null, msgType, id, Gender.Male, target);
+            LocalizedPacketDo localizer = new(builder);
             BroadcastWorker(localizer);
         }
 
@@ -634,7 +634,7 @@ namespace Game.BattleGrounds
 
         public void UpdateWorldState(uint variable, uint value, bool hidden = false)
         {
-            UpdateWorldState worldstate = new UpdateWorldState();
+            UpdateWorldState worldstate = new();
             worldstate.VariableID = variable;
             worldstate.Value = (int)value;
             worldstate.Hidden = hidden;
@@ -643,7 +643,7 @@ namespace Game.BattleGrounds
 
         public void UpdateWorldState(uint variable, bool value, bool hidden = false)
         {
-            UpdateWorldState worldstate = new UpdateWorldState();
+            UpdateWorldState worldstate = new();
             worldstate.VariableID = variable;
             worldstate.Value = value ? 1 : 0;
             worldstate.Hidden = hidden;
@@ -699,7 +699,7 @@ namespace Game.BattleGrounds
             //we must set it this way, because end time is sent in packet!
             SetRemainingTime(BattlegroundConst.AutocloseBattleground);
 
-            PVPMatchComplete pvpMatchComplete = new PVPMatchComplete();
+            PVPMatchComplete pvpMatchComplete = new();
             pvpMatchComplete.Winner = (byte)GetWinner();
             pvpMatchComplete.Duration = (int)Math.Max(0, (GetElapsedTime() - (int)BattlegroundStartTimeIntervals.Delay2m) / Time.InMilliseconds);
             pvpMatchComplete.LogData.HasValue = true;
@@ -905,7 +905,7 @@ namespace Game.BattleGrounds
                     Global.BattlegroundMgr.ScheduleQueueUpdate(0, bgQueueTypeId, GetBracketId());
                 }
                 // Let others know
-                BattlegroundPlayerLeft playerLeft = new BattlegroundPlayerLeft();
+                BattlegroundPlayerLeft playerLeft = new();
                 playerLeft.Guid = guid;
                 SendPacketToTeam(team, playerLeft, player);
             }
@@ -989,7 +989,7 @@ namespace Game.BattleGrounds
             ObjectGuid guid = player.GetGUID();
             Team team = player.GetBGTeam();
 
-            BattlegroundPlayer bp = new BattlegroundPlayer();
+            BattlegroundPlayer bp = new();
             bp.OfflineRemoveTime = 0;
             bp.Team = team;
             bp.ActiveSpec = (int)player.GetPrimarySpecialization();
@@ -999,11 +999,11 @@ namespace Game.BattleGrounds
 
             UpdatePlayersCountByTeam(team, false);                  // +1 player
 
-            BattlegroundPlayerJoined playerJoined = new BattlegroundPlayerJoined();
+            BattlegroundPlayerJoined playerJoined = new();
             playerJoined.Guid = player.GetGUID();
             SendPacketToTeam(team, playerJoined, player);
 
-            PVPMatchInitialize pvpMatchInitialize = new PVPMatchInitialize();
+            PVPMatchInitialize pvpMatchInitialize = new();
             pvpMatchInitialize.MapID = GetMapId();
             switch (GetStatus())
             {
@@ -1057,7 +1057,7 @@ namespace Game.BattleGrounds
                     player.CastSpell(player, BattlegroundConst.SpellPreparation, true);   // reduces all mana cost of spells.
 
                     uint countdownMaxForBGType = IsArena() ? BattlegroundConst.ArenaCountdownMax : BattlegroundConst.BattlegroundCountdownMax;
-                    StartTimer timer = new StartTimer();
+                    StartTimer timer = new();
                     timer.Type = TimerType.Pvp;
                     timer.TimeRemaining = countdownMaxForBGType - (GetElapsedTime() / 1000);
                     timer.TotalTime = countdownMaxForBGType;
@@ -1346,7 +1346,7 @@ namespace Game.BattleGrounds
             if (!map)
                 return false;
 
-            Quaternion rotation = new Quaternion(rotation0, rotation1, rotation2, rotation3);
+            Quaternion rotation = new(rotation0, rotation1, rotation2, rotation3);
             // Temporally add safety check for bad spawns and send log (object rotations need to be rechecked in sniff)
             if (rotation0 == 0 && rotation1 == 0 && rotation2 == 0 && rotation3 == 0)
             {
@@ -1485,7 +1485,7 @@ namespace Game.BattleGrounds
                 return null;
             }
 
-            Position pos = new Position(x, y, z, o);
+            Position pos = new(x, y, z, o);
 
             Creature creature = Creature.CreateCreature(entry, map, pos);
             if (!creature)
@@ -1581,8 +1581,8 @@ namespace Game.BattleGrounds
             if (entry == 0)
                 return;
 
-            CypherStringChatBuilder builder = new CypherStringChatBuilder(null, msgType, entry, source);
-            LocalizedPacketDo localizer = new LocalizedPacketDo(builder);
+            CypherStringChatBuilder builder = new(null, msgType, entry, source);
+            LocalizedPacketDo localizer = new(builder);
             BroadcastWorker(localizer);
         }
 
@@ -1591,8 +1591,8 @@ namespace Game.BattleGrounds
             if (entry == 0)
                 return;
 
-            CypherStringChatBuilder builder = new CypherStringChatBuilder(null, msgType, entry, source, args);
-            LocalizedPacketDo localizer = new LocalizedPacketDo(builder);
+            CypherStringChatBuilder builder = new(null, msgType, entry, source, args);
+            LocalizedPacketDo localizer = new(builder);
             BroadcastWorker(localizer);
         }
 
@@ -1724,7 +1724,7 @@ namespace Game.BattleGrounds
 
             BlockMovement(player);
 
-            PVPMatchStatisticsMessage pvpMatchStatistics = new PVPMatchStatisticsMessage();
+            PVPMatchStatisticsMessage pvpMatchStatistics = new();
             BuildPvPLogDataPacket(out pvpMatchStatistics.Data);
             player.SendPacket(pvpMatchStatistics);
         }
@@ -2025,11 +2025,11 @@ namespace Game.BattleGrounds
         }
 
         #region Fields
-        protected Dictionary<ObjectGuid, BattlegroundScore> PlayerScores = new Dictionary<ObjectGuid, BattlegroundScore>();                // Player scores
+        protected Dictionary<ObjectGuid, BattlegroundScore> PlayerScores = new();                // Player scores
         // Player lists, those need to be accessible by inherited classes
-        Dictionary<ObjectGuid, BattlegroundPlayer> m_Players = new Dictionary<ObjectGuid, BattlegroundPlayer>();
+        Dictionary<ObjectGuid, BattlegroundPlayer> m_Players = new();
         // Spirit Guide guid + Player list GUIDS
-        MultiMap<ObjectGuid, ObjectGuid> m_ReviveQueue = new MultiMap<ObjectGuid, ObjectGuid>();
+        MultiMap<ObjectGuid, ObjectGuid> m_ReviveQueue = new();
 
         // these are important variables used for starting messages
         BattlegroundEventFlags m_Events;
@@ -2071,8 +2071,8 @@ namespace Game.BattleGrounds
         uint m_LastPlayerPositionBroadcast;
 
         // Player lists
-        List<ObjectGuid> m_ResurrectQueue = new List<ObjectGuid>();               // Player GUID
-        List<ObjectGuid> m_OfflineQueue = new List<ObjectGuid>();                  // Player GUID
+        List<ObjectGuid> m_ResurrectQueue = new();               // Player GUID
+        List<ObjectGuid> m_OfflineQueue = new();                  // Player GUID
 
         // Invited counters are useful for player invitation to BG - do not allow, if BG is started to one faction to have 2 more players than another faction
         // Invited counters will be changed only when removing already invited player from queue, removing player from Battleground and inviting player to BG
@@ -2099,7 +2099,7 @@ namespace Game.BattleGrounds
         BattlegroundTemplate _battlegroundTemplate;
         PvpDifficultyRecord _pvpDifficultyEntry;
 
-        List<BattlegroundPlayerPosition> _playerPositions = new List<BattlegroundPlayerPosition>();
+        List<BattlegroundPlayerPosition> _playerPositions = new();
         #endregion
     }
 

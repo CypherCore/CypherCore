@@ -48,7 +48,7 @@ namespace Game
 
         public void SendTabardVendorActivate(ObjectGuid guid)
         {
-            PlayerTabardVendorActivate packet = new PlayerTabardVendorActivate();
+            PlayerTabardVendorActivate packet = new();
             packet.Vendor = guid;
             SendPacket(packet);
         }
@@ -119,7 +119,7 @@ namespace Game
 
         void SendTrainerBuyFailed(ObjectGuid trainerGUID, uint spellID, TrainerFailReason trainerFailedReason)
         {
-            TrainerBuyFailed trainerBuyFailed = new TrainerBuyFailed();
+            TrainerBuyFailed trainerBuyFailed = new();
             trainerBuyFailed.TrainerGUID = trainerGUID;
             trainerBuyFailed.SpellID = spellID;                             // should be same as in packet from client
             trainerBuyFailed.TrainerFailedReason = trainerFailedReason;     // 1 == "Not enough money for trainer service." 0 == "Trainer service %d unavailable."
@@ -356,7 +356,7 @@ namespace Game
             if (!GetPlayer())
                 return;
 
-            PetStableList packet = new PetStableList();
+            PetStableList packet = new();
             packet.StableMaster = guid;
 
             Pet pet = GetPlayer().GetPet();
@@ -403,7 +403,7 @@ namespace Game
 
         void SendPetStableResult(StableResult result)
         {
-            PetStableResult petStableResult = new PetStableResult();
+            PetStableResult petStableResult = new();
             petStableResult.Result = result;
             SendPacket(petStableResult);
         }
@@ -470,7 +470,7 @@ namespace Game
             VendorItemData vendorItems = vendor.GetVendorItems();
             int rawItemCount = vendorItems != null ? vendorItems.GetItemCount() : 0;
 
-            VendorInventory packet = new VendorInventory();
+            VendorInventory packet = new();
             packet.Vendor = vendor.GetGUID();
 
             float discountMod = GetPlayer().GetReputationPriceDiscount(vendor);
@@ -481,7 +481,7 @@ namespace Game
                 if (vendorItem == null)
                     continue;
 
-                VendorItemPkt item = new VendorItemPkt();
+                VendorItemPkt item = new();
 
                 PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(vendorItem.PlayerConditionId);
                 if (playerCondition != null)

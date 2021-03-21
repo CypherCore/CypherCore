@@ -60,10 +60,10 @@ namespace Game.Networking.Packets
         public uint WaveCurrent;
         public uint WaveMax;
         public uint TimerDuration;
-        public List<CriteriaProgressPkt> CriteriaProgress = new List<CriteriaProgressPkt>();
-        public List<BonusObjectiveData> BonusObjectives = new List<BonusObjectiveData>();
-        public List<uint> PickedSteps = new List<uint>();
-        public List<ScenarioSpellUpdate> Spells = new List<ScenarioSpellUpdate>();
+        public List<CriteriaProgressPkt> CriteriaProgress = new();
+        public List<BonusObjectiveData> BonusObjectives = new();
+        public List<uint> PickedSteps = new();
+        public List<ScenarioSpellUpdate> Spells = new();
         public bool ScenarioComplete = false;
     }
 
@@ -122,7 +122,7 @@ namespace Game.Networking.Packets
                 MissingScenarioPOIs[i] = _worldPacket.ReadInt32();
         }
 
-        public Array<int> MissingScenarioPOIs = new Array<int>(50);
+        public Array<int> MissingScenarioPOIs = new(50);
     }
 
     class ScenarioPOIs : ServerPacket
@@ -160,7 +160,7 @@ namespace Game.Networking.Packets
             }
         }
 
-        public List<ScenarioPOIData> ScenarioPOIDataStats = new List<ScenarioPOIData>();
+        public List<ScenarioPOIData> ScenarioPOIDataStats = new();
     }
 
     struct BonusObjectiveData

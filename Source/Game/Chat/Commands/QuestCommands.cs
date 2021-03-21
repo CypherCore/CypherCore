@@ -101,7 +101,7 @@ namespace Game.Chat
                     case QuestObjectiveType.Item:
                         {
                             uint curItemCount = player.GetItemCount((uint)obj.ObjectID, true);
-                            List<ItemPosCount> dest = new List<ItemPosCount>();
+                            List<ItemPosCount> dest = new();
                             InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, (uint)obj.ObjectID, (uint)(obj.Amount - curItemCount));
                             if (msg == InventoryResult.Ok)
                             {

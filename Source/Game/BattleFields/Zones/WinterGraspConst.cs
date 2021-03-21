@@ -45,10 +45,10 @@ namespace Game.BattleFields
         public static uint[] ClockWorldState = { 3781, 4354 };
         public static uint[] WintergraspFaction = { 1732, 1735, 35 };
 
-        public static Position WintergraspStalkerPos = new Position(4948.985f, 2937.789f, 550.5172f, 1.815142f);
+        public static Position WintergraspStalkerPos = new(4948.985f, 2937.789f, 550.5172f, 1.815142f);
 
-        public static Position RelicPos = new Position(5440.379f, 2840.493f, 430.2816f, -1.832595f);
-        public static Quaternion RelicRot = new Quaternion(0.0f, 0.0f, -0.7933531f, 0.6087617f);
+        public static Position RelicPos = new(5440.379f, 2840.493f, 430.2816f, -1.832595f);
+        public static Quaternion RelicRot = new(0.0f, 0.0f, -0.7933531f, 0.6087617f);
 
         //Destructible (Wall, Tower..)
         public static WintergraspBuildingSpawnData[] WGGameObjectBuilding =

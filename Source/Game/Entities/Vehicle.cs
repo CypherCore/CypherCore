@@ -288,10 +288,10 @@ namespace Game.Entities
             // While the validity of the following may be arguable, it is possible that when such a passenger
             // exits the vehicle will dismiss. That's why the actual adding the passenger to the vehicle is scheduled
             // asynchronously, so it can be cancelled easily in case the vehicle is uninstalled meanwhile.
-            VehicleJoinEvent e = new VehicleJoinEvent(this, unit);
+            VehicleJoinEvent e = new(this, unit);
             unit.m_Events.AddEvent(e, unit.m_Events.CalculateTime(0));
 
-            KeyValuePair<sbyte, VehicleSeat> seat = new KeyValuePair<sbyte, VehicleSeat>();
+            KeyValuePair<sbyte, VehicleSeat> seat = new();
             if (seatId < 0) // no specific seat requirement
             {
                 foreach (var _seat in Seats)
@@ -382,7 +382,7 @@ namespace Game.Entities
         {
             Cypher.Assert(_me.GetMap() != null);
 
-            List<Tuple<Unit, Position>> seatRelocation = new List<Tuple<Unit, Position>>();
+            List<Tuple<Unit, Position>> seatRelocation = new();
 
             // not sure that absolute position calculation is correct, it must depend on vehicle pitch angle
             foreach (var pair in Seats)
@@ -527,14 +527,14 @@ namespace Game.Entities
 
         Unit _me;
         VehicleRecord _vehicleInfo;                   //< DBC data for vehicle
-        List<ulong> vehiclePlayers = new List<ulong>();
+        List<ulong> vehiclePlayers = new();
 
         uint _creatureEntry;                              //< Can be different than the entry of _me in case of players
         Status _status;                                     //< Internal variable for sanity checks
         Position _lastShootPos;
 
-        List<VehicleJoinEvent> _pendingJoinEvents = new List<VehicleJoinEvent>();
-        public Dictionary<sbyte, VehicleSeat> Seats = new Dictionary<sbyte, VehicleSeat>();
+        List<VehicleJoinEvent> _pendingJoinEvents = new();
+        public Dictionary<sbyte, VehicleSeat> Seats = new();
         public uint UsableSeatNum;    //< Number of seats that match VehicleSeatEntry.UsableByPlayer, used for proper display flags
 
         public static implicit operator bool(Vehicle vehicle)
@@ -631,7 +631,7 @@ namespace Game.Entities
             Passenger.SetControlled(true, UnitState.Root);         // SMSG_FORCE_ROOT - In some cases we send SMSG_SPLINE_MOVE_ROOT here (for creatures)
             // also adds MOVEMENTFLAG_ROOT
 
-            MoveSplineInit init = new MoveSplineInit(Passenger);
+            MoveSplineInit init = new(Passenger);
             init.DisableTransportPathTransformations();
             init.MoveTo(veSeat.AttachmentOffset.X, veSeat.AttachmentOffset.Y, veSeat.AttachmentOffset.Z, false, true);
             init.SetFacing(0.0f);

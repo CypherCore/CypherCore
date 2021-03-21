@@ -97,7 +97,7 @@ namespace Game.Entities
 
         public void SendRaidGroupOnlyMessage(RaidGroupReason reason, int delay)
         {
-            RaidGroupOnly raidGroupOnly = new RaidGroupOnly();
+            RaidGroupOnly raidGroupOnly = new();
             raidGroupOnly.Delay = delay;
             raidGroupOnly.Reason = reason;
 
@@ -362,7 +362,7 @@ namespace Game.Entities
         {
             if (save != null)
             {
-                InstanceBind bind = new InstanceBind();
+                InstanceBind bind = new();
                 if (m_boundInstances.ContainsKey(save.GetDifficultyID()) && m_boundInstances[save.GetDifficultyID()].ContainsKey(save.GetMapId()))
                     bind = m_boundInstances[save.GetDifficultyID()][save.GetMapId()];
 
@@ -438,7 +438,7 @@ namespace Game.Entities
             if (mapSave == null) //it seems sometimes mapSave is NULL, but I did not check why
                 return;
 
-            InstanceSaveCreated data = new InstanceSaveCreated();
+            InstanceSaveCreated data = new();
             data.Gm = IsGameMaster();
             SendPacket(data);
             if (!IsGameMaster())
@@ -456,7 +456,7 @@ namespace Game.Entities
 
         public void SendRaidInfo()
         {
-            InstanceInfoPkt instanceInfo = new InstanceInfoPkt();
+            InstanceInfoPkt instanceInfo = new();
 
             long now = Time.UnixTime;
             foreach (var difficultyDic in m_boundInstances.Values)
@@ -660,14 +660,14 @@ namespace Game.Entities
 
         public void SendDungeonDifficulty(int forcedDifficulty = -1)
         {
-            DungeonDifficultySet dungeonDifficultySet = new DungeonDifficultySet();
+            DungeonDifficultySet dungeonDifficultySet = new();
             dungeonDifficultySet.DifficultyID = forcedDifficulty == -1 ? (int)GetDungeonDifficultyID() : forcedDifficulty;
             SendPacket(dungeonDifficultySet);
         }
 
         public void SendRaidDifficulty(bool legacy, int forcedDifficulty = -1)
         {
-            RaidDifficultySet raidDifficultySet = new RaidDifficultySet();
+            RaidDifficultySet raidDifficultySet = new();
             raidDifficultySet.DifficultyID = forcedDifficulty == -1 ? (int)(legacy ? GetLegacyRaidDifficultyID() : GetRaidDifficultyID()) : forcedDifficulty;
             raidDifficultySet.Legacy = legacy;
             SendPacket(raidDifficultySet);
@@ -731,14 +731,14 @@ namespace Game.Entities
 
         public void SendResetInstanceSuccess(uint MapId)
         {
-            InstanceReset data = new InstanceReset();
+            InstanceReset data = new();
             data.MapID = MapId;
             SendPacket(data);
         }
 
         public void SendResetInstanceFailed(ResetFailedReason reason, uint MapId)
         {
-            InstanceResetFailed data = new InstanceResetFailed();
+            InstanceResetFailed data = new();
             data.MapID = MapId;
             data.ResetFailedReason = reason;
             SendPacket(data);
@@ -746,7 +746,7 @@ namespace Game.Entities
 
         public void SendTransferAborted(uint mapid, TransferAbortReason reason, byte arg = 0, uint mapDifficultyXConditionID = 0)
         {
-            TransferAborted transferAborted = new TransferAborted();
+            TransferAborted transferAborted = new();
             transferAborted.MapID = mapid;
             transferAborted.Arg = arg;
             transferAborted.TransfertAbort = reason;
@@ -769,7 +769,7 @@ namespace Game.Entities
             else
                 type = InstanceResetWarningType.WarningMinSoon;
 
-            RaidInstanceMessage raidInstanceMessage = new RaidInstanceMessage();
+            RaidInstanceMessage raidInstanceMessage = new();
             raidInstanceMessage.Type = type;
             raidInstanceMessage.MapID = mapid;
             raidInstanceMessage.DifficultyID = difficulty;

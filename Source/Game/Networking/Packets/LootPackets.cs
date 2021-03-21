@@ -73,8 +73,8 @@ namespace Game.Networking.Packets
         public byte AcquireReason;
         public LootError FailureReason = LootError.NoLoot; // Most common value
         public uint Coins;
-        public List<LootItemData> Items = new List<LootItemData>();
-        public List<LootCurrency> Currencies = new List<LootCurrency>();
+        public List<LootItemData> Items = new();
+        public List<LootCurrency> Currencies = new();
         public bool Acquired;
         public bool AELooting;
     }
@@ -99,7 +99,7 @@ namespace Game.Networking.Packets
             }
         }
 
-        public List<LootRequest> Loot = new List<LootRequest>();
+        public List<LootRequest> Loot = new();
     }
 
     class MasterLootItem : ClientPacket
@@ -113,14 +113,14 @@ namespace Game.Networking.Packets
 
             for (int i = 0; i < Count; ++i)
             {
-                LootRequest lootRequest = new LootRequest();
+                LootRequest lootRequest = new();
                 lootRequest.Object = _worldPacket.ReadPackedGuid();
                 lootRequest.LootListID = _worldPacket.ReadUInt8();
                 Loot[i] = lootRequest;
             }
         }
 
-        public Array<LootRequest> Loot = new Array<LootRequest>(1000);
+        public Array<LootRequest> Loot = new(1000);
         public ObjectGuid Target;
     }
     
@@ -282,7 +282,7 @@ namespace Game.Networking.Packets
         public uint RollTime;
         public LootMethod Method;
         public RollMask ValidRolls;
-        public LootItemData Item = new LootItemData();
+        public LootItemData Item = new();
     }
 
     class LootRollBroadcast : ServerPacket
@@ -304,7 +304,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Player;
         public int Roll;             // Roll value can be negative, it means that it is an "offspec" roll but only during roll selection broadcast (not when sending the result)
         public RollType RollType;
-        public LootItemData Item = new LootItemData();
+        public LootItemData Item = new();
         public bool Autopassed;    // Triggers message |HlootHistory:%d|h[Loot]|h: You automatically passed on: %s because you cannot loot that item.
     }
 
@@ -327,7 +327,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Winner;
         public int Roll;
         public RollType RollType;
-        public LootItemData Item = new LootItemData();
+        public LootItemData Item = new();
         public bool MainSpec;
     }
 
@@ -342,7 +342,7 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid LootObj;
-        public LootItemData Item = new LootItemData();
+        public LootItemData Item = new();
     }
 
     class LootRollsComplete : ServerPacket
@@ -370,7 +370,7 @@ namespace Game.Networking.Packets
             Players.ForEach(guid => _worldPacket.WritePackedGuid(guid));
         }
 
-        public List<ObjectGuid> Players = new List<ObjectGuid>();
+        public List<ObjectGuid> Players = new();
         public ObjectGuid LootObj;
     }
 

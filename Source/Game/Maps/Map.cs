@@ -248,7 +248,7 @@ namespace Game.Maps
             Log.outInfo(LogFilter.Maps, "Loading map {0}", fileName);
 
             // loading data
-            GridMap gridMap = new GridMap();
+            GridMap gridMap = new();
             LoadResult gridMapLoadResult = gridMap.LoadData(fileName);
             if (gridMapLoadResult == LoadResult.Success)
                 map.GridMaps[gx][gy] = gridMap;
@@ -500,7 +500,7 @@ namespace Game.Maps
 
         public virtual void LoadGridObjects(Grid grid, Cell cell)
         {
-            ObjectGridLoader loader = new ObjectGridLoader(grid, this, cell);
+            ObjectGridLoader loader = new(grid, this, cell);
             loader.LoadN();
         }
 
@@ -509,7 +509,7 @@ namespace Game.Maps
             // First make sure this grid is loaded
             float gX = (((float)x - 0.5f - MapConst.CenterGridId) * MapConst.SizeofGrids) + (MapConst.CenterGridOffset * 2);
             float gY = (((float)y - 0.5f - MapConst.CenterGridId) * MapConst.SizeofGrids) + (MapConst.CenterGridOffset * 2);
-            Cell cell = new Cell(gX, gY);
+            Cell cell = new(gX, gY);
             EnsureGridLoaded(cell);
 
             // Mark as don't unload
@@ -762,7 +762,7 @@ namespace Game.Maps
                 // Handle updates for creatures in combat with player and are more than 60 yards away
                 if (player.IsInCombat())
                 {
-                    List<Creature> updateList = new List<Creature>();
+                    List<Creature> updateList = new();
                     HostileReference refe = player.GetHostileRefManager().GetFirst();
 
                     while (refe != null)
@@ -976,7 +976,7 @@ namespace Game.Maps
             var players = GetPlayers();
             if (!players.Empty())
             {
-                UpdateData data = new UpdateData(GetId());
+                UpdateData data = new(GetId());
                 obj.BuildOutOfRangeUpdateBlock(data);
                 UpdateObject packet;
                 data.BuildPacket(out packet);
@@ -1104,12 +1104,12 @@ namespace Game.Maps
 
         public void DynamicObjectRelocation(DynamicObject dynObj, float x, float y, float z, float orientation)
         {
-            Cell integrity_check = new Cell(dynObj.GetPositionX(), dynObj.GetPositionY());
+            Cell integrity_check = new(dynObj.GetPositionX(), dynObj.GetPositionY());
             Cell old_cell = dynObj.GetCurrentCell();
 
             Cypher.Assert(integrity_check == old_cell);
 
-            Cell new_cell = new Cell(x, y);
+            Cell new_cell = new(x, y);
 
             if (GetGrid(new_cell.GetGridX(), new_cell.GetGridY()) == null)
                 return;
@@ -1140,11 +1140,11 @@ namespace Game.Maps
 
         public void AreaTriggerRelocation(AreaTrigger at, float x, float y, float z, float orientation)
         {
-            Cell integrity_check = new Cell(at.GetPositionX(), at.GetPositionY());
+            Cell integrity_check = new(at.GetPositionX(), at.GetPositionY());
             Cell old_cell = at.GetCurrentCell();
 
             Cypher.Assert(integrity_check == old_cell);
-            Cell new_cell = new Cell(x, y);
+            Cell new_cell = new(x, y);
 
             if (GetGrid(new_cell.GetGridX(), new_cell.GetGridY()) == null)
                 return;
@@ -1699,7 +1699,7 @@ namespace Game.Maps
                 MoveAllAreaTriggersInMoveList();
 
                 // move creatures to respawn grids if this is diff.grid or to remove list
-                ObjectGridEvacuator worker = new ObjectGridEvacuator();
+                ObjectGridEvacuator worker = new();
                 var visitor = new Visitor(worker, GridMapTypeMask.AllGrid);
                 grid.VisitAllGrids(visitor);
 
@@ -1710,7 +1710,7 @@ namespace Game.Maps
             }
 
             {
-                ObjectGridCleaner worker = new ObjectGridCleaner();
+                ObjectGridCleaner worker = new();
                 var visitor = new Visitor(worker, GridMapTypeMask.AllGrid);
                 grid.VisitAllGrids(visitor);
             }
@@ -1718,7 +1718,7 @@ namespace Game.Maps
             RemoveAllObjectsInRemoveList();
 
             {
-                ObjectGridUnloader worker = new ObjectGridUnloader();
+                ObjectGridUnloader worker = new();
                 var visitor = new Visitor(worker, GridMapTypeMask.AllGrid);
                 grid.VisitAllGrids(visitor);
             }
@@ -2286,7 +2286,7 @@ namespace Game.Maps
             // look up liquid data from grid map
             if (gmap != null && (data.LiquidStatus == ZLiquidStatus.AboveWater || data.LiquidStatus == ZLiquidStatus.NoWater))
             {
-                LiquidData gridMapLiquid = new LiquidData();
+                LiquidData gridMapLiquid = new();
                 ZLiquidStatus gridMapStatus = gmap.GetLiquidStatus(x, y, z, reqLiquidType, gridMapLiquid);
                 if (gridMapStatus != ZLiquidStatus.NoWater && (gridMapLiquid.level > vmapData.floorZ))
                 {
@@ -2422,7 +2422,7 @@ namespace Game.Maps
         public void SendUpdateTransportVisibility(Player player)
         {
             // Hack to send out transports
-            UpdateData transData = new UpdateData(player.GetMapId());
+            UpdateData transData = new(player.GetMapId());
             foreach (var transport in _transports)
             {
                 var hasTransport = player.m_visibleTransports.Contains(transport.GetGUID());
@@ -2458,7 +2458,7 @@ namespace Game.Maps
 
         void SendObjectUpdates()
         {
-            Dictionary<Player, UpdateData> update_players = new Dictionary<Player, UpdateData>();
+            Dictionary<Player, UpdateData> update_players = new();
 
             while (!_updateObjects.Empty())
             {
@@ -2581,14 +2581,14 @@ namespace Game.Maps
             {
                 case SpawnObjectType.Creature:
                     {
-                        Creature obj = new Creature();
+                        Creature obj = new();
                         if (!obj.LoadFromDB(spawnId, this, true, true))
                             obj.Dispose();
                         break;
                     }
                 case SpawnObjectType.GameObject:
                     {
-                        GameObject obj = new GameObject();
+                        GameObject obj = new();
                         if (!obj.LoadFromDB(spawnId, this, true))
                             obj.Dispose();
                         break;
@@ -2649,7 +2649,7 @@ namespace Game.Maps
             }
 
             // if we get to this point, we should insert the respawninfo (there either was no prior entry, or it was deleted already)
-            RespawnInfo ri = new RespawnInfo(info);
+            RespawnInfo ri = new(info);
             _respawnTimes.Add(ri);
             bySpawnIdMap.Add(ri.spawnId, ri);
         }
@@ -2740,7 +2740,7 @@ namespace Game.Maps
 
         public void RemoveRespawnTime(SpawnObjectTypeMask types = SpawnObjectTypeMask.All, uint zoneId = 0, bool doRespawn = false, SQLTransaction dbTrans = null)
         {
-            List<RespawnInfo> v = new List<RespawnInfo>();
+            List<RespawnInfo> v = new();
             GetRespawnInfo(v, types, zoneId);
             if (!v.Empty())
                 RemoveRespawnTime(v, doRespawn, dbTrans);
@@ -2874,7 +2874,7 @@ namespace Game.Maps
                 {
                     case SpawnObjectType.Creature:
                         {
-                            Creature creature = new Creature();
+                            Creature creature = new();
                             if (!creature.LoadFromDB(data.spawnId, this, true, force))
                                 creature.Dispose();
                             else if (spawnedObjects != null)
@@ -2883,7 +2883,7 @@ namespace Game.Maps
                         }
                     case SpawnObjectType.GameObject:
                         {
-                            GameObject gameobject = new GameObject();
+                            GameObject gameobject = new();
                             if (!gameobject.LoadFromDB(data.spawnId, this, true))
                                 gameobject.Dispose();
                             else if (spawnedObjects != null)
@@ -2908,7 +2908,7 @@ namespace Game.Maps
                 return false;
             }
 
-            List<WorldObject> toUnload = new List<WorldObject>(); // unload after iterating, otherwise iterator invalidation
+            List<WorldObject> toUnload = new(); // unload after iterating, otherwise iterator invalidation
             foreach (var data in Global.ObjectMgr.GetSpawnDataForGroup(groupId))
             {
                 if (deleteRespawnTimes)
@@ -3216,7 +3216,7 @@ namespace Game.Maps
                 return;
             }
 
-            RespawnInfo ri = new RespawnInfo();
+            RespawnInfo ri = new();
             ri.type = type;
             ri.spawnId = spawnId;
             ri.entry = entry;
@@ -3328,8 +3328,8 @@ namespace Game.Maps
             if (result.IsEmpty())
                 return;
 
-            MultiMap<ulong, uint> phases = new MultiMap<ulong, uint>();
-            MultiMap<ulong, ChrCustomizationChoice> customizations = new MultiMap<ulong, ChrCustomizationChoice>();
+            MultiMap<ulong, uint> phases = new();
+            MultiMap<ulong, ChrCustomizationChoice> customizations = new();
 
             stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CORPSE_PHASES);
             stmt.AddValue(0, GetId());
@@ -3363,7 +3363,7 @@ namespace Game.Maps
                 {
                     ulong guid = customizationResult.Read<ulong>(0);
 
-                    ChrCustomizationChoice choice = new ChrCustomizationChoice();
+                    ChrCustomizationChoice choice = new();
                     choice.ChrCustomizationOptionID = customizationResult.Read<uint>(1);
                     choice.ChrCustomizationChoiceID = customizationResult.Read<uint>(2);
                     customizations.Add(guid, choice);
@@ -3381,7 +3381,7 @@ namespace Game.Maps
                     continue;
                 }
 
-                Corpse corpse = new Corpse(type);
+                Corpse corpse = new(type);
                 if (!corpse.LoadCorpseFromDB(GenerateLowGuid(HighGuid.Corpse), result.GetFields()))
                     continue;
 
@@ -3443,7 +3443,7 @@ namespace Game.Maps
             RemoveCorpse(corpse);
 
             // remove corpse from DB
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             corpse.DeleteFromDB(trans);
             DB.Characters.CommitTransaction(trans);
 
@@ -3494,7 +3494,7 @@ namespace Game.Maps
         {
             long now = Time.UnixTime;
 
-            List<ObjectGuid> corpses = new List<ObjectGuid>();
+            List<ObjectGuid> corpses = new();
 
             foreach (var p in _corpsesByPlayer)
                 if (p.Value.IsExpired(now))
@@ -3503,7 +3503,7 @@ namespace Game.Maps
             foreach (ObjectGuid ownerGuid in corpses)
                 ConvertCorpseToBones(ownerGuid);
 
-            List<Corpse> expiredBones = new List<Corpse>();
+            List<Corpse> expiredBones = new();
             foreach (Corpse bones in _corpseBones)
                 if (bones.IsExpired(now))
                     expiredBones.Add(bones);
@@ -3530,7 +3530,7 @@ namespace Game.Maps
             uint overrideLightId = zoneInfo.OverrideLightId;
             if (overrideLightId != 0)
             {
-                OverrideLight overrideLight = new OverrideLight();
+                OverrideLight overrideLight = new();
                 overrideLight.AreaLightID = _defaultLight;
                 overrideLight.OverrideLightID = overrideLightId;
                 overrideLight.TransitionMilliseconds = zoneInfo.LightFadeInTime;
@@ -3555,7 +3555,7 @@ namespace Game.Maps
             WeatherState weatherId = zoneDynamicInfo.WeatherId;
             if (weatherId != 0)
             {
-                WeatherPkt weather = new WeatherPkt(weatherId, zoneDynamicInfo.WeatherGrade);
+                WeatherPkt weather = new(weatherId, zoneDynamicInfo.WeatherGrade);
                 player.SendPacket(weather);
             }
             else if (zoneDynamicInfo.DefaultWeather != null)
@@ -3576,7 +3576,7 @@ namespace Game.Maps
             var players = GetPlayers();
             if (!players.Empty())
             {
-                PlayMusic playMusic = new PlayMusic(musicId);
+                PlayMusic playMusic = new(musicId);
 
                 foreach (var player in players)
                     if (player.GetZoneId() == zoneId && !player.HasAuraType(AuraType.ForceWeather))
@@ -3616,7 +3616,7 @@ namespace Game.Maps
             var players = GetPlayers();
             if (!players.Empty())
             {
-                WeatherPkt weather = new WeatherPkt(weatherId, weatherGrade);
+                WeatherPkt weather = new(weatherId, weatherGrade);
 
                 foreach (var player in players)
                 {
@@ -3638,7 +3638,7 @@ namespace Game.Maps
 
             if (!players.Empty())
             {
-                OverrideLight overrideLight = new OverrideLight();
+                OverrideLight overrideLight = new();
                 overrideLight.AreaLightID = _defaultLight;
                 overrideLight.OverrideLightID = lightId;
                 overrideLight.TransitionMilliseconds = fadeInTime;
@@ -4138,7 +4138,7 @@ namespace Game.Maps
             summon.InitSummon();
 
             // call MoveInLineOfSight for nearby creatures
-            AIRelocationNotifier notifier = new AIRelocationNotifier(summon);
+            AIRelocationNotifier notifier = new(summon);
             Cell.VisitAllObjects(summon, notifier, GetVisibilityRange());
 
             return summon;
@@ -5040,70 +5040,70 @@ namespace Game.Maps
         #endregion
 
         #region Fields
-        internal object _mapLock = new object();
-        object _gridLock = new object();
+        internal object _mapLock = new();
+        object _gridLock = new();
 
         bool _creatureToMoveLock;
-        List<Creature> creaturesToMove = new List<Creature>();
+        List<Creature> creaturesToMove = new();
 
         bool _gameObjectsToMoveLock;
-        List<GameObject> _gameObjectsToMove = new List<GameObject>();
+        List<GameObject> _gameObjectsToMove = new();
 
         bool _dynamicObjectsToMoveLock;
-        List<DynamicObject> _dynamicObjectsToMove = new List<DynamicObject>();
+        List<DynamicObject> _dynamicObjectsToMove = new();
 
         bool _areaTriggersToMoveLock;
-        List<AreaTrigger> _areaTriggersToMove = new List<AreaTrigger>();
+        List<AreaTrigger> _areaTriggersToMove = new();
 
         GridMap[][] GridMaps = new GridMap[MapConst.MaxGrids][];
         ushort[][] GridMapReference = new ushort[MapConst.MaxGrids][];
-        DynamicMapTree _dynamicTree = new DynamicMapTree();
+        DynamicMapTree _dynamicTree = new();
 
-        SortedSet<RespawnInfo> _respawnTimes = new SortedSet<RespawnInfo>(new CompareRespawnInfo());
-        Dictionary<ulong, RespawnInfo> _creatureRespawnTimesBySpawnId = new Dictionary<ulong, RespawnInfo>();
-        Dictionary<ulong, RespawnInfo> _gameObjectRespawnTimesBySpawnId = new Dictionary<ulong, RespawnInfo>();
-        List<uint> _toggledSpawnGroupIds = new List<uint>();
+        SortedSet<RespawnInfo> _respawnTimes = new(new CompareRespawnInfo());
+        Dictionary<ulong, RespawnInfo> _creatureRespawnTimesBySpawnId = new();
+        Dictionary<ulong, RespawnInfo> _gameObjectRespawnTimesBySpawnId = new();
+        List<uint> _toggledSpawnGroupIds = new();
         uint _respawnCheckTimer;
-        Dictionary<uint, uint> _zonePlayerCountMap = new Dictionary<uint, uint>();
+        Dictionary<uint, uint> _zonePlayerCountMap = new();
 
-        List<Transport> _transports = new List<Transport>();
+        List<Transport> _transports = new();
         Grid[][] i_grids = new Grid[MapConst.MaxGrids][];
         MapRecord i_mapRecord;
-        List<WorldObject> i_objectsToRemove = new List<WorldObject>();
-        Dictionary<WorldObject, bool> i_objectsToSwitch = new Dictionary<WorldObject, bool>();
+        List<WorldObject> i_objectsToRemove = new();
+        Dictionary<WorldObject, bool> i_objectsToSwitch = new();
         Difficulty i_spawnMode;
-        List<WorldObject> i_worldObjects = new List<WorldObject>();
-        protected List<WorldObject> m_activeNonPlayers = new List<WorldObject>();
-        protected List<Player> m_activePlayers = new List<Player>();
+        List<WorldObject> i_worldObjects = new();
+        protected List<WorldObject> m_activeNonPlayers = new();
+        protected List<Player> m_activePlayers = new();
         Map m_parentMap; // points to MapInstanced or self (always same map id)
         Map m_parentTerrainMap; // points to m_parentMap of MapEntry::ParentMapID
-        List<Map> m_childTerrainMaps = new List<Map>(); // contains m_parentMap of maps that have MapEntry::ParentMapID == GetId()
-        SortedMultiMap<long, ScriptAction> m_scriptSchedule = new SortedMultiMap<long, ScriptAction>();
+        List<Map> m_childTerrainMaps = new(); // contains m_parentMap of maps that have MapEntry::ParentMapID == GetId()
+        SortedMultiMap<long, ScriptAction> m_scriptSchedule = new();
 
-        BitSet i_gridFileExists = new BitSet(MapConst.MaxGrids * MapConst.MaxGrids); // cache what grids are available for this map (not including parent/child maps)
-        BitSet marked_cells = new BitSet(MapConst.TotalCellsPerMap * MapConst.TotalCellsPerMap);
-        public Dictionary<ulong, CreatureGroup> CreatureGroupHolder = new Dictionary<ulong, CreatureGroup>();
+        BitSet i_gridFileExists = new(MapConst.MaxGrids * MapConst.MaxGrids); // cache what grids are available for this map (not including parent/child maps)
+        BitSet marked_cells = new(MapConst.TotalCellsPerMap * MapConst.TotalCellsPerMap);
+        public Dictionary<ulong, CreatureGroup> CreatureGroupHolder = new();
         internal uint i_InstanceId;
         long i_gridExpiry;
-        List<WorldObject> i_objects = new List<WorldObject>();
+        List<WorldObject> i_objects = new();
         bool i_scriptLock;
 
         public int m_VisibilityNotifyPeriod;
         public float m_VisibleDistance;
         internal uint m_unloadTimer;
 
-        Dictionary<uint, ZoneDynamicInfo> _zoneDynamicInfo = new Dictionary<uint, ZoneDynamicInfo>();
+        Dictionary<uint, ZoneDynamicInfo> _zoneDynamicInfo = new();
         IntervalTimer _weatherUpdateTimer;
         uint _defaultLight;
-        Dictionary<HighGuid, ObjectGuidGenerator> _guidGenerators = new Dictionary<HighGuid, ObjectGuidGenerator>();
-        Dictionary<ObjectGuid, WorldObject> _objectsStore = new Dictionary<ObjectGuid, WorldObject>();
-        MultiMap<ulong, Creature> _creatureBySpawnIdStore = new MultiMap<ulong, Creature>();
-        MultiMap<ulong, GameObject> _gameobjectBySpawnIdStore = new MultiMap<ulong, GameObject>();
-        MultiMap<uint, Corpse> _corpsesByCell = new MultiMap<uint, Corpse>();
-        Dictionary<ObjectGuid, Corpse> _corpsesByPlayer = new Dictionary<ObjectGuid, Corpse>();
-        List<Corpse> _corpseBones = new List<Corpse>();
+        Dictionary<HighGuid, ObjectGuidGenerator> _guidGenerators = new();
+        Dictionary<ObjectGuid, WorldObject> _objectsStore = new();
+        MultiMap<ulong, Creature> _creatureBySpawnIdStore = new();
+        MultiMap<ulong, GameObject> _gameobjectBySpawnIdStore = new();
+        MultiMap<uint, Corpse> _corpsesByCell = new();
+        Dictionary<ObjectGuid, Corpse> _corpsesByPlayer = new();
+        List<Corpse> _corpseBones = new();
 
-        List<WorldObject> _updateObjects = new List<WorldObject>();
+        List<WorldObject> _updateObjects = new();
         #endregion
     }
 
@@ -5257,7 +5257,7 @@ namespace Game.Maps
                                 // players also become permanently bound when they enter
                                 if (groupBind.perm)
                                 {
-                                    PendingRaidLock pendingRaidLock = new PendingRaidLock();
+                                    PendingRaidLock pendingRaidLock = new();
                                     pendingRaidLock.TimeUntilLock = 60000;
                                     pendingRaidLock.CompletedMask = i_data != null ? i_data.GetCompletedEncounterMask() : 0;
                                     pendingRaidLock.Extending = false;
@@ -5469,7 +5469,7 @@ namespace Game.Maps
                 else
                 {
                     player.BindToInstance(save, true);
-                    InstanceSaveCreated data = new InstanceSaveCreated();
+                    InstanceSaveCreated data = new();
                     data.Gm = player.IsGameMaster();
                     player.SendPacket(data);
 

@@ -27,10 +27,10 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.QueryScenarioPoi)]
         void HandleQueryScenarioPOI(QueryScenarioPOI queryScenarioPOI)
         {
-            ScenarioPOIs response = new ScenarioPOIs();
+            ScenarioPOIs response = new();
 
             // Read criteria tree ids and add the in a unordered_set so we don't send POIs for the same criteria tree multiple times
-            List<int> criteriaTreeIds = new List<int>();
+            List<int> criteriaTreeIds = new();
             for (int i = 0; i < queryScenarioPOI.MissingScenarioPOIs.Count; ++i)
                 criteriaTreeIds.Add(queryScenarioPOI.MissingScenarioPOIs[i]); // CriteriaTreeID
 
@@ -39,7 +39,7 @@ namespace Game
                 var poiVector = Global.ScenarioMgr.GetScenarioPOIs((uint)criteriaTreeId);
                 if (poiVector != null)
                 {
-                    ScenarioPOIData scenarioPOIData = new ScenarioPOIData();
+                    ScenarioPOIData scenarioPOIData = new();
                     scenarioPOIData.CriteriaTreeID = criteriaTreeId;
                     scenarioPOIData.ScenarioPOIs = poiVector;
                     response.ScenarioPOIDataStats.Add(scenarioPOIData);

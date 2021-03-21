@@ -267,7 +267,7 @@ namespace Game.Chat
 
                     // send faction in "id - [faction] rank reputation [visible] [at war] [own team] [unknown] [invisible] [inactive]" format
                     // or              "id - [faction] [no reputation]" format
-                    StringBuilder ss = new StringBuilder();
+                    StringBuilder ss = new();
                     if (handler.GetSession() != null)
                         ss.AppendFormat("{0} - |cffffffff|Hfaction:{0}|h[{1}]|h|r", factionEntry.Id, name);
                     else
@@ -772,7 +772,7 @@ namespace Game.Chat
 
             string namePart = args.NextString().ToLower();
 
-            StringBuilder reply = new StringBuilder();
+            StringBuilder reply = new();
             uint count = 0;
             bool limitReached = false;
 
@@ -924,7 +924,7 @@ namespace Game.Chat
                         return true;
                     }
 
-                    StringBuilder ss = new StringBuilder();
+                    StringBuilder ss = new();
                     ss.Append(mapInfo.Id + " - [" + name + ']');
 
                     if (mapInfo.IsContinent())
@@ -1141,7 +1141,7 @@ namespace Game.Chat
                             uint rank = learn && learnSpellInfo != null ? learnSpellInfo.GetRank() : spellInfo.GetRank();
 
                             // send spell in "id - [name, rank N] [talent] [passive] [learn] [known]" format
-                            StringBuilder ss = new StringBuilder();
+                            StringBuilder ss = new();
                             if (handler.GetSession() != null)
                                 ss.Append(spellInfo.Id + " - |cffffffff|Hspell:" + spellInfo.Id + "|h[" + name);
                             else
@@ -1215,7 +1215,7 @@ namespace Game.Chat
                     uint rank = learn && learnSpellInfo != null ? learnSpellInfo.GetRank() : spellInfo.GetRank();
 
                     // send spell in "id - [name, rank N] [talent] [passive] [learn] [known]" format
-                    StringBuilder ss = new StringBuilder();
+                    StringBuilder ss = new();
                     if (handler.GetSession() != null)
                         ss.Append(id + " - |cffffffff|Hspell:" + id + "|h[" + name);
                     else

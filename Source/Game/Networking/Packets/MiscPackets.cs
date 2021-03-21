@@ -226,7 +226,7 @@ namespace Game.Networking.Packets
             }
         }
 
-        public List<Record> Data = new List<Record>();
+        public List<Record> Data = new();
 
         public struct Record
         {
@@ -534,7 +534,7 @@ namespace Game.Networking.Packets
         }
 
         public bool IsGossipTriggered;
-        public List<uint> CemeteryID = new List<uint>();
+        public List<uint> CemeteryID = new();
     }
 
     public class ResurrectResponse : ClientPacket
@@ -809,10 +809,10 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid Client;
-        public PhaseShiftData Phaseshift = new PhaseShiftData();
-        public List<ushort> PreloadMapIDs = new List<ushort>();
-        public List<ushort> UiMapPhaseIDs = new List<ushort>();
-        public List<ushort> VisibleMapIDs = new List<ushort>();
+        public PhaseShiftData Phaseshift = new();
+        public List<ushort> PreloadMapIDs = new();
+        public List<ushort> UiMapPhaseIDs = new();
+        public List<ushort> VisibleMapIDs = new();
     }
 
     public class ZoneUnderAttack : ServerPacket
@@ -971,7 +971,7 @@ namespace Game.Networking.Packets
             uint count = _worldPacket.ReadUInt32();
             for (byte i = 0; i < count && i < PlayerConst.MaxCUFProfiles; i++)
             {
-                CUFProfile cufProfile = new CUFProfile();
+                CUFProfile cufProfile = new();
 
                 byte strLen = _worldPacket.ReadBits<byte>(7);
 
@@ -1000,7 +1000,7 @@ namespace Game.Networking.Packets
             }
         }
 
-        public List<CUFProfile> CUFProfiles = new List<CUFProfile>();
+        public List<CUFProfile> CUFProfiles = new();
     }
 
     class LoadCUFProfiles : ServerPacket
@@ -1038,7 +1038,7 @@ namespace Game.Networking.Packets
             }
         }
 
-        public List<CUFProfile> CUFProfiles = new List<CUFProfile>();
+        public List<CUFProfile> CUFProfiles = new();
     }
 
     class PlayOneShotAnimKit : ServerPacket
@@ -1154,7 +1154,7 @@ namespace Game.Networking.Packets
         }
 
         public bool IsFullUpdate;
-        public Dictionary<uint, HeirloomData> Heirlooms = new Dictionary<uint, HeirloomData>();
+        public Dictionary<uint, HeirloomData> Heirlooms = new();
         int Unk;
     }
 
@@ -1292,7 +1292,7 @@ namespace Game.Networking.Packets
         }
 
         public bool IsFullUpdate = false;
-        public Dictionary<uint, MountStatusFlags> Mounts = new Dictionary<uint, MountStatusFlags>();
+        public Dictionary<uint, MountStatusFlags> Mounts = new();
     }
 
     class MountSetFavorite : ClientPacket
@@ -1352,7 +1352,7 @@ namespace Game.Networking.Packets
         }
 
         public uint PhaseShiftFlags;
-        public List<PhaseShiftDataPhase> Phases = new List<PhaseShiftDataPhase>();
+        public List<PhaseShiftDataPhase> Phases = new();
         public ObjectGuid PersonalGUID;
     }
 }

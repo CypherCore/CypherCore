@@ -22,12 +22,12 @@ namespace Game.Maps
 {
     public class MapUpdater
     {
-        ProducerConsumerQueue<MapUpdateRequest> _queue = new ProducerConsumerQueue<MapUpdateRequest>();
+        ProducerConsumerQueue<MapUpdateRequest> _queue = new();
 
         Thread[] _workerThreads;
         volatile bool _cancelationToken;
 
-        object _lock = new object();
+        object _lock = new();
         int _pendingRequests;
 
         public MapUpdater(int numThreads)

@@ -94,10 +94,10 @@ namespace Game.Entities
         public void SaveToDB()
         {
             // prevent DB data inconsistence problems and duplicates
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             DeleteFromDB(trans);
 
-            StringBuilder items = new StringBuilder();
+            StringBuilder items = new();
             for (var i = 0; i < EquipmentSlot.End; ++i)
                 items.Append($"{m_corpseData.Items[i]} ");
 
@@ -178,7 +178,7 @@ namespace Game.Entities
 
             SetObjectScale(1.0f);
             SetDisplayId(field.Read<uint>(5));
-            StringArray items = new StringArray(field.Read<string>(6), ' ');
+            StringArray items = new(field.Read<string>(6), ' ');
             for (uint index = 0; index < EquipmentSlot.End; ++index)
                 SetItem(index, uint.Parse(items[(int)index]));
 
@@ -225,7 +225,7 @@ namespace Game.Entities
         public override void BuildValuesCreate(WorldPacket data, Player target)
         {
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new WorldPacket();
+            WorldPacket buffer = new();
 
             m_objectData.WriteCreate(buffer, flags, this, target);
             m_corpseData.WriteCreate(buffer, flags, this, target);
@@ -238,7 +238,7 @@ namespace Game.Entities
         public override void BuildValuesUpdate(WorldPacket data, Player target)
         {
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new WorldPacket();
+            WorldPacket buffer = new();
 
             buffer.WriteUInt32(m_values.GetChangedObjectTypeMask());
             if (m_values.HasChanged(TypeId.Object))
@@ -253,14 +253,14 @@ namespace Game.Entities
 
         void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedCorpseMask, Player target)
         {
-            UpdateMask valuesMask = new UpdateMask((int)TypeId.Max);
+            UpdateMask valuesMask = new((int)TypeId.Max);
             if (requestedObjectMask.IsAnySet())
                 valuesMask.Set((int)TypeId.Object);
 
             if (requestedCorpseMask.IsAnySet())
                 valuesMask.Set((int)TypeId.Corpse);
 
-            WorldPacket buffer = new WorldPacket();
+            WorldPacket buffer = new();
             buffer.WriteUInt32(valuesMask.GetBlock(0));
 
             if (valuesMask[(int)TypeId.Object])
@@ -269,7 +269,7 @@ namespace Game.Entities
             if (valuesMask[(int)TypeId.Corpse])
                 m_corpseData.WriteUpdate(buffer, requestedCorpseMask, true, this, target);
 
-            WorldPacket buffer1 = new WorldPacket();
+            WorldPacket buffer1 = new();
             buffer1.WriteUInt8((byte)UpdateType.Values);
             buffer1.WritePackedGuid(GetGUID());
             buffer1.WriteUInt32(buffer.GetSize());
@@ -320,7 +320,7 @@ namespace Game.Entities
 
         public CorpseData m_corpseData;
 
-        public Loot loot = new Loot();
+        public Loot loot = new();
         public Player lootRecipient;
 
         CorpseType m_type;

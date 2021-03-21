@@ -141,7 +141,7 @@ namespace Game.DungeonFinding
         LfgState m_State;
         LfgState m_OldState;
         ObjectGuid m_Leader;
-        List<ObjectGuid> m_Players = new List<ObjectGuid>();
+        List<ObjectGuid> m_Players = new();
         // Dungeon
         uint m_Dungeon;
         // Vote Kick

@@ -341,6 +341,6 @@ namespace Game.Networking.Packets
         public int NumChoices;
         public int StaticType;
         public uint Muid = 0;
-        public StringArray Choicetext = new StringArray(10);
+        public StringArray Choicetext = new(10);
     }
 }

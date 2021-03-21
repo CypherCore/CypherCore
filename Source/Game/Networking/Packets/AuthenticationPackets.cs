@@ -97,7 +97,7 @@ namespace Game.Networking.Packets
         public uint RegionID;
         public uint BattlegroupID;
         public uint RealmID;
-        public Array<byte> LocalChallenge = new Array<byte>(16);
+        public Array<byte> LocalChallenge = new(16);
         public byte[] Digest = new byte[24];
         public ulong DosResponse;
         public string RealmJoinTicket;
@@ -215,8 +215,8 @@ namespace Game.Networking.Packets
 
             public GameTime GameTimeInfo;
 
-            public List<VirtualRealmInfo> VirtualRealms = new List<VirtualRealmInfo>();     // list of realms connected to this one (inclusive) @todo implement
-            public List<CharacterTemplate> Templates = new List<CharacterTemplate>(); // list of pre-made character templates. @todo implement
+            public List<VirtualRealmInfo> VirtualRealms = new();     // list of realms connected to this one (inclusive) @todo implement
+            public List<CharacterTemplate> Templates = new(); // list of pre-made character templates. @todo implement
 
             public List<RaceClassAvailability> AvailableClasses; // the minimum AccountExpansion required to select the classes
 
@@ -264,7 +264,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            ByteBuffer whereBuffer = new ByteBuffer();
+            ByteBuffer whereBuffer = new();
             whereBuffer.WriteUInt8((byte)Payload.Where.Type);
 
             switch (Payload.Where.Type)
@@ -282,7 +282,7 @@ namespace Game.Networking.Packets
                     break;
             }
 
-            Sha256 hash = new Sha256();
+            Sha256 hash = new();
             hash.Process(whereBuffer.GetData(), (int)whereBuffer.GetSize());
             hash.Process((uint)Payload.Where.Type);
             hash.Finish(BitConverter.GetBytes(Payload.Port));
@@ -380,7 +380,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            HmacSha256 hash = new HmacSha256(EncryptionKey);
+            HmacSha256 hash = new(EncryptionKey);
             hash.Process(BitConverter.GetBytes(Enabled), 1);
             hash.Finish(EnableEncryptionSeed, 16);
 

@@ -85,7 +85,7 @@ namespace Game.BattleFields
 
             foreach (var gy in WGConst.WGGraveYard)
             {
-                BfGraveyardWG graveyard = new BfGraveyardWG(this);
+                BfGraveyardWG graveyard = new(this);
 
                 // When between games, the graveyard is controlled by the defending team
                 if (gy.StartControl == TeamId.Neutral)
@@ -101,7 +101,7 @@ namespace Game.BattleFields
             // Spawn workshop creatures and gameobjects
             for (byte i = 0; i < WGConst.MaxWorkshops; i++)
             {
-                WGWorkshop workshop = new WGWorkshop(this, i);
+                WGWorkshop workshop = new(this, i);
                 if (i < WGWorkshopIds.Ne)
                     workshop.GiveControlTo(GetAttackerTeam(), true);
                 else
@@ -129,7 +129,7 @@ namespace Game.BattleFields
                 GameObject go = SpawnGameObject(build.Entry, build.Pos, build.Rot);
                 if (go)
                 {
-                    BfWGGameObjectBuilding b = new BfWGGameObjectBuilding(this, build.BuildingType, build.WorldState);
+                    BfWGGameObjectBuilding b = new(this, build.BuildingType, build.WorldState);
                     b.Init(go);
                     if (!IsEnabled() && go.GetEntry() == WGGameObjects.VaultGate)
                         go.SetDestructibleState(GameObjectDestructibleState.Destroyed);
@@ -551,7 +551,7 @@ namespace Game.BattleFields
             {
                 if (workshop.GetId() == workshopId)
                 {
-                    WintergraspCapturePoint capturePoint = new WintergraspCapturePoint(this, GetAttackerTeam());
+                    WintergraspCapturePoint capturePoint = new(this, GetAttackerTeam());
 
                     capturePoint.SetCapturePointData(go);
                     capturePoint.LinkToWorkshop(workshop);
@@ -782,7 +782,7 @@ namespace Game.BattleFields
 
         void SendInitWorldStatesTo(Player player)
         {
-            InitWorldStates packet = new InitWorldStates();
+            InitWorldStates packet = new();
             packet.AreaID = m_ZoneId;
             packet.MapID = m_MapId;
             packet.SubareaID = 0;
@@ -1028,13 +1028,13 @@ namespace Game.BattleFields
 
         bool m_isRelicInteractible;
 
-        List<WGWorkshop> Workshops = new List<WGWorkshop>();
+        List<WGWorkshop> Workshops = new();
 
         List<ObjectGuid>[] DefenderPortalList = new List<ObjectGuid>[SharedConst.BGTeamsCount];
-        List<BfWGGameObjectBuilding> BuildingsInZone = new List<BfWGGameObjectBuilding>();
+        List<BfWGGameObjectBuilding> BuildingsInZone = new();
 
         List<ObjectGuid>[] m_vehicles = new List<ObjectGuid>[SharedConst.BGTeamsCount];
-        List<ObjectGuid> CanonList = new List<ObjectGuid>();
+        List<ObjectGuid> CanonList = new();
 
         int m_tenacityTeam;
         uint m_tenacityStack;
@@ -1476,8 +1476,8 @@ namespace Game.BattleFields
         // Creature associations
         List<ObjectGuid>[] m_CreatureBottomList = new List<ObjectGuid>[SharedConst.BGTeamsCount];
         List<ObjectGuid>[] m_CreatureTopList = new List<ObjectGuid>[SharedConst.BGTeamsCount];
-        List<ObjectGuid> m_TowerCannonBottomList = new List<ObjectGuid>();
-        List<ObjectGuid> m_TurretTopList = new List<ObjectGuid>();
+        List<ObjectGuid> m_TowerCannonBottomList = new();
+        List<ObjectGuid> m_TurretTopList = new();
     }
 
     class WGWorkshop

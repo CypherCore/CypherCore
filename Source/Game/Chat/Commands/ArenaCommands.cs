@@ -57,7 +57,7 @@ namespace Game.Chat
                     return false;
                 }
 
-                ArenaTeam arena = new ArenaTeam();
+                ArenaTeam arena = new();
 
                 if (!arena.Create(target.GetGUID(), type, name, 4293102085, 101, 4293253939, 4, 4284049911))
                 {

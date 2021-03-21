@@ -26,14 +26,15 @@ namespace Game.AI
 {
     public class PetAI : CreatureAI
     {
+        List<ObjectGuid> _allySet = new();
+        uint _updateAlliesTimer;
+
         public PetAI(Creature c) : base(c)
         {
-            i_tracker = new TimeTracker(5000);
-
             UpdateAllies();
         }
 
-        bool _needToStop()
+        bool NeedToStop()
         {
             // This is needed for charmed creatures, as once their target was reset other effects can trigger threat
             if (me.IsCharmed() && me.GetVictim() == me.GetCharmer())
@@ -48,7 +49,7 @@ namespace Game.AI
             return !me.IsValidAttackTarget(me.GetVictim());
         }
 
-        void _stopAttack()
+        void StopAttack()
         {
             if (!me.IsAlive())
             {
@@ -74,11 +75,11 @@ namespace Game.AI
 
             Unit owner = me.GetCharmerOrOwner();
 
-            if (m_updateAlliesTimer <= diff)
+            if (_updateAlliesTimer <= diff)
                 // UpdateAllies self set update timer
                 UpdateAllies();
             else
-                m_updateAlliesTimer -= diff;
+                _updateAlliesTimer -= diff;
 
             if (me.GetVictim() && me.GetVictim().IsAlive())
             {
@@ -90,10 +91,10 @@ namespace Game.AI
                     return;
                 }
 
-                if (_needToStop())
+                if (NeedToStop())
                 {
                     Log.outDebug(LogFilter.Server, "Pet AI stopped attacking [{0}]", me.GetGUID().ToString());
-                    _stopAttack();
+                    StopAttack();
                     return;
                 }
 
@@ -129,7 +130,7 @@ namespace Game.AI
             // Autocast (casted only in combat or persistent spells in any state)
             if (!me.HasUnitState(UnitState.Casting))
             {
-                List<Tuple<Unit, Spell>> targetSpellStore = new List<Tuple<Unit, Spell>>();
+                List<Tuple<Unit, Spell>> targetSpellStore = new();
 
                 for (byte i = 0; i < me.GetPetAutoSpellSize(); ++i)
                 {
@@ -157,7 +158,7 @@ namespace Game.AI
                                 continue;
                         }
 
-                        Spell spell = new Spell(me, spellInfo, TriggerCastFlags.None);
+                        Spell spell = new(me, spellInfo, TriggerCastFlags.None);
                         bool spellUsed = false;
 
                         // Some spells can target enemy or friendly (DK Ghoul's Leap)
@@ -185,7 +186,7 @@ namespace Game.AI
                         // No enemy, check friendly
                         if (!spellUsed)
                         {
-                            foreach (var tar in m_AllySet)
+                            foreach (var tar in _allySet)
                             {
                                 Unit ally = Global.ObjAccessor.GetUnit(me, tar);
 
@@ -208,7 +209,7 @@ namespace Game.AI
                     }
                     else if (me.GetVictim() && CanAIAttack(me.GetVictim()) && spellInfo.CanBeUsedInCombat())
                     {
-                        Spell spell = new Spell(me, spellInfo, TriggerCastFlags.None);
+                        Spell spell = new(me, spellInfo, TriggerCastFlags.None);
                         if (spell.CanAutoCast(me.GetVictim()))
                             targetSpellStore.Add(Tuple.Create(me.GetVictim(), spell));
                         else
@@ -226,7 +227,7 @@ namespace Game.AI
 
                     targetSpellStore.RemoveAt(index);
 
-                    SpellCastTargets targets = new SpellCastTargets();
+                    SpellCastTargets targets = new();
                     targets.SetUnitTarget(target);
 
                     spell.Prepare(targets);
@@ -245,7 +246,7 @@ namespace Game.AI
 
         void UpdateAllies()
         {
-            m_updateAlliesTimer = 10 * Time.InMilliseconds;                 // update friendly targets every 10 seconds, lesser checks increase performance
+            _updateAlliesTimer = 10 * Time.InMilliseconds;                 // update friendly targets every 10 seconds, lesser checks increase performance
 
             Unit owner = me.GetCharmerOrOwner();
             if (!owner)
@@ -257,15 +258,15 @@ namespace Game.AI
                 group = player.GetGroup();
 
             //only pet and owner/not in group.ok
-            if (m_AllySet.Count == 2 && !group)
+            if (_allySet.Count == 2 && !group)
                 return;
 
             //owner is in group; group members filled in already (no raid . subgroupcount = whole count)
-            if (group && !group.IsRaidGroup() && m_AllySet.Count == (group.GetMembersCount() + 2))
+            if (group && !group.IsRaidGroup() && _allySet.Count == (group.GetMembersCount() + 2))
                 return;
 
-            m_AllySet.Clear();
-            m_AllySet.Add(me.GetGUID());
+            _allySet.Clear();
+            _allySet.Add(me.GetGUID());
             if (group)                                              //add group
             {
                 for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
@@ -277,11 +278,11 @@ namespace Game.AI
                     if (target.GetGUID() == owner.GetGUID())
                         continue;
 
-                    m_AllySet.Add(target.GetGUID());
+                    _allySet.Add(target.GetGUID());
                 }
             }
             else                                                    //remove group
-                m_AllySet.Add(owner.GetGUID());
+                _allySet.Add(owner.GetGUID());
         }
 
         public override void KilledUnit(Unit victim)
@@ -639,9 +640,5 @@ namespace Game.AI
         public override void MoveInLineOfSight(Unit who) { }
         public override void MoveInLineOfSight_Safe(Unit who) { }
         public override void EnterEvadeMode(EvadeReason why) { }
-
-        TimeTracker i_tracker;
-        List<ObjectGuid> m_AllySet = new List<ObjectGuid>();
-        uint m_updateAlliesTimer;
     }
 }

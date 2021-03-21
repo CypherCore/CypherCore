@@ -43,7 +43,7 @@ namespace Game
 
             AccountData adata = GetAccountData(request.DataType);
 
-            UpdateAccountData data = new UpdateAccountData();
+            UpdateAccountData data = new();
             data.Player = GetPlayer() ? GetPlayer().GetGUID() : ObjectGuid.Empty;
             data.Time = (uint)adata.Time;
             data.DataType = request.DataType;
@@ -369,7 +369,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.RequestPlayedTime)]
         void HandlePlayedTime(RequestPlayedTime packet)
         {
-            PlayedTime playedTime = new PlayedTime();
+            PlayedTime playedTime = new();
             playedTime.TotalTime = GetPlayer().GetTotalPlayedTime();
             playedTime.LevelTime = GetPlayer().GetLevelPlayedTime();
             playedTime.TriggerEvent = packet.TriggerScriptEvent;  // 0-1 - will not show in chat frame
@@ -396,7 +396,7 @@ namespace Game
         {
             Player player = GetPlayer();
 
-            LoadCUFProfiles loadCUFProfiles = new LoadCUFProfiles();
+            LoadCUFProfiles loadCUFProfiles = new();
 
             for (byte i = 0; i < PlayerConst.MaxCUFProfiles; ++i)
             {
@@ -417,7 +417,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MountSpecialAnim)]
         void HandleMountSpecialAnim(MountSpecial mountSpecial)
         {
-            SpecialMountAnim specialMountAnim = new SpecialMountAnim();
+            SpecialMountAnim specialMountAnim = new();
             specialMountAnim.UnitGUID = _player.GetGUID();
             GetPlayer().SendMessageToSet(specialMountAnim, false);
         }

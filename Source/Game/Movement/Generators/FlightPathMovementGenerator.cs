@@ -126,12 +126,12 @@ namespace Game.Movement
             owner.AddUnitState(UnitState.InFlight);
             owner.AddUnitFlag(UnitFlags.RemoveClientControl | UnitFlags.TaxiFlight);
 
-            MoveSplineInit init = new MoveSplineInit(owner);
+            MoveSplineInit init = new(owner);
             uint end = GetPathAtMapEnd();
             init.args.path = new Vector3[end];
             for (int i = (int)GetCurrentNode(); i != end; ++i)
             {
-                Vector3 vertice = new Vector3(_path[i].Loc.X, _path[i].Loc.Y, _path[i].Loc.Z);
+                Vector3 vertice = new(_path[i].Loc.X, _path[i].Loc.Y, _path[i].Loc.Z);
                 init.args.path[i] = vertice;
             }
             init.SetFirstPointId((int)GetCurrentNode());
@@ -252,9 +252,9 @@ namespace Game.Movement
         uint _endMapId;               //! map Id of last node location
         uint _preloadTargetNode;      //! node index where preloading starts
 
-        List<TaxiPathNodeRecord> _path = new List<TaxiPathNodeRecord>();
+        List<TaxiPathNodeRecord> _path = new();
         int _currentNode;
-        List<TaxiNodeChangeInfo> _pointsForPathSwitch = new List<TaxiNodeChangeInfo>();    //! node indexes and costs where TaxiPath changes
+        List<TaxiNodeChangeInfo> _pointsForPathSwitch = new();    //! node indexes and costs where TaxiPath changes
 
         class TaxiNodeChangeInfo
         {

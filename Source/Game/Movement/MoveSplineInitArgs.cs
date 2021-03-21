@@ -38,8 +38,8 @@ namespace Game.Movement
         }
 
         public Vector3[] path;
-        public FacingInfo facing = new FacingInfo();
-        public MoveSplineFlag flags = new MoveSplineFlag();
+        public FacingInfo facing = new();
+        public MoveSplineFlag flags = new();
         public int path_Idx_offset;
         public float velocity;
         public float parabolic_amplitude;

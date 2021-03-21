@@ -10,8 +10,8 @@ namespace Game.Cache
 {
     public class CharacterCache : Singleton<CharacterCache>
     {
-        Dictionary<ObjectGuid, CharacterCacheEntry> _characterCacheStore = new Dictionary<ObjectGuid, CharacterCacheEntry>();
-        Dictionary<string, CharacterCacheEntry> _characterCacheByNameStore = new Dictionary<string, CharacterCacheEntry>();
+        Dictionary<ObjectGuid, CharacterCacheEntry> _characterCacheStore = new();
+        Dictionary<string, CharacterCacheEntry> _characterCacheByNameStore = new();
 
         CharacterCache() { }
 
@@ -76,7 +76,7 @@ namespace Game.Cache
             if (race.HasValue)
                 characterCacheEntry.RaceId = (Race)race.Value;
 
-            InvalidatePlayer invalidatePlayer = new InvalidatePlayer();
+            InvalidatePlayer invalidatePlayer = new();
             invalidatePlayer.Guid = guid;
             Global.WorldMgr.SendGlobalMessage(invalidatePlayer);
 

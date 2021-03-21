@@ -92,7 +92,7 @@ namespace Game
             else
             {
                 //If a pet is dismissed, m_Controlled will change
-                List<Unit> controlled = new List<Unit>();
+                List<Unit> controlled = new();
                 foreach (var unit in GetPlayer().m_Controlled)
                     if (unit.GetEntry() == pet.GetEntry() && unit.IsAlive())
                         controlled.Add(unit);
@@ -317,7 +317,7 @@ namespace Game
                             pet.GetCharmInfo().SetIsFollowing(false);
                         }
 
-                        Spell spell = new Spell(pet, spellInfo, TriggerCastFlags.None);
+                        Spell spell = new(pet, spellInfo, TriggerCastFlags.None);
 
                         SpellCastResult result = spell.CheckPetCast(unit_target);
 
@@ -418,7 +418,7 @@ namespace Game
 
         void SendQueryPetNameResponse(ObjectGuid guid)
         {
-            QueryPetNameResponse response = new QueryPetNameResponse();
+            QueryPetNameResponse response = new();
             response.UnitGUID = guid;
 
             Creature unit = ObjectAccessor.GetCreatureOrPetOrVehicle(GetPlayer(), guid);
@@ -560,7 +560,7 @@ namespace Game
             pet.RemovePetFlag(UnitPetFlags.CanBeRenamed);
 
             PreparedStatement stmt;
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             if (isdeclined)
             {
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_PET_DECLINEDNAME);
@@ -673,10 +673,10 @@ namespace Game
             if (!caster.HasSpell(spellInfo.Id) || spellInfo.IsPassive())
                 return;
 
-            SpellCastTargets targets = new SpellCastTargets(caster, petCastSpell.Cast);
+            SpellCastTargets targets = new(caster, petCastSpell.Cast);
             caster.ClearUnitState(UnitState.Follow);
 
-            Spell spell = new Spell(caster, spellInfo, TriggerCastFlags.None);
+            Spell spell = new(caster, spellInfo, TriggerCastFlags.None);
             spell.m_fromClient = true;
             spell.m_misc.Data0 = petCastSpell.Cast.Misc[0];
             spell.m_misc.Data1 = petCastSpell.Cast.Misc[1];
@@ -701,7 +701,7 @@ namespace Game
                     }
                 }
 
-                SpellPrepare spellPrepare = new SpellPrepare();
+                SpellPrepare spellPrepare = new();
                 spellPrepare.ClientCastID = petCastSpell.Cast.CastID;
                 spellPrepare.ServerCastID = spell.m_castId;
                 SendPacket(spellPrepare);
@@ -722,7 +722,7 @@ namespace Game
 
         void SendPetNameInvalid(PetNameInvalidReason error, string name, DeclinedName declinedName)
         {
-            PetNameInvalid petNameInvalid = new PetNameInvalid();
+            PetNameInvalid petNameInvalid = new();
             petNameInvalid.Result = error;
             petNameInvalid.RenameData.NewName = name;
             for (int i = 0; i < SharedConst.MaxDeclinedNameCases; i++)

@@ -83,7 +83,7 @@ namespace Game.Entities
         public uint GetArmorProficiency() { return m_ArmorProficiency; }
         public void SendProficiency(ItemClass itemClass, uint itemSubclassMask)
         {
-            SetProficiency packet = new SetProficiency();
+            SetProficiency packet = new();
             packet.ProficiencyMask = itemSubclassMask;
             packet.ProficiencyClass = (byte)itemClass;
             SendPacket(packet);
@@ -437,7 +437,7 @@ namespace Game.Entities
 
             Log.outDebug(LogFilter.Player, "Duel Complete {0} {1}", GetName(), duel.opponent.GetName());
 
-            DuelComplete duelCompleted = new DuelComplete();
+            DuelComplete duelCompleted = new();
             duelCompleted.Started = type != DuelCompleteType.Interrupted;
             SendPacket(duelCompleted);
 
@@ -446,7 +446,7 @@ namespace Game.Entities
 
             if (type != DuelCompleteType.Interrupted)
             {
-                DuelWinner duelWinner = new DuelWinner();
+                DuelWinner duelWinner = new();
                 duelWinner.BeatenName = (type == DuelCompleteType.Won ? duel.opponent.GetName() : GetName());
                 duelWinner.WinnerName = (type == DuelCompleteType.Won ? GetName() : duel.opponent.GetName());
                 duelWinner.BeatenVirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
@@ -576,7 +576,7 @@ namespace Game.Entities
                 AddUnitState(UnitState.AttackPlayer);
                 AddPlayerFlag(PlayerFlags.ContestedPVP);
                 // call MoveInLineOfSight for nearby contested guards
-                AIRelocationNotifier notifier = new AIRelocationNotifier(this);
+                AIRelocationNotifier notifier = new(this);
                 Cell.VisitWorldObjects(this, notifier, GetVisibilityRange());
             }
             foreach (Unit unit in m_Controlled)
@@ -584,7 +584,7 @@ namespace Game.Entities
                 if (!unit.HasUnitState(UnitState.AttackPlayer))
                 {
                     unit.AddUnitState(UnitState.AttackPlayer);
-                    AIRelocationNotifier notifier = new AIRelocationNotifier(unit);
+                    AIRelocationNotifier notifier = new(unit);
                     Cell.VisitWorldObjects(this, notifier, GetVisibilityRange());
                 }
             }

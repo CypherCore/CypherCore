@@ -115,7 +115,7 @@ namespace Game.Entities
 
             if (!m_player.HasEnoughMoney(money))
             {
-                TradeStatusPkt info = new TradeStatusPkt();
+                TradeStatusPkt info = new();
                 info.Status = TradeStatus.Failed;
                 info.BagResult = InventoryResult.NotEnoughMoney;
                 m_player.GetSession().SendTradeStatus(info);
@@ -145,7 +145,7 @@ namespace Game.Entities
 
             if (!state)
             {
-                TradeStatusPkt info = new TradeStatusPkt();
+                TradeStatusPkt info = new();
                 info.Status = TradeStatus.Unaccepted;
                 if (crosssend)
                     m_trader.GetSession().SendTradeStatus(info);

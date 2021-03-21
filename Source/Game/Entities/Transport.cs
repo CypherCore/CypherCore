@@ -512,7 +512,7 @@ namespace Game.Entities
         public void UpdatePosition(float x, float y, float z, float o)
         {
             bool newActive = GetMap().IsGridLoaded(x, y);
-            Cell oldCell = new Cell(GetPositionX(), GetPositionY());
+            Cell oldCell = new(GetPositionX(), GetPositionY());
 
             Relocate(x, y, z, o);
             StationaryPosition.SetOrientation(o);
@@ -796,7 +796,7 @@ namespace Game.Entities
 
         KeyFrame _currentFrame;
         int _nextFrame;
-        TimeTrackerSmall _positionChangeTimer = new TimeTrackerSmall();
+        TimeTrackerSmall _positionChangeTimer = new();
         bool _isMoving;
         bool _pendingStop;
 
@@ -804,8 +804,8 @@ namespace Game.Entities
         bool _triggeredArrivalEvent;
         bool _triggeredDepartureEvent;
 
-        HashSet<WorldObject> _passengers = new HashSet<WorldObject>();
-        HashSet<WorldObject> _staticPassengers = new HashSet<WorldObject>();
+        HashSet<WorldObject> _passengers = new();
+        HashSet<WorldObject> _staticPassengers = new();
 
         bool _delayedAddModel;
         bool _delayedTeleport;

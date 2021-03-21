@@ -23,9 +23,11 @@ namespace Game.AI
 {
     public class TotemAI : CreatureAI
     {
+        ObjectGuid _victimGuid;
+
         public TotemAI(Creature c) : base(c)
         {
-            i_victimGuid = ObjectGuid.Empty;
+            _victimGuid = ObjectGuid.Empty;
         }
 
         public override void EnterEvadeMode(EvadeReason why)
@@ -51,7 +53,7 @@ namespace Game.AI
 
             // SpellModOp.Range not applied in this place just because not existence range mods for attacking totems
 
-            Unit victim = !i_victimGuid.IsEmpty() ? Global.ObjAccessor.GetUnit(me, i_victimGuid) : null;
+            Unit victim = !_victimGuid.IsEmpty() ? Global.ObjAccessor.GetUnit(me, _victimGuid) : null;
 
             // Search victim if no, not attackable, or out of range, or friendly (possible in case duel end)
             if (victim == null || !victim.IsTargetableForAttack() || !me.IsWithinDistInMap(victim, max_range) ||
@@ -67,15 +69,13 @@ namespace Game.AI
             if (victim != null)
             {
                 // remember
-                i_victimGuid = victim.GetGUID();
+                _victimGuid = victim.GetGUID();
 
                 // attack
                 me.CastSpell(victim, me.ToTotem().GetSpell());
             }
             else
-                i_victimGuid.Clear();
+                _victimGuid.Clear();
         }
-
-        ObjectGuid i_victimGuid;
     }
 }

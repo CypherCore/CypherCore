@@ -608,7 +608,7 @@ namespace Game.Entities
 
             if (IsInWorld)
             {
-                PowerUpdate packet = new PowerUpdate();
+                PowerUpdate packet = new();
                 packet.Guid = GetGUID();
                 packet.Powers.Add(new PowerUpdatePower(val, (byte)powerType));
                 SendMessageToSet(packet, IsTypeId(TypeId.Player));

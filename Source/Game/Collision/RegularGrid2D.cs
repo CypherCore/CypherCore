@@ -89,7 +89,7 @@ namespace Game.Collision
 
             public static Cell ComputeCell(float fx, float fy)
             {
-                Cell c = new Cell();
+                Cell c = new();
                 c.x = (int)(fx * (1.0f / CELL_SIZE) + (CELL_NUMBER / 2f));
                 c.y = (int)(fy * (1.0f / CELL_SIZE) + (CELL_NUMBER / 2f));
                 return c;
@@ -206,7 +206,7 @@ namespace Game.Collision
                 node.IntersectRay(ray, intersectCallback, ref max_dist);
         }
 
-        MultiMap<T, Node> memberTable = new MultiMap<T, Node>();
+        MultiMap<T, Node> memberTable = new();
         Node[][] nodes = new Node[CELL_NUMBER][];
     }
 }

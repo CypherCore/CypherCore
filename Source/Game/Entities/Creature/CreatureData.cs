@@ -30,7 +30,7 @@ namespace Game.Entities
         public uint Entry;
         public uint[] DifficultyEntry = new uint[SharedConst.MaxCreatureDifficulties];
         public uint[] KillCredit = new uint[SharedConst.MaxCreatureKillCredit];
-        public List<CreatureModel> Models = new List<CreatureModel>();
+        public List<CreatureModel> Models = new();
         public string Name;
         public string FemaleName;
         public string SubName;
@@ -38,7 +38,7 @@ namespace Game.Entities
         public string IconName;
         public uint GossipMenuId;
         public short Minlevel;
-        public Dictionary<Difficulty, CreatureLevelScaling> scalingStorage = new Dictionary<Difficulty, CreatureLevelScaling>();
+        public Dictionary<Difficulty, CreatureLevelScaling> scalingStorage = new();
         public short Maxlevel;
         public int HealthScalingExpansion;
         public uint RequiredExpansion;
@@ -235,7 +235,7 @@ namespace Game.Entities
             QueryData.CreatureID = Entry;
             QueryData.Allow = true;
 
-            CreatureStats stats = new CreatureStats();
+            CreatureStats stats = new();
             stats.Leader = RacialLeader;
 
             stats.Name[0] = Name;
@@ -308,10 +308,10 @@ namespace Game.Entities
 
     public class CreatureLocale
     {
-        public StringArray Name = new StringArray((int)Locale.Total);
-        public StringArray NameAlt = new StringArray((int)Locale.Total);
-        public StringArray Title = new StringArray((int)Locale.Total);
-        public StringArray TitleAlt = new StringArray((int)Locale.Total);
+        public StringArray Name = new((int)Locale.Total);
+        public StringArray NameAlt = new((int)Locale.Total);
+        public StringArray Title = new((int)Locale.Total);
+        public StringArray TitleAlt = new((int)Locale.Total);
     }
 
     public struct EquipmentItem
@@ -355,8 +355,8 @@ namespace Game.Entities
 
     public class CreatureModel
     {
-        public static CreatureModel DefaultInvisibleModel = new CreatureModel(11686, 1.0f, 1.0f);
-        public static CreatureModel DefaultVisibleModel = new CreatureModel(17519, 1.0f, 1.0f);
+        public static CreatureModel DefaultInvisibleModel = new(11686, 1.0f, 1.0f);
+        public static CreatureModel DefaultVisibleModel = new(17519, 1.0f, 1.0f);
 
         public uint CreatureDisplayID;
         public float DisplayScale;
@@ -402,7 +402,7 @@ namespace Game.Entities
         public uint incrtime;                                        // time for restore items amount if maxcount != 0
         public uint ExtendedCost;
         public ItemVendorType Type;
-        public List<uint> BonusListIDs = new List<uint>();
+        public List<uint> BonusListIDs = new();
         public uint PlayerConditionId;
         public bool IgnoreFiltering;
 
@@ -412,7 +412,7 @@ namespace Game.Entities
 
     public class VendorItemData
     {
-        List<VendorItem> m_items = new List<VendorItem>();
+        List<VendorItem> m_items = new();
 
         public VendorItem GetItem(uint slot)
         {

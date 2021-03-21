@@ -33,7 +33,7 @@ namespace Game.BattlePets
             _owner = owner;
             for (byte i = 0; i < SharedConst.MaxPetBattleSlots; ++i)
             {
-                BattlePetSlot slot = new BattlePetSlot();
+                BattlePetSlot slot = new();
                 slot.Index = i;
                 _slots.Add(slot);
             }
@@ -157,7 +157,7 @@ namespace Game.BattlePets
                             continue;
                         }
 
-                        BattlePet pet = new BattlePet();
+                        BattlePet pet = new();
                         pet.PacketInfo.Guid = ObjectGuid.Create(HighGuid.BattlePet, petsResult.Read<ulong>(0));
                         pet.PacketInfo.Species = species;
                         pet.PacketInfo.Breed = petsResult.Read<ushort>(2);
@@ -277,7 +277,7 @@ namespace Game.BattlePets
             if (battlePetSpecies == null) // should never happen
                 return;
 
-            BattlePet pet = new BattlePet();
+            BattlePet pet = new();
             pet.PacketInfo.Guid = ObjectGuid.Create(HighGuid.BattlePet, Global.ObjectMgr.GetGenerator(HighGuid.BattlePet).Generate());
             pet.PacketInfo.Species = species;
             pet.PacketInfo.CreatureID = creatureId;
@@ -293,7 +293,7 @@ namespace Game.BattlePets
 
             _pets[pet.PacketInfo.Guid.GetCounter()] = pet;
 
-            List<BattlePet> updates = new List<BattlePet>();
+            List<BattlePet> updates = new();
             updates.Add(pet);
             SendUpdates(updates, true);
 
@@ -326,7 +326,7 @@ namespace Game.BattlePets
 
             _slots[slot].Locked = false;
 
-            PetBattleSlotUpdates updates = new PetBattleSlotUpdates();
+            PetBattleSlotUpdates updates = new();
             updates.Slots.Add(_slots[slot]);
             updates.AutoSlotted = false; // what's this?
             updates.NewSlot = true; // causes the "new slot unlocked" bubble to appear
@@ -349,7 +349,7 @@ namespace Game.BattlePets
             if (pet == null)
                 return;
 
-            List<ItemPosCount> dest = new List<ItemPosCount>();
+            List<ItemPosCount> dest = new();
 
             if (_owner.GetPlayer().CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, SharedConst.BattlePetCageItemId, 1) != InventoryResult.Ok)
                 return;
@@ -368,7 +368,7 @@ namespace Game.BattlePets
 
             RemovePet(guid);
 
-            BattlePetDeleted deletePet = new BattlePetDeleted();
+            BattlePetDeleted deletePet = new();
             deletePet.PetGuid = guid;
             _owner.SendPacket(deletePet);
         }
@@ -377,7 +377,7 @@ namespace Game.BattlePets
         {
             // TODO: After each Pet Battle, any injured companion will automatically
             // regain 50 % of the damage that was taken during combat
-            List<BattlePet> updates = new List<BattlePet>();
+            List<BattlePet> updates = new();
 
             foreach (var pet in _pets.Values)
             {
@@ -425,7 +425,7 @@ namespace Game.BattlePets
 
         public void SendJournal()
         {
-            BattlePetJournal battlePetJournal = new BattlePetJournal();
+            BattlePetJournal battlePetJournal = new();
             battlePetJournal.Trap = _trapLevel;
 
             foreach (var pet in _pets)
@@ -438,7 +438,7 @@ namespace Game.BattlePets
 
         void SendUpdates(List<BattlePet> pets, bool petAdded)
         {
-            BattlePetUpdates updates = new BattlePetUpdates();
+            BattlePetUpdates updates = new();
             foreach (var pet in pets)
                 updates.Pets.Add(pet.PacketInfo);
 
@@ -448,7 +448,7 @@ namespace Game.BattlePets
 
         public void SendError(BattlePetError error, uint creatureId)
         {
-            BattlePetErrorPacket battlePetError = new BattlePetErrorPacket();
+            BattlePetErrorPacket battlePetError = new();
             battlePetError.Result = error;
             battlePetError.CreatureID = creatureId;
             _owner.SendPacket(battlePetError);
@@ -462,13 +462,13 @@ namespace Game.BattlePets
 
         WorldSession _owner;
         ushort _trapLevel;
-        Dictionary<ulong, BattlePet> _pets = new Dictionary<ulong, BattlePet>();
-        List<BattlePetSlot> _slots = new List<BattlePetSlot>();
+        Dictionary<ulong, BattlePet> _pets = new();
+        List<BattlePetSlot> _slots = new();
 
-        static Dictionary<uint, Dictionary<BattlePetState, int>> _battlePetBreedStates = new Dictionary<uint, Dictionary<BattlePetState, int>>();
-        static Dictionary<uint, Dictionary<BattlePetState, int>> _battlePetSpeciesStates = new Dictionary<uint, Dictionary<BattlePetState, int>>();
-        static MultiMap<uint, byte> _availableBreedsPerSpecies = new MultiMap<uint, byte>();
-        static Dictionary<uint, byte> _defaultQualityPerSpecies = new Dictionary<uint, byte>();
+        static Dictionary<uint, Dictionary<BattlePetState, int>> _battlePetBreedStates = new();
+        static Dictionary<uint, Dictionary<BattlePetState, int>> _battlePetSpeciesStates = new();
+        static MultiMap<uint, byte> _availableBreedsPerSpecies = new();
+        static Dictionary<uint, byte> _defaultQualityPerSpecies = new();
 
         public class BattlePet
         {

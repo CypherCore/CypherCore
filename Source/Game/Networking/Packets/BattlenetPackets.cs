@@ -33,7 +33,7 @@ namespace Game.Networking.Packets
         }
 
         public MethodCall Method;
-        public ByteBuffer Data = new ByteBuffer();
+        public ByteBuffer Data = new();
     }
 
     class Response : ServerPacket
@@ -50,7 +50,7 @@ namespace Game.Networking.Packets
 
         public BattlenetRpcErrorCode BnetStatus = BattlenetRpcErrorCode.Ok;
         public MethodCall Method;
-        public ByteBuffer Data = new ByteBuffer();
+        public ByteBuffer Data = new();
     }
 
     class ConnectionStatus : ServerPacket
@@ -113,7 +113,7 @@ namespace Game.Networking.Packets
         }
 
         public uint Token;
-        public Array<byte> Secret = new Array<byte>(32);
+        public Array<byte> Secret = new(32);
     }
 
     public struct MethodCall

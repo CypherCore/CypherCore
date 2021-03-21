@@ -21,6 +21,8 @@ namespace Game.AI
 {
     public class AreaTriggerAI
     {
+        protected AreaTrigger at;
+
         public AreaTriggerAI(AreaTrigger a)
         {
             at = a;
@@ -49,8 +51,6 @@ namespace Game.AI
 
         // Called when the AreaTrigger is removed
         public virtual void OnRemove() { }
-
-        protected AreaTrigger at;
     }
 
     class NullAreaTriggerAI : AreaTriggerAI

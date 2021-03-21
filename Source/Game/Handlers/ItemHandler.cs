@@ -229,7 +229,7 @@ namespace Game
                 if (!dstItem.HasItemFlag(ItemFieldFlags.Child))
                 {
                     // check dest.src move possibility
-                    List<ItemPosCount> sSrc = new List<ItemPosCount>();
+                    List<ItemPosCount> sSrc = new();
                     ushort eSrc = 0;
                     if (pl.IsInventoryPos(src))
                     {
@@ -353,7 +353,7 @@ namespace Game
                 InventoryResult msg = _player.CanUseItem(item);
                 if (msg == InventoryResult.Ok)
                 {
-                    ReadItemResultOK packet = new ReadItemResultOK();
+                    ReadItemResultOK packet = new();
                     packet.Item = item.GetGUID();
                     SendPacket(packet);
                 }
@@ -515,7 +515,7 @@ namespace Game
                     return;
                 }
 
-                List<ItemPosCount> dest = new List<ItemPosCount>();
+                List<ItemPosCount> dest = new();
                 InventoryResult msg = _player.CanStoreItem(ItemConst.NullBag, ItemConst.NullSlot, dest, pItem, false);
                 if (msg == InventoryResult.Ok)
                 {
@@ -594,7 +594,7 @@ namespace Game
                 }
             }
 
-            List<ItemPosCount> dest = new List<ItemPosCount>();
+            List<ItemPosCount> dest = new();
             msg = GetPlayer().CanStoreItem(packet.ContainerSlotB, ItemConst.NullSlot, dest, item, false);
             if (msg != InventoryResult.Ok)
             {
@@ -616,7 +616,7 @@ namespace Game
 
         public void SendEnchantmentLog(ObjectGuid owner, ObjectGuid caster, ObjectGuid itemGuid, uint itemId, uint enchantId, uint enchantSlot)
         {
-            EnchantmentLog packet = new EnchantmentLog(); 
+            EnchantmentLog packet = new(); 
             packet.Owner = owner;
             packet.Caster = caster;
             packet.ItemGUID = itemGuid;
@@ -629,7 +629,7 @@ namespace Game
 
         public void SendItemEnchantTimeUpdate(ObjectGuid Playerguid, ObjectGuid Itemguid, uint slot, uint Duration)
         {
-            ItemEnchantTimeUpdate data = new ItemEnchantTimeUpdate();
+            ItemEnchantTimeUpdate data = new();
             data.ItemGuid = Itemguid;
             data.DurationLeft = Duration;
             data.Slot = slot;
@@ -716,7 +716,7 @@ namespace Game
                 return;
             }
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHAR_GIFT);
             stmt.AddValue(0, item.GetOwnerGUID().GetCounter());

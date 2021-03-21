@@ -82,7 +82,7 @@ namespace Game
             }
 
             bool found = false;
-            StringBuilder ss = new StringBuilder();
+            StringBuilder ss = new();
             do
             {
                 uint id = result.Read<uint>(0);

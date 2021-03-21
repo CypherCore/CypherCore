@@ -65,7 +65,7 @@ namespace Game.Networking.Packets
         }
 
         public bool OnLevelUp;
-        public List<AdventureJournalEntry> AdventureJournalDatas = new List<AdventureJournalEntry>();
+        public List<AdventureJournalEntry> AdventureJournalDatas = new();
     }
 
     struct AdventureJournalEntry

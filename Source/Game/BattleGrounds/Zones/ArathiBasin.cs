@@ -636,7 +636,7 @@ namespace Game.BattleGrounds.Zones
             int teamIndex = GetTeamIndexByTeamId(player.GetTeam());
 
             // Is there any occupied node for this team?
-            List<byte> nodes = new List<byte>();
+            List<byte> nodes = new();
             for (byte i = 0; i < ABBattlegroundNodes.DynamicNodesCount; ++i)
                 if (m_Nodes[i] == ABNodeStatus.Occupied + teamIndex)
                     nodes.Add(i);

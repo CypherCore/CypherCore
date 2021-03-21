@@ -126,6 +126,6 @@ namespace Game.DungeonFinding
 
         // Queue
         LfgRoles m_Roles;
-        List<uint> m_SelectedDungeons = new List<uint>();
+        List<uint> m_SelectedDungeons = new();
     }
 }

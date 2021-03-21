@@ -29,7 +29,7 @@ namespace Game
         void HandleGMTicketGetCaseStatus(GMTicketGetCaseStatus packet)
         {
             //TODO: Implement GmCase and handle this packet correctly
-            GMTicketCaseStatus status = new GMTicketCaseStatus();
+            GMTicketCaseStatus status = new();
             SendPacket(status);
         }
 
@@ -38,7 +38,7 @@ namespace Game
         {
             // Note: This only disables the ticket UI at client side and is not fully reliable
             // Note: This disables the whole customer support UI after trying to send a ticket in disabled state (MessageBox: "GM Help Tickets are currently unavaiable."). UI remains disabled until the character relogs.
-            GMTicketSystemStatusPkt response = new GMTicketSystemStatusPkt();
+            GMTicketSystemStatusPkt response = new();
             response.Status = Global.SupportMgr.GetSupportSystemStatus() ? 1 : 0;
             SendPacket(response);
         }
@@ -51,7 +51,7 @@ namespace Game
                 if (!Global.SupportMgr.GetSuggestionSystemStatus())
                     return;
 
-                SuggestionTicket ticket = new SuggestionTicket(GetPlayer());
+                SuggestionTicket ticket = new(GetPlayer());
                 ticket.SetPosition(userFeedback.Header.MapID, userFeedback.Header.Position);
                 ticket.SetFacing(userFeedback.Header.Facing);
                 ticket.SetNote(userFeedback.Note);
@@ -63,7 +63,7 @@ namespace Game
                 if (!Global.SupportMgr.GetBugSystemStatus())
                     return;
 
-                BugTicket ticket = new BugTicket(GetPlayer());
+                BugTicket ticket = new(GetPlayer());
                 ticket.SetPosition(userFeedback.Header.MapID, userFeedback.Header.Position);
                 ticket.SetFacing(userFeedback.Header.Facing);
                 ticket.SetNote(userFeedback.Note);
@@ -78,7 +78,7 @@ namespace Game
             if (!Global.SupportMgr.GetComplaintSystemStatus())
                 return;
 
-            ComplaintTicket comp = new ComplaintTicket(GetPlayer());
+            ComplaintTicket comp = new(GetPlayer());
             comp.SetPosition(packet.Header.MapID, packet.Header.Position);
             comp.SetFacing(packet.Header.Facing);
             comp.SetChatLog(packet.ChatLog);
@@ -107,7 +107,7 @@ namespace Game
         {    // NOTE: all chat messages from this spammer are automatically ignored by the spam reporter until logout in case of chat spam.
              // if it's mail spam - ALL mails from this spammer are automatically removed by client
 
-            ComplaintResult result = new ComplaintResult();
+            ComplaintResult result = new();
             result.ComplaintType = packet.ComplaintType;
             result.Result = 0;
             SendPacket(result);

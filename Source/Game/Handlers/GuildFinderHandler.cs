@@ -43,7 +43,7 @@ namespace Game
             if (!lfGuildAddRecruit.PlayStyle.HasAnyFlag((uint)GuildFinderOptionsInterest.All) || lfGuildAddRecruit.PlayStyle > (uint)GuildFinderOptionsInterest.All)
                 return;
 
-            MembershipRequest request = new MembershipRequest(GetPlayer().GetGUID(), lfGuildAddRecruit.GuildGUID, lfGuildAddRecruit.Availability,
+            MembershipRequest request = new(GetPlayer().GetGUID(), lfGuildAddRecruit.GuildGUID, lfGuildAddRecruit.Availability,
                 lfGuildAddRecruit.ClassRoles, lfGuildAddRecruit.PlayStyle, lfGuildAddRecruit.Comment, Time.UnixTime);
             Global.GuildFinderMgr.AddMembershipRequest(lfGuildAddRecruit.GuildGUID, request);
         }
@@ -62,14 +62,14 @@ namespace Game
 
             Player player = GetPlayer();
 
-            LFGuildPlayer settings = new LFGuildPlayer(player.GetGUID(), lfGuildBrowse.ClassRoles, lfGuildBrowse.Availability, lfGuildBrowse.PlayStyle, (uint)GuildFinderOptionsLevel.Any);
+            LFGuildPlayer settings = new(player.GetGUID(), lfGuildBrowse.ClassRoles, lfGuildBrowse.Availability, lfGuildBrowse.PlayStyle, (uint)GuildFinderOptionsLevel.Any);
             var guildList = Global.GuildFinderMgr.GetGuildsMatchingSetting(settings, (uint)player.GetTeam());
 
-            LFGuildBrowseResult lfGuildBrowseResult = new LFGuildBrowseResult();
+            LFGuildBrowseResult lfGuildBrowseResult = new();
             for (var i = 0; i < guildList.Count; ++i)
             {
                 LFGuildSettings guildSettings = guildList[i];
-                LFGuildBrowseData guildData = new LFGuildBrowseData();
+                LFGuildBrowseData guildData = new();
                 Guild guild = Global.GuildMgr.GetGuildByGuid(guildSettings.GetGUID());
 
                 guildData.GuildName = guild.GetName();
@@ -112,13 +112,13 @@ namespace Game
         void HandleGuildFinderGetApplications(LFGuildGetApplications lfGuildGetApplications)
         {
             List<MembershipRequest> applicatedGuilds = Global.GuildFinderMgr.GetAllMembershipRequestsForPlayer(GetPlayer().GetGUID());
-            LFGuildApplications lfGuildApplications = new LFGuildApplications();
+            LFGuildApplications lfGuildApplications = new();
             lfGuildApplications.NumRemaining = 10 - Global.GuildFinderMgr.CountRequestsFromPlayer(GetPlayer().GetGUID());
 
             for (var i = 0; i < applicatedGuilds.Count; ++i)
             {
                 MembershipRequest application = applicatedGuilds[i];
-                LFGuildApplicationData applicationData = new LFGuildApplicationData();
+                LFGuildApplicationData applicationData = new();
 
                 Guild guild = Global.GuildMgr.GetGuildByGuid(application.GetGuildGuid());
                 LFGuildSettings guildSettings = Global.GuildFinderMgr.GetGuildSettings(application.GetGuildGuid());
@@ -148,7 +148,7 @@ namespace Game
             if (!guild) // Player must be in guild
                 return;
 
-            LFGuildPost lfGuildPost = new LFGuildPost();
+            LFGuildPost lfGuildPost = new();
             if (guild.GetLeaderGUID() == player.GetGUID())
             {
                 LFGuildSettings settings = Global.GuildFinderMgr.GetGuildSettings(guild.GetGUID());
@@ -177,14 +177,14 @@ namespace Game
                 return;
 
             long now = Time.UnixTime;
-            LFGuildRecruits lfGuildRecruits = new LFGuildRecruits();
+            LFGuildRecruits lfGuildRecruits = new();
             lfGuildRecruits.UpdateTime = now;
             var recruitsList = Global.GuildFinderMgr.GetAllMembershipRequestsForGuild(guild.GetGUID());
             if (recruitsList != null)
             {
                 foreach (var recruitRequestPair in recruitsList)
                 {
-                    LFGuildRecruitData recruitData = new LFGuildRecruitData();
+                    LFGuildRecruitData recruitData = new();
                     recruitData.RecruitGUID = recruitRequestPair.Key;
                     recruitData.RecruitVirtualRealm = Global.WorldMgr.GetVirtualRealmAddress();
                     recruitData.Comment = recruitRequestPair.Value.GetComment();
@@ -248,7 +248,7 @@ namespace Game
             if (guild.GetLeaderGUID() != player.GetGUID())
                     return;
 
-            LFGuildSettings settings = new LFGuildSettings(lfGuildSetGuildPost.Active, (uint)player.GetTeam(), player.GetGuild().GetGUID(), lfGuildSetGuildPost.ClassRoles,
+            LFGuildSettings settings = new(lfGuildSetGuildPost.Active, (uint)player.GetTeam(), player.GetGuild().GetGUID(), lfGuildSetGuildPost.ClassRoles,
                 lfGuildSetGuildPost.Availability, lfGuildSetGuildPost.PlayStyle, lfGuildSetGuildPost.LevelRange, lfGuildSetGuildPost.Comment);
             Global.GuildFinderMgr.SetGuildSettings(player.GetGuild().GetGUID(), settings);
         }

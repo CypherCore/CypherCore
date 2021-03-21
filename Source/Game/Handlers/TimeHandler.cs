@@ -27,7 +27,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ServerTimeOffsetRequest, Status = SessionStatus.Authed, Processing = PacketProcessing.Inplace)]
         void HandleServerTimeOffsetRequest(ServerTimeOffsetRequest packet)
         {
-            ServerTimeOffset response = new ServerTimeOffset();
+            ServerTimeOffset response = new();
             response.Time = (uint)Time.UnixTime;
             SendPacket(response);
         }

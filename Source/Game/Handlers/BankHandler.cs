@@ -39,7 +39,7 @@ namespace Game
             if (!item)
                 return;
 
-            List<ItemPosCount> dest = new List<ItemPosCount>();
+            List<ItemPosCount> dest = new();
             InventoryResult msg = GetPlayer().CanBankItem(ItemConst.NullBag, ItemConst.NullSlot, dest, item, false);
             if (msg != InventoryResult.Ok)
             {
@@ -89,7 +89,7 @@ namespace Game
 
             if (Player.IsBankPos(packet.Bag, packet.Slot))                 // moving from bank to inventory
             {
-                List<ItemPosCount> dest = new List<ItemPosCount>();
+                List<ItemPosCount> dest = new();
                 InventoryResult msg = GetPlayer().CanStoreItem(ItemConst.NullBag, ItemConst.NullSlot, dest, item, false);
                 if (msg != InventoryResult.Ok)
                 {
@@ -104,7 +104,7 @@ namespace Game
             }
             else                                                    // moving from inventory to bank
             {
-                List<ItemPosCount> dest = new List<ItemPosCount>();
+                List<ItemPosCount> dest = new();
                 InventoryResult msg = GetPlayer().CanBankItem(ItemConst.NullBag, ItemConst.NullSlot, dest, item, false);
                 if (msg != InventoryResult.Ok)
                 {
@@ -146,7 +146,7 @@ namespace Game
         public void SendShowBank(ObjectGuid guid)
         {
             m_currentBankerGUID = guid;
-            ShowBank packet = new ShowBank();
+            ShowBank packet = new();
             packet.Guid = guid;
             SendPacket(packet);
         }

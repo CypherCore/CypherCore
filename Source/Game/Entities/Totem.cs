@@ -58,7 +58,7 @@ namespace Game.Entities
             {
                 if (m_Properties.Slot >= (int)SummonSlot.Totem && m_Properties.Slot < SharedConst.MaxTotemSlot)
                 {
-                    TotemCreated packet = new TotemCreated();
+                    TotemCreated packet = new();
                     packet.Totem = GetGUID();
                     packet.Slot = (byte)(m_Properties.Slot - (int)SummonSlot.Totem);
                     packet.Duration = duration;

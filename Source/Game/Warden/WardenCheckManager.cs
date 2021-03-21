@@ -58,7 +58,7 @@ namespace Game
                 string str = result.Read<string>(6);
                 string comment = result.Read<string>(7);
 
-                WardenCheck wardenCheck = new WardenCheck();
+                WardenCheck wardenCheck = new();
                 wardenCheck.Type = checkType;
                 wardenCheck.CheckId = id;
 
@@ -87,7 +87,7 @@ namespace Game
 
                 if (checkType == WardenCheckType.MPQ || checkType == WardenCheckType.Memory)
                 {
-                    BigInteger Result = new BigInteger(checkResult.ToByteArray());
+                    BigInteger Result = new(checkResult.ToByteArray());
                     CheckResultStore[id] = Result;
                 }
 
@@ -158,10 +158,10 @@ namespace Game
             return CheckResultStore.LookupByKey(Id);
         }
 
-        public List<ushort> MemChecksIdPool = new List<ushort>();
-        public List<ushort> OtherChecksIdPool = new List<ushort>();
-        List<WardenCheck> CheckStore = new List<WardenCheck>();
-        Dictionary<uint, BigInteger> CheckResultStore = new Dictionary<uint, BigInteger>();
+        public List<ushort> MemChecksIdPool = new();
+        public List<ushort> OtherChecksIdPool = new();
+        List<WardenCheck> CheckStore = new();
+        Dictionary<uint, BigInteger> CheckResultStore = new();
     }
 
     public enum WardenActions

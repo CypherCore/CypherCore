@@ -165,7 +165,7 @@ namespace Game
 
         public void SendForceReactions()
         {
-            SetForcedReactions setForcedReactions = new SetForcedReactions();
+            SetForcedReactions setForcedReactions = new();
 
             foreach (var pair in _forcedReactions)
             {
@@ -180,7 +180,7 @@ namespace Game
 
         public void SendState(FactionState faction)
         {
-            SetFactionStanding setFactionStanding = new SetFactionStanding();
+            SetFactionStanding setFactionStanding = new();
             setFactionStanding.ReferAFriendBonus = 0.0f;
             setFactionStanding.BonusFromAchievementSystem = 0.0f;
             if (faction != null)
@@ -204,7 +204,7 @@ namespace Game
 
         public void SendInitialReputations()
         {
-            InitializeFactions initFactions = new InitializeFactions();
+            InitializeFactions initFactions = new();
 
             foreach (var pair in _factions)
             {
@@ -223,7 +223,7 @@ namespace Game
                 return;
 
             //make faction visible / not visible in reputation list at client
-            SetFactionVisible packet = new SetFactionVisible(visible);
+            SetFactionVisible packet = new(visible);
             packet.FactionIndex = faction.ReputationListID;
             _player.SendPacket(packet);
         }
@@ -241,7 +241,7 @@ namespace Game
             {
                 if (factionEntry.CanHaveReputation())
                 {
-                    FactionState newFaction = new FactionState();
+                    FactionState newFaction = new();
                     newFaction.Id = factionEntry.Id;
                     newFaction.ReputationListID = (uint)factionEntry.ReputationIndex;
                     newFaction.Standing = 0;
@@ -659,8 +659,8 @@ namespace Game
         };
         const int Reputation_Cap = 42999;
         const int Reputation_Bottom = -42000;
-        SortedDictionary<uint, FactionState> _factions = new SortedDictionary<uint, FactionState>();
-        Dictionary<uint, ReputationRank> _forcedReactions = new Dictionary<uint, ReputationRank>();
+        SortedDictionary<uint, FactionState> _factions = new();
+        Dictionary<uint, ReputationRank> _forcedReactions = new();
 
 
     }

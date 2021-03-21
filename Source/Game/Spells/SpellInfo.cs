@@ -1621,7 +1621,7 @@ namespace Game.Spells
 
         public void _LoadSpellDiminishInfo()
         {
-            SpellDiminishInfo diminishInfo = new SpellDiminishInfo();
+            SpellDiminishInfo diminishInfo = new();
             diminishInfo.DiminishGroup = DiminishingGroupCompute();
             diminishInfo.DiminishReturnType = DiminishingTypeCompute(diminishInfo.DiminishGroup);
             diminishInfo.DiminishMaxLevel = DiminishingMaxLevelCompute(diminishInfo.DiminishGroup);
@@ -2904,7 +2904,7 @@ namespace Game.Spells
 
         public List<SpellPowerCost> CalcPowerCost(Unit caster, SpellSchoolMask schoolMask, Spell spell = null)
         {
-            List<SpellPowerCost> costs = new List<SpellPowerCost>();
+            List<SpellPowerCost> costs = new();
             
             SpellPowerCost getOrCreatePowerCost(PowerType powerType)
             {
@@ -3655,7 +3655,7 @@ namespace Game.Spells
         public uint ProcCharges { get; set; }
         public uint ProcCooldown { get; set; }
         public float ProcBasePPM { get; set; }
-        List<SpellProcsPerMinuteModRecord> ProcPPMMods = new List<SpellProcsPerMinuteModRecord>();
+        List<SpellProcsPerMinuteModRecord> ProcPPMMods = new();
         public uint MaxLevel { get; set; }
         public uint BaseLevel { get; set; }
         public uint SpellLevel { get; set; }
@@ -3694,7 +3694,7 @@ namespace Game.Spells
         public SpellChainNode ChainEntry { get; set; }
 
         SpellEffectInfo[] _effects = new SpellEffectInfo[SpellConst.MaxEffects];
-        List<SpellXSpellVisualRecord> _visuals = new List<SpellXSpellVisualRecord>();
+        List<SpellXSpellVisualRecord> _visuals = new();
         SpellSpecificType _spellSpecific;
         AuraStateType _auraState;
 
@@ -4852,8 +4852,8 @@ namespace Game.Spells
         public uint DispelImmune;
         public uint DamageSchoolMask;
 
-        public List<AuraType> AuraTypeImmune = new List<AuraType>();
-        public List<SpellEffectName> SpellEffectImmune = new List<SpellEffectName>();
+        public List<AuraType> AuraTypeImmune = new();
+        public List<SpellEffectName> SpellEffectImmune = new();
     }
 }
 

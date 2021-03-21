@@ -113,7 +113,7 @@ namespace Game.Entities
 
         public void UpdatePositionData()
         {
-            PositionFullTerrainStatus data = new PositionFullTerrainStatus();
+            PositionFullTerrainStatus data = new();
             GetMap().GetFullTerrainStatusForPosition(_phaseShift, GetPositionX(), GetPositionY(), GetPositionZ(), data);
             ProcessPositionDataChanged(data);
         }
@@ -200,7 +200,7 @@ namespace Game.Entities
                 if (unit.GetVictim())
                     flags.CombatVictim = true;
 
-            WorldPacket buffer = new WorldPacket();
+            WorldPacket buffer = new();
             buffer.WriteUInt8((byte)updateType);
             buffer.WritePackedGuid(GetGUID());
             buffer.WriteUInt8((byte)tempObjectType);
@@ -213,7 +213,7 @@ namespace Game.Entities
         public void SendUpdateToPlayer(Player player)
         {
             // send create update to player
-            UpdateData upd = new UpdateData(player.GetMapId());
+            UpdateData upd = new(player.GetMapId());
             UpdateObject packet;
 
             if (player.HaveAtClient(this))
@@ -227,7 +227,7 @@ namespace Game.Entities
 
         public void BuildValuesUpdateBlockForPlayer(UpdateData data, Player target)
         {
-            WorldPacket buffer = new WorldPacket();
+            WorldPacket buffer = new();
             buffer.WriteUInt8((byte)UpdateType.Values);
             buffer.WritePackedGuid(GetGUID());
 
@@ -238,7 +238,7 @@ namespace Game.Entities
 
         public void BuildValuesUpdateBlockForPlayerWithFlag(UpdateData data, UpdateFieldFlag flags, Player target)
         {
-            WorldPacket buffer = new WorldPacket();
+            WorldPacket buffer = new();
             buffer.WriteUInt8((byte)UpdateType.Values);
             buffer.WritePackedGuid(GetGUID());
 
@@ -259,7 +259,7 @@ namespace Game.Entities
 
         public virtual void DestroyForPlayer(Player target)
         {
-            UpdateData updateData = new UpdateData(target.GetMapId());
+            UpdateData updateData = new(target.GetMapId());
             BuildDestroyUpdateBlock(updateData);
             UpdateObject packet;
             updateData.BuildPacket(out packet);
@@ -1342,7 +1342,7 @@ namespace Game.Entities
 
         public virtual void SendMessageToSetInRange(ServerPacket data, float dist, bool self)
         {
-            MessageDistDeliverer notifier = new MessageDistDeliverer(this, data, dist);
+            MessageDistDeliverer notifier = new(this, data, dist);
             Cell.VisitWorldObjects(this, notifier, dist);
         }
 
@@ -1458,7 +1458,7 @@ namespace Game.Entities
                 ang = GetOrientation();
             }
 
-            Position pos = new Position(x, y, z, ang);
+            Position pos = new(x, y, z, ang);
             return SummonGameObject(entry, pos, rotation, respawnTime);
         }
 
@@ -1586,7 +1586,7 @@ namespace Game.Entities
 
         public List<Unit> GetPlayerListInGrid(float maxSearchRange)
         {
-            List<Unit> playerList = new List<Unit>();
+            List<Unit> playerList = new();
             var checker = new AnyPlayerInObjectRangeCheck(this, maxSearchRange);
             var searcher = new PlayerListSearcher(this, playerList, checker);
 
@@ -1611,7 +1611,7 @@ namespace Game.Entities
 
         public void PlayDistanceSound(uint soundId, Player target = null)
         {
-            PlaySpeakerBoxSound playSpeakerBoxSound = new PlaySpeakerBoxSound(GetGUID(), soundId);
+            PlaySpeakerBoxSound playSpeakerBoxSound = new(GetGUID(), soundId);
             if (target != null)
                 target.SendPacket(playSpeakerBoxSound);
             else
@@ -1620,7 +1620,7 @@ namespace Game.Entities
 
         public void PlayDirectSound(uint soundId, Player target = null, uint broadcastTextId = 0)
         {
-            PlaySound sound = new PlaySound(GetGUID(), soundId, broadcastTextId);
+            PlaySound sound = new(GetGUID(), soundId, broadcastTextId);
             if (target)
                 target.SendPacket(sound);
             else
@@ -1640,7 +1640,7 @@ namespace Game.Entities
             if (!IsInWorld)
                 return;
 
-            List<Unit> targets = new List<Unit>();
+            List<Unit> targets = new();
             var check = new AnyPlayerInObjectRangeCheck(this, GetVisibilityRange(), false);
             var searcher = new PlayerListSearcher(this, targets, check);
 
@@ -1933,8 +1933,8 @@ namespace Game.Entities
 
         Position GetHitSpherePointFor(Position dest)
         {
-            Vector3 vThis = new Vector3(GetPositionX(), GetPositionY(), GetPositionZ() + GetMidsectionHeight());
-            Vector3 vObj = new Vector3(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ());
+            Vector3 vThis = new(GetPositionX(), GetPositionY(), GetPositionZ() + GetMidsectionHeight());
+            Vector3 vObj = new(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ());
             Vector3 contactPoint = vThis + (vObj - vThis).directionOrZero() * Math.Min(dest.GetExactDist(GetPosition()), GetCombatReach());
 
             return new Position(contactPoint.X, contactPoint.Y, contactPoint.Z, GetAngle(contactPoint.X, contactPoint.Y));
@@ -2376,21 +2376,21 @@ namespace Game.Entities
         Transport m_transport;
         Map _currMap;
         uint instanceId;
-        PhaseShift _phaseShift= new PhaseShift();
-        PhaseShift _suppressedPhaseShift = new PhaseShift();                   // contains phases for current area but not applied due to conditions
+        PhaseShift _phaseShift= new();
+        PhaseShift _suppressedPhaseShift = new();                   // contains phases for current area but not applied due to conditions
         int _dbPhase;
         public bool IsInWorld { get; set; }
 
         NotifyFlags m_notifyflags;
 
-        public FlaggedArray<StealthType> m_stealth = new FlaggedArray<StealthType>(2);
-        public FlaggedArray<StealthType> m_stealthDetect = new FlaggedArray<StealthType>(2);
+        public FlaggedArray<StealthType> m_stealth = new(2);
+        public FlaggedArray<StealthType> m_stealthDetect = new(2);
 
-        public FlaggedArray<InvisibilityType> m_invisibility = new FlaggedArray<InvisibilityType>((int)InvisibilityType.Max);
-        public FlaggedArray<InvisibilityType> m_invisibilityDetect = new FlaggedArray<InvisibilityType>((int)InvisibilityType.Max);
+        public FlaggedArray<InvisibilityType> m_invisibility = new((int)InvisibilityType.Max);
+        public FlaggedArray<InvisibilityType> m_invisibilityDetect = new((int)InvisibilityType.Max);
 
-        public FlaggedArray<ServerSideVisibilityType> m_serverSideVisibility = new FlaggedArray<ServerSideVisibilityType>(2);
-        public FlaggedArray<ServerSideVisibilityType> m_serverSideVisibilityDetect = new FlaggedArray<ServerSideVisibilityType>(2);
+        public FlaggedArray<ServerSideVisibilityType> m_serverSideVisibility = new(2);
+        public FlaggedArray<ServerSideVisibilityType> m_serverSideVisibilityDetect = new(2);
         #endregion
 
         public static implicit operator bool(WorldObject obj)
@@ -2513,7 +2513,7 @@ namespace Game.Entities
 
     public class MovementForces
     {
-        List<MovementForce> _forces = new List<MovementForce>();
+        List<MovementForce> _forces = new();
         float _modMagnitude = 1.0f;
 
         public List<MovementForce> GetForces() { return _forces; }

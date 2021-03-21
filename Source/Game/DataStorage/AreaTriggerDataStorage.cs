@@ -31,10 +31,10 @@ namespace Game.DataStorage
         public void LoadAreaTriggerTemplates()
         {
             uint oldMSTime = Time.GetMSTime();
-            MultiMap<uint, Vector2> verticesByAreaTrigger = new MultiMap<uint, Vector2>();
-            MultiMap<uint, Vector2> verticesTargetByAreaTrigger = new MultiMap<uint, Vector2>();
-            MultiMap<uint, Vector3> splinesBySpellMisc = new MultiMap<uint, Vector3>();
-            MultiMap<AreaTriggerId, AreaTriggerAction> actionsByAreaTrigger = new MultiMap<AreaTriggerId, AreaTriggerAction>();
+            MultiMap<uint, Vector2> verticesByAreaTrigger = new();
+            MultiMap<uint, Vector2> verticesTargetByAreaTrigger = new();
+            MultiMap<uint, Vector3> splinesBySpellMisc = new();
+            MultiMap<AreaTriggerId, AreaTriggerAction> actionsByAreaTrigger = new();
 
             //                                                       0         1             2            3           4
             SQLResult templateActions = DB.World.Query("SELECT AreaTriggerId, IsServerSide, ActionType, ActionParam, TargetType FROM `areatrigger_template_actions`");
@@ -110,7 +110,7 @@ namespace Game.DataStorage
                 {
                     uint spellMiscId = splines.Read<uint>(0);
 
-                    Vector3 spline = new Vector3(splines.Read<float>(1), splines.Read<float>(2), splines.Read<float>(3));
+                    Vector3 spline = new(splines.Read<float>(1), splines.Read<float>(2), splines.Read<float>(3));
 
                     splinesBySpellMisc.Add(spellMiscId, spline);
                 }
@@ -127,7 +127,7 @@ namespace Game.DataStorage
             {
                 do
                 {
-                    AreaTriggerTemplate areaTriggerTemplate = new AreaTriggerTemplate();
+                    AreaTriggerTemplate areaTriggerTemplate = new();
                     areaTriggerTemplate.Id = new(templates.Read<uint>(0), templates.Read<byte>(1) == 1);
                     AreaTriggerTypes type = (AreaTriggerTypes)templates.Read<byte>(2);
 
@@ -172,7 +172,7 @@ namespace Game.DataStorage
             {
                 do
                 {
-                    AreaTriggerMiscTemplate miscTemplate = new AreaTriggerMiscTemplate();
+                    AreaTriggerMiscTemplate miscTemplate = new();
                     miscTemplate.MiscId = areatriggerSpellMiscs.Read<uint>(0);
 
                     uint areatriggerId = areatriggerSpellMiscs.Read<uint>(1);
@@ -233,7 +233,7 @@ namespace Game.DataStorage
                         continue;
                     }
 
-                    AreaTriggerOrbitInfo orbitInfo = new AreaTriggerOrbitInfo();
+                    AreaTriggerOrbitInfo orbitInfo = new();
 
                     orbitInfo.StartDelay = circularMovementInfos.Read<uint>(1);
                     orbitInfo.Radius = circularMovementInfos.Read<float>(2);
@@ -305,7 +305,7 @@ namespace Game.DataStorage
                         continue;
                     }
 
-                    AreaTriggerSpawn spawn = new AreaTriggerSpawn();
+                    AreaTriggerSpawn spawn = new();
                     spawn.SpawnId = spawnId;
                     spawn.Id = areaTriggerId;
                     spawn.Location = new WorldLocation(location);
@@ -349,9 +349,9 @@ namespace Game.DataStorage
             return _areaTriggerSpawnsBySpawnId.LookupByKey(spawnId);
         }
 
-        Dictionary<(uint mapId, uint cellId), SortedSet<ulong>> _areaTriggerSpawnsByLocation = new Dictionary<(uint mapId, uint cellId), SortedSet<ulong>>();
-        Dictionary<ulong, AreaTriggerSpawn> _areaTriggerSpawnsBySpawnId = new Dictionary<ulong, AreaTriggerSpawn>();
-        Dictionary<AreaTriggerId, AreaTriggerTemplate> _areaTriggerTemplateStore = new Dictionary<AreaTriggerId, AreaTriggerTemplate>();
-        Dictionary<uint, AreaTriggerMiscTemplate> _areaTriggerTemplateSpellMisc = new Dictionary<uint, AreaTriggerMiscTemplate>();
+        Dictionary<(uint mapId, uint cellId), SortedSet<ulong>> _areaTriggerSpawnsByLocation = new();
+        Dictionary<ulong, AreaTriggerSpawn> _areaTriggerSpawnsBySpawnId = new();
+        Dictionary<AreaTriggerId, AreaTriggerTemplate> _areaTriggerTemplateStore = new();
+        Dictionary<uint, AreaTriggerMiscTemplate> _areaTriggerTemplateSpellMisc = new();
     }
 }

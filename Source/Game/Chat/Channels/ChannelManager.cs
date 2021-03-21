@@ -67,7 +67,7 @@ namespace Game.Chat
                 if (channel != null)
                     return channel;
 
-                Channel newChannel = new Channel(channelGuid, channelId, _team, zoneEntry);
+                Channel newChannel = new(channelGuid, channelId, _team, zoneEntry);
                 _channels[channelGuid] = newChannel;
                 return newChannel;
             }
@@ -77,7 +77,7 @@ namespace Game.Chat
                 if (channel != null)
                     return channel;
 
-                Channel newChannel = new Channel(CreateCustomChannelGuid(), name, _team);
+                Channel newChannel = new(CreateCustomChannelGuid(), name, _team);
                 _customChannels[name.ToLower()] = newChannel;
                 return newChannel;
             }
@@ -135,7 +135,7 @@ namespace Game.Chat
 
         public static void SendNotOnChannelNotify(Player player, string name)
         {
-            ChannelNotify notify = new ChannelNotify();
+            ChannelNotify notify = new();
             notify.Type = ChatNotify.NotMemberNotice;
             notify.Channel = name;
             player.SendPacket(notify);
@@ -148,7 +148,7 @@ namespace Game.Chat
             high |= (ulong)Global.WorldMgr.GetRealmId().Index << 42;
             high |= (ulong)(_team == Team.Alliance ? 3 : 5) << 4;
 
-            ObjectGuid channelGuid = new ObjectGuid();
+            ObjectGuid channelGuid = new();
             channelGuid.SetRawValue(high, _guidGenerator.Generate());
             return channelGuid;
         }
@@ -171,17 +171,17 @@ namespace Game.Chat
             high |= (ulong)(zoneId) << 10;
             high |= (ulong)(_team == Team.Alliance ? 3 : 5) << 4;
 
-            ObjectGuid channelGuid = new ObjectGuid();
+            ObjectGuid channelGuid = new();
             channelGuid.SetRawValue(high, channelId);
             return channelGuid;
         }
 
-        Dictionary<string, Channel> _customChannels = new Dictionary<string, Channel>();
-        Dictionary<ObjectGuid, Channel> _channels = new Dictionary<ObjectGuid, Channel>();
+        Dictionary<string, Channel> _customChannels = new();
+        Dictionary<ObjectGuid, Channel> _channels = new();
         Team _team;
         ObjectGuidGenerator _guidGenerator;
 
-        static ChannelManager allianceChannelMgr = new ChannelManager(Team.Alliance);
-        static ChannelManager hordeChannelMgr = new ChannelManager(Team.Horde);
+        static ChannelManager allianceChannelMgr = new(Team.Alliance);
+        static ChannelManager hordeChannelMgr = new(Team.Horde);
     }
 }

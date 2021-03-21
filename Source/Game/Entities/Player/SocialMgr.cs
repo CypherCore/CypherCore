@@ -26,7 +26,7 @@ namespace Game.Entities
 {
     public class SocialManager : Singleton<SocialManager>
     {
-        Dictionary<ObjectGuid, PlayerSocial> _socialMap = new Dictionary<ObjectGuid, PlayerSocial>();
+        Dictionary<ObjectGuid, PlayerSocial> _socialMap = new();
 
         SocialManager() { }
 
@@ -83,10 +83,10 @@ namespace Game.Entities
 
         public void SendFriendStatus(Player player, FriendsResult result, ObjectGuid friendGuid, bool broadcast = false)
         {
-            FriendInfo fi = new FriendInfo();
+            FriendInfo fi = new();
             GetFriendInfo(player, friendGuid, fi);
 
-            FriendStatusPkt friendStatus = new FriendStatusPkt();
+            FriendStatusPkt friendStatus = new();
             friendStatus.Initialize(friendGuid, result, fi);
 
             if (broadcast)
@@ -125,7 +125,7 @@ namespace Game.Entities
 
         public PlayerSocial LoadFromDB(SQLResult result, ObjectGuid guid)
         {
-            PlayerSocial social = new PlayerSocial();
+            PlayerSocial social = new();
             social.SetPlayerGUID(guid);
 
             if (!result.IsEmpty())
@@ -151,7 +151,7 @@ namespace Game.Entities
 
     public class PlayerSocial
     {
-        public Dictionary<ObjectGuid, FriendInfo> _playerSocialMap = new Dictionary<ObjectGuid, FriendInfo>();
+        public Dictionary<ObjectGuid, FriendInfo> _playerSocialMap = new();
         ObjectGuid m_playerGUID;
 
         uint GetNumberOfSocialsWithFlag(SocialFlag flag)
@@ -183,7 +183,7 @@ namespace Game.Entities
             }
             else
             {
-                FriendInfo fi = new FriendInfo();
+                FriendInfo fi = new();
                 fi.Flags |= flag;
                 _playerSocialMap[friendGuid] = fi;
 
@@ -242,7 +242,7 @@ namespace Game.Entities
             if (!player)
                 return;
 
-            ContactList contactList = new ContactList();
+            ContactList contactList = new();
             contactList.Flags = flags;
 
             foreach (var v in _playerSocialMap)

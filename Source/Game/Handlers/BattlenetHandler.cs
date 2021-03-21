@@ -43,7 +43,7 @@ namespace Game
         {
             SetRealmListSecret(changeRealmTicket.Secret);
 
-            ChangeRealmTicketResponse realmListTicket = new ChangeRealmTicketResponse();
+            ChangeRealmTicketResponse realmListTicket = new();
             realmListTicket.Token = changeRealmTicket.Token;
             realmListTicket.Allow = true;
             realmListTicket.Ticket = new Framework.IO.ByteBuffer();
@@ -54,7 +54,7 @@ namespace Game
 
         public void SendBattlenetResponse(uint serviceHash, uint methodId, uint token, IMessage response)
         {
-            Response bnetResponse = new Response();
+            Response bnetResponse = new();
             bnetResponse.BnetStatus = BattlenetRpcErrorCode.Ok;
             bnetResponse.Method.Type = MathFunctions.MakePair64(methodId, serviceHash);
             bnetResponse.Method.ObjectId = 1;
@@ -68,7 +68,7 @@ namespace Game
 
         public void SendBattlenetResponse(uint serviceHash, uint methodId, uint token,  BattlenetRpcErrorCode status)
         {
-            Response bnetResponse = new Response();
+            Response bnetResponse = new();
             bnetResponse.BnetStatus = status;
             bnetResponse.Method.Type = MathFunctions.MakePair64(methodId, serviceHash);
             bnetResponse.Method.ObjectId = 1;
@@ -85,7 +85,7 @@ namespace Game
 
         public void SendBattlenetRequest(uint serviceHash, uint methodId, IMessage request)
         {
-            Notification notification = new Notification();
+            Notification notification = new();
             notification.Method.Type = MathFunctions.MakePair64(methodId, serviceHash);
             notification.Method.ObjectId = 1;
             notification.Method.Token = _battlenetRequestToken++;

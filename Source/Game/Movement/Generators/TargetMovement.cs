@@ -201,7 +201,7 @@ namespace Game.Movement
             if (owner.IsTypeId(TypeId.Unit))
                 owner.ToCreature().SetCannotReachTarget(false);
 
-            MoveSplineInit init = new MoveSplineInit(owner);
+            MoveSplineInit init = new(owner);
             init.MovebyPath(_path.GetPath());
             init.SetWalk(EnableWalking());
             // Using the same condition for facing target as the one that is used for SetInFront on movement end

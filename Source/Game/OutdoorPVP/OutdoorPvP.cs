@@ -245,7 +245,7 @@ namespace Game.PvP
 
         public void SendDefenseMessage(uint zoneId, uint id)
         {
-            DefenseMessageBuilder builder = new DefenseMessageBuilder(zoneId, id);
+            DefenseMessageBuilder builder = new(zoneId, id);
             var localizer = new LocalizedPacketDo(builder);
             BroadcastWorker(localizer, zoneId);
         }
@@ -304,7 +304,7 @@ namespace Game.PvP
         }
 
         // the map of the objectives belonging to this outdoorpvp
-        public Dictionary<ulong, OPvPCapturePoint> m_capturePoints = new Dictionary<ulong, OPvPCapturePoint>();
+        public Dictionary<ulong, OPvPCapturePoint> m_capturePoints = new();
         List<ObjectGuid>[] m_players = new List<ObjectGuid>[2];
         public OutdoorPvPTypes m_TypeId;
         bool m_sendUpdate;
@@ -521,7 +521,7 @@ namespace Game.PvP
                 }
             }
 
-            List<Unit> players = new List<Unit>();
+            List<Unit> players = new();
             var checker = new AnyPlayerInObjectRangeCheck(m_capturePoint, radius);
             var searcher = new PlayerListSearcher(m_capturePoint, players, checker);
             Cell.VisitWorldObjects(m_capturePoint, searcher, radius);
@@ -722,10 +722,10 @@ namespace Game.PvP
         // pointer to the OutdoorPvP this objective belongs to
         public OutdoorPvP PvP { get; set; }
 
-        public Dictionary<uint, ulong> m_Objects = new Dictionary<uint, ulong>();
-        public Dictionary<uint, ulong> m_Creatures = new Dictionary<uint, ulong>();
-        Dictionary<ulong, uint> m_ObjectTypes = new Dictionary<ulong, uint>();
-        Dictionary<ulong, uint> m_CreatureTypes = new Dictionary<ulong, uint>();
+        public Dictionary<uint, ulong> m_Objects = new();
+        public Dictionary<uint, ulong> m_Creatures = new();
+        Dictionary<ulong, uint> m_ObjectTypes = new();
+        Dictionary<ulong, uint> m_CreatureTypes = new();
     }
 
     class DefenseMessageBuilder : MessageBuilder
@@ -740,7 +740,7 @@ namespace Game.PvP
         {
             string text = Global.OutdoorPvPMgr.GetDefenseMessage(_zoneId, _id, locale);
 
-            DefenseMessage defenseMessage = new DefenseMessage();
+            DefenseMessage defenseMessage = new();
             defenseMessage.ZoneID = _zoneId;
             defenseMessage.MessageText = text;
             return defenseMessage;

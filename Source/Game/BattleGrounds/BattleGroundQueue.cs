@@ -62,7 +62,7 @@ namespace Game.BattleGrounds
             BattlegroundBracketId bracketId = bracketEntry.GetBracketId();
 
             // create new ginfo
-            GroupQueueInfo ginfo = new GroupQueueInfo();
+            GroupQueueInfo ginfo = new();
             ginfo.BgTypeId = BgTypeId;
             ginfo.ArenaType = ArenaType;
             ginfo.ArenaTeamId = arenateamid;
@@ -105,7 +105,7 @@ namespace Game.BattleGrounds
                     if (!member)
                         continue;   // this should never happen
 
-                    PlayerQueueInfo pl_info = new PlayerQueueInfo();
+                    PlayerQueueInfo pl_info = new();
                     pl_info.LastOnlineTime = lastOnlineTime;
                     pl_info.GroupInfo = ginfo;
 
@@ -116,7 +116,7 @@ namespace Game.BattleGrounds
             }
             else
             {
-                PlayerQueueInfo pl_info = new PlayerQueueInfo();
+                PlayerQueueInfo pl_info = new();
                 pl_info.LastOnlineTime = lastOnlineTime;
                 pl_info.GroupInfo = ginfo;
 
@@ -409,10 +409,10 @@ namespace Game.BattleGrounds
                     player.SetInviteForBattlegroundQueueType(bgQueueTypeId, ginfo.IsInvitedToBGInstanceGUID);
 
                     // create remind invite events
-                    BGQueueInviteEvent inviteEvent = new BGQueueInviteEvent(player.GetGUID(), ginfo.IsInvitedToBGInstanceGUID, bgTypeId, ginfo.ArenaType, ginfo.RemoveInviteTime);
+                    BGQueueInviteEvent inviteEvent = new(player.GetGUID(), ginfo.IsInvitedToBGInstanceGUID, bgTypeId, ginfo.ArenaType, ginfo.RemoveInviteTime);
                     m_events.AddEvent(inviteEvent, m_events.CalculateTime(BattlegroundConst.InvitationRemindTime));
                     // create automatic remove events
-                    BGQueueRemoveEvent removeEvent = new BGQueueRemoveEvent(player.GetGUID(), ginfo.IsInvitedToBGInstanceGUID, bgQueueTypeId, ginfo.RemoveInviteTime);
+                    BGQueueRemoveEvent removeEvent = new(player.GetGUID(), ginfo.IsInvitedToBGInstanceGUID, bgQueueTypeId, ginfo.RemoveInviteTime);
                     m_events.AddEvent(removeEvent, m_events.CalculateTime(BattlegroundConst.InviteAcceptWaitTime));
 
                     uint queueSlot = player.GetBattlegroundQueueIndex(bgQueueTypeId);
@@ -968,7 +968,7 @@ namespace Game.BattleGrounds
 
         BattlegroundQueueTypeId m_queueId;
 
-        Dictionary<ObjectGuid, PlayerQueueInfo> m_QueuedPlayers = new Dictionary<ObjectGuid, PlayerQueueInfo>();
+        Dictionary<ObjectGuid, PlayerQueueInfo> m_QueuedPlayers = new();
 
         /// <summary>
         /// This two dimensional array is used to store All queued groups
@@ -986,7 +986,7 @@ namespace Game.BattleGrounds
         uint[][] m_SumOfWaitTimes = new uint[SharedConst.BGTeamsCount][];
 
         // Event handler
-        EventSystem m_events = new EventSystem();
+        EventSystem m_events = new();
 
         SelectionPool[] m_SelectionPools = new SelectionPool[SharedConst.BGTeamsCount];
         // class to select and invite groups to bg
@@ -1042,7 +1042,7 @@ namespace Game.BattleGrounds
             }
             public uint GetPlayerCount() { return PlayerCount; }
 
-            public List<GroupQueueInfo> SelectedGroups = new List<GroupQueueInfo>();
+            public List<GroupQueueInfo> SelectedGroups = new();
 
             uint PlayerCount;
         }
@@ -1142,7 +1142,7 @@ namespace Game.BattleGrounds
     /// </summary>
     public class GroupQueueInfo
     {
-        public Dictionary<ObjectGuid, PlayerQueueInfo> Players = new Dictionary<ObjectGuid, PlayerQueueInfo>();             // player queue info map
+        public Dictionary<ObjectGuid, PlayerQueueInfo> Players = new();             // player queue info map
         public Team Team;                                           // Player team (ALLIANCE/HORDE)
         public BattlegroundTypeId BgTypeId;                            // Battleground type id
         public bool IsRated;                                        // rated

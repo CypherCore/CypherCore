@@ -34,7 +34,7 @@ namespace Game.Entities
         float m_suppressedOrientation; // Stores the creature's "real" orientation while casting
 
         long _lastDamagedTime; // Part of Evade mechanics
-        MultiMap<byte, byte> m_textRepeat = new MultiMap<byte, byte>();
+        MultiMap<byte, byte> m_textRepeat = new();
 
         // Regenerate health
         bool _regenerateHealth; // Set on creation
@@ -61,7 +61,7 @@ namespace Game.Entities
         public uint m_originalEntry;
 
         Position m_homePosition;
-        Position m_transportHomePosition = new Position();
+        Position m_transportHomePosition = new();
 
         bool DisableReputationGain;
 
@@ -90,9 +90,9 @@ namespace Game.Entities
         uint m_combatPulseDelay;                          // (secs) how often the creature puts the entire zone in combat (only works in dungeons)
 
         // vendor items
-        List<VendorItemCount> m_vendorItemCounts = new List<VendorItemCount>();
+        List<VendorItemCount> m_vendorItemCounts = new();
 
-        public Loot loot = new Loot();
+        public Loot loot = new();
         public uint m_groupLootTimer;                            // (msecs)timer used for group loot
         public ObjectGuid lootingGroupLowGUID;                         // used to find group which is looting corpse
         ObjectGuid m_lootRecipient;

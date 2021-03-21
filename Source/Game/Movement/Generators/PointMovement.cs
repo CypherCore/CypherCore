@@ -52,7 +52,7 @@ namespace Game.Movement
 
             owner.AddUnitState(UnitState.RoamingMove);
 
-            MoveSplineInit init = new MoveSplineInit(owner);
+            MoveSplineInit init = new(owner);
             init.MoveTo(_destination.GetPositionX(), _destination.GetPositionY(), _destination.GetPositionZ(), _generatePath);
             if (_speed > 0.0f)
                 init.SetVelocity(_speed);
@@ -99,7 +99,7 @@ namespace Game.Movement
 
                 owner.AddUnitState(UnitState.RoamingMove);
 
-                MoveSplineInit init = new MoveSplineInit(owner);
+                MoveSplineInit init = new(owner);
                 init.MoveTo(_destination.GetPositionX(), _destination.GetPositionY(), _destination.GetPositionZ(), _generatePath);
                 if (_speed > 0.0f) // Default value for point motion type is 0.0, if 0.0 spline will use GetSpeed on unit
                     init.SetVelocity(_speed);

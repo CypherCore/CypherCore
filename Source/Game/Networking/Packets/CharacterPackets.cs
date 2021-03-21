@@ -72,11 +72,11 @@ namespace Game.Networking.Packets
         public bool IsAlliedRacesCreationAllowed;
 
         public int MaxCharacterLevel = 1;
-        public Optional<uint> DisabledClassesMask = new Optional<uint>();
+        public Optional<uint> DisabledClassesMask = new();
 
-        public List<CharacterInfo> Characters = new List<CharacterInfo>(); // all characters on the list
-        public List<RaceUnlock> RaceUnlockData = new List<RaceUnlock>(); //
-        public List<UnlockedConditionalAppearance> UnlockedConditionalAppearances = new List<UnlockedConditionalAppearance>();
+        public List<CharacterInfo> Characters = new(); // all characters on the list
+        public List<RaceUnlock> RaceUnlockData = new(); //
+        public List<UnlockedConditionalAppearance> UnlockedConditionalAppearances = new();
 
         public class CharacterInfo
         {
@@ -141,7 +141,7 @@ namespace Game.Networking.Packets
                 ProfessionIds[0] = 0;
                 ProfessionIds[1] = 0;
 
-                StringArguments equipment = new StringArguments(fields.Read<string>(17));
+                StringArguments equipment = new(fields.Read<string>(17));
                 ListPosition = fields.Read<byte>(19);
                 LastPlayedTime = fields.Read<uint>(20);
 
@@ -230,7 +230,7 @@ namespace Game.Networking.Packets
             public byte RaceId;
             public Class ClassId;
             public byte SexId;
-            public Array<ChrCustomizationChoice> Customizations = new Array<ChrCustomizationChoice>(50);
+            public Array<ChrCustomizationChoice> Customizations = new(50);
             public byte ExperienceLevel;
             public uint ZoneId;
             public uint MapId;
@@ -253,8 +253,8 @@ namespace Game.Networking.Packets
             public bool BoostInProgress; // @todo
             public uint[] ProfessionIds = new uint[2];      // @todo
             public VisualItemInfo[] VisualItems = new VisualItemInfo[InventorySlots.BagEnd];
-            public List<string> MailSenders = new List<string>();
-            public List<uint> MailSenderTypes = new List<uint>();
+            public List<string> MailSenders = new();
+            public List<uint> MailSenderTypes = new();
 
             public struct VisualItemInfo
             {
@@ -559,7 +559,7 @@ namespace Game.Networking.Packets
             public string Name;
             public byte SexID;
             public byte RaceID;
-            public Array<ChrCustomizationChoice> Customizations = new Array<ChrCustomizationChoice>(50);
+            public Array<ChrCustomizationChoice> Customizations = new(50);
         }
     }
 
@@ -870,7 +870,7 @@ namespace Game.Networking.Packets
         }
 
         public byte NewSex;
-        public Array<ChrCustomizationChoice> Customizations = new Array<ChrCustomizationChoice>(50);
+        public Array<ChrCustomizationChoice> Customizations = new(50);
     }
 
     public class BarberShopResult : ServerPacket
@@ -1021,7 +1021,7 @@ namespace Game.Networking.Packets
         ObjectGuid CharGUID;
         string CharName = "";
         byte SexID;
-        Array<ChrCustomizationChoice> Customizations = new Array<ChrCustomizationChoice>(50);
+        Array<ChrCustomizationChoice> Customizations = new(50);
     }
 
     class CharCustomizeFailure : ServerPacket
@@ -1083,8 +1083,8 @@ namespace Game.Networking.Packets
         public Race RaceId = Race.None;
         public Class ClassId = Class.None;
         public Gender Sex = Gender.None;
-        public Array<ChrCustomizationChoice> Customizations = new Array<ChrCustomizationChoice>(50);
-        public Optional<uint> TemplateSet = new Optional<uint>();
+        public Array<ChrCustomizationChoice> Customizations = new(50);
+        public Optional<uint> TemplateSet = new();
         public bool IsTrialBoost;
         public bool UseNPE;
         public string Name;
@@ -1104,7 +1104,7 @@ namespace Game.Networking.Packets
         public ObjectGuid CharGUID;
         public Gender SexID = Gender.None;
         public string CharName;
-        public Array<ChrCustomizationChoice> Customizations = new Array<ChrCustomizationChoice>(50);
+        public Array<ChrCustomizationChoice> Customizations = new(50);
     }
 
     public class CharRaceOrFactionChangeInfo
@@ -1114,7 +1114,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Guid;
         public bool FactionChange;
         public string Name;
-        public Array<ChrCustomizationChoice> Customizations = new Array<ChrCustomizationChoice>(50);
+        public Array<ChrCustomizationChoice> Customizations = new(50);
     }
 
     public class CharacterUndeleteInfo

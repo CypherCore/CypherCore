@@ -188,7 +188,7 @@ namespace Game.Networking.Packets
 
         public uint PageTextID;
         public bool Allow;
-        public List<PageTextInfo> Pages = new List<PageTextInfo>();
+        public List<PageTextInfo> Pages = new();
 
         public struct PageTextInfo
         {
@@ -277,7 +277,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(Allow);
             _worldPacket.FlushBits();
 
-            ByteBuffer statsData = new ByteBuffer();
+            ByteBuffer statsData = new();
             if (Allow)
             {
                 statsData.WriteUInt32(Stats.Type);
@@ -432,7 +432,7 @@ namespace Game.Networking.Packets
             }
         }
 
-        public List<QuestPOIData> QuestPOIDataStats = new List<QuestPOIData>();
+        public List<QuestPOIData> QuestPOIDataStats = new();
     }
 
     class QueryQuestCompletionNPCs : ClientPacket
@@ -468,7 +468,7 @@ namespace Game.Networking.Packets
             }
         }
 
-        public List<QuestCompletionNPC> QuestCompletionNPCs = new List<QuestCompletionNPC>();
+        public List<QuestCompletionNPC> QuestCompletionNPCs = new();
     }
 
     class QueryPetName : ClientPacket
@@ -514,7 +514,7 @@ namespace Game.Networking.Packets
         public bool Allow;
 
         public bool HasDeclined;
-        public DeclinedName DeclinedNames = new DeclinedName();
+        public DeclinedName DeclinedNames = new();
         public uint Timestamp;
         public string Name = "";
     }
@@ -595,8 +595,8 @@ namespace Game.Networking.Packets
                 data.WriteUInt32(NativeRealmAddress.Value);
         }
 
-        public Optional<uint> VirtualRealmAddress = new Optional<uint>(); // current realm (?) (identifier made from the Index, BattleGroup and Region)
-        public Optional<uint> NativeRealmAddress = new Optional<uint>(); // original realm (?) (identifier made from the Index, BattleGroup and Region)
+        public Optional<uint> VirtualRealmAddress = new(); // current realm (?) (identifier made from the Index, BattleGroup and Region)
+        public Optional<uint> NativeRealmAddress = new(); // original realm (?) (identifier made from the Index, BattleGroup and Region)
     }
 
     public class PlayerGuidLookupData
@@ -679,7 +679,7 @@ namespace Game.Networking.Packets
         public Gender Sex = Gender.None;
         public Class ClassID = Class.None;
         public byte Level;
-        public DeclinedName DeclinedNames = new DeclinedName();
+        public DeclinedName DeclinedNames = new();
     }
 
     public class CreatureXDisplay
@@ -699,7 +699,7 @@ namespace Game.Networking.Packets
     public class CreatureDisplayStats
     {
         public float TotalProbability;
-        public List<CreatureXDisplay> CreatureDisplay = new List<CreatureXDisplay>();
+        public List<CreatureXDisplay> CreatureDisplay = new();
     }
 
     public class CreatureStats
@@ -710,11 +710,11 @@ namespace Game.Networking.Packets
         public int CreatureType;
         public int CreatureFamily;
         public int Classification;
-        public CreatureDisplayStats Display = new CreatureDisplayStats();
+        public CreatureDisplayStats Display = new();
         public float HpMulti;
         public float EnergyMulti;
         public bool Leader;
-        public List<uint> QuestItems = new List<uint>();
+        public List<uint> QuestItems = new();
         public uint CreatureMovementInfoID;
         public int HealthScalingExpansion;
         public uint RequiredExpansion;
@@ -724,8 +724,8 @@ namespace Game.Networking.Packets
         public int WidgetSetUnitConditionID;
         public uint[] Flags = new uint[2];
         public uint[] ProxyCreatureID = new uint[SharedConst.MaxCreatureKillCredit];
-        public StringArray Name = new StringArray(SharedConst.MaxCreatureNames);
-        public StringArray NameAlt = new StringArray(SharedConst.MaxCreatureNames);
+        public StringArray Name = new(SharedConst.MaxCreatureNames);
+        public StringArray NameAlt = new(SharedConst.MaxCreatureNames);
     }
 
     public struct DBQueryRecord
@@ -743,13 +743,13 @@ namespace Game.Networking.Packets
         public uint DisplayID;
         public int[] Data = new int[SharedConst.MaxGOData];
         public float Size;
-        public List<uint> QuestItems = new List<uint>();
+        public List<uint> QuestItems = new();
         public uint ContentTuningId;
     }
 
     class QuestCompletionNPC
     {
         public uint QuestID;
-        public List<uint> NPCs = new List<uint>();
+        public List<uint> NPCs = new();
     }
 }

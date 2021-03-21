@@ -798,7 +798,7 @@ namespace Game.Entities
             else
                 lowGuid = map.GenerateLowGuid(HighGuid.Creature);
 
-            Creature creature = new Creature();
+            Creature creature = new();
             if (!creature.Create(lowGuid, map, entry, pos, null, vehId))
                 return null;
 
@@ -807,7 +807,7 @@ namespace Game.Entities
 
         public static Creature CreateCreatureFromDB(ulong spawnId, Map map, bool addToMap = true, bool allowDuplicate = false)
         {
-            Creature creature = new Creature();
+            Creature creature = new();
             if (!creature.LoadFromDB(spawnId, map, addToMap, allowDuplicate))
                 return null;
 
@@ -1181,7 +1181,7 @@ namespace Game.Entities
             data.phaseGroup = GetDBPhase() < 0 ? (uint)-GetDBPhase() : data.phaseGroup;
 
             // update in DB
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
 
             PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_CREATURE);
             stmt.AddValue(0, m_spawnId);
@@ -1500,7 +1500,7 @@ namespace Game.Entities
             GetMap().RemoveRespawnTime(SpawnObjectType.Creature, m_spawnId);
             Global.ObjectMgr.DeleteCreatureData(m_spawnId);
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
 
             PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_CREATURE);
             stmt.AddValue(0, m_spawnId);
@@ -1772,7 +1772,7 @@ namespace Game.Entities
 
                     SetDeathState(DeathState.JustRespawned);
 
-                    CreatureModel display = new CreatureModel(GetNativeDisplayId(), GetNativeDisplayScale(), 1.0f);
+                    CreatureModel display = new(GetNativeDisplayId(), GetNativeDisplayScale(), 1.0f);
                     if (Global.ObjectMgr.GetCreatureModelRandomGender(ref display, GetCreatureTemplate()) != null)
                     {
                         SetDisplayId(display.CreatureDisplayID, display.DisplayScale);
@@ -1977,7 +1977,7 @@ namespace Game.Entities
 
         public void SendAIReaction(AiReaction reactionType)
         {
-            AIReaction packet = new AIReaction();
+            AIReaction packet = new();
 
             packet.UnitGUID = GetGUID();
             packet.Reaction = reactionType;
@@ -1995,7 +1995,7 @@ namespace Game.Entities
 
                 if (radius > 0)
                 {
-                    List<Creature> assistList = new List<Creature>();
+                    List<Creature> assistList = new();
 
                     var u_check = new AnyAssistCreatureInRangeCheck(this, GetVictim(), radius);
                     var searcher = new CreatureListSearcher(this, assistList, u_check);
@@ -2003,7 +2003,7 @@ namespace Game.Entities
 
                     if (!assistList.Empty())
                     {
-                        AssistDelayEvent e = new AssistDelayEvent(GetVictim().GetGUID(), this);
+                        AssistDelayEvent e = new(GetVictim().GetGUID(), this);
                         while (!assistList.Empty())
                         {
                             // Pushing guids because in delay can happen some creature gets despawned
@@ -2271,7 +2271,7 @@ namespace Game.Entities
         {
             Team enemy_team = attacker.GetTeam();
 
-            ZoneUnderAttack packet = new ZoneUnderAttack();
+            ZoneUnderAttack packet = new();
             packet.AreaID = (int)GetAreaId();
             Global.WorldMgr.SendGlobalMessage(packet, null, (enemy_team == Team.Alliance ? Team.Horde : Team.Alliance));
         }
@@ -2969,7 +2969,7 @@ namespace Game.Entities
                 // If an alive instance of this spawnId is already found, skip creation
                 // If only dead instance(s) exist, despawn them and spawn a new (maybe also dead) version
                 var creatureBounds = map.GetCreatureBySpawnIdStore().LookupByKey(spawnId);
-                List<Creature> despawnList = new List<Creature>();
+                List<Creature> despawnList = new();
 
                 foreach (var creature in creatureBounds)
                 {
@@ -3305,7 +3305,7 @@ namespace Game.Entities
 
 
         ObjectGuid m_victim;
-        List<ObjectGuid> m_assistants = new List<ObjectGuid>();
+        List<ObjectGuid> m_assistants = new();
         Unit m_owner;
     }
 

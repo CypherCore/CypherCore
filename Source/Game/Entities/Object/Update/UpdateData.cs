@@ -26,9 +26,9 @@ namespace Game.Entities
     {
         uint MapId;
         uint BlockCount;
-        List<ObjectGuid> destroyGUIDs = new List<ObjectGuid>();
-        List<ObjectGuid> outOfRangeGUIDs = new List<ObjectGuid>();
-        ByteBuffer data = new ByteBuffer();
+        List<ObjectGuid> destroyGUIDs = new();
+        List<ObjectGuid> outOfRangeGUIDs = new();
+        ByteBuffer data = new();
 
         public UpdateData(uint mapId)
         {
@@ -63,7 +63,7 @@ namespace Game.Entities
             packet.NumObjUpdates = BlockCount;
             packet.MapID = (ushort)MapId;
 
-            WorldPacket buffer = new WorldPacket();
+            WorldPacket buffer = new();
             if (buffer.WriteBit(!outOfRangeGUIDs.Empty() || !destroyGUIDs.Empty()))
             {
                 buffer.WriteUInt16((ushort)destroyGUIDs.Count);

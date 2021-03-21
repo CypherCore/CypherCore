@@ -134,7 +134,7 @@ namespace Game.Networking.Packets
         // Lfg
         public uint ProposedRoles;
         public int LfgCompletedMask;
-        public List<int> LfgSlots = new List<int>();
+        public List<int> LfgSlots = new();
     }
 
     class PartyInviteResponse : ClientPacket
@@ -290,7 +290,7 @@ namespace Game.Networking.Packets
             // Auras
             foreach (AuraApplication aurApp in player.GetVisibleAuras())
             {
-                PartyMemberAuraStates aura = new PartyMemberAuraStates();
+                PartyMemberAuraStates aura = new();
                 aura.SpellID = (int)aurApp.GetBase().GetId();
                 aura.ActiveFlags = aurApp.GetEffectMask();
                 aura.Flags = (byte)aurApp.GetFlags();
@@ -329,7 +329,7 @@ namespace Game.Networking.Packets
 
                 foreach (AuraApplication aurApp in pet.GetVisibleAuras())
                 {
-                    PartyMemberAuraStates aura = new PartyMemberAuraStates();
+                    PartyMemberAuraStates aura = new();
 
                     aura.SpellID = (int)aurApp.GetBase().GetId();
                     aura.ActiveFlags = aurApp.GetEffectMask();
@@ -355,7 +355,7 @@ namespace Game.Networking.Packets
 
         public bool ForEnemy;
         public ObjectGuid MemberGuid;
-        public PartyMemberStats MemberStats = new PartyMemberStats();
+        public PartyMemberStats MemberStats = new();
     }
 
     class SetPartyLeader : ClientPacket
@@ -529,7 +529,7 @@ namespace Game.Networking.Packets
         }
 
         public sbyte PartyIndex;
-        public Dictionary<byte, ObjectGuid> TargetIcons = new Dictionary<byte, ObjectGuid>();
+        public Dictionary<byte, ObjectGuid> TargetIcons = new();
     }
 
     class ConvertRaid : ClientPacket
@@ -768,7 +768,7 @@ namespace Game.Networking.Packets
         public int MyIndex;
         public int SequenceNum;
 
-        public List<PartyPlayerInfo> PlayerList = new List<PartyPlayerInfo>();
+        public List<PartyPlayerInfo> PlayerList = new();
 
         public Optional<PartyLFGInfo> LfgInfos;
         public Optional<PartyLootSettings> LootSettings;
@@ -856,7 +856,7 @@ namespace Game.Networking.Packets
         public sbyte PartyIndex;
         public uint ActiveMarkers;
 
-        public List<RaidMarker> RaidMarkers = new List<RaidMarker>();
+        public List<RaidMarker> RaidMarkers = new();
     }
 
     class PartyKillLog : ServerPacket
@@ -906,7 +906,7 @@ namespace Game.Networking.Packets
 
         public int PhaseShiftFlags;
         public ObjectGuid PersonalGUID;
-        public List<PartyMemberPhase> List = new List<PartyMemberPhase>();
+        public List<PartyMemberPhase> List = new();
     }
 
     class PartyMemberAuraStates
@@ -914,7 +914,7 @@ namespace Game.Networking.Packets
         public int SpellID;
         public ushort Flags;
         public uint ActiveFlags;
-        public List<float> Points = new List<float>();
+        public List<float> Points = new();
 
         public void Write(WorldPacket data)
         {
@@ -950,7 +950,7 @@ namespace Game.Networking.Packets
         public int CurrentHealth;
         public int MaxHealth;
 
-        public List<PartyMemberAuraStates> Auras = new List<PartyMemberAuraStates>();
+        public List<PartyMemberAuraStates> Auras = new();
     }
 
     public struct CTROptions
@@ -1022,8 +1022,8 @@ namespace Game.Networking.Packets
 
         public int VehicleSeat;
 
-        public PartyMemberPhaseStates Phases = new PartyMemberPhaseStates();
-        public List<PartyMemberAuraStates> Auras = new List<PartyMemberAuraStates>();
+        public PartyMemberPhaseStates Phases = new();
+        public List<PartyMemberAuraStates> Auras = new();
         public Optional<PartyMemberPetStats> PetStats;
 
         public ushort PowerDisplayID;

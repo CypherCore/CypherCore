@@ -27,10 +27,20 @@ namespace Game.AI
 {
     public class CreatureAI : UnitAI
     {
+        bool _moveInLineOfSightLocked;
+        List<AreaBoundary> _boundary = new();
+        bool _negateBoundary; 
+        
+        protected new Creature me;
+
+        protected EventMap _events = new();
+        protected TaskScheduler _scheduler = new();
+        protected InstanceScript _instanceScript;
+
         public CreatureAI(Creature _creature) : base(_creature)
         {
             me = _creature;
-            MoveInLineOfSight_locked = false;
+            _moveInLineOfSightLocked = false;
         }
 
         public override void OnCharmed(bool apply)
@@ -109,12 +119,12 @@ namespace Game.AI
 
         public virtual void MoveInLineOfSight_Safe(Unit who)
         {
-            if (MoveInLineOfSight_locked)
+            if (_moveInLineOfSightLocked)
                 return;
 
-            MoveInLineOfSight_locked = true;
+            _moveInLineOfSightLocked = true;
             MoveInLineOfSight(who);
-            MoveInLineOfSight_locked = false;
+            _moveInLineOfSightLocked = false;
         }
 
         public virtual void MoveInLineOfSight(Unit who)
@@ -126,7 +136,7 @@ namespace Game.AI
                 me.EngageWithTarget(who);
         }
 
-        void _OnOwnerCombatInteraction(Unit target)
+        void OnOwnerCombatInteraction(Unit target)
         {
             if (target == null || !me.IsAlive())
                 return;
@@ -165,7 +175,7 @@ namespace Game.AI
             if (!_EnterEvadeMode(why))
                 return;
 
-            Log.outDebug( LogFilter.Unit, "Creature {0} enters evade mode.", me.GetEntry());
+            Log.outDebug(LogFilter.Unit, "Creature {0} enters evade mode.", me.GetEntry());
 
             if (me.GetVehicle() == null) // otherwise me will be in evade mode forever
             {
@@ -190,7 +200,7 @@ namespace Game.AI
                 me.GetVehicleKit().Reset(true);
         }
 
-        void SetGazeOn(Unit target)
+        public void SetGazeOn(Unit target)
         {
             if (me.IsValidAttackTarget(target) && target != me.GetVictim())
             {
@@ -276,9 +286,9 @@ namespace Game.AI
             if (_boundary.Empty())
                 return CypherStrings.CreatureMovementNotBounded;
 
-            List<KeyValuePair<int, int>> Q = new List<KeyValuePair<int, int>>();
-            List<KeyValuePair<int, int>> alreadyChecked = new List<KeyValuePair<int, int>>();
-            List<KeyValuePair<int, int>> outOfBounds = new List<KeyValuePair<int, int>>();
+            List<KeyValuePair<int, int>> Q = new();
+            List<KeyValuePair<int, int>> alreadyChecked = new();
+            List<KeyValuePair<int, int>> outOfBounds = new();
 
             Position startPosition = owner.GetPosition();
             if (!CheckBoundary(startPosition)) // fall back to creature position
@@ -309,7 +319,7 @@ namespace Game.AI
                     }
                     if (!alreadyChecked.Contains(next)) // never check a coordinate twice
                     {
-                        Position nextPos = new Position(startPosition.GetPositionX() + next.Key * SharedConst.BoundaryVisualizeStepSize, startPosition.GetPositionY() + next.Value * SharedConst.BoundaryVisualizeStepSize, startPosition.GetPositionZ());
+                        Position nextPos = new(startPosition.GetPositionX() + next.Key * SharedConst.BoundaryVisualizeStepSize, startPosition.GetPositionY() + next.Value * SharedConst.BoundaryVisualizeStepSize, startPosition.GetPositionZ());
                         if (CheckBoundary(nextPos))
                             Q.Add(next);
                         else
@@ -390,7 +400,7 @@ namespace Game.AI
 
             return true;
         }
-        
+
         public void SetBoundary(List<AreaBoundary> boundary, bool negateBoundaries = false)
         {
             _boundary = boundary;
@@ -408,8 +418,8 @@ namespace Game.AI
         public virtual void JustDied(Unit killer) { }
 
         // Called when the creature kills a unit
-        public virtual void KilledUnit(Unit victim) {}
-        
+        public virtual void KilledUnit(Unit victim) { }
+
         // Called when the creature summon successfully other creature
         public virtual void JustSummoned(Creature summon) { }
         public virtual void IsSummonedBy(Unit summoner) { }
@@ -430,11 +440,11 @@ namespace Game.AI
         public virtual void JustUnregisteredAreaTrigger(AreaTrigger areaTrigger) { }
 
         // Called when hit by a spell
-        public virtual void SpellHit(Unit caster, SpellInfo spell) {}
+        public virtual void SpellHit(Unit caster, SpellInfo spell) { }
 
         // Called when spell hits a target
-        public virtual void SpellHitTarget(Unit target, SpellInfo spell) {}
-        
+        public virtual void SpellHitTarget(Unit target, SpellInfo spell) { }
+
         public virtual bool IsEscorted() { return false; }
 
         // Called when creature appears in the world (spawn, respawn, grid load etc...)
@@ -450,18 +460,18 @@ namespace Game.AI
 
         // Called at reaching home after evade
         public virtual void JustReachedHome() { }
-        
+
         // Called at text emote receive from player
         public virtual void ReceiveEmote(Player player, TextEmotes emoteId) { }
 
         // Called when owner takes damage
-        public virtual void OwnerAttackedBy(Unit attacker) { _OnOwnerCombatInteraction(attacker); }
+        public virtual void OwnerAttackedBy(Unit attacker) { OnOwnerCombatInteraction(attacker); }
 
         // Called when owner attacks something
-        public virtual void OwnerAttacked(Unit target) { _OnOwnerCombatInteraction(target); }
+        public virtual void OwnerAttacked(Unit target) { OnOwnerCombatInteraction(target); }
 
         // called when the corpse of this creature gets removed
-        public virtual void CorpseRemoved(long respawnDelay) {}
+        public virtual void CorpseRemoved(long respawnDelay) { }
 
         public virtual void PassengerBoarded(Unit passenger, sbyte seatId, bool apply) { }
 
@@ -481,18 +491,9 @@ namespace Game.AI
         /// </summary>
         /// <param name="onlyIfActive"></param>
         /// <returns></returns>
-        public virtual bool IsEscortNPC(bool onlyIfActive)  { return false;    }
-        
-        List<AreaBoundary> GetBoundary() { return _boundary; }
+        public virtual bool IsEscortNPC(bool onlyIfActive) { return false; }
 
-        bool MoveInLineOfSight_locked;
-        protected new Creature me;
-        List<AreaBoundary> _boundary = new List<AreaBoundary>();
-        bool _negateBoundary;
-
-        protected EventMap _events = new EventMap();
-        protected TaskScheduler _scheduler = new TaskScheduler();
-        protected InstanceScript _instance;
+        public List<AreaBoundary> GetBoundary() { return _boundary; }
     }
 
     public struct AISpellInfoType

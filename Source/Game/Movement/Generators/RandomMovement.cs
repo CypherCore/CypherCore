@@ -92,7 +92,7 @@ namespace Game.Movement
 
             owner.AddUnitState(UnitState.RoamingMove);
 
-            Position position = new Position(_reference);
+            Position position = new(_reference);
             float distance = RandomHelper.FRand(0.0f, 1.0f) * _wanderDistance;
             float angle = RandomHelper.FRand(0.0f, 1.0f) * MathF.PI * 2.0f;
             owner.MovePositionToFirstCollision(ref position, distance, angle);
@@ -110,7 +110,7 @@ namespace Game.Movement
                 return;
             }
 
-            MoveSplineInit init = new MoveSplineInit(owner);
+            MoveSplineInit init = new(owner);
             init.MovebyPath(_path.GetPath());
             init.SetWalk(true);
             int traveltime = init.Launch();

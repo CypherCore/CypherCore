@@ -76,7 +76,7 @@ namespace Game.Entities
                 if (!m_cinematicCamera.Empty())
                 {
                     FlyByCamera firstCamera = m_cinematicCamera.FirstOrDefault();
-                    Position pos = new Position(firstCamera.locations.X, firstCamera.locations.Y, firstCamera.locations.Z, firstCamera.locations.W);
+                    Position pos = new(firstCamera.locations.X, firstCamera.locations.Y, firstCamera.locations.Z, firstCamera.locations.W);
                     if (!pos.IsPositionValid())
                         return;
 
@@ -119,9 +119,9 @@ namespace Game.Entities
             if (m_activeCinematic == null || m_activeCinematicCameraIndex == -1 || m_cinematicCamera == null || m_cinematicCamera.Count == 0)
                 return;
 
-            Position lastPosition = new Position();
+            Position lastPosition = new();
             uint lastTimestamp = 0;
-            Position nextPosition = new Position();
+            Position nextPosition = new();
             uint nextTimestamp = 0;
 
             // Obtain direction of travel
@@ -179,7 +179,7 @@ namespace Game.Entities
             float xDiff = nextPosition.posX - lastPosition.posX;
             float yDiff = nextPosition.posY - lastPosition.posY;
             float zDiff = nextPosition.posZ - lastPosition.posZ;
-            Position interPosition = new Position(lastPosition.posX + (xDiff * ((float)interDiff / timeDiff)), lastPosition.posY +
+            Position interPosition = new(lastPosition.posX + (xDiff * ((float)interDiff / timeDiff)), lastPosition.posY +
                 (yDiff * ((float)interDiff / timeDiff)), lastPosition.posZ + (zDiff * ((float)interDiff / timeDiff)));
 
             // Advance (at speed) to this position. The remote sight object is used

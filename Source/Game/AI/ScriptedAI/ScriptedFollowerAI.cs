@@ -35,11 +35,17 @@ namespace Game.AI
 
     class FollowerAI : ScriptedAI
     {
+        ObjectGuid _leaderGUID;
+        uint _updateFollowTimer;
+        FollowState _followState;
+
+        Quest _questForFollow;                     //normally we have a quest
+
         public FollowerAI(Creature creature) : base(creature)
         {
-            m_uiUpdateFollowTimer = 2500;
-            m_uiFollowState = FollowState.None;
-            m_pQuestForFollow = null;
+            _updateFollowTimer = 2500;
+            _followState = FollowState.None;
+            _questForFollow = null;
         }
 
         public override void AttackStart(Unit who)
@@ -124,7 +130,7 @@ namespace Game.AI
 
         public override void JustDied(Unit killer)
         {
-            if (!HasFollowState(FollowState.Inprogress) || m_uiLeaderGUID.IsEmpty() || m_pQuestForFollow == null)
+            if (!HasFollowState(FollowState.Inprogress) || _leaderGUID.IsEmpty() || _questForFollow == null)
                 return;
 
             // @todo need a better check for quests with time limit.
@@ -139,17 +145,17 @@ namespace Game.AI
                         Player member = groupRef.GetSource();
                         if (member)
                             if (member.IsInMap(player))
-                                member.FailQuest(m_pQuestForFollow.Id);
+                                member.FailQuest(_questForFollow.Id);
                     }
                 }
                 else
-                    player.FailQuest(m_pQuestForFollow.Id);
+                    player.FailQuest(_questForFollow.Id);
             }
         }
 
         public override void JustAppeared()
         {
-            m_uiFollowState = FollowState.None;
+            _followState = FollowState.None;
 
             if (!IsCombatMovementAllowed())
                 SetCombatMovement(true);
@@ -191,7 +197,7 @@ namespace Game.AI
         {
             if (HasFollowState(FollowState.Inprogress) && !me.GetVictim())
             {
-                if (m_uiUpdateFollowTimer <= uiDiff)
+                if (_updateFollowTimer <= uiDiff)
                 {
                     if (HasFollowState(FollowState.Complete) && !HasFollowState(FollowState.PostEvent))
                     {
@@ -241,10 +247,10 @@ namespace Game.AI
                         return;
                     }
 
-                    m_uiUpdateFollowTimer = 1000;
+                    _updateFollowTimer = 1000;
                 }
                 else
-                    m_uiUpdateFollowTimer -= uiDiff;
+                    _updateFollowTimer -= uiDiff;
             }
 
             UpdateFollowerAI(uiDiff);
@@ -275,7 +281,7 @@ namespace Game.AI
             }
         }
 
-        void StartFollow(Player player, uint factionForFollower = 0, Quest quest = null)
+        public void StartFollow(Player player, uint factionForFollower = 0, Quest quest = null)
         {
             if (me.GetVictim())
             {
@@ -290,12 +296,12 @@ namespace Game.AI
             }
 
             //set variables
-            m_uiLeaderGUID = player.GetGUID();
+            _leaderGUID = player.GetGUID();
 
             if (factionForFollower != 0)
                 me.SetFaction(factionForFollower);
 
-            m_pQuestForFollow = quest;
+            _questForFollow = quest;
 
             if (me.GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Waypoint)
             {
@@ -311,12 +317,12 @@ namespace Game.AI
 
             me.GetMotionMaster().MoveFollow(player, SharedConst.PetFollowDist, SharedConst.PetFollowAngle);
 
-            Log.outDebug(LogFilter.Scripts, "FollowerAI start follow {0} ({1})", player.GetName(), m_uiLeaderGUID.ToString());
+            Log.outDebug(LogFilter.Scripts, "FollowerAI start follow {0} ({1})", player.GetName(), _leaderGUID.ToString());
         }
 
         Player GetLeaderForFollower()
         {
-            Player player = Global.ObjAccessor.GetPlayer(me, m_uiLeaderGUID);
+            Player player = Global.ObjAccessor.GetPlayer(me, _leaderGUID);
             if (player)
             {
                 if (player.IsAlive())
@@ -332,7 +338,7 @@ namespace Game.AI
                             if (member &&  me.IsWithinDistInMap(member, 100.0f) && member.IsAlive())
                             {
                                 Log.outDebug(LogFilter.Scripts, "FollowerAI GetLeader changed and returned new leader.");
-                                m_uiLeaderGUID = member.GetGUID();
+                                _leaderGUID = member.GetGUID();
                                 return member;
                             }
                         }
@@ -344,7 +350,7 @@ namespace Game.AI
             return null;
         }
 
-        void SetFollowComplete(bool bWithEndEvent = false)
+        public void SetFollowComplete(bool bWithEndEvent = false)
         {
             if (me.HasUnitState(UnitState.Follow))
             {
@@ -366,15 +372,9 @@ namespace Game.AI
             AddFollowState(FollowState.Complete);
         }
 
-        bool HasFollowState(FollowState uiFollowState) { return (m_uiFollowState & uiFollowState) != 0; }
+        bool HasFollowState(FollowState uiFollowState) { return (_followState & uiFollowState) != 0; }
 
-        void AddFollowState(FollowState uiFollowState) { m_uiFollowState |= uiFollowState; }
-        void RemoveFollowState(FollowState uiFollowState) { m_uiFollowState &= ~uiFollowState; }
-
-        ObjectGuid m_uiLeaderGUID;
-        uint m_uiUpdateFollowTimer;
-        FollowState m_uiFollowState;
-
-        Quest m_pQuestForFollow;                     //normally we have a quest
+        void AddFollowState(FollowState uiFollowState) { _followState |= uiFollowState; }
+        void RemoveFollowState(FollowState uiFollowState) { _followState &= ~uiFollowState; }
     }
 }

@@ -86,7 +86,7 @@ namespace Game.Networking.Packets
                 guildData.Write(_worldPacket);
         }
 
-        public List<LFGuildBrowseData> Post = new List<LFGuildBrowseData>();
+        public List<LFGuildBrowseData> Post = new();
     }
 
     class LFGuildDeclineRecruit : ClientPacket
@@ -120,7 +120,7 @@ namespace Game.Networking.Packets
                 application.Write(_worldPacket);
         }
 
-        public List<LFGuildApplicationData> Application = new List<LFGuildApplicationData>();
+        public List<LFGuildApplicationData> Application = new();
         public int NumRemaining;
     }
 
@@ -170,7 +170,7 @@ namespace Game.Networking.Packets
                 recruit.Write(_worldPacket);
         }
 
-        public List<LFGuildRecruitData> Recruits = new List<LFGuildRecruitData>();
+        public List<LFGuildRecruitData> Recruits = new();
         public long UpdateTime;
     }
 

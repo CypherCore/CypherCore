@@ -56,7 +56,7 @@ namespace Game
             // find taxi node
             uint nearest = Global.ObjectMgr.GetNearestTaxiNode(unit.GetPositionX(), unit.GetPositionY(), unit.GetPositionZ(), unit.GetMapId(), player.GetTeam());
 
-            TaxiNodeStatusPkt data = new TaxiNodeStatusPkt();
+            TaxiNodeStatusPkt data = new();
             data.Unit = guid;
 
             if (nearest == 0)
@@ -103,7 +103,7 @@ namespace Game
             if (unit.GetEntry() == 29480)
                 GetPlayer().SetTaxiCheater(true); // Grimwing in Ebon Hold, special case. NOTE: Not perfect, Zul'Aman should not be included according to WoWhead, and I think taxicheat includes it.
 
-            ShowTaxiNodes data = new ShowTaxiNodes();
+            ShowTaxiNodes data = new();
             data.WindowInfo.HasValue = true;
             data.WindowInfo.Value.UnitGUID = unit.GetGUID();
             data.WindowInfo.Value.CurrentNode = (int)curloc;
@@ -150,7 +150,7 @@ namespace Game
             {
                 SendPacket(new NewTaxiPath());
 
-                TaxiNodeStatusPkt data = new TaxiNodeStatusPkt();
+                TaxiNodeStatusPkt data = new();
                 data.Unit = unit.GetGUID();
                 data.Status = TaxiNodeStatus.Learned;
                 SendPacket(data);
@@ -220,14 +220,14 @@ namespace Game
                 }
             }
 
-            List<uint> nodes = new List<uint>();
+            List<uint> nodes = new();
             Global.TaxiPathGraph.GetCompleteNodeRoute(from, to, GetPlayer(), nodes);
             GetPlayer().ActivateTaxiPathTo(nodes, unit, 0, preferredMountDisplay);
         }
 
         public void SendActivateTaxiReply(ActivateTaxiReply reply = ActivateTaxiReply.Ok)
         {
-            ActivateTaxiReplyPkt data = new ActivateTaxiReplyPkt();
+            ActivateTaxiReplyPkt data = new();
             data.Reply = reply;
             SendPacket(data);
         }

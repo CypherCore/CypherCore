@@ -25,7 +25,7 @@ namespace Game.Collision
 {
     public class StaticModelList
     {
-        public static Dictionary<uint, GameobjectModelData> models = new Dictionary<uint, GameobjectModelData>();
+        public static Dictionary<uint, GameobjectModelData> models = new();
     }
 
     public abstract class GameObjectModelOwnerBase
@@ -47,7 +47,7 @@ namespace Game.Collision
             if (modelData == null)
                 return false;
 
-            AxisAlignedBox mdl_box = new AxisAlignedBox(modelData.bound);
+            AxisAlignedBox mdl_box = new(modelData.bound);
             // ignore models with no bounds
             if (mdl_box == AxisAlignedBox.Zero())
             {
@@ -69,7 +69,7 @@ namespace Game.Collision
             iInvRot = iRotation.inverse();
             // transform bounding box:
             mdl_box = new AxisAlignedBox(mdl_box.Lo * iScale, mdl_box.Hi * iScale);
-            AxisAlignedBox rotated_bounds = new AxisAlignedBox();
+            AxisAlignedBox rotated_bounds = new();
             for (int i = 0; i < 8; ++i)
                 rotated_bounds.merge(iRotation * mdl_box.corner(i));
 
@@ -81,7 +81,7 @@ namespace Game.Collision
 
         public static GameObjectModel Create(GameObjectModelOwnerBase modelOwner)
         {
-            GameObjectModel mdl = new GameObjectModel();
+            GameObjectModel mdl = new();
             if (!mdl.Initialize(modelOwner))
                 return null;
 
@@ -102,7 +102,7 @@ namespace Game.Collision
 
             // child bounds are defined in object space:
             Vector3 p = iInvRot * (ray.Origin - iPos) * iInvScale;
-            Ray modRay = new Ray(p, iInvRot * ray.Direction);
+            Ray modRay = new(p, iInvRot * ray.Direction);
             float distance = maxDist * iInvScale;
             bool hit = iModel.IntersectRay(modRay, ref distance, stopAtFirstHit, ignoreFlags);
             if (hit)
@@ -149,7 +149,7 @@ namespace Game.Collision
             if (it == null)
                 return false;
 
-            AxisAlignedBox mdl_box = new AxisAlignedBox(it.bound);
+            AxisAlignedBox mdl_box = new(it.bound);
             // ignore models with no bounds
             if (mdl_box == AxisAlignedBox.Zero())
             {
@@ -163,7 +163,7 @@ namespace Game.Collision
             iInvRot = iRotation.inverse();
             // transform bounding box:
             mdl_box = new AxisAlignedBox(mdl_box.Lo * iScale, mdl_box.Hi * iScale);
-            AxisAlignedBox rotated_bounds = new AxisAlignedBox();
+            AxisAlignedBox rotated_bounds = new();
             for (int i = 0; i < 8; ++i)
                 rotated_bounds.merge(iRotation * mdl_box.corner(i));
 
@@ -190,7 +190,7 @@ namespace Game.Collision
             }
             try
             {
-                using (BinaryReader reader = new BinaryReader(new FileStream(filename, FileMode.Open, FileAccess.Read)))
+                using (BinaryReader reader = new(new FileStream(filename, FileMode.Open, FileAccess.Read)))
                 {
                     string magic = reader.ReadStringFromChars(8);
                     if (magic != MapConst.VMapMagic)

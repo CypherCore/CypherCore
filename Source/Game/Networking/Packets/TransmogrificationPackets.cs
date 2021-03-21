@@ -32,7 +32,7 @@ namespace Game.Networking.Packets
 
             for (var i = 0; i < itemsCount; ++i)
             {
-                TransmogrifyItem item = new TransmogrifyItem();
+                TransmogrifyItem item = new();
                 item.Read(_worldPacket);
                 Items[i] = item;
             }
@@ -41,7 +41,7 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid Npc;
-        public Array<TransmogrifyItem> Items = new Array<TransmogrifyItem>(13);
+        public Array<TransmogrifyItem> Items = new(13);
         public bool CurrentSpecOnly;
     }
 
@@ -65,8 +65,8 @@ namespace Game.Networking.Packets
 
         public bool IsFullUpdate;
         public bool IsSetFavorite;
-        public List<uint> FavoriteAppearances = new List<uint>();
-        public List<uint> NewAppearances = new List<uint>();
+        public List<uint> FavoriteAppearances = new();
+        public List<uint> NewAppearances = new();
     }
 
     class TransmogrifyNPC : ServerPacket

@@ -71,7 +71,7 @@ namespace Game.Chat
 
         static bool SetDataForCommandInTable(ICollection<ChatCommand> table, string text, uint permission, string help, string fullcommand)
         {
-            StringArguments args = new StringArguments(text);
+            StringArguments args = new(text);
             string cmd = args.NextString().ToLower();
 
             foreach (var command in table)
@@ -140,7 +140,7 @@ namespace Game.Chat
             return _commands.Values;
         }
 
-        static SortedDictionary<string, ChatCommand> _commands = new SortedDictionary<string, ChatCommand>();
+        static SortedDictionary<string, ChatCommand> _commands = new();
     }
 
     public delegate bool HandleCommandDelegate(StringArguments args, CommandHandler handler);
@@ -192,6 +192,6 @@ namespace Game.Chat
         public bool AllowConsole;
         public HandleCommandDelegate Handler;
         public string Help;
-        public List<ChatCommand> ChildCommands = new List<ChatCommand>();
+        public List<ChatCommand> ChildCommands = new();
     }
 }

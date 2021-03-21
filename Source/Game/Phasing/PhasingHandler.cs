@@ -15,7 +15,7 @@ namespace Game
 {
     public class PhasingHandler
     {
-        public static PhaseShift EmptyPhaseShift = new PhaseShift();
+        public static PhaseShift EmptyPhaseShift = new();
 
         public static PhaseFlags GetPhaseFlags(uint phaseId)
         {
@@ -208,7 +208,7 @@ namespace Game
         {
             PhaseShift phaseShift = obj.GetPhaseShift();
             PhaseShift suppressedPhaseShift = obj.GetSuppressedPhaseShift();
-            ConditionSourceInfo srcInfo = new ConditionSourceInfo(obj);
+            ConditionSourceInfo srcInfo = new(obj);
 
             obj.GetPhaseShift().VisibleMapIds.Clear();
             obj.GetPhaseShift().UiMapPhaseIds.Clear();
@@ -237,7 +237,7 @@ namespace Game
             PhaseShift phaseShift = obj.GetPhaseShift();
             PhaseShift suppressedPhaseShift = obj.GetSuppressedPhaseShift();
             var oldPhases = phaseShift.GetPhases(); // for comparison
-            ConditionSourceInfo srcInfo = new ConditionSourceInfo(obj);
+            ConditionSourceInfo srcInfo = new(obj);
 
             obj.GetPhaseShift().ClearPhases();
             obj.GetSuppressedPhaseShift().ClearPhases();
@@ -309,8 +309,8 @@ namespace Game
         {
             PhaseShift phaseShift = obj.GetPhaseShift();
             PhaseShift suppressedPhaseShift = obj.GetSuppressedPhaseShift();
-            PhaseShift newSuppressions = new PhaseShift();
-            ConditionSourceInfo srcInfo = new ConditionSourceInfo(obj);
+            PhaseShift newSuppressions = new();
+            ConditionSourceInfo srcInfo = new(obj);
             bool changed = false;
 
             foreach (var pair in phaseShift.Phases.ToList())
@@ -413,7 +413,7 @@ namespace Game
 
         public static void SendToPlayer(Player player, PhaseShift phaseShift)
         {
-            PhaseShiftChange phaseShiftChange = new PhaseShiftChange();
+            PhaseShiftChange phaseShiftChange = new();
             phaseShiftChange.Client = player.GetGUID();
             phaseShiftChange.Phaseshift.PhaseShiftFlags = (uint)phaseShift.Flags;
             phaseShiftChange.Phaseshift.PersonalGUID = phaseShift.PersonalGuid;
@@ -484,7 +484,7 @@ namespace Game
 
         public static bool InDbPhaseShift(WorldObject obj, PhaseUseFlagsValues phaseUseFlags, ushort phaseId, uint phaseGroupId)
         {
-            PhaseShift phaseShift = new PhaseShift();
+            PhaseShift phaseShift = new();
             InitDbPhaseShift(phaseShift, phaseUseFlags, phaseId, phaseGroupId);
             return obj.GetPhaseShift().CanSee(phaseShift);
         }
@@ -535,7 +535,7 @@ namespace Game
             chat.SendSysMessage(CypherStrings.PhaseshiftStatus, phaseShift.Flags, phaseShift.PersonalGuid.ToString());
             if (!phaseShift.Phases.Empty())
             {
-                StringBuilder phases = new StringBuilder();
+                StringBuilder phases = new();
                 string cosmetic = Global.ObjectMgr.GetCypherString(CypherStrings.PhaseFlagCosmetic, chat.GetSessionDbcLocale());
                 string personal = Global.ObjectMgr.GetCypherString(CypherStrings.PhaseFlagPersonal, chat.GetSessionDbcLocale());
                 foreach (var pair in phaseShift.Phases)
@@ -553,7 +553,7 @@ namespace Game
 
             if (!phaseShift.VisibleMapIds.Empty())
             {
-                StringBuilder visibleMapIds = new StringBuilder();
+                StringBuilder visibleMapIds = new();
                 foreach (var visibleMapId in phaseShift.VisibleMapIds)
                     visibleMapIds.Append(visibleMapId.Key + ',' + ' ');
 
@@ -562,7 +562,7 @@ namespace Game
 
             if (!phaseShift.UiMapPhaseIds.Empty())
             {
-                StringBuilder uiWorldMapAreaIdSwaps = new StringBuilder();
+                StringBuilder uiWorldMapAreaIdSwaps = new();
                 foreach (var uiWorldMapAreaIdSwap in phaseShift.UiMapPhaseIds)
                     uiWorldMapAreaIdSwaps.Append(uiWorldMapAreaIdSwap.Key + ',' + ' ');
 
@@ -572,7 +572,7 @@ namespace Game
 
         public static string FormatPhases(PhaseShift phaseShift)
         {
-            StringBuilder phases = new StringBuilder();
+            StringBuilder phases = new();
             foreach (var phaseId in phaseShift.Phases.Keys)
                 phases.Append(phaseId + ',');
 

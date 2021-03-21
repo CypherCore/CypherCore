@@ -179,14 +179,14 @@ namespace Game.Movement
 
             Cypher.Assert(_currentNode < _path.nodes.Count, $"WaypointMovementGenerator.StartMove: tried to reference a node id ({_currentNode}) which is not included in path ({_path.id})");
             WaypointNode waypoint = _path.nodes.ElementAt(_currentNode);
-            Position formationDest = new Position(waypoint.x, waypoint.y, waypoint.z, (waypoint.orientation != 0 && waypoint.delay != 0) ? waypoint.orientation : 0.0f);
+            Position formationDest = new(waypoint.x, waypoint.y, waypoint.z, (waypoint.orientation != 0 && waypoint.delay != 0) ? waypoint.orientation : 0.0f);
 
             _isArrivalDone = false;
             _recalculateSpeed = false;
 
             creature.AddUnitState(UnitState.RoamingMove);
 
-            MoveSplineInit init = new MoveSplineInit(creature);
+            MoveSplineInit init = new(creature);
 
             //! If creature is on transport, we assume waypoints set in DB are already transport offsets
             if (transportPath)

@@ -37,6 +37,9 @@ namespace Game.Achievements
 {
     public class CriteriaHandler
     {
+        protected Dictionary<uint, CriteriaProgress> _criteriaProgress = new();
+        Dictionary<uint, uint /*ms time left*/> _timeCriteriaTrees = new();
+
         public virtual void Reset()
         {
             foreach (var iter in _criteriaProgress)
@@ -2599,13 +2602,28 @@ namespace Game.Achievements
 
         public virtual string GetOwnerInfo() { return ""; }
         public virtual List<Criteria> GetCriteriaByType(CriteriaTypes type, uint asset) { return null; }
-
-        protected Dictionary<uint, CriteriaProgress> _criteriaProgress = new Dictionary<uint, CriteriaProgress>();
-        Dictionary<uint, uint /*ms time left*/> _timeCriteriaTrees = new Dictionary<uint, uint>();
     }
 
     public class CriteriaManager : Singleton<CriteriaManager>
     {
+        Dictionary<uint, CriteriaDataSet> _criteriaDataMap = new();
+
+        Dictionary<uint, CriteriaTree> _criteriaTrees = new();
+        Dictionary<uint, Criteria> _criteria = new();
+        Dictionary<uint, ModifierTreeNode> _criteriaModifiers = new();
+
+        MultiMap<uint, CriteriaTree> _criteriaTreeByCriteria = new();
+
+        // store criterias by type to speed up lookup
+        MultiMap<CriteriaTypes, Criteria> _criteriasByType = new();
+        MultiMap<uint, Criteria>[] _criteriasByAsset = new MultiMap<uint, Criteria>[(int)CriteriaTypes.TotalTypes];
+        MultiMap<CriteriaTypes, Criteria> _guildCriteriasByType = new();
+        MultiMap<CriteriaTypes, Criteria> _scenarioCriteriasByType = new();
+        MultiMap<CriteriaTypes, Criteria> _questObjectiveCriteriasByType = new();
+
+        MultiMap<CriteriaTimedTypes, Criteria> _criteriasByTimedType = new();
+        MultiMap<int, Criteria>[] _criteriasByFailEvent = new MultiMap<int, Criteria>[(int)CriteriaCondition.Max];
+
         CriteriaManager()
         {
             for (var i = 0; i < (int)CriteriaTypes.TotalTypes; ++i)
@@ -2625,7 +2643,7 @@ namespace Game.Achievements
             // Load modifier tree nodes
             foreach (var tree in CliDB.ModifierTreeStorage.Values)
             {
-                ModifierTreeNode node = new ModifierTreeNode();
+                ModifierTreeNode node = new();
                 node.Entry = tree;
                 _criteriaModifiers[node.Entry.Id] = node;
             }
@@ -2667,19 +2685,19 @@ namespace Game.Achievements
         {
             uint oldMSTime = Time.GetMSTime();
 
-            Dictionary<uint /*criteriaTreeID*/, AchievementRecord> achievementCriteriaTreeIds = new Dictionary<uint, AchievementRecord>();
+            Dictionary<uint /*criteriaTreeID*/, AchievementRecord> achievementCriteriaTreeIds = new();
             foreach (AchievementRecord achievement in CliDB.AchievementStorage.Values)
                 if (achievement.CriteriaTree != 0)
                     achievementCriteriaTreeIds[achievement.CriteriaTree] = achievement;
 
-            Dictionary<uint, ScenarioStepRecord> scenarioCriteriaTreeIds = new Dictionary<uint, ScenarioStepRecord>();
+            Dictionary<uint, ScenarioStepRecord> scenarioCriteriaTreeIds = new();
             foreach (ScenarioStepRecord scenarioStep in CliDB.ScenarioStepStorage.Values)
             {
                 if (scenarioStep.CriteriaTreeId != 0)
                     scenarioCriteriaTreeIds[scenarioStep.CriteriaTreeId] = scenarioStep;
             }
 
-            Dictionary<uint /*criteriaTreeID*/, QuestObjective> questObjectiveCriteriaTreeIds = new Dictionary<uint, QuestObjective>();
+            Dictionary<uint /*criteriaTreeID*/, QuestObjective> questObjectiveCriteriaTreeIds = new();
             foreach (var pair in Global.ObjectMgr.GetQuestTemplates())
             {
                 foreach (QuestObjective objective in pair.Value.Objectives)
@@ -2702,7 +2720,7 @@ namespace Game.Achievements
                 if (achievement == null && scenarioStep == null && questObjective == null)
                     continue;
 
-                CriteriaTree criteriaTree = new CriteriaTree();
+                CriteriaTree criteriaTree = new();
                 criteriaTree.Id = tree.Id;
                 criteriaTree.Achievement = achievement;
                 criteriaTree.ScenarioStep = scenarioStep;
@@ -2742,7 +2760,7 @@ namespace Game.Achievements
                 if (treeList.Empty())
                     continue;
 
-                Criteria criteria = new Criteria();
+                Criteria criteria = new();
                 criteria.Id = criteriaEntry.Id;
                 criteria.Entry = criteriaEntry;
                 criteria.Modifier = _criteriaModifiers.LookupByKey(criteriaEntry.ModifierTreeId);
@@ -2863,13 +2881,13 @@ namespace Game.Achievements
                         scriptId = Global.ObjectMgr.GetScriptId(scriptName);
                 }
 
-                CriteriaData data = new CriteriaData(dataType, result.Read<uint>(2), result.Read<uint>(3), scriptId);
+                CriteriaData data = new(dataType, result.Read<uint>(2), result.Read<uint>(3), scriptId);
 
                 if (!data.IsValid(criteria))
                     continue;
 
                 // this will allocate empty data set storage
-                CriteriaDataSet dataSet = new CriteriaDataSet();
+                CriteriaDataSet dataSet = new();
                 dataSet.SetCriteriaId(criteria_id);
 
                 // add real data only for not NONE data types
@@ -3012,30 +3030,12 @@ namespace Game.Achievements
 
             func(tree);
         }
-
-        Dictionary<uint, CriteriaDataSet> _criteriaDataMap = new Dictionary<uint, CriteriaDataSet>();
-
-        Dictionary<uint, CriteriaTree> _criteriaTrees = new Dictionary<uint, CriteriaTree>();
-        Dictionary<uint, Criteria> _criteria = new Dictionary<uint, Criteria>();
-        Dictionary<uint, ModifierTreeNode> _criteriaModifiers = new Dictionary<uint, ModifierTreeNode>();
-
-        MultiMap<uint, CriteriaTree> _criteriaTreeByCriteria = new MultiMap<uint, CriteriaTree>();
-
-        // store criterias by type to speed up lookup
-        MultiMap<CriteriaTypes, Criteria> _criteriasByType = new MultiMap<CriteriaTypes, Criteria>();
-        MultiMap<uint, Criteria>[] _criteriasByAsset = new MultiMap<uint, Criteria>[(int)CriteriaTypes.TotalTypes];
-        MultiMap<CriteriaTypes, Criteria> _guildCriteriasByType = new MultiMap<CriteriaTypes, Criteria>();
-        MultiMap<CriteriaTypes, Criteria> _scenarioCriteriasByType = new MultiMap<CriteriaTypes, Criteria>();
-        MultiMap<CriteriaTypes, Criteria> _questObjectiveCriteriasByType = new MultiMap<CriteriaTypes, Criteria>();
-
-        MultiMap<CriteriaTimedTypes, Criteria> _criteriasByTimedType = new MultiMap<CriteriaTimedTypes, Criteria>();
-        MultiMap<int, Criteria>[] _criteriasByFailEvent = new MultiMap<int, Criteria>[(int)CriteriaCondition.Max];
     }
 
     public class ModifierTreeNode
     {
         public ModifierTreeRecord Entry;
-        public List<ModifierTreeNode> Children = new List<ModifierTreeNode>();
+        public List<ModifierTreeNode> Children = new();
     }
 
     public class Criteria
@@ -3054,7 +3054,7 @@ namespace Game.Achievements
         public ScenarioStepRecord ScenarioStep;
         public QuestObjective QuestObjective;
         public Criteria Criteria;
-        public List<CriteriaTree> Children = new List<CriteriaTree>();
+        public List<CriteriaTree> Children = new();
     }
 
     public class CriteriaProgress
@@ -3067,7 +3067,67 @@ namespace Game.Achievements
 
     [StructLayout(LayoutKind.Explicit)]
     public class CriteriaData
-    {
+    { 
+        [FieldOffset(0)]
+        public CriteriaDataType DataType;
+
+        [FieldOffset(4)]
+        public CreatureStruct Creature;
+
+        [FieldOffset(4)]
+        public ClassRaceStruct ClassRace;
+
+        [FieldOffset(4)]
+        public HealthStruct Health;
+
+        [FieldOffset(4)]
+        public AuraStruct Aura;
+
+        [FieldOffset(4)]
+        public ValueStruct Value;
+
+        [FieldOffset(4)]
+        public LevelStruct Level;
+
+        [FieldOffset(4)]
+        public GenderStruct Gender;
+
+        [FieldOffset(4)]
+        public MapPlayersStruct MapPlayers;
+
+        [FieldOffset(4)]
+        public TeamStruct TeamId;
+
+        [FieldOffset(4)]
+        public DrunkStruct Drunk;
+
+        [FieldOffset(4)]
+        public HolidayStruct Holiday;
+
+        [FieldOffset(4)]
+        public BgLossTeamScoreStruct BattlegroundScore;
+
+        [FieldOffset(4)]
+        public EquippedItemStruct EquippedItem;
+
+        [FieldOffset(4)]
+        public MapIdStruct MapId;
+
+        [FieldOffset(4)]
+        public KnownTitleStruct KnownTitle;
+
+        [FieldOffset(4)]
+        public GameEventStruct GameEvent;
+
+        [FieldOffset(4)]
+        public ItemQualityStruct itemQuality;
+
+        [FieldOffset(4)]
+        public RawStruct Raw;
+
+        [FieldOffset(12)]
+        public uint ScriptId;
+
         public CriteriaData()
         {
             DataType = CriteriaDataType.None;
@@ -3452,66 +3512,6 @@ namespace Game.Achievements
             return false;
         }
 
-        [FieldOffset(0)]
-        public CriteriaDataType DataType;
-
-        [FieldOffset(4)]
-        public CreatureStruct Creature;
-
-        [FieldOffset(4)]
-        public ClassRaceStruct ClassRace;
-
-        [FieldOffset(4)]
-        public HealthStruct Health;
-
-        [FieldOffset(4)]
-        public AuraStruct Aura;
-
-        [FieldOffset(4)]
-        public ValueStruct Value;
-
-        [FieldOffset(4)]
-        public LevelStruct Level;
-
-        [FieldOffset(4)]
-        public GenderStruct Gender;
-
-        [FieldOffset(4)]
-        public MapPlayersStruct MapPlayers;
-
-        [FieldOffset(4)]
-        public TeamStruct TeamId;
-
-        [FieldOffset(4)]
-        public DrunkStruct Drunk;
-
-        [FieldOffset(4)]
-        public HolidayStruct Holiday;
-
-        [FieldOffset(4)]
-        public BgLossTeamScoreStruct BattlegroundScore;
-
-        [FieldOffset(4)]
-        public EquippedItemStruct EquippedItem;
-
-        [FieldOffset(4)]
-        public MapIdStruct MapId;
-
-        [FieldOffset(4)]
-        public KnownTitleStruct KnownTitle;
-
-        [FieldOffset(4)]
-        public GameEventStruct GameEvent;
-
-        [FieldOffset(4)]
-        public ItemQualityStruct itemQuality;
-
-        [FieldOffset(4)]
-        public RawStruct Raw;
-
-        [FieldOffset(12)]
-        public uint ScriptId;
-
         #region Structs
         // criteria_data_TYPE_NONE              = 0 (no data)
         // criteria_data_TYPE_T_CREATURE        = 1
@@ -3618,21 +3618,21 @@ namespace Game.Achievements
     }
 
     public class CriteriaDataSet
-    {
-        public void Add(CriteriaData data) { storage.Add(data); }
+    {   
+        uint _criteriaId;
+        List<CriteriaData> _storage = new();
+
+        public void Add(CriteriaData data) { _storage.Add(data); }
 
         public bool Meets(Player source, Unit target, uint miscValue = 0, uint miscValue2 = 0)
         {
-            foreach (var data in storage)
-                if (!data.Meets(criteria_id, source, target, miscValue, miscValue2))
+            foreach (var data in _storage)
+                if (!data.Meets(_criteriaId, source, target, miscValue, miscValue2))
                     return false;
 
             return true;
         }
 
-        public void SetCriteriaId(uint id) { criteria_id = id; }
-
-        uint criteria_id;
-        List<CriteriaData> storage = new List<CriteriaData>();
+        public void SetCriteriaId(uint id) { _criteriaId = id; }
     }
 }

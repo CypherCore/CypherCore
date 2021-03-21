@@ -489,7 +489,7 @@ namespace Game.Spells
                                 CallScriptObjectTargetSelectHandlers(ref target, effIndex, targetType);
                                 if (target)
                                 {
-                                    SpellDestination dest = new SpellDestination(target);
+                                    SpellDestination dest = new(target);
                                     CallScriptDestinationTargetSelectHandlers(ref dest, effIndex, targetType);
                                     m_targets.SetDst(dest);
                                 }
@@ -501,7 +501,7 @@ namespace Game.Spells
                     }
                 case Targets.DestChannelCaster:
                     {
-                        SpellDestination dest = new SpellDestination(channeledSpell.GetCaster());
+                        SpellDestination dest = new(channeledSpell.GetCaster());
                         CallScriptDestinationTargetSelectHandlers(ref dest, effIndex, targetType);
                         m_targets.SetDst(dest);
                         break;
@@ -571,7 +571,7 @@ namespace Game.Spells
                         {
                             if (focusObject != null)
                             {
-                                SpellDestination dest = new SpellDestination(focusObject);
+                                SpellDestination dest = new(focusObject);
                                 CallScriptDestinationTargetSelectHandlers(ref dest, effIndex, targetType);
                                 m_targets.SetDst(dest);
                             }
@@ -633,7 +633,7 @@ namespace Game.Spells
                     }
                     break;
                 case SpellTargetObjectTypes.Dest:
-                    SpellDestination dest = new SpellDestination(target);
+                    SpellDestination dest = new(target);
                     CallScriptDestinationTargetSelectHandlers(ref dest, effIndex, targetType);
                     m_targets.SetDst(dest);
                     break;
@@ -652,7 +652,7 @@ namespace Game.Spells
                 Cypher.Assert(false, "Spell.SelectImplicitConeTargets: received not implemented target reference type");
                 return;
             }
-            List<WorldObject> targets = new List<WorldObject>();
+            List<WorldObject> targets = new();
             SpellTargetObjectTypes objectType = targetType.GetObjectType();
             SpellTargetCheckTypes selectionType = targetType.GetCheckType();
             SpellEffectInfo effect = m_spellInfo.GetEffect(effIndex);
@@ -742,7 +742,7 @@ namespace Game.Spells
                     Cypher.Assert(false, "Spell.SelectImplicitAreaTargets: received not implemented target reference type");
                     return;
             }
-            List<WorldObject> targets = new List<WorldObject>();
+            List<WorldObject> targets = new();
             SpellEffectInfo effect = m_spellInfo.GetEffect(effIndex);
             if (effect == null)
                 return;
@@ -820,7 +820,7 @@ namespace Game.Spells
 
         void SelectImplicitCasterDestTargets(uint effIndex, SpellImplicitTargetInfo targetType)
         {
-            SpellDestination dest = new SpellDestination(m_caster);
+            SpellDestination dest = new(m_caster);
 
             switch (targetType.GetTarget())
             {
@@ -944,7 +944,7 @@ namespace Game.Spells
         {
             WorldObject target = m_targets.GetObjectTarget();
 
-            SpellDestination dest = new SpellDestination(target);
+            SpellDestination dest = new(target);
 
             switch (targetType.GetTarget())
             {
@@ -1099,7 +1099,7 @@ namespace Game.Spells
                         m_damageMultipliers[eff.EffectIndex] = 1.0f;
                 m_applyMultiplierMask |= effMask;
 
-                List<WorldObject> targets = new List<WorldObject>();
+                List<WorldObject> targets = new();
                 SearchChainTargets(targets, (uint)maxTargets - 1, target, targetType.GetObjectType(), targetType.GetCheckType(), effect.ImplicitTargetConditions, targetType.GetTarget() == Targets.UnitChainhealAlly);
 
                 // Chain primary target is added earlier
@@ -1137,7 +1137,7 @@ namespace Game.Spells
             float srcToDestDelta = m_targets.GetDstPos().posZ - srcPos.posZ;
 
             SpellEffectInfo effect = m_spellInfo.GetEffect(effIndex);
-            List<WorldObject> targets = new List<WorldObject>();
+            List<WorldObject> targets = new();
             var spellTraj = new WorldObjectSpellTrajTargetCheck(dist2d, srcPos, m_caster, m_spellInfo, targetType.GetCheckType(), effect.ImplicitTargetConditions, SpellTargetObjectTypes.None);
             var searcher = new WorldObjectListSearcher(m_caster, targets, spellTraj);
             SearchTargets(searcher, GridMapTypeMask.All, m_caster, srcPos, dist2d);
@@ -1203,7 +1203,7 @@ namespace Game.Spells
                 float y = (float)(m_targets.GetSrcPos().posY + Math.Sin(m_caster.GetOrientation()) * bestDist);
                 float z = m_targets.GetSrcPos().posZ + bestDist * (a * bestDist + b);
 
-                SpellDestination dest = new SpellDestination(x, y, z, m_caster.GetOrientation());
+                SpellDestination dest = new(x, y, z, m_caster.GetOrientation());
                 CallScriptDestinationTargetSelectHandlers(ref dest, effIndex, targetType);
                 m_targets.ModDst(dest);
             }
@@ -1350,7 +1350,7 @@ namespace Game.Spells
                 float y = pos.GetPositionY();
 
                 CellCoord p = GridDefines.ComputeCellCoord(x, y);
-                Cell cell = new Cell(p);
+                Cell cell = new(p);
                 cell.SetNoCreate();
 
                 Map map = referer.GetMap();
@@ -1423,7 +1423,7 @@ namespace Game.Spells
             if (isBouncingFar)
                 searchRadius *= chainTargets;
 
-            List<WorldObject> tempTargets = new List<WorldObject>();
+            List<WorldObject> tempTargets = new();
             SearchAreaTargets(tempTargets, searchRadius, target.GetPosition(), m_caster, objectType, selectType, condList);
             tempTargets.Remove(target);
 
@@ -1603,7 +1603,7 @@ namespace Game.Spells
             // This is new target calculate data for him
 
             // Get spell hit result on target
-            TargetInfo targetInfo = new TargetInfo();
+            TargetInfo targetInfo = new();
             targetInfo.targetGUID = targetGUID;                         // Store target GUID
             targetInfo.effectMask = effectMask;                         // Store all effects not immune
             targetInfo.processed = false;                              // Effects not apply on target
@@ -1690,7 +1690,7 @@ namespace Game.Spells
             }
 
             // This is new target calculate data for him
-            GOTargetInfo target = new GOTargetInfo();
+            GOTargetInfo target = new();
             target.targetGUID = targetGUID;
             target.effectMask = effectMask;
             target.processed = false;                              // Effects not apply on target
@@ -1746,7 +1746,7 @@ namespace Game.Spells
 
             // This is new target add data
 
-            ItemTargetInfo target = new ItemTargetInfo();
+            ItemTargetInfo target = new();
             target.item = item;
             target.effectMask = effectMask;
 
@@ -1937,7 +1937,7 @@ namespace Game.Spells
                 else
                     hitMask |= ProcFlagsHit.Normal;
 
-                HealInfo healInfo = new HealInfo(caster, unitTarget, addhealth, m_spellInfo, m_spellInfo.GetSchoolMask());
+                HealInfo healInfo = new(caster, unitTarget, addhealth, m_spellInfo, m_spellInfo.GetSchoolMask());
                 caster.HealBySpell(healInfo, crit);
                 unitTarget.GetThreatManager().ForwardThreatForAssistingMe(caster, healInfo.GetEffectiveHeal() * 0.5f, m_spellInfo);
                 m_healing = (int)healInfo.GetEffectiveHeal();
@@ -1950,7 +1950,7 @@ namespace Game.Spells
             else if (m_damage > 0)
             {
                 // Fill base damage struct (unitTarget - is real spell target)
-                SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(caster, unitTarget, m_spellInfo, m_SpellVisual, m_spellSchoolMask, m_castId);
+                SpellNonMeleeDamage damageInfo = new(caster, unitTarget, m_spellInfo, m_SpellVisual, m_spellSchoolMask, m_castId);
 
                 // Check damage immunity
                 if (unitTarget.IsImmunedToDamage(m_spellInfo))
@@ -1979,7 +1979,7 @@ namespace Game.Spells
                 // Do triggers for unit
                 if (canEffectTrigger)
                 {
-                    DamageInfo spellDamageInfo = new DamageInfo(damageInfo, DamageEffectType.SpellDirect, m_attackType, hitMask);
+                    DamageInfo spellDamageInfo = new(damageInfo, DamageEffectType.SpellDirect, m_attackType, hitMask);
                     caster.ProcSkillsAndAuras(unitTarget, procAttacker, procVictim, ProcFlagsSpellType.Damage, ProcFlagsSpellPhase.Hit, hitMask, this, spellDamageInfo, null);
 
                     if (caster.IsPlayer() && !m_spellInfo.HasAttribute(SpellAttr0.StopAttackTarget) &&
@@ -1991,12 +1991,12 @@ namespace Game.Spells
             else
             {
                 // Fill base damage struct (unitTarget - is real spell target)
-                SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(caster, unitTarget, m_spellInfo, m_SpellVisual, m_spellSchoolMask);
+                SpellNonMeleeDamage damageInfo = new(caster, unitTarget, m_spellInfo, m_SpellVisual, m_spellSchoolMask);
                 hitMask |= Unit.CreateProcHitMask(damageInfo, missInfo);
                 // Do triggers for unit
                 if (canEffectTrigger)
                 {
-                    DamageInfo spellNoDamageInfo = new DamageInfo(damageInfo, DamageEffectType.NoDamage, m_attackType, hitMask);
+                    DamageInfo spellNoDamageInfo = new(damageInfo, DamageEffectType.NoDamage, m_attackType, hitMask);
                     caster.ProcSkillsAndAuras(unitTarget, procAttacker, procVictim, ProcFlagsSpellType.NoDmgHeal, ProcFlagsSpellPhase.Hit, hitMask, this, spellNoDamageInfo, null);
 
                     if (caster.IsPlayer() && !m_spellInfo.HasAttribute(SpellAttr0.StopAttackTarget) &&
@@ -3520,7 +3520,7 @@ namespace Game.Spells
             if (_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.DontReportCastError))
                 result = SpellCastResult.DontReport;
 
-            CastFailed castFailed = new CastFailed();
+            CastFailed castFailed = new();
             castFailed.Visual = m_SpellVisual;
             FillSpellCastFailedArgs(castFailed, m_castId, m_spellInfo, result, m_customError, param1, param2, m_caster.ToPlayer());
             m_caster.ToPlayer().SendPacket(castFailed);
@@ -3538,7 +3538,7 @@ namespace Game.Spells
             if (_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.DontReportCastError))
                 result = SpellCastResult.DontReport;
 
-            PetCastFailed petCastFailed = new PetCastFailed();
+            PetCastFailed petCastFailed = new();
             FillSpellCastFailedArgs(petCastFailed, m_castId, m_spellInfo, result, SpellCustomErrors.None, param1, param2, owner.ToPlayer());
             owner.ToPlayer().SendPacket(petCastFailed);
         }
@@ -3548,7 +3548,7 @@ namespace Game.Spells
             if (result == SpellCastResult.SpellCastOk)
                 return;
 
-            CastFailed packet = new CastFailed();
+            CastFailed packet = new();
             packet.Visual = spellVisual;
             FillSpellCastFailedArgs(packet, castCount, spellInfo, result, customError, param1, param2, caster);
             caster.SendPacket(packet);
@@ -3566,7 +3566,7 @@ namespace Game.Spells
             if (caster.IsLoading())  // don't send mount results at loading time
                 return;
 
-            MountResultPacket packet = new MountResultPacket();
+            MountResultPacket packet = new();
             packet.Result = (uint)result;
             caster.SendPacket(packet);
         }
@@ -3594,7 +3594,7 @@ namespace Game.Spells
             if (HasPowerTypeCost(PowerType.Runes))
                 castFlags |= SpellCastFlags.NoGCD; // not needed, but Blizzard sends it
 
-            SpellStart packet = new SpellStart();
+            SpellStart packet = new();
             SpellCastData castData = packet.Cast;
 
             if (m_CastItem)
@@ -3705,7 +3705,7 @@ namespace Game.Spells
             if (m_spellInfo.StartRecoveryTime == 0)
                 castFlags |= SpellCastFlags.NoGCD;
 
-            SpellGo packet = new SpellGo();
+            SpellGo packet = new();
             SpellCastData castData = packet.Cast;
 
             if (m_CastItem != null)
@@ -3874,7 +3874,7 @@ namespace Game.Spells
 
         void SendSpellExecuteLog()
         {
-            SpellExecuteLog spellExecuteLog = new SpellExecuteLog();
+            SpellExecuteLog spellExecuteLog = new();
 
             spellExecuteLog.Caster = m_caster.GetGUID();
             spellExecuteLog.SpellID = m_spellInfo.Id;
@@ -3889,7 +3889,7 @@ namespace Game.Spells
                     _tradeSkillTargets[effect.EffectIndex].Empty() && _feedPetTargets[effect.EffectIndex].Empty())
                     continue;
 
-                SpellExecuteLog.SpellLogEffect spellLogEffect = new SpellExecuteLog.SpellLogEffect();
+                SpellExecuteLog.SpellLogEffect spellLogEffect = new();
                 spellLogEffect.Effect = (int)effect.Effect;
                 spellLogEffect.PowerDrainTargets = _powerDrainTargets[effect.EffectIndex];
                 spellLogEffect.ExtraAttacksTargets = _extraAttacksTargets[effect.EffectIndex];
@@ -3939,7 +3939,7 @@ namespace Game.Spells
 
         void ExecuteLogEffectInterruptCast(uint effIndex, Unit victim, uint spellId)
         {
-            SpellInterruptLog data = new SpellInterruptLog();
+            SpellInterruptLog data = new();
             data.Caster = m_caster.GetGUID();
             data.Victim = victim.GetGUID();
             data.InterruptedSpellID = m_spellInfo.Id;
@@ -4008,7 +4008,7 @@ namespace Game.Spells
 
         void SendInterrupted(byte result)
         {
-            SpellFailure failurePacket = new SpellFailure();
+            SpellFailure failurePacket = new();
             failurePacket.CasterUnit = m_caster.GetGUID();
             failurePacket.CastID = m_castId;
             failurePacket.SpellID = m_spellInfo.Id;
@@ -4016,7 +4016,7 @@ namespace Game.Spells
             failurePacket.Reason = result;
             m_caster.SendMessageToSet(failurePacket, true);
 
-            SpellFailedOther failedPacket = new SpellFailedOther();
+            SpellFailedOther failedPacket = new();
             failedPacket.CasterUnit = m_caster.GetGUID();
             failedPacket.CastID = m_castId;
             failedPacket.SpellID = m_spellInfo.Id;
@@ -4034,7 +4034,7 @@ namespace Game.Spells
                 m_caster.SetChannelVisual(new SpellCastVisualField());
             }
 
-            SpellChannelUpdate spellChannelUpdate = new SpellChannelUpdate();
+            SpellChannelUpdate spellChannelUpdate = new();
             spellChannelUpdate.CasterGUID = m_caster.GetGUID();
             spellChannelUpdate.TimeRemaining = (int)time;
             m_caster.SendMessageToSet(spellChannelUpdate, true);
@@ -4042,7 +4042,7 @@ namespace Game.Spells
 
         void SendChannelStart(uint duration)
         {
-            SpellChannelStart spellChannelStart = new SpellChannelStart();
+            SpellChannelStart spellChannelStart = new();
             spellChannelStart.CasterGUID = m_caster.GetGUID();
             spellChannelStart.SpellID = (int)m_spellInfo.Id;
             spellChannelStart.Visual = m_SpellVisual;
@@ -4089,7 +4089,7 @@ namespace Game.Spells
             // for player resurrections the name is looked up by guid
             string sentName = (m_caster.IsTypeId(TypeId.Player) ? "" : m_caster.GetName(target.GetSession().GetSessionDbLocaleIndex()));
 
-            ResurrectRequest resurrectRequest = new ResurrectRequest();
+            ResurrectRequest resurrectRequest = new();
             resurrectRequest.ResurrectOffererGUID = m_caster.GetGUID();
             resurrectRequest.ResurrectOffererVirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
 
@@ -4605,7 +4605,7 @@ namespace Game.Spells
 
             // check spell cast conditions from database
             {
-                ConditionSourceInfo condInfo = new ConditionSourceInfo(m_caster, m_targets.GetObjectTarget());
+                ConditionSourceInfo condInfo = new(m_caster, m_targets.GetObjectTarget());
                 if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.Spell, m_spellInfo.Id, condInfo))
                 {
                     // mLastFailedCondition can be NULL if there was an error processing the condition in Condition.Meets (i.e. wrong data for ConditionTarget or others)
@@ -6108,7 +6108,7 @@ namespace Game.Spells
                             Unit target = m_targets.GetUnitTarget() ? m_targets.GetUnitTarget() : m_caster;
                             if (target != null && target.GetTypeId() == TypeId.Player && !IsTriggered() && effect.ItemType != 0)
                             {
-                                List<ItemPosCount> dest = new List<ItemPosCount>();
+                                List<ItemPosCount> dest = new();
                                 InventoryResult msg = target.ToPlayer().CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, effect.ItemType, 1);
                                 if (msg != InventoryResult.Ok)
                                 {
@@ -6146,7 +6146,7 @@ namespace Game.Spells
                             // do not allow to enchant vellum from scroll made by vellum-prevent exploit
                             if (m_CastItem != null && Convert.ToBoolean(m_CastItem.GetTemplate().GetFlags() & ItemFlags.NoReagentCost))
                                 return SpellCastResult.TotemCategory;
-                            List<ItemPosCount> dest = new List<ItemPosCount>();
+                            List<ItemPosCount> dest = new();
                             InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, effect.ItemType, 1);
                             if (msg != InventoryResult.Ok)
                             {
@@ -6451,7 +6451,7 @@ namespace Game.Spells
 
             Log.outDebug(LogFilter.Spells, "Spell {0} partially interrupted for ({1}) ms at damage", m_spellInfo.Id, delaytime);
 
-            SpellDelayed spellDelayed = new SpellDelayed();
+            SpellDelayed spellDelayed = new();
             spellDelayed.Caster = m_caster.GetGUID();
             spellDelayed.ActualDelay = delaytime;
 
@@ -7274,7 +7274,7 @@ namespace Game.Spells
             m_caster.GetSpellHistory().CancelGlobalCooldown(m_spellInfo);
         }
 
-        List<SpellScript> m_loadedScripts = new List<SpellScript>();
+        List<SpellScript> m_loadedScripts = new();
 
         int CalculateDamage(uint i, Unit target)
         {
@@ -7401,12 +7401,12 @@ namespace Game.Spells
         }
 
         #region Fields
-        MultiMap<uint, SpellLogEffectPowerDrainParams> _powerDrainTargets = new MultiMap<uint, SpellLogEffectPowerDrainParams>();
-        MultiMap<uint, SpellLogEffectExtraAttacksParams> _extraAttacksTargets = new MultiMap<uint, SpellLogEffectExtraAttacksParams>();
-        MultiMap<uint, SpellLogEffectDurabilityDamageParams> _durabilityDamageTargets = new MultiMap<uint, SpellLogEffectDurabilityDamageParams>();
-        MultiMap<uint, SpellLogEffectGenericVictimParams> _genericVictimTargets = new MultiMap<uint, SpellLogEffectGenericVictimParams>();
-        MultiMap<uint, SpellLogEffectTradeSkillItemParams> _tradeSkillTargets = new MultiMap<uint, SpellLogEffectTradeSkillItemParams>();
-        MultiMap<uint, SpellLogEffectFeedPetParams> _feedPetTargets = new MultiMap<uint, SpellLogEffectFeedPetParams>();
+        MultiMap<uint, SpellLogEffectPowerDrainParams> _powerDrainTargets = new();
+        MultiMap<uint, SpellLogEffectExtraAttacksParams> _extraAttacksTargets = new();
+        MultiMap<uint, SpellLogEffectDurabilityDamageParams> _durabilityDamageTargets = new();
+        MultiMap<uint, SpellLogEffectGenericVictimParams> _genericVictimTargets = new();
+        MultiMap<uint, SpellLogEffectTradeSkillItemParams> _tradeSkillTargets = new();
+        MultiMap<uint, SpellLogEffectFeedPetParams> _feedPetTargets = new();
         PathGenerator m_preGeneratedPath;
 
         public SpellInfo m_spellInfo;
@@ -7436,7 +7436,7 @@ namespace Game.Spells
         SpellSchoolMask m_spellSchoolMask;                  // Spell school (can be overwrite for some spells (wand shoot for example)
         WeaponAttackType m_attackType;                      // For weapon based attack
 
-        List<SpellPowerCost> m_powerCost = new List<SpellPowerCost>();
+        List<SpellPowerCost> m_powerCost = new();
         int m_casttime;                                   // Calculated spell cast time initialized only in Spell.prepare
         bool m_canReflect;                                  // can reflect this spell?
         bool m_autoRepeat;
@@ -7487,16 +7487,16 @@ namespace Game.Spells
         // Spell target subsystem
         // *****************************************
         // Targets store structures and data
-        List<TargetInfo> m_UniqueTargetInfo = new List<TargetInfo>();
+        List<TargetInfo> m_UniqueTargetInfo = new();
         uint m_channelTargetEffectMask;                        // Mask req. alive targets
 
-        List<GOTargetInfo> m_UniqueGOTargetInfo = new List<GOTargetInfo>();
+        List<GOTargetInfo> m_UniqueGOTargetInfo = new();
 
-        List<ItemTargetInfo> m_UniqueItemInfo = new List<ItemTargetInfo>();
+        List<ItemTargetInfo> m_UniqueItemInfo = new();
 
         SpellDestination[] m_destTargets = new SpellDestination[SpellConst.MaxEffects];
 
-        List<HitTriggerSpell> m_hitTriggerSpells = new List<HitTriggerSpell>();
+        List<HitTriggerSpell> m_hitTriggerSpells = new();
 
         SpellState m_spellState;
         int m_timer;

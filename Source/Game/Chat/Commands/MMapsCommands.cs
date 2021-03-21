@@ -62,7 +62,7 @@ namespace Game.Chat
             player.GetPosition(out x, out y, out z);
 
             // path
-            PathGenerator path = new PathGenerator(target);
+            PathGenerator path = new(target);
             path.SetUseStraightPath(useStraightPath);
             bool result = path.CalculatePath(x, y, z, false, useStraightLine);
 
@@ -125,7 +125,7 @@ namespace Game.Chat
             handler.SendSysMessage("Calc   [{0:D2}, {1:D2}]", tilex, tiley);
 
             // navmesh poly . navmesh tile location
-            Detour.dtQueryFilter filter = new Detour.dtQueryFilter();
+            Detour.dtQueryFilter filter = new();
             float[] nothing = new float[3];
             ulong polyRef = 0;
             if (Detour.dtStatusFailed(navmeshquery.findNearestPoly(location, extents, filter, ref polyRef, ref nothing)))
@@ -138,8 +138,8 @@ namespace Game.Chat
                 handler.SendSysMessage("Dt     [??, ??] (invalid poly, probably no tile loaded)");
             else
             {
-                Detour.dtMeshTile tile = new Detour.dtMeshTile();
-                Detour.dtPoly poly = new Detour.dtPoly();
+                Detour.dtMeshTile tile = new();
+                Detour.dtPoly poly = new();
                 if (Detour.dtStatusSucceed(navmesh.getTileAndPolyByRef(polyRef, ref tile, ref poly)))
                 {
                     if (tile != null)
@@ -231,7 +231,7 @@ namespace Game.Chat
             WorldObject obj = handler.GetPlayer();
 
             // Get Creatures
-            List<Unit> creatureList = new List<Unit>();
+            List<Unit> creatureList = new();
 
             var go_check = new AnyUnitInObjectRangeCheck(obj, radius);
             var go_search = new UnitListSearcher(obj, creatureList, go_check);
@@ -248,7 +248,7 @@ namespace Game.Chat
                 obj.GetPosition(out gx, out gy, out gz);
                 foreach (var creature in creatureList)
                 {
-                    PathGenerator path = new PathGenerator(creature);
+                    PathGenerator path = new(creature);
                     path.CalculatePath(gx, gy, gz);
                     ++paths;
                 }

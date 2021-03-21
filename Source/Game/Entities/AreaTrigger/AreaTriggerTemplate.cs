@@ -272,9 +272,9 @@ namespace Game.Entities
         public uint ScriptId;
         public float MaxSearchRadius;
 
-        public List<Vector2> PolygonVertices = new List<Vector2>();
-        public List<Vector2> PolygonVerticesTarget = new List<Vector2>();
-        public List<AreaTriggerAction> Actions = new List<AreaTriggerAction>();
+        public List<Vector2> PolygonVertices = new();
+        public List<Vector2> PolygonVerticesTarget = new();
+        public List<AreaTriggerAction> Actions = new();
     }
 
     public unsafe class AreaTriggerMiscTemplate
@@ -305,12 +305,12 @@ namespace Game.Entities
         public uint TimeToTarget;
         public uint TimeToTargetScale;
 
-        public AreaTriggerScaleInfo OverrideScale = new AreaTriggerScaleInfo();
-        public AreaTriggerScaleInfo ExtraScale = new AreaTriggerScaleInfo();
+        public AreaTriggerScaleInfo OverrideScale = new();
+        public AreaTriggerScaleInfo ExtraScale = new();
         public AreaTriggerOrbitInfo OrbitInfo;
 
         public AreaTriggerTemplate Template;
-        public List<Vector3> SplinePoints = new List<Vector3>();
+        public List<Vector3> SplinePoints = new();
     }
 
     public class AreaTriggerSpawn

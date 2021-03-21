@@ -44,8 +44,8 @@ namespace Game.Spells
 
             uint count = 0;
 
-            StringBuilder ssNonDiscoverableEntries = new StringBuilder();
-            List<uint> reportedReqSpells = new List<uint>();
+            StringBuilder ssNonDiscoverableEntries = new();
+            List<uint> reportedReqSpells = new();
 
             do
             {
@@ -226,7 +226,7 @@ namespace Game.Spells
             return 0;
         }
 
-        static MultiMap<int, SkillDiscoveryEntry> SkillDiscoveryStorage = new MultiMap<int, SkillDiscoveryEntry>();
+        static MultiMap<int, SkillDiscoveryEntry> SkillDiscoveryStorage = new();
     }
 
     public class SkillDiscoveryEntry

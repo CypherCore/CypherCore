@@ -79,11 +79,11 @@ namespace Game.Networking.Packets
         }
 
         public PlayerModelDisplayInfo DisplayInfo;
-        public List<ushort> Glyphs = new List<ushort>();
-        public List<ushort> Talents = new List<ushort>();
-        public Array<ushort> PvpTalents = new Array<ushort>(PlayerConst.MaxPvpTalentSlots, 0);
-        public Optional<InspectGuildData> GuildData = new Optional<InspectGuildData>();
-        public Array<PVPBracketData> Bracket = new Array<PVPBracketData>(6, default);
+        public List<ushort> Glyphs = new();
+        public List<ushort> Talents = new();
+        public Array<ushort> PvpTalents = new(PlayerConst.MaxPvpTalentSlots, 0);
+        public Optional<InspectGuildData> GuildData = new();
+        public Array<PVPBracketData> Bracket = new(6, default);
         public uint? AzeriteLevel;
         public int ItemLevel;
         public uint LifetimeHK;
@@ -149,7 +149,7 @@ namespace Game.Networking.Packets
             {
                 if (gemData.ItemId != 0)
                 {
-                    ItemGemData gem = new ItemGemData();
+                    ItemGemData gem = new();
                     gem.Slot = i;
                     gem.Item = new ItemInstance(gemData);
                     Gems.Add(gem);
@@ -165,7 +165,7 @@ namespace Game.Networking.Packets
                 {
                     for (byte slot = 0; slot < essences.AzeriteEssenceID.GetSize(); ++slot)
                     {
-                        AzeriteEssenceData essence = new AzeriteEssenceData();
+                        AzeriteEssenceData essence = new();
                         essence.Index = slot;
                         essence.AzeriteEssenceID = essences.AzeriteEssenceID[slot];
                         if (essence.AzeriteEssenceID != 0)
@@ -211,22 +211,22 @@ namespace Game.Networking.Packets
         public ItemInstance Item;
         public byte Index;
         public bool Usable;
-        public List<InspectEnchantData> Enchants = new List<InspectEnchantData>();
-        public List<ItemGemData> Gems = new List<ItemGemData>();
-        public List<int> AzeritePowers = new List<int>();
-        public List<AzeriteEssenceData> AzeriteEssences = new List<AzeriteEssenceData>();
+        public List<InspectEnchantData> Enchants = new();
+        public List<ItemGemData> Gems = new();
+        public List<int> AzeritePowers = new();
+        public List<AzeriteEssenceData> AzeriteEssences = new();
     }
 
     public class PlayerModelDisplayInfo
     {
         public ObjectGuid GUID;
-        public List<InspectItemData> Items = new List<InspectItemData>();
+        public List<InspectItemData> Items = new();
         public string Name;
         public uint SpecializationID;
         public byte GenderID;
         public byte Race;
         public byte ClassID;
-        public List<ChrCustomizationChoice> Customizations = new List<ChrCustomizationChoice>();
+        public List<ChrCustomizationChoice> Customizations = new();
 
         public void Initialize(Player player)
         {

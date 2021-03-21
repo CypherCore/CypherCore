@@ -48,7 +48,7 @@ namespace Game.Loots
 
                     StoredLootContainer storedContainer = _lootItemStorage[key];
 
-                    LootItem lootItem = new LootItem();
+                    LootItem lootItem = new();
                     lootItem.itemid = result.Read<uint>(1);
                     lootItem.count = result.Read<byte>(2);
                     lootItem.follow_loot_rules = result.Read<bool>(3);
@@ -59,7 +59,7 @@ namespace Game.Loots
                     lootItem.needs_quest = result.Read<bool>(8);
                     lootItem.randomBonusListId = result.Read<uint>(9);
                     lootItem.context = (ItemContext)result.Read<byte>(10);
-                    StringArray bonusLists = new StringArray(result.Read<string>(11), ' ');
+                    StringArray bonusLists = new(result.Read<string>(11), ' ');
 
                     foreach (string str in bonusLists)
                         lootItem.BonusListIDs.Add(uint.Parse(str));
@@ -111,7 +111,7 @@ namespace Game.Loots
             {
                 foreach (var storedItemPair in container.GetLootItems())
                 {
-                    LootItem li = new LootItem();
+                    LootItem li = new();
                     li.itemid = storedItemPair.Key;
                     li.count = (byte)storedItemPair.Value.Count;
                     li.follow_loot_rules = storedItemPair.Value.FollowRules;
@@ -156,7 +156,7 @@ namespace Game.Loots
         {
             _lootItemStorage.TryRemove(containerId, out _);
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEMCONTAINER_ITEMS);
             stmt.AddValue(0, containerId);
             trans.Append(stmt);
@@ -188,9 +188,9 @@ namespace Game.Loots
                 return;
             }
 
-            StoredLootContainer container = new StoredLootContainer(loot.containerID.GetCounter());
+            StoredLootContainer container = new(loot.containerID.GetCounter());
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             if (loot.gold != 0)
                 container.AddMoney(loot.gold, trans);
 
@@ -221,7 +221,7 @@ namespace Game.Loots
             _lootItemStorage.TryAdd(loot.containerID.GetCounter(), container);
         }
 
-        ConcurrentDictionary<ulong, StoredLootContainer> _lootItemStorage = new ConcurrentDictionary<ulong, StoredLootContainer>();
+        ConcurrentDictionary<ulong, StoredLootContainer> _lootItemStorage = new();
     }
 
     class StoredLootContainer
@@ -254,7 +254,7 @@ namespace Game.Loots
 
             foreach (uint token in lootItem.BonusListIDs)
             {
-                StringBuilder bonusListIDs = new StringBuilder();
+                StringBuilder bonusListIDs = new();
                 foreach (int bonusListID in lootItem.BonusListIDs)
                     bonusListIDs.Append(bonusListID + ' ');
 
@@ -314,7 +314,7 @@ namespace Game.Loots
 
         public MultiMap<uint, StoredLootItem> GetLootItems() { return _lootItems; }
 
-        MultiMap<uint, StoredLootItem> _lootItems = new MultiMap<uint, StoredLootItem>();
+        MultiMap<uint, StoredLootItem> _lootItems = new();
         ulong _containerId;
         uint _money;
     }
@@ -346,6 +346,6 @@ namespace Game.Loots
         public bool NeedsQuest;
         public uint RandomBonusListId;
         public ItemContext Context;
-        public List<uint> BonusListIDs = new List<uint>();
+        public List<uint> BonusListIDs = new();
     }
 }

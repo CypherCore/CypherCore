@@ -77,8 +77,8 @@ namespace Game.Networking.Packets
         }
 
         public uint FactionIndex;
-        public List<GarrisonInfo> Garrisons = new List<GarrisonInfo>();
-        public List<FollowerSoftCapInfo> FollowerSoftCaps = new List<FollowerSoftCapInfo>();
+        public List<GarrisonInfo> Garrisons = new();
+        public List<FollowerSoftCapInfo> FollowerSoftCaps = new();
     }
 
     class GarrisonRemoteInfo : ServerPacket
@@ -92,7 +92,7 @@ namespace Game.Networking.Packets
                 site.Write(_worldPacket);
         }
 
-        public List<GarrisonRemoteSiteInfo> Sites = new List<GarrisonRemoteSiteInfo>();
+        public List<GarrisonRemoteSiteInfo> Sites = new();
     }
 
     class GarrisonPurchaseBuilding : ClientPacket
@@ -126,7 +126,7 @@ namespace Game.Networking.Packets
 
         public GarrisonType GarrTypeID;
         public GarrisonError Result;
-        public GarrisonBuildingInfo BuildingInfo = new GarrisonBuildingInfo();
+        public GarrisonBuildingInfo BuildingInfo = new();
         public bool PlayActivationCinematic;
     }
 
@@ -242,7 +242,7 @@ namespace Game.Networking.Packets
                 landmark.Write(_worldPacket);
         }
 
-        public List<GarrisonBuildingMapData> Buildings = new List<GarrisonBuildingMapData>();
+        public List<GarrisonBuildingMapData> Buildings = new();
     }
 
     class GarrisonPlotPlaced : ServerPacket
@@ -391,7 +391,7 @@ namespace Game.Networking.Packets
         public uint Durability;
         public uint CurrentBuildingID;
         public uint CurrentMissionID;
-        public List<GarrAbilityRecord> AbilityID = new List<GarrAbilityRecord>();
+        public List<GarrAbilityRecord> AbilityID = new();
         public uint ZoneSupportSpellID;
         public uint FollowerStatus;
         public int Health;
@@ -519,7 +519,7 @@ namespace Game.Networking.Packets
     class GarrisonCollection
     {
         public int Type;
-        public List<GarrisonCollectionEntry> Entries = new List<GarrisonCollectionEntry>();
+        public List<GarrisonCollectionEntry> Entries = new();
 
         public void Write(WorldPacket data)
         {
@@ -545,7 +545,7 @@ namespace Game.Networking.Packets
     class GarrisonEventList
     {
         public int Type;
-        public List<GarrisonEventEntry> Events = new List<GarrisonEventEntry>();
+        public List<GarrisonEventEntry> Events = new();
 
         public void Write(WorldPacket data)
         {
@@ -634,19 +634,19 @@ namespace Game.Networking.Packets
         public uint GarrSiteLevelID;
         public uint NumFollowerActivationsRemaining;
         public uint NumMissionsStartedToday;   // might mean something else, but sending 0 here enables follower abilities "Increase success chance of the first mission of the day by %."
-        public List<GarrisonPlotInfo> Plots = new List<GarrisonPlotInfo>();
-        public List<GarrisonBuildingInfo> Buildings = new List<GarrisonBuildingInfo>();
-        public List<GarrisonFollower> Followers = new List<GarrisonFollower>();
-        public List<GarrisonFollower> AutoTroops = new List<GarrisonFollower>();
-        public List<GarrisonMission> Missions = new List<GarrisonMission>();
-        public List<List<GarrisonMissionReward>> MissionRewards = new List<List<GarrisonMissionReward>>();
-        public List<List<GarrisonMissionReward>> MissionOvermaxRewards = new List<List<GarrisonMissionReward>>();
-        public List<GarrisonMissionBonusAbility> MissionAreaBonuses = new List<GarrisonMissionBonusAbility>();
-        public List<GarrisonTalent> Talents = new List<GarrisonTalent>();
-        public List<GarrisonCollection> Collections = new List<GarrisonCollection>();
-        public List<GarrisonEventList> EventLists = new List<GarrisonEventList>();
-        public List<bool> CanStartMission = new List<bool>();
-        public List<int> ArchivedMissions = new List<int>();
+        public List<GarrisonPlotInfo> Plots = new();
+        public List<GarrisonBuildingInfo> Buildings = new();
+        public List<GarrisonFollower> Followers = new();
+        public List<GarrisonFollower> AutoTroops = new();
+        public List<GarrisonMission> Missions = new();
+        public List<List<GarrisonMissionReward>> MissionRewards = new();
+        public List<List<GarrisonMissionReward>> MissionOvermaxRewards = new();
+        public List<GarrisonMissionBonusAbility> MissionAreaBonuses = new();
+        public List<GarrisonTalent> Talents = new();
+        public List<GarrisonCollection> Collections = new();
+        public List<GarrisonEventList> EventLists = new();
+        public List<bool> CanStartMission = new();
+        public List<int> ArchivedMissions = new();
     }
 
     struct FollowerSoftCapInfo
@@ -690,7 +690,7 @@ namespace Game.Networking.Packets
         }
 
         public uint GarrSiteLevelID;
-        public List<GarrisonRemoteBuildingInfo> Buildings = new List<GarrisonRemoteBuildingInfo>();
+        public List<GarrisonRemoteBuildingInfo> Buildings = new();
     }
 
     struct GarrisonBuildingMapData

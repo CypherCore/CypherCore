@@ -217,7 +217,7 @@ namespace Game.Entities
 
             CharmInfo charmInfo = pet.GetCharmInfo();
 
-            PetSpells petSpellsPacket = new PetSpells();
+            PetSpells petSpellsPacket = new();
             petSpellsPacket.PetGUID = pet.GetGUID();
             petSpellsPacket.CreatureFamily = (ushort)pet.GetCreatureTemplate().Family;         // creature family (required for pet talents)
             petSpellsPacket.Specialization = pet.GetSpecialization();
@@ -346,7 +346,7 @@ namespace Game.Entities
 
         public void SendSpellCategoryCooldowns()
         {
-            SpellCategoryCooldown cooldowns = new SpellCategoryCooldown();
+            SpellCategoryCooldown cooldowns = new();
 
             var categoryCooldownAuras = GetAuraEffectsByType(AuraType.ModSpellCategoryCooldown);
             foreach (AuraEffect aurEff in categoryCooldownAuras)
@@ -1487,9 +1487,9 @@ namespace Game.Entities
                         return;
                     }
 
-                    Spell spell = new Spell(this, spellInfo, TriggerCastFlags.None);
+                    Spell spell = new(this, spellInfo, TriggerCastFlags.None);
 
-                    SpellPrepare spellPrepare = new SpellPrepare();
+                    SpellPrepare spellPrepare = new();
                     spellPrepare.ClientCastID = castCount;
                     spellPrepare.ServerCastID = spell.m_castId;
                     SendPacket(spellPrepare);
@@ -1516,9 +1516,9 @@ namespace Game.Entities
                     continue;
                 }
 
-                Spell spell = new Spell(this, spellInfo, TriggerCastFlags.None);
+                Spell spell = new(this, spellInfo, TriggerCastFlags.None);
 
-                SpellPrepare spellPrepare = new SpellPrepare();
+                SpellPrepare spellPrepare = new();
                 spellPrepare.ClientCastID = castCount;
                 spellPrepare.ServerCastID = spell.m_castId;
                 SendPacket(spellPrepare);
@@ -1550,9 +1550,9 @@ namespace Game.Entities
                         continue;
                     }
 
-                    Spell spell = new Spell(this, spellInfo, TriggerCastFlags.None);
+                    Spell spell = new(this, spellInfo, TriggerCastFlags.None);
 
-                    SpellPrepare spellPrepare = new SpellPrepare();
+                    SpellPrepare spellPrepare = new();
                     spellPrepare.ClientCastID = castCount;
                     spellPrepare.ServerCastID = spell.m_castId;
                     SendPacket(spellPrepare);
@@ -1870,7 +1870,7 @@ namespace Game.Entities
             if (spell != null)
                 return;
 
-            PlayerSpell newspell = new PlayerSpell();
+            PlayerSpell newspell = new();
             newspell.State = PlayerSpellState.Temporary;
             newspell.Active = true;
             newspell.Dependent = false;
@@ -2009,7 +2009,7 @@ namespace Game.Entities
 
         void SendKnownSpells()
         {
-            SendKnownSpells knownSpells = new SendKnownSpells();
+            SendKnownSpells knownSpells = new();
             knownSpells.InitialLogin = false; // @todo
 
             foreach (var spell in m_spells.ToList())
@@ -2047,7 +2047,7 @@ namespace Game.Entities
             // prevent duplicated entires in spell book, also not send if not in world (loading)
             if (learning && IsInWorld)
             {
-                LearnedSpells packet = new LearnedSpells();
+                LearnedSpells packet = new();
                 packet.SpellID.Add(spellId);
                 packet.SuppressMessaging = suppressMessaging;
                 SendPacket(packet);
@@ -2243,7 +2243,7 @@ namespace Game.Entities
             // remove from spell book if not replaced by lesser rank
             if (!prev_activate)
             {
-                UnlearnedSpells unlearnedSpells = new UnlearnedSpells();
+                UnlearnedSpells unlearnedSpells = new();
                 unlearnedSpells.SpellID.Add(spellId);
                 unlearnedSpells.SuppressMessaging = suppressMessaging;
                 SendPacket(unlearnedSpells);
@@ -2388,7 +2388,7 @@ namespace Game.Entities
                             SendSupercededSpell(spellId, next_active_spell_id);
                         else
                         {
-                            UnlearnedSpells removedSpells = new UnlearnedSpells();
+                            UnlearnedSpells removedSpells = new();
                             removedSpells.SpellID.Add(spellId);
                             SendPacket(removedSpells);
                         }
@@ -2443,7 +2443,7 @@ namespace Game.Entities
                         LearnSpell(prev_spell, true, fromSkill);
                 }
 
-                PlayerSpell newspell = new PlayerSpell();
+                PlayerSpell newspell = new();
                 newspell.State = state;
                 newspell.Active = active;
                 newspell.Dependent = dependent;
@@ -2648,19 +2648,19 @@ namespace Game.Entities
             if (!IsLoading())
             {
                 ServerOpcodes opcode = (mod.type == SpellModType.Flat ? ServerOpcodes.SetFlatSpellModifier : ServerOpcodes.SetPctSpellModifier);
-                SetSpellModifier packet = new SetSpellModifier(opcode);
+                SetSpellModifier packet = new(opcode);
 
                 // @todo Implement sending of bulk modifiers instead of single
-                SpellModifierInfo spellMod = new SpellModifierInfo();
+                SpellModifierInfo spellMod = new();
 
                 spellMod.ModIndex = (byte)mod.op;
                 for (int eff = 0; eff < 128; ++eff)
                 {
-                    FlagArray128 mask = new FlagArray128();
+                    FlagArray128 mask = new();
                     mask[eff / 32] = 1u << (eff %32);
                     if (mod.mask & mask)
                     {
-                        SpellModifierData modData = new SpellModifierData();
+                        SpellModifierData modData = new();
                         if (mod.type == SpellModType.Flat)
                         {
                             modData.ModifierValue = 0.0f;
@@ -2839,16 +2839,16 @@ namespace Game.Entities
 
         void SendSpellModifiers()
         {
-            SetSpellModifier flatMods = new SetSpellModifier(ServerOpcodes.SetFlatSpellModifier);
-            SetSpellModifier pctMods = new SetSpellModifier(ServerOpcodes.SetPctSpellModifier);
+            SetSpellModifier flatMods = new(ServerOpcodes.SetFlatSpellModifier);
+            SetSpellModifier pctMods = new(ServerOpcodes.SetPctSpellModifier);
             for (var i = 0; i < (int)SpellModOp.Max; ++i)
             {
-                SpellModifierInfo flatMod = new SpellModifierInfo();
-                SpellModifierInfo pctMod = new SpellModifierInfo();
+                SpellModifierInfo flatMod = new();
+                SpellModifierInfo pctMod = new();
                 flatMod.ModIndex = pctMod.ModIndex = (byte)i;
                 for (byte j = 0; j < 128; ++j)
                 {
-                    FlagArray128 mask = new FlagArray128();
+                    FlagArray128 mask = new();
                     mask[j / 32] = 1u << (j % 32);
 
                     SpellModifierData flatData;
@@ -2893,7 +2893,7 @@ namespace Game.Entities
 
         void SendSupercededSpell(uint oldSpell, uint newSpell)
         {
-            SupercededSpells supercededSpells = new SupercededSpells();
+            SupercededSpells supercededSpells = new();
             supercededSpells.SpellID.Add(newSpell);
             supercededSpells.Superceded.Add(oldSpell);
             SendPacket(supercededSpells);
@@ -3000,7 +3000,7 @@ namespace Game.Entities
         {
             int maxRunes = GetMaxPower(PowerType.Runes);
 
-            ResyncRunes data = new ResyncRunes();
+            ResyncRunes data = new();
             data.Runes.Start = (byte)((1 << maxRunes) - 1);
             data.Runes.Count = GetRunesState();
 
@@ -3057,7 +3057,7 @@ namespace Game.Entities
                 return true;
 
             // Check no reagent use mask
-            FlagArray128 noReagentMask = new FlagArray128();
+            FlagArray128 noReagentMask = new();
             noReagentMask[0] = m_activePlayerData.NoReagentCostMask[0];
             noReagentMask[1] = m_activePlayerData.NoReagentCostMask[1];
             noReagentMask[2] = m_activePlayerData.NoReagentCostMask[2];
@@ -3232,7 +3232,7 @@ namespace Game.Entities
                         Unit target = spellInfo.IsPositive() ? this : damageInfo.GetVictim();
 
                         // reduce effect values if enchant is limited
-                        Dictionary<SpellValueMod, int> values = new Dictionary<SpellValueMod, int>();
+                        Dictionary<SpellValueMod, int> values = new();
                         if (entry != null && entry.AttributesMask.HasAnyFlag(EnchantProcAttributes.Limit60) && target.GetLevelForTarget(this) > 60)
                         {
                             int lvlDifference = (int)target.GetLevelForTarget(this) - 60;

@@ -84,7 +84,7 @@ namespace Game.Networking.Packets
 
     public class SpellCategoryCooldown : ServerPacket
     {
-        public List<CategoryCooldownInfo> CategoryCooldowns = new List<CategoryCooldownInfo>();
+        public List<CategoryCooldownInfo> CategoryCooldowns = new();
 
         public SpellCategoryCooldown() : base(ServerOpcodes.CategoryCooldown, ConnectionType.Instance) { }
 
@@ -130,8 +130,8 @@ namespace Game.Networking.Packets
         }
 
         public bool InitialLogin;
-        public List<uint> KnownSpells = new List<uint>();
-        public List<uint> FavoriteSpells = new List<uint>(); // tradeskill recipes
+        public List<uint> KnownSpells = new();
+        public List<uint> FavoriteSpells = new(); // tradeskill recipes
     }
 
     public class UpdateActionButtons : ServerPacket
@@ -169,7 +169,7 @@ namespace Game.Networking.Packets
 
     public class SendUnlearnSpells : ServerPacket
     {
-        List<uint> Spells = new List<uint>();
+        List<uint> Spells = new();
 
         public SendUnlearnSpells() : base(ServerOpcodes.SendUnlearnSpells, ConnectionType.Instance) { }
 
@@ -197,7 +197,7 @@ namespace Game.Networking.Packets
 
         public bool UpdateAll;
         public ObjectGuid UnitGUID;
-        public List<AuraInfo> Auras = new List<AuraInfo>();
+        public List<AuraInfo> Auras = new();
     }
 
     public class CastSpell : ClientPacket
@@ -281,7 +281,7 @@ namespace Game.Networking.Packets
             WriteLogData();
         }
 
-        public SpellCastData Cast = new SpellCastData();
+        public SpellCastData Cast = new();
     }
 
     public class SpellStart : ServerPacket
@@ -319,9 +319,9 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteInt32(spellId);
         }
 
-        public List<uint> SpellID = new List<uint>();
-        public List<uint> Superceded = new List<uint>();
-        public List<int> FavoriteSpellID = new List<int>();
+        public List<uint> SpellID = new();
+        public List<uint> Superceded = new();
+        public List<int> FavoriteSpellID = new();
     }
 
     public class LearnedSpells : ServerPacket
@@ -344,8 +344,8 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
         }
 
-        public List<uint> SpellID = new List<uint>();
-        public List<int> FavoriteSpellID = new List<int>();
+        public List<uint> SpellID = new();
+        public List<int> FavoriteSpellID = new();
         public uint SpecializationID;
         public bool SuppressMessaging;
     }
@@ -454,7 +454,7 @@ namespace Game.Networking.Packets
                 spellMod.Write(_worldPacket);
         }
 
-        public List<SpellModifierInfo> Modifiers = new List<SpellModifierInfo>();
+        public List<SpellModifierInfo> Modifiers = new();
     }
 
     public class UnlearnedSpells : ServerPacket
@@ -471,7 +471,7 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
         }
 
-        public List<uint> SpellID = new List<uint>();
+        public List<uint> SpellID = new();
         public bool SuppressMessaging;
     }
 
@@ -508,7 +508,7 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
         }
 
-        public List<uint> SpellID = new List<uint>();
+        public List<uint> SpellID = new();
         public bool IsPet;
     }
 
@@ -558,7 +558,7 @@ namespace Game.Networking.Packets
             SpellCooldowns.ForEach(p => p.Write(_worldPacket));
         }
 
-        public List<SpellCooldownStruct> SpellCooldowns = new List<SpellCooldownStruct>();
+        public List<SpellCooldownStruct> SpellCooldowns = new();
         public ObjectGuid Caster;
         public SpellCooldownFlags Flags;
     }
@@ -573,7 +573,7 @@ namespace Game.Networking.Packets
             Entries.ForEach(p => p.Write(_worldPacket));
         }
 
-        public List<SpellHistoryEntry> Entries = new List<SpellHistoryEntry>();
+        public List<SpellHistoryEntry> Entries = new();
     }
 
     public class ClearAllSpellCharges : ServerPacket
@@ -635,7 +635,7 @@ namespace Game.Networking.Packets
             Entries.ForEach(p => p.Write(_worldPacket));
         }
 
-        public List<SpellChargeEntry> Entries = new List<SpellChargeEntry>();
+        public List<SpellChargeEntry> Entries = new();
     }
 
     public class ClearTarget : ServerPacket
@@ -948,10 +948,10 @@ namespace Game.Networking.Packets
         public byte RaceID;
         public byte Gender;
         public byte ClassID;
-        public List<ChrCustomizationChoice> Customizations = new List<ChrCustomizationChoice>();
+        public List<ChrCustomizationChoice> Customizations = new();
         public ObjectGuid GuildGUID;
 
-        public List<int> ItemDisplayID = new List<int>();
+        public List<int> ItemDisplayID = new();
     }
 
     class MirrorImageCreatureData : ServerPacket
@@ -993,7 +993,7 @@ namespace Game.Networking.Packets
             Runes.Write(_worldPacket);
         }
 
-        public RuneData Runes = new RuneData();
+        public RuneData Runes = new();
     }
 
     class AddRunePower : ServerPacket
@@ -1103,7 +1103,7 @@ namespace Game.Networking.Packets
         public ObjectGuid CasterGUID;
         public ObjectGuid VictimGUID;
         public uint SpellID;
-        public List<uint> FailedSpells = new List<uint>();
+        public List<uint> FailedSpells = new();
     }
 
     class CustomLoadScreen : ServerPacket
@@ -1219,7 +1219,7 @@ namespace Game.Networking.Packets
         int AttackPower;
         int SpellPower;
         uint Armor;
-        List<SpellLogPowerData> PowerData = new List<SpellLogPowerData>();
+        List<SpellLogPowerData> PowerData = new();
     }
 
     class ContentTuningParams
@@ -1384,7 +1384,7 @@ namespace Game.Networking.Packets
 
         public static implicit operator SpellCastVisualField(SpellCastVisual spellCastVisual)
         {
-            SpellCastVisualField visual = new SpellCastVisualField();
+            SpellCastVisualField visual = new();
             visual.SpellXSpellVisualID = spellCastVisual.SpellXSpellVisualID;
             visual.ScriptVisualID = spellCastVisual.ScriptVisualID;
             return visual;
@@ -1449,7 +1449,7 @@ namespace Game.Networking.Packets
         public Optional<int> Remaining;
         Optional<float> TimeMod;
         public float[] Points = new float[0];
-        public List<float> EstimatedPoints = new List<float>();
+        public List<float> EstimatedPoints = new();
     }
 
     public struct AuraInfo
@@ -1609,12 +1609,12 @@ namespace Game.Networking.Packets
         public uint SpellID;
         public SpellCastVisual Visual;
         public uint SendCastFlags;
-        public SpellTargetData Target = new SpellTargetData();
+        public SpellTargetData Target = new();
         public MissileTrajectoryRequest MissileTrajectory;
         public Optional<MovementInfo> MoveUpdate;
-        public List<SpellWeight> Weight = new List<SpellWeight>();
-        public Array<SpellOptionalReagent> OptionalReagents = new Array<SpellOptionalReagent>(3);
-        public Array<SpellExtraCurrencyCost> OptionalCurrencies = new Array<SpellExtraCurrencyCost>(5 /*MAX_ITEM_EXT_COST_CURRENCIES*/);
+        public List<SpellWeight> Weight = new();
+        public Array<SpellOptionalReagent> OptionalReagents = new(3);
+        public Array<SpellExtraCurrencyCost> OptionalCurrencies = new(5 /*MAX_ITEM_EXT_COST_CURRENCIES*/);
         public ObjectGuid CraftingNPC;
         public uint[] Misc = new uint[2];
 
@@ -1721,7 +1721,7 @@ namespace Game.Networking.Packets
 
         public byte Start;
         public byte Count;
-        public List<byte> Cooldowns = new List<byte>();
+        public List<byte> Cooldowns = new();
     }
 
     public struct MissileTrajectoryResult
@@ -1840,17 +1840,17 @@ namespace Game.Networking.Packets
         public SpellCastFlags CastFlags;
         public SpellCastFlagsEx CastFlagsEx;
         public uint CastTime;
-        public List<ObjectGuid> HitTargets = new List<ObjectGuid>();
-        public List<ObjectGuid> MissTargets = new List<ObjectGuid>();
-        public List<SpellHitStatus> HitStatus = new List<SpellHitStatus>();
-        public List<SpellMissStatus> MissStatus = new List<SpellMissStatus>();
-        public SpellTargetData Target = new SpellTargetData();
-        public List<SpellPowerData> RemainingPower = new List<SpellPowerData>();
+        public List<ObjectGuid> HitTargets = new();
+        public List<ObjectGuid> MissTargets = new();
+        public List<SpellHitStatus> HitStatus = new();
+        public List<SpellMissStatus> MissStatus = new();
+        public SpellTargetData Target = new();
+        public List<SpellPowerData> RemainingPower = new();
         public Optional<RuneData> RemainingRunes;
         public MissileTrajectoryResult MissileTrajectory;
         public SpellAmmo Ammo;
         public byte DestLocSpellCastIndex;
-        public List<TargetLocation> TargetPoints = new List<TargetLocation>();
+        public List<TargetLocation> TargetPoints = new();
         public CreatureImmunities Immunities;
         public SpellHealPrediction Predict;
     }
@@ -1870,7 +1870,7 @@ namespace Game.Networking.Packets
     public class SpellModifierInfo
     {
         public byte ModIndex;
-        public List<SpellModifierData> ModifierData = new List<SpellModifierData>();
+        public List<SpellModifierData> ModifierData = new();
 
         public void Write(WorldPacket data)
         {

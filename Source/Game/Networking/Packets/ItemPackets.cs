@@ -124,7 +124,7 @@ namespace Game.Networking.Packets
 
         public uint PurchaseTime;
         public uint Flags;
-        public ItemPurchaseContents Contents = new ItemPurchaseContents();
+        public ItemPurchaseContents Contents = new();
         public ObjectGuid ItemGUID;
     }
 
@@ -731,7 +731,7 @@ namespace Game.Networking.Packets
         }
 
         public ItemContext Context;
-        public List<uint> BonusListIDs = new List<uint>();
+        public List<uint> BonusListIDs = new();
     }
 
     public class ItemMod
@@ -790,7 +790,7 @@ namespace Game.Networking.Packets
 
     public class ItemModList
     {
-        public Array<ItemMod> Values = new Array<ItemMod>((int)ItemModifier.Max);
+        public Array<ItemMod> Values = new((int)ItemModifier.Max);
 
         public void Read(WorldPacket data)
         {
@@ -845,7 +845,7 @@ namespace Game.Networking.Packets
     {
         public uint ItemID;
         public Optional<ItemBonuses> ItemBonus;
-        public ItemModList Modifications = new ItemModList();
+        public ItemModList Modifications = new();
 
         public ItemInstance() { }
 
@@ -900,7 +900,7 @@ namespace Game.Networking.Packets
         {
             ItemID = gem.ItemId;
 
-            ItemBonuses bonus = new ItemBonuses();
+            ItemBonuses bonus = new();
             bonus.Context = (ItemContext)(byte)gem.Context;
             foreach (ushort bonusListId in gem.BonusListIDs)
                 if (bonusListId != 0)
@@ -1011,7 +1011,7 @@ namespace Game.Networking.Packets
         }
 
         public byte Slot;
-        public ItemInstance Item = new ItemInstance();
+        public ItemInstance Item = new();
     }
 
     public struct InvUpdate

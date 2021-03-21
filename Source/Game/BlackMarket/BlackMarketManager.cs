@@ -44,7 +44,7 @@ namespace Game.BlackMarket
 
             do
             {
-                BlackMarketTemplate templ = new BlackMarketTemplate();
+                BlackMarketTemplate templ = new();
 
                 if (!templ.LoadFromDB(result.GetFields())) // Add checks
                     continue;
@@ -72,10 +72,10 @@ namespace Game.BlackMarket
 
             _lastUpdate = Time.UnixTime; //Set update time before loading
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             do
             {
-                BlackMarketEntry auction = new BlackMarketEntry();
+                BlackMarketEntry auction = new();
 
                 if (!auction.LoadFromDB(result.GetFields()))
                 {
@@ -99,7 +99,7 @@ namespace Game.BlackMarket
 
         public void Update(bool updateTime = false)
         {
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             long now = Time.UnixTime;
             foreach (var entry in _auctions.Values)
             {
@@ -118,7 +118,7 @@ namespace Game.BlackMarket
 
         public void RefreshAuctions()
         {
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             // Delete completed auctions
             foreach (var pair in _auctions)
             {
@@ -132,7 +132,7 @@ namespace Game.BlackMarket
             DB.Characters.CommitTransaction(trans);
             trans = new SQLTransaction();
 
-            List<BlackMarketTemplate> templates = new List<BlackMarketTemplate>();
+            List<BlackMarketTemplate> templates = new();
             foreach (var pair in _templates)
             {
                 if (GetAuctionByID(pair.Value.MarketID) != null)
@@ -147,7 +147,7 @@ namespace Game.BlackMarket
 
             foreach (BlackMarketTemplate templat in templates)
             {
-                BlackMarketEntry entry = new BlackMarketEntry();
+                BlackMarketEntry entry = new();
                 entry.Initialize(templat.MarketID, (uint)templat.Duration);
                 entry.SaveToDB(trans);
                 AddAuction(entry);
@@ -170,7 +170,7 @@ namespace Game.BlackMarket
             {
                 BlackMarketTemplate templ = pair.Value.GetTemplate();
 
-                BlackMarketItem item = new BlackMarketItem();
+                BlackMarketItem item = new();
                 item.MarketID = pair.Value.GetMarketId();
                 item.SellerNPC = templ.SellerNPC;
                 item.Item = templ.Item;
@@ -302,8 +302,8 @@ namespace Game.BlackMarket
 
         public long GetLastUpdate() { return _lastUpdate; }
 
-        Dictionary<uint, BlackMarketEntry> _auctions = new Dictionary<uint, BlackMarketEntry>();
-        Dictionary<uint, BlackMarketTemplate> _templates = new Dictionary<uint, BlackMarketTemplate>();
+        Dictionary<uint, BlackMarketEntry> _auctions = new();
+        Dictionary<uint, BlackMarketTemplate> _templates = new();
         long _lastUpdate;
     }
 }

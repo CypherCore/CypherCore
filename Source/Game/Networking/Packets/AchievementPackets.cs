@@ -32,7 +32,7 @@ namespace Game.Networking.Packets
             Data.Write(_worldPacket);
         }
 
-        public AllAchievements Data = new AllAchievements();
+        public AllAchievements Data = new();
     }
 
     class AllAccountCriteria : ServerPacket
@@ -46,7 +46,7 @@ namespace Game.Networking.Packets
                 progress.Write(_worldPacket);
         }
 
-        public List<CriteriaProgressPkt> Progress = new List<CriteriaProgressPkt>();
+        public List<CriteriaProgressPkt> Progress = new();
     }
     
     public class RespondInspectAchievements : ServerPacket
@@ -60,7 +60,7 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid Player;
-        public AllAchievements Data = new AllAchievements();
+        public AllAchievements Data = new();
     }
 
     public class CriteriaUpdate : ServerPacket
@@ -195,7 +195,7 @@ namespace Game.Networking.Packets
             }
         }
 
-        public List<GuildCriteriaProgress> Progress = new List<GuildCriteriaProgress>();
+        public List<GuildCriteriaProgress> Progress = new();
     }
 
     public class GuildCriteriaDeleted : ServerPacket
@@ -268,7 +268,7 @@ namespace Game.Networking.Packets
                 earned.Write(_worldPacket);
         }
 
-        public List<EarnedAchievement> Earned = new List<EarnedAchievement>();
+        public List<EarnedAchievement> Earned = new();
     }
 
     class GuildGetAchievementMembers : ClientPacket
@@ -302,7 +302,7 @@ namespace Game.Networking.Packets
 
         public ObjectGuid GuildGUID;
         public uint AchievementID;
-        public List<ObjectGuid> Member = new List<ObjectGuid>();
+        public List<ObjectGuid> Member = new();
     }
 
     //Structs
@@ -377,7 +377,7 @@ namespace Game.Networking.Packets
                 progress.Write(data);
         }
 
-        public List<EarnedAchievement> Earned = new List<EarnedAchievement>();
-        public List<CriteriaProgressPkt> Progress = new List<CriteriaProgressPkt>();
+        public List<EarnedAchievement> Earned = new();
+        public List<CriteriaProgressPkt> Progress = new();
     }
 }

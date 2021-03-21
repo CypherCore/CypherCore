@@ -71,7 +71,7 @@ namespace Game.Networking.Packets
         }
 
         public uint MaxSize = 100;
-        public CalendarAddEventInfo EventInfo = new CalendarAddEventInfo();
+        public CalendarAddEventInfo EventInfo = new();
     }
 
     class CalendarUpdateEvent : ClientPacket
@@ -174,9 +174,9 @@ namespace Game.Networking.Packets
         }
 
         public long ServerTime;
-        public List<CalendarSendCalendarInviteInfo> Invites = new List<CalendarSendCalendarInviteInfo>();
-        public List<CalendarSendCalendarRaidLockoutInfo> RaidLockouts = new List<CalendarSendCalendarRaidLockoutInfo>();
-        public List<CalendarSendCalendarEventInfo> Events = new List<CalendarSendCalendarEventInfo>();
+        public List<CalendarSendCalendarInviteInfo> Invites = new();
+        public List<CalendarSendCalendarRaidLockoutInfo> RaidLockouts = new();
+        public List<CalendarSendCalendarEventInfo> Events = new();
     }
 
     class CalendarSendEvent : ServerPacket
@@ -218,7 +218,7 @@ namespace Game.Networking.Packets
         public CalendarSendEventType EventType;
         public string Description;
         public string EventName;
-        public List<CalendarEventInviteInfo> Invites = new List<CalendarEventInviteInfo>();
+        public List<CalendarEventInviteInfo> Invites = new();
     }
 
     class CalendarInviteAlert : ServerPacket
@@ -653,7 +653,7 @@ namespace Game.Networking.Packets
             }
         }
 
-        public List<CalendarEventInitialInviteInfo> Invites = new List<CalendarEventInitialInviteInfo>();
+        public List<CalendarEventInitialInviteInfo> Invites = new();
     }
 
     class CalendarInviteStatusAlert : ServerPacket
@@ -777,7 +777,7 @@ namespace Game.Networking.Packets
 
             for (var i = 0; i < InviteCount; ++i)
             {
-                CalendarAddEventInviteInfo invite = new CalendarAddEventInviteInfo();
+                CalendarAddEventInviteInfo invite = new();
                 invite.Read(data);
                 Invites[i] = invite;
             }

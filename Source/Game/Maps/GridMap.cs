@@ -43,7 +43,7 @@ namespace Game.Maps
             if (!File.Exists(filename))
                 return LoadResult.FileNotFound;
 
-            using (BinaryReader reader = new BinaryReader(new FileStream(filename, FileMode.Open, FileAccess.Read)))
+            using (BinaryReader reader = new(new FileStream(filename, FileMode.Open, FileAccess.Read)))
             {
                 MapFileHeader header = reader.Read<MapFileHeader>();
                 if (header.mapMagic != MapConst.MapMagic || (header.versionMagic != MapConst.MapVersionMagic && header.versionMagic != MapConst.MapVersionMagic2)) // Hack for some different extractors using v2.0 header
@@ -464,7 +464,7 @@ namespace Game.Maps
                 quarterIndex = gx > gy ? 1u : 0;
 
 
-            Ray ray = new Ray(new Vector3(gx, gy, 0.0f), Vector3.ZAxis);
+            Ray ray = new(new Vector3(gx, gy, 0.0f), Vector3.ZAxis);
             return ray.intersection(_minHeightPlanes[quarterIndex]).Z;
         }
 

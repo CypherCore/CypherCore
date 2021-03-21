@@ -24,7 +24,7 @@ namespace Game.Entities
 {
     public class PetitionManager : Singleton<PetitionManager>
     {
-        Dictionary<ObjectGuid, Petition> _petitionStorage = new Dictionary<ObjectGuid, Petition>();
+        Dictionary<ObjectGuid, Petition> _petitionStorage = new();
 
         PetitionManager() { }
 
@@ -77,7 +77,7 @@ namespace Game.Entities
 
         public void AddPetition(ObjectGuid petitionGuid, ObjectGuid ownerGuid, string name, bool isLoading)
         {
-            Petition p = new Petition();
+            Petition p = new();
             p.PetitionGuid = petitionGuid;
             p.ownerGuid = ownerGuid;
             p.petitionName = name;
@@ -100,7 +100,7 @@ namespace Game.Entities
             _petitionStorage.Remove(petitionGuid);
 
             // Delete From DB
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PETITION_BY_GUID);
             stmt.AddValue(0, petitionGuid.GetCounter());
@@ -134,7 +134,7 @@ namespace Game.Entities
                 }
             }
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PETITION_BY_OWNER);
             stmt.AddValue(0, ownerGuid.GetCounter());
             trans.Append(stmt);
@@ -161,7 +161,7 @@ namespace Game.Entities
         public ObjectGuid PetitionGuid;
         public ObjectGuid ownerGuid;
         public string petitionName;
-        public List<(uint AccountId, ObjectGuid PlayerGuid)> signatures = new List<(uint AccountId, ObjectGuid PlayerGuid)>();
+        public List<(uint AccountId, ObjectGuid PlayerGuid)> signatures = new();
 
         public bool IsPetitionSignedByAccount(uint accountId)
         {

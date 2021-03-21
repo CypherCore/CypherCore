@@ -248,11 +248,11 @@ namespace Game.Spells
         {
             _needClientUpdate = false;
 
-            AuraUpdate update = new AuraUpdate();
+            AuraUpdate update = new();
             update.UpdateAll = false;
             update.UnitGUID = GetTarget().GetGUID();
 
-            AuraInfo auraInfo = new AuraInfo();
+            AuraInfo auraInfo = new();
             BuildUpdatePacket(ref auraInfo, remove);
             update.Auras.Add(auraInfo);
 
@@ -439,11 +439,11 @@ namespace Game.Spells
 
             // fill up to date target list
             //       target, effMask
-            Dictionary<Unit, uint> targets = new Dictionary<Unit, uint>();
+            Dictionary<Unit, uint> targets = new();
 
             FillTargetMap(ref targets, caster);
 
-            List<Unit> targetsToRemove = new List<Unit>();
+            List<Unit> targetsToRemove = new();
 
             // mark all auras as ready to remove
             foreach (var app in m_applications)
@@ -576,7 +576,7 @@ namespace Game.Spells
         public void _ApplyEffectForTargets(uint effIndex)
         {
             // prepare list of aura targets
-            List<Unit> targetList = new List<Unit>();
+            List<Unit> targetList = new();
             foreach (var app in m_applications.Values)
             {
                 if (Convert.ToBoolean(app.GetEffectsToApply() & (1 << (int)effIndex)) && !app.HasEffect(effIndex))
@@ -1035,7 +1035,7 @@ namespace Game.Spells
 
         public AuraKey GenerateKey(out uint recalculateMask)
         {
-            AuraKey key = new AuraKey(GetCasterGUID(), GetCastItemGUID(), GetId(), 0);
+            AuraKey key = new(GetCasterGUID(), GetCastItemGUID(), GetId(), 0);
             recalculateMask = 0;
             for (int i = 0; i < _effects.Length; ++i)
             {
@@ -2499,7 +2499,7 @@ namespace Game.Spells
         }
 
         #region Fields
-        List<AuraScript> m_loadedScripts = new List<AuraScript>();
+        List<AuraScript> m_loadedScripts = new();
         SpellInfo m_spellInfo;
         Difficulty m_castDifficulty;
         ObjectGuid m_castGuid;
@@ -2514,7 +2514,7 @@ namespace Game.Spells
         int m_maxDuration;                                // Max aura duration
         int m_duration;                                   // Current time
         int m_timeCla;                                    // Timer for power per sec calcultion
-        List<SpellPowerRecord> m_periodicCosts = new List<SpellPowerRecord>();// Periodic costs
+        List<SpellPowerRecord> m_periodicCosts = new();// Periodic costs
         int m_updateTargetMapInterval;                    // Timer for UpdateTargetMapOfEffect
 
         uint m_casterLevel;                          // Aura level (store caster level for correct show level dep amount)
@@ -2523,7 +2523,7 @@ namespace Game.Spells
 
         //might need to be arrays still
         AuraEffect[] _effects;
-        Dictionary<ObjectGuid, AuraApplication> m_applications = new Dictionary<ObjectGuid, AuraApplication>();
+        Dictionary<ObjectGuid, AuraApplication> m_applications = new();
 
         bool m_isRemoved;
         bool m_isSingleTarget;                        // true if it's a single target spell and registered at caster - can change at spell steal for example
@@ -2535,7 +2535,7 @@ namespace Game.Spells
         DateTime m_lastProcAttemptTime;
         DateTime m_lastProcSuccessTime;
 
-        List<AuraApplication> m_removedApplications = new List<AuraApplication>();
+        List<AuraApplication> m_removedApplications = new();
         #endregion
     }
 
@@ -2580,7 +2580,7 @@ namespace Game.Spells
                 if (effect == null || !HasEffect(effect.EffectIndex))
                     continue;
 
-                List<Unit> targetList = new List<Unit>();
+                List<Unit> targetList = new();
                 // non-area aura
                 if (effect.Effect == SpellEffectName.ApplyAura)
                 {
@@ -2697,7 +2697,7 @@ namespace Game.Spells
                 if (effect == null || !HasEffect(effect.EffectIndex))
                     continue;
 
-                List<Unit> targetList = new List<Unit>();
+                List<Unit> targetList = new();
                 if (effect.TargetB.GetTarget() == Targets.DestDynobjAlly || effect.TargetB.GetTarget() == Targets.UnitDestAreaAlly)
                 {
                     var u_check = new AnyFriendlyUnitInObjectRangeCheck(GetDynobjOwner(), dynObjOwnerCaster, radius, GetSpellInfo().HasAttribute(SpellAttr3.OnlyTargetPlayers), false, true);

@@ -579,7 +579,7 @@ namespace Game.Entities
             QueryData.GameObjectID = entry;
             QueryData.Allow = true;
 
-            GameObjectStats stats = new GameObjectStats();
+            GameObjectStats stats = new();
             stats.Type = (uint)type;
             stats.DisplayID = displayId;
 
@@ -1369,9 +1369,9 @@ namespace Game.Entities
 
     public class GameObjectLocale
     {
-        public StringArray Name = new StringArray((int)Locale.Total);
-        public StringArray CastBarCaption = new StringArray((int)Locale.Total);
-        public StringArray Unk1 = new StringArray((int)Locale.Total);
+        public StringArray Name = new((int)Locale.Total);
+        public StringArray CastBarCaption = new((int)Locale.Total);
+        public StringArray Unk1 = new((int)Locale.Total);
     }
 
     public class GameObjectAddon

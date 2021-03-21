@@ -105,7 +105,7 @@ namespace Game.Collision
 
             // child bounds are defined in object space:
             Vector3 p = iInvRot * (pRay.Origin - iPos) * iInvScale;
-            Ray modRay = new Ray(p, iInvRot * pRay.Direction);
+            Ray modRay = new(p, iInvRot * pRay.Direction);
             float distance = pMaxDist * iInvScale;
             bool hit = iModel.IntersectRay(modRay, ref distance, pStopAtFirstHit, ignoreFlags);
             if (hit)

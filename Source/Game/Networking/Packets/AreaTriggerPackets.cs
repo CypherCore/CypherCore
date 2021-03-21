@@ -108,6 +108,6 @@ namespace Game.Networking.Packets
 
         public uint TimeToTarget;
         public uint ElapsedTimeForMovement;
-        public List<Vector3> Points = new List<Vector3>();
+        public List<Vector3> Points = new();
     }
 }

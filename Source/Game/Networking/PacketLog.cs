@@ -24,7 +24,7 @@ using System.Text;
 
 public class PacketLog
 {
-    static object syncObj = new object();
+    static object syncObj = new();
     static string FullPath;
 
     static PacketLog()

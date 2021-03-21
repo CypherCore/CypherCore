@@ -171,7 +171,7 @@ namespace Game
 
             mover.UpdatePosition(movementInfo.Pos);
 
-            MoveUpdate moveUpdate = new MoveUpdate();
+            MoveUpdate moveUpdate = new();
             moveUpdate.Status = mover.m_movementInfo;
             mover.SendMessageToSet(moveUpdate, GetPlayer());
 
@@ -274,7 +274,7 @@ namespace Game
             GetPlayer().ResetMap();
             GetPlayer().SetMap(newMap);
 
-            ResumeToken resumeToken = new ResumeToken();
+            ResumeToken resumeToken = new();
             resumeToken.SequenceIndex = _player.m_movementCounter;
             resumeToken.Reason = seamlessTeleport ? 2 : 1u;
             SendPacket(resumeToken);
@@ -416,12 +416,12 @@ namespace Game
 
             if (CliDB.MapStorage.LookupByKey(loc.GetMapId()).IsDungeon())
             {
-                UpdateLastInstance updateLastInstance = new UpdateLastInstance();
+                UpdateLastInstance updateLastInstance = new();
                 updateLastInstance.MapID = loc.GetMapId();
                 SendPacket(updateLastInstance);
             }
 
-            NewWorld packet = new NewWorld();
+            NewWorld packet = new();
             packet.MapID = loc.GetMapId();
             packet.Loc.Pos = loc;
             packet.Reason = (uint)(!_player.IsBeingTeleportedSeamlessly() ? NewWorldReason.Normal : NewWorldReason.Seamless);
@@ -577,7 +577,7 @@ namespace Game
 
             GetPlayer().m_movementInfo = movementAck.Ack.Status;
 
-            MoveUpdateKnockBack updateKnockBack = new MoveUpdateKnockBack();
+            MoveUpdateKnockBack updateKnockBack = new();
             updateKnockBack.Status = GetPlayer().m_movementInfo;
             GetPlayer().SendMessageToSet(updateKnockBack, false);
         }
@@ -630,7 +630,7 @@ namespace Game
 
             moveApplyMovementForceAck.Ack.Status.Time += m_clientTimeDelay;
 
-            MoveUpdateApplyMovementForce updateApplyMovementForce = new MoveUpdateApplyMovementForce();
+            MoveUpdateApplyMovementForce updateApplyMovementForce = new();
             updateApplyMovementForce.Status = moveApplyMovementForceAck.Ack.Status;
             updateApplyMovementForce.Force = moveApplyMovementForceAck.Force;
             mover.SendMessageToSet(updateApplyMovementForce, false);
@@ -652,7 +652,7 @@ namespace Game
 
             moveRemoveMovementForceAck.Ack.Status.Time += m_clientTimeDelay;
 
-            MoveUpdateRemoveMovementForce updateRemoveMovementForce = new MoveUpdateRemoveMovementForce();
+            MoveUpdateRemoveMovementForce updateRemoveMovementForce = new();
             updateRemoveMovementForce.Status = moveRemoveMovementForceAck.Ack.Status;
             updateRemoveMovementForce.TriggerGUID = moveRemoveMovementForceAck.ID;
             mover.SendMessageToSet(updateRemoveMovementForce, false);
@@ -694,7 +694,7 @@ namespace Game
 
             setModMovementForceMagnitudeAck.Ack.Status.Time += m_clientTimeDelay;
 
-            MoveUpdateSpeed updateModMovementForceMagnitude = new MoveUpdateSpeed(ServerOpcodes.MoveUpdateModMovementForceMagnitude);
+            MoveUpdateSpeed updateModMovementForceMagnitude = new(ServerOpcodes.MoveUpdateModMovementForceMagnitude);
             updateModMovementForceMagnitude.Status = setModMovementForceMagnitudeAck.Ack.Status;
             updateModMovementForceMagnitude.Speed = setModMovementForceMagnitudeAck.Speed;
             mover.SendMessageToSet(updateModMovementForceMagnitude, false);

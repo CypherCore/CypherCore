@@ -56,7 +56,7 @@ namespace Game.Scenarios
                 return;
             }
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             foreach (var iter in _criteriaProgress)
             {
                 if (!iter.Value.Changed)
@@ -101,10 +101,10 @@ namespace Game.Scenarios
             SQLResult result = DB.Characters.Query(stmt);
             if (!result.IsEmpty())
             {
-                SQLTransaction trans = new SQLTransaction();
+                SQLTransaction trans = new();
                 long now = Time.UnixTime;
 
-                List<CriteriaTree> criteriaTrees = new List<CriteriaTree>();
+                List<CriteriaTree> criteriaTrees = new();
                 do
                 {
                     uint id = result.Read<uint>(0);
@@ -178,6 +178,6 @@ namespace Game.Scenarios
         }
 
         Map _map;
-        Dictionary<byte, Dictionary<uint, CriteriaProgress>> _stepCriteriaProgress = new Dictionary<byte, Dictionary<uint, CriteriaProgress>>();
+        Dictionary<byte, Dictionary<uint, CriteriaProgress>> _stepCriteriaProgress = new();
     }
 }

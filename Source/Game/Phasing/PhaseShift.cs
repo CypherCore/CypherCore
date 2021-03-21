@@ -241,9 +241,9 @@ namespace Game
 
         public PhaseShiftFlags Flags = PhaseShiftFlags.Unphased;
         public ObjectGuid PersonalGuid;
-        public Dictionary<uint, PhaseRef> Phases = new Dictionary<uint, PhaseRef>();
-        public Dictionary<uint, VisibleMapIdRef> VisibleMapIds = new Dictionary<uint, VisibleMapIdRef>();
-        public Dictionary<uint, UiMapPhaseIdRef> UiMapPhaseIds = new Dictionary<uint, UiMapPhaseIdRef>();
+        public Dictionary<uint, PhaseRef> Phases = new();
+        public Dictionary<uint, VisibleMapIdRef> VisibleMapIds = new();
+        public Dictionary<uint, UiMapPhaseIdRef> UiMapPhaseIds = new();
 
         int NonCosmeticReferences;
         int CosmeticReferences;

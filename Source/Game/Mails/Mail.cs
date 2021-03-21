@@ -26,7 +26,7 @@ namespace Game.Mails
     {
         public void AddItem(ulong itemGuidLow, uint item_template)
         {
-            MailItemInfo mii = new MailItemInfo();
+            MailItemInfo mii = new();
             mii.item_guid = itemGuidLow;
             mii.item_template = item_template;
             items.Add(mii);
@@ -55,8 +55,8 @@ namespace Game.Mails
         public ulong receiver;
         public string subject;
         public string body;
-        public List<MailItemInfo> items = new List<MailItemInfo>();
-        public List<uint> removedItems = new List<uint>();
+        public List<MailItemInfo> items = new();
+        public List<uint> removedItems = new();
         public long expire_time;
         public long deliver_time;
         public ulong money;

@@ -79,7 +79,7 @@ namespace Game.Maps
 
             Log.outDebug(LogFilter.Maps, "InstanceSaveManager.AddInstanceSave: mapid = {0}, instanceid = {1}", mapId, instanceId);
 
-            InstanceSave save = new InstanceSave(mapId, instanceId, difficulty, entranceId, resetTime, canReset);
+            InstanceSave save = new(mapId, instanceId, difficulty, entranceId, resetTime, canReset);
             if (!load)
                 save.SaveToDB();
 
@@ -94,7 +94,7 @@ namespace Game.Maps
 
         public void DeleteInstanceFromDB(uint instanceid)
         {
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_INSTANCE_BY_INSTANCE);
             stmt.AddValue(0, instanceid);
@@ -187,10 +187,10 @@ namespace Game.Maps
             // get the current reset times for normal instances (these may need to be updated)
             // these are only kept in memory for InstanceSaves that are loaded later
             // resettime = 0 in the DB for raid/heroic instances so those are skipped
-            Dictionary<uint, Tuple<uint, long>> instResetTime = new Dictionary<uint, Tuple<uint, long>>();
+            Dictionary<uint, Tuple<uint, long>> instResetTime = new();
 
             // index instance ids by map/difficulty pairs for fast reset warning send
-            MultiMap<uint, uint> mapDiffResetInstances = new MultiMap<uint, uint>();
+            MultiMap<uint, uint> mapDiffResetInstances = new();
 
             SQLResult result = DB.Characters.Query("SELECT id, map, difficulty, resettime FROM instance ORDER BY id ASC");
             if (!result.IsEmpty())
@@ -420,7 +420,7 @@ namespace Game.Maps
 
             bool shouldDelete = true;
             var pList = pair.Value.m_playerList;
-            List<Player> temp = new List<Player>(); // list of expired binds that should be unbound
+            List<Player> temp = new(); // list of expired binds that should be unbound
             foreach (var player in pList)
             {
                 InstanceBind bind = player.GetBoundInstance(pair.Value.GetMapId(), pair.Value.GetDifficultyID());
@@ -499,7 +499,7 @@ namespace Game.Maps
                     return;
 
                 // delete them from the DB, even if not loaded
-                SQLTransaction trans = new SQLTransaction();
+                SQLTransaction trans = new();
 
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_EXPIRED_CHAR_INSTANCE_BY_MAP_DIFF);
                 stmt.AddValue(0, mapid);
@@ -634,10 +634,10 @@ namespace Game.Maps
         // used during global instance resets
         public bool lock_instLists;
         // fast lookup by instance id
-        Dictionary<uint, InstanceSave> m_instanceSaveById = new Dictionary<uint, InstanceSave>();
+        Dictionary<uint, InstanceSave> m_instanceSaveById = new();
         // fast lookup for reset times (always use existed functions for access/set)
-        Dictionary<ulong, long> m_resetTimeByMapDifficulty = new Dictionary<ulong, long>();
-        MultiMap<long, InstResetEvent> m_resetTimeQueue = new MultiMap<long, InstResetEvent>();
+        Dictionary<ulong, long> m_resetTimeByMapDifficulty = new();
+        MultiMap<long, InstResetEvent> m_resetTimeQueue = new();
     }
 
     public class InstanceSave
@@ -766,8 +766,8 @@ namespace Game.Maps
             m_toDelete = toDelete;
         }
 
-        public List<Player> m_playerList = new List<Player>();
-        public List<Group> m_groupList = new List<Group>();
+        public List<Player> m_playerList = new();
+        public List<Group> m_groupList = new();
         long m_resetTime;
         uint m_instanceid;
         uint m_mapid;

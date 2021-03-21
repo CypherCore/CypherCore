@@ -32,7 +32,7 @@ namespace Game
             if (!player)
                 return;
 
-            CanDuelResult response = new CanDuelResult();
+            CanDuelResult response = new();
             response.TargetGUID = packet.TargetGUID;
             response.Result = player.duel == null;
             SendPacket(response);
@@ -73,7 +73,7 @@ namespace Game
             player.duel.startTimer = now;
             plTarget.duel.startTimer = now;
 
-            DuelCountdown packet = new DuelCountdown(3000);
+            DuelCountdown packet = new(3000);
 
             player.SendPacket(packet);
             plTarget.SendPacket(packet);

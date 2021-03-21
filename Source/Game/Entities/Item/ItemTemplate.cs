@@ -328,7 +328,7 @@ namespace Game.Entities
         }
 
         public uint MaxDurability;
-        public List<ItemEffectRecord> Effects = new List<ItemEffectRecord>();
+        public List<ItemEffectRecord> Effects = new();
 
         // extra fields, not part of db2 files
         public uint ScriptId;

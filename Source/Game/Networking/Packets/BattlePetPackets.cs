@@ -45,8 +45,8 @@ namespace Game.Networking.Packets
 
         public ushort Trap;
         bool HasJournalLock = true;
-        public List<BattlePetSlot> Slots = new List<BattlePetSlot>();
-        public List<BattlePetStruct> Pets = new List<BattlePetStruct>();
+        public List<BattlePetSlot> Slots = new();
+        public List<BattlePetStruct> Pets = new();
         int MaxPets = 1000;
     }
 
@@ -78,7 +78,7 @@ namespace Game.Networking.Packets
                 pet.Write(_worldPacket);
         }
 
-        public List<BattlePetStruct> Pets = new List<BattlePetStruct>();
+        public List<BattlePetStruct> Pets = new();
         public bool PetAdded;
     }
 
@@ -97,7 +97,7 @@ namespace Game.Networking.Packets
                 slot.Write(_worldPacket);
         }
 
-        public List<BattlePetSlot> Slots = new List<BattlePetSlot>();
+        public List<BattlePetSlot> Slots = new();
         public bool AutoSlotted;
         public bool NewSlot;
     }

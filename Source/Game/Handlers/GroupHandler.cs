@@ -27,7 +27,7 @@ namespace Game
     {
         public void SendPartyResult(PartyOperation operation, string member, PartyResult res, uint val = 0)
         {
-            PartyCommandResult packet = new PartyCommandResult();
+            PartyCommandResult packet = new();
 
             packet.Name = member;
             packet.Command = (byte)operation;
@@ -232,7 +232,7 @@ namespace Game
                     return;
 
                 // report
-                GroupDecline decline = new GroupDecline(GetPlayer().GetName());
+                GroupDecline decline = new(GetPlayer().GetName());
                 leader.SendPacket(decline);
             }
         }
@@ -294,7 +294,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.SetRole, Processing = PacketProcessing.Inplace)]
         void HandleSetRole(SetRole packet)
         {
-            RoleChangedInform roleChangedInform = new RoleChangedInform();
+            RoleChangedInform roleChangedInform = new();
 
             Group group = GetPlayer().GetGroup();
             byte oldRole = (byte)(group ? group.GetLfgRoles(packet.TargetGUID) : 0);
@@ -407,7 +407,7 @@ namespace Game
             if (!GetPlayer().GetGroup())
                 return;
 
-            MinimapPing minimapPing = new MinimapPing();
+            MinimapPing minimapPing = new();
             minimapPing.Sender = GetPlayer().GetGUID();
             minimapPing.PositionX = packet.PositionX;
             minimapPing.PositionY = packet.PositionY;
@@ -586,7 +586,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.RequestPartyMemberStats)]
         void HandleRequestPartyMemberStats(RequestPartyMemberStats packet)
         {
-            PartyMemberFullState partyMemberStats = new PartyMemberFullState();
+            PartyMemberFullState partyMemberStats = new();
 
             Player player = Global.ObjAccessor.FindConnectedPlayer(packet.TargetGUID);
             if (!player)
@@ -632,7 +632,7 @@ namespace Game
             if (!group.IsLeader(guid) && !group.IsAssistant(guid))
                 return;
 
-            RolePollInform rolePollInform = new RolePollInform();
+            RolePollInform rolePollInform = new();
             rolePollInform.From = guid;
             rolePollInform.PartyIndex = packet.PartyIndex;
             group.BroadcastPacket(rolePollInform, true);

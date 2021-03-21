@@ -208,7 +208,7 @@ namespace Game.Maps
                     {
                         if (GetWorldObjectCountInNGrid<Player>() == 0 && !map.ActiveObjectsNearGrid(this))
                         {
-                            ObjectGridStoper worker = new ObjectGridStoper();
+                            ObjectGridStoper worker = new();
                             var visitor = new Visitor(worker, GridMapTypeMask.AllGrid);
                             VisitAllGrids(visitor);
                             SetGridState(GridState.Idle);
@@ -442,14 +442,14 @@ namespace Game.Maps
             return 0;
         }
 
-        public List<Player> players = new List<Player>();
-        public List<Creature> creatures = new List<Creature>();
-        public List<Corpse> corpses = new List<Corpse>();
-        public List<DynamicObject> dynamicObjects = new List<DynamicObject>();
-        public List<AreaTrigger> areaTriggers = new List<AreaTrigger>();
-        public List<Conversation> conversations = new List<Conversation>();
-        public List<GameObject> gameObjects = new List<GameObject>();
-        public List<WorldObject> worldObjects = new List<WorldObject>();
+        public List<Player> players = new();
+        public List<Creature> creatures = new();
+        public List<Corpse> corpses = new();
+        public List<DynamicObject> dynamicObjects = new();
+        public List<AreaTrigger> areaTriggers = new();
+        public List<Conversation> conversations = new();
+        public List<GameObject> gameObjects = new();
+        public List<WorldObject> worldObjects = new();
     }
 
     public enum GridState

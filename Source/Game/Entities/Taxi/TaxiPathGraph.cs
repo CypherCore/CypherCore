@@ -28,8 +28,8 @@ namespace Game.Entities
     public class TaxiPathGraph : Singleton<TaxiPathGraph>
     {
         EdgeWeightedDigraph m_graph;
-        List<TaxiNodesRecord> m_nodesByVertex = new List<TaxiNodesRecord>();
-        Dictionary<uint, uint> m_verticesByNode = new Dictionary<uint, uint>();
+        List<TaxiNodesRecord> m_nodesByVertex = new();
+        Dictionary<uint, uint> m_verticesByNode = new();
 
         TaxiPathGraph() { }
 
@@ -38,7 +38,7 @@ namespace Game.Entities
             if (m_graph != null)
                 return;
 
-            List<Tuple<Tuple<uint, uint>, uint>> edges = new List<Tuple<Tuple<uint, uint>, uint>>();
+            List<Tuple<Tuple<uint, uint>, uint>> edges = new();
 
             // Initialize here
             foreach (TaxiPathRecord path in CliDB.TaxiPathStorage.Values)
@@ -148,7 +148,7 @@ namespace Game.Entities
             {
                 shortestPath.Clear();
                 // We want to use Dijkstra on this graph
-                DijkstraShortestPath g = new DijkstraShortestPath(m_graph, (int)GetVertexIDFromNodeID(from));
+                DijkstraShortestPath g = new(m_graph, (int)GetVertexIDFromNodeID(from));
                 var path = g.PathTo((int)GetVertexIDFromNodeID(to));
                 // found a path to the goal
                 shortestPath.Add(from.Id);
@@ -175,7 +175,7 @@ namespace Game.Entities
         //todo test me
         public void GetReachableNodesMask(TaxiNodesRecord from, byte[] mask)
         {
-            DepthFirstSearch depthFirst = new DepthFirstSearch(m_graph, GetVertexIDFromNodeID(from), vertex =>
+            DepthFirstSearch depthFirst = new(m_graph, GetVertexIDFromNodeID(from), vertex =>
             {
                 TaxiNodesRecord taxiNode = CliDB.TaxiNodesStorage.LookupByKey(GetNodeIDFromVertexID(vertex));
                 if (taxiNode != null)

@@ -49,7 +49,7 @@ namespace Game.Networking.Packets
         }
 
         public int TotalNumRecords;
-        public List<MailListEntry> Mails = new List<MailListEntry>();
+        public List<MailListEntry> Mails = new();
     }
 
     public class MailCreateTextItem : ClientPacket
@@ -113,7 +113,7 @@ namespace Game.Networking.Packets
             public string Target;
             public string Subject;
             public string Body;
-            public List<MailAttachment> Attachments = new List<MailAttachment>();
+            public List<MailAttachment> Attachments = new();
 
             public struct MailAttachment
             {
@@ -334,7 +334,7 @@ namespace Game.Networking.Packets
             {
                 if (gemData.ItemId != 0)
                 {
-                    ItemGemData gem = new ItemGemData();
+                    ItemGemData gem = new();
                     gem.Slot = i;
                     gem.Item = new ItemInstance(gemData);
                     Gems.Add(gem);
@@ -372,8 +372,8 @@ namespace Game.Networking.Packets
         public uint MaxDurability;
         public uint Durability;
         public bool Unlocked;
-        List<ItemEnchantData> Enchants = new List<ItemEnchantData>();
-        List<ItemGemData> Gems= new List<ItemGemData>();
+        List<ItemEnchantData> Enchants = new();
+        List<ItemGemData> Gems= new();
     }
 
     public class MailListEntry
@@ -455,6 +455,6 @@ namespace Game.Networking.Packets
         public int MailTemplateID;
         public string Subject = "";
         public string Body = "";
-        public List<MailAttachedItem> Attachments = new List<MailAttachedItem>();
+        public List<MailAttachedItem> Attachments = new();
     }
 }

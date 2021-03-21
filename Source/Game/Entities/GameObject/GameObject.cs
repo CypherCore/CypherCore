@@ -165,7 +165,7 @@ namespace Game.Entities
             if (goInfo == null)
                 return null;
 
-            GameObject go = new GameObject();
+            GameObject go = new();
             if (!go.Create(entry, map, pos, rotation, animProgress, goState, artKit, false, 0))
                 return null;
 
@@ -174,7 +174,7 @@ namespace Game.Entities
 
         public static GameObject CreateGameObjectFromDB(ulong spawnId, Map map, bool addToMap = true)
         {
-            GameObject go = new GameObject();
+            GameObject go = new();
             if (!go.LoadFromDB(spawnId, map, addToMap))
                 return null;
 
@@ -502,7 +502,7 @@ namespace Game.Entities
                                             SetGoState(GameObjectState.Active);
                                             SetFlags(GameObjectFlags.NoDespawn);
 
-                                            UpdateData udata = new UpdateData(caster.GetMapId());
+                                            UpdateData udata = new(caster.GetMapId());
                                             UpdateObject packet;
                                             BuildValuesUpdateBlockForPlayer(udata, caster.ToPlayer());
                                             udata.BuildPacket(out packet);
@@ -882,7 +882,7 @@ namespace Game.Entities
 
         public void SendGameObjectDespawn()
         {
-            GameObjectDespawn packet = new GameObjectDespawn();
+            GameObjectDespawn packet = new();
             packet.ObjectGUID = GetGUID();
             SendMessageToSet(packet, true);
         }
@@ -1065,7 +1065,7 @@ namespace Game.Entities
             GetMap().RemoveRespawnTime(SpawnObjectType.GameObject, m_spawnId);
             Global.ObjectMgr.DeleteGameObjectData(m_spawnId);
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
 
             PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_GAMEOBJECT);
             stmt.AddValue(0, m_spawnId);
@@ -1501,7 +1501,7 @@ namespace Game.Entities
 
                             if (info.Goober.pageID != 0)                    // show page...
                             {
-                                PageTextPkt data = new PageTextPkt();
+                                PageTextPkt data = new();
                                 data.GameObjectGUID = GetGUID();
                                 player.SendPacket(data);
                             }
@@ -1957,7 +1957,7 @@ namespace Game.Entities
                                         return;
                                     }
 
-                                    OpenArtifactForge openArtifactForge = new OpenArtifactForge();
+                                    OpenArtifactForge openArtifactForge = new();
                                     openArtifactForge.ArtifactGUID = item.GetGUID();
                                     openArtifactForge.ForgeGUID = GetGUID();
                                     player.SendPacket(openArtifactForge);
@@ -1969,7 +1969,7 @@ namespace Game.Entities
                                     if (!item)
                                         return;
 
-                                    OpenHeartForge openHeartForge = new OpenHeartForge();
+                                    OpenHeartForge openHeartForge = new();
                                     openHeartForge.ForgeGUID = GetGUID();
                                     player.SendPacket(openHeartForge);
                                     break;
@@ -1985,7 +1985,7 @@ namespace Game.Entities
                         if (!player)
                             return;
 
-                        GameObjectUILink gameObjectUILink = new GameObjectUILink();
+                        GameObjectUILink gameObjectUILink = new();
                         gameObjectUILink.ObjectGUID = GetGUID();
                         gameObjectUILink.UILink = (int)GetGoInfo().UILink.UILinkType;
                         player.SendPacket(gameObjectUILink);
@@ -2082,7 +2082,7 @@ namespace Game.Entities
 
         public void SendCustomAnim(uint anim)
         {
-            GameObjectCustomAnim customAnim = new GameObjectCustomAnim();
+            GameObjectCustomAnim customAnim = new();
             customAnim.ObjectGUID = GetGUID();
             customAnim.CustomAnim = anim;
             SendMessageToSet(customAnim, true);
@@ -2174,7 +2174,7 @@ namespace Game.Entities
 
         public void SetWorldRotation(float qx, float qy, float qz, float qw)
         {
-            Quaternion rotation = new Quaternion(qx, qy, qz, qw);
+            Quaternion rotation = new(qx, qy, qz, qw);
             rotation.unitize();
             m_worldRotation.X = rotation.X;
             m_worldRotation.Y = rotation.Y;
@@ -2218,7 +2218,7 @@ namespace Game.Entities
             // dealing damage, send packet
             if (player != null)
             {
-                DestructibleBuildingDamage packet = new DestructibleBuildingDamage();
+                DestructibleBuildingDamage packet = new();
                 packet.Caster = attackerOrHealer.GetGUID(); // todo: this can be a GameObject
                 packet.Target = GetGUID();
                 packet.Damage = -change;
@@ -2545,7 +2545,7 @@ namespace Game.Entities
         public override void BuildValuesCreate(WorldPacket data, Player target)
         {
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new WorldPacket();
+            WorldPacket buffer = new();
 
             buffer.WriteUInt8((byte)flags);
             m_objectData.WriteCreate(buffer, flags, this, target);
@@ -2558,7 +2558,7 @@ namespace Game.Entities
         public override void BuildValuesUpdate(WorldPacket data, Player target)
         {
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new WorldPacket();
+            WorldPacket buffer = new();
 
             buffer.WriteUInt32(m_values.GetChangedObjectTypeMask());
             if (m_values.HasChanged(TypeId.Object))
@@ -2573,14 +2573,14 @@ namespace Game.Entities
 
         public void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedGameObjectMask, Player target)
         {
-            UpdateMask valuesMask = new UpdateMask((int)TypeId.Max);
+            UpdateMask valuesMask = new((int)TypeId.Max);
             if (requestedObjectMask.IsAnySet())
                 valuesMask.Set((int)TypeId.Object);
 
             if (requestedGameObjectMask.IsAnySet())
                 valuesMask.Set((int)TypeId.GameObject);
 
-            WorldPacket buffer = new WorldPacket();
+            WorldPacket buffer = new();
             buffer.WriteUInt32(valuesMask.GetBlock(0));
 
             if (valuesMask[(int)TypeId.Object])
@@ -2589,7 +2589,7 @@ namespace Game.Entities
             if (valuesMask[(int)TypeId.GameObject])
                 m_gameObjectData.WriteUpdate(buffer, requestedGameObjectMask, true, this, target);
 
-            WorldPacket buffer1 = new WorldPacket();
+            WorldPacket buffer1 = new();
             buffer1.WriteUInt8((byte)UpdateType.Values);
             buffer1.WritePackedGuid(GetGUID());
             buffer1.WriteUInt32(buffer.GetSize());
@@ -2655,7 +2655,7 @@ namespace Game.Entities
             else
                 _animKitId = 0;
 
-            GameObjectActivateAnimKit activateAnimKit = new GameObjectActivateAnimKit();
+            GameObjectActivateAnimKit activateAnimKit = new();
             activateAnimKit.ObjectGUID = GetGUID();
             activateAnimKit.AnimKitID = animKitId;
             activateAnimKit.Maintain = !oneshot;
@@ -2846,7 +2846,7 @@ namespace Game.Entities
         // For traps this: spell casting cooldown, for doors/buttons: reset time.
 
         Player m_ritualOwner;                              // used for GAMEOBJECT_TYPE_SUMMONING_RITUAL where GO is not summoned (no owner)
-        List<ObjectGuid> m_unique_users = new List<ObjectGuid>();
+        List<ObjectGuid> m_unique_users = new();
         uint m_usetimes;
 
         ObjectGuid m_lootRecipient;
@@ -2867,10 +2867,10 @@ namespace Game.Entities
 
         GameObjectState m_prevGoState;                          // What state to set whenever resetting
 
-        Dictionary<uint, ObjectGuid> ChairListSlots = new Dictionary<uint, ObjectGuid>();
-        List<ObjectGuid> m_SkillupList = new List<ObjectGuid>();
+        Dictionary<uint, ObjectGuid> ChairListSlots = new();
+        List<ObjectGuid> m_SkillupList = new();
 
-        public Loot loot = new Loot();
+        public Loot loot = new();
 
         public GameObjectModel m_model;
 

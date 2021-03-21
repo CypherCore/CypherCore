@@ -84,7 +84,7 @@ namespace Game.Entities
 
                 if (count != 0 && itemid != 0)
                 {
-                    List<ItemPosCount> dest = new List<ItemPosCount>();
+                    List<ItemPosCount> dest = new();
                     InventoryResult msg = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, itemid, count);
                     if (msg != InventoryResult.Ok)
                     {
@@ -105,7 +105,7 @@ namespace Game.Entities
             ulong moneyRefund = item.GetPaidMoney();  // item. will be invalidated in DestroyItem
 
             // Save all relevant data to DB to prevent desynchronisation exploits
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
 
             // Delete any references to the refund data
             item.SetNotRefundable(this, true, trans, false);
@@ -121,7 +121,7 @@ namespace Game.Entities
                 uint itemid = iece.ItemID[i];
                 if (count != 0 && itemid != 0)
                 {
-                    List<ItemPosCount> dest = new List<ItemPosCount>();
+                    List<ItemPosCount> dest = new();
                     InventoryResult msg = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, itemid, count);
                     Cypher.Assert(msg == InventoryResult.Ok); // Already checked before
                     Item it = StoreNewItem(dest, itemid, true);
@@ -173,7 +173,7 @@ namespace Game.Entities
                 Log.outDebug(LogFilter.Player, "Item refund: cannot find extendedcost data.");
                 return;
             }
-            SetItemPurchaseData setItemPurchaseData = new SetItemPurchaseData();
+            SetItemPurchaseData setItemPurchaseData = new();
             setItemPurchaseData.ItemGUID = item.GetGUID();
             setItemPurchaseData.PurchaseTime = GetTotalPlayedTime() - item.GetPlayedTime();
             setItemPurchaseData.Contents.Money = item.GetPaidMoney();
@@ -197,7 +197,7 @@ namespace Game.Entities
         }
         public void SendItemRefundResult(Item item, ItemExtendedCostRecord iece, byte error)
         {
-            ItemPurchaseRefundResult itemPurchaseRefundResult = new ItemPurchaseRefundResult();
+            ItemPurchaseRefundResult itemPurchaseRefundResult = new();
             itemPurchaseRefundResult.ItemGUID = item.GetGUID();
             itemPurchaseRefundResult.Result = error;
             if (error == 0)
@@ -1246,7 +1246,7 @@ namespace Game.Entities
                 return true;                                        // equipped
 
             // attempt store
-            List<ItemPosCount> sDest = new List<ItemPosCount>();
+            List<ItemPosCount> sDest = new();
             // store in main bag to simplify second pass (special bags can be not equipped yet at this moment)
             msg = CanStoreNewItem(InventorySlots.Bag0, ItemConst.NullSlot, sDest, titem_id, titem_amount);
             if (msg == InventoryResult.Ok)
@@ -1288,7 +1288,7 @@ namespace Game.Entities
                     AddTradeableItem(item);
 
                     // save data
-                    StringBuilder ss = new StringBuilder();
+                    StringBuilder ss = new();
                     foreach (var guid in allowedLooters)
                         ss.AppendFormat("{0} ", guid);
 
@@ -1307,7 +1307,7 @@ namespace Game.Entities
                     ItemTemplate childTemplate = Global.ObjectMgr.GetItemTemplate(childItemEntry.ChildItemID);
                     if (childTemplate != null)
                     {
-                        List<ItemPosCount> childDest = new List<ItemPosCount>();
+                        List<ItemPosCount> childDest = new();
                         CanStoreItem_InInventorySlots(InventorySlots.ChildEquipmentStart, InventorySlots.ChildEquipmentEnd, childDest, childTemplate, ref count, false, null, ItemConst.NullBag, ItemConst.NullSlot);
                         Item childItem = StoreNewItem(childDest, childTemplate.GetId(), update, 0, null, context, null, addToCollection);
                         if (childItem)
@@ -1645,7 +1645,7 @@ namespace Game.Entities
 
                             GetSpellHistory().AddGlobalCooldown(spellProto, m_weaponChangeTimer);
 
-                            SpellCooldownPkt spellCooldown = new SpellCooldownPkt();
+                            SpellCooldownPkt spellCooldown = new();
                             spellCooldown.Caster = GetGUID();
                             spellCooldown.Flags = SpellCooldownFlags.IncludeGCD;
                             spellCooldown.SpellCooldowns.Add(new SpellCooldownStruct(cooldownSpell, 0));
@@ -1746,7 +1746,7 @@ namespace Game.Entities
                             }
 
                             // check dest.src move possibility but try to store currently equipped item in the bag where the parent item is
-                            List<ItemPosCount> sSrc = new List<ItemPosCount>();
+                            List<ItemPosCount> sSrc = new();
                             ushort eSrc = 0;
                             if (IsInventoryPos(parentBag, parentSlot))
                             {
@@ -1804,7 +1804,7 @@ namespace Game.Entities
                     if (IsChildEquipmentPos(childItem.GetPos()))
                         return;
 
-                    List<ItemPosCount> dest = new List<ItemPosCount>();
+                    List<ItemPosCount> dest = new();
                     uint count = childItem.GetCount();
                     InventoryResult result = CanStoreItem_InInventorySlots(InventorySlots.ChildEquipmentStart, InventorySlots.ChildEquipmentEnd, dest, childItem.GetTemplate(), ref count, false, childItem, ItemConst.NullBag, ItemConst.NullSlot);
                     if (result != InventoryResult.Ok)
@@ -1842,7 +1842,7 @@ namespace Game.Entities
         }
         public void SendEquipError(InventoryResult msg, Item item1 = null, Item item2 = null, uint itemId = 0)
         {
-            InventoryChangeFailure failure = new InventoryChangeFailure();
+            InventoryChangeFailure failure = new();
             failure.BagResult = msg;
 
             if (msg != InventoryResult.Ok)
@@ -1890,7 +1890,7 @@ namespace Game.Entities
         public bool AddItem(uint itemId, uint count)
         {
             uint noSpaceForCount;
-            List<ItemPosCount> dest = new List<ItemPosCount>();
+            List<ItemPosCount> dest = new();
             InventoryResult msg = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, itemId, count, out noSpaceForCount);
             if (msg != InventoryResult.Ok)
                 count -= noSpaceForCount;
@@ -2037,7 +2037,7 @@ namespace Game.Entities
                 // change item amount before check (for unique max count check)
                 pSrcItem.SetCount(pSrcItem.GetCount() - count);
 
-                List<ItemPosCount> dest = new List<ItemPosCount>();
+                List<ItemPosCount> dest = new();
                 InventoryResult msg = CanStoreItem(dstbag, dstslot, dest, pNewItem, false);
                 if (msg != InventoryResult.Ok)
                 {
@@ -2056,7 +2056,7 @@ namespace Game.Entities
                 // change item amount before check (for unique max count check)
                 pSrcItem.SetCount(pSrcItem.GetCount() - count);
 
-                List<ItemPosCount> dest = new List<ItemPosCount>();
+                List<ItemPosCount> dest = new();
                 InventoryResult msg = CanBankItem(dstbag, dstslot, dest, pNewItem, false);
                 if (msg != InventoryResult.Ok)
                 {
@@ -2194,7 +2194,7 @@ namespace Game.Entities
             {
                 if (IsInventoryPos(dst))
                 {
-                    List<ItemPosCount> dest = new List<ItemPosCount>();
+                    List<ItemPosCount> dest = new();
                     InventoryResult msg = CanStoreItem(dstbag, dstslot, dest, pSrcItem, false);
                     if (msg != InventoryResult.Ok)
                     {
@@ -2209,7 +2209,7 @@ namespace Game.Entities
                 }
                 else if (IsBankPos(dst))
                 {
-                    List<ItemPosCount> dest = new List<ItemPosCount>();
+                    List<ItemPosCount> dest = new();
                     InventoryResult msg = CanBankItem(dstbag, dstslot, dest, pSrcItem, false);
                     if (msg != InventoryResult.Ok)
                     {
@@ -2243,7 +2243,7 @@ namespace Game.Entities
             if (!pSrcItem.IsBag() && !pDstItem.IsBag())
             {
                 InventoryResult msg;
-                List<ItemPosCount> sDest = new List<ItemPosCount>();
+                List<ItemPosCount> sDest = new();
                 ushort eDest = 0;
                 if (IsInventoryPos(dst))
                     msg = CanStoreItem(dstbag, dstslot, sDest, pSrcItem, false);
@@ -2298,7 +2298,7 @@ namespace Game.Entities
             InventoryResult _msg = InventoryResult.Ok;
 
             // check src.dest move possibility
-            List<ItemPosCount> _sDest = new List<ItemPosCount>();
+            List<ItemPosCount> _sDest = new();
             ushort _eDest = 0;
             if (IsInventoryPos(dst))
                 _msg = CanStoreItem(dstbag, dstslot, _sDest, pSrcItem, true);
@@ -2318,7 +2318,7 @@ namespace Game.Entities
             }
 
             // check dest.src move possibility
-            List<ItemPosCount> sDest2 = new List<ItemPosCount>();
+            List<ItemPosCount> sDest2 = new();
             ushort eDest2 = 0;
             if (IsInventoryPos(src))
                 _msg = CanStoreItem(srcbag, srcslot, sDest2, pDstItem, true);
@@ -2482,7 +2482,7 @@ namespace Game.Entities
         bool _StoreOrEquipNewItem(uint vendorslot, uint item, byte count, byte bag, byte slot, long price, ItemTemplate pProto, Creature pVendor, VendorItem crItem, bool bStore)
         {
             uint stacks = count / pProto.GetBuyCount();
-            List<ItemPosCount> vDest = new List<ItemPosCount>();
+            List<ItemPosCount> vDest = new();
             ushort uiDest = 0;
             InventoryResult msg = bStore ? CanStoreNewItem(bag, slot, vDest, item, count) : CanEquipNewItem(slot, out uiDest, item, false);
             if (msg != InventoryResult.Ok)
@@ -2517,7 +2517,7 @@ namespace Game.Entities
             {
                 uint new_count = pVendor.UpdateVendorItemCurrentCount(crItem, count);
 
-                BuySucceeded packet = new BuySucceeded();
+                BuySucceeded packet = new();
                 packet.VendorGUID = pVendor.GetGUID();
                 packet.Muid = vendorslot + 1;
                 packet.NewQuantity = crItem.maxcount > 0 ? new_count : 0xFFFFFFFF;
@@ -2548,7 +2548,7 @@ namespace Game.Entities
             if (item == null) // prevent crash
                 return;
 
-            ItemPushResult packet = new ItemPushResult();
+            ItemPushResult packet = new();
 
             packet.PlayerGUID = GetGUID();
 
@@ -2951,7 +2951,7 @@ namespace Game.Entities
         }
         public List<Item> GetItemListByEntry(uint entry, bool inBankAlso = false)
         {
-            List<Item> itemList = new List<Item>();
+            List<Item> itemList = new();
 
             int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
             for (byte i = InventorySlots.ItemStart; i < inventoryEnd; ++i)
@@ -3880,9 +3880,9 @@ namespace Game.Entities
 
         public void SendItemRetrievalMail(uint itemEntry, uint count, ItemContext context)
         {
-            MailSender sender = new MailSender(MailMessageType.Creature, 34337);
-            MailDraft draft = new MailDraft("Recovered Item", "We recovered a lost item in the twisting nether and noted that it was yours.$B$BPlease find said object enclosed."); // This is the text used in Cataclysm, it probably wasn't changed.
-            SQLTransaction trans = new SQLTransaction();
+            MailSender sender = new(MailMessageType.Creature, 34337);
+            MailDraft draft = new("Recovered Item", "We recovered a lost item in the twisting nether and noted that it was yours.$B$BPlease find said object enclosed."); // This is the text used in Cataclysm, it probably wasn't changed.
+            SQLTransaction trans = new();
 
             Item item = Item.CreateItem(itemEntry, count, context, null);
             if (item)
@@ -4354,7 +4354,7 @@ namespace Game.Entities
 
                 GetSpellHistory().AddCooldown((uint)effectData.SpellID, pItem.GetEntry(), TimeSpan.FromSeconds(30));
 
-                ItemCooldown data = new ItemCooldown();
+                ItemCooldown data = new();
                 data.ItemGuid = pItem.GetGUID();
                 data.SpellID = (uint)effectData.SpellID;
                 data.Cooldown = 30 * Time.InMilliseconds; //Always 30secs?
@@ -4563,7 +4563,7 @@ namespace Game.Entities
                 if (need_space > count)
                     need_space = count;
 
-                ItemPosCount newPosition = new ItemPosCount((ushort)(InventorySlots.Bag0 << 8 | j), need_space);
+                ItemPosCount newPosition = new((ushort)(InventorySlots.Bag0 << 8 | j), need_space);
                 if (!newPosition.IsContainedIn(dest))
                 {
                     dest.Add(newPosition);
@@ -4641,7 +4641,7 @@ namespace Game.Entities
             if (need_space > count)
                 need_space = count;
 
-            ItemPosCount newPosition = new ItemPosCount((ushort)(bag << 8 | slot), need_space);
+            ItemPosCount newPosition = new((ushort)(bag << 8 | slot), need_space);
             if (!newPosition.IsContainedIn(dest))
             {
                 dest.Add(newPosition);
@@ -4981,7 +4981,7 @@ namespace Game.Entities
                 if (need_space > count)
                     need_space = count;
 
-                ItemPosCount newPosition = new ItemPosCount((ushort)(bag << 8 | j), need_space);
+                ItemPosCount newPosition = new((ushort)(bag << 8 | j), need_space);
                 if (!newPosition.IsContainedIn(dest))
                 {
                     dest.Add(newPosition);
@@ -5281,7 +5281,7 @@ namespace Game.Entities
                         {
                             // offhand item must can be stored in inventory for offhand item and it also must be unequipped
                             Item offItem = GetItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
-                            List<ItemPosCount> off_dest = new List<ItemPosCount>();
+                            List<ItemPosCount> off_dest = new();
                             if (offItem != null && (!not_loading || CanUnequipItem(((int)InventorySlots.Bag0 << 8) | (int)EquipmentSlot.OffHand, false) != InventoryResult.Ok ||
                                 CanStoreItem(ItemConst.NullBag, ItemConst.NullSlot, off_dest, offItem, false) != InventoryResult.Ok))
                                 return swap ? InventoryResult.CantSwap : InventoryResult.InvFull;
@@ -5314,7 +5314,7 @@ namespace Game.Entities
 
             // check dest.src move possibility
             ushort src = parentItem.GetPos();
-            List<ItemPosCount> dest = new List<ItemPosCount>();
+            List<ItemPosCount> dest = new();
             if (IsInventoryPos(src))
             {
                 msg = CanStoreItem(parentItem.GetBagSlot(), ItemConst.NullSlot, dest, dstItem, true);
@@ -5492,7 +5492,7 @@ namespace Game.Entities
                 }
                 else if (apply)
                 {
-                    Dictionary<SpellValueMod, int> csv = new Dictionary<SpellValueMod, int>();
+                    Dictionary<SpellValueMod, int> csv = new();
                     if (artifactPowerRank.AuraPointsOverride != 0)
                         for (int i = 0; i < SpellConst.MaxEffects; ++i)
                             if (spellInfo.GetEffect((uint)i) != null)
@@ -5506,7 +5506,7 @@ namespace Game.Entities
                 if (apply && !HasSpell(artifactPowerRank.SpellID))
                 {
                     AddTemporarySpell(artifactPowerRank.SpellID);
-                    LearnedSpells learnedSpells = new LearnedSpells();
+                    LearnedSpells learnedSpells = new();
                     learnedSpells.SuppressMessaging = true;
                     learnedSpells.SpellID.Add(artifactPowerRank.SpellID);
                     SendPacket(learnedSpells);
@@ -5514,7 +5514,7 @@ namespace Game.Entities
                 else if (!apply)
                 {
                     RemoveTemporarySpell(artifactPowerRank.SpellID);
-                    UnlearnedSpells unlearnedSpells = new UnlearnedSpells();
+                    UnlearnedSpells unlearnedSpells = new();
                     unlearnedSpells.SuppressMessaging = true;
                     unlearnedSpells.SpellID.Add(artifactPowerRank.SpellID);
                     SendPacket(unlearnedSpells);
@@ -6151,7 +6151,7 @@ namespace Game.Entities
         public void AutoStoreLoot(uint loot_id, LootStore store, ItemContext context = 0, bool broadcast = false) { AutoStoreLoot(ItemConst.NullBag, ItemConst.NullSlot, loot_id, store, context, broadcast); }
         void AutoStoreLoot(byte bag, byte slot, uint loot_id, LootStore store, ItemContext context = 0, bool broadcast = false)
         {
-            Loot loot = new Loot();
+            Loot loot = new();
             loot.FillLoot(loot_id, store, this, true, false, LootModes.Default, context);
 
             uint max_slot = loot.GetMaxSlotInLootFor(this);
@@ -6159,7 +6159,7 @@ namespace Game.Entities
             {
                 LootItem lootItem = loot.LootItemInSlot(i, this);
 
-                List<ItemPosCount> dest = new List<ItemPosCount>();
+                List<ItemPosCount> dest = new();
                 InventoryResult msg = CanStoreNewItem(bag, slot, dest, lootItem.itemid, lootItem.count);
                 if (msg != InventoryResult.Ok && slot != ItemConst.NullSlot)
                     msg = CanStoreNewItem(bag, ItemConst.NullSlot, dest, lootItem.itemid, lootItem.count);
@@ -6183,7 +6183,7 @@ namespace Game.Entities
 
             if (slots < GetInventorySlotCount())
             {
-                List<Item> unstorableItems = new List<Item>();
+                List<Item> unstorableItems = new();
 
                 for (byte slot = (byte)(InventorySlots.ItemStart + slots); slot < InventorySlots.ItemEnd; ++slot)
                 {
@@ -6196,11 +6196,11 @@ namespace Game.Entities
                 {
                     int fullBatches = unstorableItems.Count / SharedConst.MaxMailItems;
                     int remainder = unstorableItems.Count % SharedConst.MaxMailItems;
-                    SQLTransaction trans = new SQLTransaction();
+                    SQLTransaction trans = new();
 
                     var sendItemsBatch = new Action<int, int>((batchNumber, batchSize) =>
                     {
-                        MailDraft draft = new MailDraft(Global.ObjectMgr.GetCypherString(CypherStrings.NotEquippedItem), "There were problems with equipping item(s).");
+                        MailDraft draft = new(Global.ObjectMgr.GetCypherString(CypherStrings.NotEquippedItem), "There were problems with equipping item(s).");
                         for (int j = 0; j < batchSize; ++j)
                             draft.AddItem(unstorableItems[batchNumber * SharedConst.MaxMailItems + j]);
 
@@ -6257,7 +6257,7 @@ namespace Game.Entities
                 return;
             }
 
-            List<ItemPosCount> dest = new List<ItemPosCount>();
+            List<ItemPosCount> dest = new();
             InventoryResult msg = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, item.itemid, item.count);
             if (msg == InventoryResult.Ok)
             {
@@ -6365,7 +6365,7 @@ namespace Game.Entities
 
         public void SendLootRelease(ObjectGuid guid)
         {
-            LootReleaseResponse packet = new LootReleaseResponse();
+            LootReleaseResponse packet = new();
             packet.LootObj = guid;
             packet.Owner = GetGUID();
             SendPacket(packet);
@@ -6747,7 +6747,7 @@ namespace Game.Entities
                 if (!aeLooting)
                     SetLootGUID(guid);
 
-                LootResponse packet = new LootResponse();
+                LootResponse packet = new();
                 packet.Owner = guid;
                 packet.LootObj = loot.GetGUID();
                 packet.LootMethod = _lootMethod;
@@ -6770,7 +6770,7 @@ namespace Game.Entities
 
         public void SendLootError(ObjectGuid lootObj, ObjectGuid owner, LootError error)
         {
-            LootResponse packet = new LootResponse();
+            LootResponse packet = new();
             packet.LootObj = lootObj;
             packet.Owner = owner;
             packet.Acquired = false;
@@ -6780,14 +6780,14 @@ namespace Game.Entities
 
         public void SendNotifyLootMoneyRemoved(ObjectGuid lootObj)
         {
-            CoinRemoved packet = new CoinRemoved();
+            CoinRemoved packet = new();
             packet.LootObj = lootObj;
             SendPacket(packet);
         }
 
         public void SendNotifyLootItemRemoved(ObjectGuid lootObj, byte lootSlot)
         {
-            LootRemoved packet = new LootRemoved();
+            LootRemoved packet = new();
             packet.Owner = GetLootWorldObjectGUID(lootObj);
             packet.LootObj = lootObj;
             packet.LootListID = (byte)(lootSlot + 1);
@@ -6796,7 +6796,7 @@ namespace Game.Entities
 
         void SendEquipmentSetList()
         {
-            LoadEquipmentSet data = new LoadEquipmentSet();
+            LoadEquipmentSet data = new();
 
             foreach (var pair in _equipmentSets)
             {
@@ -6834,7 +6834,7 @@ namespace Game.Entities
             {
                 eqSlot.Data.Guid = setGuid;
 
-                EquipmentSetID data = new EquipmentSetID();
+                EquipmentSetID data = new();
                 data.GUID = eqSlot.Data.Guid;
                 data.Type = (int)eqSlot.Data.Type;
                 data.SetID = eqSlot.Data.SetID;

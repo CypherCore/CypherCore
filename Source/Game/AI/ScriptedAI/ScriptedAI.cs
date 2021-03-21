@@ -28,6 +28,10 @@ namespace Game.AI
 {
     public class ScriptedAI : CreatureAI
     {
+        Difficulty _difficulty;
+        bool _isCombatMovementAllowed;
+        bool _isHeroic;
+
         public ScriptedAI(Creature creature) : base(creature)
         {
             _isCombatMovementAllowed = true;
@@ -87,7 +91,7 @@ namespace Game.AI
         }
 
         //Cast spell by spell info
-        void DoCastSpell(Unit target, SpellInfo spellInfo, bool triggered = false)
+        public void DoCastSpell(Unit target, SpellInfo spellInfo, bool triggered = false)
         {
             if (target == null || me.IsNonMeleeSpellCast(false))
                 return;
@@ -97,7 +101,7 @@ namespace Game.AI
         }
 
         //Plays a sound to all nearby players
-        public void DoPlaySoundToSet(WorldObject source, uint soundId)
+        public static void DoPlaySoundToSet(WorldObject source, uint soundId)
         {
             if (source == null)
                 return;
@@ -268,7 +272,7 @@ namespace Game.AI
             me.MonsterMoveWithSpeed(x, y, z, speed);
         }
 
-        void DoTeleportTo(float[] position)
+        public void DoTeleportTo(float[] position)
         {
             me.NearTeleportTo(position[0], position[1], position[2], position[3]);
         }
@@ -286,7 +290,7 @@ namespace Game.AI
                     me.GetGUID(), me.GetEntry(), unit.GetTypeId(), unit.GetGUID(), x, y, z, o);
         }
 
-        void DoTeleportAll(float x, float y, float z, float o)
+        public void DoTeleportAll(float x, float y, float z, float o)
         {
             Map map = me.GetMap();
             if (!map.IsDungeon())
@@ -310,9 +314,9 @@ namespace Game.AI
         }
 
         //Returns a list of friendly CC'd units within range
-        List<Creature> DoFindFriendlyCC(float range)
+        public List<Creature> DoFindFriendlyCC(float range)
         {
-            List<Creature> list = new List<Creature>();
+            List<Creature> list = new();
             var u_check = new FriendlyCCedInRange(me, range);
             var searcher = new CreatureListSearcher(me, list, u_check);
             Cell.VisitAllObjects(me, searcher, range);
@@ -323,7 +327,7 @@ namespace Game.AI
         //Returns a list of all friendly units missing a specific buff within range
         public List<Creature> DoFindFriendlyMissingBuff(float range, uint spellId)
         {
-            List<Creature> list = new List<Creature>();
+            List<Creature> list = new();
             var u_check = new FriendlyMissingBuffInRange(me, range, spellId);
             var searcher = new CreatureListSearcher(me, list, u_check);
             Cell.VisitAllObjects(me, searcher, range);
@@ -332,7 +336,7 @@ namespace Game.AI
         }
 
         //Return a player with at least minimumRange from me
-        Player GetPlayerAtMinimumRange(float minimumRange)
+        public Player GetPlayerAtMinimumRange(float minimumRange)
         {
             var check = new PlayerAtMinimumRangeAway(me, minimumRange);
             var searcher = new PlayerSearcher(me, check);
@@ -398,7 +402,7 @@ namespace Game.AI
             return source.FindNearestCreature(entry, maxSearchRange, alive);
         }
 
-        public GameObject GetClosestGameObjectWithEntry(WorldObject source, uint entry, float maxSearchRange)
+        public static GameObject GetClosestGameObjectWithEntry(WorldObject source, uint entry, float maxSearchRange)
         {
             return source.FindNearestGameObject(entry, maxSearchRange);
         }
@@ -429,50 +433,40 @@ namespace Game.AI
 
         public T DungeonMode<T>(T normal5, T heroic10)
         {
-            switch (_difficulty)
+            return _difficulty switch
             {
-                case Difficulty.Normal:
-                    return normal5;
-                case Difficulty.Heroic:
-                default:
-                    return heroic10;
-            }
+                Difficulty.Normal => normal5,
+                _ => heroic10,
+            };
         }
 
         public T RaidMode<T>(T normal10, T normal25)
         {
-            switch (_difficulty)
+            return _difficulty switch
             {
-                case Difficulty.Raid10N:
-                    return normal10;
-                case Difficulty.Raid25N:
-                default:
-                    return normal25;
-            }
-        }
-        public T RaidMode<T>(T normal10, T normal25, T heroic10, T heroic25)
-        {
-            switch (_difficulty)
-            {
-                case Difficulty.Raid10N:
-                    return normal10;
-                case Difficulty.Raid25N:
-                    return normal25;
-                case Difficulty.Raid10HC:
-                    return heroic10;
-                case Difficulty.Raid25HC:
-                default:
-                    return heroic25;
-            }
+                Difficulty.Raid10N => normal10,
+                _ => normal25,
+            };
         }
 
-        Difficulty _difficulty;
-        bool _isCombatMovementAllowed;
-        bool _isHeroic;
+        public T RaidMode<T>(T normal10, T normal25, T heroic10, T heroic25)
+        {
+            return _difficulty switch
+            {
+                Difficulty.Raid10N => normal10,
+                Difficulty.Raid25N => normal25,
+                Difficulty.Raid10HC => heroic10,
+                _ => heroic25,
+            };
+        }
     }
 
     public class BossAI : ScriptedAI
     {
+        public InstanceScript instance;
+        public SummonList summons;
+        uint _bossId;
+
         public BossAI(Creature creature, uint bossId) : base(creature)
         {
             instance = creature.GetInstanceScript();
@@ -615,14 +609,12 @@ namespace Game.AI
         public override bool CanAIAttack(Unit victim) { return CheckBoundary(victim); }
 
         public void _JustReachedHome() { me.SetActive(false); }
-
-        public InstanceScript instance;
-        public SummonList summons;
-        uint _bossId;
     }
 
     public class WorldBossAI : ScriptedAI
     {
+        SummonList summons;
+
         public WorldBossAI(Creature creature) : base(creature)
         {
             summons = new SummonList(creature);
@@ -695,15 +687,15 @@ namespace Game.AI
         public override void EnterCombat(Unit who) { _EnterCombat(); }
 
         public override void JustDied(Unit killer) { _JustDied(); }
-
-        SummonList summons;
     }
 
     public class SummonList : List<ObjectGuid>
     {
+        Creature _me;
+
         public SummonList(Creature creature)
         {
-            me = creature;
+            _me = creature;
         }
 
         public void Summon(Creature summon) { Add(summon.GetGUID()); }
@@ -712,7 +704,7 @@ namespace Game.AI
         {
             foreach (var id in this)
             {
-                Creature summon = ObjectAccessor.GetCreature(me, id);
+                Creature summon = ObjectAccessor.GetCreature(_me, id);
                 if (summon && summon.IsAIEnabled && (entry == 0 || summon.GetEntry() == entry))
                 {
                     summon.GetAI().DoZoneInCombat(null, maxRangeToNearestTarget);
@@ -724,7 +716,7 @@ namespace Game.AI
         {
             foreach (var id in this)
             {
-                Creature summon = ObjectAccessor.GetCreature(me, id);
+                Creature summon = ObjectAccessor.GetCreature(_me, id);
                 if (!summon)
                     Remove(id);
                 else if (summon.GetEntry() == entry)
@@ -739,7 +731,7 @@ namespace Game.AI
         {
             while (!this.Empty())
             {
-                Creature summon = ObjectAccessor.GetCreature(me, this.FirstOrDefault());
+                Creature summon = ObjectAccessor.GetCreature(_me, this.FirstOrDefault());
                 RemoveAt(0);
                 if (summon)
                     summon.DespawnOrUnsummon();
@@ -762,7 +754,7 @@ namespace Game.AI
         {
             foreach (var id in this)
             {
-                if (!ObjectAccessor.GetCreature(me, id))
+                if (!ObjectAccessor.GetCreature(_me, id))
                     Remove(id);
             }
         }
@@ -770,7 +762,7 @@ namespace Game.AI
         public void DoAction(int info, ICheck<ObjectGuid> predicate, ushort max = 0)
         {
             // We need to use a copy of SummonList here, otherwise original SummonList would be modified
-            List<ObjectGuid> listCopy = new List<ObjectGuid>(this);
+            List<ObjectGuid> listCopy = new(this);
             listCopy.RandomResize(predicate.Invoke, max);
             DoActionImpl(info, listCopy);
         }
@@ -778,7 +770,7 @@ namespace Game.AI
         public void DoAction(int info, Predicate<ObjectGuid> predicate, ushort max = 0)
         {
             // We need to use a copy of SummonList here, otherwise original SummonList would be modified
-            List<ObjectGuid> listCopy = new List<ObjectGuid>(this);
+            List<ObjectGuid> listCopy = new(this);
             listCopy.RandomResize(predicate, max);
             DoActionImpl(info, listCopy);
         }
@@ -787,7 +779,7 @@ namespace Game.AI
         {
             foreach (var id in this)
             {
-                Creature summon = ObjectAccessor.GetCreature(me, id);
+                Creature summon = ObjectAccessor.GetCreature(_me, id);
                 if (summon && summon.GetEntry() == entry)
                     return true;
             }
@@ -799,24 +791,22 @@ namespace Game.AI
         {
             foreach (var guid in summons)
             {
-                Creature summon = ObjectAccessor.GetCreature(me, guid);
+                Creature summon = ObjectAccessor.GetCreature(_me, guid);
                 if (summon && summon.IsAIEnabled)
                     summon.GetAI().DoAction(action);
             }
         }
-
-        Creature me;
     }
 
     public class EntryCheckPredicate : ICheck<ObjectGuid>
     {
+        uint _entry;
+
         public EntryCheckPredicate(uint entry)
         {
             _entry = entry;
         }
 
         public bool Invoke(ObjectGuid guid) { return guid.GetEntry() == _entry; }
-
-        uint _entry;
     }
 }

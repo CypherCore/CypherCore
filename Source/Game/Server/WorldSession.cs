@@ -218,7 +218,7 @@ namespace Game
 
                 //! Send the 'logout complete' packet to the client
                 //! Client will respond by sending 3x CMSG_CANCEL_TRADE, which we currently dont handle
-                LogoutComplete logoutComplete = new LogoutComplete();
+                LogoutComplete logoutComplete = new();
                 SendPacket(logoutComplete);
 
                 //! Since each account can only have one online character at any given time, ensure all characters for active account are marked as offline
@@ -468,7 +468,7 @@ namespace Game
             _instanceConnectKey.connectionType = ConnectionType.Instance;
             _instanceConnectKey.Key = RandomHelper.URand(0, 0x7FFFFFFF);
 
-            ConnectTo connectTo = new ConnectTo();
+            ConnectTo connectTo = new();
             connectTo.Key = _instanceConnectKey.Raw;
             connectTo.Serial = serial;
             connectTo.Payload.Port = (ushort)WorldConfig.GetIntValue(WorldCfg.PortInstance);
@@ -553,7 +553,7 @@ namespace Game
 
         public void SendTutorialsData()
         {
-            TutorialFlags packet = new TutorialFlags();
+            TutorialFlags packet = new();
             Array.Copy(tutorials, packet.TutorialData, (int)AccountDataTypes.Max);
             SendPacket(packet);
         }
@@ -592,7 +592,7 @@ namespace Game
 
         public string GetPlayerInfo()
         {
-            StringBuilder ss = new StringBuilder();
+            StringBuilder ss = new();
             ss.Append("[Player: ");
             if (!m_playerLoading.IsEmpty())
                 ss.AppendFormat("Logging in: {0}, ", m_playerLoading.ToString());
@@ -721,10 +721,10 @@ namespace Game
 
         public void InitializeSession()
         {
-            AccountInfoQueryHolderPerRealm realmHolder = new AccountInfoQueryHolderPerRealm();
+            AccountInfoQueryHolderPerRealm realmHolder = new();
             realmHolder.Initialize(GetAccountId(), GetBattlenetAccountId());
 
-            AccountInfoQueryHolder holder = new AccountInfoQueryHolder();
+            AccountInfoQueryHolder holder = new();
             holder.Initialize(GetAccountId(), GetBattlenetAccountId());
 
             _realmAccountLoginCallback = DB.Characters.DelayQueryHolder(realmHolder);
@@ -764,7 +764,7 @@ namespace Game
                 } while (result.NextRow());
             }
 
-            ConnectionStatus bnetConnected = new ConnectionStatus();
+            ConnectionStatus bnetConnected = new();
             bnetConnected.State = 1;
             SendPacket(bnetConnected);
 
@@ -851,7 +851,7 @@ namespace Game
         }
 
         #region Fields
-        List<ObjectGuid> _legitCharacters = new List<ObjectGuid>();
+        List<ObjectGuid> _legitCharacters = new();
         ulong m_GUIDLow;
         Player _player;
         WorldSocket[] m_Socket = new WorldSocket[(int)ConnectionType.Max];
@@ -886,12 +886,12 @@ namespace Game
         uint[] tutorials = new uint[SharedConst.MaxAccountTutorialValues];
         TutorialsFlag tutorialsChanged;
 
-        Array<byte> _realmListSecret = new Array<byte>(32);
-        Dictionary<uint /*realmAddress*/, byte> _realmCharacterCounts = new Dictionary<uint, byte>();
-        Dictionary<uint, Action<Google.Protobuf.CodedInputStream>> _battlenetResponseCallbacks = new Dictionary<uint, Action<Google.Protobuf.CodedInputStream>>();
+        Array<byte> _realmListSecret = new(32);
+        Dictionary<uint /*realmAddress*/, byte> _realmCharacterCounts = new();
+        Dictionary<uint, Action<Google.Protobuf.CodedInputStream>> _battlenetResponseCallbacks = new();
         uint _battlenetRequestToken;
 
-        List<string> _registeredAddonPrefixes = new List<string>();
+        List<string> _registeredAddonPrefixes = new();
         bool _filterAddonMessages;
         uint recruiterId;
         bool isRecruiter;
@@ -899,7 +899,7 @@ namespace Game
         public long m_muteTime;
         long m_timeOutTime;
 
-        ConcurrentQueue<WorldPacket> _recvQueue = new ConcurrentQueue<WorldPacket>();
+        ConcurrentQueue<WorldPacket> _recvQueue = new();
         RBACData _RBACData;
 
         ObjectGuid m_currentBankerGUID;
@@ -915,8 +915,8 @@ namespace Game
         Task<SQLQueryHolder<PlayerLoginQueryLoad>> _charLoginCallback;
         Task<SQLQueryHolder<EnumCharacterQueryLoad>> _charEnumCallback;
 
-        AsyncCallbackProcessor<QueryCallback> _queryProcessor = new AsyncCallbackProcessor<QueryCallback>();
-        AsyncCallbackProcessor<TransactionCallback> _transactionCallbacks = new AsyncCallbackProcessor<TransactionCallback>();
+        AsyncCallbackProcessor<QueryCallback> _queryProcessor = new();
+        AsyncCallbackProcessor<TransactionCallback> _transactionCallbacks = new();
         #endregion
     }
 
@@ -1001,7 +1001,7 @@ namespace Game
 
         Policy _policy;
         WorldSession Session;
-        Dictionary<uint, PacketCounter> _PacketThrottlingMap = new Dictionary<uint, PacketCounter>();
+        Dictionary<uint, PacketCounter> _PacketThrottlingMap = new();
 
         enum Policy
         {

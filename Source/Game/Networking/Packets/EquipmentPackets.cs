@@ -77,7 +77,7 @@ namespace Game.Networking.Packets
             }
         }
 
-        public List<EquipmentSetInfo.EquipmentSetData> SetData = new List<EquipmentSetInfo.EquipmentSetData>();
+        public List<EquipmentSetInfo.EquipmentSetData> SetData = new();
     }
 
     public class SaveEquipmentSet : ClientPacket

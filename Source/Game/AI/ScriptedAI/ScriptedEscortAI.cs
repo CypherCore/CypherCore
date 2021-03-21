@@ -212,7 +212,7 @@ namespace Game.AI
                                 Log.outDebug(LogFilter.Scripts, "EscortAI.UpdateAI: reached end of waypoints, despawning at end");
                                 if (_returnToStart)
                                 {
-                                    Position respawnPosition = new Position();
+                                    Position respawnPosition = new();
                                     float orientation;
                                     me.GetRespawnPosition(out respawnPosition.posX, out respawnPosition.posY, out respawnPosition.posZ, out orientation);
                                     respawnPosition.SetOrientation(orientation);
@@ -338,7 +338,7 @@ namespace Game.AI
             GridDefines.NormalizeMapCoord(ref x);
             GridDefines.NormalizeMapCoord(ref y);
 
-            WaypointNode waypoint = new WaypointNode();
+            WaypointNode waypoint = new();
             waypoint.id = id;
             waypoint.x = x;
             waypoint.y = y;

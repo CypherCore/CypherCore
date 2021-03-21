@@ -55,7 +55,7 @@ namespace Game
 
             do
             {
-                CreatureTextEntry temp = new CreatureTextEntry();
+                CreatureTextEntry temp = new();
 
                 temp.creatureId = result.Read<uint>(0);
                 temp.groupId = result.Read<byte>(1);
@@ -178,7 +178,7 @@ namespace Game
                 return 0;
             }
 
-            List<CreatureTextEntry> tempGroup = new List<CreatureTextEntry>();
+            List<CreatureTextEntry> tempGroup = new();
             var repeatGroup = source.GetTextRepeatGroup(textGroup);
 
             foreach (var entry in textGroupContainer)
@@ -224,12 +224,12 @@ namespace Game
 
             if (srcPlr)
             {
-                PlayerTextBuilder builder = new PlayerTextBuilder(source, finalSource, finalSource.GetGender(), finalType, textEntry.groupId, textEntry.id, finalLang, whisperTarget);
+                PlayerTextBuilder builder = new(source, finalSource, finalSource.GetGender(), finalType, textEntry.groupId, textEntry.id, finalLang, whisperTarget);
                 SendChatPacket(finalSource, builder, finalType, whisperTarget, range, team, gmOnly);
             }
             else
             {
-                CreatureTextBuilder builder = new CreatureTextBuilder(finalSource, finalSource.GetGender(), finalType, textEntry.groupId, textEntry.id, finalLang, whisperTarget);
+                CreatureTextBuilder builder = new(finalSource, finalSource.GetGender(), finalType, textEntry.groupId, textEntry.id, finalLang, whisperTarget);
                 SendChatPacket(finalSource, builder, finalType, whisperTarget, range, team, gmOnly);
             }
 
@@ -495,8 +495,8 @@ namespace Game
             Cell.VisitWorldObjects(source, worker, dist);
         }
 
-        Dictionary<uint, MultiMap<byte, CreatureTextEntry>> mTextMap = new Dictionary<uint, MultiMap<byte, CreatureTextEntry>>();
-        Dictionary<CreatureTextId, CreatureTextLocale> mLocaleTextMap = new Dictionary<CreatureTextId,CreatureTextLocale>();
+        Dictionary<uint, MultiMap<byte, CreatureTextEntry>> mTextMap = new();
+        Dictionary<CreatureTextId, CreatureTextLocale> mLocaleTextMap = new();
     }
 
     public class CreatureTextHolder
@@ -560,7 +560,7 @@ namespace Game
     }
     public class CreatureTextLocale
     {
-        public StringArray Text = new StringArray((int)Locale.Total);
+        public StringArray Text = new((int)Locale.Total);
     }
     public class CreatureTextId
     {
@@ -621,7 +621,7 @@ namespace Game
             player.SendPacket(message);
         }
 
-        Dictionary<Locale, ServerPacket> _packetCache = new Dictionary<Locale, ServerPacket>();
+        Dictionary<Locale, ServerPacket> _packetCache = new();
         MessageBuilder _builder;
         ChatMsg _msgType;
     }

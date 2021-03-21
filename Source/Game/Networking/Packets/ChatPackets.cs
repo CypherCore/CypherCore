@@ -83,7 +83,7 @@ namespace Game.Networking.Packets
             Params.Read(_worldPacket);
         }
 
-        public ChatAddonMessageParams Params = new ChatAddonMessageParams();
+        public ChatAddonMessageParams Params = new();
     }
 
     class ChatAddonMessageTargeted : ClientPacket
@@ -98,7 +98,7 @@ namespace Game.Networking.Packets
         }
 
         public string Target;
-        public ChatAddonMessageParams Params = new ChatAddonMessageParams();
+        public ChatAddonMessageParams Params = new();
     }
 
     public class ChatMessageDND : ClientPacket

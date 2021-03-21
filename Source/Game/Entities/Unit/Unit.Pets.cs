@@ -706,7 +706,7 @@ namespace Game.Entities
             if (!owner || !owner.IsTypeId(TypeId.Player))
                 return;
 
-            PetActionFeedbackPacket petActionFeedback = new PetActionFeedbackPacket();
+            PetActionFeedbackPacket petActionFeedback = new();
             petActionFeedback.SpellID = spellId;
             petActionFeedback.Response = msg;
             owner.ToPlayer().SendPacket(petActionFeedback);
@@ -718,7 +718,7 @@ namespace Game.Entities
             if (!owner || !owner.IsTypeId(TypeId.Player))
                 return;
 
-            PetActionSound petActionSound = new PetActionSound();
+            PetActionSound petActionSound = new();
             petActionSound.UnitGUID = GetGUID();
             petActionSound.Action = pettalk;
             owner.ToPlayer().SendPacket(petActionSound);
@@ -730,7 +730,7 @@ namespace Game.Entities
             if (!owner || !owner.IsTypeId(TypeId.Player))
                 return;
 
-            AIReaction packet = new AIReaction();
+            AIReaction packet = new();
             packet.UnitGUID = guid;
             packet.Reaction = AiReaction.Hostile;
 
@@ -742,7 +742,7 @@ namespace Game.Entities
             if (!IsTypeId(TypeId.Player))
                 return null;
 
-            Pet pet = new Pet(ToPlayer(), PetType.Hunter);
+            Pet pet = new(ToPlayer(), PetType.Hunter);
 
             if (!pet.CreateBaseAtCreature(creatureTarget))
                 return null;
@@ -763,7 +763,7 @@ namespace Game.Entities
             if (creatureInfo == null)
                 return null;
 
-            Pet pet = new Pet(ToPlayer(), PetType.Hunter);
+            Pet pet = new(ToPlayer(), PetType.Hunter);
 
             if (!pet.CreateBaseAtCreatureInfo(creatureInfo, this) || !InitTamedPet(pet, GetLevel(), spell_id))
                 return null;

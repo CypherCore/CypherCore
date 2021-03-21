@@ -71,7 +71,7 @@ namespace Game.Spells
                     continue;
                 }
 
-                SkillExtraItemEntry skillExtraItemEntry = new SkillExtraItemEntry();
+                SkillExtraItemEntry skillExtraItemEntry = new();
                 skillExtraItemEntry.requiredSpecialization = requiredSpecialization;
                 skillExtraItemEntry.additionalCreateChance = additionalCreateChance;
                 skillExtraItemEntry.additionalMaxNum = additionalMaxNum;
@@ -103,7 +103,7 @@ namespace Game.Spells
             return true;
         }
 
-        static Dictionary<uint, SkillExtraItemEntry> SkillExtraItemStorage = new Dictionary<uint,SkillExtraItemEntry>();
+        static Dictionary<uint, SkillExtraItemEntry> SkillExtraItemStorage = new();
     }
 
     class SkillExtraItemEntry
@@ -199,7 +199,7 @@ namespace Game.Spells
             return true;
         }
 
-        static Dictionary<uint, SkillPerfectItemEntry> SkillPerfectItemStorage = new Dictionary<uint, SkillPerfectItemEntry>();
+        static Dictionary<uint, SkillPerfectItemEntry> SkillPerfectItemStorage = new();
     }
 
     // struct to store information about perfection procs

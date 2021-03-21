@@ -56,7 +56,7 @@ namespace Game.Mails
 
             m_mailTemplateItemsNeed = false;
 
-            Loot mailLoot = new Loot();
+            Loot mailLoot = new();
 
             // can be empty
             mailLoot.FillLoot(m_mailTemplateId, LootStorage.Mail, receiver, true, true, LootModes.Default, ItemContext.None);
@@ -196,7 +196,7 @@ namespace Game.Mails
 
                 if (pReceiver.IsMailsLoaded())
                 {
-                    Mail m = new Mail();
+                    Mail m = new();
                     m.messageID = mailId;
                     m.mailTemplateId = GetMailTemplateId();
                     m.subject = GetSubject();
@@ -253,7 +253,7 @@ namespace Game.Mails
         string m_subject;
         string m_body;
 
-        Dictionary<ulong, Item> m_items = new Dictionary<ulong, Item>();
+        Dictionary<ulong, Item> m_items = new();
 
         ulong m_money;
         ulong m_COD;

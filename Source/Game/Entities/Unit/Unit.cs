@@ -252,14 +252,14 @@ namespace Game.Entities
 
         public void HandleEmoteCommand(Emote anim_id)
         {
-            EmoteMessage packet = new EmoteMessage();
+            EmoteMessage packet = new();
             packet.Guid = GetGUID();
             packet.EmoteID = (int)anim_id;
             SendMessageToSet(packet, true);
         }
         public void SendDurabilityLoss(Player receiver, uint percent)
         {
-            DurabilityDamageDeath packet = new DurabilityDamageDeath();
+            DurabilityDamageDeath packet = new();
             packet.Percent = percent;
             receiver.SendPacket(packet);
         }
@@ -308,7 +308,7 @@ namespace Game.Entities
 
         public void SendClearTarget()
         {
-            BreakTarget breakTarget = new BreakTarget();
+            BreakTarget breakTarget = new();
             breakTarget.UnitGUID = GetGUID();
             SendMessageToSet(breakTarget, false);
         }
@@ -369,7 +369,7 @@ namespace Game.Entities
                 return;
 
             Locale locale = target.GetSession().GetSessionDbLocaleIndex();
-            ChatPkt data = new ChatPkt();
+            ChatPkt data = new();
             data.Initialize(isBossWhisper ? ChatMsg.RaidBossWhisper : ChatMsg.MonsterWhisper, Language.Universal, this, target, text, 0, "", locale);
             target.SendPacket(data);
         }
@@ -416,7 +416,7 @@ namespace Game.Entities
             }
 
             Locale locale = target.GetSession().GetSessionDbLocaleIndex();
-            ChatPkt data = new ChatPkt();
+            ChatPkt data = new();
             data.Initialize(isBossWhisper ? ChatMsg.RaidBossWhisper : ChatMsg.MonsterWhisper, Language.Universal, this, target, Global.DB2Mgr.GetBroadcastTextValue(bct, locale, GetGender()), 0, "", locale);
             target.SendPacket(data);
         }
@@ -429,7 +429,7 @@ namespace Game.Entities
             {
                 base.UpdateObjectVisibility(true);
                 // call MoveInLineOfSight for nearby creatures
-                AIRelocationNotifier notifier = new AIRelocationNotifier(this);
+                AIRelocationNotifier notifier = new(this);
                 Cell.VisitAllObjects(this, notifier, GetVisibilityRange());
             }
         }
@@ -554,7 +554,7 @@ namespace Game.Entities
 
         List<DynamicObject> GetDynObjects(uint spellId)
         {
-            List<DynamicObject> dynamicobjects = new List<DynamicObject>();
+            List<DynamicObject> dynamicobjects = new();
             foreach (var obj in m_dynObj)
                 if (obj.GetSpellId() == spellId)
                     dynamicobjects.Add(obj);
@@ -585,7 +585,7 @@ namespace Game.Entities
 
         List<GameObject> GetGameObjects(uint spellId)
         {
-            List<GameObject> gameobjects = new List<GameObject>();
+            List<GameObject> gameobjects = new();
             foreach (var obj in m_gameObj)
                 if (obj.GetSpellId() == spellId)
                     gameobjects.Add(obj);
@@ -830,7 +830,7 @@ namespace Game.Entities
 
         public Unit SelectNearbyTarget(Unit exclude = null, float dist = SharedConst.NominalMeleeRange)
         {
-            List<Unit> targets = new List<Unit>();
+            List<Unit> targets = new();
             var u_check = new AnyUnfriendlyUnitInObjectRangeCheck(this, this, dist);
             var searcher = new UnitListSearcher(this, targets, u_check);
             Cell.VisitAllObjects(this, searcher, dist);
@@ -982,7 +982,7 @@ namespace Game.Entities
 
             float height = pos.GetPositionZ();
 
-            MoveSplineInit init = new MoveSplineInit(this);
+            MoveSplineInit init = new(this);
 
             // Creatures without inhabit type air should begin falling after exiting the vehicle
             if (IsTypeId(TypeId.Unit) && !ToCreature().CanFly() && height > GetMap().GetWaterOrGroundLevel(GetPhaseShift(), pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), ref height) + 0.1f)
@@ -1013,14 +1013,14 @@ namespace Game.Entities
 
         void SendCancelOrphanSpellVisual(uint id)
         {
-            CancelOrphanSpellVisual cancelOrphanSpellVisual = new CancelOrphanSpellVisual();
+            CancelOrphanSpellVisual cancelOrphanSpellVisual = new();
             cancelOrphanSpellVisual.SpellVisualID = id;
             SendMessageToSet(cancelOrphanSpellVisual, true);
         }
 
         void SendPlayOrphanSpellVisual(ObjectGuid target, uint spellVisualId, float travelSpeed, bool speedAsTime = false, bool withSourceOrientation = false)
         {
-            PlayOrphanSpellVisual playOrphanSpellVisual = new PlayOrphanSpellVisual();
+            PlayOrphanSpellVisual playOrphanSpellVisual = new();
             playOrphanSpellVisual.SourceLocation = GetPosition();
             if (withSourceOrientation)
                 playOrphanSpellVisual.SourceRotation = new Vector3(0.0f, 0.0f, GetOrientation());
@@ -1034,7 +1034,7 @@ namespace Game.Entities
 
         void SendPlayOrphanSpellVisual(Vector3 targetLocation, uint spellVisualId, float travelSpeed, bool speedAsTime = false, bool withSourceOrientation = false)
         {
-            PlayOrphanSpellVisual playOrphanSpellVisual = new PlayOrphanSpellVisual();
+            PlayOrphanSpellVisual playOrphanSpellVisual = new();
             playOrphanSpellVisual.SourceLocation = GetPosition();
             if (withSourceOrientation)
                 playOrphanSpellVisual.SourceRotation = new Vector3(0.0f, 0.0f, GetOrientation());
@@ -1048,7 +1048,7 @@ namespace Game.Entities
 
         void SendCancelSpellVisual(uint id)
         {
-            CancelSpellVisual cancelSpellVisual = new CancelSpellVisual();
+            CancelSpellVisual cancelSpellVisual = new();
             cancelSpellVisual.Source = GetGUID();
             cancelSpellVisual.SpellVisualID = id;
             SendMessageToSet(cancelSpellVisual, true);
@@ -1056,7 +1056,7 @@ namespace Game.Entities
 
         public void SendPlaySpellVisual(ObjectGuid targetGuid, uint spellVisualId, uint missReason, uint reflectStatus, float travelSpeed, bool speedAsTime = false)
         {
-            PlaySpellVisual playSpellVisual = new PlaySpellVisual();
+            PlaySpellVisual playSpellVisual = new();
             playSpellVisual.Source = GetGUID();
             playSpellVisual.Target = targetGuid; // exclusive with TargetPosition
             playSpellVisual.SpellVisualID = spellVisualId;
@@ -1069,7 +1069,7 @@ namespace Game.Entities
 
         public void SendPlaySpellVisual(Vector3 targetPosition, float launchDelay, uint spellVisualId, uint missReason, uint reflectStatus, float travelSpeed, bool speedAsTime = false)
         {
-            PlaySpellVisual playSpellVisual = new PlaySpellVisual();
+            PlaySpellVisual playSpellVisual = new();
             playSpellVisual.Source = GetGUID();
             playSpellVisual.TargetPosition = targetPosition; // exclusive with Target
             playSpellVisual.LaunchDelay = launchDelay;
@@ -1083,7 +1083,7 @@ namespace Game.Entities
 
         void SendCancelSpellVisualKit(uint id)
         {
-            CancelSpellVisualKit cancelSpellVisualKit = new CancelSpellVisualKit();
+            CancelSpellVisualKit cancelSpellVisualKit = new();
             cancelSpellVisualKit.Source = GetGUID();
             cancelSpellVisualKit.SpellVisualKitID = id;
             SendMessageToSet(cancelSpellVisualKit, true);
@@ -1091,7 +1091,7 @@ namespace Game.Entities
 
         public void SendPlaySpellVisualKit(uint id, uint type, uint duration)
         {
-            PlaySpellVisualKit playSpellVisualKit = new PlaySpellVisualKit();
+            PlaySpellVisualKit playSpellVisualKit = new();
             playSpellVisualKit.Unit = GetGUID();
             playSpellVisualKit.KitRecID = id;
             playSpellVisualKit.KitType = type;
@@ -1117,7 +1117,7 @@ namespace Game.Entities
 
             if (hasMissile)
             {
-                MissileCancel packet = new MissileCancel();
+                MissileCancel packet = new();
                 packet.OwnerGUID = GetGUID();
                 packet.SpellID = spellId;
                 packet.Reverse = reverseMissile;
@@ -1276,7 +1276,7 @@ namespace Game.Entities
 
                     if (useRandom)
                     {
-                        List<uint> displayIds = new List<uint>();
+                        List<uint> displayIds = new();
                         for (var i = 0; i < formModelData.Choices.Count; ++i)
                         {
                             ChrCustomizationDisplayInfoRecord displayInfo = formModelData.Displays[i];
@@ -1546,7 +1546,7 @@ namespace Game.Entities
 
             Unit caster = aura.GetCaster();
 
-            AuraApplication aurApp = new AuraApplication(this, caster, aura, effMask);
+            AuraApplication aurApp = new(this, caster, aura, effMask);
             m_appliedAuras.Add(aurId, aurApp);
 
             if (aurSpellInfo.HasAnyAuraInterruptFlag())
@@ -1605,7 +1605,7 @@ namespace Game.Entities
                 }
 
                 // we want to shoot
-                Spell spell = new Spell(this, autoRepeatSpellInfo, TriggerCastFlags.FullMask);
+                Spell spell = new(this, autoRepeatSpellInfo, TriggerCastFlags.FullMask);
                 spell.Prepare(m_currentSpells[CurrentSpellTypes.AutoRepeat].m_targets);
 
                 // all went good, reset attack
@@ -1728,7 +1728,7 @@ namespace Game.Entities
                 return;
             }
 
-            PlayOneShotAnimKit packet = new PlayOneShotAnimKit();
+            PlayOneShotAnimKit packet = new();
             packet.Unit = GetGUID();
             packet.AnimKitID = animKitId;
             SendMessageToSet(packet, true);
@@ -1744,7 +1744,7 @@ namespace Game.Entities
 
             _aiAnimKitId = animKitId;
 
-            SetAIAnimKit data = new SetAIAnimKit();
+            SetAIAnimKit data = new();
             data.Unit = GetGUID();
             data.AnimKitID = animKitId;
             SendMessageToSet(data, true);
@@ -1762,7 +1762,7 @@ namespace Game.Entities
 
             _movementAnimKitId = animKitId;
 
-            SetMovementAnimKit data = new SetMovementAnimKit();
+            SetMovementAnimKit data = new();
             data.Unit = GetGUID();
             data.AnimKitID = animKitId;
             SendMessageToSet(data, true);
@@ -1780,7 +1780,7 @@ namespace Game.Entities
 
             _meleeAnimKitId = animKitId;
 
-            SetMeleeAnimKit data = new SetMeleeAnimKit();
+            SetMeleeAnimKit data = new();
             data.Unit = GetGUID();
             data.AnimKitID = animKitId;
             SendMessageToSet(data, true);
@@ -1951,7 +1951,7 @@ namespace Game.Entities
             if (player == null || !player.HaveAtClient(this)) // if player cannot see this unit yet, he will receive needed data with create object
                 return;
 
-            UpdateData udata = new UpdateData(GetMapId());
+            UpdateData udata = new(GetMapId());
             UpdateObject packet;
             BuildValuesUpdateBlockForPlayerWithFlag(udata, UpdateFieldFlag.Owner, player);
             udata.BuildPacket(out packet);
@@ -2368,7 +2368,7 @@ namespace Game.Entities
 
             if (IsTypeId(TypeId.Player))
             {
-                StandStateUpdate packet = new StandStateUpdate(state, animKitId);
+                StandStateUpdate packet = new(state, animKitId);
                 ToPlayer().SendPacket(packet);
             }
         }
@@ -2379,7 +2379,7 @@ namespace Game.Entities
 
             if (notifyClient)
             {
-                SetAnimTier setAnimTier = new SetAnimTier();
+                SetAnimTier setAnimTier = new();
                 setAnimTier.Unit = GetGUID();
                 setAnimTier.Tier = (int)animTier;
                 SendMessageToSet(setAnimTier, true);
@@ -2444,7 +2444,7 @@ namespace Game.Entities
         public override void BuildValuesCreate(WorldPacket data, Player target)
         {
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new WorldPacket();
+            WorldPacket buffer = new();
 
             buffer.WriteUInt8((byte)flags);
             m_objectData.WriteCreate(buffer, flags, this, target);
@@ -2457,7 +2457,7 @@ namespace Game.Entities
         public override void BuildValuesUpdate(WorldPacket data, Player target)
         {
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new WorldPacket();
+            WorldPacket buffer = new();
 
             buffer.WriteUInt32(m_values.GetChangedObjectTypeMask());
             if (m_values.HasChanged(TypeId.Object))
@@ -2472,12 +2472,12 @@ namespace Game.Entities
 
         public override void BuildValuesUpdateWithFlag(WorldPacket data, UpdateFieldFlag flags, Player target)
         {
-            UpdateMask valuesMask = new UpdateMask(14);
+            UpdateMask valuesMask = new(14);
             valuesMask.Set((int)TypeId.Unit);
 
-            WorldPacket buffer = new WorldPacket();
+            WorldPacket buffer = new();
 
-            UpdateMask mask = new UpdateMask(191);
+            UpdateMask mask = new(191);
             m_unitData.AppendAllowedFieldsMaskForFlag(mask, flags);
             m_unitData.WriteUpdate(buffer, mask, true, this, target);
 
@@ -2489,7 +2489,7 @@ namespace Game.Entities
         public void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedUnitMask, Player target)
         {
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            UpdateMask valuesMask = new UpdateMask((int)TypeId.Max);
+            UpdateMask valuesMask = new((int)TypeId.Max);
             if (requestedObjectMask.IsAnySet())
                 valuesMask.Set((int)TypeId.Object);
 
@@ -2497,7 +2497,7 @@ namespace Game.Entities
             if (requestedUnitMask.IsAnySet())
                 valuesMask.Set((int)TypeId.Unit);
 
-            WorldPacket buffer = new WorldPacket();
+            WorldPacket buffer = new();
             buffer.WriteUInt32(valuesMask.GetBlock(0));
 
             if (valuesMask[(int)TypeId.Object])
@@ -2506,7 +2506,7 @@ namespace Game.Entities
             if (valuesMask[(int)TypeId.Unit])
                 m_unitData.WriteUpdate(buffer, requestedUnitMask, true, this, target);
 
-            WorldPacket buffer1 = new WorldPacket();
+            WorldPacket buffer1 = new();
             buffer1.WriteUInt8((byte)UpdateType.Values);
             buffer1.WritePackedGuid(GetGUID());
             buffer1.WriteUInt32(buffer.GetSize());
@@ -2528,7 +2528,7 @@ namespace Game.Entities
             {
                 if (bg.IsArena())
                 {
-                    DestroyArenaUnit destroyArenaUnit = new DestroyArenaUnit();
+                    DestroyArenaUnit destroyArenaUnit = new();
                     destroyArenaUnit.Guid = GetGUID();
                     target.SendPacket(destroyArenaUnit);
                 }

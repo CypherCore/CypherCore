@@ -54,10 +54,10 @@ namespace Game.Chat.Commands
                 return false;
 
             // from console show not existed sender
-            MailSender sender = new MailSender(MailMessageType.Normal, handler.GetSession() ? handler.GetSession().GetPlayer().GetGUID().GetCounter() : 0, MailStationery.Gm);
+            MailSender sender = new(MailMessageType.Normal, handler.GetSession() ? handler.GetSession().GetPlayer().GetGUID().GetCounter() : 0, MailStationery.Gm);
 
             // @todo Fix poor design
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             new MailDraft(subject, text)
                 .SendMailTo(trans, new MailReceiver(target, targetGuid.GetCounter()), sender);
 
@@ -95,10 +95,10 @@ namespace Game.Chat.Commands
                 return false;
 
             // extract items
-            List<KeyValuePair<uint, uint>> items = new List<KeyValuePair<uint, uint>>();
+            List<KeyValuePair<uint, uint>> items = new();
 
             // get all tail string
-            StringArguments tail = new StringArguments(args.NextString(""));
+            StringArguments tail = new(args.NextString(""));
 
             // get from tail next item str
             StringArguments itemStr;
@@ -143,12 +143,12 @@ namespace Game.Chat.Commands
             }
 
             // from console show not existed sender
-            MailSender sender = new MailSender(MailMessageType.Normal, handler.GetSession() ? handler.GetSession().GetPlayer().GetGUID().GetCounter() : 0, MailStationery.Gm);
+            MailSender sender = new(MailMessageType.Normal, handler.GetSession() ? handler.GetSession().GetPlayer().GetGUID().GetCounter() : 0, MailStationery.Gm);
 
             // fill mail
-            MailDraft draft = new MailDraft(subject, text);
+            MailDraft draft = new(subject, text);
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
 
             foreach (var pair in items)
             {
@@ -202,9 +202,9 @@ namespace Game.Chat.Commands
                 return false;
 
             // from console show not existed sender
-            MailSender sender = new MailSender(MailMessageType.Normal, handler.GetSession() ? handler.GetSession().GetPlayer().GetGUID().GetCounter() : 0, MailStationery.Gm);
+            MailSender sender = new(MailMessageType.Normal, handler.GetSession() ? handler.GetSession().GetPlayer().GetGUID().GetCounter() : 0, MailStationery.Gm);
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
 
             new MailDraft(subject, text)
                 .AddMoney((uint)money)

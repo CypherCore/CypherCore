@@ -58,7 +58,7 @@ namespace Game.Guilds
             Log.outDebug(LogFilter.Guild, "GUILD: creating guild [{0}] for leader {1} ({2})",
                 name, pLeader.GetName(), m_leaderGuid);
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GUILD_MEMBERS);
             stmt.AddValue(0, m_id);
@@ -102,7 +102,7 @@ namespace Game.Guilds
 
             BroadcastPacket(new GuildEventDisbanded());
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             while (!m_members.Empty())
             {
                 var member = m_members.First();
@@ -149,7 +149,7 @@ namespace Game.Guilds
 
         public void SaveToDB()
         {
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
 
             m_achievementSys.SaveToDB(trans);
 
@@ -202,7 +202,7 @@ namespace Game.Guilds
             stmt.AddValue(1, GetId());
             DB.Characters.Execute(stmt);
 
-            GuildNameChanged guildNameChanged = new GuildNameChanged();
+            GuildNameChanged guildNameChanged = new();
             guildNameChanged.GuildGUID = GetGUID();
             guildNameChanged.GuildName = m_name;
             BroadcastPacket(guildNameChanged);
@@ -212,7 +212,7 @@ namespace Game.Guilds
 
         public void HandleRoster(WorldSession session = null)
         {
-            GuildRoster roster = new GuildRoster();
+            GuildRoster roster = new();
             roster.NumAccounts = (int)m_accountsNumber;
             roster.CreateDate = (uint)m_createdDate;
             roster.GuildFlags = 0;
@@ -220,7 +220,7 @@ namespace Game.Guilds
 
             foreach (var member in m_members.Values)
             {
-                GuildRosterMemberData memberData = new GuildRosterMemberData();
+                GuildRosterMemberData memberData = new();
 
                 memberData.Guid = member.GetGUID();
                 memberData.RankID = member.GetRankId();
@@ -256,7 +256,7 @@ namespace Game.Guilds
 
         public void SendQueryResponse(WorldSession session, ObjectGuid playerGuid)
         {
-            QueryGuildInfoResponse response = new QueryGuildInfoResponse();
+            QueryGuildInfoResponse response = new();
             response.GuildGUID = GetGUID();
             response.PlayerGuid = playerGuid;
             response.HasGuildInfo = true;
@@ -280,7 +280,7 @@ namespace Game.Guilds
 
         public void SendGuildRankInfo(WorldSession session)
         {
-            GuildRanks ranks = new GuildRanks();
+            GuildRanks ranks = new();
 
             for (byte i = 0; i < _GetRanksSize(); i++)
             {
@@ -288,7 +288,7 @@ namespace Game.Guilds
                 if (rankInfo == null)
                     continue;
 
-                GuildRankData rankData = new GuildRankData();
+                GuildRankData rankData = new();
 
                 rankData.RankID = rankInfo.GetId();
                 rankData.RankOrder = i;
@@ -315,7 +315,7 @@ namespace Game.Guilds
             Member member = GetMember(player.GetGUID());
             if (member != null)
             {
-                List<uint> criteriaIds = new List<uint>();
+                List<uint> criteriaIds = new();
                 foreach (var achievementId in achievementIds)
                 {
                     var achievement = CliDB.AchievementStorage.LookupByKey(achievementId);
@@ -436,7 +436,7 @@ namespace Game.Guilds
                     return;
             }
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
 
             _SetLeader(trans, newGuildMaster);
             oldGuildMaster.ChangeRank(trans, GuildDefaultRanks.Initiate);
@@ -458,7 +458,7 @@ namespace Game.Guilds
 
             tab.SetInfo(name, icon);
 
-            GuildEventTabModified packet = new GuildEventTabModified();
+            GuildEventTabModified packet = new();
             packet.Tab = tabId;
             packet.Name = name;
             packet.Icon = icon;
@@ -478,7 +478,7 @@ namespace Game.Guilds
                 else
                     member.SetOfficerNote(note);
 
-                GuildMemberUpdateNote updateNote = new GuildMemberUpdateNote();
+                GuildMemberUpdateNote updateNote = new();
                 updateNote.Member = guid;
                 updateNote.IsPublic = isPublic;
                 updateNote.Note = note;
@@ -504,7 +504,7 @@ namespace Game.Guilds
                 foreach (var rightsAndSlot in rightsAndSlots)
                     _SetRankBankTabRightsAndSlots(rankId, rightsAndSlot);
 
-                GuildEventRankChanged packet = new GuildEventRankChanged();
+                GuildEventRankChanged packet = new();
                 packet.RankID = rankId;
                 BroadcastPacket(packet);
             }
@@ -594,7 +594,7 @@ namespace Game.Guilds
             pInvitee.SetGuildIdInvited(m_id);
             _LogEvent(GuildEventLogTypes.InvitePlayer, player.GetGUID().GetCounter(), pInvitee.GetGUID().GetCounter());
 
-            GuildInvite invite = new GuildInvite();
+            GuildInvite invite = new();
 
             invite.InviterVirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
             invite.GuildVirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
@@ -826,7 +826,7 @@ namespace Game.Guilds
             // Call script after validation and before money transfer.
             Global.ScriptMgr.OnGuildMemberDepositMoney(this, player, amount);
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             _ModifyBankMoney(trans, amount, true);
             if (!cashFlow)
             {
@@ -869,7 +869,7 @@ namespace Game.Guilds
             // Call script after validation and before money transfer.
             Global.ScriptMgr.OnGuildMemberWitdrawMoney(this, player, amount, repair);
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             // Add money to player (if required)
             if (!repair)
             {
@@ -926,7 +926,7 @@ namespace Game.Guilds
             if (!IsMember(player.GetGUID()) || !group)
                 return;
 
-            GuildPartyState partyStateResponse = new GuildPartyState();
+            GuildPartyState partyStateResponse = new();
             partyStateResponse.InGuildParty = (player.GetMap().GetOwnerGuildId(player.GetTeam()) == GetId());
             partyStateResponse.NumMembers = 0;
             partyStateResponse.NumRequired = 0;
@@ -936,7 +936,7 @@ namespace Game.Guilds
 
         public void HandleGuildRequestChallengeUpdate(WorldSession session)
         {
-            GuildChallengeUpdate updatePacket = new GuildChallengeUpdate();
+            GuildChallengeUpdate updatePacket = new();
 
             for (int i = 0; i < GuildConst.ChallengesTypes; ++i)
                 updatePacket.CurrentCount[i] = 0; // @todo current count
@@ -960,7 +960,7 @@ namespace Game.Guilds
             if (logs == null)
                 return;
 
-            GuildEventLogQueryResults packet = new GuildEventLogQueryResults();
+            GuildEventLogQueryResults packet = new();
             foreach (var logEntry in logs)
             {
                 EventLogEntry eventLog = (EventLogEntry)logEntry;
@@ -977,7 +977,7 @@ namespace Game.Guilds
             if (logs.Empty())
                 return;
 
-            GuildNewsPkt packet = new GuildNewsPkt();
+            GuildNewsPkt packet = new();
             foreach (var logEntry in logs)
             {
                 NewsLogEntry eventLog = (NewsLogEntry)logEntry;
@@ -997,7 +997,7 @@ namespace Game.Guilds
                 if (logs == null)
                     return;
 
-                GuildBankLogQueryResults packet = new GuildBankLogQueryResults();
+                GuildBankLogQueryResults packet = new();
                 packet.Tab = tabId;
 
                 //if (tabId == GUILD_BANK_MAX_TABS && hasCashFlow)
@@ -1028,7 +1028,7 @@ namespace Game.Guilds
 
             byte rankId = member.GetRankId();
 
-            GuildPermissionsQueryResults queryResult = new GuildPermissionsQueryResults();
+            GuildPermissionsQueryResults queryResult = new();
             queryResult.RankID = rankId;
             queryResult.WithdrawGoldLimit = (int)_GetMemberRemainingMoney(member);
             queryResult.Flags = (int)_GetRankRights(rankId);
@@ -1053,7 +1053,7 @@ namespace Game.Guilds
 
             long amount = _GetMemberRemainingMoney(member);
 
-            GuildBankRemainingWithdrawMoney packet = new GuildBankRemainingWithdrawMoney();
+            GuildBankRemainingWithdrawMoney packet = new();
             packet.RemainingWithdrawMoney = amount;
             session.SendPacket(packet);
         }
@@ -1074,7 +1074,7 @@ namespace Game.Guilds
 
             if (member.GetGUID() == GetLeaderGUID())
             {
-                GuildFlaggedForRename renameFlag = new GuildFlaggedForRename();
+                GuildFlaggedForRename renameFlag = new();
                 renameFlag.FlagSet = false;
                 player.SendPacket(renameFlag);
             }
@@ -1107,7 +1107,7 @@ namespace Game.Guilds
             else
                 member.RemoveFlag(GuildMemberFlags.DND);
 
-            GuildEventStatusChange statusChange = new GuildEventStatusChange();
+            GuildEventStatusChange statusChange = new();
             statusChange.Guid = memberGuid;
             statusChange.AFK = afk;
             statusChange.DND = dnd;
@@ -1116,14 +1116,14 @@ namespace Game.Guilds
 
         void SendEventBankMoneyChanged()
         {
-            GuildEventBankMoneyChanged eventPacket = new GuildEventBankMoneyChanged();
+            GuildEventBankMoneyChanged eventPacket = new();
             eventPacket.Money = GetBankMoney();
             BroadcastPacket(eventPacket);
         }
 
         void SendEventMOTD(WorldSession session, bool broadcast = false)
         {
-            GuildEventMotd eventPacket = new GuildEventMotd();
+            GuildEventMotd eventPacket = new();
             eventPacket.MotdText = GetMOTD();
 
             if (broadcast)
@@ -1137,7 +1137,7 @@ namespace Game.Guilds
 
         void SendEventNewLeader(Member newLeader, Member oldLeader, bool isSelfPromoted = false)
         {
-            GuildEventNewLeader eventPacket = new GuildEventNewLeader();
+            GuildEventNewLeader eventPacket = new();
             eventPacket.SelfPromoted = isSelfPromoted;
             if (newLeader != null)
             {
@@ -1158,7 +1158,7 @@ namespace Game.Guilds
 
         void SendEventPlayerLeft(Player leaver, Player remover = null, bool isRemoved = false)
         {
-            GuildEventPlayerLeft eventPacket = new GuildEventPlayerLeft();
+            GuildEventPlayerLeft eventPacket = new();
             eventPacket.Removed = isRemoved;
             eventPacket.LeaverGUID = leaver.GetGUID();
             eventPacket.LeaverName = leaver.GetName();
@@ -1178,7 +1178,7 @@ namespace Game.Guilds
         {
             Player player = session.GetPlayer();
 
-            GuildEventPresenceChange eventPacket = new GuildEventPresenceChange();
+            GuildEventPresenceChange eventPacket = new();
             eventPacket.Guid = player.GetGUID();
             eventPacket.Name = player.GetName();
             eventPacket.VirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
@@ -1222,7 +1222,7 @@ namespace Game.Guilds
 
         public void LoadRankFromDB(SQLFields field)
         {
-            RankInfo rankInfo = new RankInfo(m_id);
+            RankInfo rankInfo = new(m_id);
 
             rankInfo.LoadFromDB(field);
 
@@ -1233,7 +1233,7 @@ namespace Game.Guilds
         {
             ulong lowguid = field.Read<ulong>(1);
             ObjectGuid playerGuid = ObjectGuid.Create(HighGuid.Player, lowguid);
-            Member member = new Member(m_id, playerGuid, field.Read<byte>(2));
+            Member member = new(m_id, playerGuid, field.Read<byte>(2));
             if (!member.LoadFromDB(field))
             {
                 _DeleteMemberFromDB(null, lowguid);
@@ -1247,7 +1247,7 @@ namespace Game.Guilds
         public void LoadBankRightFromDB(SQLFields field)
         {
             // tabId              rights                slots
-            GuildBankRightsAndSlots rightsAndSlots = new GuildBankRightsAndSlots(field.Read<byte>(1), field.Read<sbyte>(3), field.Read<int>(4));
+            GuildBankRightsAndSlots rightsAndSlots = new(field.Read<byte>(1), field.Read<sbyte>(3), field.Read<int>(4));
             // rankId
             _SetRankBankTabRightsAndSlots(field.Read<byte>(2), rightsAndSlots, false);
         }
@@ -1358,7 +1358,7 @@ namespace Game.Guilds
             bool broken_ranks = false;
             byte ranks = _GetRanksSize();
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             if (ranks < GuildConst.MinRanks || ranks > GuildConst.MaxRanks)
             {
                 Log.outError(LogFilter.Guild, "Guild {0} has invalid number of ranks, creating new...", m_id);
@@ -1419,7 +1419,7 @@ namespace Game.Guilds
         {
             if (session != null && session.GetPlayer() != null && _HasRankRight(session.GetPlayer(), officerOnly ? GuildRankRights.OffChatSpeak : GuildRankRights.GChatSpeak))
             {
-                ChatPkt data = new ChatPkt();
+                ChatPkt data = new();
                 data.Initialize(officerOnly ? ChatMsg.Officer : ChatMsg.Guild, language, session.GetPlayer(), null, msg);
                 foreach (var member in m_members.Values)
                 {
@@ -1436,7 +1436,7 @@ namespace Game.Guilds
         {
             if (session != null && session.GetPlayer() != null && _HasRankRight(session.GetPlayer(), officerOnly ? GuildRankRights.OffChatSpeak : GuildRankRights.GChatSpeak))
             {
-                ChatPkt data = new ChatPkt();
+                ChatPkt data = new();
                 data.Initialize(officerOnly ? ChatMsg.Officer : ChatMsg.Guild, isLogged ? Language.AddonLogged : Language.Addon, session.GetPlayer(), null, msg, 0, "", Locale.enUS, prefix);
                 foreach (var member in m_members.Values)
                 {
@@ -1489,7 +1489,7 @@ namespace Game.Guilds
 
         public void MassInviteToEvent(WorldSession session, uint minLevel, uint maxLevel, uint minRank)
         {
-            CalendarCommunityInvite packet = new CalendarCommunityInvite();
+            CalendarCommunityInvite packet = new();
 
             foreach (var member in m_members.Values)
             {
@@ -1533,7 +1533,7 @@ namespace Game.Guilds
             if (rankId == GuildConst.RankNone)
                 rankId = _GetLowestRankId();
 
-            Member member = new Member(m_id, guid, rankId);
+            Member member = new(m_id, guid, rankId);
             string name = "";
             if (player != null)
             {
@@ -1581,7 +1581,7 @@ namespace Game.Guilds
             _UpdateAccountsNumber();
             _LogEvent(GuildEventLogTypes.JoinGuild, lowguid);
 
-            GuildEventPlayerJoined joinNotificationPacket = new GuildEventPlayerJoined();
+            GuildEventPlayerJoined joinNotificationPacket = new();
             joinNotificationPacket.Guid = guid;
             joinNotificationPacket.Name = name;
             joinNotificationPacket.VirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
@@ -1679,8 +1679,8 @@ namespace Game.Guilds
             if (tabId == destTabId && slotId == destSlotId)
                 return;
 
-            BankMoveItemData from = new BankMoveItemData(this, player, tabId, slotId);
-            BankMoveItemData to = new BankMoveItemData(this, player, destTabId, destSlotId);
+            BankMoveItemData from = new(this, player, tabId, slotId);
+            BankMoveItemData to = new(this, player, destTabId, destSlotId);
             _MoveItems(from, to, splitedAmount);
         }
 
@@ -1689,8 +1689,8 @@ namespace Game.Guilds
             if ((slotId >= GuildConst.MaxBankSlots && slotId != ItemConst.NullSlot) || tabId >= _GetPurchasedTabsSize())
                 return;
 
-            BankMoveItemData bankData = new BankMoveItemData(this, player, tabId, slotId);
-            PlayerMoveItemData charData = new PlayerMoveItemData(this, player, playerBag, playerSlotId);
+            BankMoveItemData bankData = new(this, player, tabId, slotId);
+            PlayerMoveItemData charData = new(this, player, playerBag, playerSlotId);
             if (toChar)
                 _MoveItems(bankData, charData, splitedAmount);
             else
@@ -1705,7 +1705,7 @@ namespace Game.Guilds
                 pTab.SetText(text);
                 pTab.SendText(this);
 
-                GuildEventTabTextChanged eventPacket = new GuildEventTabTextChanged();
+                GuildEventTabTextChanged eventPacket = new();
                 eventPacket.Tab = tabId;
                 BroadcastPacket(eventPacket);
             }
@@ -1725,7 +1725,7 @@ namespace Game.Guilds
             byte tabId = _GetPurchasedTabsSize();                      // Next free id
             m_bankTabs.Add(new BankTab(m_id, tabId));
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GUILD_BANK_TAB);
             stmt.AddValue(0, m_id);
@@ -1768,7 +1768,7 @@ namespace Game.Guilds
                 return false;
 
             // Ranks represent sequence 0, 1, 2, ... where 0 means guildmaster
-            RankInfo info = new RankInfo(m_id, newRankId, name, rights, 0);
+            RankInfo info = new(m_id, newRankId, name, rights, 0);
             m_ranks.Add(info);
 
             bool isInTransaction = trans != null;
@@ -1788,7 +1788,7 @@ namespace Game.Guilds
         void _UpdateAccountsNumber()
         {
             // We use a set to be sure each element will be unique
-            List<uint> accountsIdSet = new List<uint>();
+            List<uint> accountsIdSet = new();
             foreach (var member in m_members.Values)
                 accountsIdSet.Add(member.GetAccountId());
 
@@ -1973,7 +1973,7 @@ namespace Game.Guilds
 
         void _LogEvent(GuildEventLogTypes eventType, ulong playerGuid1, ulong playerGuid2 = 0, byte newRank = 0)
         {
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             m_eventLog.AddEvent(trans, new EventLogEntry(m_id, m_eventLog.GetNextGUID(), eventType, playerGuid1, playerGuid2, newRank));
             DB.Characters.CommitTransaction(trans);
 
@@ -2089,7 +2089,7 @@ namespace Game.Guilds
             if (swap)
                 pSrc.LogAction(pDest);
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             // 3. Log bank events
             pDest.LogBankEvent(trans, pSrc, pSrcItem.GetCount());
             if (swap)
@@ -2118,7 +2118,7 @@ namespace Game.Guilds
             Cypher.Assert(pSrc.IsBank() || pDest.IsBank());
 
             byte tabId = 0;
-            List<byte> slots = new List<byte>();
+            List<byte> slots = new();
             if (pSrc.IsBank()) // B .
             {
                 tabId = pSrc.GetContainer();
@@ -2130,7 +2130,7 @@ namespace Game.Guilds
                         pDest.CopySlots(slots);
                     else // Different tabs - send second message
                     {
-                        List<byte> destSlots = new List<byte>();
+                        List<byte> destSlots = new();
                         pDest.CopySlots(destSlots);
                         _SendBankContentUpdate(pDest.GetContainer(), destSlots);
                     }
@@ -2150,7 +2150,7 @@ namespace Game.Guilds
             BankTab tab = GetBankTab(tabId);
             if (tab != null)
             {
-                GuildBankQueryResults packet = new GuildBankQueryResults();
+                GuildBankQueryResults packet = new();
                 packet.FullUpdate = true;          // @todo
                 packet.Tab = tabId;
                 packet.Money = m_bankMoney;
@@ -2159,7 +2159,7 @@ namespace Game.Guilds
                 {
                     Item tabItem = tab.GetItem(slot);
 
-                    GuildBankItemInfo itemInfo = new GuildBankItemInfo();
+                    GuildBankItemInfo itemInfo = new();
 
                     itemInfo.Slot = slot;
                     itemInfo.Item.ItemID = tabItem ? tabItem.GetEntry() : 0;
@@ -2176,7 +2176,7 @@ namespace Game.Guilds
                         {
                             if (gemData.ItemId != 0)
                             {
-                                ItemGemData gem = new ItemGemData();
+                                ItemGemData gem = new();
                                 gem.Slot = i;
                                 gem.Item = new ItemInstance(gemData);
                                 itemInfo.SocketEnchant.Add(gem);
@@ -2209,7 +2209,7 @@ namespace Game.Guilds
             if (member == null) // Shouldn't happen, just in case
                 return;
 
-            GuildBankQueryResults packet = new GuildBankQueryResults();
+            GuildBankQueryResults packet = new();
 
             packet.Money = m_bankMoney;
             packet.WithdrawalsRemaining = _GetMemberRemainingSlots(member, tabId);
@@ -2240,7 +2240,7 @@ namespace Game.Guilds
                         Item tabItem = tab.GetItem(slotId);
                         if (tabItem)
                         {
-                            GuildBankItemInfo itemInfo = new GuildBankItemInfo();
+                            GuildBankItemInfo itemInfo = new();
 
                             itemInfo.Slot = slotId;
                             itemInfo.Item.ItemID = tabItem.GetEntry();
@@ -2255,7 +2255,7 @@ namespace Game.Guilds
                             {
                                 if (gemData.ItemId != 0)
                                 {
-                                    ItemGemData gem = new ItemGemData();
+                                    ItemGemData gem = new();
                                     gem.Slot = i;
                                     gem.Item = new ItemInstance(gemData);
                                     itemInfo.SocketEnchant.Add(gem);
@@ -2279,7 +2279,7 @@ namespace Game.Guilds
             Member member = GetMember(targetGuid);
             Cypher.Assert(member != null);
 
-            GuildSendRankChange rankChange = new GuildSendRankChange();
+            GuildSendRankChange rankChange = new();
             rankChange.Officer = setterGuid;
             rankChange.Other = targetGuid;
             rankChange.RankID = rank;
@@ -2307,13 +2307,13 @@ namespace Game.Guilds
 
         public void AddGuildNews(GuildNews type, ObjectGuid guid, uint flags, uint value)
         {
-            NewsLogEntry news = new NewsLogEntry(m_id, m_newsLog.GetNextGUID(), type, guid, flags, value);
+            NewsLogEntry news = new(m_id, m_newsLog.GetNextGUID(), type, guid, flags, value);
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             m_newsLog.AddEvent(trans, news);
             DB.Characters.CommitTransaction(trans);
 
-            GuildNewsPkt newsPacket = new GuildNewsPkt();
+            GuildNewsPkt newsPacket = new();
             news.WritePacket(newsPacket);
             BroadcastPacket(newsPacket);
         }
@@ -2343,7 +2343,7 @@ namespace Game.Guilds
 
             Log.outDebug(LogFilter.Guild, "HandleNewsSetSticky: [{0}] chenged newsId {1} sticky to {2}", session.GetPlayerInfo(), newsId, sticky);
 
-            GuildNewsPkt newsPacket = new GuildNewsPkt();
+            GuildNewsPkt newsPacket = new();
             news.WritePacket(newsPacket);
             session.SendPacket(newsPacket);
         }
@@ -2437,7 +2437,7 @@ namespace Game.Guilds
 
         public static void SendCommandResult(WorldSession session, GuildCommandType type, GuildCommandError errCode, string param = "")
         {
-            GuildCommandResult resultPacket = new GuildCommandResult();
+            GuildCommandResult resultPacket = new();
             resultPacket.Command = type;
             resultPacket.Result = errCode;
             resultPacket.Name = param;
@@ -2446,7 +2446,7 @@ namespace Game.Guilds
 
         public static void SendSaveEmblemResult(WorldSession session, GuildEmblemError errCode)
         {
-            PlayerSaveGuildEmblem saveResponse = new PlayerSaveGuildEmblem();
+            PlayerSaveGuildEmblem saveResponse = new();
             saveResponse.Error = errCode;
             session.SendPacket(saveResponse);
         }
@@ -2459,13 +2459,13 @@ namespace Game.Guilds
         string m_info;
         long m_createdDate;
 
-        EmblemInfo m_emblemInfo = new EmblemInfo();
+        EmblemInfo m_emblemInfo = new();
         uint m_accountsNumber;
         ulong m_bankMoney;
 
-        List<RankInfo> m_ranks = new List<RankInfo>();
-        Dictionary<ObjectGuid, Member> m_members = new Dictionary<ObjectGuid, Member>();
-        List<BankTab> m_bankTabs = new List<BankTab>();
+        List<RankInfo> m_ranks = new();
+        Dictionary<ObjectGuid, Member> m_members = new();
+        List<BankTab> m_bankTabs = new();
 
         // These are actually ordered lists. The first element is the oldest entry.
         LogHolder m_eventLog;
@@ -2733,7 +2733,7 @@ namespace Game.Guilds
             string m_publicNote = "";
             string m_officerNote = "";
 
-            List<uint> m_trackedCriteriaIds = new List<uint>();
+            List<uint> m_trackedCriteriaIds = new();
 
             uint[] m_bankWithdraw = new uint[GuildConst.MaxBankTabs];
             ulong m_bankWithdrawMoney;
@@ -2815,7 +2815,7 @@ namespace Game.Guilds
                 ObjectGuid playerGUID = ObjectGuid.Create(HighGuid.Player, m_playerGuid1);
                 ObjectGuid otherGUID = ObjectGuid.Create(HighGuid.Player, m_playerGuid2);
 
-                GuildEventEntry eventEntry = new GuildEventEntry();
+                GuildEventEntry eventEntry = new();
                 eventEntry.PlayerGUID = playerGUID;
                 eventEntry.OtherGUID = otherGUID;
                 eventEntry.TransactionType = (byte)m_eventType;
@@ -2903,7 +2903,7 @@ namespace Game.Guilds
 
                 bool hasStack = (hasItem && m_itemStackCount > 1) || itemMoved;
 
-                GuildBankLogEntry bankLogEntry = new GuildBankLogEntry();
+                GuildBankLogEntry bankLogEntry = new();
                 bankLogEntry.PlayerGUID = logGuid;
                 bankLogEntry.TimeOffset = (uint)(Time.UnixTime - m_timestamp);
                 bankLogEntry.EntryType = (sbyte)m_eventType;
@@ -2983,7 +2983,7 @@ namespace Game.Guilds
 
             public void WritePacket(GuildNewsPkt newsPacket)
             {
-                GuildNewsEvent newsEvent = new GuildNewsEvent();
+                GuildNewsEvent newsEvent = new();
                 newsEvent.Id = (int)GetGUID();
                 newsEvent.MemberGuid = GetPlayerGuid();
                 newsEvent.CompletedDate = (uint)GetTimestamp();
@@ -2997,7 +2997,7 @@ namespace Game.Guilds
 
                 if (GetNewsType() == GuildNews.ItemLooted || GetNewsType() == GuildNews.ItemCrafted || GetNewsType() == GuildNews.ItemPurchased)
                 {
-                    ItemInstance itemInstance = new ItemInstance();
+                    ItemInstance itemInstance = new();
                     itemInstance.ItemID = GetValue();
                     newsEvent.Item.Set(itemInstance);
                 }
@@ -3054,7 +3054,7 @@ namespace Game.Guilds
             public List<LogEntry> GetGuildLog() { return m_log; }
 
 
-            List<LogEntry> m_log = new List<LogEntry>();
+            List<LogEntry> m_log = new();
             uint m_maxRecords;
             uint m_nextGUID;
         }
@@ -3322,7 +3322,7 @@ namespace Game.Guilds
 
             public void SendText(Guild guild, WorldSession session = null)
             {
-                GuildBankTextQueryResult textQuery = new GuildBankTextQueryResult();
+                GuildBankTextQueryResult textQuery = new();
                 textQuery.Tab = m_tabId;
                 textQuery.Text = m_text;
 
@@ -3565,7 +3565,7 @@ namespace Game.Guilds
             public byte m_slotId;
             public Item m_pItem;
             public Item m_pClonedItem;
-            public List<ItemPosCount> m_vec = new List<ItemPosCount>();
+            public List<ItemPosCount> m_vec = new();
         }
 
         public class PlayerMoveItemData : MoveItemData
@@ -3773,7 +3773,7 @@ namespace Game.Guilds
                 requiredSpace = Math.Min(requiredSpace, count);
 
                 // Reserve space
-                ItemPosCount pos = new ItemPosCount(slotId, requiredSpace);
+                ItemPosCount pos = new(slotId, requiredSpace);
                 if (!pos.IsContainedIn(m_vec))
                 {
                     m_vec.Add(pos);

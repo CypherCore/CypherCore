@@ -16,6 +16,7 @@
  */
 
 using Framework.Constants;
+using Framework.Cryptography;
 using Framework.Database;
 using Game.Accounts;
 using Game.Entities;
@@ -23,7 +24,6 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
-using Framework.Cryptography;
 
 namespace Game
 {
@@ -31,6 +31,9 @@ namespace Game
     {
         const int MaxAccountLength = 16;
         const int MaxEmailLength = 64;
+
+        readonly Dictionary<uint, RBACPermission> _permissions = new();
+        readonly MultiMap<byte, uint> _defaultPermissions = new();
 
         AccountManager() { }
 
@@ -116,7 +119,7 @@ namespace Game
             stmt.AddValue(0, accountId);
             DB.Characters.Execute(stmt);
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
 
             stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_ACCOUNT);
             stmt.AddValue(0, accountId);
@@ -170,12 +173,10 @@ namespace Game
             stmt.AddValue(2, accountId);
             DB.Login.Execute(stmt);
 
-            {
-                stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_LOGON_LEGACY);
-                stmt.AddValue(0, CalculateShaPassHash(newUsername, newPassword));
-                stmt.AddValue(1, accountId);
-                DB.Login.Execute(stmt);
-            }
+            stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_LOGON_LEGACY);
+            stmt.AddValue(0, CalculateShaPassHash(newUsername, newPassword));
+            stmt.AddValue(1, accountId);
+            DB.Login.Execute(stmt);
 
             return AccountOpResult.Ok;
         }
@@ -198,12 +199,10 @@ namespace Game
             stmt.AddValue(2, accountId);
             DB.Login.Execute(stmt);
 
-            {
-                stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_LOGON_LEGACY);
-                stmt.AddValue(0, CalculateShaPassHash(username, newPassword));
-                stmt.AddValue(1, accountId);
-                DB.Login.Execute(stmt);
-            }
+            stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_LOGON_LEGACY);
+            stmt.AddValue(0, CalculateShaPassHash(username, newPassword));
+            stmt.AddValue(1, accountId);
+            DB.Login.Execute(stmt);
 
             return AccountOpResult.Ok;
         }
@@ -280,7 +279,7 @@ namespace Game
             return false;
         }
 
-        bool GetEmail(uint accountId, out string email)
+        public bool GetEmail(uint accountId, out string email)
         {
             email = "";
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.GET_EMAIL_BY_ID);
@@ -339,7 +338,6 @@ namespace Game
             return result.IsEmpty() ? 0 : (uint)result.Read<ulong>(0);
         }
 
-        [Obsolete]
         string CalculateShaPassHash(string name, string password)
         {
             SHA1 sha = SHA1.Create();
@@ -371,7 +369,8 @@ namespace Game
 
         public void LoadRBAC()
         {
-            ClearRBAC();
+            _permissions.Clear();
+            _defaultPermissions.Clear();
 
             Log.outDebug(LogFilter.Rbac, "AccountMgr:LoadRBAC");
             uint oldMSTime = Time.GetMSTime();
@@ -455,7 +454,7 @@ namespace Game
                 rbac.SetSecurityLevel(securityLevel);
 
             PreparedStatement stmt;
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             // Delete old security level from DB
             if (realmId == -1)
             {
@@ -498,7 +497,7 @@ namespace Game
                 return false;
             }
 
-            RBACData rbac = new RBACData(accountId, "", (int)realmId);
+            RBACData rbac = new(accountId, "", (int)realmId);
             rbac.LoadFromDB();
             bool hasPermission = rbac.HasPermission(permissionId);
 
@@ -507,21 +506,12 @@ namespace Game
             return hasPermission;
         }
 
-        void ClearRBAC()
-        {
-            _permissions.Clear();
-            _defaultPermissions.Clear();
-        }
-
         public List<uint> GetRBACDefaultPermissions(byte secLevel)
         {
             return _defaultPermissions[secLevel];
         }
 
         public Dictionary<uint, RBACPermission> GetRBACPermissionList() { return _permissions; }
-
-        Dictionary<uint, RBACPermission> _permissions = new Dictionary<uint, RBACPermission>();
-        MultiMap<byte, uint> _defaultPermissions = new MultiMap<byte, uint>();
     }
 
     public enum AccountOpResult

@@ -15,15 +15,20 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Framework.Constants;
 using Framework.Dynamic;
 using Game.Entities;
 using Game.Spells;
-using Framework.Constants;
 
 namespace Game.AI
 {
     public class GameObjectAI
     {
+        protected TaskScheduler _scheduler;
+        protected EventMap _events;
+
+        public GameObject me;
+
         public GameObjectAI(GameObject gameObject)
         {
             me = gameObject;
@@ -93,10 +98,5 @@ namespace Game.AI
         public virtual void OnStateChanged(GameObjectState state) { }
         public virtual void EventInform(uint eventId) { }
         public virtual void SpellHit(Unit unit, SpellInfo spellInfo) { }
-
-        protected TaskScheduler _scheduler;
-        protected EventMap _events;
-
-        public GameObject me;
     }
 }

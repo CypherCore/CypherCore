@@ -28,7 +28,7 @@ namespace Game.Entities
     public class PlayerTaxi
     {
         public byte[] m_taximask = new byte[PlayerConst.TaxiMaskSize];
-        List<uint> m_TaxiDestinations = new List<uint>();
+        List<uint> m_TaxiDestinations = new();
         uint m_flightMasterFactionId;
 
         public void InitTaxiNodesForLevel(Race race, Class chrClass, uint level)
@@ -174,7 +174,7 @@ namespace Game.Entities
             if (m_TaxiDestinations.Empty())
                 return "";
 
-            StringBuilder ss = new StringBuilder();
+            StringBuilder ss = new();
             ss.Append($"{m_flightMasterFactionId} ");
 
             for (int i = 0; i < m_TaxiDestinations.Count; ++i)

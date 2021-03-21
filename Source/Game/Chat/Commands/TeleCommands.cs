@@ -90,7 +90,7 @@ namespace Game.Chat
                 return false;
             }
 
-            GameTele tele = new GameTele();
+            GameTele tele = new();
             tele.posX = player.GetPositionX();
             tele.posY = player.GetPositionY();
             tele.posZ = player.GetPositionZ();
@@ -232,7 +232,7 @@ namespace Game.Chat
 
                     if (!result.IsEmpty())
                     {
-                        WorldLocation loc = new WorldLocation(result.Read<ushort>(0), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), 0.0f);
+                        WorldLocation loc = new(result.Read<ushort>(0), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), 0.0f);
                         uint zoneId = result.Read<ushort>(1);
 
                         Player.SavePositionInDB(loc, zoneId, targetGuid, null);

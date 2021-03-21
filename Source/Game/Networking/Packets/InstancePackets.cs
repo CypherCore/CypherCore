@@ -45,7 +45,7 @@ namespace Game.Networking.Packets
                 lockInfos.Write(_worldPacket);
         }
 
-        public List<InstanceLock> LockList = new List<InstanceLock>();
+        public List<InstanceLock> LockList = new();
     }
 
     class ResetInstances : ClientPacket

@@ -52,7 +52,7 @@ namespace Game.Chat
             }
 
             // Everything looks OK, create new pet
-            Pet pet = new Pet(player, PetType.Hunter);
+            Pet pet = new(player, PetType.Hunter);
             if (!pet.CreateBaseAtCreature(creatureTarget))
             {
                 handler.SendSysMessage("Error 1");

@@ -246,7 +246,7 @@ namespace Game
             if (!linkInfo.Item1.IsOpen())
                 return;
 
-            ConnectToKey key = new ConnectToKey();
+            ConnectToKey key = new();
             key.Raw = linkInfo.Item2;
 
             WorldSession session = FindSession(key.AccountId);
@@ -422,7 +422,7 @@ namespace Game
             //Load weighted graph on taxi nodes path
             Global.TaxiPathGraph.Initialize();
 
-            MultiMap<uint, uint> mapData = new MultiMap<uint, uint>();
+            MultiMap<uint, uint> mapData = new();
             foreach (MapRecord mapEntry in CliDB.MapStorage.Values)
             {
                 if (mapEntry.ParentMapID != -1)
@@ -1471,7 +1471,7 @@ namespace Game
         // Send a System Message to all players (except self if mentioned)
         public void SendWorldText(CypherStrings string_id, params object[] args)
         {
-            WorldWorldTextBuilder wt_builder = new WorldWorldTextBuilder((uint)string_id, args);
+            WorldWorldTextBuilder wt_builder = new((uint)string_id, args);
             var wt_do = new LocalizedPacketListDo(wt_builder);
             foreach (var session in m_sessions.Values)
             {
@@ -1522,7 +1522,7 @@ namespace Game
         // Send a System Message to all players in the zone (except self if mentioned)
         public void SendZoneText(uint zone, string text, WorldSession self = null, uint team = 0)
         {
-            ChatPkt data = new ChatPkt();
+            ChatPkt data = new();
             data.Initialize(ChatMsg.System, Language.Universal, null, null, text);
             SendZoneMessage(zone, data, self, team);
         }
@@ -1601,7 +1601,7 @@ namespace Game
             }
 
             // Disconnect all affected players (for IP it can be several)
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             do
             {
                 uint account = resultAccounts.Read<uint>(0);
@@ -1682,7 +1682,7 @@ namespace Game
                 guid = pBanned.GetGUID();
 
             //Use transaction in order to ensure the order of the queries
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
 
             // make sure there is only one active ban
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHARACTER_BAN);
@@ -1828,7 +1828,7 @@ namespace Game
 
         public void SendServerMessage(ServerMessageType messageID, string stringParam = "", Player player = null)
         {
-            ChatServerMessage packet = new ChatServerMessage();
+            ChatServerMessage packet = new();
             packet.MessageID = (int)messageID;
             if (messageID <= ServerMessageType.String)
                 packet.StringParam = stringParam;
@@ -1854,7 +1854,7 @@ namespace Game
             foreach (var pair in m_sessions)
             {
                 WorldSession session = pair.Value;
-                WorldSessionFilter updater = new WorldSessionFilter(session);
+                WorldSessionFilter updater = new(session);
                 if (!session.Update(diff, updater))    // As interval = 0
                 {
                     if (!RemoveQueuedPlayer(session) && session != null && WorldConfig.GetIntValue(WorldCfg.IntervalDisconnectTolerance) != 0)
@@ -1903,7 +1903,7 @@ namespace Game
                 uint Id = result.Read<uint>(0);
                 uint charCount = result.Read<uint>(1);
 
-                SQLTransaction trans = new SQLTransaction();
+                SQLTransaction trans = new();
 
                 PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_REALM_CHARACTERS_BY_REALM);
                 stmt.AddValue(0, Id);
@@ -2393,7 +2393,7 @@ namespace Game
         ShutdownExitCode m_ExitCode;
         public bool IsStopped;
 
-        Dictionary<byte, Autobroadcast> m_Autobroadcasts = new Dictionary<byte, Autobroadcast>();
+        Dictionary<byte, Autobroadcast> m_Autobroadcasts = new();
 
         CleaningFlags m_CleaningFlags;
 
@@ -2407,24 +2407,24 @@ namespace Game
 
         bool m_isClosed;
 
-        Dictionary<WorldTimers, IntervalTimer> m_timers = new Dictionary<WorldTimers, IntervalTimer>();
+        Dictionary<WorldTimers, IntervalTimer> m_timers = new();
         long mail_timer;
         long mail_timer_expires;
         long blackmarket_timer;
 
-        ConcurrentDictionary<uint, WorldSession> m_sessions = new ConcurrentDictionary<uint, WorldSession>();
-        Dictionary<uint, long> m_disconnects = new Dictionary<uint, long>();
+        ConcurrentDictionary<uint, WorldSession> m_sessions = new();
+        Dictionary<uint, long> m_disconnects = new();
         uint m_maxActiveSessionCount;
         uint m_maxQueuedSessionCount;
         uint m_PlayerCount;
         uint m_MaxPlayerCount;
 
-        Dictionary<uint, uint> m_worldstates = new Dictionary<uint, uint>();
+        Dictionary<uint, uint> m_worldstates = new();
         uint m_playerLimit;
         AccountTypes m_allowedSecurityLevel;
         Locale m_defaultDbcLocale;                     // from config for one from loaded DBC locales
         BitSet m_availableDbcLocaleMask;                       // by loaded DBC
-        List<string> m_motd = new List<string>();
+        List<string> m_motd = new();
 
         // scheduled reset times
         long m_NextDailyQuestReset;
@@ -2434,12 +2434,12 @@ namespace Game
         long m_NextGuildReset;
         long m_NextCurrencyReset;
 
-        List<WorldSession> m_QueuedPlayer = new List<WorldSession>();
-        ConcurrentQueue<WorldSession> addSessQueue = new ConcurrentQueue<WorldSession>();
+        List<WorldSession> m_QueuedPlayer = new();
+        ConcurrentQueue<WorldSession> addSessQueue = new();
 
-        ConcurrentQueue<Tuple<WorldSocket, ulong>> _linkSocketQueue = new ConcurrentQueue<Tuple<WorldSocket, ulong>>();
+        ConcurrentQueue<Tuple<WorldSocket, ulong>> _linkSocketQueue = new();
 
-        AsyncCallbackProcessor<QueryCallback> _queryProcessor = new AsyncCallbackProcessor<QueryCallback>();
+        AsyncCallbackProcessor<QueryCallback> _queryProcessor = new();
 
         Realm _realm;
 
@@ -2450,7 +2450,7 @@ namespace Game
         string _guidWarningMsg;
         string _alertRestartReason;
 
-        object _guidAlertLock = new object();
+        object _guidAlertLock = new();
 
         bool _guidWarn;
         bool _guidAlert;
@@ -2526,7 +2526,7 @@ namespace Game
             if (i_args != null)
                 text = string.Format(text, i_args);
 
-            ChatPkt messageChat = new ChatPkt();
+            ChatPkt messageChat = new();
 
             var lines = new StringArray(text, "\n");
             for (var i = 0; i < lines.Length; ++i)

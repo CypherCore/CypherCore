@@ -24,7 +24,7 @@ namespace Game
     {
         public void SendAuthResponse(BattlenetRpcErrorCode code, bool queued, uint queuePos = 0)
         {
-            AuthResponse response = new AuthResponse();
+            AuthResponse response = new();
             response.Result = code;
 
             if (code == BattlenetRpcErrorCode.Ok)
@@ -62,7 +62,7 @@ namespace Game
         {
             if (position != 0)
             {
-                WaitQueueUpdate waitQueueUpdate = new WaitQueueUpdate();
+                WaitQueueUpdate waitQueueUpdate = new();
                 waitQueueUpdate.WaitInfo.WaitCount = position;
                 waitQueueUpdate.WaitInfo.WaitTime = 0;
                 waitQueueUpdate.WaitInfo.HasFCM = false;
@@ -74,7 +74,7 @@ namespace Game
 
         public void SendClientCacheVersion(uint version)
         {
-            ClientCacheVersion cache = new ClientCacheVersion();
+            ClientCacheVersion cache = new();
             cache.CacheVersion = version;
             SendPacket(cache);//enabled it
         }
@@ -82,7 +82,7 @@ namespace Game
         public void SendSetTimeZoneInformation()
         {
             // @todo: replace dummy values
-            SetTimeZoneInformation packet = new SetTimeZoneInformation();
+            SetTimeZoneInformation packet = new();
             packet.ServerTimeTZ = "Europe/Paris";
             packet.GameTimeTZ = "Europe/Paris";
 
@@ -91,7 +91,7 @@ namespace Game
 
         public void SendFeatureSystemStatusGlueScreen()
         {
-            FeatureSystemStatusGlueScreen features = new FeatureSystemStatusGlueScreen();
+            FeatureSystemStatusGlueScreen features = new();
             features.BpayStoreAvailable = false;
             features.BpayStoreDisabledByParentalControls = false;
             features.CharUndeleteEnabled = WorldConfig.GetBoolValue(WorldCfg.FeatureSystemCharacterUndeleteEnabled);

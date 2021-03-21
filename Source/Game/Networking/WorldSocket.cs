@@ -52,12 +52,12 @@ namespace Game.Networking
         long _LastPingTime;
         uint _OverSpeedPings;
 
-        object _worldSessionLock = new object();
+        object _worldSessionLock = new();
         WorldSession _worldSession;
 
         ZLib.z_stream _compressionStream;
 
-        AsyncCallbackProcessor<QueryCallback> _queryProcessor = new AsyncCallbackProcessor<QueryCallback>();
+        AsyncCallbackProcessor<QueryCallback> _queryProcessor = new();
         string _ipCountry;
 
         public WorldSocket(Socket socket) : base(socket)
@@ -120,7 +120,7 @@ namespace Game.Networking
 
             AsyncReadWithCallback(InitializeHandler);
 
-            ByteBuffer packet = new ByteBuffer();
+            ByteBuffer packet = new();
             packet.WriteString(ServerConnectionInitialize);
             packet.WriteString("\n");
             AsyncWrite(packet.GetData());
@@ -149,7 +149,7 @@ namespace Game.Networking
                         return;
                     }
 
-                    ByteBuffer buffer = new ByteBuffer(_packetBuffer.GetData());
+                    ByteBuffer buffer = new(_packetBuffer.GetData());
                     string initializer = buffer.ReadString((uint)ClientConnectionInitialize.Length);
                     if (initializer != ClientConnectionInitialize)
                     {
@@ -240,7 +240,7 @@ namespace Game.Networking
 
         bool ReadHeader()
         {
-            PacketHeader header = new PacketHeader();
+            PacketHeader header = new();
             header.Read(_headerBuffer.GetData());
 
             _packetBuffer.Resize(header.Size);
@@ -249,7 +249,7 @@ namespace Game.Networking
 
         ReadDataHandlerResult ReadData()
         {
-            PacketHeader header = new PacketHeader();
+            PacketHeader header = new();
             header.Read(_headerBuffer.GetData());
 
             if (!_worldCrypt.Decrypt(_packetBuffer.GetData(), header.Tag))
@@ -258,7 +258,7 @@ namespace Game.Networking
                 return ReadDataHandlerResult.Error;
             }
 
-            WorldPacket packet = new WorldPacket(_packetBuffer.GetData());
+            WorldPacket packet = new(_packetBuffer.GetData());
             _packetBuffer.Reset();
 
             if (packet.GetOpcode() >= (int)ClientOpcodes.Max)
@@ -281,7 +281,7 @@ namespace Game.Networking
             switch (opcode)
             {
                 case ClientOpcodes.Ping:
-                    Ping ping = new Ping(packet);
+                    Ping ping = new(packet);
                     ping.Read();
                     if (!HandlePing(ping))
                         return ReadDataHandlerResult.Error;
@@ -293,7 +293,7 @@ namespace Game.Networking
                         return ReadDataHandlerResult.Error;
                     }
 
-                    AuthSession authSession = new AuthSession(packet);
+                    AuthSession authSession = new(packet);
                     authSession.Read();
                     HandleAuthSession(authSession);
                     return ReadDataHandlerResult.WaitingForQuery;
@@ -304,7 +304,7 @@ namespace Game.Networking
                         return ReadDataHandlerResult.Error;
                     }
 
-                    AuthContinuedSession authContinuedSession = new AuthContinuedSession(packet);
+                    AuthContinuedSession authContinuedSession = new(packet);
                     authContinuedSession.Read();
                     HandleAuthContinuedSession(authContinuedSession);
                     return ReadDataHandlerResult.WaitingForQuery;
@@ -318,7 +318,7 @@ namespace Game.Networking
                     SetNoDelay(false);
                     break;
                 case ClientOpcodes.ConnectToFailed:
-                    ConnectToFailed connectToFailed = new ConnectToFailed(packet);
+                    ConnectToFailed connectToFailed = new(packet);
                     connectToFailed.Read();
                     HandleConnectToFailed(connectToFailed);
                     break;
@@ -364,7 +364,7 @@ namespace Game.Networking
             ServerOpcodes opcode = packet.GetOpcode();
             PacketLog.Write(data, (uint)opcode, GetRemoteIpAddress(), _connectType, false);
 
-            ByteBuffer buffer = new ByteBuffer();
+            ByteBuffer buffer = new();
 
             int packetSize = data.Length;
             if (packetSize > 0x400 && _worldCrypt.IsInitialized)
@@ -390,11 +390,11 @@ namespace Game.Networking
 
             data = buffer.GetData();
 
-            PacketHeader header = new PacketHeader();
+            PacketHeader header = new();
             header.Size = packetSize;
             _worldCrypt.Encrypt(ref data, ref header.Tag);
 
-            ByteBuffer byteBuffer = new ByteBuffer();
+            ByteBuffer byteBuffer = new();
             header.Write(byteBuffer);
             byteBuffer.WriteBytes(data);
 
@@ -452,7 +452,7 @@ namespace Game.Networking
 
         void HandleSendAuthSession()
         {
-            AuthChallenge challenge = new AuthChallenge();
+            AuthChallenge challenge = new();
             challenge.Challenge = _serverChallenge;
             challenge.DosChallenge = new byte[32].GenerateRandomKey(32);
             challenge.DosZeroBits = 1;
@@ -489,12 +489,12 @@ namespace Game.Networking
                 return;
             }
 
-            AccountInfo account = new AccountInfo(result.GetFields());
+            AccountInfo account = new(result.GetFields());
 
             // For hook purposes, we get Remoteaddress at this point.
             var address = GetRemoteIpAddress();
 
-            Sha256 digestKeyHash = new Sha256();
+            Sha256 digestKeyHash = new();
             digestKeyHash.Process(account.game.SessionKey, account.game.SessionKey.Length);
             if (account.game.OS == "Wn64")
                 digestKeyHash.Finish(buildInfo.Win64AuthSeed);
@@ -507,7 +507,7 @@ namespace Game.Networking
                 return;
             }
 
-            HmacSha256 hmac = new HmacSha256(digestKeyHash.Digest);
+            HmacSha256 hmac = new(digestKeyHash.Digest);
             hmac.Process(authSession.LocalChallenge, authSession.LocalChallenge.Count);
             hmac.Process(_serverChallenge, 16);
             hmac.Finish(AuthCheckSeed, 16);
@@ -520,10 +520,10 @@ namespace Game.Networking
                 return;
             }
 
-            Sha256 keyData = new Sha256();
+            Sha256 keyData = new();
             keyData.Finish(account.game.SessionKey);
 
-            HmacSha256 sessionKeyHmac = new HmacSha256(keyData.Digest);
+            HmacSha256 sessionKeyHmac = new(keyData.Digest);
             sessionKeyHmac.Process(_serverChallenge, 16);
             sessionKeyHmac.Process(authSession.LocalChallenge, authSession.LocalChallenge.Count);
             sessionKeyHmac.Finish(SessionKeySeed, 16);
@@ -532,7 +532,7 @@ namespace Game.Networking
             var sessionKeyGenerator = new SessionKeyGenerator(sessionKeyHmac.Digest, 32);
             sessionKeyGenerator.Generate(_sessionKey, 40);
 
-            HmacSha256 encryptKeyGen = new HmacSha256(_sessionKey);
+            HmacSha256 encryptKeyGen = new(_sessionKey);
             encryptKeyGen.Process(authSession.LocalChallenge, authSession.LocalChallenge.Count);
             encryptKeyGen.Process(_serverChallenge, 16);
             encryptKeyGen.Finish(EncryptionKeySeed, 16);
@@ -662,7 +662,7 @@ namespace Game.Networking
 
         void HandleAuthContinuedSession(AuthContinuedSession authSession)
         {
-            ConnectToKey key = new ConnectToKey();
+            ConnectToKey key = new();
             _key = key.Raw = authSession.Key;
 
             _connectType = key.connectionType;
@@ -689,14 +689,14 @@ namespace Game.Networking
                 return;
             }
 
-            ConnectToKey key = new ConnectToKey();
+            ConnectToKey key = new();
             _key = key.Raw = authSession.Key;
 
             uint accountId = key.AccountId;
             string login = result.Read<string>(0);
             _sessionKey = result.Read<byte[]>(1);
 
-            HmacSha256 hmac = new HmacSha256(_sessionKey);
+            HmacSha256 hmac = new(_sessionKey);
             hmac.Process(BitConverter.GetBytes(authSession.Key), 8);
             hmac.Process(authSession.LocalChallenge, authSession.LocalChallenge.Length);
             hmac.Process(_serverChallenge, 16);
@@ -709,7 +709,7 @@ namespace Game.Networking
                 return;
             }
 
-            HmacSha256 encryptKeyGen = new HmacSha256(_sessionKey);
+            HmacSha256 encryptKeyGen = new(_sessionKey);
             encryptKeyGen.Process(authSession.LocalChallenge, authSession.LocalChallenge.Length);
             encryptKeyGen.Process(_serverChallenge, 16);
             encryptKeyGen.Finish(EncryptionKeySeed, 16);
@@ -771,7 +771,7 @@ namespace Game.Networking
 
         public void SendAuthResponseError(BattlenetRpcErrorCode code)
         {
-            AuthResponse response = new AuthResponse();
+            AuthResponse response = new();
             response.SuccessInfo.HasValue = false;
             response.WaitInfo.HasValue = false;
             response.Result = code;

@@ -40,16 +40,16 @@ namespace Game.Entities
     {
         void _LoadInventory(SQLResult result, SQLResult artifactsResult, SQLResult azeriteResult, SQLResult azeriteItemMilestonePowersResult, SQLResult azeriteItemUnlockedEssencesResult, SQLResult azeriteEmpoweredItemResult, uint timeDiff)
         {
-            Dictionary<ulong, ItemAdditionalLoadInfo> additionalData = new Dictionary<ulong, ItemAdditionalLoadInfo>();
+            Dictionary<ulong, ItemAdditionalLoadInfo> additionalData = new();
             ItemAdditionalLoadInfo.Init(additionalData, artifactsResult, azeriteResult, azeriteItemMilestonePowersResult, azeriteItemUnlockedEssencesResult, azeriteEmpoweredItemResult);
 
             if (!result.IsEmpty())
             {
                 uint zoneId = GetZoneId();
-                Dictionary<ObjectGuid, Bag> bagMap = new Dictionary<ObjectGuid, Bag>();                               // fast guid lookup for bags
-                Dictionary<ObjectGuid, Item> invalidBagMap = new Dictionary<ObjectGuid, Item>();                       // fast guid lookup for bags
-                Queue<Item> problematicItems = new Queue<Item>();
-                SQLTransaction trans = new SQLTransaction();
+                Dictionary<ObjectGuid, Bag> bagMap = new();                               // fast guid lookup for bags
+                Dictionary<ObjectGuid, Item> invalidBagMap = new();                       // fast guid lookup for bags
+                Queue<Item> problematicItems = new();
+                SQLTransaction trans = new();
 
                 // Prevent items from being added to the queue while loading
                 m_itemUpdateQueueBlocked = true;
@@ -113,7 +113,7 @@ namespace Game.Entities
 
                             if (IsInventoryPos(InventorySlots.Bag0, slot))
                             {
-                                List<ItemPosCount> dest = new List<ItemPosCount>();
+                                List<ItemPosCount> dest = new();
                                 err = CanStoreItem(InventorySlots.Bag0, slot, dest, item, false);
                                 if (err == InventoryResult.Ok)
                                     item = StoreItem(dest, item, true);
@@ -128,7 +128,7 @@ namespace Game.Entities
                             }
                             else if (IsBankPos(InventorySlots.Bag0, slot))
                             {
-                                List<ItemPosCount> dest = new List<ItemPosCount>();
+                                List<ItemPosCount> dest = new();
                                 err = CanBankItem(InventorySlots.Bag0, slot, dest, item, false, false);
                                 if (err == InventoryResult.Ok)
                                     item = BankItem(dest, item, true);
@@ -155,7 +155,7 @@ namespace Game.Entities
                             var bag = bagMap.LookupByKey(bagGuid);
                             if (bag != null)
                             {
-                                List<ItemPosCount> dest = new List<ItemPosCount>();
+                                List<ItemPosCount> dest = new();
                                 err = CanStoreItem(bag.GetSlot(), slot, dest, item);
                                 if (err == InventoryResult.Ok)
                                     item = StoreItem(dest, item, true);
@@ -195,7 +195,7 @@ namespace Game.Entities
                 while (problematicItems.Count != 0)
                 {
                     string subject = Global.ObjectMgr.GetCypherString(CypherStrings.NotEquippedItem);
-                    MailDraft draft = new MailDraft(subject, "There were problems with equipping item(s).");
+                    MailDraft draft = new(subject, "There were problems with equipping item(s).");
                     for (int i = 0; problematicItems.Count != 0 && i < SharedConst.MaxMailItems; ++i)
                     {
                         draft.AddItem(problematicItems.Dequeue());
@@ -281,7 +281,7 @@ namespace Game.Entities
                         {
                             string strGUID = result.Read<string>(0);
                             var GUIDlist = new StringArray(strGUID, ' ');
-                            List<ObjectGuid> looters = new List<ObjectGuid>();
+                            List<ObjectGuid> looters = new();
                             for (var i = 0; i < GUIDlist.Length; ++i)
                             {
                                 if (ulong.TryParse(GUIDlist[i], out ulong guid))
@@ -347,7 +347,7 @@ namespace Game.Entities
         void _LoadSkills(SQLResult result)
         {
             uint count = 0;
-            Dictionary<uint, uint> loadedSkillValues = new Dictionary<uint, uint>();
+            Dictionary<uint, uint> loadedSkillValues = new();
             if (!result.IsEmpty())
             {
                 do
@@ -466,9 +466,9 @@ namespace Game.Entities
         {
             Log.outDebug(LogFilter.Player, "Loading auras for player {0}", GetGUID().ToString());
 
-            ObjectGuid casterGuid = new ObjectGuid();
-            ObjectGuid itemGuid = new ObjectGuid();
-            Dictionary<AuraKey, AuraLoadEffectInfo> effectInfo = new Dictionary<AuraKey, AuraLoadEffectInfo>();
+            ObjectGuid casterGuid = new();
+            ObjectGuid itemGuid = new();
+            Dictionary<AuraKey, AuraLoadEffectInfo> effectInfo = new();
             if (!effectResult.IsEmpty())
             {
                 do
@@ -479,7 +479,7 @@ namespace Game.Entities
                         casterGuid.SetRawValue(effectResult.Read<byte[]>(0));
                         itemGuid.SetRawValue(effectResult.Read<byte[]>(1));
 
-                        AuraKey key = new AuraKey(casterGuid, itemGuid, effectResult.Read<uint>(2), effectResult.Read<uint>(3));
+                        AuraKey key = new(casterGuid, itemGuid, effectResult.Read<uint>(2), effectResult.Read<uint>(3));
                         if (!effectInfo.ContainsKey(key))
                             effectInfo[key] = new AuraLoadEffectInfo();
 
@@ -497,7 +497,7 @@ namespace Game.Entities
                 {
                     casterGuid.SetRawValue(auraResult.Read<byte[]>(0));
                     itemGuid.SetRawValue(auraResult.Read<byte[]>(1));
-                    AuraKey key = new AuraKey(casterGuid, itemGuid, auraResult.Read<uint>(2), auraResult.Read<uint>(3));
+                    AuraKey key = new(casterGuid, itemGuid, auraResult.Read<uint>(2), auraResult.Read<uint>(3));
                     uint recalculateMask = auraResult.Read<uint>(4);
                     Difficulty difficulty = (Difficulty)auraResult.Read<byte>(5);
                     byte stackCount = auraResult.Read<byte>(6);
@@ -626,7 +626,7 @@ namespace Game.Entities
                 if (currency == null)
                     continue;
 
-                PlayerCurrency cur = new PlayerCurrency();
+                PlayerCurrency cur = new();
                 cur.state = PlayerCurrencyState.Unchanged;
                 cur.Quantity = result.Read<uint>(1);
                 cur.WeeklyQuantity = result.Read<uint>(2);
@@ -680,7 +680,7 @@ namespace Game.Entities
                     if (quest != null)
                     {
                         // find or create
-                        QuestStatusData questStatusData = new QuestStatusData();
+                        QuestStatusData questStatusData = new();
 
                         byte qstatus = result.Read<byte>(1);
                         if (qstatus < (byte)QuestStatus.Max)
@@ -1113,7 +1113,7 @@ namespace Game.Entities
                 uint fixedScalingLevel = result.Read<uint>(5);
                 uint artifactKnowledgeLevel = result.Read<uint>(6);
                 ItemContext context = (ItemContext)result.Read<byte>(7);
-                List<uint> bonusListIDs = new List<uint>();
+                List<uint> bonusListIDs = new();
                 var bonusListIdTokens = new StringArray(result.Read<string>(8), ' ');
                 for (var i = 0; i < bonusListIdTokens.Length; ++i)
                 {
@@ -1141,7 +1141,7 @@ namespace Game.Entities
 
                 _voidStorageItems[slot] = new VoidStorageItem(itemId, itemEntry, creatorGuid, randomBonusListId, fixedScalingLevel, artifactKnowledgeLevel, context, bonusListIDs);
 
-                BonusData bonus = new BonusData(new ItemInstance(_voidStorageItems[slot]));
+                BonusData bonus = new(new ItemInstance(_voidStorageItems[slot]));
                 GetSession().GetCollectionMgr().AddItemAppearance(itemEntry, bonus.AppearanceModID);
             }
             while (result.NextRow());
@@ -1162,13 +1162,13 @@ namespace Game.Entities
             stmt.AddValue(0, GetGUID().GetCounter());
             SQLResult result = DB.Characters.Query(stmt);
 
-            Dictionary<uint, Mail> mailById = new Dictionary<uint, Mail>();
+            Dictionary<uint, Mail> mailById = new();
 
             if (!result.IsEmpty())
             {
                 do
                 {
-                    Mail m = new Mail();
+                    Mail m = new();
 
                     m.messageID = result.Read<uint>(0);
                     m.messageType = (MailMessageType)result.Read<byte>(1);
@@ -1224,7 +1224,7 @@ namespace Game.Entities
                 stmt.AddValue(0, GetGUID().GetCounter());
                 SQLResult azeriteEmpoweredItemResult = DB.Characters.Query(stmt);
 
-                Dictionary<ulong, ItemAdditionalLoadInfo> additionalData = new Dictionary<ulong, ItemAdditionalLoadInfo>();
+                Dictionary<ulong, ItemAdditionalLoadInfo> additionalData = new();
                 ItemAdditionalLoadInfo.Init(additionalData, artifactResult, azeriteResult, azeriteItemMilestonePowersResult, azeriteItemUnlockedEssencesResult, azeriteEmpoweredItemResult);
 
                 do
@@ -1248,7 +1248,7 @@ namespace Game.Entities
             {
                 Log.outError(LogFilter.Player, $"Player {(player != null ? player.GetName() : "<unknown>")} ({playerGuid}) has unknown item in mailed items (GUID: {itemGuid} template: {itemEntry}) in mail ({mailId}), deleted.");
 
-                SQLTransaction trans = new SQLTransaction();
+                SQLTransaction trans = new();
 
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_INVALID_MAIL_ITEM);
                 stmt.AddValue(0, itemGuid);
@@ -1395,7 +1395,7 @@ namespace Game.Entities
 
             do
             {
-                EquipmentSetInfo eqSet = new EquipmentSetInfo();
+                EquipmentSetInfo eqSet = new();
                 eqSet.Data.Guid = result.Read<ulong>(0);
                 eqSet.Data.Type = EquipmentSetInfo.EquipmentSetType.Equipment;
                 eqSet.Data.SetID = result.Read<byte>(1);
@@ -1435,7 +1435,7 @@ namespace Game.Entities
 
             do
             {
-                EquipmentSetInfo eqSet = new EquipmentSetInfo();
+                EquipmentSetInfo eqSet = new();
 
                 eqSet.Data.Guid = result.Read<ulong>(0);
                 eqSet.Data.Type = EquipmentSetInfo.EquipmentSetType.Transmog;
@@ -2359,7 +2359,7 @@ namespace Game.Entities
                     stmt.AddValue(7, _voidStorageItems[i].ArtifactKnowledgeLevel);
                     stmt.AddValue(8, (byte)_voidStorageItems[i].Context);
 
-                    StringBuilder bonusListIDs = new StringBuilder();
+                    StringBuilder bonusListIDs = new();
                     foreach (uint bonusListID in _voidStorageItems[i].BonusListIDs)
                         bonusListIDs.AppendFormat("{0} ", bonusListID);
                     stmt.AddValue(9, bonusListIDs.ToString());
@@ -2579,12 +2579,12 @@ namespace Game.Entities
             SetLevel(level);
             SetXP(xp);
 
-            StringArray exploredZonesStrings = new StringArray(exploredZones, ' ');
+            StringArray exploredZonesStrings = new(exploredZones, ' ');
             if (exploredZonesStrings.Length == PlayerConst.ExploredZonesSize * 2)
                 for (int i = 0; i < exploredZonesStrings.Length; ++i)
                     SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ExploredZones, i / 2), (ulong)((long.Parse(exploredZonesStrings[i])) << (32 * (i % 2))));
 
-            StringArray knownTitlesStrings = new StringArray(knownTitles, ' ');
+            StringArray knownTitlesStrings = new(knownTitles, ' ');
             if ((knownTitlesStrings.Length % 2) == 0)
             {
                 for (int i = 0; i < knownTitlesStrings.Length; ++i)
@@ -2600,14 +2600,14 @@ namespace Game.Entities
 
             SetMoney(Math.Min(money, PlayerConst.MaxMoneyAmount));
 
-            List<ChrCustomizationChoice> customizations = new List<ChrCustomizationChoice>();
+            List<ChrCustomizationChoice> customizations = new();
             SQLResult customizationsResult = holder.GetResult(PlayerLoginQueryLoad.Customizations);
             if (!customizationsResult.IsEmpty())
             {
                 do
                 {
 
-                    ChrCustomizationChoice choice = new ChrCustomizationChoice();
+                    ChrCustomizationChoice choice = new();
                     choice.ChrCustomizationOptionID = customizationsResult.Read<uint>(0);
                     choice.ChrCustomizationChoiceID = customizationsResult.Read<uint>(1); 
                     customizations.Add(choice);
@@ -3228,8 +3228,8 @@ namespace Game.Entities
 
         public void SaveToDB(bool create = false)
         {
-            SQLTransaction loginTransaction = new SQLTransaction();
-            SQLTransaction characterTransaction = new SQLTransaction();
+            SQLTransaction loginTransaction = new();
+            SQLTransaction characterTransaction = new();
 
             SaveToDB(loginTransaction, characterTransaction, create);
 
@@ -3303,7 +3303,7 @@ namespace Game.Entities
                     transLowGUID = GetTransport().GetGUID().GetCounter();
                 stmt.AddValue(index++, transLowGUID);
 
-                StringBuilder ss = new StringBuilder();
+                StringBuilder ss = new();
                 for (int i = 0; i < PlayerConst.TaxiMaskSize; ++i)
                     ss.Append(m_taxi.m_taximask[i] + " ");
 
@@ -3443,7 +3443,7 @@ namespace Game.Entities
                     transLowGUID = GetTransport().GetGUID().GetCounter();
                 stmt.AddValue(index++, transLowGUID);
 
-                StringBuilder ss = new StringBuilder();
+                StringBuilder ss = new();
                 for (int i = 0; i < PlayerConst.TaxiMaskSize; ++i)
                     ss.Append(m_taxi.m_taximask[i] + " ");
 
@@ -3707,7 +3707,7 @@ namespace Game.Entities
                     charDelete_method = CharDeleteMethod.Remove;
             }
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             ulong guildId = Global.CharacterCacheStorage.GetCharacterGuildIdByGuid(playerGuid);
             if (guildId != 0)
             {
@@ -3744,7 +3744,7 @@ namespace Game.Entities
                         SQLResult resultMail = DB.Characters.Query(stmt);
                         if (!resultMail.IsEmpty())
                         {
-                            MultiMap<uint, Item> itemsByMail = new MultiMap<uint, Item>();
+                            MultiMap<uint, Item> itemsByMail = new();
 
                             stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS);
                             stmt.AddValue(0, guid);
@@ -3772,7 +3772,7 @@ namespace Game.Entities
                                 stmt.AddValue(0, guid);
                                 SQLResult azeriteEmpoweredItemResult = DB.Characters.Query(stmt);
 
-                                Dictionary<ulong, ItemAdditionalLoadInfo> additionalData = new Dictionary<ulong, ItemAdditionalLoadInfo>();
+                                Dictionary<ulong, ItemAdditionalLoadInfo> additionalData = new();
                                 ItemAdditionalLoadInfo.Init(additionalData, artifactResult, azeriteResult, azeriteItemMilestonePowersResult, azeriteItemUnlockedEssencesResult, azeriteEmpoweredItemResult);
 
                                 do
@@ -3814,7 +3814,7 @@ namespace Game.Entities
                                     continue;
                                 }
 
-                                MailDraft draft = new MailDraft(subject, body);
+                                MailDraft draft = new(subject, body);
                                 if (mailTemplateId != 0)
                                     draft = new MailDraft(mailTemplateId, false);    // items are already included
 

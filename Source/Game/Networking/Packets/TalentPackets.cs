@@ -45,20 +45,20 @@ namespace Game.Networking.Packets
             }
         }
 
-        public TalentInfoUpdate Info = new TalentInfoUpdate();
+        public TalentInfoUpdate Info = new();
 
         public class TalentGroupInfo
         {
             public uint SpecID;
-            public List<ushort> TalentIDs = new List<ushort>();
-            public List<PvPTalent> PvPTalents = new List<PvPTalent>();
+            public List<ushort> TalentIDs = new();
+            public List<PvPTalent> PvPTalents = new();
         }
 
         public class TalentInfoUpdate
         {
             public byte ActiveGroup;
             public uint PrimarySpecialization;
-            public List<TalentGroupInfo> TalentGroups = new List<TalentGroupInfo>();
+            public List<TalentGroupInfo> TalentGroups = new();
         }
     }
 
@@ -73,7 +73,7 @@ namespace Game.Networking.Packets
                 Talents[i] = _worldPacket.ReadUInt16();
         }
 
-        public Array<ushort> Talents = new Array<ushort>(PlayerConst.MaxTalentTiers);
+        public Array<ushort> Talents = new(PlayerConst.MaxTalentTiers);
     }
 
     class RespecWipeConfirm : ServerPacket
@@ -122,7 +122,7 @@ namespace Game.Networking.Packets
 
         public uint Reason;
         public int SpellID;
-        public List<ushort> Talents = new List<ushort>();
+        public List<ushort> Talents = new();
     }
 
     class ActiveGlyphs : ServerPacket
@@ -139,7 +139,7 @@ namespace Game.Networking.Packets
             _worldPacket.FlushBits();
         }
 
-        public List<GlyphBinding> Glyphs = new List<GlyphBinding>();
+        public List<GlyphBinding> Glyphs = new();
         public bool IsFullUpdate;
     }
 
@@ -154,7 +154,7 @@ namespace Game.Networking.Packets
                 Talents[i] = new PvPTalent(_worldPacket);
         }
 
-        public Array<PvPTalent> Talents = new Array<PvPTalent>(4);
+        public Array<PvPTalent> Talents = new(4);
     }
 
     class LearnPvpTalentFailed : ServerPacket
@@ -173,7 +173,7 @@ namespace Game.Networking.Packets
 
         public uint Reason;
         public uint SpellID;
-        public List<PvPTalent> Talents = new List<PvPTalent>();
+        public List<PvPTalent> Talents = new();
     }
 
     //Structs

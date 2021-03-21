@@ -577,7 +577,7 @@ namespace Game.Chat.Commands
             if (!args.Empty())
                 range = args.NextUInt32();
 
-            List<RespawnInfo> respawns = new List<RespawnInfo>();
+            List<RespawnInfo> respawns = new();
             Locale locale = handler.GetSession().GetSessionDbcLocale();
             string stringOverdue = Global.ObjectMgr.GetCypherString(CypherStrings.ListRespawnsOverdue, locale);
             string stringCreature = Global.ObjectMgr.GetCypherString(CypherStrings.ListRespawnsCreatures, locale);

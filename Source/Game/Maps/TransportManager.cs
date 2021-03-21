@@ -70,7 +70,7 @@ namespace Game.Maps
                     continue;
 
                 // paths are generated per template, saves us from generating it again in case of instanced transports
-                TransportTemplate transport = new TransportTemplate();
+                TransportTemplate transport = new();
                 transport.entry = entry;
                 GeneratePath(goInfo, transport);
 
@@ -101,8 +101,8 @@ namespace Game.Maps
             uint pathId = goInfo.MoTransport.taxiPathID;
             var path = CliDB.TaxiPathNodesByPath[pathId];
             List<KeyFrame> keyFrames = transport.keyFrames;
-            List<Vector3> splinePath = new List<Vector3>();
-            List<Vector3> allPoints = new List<Vector3>();
+            List<Vector3> splinePath = new();
+            List<Vector3> allPoints = new();
             bool mapChange = false;
 
             for (uint i = 0; i < path.Length; ++i)
@@ -113,8 +113,8 @@ namespace Game.Maps
             allPoints.Add(allPoints.Last().lerp(allPoints[allPoints.Count - 2], -0.2f));
             allPoints.Add(allPoints.Last().lerp(allPoints[allPoints.Count - 2], -1.0f));
 
-            SplineRawInitializer initer = new SplineRawInitializer(allPoints);
-            Spline orientationSpline = new Spline();
+            SplineRawInitializer initer = new(allPoints);
+            Spline orientationSpline = new();
             orientationSpline.InitSplineCustom(initer);
             orientationSpline.InitLengths();
 
@@ -130,7 +130,7 @@ namespace Game.Maps
                     }
                     else
                     {
-                        KeyFrame k = new KeyFrame(node_i);
+                        KeyFrame k = new(node_i);
                         Vector3 h;
                         orientationSpline.Evaluate_Derivative((int)(i + 1), 0.0f, out h);
                         k.InitialOrientation = Position.NormalizeOrientation((float)Math.Atan2(h.Y, h.X) + MathFunctions.PI);
@@ -202,7 +202,7 @@ namespace Game.Maps
                 if (keyFrames[i - 1].Teleport || i + 1 == keyFrames.Count)
                 {
                     int extra = !keyFrames[i - 1].Teleport ? 1 : 0;
-                    Spline spline = new Spline();
+                    Spline spline = new();
                     Span<Vector3> span = splinePath.ToArray();
                     spline.InitSpline(span.Slice(start), i - start + extra, Spline.EvaluationMode.Catmullrom);
                     spline.InitLengths();
@@ -339,7 +339,7 @@ namespace Game.Maps
 
         public void AddPathNodeToTransport(uint transportEntry, uint timeSeg, TransportAnimationRecord node)
         {
-            TransportAnimation animNode = new TransportAnimation();
+            TransportAnimation animNode = new();
             if (animNode.TotalTime < timeSeg)
                 animNode.TotalTime = timeSeg;
 
@@ -373,7 +373,7 @@ namespace Game.Maps
             }
 
             // create transport...
-            Transport trans = new Transport();
+            Transport trans = new();
 
             // ...at first waypoint
             TaxiPathNodeRecord startNode = tInfo.keyFrames.First().Node;
@@ -512,9 +512,9 @@ namespace Game.Maps
             _transportAnimations[transportEntry].Rotations[timeSeg] = node;
         }
 
-        Dictionary<uint, TransportTemplate> _transportTemplates = new Dictionary<uint, TransportTemplate>();
-        MultiMap<uint, uint> _instanceTransports = new MultiMap<uint, uint>();
-        Dictionary<uint, TransportAnimation> _transportAnimations = new Dictionary<uint, TransportAnimation>();
+        Dictionary<uint, TransportTemplate> _transportTemplates = new();
+        MultiMap<uint, uint> _instanceTransports = new();
+        Dictionary<uint, TransportAnimation> _transportAnimations = new();
     }
 
     public class SplineRawInitializer
@@ -588,10 +588,10 @@ namespace Game.Maps
             accelDist = 0.0f;
         }
 
-        public List<uint> mapsUsed = new List<uint>();
+        public List<uint> mapsUsed = new();
         public bool inInstance;
         public uint pathTime;
-        public List<KeyFrame> keyFrames = new List<KeyFrame>();
+        public List<KeyFrame> keyFrames = new();
         public float accelTime;
         public float accelDist;
         public uint entry;
@@ -616,8 +616,8 @@ namespace Game.Maps
             return Rotations.LookupByKey(time);
         }
 
-        public Dictionary<uint, TransportAnimationRecord> Path = new Dictionary<uint, TransportAnimationRecord>();
-        public Dictionary<uint, TransportRotationRecord> Rotations = new Dictionary<uint, TransportRotationRecord>();
+        public Dictionary<uint, TransportAnimationRecord> Path = new();
+        public Dictionary<uint, TransportRotationRecord> Rotations = new();
         public uint TotalTime;
     }
 }

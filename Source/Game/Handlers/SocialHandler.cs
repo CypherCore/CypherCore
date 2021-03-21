@@ -65,7 +65,7 @@ namespace Game
 
             uint gmLevelInWhoList = WorldConfig.GetUIntValue(WorldCfg.GmLevelInWhoList);
 
-            WhoResponsePkt response = new WhoResponsePkt();
+            WhoResponsePkt response = new();
             response.RequestID = whoRequest.RequestID;
 
             List<WhoListPlayerInfo> whoList = Global.WhoListStorageMgr.GetWhoList();
@@ -137,7 +137,7 @@ namespace Game
                         continue;
                 }
 
-                WhoEntry whoEntry = new WhoEntry();
+                WhoEntry whoEntry = new();
                 if (!whoEntry.PlayerData.Initialize(target.Guid, null))
                     continue;
 
@@ -205,7 +205,7 @@ namespace Game
             if (string.IsNullOrEmpty(lastip))
                 lastip = "Unknown";
 
-            WhoIsResponse response = new WhoIsResponse();
+            WhoIsResponse response = new();
             response.AccountName = packet.CharName + "'s " + "account is " + acc + ", e-mail: " + email + ", last ip: " + lastip;
             SendPacket(response);
         }

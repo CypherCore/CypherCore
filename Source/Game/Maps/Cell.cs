@@ -168,11 +168,11 @@ namespace Game.Maps
             {
                 for (uint y = area.low_bound.Y_coord; y <= area.high_bound.Y_coord; ++y)
                 {
-                    CellCoord cellCoord = new CellCoord(x, y);
+                    CellCoord cellCoord = new(x, y);
                     //lets skip standing cell since we already visited it
                     if (cellCoord != standing_cell)
                     {
-                        Cell r_zone = new Cell(cellCoord);
+                        Cell r_zone = new(cellCoord);
                         r_zone.data.nocreate = data.nocreate;
                         map.Visit(r_zone, visitor);
                     }
@@ -193,8 +193,8 @@ namespace Game.Maps
             {
                 for (uint y = begin_cell.Y_coord; y <= end_cell.Y_coord; ++y)
                 {
-                    CellCoord cellCoord = new CellCoord(x, y);
-                    Cell r_zone = new Cell(cellCoord);
+                    CellCoord cellCoord = new(x, y);
+                    Cell r_zone = new(cellCoord);
                     r_zone.data.nocreate = data.nocreate;
                     map.Visit(r_zone, visitor);
                 }
@@ -217,14 +217,14 @@ namespace Game.Maps
                 {
                     //we visit cells symmetrically from both sides, heading from center to sides and from up to bottom
                     //e.g. filling 2 trapezoids after filling central cell strip...
-                    CellCoord cellCoord_left = new CellCoord(x_start - step, y);
-                    Cell r_zone_left = new Cell(cellCoord_left);
+                    CellCoord cellCoord_left = new(x_start - step, y);
+                    Cell r_zone_left = new(cellCoord_left);
                     r_zone_left.data.nocreate = data.nocreate;
                     map.Visit(r_zone_left, visitor);
 
                     //right trapezoid cell visit
-                    CellCoord cellCoord_right = new CellCoord(x_end + step, y);
-                    Cell r_zone_right = new Cell(cellCoord_right);
+                    CellCoord cellCoord_right = new(x_end + step, y);
+                    Cell r_zone_right = new(cellCoord_right);
                     r_zone_right.data.nocreate = data.nocreate;
                     map.Visit(r_zone_right, visitor);
                 }
@@ -234,70 +234,70 @@ namespace Game.Maps
         public static void VisitGridObjects(WorldObject center_obj, Notifier visitor, float radius, bool dont_load = true)
         {
             CellCoord p = GridDefines.ComputeCellCoord(center_obj.GetPositionX(), center_obj.GetPositionY());
-            Cell cell = new Cell(p);
+            Cell cell = new(p);
             if (dont_load)
                 cell.SetNoCreate();
 
-            Visitor gnotifier = new Visitor(visitor, GridMapTypeMask.AllGrid);
+            Visitor gnotifier = new(visitor, GridMapTypeMask.AllGrid);
             cell.Visit(p, gnotifier, center_obj.GetMap(), center_obj, radius);
         }
 
         public static void VisitWorldObjects(WorldObject center_obj, Notifier visitor, float radius, bool dont_load = true)
         {
             CellCoord p = GridDefines.ComputeCellCoord(center_obj.GetPositionX(), center_obj.GetPositionY());
-            Cell cell = new Cell(p);
+            Cell cell = new(p);
             if (dont_load)
                 cell.SetNoCreate();
 
-            Visitor gnotifier = new Visitor(visitor, GridMapTypeMask.AllWorld);
+            Visitor gnotifier = new(visitor, GridMapTypeMask.AllWorld);
             cell.Visit(p, gnotifier, center_obj.GetMap(), center_obj, radius);
         }
 
         public static void VisitAllObjects(WorldObject center_obj, Notifier visitor, float radius, bool dont_load = true)
         {
             CellCoord p = GridDefines.ComputeCellCoord(center_obj.GetPositionX(), center_obj.GetPositionY());
-            Cell cell = new Cell(p);
+            Cell cell = new(p);
             if (dont_load)
                 cell.SetNoCreate();
 
-            Visitor wnotifier = new Visitor(visitor, GridMapTypeMask.AllWorld);
+            Visitor wnotifier = new(visitor, GridMapTypeMask.AllWorld);
             cell.Visit(p, wnotifier, center_obj.GetMap(), center_obj, radius);
-            Visitor gnotifier = new Visitor(visitor, GridMapTypeMask.AllGrid);
+            Visitor gnotifier = new(visitor, GridMapTypeMask.AllGrid);
             cell.Visit(p, gnotifier, center_obj.GetMap(), center_obj, radius);
         }
 
         public static void VisitGridObjects(float x, float y, Map map, Notifier visitor, float radius, bool dont_load = true)
         {
             CellCoord p = GridDefines.ComputeCellCoord(x, y);
-            Cell cell = new Cell(p);
+            Cell cell = new(p);
             if (dont_load)
                 cell.SetNoCreate();
 
-            Visitor gnotifier = new Visitor(visitor, GridMapTypeMask.AllGrid);
+            Visitor gnotifier = new(visitor, GridMapTypeMask.AllGrid);
             cell.Visit(p, gnotifier, map, x, y, radius);
         }
 
         public static void VisitWorldObjects(float x, float y, Map map, Notifier visitor, float radius, bool dont_load = true)
         {
             CellCoord p = GridDefines.ComputeCellCoord(x, y);
-            Cell cell = new Cell(p);
+            Cell cell = new(p);
             if (dont_load)
                 cell.SetNoCreate();
 
-            Visitor gnotifier = new Visitor(visitor, GridMapTypeMask.AllWorld);
+            Visitor gnotifier = new(visitor, GridMapTypeMask.AllWorld);
             cell.Visit(p, gnotifier, map, x, y, radius);
         }
 
         public static void VisitAllObjects(float x, float y, Map map, Notifier visitor, float radius, bool dont_load = true)
         {
             CellCoord p = GridDefines.ComputeCellCoord(x, y);
-            Cell cell = new Cell(p);
+            Cell cell = new(p);
             if (dont_load)
                 cell.SetNoCreate();
 
-            Visitor wnotifier = new Visitor(visitor, GridMapTypeMask.AllWorld);
+            Visitor wnotifier = new(visitor, GridMapTypeMask.AllWorld);
             cell.Visit(p, wnotifier, map, x, y, radius);
-            Visitor gnotifier = new Visitor(visitor, GridMapTypeMask.AllGrid);
+            Visitor gnotifier = new(visitor, GridMapTypeMask.AllGrid);
             cell.Visit(p, gnotifier, map, x, y, radius);
         }
 

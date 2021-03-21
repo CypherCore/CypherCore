@@ -29,7 +29,7 @@ namespace Game.Movement
     {
         public const double gravity = 19.29110527038574;
         public const float SPEED_CHARGE  =  42.0f;
-        IdleMovementGenerator staticIdleMovement = new IdleMovementGenerator();
+        IdleMovementGenerator staticIdleMovement = new();
 
         public MotionMaster(Unit me)
         {
@@ -285,7 +285,7 @@ namespace Game.Movement
             else
             {
                 // we are already close enough. We just need to turn toward the target without changing position.
-                MoveSplineInit init = new MoveSplineInit(_owner);
+                MoveSplineInit init = new(_owner);
                 init.MoveTo(_owner.GetPositionX(), _owner.GetPositionY(), _owner.GetPositionZMinusOffset());
                 init.SetFacing(target);
                 init.Launch();
@@ -298,7 +298,7 @@ namespace Game.Movement
             float x, y, z;
             pos.GetPosition(out x, out y, out z);
 
-            MoveSplineInit init = new MoveSplineInit(_owner);
+            MoveSplineInit init = new(_owner);
             init.MoveTo(x, y, z);
             init.SetAnimation(AnimType.ToGround);
             init.Launch();
@@ -310,7 +310,7 @@ namespace Game.Movement
             float x, y, z;
             pos.GetPosition(out x, out y, out z);
 
-            MoveSplineInit init = new MoveSplineInit(_owner);
+            MoveSplineInit init = new(_owner);
             init.MoveTo(x, y, z);
             init.SetAnimation(AnimType.ToFly);
             init.Launch();
@@ -335,7 +335,7 @@ namespace Game.Movement
             MoveCharge(dest.X, dest.Y, dest.Z, SPEED_CHARGE, EventId.ChargePrepath);
 
             // Charge movement is not started when using EVENT_CHARGE_PREPATH
-            MoveSplineInit init = new MoveSplineInit(_owner);
+            MoveSplineInit init = new(_owner);
             init.MovebyPath(path.GetPath());
             init.SetVelocity(speed);
             if (target != null)
@@ -361,7 +361,7 @@ namespace Game.Movement
 
             _owner.GetNearPoint(_owner, out x, out y, out z, _owner.GetCombatReach(), dist, _owner.GetAngle(srcX, srcY) + MathFunctions.PI);
 
-            MoveSplineInit init = new MoveSplineInit(_owner);
+            MoveSplineInit init = new(_owner);
             init.MoveTo(x, y, z);
             init.SetParabolic(max_height, 0);
             init.SetOrientationFixed(true);
@@ -402,7 +402,7 @@ namespace Game.Movement
             float moveTimeHalf = (float)(speedZ / gravity);
             float max_height = -MoveSpline.ComputeFallElevation(moveTimeHalf, false, -speedZ);
 
-            MoveSplineInit init = new MoveSplineInit(_owner);
+            MoveSplineInit init = new(_owner);
             init.MoveTo(x, y, z, false);
             init.SetParabolic(max_height, 0);
             init.SetVelocity(speedXY);
@@ -426,14 +426,14 @@ namespace Game.Movement
         public void MoveCirclePath(float x, float y, float z, float radius, bool clockwise, byte stepCount)
         {
             float step = 2 * MathFunctions.PI / stepCount * (clockwise ? -1.0f : 1.0f);
-            Position pos = new Position(x, y, z, 0.0f);
+            Position pos = new(x, y, z, 0.0f);
             float angle = pos.GetAngle(_owner.GetPositionX(), _owner.GetPositionY());
 
-            MoveSplineInit init = new MoveSplineInit(_owner);
+            MoveSplineInit init = new(_owner);
             init.args.path = new Vector3[stepCount];
             for (byte i = 0; i < stepCount; angle += step, ++i)
             {
-                Vector3 point = new Vector3();
+                Vector3 point = new();
                 point.X = (float)(x + radius * Math.Cos(angle));
                 point.Y = (float)(y + radius * Math.Sin(angle));
 
@@ -462,7 +462,7 @@ namespace Game.Movement
 
         void MoveSmoothPath(uint pointId, Vector3[] pathPoints, int pathSize, bool walk = false, bool fly = false)
         {
-            MoveSplineInit init = new MoveSplineInit(_owner);
+            MoveSplineInit init = new(_owner);
             if (fly)
             {
                 init.SetFly();
@@ -535,7 +535,7 @@ namespace Game.Movement
                 return;
             }
 
-            MoveSplineInit init = new MoveSplineInit(_owner);
+            MoveSplineInit init = new(_owner);
             init.MoveTo(_owner.GetPositionX(), _owner.GetPositionY(), tz, false);
             init.SetFall();
             init.Launch();
@@ -570,7 +570,7 @@ namespace Game.Movement
                 if (path < CliDB.TaxiPathNodesByPath.Count)
                 {
                     Log.outDebug(LogFilter.Server, "{0} taxi to (Path {1} node {2})", _owner.GetName(), path, pathnode);
-                    FlightPathMovementGenerator mgen = new FlightPathMovementGenerator();
+                    FlightPathMovementGenerator mgen = new();
                     mgen.LoadPath(_owner.ToPlayer());
                     StartMovement(mgen, MovementSlot.Controlled);
                 }
@@ -825,7 +825,7 @@ namespace Game.Movement
         MMCleanFlag _cleanFlag;
         bool[] _initialize = new bool[(int)MovementSlot.Max];
         int _top;
-        List<IMovementGenerator> _expireList = new List<IMovementGenerator>();
+        List<IMovementGenerator> _expireList = new();
     }
 
     public class JumpArrivalCastArgs

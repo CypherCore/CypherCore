@@ -27,7 +27,7 @@ namespace Game.DataStorage
         // Convert the geomoetry from a spline value, to an actual WoW XYZ
         static Vector3 TranslateLocation(Vector4 dbcLocation, Vector3 basePosition, Vector3 splineVector)
         {
-            Vector3 work = new Vector3();
+            Vector3 work = new();
             float x = basePosition.X + splineVector.X;
             float y = basePosition.Y + splineVector.Y;
             float z = basePosition.Z + splineVector.Z;
@@ -46,10 +46,10 @@ namespace Game.DataStorage
         // Number of cameras not used. Multiple cameras never used in 7.1.5
         static void ReadCamera(M2Camera cam, BinaryReader reader, CinematicCameraRecord dbcentry)
         {
-            List<FlyByCamera> cameras = new List<FlyByCamera>();
-            List<FlyByCamera> targetcam = new List<FlyByCamera>();
+            List<FlyByCamera> cameras = new();
+            List<FlyByCamera> targetcam = new();
 
-            Vector4 dbcData = new Vector4(dbcentry.Origin.X, dbcentry.Origin.Y, dbcentry.Origin.Z, dbcentry.OriginFacing);
+            Vector4 dbcData = new(dbcentry.Origin.X, dbcentry.Origin.Y, dbcentry.Origin.Z, dbcentry.OriginFacing);
 
             // Read target locations, only so that we can calculate orientation
             for (uint k = 0; k < cam.target_positions.timestamps.number; ++k)
@@ -76,7 +76,7 @@ namespace Game.DataStorage
                     Vector3 newPos = TranslateLocation(dbcData, cam.target_position_base, targPositions[i].p0);
 
                     // Add to vector
-                    FlyByCamera thisCam = new FlyByCamera();
+                    FlyByCamera thisCam = new();
                     thisCam.timeStamp = targTimestamps[i];
                     thisCam.locations = new Vector4(newPos.X, newPos.Y, newPos.Z, 0.0f);
                     targetcam.Add(thisCam);
@@ -108,7 +108,7 @@ namespace Game.DataStorage
                     Vector3 newPos = TranslateLocation(dbcData, cam.position_base, positions[i].p0);
 
                     // Add to vector
-                    FlyByCamera thisCam = new FlyByCamera();
+                    FlyByCamera thisCam = new();
                     thisCam.timeStamp = posTimestamps[i];
                     thisCam.locations = new Vector4(newPos.X, newPos.Y, newPos.Z, 0);
 
@@ -170,7 +170,7 @@ namespace Game.DataStorage
 
                 try
                 {
-                    using (BinaryReader m2file = new BinaryReader(new FileStream(filename, FileMode.Open, FileAccess.Read)))
+                    using (BinaryReader m2file = new(new FileStream(filename, FileMode.Open, FileAccess.Read)))
                     {
                         // Check file has correct magic (MD21)
                         if (m2file.ReadUInt32() != 0x3132444D) //"MD21"
@@ -209,7 +209,7 @@ namespace Game.DataStorage
             return FlyByCameraStorage.LookupByKey(cameraId);
         }
 
-        static MultiMap<uint, FlyByCamera> FlyByCameraStorage = new MultiMap<uint, FlyByCamera>();
+        static MultiMap<uint, FlyByCamera> FlyByCameraStorage = new();
     }
 
     public class FlyByCamera

@@ -44,7 +44,7 @@ namespace Game
             else if (pl.duel != null || pl.HasAura(9454)) // is dueling or frozen by GM via freeze command
                 reason = 2;                                         // FIXME - Need the correct value
 
-            LogoutResponse logoutResponse = new LogoutResponse();
+            LogoutResponse logoutResponse = new();
             logoutResponse.LogoutResult = reason;
             logoutResponse.Instant = instantLogout;
             SendPacket(logoutResponse);

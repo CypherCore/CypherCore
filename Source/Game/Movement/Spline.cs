@@ -296,13 +296,13 @@ namespace Game.Movement
 
             return i;
         }
-        private static readonly Matrix4 s_catmullRomCoeffs = new Matrix4(-0.5f, 1.5f, -1.5f, 0.5f, 1.0f, -2.5f, 2.0f, -0.5f, -0.5f, 0.0f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+        private static readonly Matrix4 s_catmullRomCoeffs = new(-0.5f, 1.5f, -1.5f, 0.5f, 1.0f, -2.5f, 2.0f, -0.5f, -0.5f, 0.0f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
 
-        private static readonly Matrix4 s_Bezier3Coeffs = new Matrix4(-1.0f, 3.0f, -3.0f, 1.0f, 3.0f, -6.0f, 3.0f, 0.0f, -3.0f, 3.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f);
+        private static readonly Matrix4 s_Bezier3Coeffs = new(-1.0f, 3.0f, -3.0f, 1.0f, 3.0f, -6.0f, 3.0f, 0.0f, -3.0f, 3.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f);
 
         void C_Evaluate(Span<Vector3> vertice, float t, Matrix4 matr, out Vector3 result)
         {
-            Vector4 tvec = new Vector4(t * t * t, t * t, t, 1.0f);
+            Vector4 tvec = new(t * t * t, t * t, t, 1.0f);
             Vector4 weights = (tvec * matr);
 
             result = vertice[0] * weights[0] + vertice[1] * weights[1]
@@ -310,7 +310,7 @@ namespace Game.Movement
         }
         void C_Evaluate_Derivative(Span<Vector3> vertice, float t, Matrix4 matr, out Vector3 result)
         {
-            Vector4 tvec = new Vector4(3.0f * t * t, 2.0f * t, 1.0f, 0.0f);
+            Vector4 tvec = new(3.0f * t * t, 2.0f * t, 1.0f, 0.0f);
             Vector4 weights = (tvec * matr);
 
             result = vertice[0] * weights[0] + vertice[1] * weights[1]

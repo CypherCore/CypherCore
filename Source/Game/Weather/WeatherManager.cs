@@ -46,7 +46,7 @@ namespace Game
             {
                 uint zone_id = result.Read<uint>(0);
 
-                WeatherData wzc = new WeatherData();
+                WeatherData wzc = new();
 
                 for (byte season = 0; season < 4; ++season)
                 {
@@ -87,7 +87,7 @@ namespace Game
             return _weatherData.LookupByKey(zone_id);
         }
 
-        Dictionary<uint, WeatherData> _weatherData = new Dictionary<uint, WeatherData>();
+        Dictionary<uint, WeatherData> _weatherData = new();
     }
 
     public class Weather
@@ -249,7 +249,7 @@ namespace Game
 
         public void SendWeatherUpdateToPlayer(Player player)
         {
-            WeatherPkt weather = new WeatherPkt(GetWeatherState(), m_grade);
+            WeatherPkt weather = new(GetWeatherState(), m_grade);
             player.SendPacket(weather);
         }
 
@@ -272,7 +272,7 @@ namespace Game
 
             WeatherState state = GetWeatherState();
 
-            WeatherPkt weather = new WeatherPkt(state, m_grade);
+            WeatherPkt weather = new(state, m_grade);
 
             //- Returns false if there were no players found to update
             if (!Global.WorldMgr.SendZoneMessage(m_zone, weather))
@@ -383,7 +383,7 @@ namespace Game
         uint m_zone;
         WeatherType m_type;
         float m_grade;
-        IntervalTimer m_timer = new IntervalTimer();
+        IntervalTimer m_timer = new();
         WeatherData m_weatherChances;
     }
 

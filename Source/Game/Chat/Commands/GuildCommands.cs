@@ -45,7 +45,7 @@ namespace Game.Chat
                 return true;
             }
 
-            Guild guild = new Guild();
+            Guild guild = new();
             if (!guild.Create(target, guildname))
             {
                 handler.SendSysMessage(CypherStrings.GuildNotCreated);

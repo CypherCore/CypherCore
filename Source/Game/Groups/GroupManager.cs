@@ -122,7 +122,7 @@ namespace Game.Groups
                 uint count = 0;
                 do
                 {
-                    Group group = new Group();
+                    Group group = new();
                     group.LoadGroupFromDB(result.GetFields());
                     AddGroup(group);
 
@@ -231,8 +231,8 @@ namespace Game.Groups
             }
         }
 
-        Dictionary<ulong, Group> GroupStore = new Dictionary<ulong, Group>();
-        Dictionary<uint, Group> GroupDbStore = new Dictionary<uint, Group>();
+        Dictionary<ulong, Group> GroupStore = new();
+        Dictionary<uint, Group> GroupDbStore = new();
         ulong NextGroupId;
         uint NextGroupDbStoreId;
     }

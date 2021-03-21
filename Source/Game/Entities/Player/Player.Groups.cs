@@ -30,7 +30,7 @@ namespace Game.Entities
             if (!group)
                 return null;
 
-            List<Player> nearMembers = new List<Player>();
+            List<Player> nearMembers = new();
 
             for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
             {

@@ -194,7 +194,7 @@ namespace Game
                     foreach (var pair in data.conditions)
                         pair.Value.done = 0;
 
-                    SQLTransaction trans = new SQLTransaction();
+                    SQLTransaction trans = new();
                     PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ALL_GAME_EVENT_CONDITION_SAVE);
                     stmt.AddValue(0, event_id);
                     trans.Append(stmt);
@@ -231,7 +231,7 @@ namespace Game
                         continue;
                     }
 
-                    GameEventData pGameEvent = new GameEventData();
+                    GameEventData pGameEvent = new();
                     ulong starttime = result.Read<ulong>(1);
                     pGameEvent.start = (long)starttime;
                     ulong endtime = result.Read<ulong>(2);
@@ -466,7 +466,7 @@ namespace Game
                             continue;
                         }
 
-                        ModelEquip newModelEquipSet = new ModelEquip();
+                        ModelEquip newModelEquipSet = new();
                         newModelEquipSet.modelid = result.Read<uint>(3);
                         newModelEquipSet.equipment_id = result.Read<byte>(4);
                         newModelEquipSet.equipement_id_prev = 0;
@@ -783,7 +783,7 @@ namespace Game
                         if (data != null)
                             entry = data.Id;
 
-                        VendorItem vItem = new VendorItem();
+                        VendorItem vItem = new();
                         vItem.item = result.Read<uint>(2);
                         vItem.maxcount = result.Read<uint>(3);
                         vItem.incrtime = result.Read<uint>(4);
@@ -974,8 +974,8 @@ namespace Game
             long currenttime = Time.UnixTime;
             uint nextEventDelay = Time.Day;             // 1 day
             uint calcDelay;
-            List<ushort> activate = new List<ushort>();
-            List<ushort> deactivate = new List<ushort>();
+            List<ushort> activate = new();
+            List<ushort> deactivate = new();
             for (ushort id = 1; id < mGameEvent.Length; ++id)
             {
                 // must do the activating first, and after that the deactivating
@@ -1103,7 +1103,7 @@ namespace Game
 
         void UpdateEventNPCFlags(ushort event_id)
         {
-            MultiMap<uint, ulong> creaturesByMap = new MultiMap<uint, ulong>();
+            MultiMap<uint, ulong> creaturesByMap = new();
 
             // go through the creatures whose npcflags are changed in the event
             foreach (var (guid, npcflag) in mGameEventNPCFlags[event_id])
@@ -1450,7 +1450,7 @@ namespace Game
                     BattlemasterListRecord bl = CliDB.BattlemasterListStorage.LookupByKey(bgTypeId);
                     if (bl != null && bl.HolidayWorldState != 0)
                     {
-                        UpdateWorldState worldstate = new UpdateWorldState();
+                        UpdateWorldState worldstate = new();
                         worldstate.VariableID = bl.HolidayWorldState;
                         worldstate.Value = Activate ? 1 : 0;
                         //worldstate.Hidden = false;
@@ -1489,7 +1489,7 @@ namespace Game
                         if (eventFinishCond.done > eventFinishCond.reqNum)
                             eventFinishCond.done = eventFinishCond.reqNum;
                         // save the change to db
-                        SQLTransaction trans = new SQLTransaction();
+                        SQLTransaction trans = new();
 
                         PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GAME_EVENT_CONDITION_SAVE);
                         stmt.AddValue(0, event_id);
@@ -1534,7 +1534,7 @@ namespace Game
 
         void SaveWorldEventStateToDB(ushort event_id)
         {
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GAME_EVENT_SAVE);
             stmt.AddValue(0, event_id);
@@ -1565,7 +1565,7 @@ namespace Game
             //! Not entirely sure how this will affect units in non-loaded grids.
             Global.MapMgr.DoForAllMaps(map =>
             {
-                GameEventAIHookWorker worker = new GameEventAIHookWorker(event_id, activate);
+                GameEventAIHookWorker worker = new(event_id, activate);
                 var visitor = new Visitor(worker, GridMapTypeMask.None);
                 visitor.Visit(map.GetObjectsStore().Values.ToList());
             });
@@ -1677,9 +1677,9 @@ namespace Game
         List<uint>[] mGameEventPoolIds;
         GameEventData[] mGameEvent;
         uint[] mGameEventBattlegroundHolidays;
-        Dictionary<uint, GameEventQuestToEventConditionNum> mQuestToEventConditions = new Dictionary<uint, GameEventQuestToEventConditionNum>();
+        Dictionary<uint, GameEventQuestToEventConditionNum> mQuestToEventConditions = new();
         List<(ulong guid, ulong npcflag)>[] mGameEventNPCFlags;
-        List<ushort> m_ActiveEvents = new List<ushort>();
+        List<ushort> m_ActiveEvents = new();
         bool isSystemInit;
 
         public List<ulong>[] mGameEventCreatureGuids;
@@ -1716,8 +1716,8 @@ namespace Game
         public HolidayIds holiday_id;
         public byte holidayStage;
         public GameEventState state;   // state of the game event, these are saved into the game_event table on change!
-        public Dictionary<uint, GameEventFinishCondition> conditions = new Dictionary<uint, GameEventFinishCondition>();  // conditions to finish
-        public List<ushort> prerequisite_events = new List<ushort>();  // events that must be completed before starting this event
+        public Dictionary<uint, GameEventFinishCondition> conditions = new();  // conditions to finish
+        public List<ushort> prerequisite_events = new();  // events that must be completed before starting this event
         public string description;
         public byte announce;         // if 0 dont announce, if 1 announce, if 2 take config value
 

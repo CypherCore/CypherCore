@@ -40,7 +40,7 @@ namespace Game
         {
             Player player = Global.ObjAccessor.FindPlayer(guid);
 
-            QueryPlayerNameResponse response = new QueryPlayerNameResponse();
+            QueryPlayerNameResponse response = new();
             response.Player = guid;
 
             if (response.Data.Initialize(guid, player))
@@ -59,7 +59,7 @@ namespace Game
 
         void SendQueryTimeResponse()
         {
-            QueryTimeResponse queryTimeResponse = new QueryTimeResponse();
+            QueryTimeResponse queryTimeResponse = new();
             queryTimeResponse.CurrentTime = Time.UnixTime;
             SendPacket(queryTimeResponse);
         }
@@ -93,7 +93,7 @@ namespace Game
             {
                 Log.outDebug(LogFilter.Network, $"WORLD: CMSG_GAMEOBJECT_QUERY - Missing gameobject info for (ENTRY: {packet.GameObjectID})");
 
-                QueryGameObjectResponse response = new QueryGameObjectResponse();
+                QueryGameObjectResponse response = new();
                 response.GameObjectID = packet.GameObjectID;
                 response.Guid = packet.Guid;
                 SendPacket(response);
@@ -136,7 +136,7 @@ namespace Game
             {
                 Log.outDebug(LogFilter.Network, $"WORLD: CMSG_QUERY_CREATURE - NO CREATURE INFO! (ENTRY: {packet.CreatureID})");
 
-                QueryCreatureResponse response = new QueryCreatureResponse();
+                QueryCreatureResponse response = new();
                 response.CreatureID = packet.CreatureID;
                 SendPacket(response);
             }
@@ -147,7 +147,7 @@ namespace Game
         {
             NpcText npcText = Global.ObjectMgr.GetNpcText(packet.TextID);
 
-            QueryNPCTextResponse response = new QueryNPCTextResponse();
+            QueryNPCTextResponse response = new();
             response.TextID = packet.TextID;
 
             if (npcText != null)
@@ -170,7 +170,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.QueryPageText)]
         void HandleQueryPageText(QueryPageText packet)
         {
-            QueryPageTextResponse response = new QueryPageTextResponse();
+            QueryPageTextResponse response = new();
             response.PageTextID = packet.PageTextID;
 
             uint pageID = packet.PageTextID;
@@ -207,7 +207,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.QueryCorpseLocationFromClient)]
         void HandleQueryCorpseLocation(QueryCorpseLocationFromClient queryCorpseLocation)
         {
-            CorpseLocation packet = new CorpseLocation();
+            CorpseLocation packet = new();
             Player player = Global.ObjAccessor.FindConnectedPlayer(queryCorpseLocation.Player);
             if (!player || !player.HasCorpse() || !_player.IsInSameRaidWith(player))
             {
@@ -258,7 +258,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.QueryCorpseTransport)]
         void HandleQueryCorpseTransport(QueryCorpseTransport queryCorpseTransport)
         {
-            CorpseTransportQuery response = new CorpseTransportQuery();
+            CorpseTransportQuery response = new();
             response.Player = queryCorpseTransport.Player;
 
             Player player = Global.ObjAccessor.FindConnectedPlayer(queryCorpseTransport.Player);
@@ -278,11 +278,11 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.QueryQuestCompletionNpcs)]
         void HandleQueryQuestCompletionNPCs(QueryQuestCompletionNPCs queryQuestCompletionNPCs)
         {
-            QuestCompletionNPCResponse response = new QuestCompletionNPCResponse();
+            QuestCompletionNPCResponse response = new();
 
             foreach (var questID in queryQuestCompletionNPCs.QuestCompletionNPCs)
             {
-                QuestCompletionNPC questCompletionNPC = new QuestCompletionNPC();
+                QuestCompletionNPC questCompletionNPC = new();
 
                 if (Global.ObjectMgr.GetQuestTemplate(questID) == null)
                 {
@@ -313,11 +313,11 @@ namespace Game
                 return;
 
             // Read quest ids and add the in a unordered_set so we don't send POIs for the same quest multiple times
-            HashSet<uint> questIds = new HashSet<uint>();
+            HashSet<uint> questIds = new();
             for (int i = 0; i < packet.MissingQuestCount; ++i)
                 questIds.Add(packet.MissingQuestPOIs[i]); // QuestID
 
-            QuestPOIQueryResponse response = new QuestPOIQueryResponse();
+            QuestPOIQueryResponse response = new();
 
             foreach (uint questId in questIds)
             {
@@ -335,7 +335,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ItemTextQuery)]
         void HandleItemTextQuery(ItemTextQuery packet)
         {
-            QueryItemTextResponse queryItemTextResponse = new QueryItemTextResponse();
+            QueryItemTextResponse queryItemTextResponse = new();
             queryItemTextResponse.Id = packet.Id;
 
             Item item = GetPlayer().GetItemByGuid(packet.Id);
@@ -351,10 +351,10 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.QueryRealmName)]
         void HandleQueryRealmName(QueryRealmName queryRealmName)
         {
-            RealmQueryResponse realmQueryResponse = new RealmQueryResponse();
+            RealmQueryResponse realmQueryResponse = new();
             realmQueryResponse.VirtualRealmAddress = queryRealmName.VirtualRealmAddress;
 
-            RealmId realmHandle = new RealmId(queryRealmName.VirtualRealmAddress);
+            RealmId realmHandle = new(queryRealmName.VirtualRealmAddress);
             if (Global.ObjectMgr.GetRealmName(realmHandle.Index, ref realmQueryResponse.NameInfo.RealmNameActual, ref realmQueryResponse.NameInfo.RealmNameNormalized))
             {
                 realmQueryResponse.LookupState = (byte)ResponseCodes.Success;

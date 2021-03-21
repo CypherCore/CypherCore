@@ -22,7 +22,7 @@ namespace Game.Entities
 {
     public struct ObjectGuid : IEquatable<ObjectGuid>
     {
-        public static ObjectGuid Empty = new ObjectGuid();
+        public static ObjectGuid Empty = new();
         public static ObjectGuid TradeItem = Create(HighGuid.Uniq, 10ul);
 
         ulong _low;

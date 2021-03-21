@@ -48,7 +48,7 @@ namespace Game.Maps
                     var visitor = new Visitor(this, GridMapTypeMask.AllGrid);
                     i_grid.VisitGrid(x, y, visitor);
 
-                    ObjectWorldLoader worker = new ObjectWorldLoader(this);
+                    ObjectWorldLoader worker = new(this);
                     visitor = new Visitor(worker, GridMapTypeMask.AllWorld);
                     i_grid.VisitGrid(x, y, visitor);
                 }
@@ -90,7 +90,7 @@ namespace Game.Maps
         {
             foreach (var guid in guid_set)
             {
-                T obj = new T();
+                T obj = new();
                 // Don't spawn at all if there's a respawn time
                 if ((obj.IsTypeId(TypeId.Unit) && map.GetCreatureRespawnTime(guid) == 0) || (obj.IsTypeId(TypeId.GameObject) && map.GetGORespawnTime(guid) == 0) || obj.IsTypeId(TypeId.AreaTrigger))
                 {

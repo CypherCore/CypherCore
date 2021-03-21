@@ -66,7 +66,7 @@ namespace Game.Guilds
                     if (raceEntry.Alliance == 1)
                         guildTeam = TeamId.Horde;
 
-                LFGuildSettings settings = new LFGuildSettings(listed, guildTeam, guildId, classRoles, availability, interests, level, comment);
+                LFGuildSettings settings = new(listed, guildTeam, guildId, classRoles, availability, interests, level, comment);
                 _guildSettings[guildId] = settings;
 
                 ++count;
@@ -99,7 +99,7 @@ namespace Game.Guilds
                 string comment = result.Read<string>(5);
                 uint submitTime = result.Read<uint>(6);
 
-                MembershipRequest request = new MembershipRequest(playerId, guildId, availability, classRoles, interests, comment, submitTime);
+                MembershipRequest request = new(playerId, guildId, availability, classRoles, interests, comment, submitTime);
 
                 if (!_membershipRequestsByGuild.ContainsKey(guildId))
                     _membershipRequestsByGuild[guildId] = new Dictionary<ObjectGuid, MembershipRequest>();
@@ -127,7 +127,7 @@ namespace Game.Guilds
                 _membershipRequestsByPlayer[request.GetPlayerGUID()] = new Dictionary<ObjectGuid, MembershipRequest>();
             _membershipRequestsByPlayer[request.GetPlayerGUID()][guildGuid] = request;
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_GUILD_FINDER_APPLICANT);
             stmt.AddValue(0, request.GetGuildGuid().GetCounter());
             stmt.AddValue(1, request.GetPlayerGUID().GetCounter());
@@ -156,7 +156,7 @@ namespace Game.Guilds
             if (playerDic == null)
                 return;
             
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             foreach (var guid in playerDic.Keys)
             {
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GUILD_FINDER_APPLICANT);
@@ -201,7 +201,7 @@ namespace Game.Guilds
                     _membershipRequestsByPlayer.Remove(playerId);
             }
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GUILD_FINDER_APPLICANT);
             stmt.AddValue(0, guildId.GetCounter());
             stmt.AddValue(1, playerId.GetCounter());
@@ -222,7 +222,7 @@ namespace Game.Guilds
 
         public List<MembershipRequest> GetAllMembershipRequestsForPlayer(ObjectGuid playerGuid)
         {
-            List<MembershipRequest> resultSet = new List<MembershipRequest>();
+            List<MembershipRequest> resultSet = new();
             var playerDic = _membershipRequestsByPlayer.LookupByKey(playerGuid);
             if (playerDic == null)
                 return resultSet;
@@ -240,7 +240,7 @@ namespace Game.Guilds
 
         public List<LFGuildSettings> GetGuildsMatchingSetting(LFGuildPlayer settings, uint faction)
         {
-            List<LFGuildSettings> resultSet = new List<LFGuildSettings>();
+            List<LFGuildSettings> resultSet = new();
             foreach (var guildSettings in _guildSettings.Values)
             {
                 if (!guildSettings.IsListed())
@@ -280,7 +280,7 @@ namespace Game.Guilds
         {
             _guildSettings[guildGuid] = settings;
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_GUILD_FINDER_GUILD_SETTINGS);
             stmt.AddValue(0, settings.GetGUID().GetCounter());
@@ -297,7 +297,7 @@ namespace Game.Guilds
 
         public void DeleteGuild(ObjectGuid guildId)
         {
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             PreparedStatement stmt;
             var guildDic = _membershipRequestsByGuild.LookupByKey(guildId);
             if (guildDic != null)
@@ -341,7 +341,7 @@ namespace Game.Guilds
 
         void SendApplicantListUpdate(Guild guild)
         {
-            LFGuildApplicantListChanged applicantListChanged = new LFGuildApplicantListChanged();
+            LFGuildApplicantListChanged applicantListChanged = new();
 
             guild.BroadcastPacketToRank(applicantListChanged, GuildDefaultRanks.Officer);
 
@@ -359,9 +359,9 @@ namespace Game.Guilds
 
         public LFGuildSettings GetGuildSettings(ObjectGuid guildGuid) { return _guildSettings.LookupByKey(guildGuid); }
 
-        Dictionary<ObjectGuid, LFGuildSettings> _guildSettings = new Dictionary<ObjectGuid, LFGuildSettings>();
-        Dictionary<ObjectGuid, Dictionary<ObjectGuid, MembershipRequest>> _membershipRequestsByGuild = new Dictionary<ObjectGuid, Dictionary<ObjectGuid, MembershipRequest>>();
-        Dictionary<ObjectGuid, Dictionary<ObjectGuid, MembershipRequest>> _membershipRequestsByPlayer = new Dictionary<ObjectGuid, Dictionary<ObjectGuid, MembershipRequest>>();
+        Dictionary<ObjectGuid, LFGuildSettings> _guildSettings = new();
+        Dictionary<ObjectGuid, Dictionary<ObjectGuid, MembershipRequest>> _membershipRequestsByGuild = new();
+        Dictionary<ObjectGuid, Dictionary<ObjectGuid, MembershipRequest>> _membershipRequestsByPlayer = new();
     }
 
     public class MembershipRequest

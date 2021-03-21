@@ -420,7 +420,7 @@ namespace Game
                         continue;
                     }
 
-                    RaceUnlockRequirement raceUnlockRequirement = new RaceUnlockRequirement();
+                    RaceUnlockRequirement raceUnlockRequirement = new();
                     raceUnlockRequirement.Expansion = expansion;
                     raceUnlockRequirement.AchievementId = achievementId;
 
@@ -441,7 +441,7 @@ namespace Game
             result = DB.World.Query("SELECT ClassID, RaceID, ActiveExpansionLevel, AccountExpansionLevel FROM `class_expansion_requirement`");
             if (!result.IsEmpty())
             {
-                Dictionary<byte, Dictionary<byte, Tuple<byte, byte>>> temp = new Dictionary<byte, Dictionary<byte, Tuple<byte, byte>>>();
+                Dictionary<byte, Dictionary<byte, Tuple<byte, byte>>> temp = new();
                 uint count = 0;
                 do
                 {
@@ -487,12 +487,12 @@ namespace Game
 
                 foreach (var race in temp)
                 {
-                    RaceClassAvailability raceClassAvailability = new RaceClassAvailability();
+                    RaceClassAvailability raceClassAvailability = new();
                     raceClassAvailability.RaceID = race.Key;
 
                     foreach (var class_ in race.Value)
                     {
-                        ClassAvailability classAvailability = new ClassAvailability();
+                        ClassAvailability classAvailability = new();
                         classAvailability.ClassID = class_.Key;
                         classAvailability.ActiveExpansionLevel = class_.Value.Item1;
                         classAvailability.AccountExpansionLevel = class_.Value.Item2;
@@ -617,7 +617,7 @@ namespace Game
 
             do
             {
-                GossipMenus gMenu = new GossipMenus();
+                GossipMenus gMenu = new();
 
                 gMenu.MenuId = result.Read<uint>(0);
                 gMenu.TextId = result.Read<uint>(1);
@@ -657,7 +657,7 @@ namespace Game
 
             do
             {
-                GossipMenuItems gMenuItem = new GossipMenuItems();
+                GossipMenuItems gMenuItem = new();
 
                 gMenuItem.MenuId = result.Read<uint>(0);
                 gMenuItem.OptionIndex = result.Read<uint>(1);
@@ -731,7 +731,7 @@ namespace Game
             {
                 uint id = result.Read<uint>(0);
 
-                PointOfInterest POI = new PointOfInterest();
+                PointOfInterest POI = new();
                 POI.Id = id;
                 POI.Pos = new Vector2(result.Read<float>(1), result.Read<float>(2));
                 POI.Icon = result.Read<uint>(3);
@@ -830,14 +830,14 @@ namespace Game
             do
             {
                 uint id = result.Read<uint>(0);
-                WorldLocation loc = new WorldLocation(result.Read<uint>(1), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), result.Read<float>(5));
+                WorldLocation loc = new(result.Read<uint>(1), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), result.Read<float>(5));
                 if (!GridDefines.IsValidMapCoord(loc))
                 {
                     Log.outError(LogFilter.Sql, $"World location (ID: {id}) has a invalid position MapID: {loc.GetMapId()} {loc}, skipped");
                     continue;
                 }
 
-                WorldSafeLocsEntry worldSafeLocs = new WorldSafeLocsEntry();
+                WorldSafeLocsEntry worldSafeLocs = new();
                 worldSafeLocs.Id = id;
                 worldSafeLocs.Loc = loc;
                 _worldSafeLocs[id] = worldSafeLocs;
@@ -882,7 +882,7 @@ namespace Game
             var range = GraveYardStorage.LookupByKey(zoneId);
             MapRecord mapEntry = CliDB.MapStorage.LookupByKey(MapId);
 
-            ConditionSourceInfo conditionSource = new ConditionSourceInfo(conditionObject);
+            ConditionSourceInfo conditionSource = new(conditionObject);
 
             // not need to check validity of map object; MapId _MUST_ be valid here
             if (range.Empty() && !mapEntry.IsBattlegroundOrArena())
@@ -1014,7 +1014,7 @@ namespace Game
                 return false;
 
             // add link to loaded data
-            GraveYardData data = new GraveYardData();
+            GraveYardData data = new();
             data.safeLocId = id;
             data.team = (uint)team;
 
@@ -1185,7 +1185,7 @@ namespace Game
             uint count = 0;
             do
             {
-                ScriptInfo tmp = new ScriptInfo();
+                ScriptInfo tmp = new();
                 tmp.type = type;
                 tmp.id = result.Read<uint>(0);
                 if (isSpellScriptTable)
@@ -1503,7 +1503,7 @@ namespace Game
         {
             LoadScripts(ScriptsType.Event);
 
-            List<uint> evt_scripts = new List<uint>();
+            List<uint> evt_scripts = new();
             // Load all possible script entries from gameobjects
             foreach (var go in _gameObjectTemplateStorage)
             {
@@ -1556,7 +1556,7 @@ namespace Game
         {
             LoadScripts(ScriptsType.Waypoint);
 
-            List<uint> actionSet = new List<uint>();
+            List<uint> actionSet = new();
 
             foreach (var script in sWaypointScripts)
                 actionSet.Add(script.Key);
@@ -1798,7 +1798,7 @@ namespace Game
         {
             uint entry = fields.Read<uint>(0);
 
-            CreatureTemplate creature = new CreatureTemplate();
+            CreatureTemplate creature = new();
             creature.Entry = entry;
 
             for (var i = 0; i < SharedConst.MaxCreatureDifficulties; ++i)
@@ -1944,7 +1944,7 @@ namespace Game
                     continue;
                 }
 
-                CreatureAddon creatureAddon = new CreatureAddon();
+                CreatureAddon creatureAddon = new();
                 creatureAddon.path_id = result.Read<uint>(1);
                 creatureAddon.mount = result.Read<uint>(2);
                 creatureAddon.bytes1 = result.Read<uint>(3);
@@ -2052,7 +2052,7 @@ namespace Game
                     continue;
                 }
 
-                CreatureAddon creatureAddon = new CreatureAddon();
+                CreatureAddon creatureAddon = new();
 
                 creatureAddon.path_id = result.Read<uint>(1);
                 if (creData.movementType == (byte)MovementGeneratorType.Waypoint && creatureAddon.path_id == 0)
@@ -2211,7 +2211,7 @@ namespace Game
 
                 uint id = result.Read<uint>(1);
 
-                EquipmentInfo equipmentInfo = new EquipmentInfo();
+                EquipmentInfo equipmentInfo = new();
 
                 for (var i = 0; i < SharedConst.MaxEquipmentItems; ++i)
                 {
@@ -2290,7 +2290,7 @@ namespace Game
                 if (_class == 0 || ((1 << (_class - 1)) & (int)Class.ClassMaskAllCreatures) == 0)
                     Log.outError(LogFilter.Sql, "Creature base stats for level {0} has invalid class {1}", Level, _class);
 
-                CreatureBaseStats stats = new CreatureBaseStats();
+                CreatureBaseStats stats = new();
 
                 stats.BaseMana = result.Read<uint>(2);
                 stats.AttackPower = result.Read<ushort>(3);
@@ -2338,7 +2338,7 @@ namespace Game
                     continue;
                 }
 
-                CreatureModelInfo modelInfo = new CreatureModelInfo();
+                CreatureModelInfo modelInfo = new();
                 modelInfo.BoundingRadius = result.Read<float>(1);
                 modelInfo.CombatReach = result.Read<float>(2);
                 modelInfo.DisplayIdOtherGender = result.Read<uint>(3);
@@ -2402,7 +2402,7 @@ namespace Game
                     continue;
                 }
 
-                CreatureLevelScaling creatureLevelScaling = new CreatureLevelScaling();
+                CreatureLevelScaling creatureLevelScaling = new();
                 creatureLevelScaling.MinLevel = result.Read<ushort>(2);
                 creatureLevelScaling.MaxLevel = result.Read<ushort>(3);
                 creatureLevelScaling.DeltaLevelMin = result.Read<short>(4);
@@ -2924,7 +2924,7 @@ namespace Game
                     continue;
                 }
 
-                NpcText npcText = new NpcText();
+                NpcText npcText = new();
                 for (int i = 0; i < SharedConst.MaxNpcTextOptions; i++)
                 {
                     npcText.Data[i].Probability = result.Read<float>(1 + i);
@@ -2964,13 +2964,13 @@ namespace Game
             // For reload case
             _trainers.Clear();
 
-            MultiMap<uint, TrainerSpell> spellsByTrainer = new MultiMap<uint, TrainerSpell>();
+            MultiMap<uint, TrainerSpell> spellsByTrainer = new();
             SQLResult trainerSpellsResult = DB.World.Query("SELECT TrainerId, SpellId, MoneyCost, ReqSkillLine, ReqSkillRank, ReqAbility1, ReqAbility2, ReqAbility3, ReqLevel FROM trainer_spell");
             if (!trainerSpellsResult.IsEmpty())
             {
                 do
                 {
-                    TrainerSpell spell = new TrainerSpell();
+                    TrainerSpell spell = new();
                     uint trainerId = trainerSpellsResult.Read<uint>(0);
                     spell.SpellId = trainerSpellsResult.Read<uint>(1);
                     spell.MoneyCost = trainerSpellsResult.Read<uint>(2);
@@ -3021,7 +3021,7 @@ namespace Game
                     uint trainerId = trainersResult.Read<uint>(0);
                     TrainerType trainerType = (TrainerType)trainersResult.Read<byte>(1);
                     string greeting = trainersResult.Read<string>(2);
-                    List<TrainerSpell> spells = new List<TrainerSpell>();
+                    List<TrainerSpell> spells = new();
                     var spellList = spellsByTrainer.LookupByKey(trainerId);
                     if (spellList != null)
                     {
@@ -3118,7 +3118,7 @@ namespace Game
             // For reload case
             cacheVendorItemStorage.Clear();
 
-            List<uint> skipvendors = new List<uint>();
+            List<uint> skipvendors = new();
 
             SQLResult result = DB.World.Query("SELECT entry, item, maxcount, incrtime, ExtendedCost, type, BonusListIDs, PlayerConditionID, IgnoreFiltering FROM npc_vendor ORDER BY entry, slot ASC");
             if (result.IsEmpty())
@@ -3139,7 +3139,7 @@ namespace Game
                     count += LoadReferenceVendor((int)entry, -itemid, skipvendors);
                 else
                 {
-                    VendorItem vItem = new VendorItem();
+                    VendorItem vItem = new();
                     vItem.item = (uint)itemid;
                     vItem.maxcount = result.Read<uint>(2);
                     vItem.incrtime = result.Read<uint>(3);
@@ -3191,7 +3191,7 @@ namespace Game
                     count += LoadReferenceVendor(vendor, -item_id, skip_vendors);
                 else
                 {
-                    VendorItem vItem = new VendorItem();
+                    VendorItem vItem = new();
                     vItem.item = (uint)item_id;
                     vItem.maxcount = result.Read<uint>(1);
                     vItem.incrtime = result.Read<uint>(2);
@@ -3243,7 +3243,7 @@ namespace Game
             }
 
             // Build single time for check spawnmask
-            Dictionary<uint, List<Difficulty>> spawnMasks = new Dictionary<uint, List<Difficulty>>();
+            Dictionary<uint, List<Difficulty>> spawnMasks = new();
             foreach (var mapDifficultyPair in Global.DB2Mgr.GetMapDifficulties())
             {
                 foreach (var difficultyPair in mapDifficultyPair.Value)
@@ -3255,7 +3255,7 @@ namespace Game
                 }
             }
 
-            PhaseShift phaseShift = new PhaseShift();
+            PhaseShift phaseShift = new();
 
             uint count = 0;
             do
@@ -3270,7 +3270,7 @@ namespace Game
                     continue;
                 }
 
-                CreatureData data = new CreatureData();
+                CreatureData data = new();
                 data.spawnId = guid;
                 data.Id = entry;
                 data.spawnPoint = new WorldLocation(result.Read<ushort>(2), result.Read<float>(3), result.Read<float>(4), result.Read<float>(5), result.Read<float>(6));                    
@@ -3669,7 +3669,7 @@ namespace Game
 
             foreach (GameObjectsRecord db2go in CliDB.GameObjectsStorage.Values)
             {
-                GameObjectTemplate go = new GameObjectTemplate();
+                GameObjectTemplate go = new();
                 go.entry = db2go.Id;
                 go.type = db2go.TypeID;
                 go.displayId = db2go.DisplayID;
@@ -3708,7 +3708,7 @@ namespace Game
                 {
                     uint entry = result.Read<uint>(0);
 
-                    GameObjectTemplate got = new GameObjectTemplate();
+                    GameObjectTemplate got = new();
 
                     got.entry = entry;
                     got.type = (GameObjectTypes)result.Read<uint>(1);
@@ -3883,7 +3883,7 @@ namespace Game
                     continue;
                 }
 
-                GameObjectTemplateAddon gameObjectAddon = new GameObjectTemplateAddon();
+                GameObjectTemplateAddon gameObjectAddon = new();
                 gameObjectAddon.faction = result.Read<ushort>(1);
                 gameObjectAddon.flags = result.Read<uint>(2);
                 gameObjectAddon.mingold = result.Read<uint>(3);
@@ -3948,7 +3948,7 @@ namespace Game
             uint count = 0;
 
             // build single time for check spawnmask
-            Dictionary<uint, List<Difficulty>> spawnMasks = new Dictionary<uint, List<Difficulty>>();
+            Dictionary<uint, List<Difficulty>> spawnMasks = new();
             foreach (var mapDifficultyPair in Global.DB2Mgr.GetMapDifficulties())
             {
                 foreach (var difficultyPair in mapDifficultyPair.Value)
@@ -3960,7 +3960,7 @@ namespace Game
                 }
             }
 
-            PhaseShift phaseShift = new PhaseShift();
+            PhaseShift phaseShift = new();
 
             do
             {
@@ -3993,7 +3993,7 @@ namespace Game
                     continue;
                 }
 
-                GameObjectData data = new GameObjectData();
+                GameObjectData data = new();
                 data.spawnId = guid;
                 data.Id = entry;
                 data.spawnPoint = new WorldLocation(result.Read<ushort>(2), result.Read<float>(3), result.Read<float>(4), result.Read<float>(5), result.Read<float>(6));
@@ -4175,7 +4175,7 @@ namespace Game
                     continue;
                 }
 
-                GameObjectAddon gameObjectAddon = new GameObjectAddon();
+                GameObjectAddon gameObjectAddon = new();
                 gameObjectAddon.ParentRotation = new Quaternion(result.Read<float>(1), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4));
                 gameObjectAddon.invisibilityType = (InvisibilityType)result.Read<byte>(5);
                 gameObjectAddon.invisibilityValue = result.Read<uint>(6);
@@ -4485,8 +4485,8 @@ namespace Game
 
         List<Difficulty> ParseSpawnDifficulties(string difficultyString, string table, ulong spawnId, uint mapId, List<Difficulty> mapDifficulties)
         {
-            List<Difficulty> difficulties = new List<Difficulty>();
-            StringArray tokens = new StringArray(difficultyString, ',');
+            List<Difficulty> difficulties = new();
+            StringArray tokens = new(difficultyString, ',');
             if (tokens.Length == 0)
                 return difficulties;
 
@@ -4546,7 +4546,7 @@ namespace Game
                 }
                 else
                 {
-                    ItemSpecStats itemSpecStats = new ItemSpecStats(db2Data, sparse);
+                    ItemSpecStats itemSpecStats = new(db2Data, sparse);
 
                     foreach (ItemSpecRecord itemSpec in CliDB.ItemSpecStorage.Values)
                     {
@@ -4979,7 +4979,7 @@ namespace Game
             {
                 uint id = result.Read<uint>(0);
 
-                GameTele gt = new GameTele();
+                GameTele gt = new();
 
                 gt.posX = result.Read<float>(1);
                 gt.posY = result.Read<float>(2);
@@ -5030,7 +5030,7 @@ namespace Game
                     continue;
                 }
 
-                AreaTriggerStruct at = new AreaTriggerStruct();
+                AreaTriggerStruct at = new();
                 at.target_mapId = portLoc.Loc.GetMapId();
                 at.target_X = portLoc.Loc.GetPositionX();
                 at.target_Y = portLoc.Loc.GetPositionY();
@@ -5084,7 +5084,7 @@ namespace Game
 
                 ulong requirementId = MathFunctions.MakePair64(mapid, difficulty);
 
-                AccessRequirement ar = new AccessRequirement();
+                AccessRequirement ar = new();
                 ar.levelMin = result.Read<byte>(2);
                 ar.levelMax = result.Read<byte>(3);
                 ar.item = result.Read<uint>(4);
@@ -5160,7 +5160,7 @@ namespace Game
             }
 
             uint count = 0;
-            Dictionary<uint, Tuple<uint, DungeonEncounterRecord>> dungeonLastBosses = new Dictionary<uint, Tuple<uint, DungeonEncounterRecord>>();
+            Dictionary<uint, Tuple<uint, DungeonEncounterRecord>> dungeonLastBosses = new();
             do
             {
                 uint entry = result.Read<uint>(0);
@@ -5259,7 +5259,7 @@ namespace Game
                 do
                 {
                     uint groupId = result.Read<uint>(0);
-                    SpawnGroupTemplateData group = new SpawnGroupTemplateData();
+                    SpawnGroupTemplateData group = new();
                     group.groupId = groupId;
                     group.name = result.Read<string>(1);
                     group.mapId = 0xFFFFFFFF;
@@ -5283,7 +5283,7 @@ namespace Game
             if (!_spawnGroupDataStorage.ContainsKey(0))
             {
                 Log.outError(LogFilter.Sql, "Default spawn group (index 0) is missing from DB! Manually inserted.");
-                SpawnGroupTemplateData data = new SpawnGroupTemplateData();
+                SpawnGroupTemplateData data = new();
                 data.groupId = 0;
                 data.name = "Default Group";
                 data.mapId = 0;
@@ -5295,7 +5295,7 @@ namespace Game
             {
 
                 Log.outError(LogFilter.Sql, "Default legacy spawn group (index 1) is missing from DB! Manually inserted.");
-                SpawnGroupTemplateData data = new SpawnGroupTemplateData();
+                SpawnGroupTemplateData data = new();
                 data.groupId = 1;
                 data.name = "Legacy Group";
                 data.mapId = 0;
@@ -5392,7 +5392,7 @@ namespace Game
                     continue;
                 }
 
-                InstanceSpawnGroupInfo info = new InstanceSpawnGroupInfo();
+                InstanceSpawnGroupInfo info = new();
                 info.SpawnGroupId = spawnGroupId;
                 info.BossStateId = result.Read<byte>(1);
 
@@ -5591,7 +5591,7 @@ namespace Game
                         continue;
                     }
 
-                    PlayerInfo pInfo = new PlayerInfo();
+                    PlayerInfo pInfo = new();
                     pInfo.MapId = mapId;
                     pInfo.ZoneId = zoneId;
                     pInfo.PositionX = positionX;
@@ -5613,7 +5613,7 @@ namespace Game
             // Load playercreate items
             Log.outInfo(LogFilter.ServerLoading, "Loading Player Create Items Data...");
             {
-                MultiMap<uint, ItemTemplate> itemsByCharacterLoadout = new MultiMap<uint, ItemTemplate>();
+                MultiMap<uint, ItemTemplate> itemsByCharacterLoadout = new();
                 foreach (CharacterLoadoutItemRecord characterLoadoutItem in CliDB.CharacterLoadoutItemStorage.Values)
                 {
                     ItemTemplate itemTemplate = GetItemTemplate(characterLoadoutItem.ItemID);
@@ -6279,7 +6279,7 @@ namespace Game
                 if (pInfoMapEntry == null)
                     pInfoMapEntry = new PetLevelInfo[WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel)];
 
-                PetLevelInfo pLevelInfo = new PetLevelInfo();
+                PetLevelInfo pLevelInfo = new();
                 pLevelInfo.health = result.Read<uint>(2);
                 pLevelInfo.mana = result.Read<uint>(3);
                 pLevelInfo.armor = result.Read<uint>(9);
@@ -6640,7 +6640,7 @@ namespace Game
             // for example set of race quests can lead to single not race specific quest
             do
             {
-                Quest newQuest = new Quest(result.GetFields());
+                Quest newQuest = new(result.GetFields());
                 _questTemplates[newQuest.Id] = newQuest;
                 if (newQuest.IsAutoPush())
                     _questTemplatesAutoPush.Add(newQuest);
@@ -6858,7 +6858,7 @@ namespace Game
                 } while (result.NextRow());
             }
 
-            Dictionary<uint, uint> usedMailTemplates = new Dictionary<uint, uint>();
+            Dictionary<uint, uint> usedMailTemplates = new();
 
             // Post processing
             foreach (var qinfo in _questTemplates.Values)
@@ -7622,7 +7622,7 @@ namespace Game
                 return;
             }
 
-            Dictionary<uint, MultiMap<int, QuestPOIBlobPoint>> allPoints = new Dictionary<uint, MultiMap<int, QuestPOIBlobPoint>>();
+            Dictionary<uint, MultiMap<int, QuestPOIBlobPoint>> allPoints = new();
 
             //                                               0        1    2  3  4
             SQLResult pointsResult = DB.World.Query("SELECT QuestID, Idx1, X, Y, Z FROM quest_poi_points ORDER BY QuestID DESC, Idx1, Idx2");
@@ -8095,7 +8095,7 @@ namespace Game
                     Log.outError(LogFilter.Sql, "Table npc_spellclick_spells creature: {0} references unknown user type {1}. Skipping entry.", npc_entry, userType);
 
                 byte castFlags = result.Read<byte>(2);
-                SpellClickInfo info = new SpellClickInfo();
+                SpellClickInfo info = new();
                 info.spellId = spellid;
                 info.castFlags = castFlags;
                 info.userType = userType;
@@ -8171,7 +8171,7 @@ namespace Game
             do
             {
                 uint id = result.Read<uint>(0);
-                SkillTiersEntry tier = new SkillTiersEntry();
+                SkillTiersEntry tier = new();
                 for (int i = 0; i < SkillConst.MaxSkillStep; ++i)
                     tier.Value[i] = result.Read<uint>(1 + i);
 
@@ -8466,7 +8466,7 @@ namespace Game
                 if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
                     continue;
 
-                GossipMenuItemsLocale data = new GossipMenuItemsLocale();
+                GossipMenuItemsLocale data = new();
                 AddLocaleString(result.Read<string>(3), locale, data.OptionText);
                 AddLocaleString(result.Read<string>(4), locale, data.BoxText);
 
@@ -8590,7 +8590,7 @@ namespace Game
             {
                 uint factionId = result.Read<uint>(0);
 
-                RepRewardRate repRate = new RepRewardRate();
+                RepRewardRate repRate = new();
 
                 repRate.questRate = result.Read<float>(1);
                 repRate.questDailyRate = result.Read<float>(2);
@@ -8680,7 +8680,7 @@ namespace Game
             {
                 uint creature_id = result.Read<uint>(0);
 
-                ReputationOnKillEntry repOnKill = new ReputationOnKillEntry();
+                ReputationOnKillEntry repOnKill = new();
                 repOnKill.RepFaction1 = result.Read<ushort>(1);
                 repOnKill.RepFaction2 = result.Read<ushort>(2);
                 repOnKill.IsTeamAward1 = result.Read<bool>(3);
@@ -8744,7 +8744,7 @@ namespace Game
             {
                 uint factionId = result.Read<uint>(0);
 
-                RepSpilloverTemplate repTemplate = new RepSpilloverTemplate();
+                RepSpilloverTemplate repTemplate = new();
                 repTemplate.faction[0] = result.Read<uint>(1);
                 repTemplate.faction_rate[0] = result.Read<float>(2);
                 repTemplate.faction_rank[0] = result.Read<uint>(3);
@@ -8975,7 +8975,7 @@ namespace Game
                         continue;
                 }
 
-                TempSummonData data = new TempSummonData();
+                TempSummonData data = new();
                 data.entry = result.Read<uint>(3);
 
                 if (GetCreatureTemplate(data.entry) == null)
@@ -9030,7 +9030,7 @@ namespace Game
             {
                 uint id = result.Read<uint>(0);
 
-                PageText pageText = new PageText();
+                PageText pageText = new();
                 pageText.Text = result.Read<string>(1);
                 pageText.NextPageID = result.Read<uint>(2);
                 pageText.PlayerConditionID = result.Read<int>(3);
@@ -9105,13 +9105,13 @@ namespace Game
                 return;                                             // any mails need to be returned or deleted
             }
 
-            MultiMap<uint, MailItemInfo> itemsCache = new MultiMap<uint, MailItemInfo>();
+            MultiMap<uint, MailItemInfo> itemsCache = new();
             stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_EXPIRED_MAIL_ITEMS);
             stmt.AddValue(0, (uint)basetime);
             SQLResult items = DB.Characters.Query(stmt);
             if (!items.IsEmpty())
             {
-                MailItemInfo item = new MailItemInfo();
+                MailItemInfo item = new();
                 do
                 {
                     item.item_guid = result.Read<uint>(0);
@@ -9125,7 +9125,7 @@ namespace Game
             uint returnedCount = 0;
             do
             {
-                Mail m = new Mail();
+                Mail m = new();
                 m.messageID = result.Read<uint>(0);
                 m.messageType = (MailMessageType)result.Read<byte>(1);
                 m.sender = result.Read<uint>(2);
@@ -9223,7 +9223,7 @@ namespace Game
             do
             {
                 uint sceneId = result.Read<uint>(0);
-                SceneTemplate sceneTemplate = new SceneTemplate();
+                SceneTemplate sceneTemplate = new();
                 sceneTemplate.SceneId = sceneId;
                 sceneTemplate.PlaybackFlags = (SceneFlags)result.Read<uint>(1);
                 sceneTemplate.ScenePackageId = result.Read<uint>(2);
@@ -9258,7 +9258,7 @@ namespace Game
 
             do
             {
-                PlayerChoice choice = new PlayerChoice();
+                PlayerChoice choice = new();
                 choice.ChoiceId = choiceResult.Read<int>(0);
                 choice.UiTextureKitId = choiceResult.Read<int>(1);
                 choice.SoundKitId = choiceResult.Read<uint>(2);
@@ -9289,7 +9289,7 @@ namespace Game
                     }
 
                     PlayerChoice choice = _playerChoices[choiceId];
-                    PlayerChoiceResponse response = new PlayerChoiceResponse();
+                    PlayerChoiceResponse response = new();
 
                     response.ResponseId = responseId;
                     response.ResponseIdentifier = responses.Read<ushort>(2);
@@ -9338,7 +9338,7 @@ namespace Game
                         continue;
                     }
 
-                    PlayerChoiceResponseReward reward = new PlayerChoiceResponseReward();
+                    PlayerChoiceResponseReward reward = new();
                     reward.TitleId = rewards.Read<int>(2);
                     reward.PackageId = rewards.Read<int>(3);
                     reward.SkillLineId = rewards.Read<int>(4);
@@ -9381,8 +9381,8 @@ namespace Game
                     int choiceId = rewardItem.Read<int>(0);
                     int responseId = rewardItem.Read<int>(1);
                     uint itemId = rewardItem.Read<uint>(2);
-                    StringArray bonusListIDsTok = new StringArray(rewardItem.Read<string>(3), ' ');
-                    List<uint> bonusListIds = new List<uint>();
+                    StringArray bonusListIDsTok = new(rewardItem.Read<string>(3), ' ');
+                    List<uint> bonusListIds = new();
                     if (!bonusListIDsTok.IsEmpty())
                     {
                         foreach (uint token in bonusListIDsTok)
@@ -9515,8 +9515,8 @@ namespace Game
                     int choiceId = rewardItems.Read<int>(0);
                     int responseId = rewardItems.Read<int>(1);
                     uint itemId = rewardItems.Read<uint>(2);
-                    StringArray bonusListIDsTok = new StringArray(rewardItems.Read<string>(3), ' ');
-                    List<uint> bonusListIds = new List<uint>();
+                    StringArray bonusListIDsTok = new(rewardItems.Read<string>(3), ' ');
+                    List<uint> bonusListIds = new();
                     foreach (string token in bonusListIDsTok)
                         bonusListIds.Add(uint.Parse(token));
 
@@ -9576,7 +9576,7 @@ namespace Game
                         continue;
                     }
 
-                    PlayerChoiceResponseMawPower mawPower = new PlayerChoiceResponseMawPower();
+                    PlayerChoiceResponseMawPower mawPower = new();
                     mawPower.TypeArtFileID = mawPowersResult.Read<int>(2);
                     mawPower.Rarity = mawPowersResult.Read<int>(3);
                     mawPower.RarityColor = mawPowersResult.Read<uint>(4);
@@ -9972,7 +9972,7 @@ namespace Game
         }
         public uint GetTaxiMountDisplayId(uint id, Team team, bool allowed_alt_team = false)
         {
-            CreatureModel mountModel = new CreatureModel();
+            CreatureModel mountModel = new();
             CreatureTemplate mount_info = null;
 
             // select mount creature id
@@ -10110,7 +10110,7 @@ namespace Game
                     continue;
                 }
 
-                VehicleTemplate vehicleTemplate = new VehicleTemplate();
+                VehicleTemplate vehicleTemplate = new();
                 vehicleTemplate.DespawnDelay = TimeSpan.FromMilliseconds(result.Read<int>(1));
                 _vehicleTemplateStore[creatureId] = vehicleTemplate;
 
@@ -10233,137 +10233,137 @@ namespace Game
         #region Fields
         public static LanguageDesc[] lang_description;
         //General
-        Dictionary<uint, StringArray> CypherStringStorage = new Dictionary<uint, StringArray>();
-        Dictionary<uint, RepRewardRate> _repRewardRateStorage = new Dictionary<uint, RepRewardRate>();
-        Dictionary<uint, ReputationOnKillEntry> _repOnKillStorage = new Dictionary<uint, ReputationOnKillEntry>();
-        Dictionary<uint, RepSpilloverTemplate> _repSpilloverTemplateStorage = new Dictionary<uint, RepSpilloverTemplate>();
-        MultiMap<byte, MailLevelReward> _mailLevelRewardStorage = new MultiMap<byte, MailLevelReward>();
-        MultiMap<Tuple<uint, SummonerType, byte>, TempSummonData> _tempSummonDataStorage = new MultiMap<Tuple<uint, SummonerType, byte>, TempSummonData>();
-        Dictionary<int /*choiceId*/, PlayerChoice> _playerChoices = new Dictionary<int, PlayerChoice>();
-        Dictionary<uint, PageText> _pageTextStorage = new Dictionary<uint, PageText>();
-        List<string> _reservedNamesStorage = new List<string>();
-        Dictionary<uint, SceneTemplate> _sceneTemplateStorage = new Dictionary<uint, SceneTemplate>();
+        Dictionary<uint, StringArray> CypherStringStorage = new();
+        Dictionary<uint, RepRewardRate> _repRewardRateStorage = new();
+        Dictionary<uint, ReputationOnKillEntry> _repOnKillStorage = new();
+        Dictionary<uint, RepSpilloverTemplate> _repSpilloverTemplateStorage = new();
+        MultiMap<byte, MailLevelReward> _mailLevelRewardStorage = new();
+        MultiMap<Tuple<uint, SummonerType, byte>, TempSummonData> _tempSummonDataStorage = new();
+        Dictionary<int /*choiceId*/, PlayerChoice> _playerChoices = new();
+        Dictionary<uint, PageText> _pageTextStorage = new();
+        List<string> _reservedNamesStorage = new();
+        Dictionary<uint, SceneTemplate> _sceneTemplateStorage = new();
 
-        Dictionary<byte, RaceUnlockRequirement> _raceUnlockRequirementStorage = new Dictionary<byte, RaceUnlockRequirement>();
-        List<RaceClassAvailability> _classExpansionRequirementStorage = new List<RaceClassAvailability>();
-        Dictionary<uint, string> _realmNameStorage = new Dictionary<uint, string>();
+        Dictionary<byte, RaceUnlockRequirement> _raceUnlockRequirementStorage = new();
+        List<RaceClassAvailability> _classExpansionRequirementStorage = new();
+        Dictionary<uint, string> _realmNameStorage = new();
 
         //Quest
-        Dictionary<uint, Quest> _questTemplates = new Dictionary<uint, Quest>();
-        List<Quest> _questTemplatesAutoPush = new List<Quest>();
-        MultiMap<uint, uint> _goQuestRelations = new MultiMap<uint, uint>();
-        MultiMap<uint, uint> _goQuestInvolvedRelations = new MultiMap<uint, uint>();
-        MultiMap<uint, uint> _goQuestInvolvedRelationsReverse = new MultiMap<uint, uint>();
-        MultiMap<uint, uint> _creatureQuestRelations = new MultiMap<uint, uint>();
-        MultiMap<uint, uint> _creatureQuestInvolvedRelations = new MultiMap<uint, uint>();
-        MultiMap<uint, uint> _creatureQuestInvolvedRelationsReverse = new MultiMap<uint, uint>();
-        MultiMap<int, uint> _exclusiveQuestGroups = new MultiMap<int, uint>();
-        Dictionary<uint, QuestPOIData> _questPOIStorage = new Dictionary<uint, QuestPOIData>();
-        MultiMap<uint, uint> _questAreaTriggerStorage = new MultiMap<uint, uint>();
-        Dictionary<uint, QuestObjective> _questObjectives = new Dictionary<uint, QuestObjective>();
+        Dictionary<uint, Quest> _questTemplates = new();
+        List<Quest> _questTemplatesAutoPush = new();
+        MultiMap<uint, uint> _goQuestRelations = new();
+        MultiMap<uint, uint> _goQuestInvolvedRelations = new();
+        MultiMap<uint, uint> _goQuestInvolvedRelationsReverse = new();
+        MultiMap<uint, uint> _creatureQuestRelations = new();
+        MultiMap<uint, uint> _creatureQuestInvolvedRelations = new();
+        MultiMap<uint, uint> _creatureQuestInvolvedRelationsReverse = new();
+        MultiMap<int, uint> _exclusiveQuestGroups = new();
+        Dictionary<uint, QuestPOIData> _questPOIStorage = new();
+        MultiMap<uint, uint> _questAreaTriggerStorage = new();
+        Dictionary<uint, QuestObjective> _questObjectives = new();
         Dictionary<uint, QuestGreeting>[] _questGreetingStorage = new Dictionary<uint, QuestGreeting>[2];
         Dictionary<uint, QuestGreetingLocale>[] _questGreetingLocaleStorage = new Dictionary<uint, QuestGreetingLocale>[2];
 
         //Scripts
-        List<string> scriptNamesStorage = new List<string>();
-        MultiMap<uint, uint> spellScriptsStorage = new MultiMap<uint, uint>();
-        public Dictionary<uint, MultiMap<uint, ScriptInfo>> sSpellScripts = new Dictionary<uint, MultiMap<uint, ScriptInfo>>();
-        public Dictionary<uint, MultiMap<uint, ScriptInfo>> sEventScripts = new Dictionary<uint, MultiMap<uint, ScriptInfo>>();
-        public Dictionary<uint, MultiMap<uint, ScriptInfo>> sWaypointScripts = new Dictionary<uint, MultiMap<uint, ScriptInfo>>();
-        Dictionary<uint, uint> areaTriggerScriptStorage = new Dictionary<uint, uint>();
+        List<string> scriptNamesStorage = new();
+        MultiMap<uint, uint> spellScriptsStorage = new();
+        public Dictionary<uint, MultiMap<uint, ScriptInfo>> sSpellScripts = new();
+        public Dictionary<uint, MultiMap<uint, ScriptInfo>> sEventScripts = new();
+        public Dictionary<uint, MultiMap<uint, ScriptInfo>> sWaypointScripts = new();
+        Dictionary<uint, uint> areaTriggerScriptStorage = new();
 
         //Maps
-        public Dictionary<uint, GameTele> gameTeleStorage = new Dictionary<uint, GameTele>();
-        Dictionary<uint, Dictionary<uint, CellObjectGuids>> mapObjectGuidsStore = new Dictionary<uint, Dictionary<uint, CellObjectGuids>>();
-        Dictionary<uint, InstanceTemplate> instanceTemplateStorage = new Dictionary<uint, InstanceTemplate>();
-        public MultiMap<uint, GraveYardData> GraveYardStorage = new MultiMap<uint, GraveYardData>();
-        List<ushort> _transportMaps = new List<ushort>();
-        Dictionary<uint, SpawnGroupTemplateData> _spawnGroupDataStorage = new Dictionary<uint, SpawnGroupTemplateData>();
-        MultiMap<uint, SpawnData> _spawnGroupMapStorage = new MultiMap<uint, SpawnData>();
-        MultiMap<ushort, InstanceSpawnGroupInfo> _instanceSpawnGroupStorage = new MultiMap<ushort, InstanceSpawnGroupInfo>();
+        public Dictionary<uint, GameTele> gameTeleStorage = new();
+        Dictionary<uint, Dictionary<uint, CellObjectGuids>> mapObjectGuidsStore = new();
+        Dictionary<uint, InstanceTemplate> instanceTemplateStorage = new();
+        public MultiMap<uint, GraveYardData> GraveYardStorage = new();
+        List<ushort> _transportMaps = new();
+        Dictionary<uint, SpawnGroupTemplateData> _spawnGroupDataStorage = new();
+        MultiMap<uint, SpawnData> _spawnGroupMapStorage = new();
+        MultiMap<ushort, InstanceSpawnGroupInfo> _instanceSpawnGroupStorage = new();
 
         //Spells /Skills / Phases
-        Dictionary<uint, PhaseInfoStruct> _phaseInfoById = new Dictionary<uint, PhaseInfoStruct>();
-        Dictionary<uint, TerrainSwapInfo> _terrainSwapInfoById = new Dictionary<uint, TerrainSwapInfo>();
-        MultiMap<uint, PhaseAreaInfo> _phaseInfoByArea = new MultiMap<uint, PhaseAreaInfo>();
-        MultiMap<uint, TerrainSwapInfo> _terrainSwapInfoByMap = new MultiMap<uint, TerrainSwapInfo>();
-        MultiMap<uint, SpellClickInfo> _spellClickInfoStorage = new MultiMap<uint, SpellClickInfo>();
-        Dictionary<uint, int> _fishingBaseForAreaStorage = new Dictionary<uint, int>();
-        Dictionary<uint, SkillTiersEntry> _skillTiers = new Dictionary<uint, SkillTiersEntry>();
+        Dictionary<uint, PhaseInfoStruct> _phaseInfoById = new();
+        Dictionary<uint, TerrainSwapInfo> _terrainSwapInfoById = new();
+        MultiMap<uint, PhaseAreaInfo> _phaseInfoByArea = new();
+        MultiMap<uint, TerrainSwapInfo> _terrainSwapInfoByMap = new();
+        MultiMap<uint, SpellClickInfo> _spellClickInfoStorage = new();
+        Dictionary<uint, int> _fishingBaseForAreaStorage = new();
+        Dictionary<uint, SkillTiersEntry> _skillTiers = new();
 
         //Gossip
-        MultiMap<uint, GossipMenuItems> gossipMenuItemsStorage = new MultiMap<uint, GossipMenuItems>();
-        MultiMap<uint, GossipMenus> gossipMenusStorage = new MultiMap<uint, GossipMenus>();
-        Dictionary<uint, PointOfInterest> pointsOfInterestStorage = new Dictionary<uint, PointOfInterest>();
+        MultiMap<uint, GossipMenuItems> gossipMenuItemsStorage = new();
+        MultiMap<uint, GossipMenus> gossipMenusStorage = new();
+        Dictionary<uint, PointOfInterest> pointsOfInterestStorage = new();
 
         //Creature
-        Dictionary<uint, CreatureTemplate> _creatureTemplateStorage = new Dictionary<uint, CreatureTemplate>();
-        Dictionary<uint, CreatureModelInfo> creatureModelStorage = new Dictionary<uint, CreatureModelInfo>();
-        Dictionary<ulong, CreatureData> creatureDataStorage = new Dictionary<ulong, CreatureData>();
-        Dictionary<ulong, CreatureAddon> creatureAddonStorage = new Dictionary<ulong, CreatureAddon>();
-        MultiMap<uint, uint> _creatureQuestItemStorage = new MultiMap<uint, uint>();
-        Dictionary<uint, CreatureAddon> creatureTemplateAddonStorage = new Dictionary<uint, CreatureAddon>();
-        MultiMap<uint, Tuple<uint, EquipmentInfo>> equipmentInfoStorage = new MultiMap<uint, Tuple<uint, EquipmentInfo>>();
-        Dictionary<ObjectGuid, ObjectGuid> linkedRespawnStorage = new Dictionary<ObjectGuid, ObjectGuid>();
-        Dictionary<uint, CreatureBaseStats> creatureBaseStatsStorage = new Dictionary<uint, CreatureBaseStats>();
-        Dictionary<uint, VendorItemData> cacheVendorItemStorage = new Dictionary<uint, VendorItemData>();
-        Dictionary<uint, Trainer> _trainers = new Dictionary<uint, Trainer>();
-        Dictionary<(uint creatureId, uint gossipMenuId, uint gossipOptionIndex), uint> _creatureDefaultTrainers = new Dictionary<(uint creatureId, uint gossipMenuId, uint gossipOptionIndex), uint>();
+        Dictionary<uint, CreatureTemplate> _creatureTemplateStorage = new();
+        Dictionary<uint, CreatureModelInfo> creatureModelStorage = new();
+        Dictionary<ulong, CreatureData> creatureDataStorage = new();
+        Dictionary<ulong, CreatureAddon> creatureAddonStorage = new();
+        MultiMap<uint, uint> _creatureQuestItemStorage = new();
+        Dictionary<uint, CreatureAddon> creatureTemplateAddonStorage = new();
+        MultiMap<uint, Tuple<uint, EquipmentInfo>> equipmentInfoStorage = new();
+        Dictionary<ObjectGuid, ObjectGuid> linkedRespawnStorage = new();
+        Dictionary<uint, CreatureBaseStats> creatureBaseStatsStorage = new();
+        Dictionary<uint, VendorItemData> cacheVendorItemStorage = new();
+        Dictionary<uint, Trainer> _trainers = new();
+        Dictionary<(uint creatureId, uint gossipMenuId, uint gossipOptionIndex), uint> _creatureDefaultTrainers = new();
         List<uint>[] _difficultyEntries = new List<uint>[SharedConst.MaxCreatureDifficulties]; // already loaded difficulty 1 value in creatures, used in CheckCreatureTemplate
         List<uint>[] _hasDifficultyEntries = new List<uint>[SharedConst.MaxCreatureDifficulties]; // already loaded creatures with difficulty 1 values, used in CheckCreatureTemplate
-        Dictionary<uint, NpcText> _npcTextStorage = new Dictionary<uint, NpcText>();
+        Dictionary<uint, NpcText> _npcTextStorage = new();
 
         //GameObject
-        Dictionary<uint, GameObjectTemplate> _gameObjectTemplateStorage = new Dictionary<uint, GameObjectTemplate>();
-        Dictionary<ulong, GameObjectData> gameObjectDataStorage = new Dictionary<ulong, GameObjectData>();
-        Dictionary<ulong, GameObjectTemplateAddon> _gameObjectTemplateAddonStorage = new Dictionary<ulong, GameObjectTemplateAddon>();
-        Dictionary<ulong, GameObjectAddon> _gameObjectAddonStorage = new Dictionary<ulong, GameObjectAddon>();
-        MultiMap<uint, uint> _gameObjectQuestItemStorage = new MultiMap<uint, uint>();
-        List<uint> _gameObjectForQuestStorage = new List<uint>();
+        Dictionary<uint, GameObjectTemplate> _gameObjectTemplateStorage = new();
+        Dictionary<ulong, GameObjectData> gameObjectDataStorage = new();
+        Dictionary<ulong, GameObjectTemplateAddon> _gameObjectTemplateAddonStorage = new();
+        Dictionary<ulong, GameObjectAddon> _gameObjectAddonStorage = new();
+        MultiMap<uint, uint> _gameObjectQuestItemStorage = new();
+        List<uint> _gameObjectForQuestStorage = new();
 
         //Item
-        Dictionary<uint, ItemTemplate> ItemTemplateStorage = new Dictionary<uint, ItemTemplate>();
+        Dictionary<uint, ItemTemplate> ItemTemplateStorage = new();
 
         //Player
         PlayerInfo[][] _playerInfo = new PlayerInfo[(int)Race.Max][];
 
         //Faction Change
-        public Dictionary<uint, uint> FactionChangeAchievements = new Dictionary<uint, uint>();
-        public Dictionary<uint, uint> FactionChangeItems = new Dictionary<uint, uint>();
-        public Dictionary<uint, uint> FactionChangeQuests = new Dictionary<uint, uint>();
-        public Dictionary<uint, uint> FactionChangeReputation = new Dictionary<uint, uint>();
-        public Dictionary<uint, uint> FactionChangeSpells = new Dictionary<uint, uint>();
-        public Dictionary<uint, uint> FactionChangeTitles = new Dictionary<uint, uint>();
+        public Dictionary<uint, uint> FactionChangeAchievements = new();
+        public Dictionary<uint, uint> FactionChangeItems = new();
+        public Dictionary<uint, uint> FactionChangeQuests = new();
+        public Dictionary<uint, uint> FactionChangeReputation = new();
+        public Dictionary<uint, uint> FactionChangeSpells = new();
+        public Dictionary<uint, uint> FactionChangeTitles = new();
 
         //Pets
-        Dictionary<uint, PetLevelInfo[]> petInfoStore = new Dictionary<uint, PetLevelInfo[]>();
-        MultiMap<uint, string> _petHalfName0 = new MultiMap<uint, string>();
-        MultiMap<uint, string> _petHalfName1 = new MultiMap<uint, string>();
+        Dictionary<uint, PetLevelInfo[]> petInfoStore = new();
+        MultiMap<uint, string> _petHalfName0 = new();
+        MultiMap<uint, string> _petHalfName1 = new();
 
         //Vehicles
-        Dictionary<uint, VehicleTemplate> _vehicleTemplateStore = new Dictionary<uint, VehicleTemplate>();
-        MultiMap<uint, VehicleAccessory> _vehicleTemplateAccessoryStore = new MultiMap<uint, VehicleAccessory>();
-        MultiMap<ulong, VehicleAccessory> _vehicleAccessoryStore = new MultiMap<ulong, VehicleAccessory>();
+        Dictionary<uint, VehicleTemplate> _vehicleTemplateStore = new();
+        MultiMap<uint, VehicleAccessory> _vehicleTemplateAccessoryStore = new();
+        MultiMap<ulong, VehicleAccessory> _vehicleAccessoryStore = new();
 
         //Locales
-        Dictionary<uint, CreatureLocale> _creatureLocaleStorage = new Dictionary<uint, CreatureLocale>();
-        Dictionary<uint, GameObjectLocale> _gameObjectLocaleStorage = new Dictionary<uint, GameObjectLocale>();
-        Dictionary<uint, QuestTemplateLocale> _questTemplateLocaleStorage = new Dictionary<uint, QuestTemplateLocale>();
-        Dictionary<uint, QuestObjectivesLocale> _questObjectivesLocaleStorage = new Dictionary<uint, QuestObjectivesLocale>();
-        Dictionary<uint, QuestOfferRewardLocale> _questOfferRewardLocaleStorage = new Dictionary<uint, QuestOfferRewardLocale>();
-        Dictionary<uint, QuestRequestItemsLocale> _questRequestItemsLocaleStorage = new Dictionary<uint, QuestRequestItemsLocale>();
-        Dictionary<Tuple<uint, uint>, GossipMenuItemsLocale> _gossipMenuItemsLocaleStorage = new Dictionary<Tuple<uint, uint>, GossipMenuItemsLocale>();
-        Dictionary<uint, PageTextLocale> _pageTextLocaleStorage = new Dictionary<uint, PageTextLocale>();
-        Dictionary<uint, PointOfInterestLocale> _pointOfInterestLocaleStorage = new Dictionary<uint, PointOfInterestLocale>();
-        Dictionary<int, PlayerChoiceLocale> _playerChoiceLocales = new Dictionary<int, PlayerChoiceLocale>();
+        Dictionary<uint, CreatureLocale> _creatureLocaleStorage = new();
+        Dictionary<uint, GameObjectLocale> _gameObjectLocaleStorage = new();
+        Dictionary<uint, QuestTemplateLocale> _questTemplateLocaleStorage = new();
+        Dictionary<uint, QuestObjectivesLocale> _questObjectivesLocaleStorage = new();
+        Dictionary<uint, QuestOfferRewardLocale> _questOfferRewardLocaleStorage = new();
+        Dictionary<uint, QuestRequestItemsLocale> _questRequestItemsLocaleStorage = new();
+        Dictionary<Tuple<uint, uint>, GossipMenuItemsLocale> _gossipMenuItemsLocaleStorage = new();
+        Dictionary<uint, PageTextLocale> _pageTextLocaleStorage = new();
+        Dictionary<uint, PointOfInterestLocale> _pointOfInterestLocaleStorage = new();
+        Dictionary<int, PlayerChoiceLocale> _playerChoiceLocales = new();
 
-        List<uint> _tavernAreaTriggerStorage = new List<uint>();
-        Dictionary<uint, AreaTriggerStruct> _areaTriggerStorage = new Dictionary<uint, AreaTriggerStruct>();
-        Dictionary<ulong, AccessRequirement> _accessRequirementStorage = new Dictionary<ulong, AccessRequirement>();
-        MultiMap<ulong, DungeonEncounter> _dungeonEncounterStorage = new MultiMap<ulong, DungeonEncounter>();
-        Dictionary<uint, WorldSafeLocsEntry> _worldSafeLocs = new Dictionary<uint, WorldSafeLocsEntry>();
+        List<uint> _tavernAreaTriggerStorage = new();
+        Dictionary<uint, AreaTriggerStruct> _areaTriggerStorage = new();
+        Dictionary<ulong, AccessRequirement> _accessRequirementStorage = new();
+        MultiMap<ulong, DungeonEncounter> _dungeonEncounterStorage = new();
+        Dictionary<uint, WorldSafeLocsEntry> _worldSafeLocs = new();
 
-        Dictionary<HighGuid, ObjectGuidGenerator> _guidGenerators = new Dictionary<HighGuid, ObjectGuidGenerator>();
+        Dictionary<HighGuid, ObjectGuidGenerator> _guidGenerators = new();
         // first free id for selected id type
         uint _auctionId;
         ulong _equipmentSetGuid;
@@ -10373,7 +10373,7 @@ namespace Game
         ulong _gameObjectSpawnId;
         ulong _voidItemId;
         uint[] _playerXPperLevel;
-        Dictionary<uint, uint> _baseXPTable = new Dictionary<uint, uint>();
+        Dictionary<uint, uint> _baseXPTable = new();
         #endregion
     }
 
@@ -10667,8 +10667,8 @@ namespace Game
 
     public class CellObjectGuids
     {
-        public SortedSet<ulong> creatures = new SortedSet<ulong>();
-        public SortedSet<ulong> gameobjects = new SortedSet<ulong>();
+        public SortedSet<ulong> creatures = new();
+        public SortedSet<ulong> gameobjects = new();
     }
 
     public class GameTele
@@ -11160,7 +11160,7 @@ namespace Game
         }
 
         public uint Id;
-        public List<uint> UiMapPhaseIDs = new List<uint>();
+        public List<uint> UiMapPhaseIDs = new();
     }
 
     public class PhaseInfoStruct
@@ -11176,7 +11176,7 @@ namespace Game
         }
 
         public uint Id;
-        public List<uint> Areas = new List<uint>();
+        public List<uint> Areas = new();
     }
 
     public class PhaseAreaInfo
@@ -11187,8 +11187,8 @@ namespace Game
         }
 
         public PhaseInfoStruct PhaseInfo;
-        public List<uint> SubAreaExclusions = new List<uint>();
-        public List<Condition> Conditions = new List<Condition>();
+        public List<uint> SubAreaExclusions = new();
+        public List<Condition> Conditions = new();
     }
 
     public class SceneTemplate
@@ -11212,24 +11212,24 @@ namespace Game
 
     public class GossipMenuItemsLocale
     {
-        public StringArray OptionText = new StringArray((int)Locale.Total);
-        public StringArray BoxText = new StringArray((int)Locale.Total);
+        public StringArray OptionText = new((int)Locale.Total);
+        public StringArray BoxText = new((int)Locale.Total);
     }
 
     public class PlayerChoiceLocale
     {
-        public StringArray Question = new StringArray((int)Locale.Total);
-        public Dictionary<int /*ResponseId*/, PlayerChoiceResponseLocale> Responses = new Dictionary<int, PlayerChoiceResponseLocale>();
+        public StringArray Question = new((int)Locale.Total);
+        public Dictionary<int /*ResponseId*/, PlayerChoiceResponseLocale> Responses = new();
     }
 
     public class PlayerChoiceResponseLocale
     {
-        public StringArray Answer = new StringArray((int)Locale.Total);
-        public StringArray Header = new StringArray((int)Locale.Total);
-        public StringArray SubHeader = new StringArray((int)Locale.Total);
-        public StringArray ButtonTooltip = new StringArray((int)Locale.Total);
-        public StringArray Description = new StringArray((int)Locale.Total);
-        public StringArray Confirmation = new StringArray((int)Locale.Total);
+        public StringArray Answer = new((int)Locale.Total);
+        public StringArray Header = new((int)Locale.Total);
+        public StringArray SubHeader = new((int)Locale.Total);
+        public StringArray ButtonTooltip = new((int)Locale.Total);
+        public StringArray Description = new((int)Locale.Total);
+        public StringArray Confirmation = new((int)Locale.Total);
     }
 
     public class PlayerChoiceResponseRewardItem
@@ -11243,7 +11243,7 @@ namespace Game
         }
 
         public uint Id;
-        public List<uint> BonusListIDs = new List<uint>();
+        public List<uint> BonusListIDs = new();
         public int Quantity;
     }
 
@@ -11270,10 +11270,10 @@ namespace Game
         public ulong Money;
         public uint Xp;
 
-        public List<PlayerChoiceResponseRewardItem> Items = new List<PlayerChoiceResponseRewardItem>();
-        public List<PlayerChoiceResponseRewardEntry> Currency = new List<PlayerChoiceResponseRewardEntry>();
-        public List<PlayerChoiceResponseRewardEntry> Faction = new List<PlayerChoiceResponseRewardEntry>();
-        public List<PlayerChoiceResponseRewardItem> ItemChoices = new List<PlayerChoiceResponseRewardItem>();
+        public List<PlayerChoiceResponseRewardItem> Items = new();
+        public List<PlayerChoiceResponseRewardEntry> Currency = new();
+        public List<PlayerChoiceResponseRewardEntry> Faction = new();
+        public List<PlayerChoiceResponseRewardItem> ItemChoices = new();
     }
 
     public struct PlayerChoiceResponseMawPower
@@ -11318,7 +11318,7 @@ namespace Game
         public int UiTextureKitId;
         public uint SoundKitId;
         public string Question;
-        public List<PlayerChoiceResponse> Responses = new List<PlayerChoiceResponse>();
+        public List<PlayerChoiceResponse> Responses = new();
         public bool HideWarboardHeader;
         public bool KeepOpenAfterChoice;
     }
@@ -11333,7 +11333,7 @@ namespace Game
     public class RaceClassAvailability
     {
         public byte RaceID;
-        public List<ClassAvailability> Classes = new List<ClassAvailability>();
+        public List<ClassAvailability> Classes = new();
     }
 
     public class RaceUnlockRequirement

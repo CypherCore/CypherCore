@@ -43,7 +43,7 @@ namespace Game.Networking.Packets
             Cast.Read(_worldPacket);
         }
 
-        public SpellCastRequest Cast = new SpellCastRequest();
+        public SpellCastRequest Cast = new();
     }
 
     class AccountToyUpdate : ServerPacket
@@ -73,7 +73,7 @@ namespace Game.Networking.Packets
         }
 
         public bool IsFullUpdate = false;
-        public Dictionary<uint, ToyFlags> Toys = new Dictionary<uint, ToyFlags>();
+        public Dictionary<uint, ToyFlags> Toys = new();
     }
 
     class ToyClearFanfare : ClientPacket

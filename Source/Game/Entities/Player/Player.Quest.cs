@@ -169,7 +169,7 @@ namespace Game.Entities
                     SetQuestCompletedBit(questBit, false);
             }
 
-            DailyQuestsReset dailyQuestsReset = new DailyQuestsReset();
+            DailyQuestsReset dailyQuestsReset = new();
             dailyQuestsReset.Count = m_activePlayerData.DailyQuestsCompleted.Size();
             SendPacket(dailyQuestsReset);
 
@@ -453,7 +453,7 @@ namespace Game.Entities
             if (srcitem > 0)
             {
                 uint count = quest.SourceItemIdCount;
-                List<ItemPosCount> dest = new List<ItemPosCount>();
+                List<ItemPosCount> dest = new();
                 InventoryResult msg2 = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, srcitem, count);
 
                 // player already have max number (in most case 1) source item, no additional item needed and quest can be added.
@@ -582,7 +582,7 @@ namespace Game.Entities
             if (!CanRewardQuest(quest, msg))
                 return false;
 
-            List<ItemPosCount> dest = new List<ItemPosCount>();
+            List<ItemPosCount> dest = new();
             if (quest.GetRewChoiceItemsCount() > 0)
             {
                 switch (rewardType)
@@ -915,7 +915,7 @@ namespace Game.Entities
                     if (CanSelectQuestPackageItem(questPackageItem))
                     {
                         hasFilteredQuestPackageReward = true;
-                        List<ItemPosCount> dest = new List<ItemPosCount>();
+                        List<ItemPosCount> dest = new();
                         if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemQuantity) == InventoryResult.Ok)
                         {
                             Item item = StoreNewItem(dest, questPackageItem.ItemID, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(questPackageItem.ItemID));
@@ -935,7 +935,7 @@ namespace Game.Entities
                         if (onlyItemId != 0 && questPackageItem.ItemID != onlyItemId)
                             continue;
 
-                        List<ItemPosCount> dest = new List<ItemPosCount>();
+                        List<ItemPosCount> dest = new();
                         if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, questPackageItem.ItemID, questPackageItem.ItemQuantity) == InventoryResult.Ok)
                         {
                             Item item = StoreNewItem(dest, questPackageItem.ItemID, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(questPackageItem.ItemID));
@@ -989,7 +989,7 @@ namespace Game.Entities
                     uint itemId = quest.RewardItemId[i];
                     if (itemId != 0)
                     {
-                        List<ItemPosCount> dest = new List<ItemPosCount>();
+                        List<ItemPosCount> dest = new();
                         if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, itemId, quest.RewardItemCount[i]) == InventoryResult.Ok)
                         {
                             Item item = StoreNewItem(dest, itemId, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(itemId));
@@ -1011,7 +1011,7 @@ namespace Game.Entities
                         {
                             if (quest.RewardChoiceItemId[i] != 0 && quest.RewardChoiceItemType[i] == LootItemType.Item && quest.RewardChoiceItemId[i] == rewardId)
                             {
-                                List<ItemPosCount> dest = new List<ItemPosCount>();
+                                List<ItemPosCount> dest = new();
                                 if (CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, rewardId, quest.RewardChoiceItemCount[i]) == InventoryResult.Ok)
                                 {
                                     Item item = StoreNewItem(dest, rewardId, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(rewardId));
@@ -1085,7 +1085,7 @@ namespace Game.Entities
             uint mail_template_id = quest.RewardMailTemplateId;
             if (mail_template_id != 0)
             {
-                SQLTransaction trans = new SQLTransaction();
+                SQLTransaction trans = new();
                 // @todo Poor design of mail system
                 uint questMailSender = quest.RewardMailSenderEntry;
                 if (questMailSender != 0)
@@ -1656,7 +1656,7 @@ namespace Game.Entities
                 if (count <= 0)
                     count = 1;
 
-                List<ItemPosCount> dest = new List<ItemPosCount>();
+                List<ItemPosCount> dest = new();
                 InventoryResult msg = CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, srcitem, count);
                 if (msg == InventoryResult.Ok)
                 {
@@ -2775,7 +2775,7 @@ namespace Game.Entities
         {
             if (quest != null)
             {
-                QuestUpdateComplete data = new QuestUpdateComplete();
+                QuestUpdateComplete data = new();
                 data.QuestID = quest.Id;
                 SendPacket(data);
             }
@@ -2798,7 +2798,7 @@ namespace Game.Entities
                 moneyReward = (uint)(GetQuestMoneyReward(quest) + (int)(quest.GetRewMoneyMaxLevel() * WorldConfig.GetFloatValue(WorldCfg.RateDropMoney)));
             }
 
-            QuestGiverQuestComplete packet = new QuestGiverQuestComplete();
+            QuestGiverQuestComplete packet = new();
 
             packet.QuestID = questId;
             packet.MoneyReward = moneyReward;
@@ -2825,7 +2825,7 @@ namespace Game.Entities
         {
             if (questId != 0)
             {
-                QuestGiverQuestFailed questGiverQuestFailed = new QuestGiverQuestFailed();
+                QuestGiverQuestFailed questGiverQuestFailed = new();
                 questGiverQuestFailed.QuestID = questId;
                 questGiverQuestFailed.Reason = reason; // failed reason (valid reasons: 4, 16, 50, 17, other values show default message)
                 SendPacket(questGiverQuestFailed);
@@ -2836,7 +2836,7 @@ namespace Game.Entities
         {
             if (questId != 0)
             {
-                QuestUpdateFailedTimer questUpdateFailedTimer = new QuestUpdateFailedTimer();
+                QuestUpdateFailedTimer questUpdateFailedTimer = new();
                 questUpdateFailedTimer.QuestID = questId;
                 SendPacket(questUpdateFailedTimer);
             }
@@ -2844,7 +2844,7 @@ namespace Game.Entities
 
         public void SendCanTakeQuestResponse(QuestFailedReasons reason, bool sendErrorMessage = true, string reasonText = "")
         {
-            QuestGiverInvalidQuest questGiverInvalidQuest = new QuestGiverInvalidQuest();
+            QuestGiverInvalidQuest questGiverInvalidQuest = new();
 
             questGiverInvalidQuest.Reason = reason;
             questGiverInvalidQuest.SendErrorMessage = sendErrorMessage;
@@ -2858,7 +2858,7 @@ namespace Game.Entities
             if (!receiver)
                 return;
 
-            QuestConfirmAcceptResponse packet = new QuestConfirmAcceptResponse();
+            QuestConfirmAcceptResponse packet = new();
 
             packet.QuestTitle = quest.LogTitle;
 
@@ -2880,7 +2880,7 @@ namespace Game.Entities
         {
             if (player != null)
             {
-                QuestPushResultResponse data = new QuestPushResultResponse();
+                QuestPushResultResponse data = new();
                 data.SenderGUID = player.GetGUID();
                 data.Result = reason;
                 SendPacket(data);
@@ -2889,7 +2889,7 @@ namespace Game.Entities
 
         void SendQuestUpdateAddCredit(Quest quest, ObjectGuid guid, QuestObjective obj, uint count)
         {
-            QuestUpdateAddCredit packet = new QuestUpdateAddCredit();
+            QuestUpdateAddCredit packet = new();
             packet.VictimGUID = guid;
             packet.QuestID = quest.Id;
             packet.ObjectID = obj.ObjectID;
@@ -2901,7 +2901,7 @@ namespace Game.Entities
 
         public void SendQuestUpdateAddCreditSimple(QuestObjective obj)
         {
-            QuestUpdateAddCreditSimple packet = new QuestUpdateAddCreditSimple();
+            QuestUpdateAddCreditSimple packet = new();
             packet.QuestID = obj.QuestID;
             packet.ObjectID = obj.ObjectID;
             packet.ObjectiveType = obj.Type;
@@ -2910,7 +2910,7 @@ namespace Game.Entities
 
         public void SendQuestUpdateAddPlayer(Quest quest, uint newCount)
         {
-            QuestUpdateAddPvPCredit packet = new QuestUpdateAddPvPCredit();
+            QuestUpdateAddPvPCredit packet = new();
             packet.QuestID = quest.Id;
             packet.Count = (ushort)newCount;
             SendPacket(packet);
@@ -2918,7 +2918,7 @@ namespace Game.Entities
 
         public void SendQuestGiverStatusMultiple()
         {
-            QuestGiverStatusMultiple response = new QuestGiverStatusMultiple();
+            QuestGiverStatusMultiple response = new();
 
             foreach (var itr in m_clientGUIDs)
             {
@@ -3005,7 +3005,7 @@ namespace Game.Entities
             if (m_clientGUIDs.Empty())
                 return;
 
-            UpdateData udata = new UpdateData(GetMapId());
+            UpdateData udata = new(GetMapId());
             UpdateObject packet;
             foreach (var guid in m_clientGUIDs)
             {
@@ -3022,8 +3022,8 @@ namespace Game.Entities
                             case GameObjectTypes.Generic:
                                 if (Global.ObjectMgr.IsGameObjectForQuests(obj.GetEntry()))
                                 {
-                                    ObjectFieldData objMask = new ObjectFieldData();
-                                    GameObjectFieldData goMask = new GameObjectFieldData();
+                                    ObjectFieldData objMask = new();
+                                    GameObjectFieldData goMask = new();
                                     objMask.MarkChanged(obj.m_objectData.DynamicFlags);
                                     obj.BuildValuesUpdateForPlayerWithMask(udata, objMask._changesMask, goMask._changesMask, this);
                                 }
@@ -3058,8 +3058,8 @@ namespace Game.Entities
 
                             if (buildUpdateBlock)
                             {
-                                ObjectFieldData objMask = new ObjectFieldData();
-                                UnitData unitMask = new UnitData();
+                                ObjectFieldData objMask = new();
+                                UnitData unitMask = new();
                                 unitMask.MarkChanged(obj.m_unitData.NpcFlags, 0); // NpcFlags[0] has UNIT_NPC_FLAG_SPELLCLICK
                                 obj.BuildValuesUpdateForPlayerWithMask(udata, objMask._changesMask, unitMask._changesMask, this);
                                 break;

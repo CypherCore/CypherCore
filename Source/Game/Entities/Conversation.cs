@@ -104,7 +104,7 @@ namespace Game.Entities
 
             ulong lowGuid = creator.GetMap().GenerateLowGuid(HighGuid.Conversation);
 
-            Conversation conversation = new Conversation();
+            Conversation conversation = new();
             if (!conversation.Create(lowGuid, conversationEntry, creator.GetMap(), creator, pos, participants, spellInfo))
                 return null;
 
@@ -139,7 +139,7 @@ namespace Game.Entities
                 {
                     if (actor != null)
                     {
-                        ConversationActor actorField = new ConversationActor();
+                        ConversationActor actorField = new();
                         actorField.CreatureID = actor.CreatureId;
                         actorField.CreatureDisplayInfoID = actor.CreatureModelId;
                         actorField.Id = (int)actor.Id;
@@ -168,13 +168,13 @@ namespace Game.Entities
 
             Global.ScriptMgr.OnConversationCreate(this, creator);
 
-            List<ushort> actorIndices = new List<ushort>();
-            List<ConversationLine> lines = new List<ConversationLine>();
+            List<ushort> actorIndices = new();
+            List<ConversationLine> lines = new();
             foreach (ConversationLineTemplate line in conversationTemplate.Lines)
             {
                 actorIndices.Add(line.ActorIdx);
 
-                ConversationLine lineField = new ConversationLine();
+                ConversationLine lineField = new();
                 lineField.ConversationLineID = line.Id;
                 lineField.StartTime = line.StartTime;
                 lineField.UiCameraID = line.UiCameraID;
@@ -225,7 +225,7 @@ namespace Game.Entities
         public override void BuildValuesCreate(WorldPacket data, Player target)
         {
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new WorldPacket();
+            WorldPacket buffer = new();
 
             m_objectData.WriteCreate(buffer, flags, this, target);
             m_conversationData.WriteCreate(buffer, flags, this, target);
@@ -238,7 +238,7 @@ namespace Game.Entities
         public override void BuildValuesUpdate(WorldPacket data, Player target)
         {
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new WorldPacket();
+            WorldPacket buffer = new();
 
             buffer.WriteUInt32(m_values.GetChangedObjectTypeMask());
             if (m_values.HasChanged(TypeId.Object))
@@ -253,14 +253,14 @@ namespace Game.Entities
 
         void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedConversationMask, Player target)
         {
-            UpdateMask valuesMask = new UpdateMask((int)TypeId.Max);
+            UpdateMask valuesMask = new((int)TypeId.Max);
             if (requestedObjectMask.IsAnySet())
                 valuesMask.Set((int)TypeId.Object);
 
             if (requestedConversationMask.IsAnySet())
                 valuesMask.Set((int)TypeId.Conversation);
 
-            WorldPacket buffer = new WorldPacket();
+            WorldPacket buffer = new();
             buffer.WriteUInt32(valuesMask.GetBlock(0));
 
             if (valuesMask[(int)TypeId.Object])
@@ -269,7 +269,7 @@ namespace Game.Entities
             if (valuesMask[(int)TypeId.Conversation])
                 m_conversationData.WriteUpdate(buffer, requestedConversationMask, true, this, target);
 
-            WorldPacket buffer1 = new WorldPacket();
+            WorldPacket buffer1 = new();
             buffer1.WriteUInt8((byte)UpdateType.Values);
             buffer1.WritePackedGuid(GetGUID());
             buffer1.WriteUInt32(buffer.GetSize());
@@ -297,10 +297,10 @@ namespace Game.Entities
 
         ConversationData m_conversationData;
 
-        Position _stationaryPosition = new Position();
+        Position _stationaryPosition = new();
         ObjectGuid _creatorGuid;
         uint _duration;
         uint _textureKitId;
-        List<ObjectGuid> _participants = new List<ObjectGuid>();
+        List<ObjectGuid> _participants = new();
     }
 }

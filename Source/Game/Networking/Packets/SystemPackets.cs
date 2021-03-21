@@ -296,7 +296,7 @@ namespace Game.Networking.Packets
         public bool LiveRegionKeyBindingsCopyEnabled = false;
         public bool Unknown901CheckoutRelated = false; // NYI
         public Optional<EuropaTicketConfig> EuropaTicketSystemStatus;
-        public List<int> LiveRegionCharacterCopySourceRegions = new List<int>();
+        public List<int> LiveRegionCharacterCopySourceRegions = new();
         public uint TokenPollTimeSeconds;     // NYI
         public long TokenBalanceAmount;     // NYI 
         public int MaxCharactersPerRealm;

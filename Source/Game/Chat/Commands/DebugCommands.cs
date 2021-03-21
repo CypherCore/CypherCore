@@ -542,7 +542,7 @@ namespace Game.Chat
                     target.DestroyForNearbyPlayers();  // Force new SMSG_UPDATE_OBJECT:CreateObject
                 else
                 {
-                    MoveUpdate moveUpdate = new MoveUpdate();
+                    MoveUpdate moveUpdate = new();
                     moveUpdate.Status = target.m_movementInfo;
                     target.SendMessageToSet(moveUpdate, true);
                 }
@@ -775,7 +775,7 @@ namespace Game.Chat
                 return false;
 
             Map map = handler.GetSession().GetPlayer().GetMap();
-            Position pos = new Position(x, y, z, o);
+            Position pos = new(x, y, z, o);
 
             Creature creature = Creature.CreateCreature(entry, map, pos, id);
             if (!creature)
@@ -1075,7 +1075,7 @@ namespace Game.Chat
 
                 string name = "test";
                 byte code = args.NextByte();
-                ChannelNotify packet = new ChannelNotify();
+                ChannelNotify packet = new();
                 packet.Type = (ChatNotify)code;
                 packet.Channel = name;
                 handler.GetSession().SendPacket(packet);
@@ -1090,7 +1090,7 @@ namespace Game.Chat
 
                 string msg = "testtest";
                 byte type = args.NextByte();
-                ChatPkt data = new ChatPkt();
+                ChatPkt data = new();
                 data.Initialize((ChatMsg)type, Language.Universal, handler.GetSession().GetPlayer(), handler.GetSession().GetPlayer(), msg, 0, "chan");
                 handler.GetSession().SendPacket(data);
                 return true;
@@ -1111,7 +1111,7 @@ namespace Game.Chat
             static bool HandleDebugSendLargePacketCommand(StringArguments args, CommandHandler handler)
             {
                 const string stuffingString = "This is a dummy string to push the packet's size beyond 128000 bytes. ";
-                StringBuilder ss = new StringBuilder();
+                StringBuilder ss = new();
                 while (ss.Length < 128000)
                     ss.Append(stuffingString);
                 handler.SendSysMessage(ss.ToString());
@@ -1171,7 +1171,7 @@ namespace Game.Chat
                 if (args.Empty())
                     return false;
 
-                PhaseShift phaseShift = new PhaseShift();
+                PhaseShift phaseShift = new();
 
                 if (uint.TryParse(args.NextString(), out uint terrain))
                     phaseShift.AddVisibleMapId(terrain, null);
@@ -1198,7 +1198,7 @@ namespace Game.Chat
                 int failArg1 = args.NextInt32();
                 int failArg2 = args.NextInt32();
 
-                CastFailed castFailed = new CastFailed();
+                CastFailed castFailed = new();
                 castFailed.CastID = ObjectGuid.Empty;
                 castFailed.SpellID = 133;
                 castFailed.Reason = (SpellCastResult)failNum;

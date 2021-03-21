@@ -48,7 +48,7 @@ namespace Game.Movement
         {
             int numWp = wp.Length;
             Cypher.Assert(numWp > 1, "Every path must have source & destination");
-            MoveSplineInit init = new MoveSplineInit(me);
+            MoveSplineInit init = new(me);
             if (numWp > 2)
                 init.MovebyPath(wp.ToArray());
             else
@@ -174,7 +174,7 @@ namespace Game.Movement
         public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.SplineChain; }
 
         uint _id;
-        List<SplineChainLink> _chain = new List<SplineChainLink>();
+        List<SplineChainLink> _chain = new();
         byte _chainSize;
         bool _walk;
         bool finished;

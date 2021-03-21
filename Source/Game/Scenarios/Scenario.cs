@@ -109,7 +109,7 @@ namespace Game.Scenarios
             if (step != null)
                 SetStepState(step, ScenarioStepState.InProgress);
 
-            ScenarioState scenarioState = new ScenarioState();
+            ScenarioState scenarioState = new();
             BuildScenarioState(scenarioState);
             SendPacket(scenarioState);
         }
@@ -155,7 +155,7 @@ namespace Game.Scenarios
 
         public override void SendCriteriaUpdate(Criteria criteria, CriteriaProgress progress, uint timeElapsed, bool timedCompleted)
         {
-            ScenarioProgressUpdate progressUpdate = new ScenarioProgressUpdate();
+            ScenarioProgressUpdate progressUpdate = new();
             progressUpdate.CriteriaProgress.Id = criteria.Id;
             progressUpdate.CriteriaProgress.Quantity = progress.Counter;
             progressUpdate.CriteriaProgress.Player = progress.PlayerGUID;
@@ -279,14 +279,14 @@ namespace Game.Scenarios
 
         public void SendScenarioState(Player player)
         {
-            ScenarioState scenarioState = new ScenarioState();
+            ScenarioState scenarioState = new();
             BuildScenarioState(scenarioState);
             player.SendPacket(scenarioState);
         }
 
         List<BonusObjectiveData> GetBonusObjectivesData()
         {
-            List<BonusObjectiveData> bonusObjectivesData = new List<BonusObjectiveData>();
+            List<BonusObjectiveData> bonusObjectivesData = new();
             foreach (var step in _data.Steps.Values)
             {
                 if (!step.IsBonusObjective())
@@ -306,13 +306,13 @@ namespace Game.Scenarios
 
         List<CriteriaProgressPkt> GetCriteriasProgress()
         {
-            List<CriteriaProgressPkt> criteriasProgress = new List<CriteriaProgressPkt>();
+            List<CriteriaProgressPkt> criteriasProgress = new();
 
             if (!_criteriaProgress.Empty())
             {
                 foreach (var pair in _criteriaProgress)
                 {
-                    CriteriaProgressPkt criteriaProgress = new CriteriaProgressPkt();
+                    CriteriaProgressPkt criteriaProgress = new();
                     criteriaProgress.Id = pair.Key;
                     criteriaProgress.Quantity = pair.Value.Counter;
                     criteriaProgress.Date = pair.Value.Date;
@@ -331,7 +331,7 @@ namespace Game.Scenarios
 
         void SendBootPlayer(Player player)
         {
-            ScenarioVacate scenarioBoot = new ScenarioVacate();
+            ScenarioVacate scenarioBoot = new();
             scenarioBoot.ScenarioID = (int)_data.Entry.Id;
             player.SendPacket(scenarioBoot);
         }
@@ -348,10 +348,10 @@ namespace Game.Scenarios
         public override void AfterCriteriaTreeUpdate(CriteriaTree tree, Player referencePlayer) { }
         public override void SendAllData(Player receiver) { }
 
-        List<ObjectGuid> _players = new List<ObjectGuid>();
+        List<ObjectGuid> _players = new();
         ScenarioData _data;
         ScenarioStepRecord _currentstep;
-        Dictionary<ScenarioStepRecord, ScenarioStepState> _stepStates = new Dictionary<ScenarioStepRecord, ScenarioStepState>();
+        Dictionary<ScenarioStepRecord, ScenarioStepState> _stepStates = new();
     }
 
     public enum ScenarioStepState

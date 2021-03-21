@@ -55,10 +55,10 @@ namespace Game.Movement
             if (!GridDefines.IsValidMapCoord(destX, destY, destZ) || !GridDefines.IsValidMapCoord(x, y, z))
                 return false;
 
-            Vector3 dest = new Vector3(destX, destY, destZ);
+            Vector3 dest = new(destX, destY, destZ);
             SetEndPosition(dest);
 
-            Vector3 start = new Vector3(x, y, z);
+            Vector3 start = new(x, y, z);
             SetStartPosition(start);
 
             _forceDestination = forceDest;
@@ -477,8 +477,8 @@ namespace Game.Movement
                 Array.Copy(startPoint, pathPoints, 3); // first point
 
                 // path has to be split into polygons with dist SMOOTH_PATH_STEP_SIZE between them
-                Vector3 startVec = new Vector3(startPoint[0], startPoint[1], startPoint[2]);
-                Vector3 endVec = new Vector3(endPoint[0], endPoint[1], endPoint[2]);
+                Vector3 startVec = new(startPoint[0], startPoint[1], startPoint[2]);
+                Vector3 endVec = new(endPoint[0], endPoint[1], endPoint[2]);
                 Vector3 diffVec = (endVec - startVec);
                 Vector3 prevVec = startVec;
                 float len = diffVec.GetLength();
@@ -976,7 +976,7 @@ namespace Game.Movement
         Vector3 _endPosition;
         PathType pathType;
 
-        Detour.dtQueryFilter _filter = new Detour.dtQueryFilter();
+        Detour.dtQueryFilter _filter = new();
         Detour.dtNavMeshQuery _navMeshQuery;
         Detour.dtNavMesh _navMesh;
     }

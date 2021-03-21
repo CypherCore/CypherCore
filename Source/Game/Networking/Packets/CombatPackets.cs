@@ -111,7 +111,7 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid UnitGUID;
-        public List<ThreatInfo> ThreatList = new List<ThreatInfo>();
+        public List<ThreatInfo> ThreatList = new();
     }
 
     public class HighestThreatUpdate : ServerPacket
@@ -131,7 +131,7 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid UnitGUID;
-        public List<ThreatInfo> ThreatList = new List<ThreatInfo>();
+        public List<ThreatInfo> ThreatList = new();
         public ObjectGuid HighestThreatGUID;
     }
 

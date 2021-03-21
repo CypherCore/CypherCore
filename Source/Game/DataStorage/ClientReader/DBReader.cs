@@ -37,7 +37,7 @@ namespace Game.DataStorage
 
         public static DB6Storage<T> Read<T>(BitSet availableDb2Locales, string db2Path, string fileName, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale, ref uint loadedFileCount) where T : new()
         {
-            DB6Storage<T> storage = new DB6Storage<T>();
+            DB6Storage<T> storage = new();
 
             if (!File.Exists(db2Path + fileName))
             {
@@ -45,7 +45,7 @@ namespace Game.DataStorage
                 return storage;
             }
 
-            DBReader reader = new DBReader();
+            DBReader reader = new();
             using (var stream = new FileStream(db2Path + fileName, FileMode.Open))
             {
                 if (!reader.Load(stream))
@@ -118,7 +118,7 @@ namespace Game.DataStorage
                 {
                     if (ColumnMeta[i].CompressionType == DB2ColumnCompression.Common)
                     {
-                        Dictionary<int, Value32> commonValues = new Dictionary<int, Value32>();
+                        Dictionary<int, Value32> commonValues = new();
                         CommonData[i] = commonValues;
 
                         for (int j = 0; j < ColumnMeta[i].AdditionalDataSize / 8; j++)
@@ -177,7 +177,7 @@ namespace Game.DataStorage
                     bool isIndexEmpty = Header.HasIndexTable() && indexData.Count(i => i == 0) == sections[sectionIndex].NumRecords;
 
                     // duplicate rows data
-                    Dictionary<int, int> copyData = new Dictionary<int, int>();
+                    Dictionary<int, int> copyData = new();
 
                     for (int i = 0; i < sections[sectionIndex].NumCopyRecords; i++)
                         copyData[reader.ReadInt32()] = reader.ReadInt32();
@@ -222,7 +222,7 @@ namespace Game.DataStorage
                         //indexData = sparseIndexData;
                     }
 
-                    BitReader bitReader = new BitReader(recordsData);
+                    BitReader bitReader = new(recordsData);
 
                     for (int i = 0; i < sections[sectionIndex].NumRecords; ++i)
                     {
@@ -262,7 +262,7 @@ namespace Game.DataStorage
         internal Value32[][] PalletData;
         internal Dictionary<int, Value32>[] CommonData;
 
-        Dictionary<int, WDC3Row> _records = new Dictionary<int, WDC3Row>();
+        Dictionary<int, WDC3Row> _records = new();
     }
 
     class WDC3Row
@@ -393,7 +393,7 @@ namespace Game.DataStorage
             _data.Offset = _dataOffset;
 
             int fieldIndex = 0;
-            T obj = new T();
+            T obj = new();
 
             foreach (var f in typeof(T).GetFields())
             {
@@ -533,7 +533,7 @@ namespace Game.DataStorage
                         case TypeCode.Object:
                             if (type == typeof(LocalizedString))
                             {
-                                LocalizedString localized = new LocalizedString();
+                                LocalizedString localized = new();
                                 if (_stringsTable == null)
                                 {
                                     localized[Locale.enUS] = _data.ReadCString();
@@ -749,6 +749,6 @@ namespace Game.DataStorage
             }
         }
 
-        StringArray stringStorage = new StringArray((int)Locale.Total);
+        StringArray stringStorage = new((int)Locale.Total);
     }
 }

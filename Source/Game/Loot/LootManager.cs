@@ -71,7 +71,7 @@ namespace Game.Loots
 
             uint oldMSTime = Time.GetMSTime();
 
-            List<uint> lootIdSet, lootIdSetUsed = new List<uint>();
+            List<uint> lootIdSet, lootIdSetUsed = new();
             uint count = Creature.LoadAndCollectLootIds(out lootIdSet);
 
             // Remove real entries and check loot existence
@@ -109,7 +109,7 @@ namespace Game.Loots
 
             uint oldMSTime = Time.GetMSTime();
 
-            List<uint> lootIdSet, lootIdSetUsed = new List<uint>();
+            List<uint> lootIdSet, lootIdSetUsed = new();
             uint count = Disenchant.LoadAndCollectLootIds(out lootIdSet);
 
             foreach (var disenchant in CliDB.ItemDisenchantLootStorage.Values)
@@ -162,7 +162,7 @@ namespace Game.Loots
 
             uint oldMSTime = Time.GetMSTime();
 
-            List<uint> lootIdSet, lootIdSetUsed = new List<uint>();
+            List<uint> lootIdSet, lootIdSetUsed = new();
             uint count = Gameobject.LoadAndCollectLootIds(out lootIdSet);
 
             // remove real entries and check existence loot
@@ -251,7 +251,7 @@ namespace Game.Loots
             uint oldMSTime = Time.GetMSTime();
 
             List<uint> lootIdSet;
-            List<uint> lootIdSetUsed = new List<uint>();
+            List<uint> lootIdSetUsed = new();
             uint count = Pickpocketing.LoadAndCollectLootIds(out lootIdSet);
 
             // Remove real entries and check loot existence
@@ -339,7 +339,7 @@ namespace Game.Loots
             uint oldMSTime = Time.GetMSTime();
 
             List<uint> lootIdSet;
-            List<uint> lootIdSetUsed = new List<uint>();
+            List<uint> lootIdSetUsed = new();
             uint count = Skinning.LoadAndCollectLootIds(out lootIdSet);
 
             // remove real entries and check existence loot
@@ -614,7 +614,7 @@ namespace Game.Loots
         {
             foreach (var pair in m_LootTemplates)
             {
-                List<Condition> empty = new List<Condition>();
+                List<Condition> empty = new();
                 pair.Value.CopyConditions(empty);
             }
         }
@@ -661,7 +661,7 @@ namespace Game.Loots
                     return 0;
                 }
 
-                LootStoreItem storeitem = new LootStoreItem(item, reference, chance, needsquest, lootmode, groupid, mincount, maxcount);
+                LootStoreItem storeitem = new(item, reference, chance, needsquest, lootmode, groupid, mincount, maxcount);
 
                 if (!storeitem.IsValid(this, entry))            // Validity checks
                     continue;
@@ -686,7 +686,7 @@ namespace Game.Loots
             m_LootTemplates.Clear();
         }
 
-        LootTemplateMap m_LootTemplates = new LootTemplateMap();
+        LootTemplateMap m_LootTemplates = new();
         string m_name;
         string m_entryName;
         bool m_ratesAllowed;
@@ -932,8 +932,8 @@ namespace Game.Loots
             return false;//not found or not reference
         }
 
-        LootStoreItemList Entries = new LootStoreItemList();                          // not grouped only
-        Dictionary<int, LootGroup> Groups = new Dictionary<int,LootGroup>();                           // groups have own (optimised) processing, grouped entries go there
+        LootStoreItemList Entries = new();                          // not grouped only
+        Dictionary<int, LootGroup> Groups = new();                           // groups have own (optimised) processing, grouped entries go there
 
         public class LootGroup                               // A set of loot definitions for items (refs are not allowed)
         {
@@ -1042,8 +1042,8 @@ namespace Game.Loots
                     i.conditions.Clear();
             }
 
-            LootStoreItemList ExplicitlyChanced = new LootStoreItemList();                // Entries with chances defined in DB
-            LootStoreItemList EqualChanced = new LootStoreItemList();                     // Zero chances - every entry takes the same chance
+            LootStoreItemList ExplicitlyChanced = new();                // Entries with chances defined in DB
+            LootStoreItemList EqualChanced = new();                     // Zero chances - every entry takes the same chance
 
             LootStoreItem Roll(Loot loot, ushort lootMode)
             {

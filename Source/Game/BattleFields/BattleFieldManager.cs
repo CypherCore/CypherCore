@@ -145,10 +145,10 @@ namespace Game.BattleFields
 
         // contains all initiated battlefield events
         // used when initing / cleaning up
-        List<BattleField> _battlefieldSet = new List<BattleField>();
+        List<BattleField> _battlefieldSet = new();
         // maps the zone ids to an battlefield event
         // used in player event handling
-        Dictionary<uint, BattleField> _battlefieldMap = new Dictionary<uint, BattleField>();
+        Dictionary<uint, BattleField> _battlefieldMap = new();
         // update interval
         uint _updateTimer;
     }

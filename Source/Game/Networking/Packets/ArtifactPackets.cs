@@ -42,7 +42,7 @@ namespace Game.Networking.Packets
 
         public ObjectGuid ArtifactGUID;
         public ObjectGuid ForgeGUID;
-        public Array<ArtifactPowerChoice> PowerChoices = new Array<ArtifactPowerChoice>(1);
+        public Array<ArtifactPowerChoice> PowerChoices = new(1);
 
         public struct ArtifactPowerChoice
         {

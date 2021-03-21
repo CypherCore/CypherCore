@@ -115,7 +115,7 @@ namespace Game
                 }
             }
 
-            SpellCastTargets targets = new SpellCastTargets(user, packet.Cast);
+            SpellCastTargets targets = new(user, packet.Cast);
 
             // Note: If script stop casting it must send appropriate data to client to prevent stuck item in gray state.
             if (!Global.ScriptMgr.OnItemUse(user, item, targets, packet.Cast.CastID))
@@ -214,7 +214,7 @@ namespace Game
                 return;
             }
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
 
             uint entry = result.Read<uint>(0);
             uint flags = result.Read<uint>(1);
@@ -313,7 +313,7 @@ namespace Game
                 return;
 
             // client provided targets
-            SpellCastTargets targets = new SpellCastTargets(caster, cast.Cast);
+            SpellCastTargets targets = new(caster, cast.Cast);
 
             // auto-selection buff level base at target level (in spellInfo)
             if (targets.GetUnitTarget() != null)
@@ -328,9 +328,9 @@ namespace Game
             if (cast.Cast.MoveUpdate.HasValue)
                 HandleMovementOpcode(ClientOpcodes.MoveStop, cast.Cast.MoveUpdate.Value);
 
-            Spell spell = new Spell(caster, spellInfo, TriggerCastFlags.None, ObjectGuid.Empty, false);
+            Spell spell = new(caster, spellInfo, TriggerCastFlags.None, ObjectGuid.Empty, false);
 
-            SpellPrepare spellPrepare = new SpellPrepare();
+            SpellPrepare spellPrepare = new();
             spellPrepare.ClientCastID = cast.Cast.CastID;
             spellPrepare.ServerCastID = spell.m_castId;
             SendPacket(spellPrepare);
@@ -522,7 +522,7 @@ namespace Game
             Player player = creator.ToPlayer();
             if (player)
             {
-                MirrorImageComponentedData mirrorImageComponentedData = new MirrorImageComponentedData();
+                MirrorImageComponentedData mirrorImageComponentedData = new();
                 mirrorImageComponentedData.UnitGUID = guid;
                 mirrorImageComponentedData.DisplayID = (int)creator.GetDisplayId();
                 mirrorImageComponentedData.RaceID = (byte)creator.GetRace();
@@ -572,7 +572,7 @@ namespace Game
             }
             else
             {
-                MirrorImageCreatureData data = new MirrorImageCreatureData();
+                MirrorImageCreatureData data = new();
                 data.UnitGUID = guid;
                 data.DisplayID = (int)creator.GetDisplayId();
                 SendPacket(data);
@@ -597,7 +597,7 @@ namespace Game
             // we changed dest, recalculate flight time
             spell.RecalculateDelayMomentForDst();
 
-            NotifyMissileTrajectoryCollision data = new NotifyMissileTrajectoryCollision();
+            NotifyMissileTrajectoryCollision data = new();
             data.Caster = packet.Target;
             data.CastID = packet.CastID;
             data.CollisionPos = packet.CollisionPos;

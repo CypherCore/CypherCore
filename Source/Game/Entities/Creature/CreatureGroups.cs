@@ -43,7 +43,7 @@ namespace Game.Entities
             else
             {
                 Log.outDebug(LogFilter.Unit, "Group not found: {0}. Creating new group.", leaderGuid);
-                CreatureGroup group = new CreatureGroup(leaderGuid);
+                CreatureGroup group = new(leaderGuid);
                 map.CreatureGroupHolder[leaderGuid] = group;
                 group.AddMember(member);
             }
@@ -126,7 +126,7 @@ namespace Game.Entities
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} creatures in formations in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        public static Dictionary<ulong, FormationInfo> CreatureGroupMap = new Dictionary<ulong, FormationInfo>();
+        public static Dictionary<ulong, FormationInfo> CreatureGroupMap = new();
     }
 
     public class FormationInfo
@@ -251,7 +251,7 @@ namespace Game.Entities
                 if (!member.IsFlying())
                     member.UpdateGroundPositionZ(dx, dy, ref dz);
 
-                Position point = new Position(dx, dy, dz, destination.GetOrientation());
+                Position point = new(dx, dy, dz, destination.GetOrientation());
 
                 member.GetMotionMaster().MoveFormation(id, point, moveType, !member.IsWithinDist(m_leader, dist + 5.0f), orientation);
                 member.SetHomePosition(dx, dy, dz, pathangle);
@@ -279,7 +279,7 @@ namespace Game.Entities
         public bool IsLeader(Creature creature) { return m_leader == creature; }
         
         Creature m_leader;
-        Dictionary<Creature, FormationInfo> m_members = new Dictionary<Creature, FormationInfo>();
+        Dictionary<Creature, FormationInfo> m_members = new();
 
         ulong m_groupID;
         bool m_Formed;

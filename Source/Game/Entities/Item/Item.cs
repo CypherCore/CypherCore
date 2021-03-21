@@ -159,7 +159,7 @@ namespace Game.Entities
                         stmt.AddValue(++index, GetCount());
                         stmt.AddValue(++index, (uint)m_itemData.Expiration);
 
-                        StringBuilder ss = new StringBuilder();
+                        StringBuilder ss = new();
                         for (byte i = 0; i < m_itemData.SpellCharges.GetSize() && i < _bonusData.EffectCount; ++i)
                             ss.AppendFormat("{0} ", GetSpellCharges(i));
 
@@ -215,7 +215,7 @@ namespace Game.Entities
                                 if (gemData.ItemId != 0)
                                 {
                                     stmt.AddValue(1 + i * gemFields, (uint)gemData.ItemId);
-                                    StringBuilder gemBonusListIDs = new StringBuilder();
+                                    StringBuilder gemBonusListIDs = new();
                                     foreach (ushort bonusListID in gemData.BonusListIDs)
                                     {
                                         if (bonusListID != 0)
@@ -446,7 +446,7 @@ namespace Game.Entities
             SetContext((ItemContext)fields.Read<byte>(17));
 
             var bonusListString = new StringArray(fields.Read<string>(18), ' ');
-            List<uint> bonusListIDs = new List<uint>();
+            List<uint> bonusListIDs = new();
             for (var i = 0; i < bonusListString.Length; ++i)
             {
                 if (uint.TryParse(bonusListString[i], out uint bonusListID))
@@ -1006,7 +1006,7 @@ namespace Game.Entities
                     SpellItemEnchantmentRecord gemEnchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(gemProperties.EnchantId);
                     if (gemEnchant != null)
                     {
-                        BonusData gemBonus = new BonusData(gemTemplate);
+                        BonusData gemBonus = new(gemTemplate);
                         foreach (var bonusListId in gem.BonusListIDs)
                             gemBonus.AddBonusList(bonusListId);
 
@@ -1117,7 +1117,7 @@ namespace Game.Entities
 
         public void SendUpdateSockets()
         {
-            SocketGemsSuccess socketGems = new SocketGemsSuccess();
+            SocketGemsSuccess socketGems = new();
             socketGems.Item = GetGUID();
 
             GetOwner().SendPacket(socketGems);
@@ -1129,7 +1129,7 @@ namespace Game.Entities
             if (duration == 0)
                 return;
 
-            ItemTimeUpdate itemTimeUpdate = new ItemTimeUpdate();
+            ItemTimeUpdate itemTimeUpdate = new();
             itemTimeUpdate.ItemGuid = GetGUID();
             itemTimeUpdate.DurationLeft = duration;
             owner.SendPacket(itemTimeUpdate);
@@ -1213,7 +1213,7 @@ namespace Game.Entities
         public override void BuildValuesCreate(WorldPacket data, Player target)
         {
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new WorldPacket();
+            WorldPacket buffer = new();
 
             m_objectData.WriteCreate(buffer, flags, this, target);
             m_itemData.WriteCreate(buffer, flags, this, target);
@@ -1226,7 +1226,7 @@ namespace Game.Entities
         public override void BuildValuesUpdate(WorldPacket data, Player target)
         {
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            WorldPacket buffer = new WorldPacket();
+            WorldPacket buffer = new();
 
             if (m_values.HasChanged(TypeId.Object))
                 m_objectData.WriteUpdate(buffer, flags, this, target);
@@ -1242,11 +1242,11 @@ namespace Game.Entities
 
         public override void BuildValuesUpdateWithFlag(WorldPacket data, UpdateFieldFlag flags, Player target)
         {
-            UpdateMask valuesMask = new UpdateMask(14);
+            UpdateMask valuesMask = new(14);
             valuesMask.Set((int)TypeId.Item);
 
-            WorldPacket buffer = new WorldPacket();
-            UpdateMask mask = new UpdateMask(40);
+            WorldPacket buffer = new();
+            UpdateMask mask = new(40);
 
             buffer.WriteUInt32(valuesMask.GetBlock(0));
             m_itemData.AppendAllowedFieldsMaskForFlag(mask, flags);
@@ -1259,7 +1259,7 @@ namespace Game.Entities
         void BuildValuesUpdateForPlayerWithMask(UpdateData data, UpdateMask requestedObjectMask, UpdateMask requestedItemMask, Player target)
         {
             UpdateFieldFlag flags = GetUpdateFieldFlagsFor(target);
-            UpdateMask valuesMask = new UpdateMask((int)TypeId.Max);
+            UpdateMask valuesMask = new((int)TypeId.Max);
             if (requestedObjectMask.IsAnySet())
                 valuesMask.Set((int)TypeId.Object);
 
@@ -1267,7 +1267,7 @@ namespace Game.Entities
             if (requestedItemMask.IsAnySet())
                 valuesMask.Set((int)TypeId.Item);
 
-            WorldPacket buffer = new WorldPacket();
+            WorldPacket buffer = new();
             buffer.WriteUInt32(valuesMask.GetBlock(0));
 
             if (valuesMask[(int)TypeId.Object])
@@ -1276,7 +1276,7 @@ namespace Game.Entities
             if (valuesMask[(int)TypeId.Item])
                 m_itemData.WriteUpdate(buffer, requestedItemMask, true, this, target);
 
-            WorldPacket buffer1 = new WorldPacket();
+            WorldPacket buffer1 = new();
             buffer1.WriteUInt8((byte)UpdateType.Values);
             buffer1.WritePackedGuid(GetGUID());
             buffer1.WriteUInt32(buffer.GetSize());
@@ -1332,7 +1332,7 @@ namespace Game.Entities
             if (!HasItemFlag(ItemFieldFlags.Refundable))
                 return;
 
-            ItemExpirePurchaseRefund itemExpirePurchaseRefund = new ItemExpirePurchaseRefund();
+            ItemExpirePurchaseRefund itemExpirePurchaseRefund = new();
             itemExpirePurchaseRefund.ItemGUID = GetGUID();
             owner.SendPacket(itemExpirePurchaseRefund);
 
@@ -1922,7 +1922,7 @@ namespace Game.Entities
             {
                 if (modifierIndex == -1)
                 {
-                    ItemMod mod = new ItemMod();
+                    ItemMod mod = new();
                     mod.Value = value;
                     mod.Type = (byte)modifier;
 
@@ -2052,7 +2052,7 @@ namespace Game.Entities
             int index = m_artifactPowerIdToIndex.Count;
             m_artifactPowerIdToIndex[artifactPower.ArtifactPowerId] = (ushort)index;
 
-            ArtifactPower powerField = new ArtifactPower();
+            ArtifactPower powerField = new();
             powerField.ArtifactPowerId = (ushort)artifactPower.ArtifactPowerId;
             powerField.PurchasedRank = artifactPower.PurchasedRank;
             powerField.CurrentRankWithBonus = artifactPower.CurrentRankWithBonus;
@@ -2081,7 +2081,7 @@ namespace Game.Entities
                 if (m_artifactPowerIdToIndex.ContainsKey(artifactPower.Id))
                     continue;
 
-                ArtifactPowerData powerData = new ArtifactPowerData();
+                ArtifactPowerData powerData = new();
                 powerData.ArtifactPowerId = artifactPower.Id;
                 powerData.PurchasedRank = 0;
                 powerData.CurrentRankWithBonus = (byte)((artifactPower.Flags & ArtifactPowerFlag.First) == ArtifactPowerFlag.First ? 1 : 0);
@@ -2232,7 +2232,7 @@ namespace Game.Entities
 
             SetArtifactXP(m_itemData.ArtifactXP + amount);
 
-            ArtifactXpGain artifactXpGain = new ArtifactXpGain();
+            ArtifactXpGain artifactXpGain = new();
             artifactXpGain.ArtifactGUID = GetGUID();
             artifactXpGain.Amount = amount;
             owner.SendPacket(artifactXpGain);
@@ -2641,11 +2641,11 @@ namespace Game.Entities
         string m_text;
         bool mb_in_trade;
         long m_lastPlayedTimeUpdate;
-        List<ObjectGuid> allowedGUIDs = new List<ObjectGuid>();
+        List<ObjectGuid> allowedGUIDs = new();
         uint m_randomBonusListId;        // store separately to easily find which bonus list is the one randomly given for stat rerolling
         ObjectGuid m_childItem;
-        Dictionary<uint, ushort> m_artifactPowerIdToIndex = new Dictionary<uint, ushort>();
-        Array<uint> m_gemScalingLevels = new Array<uint>(ItemConst.MaxGemSockets);
+        Dictionary<uint, ushort> m_artifactPowerIdToIndex = new();
+        Array<uint> m_gemScalingLevels = new(ItemConst.MaxGemSockets);
         #endregion
     }
 
@@ -2673,7 +2673,7 @@ namespace Game.Entities
     {
         public uint ItemSetID;
         public uint EquippedItemCount;
-        public List<ItemSetSpellRecord> SetBonuses = new List<ItemSetSpellRecord>();
+        public List<ItemSetSpellRecord> SetBonuses = new();
     }
 
     public class BonusData
@@ -2916,12 +2916,12 @@ namespace Game.Entities
         public ulong Xp;
         public uint ArtifactAppearanceId;
         public uint ArtifactTierId;
-        public List<ArtifactPowerData> ArtifactPowers = new List<ArtifactPowerData>();
+        public List<ArtifactPowerData> ArtifactPowers = new();
     }
 
     public class AzeriteEmpoweredData
     {
-        public Array<int> SelectedAzeritePowers = new Array<int>(SharedConst.MaxAzeriteEmpoweredTier);
+        public Array<int> SelectedAzeritePowers = new(SharedConst.MaxAzeriteEmpoweredTier);
     }
 
     class ItemAdditionalLoadInfo
@@ -2953,7 +2953,7 @@ namespace Game.Entities
                     info.Artifact.ArtifactAppearanceId = artifactResult.Read<uint>(2);
                     info.Artifact.ArtifactTierId = artifactResult.Read<uint>(3);
 
-                    ArtifactPowerData artifactPowerData = new ArtifactPowerData();
+                    ArtifactPowerData artifactPowerData = new();
                     artifactPowerData.ArtifactPowerId = artifactResult.Read<uint>(4);
                     artifactPowerData.PurchasedRank = artifactResult.Read<byte>(5);
 

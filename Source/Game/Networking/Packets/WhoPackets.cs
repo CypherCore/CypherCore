@@ -63,9 +63,9 @@ namespace Game.Networking.Packets
                 Areas.Add(_worldPacket.ReadInt32());
         }
 
-        public WhoRequest Request = new WhoRequest();
+        public WhoRequest Request = new();
         public uint RequestID;
-        public List<int> Areas= new List<int>();
+        public List<int> Areas= new();
     }
 
     public class WhoResponsePkt : ServerPacket
@@ -82,7 +82,7 @@ namespace Game.Networking.Packets
         }
 
         public uint RequestID;
-        public List<WhoEntry> Response = new List<WhoEntry>();
+        public List<WhoEntry> Response = new();
     }
 
     public struct WhoRequestServerInfo
@@ -143,7 +143,7 @@ namespace Game.Networking.Packets
         public string GuildVirtualRealmName;
         public long RaceFilter;
         public int ClassFilter = -1;
-        public List<string> Words = new List<string>();
+        public List<string> Words = new();
         public bool ShowEnemies;
         public bool ShowArenaPlayers;
         public bool ExactName;
@@ -167,7 +167,7 @@ namespace Game.Networking.Packets
             data.FlushBits();
         }
 
-        public PlayerGuidLookupData PlayerData = new PlayerGuidLookupData();
+        public PlayerGuidLookupData PlayerData = new();
         public ObjectGuid GuildGUID;
         public uint GuildVirtualRealmAddress;
         public string GuildName = "";

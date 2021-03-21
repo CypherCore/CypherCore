@@ -84,7 +84,7 @@ namespace Game.Collision
             if (instanceTree == null)
             {
                 string filename = VMapPath + GetMapFileName(mapId);
-                StaticMapTree newTree = new StaticMapTree(mapId);
+                StaticMapTree newTree = new(mapId);
                 LoadResult treeInitResult = newTree.InitMap(filename);
                 if (treeInitResult != LoadResult.Success)
                     return treeInitResult;
@@ -232,7 +232,7 @@ namespace Game.Collision
                 var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
                 if (instanceTree != null)
                 {
-                    LocationInfo info = new LocationInfo();
+                    LocationInfo info = new();
                     Vector3 pos = ConvertPositionToInternalRep(x, y, z);
                     if (instanceTree.GetLocationInfo(pos, info))
                     {
@@ -265,7 +265,7 @@ namespace Game.Collision
             var instanceTree = iInstanceMapTrees.LookupByKey(mapId);
             if (instanceTree != null)
             {
-                LocationInfo info = new LocationInfo();
+                LocationInfo info = new();
                 Vector3 pos = ConvertPositionToInternalRep(x, y, z);
                 if (instanceTree.GetLocationInfo(pos, info))
                 {
@@ -292,7 +292,7 @@ namespace Game.Collision
                 var model = iLoadedModelFiles.LookupByKey(filename);
                 if (model == null)
                 {
-                    WorldModel worldmodel = new WorldModel();
+                    WorldModel worldmodel = new();
                     if (!worldmodel.ReadFile(VMapPath + filename))
                     {
                         Log.outError(LogFilter.Server, "VMapManager: could not load '{0}'", filename);
@@ -347,7 +347,7 @@ namespace Game.Collision
 
         Vector3 ConvertPositionToInternalRep(float x, float y, float z)
         {
-            Vector3 pos = new Vector3();
+            Vector3 pos = new();
             float mid = 0.5f * 64.0f * 533.33333333f;
             pos.X = mid - x;
             pos.Y = mid - y;
@@ -368,14 +368,14 @@ namespace Game.Collision
         public bool IsHeightCalcEnabled() { return _enableHeightCalc; }
         public bool IsMapLoadingEnabled() { return _enableLineOfSightCalc || _enableHeightCalc; }
 
-        Dictionary<string, ManagedModel> iLoadedModelFiles = new Dictionary<string, ManagedModel>();
-        Dictionary<uint, StaticMapTree> iInstanceMapTrees = new Dictionary<uint, StaticMapTree>();
-        MultiMap<uint, uint> iChildMapData = new MultiMap<uint, uint>();
-        Dictionary<uint, uint> iParentMapData = new Dictionary<uint, uint>();
+        Dictionary<string, ManagedModel> iLoadedModelFiles = new();
+        Dictionary<uint, StaticMapTree> iInstanceMapTrees = new();
+        MultiMap<uint, uint> iChildMapData = new();
+        Dictionary<uint, uint> iParentMapData = new();
         bool _enableLineOfSightCalc;
         bool _enableHeightCalc;
 
-        object LoadedModelFilesLock = new object();
+        object LoadedModelFilesLock = new();
     }
 
     public class ManagedModel

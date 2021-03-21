@@ -101,7 +101,7 @@ namespace Game.Networking.Packets
         public int Absorbed;
         public int Flags;
         // Optional<SpellNonMeleeDamageLogDebugInfo> DebugInfo;
-        public Optional<ContentTuningParams> ContentTuning = new Optional<ContentTuningParams>();
+        public Optional<ContentTuningParams> ContentTuning = new();
     }
 
     class EnvironmentalDamageLog : CombatLogServerPacket
@@ -188,18 +188,18 @@ namespace Game.Networking.Packets
 
         public ObjectGuid Caster;
         public uint SpellID;
-        public List<SpellLogEffect> Effects = new List<SpellLogEffect>();
+        public List<SpellLogEffect> Effects = new();
 
         public class SpellLogEffect
         {
             public int Effect;
 
-            public List<SpellLogEffectPowerDrainParams> PowerDrainTargets = new List<SpellLogEffectPowerDrainParams>();
-            public List<SpellLogEffectExtraAttacksParams> ExtraAttacksTargets = new List<SpellLogEffectExtraAttacksParams>();
-            public List<SpellLogEffectDurabilityDamageParams> DurabilityDamageTargets = new List<SpellLogEffectDurabilityDamageParams>();
-            public List<SpellLogEffectGenericVictimParams> GenericVictimTargets = new List<SpellLogEffectGenericVictimParams>();
-            public List<SpellLogEffectTradeSkillItemParams> TradeSkillTargets = new List<SpellLogEffectTradeSkillItemParams>();
-            public List<SpellLogEffectFeedPetParams> FeedPetTargets = new List<SpellLogEffectFeedPetParams>();
+            public List<SpellLogEffectPowerDrainParams> PowerDrainTargets = new();
+            public List<SpellLogEffectExtraAttacksParams> ExtraAttacksTargets = new();
+            public List<SpellLogEffectDurabilityDamageParams> DurabilityDamageTargets = new();
+            public List<SpellLogEffectGenericVictimParams> GenericVictimTargets = new();
+            public List<SpellLogEffectTradeSkillItemParams> TradeSkillTargets = new();
+            public List<SpellLogEffectFeedPetParams> FeedPetTargets = new();
         }
     }
 
@@ -248,7 +248,7 @@ namespace Game.Networking.Packets
         public bool Crit;
         public Optional<float> CritRollMade;
         public Optional<float> CritRollNeeded;
-        Optional<ContentTuningParams> ContentTuning = new Optional<ContentTuningParams>();
+        Optional<ContentTuningParams> ContentTuning = new();
     }
 
     class SpellPeriodicAuraLog : CombatLogServerPacket
@@ -272,7 +272,7 @@ namespace Game.Networking.Packets
         public ObjectGuid TargetGUID;
         public ObjectGuid CasterGUID;
         public uint SpellID;
-        public List<SpellLogEffect> Effects = new List<SpellLogEffect>();
+        public List<SpellLogEffect> Effects = new();
 
         public struct PeriodicalAuraLogEffectDebugInfo
         {
@@ -316,7 +316,7 @@ namespace Game.Networking.Packets
             public uint Resisted;
             public bool Crit;
             public Optional<PeriodicalAuraLogEffectDebugInfo> DebugInfo;
-            public Optional<ContentTuningParams> ContentTuning = new Optional<ContentTuningParams>();
+            public Optional<ContentTuningParams> ContentTuning = new();
         }
     }
 
@@ -366,7 +366,7 @@ namespace Game.Networking.Packets
             }
         }
 
-        public List<SpellDispellData> DispellData = new List<SpellDispellData>();
+        public List<SpellDispellData> DispellData = new();
         public ObjectGuid CasterGUID;
         public ObjectGuid TargetGUID;
         public uint DispelledBySpellID;
@@ -434,7 +434,7 @@ namespace Game.Networking.Packets
 
         public uint SpellID;
         public ObjectGuid Caster;
-        public List<SpellLogMissEntry> Entries = new List<SpellLogMissEntry>();
+        public List<SpellLogMissEntry> Entries = new();
     }
 
     class ProcResist : ServerPacket
@@ -522,7 +522,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            WorldPacket attackRoundInfo = new WorldPacket();
+            WorldPacket attackRoundInfo = new();
             attackRoundInfo.WriteUInt32((uint)hitInfo);
             attackRoundInfo.WritePackedGuid(AttackerGUID);
             attackRoundInfo.WritePackedGuid(VictimGUID);
@@ -605,7 +605,7 @@ namespace Game.Networking.Packets
         public int RageGained;
         public UnkAttackerState UnkState;
         public float Unk;
-        public ContentTuningParams ContentTuning = new ContentTuningParams();
+        public ContentTuningParams ContentTuning = new();
     }
 
     //Structs

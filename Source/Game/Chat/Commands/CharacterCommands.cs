@@ -415,7 +415,7 @@ namespace Game.Chat
                 string factionName = factionEntry != null ? factionEntry.Name[loc] : "#Not found#";
                 ReputationRank rank = target.GetReputationMgr().GetRank(factionEntry);
                 string rankName = handler.GetCypherString(ReputationMgr.ReputationRankStrIndex[(int)rank]);
-                StringBuilder ss = new StringBuilder();
+                StringBuilder ss = new();
                 if (handler.GetSession() != null)
                     ss.AppendFormat("{0} - |cffffffff|Hfaction:{0}|h[{1} {2}]|h|r", faction.Id, factionName, loc);
                 else
@@ -495,7 +495,7 @@ namespace Game.Chat
                 if (args.Empty())
                     return false;
 
-                List<DeletedInfo> foundList = new List<DeletedInfo>();
+                List<DeletedInfo> foundList = new();
                 if (!GetDeletedCharacterInfoList(foundList, args.NextString()))
                     return false;
 
@@ -518,7 +518,7 @@ namespace Game.Chat
             [Command("list", RBACPermissions.CommandCharacterDeletedList, true)]
             static bool HandleCharacterDeletedListCommand(StringArguments args, CommandHandler handler)
             {
-                List<DeletedInfo> foundList = new List<DeletedInfo>();
+                List<DeletedInfo> foundList = new();
                 if (!GetDeletedCharacterInfoList(foundList, args.NextString()))
                     return false;
 
@@ -545,7 +545,7 @@ namespace Game.Chat
                 string newCharName = args.NextString();
                 uint newAccount = args.NextUInt32();
 
-                List<DeletedInfo> foundList = new List<DeletedInfo>();
+                List<DeletedInfo> foundList = new();
                 if (!GetDeletedCharacterInfoList(foundList, searchString))
                     return false;
 

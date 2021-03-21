@@ -85,7 +85,7 @@ namespace Game.SupportSystem
             uint count = 0;
             do
             {
-                BugTicket bug = new BugTicket();
+                BugTicket bug = new();
                 bug.LoadFromDB(result.GetFields());
 
                 if (!bug.IsClosed())
@@ -123,7 +123,7 @@ namespace Game.SupportSystem
             SQLResult chatLogResult;
             do
             {
-                ComplaintTicket complaint = new ComplaintTicket();
+                ComplaintTicket complaint = new();
                 complaint.LoadFromDB(result.GetFields());
 
                 if (!complaint.IsClosed())
@@ -171,7 +171,7 @@ namespace Game.SupportSystem
             uint count = 0;
             do
             {
-                SuggestionTicket suggestion = new SuggestionTicket();
+                SuggestionTicket suggestion = new();
                 suggestion.LoadFromDB(result.GetFields());
 
                 if (!suggestion.IsClosed())
@@ -277,7 +277,7 @@ namespace Game.SupportSystem
 
                     _lastComplaintId = 0;
 
-                    SQLTransaction trans = new SQLTransaction();
+                    SQLTransaction trans = new();
                     trans.Append(DB.Characters.GetPreparedStatement(CharStatements.DEL_ALL_GM_COMPLAINTS));
                     trans.Append(DB.Characters.GetPreparedStatement(CharStatements.DEL_ALL_GM_COMPLAINT_CHATLOGS));
                     DB.Characters.CommitTransaction(trans);
@@ -372,9 +372,9 @@ namespace Game.SupportSystem
         bool _bugSystemStatus;
         bool _complaintSystemStatus;
         bool _suggestionSystemStatus;
-        Dictionary<uint, BugTicket> _bugTicketList = new Dictionary<uint, BugTicket>();
-        Dictionary<uint, ComplaintTicket> _complaintTicketList = new Dictionary<uint, ComplaintTicket>();
-        Dictionary<uint, SuggestionTicket> _suggestionTicketList = new Dictionary<uint, SuggestionTicket>();
+        Dictionary<uint, BugTicket> _bugTicketList = new();
+        Dictionary<uint, ComplaintTicket> _complaintTicketList = new();
+        Dictionary<uint, SuggestionTicket> _suggestionTicketList = new();
         uint _lastBugId;
         uint _lastComplaintId;
         uint _lastSuggestionId;

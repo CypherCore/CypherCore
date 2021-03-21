@@ -159,7 +159,7 @@ namespace Game.DataStorage
                                 case TypeCode.Object:
                                     if (type == typeof(LocalizedString))
                                     {
-                                        LocalizedString locString = new LocalizedString();
+                                        LocalizedString locString = new();
                                         locString[Global.WorldMgr.GetDefaultDbcLocale()] = result.Read<string>(dbIndex++);
 
                                         f.SetValue(obj, locString);

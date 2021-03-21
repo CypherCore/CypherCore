@@ -51,7 +51,7 @@ namespace Game.SupportSystem
         public virtual string FormatViewMessageString(CommandHandler handler, bool detailed = false) { return ""; }
         public virtual string FormatViewMessageString(CommandHandler handler, string closedName, string assignedToName, string unassignedName, string deletedName)
         {
-            StringBuilder ss = new StringBuilder();
+            StringBuilder ss = new();
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistguid, _id));
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistname, GetPlayerName()));
 
@@ -186,7 +186,7 @@ namespace Game.SupportSystem
         {
             ulong curTime = (ulong)Time.UnixTime;
 
-            StringBuilder ss = new StringBuilder();
+            StringBuilder ss = new();
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistguid, _id));
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistname, GetPlayerName()));
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistagecreate, Time.secsToTimeString(curTime - _createTime, true, false)));
@@ -323,7 +323,7 @@ namespace Game.SupportSystem
         {
             ulong curTime = (ulong)Time.UnixTime;
 
-            StringBuilder ss = new StringBuilder();
+            StringBuilder ss = new();
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistguid, _id));
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistname, GetPlayerName()));
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistagecreate, Time.secsToTimeString(curTime - _createTime, true, false)));
@@ -428,7 +428,7 @@ namespace Game.SupportSystem
         {
             ulong curTime = (ulong)Time.UnixTime;
 
-            StringBuilder ss = new StringBuilder();
+            StringBuilder ss = new();
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistguid, _id));
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistname, GetPlayerName()));
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistagecreate, Time.secsToTimeString(curTime - _createTime, true, false)));

@@ -33,7 +33,7 @@ namespace Game.DataStorage
 
             string db2Path = dataPath + "/dbc";
 
-            BitSet availableDb2Locales = new BitSet((int)Locale.Total);
+            BitSet availableDb2Locales = new((int)Locale.Total);
             foreach (var dir in Directory.GetDirectories(db2Path))
             {
                 Locale locale = Path.GetFileName(dir).ToEnum<Locale>();
@@ -698,8 +698,8 @@ namespace Game.DataStorage
         public static byte[] OldContinentsNodesMask = new byte[PlayerConst.TaxiMaskSize];
         public static byte[] HordeTaxiNodesMask = new byte[PlayerConst.TaxiMaskSize];
         public static byte[] AllianceTaxiNodesMask = new byte[PlayerConst.TaxiMaskSize];
-        public static Dictionary<uint, Dictionary<uint, TaxiPathBySourceAndDestination>> TaxiPathSetBySource = new Dictionary<uint, Dictionary<uint, TaxiPathBySourceAndDestination>>();
-        public static Dictionary<uint, TaxiPathNodeRecord[]> TaxiPathNodesByPath = new Dictionary<uint, TaxiPathNodeRecord[]>();
+        public static Dictionary<uint, Dictionary<uint, TaxiPathBySourceAndDestination>> TaxiPathSetBySource = new();
+        public static Dictionary<uint, TaxiPathNodeRecord[]> TaxiPathNodesByPath = new();
         #endregion
 
         #region Helper Methods

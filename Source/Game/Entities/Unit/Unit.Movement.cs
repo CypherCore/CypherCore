@@ -124,21 +124,21 @@ namespace Game.Entities
             if (playerMover)
             {
                 // Send notification to self
-                MoveSetSpeed selfpacket = new MoveSetSpeed(moveTypeToOpcode[(int)mtype, 1]);
+                MoveSetSpeed selfpacket = new(moveTypeToOpcode[(int)mtype, 1]);
                 selfpacket.MoverGUID = GetGUID();
                 selfpacket.SequenceIndex = m_movementCounter++;
                 selfpacket.Speed = GetSpeed(mtype);
                 playerMover.SendPacket(selfpacket);
 
                 // Send notification to other players
-                MoveUpdateSpeed packet = new MoveUpdateSpeed(moveTypeToOpcode[(int)mtype, 2]);
+                MoveUpdateSpeed packet = new(moveTypeToOpcode[(int)mtype, 2]);
                 packet.Status = m_movementInfo;
                 packet.Speed = GetSpeed(mtype);
                 playerMover.SendMessageToSet(packet, false);
             }
             else
             {
-                MoveSplineSetSpeed packet = new MoveSplineSetSpeed(moveTypeToOpcode[(int)mtype, 0]);
+                MoveSplineSetSpeed packet = new(moveTypeToOpcode[(int)mtype, 0]);
                 packet.MoverGUID = GetGUID();
                 packet.Speed = GetSpeed(mtype);
                 SendMessageToSet(packet, true);
@@ -155,7 +155,7 @@ namespace Game.Entities
             if (!IsInWorld || MoveSpline.Finalized())
                 return;
 
-            MoveSplineInit init = new MoveSplineInit(this);
+            MoveSplineInit init = new(this);
             init.Stop();
         }
 
@@ -194,7 +194,7 @@ namespace Game.Entities
             if (!force && (!IsStopped() || !MoveSpline.Finalized()))
                 return;
 
-            MoveSplineInit init = new MoveSplineInit(this);
+            MoveSplineInit init = new(this);
             init.MoveTo(GetPositionX(), GetPositionY(), GetPositionZMinusOffset(), false);
             init.SetFacing(ori);
             init.Launch();
@@ -212,7 +212,7 @@ namespace Game.Entities
 
         public void MonsterMoveWithSpeed(float x, float y, float z, float speed, bool generatePath = false, bool forceDestination = false)
         {
-            MoveSplineInit init = new MoveSplineInit(this);
+            MoveSplineInit init = new(this);
             init.MoveTo(x, y, z, generatePath, forceDestination);
             init.SetVelocity(speed);
             init.Launch();
@@ -244,7 +244,7 @@ namespace Game.Entities
 
         void SendMoveKnockBack(Player player, float speedXY, float speedZ, float vcos, float vsin)
         {
-            MoveKnockBack moveKnockBack = new MoveKnockBack();
+            MoveKnockBack moveKnockBack = new();
             moveKnockBack.MoverGUID = GetGUID();
             moveKnockBack.SequenceIndex = m_movementCounter++;
             moveKnockBack.Speeds.HorzSpeed = speedXY;
@@ -266,18 +266,18 @@ namespace Game.Entities
             Player playerMover = GetPlayerBeingMoved();
             if (playerMover)
             {
-                MoveSetFlag packet = new MoveSetFlag(disable ? ServerOpcodes.MoveSplineEnableCollision : ServerOpcodes.MoveEnableCollision);
+                MoveSetFlag packet = new(disable ? ServerOpcodes.MoveSplineEnableCollision : ServerOpcodes.MoveEnableCollision);
                 packet.MoverGUID = GetGUID();
                 packet.SequenceIndex = m_movementCounter++;
                 playerMover.SendPacket(packet);
 
-                MoveUpdate moveUpdate = new MoveUpdate();
+                MoveUpdate moveUpdate = new();
                 moveUpdate.Status = m_movementInfo;
                 SendMessageToSet(moveUpdate, playerMover);
             }
             else
             {
-                MoveSplineSetFlag packet = new MoveSplineSetFlag(disable ? ServerOpcodes.MoveSplineDisableCollision : ServerOpcodes.MoveDisableCollision);
+                MoveSplineSetFlag packet = new(disable ? ServerOpcodes.MoveSplineDisableCollision : ServerOpcodes.MoveDisableCollision);
                 packet.MoverGUID = GetGUID();
                 SendMessageToSet(packet, true);
             }
@@ -301,12 +301,12 @@ namespace Game.Entities
             Player playerMover = GetPlayerBeingMoved();
             if (playerMover)
             {
-                MoveSetFlag packet = new MoveSetFlag(enable ? ServerOpcodes.MoveEnableTransitionBetweenSwimAndFly : ServerOpcodes.MoveDisableTransitionBetweenSwimAndFly);
+                MoveSetFlag packet = new(enable ? ServerOpcodes.MoveEnableTransitionBetweenSwimAndFly : ServerOpcodes.MoveDisableTransitionBetweenSwimAndFly);
                 packet.MoverGUID = GetGUID();
                 packet.SequenceIndex = m_movementCounter++;
                 playerMover.SendPacket(packet);
 
-                MoveUpdate moveUpdate = new MoveUpdate();
+                MoveUpdate moveUpdate = new();
                 moveUpdate.Status = m_movementInfo;
                 SendMessageToSet(moveUpdate, playerMover);
             }
@@ -327,12 +327,12 @@ namespace Game.Entities
             Player playerMover = GetPlayerBeingMoved();
             if (playerMover)
             {
-                MoveSetFlag packet = new MoveSetFlag(enable ? ServerOpcodes.MoveSetCanTurnWhileFalling : ServerOpcodes.MoveUnsetCanTurnWhileFalling);
+                MoveSetFlag packet = new(enable ? ServerOpcodes.MoveSetCanTurnWhileFalling : ServerOpcodes.MoveUnsetCanTurnWhileFalling);
                 packet.MoverGUID = GetGUID();
                 packet.SequenceIndex = m_movementCounter++;
                 playerMover.SendPacket(packet);
 
-                MoveUpdate moveUpdate = new MoveUpdate();
+                MoveUpdate moveUpdate = new();
                 moveUpdate.Status = m_movementInfo;
                 SendMessageToSet(moveUpdate, playerMover);
             }
@@ -353,12 +353,12 @@ namespace Game.Entities
             Player playerMover = GetPlayerBeingMoved();
             if (playerMover)
             {
-                MoveSetFlag packet = new MoveSetFlag(enable ? ServerOpcodes.MoveEnableDoubleJump : ServerOpcodes.MoveDisableDoubleJump);
+                MoveSetFlag packet = new(enable ? ServerOpcodes.MoveEnableDoubleJump : ServerOpcodes.MoveDisableDoubleJump);
                 packet.MoverGUID = GetGUID();
                 packet.SequenceIndex = m_movementCounter++;
                 playerMover.SendPacket(packet);
 
-                MoveUpdate moveUpdate = new MoveUpdate();
+                MoveUpdate moveUpdate = new();
                 moveUpdate.Status = m_movementInfo;
                 SendMessageToSet(moveUpdate, playerMover);
             }
@@ -653,18 +653,18 @@ namespace Game.Entities
             Player playerMover = GetPlayerBeingMoved();
             if (playerMover)
             {
-                MoveSetFlag packet = new MoveSetFlag(disable ? ServerOpcodes.MoveDisableGravity : ServerOpcodes.MoveEnableGravity);
+                MoveSetFlag packet = new(disable ? ServerOpcodes.MoveDisableGravity : ServerOpcodes.MoveEnableGravity);
                 packet.MoverGUID = GetGUID();
                 packet.SequenceIndex = m_movementCounter++;
                 playerMover.SendPacket(packet);
 
-                MoveUpdate moveUpdate = new MoveUpdate();
+                MoveUpdate moveUpdate = new();
                 moveUpdate.Status = m_movementInfo;
                 SendMessageToSet(moveUpdate, playerMover);
             }
             else
             {
-                MoveSplineSetFlag packet = new MoveSplineSetFlag(disable ? ServerOpcodes.MoveSplineDisableGravity : ServerOpcodes.MoveSplineEnableGravity);
+                MoveSplineSetFlag packet = new(disable ? ServerOpcodes.MoveSplineDisableGravity : ServerOpcodes.MoveSplineEnableGravity);
                 packet.MoverGUID = GetGUID();
                 SendMessageToSet(packet, true);
             }
@@ -824,7 +824,7 @@ namespace Game.Entities
             else
                 RemoveUnitMovementFlag(MovementFlag.Walking);
 
-            MoveSplineSetFlag packet = new MoveSplineSetFlag(enable ? ServerOpcodes.MoveSplineSetWalkMode : ServerOpcodes.MoveSplineSetRunMode);
+            MoveSplineSetFlag packet = new(enable ? ServerOpcodes.MoveSplineSetWalkMode : ServerOpcodes.MoveSplineSetRunMode);
             packet.MoverGUID = GetGUID();
             SendMessageToSet(packet, true);
             return true;
@@ -856,7 +856,7 @@ namespace Game.Entities
             else
                 RemoveUnitMovementFlag(MovementFlag.Swimming);
 
-            MoveSplineSetFlag packet = new MoveSplineSetFlag(enable ? ServerOpcodes.MoveSplineStartSwim : ServerOpcodes.MoveSplineStopSwim);
+            MoveSplineSetFlag packet = new(enable ? ServerOpcodes.MoveSplineStartSwim : ServerOpcodes.MoveSplineStopSwim);
             packet.MoverGUID = GetGUID();
             SendMessageToSet(packet, true);
 
@@ -882,18 +882,18 @@ namespace Game.Entities
             Player playerMover = GetPlayerBeingMoved();
             if (playerMover)
             {
-                MoveSetFlag packet = new MoveSetFlag(enable ? ServerOpcodes.MoveSetCanFly : ServerOpcodes.MoveUnsetCanFly);
+                MoveSetFlag packet = new(enable ? ServerOpcodes.MoveSetCanFly : ServerOpcodes.MoveUnsetCanFly);
                 packet.MoverGUID = GetGUID();
                 packet.SequenceIndex = m_movementCounter++;
                 playerMover.SendPacket(packet);
 
-                MoveUpdate moveUpdate = new MoveUpdate();
+                MoveUpdate moveUpdate = new();
                 moveUpdate.Status = m_movementInfo;
                 SendMessageToSet(moveUpdate, playerMover);
             }
             else
             {
-                MoveSplineSetFlag packet = new MoveSplineSetFlag(enable ? ServerOpcodes.MoveSplineSetFlying : ServerOpcodes.MoveSplineUnsetFlying);
+                MoveSplineSetFlag packet = new(enable ? ServerOpcodes.MoveSplineSetFlying : ServerOpcodes.MoveSplineUnsetFlying);
                 packet.MoverGUID = GetGUID();
                 SendMessageToSet(packet, true);
             }
@@ -915,18 +915,18 @@ namespace Game.Entities
             Player playerMover = GetPlayerBeingMoved();
             if (playerMover)
             {
-                MoveSetFlag packet = new MoveSetFlag(enable ? ServerOpcodes.MoveSetWaterWalk : ServerOpcodes.MoveSetLandWalk);
+                MoveSetFlag packet = new(enable ? ServerOpcodes.MoveSetWaterWalk : ServerOpcodes.MoveSetLandWalk);
                 packet.MoverGUID = GetGUID();
                 packet.SequenceIndex = m_movementCounter++;
                 playerMover.SendPacket(packet);
 
-                MoveUpdate moveUpdate = new MoveUpdate();
+                MoveUpdate moveUpdate = new();
                 moveUpdate.Status = m_movementInfo;
                 SendMessageToSet(moveUpdate, playerMover);
             }
             else
             {
-                MoveSplineSetFlag packet = new MoveSplineSetFlag(enable ? ServerOpcodes.MoveSplineSetWaterWalk : ServerOpcodes.MoveSplineSetLandWalk);
+                MoveSplineSetFlag packet = new(enable ? ServerOpcodes.MoveSplineSetWaterWalk : ServerOpcodes.MoveSplineSetLandWalk);
                 packet.MoverGUID = GetGUID();
                 SendMessageToSet(packet, true);
             }
@@ -947,18 +947,18 @@ namespace Game.Entities
             Player playerMover = GetPlayerBeingMoved();
             if (playerMover)
             {
-                MoveSetFlag packet = new MoveSetFlag(enable ? ServerOpcodes.MoveSetFeatherFall : ServerOpcodes.MoveSetNormalFall);
+                MoveSetFlag packet = new(enable ? ServerOpcodes.MoveSetFeatherFall : ServerOpcodes.MoveSetNormalFall);
                 packet.MoverGUID = GetGUID();
                 packet.SequenceIndex = m_movementCounter++;
                 playerMover.SendPacket(packet);
 
-                MoveUpdate moveUpdate = new MoveUpdate();
+                MoveUpdate moveUpdate = new();
                 moveUpdate.Status = m_movementInfo;
                 SendMessageToSet(moveUpdate, playerMover);
             }
             else
             {
-                MoveSplineSetFlag packet = new MoveSplineSetFlag(enable ? ServerOpcodes.MoveSplineSetFeatherFall : ServerOpcodes.MoveSplineSetNormalFall);
+                MoveSplineSetFlag packet = new(enable ? ServerOpcodes.MoveSplineSetFeatherFall : ServerOpcodes.MoveSplineSetNormalFall);
                 packet.MoverGUID = GetGUID();
                 SendMessageToSet(packet, true);
             }
@@ -993,18 +993,18 @@ namespace Game.Entities
             Player playerMover = GetPlayerBeingMoved();
             if (playerMover)
             {
-                MoveSetFlag packet = new MoveSetFlag(enable ? ServerOpcodes.MoveSetHovering : ServerOpcodes.MoveUnsetHovering);
+                MoveSetFlag packet = new(enable ? ServerOpcodes.MoveSetHovering : ServerOpcodes.MoveUnsetHovering);
                 packet.MoverGUID = GetGUID();
                 packet.SequenceIndex = m_movementCounter++;
                 playerMover.SendPacket(packet);
 
-                MoveUpdate moveUpdate = new MoveUpdate();
+                MoveUpdate moveUpdate = new();
                 moveUpdate.Status = m_movementInfo;
                 SendMessageToSet(moveUpdate, playerMover);
             }
             else
             {
-                MoveSplineSetFlag packet = new MoveSplineSetFlag(enable ? ServerOpcodes.MoveSplineSetHover : ServerOpcodes.MoveSplineUnsetHover);
+                MoveSplineSetFlag packet = new(enable ? ServerOpcodes.MoveSplineSetHover : ServerOpcodes.MoveSplineUnsetHover);
                 packet.MoverGUID = GetGUID();
                 SendMessageToSet(packet, true);
             }
@@ -1050,7 +1050,7 @@ namespace Game.Entities
             DisableSpline();
             if (IsTypeId(TypeId.Player))
             {
-                WorldLocation target = new WorldLocation(GetMapId(), pos);
+                WorldLocation target = new(GetMapId(), pos);
                 ToPlayer().TeleportTo(target, (TeleportToOptions.NotLeaveTransport | TeleportToOptions.NotLeaveCombat | TeleportToOptions.NotUnSummonPet | (casting ? TeleportToOptions.Spell : 0)));
             }                
             else
@@ -1205,18 +1205,18 @@ namespace Game.Entities
             Player playerMover = GetPlayerBeingMoved();// unit controlled by a player.
             if (playerMover)
             {
-                MoveSetFlag packet = new MoveSetFlag(apply ? ServerOpcodes.MoveRoot : ServerOpcodes.MoveUnroot);
+                MoveSetFlag packet = new(apply ? ServerOpcodes.MoveRoot : ServerOpcodes.MoveUnroot);
                 packet.MoverGUID = GetGUID();
                 packet.SequenceIndex = m_movementCounter++;
                 playerMover.SendPacket(packet);
 
-                MoveUpdate moveUpdate = new MoveUpdate();
+                MoveUpdate moveUpdate = new();
                 moveUpdate.Status = m_movementInfo;
                 SendMessageToSet(moveUpdate, playerMover);
             }
             else
             {
-                MoveSplineSetFlag packet = new MoveSplineSetFlag(apply ? ServerOpcodes.MoveSplineRoot : ServerOpcodes.MoveSplineUnroot);
+                MoveSplineSetFlag packet = new(apply ? ServerOpcodes.MoveSplineRoot : ServerOpcodes.MoveSplineUnroot);
                 packet.MoverGUID = GetGUID();
                 SendMessageToSet(packet, true);
             }
@@ -1411,14 +1411,14 @@ namespace Game.Entities
             Player player = ToPlayer();
             if (player)
             {
-                MoveSetVehicleRecID moveSetVehicleRec = new MoveSetVehicleRecID();
+                MoveSetVehicleRecID moveSetVehicleRec = new();
                 moveSetVehicleRec.MoverGUID = GetGUID();
                 moveSetVehicleRec.SequenceIndex = m_movementCounter++;
                 moveSetVehicleRec.VehicleRecID = vehicleId;
                 player.SendPacket(moveSetVehicleRec);
             }
 
-            SetVehicleRecID setVehicleRec = new SetVehicleRecID();
+            SetVehicleRecID setVehicleRec = new();
             setVehicleRec.VehicleGUID = GetGUID();
             setVehicleRec.VehicleRecID = vehicleId;
             SendMessageToSet(setVehicleRec, true);
@@ -1431,7 +1431,7 @@ namespace Game.Entities
             if (_movementForces == null)
                 _movementForces = new MovementForces();
 
-            MovementForce force = new MovementForce();
+            MovementForce force = new();
             force.ID = id;
             force.Origin = origin;
             force.Direction = direction;
@@ -1446,7 +1446,7 @@ namespace Game.Entities
                 Player movingPlayer = GetPlayerMovingMe();
                 if (movingPlayer != null)
                 {
-                    MoveApplyMovementForce applyMovementForce = new MoveApplyMovementForce();
+                    MoveApplyMovementForce applyMovementForce = new();
                     applyMovementForce.MoverGUID = GetGUID();
                     applyMovementForce.SequenceIndex = (int)m_movementCounter++;
                     applyMovementForce.Force = force;
@@ -1454,7 +1454,7 @@ namespace Game.Entities
                 }
                 else
                 {
-                    MoveUpdateApplyMovementForce updateApplyMovementForce = new MoveUpdateApplyMovementForce();
+                    MoveUpdateApplyMovementForce updateApplyMovementForce = new();
                     updateApplyMovementForce.Status = m_movementInfo;
                     updateApplyMovementForce.Force = force;
                     SendMessageToSet(updateApplyMovementForce, true);
@@ -1472,7 +1472,7 @@ namespace Game.Entities
                 Player movingPlayer = GetPlayerMovingMe();
                 if (movingPlayer != null)
                 {
-                    MoveRemoveMovementForce moveRemoveMovementForce = new MoveRemoveMovementForce();
+                    MoveRemoveMovementForce moveRemoveMovementForce = new();
                     moveRemoveMovementForce.MoverGUID = GetGUID();
                     moveRemoveMovementForce.SequenceIndex = (int)m_movementCounter++;
                     moveRemoveMovementForce.ID = id;
@@ -1480,7 +1480,7 @@ namespace Game.Entities
                 }
                 else
                 {
-                    MoveUpdateRemoveMovementForce updateRemoveMovementForce = new MoveUpdateRemoveMovementForce();
+                    MoveUpdateRemoveMovementForce updateRemoveMovementForce = new();
                     updateRemoveMovementForce.Status = m_movementInfo;
                     updateRemoveMovementForce.TriggerGUID = id;
                     SendMessageToSet(updateRemoveMovementForce, true);
@@ -1510,12 +1510,12 @@ namespace Game.Entities
             Player movingPlayer = GetPlayerMovingMe();
             if (movingPlayer != null)
             {
-                MoveSetFlag packet = new MoveSetFlag(ignoreMovementForcesOpcodeTable[ignore ? 1 : 0]);
+                MoveSetFlag packet = new(ignoreMovementForcesOpcodeTable[ignore ? 1 : 0]);
                 packet.MoverGUID = GetGUID();
                 packet.SequenceIndex = m_movementCounter++;
                 movingPlayer.SendPacket(packet);
 
-                MoveUpdate moveUpdate = new MoveUpdate();
+                MoveUpdate moveUpdate = new();
                 moveUpdate.Status = m_movementInfo;
                 SendMessageToSet(moveUpdate, movingPlayer);
             }
@@ -1530,7 +1530,7 @@ namespace Game.Entities
             Player movingPlayer = GetPlayerMovingMe();
             if (movingPlayer != null)
             {
-                MoveSetSpeed setModMovementForceMagnitude = new MoveSetSpeed(ServerOpcodes.MoveSetModMovementForceMagnitude);
+                MoveSetSpeed setModMovementForceMagnitude = new(ServerOpcodes.MoveSetModMovementForceMagnitude);
                 setModMovementForceMagnitude.MoverGUID = GetGUID();
                 setModMovementForceMagnitude.SequenceIndex = m_movementCounter++;
                 setModMovementForceMagnitude.Speed = modMagnitude;
@@ -1539,7 +1539,7 @@ namespace Game.Entities
             }
             else
             {
-                MoveUpdateSpeed updateModMovementForceMagnitude = new MoveUpdateSpeed(ServerOpcodes.MoveUpdateModMovementForceMagnitude);
+                MoveUpdateSpeed updateModMovementForceMagnitude = new(ServerOpcodes.MoveUpdateModMovementForceMagnitude);
                 updateModMovementForceMagnitude.Status = m_movementInfo;
                 updateModMovementForceMagnitude.Speed = modMagnitude;
                 SendMessageToSet(updateModMovementForceMagnitude, true);
@@ -1558,7 +1558,7 @@ namespace Game.Entities
 
         void SendSetPlayHoverAnim(bool enable)
         {
-            SetPlayHoverAnim data = new SetPlayHoverAnim();
+            SetPlayHoverAnim data = new();
             data.UnitGUID = GetGUID();
             data.PlayHoverAnim = enable;
 
@@ -1701,7 +1701,7 @@ namespace Game.Entities
             // SMSG_MOVE_UPDATE_TELEPORT is sent to nearby players to signal the teleport
             // SMSG_MOVE_TELEPORT is sent to self in order to trigger CMSG_MOVE_TELEPORT_ACK and update the position server side
 
-            MoveUpdateTeleport moveUpdateTeleport = new MoveUpdateTeleport();
+            MoveUpdateTeleport moveUpdateTeleport = new();
             moveUpdateTeleport.Status = m_movementInfo;
             if (_movementForces != null)
                 moveUpdateTeleport.MovementForces = _movementForces.GetForces();
@@ -1717,7 +1717,7 @@ namespace Game.Entities
                 if (transportBase != null)
                     transportBase.CalculatePassengerOffset(ref x, ref y, ref z, ref o);
 
-                MoveTeleport moveTeleport = new MoveTeleport();
+                MoveTeleport moveTeleport = new();
                 moveTeleport.MoverGUID = GetGUID();
                 moveTeleport.Pos = new Position(x, y, z, o);
                 if (GetTransGUID() != ObjectGuid.Empty)

@@ -85,7 +85,7 @@ namespace Game.Networking.Packets
                 voidItem.Write(_worldPacket);
         }
 
-        public List<VoidItem> Items = new List<VoidItem>();
+        public List<VoidItem> Items = new();
     }
 
     class VoidStorageTransfer : ClientPacket
@@ -127,8 +127,8 @@ namespace Game.Networking.Packets
                 _worldPacket.WritePackedGuid(removedItem);
         }
 
-        public List<ObjectGuid> RemovedItems = new List<ObjectGuid>();
-        public List<VoidItem> AddedItems = new List<VoidItem>();
+        public List<ObjectGuid> RemovedItems = new();
+        public List<VoidItem> AddedItems = new();
     }
 
     class SwapVoidItem : ClientPacket

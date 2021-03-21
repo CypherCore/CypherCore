@@ -366,7 +366,7 @@ namespace Game.Chat
 
             Player player = handler.GetSession().GetPlayer();
 
-            List<WorldObject> creatureList = new List<WorldObject>();
+            List<WorldObject> creatureList = new();
             if (!player.GetMap().SpawnGroupSpawn(groupId, ignoreRespawn, force, creatureList))
             {
                 handler.SendSysMessage(CypherStrings.SpawngroupBadgroup, groupId);
@@ -407,7 +407,7 @@ namespace Game.Chat
             }
             else
             {
-                StringBuilder eventFilter = new StringBuilder();
+                StringBuilder eventFilter = new();
                 eventFilter.Append(" AND (eventEntry IS NULL ");
                 bool initString = true;
 

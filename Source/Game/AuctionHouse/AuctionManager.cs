@@ -41,13 +41,13 @@ namespace Game
         AuctionHouseObject mNeutralAuctions;
         AuctionHouseObject mGoblinAuctions;
 
-        Dictionary<ObjectGuid, PlayerPendingAuctions> _pendingAuctionsByPlayer = new Dictionary<ObjectGuid, PlayerPendingAuctions>();
+        Dictionary<ObjectGuid, PlayerPendingAuctions> _pendingAuctionsByPlayer = new();
 
-        Dictionary<ObjectGuid, Item> _itemsByGuid = new Dictionary<ObjectGuid, Item>();
+        Dictionary<ObjectGuid, Item> _itemsByGuid = new();
 
         uint _replicateIdGenerator;
 
-        Dictionary<ObjectGuid, PlayerThrottleObject> _playerThrottleObjects = new Dictionary<ObjectGuid, PlayerThrottleObject>();
+        Dictionary<ObjectGuid, PlayerThrottleObject> _playerThrottleObjects = new();
         DateTime _playerThrottleObjectsCleanupTime;
 
         AuctionManager()
@@ -164,8 +164,8 @@ namespace Game
 
             // data needs to be at first place for Item.LoadFromDB
             uint count = 0;
-            MultiMap<uint, Item> itemsByAuction = new MultiMap<uint, Item>();
-            MultiMap<uint, ObjectGuid> biddersByAuction = new MultiMap<uint, ObjectGuid>();
+            MultiMap<uint, Item> itemsByAuction = new();
+            MultiMap<uint, ObjectGuid> biddersByAuction = new();
 
             do
             {
@@ -215,10 +215,10 @@ namespace Game
             result = DB.Characters.Query(DB.Characters.GetPreparedStatement(CharStatements.SEL_AUCTIONS));
             if (!result.IsEmpty())
             {
-                SQLTransaction trans = new SQLTransaction();
+                SQLTransaction trans = new();
                 do
                 {
-                    AuctionPosting auction = new AuctionPosting();
+                    AuctionPosting auction = new();
                     auction.Id = result.Read<uint>(0);
                     uint auctionHouseId = result.Read<uint>(1);
 
@@ -343,7 +343,7 @@ namespace Game
             // expire auctions we cannot afford
             if (auctionIndex < playerPendingAuctions.Auctions.Count)
             {
-                SQLTransaction trans = new SQLTransaction();
+                SQLTransaction trans = new();
 
                 do
                 {
@@ -385,7 +385,7 @@ namespace Game
                     // Expire any auctions that we couldn't get a deposit for
                     Log.outWarn(LogFilter.Auctionhouse, $"Player {playerGUID} was offline, unable to retrieve deposit!");
 
-                    SQLTransaction trans = new SQLTransaction();
+                    SQLTransaction trans = new();
                     foreach (PendingAuctionInfo pendingAuction in pair.Value.Auctions)
                     {
                         AuctionPosting auction = GetAuctionsById(pendingAuction.AuctionHouseId).GetAuction(pendingAuction.AuctionId);
@@ -517,7 +517,7 @@ namespace Game
 
         class PlayerPendingAuctions
         {
-            public List<PendingAuctionInfo> Auctions = new List<PendingAuctionInfo>();
+            public List<PendingAuctionInfo> Auctions = new();
             public int LastAuctionsSize;
         }
 
@@ -677,7 +677,7 @@ namespace Game
 
             _itemsByAuctionId[auction.Id] = auction;
 
-            AuctionPosting.Sorter insertSorter = new AuctionPosting.Sorter(Locale.enUS, new AuctionSortDef[] { new AuctionSortDef(AuctionHouseSortOrder.Price, false) }, 1);
+            AuctionPosting.Sorter insertSorter = new(Locale.enUS, new AuctionSortDef[] { new AuctionSortDef(AuctionHouseSortOrder.Price, false) }, 1);
             var auctionIndex = bucket.Auctions.BinarySearch(auction, insertSorter);
             if (auctionIndex < 0)
                 auctionIndex = ~auctionIndex;
@@ -786,7 +786,7 @@ namespace Game
             if (_itemsByAuctionId.Empty())
                 return;
 
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
 
             foreach (var auction in _itemsByAuctionId.Values.ToList())
             {
@@ -822,8 +822,8 @@ namespace Game
         public void BuildListBuckets(AuctionListBucketsResult listBucketsResult, Player player, string name, byte minLevel, byte maxLevel, AuctionHouseFilterMask filters, Optional<AuctionSearchClassFilters> classFilters,
             byte[] knownPetBits, int knownPetBitsCount, byte maxKnownPetLevel, uint offset, AuctionSortDef[] sorts, int sortCount)
         {
-            List<uint> knownAppearanceIds = new List<uint>();
-            BitArray knownPetSpecies = new BitArray(knownPetBits);
+            List<uint> knownAppearanceIds = new();
+            BitArray knownPetSpecies = new(knownPetBits);
             // prepare uncollected filter for more efficient searches
             if (filters.HasFlag(AuctionHouseFilterMask.UncollectedOnly))
             {
@@ -957,7 +957,7 @@ namespace Game
 
             foreach (AuctionsBucketData resultBucket in builder.GetResultRange())
             {
-                BucketInfo bucketInfo = new BucketInfo();
+                BucketInfo bucketInfo = new();
                 resultBucket.BuildBucketInfo(bucketInfo, player);
                 listBucketsResult.Buckets.Add(bucketInfo);
             }
@@ -967,7 +967,7 @@ namespace Game
 
         public void BuildListBuckets(AuctionListBucketsResult listBucketsResult, Player player, AuctionBucketKey[] keys, int keysCount, AuctionSortDef[] sorts, int sortCount)
         {
-            List<AuctionsBucketData> buckets = new List<AuctionsBucketData>();
+            List<AuctionsBucketData> buckets = new();
             for (int i = 0; i < keysCount; ++i)
             {
                 var bucketData = _buckets.LookupByKey(new AuctionsBucketKey(keys[i]));
@@ -975,12 +975,12 @@ namespace Game
                     buckets.Add(bucketData);
             }
 
-            AuctionsBucketData.Sorter sorter = new AuctionsBucketData.Sorter(player.GetSession().GetSessionDbcLocale(), sorts, sortCount);
+            AuctionsBucketData.Sorter sorter = new(player.GetSession().GetSessionDbcLocale(), sorts, sortCount);
             buckets.Sort(sorter);
 
             foreach (AuctionsBucketData resultBucket in buckets)
             {
-                BucketInfo bucketInfo = new BucketInfo();
+                BucketInfo bucketInfo = new();
                 resultBucket.BuildBucketInfo(bucketInfo, player);
                 listBucketsResult.Buckets.Add(bucketInfo);
             }
@@ -991,7 +991,7 @@ namespace Game
         public void BuildListBiddedItems(AuctionListBiddedItemsResult listBidderItemsResult, Player player, uint offset, AuctionSortDef[] sorts, int sortCount)
         {
             // always full list
-            List<AuctionPosting> auctions = new List<AuctionPosting>();
+            List<AuctionPosting> auctions = new();
             foreach (var auctionId in _playerBidderAuctions.LookupByKey(player.GetGUID()))
             {
                 AuctionPosting auction = _itemsByAuctionId.LookupByKey(auctionId);
@@ -999,12 +999,12 @@ namespace Game
                     auctions.Add(auction);
             }
 
-            AuctionPosting.Sorter sorter = new AuctionPosting.Sorter(player.GetSession().GetSessionDbcLocale(), sorts, sortCount);
+            AuctionPosting.Sorter sorter = new(player.GetSession().GetSessionDbcLocale(), sorts, sortCount);
             auctions.Sort(sorter);
 
             foreach (var resultAuction in auctions)
             {
-                AuctionItem auctionItem = new AuctionItem();
+                AuctionItem auctionItem = new();
                 resultAuction.BuildAuctionItem(auctionItem, true, true, true, false);
                 listBidderItemsResult.Items.Add(auctionItem);
             }
@@ -1030,7 +1030,7 @@ namespace Game
 
                 foreach (AuctionPosting resultAuction in builder.GetResultRange())
                 {
-                    AuctionItem auctionItem = new AuctionItem();
+                    AuctionItem auctionItem = new();
                     resultAuction.BuildAuctionItem(auctionItem, false, false, resultAuction.OwnerAccount != player.GetSession().GetAccountGUID(), resultAuction.Bidder.IsEmpty());
                     listItemsResult.Items.Add(auctionItem);
                 }
@@ -1058,7 +1058,7 @@ namespace Game
 
             foreach (AuctionPosting resultAuction in builder.GetResultRange())
             {
-                AuctionItem auctionItem = new AuctionItem();
+                AuctionItem auctionItem = new();
                 resultAuction.BuildAuctionItem(auctionItem, false, true, resultAuction.OwnerAccount != player.GetSession().GetAccountGUID(),
                     resultAuction.Bidder.IsEmpty());
 
@@ -1071,7 +1071,7 @@ namespace Game
         public void BuildListOwnedItems(AuctionListOwnedItemsResult listOwnerItemsResult, Player player, uint offset, AuctionSortDef[] sorts, int sortCount)
         {
             // always full list
-            List<AuctionPosting> auctions = new List<AuctionPosting>();
+            List<AuctionPosting> auctions = new();
             foreach (var auctionId in _playerOwnedAuctions.LookupByKey(player.GetGUID()))
             {
                 AuctionPosting auction = _itemsByAuctionId.LookupByKey(auctionId);
@@ -1079,12 +1079,12 @@ namespace Game
                     auctions.Add(auction);
             }
 
-            AuctionPosting.Sorter sorter = new AuctionPosting.Sorter(player.GetSession().GetSessionDbcLocale(), sorts, sortCount);
+            AuctionPosting.Sorter sorter = new(player.GetSession().GetSessionDbcLocale(), sorts, sortCount);
             auctions.Sort(sorter);
 
             foreach (var resultAuction in auctions)
             {
-                AuctionItem auctionItem = new AuctionItem();
+                AuctionItem auctionItem = new();
                 resultAuction.BuildAuctionItem(auctionItem, true, true, false, false);
                 listOwnerItemsResult.Items.Add(auctionItem);
             }
@@ -1118,7 +1118,7 @@ namespace Game
             var keyIndex = _itemsByAuctionId.IndexOfKey(cursor);
             foreach (var pair in _itemsByAuctionId.Skip(keyIndex))
             {
-                AuctionItem auctionItem = new AuctionItem();
+                AuctionItem auctionItem = new();
                 pair.Value.BuildAuctionItem(auctionItem, false, true, true, pair.Value.Bidder.IsEmpty());
                 replicateResponse.Items.Add(auctionItem);
                 if (--count == 0)
@@ -1197,7 +1197,7 @@ namespace Game
 
             ulong totalPrice = 0;
             uint remainingQuantity = quantity;
-            List<AuctionPosting> auctions = new List<AuctionPosting>();
+            List<AuctionPosting> auctions = new();
             for (var i = 0; i < bucketItr.Auctions.Count;)
             {
                 AuctionPosting auction = bucketItr.Auctions[i++];
@@ -1238,14 +1238,14 @@ namespace Game
                 return false;
             }
 
-            Optional<ObjectGuid> uniqueSeller = new Optional<ObjectGuid>();
+            Optional<ObjectGuid> uniqueSeller = new();
 
             // prepare items
-            List<MailedItemsBatch> items = new List<MailedItemsBatch>();
+            List<MailedItemsBatch> items = new();
             items.Add(new MailedItemsBatch());
 
             remainingQuantity = quantity;
-            List<int> removedItemsFromAuction = new List<int>();
+            List<int> removedItemsFromAuction = new();
 
             for (var i = 0; i < bucketItr.Auctions.Count;)
             {
@@ -1323,7 +1323,7 @@ namespace Game
 
             foreach (MailedItemsBatch batch in items)
             {
-                MailDraft mail = new MailDraft(Global.AuctionHouseMgr.BuildCommodityAuctionMailSubject(AuctionMailType.Won, itemId, batch.Quantity),
+                MailDraft mail = new(Global.AuctionHouseMgr.BuildCommodityAuctionMailSubject(AuctionMailType.Won, itemId, batch.Quantity),
                     Global.AuctionHouseMgr.BuildAuctionWonMailBody(uniqueSeller.Value, batch.TotalPrice, batch.Quantity));
 
                 for (int i = 0; i < batch.ItemsCount; ++i)
@@ -1340,7 +1340,7 @@ namespace Game
                 mail.SendMailTo(trans, player, new MailSender(this), MailCheckMask.Copied);
             }
 
-            AuctionWonNotification packet = new AuctionWonNotification();
+            AuctionWonNotification packet = new();
             packet.Info.Initialize(auctions[0], items[0].Items[0]);
             player.SendPacket(packet);
 
@@ -1373,7 +1373,7 @@ namespace Game
             {
                 if (oldBidder)
                 {
-                    AuctionOutbidNotification packet = new AuctionOutbidNotification();
+                    AuctionOutbidNotification packet = new();
                     packet.BidAmount = newBidAmount;
                     packet.MinIncrement = AuctionPosting.CalculateMinIncrement(newBidAmount);
                     packet.Info.AuctionID = auction.Id;
@@ -1427,7 +1427,7 @@ namespace Game
             // receiver exist
             if ((bidder != null || bidderAccId != 0))// && !sAuctionBotConfig.IsBotChar(auction.Bidder))
             {
-                MailDraft mail = new MailDraft(Global.AuctionHouseMgr.BuildItemAuctionMailSubject(AuctionMailType.Won, auction),
+                MailDraft mail = new(Global.AuctionHouseMgr.BuildItemAuctionMailSubject(AuctionMailType.Won, auction),
                     Global.AuctionHouseMgr.BuildAuctionWonMailBody(auction.Owner, auction.BidAmount, auction.BuyoutOrUnitPrice));
 
                 // set owner to bidder (to prevent delete item with sender char deleting)
@@ -1444,7 +1444,7 @@ namespace Game
 
                 if (bidder)
                 {
-                    AuctionWonNotification packet = new AuctionWonNotification();
+                    AuctionWonNotification packet = new();
                     packet.Info.Initialize(auction, auction.Items[0]);
                     bidder.SendPacket(packet);
 
@@ -1502,7 +1502,7 @@ namespace Game
                 int itemIndex = 0;
                 while (itemIndex < auction.Items.Count)
                 {  
-                    MailDraft mail = new MailDraft(Global.AuctionHouseMgr.BuildItemAuctionMailSubject(AuctionMailType.Expired, auction), "");
+                    MailDraft mail = new(Global.AuctionHouseMgr.BuildItemAuctionMailSubject(AuctionMailType.Expired, auction), "");
 
                     for (int i = 0; i < SharedConst.MaxMailItems && itemIndex < auction.Items.Count; ++i, ++itemIndex)
                         mail.AddItem(auction.Items[itemIndex]);
@@ -1523,7 +1523,7 @@ namespace Game
             int itemIndex = 0;
             while (itemIndex < auction.Items.Count)
             {
-                MailDraft draft = new MailDraft(Global.AuctionHouseMgr.BuildItemAuctionMailSubject(AuctionMailType.Cancelled, auction), "");
+                MailDraft draft = new(Global.AuctionHouseMgr.BuildItemAuctionMailSubject(AuctionMailType.Cancelled, auction), "");
 
                 for (int i = 0; i < SharedConst.MaxMailItems && itemIndex < auction.Items.Count; ++i, ++itemIndex)
                     draft.AddItem(auction.Items[itemIndex]);
@@ -1552,7 +1552,7 @@ namespace Game
             // owner exist (online or offline)
             if ((owner || Global.CharacterCacheStorage.HasCharacterCacheEntry(auction.Owner)))// && !sAuctionBotConfig.IsBotChar(auction.Owner))
             {
-                ByteBuffer tempBuffer = new ByteBuffer();
+                ByteBuffer tempBuffer = new();
                 tempBuffer.WritePackedTime(GameTime.GetGameTime() + WorldConfig.GetIntValue(WorldCfg.MailDeliveryDelay));
                 uint eta = tempBuffer.ReadUInt32();
 
@@ -1593,16 +1593,16 @@ namespace Game
         
         AuctionHouseRecord _auctionHouse;
 
-        SortedList<uint, AuctionPosting> _itemsByAuctionId = new SortedList<uint, AuctionPosting>(); // ordered for replicate
-        SortedDictionary<AuctionsBucketKey, AuctionsBucketData> _buckets = new SortedDictionary<AuctionsBucketKey, AuctionsBucketData>();// ordered for search by itemid only
-        Dictionary<ObjectGuid, CommodityQuote> _commodityQuotes = new Dictionary<ObjectGuid, CommodityQuote>();
+        SortedList<uint, AuctionPosting> _itemsByAuctionId = new(); // ordered for replicate
+        SortedDictionary<AuctionsBucketKey, AuctionsBucketData> _buckets = new();// ordered for search by itemid only
+        Dictionary<ObjectGuid, CommodityQuote> _commodityQuotes = new();
 
-        MultiMap<ObjectGuid, uint> _playerOwnedAuctions = new MultiMap<ObjectGuid, uint>();
-        MultiMap<ObjectGuid, uint> _playerBidderAuctions = new MultiMap<ObjectGuid, uint>();
+        MultiMap<ObjectGuid, uint> _playerOwnedAuctions = new();
+        MultiMap<ObjectGuid, uint> _playerBidderAuctions = new();
 
         // Map of throttled players for GetAll, and throttle expiry time
         // Stored here, rather than player object to maintain persistence after logout
-        Dictionary<ObjectGuid, PlayerReplicateThrottleData> _replicateThrottleMap = new Dictionary<ObjectGuid, PlayerReplicateThrottleData>();
+        Dictionary<ObjectGuid, PlayerReplicateThrottleData> _replicateThrottleMap = new();
     }
 
     public class AuctionPosting
@@ -1610,7 +1610,7 @@ namespace Game
         public uint Id;
         public AuctionsBucketData Bucket;
 
-        public List<Item> Items = new List<Item>();
+        public List<Item> Items = new();
         public ObjectGuid Owner;
         public ObjectGuid OwnerAccount;
         public ObjectGuid Bidder;
@@ -1621,7 +1621,7 @@ namespace Game
         public DateTime StartTime = DateTime.MinValue;
         public DateTime EndTime = DateTime.MinValue;
 
-        public List<ObjectGuid> BidderHistory = new List<ObjectGuid>();
+        public List<ObjectGuid> BidderHistory = new();
 
         public bool IsCommodity()
         {
@@ -1674,7 +1674,7 @@ namespace Game
                     SocketedGem gemData = Items[0].m_itemData.Gems[i];
                     if (gemData.ItemId != 0)
                     {
-                        ItemGemData gem = new ItemGemData();
+                        ItemGemData gem = new();
                         gem.Slot = i;
                         gem.Item = new ItemInstance(gemData);
                         auctionItem.Gems.Add(gem);
@@ -1802,7 +1802,7 @@ namespace Game
         public byte MaxBattlePetLevel = 0;
         public string[] FullName = new string[(int)Locale.Total];
 
-        public List<AuctionPosting> Auctions = new List<AuctionPosting>();
+        public List<AuctionPosting> Auctions = new();
 
         public void BuildBucketInfo(BucketInfo bucketInfo, Player player)
         {
@@ -2004,7 +2004,7 @@ namespace Game
         uint _offset;
         IComparer<T> _sorter;
         AuctionHouseResultLimits _maxResults;
-        List<T> _items = new List<T>();
+        List<T> _items = new();
         bool _hasMoreResults;
 
         public AuctionsResultBuilder(uint offset, IComparer<T> sorter, AuctionHouseResultLimits maxResults)

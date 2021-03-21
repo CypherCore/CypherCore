@@ -121,7 +121,7 @@ namespace Game.Collision
 
             Vector3 e1 = points[(int)tri.idx1] - points[(int)tri.idx0];
             Vector3 e2 = points[(int)tri.idx2] - points[(int)tri.idx0];
-            Vector3 p = new Vector3(ray.Direction.cross(e2));
+            Vector3 p = new(ray.Direction.cross(e2));
             float a = e1.dot(p);
 
             if (Math.Abs(a) < EPS)
@@ -131,7 +131,7 @@ namespace Game.Collision
             }
 
             float f = 1.0f / a;
-            Vector3 s = new Vector3(ray.Origin - points[(int)tri.idx0]);
+            Vector3 s = new(ray.Origin - points[(int)tri.idx0]);
             float u = f * s.dot(p);
 
             if ((u < 0.0f) || (u > 1.0f))
@@ -140,7 +140,7 @@ namespace Game.Collision
                 return false;
             }
 
-            Vector3 q = new Vector3(s.cross(e1));
+            Vector3 q = new(s.cross(e1));
             float v = f * ray.Direction.dot(q);
 
             if ((v < 0.0f) || ((u + v) > 1.0f))
@@ -205,7 +205,7 @@ namespace Game.Collision
         }
 
         ModelInstance[] prims;
-        public AreaInfo aInfo = new AreaInfo();
+        public AreaInfo aInfo = new();
     }
 
     public class LocationInfoCallback : WorkerCallback

@@ -229,7 +229,7 @@ namespace Game
                 _player.PlayerTalkClass.SendQuestQueryResponse(quest);
             else
             {
-                QueryQuestInfoResponse response = new QueryQuestInfoResponse();
+                QueryQuestInfoResponse response = new();
                 response.QuestID = packet.QuestID;
                 SendPacket(response);
             }
@@ -689,7 +689,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.RequestWorldQuestUpdate)]
         void HandleRequestWorldQuestUpdate(RequestWorldQuestUpdate packet)
         {
-            WorldQuestUpdateResponse response = new WorldQuestUpdateResponse();
+            WorldQuestUpdateResponse response = new();
 
             // @todo: 7.x Has to be implemented
             //response.WorldQuestUpdates.push_back(WorldPackets::Quest::WorldQuestUpdateInfo(lastUpdate, questID, timer, variableID, value));
@@ -742,7 +742,7 @@ namespace Game
 
                 foreach (PlayerChoiceResponseRewardItem item in reward.Items)
                 {
-                    List<ItemPosCount> dest = new List<ItemPosCount>();
+                    List<ItemPosCount> dest = new();
                     if (_player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, item.Id, (uint)item.Quantity) == InventoryResult.Ok)
                     {
                         Item newItem = _player.StoreNewItem(dest, item.Id, true, ItemEnchantmentManager.GenerateItemRandomBonusListId(item.Id), null, ItemContext.QuestReward, item.BonusListIDs);
