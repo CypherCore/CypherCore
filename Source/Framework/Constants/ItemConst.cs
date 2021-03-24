@@ -610,7 +610,7 @@ namespace Framework.Constants
 
         MaskRanged = (1 << Bow) | (1 << Gun) | (1 << Crossbow),
 
-        Max = 12
+        Max = 21
 
     }
 
@@ -838,7 +838,6 @@ namespace Framework.Constants
         Unk15 = 0x00100000, // ?
         NewItem = 0x00200000, // Item glows in inventory
         AzeriteEmpoweredItemViewed = 0x00400000, // Won't play azerite powers animation when viewing it
-        Unk17 = 0x00400000, // ?
         Unk18 = 0x00800000, // ?
         Unk19 = 0x01000000, // ?
         Unk20 = 0x02000000, // ?
