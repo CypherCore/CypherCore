@@ -759,13 +759,13 @@ namespace Framework.Constants
 
     public enum ItemSearchLocation
     {
-        InEquipment = 0x01,
-        InInventory = 0x02,
-        InBank = 0x04,
-        InReagentBank = 0x08,
+        Equipment = 0x01,
+        Inventory = 0x02,
+        Bank = 0x04,
+        ReagentBank = 0x08,
 
-        Default = InEquipment | InInventory,
-        Everywhere = InEquipment | InInventory | InBank | InReagentBank
+        Default = Equipment | Inventory,
+        Everywhere = Equipment | Inventory | Bank | ReagentBank
     }
 
     public enum ZonePVPTypeOverride

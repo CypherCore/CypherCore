@@ -1318,6 +1318,8 @@ namespace Game.Entities
                         }
                     }
                 }
+
+                UpdateAverageItemLevelTotal();
             }
             return item;
         }
@@ -1505,97 +1507,47 @@ namespace Game.Entities
         //Equip/Unequip Item
         InventoryResult CanUnequipItems(uint item, uint count)
         {
-            uint tempcount = 0;
-
             InventoryResult res = InventoryResult.Ok;
 
-            for (byte i = EquipmentSlot.Start; i < InventorySlots.BagEnd; ++i)
+            uint tempcount = 0;
+            bool result = ForEachStorageItem(ItemSearchLocation.Equipment, (pItem, equipmentSlots, location) =>
             {
-                Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (pItem != null)
+                if (pItem.GetEntry() == item)
                 {
-                    if (pItem.GetEntry() == item)
-                    {
-                        InventoryResult ires = CanUnequipItem((ushort)(InventorySlots.Bag0 << 8 | i), false);
-                        if (ires == InventoryResult.Ok)
-                        {
-                            tempcount += pItem.GetCount();
-                            if (tempcount >= count)
-                                return InventoryResult.Ok;
-                        }
-                        else
-                            res = ires;
-                    }
-                }
-            }
-
-            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
-            for (byte i = InventorySlots.ItemStart; i < inventoryEnd; ++i)
-            {
-                Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (pItem != null)
-                {
-                    if (pItem.GetEntry() == item)
+                    InventoryResult ires = CanUnequipItem((ushort)(InventorySlots.Bag0 << 8 | equipmentSlots), false);
+                    if (ires != InventoryResult.Ok)
+                        res = ires;
+                    else
                     {
                         tempcount += pItem.GetCount();
                         if (tempcount >= count)
-                            return InventoryResult.Ok;
+                            return false;
                     }
                 }
-            }
+                return true;
+            });
 
-            for (byte i = InventorySlots.ReagentStart; i < InventorySlots.ReagentEnd; ++i)
+            if (!result) // we stopped early due to a sucess
+                return InventoryResult.Ok;
+
+            ItemSearchLocation location = ItemSearchLocation.Inventory | ItemSearchLocation.Bank | ItemSearchLocation.ReagentBank;
+            result = ForEachStorageItem(location, (pItem, equipmentSlots, location) =>
             {
-                Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (pItem)
+                if (pItem.GetEntry() == item)
                 {
-                    if (pItem.GetEntry() == item)
-                    {
-                        tempcount += pItem.GetCount();
-                        if (tempcount >= count)
-                            return InventoryResult.Ok;
-                    }
+                    tempcount += pItem.GetCount();
+                    if (tempcount >= count)
+                        return false;
                 }
-            }
+                return true;
+            });
 
-            for (byte i = InventorySlots.ChildEquipmentStart; i < InventorySlots.ChildEquipmentEnd; ++i)
-            {
-                Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (pItem)
-                {
-                    if (pItem.GetEntry() == item)
-                    {
-                        tempcount += pItem.GetCount();
-                        if (tempcount >= count)
-                            return InventoryResult.Ok;
-                    }
-                }
-            }
+            if (!result) // we stopped early due to a sucess
+                return InventoryResult.Ok;
 
-            for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; ++i)
-            {
-                Bag pBag = GetBagByPos(i);
-                if (pBag != null)
-                {
-                    for (byte j = 0; j < pBag.GetBagSize(); ++j)
-                    {
-                        Item pItem = GetItemByPos(i, j);
-                        if (pItem != null)
-                        {
-                            if (pItem.GetEntry() == item)
-                            {
-                                tempcount += pItem.GetCount();
-                                if (tempcount >= count)
-                                    return InventoryResult.Ok;
-                            }
-                        }
-                    }
-                }
-            }
-
-            // not found req. item count and have unequippable items
-            return res;
+            return res; // return latest error if any
         }
+
         Item EquipNewItem(ushort pos, uint item, ItemContext context, bool update)
         {
             Item pItem = Item.CreateItem(item, 1, context, this);
@@ -1712,6 +1664,8 @@ namespace Game.Entities
             // only for full equip instead adding to stack
             UpdateCriteria(CriteriaTypes.EquipItem, pItem.GetEntry());
             UpdateCriteria(CriteriaTypes.EquipEpicItem, slot, pItem.GetEntry());
+
+            UpdateAverageItemLevelEquipped();
 
             return pItem;
         }
@@ -1977,6 +1931,9 @@ namespace Game.Entities
                     pItem.SendUpdateToPlayer(this);
 
                 AutoUnequipChildItem(pItem);
+
+                if (bag == InventorySlots.Bag0)
+                    UpdateAverageItemLevelEquipped();
             }
         }
         public void SplitItem(ushort src, ushort dst, uint count)
@@ -2671,165 +2628,42 @@ namespace Game.Entities
         }
         public Item GetItemByGuid(ObjectGuid guid)
         {
-            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
-            for (byte i = EquipmentSlot.Start; i < inventoryEnd; ++i)
+            Item result = null;
+            ForEachStorageItem(ItemSearchLocation.Everywhere, (pItem, equipmentSlots, location) =>
             {
-                Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (pItem != null)
-                    if (pItem.GetGUID() == guid)
-                        return pItem;
-            }
+                if (pItem.GetGUID() == guid)
+                {
+                    result = pItem;
+                    return false;
+                }
+                return true;
+            });
 
-            for (byte i = InventorySlots.BankItemStart; i < InventorySlots.BankBagEnd; ++i)
-            {
-                Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (pItem != null)
-                    if (pItem.GetGUID() == guid)
-                        return pItem;
-            }
-
-            for (byte i = InventorySlots.ReagentStart; i < InventorySlots.ReagentEnd; ++i)
-            {
-                Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (pItem)
-                    if (pItem.GetGUID() == guid)
-                        return pItem;
-            }
-
-            for (byte i = InventorySlots.ChildEquipmentStart; i < InventorySlots.ChildEquipmentEnd; ++i)
-            {
-                Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (pItem)
-                    if (pItem.GetGUID() == guid)
-                        return pItem;
-            }
-
-            for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; ++i)
-            {
-                Bag pBag = GetBagByPos(i);
-                if (pBag != null)
-                    for (byte j = 0; j < pBag.GetBagSize(); ++j)
-                    {
-                        Item pItem = pBag.GetItemByPos(j);
-                        if (pItem != null)
-                            if (pItem.GetGUID() == guid)
-                                return pItem;
-                    }
-            }
-
-            for (byte i = InventorySlots.BankBagStart; i < InventorySlots.BankBagEnd; ++i)
-            {
-                Bag pBag = GetBagByPos(i);
-                if (pBag != null)
-                    for (byte j = 0; j < pBag.GetBagSize(); ++j)
-                    {
-                        Item pItem = pBag.GetItemByPos(j);
-                        if (pItem != null)
-                            if (pItem.GetGUID() == guid)
-                                return pItem;
-                    }
-            }
-            return null;
+            return result;
         }
         public uint GetItemCount(uint item, bool inBankAlso = false, Item skipItem = null)
         {
-            uint count = 0;
-            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
-            for (byte i = EquipmentSlot.Start; i < inventoryEnd; i++)
-            {
-                Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (pItem != null)
-                    if (pItem != skipItem && pItem.GetEntry() == item)
-                        count += pItem.GetCount();
-            }
-
-            for (var i = InventorySlots.BagStart; i < InventorySlots.BagEnd; ++i)
-            {
-                Bag pBag = GetBagByPos(i);
-                if (pBag != null)
-                    count += pBag.GetItemCount(item, skipItem);
-            }
-
-            if (skipItem != null && skipItem.GetTemplate().GetGemProperties() != 0)
-            {
-                for (byte i = EquipmentSlot.Start; i < inventoryEnd; ++i)
-                {
-                    Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                    if (pItem != null)
-                        if (pItem != skipItem && pItem.GetSocketColor(0) != 0)
-                            count += pItem.GetGemCountWithID(item);
-                }
-            }
-
+            bool skipItemHasGemProps = skipItem != null && skipItem.GetTemplate().GetGemProperties() != 0;
+            ItemSearchLocation location = ItemSearchLocation.Equipment | ItemSearchLocation.Inventory | ItemSearchLocation.ReagentBank;
             if (inBankAlso)
+                location |= ItemSearchLocation.Bank;
+
+            uint count = 0;
+            ForEachStorageItem(location, (pItem, equipmentSlots, location) =>
             {
-                // checking every item from 39 to 74 (including bank bags)
-                for (var i = InventorySlots.BankItemStart; i < InventorySlots.BankBagEnd; ++i)
+                if (pItem != skipItem)
                 {
-                    Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                    if (pItem != null)
-                        if (pItem != skipItem && pItem.GetEntry() == item)
-                            count += pItem.GetCount();
-                }
-
-                for (var i = InventorySlots.BankBagStart; i < InventorySlots.BankBagEnd; ++i)
-                {
-                    Bag pBag = GetBagByPos(i);
-                    if (pBag != null)
-                        count += pBag.GetItemCount(item, skipItem);
-                }
-
-                if (skipItem != null && skipItem.GetTemplate().GetGemProperties() != 0)
-                {
-                    for (var i = InventorySlots.BankItemStart; i < InventorySlots.BankItemEnd; ++i)
-                    {
-                        Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                        if (pItem != null)
-                            if (pItem != skipItem && pItem.GetSocketColor(0) != 0)
-                                count += pItem.GetGemCountWithID(item);
-                    }
-                }
-            }
-
-            for (byte i = InventorySlots.ReagentStart; i < InventorySlots.ReagentEnd; ++i)
-            {
-                Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (pItem)
-                    if (pItem != skipItem && pItem.GetEntry() == item)
+                    if (pItem.GetEntry() == item)
                         count += pItem.GetCount();
-            }
-
-            if (skipItem && skipItem.GetTemplate().GetGemProperties() != 0)
-            {
-                for (byte i = InventorySlots.ReagentStart; i < InventorySlots.ReagentEnd; ++i)
-                {
-                    Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                    if (pItem)
-                        if (pItem != skipItem && pItem.GetSocketColor(0) != 0)
-                            count += pItem.GetGemCountWithID(item);
+                    else if (skipItemHasGemProps && pItem.GetSocketColor(0) != 0)
+                        count += pItem.GetGemCountWithID(item);
                 }
-            }
-
-            for (byte i = InventorySlots.ChildEquipmentStart; i < InventorySlots.ChildEquipmentEnd; ++i)
+                return true;
+            }, (pBag, equipmentSlots, location) =>
             {
-                Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (pItem)
-                {
-                    if (pItem != skipItem && pItem.GetEntry() == item)
-                        count += pItem.GetCount();
-                }
-            }
-
-            if (skipItem && skipItem.GetTemplate().GetGemProperties() != 0)
-            {
-                for (byte i = InventorySlots.ChildEquipmentStart; i < InventorySlots.ChildEquipmentEnd; ++i)
-                {
-                    Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                    if (pItem)
-                        if (pItem != skipItem && pItem.GetSocketColor(0) != 0)
-                            count += pItem.GetGemCountWithID(item);
-                }
-            }
+                count += pBag.GetItemCount(item, skipItem);
+                return true;
+            });
 
             return count;
         }
@@ -2864,235 +2698,54 @@ namespace Game.Entities
         }
         public Item GetItemByEntry(uint entry, ItemSearchLocation where = ItemSearchLocation.Default)
         {
-            if (where.HasAnyFlag(ItemSearchLocation.InEquipment))
+            Item result = null;
+            ForEachStorageItem(where, (item, equipmentSlots, location) =>
             {
-                for (byte i = EquipmentSlot.Start; i < InventorySlots.BagEnd; ++i)
+                if (item.GetEntry() == entry)
                 {
-                    Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                    if (pItem != null)
-                        if (pItem.GetEntry() == entry)
-                            return pItem;
+                    result = item;
+                    return false;
                 }
-            }
+                return true;
+            });
 
-            if (where.HasAnyFlag(ItemSearchLocation.InInventory))
-            {
-                int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
-                for (byte i = InventorySlots.ItemStart; i < inventoryEnd; ++i)
-                {
-                    Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                    if (pItem != null)
-                        if (pItem.GetEntry() == entry)
-                            return pItem;
-                }
-
-                for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; ++i)
-                {
-                    Bag pBag = GetBagByPos(i);
-                    if (pBag != null)
-                        for (byte j = 0; j < pBag.GetBagSize(); ++j)
-                        {
-                            Item pItem = pBag.GetItemByPos(j);
-                            if (pItem != null)
-                            {
-                                if (pItem.GetEntry() == entry)
-                                    return pItem;
-                            }
-                        }
-                }
-
-                for (byte i = InventorySlots.ChildEquipmentStart; i < InventorySlots.ChildEquipmentEnd; ++i)
-                {
-                    Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                    if (pItem)
-                        if (pItem.GetEntry() == entry)
-                            return pItem;
-                }
-            }
-
-            if (where.HasAnyFlag(ItemSearchLocation.InBank))
-            {
-                for (byte i = InventorySlots.BankItemStart; i < InventorySlots.BankItemEnd; ++i)
-                {
-                    Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                    if (pItem != null)
-                        if (pItem.GetEntry() == entry)
-                            return pItem;
-                }
-
-                for (byte i = InventorySlots.BankBagStart; i < InventorySlots.BankBagEnd; ++i)
-                {
-                    Bag pBag = GetBagByPos(i);
-                    if (pBag != null)
-                    {
-                        for (byte j = 0; j < pBag.GetBagSize(); ++j)
-                        {
-                            Item pItem = pBag.GetItemByPos(j);
-                            if (pItem != null)
-                                if (pItem.GetEntry() == entry)
-                                    return pItem;
-                        }
-                    }
-                }
-            }
-
-            if (where.HasAnyFlag(ItemSearchLocation.InReagentBank))
-            {
-                for (byte i = InventorySlots.ReagentStart; i < InventorySlots.ReagentEnd; ++i)
-                {
-                    Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                    if (pItem != null)
-                        if (pItem.GetEntry() == entry)
-                            return pItem;
-                }
-            }
-
-            return null;
+            return result;
         }
         public List<Item> GetItemListByEntry(uint entry, bool inBankAlso = false)
         {
-            List<Item> itemList = new();
-
-            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
-            for (byte i = InventorySlots.ItemStart; i < inventoryEnd; ++i)
-            {
-                Item item = GetItemByPos(InventorySlots.Bag0, i);
-                if (item != null)
-                    if (item.GetEntry() == entry)
-                        itemList.Add(item);
-            }
-
-            for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; ++i)
-            {
-                Bag bag = GetBagByPos(i);
-                if (bag)
-                {
-                    for (byte j = 0; j < bag.GetBagSize(); ++j)
-                    {
-                        Item item = bag.GetItemByPos(j);
-                        if (item != null)
-                            if (item.GetEntry() == entry)
-                                itemList.Add(item);
-                    }
-                }
-            }
-
-            for (byte i = EquipmentSlot.Start; i < InventorySlots.BagEnd; ++i)
-            {
-                Item item = GetItemByPos(InventorySlots.Bag0, i);
-                if (item)
-                    if (item.GetEntry() == entry)
-                        itemList.Add(item);
-            }
-
+            ItemSearchLocation location = ItemSearchLocation.Equipment | ItemSearchLocation.Inventory | ItemSearchLocation.ReagentBank;
             if (inBankAlso)
-            {
-                for (byte i = InventorySlots.BankItemStart; i < InventorySlots.BankBagEnd; ++i)
-                {
-                    Item item = GetItemByPos(InventorySlots.Bag0, i);
-                    if (item)
-                        if (item.GetEntry() == entry)
-                            itemList.Add(item);
-                }
-            }
+                location |= ItemSearchLocation.Bank;
 
-            for (byte i = InventorySlots.ChildEquipmentStart; i < InventorySlots.ChildEquipmentEnd; ++i)
+            List<Item> itemList = new();
+            ForEachStorageItem(location, (item, equipmentSlots, location) =>
             {
-                Item item = GetItemByPos(InventorySlots.Bag0, i);
-                if (item)
-                    if (item.GetEntry() == entry)
-                        itemList.Add(item);
-            }
+                if (item.GetEntry() == entry)
+                    itemList.Add(item);
+                return true;
+            });
 
             return itemList;
+
         }
         public bool HasItemCount(uint item, uint count = 1, bool inBankAlso = false)
         {
-            uint tempcount = 0;
-            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
-            for (byte i = EquipmentSlot.Start; i < inventoryEnd; i++)
-            {
-                Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (pItem != null && pItem.GetEntry() == item && !pItem.IsInTrade())
-                {
-                    tempcount += pItem.GetCount();
-                    if (tempcount >= count)
-                        return true;
-                }
-            }
-
-            for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; i++)
-            {
-                Bag pBag = GetBagByPos(i);
-                if (pBag != null)
-                {
-                    for (byte j = 0; j < pBag.GetBagSize(); j++)
-                    {
-                        Item pItem = GetItemByPos(i, j);
-                        if (pItem != null && pItem.GetEntry() == item && !pItem.IsInTrade())
-                        {
-                            tempcount += pItem.GetCount();
-                            if (tempcount >= count)
-                                return true;
-                        }
-                    }
-                }
-            }
-
+            ItemSearchLocation location = ItemSearchLocation.Equipment | ItemSearchLocation.Inventory | ItemSearchLocation.ReagentBank;
             if (inBankAlso)
-            {
-                for (byte i = InventorySlots.BankItemStart; i < InventorySlots.BankBagEnd; i++)
-                {
-                    Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                    if (pItem != null && pItem.GetEntry() == item && !pItem.IsInTrade())
-                    {
-                        tempcount += pItem.GetCount();
-                        if (tempcount >= count)
-                            return true;
-                    }
-                }
-                for (byte i = InventorySlots.BankBagStart; i < InventorySlots.BankBagEnd; i++)
-                {
-                    Bag pBag = GetBagByPos(i);
-                    if (pBag != null)
-                    {
-                        for (byte j = 0; j < pBag.GetBagSize(); j++)
-                        {
-                            Item pItem = GetItemByPos(i, j);
-                            if (pItem != null && pItem.GetEntry() == item && !pItem.IsInTrade())
-                            {
-                                tempcount += pItem.GetCount();
-                                if (tempcount >= count)
-                                    return true;
-                            }
-                        }
-                    }
-                }
-            }
+                location |= ItemSearchLocation.Bank;
 
-            for (byte i = InventorySlots.ReagentStart; i < InventorySlots.ReagentEnd; i++)
+            uint currentCount = 0;
+            return !ForEachStorageItem(location, (pItem, equipmentSlots, location) =>
             {
-                Item pItem = GetItemByPos(InventorySlots.Bag0, i);
                 if (pItem && pItem.GetEntry() == item && !pItem.IsInTrade())
                 {
-                    tempcount += pItem.GetCount();
-                    if (tempcount >= count)
-                        return true;
-                }
-            }
 
-            for (byte i = InventorySlots.ChildEquipmentStart; i < InventorySlots.ChildEquipmentEnd; i++)
-            {
-                Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (pItem && pItem.GetEntry() == item && !pItem.IsInTrade())
-                {
-                    tempcount += pItem.GetCount();
-                    if (tempcount >= count)
-                        return true;
+                    currentCount += pItem.GetCount();
+                    if (currentCount >= count)
+                        return false;
                 }
-            }
-
-            return false;
+                return true;
+            });
         }
         public static bool IsChildEquipmentPos(byte bag, byte slot)
         {
@@ -3151,102 +2804,38 @@ namespace Game.Entities
 
         public Item GetChildItemByGuid(ObjectGuid guid)
         {
-            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
-            for (byte i = EquipmentSlot.Start; i < inventoryEnd; ++i)
+            Item result = null;
+            ForEachStorageItem(ItemSearchLocation.Equipment, (pItem, equipmentSlots, location) =>
             {
-                Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (pItem)
-                    if (pItem.GetGUID() == guid)
-                        return pItem;
-            }
+                if (pItem.GetGUID() == guid)
+                {
+                    result = pItem;
+                    return false;
+                }
+                return true;
+            });
 
-            for (byte i = InventorySlots.ChildEquipmentStart; i < InventorySlots.ChildEquipmentEnd; ++i)
-            {
-                Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (pItem)
-                    if (pItem.GetGUID() == guid)
-                        return pItem;
-            }
-
-            return null;
+            return result;
         }
         uint GetItemCountWithLimitCategory(uint limitCategory, Item skipItem)
         {
             uint count = 0;
-            int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
-            for (byte i = EquipmentSlot.Start; i < inventoryEnd; ++i)
+            ForEachStorageItem(ItemSearchLocation.Everywhere, (pItem, equipmentSlots, location) =>
             {
-                Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (pItem)
+                if (pItem != skipItem)
                 {
-                    if (pItem != skipItem)
-                    {
-                        ItemTemplate pProto = pItem.GetTemplate();
-                        if (pProto != null)
-                            if (pProto.GetItemLimitCategory() == limitCategory)
-                                count += pItem.GetCount();
-                    }
+                    ItemTemplate pProto = pItem.GetTemplate();
+                    if (pProto != null)
+                        if (pProto.GetItemLimitCategory() == limitCategory)
+                            count += pItem.GetCount();
                 }
-            }
-
-            for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; ++i)
+                return true;
+            }, (pBag, equipmentSlots, location) =>
             {
-                Bag pBag = GetBagByPos(i);
-                if (pBag)
-                    count += pBag.GetItemCountWithLimitCategory(limitCategory, skipItem);
-            }
+                count += pBag.GetItemCountWithLimitCategory(limitCategory, skipItem);
 
-            for (byte i = InventorySlots.BankItemStart; i < InventorySlots.BankItemEnd; ++i)
-            {
-                Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (pItem)
-                {
-                    if (pItem != skipItem)
-                    {
-                        ItemTemplate pProto = pItem.GetTemplate();
-                        if (pProto != null)
-                            if (pProto.GetItemLimitCategory() == limitCategory)
-                                count += pItem.GetCount();
-                    }
-                }
-            }
-
-            for (byte i = InventorySlots.BankBagStart; i < InventorySlots.BankBagEnd; ++i)
-            {
-                Bag pBag = GetBagByPos(i);
-                if (pBag)
-                    count += pBag.GetItemCountWithLimitCategory(limitCategory, skipItem);
-            }
-
-            for (byte i = InventorySlots.ReagentStart; i < InventorySlots.ReagentEnd; ++i)
-            {
-                Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (pItem)
-                {
-                    if (pItem != skipItem)
-                    {
-                        ItemTemplate pProto = pItem.GetTemplate();
-                        if (pProto != null)
-                            if (pProto.GetItemLimitCategory() == limitCategory)
-                                count += pItem.GetCount();
-                    }
-                }
-            }
-
-            for (byte i = InventorySlots.ChildEquipmentStart; i < InventorySlots.ChildEquipmentEnd; ++i)
-            {
-                Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (pItem)
-                {
-                    if (pItem != skipItem)
-                    {
-                        ItemTemplate pProto = pItem.GetTemplate();
-                        if (pProto != null)
-                            if (pProto.GetItemLimitCategory() == limitCategory)
-                                count += pItem.GetCount();
-                    }
-                }
-            }
+                return true;
+            });
 
             return count;
         }
@@ -5546,7 +5135,7 @@ namespace Game.Entities
                 AzeriteEmpoweredItem azeriteEmpoweredItem = item.ToAzeriteEmpoweredItem();
                 if (azeriteEmpoweredItem)
                 {
-                    if (!apply || GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.InEquipment))
+                    if (!apply || GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Equipment))
                     {
                         for (int i = 0; i < SharedConst.MaxAzeriteEmpoweredTier; ++i)
                         {
@@ -5642,92 +5231,63 @@ namespace Game.Entities
         public bool HasItemOrGemWithIdEquipped(uint item, uint count, byte except_slot = ItemConst.NullSlot)
         {
             uint tempcount = 0;
-            for (byte i = EquipmentSlot.Start; i < EquipmentSlot.End; ++i)
-            {
-                if (i == except_slot)
-                    continue;
-
-                Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (pItem != null && pItem.GetEntry() == item)
-                {
-                    tempcount += pItem.GetCount();
-                    if (tempcount >= count)
-                        return true;
-                }
-            }
-
             ItemTemplate pProto = Global.ObjectMgr.GetItemTemplate(item);
-            if (pProto != null && pProto.GetGemProperties() != 0)
+            bool hasGemProps = pProto?.GetGemProperties() != 0;
+            return !ForEachStorageItem(ItemSearchLocation.Equipment, (pItem, equipmentSlots, location) =>
             {
-                for (byte i = EquipmentSlot.Start; i < EquipmentSlot.End; ++i)
+                if (equipmentSlots != except_slot)
                 {
-                    if (i == except_slot)
-                        continue;
-
-                    Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                    if (pItem != null && pItem.GetSocketColor(0) != 0)
-                    {
+                    if (pItem.GetEntry() == item)
+                        tempcount += pItem.GetCount();
+                    else if (pItem?.GetSocketColor(0) != 0)
                         tempcount += pItem.GetGemCountWithID(item);
-                        if (tempcount >= count)
-                            return true;
-                    }
-                }
-            }
 
-            return false;
+                    if (tempcount >= count)
+                        return false;
+                }
+                return true;
+            });
         }
         bool HasItemWithLimitCategoryEquipped(uint limitCategory, uint count, byte except_slot)
         {
             uint tempcount = 0;
-            for (byte i = EquipmentSlot.Start; i < EquipmentSlot.End; ++i)
+            return !ForEachStorageItem(ItemSearchLocation.Equipment, (pItem, equipmentSlots, location) =>
             {
-                if (i == except_slot)
-                    continue;
-
-                Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (!pItem)
-                    continue;
+                if (equipmentSlots == except_slot)
+                    return true;
 
                 ItemTemplate pProto = pItem.GetTemplate();
                 if (pProto == null)
-                    continue;
+                    return true;
 
-                if (pProto.GetItemLimitCategory() == limitCategory)
-                {
-                    tempcount += pItem.GetCount();
-                    if (tempcount >= count)
-                        return true;
-                }
-            }
+                if (pProto.GetItemLimitCategory() != limitCategory)
+                    return true;
 
-            return false;
+                tempcount += pItem.GetCount();
+                return (tempcount < count);
+            });
         }
 
         bool HasGemWithLimitCategoryEquipped(uint limitCategory, uint count, byte except_slot)
         {
             uint tempcount = 0;
-            for (byte i = EquipmentSlot.Start; i < EquipmentSlot.End; ++i)
+            return !ForEachStorageItem(ItemSearchLocation.Equipment, (pItem, equipmentSlots, location) =>
             {
-                if (i == except_slot)
-                    continue;
-
-                Item pItem = GetItemByPos(InventorySlots.Bag0, i);
-                if (!pItem)
-                    continue;
+                if (equipmentSlots == except_slot)
+                    return true;
 
                 ItemTemplate pProto = pItem.GetTemplate();
                 if (pProto == null)
-                    continue;
+                    return true;
 
                 if (pItem.GetSocketColor(0) != 0 || pItem.GetEnchantmentId(EnchantmentSlot.Prismatic) != 0)
                 {
                     tempcount += pItem.GetGemCountWithLimitCategory(limitCategory);
                     if (tempcount >= count)
-                        return true;
+                        return false;
                 }
-            }
-
-            return false;
+                return true;
+            });
         }
 
         //Visual
@@ -5863,6 +5423,10 @@ namespace Game.Entities
                 pItem.SetContainedIn(ObjectGuid.Empty);
                 pItem.SetSlot(ItemConst.NullSlot);
                 pItem.SetState(ItemUpdateState.Removed, this);
+
+                UpdateAverageItemLevelTotal();
+                if (bag == InventorySlots.Bag0)
+                    UpdateAverageItemLevelEquipped();
             }
         }
 
@@ -6960,6 +6524,198 @@ namespace Game.Entities
                 SetHealth(MathFunctions.CalculatePct(GetMaxHealth(), healthPct));
             }
             // @todo other types of power scaling such as timewalking
+        }
+
+        bool ForEachStorageItem(ItemSearchLocation location, Func<Item, byte, ItemSearchLocation, bool> callback, Func<Bag, byte, ItemSearchLocation, bool> bagCallback)
+        {
+            if (location.HasAnyFlag(ItemSearchLocation.Equipment))
+            {
+                for (byte i = EquipmentSlot.Start; i < EquipmentSlot.End; i++)
+                {
+                    Item item = GetItemByPos(InventorySlots.Bag0, i);
+                    if (item != null)
+                        if (!callback(item, i, ItemSearchLocation.Equipment))
+                            return false;
+                }
+            }
+
+            if (location.HasAnyFlag(ItemSearchLocation.Inventory))
+            {
+                for (byte i = InventorySlots.ItemStart; i < InventorySlots.ItemStart + GetInventorySlotCount(); i++)
+                {
+                    Item item = GetItemByPos(InventorySlots.Bag0, i);
+                    if (item != null)
+                        if (!callback(item, i, ItemSearchLocation.Inventory))
+                            return false;
+                }
+
+                for (byte i = InventorySlots.ChildEquipmentStart; i < InventorySlots.ChildEquipmentEnd; ++i)
+                {
+                    Item item = GetItemByPos(InventorySlots.Bag0, i);
+                    if (item != null)
+                        if (!callback(item, i, ItemSearchLocation.Inventory))
+                            return false;
+                }
+
+                for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; i++)
+                {
+                    Bag bag = GetBagByPos(i);
+                    if (bag != null)
+                        if (!bagCallback(bag, i, ItemSearchLocation.Inventory))
+                            return false;
+                }
+            }
+
+            if (location.HasAnyFlag(ItemSearchLocation.Bank))
+            {
+                for (byte i = InventorySlots.BankItemStart; i < InventorySlots.BankItemEnd; ++i)
+                {
+                    Item item = GetItemByPos(InventorySlots.Bag0, i);
+                    if (item != null)
+                        if (!callback(item, i, ItemSearchLocation.Bank))
+                            return false;
+                }
+
+                for (byte i = InventorySlots.BankBagStart; i < InventorySlots.BankBagEnd; ++i)
+                {
+                    Bag bag = GetBagByPos(i);
+                    if (bag != null)
+                        if (!bagCallback(bag, i, ItemSearchLocation.Bank))
+                            return false;
+                }
+            }
+
+            if (location.HasAnyFlag(ItemSearchLocation.ReagentBank))
+            {
+                for (byte i = InventorySlots.ReagentStart; i < InventorySlots.ReagentEnd; ++i)
+                {
+                    Item item = GetItemByPos(InventorySlots.Bag0, i);
+                    if (item != null)
+                        if (!callback(item, i, ItemSearchLocation.ReagentBank))
+                            return false;
+                }
+            }
+
+            return true;
+        }
+
+        bool ForEachStorageItem(ItemSearchLocation location, Func<Item, byte, ItemSearchLocation, bool> callback)
+        {
+            return ForEachStorageItem(location, callback, (pBag, equipmentSlots, callbackLocation) =>
+            {
+                for (byte j = 0; j < pBag.GetBagSize(); j++)
+                {
+                    Item pItem = pBag.GetItemByPos(j);
+                        if (pItem != null)
+                        if (!callback(pItem, equipmentSlots, callbackLocation))
+                            return false;
+                }
+                return true;
+            });
+        }
+        
+        bool ForEachEquipmentSlot(InventoryType inventoryType, bool canDualWield, bool canTitanGrip, Action<byte> callback)
+        {
+            switch (inventoryType)
+            {
+                case InventoryType.Head: callback(EquipmentSlot.Head); return true;
+                case InventoryType.Neck: callback(EquipmentSlot.Neck); return true;
+                case InventoryType.Shoulders: callback(EquipmentSlot.Shoulders); return true;
+                case InventoryType.Body: callback(EquipmentSlot.Shirt); return true;
+                case InventoryType.Robe:
+                case InventoryType.Chest: callback(EquipmentSlot.Chest); return true;
+                case InventoryType.Waist: callback(EquipmentSlot.Waist); return true;
+                case InventoryType.Legs: callback(EquipmentSlot.Legs); return true;
+                case InventoryType.Feet: callback(EquipmentSlot.Feet); return true;
+                case InventoryType.Wrists: callback(EquipmentSlot.Wrist); return true;
+                case InventoryType.Hands: callback(EquipmentSlot.Hands); return true;
+                case InventoryType.Cloak: callback(EquipmentSlot.Cloak); return true;
+                case InventoryType.Finger:
+                    callback(EquipmentSlot.Finger1);
+                    callback(EquipmentSlot.Finger2);
+                    return true;
+                case InventoryType.Trinket:
+                    callback(EquipmentSlot.Trinket1);
+                    callback(EquipmentSlot.Trinket2);
+                    return true;
+                case InventoryType.Weapon:
+                    callback(EquipmentSlot.MainHand);
+                    if (canDualWield)
+                        callback(EquipmentSlot.OffHand);
+                    return true;
+                case InventoryType.Weapon2Hand:
+                    callback(EquipmentSlot.MainHand);
+                    if (canDualWield && canTitanGrip)
+                        callback(EquipmentSlot.OffHand);
+                    return true;
+                case InventoryType.Ranged:
+                case InventoryType.RangedRight:
+                case InventoryType.WeaponMainhand: callback(EquipmentSlot.MainHand); return true;
+                case InventoryType.Shield:
+                case InventoryType.Holdable:
+                case InventoryType.WeaponOffhand: callback(EquipmentSlot.OffHand); return true;
+                default:
+                    return false;
+            }
+        }
+
+        public void UpdateAverageItemLevelTotal()
+        {
+            Dictionary<byte, Tuple<InventoryType, uint>> bestItemLevels = new();
+            float sum = 0;
+
+            ForEachStorageItem(ItemSearchLocation.Everywhere, (item, equipmentSlots, location) =>
+            {
+                ItemTemplate itemTemplate = item.GetTemplate();
+                if (itemTemplate != null)
+                {
+                    if (CanEquipItem(ItemConst.NullSlot, out ushort dest, item, true, false) == InventoryResult.Ok)
+                    {
+                        uint itemLevel = item.GetItemLevel(this);
+                        InventoryType inventoryType = itemTemplate.GetInventoryType();
+                        ForEachEquipmentSlot(inventoryType, m_canDualWield, m_canTitanGrip, slot =>
+                        {
+                            if (!bestItemLevels.TryGetValue(slot, out Tuple<InventoryType, uint> pair))
+                            {
+                                bestItemLevels[slot] = Tuple.Create(inventoryType, itemLevel);
+                                sum += itemLevel;
+                            }
+                            else if (itemLevel > pair.Item2)
+                            {
+                                sum += itemLevel - pair.Item2;
+                                bestItemLevels[slot] = Tuple.Create(pair.Item1, itemLevel);
+                            }
+                        });
+                    }
+                }
+                return true;
+            });
+
+            // If main hand is a 2h weapon, count it twice
+            if (!bestItemLevels.TryGetValue(EquipmentSlot.MainHand, out Tuple<InventoryType, uint> mainHand) && mainHand.Item1 == InventoryType.Weapon2Hand)
+                sum += mainHand.Item2;
+
+            sum /= 16.0f;
+            UpdateAverageItemLevelTotal(sum);
+        }
+
+        public void UpdateAverageItemLevelEquipped()
+        {
+            float totalItemLevel = 0;
+            for (byte i = EquipmentSlot.Start; i < EquipmentSlot.End; i++)
+            {
+                Item item = GetItemByPos(InventorySlots.Bag0, i);
+                if (item != null)
+                {
+                    uint itemLevel = item.GetItemLevel(this);
+                    totalItemLevel += itemLevel;
+                    if (i == EquipmentSlot.MainHand && item.GetTemplate().GetInventoryType() == InventoryType.Weapon2Hand) // 2h weapon counts twice
+                        totalItemLevel += itemLevel;
+                }
+            }
+
+            totalItemLevel /= 16.0f;
+            UpdateAverageItemLevelEquipped(totalItemLevel);
         }
     }
 }

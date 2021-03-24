@@ -1024,6 +1024,9 @@ namespace Game
             if (!pCurrChar.IsStandState() && !pCurrChar.HasUnitState(UnitState.Stunned))
                 pCurrChar.SetStandState(UnitStandStateType.Stand);
 
+            pCurrChar.UpdateAverageItemLevelTotal();
+            pCurrChar.UpdateAverageItemLevelEquipped();
+
             m_playerLoading.Clear();
 
             Global.ScriptMgr.OnPlayerLogin(pCurrChar);

@@ -65,7 +65,7 @@ namespace Game
             ActivateEssenceFailed activateEssenceResult = new();
             activateEssenceResult.AzeriteEssenceID = azeriteEssenceActivateEssence.AzeriteEssenceID;
 
-            Item item = _player.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.InEquipment);
+            Item item = _player.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Equipment);
             if (item == null)
             {
                 activateEssenceResult.Reason = AzeriteEssenceActivateResult.NotEquipped;

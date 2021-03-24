@@ -302,7 +302,7 @@ namespace Game.Entities
                         if (msg == InventoryResult.Ok)
                         {
                             RemoveItem(InventorySlots.Bag0, i, true);
-                            pItem = StoreItem(sDest, pItem, true);
+                            StoreItem(sDest, pItem, true);
                         }
                     }
                 }
@@ -1854,7 +1854,7 @@ namespace Game.Entities
         public uint GetStartLevel(Race race, Class playerClass, Optional<uint> characterTemplateId = default)
         {
             uint startLevel = WorldConfig.GetUIntValue(WorldCfg.StartPlayerLevel);
-            if (CliDB.ChrRacesStorage.LookupByKey(race).GetFlags().HasFlag(ChrRacesFlag.AlliedRace))
+            if (CliDB.ChrRacesStorage.LookupByKey(race).GetFlags().HasAnyFlag(ChrRacesFlag.AlliedRace))
                 startLevel = WorldConfig.GetUIntValue(WorldCfg.StartAlliedRaceLevel);
 
             if (playerClass == Class.Deathknight)
@@ -2345,8 +2345,8 @@ namespace Game.Entities
 
                 if (canTalk)
                 {
-                    string strOptionText = "";
-                    string strBoxText = "";
+                    string strOptionText;
+                    string strBoxText;
                     BroadcastTextRecord optionBroadcastText = CliDB.BroadcastTextStorage.LookupByKey(menuItems.OptionBroadcastTextId);
                     BroadcastTextRecord boxBroadcastText = CliDB.BroadcastTextStorage.LookupByKey(menuItems.BoxBroadcastTextId);
                     Locale locale = GetSession().GetSessionDbLocaleIndex();
@@ -4024,7 +4024,7 @@ namespace Game.Entities
 
             return false;
         }
-        
+
         public override bool IsNeverVisibleFor(WorldObject seer)
         {
             if (base.IsNeverVisibleFor(seer))
@@ -4807,7 +4807,7 @@ namespace Game.Entities
             if (pet != null)
                 pet.RemoveAurasDueToSpell(petSpell.GetAura(pet.GetEntry()));
         }
-        
+
         public bool InArena()
         {
             Battleground bg = GetBattleground();
@@ -4955,7 +4955,7 @@ namespace Game.Entities
 
                         reward.ItemChoices.Add(rewardEntry);
                     }
-                    
+
                     playerChoiceResponse.Reward.Set(reward);
                     displayPlayerChoice.Responses[i] = playerChoiceResponse;
                 }
@@ -6141,7 +6141,7 @@ namespace Game.Entities
                     {
                         ushort areaLevel = (ushort)Math.Min(Math.Max((ushort)GetLevel(), areaLevels.Value.MinLevel), areaLevels.Value.MaxLevel);
                         int diff = (int)(GetLevel()) - areaLevel;
-                        uint XP = 0;
+                        uint XP;
                         if (diff < -5)
                         {
                             XP = (uint)(Global.ObjectMgr.GetBaseXP(GetLevel() + 5) * WorldConfig.GetFloatValue(WorldCfg.RateXpExplore));
@@ -6523,13 +6523,13 @@ namespace Game.Entities
 
             switch (modGroup)
             {
-                case BaseModGroup.CritPercentage: 
-                    UpdateCritPercentage(WeaponAttackType.BaseAttack); 
+                case BaseModGroup.CritPercentage:
+                    UpdateCritPercentage(WeaponAttackType.BaseAttack);
                     break;
-                case BaseModGroup.RangedCritPercentage: 
-                    UpdateCritPercentage(WeaponAttackType.RangedAttack); 
+                case BaseModGroup.RangedCritPercentage:
+                    UpdateCritPercentage(WeaponAttackType.RangedAttack);
                     break;
-                case BaseModGroup.OffhandCritPercentage: 
+                case BaseModGroup.OffhandCritPercentage:
                     UpdateCritPercentage(WeaponAttackType.OffAttack);
                     break;
                 default:
@@ -6558,7 +6558,7 @@ namespace Game.Entities
 
             return m_auraBaseFlatMod[(int)modGroup] * m_auraBasePctMod[(int)modGroup];
         }
-        
+
         public void AddComboPoints(sbyte count, Spell spell = null)
         {
             if (count == 0)
@@ -7208,15 +7208,12 @@ namespace Game.Entities
         }
         public static WeaponAttackType GetAttackBySlot(byte slot, InventoryType inventoryType)
         {
-            switch (slot)
+            return slot switch
             {
-                case EquipmentSlot.MainHand:
-                    return inventoryType != InventoryType.Ranged && inventoryType != InventoryType.RangedRight ? WeaponAttackType.BaseAttack : WeaponAttackType.RangedAttack;
-                case EquipmentSlot.OffHand:
-                    return WeaponAttackType.OffAttack;
-                default:
-                    return WeaponAttackType.Max;
-            }
+                EquipmentSlot.MainHand => inventoryType != InventoryType.Ranged && inventoryType != InventoryType.RangedRight ? WeaponAttackType.BaseAttack : WeaponAttackType.RangedAttack,
+                EquipmentSlot.OffHand => WeaponAttackType.OffAttack,
+                _ => WeaponAttackType.Max,
+            };
         }
         public void AutoUnequipOffhandIfNeed(bool force = false)
         {
@@ -7290,6 +7287,9 @@ namespace Game.Entities
         public void RemovePlayerFlagEx(PlayerFlagsEx flags) { RemoveUpdateFieldFlagValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlagsEx), (uint)flags); }
         public void SetPlayerFlagsEx(PlayerFlagsEx flags) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PlayerFlagsEx), (uint)flags); }
 
+        public void UpdateAverageItemLevelTotal(float newItemLevel) { SetUpdateFieldValue(ref m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.AvgItemLevel, 0), newItemLevel); }
+        public void UpdateAverageItemLevelEquipped(float newItemLevel) { SetUpdateFieldValue(ref m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.AvgItemLevel, 1), newItemLevel); }
+
         public uint GetCustomizationChoice(uint chrCustomizationOptionId)
         {
             int choiceIndex = m_playerData.Customizations.FindIndexIf(choice =>
@@ -7317,7 +7317,7 @@ namespace Game.Entities
                 AddDynamicUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.Customizations), newChoice);
             }
         }
-        
+
         public Gender GetNativeSex() { return (Gender)(byte)m_playerData.NativeSex; }
         public void SetNativeSex(Gender sex) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.NativeSex), (byte)sex); }
         public void SetPvpTitle(byte pvpTitle) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.PvpTitle), pvpTitle); }
