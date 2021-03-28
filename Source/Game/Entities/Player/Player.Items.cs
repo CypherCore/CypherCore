@@ -2726,7 +2726,6 @@ namespace Game.Entities
             });
 
             return itemList;
-
         }
         public bool HasItemCount(uint item, uint count = 1, bool inBankAlso = false)
         {

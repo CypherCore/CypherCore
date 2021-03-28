@@ -282,7 +282,7 @@ namespace Game.Entities
                 if (shapeshift == null)
                     return true;
 
-                if (!shapeshift.Flags.HasAnyFlag(SpellShapeshiftFormFlags.IsNotAShapeshift))
+                if (!shapeshift.Flags.HasAnyFlag(SpellShapeshiftFormFlags.Stance))
                     return true;
             }
             if (displayId == GetNativeDisplayId())

@@ -337,7 +337,16 @@ namespace Framework.Constants
         Stealth = 30,
         MoonkinForm = 31,
         SpiritOfRedemption = 32,
-        GladiatorStance = 33
+        GladiatorStance = 33,
+        Metamorphosis2 = 34,
+        MoonkinRestoration = 35,
+        TreantForm = 36,
+        SpiritOwlForm = 37,
+        SpiritOwl2 = 38,
+        WispForm = 39,
+        Wisp2 = 40,
+        Soulshape = 41,
+        ForgeborneReveries = 42
     }
 
     public enum ReactiveType

@@ -814,12 +814,12 @@ namespace Game.Spells
                     Log.outError(LogFilter.Spells, "GetErrorAtShapeshiftedCast: unknown shapeshift {0}", form);
                     return SpellCastResult.SpellCastOk;
                 }
-                actAsShifted = !shapeInfo.Flags.HasAnyFlag(SpellShapeshiftFormFlags.IsNotAShapeshift);
+                actAsShifted = !shapeInfo.Flags.HasAnyFlag(SpellShapeshiftFormFlags.Stance);
             }
 
             if (actAsShifted)
             {
-                if (HasAttribute(SpellAttr0.NotShapeshift) || (shapeInfo != null && shapeInfo.Flags.HasAnyFlag(SpellShapeshiftFormFlags.PreventUsingOwnSkills))) // not while shapeshifted
+                if (HasAttribute(SpellAttr0.NotShapeshift) || (shapeInfo != null && shapeInfo.Flags.HasAnyFlag(SpellShapeshiftFormFlags.CanOnlyCastShapeshiftSpells))) // not while shapeshifted
                     return SpellCastResult.NotShapeshift;
                 else if (Stances != 0)   // needs other shapeshift
                     return SpellCastResult.OnlyShapeshift;
@@ -1214,7 +1214,7 @@ namespace Game.Spells
                     if (effect != null && effect.ApplyAuraName == AuraType.ModShapeshift)
                     {
                         var shapeShiftFromEntry = CliDB.SpellShapeshiftFormStorage.LookupByKey((uint)effect.MiscValue);
-                        if (shapeShiftFromEntry != null && !shapeShiftFromEntry.Flags.HasAnyFlag(SpellShapeshiftFormFlags.IsNotAShapeshift))
+                        if (shapeShiftFromEntry != null && !shapeShiftFromEntry.Flags.HasAnyFlag(SpellShapeshiftFormFlags.Stance))
                             checkMask |= VehicleSeatFlags.Uncontrolled;
                         break;
                     }
