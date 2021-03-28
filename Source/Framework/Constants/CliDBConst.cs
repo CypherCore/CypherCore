@@ -1604,8 +1604,6 @@ namespace Framework.Constants
 
     public enum MountFlags : ushort
     {
-        CanPitch = 0x4,                    // client checks MOVEMENTFLAG2_FULL_SPEED_PITCHING
-        CanSwim = 0x8,                    // client checks MOVEMENTFLAG_SWIMMING
         SelfMount = 0x02,                   // Player becomes the mount himself
         FactionSpecific = 0x04,
         PreferredSwimming = 0x10,

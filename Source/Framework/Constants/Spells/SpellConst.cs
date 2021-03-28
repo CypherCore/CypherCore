@@ -107,48 +107,71 @@ namespace Framework.Constants
         AbortOnDmg = 0x10  // _complete_ interrupt on direct damage
         //SPELL_INTERRUPT_UNK             = 0x20                // unk, 564 of 727 spells having this spell start with "Glyph"
     }
-    public enum SpellChannelInterruptFlags
-    {
-        Interrupt = 0x08,  // interrupt
-        Delay = 0x4000
-    }
 
     public enum SpellAuraInterruptFlags : uint
     {
-        Hitbyspell = 0x01,   // 0    Removed When Getting Hit By A Negative Spell?
-        TakeDamage = 0x02,   // 1    Removed By Any Damage
-        Cast = 0x04,   // 2    Cast Any Spells
-        Move = 0x08,   // 3    Removed By Any Movement
-        Turning = 0x10,   // 4    Removed By Any Turning
-        Jump = 0x20,   // 5    Removed By Jumping
-        NotMounted = 0x40,   // 6    Removed By Dismounting
-        NotAbovewater = 0x80,   // 7    Removed By Entering Water
-        NotUnderwater = 0x100,   // 8    Removed By Leaving Water
-        NotSheathed = 0x200,   // 9    Removed By Unsheathing
-        Talk = 0x400,   // 10   Talk To Npc / Loot? Action On Creature
-        Use = 0x800,   // 11   Mine/Use/Open Action On Gameobject
-        MeleeAttack = 0x1000,   // 12   Removed By Attacking
-        SpellAttack = 0x2000,   // 13   ???
-        Unk14 = 0x4000,   // 14
-        Transform = 0x8000,   // 15   Removed By Transform?
-        Unk16 = 0x10000,   // 16
-        Mount = 0x20000,   // 17   Misdirect, Aspect, Swim Speed
-        NotSeated = 0x40000,   // 18   Removed By Standing Up (Used By Food And Drink Mostly And Sleep/Fake Death Like)
-        ChangeMap = 0x80000,   // 19   Leaving Map/Getting Teleported
-        ImmuneOrLostSelection = 0x100000,   // 20   Removed By Auras That Make You Invulnerable, Or Make Other To Lose Selection On You
-        Unk21 = 0x200000,   // 21
-        Teleported = 0x400000,   // 22
-        EnterPvpCombat = 0x800000,   // 23   Removed By Entering Pvp Combat
-        DirectDamage = 0x1000000,   // 24   Removed By Any Direct Damage
-        Landing = 0x2000000,   // 25   Removed By Hitting The Ground
-        LeaveCombat = 0x80000000,   // 31   removed by leaving combat
+        None = 0,
+        HostileActionReceived = 0x01,
+        Damage = 0x02,
+        Action = 0x04,
+        Moving = 0x08,
+        Turning = 0x10,
+        Anim = 0x20,
+        Dismount = 0x40,
+        UnderWater = 0x80, // TODO: disallow casting when swimming (SPELL_FAILED_ONLY_ABOVEWATER)
+        AboveWater = 0x100, // TODO: disallow casting when not swimming (SPELL_FAILED_ONLY_UNDERWATER)
+        Sheathing = 0x200,
+        Interacting = 0x400, // TODO: more than gossip, replace all the feign death removals by aura type
+        Looting = 0x800,
+        Attacking = 0x1000,
+        ItemUse = 0x2000,
+        DamageChannelDuration = 0x4000,
+        Shapeshifting = 0x8000,
+        ActionDelayed = 0x10000,
+        Mount = 0x20000,
+        Standing = 0x40000,
+        LeaveWorld = 0x80000,
+        StealthOrInvis = 0x100000,
+        InvulnerabilityBuff = 0x200000,
+        EnterWorld = 0x400000,
+        PvPActive = 0x800000,
+        NonPeriodicDamage = 0x1000000,
+        LandingOrFlight = 0x2000000,
+        Release = 0x4000000,
+        DamageCancelsScript = 0x8000000, // NYI dedicated aura script hook
+        EnteringCombat = 0x10000000,
+        Login = 0x20000000,
+        Summon = 0x40000000,
+        LeavingCombat = 0x80000000,
 
-        NotVictim = (Hitbyspell | TakeDamage | DirectDamage)
+        NotVictim = (HostileActionReceived | Damage | NonPeriodicDamage)
     }
 
     public enum SpellAuraInterruptFlags2
     {
-
+        None = 0,
+        Falling = 0x01, // NYI
+        Swimming = 0x02, // NYI
+        NotMoving = 0x04, // NYI
+        Ground = 0x08, // NYI
+        Transform = 0x10, // NYI
+        Jump = 0x20,
+        ChangeSpec = 0x40, // NYI
+        AbandonVehicle = 0x80, // NYI
+        StartOfEncounter = 0x100, // NYI
+        EndOfEncounter = 0x200, // NYI
+        Disconnect = 0x400, // NYI
+        EnteringInstance = 0x800, // NYI
+        DuelEnd = 0x1000, // NYI
+        LeaveArenaOrBattleground = 0x2000, // NYI
+        ChangeTalent = 0x4000, // NYI
+        ChangeGlyph = 0x8000, // NYI
+        SeamlessTransfer = 0x10000, // NYI
+        WarModeLeave = 0x20000, // NYI
+        TouchingGround = 0x40000, // NYI
+        ChromieTime = 0x80000, // NYI
+        SplineFlightOrFreeFlight = 0x100000, // NYI
+        ProcOrPeriodicAttacking = 0x200000  // NYI
     }
 
     // Enum with EffectRadiusIndex and their actual radius

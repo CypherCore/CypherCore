@@ -427,7 +427,7 @@ namespace Game.BattleGrounds.Zones
             if (!(m_Nodes[node] == 0 || teamIndex == (int)m_Nodes[node] % 2))
                 return;
 
-            source.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.EnterPvpCombat);
+            source.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.PvPActive);
             uint sound;
             // If node is neutral, change to contested
             if (m_Nodes[node] == ABNodeStatus.Neutral)

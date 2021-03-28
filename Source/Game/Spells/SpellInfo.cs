@@ -179,8 +179,10 @@ namespace Game.Spells
             if (_interrupt != null)
             {
                 InterruptFlags = (SpellInterruptFlags)_interrupt.InterruptFlags;
-                Array.Copy(_interrupt.AuraInterruptFlags, AuraInterruptFlags, 2);
-                Array.Copy(_interrupt.ChannelInterruptFlags, ChannelInterruptFlags, 2);
+                AuraInterruptFlags = (SpellAuraInterruptFlags)_interrupt.AuraInterruptFlags[0];
+                AuraInterruptFlags2 = (SpellAuraInterruptFlags2)_interrupt.AuraInterruptFlags[1];
+                ChannelInterruptFlags = (SpellAuraInterruptFlags)_interrupt.ChannelInterruptFlags[0];
+                ChannelInterruptFlags2 = (SpellAuraInterruptFlags2)_interrupt.ChannelInterruptFlags[1];
             }
 
             // SpellLevelsEntry
@@ -559,7 +561,7 @@ namespace Game.Spells
 
         public bool IsMoveAllowedChannel()
         {
-            return IsChanneled() && (HasAttribute(SpellAttr5.CanChannelWhenMoving) || !ChannelInterruptFlags[0].HasAnyFlag((uint)(SpellAuraInterruptFlags.Move | SpellAuraInterruptFlags.Turning)));
+            return IsChanneled() && (HasAttribute(SpellAttr5.CanChannelWhenMoving) || !ChannelInterruptFlags.HasAnyFlag(SpellAuraInterruptFlags.Moving | SpellAuraInterruptFlags.Turning));
         }
 
         public bool NeedsComboPoints()
@@ -1447,7 +1449,7 @@ namespace Game.Spells
                 case SpellFamilyNames.Generic:
                     {
                         // Food / Drinks (mostly)
-                        if (HasAuraInterruptFlag(SpellAuraInterruptFlags.NotSeated))
+                        if (HasAuraInterruptFlag(SpellAuraInterruptFlags.Standing))
                         {
                             bool food = false;
                             bool drink = false;
@@ -2405,6 +2407,9 @@ namespace Game.Spells
                             auraSpellInfo.Id != Id);                                     // Don't remove self
                     });
                 }
+
+                if (apply && (schoolImmunity & (uint)SpellSchoolMask.Normal) != 0)
+                    target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.InvulnerabilityBuff);
             }
 
             uint mechanicImmunity = immuneInfo.MechanicImmuneMask;
@@ -2438,7 +2443,12 @@ namespace Game.Spells
 
             uint damageImmunity = immuneInfo.DamageSchoolMask;
             if (damageImmunity != 0)
+            { 
                 target.ApplySpellImmune(Id, SpellImmunity.Damage, damageImmunity, apply);
+
+                if (apply && (damageImmunity & (uint)SpellSchoolMask.Normal) != 0)
+                    target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.InvulnerabilityBuff);
+            }
 
             foreach (AuraType auraType in immuneInfo.AuraTypeImmune)
             {
@@ -3599,12 +3609,13 @@ namespace Game.Spells
         public bool HasAttribute(SpellAttr14 attribute) { return Convert.ToBoolean(AttributesEx14 & attribute); }
         public bool HasAttribute(SpellCustomAttributes attribute) { return Convert.ToBoolean(AttributesCu & attribute); }
 
-        public bool HasAnyAuraInterruptFlag() { return AuraInterruptFlags.Any(flag => flag != 0); }
-        public bool HasAuraInterruptFlag(SpellAuraInterruptFlags flag) { return (AuraInterruptFlags[0] & (uint)flag) != 0; }
-        public bool HasAuraInterruptFlag(SpellAuraInterruptFlags2 flag) { return (AuraInterruptFlags[1] & (uint)flag) != 0; }
+        public bool HasAnyAuraInterruptFlag() { return AuraInterruptFlags != SpellAuraInterruptFlags.None || AuraInterruptFlags2 != SpellAuraInterruptFlags2.None; }
+        public bool HasAuraInterruptFlag(SpellAuraInterruptFlags flag) { return AuraInterruptFlags.HasAnyFlag(flag); }
+        public bool HasAuraInterruptFlag(SpellAuraInterruptFlags2 flag) { return AuraInterruptFlags2.HasAnyFlag(flag); }
 
-        public bool HasChannelInterruptFlag(SpellChannelInterruptFlags flag) { return (ChannelInterruptFlags[0] & (uint)flag) != 0; }
-
+        public bool HasChannelInterruptFlag(SpellAuraInterruptFlags flag) { return ChannelInterruptFlags.HasAnyFlag(flag); }
+        public bool HasChannelInterruptFlag(SpellAuraInterruptFlags2 flag) { return ChannelInterruptFlags2.HasAnyFlag(flag); }
+        
         #region Fields
         public uint Id { get; set; }
         public Difficulty Difficulty { get; set; }
@@ -3648,8 +3659,10 @@ namespace Game.Spells
         public uint StartRecoveryCategory { get; set; }
         public uint StartRecoveryTime { get; set; }
         public SpellInterruptFlags InterruptFlags { get; set; }
-        public uint[] AuraInterruptFlags { get; set; } = new uint[2];
-        public uint[] ChannelInterruptFlags { get; set; } = new uint[2];
+        public SpellAuraInterruptFlags AuraInterruptFlags { get; set; }
+        public SpellAuraInterruptFlags2 AuraInterruptFlags2 { get; set; }
+        public SpellAuraInterruptFlags ChannelInterruptFlags { get; set; }
+        public SpellAuraInterruptFlags2 ChannelInterruptFlags2 { get; set; }
         public ProcFlags ProcFlags { get; set; }
         public uint ProcChance { get; set; }
         public uint ProcCharges { get; set; }

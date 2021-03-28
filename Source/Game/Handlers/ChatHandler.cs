@@ -571,9 +571,9 @@ namespace Game
             if (em == null)
                 return;
 
-            uint emote_anim = em.EmoteId;
+            Emote emoteAnim = (Emote)em.EmoteId;
 
-            switch ((Emote)emote_anim)
+            switch (emoteAnim)
             {
                 case Emote.StateSleep:
                 case Emote.StateSit:
@@ -582,13 +582,13 @@ namespace Game
                     break;
                 case Emote.StateDance:
                 case Emote.StateRead:
-                    GetPlayer().SetEmoteState((Emote)emote_anim);
+                    GetPlayer().SetEmoteState(emoteAnim);
                     break;
                 default:
                     // Only allow text-emotes for "dead" entities (feign death included)
                     if (GetPlayer().HasUnitState(UnitState.Died))
                         break;
-                    GetPlayer().HandleEmoteCommand((Emote)emote_anim);
+                    GetPlayer().HandleEmoteCommand(emoteAnim);
                     break;
             }
 
@@ -611,6 +611,9 @@ namespace Game
                 if (creature)
                     creature.GetAI().ReceiveEmote(GetPlayer(), (TextEmotes)packet.EmoteID);
             }
+
+            if (emoteAnim != Emote.OneshotNone)
+                _player.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Anim);
         }
 
         [WorldPacketHandler(ClientOpcodes.ChatReportIgnored)]

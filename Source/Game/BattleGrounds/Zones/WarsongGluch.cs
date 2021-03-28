@@ -259,7 +259,7 @@ namespace Game.BattleGrounds.Zones
 
             Team winner = 0;
 
-            player.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.EnterPvpCombat);
+            player.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.PvPActive);
             if (player.GetTeam() == Team.Alliance)
             {
                 if (!IsHordeFlagPickedup())
@@ -535,7 +535,7 @@ namespace Game.BattleGrounds.Zones
                 //target_obj.Delete();
             }
 
-            player.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.EnterPvpCombat);
+            player.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.PvPActive);
         }
 
         public override void RemovePlayer(Player player, ObjectGuid guid, Team team)

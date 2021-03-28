@@ -919,7 +919,7 @@ namespace Game.Spells
             if (apply && mode.HasAnyFlag(AuraEffectHandleModes.Real))
             {
                 // drop flag at invisibiliy in bg
-                target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.ImmuneOrLostSelection);
+                target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.StealthOrInvis);
             }
             target.UpdateObjectVisibility();
         }
@@ -987,7 +987,7 @@ namespace Game.Spells
             if (apply && mode.HasAnyFlag(AuraEffectHandleModes.Real))
             {
                 // drop flag at stealth in bg
-                target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.ImmuneOrLostSelection);
+                target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.StealthOrInvis);
             }
             target.UpdateObjectVisibility();
         }
@@ -1113,14 +1113,7 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             if (apply)
-            {
                 PhasingHandler.AddPhase(target, (uint)GetMiscValueB(), true);
-
-                // call functions which may have additional effects after chainging state of unit
-                // phase auras normally not expected at BG but anyway better check
-                // drop flag at invisibiliy in bg
-                target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.ImmuneOrLostSelection);
-            }
             else
                 PhasingHandler.RemovePhase(target, (uint)GetMiscValueB(), true);
         }
@@ -1134,14 +1127,7 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             if (apply)
-            {
                 PhasingHandler.AddPhaseGroup(target, (uint)GetMiscValueB(), true);
-
-                // call functions which may have additional effects after chainging state of unit
-                // phase auras normally not expected at BG but anyway better check
-                // drop flag at invisibiliy in bg
-                target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.ImmuneOrLostSelection);
-            }
             else
                 PhasingHandler.RemovePhaseGroup(target, (uint)GetMiscValueB(), true);
         }
@@ -1226,6 +1212,9 @@ namespace Game.Spells
                     if (transformSpellInfo == null || !GetSpellInfo().IsPositive())
                         target.SetDisplayId(modelid);
                 }
+
+                if (!shapeInfo.Flags.HasAnyFlag(SpellShapeshiftFormFlags.Stance))
+                    target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Shapeshifting, GetId());
             }
             else
             {
@@ -1602,7 +1591,6 @@ namespace Game.Spells
                     }
                 }
                 target.CombatStop();
-                target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.ImmuneOrLostSelection);
 
                 // prevent interrupt message
                 if (GetCasterGUID() == target.GetGUID() && target.GetCurrentSpell(CurrentSpellTypes.Generic) != null)
@@ -1647,10 +1635,7 @@ namespace Game.Spells
 
             // call functions which may have additional effects after chainging state of unit
             if (apply && mode.HasAnyFlag(AuraEffectHandleModes.Real))
-            {
                 target.CombatStop();
-                target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.ImmuneOrLostSelection);
-            }
         }
 
         [AuraEffectHandler(AuraType.ModDisarm)]
@@ -2686,8 +2671,9 @@ namespace Game.Spells
             m_spellInfo.ApplyAllSpellImmunitiesTo(target, GetSpellEffectInfo(), apply);
 
             // when removing flag aura, handle flag drop
+            // TODO: this should be handled in aura script for flag spells using AfterEffectRemove hook
             Player player = target.ToPlayer();
-            if (!apply && player != null && GetSpellInfo().HasAuraInterruptFlag(SpellAuraInterruptFlags.ImmuneOrLostSelection))
+            if (!apply && player != null && GetSpellInfo().HasAuraInterruptFlag(SpellAuraInterruptFlags.StealthOrInvis))
             {
                 if (player.InBattleground())
                 {
@@ -2741,13 +2727,16 @@ namespace Game.Spells
                 }
             }
 
-            if (apply && GetMiscValue() == (int)SpellSchoolMask.Normal)
-                target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.ImmuneOrLostSelection);
+            // TODO: should be changed to a proc script on flag spell (they have "Taken positive" proc flags in db2)
+            {
+                if (apply && GetMiscValue() == (int)SpellSchoolMask.Normal)
+                    target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.StealthOrInvis);
 
-            // remove all flag auras (they are positive, but they must be removed when you are immune)
-            if (GetSpellInfo().HasAttribute(SpellAttr1.DispelAurasOnImmunity)
-                && GetSpellInfo().HasAttribute(SpellAttr2.DamageReducedShield))
-                target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.ImmuneOrLostSelection);
+                // remove all flag auras (they are positive, but they must be removed when you are immune)
+                if (GetSpellInfo().HasAttribute(SpellAttr1.DispelAurasOnImmunity)
+                    && GetSpellInfo().HasAttribute(SpellAttr2.DamageReducedShield))
+                    target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.StealthOrInvis);
+            }
         }
 
         [AuraEffectHandler(AuraType.DamageImmunity)]

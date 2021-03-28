@@ -825,6 +825,9 @@ namespace Game
                     pCurrChar.SetInGuild(0);
                 }
             }
+
+            pCurrChar.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Login);
+
             pCurrChar.SendInitialPacketsAfterAddToMap();
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_ONLINE);

@@ -1476,7 +1476,7 @@ namespace Game.Entities
             var auras = GetAuraEffectsByType(type);
             foreach (var eff in auras)
                 if ((excludeAura == 0 || excludeAura != eff.GetSpellInfo().Id) && //Avoid self interrupt of channeled Crowd Control spells like Seduction
-                    eff.GetSpellInfo().HasAuraInterruptFlag(SpellAuraInterruptFlags.TakeDamage))
+                    eff.GetSpellInfo().HasAuraInterruptFlag(SpellAuraInterruptFlags.Damage))
                     return true;
             return false;
         }
@@ -2913,11 +2913,12 @@ namespace Game.Entities
         }
         public void UpdateInterruptMask()
         {
-            m_interruptMask.Clear();
+            m_interruptMask = SpellAuraInterruptFlags.None;
+            m_interruptMask2 = SpellAuraInterruptFlags2.None;
             foreach (AuraApplication aurApp in m_interruptableAuras)
             {
-                for (var i = 0; i < m_interruptMask.Length; ++i)
-                    m_interruptMask[i] |= aurApp.GetBase().GetSpellInfo().AuraInterruptFlags[i];
+                m_interruptMask |= aurApp.GetBase().GetSpellInfo().AuraInterruptFlags;
+                m_interruptMask2 |= aurApp.GetBase().GetSpellInfo().AuraInterruptFlags2;
             }
 
             Spell spell = GetCurrentSpell(CurrentSpellTypes.Channeled);
@@ -2925,8 +2926,8 @@ namespace Game.Entities
             {
                 if (spell.GetState() == SpellState.Casting)
                 {
-                    for (var i = 0; i < m_interruptMask.Length; ++i)
-                        m_interruptMask[i] |= spell.m_spellInfo.ChannelInterruptFlags[i];
+                    m_interruptMask |= spell.m_spellInfo.ChannelInterruptFlags;
+                    m_interruptMask2 |= spell.m_spellInfo.ChannelInterruptFlags2;
                 }
             }
         }
@@ -3161,27 +3162,32 @@ namespace Game.Entities
 
         public bool HasNegativeAuraWithInterruptFlag(SpellAuraInterruptFlags flag, ObjectGuid guid = default)
         {
-            return HasNegativeAuraWithInterruptFlag((uint)flag, 0, guid);
-        }
-
-        public bool HasNegativeAuraWithInterruptFlag(SpellAuraInterruptFlags2 flag, ObjectGuid guid = default)
-        {
-            return HasNegativeAuraWithInterruptFlag((uint)flag, 1, guid);
-        }
-
-        public bool HasNegativeAuraWithInterruptFlag(uint flag, int index, ObjectGuid guid = default)
-        {
-            if (!Convert.ToBoolean(m_interruptMask[index] & flag))
+            if (!HasInterruptFlag(flag))
                 return false;
 
             foreach (var aura in m_interruptableAuras)
             {
-                if (!aura.IsPositive() && Convert.ToBoolean(aura.GetBase().GetSpellInfo().AuraInterruptFlags[index] & flag)
+                if (!aura.IsPositive() && aura.GetBase().GetSpellInfo().HasAuraInterruptFlag(flag)
                     && (guid.IsEmpty() || aura.GetBase().GetCasterGUID() == guid))
                     return true;
             }
             return false;
         }
+
+        public bool HasNegativeAuraWithInterruptFlag(SpellAuraInterruptFlags2 flag, ObjectGuid guid = default)
+        {
+            if (!HasInterruptFlag(flag))
+                return false;
+
+            foreach (var aura in m_interruptableAuras)
+            {
+                if (!aura.IsPositive() && aura.GetBase().GetSpellInfo().HasAuraInterruptFlag(flag)
+                    && (guid.IsEmpty() || aura.GetBase().GetCasterGUID() == guid))
+                    return true;
+            }
+            return false;
+        }
+
         bool HasNegativeAuraWithAttribute(SpellAttr0 flag, ObjectGuid guid = default)
         {
             foreach (var list in GetAppliedAuras())
@@ -3267,19 +3273,18 @@ namespace Game.Entities
             return dispelList;
         }
 
+        bool IsInterruptFlagIgnoredForSpell(SpellAuraInterruptFlags2 flag, Unit unit, SpellInfo spellInfo)
+        {
+            return false;
+        }
+        bool IsInterruptFlagIgnoredForSpell(SpellAuraInterruptFlags flag, Unit unit, SpellInfo spellInfo)
+        {
+            return flag == SpellAuraInterruptFlags.Moving && unit.HasAuraTypeWithAffectMask(AuraType.CastWhileWalking, spellInfo);
+        }
+        
         public void RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags flag, uint except = 0)
         {
-            RemoveAurasWithInterruptFlags((uint)flag, 0, except);
-        }
-
-        public void RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2 flag, uint except = 0)
-        {
-            RemoveAurasWithInterruptFlags((uint)flag, 1, except);
-        }
-
-        void RemoveAurasWithInterruptFlags(uint flag, int index, uint except = 0)
-        {
-            if (!Convert.ToBoolean(m_interruptMask[index] & flag))
+            if (!HasInterruptFlag(flag))
                 return;
 
             // interrupt auras
@@ -3287,8 +3292,7 @@ namespace Game.Entities
             {
                 Aura aura = m_interruptableAuras[i].GetBase();
 
-                if (Convert.ToBoolean(aura.GetSpellInfo().AuraInterruptFlags[index] & flag) && (except == 0 || aura.GetId() != except)
-                    && !(Convert.ToBoolean(flag & (uint)SpellAuraInterruptFlags.Move) && HasAuraTypeWithAffectMask(AuraType.CastWhileWalking, aura.GetSpellInfo())))
+                if (aura.GetSpellInfo().HasAuraInterruptFlag(flag) && (except == 0 || aura.GetId() != except) && !IsInterruptFlagIgnoredForSpell(flag, this, aura.GetSpellInfo()))
                 {
                     uint removedAuras = m_removedAurasCount;
                     RemoveAura(aura, AuraRemoveMode.Interrupt);
@@ -3302,9 +3306,43 @@ namespace Game.Entities
             if (spell != null)
             {
                 if (spell.GetState() == SpellState.Casting
-                    && Convert.ToBoolean(spell.GetSpellInfo().ChannelInterruptFlags[index] & flag)
+                    && spell.GetSpellInfo().HasChannelInterruptFlag(flag)
                     && spell.GetSpellInfo().Id != except
-                    && !(Convert.ToBoolean(flag & (uint)SpellAuraInterruptFlags.Move) && HasAuraTypeWithAffectMask(AuraType.CastWhileWalking, spell.GetSpellInfo())))
+                    && !IsInterruptFlagIgnoredForSpell(flag, this, spell.GetSpellInfo()))
+                    InterruptNonMeleeSpells(false);
+            }
+
+            UpdateInterruptMask();
+
+        }
+
+        public void RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2 flag, uint except = 0)
+        {
+            if (!HasInterruptFlag(flag))
+                return;
+
+            // interrupt auras
+            for (var i = 0; i < m_interruptableAuras.Count; i++)
+            {
+                Aura aura = m_interruptableAuras[i].GetBase();
+
+                if (aura.GetSpellInfo().HasAuraInterruptFlag(flag) && (except == 0 || aura.GetId() != except) && !IsInterruptFlagIgnoredForSpell(flag, this, aura.GetSpellInfo()))
+                {
+                    uint removedAuras = m_removedAurasCount;
+                    RemoveAura(aura, AuraRemoveMode.Interrupt);
+                    if (m_removedAurasCount > removedAuras + 1)
+                        i = 0;
+                }
+            }
+
+            // interrupt channeled spell
+            Spell spell = GetCurrentSpell(CurrentSpellTypes.Channeled);
+            if (spell != null)
+            {
+                if (spell.GetState() == SpellState.Casting
+                    && spell.GetSpellInfo().HasChannelInterruptFlag(flag)
+                    && spell.GetSpellInfo().Id != except
+                    && !IsInterruptFlagIgnoredForSpell(flag, this, spell.GetSpellInfo()))
                     InterruptNonMeleeSpells(false);
             }
 
@@ -4173,7 +4211,7 @@ namespace Game.Entities
                 return;
 
             // Sitdown on apply aura req seated
-            if (aura.GetSpellInfo().HasAuraInterruptFlag(SpellAuraInterruptFlags.NotSeated) && !IsSitState())
+            if (aura.GetSpellInfo().HasAuraInterruptFlag(SpellAuraInterruptFlags.Standing) && !IsSitState())
                 SetStandState(UnitStandStateType.Sit);
 
             Unit caster = aura.GetCaster();

@@ -297,6 +297,8 @@ namespace Game
             // interrupt cast
             if (GetPlayer().IsNonMeleeSpellCast(false))
                 GetPlayer().InterruptNonMeleeSpells(false);
+
+            GetPlayer().RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Looting);
         }
 
         [WorldPacketHandler(ClientOpcodes.LootRelease)]

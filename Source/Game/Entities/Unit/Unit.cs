@@ -434,6 +434,13 @@ namespace Game.Entities
             }
         }
 
+        public override void AddToWorld()
+        {
+            base.AddToWorld();
+
+            RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.EnterWorld);
+        }
+
         public override void RemoveFromWorld()
         {
             // cleanup
@@ -447,6 +454,7 @@ namespace Game.Entities
                 RemoveCharmAuras();
                 RemoveAurasByType(AuraType.BindSight);
                 RemoveNotOwnSingleTargetAuras();
+                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.LeaveWorld);
 
                 RemoveAllGameObjects();
                 RemoveAllDynObjects();
@@ -1552,7 +1560,7 @@ namespace Game.Entities
             if (aurSpellInfo.HasAnyAuraInterruptFlag())
             {
                 m_interruptableAuras.Add(aurApp);
-                AddInterruptMask(aurSpellInfo.AuraInterruptFlags);
+                AddInterruptMask(aurSpellInfo.AuraInterruptFlags, aurSpellInfo.AuraInterruptFlags2);
             }
 
             AuraStateType aState = aura.GetSpellInfo().GetAuraState();
@@ -1562,10 +1570,14 @@ namespace Game.Entities
             aura._ApplyForTarget(this, caster, aurApp);
             return aurApp;
         }
-        public void AddInterruptMask(uint[] mask)
+
+        bool HasInterruptFlag(SpellAuraInterruptFlags flags) { return m_interruptMask.HasFlag(flags); }
+        bool HasInterruptFlag(SpellAuraInterruptFlags2 flags) { return m_interruptMask2.HasFlag(flags); }
+        
+        public void AddInterruptMask(SpellAuraInterruptFlags flags, SpellAuraInterruptFlags2 flags2)
         {
-            for (int i = 0; i < m_interruptMask.Length; ++i)
-                m_interruptMask[i] |= mask[i];
+            m_interruptMask |= flags;
+            m_interruptMask2 |= flags2;
         }
 
         void _UpdateAutoRepeatSpell()
@@ -1671,6 +1683,13 @@ namespace Game.Entities
             }
 
             SetPowerType(displayPower);
+        }
+
+        public void SetSheath(SheathState sheathed)
+        {
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.SheatheState), (byte)sheathed);
+            if (sheathed == SheathState.Unarmed)
+                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Sheathing);
         }
 
         public FactionTemplateRecord GetFactionTemplateEntry()
@@ -2030,7 +2049,6 @@ namespace Game.Entities
         public void SetEmoteState(Emote emote) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.EmoteState), (int)emote); }
 
         public SheathState GetSheath() { return (SheathState)(byte)m_unitData.SheatheState; }
-        public void SetSheath(SheathState sheathed) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.SheatheState), (byte)sheathed); }
 
         public uint GetCombatTimer() { return combatTimer; }
         public UnitPVPStateFlags GetPvpFlags() { return (UnitPVPStateFlags)(byte)m_unitData.PvpFlags; }
@@ -2364,7 +2382,7 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StandState), (byte)state);
 
             if (IsStandState())
-                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.NotSeated);
+                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Standing);
 
             if (IsTypeId(TypeId.Player))
             {

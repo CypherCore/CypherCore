@@ -137,8 +137,8 @@ namespace Game
                 plrMover.HandleFall(movementInfo);
 
             // interrupt parachutes upon falling or landing in water
-            if (opcode == ClientOpcodes.MoveFallLand || opcode == ClientOpcodes.MoveStartSwim)
-                mover.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Landing); // Parachutes
+            if (opcode == ClientOpcodes.MoveFallLand || opcode == ClientOpcodes.MoveStartSwim || opcode == ClientOpcodes.MoveSetFly)
+                mover.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.LandingOrFlight); // Parachutes
 
             uint mstime = GameTime.GetGameTimeMS();
 
@@ -206,7 +206,7 @@ namespace Game
 
                 if (opcode == ClientOpcodes.MoveJump)
                 { 
-                    plrMover.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Jump, 605); // Mind Control
+                    plrMover.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.Jump); // Mind Control
                     plrMover.ProcSkillsAndAuras(null, ProcFlags.Jump, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
                 }
             }

@@ -288,7 +288,7 @@ namespace Game.Entities
             else
                 ToPlayer().OnCombatExit();
 
-            RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.LeaveCombat);
+            RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.LeavingCombat);
         }
 
         public void ClearInPetCombat()
@@ -630,7 +630,7 @@ namespace Game.Entities
                 return;
 
             CombatStart(victim);
-            RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.MeleeAttack);
+            RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Attacking);
 
             // ignore ranged case
             if (attType != WeaponAttackType.BaseAttack && attType != WeaponAttackType.OffAttack)
@@ -712,7 +712,7 @@ namespace Game.Entities
                 return;
 
             CombatStart(victim);
-            RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.MeleeAttack);
+            RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Attacking);
 
             if (attType != WeaponAttackType.BaseAttack && attType != WeaponAttackType.OffAttack)
                 return;                                             // ignore ranged case
@@ -993,14 +993,14 @@ namespace Game.Entities
 
             if (damagetype != DamageEffectType.NoDamage)
             {
-                // interrupting auras with AURA_INTERRUPT_FLAG_DAMAGE before checking !damage (absorbed damage breaks that type of auras)
+                // interrupting auras with SpellAuraInterruptFlags.Damage before checking !damage (absorbed damage breaks that type of auras)
                 if (spellProto != null)
                 {
                     if (!spellProto.HasAttribute(SpellAttr4.DamageDoesntBreakAuras))
-                        victim.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.TakeDamage, spellProto.Id);
+                        victim.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Damage, spellProto.Id);
                 }
                 else
-                    victim.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.TakeDamage, 0);
+                    victim.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Damage, 0);
 
                 // interrupt spells with SPELL_INTERRUPT_FLAG_ABORT_ON_DMG on absorbed damage (no dots)
                 if (damage == 0 && damagetype != DamageEffectType.DOT && cleanDamage != null && cleanDamage.absorbed_damage != 0)
@@ -1140,7 +1140,7 @@ namespace Game.Entities
                 victim.ModifyHealth(-(int)damage);
 
                 if (damagetype == DamageEffectType.Direct || damagetype == DamageEffectType.SpellDirect)
-                    victim.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.DirectDamage, spellProto != null ? spellProto.Id : 0);
+                    victim.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.NonPeriodicDamage, spellProto != null ? spellProto.Id : 0);
 
                 if (!victim.IsTypeId(TypeId.Player))
                 {
@@ -1179,6 +1179,7 @@ namespace Game.Entities
                         {
                             Spell spell = victim.GetCurrentSpell(CurrentSpellTypes.Generic);
                             if (spell != null)
+                            {
                                 if (spell.GetState() == SpellState.Preparing)
                                 {
                                     var interruptFlags = spell.m_spellInfo.InterruptFlags;
@@ -1187,10 +1188,11 @@ namespace Game.Entities
                                     else if (interruptFlags.HasAnyFlag(SpellInterruptFlags.PushBack))
                                         spell.Delayed();
                                 }
+                            }
                         }
                         Spell spell1 = victim.GetCurrentSpell(CurrentSpellTypes.Channeled);
                         if (spell1 != null)
-                            if (spell1.GetState() == SpellState.Casting && spell1.m_spellInfo.HasChannelInterruptFlag(SpellChannelInterruptFlags.Delay) && damagetype != DamageEffectType.DOT)
+                            if (spell1.GetState() == SpellState.Casting && spell1.m_spellInfo.HasChannelInterruptFlag(SpellAuraInterruptFlags.DamageChannelDuration) && damagetype != DamageEffectType.DOT)
                                 spell1.DelayedChannel();
                     }
                 }
@@ -1352,7 +1354,7 @@ namespace Game.Entities
             if (me != null && who.IsPvP() && (!who.IsTypeId(TypeId.Player) || me.duel == null || me.duel.opponent != who))
             {
                 me.UpdatePvP(true);
-                me.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.EnterPvpCombat);
+                me.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.PvPActive);
             }
         }
         public void SetInCombatWith(Unit enemy)
@@ -1426,6 +1428,7 @@ namespace Game.Entities
             foreach (var unit in m_Controlled)
                 unit.SetInCombatState(PvP, enemy);
 
+            RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.EnteringCombat);
             ProcSkillsAndAuras(enemy, ProcFlags.EnterCombat, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
         }
 

@@ -2546,10 +2546,10 @@ namespace Game.Entities
                     spellInfo.StartRecoveryCategory = spellsResult.Read<uint>(37);
                     spellInfo.StartRecoveryTime = spellsResult.Read<uint>(38);
                     spellInfo.InterruptFlags = (SpellInterruptFlags)spellsResult.Read<uint>(39);
-                    spellInfo.AuraInterruptFlags[0] = spellsResult.Read<uint>(40);
-                    spellInfo.AuraInterruptFlags[1] = spellsResult.Read<uint>(41);
-                    spellInfo.ChannelInterruptFlags[0] = spellsResult.Read<uint>(42);
-                    spellInfo.ChannelInterruptFlags[1] = spellsResult.Read<uint>(43);
+                    spellInfo.AuraInterruptFlags = (SpellAuraInterruptFlags)spellsResult.Read<uint>(40);
+                    spellInfo.AuraInterruptFlags2 = (SpellAuraInterruptFlags2)spellsResult.Read<uint>(41);
+                    spellInfo.ChannelInterruptFlags = (SpellAuraInterruptFlags)spellsResult.Read<uint>(42);
+                    spellInfo.ChannelInterruptFlags2 = (SpellAuraInterruptFlags2)spellsResult.Read<uint>(43);
                     spellInfo.ProcFlags = (ProcFlags)spellsResult.Read<uint>(44);
                     spellInfo.ProcChance = spellsResult.Read<uint>(45);
                     spellInfo.ProcCharges = spellsResult.Read<uint>(46);
@@ -3175,7 +3175,7 @@ namespace Game.Entities
                         spellInfo.GetEffect(0).BasePoints = 0;// force seat 0, vehicle doesn't have the required seat flags for "no seat specified (-1)"
                         break;
                     case 61719: // Easter Lay Noblegarden Egg Aura - Interrupt flags copied from aura which this aura is linked with
-                        spellInfo.AuraInterruptFlags[0] = (uint)(SpellAuraInterruptFlags.Hitbyspell | SpellAuraInterruptFlags.TakeDamage);
+                        spellInfo.AuraInterruptFlags = SpellAuraInterruptFlags.HostileActionReceived | SpellAuraInterruptFlags.Damage;
                         break;
                     case 71838: // Drain Life - Bryntroll Normal
                     case 71839: // Drain Life - Bryntroll Heroic
@@ -3210,7 +3210,7 @@ namespace Game.Entities
                         spellInfo.AttributesEx |= SpellAttr1.NoThreat;
                         break;
                     case 29726: // Test Ribbon Pole Channel
-                        spellInfo.InterruptFlags &= ~SpellInterruptFlags.Interrupt;//AURA_INTERRUPT_FLAG_CAST
+                        spellInfo.ChannelInterruptFlags &= ~SpellAuraInterruptFlags.Action;//AURA_INTERRUPT_FLAG_CAST
                         break;
                     case 42767: // Sic'em
                         spellInfo.GetEffect(0).TargetA = new SpellImplicitTargetInfo(Targets.UnitNearbyEntry);
@@ -3284,7 +3284,8 @@ namespace Game.Entities
                         break;
                     case 63414: // Spinning Up (Mimiron)
                         spellInfo.GetEffect(0).TargetB = new SpellImplicitTargetInfo(Targets.UnitCaster);
-                        spellInfo.ChannelInterruptFlags.Clear();
+                        spellInfo.ChannelInterruptFlags = SpellAuraInterruptFlags.None;
+                        spellInfo.ChannelInterruptFlags2 = SpellAuraInterruptFlags2.None;
                         break;
                     case 63036: // Rocket Strike (Mimiron)
                         spellInfo.Speed = 0;
@@ -3508,7 +3509,7 @@ namespace Game.Entities
                         spellInfo.GetEffect(0).MaxRadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(EffectRadiusIndex.Yards45);
                         break;
                     case 24314: // Threatening Gaze
-                        spellInfo.AuraInterruptFlags[0] |= (uint)(SpellAuraInterruptFlags.Cast | SpellAuraInterruptFlags.Move | SpellAuraInterruptFlags.Jump);
+                        spellInfo.AuraInterruptFlags |= SpellAuraInterruptFlags.Action | SpellAuraInterruptFlags.Moving | SpellAuraInterruptFlags.Anim;
                         break;
                     case 783:  // Travel Form (dummy) - cannot be cast indoors.
                         spellInfo.Attributes |= SpellAttr0.OutdoorsOnly;
@@ -3546,7 +3547,7 @@ namespace Game.Entities
                         break;
                     // Blaze of Glory
                     case 99252:
-                        spellInfo.AuraInterruptFlags[0] |= (uint)SpellAuraInterruptFlags.ChangeMap;
+                        spellInfo.AuraInterruptFlags |= SpellAuraInterruptFlags.LeaveWorld;
                         break;
                     // ENDOF FIRELANDS SPELLS
 

@@ -473,7 +473,7 @@ namespace Game.Combat
                 Cypher.Assert(target);                                     // if the ref has status online the target must be there !
 
                 // some units are prefered in comparison to others
-                if (!noPriorityTargetFound && (target.IsImmunedToDamage(attacker.GetMeleeDamageSchoolMask()) || target.HasNegativeAuraWithInterruptFlag(SpellAuraInterruptFlags.TakeDamage)))
+                if (!noPriorityTargetFound && (target.IsImmunedToDamage(attacker.GetMeleeDamageSchoolMask()) || target.HasNegativeAuraWithInterruptFlag(SpellAuraInterruptFlags.Damage)))
                 {
                     if (i != threatList.Count - 1)
                     {

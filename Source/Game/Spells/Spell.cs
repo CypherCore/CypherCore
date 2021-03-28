@@ -2007,7 +2007,7 @@ namespace Game.Spells
                 // Failed Pickpocket, reveal rogue
                 if (missInfo == SpellMissInfo.Resist && m_spellInfo.HasAttribute(SpellCustomAttributes.PickPocket) && unitTarget.IsTypeId(TypeId.Unit))
                 {
-                    m_caster.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Talk);
+                    m_caster.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Interacting);
                     unitTarget.ToCreature().EngageWithTarget(m_caster);
                 }
             }
@@ -2096,7 +2096,7 @@ namespace Game.Spells
                     return SpellMissInfo.Evade;
 
                 if (m_caster._IsValidAttackTarget(unit, m_spellInfo))
-                    unit.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Hitbyspell);
+                    unit.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.HostileActionReceived);
                 else if (m_caster.IsFriendlyTo(unit))
                 {
                     // for delayed spells ignore negative spells (after duel end) for friendly targets
@@ -2556,17 +2556,7 @@ namespace Game.Spells
                 // stealth must be removed at cast starting (at show channel bar)
                 // skip triggered spell (item equip spell casting and other not explicit character casts/item uses)
                 if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreAuraInterruptFlags) && m_spellInfo.IsBreakingStealth())
-                {
-                    m_caster.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Cast);
-                    foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
-                    {
-                        if (effect != null && effect.GetUsedTargetObjectType() == SpellTargetObjectTypes.Unit)
-                        {
-                            m_caster.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.SpellAttack);
-                            break;
-                        }
-                    }
-                }
+                    m_caster.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Action);
 
                 m_caster.SetCurrentCastSpell(this);
 
@@ -2917,6 +2907,7 @@ namespace Game.Spells
             if (!hitMask.HasAnyFlag(ProcFlagsHit.Critical))
                 hitMask |= ProcFlagsHit.Normal;
 
+            m_originalCaster.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.ActionDelayed);
             m_originalCaster.ProcSkillsAndAuras(null, procAttacker, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Cast, hitMask, this, null, null);
 
             // Call CreatureAI hook OnSuccessfulSpellCast
@@ -2943,13 +2934,13 @@ namespace Game.Spells
                     m_caster.ModSpellDurationTime(m_spellInfo, ref duration, this);
 
                     m_spellState = SpellState.Casting;
-                    m_caster.AddInterruptMask(m_spellInfo.ChannelInterruptFlags);
+                    m_caster.AddInterruptMask(m_spellInfo.ChannelInterruptFlags, m_spellInfo.ChannelInterruptFlags2);
                     SendChannelStart((uint)duration);
                 }
                 else if (duration == -1)
                 {
                     m_spellState = SpellState.Casting;
-                    m_caster.AddInterruptMask(m_spellInfo.ChannelInterruptFlags);
+                    m_caster.AddInterruptMask(m_spellInfo.ChannelInterruptFlags, m_spellInfo.ChannelInterruptFlags2);
                     SendChannelStart((uint)duration);
                 }
             }
@@ -4591,7 +4582,7 @@ namespace Game.Spells
                 // skip stuck spell to allow use it in falling case and apply spell limitations at movement
                 SpellEffectInfo effect = m_spellInfo.GetEffect(0);
                 if ((!m_caster.HasUnitMovementFlag(MovementFlag.FallingFar) || (effect != null && effect.Effect != SpellEffectName.Stuck)) &&
-                    (IsAutoRepeat() || m_spellInfo.HasAuraInterruptFlag(SpellAuraInterruptFlags.NotSeated)))
+                    (IsAutoRepeat() || m_spellInfo.HasAuraInterruptFlag(SpellAuraInterruptFlags.Standing)))
                     return SpellCastResult.Moving;
             }
 

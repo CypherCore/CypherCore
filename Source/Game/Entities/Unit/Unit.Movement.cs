@@ -582,7 +582,7 @@ namespace Game.Entities
 
             if (relocated)
             {
-                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Move);
+                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Moving);
 
                 // move and update visible state if need
                 if (IsTypeId(TypeId.Player))
@@ -787,9 +787,9 @@ namespace Game.Entities
         {
             // remove appropriate auras if we are swimming/not swimming respectively
             if (inWater)
-                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.NotAbovewater);
+                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.UnderWater);
             else
-                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.NotUnderwater);
+                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.AboveWater);
         }
 
         public virtual void ProcessTerrainStatusUpdate(ZLiquidStatus status, Optional<LiquidData> liquidData)
@@ -1348,7 +1348,7 @@ namespace Game.Entities
                 RemoveVehicleKit();
             }
 
-            RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.NotMounted);
+            RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Dismount);
 
             // only resummon old pet if the player is already added to a map
             // this prevents adding a pet to a not created map which would otherwise cause a crash

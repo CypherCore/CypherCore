@@ -672,7 +672,7 @@ namespace Game.BattleGrounds.Zones
             SetFlagPicker(player.GetGUID());
             //get flag aura on player
             player.CastSpell(player, EotSMisc.SpellNetherstormFlag, true);
-            player.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.EnterPvpCombat);
+            player.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.PvPActive);
 
             if (player.GetTeam() == Team.Alliance)
                 SendBroadcastText(EotSBroadcastTexts.TakenFlag, ChatMsg.BgSystemAlliance, player);
@@ -803,7 +803,7 @@ namespace Game.BattleGrounds.Zones
             m_FlagState = EotSFlagState.WaitRespawn;
             player.RemoveAurasDueToSpell(EotSMisc.SpellNetherstormFlag);
 
-            player.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.EnterPvpCombat);
+            player.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.PvPActive);
 
             if (player.GetTeam() == Team.Alliance)
             {

@@ -1787,7 +1787,7 @@ namespace Game.Entities
                         InterruptNonMeleeSpells(true);
 
                 //remove auras before removing from map...
-                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.ChangeMap | SpellAuraInterruptFlags.Move | SpellAuraInterruptFlags.Turning);
+                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Moving | SpellAuraInterruptFlags.Turning);
 
                 if (!GetSession().PlayerLogout() && !options.HasAnyFlag(TeleportToOptions.Seamless))
                 {
@@ -2123,6 +2123,7 @@ namespace Game.Entities
             m_summon_expire = 0;
 
             UpdateCriteria(CriteriaTypes.AcceptedSummonings, 1);
+            RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Summon);
 
             m_summon_location.SetOrientation(GetOrientation());
             TeleportTo(m_summon_location);
@@ -4046,6 +4047,8 @@ namespace Game.Entities
             if (HasSpell(20585))
                 CastSpell(this, 20584, true);
             CastSpell(this, 8326, true);
+
+            RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Release);
 
             // there must be SMSG.FORCE_RUN_SPEED_CHANGE, SMSG.FORCE_SWIM_SPEED_CHANGE, SMSG.MOVE_WATER_WALK
             // there must be SMSG.STOP_MIRROR_TIMER

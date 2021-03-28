@@ -141,7 +141,7 @@ namespace Game
             if (factionTemplateEntry != null)
                 GetPlayer().GetReputationMgr().SetVisible(factionTemplateEntry);
 
-            GetPlayer().RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Talk);
+            GetPlayer().RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Interacting);
 
             // Stop the npc if moving
             unit.PauseMovement(WorldConfig.GetUIntValue(WorldCfg.CreatureStopForPlayer));
