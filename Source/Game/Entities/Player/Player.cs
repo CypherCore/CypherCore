@@ -3753,22 +3753,6 @@ namespace Game.Entities
             int minPower = powerType.MinPower;
             int maxPower = GetMaxPower(power);
 
-            if (addvalue < 0.0f)
-            {
-                if (curValue <= minPower)
-                    return;
-            }
-            else if (addvalue > 0.0f)
-            {
-                if (curValue >= maxPower)
-                    return;
-            }
-            else
-                return;
-
-            addvalue += m_powerFraction[powerIndex];
-            int integerValue = (int)Math.Abs(addvalue);
-
             if (powerType.CenterPower != 0)
             {
                 if (curValue > powerType.CenterPower)
@@ -3784,6 +3768,22 @@ namespace Game.Entities
                 else
                     return;
             }
+
+            addvalue += m_powerFraction[powerIndex];
+            int integerValue = (int)Math.Abs(addvalue);
+
+            if (addvalue < 0.0f)
+            {
+                if (curValue <= minPower)
+                    return;
+            }
+            else if (addvalue > 0.0f)
+            {
+                if (curValue >= maxPower)
+                    return;
+            }
+            else
+                return;
 
             if (addvalue < 0.0f)
             {
