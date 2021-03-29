@@ -100,12 +100,18 @@ namespace Framework.Constants
 
     public enum SpellInterruptFlags
     {
-        Movement = 0x01, // why need this for instant?
-        PushBack = 0x02, // push back
-        Unk3 = 0x04, // any info?
-        Interrupt = 0x08, // interrupt
-        AbortOnDmg = 0x10  // _complete_ interrupt on direct damage
-        //SPELL_INTERRUPT_UNK             = 0x20                // unk, 564 of 727 spells having this spell start with "Glyph"
+        None = 0,
+        Movement = 0x01,
+        DamagePushbackPlayerOnly = 0x02,
+        Stun = 0x04, // useless, even spells without it get interrupted
+        Combat = 0x08,
+        DamageCancelsPlayerOnly = 0x10,
+        MeleeCombat = 0x20, // NYI
+        Immunity = 0x40, // NYI
+        DamageAbsorb = 0x80,
+        ZeroDamageCancels = 0x100,
+        DamagePushback = 0x200,
+        DamageCancels = 0x400
     }
 
     public enum SpellAuraInterruptFlags : uint

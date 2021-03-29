@@ -3609,6 +3609,18 @@ namespace Game.Spells
         public bool HasAttribute(SpellAttr14 attribute) { return Convert.ToBoolean(AttributesEx14 & attribute); }
         public bool HasAttribute(SpellCustomAttributes attribute) { return Convert.ToBoolean(AttributesCu & attribute); }
 
+        public bool CanBeInterrupted(Unit interruptCaster, Unit interruptTarget)
+        {
+            return HasAttribute(SpellAttr7.CanAlwaysBeInterrupted)
+                || HasChannelInterruptFlag(SpellAuraInterruptFlags.Damage | SpellAuraInterruptFlags.EnteringCombat)
+                || (interruptTarget.IsPlayer() && InterruptFlags.HasFlag(SpellInterruptFlags.DamageCancelsPlayerOnly))
+                || InterruptFlags.HasFlag(SpellInterruptFlags.DamageCancels)
+                || interruptCaster.HasAuraTypeWithMiscvalue(AuraType.AllowInterruptSpell, (int)Id)
+                || ((interruptTarget.GetMechanicImmunityMask() & (1 << (int)Mechanics.Interrupt)) == 0
+                    && !interruptTarget.HasAuraTypeWithAffectMask(AuraType.PreventInterrupt, this)
+                    && PreventionType.HasAnyFlag(SpellPreventionType.Silence));
+        }
+        
         public bool HasAnyAuraInterruptFlag() { return AuraInterruptFlags != SpellAuraInterruptFlags.None || AuraInterruptFlags2 != SpellAuraInterruptFlags2.None; }
         public bool HasAuraInterruptFlag(SpellAuraInterruptFlags flag) { return AuraInterruptFlags.HasAnyFlag(flag); }
         public bool HasAuraInterruptFlag(SpellAuraInterruptFlags2 flag) { return AuraInterruptFlags2.HasAnyFlag(flag); }

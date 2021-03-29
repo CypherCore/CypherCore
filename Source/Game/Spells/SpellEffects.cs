@@ -2696,9 +2696,7 @@ namespace Game.Spells
                     // check if we can interrupt spell
                     if ((spell.GetState() == SpellState.Casting
                         || (spell.GetState() == SpellState.Preparing && spell.GetCastTime() > 0.0f))
-                        && (curSpellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Silence))
-                        && ((i == CurrentSpellTypes.Generic && curSpellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.Interrupt))
-                        || (i == CurrentSpellTypes.Channeled)))
+                        && curSpellInfo.CanBeInterrupted(m_caster, unitTarget))
                     {
                         if (m_originalCaster != null)
                         {

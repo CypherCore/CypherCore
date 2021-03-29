@@ -6688,8 +6688,7 @@ namespace Game.Spells
 
         bool IsAutoActionResetSpell()
         {
-            // @todo changed SPELL_INTERRUPT_FLAG_AUTOATTACK . SPELL_INTERRUPT_FLAG_INTERRUPT to fix compile - is this check correct at all?
-            if (IsTriggered() || !m_spellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.Interrupt))
+            if (IsTriggered())
                 return false;
 
             if (m_casttime == 0 && m_spellInfo.HasAttribute(SpellAttr6.NotResetSwingIfInstant))
