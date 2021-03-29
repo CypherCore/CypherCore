@@ -15,6 +15,7 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -61,7 +62,6 @@ namespace Framework.Dynamic
             }
         }
 
-
         public void KillAllEvents(bool force)
         {
             foreach (var pair in m_events.KeyValueList)
@@ -95,6 +95,8 @@ namespace Framework.Dynamic
             Event.m_execTime = e_time;
             m_events.Add(e_time, Event);
         }
+
+        public void AddEventAtOffset(BasicEvent Event, TimeSpan offset) { AddEvent(Event, CalculateTime((ulong)offset.TotalMilliseconds)); }
 
         public void ModifyEventTime(BasicEvent Event, ulong newTime)
         {

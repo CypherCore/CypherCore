@@ -22,6 +22,7 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Framework.Dynamic;
 
 namespace Scripts.Spells.Druid
 {
@@ -42,6 +43,12 @@ namespace Scripts.Spells.Druid
         public const uint BristlingFurGainRage = 204031;
         public const uint CatForm = 768;
         public const uint EarthwardenAura = 203975;
+        public const uint EclipseDummy = 79577;
+        public const uint EclipseLunarAura = 48518;
+        public const uint EclipseLunarSpellCnt = 326055;
+        public const uint EclipseOoc = 329910;
+        public const uint EclipseSolarAura = 48517;
+        public const uint EclipseSolarSpellCnt = 326053;
         public const uint Exhilarate = 28742;
         public const uint FeralChargeBear = 16979;
         public const uint FeralChargeCat = 49376;
@@ -198,6 +205,162 @@ namespace Scripts.Spells.Druid
         }
     }
 
+    class spell_dru_eclipse_common
+    {
+        public static void SetSpellCount(Unit unitOwner, uint spellId, uint amount)
+        {
+            Aura aura = unitOwner.GetAura(spellId);
+            if (aura == null)
+                unitOwner.CastCustomSpell(spellId, SpellValueMod.AuraStack, (int)amount, null, TriggerCastFlags.FullMask);
+            else
+                aura.SetStackAmount((byte)amount);
+        }
+    }
+
+    // 48517 Eclipse (Solar) + 48518 Eclipse (Lunar)
+    class spell_dru_eclipse_aura : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.EclipseLunarSpellCnt, SpellIds.EclipseSolarSpellCnt, SpellIds.EclipseDummy);
+        }
+
+        void HandleRemoved(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            AuraEffect auraEffDummy = GetTarget().GetAuraEffect(SpellIds.EclipseDummy, 0);
+            if (auraEffDummy == null)
+                return;
+
+            uint spellId = GetSpellInfo().Id == SpellIds.EclipseSolarAura ? SpellIds.EclipseLunarSpellCnt : SpellIds.EclipseSolarSpellCnt;
+            spell_dru_eclipse_common.SetSpellCount(GetTarget(), spellId, (uint)auraEffDummy.GetAmount());
+        }
+
+        public override void Register()
+        {
+            AfterEffectRemove .Add(new EffectApplyHandler(HandleRemoved, 0, AuraType.AddPctModifier, AuraEffectHandleModes.Real));
+        }
+    }
+
+    // 79577 - Eclipse - SPELL_DRUID_ECLIPSE_DUMMY
+    class spell_dru_eclipse_dummy : AuraScript
+    {
+        class InitializeEclipseCountersEvent : BasicEvent
+        {   
+            Unit _owner;
+            uint _count;
+
+            public InitializeEclipseCountersEvent(Unit owner, uint count)
+            {
+                _owner = owner;
+                _count = count;
+            }
+
+            public override bool Execute(ulong e_time, uint p_time)
+            {
+                spell_dru_eclipse_common.SetSpellCount(_owner, SpellIds.EclipseSolarSpellCnt, _count);
+                spell_dru_eclipse_common.SetSpellCount(_owner, SpellIds.EclipseLunarSpellCnt, _count);
+                return true;
+            }
+        }
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.EclipseSolarSpellCnt, SpellIds.EclipseLunarSpellCnt, SpellIds.EclipseSolarAura, SpellIds.EclipseLunarAura);
+        }
+
+        void HandleProc(ProcEventInfo eventInfo)
+        {
+            SpellInfo spellInfo = eventInfo.GetSpellInfo();
+            if (spellInfo != null)
+            {
+                if (spellInfo.SpellFamilyFlags & new FlagArray128(0x4, 0x0, 0x0, 0x0)) // Starfire
+                    OnSpellCast(SpellIds.EclipseSolarSpellCnt, SpellIds.EclipseLunarSpellCnt, SpellIds.EclipseSolarAura);
+                else if (spellInfo.SpellFamilyFlags & new FlagArray128(0x1, 0x0, 0x0, 0x0)) // Wrath
+                    OnSpellCast(SpellIds.EclipseLunarSpellCnt, SpellIds.EclipseSolarSpellCnt, SpellIds.EclipseLunarAura);
+            }
+        }
+
+        void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            // counters are applied with a delay
+            GetTarget().m_Events.AddEventAtOffset(new InitializeEclipseCountersEvent(GetTarget(), (uint)aurEff.GetAmount()), TimeSpan.FromSeconds(1));
+        }
+
+        void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().RemoveAura(SpellIds.EclipseSolarSpellCnt);
+            GetTarget().RemoveAura(SpellIds.EclipseLunarSpellCnt);
+        }
+
+        void OnOwnerOutOfCombat(bool isNowInCombat)
+        {
+            if (!isNowInCombat)
+                GetTarget().CastSpell(GetTarget(), SpellIds.EclipseOoc, TriggerCastFlags.FullMask);
+        }
+
+        public override void Register()
+        {
+            AfterEffectApply.Add(new EffectApplyHandler(HandleApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            AfterEffectRemove.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            OnProc.Add(new AuraProcHandler(HandleProc));
+            OnEnterLeaveCombat.Add(new EnterLeaveCombatHandler(OnOwnerOutOfCombat));
+        }
+
+        void OnSpellCast(uint cntSpellId, uint otherCntSpellId, uint eclipseAuraSpellId)
+        {
+            Unit target = GetTarget();
+            Aura aura = target.GetAura(cntSpellId);
+            if (aura != null)
+            {
+                uint remaining = aura.GetStackAmount();
+                if (remaining == 0)
+                    return;
+
+                if (remaining > 1)
+                    aura.SetStackAmount((byte)(remaining - 1));
+                else
+                {
+                    // cast eclipse
+                    target.CastSpell(target, eclipseAuraSpellId, TriggerCastFlags.FullMask);
+
+                    // Remove stacks from other one as well
+                    // reset remaining power on other spellId
+                    target.RemoveAura(cntSpellId);
+                    target.RemoveAura(otherCntSpellId);
+                }
+            }
+        }
+    }
+
+    // 329910 - Eclipse out of combat - SPELL_DRUID_ECLIPSE_OOC
+    class spell_dru_eclipse_ooc : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.EclipseDummy, SpellIds.EclipseSolarSpellCnt, SpellIds.EclipseLunarSpellCnt);
+        }
+
+        void Tick(AuraEffect aurEff)
+        {
+            Unit owner = GetTarget();
+            AuraEffect auraEffDummy = owner.GetAuraEffect(SpellIds.EclipseDummy, 0);
+            if (auraEffDummy == null)
+                return;
+
+            if (!owner.IsInCombat() && (!owner.HasAura(SpellIds.EclipseSolarSpellCnt) || !owner.HasAura(SpellIds.EclipseLunarSpellCnt)))
+            {
+                // Restore 2 stacks to each spell when out of combat
+                spell_dru_eclipse_common.SetSpellCount(owner, SpellIds.EclipseSolarSpellCnt, (uint)auraEffDummy.GetAmount());
+                spell_dru_eclipse_common.SetSpellCount(owner, SpellIds.EclipseLunarSpellCnt, (uint)auraEffDummy.GetAmount());
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(Tick, 0, AuraType.PeriodicDummy));
+        }
+    }
+    
     [Script] // 203974 - Earthwarden
     class spell_dru_earthwarden : AuraScript
     {
