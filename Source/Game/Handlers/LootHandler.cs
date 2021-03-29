@@ -317,7 +317,9 @@ namespace Game
 
             if (player.GetLootGUID() == lguid)
                 player.SetLootGUID(ObjectGuid.Empty);
+
             player.SendLootRelease(lguid);
+            player.RemoveAELootedWorldObject(lguid);
 
             player.RemoveUnitFlag(UnitFlags.Looting);
 
@@ -387,7 +389,7 @@ namespace Game
                 ItemTemplate proto = pItem.GetTemplate();
 
                 // destroy only 5 items from stack in case prospecting and milling
-                if (proto.GetFlags().HasAnyFlag(ItemFlags.IsProspectable | ItemFlags.IsMillable))
+                if (pItem.loot.loot_type == LootType.Prospecting || pItem.loot.loot_type == LootType.Milling)
                 {
                     pItem.m_lootGenerated = false;
                     pItem.loot.Clear();
@@ -448,7 +450,6 @@ namespace Game
 
             //Player is not looking at loot list, he doesn't need to see updates on the loot list
             loot.RemoveLooter(player.GetGUID());
-            player.RemoveAELootedObject(loot.GetGUID());
         }
 
         void DoLootReleaseAll()

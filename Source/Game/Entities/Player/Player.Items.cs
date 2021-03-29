@@ -4084,9 +4084,12 @@ namespace Game.Entities
             return m_AELootView[lootObjectGuid];
         }
 
-        public void RemoveAELootedObject(ObjectGuid lootObjectGuid)
+        public void RemoveAELootedWorldObject(ObjectGuid lootWorldObjectGuid)
         {
-            m_AELootView.Remove(lootObjectGuid);
+            var itr = m_AELootView.FirstOrDefault(pair => pair.Value == lootWorldObjectGuid);
+
+            if (itr.Key != ObjectGuid.Empty)
+                m_AELootView.Remove(itr.Key);
         }
 
         public bool HasLootWorldObjectGUID(ObjectGuid lootWorldObjectGuid)
@@ -5816,7 +5819,7 @@ namespace Game.Entities
             // dont allow protected item to be looted by someone else
             if (!item.rollWinnerGUID.IsEmpty() && item.rollWinnerGUID != GetGUID())
             {
-                SendLootRelease(GetLootGUID());
+                SendLootReleaseAll();
                 return;
             }
 
@@ -5941,9 +5944,8 @@ namespace Game.Entities
 
         public void SendLoot(ObjectGuid guid, LootType loot_type, bool aeLooting = false)
         {
-            ObjectGuid currentLootGuid = GetLootGUID();
-            if (!currentLootGuid.IsEmpty() && !aeLooting)
-                Session.DoLootRelease(currentLootGuid);
+            if (!GetLootGUID().IsEmpty() && !aeLooting)
+                Session.DoLootReleaseAll();
 
             Loot loot;
             PermissionTypes permission = PermissionTypes.All;
