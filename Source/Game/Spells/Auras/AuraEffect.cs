@@ -244,7 +244,7 @@ namespace Game.Spells
             }
             GetBase().CallScriptEffectCalcSpellModHandlers(this, ref m_spellmod);
         }
-        public void ChangeAmount(int newAmount, bool mark = true, bool onStackOrReapply = false)
+        public void ChangeAmount(int newAmount, bool mark = true, bool onStackOrReapply = false, AuraEffect triggeredBy = null)
         {
             // Reapply if amount change
             AuraEffectHandleModes handleMask = 0;
@@ -261,7 +261,7 @@ namespace Game.Spells
             foreach (var aurApp in effectApplications)
             {
                 aurApp.GetTarget()._RegisterAuraEffect(this, false);
-                HandleEffect(aurApp, handleMask, false);
+                HandleEffect(aurApp, handleMask, false, triggeredBy);
             }
 
             if (Convert.ToBoolean(handleMask & AuraEffectHandleModes.ChangeAmount))
@@ -279,14 +279,14 @@ namespace Game.Spells
                     continue;
 
                 aurApp.GetTarget()._RegisterAuraEffect(this, true);
-                HandleEffect(aurApp, handleMask, true);
+                HandleEffect(aurApp, handleMask, true, triggeredBy);
             }
 
             if (GetSpellInfo().HasAttribute(SpellAttr8.AuraSendAmount) || Aura.EffectTypeNeedsSendingAmount(GetAuraType()))
                 GetBase().SetNeedClientUpdateForTargets();
         }
 
-        public void HandleEffect(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        public void HandleEffect(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply, AuraEffect triggeredBy = null)
         {
             // check if call is correct, we really don't want using bitmasks here (with 1 exception)
             Cypher.Assert(mode == AuraEffectHandleModes.Real || mode == AuraEffectHandleModes.SendForClient
@@ -301,7 +301,7 @@ namespace Game.Spells
 
             // real aura apply/remove, handle modifier
             if (mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask))
-                ApplySpellMod(aurApp.GetTarget(), apply);
+                ApplySpellMod(aurApp.GetTarget(), apply, triggeredBy);
 
             // call scripts helping/replacing effect handlers
             bool prevented;
@@ -328,14 +328,14 @@ namespace Game.Spells
             else
                 GetBase().CallScriptAfterEffectRemoveHandlers(this, aurApp, mode);
         }
-        public void HandleEffect(Unit target, AuraEffectHandleModes mode, bool apply)
+        public void HandleEffect(Unit target, AuraEffectHandleModes mode, bool apply, AuraEffect triggeredBy = null)
         {
             AuraApplication aurApp = GetBase().GetApplicationOfTarget(target.GetGUID());
             Cypher.Assert(aurApp != null);
-            HandleEffect(aurApp, mode, apply);
+            HandleEffect(aurApp, mode, apply, triggeredBy);
         }
 
-        void ApplySpellMod(Unit target, bool apply)
+        void ApplySpellMod(Unit target, bool apply, AuraEffect triggeredBy = null)
         {
             if (m_spellmod == null || !target.IsTypeId(TypeId.Player))
                 return;
@@ -374,6 +374,9 @@ namespace Game.Spells
 
             if (recalculateEffectMask.Any())
             {
+                if (triggeredBy == null)
+                    triggeredBy = this;
+
                 ObjectGuid guid = target.GetGUID();
                 var auras = target.GetAppliedAuras();
                 foreach (var iter in auras)
@@ -389,7 +392,8 @@ namespace Game.Spells
                             {
                                 AuraEffect aurEff = aura.GetEffect(i);
                                 if (aurEff != null)
-                                    aurEff.RecalculateAmount();
+                                    if (aurEff != triggeredBy)
+                                        aurEff.RecalculateAmount(triggeredBy);
                             }
                         }
                     }
@@ -769,17 +773,19 @@ namespace Game.Spells
         public int GetPeriodicTimer() { return _periodicTimer; }
         public void SetPeriodicTimer(int periodicTimer) { _periodicTimer = periodicTimer; }
 
-        void RecalculateAmount()
-        {
+        void RecalculateAmount(AuraEffect triggeredBy = null)
+        { 
             if (!CanBeRecalculated())
-                return;
-            ChangeAmount(CalculateAmount(GetCaster()), false);
+                return; 
+
+            ChangeAmount(CalculateAmount(GetCaster()), false, false, triggeredBy);
         }
-        public void RecalculateAmount(Unit caster)
+        public void RecalculateAmount(Unit caster, AuraEffect triggeredBy = null)
         {
             if (!CanBeRecalculated())
                 return;
-            ChangeAmount(CalculateAmount(caster), false);
+
+            ChangeAmount(CalculateAmount(caster), false, false, triggeredBy);
         }
 
         public bool CanBeRecalculated() { return m_canBeRecalculated; }
