@@ -452,7 +452,7 @@ namespace Game
             loot.RemoveLooter(player.GetGUID());
         }
 
-        void DoLootReleaseAll()
+        public void DoLootReleaseAll()
         {
             Dictionary<ObjectGuid, ObjectGuid> lootView = _player.GetAELootView();
             foreach (var lootPair in lootView)
