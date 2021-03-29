@@ -3828,7 +3828,7 @@ namespace Game.Entities
             uint armor = proto.GetArmor(itemLevel);
             if (armor != 0)
             {
-                HandleStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Base, (float)armor, apply);
+                HandleStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Total, (float)armor, apply);
                 if (proto.GetClass() == ItemClass.Armor && (ItemSubClassArmor)proto.GetSubClass() == ItemSubClassArmor.Shield)
                     SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ShieldBlock), apply ? (uint)(armor * 2.5f) : 0);
             }
@@ -6691,7 +6691,7 @@ namespace Game.Entities
             });
 
             // If main hand is a 2h weapon, count it twice
-            if (!bestItemLevels.TryGetValue(EquipmentSlot.MainHand, out Tuple<InventoryType, uint> mainHand) && mainHand.Item1 == InventoryType.Weapon2Hand)
+            if (bestItemLevels.TryGetValue(EquipmentSlot.MainHand, out Tuple<InventoryType, uint> mainHand) && mainHand.Item1 == InventoryType.Weapon2Hand)
                 sum += mainHand.Item2;
 
             sum /= 16.0f;

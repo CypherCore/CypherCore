@@ -324,8 +324,16 @@ namespace Game.Entities
             if (school > SpellSchools.Normal)
             {
                 UnitMods unitMod = UnitMods.ResistanceStart + (int)school;
-                SetResistance(school, (int)GetFlatModifierValue(unitMod, UnitModifierFlatType.Base));
-                SetBonusResistanceMod(school, (int)(GetTotalAuraModValue(unitMod) - GetResistance(school)));
+                float value = MathFunctions.CalculatePct(GetFlatModifierValue(unitMod, UnitModifierFlatType.Base), Math.Max(GetFlatModifierValue(unitMod, UnitModifierFlatType.BasePCTExcludeCreate), -100.0f));
+                value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
+
+                float baseValue = value;
+
+                value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
+                value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
+
+                SetResistance(school, (int)value);
+                SetBonusResistanceMod(school, (int)(value - baseValue));
             }
             else
                 UpdateArmor();
@@ -374,7 +382,7 @@ namespace Game.Entities
         public void SetCreateMana(uint val) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BaseMana), val); }
         public uint GetArmor()
         {
-            return (uint)(GetResistance(SpellSchools.Normal) + GetBonusResistanceMod(SpellSchools.Normal));
+            return (uint)GetResistance(SpellSchools.Normal);
         }
         public void SetArmor(int val, int bonusVal)
         {
@@ -404,7 +412,7 @@ namespace Game.Entities
             int? resist = null;
             for (int i = (int)SpellSchools.Normal; i < (int)SpellSchools.Max; ++i)
             {
-                int schoolResistance = GetResistance((SpellSchools)i) + GetBonusResistanceMod((SpellSchools)i);
+                int schoolResistance = GetResistance((SpellSchools)i);
                 if (Convert.ToBoolean((int)mask & (1 << i)) && (!resist.HasValue || resist.Value > schoolResistance))
                     resist = schoolResistance;
             }
@@ -1299,25 +1307,25 @@ namespace Game.Entities
         {
             UnitMods unitMod = UnitMods.Armor;
 
-            float value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base);    // base armor (from items)
-            float baseValue = value;
+            float value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base);    // base armor
+            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);            // armor percent
 
+            // SPELL_AURA_MOD_ARMOR_PCT_FROM_STAT counts as base armor
             GetTotalAuraModifier(AuraType.ModArmorPctFromStat, aurEff =>
             {
                 int miscValue = aurEff.GetMiscValue();
                 Stats stat = (miscValue != -2) ? (Stats)miscValue : GetPrimaryStat();
 
-                int armorAmount = (int)MathFunctions.CalculatePct(GetStat(stat), aurEff.GetAmount());
-                baseValue += armorAmount;
-
+                value += MathFunctions.CalculatePct((float)GetStat(stat), aurEff.GetAmount());
                 return true;
             });
 
-            value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);           // armor percent from items
-            value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
+            float baseValue = value;
+
+            value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);        // bonus armor from auras and items
             value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);
 
-            SetArmor((int)baseValue, (int)(value - baseValue));
+            SetArmor((int)value, (int)(value - baseValue));
 
             Pet pet = GetPet();
             if (pet)

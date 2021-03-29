@@ -2210,7 +2210,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, GetStat((Stats)i));
 
             for (int i = 0; i < (int)SpellSchools.Max; ++i)
-                stmt.AddValue(index++, GetResistance((SpellSchools)i) + GetBonusResistanceMod((SpellSchools)i));
+                stmt.AddValue(index++, GetResistance((SpellSchools)i)));
 
             stmt.AddValue(index++, (float)m_activePlayerData.BlockPercentage);
             stmt.AddValue(index++, (float)m_activePlayerData.DodgePercentage);
