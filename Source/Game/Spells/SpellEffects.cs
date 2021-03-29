@@ -1641,7 +1641,7 @@ namespace Game.Spells
                 case SummonCategory.Unk:
                     if (Convert.ToBoolean(properties.Flags & SummonPropFlags.Unk10))
                     {
-                        SummonGuardian(effIndex, entry, properties, numSummons);
+                        SummonGuardian(effIndex, entry, properties, numSummons, privateObjectOwner);
                         break;
                     }
                     switch (properties.Title)
@@ -1650,7 +1650,7 @@ namespace Game.Spells
                         case SummonTitle.Guardian:
                         case SummonTitle.Runeblade:
                         case SummonTitle.Minion:
-                            SummonGuardian(effIndex, entry, properties, numSummons);
+                            SummonGuardian(effIndex, entry, properties, numSummons, privateObjectOwner);
                             break;
                         // Summons a vehicle, but doesn't force anyone to enter it (see SUMMON_CATEGORY_VEHICLE)
                         case SummonTitle.Vehicle:
@@ -1719,7 +1719,7 @@ namespace Game.Spells
                     }//switch
                     break;
                 case SummonCategory.Pet:
-                    SummonGuardian(effIndex, entry, properties, numSummons);
+                    SummonGuardian(effIndex, entry, properties, numSummons, privateObjectOwner);
                     break;
                 case SummonCategory.Puppet:
                     summon = m_caster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, m_originalCaster, m_spellInfo.Id, 0, privateObjectOwner);
@@ -2312,7 +2312,7 @@ namespace Game.Spells
             {
                 SummonPropertiesRecord properties = CliDB.SummonPropertiesStorage.LookupByKey(67);
                 if (properties != null)
-                    SummonGuardian(effIndex, petentry, properties, 1);
+                    SummonGuardian(effIndex, petentry, properties, 1, ObjectGuid.Empty);
                 return;
             }
 
@@ -4847,7 +4847,7 @@ namespace Game.Spells
             gameObjTarget.SetDestructibleState((GameObjectDestructibleState)effectInfo.MiscValue, player, true);
         }
 
-        void SummonGuardian(uint i, uint entry, SummonPropertiesRecord properties, uint numGuardians)
+        void SummonGuardian(uint i, uint entry, SummonPropertiesRecord properties, uint numGuardians, ObjectGuid privateObjectOwner)
         {
             Unit caster = m_originalCaster;
             if (caster == null)
@@ -4887,7 +4887,7 @@ namespace Game.Spells
                     // randomize position for multiple summons
                     pos = m_caster.GetRandomPoint(destTarget, radius);
 
-                TempSummon summon = map.SummonCreature(entry, pos, properties, (uint)duration, caster, m_spellInfo.Id);
+                TempSummon summon = map.SummonCreature(entry, pos, properties, (uint)duration, caster, m_spellInfo.Id, 0, privateObjectOwner);
                 if (summon == null)
                     return;
                 if (summon.HasUnitTypeMask(UnitTypeMask.Guardian))

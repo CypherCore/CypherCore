@@ -1124,7 +1124,7 @@ namespace Game.AI
                         if (summoner == null)
                             break;
 
-                        ObjectGuid privateObjectOwner;
+                        ObjectGuid privateObjectOwner = ObjectGuid.Empty;
                         if (flags.HasAnyFlag(SmartActionSummonCreatureFlags.PersonalSpawn))
                             privateObjectOwner = summoner.IsPrivateObject() ? summoner.GetPrivateObjectOwner() : summoner.GetGUID();
 
