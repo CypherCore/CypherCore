@@ -149,6 +149,21 @@ namespace Game.Entities
             }
         }
 
+        public bool IsInGroup(ObjectGuid groupGuid)
+        {
+            Group group = GetGroup();
+            if (group != null)
+                if (group.GetGUID() == groupGuid)
+                    return true;
+
+            Group originalGroup = GetOriginalGroup();
+            if (originalGroup != null)
+                if (originalGroup.GetGUID() == groupGuid)
+                    return true;
+
+            return false;
+        }
+        
         public void SetGroup(Group group, byte subgroup = 0)
         {
             if (!group)

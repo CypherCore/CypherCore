@@ -1113,6 +1113,11 @@ namespace Game.Entities
             if (_privateObjectOwner == seer.GetPrivateObjectOwner())
                 return true;
 
+            Player playerSeer = seer.ToPlayer();
+            if (playerSeer != null)
+                if (playerSeer.IsInGroup(_privateObjectOwner))
+                    return true;
+
             return false;
         }
         

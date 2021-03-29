@@ -1595,9 +1595,16 @@ namespace Game.Spells
             if (m_originalCaster == null)
                 return;
 
-            ObjectGuid privateObjectOwner = ObjectGuid.Empty;
-            if (properties.Flags.HasAnyFlag(SummonPropFlags.PersonalSpawn))
-                privateObjectOwner = m_originalCaster.IsPrivateObject() ? m_originalCaster.GetPrivateObjectOwner() : m_originalCaster.GetGUID();
+            ObjectGuid privateObjectOwner = m_originalCaster.GetGUID();
+            if (!properties.Flags.HasAnyFlag(SummonPropFlags.PersonalSpawn | SummonPropFlags.PersonalGroupSpawn))
+                privateObjectOwner = ObjectGuid.Empty;
+
+            if (m_originalCaster.IsPrivateObject())
+                privateObjectOwner = m_originalCaster.GetPrivateObjectOwner();
+
+            if (properties.Flags.HasAnyFlag(SummonPropFlags.PersonalGroupSpawn))
+                if (m_originalCaster.IsPlayer() && m_originalCaster.ToPlayer().GetGroup())
+                    privateObjectOwner = m_originalCaster.ToPlayer().GetGroup().GetGUID();
 
             int duration = m_spellInfo.CalcDuration(m_originalCaster);
 
