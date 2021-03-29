@@ -92,7 +92,7 @@ namespace Framework.Constants
         ModStalked = 68,
         SchoolAbsorb = 69,
         PeriodicWeaponPercentDamage = 70,
-        StoreTeleportReturnPoint = 71, // NYI
+        StoreTeleportReturnPoint = 71,
         ModPowerCostSchoolPct = 72,
         ModPowerCostSchool = 73,
         ReflectSpellsSchool = 74,

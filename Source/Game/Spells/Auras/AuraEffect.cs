@@ -139,7 +139,7 @@ namespace Game.Spells
 
             return totalTicks;
         }
-        
+
         void ResetPeriodic(bool resetPeriodicTimer = false)
         {
             _ticksDone = 0;
@@ -774,9 +774,9 @@ namespace Game.Spells
         public void SetPeriodicTimer(int periodicTimer) { _periodicTimer = periodicTimer; }
 
         void RecalculateAmount(AuraEffect triggeredBy = null)
-        { 
+        {
             if (!CanBeRecalculated())
-                return; 
+                return;
 
             ChangeAmount(CalculateAmount(GetCaster()), false, false, triggeredBy);
         }
@@ -3099,7 +3099,7 @@ namespace Game.Spells
 
             player.UpdateArmor();
         }
-        
+
         [AuraEffectHandler(AuraType.ModStatBonusPct)]
         void HandleModStatBonusPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
@@ -4640,7 +4640,7 @@ namespace Game.Spells
 
             target.CastSpell(target, triggerSpell, true);
         }
-        
+
         [AuraEffectHandler(AuraType.OpenStable)]
         void HandleAuraOpenStable(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
@@ -5697,6 +5697,22 @@ namespace Game.Spells
             }
             else
                 bg.RemovePlayerPosition(target.GetGUID());
+        }
+
+        [AuraEffectHandler(AuraType.StoreTeleportReturnPoint)]
+        void HandleStoreTeleportReturnPoint(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
+                return;
+
+            Player playerTarget = aurApp.GetTarget().ToPlayer();
+            if (playerTarget == null)
+                return;
+
+            if (apply)
+                playerTarget.AddStoredAuraTeleportLocation(GetSpellInfo().Id);
+            else if (!playerTarget.GetSession().IsLogingOut())
+                playerTarget.RemoveStoredAuraTeleportLocation(GetSpellInfo().Id);
         }
         #endregion
     }

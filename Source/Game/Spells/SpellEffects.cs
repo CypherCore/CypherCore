@@ -5139,6 +5139,20 @@ namespace Game.Spells
             player.SendPacket(packet);
         }
 
+        void EffectTeleportToReturnPoint(uint effIndex)
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            Player player = unitTarget.ToPlayer();
+            if (player != null)
+            {
+                WorldLocation dest = player.GetStoredAuraTeleportLocation((uint)effectInfo.MiscValue);
+                if (dest != null)
+                    player.TeleportTo(dest, unitTarget == m_caster ? TeleportToOptions.Spell | TeleportToOptions.NotLeaveCombat : 0);
+            }
+        }
+
         [SpellEffectHandler(SpellEffectName.SummonRafFriend)]
         void EffectSummonRaFFriend(uint effIndex)
         {

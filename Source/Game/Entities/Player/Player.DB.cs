@@ -1353,6 +1353,38 @@ namespace Game.Entities
                 SetArenaTeamInfoField(slot, ArenaTeamInfoType.PersonalRating, personalRatingCache[slot]);
             }
         }
+        void _LoadStoredAuraTeleportLocations(SQLResult result)
+        {
+            //                                                       0      1      2          3          4          5
+            //QueryResult* result = CharacterDatabase.PQuery("SELECT Spell, MapId, PositionX, PositionY, PositionZ, Orientation FROM character_spell_location WHERE Guid = ?", GetGUIDLow());
+
+            m_storedAuraTeleportLocations.Clear();
+            if (!result.IsEmpty())
+            {
+                do
+                {
+                    uint spellId = result.Read<uint>(0);
+
+                    if (!Global.SpellMgr.HasSpellInfo(spellId, Difficulty.None))
+                    {
+                        Log.outError(LogFilter.Spells, $"Player._LoadStoredAuraTeleportLocations: Player {GetName()} ({GetGUID()}) spell (ID: {spellId}) does not exist");
+                        continue;
+                    }
+
+                    WorldLocation location = new WorldLocation(result.Read<uint>(1), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), result.Read<float>(5));
+                    if (!GridDefines.IsValidMapCoord(location))
+                    {
+                        Log.outError(LogFilter.Spells, $"Player._LoadStoredAuraTeleportLocations: Player {GetName()} ({GetGUID()}) spell (ID: {spellId}) has invalid position on map {location.GetMapId()}, {location}.");
+                        continue;
+                    }
+
+                    StoredAuraTeleportLocation storedLocation = m_storedAuraTeleportLocations[spellId];
+                    storedLocation.Loc = location;
+                    storedLocation.CurrentState = StoredAuraTeleportLocation.State.Unchanged;
+                }
+                while (result.NextRow());
+            }
+        }
         void _LoadGroup(SQLResult result)
         {
             if (!result.IsEmpty())
@@ -2187,6 +2219,38 @@ namespace Game.Entities
             }
 
             m_mailsUpdated = false;
+        }
+        void _SaveStoredAuraTeleportLocations(SQLTransaction trans)
+        {
+            foreach (var pair in m_storedAuraTeleportLocations.ToList())
+            {
+                var storedLocation = pair.Value;
+                if (storedLocation.CurrentState == StoredAuraTeleportLocation.State.Deleted)
+                {
+                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_AURA_STORED_LOCATION);
+                    stmt.AddValue(0, GetGUID().GetCounter());
+                    trans.Append(stmt);
+                    m_storedAuraTeleportLocations.Remove(pair.Key);
+                    continue;
+                }
+
+                if (storedLocation.CurrentState == StoredAuraTeleportLocation.State.Changed)
+                {
+                    PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_AURA_STORED_LOCATION);
+                    stmt.AddValue(0, GetGUID().GetCounter());
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHARACTER_AURA_STORED_LOCATION);
+                    stmt.AddValue(0, GetGUID().GetCounter());
+                    stmt.AddValue(1, pair.Key);
+                    stmt.AddValue(2, storedLocation.Loc.GetMapId());
+                    stmt.AddValue(3, storedLocation.Loc.GetPositionX());
+                    stmt.AddValue(4, storedLocation.Loc.GetPositionY());
+                    stmt.AddValue(5, storedLocation.Loc.GetPositionZ());
+                    stmt.AddValue(6, storedLocation.Loc.GetOrientation());
+                    trans.Append(stmt);
+                }
+            }
         }
         void _SaveStats(SQLTransaction trans)
         {
@@ -3036,6 +3100,9 @@ namespace Game.Entities
             if (HasPlayerFlag(PlayerFlags.Ghost))
                 m_deathState = DeathState.Dead;
 
+            // Load spell locations - must be after loading auras
+            _LoadStoredAuraTeleportLocations(holder.GetResult(PlayerLoginQueryLoad.AuraStoredLocations));
+
             // after spell load, learn rewarded spell if need also
             _LoadQuestStatus(holder.GetResult(PlayerLoginQueryLoad.QuestStatus));
             _LoadQuestStatusObjectives(holder.GetResult(PlayerLoginQueryLoad.QuestStatusObjectives));
@@ -3572,6 +3639,7 @@ namespace Game.Entities
             _SaveActions(characterTransaction);
             _SaveAuras(characterTransaction);
             _SaveSkills(characterTransaction);
+            _SaveStoredAuraTeleportLocations(characterTransaction);
             m_achievementSys.SaveToDB(characterTransaction);
             reputationMgr.SaveToDB(characterTransaction);
             m_questObjectiveCriteriaMgr.SaveToDB(characterTransaction);
@@ -4093,6 +4161,10 @@ namespace Game.Entities
                         trans.Append(stmt);
 
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_FAVORITE_AUCTIONS_BY_CHAR);
+                        stmt.AddValue(0, guid);
+                        trans.Append(stmt);
+
+                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_AURA_STORED_LOCATIONS_BY_GUID);
                         stmt.AddValue(0, guid);
                         trans.Append(stmt);
 

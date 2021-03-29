@@ -2288,6 +2288,31 @@ namespace Game.Entities
             return false;
         }
 
+        public void AddStoredAuraTeleportLocation(uint spellId)
+        {
+            StoredAuraTeleportLocation storedLocation = new();
+            storedLocation.Loc = new WorldLocation(this);
+            storedLocation.CurrentState = StoredAuraTeleportLocation.State.Changed;
+
+            m_storedAuraTeleportLocations[spellId] = storedLocation;
+        }
+
+        public void RemoveStoredAuraTeleportLocation(uint spellId)
+        {
+            StoredAuraTeleportLocation storedLocation = m_storedAuraTeleportLocations.LookupByKey(spellId);
+            if (storedLocation != null)
+                storedLocation.CurrentState = StoredAuraTeleportLocation.State.Deleted;
+        }
+
+        public WorldLocation GetStoredAuraTeleportLocation(uint spellId)
+        {
+            StoredAuraTeleportLocation auraLocation = m_storedAuraTeleportLocations.LookupByKey(spellId);
+            if (auraLocation != null)
+                return auraLocation.Loc;
+
+            return null;
+        }
+        
         bool AddSpell(uint spellId, bool active, bool learning, bool dependent, bool disabled, bool loading = false, uint fromSkill = 0)
         {
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);

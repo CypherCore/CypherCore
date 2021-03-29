@@ -793,6 +793,12 @@ namespace Framework.Database
             PrepareStatement(CharStatements.DEL_SCENARIO_INSTANCE_CRITERIA, "DELETE FROM instance_scenario_progress WHERE id = ? AND criteria = ?");
             PrepareStatement(CharStatements.INS_SCENARIO_INSTANCE_CRITERIA, "INSERT INTO instance_scenario_progress (id, criteria, counter, date) VALUES (?, ?, ?, ?)");
             PrepareStatement(CharStatements.DEL_SCENARIO_INSTANCE_CRITERIA_FOR_INSTANCE, "DELETE FROM instance_scenario_progress WHERE id = ?");
+
+            // Spell Location
+            PrepareStatement(CharStatements.SEL_CHARACTER_AURA_STORED_LOCATIONS, "SELECT Spell, MapId, PositionX, PositionY, PositionZ, Orientation FROM character_aura_stored_location WHERE Guid = ?");
+            PrepareStatement(CharStatements.DEL_CHARACTER_AURA_STORED_LOCATIONS_BY_GUID, "DELETE FROM character_aura_stored_location WHERE Guid = ?");
+            PrepareStatement(CharStatements.DEL_CHARACTER_AURA_STORED_LOCATION, "DELETE FROM character_aura_stored_location WHERE Guid = ? AND Spell = ?");
+            PrepareStatement(CharStatements.INS_CHARACTER_AURA_STORED_LOCATION, "INSERT INTO character_aura_stored_location (Guid, Spell, MapId, PositionX, PositionY, PositionZ, Orientation) VALUES (?, ?, ?, ?, ?, ?, ?)");
         }
     }
 
@@ -1441,6 +1447,11 @@ namespace Framework.Database
         DEL_SCENARIO_INSTANCE_CRITERIA,
         INS_SCENARIO_INSTANCE_CRITERIA,
         DEL_SCENARIO_INSTANCE_CRITERIA_FOR_INSTANCE,
+
+        SEL_CHARACTER_AURA_STORED_LOCATIONS,
+        DEL_CHARACTER_AURA_STORED_LOCATIONS_BY_GUID,
+        DEL_CHARACTER_AURA_STORED_LOCATION,
+        INS_CHARACTER_AURA_STORED_LOCATION,
 
         MAX_CHARACTERDATABASE_STATEMENTS
     }

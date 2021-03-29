@@ -120,6 +120,7 @@ namespace Game.Entities
         MultiMap<uint, uint> m_overrideSpells = new();
         public Spell m_spellModTakingSpell;
         uint m_oldpetspell;
+        Dictionary<uint, StoredAuraTeleportLocation> m_storedAuraTeleportLocations = new();
 
         //Mail
         List<Mail> m_mail = new();
@@ -610,5 +611,18 @@ namespace Game.Entities
     {
         public ObjectGuid GroupGuid;
         public int UpdateSequenceNumber;
+    }
+
+    class StoredAuraTeleportLocation
+    {
+        public WorldLocation Loc;
+        public State CurrentState;
+
+        public enum State
+        {
+            Unchanged,
+            Changed,
+            Deleted
+        }
     }
 }

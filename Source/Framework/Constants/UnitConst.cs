@@ -62,6 +62,7 @@ namespace Framework.Constants
         Ejectable = 0x20,           // Ejectable
         UsableForced2 = 0x40,
         UsableForced3 = 0x100,
+        PassengerMirrorsAnims = 0x10000,           // Passenger forced to repeat all vehicle animations
         KeepPet = 0x20000,
         UsableForced4 = 0x02000000,
         CanSwitch = 0x4000000,

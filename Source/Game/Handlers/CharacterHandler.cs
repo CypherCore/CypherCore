@@ -2570,6 +2570,10 @@ namespace Game
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.AuraEffects, stmt);
 
+            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_AURA_STORED_LOCATIONS);
+            stmt.AddValue(0, lowGuid);
+            SetQuery(PlayerLoginQueryLoad.AuraStoredLocations, stmt);
+
             stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_SPELL);
             stmt.AddValue(0, lowGuid);
             SetQuery(PlayerLoginQueryLoad.Spells, stmt);
@@ -2818,6 +2822,7 @@ namespace Game
         BoundInstances,
         Auras,
         AuraEffects,
+        AuraStoredLocations,
         Spells,
         QuestStatus,
         QuestStatusObjectives,
