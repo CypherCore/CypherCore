@@ -87,8 +87,8 @@ namespace Game.Combat
             uint redirectThreadPct = victim.GetRedirectThreatPercent();
             Unit redirectTarget = victim.GetRedirectThreatTarget();
 
-            // If victim is personnal spawn, redirect all aggro to summoner
-            if (victim.IsPrivateObject() && GetOwner().IsPrivateObject() && GetOwner().CanSeeOrDetect(victim))
+            // If victim is personal spawn, redirect all aggro to summoner
+            if (victim.IsPrivateObject() && (!GetOwner().IsPrivateObject() || !GetOwner().CheckPrivateObjectOwnerVisibility(victim)))
             {
                 redirectThreadPct = 100;
                 redirectTarget = Global.ObjAccessor.GetUnit(GetOwner(), victim.GetPrivateObjectOwner());

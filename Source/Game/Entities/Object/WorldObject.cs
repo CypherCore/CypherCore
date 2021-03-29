@@ -1100,19 +1100,35 @@ namespace Game.Entities
             return 0.0f;
         }
 
+        public bool CheckPrivateObjectOwnerVisibility(WorldObject seer)
+        {
+            if (!IsPrivateObject())
+                return true;
+
+            // Owner of this private object
+            if (_privateObjectOwner == seer.GetGUID())
+                return true;
+
+            // Another private object of the same owner
+            if (_privateObjectOwner == seer.GetPrivateObjectOwner())
+                return true;
+
+            return false;
+        }
+        
         public bool CanSeeOrDetect(WorldObject obj, bool ignoreStealth = false, bool distanceCheck = false, bool checkAlert = false)
         {
             if (this == obj)
                 return true;
-
-            if (!obj.GetPrivateObjectOwner().IsEmpty())
-                return GetGUID() == obj.GetPrivateObjectOwner() || GetPrivateObjectOwner() == obj.GetPrivateObjectOwner();
 
             if (obj.IsNeverVisibleFor(this) || CanNeverSee(obj))
                 return false;
 
             if (obj.IsAlwaysVisibleFor(this) || CanAlwaysSee(obj))
                 return true;
+
+            if (!obj.CheckPrivateObjectOwnerVisibility(this))
+                return false;
 
             bool corpseVisibility = false;
             if (distanceCheck)
