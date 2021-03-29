@@ -88,20 +88,10 @@ namespace Game.Combat
             Unit redirectTarget = victim.GetRedirectThreatTarget();
 
             // If victim is personnal spawn, redirect all aggro to summoner
-            TempSummon tempSummonVictim = victim.ToTempSummon();
-            if (tempSummonVictim)
+            if (victim.IsPrivateObject() && GetOwner().IsPrivateObject() && GetOwner().CanSeeOrDetect(victim))
             {
-                if (tempSummonVictim.IsVisibleBySummonerOnly())
-                {
-                    // Personnal Spawns from same summoner can aggro each other
-                    if (!GetOwner().ToTempSummon() ||
-                        !GetOwner().ToTempSummon().IsVisibleBySummonerOnly() ||
-                        tempSummonVictim.GetSummonerGUID() != GetOwner().ToTempSummon().GetSummonerGUID())
-                    {
-                        redirectThreadPct = 100;
-                        redirectTarget = tempSummonVictim.GetSummoner();
-                    }
-                }
+                redirectThreadPct = 100;
+                redirectTarget = Global.ObjAccessor.GetUnit(GetOwner(), victim.GetPrivateObjectOwner());
             }
 
             // must check > 0.0f, otherwise dead loop

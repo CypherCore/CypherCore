@@ -5211,7 +5211,7 @@ namespace Game.Spells
 
             go.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
             go.SetSpellId(m_spellInfo.Id);
-            go.SetVisibleByUnitOnly(m_caster.GetGUID());
+            go.SetPrivateObjectOwner(m_caster.GetGUID());
 
             ExecuteLogEffectSummonObject(effIndex, go);
 

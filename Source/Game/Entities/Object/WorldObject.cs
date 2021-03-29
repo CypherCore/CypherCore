@@ -1105,6 +1105,9 @@ namespace Game.Entities
             if (this == obj)
                 return true;
 
+            if (!obj.GetPrivateObjectOwner().IsEmpty())
+                return GetGUID() == obj.GetPrivateObjectOwner() || GetPrivateObjectOwner() == obj.GetPrivateObjectOwner();
+
             if (obj.IsNeverVisibleFor(this) || CanNeverSee(obj))
                 return false;
 
@@ -1145,19 +1148,7 @@ namespace Game.Entities
                 WorldObject viewpoint = this;
                 Player player = ToPlayer();
                 if (player != null)
-                {
                     viewpoint = player.GetViewpoint();
-
-                    Creature creature = obj.ToCreature();
-                    if (creature)
-                        if (TempSummon.IsPersonalSummonOfAnotherPlayer(creature, GetGUID()))
-                            return false;
-                }
-
-                GameObject go = obj.ToGameObject();
-                if ( go != null)
-                    if (go.IsVisibleByUnitOnly() && GetGUID() != go.GetVisibleByUnitOnly())
-                        return false;
 
                 if (viewpoint == null)
                     viewpoint = this;
@@ -1423,7 +1414,7 @@ namespace Game.Entities
             return null;
         }
 
-        public TempSummon SummonCreature(uint entry, float x, float y, float z, float o = 0, TempSummonType despawnType = TempSummonType.ManualDespawn, uint despawnTime = 0, bool visibleBySummonerOnly = false)
+        public TempSummon SummonCreature(uint entry, float x, float y, float z, float o = 0, TempSummonType despawnType = TempSummonType.ManualDespawn, uint despawnTime = 0, bool personalSpawn = false)
         {
             if (x == 0.0f && y == 0.0f && z == 0.0f)
                 GetClosePoint(out x, out y, out z, GetCombatReach());
@@ -1431,15 +1422,15 @@ namespace Game.Entities
             if (o == 0.0f)
                 o = GetOrientation();
 
-            return SummonCreature(entry, new Position(x, y, z, o), despawnType, despawnTime, 0, visibleBySummonerOnly);
+            return SummonCreature(entry, new Position(x, y, z, o), despawnType, despawnTime, 0, personalSpawn);
         }
 
-        public TempSummon SummonCreature(uint entry, Position pos, TempSummonType despawnType = TempSummonType.ManualDespawn, uint despawnTime = 0, uint vehId = 0, bool visibleBySummonerOnly = false)
+        public TempSummon SummonCreature(uint entry, Position pos, TempSummonType despawnType = TempSummonType.ManualDespawn, uint despawnTime = 0, uint vehId = 0, bool personalSpawn = false)
         {
             Map map = GetMap();
             if (map != null)
             {
-                TempSummon summon = map.SummonCreature(entry, pos, null, despawnTime, ToUnit(), 0, vehId, visibleBySummonerOnly);
+                TempSummon summon = map.SummonCreature(entry, pos, null, despawnTime, ToUnit(), 0, vehId, personalSpawn);
                 if (summon != null)
                 {
                     summon.SetTempSummonType(despawnType);
@@ -1697,6 +1688,11 @@ namespace Game.Entities
         public virtual ushort GetMovementAnimKitId() { return 0; }
         public virtual ushort GetMeleeAnimKitId() { return 0; }
 
+        // Watcher
+        public bool IsPrivateObject() { return !_privateObjectOwner.IsEmpty(); }
+        public ObjectGuid GetPrivateObjectOwner() { return _privateObjectOwner; }
+        public void SetPrivateObjectOwner(ObjectGuid owner) { _privateObjectOwner = owner; }
+        
         public virtual string GetName(Locale locale = Locale.enUS) { return _name; }
         public void SetName(string name) { _name = name; }
 
@@ -2382,6 +2378,8 @@ namespace Game.Entities
         public bool IsInWorld { get; set; }
 
         NotifyFlags m_notifyflags;
+
+        ObjectGuid _privateObjectOwner;
 
         public FlaggedArray<StealthType> m_stealth = new(2);
         public FlaggedArray<StealthType> m_stealthDetect = new(2);

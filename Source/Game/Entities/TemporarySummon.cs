@@ -42,16 +42,6 @@ namespace Game.Entities
         {
             return !m_summonerGUID.IsEmpty() ? ObjectAccessor.GetCreature(this, m_summonerGUID) : null;
         }
-
-        public static bool IsPersonalSummonOfAnotherPlayer(Creature summon, ObjectGuid playerToCheck)
-        {
-            TempSummon tempSummon = summon.ToTempSummon();
-            if (tempSummon != null)
-                if (tempSummon.IsVisibleBySummonerOnly() && playerToCheck != tempSummon.GetSummonerGUID())
-                    return true;
-
-            return false;
-        }
         
         public override void Update(uint diff)
         {
@@ -290,15 +280,11 @@ namespace Game.Entities
 
         public uint GetTimer() { return m_timer; }
 
-        public void SetVisibleBySummonerOnly(bool visibleBySummonerOnly) { m_visibleBySummonerOnly = visibleBySummonerOnly; }
-        public bool IsVisibleBySummonerOnly() { return m_visibleBySummonerOnly; }
-
         public SummonPropertiesRecord m_Properties;
         TempSummonType m_type;
         uint m_timer;
         uint m_lifetime;
         ObjectGuid m_summonerGUID;
-        bool m_visibleBySummonerOnly;
     }
 
     public class Minion : TempSummon

@@ -2824,10 +2824,6 @@ namespace Game.Entities
         // There's many places not ready for dynamic spawns. This allows them to live on for now.
         void SetRespawnCompatibilityMode(bool mode = true) { m_respawnCompatibilityMode = mode; }
         public bool GetRespawnCompatibilityMode() { return m_respawnCompatibilityMode; }
-
-        public void SetVisibleByUnitOnly(ObjectGuid unit) { m_visibleByUnitOnly = unit; }
-        public bool IsVisibleByUnitOnly() { return !m_visibleByUnitOnly.IsEmpty(); }
-        public ObjectGuid GetVisibleByUnitOnly() { return m_visibleByUnitOnly; }
         
         #region Fields
         protected GameObjectFieldData m_gameObjectData;
@@ -2863,7 +2859,6 @@ namespace Game.Entities
         bool m_respawnCompatibilityMode;
         ushort _animKitId;
         uint _worldEffectID;
-        ObjectGuid m_visibleByUnitOnly;
 
         GameObjectState m_prevGoState;                          // What state to set whenever resetting
 
