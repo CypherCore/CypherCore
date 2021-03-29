@@ -2555,7 +2555,7 @@ namespace Game.Spells
             {
                 // stealth must be removed at cast starting (at show channel bar)
                 // skip triggered spell (item equip spell casting and other not explicit character casts/item uses)
-                if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreAuraInterruptFlags) && m_spellInfo.IsBreakingStealth())
+                if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreAuraInterruptFlags) && m_spellInfo.IsBreakingStealth() && !m_spellInfo.HasAttribute(SpellAttr2.IgnoreActionAuraInterruptFlags))
                     m_caster.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Action);
 
                 m_caster.SetCurrentCastSpell(this);
@@ -2907,7 +2907,9 @@ namespace Game.Spells
             if (!hitMask.HasAnyFlag(ProcFlagsHit.Critical))
                 hitMask |= ProcFlagsHit.Normal;
 
-            m_originalCaster.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.ActionDelayed);
+            if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreAuraInterruptFlags) && !m_spellInfo.HasAttribute(SpellAttr2.IgnoreActionAuraInterruptFlags))
+                m_originalCaster.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.ActionDelayed);
+
             m_originalCaster.ProcSkillsAndAuras(null, procAttacker, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Cast, hitMask, this, null, null);
 
             // Call CreatureAI hook OnSuccessfulSpellCast
@@ -5899,9 +5901,6 @@ namespace Game.Spells
         {
             Player player = m_caster.ToPlayer();
             if (!player)
-                return SpellCastResult.SpellCastOk;
-
-            if (m_spellInfo.HasAttribute(SpellAttr2.IgnoreItemCheck))
                 return SpellCastResult.SpellCastOk;
 
             if (m_CastItem == null)

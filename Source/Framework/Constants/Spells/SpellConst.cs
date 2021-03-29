@@ -1415,8 +1415,8 @@ namespace Framework.Constants
         IgnoreCasterAurastate = 0x800,   //! Will Ignore Caster Aura States Including Combat Requirements And Death State
         DisallowProcEvents = 0x1000,   //! Disallows proc events from triggered spell (default)
         IgnoreCasterMountedOrOnVehicle = 0x2000,   //! Will Ignore Mounted/On Vehicle Restrictions
-        // reuse                                        = 0x00004000,
-        // reuse                                        = 0x00008000,
+        // reuse                                        = 0x4000,
+        // reuse                                        = 0x8000,
         IgnoreCasterAuras = 0x10000,   //! Will Ignore Caster Aura Restrictions Or Requirements
         DontResetPeriodicTimer = 0x20000,   //! Will allow periodic aura timers to keep ticking (instead of resetting)
         DontReportCastError = 0x40000,   //! Will Return SpellFailedDontReport In Checkcast Functions
@@ -1613,7 +1613,7 @@ namespace Framework.Constants
         Unk25 = 0x2000000, // 25
         UnaffectedByAuraSchoolImmune = 0x4000000, // 26 Unaffected By School Immunity
         Unk27 = 0x8000000, // 27
-        IgnoreItemCheck = 0x10000000, // 28 Spell is cast without checking item requirements (charges/reagents/totem)
+        IgnoreActionAuraInterruptFlags = 0x10000000, // 28 doesnt break auras with SpellAuraInterruptFlags::Action and SpellAuraInterruptFlags::ActionDelayed
         CantCrit = 0x20000000, // 29 Spell Can'T Crit
         TriggeredCanTriggerProc = 0x40000000, // 30 Spell Can Trigger Even If Triggered
         FoodBuff = 0x80000000  // 31 Food Or Drink Buff (Like Well Fed)
@@ -1670,7 +1670,7 @@ namespace Framework.Constants
         Unk12 = 0x1000, // 12
         CombatLogNoCaster = 0x2000, // 13 No caster object is sent to client combat log
         DamageDoesntBreakAuras = 0x4000, // 14 Doesn'T Break Auras By Damage From These Spells
-        Unk15 = 0x8000, // 15
+        HiddenInSpellbook = 0x8000, // 15
         NotUsableInArenaOrRatedBg = 0x10000, // 16 Cannot Be Used In Both Arenas Or Rated Battlegrounds
         UsableInArena = 0x20000, // 17
         AreaTargetChain = 0x40000, // 18 (Nyi)Hits Area Targets One After Another Instead Of All At Once
@@ -1773,10 +1773,10 @@ namespace Framework.Constants
         DispelCharges = 0x400, // 10 Dispel And Spellsteal Individual Charges Instead Of Whole Aura.
         InterruptOnlyNonplayer = 0x800, // 11 Only Non-Player Casts Interrupt, Though Feral Charge - Bear Has It.
         SilenceOnlyNonplayer = 0x1000, // 12 Not Set In 3.2.2a.
-        Unk13 = 0x2000, // 13 Not Set In 3.2.2a.
+        CanAlwaysBeInterrupted = 0x2000, // 13 Can always be interrupted, even if caster is immune
         Unk14 = 0x4000, // 14 Only 52150 (Raise Dead - Pet) Spell.
         Unk15 = 0x8000, // 15 Exorcism. Usable On Players? 100% Crit Chance On Undead And Demons?
-        CanRestoreSecondaryPower = 0x10000, // 16 These spells can replenish a powertype, which is not the current powertype.
+        HiddenInSpellbookWhenLearned = 0x10000, // 16 After learning these spells become hidden in spellbook (but are visible when not learned for low level characters)
         Unk17 = 0x20000, // 17 Only 27965 (Suicide) Spell.
         HasChargeEffect = 0x40000, // 18 Only Spells That Have Charge Among Effects.
         ZoneTeleport = 0x80000, // 19 Teleports To Specific Zones.
@@ -1968,11 +1968,11 @@ namespace Framework.Constants
         Unk30 = 0x40000000, // 30
         Unk31 = 0x80000000  // 31
     }
-    public enum SpellAttr13
+    public enum SpellAttr13 : uint
     {
         Unk0 = 0x01, //  0
         Unk1 = 0x02, //  1
-        Unk2 = 0x04, //  2
+        PassiveIsUpgrade = 0x04, //  2 Displays "Upgrade" in spell tooltip instead of "Passive"
         Unk3 = 0x08, //  3
         Unk4 = 0x10, //  4
         Unk5 = 0x20, //  5
@@ -1993,11 +1993,50 @@ namespace Framework.Constants
         Unk20 = 0x100000, // 20
         Unk21 = 0x200000, // 21
         Unk22 = 0x400000, // 22
-        Unk23 = 0x800000  // 23
+        Unk23 = 0x800000, // 23
+        Unk24 = 0x01000000, // 24
+        Unk25 = 0x02000000, // 25
+        Unk26 = 0x04000000, // 26
+        Unk27 = 0x08000000, // 27
+        Unk28 = 0x10000000, // 28
+        Unk29 = 0x20000000, // 29
+        Unk30 = 0x40000000, // 30
+        Unk31 = 0x80000000  // 31
     }
-    public enum SpellAttr14
+    public enum SpellAttr14 : uint
     {
-
+        Unk0 = 0x01, //  0
+        ReagentCostConsumesCharges = 0x02, //  1 Consumes item charges for reagent costs instead of whole items
+        Unk2 = 0x04, //  2
+        HidePassiveFromTooltip = 0x08, //  3 Don't show "Passive" or "Upgrade" in tooltip
+        Unk4 = 0x10, //  4
+        Unk5 = 0x20, //  5
+        Unk6 = 0x40, //  6
+        Unk7 = 0x80, //  7
+        Unk8 = 0x100, //  8
+        Unk9 = 0x200, //  9
+        Unk10 = 0x400, // 10
+        Unk11 = 0x800, // 11
+        Unk12 = 0x1000, // 12
+        Unk13 = 0x2000, // 13
+        Unk14 = 0x4000, // 14
+        Unk15 = 0x8000, // 15
+        Unk16 = 0x10000, // 16
+        Unk17 = 0x20000, // 17
+        Unk18 = 0x40000, // 18
+        Unk19 = 0x80000, // 19
+        Unk20 = 0x100000, // 20
+        Unk21 = 0x200000, // 21
+        Unk22 = 0x400000, // 22
+        Unk23 = 0x800000, // 23
+        Unk24 = 0x1000000, // 24
+        Unk25 = 0x2000000, // 25
+        Unk26 = 0x4000000, // 26
+        Unk27 = 0x8000000, // 27
+        Unk28 = 0x10000000, // 28
+        Unk29 = 0x20000000, // 29
+        Unk30 = 0x40000000, // 30
+        Unk31 = 0x80000000  // 31
     }
     public enum SpellCustomAttributes
     {
