@@ -3912,8 +3912,10 @@ namespace Game.Entities
         public static bool IsValidClass(Class _class) { return Convert.ToBoolean((1 << ((int)_class - 1)) & (int)Class.ClassMaskAllPlayable); }
         public static bool IsValidRace(Race _race) { return Convert.ToBoolean((ulong)SharedConst.GetMaskForRace(_race) & SharedConst.RaceMaskAllPlayable); }
 
-        public void OnCombatExit()
+        public override void OnCombatExit()
         {
+            base.OnCombatExit();
+
             UpdatePotionCooldown();
             m_combatExitTime = Time.GetMSTime();
         }

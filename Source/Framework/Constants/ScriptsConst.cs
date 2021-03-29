@@ -65,6 +65,7 @@ namespace Framework.Constants
         CheckAreaTarget,
         Dispel,
         AfterDispel,
+        EnterLeaveCombat,
         // Spell Proc Hooks
         CheckProc,
         CheckEffectProc,

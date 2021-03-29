@@ -285,8 +285,8 @@ namespace Game.Entities
                 else if (!IsCharmed())
                     return;
             }
-            else
-                ToPlayer().OnCombatExit();
+            
+            OnCombatExit();
 
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.LeavingCombat);
         }
@@ -326,6 +326,15 @@ namespace Game.Entities
             SpellSchools school = Global.SpellMgr.GetFirstSchoolInMask(schoolMask);
 
             return fThreat * m_threatModifier[(int)school];
+        }
+
+        public virtual void OnCombatExit()
+        {
+            foreach (var pair in m_appliedAuras)
+            {
+                AuraApplication aurApp = pair.Value;
+                aurApp.GetBase().CallScriptEnterLeaveCombatHandlers(aurApp, false);
+            }
         }
 
         public bool IsTargetableForAttack(bool checkFakeDeath = true)
@@ -1427,6 +1436,12 @@ namespace Game.Entities
 
             foreach (var unit in m_Controlled)
                 unit.SetInCombatState(PvP, enemy);
+
+            foreach (var pair in m_appliedAuras)
+            {
+                AuraApplication aurApp = pair.Value;
+                aurApp.GetBase().CallScriptEnterLeaveCombatHandlers(aurApp, true);
+            }
 
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.EnteringCombat);
             ProcSkillsAndAuras(enemy, ProcFlags.EnterCombat, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);

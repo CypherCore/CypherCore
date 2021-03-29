@@ -777,6 +777,7 @@ namespace Game.Scripting
         public delegate bool AuraCheckEffectProcDelegate(AuraEffect aura, ProcEventInfo info);
         public delegate void AuraProcDelegate(ProcEventInfo info);
         public delegate void AuraEffectProcDelegate(AuraEffect aura, ProcEventInfo info);
+        public delegate void AuraEnterLeaveCombatFnType(bool isNowInCombat);
 
         public class CheckAreaTargetHandler
         {
@@ -975,7 +976,6 @@ namespace Game.Scripting
 
             AuraCheckEffectProcDelegate _HandlerScript;
         }
-
         public class AuraProcHandler
         {
             public AuraProcHandler(AuraProcDelegate handlerScript)
@@ -1003,7 +1003,20 @@ namespace Game.Scripting
 
             AuraEffectProcDelegate _EffectHandlerScript;
         }
+        public class EnterLeaveCombatHandler
+        {
+            public EnterLeaveCombatHandler(AuraEnterLeaveCombatFnType handlerScript) 
+            {
+                _handlerScript = handlerScript;
+            }
+            public void Call(bool isNowInCombat)
+            {
+                _handlerScript(isNowInCombat);
+            }
 
+            AuraEnterLeaveCombatFnType _handlerScript;
+        }
+        
         public AuraScript()
         {
             m_aura = null;
@@ -1295,6 +1308,11 @@ namespace Game.Scripting
         // where function is: void function (AuraEffect aurEff, ProcEventInfo& procInfo);
         public List<EffectProcHandler> AfterEffectProc = new();
 
+        // executed when target enters or leaves combat
+        // example: OnEnterLeaveCombat += AuraEnterLeaveCombatFn(class::function)
+        // where function is: void function (bool isNowInCombat);
+        public List<EnterLeaveCombatHandler> OnEnterLeaveCombat = new();
+
         // AuraScript interface - hook/effect execution manipulators
 
         // prevents default action of a hook from being executed (works only while called in a hook which default action can be prevented)
@@ -1413,6 +1431,7 @@ namespace Game.Scripting
                 case AuraScriptHookType.AfterProc:
                 case AuraScriptHookType.EffectProc:
                 case AuraScriptHookType.EffectAfterProc:
+                case AuraScriptHookType.EnterLeaveCombat:
                     return m_auraApplication.GetTarget();
                 default:
                     Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}` AuraScript.GetTarget called in a hook in which the call won't have effect!", m_scriptName, m_scriptSpellId);

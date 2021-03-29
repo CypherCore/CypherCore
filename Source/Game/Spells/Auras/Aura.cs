@@ -2145,6 +2145,19 @@ namespace Game.Spells
             }
         }
 
+        public void CallScriptEnterLeaveCombatHandlers(AuraApplication aurApp, bool isNowInCombat)
+        {
+            foreach (var loadedScript in m_loadedScripts)
+            {
+                loadedScript._PrepareScriptCall(AuraScriptHookType.EnterLeaveCombat, aurApp);
+
+                foreach (var hook in loadedScript.OnEnterLeaveCombat)
+                    hook.Call(isNowInCombat);
+
+                loadedScript._FinishScriptCall();
+            }
+        }
+        
         public bool CallScriptCheckProcHandlers(AuraApplication aurApp, ProcEventInfo eventInfo)
         {
             bool result = true;
