@@ -341,7 +341,6 @@ namespace Game.Entities
 
         public void ClearChanged<U>(UpdateFieldArray<U> updateField, int index) where U : new()
         {
-            _changesMask.Reset(updateField.Bit);
             _changesMask.Reset(updateField.FirstElementBit + index);
         }
 
