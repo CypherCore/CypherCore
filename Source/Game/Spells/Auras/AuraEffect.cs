@@ -4923,7 +4923,7 @@ namespace Game.Spells
                 }
             }
 
-            bool crit = RandomHelper.randChance(isAreaAura ? caster.GetUnitSpellCriticalChance(target, m_spellInfo, m_spellInfo.GetSchoolMask()) : m_critChance);
+            bool crit = RandomHelper.randChance(isAreaAura ? caster.GetUnitSpellCriticalChance(target, null, this, m_spellInfo.GetSchoolMask()) : m_critChance);
             if (crit)
                 damage = caster.SpellCriticalDamageBonus(m_spellInfo, damage, target);
 
@@ -5010,7 +5010,7 @@ namespace Game.Spells
                 }
             }
 
-            bool crit = RandomHelper.randChance(isAreaAura ? caster.GetUnitSpellCriticalChance(target, m_spellInfo, m_spellInfo.GetSchoolMask()) : m_critChance);
+            bool crit = RandomHelper.randChance(isAreaAura ? caster.GetUnitSpellCriticalChance(target, null, this, m_spellInfo.GetSchoolMask()) : m_critChance);
             if (crit)
                 damage = caster.SpellCriticalDamageBonus(m_spellInfo, damage, target);
 
@@ -5150,7 +5150,7 @@ namespace Game.Spells
                 damage = (int)target.SpellHealingBonusTaken(caster, GetSpellInfo(), (uint)damage, DamageEffectType.DOT, GetSpellEffectInfo(), GetBase().GetStackAmount());
             }
 
-            bool crit = RandomHelper.randChance(isAreaAura ? caster.GetUnitSpellCriticalChance(target, m_spellInfo, m_spellInfo.GetSchoolMask()) : m_critChance);
+            bool crit = RandomHelper.randChance(isAreaAura ? caster.GetUnitSpellCriticalChance(target, null, this, m_spellInfo.GetSchoolMask()) : m_critChance);
             if (crit)
                 damage = caster.SpellCriticalHealingBonus(m_spellInfo, damage, target);
 

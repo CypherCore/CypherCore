@@ -647,13 +647,14 @@ namespace Game.Entities
             return (uint)Math.Max(heal, 0.0f);
         }
 
-        public bool IsSpellCrit(Unit victim, SpellInfo spellProto, SpellSchoolMask schoolMask, WeaponAttackType attackType = WeaponAttackType.BaseAttack)
+        public bool IsSpellCrit(Unit victim, Spell spell, AuraEffect aurEff, SpellSchoolMask schoolMask, WeaponAttackType attackType = WeaponAttackType.BaseAttack)
         {
-            return RandomHelper.randChance(GetUnitSpellCriticalChance(victim, spellProto, schoolMask, attackType));
+            return RandomHelper.randChance(GetUnitSpellCriticalChance(victim, spell, aurEff, schoolMask, attackType));
         }
 
-        public float GetUnitSpellCriticalChance(Unit victim, SpellInfo spellProto, SpellSchoolMask schoolMask, WeaponAttackType attackType = WeaponAttackType.BaseAttack)
+        public float GetUnitSpellCriticalChance(Unit victim, Spell spell, AuraEffect aurEff, SpellSchoolMask schoolMask, WeaponAttackType attackType = WeaponAttackType.BaseAttack)
         {
+            SpellInfo spellProto = spell.GetSpellInfo() ?? aurEff.GetSpellInfo();
             //! Mobs can't crit with spells. Player Totems can
             //! Fire Elemental (from totem) can too - but this part is a hack and needs more research
             if (GetGUID().IsCreatureOrVehicle() && !(IsTotem() && GetOwnerGUID().IsPlayer()) && GetEntry() != 15438)
@@ -778,6 +779,12 @@ namespace Game.Entities
                 if (tempSummon != null)
                     crit_chance += victim.GetTotalAuraModifier(AuraType.ModCritChanceForCasterPet, aurEff => aurEff.GetCasterGUID() == tempSummon.GetSummonerGUID());
             }
+
+            // call script handlers
+            if (spell)
+                spell.CallScriptCalcCritChanceHandlers(victim, ref crit_chance);
+            else
+                aurEff.GetBase().CallScriptEffectCalcCritChanceHandlers(aurEff, aurEff.GetBase().GetApplicationOfTarget(victim.GetGUID()), victim, ref crit_chance);
 
             return Math.Max(crit_chance, 0.0f);
         }

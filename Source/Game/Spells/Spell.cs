@@ -6814,7 +6814,7 @@ namespace Game.Spells
                 }
             }
 
-            targetInfo.crit = m_caster.IsSpellCrit(unit, m_spellInfo, m_spellSchoolMask, m_attackType);
+            targetInfo.crit = m_caster.IsSpellCrit(unit, this, null, m_spellSchoolMask, m_attackType);
         }
 
         SpellCastResult CanOpenLock(uint effIndex, uint lockId, ref SkillType skillId, ref int reqSkillValue, ref int skillValue)
@@ -7092,6 +7092,18 @@ namespace Game.Spells
             }
         }
 
+        public void CallScriptCalcCritChanceHandlers(Unit victim, ref float critChance)
+        {
+            foreach (var loadedScript in m_loadedScripts)
+            {
+                loadedScript._PrepareScriptCall(SpellScriptHookType.CalcCritChance);
+                foreach (var hook in loadedScript.OnCalcCritChance)
+                    hook.Call(victim, ref critChance);
+
+                loadedScript._FinishScriptCall();
+            }
+        }
+        
         void CallScriptObjectAreaTargetSelectHandlers(List<WorldObject> targets, uint effIndex, SpellImplicitTargetInfo targetType)
         {
             foreach (var script in m_loadedScripts)

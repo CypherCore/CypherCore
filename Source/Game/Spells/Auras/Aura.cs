@@ -882,7 +882,7 @@ namespace Game.Spells
             }
             return maxStackAmount;
         }
-        
+
         public bool ModStackAmount(int num, AuraRemoveMode removeMode = AuraRemoveMode.Default, bool resetPeriodicTimer = true)
         {
             int stackAmount = m_stackAmount + num;
@@ -1449,7 +1449,7 @@ namespace Game.Spells
 
                             effect.SetDonePct(caster.SpellDamagePctDone(target, m_spellInfo, DamageEffectType.DOT)); // Calculate done percentage first!
                             effect.SetDamage((int)(caster.SpellDamageBonusDone(target, m_spellInfo, damage, DamageEffectType.DOT, effect.GetSpellEffectInfo(), GetStackAmount()) * effect.GetDonePct()));
-                            effect.SetCritChance(caster.GetUnitSpellCriticalChance(target, m_spellInfo, m_spellInfo.GetSchoolMask()));
+                            effect.SetCritChance(caster.GetUnitSpellCriticalChance(target, null, effect, m_spellInfo.GetSchoolMask()));
                             break;
                         }
                     case AuraType.PeriodicHeal:
@@ -1463,7 +1463,7 @@ namespace Game.Spells
 
                             effect.SetDonePct(caster.SpellHealingPctDone(target, m_spellInfo)); // Calculate done percentage first!
                             effect.SetDamage((int)(caster.SpellHealingBonusDone(target, m_spellInfo, damage, DamageEffectType.DOT, effect.GetSpellEffectInfo(), GetStackAmount()) * effect.GetDonePct()));
-                            effect.SetCritChance(caster.GetUnitSpellCriticalChance(target, m_spellInfo, m_spellInfo.GetSchoolMask()));
+                            effect.SetCritChance(caster.GetUnitSpellCriticalChance(target, null, effect, m_spellInfo.GetSchoolMask()));
                             break;
                         }
                     default:
@@ -2074,6 +2074,19 @@ namespace Game.Spells
             }
         }
 
+        public void CallScriptEffectCalcCritChanceHandlers(AuraEffect aurEff, AuraApplication aurApp, Unit victim, ref float critChance)
+        {
+            foreach (AuraScript loadedScript in m_loadedScripts)
+            {
+                loadedScript._PrepareScriptCall(AuraScriptHookType.EffectCalcCritChance, aurApp);
+                foreach (var hook in loadedScript.DoEffectCalcCritChance)
+                    if (hook.IsEffectAffected(m_spellInfo, aurEff.GetEffIndex()))
+                        hook.Call(aurEff, victim, ref critChance);
+
+                loadedScript._FinishScriptCall();
+            }
+        }
+        
         public void CallScriptEffectAbsorbHandlers(AuraEffect aurEff, AuraApplication aurApp, DamageInfo dmgInfo, ref uint absorbAmount, ref bool defaultPrevented)
         {
             foreach (var auraScript in m_loadedScripts)

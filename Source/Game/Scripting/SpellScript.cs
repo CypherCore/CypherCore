@@ -151,6 +151,7 @@ namespace Game.Scripting
         public delegate void SpellEffectFnType(uint index);
         public delegate void SpellBeforeHitFnType(SpellMissInfo missInfo);
         public delegate void SpellHitFnType();
+        public delegate void SpellOnCalcCritChanceFnType(Unit victim, ref float chance);
         public delegate void SpellCastFnType();
         public delegate void SpellObjectAreaTargetSelectFnType(List<WorldObject> targets);
         public delegate void SpellObjectTargetSelectFnType(ref WorldObject targets);
@@ -243,6 +244,20 @@ namespace Game.Scripting
             SpellHitFnType _pHitHandlerScript;
         }
 
+        public class OnCalcCritChanceHandler
+        {
+            public OnCalcCritChanceHandler(SpellOnCalcCritChanceFnType onCalcCritChanceHandlerScript)
+            {
+                _onCalcCritChanceHandlerScript = onCalcCritChanceHandlerScript;
+            }
+            public void Call(Unit victim, ref float critChance)
+            {
+                _onCalcCritChanceHandlerScript(victim, ref critChance);
+            }
+
+            SpellOnCalcCritChanceFnType _onCalcCritChanceHandlerScript;
+        }
+        
         public class TargetHook : EffectHook
         {
             public TargetHook(uint effectIndex, Targets targetType, bool area, bool dest = false) : base(effectIndex)
@@ -462,6 +477,9 @@ namespace Game.Scripting
         public List<BeforeHitHandler> BeforeHit = new();
         public List<HitHandler> OnHit = new();
         public List<HitHandler> AfterHit = new();
+
+        // where function is void function(Unit victim, ref float critChance)
+        public List<OnCalcCritChanceHandler> OnCalcCritChance = new();
 
         // where function is void function(List<WorldObject> targets)
         public List<ObjectAreaTargetSelectHandler> OnObjectAreaTargetSelect = new();
@@ -771,6 +789,7 @@ namespace Game.Scripting
         public delegate void AuraEffectCalcAmountDelegate(AuraEffect aura, ref int amount, ref bool canBeRecalculated);
         public delegate void AuraEffectCalcPeriodicDelegate(AuraEffect aura, ref bool isPeriodic, ref int amplitude);
         public delegate void AuraEffectCalcSpellModDelegate(AuraEffect aura, ref SpellModifier spellMod);
+        public delegate void AuraEffectCalcCritChanceFnType(AuraEffect aura, Unit victim, ref float critChance);
         public delegate void AuraEffectAbsorbDelegate(AuraEffect aura, DamageInfo damageInfo, ref uint absorbAmount);
         public delegate void AuraEffectSplitDelegate(AuraEffect aura, DamageInfo damageInfo, uint splitAmount);
         public delegate bool AuraCheckProcDelegate(ProcEventInfo info);
@@ -888,6 +907,19 @@ namespace Game.Scripting
             }
 
             AuraEffectCalcSpellModDelegate pEffectHandlerScript;
+        }
+        public class EffectCalcCritChanceHandler : EffectBase
+        {
+            public EffectCalcCritChanceHandler(AuraEffectCalcCritChanceFnType effectHandlerScript, byte effIndex, AuraType effName) : base(effIndex, effName)
+            {
+                _effectHandlerScript = effectHandlerScript;
+            }
+            public void Call(AuraEffect aurEff, Unit victim, ref float critChance)
+            {
+                _effectHandlerScript(aurEff, victim, ref critChance);
+            }
+
+            AuraEffectCalcCritChanceFnType _effectHandlerScript;
         }
         public class EffectApplyHandler : EffectBase
         {
@@ -1074,6 +1106,10 @@ namespace Game.Scripting
                 if (eff.GetAffectedEffectsMask(entry) == 0)
                     Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `DoEffectCalcSpellMod` of AuraScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
 
+            foreach (var eff in DoEffectCalcCritChance)
+                if (eff.GetAffectedEffectsMask(entry) == 0)
+                    Log.outError(LogFilter.Scripts, $"Spell `{entry.Id}` Effect `{eff}` of script `{m_scriptName}` did not match dbc effect data - handler bound to hook `DoEffectCalcCritChance` of AuraScript won't be executed");
+
             foreach (var eff in OnEffectAbsorb)
                 if (eff.GetAffectedEffectsMask(entry) == 0)
                     Log.outError(LogFilter.Scripts, "Spell `{0}` Effect `{1}` of script `{2}` did not match dbc effect data - handler bound to hook `OnEffectAbsorb` of AuraScript won't be executed", entry.Id, eff.ToString(), m_scriptName);
@@ -1247,6 +1283,11 @@ namespace Game.Scripting
         // example: DoEffectCalcSpellMod += AuraEffectCalcSpellModFn(class.function, EffectIndexSpecifier, EffectAuraNameSpecifier);
         // where function is: void function (AuraEffect aurEff, SpellModifier& spellMod);
         public List<EffectCalcSpellModHandler> DoEffectCalcSpellMod = new();
+
+        // executed when aura effect calculates crit chance for dots and hots
+        // example: DoEffectCalcCritChance += AuraEffectCalcCritChanceFn(class::function, EffectIndexSpecifier, EffectAuraNameSpecifier);
+        // where function is: void function (AuraEffect const* aurEff, Unit* victim, float& critChance);
+        public List<EffectCalcCritChanceHandler> DoEffectCalcCritChance = new();
 
         // executed when absorb aura effect is going to reduce damage
         // example: OnEffectAbsorb += AuraEffectAbsorbFn(class.function, EffectIndexSpecifier);
