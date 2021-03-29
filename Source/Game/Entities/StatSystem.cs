@@ -1851,6 +1851,26 @@ namespace Game.Entities
             ModSpellHitChance = 15.0f + GetTotalAuraModifier(AuraType.ModSpellHitChance);
             ModSpellHitChance += GetRatingBonusValue(CombatRating.HitSpell);
         }
+
+        Stats GetPrimaryStat()
+        {
+            byte primaryStatPriority;
+            var specialization = CliDB.ChrSpecializationStorage.LookupByKey(GetPrimarySpecialization());
+            if (specialization != null)
+                primaryStatPriority = (byte)specialization.PrimaryStatPriority;
+            else
+                primaryStatPriority = CliDB.ChrClassesStorage.LookupByKey(GetClass()).PrimaryStatPriority;
+
+
+            if (primaryStatPriority >= 4)
+                return Stats.Strength;
+
+            if (primaryStatPriority >= 2)
+                return Stats.Agility;
+
+            return Stats.Intellect;
+        }
+        
         public override void UpdateMaxHealth()
         {
             UnitMods unitMod = UnitMods.Health;
