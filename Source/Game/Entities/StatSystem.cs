@@ -1036,7 +1036,6 @@ namespace Game.Entities
             switch (stat)
             {
                 case Stats.Agility:
-                    UpdateArmor();
                     UpdateAllCritPercentages();
                     UpdateDodgePercentage();
                     break;
@@ -1045,7 +1044,6 @@ namespace Game.Entities
                     break;
                 case Stats.Intellect:
                     UpdateSpellCritChance();
-                    UpdateArmor();                                  //SPELL_AURA_MOD_RESISTANCE_OF_INTELLECT_PERCENT, only armor currently
                     break;
                 default:
                     break;
@@ -1059,6 +1057,7 @@ namespace Game.Entities
                 UpdateAttackPowerAndDamage(true);
             }
 
+            UpdateArmor();
             UpdateSpellDamageAndHealingBonus();
             UpdateManaRegen();
 
@@ -1302,6 +1301,18 @@ namespace Game.Entities
 
             float value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base);    // base armor (from items)
             float baseValue = value;
+
+            GetTotalAuraModifier(AuraType.ModArmorPctFromStat, aurEff =>
+            {
+                int miscValue = aurEff.GetMiscValue();
+                Stats stat = (miscValue != -2) ? (Stats)miscValue : GetPrimaryStat();
+
+                int armorAmount = (int)MathFunctions.CalculatePct(GetStat(stat), aurEff.GetAmount());
+                baseValue += armorAmount;
+
+                return true;
+            });
+
             value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);           // armor percent from items
             value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
             value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);

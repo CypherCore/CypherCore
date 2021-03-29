@@ -3079,6 +3079,21 @@ namespace Game.Spells
             target.ToPlayer().UpdateExpertise(WeaponAttackType.OffAttack);
         }
 
+        // Increase armor by <AuraEffect.BasePoints> % of your <primary stat>
+        [AuraEffectHandler(AuraType.ModArmorPctFromStat)]
+        void HandleModArmorPctFromStat(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat))
+                return;
+
+            // only players have primary stats
+            Player player = aurApp.GetTarget().ToPlayer();
+            if (!player)
+                return;
+
+            player.UpdateArmor();
+        }
+        
         [AuraEffectHandler(AuraType.ModStatBonusPct)]
         void HandleModStatBonusPercent(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {

@@ -289,7 +289,7 @@ namespace Framework.Constants
         Unk265 = 265,
         SetVignette = 266, //NYI
         ModImmuneAuraApplySchool = 267,
-        Unk268 = 268,  // Old ModAttackPowerOfStatPercent. Unused 4.3.4
+        ModArmorPctFromStat = 268,
         ModIgnoreTargetResist = 269,
         ModSchoolMaskDamageFromCaster = 270,
         ModSpellDamageFromCaster = 271,
@@ -505,7 +505,7 @@ namespace Framework.Constants
         ConvertConsumedRune = 481,
         Unk482 = 482,
         SuppressTransforms = 483, // NYI
-        Unk484 = 484,
+        AllowInterruptSpell = 484, // NYI
         ModMovementForceMagnitude = 485,
         Unk486 = 486,
         Unk487 = 487,
