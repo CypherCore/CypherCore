@@ -1595,7 +1595,9 @@ namespace Game.Spells
             if (m_originalCaster == null)
                 return;
 
-            bool personalSpawn = (properties.Flags & SummonPropFlags.PersonalSpawn) != 0;
+            ObjectGuid privateObjectOwner = ObjectGuid.Empty;
+            if (properties.Flags.HasAnyFlag(SummonPropFlags.PersonalSpawn))
+                privateObjectOwner = m_originalCaster.IsPrivateObject() ? m_originalCaster.GetPrivateObjectOwner() : m_originalCaster.GetGUID();
 
             int duration = m_spellInfo.CalcDuration(m_originalCaster);
 
@@ -1658,7 +1660,7 @@ namespace Game.Spells
                         case SummonTitle.LightWell:
                         case SummonTitle.Totem:
                             {
-                                summon = m_caster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, m_originalCaster, m_spellInfo.Id, 0, personalSpawn);
+                                summon = m_caster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, m_originalCaster, m_spellInfo.Id, 0, privateObjectOwner);
                                 if (summon == null || !summon.IsTotem())
                                     return;
 
@@ -1671,7 +1673,7 @@ namespace Game.Spells
                             }
                         case SummonTitle.Companion:
                             {
-                                summon = m_caster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, m_originalCaster, m_spellInfo.Id, 0, personalSpawn);
+                                summon = m_caster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, m_originalCaster, m_spellInfo.Id, 0, privateObjectOwner);
                                 if (summon == null || !summon.HasUnitTypeMask(UnitTypeMask.Minion))
                                     return;
 
@@ -1699,7 +1701,7 @@ namespace Game.Spells
                                         // randomize position for multiple summons
                                         pos = m_caster.GetRandomPoint(destTarget, radius);
 
-                                    summon = m_originalCaster.SummonCreature(entry, pos, summonType, (uint)duration, 0, personalSpawn);
+                                    summon = m_originalCaster.SummonCreature(entry, pos, summonType, (uint)duration, 0, privateObjectOwner);
                                     if (summon == null)
                                         continue;
 
@@ -1720,7 +1722,7 @@ namespace Game.Spells
                     SummonGuardian(effIndex, entry, properties, numSummons);
                     break;
                 case SummonCategory.Puppet:
-                    summon = m_caster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, m_originalCaster, m_spellInfo.Id, 0, personalSpawn);
+                    summon = m_caster.GetMap().SummonCreature(entry, destTarget, properties, (uint)duration, m_originalCaster, m_spellInfo.Id, 0, privateObjectOwner);
                     break;
                 case SummonCategory.Vehicle:
                     // Summoning spells (usually triggered by npc_spellclick) that spawn a vehicle and that cause the clicker

@@ -3913,7 +3913,7 @@ namespace Game.Maps
             }
         }
 
-        public TempSummon SummonCreature(uint entry, Position pos, SummonPropertiesRecord properties = null, uint duration = 0, Unit summoner = null, uint spellId = 0, uint vehId = 0, bool personalSpawn = false)
+        public TempSummon SummonCreature(uint entry, Position pos, SummonPropertiesRecord properties = null, uint duration = 0, Unit summoner = null, uint spellId = 0, uint vehId = 0, ObjectGuid privateObjectOwner = default)
         {
             var mask = UnitTypeMask.Summon;
             if (properties != null)
@@ -3995,9 +3995,7 @@ namespace Game.Maps
             summon.SetCreatedBySpell(spellId);
             summon.SetHomePosition(pos);
             summon.InitStats(duration);
-
-            if (personalSpawn && summoner != null)
-                summon.SetPrivateObjectOwner(summoner.IsPrivateObject() ? summoner.GetPrivateObjectOwner() : summoner.GetGUID());
+            summon.SetPrivateObjectOwner(privateObjectOwner);
 
             AddToMap(summon.ToCreature());
             summon.InitSummon();

@@ -1430,7 +1430,7 @@ namespace Game.Entities
             return null;
         }
 
-        public TempSummon SummonCreature(uint entry, float x, float y, float z, float o = 0, TempSummonType despawnType = TempSummonType.ManualDespawn, uint despawnTime = 0, bool personalSpawn = false)
+        public TempSummon SummonCreature(uint entry, float x, float y, float z, float o = 0, TempSummonType despawnType = TempSummonType.ManualDespawn, uint despawnTime = 0, ObjectGuid privateObjectOwner = default)
         {
             if (x == 0.0f && y == 0.0f && z == 0.0f)
                 GetClosePoint(out x, out y, out z, GetCombatReach());
@@ -1438,15 +1438,15 @@ namespace Game.Entities
             if (o == 0.0f)
                 o = GetOrientation();
 
-            return SummonCreature(entry, new Position(x, y, z, o), despawnType, despawnTime, 0, personalSpawn);
+            return SummonCreature(entry, new Position(x, y, z, o), despawnType, despawnTime, 0, privateObjectOwner);
         }
 
-        public TempSummon SummonCreature(uint entry, Position pos, TempSummonType despawnType = TempSummonType.ManualDespawn, uint despawnTime = 0, uint vehId = 0, bool personalSpawn = false)
+        public TempSummon SummonCreature(uint entry, Position pos, TempSummonType despawnType = TempSummonType.ManualDespawn, uint despawnTime = 0, uint vehId = 0, ObjectGuid privateObjectOwner = default)
         {
             Map map = GetMap();
             if (map != null)
             {
-                TempSummon summon = map.SummonCreature(entry, pos, null, despawnTime, ToUnit(), 0, vehId, personalSpawn);
+                TempSummon summon = map.SummonCreature(entry, pos, null, despawnTime, ToUnit(), 0, vehId, privateObjectOwner);
                 if (summon != null)
                 {
                     summon.SetTempSummonType(despawnType);
