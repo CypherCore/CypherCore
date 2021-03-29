@@ -1006,6 +1006,20 @@ namespace Game.Maps
             }
         }
 
+        bool CheckGridIntegrity<T>(T obj, bool moved) where T : WorldObject
+        {
+            Cell cur_cell = obj.GetCurrentCell();
+            Cell xy_cell = new Cell(obj.GetPositionX(), obj.GetPositionY());
+            if (xy_cell != cur_cell)
+            {
+                //$"grid[{GetGridX()}, {GetGridY()}]cell[{GetCellX()}, {GetCellY()}]";
+                Log.outDebug(LogFilter.Maps, $"{obj.GetTypeId()} ({obj.GetGUID()}) X: {obj.GetPositionX()} Y: {obj.GetPositionY()} ({(moved ? "final" : "original")}) is in {cur_cell} instead of {xy_cell}");
+                return true;                                        // not crash at error, just output error in debug mode
+            }
+
+            return true;
+        }
+        
         public void PlayerRelocation(Player player, float x, float y, float z, float orientation)
         {
             var oldcell = player.GetCurrentCell();
@@ -1040,9 +1054,8 @@ namespace Game.Maps
 
         public void CreatureRelocation(Creature creature, float x, float y, float z, float ang, bool respawnRelocationOnFail = true)
         {
-            CheckGridIntegrity(creature, false);
+            Cypher.Assert(CheckGridIntegrity(creature, false));
 
-            Cell old_cell = creature.GetCurrentCell();
             var new_cell = new Cell(x, y);
 
             if (!respawnRelocationOnFail && GetGrid(new_cell.GetGridX(), new_cell.GetGridY()) == null)
@@ -1054,6 +1067,7 @@ namespace Game.Maps
             if (creature.HasUnitMovementFlag(MovementFlag.Hover))
                 z += creature.m_unitData.HoverHeight;
 
+            Cell old_cell = creature.GetCurrentCell();
             // delay creature move for grid/cell to grid/cell moves
             if (old_cell.DiffCell(new_cell) || old_cell.DiffGrid(new_cell))
             {
@@ -1070,17 +1084,18 @@ namespace Game.Maps
                 RemoveCreatureFromMoveList(creature);
             }
 
-            CheckGridIntegrity(creature, true);
+            Cypher.Assert(CheckGridIntegrity(creature, true));
         }
 
         public void GameObjectRelocation(GameObject go, float x, float y, float z, float orientation, bool respawnRelocationOnFail = true)
         {
-            Cell old_cell = go.GetCurrentCell();
+            Cypher.Assert(CheckGridIntegrity(go, false));
 
             var new_cell = new Cell(x, y);
             if (!respawnRelocationOnFail && GetGrid(new_cell.GetGridX(), new_cell.GetGridY()) == null)
                 return;
 
+            Cell old_cell = go.GetCurrentCell();
             // delay creature move for grid/cell to grid/cell moves
             if (old_cell.DiffCell(new_cell) || old_cell.DiffGrid(new_cell))
             {
@@ -1100,20 +1115,19 @@ namespace Game.Maps
                 go.UpdateObjectVisibility(false);
                 RemoveGameObjectFromMoveList(go);
             }
+
+            Cypher.Assert(CheckGridIntegrity(go, true));
         }
 
         public void DynamicObjectRelocation(DynamicObject dynObj, float x, float y, float z, float orientation)
         {
-            Cell integrity_check = new(dynObj.GetPositionX(), dynObj.GetPositionY());
-            Cell old_cell = dynObj.GetCurrentCell();
-
-            Cypher.Assert(integrity_check == old_cell);
-
+            Cypher.Assert(CheckGridIntegrity(dynObj, false));
             Cell new_cell = new(x, y);
 
             if (GetGrid(new_cell.GetGridX(), new_cell.GetGridY()) == null)
                 return;
 
+            Cell old_cell = dynObj.GetCurrentCell();
             // delay creature move for grid/cell to grid/cell moves
             if (old_cell.DiffCell(new_cell) || old_cell.DiffGrid(new_cell))
             {
@@ -1132,23 +1146,18 @@ namespace Game.Maps
                 RemoveDynamicObjectFromMoveList(dynObj);
             }
 
-            old_cell = dynObj.GetCurrentCell();
-            integrity_check = new Cell(dynObj.GetPositionX(), dynObj.GetPositionY());
-
-            Cypher.Assert(integrity_check == old_cell);
+            Cypher.Assert(CheckGridIntegrity(dynObj, true));
         }
 
         public void AreaTriggerRelocation(AreaTrigger at, float x, float y, float z, float orientation)
         {
-            Cell integrity_check = new(at.GetPositionX(), at.GetPositionY());
-            Cell old_cell = at.GetCurrentCell();
-
-            Cypher.Assert(integrity_check == old_cell);
+            Cypher.Assert(CheckGridIntegrity(at, false));
             Cell new_cell = new(x, y);
 
             if (GetGrid(new_cell.GetGridX(), new_cell.GetGridY()) == null)
                 return;
 
+            Cell old_cell = at.GetCurrentCell();
             // delay areatrigger move for grid/cell to grid/cell moves
             if (old_cell.DiffCell(new_cell) || old_cell.DiffGrid(new_cell))
             {
@@ -1165,9 +1174,7 @@ namespace Game.Maps
                 RemoveAreaTriggerFromMoveList(at);
             }
 
-            old_cell = at.GetCurrentCell();
-            integrity_check = new Cell(at.GetPositionX(), at.GetPositionY());
-            Cypher.Assert(integrity_check == old_cell);
+            Cypher.Assert(CheckGridIntegrity(at, true));
         }
 
         void AddCreatureToMoveList(Creature c, float x, float y, float z, float ang)
@@ -1423,32 +1430,32 @@ namespace Game.Maps
             _areaTriggersToMoveLock = false;
         }
 
-        private bool CreatureCellRelocation(Creature c, Cell new_cell)
+        bool MapObjectCellRelocation<T>(T obj, Cell new_cell) where T : WorldObject
         {
-            Cell old_cell = c.GetCurrentCell();
+            Cell old_cell = obj.GetCurrentCell();
             if (!old_cell.DiffGrid(new_cell)) // in same grid
             {
                 // if in same cell then none do
                 if (old_cell.DiffCell(new_cell))
                 {
-                    RemoveFromGrid(c, old_cell);
-                    AddToGrid(c, new_cell);
+                    RemoveFromGrid(obj, old_cell);
+                    AddToGrid(obj, new_cell);
                 }
 
                 return true;
             }
 
             // in diff. grids but active creature
-            if (c.IsActiveObject())
+            if (obj.IsActiveObject())
             {
-                EnsureGridLoadedForActiveObject(new_cell, c);
+                EnsureGridLoadedForActiveObject(new_cell, obj);
 
                 Log.outDebug(LogFilter.Maps,
                     "Active creature (GUID: {0} Entry: {1}) moved from grid[{2}, {3}] to grid[{4}, {5}].",
-                    c.GetGUID().ToString(), c.GetEntry(), old_cell.GetGridX(),
+                    obj.GetGUID().ToString(), obj.GetEntry(), old_cell.GetGridX(),
                     old_cell.GetGridY(), new_cell.GetGridX(), new_cell.GetGridY());
-                RemoveFromGrid(c, old_cell);
-                AddToGrid(c, new_cell);
+                RemoveFromGrid(obj, old_cell);
+                AddToGrid(obj, new_cell);
 
                 return true;
             }
@@ -1457,9 +1464,9 @@ namespace Game.Maps
             var grid = new GridCoord(new_cell.GetGridX(), new_cell.GetGridY());
             if (IsGridLoaded(grid))
             {
-                RemoveFromGrid(c, old_cell);
+                RemoveFromGrid(obj, old_cell);
                 EnsureGridCreated(grid);
-                AddToGrid(c, new_cell);
+                AddToGrid(obj, new_cell);
                 return true;
             }
 
@@ -1467,158 +1474,24 @@ namespace Game.Maps
             return false;
         }
 
-        private bool GameObjectCellRelocation(GameObject go, Cell new_cell)
+        bool CreatureCellRelocation(Creature c, Cell new_cell)
         {
-            Cell old_cell = go.GetCurrentCell();
-            if (!old_cell.DiffGrid(new_cell)) // in same grid
-            {
-                // if in same cell then none do
-                if (old_cell.DiffCell(new_cell))
-                {
-                    RemoveFromGrid(go, old_cell);
-                    AddToGrid(go, new_cell);
-                }
-
-                return true;
-            }
-
-            // in diff. grids but active GameObject
-            if (go.IsActiveObject())
-            {
-                EnsureGridLoadedForActiveObject(new_cell, go);
-
-                Log.outDebug(LogFilter.Maps,
-                    "Active GameObject (GUID: {0} Entry: {1}) moved from grid[{2}, {3}] to grid[{4}, {5}].",
-                    go.GetGUID().ToString(), go.GetEntry(), old_cell.GetGridX(), old_cell.GetGridY(), new_cell.GetGridX(),
-                    new_cell.GetGridY());
-
-                RemoveFromGrid(go, old_cell);
-                AddToGrid(go, new_cell);
-
-                return true;
-            }
-
-            // in diff. loaded grid normal GameObject
-            if (IsGridLoaded(new GridCoord(new_cell.GetGridX(), new_cell.GetGridY())))
-            {
-                Log.outDebug(LogFilter.Maps,
-                    "GameObject (GUID: {0} Entry: {1}) moved from grid[{2}, {3}] to grid[{4}, {5}].", go.GetGUID().ToString(),
-                    go.GetEntry(), old_cell.GetGridX(), old_cell.GetGridY(), new_cell.GetGridX(), new_cell.GetGridY());
-
-                RemoveFromGrid(go, old_cell);
-                EnsureGridCreated(new GridCoord(new_cell.GetGridX(), new_cell.GetGridY()));
-                AddToGrid(go, new_cell);
-
-                return true;
-            }
-
-            // fail to move: normal GameObject attempt move to unloaded grid
-            Log.outDebug(LogFilter.Maps,
-                "GameObject (GUID: {0} Entry: {1}) attempted to move from grid[{2}, {3}] to unloaded grid[{4}, {5}].",
-                go.GetGUID().ToString(), go.GetEntry(), old_cell.GetGridX(), old_cell.GetGridY(), new_cell.GetGridX(),
-                new_cell.GetGridY());
-            return false;
+            return MapObjectCellRelocation(c, new_cell);
         }
 
-        private bool DynamicObjectCellRelocation(DynamicObject go, Cell new_cell)
+        bool GameObjectCellRelocation(GameObject go, Cell new_cell)
         {
-            Cell old_cell = go.GetCurrentCell();
-            if (!old_cell.DiffGrid(new_cell))                       // in same grid
-            {
-                // if in same cell then none do
-                if (old_cell.DiffCell(new_cell))
-                {
-                    Log.outDebug(LogFilter.Maps, "DynamicObject (GUID: {0}) moved in grid[{1}, {2}] from cell[{3}, {4}] to cell[{5}, {6}].", go.GetGUID().ToString(), old_cell.GetGridX(), old_cell.GetGridY(), old_cell.GetCellX(), old_cell.GetCellY(), new_cell.GetCellX(), new_cell.GetCellY());
+            return MapObjectCellRelocation(go, new_cell);
+        }
 
-                    RemoveFromGrid(go, old_cell);
-                    AddToGrid(go, new_cell);
-                }
-                else
-                    Log.outDebug(LogFilter.Maps, "DynamicObject (GUID: {0}) moved in same {1}.", go.GetGUID().ToString(), old_cell.ToString());
-
-                return true;
-            }
-
-            // in diff. grids but active GameObject
-            if (go.IsActiveObject())
-            {
-                EnsureGridLoadedForActiveObject(new_cell, go);
-
-                Log.outDebug(LogFilter.Maps, "Active DynamicObject (GUID: {0}) moved from {1} to {2}.", go.GetGUID().ToString(), old_cell.ToString(), new_cell.ToString());
-
-                RemoveFromGrid(go, old_cell);
-                AddToGrid(go, new_cell);
-
-                return true;
-            }
-
-            // in diff. loaded grid normal GameObject
-            if (IsGridLoaded(new GridCoord(new_cell.GetGridX(), new_cell.GetGridY())))
-            {
-                Log.outDebug(LogFilter.Maps, "DynamicObject (GUID: {0}) moved from {1} to {2}.", go.GetGUID().ToString(), old_cell.ToString(), new_cell.ToString());
-
-                RemoveFromGrid(go, old_cell);
-                EnsureGridCreated(new GridCoord(new_cell.GetGridX(), new_cell.GetGridY()));
-                AddToGrid(go, new_cell);
-
-                return true;
-            }
-
-            // fail to move: normal GameObject attempt move to unloaded grid
-            Log.outDebug(LogFilter.Maps, "DynamicObject (GUID: {0}) attempted to move from {1} to unloaded {2}.", go.GetGUID().ToString(), old_cell.ToString(), new_cell.ToString());
-            return false;
+        bool DynamicObjectCellRelocation(DynamicObject go, Cell new_cell)
+        {
+            return MapObjectCellRelocation(go, new_cell);
         }
 
         bool AreaTriggerCellRelocation(AreaTrigger at, Cell new_cell)
         {
-            Cell old_cell = at.GetCurrentCell();
-            if (!old_cell.DiffGrid(new_cell))                       // in same grid
-            {
-                // if in same cell then none do
-                if (old_cell.DiffCell(new_cell))
-                {
-                    Log.outDebug(LogFilter.Maps, "AreaTrigger ({0}) moved in grid[{0}, {1}] from cell[{2}, {3}] to cell[{4}, {5}].", at.GetGUID().ToString(), old_cell.GetGridX(), old_cell.GetGridY(),
-                        old_cell.GetCellX(), old_cell.GetCellY(), new_cell.GetCellX(), new_cell.GetCellY());
-
-                    RemoveFromGrid(at, old_cell);
-                    AddToGrid(at, new_cell);
-                }
-                else
-                {
-                    Log.outDebug(LogFilter.Maps, "AreaTrigger ({0}) moved in same grid[{1}, {2}]cell[{3}, {4}].", at.GetGUID().ToString(), old_cell.GetGridX(), old_cell.GetGridY(), old_cell.GetCellX(), old_cell.GetCellY());
-                }
-
-                return true;
-            }
-
-            // in diff. grids but active AreaTrigger
-            if (at.IsActiveObject())
-            {
-                EnsureGridLoadedForActiveObject(new_cell, at);
-
-                Log.outDebug(LogFilter.Maps, "Active AreaTrigger ({0}) moved from {1} to {2}.", at.GetGUID().ToString(), old_cell.ToString(), new_cell.ToString());
-
-                RemoveFromGrid(at, old_cell);
-                AddToGrid(at, new_cell);
-
-                return true;
-            }
-
-            // in diff. loaded grid normal AreaTrigger
-            if (IsGridLoaded(new GridCoord(new_cell.GetGridX(), new_cell.GetGridY())))
-            {
-                Log.outDebug(LogFilter.Maps, "AreaTrigger ({0}) moved from {1} to {2}.", at.GetGUID().ToString(), old_cell.ToString(), new_cell.ToString());
-
-                RemoveFromGrid(at, old_cell);
-                EnsureGridCreated(new GridCoord(new_cell.GetGridX(), new_cell.GetGridY()));
-                AddToGrid(at, new_cell);
-
-                return true;
-            }
-
-            // fail to move: normal AreaTrigger attempt move to unloaded grid
-            Log.outDebug(LogFilter.Maps, "AreaTrigger ({0}) attempted to move from {1} to unloaded {2}.", at.GetGUID().ToString(), old_cell.ToString(), new_cell.ToString());
-            return false;
+            return MapObjectCellRelocation(at, new_cell);
         }
 
         public bool CreatureRespawnRelocation(Creature c, bool diffGridOnly)
@@ -2339,16 +2212,6 @@ namespace Game.Maps
         public bool IsUnderWater(PhaseShift phaseShift, float x, float y, float z)
         {
             return Convert.ToBoolean(GetLiquidStatus(phaseShift, x, y, z, MapConst.MapLiquidTypeWater | MapConst.MapLiquidTypeOcean) & ZLiquidStatus.UnderWater);
-        }
-
-        private bool CheckGridIntegrity(Creature c, bool moved)
-        {
-            Cell cur_cell = c.GetCurrentCell();
-            var xy_cell = new Cell(c.GetPositionX(), c.GetPositionY());
-            if (xy_cell != cur_cell)
-                return true;
-
-            return true;
         }
 
         public string GetMapName()
