@@ -5148,6 +5148,7 @@ namespace Game.Spells
             player.SendPacket(packet);
         }
 
+        [SpellEffectHandler(SpellEffectName.TeleportToReturnPoint)]
         void EffectTeleportToReturnPoint(uint effIndex)
         {
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
