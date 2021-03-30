@@ -1378,9 +1378,11 @@ namespace Game.Entities
                         continue;
                     }
 
-                    StoredAuraTeleportLocation storedLocation = m_storedAuraTeleportLocations[spellId];
+                    StoredAuraTeleportLocation storedLocation = new();
                     storedLocation.Loc = location;
                     storedLocation.CurrentState = StoredAuraTeleportLocation.State.Unchanged;
+
+                    m_storedAuraTeleportLocations[spellId] = storedLocation;
                 }
                 while (result.NextRow());
             }
