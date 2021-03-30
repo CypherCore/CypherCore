@@ -654,7 +654,7 @@ namespace Game.Entities
 
         public float GetUnitSpellCriticalChance(Unit victim, Spell spell, AuraEffect aurEff, SpellSchoolMask schoolMask, WeaponAttackType attackType = WeaponAttackType.BaseAttack)
         {
-            SpellInfo spellProto = spell.GetSpellInfo() ?? aurEff.GetSpellInfo();
+            SpellInfo spellProto = spell?.GetSpellInfo() ?? aurEff?.GetSpellInfo();
             //! Mobs can't crit with spells. Player Totems can
             //! Fire Elemental (from totem) can too - but this part is a hack and needs more research
             if (GetGUID().IsCreatureOrVehicle() && !(IsTotem() && GetOwnerGUID().IsPlayer()) && GetEntry() != 15438)

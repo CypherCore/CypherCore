@@ -330,7 +330,7 @@ namespace Game.Entities
 
         public virtual void OnCombatExit()
         {
-            foreach (var pair in m_appliedAuras)
+            foreach (var pair in m_appliedAuras.KeyValueList)
             {
                 AuraApplication aurApp = pair.Value;
                 aurApp.GetBase().CallScriptEnterLeaveCombatHandlers(aurApp, false);
