@@ -5011,6 +5011,7 @@ namespace Game.Spells
         }
 
         [SpellEffectHandler(SpellEffectName.RemoveAura)]
+        [SpellEffectHandler(SpellEffectName.RemoveAura2)]
         void EffectRemoveAura(uint effIndex)
         {
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
