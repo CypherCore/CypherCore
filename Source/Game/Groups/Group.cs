@@ -2160,12 +2160,12 @@ namespace Game.Groups
             if (!m_readyCheckStarted)
                 return;
 
-            m_readyCheckTimer -= (int)diff;
-            if (m_readyCheckTimer <= 0)
+            m_readyCheckTimer -= TimeSpan.FromMilliseconds(diff);
+            if (m_readyCheckTimer <= TimeSpan.Zero)
                 EndReadyCheck();
         }
 
-        public void StartReadyCheck(ObjectGuid starterGuid, sbyte partyIndex, uint duration = MapConst.ReadycheckDuration)
+        public void StartReadyCheck(ObjectGuid starterGuid, sbyte partyIndex, TimeSpan duration)
         {
             if (m_readyCheckStarted)
                 return;
@@ -2175,7 +2175,7 @@ namespace Game.Groups
                 return;
 
             m_readyCheckStarted = true;
-            m_readyCheckTimer = (int)duration;
+            m_readyCheckTimer = duration;
 
             SetOfflineMembersReadyChecked();
 
@@ -2185,7 +2185,7 @@ namespace Game.Groups
             readyCheckStarted.PartyGUID = m_guid;
             readyCheckStarted.PartyIndex = partyIndex;
             readyCheckStarted.InitiatorGUID = starterGuid;
-            readyCheckStarted.Duration = duration;
+            readyCheckStarted.Duration = (uint)duration.TotalMilliseconds;
             BroadcastPacket(readyCheckStarted, false);
         }
 
@@ -2195,7 +2195,7 @@ namespace Game.Groups
                 return;
 
             m_readyCheckStarted = false;
-            m_readyCheckTimer = 0;
+            m_readyCheckTimer = TimeSpan.Zero;
 
             ResetMemberReadyChecked();
 
@@ -2623,7 +2623,7 @@ namespace Game.Groups
 
         // Ready Check
         bool m_readyCheckStarted;
-        int m_readyCheckTimer;
+        TimeSpan m_readyCheckTimer;
 
         // Raid markers
         RaidMarker[] m_markers = new RaidMarker[MapConst.RaidMarkersCount];
