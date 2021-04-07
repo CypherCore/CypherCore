@@ -669,18 +669,8 @@ namespace Game.Entities
 
             // This is needed to rotate the spline, following caster orientation
             List<Vector3> rotatedPoints = new();
-            for (var i = 0; i < offsets.Count; ++i)
+            foreach (var offset in offsets)
             {
-                Vector3 offset = offsets[i];
-                float tempX = offset.X;
-                float tempY = offset.Y;
-                float tempZ = GetPositionZ();
-
-                offset.X = (tempX * angleCos - tempY * angleSin) + GetPositionX();
-                offset.Y = (tempX * angleSin + tempY * angleCos) + GetPositionY();
-                UpdateAllowedPositionZ(offset.X, offset.Y, ref tempZ);
-                offset.Z += tempZ;
-
                 float x = GetPositionX() + (offset.X * angleCos - offset.Y * angleSin);
                 float y = GetPositionY() + (offset.Y * angleCos + offset.X * angleSin);
                 float z = GetPositionZ();
