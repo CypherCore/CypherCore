@@ -255,7 +255,7 @@ namespace Game.Achievements
                         continue;
 
                     CompletedAchievementData ca = new();
-                    ca.Date = achievementResult.Read<uint>(1);
+                    ca.Date = achievementResult.Read<long>(1);
                     ca.Changed = false;
 
                     _achievementPoints += achievement.Points;
@@ -284,7 +284,7 @@ namespace Game.Achievements
                 {
                     uint id = criteriaResult.Read<uint>(0);
                     ulong counter = criteriaResult.Read<ulong>(1);
-                    long date = criteriaResult.Read<uint>(2);
+                    long date = criteriaResult.Read<long>(2);
 
                     Criteria criteria = Global.CriteriaMgr.GetCriteria(id);
                     if (criteria == null)
@@ -768,7 +768,7 @@ namespace Game.Achievements
                         continue;
 
                     CompletedAchievementData ca = _completedAchievements[achievementid];
-                    ca.Date = achievementResult.Read<uint>(1);
+                    ca.Date = achievementResult.Read<long>(1);
                     var guids = new StringArray(achievementResult.Read<string>(2), ' ');
                     if (!guids.IsEmpty())
                     {
@@ -792,7 +792,7 @@ namespace Game.Achievements
                 {
                     uint id = criteriaResult.Read<uint>(0);
                     ulong counter = criteriaResult.Read<ulong>(1);
-                    long date = criteriaResult.Read<uint>(2);
+                    long date = criteriaResult.Read<long>(2);
                     ulong guidLow = criteriaResult.Read<ulong>(3);
 
                     Criteria criteria = Global.CriteriaMgr.GetCriteria(id);
@@ -839,7 +839,7 @@ namespace Game.Achievements
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_GUILD_ACHIEVEMENT);
                 stmt.AddValue(0, _owner.GetId());
                 stmt.AddValue(1, pair.Key);
-                stmt.AddValue(2, (uint)pair.Value.Date);
+                stmt.AddValue(2, pair.Value.Date);
                 foreach (var guid in pair.Value.CompletingPlayers)
                     guidstr.AppendFormat("{0},", guid.GetCounter());
 
@@ -863,7 +863,7 @@ namespace Game.Achievements
                 stmt.AddValue(0, _owner.GetId());
                 stmt.AddValue(1, pair.Key);
                 stmt.AddValue(2, pair.Value.Counter);
-                stmt.AddValue(3, (uint)pair.Value.Date);
+                stmt.AddValue(3, pair.Value.Date);
                 stmt.AddValue(4, pair.Value.PlayerGUID.GetCounter());
                 trans.Append(stmt);
             }

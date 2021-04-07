@@ -692,7 +692,7 @@ namespace Game.Entities
                                 GetName(), GetGUID().ToString(), quest_id, qstatus);
                         }
 
-                        long quest_time = result.Read<uint>(2);
+                        long quest_time = result.Read<long>(2);
 
                         if (quest.HasSpecialFlag(QuestSpecialFlags.Timed) && !GetQuestRewardStatus(quest_id))
                         {
@@ -851,7 +851,7 @@ namespace Game.Entities
                     }
 
                     // save _any_ from daily quest times (it must be after last reset anyway)
-                    m_lastDailyQuestTime = result.Read<uint>(1);
+                    m_lastDailyQuestTime = result.Read<long>(1);
 
                     Quest quest = Global.ObjectMgr.GetQuestTemplate(quest_id);
                     if (quest == null)
@@ -1176,8 +1176,8 @@ namespace Game.Entities
                     m.receiver = result.Read<uint>(3);
                     m.subject = result.Read<string>(4);
                     m.body = result.Read<string>(5);
-                    m.expire_time = result.Read<uint>(6);
-                    m.deliver_time = result.Read<uint>(7);
+                    m.expire_time = result.Read<long>(6);
+                    m.deliver_time = result.Read<long>(7);
                     m.money = result.Read<ulong>(8);
                     m.COD = result.Read<ulong>(9);
                     m.checkMask = (MailCheckMask)result.Read<byte>(10);
@@ -2544,10 +2544,10 @@ namespace Game.Entities
             uint totaltime = result.Read<uint> (fieldIndex++);
             uint leveltime = result.Read<uint>(fieldIndex++);
             float rest_bonus = result.Read<float>(fieldIndex++);
-            uint logout_time = result.Read<uint>(fieldIndex++);
+            long logout_time = result.Read<long>(fieldIndex++);
             byte is_logout_resting = result.Read<byte>(fieldIndex++);
             uint resettalents_cost = result.Read<uint>(fieldIndex++);
-            uint resettalents_time = result.Read<uint>(fieldIndex++);
+            long resettalents_time = result.Read<long>(fieldIndex++);
             uint primarySpecialization = result.Read<uint>(fieldIndex++);
             float trans_x = result.Read<float>(fieldIndex++);
             float trans_y = result.Read<float>(fieldIndex++);
@@ -2559,7 +2559,7 @@ namespace Game.Entities
             ushort at_login = result.Read<ushort>(fieldIndex++);
             ushort zone = result.Read<ushort>(fieldIndex++);
             byte online = result.Read<byte>(fieldIndex++);
-            uint death_expire_time = result.Read<uint>(fieldIndex++);
+            long death_expire_time = result.Read<long>(fieldIndex++);
             string taxi_path = result.Read<string>(fieldIndex++);
             Difficulty dungeonDifficulty = (Difficulty)result.Read<byte>(fieldIndex++);
             uint totalKills = result.Read<uint>(fieldIndex++);
@@ -3381,7 +3381,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, m_PlayedTimeTotal);
                 stmt.AddValue(index++, m_PlayedTimeLevel);
                 stmt.AddValue(index++, finiteAlways(_restMgr.GetRestBonus(RestTypes.XP)));
-                stmt.AddValue(index++, (uint)Time.UnixTime);
+                stmt.AddValue(index++, Time.UnixTime);
                 stmt.AddValue(index++, (HasPlayerFlag(PlayerFlags.Resting) ? 1 : 0));
                 //save, far from tavern/city
                 //save, but in tavern/city
@@ -3392,7 +3392,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, m_stableSlots);
                 stmt.AddValue(index++, (ushort)atLoginFlags);
                 stmt.AddValue(index++, GetZoneId());
-                stmt.AddValue(index++, (uint)m_deathExpireTime);
+                stmt.AddValue(index++, m_deathExpireTime);
 
                 ss.Clear();
                 ss.Append(m_taxi.SaveTaxiDestinationsToString());
@@ -3521,7 +3521,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, m_PlayedTimeTotal);
                 stmt.AddValue(index++, m_PlayedTimeLevel);
                 stmt.AddValue(index++, finiteAlways(_restMgr.GetRestBonus(RestTypes.XP)));
-                stmt.AddValue(index++, (uint)Time.UnixTime);
+                stmt.AddValue(index++, Time.UnixTime);
                 stmt.AddValue(index++, (HasPlayerFlag(PlayerFlags.Resting) ? 1 : 0));
                 //save, far from tavern/city
                 //save, but in tavern/city

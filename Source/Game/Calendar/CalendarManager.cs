@@ -56,9 +56,9 @@ namespace Game
                     string description = result.Read<string>(3);
                     CalendarEventType type = (CalendarEventType)result.Read<byte>(4);
                     int textureID = result.Read<int>(5);
-                    uint date = result.Read<uint>(6);
+                    long date = result.Read<long>(6);
                     CalendarFlags flags = (CalendarFlags)result.Read<uint>(7);
-                    uint lockDate = result.Read<uint>(8);
+                    long lockDate = result.Read<long>(8);
                     ulong guildID = 0;
 
                     if (flags.HasAnyFlag(CalendarFlags.GuildEvent) || flags.HasAnyFlag(CalendarFlags.WithoutInvites))
@@ -89,7 +89,7 @@ namespace Game
                     ObjectGuid invitee = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(2));
                     ObjectGuid senderGUID = ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(3));
                     CalendarInviteStatus status = (CalendarInviteStatus)result.Read<byte>(4);
-                    uint responseTime = result.Read<uint>(5);
+                    long responseTime = result.Read<long>(5);
                     CalendarModerationRank rank = (CalendarModerationRank)result.Read<byte>(6);
                     string note = result.Read<string>(7);
 

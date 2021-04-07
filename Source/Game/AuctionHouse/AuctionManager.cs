@@ -252,8 +252,8 @@ namespace Game
                     auction.BuyoutOrUnitPrice = result.Read<ulong>(5);
                     auction.Deposit = result.Read<ulong>(6);
                     auction.BidAmount = result.Read<ulong>(7);
-                    auction.StartTime = Time.UnixTimeToDateTime(result.Read<uint>(8));
-                    auction.EndTime = Time.UnixTimeToDateTime(result.Read<uint>(9));
+                    auction.StartTime = Time.UnixTimeToDateTime(result.Read<long>(8));
+                    auction.EndTime = Time.UnixTimeToDateTime(result.Read<long>(9));
 
                     if (biddersByAuction.ContainsKey(auction.Id))
                         auction.BidderHistory = biddersByAuction[auction.Id];
@@ -654,8 +654,8 @@ namespace Game
                 stmt.AddValue(5, auction.BuyoutOrUnitPrice);
                 stmt.AddValue(6, auction.Deposit);
                 stmt.AddValue(7, auction.BidAmount);
-                stmt.AddValue(8, (uint)Time.DateTimeToUnixTime(auction.StartTime));
-                stmt.AddValue(9, (uint)Time.DateTimeToUnixTime(auction.EndTime));
+                stmt.AddValue(8, Time.DateTimeToUnixTime(auction.StartTime));
+                stmt.AddValue(9, Time.DateTimeToUnixTime(auction.EndTime));
                 trans.Append(stmt);
 
                 foreach (Item item in auction.Items)

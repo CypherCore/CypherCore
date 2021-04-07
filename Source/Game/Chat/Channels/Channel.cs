@@ -165,7 +165,7 @@ namespace Game.Chat
             if (WorldConfig.GetIntValue(WorldCfg.PreserveCustomChannelDuration) > 0)
             {
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_OLD_CHANNELS);
-                stmt.AddValue(0, WorldConfig.GetIntValue(WorldCfg.PreserveCustomChannelDuration) * Time.Day);
+                stmt.AddValue(0, (long)(WorldConfig.GetIntValue(WorldCfg.PreserveCustomChannelDuration) * Time.Day));
                 DB.Characters.Execute(stmt);
 
                 Log.outDebug(LogFilter.ChatSystem, "Cleaned out unused custom chat channels.");

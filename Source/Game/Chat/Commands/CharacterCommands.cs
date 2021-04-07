@@ -654,7 +654,7 @@ namespace Game.Chat
 
                         // account name will be empty for not existed account
                         Global.AccountMgr.GetName(info.accountId, out info.accountName);
-                        info.deleteDate = result.Read<uint>(3);
+                        info.deleteDate = result.Read<long>(3);
                         foundList.Add(info);
                     }
                     while (result.NextRow());

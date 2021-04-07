@@ -514,7 +514,7 @@ namespace Game
                     continue;
                 }
 
-                _accountData[type].Time = result.Read<uint>(1);
+                _accountData[type].Time = result.Read<long>(1);
                 var bytes = result.Read<byte[]>(2);
                 var line = Encoding.Default.GetString(bytes);
                 _accountData[type].Data = line;
@@ -522,7 +522,7 @@ namespace Game
             while (result.NextRow());
         }
 
-        void SetAccountData(AccountDataTypes type, uint time, string data)
+        void SetAccountData(AccountDataTypes type, long time, string data)
         {
             if (Convert.ToBoolean((1 << (int)type) & (int)AccountDataTypes.GlobalCacheMask))
             {

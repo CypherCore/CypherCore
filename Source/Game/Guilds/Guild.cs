@@ -1259,7 +1259,7 @@ namespace Game.Guilds
                 m_eventLog.LoadEvent(new EventLogEntry(
                     m_id,                                       // guild id
                     field.Read<uint>(1),                      // guid
-                    field.Read<uint>(6),              // timestamp
+                    field.Read<long>(6),              // timestamp
                     (GuildEventLogTypes)field.Read<byte>(2),   // event type
                     field.Read<ulong>(3),                      // player guid 1
                     field.Read<ulong>(4),                      // player guid 2
@@ -1297,7 +1297,7 @@ namespace Game.Guilds
                     pLog.LoadEvent(new BankEventLogEntry(
                         m_id,                                   // guild id
                         guid,                                   // guid
-                        field.Read<uint>(8),          // timestamp
+                        field.Read<long>(8),          // timestamp
                         dbTabId,                                // tab id
                         eventType,                              // event type
                         field.Read<ulong>(4),                  // player guid
@@ -1317,7 +1317,7 @@ namespace Game.Guilds
             var news = new NewsLogEntry(
                 m_id,                                       // guild id
                 field.Read<uint>(1),                      // guid
-                field.Read<uint>(6),                      // timestamp //64 bits?
+                field.Read<long>(6),                      // timestamp //64 bits?
                 (GuildNews)field.Read<byte>(2),            // type
                 ObjectGuid.Create(HighGuid.Player, field.Read<ulong>(3)),                      // player guid
                 field.Read<uint>(4),                      // Flags

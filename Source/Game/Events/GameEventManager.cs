@@ -1543,7 +1543,7 @@ namespace Game
             stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_GAME_EVENT_SAVE);
             stmt.AddValue(0, event_id);
             stmt.AddValue(1, mGameEvent[event_id].state);
-            stmt.AddValue(2, mGameEvent[event_id].nextstart != 0 ? mGameEvent[event_id].nextstart : 0);
+            stmt.AddValue(2, mGameEvent[event_id].nextstart != 0 ? mGameEvent[event_id].nextstart : 0L);
             trans.Append(stmt);
             DB.Characters.CommitTransaction(trans);
         }

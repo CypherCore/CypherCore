@@ -245,13 +245,13 @@ namespace Game.Chat.Commands
             handler.SendSysMessage(CypherStrings.BaninfoBanhistory, name);
             do
             {
-                long unbanDate = result.Read<uint>(3);
+                long unbanDate = result.Read<long>(3);
                 bool active = false;
-                if (result.Read<bool>(2) && (result.Read<uint>(1) == 0 || unbanDate >= Time.UnixTime))
+                if (result.Read<bool>(2) && (result.Read<long>(1) == 0L || unbanDate >= Time.UnixTime))
                     active = true;
-                bool permanent = (result.Read<uint>(1) == 0);
-                string banTime = permanent ? handler.GetCypherString(CypherStrings.BaninfoInfinite) : Time.secsToTimeString(result.Read<uint>(1), true);
-                handler.SendSysMessage(CypherStrings.BaninfoHistoryentry, Time.UnixTimeToDateTime(result.Read<uint>(0)).ToShortTimeString(), banTime, 
+                bool permanent = (result.Read<long>(1) == 0L);
+                string banTime = permanent ? handler.GetCypherString(CypherStrings.BaninfoInfinite) : Time.secsToTimeString(result.Read<ulong>(1), true);
+                handler.SendSysMessage(CypherStrings.BaninfoHistoryentry, Time.UnixTimeToDateTime(result.Read<long>(0)).ToShortTimeString(), banTime, 
                     active ? handler.GetCypherString(CypherStrings.Yes) : handler.GetCypherString(CypherStrings.No), result.Read<string>(4), result.Read<string>(5));
             }
             while (result.NextRow());
@@ -399,12 +399,12 @@ namespace Game.Chat.Commands
                     {
                         do
                         {
-                            long timeBan = banInfo.Read<uint>(0);
+                            long timeBan = banInfo.Read<long>(0);
                             DateTime tmBan = Time.UnixTimeToDateTime(timeBan);
                             string bannedby = banInfo.Read<string>(2).Substring(0, 15);
                             string banreason = banInfo.Read<string>(3).Substring(0, 15);
 
-                            if (banInfo.Read<uint>(0) == banInfo.Read<uint>(1))
+                            if (banInfo.Read<long>(0) == banInfo.Read<long>(1))
                             {
                                 handler.SendSysMessage("|{0}|{1:D2}-{2:D2}-{3:D2} {4:D2}:{5:D2}|   permanent  |{6}|{7}|",
                                     char_name, tmBan.Year % 100, tmBan.Month + 1, tmBan.Day, tmBan.Hour, tmBan.Minute,
@@ -412,7 +412,7 @@ namespace Game.Chat.Commands
                             }
                             else
                             {
-                                long timeUnban = banInfo.Read<uint>(1);
+                                long timeUnban = banInfo.Read<long>(1);
                                 DateTime tmUnban = Time.UnixTimeToDateTime(timeUnban);
                                 handler.SendSysMessage("|{0}|{1:D2}-{2:D2}-{3:D2} {4:D2}:{5:D2}|{6:D2}-{7:D2}-{8:D2} {9:D2}:{10:D2}|{11}|{12}|",
                                     char_name, tmBan.Year % 100, tmBan.Month + 1, tmBan.Day, tmBan.Hour, tmBan.Minute,

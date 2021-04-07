@@ -212,7 +212,7 @@ namespace Game.Groups
                     if (difficultyEntry == null || difficultyEntry.InstanceType != mapEntry.InstanceType)
                         continue;
 
-                    InstanceSave save = Global.InstanceSaveMgr.AddInstanceSave(mapEntry.Id, result.Read<uint>(2), (Difficulty)diff, result.Read<uint>(5), result.Read<uint>(6), result.Read<ulong>(7) == 0, true);
+                    InstanceSave save = Global.InstanceSaveMgr.AddInstanceSave(mapEntry.Id, result.Read<uint>(2), (Difficulty)diff, result.Read<long>(5), result.Read<uint>(6), result.Read<ulong>(7) == 0, true);
                     group.BindToInstance(save, result.Read<bool>(3), true);
                     ++count;
                 }

@@ -124,7 +124,7 @@ namespace Game.BlackMarket
             }
 
             _currentBid = fields.Read<ulong>(1);
-            _secondsRemaining = (uint)(fields.Read<uint>(2) - Global.BlackMarketMgr.GetLastUpdate());
+            _secondsRemaining = (uint)(fields.Read<long>(2) - Global.BlackMarketMgr.GetLastUpdate());
             _numBids = fields.Read<uint>(3);
             _bidder = fields.Read<ulong>(4);
 

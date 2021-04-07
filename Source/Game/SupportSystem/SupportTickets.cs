@@ -116,7 +116,6 @@ namespace Game.SupportSystem
         float _facing;
         string _note;
 
-
         public BugTicket()
         {
             _note = "";
@@ -134,7 +133,7 @@ namespace Game.SupportSystem
             _id = fields.Read<uint>(idx);
             _playerGuid = ObjectGuid.Create(HighGuid.Player, fields.Read<ulong>(++idx));
             _note = fields.Read<string>(++idx);
-            _createTime = fields.Read<uint>(++idx);
+            _createTime = fields.Read<ulong>(++idx);
             _mapId = fields.Read<ushort>(++idx);
             _pos = new Vector3(fields.Read<float>(++idx), fields.Read<float>(++idx), fields.Read<float>(++idx));
             _facing = fields.Read<float>(++idx);
@@ -163,6 +162,7 @@ namespace Game.SupportSystem
             stmt.AddValue(idx, _id);
             stmt.AddValue(++idx, _playerGuid.GetCounter());
             stmt.AddValue(++idx, _note);
+            stmt.AddValue(++idx, _createTime);
             stmt.AddValue(++idx, _mapId);
             stmt.AddValue(++idx, _pos.X);
             stmt.AddValue(++idx, _pos.Y);
@@ -184,7 +184,7 @@ namespace Game.SupportSystem
 
         public override string FormatViewMessageString(CommandHandler handler, bool detailed = false)
         {
-            ulong curTime = (ulong)Time.UnixTime;
+            var curTime = (ulong)Time.UnixTime;
 
             StringBuilder ss = new();
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistguid, _id));
@@ -234,7 +234,7 @@ namespace Game.SupportSystem
             _id = fields.Read<uint>(idx);
             _playerGuid = ObjectGuid.Create(HighGuid.Player, fields.Read<ulong>(++idx));
             _note = fields.Read<string>(++idx);
-            _createTime = fields.Read<uint>(++idx);
+            _createTime = fields.Read<ulong>(++idx);
             _mapId = fields.Read<ushort>(++idx);
             _pos = new Vector3(fields.Read<float>(++idx), fields.Read<float>(++idx), fields.Read<float>(++idx));
             _facing = fields.Read<float>(++idx);
@@ -263,7 +263,7 @@ namespace Game.SupportSystem
 
         public void LoadChatLineFromDB(SQLFields fields)
         {
-            _chatLog.Lines.Add(new SupportTicketSubmitComplaint.SupportTicketChatLine(fields.Read<uint>(0), fields.Read<string>(1)));
+            _chatLog.Lines.Add(new SupportTicketSubmitComplaint.SupportTicketChatLine(fields.Read<long>(0), fields.Read<string>(1)));
         }
 
         public override void SaveToDB()
@@ -275,6 +275,7 @@ namespace Game.SupportSystem
             stmt.AddValue(idx, _id);
             stmt.AddValue(++idx, _playerGuid.GetCounter());
             stmt.AddValue(++idx, _note);
+            stmt.AddValue(++idx, _createTime);
             stmt.AddValue(++idx, _mapId);
             stmt.AddValue(++idx, _pos.X);
             stmt.AddValue(++idx, _pos.Y);
@@ -376,7 +377,7 @@ namespace Game.SupportSystem
             _id = fields.Read<uint>(idx);
             _playerGuid = ObjectGuid.Create(HighGuid.Player, fields.Read<ulong>(++idx));
             _note = fields.Read<string>(++idx);
-            _createTime = fields.Read<uint>(++idx);
+            _createTime = fields.Read<ulong>(++idx);
             _mapId = fields.Read<ushort>(++idx);
             _pos = new Vector3(fields.Read<float>(++idx), fields.Read<float>(++idx), fields.Read<float>(++idx));
             _facing = fields.Read<float>(++idx);
@@ -405,6 +406,7 @@ namespace Game.SupportSystem
             stmt.AddValue(idx, _id);
             stmt.AddValue(++idx, _playerGuid.GetCounter());
             stmt.AddValue(++idx, _note);
+            stmt.AddValue(++idx, _createTime);
             stmt.AddValue(++idx, _mapId);
             stmt.AddValue(++idx, _pos.X);
             stmt.AddValue(++idx, _pos.Y);

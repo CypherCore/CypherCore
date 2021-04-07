@@ -9085,7 +9085,6 @@ namespace Game
 
             long curTime = Time.UnixTime;
             DateTime lt = Time.UnixTimeToDateTime(curTime).ToLocalTime();
-            long basetime = curTime;
             Log.outInfo(LogFilter.Server, "Returning mails current time: hour: {0}, minute: {1}, second: {2} ", lt.Hour, lt.Minute, lt.Second);
 
             PreparedStatement stmt;
@@ -9093,11 +9092,11 @@ namespace Game
             if (!serverUp)
             {
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_EMPTY_EXPIRED_MAIL);
-                stmt.AddValue(0, basetime);
+                stmt.AddValue(0, curTime);
                 DB.Characters.Execute(stmt);
             }
             stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_EXPIRED_MAIL);
-            stmt.AddValue(0, basetime);
+            stmt.AddValue(0, curTime);
             SQLResult result = DB.Characters.Query(stmt);
             if (result.IsEmpty())
             {
@@ -9107,7 +9106,7 @@ namespace Game
 
             MultiMap<uint, MailItemInfo> itemsCache = new();
             stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_EXPIRED_MAIL_ITEMS);
-            stmt.AddValue(0, (uint)basetime);
+            stmt.AddValue(0, curTime);
             SQLResult items = DB.Characters.Query(stmt);
             if (!items.IsEmpty())
             {
@@ -9131,7 +9130,7 @@ namespace Game
                 m.sender = result.Read<uint>(2);
                 m.receiver = result.Read<ulong>(3);
                 bool has_items = result.Read<bool>(4);
-                m.expire_time = result.Read<uint>(5);
+                m.expire_time = result.Read<long>(5);
                 m.deliver_time = 0;
                 m.COD = result.Read<ulong>(6);
                 m.checkMask = (MailCheckMask)result.Read<byte>(7);
@@ -9175,8 +9174,8 @@ namespace Game
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_MAIL_RETURNED);
                         stmt.AddValue(0, m.receiver);
                         stmt.AddValue(1, m.sender);
-                        stmt.AddValue(2, basetime + 30 * Time.Day);
-                        stmt.AddValue(3, basetime);
+                        stmt.AddValue(2, curTime + 30 * Time.Day);
+                        stmt.AddValue(3, curTime);
                         stmt.AddValue(4, MailCheckMask.Returned);
                         stmt.AddValue(5, m.messageID);
                         DB.Characters.Execute(stmt);

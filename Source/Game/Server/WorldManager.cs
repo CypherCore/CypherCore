@@ -1691,7 +1691,7 @@ namespace Game
 
             stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHARACTER_BAN);
             stmt.AddValue(0, guid.GetCounter());
-            stmt.AddValue(1, duration_secs);
+            stmt.AddValue(1, (long)duration_secs);
             stmt.AddValue(2, author);
             stmt.AddValue(3, reason);
             trans.Append(stmt);

@@ -224,9 +224,9 @@ namespace Game.Networking.Packets
                 Text = data.ReadString(data.ReadBits<uint>(12));
             }
 
-            public SupportTicketChatLine(uint timestamp, string text)
+            public SupportTicketChatLine(long timestamp, string text)
             {
-                Timestamp = timestamp;
+                Timestamp = (uint)timestamp;
                 Text = text;
             }
 

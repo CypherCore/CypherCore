@@ -66,7 +66,7 @@ namespace Game.Garrisons
                 {
                     uint plotInstanceId = buildings.Read<uint>(0);
                     uint buildingId = buildings.Read<uint>(1);
-                    ulong timeBuilt = buildings.Read<ulong>(2);
+                    long timeBuilt = buildings.Read<long>(2);
                     bool active = buildings.Read<bool>(3);
 
 
@@ -80,7 +80,7 @@ namespace Game.Garrisons
                     plot.BuildingInfo.PacketInfo.HasValue = true;
                     plot.BuildingInfo.PacketInfo.Value.GarrPlotInstanceID = plotInstanceId;
                     plot.BuildingInfo.PacketInfo.Value.GarrBuildingID = buildingId;
-                    plot.BuildingInfo.PacketInfo.Value.TimeBuilt = (long)timeBuilt;
+                    plot.BuildingInfo.PacketInfo.Value.TimeBuilt = timeBuilt;
                     plot.BuildingInfo.PacketInfo.Value.Active = active;
 
                 } while (buildings.NextRow());

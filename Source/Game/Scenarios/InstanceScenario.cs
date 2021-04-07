@@ -83,7 +83,7 @@ namespace Game.Scenarios
                     stmt.AddValue(0, id);
                     stmt.AddValue(1, iter.Key);
                     stmt.AddValue(2, iter.Value.Counter);
-                    stmt.AddValue(3, (uint)iter.Value.Date);
+                    stmt.AddValue(3, iter.Value.Date);
                     trans.Append(stmt);
                 }
 
@@ -109,7 +109,7 @@ namespace Game.Scenarios
                 {
                     uint id = result.Read<uint>(0);
                     ulong counter = result.Read<ulong>(1);
-                    long date = result.Read<uint>(2);
+                    long date = result.Read<long>(2);
 
                     Criteria criteria = Global.CriteriaMgr.GetCriteria(id);
                     if (criteria == null)

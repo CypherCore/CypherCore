@@ -143,7 +143,7 @@ namespace Game.Networking.Packets
 
                 StringArguments equipment = new(fields.Read<string>(17));
                 ListPosition = fields.Read<byte>(19);
-                LastPlayedTime = fields.Read<uint>(20);
+                LastPlayedTime = fields.Read<long>(20);
 
                 var spec = Global.DB2Mgr.GetChrSpecializationByIndex(ClassId, fields.Read<byte>(21));
                 if (spec != null)
@@ -188,7 +188,7 @@ namespace Game.Networking.Packets
                 foreach (var visualItem in VisualItems)
                     visualItem.Write(data);
 
-                data.WriteUInt32(LastPlayedTime);
+                data.WriteUInt32((uint)LastPlayedTime);
                 data.WriteUInt16(SpecID);
                 data.WriteUInt32(Unknown703);
                 data.WriteUInt32(LastLoginVersion);
@@ -242,7 +242,7 @@ namespace Game.Networking.Packets
             public uint Flags4;
             public bool FirstLogin;
             public byte unkWod61x;
-            public uint LastPlayedTime;
+            public long LastPlayedTime;
             public ushort SpecID;
             public uint Unknown703;
             public uint LastLoginVersion;

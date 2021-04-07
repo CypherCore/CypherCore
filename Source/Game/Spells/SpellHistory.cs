@@ -39,22 +39,29 @@ namespace Game.Spells
             {
                 do
                 {
-                    uint spellId = cooldownsResult.Read<uint>(0);
-                    if (!Global.SpellMgr.HasSpellInfo(spellId, Difficulty.None))
+                    CooldownEntry cooldownEntry = new();
+                    cooldownEntry.SpellId = cooldownsResult.Read<uint>(0);
+                    if (!Global.SpellMgr.HasSpellInfo(cooldownEntry.SpellId, Difficulty.None))
                         continue;
 
-                    int index = (typeof(T) == typeof(Pet) ? 1 : 2);
+                    if (typeof(T) == typeof(Pet))
+                    {
+                        cooldownEntry.CooldownEnd = Time.UnixTimeToDateTime(cooldownsResult.Read<long>(1));
+                        cooldownEntry.ItemId = 0;
+                        cooldownEntry.CategoryId = cooldownsResult.Read<uint>(2);
+                        cooldownEntry.CategoryEnd = Time.UnixTimeToDateTime(cooldownsResult.Read<long>(3));
+                    }
+                    else
+                    {
+                        cooldownEntry.CooldownEnd = Time.UnixTimeToDateTime(cooldownsResult.Read<long>(2));
+                        cooldownEntry.ItemId = cooldownsResult.Read<uint>(1);
+                        cooldownEntry.CategoryId = cooldownsResult.Read<uint>(3);
+                        cooldownEntry.CategoryEnd = Time.UnixTimeToDateTime(cooldownsResult.Read<long>(4));
+                    }
 
-                    CooldownEntry cooldownEntry = new();
-                    cooldownEntry.SpellId = spellId;
-                    cooldownEntry.CooldownEnd = Time.UnixTimeToDateTime(cooldownsResult.Read<uint>(index++));
-                    cooldownEntry.ItemId = 0;
-                    cooldownEntry.CategoryId = cooldownsResult.Read<uint>(index++);
-                    cooldownEntry.CategoryEnd = Time.UnixTimeToDateTime(cooldownsResult.Read<uint>(index++));
-
-                    _spellCooldowns[spellId] = cooldownEntry;
+                    _spellCooldowns[cooldownEntry.SpellId] = cooldownEntry;
                     if (cooldownEntry.CategoryId != 0)
-                        _categoryCooldowns[cooldownEntry.CategoryId] = _spellCooldowns[spellId];
+                        _categoryCooldowns[cooldownEntry.CategoryId] = _spellCooldowns[cooldownEntry.SpellId];
 
                 } while (cooldownsResult.NextRow());
             }
@@ -69,8 +76,8 @@ namespace Game.Spells
                         continue;
 
                     ChargeEntry charges;
-                    charges.RechargeStart = Time.UnixTimeToDateTime(chargesResult.Read<uint>(1));
-                    charges.RechargeEnd = Time.UnixTimeToDateTime(chargesResult.Read<uint>(2));
+                    charges.RechargeStart = Time.UnixTimeToDateTime(chargesResult.Read<long>(1));
+                    charges.RechargeEnd = Time.UnixTimeToDateTime(chargesResult.Read<long>(2));
                     _categoryCharges.Add(categoryId, charges);
 
                 } while (chargesResult.NextRow());
@@ -90,7 +97,7 @@ namespace Game.Spells
                 stmt.AddValue(0, _owner.GetCharmInfo().GetPetNumber());
                 trans.Append(stmt);
 
-                byte index = 0;
+                byte index;
                 foreach (var pair in _spellCooldowns)
                 {
                     if (!pair.Value.OnHold)
@@ -99,9 +106,9 @@ namespace Game.Spells
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_PET_SPELL_COOLDOWN);
                         stmt.AddValue(index++, _owner.GetCharmInfo().GetPetNumber());
                         stmt.AddValue(index++, pair.Key);
-                        stmt.AddValue(index++, (uint)Time.DateTimeToUnixTime(pair.Value.CooldownEnd));
+                        stmt.AddValue(index++, Time.DateTimeToUnixTime(pair.Value.CooldownEnd));
                         stmt.AddValue(index++, pair.Value.CategoryId);
-                        stmt.AddValue(index++, (uint)Time.DateTimeToUnixTime(pair.Value.CategoryEnd));
+                        stmt.AddValue(index++, Time.DateTimeToUnixTime(pair.Value.CategoryEnd));
                         trans.Append(stmt);
                     }
                 }
@@ -112,8 +119,8 @@ namespace Game.Spells
                     stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_PET_SPELL_CHARGES);
                     stmt.AddValue(index++, _owner.GetCharmInfo().GetPetNumber());
                     stmt.AddValue(index++, pair.Key);
-                    stmt.AddValue(index++, (uint)Time.DateTimeToUnixTime(pair.Value.RechargeStart));
-                    stmt.AddValue(index++, (uint)Time.DateTimeToUnixTime(pair.Value.RechargeEnd));
+                    stmt.AddValue(index++, Time.DateTimeToUnixTime(pair.Value.RechargeStart));
+                    stmt.AddValue(index++, Time.DateTimeToUnixTime(pair.Value.RechargeEnd));
                     trans.Append(stmt);
                 }
             }
@@ -127,7 +134,7 @@ namespace Game.Spells
                 stmt.AddValue(0, _owner.GetGUID().GetCounter());
                 trans.Append(stmt);
 
-                byte index = 0;
+                byte index;
                 foreach (var pair in _spellCooldowns)
                 {
                     if (!pair.Value.OnHold)
@@ -137,9 +144,9 @@ namespace Game.Spells
                         stmt.AddValue(index++, _owner.GetGUID().GetCounter());
                         stmt.AddValue(index++, pair.Key);
                         stmt.AddValue(index++, pair.Value.ItemId);
-                        stmt.AddValue(index++, (uint)Time.DateTimeToUnixTime(pair.Value.CooldownEnd));
+                        stmt.AddValue(index++, Time.DateTimeToUnixTime(pair.Value.CooldownEnd));
                         stmt.AddValue(index++, pair.Value.CategoryId);
-                        stmt.AddValue(index++, (uint)Time.DateTimeToUnixTime(pair.Value.CategoryEnd));
+                        stmt.AddValue(index++, Time.DateTimeToUnixTime(pair.Value.CategoryEnd));
                         trans.Append(stmt);
                     }
                 }
@@ -150,8 +157,8 @@ namespace Game.Spells
                     stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHAR_SPELL_CHARGES);
                     stmt.AddValue(index++, _owner.GetGUID().GetCounter());
                     stmt.AddValue(index++, pair.Key);
-                    stmt.AddValue(index++, (uint)Time.DateTimeToUnixTime(pair.Value.RechargeStart));
-                    stmt.AddValue(index++, (uint)Time.DateTimeToUnixTime(pair.Value.RechargeEnd));
+                    stmt.AddValue(index++, Time.DateTimeToUnixTime(pair.Value.RechargeStart));
+                    stmt.AddValue(index++, Time.DateTimeToUnixTime(pair.Value.RechargeEnd));
                     trans.Append(stmt);
                 }
             }

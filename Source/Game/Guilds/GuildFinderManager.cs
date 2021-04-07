@@ -97,7 +97,7 @@ namespace Game.Guilds
                 byte classRoles = result.Read<byte>(3);
                 byte interests = result.Read<byte>(4);
                 string comment = result.Read<string>(5);
-                uint submitTime = result.Read<uint>(6);
+                long submitTime = result.Read<long>(6);
 
                 MembershipRequest request = new(playerId, guildId, availability, classRoles, interests, comment, submitTime);
 

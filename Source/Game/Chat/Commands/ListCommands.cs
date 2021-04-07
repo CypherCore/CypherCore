@@ -407,8 +407,8 @@ namespace Game.Chat.Commands
                         ulong receiverId = result1.Read<ulong>(3);
                         string receiver = result1.Read<string>(4);
                         string subject = result1.Read<string>(5);
-                        long deliverTime = result1.Read<uint>(6);
-                        long expireTime = result1.Read<uint>(7);
+                        long deliverTime = result1.Read<long>(6);
+                        long expireTime = result1.Read<long>(7);
                         ulong money = result1.Read<ulong>(8);
                         byte hasItem = result1.Read<byte>(9);
                         uint gold = (uint)(money / MoneyConstants.Gold);

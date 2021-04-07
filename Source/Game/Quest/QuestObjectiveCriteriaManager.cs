@@ -91,7 +91,7 @@ namespace Game
                 {
                     uint criteriaId = criteriaResult.Read<uint>(0);
                     ulong counter = criteriaResult.Read<ulong>(1);
-                    long date = criteriaResult.Read<uint>(2);
+                    long date = criteriaResult.Read<long>(2);
 
                     Criteria criteria = Global.CriteriaMgr.GetCriteria(criteriaId);
                     if (criteria == null)
@@ -154,7 +154,7 @@ namespace Game
                         stmt.AddValue(0, _owner.GetGUID().GetCounter());
                         stmt.AddValue(1, pair.Key);
                         stmt.AddValue(2, pair.Value.Counter);
-                        stmt.AddValue(3, (uint)pair.Value.Date);
+                        stmt.AddValue(3, pair.Value.Date);
                         trans.Append(stmt);
                     }
 
