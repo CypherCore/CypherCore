@@ -78,25 +78,24 @@ namespace Game.Networking.Packets
 
     class AvailableHotfixes : ServerPacket
     {
-        public AvailableHotfixes(uint virtualRealmAddress, uint hotfixCount, List<HotfixRecord> hotfixes) : base(ServerOpcodes.AvailableHotfixes)
+        public AvailableHotfixes(uint virtualRealmAddress, MultiMap<int, HotfixRecord> hotfixes) : base(ServerOpcodes.AvailableHotfixes)
         {
             VirtualRealmAddress = virtualRealmAddress;
-            HotfixCount = hotfixCount;
             Hotfixes = hotfixes;
         }
 
         public override void Write()
         {
             _worldPacket.WriteUInt32(VirtualRealmAddress);
-            _worldPacket.WriteUInt32(HotfixCount);
+            _worldPacket.WriteInt32(Hotfixes.Count);
 
-            foreach (HotfixRecord hotfixRecord in Hotfixes)
-                hotfixRecord.Write(_worldPacket);
+            foreach (var pair in Hotfixes)
+                _worldPacket.WriteInt32(pair.Key);
         }
 
         public uint VirtualRealmAddress;
         public uint HotfixCount;
-        public List<HotfixRecord> Hotfixes;
+        public MultiMap<int, HotfixRecord> Hotfixes;
     }
 
     class HotfixRequest : ClientPacket
@@ -110,16 +109,12 @@ namespace Game.Networking.Packets
 
             uint hotfixCount = _worldPacket.ReadUInt32();
             for (var i = 0; i < hotfixCount; ++i)
-            {
-                HotfixRecord hotfixRecord = new();
-                hotfixRecord.Read(_worldPacket);
-                Hotfixes.Add(hotfixRecord);
-            }
+                Hotfixes.Add(_worldPacket.ReadInt32());
         }
 
         public uint ClientBuild;
         public uint DataBuild;
-        public List<HotfixRecord> Hotfixes = new();
+        public List<int> Hotfixes = new();
     }
 
     class HotfixConnect : ServerPacket

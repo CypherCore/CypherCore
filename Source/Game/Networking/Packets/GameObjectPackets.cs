@@ -138,7 +138,7 @@ namespace Game.Networking.Packets
 
     class GameObjectUILink : ServerPacket
     {
-        public GameObjectUILink() : base(ServerOpcodes.GameObjectUILink, ConnectionType.Instance) { }
+        public GameObjectUILink() : base(ServerOpcodes.GameObjectUiLink, ConnectionType.Instance) { }
 
         public override void Write()
         {

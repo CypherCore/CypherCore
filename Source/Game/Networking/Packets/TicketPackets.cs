@@ -61,10 +61,10 @@ namespace Game.Networking.Packets
             foreach (var c in Cases)
             {
                 _worldPacket.WriteInt32(c.CaseID);
-                _worldPacket.WriteInt32(c.CaseOpened);
+                _worldPacket.WriteUInt32(c.CaseOpened);
                 _worldPacket.WriteInt32(c.CaseStatus);
-                _worldPacket.WriteInt16(c.CfgRealmID);
-                _worldPacket.WriteInt64(c.CharacterID);
+                _worldPacket.WriteUInt16(c.CfgRealmID);
+                _worldPacket.WriteUInt64(c.CharacterID);
                 _worldPacket.WriteInt32(c.WaitTimeOverrideMinutes);
 
                 _worldPacket.WriteBits(c.Url.GetByteCount(), 11);
@@ -80,10 +80,10 @@ namespace Game.Networking.Packets
         public struct GMTicketCase
         {
             public int CaseID;
-            public int CaseOpened;
+            public uint CaseOpened;
             public int CaseStatus;
-            public short CfgRealmID;
-            public long CharacterID;
+            public ushort CfgRealmID;
+            public ulong CharacterID;
             public int WaitTimeOverrideMinutes;
             public string Url;
             public string WaitTimeOverrideMessage;

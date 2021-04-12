@@ -42,27 +42,27 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32((uint)Result);
             _worldPacket.WriteInt32(AuctionableTokenAuctionableList.Count);
 
-            foreach (AuctionableTokenAuctionable auctionableTokenAuctionable in AuctionableTokenAuctionableList)
+            foreach (AuctionableTokenInfo auctionableTokenAuctionable in AuctionableTokenAuctionableList)
             {
                 _worldPacket.WriteUInt64(auctionableTokenAuctionable.UnkInt1);
                 _worldPacket.WriteUInt32(auctionableTokenAuctionable.UnkInt2);
-                _worldPacket.WriteUInt32(auctionableTokenAuctionable.Owner);
                 _worldPacket.WriteUInt64(auctionableTokenAuctionable.BuyoutPrice);
-                _worldPacket.WriteUInt32(auctionableTokenAuctionable.EndTime);
+                _worldPacket.WriteUInt32(auctionableTokenAuctionable.Owner);
+                _worldPacket.WriteUInt32(auctionableTokenAuctionable.DurationLeft);
             }
         }
 
         public uint UnkInt; // send CMSG_UPDATE_WOW_TOKEN_AUCTIONABLE_LIST
         public TokenResult Result;
-        List<AuctionableTokenAuctionable> AuctionableTokenAuctionableList =new();
+        List<AuctionableTokenInfo> AuctionableTokenAuctionableList = new();
 
-        struct AuctionableTokenAuctionable
+        struct AuctionableTokenInfo
         {
             public ulong UnkInt1;
             public uint UnkInt2;
             public uint Owner;
             public ulong BuyoutPrice;
-            public uint EndTime;
+            public uint DurationLeft;
         }
     }
 

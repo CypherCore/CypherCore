@@ -16,10 +16,11 @@
  */
 
 using Framework.Constants;
+using Framework.Dynamic;
 using Game.Entities;
 using Game.Groups;
 using System;
-using Framework.Dynamic;
+using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
@@ -269,11 +270,16 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(Guid);
-            _worldPacket.WriteInt32(EmoteID);
+            _worldPacket.WriteUInt32(EmoteID);
+            _worldPacket.WriteInt32(SpellVisualKitIDs.Count);
+            
+            foreach (var id in SpellVisualKitIDs)
+                _worldPacket.WriteUInt32(id);
         }
 
         public ObjectGuid Guid;
-        public int EmoteID;
+        public uint EmoteID;
+        public List<uint> SpellVisualKitIDs = new();
     }
 
     public class CTextEmote : ClientPacket
@@ -285,11 +291,16 @@ namespace Game.Networking.Packets
             Target = _worldPacket.ReadPackedGuid();
             EmoteID = _worldPacket.ReadInt32();
             SoundIndex = _worldPacket.ReadInt32();
+
+            SpellVisualKitIDs = new uint[_worldPacket.ReadUInt32()];
+            for (var i = 0; i < SpellVisualKitIDs.Length; ++i)
+                SpellVisualKitIDs[i] = _worldPacket.ReadUInt32();
         }
 
         public ObjectGuid Target;
         public int EmoteID;
         public int SoundIndex;
+        public uint[] SpellVisualKitIDs;
     }
 
     public class STextEmote : ServerPacket

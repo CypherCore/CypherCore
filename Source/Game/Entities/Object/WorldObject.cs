@@ -598,6 +598,7 @@ namespace Game.Entities
             //if (flags.SmoothPhasing)
             //{
             //    data.WriteBit(ReplaceActive);
+            //    data.WriteBit(StopAnimKits);
             //    data.WriteBit(HasReplaceObjectt);
             //    data.FlushBits();
             //    if (HasReplaceObject)

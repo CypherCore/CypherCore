@@ -189,6 +189,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteUInt32(progress.DateCreated);
                 _worldPacket.WriteUInt32(progress.DateStarted);
                 _worldPacket.WritePackedTime(progress.DateUpdated);
+                _worldPacket.WriteUInt32(0); // this is a hack. this is a packed time written as int64 (progress.DateUpdated)
                 _worldPacket.WriteUInt64(progress.Quantity);
                 _worldPacket.WritePackedGuid(progress.PlayerGUID);
                 _worldPacket.WriteInt32(progress.Flags);

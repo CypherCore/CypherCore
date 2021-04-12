@@ -419,6 +419,7 @@ namespace Game
         {
             SpecialMountAnim specialMountAnim = new();
             specialMountAnim.UnitGUID = _player.GetGUID();
+            specialMountAnim.SpellVisualKitIDs.AddRange(mountSpecial.SpellVisualKitIDs);
             GetPlayer().SendMessageToSet(specialMountAnim, false);
         }
 

@@ -209,6 +209,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteFloat(Pos.Y);
             _worldPacket.WriteUInt32(Icon);
             _worldPacket.WriteUInt32(Importance);
+            _worldPacket.WriteUInt32(Unknown905);
             _worldPacket.WriteBits(Flags, 14);
             _worldPacket.WriteBits(Name.GetByteCount(), 6);
             _worldPacket.FlushBits();
@@ -220,6 +221,7 @@ namespace Game.Networking.Packets
         public Vector2 Pos;
         public uint Icon;
         public uint Importance;
+        public uint Unknown905;
         public string Name;
     }
 

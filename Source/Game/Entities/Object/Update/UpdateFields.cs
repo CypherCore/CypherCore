@@ -377,7 +377,7 @@ namespace Game.Entities
         public UpdateField<uint> MaxDurability = new(0, 12);
         public UpdateField<uint> CreatePlayedTime = new(0, 13);
         public UpdateField<int> Context = new(0, 14);
-        public UpdateField<int> CreateTime = new(0, 15);
+        public UpdateField<long> CreateTime = new(0, 15);
         public UpdateField<ulong> ArtifactXP = new(0, 16);
         public UpdateField<byte> ItemAppearanceModID = new(0, 17);
         public UpdateField<ItemModList> Modifiers = new(0, 18);
@@ -419,7 +419,7 @@ namespace Game.Entities
             }
             data.WriteUInt32(CreatePlayedTime);
             data.WriteInt32(Context);
-            data.WriteInt32(CreateTime);
+            data.WriteInt64(CreateTime);
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
             {
                 data.WriteUInt64(ArtifactXP);
@@ -566,7 +566,7 @@ namespace Game.Entities
                 }
                 if (changesMask[15])
                 {
-                    data.WriteInt32(CreateTime);
+                    data.WriteInt64(CreateTime);
                 }
                 if (changesMask[16])
                 {
@@ -3015,15 +3015,15 @@ namespace Game.Entities
 
     public class PVPInfo : BaseUpdateData<Player>
     {
-        public UpdateField<uint> Field_0 = new(0, 1);
-        public UpdateField<uint> Field_4 = new(0, 2);
-        public UpdateField<uint> Field_8 = new(0, 3);
-        public UpdateField<uint> Field_C = new(0, 4);
-        public UpdateField<uint> Rating = new(0, 5);
-        public UpdateField<uint> Field_14 = new(0, 6);
-        public UpdateField<uint> Field_18 = new(0, 7);
-        public UpdateField<uint> PvpTierID = new(0, 8);
-        public UpdateField<uint> Field_20 = new(0, 9);
+        public UpdateField<bool> Field_20 = new(0, 1);
+        public UpdateField<uint> Field_0 = new(0, 2);
+        public UpdateField<uint> Field_4 = new(0, 3);
+        public UpdateField<uint> Field_8 = new(0, 4);
+        public UpdateField<uint> Field_C = new(0, 5);
+        public UpdateField<uint> Rating = new(0, 6);
+        public UpdateField<uint> Field_14 = new(0, 7);
+        public UpdateField<uint> Field_18 = new(0, 8);
+        public UpdateField<uint> PvpTierID = new(0, 9);
 
         public PVPInfo() : base(10) { }
 
@@ -3037,7 +3037,7 @@ namespace Game.Entities
             data.WriteUInt32(Field_14);
             data.WriteUInt32(Field_18);
             data.WriteUInt32(PvpTierID);
-            data.WriteBits((uint)Field_20, 1);
+            data.WriteBit(Field_20);
             data.FlushBits();
         }
 
@@ -3049,44 +3049,47 @@ namespace Game.Entities
 
             data.WriteBits(changesMask.GetBlock(0), 10);
 
-            data.FlushBits();
             if (changesMask[0])
             {
                 if (changesMask[1])
                 {
-                    data.WriteUInt32(Field_0);
+                    data.WriteBit(Field_20);
                 }
+            }
+            data.FlushBits();
+            if (changesMask[0])
+            {
                 if (changesMask[2])
                 {
-                    data.WriteUInt32(Field_4);
+                    data.WriteUInt32(Field_0);
                 }
                 if (changesMask[3])
                 {
-                    data.WriteUInt32(Field_8);
+                    data.WriteUInt32(Field_4);
                 }
                 if (changesMask[4])
                 {
-                    data.WriteUInt32(Field_C);
+                    data.WriteUInt32(Field_8);
                 }
                 if (changesMask[5])
                 {
-                    data.WriteUInt32(Rating);
+                    data.WriteUInt32(Field_C);
                 }
                 if (changesMask[6])
                 {
-                    data.WriteUInt32(Field_14);
+                    data.WriteUInt32(Rating);
                 }
                 if (changesMask[7])
                 {
-                    data.WriteUInt32(Field_18);
+                    data.WriteUInt32(Field_14);
                 }
                 if (changesMask[8])
                 {
-                    data.WriteUInt32(PvpTierID);
+                    data.WriteUInt32(Field_18);
                 }
                 if (changesMask[9])
                 {
-                    data.WriteBits(Field_20, 1);
+                    data.WriteUInt32(PvpTierID);
                 }
             }
             data.FlushBits();
@@ -3094,6 +3097,7 @@ namespace Game.Entities
 
         public override void ClearChangesMask()
         {
+            ClearChangesMask(Field_20);
             ClearChangesMask(Field_0);
             ClearChangesMask(Field_4);
             ClearChangesMask(Field_8);
@@ -3102,7 +3106,6 @@ namespace Game.Entities
             ClearChangesMask(Field_14);
             ClearChangesMask(Field_18);
             ClearChangesMask(PvpTierID);
-            ClearChangesMask(Field_20);
             _changesMask.ResetAll();
         }
     }
@@ -3495,37 +3498,38 @@ namespace Game.Entities
         public UpdateField<ulong> GuildClubMemberID = new(98, 101);
         public UpdateField<uint> Honor = new(98, 102);
         public UpdateField<uint> HonorNextLevel = new(98, 103);
-        public UpdateField<int> PvpRewardAchieved = new(98, 104);
+        public UpdateField<long> PvpRewardAchieved = new(98, 104);
         public UpdateField<int> PvpTierMaxFromWins = new(98, 105);
-        public UpdateField<int> PvpLastWeeksRewardAchieved = new(98, 106);
+        public UpdateField<long> PvpLastWeeksRewardAchieved = new(98, 106);
         public UpdateField<int> PvpLastWeeksTierMaxFromWins = new(98, 107);
-        public UpdateField<int> PvpLastWeeksRewardClaimed = new(98, 108);
+        public UpdateField<long> PvpLastWeeksRewardClaimed = new(98, 108);
         public UpdateField<byte> NumBankSlots = new(98, 109);
         public UpdateField<ActivePlayerUnk901> Field_1410 = new(98, 111);
         public UpdateField<Optional<QuestSession>> QuestSession = new(98, 110);
         public UpdateField<int> UiChromieTimeExpansionID = new(98, 112);
         public UpdateField<int> TransportServerTime = new(98, 113);
-        public UpdateFieldArray<ObjectGuid> InvSlots = new(199, 114, 115);
-        public UpdateFieldArray<uint> TrackResourceMask = new(2, 314, 315);
-        public UpdateFieldArray<ulong> ExploredZones = new(192, 317, 318);
-        public UpdateFieldArray<RestInfo> RestInfo = new(2, 510, 511);
-        public UpdateFieldArray<int> ModDamageDonePos = new(7, 513, 514);
-        public UpdateFieldArray<int> ModDamageDoneNeg = new(7, 513, 521);
-        public UpdateFieldArray<float> ModDamageDonePercent = new(7, 513, 528);
-        public UpdateFieldArray<float> ModHealingDonePercent = new(7, 513, 535);
-        public UpdateFieldArray<float> WeaponDmgMultipliers = new(3, 542, 543);
-        public UpdateFieldArray<float> WeaponAtkSpeedMultipliers = new(3, 542, 546);
-        public UpdateFieldArray<uint> BuybackPrice = new(12, 549, 550);
-        public UpdateFieldArray<uint> BuybackTimestamp = new(12, 549, 562);
-        public UpdateFieldArray<uint> CombatRatings = new(32, 574, 575);
-        public UpdateFieldArray<PVPInfo> PvpInfo = new(6, 607, 608);
-        public UpdateFieldArray<uint> NoReagentCostMask = new(4, 614, 615);
-        public UpdateFieldArray<uint> ProfessionSkillLine = new(2, 619, 620);
-        public UpdateFieldArray<uint> BagSlotFlags = new(4, 622, 623);
-        public UpdateFieldArray<uint> BankBagSlotFlags = new(7, 627, 628);
-        public UpdateFieldArray<ulong> QuestCompleted = new(875, 635, 636);
+        public UpdateField<uint> WeeklyRewardsPeriodSinceOrigin = new(98, 114);                // week count since Cfg_RegionsEntry::ChallengeOrigin
+        public UpdateFieldArray<ObjectGuid> InvSlots = new(199, 115, 116);
+        public UpdateFieldArray<uint> TrackResourceMask = new(2, 315, 316);
+        public UpdateFieldArray<ulong> ExploredZones = new(192, 318, 319);
+        public UpdateFieldArray<RestInfo> RestInfo = new(2, 511, 512);
+        public UpdateFieldArray<int> ModDamageDonePos = new(7, 514, 515);
+        public UpdateFieldArray<int> ModDamageDoneNeg = new(7, 514, 522);
+        public UpdateFieldArray<float> ModDamageDonePercent = new(7, 514, 529);
+        public UpdateFieldArray<float> ModHealingDonePercent = new(7, 514, 536);
+        public UpdateFieldArray<float> WeaponDmgMultipliers = new(3, 543, 544);
+        public UpdateFieldArray<float> WeaponAtkSpeedMultipliers = new(3, 543, 547);
+        public UpdateFieldArray<uint> BuybackPrice = new(12, 550, 551);
+        public UpdateFieldArray<uint> BuybackTimestamp = new(12, 550, 563);
+        public UpdateFieldArray<uint> CombatRatings = new(32, 575, 576);
+        public UpdateFieldArray<PVPInfo> PvpInfo = new(6, 608, 609);
+        public UpdateFieldArray<uint> NoReagentCostMask = new(4, 615, 616);
+        public UpdateFieldArray<uint> ProfessionSkillLine = new(2, 620, 621);
+        public UpdateFieldArray<uint> BagSlotFlags = new(4, 623, 624);
+        public UpdateFieldArray<uint> BankBagSlotFlags = new(7, 628, 629);
+        public UpdateFieldArray<ulong> QuestCompleted = new(875, 636, 637);
 
-        public ActivePlayerData() : base(0, TypeId.ActivePlayer, 1511) { }
+        public ActivePlayerData() : base(0, TypeId.ActivePlayer, 1512) { }
 
         public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Player owner, Player receiver)
         {
@@ -3659,11 +3663,11 @@ namespace Game.Entities
             }
             data.WriteUInt32(Honor);
             data.WriteUInt32(HonorNextLevel);
-            data.WriteInt32(PvpRewardAchieved);
+            data.WriteInt64(PvpRewardAchieved);
             data.WriteInt32(PvpTierMaxFromWins);
-            data.WriteInt32(PvpLastWeeksRewardAchieved);
+            data.WriteInt64(PvpLastWeeksRewardAchieved);
             data.WriteInt32(PvpLastWeeksTierMaxFromWins);
-            data.WriteInt32(PvpLastWeeksRewardClaimed);
+            data.WriteInt64(PvpLastWeeksRewardClaimed);
             data.WriteUInt8(NumBankSlots);
             data.WriteInt32(ResearchSites.Size());
             data.WriteInt32(ResearchSiteProgress.Size());
@@ -3696,6 +3700,7 @@ namespace Game.Entities
             data.WriteInt32(DisabledSpells.Size());
             data.WriteInt32(UiChromieTimeExpansionID);
             data.WriteInt32(TransportServerTime);
+            data.WriteUInt32(WeeklyRewardsPeriodSinceOrigin);
             for (int i = 0; i < KnownTitles.Size(); ++i)
             {
                 data.WriteUInt64(KnownTitles[i]);
@@ -3975,6 +3980,7 @@ namespace Game.Entities
                     }
                 }
             }
+            data.FlushBits();
             if (changesMask[0])
             {
                 if (changesMask[22])
@@ -4535,7 +4541,7 @@ namespace Game.Entities
                 }
                 if (changesMask[104])
                 {
-                    data.WriteInt32(PvpRewardAchieved);
+                    data.WriteInt64(PvpRewardAchieved);
                 }
                 if (changesMask[105])
                 {
@@ -4543,7 +4549,7 @@ namespace Game.Entities
                 }
                 if (changesMask[106])
                 {
-                    data.WriteInt32(PvpLastWeeksRewardAchieved);
+                    data.WriteInt64(PvpLastWeeksRewardAchieved);
                 }
                 if (changesMask[107])
                 {
@@ -4551,7 +4557,7 @@ namespace Game.Entities
                 }
                 if (changesMask[108])
                 {
-                    data.WriteInt32(PvpLastWeeksRewardClaimed);
+                    data.WriteInt64(PvpLastWeeksRewardClaimed);
                 }
                 if (changesMask[109])
                 {
@@ -4564,6 +4570,10 @@ namespace Game.Entities
                 if (changesMask[113])
                 {
                     data.WriteInt32(TransportServerTime);
+                }
+                if (changesMask[114])
+                {
+                    data.WriteUInt32(WeeklyRewardsPeriodSinceOrigin);
                 }
             }
             if (changesMask[98])
@@ -4581,161 +4591,161 @@ namespace Game.Entities
                     }
                 }
             }
-            if (changesMask[114])
+            if (changesMask[115])
             {
                 for (int i = 0; i < 199; ++i)
                 {
-                    if (changesMask[115 + i])
+                    if (changesMask[116 + i])
                     {
                         data.WritePackedGuid(InvSlots[i]);
                     }
                 }
             }
-            if (changesMask[314])
+            if (changesMask[315])
             {
                 for (int i = 0; i < 2; ++i)
                 {
-                    if (changesMask[315 + i])
+                    if (changesMask[316 + i])
                     {
                         data.WriteUInt32(TrackResourceMask[i]);
                     }
                 }
             }
-            if (changesMask[317])
+            if (changesMask[318])
             {
                 for (int i = 0; i < 192; ++i)
                 {
-                    if (changesMask[318 + i])
+                    if (changesMask[319 + i])
                     {
                         data.WriteUInt64(ExploredZones[i]);
                     }
                 }
             }
-            if (changesMask[510])
+            if (changesMask[511])
             {
                 for (int i = 0; i < 2; ++i)
                 {
-                    if (changesMask[511 + i])
+                    if (changesMask[512 + i])
                     {
                         RestInfo[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
                     }
                 }
             }
-            if (changesMask[513])
+            if (changesMask[514])
             {
                 for (int i = 0; i < 7; ++i)
                 {
-                    if (changesMask[514 + i])
+                    if (changesMask[515 + i])
                     {
                         data.WriteInt32(ModDamageDonePos[i]);
                     }
-                    if (changesMask[521 + i])
+                    if (changesMask[522 + i])
                     {
                         data.WriteInt32(ModDamageDoneNeg[i]);
                     }
-                    if (changesMask[528 + i])
+                    if (changesMask[529 + i])
                     {
                         data.WriteFloat(ModDamageDonePercent[i]);
                     }
-                    if (changesMask[535 + i])
+                    if (changesMask[536 + i])
                     {
                         data.WriteFloat(ModHealingDonePercent[i]);
                     }
                 }
             }
-            if (changesMask[542])
+            if (changesMask[543])
             {
                 for (int i = 0; i < 3; ++i)
                 {
-                    if (changesMask[543 + i])
+                    if (changesMask[544 + i])
                     {
                         data.WriteFloat(WeaponDmgMultipliers[i]);
                     }
-                    if (changesMask[546 + i])
+                    if (changesMask[547 + i])
                     {
                         data.WriteFloat(WeaponAtkSpeedMultipliers[i]);
                     }
                 }
             }
-            if (changesMask[549])
+            if (changesMask[550])
             {
                 for (int i = 0; i < 12; ++i)
                 {
-                    if (changesMask[550 + i])
+                    if (changesMask[551 + i])
                     {
                         data.WriteUInt32(BuybackPrice[i]);
                     }
-                    if (changesMask[562 + i])
+                    if (changesMask[563 + i])
                     {
                         data.WriteUInt32(BuybackTimestamp[i]);
                     }
                 }
             }
-            if (changesMask[574])
+            if (changesMask[575])
             {
                 for (int i = 0; i < 32; ++i)
                 {
-                    if (changesMask[575 + i])
+                    if (changesMask[576 + i])
                     {
                         data.WriteUInt32(CombatRatings[i]);
                     }
                 }
             }
-            if (changesMask[614])
+            if (changesMask[615])
             {
                 for (int i = 0; i < 4; ++i)
                 {
-                    if (changesMask[615 + i])
+                    if (changesMask[616 + i])
                     {
                         data.WriteUInt32(NoReagentCostMask[i]);
                     }
                 }
             }
-            if (changesMask[619])
+            if (changesMask[620])
             {
                 for (int i = 0; i < 2; ++i)
                 {
-                    if (changesMask[620 + i])
+                    if (changesMask[621 + i])
                     {
                         data.WriteUInt32(ProfessionSkillLine[i]);
                     }
                 }
             }
-            if (changesMask[622])
+            if (changesMask[623])
             {
                 for (int i = 0; i < 4; ++i)
                 {
-                    if (changesMask[623 + i])
+                    if (changesMask[624 + i])
                     {
                         data.WriteUInt32(BagSlotFlags[i]);
                     }
                 }
             }
-            if (changesMask[627])
+            if (changesMask[628])
             {
                 for (int i = 0; i < 7; ++i)
                 {
-                    if (changesMask[628 + i])
+                    if (changesMask[629 + i])
                     {
                         data.WriteUInt32(BankBagSlotFlags[i]);
                     }
                 }
             }
-            if (changesMask[635])
+            if (changesMask[636])
             {
                 for (int i = 0; i < 875; ++i)
                 {
-                    if (changesMask[636 + i])
+                    if (changesMask[637 + i])
                     {
                         data.WriteUInt64(QuestCompleted[i]);
                     }
                 }
             }
-            if (changesMask[607])
+            if (changesMask[608])
             {
                 for (int i = 0; i < 6; ++i)
                 {
-                    if (changesMask[608 + i])
+                    if (changesMask[609 + i])
                     {
                         PvpInfo[i].WriteUpdate(data, ignoreNestedChangesMask, owner, receiver);
                     }
@@ -4855,6 +4865,7 @@ namespace Game.Entities
             ClearChangesMask(QuestSession);
             ClearChangesMask(UiChromieTimeExpansionID);
             ClearChangesMask(TransportServerTime);
+            ClearChangesMask(WeeklyRewardsPeriodSinceOrigin);
             ClearChangesMask(InvSlots);
             ClearChangesMask(TrackResourceMask);
             ClearChangesMask(ExploredZones);

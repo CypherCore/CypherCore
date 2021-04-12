@@ -739,7 +739,7 @@ namespace Game.DataStorage
                 hotfixRecord.RecordID = recordId;
                 hotfixRecord.HotfixID = id;
                 hotfixRecord.HotfixStatus = status;
-                _hotfixData.Add(hotfixRecord);
+                _hotfixData.Add(id, hotfixRecord);
                 deletedRecords[(tableHash, recordId)] = status == HotfixRecord.Status.RecordRemoved;
 
                 ++count;
@@ -776,7 +776,7 @@ namespace Game.DataStorage
                 var storeItr = _storage.LookupByKey(tableHash);
                 if (storeItr != null)
                 {
-                    Log.outError(LogFilter.Sql, $"Table hash 0x{tableHash:X} points to a loaded DB2 store {nameof(storeItr)}, fill related table instead of hotfix_blob");
+                    Log.outError(LogFilter.Sql, $"Table hash 0x{tableHash:X} points to a loaded DB2 store {storeItr.GetType().Name}, fill related table instead of hotfix_blob");
                     continue;
                 }
 
@@ -878,11 +878,11 @@ namespace Game.DataStorage
         
         public uint GetHotfixCount() { return (uint)_hotfixData.Count; }
         
-        public List<HotfixRecord> GetHotfixData() { return _hotfixData; }
+        public MultiMap<int, HotfixRecord> GetHotfixData() { return _hotfixData; }
 
         public byte[] GetHotfixBlobData(uint tableHash, int recordId, Locale locale)
         {
-            Cypher.Assert(SharedConst.IsValidLocale(locale), "Locale {locale} is invalid locale");
+            Cypher.Assert(SharedConst.IsValidLocale(locale), $"Locale {locale} is invalid locale");
 
             return _hotfixBlob[(int)locale].LookupByKey((tableHash, recordId));
         }
@@ -2288,7 +2288,7 @@ namespace Game.DataStorage
         delegate bool AllowedHotfixOptionalData(byte[] data);
 
         Dictionary<uint, IDB2Storage> _storage = new();
-        List<HotfixRecord> _hotfixData = new();
+        MultiMap<int, HotfixRecord> _hotfixData = new();
         Dictionary<(uint tableHash, int recordId), byte[]>[] _hotfixBlob = new Dictionary<(uint tableHash, int recordId), byte[]>[(int)Locale.Total];
         MultiMap<uint, Tuple<uint, AllowedHotfixOptionalData>> _allowedHotfixOptionalData = new();
         MultiMap<(uint tableHash, int recordId), HotfixOptionalData>[]_hotfixOptionalData = new MultiMap<(uint tableHash, int recordId), HotfixOptionalData>[(int)Locale.Total];

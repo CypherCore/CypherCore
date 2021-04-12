@@ -195,6 +195,7 @@ namespace Game.Entities
             UpdateSplineMovement(diff);
             GetMotionMaster().UpdateMotion(diff);
         }
+
         void _UpdateSpells(uint diff)
         {
             if (GetCurrentSpell(CurrentSpellTypes.AutoRepeat) != null)
@@ -250,13 +251,20 @@ namespace Game.Entities
             _spellHistory.Update();
         }
 
-        public void HandleEmoteCommand(Emote anim_id)
+        public void HandleEmoteCommand(Emote animId, uint[] spellVisualKitIds = null)
         {
             EmoteMessage packet = new();
             packet.Guid = GetGUID();
-            packet.EmoteID = (int)anim_id;
+            packet.EmoteID = (uint)animId;
+
+            var emotesEntry = CliDB.EmotesStorage.LookupByKey(animId);
+            if (emotesEntry != null && spellVisualKitIds != null)
+                if (emotesEntry.AnimId == (uint)Anim.MountSpecial || emotesEntry.AnimId == (uint)Anim.MountSelfSpecial)
+                    packet.SpellVisualKitIDs.AddRange(spellVisualKitIds);
+
             SendMessageToSet(packet, true);
         }
+
         public void SendDurabilityLoss(Player receiver, uint percent)
         {
             DurabilityDamageDeath packet = new();

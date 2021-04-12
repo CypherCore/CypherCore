@@ -717,8 +717,8 @@ namespace Game
 
             pointsOfInterestStorage.Clear(); // need for reload case
 
-            //                                         0   1          2          3     4      5           6
-            SQLResult result = DB.World.Query("SELECT ID, PositionX, PositionY, Icon, Flags, Importance, Name FROM points_of_interest");
+            //                                         0   1          2          3     4      5           6     7
+            SQLResult result = DB.World.Query("SELECT ID, PositionX, PositionY, Icon, Flags, Importance, Name, Unknown905 FROM points_of_interest");
 
             if (result.IsEmpty())
             {
@@ -738,10 +738,11 @@ namespace Game
                 POI.Flags = result.Read<uint>(4);
                 POI.Importance = result.Read<uint>(5);
                 POI.Name = result.Read<string>(6);
+                POI.Unknown905 = result.Read<uint>(7);
 
                 if (!GridDefines.IsValidMapCoord(POI.Pos.X, POI.Pos.Y))
                 {
-                    Log.outError(LogFilter.Sql, "Table `points_of_interest` (ID: {0}) have invalid coordinates (PositionX: {1} PositionY: {2}), ignored.", id, POI.Pos.X, POI.Pos.Y);
+                    Log.outError(LogFilter.Sql, $"Table `points_of_interest` (ID: {id}) have invalid coordinates (PositionX: {POI.Pos.X} PositionY: {POI.Pos.Y}), ignored.");
                     continue;
                 }
 
@@ -750,7 +751,7 @@ namespace Game
                 ++count;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Points of Interest definitions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} Points of Interest definitions in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
         public List<GossipMenus> GetGossipMenusMapBounds(uint uiMenuId)

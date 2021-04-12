@@ -405,12 +405,12 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteUInt64(DbID);
-            data.WriteUInt32(MissionRecID);
             data.WriteUInt32((uint)OfferTime);
             data.WriteUInt32(OfferDuration);
             data.WriteUInt32((uint)StartTime);
             data.WriteUInt32(TravelDuration);
             data.WriteUInt32(MissionDuration);
+            data.WriteUInt32(MissionRecID);
             data.WriteUInt32(MissionState);
             data.WriteUInt32(SuccessChance);
             data.WriteUInt32(Flags);
@@ -462,8 +462,8 @@ namespace Game.Networking.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32(GarrMssnBonusAbilityID);
             data.WriteUInt32((uint)StartTime);
+            data.WriteUInt32(GarrMssnBonusAbilityID);
         }
 
         public uint GarrMssnBonusAbilityID;
@@ -533,12 +533,12 @@ namespace Game.Networking.Packets
     struct GarrisonEventEntry
     {
         public int EntryID;
-        public int EventValue;
+        public long EventValue;
 
         public void Write(WorldPacket data)
         {
+            data.WriteInt64(EventValue);
             data.WriteInt32(EntryID);
-            data.WriteInt32(EventValue);
         }
     }
 
@@ -578,6 +578,7 @@ namespace Game.Networking.Packets
             data.WriteInt32(ArchivedMissions.Count);
             data.WriteUInt32(NumFollowerActivationsRemaining);
             data.WriteUInt32(NumMissionsStartedToday);
+            data.WriteInt32(MinAutoTroopLevel);
 
             foreach (GarrisonPlotInfo plot in Plots)
                 plot.Write(data);
@@ -634,6 +635,7 @@ namespace Game.Networking.Packets
         public uint GarrSiteLevelID;
         public uint NumFollowerActivationsRemaining;
         public uint NumMissionsStartedToday;   // might mean something else, but sending 0 here enables follower abilities "Increase success chance of the first mission of the day by %."
+        public int MinAutoTroopLevel;
         public List<GarrisonPlotInfo> Plots = new();
         public List<GarrisonBuildingInfo> Buildings = new();
         public List<GarrisonFollower> Followers = new();
