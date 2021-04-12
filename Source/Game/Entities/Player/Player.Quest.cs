@@ -334,32 +334,25 @@ namespace Game.Entities
                 if (quest != null)
                 {
                     if (qmi0.QuestIcon == 4)
-                    {
                         PlayerTalkClass.SendQuestGiverRequestItems(quest, source.GetGUID(), CanRewardQuest(quest, false), true);
-                        return;
-                    }
+
                     // Send completable on repeatable and autoCompletable quest if player don't have quest
                     // @todo verify if check for !quest.IsDaily() is really correct (possibly not)
+                    else if (!source.HasQuest(questId) && !source.HasInvolvedQuest(questId))
+                        PlayerTalkClass.SendCloseGossip();
                     else
                     {
-                        if (!source.HasQuest(questId) && !source.HasInvolvedQuest(questId))
-                        {
-                            PlayerTalkClass.SendCloseGossip();
-                            return;
-                        }
+                        if (quest.IsAutoAccept() && CanAddQuest(quest, true) && CanTakeQuest(quest, true))
+                            AddQuestAndCheckCompletion(quest, source);
 
-                        if (!source.IsTypeId(TypeId.Unit) || source.ToUnit().HasNpcFlag(NPCFlags.Gossip))
-                        {
-                            if (quest.IsAutoAccept() && CanAddQuest(quest, true) && CanTakeQuest(quest, true))
-                                AddQuestAndCheckCompletion(quest, source);
+                        if (quest.IsAutoComplete() && quest.IsRepeatable() && !quest.IsDailyOrWeekly())
+                            PlayerTalkClass.SendQuestGiverRequestItems(quest, source.GetGUID(), CanCompleteRepeatableQuest(quest), true);
+                        else
+                            PlayerTalkClass.SendQuestGiverQuestDetails(quest, source.GetGUID(), true, false);
 
-                            if (quest.IsAutoComplete() && quest.IsRepeatable() && !quest.IsDailyOrWeekly())
-                                PlayerTalkClass.SendQuestGiverRequestItems(quest, source.GetGUID(), CanCompleteRepeatableQuest(quest), true);
-                            else
-                                PlayerTalkClass.SendQuestGiverQuestDetails(quest, source.GetGUID(), true, false);
-                            return;
-                        }
                     }
+
+                    return;
                 }
             }
 
