@@ -91,7 +91,7 @@ namespace Game.Entities
             return tab.BonusListIDs.SelectRandomElementByWeight(x => (float)tab.Chances[tab.BonusListIDs.IndexOf(x)]);
         }
 
-        public static uint GetRandomPropertyPoints(uint itemLevel, ItemQuality quality, InventoryType inventoryType, uint subClass)
+        public static float GetRandomPropertyPoints(uint itemLevel, ItemQuality quality, InventoryType inventoryType, uint subClass)
         {
             uint propIndex;
 
@@ -147,14 +147,14 @@ namespace Game.Entities
             switch (quality)
             {
                 case ItemQuality.Uncommon:
-                    return randPropPointsEntry.Good[propIndex];
+                    return randPropPointsEntry.GoodF[propIndex];
                 case ItemQuality.Rare:
                 case ItemQuality.Heirloom:
-                    return randPropPointsEntry.Superior[propIndex];
+                    return randPropPointsEntry.SuperiorF[propIndex];
                 case ItemQuality.Epic:
                 case ItemQuality.Legendary:
                 case ItemQuality.Artifact:
-                    return randPropPointsEntry.Epic[propIndex];
+                    return randPropPointsEntry.EpicF[propIndex];
             }
 
             return 0;

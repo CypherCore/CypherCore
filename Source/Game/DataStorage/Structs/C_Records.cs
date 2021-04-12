@@ -157,6 +157,7 @@ namespace Game.DataStorage
         public int ChrCustomizationBoneSetID;
         public int ChrCustomizationCondModelID;
         public int ChrCustomizationDisplayInfoID;
+        public int ChrCustItemGeoModifyID;
     }
 
     public sealed class ChrCustomizationOptionRecord

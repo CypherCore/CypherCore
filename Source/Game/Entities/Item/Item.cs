@@ -1091,7 +1091,7 @@ namespace Game.Entities
 
         public byte GetGemCountWithID(uint GemID)
         {
-            var list = (List<SocketedGem>)m_itemData.Gems.GetEnumerator();
+            var list = (List<SocketedGem>)m_itemData.Gems;
             return (byte)list.Count(gemData => gemData.ItemId == GemID);
         }
 
@@ -1804,7 +1804,7 @@ namespace Game.Entities
             return Math.Min(Math.Max(itemLevel, 1), 1300);
         }
 
-        public int GetItemStatValue(uint index, Player owner)
+        public float GetItemStatValue(uint index, Player owner)
         {
             Cypher.Assert(index < ItemConst.MaxStats);
             switch ((ItemModType)GetItemStatType(index))
@@ -1817,18 +1817,18 @@ namespace Game.Entities
             }
 
             uint itemLevel = GetItemLevel(owner);
-            uint randomPropPoints = ItemEnchantmentManager.GetRandomPropertyPoints(itemLevel, GetQuality(), GetTemplate().GetInventoryType(), GetTemplate().GetSubClass());
+            float randomPropPoints = ItemEnchantmentManager.GetRandomPropertyPoints(itemLevel, GetQuality(), GetTemplate().GetInventoryType(), GetTemplate().GetSubClass());
             if (randomPropPoints != 0)
             {
-                float statValue = (_bonusData.StatPercentEditor[index] * randomPropPoints) * 0.0001f;
+                float statValue = _bonusData.StatPercentEditor[index] * randomPropPoints * 0.0001f;
                 GtItemSocketCostPerLevelRecord gtCost = CliDB.ItemSocketCostPerLevelGameTable.GetRow(itemLevel);
                 if (gtCost != null)
-                    statValue -= (_bonusData.ItemStatSocketCostMultiplier[index] * gtCost.SocketCost);
+                    statValue -= _bonusData.ItemStatSocketCostMultiplier[index] * gtCost.SocketCost;
 
-                return (int)(Math.Floor(statValue + 0.5f));
+                return statValue;
             }
 
-            return 0;
+            return 0f;
         }
 
         public ItemDisenchantLootRecord GetDisenchantLoot(Player owner)
