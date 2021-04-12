@@ -50,12 +50,15 @@ namespace Scripts.Spells.Shaman
         public const uint FlametongueWeaponAura = 319778;
         public const uint GatheringStorms = 198299;
         public const uint GatheringStormsBuff = 198300;
+        public const uint HealingRainVisual = 147490;
+        public const uint HealingRainHeal = 73921;
         public const uint ItemLightningShield = 23552;
         public const uint ItemLightningShieldDamage = 27635;
         public const uint ItemManaSurge = 23571;
         public const uint LavaBurst = 51505;
         public const uint LavaBurstBonusDamage = 71824;
         public const uint LavaSurge = 77762;
+        public const uint LiquidMagmaHit = 192231;
         public const uint PathOfFlamesSpread = 210621;
         public const uint PathOfFlamesTalent = 201909;
         public const uint PowerSurge = 40466;
@@ -71,6 +74,11 @@ namespace Scripts.Spells.Shaman
         public const uint HunterInsanity = 95809;
         public const uint MageTemporalDisplacement = 80354;
         public const uint PetNetherwindsFatigued = 160455;
+    }
+
+    struct CreatureIds
+    {
+        public const uint HealingRainInvisibleStalker = 73400;
     }
 
     [Script] // 108281 - Ancestral Guidance
@@ -309,8 +317,7 @@ namespace Scripts.Spells.Shaman
 
         public override bool Load()
         {
-            Unit caster = GetCaster();
-            return caster != null && caster.IsTypeId(TypeId.Player);
+            return GetCaster().IsTypeId(TypeId.Player);
         }
 
         void HandleEffectHitTarget(uint index)
@@ -322,7 +329,7 @@ namespace Scripts.Spells.Shaman
                 slot = EquipmentSlot.OffHand;
 
             Item targetItem = player.GetItemByPos(InventorySlots.Bag0, slot);
-            if (targetItem == null || !targetItem.GetTemplate().IsRangedWeapon())
+            if (targetItem == null || !targetItem.GetTemplate().IsWeapon())
                 return;
 
             GetCaster().CastSpell(targetItem, SpellIds.FlametongueWeaponEnchant, true);
@@ -335,7 +342,7 @@ namespace Scripts.Spells.Shaman
     }
 
     [Script] // 319778 - Flametongue
-    class spell_sha_flametongue_weapon_aura : AuraScript
+    class spell_sha_flametongue_weapon_AuraScript : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -347,7 +354,7 @@ namespace Scripts.Spells.Shaman
             PreventDefaultAction();
 
             Unit attacker = eventInfo.GetActor();
-            int damage = (int)(attacker.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * 0.12f / 2600 * attacker.GetBaseAttackTime(WeaponAttackType.BaseAttack));
+            int damage = Math.Max(1, (int)(attacker.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * 0.0264f));
             attacker.CastCustomSpell(SpellIds.FlametongueAttack, SpellValueMod.BasePoint0, damage, eventInfo.GetActionTarget(), TriggerCastFlags.FullMask, null, aurEff);
         }
 
@@ -357,6 +364,70 @@ namespace Scripts.Spells.Shaman
         }
     }
 
+    [Script] // 73920 - Healing Rain
+    class spell_sha_healing_rain : SpellScript
+    {
+        void InitializeVisualStalker()
+        {
+            Aura aura = GetHitAura();
+            if (aura != null)
+            {
+                WorldLocation dest = GetExplTargetDest();
+                if (dest != null)
+                {
+                    int duration = GetSpellInfo().CalcDuration(GetOriginalCaster());
+                    TempSummon summon = GetCaster().GetMap().SummonCreature(CreatureIds.HealingRainInvisibleStalker, dest, null, (uint)duration, GetOriginalCaster());
+                    if (summon == null)
+                        return;
+
+                    summon.CastSpell(summon, SpellIds.HealingRainVisual, true);
+
+                    var script = aura.GetScript<spell_sha_healing_rain_AuraScript>("spell_sha_healing_rain");
+                    if (script != null)
+                        script.SetVisualDummy(summon);
+                }
+            }
+        }
+
+        public override void Register()
+        {
+            OnHit.Add(new HitHandler(InitializeVisualStalker));
+        }
+    }
+    
+    [Script] // 73920 - Healing Rain (Aura)
+    class spell_sha_healing_rain_AuraScript : AuraScript
+    {
+        ObjectGuid _visualDummy;
+        float _x;
+        float _y;
+        float _z;
+
+        public void SetVisualDummy(TempSummon summon)
+        {
+            _visualDummy = summon.GetGUID();
+            summon.GetPosition(out _x, out _y, out _z);
+        }
+
+        void HandleEffectPeriodic(AuraEffect aurEff)
+        {
+            GetTarget().CastSpell(_x, _y, _z, SpellIds.HealingRainHeal, true, null, aurEff);
+        }
+
+        void HandleEffecRemoved(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Creature summon = ObjectAccessor.GetCreature(GetTarget(), _visualDummy);
+            if (summon != null)
+                summon.DespawnOrUnsummon();
+        }
+
+        public override void Register()
+        {
+            OnEffectRemove.Add(new EffectApplyHandler(HandleEffecRemoved, 1, AuraType.PeriodicDummy, AuraEffectHandleModes.Real));
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 1, AuraType.PeriodicDummy));
+        }
+    }
+    
     [Script] // 52042 - Healing Stream Totem
     class spell_sha_healing_stream_totem_heal : SpellScript
     {
@@ -638,6 +709,39 @@ namespace Scripts.Spells.Shaman
         }
     }
 
+    [Script] // 192223 - Liquid Magma Totem (erupting hit spell)
+    class spell_sha_liquid_magma_totem : SpellScript
+    {
+        bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.LiquidMagmaHit);
+        }
+
+        void HandleEffectHitTarget(uint effIndex)
+        {
+            Unit hitUnit = GetHitUnit();
+            if (hitUnit != null)
+                GetCaster().CastSpell(hitUnit, SpellIds.LiquidMagmaHit, true);
+        }
+
+        void HandleTargetSelect(List<WorldObject> targets)
+        {
+            // choose one random target from targets
+            if (targets.Count > 1)
+            {
+                WorldObject selected = targets.SelectRandom();
+                targets.Clear();
+                targets.Add(selected);
+            }
+        }
+
+        public override void Register()
+        {
+            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(HandleTargetSelect, 0, Targets.UnitDestAreaEnemy));
+            OnEffectHitTarget.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.Dummy));
+        }
+    }
+    
     [Script] // 210621 - Path of Flames Spread
     class spell_sha_path_of_flames_spread : SpellScript
     {

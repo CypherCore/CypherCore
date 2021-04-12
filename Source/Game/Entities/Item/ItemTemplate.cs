@@ -321,6 +321,8 @@ namespace Game.Entities
         public bool IsConjuredConsumable() { return GetClass() == ItemClass.Consumable && GetFlags().HasAnyFlag(ItemFlags.Conjured); }
         public bool IsCraftingReagent() { return GetFlags2().HasAnyFlag(ItemFlags2.UsedInATradeskill); }
 
+        public bool IsWeapon() { return GetClass() == ItemClass.Weapon; }
+
         public bool IsRangedWeapon()
         {
             return GetClass() == ItemClass.Weapon || GetSubClass() == (uint)ItemSubClassWeapon.Bow ||
