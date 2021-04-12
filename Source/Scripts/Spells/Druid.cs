@@ -52,6 +52,7 @@ namespace Scripts.Spells.Druid
         public const uint Exhilarate = 28742;
         public const uint FeralChargeBear = 16979;
         public const uint FeralChargeCat = 49376;
+        public const uint FormAquaticPassive = 276012;
         public const uint FormAquatic = 1066;
         public const uint FormFlight = 33943;
         public const uint FormStag = 165961;
@@ -74,6 +75,7 @@ namespace Scripts.Spells.Druid
         public const uint LivingSeedProc = 48504;
         public const uint Mangle = 33917;
         public const uint MoonfireDamage = 164812;
+        public const uint Prowl = 5215;
         public const uint RejuvenationT10Proc = 70691;
         public const uint RestorationT102PBonus = 70658;
         public const uint SavageRoar = 62071;
@@ -177,7 +179,7 @@ namespace Scripts.Spells.Druid
             if (damageInfo != null)
             {
                 Unit target = GetTarget();
-                uint rage = (uint)(100.0f * (float)damageInfo.GetDamage() / (float)target.GetMaxHealth());
+                uint rage = (uint)(target.GetMaxPower(PowerType.Rage) * (float)damageInfo.GetDamage() / (float)target.GetMaxHealth());
                 if (rage > 0)
                     target.CastCustomSpell(SpellIds.BristlingFurGainRage, SpellValueMod.BasePoint0, (int)rage, target, TriggerCastFlags.FullMask);
             }
@@ -186,6 +188,25 @@ namespace Scripts.Spells.Druid
         public override void Register()
         {
             OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+        }
+    }
+
+    [Script] // 768 - CatForm - SPELL_DRUID_CAT_FORM
+    class spell_dru_cat_form : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.Prowl);
+        }
+
+        void HandleAfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().RemoveOwnedAura(SpellIds.Prowl);
+        }
+
+        public override void Register()
+        {
+            AfterEffectRemove.Add(new EffectApplyHandler(HandleAfterRemove, 0, AuraType.ModShapeshift, AuraEffectHandleModes.Real));
         }
     }
 
@@ -237,7 +258,7 @@ namespace Scripts.Spells.Druid
 
         public override void Register()
         {
-            AfterEffectRemove .Add(new EffectApplyHandler(HandleRemoved, 0, AuraType.AddPctModifier, AuraEffectHandleModes.Real));
+            AfterEffectRemove.Add(new EffectApplyHandler(HandleRemoved, 0, AuraType.AddPctModifier, AuraEffectHandleModes.Real));
         }
     }
 
@@ -245,7 +266,7 @@ namespace Scripts.Spells.Druid
     class spell_dru_eclipse_dummy : AuraScript
     {
         class InitializeEclipseCountersEvent : BasicEvent
-        {   
+        {
             Unit _owner;
             uint _count;
 
@@ -360,7 +381,7 @@ namespace Scripts.Spells.Druid
             OnEffectPeriodic.Add(new EffectPeriodicHandler(Tick, 0, AuraType.PeriodicDummy));
         }
     }
-    
+
     [Script] // 203974 - Earthwarden
     class spell_dru_earthwarden : AuraScript
     {
@@ -1375,7 +1396,7 @@ namespace Scripts.Spells.Druid
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.FormStag, SpellIds.FormAquatic, SpellIds.FormFlight, SpellIds.FormSwiftFlight);
+            return ValidateSpellInfo(SpellIds.FormStag, SpellIds.FormAquaticPassive, SpellIds.FormAquatic, SpellIds.FormFlight, SpellIds.FormSwiftFlight);
         }
 
         public override bool Load()
@@ -1422,13 +1443,13 @@ namespace Scripts.Spells.Druid
         public static uint GetFormSpellId(Player player, Difficulty difficulty, bool requiresOutdoor)
         {
             // Check what form is appropriate
-            if (player.IsInWater()) // Aquatic form
+            if (player.HasSpell(SpellIds.FormAquaticPassive) && player.IsInWater()) // Aquatic form
                 return SpellIds.FormAquatic;
 
             if (!player.IsInCombat() && player.GetSkillValue(SkillType.Riding) >= 225 && CheckLocationForForm(player, difficulty, requiresOutdoor, SpellIds.FormFlight) == SpellCastResult.SpellCastOk) // Flight form
                 return player.GetSkillValue(SkillType.Riding) >= 300 ? SpellIds.FormSwiftFlight : SpellIds.FormFlight;
 
-            if (CheckLocationForForm(player, difficulty, requiresOutdoor, SpellIds.FormStag) == SpellCastResult.SpellCastOk) // Stag form
+            if (!player.IsInWater() && CheckLocationForForm(player, difficulty, requiresOutdoor, SpellIds.FormStag) == SpellCastResult.SpellCastOk) // Stag form
                 return SpellIds.FormStag;
 
             return 0;
@@ -1448,16 +1469,20 @@ namespace Scripts.Spells.Druid
     [Script] // 783 - Travel Form (dummy)
     class spell_dru_travel_form_dummy : SpellScript
     {
+        public override bool Validate(SpellInfo spellEntry)
+        {
+            return ValidateSpellInfo(SpellIds.FormAquaticPassive, SpellIds.FormAquatic, SpellIds.FormStag);
+        }
+
         SpellCastResult CheckCast()
         {
             Player player = GetCaster().ToPlayer();
             if (!player)
                 return SpellCastResult.CustomError;
 
-            if (player.GetSkillValue(SkillType.Riding) < 75)
-                return SpellCastResult.ApprenticeRidingRequirement;
+            uint spellId = (player.HasSpell(SpellIds.FormAquaticPassive) && player.IsInWater()) ? SpellIds.FormAquatic : SpellIds.FormStag;
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(player.IsInWater() ? SpellIds.FormAquatic : SpellIds.FormStag, GetCastDifficulty());
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetCastDifficulty());
             return spellInfo.CheckLocation(player.GetMapId(), player.GetZoneId(), player.GetAreaId(), player);
         }
 
@@ -1507,7 +1532,28 @@ namespace Scripts.Spells.Druid
     }
 
     [Script] // 252216 - Tiger Dash
-    class spell_dru_tiger_dash : AuraScript
+    class spell_dru_tiger_dash : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.CatForm);
+        }
+
+        void HandleOnCast()
+        {
+            // Change into cat form
+            if (GetCaster().GetShapeshiftForm() != ShapeShiftForm.CatForm)
+                GetCaster().CastSpell(GetCaster(), SpellIds.CatForm, true);
+        }
+
+        public override void Register()
+        {
+            BeforeCast.Add(new CastHandler(HandleOnCast));
+        }
+    }
+
+    [Script] // 252216 - Tiger Dash (Aura)
+    class spell_dru_tiger_dash_AuraScript : AuraScript
     {
         void HandlePeriodic(AuraEffect aurEff)
         {
@@ -1524,7 +1570,7 @@ namespace Scripts.Spells.Druid
             OnEffectPeriodic.Add(new EffectPeriodicHandler(HandlePeriodic, 1, AuraType.PeriodicDummy));
         }
     }
-
+    
     [Script] // 48438 - Wild Growth
     class spell_dru_wild_growth : SpellScript
     {
