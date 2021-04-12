@@ -4358,24 +4358,12 @@ namespace Game.Entities
                 return;
             }
 
-            bool remove = false;
-            for (var i = 0; i < m_appliedAuras.KeyValueList.Count; i++)
+            foreach (var app in GetAppliedAuras())
             {
-                var app = m_appliedAuras.KeyValueList[i];
-                if (remove)
-                {
-                    remove = false;
-                    i = 0;
-                }
-
                 if (aura.CanStackWith(app.Value.GetBase()))
                     continue;
 
                 RemoveAura(app, AuraRemoveMode.Default);
-                if (i == m_appliedAuras.KeyValueList.Count - 1)
-                    break;
-
-                remove = true;
             }
         }
         public int GetHighestExclusiveSameEffectSpellGroupValue(AuraEffect aurEff, AuraType auraType, bool checkMiscValue = false, int miscValue = 0)
