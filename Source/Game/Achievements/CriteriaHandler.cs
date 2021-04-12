@@ -609,18 +609,18 @@ namespace Game.Achievements
             progress.PlayerGUID = referencePlayer ? referencePlayer.GetGUID() : ObjectGuid.Empty;
             _criteriaProgress[criteria.Id] = progress;
 
-            uint timeElapsed = 0;
+            TimeSpan timeElapsed = TimeSpan.Zero;
             if (criteria.Entry.StartTimer != 0)
             {
                 Cypher.Assert(trees != null);
 
                 foreach (CriteriaTree tree in trees)
                 {
-                    var timedIter = _timeCriteriaTrees.LookupByKey(tree.Id);
-                    if (timedIter != 0)
+                    var timed = _timeCriteriaTrees.LookupByKey(tree.Id);
+                    if (timed != 0)
                     {
                         // Client expects this in packet
-                        timeElapsed = criteria.Entry.StartTimer - (timedIter / Time.InMilliseconds);
+                        timeElapsed = TimeSpan.FromSeconds(criteria.Entry.StartTimer - (timed / Time.InMilliseconds));
 
                         // Remove the timer, we wont need it anymore
                         if (IsCompletedCriteriaTree(tree))
@@ -2590,7 +2590,7 @@ namespace Game.Achievements
         }
 
         public virtual void SendAllData(Player receiver) { }
-        public virtual void SendCriteriaUpdate(Criteria criteria, CriteriaProgress progress, uint timeElapsed, bool timedCompleted) { }
+        public virtual void SendCriteriaUpdate(Criteria criteria, CriteriaProgress progress, TimeSpan timeElapsed, bool timedCompleted) { }
         public virtual void SendCriteriaProgressRemoved(uint criteriaId) { }
 
         public virtual void CompletedCriteriaTree(CriteriaTree tree, Player referencePlayer) { }

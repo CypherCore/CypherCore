@@ -21,6 +21,7 @@ using Game.Achievements;
 using Game.Entities;
 using Game.Networking;
 using Game.Networking.Packets;
+using System;
 using System.Collections.Generic;
 
 namespace Game
@@ -240,7 +241,7 @@ namespace Game
             return _completedObjectives.Contains(questObjective.Id);
         }
 
-        public override void SendCriteriaUpdate(Criteria criteria, CriteriaProgress progress, uint timeElapsed, bool timedCompleted)
+        public override void SendCriteriaUpdate(Criteria criteria, CriteriaProgress progress, TimeSpan timeElapsed, bool timedCompleted)
         {
             CriteriaUpdate criteriaUpdate = new();
 
@@ -252,7 +253,7 @@ namespace Game
                 criteriaUpdate.Flags = timedCompleted ? 1 : 0u; // 1 is for keeping the counter at 0 in client
 
             criteriaUpdate.CurrentTime = progress.Date;
-            criteriaUpdate.ElapsedTime = timeElapsed;
+            criteriaUpdate.ElapsedTime = (uint)timeElapsed.TotalSeconds;
             criteriaUpdate.CreationTime = 0;
 
             SendPacket(criteriaUpdate);

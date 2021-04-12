@@ -21,6 +21,7 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Networking;
 using Game.Networking.Packets;
+using System;
 using System.Collections.Generic;
 
 namespace Game.Scenarios
@@ -153,7 +154,7 @@ namespace Game.Scenarios
             return _stepStates[step];
         }
 
-        public override void SendCriteriaUpdate(Criteria criteria, CriteriaProgress progress, uint timeElapsed, bool timedCompleted)
+        public override void SendCriteriaUpdate(Criteria criteria, CriteriaProgress progress, TimeSpan timeElapsed, bool timedCompleted)
         {
             ScenarioProgressUpdate progressUpdate = new();
             progressUpdate.CriteriaProgress.Id = criteria.Id;
@@ -163,7 +164,7 @@ namespace Game.Scenarios
             if (criteria.Entry.StartTimer != 0)
                 progressUpdate.CriteriaProgress.Flags = timedCompleted ? 1 : 0u;
 
-            progressUpdate.CriteriaProgress.TimeFromStart = timeElapsed;
+            progressUpdate.CriteriaProgress.TimeFromStart = (uint)timeElapsed.TotalSeconds;
             progressUpdate.CriteriaProgress.TimeFromCreate = 0;
 
             SendPacket(progressUpdate);

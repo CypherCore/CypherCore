@@ -602,7 +602,7 @@ namespace Game.Achievements
             return false;
         }
 
-        public override void SendCriteriaUpdate(Criteria criteria, CriteriaProgress progress, uint timeElapsed, bool timedCompleted)
+        public override void SendCriteriaUpdate(Criteria criteria, CriteriaProgress progress, TimeSpan timeElapsed, bool timedCompleted)
         {
             if (criteria.FlagsCu.HasAnyFlag(CriteriaFlagsCu.Account))
             {
@@ -615,7 +615,7 @@ namespace Game.Achievements
                     criteriaUpdate.Progress.Flags = timedCompleted ? 1 : 0u; // 1 is for keeping the counter at 0 in client
 
                 criteriaUpdate.Progress.Date = progress.Date;
-                criteriaUpdate.Progress.TimeFromStart = timeElapsed;
+                criteriaUpdate.Progress.TimeFromStart = (uint)timeElapsed.TotalSeconds;
                 criteriaUpdate.Progress.TimeFromCreate = 0;
                 SendPacket(criteriaUpdate);
             }
@@ -631,7 +631,7 @@ namespace Game.Achievements
                     criteriaUpdate.Flags = timedCompleted ? 1 : 0u; // 1 is for keeping the counter at 0 in client
 
                 criteriaUpdate.CurrentTime = progress.Date;
-                criteriaUpdate.ElapsedTime = timeElapsed;
+                criteriaUpdate.ElapsedTime = (uint)timeElapsed.TotalSeconds;
                 criteriaUpdate.CreationTime = 0;
 
                 SendPacket(criteriaUpdate);
@@ -1013,7 +1013,7 @@ namespace Game.Achievements
             UpdateCriteria(CriteriaTypes.EarnAchievementPoints, achievement.Points, 0, 0, null, referencePlayer);
         }
 
-        public override void SendCriteriaUpdate(Criteria entry, CriteriaProgress progress, uint timeElapsed, bool timedCompleted)
+        public override void SendCriteriaUpdate(Criteria entry, CriteriaProgress progress, TimeSpan timeElapsed, bool timedCompleted)
         {
             GuildCriteriaUpdate guildCriteriaUpdate = new();
 
