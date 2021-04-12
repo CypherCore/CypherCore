@@ -757,7 +757,9 @@ namespace Framework.Constants
         PlayerCondition = 305,
         NotWhileChromieTimed = 306,
         OptionalReagents = 307,
-        Unknown = 308,
+        SpectatorOrCommentator = 308,
+        SoulbindConduitLearnFailedInvalidCovenant = 309,
+        Unknown = 310,
 
         // Ok Cast Value - Here In Case A Future Version Removes Success And We Need To Use A Custom Value (Not Sent To Client Either Way)
         SpellCastOk = Success
@@ -1291,7 +1293,9 @@ namespace Framework.Constants
         YouCannotAddThatConduitToForgeOfBonds = 532, // You Cannot Add That Conduit To The Forge Of Bonds.
         YouCannotSoulshapeDuringLichborne = 533, // You Cannot Soulshape During Lichborne.
         YouCantDoThatWhileCarryingAnAnimacone = 534, // You Can'T Do That While Carrying An Animacone.
-        NecessaryConstructNotPresent = 535, // Necessary Construct Not Present.
+        NecessaryConstructNotPresent = 535, // Necessary Construct Not Present
+        ThatGuestIsAlreadyCoveredInGelatin = 536, // That Guest Is Already Covered In Gelatin.
+        YouNeedToWaitToUseThisItem = 537, // You Need To Wait To Use This Item.
     }
 
     public enum SpellMissInfo
