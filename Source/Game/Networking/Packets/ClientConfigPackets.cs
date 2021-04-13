@@ -29,14 +29,14 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(PlayerGuid);
-            _worldPacket.WriteUInt32(ServerTime);
+            _worldPacket.WriteInt64(ServerTime);
             foreach (var accounttime in AccountTimes)
-                _worldPacket.WriteUInt32(accounttime);
+                _worldPacket.WriteInt64(accounttime);
         }
 
         public ObjectGuid PlayerGuid;
-        public uint ServerTime = 0;
-        public Array<uint> AccountTimes = new((int)AccountDataTypes.Max);
+        public long ServerTime;
+        public Array<long> AccountTimes = new((int)AccountDataTypes.Max);
     }
 
     public class ClientCacheVersion : ServerPacket
@@ -72,7 +72,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WritePackedGuid(Player);
-            _worldPacket.WriteUInt32(Time);
+            _worldPacket.WriteInt64(Time);
             _worldPacket.WriteUInt32(Size);
             _worldPacket.WriteBits(DataType, 3);
 
@@ -87,8 +87,8 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid Player;
-        public uint Time = 0; // UnixTime
-        public uint Size = 0; // decompressed size
+        public long Time; // UnixTime
+        public uint Size; // decompressed size
         public AccountDataTypes DataType = 0;
         public ByteBuffer CompressedData;
     }
@@ -100,7 +100,7 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             PlayerGuid = _worldPacket.ReadPackedGuid();
-            Time = _worldPacket.ReadUInt32();
+            Time = _worldPacket.ReadInt64();
             Size = _worldPacket.ReadUInt32();
             DataType = (AccountDataTypes)_worldPacket.ReadBits<uint>(3);
 
@@ -112,7 +112,7 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid PlayerGuid;
-        public uint Time; // UnixTime
+        public long Time; // UnixTime
         public uint Size; // decompressed size
         public AccountDataTypes DataType = 0;
         public ByteBuffer CompressedData;

@@ -55,11 +55,11 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Guid = _worldPacket.ReadPackedGuid();
-            LastUpdateID = _worldPacket.ReadUInt32();
+            LastUpdateID = _worldPacket.ReadInt64();
         }
 
         public ObjectGuid Guid;
-        public uint LastUpdateID;
+        public long LastUpdateID;
     }
 
     public class BlackMarketRequestItemsResult : ServerPacket
@@ -68,14 +68,14 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteInt32(LastUpdateID);
+            _worldPacket.WriteInt64(LastUpdateID);
             _worldPacket.WriteInt32(Items.Count);
 
             foreach (BlackMarketItem item in Items)
                 item.Write(_worldPacket);
         }
 
-        public int LastUpdateID;
+        public long LastUpdateID;
         public List<BlackMarketItem> Items = new();
     }
 

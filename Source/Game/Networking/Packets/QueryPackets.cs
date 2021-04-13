@@ -390,7 +390,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32((uint)CurrentTime);
+            _worldPacket.WriteInt64(CurrentTime);
         }
 
         public long CurrentTime;
@@ -503,7 +503,7 @@ namespace Game.Networking.Packets
                 for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
                     _worldPacket.WriteString(DeclinedNames.name[i]);
 
-                _worldPacket.WriteUInt32(Timestamp);
+                _worldPacket.WriteInt64(Timestamp);
                 _worldPacket.WriteString(Name);
             }
 
@@ -515,7 +515,7 @@ namespace Game.Networking.Packets
 
         public bool HasDeclined;
         public DeclinedName DeclinedNames = new();
-        public uint Timestamp;
+        public long Timestamp;
         public string Name = "";
     }
 

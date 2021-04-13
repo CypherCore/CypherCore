@@ -45,7 +45,7 @@ namespace Game.Networking.Packets
             foreach (AuctionableTokenInfo auctionableTokenAuctionable in AuctionableTokenAuctionableList)
             {
                 _worldPacket.WriteUInt64(auctionableTokenAuctionable.UnkInt1);
-                _worldPacket.WriteUInt32(auctionableTokenAuctionable.UnkInt2);
+                _worldPacket.WriteInt64(auctionableTokenAuctionable.UnkInt2);
                 _worldPacket.WriteUInt64(auctionableTokenAuctionable.BuyoutPrice);
                 _worldPacket.WriteUInt32(auctionableTokenAuctionable.Owner);
                 _worldPacket.WriteUInt32(auctionableTokenAuctionable.DurationLeft);
@@ -59,7 +59,7 @@ namespace Game.Networking.Packets
         struct AuctionableTokenInfo
         {
             public ulong UnkInt1;
-            public uint UnkInt2;
+            public long UnkInt2;
             public uint Owner;
             public ulong BuyoutPrice;
             public uint DurationLeft;

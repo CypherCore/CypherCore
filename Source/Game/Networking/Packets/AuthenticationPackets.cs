@@ -130,7 +130,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteInt32(SuccessInfo.Value.AvailableClasses.Count);
                 _worldPacket.WriteInt32(SuccessInfo.Value.Templates.Count);
                 _worldPacket.WriteUInt32(SuccessInfo.Value.CurrencyID);
-                _worldPacket.WriteUInt32(SuccessInfo.Value.Time);
+                _worldPacket.WriteInt64(SuccessInfo.Value.Time);
 
                 foreach (var raceClassAvailability in SuccessInfo.Value.AvailableClasses)
                 {
@@ -211,7 +211,7 @@ namespace Game.Networking.Packets
             public uint VirtualRealmAddress; // a special identifier made from the Index, BattleGroup and Region. @todo implement
             public uint TimeSecondsUntilPCKick; // @todo research
             public uint CurrencyID; // this is probably used for the ingame shop. @todo implement
-            public uint Time;
+            public long Time;
 
             public GameTime GameTimeInfo;
 

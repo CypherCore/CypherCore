@@ -87,10 +87,10 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt32(VirtualRealmAddress);
-            _worldPacket.WriteInt32(Hotfixes.Count);
+            _worldPacket.WriteInt32(Hotfixes.Keys.Count);
 
-            foreach (var pair in Hotfixes)
-                _worldPacket.WriteInt32(pair.Key);
+            foreach (var key in Hotfixes.Keys)
+                _worldPacket.WriteInt32(key);
         }
 
         public uint VirtualRealmAddress;

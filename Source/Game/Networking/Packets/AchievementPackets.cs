@@ -75,7 +75,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(Flags);
             _worldPacket.WritePackedTime(CurrentTime);
             _worldPacket.WriteUInt32(ElapsedTime);
-            _worldPacket.WriteUInt32(CreationTime);
+            _worldPacket.WriteInt64(CreationTime);
             _worldPacket.WriteBit(RafAcceptanceID.HasValue);
             _worldPacket.FlushBits();
 
@@ -89,7 +89,7 @@ namespace Game.Networking.Packets
         public uint Flags;
         public long CurrentTime;
         public uint ElapsedTime;
-        public uint CreationTime;
+        public long CreationTime;
         public Optional<ulong> RafAcceptanceID;
     }
 
@@ -186,8 +186,8 @@ namespace Game.Networking.Packets
             foreach (GuildCriteriaProgress progress in Progress)
             {
                 _worldPacket.WriteUInt32(progress.CriteriaID);
-                _worldPacket.WriteUInt32(progress.DateCreated);
-                _worldPacket.WriteUInt32(progress.DateStarted);
+                _worldPacket.WriteInt64(progress.DateCreated);
+                _worldPacket.WriteInt64(progress.DateStarted);
                 _worldPacket.WritePackedTime(progress.DateUpdated);
                 _worldPacket.WriteUInt32(0); // this is a hack. this is a packed time written as int64 (progress.DateUpdated)
                 _worldPacket.WriteUInt64(progress.Quantity);
@@ -356,8 +356,8 @@ namespace Game.Networking.Packets
     public struct GuildCriteriaProgress
     {
         public uint CriteriaID;
-        public uint DateCreated;
-        public uint DateStarted;
+        public long DateCreated;
+        public long DateStarted;
         public long DateUpdated;
         public ulong Quantity;
         public ObjectGuid PlayerGUID;

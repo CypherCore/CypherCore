@@ -758,7 +758,7 @@ namespace Game.Networking.Packets
             RequesterGuid = data.ReadPackedGuid();
             Id = data.ReadUInt32();
             Type = (RideType)data.ReadUInt32();
-            Time = data.ReadInt32();
+            Time = data.ReadInt64();
         }
 
         public void Write(WorldPacket data)
@@ -766,13 +766,13 @@ namespace Game.Networking.Packets
             data.WritePackedGuid(RequesterGuid);
             data.WriteUInt32(Id);
             data.WriteUInt32((uint)Type);
-            data.WriteInt32(Time);
+            data.WriteInt64(Time);
         }
 
         public ObjectGuid RequesterGuid;
         public uint Id;
         public RideType Type;
-        public int Time;
+        public long Time;
     }
 
     public enum RideType

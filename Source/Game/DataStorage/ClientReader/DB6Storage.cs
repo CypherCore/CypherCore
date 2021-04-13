@@ -34,16 +34,20 @@ namespace Game.DataStorage
         void WriteRecord(uint id, Locale locale, ByteBuffer buffer);
 
         void EraseRecord(uint id);
+
+        string GetName();
     }
 
     [Serializable]
     public class DB6Storage<T> : Dictionary<uint, T>, IDB2Storage where T : new()
     {
         WDCHeader _header;
+        string _tableName;
 
         public void LoadData(WDCHeader header, BitSet availableDb2Locales, HotfixStatements preparedStatement, HotfixStatements preparedStatementLocale)
         {
             _header = header;
+            _tableName = typeof(T).Name;
 
             SQLResult result = DB.Hotfix.Query(DB.Hotfix.GetPreparedStatement(preparedStatement));
             if (!result.IsEmpty())
@@ -384,5 +388,10 @@ namespace Game.DataStorage
         }
 
         public uint GetTableHash() { return _header.TableHash; }
+
+        public string GetName()
+        {
+            return _tableName;
+        }
     }
 }

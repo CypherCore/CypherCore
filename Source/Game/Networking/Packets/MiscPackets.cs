@@ -316,10 +316,10 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(Time);
+            _worldPacket.WriteInt64(Time);
         }
 
-        public uint Time;
+        public long Time;
     }
 
     public class TutorialFlags : ServerPacket

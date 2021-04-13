@@ -3037,7 +3037,7 @@ namespace Game.Entities
             data.WriteUInt32(Field_14);
             data.WriteUInt32(Field_18);
             data.WriteUInt32(PvpTierID);
-            data.WriteBit(Field_20);
+            data.WriteBit((bool)Field_20);
             data.FlushBits();
         }
 

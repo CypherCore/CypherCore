@@ -2193,42 +2193,26 @@ namespace Game.Entities
             foreach (SpellAuraOptionsRecord auraOptions in CliDB.SpellAuraOptionsStorage.Values)
                 GetLoadHelper(auraOptions.SpellID, auraOptions.DifficultyID).AuraOptions = auraOptions;
 
-            CliDB.SpellAuraOptionsStorage.Clear();
-
             foreach (SpellAuraRestrictionsRecord auraRestrictions in CliDB.SpellAuraRestrictionsStorage.Values)
                 GetLoadHelper(auraRestrictions.SpellID, auraRestrictions.DifficultyID).AuraRestrictions = auraRestrictions;
-
-            CliDB.SpellAuraRestrictionsStorage.Clear();
 
             foreach (SpellCastingRequirementsRecord castingRequirements in CliDB.SpellCastingRequirementsStorage.Values)
                 GetLoadHelper(castingRequirements.SpellID, 0).CastingRequirements = castingRequirements;
 
-            CliDB.SpellCastingRequirementsStorage.Clear();
-
             foreach (SpellCategoriesRecord categories in CliDB.SpellCategoriesStorage.Values)
                 GetLoadHelper(categories.SpellID, categories.DifficultyID).Categories = categories;
-
-            CliDB.SpellCategoriesStorage.Clear();
 
             foreach (SpellClassOptionsRecord classOptions in CliDB.SpellClassOptionsStorage.Values)
                 GetLoadHelper(classOptions.SpellID, 0).ClassOptions = classOptions;
 
-            CliDB.SpellClassOptionsStorage.Clear();
-
             foreach (SpellCooldownsRecord cooldowns in CliDB.SpellCooldownsStorage.Values)
                 GetLoadHelper(cooldowns.SpellID, cooldowns.DifficultyID).Cooldowns = cooldowns;
-
-            CliDB.SpellCooldownsStorage.Clear();
 
             foreach (SpellEquippedItemsRecord equippedItems in CliDB.SpellEquippedItemsStorage.Values)
                 GetLoadHelper(equippedItems.SpellID, 0).EquippedItems = equippedItems;
 
-            CliDB.SpellEquippedItemsStorage.Clear();
-
             foreach (SpellInterruptsRecord interrupts in CliDB.SpellInterruptsStorage.Values)
                 GetLoadHelper(interrupts.SpellID, interrupts.DifficultyID).Interrupts = interrupts;
-
-            CliDB.SpellInterruptsStorage.Clear();
 
             foreach (SpellLevelsRecord levels in CliDB.SpellLevelsStorage.Values)
                 GetLoadHelper(levels.SpellID, levels.DifficultyID).Levels = levels;
@@ -2255,27 +2239,17 @@ namespace Game.Entities
             foreach (SpellReagentsRecord reagents in CliDB.SpellReagentsStorage.Values)
                 GetLoadHelper(reagents.SpellID, 0).Reagents = reagents;
 
-            CliDB.SpellReagentsStorage.Clear();
-
             foreach (SpellScalingRecord scaling in CliDB.SpellScalingStorage.Values)
                 GetLoadHelper(scaling.SpellID, 0).Scaling = scaling;
-
-            CliDB.SpellScalingStorage.Clear();
 
             foreach (SpellShapeshiftRecord shapeshift in CliDB.SpellShapeshiftStorage.Values)
                 GetLoadHelper(shapeshift.SpellID, 0).Shapeshift = shapeshift;
 
-            CliDB.SpellShapeshiftStorage.Clear();
-
             foreach (SpellTargetRestrictionsRecord targetRestrictions in CliDB.SpellTargetRestrictionsStorage.Values)
                 GetLoadHelper(targetRestrictions.SpellID, targetRestrictions.DifficultyID).TargetRestrictions = targetRestrictions;
 
-            CliDB.SpellTargetRestrictionsStorage.Clear();
-
             foreach (SpellTotemsRecord totems in CliDB.SpellTotemsStorage.Values)
                 GetLoadHelper(totems.SpellID, 0).Totems = totems;
-
-            CliDB.SpellTotemsStorage.Clear();
 
             foreach (var visual in CliDB.SpellXSpellVisualStorage.Values)
             {

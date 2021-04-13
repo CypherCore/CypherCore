@@ -61,7 +61,7 @@ namespace Game.Networking.Packets
             foreach (var c in Cases)
             {
                 _worldPacket.WriteInt32(c.CaseID);
-                _worldPacket.WriteUInt32(c.CaseOpened);
+                _worldPacket.WriteInt64(c.CaseOpened);
                 _worldPacket.WriteInt32(c.CaseStatus);
                 _worldPacket.WriteUInt16(c.CfgRealmID);
                 _worldPacket.WriteUInt64(c.CharacterID);
@@ -80,7 +80,7 @@ namespace Game.Networking.Packets
         public struct GMTicketCase
         {
             public int CaseID;
-            public uint CaseOpened;
+            public long CaseOpened;
             public int CaseStatus;
             public ushort CfgRealmID;
             public ulong CharacterID;
@@ -215,18 +215,18 @@ namespace Game.Networking.Packets
 
         public struct SupportTicketChatLine
         {
-            public uint Timestamp;
+            public long Timestamp;
             public string Text;
 
             public SupportTicketChatLine(WorldPacket data)
             {
-                Timestamp = data.ReadUInt32();
+                Timestamp = data.ReadInt64();
                 Text = data.ReadString(data.ReadBits<uint>(12));
             }
 
             public SupportTicketChatLine(long timestamp, string text)
             {
-                Timestamp = (uint)timestamp;
+                Timestamp = timestamp;
                 Text = text;
             }
 
@@ -260,7 +260,7 @@ namespace Game.Networking.Packets
         {
             public void Read(WorldPacket data)
             {
-                Timestamp = data.ReadInt32();
+                Timestamp = data.ReadInt64();
                 AuthorGUID = data.ReadPackedGuid();
 
                 bool hasClubID = data.HasBit();
@@ -305,7 +305,7 @@ namespace Game.Networking.Packets
                 public byte field_6;
             }
 
-            public int Timestamp;
+            public long Timestamp;
             public ObjectGuid AuthorGUID;
             public Optional<ulong> ClubID;
             public Optional<ObjectGuid> ChannelGUID;

@@ -188,7 +188,7 @@ namespace Game.Networking.Packets
                 foreach (var visualItem in VisualItems)
                     visualItem.Write(data);
 
-                data.WriteUInt32((uint)LastPlayedTime);
+                data.WriteInt64(LastPlayedTime);
                 data.WriteUInt16(SpecID);
                 data.WriteUInt32(Unknown703);
                 data.WriteUInt32(LastLoginVersion);

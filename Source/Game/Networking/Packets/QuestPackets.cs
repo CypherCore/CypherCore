@@ -817,7 +817,7 @@ namespace Game.Networking.Packets
 
             foreach (WorldQuestUpdateInfo worldQuestUpdate in WorldQuestUpdates)
             {
-                _worldPacket.WriteInt32(worldQuestUpdate.LastUpdate);
+                _worldPacket.WriteInt64(worldQuestUpdate.LastUpdate);
                 _worldPacket.WriteUInt32(worldQuestUpdate.QuestID);
                 _worldPacket.WriteUInt32(worldQuestUpdate.Timer);
                 _worldPacket.WriteInt32(worldQuestUpdate.VariableID);
@@ -1183,7 +1183,7 @@ namespace Game.Networking.Packets
 
     struct WorldQuestUpdateInfo
     {
-        public WorldQuestUpdateInfo(int lastUpdate, uint questID, uint timer, int variableID, int value)
+        public WorldQuestUpdateInfo(long lastUpdate, uint questID, uint timer, int variableID, int value)
         {
             LastUpdate = lastUpdate;
             QuestID = questID;
@@ -1192,7 +1192,7 @@ namespace Game.Networking.Packets
             Value = value;
         }
 
-        public int LastUpdate;
+        public long LastUpdate;
         public uint QuestID;
         public uint Timer;
         // WorldState

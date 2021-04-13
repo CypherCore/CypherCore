@@ -152,10 +152,10 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            LastUpdate = _worldPacket.ReadUInt32();
+            LastUpdate = _worldPacket.ReadInt64();
         }
 
-        public uint LastUpdate;
+        public long LastUpdate;
     }
 
     class LFGuildRecruits : ServerPacket
@@ -165,7 +165,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteInt32(Recruits.Count);
-            _worldPacket.WriteUInt32((uint)UpdateTime);
+            _worldPacket.WriteInt64(UpdateTime);
             foreach (LFGuildRecruitData recruit in Recruits)
                 recruit.Write(_worldPacket);
         }

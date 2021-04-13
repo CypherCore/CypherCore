@@ -468,7 +468,7 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WriteUInt32(MapID);
             _worldPacket.WriteUInt8((byte)State);
-            _worldPacket.WriteInt32((int)StartTime);
+            _worldPacket.WriteInt64(StartTime);
             _worldPacket.WriteInt32(Duration);
             _worldPacket.WriteUInt8(ArenaFaction);
             _worldPacket.WriteUInt32(BattlemasterListID);

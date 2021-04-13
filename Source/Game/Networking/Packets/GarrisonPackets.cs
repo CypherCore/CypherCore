@@ -338,9 +338,9 @@ namespace Game.Networking.Packets
         {
             data.WriteUInt32(GarrPlotInstanceID);
             data.WriteUInt32(GarrBuildingID);
-            data.WriteUInt32((uint)TimeBuilt);
+            data.WriteInt64(TimeBuilt);
             data.WriteUInt32(CurrentGarSpecID);
-            data.WriteUInt32((uint)TimeSpecCooldown);
+            data.WriteInt64(TimeSpecCooldown);
             data.WriteBit(Active);
             data.FlushBits();
         }
@@ -371,8 +371,8 @@ namespace Game.Networking.Packets
             data.WriteUInt32(ZoneSupportSpellID);
             data.WriteUInt32(FollowerStatus);
             data.WriteInt32(Health);
-            data .WriteInt8(BoardIndex);
-            data .WriteInt32(HealingTimestamp);
+            data.WriteInt8(BoardIndex);
+            data.WriteInt64(HealingTimestamp);
 
             AbilityID.ForEach(ability => data.WriteUInt32(ability.Id));
 
@@ -395,7 +395,7 @@ namespace Game.Networking.Packets
         public uint ZoneSupportSpellID;
         public uint FollowerStatus;
         public int Health;
-        public int HealingTimestamp;
+        public long HealingTimestamp;
         public sbyte BoardIndex;
         public string CustomName = "";
     }
@@ -405,9 +405,9 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteUInt64(DbID);
-            data.WriteUInt32((uint)OfferTime);
+            data.WriteInt64(OfferTime);
             data.WriteUInt32(OfferDuration);
-            data.WriteUInt32((uint)StartTime);
+            data.WriteInt64(StartTime);
             data.WriteUInt32(TravelDuration);
             data.WriteUInt32(MissionDuration);
             data.WriteUInt32(MissionRecID);
@@ -462,7 +462,7 @@ namespace Game.Networking.Packets
     {
         public void Write(WorldPacket data)
         {
-            data.WriteUInt32((uint)StartTime);
+            data.WriteInt64(StartTime);
             data.WriteUInt32(GarrMssnBonusAbilityID);
         }
 
@@ -488,7 +488,7 @@ namespace Game.Networking.Packets
         {
             data.WriteInt32(GarrTalentID);
             data.WriteInt32(Rank);
-            data.WriteUInt32((uint)ResearchStartTime);
+            data.WriteInt64(ResearchStartTime);
             data.WriteInt32(Flags);
             data.WriteBit(Socket.HasValue);
             data.FlushBits();

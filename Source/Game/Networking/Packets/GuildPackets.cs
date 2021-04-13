@@ -879,10 +879,10 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            CurrentVersion = _worldPacket.ReadUInt32();
+            CurrentVersion = _worldPacket.ReadInt64();
         }
 
-        public uint CurrentVersion;
+        public long CurrentVersion;
     }
 
     public class GuildRewardList : ServerPacket
@@ -894,7 +894,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteUInt32(Version);
+            _worldPacket.WriteInt64(Version);
             _worldPacket.WriteInt32(RewardItems.Count);
 
             foreach (var item in RewardItems)
@@ -902,7 +902,7 @@ namespace Game.Networking.Packets
         }
 
         public List<GuildRewardItem> RewardItems;
-        public uint Version;
+        public long Version;
     }
 
     public class GuildBankActivate : ClientPacket
