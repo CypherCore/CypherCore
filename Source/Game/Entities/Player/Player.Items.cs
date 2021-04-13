@@ -6379,7 +6379,7 @@ namespace Game.Entities
             if (newEqSet.Guid != 0)
             {
                 // something wrong...
-                var equipmentSetInfo = _equipmentSets.LookupByKey(newEqSet.SetID);
+                var equipmentSetInfo = _equipmentSets.LookupByKey(newEqSet.Guid);
                 if (equipmentSetInfo == null || equipmentSetInfo.Data.Guid != newEqSet.Guid)
                 {
                     Log.outError(LogFilter.Player, "Player {0} tried to save equipment set {1} (index: {2}), but that equipment set not found!", GetName(), newEqSet.Guid, newEqSet.SetID);
