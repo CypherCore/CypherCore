@@ -1461,7 +1461,7 @@ namespace Game.Entities
             foreach (var unit in m_Controlled)
                 unit.SetInCombatState(PvP, enemy);
 
-            foreach (var pair in m_appliedAuras)
+            foreach (var pair in GetAppliedAuras())
             {
                 AuraApplication aurApp = pair.Value;
                 aurApp.GetBase().CallScriptEnterLeaveCombatHandlers(aurApp, true);

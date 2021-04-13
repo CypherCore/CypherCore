@@ -2663,7 +2663,7 @@ namespace Game.Entities
                 RemoveAurasWithMechanic(1 << (int)Mechanics.Root);
 
             // Snares
-            foreach (var pair in m_appliedAuras)
+            foreach (var pair in GetAppliedAuras())
             {
                 Aura aura = pair.Value.GetBase();
                 if (aura.GetSpellInfo().Mechanic == Mechanics.Snare)
@@ -3731,7 +3731,8 @@ namespace Game.Entities
 
         void RemoveAppliedAuras(uint spellId, Func<AuraApplication, bool> check)
         {
-            foreach (var app in m_appliedAuras.LookupByKey(spellId))
+            var list = m_appliedAuras.LookupByKey(spellId);
+            foreach (var app in list)
             {
                 if (check(app))
                     RemoveAura(app);
@@ -3740,7 +3741,8 @@ namespace Game.Entities
 
         void RemoveOwnedAuras(uint spellId, Func<Aura, bool> check)
         {
-            foreach (var aura in m_ownedAuras.LookupByKey(spellId))
+            var list = m_ownedAuras.LookupByKey(spellId);
+            foreach (var aura in list)
             {
                 if (check(aura))
                     RemoveOwnedAura(aura);
@@ -3769,7 +3771,7 @@ namespace Game.Entities
         public void RemoveAurasByShapeShift()
         {
             uint mechanic_mask = (1 << (int)Mechanics.Snare) | (1 << (int)Mechanics.Root);
-            foreach (var pair in m_appliedAuras)
+            foreach (var pair in GetAppliedAuras())
             {
                 Aura aura = pair.Value.GetBase();
                 if ((aura.GetSpellInfo().GetAllEffectsMechanicMask() & mechanic_mask) != 0 && !aura.GetSpellInfo().HasAttribute(SpellCustomAttributes.AuraCC))
