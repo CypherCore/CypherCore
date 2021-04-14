@@ -1578,8 +1578,16 @@ namespace Game.Spells
                             _spellSpecific = SpellSpecificType.Judgement;
 
                         // only paladin auras have this (for palaldin class family)
-                        if (SpellFamilyFlags[2].HasAnyFlag(0x00000020u))
-                            _spellSpecific = SpellSpecificType.Aura;
+                        switch (Id)
+                        {
+                            case 465:    // Devotion Aura
+                            case 32223:  // Crusader Aura
+                            case 183435: // Retribution Aura
+                            case 317920: // Concentration Aura
+                                _spellSpecific = SpellSpecificType.Aura;
+                            default:
+                                break;
+                        }
 
                         break;
                     }
