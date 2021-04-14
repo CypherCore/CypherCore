@@ -1585,6 +1585,7 @@ namespace Game.Spells
                             case 183435: // Retribution Aura
                             case 317920: // Concentration Aura
                                 _spellSpecific = SpellSpecificType.Aura;
+                                break;
                             default:
                                 break;
                         }

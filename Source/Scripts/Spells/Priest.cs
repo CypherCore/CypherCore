@@ -394,15 +394,6 @@ namespace Scripts.Spells.Priest
                     if (!caster.IsInFront(target))
                         return SpellCastResult.NotInfront;
                 }
-                else
-                {
-                    //Support for modifications of this spell in Legion with The Penitent talent (7.1.5)
-                    if (!caster.HasAura(SpellIds.ThePenitentAura))
-                        return SpellCastResult.BadTargets;
-
-                    if (!caster.IsInFront(target))
-                        return SpellCastResult.UnitNotInfront;
-                }
             }
             return SpellCastResult.SpellCastOk;
         }
