@@ -1445,30 +1445,14 @@ namespace Scripts.Spells.Generic
             if (!GetCaster() || aurEff.GetTotalTicks() == 0)
                 return;
 
-            float heal = 0.0f;
-            switch (GetSpellInfo().SpellFamilyName)
+            SpellEffectInfo eff1 = GetSpellInfo().GetEffect(1);
+            if (eff1 != null)
             {
-                case SpellFamilyNames.Mage:
-                case SpellFamilyNames.Warlock:
-                case SpellFamilyNames.Priest:
-                    heal = 1.885f * (GetCaster().SpellBaseDamageBonusDone(GetSpellInfo().GetSchoolMask()));
-                    break;
-                case SpellFamilyNames.Paladin:
-                case SpellFamilyNames.Shaman:
-                    heal = Math.Max(1.885f * (GetCaster().SpellBaseDamageBonusDone(GetSpellInfo().GetSchoolMask())), 1.1f * (GetCaster().GetTotalAttackPowerValue(WeaponAttackType.BaseAttack)));
-                    break;
-                case SpellFamilyNames.Warrior:
-                case SpellFamilyNames.Hunter:
-                case SpellFamilyNames.Deathknight:
-                    heal = 1.1f * (Math.Max(GetCaster().GetTotalAttackPowerValue(WeaponAttackType.BaseAttack), GetCaster().GetTotalAttackPowerValue(WeaponAttackType.RangedAttack)));
-                    break;
-                case SpellFamilyNames.Generic:
-                default:
-                    break;
+                float healPct = eff1.CalcValue() / 100.0f;
+                float heal = healPct * GetCaster().GetMaxHealth();
+                int healTick = (int)Math.Floor(heal / aurEff.GetTotalTicks());
+                amount += healTick;
             }
-
-            int healTick = (int)Math.Floor(heal / aurEff.GetTotalTicks());
-            amount += Math.Max(healTick, 0);
         }
 
         public override void Register()
