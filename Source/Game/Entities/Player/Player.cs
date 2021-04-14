@@ -3812,6 +3812,9 @@ namespace Game.Entities
                 }
             }
 
+            if (GetCommandStatus(PlayerCommandStates.Power))
+                curValue = maxPower;
+
             if (m_regenTimerCount >= 2000)
                 SetPower(power, curValue);
             else

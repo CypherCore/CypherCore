@@ -123,7 +123,12 @@ namespace Game.Chat.Commands
             }
             else if (argstr == "on")
             {
-                handler.GetSession().GetPlayer().SetCommandStatusOn(PlayerCommandStates.Power);
+                Player player = handler.GetSession().GetPlayer();
+                // Set max power to all powers
+                for (PowerType powerType = 0; powerType < PowerType.Max; ++powerType)
+                    player.SetPower(powerType, player.GetMaxPower(powerType));
+
+                player.SetCommandStatusOn(PlayerCommandStates.Power);
                 handler.SendSysMessage("Power Cheat is ON. You don't need mana/rage/energy to use spells.");
                 return true;
             }

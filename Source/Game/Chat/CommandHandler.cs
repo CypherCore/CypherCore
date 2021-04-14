@@ -389,7 +389,7 @@ namespace Game.Chat
             playerGuid = ObjectGuid.Empty;
             playerName = "";
 
-            if (!args.Empty())
+            if (args != null && !args.Empty())
             {
                 string name = ExtractPlayerNameFromLink(args);
                 if (string.IsNullOrEmpty(name))
