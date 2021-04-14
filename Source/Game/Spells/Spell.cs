@@ -483,7 +483,7 @@ namespace Game.Spells
                         else
                         {
                             List<ObjectGuid> channelObjects = m_originalCaster.m_unitData.ChannelObjects;
-                            WorldObject target = channelObjects.Count > 0 ? Global.ObjAccessor.GetWorldObject(m_caster, channelObjects[0]) : null;
+                            WorldObject target = !channelObjects.Empty() ? Global.ObjAccessor.GetWorldObject(m_caster, channelObjects[0]) : null;
                             if (target != null)
                             {
                                 CallScriptObjectTargetSelectHandlers(ref target, effIndex, targetType);
@@ -2380,7 +2380,10 @@ namespace Game.Spells
                     Unit unit = m_caster.GetGUID() == ihit.targetGUID ? m_caster : Global.ObjAccessor.GetUnit(m_caster, ihit.targetGUID);
 
                     if (unit == null)
+                    {
+                        m_caster.RemoveChannelObject(ihit.targetGUID);
                         continue;
+                    }
 
                     if (IsValidDeadOrAliveTarget(unit))
                     {
@@ -2393,11 +2396,15 @@ namespace Game.Spells
                                 {
                                     ihit.effectMask &= ~aurApp.GetEffectMask();
                                     unit.RemoveAura(aurApp);
+                                    m_caster.RemoveChannelObject(ihit.targetGUID);
                                     continue;
                                 }
                             }
                             else // aura is dispelled
+                            {
+                                m_caster.RemoveChannelObject(ihit.targetGUID);
                                 continue;
+                            }
                         }
 
                         channelTargetEffectMask &= ~ihit.effectMask;   // remove from need alive mask effect that have alive target
@@ -4053,9 +4060,25 @@ namespace Game.Spells
             m_caster.SendMessageToSet(spellChannelStart, true);
 
             m_timer = (int)duration;
+
+            uint channelAuraMask = 0;
+            uint explicitTargetEffectMask = 0xFFFFFFFF;
+            // if there is an explicit target, only add channel objects from effects that also hit ut
+            if (!m_targets.GetUnitTargetGUID().IsEmpty())
+            {
+                var explicitTarget = m_UniqueTargetInfo.Find(target => target.targetGUID == m_targets.GetUnitTargetGUID());
+                if (explicitTarget != null)
+                    explicitTargetEffectMask = explicitTarget.effectMask;
+            }
+
+            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
+                if (effect != null && effect.Effect == SpellEffectName.ApplyAura && (explicitTargetEffectMask & (1u << (int)effect.EffectIndex)) != 0)
+                    channelAuraMask |= 1u << (int)effect.EffectIndex;
+
             foreach (TargetInfo target in m_UniqueTargetInfo)
             {
-                m_caster.AddChannelObject(target.targetGUID);
+                if ((target.effectMask & channelAuraMask) != 0)
+                    m_caster.AddChannelObject(target.targetGUID);
 
                 if (m_UniqueTargetInfo.Count == 1 && m_UniqueGOTargetInfo.Empty())
                 {
@@ -4070,7 +4093,8 @@ namespace Game.Spells
             }
 
             foreach (GOTargetInfo target in m_UniqueGOTargetInfo)
-                m_caster.AddChannelObject(target.targetGUID);
+                if ((target.effectMask & channelAuraMask) != 0)
+                    m_caster.AddChannelObject(target.targetGUID);
 
             m_caster.SetChannelSpellId(m_spellInfo.Id);
             m_caster.SetChannelVisual(m_SpellVisual);

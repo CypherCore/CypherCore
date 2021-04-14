@@ -2428,6 +2428,13 @@ namespace Game.Entities
         public void SetChannelObject(int slot, ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelObjects, slot), guid); }
         public void ClearChannelObjects() { ClearDynamicUpdateFieldValues(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelObjects)); }
 
+        public void RemoveChannelObject(ObjectGuid guid)
+        {
+            int index = m_unitData.ChannelObjects.FindIndex(guid);
+            if (index >= 0)
+                RemoveDynamicUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelObjects), index);
+        }
+
         public bool IsDamageReducedByArmor(SpellSchoolMask schoolMask, SpellInfo spellInfo = null, sbyte effIndex = -1)
         {
             // only physical spells damage gets reduced by armor
