@@ -89,6 +89,7 @@ namespace Game.Entities
         public int WidgetSetUnitConditionID;
         public bool RegenHealth;
         public uint MechanicImmuneMask;
+        public byte SpellSchoolImmuneMask;
         public CreatureFlagsExtra FlagsExtra;
         public uint ScriptID;
 
