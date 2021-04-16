@@ -259,17 +259,17 @@ namespace Game.Movement
             }
         }
 
-        public void MovePoint(uint id, Position pos, bool generatePath = true)
+        public void MovePoint(uint id, Position pos, bool generatePath = true, float? finalOrient = null)
         {
-            MovePoint(id, pos.posX, pos.posY, pos.posZ, generatePath);
+            MovePoint(id, pos.posX, pos.posY, pos.posZ, generatePath, finalOrient);
         }
 
-        public void MovePoint(uint id, float x, float y, float z, bool generatePath = true)
+        public void MovePoint(uint id, float x, float y, float z, bool generatePath = true, float? finalOrient = null)
         {
             if (_owner.IsTypeId(TypeId.Player))
-                StartMovement(new PointMovementGenerator<Player>(id, x, y, z, generatePath), MovementSlot.Active);
+                StartMovement(new PointMovementGenerator<Player>(id, x, y, z, generatePath, 0.0f, null, null, finalOrient), MovementSlot.Active);
             else
-                StartMovement(new PointMovementGenerator<Creature>(id, x, y, z, generatePath), MovementSlot.Active);
+                StartMovement(new PointMovementGenerator<Creature>(id, x, y, z, generatePath, 0.0f, null, null, finalOrient), MovementSlot.Active);
         }
 
         public void MoveCloserAndStop(uint id, Unit target, float distance)

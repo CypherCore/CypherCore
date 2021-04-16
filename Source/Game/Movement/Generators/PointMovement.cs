@@ -22,7 +22,7 @@ namespace Game.Movement
 {
     public class PointMovementGenerator<T> : MovementGeneratorMedium<T> where T : Unit
     {
-        public PointMovementGenerator(uint id, float x, float y, float z, bool generatePath, float speed = 0.0f, Unit faceTarget = null, SpellEffectExtraData spellEffectExtraData = null)
+        public PointMovementGenerator(uint id, float x, float y, float z, bool generatePath, float speed = 0.0f, Unit faceTarget = null, SpellEffectExtraData spellEffectExtraData = null, float? finalOrient = null)
         {
             _movementId = id;
             _destination = new Position(x, y, z);
@@ -31,6 +31,7 @@ namespace Game.Movement
             _spellEffectExtra = spellEffectExtraData;
             _generatePath = generatePath;
             _recalculateSpeed = false;
+            _finalOrient = finalOrient;
         }
 
         public override void DoInitialize(T owner)
@@ -62,6 +63,9 @@ namespace Game.Movement
 
             if (_spellEffectExtra != null)
                 init.SetSpellEffectExtraData(_spellEffectExtra);
+
+            if (_finalOrient.HasValue)
+                init.SetFacing(_finalOrient.Value);
 
             init.Launch();
 
@@ -149,6 +153,8 @@ namespace Game.Movement
         bool _generatePath;
         bool _recalculateSpeed;
         bool _interrupt;
+        //! if set then unit will turn to specified _orient in provided _pos
+        float? _finalOrient;
     }
 
     public class AssistanceMovementGenerator : PointMovementGenerator<Creature>
