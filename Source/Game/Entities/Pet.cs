@@ -357,7 +357,7 @@ namespace Game.Entities
                 owner.ToPlayer().SetLastPetNumber(petId);
 
             // must be after SetMinion (owner guid check)
-            LoadMechanicTemplateImmunity();
+            LoadTemplateImmunities();
             m_loading = false;
 
             return true;

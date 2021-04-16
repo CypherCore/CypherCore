@@ -419,8 +419,7 @@ namespace Game.Entities
 
             UpdateMovementFlags();
             LoadCreaturesAddon();
-            LoadMechanicTemplateImmunity();
-            LoadSpellTemplateImmunity();
+            LoadTemplateImmunities();
             return true;
         }
 
@@ -1868,15 +1867,18 @@ namespace Game.Entities
                 ForcedDespawn(msTimeToDespawn, forceRespawnTimer);
         }
 
-        public void LoadMechanicTemplateImmunity()
+        public void LoadTemplateImmunities()
         {
             // uint32 max used for "spell id", the immunity system will not perform SpellInfo checks against invalid spells
             // used so we know which immunities were loaded from template
             uint placeholderSpellId = uint.MaxValue;
 
             // unapply template immunities (in case we're updating entry)
-            for (uint i = 1; i < (int)Mechanics.Max; ++i)
+            for (uint i = 0; i < (int)Mechanics.Max; ++i)
                 ApplySpellImmune(placeholderSpellId, SpellImmunity.Mechanic, i, false);
+
+            for (var i = (int)SpellSchools.Normal; i < (int)SpellSchools.Max; ++i)
+                ApplySpellImmune(placeholderSpellId, SpellImmunity.School, 1u << i, false);
 
             // don't inherit immunities for hunter pets
             if (GetOwnerGUID().IsPlayer() && IsHunterPet())
@@ -1891,25 +1893,10 @@ namespace Game.Entities
                         ApplySpellImmune(placeholderSpellId, SpellImmunity.Mechanic, i, true);
                 }
             }
-        }
 
-        void LoadSpellTemplateImmunity()
-        {
-            // uint32 max used for "spell id", the immunity system will not perform SpellInfo checks against invalid spells
-            // used so we know which immunities were loaded from template
-            uint placeholderSpellId = uint.MaxValue;
-
-            // unapply template immunities (in case we're updating entry)
-            for (var i = SpellSchoolMask.Normal; i <= SpellSchoolMask.Arcane; ++i)
-                ApplySpellImmune(placeholderSpellId, SpellImmunity.School, i, false);
-
-            // don't inherit immunities for hunter pets
-            if (GetOwnerGUID().IsPlayer() && IsHunterPet())
-                return;
-
-            byte mask = GetCreatureTemplate().SpellSchoolImmuneMask;
+            mask = GetCreatureTemplate().SpellSchoolImmuneMask;
             if (mask != 0)
-                for (var i = (int)SpellSchoolMask.Normal; i <= (int)SpellSchoolMask.Arcane; ++i)
+                for (var i = (int)SpellSchools.Normal; i <= (int)SpellSchools.Max; ++i)
                     if ((mask & (1 << i)) != 0)
                         ApplySpellImmune(placeholderSpellId, SpellImmunity.School, 1u << i, true);
         }

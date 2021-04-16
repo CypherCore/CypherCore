@@ -1870,7 +1870,7 @@ namespace Game
             creature.WidgetSetUnitConditionID = fields.Read<int>(72);
             creature.RegenHealth = fields.Read<bool>(73);
             creature.MechanicImmuneMask = fields.Read<uint>(74);
-            creature.SpellSchoolImmuneMask = fields.Read<byte>(75);
+            creature.SpellSchoolImmuneMask = fields.Read<uint>(75);
             creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(76);
             creature.ScriptID = GetScriptId(fields.Read<string>(77));
 
