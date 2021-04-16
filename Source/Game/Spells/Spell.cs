@@ -2138,9 +2138,7 @@ namespace Game.Spells
                 diminishLevel = unit.GetDiminishing(diminishGroup);
                 DiminishingReturnsType type = m_spellInfo.GetDiminishingReturnsGroupType();
                 // Increase Diminishing on unit, current informations for actually casts will use values above
-                if ((type == DiminishingReturnsType.Player && (unit.GetCharmerOrOwnerPlayerOrPlayerItself()
-                    || (unit.IsCreature() && unit.ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.AllDiminish))))
-                    || type == DiminishingReturnsType.All)
+                if (type == DiminishingReturnsType.All || (type == DiminishingReturnsType.Player && unit.IsAffectedByDiminishingReturns()))
                     unit.IncrDiminishing(m_spellInfo);
             }
 
@@ -2716,11 +2714,9 @@ namespace Game.Spells
             // skip check if done already (for instant cast spells for example)
             if (!skipCheck)
             {
-                uint param1 = 0, param2 = 0;
-                SpellCastResult castResult = CheckCast(false, ref param1, ref param2);
-                if (castResult != SpellCastResult.SpellCastOk)
+                void cleanupSpell(SpellCastResult result, uint? param1 = null, uint? param2 = null)
                 {
-                    SendCastResult(castResult, param1, param2);
+                    SendCastResult(result, param1, param2);
                     SendInterrupted(0);
 
                     if (modOwner)
@@ -2728,6 +2724,14 @@ namespace Game.Spells
 
                     Finish(false);
                     SetExecutedCurrently(false);
+                }
+
+
+                uint param1 = 0, param2 = 0;
+                SpellCastResult castResult = CheckCast(false, ref param1, ref param2);
+                if (castResult != SpellCastResult.SpellCastOk)
+                {
+                    cleanupSpell(castResult, param1, param2);
                     return;
                 }
 
@@ -2744,14 +2748,35 @@ namespace Game.Spells
                             {
                                 // Spell will be casted at completing the trade. Silently ignore at this place
                                 my_trade.SetSpell(m_spellInfo.Id, m_CastItem);
-                                SendCastResult(SpellCastResult.DontReport);
-                                SendInterrupted(0);
-
-                                modOwner.SetSpellModTakingSpell(this, false);
-
-                                Finish(false);
-                                SetExecutedCurrently(false);
+                                cleanupSpell(SpellCastResult.DontReport);
                                 return;
+                            }
+                        }
+                    }
+                }
+
+                // check diminishing returns (again, only after finish cast bar, tested on retail)
+                Unit target = m_targets.GetUnitTarget();
+                if (target != null)
+                {
+                    uint aura_effmask = 0;
+                    for (byte i = 0; i < SpellConst.MaxEffects; ++i)
+                        if (m_spellInfo.GetEffect(i) != null && m_spellInfo.GetEffect(i).IsUnitOwnedAuraEffect())
+                            aura_effmask |= 1u << i;
+
+                    if (aura_effmask != 0)
+                    {
+                        DiminishingGroup diminishGroup = m_spellInfo.GetDiminishingReturnsGroupForSpell();
+                        if (diminishGroup != 0)
+                        {
+                            DiminishingReturnsType type = m_spellInfo.GetDiminishingReturnsGroupType();
+                            if (type == DiminishingReturnsType.All || (type == DiminishingReturnsType.Player && target.IsAffectedByDiminishingReturns()))
+                            {
+                                if (target.HasStrongerAuraWithDR(m_spellInfo, m_originalCaster ?? m_caster))
+                                {
+                                    cleanupSpell(SpellCastResult.AuraBounced);
+                                    return;
+                                }
                             }
                         }
                     }

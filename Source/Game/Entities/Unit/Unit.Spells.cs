@@ -2711,18 +2711,17 @@ namespace Game.Entities
             return null;
         }
 
+        public virtual bool IsAffectedByDiminishingReturns() { return (GetCharmerOrOwnerPlayerOrPlayerItself() != null); }
+        
         public DiminishingLevels GetDiminishing(DiminishingGroup group)
         {
             DiminishingReturn diminish = m_Diminishing[(int)group];
             if (diminish.HitCount == 0)
                 return DiminishingLevels.Level1;
 
-            // If last spell was cast more than 18 seconds ago - reset the count.
+            // If last spell was cast more than 18 seconds ago - reset level.
             if (diminish.Stack == 0 && Time.GetMSTimeDiffToNow(diminish.HitTime) > 18 * Time.InMilliseconds)
-            {
-                diminish.HitCount = DiminishingLevels.Level1;
                 return DiminishingLevels.Level1;
-            }
 
             return diminish.HitCount;
         }
@@ -2730,12 +2729,12 @@ namespace Game.Entities
         public void IncrDiminishing(SpellInfo auraSpellInfo)
         {
             DiminishingGroup group = auraSpellInfo.GetDiminishingReturnsGroupForSpell();
+            DiminishingLevels currentLevel = GetDiminishing(group);
             DiminishingLevels maxLevel = auraSpellInfo.GetDiminishingReturnsMaxLevel();
 
-            // Checking for existing in the table
             DiminishingReturn diminish = m_Diminishing[(int)group];
-            if (diminish.HitCount < maxLevel)
-                ++diminish.HitCount;
+            if (currentLevel < maxLevel)
+                diminish.HitCount = currentLevel + 1;
         }
 
         public bool ApplyDiminishingToDuration(SpellInfo auraSpellInfo, ref int duration, Unit caster, DiminishingLevels previousLevel)
@@ -2755,8 +2754,7 @@ namespace Game.Entities
                 Unit target = targetOwner ?? this;
                 Unit source = casterOwner ?? caster;
 
-                if ((target.IsTypeId(TypeId.Player) || target.ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.AllDiminish))
-                    && source.IsTypeId(TypeId.Player))
+                if (target.IsAffectedByDiminishingReturns() && source.IsPlayer())
                     duration = limitDuration;
             }
 
@@ -2789,9 +2787,9 @@ namespace Game.Entities
                     }
                     break;
                 case DiminishingGroup.AOEKnockback:
-                    if ((auraSpellInfo.GetDiminishingReturnsGroupType() == DiminishingReturnsType.Player && (((targetOwner ? targetOwner : this).ToPlayer())
-                        || IsCreature() && ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.AllDiminish)))
-                        || auraSpellInfo.GetDiminishingReturnsGroupType() == DiminishingReturnsType.All)
+                    if (auraSpellInfo.GetDiminishingReturnsGroupType() == DiminishingReturnsType.All ||
+                        (auraSpellInfo.GetDiminishingReturnsGroupType() == DiminishingReturnsType.Player &&
+                            (targetOwner ? targetOwner.IsAffectedByDiminishingReturns() : IsAffectedByDiminishingReturns())))
                     {
                         DiminishingLevels diminish = previousLevel;
                         switch (diminish)
@@ -2807,9 +2805,9 @@ namespace Game.Entities
                     }
                     break;
                 default:
-                    if ((auraSpellInfo.GetDiminishingReturnsGroupType() == DiminishingReturnsType.Player && (((targetOwner ? targetOwner : this).ToPlayer())
-                        || IsCreature() && ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.AllDiminish)))
-                        || auraSpellInfo.GetDiminishingReturnsGroupType() == DiminishingReturnsType.All)
+                    if (auraSpellInfo.GetDiminishingReturnsGroupType() == DiminishingReturnsType.All ||
+                        (auraSpellInfo.GetDiminishingReturnsGroupType() == DiminishingReturnsType.Player &&
+                            (targetOwner ? targetOwner.IsAffectedByDiminishingReturns() : IsAffectedByDiminishingReturns())))
                     {
                         DiminishingLevels diminish = previousLevel;
                         switch (diminish)
@@ -3195,17 +3193,26 @@ namespace Game.Entities
             return false;
         }
 
-        bool HasNegativeAuraWithAttribute(SpellAttr0 flag, ObjectGuid guid = default)
+        public bool HasStrongerAuraWithDR(SpellInfo auraSpellInfo, Unit caster)
         {
-            foreach (var list in GetAppliedAuras())
+            DiminishingGroup diminishGroup = auraSpellInfo.GetDiminishingReturnsGroupForSpell();
+            DiminishingLevels level = GetDiminishing(diminishGroup);
+            foreach (var itr in GetAppliedAuras())
             {
-                Aura aura = list.Value.GetBase();
-                if (!list.Value.IsPositive() && aura.GetSpellInfo().HasAttribute(flag) && (guid.IsEmpty() || aura.GetCasterGUID() == guid))
+                SpellInfo spellInfo = itr.Value.GetBase().GetSpellInfo();
+                if (spellInfo.GetDiminishingReturnsGroupForSpell() != diminishGroup)
+                    continue;
+
+                int existingDuration = itr.Value.GetBase().GetMaxDuration();
+                int newDuration = auraSpellInfo.GetMaxDuration();
+                ApplyDiminishingToDuration(auraSpellInfo, ref newDuration, caster, level);
+                if (newDuration > 0 && newDuration < existingDuration)
                     return true;
             }
+
             return false;
         }
-
+        
         public uint GetAuraCount(uint spellId)
         {
             uint count = 0;

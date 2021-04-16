@@ -2934,7 +2934,8 @@ namespace Game.Entities
             return GetCreatureTemplate().InhabitType.HasAnyFlag(InhabitType.Air);
         }
         public bool IsDungeonBoss() { return (GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.DungeonBoss)); }
-
+        public override bool IsAffectedByDiminishingReturns() { return base.IsAffectedByDiminishingReturns() || GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.AllDiminish); }
+        
         public void SetReactState(ReactStates st)
         {
             reactState = st;
