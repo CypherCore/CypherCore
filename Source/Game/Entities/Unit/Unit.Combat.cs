@@ -3183,6 +3183,9 @@ namespace Game.Entities
                     Player player = playerAffectingAttacker ? playerAffectingAttacker : playerAffectingTarget;
                     Unit creature = playerAffectingAttacker ? target : this;
 
+                    if (creature.IsContestedGuard() && player.HasPlayerFlag(PlayerFlags.ContestedPVP))
+                        return true;
+
                     var factionTemplate = creature.GetFactionTemplateEntry();
                     if (factionTemplate != null)
                     {

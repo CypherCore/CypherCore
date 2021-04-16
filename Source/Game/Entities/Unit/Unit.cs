@@ -799,6 +799,15 @@ namespace Game.Entities
         public bool IsCritter() { return GetCreatureType() == CreatureType.Critter; }
         public bool IsInFlight() { return HasUnitState(UnitState.InFlight); }
 
+        public bool IsContestedGuard()
+        {
+            var entry = GetFactionTemplateEntry();
+            if (entry != null)
+                return entry.IsContestedGuardFaction();
+
+            return false;
+        }
+        
         public void SetHoverHeight(float hoverHeight) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.HoverHeight), hoverHeight); }
 
         public override float GetCollisionHeight()
