@@ -3255,18 +3255,6 @@ namespace Game.Spells
             }
 
             unitTarget.LastSanctuaryTime = GameTime.GetGameTimeMS();
-
-            // Vanish allows to remove all threat and cast regular stealth so other spells can be used
-            if (m_caster.IsTypeId(TypeId.Player)
-                && m_spellInfo.SpellFamilyName == SpellFamilyNames.Rogue
-                && m_spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x00000800u))
-            {
-                m_caster.ToPlayer().RemoveAurasByType(AuraType.ModRoot);
-                m_caster.ToPlayer().RemoveAurasByType(AuraType.ModRoot2);
-                // Overkill
-                if (m_caster.ToPlayer().HasSpell(58426))
-                    m_caster.CastSpell(m_caster, 58427, true);
-            }
         }
 
         [SpellEffectHandler(SpellEffectName.Duel)]
