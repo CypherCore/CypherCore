@@ -2584,6 +2584,12 @@ namespace Game
                 ok = true;
             }
 
+            if (cInfo.MinGold > cInfo.MaxGold)
+            {
+                Log.outError(LogFilter.Sql, $"Creature (Entry: {cInfo.Entry}) has `mingold` {cInfo.MinGold} which is greater than `maxgold` {cInfo.MaxGold}, setting `maxgold` to {cInfo.MinGold}.");
+                cInfo.MaxGold = cInfo.MinGold;
+            }
+
             if (!CliDB.FactionTemplateStorage.ContainsKey(cInfo.Faction))
             {
                 Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has non-existing faction template ({1}). This can lead to crashes, set to faction 35", cInfo.Entry, cInfo.Faction);
