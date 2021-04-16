@@ -782,6 +782,20 @@ namespace Scripts.Spells.Items
         }
     }
 
+    [Script] // 64415 Val'anyr Hammer of Ancient Kings - Equip Effect
+    class spell_item_valanyr_hammer_of_ancient_kings : AuraScript
+    {
+        bool CheckProc(ProcEventInfo eventInfo)
+        {
+            return eventInfo.GetHealInfo() != null && eventInfo.GetHealInfo().GetEffectiveHeal() > 0;
+        }
+
+        public override void Register()
+        {
+            DoCheckProc.Add(new CheckProcHandler(CheckProc));
+        }
+    }
+    
     [Script] // 71564 - Deadly Precision
     class spell_item_deadly_precision : AuraScript
     {
