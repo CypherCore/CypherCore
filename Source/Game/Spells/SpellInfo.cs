@@ -1236,7 +1236,7 @@ namespace Game.Spells
                     return SpellCastResult.CantDoThatRightNow;
 
                 // Can only summon uncontrolled minions/guardians when on controlled vehicle
-                if (vehicleSeat.HasSeatFlag(VehicleSeatFlags.CanControl | VehicleSeatFlags.Unk2))
+                if (vehicleSeat.HasFlag(VehicleSeatFlags.CanControl | VehicleSeatFlags.Unk2))
                 {
                     foreach (SpellEffectInfo effect in _effects)
                     {

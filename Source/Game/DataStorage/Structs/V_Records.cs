@@ -109,29 +109,29 @@ namespace Game.DataStorage
         public short VehicleExitAnimKitID;
         public short CameraModeID;
 
-        public bool CanEnterOrExit()
-        {
-            return (HasSeatFlag(VehicleSeatFlags.CanEnterOrExit) ||
-                //If it has anmation for enter/ride, means it can be entered/exited by logic
-                HasSeatFlag(VehicleSeatFlags.HasLowerAnimForEnter | VehicleSeatFlags.HasLowerAnimForRide));
-        }
-        public bool CanSwitchFromSeat() { return Flags.HasAnyFlag((int)VehicleSeatFlags.CanSwitch); }
-        public bool IsUsableByOverride()
-        {
-            return HasSeatFlag(VehicleSeatFlags.Uncontrolled | VehicleSeatFlags.Unk18)
-                || HasSeatFlag(VehicleSeatFlagsB.UsableForced | VehicleSeatFlagsB.UsableForced2 |
-                    VehicleSeatFlagsB.UsableForced3 | VehicleSeatFlagsB.UsableForced4);
-        }
-        public bool IsEjectable() { return HasSeatFlag(VehicleSeatFlagsB.Ejectable); }
-
-        public bool HasSeatFlag(VehicleSeatFlags flag)
+        public bool HasFlag(VehicleSeatFlags flag)
         {
             return Flags.HasAnyFlag((int)flag);
         }
 
-        public bool HasSeatFlag(VehicleSeatFlagsB flag)
+        public bool HasFlag(VehicleSeatFlagsB flag)
         {
             return FlagsB.HasAnyFlag((int)flag);
         }
+
+        public bool CanEnterOrExit()
+        {
+            return (HasFlag(VehicleSeatFlags.CanEnterOrExit) ||
+                //If it has anmation for enter/ride, means it can be entered/exited by logic
+                HasFlag(VehicleSeatFlags.HasLowerAnimForEnter | VehicleSeatFlags.HasLowerAnimForRide));
+        }
+        public bool CanSwitchFromSeat() { return Flags.HasAnyFlag((int)VehicleSeatFlags.CanSwitch); }
+        public bool IsUsableByOverride()
+        {
+            return HasFlag(VehicleSeatFlags.Uncontrolled | VehicleSeatFlags.Unk18)
+                || HasFlag(VehicleSeatFlagsB.UsableForced | VehicleSeatFlagsB.UsableForced2 |
+                    VehicleSeatFlagsB.UsableForced3 | VehicleSeatFlagsB.UsableForced4);
+        }
+        public bool IsEjectable() { return HasFlag(VehicleSeatFlagsB.Ejectable); }
     }
 }

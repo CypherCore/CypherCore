@@ -349,16 +349,16 @@ namespace Game.Entities
                 _me.AddNpcFlag(_me.IsTypeId(TypeId.Player) ? NPCFlags.PlayerVehicle : NPCFlags.SpellClick);
 
             // Enable gravity for passenger when he did not have it active before entering the vehicle
-            if (seat.Value.SeatInfo.HasSeatFlag(VehicleSeatFlags.DisableGravity) && !seat.Value.Passenger.IsGravityDisabled)
+            if (seat.Value.SeatInfo.HasFlag(VehicleSeatFlags.DisableGravity) && !seat.Value.Passenger.IsGravityDisabled)
                 unit.SetDisableGravity(false);
 
             // Remove UNIT_FLAG_NOT_SELECTABLE if passenger did not have it before entering vehicle
-            if (seat.Value.SeatInfo.HasSeatFlag(VehicleSeatFlags.PassengerNotSelectable) && !seat.Value.Passenger.IsUnselectable)
+            if (seat.Value.SeatInfo.HasFlag(VehicleSeatFlags.PassengerNotSelectable) && !seat.Value.Passenger.IsUnselectable)
                 unit.RemoveUnitFlag(UnitFlags.NotSelectable);
 
             seat.Value.Passenger.Reset();
 
-            if (_me.IsTypeId(TypeId.Unit) && unit.IsTypeId(TypeId.Player) && seat.Value.SeatInfo.HasSeatFlag(VehicleSeatFlags.CanControl))
+            if (_me.IsTypeId(TypeId.Unit) && unit.IsTypeId(TypeId.Player) && seat.Value.SeatInfo.HasFlag(VehicleSeatFlags.CanControl))
                 _me.RemoveCharmedBy(unit);
 
             if (_me.IsInWorld)
@@ -608,14 +608,14 @@ namespace Game.Entities
                 player.StopCastingCharm();
                 player.StopCastingBindSight();
                 player.SendOnCancelExpectedVehicleRideAura();
-                if (!veSeat.HasSeatFlag(VehicleSeatFlagsB.KeepPet))
+                if (!veSeat.HasFlag(VehicleSeatFlagsB.KeepPet))
                     player.UnsummonPetTemporaryIfAny();
             }
 
-            if (veSeat.HasSeatFlag(VehicleSeatFlags.DisableGravity))
+            if (veSeat.HasFlag(VehicleSeatFlags.DisableGravity))
                 Passenger.SetDisableGravity(true);
 
-            if (Seat.Value.SeatInfo.HasSeatFlag(VehicleSeatFlags.PassengerNotSelectable))
+            if (Seat.Value.SeatInfo.HasFlag(VehicleSeatFlags.PassengerNotSelectable))
                 Passenger.AddUnitFlag(UnitFlags.NotSelectable);
 
             Passenger.m_movementInfo.transport.pos.Relocate(veSeat.AttachmentOffset.X, veSeat.AttachmentOffset.Y, veSeat.AttachmentOffset.Z);
@@ -624,7 +624,7 @@ namespace Game.Entities
             Passenger.m_movementInfo.transport.guid = Target.GetBase().GetGUID();
 
             if (Target.GetBase().IsTypeId(TypeId.Unit) && Passenger.IsTypeId(TypeId.Player) &&
-                Seat.Value.SeatInfo.HasSeatFlag(VehicleSeatFlags.CanControl))
+                Seat.Value.SeatInfo.HasFlag(VehicleSeatFlags.CanControl))
                 Cypher.Assert(Target.GetBase().SetCharmedBy(Passenger, CharmType.Vehicle));  // SMSG_CLIENT_CONTROL
 
             Passenger.SendClearTarget();                            // SMSG_BREAK_TARGET
