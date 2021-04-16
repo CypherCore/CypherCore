@@ -44,8 +44,8 @@ namespace Game.AI
 
         // Pass parameters between AI
         public virtual void DoAction(int param = 0) { }
-        public virtual void SetGUID(ulong guid, int id = 0) { }
-        public virtual ulong GetGUID(int id = 0) { return 0; }
+        public virtual void SetGUID(ObjectGuid guid, int id = 0) { }
+        public virtual ObjectGuid GetGUID(int id = 0) { return ObjectGuid.Empty; }
 
         /// <summary>
         /// Called when a player opens a gossip dialog with the gameobject.
