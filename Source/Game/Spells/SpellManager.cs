@@ -3510,6 +3510,14 @@ namespace Game.Entities
                         break;
                     // ENDOF ISLE OF CONQUEST SPELLS
                     //
+                    // Aura of Fear
+                    case 40453:
+                            // Bad DBC data? Copying 25820 here due to spell description
+                            // either is a periodic with chance on tick, or a proc
+                            spellInfo.GetEffect(0).ApplyAuraName = AuraType.ProcTriggerSpell;
+                            spellInfo.GetEffect(0).ApplyAuraPeriod = 0;
+                            spellInfo.ProcChance = 10;
+                        break;
                     // FIRELANDS SPELLS
                     // Torment Searcher
                     case 99253:

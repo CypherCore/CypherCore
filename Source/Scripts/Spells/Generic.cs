@@ -614,6 +614,29 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    [Script] // 28313 - Aura of Fear
+    class spell_gen_aura_of_fear : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(spellInfo.GetEffect(0).TriggerSpell);
+        }
+
+        void PeriodicTick(AuraEffect aurEff)
+        {
+            PreventDefaultAction();
+            if (!RandomHelper.randChance(GetSpellInfo().ProcChance))
+                return;
+
+            GetTarget().CastSpell((Unit)null, GetSpellInfo().GetEffect(aurEff.GetEffIndex()).TriggerSpell, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicTriggerSpell));
+        }
+    }
+    
     [Script]
     class spell_gen_aura_service_uniform : AuraScript
     {
@@ -1961,6 +1984,20 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    [Script]
+    class spell_gen_proc_charge_drop_only : AuraScript
+    {
+        void HandleChargeDrop(ProcEventInfo eventInfo)
+        {
+            PreventDefaultAction();
+        }
+
+        public override void Register()
+        {
+            OnProc.Add(new AuraProcHandler(HandleChargeDrop));
+        }
+    }
+    
     [Script] // 45472 Parachute
     class spell_gen_parachute : AuraScript
     {
