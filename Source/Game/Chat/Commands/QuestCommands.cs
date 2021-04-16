@@ -184,33 +184,41 @@ namespace Game.Chat
 
             QuestStatus oldStatus = player.GetQuestStatus(entry);
 
-            // remove all quest entries for 'entry' from quest log
-            for (byte slot = 0; slot < SharedConst.MaxQuestLogSize; ++slot)
+            if (player.GetQuestStatus(entry) != QuestStatus.None)
             {
-                uint logQuest = player.GetQuestSlotQuestId(slot);
-                if (logQuest == entry)
+                // remove all quest entries for 'entry' from quest log
+                for (byte slot = 0; slot < SharedConst.MaxQuestLogSize; ++slot)
                 {
-                    player.SetQuestSlot(slot, 0);
-
-                    // we ignore unequippable quest items in this case, its' still be equipped
-                    player.TakeQuestSourceItem(logQuest, false);
-
-                    if (quest.HasFlag(QuestFlags.Pvp))
+                    uint logQuest = player.GetQuestSlotQuestId(slot);
+                    if (logQuest == entry)
                     {
-                        player.pvpInfo.IsHostile = player.pvpInfo.IsInHostileArea || player.HasPvPForcingQuest();
-                        player.UpdatePvPState();
+                        player.SetQuestSlot(slot, 0);
+
+                        // we ignore unequippable quest items in this case, its' still be equipped
+                        player.TakeQuestSourceItem(logQuest, false);
+
+                        if (quest.HasFlag(QuestFlags.Pvp))
+                        {
+                            player.pvpInfo.IsHostile = player.pvpInfo.IsInHostileArea || player.HasPvPForcingQuest();
+                            player.UpdatePvPState();
+                        }
                     }
                 }
+
+                player.RemoveActiveQuest(entry, false);
+                player.RemoveRewardedQuest(entry);
+
+                Global.ScriptMgr.OnQuestStatusChange(player, entry);
+                Global.ScriptMgr.OnQuestStatusChange(player, quest, oldStatus, QuestStatus.None);
+
+                handler.SendSysMessage(CypherStrings.CommandQuestRemoved);
+                return true;
             }
-
-            player.RemoveActiveQuest(entry, false);
-            player.RemoveRewardedQuest(entry);
-
-            Global.ScriptMgr.OnQuestStatusChange(player, entry);
-            Global.ScriptMgr.OnQuestStatusChange(player, quest, oldStatus, QuestStatus.None);
-
-            handler.SendSysMessage(CypherStrings.CommandQuestRemoved);
-            return true;
+            else
+            {
+                handler.SendSysMessage(CypherStrings.CommandQuestNotfound);
+                return false;
+            }
         }
 
         [Command("reward", RBACPermissions.CommandQuestReward)]
