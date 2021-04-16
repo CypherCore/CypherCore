@@ -1917,11 +1917,12 @@ namespace Game.Entities
         {
             if (IsInWorld)
             {
+                oz += GetCollisionHeight();
                 float x, y, z;
                 if (IsTypeId(TypeId.Player))
                 {
                     GetPosition(out x, out y, out z);
-                    z += GetMidsectionHeight();
+                    z += GetCollisionHeight();
                 }
                 else
                     GetHitSpherePointFor(new Position(ox, oy, oz), out x, out y, out z);
@@ -1937,21 +1938,30 @@ namespace Game.Entities
             if (!IsInMap(obj))
                 return false;
 
-            float x, y, z;
+            float ox, oy, oz;
             if (obj.IsTypeId(TypeId.Player))
             {
-                obj.GetPosition(out x, out y, out z);
-                z += GetMidsectionHeight();
+                obj.GetPosition(out ox, out oy, out oz);
+                oz += GetCollisionHeight();
             }
             else
-                obj.GetHitSpherePointFor(new (GetPositionX(), GetPositionY(), GetPositionZ() + GetMidsectionHeight()), out x, out y, out z);
+                obj.GetHitSpherePointFor(new (GetPositionX(), GetPositionY(), GetPositionZ() + GetCollisionHeight()), out ox, out oy, out oz);
 
-            return IsWithinLOS(x, y, z, checks, ignoreFlags);
+            float x, y, z;
+            if (IsPlayer())
+            {
+                GetPosition(out x, out y, out z);
+                z += GetCollisionHeight();
+            }
+            else
+                GetHitSpherePointFor(new (obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ() + obj.GetCollisionHeight()), out x, out y, out z);
+
+            return GetMap().IsInLineOfSight(GetPhaseShift(), x, y, z, ox, oy, oz, checks, ignoreFlags);
         }
 
         Position GetHitSpherePointFor(Position dest)
         {
-            Vector3 vThis = new(GetPositionX(), GetPositionY(), GetPositionZ() + GetMidsectionHeight());
+            Vector3 vThis = new(GetPositionX(), GetPositionY(), GetPositionZ() + GetCollisionHeight());
             Vector3 vObj = new(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ());
             Vector3 contactPoint = vThis + (vObj - vThis).directionOrZero() * Math.Min(dest.GetExactDist(GetPosition()), GetCombatReach());
 
@@ -2076,9 +2086,7 @@ namespace Game.Entities
 
         public void UpdateGroundPositionZ(float x, float y, ref float z)
         {
-            float new_z = GetMap().GetHeight(GetPhaseShift(), x, y, z, true);
-            if (new_z > MapConst.InvalidHeight)
-                z = new_z + 0.05f;                                   // just to be sure that we are not a few pixel under the surface
+            z = GetMapHeight(x, y, z);
         }
 
         public void UpdateAllowedPositionZ(float x, float y, ref float z)
@@ -2098,8 +2106,8 @@ namespace Game.Entities
                             bool canSwim = ToCreature().CanSwim();
                             float ground_z = z;
                             float max_z = canSwim
-                                ? GetMap().GetWaterOrGroundLevel(GetPhaseShift(), x, y, z, ref ground_z, !ToUnit().HasAuraType(AuraType.WaterWalk))
-                                : ((ground_z = GetMap().GetHeight(GetPhaseShift(), x, y, z, true)));
+                                ? GetMapWaterOrGroundLevel(x, y, z, ref ground_z)
+                                : (ground_z = GetMapHeight(x, y, z));
                             if (max_z > MapConst.InvalidHeight)
                             {
                                 if (z > max_z)
@@ -2110,7 +2118,7 @@ namespace Game.Entities
                         }
                         else
                         {
-                            float ground_z = GetMap().GetHeight(GetPhaseShift(), x, y, z, true);
+                            float ground_z = GetMapHeight(x, y, z);
                             if (z < ground_z)
                                 z = ground_z;
                         }
@@ -2122,7 +2130,7 @@ namespace Game.Entities
                         if (!ToPlayer().CanFly())
                         {
                             float ground_z = z;
-                            float max_z = GetMap().GetWaterOrGroundLevel(GetPhaseShift(), x, y, z, ref ground_z, !ToUnit().HasAuraType(AuraType.WaterWalk));
+                            float max_z = GetMapWaterOrGroundLevel(x, y, z, ref ground_z);
                             if (max_z > MapConst.InvalidHeight)
                             {
                                 if (z > max_z)
@@ -2133,7 +2141,7 @@ namespace Game.Entities
                         }
                         else
                         {
-                            float ground_z = GetMap().GetHeight(GetPhaseShift(), x, y, z, true);
+                            float ground_z = GetMapHeight(x, y, z);
                             if (z < ground_z)
                                 z = ground_z;
                         }
@@ -2141,7 +2149,7 @@ namespace Game.Entities
                     }
                 default:
                     {
-                        float ground_z = GetMap().GetHeight(GetPhaseShift(), x, y, z, true);
+                        float ground_z = GetMapHeight(x, y, z);
                         if (ground_z > MapConst.InvalidHeight)
                             z = ground_z;
                         break;
@@ -2202,7 +2210,7 @@ namespace Game.Entities
         public Position GetNearPosition(float dist, float angle)
         {
             var pos = GetPosition();
-            MovePosition(ref pos, dist, angle);
+            MovePosition(pos, dist, angle);
             return pos;
         }
 
@@ -2216,7 +2224,7 @@ namespace Game.Entities
         public Position GetRandomNearPosition(float radius)
         {
             var pos = GetPosition();
-            MovePosition(ref pos, radius * (float)RandomHelper.NextDouble(), (float)RandomHelper.NextDouble() * MathFunctions.PI * 2);
+            MovePosition(pos, radius * (float)RandomHelper.NextDouble(), (float)RandomHelper.NextDouble() * MathFunctions.PI * 2);
             return pos;
         }
 
@@ -2226,7 +2234,7 @@ namespace Game.Entities
             GetNearPoint(obj, out x, out y, out z, obj.GetCombatReach(), distance2d, GetAngle(obj));
         }
 
-        public void MovePosition(ref Position pos, float dist, float angle)
+        public void MovePosition(Position pos, float dist, float angle)
         {
             angle += GetOrientation();
             float destx = pos.posX + dist * (float)Math.Cos(angle);
@@ -2239,8 +2247,8 @@ namespace Game.Entities
                 return;
             }
 
-            float ground = GetMap().GetHeight(GetPhaseShift(), destx, desty, MapConst.MaxHeight, true);
-            float floor = GetMap().GetHeight(GetPhaseShift(), destx, desty, pos.posZ, true);
+            float ground = GetMapHeight(destx, desty, MapConst.MaxHeight);
+            float floor = GetMapHeight(destx, desty, pos.posZ);
             float destz = Math.Abs(ground - pos.posZ) <= Math.Abs(floor - pos.posZ) ? ground : floor;
 
             float step = dist / 10.0f;
@@ -2270,37 +2278,12 @@ namespace Game.Entities
             pos.SetOrientation(GetOrientation());
         }
 
-        float NormalizeZforCollision(WorldObject obj, float x, float y, float z)
-        {
-            float ground = obj.GetMap().GetHeight(obj.GetPhaseShift(), x, y, MapConst.MaxHeight, true);
-            float floor = obj.GetMap().GetHeight(obj.GetPhaseShift(), x, y, z + 2.0f, true);
-            float helper = Math.Abs(ground - z) <= Math.Abs(floor - z) ? ground : floor;
-            if (z > helper) // must be above ground
-            {
-                Unit unit = obj.ToUnit();
-                if (unit)
-                {
-                    if (unit.CanFly())
-                        return z;
-                }
-                LiquidData liquid_status;
-                ZLiquidStatus res = obj.GetMap().GetLiquidStatus(obj.GetPhaseShift(), x, y, z, MapConst.MapAllLiquidTypes, out liquid_status);
-                if (res != 0 && liquid_status.level > helper) // water must be above ground
-                {
-                    if (liquid_status.level > z) // z is underwater
-                        return z;
-                    else
-                        return Math.Abs(liquid_status.level - z) <= Math.Abs(helper - z) ? liquid_status.level : helper;
-                }
-            }
-            return helper;
-        }
-
         public void MovePositionToFirstCollision(ref Position pos, float dist, float angle)
         {
             angle += GetOrientation();
             float destx = pos.posX + dist * (float)Math.Cos(angle);
             float desty = pos.posY + dist * (float)Math.Sin(angle);
+            float destz = pos.posZ;
 
             // Prevent invalid coordinates here, position is unchanged
             if (!GridDefines.IsValidMapCoord(destx, desty))
@@ -2309,8 +2292,8 @@ namespace Game.Entities
                 return;
             }
 
-            float destz = NormalizeZforCollision(this, destx, desty, pos.GetPositionZ());
-            bool col = Global.VMapMgr.GetObjectHitPos(PhasingHandler.GetTerrainMapId(GetPhaseShift(), GetMap(), pos.posX, pos.posY), pos.posX, pos.posY, pos.posZ + 0.5f, destx, desty, destz + 0.5f, out destx, out desty, out destz, -0.5f);
+            UpdateAllowedPositionZ(destx, desty, ref destz);
+            bool col = Global.VMapMgr.GetObjectHitPos(PhasingHandler.GetTerrainMapId(GetPhaseShift(), GetMap(), pos.posX, pos.posY), pos.posX, pos.posY, pos.posZ, destx, desty, destz, out destx, out desty, out destz, -0.5f);
 
             // collision occured
             if (col)
@@ -2322,7 +2305,7 @@ namespace Game.Entities
             }
 
             // check dynamic collision
-            col = GetMap().GetObjectHitPos(GetPhaseShift(), pos.posX, pos.posY, pos.posZ + 0.5f, destx, desty, destz + 0.5f, out destx, out desty, out destz, -0.5f);
+            col = GetMap().GetObjectHitPos(GetPhaseShift(), pos.posX, pos.posY, pos.posZ, destx, desty, destz, out destx, out desty, out destz, -0.5f);
 
             // Collided with a gameobject
             if (col)
@@ -2341,7 +2324,7 @@ namespace Game.Entities
                 {
                     destx -= step * (float)Math.Cos(angle);
                     desty -= step * (float)Math.Sin(angle);
-                    destz = NormalizeZforCollision(this, destx, desty, pos.GetPositionZ());
+                    UpdateAllowedPositionZ(destx, desty, ref destz);
                 }
                 // we have correct destz now
                 else
@@ -2353,7 +2336,7 @@ namespace Game.Entities
 
             GridDefines.NormalizeMapCoord(ref pos.posX);
             GridDefines.NormalizeMapCoord(ref pos.posY);
-            pos.posZ = NormalizeZforCollision(this, destx, desty, pos.GetPositionZ());
+            UpdateAllowedPositionZ(destx, desty, ref pos.posZ);
             pos.SetOrientation(GetOrientation());
         }
 
@@ -2361,7 +2344,24 @@ namespace Game.Entities
         {
             if (!IsInWorld)
                 return m_staticFloorZ;
-            return Math.Max(m_staticFloorZ, GetMap().GetGameObjectFloor(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZ()));
+            return Math.Max(m_staticFloorZ, GetMap().GetGameObjectFloor(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZ() + GetCollisionHeight()));
+        }
+
+        float GetMapWaterOrGroundLevel(float x, float y, float z, ref float ground)
+        {
+            Unit unit = ToUnit();
+            if (unit != null)
+                return GetMap().GetWaterOrGroundLevel(GetPhaseShift(), x, y, z, ref ground, !unit.HasAuraType(AuraType.WaterWalk), GetCollisionHeight());
+
+            return z;
+        }
+
+        public float GetMapHeight(float x, float y, float z, bool vmap = true, float distanceToSearch = MapConst.DefaultHeightSearch)
+        {
+            if (z != MapConst.MaxHeight)
+                z += GetCollisionHeight();
+
+            return GetMap().GetHeight(GetPhaseShift(), x, y, z, vmap, distanceToSearch);
         }
         
         public void SetLocationInstanceId(uint _instanceId) { instanceId = _instanceId; }

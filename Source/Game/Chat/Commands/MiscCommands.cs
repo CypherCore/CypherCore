@@ -902,8 +902,8 @@ namespace Game.Chat
             Global.DB2Mgr.Map2ZoneCoordinates((int)zoneId, ref zoneX, ref zoneY);
 
             Map map = obj.GetMap();
-            float groundZ = map.GetHeight(obj.GetPhaseShift(), obj.GetPositionX(), obj.GetPositionY(), MapConst.MaxHeight);
-            float floorZ = map.GetHeight(obj.GetPhaseShift(), obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ());
+            float groundZ = obj.GetMapHeight(obj.GetPositionX(), obj.GetPositionY(), MapConst.MaxHeight);
+            float floorZ = obj.GetMapHeight(obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ());
 
             GridCoord gridCoord = GridDefines.ComputeGridCoord(obj.GetPositionX(), obj.GetPositionY());
 

@@ -2717,7 +2717,7 @@ namespace Game.Entities
             // Set the movement flags if the creature is in that mode. (Only fly if actually in air, only swim if in water, etc)
             float ground = GetFloorZ();
 
-            bool isInAir = (MathFunctions.fuzzyGt(GetPositionZMinusOffset(), ground + 0.05f) || MathFunctions.fuzzyLt(GetPositionZMinusOffset(), ground - 0.05f)); // Can be underground too, prevent the falling
+            bool isInAir = (MathFunctions.fuzzyGt(GetPositionZMinusOffset(), ground + MapConst.GroundHeightTolerance) || MathFunctions.fuzzyLt(GetPositionZMinusOffset(), ground - MapConst.GroundHeightTolerance)); // Can be underground too, prevent the falling
 
             if (GetCreatureTemplate().InhabitType.HasAnyFlag(InhabitType.Air) && isInAir && !IsFalling())
             {

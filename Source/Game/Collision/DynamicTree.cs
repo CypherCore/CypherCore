@@ -115,7 +115,7 @@ namespace Game.Collision
 
         public float GetHeight(float x, float y, float z, float maxSearchDist, PhaseShift phaseShift)
         {
-            Vector3 v = new(x, y, z + 0.5f);
+            Vector3 v = new(x, y, z);
             Ray r = new(v, new Vector3(0, 0, -1));
             DynamicTreeIntersectionCallback callback = new(phaseShift);
             impl.IntersectZAllignedRay(r, callback, ref maxSearchDist);

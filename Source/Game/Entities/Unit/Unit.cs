@@ -824,7 +824,8 @@ namespace Game.Entities
                     {
                         var displayInfo = CliDB.CreatureDisplayInfoStorage.LookupByKey(GetNativeDisplayId());
                         var modelData = CliDB.CreatureModelDataStorage.LookupByKey(displayInfo.ModelID);
-                        return scaleMod * (mountModelData.MountHeight + modelData.CollisionHeight * 0.5f);
+                        float collisionHeight = scaleMod * (mountModelData.MountHeight + modelData.CollisionHeight * modelData.ModelScale * displayInfo.CreatureModelScale * 0.5f);
+                        return collisionHeight == 0.0f ? MapConst.DefaultCollesionHeight : collisionHeight;
                     }
                 }
             }
@@ -833,7 +834,8 @@ namespace Game.Entities
             var defaultDisplayInfo = CliDB.CreatureDisplayInfoStorage.LookupByKey(GetNativeDisplayId());
             var defaultModelData = CliDB.CreatureModelDataStorage.LookupByKey(defaultDisplayInfo.ModelID);
 
-            return scaleMod * defaultModelData.CollisionHeight;
+            float collisionHeight1 = scaleMod * defaultModelData.CollisionHeight * defaultModelData.ModelScale * defaultDisplayInfo.CreatureModelScale;
+            return collisionHeight1 == 0.0f ? MapConst.DefaultCollesionHeight : collisionHeight1;
         }
 
         public Guardian GetGuardianPet()
@@ -1005,12 +1007,12 @@ namespace Game.Entities
             if (player != null)
                 player.SetFallInformation(0, GetPositionZ());
 
-            float height = pos.GetPositionZ();
+            float height = pos.GetPositionZ() + vehicle.GetBase().GetCollisionHeight();
 
             MoveSplineInit init = new(this);
 
             // Creatures without inhabit type air should begin falling after exiting the vehicle
-            if (IsTypeId(TypeId.Unit) && !ToCreature().CanFly() && height > GetMap().GetWaterOrGroundLevel(GetPhaseShift(), pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), ref height) + 0.1f)
+            if (IsTypeId(TypeId.Unit) && !ToCreature().CanFly() && height > GetMap().GetWaterOrGroundLevel(GetPhaseShift(), pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ() + vehicle.GetBase().GetCollisionHeight(), ref height))
                 init.SetFall();
 
             init.MoveTo(pos.GetPositionX(), pos.GetPositionY(), height, false);

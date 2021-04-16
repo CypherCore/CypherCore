@@ -62,6 +62,8 @@ namespace Framework.Constants
         public const float InvalidHeight = -100000.0f;
         public const float MaxHeight = 100000.0f;
         public const float MaxFallDistance = 250000.0f;
+        public const float GroundHeightTolerance = 0.05f;
+        public const float DefaultCollesionHeight = 2.03128f; // Most common value in dbc
 
         public const uint MapMagic = 0x5350414D; //"MAPS";
         public const uint MapVersionMagic = 0x392E3176; //"v1.9";

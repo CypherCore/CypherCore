@@ -501,7 +501,7 @@ namespace Game.Maps
         }
 
         // Get water state on map
-        public ZLiquidStatus GetLiquidStatus(float x, float y, float z, uint ReqLiquidType, LiquidData data)
+        public ZLiquidStatus GetLiquidStatus(float x, float y, float z, uint ReqLiquidType, LiquidData data, float collisionHeight)
         {
             // Check water type (if no water return)
             if (_liquidGlobalFlags == 0 && _liquidFlags == null)
@@ -568,7 +568,7 @@ namespace Game.Maps
             float ground_level = GetHeight(x, y);
 
             // Check water level and ground level
-            if (liquid_level < ground_level || z < ground_level - 2)
+            if (liquid_level < ground_level || z < ground_level)
                 return ZLiquidStatus.NoWater;
 
             // All ok in water . store data
@@ -583,7 +583,7 @@ namespace Game.Maps
             // For speed check as int values
             float delta = liquid_level - z;
 
-            if (delta > 2.0f)                   // Under water
+            if (delta > collisionHeight)                   // Under water
                 return ZLiquidStatus.UnderWater;
             if (delta > 0.0f)                   // In water
                 return ZLiquidStatus.InWater;

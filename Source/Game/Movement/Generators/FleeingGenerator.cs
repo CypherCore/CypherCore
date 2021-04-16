@@ -103,9 +103,7 @@ namespace Game.Movement
             GetPoint(owner, ref destination);
 
             // Add LOS check for target point
-            Position currentPosition = owner.GetPosition();
-            bool isInLOS = Global.VMapMgr.IsInLineOfSight(PhasingHandler.GetTerrainMapId(owner.GetPhaseShift(), owner.GetMap(), currentPosition.posX, currentPosition.posY), currentPosition.posX, currentPosition.posY, currentPosition.posZ + 2.0f, destination.GetPositionX(), destination.GetPositionY(), destination.GetPositionZ() + 2.0f, ModelIgnoreFlags.Nothing);
-            if (!isInLOS)
+            if (!owner.IsWithinLOS(destination.GetPositionX(), destination.GetPositionY(), destination.GetPositionZ()))
             {
                 _timer.Reset(200);
                 return;

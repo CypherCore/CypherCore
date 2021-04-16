@@ -858,10 +858,10 @@ namespace Game.Spells
                         float angle = (float)RandomHelper.NextDouble() * (MathFunctions.PI * 35.0f / 180.0f) - (float)(Math.PI * 17.5f / 180.0f);
                         m_caster.GetClosePoint(out x, out y, out z, SharedConst.DefaultPlayerBoundingRadius, dis, angle);
 
-                        float ground = m_caster.GetMap().GetHeight(m_caster.GetPhaseShift(), x, y, z, true, 50.0f);
+                        float ground = m_caster.GetMapHeight(x, y, z);
                         float liquidLevel = MapConst.VMAPInvalidHeightValue;
                         LiquidData liquidData;
-                        if (m_caster.GetMap().GetLiquidStatus(m_caster.GetPhaseShift(), x, y, z, MapConst.MapAllLiquidTypes, out liquidData) != 0)
+                        if (m_caster.GetMap().GetLiquidStatus(m_caster.GetPhaseShift(), x, y, z, MapConst.MapAllLiquidTypes, out liquidData, m_caster.GetCollisionHeight()) != 0)
                             liquidLevel = liquidData.level;
 
                         if (liquidLevel <= ground) // When there is no liquid Map.GetWaterOrGroundLevel returns ground level

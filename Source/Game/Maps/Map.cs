@@ -1694,23 +1694,23 @@ namespace Game.Maps
             return childMap != null && childMap.i_gridFileExists[(int)(gx * MapConst.MaxGrids + gy)];
         }
 
-        public float GetWaterOrGroundLevel(PhaseShift phaseShift, float x, float y, float z)
+        public float GetWaterOrGroundLevel(PhaseShift phaseShift, float x, float y, float z, float collisionHeight = MapConst.DefaultCollesionHeight)
         {
             float ground = 0f;
             return GetWaterOrGroundLevel(phaseShift, x, y, z, ref ground);
         }
 
-        public float GetWaterOrGroundLevel(PhaseShift phaseShift, float x, float y, float z, ref float ground, bool swim = false)
+        public float GetWaterOrGroundLevel(PhaseShift phaseShift, float x, float y, float z, ref float ground, bool swim = false, float collisionHeight = MapConst.DefaultCollesionHeight)
         {
             if (GetGridMap(PhasingHandler.GetTerrainMapId(phaseShift, this, x, y), x, y) != null)
             {
                 // we need ground level (including grid height version) for proper return water level in point
-                float ground_z = GetHeight(phaseShift, x, y, z, true, 50.0f);
+                float ground_z = GetHeight(phaseShift, x, y, z + collisionHeight, true, 50.0f);
                 ground = ground_z;
 
                 LiquidData liquid_status;
 
-                ZLiquidStatus res = GetLiquidStatus(phaseShift, x, y, ground_z, MapConst.MapAllLiquidTypes, out liquid_status);
+                ZLiquidStatus res = GetLiquidStatus(phaseShift, x, y, ground_z, MapConst.MapAllLiquidTypes, out liquid_status, collisionHeight);
                 switch (res)
                 {
                     case ZLiquidStatus.AboveWater:
@@ -1734,8 +1734,7 @@ namespace Game.Maps
             if (gmap != null)
             {
                 float gridHeight = gmap.GetHeight(x, y);
-                // look from a bit higher pos to find the floor, ignore under surface case
-                if (z + 2.0f > gridHeight)
+                if (z > gridHeight)
                     mapHeight = gridHeight;
             }
 
@@ -1743,8 +1742,7 @@ namespace Game.Maps
             if (checkVMap)
             {
                 if (Global.VMapMgr.IsHeightCalcEnabled())
-                    vmapHeight = Global.VMapMgr.GetHeight(terrainMapId, x, y, z + 2.0f, maxSearchDist);
-                // look from a bit higher pos to find the floor
+                    vmapHeight = Global.VMapMgr.GetHeight(terrainMapId, x, y, z, maxSearchDist);
             }
 
             // mapHeight set for any above raw ground Z or <= INVALID_HEIGHT
@@ -1887,8 +1885,7 @@ namespace Game.Maps
                 if (gmap != null)
                 {
                     float mapHeight = gmap.GetHeight(x, y);
-                    // z + 2.0f condition taken from GetHeight(), not sure if it's such a great choice...
-                    if (z + 2.0f > mapHeight && mapHeight > check_z)
+                    if (z > mapHeight && mapHeight > check_z)
                         return false;
                 }
                 return true;
@@ -1975,13 +1972,12 @@ namespace Game.Maps
             return 0;
         }
 
-        public ZLiquidStatus GetLiquidStatus(PhaseShift phaseShift, float x, float y, float z, uint ReqLiquidType)
+        public ZLiquidStatus GetLiquidStatus(PhaseShift phaseShift, float x, float y, float z, uint ReqLiquidType, float collisionHeight = MapConst.DefaultCollesionHeight)
         {
-            LiquidData throwaway;
-            return GetLiquidStatus(phaseShift, x, y, z, ReqLiquidType, out throwaway);
+            return GetLiquidStatus(phaseShift, x, y, z, ReqLiquidType, out _, collisionHeight);
         }
 
-        public ZLiquidStatus GetLiquidStatus(PhaseShift phaseShift, float x, float y, float z, uint ReqLiquidType, out LiquidData data)
+        public ZLiquidStatus GetLiquidStatus(PhaseShift phaseShift, float x, float y, float z, uint ReqLiquidType, out LiquidData data, float collisionHeight = MapConst.DefaultCollesionHeight)
         {
             data = new LiquidData();
             var result = ZLiquidStatus.NoWater;
@@ -2037,7 +2033,7 @@ namespace Game.Maps
                     float delta = liquid_level - z;
 
                     // Get position delta
-                    if (delta > 2.0f) // Under water
+                    if (delta > collisionHeight) // Under water
                         return ZLiquidStatus.UnderWater;
                     if (delta > 0.0f) // In water
                         return ZLiquidStatus.InWater;
@@ -2051,7 +2047,7 @@ namespace Game.Maps
             if (gmap != null)
             {
                 var map_data = new LiquidData();
-                ZLiquidStatus map_result = gmap.GetLiquidStatus(x, y, z, ReqLiquidType, map_data);
+                ZLiquidStatus map_result = gmap.GetLiquidStatus(x, y, z, ReqLiquidType, map_data, collisionHeight);
                 // Not override LIQUID_MAP_ABOVE_WATER with LIQUID_MAP_NO_WATER:
                 if (map_result != ZLiquidStatus.NoWater && (map_data.level > ground_level))
                 {
@@ -2067,7 +2063,7 @@ namespace Game.Maps
             return result;
         }
 
-        public void GetFullTerrainStatusForPosition(PhaseShift phaseShift, float x, float y, float z, PositionFullTerrainStatus data, uint reqLiquidType = MapConst.MapAllLiquidTypes)
+        public void GetFullTerrainStatusForPosition(PhaseShift phaseShift, float x, float y, float z, PositionFullTerrainStatus data, uint reqLiquidType = MapConst.MapAllLiquidTypes, float collisionHeight = MapConst.DefaultCollesionHeight)
         {
             uint terrainMapId = PhasingHandler.GetTerrainMapId(phaseShift, this, x, y);
             AreaAndLiquidData vmapData = Global.VMapMgr.GetAreaAndLiquidData(terrainMapId, x, y, z, reqLiquidType);
@@ -2081,7 +2077,7 @@ namespace Game.Maps
 
             // area lookup
             AreaTableRecord areaEntry = null;
-            if (vmapData.areaInfo.HasValue && (z + 2.0f <= mapHeight || mapHeight <= vmapData.floorZ))
+            if (vmapData.areaInfo.HasValue && (z <= mapHeight || mapHeight <= vmapData.floorZ))
             {
                 WMOAreaTableRecord wmoEntry = Global.DB2Mgr.GetWMOAreaTable(vmapData.areaInfo.Value.RootId, vmapData.areaInfo.Value.AdtId, vmapData.areaInfo.Value.GroupId);
                 if (wmoEntry != null)
@@ -2110,7 +2106,7 @@ namespace Game.Maps
 
             // liquid processing
             data.LiquidStatus = ZLiquidStatus.NoWater;
-            if (vmapData.liquidInfo.HasValue && vmapData.liquidInfo.Value.Level > vmapData.floorZ && z + 2.0f > vmapData.floorZ)
+            if (vmapData.liquidInfo.HasValue && vmapData.liquidInfo.Value.Level > vmapData.floorZ && z > vmapData.floorZ)
             {
                 uint liquidType = vmapData.liquidInfo.Value.LiquidType;
                 if (GetId() == 530 && liquidType == 2) // gotta love blizzard hacks
@@ -2147,7 +2143,7 @@ namespace Game.Maps
                 data.LiquidInfo.Set(liquidInfo);
 
                 float delta = vmapData.liquidInfo.Value.Level - z;
-                if (delta > 2.0f)
+                if (delta > collisionHeight)
                     data.LiquidStatus = ZLiquidStatus.UnderWater;
                 else if (delta > 0.0f)
                     data.LiquidStatus = ZLiquidStatus.InWater;
@@ -2160,7 +2156,7 @@ namespace Game.Maps
             if (gmap != null && (data.LiquidStatus == ZLiquidStatus.AboveWater || data.LiquidStatus == ZLiquidStatus.NoWater))
             {
                 LiquidData gridMapLiquid = new();
-                ZLiquidStatus gridMapStatus = gmap.GetLiquidStatus(x, y, z, reqLiquidType, gridMapLiquid);
+                ZLiquidStatus gridMapStatus = gmap.GetLiquidStatus(x, y, z, reqLiquidType, gridMapLiquid, collisionHeight);
                 if (gridMapStatus != ZLiquidStatus.NoWater && (gridMapLiquid.level > vmapData.floorZ))
                 {
                     if (GetId() == 530 && gridMapLiquid.entry == 2)
