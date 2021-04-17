@@ -25,11 +25,8 @@ namespace Game.Chat.Commands
     class CheatCommands
     {
         [Command("god", RBACPermissions.CommandCheatGod)]
-        static bool HandleGodModeCheat(StringArguments args, CommandHandler handler)
+        static bool HandleGodModeCheatCommand(StringArguments args, CommandHandler handler)
         {
-            if (handler.GetSession() == null || !handler.GetSession().GetPlayer())
-                return false;
-
             string argstr = args.NextString();
             if (args.Empty())
                 argstr = (handler.GetSession().GetPlayer().GetCommandStatus(PlayerCommandStates.God)) ? "off" : "on";
@@ -51,11 +48,8 @@ namespace Game.Chat.Commands
         }
 
         [Command("casttime", RBACPermissions.CommandCheatCasttime)]
-        static bool HandleCasttimeCheat(StringArguments args, CommandHandler handler)
+        static bool HandleCasttimeCheatCommand(StringArguments args, CommandHandler handler)
         {
-            if (handler.GetSession() == null || !handler.GetSession().GetPlayer())
-                return false;
-
             string argstr = args.NextString();
 
             if (args.Empty())
@@ -78,11 +72,8 @@ namespace Game.Chat.Commands
         }
 
         [Command("cooldown", RBACPermissions.CommandCheatCooldown)]
-        static bool HandleCoolDownCheat(StringArguments args, CommandHandler handler)
+        static bool HandleCoolDownCheatCommand(StringArguments args, CommandHandler handler)
         {
-            if (handler.GetSession() == null || !handler.GetSession().GetPlayer())
-                return false;
-
             string argstr = args.NextString();
 
             if (args.Empty())
@@ -105,11 +96,8 @@ namespace Game.Chat.Commands
         }
 
         [Command("power", RBACPermissions.CommandCheatPower)]
-        static bool HandlePowerCheat(StringArguments args, CommandHandler handler)
+        static bool HandlePowerCheatCommand(StringArguments args, CommandHandler handler)
         {
-            if (handler.GetSession() == null || !handler.GetSession().GetPlayer())
-                return false;
-
             string argstr = args.NextString();
 
             if (args.Empty())
@@ -137,7 +125,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("status", RBACPermissions.CommandCheatStatus)]
-        static bool HandleCheatStatus(StringArguments args, CommandHandler handler)
+        static bool HandleCheatStatusCommand(StringArguments args, CommandHandler handler)
         {
             Player player = handler.GetSession().GetPlayer();
 
@@ -155,11 +143,8 @@ namespace Game.Chat.Commands
         }
 
         [Command("waterwalk", RBACPermissions.CommandCheatWaterwalk)]
-        static bool HandleWaterWalkCheat(StringArguments args, CommandHandler handler)
+        static bool HandleWaterWalkCheatCommand(StringArguments args, CommandHandler handler)
         {
-            if (handler.GetSession() == null || !handler.GetSession().GetPlayer())
-                return false;
-
             string argstr = args.NextString();
 
             Player target = handler.GetSession().GetPlayer();
@@ -221,7 +206,7 @@ namespace Game.Chat.Commands
         }
 
         [Command("explore", RBACPermissions.CommandCheatExplore)]
-        static bool HandleExploreCheat(StringArguments args, CommandHandler handler)
+        static bool HandleExploreCheatCommand(StringArguments args, CommandHandler handler)
         {
             if (args.Empty())
                 return false;
