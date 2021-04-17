@@ -70,7 +70,7 @@ namespace Game.BattleFields
                 else // No more vacant places
                 {
                     // todo Send a packet to announce it to player
-                    m_PlayersWillBeKick[player.GetTeamId()][player.GetGUID()] = Time.UnixTime + 10;
+                    m_PlayersWillBeKick[player.GetTeamId()][player.GetGUID()] = GameTime.GetGameTime() + 10;
                     InvitePlayerToQueue(player);
                 }
             }
@@ -150,7 +150,7 @@ namespace Game.BattleFields
                 // Kick players who chose not to accept invitation to the battle
                 if (m_uiKickDontAcceptTimer <= diff)
                 {
-                    long now = Time.UnixTime;
+                    long now = GameTime.GetGameTime();
                     for (int team = 0; team < SharedConst.BGTeamsCount; team++)
                     {
                         foreach (var pair in m_InvitedPlayers[team])
@@ -247,7 +247,7 @@ namespace Game.BattleFields
                         if (m_PlayersInWar[player.GetTeamId()].Count + m_InvitedPlayers[player.GetTeamId()].Count < m_MaxPlayer)
                             InvitePlayerToWar(player);
                         else // Battlefield is full of players
-                            m_PlayersWillBeKick[player.GetTeamId()][player.GetGUID()] = Time.UnixTime + 10;
+                            m_PlayersWillBeKick[player.GetTeamId()][player.GetGUID()] = GameTime.GetGameTime() + 10;
                     }
                 }
             }
@@ -272,7 +272,7 @@ namespace Game.BattleFields
             if (player.GetLevel() < m_MinLevel)
             {
                 if (!m_PlayersWillBeKick[player.GetTeamId()].ContainsKey(player.GetGUID()))
-                    m_PlayersWillBeKick[player.GetTeamId()][player.GetGUID()] = Time.UnixTime + 10;
+                    m_PlayersWillBeKick[player.GetTeamId()][player.GetGUID()] = GameTime.GetGameTime() + 10;
                 return;
             }
 
@@ -281,7 +281,7 @@ namespace Game.BattleFields
                 return;
 
             m_PlayersWillBeKick[player.GetTeamId()].Remove(player.GetGUID());
-            m_InvitedPlayers[player.GetTeamId()][player.GetGUID()] = Time.UnixTime + m_TimeForAcceptInvite;
+            m_InvitedPlayers[player.GetTeamId()][player.GetGUID()] = GameTime.GetGameTime() + m_TimeForAcceptInvite;
             player.GetSession().SendBfInvitePlayerToWar(GetQueueId(), m_ZoneId, m_TimeForAcceptInvite);
         }
 

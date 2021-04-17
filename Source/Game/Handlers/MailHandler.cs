@@ -378,7 +378,7 @@ namespace Game
 
             Player player = GetPlayer();
             Mail m = player.GetMail(packet.MailID);
-            if (m == null || m.state == MailState.Deleted || m.deliver_time > Time.UnixTime || m.sender != packet.SenderGUID.GetCounter())
+            if (m == null || m.state == MailState.Deleted || m.deliver_time > GameTime.GetGameTime() || m.sender != packet.SenderGUID.GetCounter())
             {
                 player.SendMailResult(packet.MailID, MailResponseType.ReturnedToSender, MailResponseResult.InternalError);
                 return;
@@ -433,7 +433,7 @@ namespace Game
             Player player = GetPlayer();
 
             Mail m = player.GetMail(packet.MailID);
-            if (m == null || m.state == MailState.Deleted || m.deliver_time > Time.UnixTime)
+            if (m == null || m.state == MailState.Deleted || m.deliver_time > GameTime.GetGameTime())
             {
                 player.SendMailResult(packet.MailID, MailResponseType.ItemTaken, MailResponseResult.InternalError);
                 return;
@@ -530,7 +530,7 @@ namespace Game
             Player player = GetPlayer();
 
             Mail m = player.GetMail(packet.MailID);
-            if ((m == null || m.state == MailState.Deleted || m.deliver_time > Time.UnixTime) ||
+            if ((m == null || m.state == MailState.Deleted || m.deliver_time > GameTime.GetGameTime()) ||
                 (packet.Money > 0 && m.money != (ulong)packet.Money))
             {
                 player.SendMailResult(packet.MailID, MailResponseType.MoneyTaken, MailResponseResult.InternalError);
@@ -572,7 +572,7 @@ namespace Game
             var mails = player.GetMails();
 
             MailListResult response = new();
-            long curTime  = Time.UnixTime;
+            long curTime  = GameTime.GetGameTime();
 
             foreach (Mail m in mails)
             {
@@ -603,7 +603,7 @@ namespace Game
             Player player = GetPlayer();
 
             Mail m = player.GetMail(packet.MailID);
-            if (m == null || (string.IsNullOrEmpty(m.body) && m.mailTemplateId == 0) || m.state == MailState.Deleted || m.deliver_time > Time.UnixTime)
+            if (m == null || (string.IsNullOrEmpty(m.body) && m.mailTemplateId == 0) || m.state == MailState.Deleted || m.deliver_time > GameTime.GetGameTime())
             {
                 player.SendMailResult(packet.MailID, MailResponseType.MadePermanent, MailResponseResult.InternalError);
                 return;
@@ -662,7 +662,7 @@ namespace Game
             {
                 result.NextMailTime = 0.0f;
 
-                long now = Time.UnixTime;
+                long now = GameTime.GetGameTime();
                 List<ulong> sentSenders = new();
 
                 foreach (Mail mail in GetPlayer().GetMails())

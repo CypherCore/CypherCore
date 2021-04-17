@@ -52,7 +52,7 @@ namespace Game
                 else
                 {
                     Log.outTrace(LogFilter.Network, "CMSG_DB_QUERY_BULK: {0} requested non-existing entry {1} in datastore: {2}", GetPlayerInfo(), record.RecordID, dbQuery.TableHash);
-                    dbReply.Timestamp = (uint)Time.UnixTime;
+                    dbReply.Timestamp = (uint)GameTime.GetGameTime();
                 }
 
                 SendPacket(dbReply);

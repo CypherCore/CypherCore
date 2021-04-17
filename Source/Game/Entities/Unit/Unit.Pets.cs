@@ -430,7 +430,7 @@ namespace Game.Entities
                                     GetCharmInfo().SetPetNumber(Global.ObjectMgr.GeneratePetNumber(), true);
 
                                 // if charmed two demons the same session, the 2nd gets the 1st one's name
-                                SetPetNameTimestamp((uint)Time.UnixTime); // cast can't be helped
+                                SetPetNameTimestamp((uint)GameTime.GetGameTime()); // cast can't be helped
                             }
                         }
                         playerCharmer.CharmSpellInitialize();

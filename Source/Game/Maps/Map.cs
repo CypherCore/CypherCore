@@ -2393,7 +2393,7 @@ namespace Game.Maps
             long linkedTime = GetLinkedRespawnTime(thisGUID);
             if (linkedTime != 0)
             {
-                long now = Time.UnixTime;
+                long now = GameTime.GetGameTime();
                 long respawnTime;
                 if (linkedTime == long.MaxValue)
                     respawnTime = linkedTime;
@@ -2424,7 +2424,7 @@ namespace Game.Maps
             {
                 if (!Global.ScriptMgr.CanSpawn(info.spawnId, info.entry, Global.ObjectMgr.GetCreatureData(info.spawnId), this))
                 { // if a script blocks our respawn, schedule next check in a little bit
-                    info.respawnTime = Time.UnixTime + RandomHelper.URand(4, 7);
+                    info.respawnTime = GameTime.GetGameTime() + RandomHelper.URand(4, 7);
                     return false;
                 }
             }
@@ -2614,7 +2614,7 @@ namespace Game.Maps
 
         void ProcessRespawns()
         {
-            long now = Time.UnixTime;
+            long now = GameTime.GetGameTime();
             while (!_respawnTimes.Empty())
             {
                 RespawnInfo next = _respawnTimes.First();
@@ -2715,7 +2715,7 @@ namespace Game.Maps
                 }
 
                 long respawnTime = GetRespawnTime(data.type, data.spawnId);
-                if (respawnTime != 0 && respawnTime > Time.UnixTime)
+                if (respawnTime != 0 && respawnTime > GameTime.GetGameTime())
                 {
                     if (!force && !ignoreRespawn)
                         continue;
@@ -3351,7 +3351,7 @@ namespace Game.Maps
 
         public void RemoveOldCorpses()
         {
-            long now = Time.UnixTime;
+            long now = GameTime.GetGameTime();
 
             List<ObjectGuid> corpses = new();
 
@@ -5035,7 +5035,7 @@ namespace Game.Maps
 
                     // increase current instances (hourly limit)
                     if (!group || !group.IsLFGGroup())
-                        player.AddInstanceEnterTime(GetInstanceId(), Time.UnixTime);
+                        player.AddInstanceEnterTime(GetInstanceId(), GameTime.GetGameTime());
 
                     // get or create an instance save for the map
                     InstanceSave mapSave = Global.InstanceSaveMgr.GetInstanceSave(GetInstanceId());

@@ -87,7 +87,7 @@ namespace Game
 
             if (!criteriaResult.IsEmpty())
             {
-                long now = Time.UnixTime;
+                long now = GameTime.GetGameTime();
                 do
                 {
                     uint criteriaId = criteriaResult.Read<uint>(0);

@@ -270,7 +270,7 @@ namespace Game.Networking.Packets
                         break;
                 }
 
-                TimeLeft = mail.deliver_time - Time.UnixTime;
+                TimeLeft = mail.deliver_time - GameTime.GetGameTime();
                 AltSenderType = (sbyte)mail.messageType;
                 StationeryID = (int)mail.stationery;
             }
@@ -400,7 +400,7 @@ namespace Game.Networking.Packets
             StationeryID = (int)mail.stationery;
             SentMoney = mail.money;
             Flags = (int)mail.checkMask;
-            DaysLeft = (float)(mail.expire_time - Time.UnixTime) / Time.Day;
+            DaysLeft = (float)(mail.expire_time - GameTime.GetGameTime()) / Time.Day;
             MailTemplateID = (int)mail.mailTemplateId;
             Subject = mail.subject;
             Body = mail.body;

@@ -391,7 +391,7 @@ namespace Game.Guilds
 
         public MembershipRequest()
         {
-            _time = Time.UnixTime;
+            _time = GameTime.GetGameTime();
         }
 
         public ObjectGuid GetGuildGuid() { return _guildId; }

@@ -144,7 +144,7 @@ namespace Game.Mails
 
             uint mailId = Global.ObjectMgr.GenerateMailID();
 
-            long deliver_time = Time.UnixTime + deliver_delay;
+            long deliver_time = GameTime.GetGameTime() + deliver_delay;
 
             //expire time if COD 3 days, if no COD 30 days, if auction sale pending 1 hour
             uint expire_delay;

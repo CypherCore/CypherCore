@@ -2204,7 +2204,7 @@ namespace Game
             if (!result.IsEmpty())
             {
                 uint lastUndelete = result.Read<uint>(0);
-                uint now = (uint)Time.UnixTime;
+                uint now = (uint)GameTime.GetGameTime();
                 if (lastUndelete + maxCooldown > now)
                     cooldown = Math.Max(0, lastUndelete + maxCooldown - now);
             }
@@ -2231,7 +2231,7 @@ namespace Game
                 {
                     uint lastUndelete = result.Read<uint>(0);
                     uint maxCooldown = WorldConfig.GetUIntValue(WorldCfg.FeatureSystemCharacterUndeleteCooldown);
-                    if (lastUndelete != 0 && (lastUndelete + maxCooldown > Time.UnixTime))
+                    if (lastUndelete != 0 && (lastUndelete + maxCooldown > GameTime.GetGameTime()))
                     {
                         SendUndeleteCharacterResponse(CharacterUndeleteResult.Cooldown, undeleteInfo);
                         return;
@@ -2390,7 +2390,7 @@ namespace Game
                 return;
 
             // prevent resurrect before 30-sec delay after body release not finished
-            if ((corpse.GetGhostTime() + GetPlayer().GetCorpseReclaimDelay(corpse.GetCorpseType() == CorpseType.ResurrectablePVP)) > Time.UnixTime)
+            if ((corpse.GetGhostTime() + GetPlayer().GetCorpseReclaimDelay(corpse.GetCorpseType() == CorpseType.ResurrectablePVP)) > GameTime.GetGameTime())
                 return;
 
             if (!corpse.IsWithinDistInMap(GetPlayer(), 39, true))
@@ -2648,7 +2648,7 @@ namespace Game
 
             stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_MAILCOUNT);
             stmt.AddValue(0, lowGuid);
-            stmt.AddValue(1, Time.UnixTime);
+            stmt.AddValue(1, GameTime.GetGameTime());
             SetQuery(PlayerLoginQueryLoad.MailCount, stmt);
 
             stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_MAILDATE);

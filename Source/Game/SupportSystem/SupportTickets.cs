@@ -39,7 +39,7 @@ namespace Game.SupportSystem
         public Ticket() { }
         public Ticket(Player player)
         {
-            _createTime = (ulong)Time.UnixTime;
+            _createTime = (ulong)GameTime.GetGameTime();
             _playerGuid = player.GetGUID();
         }
 
@@ -184,7 +184,7 @@ namespace Game.SupportSystem
 
         public override string FormatViewMessageString(CommandHandler handler, bool detailed = false)
         {
-            var curTime = (ulong)Time.UnixTime;
+            var curTime = (ulong)GameTime.GetGameTime();
 
             StringBuilder ss = new();
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistguid, _id));
@@ -322,7 +322,7 @@ namespace Game.SupportSystem
 
         public override string FormatViewMessageString(CommandHandler handler, bool detailed = false)
         {
-            ulong curTime = (ulong)Time.UnixTime;
+            ulong curTime = (ulong)GameTime.GetGameTime();
 
             StringBuilder ss = new();
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistguid, _id));
@@ -428,7 +428,7 @@ namespace Game.SupportSystem
 
         public override string FormatViewMessageString(CommandHandler handler, bool detailed = false)
         {
-            ulong curTime = (ulong)Time.UnixTime;
+            ulong curTime = (ulong)GameTime.GetGameTime();
 
             StringBuilder ss = new();
             ss.Append(handler.GetParsedString(CypherStrings.CommandTicketlistguid, _id));

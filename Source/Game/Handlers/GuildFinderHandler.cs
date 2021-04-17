@@ -44,7 +44,7 @@ namespace Game
                 return;
 
             MembershipRequest request = new(GetPlayer().GetGUID(), lfGuildAddRecruit.GuildGUID, lfGuildAddRecruit.Availability,
-                lfGuildAddRecruit.ClassRoles, lfGuildAddRecruit.PlayStyle, lfGuildAddRecruit.Comment, Time.UnixTime);
+                lfGuildAddRecruit.ClassRoles, lfGuildAddRecruit.PlayStyle, lfGuildAddRecruit.Comment, GameTime.GetGameTime());
             Global.GuildFinderMgr.AddMembershipRequest(lfGuildAddRecruit.GuildGUID, request);
         }
 
@@ -129,8 +129,8 @@ namespace Game
                 applicationData.ClassRoles = guildSettings.GetClassRoles();
                 applicationData.PlayStyle = guildSettings.GetInterests();
                 applicationData.Availability = guildSettings.GetAvailability();
-                applicationData.SecondsSinceCreated = (uint)(Time.UnixTime - application.GetSubmitTime());
-                applicationData.SecondsUntilExpiration = (uint)(application.GetExpiryTime() - Time.UnixTime);
+                applicationData.SecondsSinceCreated = (uint)(GameTime.GetGameTime() - application.GetSubmitTime());
+                applicationData.SecondsUntilExpiration = (uint)(application.GetExpiryTime() - GameTime.GetGameTime());
                 applicationData.Comment = application.GetComment();
 
                 lfGuildApplications.Application.Add(applicationData);
@@ -176,7 +176,7 @@ namespace Game
             if (!guild)
                 return;
 
-            long now = Time.UnixTime;
+            long now = GameTime.GetGameTime();
             LFGuildRecruits lfGuildRecruits = new();
             lfGuildRecruits.UpdateTime = now;
             var recruitsList = Global.GuildFinderMgr.GetAllMembershipRequestsForGuild(guild.GetGUID());

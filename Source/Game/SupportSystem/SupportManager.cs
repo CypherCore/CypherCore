@@ -341,7 +341,7 @@ namespace Game.SupportSystem
             }
         }
 
-        long GetAge(ulong t) { return (Time.UnixTime - (long)t) / Time.Day; }
+        long GetAge(ulong t) { return (GameTime.GetGameTime() - (long)t) / Time.Day; }
 
         IEnumerable<KeyValuePair<uint, ComplaintTicket>> GetComplaintsByPlayerGuid(ObjectGuid playerGuid)
         {
@@ -361,7 +361,7 @@ namespace Game.SupportSystem
         public void SetComplaintSystemStatus(bool status) { _complaintSystemStatus = status; }
         public void SetSuggestionSystemStatus(bool status) { _suggestionSystemStatus = status; }
 
-        public void UpdateLastChange() { _lastChange = (ulong)Time.UnixTime; }
+        public void UpdateLastChange() { _lastChange = (ulong)GameTime.GetGameTime(); }
 
         public uint GenerateBugId() { return ++_lastBugId; }
         public uint GenerateComplaintId() { return ++_lastComplaintId; }

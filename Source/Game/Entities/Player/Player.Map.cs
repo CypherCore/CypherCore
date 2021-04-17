@@ -458,7 +458,7 @@ namespace Game.Entities
         {
             InstanceInfoPkt instanceInfo = new();
 
-            long now = Time.UnixTime;
+            long now = GameTime.GetGameTime();
             foreach (var difficultyDic in m_boundInstances.Values)
             {
                 foreach (var instanceBind in difficultyDic.Values)

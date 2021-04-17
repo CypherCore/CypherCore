@@ -224,7 +224,7 @@ namespace Game.Entities
                     break;
             }
 
-            SetPetNameTimestamp((uint)Time.UnixTime); // cast can't be helped here
+            SetPetNameTimestamp((uint)GameTime.GetGameTime()); // cast can't be helped here
             SetCreatorGUID(owner.GetGUID());
 
             InitStatsForLevel(petlevel);
@@ -299,7 +299,7 @@ namespace Game.Entities
             owner.SetMinion(this, true);
             map.AddToMap(ToCreature());
 
-            uint timediff = (uint)(Time.UnixTime - result.Read<uint>(13));
+            uint timediff = (uint)(GameTime.GetGameTime() - result.Read<uint>(13));
             _LoadAuras(timediff);
 
             // load action bar, if data broken will fill later by default spells.
@@ -453,7 +453,7 @@ namespace Game.Entities
                 stmt.AddValue(10, curhealth);
                 stmt.AddValue(11, curmana);
                 stmt.AddValue(12, GenerateActionBarData());
-                stmt.AddValue(13, Time.UnixTime);
+                stmt.AddValue(13, GameTime.GetGameTime());
                 stmt.AddValue(14, (uint)m_unitData.CreatedBySpell);
                 stmt.AddValue(15, GetPetType());
                 stmt.AddValue(16, m_petSpecialization);
@@ -534,7 +534,7 @@ namespace Game.Entities
             {
                 case DeathState.Corpse:
                     {
-                        if (GetPetType() != PetType.Hunter || m_corpseRemoveTime <= Time.UnixTime)
+                        if (GetPetType() != PetType.Hunter || m_corpseRemoveTime <= GameTime.GetGameTime())
                         {
                             Remove(PetSaveMode.NotInSlot);               //hunters' pets never get removed because of death, NEVER!
                             return;

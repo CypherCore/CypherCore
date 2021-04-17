@@ -585,7 +585,7 @@ namespace Game
 
             DB.Characters.CommitTransaction(trans);
 
-            pet.SetPetNameTimestamp((uint)Time.UnixTime); // cast can't be helped
+            pet.SetPetNameTimestamp((uint)GameTime.GetGameTime()); // cast can't be helped
         }
 
         [WorldPacketHandler(ClientOpcodes.PetAbandon)]

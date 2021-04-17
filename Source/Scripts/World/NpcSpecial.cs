@@ -1551,7 +1551,7 @@ namespace Scripts.World.NpcSpecial
             {
                 _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
                 {
-                    long now = Time.UnixTime;
+                    long now = GameTime.GetGameTime();
                     foreach (var pair in _damageTimes.ToList())
                     {
                         // If unit has not dealt damage to training dummy for 5 seconds, Remove him from combat
@@ -1582,7 +1582,7 @@ namespace Scripts.World.NpcSpecial
         public override void DamageTaken(Unit doneBy, ref uint damage)
         {
             AddThreat(doneBy, damage);    // just to create threat reference
-            _damageTimes[doneBy.GetGUID()] = Time.UnixTime;
+            _damageTimes[doneBy.GetGUID()] = GameTime.GetGameTime();
             damage = 0;
         }
 

@@ -42,7 +42,7 @@ namespace Game.Entities
 
             uState = ItemUpdateState.New;
             uQueuePos = -1;
-            m_lastPlayedTimeUpdate = Time.UnixTime;
+            m_lastPlayedTimeUpdate = GameTime.GetGameTime();
 
             loot = new Loot();
         }
@@ -1356,7 +1356,7 @@ namespace Game.Entities
             // Get current played time
             uint current_playtime = m_itemData.CreatePlayedTime;
             // Calculate time elapsed since last played time update
-            long curtime = Time.UnixTime;
+            long curtime = GameTime.GetGameTime();
             uint elapsed = (uint)(curtime - m_lastPlayedTimeUpdate);
             uint new_playtime = current_playtime + elapsed;
             // Check if the refund timer has expired yet
@@ -1377,7 +1377,7 @@ namespace Game.Entities
 
         public uint GetPlayedTime()
         {
-            long curtime = Time.UnixTime;
+            long curtime = GameTime.GetGameTime();
             uint elapsed = (uint)(curtime - m_lastPlayedTimeUpdate);
             return m_itemData.CreatePlayedTime + elapsed;
         }

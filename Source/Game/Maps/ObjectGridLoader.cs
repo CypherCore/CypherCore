@@ -114,7 +114,7 @@ namespace Game.Maps
                         // If script is blocking spawn, don't spawn but queue for a re-check in a little bit
                         if (!group.flags.HasFlag(SpawnGroupFlags.CompatibilityMode) && !Global.ScriptMgr.CanSpawn(guid, cdata.Id, cdata, map))
                         {
-                            map.SaveRespawnTime(SpawnObjectType.Creature, guid, cdata.Id, Time.UnixTime + RandomHelper.URand(4, 7), map.GetZoneId(PhasingHandler.EmptyPhaseShift, cdata.spawnPoint), GridDefines.ComputeGridCoord(cdata.spawnPoint.GetPositionX(), cdata.spawnPoint.GetPositionY()).GetId(), false);
+                            map.SaveRespawnTime(SpawnObjectType.Creature, guid, cdata.Id, GameTime.GetGameTime() + RandomHelper.URand(4, 7), map.GetZoneId(PhasingHandler.EmptyPhaseShift, cdata.spawnPoint), GridDefines.ComputeGridCoord(cdata.spawnPoint.GetPositionX(), cdata.spawnPoint.GetPositionY()).GetId(), false);
                             obj.Dispose();
                             continue;
                         }

@@ -360,7 +360,7 @@ namespace Game.Garrisons
             {
                 placeBuildingResult.BuildingInfo.GarrPlotInstanceID = garrPlotInstanceId;
                 placeBuildingResult.BuildingInfo.GarrBuildingID = garrBuildingId;
-                placeBuildingResult.BuildingInfo.TimeBuilt = Time.UnixTime;
+                placeBuildingResult.BuildingInfo.TimeBuilt = GameTime.GetGameTime();
 
                 Plot plot = GetPlot(garrPlotInstanceId);
                 uint oldBuildingId = 0;
@@ -438,7 +438,7 @@ namespace Game.Garrisons
                     placeBuildingResult.Result = GarrisonError.Success;
                     placeBuildingResult.BuildingInfo.GarrPlotInstanceID = garrPlotInstanceId;
                     placeBuildingResult.BuildingInfo.GarrBuildingID = restored;
-                    placeBuildingResult.BuildingInfo.TimeBuilt = Time.UnixTime;
+                    placeBuildingResult.BuildingInfo.TimeBuilt = GameTime.GetGameTime();
                     placeBuildingResult.BuildingInfo.Active = true;
 
                     plot.SetBuildingInfo(placeBuildingResult.BuildingInfo, _owner);
@@ -689,7 +689,7 @@ namespace Game.Garrisons
                 if (PacketInfo.HasValue)
                 {
                     GarrBuildingRecord building = CliDB.GarrBuildingStorage.LookupByKey(PacketInfo.Value.GarrBuildingID);
-                    if (PacketInfo.Value.TimeBuilt + building.BuildSeconds <= Time.UnixTime)
+                    if (PacketInfo.Value.TimeBuilt + building.BuildSeconds <= GameTime.GetGameTime())
                         return true;
                 }
 

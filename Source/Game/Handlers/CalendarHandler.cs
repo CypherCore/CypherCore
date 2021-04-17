@@ -35,7 +35,7 @@ namespace Game
         {
             ObjectGuid guid = GetPlayer().GetGUID();
 
-            long currTime = Time.UnixTime;
+            long currTime = GameTime.GetGameTime();
 
             CalendarSendCalendar packet = new();
             packet.ServerTime = currTime;
@@ -123,7 +123,7 @@ namespace Game
 
             // prevent events in the past
             // To Do: properly handle timezones and remove the "- time_t(86400L)" hack
-            if (calendarAddEvent.EventInfo.Time < (Time.UnixTime - 86400L))
+            if (calendarAddEvent.EventInfo.Time < (GameTime.GetGameTime() - 86400L))
                 return;
 
             CalendarEvent calendarEvent = new(Global.CalendarMgr.GetFreeEventId(), guid, 0, (CalendarEventType)calendarAddEvent.EventInfo.EventType, calendarAddEvent.EventInfo.TextureID,
@@ -172,7 +172,7 @@ namespace Game
 
             // prevent events in the past
             // To Do: properly handle timezones and remove the "- time_t(86400L)" hack
-            if (calendarUpdateEvent.EventInfo.Time < (Time.UnixTime - 86400L))
+            if (calendarUpdateEvent.EventInfo.Time < (GameTime.GetGameTime() - 86400L))
                 return;
 
             CalendarEvent calendarEvent = Global.CalendarMgr.GetEvent(calendarUpdateEvent.EventInfo.EventID);
@@ -208,7 +208,7 @@ namespace Game
 
             // prevent events in the past
             // To Do: properly handle timezones and remove the "- time_t(86400L)" hack
-            if (calendarCopyEvent.Date < (Time.UnixTime - 86400L))
+            if (calendarCopyEvent.Date < (GameTime.GetGameTime() - 86400L))
                 return;
 
             CalendarEvent oldEvent = Global.CalendarMgr.GetEvent(calendarCopyEvent.EventID);
@@ -339,7 +339,7 @@ namespace Game
                 }
 
                 CalendarInviteStatus status = calendarEventSignUp.Tentative ? CalendarInviteStatus.Tentative : CalendarInviteStatus.SignedUp;
-                CalendarInvite invite = new(Global.CalendarMgr.GetFreeInviteId(), calendarEventSignUp.EventID, guid, guid, Time.UnixTime, status, CalendarModerationRank.Player, "");
+                CalendarInvite invite = new(Global.CalendarMgr.GetFreeInviteId(), calendarEventSignUp.EventID, guid, guid, GameTime.GetGameTime(), status, CalendarModerationRank.Player, "");
                 Global.CalendarMgr.AddInvite(calendarEvent, invite);
                 Global.CalendarMgr.SendCalendarClearPendingAction(guid);
             }
@@ -366,7 +366,7 @@ namespace Game
                 if (invite != null)
                 {
                     invite.Status = calendarRSVP.Status;
-                    invite.ResponseTime = Time.UnixTime;
+                    invite.ResponseTime = GameTime.GetGameTime();
 
                     Global.CalendarMgr.UpdateInvite(invite);
                     Global.CalendarMgr.SendCalendarEventStatus(calendarEvent, invite);
@@ -491,7 +491,7 @@ namespace Game
 
         public void SendCalendarRaidLockout(InstanceSave save, bool add)
         {
-            long currTime = Time.UnixTime;
+            long currTime = GameTime.GetGameTime();
 
             if (add)
             {
@@ -518,7 +518,7 @@ namespace Game
             if (save == null)
                 return;
 
-            long currTime = Time.UnixTime;
+            long currTime = GameTime.GetGameTime();
 
             CalendarRaidLockoutUpdated packet = new();
             packet.DifficultyID = (uint)save.GetDifficultyID();

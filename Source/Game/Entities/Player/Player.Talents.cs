@@ -539,7 +539,7 @@ namespace Game.Entities
                 UpdateCriteria(CriteriaTypes.NumberOfTalentResets, 1);
 
                 SetTalentResetCost(cost);
-                SetTalentResetTime(Time.UnixTime);
+                SetTalentResetTime(GameTime.GetGameTime());
             }
 
             return true;

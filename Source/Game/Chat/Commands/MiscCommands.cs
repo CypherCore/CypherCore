@@ -1334,7 +1334,7 @@ namespace Game.Chat
             if (target)
             {
                 // Target is online, mute will be in effect right away.
-                long muteTime = Time.UnixTime + notSpeakTime * Time.Minute;
+                long muteTime = GameTime.GetGameTime() + notSpeakTime * Time.Minute;
                 target.GetSession().m_muteTime = muteTime;
                 stmt.AddValue(0, muteTime);
                 string nameLink = handler.PlayerLink(targetName);
@@ -1727,11 +1727,11 @@ namespace Game.Chat
 
             // Output III. LANG_PINFO_BANNED if ban exists and is applied
             if (banTime >= 0)
-                handler.SendSysMessage(CypherStrings.PinfoBanned, banType, banReason, banTime > 0 ? Time.secsToTimeString((ulong)(banTime - Time.UnixTime), true) : handler.GetCypherString(CypherStrings.Permanently), bannedBy);
+                handler.SendSysMessage(CypherStrings.PinfoBanned, banType, banReason, banTime > 0 ? Time.secsToTimeString((ulong)(banTime - GameTime.GetGameTime()), true) : handler.GetCypherString(CypherStrings.Permanently), bannedBy);
 
             // Output IV. LANG_PINFO_MUTED if mute is applied
             if (muteTime > 0)
-                handler.SendSysMessage(CypherStrings.PinfoMuted, muteReason, Time.secsToTimeString((ulong)(muteTime - Time.UnixTime), true), muteBy);
+                handler.SendSysMessage(CypherStrings.PinfoMuted, muteReason, Time.secsToTimeString((ulong)(muteTime - GameTime.GetGameTime()), true), muteBy);
 
             // Output V. LANG_PINFO_ACC_ACCOUNT
             handler.SendSysMessage(CypherStrings.PinfoAccAccount, userName, accId, security);

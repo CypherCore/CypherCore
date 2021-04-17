@@ -98,12 +98,12 @@ namespace Game.BlackMarket
 
         public uint GetSecondsRemaining()
         {
-            return (uint)(_secondsRemaining - (Time.UnixTime - Global.BlackMarketMgr.GetLastUpdate()));
+            return (uint)(_secondsRemaining - (GameTime.GetGameTime() - Global.BlackMarketMgr.GetLastUpdate()));
         }
 
         long GetExpirationTime()
         {
-            return Time.UnixTime + GetSecondsRemaining();
+            return GameTime.GetGameTime() + GetSecondsRemaining();
         }
 
         public bool IsCompleted()

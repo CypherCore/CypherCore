@@ -621,7 +621,7 @@ namespace Game.Entities
             }
             else
             {
-                pvpInfo.EndTimer = Time.UnixTime;
+                pvpInfo.EndTimer = GameTime.GetGameTime();
                 SetPvP(state);
             }
         }
@@ -658,7 +658,7 @@ namespace Game.Entities
             else                                                    // in friendly area
             {
                 if (IsPvP() && !HasPlayerFlag(PlayerFlags.InPVP) && pvpInfo.EndTimer == 0)
-                    pvpInfo.EndTimer = Time.UnixTime;                  // start toggle-off
+                    pvpInfo.EndTimer = GameTime.GetGameTime();                  // start toggle-off
             }
         }
 

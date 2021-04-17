@@ -9091,7 +9091,7 @@ namespace Game
         {
             uint oldMSTime = Time.GetMSTime();
 
-            long curTime = Time.UnixTime;
+            long curTime = GameTime.GetGameTime();
             DateTime lt = Time.UnixTimeToDateTime(curTime).ToLocalTime();
             Log.outInfo(LogFilter.Server, "Returning mails current time: hour: {0}, minute: {1}, second: {2} ", lt.Hour, lt.Minute, lt.Second);
 

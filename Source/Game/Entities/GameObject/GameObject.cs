@@ -493,7 +493,7 @@ namespace Game.Entities
                             case GameObjectTypes.FishingNode:
                                 {
                                     // fishing code (bobber ready)
-                                    if (Time.UnixTime > m_respawnTime - 5)
+                                    if (GameTime.GetGameTime() > m_respawnTime - 5)
                                     {
                                         // splash bobber (bobber ready now)
                                         Unit caster = GetOwner();
@@ -527,7 +527,7 @@ namespace Game.Entities
                         {
                             if (m_respawnTime > 0)                          // timer on
                             {
-                                long now = Time.UnixTime;
+                                long now = GameTime.GetGameTime();
                                 if (m_respawnTime <= now)            // timer expired
                                 {
                                     ObjectGuid dbtableHighGuid = ObjectGuid.Create(HighGuid.GameObject, GetMapId(), GetEntry(), m_spawnId);
@@ -820,7 +820,7 @@ namespace Game.Entities
                         uint scalingMode = WorldConfig.GetUIntValue(WorldCfg.RespawnDynamicMode);
                         if (scalingMode != 0)
                             GetMap().ApplyDynamicModeRespawnScaling(this, m_spawnId, ref respawnDelay, scalingMode);
-                        m_respawnTime = Time.UnixTime + respawnDelay;
+                        m_respawnTime = GameTime.GetGameTime() + respawnDelay;
 
                         // if option not set then object will be saved at grid unload
                         // Otherwise just save respawn time to map object memory
@@ -1038,7 +1038,7 @@ namespace Game.Entities
                     m_respawnTime = GetMap().GetGORespawnTime(m_spawnId);
 
                     // ready to respawn
-                    if (m_respawnTime != 0 && m_respawnTime <= Time.UnixTime)
+                    if (m_respawnTime != 0 && m_respawnTime <= GameTime.GetGameTime())
                     {
                         m_respawnTime = 0;
                         GetMap().RemoveRespawnTime(SpawnObjectType.GameObject, m_spawnId);
@@ -1140,7 +1140,7 @@ namespace Game.Entities
 
         public override void SaveRespawnTime(uint forceDelay = 0, bool savetodb = true)
         {
-            if (m_goData != null && m_respawnTime > Time.UnixTime && m_spawnedByDefault)
+            if (m_goData != null && m_respawnTime > GameTime.GetGameTime() && m_spawnedByDefault)
             {
                 if (m_respawnCompatibilityMode)
                 {
@@ -1148,7 +1148,7 @@ namespace Game.Entities
                     return;
                 }
 
-                long thisRespawnTime = forceDelay != 0 ? Time.UnixTime + forceDelay : m_respawnTime;
+                long thisRespawnTime = forceDelay != 0 ? GameTime.GetGameTime() + forceDelay : m_respawnTime;
                 GetMap().SaveRespawnTime(SpawnObjectType.GameObject, m_spawnId, GetEntry(), thisRespawnTime, GetZoneId(), GridDefines.ComputeGridCoord(GetPositionX(), GetPositionY()).GetId(), m_goData.dbData ? savetodb : false);
             }
         }
@@ -1209,7 +1209,7 @@ namespace Game.Entities
         {
             if (m_spawnedByDefault && m_respawnTime > 0)
             {
-                m_respawnTime = Time.UnixTime;
+                m_respawnTime = GameTime.GetGameTime();
                 GetMap().RemoveRespawnTime(SpawnObjectType.GameObject, m_spawnId, true);
             }
         }
@@ -2709,7 +2709,7 @@ namespace Game.Entities
         public long GetRespawnTime() { return m_respawnTime; }
         public long GetRespawnTimeEx()
         {
-            long now = Time.UnixTime;
+            long now = GameTime.GetGameTime();
             if (m_respawnTime > now)
                 return m_respawnTime;
             else
@@ -2718,7 +2718,7 @@ namespace Game.Entities
 
         public void SetRespawnTime(int respawn)
         {
-            m_respawnTime = respawn > 0 ? Time.UnixTime + respawn : 0;
+            m_respawnTime = respawn > 0 ? GameTime.GetGameTime() + respawn : 0;
             m_respawnDelayTime = (uint)(respawn > 0 ? respawn : 0);
         }
 
@@ -2752,7 +2752,7 @@ namespace Game.Entities
         void AddLootMode(LootModes lootMode) { m_LootMode |= lootMode; }
         void RemoveLootMode(LootModes lootMode) { m_LootMode &= ~lootMode; }
         void ResetLootMode() { m_LootMode = LootModes.Default; }
-        public void SetLootGenerationTime() { m_lootGenerationTime = (uint)Time.UnixTime; }
+        public void SetLootGenerationTime() { m_lootGenerationTime = (uint)GameTime.GetGameTime(); }
         public uint GetLootGenerationTime() { return m_lootGenerationTime; }
 
         public void AddToSkillupList(ObjectGuid PlayerGuid) { m_SkillupList.Add(PlayerGuid); }

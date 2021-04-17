@@ -295,7 +295,7 @@ namespace Game.Spells
             m_castItemId = castItem != null ? castItem.GetEntry() : castItemId;
             m_castItemLevel = castItemLevel;
             m_spellVisual = new SpellCastVisual(caster ? caster.GetCastSpellXSpellVisualId(spellproto) : spellproto.GetSpellXSpellVisualId(), 0);
-            m_applyTime = Time.UnixTime;
+            m_applyTime = GameTime.GetGameTime();
             m_owner = owner;
             m_timeCla = 0;
             m_updateTargetMapInterval = 0;

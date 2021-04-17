@@ -607,7 +607,7 @@ namespace Game.Networking
             //! Negative mutetime indicates amount of seconds to be muted effective on next login - which is now.
             if (mutetime < 0)
             {
-                mutetime = Time.UnixTime + mutetime;
+                mutetime = GameTime.GetGameTime() + mutetime;
 
                 stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_MUTE_TIME_LOGIN);
                 stmt.AddValue(0, mutetime);
@@ -781,10 +781,10 @@ namespace Game.Networking
         bool HandlePing(Ping ping)
         {
             if (_LastPingTime == 0)
-                _LastPingTime = Time.UnixTime; // for 1st ping
+                _LastPingTime = GameTime.GetGameTime(); // for 1st ping
             else
             {
-                long now = Time.UnixTime;
+                long now = GameTime.GetGameTime();
                 long diff = now - _LastPingTime;
                 _LastPingTime = now;
 

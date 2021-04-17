@@ -602,7 +602,7 @@ namespace Game.Chat.Commands
                 uint gridY = ri.gridId / MapConst.MaxGrids;
                 uint gridX = ri.gridId % MapConst.MaxGrids;
 
-                string respawnTime = ri.respawnTime > Time.UnixTime ? Time.secsToTimeString((ulong)(ri.respawnTime - Time.UnixTime), true) : stringOverdue;
+                string respawnTime = ri.respawnTime > GameTime.GetGameTime() ? Time.secsToTimeString((ulong)(ri.respawnTime - GameTime.GetGameTime()), true) : stringOverdue;
                 handler.SendSysMessage($"{ri.spawnId} | {ri.entry} | [{gridX},{gridY}] | {GetZoneName(ri.zoneId, handler.GetSessionDbcLocale())} ({ri.zoneId}) | {(map.IsSpawnGroupActive(data.spawnGroupData.groupId) ? respawnTime : "inactive")}");
             }
 
@@ -625,7 +625,7 @@ namespace Game.Chat.Commands
                 uint gridY = ri.gridId / MapConst.MaxGrids;
                 uint gridX = ri.gridId % MapConst.MaxGrids;
 
-                string respawnTime = ri.respawnTime > Time.UnixTime ? Time.secsToTimeString((ulong)(ri.respawnTime - Time.UnixTime), true) : stringOverdue;
+                string respawnTime = ri.respawnTime > GameTime.GetGameTime() ? Time.secsToTimeString((ulong)(ri.respawnTime - GameTime.GetGameTime()), true) : stringOverdue;
                 handler.SendSysMessage($"{ri.spawnId} | {ri.entry} | [{gridX},{gridY}] | {GetZoneName(ri.zoneId, handler.GetSessionDbcLocale())} ({ri.zoneId}) | {(map.IsSpawnGroupActive(data.spawnGroupData.groupId) ? respawnTime : "inactive")}");
             }
             return true;

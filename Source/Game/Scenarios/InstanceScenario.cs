@@ -102,7 +102,7 @@ namespace Game.Scenarios
             if (!result.IsEmpty())
             {
                 SQLTransaction trans = new();
-                long now = Time.UnixTime;
+                long now = GameTime.GetGameTime();
 
                 List<CriteriaTree> criteriaTrees = new();
                 do

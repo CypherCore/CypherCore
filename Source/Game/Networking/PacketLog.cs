@@ -42,7 +42,7 @@ public class PacketLog
                 writer.Write(Global.WorldMgr.GetRealm().Build);
                 writer.Write(Encoding.ASCII.GetBytes("enUS"));
                 writer.Write(new byte[40]);//SessionKey
-                writer.Write((uint)Time.UnixTime);
+                writer.Write((uint)GameTime.GetGameTime());
                 writer.Write(Time.GetMSTime());
                 writer.Write(0);
             }

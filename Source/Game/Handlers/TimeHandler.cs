@@ -28,7 +28,7 @@ namespace Game
         void HandleServerTimeOffsetRequest(ServerTimeOffsetRequest packet)
         {
             ServerTimeOffset response = new();
-            response.Time = Time.UnixTime;
+            response.Time = GameTime.GetGameTime();
             SendPacket(response);
         }
 

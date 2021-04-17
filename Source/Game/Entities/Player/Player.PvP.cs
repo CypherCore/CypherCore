@@ -37,8 +37,8 @@ namespace Game.Entities
         public void UpdateHonorFields()
         {
             // called when rewarding honor and at each save
-            long now = Time.UnixTime;
-            long today = (Time.UnixTime / Time.Day) * Time.Day;
+            long now = GameTime.GetGameTime();
+            long today = (GameTime.GetGameTime() / Time.Day) * Time.Day;
 
             if (m_lastHonorUpdateTime < today)
             {
@@ -876,7 +876,7 @@ namespace Game.Entities
                 {
                     SendUpdateWorldState(3801, (uint)(wg.IsWarTime() ? 0 : 1));
                     uint timer = wg.IsWarTime() ? 0 : (wg.GetTimer() / 1000); // 0 - Time to next battle
-                    SendUpdateWorldState(4354, (uint)(Time.UnixTime + timer));
+                    SendUpdateWorldState(4354, (uint)(GameTime.GetGameTime() + timer));
                 }
             }
         }

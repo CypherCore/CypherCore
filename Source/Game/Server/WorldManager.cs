@@ -49,7 +49,7 @@ namespace Game
             _realm = new Realm();
 
             _worldUpdateTime = new WorldUpdateTime();
-            _warnShutdownTime = Time.UnixTime;
+            _warnShutdownTime = GameTime.GetGameTime();
         }
 
         public Player FindPlayerInZone(uint zone)
@@ -271,7 +271,7 @@ namespace Game
             {
                 foreach (var disconnect in m_disconnects)
                 {
-                    if ((disconnect.Value - Time.UnixTime) < tolerance)
+                    if ((disconnect.Value - GameTime.GetGameTime()) < tolerance)
                     {
                         if (disconnect.Key == session.GetAccountId())
                             return true;
@@ -1858,7 +1858,7 @@ namespace Game
                 if (!session.Update(diff, updater))    // As interval = 0
                 {
                     if (!RemoveQueuedPlayer(session) && session != null && WorldConfig.GetIntValue(WorldCfg.IntervalDisconnectTolerance) != 0)
-                        m_disconnects[session.GetAccountId()] = Time.UnixTime;
+                        m_disconnects[session.GetAccountId()] = GameTime.GetGameTime();
 
                     RemoveQueuedPlayer(session);
                     m_sessions.TryRemove(pair.Key, out _);
@@ -1923,7 +1923,7 @@ namespace Game
         void InitWeeklyQuestResetTime()
         {
             long wstime = GetWorldState(WorldStates.WeeklyQuestResetTime);
-            long curtime = Time.UnixTime;
+            long curtime = GameTime.GetGameTime();
             m_NextWeeklyQuestReset = wstime < curtime ? curtime : wstime;
         }
 
@@ -1942,7 +1942,7 @@ namespace Game
 
 
             // FIX ME: client not show day start time
-            long curTime = Time.UnixTime;
+            long curTime = GameTime.GetGameTime();
 
             // current day reset time
             long curDayResetTime = Time.GetNextResetUnixTime(WorldConfig.GetIntValue(WorldCfg.DailyQuestResetTimeHour));
@@ -1960,7 +1960,7 @@ namespace Game
         void InitMonthlyQuestResetTime()
         {
             long wstime = GetWorldState(WorldStates.MonthlyQuestResetTime);
-            long curtime = Time.UnixTime;
+            long curtime = GameTime.GetGameTime();
             m_NextMonthlyQuestReset = wstime < curtime ? curtime : wstime;
         }
 
@@ -1968,10 +1968,10 @@ namespace Game
         {
             long bgtime = GetWorldState(WorldStates.BGDailyResetTime);
             if (bgtime == 0)
-                m_NextRandomBGReset = Time.UnixTime;         // game time not yet init
+                m_NextRandomBGReset = GameTime.GetGameTime();         // game time not yet init
 
             // generate time by config
-            long curTime = Time.UnixTime;
+            long curTime = GameTime.GetGameTime();
 
             // current day reset time
             long nextDayResetTime = Time.GetNextResetUnixTime(WorldConfig.GetIntValue(WorldCfg.RandomBgResetHour));
@@ -1991,9 +1991,9 @@ namespace Game
         {
             long gtime = GetWorldState(WorldStates.GuildDailyResetTime);
             if (gtime == 0)
-                m_NextGuildReset = Time.UnixTime;         // game time not yet init
+                m_NextGuildReset = GameTime.GetGameTime();         // game time not yet init
 
-            long curTime = Time.UnixTime;
+            long curTime = GameTime.GetGameTime();
             var nextDayResetTime = Time.GetNextResetUnixTime(WorldConfig.GetIntValue(WorldCfg.GuildResetHour));
 
             if (curTime >= nextDayResetTime)
@@ -2010,10 +2010,10 @@ namespace Game
         {
             long currencytime = GetWorldState(WorldStates.CurrencyResetTime);
             if (currencytime == 0)
-                m_NextCurrencyReset = Time.UnixTime;         // game time not yet init
+                m_NextCurrencyReset = GameTime.GetGameTime();         // game time not yet init
 
             // generate time by config
-            long curTime = Time.UnixTime;
+            long curTime = GameTime.GetGameTime();
 
             var nextWeekResetTime = Time.GetNextResetUnixTime(WorldConfig.GetIntValue(WorldCfg.CurrencyResetDay), WorldConfig.GetIntValue(WorldCfg.CurrencyResetHour));
 
@@ -2107,7 +2107,7 @@ namespace Game
                 if (session.GetPlayer() != null)
                     session.GetPlayer().ResetMonthlyQuestStatus();
 
-            long curTime = Time.UnixTime;
+            long curTime = GameTime.GetGameTime();
 
             // current day reset time
             long curDayResetTime = Time.GetNextResetUnixTime(30, 1, 0);

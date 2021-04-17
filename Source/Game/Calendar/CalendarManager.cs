@@ -646,7 +646,7 @@ namespace Game
         public CalendarInvite()
         {
             InviteId = 1;
-            ResponseTime = Time.UnixTime;
+            ResponseTime = 0;
             Status = CalendarInviteStatus.Invited;
             Rank = CalendarModerationRank.Player;
             Note = "";

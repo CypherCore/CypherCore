@@ -71,7 +71,7 @@ namespace Game
                 pl.AddUnitFlag(UnitFlags.Stunned);
             }
 
-            SetLogoutStartTime(Time.UnixTime);
+            SetLogoutStartTime(GameTime.GetGameTime());
         }
 
         [WorldPacketHandler(ClientOpcodes.LogoutCancel)]

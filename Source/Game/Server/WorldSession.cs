@@ -249,7 +249,7 @@ namespace Game
 
             WorldPacket firstDelayedPacket = null;
             uint processedPackets = 0;
-            long currentTime = Time.UnixTime;
+            long currentTime = GameTime.GetGameTime();
 
             WorldPacket packet;
             //Check for any packets they was not recived yet.
@@ -332,9 +332,8 @@ namespace Game
 
             if (updater.ProcessUnsafe())
             {
-                long currTime = Time.UnixTime;
                 // If necessary, log the player out
-                if (ShouldLogOut(currTime) && m_playerLoading.IsEmpty())
+                if (ShouldLogOut(currentTime) && m_playerLoading.IsEmpty())
                     LogoutPlayer(true);
 
                 if (m_Socket[(int)ConnectionType.Realm] != null && GetPlayer() && _warden != null)

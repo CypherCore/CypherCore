@@ -483,7 +483,7 @@ namespace Game.Chat
 
             if (target)
             {
-                int curRespawnDelay = (int)(target.GetRespawnTimeEx() - Time.UnixTime);
+                int curRespawnDelay = (int)(target.GetRespawnTimeEx() - GameTime.GetGameTime());
                 if (curRespawnDelay < 0)
                     curRespawnDelay = 0;
 

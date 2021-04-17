@@ -87,7 +87,7 @@ namespace Game.Entities
 
             if (oldRestMask == 0 && _restFlagMask != 0) // only set flag/time on the first rest state
             {
-                _restTime = Time.UnixTime;
+                _restTime = GameTime.GetGameTime();
                 _player.AddPlayerFlag(PlayerFlags.Resting);
             }
 

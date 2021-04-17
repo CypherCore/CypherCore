@@ -368,7 +368,7 @@ namespace Game
                         long timeReset = Global.InstanceSaveMgr.GetResetTimeFor(mapEntry.Id, diff);
                         if (timeReset != 0)
                         {
-                            uint timeleft = (uint)(timeReset - Time.UnixTime);
+                            uint timeleft = (uint)(timeReset - GameTime.GetGameTime());
                             GetPlayer().SendInstanceResetWarning(mapEntry.Id, diff, timeleft, true);
                         }
                     }

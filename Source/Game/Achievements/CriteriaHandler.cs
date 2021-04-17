@@ -605,7 +605,7 @@ namespace Game.Achievements
             }
 
             progress.Changed = true;
-            progress.Date = Time.UnixTime; // set the date to the latest update.
+            progress.Date = GameTime.GetGameTime(); // set the date to the latest update.
             progress.PlayerGUID = referencePlayer ? referencePlayer.GetGUID() : ObjectGuid.Empty;
             _criteriaProgress[criteria.Id] = progress;
 

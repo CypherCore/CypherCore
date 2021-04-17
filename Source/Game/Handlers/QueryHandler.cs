@@ -60,7 +60,7 @@ namespace Game
         void SendQueryTimeResponse()
         {
             QueryTimeResponse queryTimeResponse = new();
-            queryTimeResponse.CurrentTime = Time.UnixTime;
+            queryTimeResponse.CurrentTime = GameTime.GetGameTime();
             SendPacket(queryTimeResponse);
         }
 

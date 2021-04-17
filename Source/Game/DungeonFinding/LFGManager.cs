@@ -255,7 +255,7 @@ namespace Game.DungeonFinding
             if (!IsOptionEnabled(LfgOptions.EnableDungeonFinder | LfgOptions.EnableRaidBrowser))
                 return;
 
-            long currTime = Time.UnixTime;
+            long currTime = GameTime.GetGameTime();
 
             // Remove obsolete role checks
             foreach (var pairCheck in RoleChecksStore)
@@ -500,14 +500,14 @@ namespace Game.DungeonFinding
             ticket.RequesterGuid = guid;
             ticket.Id = GetQueueId(gguid);
             ticket.Type = RideType.Lfg;
-            ticket.Time = (int)Time.UnixTime;
+            ticket.Time = GameTime.GetGameTime();
 
             string debugNames = "";
             if (grp)                                               // Begin rolecheck
             {
                 // Create new rolecheck
                 LfgRoleCheck roleCheck = new();
-                roleCheck.cancelTime = Time.UnixTime + SharedConst.LFGTimeRolecheck;
+                roleCheck.cancelTime = GameTime.GetGameTime() + SharedConst.LFGTimeRolecheck;
                 roleCheck.state = LfgRoleCheckState.Initialiting;
                 roleCheck.leader = guid;
                 roleCheck.dungeons = dungeons;
@@ -549,7 +549,7 @@ namespace Game.DungeonFinding
                 Dictionary<ObjectGuid, LfgRoles> rolesMap = new();
                 rolesMap[guid] = roles;
                 LFGQueue queue = GetQueue(guid);
-                queue.AddQueueData(guid, Time.UnixTime, dungeons, rolesMap);
+                queue.AddQueueData(guid, GameTime.GetGameTime(), dungeons, rolesMap);
 
                 if (!isContinue)
                 {
@@ -723,7 +723,7 @@ namespace Game.DungeonFinding
             {
                 SetState(gguid, LfgState.Queued);
                 LFGQueue queue = GetQueue(gguid);
-                queue.AddQueueData(gguid, Time.UnixTime, roleCheck.dungeons, roleCheck.roles);
+                queue.AddQueueData(gguid, GameTime.GetGameTime(), roleCheck.dungeons, roleCheck.roles);
                 RoleChecksStore.Remove(gguid);
             }
             else if (roleCheck.state != LfgRoleCheckState.Initialiting)
@@ -978,7 +978,7 @@ namespace Game.DungeonFinding
 
             bool sendUpdate = proposal.state != LfgProposalState.Success;
             proposal.state = LfgProposalState.Success;
-            long joinTime = Time.UnixTime;
+            long joinTime = GameTime.GetGameTime();
 
             LFGQueue queue = GetQueue(guid);
             LfgUpdateData updateData = new(LfgUpdateType.GroupFound);
@@ -1129,7 +1129,7 @@ namespace Game.DungeonFinding
 
             LfgPlayerBoot boot = BootsStore[gguid];
             boot.inProgress = true;
-            boot.cancelTime = Time.UnixTime + SharedConst.LFGTimeBoot;
+            boot.cancelTime = GameTime.GetGameTime() + SharedConst.LFGTimeBoot;
             boot.reason = reason;
             boot.victim = victim;
 

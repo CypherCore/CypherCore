@@ -766,7 +766,7 @@ namespace Game.BattleFields
             packet.AddState(WGWorldStates.ShowWorldstate, IsWarTime());
 
             for (uint i = 0; i < 2; ++i)
-                packet.AddState(WGConst.ClockWorldState[i], (int)(Time.UnixTime + (m_Timer / 1000)));
+                packet.AddState(WGConst.ClockWorldState[i], (int)(GameTime.GetGameTime() + (m_Timer / 1000)));
 
             packet.AddState(WGWorldStates.VehicleH, (int)GetData(WGData.VehicleH));
             packet.AddState(WGWorldStates.MaxVehicleH, (int)GetData(WGData.MaxVehicleH));

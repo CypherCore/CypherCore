@@ -34,7 +34,7 @@ namespace Game
             BFMgrEntryInvite bfMgrEntryInvite = new();
             bfMgrEntryInvite.QueueID = queueId;
             bfMgrEntryInvite.AreaID = (int)zoneId;
-            bfMgrEntryInvite.ExpireTime = Time.UnixTime + acceptTime;
+            bfMgrEntryInvite.ExpireTime = GameTime.GetGameTime() + acceptTime;
             SendPacket(bfMgrEntryInvite);
         }
 

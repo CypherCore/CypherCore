@@ -279,7 +279,7 @@ namespace Game.Achievements
 
             if (!criteriaResult.IsEmpty())
             {
-                var now = Time.UnixTime;
+                var now = GameTime.GetGameTime();
                 do
                 {
                     uint id = criteriaResult.Read<uint>(0);
@@ -518,7 +518,7 @@ namespace Game.Achievements
             Log.outDebug(LogFilter.Achievement, "PlayerAchievementMgr.CompletedAchievement({0}). {1}", achievement.Id, GetOwnerInfo());
 
             CompletedAchievementData ca = new();
-            ca.Date = Time.UnixTime;
+            ca.Date = GameTime.GetGameTime();
             ca.Changed = true;
             _completedAchievements[achievement.Id] = ca;
 
@@ -687,7 +687,7 @@ namespace Game.Achievements
             achievementEarned.Earner = _owner.GetGUID();
             achievementEarned.EarnerNativeRealm = achievementEarned.EarnerVirtualRealm = Global.WorldMgr.GetVirtualRealmAddress();
             achievementEarned.AchievementID = achievement.Id;
-            achievementEarned.Time = Time.UnixTime;
+            achievementEarned.Time = GameTime.GetGameTime();
 
             if (!achievement.Flags.HasAnyFlag(AchievementFlags.TrackingFlag))
                 _owner.SendMessageToSetInRange(achievementEarned, WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay), true);
@@ -730,7 +730,7 @@ namespace Game.Achievements
                 GuildAchievementDeleted guildAchievementDeleted = new();
                 guildAchievementDeleted.AchievementID = iter.Key;
                 guildAchievementDeleted.GuildGUID = guid;
-                guildAchievementDeleted.TimeDeleted = Time.UnixTime;
+                guildAchievementDeleted.TimeDeleted = GameTime.GetGameTime();
                 SendPacket(guildAchievementDeleted);
             }
 
@@ -787,7 +787,7 @@ namespace Game.Achievements
 
             if (!criteriaResult.IsEmpty())
             {
-                long now = Time.UnixTime;
+                long now = GameTime.GetGameTime();
                 do
                 {
                     uint id = criteriaResult.Read<uint>(0);
@@ -980,7 +980,7 @@ namespace Game.Achievements
 
             SendAchievementEarned(achievement);
             CompletedAchievementData ca = new();
-            ca.Date = Time.UnixTime;
+            ca.Date = GameTime.GetGameTime();
             ca.Changed = true;
 
             if (achievement.Flags.HasAnyFlag(AchievementFlags.ShowGuildMembers))
@@ -1055,7 +1055,7 @@ namespace Game.Achievements
             GuildAchievementEarned guildAchievementEarned = new();
             guildAchievementEarned.AchievementID = achievement.Id;
             guildAchievementEarned.GuildGUID = _owner.GetGUID();
-            guildAchievementEarned.TimeEarned = Time.UnixTime;
+            guildAchievementEarned.TimeEarned = GameTime.GetGameTime();
             SendPacket(guildAchievementEarned);
         }
 

@@ -71,7 +71,7 @@ namespace Game.Maps
                     resetTime = GetResetTimeFor(mapId, difficulty);
                 else
                 {
-                    resetTime = Time.UnixTime + 2 * Time.Hour;
+                    resetTime = GameTime.GetGameTime() + 2 * Time.Hour;
                     // normally this will be removed soon after in InstanceMap.Add, prevent error
                     ScheduleReset(true, resetTime, new InstResetEvent(0, mapId, difficulty, instanceId));
                 }
@@ -179,7 +179,7 @@ namespace Game.Maps
 
         void LoadResetTimes()
         {
-            long now = Time.UnixTime;
+            long now = GameTime.GetGameTime();
             long today = (now / Time.Day) * Time.Day;
 
             // NOTE: Use DirectPExecute for tables that will be queried later
@@ -375,12 +375,12 @@ namespace Game.Maps
             ScheduleReset(false, 0, new InstResetEvent(1, mapId, difficulty, 0));
             ScheduleReset(false, 0, new InstResetEvent(4, mapId, difficulty, 0));
             // force global reset on the instance
-            _ResetOrWarnAll(mapId, difficulty, false, Time.UnixTime);
+            _ResetOrWarnAll(mapId, difficulty, false, GameTime.GetGameTime());
         }
 
         public void Update()
         {
-            long now = Time.UnixTime;
+            long now = GameTime.GetGameTime();
 
             while (!m_resetTimeQueue.Empty())
             {
@@ -489,7 +489,7 @@ namespace Game.Maps
                 return;
 
             Log.outDebug(LogFilter.Misc, "InstanceSaveManager.ResetOrWarnAll: Processing map {0} ({1}) on difficulty {2} (warn? {3})", mapEntry.MapName[Global.WorldMgr.GetDefaultDbcLocale()], mapid, difficulty, warn);
-            long now = Time.UnixTime;
+            long now = GameTime.GetGameTime();
 
             if (!warn)
             {

@@ -39,7 +39,7 @@ namespace Game
                 default:
                 case GameEventState.Normal:
                     {
-                        long currenttime = Time.UnixTime;
+                        long currenttime = GameTime.GetGameTime();
                         // Get the event information
                         return mGameEvent[entry].start < currenttime
                             && currenttime < mGameEvent[entry].end
@@ -56,7 +56,7 @@ namespace Game
                 // if inactive world event, check the prerequisite events
                 case GameEventState.WorldInactive:
                     {
-                        long currenttime = Time.UnixTime;
+                        long currenttime = GameTime.GetGameTime();
                         foreach (var gameEventId in mGameEvent[entry].prerequisite_events)
                         {
                             if ((mGameEvent[gameEventId].state != GameEventState.WorldNextPhase && mGameEvent[gameEventId].state != GameEventState.WorldFinished) ||   // if prereq not in nextphase or finished state, then can't start this one
@@ -72,7 +72,7 @@ namespace Game
 
         public uint NextCheck(ushort entry)
         {
-            long currenttime = Time.UnixTime;
+            long currenttime = GameTime.GetGameTime();
 
             // for NEXTPHASE state world events, return the delay to start the next event, so the followup event will be checked correctly
             if ((mGameEvent[entry].state == GameEventState.WorldNextPhase || mGameEvent[entry].state == GameEventState.WorldFinished) && mGameEvent[entry].nextstart >= currenttime)
@@ -132,13 +132,13 @@ namespace Game
                 ApplyNewEvent(event_id);
                 if (overwrite)
                 {
-                    mGameEvent[event_id].start = Time.UnixTime;
+                    mGameEvent[event_id].start = GameTime.GetGameTime();
                     if (data.end <= data.start)
                         data.end = data.start + data.length;
                 }
 
                 // When event is started, set its worldstate to current time
-                Global.WorldMgr.SetWorldState(event_id, Time.UnixTime);
+                Global.WorldMgr.SetWorldState(event_id, GameTime.GetGameTime());
                 return false;
             }
             else
@@ -179,7 +179,7 @@ namespace Game
 
             if (overwrite && !serverwide_evt)
             {
-                data.start = Time.UnixTime - data.length * Time.Minute;
+                data.start = GameTime.GetGameTime() - data.length * Time.Minute;
                 if (data.end <= data.start)
                     data.end = data.start + data.length;
             }
@@ -971,7 +971,7 @@ namespace Game
 
         public uint Update()                               // return the next event delay in ms
         {
-            long currenttime = Time.UnixTime;
+            long currenttime = GameTime.GetGameTime();
             uint nextEventDelay = Time.Day;             // 1 day
             uint calcDelay;
             List<ushort> activate = new();
@@ -1526,7 +1526,7 @@ namespace Game
             // set the followup events' start time
             if (mGameEvent[event_id].nextstart == 0)
             {
-                long currenttime = Time.UnixTime;
+                long currenttime = GameTime.GetGameTime();
                 mGameEvent[event_id].nextstart = currenttime + mGameEvent[event_id].length * 60;
             }
             return true;
@@ -1613,7 +1613,7 @@ namespace Game
 
             bool singleDate = ((holiday.Date[0] >> 24) & 0x1F) == 31; // Events with fixed date within year have - 1
 
-            long curTime = Time.UnixTime;
+            long curTime = GameTime.GetGameTime();
             for (int i = 0; i < SharedConst.MaxHolidayDates && holiday.Date[i] != 0; ++i)
             {
                 uint date = holiday.Date[i];

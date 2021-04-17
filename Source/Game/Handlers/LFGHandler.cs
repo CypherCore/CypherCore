@@ -433,7 +433,7 @@ namespace Game
             LfgAnswer playerVote = boot.votes.LookupByKey(GetPlayer().GetGUID());
             byte votesNum = 0;
             byte agreeNum = 0;
-            uint secsleft = (uint)((boot.cancelTime - Time.UnixTime) / 1000);
+            uint secsleft = (uint)((boot.cancelTime - GameTime.GetGameTime()) / 1000);
             foreach (var it in boot.votes)
             {
                 if (it.Value != LfgAnswer.Pending)

@@ -131,7 +131,7 @@ namespace Game.Chat
             uint nativeid = target.GetNativeDisplayId();
             uint Entry = target.GetEntry();
 
-            long curRespawnDelay = target.GetRespawnCompatibilityMode() ? target.GetRespawnTimeEx() - Time.UnixTime : target.GetMap().GetCreatureRespawnTime(target.GetSpawnId()) - Time.UnixTime;
+            long curRespawnDelay = target.GetRespawnCompatibilityMode() ? target.GetRespawnTimeEx() - GameTime.GetGameTime() : target.GetMap().GetCreatureRespawnTime(target.GetSpawnId()) - GameTime.GetGameTime();
             if (curRespawnDelay < 0)
                 curRespawnDelay = 0;
 

@@ -778,7 +778,7 @@ namespace Game.Entities
 
                 AddTimedQuest(quest_id);
                 questStatusData.Timer = limittime * Time.InMilliseconds;
-                qtime = (uint)(Time.UnixTime + limittime);
+                qtime = (uint)(GameTime.GetGameTime() + limittime);
             }
             else
                 questStatusData.Timer = 0;
@@ -3073,14 +3073,14 @@ namespace Game.Entities
                 if (!qQuest.IsDFQuest())
                 {
                     AddDynamicUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.DailyQuestsCompleted), quest_id);
-                    m_lastDailyQuestTime = Time.UnixTime;              // last daily quest time
+                    m_lastDailyQuestTime = GameTime.GetGameTime();              // last daily quest time
                     m_DailyQuestChanged = true;
 
                 }
                 else
                 {
                     m_DFQuests.Add(quest_id);
-                    m_lastDailyQuestTime = Time.UnixTime;
+                    m_lastDailyQuestTime = GameTime.GetGameTime();
                     m_DailyQuestChanged = true;
                 }
             }

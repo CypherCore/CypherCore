@@ -39,7 +39,7 @@ namespace Game.Entities
 
             m_corpseData = new CorpseData();
 
-            m_time = Time.UnixTime;
+            m_time = GameTime.GetGameTime();
         }
 
         public override void AddToWorld()
@@ -312,7 +312,7 @@ namespace Game.Entities
         }
 
         public long GetGhostTime() { return m_time; }
-        public void ResetGhostTime() { m_time = Time.UnixTime; }
+        public void ResetGhostTime() { m_time = GameTime.GetGameTime(); }
         public CorpseType GetCorpseType() { return m_type; }
 
         public CellCoord GetCellCoord() { return _cellCoord; }

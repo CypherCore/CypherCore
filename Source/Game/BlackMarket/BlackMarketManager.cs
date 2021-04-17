@@ -70,7 +70,7 @@ namespace Game.BlackMarket
                 return;
             }
 
-            _lastUpdate = Time.UnixTime; //Set update time before loading
+            _lastUpdate = GameTime.GetGameTime(); //Set update time before loading
 
             SQLTransaction trans = new();
             do
@@ -100,7 +100,7 @@ namespace Game.BlackMarket
         public void Update(bool updateTime = false)
         {
             SQLTransaction trans = new();
-            long now = Time.UnixTime;
+            long now = GameTime.GetGameTime();
             foreach (var entry in _auctions.Values)
             {
                 if (entry.IsCompleted() && entry.GetBidder() != 0)

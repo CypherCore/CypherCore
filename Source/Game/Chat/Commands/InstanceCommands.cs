@@ -43,7 +43,7 @@ namespace Game.Chat
                 foreach (var pair in binds)
                 {
                     InstanceSave save = pair.Value.save;
-                    string timeleft = Time.GetTimeString(save.GetResetTime() - Time.UnixTime);
+                    string timeleft = Time.GetTimeString(save.GetResetTime() - GameTime.GetGameTime());
                     handler.SendSysMessage(format, pair.Key, save.GetInstanceId(), pair.Value.perm ? "yes" : "no", save.GetDifficultyID(), save.CanReset() ? "yes" : "no", timeleft);
                     counter++;
                 }
@@ -60,7 +60,7 @@ namespace Game.Chat
                     foreach (var pair in binds)
                     {
                         InstanceSave save = pair.Value.save;
-                        string timeleft = Time.GetTimeString(save.GetResetTime() - Time.UnixTime);
+                        string timeleft = Time.GetTimeString(save.GetResetTime() - GameTime.GetGameTime());
                         handler.SendSysMessage(format, pair.Key, save.GetInstanceId(), pair.Value.perm ? "yes" : "no", save.GetDifficultyID(), save.CanReset() ? "yes" : "no", timeleft);
                         counter++;
                     }
@@ -102,7 +102,7 @@ namespace Game.Chat
                     InstanceSave save = pair.Value.save;
                     if (pair.Key != player.GetMapId() && (MapId == 0 || MapId == pair.Key) && (diff == -1 || diff == (sbyte)save.GetDifficultyID()))
                     {
-                        string timeleft = Time.GetTimeString(save.GetResetTime() - Time.UnixTime);
+                        string timeleft = Time.GetTimeString(save.GetResetTime() - GameTime.GetGameTime());
                         handler.SendSysMessage("unbinding map: {0} inst: {1} perm: {2} diff: {3} canReset: {4} TTR: {5}", pair.Key, save.GetInstanceId(),
                             pair.Value.perm ? "yes" : "no", save.GetDifficultyID(), save.CanReset() ? "yes" : "no", timeleft);
                         player.UnbindInstance(pair.Key, (Difficulty)difficulty.Id);

@@ -59,8 +59,8 @@ namespace Game.Chat
             string endTimeStr = Time.UnixTimeToDateTime(eventData.end).ToLongDateString();
 
             uint delay = Global.GameEventMgr.NextCheck(eventId);
-            long nextTime = Time.UnixTime + delay;
-            string nextStr = nextTime >= eventData.start && nextTime < eventData.end ? Time.UnixTimeToDateTime(Time.UnixTime + delay).ToShortTimeString() : "-";
+            long nextTime = GameTime.GetGameTime() + delay;
+            string nextStr = nextTime >= eventData.start && nextTime < eventData.end ? Time.UnixTimeToDateTime(GameTime.GetGameTime() + delay).ToShortTimeString() : "-";
 
             string occurenceStr = Time.secsToTimeString(eventData.occurence * Time.Minute);
             string lengthStr = Time.secsToTimeString(eventData.length * Time.Minute);

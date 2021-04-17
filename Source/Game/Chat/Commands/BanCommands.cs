@@ -247,7 +247,7 @@ namespace Game.Chat.Commands
             {
                 long unbanDate = result.Read<long>(3);
                 bool active = false;
-                if (result.Read<bool>(2) && (result.Read<long>(1) == 0L || unbanDate >= Time.UnixTime))
+                if (result.Read<bool>(2) && (result.Read<long>(1) == 0L || unbanDate >= GameTime.GetGameTime()))
                     active = true;
                 bool permanent = (result.Read<long>(1) == 0L);
                 string banTime = permanent ? handler.GetCypherString(CypherStrings.BaninfoInfinite) : Time.secsToTimeString(result.Read<ulong>(1), true);
@@ -297,7 +297,7 @@ namespace Game.Chat.Commands
             {
                 long unbanDate = result.Read<uint>(3);
                 bool active = false;
-                if (result.Read<bool>(2) && (result.Read<ulong>(1) == 0 || unbanDate >= Time.UnixTime))
+                if (result.Read<bool>(2) && (result.Read<ulong>(1) == 0 || unbanDate >= GameTime.GetGameTime()))
                     active = true;
                 bool permanent = (result.Read<ulong>(1) == 0);
                 string banTime = permanent ? handler.GetCypherString(CypherStrings.BaninfoInfinite) : Time.secsToTimeString(result.Read<ulong>(1), true);

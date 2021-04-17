@@ -3041,7 +3041,7 @@ namespace Game.Entities
                 Log.outDebug(LogFilter.Player, "STORAGE: AddItemToBuyBackSlot item = {0}, slot = {1}", pItem.GetEntry(), slot);
 
                 m_items[slot] = pItem;
-                var time = Time.UnixTime;
+                var time = GameTime.GetGameTime();
                 uint etime = (uint)(time - m_logintime + (30 * 3600));
                 uint eslot = slot - InventorySlots.BuyBackStart;
 
@@ -5968,7 +5968,7 @@ namespace Game.Entities
 
                 // loot was generated and respawntime has passed since then, allow to recreate loot
                 // to avoid bugs, this rule covers spawned gameobjects only
-                if (go.IsSpawnedByDefault() && go.GetLootState() == LootState.Activated && !go.loot.IsLooted() && go.GetLootGenerationTime() + go.GetRespawnDelay() < Time.UnixTime)
+                if (go.IsSpawnedByDefault() && go.GetLootState() == LootState.Activated && !go.loot.IsLooted() && go.GetLootGenerationTime() + go.GetRespawnDelay() < GameTime.GetGameTime())
                     go.SetLootState(LootState.Ready);
 
                 if (go.GetLootState() == LootState.Ready)

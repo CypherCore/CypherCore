@@ -69,7 +69,7 @@ namespace Game
             Log.outDebug(LogFilter.Network, "Player 1 is: {0} ({1})", player.GetGUID().ToString(), player.GetName());
             Log.outDebug(LogFilter.Network, "Player 2 is: {0} ({1})", plTarget.GetGUID().ToString(), plTarget.GetName());
 
-            long now = Time.UnixTime;
+            long now = GameTime.GetGameTime();
             player.duel.startTimer = now;
             plTarget.duel.startTimer = now;
 

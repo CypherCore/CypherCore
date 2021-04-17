@@ -522,7 +522,7 @@ namespace Game.DungeonFinding
             }
 
             // Create a new proposal
-            proposal.cancelTime = Time.UnixTime + SharedConst.LFGTimeProposal;
+            proposal.cancelTime = GameTime.GetGameTime() + SharedConst.LFGTimeProposal;
             proposal.state = LfgProposalState.Initiating;
             proposal.leader = ObjectGuid.Empty;
             proposal.dungeonId = proposalDungeons.SelectRandom();
@@ -746,7 +746,7 @@ namespace Game.DungeonFinding
     {
         public LfgQueueData()
         {
-            joinTime = Time.UnixTime;
+            joinTime = GameTime.GetGameTime();
             tanks = SharedConst.LFGTanksNeeded;
             healers = SharedConst.LFGHealersNeeded;
             dps = SharedConst.LFGDPSNeeded;

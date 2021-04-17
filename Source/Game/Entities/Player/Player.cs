@@ -71,7 +71,7 @@ namespace Game.Entities
             for (byte i = 0; i < (int)MirrorTimerType.Max; i++)
                 m_MirrorTimer[i] = -1;
 
-            m_logintime = Time.UnixTime;
+            m_logintime = GameTime.GetGameTime();
             m_Last_tick = m_logintime;
 
             m_timeSyncServer = GameTime.GetGameTimeMS();
@@ -99,7 +99,7 @@ namespace Game.Entities
             }
 
             // Honor System
-            m_lastHonorUpdateTime = Time.UnixTime;
+            m_lastHonorUpdateTime = GameTime.GetGameTime();
 
             m_unitMovedByMe = this;
             m_playerMovingMe = this;
@@ -241,7 +241,7 @@ namespace Game.Entities
             SetCreateCurrency(CurrencyTypes.JusticePoints, WorldConfig.GetUIntValue(WorldCfg.CurrencyStartJusticePoints));
 
             // Played time
-            m_Last_tick = Time.UnixTime;
+            m_Last_tick = GameTime.GetGameTime();
             m_PlayedTimeTotal = 0;
             m_PlayedTimeLevel = 0;
 
@@ -324,7 +324,7 @@ namespace Game.Entities
                 return;
 
             // undelivered mail
-            if (m_nextMailDelivereTime != 0 && m_nextMailDelivereTime <= Time.UnixTime)
+            if (m_nextMailDelivereTime != 0 && m_nextMailDelivereTime <= GameTime.GetGameTime())
             {
                 SendNewMail();
                 ++unReadMails;
@@ -346,7 +346,7 @@ namespace Game.Entities
             base.Update(diff);
             SetCanDelayTeleport(false);
 
-            long now = Time.UnixTime;
+            long now = GameTime.GetGameTime();
 
             UpdatePvPFlag(now);
 
@@ -2041,7 +2041,7 @@ namespace Game.Entities
 
         public bool HasSummonPending()
         {
-            return m_summon_expire >= Time.UnixTime;
+            return m_summon_expire >= GameTime.GetGameTime();
         }
 
         public void SendSummonRequestFrom(Unit summoner)
@@ -2057,7 +2057,7 @@ namespace Game.Entities
             if (HasAura(23445))
                 return;
 
-            m_summon_expire = Time.UnixTime + PlayerConst.MaxPlayerSummonDelay;
+            m_summon_expire = GameTime.GetGameTime() + PlayerConst.MaxPlayerSummonDelay;
             m_summon_location = new WorldLocation(summoner);
 
             SummonRequest summonRequest = new();
@@ -2104,7 +2104,7 @@ namespace Game.Entities
             }
 
             // expire and auto declined
-            if (m_summon_expire < Time.UnixTime)
+            if (m_summon_expire < GameTime.GetGameTime())
                 return;
 
             // stop taxi flight at summon
@@ -2727,7 +2727,7 @@ namespace Game.Entities
         {
             // calculate next delivery time (min. from non-delivered mails
             // and recalculate unReadMail
-            long cTime = Time.UnixTime;
+            long cTime = GameTime.GetGameTime();
             m_nextMailDelivereTime = 0;
             unReadMails = 0;
             foreach (var mail in m_mail)
@@ -2743,7 +2743,7 @@ namespace Game.Entities
         }
         public void AddNewMailDeliverTime(long deliver_time)
         {
-            if (deliver_time <= Time.UnixTime)                          // ready now
+            if (deliver_time <= GameTime.GetGameTime())                          // ready now
             {
                 ++unReadMails;
                 SendNewMail();
@@ -4554,7 +4554,7 @@ namespace Game.Entities
             else if (!WorldConfig.GetBoolValue(WorldCfg.DeathCorpseReclaimDelayPve))
                 return 0;
 
-            long now = Time.UnixTime;
+            long now = GameTime.GetGameTime();
             // 0..2 full period
             // should be ceil(x)-1 but not floor(x)
             ulong count = (ulong)((now < m_deathExpireTime - 1) ? (m_deathExpireTime - 1 - now) / PlayerConst.DeathExpireStep : 0);
@@ -4567,7 +4567,7 @@ namespace Game.Entities
             if ((pvp && !WorldConfig.GetBoolValue(WorldCfg.DeathCorpseReclaimDelayPvp)) ||
                 (!pvp && !WorldConfig.GetBoolValue(WorldCfg.DeathCorpseReclaimDelayPve)))
                 return;
-            long now = Time.UnixTime;
+            long now = GameTime.GetGameTime();
             if (now < m_deathExpireTime)
             {
                 // full and partly periods 1..3
@@ -4605,7 +4605,7 @@ namespace Game.Entities
                 }
 
                 long expected_time = corpse.GetGhostTime() + PlayerConst.copseReclaimDelay[count];
-                long now = Time.UnixTime;
+                long now = GameTime.GetGameTime();
 
                 if (now >= expected_time)
                     return -1;
@@ -4696,7 +4696,7 @@ namespace Game.Entities
                     pet.SetPetNextLevelExperience(1000);
                     pet.SetFullHealth();
                     pet.SetFullPower(PowerType.Mana);
-                    pet.SetPetNameTimestamp((uint)Time.UnixTime);
+                    pet.SetPetNameTimestamp((uint)GameTime.GetGameTime());
                     break;
                 default:
                     break;

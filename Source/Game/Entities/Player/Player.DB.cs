@@ -3012,7 +3012,7 @@ namespace Game.Entities
 
             SaveRecallPosition();
 
-            long now = Time.UnixTime;
+            long now = GameTime.GetGameTime();
             long logoutTime = logout_time;
 
             // since last logout (in seconds)
@@ -3381,7 +3381,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, m_PlayedTimeTotal);
                 stmt.AddValue(index++, m_PlayedTimeLevel);
                 stmt.AddValue(index++, finiteAlways(_restMgr.GetRestBonus(RestTypes.XP)));
-                stmt.AddValue(index++, Time.UnixTime);
+                stmt.AddValue(index++, GameTime.GetGameTime());
                 stmt.AddValue(index++, (HasPlayerFlag(PlayerFlags.Resting) ? 1 : 0));
                 //save, far from tavern/city
                 //save, but in tavern/city
@@ -3521,7 +3521,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, m_PlayedTimeTotal);
                 stmt.AddValue(index++, m_PlayedTimeLevel);
                 stmt.AddValue(index++, finiteAlways(_restMgr.GetRestBonus(RestTypes.XP)));
-                stmt.AddValue(index++, Time.UnixTime);
+                stmt.AddValue(index++, GameTime.GetGameTime());
                 stmt.AddValue(index++, (HasPlayerFlag(PlayerFlags.Resting) ? 1 : 0));
                 //save, far from tavern/city
                 //save, but in tavern/city
@@ -3678,7 +3678,7 @@ namespace Game.Entities
             stmt.AddValue(3, Global.WorldMgr.GetRealmId().Index);
             stmt.AddValue(4, GetName());
             stmt.AddValue(5, GetGUID().GetCounter());
-            stmt.AddValue(6, Time.UnixTime);
+            stmt.AddValue(6, GameTime.GetGameTime());
             loginTransaction.Append(stmt);
 
             // save pet (hunter pet level and experience and all type pets health/mana).
@@ -4215,7 +4215,7 @@ namespace Game.Entities
             Log.outInfo(LogFilter.Player, "Player:DeleteOldChars: Deleting all characters which have been deleted {0} days before...", keepDays);
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_OLD_CHARS);
-            stmt.AddValue(0, (uint)(Time.UnixTime - keepDays * Time.Day));
+            stmt.AddValue(0, (uint)(GameTime.GetGameTime() - keepDays * Time.Day));
             SQLResult result = DB.Characters.Query(stmt);
 
             if (!result.IsEmpty())

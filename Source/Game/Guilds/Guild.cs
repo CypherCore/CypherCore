@@ -52,7 +52,7 @@ namespace Game.Guilds
             m_info = "";
             m_motd = "No message set.";
             m_bankMoney = 0;
-            m_createdDate = Time.UnixTime;
+            m_createdDate = GameTime.GetGameTime();
             _CreateLogHolders();
 
             Log.outDebug(LogFilter.Guild, "GUILD: creating guild [{0}] for leader {1} ({2})",
@@ -2490,7 +2490,7 @@ namespace Game.Guilds
                 m_level = 0;
                 m_class = 0;
                 m_flags = GuildMemberFlags.None;
-                m_logoutTime = (ulong)Time.UnixTime;
+                m_logoutTime = (ulong)GameTime.GetGameTime();
                 m_accountId = 0;
                 m_rankId = rankId;
                 m_achievementPoints = 0;
@@ -2628,7 +2628,7 @@ namespace Game.Guilds
             {
                 if (IsOnline())
                     return 0.0f;
-                return (float)((Time.UnixTime - (long)GetLogoutTime()) / (float)Time.Day);
+                return (float)((GameTime.GetGameTime() - (long)GetLogoutTime()) / (float)Time.Day);
             }
 
             // Decreases amount of slots left for today.
@@ -2707,7 +2707,7 @@ namespace Game.Guilds
             public bool IsTrackingCriteriaId(uint criteriaId) { return m_trackedCriteriaIds.Contains(criteriaId); }
             public bool IsOnline() { return m_flags.HasAnyFlag(GuildMemberFlags.Online); }
 
-            public void UpdateLogoutTime() { m_logoutTime = (ulong)Time.UnixTime; }
+            public void UpdateLogoutTime() { m_logoutTime = (ulong)GameTime.GetGameTime(); }
             public bool IsRank(byte rankId) { return m_rankId == rankId; }
             public bool IsRankNotLower(uint rankId) { return m_rankId <= rankId; }
             public bool IsSamePlayer(ObjectGuid guid) { return m_guid == guid; }
@@ -2751,7 +2751,7 @@ namespace Game.Guilds
             {
                 m_guildId = guildId;
                 m_guid = guid;
-                m_timestamp = Time.UnixTime;
+                m_timestamp = GameTime.GetGameTime();
             }
 
             public LogEntry(ulong guildId, uint guid, long timestamp)
@@ -2819,7 +2819,7 @@ namespace Game.Guilds
                 eventEntry.PlayerGUID = playerGUID;
                 eventEntry.OtherGUID = otherGUID;
                 eventEntry.TransactionType = (byte)m_eventType;
-                eventEntry.TransactionDate = (uint)(Time.UnixTime - m_timestamp);
+                eventEntry.TransactionDate = (uint)(GameTime.GetGameTime() - m_timestamp);
                 eventEntry.RankID = m_newRank;
                 packet.Entry.Add(eventEntry);
             }
@@ -2905,7 +2905,7 @@ namespace Game.Guilds
 
                 GuildBankLogEntry bankLogEntry = new();
                 bankLogEntry.PlayerGUID = logGuid;
-                bankLogEntry.TimeOffset = (uint)(Time.UnixTime - m_timestamp);
+                bankLogEntry.TimeOffset = (uint)(GameTime.GetGameTime() - m_timestamp);
                 bankLogEntry.EntryType = (sbyte)m_eventType;
 
                 if (hasStack)
