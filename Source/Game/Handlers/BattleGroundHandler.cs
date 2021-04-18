@@ -594,7 +594,7 @@ namespace Game
             SendPacket(new PVPOptionsEnabled());
         }
 
-        [WorldPacketHandler(ClientOpcodes.RequestPvpRewards)]
+        [WorldPacketHandler(ClientOpcodes.RequestPvpRewards, Processing = PacketProcessing.Inplace)]
         void HandleRequestPvpReward(RequestPVPRewards packet)
         {
             GetPlayer().SendPvpRewards();

@@ -85,7 +85,7 @@ namespace Game
             GetPlayer().SetSelection(packet.Selection);
         }
 
-        [WorldPacketHandler(ClientOpcodes.ObjectUpdateFailed)]
+        [WorldPacketHandler(ClientOpcodes.ObjectUpdateFailed, Processing = PacketProcessing.Inplace)]
         void HandleObjectUpdateFailed(ObjectUpdateFailed objectUpdateFailed)
         {
             Log.outError(LogFilter.Network, "Object update failed for {0} for player {1} ({2})", objectUpdateFailed.ObjectGUID.ToString(), GetPlayerName(), GetPlayer().GetGUID().ToString());
@@ -167,7 +167,7 @@ namespace Game
             // do something?
         }
 
-        [WorldPacketHandler(ClientOpcodes.AreaTrigger)]
+        [WorldPacketHandler(ClientOpcodes.AreaTrigger, Processing = PacketProcessing.Inplace)]
         void HandleAreaTrigger(AreaTriggerPkt packet)
         {
             Player player = GetPlayer();
@@ -366,7 +366,7 @@ namespace Game
             }
         }
 
-        [WorldPacketHandler(ClientOpcodes.RequestPlayedTime)]
+        [WorldPacketHandler(ClientOpcodes.RequestPlayedTime, Processing = PacketProcessing.Inplace)]
         void HandlePlayedTime(RequestPlayedTime packet)
         {
             PlayedTime playedTime = new();
@@ -515,7 +515,7 @@ namespace Game
             GetPlayer().UpdateVisibilityForPlayer();
         }
 
-        [WorldPacketHandler(ClientOpcodes.SetTitle)]
+        [WorldPacketHandler(ClientOpcodes.SetTitle, Processing = PacketProcessing.Inplace)]
         void HandleSetTitle(SetTitle packet)
         {
             // -1 at none

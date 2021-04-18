@@ -526,7 +526,7 @@ namespace Game
                 guild.HandleGuildPartyRequest(this);
         }
 
-        [WorldPacketHandler(ClientOpcodes.GuildChangeNameRequest)]
+        [WorldPacketHandler(ClientOpcodes.GuildChangeNameRequest, Processing = PacketProcessing.Inplace)]
         void HandleGuildChallengeUpdateRequest(GuildChallengeUpdateRequest packet)
         {
             Guild guild = GetPlayer().GetGuild();
@@ -543,7 +543,7 @@ namespace Game
                 GetPlayer().RemovePlayerFlag(PlayerFlags.AutoDeclineGuild);
         }
 
-        [WorldPacketHandler(ClientOpcodes.RequestGuildRewardsList, Processing = PacketProcessing.Inplace)]
+        [WorldPacketHandler(ClientOpcodes.RequestGuildRewardsList)]
         void HandleRequestGuildRewardsList(RequestGuildRewardsList packet)
         {
             if (Global.GuildMgr.GetGuildById(GetPlayer().GetGuildId()))
@@ -569,7 +569,7 @@ namespace Game
             }
         }
 
-        [WorldPacketHandler(ClientOpcodes.GuildQueryNews, Processing = PacketProcessing.Inplace)]
+        [WorldPacketHandler(ClientOpcodes.GuildQueryNews)]
         void HandleGuildQueryNews(GuildQueryNews packet)
         {
             Guild guild = GetPlayer().GetGuild();

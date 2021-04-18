@@ -26,7 +26,7 @@ namespace Game
 {
     public partial class WorldSession
     {
-        [WorldPacketHandler(ClientOpcodes.LearnTalents)]
+        [WorldPacketHandler(ClientOpcodes.LearnTalents, Processing = PacketProcessing.Inplace)]
         void HandleLearnTalents(LearnTalents packet)
         {
             LearnTalentFailed learnTalentFailed = new();
@@ -52,7 +52,7 @@ namespace Game
                 GetPlayer().SendTalentsInfoData();
         }
 
-        [WorldPacketHandler(ClientOpcodes.LearnPvpTalents)]
+        [WorldPacketHandler(ClientOpcodes.LearnPvpTalents, Processing = PacketProcessing.Inplace)]
         void HandleLearnPvpTalents(LearnPvpTalents packet)
         {
             LearnPvpTalentFailed learnPvpTalentFailed = new();
@@ -114,7 +114,7 @@ namespace Game
             unit.CastSpell(GetPlayer(), 14867, true);                  //spell: "Untalent Visual Effect"
         }
 
-        [WorldPacketHandler(ClientOpcodes.UnlearnSkill)]
+        [WorldPacketHandler(ClientOpcodes.UnlearnSkill, Processing = PacketProcessing.Inplace)]
         void HandleUnlearnSkill(UnlearnSkill packet)
         {
             SkillRaceClassInfoRecord rcEntry = Global.DB2Mgr.GetSkillRaceClassInfo(packet.SkillLine, GetPlayer().GetRace(), GetPlayer().GetClass());

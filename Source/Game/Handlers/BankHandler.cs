@@ -26,7 +26,7 @@ namespace Game
 {
     public partial class WorldSession
     {
-        [WorldPacketHandler(ClientOpcodes.AutobankItem)]
+        [WorldPacketHandler(ClientOpcodes.AutobankItem, Processing = PacketProcessing.Inplace)]
         void HandleAutoBankItem(AutoBankItem packet)
         {
             if (!CanUseBank())
@@ -58,7 +58,7 @@ namespace Game
             GetPlayer().BankItem(dest, item, true);
         }
 
-        [WorldPacketHandler(ClientOpcodes.BankerActivate)]
+        [WorldPacketHandler(ClientOpcodes.BankerActivate, Processing = PacketProcessing.Inplace)]
         void HandleBankerActivate(Hello packet)
         {
             Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Banker, NPCFlags2.None);
@@ -74,7 +74,7 @@ namespace Game
             SendShowBank(packet.Unit);
         }
 
-        [WorldPacketHandler(ClientOpcodes.AutostoreBankItem)]
+        [WorldPacketHandler(ClientOpcodes.AutostoreBankItem, Processing = PacketProcessing.Inplace)]
         void HandleAutoStoreBankItem(AutoStoreBankItem packet)
         {
             if (!CanUseBank())
@@ -117,7 +117,7 @@ namespace Game
             }
         }
 
-        [WorldPacketHandler(ClientOpcodes.BuyBankSlot)]
+        [WorldPacketHandler(ClientOpcodes.BuyBankSlot, Processing = PacketProcessing.Inplace)]
         void HandleBuyBankSlot(BuyBankSlot packet)
         {
             if (!CanUseBank(packet.Guid))

@@ -26,7 +26,7 @@ namespace Game
 {
     public partial class WorldSession
     {
-        [WorldPacketHandler(ClientOpcodes.AzeriteEssenceUnlockMilestone)]
+        [WorldPacketHandler(ClientOpcodes.AzeriteEssenceUnlockMilestone, Processing = PacketProcessing.Inplace)]
         void HandleAzeriteEssenceUnlockMilestone(AzeriteEssenceUnlockMilestone azeriteEssenceUnlockMilestone)
         {
             if (!AzeriteItem.FindHeartForge(_player))
@@ -59,7 +59,7 @@ namespace Game
             azeriteItem.SetState(ItemUpdateState.Changed, _player);
         }
 
-        [WorldPacketHandler(ClientOpcodes.AzeriteEssenceActivateEssence)]
+        [WorldPacketHandler(ClientOpcodes.AzeriteEssenceActivateEssence, Processing = PacketProcessing.Inplace)]
         void HandleAzeriteEssenceActivateEssence(AzeriteEssenceActivateEssence azeriteEssenceActivateEssence)
         {
             ActivateEssenceFailed activateEssenceResult = new();
@@ -177,7 +177,7 @@ namespace Game
             azeriteItem.SetState(ItemUpdateState.Changed, _player);
         }
 
-        [WorldPacketHandler(ClientOpcodes.AzeriteEmpoweredItemViewed)]
+        [WorldPacketHandler(ClientOpcodes.AzeriteEmpoweredItemViewed, Processing = PacketProcessing.Inplace)]
         void HandleAzeriteEmpoweredItemViewed(AzeriteEmpoweredItemViewed azeriteEmpoweredItemViewed)
         {
             Item item = _player.GetItemByGuid(azeriteEmpoweredItemViewed.ItemGUID);
@@ -188,7 +188,7 @@ namespace Game
             item.SetState(ItemUpdateState.Changed, _player);
         }
 
-        [WorldPacketHandler(ClientOpcodes.AzeriteEmpoweredItemSelectPower)]
+        [WorldPacketHandler(ClientOpcodes.AzeriteEmpoweredItemSelectPower, Processing = PacketProcessing.Inplace)]
         void HandleAzeriteEmpoweredItemSelectPower(AzeriteEmpoweredItemSelectPower azeriteEmpoweredItemSelectPower)
         {
             Item item = _player.GetItemByPos(azeriteEmpoweredItemSelectPower.ContainerSlot, azeriteEmpoweredItemSelectPower.Slot);

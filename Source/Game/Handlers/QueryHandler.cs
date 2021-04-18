@@ -30,7 +30,7 @@ namespace Game
 {
     public partial class WorldSession
     {
-        [WorldPacketHandler(ClientOpcodes.QueryPlayerName)]
+        [WorldPacketHandler(ClientOpcodes.QueryPlayerName, Processing = PacketProcessing.Inplace)]
         void HandleNameQueryRequest(QueryPlayerName queryPlayerName)
         {
             SendNameQuery(queryPlayerName.Player);
@@ -51,7 +51,7 @@ namespace Game
             SendPacket(response);
         }
 
-        [WorldPacketHandler(ClientOpcodes.QueryTime)]
+        [WorldPacketHandler(ClientOpcodes.QueryTime, Processing = PacketProcessing.Inplace)]
         void HandleQueryTime(QueryTime packet)
         {
             SendQueryTimeResponse();
@@ -142,7 +142,7 @@ namespace Game
             }
         }
 
-        [WorldPacketHandler(ClientOpcodes.QueryNpcText)]
+        [WorldPacketHandler(ClientOpcodes.QueryNpcText, Processing = PacketProcessing.Inplace)]
         void HandleNpcTextQuery(QueryNPCText packet)
         {
             NpcText npcText = Global.ObjectMgr.GetNpcText(packet.TextID);
@@ -167,7 +167,7 @@ namespace Game
             SendPacket(response);
         }
 
-        [WorldPacketHandler(ClientOpcodes.QueryPageText)]
+        [WorldPacketHandler(ClientOpcodes.QueryPageText, Processing = PacketProcessing.Inplace)]
         void HandleQueryPageText(QueryPageText packet)
         {
             QueryPageTextResponse response = new();
@@ -275,7 +275,7 @@ namespace Game
             SendPacket(response);
         }
 
-        [WorldPacketHandler(ClientOpcodes.QueryQuestCompletionNpcs)]
+        [WorldPacketHandler(ClientOpcodes.QueryQuestCompletionNpcs, Processing = PacketProcessing.Inplace)]
         void HandleQueryQuestCompletionNPCs(QueryQuestCompletionNPCs queryQuestCompletionNPCs)
         {
             QuestCompletionNPCResponse response = new();
@@ -306,7 +306,7 @@ namespace Game
             SendPacket(response);
         }
 
-        [WorldPacketHandler(ClientOpcodes.QuestPoiQuery)]
+        [WorldPacketHandler(ClientOpcodes.QuestPoiQuery, Processing = PacketProcessing.Inplace)]
         void HandleQuestPOIQuery(QuestPOIQuery packet)
         {
             if (packet.MissingQuestCount >= SharedConst.MaxQuestLogSize)
@@ -332,7 +332,7 @@ namespace Game
             SendPacket(response);
         }
 
-        [WorldPacketHandler(ClientOpcodes.ItemTextQuery)]
+        [WorldPacketHandler(ClientOpcodes.ItemTextQuery, Processing = PacketProcessing.Inplace)]
         void HandleItemTextQuery(ItemTextQuery packet)
         {
             QueryItemTextResponse queryItemTextResponse = new();
@@ -348,7 +348,7 @@ namespace Game
             SendPacket(queryItemTextResponse);
         }
 
-        [WorldPacketHandler(ClientOpcodes.QueryRealmName)]
+        [WorldPacketHandler(ClientOpcodes.QueryRealmName, Processing = PacketProcessing.Inplace)]
         void HandleQueryRealmName(QueryRealmName queryRealmName)
         {
             RealmQueryResponse realmQueryResponse = new();

@@ -30,7 +30,7 @@ namespace Game
             SendPacket(new VoidTransferResult(result));
         }
 
-        [WorldPacketHandler(ClientOpcodes.UnlockVoidStorage)]
+        [WorldPacketHandler(ClientOpcodes.UnlockVoidStorage, Processing = PacketProcessing.Inplace)]
         void HandleVoidStorageUnlock(UnlockVoidStorage unlockVoidStorage)
         {
             Creature unit = GetPlayer().GetNPCIfCanInteractWith(unlockVoidStorage.Npc, NPCFlags.VaultKeeper, NPCFlags2.None);
@@ -50,7 +50,7 @@ namespace Game
             GetPlayer().UnlockVoidStorage();
         }
 
-        [WorldPacketHandler(ClientOpcodes.QueryVoidStorage)]
+        [WorldPacketHandler(ClientOpcodes.QueryVoidStorage, Processing = PacketProcessing.Inplace)]
         void HandleVoidStorageQuery(QueryVoidStorage queryVoidStorage)
         {
             Player player = GetPlayer();
@@ -208,7 +208,7 @@ namespace Game
             SendVoidStorageTransferResult(VoidTransferError.Ok);
         }
 
-        [WorldPacketHandler(ClientOpcodes.SwapVoidItem)]
+        [WorldPacketHandler(ClientOpcodes.SwapVoidItem, Processing = PacketProcessing.Inplace)]
         void HandleVoidSwapItem(SwapVoidItem swapVoidItem)
         { 
             Player player = GetPlayer();

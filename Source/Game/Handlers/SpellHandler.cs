@@ -31,7 +31,7 @@ namespace Game
 {
     public partial class WorldSession
     {
-        [WorldPacketHandler(ClientOpcodes.UseItem)]
+        [WorldPacketHandler(ClientOpcodes.UseItem, Processing = PacketProcessing.Inplace)]
         void HandleUseItem(UseItem packet)
         {
             Player user = GetPlayer();
@@ -127,7 +127,7 @@ namespace Game
             }
         }
 
-        [WorldPacketHandler(ClientOpcodes.OpenItem)]
+        [WorldPacketHandler(ClientOpcodes.OpenItem, Processing = PacketProcessing.Inplace)]
         void HandleOpenItem(OpenItem packet)
         {
             Player player = GetPlayer();
@@ -236,7 +236,7 @@ namespace Game
             DB.Characters.CommitTransaction(trans);
         }
 
-        [WorldPacketHandler(ClientOpcodes.GameObjUse)]
+        [WorldPacketHandler(ClientOpcodes.GameObjUse, Processing = PacketProcessing.Inplace)]
         void HandleGameObjectUse(GameObjUse packet)
         {
             GameObject obj = GetPlayer().GetGameObjectIfCanInteractWith(packet.Guid);
@@ -251,7 +251,7 @@ namespace Game
             }
         }
 
-        [WorldPacketHandler(ClientOpcodes.GameObjReportUse)]
+        [WorldPacketHandler(ClientOpcodes.GameObjReportUse, Processing = PacketProcessing.Inplace)]
         void HandleGameobjectReportUse(GameObjReportUse packet)
         {
             // ignore for remote control state
@@ -350,7 +350,7 @@ namespace Game
                 GetPlayer().InterruptNonMeleeSpells(false, packet.SpellID, false);
         }
 
-        [WorldPacketHandler(ClientOpcodes.CancelAura)]
+        [WorldPacketHandler(ClientOpcodes.CancelAura, Processing = PacketProcessing.Inplace)]
         void HandleCancelAura(CancelAura cancelAura)
         {
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(cancelAura.SpellID, _player.GetMap().GetDifficultyID());
@@ -380,7 +380,7 @@ namespace Game
             GetPlayer().RemoveOwnedAura(cancelAura.SpellID, cancelAura.CasterGUID, 0, AuraRemoveMode.Cancel);
         }
 
-        [WorldPacketHandler(ClientOpcodes.CancelGrowthAura)]
+        [WorldPacketHandler(ClientOpcodes.CancelGrowthAura, Processing = PacketProcessing.Inplace)]
         void HandleCancelGrowthAura(CancelGrowthAura cancelGrowthAura)
         {
             GetPlayer().RemoveAurasByType(AuraType.ModScale, aurApp =>
@@ -390,7 +390,7 @@ namespace Game
             });
         }
 
-        [WorldPacketHandler(ClientOpcodes.CancelMountAura)]
+        [WorldPacketHandler(ClientOpcodes.CancelMountAura, Processing = PacketProcessing.Inplace)]
         void HandleCancelMountAura(CancelMountAura packet)
         {
             GetPlayer().RemoveAurasByType(AuraType.Mounted, aurApp =>
@@ -400,7 +400,7 @@ namespace Game
             });
         }
 
-        [WorldPacketHandler(ClientOpcodes.PetCancelAura)]
+        [WorldPacketHandler(ClientOpcodes.PetCancelAura, Processing = PacketProcessing.Inplace)]
         void HandlePetCancelAura(PetCancelAura packet)
         {
             if (!Global.SpellMgr.HasSpellInfo(packet.SpellID, Difficulty.None))
@@ -431,7 +431,7 @@ namespace Game
             pet.RemoveOwnedAura(packet.SpellID, ObjectGuid.Empty, 0, AuraRemoveMode.Cancel);
         }
 
-        [WorldPacketHandler(ClientOpcodes.CancelAutoRepeatSpell)]
+        [WorldPacketHandler(ClientOpcodes.CancelAutoRepeatSpell, Processing = PacketProcessing.Inplace)]
         void HandleCancelAutoRepeatSpell(CancelAutoRepeatSpell packet)
         {
             //may be better send SMSG_CANCEL_AUTO_REPEAT?
@@ -439,7 +439,7 @@ namespace Game
             _player.InterruptSpell(CurrentSpellTypes.AutoRepeat);
         }
 
-        [WorldPacketHandler(ClientOpcodes.CancelChannelling)]
+        [WorldPacketHandler(ClientOpcodes.CancelChannelling, Processing = PacketProcessing.Inplace)]
         void HandleCancelChanneling(CancelChannelling cancelChanneling)
         {
             // ignore for remote control state (for player case)
@@ -450,7 +450,7 @@ namespace Game
             mover.InterruptSpell(CurrentSpellTypes.Channeled);
         }
 
-        [WorldPacketHandler(ClientOpcodes.TotemDestroyed)]
+        [WorldPacketHandler(ClientOpcodes.TotemDestroyed, Processing = PacketProcessing.Inplace)]
         void HandleTotemDestroyed(TotemDestroyed totemDestroyed)
         {
             // ignore for remote control state
@@ -488,7 +488,7 @@ namespace Game
             _player.RemoveSelfResSpell(selfRes.SpellId);
         }
 
-        [WorldPacketHandler(ClientOpcodes.SpellClick)]
+        [WorldPacketHandler(ClientOpcodes.SpellClick, Processing = PacketProcessing.Inplace)]
         void HandleSpellClick(SpellClick packet)
         {
             // this will get something not in world. crash

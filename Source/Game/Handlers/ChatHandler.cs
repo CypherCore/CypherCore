@@ -542,7 +542,7 @@ namespace Game
             Global.ScriptMgr.OnPlayerChat(sender, ChatMsg.Dnd, Language.Universal, packet.Text);
         }
 
-        [WorldPacketHandler(ClientOpcodes.Emote)]
+        [WorldPacketHandler(ClientOpcodes.Emote, Processing = PacketProcessing.Inplace)]
         void HandleEmote(EmoteClient packet)
         {
             if (!GetPlayer().IsAlive() || GetPlayer().HasUnitState(UnitState.Died))
@@ -552,7 +552,7 @@ namespace Game
             GetPlayer().SetEmoteState(Emote.OneshotNone);
         }
 
-        [WorldPacketHandler(ClientOpcodes.SendTextEmote)]
+        [WorldPacketHandler(ClientOpcodes.SendTextEmote, Processing = PacketProcessing.Inplace)]
         void HandleTextEmote(CTextEmote packet)
         {
             if (!GetPlayer().IsAlive())

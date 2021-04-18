@@ -102,7 +102,7 @@ namespace Game
             }
         }
 
-        [WorldPacketHandler(ClientOpcodes.PetStopAttack)]
+        [WorldPacketHandler(ClientOpcodes.PetStopAttack, Processing = PacketProcessing.Inplace)]
         void HandlePetStopAttack(PetStopAttack packet)
         {
             Unit pet = ObjectAccessor.GetCreatureOrPetOrVehicle(GetPlayer(), packet.PetGUID);
@@ -410,7 +410,7 @@ namespace Game
             }
         }
 
-        [WorldPacketHandler(ClientOpcodes.QueryPetName)]
+        [WorldPacketHandler(ClientOpcodes.QueryPetName, Processing = PacketProcessing.Inplace)]
         void HandleQueryPetName(QueryPetName packet)
         {
             SendQueryPetNameResponse(packet.UnitGUID);
@@ -602,7 +602,7 @@ namespace Game
             }
         }
 
-        [WorldPacketHandler(ClientOpcodes.PetSpellAutocast)]
+        [WorldPacketHandler(ClientOpcodes.PetSpellAutocast, Processing = PacketProcessing.Inplace)]
         void HandlePetSpellAutocast(PetSpellAutocast packet)
         {
             Creature pet = ObjectAccessor.GetCreatureOrPetOrVehicle(GetPlayer(), packet.PetGUID);
@@ -645,7 +645,7 @@ namespace Game
             charmInfo.SetSpellAutocast(spellInfo, packet.AutocastEnabled);
         }
 
-        [WorldPacketHandler(ClientOpcodes.PetCastSpell)]
+        [WorldPacketHandler(ClientOpcodes.PetCastSpell, Processing = PacketProcessing.Inplace)]
         void HandlePetCastSpell(PetCastSpell petCastSpell)
         {
             Unit caster = Global.ObjAccessor.GetUnit(GetPlayer(), petCastSpell.PetGUID);

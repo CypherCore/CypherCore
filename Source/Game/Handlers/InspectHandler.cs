@@ -26,7 +26,7 @@ namespace Game
 {
     public partial class WorldSession
     {
-        [WorldPacketHandler(ClientOpcodes.Inspect)]
+        [WorldPacketHandler(ClientOpcodes.Inspect, Processing = PacketProcessing.Inplace)]
         void HandleInspect(Inspect inspect)
         {
             Player player = Global.ObjAccessor.GetPlayer(_player, inspect.Target);
@@ -85,7 +85,7 @@ namespace Game
             SendPacket(inspectResult);
         }
 
-        [WorldPacketHandler(ClientOpcodes.QueryInspectAchievements)]
+        [WorldPacketHandler(ClientOpcodes.QueryInspectAchievements, Processing = PacketProcessing.Inplace)]
         void HandleQueryInspectAchievements(QueryInspectAchievements inspect)
         {
             Player player = Global.ObjAccessor.GetPlayer(_player, inspect.Guid);

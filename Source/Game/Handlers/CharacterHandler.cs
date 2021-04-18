@@ -1585,7 +1585,7 @@ namespace Game
             GetPlayer().DeleteEquipmentSet(packet.ID);
         }
 
-        [WorldPacketHandler(ClientOpcodes.UseEquipmentSet)]
+        [WorldPacketHandler(ClientOpcodes.UseEquipmentSet, Processing = PacketProcessing.Inplace)]
         void HandleUseEquipmentSet(UseEquipmentSet useEquipmentSet)
         {
             ObjectGuid ignoredItemGuid = new(0x0C00040000000000, 0xFFFFFFFFFFFFFFFF);

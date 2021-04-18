@@ -292,7 +292,7 @@ namespace Game
             group.SendUpdate();
         }
 
-        [WorldPacketHandler(ClientOpcodes.SetRole, Processing = PacketProcessing.Inplace)]
+        [WorldPacketHandler(ClientOpcodes.SetRole)]
         void HandleSetRole(SetRole packet)
         {
             RoleChangedInform roleChangedInform = new();
@@ -608,7 +608,7 @@ namespace Game
             GetPlayer().SendRaidInfo();
         }
 
-        [WorldPacketHandler(ClientOpcodes.OptOutOfLoot)]
+        [WorldPacketHandler(ClientOpcodes.OptOutOfLoot, Processing = PacketProcessing.Inplace)]
         void HandleOptOutOfLoot(OptOutOfLoot packet)
         {
             // ignore if player not loaded

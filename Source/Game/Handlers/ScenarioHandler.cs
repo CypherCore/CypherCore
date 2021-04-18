@@ -24,7 +24,7 @@ namespace Game
 {
     public partial class WorldSession
     {
-        [WorldPacketHandler(ClientOpcodes.QueryScenarioPoi)]
+        [WorldPacketHandler(ClientOpcodes.QueryScenarioPoi, Processing = PacketProcessing.Inplace)]
         void HandleQueryScenarioPOI(QueryScenarioPOI queryScenarioPOI)
         {
             ScenarioPOIs response = new();

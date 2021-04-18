@@ -58,7 +58,7 @@ namespace Game
             GetPlayer().PlayerTalkClass.SendQuestGiverStatus(questStatus, packet.QuestGiverGUID);
         }
 
-        [WorldPacketHandler(ClientOpcodes.QuestGiverHello)]
+        [WorldPacketHandler(ClientOpcodes.QuestGiverHello, Processing = PacketProcessing.Inplace)]
         void HandleQuestgiverHello(QuestGiverHello packet)
         {
             Creature creature = GetPlayer().GetNPCIfCanInteractWith(packet.QuestGiverGUID, NPCFlags.QuestGiver, NPCFlags2.None);
@@ -84,7 +84,7 @@ namespace Game
             GetPlayer().SendPreparedGossip(creature);
         }
 
-        [WorldPacketHandler(ClientOpcodes.QuestGiverAcceptQuest)]
+        [WorldPacketHandler(ClientOpcodes.QuestGiverAcceptQuest, Processing = PacketProcessing.Inplace)]
         void HandleQuestgiverAcceptQuest(QuestGiverAcceptQuest packet)
         {
             WorldObject obj;
@@ -194,7 +194,7 @@ namespace Game
             CLOSE_GOSSIP_CLEAR_SHARING_INFO();
         }
 
-        [WorldPacketHandler(ClientOpcodes.QuestGiverQueryQuest)]
+        [WorldPacketHandler(ClientOpcodes.QuestGiverQueryQuest, Processing = PacketProcessing.Inplace)]
         void HandleQuestgiverQueryQuest(QuestGiverQueryQuest packet)
         {
             // Verify that the guid is valid and is a questgiver or involved in the requested quest
@@ -221,7 +221,7 @@ namespace Game
             }
         }
 
-        [WorldPacketHandler(ClientOpcodes.QueryQuestInfo)]
+        [WorldPacketHandler(ClientOpcodes.QueryQuestInfo, Processing = PacketProcessing.Inplace)]
         void HandleQuestQuery(QueryQuestInfo packet)
         {
             Quest quest = Global.ObjectMgr.GetQuestTemplate(packet.QuestID);
@@ -235,7 +235,7 @@ namespace Game
             }
         }
 
-        [WorldPacketHandler(ClientOpcodes.QuestGiverChooseReward)]
+        [WorldPacketHandler(ClientOpcodes.QuestGiverChooseReward, Processing = PacketProcessing.Inplace)]
         void HandleQuestgiverChooseReward(QuestGiverChooseReward packet)
         {
             Quest quest = Global.ObjectMgr.GetQuestTemplate(packet.QuestID);
@@ -410,7 +410,7 @@ namespace Game
                 GetPlayer().PlayerTalkClass.SendQuestGiverOfferReward(quest, packet.QuestGiverGUID, true);
         }
 
-        [WorldPacketHandler(ClientOpcodes.QuestGiverRequestReward)]
+        [WorldPacketHandler(ClientOpcodes.QuestGiverRequestReward, Processing = PacketProcessing.Inplace)]
         void HandleQuestgiverRequestReward(QuestGiverRequestReward packet)
         {
             WorldObject obj = Global.ObjAccessor.GetObjectByTypeMask(GetPlayer(), packet.QuestGiverGUID, TypeMask.Unit | TypeMask.GameObject);
@@ -432,7 +432,7 @@ namespace Game
                 GetPlayer().PlayerTalkClass.SendQuestGiverOfferReward(quest, packet.QuestGiverGUID, true);
         }
 
-        [WorldPacketHandler(ClientOpcodes.QuestLogRemoveQuest)]
+        [WorldPacketHandler(ClientOpcodes.QuestLogRemoveQuest, Processing = PacketProcessing.Inplace)]
         void HandleQuestLogRemoveQuest(QuestLogRemoveQuest packet)
         {
             if (packet.Entry < SharedConst.MaxQuestLogSize)
@@ -511,7 +511,7 @@ namespace Game
             GetPlayer().ClearQuestSharingInfo();
         }
 
-        [WorldPacketHandler(ClientOpcodes.QuestGiverCompleteQuest)]
+        [WorldPacketHandler(ClientOpcodes.QuestGiverCompleteQuest, Processing = PacketProcessing.Inplace)]
         void HandleQuestgiverCompleteQuest(QuestGiverCompleteQuest packet)
         {
             bool autoCompleteMode = packet.FromScript; // 0 - standart complete quest mode with npc, 1 - auto-complete mode
@@ -574,7 +574,7 @@ namespace Game
             }
         }
 
-        [WorldPacketHandler(ClientOpcodes.QuestGiverCloseQuest)]
+        [WorldPacketHandler(ClientOpcodes.QuestGiverCloseQuest, Processing = PacketProcessing.Inplace)]
         void HandleQuestgiverCloseQuest(QuestGiverCloseQuest questGiverCloseQuest)
         {
             if (_player.FindQuestSlot(questGiverCloseQuest.QuestID) >= SharedConst.MaxQuestLogSize)

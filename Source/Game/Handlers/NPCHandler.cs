@@ -29,7 +29,7 @@ namespace Game
 {
     public partial class WorldSession
     {
-        [WorldPacketHandler(ClientOpcodes.TabardVendorActivate)]
+        [WorldPacketHandler(ClientOpcodes.TabardVendorActivate, Processing = PacketProcessing.Inplace)]
         void HandleTabardVendorActivate(Hello packet)
         {
             Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.TabardDesigner, NPCFlags2.None);
@@ -53,7 +53,7 @@ namespace Game
             SendPacket(packet);
         }
 
-        [WorldPacketHandler(ClientOpcodes.TrainerList)]
+        [WorldPacketHandler(ClientOpcodes.TrainerList, Processing = PacketProcessing.Inplace)]
         void HandleTrainerList(Hello packet)
         {
             Creature npc = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Trainer, NPCFlags2.None);
@@ -89,7 +89,7 @@ namespace Game
             trainer.SendSpells(npc, _player, GetSessionDbLocaleIndex());
         }
 
-        [WorldPacketHandler(ClientOpcodes.TrainerBuySpell)]
+        [WorldPacketHandler(ClientOpcodes.TrainerBuySpell, Processing = PacketProcessing.Inplace)]
         void HandleTrainerBuySpell(TrainerBuySpell packet)
         {
             Creature npc = _player.GetNPCIfCanInteractWith(packet.TrainerGUID, NPCFlags.Trainer, NPCFlags2.None);
@@ -126,7 +126,7 @@ namespace Game
             SendPacket(trainerBuyFailed);
         }
 
-        [WorldPacketHandler(ClientOpcodes.TalkToGossip)]
+        [WorldPacketHandler(ClientOpcodes.TalkToGossip, Processing = PacketProcessing.Inplace)]
         void HandleGossipHello(Hello packet)
         {
             Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.Unit, NPCFlags.Gossip, NPCFlags2.None);
@@ -290,7 +290,7 @@ namespace Game
             }
         }
 
-        [WorldPacketHandler(ClientOpcodes.BinderActivate)]
+        [WorldPacketHandler(ClientOpcodes.BinderActivate, Processing = PacketProcessing.Inplace)]
         void HandleBinderActivate(Hello packet)
         {
             if (!GetPlayer().IsInWorld || !GetPlayer().IsAlive())
@@ -408,7 +408,7 @@ namespace Game
             SendPacket(petStableResult);
         }
 
-        [WorldPacketHandler(ClientOpcodes.RepairItem)]
+        [WorldPacketHandler(ClientOpcodes.RepairItem, Processing = PacketProcessing.Inplace)]
         void HandleRepairItem(RepairItem packet)
         {
             Creature unit = GetPlayer().GetNPCIfCanInteractWith(packet.NpcGUID, NPCFlags.Repair, NPCFlags2.None);
@@ -440,7 +440,7 @@ namespace Game
             }
         }
 
-        [WorldPacketHandler(ClientOpcodes.ListInventory)]
+        [WorldPacketHandler(ClientOpcodes.ListInventory, Processing = PacketProcessing.Inplace)]
         void HandleListInventory(Hello packet)
         {
             if (!GetPlayer().IsAlive())

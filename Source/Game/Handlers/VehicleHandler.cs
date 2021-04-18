@@ -25,7 +25,7 @@ namespace Game
 {
     public partial class WorldSession
     {
-        [WorldPacketHandler(ClientOpcodes.MoveDismissVehicle)]
+        [WorldPacketHandler(ClientOpcodes.MoveDismissVehicle, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveDismissVehicle(MoveDismissVehicle packet)
         {
             ObjectGuid vehicleGUID = GetPlayer().GetCharmGUID();
@@ -38,7 +38,7 @@ namespace Game
             GetPlayer().ExitVehicle();
         }
 
-        [WorldPacketHandler(ClientOpcodes.RequestVehiclePrevSeat)]
+        [WorldPacketHandler(ClientOpcodes.RequestVehiclePrevSeat, Processing = PacketProcessing.Inplace)]
         void HandleRequestVehiclePrevSeat(RequestVehiclePrevSeat packet)
         {
             Unit vehicle_base = GetPlayer().GetVehicleBase();
@@ -56,7 +56,7 @@ namespace Game
             GetPlayer().ChangeSeat(-1, false);
         }
 
-        [WorldPacketHandler(ClientOpcodes.RequestVehicleNextSeat)]
+        [WorldPacketHandler(ClientOpcodes.RequestVehicleNextSeat, Processing = PacketProcessing.Inplace)]
         void HandleRequestVehicleNextSeat(RequestVehicleNextSeat packet)
         {
             Unit vehicle_base = GetPlayer().GetVehicleBase();
@@ -74,7 +74,7 @@ namespace Game
             GetPlayer().ChangeSeat(-1, true);
         }
 
-        [WorldPacketHandler(ClientOpcodes.MoveChangeVehicleSeats)]
+        [WorldPacketHandler(ClientOpcodes.MoveChangeVehicleSeats, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveChangeVehicleSeats(MoveChangeVehicleSeats packet)
         {
             Unit vehicle_base = GetPlayer().GetVehicleBase();
@@ -111,7 +111,7 @@ namespace Game
             }
         }
 
-        [WorldPacketHandler(ClientOpcodes.RequestVehicleSwitchSeat)]
+        [WorldPacketHandler(ClientOpcodes.RequestVehicleSwitchSeat, Processing = PacketProcessing.Inplace)]
         void HandleRequestVehicleSwitchSeat(RequestVehicleSwitchSeat packet)
         {
             Unit vehicle_base = GetPlayer().GetVehicleBase();
@@ -198,7 +198,7 @@ namespace Game
                 Log.outError(LogFilter.Network, "HandleEjectPassenger: {0} tried to eject invalid {1}", GetPlayer().GetGUID().ToString(), packet.Passenger.ToString());
         }
 
-        [WorldPacketHandler(ClientOpcodes.RequestVehicleExit)]
+        [WorldPacketHandler(ClientOpcodes.RequestVehicleExit, Processing = PacketProcessing.Inplace)]
         void HandleRequestVehicleExit(RequestVehicleExit packet)
         {
             Vehicle vehicle = GetPlayer().GetVehicle();

@@ -52,7 +52,7 @@ namespace Game
                 _player.DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
         }
 
-        [WorldPacketHandler(ClientOpcodes.UseToy)]
+        [WorldPacketHandler(ClientOpcodes.UseToy, Processing = PacketProcessing.Inplace)]
         void HandleUseToy(UseToy packet)
         {
             uint itemId = packet.Cast.Misc[0];

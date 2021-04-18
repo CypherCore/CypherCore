@@ -27,7 +27,7 @@ namespace Game
 {
     public partial class WorldSession
     {
-        [WorldPacketHandler(ClientOpcodes.ArtifactAddPower)]
+        [WorldPacketHandler(ClientOpcodes.ArtifactAddPower, Processing = PacketProcessing.Inplace)]
         void HandleArtifactAddPower(ArtifactAddPower artifactAddPower)
         {
             if (!_player.GetGameObjectIfCanInteractWith(artifactAddPower.ForgeGUID, GameObjectTypes.ItemForge))
@@ -157,7 +157,7 @@ namespace Game
             artifact.SetModifier(ItemModifier.ArtifactTier, artifactTier);
         }
 
-        [WorldPacketHandler(ClientOpcodes.ArtifactSetAppearance)]
+        [WorldPacketHandler(ClientOpcodes.ArtifactSetAppearance, Processing = PacketProcessing.Inplace)]
         void HandleArtifactSetAppearance(ArtifactSetAppearance artifactSetAppearance)
         {
             if (!_player.GetGameObjectIfCanInteractWith(artifactSetAppearance.ForgeGUID, GameObjectTypes.ItemForge))
