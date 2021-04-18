@@ -486,12 +486,10 @@ namespace Game.AI
                                         ((SmartAI)_me.GetAI()).SetCombatMove(allowMove);
                                     }
 
-                                    _me.CastSpell(target.ToUnit(), e.Action.cast.spell, triggerFlag);
+                                    _me.CastSpell(target.ToUnit(), e.Action.cast.spell, new CastSpellExtraArgs(triggerFlag));
                                 }
                                 else if (_go)
                                     _go.CastSpell(target.ToUnit(), e.Action.cast.spell, triggerFlag);
-                                else if (target != null)
-                                    target.ToUnit().CastSpell(target.ToUnit(), e.Action.cast.spell);
                             }
                             else
                                 Log.outDebug(LogFilter.ScriptsAi, "Spell {0} not casted because it has flag SMARTCAST_AURA_NOT_PRESENT and the target (Guid: {1} Entry: {2} Type: {3}) already has the aura",
@@ -531,7 +529,7 @@ namespace Game.AI
                                         triggerFlag = TriggerCastFlags.FullMask;
                                 }
 
-                                tempLastInvoker.CastSpell(target.ToUnit(), e.Action.cast.spell, triggerFlag);
+                                tempLastInvoker.CastSpell(target.ToUnit(), e.Action.cast.spell, new CastSpellExtraArgs(triggerFlag));
 
                                 Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_INVOKER_CAST: Invoker {0} casts spell {1} on target {2} with castflags {3}",
                                     tempLastInvoker.GetGUID().ToString(), e.Action.cast.spell, target.GetGUID().ToString(), e.Action.cast.castFlags);

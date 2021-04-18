@@ -480,11 +480,8 @@ namespace Game
             List<uint> selfResSpells = _player.m_activePlayerData.SelfResSpells;
             if (!selfResSpells.Contains(selfRes.SpellId))
                 return;
-
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(selfRes.SpellId, _player.GetMap().GetDifficultyID());
-            if (spellInfo != null)
-                _player.CastSpell(_player, spellInfo, false, null);
-
+            
+            _player.CastSpell(_player, selfRes.SpellId, new CastSpellExtraArgs(_player.GetMap().GetDifficultyID()));
             _player.RemoveSelfResSpell(selfRes.SpellId);
         }
 

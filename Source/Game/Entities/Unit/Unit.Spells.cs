@@ -1066,124 +1066,58 @@ namespace Game.Entities
             return SpellMissInfo.None;
         }
 
-        public void CastSpell(SpellCastTargets targets, SpellInfo spellInfo, Dictionary<SpellValueMod, int> values, TriggerCastFlags triggerFlags = TriggerCastFlags.None, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default)
+        public void CastSpell(SpellCastTargets targets, uint spellId, CastSpellExtraArgs args)
         {
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, args.CastDifficulty != Difficulty.None ? args.CastDifficulty : GetMap().GetDifficultyID());
             if (spellInfo == null)
             {
-                Log.outError(LogFilter.Spells, "CastSpell: unknown spell by caster: {0}", GetGUID().ToString());
+                Log.outError(LogFilter.Unit, $"CastSpell: unknown spell {spellId} by caster: {GetGUID()}");
                 return;
             }
 
-            Spell spell = new(this, spellInfo, triggerFlags, originalCaster);
+            if (args == null)
+                args = new CastSpellExtraArgs();
 
-            if (values != null)
-                foreach (var pair in values)
-                    spell.SetSpellValue(pair.Key, pair.Value);
+            Spell spell = new(this, spellInfo, args.TriggerFlags, args.OriginalCaster);
+            foreach (var pair in args.SpellValueOverrides)
+                spell.SetSpellValue(pair.Key, pair.Value);
 
-            spell.m_CastItem = castItem;
-            spell.Prepare(targets, triggeredByAura);
+            spell.m_CastItem = args.CastItem;
+            spell.Prepare(targets, args.TriggeringAura);
         }
-        public void CastSpell(Unit victim, uint spellId, bool triggered, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default)
-        {
-            CastSpell(victim, spellId, triggered ? TriggerCastFlags.FullMask : TriggerCastFlags.None, castItem, triggeredByAura, originalCaster);
-        }
-        public void CastSpell(Unit victim, uint spellId, TriggerCastFlags triggerFlags = TriggerCastFlags.None, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default)
-        {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
-            if (spellInfo == null)
-            {
-                Log.outError(LogFilter.Spells, "CastSpell: unknown spell id {0} by caster: {1}", spellId, GetGUID().ToString());
-                return;
-            }
 
-            CastSpell(victim, spellInfo, triggerFlags, castItem, triggeredByAura, originalCaster);
-        }
-        public void CastSpell(Unit victim, SpellInfo spellInfo, bool triggered, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default)
+        public void CastSpell(WorldObject target, uint spellId, bool triggered)
         {
-            CastSpell(victim, spellInfo, triggered ? TriggerCastFlags.FullMask : TriggerCastFlags.None, castItem, triggeredByAura, originalCaster);
+            CastSpell(target, spellId, new CastSpellExtraArgs(triggered));
         }
-        public void CastSpell(Unit victim, SpellInfo spellInfo, TriggerCastFlags triggerFlags = TriggerCastFlags.None, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default)
+
+        public void CastSpell(WorldObject target, uint spellId, CastSpellExtraArgs args = null)
         {
             SpellCastTargets targets = new();
-            targets.SetUnitTarget(victim);
-            CastSpell(targets, spellInfo, null, triggerFlags, castItem, triggeredByAura, originalCaster);
-        }
-        public void CastSpell(float x, float y, float z, uint spellId, bool triggered, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default)
-        {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
-            if (spellInfo == null)
+            if (target)
             {
-                Log.outError(LogFilter.Unit, "CastSpell: unknown spell id {0} by caster: {1}", spellId, GetGUID().ToString());
-                return;
+                Unit unitTarget = target.ToUnit();
+                GameObject goTarget = target.ToGameObject();
+                if (unitTarget != null)
+                    targets.SetUnitTarget(unitTarget);
+                else if (goTarget != null)
+                    targets.SetGOTarget(goTarget);
+                else
+                {
+                    Log.outError(LogFilter.Unit, $"CastSpell: Invalid target {target.GetGUID()} passed to spell cast by {GetGUID()}");
+                    return;
+                }
             }
+
+            CastSpell(targets, spellId, args);
+        }
+
+        public void CastSpell(Position dest, uint spellId, CastSpellExtraArgs args = null)
+        {
             SpellCastTargets targets = new();
-            targets.SetDst(x, y, z, GetOrientation());
+            targets.SetDst(dest);
 
-            CastSpell(targets, spellInfo, null, triggered ? TriggerCastFlags.FullMask : TriggerCastFlags.None, castItem, triggeredByAura, originalCaster);
-        }
-        public void CastSpell(GameObject go, uint spellId, bool triggered, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default)
-        {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
-            if (spellInfo == null)
-            {
-                Log.outError(LogFilter.Unit, "CastSpell: unknown spell id {0} by caster: {1}", spellId, GetGUID().ToString());
-                return;
-            }
-            SpellCastTargets targets = new();
-            targets.SetGOTarget(go);
-
-            CastSpell(targets, spellInfo, null, triggered ? TriggerCastFlags.FullMask : TriggerCastFlags.None, castItem, triggeredByAura, originalCaster);
-        }
-        public void CastSpell(Item item, uint spellId, bool triggered, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default)
-        {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
-            if (spellInfo == null)
-            {
-                Log.outError(LogFilter.Unit, "CastSpell: unknown spell id {0} by caster: {1}", spellId, GetGUID().ToString());
-                return;
-            }
-            SpellCastTargets targets = new();
-            targets.SetItemTarget(item);
-
-            CastSpell(targets, spellInfo, null, triggered ? TriggerCastFlags.FullMask : TriggerCastFlags.None, castItem, triggeredByAura, originalCaster);
-        }
-
-
-        public void CastCustomSpell(Unit target, uint spellId, int bp0, int bp1, int bp2, bool triggered, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default)
-        {
-            Dictionary<SpellValueMod, int> values = new();
-            if (bp0 != 0)
-                values.Add(SpellValueMod.BasePoint0, bp0);
-            if (bp1 != 0)
-                values.Add(SpellValueMod.BasePoint1, bp1);
-            if (bp2 != 0)
-                values.Add(SpellValueMod.BasePoint2, bp2);
-            CastCustomSpell(spellId, values, target, triggered ? TriggerCastFlags.FullMask : TriggerCastFlags.None, castItem, triggeredByAura, originalCaster);
-        }
-        public void CastCustomSpell(uint spellId, SpellValueMod mod, int value, Unit target, bool triggered, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default)
-        {
-            Dictionary<SpellValueMod, int> values = new();
-            values.Add(mod, value);
-            CastCustomSpell(spellId, values, target, triggered ? TriggerCastFlags.FullMask : TriggerCastFlags.None, castItem, triggeredByAura, originalCaster);
-        }
-        public void CastCustomSpell(uint spellId, SpellValueMod mod, int value, Unit target = null, TriggerCastFlags triggerFlags = TriggerCastFlags.None, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default)
-        {
-            Dictionary<SpellValueMod, int> values = new();
-            values.Add(mod, value);
-            CastCustomSpell(spellId, values, target, triggerFlags, castItem, triggeredByAura, originalCaster);
-        }
-        public void CastCustomSpell(uint spellId, Dictionary<SpellValueMod, int> values, Unit victim = null, TriggerCastFlags triggerFlags = TriggerCastFlags.None, Item castItem = null, AuraEffect triggeredByAura = null, ObjectGuid originalCaster = default)
-        {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
-            if (spellInfo == null)
-            {
-                Log.outError(LogFilter.Unit, "CastSpell: unknown spell id {0} by caster: {1}", spellId, GetGUID().ToString());
-                return;
-            }
-            SpellCastTargets targets = new();
-            targets.SetUnitTarget(victim);
-
-            CastSpell(targets, spellInfo, values, triggerFlags, castItem, triggeredByAura, originalCaster);
+            CastSpell(targets, spellId, args);
         }
 
         public void FinishSpell(CurrentSpellTypes spellType, bool ok = true)
@@ -3038,7 +2972,12 @@ namespace Game.Entities
                     }
 
                     if (IsInMap(caster))
-                        caster.CastCustomSpell(clickInfo.spellId, SpellValueMod.BasePoint0 + i, seatId + 1, target, flags, null, null, origCasterGUID);
+                    {
+                        CastSpellExtraArgs args = new(flags);
+                        args.OriginalCaster = origCasterGUID;
+                        args.SpellValueOverrides.Add(SpellValueMod.BasePoint0 + i, seatId + 1);
+                        caster.CastSpell(target, clickInfo.spellId, args);
+                    }
                     else    // This can happen during Player._LoadAuras
                     {
                         int[] bp0 = new int[SpellConst.MaxEffects];
@@ -3055,7 +2994,7 @@ namespace Game.Entities
                 else
                 {
                     if (IsInMap(caster))
-                        caster.CastSpell(target, spellEntry, flags, null, null, origCasterGUID);
+                        caster.CastSpell(target, spellEntry.Id, new CastSpellExtraArgs().SetOriginalCaster(origCasterGUID));
                     else
                         Aura.TryRefreshStackOrCreate(spellEntry, ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, GetMapId(), spellEntry.Id, GetMap().GenerateLowGuid(HighGuid.Cast)), SpellConst.MaxEffectMask, this, clicker, GetMap().GetDifficultyID(), null, null, origCasterGUID);
                 }
@@ -3893,7 +3832,7 @@ namespace Game.Entities
                                 continue;
 
                             if (spellInfo.CasterAuraState == flag)
-                                CastSpell(this, spell.Key, true, null);
+                                CastSpell(this, spell.Key, true);
                         }
                     }
                     else if (IsPet())
@@ -3907,7 +3846,7 @@ namespace Game.Entities
                             if (spellInfo == null || !spellInfo.IsPassive())
                                 continue;
                             if (spellInfo.CasterAuraState == flag)
-                                CastSpell(this, spell.Key, true, null);
+                                CastSpell(this, spell.Key, true);
                         }
                     }
                 }

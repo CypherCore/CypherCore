@@ -1073,7 +1073,7 @@ namespace Game.Entities
                 }
 
                 if (spellInfo.IsPassive())
-                    vehicle.CastSpell(vehicle, spellInfo, true);
+                    vehicle.CastSpell(vehicle, spellInfo.Id, true);
 
                 petSpells.ActionButtons[i] = UnitActionBarEntry.MAKE_UNIT_ACTION_BUTTON(spellId, i + 8);
             }
@@ -2466,7 +2466,7 @@ namespace Game.Entities
                     break;
                 case GossipOption.Spirithealer:
                     if (IsDead())
-                        source.ToCreature().CastSpell(source.ToCreature(), 17251, true, null, null, GetGUID());
+                        source.ToCreature().CastSpell(source.ToCreature(), 17251, new CastSpellExtraArgs(GetGUID()));
                     break;
                 case GossipOption.Questgiver:
                     PrepareQuestMenu(guid);
@@ -3538,7 +3538,7 @@ namespace Game.Entities
             SetPower(PowerType.LunarPower, 0);
 
             if (resurrectAura != 0)
-                CastSpell(this, resurrectAura, true, null, null, resurrectGUID);
+                CastSpell(this, resurrectAura, new CastSpellExtraArgs(resurrectGUID));
 
             SpawnCorpseBones();
         }

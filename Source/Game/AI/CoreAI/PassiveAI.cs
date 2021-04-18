@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Game.Entities;
+using Game.Spells;
 using System.Collections.Generic;
 
 namespace Game.AI
@@ -128,7 +129,11 @@ namespace Game.AI
         public override void IsSummonedBy(Unit summoner)
         {
             if (me.m_spells[0] != 0)
-                me.CastSpell(me, me.m_spells[0], false, null, null, summoner.GetGUID());
+            {
+                CastSpellExtraArgs extra = new();
+                extra.OriginalCaster = summoner.GetGUID();
+                me.CastSpell(me, me.m_spells[0], extra);
+            }
         }
     }
 }

@@ -101,7 +101,11 @@ namespace Scripts.Spells.Shaman
             PreventDefaultAction();
             int bp0 = MathFunctions.CalculatePct((int)eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount());
             if (bp0 != 0)
-                eventInfo.GetActor().CastCustomSpell(SpellIds.AncestralGuidanceHeal, SpellValueMod.BasePoint0, bp0, eventInfo.GetActor(), true, null, aurEff);
+            {
+                CastSpellExtraArgs args = new(aurEff);
+                args.AddSpellMod(SpellValueMod.BasePoint0, bp0);
+                eventInfo.GetActor().CastSpell(eventInfo.GetActor(), SpellIds.AncestralGuidanceHeal, args);
+            }
         }
 
         public override void Register()
@@ -180,7 +184,11 @@ namespace Scripts.Spells.Shaman
 
             AuraEffect gatheringStorms = GetCaster().GetAuraEffect(SpellIds.GatheringStorms, 0);
             if (gatheringStorms != null)
-                GetCaster().CastCustomSpell(SpellIds.GatheringStormsBuff, SpellValueMod.BasePoint0, (int)(gatheringStorms.GetAmount() * _targetsHit), GetCaster(), true);
+            {
+                CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+                args.AddSpellMod(SpellValueMod.BasePoint0, (int)(gatheringStorms.GetAmount() * _targetsHit));
+                GetCaster().CastSpell(GetCaster(), SpellIds.GatheringStormsBuff, args);
+            }
         }
 
         public override void Register()
@@ -211,7 +219,7 @@ namespace Scripts.Spells.Shaman
         {
             PreventDefaultAction();
 
-            GetTarget().CastSpell(GetTarget(), SpellIds.EarthShieldHeal, true, null, aurEff, GetCasterGUID());
+            GetTarget().CastSpell(GetTarget(), SpellIds.EarthShieldHeal, new CastSpellExtraArgs(aurEff, GetCasterGUID()));
         }
 
         public override void Register()
@@ -298,7 +306,7 @@ namespace Scripts.Spells.Shaman
             Player caster = GetCaster().ToPlayer();
             uint spellId = RandomHelper.RAND(SpellIds.ElementalBlastCrit, SpellIds.ElementalBlastHaste, SpellIds.ElementalBlastMastery);
 
-            caster.CastSpell(caster, spellId, TriggerCastFlags.FullMask);
+            caster.CastSpell(caster, spellId, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
         }
 
         public override void Register()
@@ -354,8 +362,9 @@ namespace Scripts.Spells.Shaman
             PreventDefaultAction();
 
             Unit attacker = eventInfo.GetActor();
-            int damage = Math.Max(1, (int)(attacker.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * 0.0264f));
-            attacker.CastCustomSpell(SpellIds.FlametongueAttack, SpellValueMod.BasePoint0, damage, eventInfo.GetActionTarget(), TriggerCastFlags.FullMask, null, aurEff);
+            CastSpellExtraArgs args = new(aurEff);
+            args.AddSpellMod(SpellValueMod.BasePoint0, Math.Max(1, (int)(attacker.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * 0.0264f)));
+            attacker.CastSpell(eventInfo.GetActionTarget(), SpellIds.FlametongueAttack, args);
         }
 
         public override void Register()
@@ -411,7 +420,7 @@ namespace Scripts.Spells.Shaman
 
         void HandleEffectPeriodic(AuraEffect aurEff)
         {
-            GetTarget().CastSpell(_x, _y, _z, SpellIds.HealingRainHeal, true, null, aurEff);
+            GetTarget().CastSpell(new Position(_x, _y, _z), SpellIds.HealingRainHeal, new CastSpellExtraArgs(aurEff));
         }
 
         void HandleEffecRemoved(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -488,7 +497,7 @@ namespace Scripts.Spells.Shaman
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            GetTarget().CastSpell(eventInfo.GetProcTarget(), SpellIds.ItemLightningShield, true, null, aurEff);
+            GetTarget().CastSpell(eventInfo.GetProcTarget(), SpellIds.ItemLightningShield, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -508,7 +517,7 @@ namespace Scripts.Spells.Shaman
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            GetTarget().CastSpell(GetTarget(), SpellIds.ItemLightningShieldDamage, true, null, aurEff);
+            GetTarget().CastSpell(GetTarget(), SpellIds.ItemLightningShieldDamage, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -540,7 +549,11 @@ namespace Scripts.Spells.Shaman
             {
                 int mana = MathFunctions.CalculatePct(m.Amount, 35);
                 if (mana > 0)
-                    GetTarget().CastCustomSpell(SpellIds.ItemManaSurge, SpellValueMod.BasePoint0, mana, GetTarget(), true, null, aurEff);
+                {
+                    CastSpellExtraArgs args = new(aurEff);
+                    args.AddSpellMod(SpellValueMod.BasePoint0, mana);
+                    GetTarget().CastSpell(GetTarget(), SpellIds.ItemManaSurge, args);
+                }
             }
         }
 
@@ -792,10 +805,11 @@ namespace Scripts.Spells.Shaman
         void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            int basePoints0 = -aurEff.GetAmount();
-            int basePoints1 = aurEff.GetAmount();
+            CastSpellExtraArgs args = new(aurEff);
+            args.AddSpellMod(SpellValueMod.BasePoint0, -aurEff.GetAmount());
+            args.AddSpellMod(SpellValueMod.BasePoint1, aurEff.GetAmount());
 
-            GetTarget().CastCustomSpell(GetTarget(), SpellIds.TidalWaves, basePoints0, basePoints1, 0, true, null, aurEff);
+            GetTarget().CastSpell(GetTarget(), SpellIds.TidalWaves, args);
         }
 
         public override void Register()
@@ -843,7 +857,7 @@ namespace Scripts.Spells.Shaman
                     return;
             }
 
-            caster.CastSpell(target, spellId, true, null, aurEff);
+            caster.CastSpell(target, spellId, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -895,7 +909,9 @@ namespace Scripts.Spells.Shaman
             Unit target = eventInfo.GetProcTarget();
             amount += (int)target.GetRemainingPeriodicAmount(caster.GetGUID(), SpellIds.Electrified, AuraType.PeriodicDamage);
 
-            caster.CastCustomSpell(SpellIds.Electrified, SpellValueMod.BasePoint0, amount, target, true, null, aurEff);
+            CastSpellExtraArgs args = new(aurEff);
+            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, amount);
+            caster.CastSpell(target, SpellIds.Electrified, args);
         }
 
         public override void Register()
@@ -929,7 +945,9 @@ namespace Scripts.Spells.Shaman
             Unit target = eventInfo.GetProcTarget();
             amount += (int)target.GetRemainingPeriodicAmount(caster.GetGUID(), SpellIds.LavaBurstBonusDamage, AuraType.PeriodicDamage);
 
-            caster.CastCustomSpell(SpellIds.LavaBurstBonusDamage, SpellValueMod.BasePoint0, amount, target, true, null, aurEff);
+            CastSpellExtraArgs args = new(aurEff);
+            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, amount);
+            caster.CastSpell(target, SpellIds.LavaBurstBonusDamage, args);
         }
 
         public override void Register()
@@ -995,7 +1013,9 @@ namespace Scripts.Spells.Shaman
             Unit target = eventInfo.GetProcTarget();
             amount += (int)target.GetRemainingPeriodicAmount(caster.GetGUID(), SpellIds.ChainedHeal, AuraType.PeriodicHeal);
 
-            caster.CastCustomSpell(SpellIds.ChainedHeal, SpellValueMod.BasePoint0, amount, target, true, null, aurEff);
+            CastSpellExtraArgs args = new(aurEff);
+            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, amount);
+            caster.CastSpell(target, SpellIds.ChainedHeal, args);
         }
 
         public override void Register()
@@ -1017,7 +1037,7 @@ namespace Scripts.Spells.Shaman
             PreventDefaultAction();
 
             for (uint i = 0; i < 2; ++i)
-                eventInfo.GetActor().CastSpell(eventInfo.GetProcTarget(), SpellIds.WindfuryAttack, true, null, aurEff);
+                eventInfo.GetActor().CastSpell(eventInfo.GetProcTarget(), SpellIds.WindfuryAttack, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()

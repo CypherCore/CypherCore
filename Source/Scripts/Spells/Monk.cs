@@ -49,7 +49,7 @@ namespace Scripts.Spells.Monk
             Unit caster = GetCaster();
             if (caster)
                 if (caster.HasAura(SpellIds.StanceOfTheSpiritedCrane))
-                    caster.CastSpell(caster, SpellIds.CracklingJadeLightningChiProc, TriggerCastFlags.FullMask);
+                    caster.CastSpell(caster, SpellIds.CracklingJadeLightningChiProc, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
         }
 
         public override void Register()
@@ -83,8 +83,8 @@ namespace Scripts.Spells.Monk
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            GetTarget().CastSpell(eventInfo.GetActor(), SpellIds.CracklingJadeLightningKnockback, TriggerCastFlags.FullMask);
-            GetTarget().CastSpell(GetTarget(), SpellIds.CracklingJadeLightningKnockbackCd, TriggerCastFlags.FullMask);
+            GetTarget().CastSpell(eventInfo.GetActor(), SpellIds.CracklingJadeLightningKnockback, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
+            GetTarget().CastSpell(GetTarget(), SpellIds.CracklingJadeLightningKnockbackCd, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
         }
 
         public override void Register()

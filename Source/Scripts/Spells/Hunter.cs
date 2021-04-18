@@ -116,8 +116,9 @@ namespace Scripts.Spells.Hunter
         void HandleDummy(uint effIndex)
         {
             Unit caster = GetCaster();
-            int healthModSpellBasePoints0 = (int)caster.CountPctFromMaxHealth(30);
-            caster.CastCustomSpell(caster, SpellIds.PetLastStandTriggered, healthModSpellBasePoints0, 0, 0, true, null);
+            CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, (int)caster.CountPctFromMaxHealth(30));
+            caster.CastSpell(caster, SpellIds.PetLastStandTriggered, args);
         }
 
         public override void Register()
@@ -215,7 +216,7 @@ namespace Scripts.Spells.Hunter
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            GetTarget().CastSpell(GetTarget(), SpellIds.MisdirectionProc, true, null, aurEff);
+            GetTarget().CastSpell(GetTarget(), SpellIds.MisdirectionProc, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -265,7 +266,9 @@ namespace Scripts.Spells.Hunter
             {
                 if (!caster.HasAura(SpellIds.PetHeartOfThePhoenixDebuff))
                 {
-                    owner.CastCustomSpell(SpellIds.PetHeartOfThePhoenixTriggered, SpellValueMod.BasePoint0, 100, caster, true);
+                    CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+                    args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, 100);
+                    owner.CastSpell(caster, SpellIds.PetHeartOfThePhoenixTriggered, args);
                     caster.CastSpell(caster, SpellIds.PetHeartOfThePhoenixDebuff, true);
                 }
             }
@@ -301,8 +304,9 @@ namespace Scripts.Spells.Hunter
         {
             PreventDefaultAction();
 
-            int damage = (int)MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount());
-            eventInfo.GetActor().CastCustomSpell(SpellIds.RoarOfSacrificeTriggered, SpellValueMod.BasePoint0, damage, GetCaster(), TriggerCastFlags.FullMask, null, aurEff);
+            CastSpellExtraArgs args = new(aurEff);
+            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()));
+            eventInfo.GetActor().CastSpell(GetCaster(), SpellIds.RoarOfSacrificeTriggered, args);
         }
 
         public override void Register()
@@ -422,7 +426,7 @@ namespace Scripts.Spells.Hunter
             PreventDefaultAction();
             Unit caster = eventInfo.GetActor();
 
-            caster.CastSpell(caster.ToPlayer().GetPet(), SpellIds.T94PGreatness, true, null, aurEff);
+            caster.CastSpell(caster.ToPlayer().GetPet(), SpellIds.T94PGreatness, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()

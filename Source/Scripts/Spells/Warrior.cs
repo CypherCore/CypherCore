@@ -144,7 +144,7 @@ namespace Scripts.Spells.Warrior
         {
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
-            caster.CastCustomSpell(SpellIds.ChargePauseRageDecay, SpellValueMod.BasePoint0, 0, caster, true);
+            caster.CastSpell(caster, SpellIds.ChargePauseRageDecay, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, 0));
             caster.CastSpell(target, SpellIds.ChargeRootEffect, true);
             caster.CastSpell(target, SpellIds.ChargeSlowEffect, true);
         }
@@ -224,7 +224,7 @@ namespace Scripts.Spells.Warrior
         {
             WorldLocation dest = GetHitDest();
             if (dest != null)
-                GetCaster().CastSpell(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ(), SpellIds.HeroicLeapJump, true);
+                GetCaster().CastSpell(dest.GetPosition(), SpellIds.HeroicLeapJump, new CastSpellExtraArgs(true));
         }
 
         public override void Register()
@@ -311,7 +311,9 @@ namespace Scripts.Spells.Warrior
 
             Unit target = eventInfo.GetActionTarget();
             int bp0 = (int)MathFunctions.CalculatePct(target.GetMaxHealth(), GetSpellInfo().GetEffect(1).CalcValue());
-            target.CastCustomSpell(SpellIds.Stoicism, SpellValueMod.BasePoint0, bp0, (Unit)null, true);
+            CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, bp0);
+            target.CastSpell((Unit)null, SpellIds.Stoicism, args);
         }
 
         public override void Register()
@@ -356,9 +358,10 @@ namespace Scripts.Spells.Warrior
 
         void HandleScript(uint effIndex)
         {
-            int basePoints0 = (int)(GetHitUnit().CountPctFromMaxHealth(GetEffectValue()));
+            CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+            args.AddSpellMod(SpellValueMod.BasePoint0, (int)GetHitUnit().CountPctFromMaxHealth(GetEffectValue()));
 
-            GetCaster().CastCustomSpell(GetHitUnit(), SpellIds.RallyingCry, basePoints0, 0, 0, true);
+            GetCaster().CastSpell(GetHitUnit(), SpellIds.RallyingCry, args);
         }
 
         public override void Register()
@@ -472,12 +475,13 @@ namespace Scripts.Spells.Warrior
                 if (spellInfo != null && (spellInfo.Id == SpellIds.BladestormPeriodicWhirlwind || (spellInfo.Id == SpellIds.Execute && !_procTarget.HasAuraState(AuraStateType.Wounded20Percent))))
                 {
                     // If triggered by Execute (while target is not under 20% hp) or Bladestorm deals normalized weapon damage
-                    GetTarget().CastSpell(_procTarget, SpellIds.SweepingStrikesExtraAttack2, true, null, aurEff);
+                    GetTarget().CastSpell(_procTarget, SpellIds.SweepingStrikesExtraAttack2, new CastSpellExtraArgs(aurEff));
                 }
                 else
                 {
-                    int damage = (int)damageInfo.GetDamage();
-                    GetTarget().CastCustomSpell(SpellIds.SweepingStrikesExtraAttack1, SpellValueMod.BasePoint0, damage, _procTarget, true, null, aurEff);
+                    CastSpellExtraArgs args = new(aurEff);
+                    args.AddSpellMod(SpellValueMod.BasePoint0, (int)damageInfo.GetDamage());
+                    GetTarget().CastSpell(_procTarget, SpellIds.SweepingStrikesExtraAttack1, args);
                 }
             }
         }
@@ -506,7 +510,9 @@ namespace Scripts.Spells.Warrior
             int remainingDamage = (int)target.GetRemainingPeriodicAmount(target.GetGUID(), SpellIds.TraumaEffect, AuraType.PeriodicDamage);
             //Get 25% of damage from the spell casted (Slam & Whirlwind) plus Remaining Damage from Aura
             int damage = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), aurEff.GetAmount()) / Global.SpellMgr.GetSpellInfo(SpellIds.TraumaEffect, GetCastDifficulty()).GetMaxTicks()) + remainingDamage;
-            GetCaster().CastCustomSpell(SpellIds.TraumaEffect, SpellValueMod.BasePoint0, damage, target, true);
+            CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+            args.AddSpellMod(SpellValueMod.BasePoint0, damage);
+            GetCaster().CastSpell(target, SpellIds.TraumaEffect, args);
         }
 
         public override void Register()

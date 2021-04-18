@@ -1412,13 +1412,12 @@ namespace Game.Entities
             if (auraId == 0)
                 return;
 
+            CastSpellExtraArgs args = new CastSpellExtraArgs(TriggerCastFlags.FullMask);
+
             if (auraId == 35696)                                      // Demonic Knowledge
-            {
-                int basePoints = MathFunctions.CalculatePct(aura.GetDamage(), GetStat(Stats.Stamina) + GetStat(Stats.Intellect));
-                CastCustomSpell(this, auraId, basePoints, 0, 0, true);
-            }
-            else
-                CastSpell(this, auraId, true);
+                args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, MathFunctions.CalculatePct(aura.GetDamage(), GetStat(Stats.Stamina) + GetStat(Stats.Intellect)));
+
+            CastSpell(this, auraId, args);
         }
 
         bool IsPetAura(Aura aura)

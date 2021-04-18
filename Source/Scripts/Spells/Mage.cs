@@ -157,9 +157,9 @@ namespace Scripts.Spells.Mage
             }
 
             GetTarget().SetHealth(GetTarget().CountPctFromMaxHealth(effectInfo.GetAmount()));
-            GetTarget().CastSpell(GetTarget(), GetSpellInfo().GetEffect(2).TriggerSpell, TriggerCastFlags.FullMask);
-            GetTarget().CastSpell(GetTarget(), SpellIds.CauterizeDot, TriggerCastFlags.FullMask);
-            GetTarget().CastSpell(GetTarget(), SpellIds.Cauterized, TriggerCastFlags.FullMask);
+            GetTarget().CastSpell(GetTarget(), GetSpellInfo().GetEffect(2).TriggerSpell, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
+            GetTarget().CastSpell(GetTarget(), SpellIds.CauterizeDot, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
+            GetTarget().CastSpell(GetTarget(), SpellIds.Cauterized, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
         }
 
         public override void Register()
@@ -268,7 +268,7 @@ namespace Scripts.Spells.Mage
 
         void Trigger(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            eventInfo.GetActor().CastSpell(GetTarget(), SpellIds.FingersOfFrost, true, null, aurEff);
+            eventInfo.GetActor().CastSpell(GetTarget(), SpellIds.FingersOfFrost, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -356,7 +356,9 @@ namespace Scripts.Spells.Mage
             }
 
             // put target index for chain value multiplier into EFFECT_1 base points, otherwise triggered spell doesn't know which damage multiplier to apply
-            caster.CastCustomSpell(SpellIds.IceLanceTrigger, SpellValueMod.BasePoint1, index, target, true);
+            CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+            args.AddSpellMod(SpellValueMod.BasePoint1, index);
+            caster.CastSpell(target, SpellIds.IceLanceTrigger, args);
         }
 
         public override void Register()
@@ -409,7 +411,10 @@ namespace Scripts.Spells.Mage
 
             int amount = (int)(MathFunctions.CalculatePct(eventInfo.GetDamageInfo().GetDamage(), pct) / igniteDot.GetMaxTicks());
             amount += (int)eventInfo.GetProcTarget().GetRemainingPeriodicAmount(eventInfo.GetActor().GetGUID(), SpellIds.Ignite, AuraType.PeriodicDamage);
-            GetTarget().CastCustomSpell(SpellIds.Ignite, SpellValueMod.BasePoint0, amount, eventInfo.GetProcTarget(), true, null, aurEff);
+
+            CastSpellExtraArgs args = new(aurEff);
+            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, amount);
+            GetTarget().CastSpell(eventInfo.GetProcTarget(), SpellIds.Ignite, args);
         }
 
         public override void Register()
@@ -451,7 +456,7 @@ namespace Scripts.Spells.Mage
         void HandleDummy(uint effIndex)
         {
             PreventHitDefaultEffect(effIndex);
-            GetCaster().CastCustomSpell(SpellIds.LivingBombPeriodic, SpellValueMod.BasePoint2, 1, GetHitUnit(), TriggerCastFlags.FullMask);
+            GetCaster().CastSpell(GetHitUnit(), SpellIds.LivingBombPeriodic, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint2, 1));
         }
 
         public override void Register()
@@ -476,7 +481,7 @@ namespace Scripts.Spells.Mage
         void HandleSpread(uint effIndex)
         {
             if (GetSpellValue().EffectBasePoints[0] > 0)
-                GetCaster().CastCustomSpell(SpellIds.LivingBombPeriodic, SpellValueMod.BasePoint2, 0, GetHitUnit(), TriggerCastFlags.FullMask);
+                GetCaster().CastSpell(GetHitUnit(), SpellIds.LivingBombPeriodic, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint2, 0));
         }
 
         public override void Register()
@@ -501,7 +506,7 @@ namespace Scripts.Spells.Mage
 
             Unit caster = GetCaster();
             if (caster)
-                caster.CastCustomSpell(SpellIds.LivingBombExplosion, SpellValueMod.BasePoint0, aurEff.GetAmount(), GetTarget(), TriggerCastFlags.FullMask);
+                caster.CastSpell(GetTarget(), SpellIds.LivingBombExplosion, new CastSpellExtraArgs (TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, aurEff.GetAmount()));
         }
 
         public override void Register()
@@ -574,7 +579,7 @@ namespace Scripts.Spells.Mage
         {
             TempSummon ringOfFrost = GetRingOfFrostMinion();
             if (ringOfFrost)
-                GetTarget().CastSpell(ringOfFrost.GetPositionX(), ringOfFrost.GetPositionY(), ringOfFrost.GetPositionZ(), SpellIds.RingOfFrostFreeze, true);
+                GetTarget().CastSpell(ringOfFrost.GetPosition(), SpellIds.RingOfFrostFreeze, new CastSpellExtraArgs(true));
         }
 
         void Apply(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -729,7 +734,7 @@ namespace Scripts.Spells.Mage
 
             Unit caster = GetCaster();
             if (caster != null)
-                caster.CastCustomSpell(SpellIds.TouchOfTheMagiExplode, SpellValueMod.BasePoint0, amount, GetTarget(), TriggerCastFlags.FullMask);
+                caster.CastSpell(GetTarget(), SpellIds.TouchOfTheMagiExplode, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, amount));
         }
 
         public override void Register()

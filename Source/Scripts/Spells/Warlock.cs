@@ -208,15 +208,16 @@ namespace Scripts.Spells.Warlock
             if (effect != null)
             {
                 Unit caster = GetCaster();
-                int heal_amount = effect.CalcValue(caster);
+                CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+                args.AddSpellMod(SpellValueMod.BasePoint0, effect.CalcValue(caster));
 
-                caster.CastCustomSpell(caster, SpellIds.DevourMagicHeal, heal_amount, 0, 0, true);
+                caster.CastSpell(caster, SpellIds.DevourMagicHeal, args);
 
                 // Glyph of Felhunter
                 Unit owner = caster.GetOwner();
                 if (owner)
                     if (owner.GetAura(SpellIds.GlyphOfDemonTraining) != null)
-                        owner.CastCustomSpell(owner, SpellIds.DevourMagicHeal, heal_amount, 0, 0, true);
+                        owner.CastSpell(owner, SpellIds.DevourMagicHeal, args);
             }
         }
 
@@ -427,7 +428,7 @@ namespace Scripts.Spells.Warlock
             if (!caster)
                 return;
 
-            caster.CastSpell(eventInfo.GetActionTarget(), SpellIds.SeedOfCorruptionGeneric, true, null, aurEff);
+            caster.CastSpell(eventInfo.GetActionTarget(), SpellIds.SeedOfCorruptionGeneric, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -617,7 +618,7 @@ namespace Scripts.Spells.Warlock
         {
             PreventDefaultAction();
             Unit caster = eventInfo.GetActor();
-            caster.CastSpell(caster, _triggerSpell, true, null, aurEff);
+            caster.CastSpell(caster, _triggerSpell, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -644,9 +645,10 @@ namespace Scripts.Spells.Warlock
                 AuraEffect aurEff = GetEffect(1);
                 if (aurEff != null)
                 {
-                    int damage = aurEff.GetAmount() * 9;
                     // backfire damage and silence
-                    caster.CastCustomSpell(dispelInfo.GetDispeller(), SpellIds.UnstableAfflictionDispel, damage, 0, 0, true, null, aurEff);
+                    CastSpellExtraArgs args = new(aurEff);
+                    args.AddSpellMod(SpellValueMod.BasePoint0, aurEff.GetAmount() * 9);
+                    caster.CastSpell(dispelInfo.GetDispeller(), SpellIds.UnstableAfflictionDispel, args);
                 }
             }
         }

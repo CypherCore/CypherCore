@@ -2026,7 +2026,7 @@ namespace Game.Spells
 
             // Check for SPELL_ATTR7_INTERRUPT_ONLY_NONPLAYER
             if (missInfo == SpellMissInfo.None && m_spellInfo.HasAttribute(SpellAttr7.InterruptOnlyNonplayer) && !unit.IsTypeId(TypeId.Player))
-                caster.CastSpell(unit, 32747, true);
+                caster.CastSpell(unit, 32747, new CastSpellExtraArgs(true));
 
             if (spellHitTarget != null)
             {
@@ -2149,7 +2149,7 @@ namespace Game.Spells
                     int[] basePoints = new int[SpellConst.MaxEffects];
                     foreach (SpellEffectInfo auraSpellEffect in m_spellInfo.GetEffects())
                         if (auraSpellEffect != null)
-                            basePoints[auraSpellEffect.EffectIndex] =  (m_spellValue.CustomBasePointsMask & (1 << (int)auraSpellEffect.EffectIndex)) != 0 ?
+                            basePoints[auraSpellEffect.EffectIndex] = (m_spellValue.CustomBasePointsMask & (1 << (int)auraSpellEffect.EffectIndex)) != 0 ?
                                 m_spellValue.EffectBasePoints[auraSpellEffect.EffectIndex] : auraSpellEffect.CalcBaseValue(m_originalCaster, unit, m_castItemEntry, m_castItemLevel);
 
                     bool refresh = false;
@@ -2260,7 +2260,7 @@ namespace Game.Spells
                 {
                     if (CanExecuteTriggersOnHit(effMask, hit.triggeredByAura) && RandomHelper.randChance(hit.chance))
                     {
-                        m_caster.CastSpell(unit, hit.triggeredSpell, TriggerCastFlags.FullMask);
+                        m_caster.CastSpell(unit, hit.triggeredSpell.Id, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetCastDifficulty(hit.triggeredSpell.Difficulty));
                         Log.outDebug(LogFilter.Spells, "Spell {0} triggered spell {1} by SPELL_AURA_ADD_TARGET_TRIGGER aura", m_spellInfo.Id, hit.triggeredSpell.Id);
 
                         // SPELL_AURA_ADD_TARGET_TRIGGER auras shouldn't trigger auras without duration
@@ -2291,9 +2291,9 @@ namespace Game.Spells
                 foreach (var id in spellTriggered)
                 {
                     if (id < 0)
-                        unit.RemoveAurasDueToSpell((uint)-(id));
+                        unit.RemoveAurasDueToSpell((uint)-id);
                     else
-                        unit.CastSpell(unit, (uint)id, true, null, null, m_caster.GetGUID());
+                        unit.CastSpell(unit, (uint)id, new CastSpellExtraArgs(m_caster.GetGUID()));
                 }
             }
         }
@@ -2702,7 +2702,7 @@ namespace Game.Spells
 
             // Should this be done for original caster?
             Player modOwner = m_caster.GetSpellModOwner();
-            if (modOwner !=null)
+            if (modOwner != null)
             {
                 // Set spell which will drop charges for triggered cast spells
                 // if not successfully casted, will be remove in finish(false)
@@ -2904,7 +2904,7 @@ namespace Game.Spells
                     if (spellId < 0)
                         m_caster.RemoveAurasDueToSpell((uint)-spellId);
                     else
-                        m_caster.CastSpell(m_targets.GetUnitTarget() ?? m_caster, (uint)spellId, true);
+                        m_caster.CastSpell(m_targets.GetUnitTarget() ?? m_caster, (uint)spellId, new CastSpellExtraArgs(true));
                 }
             }
 
@@ -4470,7 +4470,7 @@ namespace Game.Spells
 
             return null;
         }
-        
+
         public SpellCastResult CheckCast(bool strict)
         {
             uint param1 = 0, param2 = 0;
@@ -5167,7 +5167,7 @@ namespace Game.Spells
                                     {
                                         Pet pet = m_caster.ToPlayer().GetPet();
                                         if (pet != null)
-                                            pet.CastSpell(pet, 32752, true, null, null, pet.GetGUID());
+                                            pet.CastSpell(pet, 32752, new CastSpellExtraArgs(pet.GetGUID()));
                                     }
                                 }
                                 else if (!m_spellInfo.HasAttribute(SpellAttr1.DismissPet))
@@ -6169,7 +6169,7 @@ namespace Game.Spells
                                             return SpellCastResult.DontReport;
                                         }
                                         else if ((efi = m_spellInfo.GetEffect(1)) != null)
-                                            player.CastSpell(m_caster, (uint)efi.CalcValue(), false);        // move this to anywhere
+                                            player.CastSpell(m_caster, (uint)efi.CalcValue(), new CastSpellExtraArgs(false));        // move this to anywhere
                                         return SpellCastResult.DontReport;
                                     }
                                 }
@@ -6545,7 +6545,7 @@ namespace Game.Spells
         {
             return m_powerCost.Any(cost => cost.Power == power);
         }
-        
+
         bool UpdatePointers()
         {
             if (m_originalCasterGUID == m_caster.GetGUID())
@@ -6620,7 +6620,7 @@ namespace Game.Spells
         {
             return m_caster.GetMap().GetDifficultyID();
         }
-        
+
         bool CheckEffectTarget(Unit target, SpellEffectInfo effect, Position losPosition)
         {
             if (!effect.IsEffect())
@@ -6750,7 +6750,7 @@ namespace Game.Spells
         {
             return m_spellInfo.IsPositive() && (m_triggeredByAuraSpell == null || m_triggeredByAuraSpell.IsPositive());
         }
-        
+
         bool IsNeedSendToClient()
         {
             return m_SpellVisual.SpellXSpellVisualID != 0 || m_SpellVisual.ScriptVisualID != 0 || m_spellInfo.IsChanneled() ||
@@ -7152,7 +7152,7 @@ namespace Game.Spells
                 loadedScript._FinishScriptCall();
             }
         }
-        
+
         void CallScriptObjectAreaTargetSelectHandlers(List<WorldObject> targets, uint effIndex, SpellImplicitTargetInfo targetType)
         {
             foreach (var script in m_loadedScripts)
@@ -8140,5 +8140,92 @@ namespace Game.Spells
 
         Unit _victim;
         ObjectGuid _casterGuid;
+    }
+
+    public class CastSpellExtraArgs
+    {
+        public TriggerCastFlags TriggerFlags;
+        public Item CastItem;
+        public AuraEffect TriggeringAura;
+        public ObjectGuid OriginalCaster = ObjectGuid.Empty;
+        public Difficulty CastDifficulty;
+        public Dictionary<SpellValueMod, int> SpellValueOverrides = new();
+
+        public CastSpellExtraArgs() { }
+        public CastSpellExtraArgs(bool triggered)
+        {
+            TriggerFlags = triggered ? TriggerCastFlags.FullMask : TriggerCastFlags.None;
+        }
+
+        public CastSpellExtraArgs(TriggerCastFlags trigger)
+        {
+            TriggerFlags = trigger;
+        }
+
+        public CastSpellExtraArgs(Item item)
+        {
+            TriggerFlags = TriggerCastFlags.FullMask;
+            CastItem = item;
+        }
+
+        public CastSpellExtraArgs(AuraEffect eff)
+        {
+            TriggerFlags = TriggerCastFlags.FullMask;
+            TriggeringAura = eff;
+        }
+
+        public CastSpellExtraArgs(ObjectGuid origCaster)
+        {
+            TriggerFlags = TriggerCastFlags.FullMask;
+            OriginalCaster = origCaster;
+        }
+
+        public CastSpellExtraArgs(AuraEffect eff, ObjectGuid origCaster)
+        {
+            TriggerFlags = TriggerCastFlags.FullMask;
+            TriggeringAura = eff;
+            OriginalCaster = origCaster;
+        }
+
+        public CastSpellExtraArgs(Difficulty castDifficulty)
+        {
+            CastDifficulty = castDifficulty;
+        }
+
+        public CastSpellExtraArgs(SpellValueMod mod, int val)
+        {
+            SpellValueOverrides.Add(mod, val);
+        }
+
+        public CastSpellExtraArgs SetTriggerFlags(TriggerCastFlags flag)
+        {
+            TriggerFlags = flag;
+            return this;
+        }
+        public CastSpellExtraArgs SetCastItem(Item item)
+        {
+            CastItem = item;
+            return this;
+        }
+        public CastSpellExtraArgs SetTriggeringAura(AuraEffect triggeringAura)
+        {
+            TriggeringAura = triggeringAura;
+            return this;
+        }
+        public CastSpellExtraArgs SetOriginalCaster(ObjectGuid guid)
+        {
+            OriginalCaster = guid;
+            return this;
+        }
+        public CastSpellExtraArgs SetCastDifficulty(Difficulty castDifficulty)
+        {
+            CastDifficulty = castDifficulty;
+            return this;
+        }
+        public CastSpellExtraArgs AddSpellMod(SpellValueMod mod, int val)
+        {
+            SpellValueOverrides.Add(mod, val);
+            return this;
+        }
     }
 }

@@ -371,7 +371,7 @@ namespace Scripts.Spells.Quest
         {
             Unit caster = GetCaster();
             uint spellId = RandomHelper.randChance(50) ? SpellIds.CreateResonatingSkull : SpellIds.CreateBoneDust;
-            caster.CastSpell(caster, spellId, true, null);
+            caster.CastSpell(caster, spellId, true);
         }
 
         public override void Register()
@@ -466,7 +466,7 @@ namespace Scripts.Spells.Quest
                 if (target.IsTypeId(TypeId.Unit) && target.HasAura(SpellIds.ForceShieldArcanePurpleX3))
                     // Make sure nobody else is channeling the same target
                     if (!target.HasAura(SpellIds.ScourgingCrystalController))
-                        GetCaster().CastSpell(target, SpellIds.ScourgingCrystalController, true, GetCastItem());
+                        GetCaster().CastSpell(target, SpellIds.ScourgingCrystalController, new CastSpellExtraArgs(GetCastItem()));
         }
 
         public override void Register()
@@ -574,7 +574,7 @@ namespace Scripts.Spells.Quest
                     default:
                         return;
                 }
-                caster.CastSpell(caster, spellId, true, castItem);
+                caster.CastSpell(caster, spellId, new CastSpellExtraArgs(castItem));
                 caster.CastSpell(caster, SpellIds.RobotKillCredit, true);
                 target.DespawnOrUnsummon();
             }
@@ -645,7 +645,7 @@ namespace Scripts.Spells.Quest
             // sometimes, if you're lucky, you get a dwarf
             if (RandomHelper.randChance(5))
                 spellId = SpellIds.SummonAdventurousDwarf;
-            GetCaster().CastSpell(GetCaster(), spellId, true, null);
+            GetCaster().CastSpell(GetCaster(), spellId, true);
         }
 
         public override void Register()
@@ -667,7 +667,7 @@ namespace Scripts.Spells.Quest
             if (caster.HasAuraEffect(reqAuraId, 0))
             {
                 uint spellId = (uint)GetSpellInfo().GetEffect(0).CalcValue();
-                caster.CastSpell(caster, spellId, true, null);
+                caster.CastSpell(caster, spellId, true);
             }
         }
 
@@ -739,7 +739,7 @@ namespace Scripts.Spells.Quest
             Creature target = GetHitCreature();
             if (target)
             {
-                caster.CastSpell(caster, SpellIds.TriggerAidOfTheEarthen, true, null);
+                caster.CastSpell(caster, SpellIds.TriggerAidOfTheEarthen, true);
                 caster.KilledMonsterCredit(CreatureIds.FallenEarthenDefender);
                 target.DespawnOrUnsummon();
             }
@@ -1204,7 +1204,7 @@ namespace Scripts.Spells.Quest
             if (playerTarget)
                 // Check if found player target is on fly mount or using flying form
                 if (playerTarget.HasAuraType(AuraType.Fly) || playerTarget.HasAuraType(AuraType.ModIncreaseMountedFlightSpeed))
-                    playerTarget.CastSpell(playerTarget, SpellIds.FlakCannonTrigger, TriggerCastFlags.IgnoreCasterMountedOrOnVehicle);
+                    playerTarget.CastSpell(playerTarget, SpellIds.FlakCannonTrigger, new CastSpellExtraArgs(TriggerCastFlags.IgnoreCasterMountedOrOnVehicle));
         }
 
         public override void Register()
@@ -1444,7 +1444,7 @@ namespace Scripts.Spells.Quest
         {
             WorldLocation pos = GetExplTargetDest();
             if (pos != null)
-                GetCaster().CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), (uint)GetEffectValue(), true);
+                GetCaster().CastSpell(pos.GetPosition(), (uint)GetEffectValue(), new CastSpellExtraArgs(true));
         }
 
         public override void Register()
@@ -1617,7 +1617,7 @@ namespace Scripts.Spells.Quest
             PreventDefaultAction();
             Unit caster = GetCaster();
             if (caster)
-                caster.CastSpell(caster, aurEff.GetSpellEffectInfo().TriggerSpell, true, null, aurEff);
+                caster.CastSpell(caster, aurEff.GetSpellEffectInfo().TriggerSpell, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -1651,10 +1651,12 @@ namespace Scripts.Spells.Quest
 
         void HandleScript(uint effIndex)
         {
-            sbyte seatId = 2;
             if (!GetHitCreature())
                 return;
-            GetHitCreature().CastCustomSpell(SpellIds.RideGymer, SpellValueMod.BasePoint0, seatId, GetCaster(), true);
+
+            CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, 2);
+            GetHitCreature().CastSpell(GetCaster(), SpellIds.RideGymer, args);
             GetHitCreature().CastSpell(GetHitCreature(), SpellIds.Grabbed, true);
         }
 
@@ -1725,7 +1727,7 @@ namespace Scripts.Spells.Quest
         {
             Player player = GetHitPlayer();
             if (player)
-                player.CastSpell(player, SpellIds.TotemOfTheEarthenRing, TriggerCastFlags.FullMask); // ignore reagent cost, consumed by quest
+                player.CastSpell(player, SpellIds.TotemOfTheEarthenRing, new CastSpellExtraArgs(TriggerCastFlags.FullMask)); // ignore reagent cost, consumed by quest
         }
 
         public override void Register()

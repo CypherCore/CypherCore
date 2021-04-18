@@ -103,7 +103,7 @@ namespace Scripts.World.EmeraldDragons
             base.Reset();
             me.RemoveUnitFlag(UnitFlags.NotSelectable | UnitFlags.NonAttackable);
             me.SetReactState(ReactStates.Aggressive);
-            DoCast(me, SpellIds.MarkOfNatureAura, true);
+            DoCast(me, SpellIds.MarkOfNatureAura, new CastSpellExtraArgs(true));
 
             _scheduler.Schedule(TimeSpan.FromSeconds(4), task =>
             {
@@ -123,8 +123,8 @@ namespace Scripts.World.EmeraldDragons
             {
                 // Seeping Fog appears only as "pairs", and only ONE pair at any given time!
                 // Despawntime is 2 minutes, so reschedule it for new cast after 2 minutes + a minor "random time" (30 seconds at max)
-                DoCast(me, SpellIds.SeepingFogLeft, true);
-                DoCast(me, SpellIds.SeepingFogRight, true);
+                DoCast(me, SpellIds.SeepingFogLeft, new CastSpellExtraArgs(true));
+                DoCast(me, SpellIds.SeepingFogRight, new CastSpellExtraArgs(true));
                 task.Repeat(TimeSpan.FromMinutes(2), TimeSpan.FromMinutes(2.5));
             });
         }
@@ -245,7 +245,7 @@ namespace Scripts.World.EmeraldDragons
                 Talk(TextIds.SayYsondreSummonDruids);
 
                 for (byte i = 0; i < 10; ++i)
-                    DoCast(me, SpellIds.SummonDruidSpirits, true);
+                    DoCast(me, SpellIds.SummonDruidSpirits, new CastSpellExtraArgs(true));
                 ++_stage;
             }
         }
@@ -357,7 +357,7 @@ namespace Scripts.World.EmeraldDragons
         public override void KilledUnit(Unit who)
         {
             if (who.IsTypeId(TypeId.Player))
-                DoCast(who, SpellIds.PutridMushroom, true);
+                DoCast(who, SpellIds.PutridMushroom, new CastSpellExtraArgs(true));
             base.KilledUnit(who);
         }
 
@@ -372,7 +372,7 @@ namespace Scripts.World.EmeraldDragons
             if (!HealthAbovePct(100 - 25 * _stage))
             {
                 Talk(TextIds.SayEmerissCastCorruption);
-                DoCast(me, SpellIds.CorruptionOfEarth, true);
+                DoCast(me, SpellIds.CorruptionOfEarth, new CastSpellExtraArgs(true));
                 ++_stage;
             }
         }
@@ -445,7 +445,7 @@ namespace Scripts.World.EmeraldDragons
                 Talk(TextIds.SayTaerarSummonShades);
 
                 foreach (var spell in SpellIds.TaerarShadeSpells)
-                    DoCastVictim(spell, true);
+                    DoCastVictim(spell, new CastSpellExtraArgs(true));
                 _shades += (byte)SpellIds.TaerarShadeSpells.Length;
 
                 DoCast(SpellIds.Shade);

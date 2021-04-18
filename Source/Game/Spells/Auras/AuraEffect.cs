@@ -678,16 +678,16 @@ namespace Game.Spells
             if (apply)
             {
                 if (spellId != 0)
-                    target.CastSpell(target, spellId, true, null, this);
+                    target.CastSpell(target, spellId, new CastSpellExtraArgs(this));
 
                 if (spellId2 != 0)
-                    target.CastSpell(target, spellId2, true, null, this);
+                    target.CastSpell(target, spellId2, new CastSpellExtraArgs(this));
 
                 if (spellId3 != 0)
-                    target.CastSpell(target, spellId3, true, null, this);
+                    target.CastSpell(target, spellId3, new CastSpellExtraArgs(this));
 
                 if (spellId4 != 0)
-                    target.CastSpell(target, spellId4, true, null, this);
+                    target.CastSpell(target, spellId4, new CastSpellExtraArgs(this));
 
                 if (target.IsTypeId(TypeId.Player))
                 {
@@ -711,7 +711,7 @@ namespace Game.Spells
                             continue;
 
                         if (Convert.ToBoolean(spellInfo.Stances & (1ul << (GetMiscValue() - 1))))
-                            target.CastSpell(target, pair.Key, true, null, this);
+                            target.CastSpell(target, pair.Key, new CastSpellExtraArgs(this));
                     }
                 }
             }
@@ -1246,13 +1246,13 @@ namespace Game.Spells
                     case ShapeShiftForm.CatForm:
                         AuraEffect dummy = target.GetAuraEffect(37315, 0);
                         if (dummy != null)
-                            target.CastSpell(target, 37316, true, null, dummy);
+                            target.CastSpell(target, 37316, new CastSpellExtraArgs(dummy));
                         break;
                     // Nordrassil Regalia - bonus
                     case ShapeShiftForm.MoonkinForm:
                         dummy = target.GetAuraEffect(37324, 0);
                         if (dummy != null)
-                            target.CastSpell(target, 37325, true, null, dummy);
+                            target.CastSpell(target, 37325, new CastSpellExtraArgs(dummy));
                         break;
                     default:
                         break;
@@ -2062,7 +2062,7 @@ namespace Game.Spells
                 {
                     var mountCapability = CliDB.MountCapabilityStorage.LookupByKey(GetAmount());
                     if (mountCapability != null)
-                        target.CastSpell(target, mountCapability.ModSpellAuraID, true);
+                        target.CastSpell(target, mountCapability.ModSpellAuraID, new CastSpellExtraArgs(true));
                 }
             }
             else
@@ -4064,7 +4064,7 @@ namespace Game.Spells
                         case 13139:                                     // net-o-matic
                             // root to self part of (root_target.charge.root_self sequence
                             if (caster != null)
-                                caster.CastSpell(caster, 13138, true, null, this);
+                                caster.CastSpell(caster, 13138, new CastSpellExtraArgs(this));
                             break;
                         case 34026:   // kill command
                             {
@@ -4072,7 +4072,7 @@ namespace Game.Spells
                                 if (pet == null)
                                     break;
 
-                                target.CastSpell(target, 34027, true, null, this);
+                                target.CastSpell(target, 34027, new CastSpellExtraArgs(this));
 
                                 // set 3 stacks and 3 charges (to make all auras not disappear at once)
                                 Aura owner_aura = target.GetAura(34027, GetCasterGUID());
@@ -4093,15 +4093,15 @@ namespace Game.Spells
                                 if (caster != null)
                                 {
                                     if (caster.GetGender() == Gender.Female)
-                                        caster.CastSpell(target, 37095, true, null, this); // Blood Elf Disguise
+                                        caster.CastSpell(target, 37095, new CastSpellExtraArgs(this)); // Blood Elf Disguise
                                     else
-                                        caster.CastSpell(target, 37093, true, null, this);
+                                        caster.CastSpell(target, 37093, new CastSpellExtraArgs(this));
                                 }
                                 break;
                             }
                         case 39850:                                     // Rocket Blast
                             if (RandomHelper.randChance(20))                       // backfire stun
-                                target.CastSpell(target, 51581, true, null, this);
+                                target.CastSpell(target, 51581, new CastSpellExtraArgs(this));
                             break;
                         case 43873:                                     // Headless Horseman Laugh
                             target.PlayDistanceSound(11965);
@@ -4110,9 +4110,9 @@ namespace Game.Spells
                             if (caster != null)
                             {
                                 if (caster.GetGender() == Gender.Female)
-                                    caster.CastSpell(target, 46356, true, null, this);
+                                    caster.CastSpell(target, 46356, new CastSpellExtraArgs(this));
                                 else
-                                    caster.CastSpell(target, 46355, true, null, this);
+                                    caster.CastSpell(target, 46355, new CastSpellExtraArgs(this));
                             }
                             break;
                         case 46361:                                     // Reinforced Net
@@ -4186,7 +4186,7 @@ namespace Game.Spells
                         }
 
                         if (finalSpelId != 0)
-                            caster.CastSpell(target, finalSpelId, true, null, this);
+                            caster.CastSpell(target, finalSpelId, new CastSpellExtraArgs(this));
                     }
 
                     switch (m_spellInfo.SpellFamilyName)
@@ -4208,7 +4208,7 @@ namespace Game.Spells
                                     break;
                                 case 36730:                                     // Flame Strike
                                     {
-                                        target.CastSpell(target, 36731, true, null, this);
+                                        target.CastSpell(target, 36731, new CastSpellExtraArgs(this));
                                         break;
                                     }
                                 case 44191:                                     // Flame Strike
@@ -4217,7 +4217,7 @@ namespace Game.Spells
                                         {
                                             uint spellId = (uint)(target.GetMap().IsHeroic() ? 46163 : 44190);
 
-                                            target.CastSpell(target, spellId, true, null, this);
+                                            target.CastSpell(target, spellId, new CastSpellExtraArgs(this));
                                         }
                                         break;
                                     }
@@ -4231,25 +4231,25 @@ namespace Game.Spells
                                         break;
                                     }
                                 case 42783: // Wrath of the Astromancer
-                                    target.CastSpell(target, (uint)GetAmount(), true, null, this);
+                                    target.CastSpell(target, (uint)GetAmount(), new CastSpellExtraArgs(this));
                                     break;
                                 case 46308: // Burning Winds casted only at creatures at spawn
-                                    target.CastSpell(target, 47287, true, null, this);
+                                    target.CastSpell(target, 47287, new CastSpellExtraArgs(this));
                                     break;
                                 case 52172:  // Coyote Spirit Despawn Aura
                                 case 60244:  // Blood Parrot Despawn Aura
-                                    target.CastSpell((Unit)null, (uint)GetAmount(), true, null, this);
+                                    target.CastSpell((Unit)null, (uint)GetAmount(), new CastSpellExtraArgs(this));
                                     break;
                                 case 91604: // Restricted Flight Area
                                     if (aurApp.GetRemoveMode() == AuraRemoveMode.Expire)
-                                        target.CastSpell(target, 58601, true);
+                                        target.CastSpell(target, 58601, new CastSpellExtraArgs(true));
                                     break;
                             }
                             break;
                         case SpellFamilyNames.Deathknight:
                             // Summon Gargoyle (Dismiss Gargoyle at remove)
                             if (GetId() == 61777)
-                                target.CastSpell(target, (uint)GetAmount(), true);
+                                target.CastSpell(target, (uint)GetAmount(), new CastSpellExtraArgs(true));
                             break;
                         default:
                             break;
@@ -4278,9 +4278,13 @@ namespace Game.Spells
                                     if (apply && caster != null)
                                     {
                                         SpellInfo spell = Global.SpellMgr.GetSpellInfo(spellId, GetBase().GetCastDifficulty());
+                                        CastSpellExtraArgs args = new();
+                                        args.TriggerFlags = TriggerCastFlags.FullMask;
+                                        args.OriginalCaster = GetCasterGUID();
+                                        args.CastDifficulty = spell.Difficulty;
 
                                         for (uint i = 0; i < spell.StackAmount; ++i)
-                                            caster.CastSpell(target, spell, true, null, null, GetCasterGUID());
+                                            caster.CastSpell(target, spell.Id, args);
                                         break;
                                     }
                                     target.RemoveAurasDueToSpell(spellId);
@@ -4293,8 +4297,12 @@ namespace Game.Spells
                                     if (apply && caster != null)
                                     {
                                         SpellInfo spell = Global.SpellMgr.GetSpellInfo(spellId, GetBase().GetCastDifficulty());
+                                        CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+                                        args.OriginalCaster = GetCasterGUID();
+                                        args.CastDifficulty = spell.Difficulty;
+
                                         for (uint i = 0; i < spell.StackAmount; ++i)
-                                            caster.CastSpell(target, spell, true, null, null, GetCasterGUID());
+                                            caster.CastSpell(target, spell.Id, args);
                                         break;
                                     }
                                     target.RemoveAurasDueToSpell(spellId);
@@ -4347,7 +4355,7 @@ namespace Game.Spells
                                         target.PlayDirectSound(14970, target.ToPlayer());
                                     // continue in 58205
                                     else
-                                        target.CastSpell(target, 58205, true);
+                                        target.CastSpell(target, 58205, new CastSpellExtraArgs(true));
                                 }
                                 break;
                             // LK Intro VO (2)
@@ -4561,11 +4569,12 @@ namespace Game.Spells
             {
                 if (apply)
                 {
-                    // If amount avalible cast with basepoints (Crypt Fever for example)
-                    if (GetAmount() != 0)
-                        caster.CastCustomSpell(target, triggeredSpellId, m_amount, 0, 0, true, null, this);
-                    else
-                        caster.CastSpell(target, triggeredSpellId, true, null, this);
+                    CastSpellExtraArgs args = new(this);
+
+                    if (GetAmount() != 0) // If amount avalible cast with basepoints (Crypt Fever for example)
+                        args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, GetAmount());
+
+                    caster.CastSpell(target, triggeredSpellId, args);
                 }
                 else
                 {
@@ -4609,7 +4618,7 @@ namespace Game.Spells
                     break;
             }
 
-            target.CastSpell(target, triggerSpell, true);
+            target.CastSpell(target, triggerSpell, new CastSpellExtraArgs(true));
         }
 
         [AuraEffectHandler(AuraType.TriggerSpellOnPowerAmount)]
@@ -4638,7 +4647,7 @@ namespace Game.Spells
                     break;
             }
 
-            target.CastSpell(target, triggerSpell, true);
+            target.CastSpell(target, triggerSpell, new CastSpellExtraArgs(true));
         }
 
         [AuraEffectHandler(AuraType.OpenStable)]
@@ -4808,12 +4817,12 @@ namespace Game.Spells
                 Unit triggerCaster = triggeredSpellInfo.NeedsToBeTriggeredByCaster(m_spellInfo) ? caster : target;
                 if (triggerCaster != null)
                 {
-                    triggerCaster.CastSpell(target, triggeredSpellInfo, true, null, this);
+                    triggerCaster.CastSpell(target, triggerSpellId, new CastSpellExtraArgs(this));
                     Log.outDebug(LogFilter.Spells, "AuraEffect.HandlePeriodicTriggerSpellAuraTick: Spell {0} Trigger {1}", GetId(), triggeredSpellInfo.Id);
                 }
             }
             else
-                Log.outDebug(LogFilter.Spells, "AuraEffect.HandlePeriodicTriggerSpellAuraTick: Spell {0} has non-existent spell {1} in EffectTriggered[{2}] and is therefor not triggered.", GetId(), triggerSpellId, GetEffIndex());
+                Log.outWarn(LogFilter.Spells, "AuraEffect.HandlePeriodicTriggerSpellAuraTick: Spell {0} has non-existent spell {1} in EffectTriggered[{2}] and is therefor not triggered.", GetId(), triggerSpellId, GetEffIndex());
         }
 
         void HandlePeriodicTriggerSpellWithValueAuraTick(Unit target, Unit caster)
@@ -4825,13 +4834,16 @@ namespace Game.Spells
                 Unit triggerCaster = triggeredSpellInfo.NeedsToBeTriggeredByCaster(m_spellInfo) ? caster : target;
                 if (triggerCaster != null)
                 {
-                    int basepoints = GetAmount();
-                    triggerCaster.CastCustomSpell(target, triggerSpellId, basepoints, basepoints, basepoints, true, null, this);
+                    CastSpellExtraArgs args = new(this);
+                    for (int i = 0; i < SpellConst.MaxEffects; ++i)
+                        args.SpellValueOverrides.Add(SpellValueMod.BasePoint0 + i, GetAmount());
+
+                    triggerCaster.CastSpell(target, triggerSpellId, args);
                     Log.outDebug(LogFilter.Spells, "AuraEffect.HandlePeriodicTriggerSpellWithValueAuraTick: Spell {0} Trigger {1}", GetId(), triggeredSpellInfo.Id);
                 }
             }
             else
-                Log.outDebug(LogFilter.Spells, "AuraEffect.HandlePeriodicTriggerSpellWithValueAuraTick: Spell {0} has non-existent spell {1} in EffectTriggered[{2}] and is therefor not triggered.", GetId(), triggerSpellId, GetEffIndex());
+                Log.outWarn(LogFilter.Spells, "AuraEffect.HandlePeriodicTriggerSpellWithValueAuraTick: Spell {0} has non-existent spell {1} in EffectTriggered[{2}] and is therefor not triggered.", GetId(), triggerSpellId, GetEffIndex());
         }
 
         void HandlePeriodicDamageAurasTick(Unit target, Unit caster)
@@ -4880,7 +4892,7 @@ namespace Game.Spells
                         if (GetSpellInfo().SpellFamilyName == SpellFamilyNames.Warlock && GetSpellInfo().SpellFamilyFlags[0].HasAnyFlag(0x00004000u))
                         {
                             if (caster.IsTypeId(TypeId.Player) && caster.ToPlayer().IsHonorOrXPTarget(target))
-                                caster.CastSpell(caster, 95810, true, null, this);
+                                caster.CastSpell(caster, 95810, new CastSpellExtraArgs(this));
                         }
 
                         if (GetSpellInfo().SpellFamilyName == SpellFamilyNames.Generic)
@@ -5231,7 +5243,10 @@ namespace Game.Spells
                 if (manaFeedVal > 0)
                 {
                     int feedAmount = MathFunctions.CalculatePct(gainedAmount, manaFeedVal);
-                    caster.CastCustomSpell(caster, 32554, feedAmount, 0, 0, true, null, this);
+
+                    CastSpellExtraArgs args = new(this);
+                    args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, feedAmount);
+                    caster.CastSpell(caster, 32554, args);
                 }
             }
 
@@ -5367,7 +5382,7 @@ namespace Game.Spells
             if (triggeredSpellInfo != null)
             {
                 Log.outDebug(LogFilter.Spells, $"AuraEffect.HandleProcTriggerSpellAuraProc: Triggering spell {triggeredSpellInfo.Id} from aura {GetId()} proc");
-                triggerCaster.CastSpell(triggerTarget, triggeredSpellInfo, true, null, this);
+                triggerCaster.CastSpell(triggerTarget, triggeredSpellInfo.Id, new CastSpellExtraArgs(this));
             }
             else if (triggerSpellId != 0 && GetAuraType() != AuraType.Dummy)
                 Log.outError(LogFilter.Spells, $"AuraEffect.HandleProcTriggerSpellAuraProc: Could not trigger spell {triggerSpellId} from aura {GetId()} proc, because the spell does not have an entry in Spell.dbc.");
@@ -5382,9 +5397,10 @@ namespace Game.Spells
             SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId, GetBase().GetCastDifficulty());
             if (triggeredSpellInfo != null)
             {
-                int basepoints0 = GetAmount();
-                Log.outDebug(LogFilter.Spells, "AuraEffect.HandleProcTriggerSpellWithValueAuraProc: Triggering spell {0} with value {1} from aura {2} proc", triggeredSpellInfo.Id, basepoints0, GetId());
-                triggerCaster.CastCustomSpell(triggerTarget, triggerSpellId, basepoints0, 0, 0, true, null, this);
+                CastSpellExtraArgs args = new(this);
+                args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, GetAmount());
+                triggerCaster.CastSpell(triggerTarget, triggerSpellId, args);
+                Log.outDebug(LogFilter.Spells, "AuraEffect.HandleProcTriggerSpellWithValueAuraProc: Triggering spell {0} with value {1} from aura {2} proc", triggeredSpellInfo.Id, GetAmount(), GetId());
             }
             else
                 Log.outError(LogFilter.Spells, "AuraEffect.HandleProcTriggerSpellWithValueAuraProc: Could not trigger spell {0} from aura {1} proc, because the spell does not have an entry in Spell.dbc.", triggerSpellId, GetId());
@@ -5580,7 +5596,12 @@ namespace Game.Spells
 
             // on apply cast summon spell
             if (apply)
-                target.CastSpell(target, triggerSpellInfo, true, null, this);
+            {
+                CastSpellExtraArgs args = new CastSpellExtraArgs(TriggerCastFlags.FullMask);
+                args.TriggeringAura = this;
+                args.CastDifficulty = triggerSpellInfo.Difficulty;
+                target.CastSpell(target, triggerSpellInfo.Id, args);
+            }
             // on unapply we need to search for and remove the summoned creature
             else
             {

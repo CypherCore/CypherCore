@@ -150,7 +150,9 @@ namespace Scripts.Spells.DeathKnight
             if (!GetTarget().HasAura(SpellIds.VolatileShielding))
             {
                 int bp = (int)(2 * absorbAmount * 100 / maxHealth);
-                GetTarget().CastCustomSpell(SpellIds.RunicPowerEnergize, SpellValueMod.BasePoint0, bp, GetTarget(), true, null, aurEff);
+                CastSpellExtraArgs args = new(aurEff);
+                args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(absorbAmount, 2 * absorbAmount * 100 / maxHealth));
+                GetTarget().CastSpell(GetTarget(), SpellIds.RunicPowerEnergize, args);
             }
         }
 
@@ -159,8 +161,9 @@ namespace Scripts.Spells.DeathKnight
             AuraEffect volatileShielding = GetTarget().GetAuraEffect(SpellIds.VolatileShielding, 1);
             if (volatileShielding != null)
             {
-                int damage = (int)MathFunctions.CalculatePct(absorbedAmount, volatileShielding.GetAmount());
-                GetTarget().CastCustomSpell(SpellIds.VolatileShieldingDamage, SpellValueMod.BasePoint0, damage, null, TriggerCastFlags.FullMask, null, volatileShielding);
+                CastSpellExtraArgs args = new(volatileShielding);
+                args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(absorbedAmount, volatileShielding.GetAmount()));
+                GetTarget().CastSpell((Unit)null, SpellIds.VolatileShieldingDamage, args);
             }
         }
 
@@ -292,7 +295,7 @@ namespace Scripts.Spells.DeathKnight
             {
                 WorldLocation pos = GetExplTargetDest();
                 if (pos != null)
-                    GetCaster().CastSpell(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), SpellIds.TighteningGraspSlow, true);
+                    GetCaster().CastSpell(pos, SpellIds.TighteningGraspSlow, new CastSpellExtraArgs(true));
             }
         }
 
@@ -301,6 +304,7 @@ namespace Scripts.Spells.DeathKnight
             OnCast.Add(new CastHandler(HandleDummy));
         }
     }
+
     [Script] // 43265 - Death and Decay
     class spell_dk_death_and_decay_AuraScript : AuraScript
     {
@@ -308,7 +312,7 @@ namespace Scripts.Spells.DeathKnight
         {
             Unit caster = GetCaster();
             if (caster)
-                caster.CastSpell(GetTarget(), SpellIds.DeathAndDecayDamage, true, null, aurEff);
+                caster.CastSpell(GetTarget(), SpellIds.DeathAndDecayDamage, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -331,7 +335,7 @@ namespace Scripts.Spells.DeathKnight
             caster.CastSpell(GetHitUnit(), SpellIds.DeathCoilDamage, true);
             AuraEffect unholyAura = caster.GetAuraEffect(SpellIds.Unholy, 6);
             if (unholyAura != null) // can be any effect, just here to send SpellFailedDontReport on failure
-                caster.CastSpell(caster, SpellIds.UnholyVigor, true, null, unholyAura);
+                caster.CastSpell(caster, SpellIds.UnholyVigor, new CastSpellExtraArgs(unholyAura));
         }
 
         public override void Register()
@@ -442,11 +446,11 @@ namespace Scripts.Spells.DeathKnight
                 int pctOfMaxHealth = MathFunctions.CalculatePct(spellInfo.GetEffect(2).CalcValue(GetCaster()), caster.GetMaxHealth());
                 heal = Math.Max(heal, pctOfMaxHealth);
 
-                caster.CastCustomSpell(SpellIds.DeathStrikeHeal, SpellValueMod.BasePoint0, heal, caster, true);
+                caster.CastSpell(caster, SpellIds.DeathStrikeHeal, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, heal));
 
                 AuraEffect aurEff = caster.GetAuraEffect(SpellIds.BloodShieldMastery, 0);
                 if (aurEff != null)
-                    caster.CastCustomSpell(SpellIds.BloodShieldAbsorb, SpellValueMod.BasePoint0, MathFunctions.CalculatePct(heal, aurEff.GetAmount()), caster);
+                    caster.CastSpell(caster, SpellIds.BloodShieldAbsorb, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, MathFunctions.CalculatePct(heal, aurEff.GetAmount())));
 
                 if (caster.HasAura(SpellIds.Frost))
                     caster.CastSpell(GetHitUnit(), SpellIds.DeathStrikeOffhand, true);
@@ -513,7 +517,7 @@ namespace Scripts.Spells.DeathKnight
 
         void HandleScriptEffect(uint effIndex)
         {
-            GetCaster().CastCustomSpell(SpellIds.FesteringWound, SpellValueMod.AuraStack, GetEffectValue(), GetHitUnit(), TriggerCastFlags.FullMask);
+            GetCaster().CastSpell(GetHitUnit(), SpellIds.FesteringWound, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.AuraStack, GetEffectValue()));
         }
 
         public override void Register()

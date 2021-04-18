@@ -602,7 +602,7 @@ namespace Game.AI
             if (rangedAttackSpell == 0)
                 return;
 
-            me.CastSpell(victim, rangedAttackSpell, TriggerCastFlags.CastDirectly);
+            me.CastSpell(victim, rangedAttackSpell, new CastSpellExtraArgs(TriggerCastFlags.CastDirectly));
             me.ResetAttackTimer(WeaponAttackType.RangedAttack);
         }
 

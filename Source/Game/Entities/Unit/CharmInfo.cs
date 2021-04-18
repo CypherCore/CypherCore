@@ -110,7 +110,7 @@ namespace Game.Entities
                     if (spellInfo != null)
                     {
                         if (spellInfo.IsPassive())
-                            _unit.CastSpell(_unit, spellInfo, true);
+                            _unit.CastSpell(_unit, spellInfo.Id, new CastSpellExtraArgs(true));
                         else
                             AddSpellToActionBar(spellInfo, ActiveStates.Passive, i % SharedConst.ActionBarIndexMax);
                     }
@@ -143,7 +143,7 @@ namespace Game.Entities
 
                 if (spellInfo.IsPassive())
                 {
-                    _unit.CastSpell(_unit, spellInfo, true);
+                    _unit.CastSpell(_unit, spellInfo.Id, new CastSpellExtraArgs(true));
                     _charmspells[x].SetActionAndType(spellId, ActiveStates.Passive);
                 }
                 else

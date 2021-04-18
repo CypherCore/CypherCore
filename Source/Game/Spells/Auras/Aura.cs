@@ -1155,7 +1155,7 @@ namespace Game.Spells
                     else if (spellArea.flags.HasAnyFlag(SpellAreaFlag.AutoCast))
                     {
                         if (!target.HasAura(spellArea.spellId))
-                            target.CastSpell(target, spellArea.spellId, true);
+                            target.CastSpell(target, spellArea.spellId, new CastSpellExtraArgs(true));
                     }
                 }
             }
@@ -1189,7 +1189,7 @@ namespace Game.Spells
                             if (spell < 0)
                                 target.RemoveAurasDueToSpell((uint)-spell);
                             else if (removeMode != AuraRemoveMode.Death)
-                                target.CastSpell(target, (uint)spell, true, null, null, GetCasterGUID());
+                                target.CastSpell(target, (uint)spell, new CastSpellExtraArgs(GetCasterGUID()));
                         }
                     }
                     spellTriggered = Global.SpellMgr.GetSpellLinked((int)GetId() + (int)SpellLinkedType.Aura);
@@ -1237,11 +1237,11 @@ namespace Game.Spells
                                 break;
                             case 33572: // Gronn Lord's Grasp, becomes stoned
                                 if (GetStackAmount() >= 5 && !target.HasAura(33652))
-                                    target.CastSpell(target, 33652, true);
+                                    target.CastSpell(target, 33652, new CastSpellExtraArgs(true));
                                 break;
                             case 50836: //Petrifying Grip, becomes stoned
                                 if (GetStackAmount() >= 5 && !target.HasAura(50812))
-                                    target.CastSpell(target, 50812, true);
+                                    target.CastSpell(target, 50812, new CastSpellExtraArgs(true));
                                 break;
                             case 60970: // Heroic Fury (remove Intercept cooldown)
                                 if (target.IsTypeId(TypeId.Player))
@@ -1258,8 +1258,9 @@ namespace Game.Spells
                             // Druid T8 Restoration 4P Bonus
                             if (caster.HasAura(64760))
                             {
-                                int heal = GetEffect(0).GetAmount();
-                                caster.CastCustomSpell(target, 64801, heal, 0, 0, true, null, GetEffect(0));
+                                CastSpellExtraArgs args = new(GetEffect(0));
+                                args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, GetEffect(0).GetAmount());
+                                caster.CastSpell(target, 64801, args);
                             }
                         }
                         break;
@@ -1276,7 +1277,7 @@ namespace Game.Spells
                             case 66: // Invisibility
                                 if (removeMode != AuraRemoveMode.Expire)
                                     break;
-                                target.CastSpell(target, 32612, true, null, GetEffect(1));
+                                target.CastSpell(target, 32612, new CastSpellExtraArgs(GetEffect(1)));
                                 target.CombatStop();
                                 break;
                             default:
@@ -1312,8 +1313,9 @@ namespace Game.Spells
                                 if (aurEff != null)
                                 {
                                     float multiplier = aurEff.GetAmount();
-                                    int basepoints0 = MathFunctions.CalculatePct(caster.GetMaxPower(PowerType.Mana), multiplier);
-                                    caster.CastCustomSpell(caster, 47755, basepoints0, 0, 0, true);
+                                    CastSpellExtraArgs args = new CastSpellExtraArgs(TriggerCastFlags.FullMask);
+                                    args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, MathFunctions.CalculatePct(caster.GetMaxPower(PowerType.Mana), multiplier));
+                                    caster.CastSpell(caster, 47755, args);
                                 }
                             }
                         }
@@ -1329,25 +1331,6 @@ namespace Game.Spells
             // mods at aura apply or remove
             switch (GetSpellInfo().SpellFamilyName)
             {
-                case SpellFamilyNames.Rogue:
-                    // Stealth
-                    if (GetSpellInfo().SpellFamilyFlags[0].HasAnyFlag(0x00400000u))
-                    {
-                        // Master of subtlety
-                        AuraEffect aurEff = target.GetAuraEffect(31223, 0);
-                        if (aurEff != null)
-                        {
-                            if (!apply)
-                                target.CastSpell(target, 31666, true);
-                            else
-                            {
-                                int basepoints0 = aurEff.GetAmount();
-                                target.CastCustomSpell(target, 31665, basepoints0, 0, 0, true);
-                            }
-                        }
-                        break;
-                    }
-                    break;
                 case SpellFamilyNames.Hunter:
                     switch (GetId())
                     {
@@ -1360,7 +1343,7 @@ namespace Game.Spells
                                 if (owner.HasAura(34692))
                                 {
                                     if (apply)
-                                        owner.CastSpell(owner, 34471, true, null, GetEffect(0));
+                                        owner.CastSpell(owner, 34471, new CastSpellExtraArgs(GetEffect(0)));
                                     else
                                         owner.RemoveAurasDueToSpell(34471);
                                 }
@@ -1383,7 +1366,7 @@ namespace Game.Spells
                             if (apply)
                             {
                                 if ((GetSpellInfo().Id == 31821 && target.HasAura(19746, GetCasterGUID())) || (GetSpellInfo().Id == 19746 && target.HasAura(31821)))
-                                    target.CastSpell(target, 64364, true);
+                                    target.CastSpell(target, 64364, new CastSpellExtraArgs(true));
                             }
                             else
                                 target.RemoveAurasDueToSpell(64364, GetCasterGUID());
@@ -1393,7 +1376,7 @@ namespace Game.Spells
                             if (target.HasAura(70755))
                             {
                                 if (apply)
-                                    target.CastSpell(target, 71166, true);
+                                    target.CastSpell(target, 71166, new CastSpellExtraArgs(true));
                                 else
                                     target.RemoveAurasDueToSpell(71166);
                             }
@@ -1409,7 +1392,7 @@ namespace Game.Spells
                         if (apply)
                         {
                             if (target != caster && !target.HealthAbovePct(25))
-                                caster.CastSpell(caster, 100001, true);
+                                caster.CastSpell(caster, 100001, new CastSpellExtraArgs(true));
                         }
                         else
                         {

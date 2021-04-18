@@ -500,7 +500,7 @@ namespace Scripts.Spells.Items
             Unit caster = GetCaster();
             Item item = GetCastItem();
             if (item)
-                caster.CastSpell(caster, _triggeredSpellId, true, item);
+                caster.CastSpell(caster, _triggeredSpellId, new CastSpellExtraArgs(item));
         }
 
         public override void Register()
@@ -522,7 +522,7 @@ namespace Scripts.Spells.Items
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            GetTarget().CastSpell(GetTarget(), SpellIds.AegisHeal, true, null, aurEff);
+            GetTarget().CastSpell(GetTarget(), SpellIds.AegisHeal, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -546,7 +546,7 @@ namespace Scripts.Spells.Items
             if (!GetCaster() || !GetTarget().IsTypeId(TypeId.Unit))
                 return;
 
-            GetCaster().CastSpell(GetCaster(), SpellIds.EyeOfGrillok, true, null, aurEff);
+            GetCaster().CastSpell(GetCaster(), SpellIds.EyeOfGrillok, new CastSpellExtraArgs(aurEff));
             GetTarget().ToCreature().DespawnOrUnsummon();
         }
 
@@ -592,7 +592,10 @@ namespace Scripts.Spells.Items
             if (spellId == 0)
                 return;
 
-            GetTarget().CastCustomSpell(spellId, SpellValueMod.BasePoint0, amount, GetTarget(), true, null, aurEff);
+            Unit caster = eventInfo.GetActionTarget();
+            CastSpellExtraArgs args = new(aurEff);
+            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, amount);
+            caster.CastSpell((Unit)null, spellId, args);
         }
 
         public override void Register()
@@ -638,7 +641,7 @@ namespace Scripts.Spells.Items
                 if (player.GetWeaponForAttack(WeaponAttackType.OffAttack, true) && RandomHelper.URand(0, 1) != 0)
                     spellId = SpellIds.ManifestAngerOffHand;
 
-            caster.CastSpell(target, spellId, true, null, aurEff);
+            caster.CastSpell(target, spellId, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -708,7 +711,7 @@ namespace Scripts.Spells.Items
             PreventDefaultAction();
             Unit caster = eventInfo.GetActor();
             uint spellId = triggeredSpells[(int)caster.GetClass()].SelectRandom();
-            caster.CastSpell(caster, spellId, true, null, aurEff);
+            caster.CastSpell(caster, spellId, new CastSpellExtraArgs(aurEff));
 
             if (RandomHelper.randChance(10))
                 caster.Say(TextIds.SayMadness);
@@ -731,7 +734,7 @@ namespace Scripts.Spells.Items
         void HandlePeriodicDummy(AuraEffect aurEff)
         {
             PreventDefaultAction();
-            GetTarget().CastSpell(GetTarget(), RandomHelper.RAND(SpellIds.DementiaPos, SpellIds.DementiaNeg), true, null, aurEff);
+            GetTarget().CastSpell(GetTarget(), RandomHelper.RAND(SpellIds.DementiaPos, SpellIds.DementiaNeg), new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -772,7 +775,11 @@ namespace Scripts.Spells.Items
                 protEff.GetBase().RefreshDuration();
             }
             else
-                GetTarget().CastCustomSpell(SpellIds.ProtectionOfAncientKings, SpellValueMod.BasePoint0, absorb, eventInfo.GetProcTarget(), true, null, aurEff);
+            {
+                CastSpellExtraArgs args = new(aurEff);
+                args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, absorb);
+                GetTarget().CastSpell(eventInfo.GetProcTarget(), SpellIds.ProtectionOfAncientKings, args);
+            }
         }
 
         public override void Register()
@@ -822,7 +829,9 @@ namespace Scripts.Spells.Items
         void HandleDummy(uint effIndex)
         {
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.DeadlyPrecision, GetCastDifficulty());
-            GetCaster().CastCustomSpell(spellInfo.Id, SpellValueMod.AuraStack, (int)spellInfo.StackAmount, GetCaster(), true);
+            CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+            args.SpellValueOverrides.Add(SpellValueMod.AuraStack, (int)spellInfo.StackAmount);
+            GetCaster().CastSpell(GetCaster(), spellInfo.Id, args);
         }
 
         public override void Register()
@@ -891,7 +900,7 @@ namespace Scripts.Spells.Items
                 return;
 
             uint spellId = randomSpells.SelectRandom();
-            caster.CastSpell(caster, spellId, true, null, aurEff);
+            caster.CastSpell(caster, spellId, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -964,7 +973,7 @@ namespace Scripts.Spells.Items
             {
                 PreventHitDefaultEffect(effIndex);
                 if (_failSpell != 0)
-                    GetCaster().CastSpell(GetCaster(), _failSpell, true, GetCastItem());
+                    GetCaster().CastSpell(GetCaster(), _failSpell, new CastSpellExtraArgs(GetCastItem()));
             }
         }
 
@@ -988,7 +997,7 @@ namespace Scripts.Spells.Items
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            GetTarget().CastSpell(GetTarget(), SpellIds.DesperateRage, true, null, aurEff);
+            GetTarget().CastSpell(GetTarget(), SpellIds.DesperateRage, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -1015,7 +1024,7 @@ namespace Scripts.Spells.Items
         {
             Unit caster = GetCaster();
             uint spellId = RandomHelper.URand(SpellIds.Sleepy, SpellIds.HealthySpirit);
-            caster.CastSpell(caster, spellId, true, null);
+            caster.CastSpell(caster, spellId, true);
         }
 
         public override void Register()
@@ -1035,7 +1044,7 @@ namespace Scripts.Spells.Items
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            eventInfo.GetActor().CastSpell((Unit)null, SpellIds.DiscerningEyeBeast, true, null, aurEff);
+            eventInfo.GetActor().CastSpell((Unit)null, SpellIds.DiscerningEyeBeast, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -1184,9 +1193,10 @@ namespace Scripts.Spells.Items
             if (damageInfo == null || damageInfo.GetDamage() == 0)
                 return;
 
-            int amount = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
             Unit caster = eventInfo.GetActor();
-            caster.CastCustomSpell(SpellIds.Shadowmend, SpellValueMod.BasePoint0, amount, null, true, null, aurEff);
+            CastSpellExtraArgs args = new(aurEff);
+            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount()));
+            caster.CastSpell((Unit)null, SpellIds.Shadowmend, args);
         }
 
         public override void Register()
@@ -1270,7 +1280,7 @@ namespace Scripts.Spells.Items
                     return;
             }
 
-            caster.CastSpell((Unit)null, spellId, true, null, aurEff);
+            caster.CastSpell((Unit)null, spellId, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -1346,7 +1356,7 @@ namespace Scripts.Spells.Items
                     spellId = SpellIds.TinyMagicalCrawdad;
                     break;
             }
-            caster.CastSpell(caster, spellId, true, null);
+            caster.CastSpell(caster, spellId, true);
         }
 
         public override void Register()
@@ -1372,7 +1382,7 @@ namespace Scripts.Spells.Items
                 // in that case, do not cast heal spell
                 PreventDefaultAction();
                 // but mana instead
-                eventInfo.GetActor().CastSpell((Unit)null, SpellIds.MarkOfConquestEnergize, true, null, aurEff);
+                eventInfo.GetActor().CastSpell((Unit)null, SpellIds.MarkOfConquestEnergize, new CastSpellExtraArgs(aurEff));
             }
         }
 
@@ -1445,8 +1455,9 @@ namespace Scripts.Spells.Items
             if (damageInfo == null || damageInfo.GetDamage() == 0)
                 return;
 
-            int bp = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
-            GetTarget().CastCustomSpell(SpellIds.ItemNecroticTouchProc, SpellValueMod.BasePoint0, bp, eventInfo.GetProcTarget(), true, null, aurEff);
+            CastSpellExtraArgs args = new(aurEff);
+            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount()));
+            GetTarget().CastSpell((Unit)null, SpellIds.ItemNecroticTouchProc, args);
         }
 
         public override void Register()
@@ -1477,7 +1488,7 @@ namespace Scripts.Spells.Items
                 else if (roll < 4)                       // 2% for 20 sec root, charge to target (off-like chance unknown)
                     spellId = SpellIds.NetOMaticTriggered2;
 
-                GetCaster().CastSpell(target, spellId, true, null);
+                GetCaster().CastSpell(target, spellId, true);
             }
         }
 
@@ -1515,7 +1526,7 @@ namespace Scripts.Spells.Items
                     break;
             }
 
-            caster.CastSpell(caster, spellId, true, null);
+            caster.CastSpell(caster, spellId, true);
         }
 
         public override void Register()
@@ -1572,7 +1583,9 @@ namespace Scripts.Spells.Items
                 if (shield.GetAmount() > bp0)
                     return;
 
-            caster.CastCustomSpell(SpellIds.PersistentShieldTriggered, SpellValueMod.BasePoint0, bp0, target, true, null, aurEff);
+            CastSpellExtraArgs args = new(aurEff);
+            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, bp0);
+            caster.CastSpell(target, SpellIds.PersistentShieldTriggered, args);
         }
 
         public override void Register()
@@ -1599,9 +1612,9 @@ namespace Scripts.Spells.Items
             if (damageInfo == null || damageInfo.GetDamage() == 0)
                 return;
 
-            int bp = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
-            Unit caster = eventInfo.GetActor();
-            caster.CastCustomSpell(SpellIds.HealthLink, SpellValueMod.BasePoint0, bp, null, true, null, aurEff);
+            CastSpellExtraArgs args = new(aurEff);
+            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount()));
+            eventInfo.GetActor().CastSpell((Unit)null, SpellIds.HealthLink, args);
         }
 
         public override void Register()
@@ -1652,7 +1665,7 @@ namespace Scripts.Spells.Items
                 // Yaaarrrr - pirate
                 case 2: spellId = (caster.GetGender() == Gender.Male ? SpellIds.YaaarrrrMale : SpellIds.YaaarrrrFemale); break;
             }
-            caster.CastSpell(caster, spellId, true, null);
+            caster.CastSpell(caster, spellId, true);
         }
 
         public override void Register()
@@ -1745,7 +1758,7 @@ namespace Scripts.Spells.Items
             if (!caster || !target)
                 return;
 
-            caster.CastSpell(target, SpellIds.SoulFeast, TriggerCastFlags.FullMask);
+            caster.CastSpell(target, SpellIds.SoulFeast, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
         }
 
         public override void Register()
@@ -1772,7 +1785,7 @@ namespace Scripts.Spells.Items
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            GetTarget().CastSpell(GetTarget(), SpellIds.ShadowmourneSoulFragment, true, null, aurEff);
+            GetTarget().CastSpell(GetTarget(), SpellIds.ShadowmourneSoulFragment, new CastSpellExtraArgs(aurEff));
 
             // this can't be handled in AuraScript of SoulFragments because we need to know victim
             Aura soulFragments = GetTarget().GetAura(SpellIds.ShadowmourneSoulFragment);
@@ -1780,7 +1793,7 @@ namespace Scripts.Spells.Items
             {
                 if (soulFragments.GetStackAmount() >= 10)
                 {
-                    GetTarget().CastSpell(eventInfo.GetProcTarget(), SpellIds.ShadowmourneChaosBaneDamage, true, null, aurEff);
+                    GetTarget().CastSpell(eventInfo.GetProcTarget(), SpellIds.ShadowmourneChaosBaneDamage, new CastSpellExtraArgs(aurEff));
                     soulFragments.Remove();
                 }
             }
@@ -1873,7 +1886,7 @@ namespace Scripts.Spells.Items
                     target = caster;
                 }
 
-                caster.CastSpell(target, spellId, true, GetCastItem());
+                caster.CastSpell(target, spellId, new CastSpellExtraArgs(GetCastItem()));
             }
         }
 
@@ -1896,8 +1909,9 @@ namespace Scripts.Spells.Items
             PreventDefaultAction();
 
             Unit caster = eventInfo.GetActor();
-            int amount = (int)caster.CountPctFromMaxHealth(aurEff.GetAmount());
-            caster.CastCustomSpell(SpellIds.SwiftHandOfJusticeHeal, SpellValueMod.BasePoint0, amount, null, true, null, aurEff);
+            CastSpellExtraArgs args = new(aurEff);
+            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, (int)caster.CountPctFromMaxHealth(aurEff.GetAmount()));
+            caster.CastSpell((Unit)null, SpellIds.SwiftHandOfJusticeHeal, args);
         }
 
         public override void Register()
@@ -1949,7 +1963,7 @@ namespace Scripts.Spells.Items
                     spellId = SpellIds.UnderbellyElixirTriggered2;
                     break;
             }
-            caster.CastSpell(caster, spellId, true, null);
+            caster.CastSpell(caster, spellId, true);
         }
 
         public override void Register()
@@ -2261,7 +2275,7 @@ namespace Scripts.Spells.Items
         void HandleDummy(uint effIndex)
         {
             Unit caster = GetCaster();
-            caster.CastSpell(caster, RandomHelper.randChance(50) ? SpellIds.SummonPurifiedHelboarMeat : SpellIds.SummonToxicHelboarMeat, true, null);
+            caster.CastSpell(caster, RandomHelper.randChance(50) ? SpellIds.SummonPurifiedHelboarMeat : SpellIds.SummonToxicHelboarMeat, true);
         }
 
         public override void Register()
@@ -2357,9 +2371,9 @@ namespace Scripts.Spells.Items
             if (castItem)
             {
                 if (RandomHelper.randChance(86))                  // Nigh-Invulnerability   - success
-                    caster.CastSpell(caster, SpellIds.NighInvulnerability, true, castItem);
+                    caster.CastSpell(caster, SpellIds.NighInvulnerability, new CastSpellExtraArgs(castItem));
                 else                                    // Complete Vulnerability - backfire in 14% casts
-                    caster.CastSpell(caster, SpellIds.CompleteVulnerability, true, castItem);
+                    caster.CastSpell(caster, SpellIds.CompleteVulnerability, new CastSpellExtraArgs(castItem));
             }
         }
 
@@ -2380,7 +2394,7 @@ namespace Scripts.Spells.Items
         void HandleDummy(uint effIndex)
         {
             if (GetCastItem() && GetHitUnit())
-                GetCaster().CastSpell(GetHitUnit(), RandomHelper.randChance(80) ? SpellIds.PoultryizerSuccess : SpellIds.PoultryizerBackfire, true, GetCastItem());
+                GetCaster().CastSpell(GetHitUnit(), RandomHelper.randChance(80) ? SpellIds.PoultryizerSuccess : SpellIds.PoultryizerBackfire, new CastSpellExtraArgs(GetCastItem()));
         }
 
         public override void Register()
@@ -2481,7 +2495,7 @@ namespace Scripts.Spells.Items
                 GetHitCreature().DespawnOrUnsummon();
 
                 //cast spell Raptor Capture Credit
-                caster.CastSpell(caster, SpellIds.RaptorCaptureCredit, true, null);
+                caster.CastSpell(caster, SpellIds.RaptorCaptureCredit, true);
             }
         }
 
@@ -2583,7 +2597,7 @@ namespace Scripts.Spells.Items
             bool success = true;
             if (areaEntry != null && areaEntry.IsFlyable() && !caster.GetMap().IsDungeon())
                 success = RandomHelper.randChance(95);
-            caster.CastSpell(caster, success ? SpellIds.NitroBoostsSuccess : SpellIds.NitroBoostsBackfire, true, GetCastItem());
+            caster.CastSpell(caster, success ? SpellIds.NitroBoostsSuccess : SpellIds.NitroBoostsBackfire, new CastSpellExtraArgs(GetCastItem()));
         }
 
         public override void Register()
@@ -2612,7 +2626,7 @@ namespace Scripts.Spells.Items
             if (curZ < lastZ)
             {
                 if (RandomHelper.randChance(80)) // we don't have enough sniffs to verify this, guesstimate
-                    GetTarget().CastSpell(GetTarget(), SpellIds.NitroBoostsParachute, true, null, effect);
+                    GetTarget().CastSpell(GetTarget(), SpellIds.NitroBoostsParachute, new CastSpellExtraArgs(effect));
                 GetAura().Remove();
             }
             else
@@ -2677,7 +2691,7 @@ namespace Scripts.Spells.Items
                 bg.EventPlayerDroppedFlag(caster);
 
             caster.GetSpellHistory().ResetCooldown(SpellIds.RocketBootsProc);
-            caster.CastSpell(caster, SpellIds.RocketBootsProc, true, null);
+            caster.CastSpell(caster, SpellIds.RocketBootsProc, true);
         }
 
         SpellCastResult CheckCast()
@@ -2836,10 +2850,10 @@ namespace Scripts.Spells.Items
             Unit target = eventInfo.GetProcTarget();
 
             if (eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.DoneSpellMagicDmgClassPos))
-                caster.CastSpell(target, _healProcSpellId, true, null, aurEff);
+                caster.CastSpell(target, _healProcSpellId, new CastSpellExtraArgs(aurEff));
 
             if (eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.DoneSpellMagicDmgClassNeg))
-                caster.CastSpell(target, _damageProcSpellId, true, null, aurEff);
+                caster.CastSpell(target, _damageProcSpellId, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -2868,16 +2882,16 @@ namespace Scripts.Spells.Items
             switch (caster.GetClass())
             {
                 case Class.Druid:
-                    caster.CastSpell(caster, SpellIds.SoulPreserverDruid, true, null, aurEff);
+                    caster.CastSpell(caster, SpellIds.SoulPreserverDruid, new CastSpellExtraArgs(aurEff));
                     break;
                 case Class.Paladin:
-                    caster.CastSpell(caster, SpellIds.SoulPreserverPaladin, true, null, aurEff);
+                    caster.CastSpell(caster, SpellIds.SoulPreserverPaladin, new CastSpellExtraArgs(aurEff));
                     break;
                 case Class.Priest:
-                    caster.CastSpell(caster, SpellIds.SoulPreserverPriest, true, null, aurEff);
+                    caster.CastSpell(caster, SpellIds.SoulPreserverPriest, new CastSpellExtraArgs(aurEff));
                     break;
                 case Class.Shaman:
-                    caster.CastSpell(caster, SpellIds.SoulPreserverShaman, true, null, aurEff);
+                    caster.CastSpell(caster, SpellIds.SoulPreserverShaman, new CastSpellExtraArgs(aurEff));
                     break;
                 default:
                     break;
@@ -2923,10 +2937,10 @@ namespace Scripts.Spells.Items
 
             // Aggression checks are in the spell system... just cast and forget
             if (player.GetReputationRank(FactionIds.Aldor) == ReputationRank.Exalted)
-                player.CastSpell(target, _aldorSpellId, true, null, aurEff);
+                player.CastSpell(target, _aldorSpellId, new CastSpellExtraArgs(aurEff));
 
             if (player.GetReputationRank(FactionIds.Scryers) == ReputationRank.Exalted)
-                player.CastSpell(target, _scryersSpellId, true, null, aurEff);
+                player.CastSpell(target, _scryersSpellId, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -2987,17 +3001,17 @@ namespace Scripts.Spells.Items
                 case SpellIds.DeathChoiceNormalAura:
                     {
                         if (str > agi)
-                            caster.CastSpell(caster, SpellIds.DeathChoiceNormalStrength, true, null, aurEff);
+                            caster.CastSpell(caster, SpellIds.DeathChoiceNormalStrength, new CastSpellExtraArgs(aurEff));
                         else
-                            caster.CastSpell(caster, SpellIds.DeathChoiceNormalAgility, true, null, aurEff);
+                            caster.CastSpell(caster, SpellIds.DeathChoiceNormalAgility, new CastSpellExtraArgs(aurEff));
                         break;
                     }
                 case SpellIds.DeathChoiceHeroicAura:
                     {
                         if (str > agi)
-                            caster.CastSpell(caster, SpellIds.DeathChoiceHeroicStrength, true, null, aurEff);
+                            caster.CastSpell(caster, SpellIds.DeathChoiceHeroicStrength, new CastSpellExtraArgs(aurEff));
                         else
-                            caster.CastSpell(caster, SpellIds.DeathChoiceHeroicAgility, true, null, aurEff);
+                            caster.CastSpell(caster, SpellIds.DeathChoiceHeroicAgility, new CastSpellExtraArgs(aurEff));
                         break;
                     }
                 default:
@@ -3034,7 +3048,7 @@ namespace Scripts.Spells.Items
 
             Unit caster = eventInfo.GetActor();
 
-            caster.CastSpell(caster, _stackSpell, true, null, aurEff); // cast the stack
+            caster.CastSpell(caster, _stackSpell, new CastSpellExtraArgs(aurEff)); // cast the stack
 
             Aura dummy = caster.GetAura(_stackSpell); // retrieve aura
 
@@ -3046,7 +3060,7 @@ namespace Scripts.Spells.Items
             caster.RemoveAurasDueToSpell(_stackSpell);
             Unit target = eventInfo.GetActionTarget();
             if (target)
-                caster.CastSpell(target, _triggerSpell, true, null, aurEff);
+                caster.CastSpell(target, _triggerSpell, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -3103,7 +3117,7 @@ namespace Scripts.Spells.Items
                 stat = vers;
             }
 
-            caster.CastSpell(caster, spellTrigger, true, null, aurEff);
+            caster.CastSpell(caster, spellTrigger, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -3128,10 +3142,10 @@ namespace Scripts.Spells.Items
             Unit target = eventInfo.GetActionTarget();
 
             if (caster.IsAlive())
-                caster.CastSpell(caster, SpellIds.ManaDrainEnergize, true, null, aurEff);
+                caster.CastSpell(caster, SpellIds.ManaDrainEnergize, new CastSpellExtraArgs(aurEff));
 
             if (target && target.IsAlive())
-                caster.CastSpell(target, SpellIds.ManaDrainLeech, true, null, aurEff);
+                caster.CastSpell(target, SpellIds.ManaDrainLeech, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -3199,7 +3213,7 @@ namespace Scripts.Spells.Items
             if (target)
             {
                 if (RandomHelper.randChance(95))
-                    caster.CastSpell(target, RandomHelper.randChance(32) ? SpellIds.Dullard : SpellIds.GnomishMindControlCap, true, GetCastItem());
+                    caster.CastSpell(target, RandomHelper.randChance(32) ? SpellIds.Dullard : SpellIds.GnomishMindControlCap, new CastSpellExtraArgs(GetCastItem()));
                 else
                     target.CastSpell(caster, SpellIds.GnomishMindControlCap, true); // backfire - 5% chance
             }
@@ -3233,11 +3247,11 @@ namespace Scripts.Spells.Items
             {
                 uint chance = RandomHelper.URand(0, 99);
                 if (chance < 15)
-                    GetCaster().CastSpell(target, SpellIds.TargetLock, true, GetCastItem());
+                    GetCaster().CastSpell(target, SpellIds.TargetLock, new CastSpellExtraArgs(GetCastItem()));
                 else if (chance < 25)
-                    GetCaster().CastSpell(target, SpellIds.MobilityMalfunction, true, GetCastItem());
+                    GetCaster().CastSpell(target, SpellIds.MobilityMalfunction, new CastSpellExtraArgs(GetCastItem()));
                 else
-                    GetCaster().CastSpell(target, SpellIds.ControlMachine, true, GetCastItem());
+                    GetCaster().CastSpell(target, SpellIds.ControlMachine, new CastSpellExtraArgs(GetCastItem()));
             }
         }
 
@@ -3521,7 +3535,7 @@ namespace Scripts.Spells.Items
             }
 
             if (useElixir)
-                target.CastSpell(target, chosenElixir, true, GetCastItem());
+                target.CastSpell(target, chosenElixir, new CastSpellExtraArgs(GetCastItem()));
         }
 
         public override void Register()
@@ -3559,7 +3573,7 @@ namespace Scripts.Spells.Items
 
             uint chosenElixir = availableElixirs.SelectRandom();
 
-            target.CastSpell(target, chosenElixir, true, GetCastItem());
+            target.CastSpell(target, chosenElixir, new CastSpellExtraArgs(GetCastItem()));
         }
 
         public override void Register()

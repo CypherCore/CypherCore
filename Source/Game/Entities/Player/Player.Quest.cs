@@ -800,7 +800,7 @@ namespace Game.Entities
                         caster = unit;
                 }
 
-                caster.CastSpell(this, spellInfo, true);
+                caster.CastSpell(this, spellInfo.Id, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetCastDifficulty(spellInfo.Difficulty));
             }
 
             SetQuestSlot(log_slot, quest_id, qtime);
@@ -1124,7 +1124,7 @@ namespace Game.Entities
                         caster = unit;
                 }
 
-                caster.CastSpell(this, spellInfo, true);
+                caster.CastSpell(this, spellInfo.Id, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetCastDifficulty(spellInfo.Difficulty));
             }
             else
             {
@@ -1144,7 +1144,7 @@ namespace Game.Entities
                             caster = unit;
                     }
 
-                    caster.CastSpell(this, spellInfo, true);
+                    caster.CastSpell(this, spellInfo.Id, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetCastDifficulty(spellInfo.Difficulty));
                 }
             }
 

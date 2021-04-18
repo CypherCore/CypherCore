@@ -540,19 +540,26 @@ namespace Scripts.Spells.Holiday
                     }
                     break;
                 case SpellIds.RamCanter:
-                    target.CastCustomSpell(SpellIds.RamFatigue, SpellValueMod.AuraStack, 1, target, TriggerCastFlags.FullMask);
-                    if (aurEff.GetTickNumber() == 8)
-                        target.CastSpell(target, QuestIds.BrewfestSpeedBunnyYellow, true);
-                    break;
+                    {
+                        CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+                        args.SpellValueOverrides.Add(SpellValueMod.AuraStack, 1);
+                        target.CastSpell(target, SpellIds.RamFatigue, args);
+                        if (aurEff.GetTickNumber() == 8)
+                            target.CastSpell(target, QuestIds.BrewfestSpeedBunnyYellow, true);
+                        break;
+                    }
                 case SpellIds.RamGallop:
-                    target.CastCustomSpell(SpellIds.RamFatigue, SpellValueMod.AuraStack, target.HasAura(SpellIds.RamFatigue) ? 4 : 5 /*Hack*/, target, TriggerCastFlags.FullMask);
-                    if (aurEff.GetTickNumber() == 8)
-                        target.CastSpell(target, QuestIds.BrewfestSpeedBunnyRed, true);
-                    break;
+                    {
+                        CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+                        args.SpellValueOverrides.Add(SpellValueMod.AuraStack, target.HasAura(SpellIds.RamFatigue) ? 4 : 5 /*Hack*/);
+                        target.CastSpell(target, SpellIds.RamFatigue, args);
+                        if (aurEff.GetTickNumber() == 8)
+                            target.CastSpell(target, QuestIds.BrewfestSpeedBunnyRed, true);
+                        break;
+                    }
                 default:
                     break;
             }
-
         }
 
         public override void Register()
@@ -623,7 +630,7 @@ namespace Scripts.Spells.Holiday
             PreventHitDefaultEffect(effIndex);
             // All this spells trigger a spell that requires reagents; if the
             // triggered spell is cast as "triggered", reagents are not consumed
-            GetHitUnit().CastSpell(null, GetEffectInfo().TriggerSpell, TriggerCastFlags.FullMask & ~TriggerCastFlags.IgnorePowerAndReagentCost);
+            GetHitUnit().CastSpell((Unit)null, GetEffectInfo().TriggerSpell, new CastSpellExtraArgs(TriggerCastFlags.FullMask & ~TriggerCastFlags.IgnorePowerAndReagentCost));
         }
 
         public override void Register()
@@ -643,7 +650,7 @@ namespace Scripts.Spells.Holiday
             if (aura != null)
             {
                 aura.SetDuration(aura.GetDuration() + 30 * Time.InMilliseconds);
-                GetCaster().CastSpell(GetHitUnit(), SpellIds.RelayRaceTurnIn, TriggerCastFlags.FullMask);
+                GetCaster().CastSpell(GetHitUnit(), SpellIds.RelayRaceTurnIn, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
             }
         }
 

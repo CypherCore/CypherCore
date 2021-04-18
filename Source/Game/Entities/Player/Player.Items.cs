@@ -3888,7 +3888,7 @@ namespace Game.Entities
 
                 Log.outDebug(LogFilter.Player, "WORLD: cast {0} Equip spellId - {1}", (item != null ? "item" : "itemset"), spellInfo.Id);
 
-                CastSpell(this, spellInfo, true, item);
+                CastSpell(this, spellInfo.Id, new CastSpellExtraArgs(item));
             }
             else
             {
@@ -5083,13 +5083,14 @@ namespace Game.Entities
                 }
                 else if (apply)
                 {
-                    Dictionary<SpellValueMod, int> csv = new();
+                    CastSpellExtraArgs args = new CastSpellExtraArgs(TriggerCastFlags.FullMask);
+                    args.CastItem = artifact;
                     if (artifactPowerRank.AuraPointsOverride != 0)
                         for (int i = 0; i < SpellConst.MaxEffects; ++i)
                             if (spellInfo.GetEffect((uint)i) != null)
-                                csv.Add(SpellValueMod.BasePoint0 + i, (int)artifactPowerRank.AuraPointsOverride);
+                                args.SpellValueOverrides.Add(SpellValueMod.BasePoint0 + i, (int)artifactPowerRank.AuraPointsOverride);
 
-                    CastCustomSpell(artifactPowerRank.SpellID, csv, this, TriggerCastFlags.FullMask, artifact);
+                    CastSpell(this, artifactPowerRank.SpellID, args);
                 }
             }
             else
@@ -5159,7 +5160,7 @@ namespace Game.Entities
                 if (azeritePower != null)
                 {
                     if (apply)
-                        CastSpell(this, azeritePower.SpellID, true, item);
+                        CastSpell(this, azeritePower.SpellID, item);
                     else
                         RemoveAurasDueToItemSpell(azeritePower.SpellID, item.GetGUID());
                 }
@@ -5177,7 +5178,7 @@ namespace Game.Entities
                     if (major && currentRank == 1)
                     {
                         if (apply)
-                            CastCustomSpell(PlayerConst.SpellIdHeartEssenceActionBarOverride, SpellValueMod.BasePoint0, (int)azeriteEssencePower.MajorPowerDescription, this, TriggerCastFlags.FullMask);
+                            CastSpell(this, PlayerConst.SpellIdHeartEssenceActionBarOverride, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)azeriteEssencePower.MajorPowerDescription));
                         else
                             RemoveAurasDueToSpell(PlayerConst.SpellIdHeartEssenceActionBarOverride);
                     }
@@ -5191,7 +5192,7 @@ namespace Game.Entities
             if (powerSpell != null)
             {
                 if (apply)
-                    CastSpell(this, powerSpell, true, item);
+                    CastSpell(this, powerSpell.Id, item);
                 else
                     RemoveAurasDueToItemSpell(powerSpell.Id, item.GetGUID());
             }
@@ -5204,7 +5205,7 @@ namespace Game.Entities
                     if (powerSpell.IsPassive())
                     {
                         if (apply)
-                            CastSpell(this, powerSpell, true, item);
+                            CastSpell(this, powerSpell.Id, item);
                         else
                             RemoveAurasDueToItemSpell(powerSpell.Id, item.GetGUID());
                     }
@@ -5224,7 +5225,7 @@ namespace Game.Entities
             if (apply)
             {
                 if (azeritePower.SpecSetID == 0 || Global.DB2Mgr.IsSpecSetMember(azeritePower.SpecSetID, GetPrimarySpecialization()))
-                    CastSpell(this, azeritePower.SpellID, true, item);
+                    CastSpell(this, azeritePower.SpellID, item);
             }
             else
                 RemoveAurasDueToItemSpell(azeritePower.SpellID, item.GetGUID());

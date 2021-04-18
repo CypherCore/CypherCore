@@ -706,7 +706,9 @@ namespace Game.Entities
                             break;
                     }
 
-                    CastSpell(this, triggerSpell, true, null, effect);
+                    CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+                    args.TriggeringAura = effect;
+                    CastSpell(this, triggerSpell, args);
                 }
             }
         }

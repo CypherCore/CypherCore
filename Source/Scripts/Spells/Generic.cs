@@ -440,7 +440,7 @@ namespace Scripts.Spells.Generic
                 default:
                     return;
             }
-            GetTarget().CastSpell(GetTarget(), spellId, true, null, aurEff);
+            GetTarget().CastSpell(GetTarget(), spellId, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -752,7 +752,9 @@ namespace Scripts.Spells.Generic
             PreventDefaultAction();
 
             Unit caster = eventInfo.GetActionTarget();
-            caster.CastCustomSpell(SpellIds.BloodReserveHeal, SpellValueMod.BasePoint0, aurEff.GetAmount(), caster, TriggerCastFlags.FullMask, null, aurEff);
+            CastSpellExtraArgs args = new(aurEff);
+            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, aurEff.GetAmount());
+            caster.CastSpell(caster, SpellIds.BloodReserveHeal, args);
             caster.RemoveAura(SpellIds.BloodReserveAura);
         }
 
@@ -979,7 +981,11 @@ namespace Scripts.Spells.Generic
             Unit caster = GetCaster();
             Unit target = GetHitUnit();
             if (target)
-                caster.CastCustomSpell(target, SpellIds.ChaosBlast, basepoints0, 0, 0, true);
+            {
+                CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+                args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, basepoints0);
+                caster.CastSpell(target, SpellIds.ChaosBlast, args);
+            }
         }
 
         public override void Register()
@@ -1393,7 +1399,7 @@ namespace Scripts.Spells.Generic
             else
                 spellId = SpellIds.Normal;
 
-            GetCaster().CastSpell(GetHitUnit(), spellId, true, null);
+            GetCaster().CastSpell(GetHitUnit(), spellId, true);
         }
 
         public override void Register()
@@ -1514,7 +1520,7 @@ namespace Scripts.Spells.Generic
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            GetTarget().CastSpell(eventInfo.GetProcTarget(), SpellIds.GenThrowInterrupt, true, null, aurEff);
+            GetTarget().CastSpell(eventInfo.GetProcTarget(), SpellIds.GenThrowInterrupt, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -1570,7 +1576,7 @@ namespace Scripts.Spells.Generic
                 return;
 
             // final heal
-            GetTarget().CastSpell(GetTarget(), _spellId, true, null, aurEff, GetCasterGUID());
+            GetTarget().CastSpell(GetTarget(), _spellId, new CastSpellExtraArgs(aurEff, GetCasterGUID()));
         }
 
         public override void Register()
@@ -1700,7 +1706,7 @@ namespace Scripts.Spells.Generic
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            eventInfo.GetActionTarget().CastSpell((Unit)null, SpellIds.FallDown, true, null, aurEff);
+            eventInfo.GetActionTarget().CastSpell((Unit)null, SpellIds.FallDown, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -1721,7 +1727,9 @@ namespace Scripts.Spells.Generic
         {
             PreventDefaultAction();
 
-            GetTarget().CastCustomSpell(GetSpellInfo().GetEffect(aurEff.GetEffIndex()).TriggerSpell, SpellValueMod.MaxTargets, (int)(aurEff.GetTickNumber() / 10 + 1), null, true, null, aurEff);
+            CastSpellExtraArgs args = new(aurEff);
+            args.SpellValueOverrides.Add(SpellValueMod.MaxTargets, (int)aurEff.GetTickNumber() / 10 + 1);
+            GetTarget().CastSpell((Unit)null, GetSpellInfo().GetEffect(aurEff.GetEffIndex()).TriggerSpell, args);
         }
 
         public override void Register()
@@ -1863,7 +1871,7 @@ namespace Scripts.Spells.Generic
                 default:
                     return;
             }
-            GetTarget().CastSpell(GetTarget(), spellId, true, null, aurEff);
+            GetTarget().CastSpell(GetTarget(), spellId, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -1947,7 +1955,7 @@ namespace Scripts.Spells.Generic
             if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Expire)
                 return;
 
-            GetTarget().CastSpell((Unit)null, SpellIds.Paralysis, true, null, aurEff);
+            GetTarget().CastSpell((Unit)null, SpellIds.Paralysis, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -2117,10 +2125,10 @@ namespace Scripts.Spells.Generic
             switch (caster.GetTeam())
             {
                 case Team.Alliance:
-                    caster.CastSpell(caster, SpellIds.PvpTrinketAlliance, TriggerCastFlags.FullMask);
+                    caster.CastSpell(caster, SpellIds.PvpTrinketAlliance, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
                     break;
                 case Team.Horde:
-                    caster.CastSpell(caster, SpellIds.PvpTrinketHorde, TriggerCastFlags.FullMask);
+                    caster.CastSpell(caster, SpellIds.PvpTrinketHorde, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
                     break;
             }
         }
@@ -2334,7 +2342,7 @@ namespace Scripts.Spells.Generic
         {
             // Definitely not a good thing, but currently the only way to do something at cast start
             // Should be replaced as soon as possible with a new hook: BeforeCastStart
-            GetCaster().CastSpell(GetCaster(), SpellIds.AlteredForm, TriggerCastFlags.FullMask);
+            GetCaster().CastSpell(GetCaster(), SpellIds.AlteredForm, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
             return false;
         }
 
@@ -2363,7 +2371,7 @@ namespace Scripts.Spells.Generic
             // cast speed aura
             MountCapabilityRecord mountCapability = CliDB.MountCapabilityStorage.LookupByKey(aurEff.GetAmount());
             if (mountCapability != null)
-                target.CastSpell(target, mountCapability.ModSpellAuraID, TriggerCastFlags.FullMask);
+                target.CastSpell(target, mountCapability.ModSpellAuraID, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
         }
 
         public override void Register()
@@ -2400,7 +2408,7 @@ namespace Scripts.Spells.Generic
             if (target.HasAuraType(AuraType.WorgenAlteredForm))
                 target.RemoveAurasByType(AuraType.WorgenAlteredForm);
             else    // Basepoints 1 for this aura control whether to trigger transform transition animation or not.
-                target.CastCustomSpell(SpellIds.AlteredForm, SpellValueMod.BasePoint0, 1, target, TriggerCastFlags.FullMask);
+                target.CastSpell(target, SpellIds.AlteredForm, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, 1));
         }
 
         public override void Register()
@@ -2415,7 +2423,7 @@ namespace Scripts.Spells.Generic
     {
         void TriggerTransform()
         {
-            GetCaster().CastSpell(GetCaster(), SpellIds.AlteredForm, TriggerCastFlags.FullMask);
+            GetCaster().CastSpell(GetCaster(), SpellIds.AlteredForm, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
         }
 
         public override void Register()
@@ -2746,7 +2754,7 @@ namespace Scripts.Spells.Generic
 
             // on stack 15 cast the achievement crediting spell
             if (GetStackAmount() >= 15)
-                target.CastSpell(target, SpellIds.TurkeyVengeance, true, null, aurEff, GetCasterGUID());
+                target.CastSpell(target, SpellIds.TurkeyVengeance, new CastSpellExtraArgs(aurEff, GetCasterGUID()));
         }
 
         void OnPeriodic(AuraEffect aurEff)
@@ -2811,8 +2819,9 @@ namespace Scripts.Spells.Generic
                 return;
 
             Unit caster = eventInfo.GetActor();
-            int bp = (int)(damageInfo.GetDamage() / 2);
-            caster.CastCustomSpell(SpellIds.VampiricTouchHeal, SpellValueMod.BasePoint0, bp, caster, true, null, aurEff);
+            CastSpellExtraArgs args = new(aurEff);
+            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, (int)damageInfo.GetDamage() / 2);
+            caster.CastSpell(caster, SpellIds.VampiricTouchHeal, args);
         }
 
         public override void Register()
@@ -3462,7 +3471,7 @@ namespace Scripts.Spells.Generic
 
             if (target.GetPower(PowerType.Mana) == 0)
             {
-                target.CastSpell(target, SpellIds.MarkOfKazrogalDamageHellfire, true, null, aurEff);
+                target.CastSpell(target, SpellIds.MarkOfKazrogalDamageHellfire, new CastSpellExtraArgs(aurEff));
                 // Remove aura
                 SetDuration(0);
             }

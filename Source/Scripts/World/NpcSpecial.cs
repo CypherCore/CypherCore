@@ -695,8 +695,8 @@ namespace Scripts.World.NpcSpecial
         public override void Reset()
         {
             Initialize();
-            DoCast(me, SpellIds.Brazier, true);
-            DoCast(me, SpellIds.FieryAura, false);
+            DoCast(me, SpellIds.Brazier, new CastSpellExtraArgs(true));
+            DoCast(me, SpellIds.FieryAura, new CastSpellExtraArgs(false));
             float x, y, z;
             me.GetPosition(out x, out y, out z);
             me.Relocate(x, y, z + 0.94f);
@@ -744,7 +744,7 @@ namespace Scripts.World.NpcSpecial
                         break;
                     case TextEmotes.Dance:
                         if (!player.HasAura(SpellIds.Seduction))
-                            DoCast(player, SpellIds.Seduction, true);
+                            DoCast(player, SpellIds.Seduction, new CastSpellExtraArgs(true));
                         break;
                 }
             }
@@ -1330,7 +1330,7 @@ namespace Scripts.World.NpcSpecial
 
             if (me.IsAttackReady())
             {
-                DoCastVictim(SpellIds.Deathtouch, true);
+                DoCastVictim(SpellIds.Deathtouch, new CastSpellExtraArgs(true));
                 me.ResetAttackTimer();
             }
         }
@@ -1404,7 +1404,7 @@ namespace Scripts.World.NpcSpecial
                     player.SendGossipMenu(GossipMenus.YourFortuneIsCast, me.GetGUID());
                     break;
                 case eTradeskill.GossipActionInfoDef + 6:
-                    DoCast(player, SpellIds.Fortune, false);
+                    DoCast(player, SpellIds.Fortune, new CastSpellExtraArgs(false));
                     player.SendGossipMenu(GossipMenus.HereIsYourFortune, me.GetGUID());
                     break;
             }
@@ -1449,7 +1449,7 @@ namespace Scripts.World.NpcSpecial
 
             if (spellId != 0)
             {
-                DoCast(player, spellId, false);
+                DoCast(player, spellId, new CastSpellExtraArgs(false));
                 player.GetSpellHistory().AddCooldown(spellId, 0, TimeSpan.FromHours(2));
                 SendAction(player, action);
             }
@@ -1509,7 +1509,7 @@ namespace Scripts.World.NpcSpecial
         {
             if (ExplosionTimer <= diff)
             {
-                DoCast(me, SpellIds.TonkMineDetonate, true);
+                DoCast(me, SpellIds.TonkMineDetonate, new CastSpellExtraArgs(true));
                 me.SetDeathState(DeathState.Dead); // unsummon it
             }
             else
@@ -1654,27 +1654,27 @@ namespace Scripts.World.NpcSpecial
             {
                 case eTradeskill.GossipActionInfoDef + 1: // Borean Tundra
                     player.CloseGossipMenu();
-                    DoCast(player, SpellIds.BoreanTundra, false);
+                    DoCast(player, SpellIds.BoreanTundra, new CastSpellExtraArgs(false));
                     break;
                 case eTradeskill.GossipActionInfoDef + 2: // Howling Fjord
                     player.CloseGossipMenu();
-                    DoCast(player, SpellIds.HowlingFjord, false);
+                    DoCast(player, SpellIds.HowlingFjord, new CastSpellExtraArgs(false));
                     break;
                 case eTradeskill.GossipActionInfoDef + 3: // Sholazar Basin
                     player.CloseGossipMenu();
-                    DoCast(player, SpellIds.SholazarBasin, false);
+                    DoCast(player, SpellIds.SholazarBasin, new CastSpellExtraArgs(false));
                     break;
                 case eTradeskill.GossipActionInfoDef + 4: // Icecrown
                     player.CloseGossipMenu();
-                    DoCast(player, SpellIds.Icecrown, false);
+                    DoCast(player, SpellIds.Icecrown, new CastSpellExtraArgs(false));
                     break;
                 case eTradeskill.GossipActionInfoDef + 5: // Storm peaks
                     player.CloseGossipMenu();
-                    DoCast(player, SpellIds.StormPeaks, false);
+                    DoCast(player, SpellIds.StormPeaks, new CastSpellExtraArgs(false));
                     break;
                 case eTradeskill.GossipActionInfoDef + 6: // Underground
                     player.CloseGossipMenu();
-                    DoCast(player, SpellIds.Underground, false);
+                    DoCast(player, SpellIds.Underground, new CastSpellExtraArgs(false));
                     break;
             }
 
@@ -1931,7 +1931,7 @@ namespace Scripts.World.NpcSpecial
             }
             else
                 //me.CastSpell(me, GetFireworkSpell(me.GetEntry()), true);
-                me.CastSpell(me.GetPositionX(), me.GetPositionY(), me.GetPositionZ(), GetFireworkSpell(me.GetEntry()), true);
+                me.CastSpell(me.GetPosition(), GetFireworkSpell(me.GetEntry()), new CastSpellExtraArgs(true));
         }
     }
 
@@ -2253,9 +2253,9 @@ namespace Scripts.World.NpcSpecial
                 case GossipMenus.OptionIdIronforgeSilvermoonPennant:
                 case GossipMenus.OptionIdStormwindThunderbluffPennant:
                     if (IsArgentSquire())
-                        DoCastSelf(Misc.bannerSpells[gossipListId - 3].Item1, true);
+                        DoCastSelf(Misc.bannerSpells[gossipListId - 3].Item1, new CastSpellExtraArgs(true));
                     else
-                        DoCastSelf(Misc.bannerSpells[gossipListId - 3].Item2, true);
+                        DoCastSelf(Misc.bannerSpells[gossipListId - 3].Item2, new CastSpellExtraArgs(true));
                     break;
             }
             player.PlayerTalkClass.SendCloseGossip();

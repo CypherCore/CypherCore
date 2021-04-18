@@ -886,7 +886,9 @@ namespace Game.Entities
 
         public void EnterVehicle(Unit Base, sbyte seatId = -1)
         {
-            CastCustomSpell(SharedConst.VehicleSpellRideHardcoded, SpellValueMod.BasePoint0, seatId + 1, Base, TriggerCastFlags.IgnoreCasterMountedOrOnVehicle);
+            CastSpellExtraArgs args = new(TriggerCastFlags.IgnoreCasterMountedOrOnVehicle);
+            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, seatId + 1);
+            CastSpell(this, SharedConst.VehicleSpellRideHardcoded, args);
         }
 
         public void _EnterVehicle(Vehicle vehicle, sbyte seatId, AuraApplication aurApp)

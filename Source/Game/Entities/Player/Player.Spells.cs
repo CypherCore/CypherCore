@@ -587,7 +587,7 @@ namespace Game.Entities
                             if (enchant_spell_id != 0)
                             {
                                 if (apply)
-                                    CastSpell(this, enchant_spell_id, true, item);
+                                    CastSpell(this, enchant_spell_id, item);
                                 else
                                     RemoveAurasDueToItemSpell(enchant_spell_id, item.GetGUID());
                             }
@@ -1779,7 +1779,7 @@ namespace Game.Entities
                 if (apply)
                 {
                     if (!HasAura((uint)spellId))
-                        CastSpell(this, (uint)spellId, true, item);
+                        CastSpell(this, (uint)spellId, item);
                 }
                 else
                     RemoveAurasDueToSpell((uint)spellId);
@@ -3183,7 +3183,7 @@ namespace Game.Entities
                         chance = GetWeaponProcChance();
 
                     if (RandomHelper.randChance(chance) && Global.ScriptMgr.OnCastItemCombatSpell(this, damageInfo.GetVictim(), spellInfo, item))
-                        CastSpell(damageInfo.GetVictim(), spellInfo.Id, true, item);
+                        CastSpell(damageInfo.GetVictim(), spellInfo.Id, item);
                 }
             }
 
@@ -3205,7 +3205,7 @@ namespace Game.Entities
                     if (entry != null && entry.HitMask != 0)
                     {
                         // Check hit/crit/dodge/parry requirement
-                        if (((uint)entry.HitMask & (uint)damageInfo.GetHitMask()) == 0)
+                        if ((entry.HitMask & (uint)damageInfo.GetHitMask()) == 0)
                             continue;
                     }
                     else
@@ -3247,17 +3247,17 @@ namespace Game.Entities
                     if (RandomHelper.randChance(chance))
                     {
                         if (spellInfo.IsPositive())
-                            CastSpell(this, spellInfo, true, item);
+                            CastSpell(this, spellInfo.Id, item);
                         else
-                            CastSpell(damageInfo.GetVictim(), spellInfo, true, item);
+                            CastSpell(damageInfo.GetVictim(), spellInfo.Id, item);
                     }
 
                     if (RandomHelper.randChance(chance))
                     {
                         Unit target = spellInfo.IsPositive() ? this : damageInfo.GetVictim();
 
+                        CastSpellExtraArgs args = new(item);
                         // reduce effect values if enchant is limited
-                        Dictionary<SpellValueMod, int> values = new();
                         if (entry != null && entry.AttributesMask.HasAnyFlag(EnchantProcAttributes.Limit60) && target.GetLevelForTarget(this) > 60)
                         {
                             int lvlDifference = (int)target.GetLevelForTarget(this) - 60;
@@ -3268,11 +3268,11 @@ namespace Game.Entities
                             for (byte i = 0; i < SpellConst.MaxEffects; ++i)
                             {
                                 if (spellInfo.GetEffect(i).IsEffect())
-                                    values.Add(SpellValueMod.BasePoint0 + i, MathFunctions.CalculatePct(spellInfo.GetEffect(i).CalcValue(this), effectPct));
+                                    args.SpellValueOverrides.Add(SpellValueMod.BasePoint0 + i, MathFunctions.CalculatePct(spellInfo.GetEffect(i).CalcValue(this), effectPct));
                             }
                         }
 
-                        CastCustomSpell(spellInfo.Id, values, target, TriggerCastFlags.FullMask, item);
+                        CastSpell(target, spellInfo.Id, args);
                     }
                 }
             }

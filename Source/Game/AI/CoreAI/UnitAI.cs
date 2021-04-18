@@ -98,17 +98,17 @@ namespace Game.AI
             }
         }
 
-        public bool DoSpellAttackIfReady(uint spell)
+        public bool DoSpellAttackIfReady(uint spellId)
         {
             if (me.HasUnitState(UnitState.Casting) || !me.IsAttackReady())
                 return true;
 
-            var spellInfo = Global.SpellMgr.GetSpellInfo(spell, me.GetMap().GetDifficultyID());
+            var spellInfo = Global.SpellMgr.GetSpellInfo(spellId, me.GetMap().GetDifficultyID());
             if (spellInfo != null)
             {
                 if (me.IsWithinCombatRange(me.GetVictim(), spellInfo.GetMaxRange(false)))
                 {
-                    me.CastSpell(me.GetVictim(), spellInfo, TriggerCastFlags.None);
+                    me.CastSpell(me.GetVictim(), spellId, new CastSpellExtraArgs(me.GetMap().GetDifficultyID()));
                     me.ResetAttackTimer();
                     return true;
                 }
@@ -300,32 +300,25 @@ namespace Game.AI
                 me.CastSpell(target, spellId, false);
         }
 
-        public void DoCast(Unit victim, uint spellId, bool triggered = false)
+        public void DoCast(Unit victim, uint spellId, CastSpellExtraArgs args = null)
         {
-            if (victim == null || (me.HasUnitState(UnitState.Casting) && !triggered))
+            if (me.HasUnitState(UnitState.Casting) && !args.TriggerFlags.HasAnyFlag(TriggerCastFlags.IgnoreCastInProgress))
                 return;
 
-            me.CastSpell(victim, spellId, triggered);
+            me.CastSpell(victim, spellId, args);
         }
 
-        public void DoCastSelf(uint spellId, bool triggered = false) { DoCast(me, spellId, triggered); }
+        public void DoCastSelf(uint spellId, CastSpellExtraArgs args = null) { DoCast(me, spellId, args); }
 
-        public void DoCastVictim(uint spellId, bool triggered = false)
+        public void DoCastVictim(uint spellId, CastSpellExtraArgs args = null)
         {
-            if (me.GetVictim() == null || (me.HasUnitState(UnitState.Casting) && !triggered))
-                return;
-
-            me.CastSpell(me.GetVictim(), spellId, triggered);
+            Unit victim = me.GetVictim();
+            if (victim != null)
+                DoCast(victim, spellId, args);
         }
 
-        public void DoCastAOE(uint spellId, bool triggered = false)
-        {
-            if (!triggered && me.HasUnitState(UnitState.Casting))
-                return;
-
-            me.CastSpell((Unit)null, spellId, triggered);
-        }
-
+        public void DoCastAOE(uint spellId, CastSpellExtraArgs args = null) { DoCast(null, spellId, args); }
+        
         public static void FillAISpellInfo()
         {
             //AISpellInfo = new AISpellInfoType[spellStorage.Keys.Max() + 1];

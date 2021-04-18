@@ -26,6 +26,7 @@ using Game.Guilds;
 using Game.Maps;
 using Game.Networking;
 using Game.Networking.Packets;
+using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -882,10 +883,10 @@ namespace Game
             {
                 // not blizz like, we must correctly save and load player instead...
                 if (pCurrChar.GetRace() == Race.NightElf && !pCurrChar.HasAura(20584))
-                    pCurrChar.CastSpell(pCurrChar, 20584, true);// auras SPELL_AURA_INCREASE_SPEED(+speed in wisp form), SPELL_AURA_INCREASE_SWIM_SPEED(+swim speed in wisp form), SPELL_AURA_TRANSFORM (to wisp form)
+                    pCurrChar.CastSpell(pCurrChar, 20584, new CastSpellExtraArgs(true));// auras SPELL_AURA_INCREASE_SPEED(+speed in wisp form), SPELL_AURA_INCREASE_SWIM_SPEED(+swim speed in wisp form), SPELL_AURA_TRANSFORM (to wisp form)
 
                 if (!pCurrChar.HasAura(8326))
-                    pCurrChar.CastSpell(pCurrChar, 8326, true, null);     // auras SPELL_AURA_GHOST, SPELL_AURA_INCREASE_SPEED(why?), SPELL_AURA_INCREASE_SWIM_SPEED(why?)
+                    pCurrChar.CastSpell(pCurrChar, 8326, new CastSpellExtraArgs(true));     // auras SPELL_AURA_GHOST, SPELL_AURA_INCREASE_SPEED(why?), SPELL_AURA_INCREASE_SWIM_SPEED(why?)
 
                 pCurrChar.SetWaterWalking(true);
             }
@@ -937,7 +938,7 @@ namespace Game
 
                 PlayerInfo info = Global.ObjectMgr.GetPlayerInfo(pCurrChar.GetRace(), pCurrChar.GetClass());
                 foreach (var spellId in info.castSpells)
-                    pCurrChar.CastSpell(pCurrChar, spellId, true);
+                    pCurrChar.CastSpell(pCurrChar, spellId, new CastSpellExtraArgs(true));
 
                 // start with every map explored
                 if (WorldConfig.GetBoolValue(WorldCfg.StartAllExplored))

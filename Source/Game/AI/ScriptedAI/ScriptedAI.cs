@@ -97,7 +97,7 @@ namespace Game.AI
                 return;
 
             me.StopMoving();
-            me.CastSpell(target, spellInfo, triggered ? TriggerCastFlags.FullMask : TriggerCastFlags.None);
+            me.CastSpell(target, spellInfo.Id, triggered);
         }
 
         //Plays a sound to all nearby players

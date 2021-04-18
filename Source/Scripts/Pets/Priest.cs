@@ -36,7 +36,7 @@ namespace Scripts.Pets
         {
             public npc_pet_pri_lightwell(Creature creature) : base(creature)
             {
-                DoCast(creature, SpellIds.LightWellCharges, false);
+                DoCast(creature, SpellIds.LightWellCharges, new Game.Spells.CastSpellExtraArgs(false));
             }
 
             public override void EnterEvadeMode(EvadeReason why)

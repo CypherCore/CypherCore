@@ -19,6 +19,7 @@ using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
+using Game.Spells;
 
 namespace Scripts.Pets
 {
@@ -68,7 +69,7 @@ namespace Scripts.Pets
                 }
 
                 if (!_isViper)
-                    DoCast(me, SpellIds.DeadlyPoisonPassive, true);
+                    DoCast(me, SpellIds.DeadlyPoisonPassive, new CastSpellExtraArgs(true));
             }
 
             // Redefined for random target selection:

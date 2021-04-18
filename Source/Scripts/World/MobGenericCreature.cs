@@ -15,9 +15,11 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using Framework.Constants;
 using Game.AI;
 using Game.Entities;
 using Game.Scripting;
+using Game.Spells;
 using System;
 
 namespace Scripts.World
@@ -27,10 +29,13 @@ namespace Scripts.World
     {
         public trigger_periodic(Creature creature) : base(creature)
         {
-            var interval = me.GetBaseAttackTime(Framework.Constants.WeaponAttackType.BaseAttack);
+            var interval = me.GetBaseAttackTime(WeaponAttackType.BaseAttack);
+            var spell = me.m_spells[0] != 0 ? Global.SpellMgr.GetSpellInfo(me.m_spells[0], me.GetMap().GetDifficultyID()) : null;
+
             _scheduler.Schedule(TimeSpan.FromMilliseconds(interval), task =>
             {
-                me.CastSpell(me, me.m_spells[0], true);
+                if (spell != null)
+                    me.CastSpell(me, spell.Id, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetCastDifficulty(spell.Difficulty));
                 task.Repeat(TimeSpan.FromMilliseconds(interval));
             });
         }

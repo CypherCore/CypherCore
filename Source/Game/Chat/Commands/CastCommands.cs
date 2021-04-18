@@ -118,7 +118,7 @@ namespace Game.Chat
             float x, y, z;
             handler.GetSession().GetPlayer().GetClosePoint(out x, out y, out z, dist);
 
-            handler.GetSession().GetPlayer().CastSpell(x, y, z, spellId, triggered);
+            handler.GetSession().GetPlayer().CastSpell(new Position(x, y, z), spellId, new CastSpellExtraArgs(triggered));
 
             return true;
         }
@@ -221,7 +221,7 @@ namespace Game.Chat
 
             bool triggered = (triggeredStr != null);
 
-            caster.CastSpell(x, y, z, spellId, triggered);
+            caster.CastSpell(new Position(x, y, z), spellId, new CastSpellExtraArgs(triggered));
 
             return true;
         }

@@ -74,8 +74,8 @@ namespace Scripts.Pets
 
                 _victimGUID = player.GetGUID();
 
-                DoCast(player, SpellIds.FeelingFroggy, true);
-                DoCast(me, SpellIds.SeductionVisual, true);
+                DoCast(player, SpellIds.FeelingFroggy, new Game.Spells.CastSpellExtraArgs(true));
+                DoCast(me, SpellIds.SeductionVisual, new Game.Spells.CastSpellExtraArgs(true));
                 me.GetMotionMaster().MoveFollow(player, 0.0f, 0.0f);
             }
 

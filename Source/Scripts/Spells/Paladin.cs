@@ -434,7 +434,7 @@ namespace Scripts.Spells.Paladin
         {
             Unit caster = GetCaster();
             if (caster.HasSpell(SpellIds.JudgementProtRetR3))
-                caster.CastSpell(caster, SpellIds.JudementGainHolyPower, TriggerCastFlags.FullMask);
+                caster.CastSpell(caster, SpellIds.JudementGainHolyPower, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
         }
 
         public override void Register()
@@ -517,7 +517,7 @@ namespace Scripts.Spells.Paladin
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            GetTarget().CastSpell(GetTarget(), SpellIds.ItemHealingTrance, true, null, aurEff);
+            GetTarget().CastSpell(GetTarget(), SpellIds.ItemHealingTrance, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -560,7 +560,7 @@ namespace Scripts.Spells.Paladin
                 return;
 
             if (RandomHelper.randChance(chance))
-                eventInfo.GetActor().CastSpell(eventInfo.GetProcTarget(), spellId, true, null, aurEff);
+                eventInfo.GetActor().CastSpell(eventInfo.GetProcTarget(), spellId, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -640,7 +640,11 @@ namespace Scripts.Spells.Paladin
                 {
                     List<AuraApplication> applications = eff.GetApplicationList();
                     if (!applications.Empty())
-                        eventInfo.GetActor().CastCustomSpell(SpellIds.BeaconOfLightHeal, SpellValueMod.BasePoint0, (int)heal, applications.First().GetTarget(), true);
+                    {
+                        CastSpellExtraArgs args = new(aurEff);
+                        args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, (int)heal);
+                        eventInfo.GetActor().CastSpell(applications[0].GetTarget(), SpellIds.BeaconOfLightHeal, args);
+                    }
                     return;
                 }
             }
@@ -784,7 +788,7 @@ namespace Scripts.Spells.Paladin
                     return;
             }
 
-            caster.CastSpell(target, spellId, true, null, aurEff);
+            caster.CastSpell(target, spellId, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -818,7 +822,9 @@ namespace Scripts.Spells.Paladin
             // Add remaining ticks to damage done
             amount += (int)target.GetRemainingPeriodicAmount(caster.GetGUID(), SpellIds.HolyMending, AuraType.PeriodicHeal);
 
-            caster.CastCustomSpell(SpellIds.HolyMending, SpellValueMod.BasePoint0, amount, target, true, null, aurEff);
+            CastSpellExtraArgs args = new(aurEff);
+            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, amount);
+            caster.CastSpell(target, SpellIds.HolyMending, args);
         }
 
         public override void Register()
@@ -838,7 +844,7 @@ namespace Scripts.Spells.Paladin
         void HandleEffectProc(AuraEffect aurEff, ProcEventInfo procInfo)
         {
             Unit target = GetTarget();
-            target.CastCustomSpell(SpellIds.ZealAura, SpellValueMod.AuraStack, aurEff.GetAmount(), target, true);
+            target.CastSpell(target, SpellIds.ZealAura, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.AuraStack, aurEff.GetAmount()));
 
             PreventDefaultAction();
         }

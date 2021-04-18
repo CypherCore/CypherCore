@@ -154,7 +154,7 @@ namespace Scripts.Spells.Druid
             Unit target = GetTarget();
             Unit attacker = dmgInfo.GetAttacker();
             if (attacker != null)
-                target.CastCustomSpell(SpellIds.BramblesRelect, SpellValueMod.BasePoint0, (int)absorbAmount, attacker, TriggerCastFlags.FullMask);
+                target.CastSpell(attacker, SpellIds.BramblesRelect, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)absorbAmount));
         }
 
         public override void Register()
@@ -181,7 +181,7 @@ namespace Scripts.Spells.Druid
                 Unit target = GetTarget();
                 uint rage = (uint)(target.GetMaxPower(PowerType.Rage) * (float)damageInfo.GetDamage() / (float)target.GetMaxHealth());
                 if (rage > 0)
-                    target.CastCustomSpell(SpellIds.BristlingFurGainRage, SpellValueMod.BasePoint0, (int)rage, target, TriggerCastFlags.FullMask);
+                    target.CastSpell(target, SpellIds.BristlingFurGainRage, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)rage));
             }
         }
 
@@ -232,7 +232,7 @@ namespace Scripts.Spells.Druid
         {
             Aura aura = unitOwner.GetAura(spellId);
             if (aura == null)
-                unitOwner.CastCustomSpell(spellId, SpellValueMod.AuraStack, (int)amount, null, TriggerCastFlags.FullMask);
+                unitOwner.CastSpell(unitOwner, spellId, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.AuraStack, (int)amount));
             else
                 aura.SetStackAmount((byte)amount);
         }
@@ -316,7 +316,7 @@ namespace Scripts.Spells.Druid
         void OnOwnerOutOfCombat(bool isNowInCombat)
         {
             if (!isNowInCombat)
-                GetTarget().CastSpell(GetTarget(), SpellIds.EclipseOoc, TriggerCastFlags.FullMask);
+                GetTarget().CastSpell(GetTarget(), SpellIds.EclipseOoc, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
         }
 
         public override void Register()
@@ -342,7 +342,7 @@ namespace Scripts.Spells.Druid
                 else
                 {
                     // cast eclipse
-                    target.CastSpell(target, eclipseAuraSpellId, TriggerCastFlags.FullMask);
+                    target.CastSpell(target, eclipseAuraSpellId, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
 
                     // Remove stacks from other one as well
                     // reset remaining power on other spellId
@@ -524,7 +524,7 @@ namespace Scripts.Spells.Druid
                     return;
             }
 
-            target.CastSpell(target, triggerspell, true, null, aurEff);
+            target.CastSpell(target, triggerspell, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -698,7 +698,7 @@ namespace Scripts.Spells.Druid
                 return;
 
             if (RandomHelper.randChance(chance))
-                eventInfo.GetActor().CastSpell((Unit)null, spellId, true, null, aurEff);
+                eventInfo.GetActor().CastSpell((Unit)null, spellId, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -715,14 +715,8 @@ namespace Scripts.Spells.Druid
             return ValidateSpellInfo(SpellIds.LifebloomFinalHeal, SpellIds.LifebloomEnergize);
         }
 
-        void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        void OnRemoveEffect(Unit target, AuraEffect aurEff, uint stack)
         {
-            // Final heal only on duration end
-            if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Expire)
-                return;
-
-            // final heal
-            uint stack = GetStackAmount();
             uint healAmount = (uint)aurEff.GetAmount();
             Unit caster = GetCaster();
             if (caster != null)
@@ -730,22 +724,34 @@ namespace Scripts.Spells.Druid
                 healAmount = caster.SpellHealingBonusDone(GetTarget(), GetSpellInfo(), healAmount, DamageEffectType.Heal, aurEff.GetSpellEffectInfo(), stack);
                 healAmount = GetTarget().SpellHealingBonusTaken(caster, GetSpellInfo(), healAmount, DamageEffectType.Heal, aurEff.GetSpellEffectInfo(), stack);
 
-                GetTarget().CastCustomSpell(GetTarget(), SpellIds.LifebloomFinalHeal, (int)healAmount, 0, 0, true, null, aurEff, GetCasterGUID());
-
                 // restore mana
                 var spellPowerCostList = GetSpellInfo().CalcPowerCost(caster, GetSpellInfo().GetSchoolMask());
                 var spellPowerCost = spellPowerCostList.Find(cost => cost.Power == PowerType.Mana);
                 if (spellPowerCost != null)
                 {
-                    int returnMana = spellPowerCost.Amount * (int)stack / 2;
-                    caster.CastCustomSpell(caster, SpellIds.LifebloomEnergize, returnMana, 0, 0, true, null, aurEff, GetCasterGUID());
+                    CastSpellExtraArgs args1 = new(aurEff);
+                    args1.OriginalCaster = GetCasterGUID();
+                    args1.AddSpellMod(SpellValueMod.BasePoint0, (int)(spellPowerCost.Amount * stack / 2));
+                    caster.CastSpell(caster, SpellIds.LifebloomEnergize, args1);
                 }
-                return;
             }
 
-            GetTarget().CastCustomSpell(GetTarget(), SpellIds.LifebloomFinalHeal, (int)healAmount, 0, 0, true, null, aurEff, GetCasterGUID());
+            CastSpellExtraArgs args = new(aurEff);
+            args.OriginalCaster = GetCasterGUID();
+            args.AddSpellMod(SpellValueMod.BasePoint0, (int)healAmount);
+            target.CastSpell(target, SpellIds.LifebloomFinalHeal, args);
         }
 
+        void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            // Final heal only on duration end
+            if (GetTargetApplication().GetRemoveMode() != AuraRemoveMode.Expire)
+                return;
+
+            // final heal
+            OnRemoveEffect(GetTarget(), aurEff, GetStackAmount());
+        }
+        
         void HandleDispel(DispelInfo dispelInfo)
         {
             Unit target = GetUnitOwner();
@@ -753,29 +759,7 @@ namespace Scripts.Spells.Druid
             {
                 AuraEffect aurEff = GetEffect(1);
                 if (aurEff != null)
-                {
-                    // final heal
-                    uint healAmount = (uint)aurEff.GetAmount();
-                    Unit caster = GetCaster();
-                    if (caster != null)
-                    {
-                        healAmount = caster.SpellHealingBonusDone(target, GetSpellInfo(), healAmount, DamageEffectType.Heal, aurEff.GetSpellEffectInfo(), dispelInfo.GetRemovedCharges());
-                        healAmount = target.SpellHealingBonusTaken(caster, GetSpellInfo(), healAmount, DamageEffectType.Heal, aurEff.GetSpellEffectInfo(), dispelInfo.GetRemovedCharges());
-                        target.CastCustomSpell(target, SpellIds.LifebloomFinalHeal, (int)healAmount, 0, 0, true, null, null, GetCasterGUID());
-
-                        // restore mana
-                        var spellPowerCostList = GetSpellInfo().CalcPowerCost(caster, GetSpellInfo().GetSchoolMask());
-                        var spellPowerCost = spellPowerCostList.Find(cost => cost.Power == PowerType.Mana);
-                        if (spellPowerCost != null)
-                        {
-                            int returnMana = spellPowerCost.Amount * dispelInfo.GetRemovedCharges() / 2;
-                            caster.CastCustomSpell(caster, SpellIds.LifebloomEnergize, returnMana, 0, 0, true, null, null, GetCasterGUID());
-                        }
-                        return;
-                    }
-
-                    target.CastCustomSpell(target, SpellIds.LifebloomFinalHeal, (int)healAmount, 0, 0, true, null, null, GetCasterGUID());
-                }
+                    OnRemoveEffect(target, aurEff, dispelInfo.GetRemovedCharges()); // final heal
             }
         }
 
@@ -797,8 +781,13 @@ namespace Scripts.Spells.Druid
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            int amount = (int)MathFunctions.CalculatePct(eventInfo.GetHealInfo().GetHeal(), aurEff.GetAmount());
-            GetTarget().CastCustomSpell(SpellIds.LivingSeedProc, SpellValueMod.BasePoint0, amount, eventInfo.GetProcTarget(), true, null, aurEff);
+            HealInfo healInfo = eventInfo.GetHealInfo();
+            if (healInfo ==  null || healInfo.GetHeal() == 0)
+                return;
+
+            CastSpellExtraArgs args = new(aurEff);
+            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount()));
+            GetTarget().CastSpell(eventInfo.GetProcTarget(), SpellIds.LivingSeedProc, args);
         }
 
         public override void Register()
@@ -818,7 +807,9 @@ namespace Scripts.Spells.Druid
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            GetTarget().CastCustomSpell(SpellIds.LivingSeedHeal, SpellValueMod.BasePoint0, aurEff.GetAmount(), GetTarget(), true, null, aurEff);
+            CastSpellExtraArgs args = new(aurEff);
+            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, aurEff.GetAmount());
+            GetTarget().CastSpell(GetTarget(), SpellIds.LivingSeedHeal, args);
         }
 
         public override void Register()
@@ -858,7 +849,7 @@ namespace Scripts.Spells.Druid
         {
             Unit target = GetTarget();
             if (target.HasAura(SpellIds.BalanceT10Bonus))
-                target.CastSpell((Unit)null, SpellIds.BalanceT10BonusProc, true, null);
+                target.CastSpell(null, SpellIds.BalanceT10BonusProc, true);
         }
 
         public override void Register()
@@ -971,7 +962,7 @@ namespace Scripts.Spells.Druid
         void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
-            target.CastSpell(target, SpellIds.SavageRoar, true, null, aurEff, GetCasterGUID());
+            target.CastSpell(target, SpellIds.SavageRoar, new CastSpellExtraArgs(aurEff, GetCasterGUID()));
         }
 
         void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -1020,8 +1011,8 @@ namespace Scripts.Spells.Druid
             if (GetTarget().GetShapeshiftForm() != ShapeShiftForm.CatForm || eventInfo.GetDamageInfo().GetSpellInfo().Id != SpellIds.FeralChargeCat)
                 return;
 
-            GetTarget().CastSpell(GetTarget(), Global.SpellMgr.GetSpellWithRank(SpellIds.StampedeCatRank1, GetSpellInfo().GetRank()), true, null, aurEff);
-            GetTarget().CastSpell(GetTarget(), SpellIds.StampedeCatState, true, null, aurEff);
+            GetTarget().CastSpell(GetTarget(), Global.SpellMgr.GetSpellWithRank(SpellIds.StampedeCatRank1, GetSpellInfo().GetRank()), new CastSpellExtraArgs(aurEff));
+            GetTarget().CastSpell(GetTarget(), SpellIds.StampedeCatState, new CastSpellExtraArgs(aurEff));
         }
 
         void HandleEffectBearProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -1030,7 +1021,7 @@ namespace Scripts.Spells.Druid
             if (GetTarget().GetShapeshiftForm() != ShapeShiftForm.BearForm || eventInfo.GetDamageInfo().GetSpellInfo().Id != SpellIds.FeralChargeBear)
                 return;
 
-            GetTarget().CastSpell(GetTarget(), Global.SpellMgr.GetSpellWithRank(SpellIds.StampedeBearRank1, GetSpellInfo().GetRank()), true, null, aurEff);
+            GetTarget().CastSpell(GetTarget(), Global.SpellMgr.GetSpellWithRank(SpellIds.StampedeBearRank1, GetSpellInfo().GetRank()), new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -1120,7 +1111,9 @@ namespace Scripts.Spells.Druid
         void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
-            target.CastSpell(target, SpellIds.SurvivalInstincts, true);
+            CastSpellExtraArgs args = new(aurEff);
+            args.AddSpellMod(SpellValueMod.BasePoint0, (int)target.CountPctFromMaxHealth(aurEff.GetAmount()));
+            target.CastSpell(target, SpellIds.SurvivalInstincts, args);
         }
 
         public override void Register()
@@ -1162,7 +1155,7 @@ namespace Scripts.Spells.Druid
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            eventInfo.GetActor().CastSpell(eventInfo.GetProcTarget(), SpellIds.BlessingOfTheClaw, true, null, aurEff);
+            eventInfo.GetActor().CastSpell(eventInfo.GetProcTarget(), SpellIds.BlessingOfTheClaw, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -1193,7 +1186,9 @@ namespace Scripts.Spells.Druid
                 return;
 
             int amount = MathFunctions.CalculatePct(spellPowerCost.Amount, aurEff.GetAmount());
-            caster.CastCustomSpell(SpellIds.Exhilarate, SpellValueMod.BasePoint0, amount, null, true, null, aurEff);
+            CastSpellExtraArgs args = new (aurEff);
+            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, amount);
+            caster.CastSpell((Unit)null, SpellIds.Exhilarate, args);
         }
 
         public override void Register()
@@ -1214,7 +1209,7 @@ namespace Scripts.Spells.Druid
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            eventInfo.GetActor().CastSpell((Unit)null, SpellIds.Infusion, true, null, aurEff);
+            eventInfo.GetActor().CastSpell((Unit)null, SpellIds.Infusion, new CastSpellExtraArgs(aurEff));
         }
 
         public override void Register()
@@ -1248,7 +1243,9 @@ namespace Scripts.Spells.Druid
             // Add remaining ticks to damage done
             amount += (int)target.GetRemainingPeriodicAmount(caster.GetGUID(), SpellIds.Languish, AuraType.PeriodicDamage);
 
-            caster.CastCustomSpell(SpellIds.Languish, SpellValueMod.BasePoint0, amount, target, true, null, aurEff);
+            CastSpellExtraArgs args = new(aurEff);
+            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, amount);
+            caster.CastSpell(target, SpellIds.Languish, args);
         }
 
         public override void Register()
@@ -1329,7 +1326,9 @@ namespace Scripts.Spells.Druid
             PreventDefaultAction();
 
             int amount = (int)eventInfo.GetHealInfo().GetHeal();
-            eventInfo.GetActor().CastCustomSpell(SpellIds.RejuvenationT10Proc, SpellValueMod.BasePoint0, amount, null, true, null, aurEff);
+            CastSpellExtraArgs args = new(aurEff);
+            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, (int)eventInfo.GetHealInfo().GetHeal());
+            eventInfo.GetActor().CastSpell((Unit)null, SpellIds.RejuvenationT10Proc, args);
         }
 
         public override void Register()
@@ -1354,7 +1353,7 @@ namespace Scripts.Spells.Druid
             {
                 Unit caster = GetCaster();
 
-                caster.CastSpell(hitUnit, SpellIds.ThrashBearAura, TriggerCastFlags.FullMask);
+                caster.CastSpell(hitUnit, SpellIds.ThrashBearAura, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
             }
         }
 
@@ -1429,7 +1428,7 @@ namespace Scripts.Spells.Druid
             Player player = GetTarget().ToPlayer();
 
             if (triggeredSpellId != 0) // Apply new form
-                player.CastSpell(player, triggeredSpellId, true, null, aurEff);
+                player.CastSpell(player, triggeredSpellId, new CastSpellExtraArgs(aurEff));
             else // If not set, simply remove Travel Form dummy
                 player.RemoveAura(SpellIds.TravelForm);
         }
@@ -1512,7 +1511,7 @@ namespace Scripts.Spells.Druid
             // Outdoor check already passed - Travel Form (dummy) has SPELL_ATTR0_OUTDOORS_ONLY attribute.
             uint triggeredSpellId = spell_dru_travel_form_AuraScript.GetFormSpellId(player, GetCastDifficulty(), false);
 
-            player.CastSpell(player, triggeredSpellId, true, null, aurEff);
+            player.CastSpell(player, triggeredSpellId, new CastSpellExtraArgs(aurEff));
         }
 
         void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)

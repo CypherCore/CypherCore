@@ -2001,8 +2001,7 @@ namespace Game.Entities
             if (spellId == 0)
                 return;
 
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
-            if (spellInfo == null)
+            if (!Global.SpellMgr.HasSpellInfo(spellId, GetMap().GetDifficultyID()))
             {
                 if (!user.IsTypeId(TypeId.Player) || !Global.OutdoorPvPMgr.HandleCustomSpell(user.ToPlayer(), spellId, this))
                     Log.outError(LogFilter.Server, "WORLD: unknown spell id {0} at use action for gameobject (Entry: {1} GoType: {2})", spellId, GetEntry(), GetGoType());
@@ -2016,7 +2015,7 @@ namespace Game.Entities
                 Global.OutdoorPvPMgr.HandleCustomSpell(player1, spellId, this);
 
             if (spellCaster != null)
-                spellCaster.CastSpell(user, spellInfo, triggered);
+                spellCaster.CastSpell(user, spellId, triggered);
             else
                 CastSpell(user, spellId);
         }
@@ -2045,7 +2044,7 @@ namespace Game.Entities
             if (self)
             {
                 if (target != null)
-                    target.CastSpell(target, spellInfo, triggered);
+                    target.CastSpell(target, spellInfo.Id, new CastSpellExtraArgs(triggered));
                 return;
             }
 
@@ -2059,6 +2058,7 @@ namespace Game.Entities
 
             PhasingHandler.InheritPhaseShift(trigger, this);
 
+            CastSpellExtraArgs args = new CastSpellExtraArgs(triggered);
             Unit owner = GetOwner();
             if (owner)
             {
@@ -2069,14 +2069,17 @@ namespace Game.Entities
                 trigger.SetPvpFlags(owner.GetPvpFlags());
                 // needed for GO casts for proper target validation checks
                 trigger.SetOwnerGUID(owner.GetGUID());
-                trigger.CastSpell(target != null ? target : trigger, spellInfo, triggered, null, null, owner.GetGUID());
+
+                args.OriginalCaster = owner.GetGUID();
+                trigger.CastSpell(target ?? trigger, spellInfo.Id, args);
             }
             else
             {
                 trigger.SetFaction(spellInfo.IsPositive() ? 35 : 14u);
                 // Set owner guid for target if no owner available - needed by trigger auras
                 // - trigger gets despawned and there's no caster avalible (see AuraEffect.TriggerSpell())
-                trigger.CastSpell(target != null ? target : trigger, spellInfo, triggered, null, null, target ? target.GetGUID() : ObjectGuid.Empty);
+                args.OriginalCaster = target ? target.GetGUID() : ObjectGuid.Empty;
+                trigger.CastSpell(target ?? trigger, spellInfo.Id, args);
             }
         }
 

@@ -38,7 +38,7 @@ namespace Scripts.Spells.DemonHunter
         void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
-            GetTarget().CastCustomSpell(SpellIds.ChaosStrikeEnergize, SpellValueMod.BasePoint0, aurEff.GetAmount(), GetTarget(), true, null, aurEff);
+            GetTarget().CastSpell(GetTarget(), SpellIds.ChaosStrikeEnergize, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, aurEff.GetAmount()).SetTriggeringAura(aurEff));
         }
 
         public override void Register()
