@@ -608,6 +608,37 @@ namespace Game.Networking.Packets
         public ContentTuningParams ContentTuning = new();
     }
 
+    class SpellAbsorbLog : CombatLogServerPacket
+    {
+        public SpellAbsorbLog() : base(ServerOpcodes.SpellAbsorbLog, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(Attacker);
+            _worldPacket.WritePackedGuid(Victim);
+            _worldPacket.WriteUInt32(AbsorbedSpellID);
+            _worldPacket.WriteUInt32(AbsorbSpellID);
+            _worldPacket.WritePackedGuid(Caster);
+            _worldPacket.WriteInt32(Absorbed);
+            _worldPacket.WriteUInt32(OriginalDamage);
+
+            _worldPacket.WriteBit(Unk);
+            WriteLogDataBit();
+            FlushBits();
+
+            WriteLogData();
+        }
+
+        public ObjectGuid Attacker;
+        public ObjectGuid Victim;
+        public ObjectGuid Caster;
+        public uint AbsorbedSpellID;
+        public uint AbsorbSpellID;
+        public int Absorbed;
+        public uint OriginalDamage;
+        public bool Unk;
+    }
+    
     //Structs
     struct SpellLogEffectPowerDrainParams
     {

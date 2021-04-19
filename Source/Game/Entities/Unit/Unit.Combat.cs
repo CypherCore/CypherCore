@@ -1031,7 +1031,7 @@ namespace Game.Entities
                 foreach (var aura in vCopyDamageCopy)
                 {
                     // Check if aura was removed during iteration - we don't need to work on such auras
-                    if (!(aura.GetBase().IsAppliedOnTarget(victim.GetGUID())))
+                    if (!aura.GetBase().IsAppliedOnTarget(victim.GetGUID()))
                         continue;
 
                     // check damage school mask
@@ -1041,6 +1041,7 @@ namespace Game.Entities
                     Unit shareDamageTarget = aura.GetCaster();
                     if (shareDamageTarget == null)
                         continue;
+
                     SpellInfo spell = aura.GetSpellInfo();
 
                     uint share = MathFunctions.CalculatePct(damage, aura.GetAmount());
@@ -1179,6 +1180,20 @@ namespace Game.Entities
                             killed = false;
 
                         skipSettingDeathState = true;
+
+                        if (currentAbsorb != 0)
+                        {
+                            SpellAbsorbLog absorbLog = new();
+                            absorbLog.Attacker = GetGUID();
+                            absorbLog.Victim = victim.GetGUID();
+                            absorbLog.Caster = baseAura.GetCasterGUID();
+                            absorbLog.AbsorbedSpellID = spellProto != null ? spellProto.Id : 0;
+                            absorbLog.AbsorbSpellID = baseAura.GetId();
+                            absorbLog.Absorbed = currentAbsorb;
+                            absorbLog.OriginalDamage = damageInfo.GetOriginalDamage();
+                            absorbLog.LogData.Initialize(victim);
+                            SendCombatLogMessage(absorbLog);
+                        }
                     }
 
                     damage = damageInfo.GetDamage();
@@ -2613,25 +2628,40 @@ namespace Game.Entities
                 absorbAurEff.GetBase().CallScriptEffectAbsorbHandlers(absorbAurEff, aurApp, damageInfo, ref tempAbsorb, ref defaultPrevented);
                 currentAbsorb = (int)tempAbsorb;
 
-                if (defaultPrevented)
-                    continue;
-
-                // absorb must be smaller than the damage itself
-                currentAbsorb = MathFunctions.RoundToInterval(ref currentAbsorb, 0, damageInfo.GetDamage());
-
-                damageInfo.AbsorbDamage((uint)currentAbsorb);
-
-                tempAbsorb = (uint)currentAbsorb;
-                absorbAurEff.GetBase().CallScriptEffectAfterAbsorbHandlers(absorbAurEff, aurApp, damageInfo, ref tempAbsorb);
-
-                // Check if our aura is using amount to count damage
-                if (absorbAurEff.GetAmount() >= 0)
+                if (!defaultPrevented)
                 {
-                    // Reduce shield amount
-                    absorbAurEff.ChangeAmount(absorbAurEff.GetAmount() - currentAbsorb);
-                    // Aura cannot absorb anything more - remove it
-                    if (absorbAurEff.GetAmount() <= 0)
-                        absorbAurEff.GetBase().Remove(AuraRemoveMode.EnemySpell);
+
+                    // absorb must be smaller than the damage itself
+                    currentAbsorb = MathFunctions.RoundToInterval(ref currentAbsorb, 0, damageInfo.GetDamage());
+
+                    damageInfo.AbsorbDamage((uint)currentAbsorb);
+
+                    tempAbsorb = (uint)currentAbsorb;
+                    absorbAurEff.GetBase().CallScriptEffectAfterAbsorbHandlers(absorbAurEff, aurApp, damageInfo, ref tempAbsorb);
+
+                    // Check if our aura is using amount to count damage
+                    if (absorbAurEff.GetAmount() >= 0)
+                    {
+                        // Reduce shield amount
+                        absorbAurEff.ChangeAmount(absorbAurEff.GetAmount() - currentAbsorb);
+                        // Aura cannot absorb anything more - remove it
+                        if (absorbAurEff.GetAmount() <= 0)
+                            absorbAurEff.GetBase().Remove(AuraRemoveMode.EnemySpell);
+                    }
+                }
+
+                if (currentAbsorb != 0)
+                {
+                    SpellAbsorbLog absorbLog = new();
+                    absorbLog.Attacker = damageInfo.GetAttacker().GetGUID();
+                    absorbLog.Victim = damageInfo.GetVictim().GetGUID();
+                    absorbLog.Caster = absorbAurEff.GetBase().GetCasterGUID();
+                    absorbLog.AbsorbedSpellID = damageInfo.GetSpellInfo() != null ? damageInfo.GetSpellInfo().Id : 0;
+                    absorbLog.AbsorbSpellID = absorbAurEff.GetId();
+                    absorbLog.Absorbed = currentAbsorb;
+                    absorbLog.OriginalDamage = damageInfo.GetOriginalDamage();
+                    absorbLog.LogData.Initialize(damageInfo.GetVictim());
+                    SendCombatLogMessage(absorbLog);
                 }
             }
 
@@ -2663,35 +2693,49 @@ namespace Game.Entities
                 absorbAurEff.GetBase().CallScriptEffectManaShieldHandlers(absorbAurEff, aurApp, damageInfo, ref tempAbsorb, ref defaultPrevented);
                 currentAbsorb = (int)tempAbsorb;
 
-                if (defaultPrevented)
-                    continue;
-
-                // absorb must be smaller than the damage itself
-                currentAbsorb = MathFunctions.RoundToInterval(ref currentAbsorb, 0, damageInfo.GetDamage());
-
-                int manaReduction = currentAbsorb;
-
-                // lower absorb amount by talents
-                float manaMultiplier = absorbAurEff.GetSpellEffectInfo().CalcValueMultiplier(absorbAurEff.GetCaster());
-                if (manaMultiplier != 0)
-                    manaReduction = (int)(manaReduction * manaMultiplier);
-
-                int manaTaken = -damageInfo.GetVictim().ModifyPower(PowerType.Mana, -manaReduction);
-
-                // take case when mana has ended up into account
-                currentAbsorb = currentAbsorb != 0 ? (currentAbsorb * (manaTaken / manaReduction)) : 0;
-
-                damageInfo.AbsorbDamage((uint)currentAbsorb);
-
-                tempAbsorb = (uint)currentAbsorb;
-                absorbAurEff.GetBase().CallScriptEffectAfterManaShieldHandlers(absorbAurEff, aurApp, damageInfo, ref tempAbsorb);
-
-                // Check if our aura is using amount to count damage
-                if (absorbAurEff.GetAmount() >= 0)
+                if (!defaultPrevented)
                 {
-                    absorbAurEff.ChangeAmount(absorbAurEff.GetAmount() - currentAbsorb);
-                    if ((absorbAurEff.GetAmount() <= 0))
-                        absorbAurEff.GetBase().Remove(AuraRemoveMode.EnemySpell);
+                    // absorb must be smaller than the damage itself
+                    currentAbsorb = MathFunctions.RoundToInterval(ref currentAbsorb, 0, damageInfo.GetDamage());
+
+                    int manaReduction = currentAbsorb;
+
+                    // lower absorb amount by talents
+                    float manaMultiplier = absorbAurEff.GetSpellEffectInfo().CalcValueMultiplier(absorbAurEff.GetCaster());
+                    if (manaMultiplier != 0)
+                        manaReduction = (int)(manaReduction * manaMultiplier);
+
+                    int manaTaken = -damageInfo.GetVictim().ModifyPower(PowerType.Mana, -manaReduction);
+
+                    // take case when mana has ended up into account
+                    currentAbsorb = currentAbsorb != 0 ? (currentAbsorb * (manaTaken / manaReduction)) : 0;
+
+                    damageInfo.AbsorbDamage((uint)currentAbsorb);
+
+                    tempAbsorb = (uint)currentAbsorb;
+                    absorbAurEff.GetBase().CallScriptEffectAfterManaShieldHandlers(absorbAurEff, aurApp, damageInfo, ref tempAbsorb);
+
+                    // Check if our aura is using amount to count damage
+                    if (absorbAurEff.GetAmount() >= 0)
+                    {
+                        absorbAurEff.ChangeAmount(absorbAurEff.GetAmount() - currentAbsorb);
+                        if ((absorbAurEff.GetAmount() <= 0))
+                            absorbAurEff.GetBase().Remove(AuraRemoveMode.EnemySpell);
+                    }
+                }
+
+                if (currentAbsorb != 0)
+                {
+                    SpellAbsorbLog absorbLog = new();
+                    absorbLog.Attacker = damageInfo.GetAttacker().GetGUID();
+                    absorbLog.Victim = damageInfo.GetVictim().GetGUID();
+                    absorbLog.Caster = absorbAurEff.GetBase().GetCasterGUID();
+                    absorbLog.AbsorbedSpellID = damageInfo.GetSpellInfo() != null ? damageInfo.GetSpellInfo().Id : 0;
+                    absorbLog.AbsorbSpellID = absorbAurEff.GetId();
+                    absorbLog.Absorbed = currentAbsorb;
+                    absorbLog.OriginalDamage = damageInfo.GetOriginalDamage();
+                    absorbLog.LogData.Initialize(damageInfo.GetVictim());
+                    SendCombatLogMessage(absorbLog);
                 }
             }
 
