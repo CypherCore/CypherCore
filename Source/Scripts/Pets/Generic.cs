@@ -49,7 +49,7 @@ namespace Scripts.Pets
                     me.GetMotionMaster().MoveFollow(owner, 0.0f, 0.0f);
             }
 
-            public override void EnterCombat(Unit who) { }
+            public override void JustEngagedWith(Unit who) { }
 
             public override void UpdateAI(uint diff) { }
 

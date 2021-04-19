@@ -1443,7 +1443,7 @@ namespace Game.Entities
                 if (enemy != null)
                 {
                     if (IsAIEnabled)
-                        creature.GetAI().EnterCombat(enemy);
+                        creature.GetAI().JustEngagedWith(enemy);
 
                     if (creature.GetFormation() != null)
                         creature.GetFormation().MemberEngagingTarget(creature, enemy);

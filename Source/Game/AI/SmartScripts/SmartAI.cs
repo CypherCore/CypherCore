@@ -609,7 +609,7 @@ namespace Game.AI
                 me.GetMotionMaster().MoveIdle(); // wait the order of leader
         }
 
-        public override void EnterCombat(Unit victim)
+        public override void JustEngagedWith(Unit victim)
         {
             if (IsAIControlled())
                 me.InterruptNonMeleeSpells(false); // must be before ProcessEvents

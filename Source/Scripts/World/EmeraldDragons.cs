@@ -231,10 +231,10 @@ namespace Scripts.World.EmeraldDragons
             });
         }
 
-        public override void EnterCombat(Unit who)
+        public override void JustEngagedWith(Unit who)
         {
             Talk(TextIds.SayYsondreAggro);
-            base.EnterCombat(who);
+            base.JustEngagedWith(who);
         }
 
         // Summon druid spirits on 75%, 50% and 25% health
@@ -278,10 +278,10 @@ namespace Scripts.World.EmeraldDragons
             });
         }
 
-        public override void EnterCombat(Unit who)
+        public override void JustEngagedWith(Unit who)
         {
             Talk(TextIds.SayLethonAggro);
-            base.EnterCombat(who);
+            base.JustEngagedWith(who);
         }
 
         public override void DamageTaken(Unit attacker, ref uint damage)
@@ -361,10 +361,10 @@ namespace Scripts.World.EmeraldDragons
             base.KilledUnit(who);
         }
 
-        public override void EnterCombat(Unit who)
+        public override void JustEngagedWith(Unit who)
         {
             Talk(TextIds.SayEmerissAggro);
-            base.EnterCombat(who);
+            base.JustEngagedWith(who);
         }
 
         public override void DamageTaken(Unit attacker, ref uint damage)
@@ -419,10 +419,10 @@ namespace Scripts.World.EmeraldDragons
             });
         }
 
-        public override void EnterCombat(Unit who)
+        public override void JustEngagedWith(Unit who)
         {
             Talk(TextIds.SayTaerarAggro);
-            base.EnterCombat(who);
+            base.JustEngagedWith(who);
         }
 
         public override void SummonedCreatureDies(Creature summon, Unit killer)

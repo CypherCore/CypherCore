@@ -43,7 +43,7 @@ namespace Scripts.Pets
         {
             public npc_pet_hunter_snake_trap(Creature creature) : base(creature) { }
 
-            public override void EnterCombat(Unit who) { }
+            public override void JustEngagedWith(Unit who) { }
 
             public override void Reset()
             {

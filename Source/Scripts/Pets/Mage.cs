@@ -151,7 +151,7 @@ namespace Scripts.Pets
                 owner.CastSpell(me, SpellIds.CloneMe, false);
             }
 
-            public override void EnterCombat(Unit victim)
+            public override void JustEngagedWith(Unit victim)
             {
                 if (me.GetVictim() && !me.GetVictim().HasBreakableByDamageCrowdControlAura(me))
                 {

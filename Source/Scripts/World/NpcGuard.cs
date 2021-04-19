@@ -118,7 +118,7 @@ namespace Scripts.World.NpcGuard
             DoReplyToTextEmote(textEmote);
         }
 
-        public override void EnterCombat(Unit who)
+        public override void JustEngagedWith(Unit who)
         {
             if (me.GetEntry() == CreatureIds.CenarionHoldInfantry)
                 Talk(TextIds.SayGuardSilAggro, who);
@@ -202,7 +202,7 @@ namespace Scripts.World.NpcGuard
             _scheduler.CancelAll();
         }
 
-        public override void EnterCombat(Unit who)
+        public override void JustEngagedWith(Unit who)
         {
             ScheduleVanish();
         }

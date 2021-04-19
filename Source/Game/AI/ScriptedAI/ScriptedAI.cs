@@ -48,7 +48,7 @@ namespace Game.AI
                 DoStartNoMovement(target);
         }
 
-        // Called before EnterCombat even before the creature is in combat.
+        // Called before JustEngagedWith even before the creature is in combat.
         public override void AttackStart(Unit target)
         {
             if (IsCombatMovementAllowed())
@@ -411,7 +411,7 @@ namespace Game.AI
         public override void Reset() { }
 
         //Called at creature aggro either by MoveInLOS or Attack Start
-        public override void EnterCombat(Unit victim) { }
+        public override void JustEngagedWith(Unit victim) { }
 
         public bool HealthBelowPct(int pct) { return me.HealthBelowPct(pct); }
         public bool HealthAbovePct(int pct) { return me.HealthAbovePct(pct); }
@@ -502,7 +502,7 @@ namespace Game.AI
                 instance.SetBossState(_bossId, EncounterState.Done);
         }
 
-        public void _EnterCombat()
+        public void _JustEngagedWith()
         {
             if (instance != null)
             {
@@ -602,7 +602,7 @@ namespace Game.AI
         public virtual void ScheduleTasks() { }
 
         public override void Reset() { _Reset(); }
-        public override void EnterCombat(Unit who) { _EnterCombat(); }
+        public override void JustEngagedWith(Unit who) { _JustEngagedWith(); }
         public override void JustDied(Unit killer) { _JustDied(); }
         public override void JustReachedHome() { _JustReachedHome(); }
 
@@ -635,7 +635,7 @@ namespace Game.AI
             summons.DespawnAll();
         }
 
-        void _EnterCombat()
+        void _JustEngagedWith()
         {
             Unit target = SelectTarget(SelectAggroTarget.Random, 0, 0.0f, true);
             if (target)
@@ -684,7 +684,7 @@ namespace Game.AI
 
         public override void Reset() { _Reset(); }
 
-        public override void EnterCombat(Unit who) { _EnterCombat(); }
+        public override void JustEngagedWith(Unit who) { _JustEngagedWith(); }
 
         public override void JustDied(Unit killer) { _JustDied(); }
     }

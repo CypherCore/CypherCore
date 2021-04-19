@@ -408,11 +408,8 @@ namespace Game.AI
             me.DoImmediateBoundaryCheck();
         }
 
-        /// <summary>
-        /// Called for reaction when initially engaged
-        /// </summary>
-        /// <param name="victim"></param>
-        public virtual void EnterCombat(Unit victim) { }
+        // Called for reaction when initially engaged - this will always happen _after_ JustEnteredCombat
+        public virtual void JustEngagedWith(Unit who) { }
 
         // Called when the creature is killed
         public virtual void JustDied(Unit killer) { }

@@ -478,6 +478,13 @@ namespace Game.AI
         public virtual void SetGUID(ObjectGuid guid, int id = 0) { }
         public virtual ObjectGuid GetGUID(int id = 0) { return ObjectGuid.Empty; }
 
+        // Called when the unit enters combat
+        // (NOTE: Creature engage logic should NOT be here, but in JustEngagedWith, which happens once threat is established!)
+        public virtual void JustEnteredCombat(Unit who) { }
+
+        // Called when the unit leaves combat
+        public virtual void JustExitedCombat() { }
+
         public virtual void DamageDealt(Unit victim, ref uint damage, DamageEffectType damageType) { }
         public virtual void DamageTaken(Unit attacker, ref uint damage) { }
         public virtual void HealReceived(Unit by, uint addhealth) { }

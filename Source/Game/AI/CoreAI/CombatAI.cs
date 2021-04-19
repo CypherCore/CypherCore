@@ -51,7 +51,7 @@ namespace Game.AI
             }
         }
 
-        public override void EnterCombat(Unit victim)
+        public override void JustEngagedWith(Unit victim)
         {
             foreach (var id in Spells)
             {
@@ -134,7 +134,7 @@ namespace Game.AI
             AttackStartCaster(victim, _attackDist);
         }
 
-        public override void EnterCombat(Unit victim)
+        public override void JustEngagedWith(Unit victim)
         {
             if (Spells.Empty())
                 return;

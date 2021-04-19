@@ -619,7 +619,7 @@ namespace Scripts.World.NpcSpecial
             me.RemoveNpcFlag(NPCFlags.QuestGiver);
         }
 
-        public override void EnterCombat(Unit who) { }
+        public override void JustEngagedWith(Unit who) { }
 
         public override void UpdateAI(uint diff)
         {
@@ -719,7 +719,7 @@ namespace Scripts.World.NpcSpecial
             }
         }
 
-        public override void EnterCombat(Unit who) { }
+        public override void JustEngagedWith(Unit who) { }
 
         public override void ReceiveEmote(Player player, TextEmotes emote)
         {
@@ -1038,7 +1038,7 @@ namespace Scripts.World.NpcSpecial
             }
         }
 
-        public override void EnterCombat(Unit who) { }
+        public override void JustEngagedWith(Unit who) { }
 
         public override void QuestAccept(Player player, Quest quest)
         {
@@ -1108,7 +1108,7 @@ namespace Scripts.World.NpcSpecial
             }
         }
 
-        public override void EnterCombat(Unit who) { }
+        public override void JustEngagedWith(Unit who) { }
 
         public override void SpellHit(Unit caster, SpellInfo spell)
         {
@@ -1230,7 +1230,7 @@ namespace Scripts.World.NpcSpecial
             me.SetHealth(me.CountPctFromMaxHealth(70));
         }
 
-        public override void EnterCombat(Unit who) { }
+        public override void JustEngagedWith(Unit who) { }
 
         public override void SpellHit(Unit caster, SpellInfo spell)
         {
@@ -1319,9 +1319,7 @@ namespace Scripts.World.NpcSpecial
             me.AddUnitFlag(UnitFlags.NonAttackable);
         }
 
-        public override void EnterCombat(Unit who)
-        {
-        }
+        public override void JustEngagedWith(Unit who) { }
 
         public override void UpdateAI(uint diff)
         {
@@ -1463,7 +1461,7 @@ namespace Scripts.World.NpcSpecial
         public npc_steam_tonk(Creature creature) : base(creature) { }
 
         public override void Reset() { }
-        public override void EnterCombat(Unit who) { }
+        public override void JustEngagedWith(Unit who) { }
 
         public override void OnPossess(bool apply)
         {
@@ -1501,7 +1499,7 @@ namespace Scripts.World.NpcSpecial
             Initialize();
         }
 
-        public override void EnterCombat(Unit who) { }
+        public override void JustEngagedWith(Unit who) { }
         public override void AttackStart(Unit who) { }
         public override void MoveInLineOfSight(Unit who) { }
 
@@ -1966,7 +1964,7 @@ namespace Scripts.World.NpcSpecial
                 me.GetMotionMaster().MoveFollow(owner, SharedConst.PetFollowDist, SharedConst.PetFollowAngle);
         }
 
-        public override void EnterCombat(Unit who) { }
+        public override void JustEngagedWith(Unit who) { }
 
         public override void DoAction(int param)
         {
