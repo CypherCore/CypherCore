@@ -940,8 +940,8 @@ namespace Game.Scripting
         }
         public class EffectAbsorbHandler : EffectBase
         {
-            public EffectAbsorbHandler(AuraEffectAbsorbDelegate _pEffectHandlerScript, byte _effIndex)
-                : base(_effIndex, AuraType.SchoolAbsorb)
+            public EffectAbsorbHandler(AuraEffectAbsorbDelegate _pEffectHandlerScript, byte _effIndex, bool overKill = false)
+                : base(_effIndex, overKill ? AuraType.SchoolAbsorbOverkill : AuraType.SchoolAbsorb)
             {
                 pEffectHandlerScript = _pEffectHandlerScript;
             }

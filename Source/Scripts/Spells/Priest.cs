@@ -615,19 +615,15 @@ namespace Scripts.Spells.Priest
         void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
         {
             Unit target = GetTarget();
-            if (dmgInfo.GetDamage() >= target.GetHealth())
-            {
-                target.CastSpell(target, SpellIds.SpiritOfRedemption, new CastSpellExtraArgs(aurEff));
-                target.SetFullHealth();
-                return;
-            }
+            target.CastSpell(target, SpellIds.SpiritOfRedemption, new CastSpellExtraArgs(aurEff));
+            target.SetFullHealth();
 
-            PreventDefaultAction();
+            absorbAmount = dmgInfo.GetDamage();
         }
 
         public override void Register()
         {
-            OnEffectAbsorb.Add(new EffectAbsorbHandler(HandleAbsorb, 0));
+            OnEffectAbsorb.Add(new EffectAbsorbHandler(HandleAbsorb, 0, true));
         }
     }
 

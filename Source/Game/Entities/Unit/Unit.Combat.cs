@@ -1125,15 +1125,68 @@ namespace Game.Entities
                     victim.ToCreature().LowerPlayerDamageReq(health < damage ? health : damage);
             }
 
+            bool killed = false;
+            bool skipSettingDeathState = false;
+
             if (health <= damage)
             {
+                killed = true;
+
                 Log.outDebug(LogFilter.Unit, "DealDamage: victim just died");
 
                 if (victim.IsTypeId(TypeId.Player) && victim != this)
                     victim.ToPlayer().UpdateCriteria(CriteriaTypes.TotalDamageReceived, health);
 
-                Kill(victim, durabilityLoss);
+                if (damagetype != DamageEffectType.NoDamage && damagetype != DamageEffectType.Self && victim.HasAuraType(AuraType.SchoolAbsorbOverkill))
+                {
+                    var vAbsorbOverkill = victim.GetAuraEffectsByType(AuraType.SchoolAbsorbOverkill);
+                    DamageInfo damageInfo = new(this, victim, damage, spellProto, damageSchoolMask, damagetype, cleanDamage != null ? cleanDamage.attackType : WeaponAttackType.BaseAttack);
+                    
+                    foreach (var absorbAurEff in vAbsorbOverkill)
+                    {
+                        Aura baseAura = absorbAurEff.GetBase();
+                        AuraApplication aurApp = baseAura.GetApplicationOfTarget(victim.GetGUID());
+                        if (aurApp == null)
+                            continue;
+
+                        if ((absorbAurEff.GetMiscValue() & (int)damageInfo.GetSchoolMask()) == 0)
+                            continue;
+
+                        // cannot absorb over limit
+                        if (damage >= victim.CountPctFromMaxHealth(100 + absorbAurEff.GetMiscValueB()))
+                            continue;
+
+                        // get amount which can be still absorbed by the aura
+                        int currentAbsorb = absorbAurEff.GetAmount();
+                        // aura with infinite absorb amount - let the scripts handle absorbtion amount, set here to 0 for safety
+                        if (currentAbsorb < 0)
+                            currentAbsorb = 0;
+
+                        uint tempAbsorb = (uint)currentAbsorb;
+
+                        // This aura type is used both by Spirit of Redemption (death not really prevented, must grant all credit immediately) and Cheat Death (death prevented)
+                        // repurpose PreventDefaultAction for this
+                        bool deathFullyPrevented = false;
+
+                        absorbAurEff.GetBase().CallScriptEffectAbsorbHandlers(absorbAurEff, aurApp, damageInfo, ref tempAbsorb, ref deathFullyPrevented);
+                        currentAbsorb = (int)tempAbsorb;
+
+                        // absorb must be smaller than the damage itself
+                        currentAbsorb = MathFunctions.RoundToInterval(ref currentAbsorb, 0, (int)damageInfo.GetDamage());
+                        damageInfo.AbsorbDamage((uint)currentAbsorb);
+
+                        if (deathFullyPrevented)
+                            killed = false;
+
+                        skipSettingDeathState = true;
+                    }
+
+                    damage = damageInfo.GetDamage();
+                }
             }
+
+            if (killed)
+                Kill(victim, durabilityLoss, skipSettingDeathState);
             else
             {
                 Log.outDebug(LogFilter.Unit, "DealDamageAlive");
@@ -1484,7 +1537,7 @@ namespace Game.Entities
             Cell.VisitWorldObjects(this, notifier, GetVisibilityRange());
         }
 
-        public void Kill(Unit victim, bool durabilityLoss = true)
+        public void Kill(Unit victim, bool durabilityLoss = true, bool skipSettingDeathState = false)
         {
             // Prevent killing unit twice (and giving reward from kill twice)
             if (victim.GetHealth() == 0)
@@ -1599,8 +1652,11 @@ namespace Game.Entities
             if (player != null)
                 player.UpdateCriteria(CriteriaTypes.GetKillingBlows, 1, 0, 0, victim);
 
-            Log.outDebug(LogFilter.Unit, "SET JUST_DIED");
-            victim.SetDeathState(DeathState.JustDied);
+            if (!skipSettingDeathState)
+            {
+                Log.outDebug(LogFilter.Unit, "SET JUST_DIED");
+                victim.SetDeathState(DeathState.JustDied);
+            }
 
             // Inform pets (if any) when player kills target)
             // MUST come after victim.setDeathState(JUST_DIED); or pet next target
@@ -1760,7 +1816,7 @@ namespace Game.Entities
             }
         }
 
-        public void KillSelf(bool durabilityLoss = true) { Kill(this, durabilityLoss); }
+        public void KillSelf(bool durabilityLoss = true, bool skipSettingDeathState = false) { Kill(this, durabilityLoss, skipSettingDeathState); }
 
         public virtual float GetBlockPercent(uint attackerLevel) { return 30.0f; }
 
