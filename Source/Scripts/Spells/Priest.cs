@@ -41,7 +41,12 @@ namespace Scripts.Spells.Priest
         public const uint BodyAndSoulSpeed = 65081;
         public const uint DivineBlessing = 40440;
         public const uint DivineWrath = 40441;
+        public const uint FlashHeal = 2061;
         public const uint GuardianSpiritHeal = 48153;
+        public const uint Heal = 2060;
+        public const uint HolyWordChastise = 88625;
+        public const uint HolyWordSanctify = 34861;
+        public const uint HolyWordSerenity = 2050;
         public const uint ItemEfficiency = 37595;
         public const uint LeapOfFaithEffect = 92832;
         public const uint LevitateEffect = 111759;
@@ -52,10 +57,13 @@ namespace Scripts.Spells.Priest
         public const uint PrayerOfMendingAura = 41635;
         public const uint PrayerOfMendingHeal = 33110;
         public const uint PrayerOfMendingJump = 155793;
+        public const uint PrayerOfHealing = 596;
+        public const uint Renew = 139;
         public const uint RenewedHope = 197469;
         public const uint RenewedHopeEffect = 197470;
         public const uint ShieldDisciplineEnergize = 47755;
         public const uint ShieldDisciplinePassive = 197045;
+        public const uint Smite = 585;
         public const uint SpiritOfRedemption = 27827;
         public const uint StrengthOfSoul = 197535;
         public const uint StrengthOfSoulEffect = 197548;
@@ -269,6 +277,62 @@ namespace Scripts.Spells.Priest
         }
     }
 
+    [Script] // 63733 - Holy Words
+    class spell_pri_holy_words : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.Heal, SpellIds.FlashHeal, SpellIds.PrayerOfHealing, SpellIds.Renew, SpellIds.Smite, SpellIds.HolyWordChastise, SpellIds.HolyWordSanctify, SpellIds.HolyWordSerenity)
+                && Global.SpellMgr.GetSpellInfo(SpellIds.HolyWordSerenity, Difficulty.None).GetEffect(1) != null
+                && Global.SpellMgr.GetSpellInfo(SpellIds.HolyWordSanctify, Difficulty.None).GetEffect(2) != null
+                && Global.SpellMgr.GetSpellInfo(SpellIds.HolyWordSanctify, Difficulty.None).GetEffect(3) != null
+                && Global.SpellMgr.GetSpellInfo(SpellIds.HolyWordChastise, Difficulty.None).GetEffect(1) != null;
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            SpellInfo spellInfo = eventInfo.GetSpellInfo();
+            if (spellInfo == null)
+                return;
+
+            uint targetSpellId;
+            uint cdReductionEffIndex;
+            switch (spellInfo.Id)
+            {
+                case SpellIds.Heal:
+                case SpellIds.FlashHeal: // reduce Holy Word: Serenity cd by 6 seconds
+                    targetSpellId = SpellIds.HolyWordSerenity;
+                    cdReductionEffIndex = 1;
+                    // cdReduction = sSpellMgr.GetSpellInfo(SPELL_PRIEST_HOLY_WORD_SERENITY, GetCastDifficulty()).GetEffect(EFFECT_1).CalcValue(player);
+                    break;
+                case SpellIds.PrayerOfHealing: // reduce Holy Word: Sanctify cd by 6 seconds
+                    targetSpellId = SpellIds.HolyWordSanctify;
+                    cdReductionEffIndex = 2;
+                    break;
+                case SpellIds.Renew: // reuce Holy Word: Sanctify cd by 2 seconds
+                    targetSpellId = SpellIds.HolyWordSanctify;
+                    cdReductionEffIndex = 3;
+                    break;
+                case SpellIds.Smite: // reduce Holy Word: Chastise cd by 4 seconds
+                    targetSpellId = SpellIds.HolyWordChastise;
+                    cdReductionEffIndex = 1;
+                    break;
+                default:
+                    Log.outWarn(LogFilter.Spells, $"HolyWords aura has been proced by an unknown spell: {GetSpellInfo().Id}");
+                    return;
+            }
+
+            SpellInfo targetSpellInfo = Global.SpellMgr.GetSpellInfo(targetSpellId, GetCastDifficulty());
+            int cdReduction = targetSpellInfo.GetEffect(cdReductionEffIndex).CalcValue(GetTarget());
+            GetTarget().GetSpellHistory().ModifyCooldown(targetSpellInfo, TimeSpan.FromSeconds(-cdReduction));
+        }
+
+        public override void Register()
+        {
+            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+        }
+    }
+    
     [Script] // 40438 - Priest Tier 6 Trinket
     class spell_pri_item_t6_trinket : AuraScript
     {

@@ -626,7 +626,7 @@ namespace Scripts.Spells.Shaman
             PreventDefaultAction();
             Player target = GetTarget().ToPlayer();
             if (target)
-                target.GetSpellHistory().ModifyCooldown(SpellIds.ElementalMastery, -aurEff.GetAmount());
+                target.GetSpellHistory().ModifyCooldown(SpellIds.ElementalMastery, TimeSpan.FromMilliseconds(-aurEff.GetAmount()));
         }
 
         public override void Register()

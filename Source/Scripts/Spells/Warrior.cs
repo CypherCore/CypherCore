@@ -396,7 +396,7 @@ namespace Scripts.Spells.Warrior
         void HandleAfterCast()
         {
             if (_targetCount >= (uint)GetSpellInfo().GetEffect(0).CalcValue())
-                GetCaster().ToPlayer().GetSpellHistory().ModifyCooldown(GetSpellInfo().Id, -(GetSpellInfo().GetEffect(3).CalcValue() * Time.InMilliseconds));
+                GetCaster().ToPlayer().GetSpellHistory().ModifyCooldown(GetSpellInfo().Id, TimeSpan.FromSeconds(-GetSpellInfo().GetEffect(3).CalcValue()));
         }
 
         public override void Register()

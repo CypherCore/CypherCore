@@ -188,7 +188,7 @@ namespace Scripts.Spells.Paladin
 
         void HandleEffectProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.HolyShockR1, aurEff.GetAmount());
+            GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.HolyShockR1, TimeSpan.FromSeconds(aurEff.GetAmount()));
         }
 
         public override void Register()
@@ -313,7 +313,7 @@ namespace Scripts.Spells.Paladin
         {
             int value = aurEff.GetAmount() / 10;
 
-            GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.HammerOfJustice, -value);
+            GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.HammerOfJustice, TimeSpan.FromSeconds(-value));
         }
 
         public override void Register()
@@ -682,8 +682,8 @@ namespace Scripts.Spells.Paladin
         {
             int value = aurEff.GetAmount() * 100 * _baseHolyPowerCost.Amount;
 
-            GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.AvengingWrath, -value);
-            GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.GuardianOfAcientKings, -value);
+            GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.AvengingWrath, TimeSpan.FromSeconds(-value));
+            GetTarget().GetSpellHistory().ModifyCooldown(SpellIds.GuardianOfAcientKings, TimeSpan.FromSeconds(-value));
         }
 
         public override void Register()

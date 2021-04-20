@@ -498,13 +498,7 @@ namespace Game.Spells
                 _categoryCooldowns[categoryId] = cooldownEntry;
         }
 
-        public void ModifyCooldown(uint spellId, int cooldownModMs)
-        {
-            TimeSpan offset = TimeSpan.FromMilliseconds(cooldownModMs);
-            ModifyCooldown(spellId, offset);
-        }
-
-        public void ModifyCooldown(uint spellId, TimeSpan offset)
+        public void ModifySpellCooldown(uint spellId, TimeSpan offset)
         {
             var cooldownEntry = _spellCooldowns.LookupByKey(spellId);
             if (offset.TotalMilliseconds == 0 || cooldownEntry == null)
@@ -531,6 +525,24 @@ namespace Game.Spells
             }
         }
 
+        public void ModifyCooldown(uint spellId, TimeSpan cooldownMod)
+        {
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, _owner.GetMap().GetDifficultyID());
+            if (spellInfo != null)
+                ModifyCooldown(spellInfo, cooldownMod);
+        }
+
+        public void ModifyCooldown(SpellInfo spellInfo, TimeSpan cooldownMod)
+        {
+            if (cooldownMod == TimeSpan.Zero)
+                return;
+
+            if (GetChargeRecoveryTime(spellInfo.ChargeCategoryId) > 0 && GetMaxCharges(spellInfo.ChargeCategoryId) > 0)
+                ModifyChargeRecoveryTime(spellInfo.ChargeCategoryId, cooldownMod);
+            else
+                ModifySpellCooldown(spellInfo.Id, cooldownMod);
+        }
+        
         public void ResetCooldown(uint spellId, bool update = false)
         {
             var entry = _spellCooldowns.LookupByKey(spellId);
@@ -723,6 +735,31 @@ namespace Game.Spells
             return false;
         }
 
+        void ModifyChargeRecoveryTime(uint chargeCategoryId, TimeSpan cooldownMod)
+        {
+            var chargeCategoryEntry = CliDB.SpellCategoryStorage.LookupByKey(chargeCategoryId);
+            if (chargeCategoryEntry == null)
+                return;
+
+            var chargeList = _categoryCharges.LookupByKey(chargeCategoryId);
+            if (chargeList == null || chargeList.Empty())
+                return;
+
+            var now = GameTime.GetGameTimeSystemPoint();
+
+            for (var i = 0; i < chargeList.Count; ++i)
+            {
+                var entry = chargeList[i];
+                entry.RechargeStart += cooldownMod;
+                entry.RechargeEnd += cooldownMod;
+            }
+
+            while (!chargeList.Empty() && chargeList[0].RechargeEnd < now)
+                chargeList.RemoveAt(0);
+
+            SendSetSpellCharges(chargeCategoryId, chargeList);
+        }
+
         public void RestoreCharge(uint chargeCategoryId)
         {
             var chargeList = _categoryCharges.LookupByKey(chargeCategoryId);
@@ -730,18 +767,7 @@ namespace Game.Spells
             {
                 chargeList.RemoveAt(chargeList.Count - 1);
 
-                Player player = GetPlayerOwner();
-                if (player)
-                {
-                    SetSpellCharges setSpellCharges = new();
-                    setSpellCharges.Category = chargeCategoryId;
-                    if (!chargeList.Empty())
-                        setSpellCharges.NextRecoveryTime = (uint)(chargeList.FirstOrDefault().RechargeEnd - GameTime.GetGameTimeSystemPoint()).TotalMilliseconds;
-                    setSpellCharges.ConsumedCharges = (byte)chargeList.Count;
-                    setSpellCharges.IsPet = player != _owner;
-
-                    player.SendPacket(setSpellCharges);
-                }
+                SendSetSpellCharges(chargeCategoryId, chargeList);
 
                 if (chargeList.Empty())
                     _categoryCharges.Remove(chargeCategoryId);
@@ -857,6 +883,21 @@ namespace Game.Spells
             }
         }
 
+        void SendSetSpellCharges(uint chargeCategoryId, List<ChargeEntry> chargeCollection)
+        {
+            Player player = GetPlayerOwner();
+            if (player != null)
+            {
+                SetSpellCharges setSpellCharges = new();
+                setSpellCharges.Category = chargeCategoryId;
+                if (!chargeCollection.Empty())
+                    setSpellCharges.NextRecoveryTime = (uint)(chargeCollection[0].RechargeEnd - DateTime.Now).TotalMilliseconds;
+                setSpellCharges.ConsumedCharges = (byte)chargeCollection.Count;
+                setSpellCharges.IsPet = player != _owner;
+                player.SendPacket(setSpellCharges);
+            }
+        }
+        
         void GetCooldownDurations(SpellInfo spellInfo, uint itemId, ref uint categoryId)
         {
             int notUsed = 0;
