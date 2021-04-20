@@ -224,8 +224,9 @@ namespace Framework.Database
                 if (query.IsEmpty())
                     return false;
 
-                if (Encoding.UTF8.GetByteCount(query) > 1048576) //Default size limit of querys
-                    Apply("SET GLOBAL max_allowed_packet=1073741824;");
+                var byteCount = Encoding.UTF8.GetByteCount(query);
+                if (byteCount > 1048576) //Default size limit of querys
+                    Apply($"SET GLOBAL max_allowed_packet={byteCount};");
 
                 using (var connection = _connectionInfo.GetConnection())
                 {
