@@ -345,8 +345,8 @@ namespace Game
         {
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_SLOTS_DETAIL);
             stmt.AddValue(0, guid.GetCounter());
-            stmt.AddValue(1, PetSaveMode.FirstStableSlot);
-            stmt.AddValue(2, PetSaveMode.LastStableSlot);
+            stmt.AddValue(1, (byte)PetSaveMode.FirstStableSlot);
+            stmt.AddValue(2, (byte)PetSaveMode.LastStableSlot);
 
             _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt).WithCallback(SendStablePetCallback, guid));
         }

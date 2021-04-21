@@ -113,7 +113,7 @@ namespace Game.Entities
                 // Current pet (slot 0)
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_PET_BY_ENTRY_AND_SLOT);
                 stmt.AddValue(0, ownerid);
-                stmt.AddValue(1, PetSaveMode.AsCurrent);
+                stmt.AddValue(1, (byte)PetSaveMode.AsCurrent);
             }
             else if (petEntry != 0)
             {
@@ -121,16 +121,16 @@ namespace Game.Entities
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_PET_BY_ENTRY_AND_SLOT_2);
                 stmt.AddValue(0, ownerid);
                 stmt.AddValue(1, petEntry);
-                stmt.AddValue(2, PetSaveMode.AsCurrent);
-                stmt.AddValue(3, PetSaveMode.LastStableSlot);
+                stmt.AddValue(2, (byte)PetSaveMode.AsCurrent);
+                stmt.AddValue(3, (byte)PetSaveMode.LastStableSlot);
             }
             else
             {
                 // Any current or other non-stabled pet (for hunter "call pet")
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_PET_BY_SLOT);
                 stmt.AddValue(0, ownerid);
-                stmt.AddValue(1, PetSaveMode.AsCurrent);
-                stmt.AddValue(2, PetSaveMode.LastStableSlot);
+                stmt.AddValue(1, (byte)PetSaveMode.AsCurrent);
+                stmt.AddValue(2, (byte)PetSaveMode.LastStableSlot);
             }
 
             SQLResult result = DB.Characters.Query(stmt);
@@ -266,14 +266,14 @@ namespace Game.Entities
             if (result.Read<byte>(7) != 0)
             {
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_PET_SLOT_BY_SLOT_EXCLUDE_ID);
-                stmt.AddValue(0, PetSaveMode.NotInSlot);
+                stmt.AddValue(0, (byte)PetSaveMode.NotInSlot);
                 stmt.AddValue(1, ownerid);
-                stmt.AddValue(2, PetSaveMode.AsCurrent);
+                stmt.AddValue(2, (byte)PetSaveMode.AsCurrent);
                 stmt.AddValue(3, GetCharmInfo().GetPetNumber());
                 DB.Characters.Execute(stmt);
 
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_PET_SLOT_BY_ID);
-                stmt.AddValue(0, PetSaveMode.AsCurrent);
+                stmt.AddValue(0, (byte)PetSaveMode.AsCurrent);
                 stmt.AddValue(1, ownerid);
                 stmt.AddValue(2, GetCharmInfo().GetPetNumber());
                 DB.Characters.Execute(stmt);
@@ -422,9 +422,9 @@ namespace Game.Entities
                 if (mode <= PetSaveMode.LastStableSlot)
                 {
                     stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_PET_SLOT_BY_SLOT);
-                    stmt.AddValue(0, PetSaveMode.NotInSlot);
+                    stmt.AddValue(0, (byte)PetSaveMode.NotInSlot);
                     stmt.AddValue(1, ownerLowGUID);
-                    stmt.AddValue(2, mode);
+                    stmt.AddValue(2, (byte)mode);
                     trans.Append(stmt);
                 }
 
@@ -433,8 +433,8 @@ namespace Game.Entities
                 {
                     stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_PET_BY_SLOT);
                     stmt.AddValue(0, ownerLowGUID);
-                    stmt.AddValue(1, PetSaveMode.AsCurrent);
-                    stmt.AddValue(2, PetSaveMode.LastStableSlot);
+                    stmt.AddValue(1, (byte)PetSaveMode.AsCurrent);
+                    stmt.AddValue(2, (byte)PetSaveMode.LastStableSlot);
                     trans.Append(stmt);
                 }
 
@@ -445,17 +445,17 @@ namespace Game.Entities
                 stmt.AddValue(2, ownerLowGUID);
                 stmt.AddValue(3, GetNativeDisplayId());
                 stmt.AddValue(4, GetLevel());
-                stmt.AddValue(5, (uint)m_unitData.PetExperience);
-                stmt.AddValue(6, GetReactState());
-                stmt.AddValue(7, mode);
+                stmt.AddValue(5, m_unitData.PetExperience);
+                stmt.AddValue(6, (byte)GetReactState());
+                stmt.AddValue(7, (byte)mode);
                 stmt.AddValue(8, GetName());
                 stmt.AddValue(9, HasPetFlag(UnitPetFlags.CanBeRenamed) ? 0 : 1);
                 stmt.AddValue(10, curhealth);
                 stmt.AddValue(11, curmana);
                 stmt.AddValue(12, GenerateActionBarData());
                 stmt.AddValue(13, GameTime.GetGameTime());
-                stmt.AddValue(14, (uint)m_unitData.CreatedBySpell);
-                stmt.AddValue(15, GetPetType());
+                stmt.AddValue(14, m_unitData.CreatedBySpell);
+                stmt.AddValue(15, (byte)GetPetType());
                 stmt.AddValue(16, m_petSpecialization);
                 trans.Append(stmt);
 
@@ -823,14 +823,14 @@ namespace Game.Entities
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_PET_SPELL);
                         stmt.AddValue(0, GetCharmInfo().GetPetNumber());
                         stmt.AddValue(1, pair.Key);
-                        stmt.AddValue(2, pair.Value.active);
+                        stmt.AddValue(2, (byte)pair.Value.active);
                         trans.Append(stmt);
                         break;
                     case PetSpellState.New:
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_PET_SPELL);
                         stmt.AddValue(0, GetCharmInfo().GetPetNumber());
                         stmt.AddValue(1, pair.Key);
-                        stmt.AddValue(2, pair.Value.active);
+                        stmt.AddValue(2, (byte)pair.Value.active);
                         trans.Append(stmt);
                         break;
                     case PetSpellState.Unchanged:
@@ -976,7 +976,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, key.SpellId);
                 stmt.AddValue(index++, key.EffectMask);
                 stmt.AddValue(index++, recalculateMask);
-                stmt.AddValue(index++, aura.GetCastDifficulty());
+                stmt.AddValue(index++, (byte)aura.GetCastDifficulty());
                 stmt.AddValue(index++, aura.GetStackAmount());
                 stmt.AddValue(index++, aura.GetMaxDuration());
                 stmt.AddValue(index++, aura.GetDuration());

@@ -689,9 +689,9 @@ namespace Game.BattleGrounds
 
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_PVPSTATS_BATTLEGROUND);
                 stmt.AddValue(0, battlegroundId);
-                stmt.AddValue(1, GetWinner());
+                stmt.AddValue(1, (byte)GetWinner());
                 stmt.AddValue(2, GetUniqueBracketId());
-                stmt.AddValue(3, GetTypeID(true));
+                stmt.AddValue(3, (byte)GetTypeID(true));
                 DB.Characters.Execute(stmt);
             }
 

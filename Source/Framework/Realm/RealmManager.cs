@@ -297,7 +297,7 @@ public class RealmManager : Singleton<RealmManager>
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_BNET_GAME_ACCOUNT_LOGIN_INFO);
             stmt.AddValue(0, keyData);
             stmt.AddValue(1, clientAddress.ToString());
-            stmt.AddValue(2, locale);
+            stmt.AddValue(2, (byte)locale);
             stmt.AddValue(3, os);
             stmt.AddValue(4, accountName);
             DB.Login.DirectExecute(stmt);

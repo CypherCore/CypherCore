@@ -176,7 +176,7 @@ namespace Game.Entities
                 friendInfo.Flags |= flag;
 
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHARACTER_SOCIAL_FLAGS);
-                stmt.AddValue(0, friendInfo.Flags);
+                stmt.AddValue(0, (byte)friendInfo.Flags);
                 stmt.AddValue(1, GetPlayerGUID().GetCounter());
                 stmt.AddValue(2, friendGuid.GetCounter());
                 DB.Characters.Execute(stmt);
@@ -190,7 +190,7 @@ namespace Game.Entities
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHARACTER_SOCIAL);
                 stmt.AddValue(0, GetPlayerGUID().GetCounter());
                 stmt.AddValue(1, friendGuid.GetCounter());
-                stmt.AddValue(2, flag);
+                stmt.AddValue(2, (byte)flag);
                 DB.Characters.Execute(stmt);
             }
             return true;
@@ -216,7 +216,7 @@ namespace Game.Entities
             else
             {
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHARACTER_SOCIAL_FLAGS);
-                stmt.AddValue(0, friendInfo.Flags);
+                stmt.AddValue(0, (byte)friendInfo.Flags);
                 stmt.AddValue(1, GetPlayerGUID().GetCounter());
                 stmt.AddValue(2, friendGuid.GetCounter());
                 DB.Characters.Execute(stmt);

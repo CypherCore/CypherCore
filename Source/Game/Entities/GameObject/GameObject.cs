@@ -995,7 +995,7 @@ namespace Game.Entities
             stmt.AddValue(index++, m_worldRotation.W);
             stmt.AddValue(index++, m_respawnDelayTime);
             stmt.AddValue(index++, GetGoAnimProgress());
-            stmt.AddValue(index++, GetGoState());
+            stmt.AddValue(index++, (byte)GetGoState());
             DB.World.Execute(stmt);
         }
 

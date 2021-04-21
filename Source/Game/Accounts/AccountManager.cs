@@ -63,8 +63,8 @@ namespace Game
             }
             else
             {
-                stmt.AddValue(5, null);
-                stmt.AddValue(6, null);
+                stmt.AddNull(5);
+                stmt.AddNull(6);
             }
             DB.Login.DirectExecute(stmt); // Enforce saving, otherwise AddGroup can fail
 

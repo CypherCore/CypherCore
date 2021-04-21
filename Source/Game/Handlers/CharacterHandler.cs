@@ -1252,7 +1252,7 @@ namespace Game
             // Update name and at_login flag in the db
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_NAME_AT_LOGIN);
             stmt.AddValue(0, renameInfo.NewName);
-            stmt.AddValue(1, atLoginFlags);
+            stmt.AddValue(1, (ushort)atLoginFlags);
             stmt.AddValue(2, lowGuid);
             trans.Append(stmt);
 
@@ -1467,7 +1467,7 @@ namespace Game
             {
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_NAME_AT_LOGIN);
                 stmt.AddValue(0, customizeInfo.CharName);
-                stmt.AddValue(1, atLoginFlags);
+                stmt.AddValue(1, (ushort)atLoginFlags);
                 stmt.AddValue(2, lowGuid);
                 trans.Append(stmt);
 
@@ -1794,7 +1794,7 @@ namespace Game
             // Race Change
             {
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_RACE);
-                stmt.AddValue(0, factionChangeInfo.RaceID);
+                stmt.AddValue(0, (byte)factionChangeInfo.RaceID);
                 stmt.AddValue(1, lowGuid);
 
                 trans.Append(stmt);

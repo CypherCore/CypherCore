@@ -572,7 +572,7 @@ namespace Game
                     stmt.AddValue(0, _player.GetGUID().GetCounter());
                     stmt.AddValue(1, factionState.Id);
                     stmt.AddValue(2, factionState.Standing);
-                    stmt.AddValue(3, factionState.Flags);
+                    stmt.AddValue(3, (ushort)factionState.Flags);
                     trans.Append(stmt);
 
                     factionState.needSave = false;

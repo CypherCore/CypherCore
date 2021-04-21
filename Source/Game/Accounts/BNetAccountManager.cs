@@ -117,8 +117,8 @@ namespace Game
                 return AccountOpResult.BadLink;
 
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_BNET_GAME_ACCOUNT_LINK);
-            stmt.AddValue(0, null);
-            stmt.AddValue(1, null);
+            stmt.AddNull(0);
+            stmt.AddNull(1);
             stmt.AddValue(2, gameAccountId);
             DB.Login.Execute(stmt);
             return AccountOpResult.Ok;

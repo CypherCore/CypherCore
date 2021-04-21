@@ -386,7 +386,7 @@ namespace Game.Entities
 
                             stmt.AddValue(0, save.GetInstanceId());
                             stmt.AddValue(1, permanent);
-                            stmt.AddValue(2, extendState);
+                            stmt.AddValue(2, (byte)extendState);
                             stmt.AddValue(3, GetGUID().GetCounter());
                             stmt.AddValue(4, bind.save.GetInstanceId());
 
@@ -399,7 +399,7 @@ namespace Game.Entities
                         stmt.AddValue(0, GetGUID().GetCounter());
                         stmt.AddValue(1, save.GetInstanceId());
                         stmt.AddValue(2, permanent);
-                        stmt.AddValue(3, extendState);
+                        stmt.AddValue(3, (byte)extendState);
                         DB.Characters.Execute(stmt);
                     }
                 }

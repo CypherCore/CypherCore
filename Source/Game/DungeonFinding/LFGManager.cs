@@ -100,7 +100,7 @@ namespace Game.DungeonFinding
             stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_LFG_DATA);
             stmt.AddValue(0, db_guid);
             stmt.AddValue(1, GetDungeon(guid));
-            stmt.AddValue(2, GetState(guid));
+            stmt.AddValue(2, (uint)GetState(guid));
             trans.Append(stmt);
 
             DB.Characters.CommitTransaction(trans);

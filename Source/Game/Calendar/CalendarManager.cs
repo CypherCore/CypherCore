@@ -223,10 +223,10 @@ namespace Game
             stmt.AddValue(1, calendarEvent.OwnerGuid.GetCounter());
             stmt.AddValue(2, calendarEvent.Title);
             stmt.AddValue(3, calendarEvent.Description);
-            stmt.AddValue(4, calendarEvent.EventType);
+            stmt.AddValue(4, (byte)calendarEvent.EventType);
             stmt.AddValue(5, calendarEvent.TextureId);
             stmt.AddValue(6, calendarEvent.Date);
-            stmt.AddValue(7, calendarEvent.Flags);
+            stmt.AddValue(7, (uint)calendarEvent.Flags);
             stmt.AddValue(8, calendarEvent.LockDate);
             trans.Append(stmt);
             DB.Characters.CommitTransaction(trans);
@@ -239,9 +239,9 @@ namespace Game
             stmt.AddValue(1, invite.EventId);
             stmt.AddValue(2, invite.InviteeGuid.GetCounter());
             stmt.AddValue(3, invite.SenderGuid.GetCounter());
-            stmt.AddValue(4, invite.Status);
+            stmt.AddValue(4, (byte)invite.Status);
             stmt.AddValue(5, invite.ResponseTime);
-            stmt.AddValue(6, invite.Rank);
+            stmt.AddValue(6, (byte)invite.Rank);
             stmt.AddValue(7, invite.Note);
             DB.Characters.ExecuteOrAppend(trans, stmt);
         }

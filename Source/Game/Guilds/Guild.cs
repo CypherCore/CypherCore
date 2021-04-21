@@ -2802,7 +2802,7 @@ namespace Game.Guilds
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_GUILD_EVENTLOG);
                 stmt.AddValue(index, m_guildId);
                 stmt.AddValue(++index, m_guid);
-                stmt.AddValue(++index, m_eventType);
+                stmt.AddValue(++index, (byte)m_eventType);
                 stmt.AddValue(++index, m_playerGuid1);
                 stmt.AddValue(++index, m_playerGuid2);
                 stmt.AddValue(++index, m_newRank);
@@ -2883,7 +2883,7 @@ namespace Game.Guilds
                 stmt.AddValue(index, m_guildId);
                 stmt.AddValue(++index, m_guid);
                 stmt.AddValue(++index, m_bankTabId);
-                stmt.AddValue(++index, m_eventType);
+                stmt.AddValue(++index, (byte)m_eventType);
                 stmt.AddValue(++index, m_playerGuid);
                 stmt.AddValue(++index, m_itemOrMoney);
                 stmt.AddValue(++index, m_itemStackCount);
@@ -2973,7 +2973,7 @@ namespace Game.Guilds
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_GUILD_NEWS);
                 stmt.AddValue(index, m_guildId);
                 stmt.AddValue(++index, GetGUID());
-                stmt.AddValue(++index, GetNewsType());
+                stmt.AddValue(++index, (byte)GetNewsType());
                 stmt.AddValue(++index, GetPlayerGuid().GetCounter());
                 stmt.AddValue(++index, GetFlags());
                 stmt.AddValue(++index, GetValue());
@@ -3100,7 +3100,7 @@ namespace Game.Guilds
                 stmt.AddValue(0, m_guildId);
                 stmt.AddValue(1, m_rankId);
                 stmt.AddValue(2, m_name);
-                stmt.AddValue(3, m_rights);
+                stmt.AddValue(3, (uint)m_rights);
                 stmt.AddValue(4, m_bankMoneyPerDay);
                 DB.Characters.ExecuteOrAppend(trans, stmt);
             }
@@ -3124,7 +3124,7 @@ namespace Game.Guilds
                     stmt.AddValue(0, m_guildId);
                     stmt.AddValue(1, i);
                     stmt.AddValue(2, m_rankId);
-                    stmt.AddValue(3, rightsAndSlots.GetRights());
+                    stmt.AddValue(3, (sbyte)rightsAndSlots.GetRights());
                     stmt.AddValue(4, rightsAndSlots.GetSlots());
                     trans.Append(stmt);
                 }
@@ -3155,7 +3155,7 @@ namespace Game.Guilds
                 m_rights = rights;
 
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_GUILD_RANK_RIGHTS);
-                stmt.AddValue(0, m_rights);
+                stmt.AddValue(0, (uint)m_rights);
                 stmt.AddValue(1, m_rankId);
                 stmt.AddValue(2, m_guildId);
                 DB.Characters.Execute(stmt);
@@ -3188,7 +3188,7 @@ namespace Game.Guilds
                     stmt.AddValue(0, m_guildId);
                     stmt.AddValue(1, rightsAndSlots.GetTabId());
                     stmt.AddValue(2, m_rankId);
-                    stmt.AddValue(3, rightsAndSlots.GetRights());
+                    stmt.AddValue(3, (sbyte)rightsAndSlots.GetRights());
                     stmt.AddValue(4, rightsAndSlots.GetSlots());
                     DB.Characters.Execute(stmt);
                 }

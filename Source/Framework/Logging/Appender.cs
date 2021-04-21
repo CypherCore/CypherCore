@@ -141,7 +141,7 @@ class DBAppender : Appender
         PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_LOG);
         stmt.AddValue(0, Time.DateTimeToUnixTime(message.mtime));
         stmt.AddValue(1, realmId);
-        stmt.AddValue(2, message.type);
+        stmt.AddValue(2, message.type.ToString());
         stmt.AddValue(3, (byte)message.level);
         stmt.AddValue(4, message.text);
         DB.Login.Execute(stmt);

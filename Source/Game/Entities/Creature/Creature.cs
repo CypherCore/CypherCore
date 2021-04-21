@@ -1207,12 +1207,12 @@ namespace Game.Entities
             stmt.AddValue(index++, 0);
             stmt.AddValue(index++, GetHealth());
             stmt.AddValue(index++, GetPower(PowerType.Mana));
-            stmt.AddValue(index++, GetDefaultMovementType());
+            stmt.AddValue(index++, (byte)GetDefaultMovementType());
             stmt.AddValue(index++, npcflag);
             stmt.AddValue(index++, unitFlags);
             stmt.AddValue(index++, unitFlags2);
             stmt.AddValue(index++, unitFlags3);
-            stmt.AddValue(index++, dynamicflags);
+            stmt.AddValue(index++, (uint)dynamicflags);
             trans.Append(stmt);
 
             DB.World.CommitTransaction(trans);

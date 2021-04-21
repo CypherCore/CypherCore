@@ -381,9 +381,9 @@ namespace Game.Groups
 
                 stmt.AddValue(0, m_dbStoreId);
                 stmt.AddValue(1, member.guid.GetCounter());
-                stmt.AddValue(2, member.flags);
+                stmt.AddValue(2, (byte)member.flags);
                 stmt.AddValue(3, member.group);
-                stmt.AddValue(4, member.roles);
+                stmt.AddValue(4, (byte)member.roles);
 
                 DB.Characters.Execute(stmt);
 
@@ -1846,7 +1846,7 @@ namespace Game.Groups
             {
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_GROUP_LEGACY_RAID_DIFFICULTY);
 
-                stmt.AddValue(0, m_legacyRaidDifficulty);
+                stmt.AddValue(0, (byte)m_legacyRaidDifficulty);
                 stmt.AddValue(1, m_dbStoreId);
 
                 DB.Characters.Execute(stmt);
@@ -2480,7 +2480,7 @@ namespace Game.Groups
             // Preserve the new setting in the db
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_GROUP_MEMBER_FLAG);
 
-            stmt.AddValue(0, slot.flags);
+            stmt.AddValue(0, (byte)slot.flags);
             stmt.AddValue(1, guid.GetCounter());
 
             DB.Characters.Execute(stmt);

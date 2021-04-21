@@ -30,9 +30,69 @@ namespace Framework.Database
             CommandText = commandText;
         }
 
-        public void AddValue(int index, object value)
+        public void AddValue(int index, sbyte value)
         {
             Parameters.Add(index, value);
+        }
+
+        public void AddValue(int index, byte value)
+        {
+            Parameters.Add(index, value);
+        }
+
+        public void AddValue(int index, short value)
+        {
+            Parameters.Add(index, value);
+        }
+
+        public void AddValue(int index, ushort value)
+        {
+            Parameters.Add(index, value);
+        }
+
+        public void AddValue(int index, int value)
+        {
+            Parameters.Add(index, value);
+        }
+
+        public void AddValue(int index, uint value)
+        {
+            Parameters.Add(index, value);
+        }
+
+        public void AddValue(int index, long value)
+        {
+            Parameters.Add(index, value);
+        }
+
+        public void AddValue(int index, ulong value)
+        {
+            Parameters.Add(index, value);
+        }
+
+        public void AddValue(int index, float value)
+        {
+            Parameters.Add(index, value);
+        }
+
+        public void AddValue(int index, byte[] value)
+        {
+            Parameters.Add(index, value);
+        }
+
+        public void AddValue(int index, string value)
+        {
+            Parameters.Add(index, value);
+        }
+
+        public void AddValue(int index, bool value)
+        {
+            Parameters.Add(index, value);
+        }
+
+        public void AddNull(int index)
+        {
+            Parameters.Add(index, null);
         }
 
         public void Clear()

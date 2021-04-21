@@ -185,7 +185,7 @@ namespace Game.Chat
                     handler.SendSysMessage(CypherStrings.RenamePlayerGuid, oldNameLink, targetGuid.ToString());
 
                     PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
-                    stmt.AddValue(0, AtLoginFlags.Rename);
+                    stmt.AddValue(0, (ushort)AtLoginFlags.Rename);
                     stmt.AddValue(1, targetGuid.GetCounter());
                     DB.Characters.Execute(stmt);
                 }
@@ -248,7 +248,7 @@ namespace Game.Chat
                 return false;
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
-            stmt.AddValue(0, AtLoginFlags.Customize);
+            stmt.AddValue(0, (ushort)AtLoginFlags.Customize);
             if (target)
             {
                 handler.SendSysMessage(CypherStrings.CustomizePlayer, handler.GetNameLink(target));
@@ -350,7 +350,7 @@ namespace Game.Chat
                 return false;
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
-            stmt.AddValue(0, AtLoginFlags.ChangeFaction);
+            stmt.AddValue(0, (ushort)AtLoginFlags.ChangeFaction);
             if (target)
             {
                 handler.SendSysMessage(CypherStrings.CustomizePlayer, handler.GetNameLink(target));
@@ -378,7 +378,7 @@ namespace Game.Chat
                 return false;
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_ADD_AT_LOGIN_FLAG);
-            stmt.AddValue(0, AtLoginFlags.ChangeRace);
+            stmt.AddValue(0, (ushort)AtLoginFlags.ChangeRace);
             if (target)
             {
                 // @todo add text into database

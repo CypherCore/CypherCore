@@ -1778,7 +1778,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, key.SpellId);
                 stmt.AddValue(index++, key.EffectMask);
                 stmt.AddValue(index++, recalculateMask);
-                stmt.AddValue(index++, aura.GetCastDifficulty());
+                stmt.AddValue(index++, (byte)aura.GetCastDifficulty());
                 stmt.AddValue(index++, aura.GetStackAmount());
                 stmt.AddValue(index++, aura.GetMaxDuration());
                 stmt.AddValue(index++, aura.GetDuration());
@@ -1911,7 +1911,7 @@ namespace Game.Entities
                         stmt.AddValue(1, GetActiveTalentGroup());
                         stmt.AddValue(2, pair.Key);
                         stmt.AddValue(3, pair.Value.GetAction());
-                        stmt.AddValue(4, pair.Value.GetButtonType());
+                        stmt.AddValue(4, (byte)pair.Value.GetButtonType());
                         trans.Append(stmt);
 
                         pair.Value.uState = ActionButtonUpdateState.UnChanged;
@@ -1919,7 +1919,7 @@ namespace Game.Entities
                     case ActionButtonUpdateState.Changed:
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_ACTION);
                         stmt.AddValue(0, pair.Value.GetAction());
-                        stmt.AddValue(1, pair.Value.GetButtonType());
+                        stmt.AddValue(1, (byte)pair.Value.GetButtonType());
                         stmt.AddValue(2, GetGUID().GetCounter());
                         stmt.AddValue(3, pair.Key);
                         stmt.AddValue(4, GetActiveTalentGroup());
@@ -1960,7 +1960,7 @@ namespace Game.Entities
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_CHAR_QUESTSTATUS);
                         stmt.AddValue(0, GetGUID().GetCounter());
                         stmt.AddValue(1, save.Key);
-                        stmt.AddValue(2, data.Status);
+                        stmt.AddValue(2, (byte)data.Status);
                         stmt.AddValue(3, data.Timer / Time.InMilliseconds + GameTime.GetGameTime());
                         trans.Append(stmt);
 

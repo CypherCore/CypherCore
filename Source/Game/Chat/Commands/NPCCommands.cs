@@ -772,7 +772,7 @@ namespace Game.Chat
 
                 // Update movement type
                 PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_CREATURE_MOVEMENT_TYPE);
-                stmt.AddValue(0, MovementGeneratorType.Waypoint);
+                stmt.AddValue(0, (byte)MovementGeneratorType.Waypoint);
                 stmt.AddValue(1, lowGuid);
                 DB.World.Execute(stmt);
 
@@ -1435,7 +1435,7 @@ namespace Game.Chat
 
                 PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_CREATURE_SPAWN_DISTANCE);
                 stmt.AddValue(0, option);
-                stmt.AddValue(1, mtype);
+                stmt.AddValue(1, (byte)mtype);
                 stmt.AddValue(2, guidLow);
 
                 DB.World.Execute(stmt);

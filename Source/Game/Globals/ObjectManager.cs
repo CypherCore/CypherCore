@@ -1028,7 +1028,7 @@ namespace Game
 
                 stmt.AddValue(0, id);
                 stmt.AddValue(1, zoneId);
-                stmt.AddValue(2, team);
+                stmt.AddValue(2, (uint)team);
 
                 DB.World.Execute(stmt);
             }
@@ -1076,7 +1076,7 @@ namespace Game
 
                 stmt.AddValue(0, id);
                 stmt.AddValue(1, zoneId);
-                stmt.AddValue(2, team);
+                stmt.AddValue(2, (uint)team);
 
                 DB.World.Execute(stmt);
             }
@@ -4785,7 +4785,7 @@ namespace Game
                 stmt.AddValue(2, vItem.maxcount);
                 stmt.AddValue(3, vItem.incrtime);
                 stmt.AddValue(4, vItem.ExtendedCost);
-                stmt.AddValue(5, vItem.Type);
+                stmt.AddValue(5, (byte)vItem.Type);
 
                 DB.World.Execute(stmt);
             }
@@ -9184,7 +9184,7 @@ namespace Game
                         stmt.AddValue(1, m.sender);
                         stmt.AddValue(2, curTime + 30 * Time.Day);
                         stmt.AddValue(3, curTime);
-                        stmt.AddValue(4, MailCheckMask.Returned);
+                        stmt.AddValue(4, (byte)MailCheckMask.Returned);
                         stmt.AddValue(5, m.messageID);
                         DB.Characters.Execute(stmt);
                         foreach (var itemInfo in m.items)

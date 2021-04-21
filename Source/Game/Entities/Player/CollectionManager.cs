@@ -206,7 +206,7 @@ namespace Game.Entities
                 stmt = DB.Login.GetPreparedStatement(LoginStatements.REP_ACCOUNT_HEIRLOOMS);
                 stmt.AddValue(0, _owner.GetBattlenetAccountId());
                 stmt.AddValue(1, heirloom.Key);
-                stmt.AddValue(2, heirloom.Value.flags);
+                stmt.AddValue(2, (uint)heirloom.Value.flags);
                 trans.Append(stmt);
             }
         }
@@ -404,7 +404,7 @@ namespace Game.Entities
                 PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.REP_ACCOUNT_MOUNTS);
                 stmt.AddValue(0, _owner.GetBattlenetAccountId());
                 stmt.AddValue(1, mount.Key);
-                stmt.AddValue(2, mount.Value);
+                stmt.AddValue(2, (byte)mount.Value);
                 trans.Append(stmt);
             }
         }

@@ -129,7 +129,7 @@ namespace Game.Chat.Commands
 
                 PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_DISABLES);
                 stmt.AddValue(0, entry);
-                stmt.AddValue(1, disableType);
+                stmt.AddValue(1, (byte)disableType);
                 SQLResult result = DB.World.Query(stmt);
                 if (!result.IsEmpty())
                 {
@@ -139,7 +139,7 @@ namespace Game.Chat.Commands
 
                 stmt = DB.World.GetPreparedStatement(WorldStatements.INS_DISABLES);
                 stmt.AddValue(0, entry);
-                stmt.AddValue(1, disableType);
+                stmt.AddValue(1, (byte)disableType);
                 stmt.AddValue(2, flags);
                 stmt.AddValue(3, disableComment);
                 DB.World.Execute(stmt);
@@ -261,7 +261,7 @@ namespace Game.Chat.Commands
 
                 PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.SEL_DISABLES);
                 stmt.AddValue(0, entry);
-                stmt.AddValue(1, disableType);
+                stmt.AddValue(1, (byte)disableType);
                 SQLResult result = DB.World.Query(stmt);
                 if (result.IsEmpty())
                 {
@@ -271,7 +271,7 @@ namespace Game.Chat.Commands
 
                 stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_DISABLES);
                 stmt.AddValue(0, entry);
-                stmt.AddValue(1, disableType);
+                stmt.AddValue(1, (byte)disableType);
                 DB.World.Execute(stmt);
 
                 handler.SendSysMessage("Remove Disabled {0} (Id: {1})", disableTypeStr, entry);

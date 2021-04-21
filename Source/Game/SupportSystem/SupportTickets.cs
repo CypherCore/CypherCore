@@ -282,7 +282,7 @@ namespace Game.SupportSystem
             stmt.AddValue(++idx, _pos.Z);
             stmt.AddValue(++idx, _facing);
             stmt.AddValue(++idx, _targetCharacterGuid.GetCounter());
-            stmt.AddValue(++idx, _complaintType);
+            stmt.AddValue(++idx, (byte)_complaintType);
             if (_chatLog.ReportLineIndex.HasValue)
                 stmt.AddValue(++idx, _chatLog.ReportLineIndex.Value);
             else

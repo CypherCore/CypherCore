@@ -527,7 +527,7 @@ namespace Game
             {
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_ACCOUNT_DATA);
                 stmt.AddValue(0, GetAccountId());
-                stmt.AddValue(1, type);
+                stmt.AddValue(1, (byte)type);
                 stmt.AddValue(2, time);
                 stmt.AddValue(3, data);
                 DB.Characters.Execute(stmt);
@@ -540,7 +540,7 @@ namespace Game
 
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_PLAYER_ACCOUNT_DATA);
                 stmt.AddValue(0, m_GUIDLow);
-                stmt.AddValue(1, type);
+                stmt.AddValue(1, (byte)type);
                 stmt.AddValue(2, time);
                 stmt.AddValue(3, data);
                 DB.Characters.Execute(stmt);

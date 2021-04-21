@@ -65,7 +65,7 @@ namespace Game.Chat
             {
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHANNEL);
                 stmt.AddValue(0, _channelName);
-                stmt.AddValue(1, _channelTeam);
+                stmt.AddValue(1, (uint)_channelTeam);
                 SQLResult result = DB.Characters.Query(stmt);
 
                 if (!result.IsEmpty()) //load
@@ -97,7 +97,7 @@ namespace Game.Chat
                 {
                     stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHANNEL);
                     stmt.AddValue(0, _channelName);
-                    stmt.AddValue(1, _channelTeam);
+                    stmt.AddValue(1, (uint)_channelTeam);
                     DB.Characters.Execute(stmt);
                     Log.outDebug(LogFilter.ChatSystem, "Channel({0}) saved in database", _channelName);
                 }
@@ -145,7 +145,7 @@ namespace Game.Chat
                 stmt.AddValue(2, _channelPassword);
                 stmt.AddValue(3, banlist);
                 stmt.AddValue(4, _channelName);
-                stmt.AddValue(5, _channelTeam);
+                stmt.AddValue(5, (uint)_channelTeam);
                 DB.Characters.Execute(stmt);
 
                 Log.outDebug(LogFilter.ChatSystem, "Channel({0}) updated in database", _channelName);
@@ -156,7 +156,7 @@ namespace Game.Chat
         {
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHANNEL_USAGE);
             stmt.AddValue(0, _channelName);
-            stmt.AddValue(1, _channelTeam);
+            stmt.AddValue(1, (uint)_channelTeam);
             DB.Characters.Execute(stmt);
         }
 
