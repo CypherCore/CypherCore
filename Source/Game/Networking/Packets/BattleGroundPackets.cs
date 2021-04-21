@@ -137,7 +137,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(Mapid);
             _worldPacket.WriteUInt32(ShutdownTimer);
             _worldPacket.WriteUInt32(StartTimer);
-            _worldPacket.WriteBit(ArenaFaction);
+            _worldPacket.WriteBit(ArenaFaction != 0);
             _worldPacket.WriteBit(LeftEarly);
             _worldPacket.FlushBits();
         }
@@ -629,7 +629,7 @@ namespace Game.Networking.Packets
                 foreach (var pvpStat in Stats)
                     pvpStat.Write(data);
 
-                data.WriteBit(Faction);
+                data.WriteBit(Faction != 0);
                 data.WriteBit(IsInWorld);
                 data.WriteBit(Honor.HasValue);
                 data.WriteBit(PreMatchRating.HasValue);

@@ -98,7 +98,7 @@ namespace BNetServer.Networking
 
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UpdBnetLastLoginInfo);
             stmt.AddValue(0, GetRemoteIpEndPoint().ToString());
-            stmt.AddValue(1, (byte)Enum.Parse(typeof(Locale), locale));
+            stmt.AddValue(1, (byte)locale.ToEnum<Locale>());
             stmt.AddValue(2, os);
             stmt.AddValue(3, accountInfo.Id);
 

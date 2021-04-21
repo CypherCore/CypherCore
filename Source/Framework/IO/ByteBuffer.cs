@@ -335,11 +335,11 @@ namespace Framework.IO
             WriteUInt32(packed);
         }
 
-        public bool WriteBit(object bit)
+        public bool WriteBit(bool bit)
         {
             --_bitPosition;
 
-            if (Convert.ToBoolean(bit))
+            if (bit)
                 BitValue |= (byte)(1 << _bitPosition);
 
             if (_bitPosition == 0)
@@ -349,13 +349,13 @@ namespace Framework.IO
                 _bitPosition = 8;
                 BitValue = 0;
             }
-            return Convert.ToBoolean(bit);
+            return bit;
         }
 
         public void WriteBits(object bit, int count)
         {
             for (int i = count - 1; i >= 0; --i)
-                WriteBit((Convert.ToUInt32(bit) >> i) & 1);
+                WriteBit(((Convert.ToUInt32(bit) >> i) & 1) != 0);
         }
 
         public void WritePackedTime(long time)

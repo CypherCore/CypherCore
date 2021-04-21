@@ -63,7 +63,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(MaxLevel);
             _worldPacket.WriteInt32(MapID);
             _worldPacket.WriteUInt32(InstanceID);
-            _worldPacket.WriteBit(Index);
+            _worldPacket.WriteBit(Index != 0);
             _worldPacket.FlushBits();
         }
 

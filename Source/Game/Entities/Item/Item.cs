@@ -2921,7 +2921,7 @@ namespace Game.Entities
 
     public class AzeriteEmpoweredData
     {
-        public Array<int> SelectedAzeritePowers = new(SharedConst.MaxAzeriteEmpoweredTier);
+        public int[] SelectedAzeritePowers = new int[SharedConst.MaxAzeriteEmpoweredTier];
     }
 
     class ItemAdditionalLoadInfo
@@ -2989,6 +2989,8 @@ namespace Game.Entities
                     info.AzeriteItem.KnowledgeLevel = azeriteItemResult.Read<uint>(3);
                     for (int i = 0; i < info.AzeriteItem.SelectedAzeriteEssences.Length; ++i)
                     {
+                        info.AzeriteItem.SelectedAzeriteEssences[i] = new();
+
                         uint specializationId = azeriteItemResult.Read<uint>(4 + i * 4);
                         if (!CliDB.ChrSpecializationStorage.ContainsKey(specializationId))
                             continue;

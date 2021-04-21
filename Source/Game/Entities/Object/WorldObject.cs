@@ -493,7 +493,7 @@ namespace Game.Entities
                 data.WriteBit(hasMovementScript);
 
                 if (hasUnk3)
-                    data.WriteBit(0);
+                    data.WriteBit(false);
 
                 data.FlushBits();
 
