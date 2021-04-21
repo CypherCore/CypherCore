@@ -255,51 +255,6 @@ namespace Game.Entities
             return true;
         }
 
-        public uint GetItemCount(uint item, Item eItem)
-        {
-            Item pItem;
-            uint count = 0;
-            for (var i = 0; i < GetBagSize(); ++i)
-            {
-                pItem = m_bagslot[i];
-                if (pItem != null && pItem != eItem && pItem.GetEntry() == item)
-                    count += pItem.GetCount();
-            }
-
-            if (eItem != null && eItem.GetTemplate().GetGemProperties() != 0)
-            {
-                for (var i = 0; i < GetBagSize(); ++i)
-                {
-                    pItem = m_bagslot[i];
-                    if (pItem != null && pItem != eItem && pItem.GetSocketColor(0) != 0)
-                        count += pItem.GetGemCountWithID(item);
-                }
-            }
-
-            return count;
-        }
-
-        public uint GetItemCountWithLimitCategory(uint limitCategory, Item skipItem)
-        {
-            uint count = 0;
-            for (uint i = 0; i < GetBagSize(); ++i)
-            {
-                Item pItem = m_bagslot[i];
-                if (pItem != null)
-                {
-                    if (pItem != skipItem)
-                    {
-                        ItemTemplate pProto = pItem.GetTemplate();
-                        if (pProto != null)
-                            if (pProto.GetItemLimitCategory() == limitCategory)
-                                count += m_bagslot[i].GetCount();
-                    }
-                }
-            }
-
-            return count;
-        }
-
         byte GetSlotByItemGUID(ObjectGuid guid)
         {
             for (byte i = 0; i < GetBagSize(); ++i)
