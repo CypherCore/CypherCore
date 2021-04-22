@@ -1068,15 +1068,15 @@ namespace Game.Entities
 
         public void CastSpell(SpellCastTargets targets, uint spellId, CastSpellExtraArgs args)
         {
+            if (args == null)
+                args = new CastSpellExtraArgs();
+
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, args.CastDifficulty != Difficulty.None ? args.CastDifficulty : GetMap().GetDifficultyID());
             if (spellInfo == null)
             {
                 Log.outError(LogFilter.Unit, $"CastSpell: unknown spell {spellId} by caster: {GetGUID()}");
                 return;
             }
-
-            if (args == null)
-                args = new CastSpellExtraArgs();
 
             Spell spell = new(this, spellInfo, args.TriggerFlags, args.OriginalCaster);
             foreach (var pair in args.SpellValueOverrides)
