@@ -36,6 +36,7 @@ namespace Scripts.Spells.Priest
         public const uint Atonement = 81749;
         public const uint AtonementHeal = 81751;
         public const uint AtonementTriggered = 194384;
+        public const uint AtonementTriggeredPowerShield = 214206;
         public const uint BlessedHealing = 70772;
         public const uint BodyAndSoul = 64129;
         public const uint BodyAndSoulSpeed = 65081;
@@ -157,7 +158,7 @@ namespace Scripts.Spells.Priest
         }
     }
 
-    [Script] // 194384 - Atonement
+    [Script] // 194384, 214206 - Atonement
     class spell_pri_atonement_triggered : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -473,6 +474,79 @@ namespace Scripts.Spells.Priest
         }
     }
 
+    [Script] // 194509 - Power Word: Radiance
+    class spell_pri_power_word_radiance : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.Atonement, SpellIds.AtonementTriggered);
+        }
+
+        void OnTargetSelect(List<WorldObject> targets)
+        {
+            SpellEffectInfo eff2 = GetEffectInfo(2);
+            if (eff2 == null)
+                return;
+
+            uint maxTargets = (uint)(eff2.CalcValue(GetCaster()) + 1); // adding 1 for explicit target unit
+            if (targets.Count > maxTargets)
+            {
+                Unit explTarget = GetExplTargetUnit();
+
+                // Sort targets so units with no atonement are first, then units who are injured, then oher units
+                // Make sure explicit target unit is first
+                targets.Sort((lhs, rhs) =>
+                {
+                    if (lhs == explTarget) // explTarget > anything: always true
+                        return 1;
+                    if (rhs == explTarget) // anything > explTarget: always false
+                        return -1;
+
+                    return MakeSortTuple(lhs).Equals(rhs) ? 1 : -1;
+                });
+
+                targets.Resize(maxTargets);
+            }
+        }
+
+        void HandleEffectHitTarget(uint effIndex)
+        {
+            SpellEffectInfo effect3 = GetEffectInfo(3);
+            if (effect3 == null)
+                return;
+
+            Unit caster = GetCaster();
+            int durationPct = effect3.CalcValue(caster);
+            if (caster.HasAura(SpellIds.Atonement))
+                caster.CastSpell(GetHitUnit(), SpellIds.AtonementTriggered, new CastSpellExtraArgs(SpellValueMod.DurationPct, durationPct).SetTriggerFlags(TriggerCastFlags.FullMask));
+        }
+
+        public override void Register()
+        {
+            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(OnTargetSelect, 1, Targets.UnitDestAreaAlly));
+            OnEffectHitTarget.Add(new EffectHandler(HandleEffectHitTarget, 1, SpellEffectName.Heal));
+        }
+
+        static Tuple<bool, bool> MakeSortTuple(WorldObject obj)
+        {
+            return Tuple.Create(IsUnitWithNoAtonement(obj), IsUnitInjured(obj));
+        }
+
+        // Returns true if obj is a unit but has no atonement
+        static bool IsUnitWithNoAtonement(WorldObject obj)
+        {
+            Unit unit = obj.ToUnit();
+            return unit != null && !unit.HasAura(SpellIds.AtonementTriggered);
+        }
+
+        // Returns true if obj is a unit and is injured
+        static bool IsUnitInjured(WorldObject obj)
+        {
+            Unit unit = obj.ToUnit();
+            return unit != null && unit.IsFullHealth();
+        }
+    }
+    
     [Script] // 17 - Power Word: Shield
     class spell_pri_power_word_shield : AuraScript
     {
@@ -508,7 +582,7 @@ namespace Scripts.Spells.Priest
             if (caster.HasAura(SpellIds.VoidShield) && caster == target)
                 caster.CastSpell(target, SpellIds.VoidShieldEffect, true);
             if (caster.HasAura(SpellIds.Atonement))
-                caster.CastSpell(target, SpellIds.AtonementTriggered, true);
+                caster.CastSpell(target, SpellIds.AtonementTriggeredPowerShield, true);
         }
 
         void HandleOnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -669,7 +743,7 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // 20711 - Spirit of Redemption
-    class spell_priest_spirit_of_redemption : AuraScript
+    class spell_pri_spirit_of_redemption : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -691,6 +765,31 @@ namespace Scripts.Spells.Priest
         }
     }
 
+    [Script] // 186263 - Shadow Mend
+    class spell_pri_shadow_mend : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.Atonement, SpellIds.AtonementTriggered);
+        }
+
+        void HandleEffectHit(uint effIndex)
+        {
+            Unit target = GetHitUnit();
+            if (target != null)
+            {
+                Unit caster = GetCaster();
+                if (caster.HasAura(SpellIds.Atonement))
+                    caster.CastSpell(target, SpellIds.AtonementTriggered, true);
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleEffectHit, 0, SpellEffectName.Heal));
+        }
+    }
+    
     [Script] // 28809 - Greater Heal
     class spell_pri_t3_4p_bonus : AuraScript
     {
