@@ -496,9 +496,9 @@ namespace Game.Entities
             public int AssignedSpecIndex = -1; // Index of character specialization that this set is automatically equipped for
             public string SetName = "";
             public string SetIcon = "";
-            public Array<ObjectGuid> Pieces = new(EquipmentSlot.End);
-            public Array<int> Appearances = new(EquipmentSlot.End);  // ItemModifiedAppearanceID
-            public Array<int> Enchants = new(2);  // SpellItemEnchantmentID
+            public ObjectGuid[] Pieces = new ObjectGuid[EquipmentSlot.End];
+            public int[] Appearances = new int[EquipmentSlot.End];  // ItemModifiedAppearanceID
+            public int[] Enchants = new int[2];  // SpellItemEnchantmentID
             public int Unknown901_1;
             public int Unknown901_2;
         }

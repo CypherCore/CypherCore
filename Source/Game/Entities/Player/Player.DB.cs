@@ -1446,9 +1446,6 @@ namespace Game.Entities
                         eqSet.Data.Pieces[i] = ObjectGuid.Create(HighGuid.Item, guid);
                 }
 
-                eqSet.Data.Appearances.Fill(0);
-                eqSet.Data.Enchants.Fill(0);
-
                 if (eqSet.Data.SetID >= ItemConst.MaxEquipmentSetIndex)   // client limit
                     continue;
 
@@ -1478,12 +1475,11 @@ namespace Game.Entities
                 eqSet.Data.SetIcon = result.Read<string>(3);
                 eqSet.Data.IgnoreMask = result.Read<uint>(4);
                 eqSet.state = EquipmentSetUpdateState.Unchanged;
-                eqSet.Data.Pieces.Fill(ObjectGuid.Empty);
 
                 for (int i = 0; i < EquipmentSlot.End; ++i)
                     eqSet.Data.Appearances[i] = result.Read<int>(5 + i);
 
-                for (int i = 0; i < eqSet.Data.Enchants.Count; ++i)
+                for (int i = 0; i < eqSet.Data.Enchants.Length; ++i)
                     eqSet.Data.Enchants[i] = result.Read<int>(24 + i);
 
                 if (eqSet.Data.SetID >= ItemConst.MaxEquipmentSetIndex)   // client limit
@@ -2341,7 +2337,7 @@ namespace Game.Entities
                             for (byte i = 0; i < EquipmentSlot.End; ++i)
                                 stmt.AddValue(j++, eqSet.Data.Appearances[i]);
 
-                            for (int i = 0; i < eqSet.Data.Enchants.Count; ++i)
+                            for (int i = 0; i < eqSet.Data.Enchants.Length; ++i)
                                 stmt.AddValue(j++, eqSet.Data.Enchants[i]);
 
                             stmt.AddValue(j++, GetGUID().GetCounter());
@@ -2380,7 +2376,7 @@ namespace Game.Entities
                             for (byte i = 0; i < EquipmentSlot.End; ++i)
                                 stmt.AddValue(j++, eqSet.Data.Appearances[i]);
 
-                            for (int i = 0; i < eqSet.Data.Enchants.Count; ++i)
+                            for (int i = 0; i < eqSet.Data.Enchants.Length; ++i)
                                 stmt.AddValue(j++, eqSet.Data.Enchants[i]);
                         }
                         trans.Append(stmt);
