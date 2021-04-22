@@ -2202,6 +2202,8 @@ namespace Game.Spells
                             duration = m_originalCaster.ModSpellDuration(m_spellInfo, unit, duration, positive, effectMask);
                             if (duration > 0)
                             {
+                                duration = (int)(duration * m_spellValue.DurationMul);
+
                                 // Haste modifies duration of channeled spells
                                 if (m_spellInfo.IsChanneled())
                                     m_originalCaster.ModSpellDurationTime(m_spellInfo, ref duration, this);
@@ -2964,6 +2966,9 @@ namespace Game.Spells
                     Player modOwner = m_caster.GetSpellModOwner();
                     if (modOwner != null)
                         modOwner.ApplySpellMod(m_spellInfo, SpellModOp.Duration, ref duration);
+
+                    duration = (int)(duration * m_spellValue.DurationMul);
+
                     // Apply haste mods
                     m_caster.ModSpellDurationTime(m_spellInfo, ref duration, this);
 
@@ -6955,6 +6960,9 @@ namespace Game.Spells
                 case SpellValueMod.AuraStack:
                     m_spellValue.AuraStackAmount = value;
                     break;
+                case SpellValueMod.DurationPct:
+                    m_spellValue.DurationMul = (float)value / 100.0f;
+                    break;
             }
         }
 
@@ -7760,6 +7768,7 @@ namespace Game.Spells
             MaxAffectedTargets = proto.MaxAffectedTargets;
             RadiusMod = 1.0f;
             AuraStackAmount = 1;
+            DurationMul = 1;
         }
 
         public int[] EffectBasePoints = new int[SpellConst.MaxEffects];
@@ -7767,6 +7776,7 @@ namespace Game.Spells
         public uint MaxAffectedTargets;
         public float RadiusMod;
         public int AuraStackAmount;
+        public float DurationMul;
     }
 
     // Spell modifier (used for modify other spells)
