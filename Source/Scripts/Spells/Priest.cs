@@ -36,7 +36,7 @@ namespace Scripts.Spells.Priest
         public const uint Atonement = 81749;
         public const uint AtonementHeal = 81751;
         public const uint AtonementTriggered = 194384;
-        public const uint AtonementTriggeredPowerShield = 214206;
+        public const uint AtonementTriggeredPowerTrinity = 214206;
         public const uint BlessedHealing = 70772;
         public const uint BodyAndSoul = 64129;
         public const uint BodyAndSoulSpeed = 65081;
@@ -69,6 +69,7 @@ namespace Scripts.Spells.Priest
         public const uint StrengthOfSoul = 197535;
         public const uint StrengthOfSoulEffect = 197548;
         public const uint ThePenitentAura = 200347;
+        public const uint Trinity = 214205;
         public const uint VampiricEmbraceHeal = 15290;
         public const uint VampiricTouchDispel = 64085;
         public const uint VoidShield = 199144;
@@ -479,7 +480,7 @@ namespace Scripts.Spells.Priest
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.Atonement, SpellIds.AtonementTriggered);
+            return ValidateSpellInfo(SpellIds.Atonement, SpellIds.AtonementTriggered, SpellIds.Trinity);
         }
 
         void OnTargetSelect(List<WorldObject> targets)
@@ -511,11 +512,14 @@ namespace Scripts.Spells.Priest
 
         void HandleEffectHitTarget(uint effIndex)
         {
+            Unit caster = GetCaster();
+            if (caster.HasAura(SpellIds.Trinity))
+                return;
+
             SpellEffectInfo effect3 = GetEffectInfo(3);
             if (effect3 == null)
                 return;
 
-            Unit caster = GetCaster();
             int durationPct = effect3.CalcValue(caster);
             if (caster.HasAura(SpellIds.Atonement))
                 caster.CastSpell(GetHitUnit(), SpellIds.AtonementTriggered, new CastSpellExtraArgs(SpellValueMod.DurationPct, durationPct).SetTriggerFlags(TriggerCastFlags.FullMask));
@@ -527,16 +531,16 @@ namespace Scripts.Spells.Priest
             OnEffectHitTarget.Add(new EffectHandler(HandleEffectHitTarget, 1, SpellEffectName.Heal));
         }
 
-        static Tuple<bool, bool> MakeSortTuple(WorldObject obj)
+        Tuple<bool, bool> MakeSortTuple(WorldObject obj)
         {
             return Tuple.Create(IsUnitWithNoAtonement(obj), IsUnitInjured(obj));
         }
 
         // Returns true if obj is a unit but has no atonement
-        static bool IsUnitWithNoAtonement(WorldObject obj)
+        bool IsUnitWithNoAtonement(WorldObject obj)
         {
             Unit unit = obj.ToUnit();
-            return unit != null && !unit.HasAura(SpellIds.AtonementTriggered);
+            return unit != null && !unit.HasAura(SpellIds.AtonementTriggered, GetCaster().GetGUID());
         }
 
         // Returns true if obj is a unit and is injured
@@ -550,6 +554,13 @@ namespace Scripts.Spells.Priest
     [Script] // 17 - Power Word: Shield
     class spell_pri_power_word_shield : AuraScript
     {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.BodyAndSoul, SpellIds.BodyAndSoulSpeed, SpellIds.StrengthOfSoul, SpellIds.StrengthOfSoulEffect, SpellIds.RenewedHope, SpellIds.RenewedHopeEffect,
+                SpellIds.VoidShield, SpellIds.VoidShieldEffect, SpellIds.Atonement, SpellIds.Trinity, SpellIds.AtonementTriggered, SpellIds.AtonementTriggeredPowerTrinity, SpellIds.ShieldDisciplinePassive,
+                SpellIds.ShieldDisciplineEnergize);
+        }
+        
         void CalculateAmount(AuraEffect auraEffect, ref int amount, ref bool canBeRecalculated)
         {
             canBeRecalculated = false;
@@ -582,7 +593,7 @@ namespace Scripts.Spells.Priest
             if (caster.HasAura(SpellIds.VoidShield) && caster == target)
                 caster.CastSpell(target, SpellIds.VoidShieldEffect, true);
             if (caster.HasAura(SpellIds.Atonement))
-                caster.CastSpell(target, SpellIds.AtonementTriggeredPowerShield, true);
+                caster.CastSpell(target, caster.HasAura(SpellIds.Trinity) ? SpellIds.AtonementTriggeredPowerTrinity : SpellIds.AtonementTriggered, true);
         }
 
         void HandleOnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -770,7 +781,7 @@ namespace Scripts.Spells.Priest
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.Atonement, SpellIds.AtonementTriggered);
+            return ValidateSpellInfo(SpellIds.Atonement, SpellIds.AtonementTriggered, SpellIds.Trinity);
         }
 
         void HandleEffectHit(uint effIndex)
@@ -779,7 +790,7 @@ namespace Scripts.Spells.Priest
             if (target != null)
             {
                 Unit caster = GetCaster();
-                if (caster.HasAura(SpellIds.Atonement))
+                if (caster.HasAura(SpellIds.Atonement) && !caster.HasAura(SpellIds.Trinity))
                     caster.CastSpell(target, SpellIds.AtonementTriggered, true);
             }
         }
