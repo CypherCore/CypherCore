@@ -4582,14 +4582,14 @@ namespace Game.Entities
                 return true;
             return false;
         }
-        byte FindEquipSlot(ItemTemplate proto, uint slot, bool swap)
+        byte FindEquipSlot(Item item, uint slot, bool swap)
         {
             byte[] slots = new byte[4];
             slots[0] = ItemConst.NullSlot;
             slots[1] = ItemConst.NullSlot;
             slots[2] = ItemConst.NullSlot;
             slots[3] = ItemConst.NullSlot;
-            switch (proto.GetInventoryType())
+            switch (item.GetTemplate().GetInventoryType())
             {
                 case InventoryType.Head:
                     slots[0] = EquipmentSlot.Head;
@@ -4697,15 +4697,36 @@ namespace Game.Entities
                         if (slots[i] != EquipmentSlot.OffHand || !IsTwoHandUsed())
                             return slots[i];
 
-                // if not found free and can swap return first appropriate from used
-                for (byte i = 0; i < 4; ++i)
-                    if (slots[i] != ItemConst.NullSlot && swap)
-                        return slots[i];
+                // if not found free and can swap return slot with lower item level equipped
+                if (swap)
+                {
+                    uint minItemLevel = uint.MaxValue;
+                    byte minItemLevelIndex = 0;
+                    for (byte i = 0; i < 4; ++i)
+                    {
+                        if (slots[i] != ItemConst.NullSlot)
+                        {
+                            Item equipped = GetItemByPos(InventorySlots.Bag0, slots[i]);
+                            if (equipped != null)
+                            {
+                                uint itemLevel = equipped.GetItemLevel(this);
+                                if (itemLevel < minItemLevel)
+                                {
+                                    minItemLevel = itemLevel;
+                                    minItemLevelIndex = i;
+                                }
+                            }
+                        }
+                    }
+
+                    return slots[minItemLevelIndex];
+                }
             }
 
             // no free position
             return ItemConst.NullSlot;
         }
+
         InventoryResult CanEquipNewItem(byte slot, out ushort dest, uint item, bool swap)
         {
             dest = 0;
@@ -4718,6 +4739,7 @@ namespace Game.Entities
 
             return InventoryResult.ItemNotFound;
         }
+
         public InventoryResult CanEquipItem(byte slot, out ushort dest, Item pItem, bool swap, bool not_loading = true)
         {
             dest = 0;
@@ -4778,7 +4800,7 @@ namespace Game.Entities
                     if (requiredLevels.HasValue && requiredLevels.Value.MaxLevel < SharedConst.DefaultMaxLevel && requiredLevels.Value.MaxLevel < GetLevel() && Global.DB2Mgr.GetHeirloomByItemId(pProto.GetId()) == null)
                         return InventoryResult.NotEquippable;
 
-                    byte eslot = FindEquipSlot(pProto, slot, swap);
+                    byte eslot = FindEquipSlot(pItem, slot, swap);
                     if (eslot == ItemConst.NullSlot)
                         return InventoryResult.NotEquippable;
 
