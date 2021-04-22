@@ -1259,7 +1259,7 @@ namespace Game.Entities
             Log.outError(LogFilter.Player, "STORAGE: Can't equip or store initial item {0} for race {1} class {2}, error msg = {3}", titem_id, GetRace(), GetClass(), msg);
             return false;
         }
-        public Item StoreNewItem(List<ItemPosCount> pos, uint itemId, bool update, uint randomPropertyId = 0, List<ObjectGuid> allowedLooters = null, ItemContext context = 0, List<uint> bonusListIDs = null, bool addToCollection = true)
+        public Item StoreNewItem(List<ItemPosCount> pos, uint itemId, bool update, uint randomBonusListId = 0, List<ObjectGuid> allowedLooters = null, ItemContext context = 0, List<uint> bonusListIDs = null, bool addToCollection = true)
         {
             uint count = 0;
             foreach (var itemPosCount in pos)
@@ -1279,7 +1279,7 @@ namespace Game.Entities
                 item = StoreItem(pos, item, update);
 
                 item.SetFixedLevel(GetLevel());
-                item.SetItemRandomBonusList(randomPropertyId);
+                item.SetItemRandomBonusList(randomBonusListId);
 
                 if (allowedLooters != null && allowedLooters.Count > 1 && item.GetTemplate().GetMaxStackSize() == 1 && item.IsSoulBound())
                 {
@@ -1319,7 +1319,8 @@ namespace Game.Entities
                     }
                 }
 
-                UpdateAverageItemLevelTotal();
+                if (item.GetTemplate().GetInventoryType() != InventoryType.NonEquip)
+                    UpdateAverageItemLevelTotal();
             }
             return item;
         }
@@ -5408,7 +5409,9 @@ namespace Game.Entities
                 pItem.SetSlot(ItemConst.NullSlot);
                 pItem.SetState(ItemUpdateState.Removed, this);
 
-                UpdateAverageItemLevelTotal();
+                if (pItem.GetTemplate().GetInventoryType() != InventoryType.NonEquip)
+                    UpdateAverageItemLevelTotal();
+
                 if (bag == InventorySlots.Bag0)
                     UpdateAverageItemLevelEquipped();
             }
