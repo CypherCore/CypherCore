@@ -57,6 +57,7 @@ namespace System.Collections.Generic
                 {
                     if (Count >= _limit)
                         throw new InternalBufferOverflowException("Attempted to read more array elements from packet " + Count + 1 + " than allowed " + _limit);
+
                     Insert(index, value);
                 }
                 else

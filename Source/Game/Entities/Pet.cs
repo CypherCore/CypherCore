@@ -750,22 +750,6 @@ namespace Game.Entities
             return diet.HasAnyFlag(FoodMask);
         }
 
-        public uint GetCurrentFoodBenefitLevel(uint itemlevel)
-        {
-            // -5 or greater food level
-            if (GetLevel() <= itemlevel + 5)                         //possible to feed level 60 pet with level 55 level food for full effect
-                return 35000;
-            // -10..-6
-            else if (GetLevel() <= itemlevel + 10)                   //pure guess, but sounds good
-                return 17000;
-            // -14..-11
-            else if (GetLevel() <= itemlevel + 14)                   //level 55 food gets green on 70, makes sense to me
-                return 8000;
-            // -15 or less
-            else
-                return 0;                                           //food too low level
-        }
-
         void _LoadSpellCooldowns()
         {
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_PET_SPELL_COOLDOWN);

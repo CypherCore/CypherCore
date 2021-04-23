@@ -3266,7 +3266,6 @@ namespace Game.Entities
             }
 
             UpdateInterruptMask();
-
         }
 
         public void RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2 flag, uint except = 0)

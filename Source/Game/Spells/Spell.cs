@@ -4996,7 +4996,7 @@ namespace Game.Spells
                             if (!pet.HaveInDiet(foodItem.GetTemplate()))
                                 return SpellCastResult.WrongPetFood;
 
-                            if (pet.GetCurrentFoodBenefitLevel(foodItem.GetTemplate().GetBaseItemLevel()) == 0)
+                            if (foodItem.GetTemplate().GetBaseItemLevel() + 30 <= pet.GetLevel())
                                 return SpellCastResult.FoodLowlevel;
 
                             if (m_caster.IsInCombat() || pet.IsInCombat())

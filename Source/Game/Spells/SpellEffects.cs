@@ -3578,19 +3578,24 @@ namespace Game.Spells
             if (!pet.IsAlive())
                 return;
 
-            int benefit = (int)pet.GetCurrentFoodBenefitLevel(foodItem.GetTemplate().GetBaseItemLevel());
-            if (benefit <= 0)
-                return;
-
             ExecuteLogEffectDestroyItem(effIndex, foodItem.GetEntry());
 
             uint count = 1;
             player.DestroyItemCount(foodItem, ref count, true);
             // @todo fix crash when a spell has two effects, both pointed at the same item target
 
-            CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, benefit);
-            m_caster.CastSpell(pet, effectInfo.TriggerSpell, args);
+            int pct;
+            int levelDiff = (int)(pet.GetLevel() - foodItem.GetTemplate().GetBaseItemLevel());
+            if (levelDiff >= 30)
+                return;
+            else if (levelDiff >= 20)
+                pct = (int)12.5; // we can't pass double so keeping the cast here for future references
+            else if (levelDiff >= 10)
+                pct = 25;
+            else
+                pct = 50;
+
+            m_caster.CastSpell(pet, effectInfo.TriggerSpell, new CastSpellExtraArgs(SpellValueMod.BasePoint0, pct).SetTriggerFlags(TriggerCastFlags.FullMask));
         }
 
         [SpellEffectHandler(SpellEffectName.DismissPet)]
