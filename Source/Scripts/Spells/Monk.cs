@@ -33,6 +33,10 @@ namespace Scripts.Spells.Monk
         public const uint ProvokeAoe = 118635;
         public const uint SoothingMist = 115175;
         public const uint StanceOfTheSpiritedCrane = 154436;
+        public const uint StaggerDamageAura = 124255;
+        public const uint StaggerHeavy = 124273;
+        public const uint StaggerLight = 124275;
+        public const uint StaggerModerate = 124274;
         public const uint SurgingMistHeal = 116995;
     }
 
@@ -134,6 +138,229 @@ namespace Scripts.Spells.Monk
         {
             OnCheckCast.Add(new CheckCastHandler(CheckExplicitTarget));
             OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    //static constexpr SpellEffIndex AuraStaggerEffectTick = EFFECT_0;
+    //static constexpr SpellEffIndex AuraStaggerEffectTotal = EFFECT_1;
+
+    [Script] // 115069 - Stagger
+    class spell_monk_stagger : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.StaggerLight, SpellIds.StaggerModerate, SpellIds.StaggerHeavy);
+        }
+
+        void AbsorbNormal(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
+        {
+            Absorb(dmgInfo, 1.0f);
+        }
+
+        void AbsorbMagic(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
+        {
+            AuraEffect effect = GetEffect(4);
+            if (effect == null)
+                return;
+
+            Absorb(dmgInfo, effect.GetAmount() / 100.0f);
+        }
+
+        void Absorb(DamageInfo dmgInfo, float multiplier)
+        {
+            // Prevent default action (which would remove the aura)
+            PreventDefaultAction();
+
+            // make sure damage doesn't come from stagger damage spell SPELL_MONK_STAGGER_DAMAGE_AURA
+            SpellInfo dmgSpellInfo = dmgInfo.GetSpellInfo();
+            if (dmgSpellInfo != null)
+                if (dmgSpellInfo.Id == SpellIds.StaggerDamageAura)
+                    return;
+
+            AuraEffect effect = GetEffect(0);
+            if (effect == null)
+                return;
+
+            Unit target = GetTarget();
+            float agility = target.GetStat(Stats.Agility);
+            float baseAmount = MathFunctions.CalculatePct(agility, effect.GetAmount());
+            float K = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.ArmorConstant, target.GetLevel(), -2, 0, target.GetClass());
+
+            float newAmount = (baseAmount / (baseAmount + K));
+            newAmount *= multiplier;
+
+            // Absorb X percentage of the damage
+            float absorbAmount = dmgInfo.GetDamage() * newAmount;
+            if (absorbAmount > 0)
+            {
+                dmgInfo.AbsorbDamage((uint)absorbAmount);
+
+                // Cast stagger and make it tick on each tick
+                AddAndRefreshStagger(absorbAmount);
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectAbsorb.Add(new EffectAbsorbHandler(AbsorbNormal, 1));
+            OnEffectAbsorb.Add(new EffectAbsorbHandler(AbsorbMagic, 2));
+        }
+
+        void AddAndRefreshStagger(float amount)
+        {
+            Unit target = GetTarget();
+            Aura auraStagger = FindExistingStaggerEffect(target);
+            if (auraStagger != null)
+            {
+                AuraEffect effStaggerRemaining = auraStagger.GetEffect(1);
+                if (effStaggerRemaining == null)
+                    return;
+
+                float newAmount = effStaggerRemaining.GetAmount() + amount;
+                uint spellId = GetStaggerSpellId(target, newAmount);
+                if (spellId == effStaggerRemaining.GetSpellInfo().Id)
+                {
+                    auraStagger.RefreshDuration();
+                    effStaggerRemaining.ChangeAmount((int)newAmount, false, true /* reapply */);
+                }
+                else
+                {
+                    // amount changed the stagger type so we need to change the stagger amount (e.g. from medium to light)
+                    GetTarget().RemoveAura(auraStagger);
+                    AddNewStagger(target, spellId, newAmount);
+                }
+            }
+            else
+                AddNewStagger(target, GetStaggerSpellId(target, amount), amount);
+        }
+
+        uint GetStaggerSpellId(Unit unit, float amount)
+        {
+            const float StaggerHeavy = 0.6f;
+            const float StaggerModerate = 0.3f;
+
+            float staggerPct = amount / unit.GetMaxHealth();
+            return (staggerPct >= StaggerHeavy) ? SpellIds.StaggerHeavy :
+                (staggerPct >= StaggerModerate) ? SpellIds.StaggerModerate :
+                SpellIds.StaggerLight;
+        }
+
+        void AddNewStagger(Unit unit, uint staggerSpellId, float staggerAmount)
+        {
+            // We only set the total stagger amount. The amount per tick will be set by the stagger spell script
+            unit.CastSpell(unit, staggerSpellId, new CastSpellExtraArgs(SpellValueMod.BasePoint1, (int)staggerAmount).SetTriggerFlags(TriggerCastFlags.FullMask));
+        }
+
+        public static Aura FindExistingStaggerEffect(Unit unit)
+        {
+            Aura auraLight = unit.GetAura(SpellIds.StaggerLight);
+            if (auraLight != null)
+                return auraLight;
+
+            Aura auraModerate = unit.GetAura(SpellIds.StaggerModerate);
+            if (auraModerate != null)
+                return auraModerate;
+
+            Aura auraHeavy = unit.GetAura(SpellIds.StaggerHeavy);
+            if (auraHeavy != null)
+                return auraHeavy;
+
+            return null;
+        }
+    }
+
+    [Script] // 124255 - Stagger - SPELL_MONK_STAGGER_DAMAGE_AURA
+    class spell_monk_stagger_damage_aura : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.StaggerLight, SpellIds.StaggerModerate, SpellIds.StaggerHeavy);
+        }
+
+        void OnPeriodicDamage(AuraEffect aurEff)
+        {
+            // Update our light/medium/heavy stagger with the correct stagger amount left
+            Aura auraStagger = spell_monk_stagger.FindExistingStaggerEffect(GetTarget());
+            if (auraStagger != null)
+            {
+                AuraEffect auraEff = auraStagger.GetEffect(1);
+                if (auraEff != null)
+                {
+                    float total = auraEff.GetAmount();
+                    float tickDamage = aurEff.GetDamage();
+                    auraEff.ChangeAmount((int)(total - tickDamage));
+                }
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(OnPeriodicDamage, 0, AuraType.PeriodicDamage));
+        }
+    }
+
+    [Script] // 124273, 124274, 124275 - Light/Moderate/Heavy Stagger - SPELL_MONK_STAGGER_LIGHT / SPELL_MONK_STAGGER_MODERATE / SPELL_MONK_STAGGER_HEAVY
+    class spell_monk_stagger_debuff_aura : AuraScript
+    {
+        float _period;
+
+        public override bool Load()
+        {
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.StaggerDamageAura, GetCastDifficulty());
+            SpellEffectInfo effInfo = spellInfo?.GetEffect(0);
+            if (effInfo == null)
+                return false;
+
+            _period = (float)effInfo.ApplyAuraPeriod;
+            return true;
+        }
+
+        void OnReapply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            // Calculate damage per tick
+            float total = aurEff.GetAmount();
+            float perTick = total * _period / (float)GetDuration(); // should be same as GetMaxDuration() TODO: verify
+
+            // Set amount on effect for tooltip
+            AuraEffect effInfo = GetAura().GetEffect(0);
+            if (effInfo != null)
+                effInfo.ChangeAmount((int)perTick);
+
+            // Set amount on damage aura (or cast it if needed)
+            CastOrChangeTickDamage(perTick);
+        }
+
+        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            if (mode != AuraEffectHandleModes.Real)
+                return;
+
+            // Remove damage aura
+            GetTarget().RemoveAura(SpellIds.StaggerDamageAura);
+        }
+
+        public override void Register()
+        {
+            AfterEffectApply.Add(new EffectApplyHandler(OnReapply, 1, AuraType.Dummy, AuraEffectHandleModes.RealOrReapplyMask));
+            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 1, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+
+        void CastOrChangeTickDamage(float tickDamage)
+        {
+            Unit unit = GetTarget();
+            Aura auraDamage = unit.GetAura(SpellIds.StaggerDamageAura);
+            if (auraDamage == null)
+            {
+                unit.CastSpell(unit, SpellIds.StaggerDamageAura, true);
+                auraDamage = unit.GetAura(SpellIds.StaggerDamageAura);
+            }
+
+            if (auraDamage != null)
+            {
+                AuraEffect eff = auraDamage.GetEffect(0);
+                if (eff != null)
+                    eff.SetDamage((int)tickDamage);
+            }
         }
     }
 }

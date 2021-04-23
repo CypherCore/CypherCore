@@ -1403,7 +1403,7 @@ namespace Game.Scripting
         AuraObjectType GetAuraType() { return m_aura.GetAuraType(); }
 
         // aura duration manipulation - when duration goes to 0 aura is removed
-        int GetDuration() { return m_aura.GetDuration(); }
+        public int GetDuration() { return m_aura.GetDuration(); }
         public void SetDuration(int duration, bool withMods = false) { m_aura.SetDuration(duration, withMods); }
         // sets duration to maxduration
         void RefreshDuration() { m_aura.RefreshDuration(); }
