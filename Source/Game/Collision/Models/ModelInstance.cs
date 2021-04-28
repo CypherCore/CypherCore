@@ -29,9 +29,23 @@ namespace Game.Collision
         ParentSpawn = 1 << 2
     }
 
-    public class ModelSpawn
+    public class ModelMinimalData
     {
+        public byte flags;
+        public byte adtId;
+        public uint Id;
+        public Vector3 iPos;
+        public float iScale;
+        public AxisAlignedBox iBound;
+        public string name;
+    }
+
+    public class ModelSpawn : ModelMinimalData
+    {
+        public Vector3 iRot;
+
         public ModelSpawn() { }
+
         public ModelSpawn(ModelSpawn spawn)
         {
             flags = spawn.flags;
@@ -48,8 +62,8 @@ namespace Game.Collision
         {
             spawn = new ModelSpawn();
 
-            spawn.flags = reader.ReadUInt32();
-            spawn.adtId = reader.ReadUInt16();
+            spawn.flags = reader.ReadByte();
+            spawn.adtId = reader.ReadByte();
             spawn.Id = reader.ReadUInt32();
             spawn.iPos = reader.Read<Vector3>();
             spawn.iRot = reader.Read<Vector3>();
@@ -67,30 +81,33 @@ namespace Game.Collision
             spawn.name = reader.ReadString((int)nameLen);
             return true;
         }
-
-        public uint flags;
-        public ushort adtId;
-        public uint Id;
-        public Vector3 iPos;
-        public Vector3 iRot;
-        public float iScale;
-        public AxisAlignedBox iBound;
-        public string name;
     }
 
-    public class ModelInstance : ModelSpawn
+    public class ModelInstance : ModelMinimalData
     {
+        Matrix3 iInvRot;
+        float iInvScale;
+        WorldModel iModel;
+
         public ModelInstance()
         {
             iInvScale = 0.0f;
             iModel = null;
         }
+
         public ModelInstance(ModelSpawn spawn, WorldModel model)
-            : base(spawn)
         {
+            flags = spawn.flags;
+            adtId = spawn.adtId;
+            Id = spawn.Id;
+            iPos = spawn.iPos;
+            iScale = spawn.iScale;
+            iBound = spawn.iBound;
+            name = spawn.name;
+
             iModel = model;
 
-            iInvRot = Matrix3.fromEulerAnglesZYX(MathFunctions.PI * iRot.Y / 180.0f, MathFunctions.PI * iRot.X / 180.0f, MathFunctions.PI * iRot.Z / 180.0f).inverse();
+            iInvRot = Matrix3.fromEulerAnglesZYX(MathFunctions.PI * spawn.iRot.Y / 180.0f, MathFunctions.PI * spawn.iRot.X / 180.0f, MathFunctions.PI * spawn.iRot.Z / 180.0f).inverse();
             iInvScale = 1.0f / iScale;
         }
 
@@ -193,9 +210,5 @@ namespace Game.Collision
         }
 
         public void SetUnloaded() { iModel = null; }
-
-        Matrix3 iInvRot;
-        float iInvScale;
-        WorldModel iModel;
     }
 }

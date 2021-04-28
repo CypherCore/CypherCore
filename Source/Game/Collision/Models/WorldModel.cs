@@ -25,21 +25,29 @@ namespace Game.Collision
 {
     public struct MeshTriangle
     {
+        public uint idx0;
+        public uint idx1;
+        public uint idx2;
+
         public MeshTriangle(uint na, uint nb, uint nc)
         {
             idx0 = na;
             idx1 = nb;
             idx2 = nc;
         }
-
-        public uint idx0;
-        public uint idx1;
-        public uint idx2;
     }
 
     public class WmoLiquid
     {
+        uint iTilesX;
+        uint iTilesY;
+        Vector3 iCorner;
+        uint iType;
+        float[] iHeight;
+        byte[] iFlags;
+
         public WmoLiquid() { }
+
         public WmoLiquid(uint width, uint height, Vector3 corner, uint type)
         {
             iTilesX = width;
@@ -58,6 +66,7 @@ namespace Game.Collision
                 iFlags = null;
             }
         }
+
         public WmoLiquid(WmoLiquid other)
         {
             if (this == other)
@@ -155,23 +164,23 @@ namespace Game.Collision
         }
 
         public uint GetLiquidType() { return iType; }
-        float[] GetHeightStorage() { return iHeight; }
-        byte[] GetFlagsStorage() { return iFlags; }
-
-        uint iTilesX;
-        uint iTilesY;
-        Vector3 iCorner;
-        uint iType;
-        float[] iHeight;
-        byte[] iFlags;
     }
 
     public class GroupModel : IModel
     {
+        AxisAlignedBox iBound;
+        uint iMogpFlags;
+        uint iGroupWMOID;
+        List<Vector3> vertices = new();
+        List<MeshTriangle> triangles = new();
+        BIH meshTree = new();
+        WmoLiquid iLiquid;
+
         public GroupModel()
         {
             iLiquid = null;
         }
+
         public GroupModel(GroupModel other)
         {
             iBound = other.iBound;
@@ -185,17 +194,13 @@ namespace Game.Collision
             if (other.iLiquid != null)
                 iLiquid = new WmoLiquid(other.iLiquid);
         }
+
         public GroupModel(uint mogpFlags, uint groupWMOID, AxisAlignedBox bound)
         {
             iBound = bound;
             iMogpFlags = mogpFlags;
             iGroupWMOID = groupWMOID;
             iLiquid = null;
-        }
-
-        void SetLiquidData(WmoLiquid liquid)
-        {
-            iLiquid = liquid;
         }
 
         public bool ReadFromFile(BinaryReader reader)
@@ -294,22 +299,15 @@ namespace Game.Collision
         public uint GetMogpFlags() { return iMogpFlags; }
 
         public uint GetWmoID() { return iGroupWMOID; }
-
-        AxisAlignedBox iBound;
-        uint iMogpFlags;
-        uint iGroupWMOID;
-        List<Vector3> vertices = new();
-        List<MeshTriangle> triangles = new();
-        BIH meshTree = new();
-        WmoLiquid iLiquid;
     }
 
     public class WorldModel : IModel
     {
-        public WorldModel()
-        {
-            RootWMOID = 0;
-        }
+        public uint Flags;
+
+        uint RootWMOID;
+        List<GroupModel> groupModels = new();
+        BIH groupTree = new();
 
         public override bool IntersectRay(Ray ray, ref float distance, bool stopAtFirstHit, ModelIgnoreFlags ignoreFlags)
         {
@@ -408,10 +406,5 @@ namespace Game.Collision
                 return groupTree.ReadFromFile(reader);
             }
         }
-
-        List<GroupModel> groupModels = new();
-        BIH groupTree = new();
-        uint RootWMOID;
-        public uint Flags;
     }
 }

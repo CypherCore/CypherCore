@@ -292,19 +292,15 @@ namespace Game.Collision
                 var model = iLoadedModelFiles.LookupByKey(filename);
                 if (model == null)
                 {
-                    WorldModel worldmodel = new();
-                    if (!worldmodel.ReadFile(VMapPath + filename))
+                    model = new ManagedModel();
+                    if (!model.GetModel().ReadFile(VMapPath + filename))
                     {
                         Log.outError(LogFilter.Server, "VMapManager: could not load '{0}'", filename);
                         return null;
                     }
 
                     Log.outDebug(LogFilter.Maps, "VMapManager: loading file '{0}'", filename);
-
-                    worldmodel.Flags = flags;
-
-                    model = new ManagedModel();
-                    model.SetModel(worldmodel);
+                    model.GetModel().Flags = flags;
 
                     iLoadedModelFiles.Add(filename, model);
                 }
@@ -382,7 +378,7 @@ namespace Game.Collision
     {
         public ManagedModel()
         {
-            iModel = null;
+            iModel = new();
             iRefCount = 0;
         }
 

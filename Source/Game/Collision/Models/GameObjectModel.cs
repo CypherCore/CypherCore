@@ -60,7 +60,6 @@ namespace Game.Collision
             if (iModel == null)
                 return false;
 
-            name = modelData.name;
             iPos = modelOwner.GetPosition();
             iScale = modelOwner.GetScale();
             iInvScale = 1.0f / iScale;
@@ -224,7 +223,6 @@ namespace Game.Collision
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} GameObject models in {1} ms", StaticModelList.models.Count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        string name;
         bool _collisionEnabled;
         AxisAlignedBox iBound;
         Matrix3 iInvRot;
