@@ -725,7 +725,7 @@ namespace Scripts.Spells.Shaman
     [Script] // 192223 - Liquid Magma Totem (erupting hit spell)
     class spell_sha_liquid_magma_totem : SpellScript
     {
-        bool Validate(SpellInfo spellInfo)
+        public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.LiquidMagmaHit);
         }

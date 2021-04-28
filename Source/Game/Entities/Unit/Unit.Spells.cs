@@ -2840,14 +2840,15 @@ namespace Game.Entities
                     if (IsTypeId(TypeId.Player))
                         ToPlayer().SendAutoRepeatCancel(this);
 
+                m_currentSpells[spellType] = null;
+
                 if (spell.GetState() != SpellState.Finished)
                     spell.Cancel();
+                else
+                    spell.SetReferencedFromCurrent(false);
 
                 if (IsCreature() && IsAIEnabled)
                     ToCreature().GetAI().OnSpellCastInterrupt(spell.GetSpellInfo());
-
-                m_currentSpells[spellType] = null;
-                spell.SetReferencedFromCurrent(false);
             }
         }
         public void UpdateInterruptMask()
