@@ -289,14 +289,15 @@ namespace Game.AI
             if (fail)
                 return;
 
-            GetScript().ProcessEventsFor(SmartEvents.WaypointEnded, null, _currentWaypointNode, GetScript().GetPathId());
+            uint pathid = GetScript().GetPathId();
+            GetScript().ProcessEventsFor(SmartEvents.WaypointEnded, null, _currentWaypointNode, pathid);
 
             if (_repeatWaypointPath)
             {
                 if (IsAIControlled())
                     StartPath(_run, GetScript().GetPathId(), _repeatWaypointPath);
             }
-            else
+            else if (pathid == GetScript().GetPathId()) // if it's not the same pathid, our script wants to start another path; don't override it
                 GetScript().SetPathId(0);
 
             if (_despawnState == 1)
