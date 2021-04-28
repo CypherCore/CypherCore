@@ -390,11 +390,12 @@ namespace Game.AI
             return true;
         }
 
-        public override void WaypointPathStarted(uint nodeId, uint pathId)
+        public override void WaypointPathStarted(uint pathId)
         {
             if (!HasEscortState(SmartEscortState.Escorting))
             {
-                GetScript().ProcessEventsFor(SmartEvents.WaypointStart, null, nodeId, pathId);
+                // @todo remove the constant 1 at some point, it's never anything different
+                GetScript().ProcessEventsFor(SmartEvents.WaypointStart, null, 1, pathId);
                 return;
             }
         }

@@ -59,8 +59,8 @@ namespace Game.Movement
             _nextMoveTime.Reset(1000);
 
             // inform AI
-            if (creature.GetAI() != null)
-                creature.GetAI().WaypointPathStarted(1, _path.id);
+            if (creature.IsAIEnabled)
+                creature.GetAI().WaypointPathStarted(_path.id);
         }
 
         public override void DoInitialize(Creature creature)

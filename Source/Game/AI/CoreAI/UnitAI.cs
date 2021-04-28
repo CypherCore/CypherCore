@@ -496,14 +496,6 @@ namespace Game.AI
         /// </summary>
         public virtual void OnGameEvent(bool start, ushort eventId) { }
 
-        public virtual void WaypointPathStarted(uint nodeId, uint pathId) { }
-
-        public virtual void WaypointStarted(uint nodeId, uint pathId) { }
-
-        public virtual void WaypointReached(uint nodeId, uint pathId) { }
-
-        public virtual void WaypointPathEnded(uint nodeId, uint pathId) { }
-
         public static AISpellInfoType GetAISpellInfo(uint spellId, Difficulty difficulty)
         {
             return _aiSpellInfo.LookupByKey((spellId, difficulty));

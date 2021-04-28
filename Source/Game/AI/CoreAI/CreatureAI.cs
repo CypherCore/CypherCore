@@ -500,6 +500,16 @@ namespace Game.AI
         }
         public virtual void QuestReward(Player player, Quest quest, LootItemType type, uint opt) { }
 
+        /// == Waypoints system =============================
+
+        public virtual void WaypointPathStarted(uint pathId) { }
+
+        public virtual void WaypointStarted(uint nodeId, uint pathId) { }
+
+        public virtual void WaypointReached(uint nodeId, uint pathId) { }
+
+        public virtual void WaypointPathEnded(uint nodeId, uint pathId) { }
+
         public virtual void PassengerBoarded(Unit passenger, sbyte seatId, bool apply) { }
 
         public virtual void OnSpellClick(Unit clicker, ref bool result) { }
