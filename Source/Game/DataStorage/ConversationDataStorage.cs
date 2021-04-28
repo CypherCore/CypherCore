@@ -29,36 +29,11 @@ namespace Game.DataStorage
 
         public void LoadConversationTemplates()
         {
-            _conversationActorTemplateStorage.Clear();
             _conversationLineTemplateStorage.Clear();
             _conversationTemplateStorage.Clear();
 
-            Dictionary<uint, ConversationActorTemplate[]> actorsByConversation = new();
+            Dictionary<uint, ConversationActor[]> actorsByConversation = new();
             Dictionary<uint, ulong[]> actorGuidsByConversation = new();
-
-            SQLResult actorTemplates = DB.World.Query("SELECT Id, CreatureId, CreatureModelId FROM conversation_actor_template");
-            if (!actorTemplates.IsEmpty())
-            {
-                uint oldMSTime = Time.GetMSTime();
-
-                do
-                {
-                    uint id = actorTemplates.Read<uint>(0);
-                    ConversationActorTemplate conversationActor = new();
-                    conversationActor.Id = id;
-                    conversationActor.CreatureId = actorTemplates.Read<uint>(1);
-                    conversationActor.CreatureModelId = actorTemplates.Read<uint>(2);
-
-                    _conversationActorTemplateStorage[id] = conversationActor;
-                }
-                while (actorTemplates.NextRow());
-
-                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} Conversation actor templates in {1} ms", _conversationActorTemplateStorage.Count, Time.GetMSTimeDiffToNow(oldMSTime));
-            }
-            else
-            {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Conversation actor templates. DB table `conversation_actor_template` is empty.");
-            }
 
             SQLResult lineTemplates = DB.World.Query("SELECT Id, StartTime, UiCameraID, ActorIdx, Flags FROM conversation_line_template");
             if (!lineTemplates.IsEmpty())
@@ -93,7 +68,7 @@ namespace Game.DataStorage
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Conversation line templates. DB table `conversation_line_template` is empty.");
             }
 
-            SQLResult actorResult = DB.World.Query("SELECT ConversationId, ConversationActorId, ConversationActorGuid, Idx FROM conversation_actors");
+            SQLResult actorResult = DB.World.Query("SELECT ConversationId, ConversationActorId, ConversationActorGuid, Idx, CreatureId, CreatureDisplayInfoId FROM conversation_actors");
             if (!actorResult.IsEmpty())
             {
                 uint oldMSTime = Time.GetMSTime();
@@ -105,29 +80,36 @@ namespace Game.DataStorage
                     uint actorId = actorResult.Read<uint>(1);
                     ulong actorGuid = actorResult.Read<ulong>(2);
                     ushort idx = actorResult.Read<ushort>(3);
+                    uint creatureId = actorResult.Read<uint>(4);
+                    uint creatureDisplayInfoId = actorResult.Read<uint>(5);
 
-                    if (actorId != 0 && actorGuid != 0)
+                    if (creatureId != 0 && actorGuid != 0)
                     {
                         Log.outError(LogFilter.Sql, $"Table `conversation_actors` references both actor (ID: {actorId}) and actorGuid (GUID: {actorGuid}) for Conversation {conversationId}, skipped.");
                         continue;
                     }
-                    if (actorId != 0)
-                    {
-                        ConversationActorTemplate conversationActorTemplate = _conversationActorTemplateStorage.LookupByKey(actorId);
-                        if (conversationActorTemplate != null)
-                        {
-                            if (!actorsByConversation.ContainsKey(conversationId))
-                                actorsByConversation[conversationId] = new ConversationActorTemplate[idx + 1];
 
-                            ConversationActorTemplate[] actors = actorsByConversation[conversationId];
+                    if (creatureId != 0)
+                    {
+                        if (creatureDisplayInfoId != 0)
+                        {
+                            ConversationActor conversationActor = new();
+                            conversationActor.ActorId = actorId;
+                            conversationActor.CreatureId = creatureId;
+                            conversationActor.CreatureDisplayInfoId = creatureDisplayInfoId;
+
+                            if (!actorsByConversation.ContainsKey(conversationId))
+                                actorsByConversation[conversationId] = new ConversationActor[idx + 1];
+
+                            ConversationActor[] actors = actorsByConversation[conversationId];
                             if (actors.Length <= idx)
                                 Array.Resize(ref actors, idx + 1);
 
-                            actors[idx] = conversationActorTemplate;
+                            actors[idx] = conversationActor;
                             ++count;
                         }
                         else
-                            Log.outError(LogFilter.Sql, "Table `conversation_actors` references an invalid actor (ID: {0}) for Conversation {1}, skipped", actorId, conversationId);
+                            Log.outError(LogFilter.Sql, $"Table `conversation_actors` references an actor (CreatureId: {creatureId}) without CreatureDisplayInfoId for Conversation {conversationId}, skipped");
                     }
                     else if (actorGuid != 0)
                     {
@@ -211,15 +193,14 @@ namespace Game.DataStorage
         }
 
         Dictionary<uint, ConversationTemplate> _conversationTemplateStorage = new();
-        Dictionary<uint, ConversationActorTemplate> _conversationActorTemplateStorage = new();
         Dictionary<uint, ConversationLineTemplate> _conversationLineTemplateStorage = new();
     }
 
-    public class ConversationActorTemplate
+    public class ConversationActor
     {
-        public uint Id;
+        public uint ActorId;
         public uint CreatureId;
-        public uint CreatureModelId;
+        public uint CreatureDisplayInfoId;
     }
 
     public class ConversationLineTemplate
@@ -240,7 +221,7 @@ namespace Game.DataStorage
         public uint TextureKitId;    // Background texture
         public uint ScriptId;
 
-        public List<ConversationActorTemplate> Actors = new();
+        public List<ConversationActor> Actors = new();
         public List<ulong> ActorGuids = new();
         public List<ConversationLineTemplate> Lines = new();
     }

@@ -5631,7 +5631,7 @@ namespace Game.Entities
         }
     }
 
-    public class ConversationActor
+    public class ConversationActorField
     {
         public uint CreatureID;
         public uint CreatureDisplayInfoID;
@@ -5666,7 +5666,7 @@ namespace Game.Entities
     public class ConversationData : BaseUpdateData<Conversation>
     {
         public UpdateField<List<ConversationLine>> Lines = new(0, 1);
-        public DynamicUpdateField<ConversationActor> Actors = new(0, 2);
+        public DynamicUpdateField<ConversationActorField> Actors = new(0, 2);
         public UpdateField<uint> LastLineEndTime = new(0, 3);
         public UpdateField<uint> Progress = new(0, 4);
 

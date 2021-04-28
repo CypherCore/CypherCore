@@ -139,10 +139,10 @@ namespace Game.Entities
                 {
                     if (actor != null)
                     {
-                        ConversationActor actorField = new();
+                        ConversationActorField actorField = new();
                         actorField.CreatureID = actor.CreatureId;
-                        actorField.CreatureDisplayInfoID = actor.CreatureModelId;
-                        actorField.Id = (int)actor.Id;
+                        actorField.CreatureDisplayInfoID = actor.CreatureDisplayInfoId;
+                        actorField.Id = (int)actor.ActorId;
                         actorField.Type = ConversationActorType.CreatureActor;
 
                         AddDynamicUpdateFieldValue(m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.Actors), actorField);
@@ -191,7 +191,7 @@ namespace Game.Entities
             // All actors need to be set
             foreach (ushort actorIndex in actorIndices)
             {
-                ConversationActor actor = actorIndex < m_conversationData.Actors.Size() ? m_conversationData.Actors[actorIndex] : null;
+                ConversationActorField actor = actorIndex < m_conversationData.Actors.Size() ? m_conversationData.Actors[actorIndex] : null;
                 if (actor == null || (actor.CreatureID == 0 && actor.ActorGUID.IsEmpty() && actor.NoActorObject == 0))
                 {
                     Log.outError(LogFilter.Conversation, $"Failed to create conversation (Id: {conversationEntry}) due to missing actor (Idx: {actorIndex}).");
@@ -207,7 +207,7 @@ namespace Game.Entities
 
         void AddActor(ObjectGuid actorGuid, ushort actorIdx)
         {
-            ConversationActor actorField = m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.Actors, actorIdx);
+            ConversationActorField actorField = m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.Actors, actorIdx);
             SetUpdateFieldValue(ref actorField.ActorGUID, actorGuid);
             SetUpdateFieldValue(ref actorField.Type, ConversationActorType.WorldObjectActor);
         }
