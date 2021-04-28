@@ -492,41 +492,9 @@ namespace Game.AI
         public virtual void SpellInterrupted(uint spellId, uint unTimeMs) { }
 
         /// <summary>
-        /// Called when a player opens a gossip dialog with the creature.
-        /// </summary>
-        public virtual bool GossipHello(Player player) { return false; }
-
-        /// <summary>
-        /// Called when a player selects a gossip item in the creature's gossip menu.
-        /// </summary>
-        public virtual bool GossipSelect(Player player, uint menuId, uint gossipListId) { return false; }
-
-        /// <summary>
-        /// Called when a player selects a gossip with a code in the creature's gossip menu.
-        /// </summary>
-        public virtual bool GossipSelectCode(Player player, uint menuId, uint gossipListId, string code) { return false; }
-
-        /// <summary>
-        /// Called when a player accepts a quest from the creature.
-        /// </summary>
-        public virtual void QuestAccept(Player player, Quest quest) { }
-
-        /// <summary>
-        /// Called when a player completes a quest and is rewarded, opt is the selected item's index or 0
-        /// </summary>
-        public virtual void QuestReward(Player player, Quest quest, uint opt)
-        {
-            QuestReward(player, quest, LootItemType.Item, opt);
-        }
-        public virtual void QuestReward(Player player, Quest quest, LootItemType type, uint opt) { }
-
-        /// <summary>
         /// Called when a game event starts or ends
         /// </summary>
         public virtual void OnGameEvent(bool start, ushort eventId) { }
-
-        // Called when the dialog status between a player and the creature is requested.
-        public virtual QuestGiverStatus GetDialogStatus(Player player) { return QuestGiverStatus.ScriptedDefault; }
 
         public virtual void WaypointPathStarted(uint nodeId, uint pathId) { }
 

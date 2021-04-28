@@ -387,8 +387,6 @@ namespace Framework.Constants
         CovenantCallingQuest = 0x80000,
         CovenantCallingRewardCompleteNoPOI = 0x100000,
         CovenantCallingRewardCompletePOI = 0x200000,
-
-        ScriptedDefault = 0x80000000
     }
 
     [Flags]

@@ -29,8 +29,8 @@ namespace Game.AI
     {
         bool _moveInLineOfSightLocked;
         List<AreaBoundary> _boundary = new();
-        bool _negateBoundary; 
-        
+        bool _negateBoundary;
+
         protected new Creature me;
 
         protected EventMap _events = new();
@@ -469,6 +469,36 @@ namespace Game.AI
 
         // called when the corpse of this creature gets removed
         public virtual void CorpseRemoved(long respawnDelay) { }
+
+        /// == Gossip system ================================
+
+        // Called when the dialog status between a player and the creature is requested.
+        public virtual QuestGiverStatus? GetDialogStatus(Player player)
+        {
+            return null;
+        }
+
+        // Called when a player opens a gossip dialog with the creature.
+        public virtual bool GossipHello(Player player) { return false; }
+
+        // Called when a player selects a gossip item in the creature's gossip menu.
+        public virtual bool GossipSelect(Player player, uint menuId, uint gossipListId) { return false; }
+
+        // Called when a player selects a gossip with a code in the creature's gossip menu.
+        public virtual bool GossipSelectCode(Player player, uint menuId, uint gossipListId, string code)
+        {
+            return false;
+        }
+
+        // Called when a player accepts a quest from the creature.
+        public virtual void QuestAccept(Player player, Quest quest) { }
+
+        // Called when a player completes a quest and is rewarded, opt is the selected item's index or 0
+        public virtual void QuestReward(Player player, Quest quest, uint opt)
+        {
+            QuestReward(player, quest, LootItemType.Item, opt);
+        }
+        public virtual void QuestReward(Player player, Quest quest, LootItemType type, uint opt) { }
 
         public virtual void PassengerBoarded(Unit passenger, sbyte seatId, bool apply) { }
 

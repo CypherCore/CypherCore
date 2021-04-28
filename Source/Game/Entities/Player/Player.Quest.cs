@@ -1854,18 +1854,20 @@ namespace Game.Entities
             {
                 case TypeId.GameObject:
                     {
-                        QuestGiverStatus questStatus = questgiver.ToGameObject().GetAI().GetDialogStatus(this);
-                        if (questStatus != QuestGiverStatus.ScriptedDefault)
-                            return questStatus;
+                        QuestGiverStatus? questStatus = questgiver.ToGameObject().GetAI().GetDialogStatus(this);
+                        if (questStatus.HasValue)
+                            return questStatus.Value;
+
                         qr = Global.ObjectMgr.GetGOQuestRelationBounds(questgiver.GetEntry());
                         qir = Global.ObjectMgr.GetGOQuestInvolvedRelationBounds(questgiver.GetEntry());
                         break;
                     }
                 case TypeId.Unit:
                     {
-                        QuestGiverStatus questStatus = questgiver.ToCreature().GetAI().GetDialogStatus(this);
-                        if (questStatus != QuestGiverStatus.ScriptedDefault)
-                            return questStatus;
+                        QuestGiverStatus? questStatus = questgiver.ToCreature().GetAI().GetDialogStatus(this);
+                        if (questStatus.HasValue)
+                            return questStatus.Value;
+
                         qr = Global.ObjectMgr.GetCreatureQuestRelationBounds(questgiver.GetEntry());
                         qir = Global.ObjectMgr.GetCreatureQuestInvolvedRelationBounds(questgiver.GetEntry());
                         break;

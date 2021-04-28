@@ -48,6 +48,11 @@ namespace Game.AI
         public virtual ObjectGuid GetGUID(int id = 0) { return ObjectGuid.Empty; }
 
         /// <summary>
+        /// Called when the dialog status between a player and the gameobject is requested.
+        /// </summary>
+        public virtual QuestGiverStatus? GetDialogStatus(Player player) { return null; }
+
+        /// <summary>
         /// Called when a player opens a gossip dialog with the gameobject.
         /// </summary>
         public virtual bool GossipHello(Player player) { return false; }
@@ -75,11 +80,6 @@ namespace Game.AI
             QuestReward(player, quest, LootItemType.Item, opt);
         }
         public virtual void QuestReward(Player player, Quest quest, LootItemType type, uint opt) { }
-
-        /// <summary>
-        /// Called when the dialog status between a player and the gameobject is requested.
-        /// </summary>
-        public virtual QuestGiverStatus GetDialogStatus(Player player) { return QuestGiverStatus.ScriptedDefault; }
 
         // Called when a Player clicks a GameObject, before GossipHello
         // prevents achievement tracking if returning true
