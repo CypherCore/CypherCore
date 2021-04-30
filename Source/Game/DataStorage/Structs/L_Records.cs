@@ -20,6 +20,19 @@ using Framework.GameMath;
 
 namespace Game.DataStorage
 {
+    public sealed class LanguageWordsRecord
+    {
+        public uint Id;
+        public string Word;
+        public uint LanguageID;
+    }
+
+    public sealed class LanguagesRecord
+    {
+        public LocalizedString Name;
+        public uint Id;
+    }
+
     public sealed class LFGDungeonsRecord
     {
         public uint Id;

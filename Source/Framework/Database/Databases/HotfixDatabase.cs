@@ -668,6 +668,13 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_KEYCHAIN, "SELECT ID, Key1, Key2, Key3, Key4, Key5, Key6, Key7, Key8, Key9, Key10, Key11, Key12, Key13, Key14, Key15, " +        
                 "Key16, Key17, Key18, Key19, Key20, Key21, Key22, Key23, Key24, Key25, Key26, Key27, Key28, Key29, Key30, Key31, Key32 FROM keychain");
 
+            // LanguageWords.db2
+            PrepareStatement(HotfixStatements.SEL_LANGUAGE_WORDS, "SELECT ID, Word, LanguageID FROM language_words");
+
+            // Languages.db2
+            PrepareStatement(HotfixStatements.SEL_LANGUAGES, "SELECT Name, ID FROM languages");
+            PrepareStatement(HotfixStatements.SEL_LANGUAGES_LOCALE, "SELECT ID, Name_lang FROM languages_locale WHERE locale = ?");
+
             // LfgDungeons.db2
             PrepareStatement(HotfixStatements.SEL_LFG_DUNGEONS, "SELECT ID, Name, Description, TypeID, Subtype, Faction, IconTextureFileID, RewardsBgTextureFileID, " +
                 "PopupBgTextureFileID, ExpansionLevel, MapID, DifficultyID, MinGear, GroupID, OrderIndex, RequiredPlayerConditionId, RandomID, ScenarioID, " +
@@ -1502,6 +1509,11 @@ namespace Framework.Database
         SEL_ITEM_X_BONUS_TREE,
 
         SEL_KEYCHAIN,
+
+        SEL_LANGUAGE_WORDS,
+
+        SEL_LANGUAGES,
+        SEL_LANGUAGES_LOCALE,
 
         SEL_LFG_DUNGEONS,
         SEL_LFG_DUNGEONS_LOCALE,
