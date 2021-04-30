@@ -32,14 +32,14 @@ namespace Game.Networking.Packets
 
         public override void Write() { }
 
-        public void DisableAdvancedCombatLogging()
+        public void SetAdvancedCombatLogging(bool value)
         {
-            LogData = null;
+            _includeLogData = value;
         }
 
         public void WriteLogDataBit()
         {
-            _worldPacket.WriteBit(LogData != null);
+            _worldPacket.WriteBit(_includeLogData);
         }
 
         public void FlushBits()
@@ -49,11 +49,12 @@ namespace Game.Networking.Packets
 
         public void WriteLogData()
         {
-            if (LogData != null)
+            if (_includeLogData)
                 LogData.Write(_worldPacket);
         }
 
         internal SpellCastLogData LogData;
+        bool _includeLogData;
     }
 
     class SpellNonMeleeDamageLog : CombatLogServerPacket

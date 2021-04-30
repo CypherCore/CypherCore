@@ -23,6 +23,7 @@ using Game.Combat;
 using Game.DataStorage;
 using Game.Maps;
 using Game.Movement;
+using Game.Networking;
 using Game.Networking.Packets;
 using Game.Spells;
 using System;
@@ -577,93 +578,20 @@ namespace Game.Entities
         public StringArray name = new(SharedConst.MaxDeclinedNameCases);
     }
 
-    class CombatLogSender : Notifier
+    class CombatLogSender : MessageDistDelivererCustomizer
     {
-        public CombatLogSender(WorldObject src, CombatLogServerPacket msg, float dist)
-        {
-            i_source = src;
-            i_message = msg;
-            i_distSq = dist * dist;
-        }
-
-        bool IsInRangeHelper(WorldObject obj)
-        {
-            if (!obj.IsInPhase(i_source))
-                return false;
-
-            return obj.GetExactDist2dSq(i_source) <= i_distSq;
-        }
-
-        public override void Visit(IList<Player> objs)
-        {
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Player player = objs[i];
-                if (!IsInRangeHelper(player))
-                    continue;
-
-                // Send packet to all who are sharing the player's vision
-                if (player.HasSharedVision())
-                {
-                    foreach (var visionTarget in player.GetSharedVisionList())
-                        if (visionTarget.seerView == player)
-                            SendPacket(visionTarget);
-                }
-
-                if (player.seerView == player || player.GetVehicle())
-                    SendPacket(player);
-            }
-        }
-
-        public override void Visit(IList<Creature> objs)
-        {
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                Creature creature = objs[i];
-                if (!IsInRangeHelper(creature))
-                    continue;
-
-                // Send packet to all who are sharing the creature's vision
-                if (creature.HasSharedVision())
-                {
-                    foreach (var visionTarget in creature.GetSharedVisionList())
-                        if (visionTarget.seerView == creature)
-                            SendPacket(visionTarget);
-                }
-            }
-        }
-        public override void Visit(IList<DynamicObject> objs)
-        {
-            for (var i = 0; i < objs.Count; ++i)
-            {
-                DynamicObject dynamicObject = objs[i];
-                if (!IsInRangeHelper(dynamicObject))
-                    continue;
-
-                Unit caster = dynamicObject.GetCaster();
-                if (caster)
-                {
-                    // Send packet back to the caster if the caster has vision of dynamic object
-                    Player player = caster.ToPlayer();
-                    if (player && player.seerView == dynamicObject)
-                        SendPacket(player);
-                }
-            }
-        }
-
-        void SendPacket(Player player)
-        {
-            if (!player.HaveAtClient(i_source))
-                return;
-
-            if (!player.IsAdvancedCombatLoggingEnabled())
-                i_message.DisableAdvancedCombatLogging();
-
-            player.SendPacket(i_message);
-        }
-
-        WorldObject i_source;
         CombatLogServerPacket i_message;
-        float i_distSq;
+
+        public CombatLogSender(CombatLogServerPacket msg)
+        {
+            i_message = msg;
+        }
+
+        public override ServerPacket Invoke(Player player)
+        {
+            i_message.SetAdvancedCombatLogging(player.IsAdvancedCombatLoggingEnabled());
+
+            return i_message;
+        }
     }
 }

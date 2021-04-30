@@ -23,7 +23,6 @@ using Game.Networking.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Game.Maps
 {
@@ -379,12 +378,44 @@ namespace Game.Maps
         bool isCreature;
     }
 
+    public class MessageDistDelivererCustomizer
+    {
+        ServerPacket i_message;
+
+        public MessageDistDelivererCustomizer() { }
+
+        public MessageDistDelivererCustomizer(ServerPacket message)
+        {
+            i_message = message;
+        }
+
+        public virtual ServerPacket Invoke(Player player)
+        {
+            return i_message;
+        }
+    }
+    
     public class MessageDistDeliverer : Notifier
     {
-        public MessageDistDeliverer(WorldObject src, ServerPacket msg, float dist, bool own_team_only = false, Player skipped = null)
+        WorldObject i_source;
+        MessageDistDelivererCustomizer i_messageCustomizer;
+        float i_distSq;
+        uint team;
+        Player skipped_receiver;
+
+        public MessageDistDeliverer(WorldObject src, ServerPacket pkt, float dist, bool own_team_only = false, Player skipped = null)
         {
             i_source = src;
-            i_message = msg;
+            i_messageCustomizer = new(pkt);
+            i_distSq = dist * dist;
+            team = (uint)((own_team_only && src.IsTypeId(TypeId.Player)) ? ((Player)src).GetTeam() : 0);
+            skipped_receiver = skipped;
+        }
+
+        public MessageDistDeliverer(WorldObject src, MessageDistDelivererCustomizer packetCustomizer, float dist, bool own_team_only = false, Player skipped = null)
+        {
+            i_source = src;
+            i_messageCustomizer = packetCustomizer;
             i_distSq = dist * dist;
             team = (uint)((own_team_only && src.IsTypeId(TypeId.Player)) ? ((Player)src).GetTeam() : 0);
             skipped_receiver = skipped;
@@ -466,26 +497,27 @@ namespace Game.Maps
             if (!player.HaveAtClient(i_source))
                 return;
 
-            player.SendPacket(i_message);
+            player.SendPacket(i_messageCustomizer.Invoke(player));            
         }
-
-        WorldObject i_source;
-        ServerPacket i_message;
-        float i_distSq;
-        uint team;
-        Player skipped_receiver;
     }
 
     public class MessageDistDelivererToHostile : Notifier
     {
         Unit i_source;
-        ServerPacket i_message;
+        MessageDistDelivererCustomizer i_messageCustomizer;
         float i_distSq;
 
-        public MessageDistDelivererToHostile(Unit src, ServerPacket msg, float dist)
+        public MessageDistDelivererToHostile(Unit src, ServerPacket pkt, float dist)
         {
             i_source = src;
-            i_message = msg;
+            i_messageCustomizer = new(pkt);
+            i_distSq = dist * dist;
+        }
+
+        public MessageDistDelivererToHostile(Unit src, MessageDistDelivererCustomizer packetCustomizer, float dist)
+        {
+            i_source = src;
+            i_messageCustomizer = packetCustomizer;
             i_distSq = dist * dist;
         }
 
@@ -562,7 +594,7 @@ namespace Game.Maps
             if (player == i_source || !player.HaveAtClient(i_source) || player.IsFriendlyTo(i_source))
                 return;
 
-            player.SendPacket(i_message);
+            player.SendPacket(i_messageCustomizer.Invoke(player));
         }
     }
 
