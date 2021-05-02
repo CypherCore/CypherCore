@@ -569,7 +569,7 @@ namespace Game.BattleGrounds
             }
 
             BroadcastTextBuilder builder = new(null, msgType, id, Gender.Male, target);
-            LocalizedPacketDo localizer = new(builder);
+            LocalizedDo localizer = new(builder);
             BroadcastWorker(localizer);
         }
 
@@ -1582,7 +1582,7 @@ namespace Game.BattleGrounds
                 return;
 
             CypherStringChatBuilder builder = new(null, msgType, entry, source);
-            LocalizedPacketDo localizer = new(builder);
+            LocalizedDo localizer = new(builder);
             BroadcastWorker(localizer);
         }
 
@@ -1592,7 +1592,7 @@ namespace Game.BattleGrounds
                 return;
 
             CypherStringChatBuilder builder = new(null, msgType, entry, source, args);
-            LocalizedPacketDo localizer = new(builder);
+            LocalizedDo localizer = new(builder);
             BroadcastWorker(localizer);
         }
 

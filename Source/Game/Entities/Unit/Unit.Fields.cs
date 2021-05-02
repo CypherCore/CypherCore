@@ -578,7 +578,7 @@ namespace Game.Entities
         public StringArray name = new(SharedConst.MaxDeclinedNameCases);
     }
 
-    class CombatLogSender : MessageDistDelivererCustomizer
+    class CombatLogSender : IDoWork<Player>
     {
         CombatLogServerPacket i_message;
 
@@ -587,11 +587,12 @@ namespace Game.Entities
             i_message = msg;
         }
 
-        public override ServerPacket Invoke(Player player)
+        public void Invoke(Player player)
         {
+            i_message.Clear();
             i_message.SetAdvancedCombatLogging(player.IsAdvancedCombatLoggingEnabled());
 
-            return i_message;
+            player.SendPacket(i_message);
         }
     }
 }

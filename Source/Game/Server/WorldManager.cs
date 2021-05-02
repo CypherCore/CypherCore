@@ -1472,7 +1472,7 @@ namespace Game
         public void SendWorldText(CypherStrings string_id, params object[] args)
         {
             WorldWorldTextBuilder wt_builder = new((uint)string_id, args);
-            var wt_do = new LocalizedPacketListDo(wt_builder);
+            var wt_do = new LocalizedDo(wt_builder);
             foreach (var session in m_sessions.Values)
             {
                 if (session == null || !session.GetPlayer() || !session.GetPlayer().IsInWorld)
@@ -1486,7 +1486,7 @@ namespace Game
         public void SendGMText(CypherStrings string_id, params object[] args)
         {
             var wt_builder = new WorldWorldTextBuilder((uint)string_id, args);
-            var wt_do = new LocalizedPacketListDo(wt_builder);
+            var wt_do = new LocalizedDo(wt_builder);
             foreach (var session in m_sessions.Values)
             {
                 // Session should have permissions to receive global gm messages
@@ -2512,32 +2512,47 @@ namespace Game
     }
 
     public class WorldWorldTextBuilder : MessageBuilder
-    {        
+    {
         public WorldWorldTextBuilder(uint textId, params object[] args)
         {
             i_textId = textId;
             i_args = args;
         }
 
-        public override void Invoke(List<ServerPacket> data_list, Locale loc_idx)
+        public override MultiplePacketSender Invoke(Locale locale)
         {
-            string text = Global.ObjectMgr.GetCypherString(i_textId, loc_idx);
+            string text = Global.ObjectMgr.GetCypherString(i_textId, locale);
 
             if (i_args != null)
                 text = string.Format(text, i_args);
 
-            ChatPkt messageChat = new();
+            MultiplePacketSender sender = new MultiplePacketSender();
 
             var lines = new StringArray(text, "\n");
             for (var i = 0; i < lines.Length; ++i)
             {
+                ChatPkt messageChat = new();
                 messageChat.Initialize(ChatMsg.System, Language.Universal, null, null, lines[i]);
-                data_list.Add(messageChat);
+                messageChat.Write();
+                sender.Packets.Add(messageChat);
             }
+
+            return sender;
         }
 
         uint i_textId;
         object[] i_args;
+
+        public class MultiplePacketSender : IDoWork<Player>
+        {
+            public void Invoke(Player receiver)
+            {
+                foreach (var packet in Packets)
+                    receiver.SendPacket(packet);
+            }
+
+            public List<ServerPacket> Packets = new();
+        }
     }
 
     struct Autobroadcast

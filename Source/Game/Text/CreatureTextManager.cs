@@ -596,32 +596,33 @@ namespace Game
         public void Invoke(Player player)
         {
             Locale loc_idx = player.GetSession().GetSessionDbLocaleIndex();
-            ServerPacket messageTemplate;
+            PacketSenderOwning<ChatPkt> sender;
 
             // create if not cached yet
             if (!_packetCache.ContainsKey(loc_idx))
             {
-                messageTemplate = _builder.Invoke(loc_idx);
-                _packetCache[loc_idx] = messageTemplate;
+                sender = _builder.Invoke(loc_idx);
+                _packetCache[loc_idx] = sender;
             }
             else
-                messageTemplate = _packetCache[loc_idx];
+                sender = _packetCache[loc_idx];
 
-            ChatPkt message = (ChatPkt)messageTemplate;
             switch (_msgType)
             {
                 case ChatMsg.MonsterWhisper:
                 case ChatMsg.RaidBossWhisper:
+                    ChatPkt message = sender.Data;
                     message.SetReceiver(player, loc_idx);
+                    player.SendPacket(message);
                     break;
                 default:
                     break;
             }
 
-            player.SendPacket(message);
+            sender.Invoke(player);
         }
 
-        Dictionary<Locale, ServerPacket> _packetCache = new();
+        Dictionary<Locale, PacketSenderOwning<ChatPkt>> _packetCache = new();
         MessageBuilder _builder;
         ChatMsg _msgType;
     }
@@ -639,12 +640,12 @@ namespace Game
             _target = target;
         }
 
-        public override ServerPacket Invoke(Locale locale = Locale.enUS)
+        public override PacketSenderOwning<ChatPkt> Invoke(Locale locale = Locale.enUS)
         {
             string text = Global.CreatureTextMgr.GetLocalizedChatString(_source.GetEntry(), _gender, _textGroup, _textId, locale);
-            var packet = new ChatPkt();
-            packet.Initialize(_msgType, _language, _source, _target, text, 0, "", locale);
-            return packet;
+            PacketSenderOwning<ChatPkt> chat = new();
+            chat.Data.Initialize(_msgType, _language, _source, _target, text, 0, "", locale);
+            return chat;
         }
 
         WorldObject _source;
@@ -670,12 +671,12 @@ namespace Game
             _target = target;
         }
 
-        public override ServerPacket Invoke(Locale loc_idx = Locale.enUS)
+        public override PacketSenderOwning<ChatPkt> Invoke(Locale loc_idx = Locale.enUS)
         {
             string text = Global.CreatureTextMgr.GetLocalizedChatString(_source.GetEntry(), _gender, _textGroup, _textId, loc_idx);
-            var packet = new ChatPkt();
-            packet.Initialize(_msgType, _language, _talker, _target, text, 0, "", loc_idx);
-            return packet;
+            PacketSenderOwning<ChatPkt> chat = new();
+            chat.Data.Initialize(_msgType, _language, _talker, _target, text, 0, "", loc_idx);
+            return chat;
         }
 
         WorldObject _source;

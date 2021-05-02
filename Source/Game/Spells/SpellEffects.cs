@@ -3801,15 +3801,18 @@ namespace Game.Spells
             float dist = m_caster.GetVisibilityRange();
 
             // clear focus
-            BreakTarget breakTarget = new();
-            breakTarget.UnitGUID = m_caster.GetGUID();
-            MessageDistDelivererToHostile notifierBreak = new(m_caster, breakTarget, dist);
+            PacketSenderOwning<BreakTarget> breakTarget = new();
+            breakTarget.Data.UnitGUID = m_caster.GetGUID();
+            breakTarget.Data.Write();
+
+            var notifierBreak = new MessageDistDelivererToHostile<PacketSenderOwning<BreakTarget>>(m_caster, breakTarget, dist);
             Cell.VisitWorldObjects(m_caster, notifierBreak, dist);
 
             // and selection
-            ClearTarget clearTarget = new();
-            clearTarget.Guid = m_caster.GetGUID();
-            MessageDistDelivererToHostile notifierClear = new(m_caster, clearTarget, dist);
+            PacketSenderOwning<ClearTarget> clearTarget = new();
+            clearTarget.Data.Guid = m_caster.GetGUID();
+            clearTarget.Data.Write();
+            var notifierClear = new MessageDistDelivererToHostile<PacketSenderOwning<ClearTarget>>(m_caster, clearTarget, dist);
             Cell.VisitWorldObjects(m_caster, notifierClear, dist);
 
             // we should also force pets to remove us from current target

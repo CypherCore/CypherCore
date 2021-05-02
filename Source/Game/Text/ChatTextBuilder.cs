@@ -18,6 +18,7 @@
 using Framework.Constants;
 using Game.DataStorage;
 using Game.Entities;
+using Game.Maps;
 using Game.Networking;
 using Game.Networking.Packets;
 using System.Collections.Generic;
@@ -26,8 +27,7 @@ namespace Game.Chat
 {
     public class MessageBuilder
     {
-        public virtual ServerPacket Invoke(Locale locale = Locale.enUS) { return null; }
-        public virtual void Invoke(List<ServerPacket> data, Locale locale = Locale.enUS) { }
+        public virtual dynamic Invoke(Locale locale = Locale.enUS) { return default; }
     }
 
     public class BroadcastTextBuilder : MessageBuilder
@@ -42,12 +42,12 @@ namespace Game.Chat
             _achievementId = achievementId;
         }
 
-        public override ServerPacket Invoke(Locale locale)
+        public override PacketSenderOwning<ChatPkt> Invoke(Locale locale = Locale.enUS)
         {
             BroadcastTextRecord bct = CliDB.BroadcastTextStorage.LookupByKey(_textId);
-            var packet = new ChatPkt();
-            packet.Initialize(_msgType, bct != null ? (Language)bct.LanguageID : Language.Universal, _source, _target, bct != null ? Global.DB2Mgr.GetBroadcastTextValue(bct, locale, _gender) : "", _achievementId, "", locale);
-            return packet;
+            var chat = new PacketSenderOwning<ChatPkt>();
+            chat.Data.Initialize(_msgType, bct != null ? (Language)bct.LanguageID : Language.Universal, _source, _target, bct != null ? Global.DB2Mgr.GetBroadcastTextValue(bct, locale, _gender) : "", _achievementId, "", locale);
+            return chat;
         }
 
         WorldObject _source;
@@ -69,11 +69,11 @@ namespace Game.Chat
             _target = target;
         }
 
-        public override ServerPacket Invoke(Locale locale)
+        public override PacketSenderOwning<ChatPkt> Invoke(Locale locale)
         {
-            var packet = new ChatPkt();
-            packet.Initialize(_msgType, _language, _source, _target, _text, 0, "", locale);
-            return packet;
+            var chat = new PacketSenderOwning<ChatPkt>();
+            chat.Data.Initialize(_msgType, _language, _source, _target, _text, 0, "", locale);
+            return chat;
         }
 
         WorldObject _source;
@@ -94,18 +94,18 @@ namespace Game.Chat
             _args = args;
         }
 
-        public override ServerPacket Invoke(Locale locale)
+        public override PacketSenderOwning<ChatPkt> Invoke(Locale locale)
         {
-            ChatPkt packet = new();
+            PacketSenderOwning<ChatPkt> chat = new();
 
             string text = Global.ObjectMgr.GetCypherString(_textId, locale);
 
             if (_args != null)
-                packet.Initialize(_msgType, Language.Universal, _source, _target, string.Format(text, _args), 0, "", locale);
+                chat.Data.Initialize(_msgType, Language.Universal, _source, _target, string.Format(text, _args), 0, "", locale);
             else
-                packet.Initialize(_msgType, Language.Universal, _source, _target, text, 0, "", locale);
+                chat.Data.Initialize(_msgType, Language.Universal, _source, _target, text, 0, "", locale);
 
-            return packet;
+            return chat;
         }
 
         WorldObject _source;

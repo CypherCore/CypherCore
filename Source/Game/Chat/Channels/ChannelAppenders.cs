@@ -16,10 +16,11 @@
  */
 
 using Framework.Constants;
+using Game.Cache;
 using Game.Entities;
+using Game.Maps;
 using Game.Networking;
 using Game.Networking.Packets;
-using Game.Cache;
 
 namespace Game.Chat
 {
@@ -38,16 +39,17 @@ namespace Game.Chat
             _modifier = modifier;
         }
 
-        public override ServerPacket Invoke(Locale locale = Locale.enUS)
+        public override PacketSenderOwning<ChannelNotify> Invoke(Locale locale = Locale.enUS)
         {
             // LocalizedPacketDo sends client DBC locale, we need to get available to server locale
             Locale localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
 
-            ChannelNotify data = new();
-            data.Type = _modifier.GetNotificationType();
-            data.Channel = _source.GetName(localeIdx);
-            _modifier.Append(data);
-            return data;
+            PacketSenderOwning<ChannelNotify> sender = new();
+            sender.Data.Type = _modifier.GetNotificationType();
+            sender.Data.Channel = _source.GetName(localeIdx);
+            _modifier.Append(sender.Data);
+            sender.Data.Write();
+            return sender;
         }
 
         Channel _source;
@@ -61,17 +63,17 @@ namespace Game.Chat
             _source = source;
         }
 
-        public override ServerPacket Invoke(Locale locale = Locale.enUS)
+        public override PacketSenderOwning<ChannelNotifyJoined> Invoke(Locale locale = Locale.enUS)
         {
             Locale localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
 
-            ChannelNotifyJoined notify = new();
+            PacketSenderOwning<ChannelNotifyJoined> notify = new();
             //notify.ChannelWelcomeMsg = "";
-            notify.ChatChannelID = (int)_source.GetChannelId();
+            notify.Data.ChatChannelID = (int)_source.GetChannelId();
             //notify.InstanceID = 0;
-            notify.ChannelFlags = _source.GetFlags();
-            notify.Channel = _source.GetName(localeIdx);
-            notify.ChannelGUID = _source.GetChannelGuid();
+            notify.Data.ChannelFlags = _source.GetFlags();
+            notify.Data.Channel = _source.GetName(localeIdx);
+            notify.Data.ChannelGUID = _source.GetChannelGuid();
             return notify;
         }
 
@@ -86,14 +88,14 @@ namespace Game.Chat
             _suspended = suspend;
         }
 
-        public override ServerPacket Invoke(Locale locale = Locale.enUS)
+        public override PacketSenderOwning<ChannelNotifyLeft> Invoke(Locale locale = Locale.enUS)
         {
             Locale localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
 
-            ChannelNotifyLeft notify = new();
-            notify.Channel = _source.GetName(localeIdx);
-            notify.ChatChannelID = _source.GetChannelId();
-            notify.Suspended = _suspended;
+            PacketSenderOwning<ChannelNotifyLeft> notify = new();
+            notify.Data.Channel = _source.GetName(localeIdx);
+            notify.Data.ChatChannelID = _source.GetChannelId();
+            notify.Data.Suspended = _suspended;
             return notify;
         }
 
@@ -111,19 +113,19 @@ namespace Game.Chat
             _guid = guid;
         }
 
-        public override ServerPacket Invoke(Locale locale = Locale.enUS)
+        public override PacketSenderOwning<ChatPkt> Invoke(Locale locale = Locale.enUS)
         {
             Locale localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
 
-            ChatPkt packet = new();
+            PacketSenderOwning<ChatPkt> packet = new();
             Player player = Global.ObjAccessor.FindConnectedPlayer(_guid);
             if (player)
-                packet.Initialize(ChatMsg.Channel, _lang, player, player, _what, 0, _source.GetName(localeIdx));
+                packet.Data.Initialize(ChatMsg.Channel, _lang, player, player, _what, 0, _source.GetName(localeIdx));
             else
             {
-                packet.Initialize(ChatMsg.Channel, _lang, null, null, _what, 0, _source.GetName(localeIdx));
-                packet.SenderGUID = _guid;
-                packet.TargetGUID = _guid;
+                packet.Data.Initialize(ChatMsg.Channel, _lang, null, null, _what, 0, _source.GetName(localeIdx));
+                packet.Data.SenderGUID = _guid;
+                packet.Data.TargetGUID = _guid;
             }
 
             return packet;
@@ -146,19 +148,19 @@ namespace Game.Chat
             _guid = guid;
         }
 
-        public override ServerPacket Invoke(Locale locale = Locale.enUS)
+        public override PacketSenderOwning<ChatPkt> Invoke(Locale locale = Locale.enUS)
         {
             Locale localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
 
-            ChatPkt packet = new();
+            PacketSenderOwning<ChatPkt> packet = new();
             Player player = Global.ObjAccessor.FindConnectedPlayer(_guid);
             if (player)
-                packet.Initialize(ChatMsg.Channel, _lang, player, player, _what, 0, _source.GetName(localeIdx), Locale.enUS, _prefix);
+                packet.Data.Initialize(ChatMsg.Channel, _lang, player, player, _what, 0, _source.GetName(localeIdx), Locale.enUS, _prefix);
             else
             {
-                packet.Initialize(ChatMsg.Channel, _lang, null, null, _what, 0, _source.GetName(localeIdx), Locale.enUS, _prefix);
-                packet.SenderGUID = _guid;
-                packet.TargetGUID = _guid;
+                packet.Data.Initialize(ChatMsg.Channel, _lang, null, null, _what, 0, _source.GetName(localeIdx), Locale.enUS, _prefix);
+                packet.Data.SenderGUID = _guid;
+                packet.Data.TargetGUID = _guid;
             }
 
             return packet;
@@ -179,16 +181,16 @@ namespace Game.Chat
             _guid = guid;
         }
 
-        public override ServerPacket Invoke(Locale locale = Locale.enUS)
+        public override PacketSenderOwning<UserlistAdd> Invoke(Locale locale = Locale.enUS)
         {
             Locale localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
 
-            UserlistAdd userlistAdd = new();
-            userlistAdd.AddedUserGUID = _guid;
-            userlistAdd.ChannelFlags = _source.GetFlags();
-            userlistAdd.UserFlags = _source.GetPlayerFlags(_guid);
-            userlistAdd.ChannelID = _source.GetChannelId();
-            userlistAdd.ChannelName = _source.GetName(localeIdx);
+            PacketSenderOwning<UserlistAdd> userlistAdd = new();
+            userlistAdd.Data.AddedUserGUID = _guid;
+            userlistAdd.Data.ChannelFlags = _source.GetFlags();
+            userlistAdd.Data.UserFlags = _source.GetPlayerFlags(_guid);
+            userlistAdd.Data.ChannelID = _source.GetChannelId();
+            userlistAdd.Data.ChannelName = _source.GetName(localeIdx);
             return userlistAdd;
         }
 
@@ -204,16 +206,16 @@ namespace Game.Chat
             _guid = guid;
         }
 
-        public override ServerPacket Invoke(Locale locale = Locale.enUS)
+        public override PacketSenderOwning<UserlistUpdate> Invoke(Locale locale = Locale.enUS)
         {
             Locale localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
 
-            UserlistUpdate userlistUpdate = new();
-            userlistUpdate.UpdatedUserGUID = _guid;
-            userlistUpdate.ChannelFlags = _source.GetFlags();
-            userlistUpdate.UserFlags = _source.GetPlayerFlags(_guid);
-            userlistUpdate.ChannelID = _source.GetChannelId();
-            userlistUpdate.ChannelName = _source.GetName(localeIdx);
+            PacketSenderOwning<UserlistUpdate> userlistUpdate = new();
+            userlistUpdate.Data.UpdatedUserGUID = _guid;
+            userlistUpdate.Data.ChannelFlags = _source.GetFlags();
+            userlistUpdate.Data.UserFlags = _source.GetPlayerFlags(_guid);
+            userlistUpdate.Data.ChannelID = _source.GetChannelId();
+            userlistUpdate.Data.ChannelName = _source.GetName(localeIdx);
             return userlistUpdate;
         }
 
@@ -229,15 +231,15 @@ namespace Game.Chat
             _guid = guid;
         }
 
-        public override ServerPacket Invoke(Locale locale = Locale.enUS)
+        public override PacketSenderOwning<UserlistRemove> Invoke(Locale locale = Locale.enUS)
         {
             Locale localeIdx = Global.WorldMgr.GetAvailableDbcLocale(locale);
 
-            UserlistRemove userlistRemove = new();
-            userlistRemove.RemovedUserGUID = _guid;
-            userlistRemove.ChannelFlags = _source.GetFlags();
-            userlistRemove.ChannelID = _source.GetChannelId();
-            userlistRemove.ChannelName = _source.GetName(localeIdx);
+            PacketSenderOwning<UserlistRemove> userlistRemove = new();
+            userlistRemove.Data.RemovedUserGUID = _guid;
+            userlistRemove.Data.ChannelFlags = _source.GetFlags();
+            userlistRemove.Data.ChannelID = _source.GetChannelId();
+            userlistRemove.Data.ChannelName = _source.GetName(localeIdx);
             return userlistRemove;
         }
 

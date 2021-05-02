@@ -3804,6 +3804,7 @@ namespace Game.Spells
 
             packet.LogData.Initialize(this);
 
+            
             m_caster.SendCombatLogMessage(packet);
         }
 

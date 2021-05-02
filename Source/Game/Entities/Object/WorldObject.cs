@@ -1355,13 +1355,15 @@ namespace Game.Entities
 
         public virtual void SendMessageToSetInRange(ServerPacket data, float dist, bool self)
         {
-            MessageDistDeliverer notifier = new(this, data, dist);
+            PacketSenderRef sender = new(data);
+            MessageDistDeliverer<PacketSenderRef> notifier = new(this, sender, dist);
             Cell.VisitWorldObjects(this, notifier, dist);
         }
 
         public virtual void SendMessageToSet(ServerPacket data, Player skip)
         {
-            var notifier = new MessageDistDeliverer(this, data, GetVisibilityRange(), false, skip);
+            PacketSenderRef sender = new(data);
+            var notifier = new MessageDistDeliverer<PacketSenderRef>(this, sender, GetVisibilityRange(), false, skip);
             Cell.VisitWorldObjects(this, notifier, GetVisibilityRange());
         }
 

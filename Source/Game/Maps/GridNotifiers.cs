@@ -378,44 +378,45 @@ namespace Game.Maps
         bool isCreature;
     }
 
-    public class MessageDistDelivererCustomizer
+    public class PacketSenderRef : IDoWork<Player>
     {
-        ServerPacket i_message;
+        ServerPacket Data;
 
-        public MessageDistDelivererCustomizer() { }
+        public PacketSenderRef() { }
 
-        public MessageDistDelivererCustomizer(ServerPacket message)
+        public PacketSenderRef(ServerPacket message)
         {
-            i_message = message;
+            Data = message;
         }
 
-        public virtual ServerPacket Invoke(Player player)
+        public virtual void Invoke(Player player)
         {
-            return i_message;
+            player.SendPacket(Data);
         }
     }
-    
-    public class MessageDistDeliverer : Notifier
+
+    public class PacketSenderOwning<T> : IDoWork<Player> where T : ServerPacket
+    {
+        public T Data;
+
+        public void Invoke(Player player)
+        {
+            player.SendPacket(Data);
+        }
+    }
+
+    public class MessageDistDeliverer<T> : Notifier where T : IDoWork<Player>
     {
         WorldObject i_source;
-        MessageDistDelivererCustomizer i_messageCustomizer;
+        T i_packetSender;
         float i_distSq;
         uint team;
         Player skipped_receiver;
 
-        public MessageDistDeliverer(WorldObject src, ServerPacket pkt, float dist, bool own_team_only = false, Player skipped = null)
+        public MessageDistDeliverer(WorldObject src, T packetSender, float dist, bool own_team_only = false, Player skipped = null)
         {
             i_source = src;
-            i_messageCustomizer = new(pkt);
-            i_distSq = dist * dist;
-            team = (uint)((own_team_only && src.IsTypeId(TypeId.Player)) ? ((Player)src).GetTeam() : 0);
-            skipped_receiver = skipped;
-        }
-
-        public MessageDistDeliverer(WorldObject src, MessageDistDelivererCustomizer packetCustomizer, float dist, bool own_team_only = false, Player skipped = null)
-        {
-            i_source = src;
-            i_messageCustomizer = packetCustomizer;
+            i_packetSender = packetSender;
             i_distSq = dist * dist;
             team = (uint)((own_team_only && src.IsTypeId(TypeId.Player)) ? ((Player)src).GetTeam() : 0);
             skipped_receiver = skipped;
@@ -497,27 +498,20 @@ namespace Game.Maps
             if (!player.HaveAtClient(i_source))
                 return;
 
-            player.SendPacket(i_messageCustomizer.Invoke(player));            
+            i_packetSender.Invoke(player);
         }
     }
 
-    public class MessageDistDelivererToHostile : Notifier
+    public class MessageDistDelivererToHostile<T> : Notifier where T : IDoWork<Player>
     {
         Unit i_source;
-        MessageDistDelivererCustomizer i_messageCustomizer;
+        T i_packetSender;
         float i_distSq;
 
-        public MessageDistDelivererToHostile(Unit src, ServerPacket pkt, float dist)
+        public MessageDistDelivererToHostile(Unit src, T packetSender, float dist)
         {
             i_source = src;
-            i_messageCustomizer = new(pkt);
-            i_distSq = dist * dist;
-        }
-
-        public MessageDistDelivererToHostile(Unit src, MessageDistDelivererCustomizer packetCustomizer, float dist)
-        {
-            i_source = src;
-            i_messageCustomizer = packetCustomizer;
+            i_packetSender = packetSender;
             i_distSq = dist * dist;
         }
 
@@ -594,7 +588,7 @@ namespace Game.Maps
             if (player == i_source || !player.HaveAtClient(i_source) || player.IsFriendlyTo(i_source))
                 return;
 
-            player.SendPacket(i_messageCustomizer.Invoke(player));
+            i_packetSender.Invoke(player);
         }
     }
 
@@ -941,69 +935,36 @@ namespace Game.Maps
         float i_range;
     }
 
-    public class LocalizedPacketDo : IDoWork<Player>
+    public class LocalizedDo : IDoWork<Player>
     {
-        public LocalizedPacketDo(MessageBuilder builder)
+        public LocalizedDo(MessageBuilder localizer)
         {
-            Builder = builder;
+            _localizer = localizer;
         }
 
         public void Invoke(Player player)
         {
             Locale loc_idx = player.GetSession().GetSessionDbLocaleIndex();
             int cache_idx = (int)loc_idx + 1;
-            ServerPacket data;
+            IDoWork<Player> action;
 
             // create if not cached yet
-            if (i_data_cache.Length < cache_idx + 1 || i_data_cache[cache_idx] == null)
+            if (_localizedCache.Length < cache_idx + 1 || _localizedCache[cache_idx] == null)
             {
-                if (i_data_cache.Length < cache_idx + 1)
-                    Array.Resize(ref i_data_cache, cache_idx + 1);
+                if (_localizedCache.Length < cache_idx + 1)
+                    Array.Resize(ref _localizedCache, cache_idx + 1);
 
-                data = Builder.Invoke(loc_idx);
-
-                i_data_cache[cache_idx] = data;
+                action = _localizer.Invoke(loc_idx);
+                _localizedCache[cache_idx] = action;
             }
             else
-                data = i_data_cache[cache_idx];
+                action = _localizedCache[cache_idx];
 
-            player.SendPacket(data);
+            action.Invoke(player);
         }
 
-        MessageBuilder Builder;
-        ServerPacket[] i_data_cache = new ServerPacket[(int)Locale.Total];     // 0 = default, i => i-1 locale index
-    }
-
-    public class LocalizedPacketListDo : IDoWork<Player>
-    {
-        public LocalizedPacketListDo(MessageBuilder builder)
-        {
-            i_builder = builder;
-        }
-
-        public void Invoke(Player p)
-        {
-            Locale loc_idx = p.GetSession().GetSessionDbLocaleIndex();
-            int cache_idx = (int)loc_idx + 1;
-            List<ServerPacket> data_list = new();
-
-            // create if not cached yet
-            if (i_data_cache.Count < cache_idx + 1 || i_data_cache[cache_idx].Empty())
-            {
-                data_list = i_data_cache[cache_idx];
-
-                i_builder.Invoke(data_list, loc_idx);
-            }
-            else
-                data_list = i_data_cache[cache_idx];
-
-            foreach (var packet in data_list)
-                p.SendPacket(packet);
-        }
-
-        MessageBuilder i_builder;
-        MultiMap<int, ServerPacket> i_data_cache = new();
-        // 0 = default, i => i-1 locale index
+        MessageBuilder _localizer;
+        IDoWork<Player>[] _localizedCache = new IDoWork<Player>[(int)Locale.Total];     // 0 = default, i => i-1 locale index
     }
 
     public class RespawnDo : IDoWork<WorldObject>

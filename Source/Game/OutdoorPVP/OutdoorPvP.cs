@@ -246,7 +246,7 @@ namespace Game.PvP
         public void SendDefenseMessage(uint zoneId, uint id)
         {
             DefenseMessageBuilder builder = new(zoneId, id);
-            var localizer = new LocalizedPacketDo(builder);
+            var localizer = new LocalizedDo(builder);
             BroadcastWorker(localizer, zoneId);
         }
 
@@ -736,13 +736,13 @@ namespace Game.PvP
             _id = id;
         }
 
-        public override ServerPacket Invoke(Locale locale = Locale.enUS)
+        public override PacketSenderOwning<DefenseMessage> Invoke(Locale locale = Locale.enUS)
         {
             string text = Global.OutdoorPvPMgr.GetDefenseMessage(_zoneId, _id, locale);
 
-            DefenseMessage defenseMessage = new();
-            defenseMessage.ZoneID = _zoneId;
-            defenseMessage.MessageText = text;
+            PacketSenderOwning<DefenseMessage> defenseMessage = new();
+            defenseMessage.Data.ZoneID = _zoneId;
+            defenseMessage.Data.MessageText = text;
             return defenseMessage;
         }
 

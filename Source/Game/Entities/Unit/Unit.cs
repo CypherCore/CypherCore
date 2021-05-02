@@ -351,7 +351,7 @@ namespace Game.Entities
         public virtual void Talk(string text, ChatMsg msgType, Language language, float textRange, WorldObject target)
         {
             var builder = new CustomChatTextBuilder(this, msgType, text, language, target);
-            var localizer = new LocalizedPacketDo(builder);
+            var localizer = new LocalizedDo(builder);
             var worker = new PlayerDistWorker(this, textRange, localizer);
             Cell.VisitWorldObjects(this, worker, textRange);
         }
@@ -391,7 +391,7 @@ namespace Game.Entities
             }
 
             var builder = new BroadcastTextBuilder(this, msgType, textId, GetGender(), target);
-            var localizer = new LocalizedPacketDo(builder);
+            var localizer = new LocalizedDo(builder);
             var worker = new PlayerDistWorker(this, textRange, localizer);
             Cell.VisitWorldObjects(this, worker, textRange);
         }

@@ -659,7 +659,7 @@ namespace Game.Achievements
                 if (guild)
                 {
                     BroadcastTextBuilder say_builder = new(_owner, ChatMsg.GuildAchievement, (uint)BroadcastTextIds.AchivementEarned, _owner.GetGender(), _owner, achievement.Id);
-                    var say_do = new LocalizedPacketDo(say_builder);
+                    var say_do = new LocalizedDo(say_builder);
                     guild.BroadcastWorker(say_do, _owner);
                 }
 
@@ -676,7 +676,7 @@ namespace Game.Achievements
                 else if (_owner.IsInWorld)
                 {
                     BroadcastTextBuilder _builder = new(_owner, ChatMsg.Achievement, (uint)BroadcastTextIds.AchivementEarned, _owner.GetGender(), _owner, achievement.Id);
-                    var _localizer = new LocalizedPacketDo(_builder);
+                    var _localizer = new LocalizedDo(_builder);
                     var _worker = new PlayerDistWorker(_owner, WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay), _localizer);
                     Cell.VisitWorldObjects(_owner, _worker, WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay));
                 }

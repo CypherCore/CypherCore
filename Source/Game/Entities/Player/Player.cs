@@ -5970,7 +5970,8 @@ namespace Game.Entities
             if (self)
                 SendPacket(data);
 
-            MessageDistDeliverer notifier = new(this, data, dist);
+            PacketSenderRef sender = new(data);
+            var notifier = new MessageDistDeliverer<PacketSenderRef>(this, sender, dist);
             Cell.VisitWorldObjects(this, notifier, dist);
         }
 
@@ -5979,7 +5980,8 @@ namespace Game.Entities
             if (self)
                 SendPacket(data);
 
-            MessageDistDeliverer notifier = new(this, data, dist, own_team_only);
+            PacketSenderRef sender = new(data);
+            var notifier = new MessageDistDeliverer<PacketSenderRef>(this, sender, dist, own_team_only);
             Cell.VisitWorldObjects(this, notifier, dist);
         }
 
@@ -5990,7 +5992,8 @@ namespace Game.Entities
 
             // we use World.GetMaxVisibleDistance() because i cannot see why not use a distance
             // update: replaced by GetMap().GetVisibilityDistance()
-            MessageDistDeliverer notifier = new(this, data, GetVisibilityRange(), false, skipped_rcvr);
+            PacketSenderRef sender = new(data);
+            var notifier = new MessageDistDeliverer<PacketSenderRef>(this, sender, GetVisibilityRange(), false, skipped_rcvr);
             Cell.VisitWorldObjects(this, notifier, GetVisibilityRange());
         }
         public override void SendMessageToSet(ServerPacket data, bool self)

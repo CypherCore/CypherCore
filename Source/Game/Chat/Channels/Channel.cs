@@ -21,6 +21,7 @@ using Framework.Database;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
+using Game.Networking;
 using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
@@ -834,7 +835,7 @@ namespace Game.Chat
 
         void SendToAll(MessageBuilder builder, ObjectGuid guid = default)
         {
-            LocalizedPacketDo localizer = new(builder);
+            LocalizedDo localizer = new(builder);
 
             foreach (var pair in _playersStore)
             {
@@ -847,7 +848,7 @@ namespace Game.Chat
 
         void SendToAllButOne(MessageBuilder builder, ObjectGuid who)
         {
-            LocalizedPacketDo localizer = new(builder);
+            LocalizedDo localizer = new(builder);
 
             foreach (var pair in _playersStore)
             {
@@ -862,7 +863,7 @@ namespace Game.Chat
 
         void SendToOne(MessageBuilder builder, ObjectGuid who)
         {
-            LocalizedPacketDo localizer = new(builder);
+            LocalizedDo localizer = new(builder);
 
             Player player = Global.ObjAccessor.FindConnectedPlayer(who);
             if (player)
@@ -871,7 +872,7 @@ namespace Game.Chat
 
         void SendToAllWithAddon(MessageBuilder builder, string addonPrefix, ObjectGuid guid = default)
         {
-            LocalizedPacketDo localizer = new(builder);
+            LocalizedDo localizer = new(builder);
 
             foreach (var pair in _playersStore)
             {
