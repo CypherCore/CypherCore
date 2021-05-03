@@ -382,8 +382,6 @@ namespace Game.Maps
     {
         ServerPacket Data;
 
-        public PacketSenderRef() { }
-
         public PacketSenderRef(ServerPacket message)
         {
             Data = message;
@@ -395,9 +393,9 @@ namespace Game.Maps
         }
     }
 
-    public class PacketSenderOwning<T> : IDoWork<Player> where T : ServerPacket
+    public class PacketSenderOwning<T> : IDoWork<Player> where T : ServerPacket, new()
     {
-        public T Data;
+        public T Data = new();
 
         public void Invoke(Player player)
         {
