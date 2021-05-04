@@ -66,7 +66,7 @@ namespace Game.Chat
 
         public void Invoke(Player player)
         {
-            if (player.CanUnderstandLanguageSkillId(LanguageSkillId))
+            if (Language == Language.Universal || Language == Language.Addon || Language == Language.AddonLogged || player.CanUnderstandLanguageSkillId(LanguageSkillId))
             {
                 player.SendPacket(UntranslatedPacket);
                 return;
