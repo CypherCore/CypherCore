@@ -6233,13 +6233,13 @@ namespace Game.Entities
 
         void SendChatMessageToSetInRange(ChatMsg chatMsg, Language language, string text, float range)
         {
-            ChatMessageDistDelivererCustomizer customizer = new(chatMsg, language, this, this, text);
+            ChatPacketSender customizer = new(chatMsg, language, this, this, text);
 
             // Send to self
             SendPacket(customizer.UntranslatedPacket);
 
             // Send to players
-            MessageDistDeliverer<ChatMessageDistDelivererCustomizer> notifier = new(this, customizer, range);
+            MessageDistDeliverer<ChatPacketSender> notifier = new(this, customizer, range);
             Cell.VisitWorldObjects(this, notifier, range);
         }
 
@@ -7595,54 +7595,5 @@ namespace Game.Entities
 
         //Clears the Menu
         public void ClearGossipMenu() { PlayerTalkClass.ClearMenus(); }
-    }
-
-    class ChatMessageDistDelivererCustomizer : IDoWork<Player>
-    {
-        // params
-        ChatMsg Type;
-        Language Language;
-        WorldObject Sender;
-        WorldObject Receiver;
-        string Text;
-
-        // caches
-        public ChatPkt UntranslatedPacket = new();
-        public Optional<ChatPkt> TranslatedPacket;
-        public uint LanguageSkillId;
-
-        public ChatMessageDistDelivererCustomizer(ChatMsg chatType, Language language, WorldObject sender, WorldObject receiver, string message)
-        {
-            Type = chatType;
-            Language = language;
-            Sender = sender;
-            Receiver = receiver;
-            Text = message;
-
-            UntranslatedPacket.Initialize(Type, Language, Sender, Receiver, Text);
-            UntranslatedPacket.Write();
-
-            LanguageDesc languageDesc = Global.LanguageMgr.GetLanguageDescById(language);
-            if (languageDesc != null)
-                LanguageSkillId = languageDesc.SkillId;
-        }
-
-        public void Invoke(Player player)
-        {
-            if (player.CanUnderstandLanguageSkillId(LanguageSkillId))
-            {
-                player.SendPacket(UntranslatedPacket);
-                return;
-            }
-
-            if (!TranslatedPacket.HasValue)
-            {
-                TranslatedPacket.HasValue = true;
-                TranslatedPacket.Value.Initialize(Type, Language, Sender, Receiver, Global.LanguageMgr.Translate(Text, (uint)Language));
-                TranslatedPacket.Value.Write();
-            }
-
-            player.SendPacket(TranslatedPacket.Value);
-        }
     }
 }

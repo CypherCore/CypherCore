@@ -16,10 +16,10 @@
  */
 
 using Framework.Constants;
+using Framework.Dynamic;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
-using Game.Networking;
 using Game.Networking.Packets;
 using System.Collections.Generic;
 
@@ -30,6 +30,59 @@ namespace Game.Chat
         public virtual dynamic Invoke(Locale locale = Locale.enUS) { return default; }
     }
 
+    public class ChatPacketSender : IDoWork<Player>
+    {
+        ChatMsg Type;
+        Language Language;
+        WorldObject Sender;
+        WorldObject Receiver;
+        string Text;
+        uint AchievementId;
+        Locale Locale;
+
+        uint LanguageSkillId;
+
+        // caches
+        public ChatPkt UntranslatedPacket;
+        public Optional<ChatPkt> TranslatedPacket;
+
+        public ChatPacketSender(ChatMsg chatType, Language language, WorldObject sender, WorldObject receiver, string message, uint achievementId = 0, Locale locale = Locale.enUS)
+        {
+            Type = chatType;
+            Language = language;
+            Sender = sender;
+            Receiver = receiver;
+            Text = message;
+            AchievementId = achievementId;
+            Locale = locale;
+
+            UntranslatedPacket.Initialize(Type, Language, Sender, Receiver, Text, AchievementId, "", Locale);
+            UntranslatedPacket.Write();
+
+            LanguageDesc languageDesc = Global.LanguageMgr.GetLanguageDescById(language);
+            if (languageDesc != null)
+                LanguageSkillId = languageDesc.SkillId;
+        }
+
+        public void Invoke(Player player)
+        {
+            if (player.CanUnderstandLanguageSkillId(LanguageSkillId))
+            {
+                player.SendPacket(UntranslatedPacket);
+                return;
+            }
+
+            if (!TranslatedPacket.HasValue)
+            {
+                TranslatedPacket.HasValue = true;
+                TranslatedPacket.Value.Initialize(Type, Language, Sender, Receiver, Global.LanguageMgr.Translate(Text, (uint)Language), AchievementId, "", Locale);
+                TranslatedPacket.Value.Write();
+            }
+
+            player.SendPacket(TranslatedPacket.Value);
+        }
+    }
+    
     public class BroadcastTextBuilder : MessageBuilder
     {
         public BroadcastTextBuilder(WorldObject obj, ChatMsg msgtype, uint textId, Gender gender, WorldObject target = null, uint achievementId = 0)
@@ -42,12 +95,10 @@ namespace Game.Chat
             _achievementId = achievementId;
         }
 
-        public override PacketSenderOwning<ChatPkt> Invoke(Locale locale = Locale.enUS)
+        public override ChatPacketSender Invoke(Locale locale = Locale.enUS)
         {
             BroadcastTextRecord bct = CliDB.BroadcastTextStorage.LookupByKey(_textId);
-            var chat = new PacketSenderOwning<ChatPkt>();
-            chat.Data.Initialize(_msgType, bct != null ? (Language)bct.LanguageID : Language.Universal, _source, _target, bct != null ? Global.DB2Mgr.GetBroadcastTextValue(bct, locale, _gender) : "", _achievementId, "", locale);
-            return chat;
+            return new ChatPacketSender(_msgType, bct != null ? (Language)bct.LanguageID : Language.Universal, _source, _target, bct != null ? Global.DB2Mgr.GetBroadcastTextValue(bct, locale, _gender) : "", _achievementId, locale);
         }
 
         WorldObject _source;
@@ -69,11 +120,9 @@ namespace Game.Chat
             _target = target;
         }
 
-        public override PacketSenderOwning<ChatPkt> Invoke(Locale locale)
+        public override ChatPacketSender Invoke(Locale locale)
         {
-            var chat = new PacketSenderOwning<ChatPkt>();
-            chat.Data.Initialize(_msgType, _language, _source, _target, _text, 0, "", locale);
-            return chat;
+            return new ChatPacketSender(_msgType, _language, _source, _target, _text, 0, locale);
         }
 
         WorldObject _source;
@@ -94,18 +143,14 @@ namespace Game.Chat
             _args = args;
         }
 
-        public override PacketSenderOwning<ChatPkt> Invoke(Locale locale)
+        public override ChatPacketSender Invoke(Locale locale)
         {
-            PacketSenderOwning<ChatPkt> chat = new();
-
             string text = Global.ObjectMgr.GetCypherString(_textId, locale);
 
             if (_args != null)
-                chat.Data.Initialize(_msgType, Language.Universal, _source, _target, string.Format(text, _args), 0, "", locale);
+                return new ChatPacketSender(_msgType, Language.Universal, _source, _target, string.Format(text, _args), 0, locale);
             else
-                chat.Data.Initialize(_msgType, Language.Universal, _source, _target, text, 0, "", locale);
-
-            return chat;
+                return new ChatPacketSender(_msgType, Language.Universal, _source, _target, text, 0, locale);
         }
 
         WorldObject _source;
