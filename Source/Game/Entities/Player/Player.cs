@@ -6233,13 +6233,13 @@ namespace Game.Entities
 
         void SendChatMessageToSetInRange(ChatMsg chatMsg, Language language, string text, float range)
         {
-            ChatPacketSender customizer = new(chatMsg, language, this, this, text);
+            ChatPacketSender sender = new(chatMsg, language, this, this, text);
 
             // Send to self
-            SendPacket(customizer.UntranslatedPacket);
+            sender.Invoke(this);
 
             // Send to players
-            MessageDistDeliverer<ChatPacketSender> notifier = new(this, customizer, range);
+            MessageDistDeliverer<ChatPacketSender> notifier = new(this, sender, range);
             Cell.VisitWorldObjects(this, notifier, range);
         }
 
