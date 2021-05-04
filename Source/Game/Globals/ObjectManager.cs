@@ -45,41 +45,6 @@ namespace Game
                 _difficultyEntries[i] = new List<uint>();
                 _hasDifficultyEntries[i] = new List<uint>();
             }
-
-            lang_description = new LanguageDesc[]
-            {
-                new LanguageDesc(Language.Addon,            0,      0                               ),
-                new LanguageDesc(Language.AddonLogged,      0,      0                               ),
-                new LanguageDesc(Language.Universal,        0,      0                               ),
-                new LanguageDesc(Language.Orcish,           669,    SkillType.LanguageOrcish            ),
-                new LanguageDesc(Language.Darnassian,       671,    SkillType.LanguageDarnassian        ),
-                new LanguageDesc(Language.Taurahe,          670,    SkillType.LanguageTaurahe           ),
-                new LanguageDesc(Language.Dwarvish,         672,    SkillType.LanguageDwarven           ),
-                new LanguageDesc(Language.Common,           668,    SkillType.LanguageCommon            ),
-                new LanguageDesc(Language.Demonic,          815,    SkillType.LanguageDemonTongue       ),
-                new LanguageDesc(Language.Titan,            816,    SkillType.LanguageTitan             ),
-                new LanguageDesc(Language.Thalassian,       813,    SkillType.LanguageThalassian        ),
-                new LanguageDesc(Language.Draconic,         814,    SkillType.LanguageDraconic          ),
-                new LanguageDesc(Language.Kalimag,          265462, SkillType.LanguageOldTongue         ),
-                new LanguageDesc(Language.Gnomish,          7340,   SkillType.LanguageGnomish           ),
-                new LanguageDesc(Language.Troll,            7341,   SkillType.LanguageTroll             ),
-                new LanguageDesc(Language.Gutterspeak,      17737,  SkillType.LanguageForsaken          ),
-                new LanguageDesc(Language.Draenei,          29932,  SkillType.LanguageDraenei           ),
-                new LanguageDesc(Language.Zombie,           265467, 0                                   ),
-                new LanguageDesc(Language.GnomishBinary,    265460, 0                                   ),
-                new LanguageDesc(Language.GoblinBinary,     265461, 0                                   ),
-                new LanguageDesc(Language.Worgen,           69270,  SkillType.LanguageGilnean           ),
-                new LanguageDesc(Language.Goblin,           69269,  SkillType.LanguageGoblin            ),
-                new LanguageDesc(Language.PandarenNeutral,  108127, SkillType.LanguagePandarenNeutral   ),
-                new LanguageDesc(Language.PandarenAlliance, 108130, 0                                   ),
-                new LanguageDesc(Language.PandarenHorde,    108131, 0                                   ),
-                new LanguageDesc(Language.Sprite,           265466, 0                                   ),
-                new LanguageDesc(Language.ShathYar,         265465, 0                                   ),
-                new LanguageDesc(Language.Nerglish,         265464, 0                                   ),
-                new LanguageDesc(Language.Moonkin,          265463, 0                                   ),
-                new LanguageDesc(Language.Shalassian,       262439, SkillType.LanguageShalassian        ),
-                new LanguageDesc(Language.Thalassian2,      262454, SkillType.LanguageThalassian2       )
-            };
         }
 
         //Static Methods
@@ -108,16 +73,6 @@ namespace Game
                 return new ExtendedPlayerName(name.Substring(0, pos), name.Substring(pos + 1));
             else
                 return new ExtendedPlayerName(name, "");
-        }
-        public static LanguageDesc GetLanguageDescByID(Language lang)
-        {
-            for (byte i = 0; i < lang_description.Length; ++i)
-            {
-                if (lang_description[i].lang_id == lang)
-                    return lang_description[i];
-            }
-
-            return null;
         }
         static LanguageType GetRealmLanguageType(bool create)
         {
@@ -10238,7 +10193,6 @@ namespace Game
         }
 
         #region Fields
-        public static LanguageDesc[] lang_description;
         //General
         Dictionary<uint, StringArray> CypherStringStorage = new();
         Dictionary<uint, RepRewardRate> _repRewardRateStorage = new();
@@ -10931,16 +10885,8 @@ namespace Game
 
     public class LanguageDesc
     {
-        public LanguageDesc(Language langid, uint spellid, object skillid)
-        {
-            lang_id = langid;
-            spell_id = spellid;
-            skill_id = Convert.ToUInt32(skillid);
-        }
-
-        public Language lang_id;
-        public uint spell_id;
-        public uint skill_id;
+        public uint SpellId;
+        public uint SkillId;
     }
 
     class ItemSpecStats

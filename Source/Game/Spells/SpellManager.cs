@@ -2188,6 +2188,9 @@ namespace Game.Entities
                         }
                     }
                 }
+
+                if (effect.Effect == (int)SpellEffectName.Language)
+                    Global.LanguageMgr.LoadSpellEffectLanguage(effect);
             }
 
             foreach (SpellAuraOptionsRecord auraOptions in CliDB.SpellAuraOptionsStorage.Values)

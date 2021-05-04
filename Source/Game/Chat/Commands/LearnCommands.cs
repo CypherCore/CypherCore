@@ -95,8 +95,11 @@ namespace Game.Chat.Commands
             static bool HandleLearnAllLangCommand(StringArguments args, CommandHandler handler)
             {
                 // skipping UNIVERSAL language (0)
-                for (byte i = 1; i < Enum.GetValues(typeof(Language)).Length; ++i)
-                    handler.GetSession().GetPlayer().LearnSpell(ObjectManager.lang_description[i].spell_id, false);
+                Global.LanguageMgr.ForEachLanguage((lang, languageDesc) =>
+                {
+                    handler.GetSession().GetPlayer().LearnSpell(languageDesc.SpellId, false);
+                    return true;
+                });
 
                 handler.SendSysMessage(CypherStrings.CommandLearnAllLang);
                 return true;

@@ -22,6 +22,8 @@ using Game.Arenas;
 using Game.BattleFields;
 using Game.BattleGrounds;
 using Game.BlackMarket;
+using Game.Cache;
+using Game.Chat;
 using Game.Collision;
 using Game.DataStorage;
 using Game.DungeonFinding;
@@ -29,14 +31,13 @@ using Game.Entities;
 using Game.Garrisons;
 using Game.Groups;
 using Game.Guilds;
+using Game.Loots;
 using Game.Maps;
 using Game.PvP;
 using Game.Scenarios;
 using Game.Scripting;
-using Game.SupportSystem;
 using Game.Services;
-using Game.Cache;
-using Game.Loots;
+using Game.SupportSystem;
 
 public static class Global
 {
@@ -107,6 +108,7 @@ public static class Global
     public static WeatherManager WeatherMgr { get { return WeatherManager.Instance; } }
 
     public static GameEventManager GameEventMgr { get { return GameEventManager.Instance; } }
+    public static LanguageManager LanguageMgr { get { return LanguageManager.Instance; } }
     public static CreatureTextManager CreatureTextMgr { get { return CreatureTextManager.Instance; } }
     public static AuctionManager AuctionHouseMgr { get { return AuctionManager.Instance; } }
 

@@ -1807,10 +1807,10 @@ namespace Game
 
             if (condition.LanguageID != 0)
             {
-                LanguageDesc lang = ObjectManager.GetLanguageDescByID((Language)condition.LanguageID);
-                if (lang != null)
+                LanguageDesc langDesc = Global.LanguageMgr.GetLanguageDescById((Language)condition.LanguageID);
+                if (langDesc != null)
                 {
-                    uint languageSkill = player.GetSkillValue((SkillType)lang.skill_id);
+                    uint languageSkill = player.GetSkillValue((SkillType)langDesc.SkillId);
                     if (languageSkill == 0 && player.HasAuraTypeWithMiscvalue(AuraType.ComprehendLanguage, condition.LanguageID))
                         languageSkill = 300;
 

@@ -1851,6 +1851,16 @@ namespace Game.DataStorage
             return _skillLineAbilitiesBySkillupSkill.LookupByKey(skillId);
         }
 
+        public SkillRaceClassInfoRecord GetAvailableSkillRaceClassInfo(uint skill)
+        {
+            var bounds = _skillRaceClassInfoBySkill.LookupByKey(skill);
+            foreach (var record in bounds)
+                if (record.Availability == 1)
+                    return record;
+
+            return null;
+        }
+        
         public SkillRaceClassInfoRecord GetSkillRaceClassInfo(uint skill, Race race, Class class_)
         {
             var bounds = _skillRaceClassInfoBySkill.LookupByKey(skill);
