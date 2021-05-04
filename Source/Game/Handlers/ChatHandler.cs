@@ -106,27 +106,17 @@ namespace Game
             }
 
             // prevent talking at unknown language (cheating)
-            LanguageDesc langDesc = Global.LanguageMgr.GetLanguageDescById(lang);
-            if (langDesc == null)
+            var languageData = Global.LanguageMgr.GetLanguageDescById(lang);
+            if (languageData.Empty())
             {
                 SendNotification(CypherStrings.UnknownLanguage);
                 return;
             }
 
-            if (langDesc.SkillId != 0 && !sender.HasSkill((SkillType)langDesc.SkillId))
+            if (!languageData.Any(langDesc => langDesc.SkillId == 0 || sender.HasSkill((SkillType)langDesc.SkillId)))
             {
                 // also check SPELL_AURA_COMPREHEND_LANGUAGE (client offers option to speak in that language)
-                var langAuras = sender.GetAuraEffectsByType(AuraType.ComprehendLanguage);
-                bool foundAura = false;
-                foreach (var eff in langAuras)
-                {
-                    if (eff.GetMiscValue() == (int)lang)
-                    {
-                        foundAura = true;
-                        break;
-                    }
-                }
-                if (!foundAura)
+                if (!sender.HasAuraTypeWithMiscvalue(AuraType.ComprehendLanguage, (int)lang))
                 {
                     SendNotification(CypherStrings.NotLearnedLanguage);
                     return;

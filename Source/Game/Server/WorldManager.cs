@@ -439,12 +439,6 @@ namespace Game
             Global.VMapMgr.Initialize(mapData);
             Global.MMapMgr.Initialize(mapData);
 
-            Log.outInfo(LogFilter.ServerLoading, "Loading languages...");
-            Global.LanguageMgr.LoadLanguages();
-
-            Log.outInfo(LogFilter.ServerLoading, "Loading languages words...");
-            Global.LanguageMgr.LoadLanguagesWords();
-
             Log.outInfo(LogFilter.ServerLoading, "Loading SpellInfo Storage...");
             Global.SpellMgr.LoadSpellInfoStore();
 
@@ -466,14 +460,17 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading SpellInfo immunity infos...");
             Global.SpellMgr.LoadSpellInfoImmunities();
 
-            Log.outInfo(LogFilter.ServerLoading, "Loading languages skills...");
-            Global.LanguageMgr.LoadLanguagesSkills();
-
             Log.outInfo(LogFilter.ServerLoading, "Loading PetFamilySpellsStore Data...");
             Global.SpellMgr.LoadPetFamilySpellsStore();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Spell Totem models...");
             Global.SpellMgr.LoadSpellTotemModel();
+
+            Log.outInfo(LogFilter.ServerLoading, "Loading languages...");
+            Global.LanguageMgr.LoadLanguages();
+
+            Log.outInfo(LogFilter.ServerLoading, "Loading languages words...");
+            Global.LanguageMgr.LoadLanguagesWords();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading GameObject models...");
             GameObjectModel.LoadGameObjectModelList();

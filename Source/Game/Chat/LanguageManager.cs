@@ -31,7 +31,7 @@ namespace Game.Chat
 {
     public class LanguageManager : Singleton<LanguageManager>
     {
-        Dictionary<uint, LanguageDesc> _langsMap = new();
+        MultiMap<uint, LanguageDesc> _langsMap = new();
         MultiMap<Tuple<uint, byte>, string> _wordsMap = new();
 
         LanguageManager() { }
@@ -41,36 +41,7 @@ namespace Game.Chat
             Cypher.Assert(spellEffect != null && spellEffect.Effect == (uint)SpellEffectName.Language);
 
             uint languageId = (uint)spellEffect.EffectMiscValue[0];
-            if (!_langsMap.TryGetValue(languageId, out LanguageDesc desc))
-            {
-                Log.outWarn(LogFilter.Spells, $"LoadSpellEffectLanguage called on Spell {spellEffect.SpellID} with language {languageId} which does not exist in Language.db2!");
-                return;
-            }
-
-            desc.SpellId = spellEffect.SpellID;
-        }
-
-        uint GetSpellLanguage(uint spellId)
-        {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, Difficulty.None);
-            if (spellInfo != null)
-            {
-                var effects = spellInfo.GetEffects();
-                if (effects.Length != 1 || effects[0].Effect != SpellEffectName.Language)
-                    Log.outWarn(LogFilter.Spells, $"Invalid language spell {spellId}. Expected 1 effect with SPELL_EFFECT_LANGUAGE");
-                else
-                    return (uint)effects[0].MiscValue;
-            }
-            return 0;
-        }
-
-        bool IsRelevantLanguageSkill(SkillLineRecord skillLineEntry)
-        {
-            if (skillLineEntry == null)
-                return false;
-
-            SkillRaceClassInfoRecord entry = Global.DB2Mgr.GetAvailableSkillRaceClassInfo(skillLineEntry.Id);
-            return entry != null;
+            _langsMap.Add(languageId, new LanguageDesc(spellEffect.SpellID, 0)); // register without a skill id for now
         }
 
         public void LoadLanguages()
@@ -79,7 +50,25 @@ namespace Game.Chat
 
             // Load languages from Languages.db2. Just the id, we don't need the name
             foreach (LanguagesRecord langEntry in CliDB.LanguagesStorage.Values)
-                _langsMap.Add(langEntry.Id, new LanguageDesc());
+            {
+                var spellsRange = _langsMap.LookupByKey(langEntry.Id);
+                if (spellsRange.Empty())
+                    _langsMap.Add(langEntry.Id, new LanguageDesc());
+                else
+                {
+                    List<LanguageDesc> langsWithSkill = new();
+                    foreach (var spellItr in spellsRange)
+                        foreach (var skillPair in Global.SpellMgr.GetSkillLineAbilityMapBounds(spellItr.SpellId))
+                            langsWithSkill.Add(new LanguageDesc(spellItr.SpellId, (uint)skillPair.SkillLine));
+
+                    foreach (var langDesc in langsWithSkill)
+                    {
+                        // erase temporary assignment that lacked skill
+                        _langsMap.Remove(langEntry.Id, new LanguageDesc(langDesc.SpellId, 0));
+                        _langsMap.Add(langEntry.Id, langDesc);
+                    }
+                }
+            }
 
             // Add the languages used in code in case they don't exist
             _langsMap.Add((uint)Language.Universal, new LanguageDesc());
@@ -88,49 +77,6 @@ namespace Game.Chat
 
             // Log load time
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {_langsMap.Count} languages in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
-        }
-
-        public void LoadLanguagesSkills()
-        {
-            uint oldMSTime = Time.GetMSTime();
-
-            uint count = 0;
-            foreach (SkillLineRecord skillLineEntry in CliDB.SkillLineStorage.Values)
-            {
-                if (skillLineEntry.CategoryID != SkillCategory.Languages)
-                    continue;
-
-                if (!IsRelevantLanguageSkill(skillLineEntry))
-                    continue;
-
-                var skills = Global.DB2Mgr.GetSkillLineAbilitiesBySkill(skillLineEntry.Id);
-
-                // We're expecting only 1 skill
-                if (skills.Count != 1)
-                    Log.outWarn(LogFilter.ServerLoading, $"Found language skill line with {skills.Count} spells. Expected 1. Will use 1st if available");
-
-                SkillLineAbilityRecord ability = skills.Empty() ? null : skills[0];
-                if (ability != null)
-                {
-                    uint languageId = GetSpellLanguage(ability.Spell);
-                    if (languageId != 0)
-                    {
-                        if (!_langsMap.TryGetValue(languageId, out LanguageDesc desc))
-                            Log.outWarn(LogFilter.ServerLoading, $"Spell {ability.Spell} has language {languageId}, which doesn't exist in Languages.db2");
-                        else
-                        {
-                            desc.SpellId = ability.Spell;
-                            desc.SkillId = skillLineEntry.Id;
-                            ++count;
-                        }
-                    }
-                }
-            }
-
-            // Languages that don't have skills will be added in SpellMgr::LoadSpellInfoStore() (e.g. LANG_ZOMBIE, LANG_SHATH_YAR)
-
-            // Log load time
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} languages skills in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
         public void LoadLanguagesWords()
@@ -215,10 +161,10 @@ namespace Game.Chat
 
         public bool IsLanguageExist(Language languageId)
         {
-            return _langsMap.ContainsKey((uint)languageId);
+            return CliDB.LanguagesStorage.HasRecord((uint)languageId);
         }
 
-        public LanguageDesc GetLanguageDescById(Language languageId)
+        public List<LanguageDesc> GetLanguageDescById(Language languageId)
         {
             return _langsMap.LookupByKey((uint)languageId);
         }

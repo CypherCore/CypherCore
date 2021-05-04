@@ -1807,19 +1807,20 @@ namespace Game
 
             if (condition.LanguageID != 0)
             {
-                LanguageDesc langDesc = Global.LanguageMgr.GetLanguageDescById((Language)condition.LanguageID);
-                if (langDesc != null)
+                int languageSkill = 0;
+                if (player.HasAuraTypeWithMiscvalue(AuraType.ComprehendLanguage, condition.LanguageID))
+                    languageSkill = 300;
+                else
                 {
-                    uint languageSkill = player.GetSkillValue((SkillType)langDesc.SkillId);
-                    if (languageSkill == 0 && player.HasAuraTypeWithMiscvalue(AuraType.ComprehendLanguage, condition.LanguageID))
-                        languageSkill = 300;
-
-                    if (condition.MinLanguage != 0 && languageSkill < condition.MinLanguage)
-                        return false;
-
-                    if (condition.MaxLanguage != 0 && languageSkill > condition.MaxLanguage)
-                        return false;
+                    foreach (var languageDesc in Global.LanguageMgr.GetLanguageDescById((Language)condition.LanguageID))
+                        languageSkill = Math.Max(languageSkill, player.GetSkillValue((SkillType)languageDesc.SkillId));
                 }
+
+                if (condition.MinLanguage != 0 && languageSkill < condition.MinLanguage)
+                    return false;
+
+                if (condition.MaxLanguage != 0 && languageSkill > condition.MaxLanguage)
+                    return false;
             }
 
             if (condition.MinFactionID[0] != 0 && condition.MinFactionID[1] != 0 && condition.MinFactionID[2] != 0 && condition.MaxFactionID != 0)

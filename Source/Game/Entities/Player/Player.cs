@@ -6334,9 +6334,16 @@ namespace Game.Entities
             packet.Initialize(ChatMsg.Whisper, Language.Universal, this, target, Global.DB2Mgr.GetBroadcastTextValue(bct, locale, GetGender()));
             target.SendPacket(packet);
         }
-        public bool CanUnderstandLanguageSkillId(uint langSkillId)
+        public bool CanUnderstandLanguage(Language language)
         {
-            return IsGameMaster() || (langSkillId != 0 && HasSkill((SkillType)langSkillId));
+            if (IsGameMaster())
+                return true;
+
+            foreach (var languageDesc in Global.LanguageMgr.GetLanguageDescById(language))
+                if (languageDesc.SkillId != 0 && HasSkill((SkillType)languageDesc.SkillId))
+                    return true;
+
+            return false;
         }
         #endregion
         

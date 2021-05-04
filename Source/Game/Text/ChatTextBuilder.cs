@@ -40,8 +40,6 @@ namespace Game.Chat
         uint AchievementId;
         Locale Locale;
 
-        uint LanguageSkillId;
-
         // caches
         public ChatPkt UntranslatedPacket;
         public Optional<ChatPkt> TranslatedPacket;
@@ -58,15 +56,11 @@ namespace Game.Chat
 
             UntranslatedPacket.Initialize(Type, Language, Sender, Receiver, Text, AchievementId, "", Locale);
             UntranslatedPacket.Write();
-
-            LanguageDesc languageDesc = Global.LanguageMgr.GetLanguageDescById(language);
-            if (languageDesc != null)
-                LanguageSkillId = languageDesc.SkillId;
         }
 
         public void Invoke(Player player)
         {
-            if (Language == Language.Universal || Language == Language.Addon || Language == Language.AddonLogged || player.CanUnderstandLanguageSkillId(LanguageSkillId))
+            if (Language == Language.Universal || Language == Language.Addon || Language == Language.AddonLogged || player.CanUnderstandLanguage(Language))
             {
                 player.SendPacket(UntranslatedPacket);
                 return;

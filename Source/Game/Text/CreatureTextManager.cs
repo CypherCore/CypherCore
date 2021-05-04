@@ -78,7 +78,7 @@ namespace Game
                         temp.sound = 0;
                     }
                 }
-                if (!Global.LanguageMgr.IsLanguageExist(temp.lang))
+                if (temp.lang != Language.Universal && !Global.LanguageMgr.IsLanguageExist(temp.lang))
                 {
                     Log.outError(LogFilter.Sql, "GossipManager:  Entry {0}, Group {1} in table `creature_texts` using Language {2} but Language does not exist.", temp.creatureId, temp.groupId, temp.lang);
                     temp.lang = Language.Universal;

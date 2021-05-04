@@ -97,7 +97,9 @@ namespace Game.Chat.Commands
                 // skipping UNIVERSAL language (0)
                 Global.LanguageMgr.ForEachLanguage((lang, languageDesc) =>
                 {
-                    handler.GetSession().GetPlayer().LearnSpell(languageDesc.SpellId, false);
+                    if (languageDesc.SpellId != 0)
+                        handler.GetSession().GetPlayer().LearnSpell(languageDesc.SpellId, false);
+
                     return true;
                 });
 
