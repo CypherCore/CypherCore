@@ -103,37 +103,155 @@ namespace Game.Chat
             return _wordsMap.LookupByKey(Tuple.Create(language, wordLen));
         }
 
-        public string Translate(string msg, uint sourcePlayerLanguage)
+        public string Translate(string msg, uint language, Locale locale)
         {
-            StringBuilder result = new StringBuilder();
-            StringArray tokens = new(msg, ' ');
+            string textToTranslate = "";
+            StripHyperlinks(msg, ref textToTranslate);
+            ReplaceUntranslatableCharactersWithSpace(ref textToTranslate);
 
-            bool first = true;
+            string result = "";
+            StringArray tokens = new(textToTranslate, ' ');
             foreach (string str in tokens)
             {
-                string nextPart = str;
-                uint wordLen = (uint)Math.Min(18U, str.Length);
-                var wordGroup = FindWordGroup(sourcePlayerLanguage, wordLen);
-                if (wordGroup.Empty())
-                    nextPart = "";
-                else
+                uint wordLen = (uint)Math.Min(18, str.Length);
+                var wordGroup = FindWordGroup(language, wordLen);
+                if (!wordGroup.Empty())
                 {
                     uint wordHash = SStrHash(str, true);
-                    byte idxInsideGroup = (byte)(wordHash % wordGroup.Count);
-                    nextPart = wordGroup[idxInsideGroup];
+                    byte idxInsideGroup = (byte)(wordHash % wordGroup.Count());
+
+                    string replacementWord = wordGroup[idxInsideGroup];
+
+                    switch (locale)
+                    {
+                        case Locale.koKR:
+                        case Locale.zhCN:
+                        case Locale.zhTW:
+                            {
+                                int length = Math.Min(str.Length, replacementWord.Length);
+                                for (int i = 0; i < length; ++i)
+                                {
+                                    if (str[i] >= 'A' && str[i] <= 'Z')
+                                        result += char.ToUpper(replacementWord[i]);
+                                    else
+                                        result += replacementWord[i];
+                                }
+                                break;
+                            }
+                        default:
+                            {
+                                int length = Math.Min(str.Length, replacementWord.Length);
+                                for (int i = 0; i < length; ++i)
+                                {
+                                    if (char.IsUpper(str[i]))
+                                        result += char.ToUpper(replacementWord[i]);
+                                    else
+                                        result += char.ToLower(replacementWord[i]);
+                                }
+                                break;
+                            }
+                    }
                 }
 
-                if (first)
-                    first = false;
-                else
-                    result.Append(" ");
-
-                result.Append(nextPart);
+                result += ' ';
             }
-            return result.ToString();
+
+            if (!result.IsEmpty())
+                result.Remove(result.Length - 1);
+
+            return result;
         }
 
-        static char upper_backslash(char c) { return c == '/' ? '\\' : char.ToUpper(c); }
+        public bool IsLanguageExist(Language languageId)
+        {
+            return CliDB.LanguagesStorage.HasRecord((uint)languageId);
+        }
+
+        public List<LanguageDesc> GetLanguageDescById(Language languageId)
+        {
+            return _langsMap.LookupByKey((uint)languageId);
+        }
+
+        public bool ForEachLanguage(Func<uint, LanguageDesc, bool> callback)
+        {
+            foreach (var pair in _langsMap)
+                if (!callback(pair.Key, pair.Value))
+                    return false;
+            return true;
+        }
+
+        void StripHyperlinks(string source, ref string dest)
+        {
+            char[] destChar = new char[source.Length];
+
+            int destSize = 0;
+            bool skipSquareBrackets = false;
+            for (int i = 0; i < source.Length; ++i)
+            {
+                char c = source[i];
+                if (c != '|')
+                {
+                    if (!skipSquareBrackets || (c != '[' && c != ']'))
+                        destChar[destSize++] = source[i];
+
+                    continue;
+                }
+
+                if (i + 1 >= source.Length)
+                    break;
+
+                switch (source[i + 1])
+                {
+                    case 'c':
+                    case 'C':
+                        // skip color
+                        i += 9;
+                        break;
+                    case 'r':
+                        ++i;
+                        break;
+                    case 'H':
+                        // skip just past first |h
+                        i = source.IndexOf("|h", i);
+                        if (i != -1)
+                            i += 2;
+                        skipSquareBrackets = true;
+                        break;
+                    case 'h':
+                        ++i;
+                        skipSquareBrackets = false;
+                        break;
+                    case 'T':
+                        // skip just past closing |t
+                        i = source.IndexOf("|t", i);
+                        if (i != -1)
+                            i += 2;
+                        break;
+                    default:
+                        break;
+                }
+            }
+
+            dest = new string(destChar, 0, destSize);
+        }
+
+        void ReplaceUntranslatableCharactersWithSpace(ref string text)
+        {
+            var chars = text.ToCharArray();
+            for (var i = 0; i < text.Length; ++i)
+            {
+                var w = chars[i];
+                if (!Extensions.isExtendedLatinCharacter(w) && !char.IsNumber(w) && w <= 0xFF && w != '\\')
+                    chars[i] = ' ';
+            }
+
+            text = new string(chars);
+        }
+
+        static char upper_backslash(char c)
+        {
+            return c == '/' ? '\\' : char.ToUpper(c);
+        }
 
         static uint[] s_hashtable =
         {
@@ -157,24 +275,6 @@ namespace Game.Chat
             }
 
             return seed != 0 ? seed : 1;
-        }
-
-        public bool IsLanguageExist(Language languageId)
-        {
-            return CliDB.LanguagesStorage.HasRecord((uint)languageId);
-        }
-
-        public List<LanguageDesc> GetLanguageDescById(Language languageId)
-        {
-            return _langsMap.LookupByKey((uint)languageId);
-        }
-
-        public bool ForEachLanguage(Func<uint, LanguageDesc, bool> callback)
-        {
-            foreach (var pair in _langsMap)
-                if (!callback(pair.Key, pair.Value))
-                    return false;
-            return true;
         }
     }
 }

@@ -225,6 +225,36 @@ namespace System
 
             return Encoding.UTF8.GetByteCount(str);
         }
+
+        public static bool isExtendedLatinCharacter(char wchar)
+        {
+            if (isBasicLatinCharacter(wchar))
+                return true;
+            if (wchar >= 0x00C0 && wchar <= 0x00D6)                  // LATIN CAPITAL LETTER A WITH GRAVE - LATIN CAPITAL LETTER O WITH DIAERESIS
+                return true;
+            if (wchar >= 0x00D8 && wchar <= 0x00DE)                  // LATIN CAPITAL LETTER O WITH STROKE - LATIN CAPITAL LETTER THORN
+                return true;
+            if (wchar == 0x00DF)                                     // LATIN SMALL LETTER SHARP S
+                return true;
+            if (wchar >= 0x00E0 && wchar <= 0x00F6)                  // LATIN SMALL LETTER A WITH GRAVE - LATIN SMALL LETTER O WITH DIAERESIS
+                return true;
+            if (wchar >= 0x00F8 && wchar <= 0x00FE)                  // LATIN SMALL LETTER O WITH STROKE - LATIN SMALL LETTER THORN
+                return true;
+            if (wchar >= 0x0100 && wchar <= 0x012F)                  // LATIN CAPITAL LETTER A WITH MACRON - LATIN SMALL LETTER I WITH OGONEK
+                return true;
+            if (wchar == 0x1E9E)                                     // LATIN CAPITAL LETTER SHARP S
+                return true;
+            return false;
+        }
+
+        public static bool isBasicLatinCharacter(char wchar)
+        {
+            if (wchar >= 'a' && wchar <= 'z')                      // LATIN SMALL LETTER A - LATIN SMALL LETTER Z
+                return true;
+            if (wchar >= 'A' && wchar <= 'Z')                      // LATIN CAPITAL LETTER A - LATIN CAPITAL LETTER Z
+                return true;
+            return false;
+        }
         #endregion
 
         #region BinaryReader
