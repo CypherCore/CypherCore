@@ -6344,6 +6344,9 @@ namespace Game.Entities
                 if (languageDesc.SkillId != 0 && HasSkill((SkillType)languageDesc.SkillId))
                     return true;
 
+            if (HasAuraTypeWithMiscvalue(AuraType.ComprehendLanguage, (int)language))
+                return true;
+
             return false;
         }
         #endregion
