@@ -2649,9 +2649,11 @@ namespace Game.Spells
                             case SpellEffectName.ApplyAreaAuraSummons:
                                 {
                                     targetList.Add(GetUnitOwner());
-                                    WorldObjectSpellAreaTargetCheck check = new(radius, GetUnitOwner(), caster, GetUnitOwner(), GetSpellInfo(), SpellTargetCheckTypes.Summoned, null, SpellTargetObjectTypes.Unit);
+                                    WorldObjectSpellAreaTargetCheck check = new(radius, GetUnitOwner(), caster, GetUnitOwner(), GetSpellInfo(), SpellTargetCheckTypes.Summoned, effect.ImplicitTargetConditions, SpellTargetObjectTypes.Unit);
                                     UnitListSearcher searcher = new(GetUnitOwner(), targetList, check);
                                     Cell.VisitAllObjects(GetUnitOwner(), searcher, radius);
+                                    // by design WorldObjectSpellAreaTargetCheck allows not-in-world units (for spells) but for auras it is not acceptable
+                                    targetList.RemoveAll(unit => !unit.IsSelfOrInSameMap(caster));
                                     break;
                                 }
                         }
