@@ -1548,8 +1548,12 @@ namespace Game.Entities
 
         internal void SendCombatLogMessage(CombatLogServerPacket combatLog)
         {
-            CombatLogSender combatLogCustomizer = new(combatLog);
-            var notifier = new MessageDistDeliverer<CombatLogSender>(this, combatLogCustomizer, GetVisibilityRange());
+            CombatLogSender combatLogSender = new(combatLog);
+
+            if (IsPlayer())
+                combatLogSender.Invoke(ToPlayer());
+
+            var notifier = new MessageDistDeliverer<CombatLogSender>(this, combatLogSender, GetVisibilityRange());
             Cell.VisitWorldObjects(this, notifier, GetVisibilityRange());
         }
 
