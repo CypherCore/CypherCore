@@ -5961,11 +5961,32 @@ namespace Game.Entities
             if (guid.IsGameObject())
             {
                 GameObject go = GetMap().GetGameObject(guid);
+                bool shouldLootRelease(GameObject go, LootType lootType)
+                {
+                    // not check distance for GO in case owned GO (fishing bobber case, for example)
+                    // And permit out of range GO with no owner in case fishing hole
+                    if (!go)
+                        return true;
 
-                // not check distance for GO in case owned GO (fishing bobber case, for example)
-                // And permit out of range GO with no owner in case fishing hole
-                if (!go || (loot_type != LootType.Fishinghole && ((loot_type != LootType.Fishing && loot_type != LootType.FishingJunk) || go.GetOwnerGUID() != GetGUID())
-                    && !go.IsWithinDistInMap(this, SharedConst.InteractionDistance)) || (loot_type == LootType.Corpse && go.GetRespawnTime() != 0 && go.IsSpawnedByDefault()))
+                    if (lootType == LootType.Skinning)
+                    {
+                        // Disarm Trap
+                        if (!go.IsWithinDistInMap(this, 20.0f))
+                            return true;
+                    }
+                    else
+                    {
+                        if (lootType != LootType.Fishinghole && ((lootType != LootType.Fishing && lootType != LootType.FishingJunk) || go.GetOwnerGUID() != GetGUID()) && !go.IsWithinDistInMap(this, SharedConst.InteractionDistance))
+                            return true;
+
+                        if (lootType == LootType.Corpse && go.GetRespawnTime() != 0 && go.IsSpawnedByDefault())
+                            return true;
+                    }
+
+                    return false;
+                }
+
+                if (shouldLootRelease(go, loot_type))
                 {
                     SendLootRelease(guid);
                     return;
