@@ -148,6 +148,9 @@ namespace Scripts.Spells.Items
         //Pethealing
         public const uint HealthLink = 37382;
 
+        //PowerCircle
+        public const uint LimitlessPower = 45044;
+
         //Savorydeviatedelight
         public const uint FlipOutMale = 8219;
         public const uint FlipOutFemale = 8220;
@@ -1640,6 +1643,40 @@ namespace Scripts.Spells.Items
         }
     }
 
+    [Script] // 45043 - Power Circle (Shifting Naaru Sliver)
+    class spell_item_power_circle : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.LimitlessPower);
+        }
+
+        bool CheckCaster(Unit target)
+        {
+            return target.GetGUID() == GetCasterGUID();
+        }
+
+        void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().CastSpell(null, SpellIds.LimitlessPower, true);
+            Aura buff = GetTarget().GetAura(SpellIds.LimitlessPower);
+            if (buff != null)
+                buff.SetDuration(GetDuration());
+        }
+
+        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().RemoveAurasDueToSpell(SpellIds.LimitlessPower);
+        }
+
+        public override void Register()
+        {
+            DoCheckAreaTarget.Add(new CheckAreaTargetHandler(CheckCaster));
+            AfterEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            AfterEffectRemove .Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
+    
     // http://www.wowhead.com/item=6657 Savory Deviate Delight
     [Script] // 8213 Savory Deviate Delight
     class spell_item_savory_deviate_delight : SpellScript
