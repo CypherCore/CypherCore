@@ -2072,7 +2072,8 @@ namespace Game.Entities
                         LearnSpell(id, false, fromSkill);
                 }
             }
-
+            else
+                UpdateQuestObjectiveProgress(QuestObjectiveType.LearnSpell, (int)spellId, 1);
         }
 
         public void RemoveSpell(uint spellId, bool disabled = false, bool learnLowRank = true, bool suppressMessaging = false)

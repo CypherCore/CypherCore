@@ -452,8 +452,12 @@ namespace Game.Entities
             {
                 Player player = unit.ToPlayer();
                 if (player)
+                {
                     if (player.IsDebugAreaTriggers)
                         player.SendSysMessage(CypherStrings.DebugAreatriggerEntered, GetTemplate().Id);
+
+                    player.UpdateQuestObjectiveProgress(QuestObjectiveType.AreaTriggerEnter, (int)GetEntry(), 1);
+                }
 
                 DoActions(unit);
 
@@ -467,8 +471,12 @@ namespace Game.Entities
                 {
                     Player player = leavingUnit.ToPlayer();
                     if (player)
+                    {
                         if (player.IsDebugAreaTriggers)
                             player.SendSysMessage(CypherStrings.DebugAreatriggerLeft, GetTemplate().Id);
+
+                        player.UpdateQuestObjectiveProgress(QuestObjectiveType.AreaTriggerExit, (int)GetEntry(), 1);
+                    }
 
                     UndoActions(leavingUnit);
 
