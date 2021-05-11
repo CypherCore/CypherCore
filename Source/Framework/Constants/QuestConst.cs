@@ -41,7 +41,8 @@ namespace Framework.Constants
         ObtainCurrency = 17,    // requires the player to gain X currency after starting the quest but not required to keep it until the end (does not consume)
         IncreaseReputation = 18,// requires the player to gain X reputation with a faction
         AreaTriggerEnter = 19,
-        AreaTriggerExit = 20
+        AreaTriggerExit = 20,
+        Max
     }
 
     public enum QuestObjectiveFlags
@@ -494,17 +495,9 @@ namespace Framework.Constants
         AutoAccept = 0x004, // Quest Is To Be Auto-Accepted.
         DfQuest = 0x008, // Quest Is Used By Dungeon Finder.
         Monthly = 0x010, // Quest Is Reset At The Begining Of The Month
-        Cast = 0x20, // Set by 32 in SpecialFlags in DB if the quest requires RequiredOrNpcGo killcredit but NOT kill (a spell cast)
         // Room For More Custom Flags
 
-        DbAllowed = Repeatable | ExplorationOrEvent | AutoAccept | DfQuest | Monthly | Cast,
-
-        Deliver = 0x080,   // Internal Flag Computed Only
-        Speakto = 0x100,   // Internal Flag Computed Only
-        Kill = 0x200,   // Internal Flag Computed Only
-        Timed = 0x400,   // Internal Flag Computed Only
-        PlayerKill = 0x800,    // Internal Flag Computed Only
-        CompletedAtStart = 0x1000   // Internal flag computed only
+        DbAllowed = Repeatable | ExplorationOrEvent | AutoAccept | DfQuest | Monthly,
     }
 
     public enum QuestSaveType

@@ -22,6 +22,7 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Networking.Packets;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 
 namespace Game
@@ -252,6 +253,7 @@ namespace Game
             obj.Description = fields.Read<string>(9);
 
             Objectives.Add(obj);
+            _usedQuestObjectiveTypes[(int)obj.Type] = true;
         }
 
         public void LoadQuestObjectiveVisualEffect(SQLFields fields)
@@ -575,6 +577,8 @@ namespace Game
 
         public bool HasSpecialFlag(QuestSpecialFlags flag) { return (SpecialFlags & flag) != 0; }
         public void SetSpecialFlag(QuestSpecialFlags flag) { SpecialFlags |= flag; }
+
+        public bool HasQuestObjectiveType(QuestObjectiveType type) { return _usedQuestObjectiveTypes[(int)type]; }
         
         public bool IsAutoPush() { return HasFlagEx(QuestFlagsEx.AutoPush);    }
         public bool IsWorldQuest() { return HasFlagEx(QuestFlagsEx.IsWorldQuest);}
@@ -709,6 +713,7 @@ namespace Game
         public uint SourceItemIdCount;
         public uint RewardMailSenderEntry;
         public QuestSpecialFlags SpecialFlags; // custom flags, not sniffed/WDB
+        public BitArray _usedQuestObjectiveTypes = new((int)QuestObjectiveType.Max);
         public uint ScriptId;
 
         public List<uint> DependentPreviousQuests = new();
@@ -813,6 +818,8 @@ namespace Game
                 case QuestObjectiveType.WinPetBattleAgainstNpc:
                 case QuestObjectiveType.DefeatBattlePet:
                 case QuestObjectiveType.CriteriaTree:
+                case QuestObjectiveType.AreaTriggerEnter:
+                case QuestObjectiveType.AreaTriggerExit:
                     return true;
                 default:
                     break;

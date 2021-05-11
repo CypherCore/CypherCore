@@ -492,7 +492,7 @@ namespace Game.Entities
                         }
                     }
 
-                    if (qInfo.HasSpecialFlag(QuestSpecialFlags.Timed) && q_status.Timer == 0)
+                    if (qInfo.LimitTime != 0 && q_status.Timer == 0)
                         return false;
 
                     return true;
@@ -509,7 +509,7 @@ namespace Game.Entities
             if (!CanTakeQuest(quest, false))
                 return false;
 
-            if (quest.HasSpecialFlag(QuestSpecialFlags.Deliver))
+            if (quest.HasQuestObjectiveType(QuestObjectiveType.Item))
                 foreach (QuestObjective obj in quest.Objectives)
                     if (obj.Type == QuestObjectiveType.Item && !HasItemCount((uint)obj.ObjectID, (uint)obj.Amount))
                         return false;
@@ -535,7 +535,7 @@ namespace Game.Entities
                 return false;
 
             // prevent receive reward with quest items in bank
-            if (quest.HasSpecialFlag(QuestSpecialFlags.Deliver))
+            if (quest.HasQuestObjectiveType(QuestObjectiveType.Item))
             {
                 foreach (QuestObjective obj in quest.Objectives)
                 {
@@ -768,10 +768,9 @@ namespace Game.Entities
             }
 
             uint qtime = 0;
-            if (quest.HasSpecialFlag(QuestSpecialFlags.Timed))
+            uint limittime = quest.LimitTime;
+            if (limittime != 0)
             {
-                uint limittime = quest.LimitTime;
-
                 // shared timed quest
                 if (questGiver != null && questGiver.IsTypeId(TypeId.Player))
                     limittime = questGiver.ToPlayer().m_QuestStatus[quest_id].Timer / Time.InMilliseconds;
@@ -1195,7 +1194,7 @@ namespace Game.Entities
                 if (qStatus != QuestStatus.Incomplete)
                 {
                     // completed timed quest with no requirements
-                    if (qStatus != QuestStatus.Complete || !quest.HasSpecialFlag(QuestSpecialFlags.Timed) || !quest.HasSpecialFlag(QuestSpecialFlags.CompletedAtStart))
+                    if (qStatus != QuestStatus.Complete || quest.LimitTime == 0 || !quest.Objectives.Empty())
                         return;
                 }
 
@@ -1209,7 +1208,7 @@ namespace Game.Entities
                     SetQuestSlotState(log_slot, QuestSlotStateMask.Fail);
                 }
 
-                if (quest.HasSpecialFlag(QuestSpecialFlags.Timed))
+                if (quest.LimitTime != 0)
                 {
                     QuestStatusData q_status = m_QuestStatus[questId];
 
@@ -1539,7 +1538,7 @@ namespace Game.Entities
 
         public bool SatisfyQuestTimed(Quest qInfo, bool msg)
         {
-            if (!m_timedquests.Empty() && qInfo.HasSpecialFlag(QuestSpecialFlags.Timed))
+            if (!m_timedquests.Empty() && qInfo.LimitTime != 0)
             {
                 if (msg)
                 {
@@ -1970,16 +1969,17 @@ namespace Game.Entities
 
         public void AdjustQuestReqItemCount(Quest quest)
         {
-            if (quest.HasSpecialFlag(QuestSpecialFlags.Deliver))
+            // adjust progress of quest objectives that rely on external counters, like items
+            if (quest.HasQuestObjectiveType(QuestObjectiveType.Item))
             {
                 foreach (QuestObjective obj in quest.Objectives)
                 {
-                    if (obj.Type != QuestObjectiveType.Item)
-                        continue;
-
-                    uint reqItemCount = (uint)obj.Amount;
-                    uint curItemCount = GetItemCount((uint)obj.ObjectID, true);
-                    SetQuestObjectiveData(obj, (int)Math.Min(curItemCount, reqItemCount));
+                    if (obj.Type == QuestObjectiveType.Item)
+                    {
+                        uint reqItemCount = (uint)obj.Amount;
+                        uint curItemCount = GetItemCount((uint)obj.ObjectID, true);
+                        SetQuestObjectiveData(obj, (int)Math.Min(curItemCount, reqItemCount));
+                    }
                 }
             }
         }
@@ -2144,7 +2144,7 @@ namespace Game.Entities
                     continue;
 
                 Quest qInfo = Global.ObjectMgr.GetQuestTemplate(questid);
-                if (qInfo == null || !qInfo.HasSpecialFlag(QuestSpecialFlags.Deliver))
+                if (qInfo == null || !qInfo.HasQuestObjectiveType(QuestObjectiveType.Item))
                     continue;
 
                 foreach (QuestObjective obj in qInfo.Objectives)
@@ -2183,10 +2183,9 @@ namespace Game.Entities
                 uint questid = GetQuestSlotQuestId(i);
                 if (questid == 0)
                     continue;
+
                 Quest qInfo = Global.ObjectMgr.GetQuestTemplate(questid);
-                if (qInfo == null)
-                    continue;
-                if (!qInfo.HasSpecialFlag(QuestSpecialFlags.Deliver))
+                if (qInfo == null || !qInfo.HasQuestObjectiveType(QuestObjectiveType.Item))
                     continue;
 
                 foreach (QuestObjective obj in qInfo.Objectives)
@@ -2251,36 +2250,33 @@ namespace Game.Entities
                     continue;
 
                 Quest qInfo = Global.ObjectMgr.GetQuestTemplate(questid);
-                if (qInfo == null)
+                if (qInfo == null || !qInfo.HasQuestObjectiveType(QuestObjectiveType.Monster))
                     continue;
 
                 // just if !ingroup || !noraidgroup || raidgroup
                 QuestStatusData q_status = m_QuestStatus[questid];
                 if (q_status.Status == QuestStatus.Incomplete && (GetGroup() == null || !GetGroup().IsRaidGroup() || qInfo.IsAllowedInRaid(GetMap().GetDifficultyID())))
                 {
-                    if (qInfo.HasSpecialFlag(QuestSpecialFlags.Kill))// && !qInfo.HasSpecialFlag(QuestSpecialFlags.Cast))
+                    foreach (QuestObjective obj in qInfo.Objectives)
                     {
-                        foreach (QuestObjective obj in qInfo.Objectives)
+                        if (obj.Type != QuestObjectiveType.Monster)
+                            continue;
+
+                        int reqkill = obj.ObjectID;
+                        if (reqkill == real_entry)
                         {
-                            if (obj.Type != QuestObjectiveType.Monster)
-                                continue;
-
-                            int reqkill = obj.ObjectID;
-                            if (reqkill == real_entry)
+                            int curKillCount = GetQuestObjectiveData(qInfo, obj.StorageIndex);
+                            if (curKillCount < obj.Amount)
                             {
-                                int curKillCount = GetQuestObjectiveData(qInfo, obj.StorageIndex);
-                                if (curKillCount < obj.Amount)
-                                {
-                                    SetQuestObjectiveData(obj, curKillCount + addKillCount);
-                                    SendQuestUpdateAddCredit(qInfo, guid, obj, (uint)(curKillCount + addKillCount));
-                                }
-
-                                if (CanCompleteQuest(questid))
-                                    CompleteQuest(questid);
-
-                                // same objective target can be in many active quests, but not in 2 objectives for single quest (code optimization).
-                                break;
+                                SetQuestObjectiveData(obj, curKillCount + addKillCount);
+                                SendQuestUpdateAddCredit(qInfo, guid, obj, (uint)(curKillCount + addKillCount));
                             }
+
+                            if (CanCompleteQuest(questid))
+                                CompleteQuest(questid);
+
+                            // same objective target can be in many active quests, but not in 2 objectives for single quest (code optimization).
+                            break;
                         }
                     }
                 }
@@ -2298,7 +2294,7 @@ namespace Game.Entities
                     continue;
 
                 Quest qInfo = Global.ObjectMgr.GetQuestTemplate(questid);
-                if (qInfo == null)
+                if (qInfo == null || !qInfo.HasQuestObjectiveType(QuestObjectiveType.PlayerKills))
                     continue;
 
                 // just if !ingroup || !noraidgroup || raidgroup
@@ -2344,32 +2340,29 @@ namespace Game.Entities
 
                 if (q_status.Status == QuestStatus.Incomplete)
                 {
-                    if (qInfo.HasSpecialFlag(QuestSpecialFlags.Cast))
+                    foreach (QuestObjective obj in qInfo.Objectives)
                     {
-                        foreach (QuestObjective obj in qInfo.Objectives)
+                        if (obj.Type != QuestObjectiveType.GameObject)
+                            continue;
+
+                        int reqTarget = obj.ObjectID;
+
+                        // other not this creature/GO related objectives
+                        if (reqTarget != entry)
+                            continue;
+
+                        int curCastCount = GetQuestObjectiveData(qInfo, obj.StorageIndex);
+                        if (curCastCount < obj.Amount)
                         {
-                            if (obj.Type != QuestObjectiveType.GameObject)
-                                continue;
-
-                            int reqTarget = obj.ObjectID;
-
-                            // other not this creature/GO related objectives
-                            if (reqTarget != entry)
-                                continue;
-
-                            int curCastCount = GetQuestObjectiveData(qInfo, obj.StorageIndex);
-                            if (curCastCount < obj.Amount)
-                            {
-                                SetQuestObjectiveData(obj, curCastCount + addCastCount);
-                                SendQuestUpdateAddCredit(qInfo, guid, obj, (uint)(curCastCount + addCastCount));
-                            }
-
-                            if (CanCompleteQuest(questid))
-                                CompleteQuest(questid);
-
-                            // same objective target can be in many active quests, but not in 2 objectives for single quest (code optimization).
-                            break;
+                            SetQuestObjectiveData(obj, curCastCount + addCastCount);
+                            SendQuestUpdateAddCredit(qInfo, guid, obj, (uint)(curCastCount + addCastCount));
                         }
+
+                        if (CanCompleteQuest(questid))
+                            CompleteQuest(questid);
+
+                        // same objective target can be in many active quests, but not in 2 objectives for single quest (code optimization).
+                        break;
                     }
                 }
             }
@@ -2407,29 +2400,26 @@ namespace Game.Entities
 
                 if (q_status.Status == QuestStatus.Incomplete)
                 {
-                    if (qInfo.HasSpecialFlag(QuestSpecialFlags.Kill | QuestSpecialFlags.Cast | QuestSpecialFlags.Speakto))
+                    foreach (QuestObjective obj in qInfo.Objectives)
                     {
-                        foreach (QuestObjective obj in qInfo.Objectives)
+                        if (obj.Type != QuestObjectiveType.TalkTo)
+                            continue;
+
+                        int reqTarget = obj.ObjectID;
+                        if (reqTarget == entry)
                         {
-                            if (obj.Type != QuestObjectiveType.TalkTo)
-                                continue;
-
-                            int reqTarget = obj.ObjectID;
-                            if (reqTarget == entry)
+                            int curTalkCount = GetQuestObjectiveData(qInfo, obj.StorageIndex);
+                            if (curTalkCount < obj.Amount)
                             {
-                                int curTalkCount = GetQuestObjectiveData(qInfo, obj.StorageIndex);
-                                if (curTalkCount < obj.Amount)
-                                {
-                                    SetQuestObjectiveData(obj, curTalkCount + addTalkCount);
-                                    SendQuestUpdateAddCredit(qInfo, guid, obj, (uint)(curTalkCount + addTalkCount));
-                                }
-
-                                if (CanCompleteQuest(questid))
-                                    CompleteQuest(questid);
-
-                                // Quest can't have more than one objective for the same creature (code optimisation)
-                                break;
+                                SetQuestObjectiveData(obj, curTalkCount + addTalkCount);
+                                SendQuestUpdateAddCredit(qInfo, guid, obj, (uint)(curTalkCount + addTalkCount));
                             }
+
+                            if (CanCompleteQuest(questid))
+                                CompleteQuest(questid);
+
+                            // Quest can't have more than one objective for the same creature (code optimisation)
+                            break;
                         }
                     }
                 }

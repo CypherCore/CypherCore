@@ -694,7 +694,7 @@ namespace Game.Entities
 
                         long quest_time = result.Read<long>(2);
 
-                        if (quest.HasSpecialFlag(QuestSpecialFlags.Timed) && !GetQuestRewardStatus(quest_id))
+                        if (quest.LimitTime != 0 && !GetQuestRewardStatus(quest_id))
                         {
                             AddTimedQuest(quest_id);
 

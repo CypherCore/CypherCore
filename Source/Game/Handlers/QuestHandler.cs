@@ -447,7 +447,7 @@ namespace Game
 
                     if (quest != null)
                     {
-                        if (quest.HasSpecialFlag(QuestSpecialFlags.Timed))
+                        if (quest.LimitTime != 0)
                             GetPlayer().RemoveTimedQuest(questId);
 
                         if (quest.HasFlag(QuestFlags.Pvp))
@@ -566,7 +566,7 @@ namespace Game
             }
             else
             {
-                if (quest.HasSpecialFlag(QuestSpecialFlags.Deliver))                  // some items required
+                if (quest.HasQuestObjectiveType(QuestObjectiveType.Item))                  // some items required
                     GetPlayer().PlayerTalkClass.SendQuestGiverRequestItems(quest, packet.QuestGiverGUID, GetPlayer().CanRewardQuest(quest, false), false);
                 else                                            // no items required
                     GetPlayer().PlayerTalkClass.SendQuestGiverOfferReward(quest, packet.QuestGiverGUID, true);

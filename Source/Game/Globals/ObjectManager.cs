@@ -7082,23 +7082,18 @@ namespace Game
                     switch (obj.Type)
                     {
                         case QuestObjectiveType.Item:
-                            qinfo.SetSpecialFlag(QuestSpecialFlags.Deliver);
                             if (GetItemTemplate((uint)obj.ObjectID) == null)
                                 Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing item entry {2}, quest can't be done.", qinfo.Id, obj.Id, obj.ObjectID);
                             break;
                         case QuestObjectiveType.Monster:
-                            qinfo.SetSpecialFlag(QuestSpecialFlags.Kill | QuestSpecialFlags.Cast);
                             if (GetCreatureTemplate((uint)obj.ObjectID) == null)
                                 Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing creature entry {2}, quest can't be done.", qinfo.Id, obj.Id, obj.ObjectID);
                             break;
                         case QuestObjectiveType.GameObject:
-                            qinfo.SetSpecialFlag(QuestSpecialFlags.Kill | QuestSpecialFlags.Cast);
                             if (GetGameObjectTemplate((uint)obj.ObjectID) == null)
                                 Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing gameobject entry {2}, quest can't be done.", qinfo.Id, obj.Id, obj.ObjectID);
                             break;
                         case QuestObjectiveType.TalkTo:
-                            // Need checks (is it creature only?)
-                            qinfo.SetSpecialFlag(QuestSpecialFlags.Cast | QuestSpecialFlags.Speakto);
                             break;
                         case QuestObjectiveType.MinReputation:
                         case QuestObjectiveType.MaxReputation:
@@ -7106,7 +7101,6 @@ namespace Game
                                 Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing faction id {2}", qinfo.Id, obj.Id, obj.ObjectID);
                             break;
                         case QuestObjectiveType.PlayerKills:
-                            qinfo.SetSpecialFlag(QuestSpecialFlags.Kill);
                             if (obj.Amount <= 0)
                                 Log.outError(LogFilter.Sql, "Quest {0} objective {1} has invalid player kills count {2}", qinfo.Id, obj.Id, obj.Amount);
                             break;
@@ -7403,29 +7397,6 @@ namespace Game
 
                 if (qinfo.ExclusiveGroup != 0)
                     _exclusiveQuestGroups.Add(qinfo.ExclusiveGroup, qinfo.Id);
-                if (qinfo.LimitTime != 0)
-                    qinfo.SetSpecialFlag(QuestSpecialFlags.Timed);
-
-                // Special flag to determine if quest is completed from the start, used to determine if we can fail timed quest if it is completed
-                if (!qinfo.HasSpecialFlag(QuestSpecialFlags.Kill | QuestSpecialFlags.Cast | QuestSpecialFlags.Speakto | QuestSpecialFlags.ExplorationOrEvent))
-                {
-                    bool addFlag = true;
-                    if (qinfo.HasSpecialFlag(QuestSpecialFlags.Deliver))
-                    {
-                        foreach (QuestObjective obj in qinfo.Objectives)
-                        {
-                            if (obj.Type == QuestObjectiveType.Item)
-                                if (obj.ObjectID != qinfo.SourceItemId || obj.Amount > qinfo.SourceItemIdCount)
-                                {
-                                    addFlag = false;
-                                    break;
-                                }
-                        }
-                    }
-
-                    if (addFlag)
-                        qinfo.SetSpecialFlag(QuestSpecialFlags.CompletedAtStart);
-                }
             }
 
             // check QUEST_SPECIAL_FLAGS_EXPLORATION_OR_EVENT for spell with SPELL_EFFECT_QUEST_COMPLETE

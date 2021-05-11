@@ -570,7 +570,7 @@ namespace Game.Misc
             // We can always call to RequestItems, but this packet only goes out if there are actually
             // items.  Otherwise, we'll skip straight to the OfferReward
 
-            if (!quest.HasSpecialFlag(QuestSpecialFlags.Deliver) && canComplete)
+            if (!quest.HasQuestObjectiveType(QuestObjectiveType.Item) && canComplete)
             {
                 SendQuestGiverOfferReward(quest, npcGUID, true);
                 return;
