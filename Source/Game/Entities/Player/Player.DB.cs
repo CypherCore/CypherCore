@@ -692,7 +692,9 @@ namespace Game.Entities
                                 GetName(), GetGUID().ToString(), quest_id, qstatus);
                         }
 
-                        long quest_time = result.Read<long>(2);
+                        questStatusData.Explored = (result.Read<byte>(2) > 0);
+
+                        long quest_time = result.Read<long>(3);
 
                         if (quest.LimitTime != 0 && !GetQuestRewardStatus(quest_id))
                         {
@@ -1948,7 +1950,8 @@ namespace Game.Entities
                         stmt.AddValue(0, GetGUID().GetCounter());
                         stmt.AddValue(1, save.Key);
                         stmt.AddValue(2, (byte)data.Status);
-                        stmt.AddValue(3, data.Timer / Time.InMilliseconds + GameTime.GetGameTime());
+                        stmt.AddValue(3, data.Explored);
+                        stmt.AddValue(4, data.Timer / Time.InMilliseconds + GameTime.GetGameTime());
                         trans.Append(stmt);
 
                         // Save objectives

@@ -731,6 +731,7 @@ namespace Game
         public ushort Slot = SharedConst.MaxQuestLogSize;
         public QuestStatus Status;
         public uint Timer;
+        public bool Explored;
     }
 
     public class QuestGreeting

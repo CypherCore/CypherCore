@@ -494,6 +494,9 @@ namespace Game.Entities
                         }
                     }
 
+                    if (qInfo.HasSpecialFlag(QuestSpecialFlags.ExplorationOrEvent) && !q_status.Explored)
+                        return false;
+
                     if (qInfo.LimitTime != 0 && q_status.Timer == 0)
                         return false;
 
@@ -741,7 +744,9 @@ namespace Game.Entities
             QuestStatus oldStatus = questStatusData.Status;
 
             // check for repeatable quests status reset
+            questStatusData.Slot = log_slot;
             questStatusData.Status = QuestStatus.Incomplete;
+            questStatusData.Explored = false;
 
             GiveQuestSourceItem(quest);
             AdjustQuestObjectiveProgress(quest);
@@ -800,7 +805,6 @@ namespace Game.Entities
                 caster.CastSpell(this, spellInfo.Id, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetCastDifficulty(spellInfo.Difficulty));
             }
 
-            questStatusData.Slot = log_slot;
             SetQuestSlot(log_slot, quest_id, qtime);
 
             m_QuestStatusSave[quest_id] = QuestSaveType.Default;
@@ -2127,25 +2131,17 @@ namespace Game.Entities
         {
             if (questId != 0)
             {
-                ushort log_slot = FindQuestSlot(questId);
-                if (log_slot < SharedConst.MaxQuestLogSize)
+                QuestStatusData status = m_QuestStatus.LookupByKey(questId);
+                if (status != null)
                 {
-                    Log.outError(LogFilter.Player, "Deprecated function AreaExploredOrEventHappens called for quest {0}", questId);
-                    /* @todo
-                    This function was previously used for area triggers but now those are a part of quest objective system
-                    Currently this function is used to complete quests with no objectives (needs verifying) so probably rename it?
-
-                    QuestStatusData& q_status = m_QuestStatus[questId];
-
-                    if (!q_status.Explored)
+                    // Dont complete failed quest
+                    if (!status.Explored && status.Status != QuestStatus.Failed)
                     {
-                        q_status.Explored = true;
-                        m_QuestStatusSave[questId] = QUEST_DEFAULT_SAVE_TYPE;
-                        
-                        // if we cannot complete quest send exploration succeded (to mark exploration on client)
-                        if (!CanCompleteQuest(questId))
-                            SendQuestComplete(questId)
-                    }*/
+                        status.Explored = true;
+                        m_QuestStatusSave[questId] = QuestSaveType.Default;
+
+                        SendQuestComplete(questId);
+                    }
                 }
                 if (CanCompleteQuest(questId))
                     CompleteQuest(questId);
@@ -2618,12 +2614,12 @@ namespace Game.Entities
             return false;
         }
 
-        public void SendQuestComplete(Quest quest)
+        public void SendQuestComplete(uint questId)
         {
-            if (quest != null)
+            if (questId != 0)
             {
                 QuestUpdateComplete data = new();
-                data.QuestID = quest.Id;
+                data.QuestID = questId;
                 SendPacket(data);
             }
         }
