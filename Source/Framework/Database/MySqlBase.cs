@@ -233,7 +233,7 @@ namespace Framework.Database
                     connection.Open();
                     using (MySqlCommand cmd = connection.CreateCommand())
                     {
-                        cmd.CommandTimeout = 120;
+                        cmd.CommandTimeout = 240;
                         cmd.CommandText = query;
                         cmd.ExecuteNonQuery();
                         return true;
