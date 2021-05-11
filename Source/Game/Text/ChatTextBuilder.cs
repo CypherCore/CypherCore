@@ -54,6 +54,7 @@ namespace Game.Chat
             AchievementId = achievementId;
             Locale = locale;
 
+            UntranslatedPacket = new();
             UntranslatedPacket.Initialize(Type, Language, Sender, Receiver, Text, AchievementId, "", Locale);
             UntranslatedPacket.Write();
         }

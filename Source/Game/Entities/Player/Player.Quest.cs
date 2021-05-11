@@ -2173,7 +2173,7 @@ namespace Game.Entities
 
         public void ItemRemovedQuestCheck(uint entry, uint count)
         {
-            foreach (var objectiveStatusData in m_questObjectiveStatus.LookupByKey(Tuple.Create(QuestObjectiveType.Item, entry)))
+            foreach (var objectiveStatusData in m_questObjectiveStatus.LookupByKey(Tuple.Create(QuestObjectiveType.Item, (int)entry)))
             {
                 uint questId = objectiveStatusData.QuestStatusPair.Key;
                 Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
@@ -2381,7 +2381,7 @@ namespace Game.Entities
         public bool HasQuestForItem(uint itemid)
         {
             // Search incomplete objective first
-            foreach (var objectiveItr in m_questObjectiveStatus.LookupByKey(Tuple.Create(QuestObjectiveType.Item, itemid)))
+            foreach (var objectiveItr in m_questObjectiveStatus.LookupByKey(Tuple.Create(QuestObjectiveType.Item, (int)itemid)))
             {
                 Quest qInfo = Global.ObjectMgr.GetQuestTemplate(objectiveItr.QuestStatusPair.Key);
                 QuestObjective objective = objectiveItr.Objective;

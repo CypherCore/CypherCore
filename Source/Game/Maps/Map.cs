@@ -3790,6 +3790,9 @@ namespace Game.Maps
 
         private Grid GetGrid(uint x, uint y)
         {
+            if (x > MapConst.MaxGrids || y > MapConst.MaxGrids)
+                return null;
+            
             return i_grids[x][y];
         }
 

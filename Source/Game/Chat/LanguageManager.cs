@@ -100,7 +100,7 @@ namespace Game.Chat
 
         List<string> FindWordGroup(uint language, uint wordLen)
         {
-            return _wordsMap.LookupByKey(Tuple.Create(language, wordLen));
+            return _wordsMap.LookupByKey(Tuple.Create(language, (byte)wordLen));
         }
 
         public string Translate(string msg, uint language, Locale locale)

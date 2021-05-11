@@ -658,6 +658,7 @@ namespace Game.Chat
                     data.spawnId = guid;
                     data.Id = id;
                     data.spawnPoint.Relocate(chr.GetTransOffsetX(), chr.GetTransOffsetY(), chr.GetTransOffsetZ(), chr.GetTransOffsetO());
+                    data.spawnGroupData = new();
                     // @todo: add phases
 
                     Creature _creature = trans.CreateNPCPassenger(guid, data);
