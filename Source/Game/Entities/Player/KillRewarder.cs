@@ -222,7 +222,7 @@ namespace Game.Entities
                 _RewardHonor(player);
                 // 4.1.1 Send player killcredit for quests with PlayerSlain
                 if (_victim.IsTypeId(TypeId.Player))
-                    player.KilledPlayerCredit();
+                    player.KilledPlayerCredit(_victim.GetGUID());
             }
             // Give XP only in PvE or in Battlegrounds.
             // Give reputation and kill credit only in PvE.

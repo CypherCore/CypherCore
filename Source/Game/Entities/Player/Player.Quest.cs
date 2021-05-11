@@ -2229,9 +2229,9 @@ namespace Game.Entities
             UpdateQuestObjectiveProgress(QuestObjectiveType.Monster, (int)entry, 1, guid);
         }
 
-        public void KilledPlayerCredit()
+        public void KilledPlayerCredit(ObjectGuid victimGuid)
         {
-            UpdateQuestObjectiveProgress(QuestObjectiveType.PlayerKills, 0, 1);
+            UpdateQuestObjectiveProgress(QuestObjectiveType.PlayerKills, 0, 1, victimGuid);
         }
 
         public void KillCreditGO(uint entry, ObjectGuid guid = default)
