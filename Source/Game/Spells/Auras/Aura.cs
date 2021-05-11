@@ -2653,7 +2653,7 @@ namespace Game.Spells
                                     UnitListSearcher searcher = new(GetUnitOwner(), targetList, check);
                                     Cell.VisitAllObjects(GetUnitOwner(), searcher, radius);
                                     // by design WorldObjectSpellAreaTargetCheck allows not-in-world units (for spells) but for auras it is not acceptable
-                                    targetList.RemoveAll(unit => !unit.IsSelfOrInSameMap(caster));
+                                    targetList.RemoveAll(unit => !unit.IsSelfOrInSameMap(GetUnitOwner()));
                                     break;
                                 }
                         }
