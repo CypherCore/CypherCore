@@ -709,6 +709,7 @@ namespace Game.Entities
                         // add to quest log
                         if (slot < SharedConst.MaxQuestLogSize && questStatusData.Status != QuestStatus.None)
                         {
+                            questStatusData.Slot = slot;
                             SetQuestSlot(slot, quest_id, (uint)quest_time); // cast can't be helped
 
                             if (questStatusData.Status == QuestStatus.Complete)
@@ -718,14 +719,6 @@ namespace Game.Entities
 
                             ++slot;
                         }
-
-                        // Resize quest objective data to proper size
-                        int maxStorageIndex = 0;
-                        foreach (QuestObjective obj in quest.Objectives)
-                            if (obj.StorageIndex > maxStorageIndex)
-                                maxStorageIndex = obj.StorageIndex;
-
-                        questStatusData.ObjectiveData = new int[maxStorageIndex + 1];
 
                         m_QuestStatus[quest_id] = questStatusData;
                         Log.outDebug(LogFilter.ServerLoading, "Quest status is {0} for quest {1} for player (GUID: {2})", questStatusData.Status, quest_id, GetGUID().ToString());
@@ -747,28 +740,26 @@ namespace Game.Entities
                     uint questID = result.Read<uint>(0);
 
                     Quest quest = Global.ObjectMgr.GetQuestTemplate(questID);
-                    ushort slot = FindQuestSlot(questID);
 
                     var questStatusData = m_QuestStatus.LookupByKey(questID);
-                    if (questStatusData != null && slot < SharedConst.MaxQuestLogSize && quest != null)
+                    if (questStatusData != null && questStatusData.Slot < SharedConst.MaxQuestLogSize && quest != null)
                     {
-                        byte objectiveIndex = result.Read<byte>(1);
+                        byte storageIndex = result.Read<byte>(1);
 
-                        var objectiveItr = quest.Objectives.FirstOrDefault(objective => objective.StorageIndex == objectiveIndex);
-                        if (objectiveIndex < questStatusData.ObjectiveData.Length && objectiveItr != null)
+                        var objective = quest.Objectives.FirstOrDefault(objective => objective.StorageIndex == storageIndex);
+                        if (objective != null)
                         {
                             int data = result.Read<int>(2);
-                            questStatusData.ObjectiveData[objectiveIndex] = data;
-                            if (!objectiveItr.IsStoringFlag())
-                                SetQuestSlotCounter(slot, objectiveIndex, (ushort)data);
+                            if (!objective.IsStoringFlag())
+                                SetQuestSlotCounter(questStatusData.Slot, storageIndex, (ushort)data);
                             else if (data != 0)
-                                SetQuestSlotObjectiveFlag(slot, (sbyte)objectiveIndex);
+                                SetQuestSlotObjectiveFlag(questStatusData.Slot, (sbyte)storageIndex);
                         }
                         else
-                            Log.outError(LogFilter.Player, "Player {0} ({1}) has quest {2} out of range objective index {3}.", GetName(), GetGUID().ToString(), questID, objectiveIndex);
+                            Log.outError(LogFilter.Player, $"Player {GetName()} ({GetGUID()}) has quest {questID} out of range objective index {storageIndex}.");
                     }
                     else
-                        Log.outError(LogFilter.Player, "Player {0} ({1}) does not have quest {2} but has objective data for it.", GetName(), GetGUID().ToString(), questID);
+                        Log.outError(LogFilter.Player, $"Player {GetName()} ({GetGUID()}) does not have quest {questID} but has objective data for it.");
                 }
                 while (result.NextRow());
             }
@@ -1943,7 +1934,7 @@ namespace Game.Entities
             if (!isTransaction)
                 trans = new SQLTransaction();
 
-            PreparedStatement stmt = null;
+            PreparedStatement stmt;
             bool keepAbandoned = !Global.WorldMgr.GetCleaningFlags().HasAnyFlag(CleaningFlags.Queststatus);
 
             foreach (var save in m_QuestStatusSave)
@@ -1961,13 +1952,24 @@ namespace Game.Entities
                         trans.Append(stmt);
 
                         // Save objectives
-                        for (int i = 0; i < data.ObjectiveData.Length; ++i)
+                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_QUESTSTATUS_OBJECTIVES_BY_QUEST);
+                        stmt.AddValue(0, GetGUID().GetCounter());
+                        stmt.AddValue(1, save.Key);
+                        trans.Append(stmt);
+
+                        Quest quest = Global.ObjectMgr.GetQuestTemplate(save.Key);
+
+                        foreach (QuestObjective obj in quest.Objectives)
                         {
+                            int count = GetQuestSlotObjectiveData(data.Slot, obj);
+                            if (count == 0)
+                                continue;
+
                             stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_CHAR_QUESTSTATUS_OBJECTIVES);
                             stmt.AddValue(0, GetGUID().GetCounter());
                             stmt.AddValue(1, save.Key);
-                            stmt.AddValue(2, i);
-                            stmt.AddValue(3, data.ObjectiveData[i]);
+                            stmt.AddValue(2, obj.StorageIndex);
+                            stmt.AddValue(3, count);
                             trans.Append(stmt);
                         }
                     }

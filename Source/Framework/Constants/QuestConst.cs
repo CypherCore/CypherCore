@@ -498,6 +498,8 @@ namespace Framework.Constants
         // Room For More Custom Flags
 
         DbAllowed = Repeatable | ExplorationOrEvent | AutoAccept | DfQuest | Monthly,
+
+        SequencedObjectives = 0x20 // Internal flag computed only
     }
 
     public enum QuestSaveType

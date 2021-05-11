@@ -728,9 +728,9 @@ namespace Game
 
     public class QuestStatusData
     {
+        public ushort Slot = SharedConst.MaxQuestLogSize;
         public QuestStatus Status;
         public uint Timer;
-        public int[] ObjectiveData;
     }
 
     public class QuestGreeting

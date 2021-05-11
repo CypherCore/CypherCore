@@ -2123,7 +2123,9 @@ namespace Game
             if (condition.QuestKillID != 0)
             {
                 Quest quest = Global.ObjectMgr.GetQuestTemplate(condition.QuestKillID);
-                if (quest != null && player.GetQuestStatus(condition.QuestKillID) != QuestStatus.Complete)
+                ushort questSlot = player.FindQuestSlot(condition.QuestKillID);
+
+                if (quest != null && player.GetQuestStatus(condition.QuestKillID) != QuestStatus.Complete && questSlot < SharedConst.MaxQuestLogSize)
                 {
                     results = new bool[condition.QuestKillMonster.Length];
                     for (var i = 0; i < results.Length; ++i)
@@ -2136,7 +2138,7 @@ namespace Game
                             var questObjective = quest.Objectives.Find(objective => objective.Type == QuestObjectiveType.Monster && objective.ObjectID == condition.QuestKillMonster[i]);
 
                             if (questObjective != null)
-                                results[i] = player.GetQuestObjectiveData(quest, questObjective.StorageIndex) >= questObjective.Amount;
+                                results[i] = player.GetQuestSlotObjectiveData(questSlot, questObjective) >= questObjective.Amount;
                         }
                     }
 

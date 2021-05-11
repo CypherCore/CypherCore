@@ -204,17 +204,21 @@ namespace Game
                 List<uint> quests = Global.ObjectMgr.GetQuestsForAreaTrigger(packet.AreaTriggerID);
                 if (quests != null)
                 {
+                    bool completedObjectiveInSequencedQuest = false;
                     foreach (uint questId in quests)
                     {
                         Quest qInfo = Global.ObjectMgr.GetQuestTemplate(questId);
-                        if (qInfo != null && player.GetQuestStatus(questId) == QuestStatus.Incomplete)
+                        ushort slot = player.FindQuestSlot(questId);
+                        if (qInfo != null && slot < SharedConst.MaxQuestLogSize && player.GetQuestStatus(questId) == QuestStatus.Incomplete)
                         {
                             foreach (QuestObjective obj in qInfo.Objectives)
                             {
-                                if (obj.Type == QuestObjectiveType.AreaTrigger && !player.IsQuestObjectiveComplete(obj))
+                                if (obj.Type == QuestObjectiveType.AreaTrigger && !player.IsQuestObjectiveComplete(slot, qInfo, obj))
                                 {
                                     player.SetQuestObjectiveData(obj, 1);
                                     player.SendQuestUpdateAddCreditSimple(obj);
+                                    if (qInfo.HasSpecialFlag(QuestSpecialFlags.SequencedObjectives))
+                                        completedObjectiveInSequencedQuest = true;
                                     break;
                                 }
                             }
@@ -223,6 +227,9 @@ namespace Game
                                 player.CompleteQuest(questId);
                         }
                     }
+
+                    if (completedObjectiveInSequencedQuest)
+                        player.UpdateForQuestWorldObjects();
                 }
             }
 

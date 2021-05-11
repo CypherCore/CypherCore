@@ -365,7 +365,15 @@ namespace Game.Conditions
                             if (questObj == null)
                                 break;
 
-                            condMeets = (!player.GetQuestRewardStatus(questObj.QuestID) && player.IsQuestObjectiveComplete(questObj));
+                            Quest quest = Global.ObjectMgr.GetQuestTemplate(questObj.QuestID);
+                            if (quest == null)
+                                break;
+
+                            ushort slot = player.FindQuestSlot(questObj.QuestID);
+                            if (slot >= SharedConst.MaxQuestLogSize)
+                                break;
+
+                            condMeets = (!player.GetQuestRewardStatus(questObj.QuestID) && player.IsQuestObjectiveComplete(slot, quest, questObj));
                         }
                         break;
                     }

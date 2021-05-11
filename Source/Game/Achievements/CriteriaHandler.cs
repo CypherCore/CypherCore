@@ -1689,7 +1689,12 @@ namespace Game.Achievements
                         if (objective == null)
                             return false;
 
-                        if (referencePlayer.GetQuestRewardStatus(objective.QuestID) || !referencePlayer.IsQuestObjectiveComplete(objective))
+                        Quest quest = Global.ObjectMgr.GetQuestTemplate(objective.QuestID);
+                        if (quest == null)
+                            return false;
+
+                        ushort slot = referencePlayer.FindQuestSlot(objective.QuestID);
+                        if (slot >= SharedConst.MaxQuestLogSize || referencePlayer.GetQuestRewardStatus(objective.QuestID) || !referencePlayer.IsQuestObjectiveComplete(slot, quest, objective))
                             return false;
                         break;
                     }

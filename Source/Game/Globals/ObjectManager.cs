@@ -7083,20 +7083,23 @@ namespace Game
                     {
                         case QuestObjectiveType.Item:
                             if (GetItemTemplate((uint)obj.ObjectID) == null)
-                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing item entry {2}, quest can't be done.", qinfo.Id, obj.Id, obj.ObjectID);
+                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has non existing item entry {obj.ObjectID}, quest can't be done.");
                             break;
                         case QuestObjectiveType.Monster:
                             if (GetCreatureTemplate((uint)obj.ObjectID) == null)
-                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing creature entry {2}, quest can't be done.", qinfo.Id, obj.Id, obj.ObjectID);
+                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has non existing creature entry {obj.ObjectID}, quest can't be done.");
                             break;
                         case QuestObjectiveType.GameObject:
                             if (GetGameObjectTemplate((uint)obj.ObjectID) == null)
-                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing gameobject entry {2}, quest can't be done.", qinfo.Id, obj.Id, obj.ObjectID);
+                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has non existing gameobject entry {obj.ObjectID}, quest can't be done.");
                             break;
                         case QuestObjectiveType.TalkTo:
+                            if (Global.ObjectMgr.GetCreatureTemplate((uint)obj.ObjectID) == null)
+                                Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} objective {obj.Id} has non existing creature entry {obj.ObjectID}, quest can't be done.");
                             break;
                         case QuestObjectiveType.MinReputation:
                         case QuestObjectiveType.MaxReputation:
+                        case QuestObjectiveType.IncreaseReputation:
                             if (!CliDB.FactionStorage.ContainsKey((uint)obj.ObjectID))
                                 Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing faction id {2}", qinfo.Id, obj.Id, obj.ObjectID);
                             break;
@@ -7130,6 +7133,11 @@ namespace Game
                             break;
                         case QuestObjectiveType.AreaTrigger:
                             if (!CliDB.AreaTriggerStorage.ContainsKey((uint)obj.ObjectID) && obj.ObjectID != -1)
+                                Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing AreaTrigger.db2 id {2}", qinfo.Id, obj.Id, obj.ObjectID);
+                            break;
+                        case QuestObjectiveType.AreaTriggerEnter:
+                        case QuestObjectiveType.AreaTriggerExit:
+                            if (Global.AreaTriggerDataStorage.GetAreaTriggerTemplate(new AreaTriggerId((uint)obj.ObjectID, false)) == null && Global.AreaTriggerDataStorage.GetAreaTriggerTemplate(new AreaTriggerId((uint)obj.ObjectID, true)) != null)
                                 Log.outError(LogFilter.Sql, "Quest {0} objective {1} has non existing areatrigger id {2}", qinfo.Id, obj.Id, obj.ObjectID);
                             break;
                         case QuestObjectiveType.Money:
@@ -7139,6 +7147,9 @@ namespace Game
                             Log.outError(LogFilter.Sql, "Quest {0} objective {1} has unhandled type {2}", qinfo.Id, obj.Id, obj.Type);
                             break;
                     }
+
+                    if (obj.Flags.HasAnyFlag(QuestObjectiveFlags.Sequenced))
+                        qinfo.SetSpecialFlag(QuestSpecialFlags.SequencedObjectives);
                 }
 
                 for (var j = 0; j < SharedConst.QuestItemDropCount; j++)

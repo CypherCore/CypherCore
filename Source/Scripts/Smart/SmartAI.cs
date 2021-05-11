@@ -120,7 +120,8 @@ namespace Scripts.Smart
         // Called when a quest objective data change
         public override void OnQuestObjectiveChange(Player player, Quest quest, QuestObjective objective, int oldAmount, int newAmount)
         {
-            if (player.IsQuestObjectiveComplete(objective))
+            ushort slot = player.FindQuestSlot(quest.Id);
+            if (slot < SharedConst.MaxQuestLogSize && player.IsQuestObjectiveComplete(slot, quest, objective))
             {
                 SmartScript smartScript = new SmartScript();
                 smartScript.OnInitialize(quest);

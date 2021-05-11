@@ -371,7 +371,11 @@ namespace Game
                 ReputationRank old_rank = ReputationToRank(factionState.Standing + BaseRep);
                 ReputationRank new_rank = ReputationToRank(standing);
 
-                factionState.Standing = standing - BaseRep;
+                int newStanding = standing - BaseRep;
+
+                _player.ReputationChanged(factionEntry, newStanding - factionState.Standing);
+
+                factionState.Standing = newStanding;
                 factionState.needSend = true;
                 factionState.needSave = true;
 
@@ -385,7 +389,7 @@ namespace Game
 
                 UpdateRankCounters(old_rank, new_rank);
 
-                _player.ReputationChanged(factionEntry);
+
                 _player.UpdateCriteria(CriteriaTypes.KnownFactions, factionEntry.Id);
                 _player.UpdateCriteria(CriteriaTypes.GainReputation, factionEntry.Id);
                 _player.UpdateCriteria(CriteriaTypes.GainExaltedReputation, factionEntry.Id);

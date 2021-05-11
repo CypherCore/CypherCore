@@ -1204,14 +1204,14 @@ namespace Game.Entities
                 if (playerCurrency.state != PlayerCurrencyState.New)
                     playerCurrency.state = PlayerCurrencyState.Changed;
 
+                CurrencyChanged((uint)id, count);
+
                 playerCurrency.Quantity = (uint)newTotalCount;
                 playerCurrency.WeeklyQuantity = (uint)newWeekCount;
                 playerCurrency.TrackedQuantity = (uint)newTrackedCount;
 
                 if (count > 0)
                     UpdateCriteria(CriteriaTypes.Currency, (uint)id, (uint)count);
-
-                CurrencyChanged((uint)id, count);
 
                 _currencyStorage[(uint)id] = playerCurrency;
 
@@ -5076,8 +5076,8 @@ namespace Game.Entities
         }
         public void SetMoney(ulong value)
         {
-            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Coinage), value);
             MoneyChanged((uint)value);
+            SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Coinage), value);
             UpdateCriteria(CriteriaTypes.HighestGoldValueOwned);
         }
 

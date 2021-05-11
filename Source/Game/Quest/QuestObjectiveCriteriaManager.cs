@@ -291,6 +291,13 @@ namespace Game
                 return false;
             }
 
+            ushort slot = _owner.FindQuestSlot(objective.QuestID);
+            if (slot >= SharedConst.MaxQuestLogSize || !_owner.IsQuestObjectiveCompletable(slot, quest, objective))
+            {
+                Log.outTrace(LogFilter.Achievement, $"QuestObjectiveCriteriaMgr.CanUpdateCriteriaTree: (Id: {criteria.Id} Type {criteria.Entry.Type} Quest Objective {objective.Id}) Objective not completable");
+                return false;
+            }
+
             return base.CanUpdateCriteriaTree(criteria, tree, referencePlayer);
         }
 
