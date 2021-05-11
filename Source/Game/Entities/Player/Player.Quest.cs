@@ -27,7 +27,6 @@ using Game.Networking.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Game.Entities
 {
@@ -462,22 +461,22 @@ namespace Game.Entities
             return true;
         }
 
-        public bool CanCompleteQuest(uint quest_id)
+        public bool CanCompleteQuest(uint questId, uint ignoredQuestObjectiveId = 0)
         {
-            if (quest_id != 0)
+            if (questId != 0)
             {
-                Quest qInfo = Global.ObjectMgr.GetQuestTemplate(quest_id);
+                Quest qInfo = Global.ObjectMgr.GetQuestTemplate(questId);
                 if (qInfo == null)
                     return false;
 
-                if (!qInfo.IsRepeatable() && GetQuestRewardStatus(quest_id))
+                if (!qInfo.IsRepeatable() && GetQuestRewardStatus(questId))
                     return false;                                   // not allow re-complete quest
 
                 // auto complete quest
                 if ((qInfo.IsAutoComplete() || qInfo.Flags.HasAnyFlag(QuestFlags.AutoComplete)) && CanTakeQuest(qInfo, false))
                     return true;
 
-                var q_status = m_QuestStatus.LookupByKey(quest_id);
+                var q_status = m_QuestStatus.LookupByKey(questId);
                 if (q_status == null)
                     return false;
 
@@ -485,6 +484,9 @@ namespace Game.Entities
                 {
                     foreach (QuestObjective obj in qInfo.Objectives)
                     {
+                        if (ignoredQuestObjectiveId != 0 && obj.Id == ignoredQuestObjectiveId)
+                            continue;
+
                         if (!obj.Flags.HasAnyFlag(QuestObjectiveFlags.Optional) && !obj.Flags.HasAnyFlag(QuestObjectiveFlags.PartOfProgressBar))
                         {
                             if (!IsQuestObjectiveComplete(q_status.Slot, qInfo, obj))
@@ -731,6 +733,7 @@ namespace Game.Entities
 
             uint quest_id = quest.Id;
 
+            // if not exist then created with set uState == NEW and rewarded=false
             if (!m_QuestStatus.ContainsKey(quest_id))
                 m_QuestStatus[quest_id] = new QuestStatusData();
 
@@ -745,6 +748,7 @@ namespace Game.Entities
 
             foreach (QuestObjective obj in quest.Objectives)
             {
+                m_questObjectiveStatus.Add(Tuple.Create(obj.Type, obj.ObjectID), new QuestObjectiveStatusData() { QuestStatusPair = KeyValuePair.Create(quest_id, questStatusData), Objective = obj });
                 switch (obj.Type)
                 {
                     case QuestObjectiveType.MinReputation:
@@ -1775,16 +1779,22 @@ namespace Game.Entities
                 SendQuestUpdate(questId);
         }
 
-        public void RemoveActiveQuest(uint quest_id, bool update = true)
+        public void RemoveActiveQuest(uint questId, bool update = true)
         {
-            if (m_QuestStatus.ContainsKey(quest_id))
+            var questStatus = m_QuestStatus.LookupByKey(questId);
+            if (questStatus != null)
             {
-                m_QuestStatus.Remove(quest_id);
-                m_QuestStatusSave[quest_id] = QuestSaveType.Delete;
+                foreach (var objective in m_questObjectiveStatus.KeyValueList)
+                {
+                    if (objective.Value.QuestStatusPair.Value == questStatus)
+                        m_questObjectiveStatus.Remove(objective);
+                }
+                m_QuestStatus.Remove(questId);
+                m_QuestStatusSave[questId] = QuestSaveType.Delete;
             }
 
             if (update)
-                SendQuestUpdate(quest_id);
+                SendQuestUpdate(questId);
         }
 
         public void RemoveRewardedQuest(uint questId, bool update = true)
@@ -2162,81 +2172,31 @@ namespace Game.Entities
 
         public void ItemAddedQuestCheck(uint entry, uint count)
         {
-            for (byte i = 0; i < SharedConst.MaxQuestLogSize; ++i)
-            {
-                uint questid = GetQuestSlotQuestId(i);
-                if (questid == 0)
-                    continue;
-
-                QuestStatusData q_status = m_QuestStatus[questid];
-
-                if (q_status.Status != QuestStatus.Incomplete)
-                    continue;
-
-                Quest qInfo = Global.ObjectMgr.GetQuestTemplate(questid);
-                if (qInfo == null || !qInfo.HasQuestObjectiveType(QuestObjectiveType.Item))
-                    continue;
-
-                foreach (QuestObjective obj in qInfo.Objectives)
-                {
-                    if (obj.Type != QuestObjectiveType.Item || !IsQuestObjectiveCompletable(i, qInfo, obj))
-                        continue;
-
-                    if (obj.ObjectID != entry)
-                        continue;
-
-                    int reqItemCount = obj.Amount;
-                    int curItemCount = GetQuestSlotObjectiveData(i, obj);
-                    if (curItemCount < reqItemCount)
-                    {
-                        int newItemCount = (int)Math.Min(curItemCount + count, reqItemCount);
-                        SetQuestObjectiveData(obj, newItemCount);
-                    }
-
-                    if (CanCompleteQuest(questid))
-                        CompleteQuest(questid);
-
-                    break;
-                }
-            }
-
-            UpdateForQuestWorldObjects();
+            UpdateQuestObjectiveProgress(QuestObjectiveType.Item, (int)entry, count);
         }
 
         public void ItemRemovedQuestCheck(uint entry, uint count)
         {
-            for (byte i = 0; i < SharedConst.MaxQuestLogSize; ++i)
+            foreach (var objectiveStatusData in m_questObjectiveStatus.LookupByKey(Tuple.Create(QuestObjectiveType.Item, entry)))
             {
-                uint questid = GetQuestSlotQuestId(i);
-                if (questid == 0)
+                uint questId = objectiveStatusData.QuestStatusPair.Key;
+                Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
+                ushort logSlot = objectiveStatusData.QuestStatusPair.Value.Slot;
+                QuestObjective objective = objectiveStatusData.Objective;
+
+                if (!IsQuestObjectiveCompletable(logSlot, quest, objective))
                     continue;
 
-                Quest qInfo = Global.ObjectMgr.GetQuestTemplate(questid);
-                if (qInfo == null || !qInfo.HasQuestObjectiveType(QuestObjectiveType.Item))
-                    continue;
+                int curItemCount = GetQuestSlotObjectiveData(logSlot, objective);
+                if (curItemCount >= objective.Amount) // we may have more than what the status shows
+                    curItemCount = (int)GetItemCount(entry, false);
 
-                foreach (QuestObjective obj in qInfo.Objectives)
+                int newItemCount = (int)((count > curItemCount) ? 0 : curItemCount - count);
+
+                if (newItemCount < objective.Amount)
                 {
-                    if (obj.Type != QuestObjectiveType.Item || !IsQuestObjectiveCompletable(i, qInfo, obj))
-                        continue;
-
-                    if (obj.ObjectID != entry)
-                        continue;
-
-                    uint reqItemCount = (uint)obj.Amount;
-                    int curItemCount = GetQuestSlotObjectiveData(i, obj);
-
-                    if (curItemCount >= reqItemCount) // we may have more than what the status shows
-                        curItemCount = (int)GetItemCount(entry, false);
-
-                    int newItemCount = (int)((count > curItemCount) ? 0 : curItemCount - count);
-
-                    if (newItemCount < reqItemCount)
-                    {
-                        SetQuestObjectiveData(obj, newItemCount);
-                        IncompleteQuest(questid);
-                    }
-                    break;
+                    SetQuestObjectiveData(objective, newItemCount);
+                    IncompleteQuest(questId);
                 }
             }
 
@@ -2270,489 +2230,209 @@ namespace Game.Entities
             StartCriteriaTimer(CriteriaTimedTypes.Creature, real_entry);   // MUST BE CALLED FIRST
             UpdateCriteria(CriteriaTypes.KillCreature, real_entry, addKillCount, 0, killed);
 
-            bool completedObjectiveInSequencedQuest = false;
-            for (byte i = 0; i < SharedConst.MaxQuestLogSize; ++i)
-            {
-                uint questid = GetQuestSlotQuestId(i);
-                if (questid == 0)
-                    continue;
-
-                Quest qInfo = Global.ObjectMgr.GetQuestTemplate(questid);
-                if (qInfo == null || !qInfo.HasQuestObjectiveType(QuestObjectiveType.Monster))
-                    continue;
-
-                if (m_QuestStatus[questid].Status != QuestStatus.Incomplete)
-                    continue;
-
-                if (GetGroup() && GetGroup().IsRaidGroup() && qInfo.IsAllowedInRaid(GetMap().GetDifficultyID()))
-                    continue;
-
-                foreach (QuestObjective obj in qInfo.Objectives)
-                {
-                    if (obj.Type != QuestObjectiveType.Monster || !IsQuestObjectiveCompletable(i, qInfo, obj))
-                        continue;
-
-                    if (obj.ObjectID != entry)
-                        continue;
-
-                    uint reqKillCount = (uint)obj.Amount;
-                    int curKillCount = GetQuestSlotObjectiveData(i, obj);
-                    if (curKillCount < reqKillCount)
-                    {
-                        SetQuestObjectiveData(obj, curKillCount + addKillCount);
-                        SendQuestUpdateAddCredit(qInfo, guid, obj, (uint)(curKillCount + addKillCount));
-                        if (!completedObjectiveInSequencedQuest && qInfo.HasSpecialFlag(QuestSpecialFlags.SequencedObjectives) && IsQuestObjectiveComplete(i, qInfo, obj))
-                            completedObjectiveInSequencedQuest = true;
-                    }
-
-                    if (CanCompleteQuest(questid))
-                        CompleteQuest(questid);
-
-                    // same objective target can be in many active quests, but not in 2 objectives for single quest (code optimization).
-                    break;
-                }
-            }
-
-            if (completedObjectiveInSequencedQuest)
-                UpdateForQuestWorldObjects();
+            UpdateQuestObjectiveProgress(QuestObjectiveType.Monster, (int)entry, 1, guid);
         }
 
         public void KilledPlayerCredit()
         {
-            ushort addKillCount = 1;
-
-            bool completedObjectiveInSequencedQuest = false;
-            for (byte i = 0; i < SharedConst.MaxQuestLogSize; ++i)
-            {
-                uint questid = GetQuestSlotQuestId(i);
-                if (questid == 0)
-                    continue;
-
-                Quest qInfo = Global.ObjectMgr.GetQuestTemplate(questid);
-                if (qInfo == null || !qInfo.HasQuestObjectiveType(QuestObjectiveType.PlayerKills))
-                    continue;
-
-                // just if !ingroup || !noraidgroup || raidgroup
-                QuestStatusData q_status = m_QuestStatus[questid];
-                if (q_status.Status == QuestStatus.Incomplete && (GetGroup() == null || !GetGroup().IsRaidGroup() || qInfo.IsAllowedInRaid(GetMap().GetDifficultyID())))
-                {
-                    foreach (QuestObjective obj in qInfo.Objectives)
-                    {
-                        if (obj.Type != QuestObjectiveType.PlayerKills || !IsQuestObjectiveCompletable(i, qInfo, obj))
-                            continue;
-
-                        int curKillCount = GetQuestSlotObjectiveData(i, obj);
-                        if (curKillCount < obj.Amount)
-                        {
-                            SetQuestObjectiveData(obj, curKillCount + addKillCount);
-                            SendQuestUpdateAddPlayer(qInfo, (uint)(curKillCount + addKillCount));
-                            if (!completedObjectiveInSequencedQuest && qInfo.HasSpecialFlag(QuestSpecialFlags.SequencedObjectives) && IsQuestObjectiveComplete(i, qInfo, obj))
-                                completedObjectiveInSequencedQuest = true;
-                        }
-
-                        if (CanCompleteQuest(questid))
-                            CompleteQuest(questid);
-
-                        // Quest can't have more than one player kill objective (code optimisation)
-                        break;
-                    }
-                }
-            }
-
-            if (completedObjectiveInSequencedQuest)
-                UpdateForQuestWorldObjects();
+            UpdateQuestObjectiveProgress(QuestObjectiveType.PlayerKills, 0, 1);
         }
 
         public void KillCreditGO(uint entry, ObjectGuid guid = default)
         {
-            ushort addCastCount = 1;
-            bool completedObjectiveInSequencedQuest = false;
-            for (byte i = 0; i < SharedConst.MaxQuestLogSize; ++i)
-            {
-                uint questid = GetQuestSlotQuestId(i);
-                if (questid == 0)
-                    continue;
-
-                Quest qInfo = Global.ObjectMgr.GetQuestTemplate(questid);
-                if (qInfo == null || !qInfo.HasQuestObjectiveType(QuestObjectiveType.GameObject))
-                    continue;
-
-                if (m_QuestStatus[questid].Status != QuestStatus.Incomplete)
-                    continue;
-
-                if (GetGroup() && GetGroup().IsRaidGroup() && qInfo.IsAllowedInRaid(GetMap().GetDifficultyID()))
-                    continue;
-
-                foreach (QuestObjective obj in qInfo.Objectives)
-                {
-                    if (obj.Type != QuestObjectiveType.GameObject || !IsQuestObjectiveCompletable(i, qInfo, obj))
-                        continue;
-
-                    int reqTarget = obj.ObjectID;
-
-                    // other not this creature/GO related objectives
-                    if (obj.ObjectID != entry)
-                        continue;
-
-                    uint reqCastCount = (uint)obj.Amount;
-                    int curCastCount = GetQuestSlotObjectiveData(i, obj);
-                    if (curCastCount < reqCastCount)
-                    {
-                        SetQuestObjectiveData(obj, curCastCount + addCastCount);
-                        SendQuestUpdateAddCredit(qInfo, guid, obj, (uint)(curCastCount + addCastCount));
-                        if (!completedObjectiveInSequencedQuest && qInfo.HasSpecialFlag(QuestSpecialFlags.SequencedObjectives) && IsQuestObjectiveComplete(i, qInfo, obj))
-                            completedObjectiveInSequencedQuest = true;
-                    }
-
-                    if (CanCompleteQuest(questid))
-                        CompleteQuest(questid);
-
-                    // same objective target can be in many active quests, but not in 2 objectives for single quest (code optimization).
-                    break;
-                }
-            }
-
-            if (completedObjectiveInSequencedQuest)
-                UpdateForQuestWorldObjects();
+            UpdateQuestObjectiveProgress(QuestObjectiveType.GameObject, (int)entry, 1, guid);
         }
 
         public void KillCreditCriteriaTreeObjective(QuestObjective questObjective)
         {
-            if (questObjective.Type != QuestObjectiveType.CriteriaTree)
-                return;
-
-            Quest quest = Global.ObjectMgr.GetQuestTemplate(questObjective.QuestID);
-            if (!IsQuestObjectiveComplete(FindQuestSlot(questObjective.QuestID), quest, questObjective))
-            {
-                SetQuestObjectiveData(questObjective, 1);
-                SendQuestUpdateAddCreditSimple(questObjective);
-
-                if (CanCompleteQuest(questObjective.QuestID))
-                    CompleteQuest(questObjective.QuestID);
-
-                if (quest.HasSpecialFlag(QuestSpecialFlags.SequencedObjectives))
-                    UpdateForQuestWorldObjects();
-            }
+            UpdateQuestObjectiveProgress(QuestObjectiveType.CriteriaTree, questObjective.ObjectID, 1);
         }
 
         public void TalkedToCreature(uint entry, ObjectGuid guid)
         {
-            ushort addTalkCount = 1;
-            bool completedObjectiveInSequencedQuest = false;
-            for (byte i = 0; i < SharedConst.MaxQuestLogSize; ++i)
-            {
-                uint questid = GetQuestSlotQuestId(i);
-                if (questid == 0)
-                    continue;
-
-                Quest qInfo = Global.ObjectMgr.GetQuestTemplate(questid);
-                if (qInfo == null || !qInfo.HasQuestObjectiveType(QuestObjectiveType.TalkTo))
-                    continue;
-
-                if (m_QuestStatus[questid].Status != QuestStatus.Incomplete)
-                    continue;
-
-                if (GetGroup() && GetGroup().IsRaidGroup() && qInfo.IsAllowedInRaid(GetMap().GetDifficultyID()))
-                    continue;
-
-                foreach (QuestObjective obj in qInfo.Objectives)
-                {
-                    if (obj.Type != QuestObjectiveType.TalkTo || !IsQuestObjectiveCompletable(i, qInfo, obj))
-                        continue;
-
-                    if (obj.ObjectID != entry)
-                        continue;
-
-                    uint reqTalkCount = (uint)obj.Amount;
-                    int curTalkCount = GetQuestSlotObjectiveData(i, obj);
-                    if (curTalkCount < reqTalkCount)
-                    {
-                        SetQuestObjectiveData(obj, curTalkCount + addTalkCount);
-                        SendQuestUpdateAddCredit(qInfo, guid, obj, (uint)(curTalkCount + addTalkCount));
-                        if (!completedObjectiveInSequencedQuest && qInfo.HasSpecialFlag(QuestSpecialFlags.SequencedObjectives) && IsQuestObjectiveComplete(i, qInfo, obj))
-                            completedObjectiveInSequencedQuest = true;
-                    }
-
-                    if (CanCompleteQuest(questid))
-                        CompleteQuest(questid);
-
-                    // Quest can't have more than one objective for the same creature (code optimisation)
-                    break;
-                }
-            }
-
-            if (completedObjectiveInSequencedQuest)
-                UpdateForQuestWorldObjects();
+            UpdateQuestObjectiveProgress(QuestObjectiveType.TalkTo, (int)entry, 1, guid);
         }
 
         public void MoneyChanged(ulong value)
         {
-            bool completedObjectiveInSequencedQuest = false;
-            for (byte i = 0; i < SharedConst.MaxQuestLogSize; ++i)
-            {
-                uint questid = GetQuestSlotQuestId(i);
-                if (questid == 0)
-                    continue;
-
-                Quest qInfo = Global.ObjectMgr.GetQuestTemplate(questid);
-                if (qInfo == null || !qInfo.HasQuestObjectiveType(QuestObjectiveType.Money))
-                    continue;
-
-                QuestStatusData q_status = m_QuestStatus[questid];
-
-                foreach (QuestObjective obj in qInfo.Objectives)
-                {
-                    if (obj.Type != QuestObjectiveType.Money || !IsQuestObjectiveCompletable(i, qInfo, obj))
-                        continue;
-
-                    if (!IsQuestObjectiveComplete(i, qInfo, obj))
-                    {
-                        if ((long)value >= obj.Amount)
-                        {
-                            if (CanCompleteQuest(questid))
-                                CompleteQuest(questid);
-
-                            if (!completedObjectiveInSequencedQuest && qInfo.HasSpecialFlag(QuestSpecialFlags.SequencedObjectives))
-                                completedObjectiveInSequencedQuest = true;
-                        }
-                    }
-                    else if (q_status.Status == QuestStatus.Complete)
-                    {
-                        if ((long)value < obj.Amount)
-                            IncompleteQuest(questid);
-                    }
-                }
-            }
-
-            if (completedObjectiveInSequencedQuest)
-                UpdateForQuestWorldObjects();
+            UpdateQuestObjectiveProgress(QuestObjectiveType.Money, 0, (long)value - (long)GetMoney());
         }
 
         public void ReputationChanged(FactionRecord FactionRecord, int change)
         {
-            bool completedObjectiveInSequencedQuest = false;
-            for (byte i = 0; i < SharedConst.MaxQuestLogSize; ++i)
-            {
-                uint questid = GetQuestSlotQuestId(i);
-                if (questid != 0)
-                {
-                    Quest qInfo = Global.ObjectMgr.GetQuestTemplate(questid);
-                    if (qInfo != null)
-                    {
-                        QuestStatusData q_status = m_QuestStatus[questid];
-
-                        if (!qInfo.HasQuestObjectiveType(QuestObjectiveType.MinReputation) && !qInfo.HasQuestObjectiveType(QuestObjectiveType.MaxReputation)
-                            && (!qInfo.HasQuestObjectiveType(QuestObjectiveType.IncreaseReputation) || q_status.Status != QuestStatus.Incomplete))
-                            continue;
-
-                        foreach (QuestObjective obj in qInfo.Objectives)
-                        {
-                            if (obj.ObjectID != FactionRecord.Id || !IsQuestObjectiveCompletable(i, qInfo, obj))
-                                continue;
-
-                            switch (obj.Type)
-                            {
-                                case QuestObjectiveType.MinReputation:
-                                    if (!IsQuestObjectiveComplete(i, qInfo, obj))
-                                    {
-                                        if (GetReputationMgr().GetReputation(FactionRecord) + change >= obj.Amount)
-                                        {
-                                            if (CanCompleteQuest(questid))
-                                                CompleteQuest(questid);
-
-                                            if (qInfo.HasSpecialFlag(QuestSpecialFlags.SequencedObjectives))
-                                                completedObjectiveInSequencedQuest = true;
-                                        }
-                                    }
-                                    else if (q_status.Status == QuestStatus.Complete)
-                                    {
-                                        if (GetReputationMgr().GetReputation(FactionRecord) + change < obj.Amount)
-                                            IncompleteQuest(questid);
-                                    }
-                                    break;
-                                case QuestObjectiveType.MaxReputation:
-                                    if (!IsQuestObjectiveComplete(i, qInfo, obj))
-                                    {
-                                        if (GetReputationMgr().GetReputation(FactionRecord) + change <= obj.Amount)
-                                        {
-                                            if (CanCompleteQuest(questid))
-                                                CompleteQuest(questid);
-
-                                            if (qInfo.HasSpecialFlag(QuestSpecialFlags.SequencedObjectives))
-                                                completedObjectiveInSequencedQuest = true;
-                                        }
-                                    }
-                                    else if (q_status.Status == QuestStatus.Complete)
-                                    {
-                                        if (GetReputationMgr().GetReputation(FactionRecord) + change > obj.Amount)
-                                            IncompleteQuest(questid);
-                                    }
-                                    break;
-                                case QuestObjectiveType.IncreaseReputation:
-                                    int currentProgress = GetQuestSlotObjectiveData(i, obj);
-                                    if (change > 0 && currentProgress < obj.Amount)
-                                    {
-                                        SetQuestObjectiveData(obj, currentProgress + change);
-                                        SendQuestUpdateAddCredit(qInfo, ObjectGuid.Empty, obj, (uint)(currentProgress + change));
-
-                                        if (CanCompleteQuest(questid))
-                                            CompleteQuest(questid);
-
-                                        if (!completedObjectiveInSequencedQuest && qInfo.HasSpecialFlag(QuestSpecialFlags.SequencedObjectives) && IsQuestObjectiveComplete(i, qInfo, obj))
-                                            completedObjectiveInSequencedQuest = true;
-                                    }
-                                    break;
-                            }
-                        }
-                    }
-                }
-            }
-
-            if (completedObjectiveInSequencedQuest)
-                UpdateForQuestWorldObjects();
+            UpdateQuestObjectiveProgress(QuestObjectiveType.MinReputation, (int)FactionRecord.Id, change);
+            UpdateQuestObjectiveProgress(QuestObjectiveType.MaxReputation, (int)FactionRecord.Id, change);
+            UpdateQuestObjectiveProgress(QuestObjectiveType.IncreaseReputation, (int)FactionRecord.Id, change);
         }
 
         void CurrencyChanged(uint currencyId, int change)
         {
-            bool completedObjectiveInSequencedQuest = false;
-            for (byte i = 0; i < SharedConst.MaxQuestLogSize; ++i)
+            UpdateQuestObjectiveProgress(QuestObjectiveType.Currency, (int)currencyId, change);
+            UpdateQuestObjectiveProgress(QuestObjectiveType.HaveCurrency, (int)currencyId, change);
+            UpdateQuestObjectiveProgress(QuestObjectiveType.ObtainCurrency, (int)currencyId, change);
+        }
+
+        void UpdateQuestObjectiveProgress(QuestObjectiveType objectiveType, int objectId, long addCount, ObjectGuid victimGuid = default)
+        {
+            bool anyObjectiveChangedCompletionState = false;
+
+            foreach (var objectiveStatusData in m_questObjectiveStatus.LookupByKey(Tuple.Create(objectiveType, objectId)))
             {
-                uint questid = GetQuestSlotQuestId(i);
-                if (questid == 0)
-                    continue;
+                uint questId = objectiveStatusData.QuestStatusPair.Key;
+                Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
 
-                Quest qInfo = Global.ObjectMgr.GetQuestTemplate(questid);
-                if (qInfo == null)
-                    continue;
-
-                QuestStatusData q_status = m_QuestStatus[questid];
-
-                if (!qInfo.HasQuestObjectiveType(QuestObjectiveType.Currency) && !qInfo.HasQuestObjectiveType(QuestObjectiveType.HaveCurrency)
-                    && (!qInfo.HasQuestObjectiveType(QuestObjectiveType.ObtainCurrency) || q_status.Status != QuestStatus.Incomplete))
-                    continue;
-
-                foreach (QuestObjective obj in qInfo.Objectives)
-                {
-                    if (obj.ObjectID != currencyId || !IsQuestObjectiveCompletable(i, qInfo, obj))
+                if (!QuestObjective.CanAlwaysBeProgressedInRaid(objectiveType))
+                    if (GetGroup() && GetGroup().IsRaidGroup() && quest.IsAllowedInRaid(GetMap().GetDifficultyID()))
                         continue;
 
-                    switch (obj.Type)
+                ushort logSlot = objectiveStatusData.QuestStatusPair.Value.Slot;
+                QuestObjective objective = objectiveStatusData.Objective;
+                if (!IsQuestObjectiveCompletable(logSlot, quest, objective))
+                    continue;
+
+                bool objectiveWasComplete = IsQuestObjectiveComplete(logSlot, quest, objective);
+                if (!objectiveWasComplete || addCount < 0)
+                {
+                    bool objectiveIsNowComplete = false;
+                    if (objective.IsStoringValue())
                     {
-                        case QuestObjectiveType.Currency:
-                            if (!IsQuestObjectiveComplete(i, qInfo, obj))
-                            {
-                                if (GetCurrency(currencyId) + change >= obj.Amount)
-                                {
-                                    if (CanCompleteQuest(questid))
-                                        CompleteQuest(questid);
+                        if (objectiveType == QuestObjectiveType.PlayerKills && objective.Flags.HasAnyFlag(QuestObjectiveFlags.KillPlayersSameFaction))
+                        {
+                            Player victim = Global.ObjAccessor.GetPlayer(GetMap(), victimGuid);
+                            if (victim?.GetTeam() != GetTeam())
+                                continue;
+                        }
 
-                                    if (qInfo.HasSpecialFlag(QuestSpecialFlags.SequencedObjectives))
-                                        completedObjectiveInSequencedQuest = true;
-                                }
-                            }
-                            else if (q_status.Status == QuestStatus.Complete)
+                        int currentProgress = GetQuestSlotObjectiveData(logSlot, objective);
+                        if (addCount > 0 ? (currentProgress < objective.Amount) : (currentProgress > 0))
+                        {
+                            int newProgress = (int)Math.Clamp(currentProgress + addCount, 0, objective.Amount);
+                            SetQuestObjectiveData(objective, newProgress);
+                            if (addCount > 0 && !objective.Flags.HasAnyFlag(QuestObjectiveFlags.HideCreditMsg))
                             {
-                                if (GetCurrency(currencyId) + change < obj.Amount)
-                                    IncompleteQuest(questid);
+                                if (objectiveType != QuestObjectiveType.PlayerKills)
+                                    SendQuestUpdateAddCredit(quest, victimGuid, objective, (uint)newProgress);
+                                else
+                                    SendQuestUpdateAddPlayer(quest, (uint)newProgress);
                             }
-                            break;
 
-                        case QuestObjectiveType.HaveCurrency:
-                            int newProgress = (int)Math.Min(GetCurrency(currencyId) + change, obj.Amount);
-                            SetQuestObjectiveData(obj, newProgress);
-                            if (!IsQuestObjectiveComplete(i, qInfo, obj))
-                            {
-                                if (newProgress >= obj.Amount)
-                                {
-                                    if (CanCompleteQuest(questid))
-                                        CompleteQuest(questid);
-
-                                    if (qInfo.HasSpecialFlag(QuestSpecialFlags.SequencedObjectives))
-                                        completedObjectiveInSequencedQuest = true;
-                                }
-                            }
-                            else if (q_status.Status == QuestStatus.Complete)
-                            {
-                                if (newProgress < obj.Amount)
-                                    IncompleteQuest(questid);
-                            }
-                            break;
-                        case QuestObjectiveType.ObtainCurrency:
-                            int currentProgress = GetQuestSlotObjectiveData(i, obj);
-                            if (change > 0 && currentProgress < obj.Amount)
-                            {
-                                SetQuestObjectiveData(obj, currentProgress + change);
-                                SendQuestUpdateAddCredit(qInfo, ObjectGuid.Empty, obj, (uint)(currentProgress + change));
-
-                                if (CanCompleteQuest(questid))
-                                    CompleteQuest(questid);
-
-                                if (!completedObjectiveInSequencedQuest && qInfo.HasSpecialFlag(QuestSpecialFlags.SequencedObjectives) && IsQuestObjectiveComplete(i, qInfo, obj))
-                                    completedObjectiveInSequencedQuest = true;
-                            }
-                            break;
+                            objectiveIsNowComplete = IsQuestObjectiveComplete(logSlot, quest, objective);
+                        }
                     }
+                    else if (objective.IsStoringFlag())
+                    {
+                        SetQuestObjectiveData(objective, addCount > 0 ? 1 : 0);
+
+                        if (addCount > 0 && !objective.Flags.HasAnyFlag(QuestObjectiveFlags.HideCreditMsg))
+                            SendQuestUpdateAddCreditSimple(objective);
+
+                        objectiveIsNowComplete = IsQuestObjectiveComplete(logSlot, quest, objective);
+                    }
+                    else
+                    {
+                        switch (objectiveType)
+                        {
+                            case QuestObjectiveType.Currency:
+                                objectiveIsNowComplete = GetCurrency((uint)objectId) + addCount >= objective.Amount;
+                                break;
+                            case QuestObjectiveType.LearnSpell:
+                                objectiveIsNowComplete = addCount != 0;
+                                break;
+                            case QuestObjectiveType.MinReputation:
+                                objectiveIsNowComplete = GetReputationMgr().GetReputation((uint)objectId) + addCount >= objective.Amount;
+                                break;
+                            case QuestObjectiveType.MaxReputation:
+                                objectiveIsNowComplete = GetReputationMgr().GetReputation((uint)objectId) + addCount <= objective.Amount;
+                                break;
+                            case QuestObjectiveType.Money:
+                                objectiveIsNowComplete = (long)GetMoney() + addCount >= objective.Amount;
+                                break;
+                            case QuestObjectiveType.ProgressBar:
+                                objectiveIsNowComplete = IsQuestObjectiveProgressBarComplete(logSlot, quest);
+                                break;
+                            default:
+                                Cypher.Assert(false, "Unhandled quest objective type {objectiveType}");
+                                break;
+                        }
+                    }
+
+                    if (objective.Flags.HasAnyFlag(QuestObjectiveFlags.PartOfProgressBar))
+                    {
+                        if (IsQuestObjectiveProgressBarComplete(logSlot, quest))
+                        {
+                            var progressBarObjective = quest.Objectives.Find(otherObjective => otherObjective.Type == QuestObjectiveType.ProgressBar && !otherObjective.Flags.HasAnyFlag(QuestObjectiveFlags.PartOfProgressBar));
+                            if (progressBarObjective != null)
+                                SendQuestUpdateAddCreditSimple(progressBarObjective);
+
+                            objectiveIsNowComplete = true;
+                        }
+                    }
+
+                    if (objectiveWasComplete != objectiveIsNowComplete)
+                        anyObjectiveChangedCompletionState = true;
+
+                    if (objectiveIsNowComplete && CanCompleteQuest(questId, objective.Id))
+                        CompleteQuest(questId);
+                    else if (objectiveStatusData.QuestStatusPair.Value.Status == QuestStatus.Complete)
+                        IncompleteQuest(questId);
                 }
             }
 
-            if (completedObjectiveInSequencedQuest)
+            if (anyObjectiveChangedCompletionState)
                 UpdateForQuestWorldObjects();
         }
 
         public bool HasQuestForItem(uint itemid)
         {
-            for (byte i = 0; i < SharedConst.MaxQuestLogSize; ++i)
+            // Search incomplete objective first
+            foreach (var objectiveItr in m_questObjectiveStatus.LookupByKey(Tuple.Create(QuestObjectiveType.Item, itemid)))
             {
-                uint questid = GetQuestSlotQuestId(i);
-                if (questid == 0)
+                Quest qInfo = Global.ObjectMgr.GetQuestTemplate(objectiveItr.QuestStatusPair.Key);
+                QuestObjective objective = objectiveItr.Objective;
+                if (!IsQuestObjectiveCompletable(objectiveItr.QuestStatusPair.Value.Slot, qInfo, objective))
                     continue;
 
-                var q_status = m_QuestStatus.LookupByKey(questid);
-                if (q_status == null)
-                    continue;
-
-                if (q_status.Status == QuestStatus.Incomplete)
-                {
-                    Quest qInfo = Global.ObjectMgr.GetQuestTemplate(questid);
-                    if (qInfo == null)
+                // hide quest if player is in raid-group and quest is no raid quest
+                if (GetGroup() && GetGroup().IsRaidGroup() && !qInfo.IsAllowedInRaid(GetMap().GetDifficultyID()))
+                    if (!InBattleground()) //there are two ways.. we can make every bg-quest a raidquest, or add this code here.. i don't know if this can be exploited by other quests, but i think all other quests depend on a specific area.. but keep this in mind, if something strange happens later
                         continue;
 
-                    // hide quest if player is in raid-group and quest is no raid quest
-                    if (GetGroup() != null && GetGroup().IsRaidGroup() && !qInfo.IsAllowedInRaid(GetMap().GetDifficultyID()))
-                        if (!InBattleground()) //there are two ways.. we can make every bg-quest a raidquest, or add this code here.. i don't know if this can be exploited by other quests, but i think all other quests depend on a specific area.. but keep this in mind, if something strange happens later
-                            continue;
+                if (!IsQuestObjectiveComplete(objectiveItr.QuestStatusPair.Value.Slot, qInfo, objective))
+                    return true;
+            }
 
-                    // There should be no mixed ReqItem/ReqSource drop
-                    // This part for ReqItem drop
-                    foreach (QuestObjective obj in qInfo.Objectives)
-                    {
-                        if (obj.Type == QuestObjectiveType.Item && IsQuestObjectiveCompletable(i, qInfo, obj) && itemid == obj.ObjectID && GetQuestSlotObjectiveData(i, obj) < obj.Amount)
-                            return true;
-                    }
-                    // This part - for ReqSource
-                    for (byte j = 0; j < SharedConst.QuestItemDropCount; ++j)
-                    {
-                        // examined item is a source item
-                        if (qInfo.ItemDrop[j] == itemid)
-                        {
-                            ItemTemplate pProto = Global.ObjectMgr.GetItemTemplate(itemid);
+            // This part - for ItemDrop
+            foreach (var questStatus in m_QuestStatus)
+            {
+                if (questStatus.Value.Status != QuestStatus.Incomplete)
+                    continue;
 
-                            // 'unique' item
-                            if (pProto.GetMaxCount() != 0 && GetItemCount(itemid, true) < pProto.GetMaxCount())
-                                return true;
+                Quest qInfo = Global.ObjectMgr.GetQuestTemplate(questStatus.Key);
+                // hide quest if player is in raid-group and quest is no raid quest
+                if (GetGroup() && GetGroup().IsRaidGroup() && !qInfo.IsAllowedInRaid(GetMap().GetDifficultyID()))
+                    if (!InBattleground())
+                        continue;
 
-                            // allows custom amount drop when not 0
-                            if (qInfo.ItemDropQuantity[j] != 0)
-                            {
-                                if (GetItemCount(itemid, true) < qInfo.ItemDropQuantity[j])
-                                    return true;
-                            }
-                            else if (GetItemCount(itemid, true) < pProto.GetMaxStackSize())
-                                return true;
-                        }
-                    }
+                for (byte j = 0; j < SharedConst.QuestItemDropCount; ++j)
+                {
+                    // examined item is a source item
+                    if (qInfo.ItemDrop[j] != itemid)
+                        continue;
+
+                    ItemTemplate pProto = Global.ObjectMgr.GetItemTemplate(itemid);
+
+                    // allows custom amount drop when not 0
+                    uint maxAllowedCount = qInfo.ItemDropQuantity[j] != 0 ? qInfo.ItemDropQuantity[j] : pProto.GetMaxStackSize();
+
+                    // 'unique' item
+                    if (pProto.GetMaxCount() != 0 && pProto.GetMaxCount() < maxAllowedCount)
+                        maxAllowedCount = pProto.GetMaxCount();
+
+                    if (GetItemCount(itemid, true) < maxAllowedCount)
+                        return true;
                 }
             }
+
             return false;
         }
 

@@ -201,10 +201,11 @@ namespace Game
 
             if (player.IsAlive())
             {
+                // not using Player.UpdateQuestObjectiveProgress, ObjectID in quest_objectives can be set to -1, areatrigger_involvedrelation then holds correct id
                 List<uint> quests = Global.ObjectMgr.GetQuestsForAreaTrigger(packet.AreaTriggerID);
                 if (quests != null)
                 {
-                    bool completedObjectiveInSequencedQuest = false;
+                    bool anyObjectiveChangedCompletionState = false;
                     foreach (uint questId in quests)
                     {
                         Quest qInfo = Global.ObjectMgr.GetQuestTemplate(questId);
@@ -213,14 +214,22 @@ namespace Game
                         {
                             foreach (QuestObjective obj in qInfo.Objectives)
                             {
-                                if (obj.Type == QuestObjectiveType.AreaTrigger && !player.IsQuestObjectiveComplete(slot, qInfo, obj))
-                                {
-                                    player.SetQuestObjectiveData(obj, 1);
-                                    player.SendQuestUpdateAddCreditSimple(obj);
-                                    if (qInfo.HasSpecialFlag(QuestSpecialFlags.SequencedObjectives))
-                                        completedObjectiveInSequencedQuest = true;
-                                    break;
-                                }
+                                if (obj.Type != QuestObjectiveType.AreaTrigger)
+                                    continue;
+
+                                if (!player.IsQuestObjectiveCompletable(slot, qInfo, obj))
+                                    continue;
+
+                                if (player.IsQuestObjectiveComplete(slot, qInfo, obj))
+                                    continue;
+
+                                if (obj.ObjectID != -1 && obj.ObjectID != packet.AreaTriggerID)
+                                    continue;
+
+                                player.SetQuestObjectiveData(obj, 1);
+                                player.SendQuestUpdateAddCreditSimple(obj);
+                                anyObjectiveChangedCompletionState = true;
+                                break;
                             }
 
                             if (player.CanCompleteQuest(questId))
@@ -228,7 +237,7 @@ namespace Game
                         }
                     }
 
-                    if (completedObjectiveInSequencedQuest)
+                    if (anyObjectiveChangedCompletionState)
                         player.UpdateForQuestWorldObjects();
                 }
             }

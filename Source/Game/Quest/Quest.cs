@@ -810,6 +810,26 @@ namespace Game
         public string Description;
         public int[] VisualEffects = new int[0];
 
+        public bool IsStoringValue()
+        {
+            switch (Type)
+            {
+                case QuestObjectiveType.Monster:
+                case QuestObjectiveType.Item:
+                case QuestObjectiveType.GameObject:
+                case QuestObjectiveType.TalkTo:
+                case QuestObjectiveType.PlayerKills:
+                case QuestObjectiveType.WinPvpPetBattles:
+                case QuestObjectiveType.HaveCurrency:
+                case QuestObjectiveType.ObtainCurrency:
+                case QuestObjectiveType.IncreaseReputation:
+                    return true;
+                default:
+                    break;
+            }
+            return false;
+        }
+        
         public bool IsStoringFlag()
         {
             switch (Type)
@@ -820,6 +840,25 @@ namespace Game
                 case QuestObjectiveType.CriteriaTree:
                 case QuestObjectiveType.AreaTriggerEnter:
                 case QuestObjectiveType.AreaTriggerExit:
+                    return true;
+                default:
+                    break;
+            }
+            return false;
+        }
+
+        public static bool CanAlwaysBeProgressedInRaid(QuestObjectiveType type)
+        {
+            switch (type)
+            {
+                case QuestObjectiveType.Item:
+                case QuestObjectiveType.Currency:
+                case QuestObjectiveType.LearnSpell:
+                case QuestObjectiveType.MinReputation:
+                case QuestObjectiveType.MaxReputation:
+                case QuestObjectiveType.Money:
+                case QuestObjectiveType.HaveCurrency:
+                case QuestObjectiveType.IncreaseReputation:
                     return true;
                 default:
                     break;

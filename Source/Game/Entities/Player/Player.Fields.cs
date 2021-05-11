@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Game.Achievements;
+using Game.BattleGrounds;
 using Game.Chat;
 using Game.DataStorage;
 using Game.Garrisons;
@@ -25,9 +26,9 @@ using Game.Mails;
 using Game.Maps;
 using Game.Misc;
 using Game.Spells;
+using System;
 using System.Collections;
 using System.Collections.Generic;
-using Game.BattleGrounds;
 
 namespace Game.Entities
 {
@@ -164,6 +165,7 @@ namespace Game.Entities
         List<uint> m_monthlyquests = new();
         MultiMap<uint, uint> m_seasonalquests = new();
         Dictionary<uint, QuestStatusData> m_QuestStatus = new();
+        MultiMap<Tuple<QuestObjectiveType, int>, QuestObjectiveStatusData> m_questObjectiveStatus = new();
         Dictionary<uint, QuestSaveType> m_QuestStatusSave = new();
         List<uint> m_DFQuests = new();
         List<uint> m_RewardedQuests = new();
@@ -624,5 +626,11 @@ namespace Game.Entities
             Changed,
             Deleted
         }
+    }
+
+    struct QuestObjectiveStatusData
+    {
+        public KeyValuePair<uint, QuestStatusData> QuestStatusPair;
+        public QuestObjective Objective;
     }
 }
