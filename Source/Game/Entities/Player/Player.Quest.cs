@@ -770,7 +770,7 @@ namespace Game.Entities
                 }
             }
 
-            uint qtime = 0;
+            long endTime = 0;
             uint limittime = quest.LimitTime;
             if (limittime != 0)
             {
@@ -780,7 +780,7 @@ namespace Game.Entities
 
                 AddTimedQuest(quest_id);
                 questStatusData.Timer = limittime * Time.InMilliseconds;
-                qtime = (uint)(GameTime.GetGameTime() + limittime);
+                endTime = GameTime.GetGameTime() + limittime;
             }
             else
                 questStatusData.Timer = 0;
@@ -805,7 +805,9 @@ namespace Game.Entities
                 caster.CastSpell(this, spellInfo.Id, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetCastDifficulty(spellInfo.Difficulty));
             }
 
-            SetQuestSlot(log_slot, quest_id, qtime);
+            SetQuestSlot(log_slot, quest_id);
+            SetQuestSlotEndTime(log_slot, endTime);
+            SetQuestSlotAcceptTime(log_slot, GameTime.GetGameTime());
 
             m_QuestStatusSave[quest_id] = QuestSaveType.Default;
 
@@ -1204,10 +1206,7 @@ namespace Game.Entities
                 ushort log_slot = FindQuestSlot(questId);
 
                 if (log_slot < SharedConst.MaxQuestLogSize)
-                {
-                    SetQuestSlotTimer(log_slot, 1);
                     SetQuestSlotState(log_slot, QuestSlotStateMask.Fail);
-                }
 
                 if (quest.LimitTime != 0)
                 {
@@ -2028,11 +2027,16 @@ namespace Game.Entities
             return 0;
         }
 
-        public uint GetQuestSlotTime(ushort slot)
+        public uint GetQuestSlotEndTime(ushort slot)
         {
             return m_playerData.QuestLog[slot].EndTime;
         }
 
+        public uint GetQuestSlotAcceptTime(ushort slot)
+        {
+            return m_playerData.QuestLog[slot].AcceptTime;
+        }
+        
         bool GetQuestSlotObjectiveFlag(ushort slot, sbyte objectiveIndex)
         {
             if (objectiveIndex < SharedConst.MaxQuestCounts)
@@ -2060,16 +2064,18 @@ namespace Game.Entities
             return GetQuestSlotObjectiveFlag(slot, objective.StorageIndex) ? 1 : 0;
         }
 
-        public void SetQuestSlot(ushort slot, uint quest_id, uint timer = 0)
+        public void SetQuestSlot(ushort slot, uint quest_id)
         {
             var questLogField = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.QuestLog, slot);
             SetUpdateFieldValue(questLogField.ModifyValue(questLogField.QuestID), quest_id);
             SetUpdateFieldValue(questLogField.ModifyValue(questLogField.StateFlags), 0u);
+            SetUpdateFieldValue(questLogField.ModifyValue(questLogField.EndTime), 0u);
+            SetUpdateFieldValue(questLogField.ModifyValue(questLogField.AcceptTime), 0u);
+            SetUpdateFieldValue(questLogField.ModifyValue(questLogField.ObjectiveFlags), 0u);
 
             for (int i = 0; i < SharedConst.MaxQuestCounts; ++i)
                 SetUpdateFieldValue(ref questLogField.ModifyValue(questLogField.ObjectiveProgress, i), (ushort)0);
 
-            SetUpdateFieldValue(questLogField.ModifyValue(questLogField.EndTime), timer);
         }
 
         public void SetQuestSlotCounter(ushort slot, byte counter, ushort count)
@@ -2093,10 +2099,16 @@ namespace Game.Entities
             RemoveUpdateFieldFlagValue(questLogField.ModifyValue(questLogField.StateFlags), (uint)state);
         }
 
-        public void SetQuestSlotTimer(ushort slot, uint timer)
+        public void SetQuestSlotEndTime(ushort slot, long endTime)
         {
             QuestLog questLog = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.QuestLog, slot);
-            SetUpdateFieldValue(questLog.ModifyValue(questLog.EndTime), timer);
+            SetUpdateFieldValue(questLog.ModifyValue(questLog.EndTime), (uint)endTime);
+        }
+
+        public void SetQuestSlotAcceptTime(ushort slot, long acceptTime)
+        {
+            QuestLog questLog = m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.QuestLog, slot);
+            SetUpdateFieldValue(questLog.ModifyValue(questLog.AcceptTime), (uint)acceptTime);
         }
 
         void SetQuestSlotObjectiveFlag(ushort slot, sbyte objectiveIndex)

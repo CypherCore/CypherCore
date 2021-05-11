@@ -692,27 +692,30 @@ namespace Game.Entities
                                 GetName(), GetGUID().ToString(), quest_id, qstatus);
                         }
 
-                        questStatusData.Explored = (result.Read<byte>(2) > 0);
+                        questStatusData.Explored = result.Read<byte>(2) > 0;
 
-                        long quest_time = result.Read<long>(3);
+                        long acceptTime = result.Read<long>(3);
+                        long endTime = result.Read<long>(4);
 
                         if (quest.LimitTime != 0 && !GetQuestRewardStatus(quest_id))
                         {
                             AddTimedQuest(quest_id);
 
-                            if (quest_time <= GameTime.GetGameTime())
+                            if (endTime <= GameTime.GetGameTime())
                                 questStatusData.Timer = 1;
                             else
-                                questStatusData.Timer = (uint)((quest_time - GameTime.GetGameTime()) * Time.InMilliseconds);
+                                questStatusData.Timer = (uint)((endTime - GameTime.GetGameTime()) * Time.InMilliseconds);
                         }
                         else
-                            quest_time = 0;
+                            endTime = 0;
 
                         // add to quest log
                         if (slot < SharedConst.MaxQuestLogSize && questStatusData.Status != QuestStatus.None)
                         {
                             questStatusData.Slot = slot;
-                            SetQuestSlot(slot, quest_id, (uint)quest_time); // cast can't be helped
+                            SetQuestSlot(slot, quest_id);
+                            SetQuestSlotEndTime(slot, endTime);
+                            SetQuestSlotAcceptTime(slot, acceptTime);
 
                             if (questStatusData.Status == QuestStatus.Complete)
                                 SetQuestSlotState(slot, QuestSlotStateMask.Complete);
@@ -1951,7 +1954,8 @@ namespace Game.Entities
                         stmt.AddValue(1, save.Key);
                         stmt.AddValue(2, (byte)data.Status);
                         stmt.AddValue(3, data.Explored);
-                        stmt.AddValue(4, data.Timer / Time.InMilliseconds + GameTime.GetGameTime());
+                        stmt.AddValue(4, (long)GetQuestSlotAcceptTime(data.Slot));
+                        stmt.AddValue(5, (long)GetQuestSlotEndTime(data.Slot));
                         trans.Append(stmt);
 
                         // Save objectives
