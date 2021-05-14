@@ -187,7 +187,7 @@ namespace Game.Entities
         int GetMinPower(PowerType power) { return power == PowerType.LunarPower ? -100 : 0; }
 
         // returns negative amount on power reduction
-        public int ModifyPower(PowerType power, int dVal)
+        public int ModifyPower(PowerType power, int dVal, bool withPowerUpdate = true)
         {
             int gain = 0;
 
@@ -202,19 +202,19 @@ namespace Game.Entities
             int val = (dVal + curPower);
             if (val <= GetMinPower(power))
             {
-                SetPower(power, GetMinPower(power));
+                SetPower(power, GetMinPower(power), withPowerUpdate);
                 return -curPower;
             }
 
             int maxPower = GetMaxPower(power);
             if (val < maxPower)
             {
-                SetPower(power, val);
+                SetPower(power, val, withPowerUpdate);
                 gain = val - curPower;
             }
             else if (curPower != maxPower)
             {
-                SetPower(power, maxPower);
+                SetPower(power, maxPower, withPowerUpdate);
                 gain = maxPower - curPower;
             }
 
@@ -601,7 +601,7 @@ namespace Game.Entities
             if (val < cur_power)
                 SetPower(powerType, val);
         }
-        public void SetPower(PowerType powerType, int val)
+        public void SetPower(PowerType powerType, int val, bool withPowerUpdate = true)
         {
             uint powerIndex = GetPowerIndex(powerType);
             if (powerIndex == (int)PowerType.Max || powerIndex >= (int)PowerType.MaxPerClass)
@@ -614,7 +614,7 @@ namespace Game.Entities
             int oldPower = m_unitData.Power[(int)powerIndex];
             SetUpdateFieldValue(ref m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Power, (int)powerIndex), val);
 
-            if (IsInWorld)
+            if (IsInWorld && withPowerUpdate)
             {
                 PowerUpdate packet = new();
                 packet.Guid = GetGUID();

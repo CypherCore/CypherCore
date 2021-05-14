@@ -1523,7 +1523,7 @@ namespace Game.Entities
 
         void EnergizeBySpell(Unit victim, SpellInfo spellInfo, int damage, PowerType powerType)
         {
-            int gain = victim.ModifyPower(powerType, damage);
+            int gain = victim.ModifyPower(powerType, damage, false);
             int overEnergize = damage - gain;
 
             victim.GetThreatManager().ForwardThreatForAssistingMe(this, damage / 2, spellInfo, true);
