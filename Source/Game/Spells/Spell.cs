@@ -1758,6 +1758,21 @@ namespace Game.Spells
             m_destTargets[effIndex] = dest;
         }
 
+        public long GetUnitTargetCountForEffect(uint effect)
+        {
+            return m_UniqueTargetInfo.Count(targetInfo => (targetInfo.effectMask & (1 << (int)effect)) != 0);
+        }
+
+        public long GetGameObjectTargetCountForEffect(uint effect)
+        {
+            return m_UniqueGOTargetInfo.Count(targetInfo => (targetInfo.effectMask & (1 << (int)effect)) != 0);
+        }
+
+        public long GetItemTargetCountForEffect(uint effect)
+        {
+            return m_UniqueItemInfo.Count(targetInfo => (targetInfo.effectMask & (1 << (int)effect)) != 0);
+        }
+
         void DoAllEffectOnTarget(TargetInfo target)
         {
             if (target == null || target.processed)
@@ -6853,9 +6868,9 @@ namespace Game.Spells
 
                             if (m_caster.IsTypeId(TypeId.Player))
                             {
-                                int targetAmount = m_UniqueTargetInfo.Count;
+                                long targetAmount = GetUnitTargetCountForEffect(effect.EffectIndex);
                                 if (targetAmount > 20)
-                                    m_damage = m_damage * 20 / targetAmount;
+                                    m_damage = (int)(m_damage * 20 / targetAmount);
                             }
                         }
                     }

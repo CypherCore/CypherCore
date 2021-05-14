@@ -257,7 +257,7 @@ namespace Game.Scripting
 
             SpellOnCalcCritChanceFnType _onCalcCritChanceHandlerScript;
         }
-        
+
         public class TargetHook : EffectHook
         {
             public TargetHook(uint effectIndex, Targets targetType, bool area, bool dest = false) : base(effectIndex)
@@ -430,6 +430,15 @@ namespace Game.Scripting
         {
             return m_currentScriptState == (byte)SpellScriptHookType.CheckCast;
         }
+
+        bool IsAfterTargetSelectionPhase()
+        {
+            return IsInHitPhase()
+                || m_currentScriptState == (byte)SpellScriptHookType.OnCast
+                || m_currentScriptState == (byte)SpellScriptHookType.AfterCast
+                || m_currentScriptState == (byte)SpellScriptHookType.CalcCritChance;
+        }
+        
         public bool IsInTargetHook()
         {
             switch ((SpellScriptHookType)m_currentScriptState)
@@ -551,10 +560,40 @@ namespace Game.Scripting
         public Unit GetExplTargetUnit() { return m_spell.m_targets.GetUnitTarget(); }
 
         // returns: GameObject which was selected as an explicit spell target or null if there's no target
-        GameObject GetExplTargetGObj() { return m_spell.m_targets.GetGOTarget(); }
+        public GameObject GetExplTargetGObj() { return m_spell.m_targets.GetGOTarget(); }
 
         // returns: Item which was selected as an explicit spell target or null if there's no target
-        Item GetExplTargetItem() { return m_spell.m_targets.GetItemTarget(); }
+        public Item GetExplTargetItem() { return m_spell.m_targets.GetItemTarget(); }
+
+        public long GetUnitTargetCountForEffect(uint effect)
+        {
+            if (!IsAfterTargetSelectionPhase())
+            {
+                Log.outError(LogFilter.Scripts, $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript.GetUnitTargetCountForEffect was called, but function has no effect in current hook! (spell has not selected targets yet)");
+                return 0;
+            }
+            return m_spell.GetUnitTargetCountForEffect(effect);
+        }
+
+        public long GetGameObjectTargetCountForEffect(uint effect)
+        {
+            if (!IsAfterTargetSelectionPhase())
+            {
+                Log.outError(LogFilter.Scripts, $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript.GetGameObjectTargetCountForEffect was called, but function has no effect in current hook! (spell has not selected targets yet)");
+                return 0;
+            }
+            return m_spell.GetGameObjectTargetCountForEffect(effect);
+        }
+
+        public long GetItemTargetCountForEffect(uint effect)
+        {
+            if (!IsAfterTargetSelectionPhase())
+            {
+                Log.outError(LogFilter.Scripts, $"Script: `{m_scriptName}` Spell: `{m_scriptSpellId}`: function SpellScript.GetItemTargetCountForEffect was called, but function has no effect in current hook! (spell has not selected targets yet)");
+                return 0;
+            }
+            return m_spell.GetItemTargetCountForEffect(effect);
+        }
 
         // methods useable only during spell hit on target, or during spell launch on target:
         // returns: target of current effect if it was Unit otherwise null

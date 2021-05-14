@@ -153,11 +153,11 @@ namespace Game.Spells
                 // Meteor like spells (divided damage to targets)
                 if (m_spellInfo.HasAttribute(SpellCustomAttributes.ShareDamage))
                 {
-                    int count = m_UniqueTargetInfo.Count(targetInfo => Convert.ToBoolean(targetInfo.effectMask & (1 << (int)effIndex)));
+                    long count = GetUnitTargetCountForEffect(effIndex);
 
                     // divide to all targets
                     if (count != 0)
-                        damage /= count;
+                        damage /= (int)count;
                 }
 
                 switch (m_spellInfo.SpellFamilyName)
