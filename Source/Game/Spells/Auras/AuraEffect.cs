@@ -5537,14 +5537,10 @@ namespace Game.Spells
             if (!player)
                 return;
 
-            SceneTemplate sceneTemplate = Global.ObjectMgr.GetSceneTemplate((uint)GetMiscValue());
-            if (sceneTemplate == null)
-                return;
-
             if (apply)
-                player.GetSceneMgr().PlaySceneByTemplate(sceneTemplate);
+                player.GetSceneMgr().PlayScene((uint)GetMiscValue());
             else
-                player.GetSceneMgr().CancelSceneByPackageId(sceneTemplate.ScenePackageId);
+                player.GetSceneMgr().CancelSceneBySceneId((uint)GetMiscValue());
         }
 
         [AuraEffectHandler(AuraType.AreaTrigger)]
