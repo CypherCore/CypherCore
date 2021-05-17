@@ -3772,6 +3772,7 @@ namespace Game.Entities
             addvalue += m_powerFraction[powerIndex];
             int integerValue = (int)Math.Abs(addvalue);
 
+            bool forcesSetPower = false;
             if (addvalue < 0.0f)
             {
                 if (curValue <= minPower)
@@ -3796,6 +3797,7 @@ namespace Game.Entities
                 {
                     curValue = minPower;
                     m_powerFraction[powerIndex] = 0;
+                    forcesSetPower = true;
                 }
             }
             else
@@ -3809,13 +3811,14 @@ namespace Game.Entities
                 {
                     curValue = maxPower;
                     m_powerFraction[powerIndex] = 0;
+                    forcesSetPower = true;
                 }
             }
 
             if (GetCommandStatus(PlayerCommandStates.Power))
                 curValue = maxPower;
 
-            if (m_regenTimerCount >= 2000)
+            if (m_regenTimerCount >= 2000 || forcesSetPower)
                 SetPower(power, curValue);
             else
             {
