@@ -885,65 +885,56 @@ namespace Game.Entities
         // stat system helpers
         public void SetUpdateFieldStatValue<T>(IUpdateField<T> updateField, T value) where T : new()
         {
-            //static_assert(std::is_arithmetic < T >::value, "SetUpdateFieldStatValue must be used with arithmetic types");
-            SetUpdateFieldValue(updateField, Math.Max((dynamic)value, 0));
+            SetUpdateFieldValue(updateField, (T)Math.Max((dynamic)value, 0));
         }
 
-        public void SetUpdateFieldStatValue<T>(ref T oldValue, T value)
+        public void SetUpdateFieldStatValue<T>(ref T oldValue, T value) where T : new()
         {      
-            //static_assert(std::is_arithmetic < T >::value, "SetUpdateFieldStatValue must be used with arithmetic types");
-            SetUpdateFieldValue(ref oldValue, Math.Max((dynamic)value, 0));
+            SetUpdateFieldValue(ref oldValue, (T)Math.Max((dynamic)value, 0));
         }
 
         public void ApplyModUpdateFieldValue<T>(IUpdateField<T> updateField, T mod, bool apply) where T : new()
         {
-            //static_assert(std::is_arithmetic < T >::value, "SetUpdateFieldStatValue must be used with arithmetic types");
             dynamic value = updateField.GetValue();
             if (apply)
                 value += mod;
             else
                 value -= mod;
 
-            SetUpdateFieldValue(updateField, value);
+            SetUpdateFieldValue(updateField, (T)value);
         }
 
         public void ApplyModUpdateFieldValue<T>(ref T oldvalue, T mod, bool apply) where T : new()
         {
-            //static_assert(std::is_arithmetic < T >::value, "SetUpdateFieldStatValue must be used with arithmetic types");
-
             dynamic value = oldvalue;
             if (apply)
                 value += mod;
             else
                 value -= mod;
 
-            SetUpdateFieldValue(ref oldvalue, value);
+            SetUpdateFieldValue(ref oldvalue, (T)value);
         }
 
         public void ApplyPercentModUpdateFieldValue<T>(IUpdateField<T> updateField, float percent, bool apply) where T : new()
         {
-            //static_assert(std::is_arithmetic < T >::value, "SetUpdateFieldStatValue must be used with arithmetic types");
-
             dynamic value = updateField.GetValue();
 
             if (percent == -100.0f)
                 percent = -99.99f;
             value *= (apply ? (100.0f + percent) / 100.0f : 100.0f / (100.0f + percent));
 
-            SetUpdateFieldValue(updateField, value);
+            SetUpdateFieldValue(updateField, (T)value);
         }
 
         public void ApplyPercentModUpdateFieldValue<T>(ref T oldValue, float percent, bool apply) where T : new()
         {
-            //static_assert(std::is_arithmetic < T >::value, "SetUpdateFieldStatValue must be used with arithmetic types");
-
             dynamic value = oldValue;
 
             if (percent == -100.0f)
                 percent = -99.99f;
             value *= (apply ? (100.0f + percent) / 100.0f : 100.0f / (100.0f + percent));
 
-            SetUpdateFieldValue(ref oldValue, value);
+            SetUpdateFieldValue(ref oldValue, (T)value);
         }
 
         public void ForceUpdateFieldChange()

@@ -2512,7 +2512,7 @@ namespace Game.Entities
             }
 
             int objectiveIndex = quest.Objectives.IndexOf(objective);
-            if (objectiveIndex == -1)
+            if (objectiveIndex == 0)
                 return true;
 
             // check sequenced objectives
