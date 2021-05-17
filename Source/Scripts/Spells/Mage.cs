@@ -29,6 +29,7 @@ namespace Scripts.Spells.Mage
 {
     struct SpellIds
     {
+        public const uint ArcaneBarrageR3 = 321526;
         public const uint BlazingBarrierTrigger = 235314;
         public const uint Cauterized = 87024;
         public const uint CauterizeDot = 87023;
@@ -60,7 +61,6 @@ namespace Scripts.Spells.Mage
         public const uint IcyVeins = 12472;
         public const uint ChainReactionDummy = 278309;
         public const uint ChainReaction = 278310;
-        public const uint TouchOfTheMagiAura = 210824;
         public const uint TouchOfTheMagiExplode = 210833;
 
         //Misc
@@ -70,6 +70,78 @@ namespace Scripts.Spells.Mage
         public const uint PetNetherwindsFatigued = 160455;
     }
 
+    [Script] // 44425 - Arcane Barrage
+    class spell_mage_arcane_barrage : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ArcaneBarrageR3);
+        }
+
+        void HandleEffectHitTarget(uint effIndex)
+        {
+            // Consume all arcane charges; for each charge add 30% additional damage
+            Unit caster = GetCaster();
+            float charges = -caster.ConsumeAllPower(PowerType.ArcaneCharges);
+
+            float currDamage = GetHitDamage();
+            float extraDamage = (charges * 0.3f) * currDamage;
+            SetHitDamage((int)(currDamage + extraDamage));
+
+            Aura aura = caster.GetAura(SpellIds.ArcaneBarrageR3);
+            if (aura != null)
+            {
+                AuraEffect auraEffect = aura.GetEffect(0);
+                if (auraEffect != null)
+                {
+                    float pct = charges * (auraEffect.GetAmount() * 0.01f);
+                    int maxMana = caster.GetMaxPower(PowerType.Mana);
+
+                    int extraMana = MathFunctions.CalculatePct(maxMana, pct);
+                    caster.ModifyPower(PowerType.Mana, extraMana);
+                }
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.SchoolDamage));
+        }
+    }
+
+    [Script] // 1449 - Arcane Explosion
+    class spell_mage_arcane_explosion : SpellScript
+    {
+        bool _once = true;
+
+        void PreventEnergize(uint effIndex)
+        {
+            PreventHitDefaultEffect(effIndex);
+        }
+
+        void HandleTargetHit(uint effIndex)
+        {
+            if (_once)
+            {
+                SpellEffectInfo effInfo = GetEffectInfo(0);
+                if (effInfo != null)
+                {
+                    Unit caster = GetCaster();
+                    int value = effInfo.CalcValue(caster);
+                    caster.ModifyPower((PowerType)effInfo.MiscValue, value);
+                }
+                _once = false;
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(PreventEnergize, 0, SpellEffectName.Energize));
+            OnEffectHitTarget.Add(new EffectHandler(PreventEnergize, 2, SpellEffectName.Energize));
+            OnEffectHitTarget.Add(new EffectHandler(HandleTargetHit, 1, SpellEffectName.SchoolDamage));
+        }
+    }
+    
     [Script] // 235313 - Blazing Barrier
     class spell_mage_blazing_barrier : AuraScript
     {
