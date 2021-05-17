@@ -1527,7 +1527,7 @@ namespace Game.Entities
             int overEnergize = damage - gain;
 
             victim.GetThreatManager().ForwardThreatForAssistingMe(this, damage / 2, spellInfo, true);
-            SendEnergizeSpellLog(victim, spellInfo.Id, damage, overEnergize, powerType);
+            SendEnergizeSpellLog(victim, spellInfo.Id, gain, overEnergize, powerType);
         }
 
         public void ApplySpellImmune(uint spellId, SpellImmunity op, SpellSchoolMask type, bool apply)
