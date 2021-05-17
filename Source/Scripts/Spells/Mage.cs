@@ -31,6 +31,7 @@ namespace Scripts.Spells.Mage
     {
         public const uint ArcaneBarrageEnergize = 321529;
         public const uint ArcaneBarrageR3 = 321526;
+        public const uint ArcaneCharge = 36032;
         public const uint ArcaneMage = 137021;
         public const uint BlazingBarrierTrigger = 235314;
         public const uint Cauterized = 87024;
@@ -116,6 +117,25 @@ namespace Scripts.Spells.Mage
         }
     }
 
+    [Script] // 195302 - Arcane Charge
+    class spell_mage_arcane_charge_clear : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ArcaneCharge);
+        }
+
+        void RemoveArcaneCharge(uint effIndex)
+        {
+            GetHitUnit().RemoveAurasDueToSpell(SpellIds.ArcaneCharge);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(RemoveArcaneCharge, 0, SpellEffectName.Dummy));
+        }
+    }
+    
     [Script] // 1449 - Arcane Explosion
     class spell_mage_arcane_explosion : SpellScript
     {
