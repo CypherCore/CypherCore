@@ -30,6 +30,7 @@ namespace Scripts.Spells.Mage
     struct SpellIds
     {
         public const uint ArcaneBarrageR3 = 321526;
+        public const uint ArcaneMage = 137021;
         public const uint BlazingBarrierTrigger = 235314;
         public const uint Cauterized = 87024;
         public const uint CauterizeDot = 87023;
@@ -47,6 +48,7 @@ namespace Scripts.Spells.Mage
         public const uint LivingBombExplosion = 44461;
         public const uint LivingBombPeriodic = 217694;
         public const uint ManaSurge = 37445;
+        public const uint Reverberate = 281482;
         public const uint RingOfFrostDummy = 91264;
         public const uint RingOfFrostFreeze = 82691;
         public const uint RingOfFrostSummon = 113724;
@@ -112,33 +114,42 @@ namespace Scripts.Spells.Mage
     [Script] // 1449 - Arcane Explosion
     class spell_mage_arcane_explosion : SpellScript
     {
-        bool _once = true;
-
-        void PreventEnergize(uint effIndex)
+        public override bool Validate(SpellInfo spellInfo)
         {
-            PreventHitDefaultEffect(effIndex);
+            if (!ValidateSpellInfo(SpellIds.ArcaneMage, SpellIds.Reverberate))
+                return false;
+
+            SpellEffectInfo damageEffect = spellInfo.GetEffect(1);
+            return damageEffect != null && damageEffect.IsEffect(SpellEffectName.SchoolDamage);
         }
 
-        void HandleTargetHit(uint effIndex)
+        void CheckRequiredAuraForBaselineEnergize(uint effIndex)
         {
-            if (_once)
+            if (GetUnitTargetCountForEffect(1) == 0 || !GetCaster().HasAura(SpellIds.ArcaneMage))
+                PreventHitDefaultEffect(effIndex);
+        }
+
+        void HandleReverberate(uint effIndex)
+        {
+            bool procTriggered = false;
+            
+            Unit caster = GetCaster();
+            AuraEffect triggerChance = caster.GetAuraEffect(SpellIds.Reverberate, 0);
+            if (triggerChance != null)
             {
-                SpellEffectInfo effInfo = GetEffectInfo(0);
-                if (effInfo != null)
-                {
-                    Unit caster = GetCaster();
-                    int value = effInfo.CalcValue(caster);
-                    caster.ModifyPower((PowerType)effInfo.MiscValue, value);
-                }
-                _once = false;
+                AuraEffect requiredTargets = caster.GetAuraEffect(SpellIds.Reverberate, 1);
+                if (requiredTargets != null)
+                    procTriggered = GetUnitTargetCountForEffect(1) >= requiredTargets.GetAmount() && RandomHelper.randChance(triggerChance.GetAmount());
             }
+
+            if (!procTriggered)
+                PreventHitDefaultEffect(effIndex);
         }
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(PreventEnergize, 0, SpellEffectName.Energize));
-            OnEffectHitTarget.Add(new EffectHandler(PreventEnergize, 2, SpellEffectName.Energize));
-            OnEffectHitTarget.Add(new EffectHandler(HandleTargetHit, 1, SpellEffectName.SchoolDamage));
+            OnEffectHitTarget.Add(new EffectHandler(CheckRequiredAuraForBaselineEnergize, 0, SpellEffectName.Energize));
+            OnEffectHitTarget.Add(new EffectHandler(HandleReverberate, 2, SpellEffectName.Energize));
         }
     }
     
