@@ -186,20 +186,6 @@ namespace Game.Entities
 
         int GetMinPower(PowerType power) { return power == PowerType.LunarPower ? -100 : 0; }
 
-        // Always return negative value for power reduction (or 0)
-        public int ConsumeAllPower(PowerType power)
-        {
-            int curPower = GetPower(power);
-            int minPower = GetMinPower(power);
-
-            if (curPower <= minPower)
-                return 0;
-
-            int diff = minPower - curPower;
-            SetPower(power, minPower);
-            return diff;
-        }
-
         // returns negative amount on power reduction
         public int ModifyPower(PowerType power, int dVal, bool withPowerUpdate = true)
         {

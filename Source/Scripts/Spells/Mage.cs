@@ -29,6 +29,7 @@ namespace Scripts.Spells.Mage
 {
     struct SpellIds
     {
+        public const uint ArcaneBarrageEnergize = 321529;
         public const uint ArcaneBarrageR3 = 321526;
         public const uint ArcaneMage = 137021;
         public const uint BlazingBarrierTrigger = 235314;
@@ -75,39 +76,43 @@ namespace Scripts.Spells.Mage
     [Script] // 44425 - Arcane Barrage
     class spell_mage_arcane_barrage : SpellScript
     {
+        ObjectGuid _primaryTarget;
+
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.ArcaneBarrageR3);
+            return ValidateSpellInfo(SpellIds.ArcaneBarrageR3, SpellIds.ArcaneBarrageEnergize) && spellInfo.GetEffect(1) != null;
+        }
+
+        void ConsumeArcaneCharges()
+        {
+            Unit caster = GetCaster();
+
+            // Consume all arcane charges
+            int arcaneCharges = -caster.ModifyPower(PowerType.ArcaneCharges, -caster.GetMaxPower(PowerType.ArcaneCharges), false);
+            if (arcaneCharges != 0)
+            {
+                AuraEffect auraEffect = caster.GetAuraEffect(SpellIds.ArcaneBarrageR3, 0, caster.GetGUID());
+                if (auraEffect != null)
+                    caster.CastSpell(caster, SpellIds.ArcaneBarrageEnergize, new CastSpellExtraArgs(SpellValueMod.BasePoint0, arcaneCharges * auraEffect.GetAmount() / 100));
+            }
         }
 
         void HandleEffectHitTarget(uint effIndex)
         {
-            // Consume all arcane charges; for each charge add 30% additional damage
-            Unit caster = GetCaster();
-            float charges = -caster.ConsumeAllPower(PowerType.ArcaneCharges);
+            if (GetHitUnit().GetGUID() != _primaryTarget)
+                SetHitDamage(MathFunctions.CalculatePct(GetHitDamage(), GetEffectInfo(1).CalcValue(GetCaster())));
+        }
 
-            float currDamage = GetHitDamage();
-            float extraDamage = (charges * 0.3f) * currDamage;
-            SetHitDamage((int)(currDamage + extraDamage));
-
-            Aura aura = caster.GetAura(SpellIds.ArcaneBarrageR3);
-            if (aura != null)
-            {
-                AuraEffect auraEffect = aura.GetEffect(0);
-                if (auraEffect != null)
-                {
-                    float pct = charges * (auraEffect.GetAmount() * 0.01f);
-                    int maxMana = caster.GetMaxPower(PowerType.Mana);
-
-                    int extraMana = MathFunctions.CalculatePct(maxMana, pct);
-                    caster.ModifyPower(PowerType.Mana, extraMana);
-                }
-            }
+        void MarkPrimaryTarget(uint effIndex)
+        {
+            _primaryTarget = GetHitUnit().GetGUID();
         }
 
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleEffectHitTarget, 0, SpellEffectName.SchoolDamage));
+            OnEffectLaunchTarget.Add(new EffectHandler(MarkPrimaryTarget, 1, SpellEffectName.Dummy));
+            AfterCast.Add(new CastHandler(ConsumeArcaneCharges));
         }
     }
 
