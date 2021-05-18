@@ -488,10 +488,6 @@ namespace Game.AI
         public virtual void QuestAccept(Player player, Quest quest) { }
 
         // Called when a player completes a quest and is rewarded, opt is the selected item's index or 0
-        public virtual void QuestReward(Player player, Quest quest, uint opt)
-        {
-            QuestReward(player, quest, LootItemType.Item, opt);
-        }
         public virtual void QuestReward(Player player, Quest quest, LootItemType type, uint opt) { }
 
         /// == Waypoints system =============================

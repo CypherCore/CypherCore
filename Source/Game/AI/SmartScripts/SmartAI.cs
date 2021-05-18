@@ -821,7 +821,7 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.AcceptedQuest, player, quest.Id);
         }
 
-        public override void QuestReward(Player player, Quest quest, uint opt)
+        public override void QuestReward(Player player, Quest quest, LootItemType type, uint opt)
         {
             GetScript().ProcessEventsFor(SmartEvents.RewardQuest, player, quest.Id, opt);
         }
@@ -1130,7 +1130,7 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.AcceptedQuest, player, quest.Id, 0, false, null, me);
         }
 
-        public override void QuestReward(Player player, Quest quest, uint opt)
+        public override void QuestReward(Player player, Quest quest, LootItemType type, uint opt)
         {
             GetScript().ProcessEventsFor(SmartEvents.RewardQuest, player, quest.Id, opt, false, null, me);
         }

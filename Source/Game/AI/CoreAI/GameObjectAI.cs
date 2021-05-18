@@ -75,10 +75,6 @@ namespace Game.AI
         /// <summary>
         /// Called when a player completes a quest and is rewarded, opt is the selected item's index or 0
         /// </summary>
-        public virtual void QuestReward(Player player, Quest quest, uint opt)
-        {
-            QuestReward(player, quest, LootItemType.Item, opt);
-        }
         public virtual void QuestReward(Player player, Quest quest, LootItemType type, uint opt) { }
 
         // Called when a Player clicks a GameObject, before GossipHello

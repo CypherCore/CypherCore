@@ -668,7 +668,7 @@ namespace Scripts.World.NpcSpecial
                 Reset();
         }
 
-        public override void QuestReward(Player player, Quest quest, uint opt)
+        public override void QuestReward(Player player, Quest quest, LootItemType type, uint opt)
         {
             if (quest.Id == QuestConst.Cluck)
                 Reset();
