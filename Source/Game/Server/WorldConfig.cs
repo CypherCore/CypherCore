@@ -134,19 +134,6 @@ namespace Game
 
             Values[WorldCfg.RateCorpseDecayLooted] = GetDefaultValue("Rate.Corpse.Decay.Looted", 0.5f);
 
-            Values[WorldCfg.RateTargetPosRecalculationRange] = GetDefaultValue("TargetPosRecalculateRange", 1.5f);
-            if ((float)Values[WorldCfg.RateTargetPosRecalculationRange] < SharedConst.ContactDistance)
-            {
-                Log.outError(LogFilter.ServerLoading, "TargetPosRecalculateRange ({0}) must be >= {1}. Using {1} instead.", Values[WorldCfg.RateTargetPosRecalculationRange], SharedConst.ContactDistance);
-                Values[WorldCfg.RateTargetPosRecalculationRange] = SharedConst.ContactDistance;
-            }
-            else if ((float)Values[WorldCfg.RateTargetPosRecalculationRange] > SharedConst.NominalMeleeRange)
-            {
-                Log.outError(LogFilter.ServerLoading, "TargetPosRecalculateRange ({0}) must be <= {1}. Using {1} instead.",
-                    Values[WorldCfg.RateTargetPosRecalculationRange], SharedConst.NominalMeleeRange);
-                Values[WorldCfg.RateTargetPosRecalculationRange] = SharedConst.NominalMeleeRange;
-            }
-
             Values[WorldCfg.RateDurabilityLossOnDeath] = GetDefaultValue("DurabilityLoss.OnDeath", 10.0f);
             if ((float)Values[WorldCfg.RateDurabilityLossOnDeath] < 0.0f)
             {

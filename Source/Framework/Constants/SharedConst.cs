@@ -1603,7 +1603,6 @@ namespace Framework.Constants
         RateRestOfflineInWilderness,
         RateSkillDiscovery,
         RateTalent,
-        RateTargetPosRecalculationRange,
         RateXpExplore,
         RateXpGuildModifier,
         RateXpKill,

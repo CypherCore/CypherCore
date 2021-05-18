@@ -31,6 +31,8 @@ namespace Game.Movement
 
     public abstract class TargetedMovementGenerator<T> : MovementGeneratorMedium<T>, ITargetedMovementGeneratorBase where T : Unit
     {
+        protected static float MOVE_FOLLOW_REPOSITIONING_DISTANCE = 1.5f;
+
         protected TargetedMovementGenerator(Unit target, float offset = 0, float angle = 0)
         {
             _target = new FollowerReference();
@@ -71,9 +73,10 @@ namespace Game.Movement
             {
                 _timer.Reset(100);
 
-                float distance = owner.GetCombatReach() + WorldConfig.GetFloatValue(WorldCfg.RateTargetPosRecalculationRange);
+                // the allowed distance between target and mover before the mover needs to reposition in order to keep attacking
+                float distance = GetMaxDistanceBeforeRepositioning(owner);
                 if (owner.IsPet() && (owner.GetCharmerOrOwnerGUID() == GetTarget().GetGUID()))
-                    distance = 1.0f; // pet following owner
+                    distance = 1.0f + GetTarget().GetCombatReach(); // pet following owner
 
                 Vector3 destination = owner.MoveSpline.FinalDestination();
                 if (owner.MoveSpline.onTransport)
@@ -85,10 +88,10 @@ namespace Game.Movement
                 }
 
                 // First check distance
-                if (owner.IsTypeId(TypeId.Unit) && owner.ToCreature().CanFly())
-                    targetMoved = !GetTarget().IsWithinDist3d(destination.X, destination.Y, destination.Z, distance);
+                if (owner.IsCreature() && owner.ToCreature().CanFly())
+                    targetMoved = !GetTarget().IsInDist(destination.X, destination.Y, destination.Z, distance);
                 else
-                    targetMoved = !GetTarget().IsWithinDist2d(destination.X, destination.Y, distance);
+                    targetMoved = !GetTarget().IsInDist2d(destination.X, destination.Y, distance);
 
 
                 // then, if the target is in range, check also Line of Sight.
@@ -228,7 +231,8 @@ namespace Game.Movement
         public abstract void ReachTarget(T owner);
         public virtual bool EnableWalking() { return false; }
         public abstract void MovementInform(T owner);
-        
+        public virtual float GetMaxDistanceBeforeRepositioning(T owner) { return 0.0f; }
+
         public void StopFollowing() { }
 
         public bool IsTargetValid() { return _target.IsValid(); }
@@ -302,6 +306,14 @@ namespace Game.Movement
                 owner.ToCreature().SetCannotReachTarget(false);
         }
 
+        public override float GetMaxDistanceBeforeRepositioning(T owner)
+        {
+            // the notion of melee range and melee attack is clearly separated from the notion of the movement.
+            // As a seperation of concern refactoring, this value should be passed into parameter by the caller (during creation of ChaseMoveGen) instead of defining it
+            // here (or a callback should be used since this value depends on dynamic fields (combat reach).
+            return owner.GetMeleeRange(base.GetTarget());
+        }
+
         public override void MovementInform(T owner)
         {
             if (owner.IsTypeId(TypeId.Unit))
@@ -360,6 +372,11 @@ namespace Game.Movement
                 return false;
             else
                 return IsTargetValid() && GetTarget().IsWalking();
+        }
+
+        public override float GetMaxDistanceBeforeRepositioning(T owner)
+        {
+            return owner.GetCombatReach() + base.GetTarget().GetCombatReach() + MOVE_FOLLOW_REPOSITIONING_DISTANCE;
         }
 
         public override void MovementInform(T owner)
