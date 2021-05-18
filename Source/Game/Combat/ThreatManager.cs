@@ -82,6 +82,7 @@ namespace Game.Combat
         {
             if (!CanHaveThreatList() || !IsEngaged())
                 return;
+
             if (_updateClientTimer <= tdiff)
             {
                 _updateClientTimer = CLIENT_THREAT_UPDATE_INTERVAL;

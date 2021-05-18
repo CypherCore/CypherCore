@@ -2555,6 +2555,13 @@ namespace Game.Maps
             _respawnTimes.Remove(info);
         }
 
+        public void ForceRespawn(SpawnObjectType type, ulong spawnId)
+        {
+            RespawnInfo info = GetRespawnInfo(type, spawnId);
+            if (info != null)
+                Respawn(info, true);
+        }
+
         public void RemoveRespawnTime(RespawnInfo info, bool doRespawn = false, SQLTransaction dbTrans = null)
         {
             PreparedStatement stmt;

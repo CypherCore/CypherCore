@@ -74,7 +74,7 @@ namespace Game.Chat
 
             Player player = handler.GetSession().GetPlayer();
             // force respawn to make sure we find something
-            player.GetMap().RemoveRespawnTime(SpawnObjectType.GameObject, guidLow, true);
+            player.GetMap().ForceRespawn(SpawnObjectType.GameObject, guidLow);
             GameObject obj = handler.GetObjectFromPlayerMapByDbGuid(guidLow);
             if (!obj)
             {

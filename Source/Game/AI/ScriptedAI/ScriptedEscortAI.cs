@@ -250,7 +250,7 @@ namespace Game.AI
 
 
             //Check if player or any member of his group is within range
-            if (_despawnAtFar && HasEscortState(EscortState.Escorting) && !_playerGUID.IsEmpty() && !me.GetVictim() && !HasEscortState(EscortState.Returning))
+            if (_despawnAtFar && HasEscortState(EscortState.Escorting) && !_playerGUID.IsEmpty() && !me.IsEngaged() && !HasEscortState(EscortState.Returning))
             {
                 if (_playerCheckTimer <= diff)
                 {
@@ -263,10 +263,13 @@ namespace Game.AI
                         if (creatureData != null)
                             isEscort = (WorldConfig.GetBoolValue(WorldCfg.RespawnDynamicEscortNpc) && creatureData.spawnGroupData.flags.HasAnyFlag(SpawnGroupFlags.EscortQuestNpc));
 
-                        if (_instantRespawn && !isEscort)
-                            me.DespawnOrUnsummon(0, TimeSpan.FromSeconds(1));
-                        else if (_instantRespawn && isEscort)
-                            me.GetMap().RemoveRespawnTime(SpawnObjectType.Creature, me.GetSpawnId(), true);
+                        if (_instantRespawn)
+                        {
+                            if (!isEscort)
+                                me.DespawnOrUnsummon(0, TimeSpan.FromSeconds(1));
+                            else
+                                me.GetMap().RemoveRespawnTime(SpawnObjectType.Creature, me.GetSpawnId(), true);
+                        }
                         else
                             me.DespawnOrUnsummon();
 

@@ -129,7 +129,7 @@ namespace Game.Chat
             uint mechanicImmuneMask = cInfo.MechanicImmuneMask;
             uint displayid = target.GetDisplayId();
             uint nativeid = target.GetNativeDisplayId();
-            uint Entry = target.GetEntry();
+            uint entry = target.GetEntry();
 
             long curRespawnDelay = target.GetRespawnCompatibilityMode() ? target.GetRespawnTimeEx() - GameTime.GetGameTime() : target.GetMap().GetCreatureRespawnTime(target.GetSpawnId()) - GameTime.GetGameTime();
             if (curRespawnDelay < 0)
@@ -138,7 +138,7 @@ namespace Game.Chat
             string curRespawnDelayStr = Time.secsToTimeString((ulong)curRespawnDelay, true);
             string defRespawnDelayStr = Time.secsToTimeString(target.GetRespawnDelay(), true);
 
-            handler.SendSysMessage(CypherStrings.NpcinfoChar, target.GetSpawnId(), target.GetGUID().ToString(), faction, npcflags, Entry, displayid, nativeid);
+            handler.SendSysMessage(CypherStrings.NpcinfoChar, target.GetName(), target.GetSpawnId(), target.GetGUID().ToString(), entry, faction, npcflags, displayid, nativeid);
             if (target.GetCreatureData() != null && target.GetCreatureData().spawnGroupData.groupId != 0)
             {
                 SpawnGroupTemplateData groupData = target.GetCreatureData().spawnGroupData;
@@ -184,7 +184,7 @@ namespace Game.Chat
                 if (cInfo.FlagsExtra.HasAnyFlag((CreatureFlagsExtra)value))
                     handler.SendSysMessage("{0} (0x{1:X})", (CreatureFlagsExtra)value, value);
 
-            handler.SendSysMessage(CypherStrings.NpcinfoNpcFlags, npcflags);
+            handler.SendSysMessage(CypherStrings.NpcinfoNpcFlags, target.m_unitData.NpcFlags[0]);
             foreach (uint value in Enum.GetValues(typeof(NPCFlags)))
                 if (npcflags.HasAnyFlag(value))
                     handler.SendSysMessage("{0} (0x{1:X})", (NPCFlags)value, value);
@@ -880,7 +880,7 @@ namespace Game.Chat
                         return false;
 
                     // force respawn to make sure we find something
-                    handler.GetSession().GetPlayer().GetMap().RemoveRespawnTime(SpawnObjectType.Creature, guidLow, true);
+                    handler.GetSession().GetPlayer().GetMap().ForceRespawn(SpawnObjectType.Creature, guidLow);
                     // then try to find it
                     creature = handler.GetCreatureFromPlayerMapByDbGuid(guidLow);
                 }
