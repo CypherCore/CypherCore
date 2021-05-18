@@ -271,7 +271,7 @@ namespace Game.Spells
                 if (m_spellInfo.IsChanneled())
                 {
                     // maybe do this for all spells?
-                    if (m_UniqueTargetInfo.Empty() && m_UniqueGOTargetInfo.Empty() && m_UniqueItemInfo.Empty() && !m_targets.HasDst())
+                    if (focusObject == null && m_UniqueTargetInfo.Empty() && m_UniqueGOTargetInfo.Empty() && m_UniqueItemInfo.Empty() && !m_targets.HasDst())
                     {
                         SendCastResult(SpellCastResult.BadImplicitTargets);
                         Finish(false);
