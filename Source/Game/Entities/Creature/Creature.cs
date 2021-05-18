@@ -519,14 +519,19 @@ namespace Game.Entities
                     if (m_shouldReacquireTarget && !IsFocusing(null, true))
                     {
                         SetTarget(m_suppressedTarget);
-                        if (!m_suppressedTarget.IsEmpty())
+
+                        if (!HasUnitFlag2(UnitFlags2.DisableTurn))
                         {
-                            WorldObject objTarget = Global.ObjAccessor.GetWorldObject(this, m_suppressedTarget);
-                            if (objTarget)
-                                SetFacingToObject(objTarget);
+                            if (!m_suppressedTarget.IsEmpty())
+                            {
+                                WorldObject objTarget = Global.ObjAccessor.GetWorldObject(this, m_suppressedTarget);
+                                if (objTarget)
+                                    SetFacingToObject(objTarget);
+                            }
+                            else
+                                SetFacingTo(m_suppressedOrientation);
                         }
-                        else
-                            SetFacingTo(m_suppressedOrientation);
+
                         m_shouldReacquireTarget = false;
                     }
 
@@ -2979,18 +2984,22 @@ namespace Game.Entities
                 }
             }
 
-            bool canTurnDuringCast = !focusSpell.GetSpellInfo().HasAttribute(SpellAttr5.DontTurnDuringCast);
-            // Face the target - we need to do this before the unit state is modified for no-turn spells
-            if (target)
-                SetFacingToObject(target, false);
-            else if (!canTurnDuringCast)
+            bool noTurnDuringCast = spellInfo.HasAttribute(SpellAttr5.DontTurnDuringCast);
+
+            if (!HasUnitFlag2(UnitFlags2.DisableTurn))
             {
-                Unit victim = GetVictim();
-                if (victim)
-                    SetFacingToObject(victim, false); // ensure server-side orientation is correct at beginning of cast
+                // Face the target - we need to do this before the unit state is modified for no-turn spells
+                if (target)
+                    SetFacingToObject(target, false);
+                else if (!noTurnDuringCast)
+                {
+                    Unit victim = GetVictim();
+                    if (victim)
+                        SetFacingToObject(victim, false); // ensure server-side orientation is correct at beginning of cast
+                }
             }
 
-            if (!canTurnDuringCast)
+            if (!noTurnDuringCast)
                 AddUnitState(UnitState.CannotTurn);
         }
 
@@ -3028,7 +3037,7 @@ namespace Game.Entities
             if (focusSpell && focusSpell != _focusSpell)
                 return;
 
-            if (IsPet())// player pets do not use delay system
+            if (IsPet() && !HasUnitFlag2(UnitFlags2.DisableTurn))// player pets do not use delay system
             {
                 SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Target), m_suppressedTarget);
                 if (!m_suppressedTarget.IsEmpty())
