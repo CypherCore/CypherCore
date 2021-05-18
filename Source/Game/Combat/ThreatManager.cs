@@ -268,7 +268,7 @@ namespace Game.Combat
                     for (var i = 0; i < redirInfo.Count; ++i)
                     {
                         var pair = redirInfo[i]; // (victim,pct)
-                        Unit redirTarget = null;
+                        Unit redirTarget;
 
                         var refe = _myThreatListEntries.LookupByKey(pair.Item1); // try to look it up in our threat list first (faster)
                         if (refe != null)

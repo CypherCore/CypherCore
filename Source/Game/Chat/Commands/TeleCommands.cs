@@ -45,7 +45,7 @@ namespace Game.Chat
                 return false;
             }
 
-            if (me.IsInCombat())
+            if (me.IsInCombat() && !handler.GetSession().HasPermission(RBACPermissions.CommandTeleName))
             {
                 handler.SendSysMessage(CypherStrings.YouInCombat);
                 return false;
