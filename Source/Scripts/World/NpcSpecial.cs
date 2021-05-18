@@ -1531,48 +1531,22 @@ namespace Scripts.World.NpcSpecial
     }
 
     [Script]
-    class npc_training_dummy : ScriptedAI
+    class npc_training_dummy : PassiveAI
     {
         public npc_training_dummy(Creature creature) : base(creature)
         {
-            SetCombatMovement(false);
+            _combatCheckTimer = 500;
+            uint entry = me.GetEntry();
+            if (entry == TargetDummy || entry == AdvancedTargetDummy)
+            {
+                _combatCheckTimer = 0;
+                me.DespawnOrUnsummon(TimeSpan.FromSeconds(16));
+            }
         }
 
         public override void Reset()
         {
-            // TODO: solve this in a different way! setting them as stunned prevents dummies from parrying
-            me.SetControlled(true, UnitState.Stunned);//disable rotate
-
-            _scheduler.CancelAll();
             _damageTimes.Clear();
-            if (me.GetEntry() != AdvancedTargetDummy && me.GetEntry() != TargetDummy)
-            {
-                _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
-                {
-                    long now = GameTime.GetGameTime();
-                    var pveRefs = me.GetCombatManager().GetPvECombatRefs();
-                    foreach (var pair in _damageTimes)
-                    {
-                        // If unit has not dealt damage to training dummy for 5 seconds, Remove him from combat
-                        if (pair.Value < now - 5)
-                        {
-                            var refe = pveRefs.LookupByKey(pair.Key);
-                            if (refe != null)
-                                refe.EndCombat();
-
-                            _damageTimes.Remove(pair.Key);
-                        }
-                    }
-
-                    foreach (var pair in pveRefs)
-                        if (!_damageTimes.ContainsKey(pair.Key))
-                            _damageTimes[pair.Key] = now;
-
-                    task.Repeat();
-                });
-            }
-            else
-                _scheduler.Schedule(TimeSpan.FromSeconds(15), task => me.DespawnOrUnsummon());
         }
 
         public override void EnterEvadeMode(EvadeReason why)
@@ -1585,25 +1559,48 @@ namespace Scripts.World.NpcSpecial
 
         public override void DamageTaken(Unit doneBy, ref uint damage)
         {
-            AddThreat(doneBy, damage);    // just to create threat reference
             _damageTimes[doneBy.GetGUID()] = GameTime.GetGameTime();
             damage = 0;
         }
 
         public override void UpdateAI(uint diff)
         {
-            if (!me.IsInCombat())
+            if (_combatCheckTimer == 0 || !me.IsInCombat())
                 return;
 
-            if (!me.HasUnitState(UnitState.Stunned))
-                me.SetControlled(true, UnitState.Stunned);//disable rotate
+            if (diff < _combatCheckTimer)
+            {
+                _combatCheckTimer -= diff;
+                return;
+            }
 
-            _scheduler.Update(diff);
+            _combatCheckTimer = 500;
+
+            long now = GameTime.GetGameTime();
+            var pveRefs = me.GetCombatManager().GetPvECombatRefs();
+            foreach (var pair in _damageTimes.ToList())
+            {
+                // If unit has not dealt damage to training dummy for 5 seconds, remove him from combat
+                if (pair.Value < now - 5)
+                {
+                    var it = pveRefs.LookupByKey(pair.Key);
+                    if (it != null)
+                    {
+                        it.EndCombat();
+                        _damageTimes.Remove(pair.Key);
+                    }
+                }
+            }
+
+            foreach (var pair in pveRefs)
+                if (!_damageTimes.ContainsKey(pair.Key))
+                    _damageTimes[pair.Key] = now;
         }
 
         public override void MoveInLineOfSight(Unit who) { }
 
-        Dictionary<ObjectGuid, long> _damageTimes = new Dictionary<ObjectGuid, long>();
+        Dictionary<ObjectGuid, long> _damageTimes = new();
+        uint _combatCheckTimer;
 
         const uint AdvancedTargetDummy = 2674;
         const uint TargetDummy = 2673;
