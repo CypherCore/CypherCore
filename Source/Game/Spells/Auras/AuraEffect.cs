@@ -1163,7 +1163,7 @@ namespace Game.Spells
         [AuraEffectHandler(AuraType.ModShapeshift)]
         void HandleAuraModShapeshift(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
-            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.RealOrReapplyMask))
                 return;
 
             SpellShapeshiftFormRecord shapeInfo = CliDB.SpellShapeshiftFormStorage.LookupByKey(GetMiscValue());
