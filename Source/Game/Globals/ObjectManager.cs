@@ -3523,8 +3523,9 @@ namespace Game
             if (linkedGuidLow == 0) // we're removing the linking
             {
                 linkedRespawnStorage.Remove(guid);
-                stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_CRELINKED_RESPAWN);
+                stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_LINKED_RESPAWN);
                 stmt.AddValue(0, guidLow);
+                stmt.AddValue(1, (uint)CreatureLinkedRespawnType.CreatureToCreature);
                 DB.World.Execute(stmt);
                 return true;
             }
@@ -3553,9 +3554,10 @@ namespace Game
             ObjectGuid linkedGuid = ObjectGuid.Create(HighGuid.Creature, slave.spawnPoint.GetMapId(), slave.Id, linkedGuidLow);
 
             linkedRespawnStorage[guid] = linkedGuid;
-            stmt = DB.World.GetPreparedStatement(WorldStatements.REP_CREATURE_LINKED_RESPAWN);
+            stmt = DB.World.GetPreparedStatement(WorldStatements.REP_LINKED_RESPAWN);
             stmt.AddValue(0, guidLow);
             stmt.AddValue(1, linkedGuidLow);
+            stmt.AddValue(2, (uint)CreatureLinkedRespawnType.CreatureToCreature);
             DB.World.Execute(stmt);
             return true;
         }

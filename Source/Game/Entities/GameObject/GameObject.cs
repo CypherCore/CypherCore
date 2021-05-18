@@ -1075,6 +1075,26 @@ namespace Game.Entities
             stmt.AddValue(0, m_spawnId);
             trans.Append(stmt);
 
+            stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_LINKED_RESPAWN);
+            stmt.AddValue(0, m_spawnId);
+            stmt.AddValue(1, (uint)CreatureLinkedRespawnType.GOToGO);
+            trans.Append(stmt);
+
+            stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_LINKED_RESPAWN);
+            stmt.AddValue(0, m_spawnId);
+            stmt.AddValue(1, (uint)CreatureLinkedRespawnType.GOToCreature);
+            trans.Append(stmt);
+
+            stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_LINKED_RESPAWN_MASTER);
+            stmt.AddValue(0, m_spawnId);
+            stmt.AddValue(1, (uint)CreatureLinkedRespawnType.GOToGO);
+            trans.Append(stmt);
+
+            stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_LINKED_RESPAWN_MASTER);
+            stmt.AddValue(0, m_spawnId);
+            stmt.AddValue(1, (uint)CreatureLinkedRespawnType.CreatureToGO);
+            trans.Append(stmt);
+
             DB.World.CommitTransaction(trans);
         }
 
