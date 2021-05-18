@@ -239,12 +239,12 @@ namespace Game.AI
 
                 return me.GetVictim() != null;
             }
-            else if (me.GetThreatManager().IsThreatListEmpty(true))
+            else if (!me.IsInCombat())
             {
                 EnterEvadeMode(EvadeReason.NoHostiles);
                 return false;
             }
-            else
+            else if (me.GetVictim() != null)
                 me.AttackStop();
 
             return true;

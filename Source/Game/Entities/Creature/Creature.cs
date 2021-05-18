@@ -428,7 +428,7 @@ namespace Game.Entities
 
         public override void Update(uint diff)
         {
-            if (IsAIEnabled && triggerJustAppeared && m_deathState == DeathState.Alive)
+            if (IsAIEnabled && triggerJustAppeared && m_deathState != DeathState.Dead)
             {
                 if (m_respawnCompatibilityMode && VehicleKit != null)
                     VehicleKit.Reset();

@@ -2678,7 +2678,7 @@ namespace Game.Maps
         SpawnGroupTemplateData GetSpawnGroupData(uint groupId)
         {
             SpawnGroupTemplateData data = Global.ObjectMgr.GetSpawnGroupData(groupId);
-            if (data != null && data.mapId == GetId())
+            if (data != null && (data.flags.HasAnyFlag(SpawnGroupFlags.System) || data.mapId == GetId()))
                 return data;
 
             return null;
@@ -2812,13 +2812,14 @@ namespace Game.Maps
             SpawnGroupTemplateData data = GetSpawnGroupData(groupId);
             if (data == null)
             {
-                Log.outWarn(LogFilter.Maps, $"Tried to query state of non-existing spawn group {groupId} on map {GetId()}.");
+                Log.outError(LogFilter.Maps, $"Tried to query state of non-existing spawn group {groupId} on map {GetId()}.");
                 return false;
             }
 
             if (data.flags.HasAnyFlag(SpawnGroupFlags.System))
                 return true;
 
+            // either manual spawn group and toggled, or not manual spawn group and not toggled...
             return _toggledSpawnGroupIds.Contains(groupId) != !data.flags.HasAnyFlag(SpawnGroupFlags.ManualSpawn);
         }
 

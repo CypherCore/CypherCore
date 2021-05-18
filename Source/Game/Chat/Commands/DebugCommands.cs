@@ -797,8 +797,6 @@ namespace Game.Chat
                 handler.SendSysMessage($"{target.GetName()} ({target.GetGUID()}) is not alive.");
                 return true;
             }
-            if (!target.CanHaveThreatList())
-                handler.SendSysMessage($"{target.GetName()} ({target.GetGUID()}) cannot have a threat list.");
 
             uint count = 0;
             var threatenedByMe = target.GetThreatManager().GetThreatenedByMeList();
@@ -816,9 +814,8 @@ namespace Game.Chat
             }
 
             if (!mgr.CanHaveThreatList())
-                return true;
-
-            if (mgr.IsEngaged())
+                handler.SendSysMessage($"{target.GetName()} ({target.GetGUID()}) cannot have a threat list.");
+            else if (mgr.IsEngaged())
             {
                 count = 0;
                 handler.SendSysMessage($"Threat list of {target.GetName()} ({target.GetGUID()}, SpawnID {(target.IsCreature() ? target.ToCreature().GetSpawnId() : 0)})");
