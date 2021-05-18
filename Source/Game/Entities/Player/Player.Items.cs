@@ -5431,7 +5431,7 @@ namespace Game.Entities
                 pItem.SetSlot(ItemConst.NullSlot);
                 pItem.SetState(ItemUpdateState.Removed, this);
 
-                if (pItem.GetTemplate().GetInventoryType() != InventoryType.NonEquip)
+                if (pProto.GetInventoryType() != InventoryType.NonEquip)
                     UpdateAverageItemLevelTotal();
 
                 if (bag == InventorySlots.Bag0)
