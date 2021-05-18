@@ -33,6 +33,7 @@ namespace Scripts.Spells.Hunter
         public const uint ExhilarationR2 = 231546;
         public const uint Lonewolf = 155228;
         public const uint MastersCallTriggered = 62305;
+        public const uint Misdirection = 34477;
         public const uint MisdirectionProc = 35079;
         public const uint PetLastStandTriggered = 53479;
         public const uint PetHeartOfThePhoenixTriggered = 54114;
@@ -205,12 +206,7 @@ namespace Scripts.Spells.Hunter
                 return;
 
             if (!GetTarget().HasAura(SpellIds.MisdirectionProc))
-                GetTarget().ResetRedirectThreat();
-        }
-
-        bool CheckProc(ProcEventInfo eventInfo)
-        {
-            return GetTarget().GetRedirectThreatTarget();
+                GetTarget().GetThreatManager().UnregisterRedirectThreat(SpellIds.Misdirection);
         }
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -222,7 +218,6 @@ namespace Scripts.Spells.Hunter
         public override void Register()
         {
             AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 1, AuraType.Dummy, AuraEffectHandleModes.Real));
-            DoCheckProc.Add(new CheckProcHandler(CheckProc));
             OnEffectProc.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy));
         }
     }
@@ -233,7 +228,7 @@ namespace Scripts.Spells.Hunter
     {
         void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            GetTarget().ResetRedirectThreat();
+            GetTarget().GetThreatManager().UnregisterRedirectThreat(SpellIds.Misdirection);
         }
 
         public override void Register()

@@ -2179,7 +2179,7 @@ namespace Scripts.Spells.Generic
             if (mana != 0)
             {
                 mana /= 10;
-                caster.EnergizeBySpell(caster, GetId(), mana, PowerType.Mana);
+                caster.EnergizeBySpell(caster, GetSpellInfo(), mana, PowerType.Mana);
             }
         }
 

@@ -475,7 +475,7 @@ namespace Game.Entities
             if (IsInAreaThatActivatesPvpTalents())
                 return;
 
-            if (GetCombatTimer() == 0)
+            if (!GetCombatManager().HasPvPCombat())
             { 
                 RemoveAurasDueToSpell(PlayerConst.SpellPvpRulesEnabled);
                 UpdateItemLevelAreaBasedScaling();

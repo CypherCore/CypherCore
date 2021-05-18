@@ -441,20 +441,19 @@ namespace Game.Chat
             Unit target = handler.GetSelectedUnit();
             if (!target)
                 target = handler.GetSession().GetPlayer();
-            HostileReference refe = target.GetHostileRefManager().GetFirst();
-            uint count = 0;
-            handler.SendSysMessage("Hostil reference list of {0} (guid {1})", target.GetName(), target.GetGUID().ToString());
-            while (refe != null)
+
+            handler.SendSysMessage($"Combat refs: (Combat state: {target.IsInCombat()} | Manager state: {target.GetCombatManager().HasCombat()})");
+            foreach (var refe in target.GetCombatManager().GetPvPCombatRefs())
             {
-                Unit unit = refe.GetSource().GetOwner();
-                if (unit)
-                {
-                    ++count;
-                    handler.SendSysMessage("   {0}.   {1}   ({2}, SpawnId: {3})  - threat {4}", count, unit.GetName(), unit.GetGUID().ToString(), unit.IsTypeId(TypeId.Unit) ? unit.ToCreature().GetSpawnId() : 0, refe.GetThreat());
-                }
-                refe = refe.Next();
+                Unit unit = refe.Value.GetOther(target);
+                handler.SendSysMessage($"[PvP] {unit.GetName()} (SpawnID {(unit.IsCreature() ? unit.ToCreature().GetSpawnId() : 0)})");
             }
-            handler.SendSysMessage("End of hostil reference list.");
+            foreach (var refe in target.GetCombatManager().GetPvECombatRefs())
+            {
+                Unit unit = refe.Value.GetOther(target);
+                handler.SendSysMessage($"[PvE] {unit.GetName()} (SpawnID {(unit.IsCreature() ? unit.ToCreature().GetSpawnId() : 0)})");
+            }
+
             return true;
         }
 
@@ -788,22 +787,51 @@ namespace Game.Chat
         [Command("threat", RBACPermissions.CommandDebugThreat)]
         static bool HandleDebugThreatListCommand(StringArguments args, CommandHandler handler)
         {
-            Creature target = handler.GetSelectedCreature();
-            if (!target || target.IsTotem() || target.IsPet())
-                return false;
+            Unit target = handler.GetSelectedUnit();
+            if (target == null)
+                target = handler.GetSession().GetPlayer();
 
-            var threatList = target.GetThreatManager().GetThreatList();
-            uint count = 0;
-            handler.SendSysMessage("Threat list of {0} (guid {1})", target.GetName(), target.GetGUID().ToString());
-            foreach (var refe in threatList)
+            ThreatManager mgr = target.GetThreatManager();
+            if (!target.IsAlive())
             {
-                Unit unit = refe.GetTarget();
-                if (!unit)
-                    continue;
-                ++count;
-                handler.SendSysMessage("   {0}.   {1}   (guid {2})  - threat {3}", count, unit.GetName(), unit.GetGUID().ToString(), refe.GetThreat());
+                handler.SendSysMessage($"{target.GetName()} ({target.GetGUID()}) is not alive.");
+                return true;
             }
-            handler.SendSysMessage("End of threat list.");
+            if (!target.CanHaveThreatList())
+                handler.SendSysMessage($"{target.GetName()} ({target.GetGUID()}) cannot have a threat list.");
+
+            uint count = 0;
+            var threatenedByMe = target.GetThreatManager().GetThreatenedByMeList();
+            if (threatenedByMe.Empty())
+                handler.SendSysMessage($"{target.GetName()} ({target.GetGUID()}) does not threaten any units.");
+            else
+            {
+                handler.SendSysMessage($"List of units threatened by {target.GetName()} ({target.GetGUID()})");
+                foreach (var pair in threatenedByMe)
+                {
+                    Unit unit = pair.Value.GetOwner();
+                    handler.SendSysMessage($"   {++count}.   {unit.GetName()}   ({unit.GetGUID()}, SpawnID {(unit.IsCreature() ? unit.ToCreature().GetSpawnId() : 0)})  - threat {pair.Value.GetThreat()}");
+                }
+                handler.SendSysMessage("End of threatened-by-me list.");
+            }
+
+            if (!mgr.CanHaveThreatList())
+                return true;
+
+            if (mgr.IsEngaged())
+            {
+                count = 0;
+                handler.SendSysMessage($"Threat list of {target.GetName()} ({target.GetGUID()}, SpawnID {(target.IsCreature() ? target.ToCreature().GetSpawnId() : 0)})");
+                foreach (ThreatReference refe in mgr.GetSortedThreatList())
+                {
+                    Unit unit = refe.GetVictim();
+                    handler.SendSysMessage($"   {++count}.   {unit.GetName()}   ({unit.GetGUID()})  - threat {refe.GetThreat()}[{refe.GetTauntState()}][{refe.GetOnlineState()}]");
+                }
+                handler.SendSysMessage("End of threat list.");
+            }
+            else
+                handler.SendSysMessage($"{target.GetName()} ({target.GetGUID()}, SpawnID {(target.IsCreature() ? target.ToCreature().GetSpawnId() : 0)}) is not currently engaged.");
+
             return true;
         }
 

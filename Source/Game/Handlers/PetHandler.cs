@@ -122,7 +122,6 @@ namespace Game
                 return;
 
             pet.AttackStop();
-            pet.ClearInPetCombat();
         }
 
         void HandlePetActionHelper(Unit pet, ObjectGuid guid1, uint spellid, ActiveStates flag, ObjectGuid guid2, float x, float y, float z)
@@ -156,7 +155,6 @@ namespace Game
                         case CommandStates.Follow:                        //spellid=1792  //FOLLOW
                             pet.AttackStop();
                             pet.InterruptNonMeleeSpells(false);
-                            pet.ClearInPetCombat();
                             pet.GetMotionMaster().MoveFollow(GetPlayer(), SharedConst.PetFollowDist, pet.GetFollowAngle());
                             charmInfo.SetCommandState(CommandStates.Follow);
 
@@ -271,7 +269,6 @@ namespace Game
                     {
                         case ReactStates.Passive:                         //passive
                             pet.AttackStop();
-                            pet.ClearInPetCombat();
                             goto case ReactStates.Defensive;
                         case ReactStates.Defensive:                       //recovery
                         case ReactStates.Aggressive:                      //activete

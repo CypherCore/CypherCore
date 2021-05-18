@@ -788,7 +788,7 @@ namespace Game.Spells
 
                 int gain = (int)(newDamage * gainMultiplier);
 
-                m_caster.EnergizeBySpell(m_caster, m_spellInfo.Id, gain, powerType);
+                m_caster.EnergizeBySpell(m_caster, m_spellInfo, gain, powerType);
             }
             ExecuteLogEffectTakeTargetPower(effIndex, unitTarget, powerType, (uint)newDamage, gainMultiplier);
         }
@@ -1229,7 +1229,7 @@ namespace Game.Spells
                     break;
             }
 
-            m_caster.EnergizeBySpell(unitTarget, m_spellInfo.Id, damage, power);
+            m_caster.EnergizeBySpell(unitTarget, m_spellInfo, damage, power);
         }
 
         [SpellEffectHandler(SpellEffectName.EnergizePct)]
@@ -1252,7 +1252,7 @@ namespace Game.Spells
                 return;
 
             int gain = (int)MathFunctions.CalculatePct(maxPower, damage);
-            m_caster.EnergizeBySpell(unitTarget, m_spellInfo.Id, gain, power);
+            m_caster.EnergizeBySpell(unitTarget, m_spellInfo, gain, power);
         }
 
         void SendLoot(ObjectGuid guid, LootType loottype)
@@ -2411,28 +2411,22 @@ namespace Game.Spells
 
             // this effect use before aura Taunt apply for prevent taunt already attacking target
             // for spell as marked "non effective at already attacking target"
-            if (unitTarget == null || !unitTarget.CanHaveThreatList() || unitTarget.GetVictim() == m_caster)
+            if (unitTarget == null || !unitTarget.CanHaveThreatList())
             {
                 SendCastResult(SpellCastResult.DontReport);
                 return;
             }
 
-            if (!unitTarget.GetThreatManager().GetOnlineContainer().Empty())
+            ThreatManager mgr = unitTarget.GetThreatManager();
+            if (mgr.GetCurrentVictim() == m_caster)
             {
-                // Also use this effect to set the taunter's threat to the taunted creature's highest value
-                float myThreat = unitTarget.GetThreatManager().GetThreat(m_caster);
-                float topThreat = unitTarget.GetThreatManager().GetOnlineContainer().GetMostHated().GetThreat();
-                if (topThreat > myThreat)
-                    unitTarget.GetThreatManager().AddThreat(m_caster, topThreat - myThreat);
-
-                //Set aggro victim to caster
-                HostileReference forcedVictim = unitTarget.GetThreatManager().GetOnlineContainer().GetReferenceByTarget(m_caster);
-                if (forcedVictim != null)
-                    unitTarget.GetThreatManager().SetCurrentVictim(forcedVictim);
+                SendCastResult(SpellCastResult.DontReport);
+                return;
             }
 
-            if (unitTarget.ToCreature().IsAIEnabled && !unitTarget.ToCreature().HasReactState(ReactStates.Passive))
-                unitTarget.ToCreature().GetAI().AttackStart(m_caster);
+            if (!mgr.IsThreatListEmpty())
+                // Set threat equal to highest threat currently on target
+                mgr.MatchUnitThreatToHighestThreat(m_caster);
         }
 
         [SpellEffectHandler(SpellEffectName.WeaponDamageNoSchool)]
@@ -2654,13 +2648,13 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
-            if (unitTarget == null || !unitTarget.IsAlive() || !m_caster.IsAlive())
+            if (unitTarget == null || !m_caster.IsAlive())
                 return;
 
             if (!unitTarget.CanHaveThreatList())
                 return;
 
-            unitTarget.GetThreatManager().AddThreat(m_caster, damage);
+            unitTarget.GetThreatManager().AddThreat(m_caster, damage, m_spellInfo, true);
         }
 
         [SpellEffectHandler(SpellEffectName.HealMaxHealth)]
@@ -3241,19 +3235,19 @@ namespace Game.Spells
             if (unitTarget == null)
                 return;
 
-            if (unitTarget.IsTypeId(TypeId.Player))
-                unitTarget.ToPlayer().SendAttackSwingCancelAttack();     // melee and ranged forced attack cancel
-
-            unitTarget.GetHostileRefManager().UpdateVisibility();
-
-            var attackers = unitTarget.GetAttackers();
-            for (var i = 0; i < attackers.Count; ++i)
+            if (unitTarget.IsPlayer() && !unitTarget.GetMap().IsDungeon())
             {
-                var unit = attackers[i];
-                if (!unit.CanSeeOrDetect(unitTarget))
-                    unit.AttackStop();
+                // stop all pve combat for players outside dungeons, suppress pvp combat
+                unitTarget.CombatStop(false, false);
+            }
+            else
+            {
+                // in dungeons (or for nonplayers), reset this unit on all enemies' threat lists
+                foreach (var pair in unitTarget.GetThreatManager().GetThreatenedByMeList())
+                    pair.Value.SetThreat(0.0f);
             }
 
+            // makes spells cast before this time fizzle
             unitTarget.LastSanctuaryTime = GameTime.GetGameTimeMS();
         }
 
@@ -4808,7 +4802,7 @@ namespace Game.Spells
                 return;
 
             if (unitTarget != null)
-                m_caster.SetRedirectThreat(unitTarget.GetGUID(), (uint)damage);
+                m_caster.GetThreatManager().RegisterRedirectThreat(m_spellInfo.Id, unitTarget.GetGUID(), (uint)damage);
         }
 
         [SpellEffectHandler(SpellEffectName.GameObjectDamage)]

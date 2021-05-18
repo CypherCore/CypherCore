@@ -2033,7 +2033,7 @@ namespace Game.Spells
             // spellHitTarget can be null if spell is missed in DoSpellHitOnUnit
             if (missInfo != SpellMissInfo.Evade && spellHitTarget && !m_caster.IsFriendlyTo(unit) && (!IsPositive() || m_spellInfo.HasEffect(SpellEffectName.Dispel)))
             {
-                m_caster.CombatStart(unit, m_spellInfo.HasInitialAggro());
+                m_caster.AttackedTarget(unit, m_spellInfo.HasInitialAggro());
 
                 if (!unit.IsStandState())
                     unit.SetStandState(UnitStandStateType.Stand);
@@ -2133,7 +2133,8 @@ namespace Game.Spells
                     }
                     if (unit.IsInCombat() && m_spellInfo.HasInitialAggro())
                     {
-                        m_caster.SetInCombatState(unit.GetCombatTimer() > 0, unit);
+                        if (m_caster.HasUnitFlag(UnitFlags.PvpAttackable))               // only do explicit combat forwarding for PvP enabled units
+                            m_caster.GetCombatManager().InheritCombatStatesFrom(unit);    // for creature v creature combat, the threat forward does it for us
                         unit.GetThreatManager().ForwardThreatForAssistingMe(m_caster, 0.0f, null, true);
                     }
                 }
@@ -6848,6 +6849,10 @@ namespace Game.Spells
                 unit = m_caster;
             if (unit == null)
                 return;
+
+            // This will only cause combat - the target will engage once the projectile hits (in DoAllEffectOnTarget)
+            if (targetInfo.missCondition != SpellMissInfo.Evade && !m_caster.IsFriendlyTo(unit) && (!m_spellInfo.IsPositive() || m_spellInfo.HasEffect(SpellEffectName.Dispel)) && (m_spellInfo.HasInitialAggro() || unit.IsEngaged()))
+                m_caster.SetInCombatWith(unit);
 
             foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
             {

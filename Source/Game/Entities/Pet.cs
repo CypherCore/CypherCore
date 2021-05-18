@@ -1343,6 +1343,8 @@ namespace Game.Entities
             AddUnitFlag2(UnitFlags2.RegeneratePower);
             SetSheath(SheathState.Melee);
 
+            GetThreatManager().Initialize();
+
             return true;
         }
 

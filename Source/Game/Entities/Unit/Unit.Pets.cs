@@ -274,6 +274,8 @@ namespace Game.Entities
                     }
                 }
             }
+
+            UpdatePetCombatState();
         }
 
         public bool SetCharmedBy(Unit charmer, CharmType type, AuraApplication aurApp = null)
@@ -314,7 +316,6 @@ namespace Game.Entities
 
             CastStop();
             CombatStop(); // @todo CombatStop(true) may cause crash (interrupt spells)
-            GetThreatManager().ClearAllThreat();
 
             Player playerCharmer = charmer.ToPlayer();
 
@@ -463,8 +464,6 @@ namespace Game.Entities
 
             CastStop();
             CombatStop(); // @todo CombatStop(true) may cause crash (interrupt spells)
-            GetHostileRefManager().DeleteReferences();
-            GetThreatManager().ClearAllThreat();
 
             if (_oldFactionId != 0)
             {
@@ -544,6 +543,8 @@ namespace Game.Entities
                 }
                 player.SetClientControl(this, true);
             }
+
+            EngageWithTarget(charmer);
 
             // a guardian should always have charminfo
             if (playerCharmer && this != charmer.GetFirstControlled())
@@ -651,6 +652,8 @@ namespace Game.Entities
                     m_Controlled.Remove(charm);
                 }
             }
+
+            UpdatePetCombatState();
         }
 
         public Unit GetFirstControlled()
@@ -698,6 +701,8 @@ namespace Game.Entities
                 Log.outFatal(LogFilter.Unit, "Unit {0} is not able to release its minion {1}", GetEntry(), GetMinionGUID());
             if (!GetCharmGUID().IsEmpty())
                 Log.outFatal(LogFilter.Unit, "Unit {0} is not able to release its charm {1}", GetEntry(), GetCharmGUID());
+            if (!IsPet()) // pets don't use the flag for this
+                RemoveUnitFlag(UnitFlags.PetInCombat); // m_controlled is now empty, so we know none of our minions are in combat
         }
 
         public void SendPetActionFeedback(PetActionFeedback msg, uint spellId)
@@ -793,6 +798,26 @@ namespace Game.Entities
             pet.InitPetCreateSpells();
             pet.SetFullHealth();
             return true;
+        }
+
+        public void UpdatePetCombatState()
+        {
+            Cypher.Assert(!IsPet()); // player pets do not use UNIT_FLAG_PET_IN_COMBAT for this purpose - but player pets should also never have minions of their own to call this
+
+            bool state = false;
+            foreach (Unit minion in m_Controlled)
+            {
+                if (minion.IsInCombat())
+                {
+                    state = true;
+                    break;
+                }
+            }
+
+            if (state)
+                AddUnitFlag(UnitFlags.PetInCombat);
+            else
+                RemoveUnitFlag(UnitFlags.PetInCombat);
         }
     }
 }

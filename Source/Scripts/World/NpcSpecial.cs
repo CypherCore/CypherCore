@@ -1550,18 +1550,24 @@ namespace Scripts.World.NpcSpecial
                 _scheduler.Schedule(TimeSpan.FromSeconds(1), task =>
                 {
                     long now = GameTime.GetGameTime();
-                    foreach (var pair in _damageTimes.ToList())
+                    var pveRefs = me.GetCombatManager().GetPvECombatRefs();
+                    foreach (var pair in _damageTimes)
                     {
                         // If unit has not dealt damage to training dummy for 5 seconds, Remove him from combat
                         if (pair.Value < now - 5)
                         {
-                            Unit unit = Global.ObjAccessor.GetUnit(me, pair.Key);
-                            if (unit)
-                                unit.GetHostileRefManager().DeleteReference(me);
+                            var refe = pveRefs.LookupByKey(pair.Key);
+                            if (refe != null)
+                                refe.EndCombat();
 
                             _damageTimes.Remove(pair.Key);
                         }
                     }
+
+                    foreach (var pair in pveRefs)
+                        if (!_damageTimes.ContainsKey(pair.Key))
+                            _damageTimes[pair.Key] = now;
+
                     task.Repeat();
                 });
             }

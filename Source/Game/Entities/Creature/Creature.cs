@@ -19,6 +19,7 @@ using Framework.Constants;
 using Framework.Database;
 using Framework.Dynamic;
 using Game.AI;
+using Game.Combat;
 using Game.DataStorage;
 using Game.Groups;
 using Game.Loots;
@@ -420,6 +421,8 @@ namespace Game.Entities
             UpdateMovementFlags();
             LoadCreaturesAddon();
             LoadTemplateImmunities();
+
+            GetThreatManager().UpdateOnlineStates(true, true);
             return true;
         }
 
@@ -510,6 +513,8 @@ namespace Game.Entities
 
                     if (!IsAlive())
                         break;
+
+                    GetThreatManager().Update(diff);
 
                     if (m_shouldReacquireTarget && !IsFocusing(null, true))
                     {
@@ -903,10 +908,110 @@ namespace Game.Entities
                 ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.KnockBackDest, true);
             }
 
+            GetThreatManager().Initialize();
+
             return true;
         }
 
-        void InitializeReactState()
+        public Unit SelectVictim()
+        {
+            Unit target = null;
+
+            ThreatManager mgr = GetThreatManager();
+
+            if (mgr.CanHaveThreatList())
+            {
+                target = mgr.SelectVictim();
+                while (!target)
+                {
+                    Unit newTarget = null;
+                    // nothing found to attack - try to find something we're in combat with (but don't have a threat entry for yet) and start attacking it
+                    foreach (var pair in GetCombatManager().GetPvECombatRefs())
+                    {
+                        newTarget = pair.Value.GetOther(this);
+                        if (!mgr.IsThreatenedBy(newTarget, true))
+                        {
+                            mgr.AddThreat(newTarget, 0.0f, null, true, true);
+                            break;
+                        }
+                        else
+                            newTarget = null;
+                    }
+                    if (!newTarget)
+                        break;
+                    target = mgr.SelectVictim();
+                }
+            }
+            else if (!HasReactState(ReactStates.Passive))
+            {
+                // We're a player pet, probably
+                target = GetAttackerForHelper();
+                if (!target && IsSummon())
+                {
+                    Unit owner = ToTempSummon().GetOwner();
+                    if (owner != null)
+                    {
+                        if (owner.IsInCombat())
+                            target = owner.GetAttackerForHelper();
+                        if (!target)
+                        {
+                            foreach (var itr in owner.m_Controlled)
+                            {
+                                if (itr.IsInCombat())
+                                {
+                                    target = itr.GetAttackerForHelper();
+                                    if (target)
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            else
+                return null;
+
+            if (target && _IsTargetAcceptable(target) && CanCreatureAttack(target))
+            {
+                if (!IsFocusing(null, true))
+                    SetInFront(target);
+                return target;
+            }
+
+            /// @todo a vehicle may eat some mob, so mob should not evade
+            if (GetVehicle())
+                return null;
+
+            // search nearby enemy before enter evade mode
+            if (HasReactState(ReactStates.Passive))
+            {
+                target = SelectNearestTargetInAttackDistance(m_CombatDistance != 0 ? m_CombatDistance : SharedConst.AttackDistance);
+
+                if (target && _IsTargetAcceptable(target) && CanCreatureAttack(target))
+                    return target;
+            }
+
+            var iAuras = GetAuraEffectsByType(AuraType.ModInvisibility);
+            if (!iAuras.Empty())
+            {
+                foreach (var itr in iAuras)
+                {
+                    if (itr.GetBase().IsPermanent())
+                    {
+                        GetAI().EnterEvadeMode(EvadeReason.Other);
+                        break;
+                    }
+                }
+                return null;
+            }
+
+            // enter in evade mode in other case
+            GetAI().EnterEvadeMode(EvadeReason.NoHostiles);
+
+            return null;
+        }
+
+        public void InitializeReactState()
         {
             if (IsTotem() || IsTrigger() || IsCritter() || IsSpiritService())
                 SetReactState(ReactStates.Passive);
@@ -992,6 +1097,37 @@ namespace Game.Entities
                 && !IsPet()
                 && !IsTotem()
                 && !GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoXpAtKill);
+        }
+
+        public override void AtEnterCombat()
+        {
+            base.AtEnterCombat();
+
+            if (!GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.MountedCombatAllowed))
+                Dismount();
+
+            if (IsPet() || IsGuardian()) // update pets' speed for catchup OOC speed
+            {
+                UpdateSpeed(UnitMoveType.Run);
+                UpdateSpeed(UnitMoveType.Swim);
+                UpdateSpeed(UnitMoveType.Flight);
+            }
+        }
+
+        public override void AtExitCombat()
+        {
+            base.AtExitCombat();
+
+            ClearUnitState(UnitState.AttackPlayer);
+            if (HasDynamicFlag(UnitDynFlags.Tapped))
+                SetDynamicFlags((UnitDynFlags)GetCreatureTemplate().DynamicFlags);
+
+            if (IsPet() || IsGuardian()) // update pets' speed for catchup OOC speed
+            {
+                UpdateSpeed(UnitMoveType.Run);
+                UpdateSpeed(UnitMoveType.Swim);
+                UpdateSpeed(UnitMoveType.Flight);
+            }
         }
 
         public bool IsEscortNPC(bool onlyIfActive = true)
@@ -3147,127 +3283,6 @@ namespace Game.Entities
         // There's many places not ready for dynamic spawns. This allows them to live on for now.
         void SetRespawnCompatibilityMode(bool mode = true) { m_respawnCompatibilityMode = mode; }
         public bool GetRespawnCompatibilityMode() { return m_respawnCompatibilityMode; }
-
-        public Unit SelectVictim()
-        {
-            // function provides main threat functionality
-            // next-victim-selection algorithm and evade mode are called
-            // threat list sorting etc.
-
-            Unit target = null;
-
-            // First checking if we have some taunt on us
-            var tauntAuras = GetAuraEffectsByType(AuraType.ModTaunt);
-            if (!tauntAuras.Empty())
-            {
-                Unit caster = tauntAuras.Last().GetCaster();
-
-                // The last taunt aura caster is alive an we are happy to attack him
-                if (caster != null && caster.IsAlive())
-                    return GetVictim();
-                else if (tauntAuras.Count > 1)
-                {
-                    // We do not have last taunt aura caster but we have more taunt auras,
-                    // so find first available target
-
-                    // Auras are pushed_back, last caster will be on the end
-                    for (var i = tauntAuras.Count - 1; i >= 0; i--)
-                    {
-                        caster = tauntAuras[i].GetCaster();
-                        if (caster != null && CanSeeOrDetect(caster, true) && IsValidAttackTarget(caster) && caster.IsInAccessiblePlaceFor(ToCreature()))
-                        {
-                            target = caster;
-                            break;
-                        }
-                    }
-                }
-                else
-                    target = GetVictim();
-            }
-
-            if (CanHaveThreatList())
-            {
-                if (target == null && !GetThreatManager().IsThreatListEmpty())
-                    // No taunt aura or taunt aura caster is dead standard target selection
-                    target = GetThreatManager().GetHostilTarget();
-            }
-            else if (!HasReactState(ReactStates.Passive))
-            {
-                // We have player pet probably
-                target = GetAttackerForHelper();
-                if (target == null && IsSummon())
-                {
-                    Unit owner = ToTempSummon().GetOwner();
-                    if (owner != null)
-                    {
-                        if (owner.IsInCombat())
-                            target = owner.GetAttackerForHelper();
-                        if (target == null)
-                        {
-                            foreach (var unit in owner.m_Controlled)
-                            {
-                                if (unit.IsInCombat())
-                                {
-                                    target = unit.GetAttackerForHelper();
-                                    if (target)
-                                        break;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            else
-                return null;
-
-            if (target != null && _IsTargetAcceptable(target) && CanCreatureAttack(target))
-            {
-                if (!IsFocusing(null, true))
-                    SetInFront(target);
-                return target;
-            }
-
-            // last case when creature must not go to evade mode:
-            // it in combat but attacker not make any damage and not enter to aggro radius to have record in threat list
-            // Note: creature does not have targeted movement generator but has attacker in this case
-            foreach (var unit in attackerList)
-            {
-                if (CanCreatureAttack(unit) && !unit.IsTypeId(TypeId.Player)
-                    && !unit.ToCreature().HasUnitTypeMask(UnitTypeMask.ControlableGuardian))
-                    return null;
-            }
-
-            // @todo a vehicle may eat some mob, so mob should not evade
-            if (GetVehicle() != null)
-                return null;
-
-            // search nearby enemy before enter evade mode
-            if (HasReactState(ReactStates.Aggressive))
-            {
-                target = SelectNearestTargetInAttackDistance(m_CombatDistance != 0 ? m_CombatDistance : SharedConst.AttackDistance);
-
-                if (target != null && _IsTargetAcceptable(target) && CanCreatureAttack(target))
-                    return target;
-            }
-
-            var iAuras = GetAuraEffectsByType(AuraType.ModInvisibility);
-            if (!iAuras.Empty())
-            {
-                foreach (var aura in iAuras)
-                {
-                    if (aura.GetBase().IsPermanent())
-                    {
-                        GetAI().EnterEvadeMode();
-                        break;
-                    }
-                }
-                return null;
-            }
-
-            // enter in evade mode in other case
-            GetAI().EnterEvadeMode(EvadeReason.NoHostiles);
-            return null;
-        }
     }
 
     public class VendorItemCount

@@ -446,7 +446,6 @@ namespace Game.Chat
                 return false;
 
             target.CombatStop();
-            target.GetHostileRefManager().DeleteReferences();
             return true;
         }
 

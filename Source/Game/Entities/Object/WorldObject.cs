@@ -1604,6 +1604,11 @@ namespace Game.Entities
         {
             return GetPhaseShift().CanSee(obj.GetPhaseShift());
         }
+
+        public static bool InSamePhase(WorldObject a, WorldObject b)
+        {
+            return a != null && b != null && a.IsInPhase(b);
+        }
         
         public virtual float GetCombatReach() { return 0.0f;    } // overridden (only) in Unit
         public PhaseShift GetPhaseShift() { return _phaseShift; }

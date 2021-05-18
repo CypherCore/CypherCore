@@ -727,7 +727,6 @@ namespace Game.BattleGrounds
                 {
                     //needed cause else in av some creatures will kill the players at the end
                     player.CombatStop();
-                    player.GetHostileRefManager().DeleteReferences();
                 }
 
                 // remove temporary currency bonus auras before rewarding player

@@ -342,6 +342,20 @@ namespace Game.Entities
                 UpdateDamagePhysical(attType);
         }
 
+        public override void AtEnterCombat()
+        {
+            base.AtEnterCombat();
+            if (GetCombatManager().HasPvPCombat())
+                EnablePvpRules(true);
+        }
+
+        public override void AtExitCombat()
+        {
+            base.AtExitCombat();
+            UpdatePotionCooldown();
+            m_combatExitTime = Time.GetMSTime();
+        }
+
         public override float GetBlockPercent(uint attackerLevel)
         {
             float blockArmor = (float)m_activePlayerData.ShieldBlock;

@@ -108,7 +108,7 @@ namespace Game
                 //FIXME: logout must be delayed in case lost connection with client in time of combat
                 if (GetPlayer().GetDeathTimer() != 0)
                 {
-                    _player.GetHostileRefManager().DeleteReferences();
+                    _player.CombatStop();
                     _player.BuildPlayerRepop();
                     _player.RepopAtGraveyard();
                 }

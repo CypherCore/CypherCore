@@ -62,41 +62,42 @@ namespace Game.AI
             if (!creature)
                 creature = me;
 
-            if (!creature.CanHaveThreatList())
-                return;
-
             Map map = creature.GetMap();
-            if (!map.IsDungeon())                                  //use IsDungeon instead of Instanceable, in case Battlegrounds will be instantiated
+            if (creature.CanHaveThreatList())
             {
-                Log.outError(LogFilter.Server, "DoZoneInCombat call for map that isn't an instance (creature entry = {0})", creature.IsTypeId(TypeId.Unit) ? creature.ToCreature().GetEntry() : 0);
-                return;
-            }
-
-            if (!creature.HasReactState(ReactStates.Passive) && creature.GetVictim() == null)
-            {
-                Unit nearTarget = creature.SelectNearestTarget(maxRangeToNearestTarget);
-                if (nearTarget != null)
-                    creature.GetAI().AttackStart(nearTarget);
-                else if (creature.IsSummon())
+                if (!map.IsDungeon())                                  //use IsDungeon instead of Instanceable, in case Battlegrounds will be instantiated
                 {
-                    Unit summoner = creature.ToTempSummon().GetSummoner();
-                    if (summoner != null)
+                    Log.outError(LogFilter.Server, "DoZoneInCombat call for map that isn't an instance (creature entry = {0})", creature.IsTypeId(TypeId.Unit) ? creature.ToCreature().GetEntry() : 0);
+                    return;
+                }
+
+                if (!creature.HasReactState(ReactStates.Passive) && creature.GetVictim() == null)
+                {
+                    Unit nearTarget = creature.SelectNearestTarget(maxRangeToNearestTarget);
+                    if (nearTarget != null)
+                        creature.GetAI().AttackStart(nearTarget);
+                    else if (creature.IsSummon())
                     {
-                        Unit target = summoner.GetAttackerForHelper();
-                        if (target == null && summoner.CanHaveThreatList() && !summoner.GetThreatManager().IsThreatListEmpty())
-                            target = summoner.GetThreatManager().GetHostilTarget();
-                        if (target != null && (creature.IsFriendlyTo(summoner) || creature.IsHostileTo(target)))
-                            creature.GetAI().AttackStart(target);
+                        Unit summoner = creature.ToTempSummon().GetSummoner();
+                        if (summoner != null)
+                        {
+                            if (creature.IsFriendlyTo(summoner))
+                            {
+                                Unit target = summoner.GetAttackerForHelper();
+                                if (target != null && creature.IsHostileTo(target))
+                                    creature.GetAI().AttackStart(target);
+                            }
+                        }
                     }
                 }
-            }
 
-            // Intended duplicated check, the code above this should select a victim
-            // If it can't find a suitable attack target then we should error out.
-            if (!creature.HasReactState(ReactStates.Passive) && creature.GetVictim() == null)
-            {
-                Log.outError(LogFilter.Server, "DoZoneInCombat called for creature that has empty threat list (creature entry = {0})", creature.GetEntry());
-                return;
+                // Intended duplicated check, the code above this should select a victim
+                // If it can't find a suitable attack target then we should error out.
+                if (!creature.HasReactState(ReactStates.Passive) && creature.GetVictim() == null)
+                {
+                    Log.outError(LogFilter.Server, "DoZoneInCombat called for creature that has empty threat list (creature entry = {0})", creature.GetEntry());
+                    return;
+                }
             }
 
             var playerList = map.GetPlayers();
@@ -104,17 +105,8 @@ namespace Game.AI
                 return;
 
             foreach (var player in playerList)
-            {
-                if (player.IsGameMaster())
-                    continue;
-
-                if (player.IsAlive())
-                {
-                    creature.SetInCombatWith(player);
-                    player.SetInCombatWith(creature);
-                    creature.GetThreatManager().AddThreat(player, 0.0f, null, true, true);
-                }
-            }
+                if (player != null && player.IsAlive())
+                    creature.EngageWithTarget(player);
         }
 
         public virtual void MoveInLineOfSight_Safe(Unit who)
@@ -247,11 +239,13 @@ namespace Game.AI
 
                 return me.GetVictim() != null;
             }
-            else if (me.GetThreatManager().IsThreatListEmpty())
+            else if (me.GetThreatManager().IsThreatListEmpty(true))
             {
                 EnterEvadeMode(EvadeReason.NoHostiles);
                 return false;
             }
+            else
+                me.AttackStop();
 
             return true;
         }

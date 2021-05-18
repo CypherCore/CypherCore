@@ -188,12 +188,12 @@ namespace Game.AI
 
             if (targetType == SelectAggroTarget.MaxDistance || targetType == SelectAggroTarget.MinDistance)
             {
-                foreach (HostileReference refe in mgr.GetThreatList())
+                foreach (ThreatReference refe in mgr.GetSortedThreatList())
                 {
                     if (!refe.IsOnline())
                         continue;
 
-                    targetList.Add(refe.GetTarget());
+                    targetList.Add(refe.GetVictim());
                 }
             }
             else
@@ -202,12 +202,12 @@ namespace Game.AI
                 if (currentVictim != null)
                     targetList.Add(currentVictim);
 
-                foreach (HostileReference refe in mgr.GetThreatList())
+                foreach (ThreatReference refe in mgr.GetSortedThreatList())
                 {
                     if (!refe.IsOnline())
                         continue;
 
-                    Unit thisTarget = refe.GetTarget();
+                    Unit thisTarget = refe.GetVictim();
                     if (thisTarget != currentVictim)
                         targetList.Add(thisTarget);
                 }

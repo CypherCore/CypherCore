@@ -53,15 +53,14 @@ namespace Game.Entities
         protected List<Unit> attackerList = new();
         Dictionary<ReactiveType, uint> m_reactiveTimer = new();
         protected float[][] m_weaponDamage = new float[(int)WeaponAttackType.Max][];
-        public float[] m_threatModifier = new float[(int)SpellSchools.Max];
 
         uint[] m_baseAttackSpeed = new uint[(int)WeaponAttackType.Max];
         float[] m_modAttackSpeedPct = new float[(int)WeaponAttackType.Max];
         protected uint[] m_attackTimer = new uint[(int)WeaponAttackType.Max];
 
-        ThreatManager threatManager;
-        HostileRefManager hostileRefManager;
-        RedirectThreatInfo _redirectThreatInfo;
+        CombatManager m_combatManager;
+        ThreatManager m_threatManager;
+
         protected Unit attacking;
 
         public float ModMeleeHitChance { get; set; }
@@ -518,27 +517,6 @@ namespace Game.Entities
         Unit _dispellerUnit;
         uint _dispellerSpell;
         byte _chargesRemoved;
-    }
-
-    public struct RedirectThreatInfo
-    {
-        ObjectGuid _targetGUID;
-        uint _threatPct;
-
-        public ObjectGuid GetTargetGUID() { return _targetGUID; }
-        public uint GetThreatPct() { return _threatPct; }
-
-        public void Set(ObjectGuid guid, uint pct)
-        {
-            _targetGUID = guid;
-            _threatPct = pct;
-        }
-
-        public void ModifyThreatPct(int amount)
-        {
-            amount += (int)_threatPct;
-            _threatPct = (uint)(Math.Max(0, amount));
-        }
     }
 
     public class SpellPeriodicAuraLogInfo

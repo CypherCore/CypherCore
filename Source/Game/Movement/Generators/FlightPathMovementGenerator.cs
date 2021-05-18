@@ -108,7 +108,6 @@ namespace Game.Movement
 
             if (owner.m_taxi.Empty())
             {
-                owner.GetHostileRefManager().SetOnlineOfflineState(true);
                 // update z position to ground and orientation for landing point
                 // this prevent cheating with landing  point at lags
                 // when client side flight end early in comparison server side
@@ -122,8 +121,8 @@ namespace Game.Movement
 
         public override void DoReset(Player owner)
         {
-            owner.GetHostileRefManager().SetOnlineOfflineState(false);
             owner.AddUnitState(UnitState.InFlight);
+            owner.CombatStopWithPets();
             owner.AddUnitFlag(UnitFlags.RemoveClientControl | UnitFlags.TaxiFlight);
 
             MoveSplineInit init = new(owner);

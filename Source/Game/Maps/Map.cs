@@ -762,22 +762,13 @@ namespace Game.Maps
                 // Handle updates for creatures in combat with player and are more than 60 yards away
                 if (player.IsInCombat())
                 {
-                    List<Creature> updateList = new();
-                    HostileReference refe = player.GetHostileRefManager().GetFirst();
-
-                    while (refe != null)
+                    foreach (var pair in player.GetCombatManager().GetPvECombatRefs())
                     {
-                        Unit unit = refe.GetSource().GetOwner();
-                        if (unit)
-                            if (unit.ToCreature() && unit.GetMapId() == player.GetMapId() && !unit.IsWithinDistInMap(player, GetVisibilityRange(), false))
-                                updateList.Add(unit.ToCreature());
-
-                        refe = refe.Next();
+                        Creature unit = pair.Value.GetOther(player).ToCreature();
+                        if (unit != null)
+                            if (unit.GetMapId() == player.GetMapId() && !unit.IsWithinDistInMap(player, GetVisibilityRange(), false))
+                                VisitNearbyCellsOf(unit, grid_object_update, world_object_update);
                     }
-
-                    // Process deferred update list for player
-                    foreach (Creature c in updateList)
-                        VisitNearbyCellsOf(c, grid_object_update, world_object_update);
                 }
             }
 
@@ -927,7 +918,7 @@ namespace Game.Maps
             player.UpdateZone(MapConst.InvalidZone, 0);
             Global.ScriptMgr.OnPlayerLeaveMap(this, player);
 
-            player.GetHostileRefManager().DeleteReferences(); // multithreading crashfix
+            player.CombatStop();
 
             bool inWorld = player.IsInWorld;
             player.RemoveFromWorld();

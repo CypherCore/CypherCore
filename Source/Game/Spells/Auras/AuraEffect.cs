@@ -1522,6 +1522,8 @@ namespace Game.Spells
                     }
                 }
             }
+
+            target.GetThreatManager().UpdateOnlineStates(true, false);
         }
 
         [AuraEffectHandler(AuraType.ModScale)]
@@ -1596,13 +1598,21 @@ namespace Game.Spells
                         }
                     }
                 }
-                target.CombatStop();
+
+                if (target.GetMap().IsDungeon()) // feign death does not remove combat in dungeons
+                {
+                    target.AttackStop();
+                    Player targetPlayer = target.ToPlayer();
+                    if (targetPlayer != null)
+                        targetPlayer.SendAttackSwingCancelAttack();
+                }
+                else
+                    target.CombatStop(false, false);
 
                 // prevent interrupt message
                 if (GetCasterGUID() == target.GetGUID() && target.GetCurrentSpell(CurrentSpellTypes.Generic) != null)
                     target.FinishSpell(CurrentSpellTypes.Generic, false);
                 target.InterruptNonMeleeSpells(true);
-                target.GetHostileRefManager().DeleteReferences();
 
                 // stop handling the effect if it was removed by linked event
                 if (aurApp.HasRemoveMode())
@@ -1612,6 +1622,10 @@ namespace Game.Spells
                 target.AddUnitFlag2(UnitFlags2.FeignDeath);
                 target.AddDynamicFlag(UnitDynFlags.Dead);
                 target.AddUnitState(UnitState.Died);
+
+                Creature creature = target.ToCreature();
+                if (creature != null)
+                    creature.SetReactState(ReactStates.Passive);
             }
             else
             {
@@ -1619,7 +1633,13 @@ namespace Game.Spells
                 target.RemoveUnitFlag2(UnitFlags2.FeignDeath);
                 target.RemoveDynamicFlag(UnitDynFlags.Dead);
                 target.ClearUnitState(UnitState.Died);
+
+                Creature creature = target.ToCreature();
+                if (creature != null)
+                    creature.InitializeReactState();
             }
+
+            target.GetThreatManager().UpdateOnlineStates(true, false);
         }
 
         [AuraEffectHandler(AuraType.ModUnattackable)]
@@ -1641,7 +1661,17 @@ namespace Game.Spells
 
             // call functions which may have additional effects after chainging state of unit
             if (apply && mode.HasAnyFlag(AuraEffectHandleModes.Real))
-                target.CombatStop();
+            {
+                if (target.GetMap().IsDungeon())
+                {
+                    target.AttackStop();
+                    Player targetPlayer = target.ToPlayer();
+                    if (targetPlayer != null)
+                        targetPlayer.SendAttackSwingCancelAttack();
+                }
+                else
+                    target.CombatStop();
+            }
         }
 
         [AuraEffectHandler(AuraType.ModDisarm)]
@@ -2239,18 +2269,7 @@ namespace Game.Spells
             if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask))
                 return;
 
-            Unit target = aurApp.GetTarget();
-            for (byte i = 0; i < (int)SpellSchools.Max; ++i)
-                if (Convert.ToBoolean(GetMiscValue() & (1 << i)))
-                {
-                    if (apply)
-                        MathFunctions.AddPct(ref target.m_threatModifier[i], GetAmount());
-                    else
-                    {
-                        float amount = target.GetTotalAuraMultiplierByMiscMask(AuraType.ModThreat, 1u << i);
-                        target.m_threatModifier[i] = amount;
-                    }
-                }
+            aurApp.GetTarget().GetThreatManager().UpdateMySpellSchoolModifiers();
         }
 
         [AuraEffectHandler(AuraType.ModTotalThreat)]
@@ -2266,7 +2285,7 @@ namespace Game.Spells
 
             Unit caster = GetCaster();
             if (caster != null && caster.IsAlive())
-                target.GetHostileRefManager().AddTempThreat(GetAmount(), apply);
+                caster.GetThreatManager().UpdateMyTempModifiers();
         }
 
         [AuraEffectHandler(AuraType.ModTaunt)]
@@ -2280,17 +2299,22 @@ namespace Game.Spells
             if (!target.IsAlive() || !target.CanHaveThreatList())
                 return;
 
-            Unit caster = GetCaster();
-            if (caster == null || !caster.IsAlive())
+            target.GetThreatManager().TauntUpdate();
+        }
+
+        [AuraEffectHandler(AuraType.ModDetaunt)]
+        void HandleModDetaunt(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
-            if (apply)
-                target.TauntApply(caster);
-            else
-            {
-                // When taunt aura fades out, mob will switch to previous target if current has less than 1.1 * secondthreat
-                target.TauntFadeOut(caster);
-            }
+            Unit caster = GetCaster();
+            Unit target = aurApp.GetTarget();
+
+            if (!caster || !caster.IsAlive() || !target.IsAlive() || !caster.CanHaveThreatList())
+                return;
+
+            caster.GetThreatManager().TauntUpdate();
         }
 
         /*****************************/
@@ -2305,6 +2329,7 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             target.SetControlled(apply, UnitState.Confused);
+            target.GetThreatManager().UpdateOnlineStates(true, false);
         }
 
         [AuraEffectHandler(AuraType.ModFear)]
@@ -2316,6 +2341,7 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             target.SetControlled(apply, UnitState.Fleeing);
+            target.GetThreatManager().UpdateOnlineStates(true, false);
         }
 
         [AuraEffectHandler(AuraType.ModStun)]
@@ -2327,6 +2353,7 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             target.SetControlled(apply, UnitState.Stunned);
+            target.GetThreatManager().UpdateOnlineStates(true, false);
         }
 
         [AuraEffectHandler(AuraType.ModRoot)]
@@ -2339,6 +2366,7 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             target.SetControlled(apply, UnitState.Root);
+            target.GetThreatManager().UpdateOnlineStates(true, false);
         }
 
         [AuraEffectHandler(AuraType.PreventsFleeing)]
@@ -2743,6 +2771,8 @@ namespace Game.Spells
                     && GetSpellInfo().HasAttribute(SpellAttr2.DamageReducedShield))
                     target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.StealthOrInvis);
             }
+
+            target.GetThreatManager().UpdateOnlineStates(true, false);
         }
 
         [AuraEffectHandler(AuraType.DamageImmunity)]
@@ -2753,6 +2783,8 @@ namespace Game.Spells
 
             Unit target = aurApp.GetTarget();
             m_spellInfo.ApplyAllSpellImmunitiesTo(target, GetSpellEffectInfo(), apply);
+
+            target.GetThreatManager().UpdateOnlineStates(true, false);
         }
 
         [AuraEffectHandler(AuraType.DispelImmunity)]
@@ -4466,7 +4498,7 @@ namespace Game.Spells
             player.GetReputationMgr().ApplyForceReaction(factionId, factionRank, apply);
             player.GetReputationMgr().SendForceReactions();
 
-            // stop fighting if at apply forced rank friendly or at remove real rank friendly
+            // stop fighting at apply (if forced rank friendly) or at remove (if real rank friendly)
             if ((apply && factionRank >= ReputationRank.Friendly) || (!apply && player.GetReputationRank(factionId) >= ReputationRank.Friendly))
                 player.StopAttackFaction(factionId);
         }

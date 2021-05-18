@@ -1514,14 +1514,7 @@ namespace Game.Entities
             SendCombatLogMessage(data);
         }
 
-        public void EnergizeBySpell(Unit victim, uint spellId, int damage, PowerType powerType)
-        {
-            SpellInfo info = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
-            if (info != null)
-                EnergizeBySpell(victim, info, damage, powerType);
-        }
-
-        void EnergizeBySpell(Unit victim, SpellInfo spellInfo, int damage, PowerType powerType)
+        public void EnergizeBySpell(Unit victim, SpellInfo spellInfo, int damage, PowerType powerType)
         {
             int gain = victim.ModifyPower(powerType, damage, false);
             int overEnergize = damage - gain;

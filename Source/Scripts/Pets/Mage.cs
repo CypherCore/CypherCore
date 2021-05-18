@@ -76,21 +76,13 @@ namespace Scripts.Pets
                             continue;
                         }
                         // else compare best fit unit with current unit
-                        var triggers = unit.GetThreatManager().GetThreatList();
-                        foreach (var reference in triggers)
+                        float threat = unit.GetThreatManager().GetThreat(owner);
+                        // Check if best fit hostile unit hs lower threat than this current unit
+                        if (highestThreat < threat)
                         {
-                            // Try to find threat referenced to owner
-                            if (reference.GetTarget() == owner)
-                            {
-                                // Check if best fit hostile unit hs lower threat than this current unit
-                                if (highestThreat < reference.GetThreat())
-                                {
-                                    // If so, update best fit unit
-                                    highestThreat = reference.GetThreat();
-                                    highestThreatUnit = unit;
-                                    break;
-                                }
-                            }
+                            // If so, update best fit unit
+                            highestThreat = threat;
+                            highestThreatUnit = unit;
                         }
                         // In case no unit with threat was found so far, always check for nearest unit (only for players)
                         if (unit.IsTypeId(TypeId.Player))
@@ -112,30 +104,7 @@ namespace Scripts.Pets
             bool IsInThreatList(Unit target)
             {
                 Unit owner = me.GetCharmerOrOwner();
-
-                List<Unit> targets = new List<Unit>();
-                var u_check = new AnyUnfriendlyUnitInObjectRangeCheck(me, me, 30.0f);
-                var searcher = new UnitListSearcher(me, targets, u_check);
-                Cell.VisitAllObjects(me, searcher, 40.0f);
-
-                foreach (var unit in targets)
-                {
-                    if (unit == target)
-                    {
-                        // Consider only units without CC
-                        if (!unit.HasBreakableByDamageCrowdControlAura(unit))
-                        {
-                            var triggers = unit.GetThreatManager().GetThreatList();
-                            foreach (var reference in triggers)
-                            {
-                                // Try to find threat referenced to owner
-                                if (reference.GetTarget() == owner)
-                                    return true;
-                            }
-                        }
-                    }
-                }
-                return false;
+                return owner && target.IsThreatenedBy(owner);
             }
 
             public override void InitializeAI()

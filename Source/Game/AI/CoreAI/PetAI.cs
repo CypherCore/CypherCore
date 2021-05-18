@@ -56,8 +56,6 @@ namespace Game.AI
                 me.GetMotionMaster().Clear();
                 me.GetMotionMaster().MoveIdle();
                 me.CombatStop();
-                me.GetHostileRefManager().DeleteReferences();
-
                 return;
             }
 
@@ -454,9 +452,9 @@ namespace Game.AI
                 }
             }
 
-            me.ClearInPetCombat();
+            me.RemoveUnitFlag(UnitFlags.PetInCombat); // on player pets, this flag indicates that we're actively going after a target - we're returning, so remove it
         }
-
+        
         void DoAttack(Unit target, bool chase)
         {
             // Handles attack with or without chase and also resets flags
@@ -464,12 +462,7 @@ namespace Game.AI
 
             if (me.Attack(target, true))
             {
-                // properly fix fake combat after pet is sent to attack
-                Unit owner = me.GetOwner();
-                if (owner != null)
-                    owner.AddUnitFlag(UnitFlags.PetInCombat);
-
-                me.AddUnitFlag(UnitFlags.PetInCombat);
+                me.AddUnitFlag(UnitFlags.PetInCombat); // on player pets, this flag indicates we're actively going after a target - that's what we're doing, so set it
 
                 // Play sound to let the player know the pet is attacking something it picked on its own
                 if (me.HasReactState(ReactStates.Aggressive) && !me.GetCharmInfo().IsCommandAttack())

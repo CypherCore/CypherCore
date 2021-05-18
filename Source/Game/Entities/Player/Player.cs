@@ -316,6 +316,8 @@ namespace Game.Entities
                 SetPrimarySpecialization(defaultSpec.Id);
             }
 
+            GetThreatManager().Initialize();
+
             return true;
         }
         public override void Update(uint diff)
@@ -358,7 +360,7 @@ namespace Game.Entities
 
             UpdateAfkReport(now);
 
-            if (GetCombatTimer() != 0) // Only set when in pvp combat
+            if (GetCombatManager().HasPvPCombat()) // Only set when in pvp combat
             {
                 Aura aura = GetAura(PlayerConst.SpellPvpRulesEnabled);
                 if (aura != null)
@@ -615,7 +617,7 @@ namespace Game.Entities
                 {
                     m_hostileReferenceCheckTimer = 15 * Time.InMilliseconds;
                     if (!GetMap().IsDungeon())
-                        GetHostileRefManager().DeleteReferencesOutOfRange(GetVisibilityRange());
+                        GetCombatManager().EndCombatBeyondRange(GetVisibilityRange(), true);
                 }
                 else
                     m_hostileReferenceCheckTimer -= diff;
@@ -1908,9 +1910,6 @@ namespace Game.Entities
 
             // Call base
             base.SetInWater(inWater);
-
-            // Update threat tables
-            GetHostileRefManager().UpdateThreatTables();
         }
         public void ValidateMovementInfo(MovementInfo mi)
         {
@@ -2151,15 +2150,11 @@ namespace Game.Entities
 
                 Pet pet = GetPet();
                 if (pet != null)
-                {
                     pet.SetFaction(35);
-                    pet.GetHostileRefManager().SetOnlineOfflineState(false);
-                }
 
                 RemovePvpFlag(UnitPVPStateFlags.FFAPvp);
                 ResetContestedPvP();
 
-                GetHostileRefManager().SetOnlineOfflineState(false);
                 CombatStopWithPets();
 
                 PhasingHandler.SetAlwaysVisible(this, true, false);
@@ -2176,10 +2171,7 @@ namespace Game.Entities
 
                 Pet pet = GetPet();
                 if (pet != null)
-                {
                     pet.SetFaction(GetFaction());
-                    pet.GetHostileRefManager().SetOnlineOfflineState(true);
-                }
 
                 // restore FFA PvP Server state
                 if (Global.WorldMgr.IsFFAPvPRealm())
@@ -2188,7 +2180,6 @@ namespace Game.Entities
                 // restore FFA PvP area state, remove not allowed for GM mounts
                 UpdateArea(m_areaUpdateId);
 
-                GetHostileRefManager().SetOnlineOfflineState(true);
                 m_serverSideVisibilityDetect.SetValue(ServerSideVisibilityType.GM, AccountTypes.Player);
             }
 
@@ -3917,14 +3908,6 @@ namespace Game.Entities
         public static bool IsValidGender(Gender _gender) { return _gender <= Gender.Female; }
         public static bool IsValidClass(Class _class) { return Convert.ToBoolean((1 << ((int)_class - 1)) & (int)Class.ClassMaskAllPlayable); }
         public static bool IsValidRace(Race _race) { return Convert.ToBoolean((ulong)SharedConst.GetMaskForRace(_race) & SharedConst.RaceMaskAllPlayable); }
-
-        public override void OnCombatExit()
-        {
-            base.OnCombatExit();
-
-            UpdatePotionCooldown();
-            m_combatExitTime = Time.GetMSTime();
-        }
 
         void LeaveLFGChannel()
         {
@@ -6887,7 +6870,6 @@ namespace Game.Entities
             m_taxi.ClearTaxiDestinations();        // not destinations, clear source node
             Dismount();
             RemoveUnitFlag(UnitFlags.RemoveClientControl | UnitFlags.TaxiFlight);
-            GetHostileRefManager().SetOnlineOfflineState(true);
         }
 
         public void ContinueTaxiFlight()
