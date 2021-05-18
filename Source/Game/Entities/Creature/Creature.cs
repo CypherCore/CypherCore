@@ -553,6 +553,7 @@ namespace Game.Entities
                         if (diff >= m_boundaryCheckTime)
                         {
                             GetAI().CheckInRoom();
+                            GetThreatManager().UpdateOnlineStates(false, true);
                             m_boundaryCheckTime = 2500;
                         }
                         else
