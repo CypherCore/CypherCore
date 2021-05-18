@@ -24,6 +24,7 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
 using Game.Networking.Packets;
+using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -495,7 +496,7 @@ namespace Game.Chat
             if (unit)
             {
                 Player player = handler.GetSession().GetPlayer();
-                handler.SendSysMessage($"Checking LoS {player.GetName()} -> {unit.GetName()}:");
+                handler.SendSysMessage($"Checking LoS {player.GetName()} . {unit.GetName()}:");
                 handler.SendSysMessage($"    VMAP LoS: {(player.IsWithinLOSInMap(unit, LineOfSightChecks.Vmap) ? "clear" : "obstructed")}");
                 handler.SendSysMessage($"    GObj LoS: {(player.IsWithinLOSInMap(unit, LineOfSightChecks.Gobject) ? "clear" : "obstructed")}");
                 handler.SendSysMessage($"{unit.GetName()} is {(player.IsWithinLOSInMap(unit) ? "" : "not ")}in line of sight of {player.GetName()}.");
@@ -828,6 +829,82 @@ namespace Game.Chat
             }
             else
                 handler.SendSysMessage($"{target.GetName()} ({target.GetGUID()}, SpawnID {(target.IsCreature() ? target.ToCreature().GetSpawnId() : 0)}) is not currently engaged.");
+
+            return true;
+        }
+
+        [Command("threatinfo", RBACPermissions.CommandDebugThreatinfo)]
+        static bool HandleDebugThreatInfoCommand(StringArguments args, CommandHandler handler)
+        {
+            Unit target = handler.GetSelectedUnit();
+            if (target == null)
+            {
+                handler.SendSysMessage(CypherStrings.SelectCharOrCreature);
+                return false;
+            }
+
+            handler.SendSysMessage($"Threat info for {target.GetName()} ({target.GetGUID()}):");
+
+            ThreatManager mgr = target.GetThreatManager();
+
+            // _singleSchoolModifiers
+            {
+                var mods = mgr._singleSchoolModifiers;
+                handler.SendSysMessage(" - Single-school threat modifiers:");
+                handler.SendSysMessage($" |-- Physical: {mods[(int)SpellSchools.Normal] * 100.0f:0.##}");
+                handler.SendSysMessage($" |-- Holy    : {mods[(int)SpellSchools.Holy] * 100.0f:0.##}");
+                handler.SendSysMessage($" |-- Fire    : {mods[(int)SpellSchools.Fire] * 100.0f:0.##}");
+                handler.SendSysMessage($" |-- Nature  : {mods[(int)SpellSchools.Nature] * 100.0f:0.##}");
+                handler.SendSysMessage($" |-- Frost   : {mods[(int)SpellSchools.Frost] * 100.0f:0.##}");
+                handler.SendSysMessage($" |-- Shadow  : {mods[(int)SpellSchools.Shadow] * 100.0f:0.##}");
+                handler.SendSysMessage($" |-- Arcane  : {mods[(int)SpellSchools.Arcane] * 100.0f:0.##}");
+            }
+
+            // _multiSchoolModifiers
+            {
+                var mods = mgr._multiSchoolModifiers;
+                handler.SendSysMessage($"- Multi-school threat modifiers ({mods.Count} entries):");
+
+                foreach (var pair in mods)
+                    handler.SendSysMessage($" |-- Mask {pair.Key:X}: {pair.Value:0.XX}");
+            }
+
+            // _redirectInfo
+            {
+                var redirectInfo = mgr._redirectInfo;
+                if (redirectInfo.Empty())
+                    handler.SendSysMessage(" - No redirects being applied");
+                else
+                {
+                    handler.SendSysMessage($" - {redirectInfo.Count} redirects being applied:");
+                    foreach (var pair in redirectInfo)
+                    {
+                        Unit unit = Global.ObjAccessor.GetUnit(target, pair.Item1);
+                        handler.SendSysMessage($" |-- {pair.Item2:D2} to {(unit != null ? unit.GetName() : pair.Item1)}");
+                    }
+                }
+            }
+
+            // _redirectRegistry
+            {
+                var redirectRegistry = mgr._redirectRegistry;
+                if (redirectRegistry.Empty())
+                    handler.SendSysMessage(" - No redirects are registered");
+                else
+                {
+                    handler.SendSysMessage($" - {redirectRegistry.Count} spells may have redirects registered");
+                    foreach (var outerPair in redirectRegistry) // (spellId, (guid, pct))
+                    {
+                        SpellInfo spell = Global.SpellMgr.GetSpellInfo(outerPair.Key, Difficulty.None);
+                        handler.SendSysMessage($" |-- #{outerPair.Key} {(spell != null ? spell.SpellName[Global.WorldMgr.GetDefaultDbcLocale()] : "<unknown>")} ({outerPair.Value.Count} entries):");
+                        foreach (var innerPair in outerPair.Value) // (guid, pct)
+                        {
+                            Unit unit = Global.ObjAccessor.GetUnit(target, innerPair.Key);
+                            handler.SendSysMessage($"   |-- {innerPair.Value} to {(unit != null ? unit.GetName() : innerPair.Key)}");
+                        }
+                    }
+                }
+            }
 
             return true;
         }

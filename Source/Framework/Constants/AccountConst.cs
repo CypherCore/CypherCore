@@ -775,7 +775,7 @@ namespace Framework.Constants
         CommandReloadQuestGreetingLocale = 867, // Reserved
         CommandModifyPower = 868,
         CommandDebugSendPlayerChoice = 869,
-        CommandDebugThreatinfo = 870, // reserved
+        CommandDebugThreatinfo = 870,
         CommandDebugInstancespawn = 871, // reserved
         CommandServerDebug = 872,
         CommandReloadCreatureMovementOverride = 873,

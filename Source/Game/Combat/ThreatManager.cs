@@ -40,11 +40,11 @@ namespace Game.Combat
         ThreatReference _currentVictimRef;
 
         Dictionary<ObjectGuid, ThreatReference> _threatenedByMe = new(); // these refs are entries for myself on other units' threat lists
-        float[] _singleSchoolModifiers = new float[(int)SpellSchools.Max]; // most spells are single school - we pre-calculate these and store them
-        volatile Dictionary<SpellSchoolMask, float> _multiSchoolModifiers = new(); // these are calculated on demand
+        public float[] _singleSchoolModifiers = new float[(int)SpellSchools.Max]; // most spells are single school - we pre-calculate these and store them
+        public volatile Dictionary<SpellSchoolMask, float> _multiSchoolModifiers = new(); // these are calculated on demand
 
-        List<Tuple<ObjectGuid, uint>> _redirectInfo = new(); // current redirection targets and percentages (updated from registry in ThreatManager::UpdateRedirectInfo)
-        Dictionary<uint, Dictionary<ObjectGuid, uint>> _redirectRegistry = new(); // spellid . (victim . pct); all redirection effects on us (removal individually managed by spell scripts because blizzard is dumb)
+        public List<Tuple<ObjectGuid, uint>> _redirectInfo = new(); // current redirection targets and percentages (updated from registry in ThreatManager::UpdateRedirectInfo)
+        public Dictionary<uint, Dictionary<ObjectGuid, uint>> _redirectRegistry = new(); // spellid . (victim . pct); all redirection effects on us (removal individually managed by spell scripts because blizzard is dumb)
 
         public static bool CanHaveThreatList(Unit who)
         {
