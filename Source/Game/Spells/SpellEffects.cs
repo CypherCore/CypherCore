@@ -2580,7 +2580,7 @@ namespace Game.Spells
 
             // if (addPctMods) { percent mods are added in Unit::CalculateDamage } else { percent mods are added in Unit::MeleeDamageBonusDone }
             // this distinction is neccessary to properly inform the client about his autoattack damage values from Script_UnitDamage
-            bool addPctMods = !m_spellInfo.HasAttribute(SpellAttr6.NoDonePctDamageMods) && m_spellSchoolMask.HasAnyFlag(SpellSchoolMask.Normal);
+            bool addPctMods = !m_spellInfo.HasAttribute(SpellAttr6.IgnoreCasterDamageModifiers) && m_spellSchoolMask.HasAnyFlag(SpellSchoolMask.Normal);
             if (addPctMods)
             {
                 UnitMods unitMod;

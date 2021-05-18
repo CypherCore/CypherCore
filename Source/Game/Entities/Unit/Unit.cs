@@ -490,7 +490,6 @@ namespace Game.Entities
 
             m_Events.KillAllEvents(false);                      // non-delatable (currently casted spells) will not deleted now but it will deleted at call in Map.RemoveAllObjectsInRemoveList
             CombatStop();
-            GetThreatManager().ClearAllThreat();
         }
         public override void CleanupsBeforeDelete(bool finalCleanup = true)
         {
@@ -2970,7 +2969,7 @@ namespace Game.Entities
 
                 if (damagetype != DamageEffectType.NoDamage)
                 {
-                    if (victim != this && (spellProto == null || !spellProto.HasAttribute(SpellAttr7.NoPushbackOnDamage)))
+                    if (victim != this && (spellProto == null || !(spellProto.HasAttribute(SpellAttr7.NoPushbackOnDamage) || spellProto.HasAttribute(SpellAttr3.TreatAsPeriodic))))
                     {
                         if (damagetype != DamageEffectType.DOT)
                         {
@@ -3829,7 +3828,7 @@ namespace Game.Entities
             {
                 // Some spells don't benefit from pct done mods
                 // mods for SPELL_SCHOOL_MASK_NORMAL are already factored in base melee damage calculation
-                if (!spellProto.HasAttribute(SpellAttr6.NoDonePctDamageMods) && !spellProto.GetSchoolMask().HasAnyFlag(SpellSchoolMask.Normal))
+                if (!spellProto.HasAttribute(SpellAttr6.IgnoreCasterDamageModifiers) && !spellProto.GetSchoolMask().HasAnyFlag(SpellSchoolMask.Normal))
                 {
                     float maxModDamagePercentSchool = 0.0f;
                     Player thisPlayer = ToPlayer();

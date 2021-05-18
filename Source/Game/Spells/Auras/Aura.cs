@@ -1628,7 +1628,7 @@ namespace Game.Spells
             Cypher.Assert(procEntry != null);
 
             // take one charge, aura expiration will be handled in Aura.TriggerProcOnEvent (if needed)
-            if (!procEntry.AttributesMask.HasAnyFlag(ProcAttributes.UseStacksForCharges) && IsUsingCharges())
+            if (!procEntry.AttributesMask.HasAnyFlag(ProcAttributes.UseStacksForCharges) && IsUsingCharges() && (eventInfo.GetSpellInfo() == null || !eventInfo.GetSpellInfo().HasAttribute(SpellAttr6.DoNotConsumeResources)))
             {
                 --m_procCharges;
                 SetNeedClientUpdateForTargets();

@@ -1667,7 +1667,7 @@ namespace Framework.Constants
     {
         IgnoreResistances = 0x01, //  0 Spells With This Attribute Will Completely Ignore The Target'S Resistance (These Spells Can'T Be Resisted)
         ProcOnlyOnCaster = 0x02, //  1 Proc Only On Effects With TargetUnitCaster?
-        Unk2 = 0x04, //  2
+        AuraExpiresOffline = 0x04, //  2 duration is removed from aura while player is logged out
         Unk3 = 0x08, //  3
         Unk4 = 0x10, //  4 This Will No Longer Cause Guards To Attack On Use??
         Unk5 = 0x20, //  5
@@ -1688,7 +1688,7 @@ namespace Framework.Constants
         NotCheckSelfcastPower = 0x100000, // 20 Supersedes Message "More Powerful Spell Applied" For Self Casts.
         DontRemoveInArena = 0x200000, // 21 Pally Aura, Dk Presence, Dudu Form, Warrior Stance, Shadowform, Hunter Track
         Unk22 = 0x400000, // 22 Seal Of Command (42058,57770) And Gymer'S Smash 55426
-        Unk23 = 0x800000, // 23
+        SuppressWeaponProcs = 0x800000, // 23 spells with this flag should not trigger item spells / enchants (mostly in conjunction with SPELL_ATTR0_STOP_ATTACK_TARGET)
         Unk24 = 0x1000000, // 24 Some Shoot Spell
         IsPetScaling = 0x2000000, // 25 Pet Scaling Auras
         CastOnlyInOutland = 0x4000000, // 26 Can Only Be Used In Outland.
@@ -1702,7 +1702,7 @@ namespace Framework.Constants
     {
         CanChannelWhenMoving = 0x01, //  0 available casting channel spell when moving
         NoReagentWhilePrep = 0x02, //  1 Not Need Reagents If UnitFlagPreparation
-        Unk2 = 0x04, //  2
+        RemoveEnteringArena = 0x04, //  2 remove this aura on arena enter
         UsableWhileStunned = 0x08, //  3 Usable While Stunned
         Unk4 = 0x10, //  4
         SingleTargetSpell = 0x20, //  5 Only One Target Can Be Apply At A Time
@@ -1726,7 +1726,7 @@ namespace Framework.Constants
         Unk23 = 0x800000, // 23
         Unk24 = 0x1000000, // 24
         Unk25 = 0x2000000, // 25
-        Unk26 = 0x4000000, // 26 Aoe Related - Boulder, Cannon, Corpse Explosion, Fire Nova, Flames, Frost Bomb, Living Bomb, Seed Of Corruption, Starfall, Thunder Clap, Volley
+        AlwaysAoeLineOfSight = 0x4000000, // 26 Aoe Related - Boulder, Cannon, Corpse Explosion, Fire Nova, Flames, Frost Bomb, Living Bomb, Seed Of Corruption, Starfall, Thunder Clap, Volley
         DontShowAuraIfSelfCast = 0x8000000, // 27
         DontShowAuraIfNotSelfCast = 0x10000000, // 28
         Unk29 = 0x20000000, // 29
@@ -1740,7 +1740,7 @@ namespace Framework.Constants
         IgnoreCasterAuras = 0x04, //  2
         AssistIgnoreImmuneFlag = 0x08, //  3
         Unk4 = 0x10, //  4
-        Unk5 = 0x20, //  5
+        DoNotConsumeResources = 0x20, //  5 dont consume proc charges
         UseSpellCastEvent = 0x40, //  6
         Unk7 = 0x80, //  7
         CantTargetCrowdControlled = 0x100, //  8
@@ -1762,9 +1762,9 @@ namespace Framework.Constants
         CanTargetUntargetable = 0x1000000, // 24
         NotResetSwingIfInstant = 0x2000000, // 25 Exorcism, Flash Of Light
         Unk26 = 0x4000000, // 26 Related To Player Castable Positive Buff
-        Unk27 = 0x8000000, // 27
+        IgnoreHealingModifiers = 0x8000000, // 27 some custom rules - complicated
         Unk28 = 0x10000000, // 28 Death Grip
-        NoDonePctDamageMods = 0x20000000, // 29 Ignores Done Percent Damage Mods?
+        IgnoreCasterDamageModifiers = 0x20000000, // 29 ignores done percent damage mods? some custom rules - complicated
         Unk30 = 0x40000000, // 30
         IgnoreCategoryCooldownMods = 0x80000000  // 31 Some Special Cooldown Calc? Only 2894
     }

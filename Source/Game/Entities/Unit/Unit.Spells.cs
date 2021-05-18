@@ -172,7 +172,7 @@ namespace Game.Entities
                 return 1.0f;
 
             // Some spells don't benefit from pct done mods
-            if (spellProto.HasAttribute(SpellAttr6.NoDonePctDamageMods))
+            if (spellProto.HasAttribute(SpellAttr6.IgnoreCasterDamageModifiers))
                 return 1.0f;
 
             // For totems pct done mods are calculated when its calculation is run on the player in SpellDamageBonusDone.
@@ -3761,9 +3761,10 @@ namespace Game.Entities
             RemoveAppliedAuras(aurApp =>
             {
                 Aura aura = aurApp.GetBase();
-                return !aura.GetSpellInfo().HasAttribute(SpellAttr4.DontRemoveInArena) // don't remove stances, shadowform, pally/hunter auras
-                    && !aura.IsPassive()                               // don't remove passive auras
-                    && (aurApp.IsPositive() || !aura.GetSpellInfo().HasAttribute(SpellAttr3.DeathPersistent)); // not negative death persistent auras
+                return (!aura.GetSpellInfo().HasAttribute(SpellAttr4.DontRemoveInArena)                          // don't remove stances, shadowform, pally/hunter auras
+                    && !aura.IsPassive()                                                                              // don't remove passive auras
+                    && (aurApp.IsPositive() || !aura.GetSpellInfo().HasAttribute(SpellAttr3.DeathPersistent))) || // not negative death persistent auras
+                    aura.GetSpellInfo().HasAttribute(SpellAttr5.RemoveEnteringArena);                             // special marker, always remove
             });
         }
         public void RemoveAllAurasExceptType(AuraType type)

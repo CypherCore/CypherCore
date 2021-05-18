@@ -3386,7 +3386,7 @@ namespace Game.Entities
                         break;
                     case 70106: // Chilled to the Bone                        
                         spellInfo.AttributesEx3 |= SpellAttr3.NoDoneBonus;
-                        spellInfo.AttributesEx6 |= SpellAttr6.NoDonePctDamageMods;
+                        spellInfo.AttributesEx6 |= SpellAttr6.IgnoreCasterDamageModifiers;
                         break;
                     case 71614: // Ice Lock
                         spellInfo.Mechanic = Mechanics.Stun;

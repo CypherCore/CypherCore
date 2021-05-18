@@ -1997,7 +1997,7 @@ namespace Game.Spells
                     DamageInfo spellDamageInfo = new(damageInfo, DamageEffectType.SpellDirect, m_attackType, hitMask);
                     caster.ProcSkillsAndAuras(unitTarget, procAttacker, procVictim, ProcFlagsSpellType.Damage, ProcFlagsSpellPhase.Hit, hitMask, this, spellDamageInfo, null);
 
-                    if (caster.IsPlayer() && !m_spellInfo.HasAttribute(SpellAttr0.StopAttackTarget) &&
+                    if (caster.IsPlayer() && !m_spellInfo.HasAttribute(SpellAttr0.StopAttackTarget) && !m_spellInfo.HasAttribute(SpellAttr4.SuppressWeaponProcs) &&
                         (m_spellInfo.DmgClass == SpellDmgClass.Melee || m_spellInfo.DmgClass == SpellDmgClass.Ranged))
                         caster.ToPlayer().CastItemCombatSpell(spellDamageInfo);
                 }
@@ -2014,7 +2014,7 @@ namespace Game.Spells
                     DamageInfo spellNoDamageInfo = new(damageInfo, DamageEffectType.NoDamage, m_attackType, hitMask);
                     caster.ProcSkillsAndAuras(unitTarget, procAttacker, procVictim, ProcFlagsSpellType.NoDmgHeal, ProcFlagsSpellPhase.Hit, hitMask, this, spellNoDamageInfo, null);
 
-                    if (caster.IsPlayer() && !m_spellInfo.HasAttribute(SpellAttr0.StopAttackTarget) &&
+                    if (caster.IsPlayer() && !m_spellInfo.HasAttribute(SpellAttr0.StopAttackTarget) && !m_spellInfo.HasAttribute(SpellAttr4.SuppressWeaponProcs) &&
                         (m_spellInfo.DmgClass == SpellDmgClass.Melee || m_spellInfo.DmgClass == SpellDmgClass.Ranged))
                         caster.ToPlayer().CastItemCombatSpell(spellNoDamageInfo);
                 }
@@ -4741,7 +4741,7 @@ namespace Game.Spells
                                 losTarget = dynObj;
                         }
 
-                        if (!m_spellInfo.HasAttribute(SpellAttr2.CanTargetNotInLos) && !Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_spellInfo.Id, null, DisableFlags.SpellLOS)
+                        if (!m_spellInfo.HasAttribute(SpellAttr2.CanTargetNotInLos) && !m_spellInfo.HasAttribute(SpellAttr5.AlwaysAoeLineOfSight) && !Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_spellInfo.Id, null, DisableFlags.SpellLOS)
                             && !unitTarget.IsWithinLOSInMap(losTarget, LineOfSightChecks.All, ModelIgnoreFlags.M2))
                             return SpellCastResult.LineOfSight;
                     }
@@ -4754,7 +4754,7 @@ namespace Game.Spells
                 float x, y, z;
                 m_targets.GetDstPos().GetPosition(out x, out y, out z);
 
-                if (!m_spellInfo.HasAttribute(SpellAttr2.CanTargetNotInLos) && !Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_spellInfo.Id, null, DisableFlags.SpellLOS)
+                if (!m_spellInfo.HasAttribute(SpellAttr2.CanTargetNotInLos) && !m_spellInfo.HasAttribute(SpellAttr5.AlwaysAoeLineOfSight) && !Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_spellInfo.Id, null, DisableFlags.SpellLOS)
                     && !m_caster.IsWithinLOS(x, y, z, LineOfSightChecks.All, ModelIgnoreFlags.M2))
                     return SpellCastResult.LineOfSight;
             }
