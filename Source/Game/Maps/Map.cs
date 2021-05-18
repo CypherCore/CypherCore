@@ -762,13 +762,17 @@ namespace Game.Maps
                 // Handle updates for creatures in combat with player and are more than 60 yards away
                 if (player.IsInCombat())
                 {
+                    List<Unit> toVisit = new();
                     foreach (var pair in player.GetCombatManager().GetPvECombatRefs())
                     {
                         Creature unit = pair.Value.GetOther(player).ToCreature();
                         if (unit != null)
                             if (unit.GetMapId() == player.GetMapId() && !unit.IsWithinDistInMap(player, GetVisibilityRange(), false))
-                                VisitNearbyCellsOf(unit, grid_object_update, world_object_update);
+                                toVisit.Add(unit);
                     }
+
+                    foreach (Unit unit in toVisit)
+                        VisitNearbyCellsOf(unit, grid_object_update, world_object_update);
                 }
             }
 
