@@ -44,6 +44,11 @@ namespace Framework.Dynamic
             Value = default;
         }
 
+        public T ValueOr(T otherValue)
+        {
+            return HasValue ? Value : otherValue;
+        }
+
         public static explicit operator T(Optional<T> value)
         {
             return (T)value;

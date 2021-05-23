@@ -287,172 +287,191 @@ namespace Game
             }
         }
 
-        [WorldPacketHandler(ClientOpcodes.GuildBankTransferItemToBank)]
-        void HandleGuildBankTransferItemToBank(GuildBankTransferItem guildBankTransferItem)
+        [WorldPacketHandler(ClientOpcodes.DepositGuildBankItem)]
+        void HandleDepositGuildBankItem(DepositGuildBankItem depositGuildBankItem)
         {
-            if (!GetPlayer().GetGameObjectIfCanInteractWith(guildBankTransferItem.Banker, GameObjectTypes.GuildBank))
+            if (!GetPlayer().GetGameObjectIfCanInteractWith(depositGuildBankItem.Banker, GameObjectTypes.GuildBank))
                 return;
 
             Guild guild = GetPlayer().GetGuild();
             if (guild == null)
                 return;
 
-            byte playerBag = InventorySlots.Bag0;
-
-            if (guildBankTransferItem.HasBag)
-                playerBag = guildBankTransferItem.PlayerBag;
-
-            if (!Player.IsInventoryPos(playerBag, guildBankTransferItem.PlayerSlot))
-                GetPlayer().SendEquipError(InventoryResult.InternalBagError);
+            if (!Player.IsInventoryPos(depositGuildBankItem.ContainerSlot.ValueOr(InventorySlots.Bag0), depositGuildBankItem.ContainerItemSlot))
+                GetPlayer().SendEquipError(InventoryResult.InternalBagError, null);
             else
-                guild.SwapItemsWithInventory(GetPlayer(), false, guildBankTransferItem.BankTab, guildBankTransferItem.BankSlot, playerBag, guildBankTransferItem.PlayerSlot, 0);
+                guild.SwapItemsWithInventory(GetPlayer(), false, depositGuildBankItem.BankTab, depositGuildBankItem.BankSlot,
+                    depositGuildBankItem.ContainerSlot.ValueOr(InventorySlots.Bag0), depositGuildBankItem.ContainerItemSlot, 0);
         }
 
-        [WorldPacketHandler(ClientOpcodes.GuildBankTransferItemToPlayer)]
-        void HandleGuildBankTransferItemToPlayer(GuildBankTransferItem guildBankTransferItem)
+        [WorldPacketHandler(ClientOpcodes.StoreGuildBankItem)]
+        void HandleStoreGuildBankItem(StoreGuildBankItem storeGuildBankItem)
         {
-            if (!GetPlayer().GetGameObjectIfCanInteractWith(guildBankTransferItem.Banker, GameObjectTypes.GuildBank))
+            if (!GetPlayer().GetGameObjectIfCanInteractWith(storeGuildBankItem.Banker, GameObjectTypes.GuildBank))
                 return;
 
             Guild guild = GetPlayer().GetGuild();
             if (guild == null)
                 return;
 
-            byte playerBag = InventorySlots.Bag0;
-
-            if (guildBankTransferItem.HasBag)
-                playerBag = guildBankTransferItem.PlayerBag;
-
-            if (!Player.IsInventoryPos(playerBag, guildBankTransferItem.PlayerSlot))
-                GetPlayer().SendEquipError(InventoryResult.InternalBagError);
+            if (!Player.IsInventoryPos(storeGuildBankItem.ContainerSlot.ValueOr(InventorySlots.Bag0), storeGuildBankItem.ContainerItemSlot))
+                GetPlayer().SendEquipError(InventoryResult.InternalBagError, null);
             else
-                guild.SwapItemsWithInventory(GetPlayer(), true, guildBankTransferItem.BankTab, guildBankTransferItem.BankSlot, playerBag, guildBankTransferItem.PlayerSlot, 0);
+                guild.SwapItemsWithInventory(GetPlayer(), true, storeGuildBankItem.BankTab, storeGuildBankItem.BankSlot,
+                    storeGuildBankItem.ContainerSlot.ValueOr(InventorySlots.Bag0), storeGuildBankItem.ContainerItemSlot, 0);
         }
 
-        [WorldPacketHandler(ClientOpcodes.GuildBankMoveItemInBank)]
-        void HandleGuildBankMoveItemInBank(GuildBankMoveItemInBank guildBankMoveItemInBank)
+        [WorldPacketHandler(ClientOpcodes.SwapItemWithGuildBankItem)]
+        void HandleSwapItemWithGuildBankItem(SwapItemWithGuildBankItem swapItemWithGuildBankItem)
         {
-            if (!GetPlayer().GetGameObjectIfCanInteractWith(guildBankMoveItemInBank.Banker, GameObjectTypes.GuildBank))
+            if (!GetPlayer().GetGameObjectIfCanInteractWith(swapItemWithGuildBankItem.Banker, GameObjectTypes.GuildBank))
                 return;
 
             Guild guild = GetPlayer().GetGuild();
             if (guild == null)
                 return;
 
-            guild.SwapItems(GetPlayer(), guildBankMoveItemInBank.BankTab, guildBankMoveItemInBank.BankSlot, guildBankMoveItemInBank.NewBankTab, guildBankMoveItemInBank.NewBankSlot, 0);
-        }
-
-        [WorldPacketHandler(ClientOpcodes.GuildBankCombineItemStackWithBank)]
-        void HandleGuildBankCombineItemStackWithBank(GuildBankCombineItemStack guildBankCombineItemStack)
-        {
-            if (!GetPlayer().GetGameObjectIfCanInteractWith(guildBankCombineItemStack.Banker, GameObjectTypes.GuildBank))
-                return;
-
-            Guild guild = GetPlayer().GetGuild();
-            if (guild == null)
-                return;
-
-            byte playerBag = InventorySlots.Bag0;
-
-            if (guildBankCombineItemStack.HasBag)
-                playerBag = guildBankCombineItemStack.PlayerBag;
-
-            if (!Player.IsInventoryPos(playerBag, guildBankCombineItemStack.PlayerSlot))
-                GetPlayer().SendEquipError(InventoryResult.InternalBagError);
+            if (!Player.IsInventoryPos(swapItemWithGuildBankItem.ContainerSlot.ValueOr(InventorySlots.Bag0), swapItemWithGuildBankItem.ContainerItemSlot))
+                GetPlayer().SendEquipError(InventoryResult.InternalBagError, null);
             else
-                guild.SwapItemsWithInventory(GetPlayer(), false, guildBankCombineItemStack.BankTab, guildBankCombineItemStack.BankSlot, playerBag, guildBankCombineItemStack.PlayerSlot, guildBankCombineItemStack.StackCount);
+                guild.SwapItemsWithInventory(GetPlayer(), false, swapItemWithGuildBankItem.BankTab, swapItemWithGuildBankItem.BankSlot,
+                    swapItemWithGuildBankItem.ContainerSlot.ValueOr(InventorySlots.Bag0), swapItemWithGuildBankItem.ContainerItemSlot, 0);
         }
 
-        [WorldPacketHandler(ClientOpcodes.GuildBankCombineItemStackWithPlayer)]
-        void HandleGuildBankCombineItemStackWithPlayer(GuildBankCombineItemStack guildBankCombineItemStack)
+        [WorldPacketHandler(ClientOpcodes.SwapGuildBankItemWithGuildBankItem)]
+        void HandleSwapGuildBankItemWithGuildBankItem(SwapGuildBankItemWithGuildBankItem swapGuildBankItemWithGuildBankItem)
         {
-            if (!GetPlayer().GetGameObjectIfCanInteractWith(guildBankCombineItemStack.Banker, GameObjectTypes.GuildBank))
+            if (!GetPlayer().GetGameObjectIfCanInteractWith(swapGuildBankItemWithGuildBankItem.Banker, GameObjectTypes.GuildBank))
                 return;
 
             Guild guild = GetPlayer().GetGuild();
             if (guild == null)
                 return;
 
-            byte playerBag = InventorySlots.Bag0;
+            guild.SwapItems(GetPlayer(), swapGuildBankItemWithGuildBankItem.BankTab[0], swapGuildBankItemWithGuildBankItem.BankSlot[0],
+                swapGuildBankItemWithGuildBankItem.BankTab[1], swapGuildBankItemWithGuildBankItem.BankSlot[1], 0);
+        }
 
-            if (guildBankCombineItemStack.HasBag)
-                playerBag = guildBankCombineItemStack.PlayerBag;
+        [WorldPacketHandler(ClientOpcodes.MoveGuildBankItem)]
+        void HandleMoveGuildBankItem(MoveGuildBankItem moveGuildBankItem)
+        {
+            if (!GetPlayer().GetGameObjectIfCanInteractWith(moveGuildBankItem.Banker, GameObjectTypes.GuildBank))
+                return;
 
-            if (!Player.IsInventoryPos(playerBag, guildBankCombineItemStack.PlayerSlot))
-                GetPlayer().SendEquipError(InventoryResult.InternalBagError);
+            Guild guild = GetPlayer().GetGuild();
+            if (guild == null)
+                return;
+
+            guild.SwapItems(GetPlayer(), moveGuildBankItem.BankTab, moveGuildBankItem.BankSlot, moveGuildBankItem.BankTab1, moveGuildBankItem.BankSlot1, 0);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.MergeItemWithGuildBankItem)]
+        void HandleMergeItemWithGuildBankItem(MergeItemWithGuildBankItem mergeItemWithGuildBankItem)
+        {
+            if (!GetPlayer().GetGameObjectIfCanInteractWith(mergeItemWithGuildBankItem.Banker, GameObjectTypes.GuildBank))
+                return;
+
+            Guild guild = GetPlayer().GetGuild();
+            if (guild == null)
+                return;
+
+            if (!Player.IsInventoryPos(mergeItemWithGuildBankItem.ContainerSlot.ValueOr(InventorySlots.Bag0), mergeItemWithGuildBankItem.ContainerItemSlot))
+                GetPlayer().SendEquipError(InventoryResult.InternalBagError, null);
             else
-                guild.SwapItemsWithInventory(GetPlayer(), true, guildBankCombineItemStack.BankTab, guildBankCombineItemStack.BankSlot, playerBag, guildBankCombineItemStack.PlayerSlot, guildBankCombineItemStack.StackCount);
+                guild.SwapItemsWithInventory(GetPlayer(), false, mergeItemWithGuildBankItem.BankTab, mergeItemWithGuildBankItem.BankSlot,
+                    mergeItemWithGuildBankItem.ContainerSlot.ValueOr(InventorySlots.Bag0), mergeItemWithGuildBankItem.ContainerItemSlot, mergeItemWithGuildBankItem.StackCount);
         }
 
-        [WorldPacketHandler(ClientOpcodes.GuildBankTransferItemStackToBank)]
-        void HandleGuildBankTransferItemStackToBank(GuildBankTransferItemStack guildBankTransferItemStack)
+        [WorldPacketHandler(ClientOpcodes.SplitItemToGuildBank)]
+        void HandleSplitItemToGuildBank(SplitItemToGuildBank splitItemToGuildBank)
         {
-            if (!GetPlayer().GetGameObjectIfCanInteractWith(guildBankTransferItemStack.Banker, GameObjectTypes.GuildBank))
+            if (!GetPlayer().GetGameObjectIfCanInteractWith(splitItemToGuildBank.Banker, GameObjectTypes.GuildBank))
                 return;
 
             Guild guild = GetPlayer().GetGuild();
             if (guild == null)
                 return;
 
-            byte playerBag = InventorySlots.Bag0;
-
-            if (guildBankTransferItemStack.HasBag)
-                playerBag = guildBankTransferItemStack.PlayerBag;
-
-            if (!Player.IsInventoryPos(playerBag, guildBankTransferItemStack.PlayerSlot))
-                GetPlayer().SendEquipError(InventoryResult.InternalBagError);
+            if (!Player.IsInventoryPos(splitItemToGuildBank.ContainerSlot.ValueOr(InventorySlots.Bag0), splitItemToGuildBank.ContainerItemSlot))
+                GetPlayer().SendEquipError(InventoryResult.InternalBagError, null);
             else
-                guild.SwapItemsWithInventory(GetPlayer(), false, guildBankTransferItemStack.BankTab, guildBankTransferItemStack.BankSlot, playerBag, guildBankTransferItemStack.PlayerSlot, guildBankTransferItemStack.StackCount);
+                guild.SwapItemsWithInventory(GetPlayer(), false, splitItemToGuildBank.BankTab, splitItemToGuildBank.BankSlot,
+                    splitItemToGuildBank.ContainerSlot.ValueOr(InventorySlots.Bag0), splitItemToGuildBank.ContainerItemSlot, splitItemToGuildBank.StackCount);
         }
 
-        [WorldPacketHandler(ClientOpcodes.GuildBankTransferItemStackToPlayer)]
-        void HandleGuildBankTransferItemStackToPlayer(GuildBankTransferItemStack guildBankTransferItemStack)
+        [WorldPacketHandler(ClientOpcodes.MergeGuildBankItemWithItem)]
+        void HandleMergeGuildBankItemWithItem(MergeGuildBankItemWithItem mergeGuildBankItemWithItem)
         {
-            if (!GetPlayer().GetGameObjectIfCanInteractWith(guildBankTransferItemStack.Banker, GameObjectTypes.GuildBank))
+            if (!GetPlayer().GetGameObjectIfCanInteractWith(mergeGuildBankItemWithItem.Banker, GameObjectTypes.GuildBank))
                 return;
 
             Guild guild = GetPlayer().GetGuild();
             if (guild == null)
                 return;
 
-            byte playerBag = InventorySlots.Bag0;
-
-            if (guildBankTransferItemStack.HasBag)
-                playerBag = guildBankTransferItemStack.PlayerBag;
-
-            if (!Player.IsInventoryPos(playerBag, guildBankTransferItemStack.PlayerSlot))
-                GetPlayer().SendEquipError(InventoryResult.InternalBagError);
+            if (!Player.IsInventoryPos(mergeGuildBankItemWithItem.ContainerSlot.ValueOr(InventorySlots.Bag0), mergeGuildBankItemWithItem.ContainerItemSlot))
+                GetPlayer().SendEquipError(InventoryResult.InternalBagError, null);
             else
-                guild.SwapItemsWithInventory(GetPlayer(), true, guildBankTransferItemStack.BankTab, guildBankTransferItemStack.BankSlot, playerBag, guildBankTransferItemStack.PlayerSlot, guildBankTransferItemStack.StackCount);
+                guild.SwapItemsWithInventory(GetPlayer(), true, mergeGuildBankItemWithItem.BankTab, mergeGuildBankItemWithItem.BankSlot,
+                    mergeGuildBankItemWithItem.ContainerSlot.ValueOr(InventorySlots.Bag0), mergeGuildBankItemWithItem.ContainerItemSlot, mergeGuildBankItemWithItem.StackCount);
         }
 
-        [WorldPacketHandler(ClientOpcodes.GuildBankTransferItemToPlayerAutostore)]
-        void HandleGuildBankTransferItemToPlayerAutoStore(GuildBankTransferItemAutoStore packet)
+        [WorldPacketHandler(ClientOpcodes.SplitGuildBankItemToInventory)]
+        void HandleSplitGuildBankItemToInventory(SplitGuildBankItemToInventory splitGuildBankItemToInventory)
         {
-            if (!GetPlayer().GetGameObjectIfCanInteractWith(packet.Banker, GameObjectTypes.GuildBank))
+            if (!GetPlayer().GetGameObjectIfCanInteractWith(splitGuildBankItemToInventory.Banker, GameObjectTypes.GuildBank))
                 return;
 
             Guild guild = GetPlayer().GetGuild();
             if (guild == null)
                 return;
 
-            if (GetPlayer().GetInventorySlotCount() == 0)
-                GetPlayer().SendEquipError(InventoryResult.BagFull);
+            if (!Player.IsInventoryPos(splitGuildBankItemToInventory.ContainerSlot.ValueOr(InventorySlots.Bag0), splitGuildBankItemToInventory.ContainerItemSlot))
+                GetPlayer().SendEquipError(InventoryResult.InternalBagError, null);
             else
-                guild.SwapItemsWithInventory(GetPlayer(), true, packet.BankTab, packet.BankSlot, 0, 0, 0);
+                guild.SwapItemsWithInventory(GetPlayer(), true, splitGuildBankItemToInventory.BankTab, splitGuildBankItemToInventory.BankSlot,
+                    splitGuildBankItemToInventory.ContainerSlot.ValueOr(InventorySlots.Bag0), splitGuildBankItemToInventory.ContainerItemSlot, splitGuildBankItemToInventory.StackCount);
         }
 
-        [WorldPacketHandler(ClientOpcodes.GuildBankCombineItemStackInBank)]
-        void HandleGuildBankCombineItemStackInBank(GuildBankCombineItemStackInBank packet)
+        [WorldPacketHandler(ClientOpcodes.AutoStoreGuildBankItem)]
+        void HandleAutoStoreGuildBankItem(AutoStoreGuildBankItem autoStoreGuildBankItem)
         {
-            if (!GetPlayer().GetGameObjectIfCanInteractWith(packet.Banker, GameObjectTypes.GuildBank))
+            if (!GetPlayer().GetGameObjectIfCanInteractWith(autoStoreGuildBankItem.Banker, GameObjectTypes.GuildBank))
                 return;
 
             Guild guild = GetPlayer().GetGuild();
             if (guild == null)
                 return;
 
-            guild.SwapItems(GetPlayer(), packet.BankTab, packet.BankSlot, packet.NewBankTab, packet.NewBankSlot, packet.StackCount);
+            guild.SwapItemsWithInventory(GetPlayer(), true, autoStoreGuildBankItem.BankTab, autoStoreGuildBankItem.BankSlot, InventorySlots.Bag0, ItemConst.NullSlot, 0);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.MergeGuildBankItemWithGuildBankItem)]
+        void HandleMergeGuildBankItemWithGuildBankItem(MergeGuildBankItemWithGuildBankItem mergeGuildBankItemWithGuildBankItem)
+        {
+            if (!GetPlayer().GetGameObjectIfCanInteractWith(mergeGuildBankItemWithGuildBankItem.Banker, GameObjectTypes.GuildBank))
+                return;
+
+            Guild guild = GetPlayer().GetGuild();
+            if (guild == null)
+                return;
+
+            guild.SwapItems(GetPlayer(), mergeGuildBankItemWithGuildBankItem.BankTab, mergeGuildBankItemWithGuildBankItem.BankSlot,
+                mergeGuildBankItemWithGuildBankItem.BankTab1, mergeGuildBankItemWithGuildBankItem.BankSlot1, mergeGuildBankItemWithGuildBankItem.StackCount);
+        }
+
+        [WorldPacketHandler(ClientOpcodes.SplitGuildBankItem)]
+        void HandleSplitGuildBankItem(SplitGuildBankItem splitGuildBankItem)
+        {
+            if (!GetPlayer().GetGameObjectIfCanInteractWith(splitGuildBankItem.Banker, GameObjectTypes.GuildBank))
+                return;
+
+            Guild guild = GetPlayer().GetGuild();
+            if (guild == null)
+                return;
+
+            guild.SwapItems(GetPlayer(), splitGuildBankItem.BankTab, splitGuildBankItem.BankSlot,
+                splitGuildBankItem.BankTab1, splitGuildBankItem.BankSlot1, splitGuildBankItem.StackCount);
         }
 
         [WorldPacketHandler(ClientOpcodes.GuildBankBuyTab)]
