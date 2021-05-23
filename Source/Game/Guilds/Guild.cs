@@ -2047,12 +2047,16 @@ namespace Game.Guilds
             else // 6. No split
             {
                 // 6.1. Try to merge items in destination (pDest.GetItem() == NULL)
-                if (!_DoItemsMove(pSrc, pDest, false)) // Item could not be merged
+                InventoryResult mergeAttemptResult = _DoItemsMove(pSrc, pDest, false);
+                if (mergeAttemptResult != InventoryResult.Ok) // Item could not be merged
                 {
                     // 6.2. Try to swap items
                     // 6.2.1. Initialize destination item
                     if (!pDest.InitItem())
+                    {
+                        pSrc.SendEquipError(mergeAttemptResult, pSrc.GetItem(false));
                         return;
+                    }
 
                     // 6.2.2. Check rights to store item in source (opposite direction)
                     if (!pSrc.HasStoreRights(pDest))
@@ -2069,20 +2073,24 @@ namespace Game.Guilds
             _SendBankContentUpdate(pSrc, pDest);
         }
 
-        bool _DoItemsMove(MoveItemData pSrc, MoveItemData pDest, bool sendError, uint splitedAmount = 0)
+        InventoryResult _DoItemsMove(MoveItemData pSrc, MoveItemData pDest, bool sendError, uint splitedAmount = 0)
         {
             Item pDestItem = pDest.GetItem();
             bool swap = (pDestItem != null);
 
             Item pSrcItem = pSrc.GetItem(splitedAmount != 0);
             // 1. Can store source item in destination
-            if (!pDest.CanStore(pSrcItem, swap, sendError))
-                return false;
+            InventoryResult destResult = pDest.CanStore(pSrcItem, swap, sendError);
+            if (destResult != InventoryResult.Ok)
+                return destResult;
 
             // 2. Can store destination item in source
             if (swap)
-                if (!pSrc.CanStore(pDestItem, true, true))
-                    return false;
+            {
+                InventoryResult srcResult = pSrc.CanStore(pDestItem, true, true);
+                if (srcResult != InventoryResult.Ok)
+                    return srcResult;
+            }
 
             // GM LOG (@todo move to scripts)
             pDest.LogAction(pSrc);
@@ -2110,7 +2118,7 @@ namespace Game.Guilds
                 pSrc.StoreItem(trans, pDestItem);
 
             DB.Characters.CommitTransaction(trans);
-            return true;
+            return InventoryResult.Ok;
         }
 
         void _SendBankContentUpdate(MoveItemData pSrc, MoveItemData pDest)
@@ -3502,13 +3510,13 @@ namespace Game.Guilds
                 return true;
             }
 
-            public bool CanStore(Item pItem, bool swap, bool sendError)
+            public InventoryResult CanStore(Item pItem, bool swap, bool sendError)
             {
                 m_vec.Clear();
                 InventoryResult msg = CanStore(pItem, swap);
                 if (sendError && msg != InventoryResult.Ok)
-                    m_pPlayer.SendEquipError(msg, pItem);
-                return (msg == InventoryResult.Ok);
+                    SendEquipError(msg, pItem);
+                return msg;
             }
 
             public bool CloneItem(uint count)
@@ -3517,7 +3525,7 @@ namespace Game.Guilds
                 m_pClonedItem = m_pItem.CloneItem(count);
                 if (m_pClonedItem == null)
                 {
-                    m_pPlayer.SendEquipError(InventoryResult.ItemNotFound, m_pItem);
+                    SendEquipError(InventoryResult.ItemNotFound, m_pItem);
                     return false;
                 }
                 return true;
@@ -3538,6 +3546,11 @@ namespace Game.Guilds
                     ids.Add((byte)item.pos);
             }
 
+            public void SendEquipError(InventoryResult result, Item item)
+            {
+                m_pPlayer.SendEquipError(result, item);
+            }
+            
             public abstract bool IsBank();
             // Initializes item. Returns true, if item exists, false otherwise.
             public abstract bool InitItem();
@@ -3583,13 +3596,13 @@ namespace Game.Guilds
                     // Anti-WPE protection. Do not move non-empty bags to bank.
                     if (m_pItem.IsNotEmptyBag())
                     {
-                        m_pPlayer.SendEquipError(InventoryResult.DestroyNonemptyBag, m_pItem);
+                        SendEquipError(InventoryResult.DestroyNonemptyBag, m_pItem);
                         m_pItem = null;
                     }
                     // Bound items cannot be put into bank.
                     else if (!m_pItem.CanBeTraded())
                     {
-                        m_pPlayer.SendEquipError(InventoryResult.CantSwap, m_pItem);
+                        SendEquipError(InventoryResult.CantSwap, m_pItem);
                         m_pItem = null;
                     }
                 }
