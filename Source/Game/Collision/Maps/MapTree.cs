@@ -98,9 +98,10 @@ namespace Game.Collision
         {
             foreach (var id in iLoadedSpawns)
             {
-                iTreeValues[id.Key].SetUnloaded();
                 for (uint refCount = 0; refCount < id.Key; ++refCount)
                     vm.ReleaseModelInstance(iTreeValues[id.Key].name);
+
+                iTreeValues[id.Key].SetUnloaded();
             }
             iLoadedSpawns.Clear();
             iLoadedTiles.Clear();
