@@ -1076,145 +1076,265 @@ namespace Game.Networking.Packets
         public bool FullUpdate;
     }
 
-    public class GuildBankTransferItem : ClientPacket
+    class DepositGuildBankItem : ClientPacket
     {
-        public GuildBankTransferItem(WorldPacket packet) : base(packet) { }
+        public DepositGuildBankItem(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Banker = _worldPacket.ReadPackedGuid();
             BankTab = _worldPacket.ReadUInt8();
-            BankSlot = _worldPacket.ReadUInt8();
-            PlayerSlot = _worldPacket.ReadUInt8();
+            BankSlot = _worldPacket.ReadUInt8(); ;
+            ContainerItemSlot = _worldPacket.ReadUInt8();
 
-            HasBag = _worldPacket.HasBit();
-            _worldPacket.ResetBitPos();
-
-            if (HasBag)
-                PlayerBag = _worldPacket.ReadUInt8();
+            if (_worldPacket.HasBit())
+                ContainerSlot.Set(_worldPacket.ReadUInt8());
         }
 
         public ObjectGuid Banker;
         public byte BankTab;
         public byte BankSlot;
-        public byte PlayerSlot;
-        public bool HasBag;
-        public byte PlayerBag;
+        public Optional<byte> ContainerSlot;
+        public byte ContainerItemSlot;
     }
 
-    class GuildBankMoveItemInBank : ClientPacket
+    class StoreGuildBankItem : ClientPacket
     {
-        public GuildBankMoveItemInBank(WorldPacket packet) : base(packet) { }
+        public StoreGuildBankItem(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Banker = _worldPacket.ReadPackedGuid();
             BankTab = _worldPacket.ReadUInt8();
-            BankSlot = _worldPacket.ReadUInt8();
-            NewBankTab = _worldPacket.ReadUInt8();
-            NewBankSlot = _worldPacket.ReadUInt8();
+            BankSlot = _worldPacket.ReadUInt8(); ;
+            ContainerItemSlot = _worldPacket.ReadUInt8();
+
+            if (_worldPacket.HasBit())
+                ContainerSlot.Set(_worldPacket.ReadUInt8());
         }
 
         public ObjectGuid Banker;
         public byte BankTab;
         public byte BankSlot;
-        public byte NewBankTab;
-        public byte NewBankSlot;
+        public Optional<byte> ContainerSlot;
+        public byte ContainerItemSlot;
     }
-    class GuildBankCombineItemStack : ClientPacket
+
+    class SwapItemWithGuildBankItem : ClientPacket
     {
-        public GuildBankCombineItemStack(WorldPacket packet) : base(packet) { }
+        public SwapItemWithGuildBankItem(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Banker = _worldPacket.ReadPackedGuid();
+            BankTab = _worldPacket.ReadUInt8();
+            BankSlot = _worldPacket.ReadUInt8(); ;
+            ContainerItemSlot = _worldPacket.ReadUInt8();
+
+            if (_worldPacket.HasBit())
+                ContainerSlot.Set(_worldPacket.ReadUInt8());
+        }
+
+        public ObjectGuid Banker;
+        public byte BankTab;
+        public byte BankSlot;
+        public Optional<byte> ContainerSlot;
+        public byte ContainerItemSlot;
+    }
+
+    class SwapGuildBankItemWithGuildBankItem : ClientPacket
+    {
+        public SwapGuildBankItemWithGuildBankItem(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Banker = _worldPacket.ReadPackedGuid();
+            BankTab[0] = _worldPacket.ReadUInt8();
+            BankSlot[0] = _worldPacket.ReadUInt8();
+            BankTab[1] = _worldPacket.ReadUInt8();
+            BankSlot[1] = _worldPacket.ReadUInt8();
+        }
+
+        public ObjectGuid Banker;
+        public byte[] BankTab = new byte[2];
+        public byte[] BankSlot = new byte[2];
+    }
+
+    class MoveGuildBankItem : ClientPacket
+    {
+        public MoveGuildBankItem(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
             Banker = _worldPacket.ReadPackedGuid();
             BankTab = _worldPacket.ReadUInt8();
             BankSlot = _worldPacket.ReadUInt8();
-            PlayerSlot = _worldPacket.ReadUInt8();
+            BankTab1 = _worldPacket.ReadUInt8();
+            BankSlot1 = _worldPacket.ReadUInt8();
+        }
+
+        public ObjectGuid Banker;
+        public byte BankTab;
+        public byte BankSlot;
+        public byte BankTab1;
+        public byte BankSlot1;
+    }
+
+    class MergeItemWithGuildBankItem : ClientPacket
+    {
+        public MergeItemWithGuildBankItem(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Banker = _worldPacket.ReadPackedGuid();
+            BankTab = _worldPacket.ReadUInt8();
+            BankSlot = _worldPacket.ReadUInt8(); ;
+            ContainerItemSlot = _worldPacket.ReadUInt8();
             StackCount = _worldPacket.ReadUInt32();
 
-            HasBag = _worldPacket.HasBit();
-            _worldPacket.ResetBitPos();
-
-            if (HasBag)
-                PlayerBag = _worldPacket.ReadUInt8();
+            if (_worldPacket.HasBit())
+                ContainerSlot.Set(_worldPacket.ReadUInt8());
         }
 
         public ObjectGuid Banker;
         public byte BankTab;
         public byte BankSlot;
-        public byte PlayerSlot;
-        public uint StackCount;
-        public bool HasBag;
-        public byte PlayerBag;
-    }
-
-    class GuildBankTransferItemStack : ClientPacket
-    {
-        public GuildBankTransferItemStack(WorldPacket packet) : base(packet) { }
-
-        public override void Read()
-        {
-            Banker = _worldPacket.ReadPackedGuid();
-            BankTab = _worldPacket.ReadUInt8();
-            BankSlot = _worldPacket.ReadUInt8();
-            PlayerSlot = _worldPacket.ReadUInt8();
-            StackCount = _worldPacket.ReadUInt32();
-
-            HasBag = _worldPacket.HasBit();
-            _worldPacket.ResetBitPos();
-
-            if (HasBag)
-                PlayerBag = _worldPacket.ReadUInt8();
-        }
-
-        public ObjectGuid Banker;
-        public byte BankTab;
-        public byte BankSlot;
-        public byte PlayerSlot;
-        public uint StackCount;
-        public bool HasBag;
-        public byte PlayerBag;
-    }
-
-    class GuildBankTransferItemAutoStore : ClientPacket
-    {
-        public GuildBankTransferItemAutoStore(WorldPacket packet) : base(packet) { }
-
-        public override void Read()
-        {
-            Banker = _worldPacket.ReadPackedGuid();
-            BankTab = _worldPacket.ReadUInt8();
-            BankSlot = _worldPacket.ReadUInt8();
-        }
-
-        public ObjectGuid Banker;
-        public byte BankTab;
-        public byte BankSlot;
-    }
-
-    class GuildBankCombineItemStackInBank : ClientPacket
-    {
-        public GuildBankCombineItemStackInBank(WorldPacket packet) : base(packet) { }
-
-        public override void Read()
-        {
-            Banker = _worldPacket.ReadPackedGuid();
-            BankTab = _worldPacket.ReadUInt8();
-            BankSlot = _worldPacket.ReadUInt8();
-            NewBankTab = _worldPacket.ReadUInt8();
-            NewBankSlot = _worldPacket.ReadUInt8();
-            StackCount = _worldPacket.ReadUInt32();
-        }
-
-        public ObjectGuid Banker;
-        public byte BankTab;
-        public byte BankSlot;
-        public byte NewBankTab;
-        public byte NewBankSlot;
+        public Optional<byte> ContainerSlot;
+        public byte ContainerItemSlot;
         public uint StackCount;
     }
 
+    class SplitItemToGuildBank : ClientPacket
+    {
+        public SplitItemToGuildBank(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Banker = _worldPacket.ReadPackedGuid();
+            BankTab = _worldPacket.ReadUInt8();
+            BankSlot = _worldPacket.ReadUInt8(); ;
+            ContainerItemSlot = _worldPacket.ReadUInt8();
+            StackCount = _worldPacket.ReadUInt32();
+
+            if (_worldPacket.HasBit())
+                ContainerSlot.Set(_worldPacket.ReadUInt8());
+        }
+
+        public ObjectGuid Banker;
+        public byte BankTab;
+        public byte BankSlot;
+        public Optional<byte> ContainerSlot;
+        public byte ContainerItemSlot;
+        public uint StackCount;
+    }
+
+    class MergeGuildBankItemWithItem : ClientPacket
+    {
+        public MergeGuildBankItemWithItem(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Banker = _worldPacket.ReadPackedGuid();
+            BankTab = _worldPacket.ReadUInt8();
+            BankSlot = _worldPacket.ReadUInt8(); ;
+            ContainerItemSlot = _worldPacket.ReadUInt8();
+            StackCount = _worldPacket.ReadUInt32();
+
+            if (_worldPacket.HasBit())
+                ContainerSlot.Set(_worldPacket.ReadUInt8());
+        }
+
+        public ObjectGuid Banker;
+        public byte BankTab;
+        public byte BankSlot;
+        public Optional<byte> ContainerSlot;
+        public byte ContainerItemSlot;
+        public uint StackCount;
+    }
+
+    class SplitGuildBankItemToInventory : ClientPacket
+    {
+        public SplitGuildBankItemToInventory(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Banker = _worldPacket.ReadPackedGuid();
+            BankTab = _worldPacket.ReadUInt8();
+            BankSlot = _worldPacket.ReadUInt8(); ;
+            ContainerItemSlot = _worldPacket.ReadUInt8();
+            StackCount = _worldPacket.ReadUInt32();
+
+            if (_worldPacket.HasBit())
+                ContainerSlot.Set(_worldPacket.ReadUInt8());
+        }
+
+        public ObjectGuid Banker;
+        public byte BankTab;
+        public byte BankSlot;
+        public Optional<byte> ContainerSlot;
+        public byte ContainerItemSlot;
+        public uint StackCount;
+    }
+
+    class AutoStoreGuildBankItem : ClientPacket
+    {
+        public AutoStoreGuildBankItem(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Banker = _worldPacket.ReadPackedGuid();
+            BankTab = _worldPacket.ReadUInt8();
+            BankSlot = _worldPacket.ReadUInt8();
+        }
+
+        public ObjectGuid Banker;
+        public byte BankTab;
+        public byte BankSlot;
+    }
+
+    class MergeGuildBankItemWithGuildBankItem : ClientPacket
+    {
+        public MergeGuildBankItemWithGuildBankItem(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Banker = _worldPacket.ReadPackedGuid();
+            BankTab = _worldPacket.ReadUInt8();
+            BankSlot = _worldPacket.ReadUInt8();
+            BankTab1 = _worldPacket.ReadUInt8();
+            BankSlot1 = _worldPacket.ReadUInt8();
+            StackCount = _worldPacket.ReadUInt32();
+        }
+
+        public ObjectGuid Banker;
+        public byte BankTab;
+        public byte BankSlot;
+        public byte BankTab1;
+        public byte BankSlot1;
+        public uint StackCount;
+    }
+
+    class SplitGuildBankItem : ClientPacket
+    {
+        public SplitGuildBankItem(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            Banker = _worldPacket.ReadPackedGuid();
+            BankTab = _worldPacket.ReadUInt8();
+            BankSlot = _worldPacket.ReadUInt8();
+            BankTab1 = _worldPacket.ReadUInt8();
+            BankSlot1 = _worldPacket.ReadUInt8();
+            StackCount = _worldPacket.ReadUInt32();
+        }
+
+        public ObjectGuid Banker;
+        public byte BankTab;
+        public byte BankSlot;
+        public byte BankTab1;
+        public byte BankSlot1;
+        public uint StackCount;
+    }
     public class GuildBankLogQuery : ClientPacket
     {
         public GuildBankLogQuery(WorldPacket packet) : base(packet) { }
