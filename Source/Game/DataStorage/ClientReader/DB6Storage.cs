@@ -305,7 +305,7 @@ namespace Game.DataStorage
                                     locale = 0;
                                     if (!locStr.HasString(locale))
                                     {
-                                        buffer.WriteUInt16(0);
+                                        buffer.WriteUInt8(0);
                                         break;
                                     }
                                 }
