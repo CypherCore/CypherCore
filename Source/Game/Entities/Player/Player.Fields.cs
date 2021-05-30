@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -60,7 +60,7 @@ namespace Game.Entities
         TradeData m_trade;
 
         //PVP
-        BgBattlegroundQueueID_Rec[] m_bgBattlegroundQueueID = new BgBattlegroundQueueID_Rec[SharedConst.MaxPlayerBGQueues]; 
+        BgBattlegroundQueueID_Rec[] m_bgBattlegroundQueueID = new BgBattlegroundQueueID_Rec[SharedConst.MaxPlayerBGQueues];
         BGData m_bgData;
         bool m_IsBGRandomWinner;
         public PvPInfo pvpInfo;
@@ -143,7 +143,7 @@ namespace Game.Entities
 
         RestMgr _restMgr;
 
-        //Combat 
+        //Combat
         int[] baseRatingValue = new int[(int)CombatRating.Max];
         float[] m_auraBaseFlatMod = new float[(int)BaseModGroup.End];
         float[] m_auraBasePctMod = new float[(int)BaseModGroup.End];
@@ -165,7 +165,7 @@ namespace Game.Entities
         List<uint> m_monthlyquests = new();
         MultiMap<uint, uint> m_seasonalquests = new();
         Dictionary<uint, QuestStatusData> m_QuestStatus = new();
-        MultiMap<Tuple<QuestObjectiveType, int>, QuestObjectiveStatusData> m_questObjectiveStatus = new();
+        MultiMap<(QuestObjectiveType Type, int ObjectID), QuestObjectiveStatusData> m_questObjectiveStatus = new();
         Dictionary<uint, QuestSaveType> m_QuestStatusSave = new();
         List<uint> m_DFQuests = new();
         List<uint> m_RewardedQuests = new();
@@ -630,7 +630,7 @@ namespace Game.Entities
 
     struct QuestObjectiveStatusData
     {
-        public KeyValuePair<uint, QuestStatusData> QuestStatusPair;
+        public (uint QuestID, QuestStatusData Status) QuestStatusPair;
         public QuestObjective Objective;
     }
 }

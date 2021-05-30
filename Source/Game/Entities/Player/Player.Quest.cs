@@ -1,6 +1,6 @@
 ﻿/*
  * Copyright (C) 2012-2020 CypherCore <http://github.com/CypherCore>
- * 
+ *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
@@ -729,22 +729,21 @@ namespace Game.Entities
 
         public void AddQuest(Quest quest, WorldObject questGiver)
         {
-            ushort log_slot = FindQuestSlot(0);
-
-            if (log_slot >= SharedConst.MaxQuestLogSize) // Player does not have any free slot in the quest log
+            ushort logSlot = FindQuestSlot(0);
+            if (logSlot >= SharedConst.MaxQuestLogSize) // Player does not have any free slot in the quest log
                 return;
 
-            uint quest_id = quest.Id;
+            uint questId = quest.Id;
 
             // if not exist then created with set uState == NEW and rewarded=false
-            if (!m_QuestStatus.ContainsKey(quest_id))
-                m_QuestStatus[quest_id] = new QuestStatusData();
+            if (!m_QuestStatus.ContainsKey(questId))
+                m_QuestStatus[questId] = new QuestStatusData();
 
-            QuestStatusData questStatusData = m_QuestStatus.LookupByKey(quest_id);
+            QuestStatusData questStatusData = m_QuestStatus.LookupByKey(questId);
             QuestStatus oldStatus = questStatusData.Status;
 
             // check for repeatable quests status reset
-            questStatusData.Slot = log_slot;
+            questStatusData.Slot = logSlot;
             questStatusData.Status = QuestStatus.Incomplete;
             questStatusData.Explored = false;
 
@@ -753,7 +752,7 @@ namespace Game.Entities
 
             foreach (QuestObjective obj in quest.Objectives)
             {
-                m_questObjectiveStatus.Add(Tuple.Create(obj.Type, obj.ObjectID), new QuestObjectiveStatusData() { QuestStatusPair = KeyValuePair.Create(quest_id, questStatusData), Objective = obj });
+                m_questObjectiveStatus.Add((obj.Type, obj.ObjectID), new QuestObjectiveStatusData() { QuestStatusPair = (questId, questStatusData), Objective = obj });
                 switch (obj.Type)
                 {
                     case QuestObjectiveType.MinReputation:
@@ -776,9 +775,9 @@ namespace Game.Entities
             {
                 // shared timed quest
                 if (questGiver != null && questGiver.IsTypeId(TypeId.Player))
-                    limittime = questGiver.ToPlayer().m_QuestStatus[quest_id].Timer / Time.InMilliseconds;
+                    limittime = questGiver.ToPlayer().m_QuestStatus[questId].Timer / Time.InMilliseconds;
 
-                AddTimedQuest(quest_id);
+                AddTimedQuest(questId);
                 questStatusData.Timer = limittime * Time.InMilliseconds;
                 endTime = GameTime.GetGameTime() + limittime;
             }
@@ -805,17 +804,17 @@ namespace Game.Entities
                 caster.CastSpell(this, spellInfo.Id, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetCastDifficulty(spellInfo.Difficulty));
             }
 
-            SetQuestSlot(log_slot, quest_id);
-            SetQuestSlotEndTime(log_slot, endTime);
-            SetQuestSlotAcceptTime(log_slot, GameTime.GetGameTime());
+            SetQuestSlot(logSlot, questId);
+            SetQuestSlotEndTime(logSlot, endTime);
+            SetQuestSlotAcceptTime(logSlot, GameTime.GetGameTime());
 
-            m_QuestStatusSave[quest_id] = QuestSaveType.Default;
+            m_QuestStatusSave[questId] = QuestSaveType.Default;
 
-            StartCriteriaTimer(CriteriaTimedTypes.Quest, quest_id);
+            StartCriteriaTimer(CriteriaTimedTypes.Quest, questId);
 
-            SendQuestUpdate(quest_id);
+            SendQuestUpdate(questId);
 
-            Global.ScriptMgr.OnQuestStatusChange(this, quest_id);
+            Global.ScriptMgr.OnQuestStatusChange(this, questId);
             Global.ScriptMgr.OnQuestStatusChange(this, quest, oldStatus, questStatusData.Status);
         }
 
@@ -1789,7 +1788,7 @@ namespace Game.Entities
             {
                 foreach (var objective in m_questObjectiveStatus.KeyValueList)
                 {
-                    if (objective.Value.QuestStatusPair.Value == questStatus)
+                    if (objective.Value.QuestStatusPair.Status == questStatus)
                         m_questObjectiveStatus.Remove(objective);
                 }
                 m_QuestStatus.Remove(questId);
@@ -2036,7 +2035,7 @@ namespace Game.Entities
         {
             return m_playerData.QuestLog[slot].AcceptTime;
         }
-        
+
         bool GetQuestSlotObjectiveFlag(ushort slot, sbyte objectiveIndex)
         {
             if (objectiveIndex < SharedConst.MaxQuestCounts)
@@ -2185,11 +2184,11 @@ namespace Game.Entities
 
         public void ItemRemovedQuestCheck(uint entry, uint count)
         {
-            foreach (var objectiveStatusData in m_questObjectiveStatus.LookupByKey(Tuple.Create(QuestObjectiveType.Item, (int)entry)))
+            foreach (var objectiveStatusData in m_questObjectiveStatus.LookupByKey((QuestObjectiveType.Item, (int)entry)))
             {
-                uint questId = objectiveStatusData.QuestStatusPair.Key;
+                uint questId = objectiveStatusData.QuestStatusPair.QuestID;
                 Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
-                ushort logSlot = objectiveStatusData.QuestStatusPair.Value.Slot;
+                ushort logSlot = objectiveStatusData.QuestStatusPair.Status.Slot;
                 QuestObjective objective = objectiveStatusData.Objective;
 
                 if (!IsQuestObjectiveCompletable(logSlot, quest, objective))
@@ -2284,16 +2283,16 @@ namespace Game.Entities
         {
             bool anyObjectiveChangedCompletionState = false;
 
-            foreach (var objectiveStatusData in m_questObjectiveStatus.LookupByKey(Tuple.Create(objectiveType, objectId)))
+            foreach (var objectiveStatusData in m_questObjectiveStatus.LookupByKey((objectiveType, objectId)))
             {
-                uint questId = objectiveStatusData.QuestStatusPair.Key;
+                uint questId = objectiveStatusData.QuestStatusPair.QuestID;
                 Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
 
                 if (!QuestObjective.CanAlwaysBeProgressedInRaid(objectiveType))
                     if (GetGroup() && GetGroup().IsRaidGroup() && quest.IsAllowedInRaid(GetMap().GetDifficultyID()))
                         continue;
 
-                ushort logSlot = objectiveStatusData.QuestStatusPair.Value.Slot;
+                ushort logSlot = objectiveStatusData.QuestStatusPair.Status.Slot;
                 QuestObjective objective = objectiveStatusData.Objective;
                 if (!IsQuestObjectiveCompletable(logSlot, quest, objective))
                     continue;
@@ -2381,7 +2380,7 @@ namespace Game.Entities
 
                     if (objectiveIsNowComplete && CanCompleteQuest(questId, objective.Id))
                         CompleteQuest(questId);
-                    else if (objectiveStatusData.QuestStatusPair.Value.Status == QuestStatus.Complete)
+                    else if (objectiveStatusData.QuestStatusPair.Status.Status == QuestStatus.Complete)
                         IncompleteQuest(questId);
                 }
             }
@@ -2393,11 +2392,11 @@ namespace Game.Entities
         public bool HasQuestForItem(uint itemid)
         {
             // Search incomplete objective first
-            foreach (var objectiveItr in m_questObjectiveStatus.LookupByKey(Tuple.Create(QuestObjectiveType.Item, (int)itemid)))
+            foreach (var objectiveItr in m_questObjectiveStatus.LookupByKey((QuestObjectiveType.Item, (int)itemid)))
             {
-                Quest qInfo = Global.ObjectMgr.GetQuestTemplate(objectiveItr.QuestStatusPair.Key);
+                Quest qInfo = Global.ObjectMgr.GetQuestTemplate(objectiveItr.QuestStatusPair.QuestID);
                 QuestObjective objective = objectiveItr.Objective;
-                if (!IsQuestObjectiveCompletable(objectiveItr.QuestStatusPair.Value.Slot, qInfo, objective))
+                if (!IsQuestObjectiveCompletable(objectiveItr.QuestStatusPair.Status.Slot, qInfo, objective))
                     continue;
 
                 // hide quest if player is in raid-group and quest is no raid quest
@@ -2405,7 +2404,7 @@ namespace Game.Entities
                     if (!InBattleground()) //there are two ways.. we can make every bg-quest a raidquest, or add this code here.. i don't know if this can be exploited by other quests, but i think all other quests depend on a specific area.. but keep this in mind, if something strange happens later
                         continue;
 
-                if (!IsQuestObjectiveComplete(objectiveItr.QuestStatusPair.Value.Slot, qInfo, objective))
+                if (!IsQuestObjectiveComplete(objectiveItr.QuestStatusPair.Status.Slot, qInfo, objective))
                     return true;
             }
 
