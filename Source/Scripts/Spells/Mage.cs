@@ -29,11 +29,15 @@ namespace Scripts.Spells.Mage
 {
     struct SpellIds
     {
+        public const uint AlterTimeAura = 110909;
+        public const uint AlterTimeVisual = 347402;
+        public const uint ArcaneAlterTimeAura = 342246;
         public const uint ArcaneBarrageEnergize = 321529;
         public const uint ArcaneBarrageR3 = 321526;
         public const uint ArcaneCharge = 36032;
         public const uint ArcaneMage = 137021;
         public const uint BlazingBarrierTrigger = 235314;
+        public const uint Blink = 1953;
         public const uint Cauterized = 87024;
         public const uint CauterizeDot = 87023;
         public const uint ConeOfCold = 120;
@@ -50,6 +54,7 @@ namespace Scripts.Spells.Mage
         public const uint LivingBombExplosion = 44461;
         public const uint LivingBombPeriodic = 217694;
         public const uint ManaSurge = 37445;
+        public const uint MasterOfTime = 342249;
         public const uint Reverberate = 281482;
         public const uint RingOfFrostDummy = 91264;
         public const uint RingOfFrostFreeze = 82691;
@@ -74,6 +79,71 @@ namespace Scripts.Spells.Mage
         public const uint PetNetherwindsFatigued = 160455;
     }
 
+    // 110909 - Alter Time Aura
+    [Script] // 342246 - Alter Time Aura
+    class spell_mage_alter_time_aura : AuraScript
+    {
+        ulong _health;
+        Position _pos;
+
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.AlterTimeVisual, SpellIds.MasterOfTime, SpellIds.Blink);
+        }
+
+        void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit unit = GetTarget();
+            _health = unit.GetHealth();
+            _pos = unit.GetPosition();
+        }
+
+        void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit unit = GetTarget();
+            if (unit.GetDistance(_pos) <= 100.0f && GetTargetApplication().GetRemoveMode() == AuraRemoveMode.Expire)
+            {
+                unit.SetHealth(_health);
+                unit.NearTeleportTo(_pos);
+
+                if (unit.HasAura(SpellIds.MasterOfTime))
+                {
+                    SpellInfo blink = Global.SpellMgr.GetSpellInfo(SpellIds.Blink, Difficulty.None);
+                    unit.GetSpellHistory().ResetCharges(blink.ChargeCategoryId);
+                }
+                unit.CastSpell(unit, SpellIds.AlterTimeVisual);
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.OverrideActionbarSpells, AuraEffectHandleModes.Real));
+            AfterEffectRemove.Add(new EffectApplyHandler(AfterRemove, 0, AuraType.OverrideActionbarSpells, AuraEffectHandleModes.Real));
+        }
+    }
+
+    // 127140 - Alter Time Active
+    [Script] // 342247 - Alter Time Active
+    class spell_mage_alter_time_active : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.AlterTimeAura, SpellIds.ArcaneAlterTimeAura);
+        }
+
+        void RemoveAlterTimeAura(uint effIndex)
+        {
+            Unit unit = GetCaster();
+            unit.RemoveAura(SpellIds.AlterTimeAura, ObjectGuid.Empty, 0, AuraRemoveMode.Expire);
+            unit.RemoveAura(SpellIds.ArcaneAlterTimeAura, ObjectGuid.Empty, 0, AuraRemoveMode.Expire);
+        }
+
+        public override void Register()
+        {
+            OnEffectHit.Add(new EffectHandler(RemoveAlterTimeAura, 0, SpellEffectName.Dummy));
+        }
+    }
+    
     [Script] // 44425 - Arcane Barrage
     class spell_mage_arcane_barrage : SpellScript
     {
