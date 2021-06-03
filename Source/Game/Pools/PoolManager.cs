@@ -765,45 +765,30 @@ namespace Game
                 // roll objects to be spawned
                 if (!ExplicitlyChanced.Empty())
                 {
-                    while (count != 0 && ExplicitlyChanced.Count > rolledObjects.Count)
-                    {
-                        --count;
-                        float roll = (float)RandomHelper.randChance();
+                    float roll = (float)RandomHelper.randChance();
 
-                        foreach (PoolObject obj in ExplicitlyChanced)
+                    foreach (PoolObject obj in ExplicitlyChanced)
+                    {
+                        roll -= obj.chance;
+                        // Triggering object is marked as spawned at this time and can be also rolled (respawn case)
+                        // so this need explicit check for this case
+                        if (roll < 0 && (obj.guid == triggerFrom || !spawns.IsActiveObject<T>(obj.guid)))
                         {
-                            roll -= obj.chance;
-                            // Triggering object is marked as spawned at this time and can be also rolled (respawn case)
-                            // so this need explicit check for this case
-                            if (roll < 0 && (obj.guid == triggerFrom || !spawns.IsActiveObject<T>(obj.guid)))
-                            {
-                                rolledObjects.Add(obj);
-                                break;
-                            }
+                            rolledObjects.Add(obj);
+                            break;
                         }
                     }
                 }
-                else if (!EqualChanced.Empty())
+                
+                if (!EqualChanced.Empty() && rolledObjects.Empty())
                 {
-                    rolledObjects = EqualChanced;
-
-                    for (var i =0; i < rolledObjects.Count; ++i)
-                    {
-                        var obj = rolledObjects[i];
-                        // remove most of the active objects so there is higher chance inactive ones are spawned
-                        if (spawns.IsActiveObject<T>(obj.guid) && RandomHelper.URand(1, 4) != 1)
-                            rolledObjects.Remove(obj);
-                    }
-
+                    rolledObjects.AddRange(EqualChanced.Where(obj => obj.guid == triggerFrom || !spawns.IsActiveObject<T>(obj.guid)));
                     rolledObjects.RandomResize((uint)count);
                 }
 
                 // try to spawn rolled objects
                 foreach (PoolObject obj in rolledObjects)
                 {
-                    if (spawns.IsActiveObject<T>(obj.guid))
-                        continue;
-
                     if (obj.guid == triggerFrom)
                     {
                         ReSpawn1Object(obj);
