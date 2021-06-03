@@ -45,13 +45,6 @@ namespace Framework.Constants
         public const uint ReadycheckDuration = 35000;
 
         //Liquid
-        public const uint MapLiquidTypeNoWater = 0x00;
-        public const uint MapLiquidTypeWater = 0x01;
-        public const uint MapLiquidTypeOcean = 0x02;
-        public const uint MapLiquidTypeMagma = 0x04;
-        public const uint MapLiquidTypeSlime = 0x08;
-        public const uint MapLiquidTypeDarkWater = 0x10;
-        public const uint MapAllLiquidTypes = (MapLiquidTypeWater | MapLiquidTypeOcean | MapLiquidTypeMagma | MapLiquidTypeSlime);
         public const float LiquidTileSize = (533.333f / 128.0f);
 
         public const int MinMapUpdateDelay = 50;
@@ -242,5 +235,40 @@ namespace Framework.Constants
         BlockSpawn = 0x02,
 
         All = (ActivateSpawn | BlockSpawn)
+    }
+
+    public enum AreaHeaderFlags : ushort
+    {
+        None = 0x0000,
+        NoArea = 0x0001
+    }
+
+    public enum HeightHeaderFlags : uint
+    {
+        None = 0x0000,
+        NoHeight = 0x0001,
+        HeightAsInt16 = 0x0002,
+        HeightAsInt8 = 0x0004,
+        HasFlightBounds = 0x0008
+    }
+
+    public enum LiquidHeaderFlags : byte
+    {
+        None = 0x0000,
+        NoType = 0x0001,
+        NoHeight = 0x0002
+    }
+
+    public enum LiquidHeaderTypeFlags : byte
+    {
+        NoWater = 0x00,
+        Water = 0x01,
+        Ocean = 0x02,
+        Magma = 0x04,
+        Slime = 0x08,
+
+        DarkWater = 0x10,
+
+        AllLiquids = Water | Ocean | Magma | Slime
     }
 }

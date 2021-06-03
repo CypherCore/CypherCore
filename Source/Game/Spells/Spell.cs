@@ -861,7 +861,7 @@ namespace Game.Spells
                         float ground = m_caster.GetMapHeight(x, y, z);
                         float liquidLevel = MapConst.VMAPInvalidHeightValue;
                         LiquidData liquidData;
-                        if (m_caster.GetMap().GetLiquidStatus(m_caster.GetPhaseShift(), x, y, z, MapConst.MapAllLiquidTypes, out liquidData, m_caster.GetCollisionHeight()) != 0)
+                        if (m_caster.GetMap().GetLiquidStatus(m_caster.GetPhaseShift(), x, y, z, LiquidHeaderTypeFlags.AllLiquids, out liquidData, m_caster.GetCollisionHeight()) != 0)
                             liquidLevel = liquidData.level;
 
                         if (liquidLevel <= ground) // When there is no liquid Map.GetWaterOrGroundLevel returns ground level

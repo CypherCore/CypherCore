@@ -795,7 +795,7 @@ namespace Game.Entities
             if (status != 0 && liquidData.HasValue)
             {
                 // Breath bar state (under water in any liquid type)
-                if (liquidData.Value.type_flags.HasAnyFlag(MapConst.MapAllLiquidTypes))
+                if (liquidData.Value.type_flags.HasAnyFlag(LiquidHeaderTypeFlags.AllLiquids))
                 {
                     if (status.HasAnyFlag(ZLiquidStatus.UnderWater))
                         m_MirrorTimerFlags |= PlayerUnderwaterState.InWater;
@@ -804,13 +804,13 @@ namespace Game.Entities
                 }
 
                 // Fatigue bar state (if not on flight path or transport)
-                if (liquidData.Value.type_flags.HasAnyFlag(MapConst.MapLiquidTypeDarkWater) && !IsInFlight() && !GetTransport())
+                if (liquidData.Value.type_flags.HasAnyFlag(LiquidHeaderTypeFlags.DarkWater) && !IsInFlight() && !GetTransport())
                     m_MirrorTimerFlags |= PlayerUnderwaterState.InDarkWater;
                 else
                     m_MirrorTimerFlags &= ~PlayerUnderwaterState.InDarkWater;
 
                 // Lava state (any contact)
-                if (liquidData.Value.type_flags.HasAnyFlag(MapConst.MapLiquidTypeMagma))
+                if (liquidData.Value.type_flags.HasAnyFlag(LiquidHeaderTypeFlags.Magma))
                 {
                     if (status.HasAnyFlag(ZLiquidStatus.InContact))
                         m_MirrorTimerFlags |= PlayerUnderwaterState.InLava;
@@ -819,7 +819,7 @@ namespace Game.Entities
                 }
 
                 // Slime state (any contact)
-                if (liquidData.Value.type_flags.HasAnyFlag(MapConst.MapLiquidTypeSlime))
+                if (liquidData.Value.type_flags.HasAnyFlag(LiquidHeaderTypeFlags.Slime))
                 {
                     if (status.HasAnyFlag(ZLiquidStatus.InContact))
                         m_MirrorTimerFlags |= PlayerUnderwaterState.InSlime;

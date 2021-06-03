@@ -174,7 +174,7 @@ namespace Game.Movement
                     // Check both start and end points, if they're both in water, then we can *safely* let the creature move
                     for (uint i = 0; i < _pathPoints.Length; ++i)
                     {
-                        ZLiquidStatus status = _sourceUnit.GetMap().GetLiquidStatus(_sourceUnit.GetPhaseShift(), _pathPoints[i].X, _pathPoints[i].Y, _pathPoints[i].Z, MapConst.MapAllLiquidTypes, _sourceUnit.GetCollisionHeight());
+                        ZLiquidStatus status = _sourceUnit.GetMap().GetLiquidStatus(_sourceUnit.GetPhaseShift(), _pathPoints[i].X, _pathPoints[i].Y, _pathPoints[i].Z, LiquidHeaderTypeFlags.AllLiquids, _sourceUnit.GetCollisionHeight());
                         // One of the points is not in the water, cancel movement.
                         if (status == ZLiquidStatus.NoWater)
                         {
@@ -839,18 +839,18 @@ namespace Game.Movement
         NavTerrainFlag GetNavTerrain(float x, float y, float z)
         {
             LiquidData data;
-            ZLiquidStatus liquidStatus = _sourceUnit.GetMap().GetLiquidStatus(_sourceUnit.GetPhaseShift(), x, y, z, MapConst.MapAllLiquidTypes, out data, _sourceUnit.GetCollisionHeight());
+            ZLiquidStatus liquidStatus = _sourceUnit.GetMap().GetLiquidStatus(_sourceUnit.GetPhaseShift(), x, y, z, LiquidHeaderTypeFlags.AllLiquids, out data, _sourceUnit.GetCollisionHeight());
             if (liquidStatus == ZLiquidStatus.NoWater)
                 return NavTerrainFlag.Ground;
 
-            data.type_flags &= ~MapConst.MapLiquidTypeDarkWater;
+            data.type_flags &= ~LiquidHeaderTypeFlags.DarkWater;
             switch (data.type_flags)
             {
-                case MapConst.MapLiquidTypeWater:
-                case MapConst.MapLiquidTypeOcean:
+                case LiquidHeaderTypeFlags.Water:
+                case LiquidHeaderTypeFlags.Ocean:
                     return NavTerrainFlag.Water;
-                case MapConst.MapLiquidTypeMagma:
-                case MapConst.MapLiquidTypeSlime:
+                case LiquidHeaderTypeFlags.Magma:
+                case LiquidHeaderTypeFlags.Slime:
                     return NavTerrainFlag.MagmaSlime;
                 default:
                     return NavTerrainFlag.Ground;

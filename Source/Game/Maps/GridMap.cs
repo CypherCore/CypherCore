@@ -139,7 +139,7 @@ namespace Game.Maps
             else
                 _gridGetHeight = GetHeightFromFlat;
 
-            if (mapHeader.flags.HasAnyFlag(HeightHeaderFlags.HeightHasFlightBounds))
+            if (mapHeader.flags.HasAnyFlag(HeightHeaderFlags.HasFlightBounds))
             {
                 short[] maxHeights = reader.ReadArray<short>(3 * 3);
                 short[] minHeights = reader.ReadArray<short>(3 * 3);
@@ -190,20 +190,20 @@ namespace Game.Maps
                 return false;
 
             _liquidGlobalEntry = liquidHeader.liquidType;
-            _liquidGlobalFlags = liquidHeader.liquidFlags;
+            _liquidGlobalFlags = (LiquidHeaderTypeFlags)liquidHeader.liquidFlags;
             _liquidOffX = liquidHeader.offsetX;
             _liquidOffY = liquidHeader.offsetY;
             _liquidWidth = liquidHeader.width;
             _liquidHeight = liquidHeader.height;
             _liquidLevel = liquidHeader.liquidLevel;
 
-            if (!liquidHeader.flags.HasAnyFlag(LiquidHeaderFlags.LiquidNoType))
+            if (!liquidHeader.flags.HasAnyFlag(LiquidHeaderFlags.NoType))
             {
                 _liquidEntry = reader.ReadArray<ushort>(16 * 16);
                 _liquidFlags = reader.ReadBytes(16 * 16);
             }
 
-            if (!liquidHeader.flags.HasAnyFlag(LiquidHeaderFlags.LiquidNoHeight))
+            if (!liquidHeader.flags.HasAnyFlag(LiquidHeaderFlags.NoHeight))
                 _liquidMap = reader.ReadArray<float>((uint)(_liquidWidth * _liquidHeight));
 
             return true;
@@ -488,23 +488,23 @@ namespace Game.Maps
         }
 
         // Why does this return LIQUID data?
-        public byte GetTerrainType(float x, float y)
+        public LiquidHeaderTypeFlags GetTerrainType(float x, float y)
         {
             if (_liquidFlags == null)
-                return 0;
+                return LiquidHeaderTypeFlags.NoWater;
 
             x = 16 * (32 - x / MapConst.SizeofGrids);
             y = 16 * (32 - y / MapConst.SizeofGrids);
             int lx = (int)x & 15;
             int ly = (int)y & 15;
-            return _liquidFlags[lx * 16 + ly];
+            return (LiquidHeaderTypeFlags)_liquidFlags[lx * 16 + ly];
         }
 
         // Get water state on map
-        public ZLiquidStatus GetLiquidStatus(float x, float y, float z, uint ReqLiquidType, LiquidData data, float collisionHeight)
+        public ZLiquidStatus GetLiquidStatus(float x, float y, float z, LiquidHeaderTypeFlags? reqLiquidType, LiquidData data, float collisionHeight)
         {
             // Check water type (if no water return)
-            if (_liquidGlobalFlags == 0 && _liquidFlags == null)
+            if (_liquidGlobalFlags == LiquidHeaderTypeFlags.NoWater && _liquidFlags == null)
                 return ZLiquidStatus.NoWater;
 
             // Get cell
@@ -516,12 +516,12 @@ namespace Game.Maps
 
             // Check water type in cell
             int idx = (x_int >> 3) * 16 + (y_int >> 3);
-            byte type = _liquidFlags != null ? _liquidFlags[idx] : _liquidGlobalFlags;
+            LiquidHeaderTypeFlags type = _liquidFlags != null ? (LiquidHeaderTypeFlags)_liquidFlags[idx] : _liquidGlobalFlags;
             uint entry = _liquidEntry != null ? _liquidEntry[idx] : _liquidGlobalEntry;
             LiquidTypeRecord liquidEntry = CliDB.LiquidTypeStorage.LookupByKey(entry);
             if (liquidEntry != null)
             {
-                type &= (byte)MapConst.MapLiquidTypeDarkWater;
+                type &= LiquidHeaderTypeFlags.DarkWater;
                 uint liqTypeIdx = liquidEntry.SoundBank;
                 if (entry < 21)
                 {
@@ -543,14 +543,14 @@ namespace Game.Maps
                         }
                     }
                 }
-                type |= (byte)(1 << (int)liqTypeIdx);
+                type |= (LiquidHeaderTypeFlags)(1 << (int)liqTypeIdx);
             }
 
-            if (type == 0)
+            if (type == LiquidHeaderTypeFlags.NoWater)
                 return ZLiquidStatus.NoWater;
 
             // Check req liquid type mask
-            if (ReqLiquidType != 0 && !Convert.ToBoolean(ReqLiquidType & type))
+            if (reqLiquidType.HasValue && (reqLiquidType & type) == LiquidHeaderTypeFlags.NoWater)
                 return ZLiquidStatus.NoWater;
 
             // Check water level:
@@ -622,7 +622,7 @@ namespace Game.Maps
         float[] _liquidMap;
         ushort _gridArea;
         ushort _liquidGlobalEntry;
-        byte _liquidGlobalFlags;
+        LiquidHeaderTypeFlags _liquidGlobalFlags;
         byte _liquidOffX;
         byte _liquidOffY;
         byte _liquidWidth;
@@ -675,31 +675,9 @@ namespace Game.Maps
 
     public class LiquidData
     {
-        public uint type_flags;
+        public LiquidHeaderTypeFlags type_flags;
         public uint entry;
         public float level;
         public float depth_level;
-    }
-
-    [Flags]
-    public enum AreaHeaderFlags : ushort
-    {
-        NoArea = 0x0001
-    }
-
-    [Flags]
-    public enum HeightHeaderFlags
-    {
-        NoHeight = 0x0001,
-        HeightAsInt16 = 0x0002,
-        HeightAsInt8 = 0x0004,
-        HeightHasFlightBounds = 0x0008
-    }
-
-    [Flags]
-    public enum LiquidHeaderFlags : byte
-    {
-        LiquidNoType = 0x0001,
-        LiquidNoHeight = 0x0002
     }
 }

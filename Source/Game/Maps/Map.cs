@@ -1705,7 +1705,7 @@ namespace Game.Maps
 
                 LiquidData liquid_status;
 
-                ZLiquidStatus res = GetLiquidStatus(phaseShift, x, y, ground_z, MapConst.MapAllLiquidTypes, out liquid_status, collisionHeight);
+                ZLiquidStatus res = GetLiquidStatus(phaseShift, x, y, ground_z, LiquidHeaderTypeFlags.AllLiquids, out liquid_status, collisionHeight);
                 switch (res)
                 {
                     case ZLiquidStatus.AboveWater:
@@ -1959,20 +1959,21 @@ namespace Game.Maps
 
         public void GetZoneAndAreaId(PhaseShift phaseShift, out uint zoneid, out uint areaid, Position pos) { GetZoneAndAreaId(phaseShift, out zoneid, out areaid, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ()); }
 
-        private byte GetTerrainType(PhaseShift phaseShift, float x, float y)
+        private LiquidHeaderTypeFlags GetTerrainType(PhaseShift phaseShift, float x, float y)
         {
             GridMap gmap = GetGridMap(PhasingHandler.GetTerrainMapId(phaseShift, this, x, y), x, y);
             if (gmap != null)
                 return gmap.GetTerrainType(x, y);
-            return 0;
+
+            return LiquidHeaderTypeFlags.NoWater;
         }
 
-        public ZLiquidStatus GetLiquidStatus(PhaseShift phaseShift, float x, float y, float z, uint ReqLiquidType, float collisionHeight = MapConst.DefaultCollesionHeight)
+        public ZLiquidStatus GetLiquidStatus(PhaseShift phaseShift, float x, float y, float z, LiquidHeaderTypeFlags reqLiquidType, float collisionHeight = MapConst.DefaultCollesionHeight)
         {
-            return GetLiquidStatus(phaseShift, x, y, z, ReqLiquidType, out _, collisionHeight);
+            return GetLiquidStatus(phaseShift, x, y, z, reqLiquidType, out _, collisionHeight);
         }
 
-        public ZLiquidStatus GetLiquidStatus(PhaseShift phaseShift, float x, float y, float z, uint ReqLiquidType, out LiquidData data, float collisionHeight = MapConst.DefaultCollesionHeight)
+        public ZLiquidStatus GetLiquidStatus(PhaseShift phaseShift, float x, float y, float z, LiquidHeaderTypeFlags reqLiquidType, out LiquidData data, float collisionHeight = MapConst.DefaultCollesionHeight)
         {
             data = new LiquidData();
             var result = ZLiquidStatus.NoWater;
@@ -1980,7 +1981,7 @@ namespace Game.Maps
             float ground_level = MapConst.InvalidHeight;
             uint liquid_type = 0;
             uint terrainMapId = PhasingHandler.GetTerrainMapId(phaseShift, this, x, y);
-            if (Global.VMapMgr.GetLiquidLevel(terrainMapId, x, y, z, ReqLiquidType, ref liquid_level, ref ground_level, ref liquid_type))
+            if (Global.VMapMgr.GetLiquidLevel(terrainMapId, x, y, z, (byte)reqLiquidType, ref liquid_level, ref ground_level, ref liquid_type))
             {
                 Log.outDebug(LogFilter.Maps, "getLiquidStatus(): vmap liquid level: {0} ground: {1} type: {2}",
                     liquid_level, ground_level, liquid_type);
@@ -2023,7 +2024,7 @@ namespace Game.Maps
                     data.depth_level = ground_level;
 
                     data.entry = liquid_type;
-                    data.type_flags = (uint)(1 << (int)liquidFlagType);
+                    data.type_flags = (LiquidHeaderTypeFlags)(1 << (int)liquidFlagType);
 
                     float delta = liquid_level - z;
 
@@ -2042,7 +2043,7 @@ namespace Game.Maps
             if (gmap != null)
             {
                 var map_data = new LiquidData();
-                ZLiquidStatus map_result = gmap.GetLiquidStatus(x, y, z, ReqLiquidType, map_data, collisionHeight);
+                ZLiquidStatus map_result = gmap.GetLiquidStatus(x, y, z, reqLiquidType, map_data, collisionHeight);
                 // Not override LIQUID_MAP_ABOVE_WATER with LIQUID_MAP_NO_WATER:
                 if (map_result != ZLiquidStatus.NoWater && (map_data.level > ground_level))
                 {
@@ -2058,10 +2059,10 @@ namespace Game.Maps
             return result;
         }
 
-        public void GetFullTerrainStatusForPosition(PhaseShift phaseShift, float x, float y, float z, PositionFullTerrainStatus data, uint reqLiquidType = MapConst.MapAllLiquidTypes, float collisionHeight = MapConst.DefaultCollesionHeight)
+        public void GetFullTerrainStatusForPosition(PhaseShift phaseShift, float x, float y, float z, PositionFullTerrainStatus data, LiquidHeaderTypeFlags reqLiquidType, float collisionHeight = MapConst.DefaultCollesionHeight)
         {
             uint terrainMapId = PhasingHandler.GetTerrainMapId(phaseShift, this, x, y);
-            AreaAndLiquidData vmapData = Global.VMapMgr.GetAreaAndLiquidData(terrainMapId, x, y, z, reqLiquidType);
+            AreaAndLiquidData vmapData = Global.VMapMgr.GetAreaAndLiquidData(terrainMapId, x, y, z, (byte)reqLiquidType);
             if (vmapData.areaInfo.HasValue)
                 data.areaInfo.Set(new PositionFullTerrainStatus.AreaInfo(vmapData.areaInfo.Value.AdtId, vmapData.areaInfo.Value.RootId, vmapData.areaInfo.Value.GroupId, vmapData.areaInfo.Value.MogpFlags));
 
@@ -2134,7 +2135,7 @@ namespace Game.Maps
                 liquidInfo.level = vmapData.liquidInfo.Value.Level;
                 liquidInfo.depth_level = vmapData.floorZ;
                 liquidInfo.entry = liquidType;
-                liquidInfo.type_flags = 1u << (int)liquidFlagType;
+                liquidInfo.type_flags = (LiquidHeaderTypeFlags)(1u << (int)liquidFlagType);
                 data.LiquidInfo.Set(liquidInfo);
 
                 float delta = vmapData.liquidInfo.Value.Level - z;
@@ -2197,12 +2198,12 @@ namespace Game.Maps
 
         public bool IsInWater(PhaseShift phaseShift, float x, float y, float pZ)
         {
-            return Convert.ToBoolean(GetLiquidStatus(phaseShift, x, y, pZ, MapConst.MapAllLiquidTypes) & (ZLiquidStatus.InWater | ZLiquidStatus.UnderWater));
+            return Convert.ToBoolean(GetLiquidStatus(phaseShift, x, y, pZ, LiquidHeaderTypeFlags.AllLiquids) & (ZLiquidStatus.InWater | ZLiquidStatus.UnderWater));
         }
 
         public bool IsUnderWater(PhaseShift phaseShift, float x, float y, float z)
         {
-            return Convert.ToBoolean(GetLiquidStatus(phaseShift, x, y, z, MapConst.MapLiquidTypeWater | MapConst.MapLiquidTypeOcean) & ZLiquidStatus.UnderWater);
+            return Convert.ToBoolean(GetLiquidStatus(phaseShift, x, y, z, LiquidHeaderTypeFlags.Water | LiquidHeaderTypeFlags.Ocean) & ZLiquidStatus.UnderWater);
         }
 
         public string GetMapName()
