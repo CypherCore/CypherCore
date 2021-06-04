@@ -42,6 +42,14 @@ namespace Game.DataStorage
         public int CovenantID;
     }
 
+    public sealed class AchievementCategoryRecord
+    {
+        public LocalizedString Name;
+        public uint Id;
+        public short Parent;
+        public sbyte UiOrder;
+    }
+
     public sealed class AdventureJournalRecord
     {
         public uint Id;

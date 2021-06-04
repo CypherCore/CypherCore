@@ -26,6 +26,10 @@ namespace Framework.Database
                 "Points, Flags, UiOrder, IconFileID, RewardItemID, CriteriaTree, SharesCriteria, CovenantID FROM achievement");
             PrepareStatement(HotfixStatements.SEL_ACHIEVEMENT_LOCALE, "SELECT ID, Description_lang, Title_lang, Reward_lang FROM achievement_locale WHERE locale = ?");
 
+            // AchievementCategory.db2
+            PrepareStatement(HotfixStatements.SEL_ACHIEVEMENT_CATEGORY, "SELECT Name, ID, Parent, UiOrder FROM achievement_category");
+            PrepareStatement(HotfixStatements.SEL_ACHIEVEMENT_CATEGORY_LOCALE, "SELECT ID, Name_lang FROM achievement_category_locale WHERE locale = ?");
+
             // AdventureJournal.db2
             PrepareStatement(HotfixStatements.SEL_ADVENTURE_JOURNAL, "SELECT ID, Name, Description, ButtonText, RewardDescription, ContinueDescription, Type, " +
                 "PlayerConditionID, Flags, ButtonActionType, TextureFileDataID, LfgDungeonID, QuestID, BattleMasterListID, PriorityMin, PriorityMax, ItemID, " +
@@ -1167,6 +1171,9 @@ namespace Framework.Database
 
         SEL_ACHIEVEMENT,
         SEL_ACHIEVEMENT_LOCALE,
+
+        SEL_ACHIEVEMENT_CATEGORY,
+        SEL_ACHIEVEMENT_CATEGORY_LOCALE,
 
         SEL_ADVENTURE_JOURNAL,
         SEL_ADVENTURE_JOURNAL_LOCALE,
