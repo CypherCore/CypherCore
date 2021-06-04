@@ -2043,7 +2043,14 @@ namespace Game
                     return false;
             }
 
-            // TODO: time condition
+            if (condition.Time[0] != 0)
+            {
+                var from = Time.GetUnixTimeFromPackedTime(condition.Time[0]);
+                var to = Time.GetUnixTimeFromPackedTime(condition.Time[1]);
+
+                if (GameTime.GetGameTime() < from || GameTime.GetGameTime() > to)
+                    return false;
+            }
 
             if (condition.WorldStateExpressionID != 0)
             {
@@ -2055,7 +2062,9 @@ namespace Game
                     return false;
             }
 
-            // TODO: weather condition
+            if (condition.WeatherID != 0)
+                if (player.GetMap().GetZoneWeather(player.GetZoneId()) != (WeatherState)condition.WeatherID)
+                    return false;
 
             if (condition.Achievement[0] != 0)
             {

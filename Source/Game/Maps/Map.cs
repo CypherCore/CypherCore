@@ -3467,6 +3467,21 @@ namespace Game.Maps
             return info.DefaultWeather;
         }
 
+        public WeatherState GetZoneWeather(uint zoneId)
+        {
+            ZoneDynamicInfo zoneDynamicInfo = _zoneDynamicInfo.LookupByKey(zoneId);
+            if (zoneDynamicInfo != null)
+            {
+                if (zoneDynamicInfo.WeatherId != 0)
+                        return zoneDynamicInfo.WeatherId;
+
+                if (zoneDynamicInfo.DefaultWeather != null)
+                    return zoneDynamicInfo.DefaultWeather.GetWeatherState();
+            }
+
+            return WeatherState.Fine;
+        }
+        
         public void SetZoneWeather(uint zoneId, WeatherState weatherId, float weatherGrade)
         {
             if (!_zoneDynamicInfo.ContainsKey(zoneId))

@@ -149,9 +149,7 @@ namespace Framework.IO
 
         public uint ReadPackedTime()
         {
-            uint packedDate = ReadUInt32();
-            var time = new DateTime((int)((packedDate >> 24) & 0x1F) + 2000, (int)((packedDate >> 20) & 0xF) + 1, (int)((packedDate >> 14) & 0x3F) + 1, (int)(packedDate >> 6) & 0x1F, (int)(packedDate & 0x3F), 0);
-            return (uint)Time.DateTimeToUnixTime(time);
+            return (uint)Time.GetUnixTimeFromPackedTime(ReadUInt32());
         }
 
         public Vector3 ReadVector3()
@@ -360,14 +358,12 @@ namespace Framework.IO
 
         public void WritePackedTime(long time)
         {
-            var now = Time.UnixTimeToDateTime(time);
-            WriteUInt32(Convert.ToUInt32((now.Year - 2000) << 24 | (now.Month - 1) << 20 | (now.Day - 1) << 14 | (int)now.DayOfWeek << 11 | now.Hour << 6 | now.Minute));
+            WriteUInt32(Time.GetPackedTimeFromUnixTime(time));
         }
 
         public void WritePackedTime()
         {
-            DateTime now = DateTime.Now;
-            WriteUInt32(Convert.ToUInt32((now.Year - 2000) << 24 | (now.Month - 1) << 20 | (now.Day - 1) << 14 | (int)now.DayOfWeek << 11 | now.Hour << 6 | now.Minute));
+            WriteUInt32(Time.GetPackedTimeFromDateTime(DateTime.Now));
         }
         #endregion
 

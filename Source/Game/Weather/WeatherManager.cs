@@ -339,7 +339,7 @@ namespace Game
             UpdateWeather();
         }
 
-        WeatherState GetWeatherState()
+        public WeatherState GetWeatherState()
         {
             if (m_grade < 0.27f)
                 return WeatherState.Fine;

@@ -95,6 +95,7 @@ public static class Time
     {
         return DateTimeOffset.FromUnixTimeSeconds(unixTime).LocalDateTime;
     }
+
     public static long DateTimeToUnixTime(DateTime dateTime)
     {
         return ((DateTimeOffset)dateTime).ToUnixTimeSeconds();
@@ -184,6 +185,23 @@ public static class Time
         long minute = (time % Hour) / Minute;
 
         return $"Days: {days} Hours: {hours} Minutes: {minute}";
+    }
+
+    public static long GetUnixTimeFromPackedTime(uint packedDate)
+    {
+        var time = new DateTime((int)((packedDate >> 24) & 0x1F) + 2000, (int)((packedDate >> 20) & 0xF) + 1, (int)((packedDate >> 14) & 0x3F) + 1, (int)(packedDate >> 6) & 0x1F, (int)(packedDate & 0x3F), 0);
+        return (uint)DateTimeToUnixTime(time);
+    }
+
+    public static uint GetPackedTimeFromUnixTime(long unixTime)
+    {
+        var now = UnixTimeToDateTime(unixTime);
+        return Convert.ToUInt32((now.Year - 2000) << 24 | (now.Month - 1) << 20 | (now.Day - 1) << 14 | (int)now.DayOfWeek << 11 | now.Hour << 6 | now.Minute);
+    }
+
+    public static uint GetPackedTimeFromDateTime(DateTime now)
+    {
+        return Convert.ToUInt32((now.Year - 2000) << 24 | (now.Month - 1) << 20 | (now.Day - 1) << 14 | (int)now.DayOfWeek << 11 | now.Hour << 6 | now.Minute);
     }
 
     public static void Profile(string description, int iterations, Action func)
