@@ -653,16 +653,16 @@ namespace Game.Achievements
             ulong requiredCount = tree.Entry.Amount;
             switch ((CriteriaTreeOperator)tree.Entry.Operator)
             {
-                case CriteriaTreeOperator.Single:
+                case CriteriaTreeOperator.Complete:
                     return tree.Criteria != null && IsCompletedCriteria(tree.Criteria, requiredCount);
-                case CriteriaTreeOperator.SinglerNotCompleted:
+                case CriteriaTreeOperator.NotComplete:
                     return tree.Criteria == null || !IsCompletedCriteria(tree.Criteria, requiredCount);
-                case CriteriaTreeOperator.All:
+                case CriteriaTreeOperator.CompleteAll:
                     foreach (CriteriaTree node in tree.Children)
                         if (!IsCompletedCriteriaTree(node))
                             return false;
                     return true;
-                case CriteriaTreeOperator.SumChildren:
+                case CriteriaTreeOperator.Sum:
                     {
                         ulong progress = 0;
                         CriteriaManager.WalkCriteriaTree(tree, criteriaTree =>
@@ -676,7 +676,7 @@ namespace Game.Achievements
                         });
                         return progress >= requiredCount;
                     }
-                case CriteriaTreeOperator.MaxChild:
+                case CriteriaTreeOperator.Highest:
                     {
                         ulong progress = 0;
                         CriteriaManager.WalkCriteriaTree(tree, criteriaTree =>
@@ -691,7 +691,7 @@ namespace Game.Achievements
                         });
                         return progress >= requiredCount;
                     }
-                case CriteriaTreeOperator.CountDirectChildren:
+                case CriteriaTreeOperator.StartedAtLeast:
                     {
                         ulong progress = 0;
                         foreach (CriteriaTree node in tree.Children)
@@ -708,7 +708,7 @@ namespace Game.Achievements
 
                         return false;
                     }
-                case CriteriaTreeOperator.Any:
+                case CriteriaTreeOperator.CompleteAtLeast:
                     {
                         ulong progress = 0;
                         foreach (CriteriaTree node in tree.Children)
@@ -718,7 +718,7 @@ namespace Game.Achievements
 
                         return false;
                     }
-                case CriteriaTreeOperator.SumChildrenWeight:
+                case CriteriaTreeOperator.ProgressBar:
                     {
                         ulong progress = 0;
                         CriteriaManager.WalkCriteriaTree(tree, criteriaTree =>
