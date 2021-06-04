@@ -2165,6 +2165,15 @@ namespace Framework.Constants
         Disabled = 0x1
     }
 
+    public enum FriendshipReputationFlags : int
+    {
+        NoFXOnReactionChange = 0x01,
+        NoLogTextOnRepGain = 0x02,
+        NoLogTextOnReactionChange = 0x04,
+        ShowRepGainandReactionChangeForHiddenFaction = 0x08,
+        NoRepGainModifiers = 0x10
+    }
+
     public enum GlobalCurve
     {
         CritDiminishing = 0,

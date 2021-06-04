@@ -263,6 +263,12 @@ namespace Game.DataStorage
                 if (faction.ParentFactionID != 0)
                     _factionTeams.Add(faction.ParentFactionID, faction.Id);
 
+            foreach (FriendshipRepReactionRecord friendshipRepReaction in CliDB.FriendshipRepReactionStorage.Values)
+                _friendshipRepReactions.Add(friendshipRepReaction.FriendshipRepID, friendshipRepReaction);
+
+            foreach (var key in _friendshipRepReactions.Keys)
+                _friendshipRepReactions[key].Sort(new FriendshipRepReactionRecordComparer());
+
             foreach (GameObjectDisplayInfoRecord gameObjectDisplayInfo in CliDB.GameObjectDisplayInfoStorage.Values)
             {
                 if (gameObjectDisplayInfo.GeoBoxMax.X < gameObjectDisplayInfo.GeoBoxMin.X)
@@ -1306,6 +1312,11 @@ namespace Game.DataStorage
             return _factionTeams.LookupByKey(faction);
         }
 
+        public List<FriendshipRepReactionRecord> GetFriendshipRepReactions(uint friendshipRepID)
+        {
+            return _friendshipRepReactions.LookupByKey(friendshipRepID);
+        }
+        
         public uint GetGlobalCurveId(GlobalCurve globalCurveType)
         {
             foreach (var globalCurveEntry in CliDB.GlobalCurveStorage.Values)
@@ -2241,6 +2252,7 @@ namespace Game.DataStorage
         Dictionary<Tuple<uint, int>, ExpectedStatRecord> _expectedStatsByLevel = new();
         MultiMap<uint, ExpectedStatModRecord> _expectedStatModsByContentTuning = new();
         MultiMap<uint, uint> _factionTeams = new();
+        MultiMap<uint, FriendshipRepReactionRecord> _friendshipRepReactions = new();
         Dictionary<uint, HeirloomRecord> _heirlooms = new();
         MultiMap<uint, uint> _glyphBindableSpells = new();
         MultiMap<uint, uint> _glyphRequiredSpecs = new();
@@ -2491,6 +2503,14 @@ namespace Game.DataStorage
             if (left.ClassID != right.ClassID)
                 return left.ClassID.CompareTo(right.ClassID);
             return left.PowerType.CompareTo(right.PowerType);
+        }
+    }
+
+    class FriendshipRepReactionRecordComparer : IComparer<FriendshipRepReactionRecord>
+    {
+        public int Compare(FriendshipRepReactionRecord left, FriendshipRepReactionRecord right)
+        {
+            return left.ReactionThreshold.CompareTo(right.ReactionThreshold);
         }
     }
 

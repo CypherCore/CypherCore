@@ -1413,6 +1413,16 @@ namespace Game.Entities
         //Repitation
         public int CalculateReputationGain(ReputationSource source, uint creatureOrQuestLevel, int rep, int faction, bool noQuestBonus = false)
         {
+            bool noBonuses = false;
+            var factionEntry = CliDB.FactionStorage.LookupByKey(faction);
+            if (factionEntry != null)
+            {
+                var friendshipReputation = CliDB.FriendshipReputationStorage.LookupByKey(factionEntry.FriendshipRepID);
+                if (friendshipReputation != null)
+                    if (friendshipReputation.Flags.HasAnyFlag(FriendshipReputationFlags.NoRepGainModifiers))
+                        noBonuses = true;
+            }
+
             float percent = 100.0f;
 
             float repMod = noQuestBonus ? 0.0f : GetTotalAuraModifier(AuraType.ModReputationGain);

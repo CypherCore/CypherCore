@@ -139,6 +139,8 @@ namespace Game.DataStorage
             ExpectedStatModStorage = ReadDB2<ExpectedStatModRecord>("ExpectedStatMod.db2", HotfixStatements.SEL_EXPECTED_STAT_MOD);
             FactionStorage = ReadDB2<FactionRecord>("Faction.db2", HotfixStatements.SEL_FACTION, HotfixStatements.SEL_FACTION_LOCALE);
             FactionTemplateStorage = ReadDB2<FactionTemplateRecord>("FactionTemplate.db2", HotfixStatements.SEL_FACTION_TEMPLATE);
+            FriendshipRepReactionStorage = ReadDB2<FriendshipRepReactionRecord>("FriendshipRepReaction.db2", HotfixStatements.SEL_FRIENDSHIP_REP_REACTION, HotfixStatements.SEL_FRIENDSHIP_REP_REACTION_LOCALE);
+            FriendshipReputationStorage = ReadDB2<FriendshipReputationRecord>("FriendshipReputation.db2", HotfixStatements.SEL_FRIENDSHIP_REPUTATION, HotfixStatements.SEL_FRIENDSHIP_REPUTATION_LOCALE);
             GameObjectDisplayInfoStorage = ReadDB2<GameObjectDisplayInfoRecord>("GameObjectDisplayInfo.db2", HotfixStatements.SEL_GAMEOBJECT_DISPLAY_INFO);
             GameObjectsStorage = ReadDB2<GameObjectsRecord>("GameObjects.db2", HotfixStatements.SEL_GAMEOBJECTS, HotfixStatements.SEL_GAMEOBJECTS_LOCALE);
             GarrAbilityStorage = ReadDB2<GarrAbilityRecord>("GarrAbility.db2", HotfixStatements.SEL_GARR_ABILITY, HotfixStatements.SEL_GARR_ABILITY_LOCALE);
@@ -503,6 +505,8 @@ namespace Game.DataStorage
         public static DB6Storage<ExpectedStatModRecord> ExpectedStatModStorage;
         public static DB6Storage<FactionRecord> FactionStorage;
         public static DB6Storage<FactionTemplateRecord> FactionTemplateStorage;
+        public static DB6Storage<FriendshipRepReactionRecord> FriendshipRepReactionStorage;
+        public static DB6Storage<FriendshipReputationRecord> FriendshipReputationStorage;
         public static DB6Storage<GameObjectsRecord> GameObjectsStorage;
         public static DB6Storage<GameObjectDisplayInfoRecord> GameObjectDisplayInfoStorage;
         public static DB6Storage<GarrAbilityRecord> GarrAbilityStorage;

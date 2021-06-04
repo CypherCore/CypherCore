@@ -22,6 +22,7 @@ using Game.Entities;
 using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game
 {
@@ -37,18 +38,32 @@ namespace Game
             _sendFactionIncreased = false;
         }
 
-        ReputationRank ReputationToRank(int standing)
+        ReputationRank ReputationToRankHelper<T>(IList<T> thresholds, int standing, Func<T, int> thresholdExtractor)
         {
-            int limit = Reputation_Cap + 1;
-            for (var rank = ReputationRank.Max - 1; rank >= ReputationRank.Min; --rank)
+            int i = 0;
+            int rank = -1;
+            while (i != thresholds.Count - 1 && standing >= thresholdExtractor(thresholds[i]))
             {
-                limit -= PointsInRank[(int)rank];
-                if (standing >= limit)
-                    return rank;
+                ++rank;
+                ++i;
             }
-            return ReputationRank.Min;
+
+            return (ReputationRank)rank;
         }
 
+        ReputationRank ReputationToRank(FactionRecord factionEntry, int standing)
+        {
+            ReputationRank rank = ReputationRank.Min;
+
+            var friendshipReactions = Global.DB2Mgr.GetFriendshipRepReactions(factionEntry.FriendshipRepID);
+            if (!friendshipReactions.Empty())
+                rank = ReputationToRankHelper(friendshipReactions, standing, (FriendshipRepReactionRecord frr) => { return frr.ReactionThreshold; });
+            else
+                rank = ReputationToRankHelper(ReputationRankThresholds, standing, (int threshold) => { return threshold; });
+
+            return rank;
+        }
+        
         public FactionState GetState(FactionRecord factionEntry)
         {
             return factionEntry.CanHaveReputation() ? GetState(factionEntry.ReputationIndex) : null;
@@ -88,24 +103,35 @@ namespace Game
 
         public int GetBaseReputation(FactionRecord factionEntry)
         {
-            if (factionEntry == null)
+            int dataIndex = GetFactionDataIndexForRaceAndClass(factionEntry);
+            if (dataIndex < 0)
                 return 0;
 
-            long raceMask = SharedConst.GetMaskForRace(_player.GetRace());
-            uint classMask = _player.GetClassMask();
-            for (var i = 0; i < 4; i++)
-            {
-                if ((Convert.ToBoolean(factionEntry.ReputationRaceMask[i] & raceMask) ||
-                    (factionEntry.ReputationRaceMask[i] == 0 && factionEntry.ReputationClassMask[i] != 0)) &&
-                    (Convert.ToBoolean(factionEntry.ReputationClassMask[i] & classMask) ||
-                    factionEntry.ReputationClassMask[i] == 0))
-                    return factionEntry.ReputationBase[i];
-            }
-
-            // in faction.dbc exist factions with (RepListId >=0, listed in character reputation list) with all BaseRepRaceMask[i] == 0
-            return 0;
+            return factionEntry.ReputationBase[dataIndex];
         }
 
+        int GetMinReputation(FactionRecord factionEntry)
+        {
+            var friendshipReactions = Global.DB2Mgr.GetFriendshipRepReactions(factionEntry.FriendshipRepID);
+            if (!friendshipReactions.Empty())
+                return friendshipReactions[0].ReactionThreshold;
+
+            return ReputationRankThresholds[0];
+        }
+
+        int GetMaxReputation(FactionRecord factionEntry)
+        {
+            var friendshipReactions = Global.DB2Mgr.GetFriendshipRepReactions(factionEntry.FriendshipRepID);
+            if (!friendshipReactions.Empty())
+                return friendshipReactions.LastOrDefault().ReactionThreshold;
+
+            int dataIndex = GetFactionDataIndexForRaceAndClass(factionEntry);
+            if (dataIndex >= 0 && factionEntry.ReputationMax[dataIndex] != 0)
+                return factionEntry.ReputationMax[dataIndex];
+
+            return ReputationRankThresholds.LastOrDefault();
+        }
+        
         public int GetReputation(FactionRecord factionEntry)
         {
             // Faction without recorded reputation. Just ignore.
@@ -122,13 +148,13 @@ namespace Game
         public ReputationRank GetRank(FactionRecord factionEntry)
         {
             int reputation = GetReputation(factionEntry);
-            return ReputationToRank(reputation);
+            return ReputationToRank(factionEntry, reputation);
         }
 
         ReputationRank GetBaseRank(FactionRecord factionEntry)
         {
             int reputation = GetBaseReputation(factionEntry);
-            return ReputationToRank(reputation);
+            return ReputationToRank(factionEntry, reputation);
         }
 
         public ReputationRank GetForcedRankIfAny(FactionTemplateRecord factionTemplateEntry)
@@ -146,21 +172,11 @@ namespace Game
 
         uint GetDefaultStateFlags(FactionRecord factionEntry)
         {
-            if (factionEntry == null)
+            int dataIndex = GetFactionDataIndexForRaceAndClass(factionEntry);
+            if (dataIndex < 0)
                 return 0;
 
-            long raceMask = SharedConst.GetMaskForRace(_player.GetRace());
-            uint classMask = _player.GetClassMask();
-            for (int i = 0; i < 4; i++)
-            {
-                if ((Convert.ToBoolean(factionEntry.ReputationRaceMask[i] & raceMask) ||
-                    (factionEntry.ReputationRaceMask[i] == 0 &&
-                     factionEntry.ReputationClassMask[i] != 0)) &&
-                    (Convert.ToBoolean(factionEntry.ReputationClassMask[i] & classMask) ||
-                     factionEntry.ReputationClassMask[i] == 0))
-                    return factionEntry.ReputationFlags[i];
-            }
-            return 0;
+            return factionEntry.ReputationFlags[dataIndex];
         }
 
         public void SendForceReactions()
@@ -252,7 +268,8 @@ namespace Game
                     if (Convert.ToBoolean(newFaction.Flags & FactionFlags.Visible))
                         ++_visibleFactionCount;
 
-                    UpdateRankCounters(ReputationRank.Hostile, GetBaseRank(factionEntry));
+                    if (factionEntry.FriendshipRepID == 0)
+                        UpdateRankCounters(ReputationRank.Hostile, GetBaseRank(factionEntry));
 
                     _factions[newFaction.ReputationListID] = newFaction;
                 }
@@ -363,13 +380,13 @@ namespace Game
                     standing += factionState.Standing + BaseRep;
                 }
 
-                if (standing > Reputation_Cap)
-                    standing = Reputation_Cap;
-                else if (standing < Reputation_Bottom)
-                    standing = Reputation_Bottom;
+                if (standing > GetMaxReputation(factionEntry))
+                    standing = GetMaxReputation(factionEntry);
+                else if (standing < GetMinReputation(factionEntry))
+                    standing = GetMinReputation(factionEntry);
 
-                ReputationRank old_rank = ReputationToRank(factionState.Standing + BaseRep);
-                ReputationRank new_rank = ReputationToRank(standing);
+                ReputationRank old_rank = ReputationToRank(factionEntry, factionState.Standing + BaseRep);
+                ReputationRank new_rank = ReputationToRank(factionEntry, standing);
 
                 int newStanding = standing - BaseRep;
 
@@ -387,8 +404,8 @@ namespace Game
                 if (new_rank > old_rank)
                     _sendFactionIncreased = true;
 
-                UpdateRankCounters(old_rank, new_rank);
-
+                if (factionEntry.FriendshipRepID == 0)
+                    UpdateRankCounters(old_rank, new_rank);
 
                 _player.UpdateCriteria(CriteriaTypes.KnownFactions, factionEntry.Id);
                 _player.UpdateCriteria(CriteriaTypes.GainReputation, factionEntry.Id);
@@ -524,10 +541,13 @@ namespace Game
                         faction.Standing = result.Read<int>(1);
 
                         // update counters
-                        int BaseRep = GetBaseReputation(factionEntry);
-                        ReputationRank old_rank = ReputationToRank(BaseRep);
-                        ReputationRank new_rank = ReputationToRank(BaseRep + faction.Standing);
-                        UpdateRankCounters(old_rank, new_rank);
+                        if (factionEntry.FriendshipRepID == 0)
+                        {
+                            int BaseRep = GetBaseReputation(factionEntry);
+                            ReputationRank old_rank = ReputationToRank(factionEntry, BaseRep);
+                            ReputationRank new_rank = ReputationToRank(factionEntry, BaseRep + faction.Standing);
+                            UpdateRankCounters(old_rank, new_rank);
+                        }
 
                         FactionFlags dbFactionFlags = (FactionFlags)result.Read<uint>(2);
 
@@ -601,6 +621,24 @@ namespace Game
                 ++_honoredFactionCount;
         }
 
+        int GetFactionDataIndexForRaceAndClass(FactionRecord factionEntry)
+        {
+            if (factionEntry == null)
+                return -1;
+
+            long raceMask = SharedConst.GetMaskForRace(_player.GetRace());
+            short classMask = (short)_player.GetClassMask();
+            for (int i = 0; i < 4; i++)
+            {
+                if ((factionEntry.ReputationRaceMask[i].HasAnyFlag(raceMask) || (factionEntry.ReputationRaceMask[i] == 0 && factionEntry.ReputationClassMask[i] != 0))
+                    && (factionEntry.ReputationClassMask[i].HasAnyFlag(classMask) || factionEntry.ReputationClassMask[i] == 0))
+
+                    return i;
+            }
+
+            return -1;
+        }
+        
         public byte GetVisibleFactionCount() { return _visibleFactionCount; }
 
         public byte GetHonoredFactionCount() { return _honoredFactionCount; }
@@ -633,13 +671,13 @@ namespace Game
             if (factionEntry == null)
                 return 0;
 
-            ulong raceMask = (ulong)SharedConst.GetMaskForRace(race);
+            long raceMask = SharedConst.GetMaskForRace(race);
             uint classMask = (1u << ((int)playerClass - 1));
 
             for (int i = 0; i < 4; i++)
             {
                 if ((factionEntry.ReputationClassMask[i] == 0 || factionEntry.ReputationClassMask[i].HasAnyFlag((short)classMask))
-                    && (factionEntry.ReputationRaceMask[i] == 0 || factionEntry.ReputationRaceMask[i].HasAnyFlag((uint)raceMask)))
+                    && (factionEntry.ReputationRaceMask[i] == 0 || factionEntry.ReputationRaceMask[i].HasAnyFlag(raceMask)))
                     return factionEntry.ReputationBase[i];
             }
 
@@ -655,19 +693,38 @@ namespace Game
         bool _sendFactionIncreased; //! Play visual effect on next SMSG_SET_FACTION_STANDING sent
         #endregion
 
-        public static int[] PointsInRank = { 36000, 3000, 3000, 3000, 6000, 12000, 21000, 1000 };
+        public static int[] ReputationRankThresholds =
+        {
+            -42000,
+            // Hated
+            -6000,
+            // Hostile
+            -3000,
+            // Unfriendly
+            0,
+            // Neutral
+            3000,
+            // Friendly
+            9000,
+            // Honored
+            21000,
+            // Revered
+            42000
+            // Exalted
+        };
+
         public static CypherStrings[] ReputationRankStrIndex =
         {
             CypherStrings.RepHated, CypherStrings.RepHostile, CypherStrings.RepUnfriendly, CypherStrings.RepNeutral,
             CypherStrings.RepFriendly, CypherStrings.RepHonored, CypherStrings.RepRevered, CypherStrings.RepExalted
         };
-        const int Reputation_Cap = 42999;
+
+        const int Reputation_Cap = 42000;
         const int Reputation_Bottom = -42000;
         SortedDictionary<uint, FactionState> _factions = new();
         Dictionary<uint, ReputationRank> _forcedReactions = new();
-
-
     }
+
     public class FactionState
     {
         public uint Id;

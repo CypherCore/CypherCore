@@ -405,6 +405,15 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_FACTION_TEMPLATE, "SELECT ID, Faction, Flags, FactionGroup, FriendGroup, EnemyGroup, Enemies1, Enemies2, Enemies3, " +        
                 "Enemies4, Friend1, Friend2, Friend3, Friend4 FROM faction_template");
 
+            // FriendshipRepReaction.db2
+            PrepareStatement(HotfixStatements.SEL_FRIENDSHIP_REP_REACTION, "SELECT ID, Reaction, FriendshipRepID, ReactionThreshold FROM friendship_rep_reaction");
+            PrepareStatement(HotfixStatements.SEL_FRIENDSHIP_REP_REACTION_LOCALE, "SELECT ID, Reaction_lang FROM friendship_rep_reaction_locale WHERE locale = ?");
+
+            // FriendshipReputation.db2
+            PrepareStatement(HotfixStatements.SEL_FRIENDSHIP_REPUTATION, "SELECT Description, StandingModified, StandingChanged, ID, FactionID, TextureFileID, Flags FROM friendship_reputation");
+            PrepareStatement(HotfixStatements.SEL_FRIENDSHIP_REPUTATION_LOCALE, "SELECT ID, Description_lang, StandingModified_lang, StandingChanged_lang FROM friendship_reputation_locale WHERE locale = ?");
+
+
             // GameobjectDisplayInfo.db2
             PrepareStatement(HotfixStatements.SEL_GAMEOBJECT_DISPLAY_INFO, "SELECT ID, GeoBoxMinX, GeoBoxMinY, GeoBoxMinZ, GeoBoxMaxX, GeoBoxMaxY, GeoBoxMaxZ, " +        
                 "FileDataID, ObjectEffectPackageID, OverrideLootEffectScale, OverrideNameScale FROM gameobject_display_info");
@@ -1375,6 +1384,12 @@ namespace Framework.Database
         SEL_FACTION_LOCALE,
 
         SEL_FACTION_TEMPLATE,
+
+        SEL_FRIENDSHIP_REP_REACTION,
+        SEL_FRIENDSHIP_REP_REACTION_LOCALE,
+
+        SEL_FRIENDSHIP_REPUTATION,
+        SEL_FRIENDSHIP_REPUTATION_LOCALE,
 
         SEL_GAMEOBJECT_DISPLAY_INFO,
 

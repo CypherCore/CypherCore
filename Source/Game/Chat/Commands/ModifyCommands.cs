@@ -393,42 +393,7 @@ namespace Game.Chat
             if (factionId == 0 || !int.TryParse(rankTxt, out int amount))
                 return false;
 
-            if ((amount == 0) && !(amount < 0) && !rankTxt.IsNumber())
-            {
-                string rankStr = rankTxt.ToLower();
-
-                int r = 0;
-                amount = -42000;
-                for (; r < (int)ReputationRank.Max; ++r)
-                {
-                    string rank = handler.GetCypherString(ReputationMgr.ReputationRankStrIndex[r]);
-                    if (string.IsNullOrEmpty(rank))
-                        continue;
-
-                    if (rank.Equals(rankStr))
-                    {
-                        string deltaTxt = args.NextString();
-                        if (!string.IsNullOrEmpty(deltaTxt))
-                        {
-                            if (!int.TryParse(deltaTxt, out int delta) || delta < 0 || (delta > ReputationMgr.PointsInRank[r] - 1))
-                            {
-                                handler.SendSysMessage(CypherStrings.CommandFactionDelta, (ReputationMgr.PointsInRank[r] - 1));
-                                return false;
-                            }
-                            amount += delta;
-                        }
-                        break;
-                    }
-                    amount += ReputationMgr.PointsInRank[r];
-                }
-                if (r >= (int)ReputationRank.Max)
-                {
-                    handler.SendSysMessage(CypherStrings.CommandFactionInvparam, rankTxt);
-                    return false;
-                }
-            }
-
-            FactionRecord factionEntry = CliDB.FactionStorage.LookupByKey(factionId);
+            var factionEntry = CliDB.FactionStorage.LookupByKey(factionId);
             if (factionEntry == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandFactionUnknown, factionId);
@@ -439,6 +404,50 @@ namespace Game.Chat
             {
                 handler.SendSysMessage(CypherStrings.CommandFactionNorepError, factionEntry.Name[handler.GetSessionDbcLocale()], factionId);
                 return false;
+            }
+
+            // try to find rank by name
+            if ((amount == 0) && !(amount < 0) && !rankTxt.IsNumber())
+            {
+                string rankStr = rankTxt.ToLower();
+
+                int i = 0;
+                int r = 0;
+
+                for (; i != ReputationMgr.ReputationRankThresholds.Length - 1; ++i, ++r)
+                {
+                    string rank = handler.GetCypherString(ReputationMgr.ReputationRankStrIndex[r]);
+                    if (string.IsNullOrEmpty(rank))
+                        continue;
+
+                    if (rank.Equals(rankStr))
+                        break;
+
+                    if (i == ReputationMgr.ReputationRankThresholds.Length - 1)
+                    {
+                        handler.SendSysMessage(CypherStrings.CommandFactionInvparam, rankTxt);
+                        return false;
+                    }
+
+                    amount = ReputationMgr.ReputationRankThresholds[i];
+
+                    string deltaTxt = args.NextString();
+                    if (!string.IsNullOrEmpty(deltaTxt))
+                    {
+                        int toNextRank = 0;
+                        var nextThresholdIndex = i;
+                        ++nextThresholdIndex;
+                        if (nextThresholdIndex != ReputationMgr.ReputationRankThresholds.Length - 1)
+                            toNextRank = nextThresholdIndex - i;
+
+                        if (!int.TryParse(deltaTxt, out int delta) || delta < 0 || delta >= toNextRank)
+                        {
+                            handler.SendSysMessage(CypherStrings.CommandFactionDelta, Math.Max(0, toNextRank - 1));
+                            return false;
+                        }
+                        amount += delta;
+                    }
+                }
             }
 
             target.GetReputationMgr().SetOneFactionReputation(factionEntry, amount, false);

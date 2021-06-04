@@ -99,4 +99,23 @@ namespace Game.DataStorage
         }
         public bool IsContestedGuardFaction() { return (Flags & (ushort)FactionTemplateFlags.ContestedGuard) != 0; }
     }
+
+    public sealed class FriendshipRepReactionRecord
+    {
+        public uint Id;
+        public LocalizedString Reaction;
+        public uint FriendshipRepID;
+        public ushort ReactionThreshold;
+    }
+
+    public sealed class FriendshipReputationRecord
+    {
+        public LocalizedString Description;
+        public LocalizedString StandingModified;
+        public LocalizedString StandingChanged;
+        public uint Id;
+        public int FactionID;
+        public int TextureFileID;
+        public FriendshipReputationFlags Flags;
+    }
 }
