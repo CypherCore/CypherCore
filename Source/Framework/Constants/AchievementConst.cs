@@ -84,24 +84,6 @@ namespace Framework.Constants
         QuestObjective = 0x10
     }
 
-    public enum CriteriaCondition
-    {
-        None = 0,
-        NoDeath = 1,
-        Unk2 = 2,
-        BgMap = 3,
-        NoLose = 4,
-        RemoveAura = 5,
-        CastSpell = 8,
-        NoSpellHit = 9,
-        NotInGroup = 10,
-        LostPetBattle = 11,
-        Unk13 = 13,
-        Event = 14,
-
-        Max
-    }
-
     public enum CriteriaAdditionalCondition
     {
         SourceDrunkValue = 1,
@@ -415,6 +397,27 @@ namespace Framework.Constants
         SoulbindMinConduitsAtRank = 309, // NYI
         IsRestrictedAccount = 310, // NYI
         SourceFlying = 311,
+    }
+
+    public enum CriteriaFailEvent : byte
+    {
+        None = 0,
+        Death = 1,    // Death
+        Hours24WithoutCompletingDailyQuest = 2,    // 24 hours without completing a daily quest
+        LeaveBattleground = 3,    // Leave a battleground
+        LoseRankedArenaMatchWithTeamSize = 4,    // Lose a ranked arena match with team size {#Team Size}
+        LoseAura = 5,    // Lose aura "{Spell}"
+        GainAura = 6,    // Gain aura "{Spell}"
+        GainAuraEffect = 7,    // Gain aura effect "{SpellAuraNames.EnumID}"
+        CastSpell = 8,    // Cast spell "{Spell}"
+        BeSpellTarget = 9,    // Have spell "{Spell}" cast on you
+        ModifyPartyStatus = 10,   // Modify your party status
+        LosePetBattle = 11,   // Lose a pet battle
+        BattlePetDies = 12,   // Battle pet dies
+        DailyQuestsCleared = 13,   // Daily quests cleared
+        SendEvent = 14,   // Send event "{GameEvents}" (player-sent/instance only)
+
+        Max
     }
 
     public enum CriteriaFlags

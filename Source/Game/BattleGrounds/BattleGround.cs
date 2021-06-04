@@ -917,7 +917,7 @@ namespace Game.BattleGrounds
                 player.SetBGTeam(0);
 
                 // remove all criterias on bg leave
-                player.ResetCriteria(CriteriaCondition.BgMap, GetMapId(), true);
+                player.ResetCriteria(CriteriaFailEvent.LeaveBattleground, GetMapId(), true);
 
                 if (Transport)
                     player.TeleportToBGEntryPoint();
@@ -1066,7 +1066,7 @@ namespace Game.BattleGrounds
             }
 
             // reset all map criterias on map enter
-            player.ResetCriteria(CriteriaCondition.BgMap, GetMapId(), true);
+            player.ResetCriteria(CriteriaFailEvent.LeaveBattleground, GetMapId(), true);
 
             // setup BG group membership
             PlayerAddedToBGCheckIfBGIsRunning(player);

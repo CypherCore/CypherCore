@@ -364,15 +364,15 @@ namespace Game.Achievements
             }
         }
 
-        public void ResetCriteria(CriteriaCondition condition, uint failAsset, bool evenIfCriteriaComplete)
+        public void ResetCriteria(CriteriaFailEvent failEvent, uint failAsset, bool evenIfCriteriaComplete)
         {
-            Log.outDebug(LogFilter.Achievement, $"ResetAchievementCriteria({condition}, {failAsset}, {evenIfCriteriaComplete})");
+            Log.outDebug(LogFilter.Achievement, $"ResetAchievementCriteria({failEvent}, {failAsset}, {evenIfCriteriaComplete})");
 
             // disable for gamemasters with GM-mode enabled
             if (_owner.IsGameMaster())
                 return;
 
-            var achievementCriteriaList = Global.CriteriaMgr.GetCriteriaByFailEvent(condition, (int)failAsset);
+            var achievementCriteriaList = Global.CriteriaMgr.GetCriteriaByFailEvent(failEvent, (int)failAsset);
             if (!achievementCriteriaList.Empty())
             {
                 foreach (Criteria achievementCriteria in achievementCriteriaList)

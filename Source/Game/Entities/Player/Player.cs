@@ -658,7 +658,7 @@ namespace Game.Entities
                 UpdateCriteria(CriteriaTypes.DeathInDungeon, 1);
 
                 // reset all death criterias
-                ResetCriteria(CriteriaCondition.NoDeath, 0);
+                ResetCriteria(CriteriaFailEvent.Death, 0);
             }
 
             base.SetDeathState(s);

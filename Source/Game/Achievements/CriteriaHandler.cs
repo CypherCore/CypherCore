@@ -900,13 +900,13 @@ namespace Game.Achievements
             if (criteria.Entry.FailEvent == 0)
                 return true;
 
-            switch ((CriteriaCondition)criteria.Entry.FailEvent)
+            switch ((CriteriaFailEvent)criteria.Entry.FailEvent)
             {
-                case CriteriaCondition.BgMap:
+                case CriteriaFailEvent.LeaveBattleground:
                     if (!referencePlayer.InBattleground())
                         return false;
                     break;
-                case CriteriaCondition.NotInGroup:
+                case CriteriaFailEvent.ModifyPartyStatus:
                     if (referencePlayer.GetGroup())
                         return false;
                     break;
@@ -1144,7 +1144,7 @@ namespace Game.Achievements
                     if (miscValue1 == 0)
                         return false;
 
-                    if (criteria.Entry.FailEvent == (uint)CriteriaCondition.BgMap)
+                    if ((CriteriaFailEvent)criteria.Entry.FailEvent == CriteriaFailEvent.LeaveBattleground)
                     {
                         if (!referencePlayer.InBattleground())
                             return false;
@@ -2627,7 +2627,7 @@ namespace Game.Achievements
         MultiMap<CriteriaTypes, Criteria> _questObjectiveCriteriasByType = new();
 
         MultiMap<CriteriaTimedTypes, Criteria> _criteriasByTimedType = new();
-        MultiMap<int, Criteria>[] _criteriasByFailEvent = new MultiMap<int, Criteria>[(int)CriteriaCondition.Max];
+        MultiMap<int, Criteria>[] _criteriasByFailEvent = new MultiMap<int, Criteria>[(int)CriteriaFailEvent.Max];
 
         CriteriaManager()
         {
@@ -2746,7 +2746,7 @@ namespace Game.Achievements
                     _criteriaTreeByCriteria.Add(pair.Value.Entry.CriteriaID, pair.Value);
             }
 
-            for (var i = 0; i < (int)CriteriaCondition.Max; ++i)
+            for (var i = 0; i < (int)CriteriaFailEvent.Max; ++i)
                 _criteriasByFailEvent[i] = new MultiMap<int, Criteria>();
 
             // Load criteria
@@ -2759,7 +2759,7 @@ namespace Game.Achievements
                 Cypher.Assert(criteriaEntry.Type < CriteriaTypes.TotalTypes,
                     $"CRITERIA_TYPE_TOTAL must be greater than or equal to {criteriaEntry.Type + 1} but is currently equal to {CriteriaTypes.TotalTypes}");
                 Cypher.Assert(criteriaEntry.StartEvent < CriteriaTimedTypes.Max, $"CRITERIA_TYPE_TOTAL must be greater than or equal to {criteriaEntry.StartEvent + 1} but is currently equal to {CriteriaTimedTypes.Max}");
-                Cypher.Assert(criteriaEntry.FailEvent < (byte)CriteriaCondition.Max, $"CRITERIA_CONDITION_MAX must be greater than or equal to {criteriaEntry.FailEvent + 1} but is currently equal to {CriteriaCondition.Max}");
+                Cypher.Assert(criteriaEntry.FailEvent < (byte)CriteriaFailEvent.Max, $"CRITERIA_CONDITION_MAX must be greater than or equal to {criteriaEntry.FailEvent + 1} but is currently equal to {CriteriaFailEvent.Max}");
 
                 var treeList = _criteriaTreeByCriteria.LookupByKey(criteriaEntry.Id);
                 if (treeList.Empty())
@@ -3000,9 +3000,9 @@ namespace Game.Achievements
             return _criteriasByTimedType.LookupByKey(type);
         }
 
-        public List<Criteria> GetCriteriaByFailEvent(CriteriaCondition condition, int asset)
+        public List<Criteria> GetCriteriaByFailEvent(CriteriaFailEvent failEvent, int asset)
         {
-            return _criteriasByFailEvent[(int)condition].LookupByKey(asset);
+            return _criteriasByFailEvent[(int)failEvent].LookupByKey(asset);
         }
 
         public CriteriaDataSet GetCriteriaDataSet(Criteria criteria)
