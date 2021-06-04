@@ -3005,10 +3005,14 @@ namespace Game.Entities
 
         public bool HasAura(uint spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0)
         {
-            if (GetAuraApplication(spellId, casterGUID, itemCasterGUID, reqEffMask) != null)
-                return true;
-            return false;
+            return GetAuraApplication(spellId, casterGUID, itemCasterGUID, reqEffMask) != null;
         }
+
+        public bool HasAura(Func<Aura, bool> predicate)
+        {
+            return GetAuraApplication(predicate) != null;
+        }
+        
         public bool HasAuraEffect(uint spellId, uint effIndex, ObjectGuid casterGUID = default)
         {
             var range = m_appliedAuras.LookupByKey(spellId);
@@ -4085,27 +4089,74 @@ namespace Game.Entities
 
         public AuraApplication GetAuraApplication(uint spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0, AuraApplication except = null)
         {
-            var range = m_appliedAuras.LookupByKey(spellId);
-            if (!range.Empty())
+            return GetAuraApplication(spellId, app =>
             {
-                foreach (var app in range)
+                Aura aura = app.GetBase();
+
+                if (((aura.GetEffectMask() & reqEffMask) == reqEffMask) && (casterGUID.IsEmpty() || aura.GetCasterGUID() == casterGUID)
+                    && (itemCasterGUID.IsEmpty() || aura.GetCastItemGUID() == itemCasterGUID) && (except == null || except != app))
                 {
-                    Aura aura = app.GetBase();
-                    if (((aura.GetEffectMask() & reqEffMask) == reqEffMask) && (casterGUID.IsEmpty() || aura.GetCasterGUID() == casterGUID)
-                        && (itemCasterGUID.IsEmpty() || aura.GetCastItemGUID() == itemCasterGUID) && (except == null || except != app))
-                    {
-                        return app;
-                    }
+                    return true;
                 }
-            }
+
+                return false;
+            });
+        }
+
+        public AuraApplication GetAuraApplication(uint spellId, Func<AuraApplication, bool> predicate)
+        {
+            foreach (var app in m_appliedAuras.LookupByKey(spellId))
+                if (predicate(app))
+                    return app;
+
             return null;
         }
+
+        public AuraApplication GetAuraApplication(uint spellId, Func<Aura, bool> predicate)
+        {
+            foreach (var app in m_appliedAuras.LookupByKey(spellId))
+                if (predicate(app.GetBase()))
+                    return app;
+
+            return null;
+        }
+
+        public AuraApplication GetAuraApplication(Func<AuraApplication, bool> predicate)
+        {
+            foreach (var pair in GetAppliedAuras())
+                if (predicate(pair.Value))
+                    return pair.Value;
+
+            return null;
+        }
+
+        public AuraApplication GetAuraApplication(Func<Aura, bool> predicate)
+        {
+            foreach (var pair in GetAppliedAuras())
+                if (predicate(pair.Value.GetBase()))
+                    return pair.Value;
+
+            return null;
+        }
+
         public Aura GetAura(uint spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0)
         {
             AuraApplication aurApp = GetAuraApplication(spellId, casterGUID, itemCasterGUID, reqEffMask);
             return aurApp?.GetBase();
         }
 
+        public Aura GetAura(uint spellId, Func<Aura, bool> predicate)
+        {
+            AuraApplication aurApp = GetAuraApplication(spellId, predicate);
+            return aurApp?.GetBase();
+        }
+
+        public Aura GetAura(Func<Aura, bool> predicate)
+        {
+            AuraApplication aurApp = GetAuraApplication(predicate);
+            return aurApp?.GetBase();
+        }
+        
         public uint BuildAuraStateUpdateForTarget(Unit target)
         {
             uint auraStates = m_unitData.AuraState & ~(uint)AuraStateType.PerCasterAuraStateMask;
