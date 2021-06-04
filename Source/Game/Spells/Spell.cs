@@ -2092,7 +2092,7 @@ namespace Game.Spells
             Player player = unit.ToPlayer();
             if (player != null)
             {
-                player.StartCriteriaTimer(CriteriaTimedTypes.SpellTarget, m_spellInfo.Id);
+                player.StartCriteriaTimer(CriteriaStartEvent.BeSpellTarget, m_spellInfo.Id);
                 player.UpdateCriteria(CriteriaTypes.BeSpellTarget, m_spellInfo.Id, 0, 0, m_caster);
                 player.UpdateCriteria(CriteriaTypes.BeSpellTarget2, m_spellInfo.Id);
             }
@@ -2100,7 +2100,7 @@ namespace Game.Spells
             player = m_caster.ToPlayer();
             if (player != null)
             {
-                player.StartCriteriaTimer(CriteriaTimedTypes.SpellCaster, m_spellInfo.Id);
+                player.StartCriteriaTimer(CriteriaStartEvent.CastSpell, m_spellInfo.Id);
                 player.UpdateCriteria(CriteriaTypes.CastSpell2, m_spellInfo.Id, 0, 0, unit);
             }
 
@@ -2848,7 +2848,7 @@ namespace Game.Spells
             {
                 if (!Convert.ToBoolean(_triggeredCastFlags & TriggerCastFlags.IgnoreCastItem) && m_CastItem != null)
                 {
-                    player.StartCriteriaTimer(CriteriaTimedTypes.Item, m_CastItem.GetEntry());
+                    player.StartCriteriaTimer(CriteriaStartEvent.UseItem, m_CastItem.GetEntry());
                     player.UpdateCriteria(CriteriaTypes.UseItem, m_CastItem.GetEntry());
                 }
 

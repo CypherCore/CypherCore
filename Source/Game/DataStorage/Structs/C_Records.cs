@@ -479,7 +479,7 @@ namespace Game.DataStorage
         public CriteriaTypes Type;
         public uint Asset;
         public uint ModifierTreeId;
-        public CriteriaTimedTypes StartEvent;
+        public byte StartEvent;
         public uint StartAsset;
         public ushort StartTimer;
         public byte FailEvent;

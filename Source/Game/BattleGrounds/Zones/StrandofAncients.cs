@@ -344,7 +344,7 @@ namespace Game.BattleGrounds.Zones
                     ToggleTimer();
                     DemolisherStartState(false);
                     Status = SAStatus.RoundOne;
-                    StartCriteriaTimer(CriteriaTimedTypes.Event, (Attackers == TeamId.Alliance) ? 23748 : 21702u);
+                    StartCriteriaTimer(CriteriaStartEvent.SendEvent, (Attackers == TeamId.Alliance) ? 23748 : 21702u);
                 }
                 if (TotalTime >= SATimers.BoatStart)
                     StartShips();
@@ -367,7 +367,7 @@ namespace Game.BattleGrounds.Zones
                     ToggleTimer();
                     DemolisherStartState(false);
                     Status = SAStatus.RoundTwo;
-                    StartCriteriaTimer(CriteriaTimedTypes.Event, (Attackers == TeamId.Alliance) ? 23748 : 21702u);
+                    StartCriteriaTimer(CriteriaStartEvent.SendEvent, (Attackers == TeamId.Alliance) ? 23748 : 21702u);
                     // status was set to STATUS_WAIT_JOIN manually for Preparation, set it back now
                     SetStatus(BattlegroundStatus.InProgress);
                     foreach (var pair in GetPlayers())

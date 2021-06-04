@@ -420,6 +420,27 @@ namespace Framework.Constants
         Max
     }
 
+    public enum CriteriaStartEvent : byte
+    {
+        None = 0, // - NONE -
+        ReachLevel = 1, // Reach level {#Level}
+        CompleteDailyQuest = 2, // Complete daily quest "{QuestV2}"
+        StartBattleground = 3, // Start battleground "{Map}"
+        WinRankedArenaMatchWithTeamSize = 4, // Win a ranked arena match with team size {#Team Size}
+        GainAura = 5, // Gain aura "{Spell}"
+        GainAuraEffect = 6, // Gain aura effect "{SpellAuraNames.EnumID}"
+        CastSpell = 7, // Cast spell "{Spell}"
+        BeSpellTarget = 8, // Have spell "{Spell}" cast on you
+        AcceptQuest = 9, // Accept quest "{QuestV2}"
+        KillNPC = 10, // Kill NPC "{Creature}"
+        KillPlayer = 11, // Kill player
+        UseItem = 12, // Use item "{Item}"
+        SendEvent = 13, // Send event "{GameEvents}" (player-sent/instance only)
+        BeginScenarioStep = 14, // Begin scenario step "{#Step}" (for use with "Player on Scenario" modifier only)
+
+        Max
+    }
+
     public enum CriteriaFlags
     {
         ShowProgressBar = 0x01,
@@ -428,21 +449,6 @@ namespace Framework.Constants
         ResetOnStart = 0x08,
         IsDate = 0x10,
         MoneyCounter = 0x20
-    }
-
-    public enum CriteriaTimedTypes : byte
-    {
-        Event = 1,    // Timer Is Started By Internal Event With Id In Timerstartevent
-        Quest = 2,    // Timer Is Started By Accepting Quest With Entry In Timerstartevent
-        SpellCaster = 5,    // Timer Is Started By Casting A Spell With Entry In Timerstartevent
-        SpellTarget = 6,    // Timer Is Started By Being Target Of Spell With Entry In Timerstartevent
-        Creature = 7,    // Timer Is Started By Killing Creature With Entry In Timerstartevent
-        Item = 9,    // Timer Is Started By Using Item With Entry In Timerstartevent
-        Unk = 10,   // Unknown
-        Unk2 = 13,   // Unknown
-        ScenarioStage = 14,   // Timer is started by changing stages in a scenario
-
-        Max
     }
 
     public enum CriteriaTypes : byte

@@ -1772,13 +1772,13 @@ namespace Game.BattleGrounds
             return Global.ObjectMgr.GetClosestGraveYard(player, player.GetTeam(), player);
         }
 
-        public void StartCriteriaTimer(CriteriaTimedTypes type, uint entry)
+        public void StartCriteriaTimer(CriteriaStartEvent startEvent, uint entry)
         {
             foreach (var guid in GetPlayers().Keys)
             {
                 Player player = Global.ObjAccessor.FindPlayer(guid);
                 if (player)
-                    player.StartCriteriaTimer(type, entry);
+                    player.StartCriteriaTimer(startEvent, entry);
             }
         }
 

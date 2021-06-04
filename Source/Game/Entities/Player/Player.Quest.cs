@@ -810,7 +810,7 @@ namespace Game.Entities
 
             m_QuestStatusSave[questId] = QuestSaveType.Default;
 
-            StartCriteriaTimer(CriteriaTimedTypes.Quest, questId);
+            StartCriteriaTimer(CriteriaStartEvent.AcceptQuest, questId);
 
             SendQuestUpdate(questId);
 
@@ -2234,7 +2234,7 @@ namespace Game.Entities
                     real_entry = killed.GetEntry();
             }
 
-            StartCriteriaTimer(CriteriaTimedTypes.Creature, real_entry);   // MUST BE CALLED FIRST
+            StartCriteriaTimer(CriteriaStartEvent.KillNPC, real_entry);   // MUST BE CALLED FIRST
             UpdateCriteria(CriteriaTypes.KillCreature, real_entry, addKillCount, 0, killed);
 
             UpdateQuestObjectiveProgress(QuestObjectiveType.Monster, (int)entry, 1, guid);

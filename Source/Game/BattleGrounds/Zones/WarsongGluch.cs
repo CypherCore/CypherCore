@@ -195,7 +195,7 @@ namespace Game.BattleGrounds.Zones
             SpawnBGObject(WSGObjectTypes.DoorH4, BattlegroundConst.RespawnOneDay);
 
             // players joining later are not eligibles
-            StartCriteriaTimer(CriteriaTimedTypes.Event, 8563);
+            StartCriteriaTimer(CriteriaStartEvent.SendEvent, 8563);
         }
 
         public override void AddPlayer(Player player)
@@ -446,7 +446,7 @@ namespace Game.BattleGrounds.Zones
                 UpdateFlagState(Team.Horde, WSGFlagState.OnPlayer);
                 UpdateWorldState(WSGWorldStates.FlagUnkAlliance, 1);
                 player.CastSpell(player, WSGSpellId.SilverwingFlag, true);
-                player.StartCriteriaTimer(CriteriaTimedTypes.SpellTarget, WSGSpellId.SilverwingFlagPicked);
+                player.StartCriteriaTimer(CriteriaStartEvent.BeSpellTarget, WSGSpellId.SilverwingFlagPicked);
                 if (_flagState[1] == WSGFlagState.OnPlayer)
                     _bothFlagsKept = true;
             }
@@ -464,7 +464,7 @@ namespace Game.BattleGrounds.Zones
                 UpdateFlagState(Team.Alliance, WSGFlagState.OnPlayer);
                 UpdateWorldState(WSGWorldStates.FlagUnkHorde, 1);
                 player.CastSpell(player, WSGSpellId.WarsongFlag, true);
-                player.StartCriteriaTimer(CriteriaTimedTypes.SpellTarget, WSGSpellId.WarsongFlagPicked);
+                player.StartCriteriaTimer(CriteriaStartEvent.BeSpellTarget, WSGSpellId.WarsongFlagPicked);
                 if (_flagState[0] == WSGFlagState.OnPlayer)
                     _bothFlagsKept = true;
             }

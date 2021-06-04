@@ -615,23 +615,23 @@ namespace Game.Maps
         }
 
         // Start timed achievement for all players in instance
-        public void DoStartCriteriaTimer(CriteriaTimedTypes type, uint entry)
+        public void DoStartCriteriaTimer(CriteriaStartEvent startEvent, uint entry)
         {
             var PlayerList = instance.GetPlayers();
 
             if (!PlayerList.Empty())
                 foreach (var player in PlayerList)
-                    player.StartCriteriaTimer(type, entry);
+                    player.StartCriteriaTimer(startEvent, entry);
         }
 
         // Stop timed achievement for all players in instance
-        public void DoStopCriteriaTimer(CriteriaTimedTypes type, uint entry)
+        public void DoStopCriteriaTimer(CriteriaStartEvent startEvent, uint entry)
         {
             var PlayerList = instance.GetPlayers();
 
             if (!PlayerList.Empty())
                 foreach (var player in PlayerList)
-                    player.RemoveCriteriaTimer(type, entry);
+                    player.RemoveCriteriaTimer(startEvent, entry);
         }
 
         // Remove Auras due to Spell on all players in instance

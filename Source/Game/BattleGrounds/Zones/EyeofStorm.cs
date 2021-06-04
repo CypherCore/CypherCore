@@ -132,7 +132,7 @@ namespace Game.BattleGrounds.Zones
             }
 
             // Achievement: Flurry
-            StartCriteriaTimer(CriteriaTimedTypes.Event, EotSMisc.EventStartBattle);
+            StartCriteriaTimer(CriteriaStartEvent.SendEvent, EotSMisc.EventStartBattle);
         }
 
         void AddPoints(Team Team, uint Points)

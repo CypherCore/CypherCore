@@ -43,14 +43,14 @@ namespace Game.Entities
         {
             return m_achievementSys.HasAchieved(achievementId);
         }
-        public void StartCriteriaTimer(CriteriaTimedTypes type, uint entry, uint timeLost = 0)
+        public void StartCriteriaTimer(CriteriaStartEvent startEvent, uint entry, uint timeLost = 0)
         {
-            m_achievementSys.StartCriteriaTimer(type, entry, timeLost);
+            m_achievementSys.StartCriteriaTimer(startEvent, entry, timeLost);
         }
 
-        public void RemoveCriteriaTimer(CriteriaTimedTypes type, uint entry)
+        public void RemoveCriteriaTimer(CriteriaStartEvent startEvent, uint entry)
         {
-            m_achievementSys.RemoveCriteriaTimer(type, entry);
+            m_achievementSys.RemoveCriteriaTimer(startEvent, entry);
         }
 
         public void ResetCriteria(CriteriaFailEvent failEvent, uint failAsset, bool evenIfCriteriaComplete = false)

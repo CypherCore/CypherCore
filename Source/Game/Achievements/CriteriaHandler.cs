@@ -484,9 +484,9 @@ namespace Game.Achievements
             }
         }
 
-        public void StartCriteriaTimer(CriteriaTimedTypes type, uint entry, uint timeLost = 0)
+        public void StartCriteriaTimer(CriteriaStartEvent startEvent, uint entry, uint timeLost = 0)
         {
-            List<Criteria> criteriaList = Global.CriteriaMgr.GetTimedCriteriaByType(type);
+            List<Criteria> criteriaList = Global.CriteriaMgr.GetTimedCriteriaByType(startEvent);
             foreach (Criteria criteria in criteriaList)
             {
                 if (criteria.Entry.StartAsset != entry)
@@ -515,9 +515,9 @@ namespace Game.Achievements
             }
         }
 
-        public void RemoveCriteriaTimer(CriteriaTimedTypes type, uint entry)
+        public void RemoveCriteriaTimer(CriteriaStartEvent startEvent, uint entry)
         {
-            List<Criteria> criteriaList = Global.CriteriaMgr.GetTimedCriteriaByType(type);
+            List<Criteria> criteriaList = Global.CriteriaMgr.GetTimedCriteriaByType(startEvent);
             foreach (Criteria criteria in criteriaList)
             {
                 if (criteria.Entry.StartAsset != entry)
@@ -2626,7 +2626,7 @@ namespace Game.Achievements
         MultiMap<CriteriaTypes, Criteria> _scenarioCriteriasByType = new();
         MultiMap<CriteriaTypes, Criteria> _questObjectiveCriteriasByType = new();
 
-        MultiMap<CriteriaTimedTypes, Criteria> _criteriasByTimedType = new();
+        MultiMap<CriteriaStartEvent, Criteria> _criteriasByTimedType = new();
         MultiMap<int, Criteria>[] _criteriasByFailEvent = new MultiMap<int, Criteria>[(int)CriteriaFailEvent.Max];
 
         CriteriaManager()
@@ -2758,7 +2758,7 @@ namespace Game.Achievements
             {
                 Cypher.Assert(criteriaEntry.Type < CriteriaTypes.TotalTypes,
                     $"CRITERIA_TYPE_TOTAL must be greater than or equal to {criteriaEntry.Type + 1} but is currently equal to {CriteriaTypes.TotalTypes}");
-                Cypher.Assert(criteriaEntry.StartEvent < CriteriaTimedTypes.Max, $"CRITERIA_TYPE_TOTAL must be greater than or equal to {criteriaEntry.StartEvent + 1} but is currently equal to {CriteriaTimedTypes.Max}");
+                Cypher.Assert(criteriaEntry.StartEvent < (byte)CriteriaStartEvent.Max, $"CRITERIA_TYPE_TOTAL must be greater than or equal to {criteriaEntry.StartEvent + 1} but is currently equal to {CriteriaStartEvent.Max}");
                 Cypher.Assert(criteriaEntry.FailEvent < (byte)CriteriaFailEvent.Max, $"CRITERIA_CONDITION_MAX must be greater than or equal to {criteriaEntry.FailEvent + 1} but is currently equal to {CriteriaFailEvent.Max}");
 
                 var treeList = _criteriaTreeByCriteria.LookupByKey(criteriaEntry.Id);
@@ -2841,7 +2841,7 @@ namespace Game.Achievements
                 }
 
                 if (criteriaEntry.StartTimer != 0)
-                    _criteriasByTimedType.Add(criteriaEntry.StartEvent, criteria);
+                    _criteriasByTimedType.Add((CriteriaStartEvent)criteriaEntry.StartEvent, criteria);
 
                 if (criteriaEntry.FailEvent != 0)
                     _criteriasByFailEvent[criteriaEntry.FailEvent].Add((int)criteriaEntry.FailAsset, criteria);
@@ -2995,9 +2995,9 @@ namespace Game.Achievements
             return _criteriaTreeByCriteria.LookupByKey(criteriaId);
         }
 
-        public List<Criteria> GetTimedCriteriaByType(CriteriaTimedTypes type)
+        public List<Criteria> GetTimedCriteriaByType(CriteriaStartEvent startEvent)
         {
-            return _criteriasByTimedType.LookupByKey(type);
+            return _criteriasByTimedType.LookupByKey(startEvent);
         }
 
         public List<Criteria> GetCriteriaByFailEvent(CriteriaFailEvent failEvent, int asset)
