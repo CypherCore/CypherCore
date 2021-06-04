@@ -988,6 +988,9 @@ namespace Framework.Database
                 "RtOperandType1, RtOperandType2, RtOperandType3, RtOperandType4, RtOperandType5, RtOperand1, RtOperand2, RtOperand3, RtOperand4, RtOperand5, " +        
                 "Logic1, Logic2, Logic3, Logic4, Logic5 FROM spell_item_enchantment_condition");
 
+            // SpellLabel.db2
+            PrepareStatement(HotfixStatements.SEL_SPELL_LABEL, "SELECT ID, LabelID, SpellID FROM spell_label");
+
             // SpellLearnSpell.db2
             PrepareStatement(HotfixStatements.SEL_SPELL_LEARN_SPELL, "SELECT ID, SpellID, LearnSpellID, OverridesSpellID FROM spell_learn_spell");
 
@@ -1692,6 +1695,8 @@ namespace Framework.Database
         SEL_SPELL_ITEM_ENCHANTMENT_LOCALE,
 
         SEL_SPELL_ITEM_ENCHANTMENT_CONDITION,
+
+        SEL_SPELL_LABEL,
 
         SEL_SPELL_LEARN_SPELL,
 

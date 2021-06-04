@@ -359,6 +359,13 @@ namespace Game.DataStorage
         public byte[] Logic = new byte[5];
     }
 
+    public sealed class SpellLabelRecord
+    {
+        public uint Id;
+        public uint LabelID;
+        public int SpellID;
+    }
+
     public sealed class SpellLearnSpellRecord
     {
         public uint Id;

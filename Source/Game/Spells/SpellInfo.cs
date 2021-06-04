@@ -31,7 +31,7 @@ namespace Game.Spells
 {
     public class SpellInfo
     {
-        public SpellInfo(SpellNameRecord spellName, Difficulty difficulty, SpellInfoLoadHelper data, List<SpellXSpellVisualRecord> visuals)
+        public SpellInfo(SpellNameRecord spellName, Difficulty difficulty, SpellInfoLoadHelper data, List<SpellLabelRecord> labels, List<SpellXSpellVisualRecord> visuals)
         {
             Id = spellName.Id;
             Difficulty = difficulty;
@@ -184,6 +184,9 @@ namespace Game.Spells
                 ChannelInterruptFlags = (SpellAuraInterruptFlags)_interrupt.ChannelInterruptFlags[0];
                 ChannelInterruptFlags2 = (SpellAuraInterruptFlags2)_interrupt.ChannelInterruptFlags[1];
             }
+
+            foreach (var label in labels)
+                Labels.Add(label.LabelID);
 
             // SpellLevelsEntry
             SpellLevelsRecord _levels = data.Levels;
@@ -3555,6 +3558,11 @@ namespace Game.Spells
             var playerCondition = CliDB.PlayerConditionStorage.LookupByKey(ShowFutureSpellPlayerConditionID);
             return playerCondition == null || ConditionManager.IsPlayerMeetingCondition(player, playerCondition);
         }
+
+        public bool HasLabel(uint labelId)
+        {
+            return Labels.Contains(labelId);
+        }
         
         public static SpellCastTargetFlags GetTargetFlagMask(SpellTargetObjectTypes objType)
         {
@@ -3724,6 +3732,8 @@ namespace Game.Spells
         public int RequiredAreasID { get; set; }
         public SpellSchoolMask SchoolMask { get; set; }
         public uint ChargeCategoryId;
+        public List<uint> Labels = new();
+
         // SpellScalingEntry
         public ScalingInfo Scaling;
         public uint ExplicitTargetMask { get; set; }

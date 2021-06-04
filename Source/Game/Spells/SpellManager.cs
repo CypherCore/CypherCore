@@ -2217,6 +2217,9 @@ namespace Game.Entities
             foreach (SpellInterruptsRecord interrupts in CliDB.SpellInterruptsStorage.Values)
                 GetLoadHelper(interrupts.SpellID, interrupts.DifficultyID).Interrupts = interrupts;
 
+            foreach (SpellLabelRecord label in CliDB.SpellLabelStorage.Values)
+                GetLoadHelper(label.LabelID, 0).Labels.Add(label);
+
             foreach (SpellLevelsRecord levels in CliDB.SpellLevelsStorage.Values)
                 GetLoadHelper(levels.SpellID, levels.DifficultyID).Levels = levels;
 
@@ -2270,7 +2273,8 @@ namespace Game.Entities
                 if (spellNameEntry == null)
                     continue;
 
-                var visuals = data.Value.Visuals; // copy, need to ensure source remains unmodified
+                var labels = new List<SpellLabelRecord>(data.Value.Labels); // copy, need to ensure source remains unmodified
+                var visuals = new List<SpellXSpellVisualRecord>(data.Value.Visuals); // copy, need to ensure source remains unmodified
 
                 // fill blanks
                 DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(data.Key.difficulty);
@@ -2300,6 +2304,8 @@ namespace Game.Entities
                             if (data.Value.Interrupts == null)
                                 data.Value.Interrupts = fallbackData.Interrupts;
 
+                            labels.AddRange(fallbackData.Labels);
+
                             if (data.Value.Levels == null)
                                 data.Value.Levels = fallbackData.Levels;
 
@@ -2324,7 +2330,7 @@ namespace Game.Entities
                 //second key = id
 
 
-                mSpellInfoMap.Add(spellNameEntry.Id, new SpellInfo(spellNameEntry, data.Key.difficulty, data.Value, visuals));
+                mSpellInfoMap.Add(spellNameEntry.Id, new SpellInfo(spellNameEntry, data.Key.difficulty, data.Value, labels, visuals));
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded SpellInfo store in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
@@ -3999,6 +4005,7 @@ namespace Game.Entities
         public SpellEffectRecord[] Effects = new SpellEffectRecord[SpellConst.MaxEffects];
         public SpellEquippedItemsRecord EquippedItems;
         public SpellInterruptsRecord Interrupts;
+        public List<SpellLabelRecord> Labels = new();
         public SpellLevelsRecord Levels;
         public SpellMiscRecord Misc;
         public SpellPowerRecord[] Powers = new SpellPowerRecord[SpellConst.MaxPowersPerSpell];
