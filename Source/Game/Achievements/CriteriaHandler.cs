@@ -138,6 +138,7 @@ namespace Game.Achievements
                     case CriteriaTypes.WinArena: // This also behaves like ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA
                     case CriteriaTypes.OnLogin:
                     case CriteriaTypes.PlaceGarrisonBuilding:
+                    case CriteriaTypes.UpgradeGarrisonBuilding:
                     case CriteriaTypes.OwnBattlePetCount:
                     case CriteriaTypes.HonorLevelReached:
                     case CriteriaTypes.PrestigeReached:
@@ -399,7 +400,6 @@ namespace Game.Achievements
                     case CriteriaTypes.EnterArea:
                     case CriteriaTypes.LeaveArea:
                     case CriteriaTypes.CompleteDungeonEncounter:
-                    case CriteriaTypes.UpgradeGarrisonBuilding:
                     case CriteriaTypes.ConstructGarrisonBuilding:
                     case CriteriaTypes.UpgradeGarrison:
                     case CriteriaTypes.StartGarrisonMission:
@@ -1761,7 +1761,7 @@ namespace Game.Achievements
                         return false;
                     break;
                 case CriteriaAdditionalCondition.Mentor: // 123
-                    if (!referencePlayer.HasPlayerFlag(PlayerFlags.Mentor))
+                    if (!referencePlayer.HasPlayerFlag(PlayerFlags.Timewalking))
                         return false;
                     break;
                 case CriteriaAdditionalCondition.GarrisonLevelAbove: // 126

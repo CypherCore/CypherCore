@@ -476,6 +476,8 @@ namespace Game.Garrisons
                     GarrisonBuildingActivated buildingActivated = new();
                     buildingActivated.GarrPlotInstanceID = garrPlotInstanceId;
                     _owner.SendPacket(buildingActivated);
+
+                    _owner.UpdateCriteria(CriteriaTypes.UpgradeGarrisonBuilding, plot.BuildingInfo.PacketInfo.Value.GarrBuildingID);
                 }
             }
         }
