@@ -391,7 +391,7 @@ namespace Framework.Constants
         PlayedTooLong = 0x2000,
         IsOutOfBounds = 0x4000,
         Developer = 0x8000,
-        Unk16 = 0x10000,
+        LowLevelRaidEnabled = 0x10000,
         TaxiBenchmark = 0x20000,
         PVPTimer = 0x40000,
         Uber = 0x80000,
@@ -405,8 +405,8 @@ namespace Framework.Constants
         AutoDeclineGuild = 0x8000000,
         GuildLevelEnabled = 0x10000000,
         VoidUnlocked = 0x20000000,
-        Mentor = 0x40000000,
-        Unk31 = 0x80000000
+        Timewalking = 0x40000000,
+        CommentatorCamera = 0x80000000
     }
 
     public enum PlayerFlagsEx
