@@ -363,7 +363,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public uint LabelID;
-        public int SpellID;
+        public uint SpellID;
     }
 
     public sealed class SpellLearnSpellRecord
