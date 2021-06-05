@@ -3015,29 +3015,29 @@ namespace Game.Entities
 
     public class PVPInfo : BaseUpdateData<Player>
     {
-        public UpdateField<bool> Field_20 = new(0, 1);
-        public UpdateField<uint> Field_0 = new(0, 2);
-        public UpdateField<uint> Field_4 = new(0, 3);
-        public UpdateField<uint> Field_8 = new(0, 4);
-        public UpdateField<uint> Field_C = new(0, 5);
+        public UpdateField<bool> Disqualified = new(0, 1);
+        public UpdateField<uint> WeeklyPlayed = new(0, 2);
+        public UpdateField<uint> WeeklyWon = new(0, 3);
+        public UpdateField<uint> SeasonPlayed = new(0, 4);
+        public UpdateField<uint> SeasonWon = new(0, 5);
         public UpdateField<uint> Rating = new(0, 6);
-        public UpdateField<uint> Field_14 = new(0, 7);
-        public UpdateField<uint> Field_18 = new(0, 8);
+        public UpdateField<uint> WeeklyBestRating = new(0, 7);
+        public UpdateField<uint> SeasonBestRating = new(0, 8);
         public UpdateField<uint> PvpTierID = new(0, 9);
 
         public PVPInfo() : base(10) { }
 
         public void WriteCreate(WorldPacket data, Player owner, Player receiver)
         {
-            data.WriteUInt32(Field_0);
-            data.WriteUInt32(Field_4);
-            data.WriteUInt32(Field_8);
-            data.WriteUInt32(Field_C);
+            data.WriteUInt32(WeeklyPlayed);
+            data.WriteUInt32(WeeklyWon);
+            data.WriteUInt32(SeasonPlayed);
+            data.WriteUInt32(SeasonWon);
             data.WriteUInt32(Rating);
-            data.WriteUInt32(Field_14);
-            data.WriteUInt32(Field_18);
+            data.WriteUInt32(WeeklyBestRating);
+            data.WriteUInt32(SeasonBestRating);
             data.WriteUInt32(PvpTierID);
-            data.WriteBit((bool)Field_20);
+            data.WriteBit(Disqualified);
             data.FlushBits();
         }
 
@@ -3053,7 +3053,7 @@ namespace Game.Entities
             {
                 if (changesMask[1])
                 {
-                    data.WriteBit(Field_20);
+                    data.WriteBit(Disqualified);
                 }
             }
             data.FlushBits();
@@ -3061,19 +3061,19 @@ namespace Game.Entities
             {
                 if (changesMask[2])
                 {
-                    data.WriteUInt32(Field_0);
+                    data.WriteUInt32(WeeklyPlayed);
                 }
                 if (changesMask[3])
                 {
-                    data.WriteUInt32(Field_4);
+                    data.WriteUInt32(WeeklyWon);
                 }
                 if (changesMask[4])
                 {
-                    data.WriteUInt32(Field_8);
+                    data.WriteUInt32(SeasonPlayed);
                 }
                 if (changesMask[5])
                 {
-                    data.WriteUInt32(Field_C);
+                    data.WriteUInt32(SeasonWon);
                 }
                 if (changesMask[6])
                 {
@@ -3081,11 +3081,11 @@ namespace Game.Entities
                 }
                 if (changesMask[7])
                 {
-                    data.WriteUInt32(Field_14);
+                    data.WriteUInt32(WeeklyBestRating);
                 }
                 if (changesMask[8])
                 {
-                    data.WriteUInt32(Field_18);
+                    data.WriteUInt32(SeasonBestRating);
                 }
                 if (changesMask[9])
                 {
@@ -3097,14 +3097,14 @@ namespace Game.Entities
 
         public override void ClearChangesMask()
         {
-            ClearChangesMask(Field_20);
-            ClearChangesMask(Field_0);
-            ClearChangesMask(Field_4);
-            ClearChangesMask(Field_8);
-            ClearChangesMask(Field_C);
+            ClearChangesMask(Disqualified);
+            ClearChangesMask(WeeklyPlayed);
+            ClearChangesMask(WeeklyWon);
+            ClearChangesMask(SeasonPlayed);
+            ClearChangesMask(SeasonWon);
             ClearChangesMask(Rating);
-            ClearChangesMask(Field_14);
-            ClearChangesMask(Field_18);
+            ClearChangesMask(WeeklyBestRating);
+            ClearChangesMask(SeasonBestRating);
             ClearChangesMask(PvpTierID);
             _changesMask.ResetAll();
         }

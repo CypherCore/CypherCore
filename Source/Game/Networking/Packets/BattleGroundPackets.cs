@@ -530,7 +530,7 @@ namespace Game.Networking.Packets
         public int BestSeasonRating;
         public int PvpTierID;
         public int Unused3;
-        public bool Unused4;
+        public bool Disqualified;
 
         public void Write(WorldPacket data)
         {
@@ -547,7 +547,7 @@ namespace Game.Networking.Packets
             data.WriteInt32(BestSeasonRating);
             data.WriteInt32(PvpTierID);
             data.WriteInt32(Unused3);
-            data.WriteBit(Unused4);
+            data.WriteBit(Disqualified);
             data.FlushBits();
         }
     }

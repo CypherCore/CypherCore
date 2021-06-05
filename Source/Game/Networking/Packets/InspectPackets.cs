@@ -297,9 +297,9 @@ namespace Game.Networking.Packets
             data.WriteInt32(SeasonPlayed);
             data.WriteInt32(SeasonWon);
             data.WriteInt32(WeeklyBestRating);
-            data.WriteInt32(Unk710);
-            data.WriteInt32(Unk801_1);
-            data.WriteBit(Unk801_2);
+            data.WriteInt32(SeasonBestRating);
+            data.WriteInt32(PvpTierID);
+            data.WriteBit(Disqualified);
             data.FlushBits();
         }
 
@@ -310,10 +310,10 @@ namespace Game.Networking.Packets
         public int SeasonPlayed;
         public int SeasonWon;
         public int WeeklyBestRating;
-        public int Unk710;
-        public int Unk801_1;
+        public int SeasonBestRating;
+        public int PvpTierID;
         public byte Bracket;
-        public bool Unk801_2;
+        public bool Disqualified;
     }
 
     public struct AzeriteEssenceData
