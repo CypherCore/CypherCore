@@ -629,6 +629,10 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_ITEM_MODIFIED_APPEARANCE, "SELECT ID, ItemID, ItemAppearanceModifierID, ItemAppearanceID, OrderIndex, " +        
                 "TransmogSourceTypeEnum FROM item_modified_appearance");
 
+            // ItemModifiedAppearanceExtra.db2
+            PrepareStatement(HotfixStatements.SEL_ITEM_MODIFIED_APPEARANCE_EXTRA, "SELECT ID, IconFileDataID, UnequippedIconFileDataID, SheatheType, " +
+                "DisplayWeaponSubclassID, DisplayInventoryType FROM item_modified_appearance_extra");
+
             // ItemNameDescription.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_NAME_DESCRIPTION, "SELECT ID, Description, Color FROM item_name_description");
             PrepareStatement(HotfixStatements.SEL_ITEM_NAME_DESCRIPTION_LOCALE, "SELECT ID, Description_lang FROM item_name_description_locale WHERE locale = ?");
@@ -1513,6 +1517,8 @@ namespace Framework.Database
         SEL_ITEM_LIMIT_CATEGORY_CONDITION,
 
         SEL_ITEM_MODIFIED_APPEARANCE,
+
+        SEL_ITEM_MODIFIED_APPEARANCE_EXTRA,
 
         SEL_ITEM_NAME_DESCRIPTION,
         SEL_ITEM_NAME_DESCRIPTION_LOCALE,
