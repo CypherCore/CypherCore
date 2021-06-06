@@ -1704,7 +1704,7 @@ namespace Game.Entities
                             {
                                 var repState = player.GetReputationMgr().GetState(factionEntry);
                                 if (repState != null)
-                                    if (!Convert.ToBoolean(repState.Flags & FactionFlags.AtWar))
+                                    if (!repState.Flags.HasFlag(ReputationFlags.AtWar))
                                         return false;
                             }
                         }

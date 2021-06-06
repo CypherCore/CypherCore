@@ -85,7 +85,7 @@ namespace Game
 
             FactionState factionState = GetState(factionEntry);
             if (factionState != null)
-                return (factionState.Flags.HasAnyFlag(FactionFlags.AtWar));
+                return factionState.Flags.HasFlag(ReputationFlags.AtWar);
             return false;
         }
 
@@ -170,13 +170,13 @@ namespace Game
                 _forcedReactions.Remove(faction_id);
         }
 
-        uint GetDefaultStateFlags(FactionRecord factionEntry)
+        ReputationFlags GetDefaultStateFlags(FactionRecord factionEntry)
         {
             int dataIndex = GetFactionDataIndexForRaceAndClass(factionEntry);
             if (dataIndex < 0)
-                return 0;
+                return ReputationFlags.None;
 
-            return factionEntry.ReputationFlags[dataIndex];
+            return (ReputationFlags)factionEntry.ReputationFlags[dataIndex];
         }
 
         public void SendForceReactions()
@@ -261,11 +261,11 @@ namespace Game
                     newFaction.Id = factionEntry.Id;
                     newFaction.ReputationListID = (uint)factionEntry.ReputationIndex;
                     newFaction.Standing = 0;
-                    newFaction.Flags = (FactionFlags)(GetDefaultStateFlags(factionEntry) & 0xFF);//todo fixme for higher value then byte?????
+                    newFaction.Flags = GetDefaultStateFlags(factionEntry);
                     newFaction.needSend = true;
                     newFaction.needSave = true;
 
-                    if (Convert.ToBoolean(newFaction.Flags & FactionFlags.Visible))
+                    if (newFaction.Flags.HasFlag(ReputationFlags.Visible))
                         ++_visibleFactionCount;
 
                     if (factionEntry.FriendshipRepID == 0)
@@ -323,7 +323,7 @@ namespace Game
                         {
                             var parentState = _factions.LookupByKey(parent.ReputationIndex);
                             // some team factions have own reputation standing, in this case do not spill to other sub-factions
-                            if (parentState != null && parentState.Flags.HasAnyFlag(FactionFlags.Special))
+                            if (parentState != null && parentState.Flags.HasFlag(ReputationFlags.HeaderShowsBar))
                             {
                                 SetOneFactionReputation(parent, (int)spillOverRepOut, incremental);
                             }
@@ -445,15 +445,17 @@ namespace Game
         void SetVisible(FactionState faction)
         {
             // always invisible or hidden faction can't be make visible
-            // except if faction has FACTION_FLAG_SPECIAL
-            if (Convert.ToBoolean(faction.Flags & (FactionFlags.InvisibleForced | FactionFlags.Hidden)) && !Convert.ToBoolean(faction.Flags & FactionFlags.Special))
+            if (faction.Flags.HasFlag(ReputationFlags.Hidden))
+                return;
+
+            if (faction.Flags.HasFlag(ReputationFlags.Header) && !faction.Flags.HasFlag(ReputationFlags.HeaderShowsBar))
                 return;
 
             // already set
-            if (Convert.ToBoolean(faction.Flags & FactionFlags.Visible))
+            if (faction.Flags.HasFlag(ReputationFlags.Visible))
                 return;
 
-            faction.Flags |= FactionFlags.Visible;
+            faction.Flags |= ReputationFlags.Visible;
             faction.needSend = true;
             faction.needSave = true;
 
@@ -469,7 +471,7 @@ namespace Game
                 return;
 
             // always invisible or hidden faction can't change war state
-            if (Convert.ToBoolean(factionState.Flags & (FactionFlags.InvisibleForced | FactionFlags.Hidden)))
+            if (factionState.Flags.HasFlag(ReputationFlags.Hidden | ReputationFlags.Header))
                 return;
 
             SetAtWar(factionState, on);
@@ -478,17 +480,17 @@ namespace Game
         void SetAtWar(FactionState faction, bool atWar)
         {
             // Do not allow to declare war to our own faction. But allow for rival factions (eg Aldor vs Scryer).
-            if (atWar && faction.Flags.HasAnyFlag(FactionFlags.PeaceForced) && !faction.Flags.HasAnyFlag(FactionFlags.Rival))
+            if (atWar && faction.Flags.HasFlag(ReputationFlags.Peaceful))
                 return;
 
             // already set
-            if (((faction.Flags & FactionFlags.AtWar) != 0) == atWar)
+            if (faction.Flags.HasFlag(ReputationFlags.AtWar) == atWar)
                 return;
 
             if (atWar)
-                faction.Flags |= FactionFlags.AtWar;
+                faction.Flags |= ReputationFlags.AtWar;
             else
-                faction.Flags &= ~FactionFlags.AtWar;
+                faction.Flags &= ~ReputationFlags.AtWar;
 
             faction.needSend = true;
             faction.needSave = true;
@@ -506,17 +508,17 @@ namespace Game
         void SetInactive(FactionState faction, bool inactive)
         {
             // always invisible or hidden faction can't be inactive
-            if (inactive && Convert.ToBoolean(faction.Flags & (FactionFlags.InvisibleForced | FactionFlags.Hidden)) || !Convert.ToBoolean(faction.Flags & FactionFlags.Visible))
+            if (faction.Flags.HasFlag(ReputationFlags.Hidden | ReputationFlags.Header) || !faction.Flags.HasFlag(ReputationFlags.Visible))
                 return;
 
             // already set
-            if (((faction.Flags & FactionFlags.Inactive) != 0) == inactive)
+            if (faction.Flags.HasFlag(ReputationFlags.Inactive) == inactive)
                 return;
 
             if (inactive)
-                faction.Flags |= FactionFlags.Inactive;
+                faction.Flags |= ReputationFlags.Inactive;
             else
-                faction.Flags &= ~FactionFlags.Inactive;
+                faction.Flags &= ~ReputationFlags.Inactive;
 
             faction.needSend = true;
             faction.needSave = true;
@@ -549,20 +551,20 @@ namespace Game
                             UpdateRankCounters(old_rank, new_rank);
                         }
 
-                        FactionFlags dbFactionFlags = (FactionFlags)result.Read<uint>(2);
+                        ReputationFlags dbFactionFlags = (ReputationFlags)result.Read<uint>(2);
 
-                        if (Convert.ToBoolean(dbFactionFlags & FactionFlags.Visible))
+                        if (dbFactionFlags.HasFlag(ReputationFlags.Visible))
                             SetVisible(faction);                    // have internal checks for forced invisibility
 
-                        if (Convert.ToBoolean(dbFactionFlags & FactionFlags.Inactive))
+                        if (dbFactionFlags.HasFlag(ReputationFlags.Inactive))
                             SetInactive(faction, true);              // have internal checks for visibility requirement
 
-                        if (Convert.ToBoolean(dbFactionFlags & FactionFlags.AtWar))  // DB at war
+                        if (dbFactionFlags.HasFlag(ReputationFlags.AtWar))  // DB at war
                             SetAtWar(faction, true);                 // have internal checks for FACTION_FLAG_PEACE_FORCED
                         else                                        // DB not at war
                         {
                             // allow remove if visible (and then not FACTION_FLAG_INVISIBLE_FORCED or FACTION_FLAG_HIDDEN)
-                            if (Convert.ToBoolean(faction.Flags & FactionFlags.Visible))
+                            if (faction.Flags.HasFlag(ReputationFlags.Visible))
                                 SetAtWar(faction, false);            // have internal checks for FACTION_FLAG_PEACE_FORCED
                         }
 
@@ -730,7 +732,7 @@ namespace Game
         public uint Id;
         public uint ReputationListID;
         public int Standing;
-        public FactionFlags Flags;
+        public ReputationFlags Flags;
         public bool needSend;
         public bool needSave;
     }

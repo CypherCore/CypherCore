@@ -280,17 +280,17 @@ namespace Game.Chat
 
                         ss.AppendFormat(" {0}|h|r ({1})", rankName, target.GetReputationMgr().GetReputation(factionEntry));
 
-                        if (factionState.Flags.HasAnyFlag(FactionFlags.Visible))
+                        if (factionState.Flags.HasFlag(ReputationFlags.Visible))
                             ss.Append(handler.GetCypherString(CypherStrings.FactionVisible));
-                        if (factionState.Flags.HasAnyFlag(FactionFlags.AtWar))
+                        if (factionState.Flags.HasFlag(ReputationFlags.AtWar))
                             ss.Append(handler.GetCypherString(CypherStrings.FactionAtwar));
-                        if (factionState.Flags.HasAnyFlag(FactionFlags.PeaceForced))
+                        if (factionState.Flags.HasFlag(ReputationFlags.Peaceful))
                             ss.Append(handler.GetCypherString(CypherStrings.FactionPeaceForced));
-                        if (factionState.Flags.HasAnyFlag(FactionFlags.Hidden))
+                        if (factionState.Flags.HasFlag(ReputationFlags.Hidden))
                             ss.Append(handler.GetCypherString(CypherStrings.FactionHidden));
-                        if (factionState.Flags.HasAnyFlag(FactionFlags.InvisibleForced))
+                        if (factionState.Flags.HasFlag(ReputationFlags.Header))
                             ss.Append(handler.GetCypherString(CypherStrings.FactionInvisibleForced));
-                        if (factionState.Flags.HasAnyFlag(FactionFlags.Inactive))
+                        if (factionState.Flags.HasFlag(ReputationFlags.Inactive))
                             ss.Append(handler.GetCypherString(CypherStrings.FactionInactive));
                     }
                     else

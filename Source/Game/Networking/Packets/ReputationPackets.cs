@@ -30,7 +30,7 @@ namespace Game.Networking.Packets
         {
             for (ushort i = 0; i < FactionCount; ++i)
             {
-                _worldPacket.WriteUInt8((byte)FactionFlags[i]);
+                _worldPacket.WriteUInt8((byte)((ushort)FactionFlags[i] & 0xFF));
                 _worldPacket.WriteInt32(FactionStandings[i]);
             }
 
@@ -42,7 +42,7 @@ namespace Game.Networking.Packets
 
         public int[] FactionStandings = new int[FactionCount];
         public bool[] FactionHasBonus = new bool[FactionCount]; //@todo: implement faction bonus
-        public FactionFlags[] FactionFlags = new FactionFlags[FactionCount];
+        public ReputationFlags[] FactionFlags = new ReputationFlags[FactionCount];
     }
 
     class RequestForcedReactions : ClientPacket
