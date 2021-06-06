@@ -19,6 +19,14 @@ using Framework.Constants;
 
 namespace Game.DataStorage
 {
+    public sealed class ParagonReputationRecord
+    {
+        public uint Id;
+        public uint FactionID;
+        public int LevelThreshold;
+        public int QuestID;
+    }
+
     public sealed class PhaseRecord
     {
         public uint Id;

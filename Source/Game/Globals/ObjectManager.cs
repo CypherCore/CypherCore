@@ -7442,6 +7442,14 @@ namespace Game
                 }
             }
 
+            // Make all paragon reward quests repeatable
+            foreach (ParagonReputationRecord paragonReputation in CliDB.ParagonReputationStorage.Values)
+            {
+                Quest quest = GetQuestTemplate((uint)paragonReputation.QuestID);
+                if (quest != null)
+                    quest.SetSpecialFlag(QuestSpecialFlags.Repeatable);
+            }
+
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} quests definitions in {1} ms", _questTemplates.Count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
         public void LoadQuestStartersAndEnders()

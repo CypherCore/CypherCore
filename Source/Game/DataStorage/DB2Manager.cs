@@ -414,6 +414,10 @@ namespace Game.DataStorage
                 }
             }
 
+            foreach (ParagonReputationRecord paragonReputation in CliDB.ParagonReputationStorage.Values)
+                if (CliDB.FactionStorage.HasRecord(paragonReputation.FactionID))
+                    _paragonReputations[paragonReputation.FactionID] = paragonReputation;
+
             foreach (var group in CliDB.PhaseXPhaseGroupStorage.Values)
             {
                 PhaseRecord phase = CliDB.PhaseStorage.LookupByKey(group.PhaseId);
@@ -1722,6 +1726,11 @@ namespace Game.DataStorage
             return 0;
         }
 
+        public ParagonReputationRecord GetParagonReputation(uint factionId)
+        {
+            return _paragonReputations.LookupByKey(factionId);
+        }
+        
         public PvpDifficultyRecord GetBattlegroundBracketByLevel(uint mapid, uint level)
         {
             PvpDifficultyRecord maxEntry = null;              // used for level > max listed level case
@@ -2275,6 +2284,7 @@ namespace Game.DataStorage
         MultiMap<uint, MountXDisplayRecord> _mountDisplays = new();
         Dictionary<uint, List<NameGenRecord>[]> _nameGenData = new();
         List<string>[] _nameValidators = new List<string>[(int)Locale.Total + 1];
+        Dictionary<uint, ParagonReputationRecord> _paragonReputations = new();
         MultiMap<uint, uint> _phasesByGroup = new();
         Dictionary<PowerType, PowerTypeRecord> _powerTypes = new();
         Dictionary<uint, byte> _pvpItemBonus = new();

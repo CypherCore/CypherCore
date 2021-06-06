@@ -773,6 +773,9 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_OVERRIDE_SPELL_DATA, "SELECT ID, Spells1, Spells2, Spells3, Spells4, Spells5, Spells6, Spells7, Spells8, Spells9, " +        
                 "Spells10, PlayerActionBarFileDataID, Flags FROM override_spell_data");
 
+            // ParagonReputation.db2
+            PrepareStatement(HotfixStatements.SEL_PARAGON_REPUTATION, "SELECT ID, FactionID, LevelThreshold, QuestID FROM paragon_reputation");
+
             // Phase.db2
             PrepareStatement(HotfixStatements.SEL_PHASE, "SELECT ID, Flags FROM phase");
 
@@ -1585,6 +1588,8 @@ namespace Framework.Database
         SEL_NUM_TALENTS_AT_LEVEL,
 
         SEL_OVERRIDE_SPELL_DATA,
+
+        SEL_PARAGON_REPUTATION,
 
         SEL_PHASE,
 

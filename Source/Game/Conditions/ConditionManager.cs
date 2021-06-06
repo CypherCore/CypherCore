@@ -1152,8 +1152,7 @@ namespace Game
                     }
                 case ConditionTypes.ReputationRank:
                     {
-                        FactionRecord factionEntry = CliDB.FactionStorage.LookupByKey(cond.ConditionValue1);
-                        if (factionEntry == null)
+                        if (!CliDB.FactionStorage.ContainsKey(cond.ConditionValue1))
                         {
                             Log.outError(LogFilter.Sql, "{0} has non existing faction ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
                             return false;

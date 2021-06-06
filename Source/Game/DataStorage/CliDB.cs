@@ -227,6 +227,7 @@ namespace Game.DataStorage
             NamesReservedLocaleStorage = ReadDB2<NamesReservedLocaleRecord>("NamesReservedLocale.db2", HotfixStatements.SEL_NAMES_RESERVED_LOCALE);
             NumTalentsAtLevelStorage = ReadDB2<NumTalentsAtLevelRecord>("NumTalentsAtLevel.db2", HotfixStatements.SEL_NUM_TALENTS_AT_LEVEL);
             OverrideSpellDataStorage = ReadDB2<OverrideSpellDataRecord>("OverrideSpellData.db2", HotfixStatements.SEL_OVERRIDE_SPELL_DATA);
+            ParagonReputationStorage = ReadDB2<ParagonReputationRecord>("ParagonReputation.db2", HotfixStatements.SEL_PARAGON_REPUTATION);
             PhaseStorage = ReadDB2<PhaseRecord>("Phase.db2", HotfixStatements.SEL_PHASE);
             PhaseXPhaseGroupStorage = ReadDB2<PhaseXPhaseGroupRecord>("PhaseXPhaseGroup.db2", HotfixStatements.SEL_PHASE_X_PHASE_GROUP);
             PlayerConditionStorage = ReadDB2<PlayerConditionRecord>("PlayerCondition.db2", HotfixStatements.SEL_PLAYER_CONDITION, HotfixStatements.SEL_PLAYER_CONDITION_LOCALE);
@@ -594,6 +595,7 @@ namespace Game.DataStorage
         public static DB6Storage<NamesReservedLocaleRecord> NamesReservedLocaleStorage;
         public static DB6Storage<NumTalentsAtLevelRecord> NumTalentsAtLevelStorage;
         public static DB6Storage<OverrideSpellDataRecord> OverrideSpellDataStorage;
+        public static DB6Storage<ParagonReputationRecord> ParagonReputationStorage;
         public static DB6Storage<PhaseRecord> PhaseStorage;
         public static DB6Storage<PhaseXPhaseGroupRecord> PhaseXPhaseGroupStorage;
         public static DB6Storage<PlayerConditionRecord> PlayerConditionStorage;
