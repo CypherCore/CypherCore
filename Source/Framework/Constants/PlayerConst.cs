@@ -602,6 +602,7 @@ namespace Framework.Constants
         VengefulGladiator = 0x0000010000000000, // 40
     }
 
+    [Flags]
     public enum PlayerExtraFlags
     {
         // gm abilities
@@ -612,7 +613,12 @@ namespace Framework.Constants
         GMChat = 0x20,               // Show GM badge in chat messages
 
         // other states
-        PVPDeath = 0x100                // store PvP death status until corpse creating.
+        PVPDeath = 0x100,            // store PvP death status until corpse creating.
+
+        // Character services markers
+        HasRaceChanged = 0x0200,
+        GrantedLevelsFromRaf = 0x0400,
+        LevelBoosted = 0x0800
     }
 
     public enum EquipmentSetUpdateState

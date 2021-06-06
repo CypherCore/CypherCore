@@ -6391,6 +6391,13 @@ namespace Game.Entities
                 SendMovementSetCollisionHeight(scale * GetCollisionHeight(), UpdateCollisionHeightReason.Scale);
         }
 
+        bool HasRaceChanged() { return m_ExtraFlags.HasFlag(PlayerExtraFlags.HasRaceChanged); }
+        void SetHasRaceChanged() { m_ExtraFlags |= PlayerExtraFlags.HasRaceChanged; }
+        bool HasBeenGrantedLevelsFromRaF() { return m_ExtraFlags.HasFlag(PlayerExtraFlags.GrantedLevelsFromRaf); }
+        void SetBeenGrantedLevelsFromRaF() { m_ExtraFlags |= PlayerExtraFlags.GrantedLevelsFromRaf; }
+        bool HasLevelBoosted() { return m_ExtraFlags.HasFlag(PlayerExtraFlags.LevelBoosted); }
+        void SetHasLevelBoosted() { m_ExtraFlags |= PlayerExtraFlags.LevelBoosted; }
+        
         public uint GetXP() { return m_activePlayerData.XP; }
         public uint GetXPForNextLevel() { return m_activePlayerData.NextLevelXP; }
 

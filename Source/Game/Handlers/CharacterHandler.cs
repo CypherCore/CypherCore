@@ -1795,7 +1795,8 @@ namespace Game
             {
                 stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_RACE);
                 stmt.AddValue(0, (byte)factionChangeInfo.RaceID);
-                stmt.AddValue(1, lowGuid);
+                stmt.AddValue(1, (ushort)PlayerExtraFlags.HasRaceChanged);
+                stmt.AddValue(2, lowGuid);
 
                 trans.Append(stmt);
             }
