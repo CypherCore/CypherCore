@@ -34,6 +34,14 @@ namespace Game.DataStorage
         public ushort Profession;
     }
 
+    public sealed class QuestLineXQuestRecord
+    {
+        public uint Id;
+        public uint QuestLineID;
+        public uint QuestID;
+        public uint OrderIndex;
+    }
+
     public sealed class QuestMoneyRewardRecord
     {
         public uint Id;
