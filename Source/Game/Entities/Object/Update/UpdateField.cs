@@ -158,9 +158,9 @@ namespace Game.Entities
             return _values.IndexOf(value);
         }
 
-        public int FindIndexIf(Predicate<T> blah)
+        public int FindIndexIf(Predicate<T> predicate)
         {
-            return _values.FindIndex(blah);
+            return _values.FindIndex(predicate);
         }
 
         public bool HasChanged(int index)

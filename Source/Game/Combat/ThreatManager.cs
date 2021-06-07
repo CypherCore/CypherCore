@@ -28,7 +28,6 @@ namespace Game.Combat
     public class ThreatManager
     {
         public static uint CLIENT_THREAT_UPDATE_INTERVAL = 1000u;
-        static CompareThreatLessThan CompareThreat = new();
 
         public Unit _owner;
         bool _ownerCanHaveThreatList;
@@ -632,7 +631,7 @@ namespace Game.Combat
             Cypher.Assert(!_myThreatListEntries.ContainsKey(guid), $"Duplicate threat reference being inserted on {_owner.GetGUID()} for {guid.ToString()}!");
             _myThreatListEntries[guid] = refe;
             _sortedThreatList.Add(refe);
-            _sortedThreatList.Sort(CompareThreat);
+            _sortedThreatList.Sort();
         }
 
         public void PurgeThreatListRef(ObjectGuid guid, bool sendRemove)
@@ -647,7 +646,7 @@ namespace Game.Combat
                 _currentVictimRef = null;
 
             _sortedThreatList.Remove(refe);
-            _sortedThreatList.Sort(CompareThreat);
+            _sortedThreatList.Sort();
             if (sendRemove && refe.IsOnline())
                 SendRemoveToClients(refe.GetVictim());
         }
@@ -700,7 +699,7 @@ namespace Game.Combat
 
         public void ListNotifyChanged()
         {
-            _sortedThreatList.Sort(CompareThreat);
+            _sortedThreatList.Sort();
         }
 
         public Dictionary<ObjectGuid, ThreatReference> GetThreatenedByMeList() { return _threatenedByMe; }
@@ -729,7 +728,7 @@ namespace Game.Combat
         Offline = 0
     }
 
-    public class ThreatReference
+    public class ThreatReference : IComparable<ThreatReference>
     {
         Unit _owner;
         ThreatManager _mgr;
@@ -878,13 +877,10 @@ namespace Game.Combat
                 ScaleThreat(0.01f * (100f + percent)); }
 
         public void ListNotifyChanged() { _mgr.ListNotifyChanged(); }
-    }
 
-    public class CompareThreatLessThan : IComparer<ThreatReference>
-    {
-        public int Compare(ThreatReference a, ThreatReference b)
+        public int CompareTo(ThreatReference other)
         {
-            return ThreatManager.CompareReferencesLT(a, b, 1.0f) ? 1 : -1;
+            return ThreatManager.CompareReferencesLT(this, other, 1.0f) ? 1 : -1;
         }
     }
 }
