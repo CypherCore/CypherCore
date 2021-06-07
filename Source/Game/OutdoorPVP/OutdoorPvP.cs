@@ -540,7 +540,7 @@ namespace Game.PvP
             if (fact_diff == 0.0f)
                 return false;
 
-            Team Challenger = 0;
+            Team Challenger;
             float maxDiff = m_maxSpeed * diff;
 
             if (fact_diff < 0)

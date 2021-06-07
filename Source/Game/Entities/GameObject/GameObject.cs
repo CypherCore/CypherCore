@@ -2078,7 +2078,7 @@ namespace Game.Entities
 
             PhasingHandler.InheritPhaseShift(trigger, this);
 
-            CastSpellExtraArgs args = new CastSpellExtraArgs(triggered);
+            CastSpellExtraArgs args = new(triggered);
             Unit owner = GetOwner();
             if (owner)
             {

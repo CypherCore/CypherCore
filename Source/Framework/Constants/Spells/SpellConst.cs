@@ -98,6 +98,7 @@ namespace Framework.Constants
         Ranged = 2      //hunter range and ranged weapon
     }
 
+    [Flags]
     public enum SpellInterruptFlags
     {
         None = 0,

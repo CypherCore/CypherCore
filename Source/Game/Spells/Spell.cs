@@ -255,8 +255,8 @@ namespace Game.Spells
                 if (Convert.ToBoolean(implicitTargetMask & (SpellCastTargetFlags.Gameobject | SpellCastTargetFlags.GameobjectItem)))
                     m_targets.SetTargetFlag(SpellCastTargetFlags.Gameobject);
 
-                SelectEffectImplicitTargets(effect.EffectIndex, effect.TargetA, processedAreaEffectsMask);
-                SelectEffectImplicitTargets(effect.EffectIndex, effect.TargetB, processedAreaEffectsMask);
+                SelectEffectImplicitTargets(effect.EffectIndex, effect.TargetA, ref processedAreaEffectsMask);
+                SelectEffectImplicitTargets(effect.EffectIndex, effect.TargetB, ref processedAreaEffectsMask);
 
                 // Select targets of effect based on effect type
                 // those are used when no valid target could be added for spell effect based on spell target type
@@ -325,7 +325,7 @@ namespace Game.Spells
             m_caster.m_Events.ModifyEventTime(_spellEvent, GetDelayStart() + m_delayMoment);
         }
 
-        void SelectEffectImplicitTargets(uint effIndex, SpellImplicitTargetInfo targetType, uint processedEffectMask)
+        void SelectEffectImplicitTargets(uint effIndex, SpellImplicitTargetInfo targetType, ref uint processedEffectMask)
         {
             if (targetType.GetTarget() == 0)
                 return;
@@ -2168,7 +2168,7 @@ namespace Game.Spells
                             basePoints[auraSpellEffect.EffectIndex] = (m_spellValue.CustomBasePointsMask & (1 << (int)auraSpellEffect.EffectIndex)) != 0 ?
                                 m_spellValue.EffectBasePoints[auraSpellEffect.EffectIndex] : auraSpellEffect.CalcBaseValue(m_originalCaster, unit, m_castItemEntry, m_castItemLevel);
 
-                    bool refresh = false;
+                    bool refresh;
                     bool resetPeriodicTimer = !_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.DontResetPeriodicTimer);
                     m_spellAura = Aura.TryRefreshStackOrCreate(m_spellInfo, m_castId, effectMask, unit,
                         m_originalCaster, GetCastDifficulty(), out refresh, basePoints, m_CastItem, ObjectGuid.Empty, resetPeriodicTimer, ObjectGuid.Empty, m_castItemEntry, m_castItemLevel);
@@ -4821,8 +4821,6 @@ namespace Game.Spells
                         return SpellCastResult.RequiresSpellFocus;
                 }
             }
-
-            castResult = SpellCastResult.SpellCastOk;
 
             // always (except passive spells) check items (focus object can be required for any type casts)
             if (!m_spellInfo.IsPassive())

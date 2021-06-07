@@ -223,7 +223,7 @@ namespace Game.Chat
                     InventoryResult msg = playerTarget.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, template.Value.GetId(), 1);
                     if (msg == InventoryResult.Ok)
                     {
-                        List<uint> bonusListIDsForItem = new List<uint>(bonusListIDs); // copy, bonuses for each depending on context might be different for each item
+                        List<uint> bonusListIDsForItem = new(bonusListIDs); // copy, bonuses for each depending on context might be different for each item
                         if (itemContext != ItemContext.None && itemContext < ItemContext.Max)
                         {
                             var contextBonuses = Global.DB2Mgr.GetDefaultItemBonusTree(template.Value.GetId(), itemContext);

@@ -153,7 +153,7 @@ namespace Game
             var hash = sha.ComputeHash(data, 0, (int)length);
             uint checkSum = 0;
             for (byte i = 0; i < 5; ++i)
-                checkSum = checkSum ^ BitConverter.ToUInt32(hash, i * 4);
+                checkSum ^= BitConverter.ToUInt32(hash, i * 4);
 
             return checkSum;
         }

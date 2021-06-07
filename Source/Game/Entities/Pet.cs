@@ -1398,7 +1398,7 @@ namespace Game.Entities
             if (auraId == 0)
                 return;
 
-            CastSpellExtraArgs args = new CastSpellExtraArgs(TriggerCastFlags.FullMask);
+            CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
 
             if (auraId == 35696)                                      // Demonic Knowledge
                 args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, MathFunctions.CalculatePct(aura.GetDamage(), GetStat(Stats.Stamina) + GetStat(Stats.Intellect)));

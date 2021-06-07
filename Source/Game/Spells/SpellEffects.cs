@@ -1044,7 +1044,7 @@ namespace Game.Spells
 
             // can the player store the new item?
             List<ItemPosCount> dest = new();
-            uint no_space = 0;
+            uint no_space;
             InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, newitemid, num_to_add, out no_space);
             if (msg != InventoryResult.Ok)
             {

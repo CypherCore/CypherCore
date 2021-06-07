@@ -63,7 +63,7 @@ namespace Game
                 _maxUpdateTimeOfCurrentTable = 0;
             }
 
-            if (_updateTimeDataTable[_updateTimeDataTable.Length - 1] != 0)
+            if (_updateTimeDataTable[^1] != 0)
                 _averageUpdateTime = (uint)(_totalUpdateTime / _updateTimeDataTable.Length);
             else if (_updateTimeTableIndex != 0)
                 _averageUpdateTime = _totalUpdateTime / _updateTimeTableIndex;

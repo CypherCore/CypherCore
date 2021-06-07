@@ -77,7 +77,7 @@ namespace Game
                 {
                     foreach (var hotfixRecord in hotfixRecords)
                     {
-                        HotfixConnect.HotfixData hotfixData = new HotfixConnect.HotfixData();
+                        HotfixConnect.HotfixData hotfixData = new();
                         hotfixData.Record = hotfixRecord;
                         if (hotfixRecord.HotfixStatus == HotfixRecord.Status.Valid)
                         {

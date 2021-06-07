@@ -492,7 +492,7 @@ namespace Game
             var factionEntry = CliDB.FactionStorage.LookupByKey(factionTemplateEntry.Faction);
             if (factionEntry.Id != 0)
                 // Never show factions of the opposing team
-                if (!Convert.ToBoolean(factionEntry.ReputationRaceMask[1] & SharedConst.GetMaskForRace(_player.GetRace())) && factionEntry.ReputationBase[1] == Reputation_Bottom)
+                if (!Convert.ToBoolean(factionEntry.ReputationRaceMask[1] & SharedConst.GetMaskForRace(_player.GetRace())) && factionEntry.ReputationBase[1] == SharedConst.ReputationBottom)
                     SetVisible(factionEntry);
         }
 
@@ -783,7 +783,7 @@ namespace Game
         bool _sendFactionIncreased; //! Play visual effect on next SMSG_SET_FACTION_STANDING sent
         #endregion
 
-        public static int[] ReputationRankThresholds =
+        static int[] ReputationRankThresholds =
         {
             -42000,
             // Hated
@@ -803,14 +803,12 @@ namespace Game
             // Exalted
         };
 
-        public static CypherStrings[] ReputationRankStrIndex =
+        static CypherStrings[] ReputationRankStrIndex =
         {
             CypherStrings.RepHated, CypherStrings.RepHostile, CypherStrings.RepUnfriendly, CypherStrings.RepNeutral,
             CypherStrings.RepFriendly, CypherStrings.RepHonored, CypherStrings.RepRevered, CypherStrings.RepExalted
         };
 
-        const int Reputation_Cap = 42000;
-        const int Reputation_Bottom = -42000;
         SortedDictionary<uint, FactionState> _factions = new();
         Dictionary<uint, ReputationRank> _forcedReactions = new();
     }

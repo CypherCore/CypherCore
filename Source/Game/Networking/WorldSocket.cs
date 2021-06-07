@@ -63,7 +63,7 @@ namespace Game.Networking
         public WorldSocket(Socket socket) : base(socket)
         {
             _connectType = ConnectionType.Realm;
-            _serverChallenge = new byte[0].GenerateRandomKey(16);
+            _serverChallenge = Array.Empty<byte>().GenerateRandomKey(16);
             _worldCrypt = new WorldCrypt();
 
             _encryptKey = new byte[16];

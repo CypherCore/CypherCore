@@ -133,12 +133,10 @@ namespace Game.Networking
             if (packetType == null)
                 return;
 
-            using (var clientPacket = (ClientPacket)Activator.CreateInstance(packetType, packet))
-            {
-                clientPacket.Read();
-                clientPacket.LogPacket(session);
-                methodCaller(session, clientPacket);
-            }
+            using var clientPacket = (ClientPacket)Activator.CreateInstance(packetType, packet);
+            clientPacket.Read();
+            clientPacket.LogPacket(session);
+            methodCaller(session, clientPacket);
         }
 
         static Action<WorldSession, ClientPacket> CreateDelegate<P1>(MethodInfo method) where P1 : ClientPacket

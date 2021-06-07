@@ -57,31 +57,29 @@ namespace Game
                 return false;
             }
 
-            using (BinaryReader reader = new(new FileStream(filename, FileMode.Open, FileAccess.Read), Encoding.UTF8))
+            using BinaryReader reader = new(new FileStream(filename, FileMode.Open, FileAccess.Read), Encoding.UTF8);
+            Detour.dtNavMeshParams Params = new();
+            Params.orig[0] = reader.ReadSingle();
+            Params.orig[1] = reader.ReadSingle();
+            Params.orig[2] = reader.ReadSingle();
+
+            Params.tileWidth = reader.ReadSingle();
+            Params.tileHeight = reader.ReadSingle();
+            Params.maxTiles = reader.ReadInt32();
+            Params.maxPolys = reader.ReadInt32();
+
+            Detour.dtNavMesh mesh = new();
+            if (Detour.dtStatusFailed(mesh.init(Params)))
             {
-                Detour.dtNavMeshParams Params = new();
-                Params.orig[0] = reader.ReadSingle();
-                Params.orig[1] = reader.ReadSingle();
-                Params.orig[2] = reader.ReadSingle();
-
-                Params.tileWidth = reader.ReadSingle();
-                Params.tileHeight = reader.ReadSingle();
-                Params.maxTiles = reader.ReadInt32();
-                Params.maxPolys = reader.ReadInt32();
-
-                Detour.dtNavMesh mesh = new();
-                if (Detour.dtStatusFailed(mesh.init(Params)))
-                {
-                    Log.outError(LogFilter.Maps, "MMAP:loadMapData: Failed to initialize dtNavMesh for mmap {0:D4} from file {1}", mapId, filename);
-                    return false;
-                }
-
-                Log.outInfo(LogFilter.Maps, "MMAP:loadMapData: Loaded {0:D4}.mmap", mapId);
-
-                // store inside our map list
-                loadedMMaps[mapId] = new MMapData(mesh);
-                return true;
+                Log.outError(LogFilter.Maps, "MMAP:loadMapData: Failed to initialize dtNavMesh for mmap {0:D4} from file {1}", mapId, filename);
+                return false;
             }
+
+            Log.outInfo(LogFilter.Maps, "MMAP:loadMapData: Loaded {0:D4}.mmap", mapId);
+
+            // store inside our map list
+            loadedMMaps[mapId] = new MMapData(mesh);
+            return true;
         }
 
         uint PackTileID(uint x, uint y)
@@ -133,38 +131,36 @@ namespace Game
                 return false;
             }
 
-            using (BinaryReader reader = new(new FileStream(fileName, FileMode.Open, FileAccess.Read)))
+            using BinaryReader reader = new(new FileStream(fileName, FileMode.Open, FileAccess.Read));
+            MmapTileHeader fileHeader = reader.Read<MmapTileHeader>();
+            if (fileHeader.mmapMagic != MapConst.mmapMagic)
             {
-                MmapTileHeader fileHeader = reader.Read<MmapTileHeader>();
-                if (fileHeader.mmapMagic != MapConst.mmapMagic)
-                {
-                    Log.outError(LogFilter.Maps, "MMAP:loadMap: Bad header in mmap {0:D4}{1:D2}{2:D2}.mmtile", mapId, x, y);
-                    return false;
-                }
-                if (fileHeader.mmapVersion != MapConst.mmapVersion)
-                {
-                    Log.outError(LogFilter.Maps, "MMAP:loadMap: {0:D4}{1:D2}{2:D2}.mmtile was built with generator v{3}, expected v{4}",
-                        mapId, x, y, fileHeader.mmapVersion, MapConst.mmapVersion);
-                    return false;
-                }
-
-                var bytes = reader.ReadBytes((int)fileHeader.size);
-                Detour.dtRawTileData data = new();
-                data.FromBytes(bytes, 0);
-
-                ulong tileRef = 0;
-                // memory allocated for data is now managed by detour, and will be deallocated when the tile is removed
-                if (Detour.dtStatusSucceed(mmap.navMesh.addTile(data, 1, 0, ref tileRef)))
-                {
-                    mmap.loadedTileRefs.Add(packedGridPos, tileRef);
-                    ++loadedTiles;
-                    Log.outInfo(LogFilter.Maps, "MMAP:loadMap: Loaded mmtile {0:D4}[{1:D2}, {2:D2}]", mapId, x, y);
-                    return true;
-                }
-
-                Log.outError(LogFilter.Maps, "MMAP:loadMap: Could not load {0:D4}{1:D2}{2:D2}.mmtile into navmesh", mapId, x, y);
+                Log.outError(LogFilter.Maps, "MMAP:loadMap: Bad header in mmap {0:D4}{1:D2}{2:D2}.mmtile", mapId, x, y);
                 return false;
             }
+            if (fileHeader.mmapVersion != MapConst.mmapVersion)
+            {
+                Log.outError(LogFilter.Maps, "MMAP:loadMap: {0:D4}{1:D2}{2:D2}.mmtile was built with generator v{3}, expected v{4}",
+                    mapId, x, y, fileHeader.mmapVersion, MapConst.mmapVersion);
+                return false;
+            }
+
+            var bytes = reader.ReadBytes((int)fileHeader.size);
+            Detour.dtRawTileData data = new();
+            data.FromBytes(bytes, 0);
+
+            ulong tileRef = 0;
+            // memory allocated for data is now managed by detour, and will be deallocated when the tile is removed
+            if (Detour.dtStatusSucceed(mmap.navMesh.addTile(data, 1, 0, ref tileRef)))
+            {
+                mmap.loadedTileRefs.Add(packedGridPos, tileRef);
+                ++loadedTiles;
+                Log.outInfo(LogFilter.Maps, "MMAP:loadMap: Loaded mmtile {0:D4}[{1:D2}, {2:D2}]", mapId, x, y);
+                return true;
+            }
+
+            Log.outError(LogFilter.Maps, "MMAP:loadMap: Could not load {0:D4}{1:D2}{2:D2}.mmtile into navmesh", mapId, x, y);
+            return false;
         }
 
         public bool LoadMapInstance(string basePath, uint mapId, uint instanceId)
@@ -235,8 +231,7 @@ namespace Game
             ulong tileRef = mmap.loadedTileRefs[packedGridPos];
 
             // unload, and mark as non loaded
-            Detour.dtRawTileData data;
-            if (Detour.dtStatusFailed(mmap.navMesh.removeTile(tileRef, out data)))
+            if (Detour.dtStatusFailed(mmap.navMesh.removeTile(tileRef, out _)))
             {
                 // this is technically a memory leak
                 // if the grid is later reloaded, dtNavMesh.addTile will return error but no extra memory is used
@@ -270,8 +265,7 @@ namespace Game
             {
                 uint x = (i.Key >> 16);
                 uint y = (i.Key & 0x0000FFFF);
-                Detour.dtRawTileData data;
-                if (Detour.dtStatusFailed(mmap.navMesh.removeTile(i.Value, out data)))
+                if (Detour.dtStatusFailed(mmap.navMesh.removeTile(i.Value, out _)))
                     Log.outError(LogFilter.Maps, "MMAP:unloadMap: Could not unload {0:D4}{1:D2}{2:D2}.mmtile from navmesh", mapId, x, y);
                 else
                 {

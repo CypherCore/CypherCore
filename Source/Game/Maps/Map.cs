@@ -119,20 +119,18 @@ namespace Game.Maps
             // tile list is optional
             if (File.Exists(tileListName))
             {
-                using (var reader = new BinaryReader(new FileStream(tileListName, FileMode.Open, FileAccess.Read)))
+                using var reader = new BinaryReader(new FileStream(tileListName, FileMode.Open, FileAccess.Read));
+                var mapMagic = reader.ReadUInt32();
+                var versionMagic = reader.ReadUInt32();
+                if (mapMagic == MapConst.MapMagic && versionMagic == MapConst.MapVersionMagic)
                 {
-                    var mapMagic = reader.ReadUInt32();
-                    var versionMagic = reader.ReadUInt32();
-                    if (mapMagic == MapConst.MapMagic && versionMagic == MapConst.MapVersionMagic)
-                    {
-                        var build = reader.ReadUInt32();
-                        byte[] tilesData = reader.ReadArray<byte>(MapConst.MaxGrids * MapConst.MaxGrids);
-                        for (uint gx = 0; gx < MapConst.MaxGrids; ++gx)
-                            for (uint gy = 0; gy < MapConst.MaxGrids; ++gy)
-                                i_gridFileExists[(int)(gx * MapConst.MaxGrids + gy)] = tilesData[(int)(gx * MapConst.MaxGrids + gy)] == 49; // char of 1
+                    var build = reader.ReadUInt32();
+                    byte[] tilesData = reader.ReadArray<byte>(MapConst.MaxGrids * MapConst.MaxGrids);
+                    for (uint gx = 0; gx < MapConst.MaxGrids; ++gx)
+                        for (uint gy = 0; gy < MapConst.MaxGrids; ++gy)
+                            i_gridFileExists[(int)(gx * MapConst.MaxGrids + gy)] = tilesData[(int)(gx * MapConst.MaxGrids + gy)] == 49; // char of 1
 
-                        return;
-                    }
+                    return;
                 }
             }
 
@@ -159,17 +157,15 @@ namespace Game.Maps
                 return false;
             }
 
-            using (var reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read)))
+            using var reader = new BinaryReader(new FileStream(fileName, FileMode.Open, FileAccess.Read));
+            var header = reader.Read<MapFileHeader>();
+            if (header.mapMagic != MapConst.MapMagic || (header.versionMagic != MapConst.MapVersionMagic && header.versionMagic != MapConst.MapVersionMagic2)) // Hack for some different extractors using v2.0 header
             {
-                var header = reader.Read<MapFileHeader>();
-                if (header.mapMagic != MapConst.MapMagic || (header.versionMagic != MapConst.MapVersionMagic && header.versionMagic != MapConst.MapVersionMagic2)) // Hack for some different extractors using v2.0 header
-                {
-                    Log.outError(LogFilter.Maps, "Map file '{0}' is from an incompatible map version ({1}), {2} is expected. Please recreate using the mapextractor.",
-                        fileName, header.versionMagic, MapConst.MapVersionMagic);
-                    return false;
-                }
-                return true;
+                Log.outError(LogFilter.Maps, "Map file '{0}' is from an incompatible map version ({1}), {2} is expected. Please recreate using the mapextractor.",
+                    fileName, header.versionMagic, MapConst.MapVersionMagic);
+                return false;
             }
+            return true;
         }
 
         public static bool ExistVMap(uint mapid, uint gx, uint gy)
@@ -1004,7 +1000,7 @@ namespace Game.Maps
         bool CheckGridIntegrity<T>(T obj, bool moved) where T : WorldObject
         {
             Cell cur_cell = obj.GetCurrentCell();
-            Cell xy_cell = new Cell(obj.GetPositionX(), obj.GetPositionY());
+            Cell xy_cell = new(obj.GetPositionX(), obj.GetPositionY());
             if (xy_cell != cur_cell)
             {
                 //$"grid[{GetGridX()}, {GetGridY()}]cell[{GetCellX()}, {GetCellY()}]";
@@ -4966,7 +4962,6 @@ namespace Game.Maps
         public Dictionary<ulong, CreatureGroup> CreatureGroupHolder = new();
         internal uint i_InstanceId;
         long i_gridExpiry;
-        List<WorldObject> i_objects = new();
         bool i_scriptLock;
 
         public int m_VisibilityNotifyPeriod;

@@ -250,7 +250,7 @@ namespace Game.Networking.Packets
             violenceLevel = _worldPacket.ReadInt8();
         }
 
-        sbyte violenceLevel = -1; // 0 - no combat effects, 1 - display some combat effects, 2 - blood, 3 - bloody, 4 - bloodier, 5 - bloodiest
+        public sbyte violenceLevel; // 0 - no combat effects, 1 - display some combat effects, 2 - blood, 3 - bloody, 4 - bloodier, 5 - bloodiest
     }
 
     public class TimeSyncRequest : ServerPacket
@@ -1155,7 +1155,7 @@ namespace Game.Networking.Packets
 
         public bool IsFullUpdate;
         public Dictionary<uint, HeirloomData> Heirlooms = new();
-        int Unk;
+        public int Unk;
     }
 
     class MountSpecial : ClientPacket

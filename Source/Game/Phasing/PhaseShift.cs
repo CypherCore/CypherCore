@@ -288,6 +288,7 @@ namespace Game
         public int References;
     }
 
+    [Flags]
     public enum PhaseShiftFlags
     {
         None = 0x00,
@@ -299,6 +300,7 @@ namespace Game
         NoCosmetic = 0x10  // This flag ignores shared cosmetic phases (two players that both have shared cosmetic phase but no other phase cannot see each other)
     }
 
+    [Flags]
     public enum PhaseFlags : ushort
     {
         None = 0x0,

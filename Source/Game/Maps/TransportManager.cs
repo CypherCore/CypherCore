@@ -110,8 +110,8 @@ namespace Game.Maps
 
             // Add extra points to allow derivative calculations for all path nodes
             allPoints.Insert(0, allPoints.First().lerp(allPoints[1], -0.2f));
-            allPoints.Add(allPoints.Last().lerp(allPoints[allPoints.Count - 2], -0.2f));
-            allPoints.Add(allPoints.Last().lerp(allPoints[allPoints.Count - 2], -1.0f));
+            allPoints.Add(allPoints.Last().lerp(allPoints[^2], -0.2f));
+            allPoints.Add(allPoints.Last().lerp(allPoints[^2], -1.0f));
 
             SplineRawInitializer initer = new(allPoints);
             Spline orientationSpline = new();
@@ -204,7 +204,7 @@ namespace Game.Maps
                     int extra = !keyFrames[i - 1].Teleport ? 1 : 0;
                     Spline spline = new();
                     Span<Vector3> span = splinePath.ToArray();
-                    spline.InitSpline(span.Slice(start), i - start + extra, Spline.EvaluationMode.Catmullrom);
+                    spline.InitSpline(span[start..], i - start + extra, Spline.EvaluationMode.Catmullrom);
                     spline.InitLengths();
                     for (int j = start; j < i + extra; ++j)
                     {

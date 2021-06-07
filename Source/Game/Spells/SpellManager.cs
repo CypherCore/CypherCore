@@ -1854,7 +1854,7 @@ namespace Game.Entities
         }
 
         public void LoadPetDefaultSpells()
-        {
+        {       
             uint oldMSTime = Time.GetMSTime();
 
             mPetDefaultSpellsMap.Clear();
@@ -1862,7 +1862,6 @@ namespace Game.Entities
             uint countCreature = 0;
 
             Log.outInfo(LogFilter.ServerLoading, "Loading summonable creature templates...");
-            oldMSTime = Time.GetMSTime();
 
             // different summon spells
             foreach (var spellEntry in mSpellInfoMap.Values)

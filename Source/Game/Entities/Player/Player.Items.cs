@@ -5134,7 +5134,7 @@ namespace Game.Entities
                 }
                 else if (apply)
                 {
-                    CastSpellExtraArgs args = new CastSpellExtraArgs(TriggerCastFlags.FullMask);
+                    CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
                     args.CastItem = artifact;
                     if (artifactPowerRank.AuraPointsOverride != 0)
                         for (int i = 0; i < SpellConst.MaxEffects; ++i)

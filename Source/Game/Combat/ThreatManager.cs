@@ -299,7 +299,7 @@ namespace Game.Combat
                 return;                                              // typical causes: bad scripts trying to add threat to GMs, dead targets etc
 
             // ok, we're now in combat - create the threat list reference and push it to the respective managers
-            ThreatReference newRefe = new ThreatReference(this, target, amount);
+            ThreatReference newRefe = new(this, target, amount);
             PutThreatListRef(target.GetGUID(), newRefe);
             target.GetThreatManager().PutThreatenedByMeRef(_owner.GetGUID(), newRefe);
             if (!newRefe.IsOffline() && !_ownerEngaged)

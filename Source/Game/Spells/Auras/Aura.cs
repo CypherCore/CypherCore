@@ -1313,7 +1313,7 @@ namespace Game.Spells
                                 if (aurEff != null)
                                 {
                                     float multiplier = aurEff.GetAmount();
-                                    CastSpellExtraArgs args = new CastSpellExtraArgs(TriggerCastFlags.FullMask);
+                                    CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
                                     args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, MathFunctions.CalculatePct(caster.GetMaxPower(PowerType.Mana), multiplier));
                                     caster.CastSpell(caster, 47755, args);
                                 }
@@ -2487,7 +2487,7 @@ namespace Game.Spells
                     if (casterGUID != owner.GetGUID() && spellproto.IsSingleTarget())
                         return null;
 
-            Aura aura = null;
+            Aura aura;
             switch (owner.GetTypeId())
             {
                 case TypeId.Unit:

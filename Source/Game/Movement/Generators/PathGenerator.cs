@@ -468,7 +468,7 @@ namespace Game.Movement
         {
             float[] pathPoints = new float[74 * 3];
             int pointCount = 0;
-            uint dtResult = Detour.DT_FAILURE;
+            uint dtResult;
 
             if (_straightLine)
             {
@@ -556,7 +556,7 @@ namespace Game.Movement
                 if (Dist3DSqr(GetActualEndPosition(), GetEndPosition()) < 0.3f * Dist3DSqr(GetStartPosition(), GetEndPosition()))
                 {
                     SetActualEndPosition(GetEndPosition());
-                    _pathPoints[_pathPoints.Length - 1] = GetEndPosition();
+                    _pathPoints[^1] = GetEndPosition();
                 }
                 else
                 {
@@ -636,7 +636,7 @@ namespace Game.Movement
                 Span<float> span = steerPath;
                 // Stop at Off-Mesh link or when point is further than slop away.
                 if ((steerPathFlags[ns].HasAnyFlag((byte)Detour.dtStraightPathFlags.DT_STRAIGHTPATH_OFFMESH_CONNECTION) ||
-                    !InRangeYZX(span.Slice((int)ns * 3).ToArray(), startPos, minTargetDist, 1000.0f)))
+                    !InRangeYZX(span[((int)ns * 3)..].ToArray(), startPos, minTargetDist, 1000.0f)))
                     break;
                 ns++;
             }
@@ -678,11 +678,7 @@ namespace Game.Movement
             while (npolys != 0 && nsmoothPath < maxSmoothPathSize)
             {
                 // Find location to steer towards.
-                float[] steerPos;
-                Detour.dtStraightPathFlags steerPosFlag;
-                ulong steerPosRef = 0;
-
-                if (!GetSteerTarget(iterPos, targetPos, 0.3f, polys, npolys, out steerPos, out steerPosFlag, out steerPosRef))
+                if (!GetSteerTarget(iterPos, targetPos, 0.3f, polys, npolys, out float[] steerPos, out Detour.dtStraightPathFlags steerPosFlag, out ulong steerPosRef))
                     break;
 
                 bool endOfPath = steerPosFlag.HasAnyFlag(Detour.dtStraightPathFlags.DT_STRAIGHTPATH_END);

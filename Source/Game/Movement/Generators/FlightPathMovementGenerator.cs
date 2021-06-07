@@ -67,7 +67,7 @@ namespace Game.Movement
                 if (!nodes.Empty())
                 {
                     TaxiPathNodeRecord start = nodes[0];
-                    TaxiPathNodeRecord end = nodes[nodes.Length - 1];
+                    TaxiPathNodeRecord end = nodes[^1];
                     bool passedPreviousSegmentProximityCheck = false;
                     for (uint i = 0; i < nodes.Length; ++i)
                     {
@@ -83,7 +83,7 @@ namespace Game.Movement
                         else
                         {
                             _path.RemoveAt(_path.Count - 1);
-                            _pointsForPathSwitch[_pointsForPathSwitch.Count - 1].PathIndex -= 1;
+                            _pointsForPathSwitch[^1].PathIndex -= 1;
                         }
                     }
                 }

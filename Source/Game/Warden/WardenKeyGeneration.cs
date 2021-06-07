@@ -31,7 +31,7 @@ namespace Game
             o1 = sh.ComputeHash(buff, 0, halfSize);
 
             sh = SHA1.Create();
-            o2 = sh.ComputeHash(span.Slice(halfSize).ToArray(), 0, buff.Length - halfSize);
+            o2 = sh.ComputeHash(span[halfSize..].ToArray(), 0, buff.Length - halfSize);
 
             FillUp();
         }

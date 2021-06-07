@@ -261,7 +261,7 @@ namespace Game.Loots
 
             // Process currency items
             uint max_slot = GetMaxSlotInLootFor(player);
-            LootItem item = null;
+            LootItem item;
             int itemsSize = items.Count;
             for (byte i = 0; i < max_slot; ++i)
             {

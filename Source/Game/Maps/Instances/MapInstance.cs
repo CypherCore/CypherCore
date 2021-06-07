@@ -82,8 +82,8 @@ namespace Game.Maps
             if (GetId() != mapId || player == null)
                 return null;
 
-            Map map = null;
-            uint newInstanceId = 0;                       // instanceId of the resulting map
+            Map map;
+            uint newInstanceId;                       // instanceId of the resulting map
 
             if (IsBattlegroundOrArena())
             {
@@ -124,7 +124,7 @@ namespace Game.Maps
                         return (map && map.GetId() == GetId()) ? map : null; // is this check necessary? or does MapInstanced only find instances of itself?
                     }
 
-                    InstanceBind groupBind = null;
+                    InstanceBind groupBind;
                     Group group = player.GetGroup();
                     // use the player's difficulty setting (it may not be the same as the group's)
                     if (group)

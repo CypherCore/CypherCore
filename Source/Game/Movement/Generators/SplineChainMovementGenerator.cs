@@ -57,7 +57,7 @@ namespace Game.Movement
             return (uint)init.Launch();
         }
 
-        void SendSplineFor(Unit me, int index, uint toNext)
+        void SendSplineFor(Unit me, int index, ref uint toNext)
         {
             Cypher.Assert(index < _chainSize);
             Log.outDebug(LogFilter.Movement, "{0}: Sending spline for {1}.", me.GetGUID().ToString(), index);
@@ -90,7 +90,7 @@ namespace Game.Movement
                         _nextFirstWP = (byte)(thisLink.Points.Count - 1);
                     }
                     Span<Vector3> span = thisLink.Points.ToArray();
-                    SendPathSpline(me, span.Slice(_nextFirstWP - 1));
+                    SendPathSpline(me, span[(_nextFirstWP - 1)..]);
                     Log.outDebug(LogFilter.Movement, "{0}: Resumed spline chain generator from resume state.", me.GetGUID().ToString());
                     ++_nextIndex;
                     if (_nextIndex >= _chainSize)
@@ -102,7 +102,7 @@ namespace Game.Movement
                 else
                 {
                     _msToNext = Math.Max(_chain[_nextIndex].TimeToNext, 1u);
-                    SendSplineFor(me, _nextIndex, _msToNext);
+                    SendSplineFor(me, _nextIndex, ref _msToNext);
                     ++_nextIndex;
                     if (_nextIndex >= _chainSize)
                         _msToNext = 0;
@@ -141,7 +141,7 @@ namespace Game.Movement
                 // Send next spline
                 Log.outDebug(LogFilter.Movement, "{0}: Should send spline {1} ({2} ms late).", me.GetGUID().ToString(), _nextIndex, diff - _msToNext);
                 _msToNext = Math.Max(_chain[_nextIndex].TimeToNext, 1u);
-                SendSplineFor(me, _nextIndex, _msToNext);
+                SendSplineFor(me, _nextIndex, ref _msToNext);
                 ++_nextIndex;
                 if (_nextIndex >= _chainSize)
                 {

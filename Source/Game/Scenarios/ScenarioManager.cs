@@ -159,7 +159,6 @@ namespace Game.Scenarios
                 return;
             }
 
-            List<Vector2>[][] POIs = new List<Vector2>[0][];
             Dictionary<uint, MultiMap<int, ScenarioPOIPoint>> allPoints = new();
 
             //                                               0               1    2  3  4

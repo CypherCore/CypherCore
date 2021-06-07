@@ -401,7 +401,7 @@ namespace Game
             if (locale >= Locale.Total)
                 locale = Locale.enUS;
 
-            string baseText = "";
+            string baseText;
             BroadcastTextRecord bct = CliDB.BroadcastTextStorage.LookupByKey(creatureTextEntry.BroadcastTextId);
 
             if (bct != null)
@@ -499,50 +499,6 @@ namespace Game
         Dictionary<CreatureTextId, CreatureTextLocale> mLocaleTextMap = new();
     }
 
-    public class CreatureTextHolder
-    {
-        public CreatureTextHolder(uint entry)
-        {
-            Entry = entry;
-            Groups = new MultiMap<uint, CreatureTextEntry>();
-        }
-
-        public void AddText(uint group, CreatureTextEntry entry)
-        {
-            Groups.Add(group, entry);
-        }
-
-        public List<CreatureTextEntry> GetGroupList(uint group)
-        {
-            return Groups.LookupByKey(group);
-        }
-
-        uint Entry;
-        MultiMap<uint, CreatureTextEntry> Groups;
-    }
-
-    public class CreatureTextRepeatHolder
-    {
-        public CreatureTextRepeatHolder(ulong guid)
-        {
-            Guid = guid;
-            Groups = new MultiMap<byte, byte>();
-        }
-
-        public void AddText(byte group, byte entry)
-        {
-            Groups.Add(group, entry);
-        }
-
-        public List<byte> GetGroupList(byte group)
-        {
-            return Groups.LookupByKey(group);
-        }
-
-        ulong Guid;
-        MultiMap<byte, byte> Groups;
-    }
-
     public class CreatureTextEntry
     {
         public uint creatureId;
@@ -558,10 +514,12 @@ namespace Game
         public uint BroadcastTextId;
         public CreatureTextRange TextRange;
     }
+
     public class CreatureTextLocale
     {
         public StringArray Text = new((int)Locale.Total);
     }
+
     public class CreatureTextId
     {
         public CreatureTextId(uint e, uint g, uint i)
@@ -571,9 +529,9 @@ namespace Game
             textId = i;
         }
 
-        uint entry;
-        uint textGroup;
-        uint textId;
+        public uint entry;
+        public uint textGroup;
+        public uint textId;
     }
 
     public enum CreatureTextRange

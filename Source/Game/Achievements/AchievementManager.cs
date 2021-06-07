@@ -744,7 +744,7 @@ namespace Game.Achievements
             DeleteFromDB(guid);
         }
 
-        void DeleteFromDB(ObjectGuid guid)
+        public static void DeleteFromDB(ObjectGuid guid)
         {
             SQLTransaction trans = new();
 

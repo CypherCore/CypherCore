@@ -42,7 +42,6 @@ namespace Game.Loots
                 do
                 {
                     ulong key = result.Read<ulong>(0);
-                    var itr = _lootItemStorage.LookupByKey(key);
                     if (!_lootItemStorage.ContainsKey(key))
                         _lootItemStorage[key] = new StoredLootContainer(key);
 
@@ -252,15 +251,12 @@ namespace Game.Loots
             stmt.AddValue(9, lootItem.randomBonusListId);
             stmt.AddValue(10, (uint)lootItem.context);
 
-            foreach (uint token in lootItem.BonusListIDs)
-            {
-                StringBuilder bonusListIDs = new();
-                foreach (int bonusListID in lootItem.BonusListIDs)
-                    bonusListIDs.Append(bonusListID + ' ');
+            StringBuilder bonusListIDs = new();
+            foreach (int bonusListID in lootItem.BonusListIDs)
+                bonusListIDs.Append(bonusListID + ' ');
 
-                stmt.AddValue(11, bonusListIDs.ToString());
-                trans.Append(stmt);
-            }
+            stmt.AddValue(11, bonusListIDs.ToString());
+            trans.Append(stmt);
         }
 
         public void AddMoney(uint money, SQLTransaction trans)

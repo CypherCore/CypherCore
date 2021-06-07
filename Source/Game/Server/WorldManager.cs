@@ -1231,7 +1231,7 @@ namespace Game
         public void Update(uint diff)
         {
             ///- Update the game time and check for shutdown time
-            _UpdateGameTime();
+            UpdateGameTime();
             long currentGameTime = GameTime.GetGameTime();
 
             _worldUpdateTime.UpdateWithDiff(diff);
@@ -1731,7 +1731,7 @@ namespace Game
             return true;
         }
 
-        void _UpdateGameTime()
+        void UpdateGameTime()
         {
             // update the time
             long lastGameTime = GameTime.GetGameTime();
@@ -1899,10 +1899,10 @@ namespace Game
         {
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHARACTER_COUNT);
             stmt.AddValue(0, accountId);
-            _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt).WithCallback(_UpdateRealmCharCount));
+            _queryProcessor.AddCallback(DB.Characters.AsyncQuery(stmt).WithCallback(UpdateRealmCharCount));
         }
 
-        void _UpdateRealmCharCount(SQLResult result)
+        void UpdateRealmCharCount(SQLResult result)
         { 
             if (!result.IsEmpty())
             {
@@ -2061,7 +2061,7 @@ namespace Game
                 if (session.GetPlayer() != null)
                     session.GetPlayer().ResetCurrencyWeekCap();
 
-            m_NextCurrencyReset = m_NextCurrencyReset + Time.Day * WorldConfig.GetIntValue(WorldCfg.CurrencyResetInterval);
+            m_NextCurrencyReset += Time.Day * WorldConfig.GetIntValue(WorldCfg.CurrencyResetInterval);
             SetWorldState(WorldStates.CurrencyResetTime, (ulong)m_NextCurrencyReset);
         }
 
@@ -2095,7 +2095,7 @@ namespace Game
                 if (session.GetPlayer() != null)
                     session.GetPlayer().ResetWeeklyQuestStatus();
 
-            m_NextWeeklyQuestReset = (m_NextWeeklyQuestReset + Time.Week);
+            m_NextWeeklyQuestReset += Time.Week;
             SetWorldState(WorldStates.WeeklyQuestResetTime, (ulong)m_NextWeeklyQuestReset);
 
             // change available weeklies
@@ -2149,13 +2149,13 @@ namespace Game
                 if (session.GetPlayer())
                     session.GetPlayer().SetRandomWinner(false);
 
-            m_NextRandomBGReset = m_NextRandomBGReset + Time.Day;
+            m_NextRandomBGReset += Time.Day;
             SetWorldState(WorldStates.BGDailyResetTime, (ulong)m_NextRandomBGReset);
         }
 
         void ResetGuildCap()
         {
-            m_NextGuildReset = (m_NextGuildReset + Time.Day);
+            m_NextGuildReset += Time.Day;
             SetWorldState(WorldStates.GuildDailyResetTime, (ulong)m_NextGuildReset);
             ulong week = GetWorldState(WorldStates.GuildWeeklyResetTime);
             week = week < 7 ? week + 1 : 1;
@@ -2532,7 +2532,7 @@ namespace Game
             if (i_args != null)
                 text = string.Format(text, i_args);
 
-            MultiplePacketSender sender = new MultiplePacketSender();
+            MultiplePacketSender sender = new();
 
             var lines = new StringArray(text, "\n");
             for (var i = 0; i < lines.Length; ++i)

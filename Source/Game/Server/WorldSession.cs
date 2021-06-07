@@ -81,8 +81,7 @@ namespace Game
             }
 
             // empty incoming packet queue
-            WorldPacket packet;
-            while (_recvQueue.TryDequeue(out packet)) ;
+            _recvQueue.Clear();
 
             DB.Login.Execute("UPDATE account SET online = 0 WHERE id = {0};", GetAccountId());     // One-time query
         }
@@ -773,9 +772,6 @@ namespace Game
             SendPacket(bnetConnected);
 
             _battlePetMgr.LoadFromDB(holder.GetResult(AccountInfoQueryLoad.BattlePets), holder.GetResult(AccountInfoQueryLoad.BattlePetSlot));
-
-            realmHolder = null;
-            holder = null;
         }
 
         public RBACData GetRBACData()
@@ -839,10 +835,6 @@ namespace Game
         // Battle Pets
         public BattlePetMgr GetBattlePetMgr() { return _battlePetMgr; }
         public CollectionMgr GetCollectionMgr() { return _collectionMgr; }
-
-        void ClearRedirectFlag(SessionFlags flag) { m_flags &= ~flag; }
-        public bool WasRedirected() { return m_flags.HasAnyFlag(SessionFlags.FromRedirect); }
-        bool HasRedirected() { return m_flags.HasAnyFlag(SessionFlags.HasRedirected); }
 
         // Battlenet
         public Array<byte> GetRealmListSecret() { return _realmListSecret; }

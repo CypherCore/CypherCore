@@ -1023,6 +1023,7 @@ namespace Framework.Constants
         PlusMaxLevelForExpansion = 2
     }
 
+    [Flags]
     public enum ContentTuningFlag
     {
         DisabledForItem = 0x04,
@@ -1679,6 +1680,7 @@ namespace Framework.Constants
         CooldownExpiresAtDailyReset = 0x08
     }
 
+    [Flags]
     public enum SpellEffectAttributes
     {
         None = 0,

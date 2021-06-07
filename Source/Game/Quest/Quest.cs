@@ -809,7 +809,7 @@ namespace Game
         public uint Flags2;
         public float ProgressBarWeight;
         public string Description;
-        public int[] VisualEffects = new int[0];
+        public int[] VisualEffects = Array.Empty<int>();
 
         public bool IsStoringValue()
         {

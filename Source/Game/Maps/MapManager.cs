@@ -259,7 +259,7 @@ namespace Game.Entities
             MapRecord mEntry = CliDB.MapStorage.LookupByKey(mapid);
 
             if (startUp)
-                return mEntry != null ? true : false;
+                return mEntry != null;
             else
                 return mEntry != null && (!mEntry.IsDungeon() || Global.ObjectMgr.GetInstanceTemplate(mapid) != null);
 

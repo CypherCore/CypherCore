@@ -43,35 +43,33 @@ namespace Game.Maps
             if (!File.Exists(filename))
                 return LoadResult.FileNotFound;
 
-            using (BinaryReader reader = new(new FileStream(filename, FileMode.Open, FileAccess.Read)))
+            using BinaryReader reader = new(new FileStream(filename, FileMode.Open, FileAccess.Read));
+            MapFileHeader header = reader.Read<MapFileHeader>();
+            if (header.mapMagic != MapConst.MapMagic || (header.versionMagic != MapConst.MapVersionMagic && header.versionMagic != MapConst.MapVersionMagic2)) // Hack for some different extractors using v2.0 header
             {
-                MapFileHeader header = reader.Read<MapFileHeader>();
-                if (header.mapMagic != MapConst.MapMagic || (header.versionMagic != MapConst.MapVersionMagic && header.versionMagic != MapConst.MapVersionMagic2)) // Hack for some different extractors using v2.0 header
-                {
-                    Log.outError(LogFilter.Maps, $"Map file '{filename}' is from an incompatible map version. Please recreate using the mapextractor.");
-                    return LoadResult.ReadFromFileFailed;
-                }
-
-                if (header.areaMapOffset != 0 && !LoadAreaData(reader, header.areaMapOffset))
-                {
-                    Log.outError(LogFilter.Maps, "Error loading map area data");
-                    return LoadResult.ReadFromFileFailed;
-                }
-
-                if (header.heightMapOffset != 0 && !LoadHeightData(reader, header.heightMapOffset))
-                {
-                    Log.outError(LogFilter.Maps, "Error loading map height data");
-                    return LoadResult.ReadFromFileFailed;
-                }
-
-                if (header.liquidMapOffset != 0 && !LoadLiquidData(reader, header.liquidMapOffset))
-                {
-                    Log.outError(LogFilter.Maps, "Error loading map liquids data");
-                    return LoadResult.ReadFromFileFailed;
-                }
-
-                return LoadResult.Success;
+                Log.outError(LogFilter.Maps, $"Map file '{filename}' is from an incompatible map version. Please recreate using the mapextractor.");
+                return LoadResult.ReadFromFileFailed;
             }
+
+            if (header.areaMapOffset != 0 && !LoadAreaData(reader, header.areaMapOffset))
+            {
+                Log.outError(LogFilter.Maps, "Error loading map area data");
+                return LoadResult.ReadFromFileFailed;
+            }
+
+            if (header.heightMapOffset != 0 && !LoadHeightData(reader, header.heightMapOffset))
+            {
+                Log.outError(LogFilter.Maps, "Error loading map height data");
+                return LoadResult.ReadFromFileFailed;
+            }
+
+            if (header.liquidMapOffset != 0 && !LoadLiquidData(reader, header.liquidMapOffset))
+            {
+                Log.outError(LogFilter.Maps, "Error loading map liquids data");
+                return LoadResult.ReadFromFileFailed;
+            }
+
+            return LoadResult.Success;
         }
 
         public void UnloadData()
@@ -450,7 +448,7 @@ namespace Game.Maps
             float gx = x - ((int)gridCoord.X_coord - MapConst.CenterGridId + 1) * MapConst.SizeofGrids;
             float gy = y - ((int)gridCoord.Y_coord - MapConst.CenterGridId + 1) * MapConst.SizeofGrids;
 
-            uint quarterIndex = 0;
+            uint quarterIndex;
             if (Convert.ToBoolean(doubleGridY & 1))
             {
                 if (Convert.ToBoolean(doubleGridX & 1))

@@ -56,8 +56,8 @@ namespace Game.Networking.Packets
             Reason = _worldPacket.ReadInt32();
         }
 
-        int ChannelSpell;
-        int Reason = 0;       // 40 = /run SpellStopCasting(), 16 = movement/AURA_INTERRUPT_FLAG_MOVE, 41 = turning/AURA_INTERRUPT_FLAG_TURNING
+        public int ChannelSpell;
+        public int Reason;       // 40 = /run SpellStopCasting(), 16 = movement/AURA_INTERRUPT_FLAG_MOVE, 41 = turning/AURA_INTERRUPT_FLAG_TURNING
                                 // does not match SpellCastResult enum
     }
 
@@ -1448,7 +1448,7 @@ namespace Game.Networking.Packets
         public Optional<int> Duration;
         public Optional<int> Remaining;
         Optional<float> TimeMod;
-        public float[] Points = new float[0];
+        public float[] Points = Array.Empty<float>();
         public List<float> EstimatedPoints = new();
     }
 

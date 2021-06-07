@@ -1029,9 +1029,8 @@ namespace Game
                     return;
             }
 
-            uint val = mSpawnedPools[pool_id];
-            if (val > 0)
-                --val;
+            if (mSpawnedPools[pool_id] > 0)
+                --mSpawnedPools[pool_id];
         }
 
         public List<ulong> GetActiveQuests() { return mActiveQuests; } // a copy of the set

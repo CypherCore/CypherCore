@@ -79,7 +79,7 @@ namespace BNetServer
 
         static bool StartDB()
         {
-            DatabaseLoader loader = new DatabaseLoader(DatabaseTypeFlags.None);
+            DatabaseLoader loader = new(DatabaseTypeFlags.None);
             loader.AddDatabase(DB.Login, "Login");
 
             if (!loader.Load())
@@ -111,11 +111,11 @@ namespace BNetServer
 
             bool hadWarning = false;
             uint count = 0;
-            SQLTransaction trans = new SQLTransaction();
+            SQLTransaction trans = new();
             do
             {
                 uint id = result.Read<uint>(0);
-                (byte[] salt, byte[] verifier) registrationData = SRP6.MakeRegistrationDataFromHash(result.Read<string>(1).ToByteArray());
+                (byte[] salt, byte[] verifier) = SRP6.MakeRegistrationDataFromHash(result.Read<string>(1).ToByteArray());
 
                 if (result.Read<long>(2) != 0 && !hadWarning)
                 {
@@ -124,8 +124,8 @@ namespace BNetServer
                 }
 
                 PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.UPD_LOGON);
-                stmt.AddValue(0, registrationData.salt);
-                stmt.AddValue(1, registrationData.verifier);
+                stmt.AddValue(0, salt);
+                stmt.AddValue(1, verifier);
                 stmt.AddValue(2, id);
                 trans.Append(stmt);
 

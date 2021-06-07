@@ -5625,7 +5625,7 @@ namespace Game.Spells
             // on apply cast summon spell
             if (apply)
             {
-                CastSpellExtraArgs args = new CastSpellExtraArgs(TriggerCastFlags.FullMask);
+                CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
                 args.TriggeringAura = this;
                 args.CastDifficulty = triggerSpellInfo.Difficulty;
                 target.CastSpell(target, triggerSpellInfo.Id, args);

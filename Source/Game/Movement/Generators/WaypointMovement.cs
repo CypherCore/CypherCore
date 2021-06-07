@@ -228,7 +228,7 @@ namespace Game.Movement
             init.Launch();
 
             // inform formation
-            creature.SignalFormationMovement(formationDest, waypoint.id, waypoint.moveType, (waypoint.orientation != 0 && waypoint.delay != 0) ? true : false);
+            creature.SignalFormationMovement(formationDest, waypoint.id, waypoint.moveType, (waypoint.orientation != 0 && waypoint.delay != 0));
             return true;
         }
 
@@ -307,7 +307,7 @@ namespace Game.Movement
 
         public override void Pause(uint timer = 0)
         {
-            _stalled = timer != 0 ? false : true;
+            _stalled = timer == 0;
             _nextMoveTime.Reset(timer != 0 ? (int)timer : 1);
         }
 

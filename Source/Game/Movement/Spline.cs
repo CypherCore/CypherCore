@@ -64,13 +64,13 @@ namespace Game.Movement
         void EvaluateCatmullRom(int index, float t, out Vector3 result)
         {
             Span<Vector3> span = points;
-            C_Evaluate(span.Slice(index - 1), t, s_catmullRomCoeffs, out result);
+            C_Evaluate(span[(index - 1)..], t, s_catmullRomCoeffs, out result);
         }
         void EvaluateBezier3(int index, float t, out Vector3 result)
         {
             index *= (int)3u;
             Span<Vector3> span = points;
-            C_Evaluate(span.Slice(index), t, s_Bezier3Coeffs, out result);
+            C_Evaluate(span[index..], t, s_Bezier3Coeffs, out result);
         }
         #endregion
 
@@ -192,13 +192,13 @@ namespace Game.Movement
         void EvaluateDerivativeCatmullRom(int index, float t, out Vector3 result)
         {
             Span<Vector3> span = points;
-            C_Evaluate_Derivative(span.Slice(index - 1), t, s_catmullRomCoeffs, out result);
+            C_Evaluate_Derivative(span[(index - 1)..], t, s_catmullRomCoeffs, out result);
         }
         void EvaluateDerivativeBezier3(int index, float t, out Vector3 result)
         {
             index *= (int)3u;
             Span<Vector3> span = points;
-            C_Evaluate_Derivative(span.Slice(index), t, s_Bezier3Coeffs, out result);
+            C_Evaluate_Derivative(span[index..], t, s_Bezier3Coeffs, out result);
         }
         #endregion
         
@@ -225,7 +225,7 @@ namespace Game.Movement
         {
             Vector3 nextPos;
             Span<Vector3> p = points.AsSpan(index - 1);
-            Vector3 curPos = nextPos = p[1];
+            Vector3 curPos = p[1];
 
             int i = 1;
             double length = 0;
@@ -329,7 +329,8 @@ namespace Game.Movement
         {
             int i = index_lo;
             Array.Resize(ref lengths, index_hi+1);
-            int prev_length = 0, new_length = 0;
+            int prev_length;
+            int new_length;
             while (i < index_hi)
             {
                 new_length = cacher.SetGetTime(this, i);
@@ -355,8 +356,8 @@ namespace Game.Movement
 
         public bool Empty() { return index_lo == index_hi;}
 
-        int[] lengths = new int[0];
-        Vector3[] points = new Vector3[0];
+        int[] lengths = Array.Empty<int>();
+        Vector3[] points = Array.Empty<Vector3>();
         public EvaluationMode m_mode;
         bool _cyclic;
         int index_lo;

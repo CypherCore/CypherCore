@@ -1625,7 +1625,7 @@ namespace Game.Achievements
                     break;
                 case ModifierTreeType.BattlePetAchievementPointsEqualOrGreaterThan: // 76
                     {
-                        short getRootAchievementCategory(AchievementRecord achievement)
+                        static short getRootAchievementCategory(AchievementRecord achievement)
                         {
                             short category = (short)achievement.Category;
                             do

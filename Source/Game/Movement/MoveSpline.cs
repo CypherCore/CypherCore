@@ -113,7 +113,7 @@ namespace Game.Movement
         {
             int point = point_Idx_offset + point_Idx - spline.First() + (Finalized() ? 1 : 0);
             if (IsCyclic())
-                point = point % (spline.Last() - spline.First());
+                point %= (spline.Last() - spline.First());
             return point;
         }
 
@@ -164,7 +164,7 @@ namespace Game.Movement
                 }
 
                 if (splineflags.HasFlag(SplineFlag.Backward))
-                    orientation = orientation - (float)Math.PI;
+                    orientation -= (float)Math.PI;
             }
 
             return new Vector4(c.X, c.Y, c.Z, orientation);
@@ -274,7 +274,7 @@ namespace Game.Movement
                     if (spline.IsCyclic())
                     {
                         point_Idx = spline.First();
-                        time_passed = time_passed % Duration();
+                        time_passed %= Duration();
                         result = UpdateResult.NextCycle;
                     }
                     else

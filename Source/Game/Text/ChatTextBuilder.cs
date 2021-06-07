@@ -19,7 +19,6 @@ using Framework.Constants;
 using Framework.Dynamic;
 using Game.DataStorage;
 using Game.Entities;
-using Game.Maps;
 using Game.Networking.Packets;
 using System.Collections.Generic;
 
