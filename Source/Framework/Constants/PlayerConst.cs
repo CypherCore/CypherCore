@@ -469,6 +469,7 @@ namespace Framework.Constants
         UsingPartGarrison = 0x100,
         CanUseObjectsMounted = 0x200,
         CanVisitPartyGarrison = 0x400,
+        WarMode = 0x800,
         AccountSecured = 0x1000, // Script_IsAccountSecured
         OverrideTransportServerTime = 0x8000,
         MentorRestricted = 0x20000,

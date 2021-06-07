@@ -1511,7 +1511,7 @@ namespace Game.Entities
             InventoryResult res = InventoryResult.Ok;
 
             uint tempcount = 0;
-            bool result = ForEachStorageItem(ItemSearchLocation.Equipment, pItem =>
+            bool result = ForEachItem(ItemSearchLocation.Equipment, pItem =>
             {
                 if (pItem.GetEntry() == item)
                 {
@@ -2615,7 +2615,7 @@ namespace Game.Entities
         public Item GetItemByGuid(ObjectGuid guid)
         {
             Item result = null;
-            ForEachStorageItem(ItemSearchLocation.Everywhere, item =>
+            ForEachItem(ItemSearchLocation.Everywhere, item =>
             {
                 if (item.GetGUID() == guid)
                 {
@@ -2637,7 +2637,7 @@ namespace Game.Entities
                 location |= ItemSearchLocation.Bank;
 
             uint count = 0;
-            ForEachStorageItem(location, pItem =>
+            ForEachItem(location, pItem =>
             {
                 if (pItem != skipItem)
                 {
@@ -2684,7 +2684,7 @@ namespace Game.Entities
         public Item GetItemByEntry(uint entry, ItemSearchLocation where = ItemSearchLocation.Default)
         {
             Item result = null;
-            ForEachStorageItem(where, item =>
+            ForEachItem(where, item =>
             {
                 if (item.GetEntry() == entry)
                 {
@@ -2704,7 +2704,7 @@ namespace Game.Entities
                 location |= ItemSearchLocation.Bank;
 
             List<Item> itemList = new();
-            ForEachStorageItem(location, item =>
+            ForEachItem(location, item =>
             {
                 if (item.GetEntry() == entry)
                     itemList.Add(item);
@@ -2721,7 +2721,7 @@ namespace Game.Entities
                 location |= ItemSearchLocation.Bank;
 
             uint currentCount = 0;
-            return !ForEachStorageItem(location, pItem =>
+            return !ForEachItem(location, pItem =>
             {
                 if (pItem && pItem.GetEntry() == item && !pItem.IsInTrade())
                 {
@@ -2791,7 +2791,7 @@ namespace Game.Entities
         public Item GetChildItemByGuid(ObjectGuid guid)
         {
             Item result = null;
-            ForEachStorageItem(ItemSearchLocation.Equipment | ItemSearchLocation.Inventory, item =>
+            ForEachItem(ItemSearchLocation.Equipment | ItemSearchLocation.Inventory, item =>
             {
                 if (item.GetGUID() == guid)
                 {
@@ -2807,7 +2807,7 @@ namespace Game.Entities
         uint GetItemCountWithLimitCategory(uint limitCategory, Item skipItem)
         {
             uint count = 0;
-            ForEachStorageItem(ItemSearchLocation.Everywhere, item =>
+            ForEachItem(ItemSearchLocation.Everywhere, item =>
             {
                 if (item != skipItem)
                 {
@@ -3428,23 +3428,16 @@ namespace Game.Entities
             return false;
         }
 
-        uint GetMaxPersonalArenaRatingRequirement(uint minarenaslot)
+        public uint GetMaxPersonalArenaRatingRequirement(uint minarenaslot)
         {
             // returns the maximal personal arena rating that can be used to purchase items requiring this condition
-            // the personal rating of the arena team must match the required limit as well
-            // so return max[in arenateams](min(personalrating[teamtype], teamrating[teamtype]))
+            // so return max[in arenateams](personalrating[teamtype])
             uint max_personal_rating = 0;
             for (byte i = (byte)minarenaslot; i < SharedConst.MaxArenaSlot; ++i)
             {
-                ArenaTeam at = Global.ArenaTeamMgr.GetArenaTeamById(GetArenaTeamId(i));
-                if (at != null)
-                {
-                    uint p_rating = GetArenaPersonalRating(i);
-                    uint t_rating = at.GetRating();
-                    p_rating = p_rating < t_rating ? p_rating : t_rating;
-                    if (max_personal_rating < p_rating)
-                        max_personal_rating = p_rating;
-                }
+                uint p_rating = GetArenaPersonalRating(i);
+                if (max_personal_rating < p_rating)
+                    max_personal_rating = p_rating;
             }
             return max_personal_rating;
         }
@@ -4469,7 +4462,60 @@ namespace Game.Entities
         {
             return StoreItem(dest, pItem, update);
         }
+        public uint GetFreeInventorySlotCount(ItemSearchLocation location = ItemSearchLocation.Inventory)
+        {
+            uint freeSlotCount = 0;
 
+            if (location.HasFlag(ItemSearchLocation.Equipment))
+                for (byte i = EquipmentSlot.Start; i < EquipmentSlot.End; ++i)
+                    if (GetItemByPos(InventorySlots.Bag0, i) == null)
+                        ++freeSlotCount;
+
+            if (location.HasFlag(ItemSearchLocation.Inventory))
+            {
+                int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();
+                for (byte i = InventorySlots.ItemStart; i < inventoryEnd; ++i)
+                    if (GetItemByPos(InventorySlots.Bag0, i) == null)
+                        ++freeSlotCount;
+
+                for (byte i = InventorySlots.BagStart; i < InventorySlots.BagEnd; ++i)
+                {
+                    Bag bag = GetBagByPos(i);
+                    if (bag != null)
+                    {
+                        for (byte j = 0; j < bag.GetBagSize(); ++j)
+                            if (bag.GetItemByPos(j) == null)
+                                ++freeSlotCount;
+                    }
+                }
+            }
+
+            if (location.HasFlag(ItemSearchLocation.Bank))
+            {
+                for (byte i = InventorySlots.BankItemStart; i < InventorySlots.BankItemEnd; ++i)
+                    if (GetItemByPos(InventorySlots.Bag0, i) == null)
+                        ++freeSlotCount;
+
+                for (byte i = InventorySlots.BankBagStart; i < InventorySlots.BankBagEnd; ++i)
+                {
+                    Bag bag = GetBagByPos(i);
+                    if (bag != null)
+                    {
+                        for (byte j = 0; j < bag.GetBagSize(); ++j)
+                            if (bag.GetItemByPos(j) == null)
+                                ++freeSlotCount;
+                    }
+                }
+            }
+
+            if (location.HasFlag(ItemSearchLocation.ReagentBank))
+                for (byte i = InventorySlots.ReagentStart; i < InventorySlots.ReagentEnd; ++i)
+                    if (GetItemByPos(InventorySlots.Bag0, i) == null)
+                        ++freeSlotCount;
+
+            return freeSlotCount;
+        }
+        
         //Bags
         public Bag GetBagByPos(byte bag)
         {
@@ -5242,7 +5288,7 @@ namespace Game.Entities
 
             ItemTemplate pProto = Global.ObjectMgr.GetItemTemplate(item);
             bool includeGems = pProto?.GetGemProperties() != 0;
-            return !ForEachStorageItem(ItemSearchLocation.Equipment, pItem =>
+            return !ForEachItem(ItemSearchLocation.Equipment, pItem =>
             {
                 if (pItem.GetSlot() != except_slot)
                 {
@@ -5261,7 +5307,7 @@ namespace Game.Entities
         bool HasItemWithLimitCategoryEquipped(uint limitCategory, uint count, byte except_slot)
         {
             uint tempcount = 0;
-            return !ForEachStorageItem(ItemSearchLocation.Equipment, pItem =>
+            return !ForEachItem(ItemSearchLocation.Equipment, pItem =>
             {
                 if (pItem.GetSlot() == except_slot)
                     return true;
@@ -5280,7 +5326,7 @@ namespace Game.Entities
         bool HasGemWithLimitCategoryEquipped(uint limitCategory, uint count, byte except_slot)
         {
             uint tempcount = 0;
-            return !ForEachStorageItem(ItemSearchLocation.Equipment, pItem =>
+            return !ForEachItem(ItemSearchLocation.Equipment, pItem =>
             {
                 if (pItem.GetSlot() == except_slot)
                     return true;
@@ -6555,7 +6601,7 @@ namespace Game.Entities
             // @todo other types of power scaling such as timewalking
         }
 
-        bool ForEachStorageItem(ItemSearchLocation location, Func<Item, bool> callback)
+        public bool ForEachItem(ItemSearchLocation location, Func<Item, bool> callback)
         {
             if (location.HasAnyFlag(ItemSearchLocation.Equipment))
             {
@@ -6720,7 +6766,7 @@ namespace Game.Entities
             (InventoryType inventoryType, uint itemLevel, ObjectGuid guid)[] bestItemLevels = new (InventoryType inventoryType, uint itemLevel, ObjectGuid guid)[EquipmentSlot.End];
             float sum = 0;
 
-            ForEachStorageItem(ItemSearchLocation.Everywhere, item =>
+            ForEachItem(ItemSearchLocation.Everywhere, item =>
             {
                 ItemTemplate itemTemplate = item.GetTemplate();
                 if (itemTemplate != null)

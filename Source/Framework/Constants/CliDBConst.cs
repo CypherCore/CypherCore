@@ -988,6 +988,7 @@ namespace Framework.Constants
         Max
     }
 
+    [Flags]
     public enum BattlemasterListFlags : int
     {
         Disabled = 0x01,

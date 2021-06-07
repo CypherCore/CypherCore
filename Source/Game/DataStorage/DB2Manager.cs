@@ -1463,6 +1463,17 @@ namespace Game.DataStorage
             return bonusListIDs;
         }
 
+        public List<uint> GetAllItemBonusTreeBonuses(uint itemBonusTreeId)
+        {
+            List<uint> bonusListIDs = new List<uint>();
+            VisitItemBonusTree(itemBonusTreeId, true, bonusTreeNode =>
+            {
+                if (bonusTreeNode.ChildItemBonusListID != 0)
+                    bonusListIDs.Add(bonusTreeNode.ChildItemBonusListID);
+            });
+            return bonusListIDs;
+        }
+        
         void LoadAzeriteEmpoweredItemUnlockMappings(MultiMap<uint, AzeriteUnlockMappingRecord> azeriteUnlockMappingsBySet, uint itemId)
         {
             var itemIdRange = _itemToBonusTree.LookupByKey(itemId);

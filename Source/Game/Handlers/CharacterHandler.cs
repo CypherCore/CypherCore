@@ -123,7 +123,7 @@ namespace Game
                 while (result.NextRow());
             }
 
-            charResult.IsAlliedRacesCreationAllowed = GetAccountExpansion() >= Expansion.BattleForAzeroth;
+            charResult.IsAlliedRacesCreationAllowed = CanAccessAlliedRaces();
 
             foreach (var requirement in Global.ObjectMgr.GetRaceUnlockRequirements())
             {

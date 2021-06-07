@@ -676,6 +676,11 @@ namespace Game
         {
             return _transactionCallbacks.AddCallback(callback);
         }
+
+        public bool CanAccessAlliedRaces()
+        {
+            return GetAccountExpansion() >= Expansion.BattleForAzeroth;
+        }
         
         void InitWarden(BigInteger k)
         {

@@ -2089,6 +2089,30 @@ namespace Game.Entities
             }
         }
 
+        public uint GetTotalUnlockedArtifactPowers()
+        {
+            uint purchased = GetTotalPurchasedArtifactPowers();
+            ulong artifactXp = m_itemData.ArtifactXP;
+            uint currentArtifactTier = GetModifier(ItemModifier.ArtifactTier);
+            uint extraUnlocked = 0;
+            do
+            {
+                ulong xpCost = 0;
+                var cost = CliDB.ArtifactLevelXPGameTable.GetRow(purchased + extraUnlocked + 1);
+                if (cost != null)
+                    xpCost = (ulong)(currentArtifactTier == PlayerConst.MaxArtifactTier ? cost.XP2 : cost.XP);
+
+                if (artifactXp < xpCost)
+                    break;
+
+                artifactXp -= xpCost;
+                ++extraUnlocked;
+
+            } while (true);
+
+            return purchased + extraUnlocked;
+        }
+        
         public uint GetTotalPurchasedArtifactPowers()
         {
             uint purchasedRanks = 0;

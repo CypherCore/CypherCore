@@ -728,7 +728,7 @@ namespace Game.Entities
             {
                 int transmogSlot = Item.ItemTransmogrificationSlots[(int)item.inventoryType];
                 if (transmogSlot >= 0)
-                    _owner.GetPlayer().UpdateCriteria(CriteriaTypes.AppearanceUnlockedBySlot, (ulong)transmogSlot, 1);
+                    _owner.GetPlayer().UpdateCriteria(CriteriaTypes.AppearanceUnlockedBySlot, (ulong)transmogSlot, itemModifiedAppearance.Id);
             }
 
             var sets = Global.DB2Mgr.GetTransmogSetsForItemModifiedAppearance(itemModifiedAppearance.Id);

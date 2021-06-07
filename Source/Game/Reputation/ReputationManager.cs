@@ -182,7 +182,7 @@ namespace Game
             return GetForcedRankIfAny(factionTemplateEntry.Faction);
         }
 
-        int GetParagonLevel(uint paragonFactionId)
+        public int GetParagonLevel(uint paragonFactionId)
         {
             return GetParagonLevel(CliDB.FactionStorage.LookupByKey(paragonFactionId));
         }

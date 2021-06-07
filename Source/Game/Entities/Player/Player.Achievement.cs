@@ -20,6 +20,7 @@ using Game.Achievements;
 using Game.DataStorage;
 using Game.Guilds;
 using Game.Scenarios;
+using System.Collections.Generic;
 
 namespace Game.Entities
 {
@@ -39,6 +40,12 @@ namespace Game.Entities
         {
             return m_achievementSys.GetAchievementPoints();
         }
+
+        public ICollection<uint> GetCompletedAchievementIds()
+        {
+            return m_achievementSys.GetCompletedAchievementIds();
+        }
+        
         public bool HasAchieved(uint achievementId)
         {
             return m_achievementSys.HasAchieved(achievementId);

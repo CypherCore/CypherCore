@@ -35,8 +35,8 @@ namespace Game.Scenarios
 
             //ASSERT(_data);
 
-            foreach (var step in _data.Steps)
-                SetStepState(step.Value, ScenarioStepState.NotStarted);
+            foreach (var scenarioStep in _data.Steps.Values)
+                SetStepState(scenarioStep, ScenarioStepState.NotStarted);
 
             ScenarioStepRecord firstStep = GetFirstStep();
             if (firstStep != null)
@@ -80,16 +80,16 @@ namespace Game.Scenarios
                 return;
 
             ScenarioStepRecord newStep = null;
-            foreach (var _step in _data.Steps.Values)
+            foreach (var scenarioStep in _data.Steps.Values)
             {
-                if (_step.IsBonusObjective())
+                if (scenarioStep.IsBonusObjective())
                     continue;
 
-                if (GetStepState(_step) == ScenarioStepState.Done)
+                if (GetStepState(scenarioStep) == ScenarioStepState.Done)
                     continue;
 
-                if (newStep == null || _step.OrderIndex < newStep.OrderIndex)
-                    newStep = _step;
+                if (newStep == null || scenarioStep.OrderIndex < newStep.OrderIndex)
+                    newStep = scenarioStep;
             }
 
             SetStep(newStep);
@@ -129,12 +129,12 @@ namespace Game.Scenarios
 
         bool IsComplete()
         {
-            foreach (var step in _data.Steps.Values)
+            foreach (var scenarioStep in _data.Steps.Values)
             {
-                if (step.IsBonusObjective())
+                if (scenarioStep.IsBonusObjective())
                     continue;
 
-                if (GetStepState(step) != ScenarioStepState.Done)
+                if (GetStepState(scenarioStep) != ScenarioStepState.Done)
                     return false;
             }
 
@@ -278,6 +278,22 @@ namespace Game.Scenarios
             return firstStep;
         }
 
+        public ScenarioStepRecord GetLastStep()
+        {
+            // Do it like this because we don't know what order they're in inside the container.
+            ScenarioStepRecord lastStep = null;
+            foreach (var scenarioStep in _data.Steps.Values)
+            {
+                if (scenarioStep.IsBonusObjective())
+                    continue;
+
+                if (lastStep == null || scenarioStep.OrderIndex > lastStep.OrderIndex)
+                    lastStep = scenarioStep;
+            }
+
+            return lastStep;
+        }
+        
         public void SendScenarioState(Player player)
         {
             ScenarioState scenarioState = new();
@@ -288,16 +304,16 @@ namespace Game.Scenarios
         List<BonusObjectiveData> GetBonusObjectivesData()
         {
             List<BonusObjectiveData> bonusObjectivesData = new();
-            foreach (var step in _data.Steps.Values)
+            foreach (var scenarioStep in _data.Steps.Values)
             {
-                if (!step.IsBonusObjective())
+                if (!scenarioStep.IsBonusObjective())
                     continue;
 
-                if (Global.CriteriaMgr.GetCriteriaTree(step.CriteriaTreeId) != null)
+                if (Global.CriteriaMgr.GetCriteriaTree(scenarioStep.CriteriaTreeId) != null)
                 {
                     BonusObjectiveData bonusObjectiveData;
-                    bonusObjectiveData.BonusObjectiveID = (int)step.Id;
-                    bonusObjectiveData.ObjectiveComplete = GetStepState(step) == ScenarioStepState.Done;
+                    bonusObjectiveData.BonusObjectiveID = (int)scenarioStep.Id;
+                    bonusObjectiveData.ObjectiveComplete = GetStepState(scenarioStep) == ScenarioStepState.Done;
                     bonusObjectivesData.Add(bonusObjectiveData);
                 }
             }

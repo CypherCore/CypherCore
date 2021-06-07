@@ -5015,7 +5015,7 @@ namespace Game.Entities
             return true;
         }
 
-        bool CanEnableWarModeInArea()
+        public bool CanEnableWarModeInArea()
         {
             var area = CliDB.AreaTableStorage.LookupByKey(GetAreaId());
             if (area == null || !IsFriendlyArea(area))
@@ -5878,6 +5878,16 @@ namespace Game.Entities
             return reputationMgr;
         }
 
+        public void SetReputation(uint factionentry, int value)
+        {
+            GetReputationMgr().SetReputation(CliDB.FactionStorage.LookupByKey(factionentry), value);
+        }
+
+        public int GetReputation(uint factionentry)
+        {
+            return GetReputationMgr().GetReputation(CliDB.FactionStorage.LookupByKey(factionentry));
+        }
+        
         #region Sends / Updates
         void BeforeVisibilityDestroy(WorldObject obj, Player p)
         {
@@ -6423,12 +6433,12 @@ namespace Game.Entities
                 SendMovementSetCollisionHeight(scale * GetCollisionHeight(), UpdateCollisionHeightReason.Scale);
         }
 
-        bool HasRaceChanged() { return m_ExtraFlags.HasFlag(PlayerExtraFlags.HasRaceChanged); }
-        void SetHasRaceChanged() { m_ExtraFlags |= PlayerExtraFlags.HasRaceChanged; }
-        bool HasBeenGrantedLevelsFromRaF() { return m_ExtraFlags.HasFlag(PlayerExtraFlags.GrantedLevelsFromRaf); }
-        void SetBeenGrantedLevelsFromRaF() { m_ExtraFlags |= PlayerExtraFlags.GrantedLevelsFromRaf; }
-        bool HasLevelBoosted() { return m_ExtraFlags.HasFlag(PlayerExtraFlags.LevelBoosted); }
-        void SetHasLevelBoosted() { m_ExtraFlags |= PlayerExtraFlags.LevelBoosted; }
+        public bool HasRaceChanged() { return m_ExtraFlags.HasFlag(PlayerExtraFlags.HasRaceChanged); }
+        public void SetHasRaceChanged() { m_ExtraFlags |= PlayerExtraFlags.HasRaceChanged; }
+        public bool HasBeenGrantedLevelsFromRaF() { return m_ExtraFlags.HasFlag(PlayerExtraFlags.GrantedLevelsFromRaf); }
+        public void SetBeenGrantedLevelsFromRaF() { m_ExtraFlags |= PlayerExtraFlags.GrantedLevelsFromRaf; }
+        public bool HasLevelBoosted() { return m_ExtraFlags.HasFlag(PlayerExtraFlags.LevelBoosted); }
+        public void SetHasLevelBoosted() { m_ExtraFlags |= PlayerExtraFlags.LevelBoosted; }
         
         public uint GetXP() { return m_activePlayerData.XP; }
         public uint GetXPForNextLevel() { return m_activePlayerData.NextLevelXP; }

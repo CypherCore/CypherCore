@@ -59,6 +59,11 @@ namespace Game.Achievements
             return _achievementPoints;
         }
 
+        public ICollection<uint> GetCompletedAchievementIds()
+        {
+            return _completedAchievements.Keys;
+        }
+        
         public override bool CanUpdateCriteriaTree(Criteria criteria, CriteriaTree tree, Player referencePlayer)
         {
             AchievementRecord achievement = tree.Achievement;

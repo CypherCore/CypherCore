@@ -310,7 +310,7 @@ namespace Game.Garrisons
             return _plots.Values;
         }
 
-        Plot GetPlot(uint garrPlotInstanceId)
+        public Plot GetPlot(uint garrPlotInstanceId)
         {
             return _plots.LookupByKey(garrPlotInstanceId);
         }

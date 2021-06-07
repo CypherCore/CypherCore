@@ -319,6 +319,15 @@ namespace Game.BattlePets
             return (byte)_pets.Values.Count(battlePet => battlePet.PacketInfo.Species == species && battlePet.SaveInfo != BattlePetSaveInfo.Removed);
         }
 
+        public uint GetPetUniqueSpeciesCount()
+        {
+            HashSet<uint> speciesIds = new();
+            foreach (var pair in _pets)
+                speciesIds.Add(pair.Value.PacketInfo.Species);
+
+            return (uint)speciesIds.Count;
+        }
+        
         public void UnlockSlot(byte slot)
         {
             if (!_slots[slot].Locked)
@@ -460,6 +469,8 @@ namespace Game.BattlePets
         public ushort GetTrapLevel() { return _trapLevel; }
         public List<BattlePetSlot> GetSlots() { return _slots; }
 
+        public bool HasJournalLock() { return true; }
+        
         WorldSession _owner;
         ushort _trapLevel;
         Dictionary<ulong, BattlePet> _pets = new();
