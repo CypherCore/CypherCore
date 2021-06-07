@@ -2575,10 +2575,10 @@ namespace Game.Entities
 
         public bool CanJoinConstantChannelInZone(ChatChannelsRecord channel, AreaTableRecord zone)
         {
-            if (channel.Flags.HasAnyFlag(ChannelDBCFlags.ZoneDep) && zone.Flags[0].HasAnyFlag(AreaFlags.ArenaInstance))
+            if (channel.Flags.HasAnyFlag(ChannelDBCFlags.ZoneDep) && zone.Flags.HasFlag(AreaFlags.ArenaInstance))
                 return false;
 
-            if (channel.Flags.HasAnyFlag(ChannelDBCFlags.CityOnly) && !zone.Flags[0].HasAnyFlag(AreaFlags.Capital))
+            if (channel.Flags.HasAnyFlag(ChannelDBCFlags.CityOnly) && !zone.Flags.HasFlag(AreaFlags.Capital))
                 return false;
 
             if (channel.Flags.HasAnyFlag(ChannelDBCFlags.GuildReq) && GetGuildId() != 0)
@@ -4491,7 +4491,7 @@ namespace Game.Entities
             AreaTableRecord zone = CliDB.AreaTableStorage.LookupByKey(GetAreaId());
 
             // Such zones are considered unreachable as a ghost and the player must be automatically revived
-            if ((!IsAlive() && zone != null && zone.Flags[0].HasAnyFlag(AreaFlags.NeedFly)) || GetTransport() != null || GetPositionZ() < GetMap().GetMinHeight(GetPhaseShift(), GetPositionX(), GetPositionY()))
+            if ((!IsAlive() && zone != null && zone.Flags.HasFlag(AreaFlags.NeedFly)) || GetTransport() != null || GetPositionZ() < GetMap().GetMinHeight(GetPhaseShift(), GetPositionX(), GetPositionY()))
             {
                 ResurrectPlayer(0.5f);
                 SpawnCorpseBones();
@@ -4990,6 +4990,38 @@ namespace Game.Entities
                     return false;
 
             return true;
+        }
+
+        bool IsInFriendlyArea()
+        {
+            var areaEntry = CliDB.AreaTableStorage.LookupByKey(GetAreaId());
+            if (areaEntry != null)
+                return IsFriendlyArea(areaEntry);
+
+            return false;
+        }
+
+        bool IsFriendlyArea(AreaTableRecord areaEntry)
+        {
+            Cypher.Assert(areaEntry != null);
+
+            var factionTemplate = GetFactionTemplateEntry();
+            if (factionTemplate == null)
+                return false;
+
+            if ((factionTemplate.FriendGroup & areaEntry.FactionGroupMask) == 0)
+                return false;
+
+            return true;
+        }
+
+        bool CanEnableWarModeInArea()
+        {
+            var area = CliDB.AreaTableStorage.LookupByKey(GetAreaId());
+            if (area == null || !IsFriendlyArea(area))
+                return false;
+
+            return area.Flags2.HasFlag(AreaFlags2.CanEnableWarMode);
         }
 
         // Used in triggers for check "Only to targets that grant experience or honor" req

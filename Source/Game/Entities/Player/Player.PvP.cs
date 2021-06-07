@@ -511,7 +511,7 @@ namespace Game.Entities
                     if (area.IsSanctuary())
                         return false;
 
-                    if (area.Flags[0].HasAnyFlag(AreaFlags.Arena))
+                    if (area.Flags.HasFlag(AreaFlags.Arena))
                         return true;
 
                     if (Global.BattleFieldMgr.GetBattlefieldToZoneId(area.Id) != null)

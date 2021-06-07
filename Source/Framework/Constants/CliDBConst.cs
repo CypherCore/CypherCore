@@ -877,6 +877,7 @@ namespace Framework.Constants
         FlyWarriorChargeEnd = 821
     }
 
+    [Flags]
     public enum AreaFlags
     {
         Snow = 0x01,                // Snow (Only Dun Morogh, Naxxramas, Razorfen Downs And Winterspring)
@@ -911,6 +912,7 @@ namespace Framework.Constants
         Unk9 = 0x40000000,
     }
 
+    [Flags]
     public enum AreaFlags2
     {
         DontShowSanctuary = 0x200,                // Hides sanctuary status from zone text color (Script_GetZonePVPInfo)

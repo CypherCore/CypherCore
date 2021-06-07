@@ -652,7 +652,7 @@ namespace Game
             }
 
             AreaTableRecord atEntry = CliDB.AreaTableStorage.LookupByKey(GetPlayer().GetAreaId());
-            if (atEntry == null || !atEntry.Flags[0].HasAnyFlag(AreaFlags.CanHearthAndResurrect))
+            if (atEntry == null || !atEntry.Flags.HasFlag(AreaFlags.CanHearthAndResurrect))
                 return;
 
             GetPlayer().BuildPlayerRepop();

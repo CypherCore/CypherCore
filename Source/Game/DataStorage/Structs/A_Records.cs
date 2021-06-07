@@ -142,7 +142,8 @@ namespace Game.DataStorage
         public byte WildBattlePetLevelMax;
         public byte WindSettingsID;
         public uint ContentTuningID;
-        public AreaFlags[] Flags = new AreaFlags[2];
+        public AreaFlags Flags;
+        public AreaFlags2 Flags2;
         public ushort[] LiquidTypeID = new ushort[4];
 
         public bool IsSanctuary()
@@ -150,14 +151,14 @@ namespace Game.DataStorage
             if (ContinentID == 609)
                 return true;
 
-            return Flags[0].HasAnyFlag(AreaFlags.Sanctuary);
+            return Flags.HasAnyFlag(AreaFlags.Sanctuary);
         }
 
         public bool IsFlyable()
         {
-            if (Flags[0].HasAnyFlag(AreaFlags.Outland))
+            if (Flags.HasAnyFlag(AreaFlags.Outland))
             {
-                if (!Flags[0].HasAnyFlag(AreaFlags.NoFlyZone))
+                if (!Flags.HasAnyFlag(AreaFlags.NoFlyZone))
                     return true;
             }
 

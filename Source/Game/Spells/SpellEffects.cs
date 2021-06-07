@@ -3268,14 +3268,14 @@ namespace Game.Spells
 
             // Players can only fight a duel in zones with this flag
             AreaTableRecord casterAreaEntry = CliDB.AreaTableStorage.LookupByKey(caster.GetAreaId());
-            if (casterAreaEntry != null && !casterAreaEntry.Flags[0].HasAnyFlag(AreaFlags.AllowDuels))
+            if (casterAreaEntry != null && !casterAreaEntry.Flags.HasFlag(AreaFlags.AllowDuels))
             {
                 SendCastResult(SpellCastResult.NoDueling);            // Dueling isn't allowed here
                 return;
             }
 
             AreaTableRecord targetAreaEntry = CliDB.AreaTableStorage.LookupByKey(target.GetAreaId());
-            if (targetAreaEntry != null && !targetAreaEntry.Flags[0].HasAnyFlag(AreaFlags.AllowDuels))
+            if (targetAreaEntry != null && !targetAreaEntry.Flags.HasFlag(AreaFlags.AllowDuels))
             {
                 SendCastResult(SpellCastResult.NoDueling);            // Dueling isn't allowed here
                 return;

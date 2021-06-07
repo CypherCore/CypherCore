@@ -1783,9 +1783,9 @@ namespace Game.Maps
         {
             if (wmoEntry != null && atEntry != null)
             {
-                if (atEntry.Flags[0].HasAnyFlag(AreaFlags.Outside))
+                if (atEntry.Flags.HasFlag(AreaFlags.Outside))
                     return true;
-                if (atEntry.Flags[0].HasAnyFlag(AreaFlags.Inside))
+                if (atEntry.Flags.HasFlag(AreaFlags.Inside))
                     return false;
             }
 
