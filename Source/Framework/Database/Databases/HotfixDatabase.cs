@@ -836,6 +836,10 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_PVP_TALENT_SLOT_UNLOCK, "SELECT ID, Slot, LevelRequired, DeathKnightLevelRequired, DemonHunterLevelRequired" +        
                 " FROM pvp_talent_slot_unlock");
 
+            // PvpTier.db2
+            PrepareStatement(HotfixStatements.SEL_PVP_TIER, "SELECT Name, ID, MinRating, MaxRating, PrevTier, NextTier, BracketID, `Rank`, RankIconFileDataID FROM pvp_tier");
+            PrepareStatement(HotfixStatements.SEL_PVP_TIER_LOCALE, "SELECT ID, Name_lang FROM pvp_tier_locale WHERE locale = ?");
+
             // QuestFactionReward.db2
             PrepareStatement(HotfixStatements.SEL_QUEST_FACTION_REWARD, "SELECT ID, Difficulty1, Difficulty2, Difficulty3, Difficulty4, Difficulty5, Difficulty6, " +        
                 "Difficulty7, Difficulty8, Difficulty9, Difficulty10 FROM quest_faction_reward");
@@ -1623,6 +1627,9 @@ namespace Framework.Database
         SEL_PVP_TALENT_CATEGORY,
 
         SEL_PVP_TALENT_SLOT_UNLOCK,
+
+        SEL_PVP_TIER,
+        SEL_PVP_TIER_LOCALE,
 
         SEL_QUEST_FACTION_REWARD,
 
