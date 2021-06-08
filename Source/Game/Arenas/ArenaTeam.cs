@@ -144,7 +144,7 @@ namespace Game.Arenas
             newMember.WeekGames = 0;
             newMember.SeasonWins = 0;
             newMember.WeekWins = 0;
-            newMember.PersonalRating = 0;
+            newMember.PersonalRating = (ushort)personalRating;
             newMember.MatchMakerRating = (ushort)matchMakerRating;
 
             Members.Add(newMember);

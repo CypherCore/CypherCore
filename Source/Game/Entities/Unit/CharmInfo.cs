@@ -150,7 +150,7 @@ namespace Game.Entities
                 {
                     _charmspells[x].SetActionAndType(spellId, ActiveStates.Disabled);
 
-                    ActiveStates newstate = ActiveStates.Passive;
+                    ActiveStates newstate;
 
                     if (!spellInfo.IsAutocastable())
                         newstate = ActiveStates.Passive;

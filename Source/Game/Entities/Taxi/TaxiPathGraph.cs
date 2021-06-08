@@ -137,8 +137,7 @@ namespace Game.Entities
             */
 
             // Find if we have a direct path
-            uint pathId, goldCost;
-            Global.ObjectMgr.GetTaxiPath(from.Id, to.Id, out pathId, out goldCost);
+            Global.ObjectMgr.GetTaxiPath(from.Id, to.Id, out uint pathId, out _);
             if (pathId != 0)
             {
                 shortestPath.Add(from.Id);

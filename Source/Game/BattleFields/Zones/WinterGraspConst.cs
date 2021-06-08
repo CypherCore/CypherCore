@@ -715,8 +715,8 @@ namespace Game.BattleFields
     {
         public WintergraspTowerCannonData()
         {
-            TowerCannonBottom = new Position[0];
-            TurretTop = new Position[0];
+            TowerCannonBottom = System.Array.Empty<Position>();
+            TurretTop = System.Array.Empty<Position>();
         }
 
         public uint towerEntry;

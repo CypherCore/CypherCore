@@ -987,7 +987,7 @@ namespace Game.DungeonFinding
                 ObjectGuid pguid = it.Key;
                 ObjectGuid gguid = it.Value.group;
                 uint dungeonId = GetSelectedDungeons(pguid).First();
-                int waitTime = -1;
+                int waitTime;
                 if (sendUpdate)
                     SendLfgUpdateProposal(pguid, proposal);
 

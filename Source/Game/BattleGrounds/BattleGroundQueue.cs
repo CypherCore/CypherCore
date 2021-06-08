@@ -194,7 +194,7 @@ namespace Game.BattleGrounds
             m_SumOfWaitTimes[team_index][(int)bracket_id] += timeInQueue;
             //set index of last player added to next one
             lastPlayerAddedPointer++;
-            lastPlayerAddedPointer %= SharedConst.CountOfPlayersToAverageWaitTime;
+            m_WaitTimeLastPlayer[team_index][(int)bracket_id] = lastPlayerAddedPointer % SharedConst.CountOfPlayersToAverageWaitTime;
         }
 
         public uint GetAverageQueueWaitTime(GroupQueueInfo ginfo, BattlegroundBracketId bracket_id)

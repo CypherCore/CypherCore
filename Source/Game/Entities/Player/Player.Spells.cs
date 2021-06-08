@@ -1413,13 +1413,13 @@ namespace Game.Entities
                 switch (Condition.Operator[i])
                 {
                     case 2:                                         // requires less <color> than (<value> || <comparecolor>) gems
-                        activate &= (_cur_gem < _cmp_gem) ? true : false;
+                        activate &= (_cur_gem < _cmp_gem);
                         break;
                     case 3:                                         // requires more <color> than (<value> || <comparecolor>) gems
-                        activate &= (_cur_gem > _cmp_gem) ? true : false;
+                        activate &= (_cur_gem > _cmp_gem);
                         break;
                     case 5:                                         // requires at least <color> than (<value> || <comparecolor>) gems
-                        activate &= (_cur_gem >= _cmp_gem) ? true : false;
+                        activate &= (_cur_gem >= _cmp_gem);
                         break;
                 }
             }
@@ -2039,7 +2039,7 @@ namespace Game.Entities
         {
             PlayerSpell spell = m_spells.LookupByKey(spellId);
 
-            bool disabled = (spell != null) ? spell.Disabled : false;
+            bool disabled = (spell != null) && spell.Disabled;
             bool active = !disabled || spell.Active;
 
             bool learning = AddSpell(spellId, active, true, dependent, false, false, fromSkill);
@@ -2989,7 +2989,7 @@ namespace Game.Entities
         public void SetRuneCooldown(byte index, uint cooldown)
         {
             m_runes.Cooldown[index] = cooldown;
-            m_runes.SetRuneState(index, (cooldown == 0) ? true : false);
+            m_runes.SetRuneState(index, (cooldown == 0));
             int activeRunes = m_runes.Cooldown.Count(p => p == 0);
             if (activeRunes != GetPower(PowerType.Runes))
                 SetPower(PowerType.Runes, activeRunes);

@@ -22,7 +22,7 @@ namespace BNetServer.Networking
                 return BattlenetRpcErrorCode.Denied;
 
             Bgs.Protocol.Attribute command = null;
-            Dictionary<string, Variant> Params = new Dictionary<string, Variant>();
+            Dictionary<string, Variant> Params = new();
 
             for (int i = 0; i < request.Attribute.Count; ++i)
             {

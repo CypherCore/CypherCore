@@ -70,7 +70,7 @@ namespace Game
         {
             int pos = name.IndexOf('-');
             if (pos != -1)
-                return new ExtendedPlayerName(name.Substring(0, pos), name.Substring(pos + 1));
+                return new ExtendedPlayerName(name.Substring(0, pos), name[(pos + 1)..]);
             else
                 return new ExtendedPlayerName(name, "");
         }

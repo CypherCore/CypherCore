@@ -495,8 +495,7 @@ namespace Game.Entities
         }
         InventoryResult CanStoreItem(byte bag, byte slot, List<ItemPosCount> dest, uint entry, uint count, Item pItem, bool swap)
         {
-            uint throwaway;
-            return CanStoreItem(bag, slot, dest, entry, count, pItem, swap, out throwaway);
+            return CanStoreItem(bag, slot, dest, entry, count, pItem, swap, out _);
         }
         InventoryResult CanStoreItem(byte bag, byte slot, List<ItemPosCount> dest, uint entry, uint count, Item pItem, bool swap, out uint no_space_count)
         {

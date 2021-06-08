@@ -84,7 +84,6 @@ namespace Game.Entities
 
         //Spells 
         protected Dictionary<CurrentSpellTypes, Spell> m_currentSpells = new((int)CurrentSpellTypes.Max);
-        Dictionary<SpellValueMod, int> CustomSpellValueMod = new();
         MultiMap<uint, uint>[] m_spellImmune = new MultiMap<uint, uint>[(int)SpellImmunity.Max];
         SpellAuraInterruptFlags m_interruptMask;
         SpellAuraInterruptFlags2 m_interruptMask2;
@@ -93,7 +92,6 @@ namespace Game.Entities
         SpellHistory _spellHistory;
 
         //Auras
-        List<AuraEffect> AuraEffectList = new();
         MultiMap<AuraType, AuraEffect> m_modAuras = new();
         List<Aura> m_removedAuras = new();
         List<AuraApplication> m_interruptableAuras = new();             // auras which have interrupt mask applied on unit

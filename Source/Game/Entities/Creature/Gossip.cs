@@ -86,7 +86,7 @@ namespace Game.Misc
                     continue;
 
                 // Store texts for localization.
-                string strOptionText = "", strBoxText = "";
+                string strOptionText, strBoxText;
                 BroadcastTextRecord optionBroadcastText = CliDB.BroadcastTextStorage.LookupByKey(item.OptionBroadcastTextId);
                 BroadcastTextRecord boxBroadcastText = CliDB.BroadcastTextStorage.LookupByKey(item.BoxBroadcastTextId);
 

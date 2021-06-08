@@ -1,17 +1,16 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
-using System;
-using System.Collections.Generic;
-using System.Text;
-using Framework.Networking;
-using System.Net.Sockets;
-using Framework.Web;
+using Framework.Configuration;
 using Framework.Constants;
 using Framework.Database;
-using Framework.Configuration;
+using Framework.Networking;
 using Framework.Serialization;
+using Framework.Web;
+using System;
+using System.Net.Sockets;
 using System.Security.Cryptography;
+using System.Text;
 
 namespace BNetServer.Networking
 {
@@ -53,7 +52,7 @@ namespace BNetServer.Networking
         public void HandleLoginRequest(HttpHeader request)
         {
             LogonData loginForm = Json.CreateObject<LogonData>(request.Content);
-            LogonResult loginResult = new LogonResult();
+            LogonResult loginResult = new();
             if (loginForm == null)
             {
                 loginResult.AuthenticationState = "LOGIN";
@@ -96,7 +95,7 @@ namespace BNetServer.Networking
                 {
                     if (loginTicket.IsEmpty() || loginTicketExpiry < Time.UnixTime)
                     {
-                        byte[] ticket = new byte[0].GenerateRandomKey(20);
+                        byte[] ticket = Array.Empty<byte>().GenerateRandomKey(20);
                         loginTicket = "TC-" + ticket.ToHexString();
                     }
 
@@ -117,7 +116,7 @@ namespace BNetServer.Networking
 
                     if (maxWrongPassword != 0)
                     {
-                        SQLTransaction trans = new SQLTransaction();
+                        SQLTransaction trans = new();
                         stmt = DB.Login.GetPreparedStatement(LoginStatements.UpdBnetFailedLogins);
                         stmt.AddValue(0, accountId);
                         trans.Append(stmt);

@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System;
+
 namespace Framework.Constants
 {
     public enum AuctionResult
@@ -59,6 +61,7 @@ namespace Framework.Constants
         Items = 50
     }
 
+    [Flags]
     public enum AuctionHouseFilterMask
     {
         None = 0x0,

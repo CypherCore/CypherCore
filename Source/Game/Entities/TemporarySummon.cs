@@ -833,7 +833,7 @@ namespace Game.Entities
             if (ranged)
                 return;
 
-            float val = 0.0f;
+            float val;
             float bonusAP = 0.0f;
             UnitMods unitMod = UnitMods.AttackPower;
 

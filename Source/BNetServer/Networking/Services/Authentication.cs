@@ -6,10 +6,9 @@ using Bgs.Protocol.Authentication.V1;
 using Bgs.Protocol.Challenge.V1;
 using Framework.Constants;
 using Framework.Database;
+using Framework.Realm;
 using Google.Protobuf;
 using System;
-using Framework.Realm;
-using System.Net;
 
 namespace BNetServer.Networking
 {
@@ -42,7 +41,7 @@ namespace BNetServer.Networking
 
             var endpoint = Global.LoginServiceMgr.GetAddressForClient(GetRemoteIpEndPoint().Address);
 
-            ChallengeExternalRequest externalChallenge = new ChallengeExternalRequest();
+            ChallengeExternalRequest externalChallenge = new();
             externalChallenge.PayloadType = "web_auth_url";            
             externalChallenge.Payload = ByteString.CopyFromUtf8($"https://{endpoint.Address}:{endpoint.Port}/bnetserver/login/");
 
@@ -92,7 +91,7 @@ namespace BNetServer.Networking
                 {
                     var realmId = new RealmId(lastPlayerCharactersResult.Read<byte>(1), lastPlayerCharactersResult.Read<byte>(2), lastPlayerCharactersResult.Read<uint>(3));
 
-                    LastPlayedCharacterInfo lastPlayedCharacter = new LastPlayedCharacterInfo();
+                    LastPlayedCharacterInfo lastPlayedCharacter = new();
                     lastPlayedCharacter.RealmId = realmId;
                     lastPlayedCharacter.CharacterName = lastPlayerCharactersResult.Read<string>(4);
                     lastPlayedCharacter.CharacterGUID = lastPlayerCharactersResult.Read<ulong>(5);
@@ -142,14 +141,14 @@ namespace BNetServer.Networking
                 }
             }
 
-            LogonResult logonResult = new LogonResult();
+            LogonResult logonResult = new();
             logonResult.ErrorCode = 0;
             logonResult.AccountId = new EntityId();
             logonResult.AccountId.Low = accountInfo.Id;
             logonResult.AccountId.High = 0x100000000000000;
             foreach (var pair in accountInfo.GameAccounts)
             {
-                EntityId gameAccountId = new EntityId();
+                EntityId gameAccountId = new();
                 gameAccountId.Low = pair.Value.Id;
                 gameAccountId.High = 0x200000200576F57;
                 logonResult.GameAccountId.Add(gameAccountId);

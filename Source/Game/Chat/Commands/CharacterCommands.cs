@@ -288,7 +288,7 @@ namespace Game.Chat
             }
 
             uint oldAccountId = characterInfo.AccountId;
-            uint newAccountId = oldAccountId;
+            uint newAccountId;
 
             PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_ACCOUNT_ID_BY_NAME);
             stmt.AddValue(0, accountName);

@@ -1,12 +1,10 @@
 ﻿// Copyright (c) CypherCore <http://github.com/CypherCore> All rights reserved.
 // Licensed under the GNU GENERAL PUBLIC LICENSE. See LICENSE file in the project root for full license information.
 
+using Bgs.Protocol;
 using Bgs.Protocol.Connection.V1;
 using Framework.Constants;
-using System.Collections.Generic;
-using Google.Protobuf;
-using Bgs.Protocol;
-using System.Diagnostics;
+using System;
 
 namespace BNetServer.Networking
 {
@@ -19,7 +17,7 @@ namespace BNetServer.Networking
                 response.ClientId.MergeFrom(request.ClientId);
 
             response.ServerId = new ProcessId();
-            response.ServerId.Label = (uint)Process.GetCurrentProcess().Id;
+            response.ServerId.Label = (uint)Environment.ProcessId;
             response.ServerId.Epoch = (uint)Time.UnixTime;
             response.ServerTime = (ulong)Time.UnixTimeMilliseconds;
 

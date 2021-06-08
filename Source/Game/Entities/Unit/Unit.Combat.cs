@@ -1337,7 +1337,7 @@ namespace Game.Entities
             //   1. >    2. >    3. >       4. >    5. >   6. >       7. >  8.
             // MISS > DODGE > PARRY > GLANCING > BLOCK > CRIT > CRUSHING > HIT
 
-            int sum = 0, tmp = 0;
+            int sum = 0;
             int roll = RandomHelper.IRand(0, 9999);
 
             uint attackerLevel = GetLevelForTarget(victim);
@@ -1357,7 +1357,7 @@ namespace Game.Entities
             }
 
             // 1. MISS
-            tmp = miss_chance;
+            int tmp = miss_chance;
             if (tmp > 0 && roll < (sum += tmp))
                 return MeleeHitOutcome.Miss;
 
@@ -1477,9 +1477,9 @@ namespace Game.Entities
 
             if (minDamage > maxDamage)
             {
-                minDamage = minDamage + maxDamage;
+                minDamage += maxDamage;
                 maxDamage = minDamage - maxDamage;
-                minDamage = minDamage - maxDamage;
+                minDamage -= maxDamage;
             }
 
             if (maxDamage == 0.0f)

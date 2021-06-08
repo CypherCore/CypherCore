@@ -371,40 +371,38 @@ namespace Game.Collision
         {
             if (!File.Exists(filename))
             {
-                filename = filename + ".vmo";
+                filename += ".vmo";
                 if (!File.Exists(filename))
                     return false;
             }
 
-            using (BinaryReader reader = new(new FileStream(filename, FileMode.Open, FileAccess.Read)))
+            using BinaryReader reader = new(new FileStream(filename, FileMode.Open, FileAccess.Read));
+            if (reader.ReadStringFromChars(8) != MapConst.VMapMagic)
+                return false;
+
+            if (reader.ReadStringFromChars(4) != "WMOD")
+                return false;
+
+            reader.ReadUInt32(); //chunkSize notused
+            RootWMOID = reader.ReadUInt32();
+
+            // read group models
+            if (reader.ReadStringFromChars(4) != "GMOD")
+                return false;
+
+            uint count = reader.ReadUInt32();
+            for (var i = 0; i < count; ++i)
             {
-                if (reader.ReadStringFromChars(8) != MapConst.VMapMagic)
-                    return false;
-
-                if (reader.ReadStringFromChars(4) != "WMOD")
-                    return false;
-
-                reader.ReadUInt32(); //chunkSize notused
-                RootWMOID = reader.ReadUInt32();
-
-                // read group models
-                if (reader.ReadStringFromChars(4) != "GMOD")
-                    return false;
-
-                uint count = reader.ReadUInt32();
-                for (var i = 0; i < count; ++i)
-                {
-                    GroupModel group = new();
-                    group.ReadFromFile(reader);
-                    groupModels.Add(group);
-                }
-
-                // read group BIH
-                if (reader.ReadStringFromChars(4) != "GBIH")
-                    return false;
-
-                return groupTree.ReadFromFile(reader);
+                GroupModel group = new();
+                group.ReadFromFile(reader);
+                groupModels.Add(group);
             }
+
+            // read group BIH
+            if (reader.ReadStringFromChars(4) != "GBIH")
+                return false;
+
+            return groupTree.ReadFromFile(reader);
         }
     }
 }

@@ -527,7 +527,6 @@ namespace Game.Entities
 
         Unit _me;
         VehicleRecord _vehicleInfo;                   //< DBC data for vehicle
-        List<ulong> vehiclePlayers = new();
 
         uint _creatureEntry;                              //< Can be different than the entry of _me in case of players
         Status _status;                                     //< Internal variable for sanity checks

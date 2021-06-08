@@ -155,9 +155,8 @@ namespace Game.Entities
 
             for (int i = 1; i < m_TaxiDestinations.Count; ++i)
             {
-                uint cost;
                 uint path;
-                Global.ObjectMgr.GetTaxiPath(m_TaxiDestinations[i - 1], m_TaxiDestinations[i], out path, out cost);
+                Global.ObjectMgr.GetTaxiPath(m_TaxiDestinations[i - 1], m_TaxiDestinations[i], out path, out _);
                 if (path == 0)
                     return false;
             }
@@ -189,9 +188,8 @@ namespace Game.Entities
                 return 0;
 
             uint path;
-            uint cost;
 
-            Global.ObjectMgr.GetTaxiPath(m_TaxiDestinations[0], m_TaxiDestinations[1], out path, out cost);
+            Global.ObjectMgr.GetTaxiPath(m_TaxiDestinations[0], m_TaxiDestinations[1], out path, out _);
 
             return path;
         }

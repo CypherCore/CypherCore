@@ -628,7 +628,7 @@ namespace Game.Combat
 
         void PutThreatListRef(ObjectGuid guid, ThreatReference refe)
         {
-            Cypher.Assert(!_myThreatListEntries.ContainsKey(guid), $"Duplicate threat reference being inserted on {_owner.GetGUID()} for {guid.ToString()}!");
+            Cypher.Assert(!_myThreatListEntries.ContainsKey(guid), $"Duplicate threat reference being inserted on {_owner.GetGUID()} for {guid}!");
             _myThreatListEntries[guid] = refe;
             _sortedThreatList.Add(refe);
             _sortedThreatList.Sort();
@@ -771,7 +771,6 @@ namespace Game.Combat
             if (onlineState == _online)
                 return;
 
-            bool increase = (onlineState > _online);
             _online = onlineState;
             ListNotifyChanged();
 

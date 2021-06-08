@@ -188,7 +188,7 @@ namespace Game.Entities
                         if (_pendingStop && GetGoState() != GameObjectState.Ready)
                         {
                             SetGoState(GameObjectState.Ready);
-                            m_goValue.Transport.PathProgress = (m_goValue.Transport.PathProgress / GetTransportPeriod());
+                            m_goValue.Transport.PathProgress /= GetTransportPeriod();
                             m_goValue.Transport.PathProgress *= GetTransportPeriod();
                             m_goValue.Transport.PathProgress += _currentFrame.ArriveTime;
                         }

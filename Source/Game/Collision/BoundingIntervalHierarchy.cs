@@ -33,7 +33,7 @@ namespace Game.Collision
         void InitEmpty()
         {
             tree= new uint[3];
-            objects = new uint[0];
+            objects = Array.Empty<uint>();
             // create space for the first node
             tree[0] = (3u << 30); // dummy leaf
         }

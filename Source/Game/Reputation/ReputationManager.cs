@@ -783,7 +783,7 @@ namespace Game
         bool _sendFactionIncreased; //! Play visual effect on next SMSG_SET_FACTION_STANDING sent
         #endregion
 
-        static int[] ReputationRankThresholds =
+        public static int[] ReputationRankThresholds =
         {
             -42000,
             // Hated
@@ -803,7 +803,7 @@ namespace Game
             // Exalted
         };
 
-        static CypherStrings[] ReputationRankStrIndex =
+        public static CypherStrings[] ReputationRankStrIndex =
         {
             CypherStrings.RepHated, CypherStrings.RepHostile, CypherStrings.RepUnfriendly, CypherStrings.RepNeutral,
             CypherStrings.RepFriendly, CypherStrings.RepHonored, CypherStrings.RepRevered, CypherStrings.RepExalted

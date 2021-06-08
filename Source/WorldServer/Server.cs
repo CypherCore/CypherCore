@@ -98,7 +98,7 @@ namespace WorldServer
             //- Launch CliRunnable thread
             if (ConfigMgr.GetDefaultValue("Console.Enable", true))
             {
-                Thread commandThread = new Thread(CommandManager.InitConsole);
+                Thread commandThread = new(CommandManager.InitConsole);
                 commandThread.Start();
             }
 
@@ -143,7 +143,7 @@ namespace WorldServer
         static bool StartDB()
         {
             // Load databases
-            DatabaseLoader loader = new DatabaseLoader(DatabaseTypeFlags.All);
+            DatabaseLoader loader = new(DatabaseTypeFlags.All);
             loader.AddDatabase(DB.Login, "Login");
             loader.AddDatabase(DB.Characters, "Character");
             loader.AddDatabase(DB.World, "World");

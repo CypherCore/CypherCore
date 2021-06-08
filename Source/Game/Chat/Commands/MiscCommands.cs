@@ -1580,7 +1580,7 @@ namespace Game.Chat
             Locale locale = handler.GetSessionDbcLocale();
             uint totalPlayerTime;
             uint level;
-            string alive = handler.GetCypherString(CypherStrings.Error);
+            string alive;
             ulong money;
             uint xp = 0;
             uint xptotal = 0;

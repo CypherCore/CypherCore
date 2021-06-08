@@ -2031,7 +2031,7 @@ namespace Game
         public Span<T> GetResultRange()
         {
             Span<T> h = _items.ToArray();
-            return h.Slice((int)_offset);
+            return h[(int)_offset..];
         }
 
         public bool HasMoreResults()

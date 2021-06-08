@@ -921,7 +921,7 @@ namespace Game.Entities
 
         public Unit SelectVictim()
         {
-            Unit target = null;
+            Unit target;
 
             ThreatManager mgr = GetThreatManager();
 

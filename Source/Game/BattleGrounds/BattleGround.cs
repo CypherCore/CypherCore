@@ -2088,12 +2088,10 @@ namespace Game.BattleGrounds
         // Arena team ids by team
         uint[] m_ArenaTeamIds = new uint[SharedConst.BGTeamsCount];
 
-        int[] m_ArenaTeamRatingChanges = new int[SharedConst.BGTeamsCount];
         uint[] m_ArenaTeamMMR = new uint[SharedConst.BGTeamsCount];
 
         // Start location
         BattlegroundMap m_Map;
-        Position[] StartPosition = new Position[SharedConst.BGTeamsCount];
 
         BattlegroundTemplate _battlegroundTemplate;
         PvpDifficultyRecord _pvpDifficultyEntry;

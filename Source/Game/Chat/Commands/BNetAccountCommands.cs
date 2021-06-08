@@ -100,7 +100,7 @@ namespace Game.Chat.Commands
             string accountName = accountId.ToString() + '#' + index;
 
             // Generate random hex string for password, these accounts must not be logged on with GRUNT
-            byte[] randPassword = new byte[0].GenerateRandomKey(8);
+            byte[] randPassword = Array.Empty<byte>().GenerateRandomKey(8);
             switch (Global.AccountMgr.CreateAccount(accountName, randPassword.ToHexString(), bnetAccountName, accountId, index))
             {
                 case AccountOpResult.Ok:
@@ -179,7 +179,7 @@ namespace Game.Chat.Commands
                 {
                     int index = name.IndexOf('#');
                     if (index > 0)
-                        return "WoW" + name.Substring(++index);
+                        return "WoW" + name[++index..];
                     else
                         return name;
                 });

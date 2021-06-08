@@ -140,7 +140,7 @@ namespace Game.Entities
                 if (GetMiscTemplate().ExtraScale.Raw.Data[5] != 0)
                     SetUpdateFieldValue(extraScaleCurve.ModifyValue(extraScaleCurve.ParameterCurve), GetMiscTemplate().ExtraScale.Raw.Data[5]);
                 if (GetMiscTemplate().ExtraScale.Structured.OverrideActive != 0)
-                    SetUpdateFieldValue(extraScaleCurve.ModifyValue(extraScaleCurve.OverrideActive), GetMiscTemplate().ExtraScale.Structured.OverrideActive != 0 ? true : false);
+                    SetUpdateFieldValue(extraScaleCurve.ModifyValue(extraScaleCurve.OverrideActive), GetMiscTemplate().ExtraScale.Structured.OverrideActive != 0);
             }
 
 

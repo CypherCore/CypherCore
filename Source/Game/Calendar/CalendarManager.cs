@@ -410,7 +410,7 @@ namespace Game
             packet.ResponseTime = invite.ResponseTime;
             packet.Status = invite.Status;
             packet.Type = (byte)(calendarEvent != null ? calendarEvent.IsGuildEvent() ? 1 : 0 : 0); // Correct ?
-            packet.ClearPending = calendarEvent != null ? !calendarEvent.IsGuildEvent() : true; // Correct ?
+            packet.ClearPending = calendarEvent == null || !calendarEvent.IsGuildEvent(); // Correct ?
 
             if (calendarEvent == null) // Pre-invite
             {

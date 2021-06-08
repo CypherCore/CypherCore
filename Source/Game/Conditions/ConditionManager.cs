@@ -1529,7 +1529,7 @@ namespace Game
                     }
                 case ConditionTypes.StandState:
                     {
-                        bool valid = false;
+                        bool valid;
                         switch (cond.ConditionValue1)
                         {
                             case 0:
@@ -1677,8 +1677,7 @@ namespace Game
 
         public static uint GetPlayerConditionLfgValue(Player player, PlayerConditionLfgStatus status)
         {
-            Group group = player.GetGroup();
-            if (group = null)
+            if (player.GetGroup() == null)
                 return 0;
 
             switch (status)

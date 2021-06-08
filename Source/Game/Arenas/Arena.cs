@@ -153,12 +153,12 @@ namespace Game.Arenas
             // arena rating calculation
             if (IsRated())
             {
-                uint loserTeamRating = 0;
-                uint loserMatchmakerRating = 0;
+                uint loserTeamRating;
+                uint loserMatchmakerRating;
                 int loserChange = 0;
                 int loserMatchmakerChange = 0;
-                uint winnerTeamRating = 0;
-                uint winnerMatchmakerRating = 0;
+                uint winnerTeamRating;
+                uint winnerMatchmakerRating;
                 int winnerChange = 0;
                 int winnerMatchmakerChange = 0;
                 bool guildAwarded = false;

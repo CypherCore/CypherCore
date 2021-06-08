@@ -635,7 +635,7 @@ namespace Game.Entities
                                 else
                                     radius = goInfo.Trap.radius / 2.0f;
 
-                                Unit target = null;
+                                Unit target;
                                 // @todo this hack with search required until GO casting not implemented
                                 Unit owner = GetOwner();
                                 if (owner)
@@ -1169,7 +1169,7 @@ namespace Game.Entities
                 }
 
                 long thisRespawnTime = forceDelay != 0 ? GameTime.GetGameTime() + forceDelay : m_respawnTime;
-                GetMap().SaveRespawnTime(SpawnObjectType.GameObject, m_spawnId, GetEntry(), thisRespawnTime, GetZoneId(), GridDefines.ComputeGridCoord(GetPositionX(), GetPositionY()).GetId(), m_goData.dbData ? savetodb : false);
+                GetMap().SaveRespawnTime(SpawnObjectType.GameObject, m_spawnId, GetEntry(), thisRespawnTime, GetZoneId(), GridDefines.ComputeGridCoord(GetPositionX(), GetPositionY()).GetId(), m_goData.dbData && savetodb);
             }
         }
 

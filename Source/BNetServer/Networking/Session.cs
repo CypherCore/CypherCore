@@ -125,12 +125,12 @@ namespace BNetServer.Networking
 
         public async void SendResponse(uint token, IMessage response)
         {
-            Header header = new Header();
+            Header header = new();
             header.Token = token;
             header.ServiceId = 0xFE;
             header.Size = (uint)response.CalculateSize();
 
-            ByteBuffer buffer = new ByteBuffer();
+            ByteBuffer buffer = new();
             buffer.WriteBytes(GetHeaderSize(header), 2);
             buffer.WriteBytes(header.ToByteArray());
             buffer.WriteBytes(response.ToByteArray());
@@ -140,12 +140,12 @@ namespace BNetServer.Networking
 
         public async void SendResponse(uint token, BattlenetRpcErrorCode status)
         {
-            Header header = new Header();
+            Header header = new();
             header.Token = token;
             header.Status = (uint)status;
             header.ServiceId = 0xFE;
 
-            ByteBuffer buffer = new ByteBuffer();
+            ByteBuffer buffer = new();
             buffer.WriteBytes(GetHeaderSize(header), 2);
             buffer.WriteBytes(header.ToByteArray());
 
@@ -154,14 +154,14 @@ namespace BNetServer.Networking
 
         public async void SendRequest(uint serviceHash, uint methodId, IMessage request)
         {
-            Header header = new Header();
+            Header header = new();
             header.ServiceId = 0;
             header.ServiceHash = serviceHash;
             header.MethodId = methodId;
             header.Size = (uint)request.CalculateSize();
             header.Token = requestToken++;
 
-            ByteBuffer buffer = new ByteBuffer();
+            ByteBuffer buffer = new();
             buffer.WriteBytes(GetHeaderSize(header), 2);
             buffer.WriteBytes(header.ToByteArray());
             buffer.WriteBytes(request.ToByteArray());
@@ -260,7 +260,7 @@ namespace BNetServer.Networking
 
             int hashPos = Name.IndexOf('#');
             if (hashPos != -1)
-                DisplayName = "WoW" + Name.Substring(hashPos + 1);
+                DisplayName = "WoW" + Name[(hashPos + 1)..];
             else
                 DisplayName = Name;
 

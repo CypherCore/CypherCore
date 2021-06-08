@@ -1371,7 +1371,7 @@ namespace Game.Entities
 
         public bool IsVisible()
         {
-            return (m_serverSideVisibility.GetValue(ServerSideVisibilityType.GM) > (uint)AccountTypes.Player) ? false : true;
+            return m_serverSideVisibility.GetValue(ServerSideVisibilityType.GM) <= (uint)AccountTypes.Player;
         }
 
         public void SetVisible(bool val)

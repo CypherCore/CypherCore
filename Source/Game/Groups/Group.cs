@@ -195,7 +195,7 @@ namespace Game.Groups
 
         public void ConvertToRaid()
         {
-            m_groupFlags = (m_groupFlags | GroupFlags.Raid);
+            m_groupFlags |= GroupFlags.Raid;
 
             _initRaidSubGroupsCounter();
 
@@ -1144,7 +1144,7 @@ namespace Game.Groups
                 {
                     byte maxresul = 0;
                     ObjectGuid maxguid = ObjectGuid.Empty;
-                    Player player = null;
+                    Player player;
 
                     foreach (var pair in roll.playerVote)
                     {
@@ -1205,7 +1205,7 @@ namespace Game.Groups
                 {
                     byte maxresul = 0;
                     ObjectGuid maxguid = ObjectGuid.Empty;
-                    Player player = null;
+                    Player player;
                     RollType rollVote = RollType.NotValid;
 
                     foreach (var pair in roll.playerVote)
@@ -2102,7 +2102,7 @@ namespace Game.Groups
         public void ResetMaxEnchantingLevel()
         {
             m_maxEnchantingLevel = 0;
-            Player member = null;
+            Player member;
             foreach (var memberSlot in m_memberSlots)
             {
                 member = Global.ObjAccessor.FindPlayer(memberSlot.guid);

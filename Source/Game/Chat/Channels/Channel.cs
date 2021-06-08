@@ -21,7 +21,6 @@ using Framework.Database;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
-using Game.Networking;
 using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
@@ -83,7 +82,7 @@ namespace Game.Chat
                         for (var i = 0; i < tokens.Length; ++i)
                         {
                             ObjectGuid bannedGuid = new();
-                            if (ulong.TryParse(tokens[i].Substring(0, 16), out ulong highguid) && ulong.TryParse(tokens[i].Substring(16), out ulong lowguid))
+                            if (ulong.TryParse(tokens[i].Substring(0, 16), out ulong highguid) && ulong.TryParse(tokens[i][16..], out ulong lowguid))
                                 bannedGuid.SetRawValue(highguid, lowguid);
 
                             if (!bannedGuid.IsEmpty())

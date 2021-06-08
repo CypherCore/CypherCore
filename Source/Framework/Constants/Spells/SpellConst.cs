@@ -115,6 +115,7 @@ namespace Framework.Constants
         DamageCancels = 0x400
     }
 
+    [Flags]
     public enum SpellAuraInterruptFlags : uint
     {
         None = 0,
@@ -154,6 +155,7 @@ namespace Framework.Constants
         NotVictim = (HostileActionReceived | Damage | NonPeriodicDamage)
     }
 
+    [Flags]
     public enum SpellAuraInterruptFlags2
     {
         None = 0,

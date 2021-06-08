@@ -782,7 +782,7 @@ namespace Game.Garrisons
 
                 foreach (var guid in BuildingInfo.Spawns)
                 {
-                    WorldObject obj = null;
+                    WorldObject obj;
                     switch (guid.GetHigh())
                     {
                         case HighGuid.Creature:

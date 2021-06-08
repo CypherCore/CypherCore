@@ -189,30 +189,28 @@ namespace Game.Collision
             }
             try
             {
-                using (BinaryReader reader = new(new FileStream(filename, FileMode.Open, FileAccess.Read)))
+                using BinaryReader reader = new(new FileStream(filename, FileMode.Open, FileAccess.Read));
+                string magic = reader.ReadStringFromChars(8);
+                if (magic != MapConst.VMapMagic)
                 {
-                    string magic = reader.ReadStringFromChars(8);
-                    if (magic != MapConst.VMapMagic)
-                    {
-                        Log.outError(LogFilter.Misc, $"File '{filename}' has wrong header, expected {MapConst.VMapMagic}.");
-                        return;
-                    }
+                    Log.outError(LogFilter.Misc, $"File '{filename}' has wrong header, expected {MapConst.VMapMagic}.");
+                    return;
+                }
 
-                    long length = reader.BaseStream.Length;
-                    while (true)
-                    {
-                        if (reader.BaseStream.Position >= length)
-                            break;
+                long length = reader.BaseStream.Length;
+                while (true)
+                {
+                    if (reader.BaseStream.Position >= length)
+                        break;
 
-                        uint displayId = reader.ReadUInt32();
-                        bool isWmo = reader.ReadBoolean();
-                        int name_length = reader.ReadInt32();
-                        string name = reader.ReadString(name_length);
-                        Vector3 v1 = reader.Read<Vector3>();
-                        Vector3 v2 = reader.Read<Vector3>();
+                    uint displayId = reader.ReadUInt32();
+                    bool isWmo = reader.ReadBoolean();
+                    int name_length = reader.ReadInt32();
+                    string name = reader.ReadString(name_length);
+                    Vector3 v1 = reader.Read<Vector3>();
+                    Vector3 v2 = reader.Read<Vector3>();
 
-                        StaticModelList.models.Add(displayId, new GameobjectModelData(name, v1, v2, isWmo));
-                    }
+                    StaticModelList.models.Add(displayId, new GameobjectModelData(name, v1, v2, isWmo));
                 }
             }
             catch (EndOfStreamException ex)

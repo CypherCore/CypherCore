@@ -98,7 +98,7 @@ namespace Game.Entities
         {
             posX = (float)(posX + (offset.posX * Math.Cos(Orientation) + offset.posY * Math.Sin(Orientation + MathFunctions.PI)));
             posY = (float)(posY + (offset.posY * Math.Cos(Orientation) + offset.posX * Math.Sin(Orientation)));
-            posZ = posZ + offset.posZ;
+            posZ += offset.posZ;
             SetOrientation(Orientation + offset.Orientation);
         }
 
@@ -162,7 +162,7 @@ namespace Game.Entities
             if (o < 0)
             {
                 float mod = o * -1;
-                mod = mod % (2.0f * MathFunctions.PI);
+                mod %= (2.0f * MathFunctions.PI);
                 mod = -mod + 2.0f * MathFunctions.PI;
                 return mod;
             }

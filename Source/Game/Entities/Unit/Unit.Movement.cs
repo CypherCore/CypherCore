@@ -687,8 +687,8 @@ namespace Game.Entities
             uint areaId = GetAreaId();
             uint ridingSkill = 5000;
             AreaMountFlags mountFlags = 0;
-            bool isSubmerged = false;
-            bool isInWater = false;
+            bool isSubmerged;
+            bool isInWater;
 
             if (IsTypeId(TypeId.Player))
                 ridingSkill = ToPlayer().GetSkillValue(SkillType.Riding);
@@ -705,8 +705,7 @@ namespace Game.Entities
                     mountFlags = (AreaMountFlags)areaTable.MountFlags;
             }
 
-            LiquidData liquid;
-            ZLiquidStatus liquidStatus = GetMap().GetLiquidStatus(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZ(), LiquidHeaderTypeFlags.AllLiquids, out liquid);
+            ZLiquidStatus liquidStatus = GetMap().GetLiquidStatus(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZ(), LiquidHeaderTypeFlags.AllLiquids, out _);
             isSubmerged = liquidStatus.HasAnyFlag(ZLiquidStatus.UnderWater) || HasUnitMovementFlag(MovementFlag.Swimming);
             isInWater = liquidStatus.HasAnyFlag(ZLiquidStatus.InWater | ZLiquidStatus.UnderWater);
 

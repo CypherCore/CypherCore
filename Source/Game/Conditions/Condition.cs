@@ -62,7 +62,7 @@ namespace Game.Conditions
                     {
                         // don't allow 0 items (it's checked during table load)
                         Cypher.Assert(ConditionValue2 != 0);
-                        bool checkBank = ConditionValue3 != 0 ? true : false;
+                        bool checkBank = ConditionValue3 != 0;
                         condMeets = player.HasItemCount(ConditionValue1, ConditionValue2, checkBank);
                     }
                     break;
@@ -176,7 +176,7 @@ namespace Game.Conditions
                         condMeets = (uint)Player.GetDrunkenstateByValue(player.GetDrunkValue()) >= ConditionValue1;
                     break;
                 case ConditionTypes.NearCreature:
-                    condMeets = obj.FindNearestCreature(ConditionValue1, ConditionValue2, ConditionValue3 == 0 ? true : false) != null;
+                    condMeets = obj.FindNearestCreature(ConditionValue1, ConditionValue2, ConditionValue3 == 0) != null;
                     break;
                 case ConditionTypes.NearGameobject:
                     condMeets = obj.FindNearestGameObject(ConditionValue1, ConditionValue2) != null;
@@ -550,7 +550,7 @@ namespace Game.Conditions
                     ss.Append(" (Unknown)");
             }
 
-            ss.Append("]");
+            ss.Append(']');
             return ss.ToString();
         }
 

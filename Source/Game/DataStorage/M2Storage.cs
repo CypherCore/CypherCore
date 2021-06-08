@@ -170,27 +170,25 @@ namespace Game.DataStorage
 
                 try
                 {
-                    using (BinaryReader m2file = new(new FileStream(filename, FileMode.Open, FileAccess.Read)))
+                    using BinaryReader m2file = new(new FileStream(filename, FileMode.Open, FileAccess.Read));
+                    // Check file has correct magic (MD21)
+                    if (m2file.ReadUInt32() != 0x3132444D) //"MD21"
                     {
-                        // Check file has correct magic (MD21)
-                        if (m2file.ReadUInt32() != 0x3132444D) //"MD21"
-                        {
-                            Log.outError(LogFilter.ServerLoading, "Camera file {0} is damaged. File identifier not found.", filename);
-                            continue;
-                        }
-
-                        m2file.ReadUInt32(); //unknown size
-
-                        // Read header
-                        M2Header header = m2file.Read<M2Header>();
-
-                        // Get camera(s) - Main header, then dump them.
-                        m2file.BaseStream.Position = 8 + header.ofsCameras;
-                        M2Camera cam = m2file.Read<M2Camera>();
-
-                        m2file.BaseStream.Position = 8;
-                        ReadCamera(cam, new BinaryReader(new MemoryStream(m2file.ReadBytes((int)m2file.BaseStream.Length - 8))), cameraEntry);
+                        Log.outError(LogFilter.ServerLoading, "Camera file {0} is damaged. File identifier not found.", filename);
+                        continue;
                     }
+
+                    m2file.ReadUInt32(); //unknown size
+
+                    // Read header
+                    M2Header header = m2file.Read<M2Header>();
+
+                    // Get camera(s) - Main header, then dump them.
+                    m2file.BaseStream.Position = 8 + header.ofsCameras;
+                    M2Camera cam = m2file.Read<M2Camera>();
+
+                    m2file.BaseStream.Position = 8;
+                    ReadCamera(cam, new BinaryReader(new MemoryStream(m2file.ReadBytes((int)m2file.BaseStream.Length - 8))), cameraEntry);
                 }
                 catch (EndOfStreamException)
                 {

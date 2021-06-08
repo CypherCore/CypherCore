@@ -764,6 +764,7 @@ namespace Framework.Constants
         LoadedFromDB = 0x02
     }
 
+    [Flags]
     public enum ItemSearchLocation
     {
         Equipment = 0x01,

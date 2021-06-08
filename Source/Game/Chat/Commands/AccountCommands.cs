@@ -39,7 +39,7 @@ namespace Game.Chat
 
             // Security level required
             WorldSession session = handler.GetSession();
-            bool hasRBAC = (session.HasPermission(RBACPermissions.EmailConfirmForPassChange) ? true : false);
+            bool hasRBAC = (session.HasPermission(RBACPermissions.EmailConfirmForPassChange));
             uint pwConfig = 0; // 0 - PW_NONE, 1 - PW_EMAIL, 2 - PW_RBAC
 
             handler.SendSysMessage(CypherStrings.AccountSecType, (pwConfig == 0 ? "Lowest level: No Email input required." :

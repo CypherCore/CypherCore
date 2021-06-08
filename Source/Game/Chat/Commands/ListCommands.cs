@@ -369,17 +369,15 @@ namespace Game.Chat.Commands
             if (args.Empty())
                 return false;
 
-            Player target;
             ObjectGuid targetGuid;
             string targetName;
 
             ObjectGuid parseGUID = ObjectGuid.Create(HighGuid.Player, args.NextUInt64());
             if (Global.CharacterCacheStorage.GetCharacterNameByGuid(parseGUID, out targetName))
             {
-                target = Global.ObjAccessor.FindPlayer(parseGUID);
                 targetGuid = parseGUID;
             }
-            else if (!handler.ExtractPlayerTarget(args, out target, out targetGuid, out targetName))
+            else if (!handler.ExtractPlayerTarget(args, out _, out targetGuid, out targetName))
                 return false;
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAIL_LIST_COUNT);

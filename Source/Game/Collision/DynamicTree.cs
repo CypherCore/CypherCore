@@ -51,7 +51,7 @@ namespace Game.Collision
             impl.Update(diff);
         }
 
-        public bool GetIntersectionTime(Ray ray, Vector3 endPos, PhaseShift phaseShift, float maxDist)
+        public bool GetIntersectionTime(Ray ray, Vector3 endPos, PhaseShift phaseShift, ref float maxDist)
         {
             float distance = maxDist;
             DynamicTreeIntersectionCallback callback = new(phaseShift);
@@ -63,7 +63,7 @@ namespace Game.Collision
 
         public bool GetObjectHitPos(Vector3 startPos, Vector3 endPos, ref Vector3 resultHitPos, float modifyDist, PhaseShift phaseShift)
         {
-            bool result = false;
+            bool result;
             float maxDist = (endPos - startPos).magnitude();
             // valid map coords should *never ever* produce float overflow, but this would produce NaNs too
             Cypher.Assert(maxDist < float.MaxValue);
@@ -76,7 +76,7 @@ namespace Game.Collision
             Vector3 dir = (endPos - startPos) / maxDist;              // direction with length of 1
             Ray ray = new(startPos, dir);
             float dist = maxDist;
-            if (GetIntersectionTime(ray, endPos, phaseShift, dist))
+            if (GetIntersectionTime(ray, endPos, phaseShift, ref dist))
             {
                 resultHitPos = startPos + dir * dist;
                 if (modifyDist < 0)
