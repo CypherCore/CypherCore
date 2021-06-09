@@ -2083,7 +2083,7 @@ namespace Game.Entities
         }
         public bool HasUnitState(UnitState f)
         {
-            return Convert.ToBoolean(m_state & f);
+            return m_state.HasFlag(f);
         }
         public void ClearUnitState(UnitState f)
         {
