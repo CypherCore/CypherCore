@@ -604,7 +604,7 @@ namespace Game.Maps
                 WorldObject obj = objs[i];
 
                 if (obj.IsTypeId(TypeId.Player) || obj.IsTypeId(TypeId.Corpse))
-                    return;
+                    continue;
 
                 if (obj.IsInWorld)
                     obj.Update(i_timeDiff);
