@@ -359,8 +359,7 @@ INSERT INTO `reference_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `
 -- nazjatar
 DELETE FROM `fishing_loot_template` WHERE `Entry`=10052;
 INSERT INTO `fishing_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `QuestRequired`, `LootMode`, `GroupId`, `MinCount`, `MaxCount`, `Comment`) VALUES 
-(10052, 2010, 2010, 100, 0, 1, 1, 1, 1, 'nazjatar fishing'),
-(10052, 168155, 0, 0.1, 1, 1, 1, 1, 1, 'nazjatar fishing');
+(10052, 2010, 2010, 100, 0, 1, 1, 1, 1, 'nazjatar fishing');
 
 
 DELETE FROM `reference_loot_template` WHERE `Entry`=2010;
@@ -385,6 +384,7 @@ INSERT INTO `reference_loot_template` (`Entry`, `Item`, `Reference`, `Chance`, `
 (2010, 154785, 0, 0.2, 0, 1, 1, 1, 1, 'nazjatar fishing'),
 (2010, 154792, 0, 0.2, 0, 1, 1, 1, 1, 'nazjatar fishing'),
 (2010, 163131, 0, 0, 0, 1, 1, 1, 1, ''), --
+(2010, 168155, 0, 0.1, 0, 1, 1, 1, 1, 'nazjatar fishing'),
 (2010, 154788, 0, 0.2, 0, 1, 1, 1, 1, 'nazjatar fishing');
 
 --  Great Sea Ray Mount
