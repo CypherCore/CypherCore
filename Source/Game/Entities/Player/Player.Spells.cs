@@ -49,7 +49,6 @@ namespace Game.Entities
                     if (rcEntry.Flags.HasAnyFlag(SkillRaceClassInfoFlags.AlwaysMaxValue))
                         SetSkillRank(pair.Value.Pos, maxSkill);
 
-                    SetSkillRank(pair.Value.Pos, maxSkill);
                     SetSkillMaxRank(pair.Value.Pos, maxSkill);
                     if (pair.Value.State != SkillState.New)
                         pair.Value.State = SkillState.Changed;
