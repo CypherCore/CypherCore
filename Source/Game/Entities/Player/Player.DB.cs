@@ -3350,15 +3350,15 @@ namespace Game.Entities
                 stmt.AddValue(index++, GetName());
                 stmt.AddValue(index++, (byte)GetRace());
                 stmt.AddValue(index++, (byte)GetClass());
-                stmt.AddValue(index++, (byte)m_playerData.NativeSex);   // save gender from PLAYER_BYTES_3, UNIT_BYTES_0 changes with every transform effect
+                stmt.AddValue(index++, (byte)GetNativeSex());   // save gender from PLAYER_BYTES_3, UNIT_BYTES_0 changes with every transform effect
                 stmt.AddValue(index++, GetLevel());
-                stmt.AddValue(index++, (uint)GetNativeSex());
+                stmt.AddValue(index++, m_activePlayerData.XP);
                 stmt.AddValue(index++, GetMoney());
                 stmt.AddValue(index++, GetInventorySlotCount());
                 stmt.AddValue(index++, GetBankBagSlotCount());
-                stmt.AddValue(index++, (byte)m_activePlayerData.RestInfo[(int)RestTypes.XP].StateID);
-                stmt.AddValue(index++, (uint)m_playerData.PlayerFlags);
-                stmt.AddValue(index++, (uint)m_playerData.PlayerFlagsEx);
+                stmt.AddValue(index++, m_activePlayerData.RestInfo[(int)RestTypes.XP].StateID);
+                stmt.AddValue(index++, m_playerData.PlayerFlags);
+                stmt.AddValue(index++, m_playerData.PlayerFlagsEx);
                 stmt.AddValue(index++, (ushort)GetMapId());
                 stmt.AddValue(index++, GetInstanceId());
                 stmt.AddValue(index++, (byte)GetDungeonDifficultyID());
@@ -3403,11 +3403,11 @@ namespace Game.Entities
                 ss.Append(m_taxi.SaveTaxiDestinationsToString());
 
                 stmt.AddValue(index++, ss.ToString());
-                stmt.AddValue(index++, (uint)m_activePlayerData.LifetimeHonorableKills);
-                stmt.AddValue(index++, (ushort)m_activePlayerData.TodayHonorableKills);
-                stmt.AddValue(index++, (ushort)m_activePlayerData.YesterdayHonorableKills);
-                stmt.AddValue(index++, (uint)m_playerData.PlayerTitle);
-                stmt.AddValue(index++, (uint)m_activePlayerData.WatchedFactionIndex);
+                stmt.AddValue(index++, m_activePlayerData.LifetimeHonorableKills);
+                stmt.AddValue(index++, m_activePlayerData.TodayHonorableKills);
+                stmt.AddValue(index++, m_activePlayerData.YesterdayHonorableKills);
+                stmt.AddValue(index++, m_playerData.PlayerTitle);
+                stmt.AddValue(index++, m_activePlayerData.WatchedFactionIndex);
                 stmt.AddValue(index++, GetDrunkValue());
                 stmt.AddValue(index++, GetHealth());
 
@@ -3463,7 +3463,7 @@ namespace Game.Entities
 
                 stmt.AddValue(index++, ss.ToString());
 
-                stmt.AddValue(index++, (byte)m_activePlayerData.MultiActionBars);
+                stmt.AddValue(index++, m_activePlayerData.MultiActionBars);
                 stmt.AddValue(index++, Global.RealmMgr.GetMinorMajorBugfixVersionForBuild(Global.WorldMgr.GetRealm().Build));
             }
             else
@@ -3473,15 +3473,15 @@ namespace Game.Entities
                 stmt.AddValue(index++, GetName());
                 stmt.AddValue(index++, (byte)GetRace());
                 stmt.AddValue(index++, (byte)GetClass());
-                stmt.AddValue(index++, (byte)m_playerData.NativeSex);   // save gender from PLAYER_BYTES_3, UNIT_BYTES_0 changes with every transform effect
+                stmt.AddValue(index++, (byte)GetNativeSex());   // save gender from PLAYER_BYTES_3, UNIT_BYTES_0 changes with every transform effect
                 stmt.AddValue(index++, GetLevel());
-                stmt.AddValue(index++, (uint)GetNativeSex());
+                stmt.AddValue(index++, m_activePlayerData.XP);
                 stmt.AddValue(index++, GetMoney());
                 stmt.AddValue(index++, GetInventorySlotCount());
                 stmt.AddValue(index++, GetBankBagSlotCount());
-                stmt.AddValue(index++, (byte)m_activePlayerData.RestInfo[(int)RestTypes.XP].StateID);
-                stmt.AddValue(index++, (uint)m_playerData.PlayerFlags);
-                stmt.AddValue(index++, (uint)m_playerData.PlayerFlagsEx);
+                stmt.AddValue(index++, m_activePlayerData.RestInfo[(int)RestTypes.XP].StateID);
+                stmt.AddValue(index++, m_playerData.PlayerFlags);
+                stmt.AddValue(index++, m_playerData.PlayerFlagsEx);
 
                 if (!IsBeingTeleported())
                 {
@@ -3544,11 +3544,11 @@ namespace Game.Entities
                 ss.Append(m_taxi.SaveTaxiDestinationsToString());
 
                 stmt.AddValue(index++, ss.ToString());
-                stmt.AddValue(index++, (uint)m_activePlayerData.LifetimeHonorableKills);
-                stmt.AddValue(index++, (ushort)m_activePlayerData.TodayHonorableKills);
-                stmt.AddValue(index++, (ushort)m_activePlayerData.YesterdayHonorableKills);
-                stmt.AddValue(index++, (uint)m_playerData.PlayerTitle);
-                stmt.AddValue(index++, (uint)m_activePlayerData.WatchedFactionIndex);
+                stmt.AddValue(index++, m_activePlayerData.LifetimeHonorableKills);
+                stmt.AddValue(index++, m_activePlayerData.TodayHonorableKills);
+                stmt.AddValue(index++, m_activePlayerData.YesterdayHonorableKills);
+                stmt.AddValue(index++, m_playerData.PlayerTitle);
+                stmt.AddValue(index++, m_activePlayerData.WatchedFactionIndex);
                 stmt.AddValue(index++, GetDrunkValue());
                 stmt.AddValue(index++, GetHealth());
 
@@ -3603,12 +3603,12 @@ namespace Game.Entities
                     ss.Append($"{(uint)(m_activePlayerData.KnownTitles[i] & 0xFFFFFFFF)} {(uint)((m_activePlayerData.KnownTitles[i] >> 32) & 0xFFFFFFFF)} ");
 
                 stmt.AddValue(index++, ss.ToString());
-                stmt.AddValue(index++, (byte)m_activePlayerData.MultiActionBars);
+                stmt.AddValue(index++, m_activePlayerData.MultiActionBars);
 
                 stmt.AddValue(index++, IsInWorld && !GetSession().PlayerLogout() ? 1 : 0);
-                stmt.AddValue(index++, (uint)m_activePlayerData.Honor);
+                stmt.AddValue(index++, m_activePlayerData.Honor);
                 stmt.AddValue(index++, GetHonorLevel());
-                stmt.AddValue(index++, (byte)m_activePlayerData.RestInfo[(int)RestTypes.Honor].StateID);
+                stmt.AddValue(index++, m_activePlayerData.RestInfo[(int)RestTypes.Honor].StateID);
                 stmt.AddValue(index++, finiteAlways(_restMgr.GetRestBonus(RestTypes.Honor)));
                 stmt.AddValue(index++, Global.WorldMgr.GetRealm().Build);
 

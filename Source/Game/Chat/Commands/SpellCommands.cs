@@ -113,6 +113,7 @@ namespace Game.Chat
                 return true;
             }
 
+            args.Reset();
             // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
             uint spellId = handler.ExtractSpellIdFromLink(args);
             if (spellId == 0)
