@@ -1685,7 +1685,7 @@ namespace Game.Spells
                                 summon.SetNpcFlags((NPCFlags)((int)summon.GetCreatureTemplate().Npcflag & 0xFFFFFFFF));
                                 summon.SetNpcFlags2((NPCFlags2)((int)summon.GetCreatureTemplate().Npcflag >> 32));
 
-                                summon.AddUnitFlag(UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc);
+                                summon.SetImmuneToAll(true);
 
                                 summon.GetAI().EnterEvadeMode();
                                 break;

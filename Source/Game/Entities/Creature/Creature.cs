@@ -1718,9 +1718,7 @@ namespace Game.Entities
                 return false;
 
             // This set of checks is should be done only for creatures
-            if ((HasUnitFlag(UnitFlags.ImmuneToNpc) && !who.IsTypeId(TypeId.Player))                                // flag is valid only for non player characters
-                || (HasUnitFlag(UnitFlags.ImmuneToPc) && who.IsTypeId(TypeId.Player))                               // immune to PC and target is a player, return false
-                || (who.GetOwner() && who.GetOwner().IsTypeId(TypeId.Player) && HasUnitFlag(UnitFlags.ImmuneToPc))) // player pets are immune to pc as well
+            if ((IsImmuneToNPC() && !who.HasUnitFlag(UnitFlags.PvpAttackable)) || (IsImmuneToPC() && who.HasUnitFlag(UnitFlags.PvpAttackable)))
                 return false;
 
             // Do not attack non-combat pets
@@ -2219,7 +2217,7 @@ namespace Game.Entities
             if (IsCivilian())
                 return false;
 
-            if (HasUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable | UnitFlags.ImmuneToPc))
+            if (HasUnitFlag(UnitFlags.NonAttackable | UnitFlags.NotSelectable) || IsImmuneToNPC())
                 return false;
 
             // skip fighting creature
@@ -3114,6 +3112,10 @@ namespace Game.Entities
         {
             return (reactState == state);
         }
+
+        public override void SetImmuneToAll(bool apply) { SetImmuneToAll(apply, HasReactState(ReactStates.Passive)); }
+        public override void SetImmuneToPC(bool apply) { SetImmuneToPC(apply, HasReactState(ReactStates.Passive)); }
+        public override void SetImmuneToNPC(bool apply) { SetImmuneToNPC(apply, HasReactState(ReactStates.Passive)); }
 
         public bool IsInEvadeMode() { return HasUnitState(UnitState.Evade); }
         public bool IsEvadingAttacks() { return IsInEvadeMode() || CanNotReachTarget(); }

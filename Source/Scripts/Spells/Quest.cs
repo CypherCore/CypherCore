@@ -434,13 +434,13 @@ namespace Scripts.Spells.Quest
         void HandleEffectApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
-            target.AddUnitFlag(UnitFlags.ImmuneToPc);
+            target.SetImmuneToPC(true);
             target.AddUnitState(UnitState.Root);
         }
 
         void HandleEffectRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            GetTarget().RemoveUnitFlag(UnitFlags.ImmuneToPc);
+            GetTarget().SetImmuneToPC(false);
         }
 
         public override void Register()

@@ -163,7 +163,7 @@ namespace Game.AI
             {
                 me.GetMotionMaster().MoveTargetedHome();
                 if (_hasImmuneToNPCFlags)
-                    me.AddUnitFlag(UnitFlags.ImmuneToNpc);
+                    me.SetImmuneToNPC(true);
                 Reset();
             }
         }
@@ -443,10 +443,10 @@ namespace Game.AI
             //disable npcflags
             me.SetNpcFlags(NPCFlags.None);
             me.SetNpcFlags2(NPCFlags2.None);
-            if (me.HasUnitFlag(UnitFlags.ImmuneToNpc))
+            if (me.IsImmuneToNPC())
             {
                 _hasImmuneToNPCFlags = true;
-                me.RemoveUnitFlag(UnitFlags.ImmuneToNpc);
+                me.SetImmuneToNPC(false);
             }
 
             Log.outDebug(LogFilter.Scripts, $"EscortAI.Start: (script: {me.GetScriptName()}, creature entry: {me.GetEntry()}) started with {_path.nodes.Count} waypoints. ActiveAttacker = {_activeAttacker}, Run = {_running}, Player = {_playerGUID}");

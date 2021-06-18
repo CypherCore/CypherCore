@@ -1660,12 +1660,12 @@ namespace Game.Entities
 
             // check flags
             if (target.HasUnitFlag(UnitFlags.NonAttackable | UnitFlags.TaxiFlight | UnitFlags.NotAttackable1 | UnitFlags.Unk16)
-                || (!HasUnitFlag(UnitFlags.PvpAttackable) && target.HasUnitFlag(UnitFlags.ImmuneToNpc))
-                || (!target.HasUnitFlag(UnitFlags.PvpAttackable) && HasUnitFlag(UnitFlags.ImmuneToNpc)))
+                || (!HasUnitFlag(UnitFlags.PvpAttackable) && target.IsImmuneToNPC())
+                || (!target.HasUnitFlag(UnitFlags.PvpAttackable) && IsImmuneToNPC()))
                 return false;
 
             if ((bySpell == null || !bySpell.HasAttribute(SpellAttr8.AttackIgnoreImmuneToPCFlag))
-                && (HasUnitFlag(UnitFlags.PvpAttackable) && target.HasUnitFlag(UnitFlags.ImmuneToPc))
+                && (HasUnitFlag(UnitFlags.PvpAttackable) && target.IsImmuneToPC())
                 // check if this is a world trigger cast - GOs are using world triggers to cast their spells, so we need to ignore their immunity flag here, this is a temp workaround, needs removal when go cast is implemented properly
                 && GetEntry() != SharedConst.WorldTrigger)
                 return false;
@@ -1782,12 +1782,12 @@ namespace Game.Entities
             {
                 if (HasUnitFlag(UnitFlags.PvpAttackable))
                 {
-                    if (target.HasUnitFlag(UnitFlags.ImmuneToPc))
+                    if (target.IsImmuneToPC())
                         return false;
                 }
                 else
                 {
-                    if (target.HasUnitFlag(UnitFlags.ImmuneToNpc))
+                    if (target.IsImmuneToNPC())
                         return false;
                 }
             }

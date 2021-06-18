@@ -336,7 +336,8 @@ namespace Game.AI
                     if (point)
                     {
                         point.SetObjectScale(SharedConst.BoundaryVisualizeCreatureScale);
-                        point.AddUnitFlag(UnitFlags.ImmuneToPc | UnitFlags.Stunned | UnitFlags.ImmuneToNpc);
+                        point.AddUnitFlag(UnitFlags.Stunned);
+                        point.SetImmuneToAll(true);
                         if (!hasOutOfBoundsNeighbor)
                             point.AddUnitFlag(UnitFlags.NotSelectable);
                     }

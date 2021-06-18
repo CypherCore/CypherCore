@@ -241,7 +241,7 @@ namespace Scripts.World.ItemScripts
             {
                 summon.SetVisible(false);
                 summon.SetReactState(ReactStates.Passive);
-                summon.AddUnitFlag(UnitFlags.ImmuneToPc);
+                summon.SetImmuneToPC(true);
             }
             return false;
         }

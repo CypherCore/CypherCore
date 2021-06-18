@@ -167,8 +167,8 @@ namespace Game.Combat
                 if (!IsInCombatWith(refe.Key))
                 {
                     Unit target = refe.Value.GetOther(who);
-                    if ((_owner.HasUnitFlag(UnitFlags.ImmuneToPc) && target.HasUnitFlag(UnitFlags.PvpAttackable)) ||
-                        (_owner.HasUnitFlag(UnitFlags.ImmuneToNpc) && !target.HasUnitFlag(UnitFlags.PvpAttackable)))
+                    if ((_owner.IsImmuneToPC() && target.HasUnitFlag(UnitFlags.PvpAttackable)) ||
+                        (_owner.IsImmuneToNPC() && !target.HasUnitFlag(UnitFlags.PvpAttackable)))
                         continue;
                     SetInCombatWith(target);
                 }
@@ -178,8 +178,8 @@ namespace Game.Combat
                 if (!IsInCombatWith(refe.Key))
                 {
                     Unit target = refe.Value.GetOther(who);
-                    if ((_owner.HasUnitFlag(UnitFlags.ImmuneToPc) && target.HasUnitFlag(UnitFlags.PvpAttackable)) ||
-                        (_owner.HasUnitFlag(UnitFlags.ImmuneToNpc) && !target.HasUnitFlag(UnitFlags.PvpAttackable)))
+                    if ((_owner.IsImmuneToPC() && target.HasUnitFlag(UnitFlags.PvpAttackable)) ||
+                        (_owner.IsImmuneToNPC() && !target.HasUnitFlag(UnitFlags.PvpAttackable)))
                         continue;
                     SetInCombatWith(target);
                 }

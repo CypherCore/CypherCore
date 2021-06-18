@@ -3115,7 +3115,9 @@ namespace Game.Entities
             return gain;
         }
 
-        void SetImmuneToAll(bool apply, bool keepCombat)
+        public bool IsImmuneToAll() { return IsImmuneToPC() && IsImmuneToNPC(); }
+
+        public void SetImmuneToAll(bool apply, bool keepCombat)
         {
             if (apply)
             {
@@ -3133,7 +3135,11 @@ namespace Game.Entities
             }
         }
 
-        void SetImmuneToPC(bool apply, bool keepCombat)
+        public virtual void SetImmuneToAll(bool apply) { SetImmuneToAll(apply, false); }
+
+        public bool IsImmuneToPC() { return HasUnitFlag(UnitFlags.ImmuneToPc); }
+
+        public void SetImmuneToPC(bool apply, bool keepCombat)
         {
             if (apply)
             {
@@ -3163,7 +3169,11 @@ namespace Game.Entities
             }
         }
 
-        void SetImmuneToNPC(bool apply, bool keepCombat)
+        public virtual void SetImmuneToPC(bool apply) { SetImmuneToPC(apply, false); }
+
+        public bool IsImmuneToNPC() { return HasUnitFlag(UnitFlags.ImmuneToNpc); }
+
+        public void SetImmuneToNPC(bool apply, bool keepCombat)
         {
             if (apply)
             {
@@ -3192,6 +3202,8 @@ namespace Game.Entities
                 m_threatManager.UpdateOnlineStates(true, true);
             }
         }
+
+        public virtual void SetImmuneToNPC(bool apply) { SetImmuneToNPC(apply, false); }
 
         public virtual float GetBlockPercent(uint attackerLevel) { return 30.0f; }
 

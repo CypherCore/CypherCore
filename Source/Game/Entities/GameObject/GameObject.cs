@@ -2074,7 +2074,7 @@ namespace Game.Entities
                 return;
 
             // remove immunity flags, to allow spell to target anything
-            trigger.RemoveUnitFlag(UnitFlags.ImmuneToNpc | UnitFlags.ImmuneToPc);
+            trigger.SetImmuneToAll(false);
 
             PhasingHandler.InheritPhaseShift(trigger, this);
 
