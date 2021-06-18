@@ -297,7 +297,7 @@ namespace Game.Entities
                 if (status == QuestStatus.Complete)
                     qm.AddMenuItem(quest_id, 4);
                 else if (status == QuestStatus.Incomplete)
-                    qm.AddMenuItem(quest_id, 2);
+                    qm.AddMenuItem(quest_id, 4);
             }
 
             foreach (var quest_id in objectQR)
@@ -743,12 +743,10 @@ namespace Game.Entities
             QuestStatus oldStatus = questStatusData.Status;
 
             // check for repeatable quests status reset
+            SetQuestSlot(logSlot, questId);
             questStatusData.Slot = logSlot;
             questStatusData.Status = QuestStatus.Incomplete;
             questStatusData.Explored = false;
-
-            GiveQuestSourceItem(quest);
-            AdjustQuestObjectiveProgress(quest);
 
             foreach (QuestObjective obj in quest.Objectives)
             {
@@ -768,6 +766,9 @@ namespace Game.Entities
                         break;
                 }
             }
+
+            GiveQuestSourceItem(quest);
+            AdjustQuestObjectiveProgress(quest);
 
             long endTime = 0;
             uint limittime = quest.LimitTime;
@@ -804,7 +805,6 @@ namespace Game.Entities
                 caster.CastSpell(this, spellInfo.Id, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetCastDifficulty(spellInfo.Difficulty));
             }
 
-            SetQuestSlot(logSlot, questId);
             SetQuestSlotEndTime(logSlot, endTime);
             SetQuestSlotAcceptTime(logSlot, GameTime.GetGameTime());
 
@@ -824,9 +824,9 @@ namespace Game.Entities
             {
                 SetQuestStatus(quest_id, QuestStatus.Complete);
 
-                ushort log_slot = FindQuestSlot(quest_id);
-                if (log_slot < SharedConst.MaxQuestLogSize)
-                    SetQuestSlotState(log_slot, QuestSlotStateMask.Complete);
+                QuestStatusData questStatus = m_QuestStatus.LookupByKey(quest_id);
+                if (questStatus != null)
+                    SetQuestSlotState(questStatus.Slot, QuestSlotStateMask.Complete);
 
                 Quest qInfo = Global.ObjectMgr.GetQuestTemplate(quest_id);
                 if (qInfo != null)
