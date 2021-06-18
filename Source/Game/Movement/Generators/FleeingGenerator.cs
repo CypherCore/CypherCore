@@ -99,8 +99,8 @@ namespace Game.Movement
 
             owner.AddUnitState(UnitState.FleeingMove);
 
-            Position destination = owner.GetPosition();
-            GetPoint(owner, ref destination);
+            Position destination = new Position(owner.GetPosition());
+            GetPoint(owner, destination);
 
             // Add LOS check for target point
             if (!owner.IsWithinLOS(destination.GetPositionX(), destination.GetPositionY(), destination.GetPositionZ()))
@@ -127,7 +127,7 @@ namespace Game.Movement
             _timer.Reset(traveltime + RandomHelper.URand(800, 1500));
         }
 
-        void GetPoint(T owner, ref Position position)
+        void GetPoint(T owner, Position position)
         {
             float casterDistance, casterAngle;
             Unit fleeTarget = Global.ObjAccessor.GetUnit(owner, _fleeTargetGUID);
@@ -162,7 +162,7 @@ namespace Game.Movement
                 angle = RandomHelper.FRand(0.0f, 2.0f * MathF.PI);
             }
 
-            owner.MovePositionToFirstCollision(ref position, distance, angle);
+            owner.MovePositionToFirstCollision(position, distance, angle);
         }
 
         public override MovementGeneratorType GetMovementGeneratorType()

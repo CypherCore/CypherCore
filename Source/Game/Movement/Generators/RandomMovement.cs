@@ -95,7 +95,7 @@ namespace Game.Movement
             Position position = new(_reference);
             float distance = RandomHelper.FRand(0.0f, 1.0f) * _wanderDistance;
             float angle = RandomHelper.FRand(0.0f, 1.0f) * MathF.PI * 2.0f;
-            owner.MovePositionToFirstCollision(ref position, distance, angle);
+            owner.MovePositionToFirstCollision(position, distance, angle);
 
             uint resetTimer = RandomHelper.randChance(50) ? RandomHelper.URand(5000, 10000) : RandomHelper.URand(1000, 2000);
 

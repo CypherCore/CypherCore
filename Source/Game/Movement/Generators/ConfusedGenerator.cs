@@ -67,10 +67,10 @@ namespace Game.Movement
                 // start moving
                 owner.AddUnitState(UnitState.ConfusedMove);
 
-                Position destination = _reference;
+                Position destination = new(_reference);
                 float distance = (float)(4.0f * RandomHelper.FRand(0.0f, 1.0f) - 2.0f);
                 float angle = RandomHelper.FRand(0.0f, 1.0f) * MathF.PI * 2.0f;
-                owner.MovePositionToFirstCollision(ref destination, distance, angle);
+                owner.MovePositionToFirstCollision(destination, distance, angle);
 
                 if (_path == null)
                     _path = new PathGenerator(owner);

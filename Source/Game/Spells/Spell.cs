@@ -929,8 +929,8 @@ namespace Game.Spells
                         if (dist < objSize)
                             dist = objSize;
 
-                        Position pos = dest.Position;
-                        m_caster.MovePositionToFirstCollision(ref pos, dist, angl);
+                        Position pos = new(dest.Position);
+                        m_caster.MovePositionToFirstCollision(pos, dist, angl);
 
                         dest.Relocate(pos);
                     }
@@ -961,8 +961,8 @@ namespace Game.Spells
                         if (targetType.GetTarget() == Targets.DestRandom)
                             dist *= (float)RandomHelper.NextDouble();
 
-                        Position pos = dest.Position;
-                        target.MovePositionToFirstCollision(ref pos, dist, angle);
+                        Position pos = new(dest.Position);
+                        target.MovePositionToFirstCollision(pos, dist, angle);
 
                         dest.Relocate(pos);
                     }
@@ -999,8 +999,8 @@ namespace Game.Spells
                         if (targetType.GetTarget() == Targets.DestRandom)
                             dist *= (float)RandomHelper.NextDouble();
 
-                        Position pos = m_targets.GetDstPos();
-                        m_caster.MovePositionToFirstCollision(ref pos, dist, angle);
+                        Position pos = new(m_targets.GetDstPos());
+                        m_caster.MovePositionToFirstCollision(pos, dist, angle);
 
                         dest.Relocate(pos);
                     }

@@ -2214,8 +2214,8 @@ namespace Game.Entities
 
         public Position GetFirstCollisionPosition(float dist, float angle)
         {
-            var pos = GetPosition();
-            MovePositionToFirstCollision(ref pos, dist, angle);
+            var pos = new Position(GetPosition());
+            MovePositionToFirstCollision(pos, dist, angle);
             return pos;
         }
 
@@ -2276,7 +2276,7 @@ namespace Game.Entities
             pos.SetOrientation(GetOrientation());
         }
 
-        public void MovePositionToFirstCollision(ref Position pos, float dist, float angle)
+        public void MovePositionToFirstCollision(Position pos, float dist, float angle)
         {
             angle += GetOrientation();
             float destx = pos.posX + dist * (float)Math.Cos(angle);
