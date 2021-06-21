@@ -232,6 +232,8 @@ namespace Game
                                 break;
                             }
 
+                            player.AreaExploredOrEventHappens(questId);
+
                             if (player.CanCompleteQuest(questId))
                                 player.CompleteQuest(questId);
                         }

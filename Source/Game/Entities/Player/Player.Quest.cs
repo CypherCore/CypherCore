@@ -473,7 +473,7 @@ namespace Game.Entities
                     return false;                                   // not allow re-complete quest
 
                 // auto complete quest
-                if ((qInfo.IsAutoComplete() || qInfo.Flags.HasAnyFlag(QuestFlags.AutoComplete)) && CanTakeQuest(qInfo, false))
+                if (qInfo.IsAutoComplete() && CanTakeQuest(qInfo, false))
                     return true;
 
                 var q_status = m_QuestStatus.LookupByKey(questId);
