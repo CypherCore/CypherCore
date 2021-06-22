@@ -45,6 +45,7 @@ namespace Game.Spells
         Death
     }
 
+    [Flags]
     public enum AuraFlags
     {
         None = 0x00,
@@ -226,21 +227,29 @@ namespace Game.Spells
             // send stack amount for aura which could be stacked (never 0 - causes incorrect display) or charges
             // stack amount has priority over charges (checked on retail with spell 50262)
             auraData.Applications = aura.IsUsingStacks() ? aura.GetStackAmount() : aura.GetCharges();
-            if (!auraData.Flags.HasAnyFlag(AuraFlags.NoCaster))
+            if (!auraData.Flags.HasFlag(AuraFlags.NoCaster))
                 auraData.CastUnit.Set(aura.GetCasterGUID());
 
-            if (auraData.Flags.HasAnyFlag(AuraFlags.Duration))
+            if (auraData.Flags.HasFlag(AuraFlags.Duration))
             {
                 auraData.Duration.Set(aura.GetMaxDuration());
                 auraData.Remaining.Set(aura.GetDuration());
             }
 
-            if (auraData.Flags.HasAnyFlag(AuraFlags.Scalable))
+            if (auraData.Flags.HasFlag(AuraFlags.Scalable))
             {
-                auraData.Points = new float[GetBase().GetAuraEffects().Length];
                 foreach (AuraEffect effect in GetBase().GetAuraEffects())
+                {
                     if (effect != null && HasEffect(effect.GetEffIndex()))       // Not all of aura's effects have to be applied on every target
-                        auraData.Points[effect.GetEffIndex()] = effect.GetAmount();
+                    {
+                        auraData.Points.Add(effect.GetAmount());
+                        if (effect.GetEstimatedAmount().HasValue)
+                            auraData.EstimatedPoints.Add(effect.GetEstimatedAmount().Value);
+                    }
+                }
+
+                if (!auraData.EstimatedPoints.Empty())
+                    auraData.EstimatedPoints.Resize((uint)auraData.Points.Count); // pad to equal sizes
             }
         }
 

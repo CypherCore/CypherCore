@@ -1409,7 +1409,7 @@ namespace Game.Networking.Packets
             data.WriteBit(Duration.HasValue);
             data.WriteBit(Remaining.HasValue);
             data.WriteBit(TimeMod.HasValue);
-            data.WriteBits(Points.Length, 6);
+            data.WriteBits(Points.Count, 6);
             data.WriteBits(EstimatedPoints.Count, 6);
             data.WriteBit(ContentTuning.HasValue);
 
@@ -1448,7 +1448,7 @@ namespace Game.Networking.Packets
         public Optional<int> Duration;
         public Optional<int> Remaining;
         Optional<float> TimeMod;
-        public float[] Points = Array.Empty<float>();
+        public List<float> Points = new();
         public List<float> EstimatedPoints = new();
     }
 
