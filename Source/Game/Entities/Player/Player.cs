@@ -3956,7 +3956,7 @@ namespace Game.Entities
                     break;
             }
 
-            DealDamageMods(this, ref damage, ref absorb);
+            DealDamageMods(null, this, ref damage, ref absorb);
 
             EnvironmentalDamageLog packet = new();
             packet.Victim = GetGUID();
@@ -3965,7 +3965,7 @@ namespace Game.Entities
             packet.Absorbed = (int)absorb;
             packet.Resisted = (int)resist;
 
-            uint final_damage = DealDamage(this, damage, null, DamageEffectType.Self, SpellSchoolMask.Normal, null, false);
+            uint final_damage = DealDamage(this, this, damage, null, DamageEffectType.Self, SpellSchoolMask.Normal, null, false);
             packet.LogData.Initialize(this);
 
             SendCombatLogMessage(packet);

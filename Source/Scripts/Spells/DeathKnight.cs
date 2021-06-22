@@ -271,7 +271,7 @@ namespace Scripts.Spells.DeathKnight
             int amount = (int)damageInfo.GetDamage() / 2;
             SpellNonMeleeDamage log = new SpellNonMeleeDamage(drw, drw.GetVictim(), spellInfo, new SpellCastVisual(spellInfo.GetSpellXSpellVisualId(drw), 0), spellInfo.GetSchoolMask());
             log.damage = (uint)amount;
-            drw.DealDamage(drw.GetVictim(), (uint)amount, null, DamageEffectType.SpellDirect, spellInfo.GetSchoolMask(), spellInfo, true);
+            Unit.DealDamage(drw, drw.GetVictim(), (uint)amount, null, DamageEffectType.SpellDirect, spellInfo.GetSchoolMask(), spellInfo, true);
             drw.SendSpellNonMeleeDamageLog(log);
         }
 

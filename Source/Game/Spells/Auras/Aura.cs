@@ -347,6 +347,19 @@ namespace Game.Spells
             }
         }
 
+        public float CalcPeriodicCritChance(Unit caster)
+        {
+            if (!caster)
+                return 0.0f;
+
+            Player modOwner = caster.GetSpellModOwner();
+            if (modOwner == null)
+                return 0.0f;
+
+            float critChance = modOwner.SpellCritChanceDone(GetSpellInfo(), GetSpellInfo().GetSchoolMask(), GetSpellInfo().GetAttackType());
+            return Math.Max(0.0f, critChance);
+        }
+        
         public Unit GetCaster()
         {
             if (m_owner.GetGUID() == m_casterGuid)
@@ -854,13 +867,8 @@ namespace Game.Spells
                     effect.ChangeAmount(effect.CalculateAmount(caster), false, true);
 
             foreach (var app in applications)
-            {
                 if (!app.HasRemoveMode())
-                {
-                    HandleAuraSpecificPeriodics(app, caster);
                     HandleAuraSpecificMods(app, caster, true, true);
-                }
-            }
 
             SetNeedClientUpdateForTargets();
         }
@@ -1406,55 +1414,6 @@ namespace Game.Spells
             }
         }
 
-        public void HandleAuraSpecificPeriodics(AuraApplication aurApp, Unit caster)
-        {
-            Unit target = aurApp.GetTarget();
-
-            if (!caster || aurApp.HasRemoveMode())
-                return;
-
-            foreach (AuraEffect effect in GetAuraEffects())
-            {
-                if (effect == null || effect.IsAreaAuraEffect() || effect.IsEffect(SpellEffectName.PersistentAreaAura))
-                    continue;
-
-                switch (effect.GetSpellEffectInfo().ApplyAuraName)
-                {
-                    case AuraType.PeriodicDamage:
-                    case AuraType.PeriodicDamagePercent:
-                    case AuraType.PeriodicLeech:
-                        {
-                            // ignore non positive values (can be result apply spellmods to aura damage
-                            uint damage = (uint)Math.Max(effect.GetAmount(), 0);
-
-                            // Script Hook For HandlePeriodicDamageAurasTick -- Allow scripts to change the Damage pre class mitigation calculations
-                            Global.ScriptMgr.ModifyPeriodicDamageAurasTick(target, caster, ref damage);
-
-                            effect.SetDonePct(caster.SpellDamagePctDone(target, m_spellInfo, DamageEffectType.DOT)); // Calculate done percentage first!
-                            effect.SetDamage((int)(caster.SpellDamageBonusDone(target, m_spellInfo, damage, DamageEffectType.DOT, effect.GetSpellEffectInfo(), GetStackAmount()) * effect.GetDonePct()));
-                            effect.SetCritChance(caster.GetUnitSpellCriticalChance(target, null, effect, m_spellInfo.GetSchoolMask()));
-                            break;
-                        }
-                    case AuraType.PeriodicHeal:
-                    case AuraType.ObsModHealth:
-                        {
-                            // ignore non positive values (can be result apply spellmods to aura damage
-                            uint damage = (uint)Math.Max(effect.GetAmount(), 0);
-
-                            // Script Hook For HandlePeriodicDamageAurasTick -- Allow scripts to change the Damage pre class mitigation calculations
-                            Global.ScriptMgr.ModifyPeriodicDamageAurasTick(target, caster, ref damage);
-
-                            effect.SetDonePct(caster.SpellHealingPctDone(target, m_spellInfo)); // Calculate done percentage first!
-                            effect.SetDamage((int)(caster.SpellHealingBonusDone(target, m_spellInfo, damage, DamageEffectType.DOT, effect.GetSpellEffectInfo(), GetStackAmount()) * effect.GetDonePct()));
-                            effect.SetCritChance(caster.GetUnitSpellCriticalChance(target, null, effect, m_spellInfo.GetSchoolMask()));
-                            break;
-                        }
-                    default:
-                        break;
-                }
-            }
-        }
-
         bool CanBeAppliedOn(Unit target)
         {
             // unit not in world or during remove from world
@@ -1842,7 +1801,7 @@ namespace Game.Spells
         public float CalcPPMProcChance(Unit actor)
         {
             // Formula see http://us.battle.net/wow/en/forum/topic/8197741003#1
-            float ppm = m_spellInfo.CalcProcPPM(actor, m_castItemLevel);
+            float ppm = m_spellInfo.CalcProcPPM(actor, GetCastItemLevel());
             float averageProcInterval = 60.0f / ppm;
 
             var currentTime = GameTime.GetGameTimeSteadyPoint();

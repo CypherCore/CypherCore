@@ -568,7 +568,7 @@ namespace Game.Chat
             // flat melee damage without resistence/etc reduction
             if (string.IsNullOrEmpty(schoolStr))
             {
-                attacker.DealDamage(target, damage_, null, DamageEffectType.Direct, SpellSchoolMask.Normal, null, false);
+                Unit.DealDamage(attacker, target, damage_, null, DamageEffectType.Direct, SpellSchoolMask.Normal, null, false);
                 if (target != attacker)
                     attacker.SendAttackStateUpdate(HitInfo.AffectsVictim, target, SpellSchoolMask.Normal, damage_, 0, 0, VictimState.Hit, 0);
                 return true;
@@ -579,8 +579,8 @@ namespace Game.Chat
 
             SpellSchoolMask schoolmask = (SpellSchoolMask)(1 << school);
 
-            if (attacker.IsDamageReducedByArmor(schoolmask))
-                damage_ = attacker.CalcArmorReducedDamage(handler.GetPlayer(), target, damage_, null, WeaponAttackType.BaseAttack);
+            if (Unit.IsDamageReducedByArmor(schoolmask))
+                damage_ = Unit.CalcArmorReducedDamage(handler.GetPlayer(), target, damage_, null, WeaponAttackType.BaseAttack);
 
             string spellStr = args.NextString();
 
@@ -588,7 +588,7 @@ namespace Game.Chat
             if (string.IsNullOrEmpty(spellStr))
             {
                 DamageInfo dmgInfo = new(attacker, target, damage_, null, schoolmask, DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
-                attacker.CalcAbsorbResist(dmgInfo);
+                Unit.CalcAbsorbResist(dmgInfo);
 
                 if (dmgInfo.GetDamage() == 0)
                     return true;
@@ -597,8 +597,8 @@ namespace Game.Chat
 
                 uint absorb = dmgInfo.GetAbsorb();
                 uint resist = dmgInfo.GetResist();
-                attacker.DealDamageMods(target, ref damage_, ref absorb);
-                attacker.DealDamage(target, damage_, null, DamageEffectType.Direct, schoolmask, null, false);
+                Unit.DealDamageMods(attacker, target, ref damage_, ref absorb);
+                Unit.DealDamage(attacker, target, damage_, null, DamageEffectType.Direct, schoolmask, null, false);
                 attacker.SendAttackStateUpdate(HitInfo.AffectsVictim, target, schoolmask, damage_, absorb, resist, VictimState.Hit, 0);
                 return true;
             }
@@ -613,9 +613,9 @@ namespace Game.Chat
             if (spellInfo == null)
                 return false;
 
-            SpellNonMeleeDamage damageInfo = new(attacker, target, spellInfo, new Networking.Packets.SpellCastVisual(spellInfo.GetSpellXSpellVisualId(attacker), 0), spellInfo.SchoolMask);
+            SpellNonMeleeDamage damageInfo = new(attacker, target, spellInfo, new SpellCastVisual(spellInfo.GetSpellXSpellVisualId(attacker), 0), spellInfo.SchoolMask);
             damageInfo.damage = damage_;
-            attacker.DealDamageMods(damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
+            Unit.DealDamageMods(damageInfo.attacker, damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
             target.DealSpellDamage(damageInfo, true);
             target.SendSpellNonMeleeDamageLog(damageInfo);
             return true;
@@ -670,7 +670,7 @@ namespace Game.Chat
                     return false;
 
             if (target.IsAlive())
-                handler.GetSession().GetPlayer().Kill(target);
+                Unit.Kill(handler.GetSession().GetPlayer(), target);
 
             return true;
         }

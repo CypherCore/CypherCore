@@ -207,7 +207,7 @@ namespace Game
                 if (opcode == ClientOpcodes.MoveJump)
                 { 
                     plrMover.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.Jump); // Mind Control
-                    plrMover.ProcSkillsAndAuras(null, ProcFlags.Jump, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
+                    Unit.ProcSkillsAndAuras(plrMover, null, ProcFlags.Jump, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
                 }
             }
         }

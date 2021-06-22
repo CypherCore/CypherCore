@@ -105,6 +105,7 @@ namespace Game.Entities
             }
 
             int DoneTotal = 0;
+            float DoneTotalMod = SpellDamagePctDone(victim, spellProto, damagetype);
 
             // Done fixed damage bonus auras
             int DoneAdvertisedBenefit = SpellBaseDamageBonusDone(spellProto.GetSchoolMask());
@@ -141,27 +142,21 @@ namespace Game.Entities
             float coeff = effect.BonusCoefficient;
             if (DoneAdvertisedBenefit != 0)
             {
-                Player modOwner = GetSpellModOwner();
-                if (modOwner)
+                Player modOwner1 = GetSpellModOwner();
+                if (modOwner1)
                 {
                     coeff *= 100.0f;
-                    modOwner.ApplySpellMod(spellProto, SpellModOp.BonusCoefficient, ref coeff);
+                    modOwner1.ApplySpellMod(spellProto, SpellModOp.BonusCoefficient, ref coeff);
                     coeff /= 100.0f;
                 }
                 DoneTotal += (int)(DoneAdvertisedBenefit * coeff * stack);
             }
 
-            // Done Percentage for DOT is already calculated, no need to do it again. The percentage mod is applied in Aura.HandleAuraSpecificMods.
-            float tmpDamage = ((int)pdamage + DoneTotal) * (damagetype == DamageEffectType.DOT ? 1.0f : SpellDamagePctDone(victim, spellProto, damagetype));
+            float tmpDamage = (float)((int)pdamage + DoneTotal) * DoneTotalMod;
             // apply spellmod to Done damage (flat and pct)
             Player _modOwner = GetSpellModOwner();
-            if (_modOwner)
-            {
-                if (damagetype == DamageEffectType.DOT)
-                    _modOwner.ApplySpellMod(spellProto, SpellModOp.PeriodicHealingAndDamage, ref tmpDamage);
-                else
-                    _modOwner.ApplySpellMod(spellProto, SpellModOp.HealingAndDamage, ref tmpDamage);
-            }
+            if (_modOwner != null)
+                _modOwner.ApplySpellMod(spellProto, damagetype == DamageEffectType.DOT ? SpellModOp.PeriodicHealingAndDamage : SpellModOp.HealingAndDamage, ref tmpDamage);
 
             return (uint)Math.Max(tmpDamage, 0.0f);
         }
@@ -171,13 +166,21 @@ namespace Game.Entities
             if (spellProto == null || !victim || damagetype == DamageEffectType.Direct)
                 return 1.0f;
 
+            // Some spells don't benefit from done mods
+            if (spellProto.HasAttribute(SpellAttr3.NoDoneBonus))
+                return 1.0f;
+
             // Some spells don't benefit from pct done mods
             if (spellProto.HasAttribute(SpellAttr6.IgnoreCasterDamageModifiers))
                 return 1.0f;
 
-            // For totems pct done mods are calculated when its calculation is run on the player in SpellDamageBonusDone.
-            if (IsTypeId(TypeId.Unit) && IsTotem())
-                return 1.0f;
+            // For totems get damage bonus from owner
+            if (IsCreature() && IsTotem())
+            {
+                Unit owner = GetOwner();
+                if (owner != null)
+                    return owner.SpellDamagePctDone(victim, spellProto, damagetype);
+            }
 
             // Done total percent damage auras
             float DoneTotalMod = 1.0f;
@@ -392,19 +395,23 @@ namespace Game.Entities
             return GetTotalAuraModifierByMiscMask(AuraType.ModHealing, (int)schoolMask);
         }
 
-        public int SpellCriticalHealingBonus(SpellInfo spellProto, int damage, Unit victim)
+        public static int SpellCriticalHealingBonus(Unit caster, SpellInfo spellProto, int damage, Unit victim)
         {
             // Calculate critical bonus
             int crit_bonus = damage;
 
             // adds additional damage to critBonus (from talents)
-            Player modOwner = GetSpellModOwner();
-            if (modOwner != null)
-                modOwner.ApplySpellMod(spellProto, SpellModOp.CritDamageAndHealing, ref crit_bonus);
+            if (caster != null)
+            {
+                Player modOwner = caster.GetSpellModOwner();
+                if (modOwner != null)
+                    modOwner.ApplySpellMod(spellProto, SpellModOp.CritDamageAndHealing, ref crit_bonus);
+            }
 
             damage += crit_bonus;
 
-            damage = (int)(damage * GetTotalAuraMultiplier(AuraType.ModCriticalHealingAmount));
+            if (caster != null)
+                damage = (int)(damage * caster.GetTotalAuraMultiplier(AuraType.ModCriticalHealingAmount));
 
             return damage;
         }
@@ -424,19 +431,20 @@ namespace Game.Entities
                 return healamount;
 
             int DoneTotal = 0;
+            float DoneTotalMod = SpellHealingPctDone(victim, spellProto);
 
             // done scripted mod (take it from owner)
             Unit owner1 = GetOwner() ?? this;
             var mOverrideClassScript = owner1.GetAuraEffectsByType(AuraType.OverrideClassScripts);
-            foreach (var eff in mOverrideClassScript)
+            foreach (var aurEff in mOverrideClassScript)
             {
-                if (!eff.IsAffectingSpell(spellProto))
+                if (!aurEff.IsAffectingSpell(spellProto))
                     continue;
 
-                switch (eff.GetMiscValue())
+                switch (aurEff.GetMiscValue())
                 {
                     case 3736: // Hateful Totem of the Third Wind / Increased Lesser Healing Wave / LK Arena (4/5/6) Totem of the Third Wind / Savage Totem of the Third Wind
-                        DoneTotal += eff.GetAmount();
+                        DoneTotal += aurEff.GetAmount();
                         break;
                     default:
                         break;
@@ -491,25 +499,32 @@ namespace Game.Entities
                     DoneTotal = 0;
             }
 
-            // use float as more appropriate for negative values and percent applying
-            float heal = (healamount + DoneTotal) * (damagetype == DamageEffectType.DOT ? 1.0f : SpellHealingPctDone(victim, spellProto));
+            float heal = (float)((int)healamount + DoneTotal) * DoneTotalMod;
+
             // apply spellmod to Done amount
             Player _modOwner = GetSpellModOwner();
             if (_modOwner)
-            {
-                if (damagetype == DamageEffectType.DOT)
-                    _modOwner.ApplySpellMod(spellProto, SpellModOp.PeriodicHealingAndDamage, ref heal);
-                else
-                    _modOwner.ApplySpellMod(spellProto, SpellModOp.HealingAndDamage, ref heal);
-            }
+                _modOwner.ApplySpellMod(spellProto, damagetype == DamageEffectType.DOT ? SpellModOp.PeriodicHealingAndDamage : SpellModOp.HealingAndDamage, ref heal);
 
             return (uint)Math.Max(heal, 0.0f);
         }
 
         public float SpellHealingPctDone(Unit victim, SpellInfo spellProto)
         {
-            // For totems pct done mods are calculated when its calculation is run on the player in SpellHealingBonusDone.
-            if (IsTypeId(TypeId.Unit) && IsTotem())
+            // For totems get healing bonus from owner
+            if (IsCreature() && IsTotem())
+            {
+                Unit owner = GetOwner();
+                if (owner != null)
+                    return owner.SpellHealingPctDone(victim, spellProto);
+            }
+
+            // Some spells don't benefit from done mods
+            if (spellProto.HasAttribute(SpellAttr3.NoDoneBonus))
+                return 1.0f;
+
+            // Some spells don't benefit from done mods
+            if (spellProto.HasAttribute(SpellAttr6.IgnoreHealingModifiers))
                 return 1.0f;
 
             // No bonus healing for potion spells
@@ -647,40 +662,19 @@ namespace Game.Entities
             return (uint)Math.Max(heal, 0.0f);
         }
 
-        public bool IsSpellCrit(Unit victim, Spell spell, AuraEffect aurEff, SpellSchoolMask schoolMask, WeaponAttackType attackType = WeaponAttackType.BaseAttack)
+        public float SpellCritChanceDone(SpellInfo spellInfo, SpellSchoolMask schoolMask, WeaponAttackType attackType = WeaponAttackType.BaseAttack)
         {
-            return RandomHelper.randChance(GetUnitSpellCriticalChance(victim, spell, aurEff, schoolMask, attackType));
-        }
-
-        public float GetUnitSpellCriticalChance(Unit victim, Spell spell, AuraEffect aurEff, SpellSchoolMask schoolMask, WeaponAttackType attackType = WeaponAttackType.BaseAttack)
-        {
-            SpellInfo spellProto = spell?.GetSpellInfo() ?? aurEff?.GetSpellInfo();
-            //! Mobs can't crit with spells. Player Totems can
-            //! Fire Elemental (from totem) can too - but this part is a hack and needs more research
-            if (GetGUID().IsCreatureOrVehicle() && !(IsTotem() && GetOwnerGUID().IsPlayer()) && GetEntry() != 15438)
+            //! Mobs can't crit with spells. (Except player controlled)
+            if (IsCreature() && !GetSpellModOwner())
                 return 0.0f;
 
             // not critting spell
-            if (spellProto.HasAttribute(SpellAttr2.CantCrit))
+            if (spellInfo.HasAttribute(SpellAttr2.CantCrit))
                 return 0.0f;
 
             float crit_chance = 0.0f;
-            switch (spellProto.DmgClass)
+            switch (spellInfo.DmgClass)
             {
-                case SpellDmgClass.None:
-                    // We need more spells to find a general way (if there is any)
-                    switch (spellProto.Id)
-                    {
-                        case 379:   // Earth Shield
-                        case 33778: // Lifebloom Final Bloom
-                        case 64844: // Divine Hymn
-                        case 71607: // Item - Bauble of True Blood 10m
-                        case 71646: // Item - Bauble of True Blood 25m
-                            break;
-                        default:
-                            return 0.0f;
-                    }
-                    goto case SpellDmgClass.Magic;
                 case SpellDmgClass.Magic:
                     {
                         if (schoolMask.HasAnyFlag(SpellSchoolMask.Normal))
@@ -690,26 +684,58 @@ namespace Game.Entities
                             crit_chance = ToPlayer().m_activePlayerData.SpellCritPercentage;
                         else
                             crit_chance = BaseSpellCritChance;
+                        break;
+                    }
+                case SpellDmgClass.Melee:
+                case SpellDmgClass.Ranged:
+                    crit_chance += GetUnitCriticalChanceDone(attackType);
+                    break;
 
+                case SpellDmgClass.None:
+                default:
+                    return 0f;
+            }
+            // percent done
+            // only players use intelligence for critical chance computations
+            Player modOwner = GetSpellModOwner();
+            if (modOwner != null)
+                modOwner.ApplySpellMod(spellInfo, SpellModOp.CritChance, ref crit_chance);
+
+            return Math.Max(crit_chance, 0.0f);
+        }
+
+        public float SpellCritChanceTaken(Unit caster, Spell spell, AuraEffect aurEff, SpellSchoolMask schoolMask, float doneChance, WeaponAttackType attackType = WeaponAttackType.BaseAttack)
+        {
+            SpellInfo spellInfo = spell != null ? spell.GetSpellInfo() : aurEff.GetSpellInfo();
+            // not critting spell
+            if (spellInfo.HasAttribute(SpellAttr2.CantCrit))
+                return 0.0f;
+
+            float crit_chance = doneChance;
+            switch (spellInfo.DmgClass)
+            {
+                case SpellDmgClass.Magic:
+                    {
                         // taken
-                        if (victim)
+                        if (!spellInfo.IsPositive())
                         {
-                            if (!spellProto.IsPositive())
-                            {
-                                // Modify critical chance by victim SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE
-                                crit_chance += victim.GetTotalAuraModifier(AuraType.ModAttackerSpellAndWeaponCritChance);
-                            }
+                            // Modify critical chance by victim SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE
+                            crit_chance += GetTotalAuraModifier(AuraType.ModAttackerSpellAndWeaponCritChance);
+                        }
+
+                        if (caster)
+                        {
                             // scripted (increase crit chance ... against ... target by x%
-                            var mOverrideClassScript = GetAuraEffectsByType(AuraType.OverrideClassScripts);
+                            var mOverrideClassScript = caster.GetAuraEffectsByType(AuraType.OverrideClassScripts);
                             foreach (var eff in mOverrideClassScript)
                             {
-                                if (!eff.IsAffectingSpell(spellProto))
+                                if (!eff.IsAffectingSpell(spellInfo))
                                     continue;
 
                                 switch (eff.GetMiscValue())
                                 {
                                     case 911: // Shatter
-                                        if (victim.HasAuraState(AuraStateType.Frozen, spellProto, this))
+                                        if (HasAuraState(AuraStateType.Frozen, spellInfo, this))
                                         {
                                             crit_chance *= 1.5f;
                                             AuraEffect _eff = eff.GetBase().GetEffect(1);
@@ -722,19 +748,19 @@ namespace Game.Entities
                                 }
                             }
                             // Custom crit by class
-                            switch (spellProto.SpellFamilyName)
+                            switch (spellInfo.SpellFamilyName)
                             {
                                 case SpellFamilyNames.Rogue:
                                     // Shiv-applied poisons can't crit
-                                    if (FindCurrentSpellBySpellId(5938) != null)
+                                    if (caster.FindCurrentSpellBySpellId(5938) != null)
                                         crit_chance = 0.0f;
                                     break;
                                 case SpellFamilyNames.Shaman:
                                     // Lava Burst
-                                    if (spellProto.SpellFamilyFlags[1].HasAnyFlag(0x00001000u))
+                                    if (spellInfo.SpellFamilyFlags[1].HasAnyFlag(0x00001000u))
                                     {
-                                        if (victim.GetAuraEffect(AuraType.PeriodicDamage, SpellFamilyNames.Shaman, new FlagArray128(0x10000000, 0, 0), GetGUID()) != null)
-                                            if (victim.GetTotalAuraModifier(AuraType.ModAttackerSpellAndWeaponCritChance) > -100)
+                                        if (GetAuraEffect(AuraType.PeriodicDamage, SpellFamilyNames.Shaman, new FlagArray128(0x10000000, 0, 0), caster.GetGUID()) != null)
+                                            if (GetTotalAuraModifier(AuraType.ModAttackerSpellAndWeaponCritChance) > -100)
                                                 return 100.0f;
                                         break;
                                     }
@@ -742,9 +768,9 @@ namespace Game.Entities
                             }
 
                             // Spell crit suppression
-                            if (victim.GetTypeId() == TypeId.Unit)
+                            if (IsCreature())
                             {
-                                int levelDiff = (int)(victim.GetLevelForTarget(this) - GetLevel());
+                                int levelDiff = (int)(GetLevelForTarget(this) - caster.GetLevel());
                                 crit_chance -= levelDiff * 1.0f;
                             }
                         }
@@ -753,38 +779,34 @@ namespace Game.Entities
                 case SpellDmgClass.Melee:
                 case SpellDmgClass.Ranged:
                     {
-                        if (victim)
-                            crit_chance += GetUnitCriticalChance(attackType, victim);
+                        if (caster != null)
+                            crit_chance += GetUnitCriticalChanceTaken(caster, attackType, crit_chance);
                         break;
                     }
+                case SpellDmgClass.None:
                 default:
-                    return 0.0f;
+                    return 0f;
             }
-            // percent done
-            // only players use intelligence for critical chance computations
-            Player modOwner = GetSpellModOwner();
-            if (modOwner != null)
-                modOwner.ApplySpellMod(spellProto, SpellModOp.CritChance, ref crit_chance);
 
             // for this types the bonus was already added in GetUnitCriticalChance, do not add twice
-            if (spellProto.DmgClass != SpellDmgClass.Melee && spellProto.DmgClass != SpellDmgClass.Ranged)
+            if (caster != null && spellInfo.DmgClass != SpellDmgClass.Melee && spellInfo.DmgClass != SpellDmgClass.Ranged)
             {
-                crit_chance += victim.GetTotalAuraModifier(AuraType.ModCritChanceForCasterWithAbilities, aurEff => aurEff.GetCasterGUID() == GetGUID() && aurEff.IsAffectingSpell(spellProto));
+                crit_chance += GetTotalAuraModifier(AuraType.ModCritChanceForCasterWithAbilities, aurEff => aurEff.GetCasterGUID() == caster.GetGUID() && aurEff.IsAffectingSpell(spellInfo));
 
-                crit_chance += victim.GetTotalAuraModifier(AuraType.ModCritChanceForCaster, aurEff => aurEff.GetCasterGUID() != GetGUID());
+                crit_chance += GetTotalAuraModifier(AuraType.ModCritChanceForCaster, aurEff => aurEff.GetCasterGUID() == caster.GetGUID());
 
-                crit_chance += GetTotalAuraModifier(AuraType.ModCritChanceVersusTargetHealth, aurEff => !victim.HealthBelowPct(aurEff.GetMiscValueB()));
+                crit_chance += caster.GetTotalAuraModifier(AuraType.ModCritChanceVersusTargetHealth, aurEff => !HealthBelowPct(aurEff.GetMiscValueB()));
 
-                TempSummon tempSummon = ToTempSummon();
+                TempSummon tempSummon = caster.ToTempSummon();
                 if (tempSummon != null)
-                    crit_chance += victim.GetTotalAuraModifier(AuraType.ModCritChanceForCasterPet, aurEff => aurEff.GetCasterGUID() == tempSummon.GetSummonerGUID());
+                    crit_chance += GetTotalAuraModifier(AuraType.ModCritChanceForCasterPet, aurEff => aurEff.GetCasterGUID() == tempSummon.GetSummonerGUID());
             }
 
             // call script handlers
             if (spell)
-                spell.CallScriptCalcCritChanceHandlers(victim, ref crit_chance);
+                spell.CallScriptCalcCritChanceHandlers(this, ref crit_chance);
             else
-                aurEff.GetBase().CallScriptEffectCalcCritChanceHandlers(aurEff, aurEff.GetBase().GetApplicationOfTarget(victim.GetGUID()), victim, ref crit_chance);
+                aurEff.GetBase().CallScriptEffectCalcCritChanceHandlers(aurEff, aurEff.GetBase().GetApplicationOfTarget(GetGUID()), this, ref crit_chance);
 
             return Math.Max(crit_chance, 0.0f);
         }
@@ -1752,16 +1774,17 @@ namespace Game.Entities
             return false;
         }
 
-        public void ProcSkillsAndAuras(Unit actionTarget, ProcFlags typeMaskActor, ProcFlags typeMaskActionTarget, ProcFlagsSpellType spellTypeMask, ProcFlagsSpellPhase spellPhaseMask, ProcFlagsHit hitMask, Spell spell, DamageInfo damageInfo, HealInfo healInfo)
+        public static void ProcSkillsAndAuras(Unit actor, Unit actionTarget, ProcFlags typeMaskActor, ProcFlags typeMaskActionTarget, ProcFlagsSpellType spellTypeMask, ProcFlagsSpellPhase spellPhaseMask, ProcFlagsHit hitMask, Spell spell, DamageInfo damageInfo, HealInfo healInfo)
         {
             WeaponAttackType attType = damageInfo != null ? damageInfo.GetAttackType() : WeaponAttackType.BaseAttack;
-            if (typeMaskActor != 0)
-                ProcSkillsAndReactives(false, actionTarget, typeMaskActor, hitMask, attType);
+            if (typeMaskActor != 0 && actor != null)
+                actor.ProcSkillsAndReactives(false, actionTarget, typeMaskActor, hitMask, attType);
 
             if (typeMaskActionTarget != 0 && actionTarget)
-                actionTarget.ProcSkillsAndReactives(true, this, typeMaskActionTarget, hitMask, attType);
+                actionTarget.ProcSkillsAndReactives(true, actor, typeMaskActionTarget, hitMask, attType);
 
-            TriggerAurasProcOnEvent(null, null, actionTarget, typeMaskActor, typeMaskActionTarget, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
+            if (actor != null)
+                actor.TriggerAurasProcOnEvent(null, null, actionTarget, typeMaskActor, typeMaskActionTarget, spellTypeMask, spellPhaseMask, hitMask, spell, damageInfo, healInfo);
         }
 
         void ProcSkillsAndReactives(bool isVictim, Unit procTarget, ProcFlags typeMask, ProcFlagsHit hitMask, WeaponAttackType attType)
@@ -2125,30 +2148,33 @@ namespace Game.Entities
             return false;
         }
 
-        public uint SpellCriticalDamageBonus(SpellInfo spellProto, uint damage, Unit victim = null)
+        public static uint SpellCriticalDamageBonus(Unit caster, SpellInfo spellProto, uint damage, Unit victim = null)
         {
             // Calculate critical bonus
             int crit_bonus = (int)damage * 2;
             float crit_mod = 0.0f;
 
-            crit_mod += (GetTotalAuraMultiplierByMiscMask(AuraType.ModCritDamageBonus, (uint)spellProto.GetSchoolMask()) - 1.0f) * 100;
-
-            if (crit_bonus != 0)
-                MathFunctions.AddPct(ref crit_bonus, (int)crit_mod);
-
-            MathFunctions.AddPct(ref crit_bonus, victim.GetTotalAuraModifier(AuraType.ModCriticalDamageTakenFromCaster, aurEff =>
+            if (caster != null)
             {
-                return aurEff.GetCasterGUID() == GetGUID();
-            }));
+                crit_mod += (caster.GetTotalAuraMultiplierByMiscMask(AuraType.ModCritDamageBonus, (uint)spellProto.GetSchoolMask()) - 1.0f) * 100;
 
-            crit_bonus -= (int)damage;
+                if (crit_bonus != 0)
+                    MathFunctions.AddPct(ref crit_bonus, (int)crit_mod);
 
-            // adds additional damage to critBonus (from talents)
-            Player modOwner = GetSpellModOwner();
-            if (modOwner != null)
-                modOwner.ApplySpellMod(spellProto, SpellModOp.CritDamageAndHealing, ref crit_bonus);
+                MathFunctions.AddPct(ref crit_bonus, victim.GetTotalAuraModifier(AuraType.ModCriticalDamageTakenFromCaster, aurEff =>
+                {
+                    return aurEff.GetCasterGUID() == caster.GetGUID();
+                }));
 
-            crit_bonus += (int)damage;
+                crit_bonus -= (int)damage;
+
+                // adds additional damage to critBonus (from talents)
+                Player modOwner = caster.GetSpellModOwner();
+                if (modOwner != null)
+                    modOwner.ApplySpellMod(spellProto, SpellModOp.CritDamageAndHealing, ref crit_bonus);
+
+                crit_bonus += (int)damage;
+            }
 
             return (uint)crit_bonus;
         }
@@ -2197,46 +2223,53 @@ namespace Game.Entities
             return spellInfo.GetSpellSpecific() == SpellSpecificType.MagePolymorph;
         }
 
-        public void DealHeal(HealInfo healInfo)
+        public static void DealHeal(HealInfo healInfo)
         {
             int gain = 0;
+            Unit healer = healInfo.GetHealer();
             Unit victim = healInfo.GetTarget();
             uint addhealth = healInfo.GetHeal();
 
-            if (victim.IsAIEnabled)
-                victim.GetAI().HealReceived(this, addhealth);
+            if (healer)
+            {
+                if (victim.IsAIEnabled)
+                    victim.GetAI().HealReceived(healer, addhealth);
 
-            if (IsAIEnabled)
-                GetAI().HealDone(victim, addhealth);
+                if (healer.IsAIEnabled)
+                    healer.GetAI().HealDone(victim, addhealth);
+            }
 
             if (addhealth != 0)
                 gain = (int)victim.ModifyHealth(addhealth);
 
             // Hook for OnHeal Event
             uint tempGain = (uint)gain;
-            Global.ScriptMgr.OnHeal(this, victim, ref tempGain);
+            Global.ScriptMgr.OnHeal(healer, victim, ref tempGain);
             gain = (int)tempGain;
 
-            Unit unit = this;
+            Unit unit = healer;
+            if (healer != null && healer.IsCreature() && healer.IsTotem())
+                unit = healer.GetOwner();
 
-            if (IsTypeId(TypeId.Unit) && IsTotem())
-                unit = GetOwner();
-
-            Player player = unit.ToPlayer();
-            if (player != null)
+            if (unit)
             {
-                Battleground bg = player.GetBattleground();
-                if (bg)
-                    bg.UpdatePlayerScore(player, ScoreType.HealingDone, (uint)gain);
+                Player bgPlayer = unit.ToPlayer();
+                if (bgPlayer != null)
+                {
+                    Battleground bg = bgPlayer.GetBattleground();
+                    if (bg)
+                        bg.UpdatePlayerScore(bgPlayer, ScoreType.HealingDone, (uint)gain);
 
-                // use the actual gain, as the overheal shall not be counted, skip gain 0 (it ignored anyway in to criteria)
-                if (gain != 0)
-                    player.UpdateCriteria(CriteriaTypes.HealingDone, (uint)gain, 0, 0, victim);
+                    // use the actual gain, as the overheal shall not be counted, skip gain 0 (it ignored anyway in to criteria)
+                    if (gain != 0)
+                        bgPlayer.UpdateCriteria(CriteriaTypes.HealingDone, (uint)gain, 0, 0, victim);
 
-                player.UpdateCriteria(CriteriaTypes.HighestHealCasted, addhealth);
+                    bgPlayer.UpdateCriteria(CriteriaTypes.HighestHealCasted, addhealth);
+                }
             }
 
-            if ((player = victim.ToPlayer()) != null)
+            Player player = victim.ToPlayer();
+            if (player != null)
             {
                 player.UpdateCriteria(CriteriaTypes.TotalHealingReceived, (uint)gain);
                 player.UpdateCriteria(CriteriaTypes.HighestHealingReceived, addhealth);
@@ -2267,8 +2300,8 @@ namespace Game.Entities
         {
             // calculate heal absorb and reduce healing
             CalcHealAbsorb(healInfo);
-
             DealHeal(healInfo);
+
             SendHealSpellLog(healInfo, critical);
             return healInfo.GetEffectiveHeal();
         }
@@ -2329,84 +2362,90 @@ namespace Game.Entities
 
             SpellSchoolMask damageSchoolMask = damageInfo.schoolMask;
 
-            if (IsDamageReducedByArmor(damageSchoolMask, spellInfo))
-                damage = (int)CalcArmorReducedDamage(damageInfo.attacker, victim, (uint)damage, spellInfo, attackType);
-
-            bool blocked = false;
-            // Per-school calc
-            switch (spellInfo.DmgClass)
+            // Spells with SPELL_ATTR4_FIXED_DAMAGE ignore resilience because their damage is based off another spell's damage.
+            if (!spellInfo.HasAttribute(SpellAttr4.FixedDamage))
             {
-                // Melee and Ranged Spells
-                case SpellDmgClass.Ranged:
-                case SpellDmgClass.Melee:
-                    {
-                        // Physical Damage
-                        if (damageSchoolMask.HasAnyFlag(SpellSchoolMask.Normal))
+                if (IsDamageReducedByArmor(damageSchoolMask, spellInfo))
+                    damage = (int)CalcArmorReducedDamage(damageInfo.attacker, victim, (uint)damage, spellInfo, attackType);
+
+                bool blocked = false;
+                // Per-school calc
+                switch (spellInfo.DmgClass)
+                {
+                    // Melee and Ranged Spells
+                    case SpellDmgClass.Ranged:
+                    case SpellDmgClass.Melee:
                         {
-                            // Spells with this attribute were already calculated in MeleeSpellHitResult
-                            if (!spellInfo.HasAttribute(SpellAttr3.BlockableSpell))
+                            // Physical Damage
+                            if (damageSchoolMask.HasAnyFlag(SpellSchoolMask.Normal))
                             {
-                                // Get blocked status
-                                blocked = IsSpellBlocked(victim, spellInfo, attackType);
+                                // Spells with this attribute were already calculated in MeleeSpellHitResult
+                                if (!spellInfo.HasAttribute(SpellAttr3.BlockableSpell))
+                                {
+                                    // Get blocked status
+                                    blocked = IsSpellBlocked(victim, spellInfo, attackType);
+                                }
                             }
-                        }
 
-                        if (crit)
-                        {
-                            damageInfo.HitInfo |= HitInfo.CriticalHit;
-
-                            // Calculate crit bonus
-                            uint crit_bonus = (uint)damage;
-                            // Apply crit_damage bonus for melee spells
-                            Player modOwner = GetSpellModOwner();
-                            if (modOwner != null)
-                                modOwner.ApplySpellMod(spellInfo, SpellModOp.CritDamageAndHealing, ref crit_bonus);
-                            damage += (int)crit_bonus;
-
-                            // Increase crit damage from SPELL_AURA_MOD_CRIT_DAMAGE_BONUS
-                            float critPctDamageMod = (GetTotalAuraMultiplierByMiscMask(AuraType.ModCritDamageBonus, (uint)spellInfo.GetSchoolMask()) - 1.0f) * 100;
-
-                            if (critPctDamageMod != 0)
-                                MathFunctions.AddPct(ref damage, (int)critPctDamageMod);
-                        }
-
-                        // Spell weapon based damage CAN BE crit & blocked at same time
-                        if (blocked)
-                        {
-                            // double blocked amount if block is critical
-                            float value = victim.GetBlockPercent(GetLevel());
-                            if (victim.IsBlockCritical())
-                                value *= 2; // double blocked percent
-                            damageInfo.blocked = (uint)MathFunctions.CalculatePct(damage, value);
-                            if (damage <= damageInfo.blocked)
+                            if (crit)
                             {
-                                damageInfo.blocked = (uint)damage;
-                                damageInfo.fullBlock = true;
+                                damageInfo.HitInfo |= HitInfo.CriticalHit;
+
+                                // Calculate crit bonus
+                                uint crit_bonus = (uint)damage;
+                                // Apply crit_damage bonus for melee spells
+                                Player modOwner = GetSpellModOwner();
+                                if (modOwner != null)
+                                    modOwner.ApplySpellMod(spellInfo, SpellModOp.CritDamageAndHealing, ref crit_bonus);
+                                damage += (int)crit_bonus;
+
+                                // Increase crit damage from SPELL_AURA_MOD_CRIT_DAMAGE_BONUS
+                                float critPctDamageMod = (GetTotalAuraMultiplierByMiscMask(AuraType.ModCritDamageBonus, (uint)spellInfo.GetSchoolMask()) - 1.0f) * 100;
+
+                                if (critPctDamageMod != 0)
+                                    MathFunctions.AddPct(ref damage, (int)critPctDamageMod);
                             }
-                            damage -= (int)damageInfo.blocked;
+
+                            // Spell weapon based damage CAN BE crit & blocked at same time
+                            if (blocked)
+                            {
+                                // double blocked amount if block is critical
+                                float value = victim.GetBlockPercent(GetLevel());
+                                if (victim.IsBlockCritical())
+                                    value *= 2; // double blocked percent
+                                damageInfo.blocked = (uint)MathFunctions.CalculatePct(damage, value);
+                                if (damage <= damageInfo.blocked)
+                                {
+                                    damageInfo.blocked = (uint)damage;
+                                    damageInfo.fullBlock = true;
+                                }
+                                damage -= (int)damageInfo.blocked;
+                            }
+
+                            if (CanApplyResilience())
+                                ApplyResilience(victim, ref damage);
+
+                            break;
                         }
-                        uint dmg = (uint)damage;
-                        ApplyResilience(victim, ref dmg);
-                        damage = (int)dmg;
-                        break;
-                    }
-                // Magical Attacks
-                case SpellDmgClass.None:
-                case SpellDmgClass.Magic:
-                    {
-                        // If crit add critical bonus
-                        if (crit)
+                    // Magical Attacks
+                    case SpellDmgClass.None:
+                    case SpellDmgClass.Magic:
                         {
-                            damageInfo.HitInfo |= HitInfo.CriticalHit;
-                            damage = (int)SpellCriticalDamageBonus(spellInfo, (uint)damage, victim);
+                            // If crit add critical bonus
+                            if (crit)
+                            {
+                                damageInfo.HitInfo |= HitInfo.CriticalHit;
+                                damage = (int)SpellCriticalDamageBonus(this, spellInfo, (uint)damage, victim);
+                            }
+
+                            if (CanApplyResilience())
+                                ApplyResilience(victim, ref damage);
+
+                            break;
                         }
-                        uint dmg = (uint)damage;
-                        ApplyResilience(victim, ref dmg);
-                        damage = (int)dmg;
+                    default:
                         break;
-                    }
-                default:
-                    break;
+                }
             }
 
             // Script Hook For CalculateSpellDamageTaken -- Allow scripts to change the Damage post class mitigation calculations
@@ -2431,6 +2470,7 @@ namespace Game.Entities
 
             damageInfo.damage = dmgInfo.GetDamage();
         }
+
         public void DealSpellDamage(SpellNonMeleeDamage damageInfo, bool durabilityLoss)
         {
             if (damageInfo == null)
@@ -2451,7 +2491,7 @@ namespace Game.Entities
 
             // Call default DealDamage
             CleanDamage cleanDamage = new(damageInfo.cleanDamage, damageInfo.absorb, WeaponAttackType.BaseAttack, MeleeHitOutcome.Normal);
-            DealDamage(victim, damageInfo.damage, cleanDamage, DamageEffectType.SpellDirect, damageInfo.schoolMask, damageInfo.Spell, durabilityLoss);
+            DealDamage(this, victim, damageInfo.damage, cleanDamage, DamageEffectType.SpellDirect, damageInfo.schoolMask, damageInfo.Spell, durabilityLoss);
         }
 
         public void SendSpellNonMeleeDamageLog(SpellNonMeleeDamage log)
@@ -4181,6 +4221,7 @@ namespace Game.Entities
             else
                 aurApp._HandleEffect(effIndex, true);
         }
+
         // handles effects of aura application
         // should be done after registering aura in lists
         public void _ApplyAura(AuraApplication aurApp, uint effMask)
@@ -4219,7 +4260,6 @@ namespace Game.Entities
             if (aurApp.HasRemoveMode())
                 return;
 
-            aura.HandleAuraSpecificPeriodics(aurApp, caster);
             aura.HandleAuraSpecificMods(aurApp, caster, true, false);
 
             // apply effects of the aura
@@ -4229,6 +4269,7 @@ namespace Game.Entities
                     aurApp._HandleEffect(i, true);
             }
         }
+
         public void _AddAura(UnitAura aura, Unit caster)
         {
             Cypher.Assert(!m_cleanupDone);
@@ -4261,6 +4302,7 @@ namespace Game.Entities
                 }
             }
         }
+
         public Aura _TryStackingOrRefreshingExistingAura(SpellInfo newAura, uint effMask, Unit caster, int[] baseAmount = null, Item castItem = null, ObjectGuid casterGUID = default, bool resetPeriodicTimer = true, ObjectGuid castItemGuid = default, uint castItemId = 0, int castItemLevel = -1)
         {
             Cypher.Assert(!casterGUID.IsEmpty() || caster);

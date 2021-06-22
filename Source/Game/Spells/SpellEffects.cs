@@ -110,7 +110,7 @@ namespace Game.Spells
             data.SpellID = m_spellInfo.Id;
             m_caster.SendMessageToSet(data, true);
 
-            m_caster.DealDamage(unitTarget, (uint)unitTarget.GetHealth(), null, DamageEffectType.NoDamage, SpellSchoolMask.Normal, null, false);
+            Unit.DealDamage(m_caster, unitTarget, (uint)unitTarget.GetHealth(), null, DamageEffectType.NoDamage, SpellSchoolMask.Normal, null, false);
         }
 
         [SpellEffectHandler(SpellEffectName.EnvironmentalDamage)]
@@ -128,7 +128,7 @@ namespace Game.Spells
             else
             {
                 DamageInfo damageInfo = new(m_caster, unitTarget, (uint)damage, m_spellInfo, m_spellInfo.GetSchoolMask(), DamageEffectType.SpellDirect, WeaponAttackType.BaseAttack);
-                m_caster.CalcAbsorbResist(damageInfo);
+                Unit.CalcAbsorbResist(damageInfo);
 
                 SpellNonMeleeDamage log = new(m_caster, unitTarget, m_spellInfo, m_SpellVisual, m_spellInfo.GetSchoolMask(), m_castId);
                 log.damage = damageInfo.GetDamage();
@@ -908,9 +908,8 @@ namespace Game.Spells
                     addhealth = (int)caster.SpellHealingBonusDone(unitTarget, m_spellInfo, (uint)caster.CountPctFromMaxHealth(damage), DamageEffectType.Heal, effectInfo);
                 else
                 {
-                    addhealth = (int)caster.SpellHealingBonusDone(unitTarget, m_spellInfo, (uint)addhealth, DamageEffectType.Heal, effectInfo);
                     uint bonus = caster.SpellHealingBonusDone(unitTarget, m_spellInfo, (uint)addhealth, DamageEffectType.Heal, effectInfo);
-                    damage = (int)(bonus + (bonus * _variance));
+                    addhealth = (int)(bonus + (uint)(bonus * _variance));
                 }
 
                 addhealth = (int)unitTarget.SpellHealingBonusTaken(caster, m_spellInfo, (uint)addhealth, DamageEffectType.Heal, effectInfo);
@@ -937,9 +936,7 @@ namespace Game.Spells
                 return;
 
             uint heal = m_originalCaster.SpellHealingBonusDone(unitTarget, m_spellInfo, (uint)unitTarget.CountPctFromMaxHealth(damage), DamageEffectType.Heal, effectInfo);
-            heal = unitTarget.SpellHealingBonusTaken(m_originalCaster, m_spellInfo, heal, DamageEffectType.Heal, effectInfo);
-
-            m_healing += (int)heal;
+            m_healing += (int)unitTarget.SpellHealingBonusTaken(m_originalCaster, m_spellInfo, heal, DamageEffectType.Heal, effectInfo);
         }
 
         [SpellEffectHandler(SpellEffectName.HealMechanical)]
@@ -2705,9 +2702,9 @@ namespace Game.Spells
                             int duration = m_spellInfo.GetDuration();
                             unitTarget.GetSpellHistory().LockSpellSchool(curSpellInfo.GetSchoolMask(), (uint)unitTarget.ModSpellDuration(m_spellInfo, unitTarget, duration, false, (uint)(1 << (int)effIndex)));
                             if (m_spellInfo.DmgClass == SpellDmgClass.Magic)
-                                m_originalCaster.ProcSkillsAndAuras(unitTarget, ProcFlags.DoneSpellMagicDmgClassNeg, ProcFlags.TakenSpellMagicDmgClassNeg, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Hit, ProcFlagsHit.Interrupt, null, null, null);
+                                Unit.ProcSkillsAndAuras(m_originalCaster, unitTarget, ProcFlags.DoneSpellMagicDmgClassNeg, ProcFlags.TakenSpellMagicDmgClassNeg, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Hit, ProcFlagsHit.Interrupt, null, null, null);
                             else if (m_spellInfo.DmgClass == SpellDmgClass.Melee)
-                                m_originalCaster.ProcSkillsAndAuras(unitTarget, ProcFlags.DoneSpellMeleeDmgClass, ProcFlags.TakenSpellMeleeDmgClass, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Hit, ProcFlagsHit.Interrupt, null, null, null);
+                                Unit.ProcSkillsAndAuras(m_originalCaster, unitTarget, ProcFlags.DoneSpellMeleeDmgClass, ProcFlags.TakenSpellMeleeDmgClass, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Hit, ProcFlagsHit.Interrupt, null, null, null);
                         }
                         ExecuteLogEffectInterruptCast(effIndex, unitTarget, curSpellInfo.Id);
                         unitTarget.InterruptSpell(i, false);

@@ -287,7 +287,7 @@ namespace Scripts.Spells.Monk
                 if (auraEff != null)
                 {
                     float total = auraEff.GetAmount();
-                    float tickDamage = aurEff.GetDamage();
+                    float tickDamage = aurEff.GetAmount();
                     auraEff.ChangeAmount((int)(total - tickDamage));
                 }
             }
@@ -359,7 +359,7 @@ namespace Scripts.Spells.Monk
             {
                 AuraEffect eff = auraDamage.GetEffect(0);
                 if (eff != null)
-                    eff.SetDamage((int)tickDamage);
+                    eff.ChangeAmount((int)tickDamage);
             }
         }
     }

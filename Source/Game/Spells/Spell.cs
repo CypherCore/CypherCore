@@ -1947,7 +1947,7 @@ namespace Game.Spells
                 if (crit)
                 {
                     hitMask |= ProcFlagsHit.Critical;
-                    addhealth = (uint)caster.SpellCriticalHealingBonus(m_spellInfo, (int)addhealth, null);
+                    addhealth = (uint)Unit.SpellCriticalHealingBonus(caster, m_spellInfo, (int)addhealth, null);
                 }
                 else
                     hitMask |= ProcFlagsHit.Normal;
@@ -1959,7 +1959,7 @@ namespace Game.Spells
 
                 // Do triggers for unit
                 if (canEffectTrigger)
-                    caster.ProcSkillsAndAuras(unitTarget, procAttacker, procVictim, ProcFlagsSpellType.Heal, ProcFlagsSpellPhase.Hit, hitMask, this, null, healInfo);
+                    Unit.ProcSkillsAndAuras(caster, unitTarget, procAttacker, procVictim, ProcFlagsSpellType.Heal, ProcFlagsSpellPhase.Hit, hitMask, this, null, healInfo);
             }
             // Do damage and triggers
             else if (m_damage > 0)
@@ -1978,7 +1978,7 @@ namespace Game.Spells
                 {
                     // Add bonuses and fill damageInfo struct
                     caster.CalculateSpellDamageTaken(damageInfo, m_damage, m_spellInfo, m_attackType, target.crit);
-                    caster.DealDamageMods(damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
+                    Unit.DealDamageMods(damageInfo.attacker, damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
 
                     hitMask |= Unit.CreateProcHitMask(damageInfo, missInfo);
                     procVictim |= ProcFlags.TakenDamage;
@@ -1995,7 +1995,7 @@ namespace Game.Spells
                 if (canEffectTrigger)
                 {
                     DamageInfo spellDamageInfo = new(damageInfo, DamageEffectType.SpellDirect, m_attackType, hitMask);
-                    caster.ProcSkillsAndAuras(unitTarget, procAttacker, procVictim, ProcFlagsSpellType.Damage, ProcFlagsSpellPhase.Hit, hitMask, this, spellDamageInfo, null);
+                    Unit.ProcSkillsAndAuras(caster, unitTarget, procAttacker, procVictim, ProcFlagsSpellType.Damage, ProcFlagsSpellPhase.Hit, hitMask, this, spellDamageInfo, null);
 
                     if (caster.IsPlayer() && !m_spellInfo.HasAttribute(SpellAttr0.StopAttackTarget) && !m_spellInfo.HasAttribute(SpellAttr4.SuppressWeaponProcs) &&
                         (m_spellInfo.DmgClass == SpellDmgClass.Melee || m_spellInfo.DmgClass == SpellDmgClass.Ranged))
@@ -2012,7 +2012,7 @@ namespace Game.Spells
                 if (canEffectTrigger)
                 {
                     DamageInfo spellNoDamageInfo = new(damageInfo, DamageEffectType.NoDamage, m_attackType, hitMask);
-                    caster.ProcSkillsAndAuras(unitTarget, procAttacker, procVictim, ProcFlagsSpellType.NoDmgHeal, ProcFlagsSpellPhase.Hit, hitMask, this, spellNoDamageInfo, null);
+                    Unit.ProcSkillsAndAuras(caster, unitTarget, procAttacker, procVictim, ProcFlagsSpellType.NoDmgHeal, ProcFlagsSpellPhase.Hit, hitMask, this, spellNoDamageInfo, null);
 
                     if (caster.IsPlayer() && !m_spellInfo.HasAttribute(SpellAttr0.StopAttackTarget) && !m_spellInfo.HasAttribute(SpellAttr4.SuppressWeaponProcs) &&
                         (m_spellInfo.DmgClass == SpellDmgClass.Melee || m_spellInfo.DmgClass == SpellDmgClass.Ranged))
@@ -2960,7 +2960,7 @@ namespace Game.Spells
             if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreAuraInterruptFlags) && !m_spellInfo.HasAttribute(SpellAttr2.IgnoreActionAuraInterruptFlags))
                 m_originalCaster.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.ActionDelayed);
 
-            m_originalCaster.ProcSkillsAndAuras(null, procAttacker, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Cast, hitMask, this, null, null);
+            Unit.ProcSkillsAndAuras(m_originalCaster, null, procAttacker, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Cast, hitMask, this, null, null);
 
             // Call CreatureAI hook OnSuccessfulSpellCast
             Creature caster = m_originalCaster.ToCreature();
@@ -3187,7 +3187,7 @@ namespace Game.Spells
                     procAttacker = IsPositive() ? ProcFlags.DoneSpellNoneDmgClassPos : ProcFlags.DoneSpellNoneDmgClassNeg;
             }
 
-            m_originalCaster.ProcSkillsAndAuras(null, procAttacker, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Finish, m_hitMask, this, null, null);
+            Unit.ProcSkillsAndAuras(m_originalCaster, null, procAttacker, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Finish, m_hitMask, this, null, null);
         }
 
         void SendSpellCooldown()
@@ -6865,11 +6865,9 @@ namespace Game.Spells
                     {
                         if (effect.IsTargetingArea() || effect.IsAreaAuraEffect() || effect.IsEffect(SpellEffectName.PersistentAreaAura))
                         {
-                            m_damage = (int)(m_damage * unit.GetTotalAuraMultiplierByMiscMask(AuraType.ModAoeDamageAvoidance, (uint)m_spellInfo.SchoolMask));
-                            if (!m_caster.IsTypeId(TypeId.Player))
-                                m_damage = (int)(m_damage * unit.GetTotalAuraMultiplierByMiscMask(AuraType.ModCreatureAoeDamageAvoidance, (uint)m_spellInfo.SchoolMask));
+                            m_damage = unit.CalculateAOEAvoidance(m_damage, (uint)m_spellInfo.SchoolMask, m_caster);
 
-                            if (m_caster.IsTypeId(TypeId.Player))
+                            if (m_caster.IsPlayer())
                             {
                                 long targetAmount = GetUnitTargetCountForEffect(effect.EffectIndex);
                                 if (targetAmount > 20)
@@ -6887,7 +6885,8 @@ namespace Game.Spells
                 }
             }
 
-            targetInfo.crit = m_caster.IsSpellCrit(unit, this, null, m_spellSchoolMask, m_attackType);
+            float critChance = m_caster.SpellCritChanceDone(m_spellInfo, m_spellSchoolMask, m_attackType);
+            targetInfo.crit = RandomHelper.randChance(unit.SpellCritChanceTaken(m_caster, this, null, m_spellSchoolMask, critChance, m_attackType));
         }
 
         SpellCastResult CanOpenLock(uint effIndex, uint lockId, ref SkillType skillId, ref int reqSkillValue, ref int skillValue)
@@ -8163,7 +8162,7 @@ namespace Game.Spells
             ProcFlagsSpellPhase spellPhaseMask = ProcFlagsSpellPhase.None;
             ProcFlagsHit hitMask = ProcFlagsHit.Reflect;
 
-            caster.ProcSkillsAndAuras(_victim, typeMaskActor, typeMaskActionTarget, spellTypeMask, spellPhaseMask, hitMask, null, null, null);
+            Unit.ProcSkillsAndAuras(caster, _victim, typeMaskActor, typeMaskActionTarget, spellTypeMask, spellPhaseMask, hitMask, null, null, null);
             return true;
         }
 

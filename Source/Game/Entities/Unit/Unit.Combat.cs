@@ -46,7 +46,7 @@ namespace Game.Entities
                     InterruptNonMeleeSpells(false);
 
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.EnteringCombat);
-            ProcSkillsAndAuras(null, ProcFlags.EnterCombat, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
+            ProcSkillsAndAuras(this, null, ProcFlags.EnterCombat, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
         }
 
         public virtual void AtExitCombat()
@@ -558,13 +558,13 @@ namespace Game.Entities
                     CalcDamageInfo damageInfo;
                     CalculateMeleeDamage(victim, 0, out damageInfo, attType);
                     // Send log damage message to client
-                    DealDamageMods(victim, ref damageInfo.damage, ref damageInfo.absorb);
+                    DealDamageMods(damageInfo.attacker, victim, ref damageInfo.damage, ref damageInfo.absorb);
                     SendAttackStateUpdate(damageInfo);
 
                     DealMeleeDamage(damageInfo, true);
 
                     DamageInfo dmgInfo = new(damageInfo);
-                    ProcSkillsAndAuras(damageInfo.target, damageInfo.procAttacker, damageInfo.procVictim, ProcFlagsSpellType.None, ProcFlagsSpellPhase.None, dmgInfo.GetHitMask(), null, dmgInfo, null);
+                    ProcSkillsAndAuras(damageInfo.attacker, damageInfo.target, damageInfo.procAttacker, damageInfo.procVictim, ProcFlagsSpellType.None, ProcFlagsSpellPhase.None, dmgInfo.GetHitMask(), null, dmgInfo, null);
                     Log.outDebug(LogFilter.Unit, "AttackerStateUpdate: {0} attacked {1} for {2} dmg, absorbed {3}, blocked {4}, resisted {5}.",
                         GetGUID().ToString(), victim.GetGUID().ToString(), damageInfo.damage, damageInfo.absorb, damageInfo.blocked_amount, damageInfo.resist);
                 }
@@ -756,71 +756,6 @@ namespace Game.Entities
             }
         }
 
-        public void SetInCombatState(bool PvP, Unit enemy = null)
-        {
-            // only alive units can be in combat
-            if (!IsAlive())
-                return;
-
-            if (PvP)
-            {
-                combatTimer = 5000;
-                Player me = ToPlayer();
-                if (me)
-                    me.EnablePvpRules(true);
-            }
-
-            if (IsInCombat() || HasUnitState(UnitState.Evade))
-                return;
-
-            AddUnitFlag(UnitFlags.InCombat);
-
-            Creature creature = ToCreature();
-            if (creature != null)
-            {
-                // Set home position at place of engaging combat for escorted creatures
-                if ((IsAIEnabled && creature.GetAI().IsEscorted()) || GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Waypoint ||
-                    GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Point)
-                    creature.SetHomePosition(GetPositionX(), GetPositionY(), GetPositionZ(), Orientation);
-
-                if (enemy != null)
-                {
-                    if (IsAIEnabled)
-                        creature.GetAI().JustEngagedWith(enemy);
-
-                    if (creature.GetFormation() != null)
-                        creature.GetFormation().MemberEngagingTarget(creature, enemy);
-                }
-
-                if (IsPet())
-                {
-                    UpdateSpeed(UnitMoveType.Run);
-                    UpdateSpeed(UnitMoveType.Swim);
-                    UpdateSpeed(UnitMoveType.Flight);
-                }
-
-                if (!creature.GetCreatureTemplate().TypeFlags.HasAnyFlag(CreatureTypeFlags.MountedCombatAllowed))
-                    Dismount();
-            }
-
-            foreach (var unit in m_Controlled)
-                unit.SetInCombatState(PvP, enemy);
-
-            foreach (var pair in GetAppliedAuras())
-            {
-                AuraApplication aurApp = pair.Value;
-                aurApp.GetBase().CallScriptEnterLeaveCombatHandlers(aurApp, true);
-            }
-
-            Spell spell = GetCurrentSpell(CurrentSpellTypes.Generic);
-            if (spell != null)
-                if (spell.GetState() == SpellState.Preparing && spell.m_spellInfo.HasAttribute(SpellAttr0.CantUsedInCombat) && spell.m_spellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.Combat))
-                    InterruptNonMeleeSpells(false);
-
-            RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.EnteringCombat);
-            ProcSkillsAndAuras(enemy, ProcFlags.EnterCombat, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
-        }
-
         internal void SendCombatLogMessage(CombatLogServerPacket combatLog)
         {
             CombatLogSender combatLogSender = new(combatLog);
@@ -837,14 +772,20 @@ namespace Game.Entities
             return !m_threatManager.IsThreatListEmpty();
         }
 
-        public void Kill(Unit victim, bool durabilityLoss = true, bool skipSettingDeathState = false)
+        public static void Kill(Unit attacker, Unit victim, bool durabilityLoss = true, bool skipSettingDeathState = false)
         {
             // Prevent killing unit twice (and giving reward from kill twice)
             if (victim.GetHealth() == 0)
                 return;
 
+            if (attacker != null && !attacker.IsInMap(victim))
+                attacker = null;
+
             // find player: owner of controlled `this` or `this` itself maybe
-            Player player = GetCharmerOrOwnerPlayerOrPlayerItself();
+            Player player = null;
+            if (attacker != null)
+                player = attacker.GetCharmerOrOwnerPlayerOrPlayerItself();
+
             Creature creature = victim.ToCreature();
 
             bool isRewardAllowed = true;
@@ -911,7 +852,7 @@ namespace Game.Entities
                     loot.Clear();
                     uint lootid = creature.GetCreatureTemplate().LootId;
                     if (lootid != 0)
-                        loot.FillLoot(lootid, LootStorage.Creature, looter, false, false, creature.GetLootMode(), GetMap().GetDifficultyLootItemContext());
+                        loot.FillLoot(lootid, LootStorage.Creature, looter, false, false, creature.GetLootMode(), creature.GetMap().GetDifficultyLootItemContext());
 
                     if (creature.GetLootMode() > 0)
                         loot.GenerateMoneyLoot(creature.GetCreatureTemplate().MinGold, creature.GetCreatureTemplate().MaxGold);
@@ -933,24 +874,28 @@ namespace Game.Entities
             }
 
             // Do KILL and KILLED procs. KILL proc is called only for the unit who landed the killing blow (and its owner - for pets and totems) regardless of who tapped the victim
-            if (IsPet() || IsTotem())
+            if (attacker != null && (attacker.IsPet() || attacker.IsTotem()))
             {
                 // proc only once for victim
-                Unit owner = GetOwner();
+                Unit owner = attacker.GetOwner();
                 if (owner != null)
-                    owner.ProcSkillsAndAuras(victim, ProcFlags.Kill, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
+                    ProcSkillsAndAuras(owner, victim, ProcFlags.Kill, ProcFlags.None, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
             }
 
             if (!victim.IsCritter())
-                ProcSkillsAndAuras(victim, ProcFlags.Kill, ProcFlags.Killed, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
+                ProcSkillsAndAuras(attacker, victim, ProcFlags.Kill, ProcFlags.Killed, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
 
             // Proc auras on death - must be before aura/combat remove
-            victim.ProcSkillsAndAuras(victim, ProcFlags.None, ProcFlags.Death, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
+            ProcSkillsAndAuras(victim, victim, ProcFlags.None, ProcFlags.Death, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.None, ProcFlagsHit.None, null, null, null);
 
             // update get killing blow achievements, must be done before setDeathState to be able to require auras on target
             // and before Spirit of Redemption as it also removes auras
-            if (player != null)
-                player.UpdateCriteria(CriteriaTypes.GetKillingBlows, 1, 0, 0, victim);
+            if (attacker != null)
+            {
+                Player killerPlayer = attacker.GetCharmerOrOwnerPlayerOrPlayerItself();
+                if (killerPlayer != null)
+                    killerPlayer.UpdateCriteria(CriteriaTypes.GetKillingBlows, 1, 0, 0, victim);
+            }
 
             if (!skipSettingDeathState)
             {
@@ -985,11 +930,11 @@ namespace Game.Entities
                     // Durability loss is calculated more accurately again for each item in Player.DurabilityLoss
                     plrVictim.DurabilityLossAll(baseLoss, false);
                     // durability lost message
-                    SendDurabilityLoss(plrVictim, loss);
+                    plrVictim.SendDurabilityLoss(plrVictim, loss);
                 }
                 // Call KilledUnit for creatures
-                if (IsTypeId(TypeId.Unit) && IsAIEnabled)
-                    ToCreature().GetAI().KilledUnit(victim);
+                if (attacker != null && attacker.IsCreature() && attacker.IsAIEnabled)
+                    attacker.ToCreature().GetAI().KilledUnit(victim);
 
                 // last damage from non duel opponent or opponent controlled creature
                 if (plrVictim.duel != null)
@@ -1015,12 +960,12 @@ namespace Game.Entities
                 }
 
                 // Call KilledUnit for creatures, this needs to be called after the lootable flag is set
-                if (IsTypeId(TypeId.Unit) && IsAIEnabled)
-                    ToCreature().GetAI().KilledUnit(victim);
+                if (attacker != null && attacker.IsCreature() && attacker.IsAIEnabled)
+                    attacker.ToCreature().GetAI().KilledUnit(victim);
 
                 // Call creature just died function
                 if (creature.IsAIEnabled)
-                    creature.GetAI().JustDied(this);
+                    creature.GetAI().JustDied(attacker);
 
                 TempSummon summon = creature.ToTempSummon();
                 if (summon != null)
@@ -1028,22 +973,21 @@ namespace Game.Entities
                     Unit summoner = summon.GetSummoner();
                     if (summoner != null)
                         if (summoner.IsTypeId(TypeId.Unit) && summoner.IsAIEnabled)
-                            summoner.ToCreature().GetAI().SummonedCreatureDies(creature, this);
+                            summoner.ToCreature().GetAI().SummonedCreatureDies(creature, attacker);
                 }
 
                 // Dungeon specific stuff, only applies to players killing creatures
                 if (creature.GetInstanceId() != 0)
                 {
                     Map instanceMap = creature.GetMap();
-                    Player creditedPlayer = GetCharmerOrOwnerPlayerOrPlayerItself();
-                    // @todo do instance binding anyway if the charmer/owner is offline
 
-                    if (instanceMap.IsDungeon() && (creditedPlayer || this == victim))
+                    /// @todo do instance binding anyway if the charmer/owner is offline
+                    if (instanceMap.IsDungeon() && ((attacker != null && attacker.GetCharmerOrOwnerPlayerOrPlayerItself() != null) || attacker == victim))
                     {
                         if (instanceMap.IsRaidOrHeroicDungeon())
                         {
                             if (creature.GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.InstanceBind))
-                                ((InstanceMap)instanceMap).PermBindAllPlayers();
+                                instanceMap.ToInstanceMap().PermBindAllPlayers();
                         }
                         else
                         {
@@ -1061,7 +1005,7 @@ namespace Game.Entities
 
             // outdoor pvp things, do these after setting the death state, else the player activity notify won't work... doh...
             // handle player kill only if not suicide (spirit of redemption for example)
-            if (player != null && this != victim)
+            if (player != null && attacker != victim)
             {
                 OutdoorPvP pvp = player.GetOutdoorPvP();
                 if (pvp != null)
@@ -1087,35 +1031,44 @@ namespace Game.Entities
             }
 
             // achievement stuff
-            if (victim.IsTypeId(TypeId.Player))
+            if (attacker != null && victim.IsPlayer())
             {
-                if (IsTypeId(TypeId.Unit))
-                    victim.ToPlayer().UpdateCriteria(CriteriaTypes.KilledByCreature, GetEntry());
-                else if (IsTypeId(TypeId.Player) && victim != this)
-                    victim.ToPlayer().UpdateCriteria(CriteriaTypes.KilledByPlayer, 1, (ulong)ToPlayer().GetTeam());
+                if (attacker.IsCreature())
+                    victim.ToPlayer().UpdateCriteria(CriteriaTypes.KilledByCreature, attacker.GetEntry());
+                else if (attacker.IsPlayer() && victim != attacker)
+                    victim.ToPlayer().UpdateCriteria(CriteriaTypes.KilledByPlayer, 1, (ulong)attacker.ToPlayer().GetTeam());
             }
 
             // Hook for OnPVPKill Event
-            Player killerPlr = ToPlayer();
-            Creature killerCre = ToCreature();
-            if (killerPlr != null)
+            if (attacker != null)
             {
-                Player killedPlr = victim.ToPlayer();
-                Creature killedCre = victim.ToCreature();
-                if (killedPlr != null)
-                    Global.ScriptMgr.OnPVPKill(killerPlr, killedPlr);
-                else if (killedCre != null)
-                    Global.ScriptMgr.OnCreatureKill(killerPlr, killedCre);
-            }
-            else if (killerCre != null)
-            {
-                Player killed = victim.ToPlayer();
-                if (killed != null)
-                    Global.ScriptMgr.OnPlayerKilledByCreature(killerCre, killed);
+                Player killerPlr = attacker.ToPlayer();
+                if (killerPlr != null)
+                {
+                    Player killedPlr = victim.ToPlayer();
+                    if (killedPlr != null)
+                        Global.ScriptMgr.OnPVPKill(killerPlr, killedPlr);
+                    else
+                    {
+                        Creature killedCre = victim.ToCreature();
+                        if (killedCre != null)
+                            Global.ScriptMgr.OnCreatureKill(killerPlr, killedCre);
+                    }
+                }
+                else
+                {
+                    Creature killerCre = attacker.ToCreature();
+                    if (killerCre != null)
+                    {
+                        Player killed = victim.ToPlayer();
+                        if (killed != null)
+                            Global.ScriptMgr.OnPlayerKilledByCreature(killerCre, killed);
+                    }
+                }
             }
         }
 
-        public void KillSelf(bool durabilityLoss = true, bool skipSettingDeathState = false) { Kill(this, durabilityLoss, skipSettingDeathState); }
+        public void KillSelf(bool durabilityLoss = true, bool skipSettingDeathState = false) { Kill(this, this, durabilityLoss, skipSettingDeathState); }
 
         public virtual bool CanUseAttackType(WeaponAttackType attacktype)
         {
@@ -1289,11 +1242,13 @@ namespace Game.Entities
             if (!damageInfo.HitInfo.HasAnyFlag(HitInfo.Miss))
                 damageInfo.HitInfo |= HitInfo.AffectsVictim;
 
-            uint resilienceReduction = damageInfo.damage;
-            ApplyResilience(victim, ref resilienceReduction);
-            resilienceReduction = damageInfo.damage - resilienceReduction;
-            damageInfo.damage -= resilienceReduction;
-            damageInfo.cleanDamage += resilienceReduction;
+            int resilienceReduction = (int)damageInfo.damage;
+            if (CanApplyResilience())
+                ApplyResilience(victim, ref resilienceReduction);
+
+            resilienceReduction = (int)damageInfo.damage - resilienceReduction;
+            damageInfo.damage -= (uint)resilienceReduction;
+            damageInfo.cleanDamage += (uint)resilienceReduction;
 
             // Calculate absorb resist
             if (damageInfo.damage > 0)
@@ -1326,7 +1281,7 @@ namespace Game.Entities
             int miss_chance = (int)(MeleeSpellMissChance(victim, attType, null) * 100.0f);
 
             // Critical hit chance
-            int crit_chance = (int)(GetUnitCriticalChance(attType, victim) + GetTotalAuraModifier(AuraType.ModAutoAttackCritChance) * 100.0f);
+            int crit_chance = (int)((GetUnitCriticalChanceAgainst(attType, victim) + GetTotalAuraModifier(AuraType.ModAutoAttackCritChance)) * 100.0f);
 
             int dodge_chance = (int)(GetUnitDodgeChance(attType, victim) * 100.0f);
             int block_chance = (int)(GetUnitBlockChance(attType, victim) * 100.0f);

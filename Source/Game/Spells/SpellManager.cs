@@ -2986,6 +2986,14 @@ namespace Game.Entities
                         spellInfo.GetEffect(0).TriggerSpell = 46737;
                         spellInfo.GetEffect(0).ApplyAuraName = AuraType.PeriodicTriggerSpell;
                         break;
+                    case 379:   // Earth Shield
+                    case 71607: // Item - Bauble of True Blood 10m
+                    case 71646: // Item - Bauble of True Blood 25m
+                    case 71610: // Item - Althor's Abacus trigger 10m
+                    case 71641:  // Item - Althor's Abacus trigger 25m
+                            // We need more spells to find a general way (if there is any)
+                            spellInfo.DmgClass = SpellDmgClass.Magic;
+                        break;
                     case 63026: // Summon Aspirant Test NPC (HACK: Target shouldn't be changed)
                     case 63137: // Summon Valiant Test (HACK: Target shouldn't be changed; summon position should be untied from spell destination)
                         spellInfo.GetEffect(0).TargetA = new SpellImplicitTargetInfo(Targets.DestDb);

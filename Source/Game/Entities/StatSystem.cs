@@ -667,7 +667,7 @@ namespace Game.Entities
             return 0;
         }
         public virtual uint GetPowerIndex(PowerType powerType) { return 0; }
-        public float GetPowerPct(PowerType powerType) { return GetMaxPower(powerType) != 0 ? 100.0f* GetPower(powerType) / GetMaxPower(powerType) : 0.0f; }
+        public float GetPowerPct(PowerType powerType) { return GetMaxPower(powerType) != 0 ? 100.0f * GetPower(powerType) / GetMaxPower(powerType) : 0.0f; }
 
         void TriggerOnPowerChangeAuras(PowerType power, int oldVal, int newVal)
         {
@@ -713,27 +713,43 @@ namespace Game.Entities
             }
         }
 
-        public void ApplyResilience(Unit victim, ref uint damage)
+        public bool CanApplyResilience()
+        {
+            return !IsVehicle() && GetOwnerGUID().IsPlayer();
+        }
+
+        public static void ApplyResilience(Unit victim, ref int damage)
         {
             // player mounted on multi-passenger mount is also classified as vehicle
-            if (IsVehicle() || (victim.IsVehicle() && !victim.IsTypeId(TypeId.Player)))
-                return;
-
-            // Don't consider resilience if not in PvP - player or pet
-            if (!GetCharmerOrOwnerPlayerOrPlayerItself())
+            if (victim.IsVehicle() && !victim.IsPlayer())
                 return;
 
             Unit target = null;
-            if (victim.IsTypeId(TypeId.Player))
+            if (victim.IsPlayer())
                 target = victim;
-            else if (victim.IsTypeId(TypeId.Unit) && victim.GetOwner() && victim.GetOwner().IsTypeId(TypeId.Player))
-                target = victim.GetOwner();
+            else // victim->GetTypeId() == TYPEID_UNIT
+            {
+                Unit owner = victim.GetOwner();
+                if (owner != null)
+                    if (owner.IsPlayer())
+                        target = owner;
+            }
 
             if (!target)
                 return;
 
-            damage -= target.GetDamageReduction(damage);
+            damage -= (int)target.GetDamageReduction((uint)damage);
         }
+
+        public int CalculateAOEAvoidance(int damage, uint schoolMask, Unit caster)
+        {
+            damage = (int)((float)damage * GetTotalAuraMultiplierByMiscMask(AuraType.ModAoeDamageAvoidance, schoolMask));
+            if (caster.IsCreature())
+                damage = (int)((float)damage * GetTotalAuraMultiplierByMiscMask(AuraType.ModCreatureAoeDamageAvoidance, schoolMask));
+
+            return damage;
+        }
+        
         // player or player's pet resilience (-1%)
         uint GetDamageReduction(uint damage) { return GetCombatRatingDamageReduction(CombatRating.ResiliencePlayerDamage, 1.0f, 100.0f, damage); }
 
@@ -802,7 +818,7 @@ namespace Game.Entities
             return missChance;
         }
 
-        float GetUnitCriticalChance(WeaponAttackType attackType, Unit victim)
+        float GetUnitCriticalChanceDone(WeaponAttackType attackType)
         {
             float chance = 0.0f;
             Player thisPlayer = ToPlayer();
@@ -830,25 +846,38 @@ namespace Game.Entities
                     chance += GetTotalAuraModifier(AuraType.ModCritPct);
                 }
             }
+            return chance;
+        }
+
+        float GetUnitCriticalChanceTaken(Unit attacker, WeaponAttackType attackType, float critDone)
+        {
+            float chance = critDone;
 
             // flat aura mods
             if (attackType == WeaponAttackType.RangedAttack)
-                chance += victim.GetTotalAuraModifier(AuraType.ModAttackerRangedCritChance);
+                chance += GetTotalAuraModifier(AuraType.ModAttackerRangedCritChance);
             else
-                chance += victim.GetTotalAuraModifier(AuraType.ModAttackerMeleeCritChance);
+                chance += GetTotalAuraModifier(AuraType.ModAttackerMeleeCritChance);
 
-            chance += GetTotalAuraModifier(AuraType.ModCritChanceVersusTargetHealth, aurEff => !victim.HealthBelowPct(aurEff.GetMiscValueB()));
+            chance += GetTotalAuraModifier(AuraType.ModCritChanceVersusTargetHealth, aurEff => !HealthBelowPct(aurEff.GetMiscValueB()));
 
-            chance += victim.GetTotalAuraModifier(AuraType.ModCritChanceForCaster, aurEff => aurEff.GetCasterGUID() == GetGUID());
+            chance += GetTotalAuraModifier(AuraType.ModCritChanceForCaster, aurEff => aurEff.GetCasterGUID() == attacker.GetGUID());
 
-            TempSummon tempSummon = ToTempSummon();
-            if (tempSummon)
-                chance += victim.GetTotalAuraModifier(AuraType.ModCritChanceForCasterPet, aurEff => aurEff.GetCasterGUID() == tempSummon.GetSummonerGUID());
+            TempSummon tempSummon = attacker.ToTempSummon();
+            if (tempSummon != null)
+                chance += GetTotalAuraModifier(AuraType.ModCritChanceForCasterPet, aurEff => aurEff.GetCasterGUID() == tempSummon.GetSummonerGUID());
 
-            chance += victim.GetTotalAuraModifier(AuraType.ModAttackerSpellAndWeaponCritChance);
+            chance += GetTotalAuraModifier(AuraType.ModAttackerSpellAndWeaponCritChance);
 
             return Math.Max(chance, 0.0f);
         }
+
+        float GetUnitCriticalChanceAgainst(WeaponAttackType attackType, Unit victim)
+        {
+            float chance = GetUnitCriticalChanceDone(attackType);
+            return victim.GetUnitCriticalChanceTaken(this, attackType, chance);
+        }
+        
         float GetUnitDodgeChance(WeaponAttackType attType, Unit victim)
         {
             int levelDiff = (int)(victim.GetLevelForTarget(this) - GetLevelForTarget(victim));
