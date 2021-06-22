@@ -597,7 +597,7 @@ namespace Scripts.Spells.Items
 
             Unit caster = eventInfo.GetActionTarget();
             CastSpellExtraArgs args = new(aurEff);
-            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, amount);
+            args.AddSpellMod(SpellValueMod.BasePoint0, amount);
             caster.CastSpell((Unit)null, spellId, args);
         }
 
@@ -780,7 +780,7 @@ namespace Scripts.Spells.Items
             else
             {
                 CastSpellExtraArgs args = new(aurEff);
-                args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, absorb);
+                args.AddSpellMod(SpellValueMod.BasePoint0, absorb);
                 GetTarget().CastSpell(eventInfo.GetProcTarget(), SpellIds.ProtectionOfAncientKings, args);
             }
         }
@@ -833,7 +833,7 @@ namespace Scripts.Spells.Items
         {
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.DeadlyPrecision, GetCastDifficulty());
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-            args.SpellValueOverrides.Add(SpellValueMod.AuraStack, (int)spellInfo.StackAmount);
+            args.AddSpellMod(SpellValueMod.AuraStack, (int)spellInfo.StackAmount);
             GetCaster().CastSpell(GetCaster(), spellInfo.Id, args);
         }
 
@@ -1198,7 +1198,7 @@ namespace Scripts.Spells.Items
 
             Unit caster = eventInfo.GetActor();
             CastSpellExtraArgs args = new(aurEff);
-            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount()));
+            args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount()));
             caster.CastSpell((Unit)null, SpellIds.Shadowmend, args);
         }
 
@@ -1459,7 +1459,7 @@ namespace Scripts.Spells.Items
                 return;
 
             CastSpellExtraArgs args = new(aurEff);
-            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount()));
+            args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount()));
             GetTarget().CastSpell((Unit)null, SpellIds.ItemNecroticTouchProc, args);
         }
 
@@ -1587,7 +1587,7 @@ namespace Scripts.Spells.Items
                     return;
 
             CastSpellExtraArgs args = new(aurEff);
-            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, bp0);
+            args.AddSpellMod(SpellValueMod.BasePoint0, bp0);
             caster.CastSpell(target, SpellIds.PersistentShieldTriggered, args);
         }
 
@@ -1616,7 +1616,7 @@ namespace Scripts.Spells.Items
                 return;
 
             CastSpellExtraArgs args = new(aurEff);
-            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount()));
+            args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount()));
             eventInfo.GetActor().CastSpell((Unit)null, SpellIds.HealthLink, args);
         }
 
@@ -1947,7 +1947,7 @@ namespace Scripts.Spells.Items
 
             Unit caster = eventInfo.GetActor();
             CastSpellExtraArgs args = new(aurEff);
-            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, (int)caster.CountPctFromMaxHealth(aurEff.GetAmount()));
+            args.AddSpellMod(SpellValueMod.BasePoint0, (int)caster.CountPctFromMaxHealth(aurEff.GetAmount()));
             caster.CastSpell((Unit)null, SpellIds.SwiftHandOfJusticeHeal, args);
         }
 

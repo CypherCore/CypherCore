@@ -312,7 +312,7 @@ namespace Scripts.Spells.Warrior
             Unit target = eventInfo.GetActionTarget();
             int bp0 = (int)MathFunctions.CalculatePct(target.GetMaxHealth(), GetSpellInfo().GetEffect(1).CalcValue());
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, bp0);
+            args.AddSpellMod(SpellValueMod.BasePoint0, bp0);
             target.CastSpell((Unit)null, SpellIds.Stoicism, args);
         }
 

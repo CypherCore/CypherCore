@@ -98,7 +98,7 @@ namespace Scripts.Spells.Priest
                 return;
 
             CastSpellExtraArgs args = new(aurEff);
-            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(healInfo.GetHeal(), 10));
+            args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(healInfo.GetHeal(), 10));
             caster.CastSpell(caster, SpellIds.OracularHeal, args);
         }
 
@@ -267,7 +267,7 @@ namespace Scripts.Spells.Priest
             // Remove the aura now, we don't want 40% healing bonus
             Remove(AuraRemoveMode.EnemySpell);
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, healAmount);
+            args.AddSpellMod(SpellValueMod.BasePoint0, healAmount);
             target.CastSpell(target, SpellIds.GuardianSpiritHeal, args);
             absorbAmount = dmgInfo.GetDamage();
         }
@@ -883,7 +883,7 @@ namespace Scripts.Spells.Priest
             amount += (int)target.GetRemainingPeriodicAmount(caster.GetGUID(), SpellIds.BlessedHealing, AuraType.PeriodicHeal);
 
             CastSpellExtraArgs args = new(aurEff);
-            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, amount);
+            args.AddSpellMod(SpellValueMod.BasePoint0, amount);
             caster.CastSpell(target, SpellIds.BlessedHealing, args);
         }
 
@@ -919,8 +919,8 @@ namespace Scripts.Spells.Priest
             int teamHeal = selfHeal / 2;
 
             CastSpellExtraArgs args = new(aurEff);
-            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, teamHeal);
-            args.SpellValueOverrides.Add(SpellValueMod.BasePoint1, selfHeal);
+            args.AddSpellMod(SpellValueMod.BasePoint0, teamHeal);
+            args.AddSpellMod(SpellValueMod.BasePoint1, selfHeal);
             GetTarget().CastSpell((Unit)null, SpellIds.VampiricEmbraceHeal, args);
         }
 
@@ -968,7 +968,7 @@ namespace Scripts.Spells.Priest
                     {
                         // backfire damage
                         CastSpellExtraArgs args = new(aurEff);
-                        args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, aurEff.GetAmount() * 8);
+                        args.AddSpellMod(SpellValueMod.BasePoint0, aurEff.GetAmount() * 8);
                         caster.CastSpell(target, SpellIds.VampiricTouchDispel, args);
                     }
                 }

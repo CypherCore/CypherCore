@@ -149,9 +149,8 @@ namespace Scripts.Spells.DeathKnight
 
             if (!GetTarget().HasAura(SpellIds.VolatileShielding))
             {
-                int bp = (int)(2 * absorbAmount * 100 / maxHealth);
                 CastSpellExtraArgs args = new(aurEff);
-                args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(absorbAmount, 2 * absorbAmount * 100 / maxHealth));
+                args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(absorbAmount, 2 * absorbAmount * 100 / maxHealth));
                 GetTarget().CastSpell(GetTarget(), SpellIds.RunicPowerEnergize, args);
             }
         }

@@ -591,7 +591,7 @@ namespace Scripts.Spells.Mage
             amount += (int)eventInfo.GetProcTarget().GetRemainingPeriodicAmount(eventInfo.GetActor().GetGUID(), SpellIds.Ignite, AuraType.PeriodicDamage);
 
             CastSpellExtraArgs args = new(aurEff);
-            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, amount);
+            args.AddSpellMod(SpellValueMod.BasePoint0, amount);
             GetTarget().CastSpell(eventInfo.GetProcTarget(), SpellIds.Ignite, args);
         }
 

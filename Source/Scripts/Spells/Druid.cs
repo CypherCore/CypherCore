@@ -786,7 +786,7 @@ namespace Scripts.Spells.Druid
                 return;
 
             CastSpellExtraArgs args = new(aurEff);
-            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount()));
+            args.AddSpellMod(SpellValueMod.BasePoint0, (int)MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount()));
             GetTarget().CastSpell(eventInfo.GetProcTarget(), SpellIds.LivingSeedProc, args);
         }
 
@@ -808,7 +808,7 @@ namespace Scripts.Spells.Druid
         {
             PreventDefaultAction();
             CastSpellExtraArgs args = new(aurEff);
-            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, aurEff.GetAmount());
+            args.AddSpellMod(SpellValueMod.BasePoint0, aurEff.GetAmount());
             GetTarget().CastSpell(GetTarget(), SpellIds.LivingSeedHeal, args);
         }
 
@@ -1187,7 +1187,7 @@ namespace Scripts.Spells.Druid
 
             int amount = MathFunctions.CalculatePct(spellPowerCost.Amount, aurEff.GetAmount());
             CastSpellExtraArgs args = new (aurEff);
-            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, amount);
+            args.AddSpellMod(SpellValueMod.BasePoint0, amount);
             caster.CastSpell((Unit)null, SpellIds.Exhilarate, args);
         }
 
@@ -1244,7 +1244,7 @@ namespace Scripts.Spells.Druid
             amount += (int)target.GetRemainingPeriodicAmount(caster.GetGUID(), SpellIds.Languish, AuraType.PeriodicDamage);
 
             CastSpellExtraArgs args = new(aurEff);
-            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, amount);
+            args.AddSpellMod(SpellValueMod.BasePoint0, amount);
             caster.CastSpell(target, SpellIds.Languish, args);
         }
 
@@ -1327,7 +1327,7 @@ namespace Scripts.Spells.Druid
 
             int amount = (int)eventInfo.GetHealInfo().GetHeal();
             CastSpellExtraArgs args = new(aurEff);
-            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, (int)eventInfo.GetHealInfo().GetHeal());
+            args.AddSpellMod(SpellValueMod.BasePoint0, (int)eventInfo.GetHealInfo().GetHeal());
             eventInfo.GetActor().CastSpell((Unit)null, SpellIds.RejuvenationT10Proc, args);
         }
 

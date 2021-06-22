@@ -4619,7 +4619,7 @@ namespace Game.Spells
                     CastSpellExtraArgs args = new(this);
 
                     if (GetAmount() != 0) // If amount avalible cast with basepoints (Crypt Fever for example)
-                        args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, GetAmount());
+                        args.AddSpellMod(SpellValueMod.BasePoint0, GetAmount());
 
                     caster.CastSpell(target, triggeredSpellId, args);
                 }
@@ -4883,7 +4883,7 @@ namespace Game.Spells
                 {
                     CastSpellExtraArgs args = new(this);
                     for (int i = 0; i < SpellConst.MaxEffects; ++i)
-                        args.SpellValueOverrides.Add(SpellValueMod.BasePoint0 + i, GetAmount());
+                        args.AddSpellMod(SpellValueMod.BasePoint0 + i, GetAmount());
 
                     triggerCaster.CastSpell(target, triggerSpellId, args);
                     Log.outDebug(LogFilter.Spells, "AuraEffect.HandlePeriodicTriggerSpellWithValueAuraTick: Spell {0} Trigger {1}", GetId(), triggeredSpellInfo.Id);
@@ -5272,7 +5272,7 @@ namespace Game.Spells
                     int feedAmount = MathFunctions.CalculatePct(gainedAmount, manaFeedVal);
 
                     CastSpellExtraArgs args = new(this);
-                    args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, feedAmount);
+                    args.AddSpellMod(SpellValueMod.BasePoint0, feedAmount);
                     caster.CastSpell(caster, 32554, args);
                 }
             }
@@ -5425,7 +5425,7 @@ namespace Game.Spells
             if (triggeredSpellInfo != null)
             {
                 CastSpellExtraArgs args = new(this);
-                args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, GetAmount());
+                args.AddSpellMod(SpellValueMod.BasePoint0, GetAmount());
                 triggerCaster.CastSpell(triggerTarget, triggerSpellId, args);
                 Log.outDebug(LogFilter.Spells, "AuraEffect.HandleProcTriggerSpellWithValueAuraProc: Triggering spell {0} with value {1} from aura {2} proc", triggeredSpellInfo.Id, GetAmount(), GetId());
             }

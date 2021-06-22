@@ -3009,7 +3009,7 @@ namespace Game.Entities
                     {
                         CastSpellExtraArgs args = new(flags);
                         args.OriginalCaster = origCasterGUID;
-                        args.SpellValueOverrides.Add(SpellValueMod.BasePoint0 + i, seatId + 1);
+                        args.AddSpellMod(SpellValueMod.BasePoint0 + i, seatId + 1);
                         caster.CastSpell(target, clickInfo.spellId, args);
                     }
                     else    // This can happen during Player._LoadAuras

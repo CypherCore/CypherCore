@@ -389,7 +389,7 @@ namespace Game.Spells
             // set basepoints for trigger with value effect
             if (effectInfo.Effect == SpellEffectName.TriggerSpellWithValue)
                 for (int i = 0; i < SpellConst.MaxEffects; ++i)
-                    args.SpellValueOverrides.Add(SpellValueMod.BasePoint0 + i, damage);
+                    args.AddSpellMod(SpellValueMod.BasePoint0 + i, damage);
 
             // original caster guid only for GO cast
             m_caster.CastSpell(targets, spellInfo.Id, args);
@@ -435,7 +435,7 @@ namespace Game.Spells
             // set basepoints for trigger with value effect
             if (effectInfo.Effect == SpellEffectName.TriggerMissileSpellWithValue)
                 for (int i = 0; i < SpellConst.MaxEffects; ++i)
-                    args.SpellValueOverrides.Add(SpellValueMod.BasePoint0 + i, damage);
+                    args.AddSpellMod(SpellValueMod.BasePoint0 + i, damage);
 
             // original caster guid only for GO cast
             m_caster.CastSpell(targets, spellInfo.Id, args);
@@ -474,7 +474,7 @@ namespace Game.Spells
                     case 52349: // Overtake
                         {
                             CastSpellExtraArgs args1 = new(m_originalCasterGUID);
-                            args1.SpellValueOverrides.Add(SpellValueMod.BasePoint0, damage);
+                            args1.AddSpellMod(SpellValueMod.BasePoint0, damage);
                             unitTarget.CastSpell(unitTarget, spellInfo.Id, args1);
                             return;
                         }
@@ -492,7 +492,7 @@ namespace Game.Spells
             // set basepoints for trigger with value effect
             if (effectInfo.Effect == SpellEffectName.ForceCastWithValue)
                 for (int i = 0; i < SpellConst.MaxEffects; ++i)
-                    args.SpellValueOverrides.Add(SpellValueMod.BasePoint0 + i, damage);
+                    args.AddSpellMod(SpellValueMod.BasePoint0 + i, damage);
 
             unitTarget.CastSpell(m_caster, spellInfo.Id, args);
         }
@@ -1746,7 +1746,7 @@ namespace Game.Spells
 
                     // if we have small value, it indicates seat position
                     if (basePoints > 0 && basePoints < SharedConst.MaxVehicleSeats)
-                        args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, basePoints);
+                        args.AddSpellMod(SpellValueMod.BasePoint0, basePoints);
 
                     m_originalCaster.CastSpell(summon, spellId, args);
 
@@ -3176,7 +3176,7 @@ namespace Game.Spells
                                         if (totem != null && totem.IsTotem())
                                         {
                                             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-                                            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, damage);
+                                            args.AddSpellMod(SpellValueMod.BasePoint0, damage);
                                             m_caster.CastSpell(totem, 55277, args);
                                         }
                                     }
@@ -3571,12 +3571,8 @@ namespace Game.Spells
 
             ExecuteLogEffectDestroyItem(effIndex, foodItem.GetEntry());
 
-            uint count = 1;
-            player.DestroyItemCount(foodItem, ref count, true);
-            // @todo fix crash when a spell has two effects, both pointed at the same item target
-
             int pct;
-            int levelDiff = (int)(pet.GetLevel() - foodItem.GetTemplate().GetBaseItemLevel());
+            int levelDiff = (int)pet.GetLevel() - (int)foodItem.GetTemplate().GetBaseItemLevel();
             if (levelDiff >= 30)
                 return;
             else if (levelDiff >= 20)
@@ -3586,7 +3582,13 @@ namespace Game.Spells
             else
                 pct = 50;
 
-            m_caster.CastSpell(pet, effectInfo.TriggerSpell, new CastSpellExtraArgs(SpellValueMod.BasePoint0, pct).SetTriggerFlags(TriggerCastFlags.FullMask));
+            uint count = 1;
+            player.DestroyItemCount(foodItem, ref count, true);
+            // @todo fix crash when a spell has two effects, both pointed at the same item target
+
+            CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+            args.AddSpellMod(SpellValueMod.BasePoint0, pct);
+            m_caster.CastSpell(pet, effectInfo.TriggerSpell, args);
         }
 
         [SpellEffectHandler(SpellEffectName.DismissPet)]
@@ -4272,7 +4274,7 @@ namespace Game.Spells
             if (mana != 0)
             {
                 CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-                args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, mana);
+                args.AddSpellMod(SpellValueMod.BasePoint0, mana);
                 m_caster.CastSpell(m_caster, 39104, args);
             }
         }

@@ -910,7 +910,7 @@ namespace Scripts.Spells.Shaman
             amount += (int)target.GetRemainingPeriodicAmount(caster.GetGUID(), SpellIds.Electrified, AuraType.PeriodicDamage);
 
             CastSpellExtraArgs args = new(aurEff);
-            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, amount);
+            args.AddSpellMod(SpellValueMod.BasePoint0, amount);
             caster.CastSpell(target, SpellIds.Electrified, args);
         }
 
@@ -946,7 +946,7 @@ namespace Scripts.Spells.Shaman
             amount += (int)target.GetRemainingPeriodicAmount(caster.GetGUID(), SpellIds.LavaBurstBonusDamage, AuraType.PeriodicDamage);
 
             CastSpellExtraArgs args = new(aurEff);
-            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, amount);
+            args.AddSpellMod(SpellValueMod.BasePoint0, amount);
             caster.CastSpell(target, SpellIds.LavaBurstBonusDamage, args);
         }
 
@@ -1014,7 +1014,7 @@ namespace Scripts.Spells.Shaman
             amount += (int)target.GetRemainingPeriodicAmount(caster.GetGUID(), SpellIds.ChainedHeal, AuraType.PeriodicHeal);
 
             CastSpellExtraArgs args = new(aurEff);
-            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, amount);
+            args.AddSpellMod(SpellValueMod.BasePoint0, amount);
             caster.CastSpell(target, SpellIds.ChainedHeal, args);
         }
 

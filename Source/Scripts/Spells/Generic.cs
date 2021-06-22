@@ -753,7 +753,7 @@ namespace Scripts.Spells.Generic
 
             Unit caster = eventInfo.GetActionTarget();
             CastSpellExtraArgs args = new(aurEff);
-            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, aurEff.GetAmount());
+            args.AddSpellMod(SpellValueMod.BasePoint0, aurEff.GetAmount());
             caster.CastSpell(caster, SpellIds.BloodReserveHeal, args);
             caster.RemoveAura(SpellIds.BloodReserveAura);
         }
@@ -983,7 +983,7 @@ namespace Scripts.Spells.Generic
             if (target)
             {
                 CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-                args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, basepoints0);
+                args.AddSpellMod(SpellValueMod.BasePoint0, basepoints0);
                 caster.CastSpell(target, SpellIds.ChaosBlast, args);
             }
         }
@@ -1728,7 +1728,7 @@ namespace Scripts.Spells.Generic
             PreventDefaultAction();
 
             CastSpellExtraArgs args = new(aurEff);
-            args.SpellValueOverrides.Add(SpellValueMod.MaxTargets, (int)aurEff.GetTickNumber() / 10 + 1);
+            args.AddSpellMod(SpellValueMod.MaxTargets, (int)aurEff.GetTickNumber() / 10 + 1);
             GetTarget().CastSpell((Unit)null, GetSpellInfo().GetEffect(aurEff.GetEffIndex()).TriggerSpell, args);
         }
 
@@ -2820,7 +2820,7 @@ namespace Scripts.Spells.Generic
 
             Unit caster = eventInfo.GetActor();
             CastSpellExtraArgs args = new(aurEff);
-            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, (int)damageInfo.GetDamage() / 2);
+            args.AddSpellMod(SpellValueMod.BasePoint0, (int)damageInfo.GetDamage() / 2);
             caster.CastSpell(caster, SpellIds.VampiricTouchHeal, args);
         }
 

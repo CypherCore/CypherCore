@@ -542,7 +542,7 @@ namespace Scripts.Spells.Holiday
                 case SpellIds.RamCanter:
                     {
                         CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-                        args.SpellValueOverrides.Add(SpellValueMod.AuraStack, 1);
+                        args.AddSpellMod(SpellValueMod.AuraStack, 1);
                         target.CastSpell(target, SpellIds.RamFatigue, args);
                         if (aurEff.GetTickNumber() == 8)
                             target.CastSpell(target, QuestIds.BrewfestSpeedBunnyYellow, true);
@@ -551,7 +551,7 @@ namespace Scripts.Spells.Holiday
                 case SpellIds.RamGallop:
                     {
                         CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-                        args.SpellValueOverrides.Add(SpellValueMod.AuraStack, target.HasAura(SpellIds.RamFatigue) ? 4 : 5 /*Hack*/);
+                        args.AddSpellMod(SpellValueMod.AuraStack, target.HasAura(SpellIds.RamFatigue) ? 4 : 5 /*Hack*/);
                         target.CastSpell(target, SpellIds.RamFatigue, args);
                         if (aurEff.GetTickNumber() == 8)
                             target.CastSpell(target, QuestIds.BrewfestSpeedBunnyRed, true);

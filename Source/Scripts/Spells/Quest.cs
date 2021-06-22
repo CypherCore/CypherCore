@@ -1655,7 +1655,7 @@ namespace Scripts.Spells.Quest
                 return;
 
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, 2);
+            args.AddSpellMod(SpellValueMod.BasePoint0, 2);
             GetHitCreature().CastSpell(GetCaster(), SpellIds.RideGymer, args);
             GetHitCreature().CastSpell(GetHitCreature(), SpellIds.Grabbed, true);
         }

@@ -862,11 +862,11 @@ namespace Game.Entities
             return targets.SelectRandom();
         }
 
-        public void EnterVehicle(Unit Base, sbyte seatId = -1)
+        public void EnterVehicle(Unit baseUnit, sbyte seatId = -1)
         {
             CastSpellExtraArgs args = new(TriggerCastFlags.IgnoreCasterMountedOrOnVehicle);
-            args.SpellValueOverrides.Add(SpellValueMod.BasePoint0, seatId + 1);
-            CastSpell(this, SharedConst.VehicleSpellRideHardcoded, args);
+            args.AddSpellMod(SpellValueMod.BasePoint0, seatId + 1);
+            CastSpell(baseUnit, SharedConst.VehicleSpellRideHardcoded, args);
         }
 
         public void _EnterVehicle(Vehicle vehicle, sbyte seatId, AuraApplication aurApp)

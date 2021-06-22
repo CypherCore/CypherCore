@@ -3268,7 +3268,7 @@ namespace Game.Entities
                             for (byte i = 0; i < SpellConst.MaxEffects; ++i)
                             {
                                 if (spellInfo.GetEffect(i).IsEffect())
-                                    args.SpellValueOverrides.Add(SpellValueMod.BasePoint0 + i, MathFunctions.CalculatePct(spellInfo.GetEffect(i).CalcValue(this), effectPct));
+                                    args.AddSpellMod(SpellValueMod.BasePoint0 + i, MathFunctions.CalculatePct(spellInfo.GetEffect(i).CalcValue(this), effectPct));
                             }
                         }
 

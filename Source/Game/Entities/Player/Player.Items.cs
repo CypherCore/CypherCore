@@ -5138,7 +5138,7 @@ namespace Game.Entities
                     if (artifactPowerRank.AuraPointsOverride != 0)
                         for (int i = 0; i < SpellConst.MaxEffects; ++i)
                             if (spellInfo.GetEffect((uint)i) != null)
-                                args.SpellValueOverrides.Add(SpellValueMod.BasePoint0 + i, (int)artifactPowerRank.AuraPointsOverride);
+                                args.AddSpellMod(SpellValueMod.BasePoint0 + i, (int)artifactPowerRank.AuraPointsOverride);
 
                     CastSpell(this, artifactPowerRank.SpellID, args);
                 }
@@ -5228,7 +5228,11 @@ namespace Game.Entities
                     if (major && currentRank == 1)
                     {
                         if (apply)
-                            CastSpell(this, PlayerConst.SpellIdHeartEssenceActionBarOverride, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, (int)azeriteEssencePower.MajorPowerDescription));
+                        {
+                            CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+                            args.AddSpellMod(SpellValueMod.BasePoint0, (int)azeriteEssencePower.MajorPowerDescription);
+                            CastSpell(this, PlayerConst.SpellIdHeartEssenceActionBarOverride, args);
+                        }
                         else
                             RemoveAurasDueToSpell(PlayerConst.SpellIdHeartEssenceActionBarOverride);
                     }
