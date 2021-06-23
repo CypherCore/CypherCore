@@ -302,12 +302,13 @@ namespace Game.Combat
             ThreatReference newRefe = new(this, target, amount);
             PutThreatListRef(target.GetGUID(), newRefe);
             target.GetThreatManager().PutThreatenedByMeRef(_owner.GetGUID(), newRefe);
-            if (!newRefe.IsOffline() && !_ownerEngaged)
+
+            Creature cOwner = _owner.ToCreature();
+            Cypher.Assert(cOwner != null); // if we got here the owner can have a threat list, and must be a creature!
+            if (!_ownerEngaged && (cOwner.HasReactState(ReactStates.Passive) || !newRefe.IsOffline()))
             {
                 _ownerEngaged = true;
 
-                Creature cOwner = _owner.ToCreature();
-                Cypher.Assert(cOwner != null); // if we got here the owner can have a threat list, and must be a creature!
                 SaveCreatureHomePositionIfNeed(cOwner);
                 if (cOwner.IsAIEnabled)
                     cOwner.GetAI().JustEngagedWith(target);
