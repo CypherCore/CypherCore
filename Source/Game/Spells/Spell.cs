@@ -4304,10 +4304,7 @@ namespace Game.Spells
                     continue;
                 }
 
-                if (hit)
-                    m_caster.ModifyPower(cost.Power, -cost.Amount);
-                else
-                    m_caster.ModifyPower(cost.Power, -RandomHelper.IRand(0, cost.Amount / 4));
+                m_caster.ModifyPower(cost.Power, -cost.Amount);
             }
         }
 
