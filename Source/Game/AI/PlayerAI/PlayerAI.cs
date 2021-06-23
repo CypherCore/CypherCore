@@ -602,7 +602,18 @@ namespace Game.AI
             if (rangedAttackSpell == 0)
                 return;
 
-            me.CastSpell(victim, rangedAttackSpell, new CastSpellExtraArgs(TriggerCastFlags.CastDirectly));
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(rangedAttackSpell, me.GetMap().GetDifficultyID());
+            if (spellInfo == null)
+                return;
+
+            Spell spell = new Spell(me, spellInfo, TriggerCastFlags.CastDirectly);
+            if (spell.CheckPetCast(victim) != SpellCastResult.SpellCastOk)
+                return;
+
+            SpellCastTargets targets = new();
+            targets.SetUnitTarget(victim);
+            spell.Prepare(targets);
+
             me.ResetAttackTimer(WeaponAttackType.RangedAttack);
         }
 
