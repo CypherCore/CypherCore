@@ -164,8 +164,8 @@ namespace Game.Entities
             // call leave script hooks immedately (before updating flags)
             if (oldZone != newZone)
             {
-                Global.OutdoorPvPMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
-                Global.BattleFieldMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
+                Global.OutdoorPvPMgr.HandlePlayerLeaveZone(this, oldZone);
+                Global.BattleFieldMgr.HandlePlayerLeaveZone(this, oldZone);
             }
 
             // group update
