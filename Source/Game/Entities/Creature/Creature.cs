@@ -2446,36 +2446,6 @@ namespace Game.Entities
             Global.WorldMgr.SendGlobalMessage(packet, null, (enemy_team == Team.Alliance ? Team.Horde : Team.Alliance));
         }
 
-        public void SetInCombatWithZone()
-        {
-            if (!CanHaveThreatList())
-            {
-                Log.outError(LogFilter.Unit, "Creature entry {0} call SetInCombatWithZone but creature cannot have threat list.", GetEntry());
-                return;
-            }
-
-            Map map = GetMap();
-
-            if (!map.IsDungeon())
-            {
-                Log.outError(LogFilter.Unit, "Creature entry {0} call SetInCombatWithZone for map (id: {1}) that isn't an instance.", GetEntry(), map.GetId());
-                return;
-            }
-
-            var PlList = map.GetPlayers();
-            if (PlList.Empty())
-                return;
-
-            foreach (var player in PlList)
-            {
-                if (player.IsGameMaster())
-                    continue;
-
-                if (player.IsAlive())
-                    EngageWithTarget(player);
-            }
-        }
-
         public override bool HasSpell(uint spellId)
         {
             for (byte i = 0; i < SharedConst.MaxCreatureSpells; ++i)

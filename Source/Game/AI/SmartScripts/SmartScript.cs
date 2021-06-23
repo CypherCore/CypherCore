@@ -928,7 +928,9 @@ namespace Game.AI
                         {
                             if (IsCreature(target))
                             {
-                                _me.SetInCombatWithZone();
+                                Creature creature = target.ToCreature();
+                                if (creature.IsAIEnabled)
+                                    creature.GetAI().DoZoneInCombat();
                                 Log.outDebug(LogFilter.ScriptsAi, $"SmartScript.ProcessAction: SMART_ACTION_SET_IN_COMBAT_WITH_ZONE: Creature: {_me.GetGUID()}, Target: {target.GetGUID()}");
                             }
                         }
