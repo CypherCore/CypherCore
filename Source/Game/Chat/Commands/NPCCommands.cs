@@ -58,12 +58,12 @@ namespace Game.Chat
             }
 
             Player player = handler.GetSession().GetPlayer();
-
-            if (!player.GetMap().SpawnGroupDespawn(groupId, deleteRespawnTimes))
+            if (!player.GetMap().SpawnGroupDespawn(groupId, deleteRespawnTimes, out int despawnedCount))
             {
                 handler.SendSysMessage(CypherStrings.SpawngroupBadgroup, groupId);
                 return false;
             }
+            handler.SendSysMessage($"Despawned a total of {despawnedCount} objects.");
 
             return true;
         }
@@ -454,8 +454,6 @@ namespace Game.Chat
             }
 
             handler.SendSysMessage(CypherStrings.SpawngroupSpawncount, creatureList.Count);
-            foreach (WorldObject obj in creatureList)
-                handler.SendSysMessage($"{obj.GetName()} ({obj.GetGUID()})");
 
             return true;
         }

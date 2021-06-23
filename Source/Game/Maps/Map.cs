@@ -2759,6 +2759,11 @@ namespace Game.Maps
 
         public bool SpawnGroupDespawn(uint groupId, bool deleteRespawnTimes)
         {
+            return SpawnGroupDespawn(groupId, deleteRespawnTimes, out _);
+        }
+        public bool SpawnGroupDespawn(uint groupId, bool deleteRespawnTimes, out int count)
+        {
+            count = 0;
             SpawnGroupTemplateData groupData = GetSpawnGroupData(groupId);
             if (groupData == null || groupData.flags.HasAnyFlag(SpawnGroupFlags.System))
             {
@@ -2792,6 +2797,8 @@ namespace Game.Maps
                         return false;
                 }
             }
+
+            count = toUnload.Count;
 
             // now do the actual despawning
             foreach (WorldObject obj in toUnload)

@@ -552,7 +552,7 @@ namespace Game.Chat
                             }
                         }
                         else
-                            handler.SendSysMessage($" | |-- '{groupData.name}' could've been {(isSpawn ? "allowed to spawn" : "blocked from spawning")} if boss state {bossStateId} matched mask {tuple.Item3}; but it is {(EncounterState)actualState} . {(1 << (int)actualState)}, which does not match.");
+                            handler.SendSysMessage($" | |-- '{groupData.name}' could've been {(isSpawn ? "allowed to spawn" : "blocked from spawning")} if boss state {bossStateId} matched mask 0x{tuple.Item3:X2}; but it is {(EncounterState)actualState} . 0x{(1 << (int)actualState):X2}, which does not match.");
                     }
                     if (isBlocked)
                         handler.SendSysMessage($" | |=> '{groupData.name}' is not active due to a blocking rule being matched");
