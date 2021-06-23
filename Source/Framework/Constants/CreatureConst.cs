@@ -13,7 +13,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
- */﻿
+ */
+using System;
 
 namespace Framework.Constants
 {
@@ -365,6 +366,7 @@ namespace Framework.Constants
         Other
     }
 
+    [Flags]
     public enum GroupAIFlags
     {
         None = 0,          // No creature group behavior

@@ -125,9 +125,9 @@ namespace Game.Entities
             if (lowguid == 0)
                 return;
 
-            var frmdata = FormationMgr.CreatureGroupMap.LookupByKey(lowguid);
-            if (frmdata != null)
-                FormationMgr.AddCreatureToGroup(frmdata.leaderGUID, this);
+            var formationInfo = FormationMgr.GetFormationInfo(lowguid);
+            if (formationInfo != null)
+                FormationMgr.AddCreatureToGroup(formationInfo.LeaderSpawnId, this);
         }
 
         public bool IsFormationLeader()
@@ -784,17 +784,18 @@ namespace Game.Entities
 
         void InitializeMovementAI()
         {
-            if (m_formation == null)
-                GetMotionMaster().Initialize();
-            else if (m_formation.GetLeader() == this)
+            if (m_formation != null)
             {
-                m_formation.FormationReset(false);
-                GetMotionMaster().Initialize();
+                if (m_formation.GetLeader() == this)
+                    m_formation.FormationReset(false);
+                else if (m_formation.IsFormed())
+                {
+                    GetMotionMaster().MoveIdle(); //wait the order of leader
+                    return;
+                }
             }
-            else if (m_formation.IsFormed())
-                GetMotionMaster().MoveIdle(); //wait the order of leader
-            else
-                GetMotionMaster().Initialize();
+
+            GetMotionMaster().Initialize();
         }
 
         public static Creature CreateCreature(uint entry, Map map, Position pos, uint vehId = 0)

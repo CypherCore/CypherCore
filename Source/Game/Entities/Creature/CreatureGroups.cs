@@ -20,48 +20,60 @@ using Game.Maps;
 using System;
 using System.Collections.Generic;
 using Framework.Constants;
+using System.Linq;
 
 namespace Game.Entities
 {
     public class FormationMgr
     {
-        public static void AddCreatureToGroup(ulong leaderGuid, Creature member)
+        static Dictionary<ulong, FormationInfo> _creatureGroupMap = new();
+
+        public static void AddCreatureToGroup(ulong leaderSpawnId, Creature creature)
         {
-            Map map = member.GetMap();
-            if (!map)
-                return;
+            Map map = creature.GetMap();
 
-            var creatureGroup = map.CreatureGroupHolder.LookupByKey(leaderGuid);
-
-            //Add member to an existing group
+            var creatureGroup = map.CreatureGroupHolder.LookupByKey(leaderSpawnId);
             if (creatureGroup != null)
             {
-                Log.outDebug(LogFilter.Unit, "Group found: {0}, inserting creature GUID: {1}, Group InstanceID {2}", leaderGuid, member.GetGUID().ToString(), member.GetInstanceId());
-                creatureGroup.AddMember(member);
+                //Add member to an existing group
+                Log.outDebug(LogFilter.Unit, "Group found: {0}, inserting creature GUID: {1}, Group InstanceID {2}", leaderSpawnId, creature.GetGUID().ToString(), creature.GetInstanceId());
+
+                // With dynamic spawn the creature may have just respawned
+                // we need to find previous instance of creature and delete it from the formation, as it'll be invalidated
+                var bounds = map.GetCreatureBySpawnIdStore().LookupByKey(creature.GetSpawnId());
+                foreach (var other in bounds)
+                {
+                    if (other == creature)
+                        continue;
+
+                    if (creatureGroup.HasMember(other))
+                        creatureGroup.RemoveMember(other);
+                }
+
+                creatureGroup.AddMember(creature);
             }
-            //Create new group
             else
             {
-                Log.outDebug(LogFilter.Unit, "Group not found: {0}. Creating new group.", leaderGuid);
-                CreatureGroup group = new(leaderGuid);
-                map.CreatureGroupHolder[leaderGuid] = group;
-                group.AddMember(member);
+                //Create new group
+                Log.outDebug(LogFilter.Unit, "Group not found: {0}. Creating new group.", leaderSpawnId);
+                CreatureGroup group = new(leaderSpawnId);
+                map.CreatureGroupHolder[leaderSpawnId] = group;
+                group.AddMember(creature);
             }
         }
 
         public static void RemoveCreatureFromGroup(CreatureGroup group, Creature member)
         {
-            Log.outDebug(LogFilter.Unit, "Deleting member GUID: {0} from group {1}", group.GetId(), member.GetSpawnId());
+            Log.outDebug(LogFilter.Unit, "Deleting member GUID: {0} from group {1}", group.GetLeaderSpawnId(), member.GetSpawnId());
             group.RemoveMember(member);
 
             if (group.IsEmpty())
             {
                 Map map = member.GetMap();
-                if (!map)
-                    return;
 
                 Log.outDebug(LogFilter.Unit, "Deleting group with InstanceID {0}", member.GetInstanceId());
-                map.CreatureGroupHolder.Remove(group.GetId());
+                Cypher.Assert(map.CreatureGroupHolder.ContainsKey(group.GetLeaderSpawnId()), $"Not registered group {group.GetLeaderSpawnId()} in map {map.GetId()}");
+                map.CreatureGroupHolder.Remove(group.GetLeaderSpawnId());
             }
         }
 
@@ -69,11 +81,8 @@ namespace Game.Entities
         {
             uint oldMSTime = Time.GetMSTime();
 
-            CreatureGroupMap.Clear();
-
             //Get group data
             SQLResult result = DB.World.Query("SELECT leaderGUID, memberGUID, dist, angle, groupAI, point_1, point_2 FROM creature_formations ORDER BY leaderGUID");
-
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creatures in formations. DB table `creature_formations` is empty!");
@@ -81,110 +90,155 @@ namespace Game.Entities
             }
 
             uint count = 0;
-            FormationInfo group_member;
+            List<ulong> leaderSpawnIds = new();
             do
             {
                 //Load group member data
-                group_member = new FormationInfo();
-                group_member.leaderGUID = result.Read<ulong>(0);
-                ulong memberGUID = result.Read<ulong>(1);
-                group_member.groupAI = result.Read<uint>(4);
-                group_member.point_1 = result.Read<ushort>(5);
-                group_member.point_2 = result.Read<ushort>(6);
+                FormationInfo member = new();
+                member.LeaderSpawnId = result.Read<ulong>(0);
+                ulong memberSpawnId = result.Read<ulong>(1);
+                member.FollowDist = 0f;
+                member.FollowAngle = 0f;
+
                 //If creature is group leader we may skip loading of dist/angle
-                if (group_member.leaderGUID != memberGUID)
+                if (member.LeaderSpawnId != memberSpawnId)
                 {
-                    group_member.follow_dist = result.Read<float>(2);
-                    group_member.follow_angle = result.Read<float>(3) * MathFunctions.PI / 180;
+                    member.FollowDist = result.Read<float>(2);
+                    member.FollowAngle = result.Read<float>(3) * MathFunctions.PI / 180;
                 }
-                else
-                {
-                    group_member.follow_dist = 0;
-                    group_member.follow_angle = 0;
-                }
+
+                member.GroupAI = result.Read<uint>(4);
+
+                for (var i = 0; i < 2; ++i)
+                    member.LeaderWaypointIDs[i] = result.Read<ushort>(5 + i);
 
                 // check data correctness
                 {
-                    if (Global.ObjectMgr.GetCreatureData(group_member.leaderGUID) == null)
+                    if (Global.ObjectMgr.GetCreatureData(member.LeaderSpawnId) == null)
                     {
-                        Log.outError(LogFilter.Sql, "creature_formations table leader guid {0} incorrect (not exist)", group_member.leaderGUID);
+                        Log.outError(LogFilter.Sql, $"creature_formations table leader guid {member.LeaderSpawnId} incorrect (not exist)");
                         continue;
                     }
 
-                    if (Global.ObjectMgr.GetCreatureData(memberGUID) == null)
+                    if (Global.ObjectMgr.GetCreatureData(memberSpawnId) == null)
                     {
-                        Log.outError(LogFilter.Sql, "creature_formations table member guid {0} incorrect (not exist)", memberGUID);
+                        Log.outError(LogFilter.Sql, $"creature_formations table member guid {memberSpawnId} incorrect (not exist)");
                         continue;
                     }
+
+                    leaderSpawnIds.Add(member.LeaderSpawnId);
                 }
 
-                CreatureGroupMap[memberGUID] = group_member;
+                _creatureGroupMap.Add(memberSpawnId, member);
                 ++count;
             }
             while (result.NextRow());
 
+            foreach (ulong leaderSpawnId in leaderSpawnIds)
+            {
+                if (!_creatureGroupMap.ContainsKey(leaderSpawnId))
+                {
+                    Log.outError(LogFilter.Sql, $"creature_formation contains leader spawn {leaderSpawnId} which is not included on its formation, removing");
+                    foreach (var itr in _creatureGroupMap.ToList())
+                    {
+                        if (itr.Value.LeaderSpawnId == leaderSpawnId)
+                            _creatureGroupMap.Remove(itr.Key);
+                    }
+                }
+            }
+
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} creatures in formations in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        public static Dictionary<ulong, FormationInfo> CreatureGroupMap = new();
+        public static FormationInfo GetFormationInfo(ulong spawnId)
+        {
+            return _creatureGroupMap.LookupByKey(spawnId);
+        }
+
+        public static void AddFormationMember(ulong spawnId, float followAng, float followDist, ulong leaderSpawnId, uint groupAI)
+        {
+            FormationInfo member = new();
+            member.LeaderSpawnId = leaderSpawnId;
+            member.FollowDist = followDist;
+            member.FollowAngle = followAng;
+            member.GroupAI = groupAI;
+            for (var i = 0; i < 2; ++i)
+                member.LeaderWaypointIDs[i] = 0;
+
+            _creatureGroupMap.Add(spawnId, member);
+        }
     }
 
     public class FormationInfo
     {
-        public ulong leaderGUID;
-        public float follow_dist;
-        public float follow_angle;
-        public uint groupAI;
-        public ushort point_1;
-        public ushort point_2;
+        public ulong LeaderSpawnId;
+        public float FollowDist;
+        public float FollowAngle;
+        public uint GroupAI;
+        public uint[] LeaderWaypointIDs = new uint[2];
     }
 
     public class CreatureGroup
     {
-        public CreatureGroup(ulong id)
+        Creature _leader;
+        Dictionary<Creature, FormationInfo> _members = new();
+
+        ulong _leaderSpawnId;
+        bool _formed;
+        bool _engaging;
+
+        public CreatureGroup(ulong leaderSpawnId)
         {
-            m_groupID = id;
+            _leaderSpawnId = leaderSpawnId;
         }
 
         public void AddMember(Creature member)
         {
-            Log.outDebug(LogFilter.Unit, "CreatureGroup.AddMember: Adding unit GUID: {0}.", member.GetGUID().ToString());
+            Log.outDebug(LogFilter.Unit, "CreatureGroup.AddMember: Adding {0}.", member.GetGUID().ToString());
 
             //Check if it is a leader
-            if (member.GetSpawnId() == m_groupID)
+            if (member.GetSpawnId() == _leaderSpawnId)
             {
-                Log.outDebug(LogFilter.Unit, "Unit GUID: {0} is formation leader. Adding group.", member.GetGUID().ToString());
-                m_leader = member;
+                Log.outDebug(LogFilter.Unit, "{0} is formation leader. Adding group.", member.GetGUID().ToString());
+                _leader = member;
             }
 
-            m_members[member] = FormationMgr.CreatureGroupMap.LookupByKey(member.GetSpawnId());
+            // formation must be registered at this point
+            FormationInfo formationInfo = FormationMgr.GetFormationInfo(member.GetSpawnId());
+            _members.Add(member, formationInfo);
             member.SetFormation(this);
         }
 
         public void RemoveMember(Creature member)
         {
-            if (m_leader == member)
-                m_leader = null;
+            if (_leader == member)
+                _leader = null;
 
-            m_members.Remove(member);
+            _members.Remove(member);
             member.SetFormation(null);
         }
 
         public void MemberEngagingTarget(Creature member, Unit target)
         {
-            GroupAIFlags groupAI = (GroupAIFlags)FormationMgr.CreatureGroupMap[member.GetSpawnId()].groupAI;
+            // used to prevent recursive calls
+            if (_engaging)
+                return;
+
+            GroupAIFlags groupAI = (GroupAIFlags)FormationMgr.GetFormationInfo(member.GetSpawnId()).GroupAI;
             if (groupAI == 0)
                 return;
 
-            if (member == m_leader)
+            if (member == _leader)
             {
-                if (!groupAI.HasAnyFlag(GroupAIFlags.MembersAssistLeader))
+                if (!groupAI.HasFlag(GroupAIFlags.MembersAssistLeader))
                     return;
             }
-            else if (!groupAI.HasAnyFlag(GroupAIFlags.LeaderAssistsMember))
+            else if (!groupAI.HasFlag(GroupAIFlags.LeaderAssistsMember))
                 return;
 
-            foreach (var pair in m_members)
+            _engaging = true;
+
+            foreach (var pair in _members)
             {
                 Creature other = pair.Key;
 
@@ -195,16 +249,18 @@ namespace Game.Entities
                 if (!other.IsAlive())
                     continue;
 
-                if (((other != m_leader && groupAI.HasAnyFlag(GroupAIFlags.MembersAssistLeader)) || (other == m_leader && groupAI.HasAnyFlag(GroupAIFlags.LeaderAssistsMember))) && other.IsValidAttackTarget(target))
+                if (((other != _leader && groupAI.HasFlag(GroupAIFlags.MembersAssistLeader)) || (other == _leader && groupAI.HasFlag(GroupAIFlags.LeaderAssistsMember))) && other.IsValidAttackTarget(target))
                     other.EngageWithTarget(target);
             }
+
+            _engaging = false;
         }
 
         public void FormationReset(bool dismiss)
         {
-            foreach (var creature in m_members.Keys)
+            foreach (var creature in _members.Keys)
             {
-                if (creature != m_leader && creature.IsAlive())
+                if (creature != _leader && creature.IsAlive())
                 {
                     if (dismiss)
                         creature.GetMotionMaster().Initialize();
@@ -213,37 +269,44 @@ namespace Game.Entities
                     Log.outDebug(LogFilter.Unit, "Set {0} movement for member GUID: {1}", dismiss ? "default" : "idle", creature.GetGUID().ToString());
                 }
             }
-            m_Formed = !dismiss;
+
+            _formed = !dismiss;
         }
 
         public void LeaderMoveTo(Position destination, uint id = 0, WaypointMoveType moveType = 0, bool orientation = false)
         {
             //! To do: This should probably get its own movement generator or use WaypointMovementGenerator.
             //! If the leader's path is known, member's path can be plotted as well using formation offsets.
-            if (!m_leader)
+            if (_leader == null)
                 return;
 
-            float x = destination.GetPositionX();
-            float y = destination.GetPositionY();
-            float z = destination.GetPositionZ();
-            float pathangle = (float)Math.Atan2(m_leader.GetPositionY() - y, m_leader.GetPositionX() - x);
+            Position pos = new(destination);
+            float pathangle = (float)Math.Atan2(_leader.GetPositionY() - pos.GetPositionY(), _leader.GetPositionX() - pos.GetPositionX());
 
-            foreach (var pair in m_members)
+            foreach (var pair in _members)
             {
                 Creature member = pair.Key;
-                if (member == m_leader || !member.IsAlive() || member.GetVictim() || !pair.Value.groupAI.HasAnyFlag((uint)GroupAIFlags.IdleInFormation))
+                if (member == _leader || !member.IsAlive() || member.IsEngaged() || !pair.Value.GroupAI.HasAnyFlag((uint)GroupAIFlags.IdleInFormation))
                     continue;
 
-                if (pair.Value.point_1 != 0)
-                    if (m_leader.GetCurrentWaypointInfo().nodeId == pair.Value.point_1 - 1 || m_leader.GetCurrentWaypointInfo().nodeId == pair.Value.point_2 - 1)
-                        pair.Value.follow_angle = (float)Math.PI * 2 - pair.Value.follow_angle;
+                if (pair.Value.LeaderWaypointIDs[0] != 0)
+                {
+                    for (var i = 0; i < 2; ++i)
+                    {
+                        if (_leader.GetCurrentWaypointInfo().nodeId == pair.Value.LeaderWaypointIDs[i])
+                        {
+                            pair.Value.FollowAngle = MathF.PI * 2f - pair.Value.FollowAngle;
+                            break;
+                        }
+                    }
+                }
 
-                float angle = pair.Value.follow_angle;
-                float dist = pair.Value.follow_dist;
+                float angle = pair.Value.FollowAngle;
+                float dist = pair.Value.FollowDist;
 
-                float dx = x + (float)Math.Cos(angle + pathangle) * dist;
-                float dy = y + (float)Math.Sin(angle + pathangle) * dist;
-                float dz = z;
+                float dx = pos.GetPositionX() + MathF.Cos(angle + pathangle) * dist;
+                float dy = pos.GetPositionY() + MathF.Sin(angle + pathangle) * dist;
+                float dz = pos.GetPositionZ();
 
                 GridDefines.NormalizeMapCoord(ref dx);
                 GridDefines.NormalizeMapCoord(ref dy);
@@ -253,16 +316,16 @@ namespace Game.Entities
 
                 Position point = new(dx, dy, dz, destination.GetOrientation());
 
-                member.GetMotionMaster().MoveFormation(id, point, moveType, !member.IsWithinDist(m_leader, dist + 5.0f), orientation);
+                member.GetMotionMaster().MoveFormation(id, point, moveType, !member.IsWithinDist(_leader, dist + 5.0f), orientation);
                 member.SetHomePosition(dx, dy, dz, pathangle);
             }
         }
 
         public bool CanLeaderStartMoving()
         {
-            foreach (var itr in m_members)
+            foreach (var itr in _members)
             {
-                if (itr.Key != m_leader && itr.Key.IsAlive())
+                if (itr.Key != _leader && itr.Key.IsAlive())
                 {
                     if (itr.Key.IsEngaged() || itr.Key.IsReturningHome())
                         return false;
@@ -272,16 +335,12 @@ namespace Game.Entities
             return true;
         }
 
-        public Creature GetLeader() { return m_leader; }
-        public ulong GetId() { return m_groupID; }
-        public bool IsEmpty() { return m_members.Empty(); }
-        public bool IsFormed() { return m_Formed; }
-        public bool IsLeader(Creature creature) { return m_leader == creature; }
-        
-        Creature m_leader;
-        Dictionary<Creature, FormationInfo> m_members = new();
+        public Creature GetLeader() { return _leader; }
+        public ulong GetLeaderSpawnId() { return _leaderSpawnId; }
+        public bool IsEmpty() { return _members.Empty(); }
+        public bool IsFormed() { return _formed; }
+        public bool IsLeader(Creature creature) { return _leader == creature; }
 
-        ulong m_groupID;
-        bool m_Formed;
+        public bool HasMember(Creature member) { return _members.ContainsKey(member); }
     }
 }
