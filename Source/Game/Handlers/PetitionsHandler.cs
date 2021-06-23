@@ -132,7 +132,7 @@ namespace Game
             signaturesPacket.OwnerAccountID = ObjectGuid.Create(HighGuid.WowAccount, Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(petition.ownerGuid));
             signaturesPacket.PetitionID = (int)petition.PetitionGuid.GetCounter();
 
-            foreach (var signature in petition.signatures)
+            foreach (var signature in petition.Signatures)
             {
                 ServerPetitionShowSignatures.PetitionSignature signaturePkt = new();
                 signaturePkt.Signer = signature.PlayerGuid;
@@ -170,7 +170,7 @@ namespace Game
             petitionInfo.Petitioner = petition.ownerGuid;
             petitionInfo.MinSignatures = reqSignatures;
             petitionInfo.MaxSignatures = reqSignatures;
-            petitionInfo.Title = petition.petitionName;
+            petitionInfo.Title = petition.PetitionName;
 
             responsePacket.Allow = true;
             responsePacket.Info = petitionInfo;
@@ -223,7 +223,7 @@ namespace Game
             }
 
             ObjectGuid ownerGuid = petition.ownerGuid;
-            int signs = petition.signatures.Count;
+            int signs = petition.Signatures.Count;
 
             if (ownerGuid == GetPlayer().GetGUID())
                 return;
@@ -272,7 +272,7 @@ namespace Game
             }
 
             // fill petition store
-            petition.AddSignature(packet.PetitionGUID, GetAccountId(), _player.GetGUID(), false);
+            petition.AddSignature(GetAccountId(), _player.GetGUID(), false);
 
             Log.outDebug(LogFilter.Network, "PETITION SIGN: {0} by player: {1} ({2} Account: {3})", packet.PetitionGUID.ToString(), GetPlayer().GetName(), GetPlayer().GetGUID().ToString(), GetAccountId());
 
@@ -360,7 +360,7 @@ namespace Game
                 return;
             }
 
-            string name = petition.petitionName; // we need a copy, Guild::AddMember invalidates petition
+            string name = petition.PetitionName; // we need a copy, Guild::AddMember invalidates petition
 
             // Only the petition owner can turn in the petition
             if (GetPlayer().GetGUID() != petition.ownerGuid)
@@ -383,7 +383,7 @@ namespace Game
                 return;
             }
 
-            var signatures = petition.signatures; // we need a copy, Guild::AddMember invalidates petition
+            var signatures = petition.Signatures; // we need a copy, Guild::AddMember invalidates petition
             uint requiredSignatures = WorldConfig.GetUIntValue(WorldCfg.MinPetitionSigns);
 
             // Notify player if signatures are missing

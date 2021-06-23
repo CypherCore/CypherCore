@@ -30,7 +30,7 @@ namespace Game.Chat
     [CommandGroup("lookup", RBACPermissions.CommandLookup, true)]
     class LookupCommands
     {
-        static int maxlookup = 50;
+        static int maxResults = 50;
 
         [Command("area", RBACPermissions.CommandLookupArea, true)]
         static bool Area(StringArguments args, CommandHandler handler)
@@ -70,9 +70,9 @@ namespace Game.Chat
 
                 if (locale < Locale.Total)
                 {
-                    if (maxlookup != 0 && count++ == maxlookup)
+                    if (maxResults != 0 && count++ == maxResults)
                     {
-                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxlookup);
+                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
                         return true;
                     }
 
@@ -121,9 +121,9 @@ namespace Game.Chat
 
                         if (name.Like(namePart))
                         {
-                            if (maxlookup != 0 && count++ == maxlookup)
+                            if (maxResults != 0 && count++ == maxResults)
                             {
-                                handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxlookup);
+                                handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
                                 return true;
                             }
 
@@ -146,9 +146,9 @@ namespace Game.Chat
 
                 if (_name.Like(namePart))
                 {
-                    if (maxlookup != 0 && count++ == maxlookup)
+                    if (maxResults != 0 && count++ == maxResults)
                     {
-                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxlookup);
+                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
                         return true;
                     }
 
@@ -192,9 +192,9 @@ namespace Game.Chat
 
                 if (descr.Like(namePart))
                 {
-                    if (maxlookup != 0 && count++ == maxlookup)
+                    if (maxResults != 0 && count++ == maxResults)
                     {
-                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxlookup);
+                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
                         return true;
                     }
 
@@ -259,9 +259,9 @@ namespace Game.Chat
 
                 if (locale < Locale.Total)
                 {
-                    if (maxlookup != 0 && count++ == maxlookup)
+                    if (maxResults != 0 && count++ == maxResults)
                     {
-                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxlookup);
+                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
                         return true;
                     }
 
@@ -330,9 +330,9 @@ namespace Game.Chat
 
                 if (name.Like(namePart))
                 {
-                    if (maxlookup != 0 && count++ == maxlookup)
+                    if (maxResults != 0 && count++ == maxResults)
                     {
-                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxlookup);
+                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
                         return true;
                     }
 
@@ -390,9 +390,9 @@ namespace Game.Chat
 
                 if (locale < Locale.Total)
                 {
-                    if (maxlookup != 0 && count++ == maxlookup)
+                    if (maxResults != 0 && count++ == maxResults)
                     {
-                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxlookup);
+                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
                         return true;
                     }
 
@@ -437,9 +437,9 @@ namespace Game.Chat
 
                         if (name.Like(namePart))
                         {
-                            if (maxlookup != 0 && count++ == maxlookup)
+                            if (maxResults != 0 && count++ == maxResults)
                             {
-                                handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxlookup);
+                                handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
                                 return true;
                             }
 
@@ -462,9 +462,9 @@ namespace Game.Chat
 
                 if (_name.Like(namePart))
                 {
-                    if (maxlookup != 0 && count++ == maxlookup)
+                    if (maxResults != 0 && count++ == maxResults)
                     {
-                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxlookup);
+                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
                         return true;
                     }
 
@@ -502,72 +502,66 @@ namespace Game.Chat
             foreach (var qInfo in qTemplates.Values)
             {
                 int localeIndex = handler.GetSessionDbLocaleIndex();
-                if (localeIndex >= 0)
+                QuestTemplateLocale questLocale = Global.ObjectMgr.GetQuestLocale(qInfo.Id);
+                if (questLocale != null)
                 {
-                    byte ulocaleIndex = (byte)localeIndex;
-                    QuestTemplateLocale questLocale = Global.ObjectMgr.GetQuestLocale(qInfo.Id);
-                    if (questLocale != null)
+                    if (questLocale.LogTitle.Length > localeIndex && !questLocale.LogTitle[localeIndex].IsEmpty())
                     {
-                        if (questLocale.LogTitle.Length > ulocaleIndex && !string.IsNullOrEmpty(questLocale.LogTitle[ulocaleIndex]))
+                        string title = questLocale.LogTitle[localeIndex];
+
+                        if (title.Like(namePart))
                         {
-                            string title = questLocale.LogTitle[ulocaleIndex];
-
-                            if (title.Like(namePart))
+                            if (maxResults != 0 && count++ == maxResults)
                             {
-                                if (maxlookup != 0 && count++ == maxlookup)
-                                {
-                                    handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxlookup);
-                                    return true;
-                                }
-
-                                string statusStr = "";
-
-                                if (target)
-                                {
-                                    QuestStatus status = target.GetQuestStatus(qInfo.Id);
-
-                                    switch (status)
-                                    {
-                                        case QuestStatus.Complete:
-                                            statusStr = handler.GetCypherString(CypherStrings.CommandQuestComplete);
-                                            break;
-                                        case QuestStatus.Incomplete:
-                                            statusStr = handler.GetCypherString(CypherStrings.CommandQuestActive);
-                                            break;
-                                        case QuestStatus.Rewarded:
-                                            statusStr = handler.GetCypherString(CypherStrings.CommandQuestRewarded);
-                                            break;
-                                        default:
-                                            break;
-                                    }
-                                }
-
-                                if (handler.GetSession() != null)
-                                {
-                                    int maxLevel = 0;
-                                    var questLevels = Global.DB2Mgr.GetContentTuningData(qInfo.ContentTuningId, handler.GetSession().GetPlayer().m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
-                                    if (questLevels.HasValue)
-                                        maxLevel = questLevels.Value.MaxLevel;
-
-                                    int scalingFactionGroup = 0;
-                                    ContentTuningRecord contentTuning = CliDB.ContentTuningStorage.LookupByKey(qInfo.ContentTuningId);
-                                    if (contentTuning != null)
-                                        scalingFactionGroup = contentTuning.GetScalingFactionGroup();
-
-                                    handler.SendSysMessage(CypherStrings.QuestListChat, qInfo.Id, qInfo.Id,
-                                        handler.GetSession().GetPlayer().GetQuestLevel(qInfo),
-                                        handler.GetSession().GetPlayer().GetQuestMinLevel(qInfo),
-                                        maxLevel, scalingFactionGroup,
-                                        title, statusStr);
-                                }
-                                else
-                                    handler.SendSysMessage(CypherStrings.QuestListConsole, qInfo.Id, title, statusStr);
-
-                                if (!found)
-                                    found = true;
-
-                                continue;
+                                handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
+                                return true;
                             }
+
+                            string statusStr = "";
+
+                            if (target)
+                            {
+                                switch (target.GetQuestStatus(qInfo.Id))
+                                {
+                                    case QuestStatus.Complete:
+                                        statusStr = handler.GetCypherString(CypherStrings.CommandQuestComplete);
+                                        break;
+                                    case QuestStatus.Incomplete:
+                                        statusStr = handler.GetCypherString(CypherStrings.CommandQuestActive);
+                                        break;
+                                    case QuestStatus.Rewarded:
+                                        statusStr = handler.GetCypherString(CypherStrings.CommandQuestRewarded);
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            }
+
+                            if (handler.GetSession() != null)
+                            {
+                                int maxLevel = 0;
+                                var questLevels = Global.DB2Mgr.GetContentTuningData(qInfo.ContentTuningId, handler.GetSession().GetPlayer().m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+                                if (questLevels.HasValue)
+                                    maxLevel = questLevels.Value.MaxLevel;
+
+                                int scalingFactionGroup = 0;
+                                ContentTuningRecord contentTuning = CliDB.ContentTuningStorage.LookupByKey(qInfo.ContentTuningId);
+                                if (contentTuning != null)
+                                    scalingFactionGroup = contentTuning.GetScalingFactionGroup();
+
+                                handler.SendSysMessage(CypherStrings.QuestListChat, qInfo.Id, qInfo.Id,
+                                    handler.GetSession().GetPlayer().GetQuestLevel(qInfo),
+                                    handler.GetSession().GetPlayer().GetQuestMinLevel(qInfo),
+                                    maxLevel, scalingFactionGroup,
+                                    title, statusStr);
+                            }
+                            else
+                                handler.SendSysMessage(CypherStrings.QuestListConsole, qInfo.Id, title, statusStr);
+
+                            if (!found)
+                                found = true;
+
+                            continue;
                         }
                     }
                 }
@@ -578,9 +572,9 @@ namespace Game.Chat
 
                 if (_title.Like(namePart))
                 {
-                    if (maxlookup != 0 && count++ == maxlookup)
+                    if (maxResults != 0 && count++ == maxResults)
                     {
-                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxlookup);
+                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
                         return true;
                     }
 
@@ -678,9 +672,9 @@ namespace Game.Chat
 
                 if (locale < Locale.Total)
                 {
-                    if (maxlookup != 0 && count++ == maxlookup)
+                    if (maxResults != 0 && count++ == maxResults)
                     {
-                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxlookup);
+                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
                         return true;
                     }
 
@@ -737,9 +731,9 @@ namespace Game.Chat
                 if (!name.Like(namePart))
                     continue;
 
-                if (maxlookup != 0 && count++ == maxlookup)
+                if (maxResults != 0 && count++ == maxResults)
                 {
-                    handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxlookup);
+                    handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
                     return true;
                 }
 
@@ -781,7 +775,7 @@ namespace Game.Chat
                 if (!tele.Value.name.Like(namePart))
                     continue;
 
-                if (maxlookup != 0 && count++ == maxlookup)
+                if (maxResults != 0 && count++ == maxResults)
                 {
                     limitReached = true;
                     break;
@@ -799,7 +793,7 @@ namespace Game.Chat
                 handler.SendSysMessage(CypherStrings.CommandTeleLocation, reply.ToString());
 
             if (limitReached)
-                handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxlookup);
+                handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
 
             return true;
         }
@@ -851,9 +845,9 @@ namespace Game.Chat
 
                     if (locale < Locale.Total)
                     {
-                        if (maxlookup != 0 && counter == maxlookup)
+                        if (maxResults != 0 && counter == maxResults)
                         {
-                            handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxlookup);
+                            handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
                             return true;
                         }
 
@@ -918,9 +912,9 @@ namespace Game.Chat
 
                 if (locale < Locale.Total)
                 { 
-                    if (maxlookup != 0 && counter == maxlookup)
+                    if (maxResults != 0 && counter == maxResults)
                     {
-                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxlookup);
+                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
                         return true;
                     }
 
@@ -1035,9 +1029,9 @@ namespace Game.Chat
                 uint count = 0;
                 do
                 {
-                    if (maxlookup != 0 && count++ == maxlookup)
+                    if (maxResults != 0 && count++ == maxResults)
                     {
-                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxlookup);
+                        handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
                         return true;
                     }
                     uint accountId = result.Read<uint>(0);
@@ -1120,9 +1114,9 @@ namespace Game.Chat
 
                         if (locale < Locale.Total)
                         {
-                            if (maxlookup != 0 && count++ == maxlookup)
+                            if (maxResults != 0 && count++ == maxResults)
                             {
-                                handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxlookup);
+                                handler.SendSysMessage(CypherStrings.CommandLookupMaxResults, maxResults);
                                 return true;
                             }
 

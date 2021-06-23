@@ -68,7 +68,7 @@ namespace Game.Entities
                 if (petition == null)
                     continue;
 
-                petition.AddSignature(petition.PetitionGuid, result.Read<uint>(1), ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(2)), true);
+                petition.AddSignature(result.Read<uint>(1), ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(2)), true);
                 ++count;
             } while (result.NextRow());
 
@@ -80,8 +80,8 @@ namespace Game.Entities
             Petition p = new();
             p.PetitionGuid = petitionGuid;
             p.ownerGuid = ownerGuid;
-            p.petitionName = name;
-            p.signatures.Clear();
+            p.PetitionName = name;
+            p.Signatures.Clear();
 
             _petitionStorage[petitionGuid] = p;
 
@@ -160,28 +160,28 @@ namespace Game.Entities
     {
         public ObjectGuid PetitionGuid;
         public ObjectGuid ownerGuid;
-        public string petitionName;
-        public List<(uint AccountId, ObjectGuid PlayerGuid)> signatures = new();
+        public string PetitionName;
+        public List<(uint AccountId, ObjectGuid PlayerGuid)> Signatures = new();
 
         public bool IsPetitionSignedByAccount(uint accountId)
         {
-            foreach (var signature in signatures)
+            foreach (var signature in Signatures)
                 if (signature.AccountId == accountId)
                     return true;
 
             return false;
         }
 
-        public void AddSignature(ObjectGuid petitionGuid, uint accountId, ObjectGuid playerGuid, bool isLoading)
+        public void AddSignature(uint accountId, ObjectGuid playerGuid, bool isLoading)
         {
-            signatures.Add((accountId, playerGuid));
+            Signatures.Add((accountId, playerGuid));
 
             if (isLoading)
                 return;
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_PETITION_SIGNATURE);
             stmt.AddValue(0, ownerGuid.GetCounter());
-            stmt.AddValue(1, petitionGuid.GetCounter());
+            stmt.AddValue(1, PetitionGuid.GetCounter());
             stmt.AddValue(2, playerGuid.GetCounter());
             stmt.AddValue(3, accountId);
 
@@ -190,7 +190,7 @@ namespace Game.Entities
 
         public void UpdateName(string newName)
         {
-            petitionName = newName;
+            PetitionName = newName;
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_PETITION_NAME);
             stmt.AddValue(0, newName);
@@ -200,11 +200,11 @@ namespace Game.Entities
 
         public void RemoveSignatureBySigner(ObjectGuid playerGuid)
         {
-            foreach (var itr in signatures)
+            foreach (var itr in Signatures)
             {
                 if (itr.PlayerGuid == playerGuid)
                 {
-                    signatures.Remove(itr);
+                    Signatures.Remove(itr);
 
                     // notify owner
                     Player owner = Global.ObjAccessor.FindConnectedPlayer(ownerGuid);

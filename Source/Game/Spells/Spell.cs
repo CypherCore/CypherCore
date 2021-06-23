@@ -2698,15 +2698,15 @@ namespace Game.Spells
                 // This prevents spells such as Hunter's Mark from triggering pet attack
                 if (m_spellInfo.DmgClass != SpellDmgClass.None)
                 {
-                    Unit unitTarget = m_targets.GetUnitTarget();
-                    if (unitTarget)
+                    Unit target = m_targets.GetUnitTarget();
+                    if (target != null)
                     {
                         foreach (Unit controlled in playerCaster.m_Controlled)
                         {
                             Creature cControlled = controlled.ToCreature();
                             if (cControlled != null)
                                 if (cControlled.IsAIEnabled)
-                                    cControlled.GetAI().OwnerAttacked(unitTarget);
+                                    cControlled.GetAI().OwnerAttacked(target);
                         }
                     }
                 }
@@ -2784,8 +2784,7 @@ namespace Game.Spells
 
                     if (aura_effmask != 0)
                     {
-                        DiminishingGroup diminishGroup = m_spellInfo.GetDiminishingReturnsGroupForSpell();
-                        if (diminishGroup != 0)
+                        if (m_spellInfo.GetDiminishingReturnsGroupForSpell() != 0)
                         {
                             DiminishingReturnsType type = m_spellInfo.GetDiminishingReturnsGroupType();
                             if (type == DiminishingReturnsType.All || (type == DiminishingReturnsType.Player && target.IsAffectedByDiminishingReturns()))

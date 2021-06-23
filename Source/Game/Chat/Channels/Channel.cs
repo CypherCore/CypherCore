@@ -764,8 +764,8 @@ namespace Game.Chat
 
                 if (exclaim)
                 {
-                    ChannelNameBuilder ownerChangedBuilder = new(this, new OwnerChangedAppend(_ownerGuid));
-                    SendToAll(ownerChangedBuilder);
+                    ChannelNameBuilder ownerBuilder = new(this, new OwnerChangedAppend(_ownerGuid));
+                    SendToAll(ownerBuilder);
                 }
 
                 UpdateChannelInDB();

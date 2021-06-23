@@ -722,9 +722,9 @@ namespace Game.AI
                         {
                             foreach (var seat in vehicle.Seats)
                             {
-                                Player player1 = Global.ObjAccessor.GetPlayer(unit, seat.Value.Passenger.Guid);
-                                if (player1 != null)
-                                    player1.GroupEventHappens(e.Action.quest.questId, GetBaseObject());
+                                Player passenger = Global.ObjAccessor.GetPlayer(unit, seat.Value.Passenger.Guid);
+                                if (passenger != null)
+                                    passenger.GroupEventHappens(e.Action.quest.questId, GetBaseObject());
                             }
                         }
                         break;
