@@ -3403,7 +3403,7 @@ namespace Game.Entities
                 // Spells with melee and magic school mask, decide whether resistance or armor absorb is higher
                 if (spellInfo != null && spellInfo.HasAttribute(SpellCustomAttributes.SchoolmaskNormalWithMagic))
                 {
-                    uint damageAfterArmor = CalcArmorReducedDamage(attacker, victim, damage, spellInfo, WeaponAttackType.BaseAttack);
+                    uint damageAfterArmor = CalcArmorReducedDamage(attacker, victim, damage, spellInfo, spellInfo.GetAttackType());
                     float armorReduction = damage - damageAfterArmor;
 
                     // pick the lower one, the weakest resistance counts

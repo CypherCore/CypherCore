@@ -4982,9 +4982,9 @@ namespace Game.Spells
             // Calculate armor mitigation
             if (Unit.IsDamageReducedByArmor(GetSpellInfo().GetSchoolMask(), GetSpellInfo(), (sbyte)GetEffIndex()))
             {
-                uint damageReductedArmor = Unit.CalcArmorReducedDamage(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetAttackType(), GetBase().GetCasterLevel());
-                cleanDamage.mitigated_damage += damage - damageReductedArmor;
-                damage = damageReductedArmor;
+                uint damageReducedArmor = Unit.CalcArmorReducedDamage(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetAttackType(), GetBase().GetCasterLevel());
+                cleanDamage.mitigated_damage += damage - damageReducedArmor;
+                damage = damageReducedArmor;
             }
 
             if (!GetSpellInfo().HasAttribute(SpellAttr4.FixedDamage))
@@ -5047,7 +5047,7 @@ namespace Game.Spells
                 caster.SpellHitResult(target, GetSpellInfo(), false) != SpellMissInfo.None)
                 return;
 
-            CleanDamage cleanDamage = new(0, 0, WeaponAttackType.BaseAttack, MeleeHitOutcome.Normal);
+            CleanDamage cleanDamage = new(0, 0, GetSpellInfo().GetAttackType(), MeleeHitOutcome.Normal);
 
             uint stackAmountForBonuses = !GetSpellEffectInfo().EffectAttributes.HasFlag(SpellEffectAttributes.NoScaleWithStack) ? GetBase().GetStackAmount() : 1u;
 
@@ -5066,9 +5066,9 @@ namespace Game.Spells
             // Calculate armor mitigation
             if (Unit.IsDamageReducedByArmor(GetSpellInfo().GetSchoolMask(), GetSpellInfo(), (sbyte)GetEffIndex()))
             {
-                uint damageReductedArmor = Unit.CalcArmorReducedDamage(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetAttackType(), GetBase().GetCasterLevel());
-                cleanDamage.mitigated_damage += damage - damageReductedArmor;
-                damage = damageReductedArmor;
+                uint damageReducedArmor = Unit.CalcArmorReducedDamage(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetAttackType(), GetBase().GetCasterLevel());
+                cleanDamage.mitigated_damage += damage - damageReducedArmor;
+                damage = damageReducedArmor;
             }
 
             if (!GetSpellInfo().HasAttribute(SpellAttr4.FixedDamage))
@@ -5083,7 +5083,7 @@ namespace Game.Spells
 
             damage = (uint)dmg;
 
-            DamageInfo damageInfo = new(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetSchoolMask(), DamageEffectType.DOT, WeaponAttackType.BaseAttack);
+            DamageInfo damageInfo = new(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetSchoolMask(), DamageEffectType.DOT, GetSpellInfo().GetAttackType());
             Unit.CalcAbsorbResist(damageInfo);
 
             uint absorb = damageInfo.GetAbsorb();
