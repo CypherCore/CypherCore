@@ -4895,9 +4895,6 @@ namespace Game.Spells
 
         void HandlePeriodicDamageAurasTick(Unit target, Unit caster)
         {
-            // dynobj auras must always have a caster
-            Cypher.Assert(GetSpellEffectInfo().Effect != SpellEffectName.PersistentAreaAura || caster != null);
-
             if (!target.IsAlive())
                 return;
 
@@ -4908,6 +4905,7 @@ namespace Game.Spells
             }
 
             // Consecrate ticks can miss and will not show up in the combat log
+            // dynobj auras must always have a caster
             if (GetSpellEffectInfo().Effect == SpellEffectName.PersistentAreaAura &&
                 caster.SpellHitResult(target, GetSpellInfo(), false) != SpellMissInfo.None)
                 return;
@@ -5031,9 +5029,6 @@ namespace Game.Spells
 
         void HandlePeriodicHealthLeechAuraTick(Unit target, Unit caster)
         {
-            // dynobj auras must always have a caster
-            Cypher.Assert(GetSpellEffectInfo().Effect != SpellEffectName.PersistentAreaAura || caster != null);
-
             if (!target.IsAlive())
                 return;
 
@@ -5043,6 +5038,7 @@ namespace Game.Spells
                 return;
             }
 
+            // dynobj auras must always have a caster
             if (GetSpellEffectInfo().Effect == SpellEffectName.PersistentAreaAura &&
                 caster.SpellHitResult(target, GetSpellInfo(), false) != SpellMissInfo.None)
                 return;
@@ -5111,10 +5107,11 @@ namespace Game.Spells
             }
 
             int new_damage = (int)Unit.DealDamage(caster, target, damage, cleanDamage, DamageEffectType.DOT, GetSpellInfo().GetSchoolMask(), GetSpellInfo(), false);
+            Unit.ProcSkillsAndAuras(caster, target, procAttacker, procVictim, ProcFlagsSpellType.Damage, ProcFlagsSpellPhase.None, hitMask, null, damageInfo, null);
+
+            // process caster heal from now on (must be in world)
             if (!caster || !caster.IsAlive())
                 return;
-
-            Unit.ProcSkillsAndAuras(caster, target, procAttacker, procVictim, ProcFlagsSpellType.Damage, ProcFlagsSpellPhase.None, hitMask, null, damageInfo, null);
 
             float gainMultiplier = GetSpellEffectInfo().CalcValueMultiplier(caster);
 
@@ -5162,9 +5159,6 @@ namespace Game.Spells
 
         void HandlePeriodicHealAurasTick(Unit target, Unit caster)
         {
-            // dynobj auras must always have a caster
-            Cypher.Assert(GetSpellEffectInfo().Effect != SpellEffectName.PersistentAreaAura || caster != null);
-
             if (!target.IsAlive())
                 return;
 
