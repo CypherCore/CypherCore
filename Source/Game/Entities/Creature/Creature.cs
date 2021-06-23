@@ -939,6 +939,7 @@ namespace Game.Entities
                         if (!mgr.IsThreatenedBy(newTarget, true))
                         {
                             mgr.AddThreat(newTarget, 0.0f, null, true, true);
+                            Cypher.Assert(mgr.IsThreatenedBy(newTarget, true), $"{GetName()} tried to add combatant {newTarget.GetName()} to threat list, but this failed - potential infinite loop"); // prevent potential infinite loop
                             break;
                         }
                         else
