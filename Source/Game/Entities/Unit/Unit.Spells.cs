@@ -1447,22 +1447,20 @@ namespace Game.Entities
             AuraType[] diseaseAuraTypes =
             {
                 AuraType.PeriodicDamage, // Frost Fever and Blood Plague
-                AuraType.Linked,          // Crypt Fever and Ebon Plague
-                AuraType.None
+                AuraType.Linked          // Crypt Fever and Ebon Plague
             };
 
             uint diseases = 0;
-            foreach (var aura in diseaseAuraTypes)
+            foreach (var aType in diseaseAuraTypes)
             {
-                if (aura == AuraType.None)
+                if (aType == AuraType.None)
                     break;
 
-                for (var i = 0; i < m_modAuras[aura].Count;)
+                for (var i = 0; i < m_modAuras[aType].Count;)
                 {
-                    var eff = m_modAuras[aura][i];
+                    var eff = m_modAuras[aType][i];
                     // Get auras with disease dispel type by caster
-                    if (eff.GetSpellInfo().Dispel == DispelType.Disease
-                        && eff.GetCasterGUID() == casterGUID)
+                    if (eff.GetSpellInfo().Dispel == DispelType.Disease && eff.GetCasterGUID() == casterGUID)
                     {
                         ++diseases;
 
@@ -2850,12 +2848,13 @@ namespace Game.Entities
                     if (IsTypeId(TypeId.Player))
                         ToPlayer().SendAutoRepeatCancel(this);
 
-                m_currentSpells[spellType] = null;
-
                 if (spell.GetState() != SpellState.Finished)
                     spell.Cancel();
                 else
+                {
+                    m_currentSpells[spellType] = null;
                     spell.SetReferencedFromCurrent(false);
+                }
 
                 if (IsCreature() && IsAIEnabled)
                     ToCreature().GetAI().OnSpellCastInterrupt(spell.GetSpellInfo());
