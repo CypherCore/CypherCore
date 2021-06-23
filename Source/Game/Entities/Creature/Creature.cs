@@ -924,32 +924,8 @@ namespace Game.Entities
         {
             Unit target;
 
-            ThreatManager mgr = GetThreatManager();
-
-            if (mgr.CanHaveThreatList())
-            {
-                target = mgr.SelectVictim();
-                while (!target)
-                {
-                    Unit newTarget = null;
-                    // nothing found to attack - try to find something we're in combat with (but don't have a threat entry for yet) and start attacking it
-                    foreach (var pair in GetCombatManager().GetPvECombatRefs())
-                    {
-                        newTarget = pair.Value.GetOther(this);
-                        if (!mgr.IsThreatenedBy(newTarget, true))
-                        {
-                            mgr.AddThreat(newTarget, 0.0f, null, true, true);
-                            Cypher.Assert(mgr.IsThreatenedBy(newTarget, true), $"{GetName()} tried to add combatant {newTarget.GetName()} to threat list, but this failed - potential infinite loop"); // prevent potential infinite loop
-                            break;
-                        }
-                        else
-                            newTarget = null;
-                    }
-                    if (!newTarget)
-                        break;
-                    target = mgr.SelectVictim();
-                }
-            }
+            if (CanHaveThreatList())
+                target = GetThreatManager().SelectVictim();
             else if (!HasReactState(ReactStates.Passive))
             {
                 // We're a player pet, probably
@@ -989,15 +965,6 @@ namespace Game.Entities
             /// @todo a vehicle may eat some mob, so mob should not evade
             if (GetVehicle())
                 return null;
-
-            // search nearby enemy before enter evade mode
-            if (HasReactState(ReactStates.Passive))
-            {
-                target = SelectNearestTargetInAttackDistance(m_CombatDistance != 0 ? m_CombatDistance : SharedConst.AttackDistance);
-
-                if (target && _IsTargetAcceptable(target) && CanCreatureAttack(target))
-                    return target;
-            }
 
             var iAuras = GetAuraEffectsByType(AuraType.ModInvisibility);
             if (!iAuras.Empty())
