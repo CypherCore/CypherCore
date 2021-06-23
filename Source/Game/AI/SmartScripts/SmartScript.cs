@@ -2901,13 +2901,19 @@ namespace Game.AI
                         }
                         break;
                     }
-                case SmartTargets.VehicleAccessory:
+                case SmartTargets.VehiclePassenger:
                     {
                         if (_me && _me.IsVehicle())
                         {
-                            Unit target = _me.GetVehicleKit().GetPassenger((sbyte)e.Target.vehicle.seat);
-                            if (target)
-                                targets.Add(target);
+                            foreach (var pair in _me.GetVehicleKit().Seats)
+                            {
+                                if (e.Target.vehicle.seatMask == 0 || (e.Target.vehicle.seatMask & (1 << pair.Key)) != 0)
+                                {
+                                    Unit u = Global.ObjAccessor.GetUnit(_me, pair.Value.Passenger.Guid);
+                                    if (u != null)
+                                        targets.Add(u);
+                                }
+                            }
                         }
                         break;
                     }

@@ -447,7 +447,7 @@ namespace Game.AI
                 case SmartTargets.Stored:
                 case SmartTargets.LootRecipients:
                 case SmartTargets.Farthest:
-                case SmartTargets.VehicleAccessory:
+                case SmartTargets.VehiclePassenger:
                 case SmartTargets.SpellTarget:
                     break;
                 default:
@@ -3130,7 +3130,7 @@ namespace Game.AI
         }
         public struct Vehicle
         {
-            public uint seat;
+            public uint seatMask;
         }
         public struct Raw
         {

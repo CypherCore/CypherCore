@@ -426,7 +426,7 @@ namespace Framework.Constants
         ClosestFriendly = 26,   // maxDist, playerOnly
         LootRecipients = 27,   // all players that have tagged this creature (for kill credit)
         Farthest = 28,   // maxDist, playerOnly, isInLos
-        VehicleAccessory = 29,   // seat number (vehicle can target it's own accessory)
+        VehiclePassenger = 29,   // seatMask (0 - all seats)
         SpellTarget = 30,
 
         End = 31
