@@ -556,17 +556,17 @@ namespace Game.Entities
                 if (meleeAttackAuraEffect == null)
                 {
                     CalcDamageInfo damageInfo;
-                    CalculateMeleeDamage(victim, 0, out damageInfo, attType);
+                    CalculateMeleeDamage(victim, out damageInfo, attType);
                     // Send log damage message to client
-                    DealDamageMods(damageInfo.attacker, victim, ref damageInfo.damage, ref damageInfo.absorb);
+                    DealDamageMods(damageInfo.Attacker, victim, ref damageInfo.Damage, ref damageInfo.Absorb);
                     SendAttackStateUpdate(damageInfo);
 
                     DealMeleeDamage(damageInfo, true);
 
                     DamageInfo dmgInfo = new(damageInfo);
-                    ProcSkillsAndAuras(damageInfo.attacker, damageInfo.target, damageInfo.procAttacker, damageInfo.procVictim, ProcFlagsSpellType.None, ProcFlagsSpellPhase.None, dmgInfo.GetHitMask(), null, dmgInfo, null);
+                    ProcSkillsAndAuras(damageInfo.Attacker, damageInfo.Target, damageInfo.ProcAttacker, damageInfo.ProcVictim, ProcFlagsSpellType.None, ProcFlagsSpellPhase.None, dmgInfo.GetHitMask(), null, dmgInfo, null);
                     Log.outDebug(LogFilter.Unit, "AttackerStateUpdate: {0} attacked {1} for {2} dmg, absorbed {3}, blocked {4}, resisted {5}.",
-                        GetGUID().ToString(), victim.GetGUID().ToString(), damageInfo.damage, damageInfo.absorb, damageInfo.blocked_amount, damageInfo.resist);
+                        GetGUID().ToString(), victim.GetGUID().ToString(), damageInfo.Damage, damageInfo.Absorb, damageInfo.Blocked, damageInfo.Resist);
                 }
                 else
                 {
@@ -604,25 +604,27 @@ namespace Game.Entities
                 SetFacingToObject(victim, false); // update client side facing to face the target (prevents visual glitches when casting untargeted spells)
 
             CalcDamageInfo damageInfo = new();
-            damageInfo.attacker = this;
-            damageInfo.target = victim;
-            damageInfo.damageSchoolMask = (uint)GetMeleeDamageSchoolMask();
-            damageInfo.attackType = attType;
-            damageInfo.damage = 0;
-            damageInfo.originalDamage = 0;
-            damageInfo.cleanDamage = 0;
-            damageInfo.absorb = 0;
-            damageInfo.resist = 0;
-            damageInfo.blocked_amount = 0;
+            damageInfo.Attacker = this;
+            damageInfo.Target = victim;
+
+            damageInfo.DamageSchoolMask = (uint)GetMeleeDamageSchoolMask();
+            damageInfo.OriginalDamage = 0;
+            damageInfo.Damage = 0;
+            damageInfo.Absorb = 0;
+            damageInfo.Resist = 0;
+
+            damageInfo.AttackType = attType;
+            damageInfo.CleanDamage = 0;
+            damageInfo.Blocked = 0;
 
             damageInfo.TargetState = VictimState.Hit;
             damageInfo.HitInfo = HitInfo.AffectsVictim | HitInfo.NormalSwing | HitInfo.FakeDamage;
             if (attType == WeaponAttackType.OffAttack)
                 damageInfo.HitInfo |= HitInfo.OffHand;
 
-            damageInfo.procAttacker = ProcFlags.None;
-            damageInfo.procVictim = ProcFlags.None;
-            damageInfo.hitOutCome = MeleeHitOutcome.Normal;
+            damageInfo.ProcAttacker = ProcFlags.None;
+            damageInfo.ProcVictim = ProcFlags.None;
+            damageInfo.HitOutCome = MeleeHitOutcome.Normal;
 
             SendAttackStateUpdate(damageInfo);
         }
@@ -693,15 +695,15 @@ namespace Game.Entities
         {
             CalcDamageInfo dmgInfo = new();
             dmgInfo.HitInfo = HitInfo;
-            dmgInfo.attacker = this;
-            dmgInfo.target = target;
-            dmgInfo.damage = Damage - AbsorbDamage - Resist - BlockedAmount;
-            dmgInfo.originalDamage = Damage;
-            dmgInfo.damageSchoolMask = (uint)damageSchoolMask;
-            dmgInfo.absorb = AbsorbDamage;
-            dmgInfo.resist = Resist;
+            dmgInfo.Attacker = this;
+            dmgInfo.Target = target;
+            dmgInfo.Damage = Damage - AbsorbDamage - Resist - BlockedAmount;
+            dmgInfo.OriginalDamage = Damage;
+            dmgInfo.DamageSchoolMask = (uint)damageSchoolMask;
+            dmgInfo.Absorb = AbsorbDamage;
+            dmgInfo.Resist = Resist;
             dmgInfo.TargetState = TargetState;
-            dmgInfo.blocked_amount = BlockedAmount;
+            dmgInfo.Blocked = BlockedAmount;
             SendAttackStateUpdate(dmgInfo);
         }
 
@@ -709,27 +711,27 @@ namespace Game.Entities
         {
             AttackerStateUpdate packet = new();
             packet.hitInfo = damageInfo.HitInfo;
-            packet.AttackerGUID = damageInfo.attacker.GetGUID();
-            packet.VictimGUID = damageInfo.target.GetGUID();
-            packet.Damage = (int)damageInfo.damage;
-            packet.OriginalDamage = (int)damageInfo.originalDamage;
-            int overkill = (int)(damageInfo.damage - damageInfo.target.GetHealth());
+            packet.AttackerGUID = damageInfo.Attacker.GetGUID();
+            packet.VictimGUID = damageInfo.Target.GetGUID();
+            packet.Damage = (int)damageInfo.Damage;
+            packet.OriginalDamage = (int)damageInfo.OriginalDamage;
+            int overkill = (int)(damageInfo.Damage - damageInfo.Target.GetHealth());
             packet.OverDamage = (overkill < 0 ? -1 : overkill);
 
             SubDamage subDmg = new();
-            subDmg.SchoolMask = (int)damageInfo.damageSchoolMask;   // School of sub damage
-            subDmg.FDamage = damageInfo.damage;                // sub damage
-            subDmg.Damage = (int)damageInfo.damage;                 // Sub Damage
-            subDmg.Absorbed = (int)damageInfo.absorb;
-            subDmg.Resisted = (int)damageInfo.resist;
+            subDmg.SchoolMask = (int)damageInfo.DamageSchoolMask;   // School of sub damage
+            subDmg.FDamage = damageInfo.Damage;                // sub damage
+            subDmg.Damage = (int)damageInfo.Damage;                 // Sub Damage
+            subDmg.Absorbed = (int)damageInfo.Absorb;
+            subDmg.Resisted = (int)damageInfo.Resist;
             packet.SubDmg.Set(subDmg);
 
             packet.VictimState = (byte)damageInfo.TargetState;
-            packet.BlockAmount = (int)damageInfo.blocked_amount;
-            packet.LogData.Initialize(damageInfo.attacker);
+            packet.BlockAmount = (int)damageInfo.Blocked;
+            packet.LogData.Initialize(damageInfo.Attacker);
 
             ContentTuningParams contentTuningParams = new();
-            if (contentTuningParams.GenerateDataForUnits(damageInfo.attacker, damageInfo.target))
+            if (contentTuningParams.GenerateDataForUnits(damageInfo.Attacker, damageInfo.Target))
                 packet.ContentTuning = contentTuningParams;
 
             SendCombatLogMessage(packet);
@@ -1086,26 +1088,28 @@ namespace Game.Entities
         }
 
         // TODO for melee need create structure as in
-        void CalculateMeleeDamage(Unit victim, uint damage, out CalcDamageInfo damageInfo, WeaponAttackType attackType)
+        void CalculateMeleeDamage(Unit victim, out CalcDamageInfo damageInfo, WeaponAttackType attackType)
         {
             damageInfo = new CalcDamageInfo();
 
-            damageInfo.attacker = this;
-            damageInfo.target = victim;
-            damageInfo.damageSchoolMask = (uint)SpellSchoolMask.Normal;
-            damageInfo.attackType = attackType;
-            damageInfo.damage = 0;
-            damageInfo.originalDamage = 0;
-            damageInfo.cleanDamage = 0;
-            damageInfo.absorb = 0;
-            damageInfo.resist = 0;
-            damageInfo.blocked_amount = 0;
+            damageInfo.Attacker = this;
+            damageInfo.Target = victim;
 
-            damageInfo.TargetState = 0;
+            damageInfo.DamageSchoolMask = (uint)SpellSchoolMask.Normal;
+            damageInfo.Damage = 0;
+            damageInfo.OriginalDamage = 0;
+            damageInfo.Absorb = 0;
+            damageInfo.Resist = 0;
+
+            damageInfo.Blocked = 0;
             damageInfo.HitInfo = 0;
-            damageInfo.procAttacker = ProcFlags.None;
-            damageInfo.procVictim = ProcFlags.None;
-            damageInfo.hitOutCome = MeleeHitOutcome.Evade;
+            damageInfo.TargetState = 0;
+
+            damageInfo.AttackType = attackType;
+            damageInfo.ProcAttacker = ProcFlags.None;
+            damageInfo.ProcVictim = ProcFlags.None;
+            damageInfo.CleanDamage = 0;
+            damageInfo.HitOutCome = MeleeHitOutcome.Evade;
 
             if (victim == null)
                 return;
@@ -1117,12 +1121,12 @@ namespace Game.Entities
             switch (attackType)
             {
                 case WeaponAttackType.BaseAttack:
-                    damageInfo.procAttacker = ProcFlags.DoneMeleeAutoAttack | ProcFlags.DoneMainHandAttack;
-                    damageInfo.procVictim = ProcFlags.TakenMeleeAutoAttack;
+                    damageInfo.ProcAttacker = ProcFlags.DoneMeleeAutoAttack | ProcFlags.DoneMainHandAttack;
+                    damageInfo.ProcVictim = ProcFlags.TakenMeleeAutoAttack;
                     break;
                 case WeaponAttackType.OffAttack:
-                    damageInfo.procAttacker = ProcFlags.DoneMeleeAutoAttack | ProcFlags.DoneOffHandAttack;
-                    damageInfo.procVictim = ProcFlags.TakenMeleeAutoAttack;
+                    damageInfo.ProcAttacker = ProcFlags.DoneMeleeAutoAttack | ProcFlags.DoneOffHandAttack;
+                    damageInfo.ProcVictim = ProcFlags.TakenMeleeAutoAttack;
                     damageInfo.HitInfo = HitInfo.OffHand;
                     break;
                 default:
@@ -1130,108 +1134,116 @@ namespace Game.Entities
             }
 
             // Physical Immune check
-            if (damageInfo.target.IsImmunedToDamage((SpellSchoolMask)damageInfo.damageSchoolMask))
+            if (damageInfo.Target.IsImmunedToDamage((SpellSchoolMask)damageInfo.DamageSchoolMask))
             {
                 damageInfo.HitInfo |= HitInfo.NormalSwing;
                 damageInfo.TargetState = VictimState.Immune;
 
-                damageInfo.damage = 0;
-                damageInfo.cleanDamage = 0;
+                damageInfo.Damage = 0;
+                damageInfo.CleanDamage = 0;
                 return;
             }
 
-            damage += CalculateDamage(damageInfo.attackType, false, true);
+            uint damage = 0;
+            damage += CalculateDamage(damageInfo.AttackType, false, true);
             // Add melee damage bonus
-            damage = MeleeDamageBonusDone(damageInfo.target, damage, damageInfo.attackType, DamageEffectType.Direct);
-            damage = damageInfo.target.MeleeDamageBonusTaken(this, damage, damageInfo.attackType, DamageEffectType.Direct);
+            damage = MeleeDamageBonusDone(damageInfo.Target, damage, damageInfo.AttackType, DamageEffectType.Direct, null, (SpellSchoolMask)damageInfo.DamageSchoolMask);
+            damage = damageInfo.Target.MeleeDamageBonusTaken(this, damage, damageInfo.AttackType, DamageEffectType.Direct, null, (SpellSchoolMask)damageInfo.DamageSchoolMask);
 
             // Script Hook For CalculateMeleeDamage -- Allow scripts to change the Damage pre class mitigation calculations
-            Global.ScriptMgr.ModifyMeleeDamage(damageInfo.target, damageInfo.attacker, ref damage);
+            Global.ScriptMgr.ModifyMeleeDamage(damageInfo.Target, damageInfo.Attacker, ref damage);
 
             // Calculate armor reduction
-            if (IsDamageReducedByArmor((SpellSchoolMask)damageInfo.damageSchoolMask))
+            if (IsDamageReducedByArmor((SpellSchoolMask)damageInfo.DamageSchoolMask))
             {
-                damageInfo.damage = CalcArmorReducedDamage(damageInfo.attacker, damageInfo.target, damage, null, damageInfo.attackType);
-                damageInfo.cleanDamage += damage - damageInfo.damage;
+                damageInfo.Damage = CalcArmorReducedDamage(damageInfo.Attacker, damageInfo.Target, damage, null, damageInfo.AttackType);
+                damageInfo.CleanDamage += damage - damageInfo.Damage;
             }
             else
-                damageInfo.damage = damage;
+                damageInfo.Damage = damage;
 
-            damageInfo.hitOutCome = RollMeleeOutcomeAgainst(damageInfo.target, damageInfo.attackType);
+            damageInfo.HitOutCome = RollMeleeOutcomeAgainst(damageInfo.Target, damageInfo.AttackType);
 
-            switch (damageInfo.hitOutCome)
+            switch (damageInfo.HitOutCome)
             {
                 case MeleeHitOutcome.Evade:
                     damageInfo.HitInfo |= HitInfo.Miss | HitInfo.SwingNoHitSound;
                     damageInfo.TargetState = VictimState.Evades;
-                    damageInfo.originalDamage = damageInfo.damage;
-                    damageInfo.damage = 0;
-                    damageInfo.cleanDamage = 0;
+                    damageInfo.OriginalDamage = damageInfo.Damage;
+
+                    damageInfo.Damage = 0;
+                    damageInfo.CleanDamage = 0;
                     return;
                 case MeleeHitOutcome.Miss:
                     damageInfo.HitInfo |= HitInfo.Miss;
                     damageInfo.TargetState = VictimState.Intact;
-                    damageInfo.originalDamage = damageInfo.damage;
-                    damageInfo.damage = 0;
-                    damageInfo.cleanDamage = 0;
+                    damageInfo.OriginalDamage = damageInfo.Damage;
+
+                    damageInfo.Damage = 0;
+                    damageInfo.CleanDamage = 0;
                     break;
                 case MeleeHitOutcome.Normal:
                     damageInfo.TargetState = VictimState.Hit;
-                    damageInfo.originalDamage = damageInfo.damage;
+                    damageInfo.OriginalDamage = damageInfo.Damage;
                     break;
                 case MeleeHitOutcome.Crit:
                     damageInfo.HitInfo |= HitInfo.CriticalHit;
                     damageInfo.TargetState = VictimState.Hit;
                     // Crit bonus calc
-                    damageInfo.damage += damageInfo.damage;
+                    damageInfo.Damage *= 2;
 
                     // Increase crit damage from SPELL_AURA_MOD_CRIT_DAMAGE_BONUS
-                    float mod = (GetTotalAuraMultiplierByMiscMask(AuraType.ModCritDamageBonus, damageInfo.damageSchoolMask) - 1.0f) * 100;
+                    float mod = (GetTotalAuraMultiplierByMiscMask(AuraType.ModCritDamageBonus, damageInfo.DamageSchoolMask) - 1.0f) * 100;
 
                     if (mod != 0)
-                        MathFunctions.AddPct(ref damageInfo.damage, mod);
+                        MathFunctions.AddPct(ref damageInfo.Damage, mod);
 
-                    damageInfo.originalDamage = damageInfo.damage;
+                    damageInfo.OriginalDamage = damageInfo.Damage;
                     break;
                 case MeleeHitOutcome.Parry:
                     damageInfo.TargetState = VictimState.Parry;
-                    damageInfo.originalDamage = damageInfo.damage;
-                    damageInfo.cleanDamage += damageInfo.damage;
-                    damageInfo.damage = 0;
+                    damageInfo.CleanDamage += damageInfo.Damage;
+
+                    damageInfo.OriginalDamage = damageInfo.Damage;
+                    damageInfo.Damage = 0;
                     break;
                 case MeleeHitOutcome.Dodge:
                     damageInfo.TargetState = VictimState.Dodge;
-                    damageInfo.originalDamage = damageInfo.damage;
-                    damageInfo.cleanDamage += damageInfo.damage;
-                    damageInfo.damage = 0;
+                    damageInfo.CleanDamage += damageInfo.Damage;
+
+                    damageInfo.OriginalDamage = damageInfo.Damage;
+                    damageInfo.Damage = 0;
                     break;
                 case MeleeHitOutcome.Block:
                     damageInfo.TargetState = VictimState.Hit;
                     damageInfo.HitInfo |= HitInfo.Block;
-                    damageInfo.originalDamage = damageInfo.damage;
                     // 30% damage blocked, double blocked amount if block is critical
-                    damageInfo.blocked_amount = MathFunctions.CalculatePct(damageInfo.damage, damageInfo.target.IsBlockCritical() ? damageInfo.target.GetBlockPercent(GetLevel()) * 2 : damageInfo.target.GetBlockPercent(GetLevel()));
-                    damageInfo.damage -= damageInfo.blocked_amount;
-                    damageInfo.cleanDamage += damageInfo.blocked_amount;
+                    damageInfo.Blocked = MathFunctions.CalculatePct(damageInfo.Damage, damageInfo.Target.GetBlockPercent(GetLevel()));
+                    if (damageInfo.Target.IsBlockCritical())
+                        damageInfo.Blocked *= 2;
+
+                    damageInfo.OriginalDamage = damageInfo.Damage;
+                    damageInfo.Damage -= damageInfo.Blocked;
+                    damageInfo.CleanDamage += damageInfo.Blocked;
                     break;
                 case MeleeHitOutcome.Glancing:
                     damageInfo.HitInfo |= HitInfo.Glancing;
                     damageInfo.TargetState = VictimState.Hit;
-                    damageInfo.originalDamage = damageInfo.damage;
                     int leveldif = (int)victim.GetLevel() - (int)GetLevel();
                     if (leveldif > 3)
                         leveldif = 3;
 
+                    damageInfo.OriginalDamage = damageInfo.Damage;
                     float reducePercent = 1.0f - leveldif * 0.1f;
-                    damageInfo.cleanDamage += damageInfo.damage - (uint)(reducePercent * damageInfo.damage);
-                    damageInfo.damage = (uint)(reducePercent * damageInfo.damage);
+                    damageInfo.CleanDamage += damageInfo.Damage - (uint)(reducePercent * damageInfo.Damage);
+                    damageInfo.Damage = (uint)(reducePercent * damageInfo.Damage);
                     break;
                 case MeleeHitOutcome.Crushing:
                     damageInfo.HitInfo |= HitInfo.Crushing;
                     damageInfo.TargetState = VictimState.Hit;
                     // 150% normal damage
-                    damageInfo.damage += (damageInfo.damage / 2);
-                    damageInfo.originalDamage = damageInfo.damage;
+                    damageInfo.Damage += (damageInfo.Damage / 2);
+                    damageInfo.OriginalDamage = damageInfo.Damage;
                     break;
 
                 default:
@@ -1242,34 +1254,34 @@ namespace Game.Entities
             if (!damageInfo.HitInfo.HasAnyFlag(HitInfo.Miss))
                 damageInfo.HitInfo |= HitInfo.AffectsVictim;
 
-            int resilienceReduction = (int)damageInfo.damage;
+            int resilienceReduction = (int)damageInfo.Damage;
             if (CanApplyResilience())
                 ApplyResilience(victim, ref resilienceReduction);
 
-            resilienceReduction = (int)damageInfo.damage - resilienceReduction;
-            damageInfo.damage -= (uint)resilienceReduction;
-            damageInfo.cleanDamage += (uint)resilienceReduction;
+            resilienceReduction = (int)damageInfo.Damage - resilienceReduction;
+            damageInfo.Damage -= (uint)resilienceReduction;
+            damageInfo.CleanDamage += (uint)resilienceReduction;
 
             // Calculate absorb resist
-            if (damageInfo.damage > 0)
+            if (damageInfo.Damage > 0)
             {
-                damageInfo.procVictim |= ProcFlags.TakenDamage;
+                damageInfo.ProcVictim |= ProcFlags.TakenDamage;
                 // Calculate absorb & resists
                 DamageInfo dmgInfo = new(damageInfo);
                 CalcAbsorbResist(dmgInfo);
-                damageInfo.absorb = dmgInfo.GetAbsorb();
-                damageInfo.resist = dmgInfo.GetResist();
+                damageInfo.Absorb = dmgInfo.GetAbsorb();
+                damageInfo.Resist = dmgInfo.GetResist();
 
-                if (damageInfo.absorb != 0)
-                    damageInfo.HitInfo |= (damageInfo.damage - damageInfo.absorb == 0 ? HitInfo.FullAbsorb : HitInfo.PartialAbsorb);
+                if (damageInfo.Absorb != 0)
+                    damageInfo.HitInfo |= (damageInfo.Damage - damageInfo.Absorb == 0 ? HitInfo.FullAbsorb : HitInfo.PartialAbsorb);
 
-                if (damageInfo.resist != 0)
-                    damageInfo.HitInfo |= (damageInfo.damage - damageInfo.resist == 0 ? HitInfo.FullResist : HitInfo.PartialResist);
+                if (damageInfo.Resist != 0)
+                    damageInfo.HitInfo |= (damageInfo.Damage - damageInfo.Resist == 0 ? HitInfo.FullResist : HitInfo.PartialResist);
 
-                damageInfo.damage = dmgInfo.GetDamage();
+                damageInfo.Damage = dmgInfo.GetDamage();
             }
             else // Impossible get negative result but....
-                damageInfo.damage = 0;
+                damageInfo.Damage = 0;
         }
 
         MeleeHitOutcome RollMeleeOutcomeAgainst(Unit victim, WeaponAttackType attType)
@@ -1431,14 +1443,7 @@ namespace Game.Entities
             maxDamage = Math.Max(0.0f, maxDamage);
 
             if (minDamage > maxDamage)
-            {
-                minDamage += maxDamage;
-                maxDamage = minDamage - maxDamage;
-                minDamage -= maxDamage;
-            }
-
-            if (maxDamage == 0.0f)
-                maxDamage = 5.0f;
+                Extensions.Swap(ref minDamage, ref maxDamage);
 
             return RandomHelper.URand(minDamage, maxDamage);
         }

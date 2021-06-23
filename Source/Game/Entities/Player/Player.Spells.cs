@@ -1739,6 +1739,15 @@ namespace Game.Entities
 
         public Dictionary<uint, PlayerSpell> GetSpellMap() { return m_spells; }
 
+        public override SpellSchoolMask GetMeleeDamageSchoolMask(WeaponAttackType attackType = WeaponAttackType.BaseAttack)
+        {
+            Item weapon = GetWeaponForAttack(attackType, true);
+            if (weapon != null)
+                return (SpellSchoolMask)(1 << (int)weapon.GetTemplate().GetDamageType());
+
+            return SpellSchoolMask.Normal;
+        }
+        
         void CastAllObtainSpells()
         {
             int inventoryEnd = InventorySlots.ItemStart + GetInventorySlotCount();

@@ -239,17 +239,17 @@ namespace Game.Entities
 
         public DamageInfo(CalcDamageInfo dmgInfo)
         {
-            m_attacker = dmgInfo.attacker;
-            m_victim = dmgInfo.target;
-            m_damage = dmgInfo.damage;
-            m_originalDamage = dmgInfo.damage;
+            m_attacker = dmgInfo.Attacker;
+            m_victim = dmgInfo.Target;
+            m_damage = dmgInfo.Damage;
+            m_originalDamage = dmgInfo.Damage;
             m_spellInfo = null;
-            m_schoolMask = (SpellSchoolMask)dmgInfo.damageSchoolMask;
+            m_schoolMask = (SpellSchoolMask)dmgInfo.DamageSchoolMask;
             m_damageType = DamageEffectType.Direct;
-            m_attackType = dmgInfo.attackType;
-            m_absorb = dmgInfo.absorb;
-            m_resist = dmgInfo.resist;
-            m_block = dmgInfo.blocked_amount;
+            m_attackType = dmgInfo.AttackType;
+            m_absorb = dmgInfo.Absorb;
+            m_resist = dmgInfo.Resist;
+            m_block = dmgInfo.Blocked;
 
             switch (dmgInfo.TargetState)
             {
@@ -271,7 +271,7 @@ namespace Game.Entities
                 m_hitMask |= ProcFlagsHit.Block;
 
             bool damageNullified = dmgInfo.HitInfo.HasAnyFlag(HitInfo.FullAbsorb | HitInfo.FullResist) || m_hitMask.HasAnyFlag(ProcFlagsHit.Immune | ProcFlagsHit.FullBlock);
-            switch (dmgInfo.hitOutCome)
+            switch (dmgInfo.HitOutCome)
             {
                 case MeleeHitOutcome.Miss:
                     m_hitMask |= ProcFlagsHit.Miss;
@@ -428,22 +428,23 @@ namespace Game.Entities
 
     public class CalcDamageInfo
     {
-        public Unit attacker { get; set; }             // Attacker
-        public Unit target { get; set; }               // Target for damage
-        public uint damageSchoolMask { get; set; }
-        public uint damage;
-        public uint originalDamage;
-        public uint absorb;
-        public uint resist;
-        public uint blocked_amount { get; set; }
+        public Unit Attacker { get; set; }             // Attacker
+        public Unit Target { get; set; }               // Target for damage
+        public uint DamageSchoolMask { get; set; }
+        public uint Damage;
+        public uint OriginalDamage { get; set; }
+        public uint Absorb;
+        public uint Resist { get; set; }
+        public uint Blocked { get; set; }
         public HitInfo HitInfo { get; set; }
         public VictimState TargetState { get; set; }
+
         // Helper
-        public WeaponAttackType attackType { get; set; }
-        public ProcFlags procAttacker { get; set; }
-        public ProcFlags procVictim { get; set; }
-        public uint cleanDamage { get; set; }        // Used only for rage calculation
-        public MeleeHitOutcome hitOutCome { get; set; }  // TODO: remove this field (need use TargetState)
+        public WeaponAttackType AttackType { get; set; }
+        public ProcFlags ProcAttacker { get; set; }
+        public ProcFlags ProcVictim { get; set; }
+        public uint CleanDamage { get; set; }        // Used only for rage calculation
+        public MeleeHitOutcome HitOutCome { get; set; }  // TODO: remove this field (need use TargetState)
     }
 
     public class SpellNonMeleeDamage

@@ -2920,7 +2920,7 @@ namespace Game.Entities
 
         void DealMeleeDamage(CalcDamageInfo damageInfo, bool durabilityLoss)
         {
-            Unit victim = damageInfo.target;
+            Unit victim = damageInfo.Target;
 
             if (!victim.IsAlive() || victim.HasUnitState(UnitState.InFlight) || (victim.IsTypeId(TypeId.Unit) && victim.ToCreature().IsEvadingAttacks()))
                 return;
@@ -2928,7 +2928,7 @@ namespace Game.Entities
             // Hmmmm dont like this emotes client must by self do all animations
             if (damageInfo.HitInfo.HasAnyFlag(HitInfo.CriticalHit))
                 victim.HandleEmoteCommand(Emote.OneshotWoundCritical);
-            if (damageInfo.blocked_amount != 0 && damageInfo.TargetState != VictimState.Blocks)
+            if (damageInfo.Blocked != 0 && damageInfo.TargetState != VictimState.Blocks)
                 victim.HandleEmoteCommand(Emote.OneshotParryShield);
 
             if (damageInfo.TargetState == VictimState.Parry &&
@@ -2965,11 +2965,11 @@ namespace Game.Entities
             }
 
             // Call default DealDamage
-            CleanDamage cleanDamage = new(damageInfo.cleanDamage, damageInfo.absorb, damageInfo.attackType, damageInfo.hitOutCome);
-            DealDamage(this, victim, damageInfo.damage, cleanDamage, DamageEffectType.Direct, (SpellSchoolMask)damageInfo.damageSchoolMask, null, durabilityLoss);
+            CleanDamage cleanDamage = new(damageInfo.CleanDamage, damageInfo.Absorb, damageInfo.AttackType, damageInfo.HitOutCome);
+            DealDamage(this, victim, damageInfo.Damage, cleanDamage, DamageEffectType.Direct, (SpellSchoolMask)damageInfo.DamageSchoolMask, null, durabilityLoss);
 
             // If this is a creature and it attacks from behind it has a probability to daze it's victim
-            if ((damageInfo.hitOutCome == MeleeHitOutcome.Crit || damageInfo.hitOutCome == MeleeHitOutcome.Crushing || damageInfo.hitOutCome == MeleeHitOutcome.Normal || damageInfo.hitOutCome == MeleeHitOutcome.Glancing) &&
+            if ((damageInfo.HitOutCome == MeleeHitOutcome.Crit || damageInfo.HitOutCome == MeleeHitOutcome.Crushing || damageInfo.HitOutCome == MeleeHitOutcome.Normal || damageInfo.HitOutCome == MeleeHitOutcome.Glancing) &&
                 !IsTypeId(TypeId.Player) && !ToCreature().IsControlledByPlayer() && !victim.HasInArc(MathFunctions.PI, this)
                 && (victim.IsTypeId(TypeId.Player) || !victim.ToCreature().IsWorldBoss()) && !victim.IsVehicle())
             {
@@ -2999,7 +2999,7 @@ namespace Game.Entities
             }
 
             // Do effect if any damage done to target
-            if (damageInfo.damage != 0)
+            if (damageInfo.Damage != 0)
             {
                 // We're going to call functions which can modify content of the list during iteration over it's elements
                 // Let's copy the list so we can prevent iterator invalidation
@@ -3042,7 +3042,7 @@ namespace Game.Entities
                     damageShield.Defender = GetGUID();
                     damageShield.SpellID = spellInfo.Id;
                     damageShield.TotalDamage = damage;
-                    damageShield.OriginalDamage = (int)damageInfo.originalDamage;
+                    damageShield.OriginalDamage = (int)damageInfo.OriginalDamage;
                     damageShield.OverKill = (uint)Math.Max(damage - GetHealth(), 0);
                     damageShield.SchoolMask = (uint)spellInfo.SchoolMask;
                     damageShield.LogAbsorbed = damageInfo1.GetAbsorb();
@@ -3810,10 +3810,10 @@ namespace Game.Entities
                 return damage;
 
             float mitigation = Math.Min(armor / (armor + armorConstant), 0.85f);
-            return Math.Max((uint)(damage * (1.0f - mitigation)), 1);
+            return Math.Max((uint)(damage * (1.0f - mitigation)), 0);
         }
 
-        public uint MeleeDamageBonusDone(Unit victim, uint pdamage, WeaponAttackType attType, DamageEffectType damagetype, SpellInfo spellProto = null)
+        public uint MeleeDamageBonusDone(Unit victim, uint pdamage, WeaponAttackType attType, DamageEffectType damagetype, SpellInfo spellProto = null, SpellSchoolMask damageSchoolMask = SpellSchoolMask.Normal)
         {
             if (victim == null || pdamage == 0)
                 return 0;
@@ -3856,12 +3856,13 @@ namespace Game.Entities
             // Done total percent damage auras
             float DoneTotalMod = 1.0f;
 
+            SpellSchoolMask schoolMask = spellProto != null ? spellProto.GetSchoolMask() : damageSchoolMask;
 
-            if (spellProto != null)
+            if ((schoolMask & SpellSchoolMask.Normal) == 0)
             {
                 // Some spells don't benefit from pct done mods
                 // mods for SPELL_SCHOOL_MASK_NORMAL are already factored in base melee damage calculation
-                if (!spellProto.HasAttribute(SpellAttr6.IgnoreCasterDamageModifiers) && !spellProto.GetSchoolMask().HasAnyFlag(SpellSchoolMask.Normal))
+                if (spellProto == null || !spellProto.HasAttribute(SpellAttr6.IgnoreCasterDamageModifiers))
                 {
                     float maxModDamagePercentSchool = 0.0f;
                     Player thisPlayer = ToPlayer();
@@ -3869,21 +3870,22 @@ namespace Game.Entities
                     {
                         for (var i = SpellSchools.Holy; i < SpellSchools.Max; ++i)
                         {
-                            if (Convert.ToBoolean((int)spellProto.GetSchoolMask() & (1 << (int)i)))
+                            if (Convert.ToBoolean((int)schoolMask & (1 << (int)i)))
                                 maxModDamagePercentSchool = Math.Max(maxModDamagePercentSchool, thisPlayer.m_activePlayerData.ModDamageDonePercent[(int)i]);
                         }
                     }
                     else
-                        maxModDamagePercentSchool = GetTotalAuraMultiplierByMiscMask(AuraType.ModDamagePercentDone, (uint)spellProto.GetSchoolMask());
+                        maxModDamagePercentSchool = GetTotalAuraMultiplierByMiscMask(AuraType.ModDamagePercentDone, (uint)schoolMask);
 
                     DoneTotalMod *= maxModDamagePercentSchool;
                 }
-                else
-                {
-                    // melee attack
-                    foreach (AuraEffect autoAttackDamage in GetAuraEffectsByType(AuraType.ModAutoAttackDamage))
-                        MathFunctions.AddPct(ref DoneTotalMod, autoAttackDamage.GetAmount());
-                }
+            }
+
+            if (spellProto == null)
+            {
+                // melee attack
+                foreach (AuraEffect autoAttackDamage in GetAuraEffectsByType(AuraType.ModAutoAttackDamage))
+                    MathFunctions.AddPct(ref DoneTotalMod, autoAttackDamage.GetAmount());
             }
 
             DoneTotalMod *= GetTotalAuraMultiplierByMiscMask(AuraType.ModDamageDoneVersus, creatureTypeMask);
@@ -3919,7 +3921,7 @@ namespace Game.Entities
             return (uint)Math.Max(tmpDamage, 0.0f);
         }
 
-        public uint MeleeDamageBonusTaken(Unit attacker, uint pdamage, WeaponAttackType attType, DamageEffectType damagetype, SpellInfo spellProto = null)
+        public uint MeleeDamageBonusTaken(Unit attacker, uint pdamage, WeaponAttackType attType, DamageEffectType damagetype, SpellInfo spellProto = null, SpellSchoolMask damageSchoolMask = SpellSchoolMask.Normal)
         {
             if (pdamage == 0)
                 return 0;
@@ -3996,7 +3998,7 @@ namespace Game.Entities
             // Sanctified Wrath (bypass damage reduction)
             if (attacker != null && TakenTotalMod < 1.0f)
             {
-                SpellSchoolMask attackSchoolMask = spellProto != null ? spellProto.GetSchoolMask() : SpellSchoolMask.Normal;
+                SpellSchoolMask attackSchoolMask = spellProto != null ? spellProto.GetSchoolMask() : damageSchoolMask;
 
                 float damageReduction = 1.0f - TakenTotalMod;
                 var casterIgnoreResist = attacker.GetAuraEffectsByType(AuraType.ModIgnoreTargetResist);
@@ -4022,7 +4024,7 @@ namespace Game.Entities
             return false;
         }
 
-        public virtual SpellSchoolMask GetMeleeDamageSchoolMask() { return SpellSchoolMask.None; }
+        public virtual SpellSchoolMask GetMeleeDamageSchoolMask(WeaponAttackType attackType = WeaponAttackType.BaseAttack) { return SpellSchoolMask.None; }
 
         float CalculateDefaultCoefficient(SpellInfo spellInfo, DamageEffectType damagetype)
         {

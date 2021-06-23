@@ -3130,7 +3130,7 @@ namespace Game.Entities
             return (T)i_AI;
         }
 
-        public override SpellSchoolMask GetMeleeDamageSchoolMask() { return m_meleeDamageSchoolMask; }
+        public override SpellSchoolMask GetMeleeDamageSchoolMask(WeaponAttackType attackType = WeaponAttackType.BaseAttack) { return m_meleeDamageSchoolMask; }
         public void SetMeleeDamageSchool(SpellSchools school) { m_meleeDamageSchoolMask = (SpellSchoolMask)(1 << (int)school); }
 
         public sbyte GetOriginalEquipmentId() { return m_originalEquipmentId; }

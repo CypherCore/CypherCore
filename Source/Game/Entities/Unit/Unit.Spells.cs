@@ -1845,12 +1845,6 @@ namespace Game.Entities
             }
         }
 
-        void TriggerAurasProcOnEvent(CalcDamageInfo damageInfo)
-        {
-            DamageInfo dmgInfo = new(damageInfo);
-            TriggerAurasProcOnEvent(null, null, damageInfo.target, damageInfo.procAttacker, damageInfo.procVictim, ProcFlagsSpellType.None, ProcFlagsSpellPhase.None, dmgInfo.GetHitMask(), null, dmgInfo, null);
-        }
-
         void TriggerAurasProcOnEvent(List<AuraApplication> myProcAuras, List<AuraApplication> targetProcAuras, Unit actionTarget, ProcFlags typeMaskActor, ProcFlags typeMaskActionTarget, ProcFlagsSpellType spellTypeMask, ProcFlagsSpellPhase spellPhaseMask, ProcFlagsHit hitMask, Spell spell, DamageInfo damageInfo, HealInfo healInfo)
         {
             // prepare data for self trigger
