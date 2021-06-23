@@ -36,7 +36,7 @@ namespace Game.Spells
 {
     public partial class Spell : IDisposable
     {
-        public Spell(Unit caster, SpellInfo info, TriggerCastFlags triggerFlags, ObjectGuid originalCasterGUID = default, bool skipcheck = false)
+        public Spell(Unit caster, SpellInfo info, TriggerCastFlags triggerFlags, ObjectGuid originalCasterGUID = default)
         {
             m_spellInfo = info;
             m_caster = (info.HasAttribute(SpellAttr6.CastByCharmer) && caster.GetCharmerOrOwner() != null ? caster.GetCharmerOrOwner() : caster);
@@ -47,7 +47,6 @@ namespace Game.Spells
             m_SpellVisual.SpellXSpellVisualID = caster.GetCastSpellXSpellVisualId(m_spellInfo);
 
             m_customError = SpellCustomErrors.None;
-            m_skipCheck = skipcheck;
             m_fromClient = false;
             m_needComboPoints = m_spellInfo.NeedsComboPoints();
 
@@ -1613,11 +1612,7 @@ namespace Game.Spells
 
             // Calculate hit result
             if (m_originalCaster != null)
-            {
                 targetInfo.missCondition = m_originalCaster.SpellHitResult(target, m_spellInfo, m_canReflect && !(IsPositive() && m_caster.IsFriendlyTo(target)));
-                if (m_skipCheck && targetInfo.missCondition != SpellMissInfo.Immune)
-                    targetInfo.missCondition = SpellMissInfo.None;
-            }
             else
                 targetInfo.missCondition = SpellMissInfo.Evade;
 
@@ -7580,8 +7575,6 @@ namespace Game.Spells
         // we can't store original aura link to prevent access to deleted auras
         // and in same time need aura data and after aura deleting.
         public SpellInfo m_triggeredByAuraSpell;
-
-        bool m_skipCheck;
         #endregion
     }
 

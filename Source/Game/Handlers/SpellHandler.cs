@@ -330,7 +330,7 @@ namespace Game
             if (cast.Cast.MoveUpdate.HasValue)
                 HandleMovementOpcode(ClientOpcodes.MoveStop, cast.Cast.MoveUpdate.Value);
 
-            Spell spell = new(caster, spellInfo, TriggerCastFlags.None, ObjectGuid.Empty, false);
+            Spell spell = new(caster, spellInfo, TriggerCastFlags.None);
 
             SpellPrepare spellPrepare = new();
             spellPrepare.ClientCastID = cast.Cast.CastID;

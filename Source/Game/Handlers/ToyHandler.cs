@@ -79,7 +79,7 @@ namespace Game
 
             SpellCastTargets targets = new(_player, packet.Cast);
 
-            Spell spell = new(_player, spellInfo, TriggerCastFlags.None, ObjectGuid.Empty, false);
+            Spell spell = new(_player, spellInfo, TriggerCastFlags.None);
 
             SpellPrepare spellPrepare = new();
             spellPrepare.ClientCastID = packet.Cast.CastID;
