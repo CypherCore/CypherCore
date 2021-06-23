@@ -1702,7 +1702,7 @@ namespace Game.Spells
 
             Action<Unit> flagAddFn = null;
             Action<Unit> flagRemoveFn = null;
-            uint slot;
+            byte slot;
             WeaponAttackType attType;
             switch (type)
             {
@@ -1742,10 +1742,10 @@ namespace Game.Spells
             {
                 Player player = target.ToPlayer();
 
-                Item item = player.GetItemByPos(InventorySlots.Bag0, (byte)slot);
+                Item item = player.GetItemByPos(InventorySlots.Bag0, slot);
                 if (item != null)
                 {
-                    WeaponAttackType attackType = Player.GetAttackBySlot((byte)slot, item.GetTemplate().GetInventoryType());
+                    WeaponAttackType attackType = Player.GetAttackBySlot(slot, item.GetTemplate().GetInventoryType());
 
                     player.ApplyItemDependentAuras(item, !apply);
                     if (attackType < WeaponAttackType.Max)

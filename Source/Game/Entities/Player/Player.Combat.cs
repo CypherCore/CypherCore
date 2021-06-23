@@ -291,17 +291,14 @@ namespace Game.Entities
             return true;
         }
 
-        public void _ApplyWeaponDamage(uint slot, Item item, bool apply)
+        public void _ApplyWeaponDamage(byte slot, Item item, bool apply)
         {
             ItemTemplate proto = item.GetTemplate();
-            WeaponAttackType attType = WeaponAttackType.BaseAttack;
+            WeaponAttackType attType = GetAttackBySlot(slot, proto.GetInventoryType());
+            if (attType == WeaponAttackType.Max)
+                return;
+
             float damage = 0.0f;
-
-            if (slot == EquipmentSlot.MainHand && (proto.GetInventoryType() == InventoryType.Ranged || proto.GetInventoryType() == InventoryType.RangedRight))
-                attType = WeaponAttackType.RangedAttack;
-            else if (slot == EquipmentSlot.OffHand)
-                attType = WeaponAttackType.OffAttack;
-
             uint itemLevel = item.GetItemLevel(this);
             float minDamage, maxDamage;
             proto.GetDamage(itemLevel, out minDamage, out maxDamage);
