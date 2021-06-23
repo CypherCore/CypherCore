@@ -3157,7 +3157,7 @@ namespace Game.Entities
                 if (spellInfo.GetDiminishingReturnsGroupForSpell() != diminishGroup)
                     continue;
 
-                int existingDuration = itr.Value.GetBase().GetMaxDuration();
+                int existingDuration = itr.Value.GetBase().GetDuration();
                 int newDuration = auraSpellInfo.GetMaxDuration();
                 ApplyDiminishingToDuration(auraSpellInfo, ref newDuration, caster, level);
                 if (newDuration > 0 && newDuration < existingDuration)
