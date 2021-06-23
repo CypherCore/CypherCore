@@ -6865,7 +6865,7 @@ namespace Game.Spells
                     {
                         if (effect.IsTargetingArea() || effect.IsAreaAuraEffect() || effect.IsEffect(SpellEffectName.PersistentAreaAura))
                         {
-                            m_damage = unit.CalculateAOEAvoidance(m_damage, (uint)m_spellInfo.SchoolMask, m_caster);
+                            m_damage = unit.CalculateAOEAvoidance(m_damage, (uint)m_spellInfo.SchoolMask, m_caster.GetGUID());
 
                             if (m_caster.IsPlayer())
                             {

@@ -4990,7 +4990,7 @@ namespace Game.Spells
             if (!GetSpellInfo().HasAttribute(SpellAttr4.FixedDamage))
             {
                 if (GetSpellEffectInfo().IsTargetingArea() || GetSpellEffectInfo().IsAreaAuraEffect() || GetSpellEffectInfo().Effect == SpellEffectName.PersistentAreaAura)
-                    damage = (uint)target.CalculateAOEAvoidance((int)damage, (uint)m_spellInfo.SchoolMask, caster);
+                    damage = (uint)target.CalculateAOEAvoidance((int)damage, (uint)m_spellInfo.SchoolMask, GetBase().GetCastItemGUID());
             }
 
             int dmg = (int)damage;
@@ -5074,7 +5074,7 @@ namespace Game.Spells
             if (!GetSpellInfo().HasAttribute(SpellAttr4.FixedDamage))
             {
                 if (GetSpellEffectInfo().IsTargetingArea() || GetSpellEffectInfo().IsAreaAuraEffect() || GetSpellEffectInfo().Effect == SpellEffectName.PersistentAreaAura)
-                    damage = (uint)target.CalculateAOEAvoidance((int)damage, (uint)m_spellInfo.SchoolMask, caster);
+                    damage = (uint)target.CalculateAOEAvoidance((int)damage, (uint)m_spellInfo.SchoolMask, GetBase().GetCastItemGUID());
             }
 
             int dmg = (int)damage;

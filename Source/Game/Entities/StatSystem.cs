@@ -741,10 +741,10 @@ namespace Game.Entities
             damage -= (int)target.GetDamageReduction((uint)damage);
         }
 
-        public int CalculateAOEAvoidance(int damage, uint schoolMask, Unit caster)
+        public int CalculateAOEAvoidance(int damage, uint schoolMask, ObjectGuid casterGuid)
         {
             damage = (int)((float)damage * GetTotalAuraMultiplierByMiscMask(AuraType.ModAoeDamageAvoidance, schoolMask));
-            if (caster.IsCreature())
+            if (casterGuid.IsAnyTypeCreature())
                 damage = (int)((float)damage * GetTotalAuraMultiplierByMiscMask(AuraType.ModCreatureAoeDamageAvoidance, schoolMask));
 
             return damage;
