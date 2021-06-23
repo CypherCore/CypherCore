@@ -3064,12 +3064,14 @@ namespace Game.Entities
                     case 53096: // Quetz'lun's Judgment
                     case 70743: // AoD Special
                     case 70614: // AoD Special - Vegard
-                    case 4020: // Safirdrang's Chill
+                    case 4020:  // Safirdrang's Chill
                     case 52438: // Summon Skittering Swarmer (Force Cast)
                     case 52449: // Summon Skittering Infector (Force Cast)
                     case 53609: // Summon Anub'ar Assassin (Force Cast)
                     case 53457: // Summon Impale Trigger (AoE)
-                    case 45907:  // Torch Target Picker
+                    case 45907: // Torch Target Picker
+                    case 52953: // Torch
+                    case 58121: // Torch
                         spellInfo.MaxAffectedTargets = 1;
                         break;
                     case 36384: // Skartax Purple Beam
