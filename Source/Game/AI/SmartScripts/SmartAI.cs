@@ -522,11 +522,6 @@ namespace Game.AI
             base.MoveInLineOfSight(who);
         }
 
-        public override bool CanAIAttack(Unit victim)
-        {
-            return !me.HasReactState(ReactStates.Passive);
-        }
-
         bool AssistPlayerInCombatAgainst(Unit who)
         {
             if (me.HasReactState(ReactStates.Passive) || !IsAIControlled())
