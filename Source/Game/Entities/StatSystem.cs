@@ -791,7 +791,7 @@ namespace Game.Entities
         float MeleeSpellMissChance(Unit victim, WeaponAttackType attType, SpellInfo spellInfo)
         {
             //calculate miss chance
-            float missChance = victim.GetUnitMissChance(attType);
+            float missChance = victim.GetUnitMissChance();
 
             // melee attacks while dual wielding have +19% chance to miss
             if (spellInfo == null && HaveOffhandWeapon() && !IsInFeralForm())
@@ -813,9 +813,16 @@ namespace Game.Entities
             else
                 missChance -= ModMeleeHitChance;
 
-            // Limit miss chance from 0 to 60%
-            MathFunctions.RoundToInterval(ref missChance, 0.0f, 60.0f);
-            return missChance;
+            // Limit miss chance to 60%
+            missChance = Math.Min(missChance, 60f);
+
+            // miss chance from SPELL_AURA_MOD_ATTACKER_xxx_HIT_CHANCE can exceed 60% miss cap (eg aura 50240)
+            if (attType == WeaponAttackType.RangedAttack)
+                missChance -= victim.GetTotalAuraModifier(AuraType.ModAttackerRangedHitChance);
+            else
+                missChance -= victim.GetTotalAuraModifier(AuraType.ModAttackerMeleeHitChance);
+
+            return Math.Max(missChance, 0f);
         }
 
         float GetUnitCriticalChanceDone(WeaponAttackType attackType)
@@ -954,14 +961,9 @@ namespace Game.Entities
                 chance -= GetTotalAuraModifier(AuraType.ModExpertise) / 4.0f;
             return Math.Max(chance, 0.0f);
         }
-        float GetUnitMissChance(WeaponAttackType attType)
+        float GetUnitMissChance()
         {
             float miss_chance = 5.0f;
-
-            if (attType == WeaponAttackType.RangedAttack)
-                miss_chance -= GetTotalAuraModifier(AuraType.ModAttackerRangedHitChance);
-            else
-                miss_chance -= GetTotalAuraModifier(AuraType.ModAttackerMeleeHitChance);
 
             return miss_chance;
         }
