@@ -331,7 +331,7 @@ namespace Game.Entities
                     if ((aurEff.GetMiscValue() & (int)spellProto.GetSchoolMask()) == 0)
                         continue;
 
-                    MathFunctions.ApplyPct(ref damageReduction, aurEff.GetAmount());
+                    MathFunctions.AddPct(ref damageReduction, -aurEff.GetAmount());
                 }
 
                 TakenTotalMod = 1.0f - damageReduction;
