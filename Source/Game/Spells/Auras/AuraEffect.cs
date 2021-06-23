@@ -1084,9 +1084,6 @@ namespace Game.Spells
             {
                 if (target.IsTypeId(TypeId.Player))
                 {
-                    // disable breath/etc timers
-                    target.ToPlayer().StopMirrorTimers();
-
                     // set stand state (expected in this form)
                     if (!target.IsStandState())
                         target.SetStandState(UnitStandStateType.Stand);
