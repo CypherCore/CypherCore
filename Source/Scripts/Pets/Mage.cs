@@ -43,161 +43,139 @@ namespace Scripts.Pets
         }
 
         [Script]
-        class npc_pet_mage_mirror_image : CasterAI
+        class npc_pet_mage_mirror_image : ScriptedAI
         {
+            const float CHASE_DISTANCE = 35.0f;
+
+            uint _fireBlastTimer = 0;
+
             public npc_pet_mage_mirror_image(Creature creature) : base(creature) { }
-
-            void Init()
-            {
-                Unit owner = me.GetCharmerOrOwner();
-
-                List<Unit> targets = new List<Unit>();
-                var u_check = new AnyUnfriendlyUnitInObjectRangeCheck(me, me, 30.0f);
-                var searcher = new UnitListSearcher(me, targets, u_check);
-                Cell.VisitAllObjects(me, searcher, 40.0f);
-
-                Unit highestThreatUnit = null;
-                float highestThreat = 0.0f;
-                Unit nearestPlayer = null;
-                foreach (var unit in targets)
-                {
-                    // Consider only units without CC
-                    if (!unit.HasBreakableByDamageCrowdControlAura(unit))
-                    {
-                        // Take first found unit
-                        if (!highestThreatUnit && !unit.IsTypeId(TypeId.Player))
-                        {
-                            highestThreatUnit = unit;
-                            continue;
-                        }
-                        if (!nearestPlayer && unit.IsTypeId(TypeId.Player))
-                        {
-                            nearestPlayer = unit;
-                            continue;
-                        }
-                        // else compare best fit unit with current unit
-                        float threat = unit.GetThreatManager().GetThreat(owner);
-                        // Check if best fit hostile unit hs lower threat than this current unit
-                        if (highestThreat < threat)
-                        {
-                            // If so, update best fit unit
-                            highestThreat = threat;
-                            highestThreatUnit = unit;
-                        }
-                        // In case no unit with threat was found so far, always check for nearest unit (only for players)
-                        if (unit.IsTypeId(TypeId.Player))
-                        {
-                            // If this player is closer than the previous one, update it
-                            if (me.GetDistance(unit.GetPosition()) < me.GetDistance(nearestPlayer.GetPosition()))
-                                nearestPlayer = unit;
-                        }
-                    }
-                }
-                // Prioritize units with threat referenced to owner
-                if (highestThreat > 0.0f && highestThreatUnit)
-                    me.Attack(highestThreatUnit, false);
-                // If there is no such target, try to attack nearest hostile unit if such exists
-                else if (nearestPlayer)
-                    me.Attack(nearestPlayer, false);
-            }
-
-            bool IsInThreatList(Unit target)
-            {
-                Unit owner = me.GetCharmerOrOwner();
-                return owner && target.IsThreatenedBy(owner);
-            }
 
             public override void InitializeAI()
             {
-                base.InitializeAI();
                 Unit owner = me.GetOwner();
-                if (!owner)
+                if (owner == null)
                     return;
 
                 // here mirror image casts on summoner spell (not present in client dbc) 49866
-                // here should be auras (not present in client dbc): 35657, 35658, 35659, 35660 selfcasted by mirror images (stats related?)
+                // here should be auras (not present in client dbc): 35657, 35658, 35659, 35660 selfcast by mirror images (stats related?)
                 // Clone Me!
-                owner.CastSpell(me, SpellIds.CloneMe, false);
+                owner.CastSpell(me, SpellIds.CloneMe, true);
             }
 
-            public override void JustEngagedWith(Unit victim)
+            // custom UpdateVictim implementation to handle special target selection
+            // we prioritize between things that are in combat with owner based on the owner's threat to them
+            new bool UpdateVictim()
             {
-                if (me.GetVictim() && !me.GetVictim().HasBreakableByDamageCrowdControlAura(me))
+                Unit owner = me.GetOwner();
+                if (owner == null)
+                    return false;
+
+                if (!me.HasUnitState(UnitState.Casting) && !me.IsInCombat() && !owner.IsInCombat())
+                    return false;
+
+                Unit currentTarget = me.GetVictim();
+                if (currentTarget && !CanAIAttack(currentTarget))
                 {
-                    me.CastSpell(victim, SpellIds.MageFireBlast, false);
-                    _scheduler.Schedule(TimeSpan.FromSeconds(0), task =>
-                    {  
-                        DoCastVictim(SpellIds.MageFrostBolt);
-                        task.Repeat(TimeSpan.FromSeconds(4));
-                    });
-                    _scheduler.Schedule(TimeSpan.FromSeconds(6), task =>
-                    {
-                        DoCastVictim(SpellIds.MageFireBlast);
-                        task.Repeat();
-                    });
+                    me.InterruptNonMeleeSpells(true); // do not finish casting on invalid targets
+                    me.AttackStop();
+                    currentTarget = null;
                 }
-                else
-                    EnterEvadeMode(EvadeReason.Other);
-            }
 
-            public override void Reset()
-            {
-                _scheduler.CancelAll();
+                // don't reselect if we're currently casting anyway
+                if (currentTarget && me.HasUnitState(UnitState.Casting))
+                    return true;
+
+                Unit selectedTarget = null;
+                var mgr = owner.GetCombatManager();
+                if (mgr.HasPvPCombat())
+                { // select pvp target
+                    float minDistance = 0.0f;
+                    foreach (var pair in mgr.GetPvPCombatRefs())
+                    {
+                        Unit target = pair.Value.GetOther(owner);
+                        if (!target.IsPlayer())
+                            continue;
+
+                        if (!CanAIAttack(target))
+                            continue;
+
+                        float dist = owner.GetDistance(target);
+                        if (!selectedTarget || dist < minDistance)
+                        {
+                            selectedTarget = target;
+                            minDistance = dist;
+                        }
+                    }
+                }
+
+                if (!selectedTarget)
+                { // select pve target
+                    float maxThreat = 0.0f;
+                    foreach (var pair in mgr.GetPvECombatRefs())
+                    {
+                        Unit target = pair.Value.GetOther(owner);
+                        if (!CanAIAttack(target))
+                            continue;
+
+                        float threat = target.GetThreatManager().GetThreat(owner);
+                        if (threat >= maxThreat)
+                        {
+                            selectedTarget = target;
+                            maxThreat = threat;
+                        }
+                    }
+                }
+
+                if (!selectedTarget)
+                {
+                    EnterEvadeMode(EvadeReason.NoHostiles);
+                    return false;
+                }
+
+                if (selectedTarget != me.GetVictim())
+                    AttackStartCaster(selectedTarget, CHASE_DISTANCE);
+                return true;
             }
 
             public override void UpdateAI(uint diff)
             {
-                Unit owner = me.GetCharmerOrOwner();
-                if (!owner)
-                    return;
-
-                Unit target = owner.GetAttackerForHelper();
-
-                _scheduler.Update(diff);
-
-                // prevent CC interrupts by images
-                if (me.GetVictim() && me.GetVictim().HasBreakableByDamageCrowdControlAura(me))
+                Unit owner = me.GetOwner();
+                if (owner == null)
                 {
-                    me.InterruptNonMeleeSpells(false);
+                    me.DespawnOrUnsummon();
                     return;
                 }
+
+                if (_fireBlastTimer != 0)
+                {
+                    if (_fireBlastTimer <= diff)
+                        _fireBlastTimer = 0;
+                    else
+                        _fireBlastTimer -= diff;
+                }
+
+                if (!UpdateVictim())
+                    return;
 
                 if (me.HasUnitState(UnitState.Casting))
                     return;
 
-                // assign target if image doesnt have any or the target is not actual
-                if (!target || me.GetVictim() != target)
+                if (_fireBlastTimer == 0)
                 {
-                    Unit ownerTarget = null;
-                    Player owner1 = me.GetCharmerOrOwner().ToPlayer();
-                    if (owner1)
-                        ownerTarget = owner1.GetSelectedUnit();
-
-                    // recognize which victim will be choosen
-                    if (ownerTarget && ownerTarget.IsTypeId(TypeId.Player))
-                    {
-                        if (!ownerTarget.HasBreakableByDamageCrowdControlAura(ownerTarget))
-                            me.Attack(ownerTarget, false);
-                    }
-                    else if (ownerTarget && !ownerTarget.IsTypeId(TypeId.Player) && IsInThreatList(ownerTarget))
-                    {
-                        if (!ownerTarget.HasBreakableByDamageCrowdControlAura(ownerTarget))
-                            me.Attack(ownerTarget, false);
-                    }
-                    else
-                        Init();
+                    DoCastVictim(SpellIds.MageFireBlast);
+                    _fireBlastTimer = MiscConst.TimerMirrorImageFireBlast;
                 }
+                else
+                    DoCastVictim(SpellIds.MageFrostBolt);
+            }
 
-                _events.ExecuteEvents(eventId =>
-                {
-                    if (eventId == SpellIds.MageFrostBolt)
-                    {
-
-                    }
-                    else if (eventId == SpellIds.MageFireBlast)
-                    {
-                    }
-                });
+            public override bool CanAIAttack(Unit who)
+            {
+                Unit owner = me.GetOwner();
+                return owner && who.IsAlive() &&
+                    !who.HasBreakableByDamageCrowdControlAura() &&
+                    who.IsInCombatWith(owner) && CanAIAttack(who);
             }
 
             // Do not reload Creature templates on evade mode enter - prevent visual lost
@@ -214,7 +192,6 @@ namespace Scripts.Pets
                     me.GetMotionMaster().Clear(false);
                     me.GetMotionMaster().MoveFollow(owner, SharedConst.PetFollowDist, me.GetFollowAngle(), MovementSlot.Active);
                 }
-                Init();
             }
         }
     }
