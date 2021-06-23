@@ -34,7 +34,7 @@ namespace Framework.Constants
         EffectHitTarget,
         EffectSuccessfulDispel,
         BeforeHit,
-        OnHit,
+        Hit,
         AfterHit,
         ObjectAreaTargetSelect,
         ObjectTargetSelect,

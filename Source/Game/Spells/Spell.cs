@@ -7132,7 +7132,7 @@ namespace Game.Spells
         {
             foreach (var script in m_loadedScripts)
             {
-                script._PrepareScriptCall(SpellScriptHookType.OnHit);
+                script._PrepareScriptCall(SpellScriptHookType.Hit);
 
                 foreach (var hook in script.OnHit)
                     hook.Call();

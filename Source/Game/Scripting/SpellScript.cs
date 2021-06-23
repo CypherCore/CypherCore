@@ -447,16 +447,33 @@ namespace Game.Scripting
                 case SpellScriptHookType.EffectHitTarget:
                 case SpellScriptHookType.EffectSuccessfulDispel:
                 case SpellScriptHookType.BeforeHit:
-                case SpellScriptHookType.OnHit:
+                case SpellScriptHookType.Hit:
                 case SpellScriptHookType.AfterHit:
                     return true;
             }
             return false;
         }
+
+        bool IsInModifiableHook()
+        {
+            // after hit hook executed after damage/healing is already done
+            // modifying it at this point has no effect
+            switch ((SpellScriptHookType)m_currentScriptState)
+            {
+                case SpellScriptHookType.LaunchTarget:
+                case SpellScriptHookType.EffectHitTarget:
+                case SpellScriptHookType.BeforeHit:
+                case SpellScriptHookType.Hit:
+                    return true;
+            }
+            return false;
+        }
+        
         public bool IsInHitPhase()
         {
             return (m_currentScriptState >= (byte)SpellScriptHookType.EffectHit && m_currentScriptState < (byte)SpellScriptHookType.AfterHit + 1);
         }
+
         public bool IsInEffectHook()
         {
             return (m_currentScriptState >= (byte)SpellScriptHookType.Launch && m_currentScriptState <= (byte)SpellScriptHookType.EffectHitTarget)
@@ -675,7 +692,7 @@ namespace Game.Scripting
         }
         public void SetHitDamage(int damage)
         {
-            if (!IsInTargetHook())
+            if (!IsInModifiableHook())
             {
                 Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.SetHitDamage was called, but function has no effect in current hook!", m_scriptName, m_scriptSpellId);
                 return;
@@ -696,7 +713,7 @@ namespace Game.Scripting
         }
         public void SetHitHeal(int heal)
         {
-            if (!IsInTargetHook())
+            if (!IsInModifiableHook())
             {
                 Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.SetHitHeal was called, but function has no effect in current hook!", m_scriptName, m_scriptSpellId);
                 return;
