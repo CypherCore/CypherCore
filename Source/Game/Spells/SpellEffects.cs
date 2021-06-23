@@ -584,27 +584,26 @@ namespace Game.Spells
             }
 
             // Init dest coordinates
-            uint mapid = destTarget.GetMapId();
-            if (mapid == 0xFFFFFFFF)
-                mapid = unitTarget.GetMapId();
-            float x, y, z, orientation;
-            destTarget.GetPosition(out x, out y, out z, out orientation);
-            if (orientation == 0 && m_targets.GetUnitTarget() != null)
-                orientation = m_targets.GetUnitTarget().GetOrientation();
-            Log.outDebug(LogFilter.Spells, "Spell.EffectTeleportUnits - teleport unit to {0} {1} {2} {3} {4}\n", mapid, x, y, z, orientation);
+            WorldLocation targetDest = new(destTarget);
+            if (targetDest.GetMapId() == 0xFFFFFFFF)
+                targetDest.SetMapId(unitTarget.GetMapId());
+
+            if (targetDest.GetOrientation() == 0 && m_targets.GetUnitTarget())
+                targetDest.SetOrientation(m_targets.GetUnitTarget().GetOrientation());
 
             Player player = unitTarget.ToPlayer();
-            if (player)
+            if (player != null)
             {
                 // Custom loading screen
                 uint customLoadingScreenId = (uint)effectInfo.MiscValue;
                 if (customLoadingScreenId != 0)
                     player.SendPacket(new CustomLoadScreen(m_spellInfo.Id, customLoadingScreenId));
-
-                player.TeleportTo(mapid, x, y, z, orientation, unitTarget == m_caster ? TeleportToOptions.Spell | TeleportToOptions.NotLeaveCombat : 0);
             }
-            else if (mapid == unitTarget.GetMapId())
-                unitTarget.NearTeleportTo(x, y, z, orientation, unitTarget == m_caster);
+            
+            if (targetDest.GetMapId() == unitTarget.GetMapId())
+                unitTarget.NearTeleportTo(targetDest, unitTarget == m_caster);
+            else if (player != null)
+                player.TeleportTo(targetDest, unitTarget == m_caster ? TeleportToOptions.Spell : 0);
             else
             {
                 Log.outError(LogFilter.Spells, "Spell.EffectTeleportUnits - spellId {0} attempted to teleport creature to a different map.", m_spellInfo.Id);
