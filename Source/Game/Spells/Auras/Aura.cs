@@ -1706,32 +1706,33 @@ namespace Game.Spells
             // do that only for passive spells
             // @todo this needs to be unified for all kinds of auras
             Unit target = aurApp.GetTarget();
-            if (IsPassive() && target.IsTypeId(TypeId.Player))
+            if (IsPassive() && target.IsPlayer() && GetSpellInfo().EquippedItemClass != ItemClass.None)
             {
-                if (GetSpellInfo().EquippedItemClass == ItemClass.Weapon)
+                if (!GetSpellInfo().HasAttribute(SpellAttr3.NoProcEquipRequirement))
                 {
-                    if (target.ToPlayer().IsInFeralForm())
-                        return 0;
-
-                    DamageInfo damageInfo = eventInfo.GetDamageInfo();
-                    if (damageInfo != null)
+                    Item item = null;
+                    if (GetSpellInfo().EquippedItemClass == ItemClass.Weapon)
                     {
-                        WeaponAttackType attType = damageInfo.GetAttackType();
-                        Item item = null;
-                        if (attType == WeaponAttackType.BaseAttack || attType == WeaponAttackType.RangedAttack)
-                            item = target.ToPlayer().GetUseableItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
-                        else if (attType == WeaponAttackType.OffAttack)
-                            item = target.ToPlayer().GetUseableItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
-
-                        if (item == null || item.IsBroken() || item.GetTemplate().GetClass() != ItemClass.Weapon || !Convert.ToBoolean((1 << (int)item.GetTemplate().GetSubClass()) & GetSpellInfo().EquippedItemSubClassMask))
+                        if (target.ToPlayer().IsInFeralForm())
                             return 0;
+
+                        DamageInfo damageInfo = eventInfo.GetDamageInfo();
+                        if (damageInfo != null)
+                        {
+                            WeaponAttackType attType = damageInfo.GetAttackType();
+                            if (damageInfo.GetAttackType() != WeaponAttackType.OffAttack)
+                                item = target.ToPlayer().GetUseableItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
+                            else
+                                item = target.ToPlayer().GetUseableItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
+                        }
                     }
-                }
-                else if (GetSpellInfo().EquippedItemClass == ItemClass.Armor)
-                {
-                    // Check if player is wearing shield
-                    Item item = target.ToPlayer().GetUseableItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
-                    if (item == null || item.IsBroken() || item.GetTemplate().GetClass() != ItemClass.Armor || !Convert.ToBoolean((1 << (int)item.GetTemplate().GetSubClass()) & GetSpellInfo().EquippedItemSubClassMask))
+                    else if (GetSpellInfo().EquippedItemClass == ItemClass.Armor)
+                    {
+                        // Check if player is wearing shield
+                        item = target.ToPlayer().GetUseableItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
+                    }
+
+                    if (!item || item.IsBroken() || !item.IsFitToSpellRequirements(GetSpellInfo()))
                         return 0;
                 }
             }

@@ -1634,7 +1634,7 @@ namespace Framework.Constants
     public enum SpellAttr3 : uint
     {
         Unk0 = 0x01, //  0
-        Unk1 = 0x02, //  1
+        NoProcEquipRequirement = 0x02, //  1 Ignores subclass mask check when checking proc
         Unk2 = 0x04, //  2
         BlockableSpell = 0x08, //  3 Only Dmg Class Melee In 3.1.3
         IgnoreResurrectionTimer = 0x10, //  4 You Don'T Have To Wait To Be Resurrected With These Spells
