@@ -216,35 +216,35 @@ namespace Game.Chat
             var its = Global.ObjectMgr.GetItemTemplates();
             foreach (var template in its)
             {
-                if (template.Value.GetItemSet() == itemSetId)
+                if (template.Value.GetItemSet() != itemSetId)
+                    continue;
+
+                found = true;
+                List<ItemPosCount> dest = new();
+                InventoryResult msg = playerTarget.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, template.Value.GetId(), 1);
+                if (msg == InventoryResult.Ok)
                 {
-                    found = true;
-                    List<ItemPosCount> dest = new();
-                    InventoryResult msg = playerTarget.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, template.Value.GetId(), 1);
-                    if (msg == InventoryResult.Ok)
+                    List<uint> bonusListIDsForItem = new(bonusListIDs); // copy, bonuses for each depending on context might be different for each item
+                    if (itemContext != ItemContext.None && itemContext < ItemContext.Max)
                     {
-                        List<uint> bonusListIDsForItem = new(bonusListIDs); // copy, bonuses for each depending on context might be different for each item
-                        if (itemContext != ItemContext.None && itemContext < ItemContext.Max)
-                        {
-                            var contextBonuses = Global.DB2Mgr.GetDefaultItemBonusTree(template.Value.GetId(), itemContext);
-                            bonusListIDsForItem.AddRange(contextBonuses);
-                        }
-
-                        Item item = playerTarget.StoreNewItem(dest, template.Value.GetId(), true, 0, null, itemContext, bonusListIDsForItem);
-
-                        // remove binding (let GM give it to another player later)
-                        if (player == playerTarget)
-                            item.SetBinding(false);
-
-                        player.SendNewItem(item, 1, false, true);
-                        if (player != playerTarget)
-                            playerTarget.SendNewItem(item, 1, true, false);
+                        var contextBonuses = Global.DB2Mgr.GetDefaultItemBonusTree(template.Value.GetId(), itemContext);
+                        bonusListIDsForItem.AddRange(contextBonuses);
                     }
-                    else
-                    {
-                        player.SendEquipError(msg, null, null, template.Value.GetId());
-                        handler.SendSysMessage(CypherStrings.ItemCannotCreate, template.Value.GetId(), 1);
-                    }
+
+                    Item item = playerTarget.StoreNewItem(dest, template.Value.GetId(), true, 0, null, itemContext, bonusListIDsForItem);
+
+                    // remove binding (let GM give it to another player later)
+                    if (player == playerTarget)
+                        item.SetBinding(false);
+
+                    player.SendNewItem(item, 1, false, true);
+                    if (player != playerTarget)
+                        playerTarget.SendNewItem(item, 1, true, false);
+                }
+                else
+                {
+                    player.SendEquipError(msg, null, null, template.Value.GetId());
+                    handler.SendSysMessage(CypherStrings.ItemCannotCreate, template.Value.GetId(), 1);
                 }
             }
 

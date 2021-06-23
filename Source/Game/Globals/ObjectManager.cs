@@ -3668,7 +3668,6 @@ namespace Game
             }
             else
             {
-                uint count = 0;
                 do
                 {
                     uint entry = result.Read<uint>(0);
@@ -3817,11 +3816,10 @@ namespace Game
                     }
 
                     _gameObjectTemplateStorage[entry] = got;
-                    ++count;
                 }
                 while (result.NextRow());
 
-                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} game object templates in {1} ms", count, Time.GetMSTimeDiffToNow(time));
+                Log.outInfo(LogFilter.ServerLoading, "Loaded {0} game object templates in {1} ms", _gameObjectTemplateStorage.Count, Time.GetMSTimeDiffToNow(time));
             }
         }
         public void LoadGameObjectTemplateAddons()
@@ -4239,48 +4237,43 @@ namespace Game
             uint count = 0;
 
             // collect GO entries for GO that must activated
-            foreach (var go in GetGameObjectTemplates())
+            foreach (var pair in GetGameObjectTemplates())
             {
-                switch (go.Value.type)
+                switch (pair.Value.type)
                 {
                     case GameObjectTypes.QuestGiver:
-                        _gameObjectForQuestStorage.Add(go.Value.entry);
-                        ++count;
                         break;
                     case GameObjectTypes.Chest:
                         {
                             // scan GO chest with loot including quest items
-                            uint loot_id = (go.Value.GetLootId());
+                            uint lootId = pair.Value.GetLootId();
 
                             // find quest loot for GO
-                            if (go.Value.Chest.questID != 0 || Loots.LootStorage.Gameobject.HaveQuestLootFor(loot_id))
-                            {
-                                _gameObjectForQuestStorage.Add(go.Value.entry);
-                                ++count;
-                            }
-                            break;
+                            if (pair.Value.Chest.questID != 0 || Loots.LootStorage.Gameobject.HaveQuestLootFor(lootId))
+                                break;
+
+                            continue;
                         }
                     case GameObjectTypes.Generic:
                         {
-                            if (go.Value.Generic.questID > 0)            //quests objects
-                            {
-                                _gameObjectForQuestStorage.Add(go.Value.entry);
-                                ++count;
-                            }
-                            break;
+                            if (pair.Value.Generic.questID > 0)            //quests objects
+                                break;
+
+                            continue;
                         }
                     case GameObjectTypes.Goober:
                         {
-                            if (go.Value.Goober.questID > 0)              //quests objects
-                            {
-                                _gameObjectForQuestStorage.Add(go.Value.entry);
-                                ++count;
-                            }
-                            break;
+                            if (pair.Value.Goober.questID > 0)              //quests objects
+                                break;
+
+                            continue;
                         }
                     default:
-                        break;
+                        continue;
                 }
+
+                _gameObjectForQuestStorage.Add(pair.Value.entry);
+                ++count;
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} GameObjects for quests in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
@@ -7308,8 +7301,7 @@ namespace Game
 
                 if (qinfo.NextQuestInChain != 0)
                 {
-                    var qNext = _questTemplates.LookupByKey(qinfo.NextQuestInChain);
-                    if (qNext == null)
+                    if (!_questTemplates.ContainsKey(qinfo.NextQuestInChain))
                     {
                         Log.outError(LogFilter.Sql, "Quest {0} has `NextQuestIdChain` = {1} but quest {2} does not exist, quest chain will not work.",
                             qinfo.Id, qinfo.NextQuestInChain, qinfo.NextQuestInChain);
@@ -7567,8 +7559,6 @@ namespace Game
 
             _questPOIStorage.Clear();                              // need for reload case
 
-            uint count = 0;
-
             //                                         0        1          2     3               4                 5              6      7        8         9      10             11                 12                           13               14
             SQLResult result = DB.World.Query("SELECT QuestID, BlobIndex, Idx1, ObjectiveIndex, QuestObjectiveID, QuestObjectID, MapID, UiMapID, Priority, Flags, WorldEffectID, PlayerConditionID, NavigationPlayerConditionID, SpawnTrackingID, AlwaysAllowMergingBlobs FROM quest_poi order by QuestID, Idx1");
             if (result.IsEmpty())
@@ -7632,7 +7622,6 @@ namespace Game
                         poiData.QuestID = questID;
                         poiData.Blobs.Add(new QuestPOIBlobData(blobIndex, objectiveIndex, questObjectiveID, questObjectID, mapID, uiMapId, priority, flags,
                             worldEffectID, playerConditionID, navigationPlayerConditionID, spawnTrackingID, points, alwaysAllowMergingBlobs));
-                        ++count;
                         continue;
                     }
                 }
@@ -7640,7 +7629,7 @@ namespace Game
 
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} quest POI definitions in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} quest POI definitions in {1} ms", _questPOIStorage.Count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
         public void LoadQuestAreaTriggers()
         {
