@@ -820,7 +820,8 @@ namespace Game.BattleGrounds
 
         void BlockMovement(Player player)
         {
-            player.SetClientControl(player, false);                          // movement disabled NOTE: the effect will be automatically removed by client when the player is teleported from the Battleground, so no need to send with byte(1) in RemovePlayerAtLeave()
+            // movement disabled NOTE: the effect will be automatically removed by client when the player is teleported from the battleground, so no need to send with uint8(1) in RemovePlayerAtLeave()
+            player.SetClientControl(player, false);
         }
 
         public virtual void RemovePlayerAtLeave(ObjectGuid guid, bool Transport, bool SendPacket)

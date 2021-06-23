@@ -484,11 +484,11 @@ namespace Framework.Constants
 
         Unattackable = InFlight,
         Moving = RoamingMove | ConfusedMove | FleeingMove | ChaseMove | FollowMove,
-        Controlled = (Confused | Stunned | Fleeing),
-        LostControl = (Controlled | Jumping | Charging),
-        Sightless = (LostControl | Evade),
-        CannotAutoattack = (LostControl | Casting),
-        CannotTurn = (LostControl | Rotating),
+        Controlled = Confused | Stunned | Fleeing,
+        LostControl = Controlled | Possessed | Jumping | Charging,
+        Sightless = LostControl | Evade,
+        CannotAutoattack = LostControl | Casting,
+        CannotTurn = LostControl | Rotating,
         NotMove = Root | Stunned | Died | Distracted,
 
         AllErasable = AllStateSupported & ~IgnorePathfinding,

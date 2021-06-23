@@ -541,7 +541,9 @@ namespace Game.Entities
                     NeedChangeAI = true;
                     IsAIEnabled = false;
                 }
-                player.SetClientControl(this, true);
+
+                if (!HasUnitState(UnitState.LostControl))
+                    player.SetClientControl(this, true);
             }
 
             EngageWithTarget(charmer);

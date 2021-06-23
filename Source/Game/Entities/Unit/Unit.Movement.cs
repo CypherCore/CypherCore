@@ -1113,12 +1113,14 @@ namespace Game.Entities
                         if (HasAuraType(AuraType.ModStun))
                             return;
 
+                        ClearUnitState(state);
                         SetStunned(false);
                         break;
                     case UnitState.Root:
                         if (HasAuraType(AuraType.ModRoot) || HasAuraType(AuraType.ModRoot2) || GetVehicle() != null)
                             return;
 
+                        ClearUnitState(state);
                         if (!HasUnitState(UnitState.Stunned))
                             SetRooted(false);
                         break;
@@ -1126,33 +1128,32 @@ namespace Game.Entities
                         if (HasAuraType(AuraType.ModConfuse))
                             return;
 
+                        ClearUnitState(state);
                         SetConfused(false);
                         break;
                     case UnitState.Fleeing:
                         if (HasAuraType(AuraType.ModFear))
                             return;
 
+                        ClearUnitState(state);
                         SetFeared(false);
                         break;
                     default:
                         return;
                 }
 
-                ClearUnitState(state);
-
                 // Unit States might have been already cleared but auras still present. I need to check with HasAuraType
                 if (HasAuraType(AuraType.ModStun))
                     SetStunned(true);
-                else
-                {
-                    if (HasAuraType(AuraType.ModRoot) || HasAuraType(AuraType.ModRoot2))
-                        SetRooted(true);
 
-                    if (HasAuraType(AuraType.ModConfuse))
-                        SetConfused(true);
-                    else if (HasAuraType(AuraType.ModFear))
-                        SetFeared(true);
-                }
+                if (HasAuraType(AuraType.ModRoot) || HasAuraType(AuraType.ModRoot2))
+                    SetRooted(true);
+
+                if (HasAuraType(AuraType.ModConfuse))
+                    SetConfused(true);
+
+                if (HasAuraType(AuraType.ModFear))
+                    SetFeared(true);
             }
         }
 
@@ -1251,8 +1252,12 @@ namespace Game.Entities
 
             Player player = ToPlayer();
             if (player)
-                if (player.HasUnitState(UnitState.Possessed))
-                    player.SetClientControl(this, !apply);
+            {
+                if (apply)
+                    player.SetClientControl(this, false);
+                else if (!HasUnitState(UnitState.LostControl))
+                    player.SetClientControl(this, true);
+            }
         }
 
         void SetConfused(bool apply)
@@ -1275,8 +1280,12 @@ namespace Game.Entities
 
             Player player = ToPlayer();
             if (player)
-                if (player.HasUnitState(UnitState.Possessed))
-                    player.SetClientControl(this, !apply);
+            {
+                if (apply)
+                    player.SetClientControl(this, false);
+                else if (!HasUnitState(UnitState.LostControl))
+                    player.SetClientControl(this, true);
+            }
         }
 
         public bool CanFreeMove()
