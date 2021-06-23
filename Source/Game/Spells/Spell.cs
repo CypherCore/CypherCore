@@ -1849,12 +1849,8 @@ namespace Game.Spells
                 spellHitTarget = unit;
             else if (missInfo == SpellMissInfo.Reflect)                // In case spell reflect from target, do all effect on caster (if hit)
             {
-                if (target.reflectResult == SpellMissInfo.None)       // If reflected spell hit caster . do all effect on him
-                {
+                if (target.reflectResult == SpellMissInfo.None)       // If reflected spell hit caster -> do all effect on him
                     spellHitTarget = m_caster;
-                    if (m_caster.IsTypeId(TypeId.Unit))
-                        m_caster.ToCreature().LowerPlayerDamageReq((uint)target.damage);
-                }
             }
 
             PrepareScriptHitHandlers();
