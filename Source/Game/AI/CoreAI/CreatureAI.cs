@@ -192,39 +192,6 @@ namespace Game.AI
                 me.GetVehicleKit().Reset(true);
         }
 
-        public void SetGazeOn(Unit target)
-        {
-            if (me.IsValidAttackTarget(target) && target != me.GetVictim())
-            {
-                if (!me.IsFocusing(null, true))
-                    AttackStart(target);
-                me.SetReactState(ReactStates.Passive);
-            }
-        }
-
-        public bool UpdateVictimWithGaze()
-        {
-            if (!me.IsEngaged())
-                return false;
-
-            if (me.HasReactState(ReactStates.Passive))
-            {
-                if (me.GetVictim() != null)
-                    return true;
-                else
-                    me.SetReactState(ReactStates.Aggressive);
-            }
-
-            Unit victim = me.SelectVictim();
-            if (victim != null)
-            {
-                if (!me.IsFocusing(null, true) && victim != me.GetVictim())
-                    AttackStart(victim);
-            }
-
-            return me.GetVictim() != null;
-        }
-
         public bool UpdateVictim()
         {
             if (!me.IsEngaged())
