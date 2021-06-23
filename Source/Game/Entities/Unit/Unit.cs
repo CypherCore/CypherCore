@@ -1182,11 +1182,7 @@ namespace Game.Entities
 
         public void OnPhaseChange()
         {
-            if (!IsInWorld)
-                return;
 
-            if (IsTypeId(TypeId.Unit) || !ToPlayer().GetSession().PlayerLogout())
-                m_threatManager.UpdateOnlineStates(true, true);
         }
 
         public uint GetModelForForm(ShapeShiftForm form, uint spellId)
