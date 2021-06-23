@@ -549,8 +549,13 @@ namespace Game.Combat
             if (spell != null && spell.HasAttribute(SpellAttr1.NoThreat)) // shortcut, none of the calls would do anything
                 return;
 
+            if (_threatenedByMe.Empty())
+                return;
+
+            float perTarget = baseAmount / _threatenedByMe.Count; // Threat is divided evenly among all targets (LibThreat sourced)
+
             foreach (var pair in _threatenedByMe)
-                pair.Value.GetOwner().GetThreatManager().AddThreat(assistant, baseAmount, spell, ignoreModifiers);
+                pair.Value.GetOwner().GetThreatManager().AddThreat(assistant, perTarget, spell, ignoreModifiers);
         }
 
         public void RemoveMeFromThreatLists()
