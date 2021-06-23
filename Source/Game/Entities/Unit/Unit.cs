@@ -3809,9 +3809,9 @@ namespace Game.Entities
             return Math.Max((uint)(damage * (1.0f - mitigation)), 0);
         }
 
-        public uint MeleeDamageBonusDone(Unit victim, uint pdamage, WeaponAttackType attType, DamageEffectType damagetype, SpellInfo spellProto = null, SpellSchoolMask damageSchoolMask = SpellSchoolMask.Normal)
+        public uint MeleeDamageBonusDone(Unit victim, uint damage, WeaponAttackType attType, DamageEffectType damagetype, SpellInfo spellProto = null, SpellSchoolMask damageSchoolMask = SpellSchoolMask.Normal)
         {
-            if (victim == null || pdamage == 0)
+            if (victim == null || damage == 0)
                 return 0;
 
             uint creatureTypeMask = victim.GetCreatureTypeMask();
@@ -3898,23 +3898,20 @@ namespace Game.Entities
             if (spellProto != null)
                 MathFunctions.AddPct(ref DoneTotalMod, GetTotalAuraModifierByMiscValue(AuraType.ModDamageDoneForMechanic, (int)spellProto.Mechanic));
 
-            float tmpDamage = (pdamage + DoneFlatBenefit) * DoneTotalMod;
+            float damageF = damage;
 
             // apply spellmod to Done damage
             if (spellProto != null)
             {
                 Player modOwner = GetSpellModOwner();
                 if (modOwner != null)
-                {
-                    if (damagetype == DamageEffectType.DOT)
-                        modOwner.ApplySpellMod(spellProto, SpellModOp.PeriodicHealingAndDamage, ref tmpDamage);
-                    else
-                        modOwner.ApplySpellMod(spellProto, SpellModOp.HealingAndDamage, ref tmpDamage);
-                }
+                    modOwner.ApplySpellMod(spellProto, damagetype == DamageEffectType.DOT ? SpellModOp.PeriodicHealingAndDamage : SpellModOp.HealingAndDamage, ref damageF);
             }
 
+            damageF = (damageF + DoneFlatBenefit) * DoneTotalMod;
+
             // bonus result can be negative
-            return (uint)Math.Max(tmpDamage, 0.0f);
+            return (uint)Math.Max(damageF, 0.0f);
         }
 
         public uint MeleeDamageBonusTaken(Unit attacker, uint pdamage, WeaponAttackType attType, DamageEffectType damagetype, SpellInfo spellProto = null, SpellSchoolMask damageSchoolMask = SpellSchoolMask.Normal)

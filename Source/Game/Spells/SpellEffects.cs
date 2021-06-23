@@ -2441,9 +2441,8 @@ namespace Game.Spells
             // multiple weapon dmg effect workaround
             // execute only the last weapon damage
             // and handle all effects at once
-            for (var i = effIndex + 1; i < SpellConst.MaxEffects; ++i)
+            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
             {
-                var effect = m_spellInfo.GetEffect(i);
                 if (effect == null)
                     continue;
 
@@ -2631,12 +2630,11 @@ namespace Game.Spells
             weaponDamage = (uint)(weaponDamage * totalDamagePercentMod);
 
             // prevent negative damage
-            uint eff_damage = Math.Max(weaponDamage, 0);
+            weaponDamage = Math.Max(weaponDamage, 0);
 
             // Add melee damage bonuses (also check for negative)
-            uint damage = m_caster.MeleeDamageBonusDone(unitTarget, eff_damage, m_attackType, DamageEffectType.Direct, m_spellInfo);
-
-            m_damage += (int)unitTarget.MeleeDamageBonusTaken(m_caster, damage, m_attackType, DamageEffectType.SpellDirect, m_spellInfo);
+            weaponDamage = m_caster.MeleeDamageBonusDone(unitTarget, weaponDamage, m_attackType, DamageEffectType.SpellDirect, m_spellInfo);
+            m_damage += (int)unitTarget.MeleeDamageBonusTaken(m_caster, weaponDamage, m_attackType, DamageEffectType.SpellDirect, m_spellInfo);
         }
 
         [SpellEffectHandler(SpellEffectName.Threat)]
