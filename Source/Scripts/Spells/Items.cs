@@ -1380,7 +1380,7 @@ namespace Scripts.Spells.Items
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            if (eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.DoneRangedAutoAttack | ProcFlags.DoneSpellRangedDmgClass))
+            if (eventInfo.GetTypeMask().HasFlag(ProcFlags.DoneRangedAutoAttack | ProcFlags.DoneSpellRangedDmgClass))
             {
                 // in that case, do not cast heal spell
                 PreventDefaultAction();
@@ -2886,10 +2886,10 @@ namespace Scripts.Spells.Items
             Unit caster = eventInfo.GetActor();
             Unit target = eventInfo.GetProcTarget();
 
-            if (eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.DoneSpellMagicDmgClassPos))
+            if (eventInfo.GetTypeMask().HasFlag(ProcFlags.DoneSpellMagicDmgClassPos))
                 caster.CastSpell(target, _healProcSpellId, new CastSpellExtraArgs(aurEff));
 
-            if (eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.DoneSpellMagicDmgClassNeg))
+            if (eventInfo.GetTypeMask().HasFlag(ProcFlags.DoneSpellMagicDmgClassNeg))
                 caster.CastSpell(target, _damageProcSpellId, new CastSpellExtraArgs(aurEff));
         }
 

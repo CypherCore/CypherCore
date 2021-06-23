@@ -1633,7 +1633,7 @@ namespace Game.Spells
                     return 0;
 
                 // check if aura can proc when spell is triggered (exception for hunter auto shot & wands)
-                if (spell.IsTriggered() && !procEntry.AttributesMask.HasAnyFlag(ProcAttributes.TriggeredCanProc) && !eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.AutoAttackMask))
+                if (spell.IsTriggered() && !procEntry.AttributesMask.HasAnyFlag(ProcAttributes.TriggeredCanProc) && !eventInfo.GetTypeMask().HasFlag(ProcFlags.AutoAttackMask))
                     if (!GetSpellInfo().HasAttribute(SpellAttr3.CanProcWithTriggered))
                         return 0;
             }
@@ -1699,7 +1699,7 @@ namespace Game.Spells
             // But except periodic and kill triggers (can triggered from self)
             SpellInfo spellInfo = eventInfo.GetSpellInfo();
             if (spellInfo != null)
-                if (spellInfo.Id == GetId() && !eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.TakenPeriodic | ProcFlags.Kill))
+                if (spellInfo.Id == GetId() && !eventInfo.GetTypeMask().HasFlag(ProcFlags.TakenPeriodic | ProcFlags.Kill))
                     return 0;
 
             // Check if current equipment meets aura requirements

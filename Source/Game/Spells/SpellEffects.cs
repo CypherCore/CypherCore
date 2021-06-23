@@ -314,13 +314,6 @@ namespace Game.Spells
                 // special cases
                 switch (triggered_spell_id)
                 {
-                    // Vanish (not exist)
-                    case 18461:
-                        {
-                            unitTarget.RemoveMovementImpairingAuras(true);
-                            unitTarget.RemoveAurasByType(AuraType.ModStalked);
-                            return;
-                        }
                     // Demonic Empowerment -- succubus
                     case 54437:
                         {

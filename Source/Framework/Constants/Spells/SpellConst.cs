@@ -2436,9 +2436,7 @@ namespace Framework.Constants
         SpellMask = DoneSpellMeleeDmgClass | TakenSpellMeleeDmgClass |  DoneRangedAutoAttack | TakenRangedAutoAttack
             | DoneSpellRangedDmgClass | TakenSpellRangedDmgClass | DoneSpellNoneDmgClassPos | TakenSpellNoneDmgClassPos
             | DoneSpellNoneDmgClassNeg | TakenSpellNoneDmgClassNeg | DoneSpellMagicDmgClassPos | TakenSpellMagicDmgClassPos
-            | DoneSpellMagicDmgClassNeg | TakenSpellMagicDmgClassNeg | DoneTrapActivation,
-
-        PeriodicMask = DonePeriodic | TakenPeriodic,
+            | DoneSpellMagicDmgClassNeg | TakenSpellMagicDmgClassNeg | DonePeriodic | TakenPeriodic | DoneTrapActivation,
 
         DoneHitMask = DoneMeleeAutoAttack | DoneRangedAutoAttack | DoneSpellMeleeDmgClass | DoneSpellRangedDmgClass
             | DoneSpellNoneDmgClassPos | DoneSpellNoneDmgClassNeg | DoneSpellMagicDmgClassPos | DoneSpellMagicDmgClassNeg

@@ -469,7 +469,7 @@ namespace Game.Entities
         public static bool CanSpellTriggerProcOnEvent(SpellProcEntry procEntry, ProcEventInfo eventInfo)
         {
             // proc type doesn't match
-            if (!Convert.ToBoolean(eventInfo.GetTypeMask() & procEntry.ProcFlags))
+            if (!eventInfo.GetTypeMask().HasFlag(procEntry.ProcFlags))
                 return false;
 
             // check XP or honor target requirement
@@ -494,11 +494,11 @@ namespace Game.Entities
             }
 
             // always trigger for these types
-            if ((eventInfo.GetTypeMask() & (ProcFlags.Killed | ProcFlags.Kill | ProcFlags.Death)) != 0)
+            if (eventInfo.GetTypeMask().HasFlag(ProcFlags.Killed | ProcFlags.Kill | ProcFlags.Death))
                 return true;
 
             // Do not consider autoattacks as triggered spells
-            if (!procEntry.AttributesMask.HasAnyFlag(ProcAttributes.TriggeredCanProc) && !eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.AutoAttackMask))
+            if (!procEntry.AttributesMask.HasAnyFlag(ProcAttributes.TriggeredCanProc) && !eventInfo.GetTypeMask().HasFlag(ProcFlags.AutoAttackMask))
             {
                 Spell spell = eventInfo.GetProcSpell();
                 if (spell)
@@ -518,30 +518,27 @@ namespace Game.Entities
                 return false;
 
             // check spell family name/flags (if set) for spells
-            if (eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.PeriodicMask | ProcFlags.SpellMask))
+            if (eventInfo.GetTypeMask().HasFlag(ProcFlags.SpellMask))
             {
                 SpellInfo eventSpellInfo = eventInfo.GetSpellInfo();
                 if (eventSpellInfo != null)
                     if (!eventSpellInfo.IsAffected(procEntry.SpellFamilyName, procEntry.SpellFamilyMask))
                         return false;
-            }
 
-            // check spell type mask (if set)
-            if ((eventInfo.GetTypeMask() & (ProcFlags.SpellMask | ProcFlags.PeriodicMask)) != 0)
-            {
+                // check spell type mask (if set)
                 if (procEntry.SpellTypeMask != 0 && !Convert.ToBoolean(eventInfo.GetSpellTypeMask() & procEntry.SpellTypeMask))
                     return false;
             }
 
             // check spell phase mask
-            if ((eventInfo.GetTypeMask() & ProcFlags.ReqSpellPhaseMask) != 0)
+            if (eventInfo.GetTypeMask().HasFlag(ProcFlags.ReqSpellPhaseMask))
             {
                 if (!Convert.ToBoolean(eventInfo.GetSpellPhaseMask() & procEntry.SpellPhaseMask))
                     return false;
             }
 
             // check hit mask (on taken hit or on done hit, but not on spell cast phase)
-            if ((eventInfo.GetTypeMask() & ProcFlags.TakenHitMask) != 0 || ((eventInfo.GetTypeMask() & ProcFlags.DoneHitMask) != 0
+            if (eventInfo.GetTypeMask().HasFlag(ProcFlags.TakenHitMask) || (eventInfo.GetTypeMask().HasFlag(ProcFlags.DoneHitMask)
                 && !Convert.ToBoolean(eventInfo.GetSpellPhaseMask() & ProcFlagsSpellPhase.Cast)))
             {
                 ProcFlagsHit hitMask = procEntry.HitMask;
@@ -549,7 +546,7 @@ namespace Game.Entities
                 if (hitMask == 0)
                 {
                     // for taken procs allow normal + critical hits by default
-                    if ((eventInfo.GetTypeMask() & ProcFlags.TakenHitMask) != 0)
+                    if (eventInfo.GetTypeMask().HasFlag(ProcFlags.TakenHitMask))
                         hitMask |= ProcFlagsHit.Normal | ProcFlagsHit.Critical;
                     // for done procs allow normal + critical + absorbs by default
                     else
@@ -1416,7 +1413,7 @@ namespace Game.Entities
                             Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} doesn't have `ProcFlags` value defined, proc will not be triggered", spellInfo.Id);
                         if (Convert.ToBoolean(procEntry.SpellTypeMask & ~ProcFlagsSpellType.MaskAll))
                             Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has wrong `SpellTypeMask` set: {1}", spellInfo.Id, procEntry.SpellTypeMask);
-                        if (procEntry.SpellTypeMask != 0 && !Convert.ToBoolean(procEntry.ProcFlags & (ProcFlags.SpellMask | ProcFlags.PeriodicMask)))
+                        if (procEntry.SpellTypeMask != 0 && !Convert.ToBoolean(procEntry.ProcFlags & (ProcFlags.SpellMask)))
                             Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has `SpellTypeMask` value defined, but it won't be used for defined `ProcFlags` value", spellInfo.Id);
                         if (procEntry.SpellPhaseMask == 0 && Convert.ToBoolean(procEntry.ProcFlags & ProcFlags.ReqSpellPhaseMask))
                             Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} doesn't have `SpellPhaseMask` value defined, but it's required for defined `ProcFlags` value, proc will not be triggered", spellInfo.Id);
