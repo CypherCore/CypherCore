@@ -99,10 +99,15 @@ namespace Game.AI
 
         public static IMovementGenerator SelectMovementAI(Creature creature)
         {
-            return creature.DefaultMovementType switch
+            MovementGeneratorType type = MovementGeneratorType.Idle;
+            if (creature.GetPlayerMovingMe() == null)
+                type = creature.GetDefaultMovementType();
+
+            return type switch
             {
                 MovementGeneratorType.Random => new RandomMovementGenerator(),
                 MovementGeneratorType.Waypoint => new WaypointMovementGenerator(),
+                MovementGeneratorType.Idle => new IdleMovementGenerator(),
                 _ => null,
             };
         }

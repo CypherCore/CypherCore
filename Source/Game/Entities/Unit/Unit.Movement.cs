@@ -1603,7 +1603,7 @@ namespace Game.Entities
             return null;
         }
 
-        Player GetPlayerMovingMe() { return m_playerMovingMe; }
+        public Player GetPlayerMovingMe() { return m_playerMovingMe; }
 
         public void AddUnitMovementFlag(MovementFlag f)
         {

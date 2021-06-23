@@ -7245,8 +7245,13 @@ namespace Game.Entities
         public void SetMover(Unit target)
         {
             m_unitMovedByMe.m_playerMovingMe = null;
+            if (m_unitMovedByMe.IsCreature())
+                m_unitMovedByMe.GetMotionMaster().Initialize();
+
             m_unitMovedByMe = target;
             m_unitMovedByMe.m_playerMovingMe = this;
+            if (m_unitMovedByMe.IsCreature())
+                m_unitMovedByMe.GetMotionMaster().Initialize();
 
             MoveSetActiveMover packet = new();
             packet.MoverGUID = target.GetGUID();

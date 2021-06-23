@@ -3177,7 +3177,7 @@ namespace Game.Entities
         public void SetNoSearchAssistance(bool val) { m_AlreadySearchedAssistance = val; }
         public bool HasSearchedAssistance() { return m_AlreadySearchedAssistance; }
 
-        MovementGeneratorType GetDefaultMovementType() { return DefaultMovementType; }
+        public MovementGeneratorType GetDefaultMovementType() { return DefaultMovementType; }
         public void SetDefaultMovementType(MovementGeneratorType mgt) { DefaultMovementType = mgt; }
 
         public long GetRespawnTime() { return m_respawnTime; }
