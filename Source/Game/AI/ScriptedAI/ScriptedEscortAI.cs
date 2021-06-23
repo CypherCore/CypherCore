@@ -125,7 +125,7 @@ namespace Game.AI
             }
         }
 
-        public override void JustAppeared()
+        public override void InitializeAI()
         {
             _escortState = EscortState.None;
 
@@ -137,8 +137,6 @@ namespace Game.AI
 
             if (me.GetFaction() != me.GetCreatureTemplate().Faction)
                 me.RestoreFaction();
-
-            Reset();
         }
 
         void ReturnToLastPoint()
