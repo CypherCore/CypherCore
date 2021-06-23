@@ -285,6 +285,10 @@ namespace Game.Combat
                 }
             }
 
+            // ensure we're in combat (threat implies combat!)
+            if (!_owner.GetCombatManager().SetInCombatWith(target)) // if this returns false, we're not actually in combat, and thus cannot have threat!
+                return;                                              // typical causes: bad scripts trying to add threat to GMs, dead targets etc
+
             // ok, now we actually apply threat
             // check if we already have an entry - if we do, just increase threat for that entry and we're done
             var targetRefe = _myThreatListEntries.LookupByKey(target.GetGUID());
@@ -293,10 +297,6 @@ namespace Game.Combat
                 targetRefe.AddThreat(amount);
                 return;
             }
-
-            // otherwise, ensure we're in combat (threat implies combat!)
-            if (!_owner.GetCombatManager().SetInCombatWith(target)) // if this returns false, we're not actually in combat, and thus cannot have threat!
-                return;                                              // typical causes: bad scripts trying to add threat to GMs, dead targets etc
 
             // ok, we're now in combat - create the threat list reference and push it to the respective managers
             ThreatReference newRefe = new(this, target, amount);

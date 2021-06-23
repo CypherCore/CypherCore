@@ -146,7 +146,8 @@ namespace Game.Combat
                 NotifyAICombat(_owner, who);
             if (needOtherAI)
                 NotifyAICombat(who, _owner);
-            return true;
+
+            return IsInCombatWith(who);
         }
 
         public bool IsInCombatWith(ObjectGuid guid)
