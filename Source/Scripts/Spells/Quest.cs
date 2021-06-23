@@ -125,6 +125,11 @@ namespace Scripts.Spells.Quest
         public const uint CreateBearFlank = 56566;
         public const uint BearFlankFail = 56569;
 
+        //ThatsAbominable
+        public const uint IcyGhoulCredit = 59591; // Credit for Icy Ghoul
+        public const uint ViciousGeistsCredit = 60042; // Credit for Vicious Geists
+        public const uint RisenAllianceSoldiersCredit = 60040; // Credit for Risen Alliance Soldiers
+
         //Burstattheseams
         public const uint BurstAtTheSeams = 52510; // Burst At The Seams
         public const uint BurstAtTheSeamsDmg = 52508; // Damage Spell
@@ -241,6 +246,12 @@ namespace Scripts.Spells.Quest
         public const uint Skytalon = 31583;
         public const uint Decoy = 31578;
 
+        //ThatsAbominable
+        public const uint IcyGhoul = 31142;
+        public const uint RisenAllianceSoldiers = 31205;
+        public const uint ViciousGeist = 31147;
+        public const uint RenimatedAbomination = 31692;
+
         //Burstattheseams
         public const uint DrakkariChieftaink = 29099;
 
@@ -273,6 +284,9 @@ namespace Scripts.Spells.Quest
 
         //Quest12372
         public const uint WhisperOnHitByForceWhisper = 1;
+
+        //ThatsAbominable
+        public const uint QuestThatsAbominable = 13264;
 
         //BurstAtTheSeams
         public const uint QuestIdBurstAtTheSeams = 12690;
@@ -1453,6 +1467,70 @@ namespace Scripts.Spells.Quest
         }
     }
 
+    [Script]
+    class spell_q13264_thats_abominable : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.IcyGhoulCredit, SpellIds.ViciousGeistsCredit, SpellIds.RisenAllianceSoldiersCredit);
+        }
+
+        void HandleKnockBack(uint effIndex)
+        {
+            PreventHitDefaultEffect(effIndex);
+
+            Creature creature = GetHitCreature();
+            if (creature != null)
+            {
+                Unit charmer = GetCaster().GetCharmerOrOwner();
+                if (charmer != null)
+                {
+                    Player player = charmer.ToPlayer();
+                    if (player != null)
+                        if (player.GetQuestStatus(Misc.QuestThatsAbominable) == QuestStatus.Incomplete)
+                            if (GiveCreditIfValid(player, creature))
+                                creature.KillSelf();
+                }
+            }
+        }
+
+        bool GiveCreditIfValid(Player player, Creature creature)
+        {
+            uint entry = creature.GetEntry();
+
+            switch (entry)
+            {
+                case CreatureIds.IcyGhoul:
+                    player.CastSpell(player, SpellIds.IcyGhoulCredit, true);
+                    return true;
+                case CreatureIds.ViciousGeist:
+                    player.CastSpell(player, SpellIds.ViciousGeistsCredit, true);
+                    return true;
+                case CreatureIds.RisenAllianceSoldiers:
+                    player.CastSpell(player, SpellIds.RisenAllianceSoldiersCredit, true);
+                    return true;
+            }
+
+            return false;
+        }
+
+        void HandleScript(uint effIndex)
+        {
+            Creature creature = GetCaster().ToCreature();
+            if (creature != null)
+            {
+                creature.KillSelf();
+                creature.DespawnOrUnsummon();
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleKnockBack, 1, SpellEffectName.KnockBack));
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+    
     [Script]
     class spell_q12690_burst_at_the_seams : SpellScript
     {
