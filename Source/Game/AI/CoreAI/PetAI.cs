@@ -140,7 +140,7 @@ namespace Game.AI
                     if (spellInfo == null)
                         continue;
 
-                    if (me.GetCharmInfo() != null && me.GetSpellHistory().HasGlobalCooldown(spellInfo))
+                    if (me.GetSpellHistory().HasGlobalCooldown(spellInfo))
                         continue;
 
                     // check spell cooldown

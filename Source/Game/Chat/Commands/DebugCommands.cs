@@ -616,7 +616,7 @@ namespace Game.Chat
             if (!target)
                 return false;
 
-            handler.SendSysMessage("Loot recipient for creature {0} (GUID {1}, DB GUID {2}) is {3}", target.GetName(), target.GetGUID().ToString(), target.GetSpawnId(),
+            handler.SendSysMessage("Loot recipient for creature {0} (GUID {1}, SpawnID {2}) is {3}", target.GetName(), target.GetGUID().ToString(), target.GetSpawnId(),
                 target.HasLootRecipient() ? (target.GetLootRecipient() ? target.GetLootRecipient().GetName() : "offline") : "no loot recipient");
             return true;
         }
@@ -923,21 +923,30 @@ namespace Game.Chat
                 handler.SendSysMessage("End of threatened-by-me list.");
             }
 
-            if (!mgr.CanHaveThreatList())
-                handler.SendSysMessage($"{target.GetName()} ({target.GetGUID()}) cannot have a threat list.");
-            else if (mgr.IsEngaged())
+            if (mgr.CanHaveThreatList())
             {
-                count = 0;
-                handler.SendSysMessage($"Threat list of {target.GetName()} ({target.GetGUID()}, SpawnID {(target.IsCreature() ? target.ToCreature().GetSpawnId() : 0)})");
-                foreach (ThreatReference refe in mgr.GetSortedThreatList())
+                if (!mgr.IsThreatListEmpty(true))
                 {
-                    Unit unit = refe.GetVictim();
-                    handler.SendSysMessage($"   {++count}.   {unit.GetName()}   ({unit.GetGUID()})  - threat {refe.GetThreat()}[{refe.GetTauntState()}][{refe.GetOnlineState()}]");
+                    if (mgr.IsEngaged())
+                        handler.SendSysMessage($"Threat list of {target.GetName()} ({target.GetGUID()}, SpawnID {(target.IsCreature() ? target.ToCreature().GetSpawnId() : 0)}):");
+                    else
+                        handler.SendSysMessage($"{target.GetName()} ({target.GetGUID()}, SpawnID {(target.IsCreature() ? target.ToCreature().GetSpawnId() : 0)}) is not engaged, but still has a threat list? Well, here it is:");
+
+                    count = 0;
+                    foreach (ThreatReference refe in mgr.GetSortedThreatList())
+                    {
+                        Unit unit = refe.GetVictim();
+                        handler.SendSysMessage($"   {++count}.   {unit.GetName()}   ({unit.GetGUID()})  - threat {refe.GetThreat()}[{refe.GetTauntState()}][{refe.GetOnlineState()}]");
+                    }
+                    handler.SendSysMessage("End of threat list.");
                 }
-                handler.SendSysMessage("End of threat list.");
+                else if (!mgr.IsEngaged())
+                    handler.SendSysMessage($"{target.GetName()} ({target.GetGUID()}, SpawnID {(target.IsCreature() ? target.ToCreature().GetSpawnId() : 0)}) is not currently engaged.");
+                else
+                    handler.SendSysMessage($"{target.GetName()} ({target.GetGUID()}, SpawnID {(target.IsCreature() ? target.ToCreature().GetSpawnId() : 0)}) seems to be engaged, but does not have a threat list??");
             }
             else
-                handler.SendSysMessage($"{target.GetName()} ({target.GetGUID()}, SpawnID {(target.IsCreature() ? target.ToCreature().GetSpawnId() : 0)}) is not currently engaged.");
+                handler.SendSysMessage($"{target.GetName()} ({target.GetGUID()}) cannot have a threat list.");
 
             return true;
         }

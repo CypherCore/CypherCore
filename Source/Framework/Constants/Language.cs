@@ -969,14 +969,14 @@ namespace Framework.Constants
         // Room for more level 3              1196-1198 not used
 
         // Debug Commands
-        DebugAreatriggerLeft = 1999,
         CinematicNotExist = 1200,
         MovieNotExist = 1201,
         DebugAreatriggerOn = 1202,
         DebugAreatriggerOff = 1203,
         DebugAreatriggerEntered = 1204,
-        // 1205-2002 - free
+        // 1205-1999 - free
 
+        DebugAreatriggerLeft = 1999,
         // Ticket Strings 2003-2028
         CommandTicketclosed = 2003,
         CommandTicketdeleted = 2004,
