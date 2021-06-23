@@ -3925,11 +3925,6 @@ namespace Game.Entities
                 return 0;
 
             int TakenFlatBenefit = 0;
-            float TakenTotalCasterMod = 0.0f;
-
-            // get all auras from caster that allow the spell to ignore resistance (sanctified wrath)
-            int attackSchoolMask = (int)(spellProto != null ? spellProto.GetSchoolMask() : SpellSchoolMask.Normal);
-            TakenTotalCasterMod += attacker.GetTotalAuraModifierByMiscMask(AuraType.ModIgnoreTargetResist, attackSchoolMask);
 
             // ..taken
             TakenFlatBenefit += GetTotalAuraModifierByMiscMask(AuraType.ModDamageTaken, (int)attacker.GetMeleeDamageSchoolMask());
@@ -3998,24 +3993,25 @@ namespace Game.Entities
                 MathFunctions.AddPct(ref TakenTotalMod, -(modOwner.GetRatingBonusValue(CombatRating.VersatilityDamageTaken) + versaBonus));
             }
 
-            float tmpDamage = 0.0f;
-
-            if (TakenTotalCasterMod != 0)
+            // Sanctified Wrath (bypass damage reduction)
+            if (attacker != null && TakenTotalMod < 1.0f)
             {
-                if (TakenFlatBenefit < 0)
-                {
-                    if (TakenTotalMod < 1)
-                        tmpDamage = (((MathFunctions.CalculatePct(pdamage, TakenTotalCasterMod) + TakenFlatBenefit) * TakenTotalMod) + MathFunctions.CalculatePct(pdamage, TakenTotalCasterMod));
-                    else
-                        tmpDamage = (((MathFunctions.CalculatePct(pdamage, TakenTotalCasterMod) + TakenFlatBenefit) + MathFunctions.CalculatePct(pdamage, TakenTotalCasterMod)) * TakenTotalMod);
-                }
-                else if (TakenTotalMod < 1)
-                    tmpDamage = ((MathFunctions.CalculatePct(pdamage + TakenFlatBenefit, TakenTotalCasterMod) * TakenTotalMod) + MathFunctions.CalculatePct(pdamage + TakenFlatBenefit, TakenTotalCasterMod));
-            }
-            if (tmpDamage == 0)
-                tmpDamage = (pdamage + TakenFlatBenefit) * TakenTotalMod;
+                SpellSchoolMask attackSchoolMask = spellProto != null ? spellProto.GetSchoolMask() : SpellSchoolMask.Normal;
 
-            // bonus result can be negative
+                float damageReduction = 1.0f - TakenTotalMod;
+                var casterIgnoreResist = attacker.GetAuraEffectsByType(AuraType.ModIgnoreTargetResist);
+                foreach (AuraEffect aurEff in casterIgnoreResist)
+                {
+                    if ((aurEff.GetMiscValue() & (int)attackSchoolMask) == 0)
+                        continue;
+
+                    MathFunctions.ApplyPct(ref damageReduction, aurEff.GetAmount());
+                }
+
+                TakenTotalMod = 1.0f - damageReduction;
+            }
+
+            float tmpDamage = (float)(pdamage + TakenFlatBenefit) * TakenTotalMod;
             return (uint)Math.Max(tmpDamage, 0.0f);
         }
 

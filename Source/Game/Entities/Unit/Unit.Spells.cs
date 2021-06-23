@@ -140,7 +140,7 @@ namespace Game.Entities
 
             // Default calculation
             float coeff = effect.BonusCoefficient;
-            if (DoneAdvertisedBenefit != 0)
+            if (coeff != 0 && DoneAdvertisedBenefit != 0)
             {
                 Player modOwner1 = GetSpellModOwner();
                 if (modOwner1)
@@ -260,7 +260,6 @@ namespace Game.Entities
 
             int TakenTotal = 0;
             float TakenTotalMod = 1.0f;
-            float TakenTotalCasterMod = 0.0f;
 
             // Mod damage from spell mechanic
             uint mechanicMask = spellProto.GetAllEffectsMechanicMask();
@@ -282,9 +281,6 @@ namespace Game.Entities
             // Spells with SPELL_ATTR4_FIXED_DAMAGE should only benefit from mechanic damage mod auras.
             if (!spellProto.HasAttribute(SpellAttr4.FixedDamage))
             {
-                // get all auras from caster that allow the spell to ignore resistance (sanctified wrath)
-                TakenTotalCasterMod += GetTotalAuraModifierByMiscMask(AuraType.ModIgnoreTargetResist, (int)spellProto.GetSchoolMask());
-
                 // Versatility
                 Player modOwner = GetSpellModOwner();
                 if (modOwner)
@@ -299,15 +295,18 @@ namespace Game.Entities
                 TakenTotalMod *= GetTotalAuraMultiplierByMiscMask(AuraType.ModDamagePercentTaken, (uint)spellProto.GetSchoolMask());
 
                 // From caster spells
-                TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModSchoolMaskDamageFromCaster, aurEff =>
+                if (caster != null)
                 {
-                    return aurEff.GetCasterGUID() == caster.GetGUID() && (aurEff.GetMiscValue() & (int)spellProto.GetSchoolMask()) != 0;
-                });
+                    TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModSchoolMaskDamageFromCaster, aurEff =>
+                    {
+                        return aurEff.GetCasterGUID() == caster.GetGUID() && (aurEff.GetMiscValue() & (int)spellProto.GetSchoolMask()) != 0;
+                    });
 
-                TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModSpellDamageFromCaster, aurEff =>
-                {
-                    return aurEff.GetCasterGUID() == caster.GetGUID() && aurEff.IsAffectingSpell(spellProto);
-                });
+                    TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModSpellDamageFromCaster, aurEff =>
+                    {
+                        return aurEff.GetCasterGUID() == caster.GetGUID() && aurEff.IsAffectingSpell(spellProto);
+                    });
+                }
 
                 if (damagetype == DamageEffectType.DOT)
                     TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModPeriodicDamageTaken, aurEff => (aurEff.GetMiscValue() & (uint)spellProto.GetSchoolMask()) != 0);
@@ -319,35 +318,26 @@ namespace Game.Entities
 
                 // Default calculation
                 if (TakenAdvertisedBenefit != 0)
-                {
-                    // level penalty still applied on Taken bonus - is it blizzlike?
-                    if (modOwner)
-                    {
-                        coeff *= 100.0f;
-                        modOwner.ApplySpellMod(spellProto, SpellModOp.BonusCoefficient, ref coeff);
-                        coeff /= 100.0f;
-                    }
                     TakenTotal += (int)(TakenAdvertisedBenefit * coeff * stack);
-                }
             }
 
-            float tmpDamage = 0.0f;
-
-            if (TakenTotalCasterMod != 0)
+            // Sanctified Wrath (bypass damage reduction)
+            if (caster != null && TakenTotalMod < 1.0f)
             {
-                if (TakenTotal < 0)
+                float damageReduction = 1.0f - TakenTotalMod;
+                var casterIgnoreResist = caster.GetAuraEffectsByType(AuraType.ModIgnoreTargetResist);
+                foreach (AuraEffect aurEff in casterIgnoreResist)
                 {
-                    if (TakenTotalMod < 1)
-                        tmpDamage = (((MathFunctions.CalculatePct(pdamage, TakenTotalCasterMod) + TakenTotal) * TakenTotalMod) + MathFunctions.CalculatePct(pdamage, TakenTotalCasterMod));
-                    else
-                        tmpDamage = (((float)(MathFunctions.CalculatePct(pdamage, TakenTotalCasterMod) + TakenTotal) + MathFunctions.CalculatePct(pdamage, TakenTotalCasterMod)) * TakenTotalMod);
-                }
-                else if (TakenTotalMod < 1)
-                    tmpDamage = ((MathFunctions.CalculatePct(pdamage + TakenTotal, TakenTotalCasterMod) * TakenTotalMod) + MathFunctions.CalculatePct(pdamage + TakenTotal, TakenTotalCasterMod));
-            }
-            if (tmpDamage == 0)
-                tmpDamage = (pdamage + TakenTotal) * TakenTotalMod;
+                    if ((aurEff.GetMiscValue() & (int)spellProto.GetSchoolMask()) == 0)
+                        continue;
 
+                    MathFunctions.ApplyPct(ref damageReduction, aurEff.GetAmount());
+                }
+
+                TakenTotalMod = 1.0f - damageReduction;
+            }
+
+            float tmpDamage = (float)(pdamage + TakenTotal) * TakenTotalMod;
             return (uint)Math.Max(tmpDamage, 0.0f);
         }
 
@@ -469,7 +459,7 @@ namespace Game.Entities
             }
 
             // Default calculation
-            if (DoneAdvertisedBenefit != 0)
+            if (coeff != 0 && DoneAdvertisedBenefit != 0)
             {
                 Player modOwner = GetSpellModOwner();
                 if (modOwner)
@@ -609,17 +599,7 @@ namespace Game.Entities
 
             // Default calculation
             if (TakenAdvertisedBenefit != 0)
-            {
-                Player modOwner = GetSpellModOwner();
-                if (modOwner)
-                {
-                    coeff *= 100.0f;
-                    modOwner.ApplySpellMod(spellProto, SpellModOp.BonusCoefficient, ref coeff);
-                    coeff /= 100.0f;
-                }
-
                 TakenTotal += (int)(TakenAdvertisedBenefit * coeff * stack);
-            }
 
             if (damagetype == DamageEffectType.DOT)
             {
@@ -633,12 +613,15 @@ namespace Game.Entities
                     MathFunctions.AddPct(ref TakenTotalMod, maxval_hot);
             }
 
-            TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModHealingReceived, aurEff =>
+            if (caster)
             {
-                if (caster.GetGUID() == aurEff.GetCasterGUID() && aurEff.IsAffectingSpell(spellProto))
-                    return true;
-                return false;
-            });
+                TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModHealingReceived, aurEff =>
+                {
+                    if (caster.GetGUID() == aurEff.GetCasterGUID() && aurEff.IsAffectingSpell(spellProto))
+                        return true;
+                    return false;
+                });
+            }
 
             foreach (SpellEffectInfo eff in spellProto.GetEffects())
             {
