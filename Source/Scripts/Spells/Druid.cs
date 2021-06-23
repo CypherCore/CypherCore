@@ -717,13 +717,9 @@ namespace Scripts.Spells.Druid
 
         void OnRemoveEffect(Unit target, AuraEffect aurEff, uint stack)
         {
-            uint healAmount = (uint)aurEff.GetAmount();
             Unit caster = GetCaster();
             if (caster != null)
             {
-                healAmount = caster.SpellHealingBonusDone(GetTarget(), GetSpellInfo(), healAmount, DamageEffectType.Heal, aurEff.GetSpellEffectInfo(), stack);
-                healAmount = GetTarget().SpellHealingBonusTaken(caster, GetSpellInfo(), healAmount, DamageEffectType.Heal, aurEff.GetSpellEffectInfo(), stack);
-
                 // restore mana
                 var spellPowerCostList = GetSpellInfo().CalcPowerCost(caster, GetSpellInfo().GetSchoolMask());
                 var spellPowerCost = spellPowerCostList.Find(cost => cost.Power == PowerType.Mana);
@@ -736,10 +732,7 @@ namespace Scripts.Spells.Druid
                 }
             }
 
-            CastSpellExtraArgs args = new(aurEff);
-            args.OriginalCaster = GetCasterGUID();
-            args.AddSpellMod(SpellValueMod.BasePoint0, (int)healAmount);
-            target.CastSpell(target, SpellIds.LifebloomFinalHeal, args);
+            target.CastSpell(target, SpellIds.LifebloomFinalHeal, new CastSpellExtraArgs(aurEff, GetCasterGUID()));
         }
 
         void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
