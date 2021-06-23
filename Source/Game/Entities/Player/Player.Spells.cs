@@ -1700,6 +1700,23 @@ namespace Game.Entities
                     {
                         if (!spellInfo.HasAttribute(SpellAttr8.ArmorSpecialization))
                         {
+                            // most used check: shield only
+                            if ((spellInfo.EquippedItemSubClassMask & (1 << (int)ItemSubClassArmor.Shield)) != 0)
+                            {
+                                Item item = GetUseableItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
+                                if (item != null)
+                                    if (item != ignoreItem && item.IsFitToSpellRequirements(spellInfo))
+                                        return true;
+
+                                // special check to filter things like Shield Wall, the aura is not permanent and must stay even without required item
+                                if (!spellInfo.IsPassive())
+                                {
+                                    foreach (SpellEffectInfo effect in spellInfo.GetEffects())
+                                        if (effect != null && effect.IsAura())
+                                            return true;
+                                }
+                            }
+
                             // tabard not have dependent spells
                             for (byte i = EquipmentSlot.Start; i < EquipmentSlot.MainHand; ++i)
                             {
@@ -1708,12 +1725,6 @@ namespace Game.Entities
                                     if (item != ignoreItem && item.IsFitToSpellRequirements(spellInfo))
                                         return true;
                             }
-
-                            // shields can be equipped to offhand slot
-                            Item item1 = GetUseableItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
-                            if (item1)
-                                if (item1 != ignoreItem && item1.IsFitToSpellRequirements(spellInfo))
-                                    return true;
                         }
                         else
                         {
