@@ -458,6 +458,115 @@ namespace Game.Chat
             return true;
         }
 
+        [Command("instancespawn", RBACPermissions.CommandDebugInstancespawn)]
+        static bool HandleDebugInstanceSpawns(StringArguments args, CommandHandler handler)
+        {
+            Player player = handler.GetSession().GetPlayer();
+            if (player == null)
+                return false;
+
+            string explainOrGroupId = args.NextString();
+
+            bool explain = false;
+            uint groupID = 0;
+            if (explainOrGroupId.Equals("explain"))
+                explain = true;
+            else
+                groupID = uint.Parse(explainOrGroupId);
+
+            if (groupID != 0 && Global.ObjectMgr.GetSpawnGroupData(groupID) == null)
+            {
+                handler.SendSysMessage($"There is no spawn group with ID {groupID}.");
+                return false;
+            }
+
+            Map map = player.GetMap();
+            string mapName = map.GetMapName();
+            InstanceScript instance = player.GetInstanceScript();
+            if (instance == null)
+            {
+                handler.SendSysMessage($"{mapName} has no instance script.");
+                return false;
+            }
+
+            var spawnGroups = instance.GetInstanceSpawnGroups();
+            if (spawnGroups.Empty())
+            {
+                handler.SendSysMessage($"{mapName}'s instance script does not manage any spawn groups.");
+                return false;
+            }
+
+            MultiMap<uint, Tuple<bool, byte, byte>> store = new();
+            foreach (InstanceSpawnGroupInfo info in spawnGroups)
+            {
+                if (groupID != 0 && info.SpawnGroupId != groupID)
+                    continue;
+
+                bool isSpawn;
+                if (info.Flags.HasFlag(InstanceSpawnGroupFlags.BlockSpawn))
+                    isSpawn = false;
+                else if (info.Flags.HasFlag(InstanceSpawnGroupFlags.ActivateSpawn))
+                    isSpawn = true;
+                else
+                    continue;
+
+                store.Add(info.SpawnGroupId, Tuple.Create(isSpawn, info.BossStateId, info.BossStates));
+            }
+
+            if (groupID != 0 && !store.ContainsKey(groupID))
+            {
+                handler.SendSysMessage($"{mapName}'s instance script does not manage group '{Global.ObjectMgr.GetSpawnGroupData(groupID).name}'.");
+                return false;
+            }
+
+            if (groupID == 0)
+                handler.SendSysMessage($"Spawn groups managed by {mapName} ({map.GetId()}):");
+
+            foreach (var key in store.Keys)
+            {
+                SpawnGroupTemplateData groupData = Global.ObjectMgr.GetSpawnGroupData(key);
+                Cypher.Assert(groupData != null); // checked by objectmgr on load
+                if (explain)
+                {
+                    handler.SendSysMessage(" |-- '{}' ({})", groupData.name, key);
+                    bool isBlocked = false, isSpawned = false;
+                    foreach (var tuple in store[key])
+                    {
+                        bool isSpawn = tuple.Item1;
+                        byte bossStateId = tuple.Item2;
+                        EncounterState actualState = instance.GetBossState(bossStateId);
+                        if ((tuple.Item3 & (1 << (int)actualState)) != 0)
+                        {
+                            if (isSpawn)
+                            {
+                                isSpawned = true;
+                                if (isBlocked)
+                                    handler.SendSysMessage($" | |-- '{groupData.name}' would be allowed to spawn by boss state {bossStateId} being {(EncounterState)actualState}, but this is overruled");
+                                else
+                                    handler.SendSysMessage($" | |-- '{groupData.name}' is allowed to spawn because boss state {bossStateId} is {(EncounterState)bossStateId}.");
+                            }
+                            else
+                            {
+                                isBlocked = true;
+                                handler.SendSysMessage($" | |-- '{groupData.name}' is blocked from spawning because boss state {bossStateId} is {(EncounterState)bossStateId}.");
+                            }
+                        }
+                        else
+                            handler.SendSysMessage($" | |-- '{groupData.name}' could've been {(isSpawn ? "allowed to spawn" : "blocked from spawning")} if boss state {bossStateId} matched mask {tuple.Item3}; but it is {(EncounterState)actualState} . {(1 << (int)actualState)}, which does not match.");
+                    }
+                    if (isBlocked)
+                        handler.SendSysMessage($" | |=> '{groupData.name}' is not active due to a blocking rule being matched");
+                    else if (isSpawned)
+                        handler.SendSysMessage($" | |=> '{groupData.name}' is active due to a spawn rule being matched");
+                    else
+                        handler.SendSysMessage($" | |=> '{groupData.name}' is not active due to none of its rules being matched");
+                }
+                else
+                    handler.SendSysMessage($" - '{groupData.name}' ({key}) is {(map.IsSpawnGroupActive(key) ? "" : "not ")}active");
+            }
+            return true;
+        }
+
         [Command("itemexpire", RBACPermissions.CommandDebugItemexpire)]
         static bool HandleDebugItemExpireCommand(StringArguments args, CommandHandler handler)
         {
@@ -474,6 +583,29 @@ namespace Game.Chat
             handler.GetSession().GetPlayer().DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
             Global.ScriptMgr.OnItemExpire(handler.GetSession().GetPlayer(), item.GetTemplate());
 
+            return true;
+        }
+
+        [Command("loadcells", RBACPermissions.CommandDebugLoadcells)]
+        static bool HandleDebugLoadCellsCommand(StringArguments args, CommandHandler handler)
+        {
+            Player player = handler.GetSession().GetPlayer();
+            if (!player)
+                return false;
+
+            Map map = null;
+
+            if (!args.Empty())
+            {
+                uint mapId = args.NextUInt32();
+                map = Global.MapMgr.FindBaseNonInstanceMap(mapId);
+            }
+            if (!map)
+                map = player.GetMap();
+
+            map.LoadAllCells();
+
+            handler.SendSysMessage("Cells loaded (mapId: {0})", map.GetId());
             return true;
         }
 
@@ -600,29 +732,6 @@ namespace Game.Chat
             else
                 handler.SendSysMessage(CypherStrings.CommandNearGraveyardNotfound);
 
-            return true;
-        }
-
-        [Command("loadcells", RBACPermissions.CommandDebugLoadcells)]
-        static bool HandleDebugLoadCellsCommand(StringArguments args, CommandHandler handler)
-        {
-            Player player = handler.GetSession().GetPlayer();
-            if (!player)
-                return false;
-
-            Map map = null;
-
-            if (!args.Empty())
-            {
-                uint mapId = args.NextUInt32();
-                map = Global.MapMgr.FindBaseNonInstanceMap(mapId);
-            }
-            if (!map)
-                map = player.GetMap();
-
-            map.LoadAllCells();
-
-            handler.SendSysMessage("Cells loaded (mapId: {0})", map.GetId());
             return true;
         }
 

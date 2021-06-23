@@ -776,7 +776,7 @@ namespace Framework.Constants
         CommandModifyPower = 868,
         CommandDebugSendPlayerChoice = 869,
         CommandDebugThreatinfo = 870,
-        CommandDebugInstancespawn = 871, // reserved
+        CommandDebugInstancespawn = 871,
         CommandServerDebug = 872,
         CommandReloadCreatureMovementOverride = 873,
         // 874 previously used, do not reuse

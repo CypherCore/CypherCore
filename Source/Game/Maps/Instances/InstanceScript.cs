@@ -904,6 +904,8 @@ namespace Game.Maps
 
         public virtual void WriteSaveDataMore(StringBuilder data) { }
 
+        public List<InstanceSpawnGroupInfo> GetInstanceSpawnGroups() { return _instanceSpawnGroups; }
+
         public InstanceMap instance;
         List<char> headers = new();
         Dictionary<uint, BossInfo> bosses = new();
