@@ -1559,7 +1559,8 @@ namespace Scripts.World.NpcSpecial
 
         public override void DamageTaken(Unit doneBy, ref uint damage)
         {
-            _damageTimes[doneBy.GetGUID()] = GameTime.GetGameTime();
+            if (doneBy != null)
+                _damageTimes[doneBy.GetGUID()] = GameTime.GetGameTime();
             damage = 0;
         }
 
