@@ -199,13 +199,7 @@ namespace Game.Entities
         public void AddValue(T value)
         {
             MarkChanged(_values.Count);
-
-            if (value is IHasChangesMask)
-            {
-                IHasChangesMask hasChanges = (IHasChangesMask)value;
-                if (hasChanges != null)
-                    hasChanges.GetUpdateMask().SetAll();
-            }
+            MarkAllUpdateMaskFields(_values[i]);
 
             _values.Add(value);
         }
@@ -217,9 +211,7 @@ namespace Game.Entities
             {
                 MarkChanged(i);
                 // also mark all fields of value as changed
-                IHasChangesMask hasChangesMask = (IHasChangesMask)_values[i];
-                if (hasChangesMask != null)
-                    hasChangesMask.GetUpdateMask().SetAll();
+                MarkAllUpdateMaskFields(_values[i]);
             }
         }
 
@@ -231,14 +223,18 @@ namespace Game.Entities
             {
                 MarkChanged(i);
                 // also mark all fields of value as changed
-                IHasChangesMask hasChanges = (IHasChangesMask)_values[i];
-                if (hasChanges != null)
-                    hasChanges.GetUpdateMask().SetAll();
+                MarkAllUpdateMaskFields(_values[i]);
             }
             if ((_values.Count % 32) != 0)
                 _updateMask[UpdateMask.GetBlockIndex(_values.Count)] &= (uint)~UpdateMask.GetBlockFlag(_values.Count);
             else
                 _updateMask.RemoveAt(_updateMask.Count - 1);
+        }
+
+        void MarkAllUpdateMaskFields(T value)
+        {
+            if (value is IHasChangesMask)
+                ((IHasChangesMask)value).GetUpdateMask().SetAll();
         }
 
         public void Clear()
