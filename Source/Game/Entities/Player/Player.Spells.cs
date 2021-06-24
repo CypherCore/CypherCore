@@ -2868,6 +2868,10 @@ namespace Game.Entities
             if (mod.op == SpellModOp.Duration && spellInfo.GetDuration() == -1)
                 return false;
 
+            // mod crit to spells that can't crit
+            if (mod.op == SpellModOp.CritChance && !spellInfo.HasAttribute(SpellCustomAttributes.CanCrit))
+                return false;
+
             return spellInfo.IsAffectedBySpellMod(mod);
         }
 
