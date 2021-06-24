@@ -113,19 +113,19 @@ namespace Game.Movement
             creature.UpdateCurrentWaypointInfo(waypoint.id, _path.id);
         }
 
-        void StartMove(Creature creature)
+        void StartMove(Creature creature, bool relaunch = false)
         {
-            if (!creature || !creature.IsAlive())
+            // sanity checks
+            if (creature == null || !creature.IsAlive() || _done || _path == null || _path.nodes.Empty() || (relaunch && _isArrivalDone))
                 return;
 
-            if (_done || _path == null || _path.nodes.Empty())
-                return;
-
-            // if the owner is the leader of its formation, check members status
-            if (!CanMove(creature) || (creature.IsFormationLeader() && !creature.IsFormationLeaderMoveAllowed()))
+            if (!relaunch)  // on relaunch, can avoid this since its only called on valid movement
             {
-                _nextMoveTime.Reset(1000);
-                return;
+                if (!CanMove(creature) || (creature.IsFormationLeader() && !creature.IsFormationLeaderMoveAllowed())) // if cannot move OR cannot move because of formation
+                {
+                    _nextMoveTime.Reset(1000); // delay 1s
+                    return;
+                }
             }
 
             bool transportPath = creature.GetTransport() != null;
@@ -225,7 +225,6 @@ namespace Game.Movement
 
             // inform formation
             creature.SignalFormationMovement(formationDest, waypoint.id, waypoint.moveType, (waypoint.orientation != 0 && waypoint.delay != 0));
-            return;
         }
 
         public override bool DoUpdate(Creature creature, uint diff)
@@ -234,30 +233,47 @@ namespace Game.Movement
                 return true;
 
             if (_done || _path == null || _path.nodes.Empty())
-                return false;
+                return true;
 
             if (_stalled || creature.HasUnitState(UnitState.NotMove) || creature.IsMovementPreventedByCasting())
             {
-                creature.ClearUnitState(UnitState.RoamingMove);
                 creature.StopMoving();
                 return true;
             }
 
-            if (!_nextMoveTime.Passed())
-                _nextMoveTime.Update((int)diff);
-
-            if (creature.HasUnitState(UnitState.RoamingMove) && creature.MoveSpline.Finalized() && !_isArrivalDone)
+            // if it's moving
+            if (!creature.MoveSpline.Finalized())
             {
-                OnArrived(creature);
-                _isArrivalDone = true;
+                // set home position at place (every MotionMaster::UpdateMotion)
+                if (creature.GetTransGUID().IsEmpty())
+                    creature.SetHomePosition(creature.GetPosition());
+
+                // relaunch movement if its speed has changed
+                if (_recalculateSpeed)
+                    StartMove(creature, true);
             }
+            else
+            {
+                // check if there is a wait time for the next movement
+                if (!_nextMoveTime.Passed())
+                {
+                    // dont update wait timer while moving
+                    _nextMoveTime.Update((int)diff);
+                    if (_nextMoveTime.Passed())
+                    {
+                        _nextMoveTime.Reset(0);
+                        StartMove(creature); // check path status, get next point and move if necessary & can
+                    }
+                }
+                else // if it's not moving and there is no timer, assume node is reached
+                {
+                    OnArrived(creature); // hooks and wait timer reset (if necessary)
+                    _isArrivalDone = true; // signals that the next move will happen after reaching a node
 
-            // Set home position at place on waypoint movement.
-            if (creature.GetTransGUID().IsEmpty())
-                creature.SetHomePosition(creature.GetPosition());
-
-            if (_recalculateSpeed || (_nextMoveTime.Passed() && (!creature.HasUnitState(UnitState.RoamingMove) || creature.MoveSpline.Finalized())))
-                StartMove(creature);
+                    if (_nextMoveTime.Passed())
+                        StartMove(creature); // check path status, get next point and move if necessary & can
+                }
+            }
 
             return true;
         }
