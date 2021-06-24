@@ -63,7 +63,6 @@ namespace Game.AI
         uint _invincibilityHpLevel;
 
         uint _despawnTime;
-        uint _respawnTime;
         uint _despawnState;
 
         // Vehicle conditions
@@ -570,7 +569,6 @@ namespace Game.AI
             GetScript().OnInitialize(me);
 
             _despawnTime = 0;
-            _respawnTime = 0;
             _despawnState = 0;
             _escortState = SmartEscortState.None;
 
@@ -1021,7 +1019,7 @@ namespace Game.AI
                     _despawnState++;
                 }
                 else
-                    me.DespawnOrUnsummon(0, TimeSpan.FromSeconds(_respawnTime));
+                    me.DespawnOrUnsummon();
             }
             else
                 _despawnTime -= diff;
@@ -1048,7 +1046,6 @@ namespace Game.AI
         public void SetDespawnTime(uint t, uint r = 0)
         {
             _despawnTime = t;
-            _respawnTime = r;
             _despawnState = t != 0 ? 1 : 0u;
         }
 

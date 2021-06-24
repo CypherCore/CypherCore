@@ -968,27 +968,22 @@ namespace Game.AI
                 case SmartActions.ForceDespawn:
                     {
                         // there should be at least a world update tick before despawn, to avoid breaking linked actions
-                        uint respawnDelay = Math.Max(e.Action.forceDespawn.delay, 1u);
+                        TimeSpan despawnDelay = TimeSpan.FromMilliseconds(e.Action.forceDespawn.delay);
+                        if (despawnDelay <= TimeSpan.Zero)
+                            despawnDelay = TimeSpan.FromMilliseconds(1);
+
+                        TimeSpan forceRespawnTimer = TimeSpan.FromSeconds(e.Action.forceDespawn.forceRespawnTimer);
 
                         foreach (var target in targets)
                         {
                             Creature creature = target.ToCreature();
                             if (creature != null)
-                            {
-                                CreatureAI smartAI = creature.GetAI();
-                                if (smartAI != null && smartAI is SmartAI)
-                                {
-                                    ((SmartAI)smartAI).SetDespawnTime(respawnDelay);
-                                    ((SmartAI)smartAI).StartDespawn();
-                                }
-                                else
-                                    creature.DespawnOrUnsummon(TimeSpan.FromMilliseconds(respawnDelay));
-                            }
+                                creature.DespawnOrUnsummon(despawnDelay, forceRespawnTimer);
                             else
                             {
                                 GameObject go = target.ToGameObject();
                                 if (go != null)
-                                    go.SetRespawnTime((int)respawnDelay);
+                                    go.DespawnOrUnsummon(despawnDelay, forceRespawnTimer);
                             }
                         }
                         break;

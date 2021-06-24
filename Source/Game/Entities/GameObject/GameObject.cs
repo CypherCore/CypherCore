@@ -429,7 +429,7 @@ namespace Game.Entities
                 if (m_despawnDelay > diff)
                     m_despawnDelay -= diff;
                 else
-                    DespawnOrUnsummon();
+                    DespawnOrUnsummon(TimeSpan.FromMilliseconds(0), m_despawnRespawnTime);
             }
 
             switch (m_lootState)
@@ -870,17 +870,21 @@ namespace Game.Entities
             m_unique_users.Add(player.GetGUID());
         }
 
-        void DespawnOrUnsummon(TimeSpan delay = default)
+        public void DespawnOrUnsummon(TimeSpan delay = default, TimeSpan forceRespawnTime = default)
         {
             if (delay > TimeSpan.Zero)
             {
                 if (m_despawnDelay == 0 || m_despawnDelay > delay.TotalMilliseconds)
+                {
                     m_despawnDelay = (uint)delay.TotalMilliseconds;
+                    m_despawnRespawnTime = forceRespawnTime;
+                }
             }
             else
             {
-                if (m_goData != null && m_respawnDelayTime != 0)
-                    SaveRespawnTime(m_respawnDelayTime);
+                uint respawnDelay = (uint)((forceRespawnTime > TimeSpan.Zero) ? forceRespawnTime.TotalSeconds : m_respawnDelayTime);
+                if (m_goData != null && respawnDelay != 0)
+                    SaveRespawnTime(respawnDelay);
                 Delete();
             }
         }
@@ -2883,6 +2887,7 @@ namespace Game.Entities
         long m_respawnTime;                          // (secs) time of next respawn (or despawn if GO have owner()),
         uint m_respawnDelayTime;                     // (secs) if 0 then current GO state no dependent from timer
         uint m_despawnDelay;
+        TimeSpan m_despawnRespawnTime;                   // override respawn time after delayed despawn
         LootState m_lootState;
         ObjectGuid m_lootStateUnitGUID;                    // GUID of the unit passed with SetLootState(LootState, Unit*)
         bool m_spawnedByDefault;
