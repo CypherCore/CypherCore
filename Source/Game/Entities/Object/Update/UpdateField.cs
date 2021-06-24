@@ -199,7 +199,7 @@ namespace Game.Entities
         public void AddValue(T value)
         {
             MarkChanged(_values.Count);
-            MarkAllUpdateMaskFields(_values[i]);
+            MarkAllUpdateMaskFields(value);
 
             _values.Add(value);
         }
