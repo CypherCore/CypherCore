@@ -304,18 +304,23 @@ namespace Game
             // Check possible spell cast overrides
             spellInfo = caster.GetCastSpellInfo(spellInfo);
 
-            // Client is resending autoshot cast opcode when other spell is casted during shoot rotation
-            // Skip it to prevent "interrupt" message
-            if (spellInfo.IsAutoRepeatRangedSpell() && GetPlayer().GetCurrentSpell(CurrentSpellTypes.AutoRepeat) != null
-                && GetPlayer().GetCurrentSpell(CurrentSpellTypes.AutoRepeat).m_spellInfo == spellInfo)
-                return;
-
             // can't use our own spells when we're in possession of another unit,
             if (GetPlayer().IsPossessing())
                 return;
 
             // client provided targets
             SpellCastTargets targets = new(caster, cast.Cast);
+
+            // Client is resending autoshot cast opcode when other spell is cast during shoot rotation
+            // Skip it to prevent "interrupt" message
+            // Also check targets! target may have changed and we need to interrupt current spell
+            if (spellInfo.IsAutoRepeatRangedSpell())
+            {
+                Spell autoRepeatSpell = caster.GetCurrentSpell(CurrentSpellTypes.AutoRepeat);
+                if (autoRepeatSpell != null)
+                    if (autoRepeatSpell.m_spellInfo == spellInfo && autoRepeatSpell.m_targets.GetUnitTargetGUID() == targets.GetUnitTargetGUID())
+                        return;
+            }
 
             // auto-selection buff level base at target level (in spellInfo)
             if (targets.GetUnitTarget() != null)
