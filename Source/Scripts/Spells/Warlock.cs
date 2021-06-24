@@ -364,6 +364,15 @@ namespace Scripts.Spells.Warlock
             return ValidateSpellInfo(SpellIds.SeedOfCorruptionDamage);
         }
 
+        void CalculateBuffer(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
+        {
+            Unit caster = GetCaster();
+            if (caster == null)
+                return;
+
+            amount = caster.SpellBaseDamageBonusDone(GetSpellInfo().GetSchoolMask()) * GetSpellInfo().GetEffect(0).CalcValue(caster) / 100;
+        }
+        
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
             PreventDefaultAction();
@@ -390,7 +399,8 @@ namespace Scripts.Spells.Warlock
 
         public override void Register()
         {
-            OnEffectProc.Add(new EffectProcHandler(HandleProc, 1, AuraType.Dummy));
+            DoEffectCalcAmount.Add(new EffectCalcAmountHandler(CalculateBuffer, 2, AuraType.Dummy));
+            OnEffectProc.Add(new EffectProcHandler(HandleProc, 2, AuraType.Dummy));
         }
     }
 
