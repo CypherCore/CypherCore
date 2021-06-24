@@ -355,19 +355,6 @@ namespace Game.Spells
                     _effects[effect.EffectIndex] = new AuraEffect(this, effect, baseAmount != null ? baseAmount[effect.EffectIndex] : (int?)null, caster);
             }
         }
-
-        public float CalcPeriodicCritChance(Unit caster)
-        {
-            if (!caster)
-                return 0.0f;
-
-            Player modOwner = caster.GetSpellModOwner();
-            if (modOwner == null)
-                return 0.0f;
-
-            float critChance = modOwner.SpellCritChanceDone(GetSpellInfo(), GetSpellInfo().GetSchoolMask(), GetSpellInfo().GetAttackType());
-            return Math.Max(0.0f, critChance);
-        }
         
         public Unit GetCaster()
         {

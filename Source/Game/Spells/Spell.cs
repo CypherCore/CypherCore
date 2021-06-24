@@ -6872,7 +6872,7 @@ namespace Game.Spells
                 }
             }
 
-            float critChance = m_caster.SpellCritChanceDone(m_spellInfo, m_spellSchoolMask, m_attackType);
+            float critChance = m_caster.SpellCritChanceDone(this, null, m_spellSchoolMask, m_attackType);
             targetInfo.crit = RandomHelper.randChance(unit.SpellCritChanceTaken(m_caster, this, null, m_spellSchoolMask, critChance, m_attackType));
         }
 

@@ -2664,6 +2664,23 @@ namespace Game.Entities
                     switch (effect.Effect)
                     {
                         case SpellEffectName.SchoolDamage:
+                        case SpellEffectName.HealthLeech:
+                        case SpellEffectName.Heal:
+                        case SpellEffectName.WeaponDamageNoSchool:
+                        case SpellEffectName.WeaponPercentDamage:
+                        case SpellEffectName.WeaponDamage:
+                        case SpellEffectName.PowerBurn:
+                        case SpellEffectName.HealMechanical:
+                        case SpellEffectName.NormalizedWeaponDmg:
+                        case SpellEffectName.HealPct:
+                        case SpellEffectName.DamageFromMaxHealthPCT:
+                            spellInfo.AttributesCu |= SpellCustomAttributes.CanCrit;
+                            break;
+                    }
+
+                    switch (effect.Effect)
+                    {
+                        case SpellEffectName.SchoolDamage:
                         case SpellEffectName.WeaponDamage:
                         case SpellEffectName.WeaponDamageNoSchool:
                         case SpellEffectName.NormalizedWeaponDmg:
@@ -2846,38 +2863,43 @@ namespace Game.Entities
             // addition for binary spells, ommit spells triggering other spells
             foreach (var spellInfo in mSpellInfoMap.Values)
             {
-                if (spellInfo.HasAttribute(SpellCustomAttributes.BinarySpell))
-                    continue;
-
-                bool allNonBinary = true;
-                bool overrideAttr = false;
-                foreach (SpellEffectInfo effect in spellInfo.GetEffects())
+                if (!spellInfo.HasAttribute(SpellCustomAttributes.BinarySpell))
                 {
-                    if (effect == null)
-                        continue;
-
-                    if (effect.IsAura() && effect.TriggerSpell != 0)
+                    bool allNonBinary = true;
+                    bool overrideAttr = false;
+                    foreach (SpellEffectInfo effect in spellInfo.GetEffects())
                     {
-                        switch (effect.ApplyAuraName)
+                        if (effect == null)
+                            continue;
+
+                        if (effect.IsAura() && effect.TriggerSpell != 0)
                         {
-                            case AuraType.PeriodicTriggerSpell:
-                            case AuraType.PeriodicTriggerSpellWithValue:
-                                SpellInfo triggerSpell = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, Difficulty.None);
-                                if (triggerSpell != null)
-                                {
-                                    overrideAttr = true;
-                                    if (triggerSpell.HasAttribute(SpellCustomAttributes.BinarySpell))
-                                        allNonBinary = false;
-                                }
-                                break;
-                            default:
-                                break;
+                            switch (effect.ApplyAuraName)
+                            {
+                                case AuraType.PeriodicTriggerSpell:
+                                case AuraType.PeriodicTriggerSpellWithValue:
+                                    SpellInfo triggerSpell = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, Difficulty.None);
+                                    if (triggerSpell != null)
+                                    {
+                                        overrideAttr = true;
+                                        if (triggerSpell.HasAttribute(SpellCustomAttributes.BinarySpell))
+                                            allNonBinary = false;
+                                    }
+                                    break;
+                                default:
+                                    break;
+                            }
                         }
                     }
+
+                    if (overrideAttr && allNonBinary)
+                        spellInfo.AttributesCu &= ~SpellCustomAttributes.BinarySpell;
                 }
 
-                if (overrideAttr && allNonBinary)
-                    spellInfo.AttributesCu &= ~SpellCustomAttributes.BinarySpell;
+                // remove attribute from spells that can't crit
+                if (spellInfo.HasAttribute(SpellCustomAttributes.CanCrit))
+                    if (spellInfo.HasAttribute(SpellAttr2.CantCrit))
+                        spellInfo.AttributesCu &= ~SpellCustomAttributes.CanCrit;
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded spell custom attributes in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));

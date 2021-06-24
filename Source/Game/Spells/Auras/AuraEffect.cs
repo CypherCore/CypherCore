@@ -446,7 +446,7 @@ namespace Game.Spells
 
         public float GetCritChanceFor(Unit caster, Unit target)
         {
-            return target.SpellCritChanceTaken(caster, null, this, GetSpellInfo().GetSchoolMask(), GetBase().CalcPeriodicCritChance(caster), GetSpellInfo().GetAttackType());
+            return target.SpellCritChanceTaken(caster, null, this, GetSpellInfo().GetSchoolMask(), CalcPeriodicCritChance(caster), GetSpellInfo().GetAttackType());
         }
         
         public bool IsAffectingSpell(SpellInfo spell)
@@ -595,6 +595,11 @@ namespace Game.Spells
                                 return false;
                         break;
                     }
+                case AuraType.ModSpellCritChance:
+                    // skip spells that can't crit
+                    if (spellInfo == null || !spellInfo.HasAttribute(SpellCustomAttributes.CanCrit))
+                        return false;
+                    break;
                 default:
                     break;
             }
@@ -5380,6 +5385,27 @@ namespace Game.Spells
             caster.SendSpellNonMeleeDamageLog(damageInfo);
         }
 
+        bool CanPeriodicTickCrit()
+        {
+            if (GetSpellInfo().HasAttribute(SpellAttr2.CantCrit))
+                return false;
+
+            return true;
+        }
+
+        float CalcPeriodicCritChance(Unit caster)
+        {
+            if (!caster || !CanPeriodicTickCrit())
+                return 0.0f;
+
+            Player modOwner = caster.GetSpellModOwner();
+            if (!modOwner)
+                return 0.0f;
+
+            float critChance = modOwner.SpellCritChanceDone(null, this, GetSpellInfo().GetSchoolMask(), GetSpellInfo().GetAttackType());
+            return Math.Max(0.0f, critChance);
+        }
+        
         void HandleBreakableCCAuraProc(AuraApplication aurApp, ProcEventInfo eventInfo)
         {
             int damageLeft = (int)(GetAmount() - eventInfo.GetDamageInfo().GetDamage());

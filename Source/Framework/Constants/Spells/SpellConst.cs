@@ -2060,6 +2060,7 @@ namespace Framework.Constants
         NoInitialThreat = 0x10,
         AuraCC = 0x20,
         DontBreakStealth = 0x40,
+        CanCrit = 0x80,
         DirectDamage = 0x100,
         Charge = 0x200,
         PickPocket = 0x400,

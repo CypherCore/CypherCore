@@ -645,14 +645,15 @@ namespace Game.Entities
             return (uint)Math.Max(heal, 0.0f);
         }
 
-        public float SpellCritChanceDone(SpellInfo spellInfo, SpellSchoolMask schoolMask, WeaponAttackType attackType = WeaponAttackType.BaseAttack)
+        public float SpellCritChanceDone(Spell spell, AuraEffect aurEff, SpellSchoolMask schoolMask, WeaponAttackType attackType = WeaponAttackType.BaseAttack)
         {
+            SpellInfo spellInfo = spell != null ? spell.GetSpellInfo() : aurEff.GetSpellInfo();
             //! Mobs can't crit with spells. (Except player controlled)
             if (IsCreature() && !GetSpellModOwner())
                 return 0.0f;
 
             // not critting spell
-            if (spellInfo.HasAttribute(SpellAttr2.CantCrit))
+            if (spell != null && !spellInfo.HasAttribute(SpellCustomAttributes.CanCrit))
                 return 0.0f;
 
             float crit_chance = 0.0f;
@@ -691,7 +692,7 @@ namespace Game.Entities
         {
             SpellInfo spellInfo = spell != null ? spell.GetSpellInfo() : aurEff.GetSpellInfo();
             // not critting spell
-            if (spellInfo.HasAttribute(SpellAttr2.CantCrit))
+            if (spell != null && !spellInfo.HasAttribute(SpellCustomAttributes.CanCrit))
                 return 0.0f;
 
             float crit_chance = doneChance;
