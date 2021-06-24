@@ -341,7 +341,7 @@ namespace Game.Maps
 
                     if (bossInfo.state == EncounterState.Done)
                     {
-                        Log.outError(LogFilter.Maps, $"InstanceScript: Tried to set instance state from {bossInfo.state} back to {state} for map {instance.GetId()}, instance id {instance.GetInstanceId()}. Blocked!");
+                        Log.outError(LogFilter.Maps, $"InstanceScript: Tried to set instance boss {id} state from {bossInfo.state} back to {state} for map {instance.GetId()}, instance id {instance.GetInstanceId()}. Blocked!");
                         return false;
                     }
 
