@@ -82,11 +82,6 @@ namespace Game.Entities
             return DoneAdvertisedBenefit;
         }
 
-        public int SpellBaseDamageBonusTaken(SpellSchoolMask schoolMask)
-        {
-            return GetTotalAuraModifierByMiscMask(AuraType.ModDamageTaken, (int)schoolMask);
-        }
-
         public uint SpellDamageBonusDone(Unit victim, SpellInfo spellProto, uint pdamage, DamageEffectType damagetype, SpellEffectInfo effect, uint stack = 1)
         {
             if (spellProto == null || victim == null || damagetype == DamageEffectType.Direct)
@@ -109,6 +104,9 @@ namespace Game.Entities
 
             // Done fixed damage bonus auras
             int DoneAdvertisedBenefit = SpellBaseDamageBonusDone(spellProto.GetSchoolMask());
+            // modify spell power by victim's SPELL_AURA_MOD_DAMAGE_TAKEN auras (eg Amplify/Dampen Magic)
+            DoneAdvertisedBenefit += victim.GetTotalAuraModifierByMiscMask(AuraType.ModDamageTaken, spellProto.GetSchoolMask());
+
             // Pets just add their bonus damage to their spell damage
             // note that their spell damage is just gain of their own auras
             if (HasUnitTypeMask(UnitTypeMask.Guardian))
@@ -137,10 +135,16 @@ namespace Game.Entities
                 APbonus += GetTotalAttackPowerValue(attType);
                 DoneTotal += (int)(stack * ApCoeffMod * APbonus);
             }
+            else
+            {
+                // No bonus damage for SPELL_DAMAGE_CLASS_NONE class spells by default
+                if (spellProto.DmgClass == SpellDmgClass.None)
+                    return (uint)Math.Max(pdamage * DoneTotalMod, 0.0f);
+            }
 
             // Default calculation
             float coeff = effect.BonusCoefficient;
-            if (coeff != 0 && DoneAdvertisedBenefit != 0)
+            if (DoneAdvertisedBenefit != 0)
             {
                 Player modOwner1 = GetSpellModOwner();
                 if (modOwner1)
@@ -258,7 +262,6 @@ namespace Game.Entities
             if (spellProto == null || damagetype == DamageEffectType.Direct)
                 return pdamage;
 
-            int TakenTotal = 0;
             float TakenTotalMod = 1.0f;
 
             // Mod damage from spell mechanic
@@ -310,15 +313,6 @@ namespace Game.Entities
 
                 if (damagetype == DamageEffectType.DOT)
                     TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModPeriodicDamageTaken, aurEff => (aurEff.GetMiscValue() & (uint)spellProto.GetSchoolMask()) != 0);
-
-                int TakenAdvertisedBenefit = SpellBaseDamageBonusTaken(spellProto.GetSchoolMask());
-
-                // Check for table values
-                float coeff = effect.BonusCoefficient;
-
-                // Default calculation
-                if (TakenAdvertisedBenefit != 0)
-                    TakenTotal += (int)(TakenAdvertisedBenefit * coeff * stack);
             }
 
             // Sanctified Wrath (bypass damage reduction)
@@ -337,7 +331,7 @@ namespace Game.Entities
                 TakenTotalMod = 1.0f - damageReduction;
             }
 
-            float tmpDamage = (float)(pdamage + TakenTotal) * TakenTotalMod;
+            float tmpDamage = pdamage * TakenTotalMod;
             return (uint)Math.Max(tmpDamage, 0.0f);
         }
 
@@ -378,11 +372,6 @@ namespace Game.Entities
                 }
             }
             return advertisedBenefit;
-        }
-
-        int SpellBaseHealingBonusTaken(SpellSchoolMask schoolMask)
-        {
-            return GetTotalAuraModifierByMiscMask(AuraType.ModHealing, (int)schoolMask);
         }
 
         public static int SpellCriticalHealingBonus(Unit caster, SpellInfo spellProto, int damage, Unit victim)
@@ -443,23 +432,33 @@ namespace Game.Entities
 
             // Done fixed damage bonus auras
             uint DoneAdvertisedBenefit = SpellBaseHealingBonusDone(spellProto.GetSchoolMask());
+            // modify spell power by victim's SPELL_AURA_MOD_HEALING auras (eg Amplify/Dampen Magic)
+            DoneAdvertisedBenefit += (uint)victim.GetTotalAuraModifierByMiscMask(AuraType.ModHealing, (int)spellProto.GetSchoolMask());
+
+            // Pets just add their bonus damage to their spell damage
+            // note that their spell damage is just gain of their own auras
+            if (HasUnitTypeMask(UnitTypeMask.Guardian))
+                DoneAdvertisedBenefit += (uint)((Guardian)this).GetBonusDamage();
 
             // Check for table values
             float coeff = effect.BonusCoefficient;
             if (effect.BonusCoefficientFromAP > 0.0f)
             {
-                DoneTotal += (int)(effect.BonusCoefficientFromAP * stack * GetTotalAttackPowerValue(
-                    (spellProto.IsRangedWeaponSpell() && spellProto.DmgClass != SpellDmgClass.Melee) ? WeaponAttackType.RangedAttack : WeaponAttackType.BaseAttack));
+                WeaponAttackType attType = (spellProto.IsRangedWeaponSpell() && spellProto.DmgClass != SpellDmgClass.Melee) ? WeaponAttackType.RangedAttack : WeaponAttackType.BaseAttack;
+                float APbonus = (float)victim.GetTotalAuraModifier(attType == WeaponAttackType.BaseAttack ? AuraType.MeleeAttackPowerAttackerBonus : AuraType.RangedAttackPowerAttackerBonus);
+                APbonus += GetTotalAttackPowerValue(attType);
+
+                DoneTotal += (int)(effect.BonusCoefficientFromAP * stack * APbonus);
             }
-            else if (coeff <= 0.0f)
+            else if (coeff <= 0.0f) // no AP and no SP coefs, skip
             {
                 // No bonus healing for SPELL_DAMAGE_CLASS_NONE class spells by default
                 if (spellProto.DmgClass == SpellDmgClass.None)
-                    return healamount;
+                    return (uint)Math.Max(healamount * DoneTotalMod, 0.0f);
             }
 
             // Default calculation
-            if (coeff != 0 && DoneAdvertisedBenefit != 0)
+            if (DoneAdvertisedBenefit != 0)
             {
                 Player modOwner = GetSpellModOwner();
                 if (modOwner)
@@ -570,12 +569,6 @@ namespace Game.Entities
             if (Tenacity != null)
                 MathFunctions.AddPct(ref TakenTotalMod, Tenacity.GetAmount());
 
-            // Healing Done
-            int TakenTotal = 0;
-
-            // Taken fixed damage bonus auras
-            int TakenAdvertisedBenefit = SpellBaseHealingBonusTaken(spellProto.GetSchoolMask());
-
             // Nourish cast
             if (spellProto.SpellFamilyName == SpellFamilyNames.Druid && spellProto.SpellFamilyFlags[1].HasAnyFlag(0x2000000u))
             {
@@ -584,22 +577,6 @@ namespace Game.Entities
                     // increase healing by 20%
                     TakenTotalMod *= 1.2f;
             }
-
-            // Check for table values
-            float coeff = effect.BonusCoefficient;
-            if (coeff <= 0.0f)
-            {
-                // No bonus healing for SPELL_DAMAGE_CLASS_NONE class spells by default
-                if (spellProto.DmgClass == SpellDmgClass.None)
-                {
-                    healamount = (uint)Math.Max((healamount * TakenTotalMod), 0.0f);
-                    return healamount;
-                }
-            }
-
-            // Default calculation
-            if (TakenAdvertisedBenefit != 0)
-                TakenTotal += (int)(TakenAdvertisedBenefit * coeff * stack);
 
             if (damagetype == DamageEffectType.DOT)
             {
@@ -623,25 +600,7 @@ namespace Game.Entities
                 });
             }
 
-            foreach (SpellEffectInfo eff in spellProto.GetEffects())
-            {
-                if (eff == null)
-                    continue;
-
-                switch (eff.ApplyAuraName)
-                {
-                    // Bonus healing does not apply to these spells
-                    case AuraType.PeriodicLeech:
-                    case AuraType.PeriodicHealthFunnel:
-                        TakenTotal = 0;
-                        break;
-                }
-                if (eff.Effect == SpellEffectName.HealthLeech)
-                    TakenTotal = 0;
-            }
-
-            float heal = (healamount + TakenTotal) * TakenTotalMod;
-
+            float heal = healamount * TakenTotalMod;
             return (uint)Math.Max(heal, 0.0f);
         }
 
