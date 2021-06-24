@@ -1571,7 +1571,7 @@ namespace Game.AI
                             if (creature != null)
                             {
                                 if (IsSmart(creature))
-                                    creature.GetAI<SmartAI>().SetScript9(e, e.Action.timedActionList.id, GetLastInvoker());
+                                    creature.GetAI<SmartAI>().SetTimedActionList(e, e.Action.timedActionList.id, GetLastInvoker());
                             }
                             else
                             {
@@ -1579,7 +1579,7 @@ namespace Game.AI
                                 if (go != null)
                                 {
                                     if (IsSmartGO(go))
-                                        go.GetAI<SmartGameObjectAI>().SetScript9(e, e.Action.timedActionList.id, GetLastInvoker());
+                                        go.GetAI<SmartGameObjectAI>().SetTimedActionList(e, e.Action.timedActionList.id, GetLastInvoker());
                                 }
                                 else
                                 {
@@ -1588,7 +1588,7 @@ namespace Game.AI
                                     {
                                         SmartAreaTriggerAI atSAI = areaTriggerTarget.GetAI<SmartAreaTriggerAI>();
                                         if (atSAI != null)
-                                            atSAI.SetScript9(e, e.Action.timedActionList.id, GetLastInvoker());
+                                            atSAI.SetTimedActionList(e, e.Action.timedActionList.id, GetLastInvoker());
                                     }
                                 }
                             }
@@ -1672,7 +1672,7 @@ namespace Game.AI
                             if (creature != null)
                             {
                                 if (IsSmart(creature))
-                                    creature.GetAI<SmartAI>().SetScript9(e, randomId, GetLastInvoker());
+                                    creature.GetAI<SmartAI>().SetTimedActionList(e, randomId, GetLastInvoker());
                             }
                             else
                             {
@@ -1680,7 +1680,7 @@ namespace Game.AI
                                 if (go != null)
                                 {
                                     if (IsSmartGO(go))
-                                        go.GetAI<SmartGameObjectAI>().SetScript9(e, randomId, GetLastInvoker());
+                                        go.GetAI<SmartGameObjectAI>().SetTimedActionList(e, randomId, GetLastInvoker());
                                 }
                                 else
                                 {
@@ -1689,7 +1689,7 @@ namespace Game.AI
                                     {
                                         SmartAreaTriggerAI atSAI = areaTriggerTarget.GetAI<SmartAreaTriggerAI>();
                                         if (atSAI != null)
-                                            atSAI.SetScript9(e, randomId, GetLastInvoker());
+                                            atSAI.SetTimedActionList(e, randomId, GetLastInvoker());
                                     }
                                 }
                             }
@@ -1711,7 +1711,7 @@ namespace Game.AI
                             if (creature != null)
                             {
                                 if (IsSmart(creature))
-                                    creature.GetAI<SmartAI>().SetScript9(e, id, GetLastInvoker());
+                                    creature.GetAI<SmartAI>().SetTimedActionList(e, id, GetLastInvoker());
                             }
                             else
                             {
@@ -1719,7 +1719,7 @@ namespace Game.AI
                                 if (go != null)
                                 {
                                     if (IsSmartGO(go))
-                                        go.GetAI<SmartGameObjectAI>().SetScript9(e, id, GetLastInvoker());
+                                        go.GetAI<SmartGameObjectAI>().SetTimedActionList(e, id, GetLastInvoker());
                                 }
                                 else
                                 {
@@ -1728,7 +1728,7 @@ namespace Game.AI
                                     {
                                         SmartAreaTriggerAI atSAI = areaTriggerTarget.GetAI<SmartAreaTriggerAI>();
                                         if (atSAI != null)
-                                            atSAI.SetScript9(e, id, GetLastInvoker());
+                                            atSAI.SetTimedActionList(e, id, GetLastInvoker());
                                     }
                                 }
                             }
@@ -3641,10 +3641,10 @@ namespace Game.AI
                         {
                             if (e.GetScriptType() == SmartScriptType.TimedActionlist)
                             {
-                                Unit invoker9 = null;
+                                Unit invoker = null;
                                 if (_me != null && !mTimedActionListInvoker.IsEmpty())
-                                    invoker9 = Global.ObjAccessor.GetUnit(_me, mTimedActionListInvoker);
-                                ProcessEvent(e, invoker9);
+                                    invoker = Global.ObjAccessor.GetUnit(_me, mTimedActionListInvoker);
+                                ProcessEvent(e, invoker);
                                 e.EnableTimed = false;//disable event if it is in an ActionList and was processed once
                                 foreach (var holder in _timedActionList)
                                 {

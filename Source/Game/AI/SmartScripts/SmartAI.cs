@@ -567,6 +567,8 @@ namespace Game.AI
 
         public override void InitializeAI()
         {
+            GetScript().OnInitialize(me);
+
             _despawnTime = 0;
             _respawnTime = 0;
             _despawnState = 0;
@@ -574,11 +576,11 @@ namespace Game.AI
 
             me.SetVisible(true);
 
-            if (me.GetFaction() != me.GetCreatureTemplate().Faction)
-                me.RestoreFaction();
-
-            GetScript().OnReset();
-            GetScript().ProcessEventsFor(SmartEvents.Respawn);
+            if (!me.IsDead())
+            {
+                GetScript().ProcessEventsFor(SmartEvents.Respawn);
+                GetScript().OnReset();
+            }
 
             _followGuid.Clear();//do not reset follower on Reset(), we need it after combat evade
             _followDist = 0;
@@ -883,7 +885,7 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.FollowCompleted, player);
         }
 
-        public void SetScript9(SmartScriptHolder e, uint entry, Unit invoker)
+        public void SetTimedActionList(SmartScriptHolder e, uint entry, Unit invoker)
         {
             GetScript().SetScript9(e, entry, invoker);
         }
@@ -1127,7 +1129,7 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.DataSet, null, id, value);
         }
 
-        public void SetScript9(SmartScriptHolder e, uint entry, Unit invoker)
+        public void SetTimedActionList(SmartScriptHolder e, uint entry, Unit invoker)
         {
             GetScript().SetScript9(e, entry, invoker);
         }
@@ -1178,7 +1180,7 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.AreatriggerOntrigger, unit);
         }
 
-        public void SetScript9(SmartScriptHolder e, uint entry, Unit invoker)
+        public void SetTimedActionList(SmartScriptHolder e, uint entry, Unit invoker)
         {
             GetScript().SetScript9(e, entry, invoker);
         }
