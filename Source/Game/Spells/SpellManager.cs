@@ -1425,6 +1425,24 @@ namespace Game.Entities
                             Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has wrong `HitMask` set: {1}", spellInfo.Id, procEntry.HitMask);
                         if (procEntry.HitMask != 0 && !(Convert.ToBoolean(procEntry.ProcFlags & ProcFlags.TakenHitMask) || (Convert.ToBoolean(procEntry.ProcFlags & ProcFlags.DoneHitMask) && (procEntry.SpellPhaseMask == 0 || Convert.ToBoolean(procEntry.SpellPhaseMask & (ProcFlagsSpellPhase.Hit | ProcFlagsSpellPhase.Finish))))))
                             Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has `HitMask` value defined, but it won't be used for defined `ProcFlags` and `SpellPhaseMask` values", spellInfo.Id);
+                        if (procEntry.AttributesMask.HasFlag(ProcAttributes.ReqSpellmod))
+                        {
+                            bool found = false;
+                            foreach (SpellEffectInfo effect in spellInfo.GetEffects())
+                            {
+                                if (effect == null || !effect.IsAura())
+                                    continue;
+
+                                if (effect.ApplyAuraName == AuraType.AddPctModifier || effect.ApplyAuraName == AuraType.AddFlatModifier)
+                                {
+                                    found = true;
+                                    break;
+                                }
+                            }
+
+                            if (!found)
+                                Log.outError(LogFilter.Sql, $"The `spell_proc` table entry for spellId {spellInfo.Id} has Attribute PROC_ATTR_REQ_SPELLMOD, but spell has no spell mods. Proc will not be triggered");
+                        }
 
                         mSpellProcMap.Add((spellInfo.Id, spellInfo.Difficulty), procEntry);
                         ++count;

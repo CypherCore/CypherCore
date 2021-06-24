@@ -2482,6 +2482,7 @@ namespace Framework.Constants
         MaskAll = 0x0003FFF
     }
 
+    [Flags]
     public enum ProcAttributes
     {
         ReqExpOrHonor = 0x01, // requires proc target to give exp or honor for aura proc
