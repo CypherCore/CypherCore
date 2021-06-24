@@ -3102,7 +3102,7 @@ namespace Game.AI
                         uint count = _me.GetVictim().GetAuraCount(e.Event.aura.spell);
                         if (count < e.Event.aura.count)
                             return;
-                        ProcessTimedAction(e, e.Event.aura.repeatMin, e.Event.aura.repeatMax);
+                        ProcessTimedAction(e, e.Event.aura.repeatMin, e.Event.aura.repeatMax, _me.GetVictim());
                         break;
                     }
                 case SmartEvents.Charmed:

@@ -373,6 +373,63 @@ namespace Game.AI
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} SmartAI waypoint paths (total {total} waypoints) in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
+        static bool EventHasInvoker(SmartEvents smartEvent)
+        {
+            switch (smartEvent)
+            { // white list of events that actually have an invoker passed to them
+                case SmartEvents.Aggro:
+                case SmartEvents.Death:
+                case SmartEvents.Kill:
+                case SmartEvents.SummonedUnit:
+                case SmartEvents.SpellHit:
+                case SmartEvents.SpellHitTarget:
+                case SmartEvents.Damaged:
+                case SmartEvents.ReceiveHeal:
+                case SmartEvents.ReceiveEmote:
+                case SmartEvents.JustSummoned:
+                case SmartEvents.DamagedTarget:
+                case SmartEvents.SummonDespawned:
+                case SmartEvents.PassengerBoarded:
+                case SmartEvents.PassengerRemoved:
+                case SmartEvents.GossipHello:
+                case SmartEvents.GossipSelect:
+                case SmartEvents.AcceptedQuest:
+                case SmartEvents.RewardQuest:
+                case SmartEvents.FollowCompleted:
+                case SmartEvents.OnSpellclick:
+                case SmartEvents.GoLootStateChanged:
+                case SmartEvents.AreatriggerOntrigger:
+                case SmartEvents.IcLos:
+                case SmartEvents.OocLos:
+                case SmartEvents.DistanceCreature:
+                case SmartEvents.FriendlyHealth:
+                case SmartEvents.FriendlyHealthPCT:
+                case SmartEvents.FriendlyIsCc:
+                case SmartEvents.FriendlyMissingBuff:
+                case SmartEvents.ActionDone:
+                case SmartEvents.TargetHealthPct:
+                case SmartEvents.TargetManaPct:
+                case SmartEvents.Range:
+                case SmartEvents.VictimCasting:
+                case SmartEvents.TargetBuffed:
+                case SmartEvents.IsBehindTarget:
+                case SmartEvents.InstancePlayerEnter:
+                case SmartEvents.TransportAddcreature:
+                case SmartEvents.QuestAccepted:
+                case SmartEvents.QuestObjCompletion:
+                case SmartEvents.QuestCompletion:
+                case SmartEvents.QuestFail:
+                case SmartEvents.QuestRewarded:
+                case SmartEvents.SceneStart:
+                case SmartEvents.SceneTrigger:
+                case SmartEvents.SceneCancel:
+                case SmartEvents.SceneComplete:
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
         static bool IsTargetValid(SmartScriptHolder e)
         {
             if (Math.Abs(e.Target.o) > 2 * MathFunctions.PI)
@@ -426,6 +483,16 @@ namespace Game.AI
                         }
                         break;
                     }
+                case SmartTargets.ActionInvoker:
+                case SmartTargets.ActionInvokerVehicle:
+                case SmartTargets.InvokerParty:
+                    if (e.GetScriptType() != SmartScriptType.TimedActionlist && e.GetEventType() != SmartEvents.Link && !EventHasInvoker(e.Event.type))
+                    {
+                        Log.outError(LogFilter.Sql, "SmartAIMgr: Entry {e.entryOrGuid} SourceType {e.GetScriptType()} Event {e.GetEventType()} Action {}e.GetActionType() has invoker target, but action does not provide any invoker!");
+                        // allow this to load for now
+                        // return false;
+                        break;
+                    }
                 case SmartTargets.PlayerRange:
                 case SmartTargets.Self:
                 case SmartTargets.Victim:
@@ -433,11 +500,8 @@ namespace Game.AI
                 case SmartTargets.HostileLastAggro:
                 case SmartTargets.HostileRandom:
                 case SmartTargets.HostileRandomNotTop:
-                case SmartTargets.ActionInvoker:
-                case SmartTargets.InvokerParty:
                 case SmartTargets.Position:
                 case SmartTargets.None:
-                case SmartTargets.ActionInvokerVehicle:
                 case SmartTargets.OwnerOrSummoner:
                 case SmartTargets.ThreatList:
                 case SmartTargets.ClosestGameobject:

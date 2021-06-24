@@ -397,7 +397,7 @@ namespace Framework.Constants
 
     public enum SmartTargets
     {
-        None = 0,    // None, Defaulting To Invoket
+        None = 0,    // None
         Self = 1,    // Self Cast
         Victim = 2,    // Our Current Target (Ie: Highest Aggro)
         HostileSecondAggro = 3,    // Second highest aggro, maxdist, playerOnly, powerType + 1

@@ -888,7 +888,7 @@ namespace Game.AI
 
             SetDespawnTime(5000);
             StartDespawn();
-            GetScript().ProcessEventsFor(SmartEvents.FollowCompleted);
+            GetScript().ProcessEventsFor(SmartEvents.FollowCompleted, player);
         }
 
         public void SetScript9(SmartScriptHolder e, uint entry, Unit invoker)
