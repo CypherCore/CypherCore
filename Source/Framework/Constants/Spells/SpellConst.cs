@@ -1411,6 +1411,7 @@ namespace Framework.Constants
         DemonHunter = 107
     }
 
+    [Flags]
     public enum TriggerCastFlags : uint
     {
         None = 0x0,   //! Not Triggered

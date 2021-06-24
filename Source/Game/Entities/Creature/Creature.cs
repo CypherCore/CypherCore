@@ -2882,6 +2882,10 @@ namespace Game.Entities
             if (_focusSpell != null)
                 return;
 
+            // some spells shouldn't track targets
+            if (focusSpell.IsFocusDisabled())
+                return;
+
             SpellInfo spellInfo = focusSpell.GetSpellInfo();
 
             // don't use spell focus for vehicle spells

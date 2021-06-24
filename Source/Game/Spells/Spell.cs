@@ -2543,7 +2543,7 @@ namespace Game.Spells
             // focus if not controlled creature
             if (m_caster.GetTypeId() == TypeId.Unit && !m_caster.HasUnitFlag(UnitFlags.PlayerControlled))
             {
-                if (!(m_spellInfo.IsNextMeleeSwingSpell() || IsAutoRepeat() || _triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreSetFacing)))
+                if (!(m_spellInfo.IsNextMeleeSwingSpell() || IsAutoRepeat()))
                 {
                     if (m_targets.GetObjectTarget() && m_caster != m_targets.GetObjectTarget())
                         m_caster.ToCreature().FocusTarget(this, m_targets.GetObjectTarget());
@@ -7398,6 +7398,7 @@ namespace Game.Spells
         public bool IsTriggered() { return _triggeredCastFlags.HasAnyFlag(TriggerCastFlags.FullMask); }
         public bool IsTriggeredByAura(SpellInfo auraSpellInfo) { return (auraSpellInfo == m_triggeredByAuraSpell); }
         public bool IsIgnoringCooldowns() { return _triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreSpellAndCategoryCD); }
+        public bool IsFocusDisabled() { return _triggeredCastFlags.HasFlag(TriggerCastFlags.IgnoreSetFacing) || (m_spellInfo.IsChanneled() && !m_spellInfo.HasAttribute(SpellAttr1.ChannelTrackTarget)); }
         public bool IsProcDisabled() { return _triggeredCastFlags.HasAnyFlag(TriggerCastFlags.DisallowProcEvents); }
         public bool IsChannelActive() { return m_caster.GetChannelSpellId() != 0; }
 
