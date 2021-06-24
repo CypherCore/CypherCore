@@ -1203,8 +1203,9 @@ namespace Scripts.Spells.Generic
             target.AddDynamicFlag(UnitDynFlags.Dead);
             target.AddUnitFlag2(UnitFlags2.FeignDeath);
 
-            if (target.IsTypeId(TypeId.Unit))
-                target.ToCreature().SetReactState(ReactStates.Passive);
+            Creature creature = target.ToCreature();
+            if (creature != null)
+                creature.SetReactState(ReactStates.Passive);
         }
 
         void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -1212,6 +1213,10 @@ namespace Scripts.Spells.Generic
             Unit target = GetTarget();
             target.RemoveDynamicFlag(UnitDynFlags.Dead);
             target.RemoveUnitFlag2(UnitFlags2.FeignDeath);
+
+            Creature creature = target.ToCreature();
+            if (creature != null)
+                creature.InitializeReactState();
         }
 
         public override void Register()
