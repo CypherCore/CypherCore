@@ -364,6 +364,12 @@ namespace Scripts.Spells.Generic
         public const uint A_ValiantOfSilvermoon = 13696;
     }
 
+    struct Misc
+    {
+        //FungalDecay
+        public const int AuraDuration = 12600; // found in sniffs, there is no duration entry we can possibly use
+    }
+
     [Script]
     class spell_gen_absorb0_hitlimit1 : AuraScript
     {
@@ -596,7 +602,7 @@ namespace Scripts.Spells.Generic
             OnEffectUpdatePeriodic.Add(new EffectUpdatePeriodicHandler(UpdatePeriodic, 1, AuraType.PeriodicDummy));
         }
     }
-    
+
     [Script] // 41337 Aura of Anger
     class spell_gen_aura_of_anger : AuraScript
     {
@@ -636,7 +642,7 @@ namespace Scripts.Spells.Generic
             OnEffectPeriodic.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicTriggerSpell));
         }
     }
-    
+
     [Script]
     class spell_gen_aura_service_uniform : AuraScript
     {
@@ -966,7 +972,7 @@ namespace Scripts.Spells.Generic
             OnEffectUpdatePeriodic.Add(new EffectUpdatePeriodicHandler(UpdatePeriodic, 1, AuraType.PeriodicDummy));
         }
     }
-    
+
     [Script]
     class spell_gen_chaos_blast : SpellScript
     {
@@ -1267,6 +1273,91 @@ namespace Scripts.Spells.Generic
         public override void Register()
         {
             OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+
+    [Script] // 32065 - Fungal Decay
+    class spell_gen_decay_over_time_fungal_decay_SpellScript : SpellScript
+    {
+        void ModAuraStack()
+        {
+            Aura aur = GetHitAura();
+            if (aur != null)
+                aur.SetStackAmount((byte)GetSpellInfo().StackAmount);
+        }
+
+        public override void Register()
+        {
+            AfterHit.Add(new HitHandler(ModAuraStack));
+        }
+    }
+
+    [Script] // 32065 - Fungal Decay
+    class spell_gen_decay_over_time_fungal_decay_AuraScript : AuraScript
+    {
+        void ModDuration(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            // only on actual reapply, not on stack decay
+            if (GetDuration() == GetMaxDuration())
+            {
+                SetMaxDuration(Misc.AuraDuration);
+                SetDuration(Misc.AuraDuration);
+            }
+        }
+
+        bool CheckProc(ProcEventInfo eventInfo)
+        {
+            return eventInfo.GetSpellInfo() == GetSpellInfo();
+        }
+
+        void Decay(ProcEventInfo eventInfo)
+        {
+            PreventDefaultAction();
+            ModStackAmount(-1);
+        }
+
+        public override void Register()
+        {
+            DoCheckProc.Add(new CheckProcHandler(CheckProc));
+            OnProc.Add(new AuraProcHandler(Decay));
+            OnEffectApply.Add(new EffectApplyHandler(ModDuration, 0, AuraType.ModDecreaseSpeed, AuraEffectHandleModes.RealOrReapplyMask));
+        }
+    }
+
+    [Script] // 36659 - Tail Sting
+    class spell_gen_decay_over_time_tail_sting_SpellScript : SpellScript
+    {
+        void ModAuraStack()
+        {
+            Aura aur = GetHitAura();
+            if (aur != null)
+                aur.SetStackAmount((byte)GetSpellInfo().StackAmount);
+        }
+
+        public override void Register()
+        {
+            AfterHit.Add(new HitHandler(ModAuraStack));
+        }
+    }
+
+    [Script] // 36659 - Tail Sting
+    class spell_gen_decay_over_time_tail_sting_AuraScript : AuraScript
+    {
+        bool CheckProc(ProcEventInfo eventInfo)
+        {
+            return eventInfo.GetSpellInfo() == GetSpellInfo();
+        }
+
+        void Decay(ProcEventInfo eventInfo)
+        {
+            PreventDefaultAction();
+            ModStackAmount(-1);
+        }
+
+        public override void Register()
+        {
+            DoCheckProc.Add(new CheckProcHandler(CheckProc));
+            OnProc.Add(new AuraProcHandler(Decay));
         }
     }
 
@@ -1742,7 +1833,7 @@ namespace Scripts.Spells.Generic
             OnEffectPeriodic.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicTriggerSpell));
         }
     }
-    
+
     [Script] // 28702 - Netherbloom
     class spell_gen_netherbloom : SpellScript
     {
@@ -1825,10 +1916,10 @@ namespace Scripts.Spells.Generic
 
         public override void Register()
         {
-            OnEffectPeriodic .Add(new EffectPeriodicHandler(PeriodicTick, 1, AuraType.PeriodicTriggerSpell));
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(PeriodicTick, 1, AuraType.PeriodicTriggerSpell));
         }
     }
-    
+
     [Script] // 27539 - Obsidian Armor
     class spell_gen_obsidian_armor : AuraScript
     {
@@ -2010,7 +2101,7 @@ namespace Scripts.Spells.Generic
             OnProc.Add(new AuraProcHandler(HandleChargeDrop));
         }
     }
-    
+
     [Script] // 45472 Parachute
     class spell_gen_parachute : AuraScript
     {
@@ -2240,7 +2331,7 @@ namespace Scripts.Spells.Generic
 
         public override void Register()
         {
-            OnEffectPeriodic .Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicDamage));
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicDamage));
         }
     }
 
@@ -2261,10 +2352,10 @@ namespace Scripts.Spells.Generic
 
         public override void Register()
         {
-            OnEffectPeriodic .Add(new EffectPeriodicHandler(PeriodicTick, 2, AuraType.PeriodicDamagePercent));
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(PeriodicTick, 2, AuraType.PeriodicDamagePercent));
         }
     }
-    
+
     [Script]
     class spell_gen_replenishment : SpellScript
     {
@@ -2472,7 +2563,7 @@ namespace Scripts.Spells.Generic
 
     [Script]
     class spell_gen_spectator_cheer_trigger : SpellScript
-    {  
+    {
         readonly static Emote[] EmoteArray = { Emote.OneshotCheer, Emote.OneshotExclamation, Emote.OneshotApplaud };
 
         void HandleDummy(uint effIndex)

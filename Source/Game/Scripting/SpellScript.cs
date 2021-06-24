@@ -1465,7 +1465,7 @@ namespace Game.Scripting
         void RefreshDuration() { m_aura.RefreshDuration(); }
         long GetApplyTime() { return m_aura.GetApplyTime(); }
         public int GetMaxDuration() { return m_aura.GetMaxDuration(); }
-        void SetMaxDuration(int duration) { m_aura.SetMaxDuration(duration); }
+        public void SetMaxDuration(int duration) { m_aura.SetMaxDuration(duration); }
         int CalcMaxDuration() { return m_aura.CalcMaxDuration(); }
         // expired - duration just went to 0
         public bool IsExpired() { return m_aura.IsExpired(); }
