@@ -1034,7 +1034,7 @@ namespace Framework.Constants
         GoinfoLootid = 5028,
         CommandLookupMaxResults = 5029,
         Unauthorized = 5030,
-        NpcinfoAiinfo = 5031,
+        ObjectInfoAIInfo = 5031,
         CommandNoBattlegroundFound = 5032,
         CommandNoAchievementCriteriaFound = 5033,
         CommandNoOutdoorPvpForund = 5034,
