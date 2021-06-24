@@ -415,6 +415,7 @@ namespace Game.AI
                 case SmartEvents.IsBehindTarget:
                 case SmartEvents.InstancePlayerEnter:
                 case SmartEvents.TransportAddcreature:
+                case SmartEvents.DataSet:
                 case SmartEvents.QuestAccepted:
                 case SmartEvents.QuestObjCompletion:
                 case SmartEvents.QuestCompletion:

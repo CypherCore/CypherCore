@@ -1055,10 +1055,27 @@ namespace Game.AI
                     {
                         foreach (var target in targets)
                         {
-                            if (IsCreature(target))
-                                target.ToCreature().GetAI().SetData(e.Action.setData.field, e.Action.setData.data);
-                            else if (IsGameObject(target))
-                                target.ToGameObject().GetAI().SetData(e.Action.setData.field, e.Action.setData.data);
+                            Creature cTarget = target.ToCreature();
+                            if (cTarget != null)
+                            {
+                                CreatureAI ai = cTarget.GetAI();
+                                if (IsSmart(cTarget))
+                                    ((SmartAI)ai).SetData(e.Action.setData.field, e.Action.setData.data, _me);
+                                else
+                                    ai.SetData(e.Action.setData.field, e.Action.setData.data);
+                            }
+                            else
+                            {
+                                GameObject oTarget = target.ToGameObject();
+                                if (oTarget != null)
+                                {
+                                    GameObjectAI ai = oTarget.GetAI();
+                                    if (IsSmart(oTarget))
+                                        ((SmartGameObjectAI)ai).SetData(e.Action.setData.field, e.Action.setData.data, _me);
+                                    else
+                                        ai.SetData(e.Action.setData.field, e.Action.setData.data);
+                                }
+                            }
                         }
                         break;
                     }
@@ -1573,7 +1590,7 @@ namespace Game.AI
                                 GameObject go = target.ToGameObject();
                                 if (go != null)
                                 {
-                                    if (IsSmartGO(go))
+                                    if (IsSmart(go))
                                         go.GetAI<SmartGameObjectAI>().SetTimedActionList(e, e.Action.timedActionList.id, GetLastInvoker());
                                 }
                                 else
@@ -1674,7 +1691,7 @@ namespace Game.AI
                                 GameObject go = target.ToGameObject();
                                 if (go != null)
                                 {
-                                    if (IsSmartGO(go))
+                                    if (IsSmart(go))
                                         go.GetAI<SmartGameObjectAI>().SetTimedActionList(e, randomId, GetLastInvoker());
                                 }
                                 else
@@ -1713,7 +1730,7 @@ namespace Game.AI
                                 GameObject go = target.ToGameObject();
                                 if (go != null)
                                 {
-                                    if (IsSmartGO(go))
+                                    if (IsSmart(go))
                                         go.GetAI<SmartGameObjectAI>().SetTimedActionList(e, id, GetLastInvoker());
                                 }
                                 else
@@ -4072,6 +4089,47 @@ namespace Game.AI
             return false;
         }
         public bool IsGameObject(WorldObject obj) { return obj != null && obj.IsTypeId(TypeId.GameObject); }
+        
+        bool IsSmart(Creature creature, bool silent = false)
+        {
+            if (creature == null)
+                return false;
+
+            bool smart = true;
+            if (creature != null && creature.GetAIName() != "SmartAI")
+                smart = false;
+
+            if (!smart && !silent)
+                Log.outError(LogFilter.Sql, "SmartScript: Action target Creature (GUID: {0} Entry: {1}) is not using SmartAI, action skipped to prevent crash.", creature != null ? creature.GetSpawnId() : (_me != null ? _me.GetSpawnId() : 0), creature != null ? creature.GetEntry() : (_me != null ? _me.GetEntry() : 0));
+
+            return smart;
+        }
+
+        bool IsSmart(GameObject gameObject, bool silent = false)
+        {
+            if (gameObject == null)
+                return false;
+
+            bool smart = true;
+            if (gameObject != null && gameObject.GetAIName() != "SmartGameObjectAI")
+                smart = false;
+
+            if (!smart && !silent)
+                Log.outError(LogFilter.Sql, "SmartScript: Action target GameObject (GUID: {0} Entry: {1}) is not using SmartGameObjectAI, action skipped to prevent crash.", gameObject != null ? gameObject.GetSpawnId() : (_go != null ? _go.GetSpawnId() : 0), gameObject != null ? gameObject.GetEntry() : (_go != null ? _go.GetEntry() : 0));
+
+            return smart;
+        }
+
+        bool IsSmart(bool silent = false)
+        {
+            if (_me != null)
+                return IsSmart(_me, silent);
+
+            if (_go != null)
+                return IsSmart(_go, silent);
+
+            return false;
+        }
 
         void StoreTargetList(List<WorldObject> targets, uint id)
         {
@@ -4087,35 +4145,6 @@ namespace Game.AI
                 return list.GetObjectList(obj);
 
             return null;
-        }
-        
-        bool IsSmart(Creature c = null)
-        {
-            bool smart = true;
-            if (c != null && c.GetAIName() != "SmartAI")
-                smart = false;
-
-            if (_me == null || _me.GetAIName() != "SmartAI")
-                smart = false;
-
-            if (!smart)
-                Log.outError(LogFilter.Sql, "SmartScript: Action target Creature (GUID: {0} Entry: {1}) is not using SmartAI, action skipped to prevent crash.", c != null ? c.GetSpawnId() : (_me != null ? _me.GetSpawnId() : 0), c != null ? c.GetEntry() : (_me != null ? _me.GetEntry() : 0));
-
-            return smart;
-        }
-
-        bool IsSmartGO(GameObject g = null)
-        {
-            bool smart = true;
-            if (g != null && g.GetAIName() != "SmartGameObjectAI")
-                smart = false;
-
-            if (_go == null || _go.GetAIName() != "SmartGameObjectAI")
-                smart = false;
-            if (!smart)
-                Log.outError(LogFilter.Sql, "SmartScript: Action target GameObject (GUID: {0} Entry: {1}) is not using SmartGameObjectAI, action skipped to prevent crash.", g != null ? g.GetSpawnId() : (_go != null ? _go.GetSpawnId() : 0), g != null ? g.GetEntry() : (_go != null ? _go.GetEntry() : 0));
-
-            return smart;
         }
 
         void StoreCounter(uint id, uint value, uint reset)

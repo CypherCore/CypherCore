@@ -746,9 +746,11 @@ namespace Game.AI
             return 0;
         }
 
-        public override void SetData(uint id, uint value)
+        public override void SetData(uint id, uint value) { SetData(id, value, null); }
+
+        public void SetData(uint id, uint value, Unit invoker)
         {
-            GetScript().ProcessEventsFor(SmartEvents.DataSet, null, id, value);
+            GetScript().ProcessEventsFor(SmartEvents.DataSet, invoker, id, value);
         }
 
         public override void SetGUID(ObjectGuid guid, int id) { }
@@ -1121,9 +1123,11 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.Death, player, eventId, 0, false, null, me);
         }
 
-        public override void SetData(uint id, uint value)
+        public override void SetData(uint id, uint value) { SetData(id, value, null); }
+        
+        public void SetData(uint id, uint value, Unit invoker)
         {
-            GetScript().ProcessEventsFor(SmartEvents.DataSet, null, id, value);
+            GetScript().ProcessEventsFor(SmartEvents.DataSet, invoker, id, value);
         }
 
         public void SetTimedActionList(SmartScriptHolder e, uint entry, Unit invoker)
