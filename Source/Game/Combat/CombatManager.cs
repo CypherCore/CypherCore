@@ -56,18 +56,8 @@ namespace Game.Combat
                 return false;
             if (a.HasUnitState(UnitState.InFlight) || b.HasUnitState(UnitState.InFlight))
                 return false;
-            if (a.IsControlledByPlayer() || b.IsControlledByPlayer())
-            {
-                // PvSomething, only block friendly fire
-                if (a.IsFriendlyTo(b) || b.IsFriendlyTo(a))
-                    return false;
-            }
-            else
-            {
-                // CvC, need hostile reaction to start a fight
-                if (!a.IsHostileTo(b) && !b.IsHostileTo(a))
-                    return false;
-            }
+            if (a.IsFriendlyTo(b) || b.IsFriendlyTo(a))
+                return false;
             Player playerA = a.GetCharmerOrOwnerPlayerOrPlayerItself();
             Player playerB = b.GetCharmerOrOwnerPlayerOrPlayerItself();
             // ...neither of the two units must be (owned by) a player with .gm on
