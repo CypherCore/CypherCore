@@ -954,6 +954,7 @@ namespace Game
                 commodityQuoteResult.QuoteDuration.Set((int)(quote.ValidTo - GameTime.GetGameTimeSteadyPoint()).TotalMilliseconds);
             }
 
+            commodityQuoteResult.ItemID = getCommodityQuote.ItemID;
             commodityQuoteResult.DesiredDelay = (uint)throttle.DelayUntilNext.TotalSeconds;
 
             SendPacket(commodityQuoteResult);

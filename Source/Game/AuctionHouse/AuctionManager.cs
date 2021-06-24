@@ -1138,7 +1138,11 @@ namespace Game
 
         public CommodityQuote CreateCommodityQuote(Player player, uint itemId, uint quantity)
         {
-            var bucketData = _buckets.LookupByKey(AuctionsBucketKey.ForCommodity(itemId));
+            ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemId);
+            if (itemTemplate == null)
+                return null;
+
+            var bucketData = _buckets.LookupByKey(AuctionsBucketKey.ForCommodity(itemTemplate));
             if (bucketData == null)
                 return null;
 
@@ -1181,7 +1185,11 @@ namespace Game
 
         public bool BuyCommodity(SQLTransaction trans, Player player, uint itemId, uint quantity, TimeSpan delayForNextAction)
         {
-            var bucketItr = _buckets.LookupByKey(AuctionsBucketKey.ForCommodity(itemId));
+            ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemId);
+            if (itemTemplate == null)
+                return false;
+
+            var bucketItr = _buckets.LookupByKey(AuctionsBucketKey.ForCommodity(itemTemplate));
             if (bucketItr == null)
             {
                 player.GetSession().SendAuctionCommandResult(0, AuctionCommand.PlaceBid, AuctionResult.CommodityPurchaseFailed, delayForNextAction);
@@ -1966,12 +1974,12 @@ namespace Game
                     (ushort)item.GetModifier(ItemModifier.BattlePetSpeciesId), (ushort)item.GetBonus().Suffix);
             }
             else
-                return ForCommodity(item.GetEntry());
+                return ForCommodity(itemTemplate);
         }
 
-        public static AuctionsBucketKey ForCommodity(uint itemId)
+        public static AuctionsBucketKey ForCommodity(ItemTemplate itemTemplate)
         {
-            return new AuctionsBucketKey(itemId, 0, 0, 0);
+            return new AuctionsBucketKey(itemTemplate.GetId(), (ushort)itemTemplate.GetBaseItemLevel(), 0, 0);
         }
     }
 

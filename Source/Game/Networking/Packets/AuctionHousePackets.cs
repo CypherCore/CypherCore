@@ -465,7 +465,7 @@ namespace Game.Networking.Packets
         public Optional<ulong> TotalPrice;
         public Optional<uint> Quantity;
         public Optional<int> QuoteDuration;
-        public int Unknown830;
+        public int ItemID;
         public uint DesiredDelay;
 
         public AuctionGetCommodityQuoteResult() : base(ServerOpcodes.AuctionGetCommodityQuoteResult) { }
@@ -475,7 +475,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(TotalPrice.HasValue);
             _worldPacket.WriteBit(Quantity.HasValue);
             _worldPacket.WriteBit(QuoteDuration.HasValue);
-            _worldPacket.WriteInt32(Unknown830);
+            _worldPacket.WriteInt32(ItemID);
             _worldPacket.WriteUInt32(DesiredDelay);
 
             if (TotalPrice.HasValue)
