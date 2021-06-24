@@ -2731,6 +2731,7 @@ namespace Game.AI
         {
             public uint entry;
             public uint despawnTime;
+            public uint summonType;
         }
         public struct Active
         {

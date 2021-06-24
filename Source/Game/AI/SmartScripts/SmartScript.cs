@@ -1173,13 +1173,15 @@ namespace Game.AI
                         foreach (var target in targets)
                         {
                             Position pos = target.GetPositionWithOffset(new Position(e.Target.x, e.Target.y, e.Target.z, e.Target.o));
-                            summoner.SummonGameObject(e.Action.summonGO.entry, pos, Quaternion.fromEulerAnglesZYX(pos.GetOrientation(), 0.0f, 0.0f), e.Action.summonGO.despawnTime);
+                            Quaternion rot = Quaternion.fromEulerAnglesZYX(pos.GetOrientation(), 0f, 0f);
+                            summoner.SummonGameObject(e.Action.summonGO.entry, pos, rot, e.Action.summonGO.despawnTime, (GameObjectSummonType)e.Action.summonGO.summonType);
                         }
 
                         if (e.GetTargetType() != SmartTargets.Position)
                             break;
 
-                        summoner.SummonGameObject(e.Action.summonGO.entry, new Position(e.Target.x, e.Target.y, e.Target.z, e.Target.o), Quaternion.fromEulerAnglesZYX(e.Target.o, 0.0f, 0.0f), e.Action.summonGO.despawnTime);
+                        Quaternion _rot = Quaternion.fromEulerAnglesZYX(e.Target.o, 0f, 0f);
+                        summoner.SummonGameObject(e.Action.summonGO.entry, new Position(e.Target.x, e.Target.y, e.Target.z, e.Target.o), _rot, e.Action.summonGO.despawnTime, (GameObjectSummonType)e.Action.summonGO.summonType);
                         break;
                     }
                 case SmartActions.KillUnit:

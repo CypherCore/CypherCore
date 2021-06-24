@@ -134,4 +134,10 @@ namespace Framework.Constants
         Destroyed = 2,
         Rebuilding = 3
     }
+
+    public enum GameObjectSummonType
+    {
+        TimedOrCorpseDespawn = 0,    // despawns after a specified time OR when the summoner dies
+        TimedDespawn = 1     // despawns after a specified time
+    }
 }

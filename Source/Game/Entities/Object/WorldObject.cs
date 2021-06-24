@@ -1456,7 +1456,7 @@ namespace Game.Entities
             return null;
         }
 
-        public GameObject SummonGameObject(uint entry, float x, float y, float z, float ang, Quaternion rotation, uint respawnTime)
+        public GameObject SummonGameObject(uint entry, float x, float y, float z, float ang, Quaternion rotation, uint respawnTime, GameObjectSummonType summonType = GameObjectSummonType.TimedOrCorpseDespawn)
         {
             if (x == 0 && y == 0 && z == 0)
             {
@@ -1465,10 +1465,10 @@ namespace Game.Entities
             }
 
             Position pos = new(x, y, z, ang);
-            return SummonGameObject(entry, pos, rotation, respawnTime);
+            return SummonGameObject(entry, pos, rotation, respawnTime, summonType);
         }
 
-        public GameObject SummonGameObject(uint entry, Position pos, Quaternion rotation, uint respawnTime)
+        public GameObject SummonGameObject(uint entry, Position pos, Quaternion rotation, uint respawnTime, GameObjectSummonType summonType = GameObjectSummonType.TimedOrCorpseDespawn)
         {
             if (!IsInWorld)
                 return null;
@@ -1488,7 +1488,7 @@ namespace Game.Entities
             PhasingHandler.InheritPhaseShift(go, this);
 
             go.SetRespawnTime((int)respawnTime);
-            if (IsTypeId(TypeId.Player) || IsTypeId(TypeId.Unit)) //not sure how to handle this
+            if (IsPlayer() || (IsCreature() && summonType == GameObjectSummonType.TimedOrCorpseDespawn)) //not sure how to handle this
                 ToUnit().AddGameObject(go);
             else
                 go.SetSpawnedByDefault(false);
