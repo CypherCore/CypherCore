@@ -230,7 +230,7 @@ namespace Game.Spells
                 {
                     uint bonus = m_originalCaster.SpellDamageBonusDone(unitTarget, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect, effectInfo);
                     damage = (int)(bonus + (bonus * _variance));
-                    damage = (int)unitTarget.SpellDamageBonusTaken(m_originalCaster, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect, effectInfo);
+                    damage = (int)unitTarget.SpellDamageBonusTaken(m_originalCaster, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect);
                 }
 
                 m_damage += damage;
@@ -767,7 +767,7 @@ namespace Game.Spells
             // add spell damage bonus
             uint bonus = m_caster.SpellDamageBonusDone(unitTarget, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect, effectInfo);
             damage = (int)(bonus + (bonus * _variance));
-            damage = (int)unitTarget.SpellDamageBonusTaken(m_caster, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect, effectInfo);
+            damage = (int)unitTarget.SpellDamageBonusTaken(m_caster, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect);
 
             int newDamage = -(unitTarget.ModifyPower(powerType, -damage));
 
@@ -904,7 +904,7 @@ namespace Game.Spells
                     addhealth = (int)(bonus + (uint)(bonus * _variance));
                 }
 
-                addhealth = (int)unitTarget.SpellHealingBonusTaken(caster, m_spellInfo, (uint)addhealth, DamageEffectType.Heal, effectInfo);
+                addhealth = (int)unitTarget.SpellHealingBonusTaken(caster, m_spellInfo, (uint)addhealth, DamageEffectType.Heal);
 
                 // Remove Grievious bite if fully healed
                 if (unitTarget.HasAura(48920) && ((uint)(unitTarget.GetHealth() + (ulong)addhealth) >= unitTarget.GetMaxHealth()))
@@ -928,7 +928,7 @@ namespace Game.Spells
                 return;
 
             uint heal = m_originalCaster.SpellHealingBonusDone(unitTarget, m_spellInfo, (uint)unitTarget.CountPctFromMaxHealth(damage), DamageEffectType.Heal, effectInfo);
-            m_healing += (int)unitTarget.SpellHealingBonusTaken(m_originalCaster, m_spellInfo, heal, DamageEffectType.Heal, effectInfo);
+            m_healing += (int)unitTarget.SpellHealingBonusTaken(m_originalCaster, m_spellInfo, heal, DamageEffectType.Heal);
         }
 
         [SpellEffectHandler(SpellEffectName.HealMechanical)]
@@ -947,7 +947,7 @@ namespace Game.Spells
             uint heal = m_originalCaster.SpellHealingBonusDone(unitTarget, m_spellInfo, (uint)damage, DamageEffectType.Heal, effectInfo);
             heal += (uint)(heal * _variance);
 
-            m_healing += (int)unitTarget.SpellHealingBonusTaken(m_originalCaster, m_spellInfo, heal, DamageEffectType.Heal, effectInfo);
+            m_healing += (int)unitTarget.SpellHealingBonusTaken(m_originalCaster, m_spellInfo, heal, DamageEffectType.Heal);
         }
 
         [SpellEffectHandler(SpellEffectName.HealthLeech)]
@@ -961,7 +961,7 @@ namespace Game.Spells
 
             uint bonus = m_caster.SpellDamageBonusDone(unitTarget, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect, effectInfo);
             damage = (int)(bonus + (bonus * _variance));
-            damage = (int)unitTarget.SpellDamageBonusTaken(m_caster, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect, effectInfo);
+            damage = (int)unitTarget.SpellDamageBonusTaken(m_caster, m_spellInfo, (uint)damage, DamageEffectType.SpellDirect);
 
             Log.outDebug(LogFilter.Spells, "HealthLeech :{0}", damage);
 
@@ -974,7 +974,7 @@ namespace Game.Spells
             if (m_caster.IsAlive())
             {
                 healthGain = m_caster.SpellHealingBonusDone(m_caster, m_spellInfo, healthGain, DamageEffectType.Heal, effectInfo);
-                healthGain = m_caster.SpellHealingBonusTaken(m_caster, m_spellInfo, healthGain, DamageEffectType.Heal, effectInfo);
+                healthGain = m_caster.SpellHealingBonusTaken(m_caster, m_spellInfo, healthGain, DamageEffectType.Heal);
 
                 HealInfo healInfo = new(m_caster, m_caster, healthGain, m_spellInfo, m_spellSchoolMask);
                 m_caster.HealBySpell(healInfo);

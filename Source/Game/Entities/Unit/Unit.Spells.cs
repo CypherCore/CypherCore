@@ -105,7 +105,7 @@ namespace Game.Entities
             // Done fixed damage bonus auras
             int DoneAdvertisedBenefit = SpellBaseDamageBonusDone(spellProto.GetSchoolMask());
             // modify spell power by victim's SPELL_AURA_MOD_DAMAGE_TAKEN auras (eg Amplify/Dampen Magic)
-            DoneAdvertisedBenefit += victim.GetTotalAuraModifierByMiscMask(AuraType.ModDamageTaken, spellProto.GetSchoolMask());
+            DoneAdvertisedBenefit += victim.GetTotalAuraModifierByMiscMask(AuraType.ModDamageTaken, (int)spellProto.GetSchoolMask());
 
             // Pets just add their bonus damage to their spell damage
             // note that their spell damage is just gain of their own auras
@@ -257,7 +257,7 @@ namespace Game.Entities
             return DoneTotalMod;
         }
 
-        public uint SpellDamageBonusTaken(Unit caster, SpellInfo spellProto, uint pdamage, DamageEffectType damagetype, SpellEffectInfo effect, uint stack = 1)
+        public uint SpellDamageBonusTaken(Unit caster, SpellInfo spellProto, uint pdamage, DamageEffectType damagetype)
         {
             if (spellProto == null || damagetype == DamageEffectType.Direct)
                 return pdamage;
@@ -551,7 +551,7 @@ namespace Game.Entities
             return DoneTotalMod;
         }
 
-        public uint SpellHealingBonusTaken(Unit caster, SpellInfo spellProto, uint healamount, DamageEffectType damagetype, SpellEffectInfo effect, uint stack = 1)
+        public uint SpellHealingBonusTaken(Unit caster, SpellInfo spellProto, uint healamount, DamageEffectType damagetype)
         {
             float TakenTotalMod = 1.0f;
 
@@ -563,11 +563,6 @@ namespace Game.Entities
             float maxval = GetMaxPositiveAuraModifier(AuraType.ModHealingPct);
             if (maxval != 0)
                 MathFunctions.AddPct(ref TakenTotalMod, maxval);
-
-            // Tenacity increase healing % taken
-            AuraEffect Tenacity = GetAuraEffect(58549, 0);
-            if (Tenacity != null)
-                MathFunctions.AddPct(ref TakenTotalMod, Tenacity.GetAmount());
 
             // Nourish cast
             if (spellProto.SpellFamilyName == SpellFamilyNames.Druid && spellProto.SpellFamilyFlags[1].HasAnyFlag(0x2000000u))
