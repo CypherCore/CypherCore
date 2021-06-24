@@ -1131,7 +1131,7 @@ namespace Game
             _replicateThrottleMap[player.GetGUID()] = throttleData;
         }
 
-        public ulong CalcualteAuctionHouseCut(ulong bidAmount)
+        public ulong CalculateAuctionHouseCut(ulong bidAmount)
         {
             return (ulong)Math.Max((long)(MathFunctions.CalculatePct(bidAmount, _auctionHouse.ConsignmentRate) * WorldConfig.GetFloatValue(WorldCfg.RateAuctionCut)), 0);
         }
@@ -1311,7 +1311,7 @@ namespace Game
                         $"Count: {boughtFromAuction}) and pay money: { auction.BuyoutOrUnitPrice * boughtFromAuction}. Original owner {ownerName} (Account: {Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(auction.Owner)})");
                 }
 
-                ulong auctionHouseCut = CalcualteAuctionHouseCut(auction.BuyoutOrUnitPrice * boughtFromAuction);
+                ulong auctionHouseCut = CalculateAuctionHouseCut(auction.BuyoutOrUnitPrice * boughtFromAuction);
                 ulong depositPart = Global.AuctionHouseMgr.GetCommodityAuctionDeposit(items[0].Items[0].GetTemplate(), (auction.EndTime - auction.StartTime), boughtFromAuction);
                 ulong profit = auction.BuyoutOrUnitPrice * boughtFromAuction + depositPart - auctionHouseCut;
 
@@ -1328,6 +1328,9 @@ namespace Game
                     .AddMoney(profit)
                     .SendMailTo(trans, new MailReceiver(Global.ObjAccessor.FindConnectedPlayer(auction.Owner), auction.Owner), new MailSender(this), MailCheckMask.Copied, WorldConfig.GetUIntValue(WorldCfg.MailDeliveryDelay));
             }
+
+            player.ModifyMoney(-(long)totalPrice);
+            player.SaveGoldToDB(trans);
 
             foreach (MailedItemsBatch batch in items)
             {
@@ -1479,7 +1482,7 @@ namespace Game
             // owner exist
             if ((owner || Global.CharacterCacheStorage.HasCharacterCacheEntry(auction.Owner)))// && !sAuctionBotConfig.IsBotChar(auction.Owner))
             {
-                ulong auctionHouseCut = CalcualteAuctionHouseCut(auction.BidAmount);
+                ulong auctionHouseCut = CalculateAuctionHouseCut(auction.BidAmount);
                 ulong profit = auction.BidAmount + auction.Deposit - auctionHouseCut;
 
                 //FIXME: what do if owner offline
@@ -1566,7 +1569,7 @@ namespace Game
 
                 new MailDraft(Global.AuctionHouseMgr.BuildItemAuctionMailSubject(AuctionMailType.Invoice, auction),
                     Global.AuctionHouseMgr.BuildAuctionInvoiceMailBody(auction.Bidder, auction.BidAmount, auction.BuyoutOrUnitPrice, (uint)auction.Deposit,
-                        CalcualteAuctionHouseCut(auction.BidAmount), WorldConfig.GetUIntValue(WorldCfg.MailDeliveryDelay), eta))
+                        CalculateAuctionHouseCut(auction.BidAmount), WorldConfig.GetUIntValue(WorldCfg.MailDeliveryDelay), eta))
                     .SendMailTo(trans, new MailReceiver(owner, auction.Owner), new MailSender(this), MailCheckMask.Copied);
             }
         }
