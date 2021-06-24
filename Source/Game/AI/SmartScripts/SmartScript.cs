@@ -982,7 +982,7 @@ namespace Game.AI
                                     ((SmartAI)smartAI).StartDespawn();
                                 }
                                 else
-                                    creature.DespawnOrUnsummon(respawnDelay);
+                                    creature.DespawnOrUnsummon(TimeSpan.FromMilliseconds(respawnDelay));
                             }
                             else
                             {

@@ -45,6 +45,7 @@ namespace Game.Entities
             m_updateFlag.Rotation = true;
 
             m_respawnDelayTime = 300;
+            m_despawnDelay = 0;
             m_lootState = LootState.NotReady;
             m_spawnedByDefault = true;
 
@@ -422,6 +423,14 @@ namespace Game.Entities
                 GetAI().UpdateAI(diff);
             else if (!AIM_Initialize())
                 Log.outError(LogFilter.Server, "Could not initialize GameObjectAI");
+
+            if (m_despawnDelay != 0)
+            {
+                if (m_despawnDelay > diff)
+                    m_despawnDelay -= diff;
+                else
+                    DespawnOrUnsummon();
+            }
 
             switch (m_lootState)
             {
@@ -861,6 +870,21 @@ namespace Game.Entities
             m_unique_users.Add(player.GetGUID());
         }
 
+        void DespawnOrUnsummon(TimeSpan delay = default)
+        {
+            if (delay > TimeSpan.Zero)
+            {
+                if (m_despawnDelay == 0 || m_despawnDelay > delay.TotalMilliseconds)
+                    m_despawnDelay = (uint)delay.TotalMilliseconds;
+            }
+            else
+            {
+                if (m_goData != null && m_respawnDelayTime != 0)
+                    SaveRespawnTime(m_respawnDelayTime);
+                Delete();
+            }
+        }
+
         public void Delete()
         {
             SetLootState(LootState.NotReady);
@@ -1160,7 +1184,7 @@ namespace Game.Entities
 
         public override void SaveRespawnTime(uint forceDelay = 0, bool savetodb = true)
         {
-            if (m_goData != null && m_respawnTime > GameTime.GetGameTime() && m_spawnedByDefault)
+            if (m_goData != null && (forceDelay != 0 || m_respawnTime > GameTime.GetGameTime()) && m_spawnedByDefault)
             {
                 if (m_respawnCompatibilityMode)
                 {
@@ -2858,6 +2882,7 @@ namespace Game.Entities
         uint m_spellId;
         long m_respawnTime;                          // (secs) time of next respawn (or despawn if GO have owner()),
         uint m_respawnDelayTime;                     // (secs) if 0 then current GO state no dependent from timer
+        uint m_despawnDelay;
         LootState m_lootState;
         ObjectGuid m_lootStateUnitGUID;                    // GUID of the unit passed with SetLootState(LootState, Unit*)
         bool m_spawnedByDefault;
