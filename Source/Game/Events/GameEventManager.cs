@@ -1630,16 +1630,20 @@ namespace Game
                 if (curTime < startTime + gameEvent.length * Time.Minute)
                 {
                     gameEvent.start = startTime + stageOffset;
-                    return;
+                    break;
                 }
                 else if (singleDate)
                 {
                     var tmCopy = timeInfo.AddYears(Time.UnixTimeToDateTime(curTime).ToLocalTime().Year); // This year
                     gameEvent.start = Time.DateTimeToUnixTime(tmCopy) + stageOffset;
-                    return;
+                    break;
+                }
+                else
+                {
+                    // date is due and not a singleDate event, try with next DBC date (modified by holiday_dates)
+                    // if none is found we don't modify start date and use the one in game_event
                 }
             }
-            Log.outError(LogFilter.Sql, $"No suitable start date found for holiday {gameEvent.holiday_id}.");
         }
 
         public bool IsHolidayActive(HolidayIds id)
