@@ -2860,7 +2860,7 @@ namespace Game.Entities
                 spellInfo._InitializeExplicitTargetMask();
             }
 
-            // addition for binary spells, ommit spells triggering other spells
+            // addition for binary spells, omit spells triggering other spells
             foreach (var spellInfo in mSpellInfoMap.Values)
             {
                 if (!spellInfo.HasAttribute(SpellCustomAttributes.BinarySpell))

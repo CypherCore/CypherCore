@@ -6872,7 +6872,9 @@ namespace Game.Spells
                 }
             }
 
-            float critChance = m_caster.SpellCritChanceDone(this, null, m_spellSchoolMask, m_attackType);
+            float critChance = m_spellValue.CriticalChance;
+            if (critChance == 0.0f)
+                critChance = m_caster.SpellCritChanceDone(this, null, m_spellSchoolMask, m_attackType);
             targetInfo.crit = RandomHelper.randChance(unit.SpellCritChanceTaken(m_caster, this, null, m_spellSchoolMask, critChance, m_attackType));
         }
 
@@ -6964,6 +6966,9 @@ namespace Game.Spells
                     break;
                 case SpellValueMod.AuraStack:
                     m_spellValue.AuraStackAmount = value;
+                    break;
+                case SpellValueMod.CritChance:
+                    m_spellValue.CriticalChance = value / 100.0f; // @todo ugly /100 remove when basepoints are double
                     break;
                 case SpellValueMod.DurationPct:
                     m_spellValue.DurationMul = (float)value / 100.0f;
@@ -7771,6 +7776,7 @@ namespace Game.Spells
             MaxAffectedTargets = proto.MaxAffectedTargets;
             RadiusMod = 1.0f;
             AuraStackAmount = 1;
+            CriticalChance = 0.0f;
             DurationMul = 1;
         }
 
@@ -7780,6 +7786,7 @@ namespace Game.Spells
         public float RadiusMod;
         public int AuraStackAmount;
         public float DurationMul;
+        public float CriticalChance;
     }
 
     // Spell modifier (used for modify other spells)

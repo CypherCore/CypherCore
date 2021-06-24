@@ -395,6 +395,7 @@ namespace Framework.Constants
         RadiusMod,
         MaxTargets,
         AuraStack,
+        CritChance,
         DurationPct
     }
 
