@@ -565,7 +565,7 @@ namespace Game.AI
             return false;
         }
 
-        public override void JustAppeared()
+        public override void InitializeAI()
         {
             _despawnTime = 0;
             _respawnTime = 0;
@@ -709,14 +709,6 @@ namespace Game.AI
         public override void PassengerBoarded(Unit passenger, sbyte seatId, bool apply)
         {
             GetScript().ProcessEventsFor(apply ? SmartEvents.PassengerBoarded : SmartEvents.PassengerRemoved, passenger, (uint)seatId, 0, apply);
-        }
-
-        public override void InitializeAI()
-        {
-            _script.OnInitialize(me);
-
-            if (!me.IsDead())
-                GetScript().OnReset();
         }
 
         public override void OnCharmed(bool apply)
@@ -893,9 +885,7 @@ namespace Game.AI
 
         public void SetScript9(SmartScriptHolder e, uint entry, Unit invoker)
         {
-            if (invoker != null)
-                GetScript().LastInvoker = invoker.GetGUID();
-            GetScript().SetScript9(e, entry);
+            GetScript().SetScript9(e, entry, invoker);
         }
 
         public override void OnGameEvent(bool start, ushort eventId)
@@ -1088,9 +1078,6 @@ namespace Game.AI
 
         public override void Reset()
         {
-            // call respawn event on reset
-            GetScript().ProcessEventsFor(SmartEvents.Respawn);
-
             GetScript().OnReset();
         }
 
@@ -1142,9 +1129,7 @@ namespace Game.AI
 
         public void SetScript9(SmartScriptHolder e, uint entry, Unit invoker)
         {
-            if (invoker != null)
-                GetScript().LastInvoker = invoker.GetGUID();
-            GetScript().SetScript9(e, entry);
+            GetScript().SetScript9(e, entry, invoker);
         }
 
         public override void OnGameEvent(bool start, ushort eventId)
@@ -1195,10 +1180,7 @@ namespace Game.AI
 
         public void SetScript9(SmartScriptHolder e, uint entry, Unit invoker)
         {
-            if (invoker)
-                GetScript().LastInvoker = invoker.GetGUID();
-
-            GetScript().SetScript9(e, entry);
+            GetScript().SetScript9(e, entry, invoker);
         }
 
         public SmartScript GetScript() { return _script; }

@@ -39,6 +39,7 @@ namespace Game.AI
         List<SmartScriptHolder> _events = new();
         List<SmartScriptHolder> _installEvents = new();
         List<SmartScriptHolder> _timedActionList = new();
+        ObjectGuid mTimedActionListInvoker;
         Creature _me;
         ObjectGuid _meOrigGUID;
         GameObject _go;
@@ -3638,9 +3639,12 @@ namespace Game.AI
                     case SmartEvents.DistanceCreature:
                     case SmartEvents.DistanceGameobject:
                         {
-                            ProcessEvent(e);
                             if (e.GetScriptType() == SmartScriptType.TimedActionlist)
                             {
+                                Unit invoker9 = null;
+                                if (_me != null && !mTimedActionListInvoker.IsEmpty())
+                                    invoker9 = Global.ObjAccessor.GetUnit(_me, mTimedActionListInvoker);
+                                ProcessEvent(e, invoker9);
                                 e.EnableTimed = false;//disable event if it is in an ActionList and was processed once
                                 foreach (var holder in _timedActionList)
                                 {
@@ -3652,6 +3656,8 @@ namespace Game.AI
                                     }
                                 }
                             }
+                            else
+                                ProcessEvent(e);
                             break;
                         }
                 }
@@ -3994,12 +4000,14 @@ namespace Game.AI
             return searcher.GetTarget();
         }
 
-        public void SetScript9(SmartScriptHolder e, uint entry)
+        public void SetScript9(SmartScriptHolder e, uint entry, Unit invoker)
         {
             _timedActionList.Clear();
             _timedActionList = Global.SmartAIMgr.GetScript((int)entry, SmartScriptType.TimedActionlist);
             if (_timedActionList.Empty())
                 return;
+
+            mTimedActionListInvoker = invoker != null ? invoker.GetGUID() : ObjectGuid.Empty;
             int i = 0;
             foreach (var holder in _timedActionList.ToList())
             {

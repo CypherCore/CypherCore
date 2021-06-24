@@ -491,8 +491,8 @@ namespace Game.AI
                         Log.outError(LogFilter.Sql, "SmartAIMgr: Entry {e.entryOrGuid} SourceType {e.GetScriptType()} Event {e.GetEventType()} Action {}e.GetActionType() has invoker target, but action does not provide any invoker!");
                         // allow this to load for now
                         // return false;
-                        break;
                     }
+                    break;
                 case SmartTargets.PlayerRange:
                 case SmartTargets.Self:
                 case SmartTargets.Victim:
