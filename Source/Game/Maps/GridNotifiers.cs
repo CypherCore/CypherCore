@@ -2077,13 +2077,6 @@ namespace Game.Maps
             i_range = range;
             i_incOwnRadius = incOwnRadius;
             i_incTargetRadius = incTargetRadius;
-
-            if (_spellInfo == null)
-            {
-                DynamicObject dynObj = i_obj.ToDynamicObject();
-                if (dynObj)
-                    _spellInfo = dynObj.GetSpellInfo();
-            }
         }
 
         public bool Invoke(Unit u)

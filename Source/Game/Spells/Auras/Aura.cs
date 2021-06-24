@@ -2546,10 +2546,12 @@ namespace Game.Spells
                     continue;
 
                 List<Unit> targetList = new();
+                var condList = effect.ImplicitTargetConditions;
                 // non-area aura
                 if (effect.Effect == SpellEffectName.ApplyAura)
                 {
-                    targetList.Add(GetUnitOwner());
+                    if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(GetUnitOwner(), GetUnitOwner(), condList))
+                        targetList.Add(GetUnitOwner());
                 }
                 else
                 {
@@ -2557,61 +2559,61 @@ namespace Game.Spells
 
                     if (!GetUnitOwner().HasUnitState(UnitState.Isolated))
                     {
+                        SpellTargetCheckTypes selectionType = SpellTargetCheckTypes.Default;
                         switch (effect.Effect)
                         {
                             case SpellEffectName.ApplyAreaAuraParty:
-                            case SpellEffectName.ApplyAreaAuraRaid:
                             case SpellEffectName.ApplyAreaAuraPartyNonrandom:
-                            {
-                                    targetList.Add(GetUnitOwner());
-                                    var u_check = new AnyGroupedUnitInObjectRangeCheck(GetUnitOwner(), GetUnitOwner(), radius, effect.Effect == SpellEffectName.ApplyAreaAuraRaid, GetSpellInfo().HasAttribute(SpellAttr3.OnlyTargetPlayers), false, true);
-                                    var searcher = new UnitListSearcher(GetUnitOwner(), targetList, u_check);
-                                    Cell.VisitAllObjects(GetUnitOwner(), searcher, radius);
+                                    selectionType = SpellTargetCheckTypes.Party;
                                     break;
-                                }
+                            case SpellEffectName.ApplyAreaAuraRaid:
+                                selectionType = SpellTargetCheckTypes.Raid;
+                                break;
                             case SpellEffectName.ApplyAreaAuraFriend:
-                                {
-                                    targetList.Add(GetUnitOwner());
-                                    var u_check = new AnyFriendlyUnitInObjectRangeCheck(GetUnitOwner(), GetUnitOwner(), radius, GetSpellInfo().HasAttribute(SpellAttr3.OnlyTargetPlayers), false, true);
-                                    var searcher = new UnitListSearcher(GetUnitOwner(), targetList, u_check);
-                                    Cell.VisitAllObjects(GetUnitOwner(), searcher, radius);
-                                    break;
-                                }
+                                selectionType = SpellTargetCheckTypes.Ally;
+                                break;
                             case SpellEffectName.ApplyAreaAuraEnemy:
-                                {
-                                    var u_check = new AnyAoETargetUnitInObjectRangeCheck(GetUnitOwner(), GetUnitOwner(), radius, GetSpellInfo(), false, true);
-                                    var searcher = new UnitListSearcher(GetUnitOwner(), targetList, u_check);
-                                    Cell.VisitAllObjects(GetUnitOwner(), searcher, radius);
-                                    break;
-                                }
+                                selectionType = SpellTargetCheckTypes.Enemy;
+                                break;
                             case SpellEffectName.ApplyAreaAuraPet:
-                                targetList.Add(GetUnitOwner());
+                                if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(GetUnitOwner(), GetUnitOwner(), condList))
+                                    targetList.Add(GetUnitOwner());
                                 goto case SpellEffectName.ApplyAreaAuraOwner;
                             case SpellEffectName.ApplyAreaAuraOwner:
                                 {
                                     Unit owner = GetUnitOwner().GetCharmerOrOwner();
                                     if (owner != null)
                                         if (GetUnitOwner().IsWithinDistInMap(owner, radius))
-                                            targetList.Add(owner);
+                                            if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(owner, GetUnitOwner(), condList))
+                                                targetList.Add(owner);
                                     break;
                                 }
                             case SpellEffectName.ApplyAuraOnPet:
                                 {
                                     Unit pet = Global.ObjAccessor.GetUnit(GetUnitOwner(), GetUnitOwner().GetPetGUID());
                                     if (pet != null)
-                                        targetList.Add(pet);
+                                        if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(pet, GetUnitOwner(), condList))
+                                            targetList.Add(pet);
                                     break;
                                 }
                             case SpellEffectName.ApplyAreaAuraSummons:
                                 {
-                                    targetList.Add(GetUnitOwner());
-                                    WorldObjectSpellAreaTargetCheck check = new(radius, GetUnitOwner(), caster, GetUnitOwner(), GetSpellInfo(), SpellTargetCheckTypes.Summoned, effect.ImplicitTargetConditions, SpellTargetObjectTypes.Unit);
-                                    UnitListSearcher searcher = new(GetUnitOwner(), targetList, check);
-                                    Cell.VisitAllObjects(GetUnitOwner(), searcher, radius);
-                                    // by design WorldObjectSpellAreaTargetCheck allows not-in-world units (for spells) but for auras it is not acceptable
-                                    targetList.RemoveAll(unit => !unit.IsSelfOrInSameMap(GetUnitOwner()));
+                                    if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(GetUnitOwner(), GetUnitOwner(), condList))
+                                        targetList.Add(GetUnitOwner());
+
+                                    selectionType = SpellTargetCheckTypes.Summoned;
                                     break;
                                 }
+                        }
+
+                        if (selectionType != SpellTargetCheckTypes.Default)
+                        {
+                            WorldObjectSpellAreaTargetCheck check = new(radius, GetUnitOwner(), caster, GetUnitOwner(), GetSpellInfo(), selectionType, condList, SpellTargetObjectTypes.Unit);
+                            UnitListSearcher searcher = new(GetUnitOwner(), targetList, check);
+                            Cell.VisitAllObjects(GetUnitOwner(), searcher, radius);
+
+                            // by design WorldObjectSpellAreaTargetCheck allows not-in-world units (for spells) but for auras it is not acceptable
+                            targetList.RemoveAll(unit => !unit.IsSelfOrInSameMap(GetUnitOwner()));
                         }
                     }
                 }
@@ -2664,19 +2666,20 @@ namespace Game.Spells
                 if (effect == null || !HasEffect(effect.EffectIndex))
                     continue;
 
+                // we can't use effect type like area auras to determine check type, check targets
+                SpellTargetCheckTypes selectionType = effect.TargetA.GetCheckType();
+                if (effect.TargetB.GetReferenceType() == SpellTargetReferenceTypes.Dest)
+                    selectionType = effect.TargetB.GetCheckType();
+
                 List<Unit> targetList = new();
-                if (effect.TargetB.GetTarget() == Targets.DestDynobjAlly || effect.TargetB.GetTarget() == Targets.UnitDestAreaAlly)
-                {
-                    var u_check = new AnyFriendlyUnitInObjectRangeCheck(GetDynobjOwner(), dynObjOwnerCaster, radius, GetSpellInfo().HasAttribute(SpellAttr3.OnlyTargetPlayers), false, true);
-                    var searcher = new UnitListSearcher(GetDynobjOwner(), targetList, u_check);
-                    Cell.VisitAllObjects(GetDynobjOwner(), searcher, radius);
-                }
-                else
-                {
-                    var u_check = new AnyAoETargetUnitInObjectRangeCheck(GetDynobjOwner(), dynObjOwnerCaster, radius, null, false, true);
-                    var searcher = new UnitListSearcher(GetDynobjOwner(), targetList, u_check);
-                    Cell.VisitAllObjects(GetDynobjOwner(), searcher, radius);
-                }
+                var condList = effect.ImplicitTargetConditions;
+
+                WorldObjectSpellAreaTargetCheck check = new(radius, GetDynobjOwner(), dynObjOwnerCaster, dynObjOwnerCaster, GetSpellInfo(), selectionType, condList, SpellTargetObjectTypes.Unit);
+                UnitListSearcher searcher = new(GetDynobjOwner(), targetList, check);
+                Cell.VisitAllObjects(GetDynobjOwner(), searcher, radius);
+
+                // by design WorldObjectSpellAreaTargetCheck allows not-in-world units (for spells) but for auras it is not acceptable
+                targetList.RemoveAll(unit => !unit.IsSelfOrInSameMap(GetUnitOwner()));
 
                 foreach (var unit in targetList)
                 {
