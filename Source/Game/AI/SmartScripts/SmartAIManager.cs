@@ -489,7 +489,7 @@ namespace Game.AI
                 case SmartTargets.InvokerParty:
                     if (e.GetScriptType() != SmartScriptType.TimedActionlist && e.GetEventType() != SmartEvents.Link && !EventHasInvoker(e.Event.type))
                     {
-                        Log.outError(LogFilter.Sql, "SmartAIMgr: Entry {e.entryOrGuid} SourceType {e.GetScriptType()} Event {e.GetEventType()} Action {}e.GetActionType() has invoker target, but action does not provide any invoker!");
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: Entry {e.EntryOrGuid} SourceType {e.GetScriptType()} Event {e.GetEventType()} Action {e.GetActionType()} has invoker target, but action does not provide any invoker!");
                         // allow this to load for now
                         // return false;
                     }

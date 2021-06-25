@@ -95,7 +95,7 @@ namespace Scripts.Spells.Mage
         {
             Unit unit = GetTarget();
             _health = unit.GetHealth();
-            _pos = unit.GetPosition();
+            _pos = new(unit.GetPosition());
         }
 
         void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
