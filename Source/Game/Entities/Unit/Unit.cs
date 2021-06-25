@@ -2560,7 +2560,7 @@ namespace Game.Entities
             }
 
             if (attacker != null)
-                damage *= (uint)attacker.GetDamageMultiplierForTarget(victim);
+                damage = (uint)(damage * attacker.GetDamageMultiplierForTarget(victim));
         }
 
         public static uint DealDamage(Unit attacker, Unit victim, uint damage, CleanDamage cleanDamage = null, DamageEffectType damagetype = DamageEffectType.Direct, SpellSchoolMask damageSchoolMask = SpellSchoolMask.Normal, SpellInfo spellProto = null, bool durabilityLoss = true)
@@ -2710,7 +2710,7 @@ namespace Game.Entities
                 victim.ToPlayer().UpdateCriteria(CriteriaTypes.HighestHitReceived, damage);
 
             if (attacker != null)
-                damage /= (uint)victim.GetHealthMultiplierForTarget(attacker);
+                damage = (uint)(damage / victim.GetHealthMultiplierForTarget(attacker));
 
             if (victim.GetTypeId() != TypeId.Player && (!victim.IsControlledByPlayer() || victim.IsVehicle()))
             {
