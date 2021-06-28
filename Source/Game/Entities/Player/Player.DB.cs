@@ -755,6 +755,7 @@ namespace Game.Entities
                         if (objective != null)
                         {
                             int data = result.Read<int>(2);
+                            m_questObjectiveStatus.Add((objective.Type, objective.ObjectID), new QuestObjectiveStatusData() { QuestStatusPair = (questID, questStatusData), Objective = objective });
                             if (!objective.IsStoringFlag())
                                 SetQuestSlotCounter(questStatusData.Slot, storageIndex, (ushort)data);
                             else if (data != 0)
@@ -1968,15 +1969,11 @@ namespace Game.Entities
 
                         foreach (QuestObjective obj in quest.Objectives)
                         {
-                            int count = GetQuestSlotObjectiveData(data.Slot, obj);
-                            if (count == 0)
-                                continue;
-
                             stmt = DB.Characters.GetPreparedStatement(CharStatements.REP_CHAR_QUESTSTATUS_OBJECTIVES);
                             stmt.AddValue(0, GetGUID().GetCounter());
                             stmt.AddValue(1, save.Key);
                             stmt.AddValue(2, obj.StorageIndex);
-                            stmt.AddValue(3, count);
+                            stmt.AddValue(3, GetQuestSlotObjectiveData(data.Slot, obj));
                             trans.Append(stmt);
                         }
                     }
