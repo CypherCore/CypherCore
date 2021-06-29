@@ -586,6 +586,9 @@ namespace Game.Combat
 
         public void RegisterRedirectThreat(uint spellId, ObjectGuid victim, uint pct)
         {
+            if (!_redirectRegistry.ContainsKey(spellId))
+                _redirectRegistry[spellId] = new();
+
             _redirectRegistry[spellId][victim] = pct;
             UpdateRedirectInfo();
         }
