@@ -1395,7 +1395,7 @@ namespace Game.Entities
                         // validate data
                         if (Convert.ToBoolean(procEntry.SchoolMask & ~SpellSchoolMask.All))
                             Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has wrong `SchoolMask` set: {1}", spellInfo.Id, procEntry.SchoolMask);
-                        if (procEntry.SpellFamilyName != 0 && Global.DB2Mgr.IsValidSpellFamiliyName(procEntry.SpellFamilyName))
+                        if (procEntry.SpellFamilyName != 0 && !Global.DB2Mgr.IsValidSpellFamiliyName(procEntry.SpellFamilyName))
                             Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has wrong `SpellFamilyName` set: {1}", spellInfo.Id, procEntry.SpellFamilyName);
                         if (procEntry.Chance < 0)
                         {
