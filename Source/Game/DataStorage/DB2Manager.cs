@@ -1915,7 +1915,7 @@ namespace Game.DataStorage
             return _specsBySpecSet.Contains(Tuple.Create(specSetId, specId));
         }
 
-        bool IsValidSpellFamiliyName(SpellFamilyNames family)
+        public bool IsValidSpellFamiliyName(SpellFamilyNames family)
         {
             return _spellFamilyNames.Contains((byte)family);
         }

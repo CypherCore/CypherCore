@@ -469,7 +469,7 @@ namespace Game.Entities
         public static bool CanSpellTriggerProcOnEvent(SpellProcEntry procEntry, ProcEventInfo eventInfo)
         {
             // proc type doesn't match
-            if (!eventInfo.GetTypeMask().HasFlag(procEntry.ProcFlags))
+            if ((eventInfo.GetTypeMask() & procEntry.ProcFlags) == 0)
                 return false;
 
             // check XP or honor target requirement
@@ -1322,9 +1322,9 @@ namespace Game.Entities
 
             mSpellProcMap.Clear();                             // need for reload case
 
-            //                                            0        1           2                3                 4                 5                 6
+            //                                         0        1           2                3                 4                 5                 6
             SQLResult result = DB.World.Query("SELECT SpellId, SchoolMask, SpellFamilyName, SpellFamilyMask0, SpellFamilyMask1, SpellFamilyMask2, SpellFamilyMask3, " +
-            //           7              8               9       10              11              12      13        14      15
+                //7          8              9               10       11              12                  13              14      15        16
                 "ProcFlags, SpellTypeMask, SpellPhaseMask, HitMask, AttributesMask, DisableEffectsMask, ProcsPerMinute, Chance, Cooldown, Charges FROM spell_proc");
 
             uint count = 0;
@@ -1395,7 +1395,7 @@ namespace Game.Entities
                         // validate data
                         if (Convert.ToBoolean(procEntry.SchoolMask & ~SpellSchoolMask.All))
                             Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has wrong `SchoolMask` set: {1}", spellInfo.Id, procEntry.SchoolMask);
-                        if (procEntry.SpellFamilyName != 0 && ((int)procEntry.SpellFamilyName < 3 || (int)procEntry.SpellFamilyName > 17 || (int)procEntry.SpellFamilyName == 14 || (int)procEntry.SpellFamilyName == 16))
+                        if (procEntry.SpellFamilyName != 0 && Global.DB2Mgr.IsValidSpellFamiliyName(procEntry.SpellFamilyName))
                             Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has wrong `SpellFamilyName` set: {1}", spellInfo.Id, procEntry.SpellFamilyName);
                         if (procEntry.Chance < 0)
                         {
@@ -1407,8 +1407,6 @@ namespace Game.Entities
                             Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has negative value in `ProcsPerMinute` field", spellInfo.Id);
                             procEntry.ProcsPerMinute = 0;
                         }
-                        if (procEntry.Chance == 0 && procEntry.ProcsPerMinute == 0)
-                            Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} doesn't have `Chance` and `ProcsPerMinute` values defined, proc will not be triggered", spellInfo.Id);
                         if (procEntry.ProcFlags == 0)
                             Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} doesn't have `ProcFlags` value defined, proc will not be triggered", spellInfo.Id);
                         if (Convert.ToBoolean(procEntry.SpellTypeMask & ~ProcFlagsSpellType.MaskAll))
