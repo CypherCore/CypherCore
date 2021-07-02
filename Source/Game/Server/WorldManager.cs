@@ -398,7 +398,7 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Initialize DataStorage...");
             // Load DB2s
             m_availableDbcLocaleMask = CliDB.LoadStores(_dataPath, m_defaultDbcLocale);
-            if (!m_availableDbcLocaleMask[(int)m_defaultDbcLocale])
+            if (m_availableDbcLocaleMask == null || !m_availableDbcLocaleMask[(int)m_defaultDbcLocale])
             {
                 Log.outFatal(LogFilter.ServerLoading, $"Unable to load db2 files for {m_defaultDbcLocale} locale specified in DBC.Locale config!");
                 ShutdownServ(1, ShutdownMask.Force, ShutdownExitCode.Error);
