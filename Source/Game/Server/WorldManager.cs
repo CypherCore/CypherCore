@@ -401,7 +401,7 @@ namespace Game
             if (m_availableDbcLocaleMask == null || !m_availableDbcLocaleMask[(int)m_defaultDbcLocale])
             {
                 Log.outFatal(LogFilter.ServerLoading, $"Unable to load db2 files for {m_defaultDbcLocale} locale specified in DBC.Locale config!");
-                ShutdownServ(1, ShutdownMask.Force, ShutdownExitCode.Error);
+                Environment.Exit(1);
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loading hotfix blobs...");
