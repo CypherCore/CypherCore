@@ -189,6 +189,7 @@ namespace Framework.Constants
         public const int BoundaryVisualizeStepSize = 1;
         public const int BoundaryVisualizeFailsafeLimit = 750;
         public const int BoundaryVisualizeSpawnHeight = 5;
+        public const uint AIDefaultCooldown = 5000;
 
         /// <summary>
         /// GameObject Const

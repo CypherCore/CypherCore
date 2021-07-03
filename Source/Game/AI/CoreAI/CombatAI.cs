@@ -46,7 +46,7 @@ namespace Game.AI
             foreach (var id in Spells)
             {
                 AISpellInfoType info = GetAISpellInfo(id, me.GetMap().GetDifficultyID());
-                if (info.condition == AICondition.Die)
+                if (info != null && info.condition == AICondition.Die)
                     me.CastSpell(killer, id, true);
             }
         }
@@ -56,10 +56,13 @@ namespace Game.AI
             foreach (var id in Spells)
             {
                 AISpellInfoType info = GetAISpellInfo(id, me.GetMap().GetDifficultyID());
-                if (info.condition == AICondition.Aggro)
-                    me.CastSpell(victim, id, false);
-                else if (info.condition == AICondition.Combat)
-                    _events.ScheduleEvent(id, info.cooldown + RandomHelper.Rand32() % info.cooldown);
+                if (info != null)
+                {
+                    if (info.condition == AICondition.Aggro)
+                        me.CastSpell(victim, id, false);
+                    else if (info.condition == AICondition.Combat)
+                        _events.ScheduleEvent(id, info.cooldown + RandomHelper.Rand32() % info.cooldown);
+                }
             }
         }
 
@@ -78,7 +81,8 @@ namespace Game.AI
             {
                 DoCast(spellId);
                 AISpellInfoType info = GetAISpellInfo(spellId, me.GetMap().GetDifficultyID());
-                _events.ScheduleEvent(spellId, info.cooldown + RandomHelper.Rand32() % info.cooldown);
+                if (info != null)
+                    _events.ScheduleEvent(spellId, info.cooldown + RandomHelper.Rand32() % info.cooldown);
             }
             else
                 DoMeleeAttackIfReady();
@@ -121,7 +125,7 @@ namespace Game.AI
             foreach (var id in Spells)
             {
                 AISpellInfoType info = GetAISpellInfo(id, me.GetMap().GetDifficultyID());
-                if (info.condition == AICondition.Combat && _attackDist > info.maxRange)
+                if (info != null && info.condition == AICondition.Combat && _attackDist > info.maxRange)
                     _attackDist = info.maxRange;
             }
 
@@ -144,17 +148,20 @@ namespace Game.AI
             foreach (var id in Spells)
             {
                 AISpellInfoType info = GetAISpellInfo(id, me.GetMap().GetDifficultyID());
-                if (info.condition == AICondition.Aggro)
-                    me.CastSpell(victim, id, false);
-                else if (info.condition == AICondition.Combat)
+                if (info != null)
                 {
-                    uint cooldown = info.realCooldown;
-                    if (count == spell)
+                    if (info.condition == AICondition.Aggro)
+                        me.CastSpell(victim, id, false);
+                    else if (info.condition == AICondition.Combat)
                     {
-                        DoCast(Spells[spell]);
-                        cooldown += (uint)me.GetCurrentSpellCastTime(id);
+                        uint cooldown = info.realCooldown;
+                        if (count == spell)
+                        {
+                            DoCast(Spells[spell]);
+                            cooldown += (uint)me.GetCurrentSpellCastTime(id);
+                        }
+                        _events.ScheduleEvent(id, cooldown);
                     }
-                    _events.ScheduleEvent(id, cooldown);
                 }
             }
         }
@@ -181,7 +188,8 @@ namespace Game.AI
                 DoCast(spellId);
                 uint casttime = (uint)me.GetCurrentSpellCastTime(spellId);
                 AISpellInfoType info = GetAISpellInfo(spellId, me.GetMap().GetDifficultyID());
-                _events.ScheduleEvent(spellId, (casttime != 0 ? casttime : 500) + info.realCooldown);
+                if (info != null)
+                    _events.ScheduleEvent(spellId, (casttime != 0 ? casttime : 500) + info.realCooldown);
             }
         }
     }

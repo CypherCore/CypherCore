@@ -223,7 +223,7 @@ namespace Game.AI
                 AISpellInfoType aiSpell = GetAISpellInfo(me.m_spells[i], me.GetMap().GetDifficultyID());
 
                 //This spell doesn't exist
-                if (tempSpell == null)
+                if (tempSpell == null || aiSpell == null)
                     continue;
 
                 // Targets and Effects checked first as most used restrictions

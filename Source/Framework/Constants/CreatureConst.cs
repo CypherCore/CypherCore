@@ -45,7 +45,7 @@ namespace Framework.Constants
         Unknown = 5                      // found in 2.2.3 for 2 mobs
     }
 
-    [System.Flags]
+    [Flags]
     public enum UnitFlags : uint
     {
         ServerControlled = 0x01,

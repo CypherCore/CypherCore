@@ -252,9 +252,13 @@ namespace Game.AI
         public void DoCast(uint spellId)
         {
             Unit target = null;
+            AITarget aiTargetType = AITarget.Self;
 
             AISpellInfoType info = GetAISpellInfo(spellId, me.GetMap().GetDifficultyID());
-            switch (info.target)
+            if (info != null)
+                aiTargetType = info.target;
+
+            switch (aiTargetType)
             {
                 default:
                 case AITarget.Self:
@@ -321,8 +325,6 @@ namespace Game.AI
         
         public static void FillAISpellInfo()
         {
-            //AISpellInfo = new AISpellInfoType[spellStorage.Keys.Max() + 1];
-
             Global.SpellMgr.ForEachSpellInfo(spellInfo =>
             {
                 AISpellInfoType AIInfo = new();

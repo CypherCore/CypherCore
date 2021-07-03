@@ -491,8 +491,15 @@ namespace Game.AI
         public List<AreaBoundary> GetBoundary() { return _boundary; }
     }
 
-    public struct AISpellInfoType
+    public class AISpellInfoType
     {
+        public AISpellInfoType()
+        {
+            target = AITarget.Self;
+            condition = AICondition.Combat;
+            cooldown = SharedConst.AIDefaultCooldown;
+        }
+
         public AITarget target;
         public AICondition condition;
         public uint cooldown;
