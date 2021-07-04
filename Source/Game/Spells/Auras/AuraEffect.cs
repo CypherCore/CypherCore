@@ -132,10 +132,10 @@ namespace Game.Spells
                 {
                     case AuraType.PeriodicDamage:
                     case AuraType.PeriodicLeech:
-                        _estimatedAmount = caster.SpellDamageBonusDone(GetBase().GetUnitOwner(), GetSpellInfo(), (uint)amount, DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses);
+                        _estimatedAmount = caster.SpellDamageBonusDone(GetBase().GetOwner().ToUnit(), GetSpellInfo(), (uint)amount, DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses);
                         break;
                     case AuraType.PeriodicHeal:
-                        _estimatedAmount = caster.SpellHealingBonusDone(GetBase().GetUnitOwner(), GetSpellInfo(), (uint)amount, DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses);
+                        _estimatedAmount = caster.SpellHealingBonusDone(GetBase().GetOwner().ToUnit(), GetSpellInfo(), (uint)amount, DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses);
                         break;
                     default:
                         break;

@@ -352,7 +352,7 @@ namespace Game.Spells
             foreach (SpellEffectInfo effect in GetSpellInfo().GetEffects())
             {
                 if (effect != null && Convert.ToBoolean(effMask & (1 << (int)effect.EffectIndex)))
-                    _effects[effect.EffectIndex] = new AuraEffect(this, effect, baseAmount != null ? baseAmount[effect.EffectIndex] : (int?)null, caster);
+                    _effects[effect.EffectIndex] = new AuraEffect(this, effect, baseAmount != null ? baseAmount[effect.EffectIndex] : null, caster);
             }
         }
         
@@ -2672,7 +2672,7 @@ namespace Game.Spells
                 Cell.VisitAllObjects(GetDynobjOwner(), searcher, radius);
 
                 // by design WorldObjectSpellAreaTargetCheck allows not-in-world units (for spells) but for auras it is not acceptable
-                targetList.RemoveAll(unit => !unit.IsSelfOrInSameMap(GetUnitOwner()));
+                targetList.RemoveAll(unit => !unit.IsSelfOrInSameMap(GetOwner()));
 
                 foreach (var unit in targetList)
                 {
