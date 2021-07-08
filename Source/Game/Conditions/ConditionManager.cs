@@ -463,7 +463,6 @@ namespace Game
                                     SpellClickEventConditionStore[cond.SourceGroup] = new MultiMap<uint, Condition>();
 
                                 SpellClickEventConditionStore[cond.SourceGroup].Add((uint)cond.SourceEntry, cond);
-                                valid = true;
                                 ++count;
                                 continue;   // do not add to m_AllocatedMemory to avoid double deleting
                             }
@@ -476,7 +475,6 @@ namespace Game
                                     VehicleSpellConditionStore[cond.SourceGroup] = new MultiMap<uint, Condition>();
 
                                 VehicleSpellConditionStore[cond.SourceGroup].Add((uint)cond.SourceEntry, cond);
-                                valid = true;
                                 ++count;
                                 continue;   // do not add to m_AllocatedMemory to avoid double deleting
                             }
@@ -488,7 +486,6 @@ namespace Game
                                     SmartEventConditionStore[key] = new MultiMap<uint, Condition>();
 
                                 SmartEventConditionStore[key].Add(cond.SourceGroup, cond);
-                                valid = true;
                                 ++count;
                                 continue;
                             }
@@ -498,7 +495,6 @@ namespace Game
                                     NpcVendorConditionContainerStore[cond.SourceGroup] = new MultiMap<uint, Condition>();
 
                                 NpcVendorConditionContainerStore[cond.SourceGroup].Add((uint)cond.SourceEntry, cond);
-                                valid = true;
                                 ++count;
                                 continue;
                             }

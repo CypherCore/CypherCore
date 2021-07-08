@@ -137,7 +137,6 @@ namespace Game.Entities
 
             UpdateType updateType = UpdateType.CreateObject;
             TypeId tempObjectType = ObjectTypeId;
-            TypeMask tempObjectTypeMask = ObjectTypeMask;
             CreateObjectBits flags = m_updateFlag;
 
             if (target == this)
@@ -145,7 +144,6 @@ namespace Game.Entities
                 flags.ThisIsYou = true;
                 flags.ActivePlayer = true;
                 tempObjectType = TypeId.ActivePlayer;
-                tempObjectTypeMask |= TypeMask.ActivePlayer;
             }
 
             switch (GetGUID().GetHigh())

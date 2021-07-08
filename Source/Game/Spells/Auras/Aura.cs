@@ -1699,7 +1699,6 @@ namespace Game.Spells
                         DamageInfo damageInfo = eventInfo.GetDamageInfo();
                         if (damageInfo != null)
                         {
-                            WeaponAttackType attType = damageInfo.GetAttackType();
                             if (damageInfo.GetAttackType() != WeaponAttackType.OffAttack)
                                 item = target.ToPlayer().GetUseableItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
                             else

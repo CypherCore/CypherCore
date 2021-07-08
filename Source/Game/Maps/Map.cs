@@ -3021,8 +3021,8 @@ namespace Game.Maps
                 // also not allow unloading spawn grid to prevent creating creature clone at load
                 if (!c.IsPet() && c.GetSpawnId() != 0)
                 {
-                    float x, y, z;
-                    c.GetRespawnPosition(out x, out y, out z);
+                    float x, y;
+                    c.GetRespawnPosition(out x, out y, out _);
                     GridCoord p = GridDefines.ComputeGridCoord(x, y);
                     if (GetGrid(p.X_coord, p.Y_coord) != null)
                         GetGrid(p.X_coord, p.Y_coord).IncUnloadActiveLock();
@@ -3052,8 +3052,8 @@ namespace Game.Maps
                 // also allow unloading spawn grid
                 if (!c.IsPet() && c.GetSpawnId() != 0)
                 {
-                    float x, y, z;
-                    c.GetRespawnPosition(out x, out y, out z);
+                    float x, y;
+                    c.GetRespawnPosition(out x, out y, out _);
                     GridCoord p = GridDefines.ComputeGridCoord(x, y);
                     if (GetGrid(p.X_coord, p.Y_coord) != null)
                         GetGrid(p.X_coord, p.Y_coord).DecUnloadActiveLock();

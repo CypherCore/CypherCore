@@ -1257,7 +1257,7 @@ namespace Game.Entities
 
         public override void UpdateAttackPowerAndDamage(bool ranged = false)
         {
-            float val2 = 0.0f;
+            float val2;
             float level = GetLevel();
 
             var entry = CliDB.ChrClassesStorage.LookupByKey(GetClass());
@@ -2114,7 +2114,7 @@ namespace Game.Entities
 
         public override void CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, bool addTotalPct, out float minDamage, out float maxDamage)
         {
-            float variance = 1.0f;
+            float variance;
             UnitMods unitMod;
             switch (attType)
             {

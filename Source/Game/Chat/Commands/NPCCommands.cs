@@ -1245,7 +1245,6 @@ namespace Game.Chat
                 if (string.IsNullOrEmpty(guid_str))
                     return false;
 
-                ulong lowguid;
                 Creature creature = null;
 
                 if (!string.IsNullOrEmpty(dontdel_str))
@@ -1279,11 +1278,10 @@ namespace Game.Chat
                     creature = handler.GetSelectedCreature();
                     if (!creature || creature.IsPet())
                         return false;
-                    lowguid = creature.GetSpawnId();
                 }
                 else                                                    // case .setmovetype #creature_guid $move_type (with selected creature)
                 {
-                    if (!ulong.TryParse(guid_str, out lowguid) || lowguid != 0)
+                    if (!ulong.TryParse(guid_str, out ulong lowguid) || lowguid != 0)
                         creature = handler.GetCreatureFromPlayerMapByDbGuid(lowguid);
 
                     // attempt check creature existence by DB data
@@ -1295,10 +1293,6 @@ namespace Game.Chat
                             handler.SendSysMessage(CypherStrings.CommandCreatguidnotfound, lowguid);
                             return false;
                         }
-                    }
-                    else
-                    {
-                        lowguid = creature.GetSpawnId();
                     }
                 }
 
@@ -1331,7 +1325,7 @@ namespace Game.Chat
                     }
                     creature.SaveToDB();
                 }
-                if (doNotDelete == false)
+                if (!doNotDelete)
                 {
                     handler.SendSysMessage(CypherStrings.MoveTypeSet, type);
                 }

@@ -210,7 +210,7 @@ namespace WorldServer
         {
             Log.outInfo(LogFilter.Server, "Halting process...");
             Thread.Sleep(5000);
-            Environment.Exit(-1);
+            Environment.Exit(Global.WorldMgr.GetExitCode());
         }
     }
 }

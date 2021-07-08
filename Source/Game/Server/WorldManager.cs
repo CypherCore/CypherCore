@@ -2318,6 +2318,8 @@ namespace Game
         public bool IsShuttingDown() { return m_ShutdownTimer > 0; }
         public uint GetShutDownTimeLeft() { return m_ShutdownTimer; }
 
+        public int GetExitCode() { return (int)m_ExitCode; }
+
         public void StopNow(ShutdownExitCode exitcode = ShutdownExitCode.Error) { IsStopped = true; m_ExitCode = exitcode; }
 
         public bool IsPvPRealm()
