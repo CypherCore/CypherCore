@@ -2671,7 +2671,7 @@ namespace Game.Spells
                 Cell.VisitAllObjects(GetDynobjOwner(), searcher, radius);
 
                 // by design WorldObjectSpellAreaTargetCheck allows not-in-world units (for spells) but for auras it is not acceptable
-                targetList.RemoveAll(unit => !unit.IsSelfOrInSameMap(GetOwner()));
+                targetList.RemoveAll(unit => !unit.IsSelfOrInSameMap(GetDynobjOwner()));
 
                 foreach (var unit in targetList)
                 {
