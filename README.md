@@ -22,7 +22,7 @@ The current support game version is: 9.0.5.38556
 * Must use Arctium WoW Client Launcher [Download](https://arctium.io) (World of Warcraft -> Private Server Launcher -> Shadowlands)
 
 ### Support / General Info
-* Check out our channel on Arctium Discord [Here](https://discord.gg/Hac3qn6)
+* Check out our Discord [Here](https://discord.gg/tCx3JbJ5qQ)
 * Check out Trinity Core Wiki as a few steps are the same [Here](https://trinitycore.atlassian.net/wiki/spaces/tc/pages/2130077/Installation+Guide)
 
 ### Legal
