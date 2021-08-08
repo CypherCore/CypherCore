@@ -57,16 +57,13 @@ namespace Game.BattleGrounds
         }
 
         // add group or player (grp == null) to bg queue with the given leader and bg specifications
-        public GroupQueueInfo AddGroup(Player leader, Group grp, BattlegroundTypeId BgTypeId, PvpDifficultyRecord bracketEntry, ArenaTypes ArenaType, bool isRated, bool isPremade, uint ArenaRating, uint MatchmakerRating, uint arenateamid = 0)
+        public GroupQueueInfo AddGroup(Player leader, Group grp, PvpDifficultyRecord bracketEntry, bool isPremade, uint ArenaRating, uint MatchmakerRating, uint arenateamid = 0)
         {
             BattlegroundBracketId bracketId = bracketEntry.GetBracketId();
 
             // create new ginfo
             GroupQueueInfo ginfo = new();
-            ginfo.BgTypeId = BgTypeId;
-            ginfo.ArenaType = ArenaType;
             ginfo.ArenaTeamId = arenateamid;
-            ginfo.IsRated = isRated;
             ginfo.IsInvitedToBGInstanceGUID = 0;
             ginfo.JoinTime = GameTime.GetGameTimeMS();
             ginfo.RemoveInviteTime = 0;
@@ -80,20 +77,20 @@ namespace Game.BattleGrounds
 
             //compute index (if group is premade or joined a rated match) to queues
             uint index = 0;
-            if (!isRated && !isPremade)
+            if (!m_queueId.Rated && !isPremade)
                 index += SharedConst.BGTeamsCount;
             if (ginfo.Team == Team.Horde)
                 index++;
-            Log.outDebug(LogFilter.Battleground, "Adding Group to BattlegroundQueue bgTypeId : {0}, bracket_id : {1}, index : {2}", BgTypeId, bracketId, index);
+            Log.outDebug(LogFilter.Battleground, "Adding Group to BattlegroundQueue bgTypeId : {0}, bracket_id : {1}, index : {2}", m_queueId.BattlemasterListId, bracketId, index);
 
             uint lastOnlineTime = GameTime.GetGameTimeMS();
 
             //announce world (this don't need mutex)
-            if (isRated && WorldConfig.GetBoolValue(WorldCfg.ArenaQueueAnnouncerEnable))
+            if (m_queueId.Rated && WorldConfig.GetBoolValue(WorldCfg.ArenaQueueAnnouncerEnable))
             {
                 ArenaTeam team = Global.ArenaTeamMgr.GetArenaTeamById(arenateamid);
                 if (team != null)
-                    Global.WorldMgr.SendWorldText( CypherStrings.ArenaQueueAnnounceWorldJoin, team.GetName(), ginfo.ArenaType, ginfo.ArenaType, ginfo.ArenaTeamRating);
+                    Global.WorldMgr.SendWorldText( CypherStrings.ArenaQueueAnnounceWorldJoin, team.GetName(), m_queueId.TeamSize, m_queueId.TeamSize, ginfo.ArenaTeamRating);
             }
 
             //add players from group to ginfo
@@ -130,9 +127,9 @@ namespace Game.BattleGrounds
                 m_QueuedGroups[(int)bracketId][index].Add(ginfo);
 
                 //announce to world, this code needs mutex
-                if (!isRated && !isPremade && WorldConfig.GetBoolValue(WorldCfg.BattlegroundQueueAnnouncerEnable))
+                if (!m_queueId.Rated && !isPremade && WorldConfig.GetBoolValue(WorldCfg.BattlegroundQueueAnnouncerEnable))
                 {
-                    Battleground bg = Global.BattlegroundMgr.GetBattlegroundTemplate(ginfo.BgTypeId);
+                    Battleground bg = Global.BattlegroundMgr.GetBattlegroundTemplate((BattlegroundTypeId)m_queueId.BattlemasterListId);
                     if (bg)
                     {
                         string bgName = bg.GetName();
@@ -173,14 +170,14 @@ namespace Game.BattleGrounds
         {
             uint timeInQueue = Time.GetMSTimeDiff(ginfo.JoinTime, GameTime.GetGameTimeMS());
             uint team_index = TeamId.Alliance;                    //default set to TeamIndex.Alliance - or non rated arenas!
-            if (ginfo.ArenaType == 0)
+            if (m_queueId.TeamSize == 0)
             {
                 if (ginfo.Team == Team.Horde)
                     team_index = TeamId.Horde;
             }
             else
             {
-                if (ginfo.IsRated)
+                if (m_queueId.Rated)
                     team_index = TeamId.Horde;                     //for rated arenas use TeamIndex.Horde
             }
 
@@ -200,14 +197,14 @@ namespace Game.BattleGrounds
         public uint GetAverageQueueWaitTime(GroupQueueInfo ginfo, BattlegroundBracketId bracket_id)
         {
             uint team_index = TeamId.Alliance;                    //default set to TeamIndex.Alliance - or non rated arenas!
-            if (ginfo.ArenaType == 0)
+            if (m_queueId.TeamSize == 0)
             {
                 if (ginfo.Team == Team.Horde)
                     team_index = TeamId.Horde;
             }
             else
             {
-                if (ginfo.IsRated)
+                if (m_queueId.Rated)
                     team_index = TeamId.Horde;                     //for rated arenas use TeamIndex.Horde
             }
             //check if there is enought values(we always add values > 0)
@@ -282,7 +279,7 @@ namespace Game.BattleGrounds
             // if invited to bg, and should decrease invited count, then do it
             if (decreaseInvitedCount && group.IsInvitedToBGInstanceGUID != 0)
             {
-                Battleground bg = Global.BattlegroundMgr.GetBattleground(group.IsInvitedToBGInstanceGUID, group.BgTypeId);
+                Battleground bg = Global.BattlegroundMgr.GetBattleground(group.IsInvitedToBGInstanceGUID, (BattlegroundTypeId)m_queueId.BattlemasterListId);
                 if (bg)
                     bg.DecreaseInvitedCount(group.Team);
             }
@@ -291,15 +288,15 @@ namespace Game.BattleGrounds
             m_QueuedPlayers.Remove(guid);
 
             // announce to world if arena team left queue for rated match, show only once
-            if (group.ArenaType != 0 && group.IsRated && group.Players.Empty() && WorldConfig.GetBoolValue(WorldCfg.ArenaQueueAnnouncerEnable))
+            if (m_queueId.TeamSize != 0 && m_queueId.Rated && group.Players.Empty() && WorldConfig.GetBoolValue(WorldCfg.ArenaQueueAnnouncerEnable))
             {
                 ArenaTeam team = Global.ArenaTeamMgr.GetArenaTeamById(group.ArenaTeamId);
                 if (team != null)
-                    Global.WorldMgr.SendWorldText( CypherStrings.ArenaQueueAnnounceWorldExit, team.GetName(), group.ArenaType, group.ArenaType, group.ArenaTeamRating);
+                    Global.WorldMgr.SendWorldText( CypherStrings.ArenaQueueAnnounceWorldExit, team.GetName(), m_queueId.TeamSize, m_queueId.TeamSize, group.ArenaTeamRating);
             }
 
             // if player leaves queue and he is invited to rated arena match, then he have to lose
-            if (group.IsInvitedToBGInstanceGUID != 0 && group.IsRated && decreaseInvitedCount)
+            if (group.IsInvitedToBGInstanceGUID != 0 && m_queueId.Rated && decreaseInvitedCount)
             {
                 ArenaTeam at = Global.ArenaTeamMgr.GetArenaTeamById(group.ArenaTeamId);
                 if (at != null)
@@ -324,7 +321,7 @@ namespace Game.BattleGrounds
             // if group wasn't empty, so it wasn't deleted, and player have left a rated
             // queue . everyone from the group should leave too
             // don't remove recursively if already invited to bg!
-            if (group.IsInvitedToBGInstanceGUID == 0 && group.IsRated)
+            if (group.IsInvitedToBGInstanceGUID == 0 && m_queueId.Rated)
             {
                 // remove next player, this is recursive
                 // first send removal information
@@ -409,7 +406,7 @@ namespace Game.BattleGrounds
                     player.SetInviteForBattlegroundQueueType(bgQueueTypeId, ginfo.IsInvitedToBGInstanceGUID);
 
                     // create remind invite events
-                    BGQueueInviteEvent inviteEvent = new(player.GetGUID(), ginfo.IsInvitedToBGInstanceGUID, bgTypeId, ginfo.ArenaType, ginfo.RemoveInviteTime);
+                    BGQueueInviteEvent inviteEvent = new(player.GetGUID(), ginfo.IsInvitedToBGInstanceGUID, bgTypeId, (ArenaTypes)m_queueId.TeamSize, ginfo.RemoveInviteTime);
                     m_events.AddEvent(inviteEvent, m_events.CalculateTime(BattlegroundConst.InvitationRemindTime));
                     // create automatic remove events
                     BGQueueRemoveEvent removeEvent = new(player.GetGUID(), ginfo.IsInvitedToBGInstanceGUID, bgQueueTypeId, ginfo.RemoveInviteTime);
@@ -421,7 +418,7 @@ namespace Game.BattleGrounds
                          player.GetName(), player.GetGUID().ToString(), bg.GetInstanceID(), queueSlot, bg.GetTypeID());
 
                     BattlefieldStatusNeedConfirmation battlefieldStatus;
-                    Global.BattlegroundMgr.BuildBattlegroundStatusNeedConfirmation(out battlefieldStatus, bg, player, queueSlot, player.GetBattlegroundQueueJoinTime(bgQueueTypeId), BattlegroundConst.InviteAcceptWaitTime, ginfo.ArenaType);
+                    Global.BattlegroundMgr.BuildBattlegroundStatusNeedConfirmation(out battlefieldStatus, bg, player, queueSlot, player.GetBattlegroundQueueJoinTime(bgQueueTypeId), BattlegroundConst.InviteAcceptWaitTime, (ArenaTypes)m_queueId.TeamSize);
                     player.SendPacket(battlefieldStatus);
                 }
                 return true;
@@ -966,6 +963,8 @@ namespace Game.BattleGrounds
             }
         }
 
+        public BattlegroundQueueTypeId GetQueueId() { return m_queueId; }
+        
         BattlegroundQueueTypeId m_queueId;
 
         Dictionary<ObjectGuid, PlayerQueueInfo> m_QueuedPlayers = new();
@@ -1144,9 +1143,6 @@ namespace Game.BattleGrounds
     {
         public Dictionary<ObjectGuid, PlayerQueueInfo> Players = new();             // player queue info map
         public Team Team;                                           // Player team (ALLIANCE/HORDE)
-        public BattlegroundTypeId BgTypeId;                            // Battleground type id
-        public bool IsRated;                                        // rated
-        public ArenaTypes ArenaType;                                      // 2v2, 3v3, 5v5 or 0 when BG
         public uint ArenaTeamId;                                    // team id if rated match
         public uint JoinTime;                                       // time when group was added
         public uint RemoveInviteTime;                               // time when we will remove invite for players in group

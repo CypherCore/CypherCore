@@ -153,12 +153,12 @@ namespace Game
                     return;
 
                 BattlegroundQueue bgQueue = Global.BattlegroundMgr.GetBattlegroundQueue(bgQueueTypeId);
-                GroupQueueInfo ginfo = bgQueue.AddGroup(GetPlayer(), null, bgTypeId, bracketEntry, 0, false, isPremade, 0, 0);
+                GroupQueueInfo ginfo = bgQueue.AddGroup(GetPlayer(), null, bracketEntry, isPremade, 0, 0);
 
                 uint avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, bracketEntry.GetBracketId());
                 uint queueSlot = GetPlayer().AddBattlegroundQueueId(bgQueueTypeId);
 
-                Global.BattlegroundMgr.BuildBattlegroundStatusQueued(out BattlefieldStatusQueued battlefieldStatusQueued, bg, GetPlayer(), queueSlot, ginfo.JoinTime, bgQueueTypeId, avgTime, ginfo.ArenaType, false);
+                Global.BattlegroundMgr.BuildBattlegroundStatusQueued(out BattlefieldStatusQueued battlefieldStatusQueued, bg, GetPlayer(), queueSlot, ginfo.JoinTime, bgQueueTypeId, avgTime, 0, false);
                 SendPacket(battlefieldStatusQueued);
 
                 Log.outDebug(LogFilter.Battleground, $"Battleground: player joined queue for bg queue {bgQueueTypeId}, {_player.GetGUID()}, NAME {_player.GetName()}");
@@ -179,7 +179,7 @@ namespace Game
                 if (err == 0)
                 {
                     Log.outDebug(LogFilter.Battleground, "Battleground: the following players are joining as group:");
-                    ginfo = bgQueue.AddGroup(GetPlayer(), grp, bgTypeId, bracketEntry, 0, false, isPremade, 0, 0);
+                    ginfo = bgQueue.AddGroup(GetPlayer(), grp, bracketEntry, isPremade, 0, 0);
                     avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, bracketEntry.GetBracketId());
                 }
 
@@ -200,7 +200,7 @@ namespace Game
                     // add to queue
                     uint queueSlot = member.AddBattlegroundQueueId(bgQueueTypeId);
 
-                    Global.BattlegroundMgr.BuildBattlegroundStatusQueued(out BattlefieldStatusQueued battlefieldStatusQueued, bg, member, queueSlot, ginfo.JoinTime, bgQueueTypeId, avgTime, ginfo.ArenaType, true);
+                    Global.BattlegroundMgr.BuildBattlegroundStatusQueued(out BattlefieldStatusQueued battlefieldStatusQueued, bg, member, queueSlot, ginfo.JoinTime, bgQueueTypeId, avgTime, 0, true);
                     member.SendPacket(battlefieldStatusQueued);
                     Log.outDebug(LogFilter.Battleground, $"Battleground: player joined queue for bg queue {bgQueueTypeId}, {member.GetGUID()}, NAME {member.GetName()}");
                 }
@@ -305,7 +305,7 @@ namespace Game
                 return;
 
             //some checks if player isn't cheating - it is not exactly cheating, but we cannot allow it
-            if (battlefieldPort.AcceptedInvite && ginfo.ArenaType == 0)
+            if (battlefieldPort.AcceptedInvite && bgQueue.GetQueueId().TeamSize == 0)
             {
                 //if player is trying to enter Battleground(not arena!) and he has deserter debuff, we must just remove him from queue
                 if (!GetPlayer().CanJoinToBattleground(bg))
@@ -374,7 +374,7 @@ namespace Game
             else // leave queue
             {
                 // if player leaves rated arena match before match start, it is counted as he played but he lost
-                if (ginfo.IsRated && ginfo.IsInvitedToBGInstanceGUID != 0)
+                if (bgQueue.GetQueueId().Rated && ginfo.IsInvitedToBGInstanceGUID != 0)
                 {
                     ArenaTeam at = Global.ArenaTeamMgr.GetArenaTeamById((uint)ginfo.Team);
                     if (at != null)
@@ -391,7 +391,7 @@ namespace Game
                 GetPlayer().RemoveBattlegroundQueueId(bgQueueTypeId);  // must be called this way, because if you move this call to queue.removeplayer, it causes bugs
                 bgQueue.RemovePlayer(GetPlayer().GetGUID(), true);
                 // player left queue, we should update it - do not update Arena Queue
-                if (ginfo.ArenaType == 0)
+                if (bgQueue.GetQueueId().TeamSize == 0)
                     Global.BattlegroundMgr.ScheduleQueueUpdate(ginfo.ArenaMatchmakerRating, bgQueueTypeId, bracketEntry.GetBracketId());
 
                 Log.outDebug(LogFilter.Battleground, $"Battleground: player {_player.GetName()} ({_player.GetGUID()}) left queue for bgtype { bg.GetTypeID()}, queue {bgQueueTypeId}.");
@@ -533,7 +533,7 @@ namespace Game
             {
                 Log.outDebug(LogFilter.Battleground, "Battleground: arena team id {0}, leader {1} queued with matchmaker rating {2} for type {3}", GetPlayer().GetArenaTeamId(packet.TeamSizeIndex), GetPlayer().GetName(), matchmakerRating, arenatype);
 
-                ginfo = bgQueue.AddGroup(GetPlayer(), grp, bgTypeId, bracketEntry, arenatype, true, false, arenaRating, matchmakerRating, ateamId);
+                ginfo = bgQueue.AddGroup(GetPlayer(), grp, bracketEntry, false, arenaRating, matchmakerRating, ateamId);
                 avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, bracketEntry.GetBracketId());
             }
 
