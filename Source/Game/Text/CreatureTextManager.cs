@@ -237,7 +237,7 @@ namespace Game
             return textEntry.duration;
         }
 
-        float GetRangeForChatType(ChatMsg msgType)
+        public float GetRangeForChatType(ChatMsg msgType)
         {
             float dist = WorldConfig.GetFloatValue(WorldCfg.ListenRangeSay);
             switch (msgType)

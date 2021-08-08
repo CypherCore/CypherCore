@@ -241,9 +241,8 @@ namespace Game.DataStorage
 
             foreach (ContentTuningXExpectedRecord contentTuningXExpectedStat in ContentTuningXExpectedStorage.Values)
             {
-                ExpectedStatModRecord expectedStatMod = ExpectedStatModStorage.LookupByKey(contentTuningXExpectedStat.ExpectedStatModID);
-                if (expectedStatMod != null)
-                    _expectedStatModsByContentTuning.Add(contentTuningXExpectedStat.ContentTuningID, expectedStatMod);
+                if (ExpectedStatModStorage.ContainsKey(contentTuningXExpectedStat.ExpectedStatModID))
+                    _expectedStatModsByContentTuning.Add(contentTuningXExpectedStat.ContentTuningID, contentTuningXExpectedStat);
             }
 
             foreach (CurvePointRecord curvePoint in CurvePointStorage.Values)
@@ -1214,6 +1213,49 @@ namespace Game.DataStorage
             return null;
         }
 
+        float ExpectedStatModReducer(float mod, ContentTuningXExpectedRecord contentTuningXExpected, ExpectedStatType stat)
+        {
+            if (contentTuningXExpected == null)
+                return mod;
+
+            //if (contentTuningXExpected->MinMythicPlusSeasonID)
+            //    if (MythicPlusSeasonEntry const* mythicPlusSeason = sMythicPlusSeasonStore.LookupEntry(contentTuningXExpected->MinMythicPlusSeasonID))
+            //        if (MythicPlusSubSeason < mythicPlusSeason->SubSeason)
+            //            return mod;
+
+            //if (contentTuningXExpected->MaxMythicPlusSeasonID)
+            //    if (MythicPlusSeasonEntry const* mythicPlusSeason = sMythicPlusSeasonStore.LookupEntry(contentTuningXExpected->MaxMythicPlusSeasonID))
+            //        if (MythicPlusSubSeason >= mythicPlusSeason->SubSeason)
+            //            return mod;
+
+            var expectedStatMod = ExpectedStatModStorage.LookupByKey(contentTuningXExpected.ExpectedStatModID);
+            switch (stat)
+            {
+                case ExpectedStatType.CreatureHealth:
+                    return mod * expectedStatMod.CreatureHealthMod;
+                case ExpectedStatType.PlayerHealth:
+                    return mod * expectedStatMod.PlayerHealthMod;
+                case ExpectedStatType.CreatureAutoAttackDps:
+                    return mod * expectedStatMod.CreatureAutoAttackDPSMod;
+                case ExpectedStatType.CreatureArmor:
+                    return mod * expectedStatMod.CreatureArmorMod;
+                case ExpectedStatType.PlayerMana:
+                    return mod * expectedStatMod.PlayerManaMod;
+                case ExpectedStatType.PlayerPrimaryStat:
+                    return mod * expectedStatMod.PlayerPrimaryStatMod;
+                case ExpectedStatType.PlayerSecondaryStat:
+                    return mod * expectedStatMod.PlayerSecondaryStatMod;
+                case ExpectedStatType.ArmorConstant:
+                    return mod * expectedStatMod.ArmorConstantMod;
+                case ExpectedStatType.CreatureSpellDamage:
+                    return mod * expectedStatMod.CreatureSpellDamageMod;
+            }
+
+            return mod;
+
+            // int32 MythicPlusSubSeason = 0;
+        }
+        
         public float EvaluateExpectedStat(ExpectedStatType stat, uint level, int expansion, uint contentTuningId, Class unitClass)
         {
             var expectedStatRecord = _expectedStatsByLevel.LookupByKey(Tuple.Create(level, expansion));
@@ -1241,63 +1283,63 @@ namespace Game.DataStorage
                     break;
             }
 
-            List<ExpectedStatModRecord> contentTuningMods = _expectedStatModsByContentTuning.LookupByKey(contentTuningId);
+            List<ContentTuningXExpectedRecord> contentTuningMods = _expectedStatModsByContentTuning.LookupByKey(contentTuningId);
             float value = 0.0f;
             switch (stat)
             {
                 case ExpectedStatType.CreatureHealth:
                     value = expectedStatRecord.CreatureHealth;
                     if (!contentTuningMods.Empty())
-                        value *= contentTuningMods.Sum(expectedStatMod => expectedStatMod != null ? expectedStatMod.CreatureHealthMod : 1.0f);
+                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat));
                     if (classMod != null)
                         value *= classMod.CreatureHealthMod;
                     break;
                 case ExpectedStatType.PlayerHealth:
                     value = expectedStatRecord.PlayerHealth;
                     if (!contentTuningMods.Empty())
-                        value *= contentTuningMods.Sum(expectedStatMod => expectedStatMod != null ? expectedStatMod.PlayerHealthMod : 1.0f);
+                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat));
                     if (classMod != null)
                         value *= classMod.PlayerHealthMod;
                     break;
                 case ExpectedStatType.CreatureAutoAttackDps:
                     value = expectedStatRecord.CreatureAutoAttackDps;
                     if (!contentTuningMods.Empty())
-                        value *= contentTuningMods.Sum(expectedStatMod => expectedStatMod != null ? expectedStatMod.CreatureAutoAttackDPSMod : 1.0f);
+                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat));
                     if (classMod != null)
                         value *= classMod.CreatureAutoAttackDPSMod;
                     break;
                 case ExpectedStatType.CreatureArmor:
                     value = expectedStatRecord.CreatureArmor;
                     if (!contentTuningMods.Empty())
-                        value *= contentTuningMods.Sum(expectedStatMod => expectedStatMod != null ? expectedStatMod.CreatureArmorMod : 1.0f);
+                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat));
                     if (classMod != null)
                         value *= classMod.CreatureArmorMod;
                     break;
                 case ExpectedStatType.PlayerMana:
                     value = expectedStatRecord.PlayerMana;
                     if (!contentTuningMods.Empty())
-                        value *= contentTuningMods.Sum(expectedStatMod => expectedStatMod != null ? expectedStatMod.PlayerManaMod : 1.0f);
+                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat));
                     if (classMod != null)
                         value *= classMod.PlayerManaMod;
                     break;
                 case ExpectedStatType.PlayerPrimaryStat:
                     value = expectedStatRecord.PlayerPrimaryStat;
                     if (!contentTuningMods.Empty())
-                        value *= contentTuningMods.Sum(expectedStatMod => expectedStatMod != null ? expectedStatMod.PlayerPrimaryStatMod : 1.0f);
+                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat));
                     if (classMod != null)
                         value *= classMod.PlayerPrimaryStatMod;
                     break;
                 case ExpectedStatType.PlayerSecondaryStat:
                     value = expectedStatRecord.PlayerSecondaryStat;
                     if (!contentTuningMods.Empty())
-                        value *= contentTuningMods.Sum(expectedStatMod => expectedStatMod != null ? expectedStatMod.PlayerSecondaryStatMod : 1.0f);
+                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat));
                     if (classMod != null)
                         value *= classMod.PlayerSecondaryStatMod;
                     break;
                 case ExpectedStatType.ArmorConstant:
                     value = expectedStatRecord.ArmorConstant;
                     if (!contentTuningMods.Empty())
-                        value *= contentTuningMods.Sum(expectedStatMod => expectedStatMod != null ? expectedStatMod.ArmorConstantMod : 1.0f);
+                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat));
                     if (classMod != null)
                         value *= classMod.ArmorConstantMod;
                     break;
@@ -1306,7 +1348,7 @@ namespace Game.DataStorage
                 case ExpectedStatType.CreatureSpellDamage:
                     value = expectedStatRecord.CreatureSpellDamage;
                     if (!contentTuningMods.Empty())
-                        value *= contentTuningMods.Sum(expectedStatMod => expectedStatMod != null ? expectedStatMod.CreatureSpellDamageMod : 1.0f);
+                        value *= contentTuningMods.Sum(expectedStatMod => ExpectedStatModReducer(1.0f, expectedStatMod, stat));
                     if (classMod != null)
                         value *= classMod.CreatureSpellDamageMod;
                     break;
@@ -2275,7 +2317,7 @@ namespace Game.DataStorage
         MultiMap<uint, CurvePointRecord> _curvePoints = new();
         Dictionary<Tuple<uint, byte, byte, byte>, EmotesTextSoundRecord> _emoteTextSounds = new();
         Dictionary<Tuple<uint, int>, ExpectedStatRecord> _expectedStatsByLevel = new();
-        MultiMap<uint, ExpectedStatModRecord> _expectedStatModsByContentTuning = new();
+        MultiMap<uint, ContentTuningXExpectedRecord> _expectedStatModsByContentTuning = new();
         MultiMap<uint, uint> _factionTeams = new();
         MultiMap<uint, FriendshipRepReactionRecord> _friendshipRepReactions = new();
         Dictionary<uint, HeirloomRecord> _heirlooms = new();

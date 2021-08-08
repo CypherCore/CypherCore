@@ -59,9 +59,9 @@ namespace Game.DataStorage
 
     public sealed class GarrAbilityRecord
     {
+        public uint Id;
         public string Name;
         public string Description;
-        public uint Id;
         public byte GarrAbilityCategoryID;
         public byte GarrFollowerTypeID;
         public int IconFileDataID;
@@ -109,10 +109,10 @@ namespace Game.DataStorage
 
     public sealed class GarrClassSpecRecord
     {
+        public uint Id;
         public string ClassSpec;
         public string ClassSpecMale;
         public string ClassSpecFemale;
-        public uint Id;
         public ushort UiTextureAtlasMemberID;
         public ushort GarrFollItemSetID;
         public byte FollowerClassLimit;
@@ -121,10 +121,10 @@ namespace Game.DataStorage
 
     public sealed class GarrFollowerRecord
     {
+        public uint Id;
         public string HordeSourceText;
         public string AllianceSourceText;
         public string TitleName;
-        public uint Id;
         public byte GarrTypeID;
         public byte GarrFollowerTypeID;
         public int HordeCreatureID;

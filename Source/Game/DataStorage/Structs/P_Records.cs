@@ -42,9 +42,9 @@ namespace Game.DataStorage
 
     public sealed class PlayerConditionRecord
     {
+        public uint Id;
         public long RaceMask;
         public string FailureDescription;
-        public uint Id;
         public int ClassMask;
         public uint SkillLogic;
         public int LanguageID;

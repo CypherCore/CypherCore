@@ -41,10 +41,11 @@ namespace Game.DataStorage
 
     public sealed class CharacterLoadoutRecord
     {
-        public long RaceMask;
         public uint Id;
+        public long RaceMask;
         public sbyte ChrClassID;
         public sbyte Purpose;
+        public sbyte Unused910;
 
         public bool IsForNewCharacter() { return Purpose == 9; }
     }
@@ -58,9 +59,9 @@ namespace Game.DataStorage
 
     public sealed class ChatChannelsRecord
     {
-        public LocalizedString Name;
-        public string Shortcut; 
         public uint Id;
+        public LocalizedString Name;
+        public string Shortcut;
         public ChannelDBCFlags Flags;
         public sbyte FactionGroup;
         public int Ruleset;
@@ -131,10 +132,9 @@ namespace Game.DataStorage
         public uint ChrCustomizationOptionID;
         public uint ChrCustomizationReqID;
         public ushort SortOrder;
-        public int SwatchColor1;
-        public int SwatchColor2;
         public ushort UiOrderIndex;
         public int Flags;
+        public int[] SwatchColor = new int[2];
     }
 
     public sealed class ChrCustomizationDisplayInfoRecord
@@ -212,6 +212,7 @@ namespace Game.DataStorage
         public float CustomizeFacing;
         public float CameraDistanceOffset;
         public float BarberShopCameraOffsetScale;
+        public float BarberShopCameraHeightOffsetScale; // applied after BarberShopCameraOffsetScale
         public float BarberShopCameraRotationOffset;
     }
 
@@ -221,9 +222,10 @@ namespace Game.DataStorage
         public int ChrRacesID;
         public int ChrModelID;
     }
-    
+
     public sealed class ChrRacesRecord
     {
+        public uint Id;
         public string ClientPrefix;
         public string ClientFileString;
         public LocalizedString Name;
@@ -239,44 +241,45 @@ namespace Game.DataStorage
         public string NameFemaleL;
         public string NameLowercaseL;
         public string NameFemaleLowercaseL;
-        public uint Id;
         public int Flags;
-        public int BaseLanguage;
+        public int FactionID;
+        public uint CinematicSequenceID;
         public int ResSicknessSpellID;
         public int SplashSoundID;
+        public int Alliance;
+        public int RaceRelated;
+        public int UnalteredVisualRaceID;
+        public int DefaultClassID;
         public int CreateScreenFileDataID;
         public int SelectScreenFileDataID;
+        public int NeutralRaceID;
         public int LowResScreenFileDataID;
-        public uint[] AlteredFormStartVisualKitID = new uint[3];
-        public uint[] AlteredFormFinishVisualKitID = new uint[3];
+        public int[] AlteredFormStartVisualKitID = new int[3];
+        public int[] AlteredFormFinishVisualKitID = new int[3];
         public int HeritageArmorAchievementID;
         public int StartingLevel;
         public int UiDisplayOrder;
+        public int MaleModelFallbackRaceID;
+        public int FemaleModelFallbackRaceID;
+        public int MaleTextureFallbackRaceID;
+        public int FemaleTextureFallbackRaceID;
         public int PlayableRaceBit;
         public int HelmetAnimScalingRaceID;
         public int TransmogrifyDisabledSlotMask;
+        public int UnalteredVisualCustomizationRaceID;
         public float[] AlteredFormCustomizeOffsetFallback = new float[3];
         public float AlteredFormCustomizeRotationFallback;
-        public ushort FactionID;
-        public ushort CinematicSequenceID;
+        public float[] Unknown910_1 = new float[3];
+        public float[] Unknown910_2 = new float[3];
+        public sbyte BaseLanguage;
         public sbyte CreatureType;
-        public sbyte Alliance;
-        public sbyte RaceRelated;
-        public sbyte UnalteredVisualRaceID;
-        public sbyte DefaultClassID;
-        public sbyte NeutralRaceID;
-        public sbyte MaleModelFallbackRaceID;
         public sbyte MaleModelFallbackSex;
-        public sbyte FemaleModelFallbackRaceID;
         public sbyte FemaleModelFallbackSex;
-        public sbyte MaleTextureFallbackRaceID;
         public sbyte MaleTextureFallbackSex;
-        public sbyte FemaleTextureFallbackRaceID;
         public sbyte FemaleTextureFallbackSex;
-        public sbyte UnalteredVisualCustomizationRaceID;
 
         public ChrRacesFlag GetFlags() { return (ChrRacesFlag)Flags; }
-}
+    }
 
     public sealed class ChrSpecializationRecord
     {
@@ -350,7 +353,8 @@ namespace Game.DataStorage
     {
         public uint Id;
         public int ExpectedStatModID;
-        public int MythicPlusSeasonID;
+        public int MinMythicPlusSeasonID;
+        public int MaxMythicPlusSeasonID;
         public uint ContentTuningID;
     }
 

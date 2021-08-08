@@ -21,10 +21,10 @@ namespace Game.DataStorage
 {
     public sealed class FactionRecord
     {
+        public uint Id;
         public long[] ReputationRaceMask = new long[4];
         public LocalizedString Name;
         public string Description;
-        public uint Id;
         public short ReputationIndex;
         public ushort ParentFactionID;
         public byte Expansion;

@@ -307,7 +307,7 @@ namespace Game.Entities
         public HolidayIds GetHolidayID() { return (HolidayIds)ExtendedData.RequiredHoliday; }
         public float GetDmgVariance() { return ExtendedData.DmgVariance; }
         public byte GetArtifactID() { return ExtendedData.ArtifactID; }
-        public byte GetRequiredExpansion() { return ExtendedData.ExpansionID; }
+        public byte GetRequiredExpansion() { return (byte)ExtendedData.ExpansionID; }
 
         public bool IsCurrencyToken() { return (GetBagFamily() & BagFamilyMask.CurrencyTokens) != 0; }
 

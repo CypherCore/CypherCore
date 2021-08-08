@@ -289,6 +289,7 @@ namespace Game.DataStorage
         public float ResourceCoefficient;
         public float GroupSizeBasePointsCoefficient;
         public float EffectBasePoints;
+        public int ScalingClass;
         public int[] EffectMiscValue = new int[2];
         public uint[] EffectRadiusIndex = new uint[2];
         public FlagArray128 EffectSpellClassMask;
@@ -323,9 +324,9 @@ namespace Game.DataStorage
 
     public sealed class SpellItemEnchantmentRecord
     {
+        public uint Id;
         public string Name;
         public string HordeName;
-        public uint Id;
         public uint[] EffectArg = new uint[ItemConst.MaxItemEnchantmentEffects];
         public float[] EffectScalingPoints = new float[ItemConst.MaxItemEnchantmentEffects];
         public uint IconFileDataID;
@@ -485,7 +486,6 @@ namespace Game.DataStorage
     {
         public uint Id;
         public uint SpellID;
-        public int Class;
         public uint MinScalingLevel;
         public uint MaxScalingLevel;
         public ushort ScalesFromItemLevel;
@@ -552,7 +552,7 @@ namespace Game.DataStorage
         public byte DifficultyID;
         public uint SpellVisualID;
         public float Probability;
-        public byte Priority;
+        public int Priority;
         public int SpellIconFileID;
         public int ActiveIconFileID;
         public ushort ViewerUnitConditionID;

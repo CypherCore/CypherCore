@@ -2369,6 +2369,8 @@ namespace Framework.Constants
         LearnSoulbindConduit = 281,
         ConvertItemsToCurrency = 282,
         CompleteCampaign = 283, // Flags all quests as completed that are assigned to campaign (MiscValueA)
+        SendChatMessage = 284, // MiscValue[0] = BroadcastTextID, MiscValue[1] = ChatType
+        ModifyKeystone2 = 285,
         TotalSpellEffects
     }
 

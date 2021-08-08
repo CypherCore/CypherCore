@@ -593,6 +593,11 @@ namespace Game.Entities
                         return true;
                     return false;
                 });
+
+                TakenTotalMod *= GetTotalAuraMultiplier(AuraType.ModHealingTakenFromCaster, aurEff =>
+                {
+                    return aurEff.GetCasterGUID() == caster.GetGUID();
+                });
             }
 
             float heal = healamount * TakenTotalMod;

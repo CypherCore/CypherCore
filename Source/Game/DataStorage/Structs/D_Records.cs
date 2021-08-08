@@ -74,7 +74,7 @@ namespace Game.DataStorage
         public int CompleteWorldStateID;
         public sbyte Bit;
         public int CreatureDisplayID;
-        public byte Flags;
+        public int Flags;
         public int SpellIconFileID;
         public int Faction;
     }

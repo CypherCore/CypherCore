@@ -4549,13 +4549,15 @@ namespace Game
             }
 
             // Load item effects (spells)
-            foreach (var effectEntry in CliDB.ItemEffectStorage.Values)
+            foreach (var effectEntry in CliDB.ItemXItemEffectStorage.Values)
             {
-                var itemTemplate = ItemTemplateStorage.LookupByKey(effectEntry.ParentItemID);
-                if (itemTemplate == null)
-                    continue;
-
-                itemTemplate.Effects.Add(effectEntry);
+                var item = ItemTemplateStorage.LookupByKey(effectEntry.ItemID);
+                if (item != null)
+                {
+                    var effect = CliDB.ItemEffectStorage.LookupByKey(effectEntry.ItemEffectID);
+                    if (effect != null)
+                        item.Effects.Add(effect);
+                }
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} item templates in {1} ms", sparseCount, Time.GetMSTimeDiffToNow(oldMSTime));

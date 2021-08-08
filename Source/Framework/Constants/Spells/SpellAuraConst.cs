@@ -525,6 +525,8 @@ namespace Framework.Constants
         ModCriticalDamageTakenFromCaster = 501,
         ModVersatilityDamageDoneBenefit = 502, // NYI
         ModVersatilityHealingDoneBenefit = 503, // NYI
+        ModHealingTakenFromCaster = 504,
+        ModPlayerChoiceRerolls = 505, // NYI
         Total
     }
 

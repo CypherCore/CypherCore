@@ -701,7 +701,7 @@ namespace Framework.Constants
         // 227 - 0 Criterias
         ApplyConduit = 228,
         ConvertItemsToCurrency = 229,
-        TotalTypes = 230
+        TotalTypes = 232
     }
 
     public enum CriteriaDataType

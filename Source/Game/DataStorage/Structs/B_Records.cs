@@ -34,9 +34,9 @@ namespace Game.DataStorage
 
     public sealed class BarberShopStyleRecord
     {
+        public uint Id;
         public string DisplayName;
         public string Description;
-        public uint Id;
         public byte Type;                                                     // value 0 . hair, value 2 . facialhair
         public float CostModifier;
         public byte Race;
@@ -48,7 +48,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public float StateMultiplier;
-        public byte QualityEnum;
+        public sbyte QualityEnum;
     }
 
     public sealed class BattlePetBreedStateRecord
@@ -67,7 +67,7 @@ namespace Game.DataStorage
         public uint CreatureID;
         public uint SummonSpellID;
         public int IconFileDataID;
-        public byte PetTypeEnum;
+        public sbyte PetTypeEnum;
         public ushort Flags;
         public sbyte SourceTypeEnum;
         public int CardUIModelSceneID;

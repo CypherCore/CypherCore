@@ -205,7 +205,6 @@ namespace Game.DataStorage
         public ushort SpellCategoryID;
         public int SpellID;
         public ushort ChrSpecializationID;
-        public uint ParentItemID;
     }
 
     public sealed class ItemExtendedCostRecord
@@ -299,11 +298,11 @@ namespace Game.DataStorage
 
     public sealed class ItemSearchNameRecord
     {
+        public uint Id;
         public long AllowableRace;
         public string Display;
-        public uint Id;
         public byte OverallQualityID;
-        public byte ExpansionID;
+        public int ExpansionID;
         public ushort MinFactionID;
         public byte MinReputation;
         public int AllowableClass;
@@ -343,7 +342,9 @@ namespace Game.DataStorage
         public string Display2;
         public string Display1;
         public LocalizedString Display;
+        public int ExpansionID;
         public float DmgVariance;
+        public uint InstanceBound;
         public uint DurationInInventory;
         public float QualityModifier;
         public uint BagFamily;
@@ -370,7 +371,6 @@ namespace Game.DataStorage
         public ushort GemProperties;
         public ushort SocketMatchEnchantmentId;
         public ushort TotemCategoryID;
-        public ushort InstanceBound;
         public ushort[] ZoneBound = new ushort[2];
         public ushort ItemSet;
         public ushort LockID;
@@ -382,7 +382,6 @@ namespace Game.DataStorage
         public ushort RequiredSkill;
         public ushort ItemLevel;
         public short AllowableClass;
-        public byte ExpansionID;
         public byte ArtifactID;
         public byte SpellWeight;
         public byte SpellWeightCategory;
@@ -425,6 +424,13 @@ namespace Game.DataStorage
     {
         public uint Id;
         public ushort ItemBonusTreeID;
+        public uint ItemID;
+    }
+
+    public sealed class ItemXItemEffectRecord
+    {
+        public uint Id;
+        public int ItemEffectID;
         public uint ItemID;
     }
 }

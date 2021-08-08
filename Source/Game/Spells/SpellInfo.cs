@@ -83,7 +83,6 @@ namespace Game.Spells
             SpellScalingRecord _scaling = data.Scaling;
             if (_scaling != null)
             {
-                Scaling._Class = _scaling.Class;
                 Scaling.MinScalingLevel = _scaling.MinScalingLevel;
                 Scaling.MaxScalingLevel = _scaling.MaxScalingLevel;
                 Scaling.ScalesFromItemLevel = _scaling.ScalesFromItemLevel;
@@ -3750,7 +3749,6 @@ namespace Game.Spells
 
         public struct ScalingInfo
         {
-            public int _Class { get; set; }
             public uint MinScalingLevel;
             public uint MaxScalingLevel;
             public uint ScalesFromItemLevel;
@@ -3785,6 +3783,7 @@ namespace Game.Spells
             TriggerSpell = effect.EffectTriggerSpell;
             SpellClassMask = effect.EffectSpellClassMask;
             BonusCoefficientFromAP = effect.BonusCoefficientFromAP;
+            Scaling.Class = effect.ScalingClass;
             Scaling.Coefficient = effect.Coefficient;
             Scaling.Variance = effect.Variance;
             Scaling.ResourceCoefficient = effect.ResourceCoefficient;
@@ -3933,7 +3932,7 @@ namespace Game.Spells
                 float tempValue = 0.0f;
                 if (level > 0)
                 {
-                    if (_spellInfo.Scaling._Class == 0)
+                    if (Scaling.Class == 0)
                         return 0;
 
                     uint effectiveItemLevel = itemLevel != -1 ? (uint)itemLevel : 1u;
@@ -3942,21 +3941,21 @@ namespace Game.Spells
                         if (_spellInfo.Scaling.ScalesFromItemLevel != 0)
                             effectiveItemLevel = _spellInfo.Scaling.ScalesFromItemLevel;
 
-                        if (_spellInfo.Scaling._Class == -8 || _spellInfo.Scaling._Class == -9)
+                        if (Scaling.Class == -8 || Scaling.Class == -9)
                         {
                             RandPropPointsRecord randPropPoints = CliDB.RandPropPointsStorage.LookupByKey(effectiveItemLevel);
                             if (randPropPoints == null)
                                 randPropPoints = CliDB.RandPropPointsStorage.LookupByKey(CliDB.RandPropPointsStorage.Count - 1);
 
-                            tempValue = _spellInfo.Scaling._Class == -8 ? randPropPoints.DamageReplaceStatF : randPropPoints.DamageSecondaryF;
+                            tempValue = Scaling.Class == -8 ? randPropPoints.DamageReplaceStatF : randPropPoints.DamageSecondaryF;
                         }
                         else
                             tempValue = ItemEnchantmentManager.GetRandomPropertyPoints(effectiveItemLevel, ItemQuality.Rare, InventoryType.Chest, 0);
                     }
                     else
-                        tempValue = CliDB.GetSpellScalingColumnForClass(CliDB.SpellScalingGameTable.GetRow(level), _spellInfo.Scaling._Class);
+                        tempValue = CliDB.GetSpellScalingColumnForClass(CliDB.SpellScalingGameTable.GetRow(level), Scaling.Class);
 
-                    if (_spellInfo.Scaling._Class == -7)
+                    if (Scaling.Class == -7)
                     {
                         GtGenericMultByILvlRecord ratingMult = CliDB.CombatRatingsMultByILvlGameTable.GetRow(effectiveItemLevel);
                         if (ratingMult != null)
@@ -4503,6 +4502,8 @@ namespace Game.Spells
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 281 SPELL_EFFECT_LEARN_SOULBIND_CONDUIT
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 282 SPELL_EFFECT_CONVERT_ITEMS_TO_CURRENCY
             new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 283 SPELL_EFFECT_COMPLETE_CAMPAIGN
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 284 SPELL_EFFECT_SEND_CHAT_MESSAGE
+            new StaticData(SpellEffectImplicitTargetTypes.Explicit, SpellTargetObjectTypes.Unit), // 285 SPELL_EFFECT_MODIFY_KEYSTONE_2
         };
 
         #region Fields
@@ -4540,6 +4541,7 @@ namespace Game.Spells
 
         public struct ScalingInfo
         {
+            public int Class;
             public float Coefficient;
             public float Variance;
             public float ResourceCoefficient;

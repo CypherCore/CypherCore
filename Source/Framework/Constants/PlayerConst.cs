@@ -45,7 +45,7 @@ namespace Framework.Constants
         public const uint infinityCooldownDelayCheck = Time.Month / 2;
         public const int MaxPlayerSummonDelay = 2 * Time.Minute;
 
-        public const int TaxiMaskSize = 337;
+        public const int TaxiMaskSize = 338;
 
         // corpse reclaim times
         public const int DeathExpireStep = (5 * Time.Minute);

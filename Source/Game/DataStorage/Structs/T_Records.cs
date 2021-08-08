@@ -131,8 +131,8 @@ namespace Game.DataStorage
 
     public sealed class TransmogSetGroupRecord
     {
-        public string Name;
         public uint Id;
+        public string Name;
     }
 
     public sealed class TransmogSetItemRecord

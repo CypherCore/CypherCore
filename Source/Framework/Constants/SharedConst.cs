@@ -49,7 +49,7 @@ namespace Framework.Constants
         /// <summary>
         /// BattlePets Const
         /// </summary>
-        public const int MaxBattlePetSpeciesId = 3084;
+        public const int MaxBattlePetSpeciesId = 3159;
         public const int MaxPetBattleSlots = 3;
         public const int MaxBattlePetsPerSpecies = 3;
         public const int BattlePetCageItemId = 82800;

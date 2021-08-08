@@ -205,6 +205,7 @@ namespace Game.DataStorage
             ItemSpecStorage = ReadDB2<ItemSpecRecord>("ItemSpec.db2", HotfixStatements.SEL_ITEM_SPEC);
             ItemSpecOverrideStorage = ReadDB2<ItemSpecOverrideRecord>("ItemSpecOverride.db2", HotfixStatements.SEL_ITEM_SPEC_OVERRIDE);
             ItemXBonusTreeStorage = ReadDB2<ItemXBonusTreeRecord>("ItemXBonusTree.db2", HotfixStatements.SEL_ITEM_X_BONUS_TREE);
+            ItemXItemEffectStorage = ReadDB2<ItemXItemEffectRecord>("ItemXItemEffect.db2", HotfixStatements.SEL_ITEM_X_ITEM_EFFECT);
             //KeyChainStorage = ReadDB2<KeyChainRecord>("KeyChain.db2", HotfixStatements.SEL_KEYCHAIN);
             LanguageWordsStorage = ReadDB2<LanguageWordsRecord>("LanguageWords.db2", HotfixStatements.SEL_LANGUAGE_WORDS);
             LanguagesStorage = ReadDB2<LanguagesRecord>("Languages.db2", HotfixStatements.SEL_LANGUAGES, HotfixStatements.SEL_LANGUAGES_LOCALE);
@@ -576,6 +577,7 @@ namespace Game.DataStorage
         public static DB6Storage<ItemSpecRecord> ItemSpecStorage;
         public static DB6Storage<ItemSpecOverrideRecord> ItemSpecOverrideStorage;
         public static DB6Storage<ItemXBonusTreeRecord> ItemXBonusTreeStorage;
+        public static DB6Storage<ItemXItemEffectRecord> ItemXItemEffectStorage;
         //public static DB6Storage<KeyChainRecord> KeyChainStorage;
         public static DB6Storage<LanguageWordsRecord> LanguageWordsStorage;
         public static DB6Storage<LanguagesRecord> LanguagesStorage;

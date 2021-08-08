@@ -30,7 +30,6 @@ namespace Game.DataStorage
         public uint Id;
         public string Directory;
         public LocalizedString MapName;
-        public string InternalName;
         public string MapDescription0;                               // Horde
         public string MapDescription1;                               // Alliance
         public string PvpShortDescription;
@@ -134,7 +133,7 @@ namespace Game.DataStorage
         public uint Type;
         public uint Asset;
         public int SecondaryAsset;
-        public sbyte TertiaryAsset;
+        public int TertiaryAsset;
     }
 
     public sealed class MountRecord

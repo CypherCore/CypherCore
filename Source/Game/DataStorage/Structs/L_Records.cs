@@ -29,8 +29,8 @@ namespace Game.DataStorage
 
     public sealed class LanguagesRecord
     {
-        public LocalizedString Name;
         public uint Id;
+        public LocalizedString Name;
     }
 
     public sealed class LFGDungeonsRecord

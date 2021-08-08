@@ -5689,6 +5689,20 @@ namespace Game.Spells
 
             Conversation.CreateConversation((uint)effectInfo.MiscValue, GetCaster(), unitTarget.GetPosition(), new List<ObjectGuid>() { unitTarget.GetGUID() }, GetSpellInfo());
         }
+
+        [SpellEffectHandler(SpellEffectName.SendChatMessage)]
+        void EffectSendChatMessage(uint effIndex)
+        {
+            if (effectHandleMode != SpellEffectHandleMode.Hit)
+                return;
+
+            uint broadcastTextId = (uint)effectInfo.MiscValue;
+            if (!CliDB.BroadcastTextStorage.ContainsKey(broadcastTextId))
+                return;
+
+            ChatMsg chatType = (ChatMsg)effectInfo.MiscValueB;
+            unitTarget.Talk(broadcastTextId, chatType, Global.CreatureTextMgr.GetRangeForChatType(chatType), unitTarget);
+        }
     }
 
     public class DispelableAura
