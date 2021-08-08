@@ -3797,11 +3797,15 @@ namespace Game.Entities
             if (MathFunctions.fuzzyLe(armor, 0.0f))
                 return damage;
 
+            Class attackerClass = Class.Warrior;
             if (attacker != null)
+            {
                 attackerLevel = attacker.GetLevelForTarget(victim);
+                attackerClass = attacker.GetClass();
+            }
 
             // Expansion and ContentTuningID necessary? Does Player get a ContentTuningID too ?
-            float armorConstant = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.ArmorConstant, attackerLevel, -2, 0, attacker.GetClass());
+            float armorConstant = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.ArmorConstant, attackerLevel, -2, 0, attackerClass);
             if ((armor + armorConstant) == 0)
                 return damage;
 
