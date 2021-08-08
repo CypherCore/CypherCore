@@ -63,7 +63,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(TableHash);
             _worldPacket.WriteUInt32(RecordID);
             _worldPacket.WriteUInt32(Timestamp);
-            _worldPacket.WriteBits((byte)Status, 2);
+            _worldPacket.WriteBits((byte)Status, 3);
             _worldPacket.WriteUInt32(Data.GetSize());
             _worldPacket.WriteBytes(Data.GetData());
         }
@@ -140,7 +140,7 @@ namespace Game.Networking.Packets
             {
                 Record.Write(data);
                 data.WriteUInt32(Size);
-                data.WriteBits((byte)Record.HotfixStatus, 2);
+                data.WriteBits((byte)Record.HotfixStatus, 3);
                 data.FlushBits();
             }
 

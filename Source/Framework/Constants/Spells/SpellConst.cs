@@ -762,7 +762,8 @@ namespace Framework.Constants
         OptionalReagents = 307,
         SpectatorOrCommentator = 308,
         SoulbindConduitLearnFailedInvalidCovenant = 309,
-        Unknown = 310,
+        ShadowlandsRidingRequirement = 310,
+        Unknown = 311,
 
         // Ok Cast Value - Here In Case A Future Version Removes Success And We Need To Use A Custom Value (Not Sent To Client Either Way)
         SpellCastOk = Success

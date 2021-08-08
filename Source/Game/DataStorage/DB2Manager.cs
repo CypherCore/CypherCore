@@ -2553,9 +2553,11 @@ namespace Game.DataStorage
 
         public enum Status
         {
-            Valid           = 1,
-            RecordRemoved   = 2,
-            Invalid         = 3
+            NotSet = 0,
+            Valid = 1,
+            RecordRemoved = 2,
+            Invalid = 3,
+            NotPublic = 4
         }
     }
 
