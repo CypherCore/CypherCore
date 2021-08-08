@@ -5701,7 +5701,7 @@ namespace Game.Spells
                 return;
 
             ChatMsg chatType = (ChatMsg)effectInfo.MiscValueB;
-            unitTarget.Talk(broadcastTextId, chatType, Global.CreatureTextMgr.GetRangeForChatType(chatType), unitTarget);
+            m_caster.Talk(broadcastTextId, chatType, Global.CreatureTextMgr.GetRangeForChatType(chatType), unitTarget);
         }
     }
 
