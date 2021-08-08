@@ -556,6 +556,18 @@ namespace Game.Networking.Packets
         }
     }
 
+    struct GarrisonSpecGroup
+    {
+        public int ChrSpecializationID;
+        public int SoulbindID;
+
+        public void Write(WorldPacket data)
+        {
+            data.WriteInt32(ChrSpecializationID);
+            data.WriteInt32(SoulbindID);
+        }
+    }
+
     class GarrisonInfo
     {
         public void Write(WorldPacket data)
@@ -574,6 +586,7 @@ namespace Game.Networking.Packets
             data.WriteInt32(Talents.Count);
             data.WriteInt32(Collections.Count);
             data.WriteInt32(EventLists.Count);
+            data.WriteInt32(SpecGroups.Count);
             data.WriteInt32(CanStartMission.Count);
             data.WriteInt32(ArchivedMissions.Count);
             data.WriteUInt32(NumFollowerActivationsRemaining);
@@ -600,6 +613,9 @@ namespace Game.Networking.Packets
 
             foreach (GarrisonEventList eventList in EventLists)
                 eventList.Write(data);
+
+            foreach (var specGroup in SpecGroups)
+                specGroup.Write(data);
 
             foreach (var id in ArchivedMissions)
                 data.WriteInt32(id);
@@ -647,6 +663,7 @@ namespace Game.Networking.Packets
         public List<GarrisonTalent> Talents = new();
         public List<GarrisonCollection> Collections = new();
         public List<GarrisonEventList> EventLists = new();
+        public List<GarrisonSpecGroup> SpecGroups = new();
         public List<bool> CanStartMission = new();
         public List<int> ArchivedMissions = new();
     }

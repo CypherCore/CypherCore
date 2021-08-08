@@ -658,7 +658,7 @@ namespace Game.Chat
                 return;
             }
 
-            SendToAll(new ChannelSayBuilder(this, lang, what, guid), !playerInfo.IsModerator() ? guid : ObjectGuid.Empty);
+            SendToAll(new ChannelSayBuilder(this, lang, what, guid, _channelGuid), !playerInfo.IsModerator() ? guid : ObjectGuid.Empty);
         }
 
         public void AddonSay(ObjectGuid guid, string prefix, string what, bool isLogged)
@@ -883,9 +883,10 @@ namespace Game.Chat
         }
 
         public uint GetChannelId() { return _channelId; }
-        public ObjectGuid GetChannelGuid() { return _channelGuid; }
         public bool IsConstant() { return _channelId != 0; }
 
+        public ObjectGuid GetGUID() { return _channelGuid; }
+        
         public bool IsLFG() { return GetFlags().HasAnyFlag(ChannelFlags.Lfg); }
         bool IsAnnounce() { return _announceEnabled; }
         void SetAnnounce(bool nannounce) { _announceEnabled = nannounce; }

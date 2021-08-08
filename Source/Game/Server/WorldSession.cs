@@ -869,7 +869,6 @@ namespace Game
 
         long _logoutTime;
         bool m_inQueue;
-        SessionFlags m_flags;
         ObjectGuid m_playerLoading;                               // code processed in LoginPlayer
         bool m_playerLogout;                                // code processed in LogoutPlayer
         bool m_playerRecentlyLogout;

@@ -229,10 +229,16 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             uint nameLen = _worldPacket.ReadBits<uint>(9);
+            bool hasUnused910 = _worldPacket.HasBit();
+
             Name = _worldPacket.ReadString(nameLen);
+
+            if (hasUnused910)
+                Unused910.Set(_worldPacket.ReadInt32());
         }
 
         public string Name;
+        public Optional<int> Unused910;
     }
 
     public class GuildInvite : ServerPacket
@@ -1640,6 +1646,9 @@ namespace Game.Networking.Packets
             data.WriteBits(OfficerNote.GetByteCount(), 8);
             data.WriteBit(Authenticated);
             data.WriteBit(SorEligible);
+            data.FlushBits();
+
+            DungeonScore.Write(data);
 
             data.WriteString(Name);
             data.WriteString(Note);
@@ -1666,6 +1675,7 @@ namespace Game.Networking.Packets
         public bool Authenticated;
         public bool SorEligible;
         public GuildRosterProfessionData[] Profession = new GuildRosterProfessionData[2];
+        public DungeonScoreSummary DungeonScore = new();
     }
 
     public class GuildEventEntry

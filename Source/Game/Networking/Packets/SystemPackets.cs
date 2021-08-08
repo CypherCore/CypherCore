@@ -233,6 +233,19 @@ namespace Game.Networking.Packets
         }
     }
 
+    public class FeatureSystemStatus2 : ServerPacket
+    {
+        public FeatureSystemStatus2() : base(ServerOpcodes.FeatureSystemStatus2) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteBit(TextToSpeechFeatureEnabled);
+            _worldPacket.FlushBits();
+        }
+
+        public bool TextToSpeechFeatureEnabled;
+    }
+    
     public class FeatureSystemStatusGlueScreen : ServerPacket
     {
         public FeatureSystemStatusGlueScreen() : base(ServerOpcodes.FeatureSystemStatusGlueScreen) { }

@@ -2509,6 +2509,7 @@ namespace Game.Entities
         public uint TransportID;
         public float Magnitude;
         public byte Type;
+        public int Unused910;
 
         public void Read(WorldPacket data)
         {
@@ -2518,7 +2519,9 @@ namespace Game.Entities
             TransportID = data.ReadUInt32();
             Magnitude = data.ReadFloat();
             Type = data.ReadBits<byte>(2);
-            
+            bool has910 = data.HasBit();
+            if (has910)
+                Unused910 = data.ReadInt32();
         }
 
         public void Write(WorldPacket data)

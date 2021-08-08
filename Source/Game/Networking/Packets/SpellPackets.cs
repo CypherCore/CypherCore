@@ -1240,9 +1240,8 @@ namespace Game.Networking.Packets
             ScalingHealthItemLevelCurveID = (ushort)target.m_unitData.ScalingHealthItemLevelCurveID;
             TargetLevel = (byte)target.GetLevel();
             Expansion = (byte)creatureTemplate.HealthScalingExpansion;
-            TargetMinScalingLevel = (byte)creatureScaling.MinLevel;
-            TargetMaxScalingLevel = (byte)creatureScaling.MaxLevel;
             TargetScalingLevelDelta = (sbyte)attacker.m_unitData.ScalingLevelDelta;
+            TargetContentTuningID = creatureScaling.ContentTuningID;
             return true;
         }
 
@@ -1257,9 +1256,8 @@ namespace Game.Networking.Packets
             ScalingHealthItemLevelCurveID = (ushort)target.m_unitData.ScalingHealthItemLevelCurveID;
             TargetLevel = (byte)target.GetLevel();
             Expansion = (byte)creatureTemplate.HealthScalingExpansion;
-            TargetMinScalingLevel = (byte)creatureScaling.MinLevel;
-            TargetMaxScalingLevel = (byte)creatureScaling.MaxLevel;
             TargetScalingLevelDelta = (sbyte)target.m_unitData.ScalingLevelDelta;
+            TargetContentTuningID = creatureScaling.ContentTuningID;
             return true;
         }
 
@@ -1274,9 +1272,8 @@ namespace Game.Networking.Packets
             PlayerItemLevel = 0;
             TargetLevel = (byte)target.GetLevel();
             Expansion = (byte)creatureTemplate.HealthScalingExpansion;
-            TargetMinScalingLevel = (byte)creatureScaling.MinLevel;
-            TargetMaxScalingLevel = (byte)creatureScaling.MaxLevel;
             TargetScalingLevelDelta = (sbyte)accessor.m_unitData.ScalingLevelDelta;
+            TargetContentTuningID = creatureScaling.ContentTuningID;
             return true;
         }
 
@@ -1323,10 +1320,10 @@ namespace Game.Networking.Packets
             data.WriteUInt16(ScalingHealthItemLevelCurveID);
             data.WriteUInt8(TargetLevel);
             data.WriteUInt8(Expansion);
-            data.WriteUInt8(TargetMinScalingLevel);
-            data.WriteUInt8(TargetMaxScalingLevel);
             data.WriteInt8(TargetScalingLevelDelta); 
             data.WriteUInt32((uint)Flags);
+            data.WriteUInt32(PlayerContentTuningID);
+            data.WriteUInt32(TargetContentTuningID);
             data.WriteBits(TuningType, 4);
             data.FlushBits();
         }
@@ -1338,10 +1335,10 @@ namespace Game.Networking.Packets
         public ushort ScalingHealthItemLevelCurveID;
         public byte TargetLevel;
         public byte Expansion;
-        public byte TargetMinScalingLevel;
-        public byte TargetMaxScalingLevel;
         public sbyte TargetScalingLevelDelta;
-        public ContentTuningFlags Flags = ContentTuningFlags.NoLevelScaling | ContentTuningFlags.NoItemLevelScaling; 
+        public ContentTuningFlags Flags = ContentTuningFlags.NoLevelScaling | ContentTuningFlags.NoItemLevelScaling;
+        public uint PlayerContentTuningID;
+        public uint TargetContentTuningID;
 
         public enum ContentTuningType
         {        
@@ -1581,13 +1578,11 @@ namespace Game.Networking.Packets
     {
         public int ItemID;
         public int Slot;
-        public int Count;
 
         public void Read(WorldPacket data)
         {
             ItemID = data.ReadInt32();
             Slot = data.ReadInt32();
-            Count = data.ReadInt32();
         }
     }
 

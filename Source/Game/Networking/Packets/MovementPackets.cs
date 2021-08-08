@@ -323,7 +323,11 @@ namespace Game.Networking.Packets
             data.WriteUInt32(movementForce.TransportID);
             data.WriteFloat(movementForce.Magnitude);
             data.WriteBits(movementForce.Type, 2);
+            data.WriteBit(movementForce.Unused910 != 0);
             data.FlushBits();
+
+            if (movementForce.Unused910 != 0)
+                data.WriteInt32(movementForce.Unused910);
         }
     }
 

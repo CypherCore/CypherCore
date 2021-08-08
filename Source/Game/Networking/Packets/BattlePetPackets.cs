@@ -32,7 +32,6 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt16(Trap);
             _worldPacket.WriteInt32(Slots.Count);
             _worldPacket.WriteInt32(Pets.Count);
-            _worldPacket.WriteInt32(MaxPets);
             _worldPacket.WriteBit(HasJournalLock);
             _worldPacket.FlushBits();
 
@@ -47,7 +46,6 @@ namespace Game.Networking.Packets
         bool HasJournalLock = true;
         public List<BattlePetSlot> Slots = new();
         public List<BattlePetStruct> Pets = new();
-        int MaxPets = 1000;
     }
 
     class BattlePetJournalLockAcquired : ServerPacket

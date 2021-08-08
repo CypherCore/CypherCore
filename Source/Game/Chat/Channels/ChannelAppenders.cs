@@ -73,7 +73,7 @@ namespace Game.Chat
             //notify.InstanceID = 0;
             notify.Data.ChannelFlags = _source.GetFlags();
             notify.Data.Channel = _source.GetName(localeIdx);
-            notify.Data.ChannelGUID = _source.GetChannelGuid();
+            notify.Data.ChannelGUID = _source.GetGUID();
             return notify;
         }
 
@@ -105,12 +105,13 @@ namespace Game.Chat
 
     class ChannelSayBuilder : MessageBuilder
     {
-        public ChannelSayBuilder(Channel source, Language lang, string what, ObjectGuid guid)
+        public ChannelSayBuilder(Channel source, Language lang, string what, ObjectGuid guid, ObjectGuid channelGuid)
         {
             _source = source;
             _lang = lang;
             _what = what;
             _guid = guid;
+            _channelGuid = channelGuid;
         }
 
         public override PacketSenderOwning<ChatPkt> Invoke(Locale locale = Locale.enUS)
@@ -128,6 +129,8 @@ namespace Game.Chat
                 packet.Data.TargetGUID = _guid;
             }
 
+            packet.Data.ChannelGUID.Set(_channelGuid);
+
             return packet;
         }
         
@@ -135,6 +138,7 @@ namespace Game.Chat
         Language _lang;
         string _what;
         ObjectGuid _guid;
+        ObjectGuid _channelGuid;
     }
 
     class ChannelWhisperBuilder : MessageBuilder

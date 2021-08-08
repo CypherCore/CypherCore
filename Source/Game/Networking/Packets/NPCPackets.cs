@@ -205,8 +205,7 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt32(Id);
-            _worldPacket.WriteFloat(Pos.X);
-            _worldPacket.WriteFloat(Pos.Y);
+            _worldPacket.WriteVector3(Pos);
             _worldPacket.WriteUInt32(Icon);
             _worldPacket.WriteUInt32(Importance);
             _worldPacket.WriteUInt32(Unknown905);
@@ -218,7 +217,7 @@ namespace Game.Networking.Packets
 
         public uint Id;
         public uint Flags;
-        public Vector2 Pos;
+        public Vector3 Pos;
         public uint Icon;
         public uint Importance;
         public uint Unknown905;

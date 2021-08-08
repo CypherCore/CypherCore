@@ -132,6 +132,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteUInt32(Stats.RequiredExpansion);
                 _worldPacket.WriteUInt32(Stats.VignetteID);
                 _worldPacket.WriteInt32(Stats.Class);
+                _worldPacket.WriteInt32(Stats.CreatureDifficultyID);
                 _worldPacket.WriteInt32(Stats.WidgetSetID);
                 _worldPacket.WriteInt32(Stats.WidgetSetUnitConditionID);
 
@@ -720,6 +721,7 @@ namespace Game.Networking.Packets
         public uint RequiredExpansion;
         public uint VignetteID;
         public int Class;
+        public int CreatureDifficultyID;
         public int WidgetSetID;
         public int WidgetSetUnitConditionID;
         public uint[] Flags = new uint[2];

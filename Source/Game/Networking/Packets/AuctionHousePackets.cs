@@ -928,6 +928,7 @@ namespace Game.Networking.Packets
         public Optional<ulong> BidAmount;
         public List<ItemGemData> Gems = new();
         public Optional<AuctionBucketKey> AuctionBucketKey;
+        public Optional<ObjectGuid> Creator;
 
         public void Write(WorldPacket data)
         {
@@ -941,6 +942,7 @@ namespace Game.Networking.Packets
             data.WriteBit(CensorServerSideInfo);
             data.WriteBit(CensorBidInfo);
             data.WriteBit(AuctionBucketKey.HasValue);
+            data.WriteBit(Creator.HasValue);
             if (!CensorBidInfo)
             {
                 data.WriteBit(Bidder.HasValue);
@@ -981,6 +983,9 @@ namespace Game.Networking.Packets
                 data.WritePackedGuid(OwnerAccountID);
                 data.WriteUInt32(EndTime);
             }
+
+            if (Creator.HasValue)
+                data.WritePackedGuid(Creator.Value);
 
             if (!CensorBidInfo)
             {

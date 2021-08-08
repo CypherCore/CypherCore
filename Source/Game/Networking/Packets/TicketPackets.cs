@@ -141,6 +141,7 @@ namespace Game.Networking.Packets
             bool hasLFGListApplicant = _worldPacket.HasBit();
             bool hasClubMessage = _worldPacket.HasBit();
             bool hasClubFinderResult = _worldPacket.HasBit();
+            bool hasUnk910 = _worldPacket.HasBit();
 
             _worldPacket.ResetBitPos();
 
@@ -196,6 +197,12 @@ namespace Game.Networking.Packets
                 ClubFinderResult.HasValue = true;
                 ClubFinderResult.Value.Read(_worldPacket);
             }
+
+            if (hasUnk910)
+            {
+                Unused910.HasValue = true;
+                Unused910.Value.Read(_worldPacket);
+            }
         }
 
         public SupportTicketHeader Header;
@@ -212,6 +219,7 @@ namespace Game.Networking.Packets
         public Optional<SupportTicketLFGListApplicant> LFGListApplicant;
         public Optional<SupportTicketCommunityMessage> CommunityMessage;
         public Optional<SupportTicketClubFinderResult> ClubFinderResult;
+        public Optional<SupportTicketUnused910> Unused910;
 
         public struct SupportTicketChatLine
         {
@@ -458,6 +466,19 @@ namespace Game.Networking.Packets
                 ClubID = data.ReadUInt64();
                 ClubFinderGUID = data.ReadPackedGuid();
                 ClubName = data.ReadString(data.ReadBits<uint>(12));
+            }
+        }
+
+        public struct SupportTicketUnused910
+        {
+            public string field_0;
+            public ObjectGuid field_104;
+
+            public void Read(WorldPacket data)
+            {
+                uint field_0Length = data.ReadBits<uint>(7);
+                field_104 = data.ReadPackedGuid();
+                field_0 = data.ReadString(field_0Length);
             }
         }
     }

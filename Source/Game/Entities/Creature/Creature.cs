@@ -1334,16 +1334,20 @@ namespace Game.Entities
             CreatureTemplate cInfo = GetCreatureTemplate();
 
             // level
-            var levels = cInfo.GetMinMaxLevel();
-            int minlevel = Math.Min(levels[0], levels[1]);
-            int maxlevel = Math.Max(levels[0], levels[1]);
+            var minMaxLevels = cInfo.GetMinMaxLevel();
+            int minlevel = Math.Min(minMaxLevels[0], minMaxLevels[1]);
+            int maxlevel = Math.Max(minMaxLevels[0], minMaxLevels[1]);
             int level = (minlevel == maxlevel ? minlevel : RandomHelper.IRand(minlevel, maxlevel));
             SetLevel((uint)level);
 
             CreatureLevelScaling scaling = cInfo.GetLevelScaling(GetMap().GetDifficultyID());
 
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelMin), scaling.MinLevel);
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelMax), scaling.MaxLevel);
+            var levels = Global.DB2Mgr.GetContentTuningData(scaling.ContentTuningID, 0);
+            if (levels != null)
+            {
+                SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelMin), levels.Value.MinLevel);
+                SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ScalingLevelMax), levels.Value.MaxLevel);
+            }
 
             int mindelta = Math.Min(scaling.DeltaLevelMax, scaling.DeltaLevelMin);
             int maxdelta = Math.Max(scaling.DeltaLevelMax, scaling.DeltaLevelMin);
@@ -2483,7 +2487,7 @@ namespace Game.Entities
             CreatureTemplate cinfo = GetCreatureTemplate();
             CreatureLevelScaling scaling = cinfo.GetLevelScaling(GetMap().GetDifficultyID());
 
-            return (scaling.MinLevel != 0 && scaling.MaxLevel != 0);
+            return scaling.ContentTuningID != 0;
         }
 
         ulong GetMaxHealthByLevel(uint level)

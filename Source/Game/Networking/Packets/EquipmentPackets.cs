@@ -62,8 +62,10 @@ namespace Game.Networking.Packets
                 foreach (var id in equipSet.Enchants)
                     _worldPacket.WriteInt32(id);
 
-                _worldPacket.WriteInt32(equipSet.Unknown901_1);
-                _worldPacket.WriteInt32(equipSet.Unknown901_2);
+                _worldPacket.WriteInt32(equipSet.SecondaryShoulderApparanceID);
+                _worldPacket.WriteInt32(equipSet.SecondaryShoulderSlot);
+                _worldPacket.WriteInt32(equipSet.SecondaryWeaponAppearanceID);
+                _worldPacket.WriteInt32(equipSet.SecondaryWeaponSlot);
 
                 _worldPacket.WriteBit(equipSet.AssignedSpecIndex != -1);
                 _worldPacket.WriteBits(equipSet.SetName.GetByteCount(), 8);
@@ -103,8 +105,10 @@ namespace Game.Networking.Packets
             Set.Enchants[0] = _worldPacket.ReadInt32();
             Set.Enchants[1] = _worldPacket.ReadInt32();
 
-            Set.Unknown901_1 = _worldPacket.ReadInt32();
-            Set.Unknown901_2 = _worldPacket.ReadInt32();
+            Set.SecondaryShoulderApparanceID = _worldPacket.ReadInt32();
+            Set.SecondaryShoulderSlot = _worldPacket.ReadInt32();
+            Set.SecondaryWeaponAppearanceID = _worldPacket.ReadInt32();
+            Set.SecondaryWeaponSlot = _worldPacket.ReadInt32();
 
             bool hasSpecIndex = _worldPacket.HasBit();
 

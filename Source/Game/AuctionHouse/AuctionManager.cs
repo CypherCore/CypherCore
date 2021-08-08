@@ -1724,6 +1724,10 @@ namespace Game
             // SMSG_AUCTION_LIST_BIDDER_ITEMS_RESULT, SMSG_AUCTION_LIST_OWNER_ITEMS_RESULT, SMSG_AUCTION_REPLICATE_RESPONSE (if commodity)
             if (sendKey)
                 auctionItem.AuctionBucketKey.Set(new AuctionBucketKey(AuctionsBucketKey.ForItem(Items[0])));
+
+            // all
+            if (!Items[0].m_itemData.Creator._value.IsEmpty())
+                auctionItem.Creator.Set(Items[0].m_itemData.Creator);
         }
 
         public static ulong CalculateMinIncrement(ulong bidAmount)

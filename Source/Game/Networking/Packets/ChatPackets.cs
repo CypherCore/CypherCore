@@ -64,6 +64,7 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Language = (Language)_worldPacket.ReadInt32();
+            ChannelGUID = _worldPacket.ReadPackedGuid();
             uint targetLen = _worldPacket.ReadBits<uint>(9);
             uint textLen = _worldPacket.ReadBits<uint>(9);
             Target = _worldPacket.ReadString(targetLen);
@@ -71,6 +72,7 @@ namespace Game.Networking.Packets
         }
 
         public Language Language = Language.Universal;
+        public ObjectGuid ChannelGUID;
         public string Text;
         public string Target;
     }
@@ -95,11 +97,13 @@ namespace Game.Networking.Packets
         {
             uint targetLen = _worldPacket.ReadBits<uint>(9);
             Params.Read(_worldPacket);
+            ChannelGUID.Set(_worldPacket.ReadPackedGuid());
             Target = _worldPacket.ReadString(targetLen);
         }
 
         public string Target;
         public ChatAddonMessageParams Params = new();
+        public Optional<ObjectGuid> ChannelGUID; // not optional in the packet. Optional for api reasons
     }
 
     public class ChatMessageDND : ClientPacket
@@ -229,6 +233,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(HideChatLog);
             _worldPacket.WriteBit(FakeSenderName);
             _worldPacket.WriteBit(Unused_801.HasValue);
+            _worldPacket.WriteBit(ChannelGUID.HasValue);
             _worldPacket.FlushBits();
 
             _worldPacket.WriteString(SenderName);
@@ -239,9 +244,12 @@ namespace Game.Networking.Packets
 
             if (Unused_801.HasValue)
                 _worldPacket.WriteUInt32(Unused_801.Value);
+
+            if (ChannelGUID.HasValue)
+                _worldPacket.WritePackedGuid(ChannelGUID.Value);
         }
 
-        public ChatMsg SlashCmd = 0;
+        public ChatMsg SlashCmd;
         public Language _Language = Language.Universal;
         public ObjectGuid SenderGUID;
         public ObjectGuid SenderGuildGUID;
@@ -256,11 +264,12 @@ namespace Game.Networking.Packets
         public string Channel = "";
         public string ChatText = "";
         public uint AchievementID;
-        public ChatFlags _ChatFlags = 0;
-        public float DisplayTime = 0.0f;
+        public ChatFlags _ChatFlags;
+        public float DisplayTime;
         public Optional<uint> Unused_801;
-        public bool HideChatLog = false;
-        public bool FakeSenderName = false;
+        public bool HideChatLog;
+        public bool FakeSenderName;
+        public Optional<ObjectGuid> ChannelGUID;
     }
 
     public class EmoteMessage : ServerPacket

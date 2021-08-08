@@ -58,6 +58,15 @@ namespace Game.Chat
             return null;
         }
 
+        public static Channel GetChannelForPlayerByGuid(ObjectGuid channelGuid, Player playerSearcher)
+        {
+            foreach (Channel channel in playerSearcher.GetJoinedChannels())
+                if (channel.GetGUID() == channelGuid)
+                    return channel;
+
+            return null;
+        }
+
         public Channel GetJoinChannel(uint channelId, string name, AreaTableRecord zoneEntry = null)
         {
             if (channelId != 0) // builtin

@@ -85,6 +85,7 @@ namespace Game.Entities
         public float ModExperience;
         public bool RacialLeader;
         public uint MovementId;
+        public int CreatureDifficultyID;
         public int WidgetSetID;
         public int WidgetSetUnitConditionID;
         public bool RegenHealth;
@@ -266,6 +267,7 @@ namespace Game.Entities
             stats.HealthScalingExpansion = HealthScalingExpansion;
             stats.VignetteID = VignetteID;
             stats.Class = (int)UnitClass;
+            stats.CreatureDifficultyID = CreatureDifficultyID;
             stats.WidgetSetID = WidgetSetID;
             stats.WidgetSetUnitConditionID = WidgetSetUnitConditionID;
 
@@ -454,8 +456,6 @@ namespace Game.Entities
 
     public class CreatureLevelScaling
     {
-        public ushort MinLevel;
-        public ushort MaxLevel;
         public short DeltaLevelMin;
         public short DeltaLevelMax;
         public uint ContentTuningID;

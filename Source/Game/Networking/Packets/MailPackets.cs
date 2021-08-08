@@ -167,12 +167,10 @@ namespace Game.Networking.Packets
         {
             Mailbox = _worldPacket.ReadPackedGuid();
             MailID = _worldPacket.ReadUInt32();
-            BiReceipt = _worldPacket.HasBit();
         }
 
         public ObjectGuid Mailbox;
         public uint MailID;
-        public bool BiReceipt;
     }
 
     public class MailDelete : ClientPacket

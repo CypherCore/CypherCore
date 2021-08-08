@@ -16,6 +16,7 @@
  */
 
 using Framework.Constants;
+using Framework.Dynamic;
 using Game.Chat;
 using Game.DataStorage;
 using Game.Entities;
@@ -85,7 +86,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ChatMessageChannel)]
         void HandleChatMessageChannel(ChatMessageChannel packet)
         {
-            HandleChat(ChatMsg.Channel, packet.Language, packet.Text, packet.Target);
+            HandleChat(ChatMsg.Channel, packet.Language, packet.Text, packet.Target, packet.ChannelGUID);
         }
 
         [WorldPacketHandler(ClientOpcodes.ChatMessageEmote)]
@@ -94,7 +95,7 @@ namespace Game
             HandleChat(ChatMsg.Emote, Language.Universal, packet.Text);
         }
 
-        void HandleChat(ChatMsg type, Language lang, string msg, string target = "")
+        void HandleChat(ChatMsg type, Language lang, string msg, string target = "", ObjectGuid channelGuid = default)
         {
             Player sender = GetPlayer();
 
@@ -340,7 +341,7 @@ namespace Game
                             return;
                         }
                     }
-                    Channel chn = ChannelManager.GetChannelForPlayerByNamePart(target, sender);
+                    Channel chn = !channelGuid.IsEmpty() ? ChannelManager.GetChannelForPlayerByGuid(channelGuid, sender) : ChannelManager.GetChannelForPlayerByNamePart(target, sender);
                     if (chn != null)
                     {
                         Global.ScriptMgr.OnPlayerChat(GetPlayer(), type, lang, msg, chn);
@@ -378,10 +379,10 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.ChatAddonMessageTargeted)]
         void HandleChatAddonMessageTargeted(ChatAddonMessageTargeted chatAddonMessageTargeted)
         {
-            HandleChatAddon(chatAddonMessageTargeted.Params.Type, chatAddonMessageTargeted.Params.Prefix, chatAddonMessageTargeted.Params.Text, chatAddonMessageTargeted.Params.IsLogged, chatAddonMessageTargeted.Target);
+            HandleChatAddon(chatAddonMessageTargeted.Params.Type, chatAddonMessageTargeted.Params.Prefix, chatAddonMessageTargeted.Params.Text, chatAddonMessageTargeted.Params.IsLogged, chatAddonMessageTargeted.Target, chatAddonMessageTargeted.ChannelGUID);
         }
 
-        void HandleChatAddon(ChatMsg type, string prefix, string text, bool isLogged, string target = "")
+        void HandleChatAddon(ChatMsg type, string prefix, string text, bool isLogged, string target = "", Optional<ObjectGuid> channelGuid = default)
         {
             Player sender = GetPlayer();
 
@@ -445,7 +446,7 @@ namespace Game
                         break;
                     }
                 case ChatMsg.Channel:
-                    Channel chn = ChannelManager.GetChannelForPlayerByNamePart(target, sender);
+                    Channel chn = channelGuid.HasValue ? ChannelManager.GetChannelForPlayerByGuid(channelGuid.Value, sender) : ChannelManager.GetChannelForPlayerByNamePart(target, sender);
                     if (chn != null)
                         chn.AddonSay(sender.GetGUID(), prefix, text, isLogged);
                     break;

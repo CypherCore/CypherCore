@@ -166,6 +166,7 @@ namespace Game.Networking.Packets
 
                 _worldPacket.WriteUInt32(Info.PortraitGiver);
                 _worldPacket.WriteUInt32(Info.PortraitGiverMount);
+                _worldPacket.WriteInt32(Info.PortraitGiverModelSceneID);
                 _worldPacket.WriteUInt32(Info.PortraitTurnIn);
 
                 for (uint i = 0; i < SharedConst.QuestRewardReputationsCount; ++i)
@@ -312,6 +313,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(QuestPackageID);
             _worldPacket.WriteUInt32(PortraitGiver);
             _worldPacket.WriteUInt32(PortraitGiverMount);
+            _worldPacket.WriteInt32(PortraitGiverModelSceneID);
             _worldPacket.WriteUInt32(PortraitTurnIn);
 
             _worldPacket.WriteBits(QuestTitle.GetByteCount(), 9);
@@ -332,6 +334,7 @@ namespace Game.Networking.Packets
         public uint PortraitTurnIn;
         public uint PortraitGiver;
         public uint PortraitGiverMount;
+        public int PortraitGiverModelSceneID;
         public string QuestTitle = "";
         public string RewardText = "";
         public string PortraitGiverText = "";
@@ -430,6 +433,7 @@ namespace Game.Networking.Packets
             _worldPacket.WriteInt32(QuestPackageID);
             _worldPacket.WriteUInt32(PortraitGiver);
             _worldPacket.WriteUInt32(PortraitGiverMount);
+            _worldPacket.WriteInt32(PortraitGiverModelSceneID);
             _worldPacket.WriteUInt32(PortraitTurnIn);
             _worldPacket.WriteUInt32(QuestFlags[0]); // Flags
             _worldPacket.WriteUInt32(QuestFlags[1]); // FlagsEx
@@ -494,6 +498,7 @@ namespace Game.Networking.Packets
         public uint PortraitTurnIn;
         public uint PortraitGiver;
         public uint PortraitGiverMount;
+        public int PortraitGiverModelSceneID;
         public int QuestStartItemID;
         public int QuestSessionBonus;
         public string PortraitGiverText = "";
@@ -839,6 +844,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(SenderGUID);
             _worldPacket.WriteInt32(UiTextureKitID);
             _worldPacket.WriteUInt32(SoundKitID);
+            _worldPacket.WriteUInt8(NumRerolls);
             _worldPacket.WriteBits(Question.GetByteCount(), 8);
             _worldPacket.WriteBit(CloseChoiceFrame);
             _worldPacket.WriteBit(HideWarboardHeader);
@@ -855,6 +861,7 @@ namespace Game.Networking.Packets
         public int ChoiceID;
         public int UiTextureKitID;
         public uint SoundKitID;
+        public byte NumRerolls;
         public string Question;
         public List<PlayerChoiceResponse> Responses = new();
         public bool CloseChoiceFrame;
@@ -870,10 +877,12 @@ namespace Game.Networking.Packets
         {
             ChoiceID = _worldPacket.ReadInt32();
             ResponseID = _worldPacket.ReadInt32();
+            IsReroll = _worldPacket.HasBit();
         }
 
         public int ChoiceID;
         public int ResponseID;
+        public bool IsReroll;
     }
 
     //Structs
@@ -970,6 +979,7 @@ namespace Game.Networking.Packets
         public uint RewardNumSkillUps; // reward skill points
         public uint PortraitGiver; // quest giver entry ?
         public uint PortraitGiverMount;
+        public int PortraitGiverModelSceneID;
         public uint PortraitTurnIn; // quest turn in entry ?
         public string PortraitGiverText;
         public string PortraitGiverName;

@@ -431,6 +431,7 @@ namespace Game.Misc
             packet.QuestID = quest.Id;
             packet.PortraitGiver = quest.QuestGiverPortrait;
             packet.PortraitGiverMount = quest.QuestGiverPortraitMount;
+            packet.PortraitGiverModelSceneID = quest.QuestGiverPortraitModelSceneId;
             packet.PortraitTurnIn = quest.QuestTurnInPortrait;
             packet.QuestSessionBonus = 0; //quest.GetQuestSessionBonus(); // this is only sent while quest session is active
             packet.AutoLaunched = autoLaunched;
@@ -558,6 +559,7 @@ namespace Game.Misc
             packet.PortraitTurnIn = quest.QuestTurnInPortrait;
             packet.PortraitGiver = quest.QuestGiverPortrait;
             packet.PortraitGiverMount = quest.QuestGiverPortraitMount;
+            packet.PortraitGiverModelSceneID = quest.QuestGiverPortraitModelSceneId;
             packet.QuestPackageID = quest.PackageID;
 
             packet.QuestData = offer;
@@ -768,7 +770,7 @@ namespace Game.Misc
     public class PointOfInterest
     {
         public uint Id;
-        public Vector2 Pos;
+        public Vector3 Pos;
         public uint Icon;
         public uint Flags;
         public uint Importance;

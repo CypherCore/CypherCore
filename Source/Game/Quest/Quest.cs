@@ -89,46 +89,47 @@ namespace Game
 
             QuestGiverPortrait = fields.Read<uint>(66);
             QuestGiverPortraitMount = fields.Read<uint>(67);
-            QuestTurnInPortrait = fields.Read<uint>(68);
+            QuestGiverPortraitModelSceneId = fields.Read<int>(68);
+            QuestTurnInPortrait = fields.Read<uint>(69);
 
             for (int i = 0; i < SharedConst.QuestRewardReputationsCount; ++i)
             {
-                RewardFactionId[i] = fields.Read<uint>(69 + i * 4);
-                RewardFactionValue[i] = fields.Read<int>(70 + i * 4);
-                RewardFactionOverride[i] = fields.Read<int>(71 + i * 4);
-                RewardFactionCapIn[i] = fields.Read<int>(72 + i * 4);
+                RewardFactionId[i] = fields.Read<uint>(70 + i * 4);
+                RewardFactionValue[i] = fields.Read<int>(71 + i * 4);
+                RewardFactionOverride[i] = fields.Read<int>(72 + i * 4);
+                RewardFactionCapIn[i] = fields.Read<int>(73 + i * 4);
             }
 
-            RewardReputationMask = fields.Read<uint>(89);
+            RewardReputationMask = fields.Read<uint>(90);
 
             for (int i = 0; i < SharedConst.QuestRewardCurrencyCount; ++i)
             {
-                RewardCurrencyId[i] = fields.Read<uint>(90 + i * 2);
-                RewardCurrencyCount[i] = fields.Read<uint>(91 + i * 2);
+                RewardCurrencyId[i] = fields.Read<uint>(91 + i * 2);
+                RewardCurrencyCount[i] = fields.Read<uint>(92 + i * 2);
 
                 if (RewardCurrencyId[i] != 0)
                     ++_rewCurrencyCount;
             }
 
-            SoundAccept = fields.Read<uint>(98);
-            SoundTurnIn = fields.Read<uint>(99);
-            AreaGroupID = fields.Read<uint>(100);
-            LimitTime = fields.Read<uint>(101);
-            AllowableRaces = (long)fields.Read<ulong>(102);
-            TreasurePickerID = fields.Read<int>(103);
-            Expansion = fields.Read<int>(104);
-            ManagedWorldStateID = fields.Read<int>(105);
-            QuestSessionBonus = fields.Read<int>(106);
+            SoundAccept = fields.Read<uint>(99);
+            SoundTurnIn = fields.Read<uint>(100);
+            AreaGroupID = fields.Read<uint>(101);
+            LimitTime = fields.Read<uint>(102);
+            AllowableRaces = (long)fields.Read<ulong>(103);
+            TreasurePickerID = fields.Read<int>(104);
+            Expansion = fields.Read<int>(105);
+            ManagedWorldStateID = fields.Read<int>(106);
+            QuestSessionBonus = fields.Read<int>(107);
 
-            LogTitle = fields.Read<string>(107);
-            LogDescription = fields.Read<string>(108);
-            QuestDescription = fields.Read<string>(109);
-            AreaDescription = fields.Read<string>(110);
-            PortraitGiverText = fields.Read<string>(111);
-            PortraitGiverName = fields.Read<string>(112);
-            PortraitTurnInText = fields.Read<string>(113);
-            PortraitTurnInName = fields.Read<string>(114);
-            QuestCompletionLog = fields.Read<string>(115);
+            LogTitle = fields.Read<string>(108);
+            LogDescription = fields.Read<string>(109);
+            QuestDescription = fields.Read<string>(110);
+            AreaDescription = fields.Read<string>(111);
+            PortraitGiverText = fields.Read<string>(112);
+            PortraitGiverName = fields.Read<string>(113);
+            PortraitTurnInText = fields.Read<string>(114);
+            PortraitTurnInName = fields.Read<string>(115);
+            QuestCompletionLog = fields.Read<string>(116);
         }
 
         public void LoadRewardDisplaySpell(SQLFields fields)
@@ -503,6 +504,7 @@ namespace Game
             QueryData.Info.RewardFactionFlags = RewardReputationMask;
             QueryData.Info.PortraitGiver = QuestGiverPortrait;
             QueryData.Info.PortraitGiverMount = QuestGiverPortraitMount;
+            QueryData.Info.PortraitGiverModelSceneID = QuestGiverPortraitModelSceneId;
             QueryData.Info.PortraitTurnIn = QuestTurnInPortrait;
 
             for (byte i = 0; i < SharedConst.QuestItemDropCount; ++i)
@@ -651,6 +653,7 @@ namespace Game
         public uint RewardSkillPoints;
         public uint QuestGiverPortrait;
         public uint QuestGiverPortraitMount;
+        public int QuestGiverPortraitModelSceneId;
         public uint QuestTurnInPortrait;
         public uint[] RewardFactionId = new uint[SharedConst.QuestRewardReputationsCount];
         public int[] RewardFactionValue = new int[SharedConst.QuestRewardReputationsCount];

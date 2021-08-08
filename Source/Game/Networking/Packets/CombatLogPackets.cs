@@ -575,14 +575,14 @@ namespace Game.Networking.Packets
             attackRoundInfo.WriteUInt8((byte)ContentTuning.TuningType);
             attackRoundInfo.WriteUInt8(ContentTuning.TargetLevel);
             attackRoundInfo.WriteUInt8(ContentTuning.Expansion);
-            attackRoundInfo.WriteUInt8(ContentTuning.TargetMinScalingLevel);
-            attackRoundInfo.WriteUInt8(ContentTuning.TargetMaxScalingLevel);
             attackRoundInfo.WriteInt16(ContentTuning.PlayerLevelDelta);
             attackRoundInfo.WriteInt8(ContentTuning.TargetScalingLevelDelta);
             attackRoundInfo.WriteFloat(ContentTuning.PlayerItemLevel);
             attackRoundInfo.WriteFloat(ContentTuning.TargetItemLevel);
             attackRoundInfo.WriteUInt16(ContentTuning.ScalingHealthItemLevelCurveID);
             attackRoundInfo.WriteUInt32((uint)ContentTuning.Flags);
+            attackRoundInfo.WriteUInt32(ContentTuning.PlayerContentTuningID);
+            attackRoundInfo.WriteUInt32(ContentTuning.TargetContentTuningID);
 
             WriteLogDataBit();
             FlushBits();

@@ -1001,6 +1001,8 @@ namespace Game.Networking.Packets
             data.WriteBit(PetStats.HasValue);
             data.FlushBits();
 
+            DungeonScore.Write(data);
+
             if (PetStats.HasValue)
                 PetStats.Value.Write(data);
         }
@@ -1032,6 +1034,7 @@ namespace Game.Networking.Packets
         public uint WmoDoodadPlacementID;
         public sbyte[] PartyType = new sbyte[2];
         public CTROptions ChromieTime;
+        public DungeonScoreSummary DungeonScore = new();
     }
 
     struct PartyPlayerInfo

@@ -3441,6 +3441,67 @@ namespace Game.Achievements
                 case ModifierTreeType.PlayerMythicPlusRatingEqualOrGreaterThan: // 321 NYI
                 case ModifierTreeType.PlayerMythicPlusRunCountInCurrentExpansionEqualOrGreaterThan: // 322 NYI
                     return false;
+                case ModifierTreeType.PlayerHasCustomizationChoice: // 323
+                    {
+                        int customizationChoiceIndex = referencePlayer.m_playerData.Customizations.FindIndexIf(choice =>
+                        {
+                            return choice.ChrCustomizationChoiceID == reqValue;
+                        });
+
+                        if (customizationChoiceIndex < 0)
+                            return false;
+
+                        break;
+                    }
+                case ModifierTreeType.PlayerBestWeeklyWinPvpTier: // 324
+                    {
+                        var pvpTier = CliDB.PvpTierStorage.LookupByKey(reqValue);
+                        if (pvpTier == null)
+                            return false;
+
+                        if (pvpTier.BracketID >= referencePlayer.m_activePlayerData.PvpInfo.GetSize())
+                            return false;
+
+                        var pvpInfo = referencePlayer.m_activePlayerData.PvpInfo[pvpTier.BracketID];
+                        if (pvpTier.Id != pvpInfo.WeeklyBestWinPvpTierID || pvpInfo.Disqualified)
+                            return false;
+
+                        break;
+                    }
+                case ModifierTreeType.PlayerBestWeeklyWinPvpTierInBracketEqualOrGreaterThan: // 325
+                    {
+                        if (secondaryAsset >= referencePlayer.m_activePlayerData.PvpInfo.GetSize())
+                            return false;
+
+                        var pvpInfo = referencePlayer.m_activePlayerData.PvpInfo[secondaryAsset];
+                        var pvpTier = CliDB.PvpTierStorage.LookupByKey(pvpInfo.WeeklyBestWinPvpTierID);
+                        if (pvpTier == null)
+                            return false;
+
+                        if (pvpTier.Rank < reqValue)
+                            return false;
+
+                        break;
+                    }
+                case ModifierTreeType.PlayerHasVanillaCollectorsEdition: // 326
+                    return false;
+                case ModifierTreeType.PlayerHasItemWithKeystoneLevelModifierEqualOrGreaterThan: // 327
+                    {
+                        bool bagScanReachedEnd = referencePlayer.ForEachItem(ItemSearchLocation.Inventory, item =>
+                        {
+                            if (item.GetEntry() != reqValue)
+                                return true;
+
+                            if (item.GetModifier(ItemModifier.ChallengeKeystoneLevel) < secondaryAsset)
+                                return true;
+
+                            return false;
+                        });
+                        if (bagScanReachedEnd)
+                            return false;
+
+                        break;
+                    }
                 default:
                     return false;
             }

@@ -501,8 +501,10 @@ namespace Game.Entities
             public ObjectGuid[] Pieces = new ObjectGuid[EquipmentSlot.End];
             public int[] Appearances = new int[EquipmentSlot.End];  // ItemModifiedAppearanceID
             public int[] Enchants = new int[2];  // SpellItemEnchantmentID
-            public int Unknown901_1;
-            public int Unknown901_2;
+            public int SecondaryShoulderApparanceID; // Secondary shoulder appearance
+            public int SecondaryShoulderSlot; // Always 2 if secondary shoulder apperance is used
+            public int SecondaryWeaponAppearanceID; // For legion artifacts: linked child item appearance
+            public int SecondaryWeaponSlot; // For legion artifacts: which slot is used by child item
         }
 
         public enum EquipmentSetType

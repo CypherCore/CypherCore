@@ -1091,6 +1091,10 @@ namespace Game
             features.IsMuted = !CanSpeak();
 
             SendPacket(features);
+
+            FeatureSystemStatus2 features2 = new();
+            features2.TextToSpeechFeatureEnabled = false;
+            SendPacket(features2);
         }
 
         [WorldPacketHandler(ClientOpcodes.SetFactionAtWar)]

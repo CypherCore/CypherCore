@@ -672,9 +672,8 @@ namespace Game
 
             pointsOfInterestStorage.Clear(); // need for reload case
 
-            //                                         0   1          2          3     4      5           6     7
-            SQLResult result = DB.World.Query("SELECT ID, PositionX, PositionY, Icon, Flags, Importance, Name, Unknown905 FROM points_of_interest");
-
+            //                                   0   1          2          3          4     5      6           7     8
+            var result = DB.World.Query("SELECT ID, PositionX, PositionY, PositionZ, Icon, Flags, Importance, Name, Unknown905 FROM points_of_interest");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Points of Interest definitions. DB table `points_of_interest` is empty.");
@@ -688,16 +687,16 @@ namespace Game
 
                 PointOfInterest POI = new();
                 POI.Id = id;
-                POI.Pos = new Vector2(result.Read<float>(1), result.Read<float>(2));
-                POI.Icon = result.Read<uint>(3);
-                POI.Flags = result.Read<uint>(4);
-                POI.Importance = result.Read<uint>(5);
-                POI.Name = result.Read<string>(6);
-                POI.Unknown905 = result.Read<uint>(7);
+                POI.Pos = new Vector3(result.Read<float>(1), result.Read<float>(2), result.Read<float>(3));
+                POI.Icon = result.Read<uint>(4);
+                POI.Flags = result.Read<uint>(5);
+                POI.Importance = result.Read<uint>(6);
+                POI.Name = result.Read<string>(7);
+                POI.Unknown905 = result.Read<uint>(8);
 
-                if (!GridDefines.IsValidMapCoord(POI.Pos.X, POI.Pos.Y))
+                if (!GridDefines.IsValidMapCoord(POI.Pos.X, POI.Pos.Y, POI.Pos.Z))
                 {
-                    Log.outError(LogFilter.Sql, $"Table `points_of_interest` (ID: {id}) have invalid coordinates (PositionX: {POI.Pos.X} PositionY: {POI.Pos.Y}), ignored.");
+                    Log.outError(LogFilter.Sql, $"Table `points_of_interest` (ID: {id}) have invalid coordinates (PositionX: {POI.Pos.X} PositionY: {POI.Pos.Y} PositionZ: {POI.Pos.Z}), ignored.");
                     continue;
                 }
 
@@ -1821,13 +1820,14 @@ namespace Game
             creature.ModExperience = fields.Read<float>(68);
             creature.RacialLeader = fields.Read<bool>(69);
             creature.MovementId = fields.Read<uint>(70);
-            creature.WidgetSetID = fields.Read<int>(71);
-            creature.WidgetSetUnitConditionID = fields.Read<int>(72);
-            creature.RegenHealth = fields.Read<bool>(73);
-            creature.MechanicImmuneMask = fields.Read<uint>(74);
-            creature.SpellSchoolImmuneMask = fields.Read<uint>(75);
-            creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(76);
-            creature.ScriptID = GetScriptId(fields.Read<string>(77));
+            creature.CreatureDifficultyID = fields.Read<int>(71);
+            creature.WidgetSetID = fields.Read<int>(72);
+            creature.WidgetSetUnitConditionID = fields.Read<int>(73);
+            creature.RegenHealth = fields.Read<bool>(74);
+            creature.MechanicImmuneMask = fields.Read<uint>(75);
+            creature.SpellSchoolImmuneMask = fields.Read<uint>(76);
+            creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(77);
+            creature.ScriptID = GetScriptId(fields.Read<string>(78));
 
             _creatureTemplateStorage[entry] = creature;
         }
@@ -2338,8 +2338,8 @@ namespace Game
         {
             uint oldMSTime = Time.GetMSTime();
 
-            //                                         0      1             2                3                4                     5                     6
-            SQLResult result = DB.World.Query("SELECT Entry, DifficultyID, LevelScalingMin, LevelScalingMax, LevelScalingDeltaMin, LevelScalingDeltaMax, ContentTuningID FROM creature_template_scaling ORDER BY Entry");
+            //                                   0      1             2                     3                     4
+            var result = DB.World.Query("SELECT Entry, DifficultyID, LevelScalingDeltaMin, LevelScalingDeltaMax, ContentTuningID FROM creature_template_scaling ORDER BY Entry");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creature template scaling definitions. DB table `creature_template_scaling` is empty.");
@@ -2360,11 +2360,9 @@ namespace Game
                 }
 
                 CreatureLevelScaling creatureLevelScaling = new();
-                creatureLevelScaling.MinLevel = result.Read<ushort>(2);
-                creatureLevelScaling.MaxLevel = result.Read<ushort>(3);
-                creatureLevelScaling.DeltaLevelMin = result.Read<short>(4);
-                creatureLevelScaling.DeltaLevelMax = result.Read<short>(5);
-                creatureLevelScaling.ContentTuningID = result.Read<uint>(6);
+                creatureLevelScaling.DeltaLevelMin = result.Read<short>(2);
+                creatureLevelScaling.DeltaLevelMax = result.Read<short>(3);
+                creatureLevelScaling.ContentTuningID = result.Read<uint>(4);
 
                 template.scalingStorage[difficulty] = creatureLevelScaling;
 
@@ -6555,35 +6553,37 @@ namespace Game
             _exclusiveQuestGroups.Clear();
 
             SQLResult result = DB.World.Query("SELECT " +
-                //0   1          2               3                4            5            6                  7                8                   9
+                //0  1          2               3                4            5            6                  7                8                   9
                 "ID, QuestType, QuestPackageID, ContentTuningID, QuestSortID, QuestInfoID, SuggestedGroupNum, RewardNextQuest, RewardXPDifficulty, RewardXPMultiplier, " +
-                //10           11                     12                     13                14           15           16               17
+                //10          11                     12                     13                14           15           16               17
                 "RewardMoney, RewardMoneyDifficulty, RewardMoneyMultiplier, RewardBonusMoney, RewardSpell, RewardHonor, RewardKillHonor, StartItem, " +
-                //18                          19                          20                        21     22       23
+                //18                         19                          20                        21     22       23
                 "RewardArtifactXPDifficulty, RewardArtifactXPMultiplier, RewardArtifactCategoryID, Flags, FlagsEx, FlagsEx2, " +
-                //24           25             26         27                 28           29             30         31
+                //24          25             26         27                 28           29             30         31
                 "RewardItem1, RewardAmount1, ItemDrop1, ItemDropQuantity1, RewardItem2, RewardAmount2, ItemDrop2, ItemDropQuantity2, " +
-                //32           33             34         35                 36           37             38         39
+                //32          33             34         35                 36           37             38         39
                 "RewardItem3, RewardAmount3, ItemDrop3, ItemDropQuantity3, RewardItem4, RewardAmount4, ItemDrop4, ItemDropQuantity4, " +
-                //40                   41                         42                          43                   44                         45
+                //40                  41                         42                          43                   44                         45
                 "RewardChoiceItemID1, RewardChoiceItemQuantity1, RewardChoiceItemDisplayID1, RewardChoiceItemID2, RewardChoiceItemQuantity2, RewardChoiceItemDisplayID2, " +
-                //46                   47                         48                          49                   50                         51
+                //46                  47                         48                          49                   50                         51
                 "RewardChoiceItemID3, RewardChoiceItemQuantity3, RewardChoiceItemDisplayID3, RewardChoiceItemID4, RewardChoiceItemQuantity4, RewardChoiceItemDisplayID4, " +
-                //52                   53                         54                          55                   56                         57
+                //52                  53                         54                          55                   56                         57
                 "RewardChoiceItemID5, RewardChoiceItemQuantity5, RewardChoiceItemDisplayID5, RewardChoiceItemID6, RewardChoiceItemQuantity6, RewardChoiceItemDisplayID6, " +
-                //58            59    60    61           62           63                 64                 65                 66             67                  68
-                "POIContinent, POIx, POIy, POIPriority, RewardTitle, RewardArenaPoints, RewardSkillLineID, RewardNumSkillUps, PortraitGiver, PortraitGiverMount, PortraitTurnIn, " +
-                //69                70                   71                      72                   73                74                   75                      76
+                //58           59    60    61           62           63                 64                 65
+                "POIContinent, POIx, POIy, POIPriority, RewardTitle, RewardArenaPoints, RewardSkillLineID, RewardNumSkillUps, " +
+                //66            67                  68                         69
+                "PortraitGiver, PortraitGiverMount, PortraitGiverModelSceneID, PortraitTurnIn, " +
+                //70               71                   72                      73                   74                75                   76                      77
                 "RewardFactionID1, RewardFactionValue1, RewardFactionOverride1, RewardFactionCapIn1, RewardFactionID2, RewardFactionValue2, RewardFactionOverride2, RewardFactionCapIn2, " +
-                //77                78                   79                      80                   81                82                   83                      84
+                //78               79                   80                      81                   82                83                   84                      85
                 "RewardFactionID3, RewardFactionValue3, RewardFactionOverride3, RewardFactionCapIn3, RewardFactionID4, RewardFactionValue4, RewardFactionOverride4, RewardFactionCapIn4, " +
-                //85                86                   87                      88                   89
+                //86               87                   88                      89                   90
                 "RewardFactionID5, RewardFactionValue5, RewardFactionOverride5, RewardFactionCapIn5, RewardFactionFlags, " +
-                //90                 91                  92                 93                  94                 95                  96                 97
+                //91                92                  93                 94                  95                 96                  97                 98
                 "RewardCurrencyID1, RewardCurrencyQty1, RewardCurrencyID2, RewardCurrencyQty2, RewardCurrencyID3, RewardCurrencyQty3, RewardCurrencyID4, RewardCurrencyQty4, " +
-                //98                  99                  100          101          102             103               104        105                  106
+                //99                 100                 101          102          103             104               105        106                  107
                 "AcceptedSoundKitID, CompleteSoundKitID, AreaGroupID, TimeAllowed, AllowableRaces, TreasurePickerID, Expansion, ManagedWorldStateID, QuestSessionBonus, " +
-                //107       108             109               110              111                112                113                 114                 115
+                //108      109             110               111              112                113                114                 115                 116
                 "LogTitle, LogDescription, QuestDescription, AreaDescription, PortraitGiverText, PortraitGiverName, PortraitTurnInText, PortraitTurnInName, QuestCompletionLog" +
                 " FROM quest_template");
 
