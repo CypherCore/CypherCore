@@ -2433,8 +2433,9 @@ namespace Game.Spells
             // multiple weapon dmg effect workaround
             // execute only the last weapon damage
             // and handle all effects at once
-            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
+            for (var j = effIndex + 1; j < SpellConst.MaxEffects; ++j)
             {
+                var effect = m_spellInfo.GetEffect(j);
                 if (effect == null)
                     continue;
 
