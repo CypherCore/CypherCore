@@ -330,24 +330,14 @@ namespace Game.Combat
             int index = 0;
 
             ThreatReference highest = _sortedThreatList[index];
-            if (!highest.IsOnline())
+            if (!highest.IsAvailable())
                 return;
 
-            if (highest.GetTauntState() != 0) // might need to skip this - new max could be one of the preceding elements (heap property) since there is only one taunt element
+            if (highest.IsTaunting() && (++index) != _sortedThreatList.Count - 1) // might need to skip this - max threat could be the preceding element (there is only one taunt element)
             {
-                if ((++index) != _sortedThreatList.Count - 1)
-                {
-                    ThreatReference a = _sortedThreatList[index];
-                    if (a.IsOnline() && a.GetThreat() > highest.GetThreat())
-                        highest = a;
-
-                    if ((++index) != _sortedThreatList.Count)
-                    {
-                        ThreatReference aa = _sortedThreatList[index];
-                        if (aa.IsOnline() && aa.GetThreat() > highest.GetThreat())
-                            highest = aa;
-                    }
-                }
+                ThreatReference a = _sortedThreatList[index];
+                if (a.IsAvailable() && a.GetThreat() > highest.GetThreat())
+                    highest = a;
             }
 
             AddThreat(target, highest.GetThreat() - GetThreat(target, true), null, true, true);
@@ -364,7 +354,7 @@ namespace Game.Combat
                 if (refe == null)
                     continue;
 
-                if (!refe.IsOnline())
+                if (!refe.IsAvailable())
                     continue;
 
                 tauntRef = refe;
@@ -656,7 +646,7 @@ namespace Game.Combat
 
             _sortedThreatList.Remove(refe);
             _sortedThreatList.Sort();
-            if (sendRemove && refe.IsOnline())
+            if (sendRemove && refe.IsAvailable())
                 SendRemoveToClients(refe.GetVictim());
         }
 
