@@ -6145,16 +6145,11 @@ namespace Game.Entities
             if (IsInFlight())
                 return;
 
-            bool isOutdoor;
-            uint areaId = GetMap().GetAreaId(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZ(), out isOutdoor);
-            AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(areaId);
-
-            if (WorldConfig.GetBoolValue(WorldCfg.VmapIndoorCheck) && !isOutdoor)
+            if (WorldConfig.GetBoolValue(WorldCfg.VmapIndoorCheck) && !IsOutdoors())
                 RemoveAurasWithAttribute(SpellAttr0.OutdoorsOnly);
 
-            if (areaId == 0)
-                return;
-
+            uint areaId = GetAreaId();
+            var areaEntry = CliDB.AreaTableStorage.LookupByKey(areaId);
             if (areaEntry == null)
             {
                 Log.outError(LogFilter.Player, "Player '{0}' ({1}) discovered unknown area (x: {2} y: {3} z: {4} map: {5})",

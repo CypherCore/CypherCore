@@ -1775,7 +1775,7 @@ namespace Game.Maps
             return -500.0f;
         }
 
-        private bool IsOutdoorWMO(uint mogpFlags, int adtId, int rootId, int groupId, WMOAreaTableRecord wmoEntry, AreaTableRecord atEntry)
+        private bool IsOutdoorWMO(uint mogpFlags, WMOAreaTableRecord wmoEntry, AreaTableRecord atEntry)
         {
             if (wmoEntry != null && atEntry != null)
             {
@@ -1785,16 +1785,15 @@ namespace Game.Maps
                     return false;
             }
 
-            bool outdoor = Convert.ToBoolean(mogpFlags & 0x8);
-
             if (wmoEntry != null)
             {
                 if (Convert.ToBoolean(wmoEntry.Flags & 4))
                     return true;
                 if ((wmoEntry.Flags & 2) != 0)
-                    outdoor = false;
+                    return false;
             }
-            return outdoor;
+
+            return (mogpFlags & 0x8) != 0;
         }
 
         public bool IsOutdoors(PhaseShift phaseShift, float x, float y, float z)
@@ -1814,7 +1813,7 @@ namespace Game.Maps
                     wmoEntry.AreaTableID);
                 atEntry = CliDB.AreaTableStorage.LookupByKey(wmoEntry.AreaTableID);
             }
-            return IsOutdoorWMO(mogpFlags, adtId, rootId, groupId, wmoEntry, atEntry);
+            return IsOutdoorWMO(mogpFlags, wmoEntry, atEntry);
         }
 
         private bool GetAreaInfo(PhaseShift phaseShift, float x, float y, float z, out uint flags, out int adtId, out int rootId, out int groupId)
@@ -1922,7 +1921,7 @@ namespace Game.Maps
             }
 
             if (haveAreaInfo)
-                isOutdoors = IsOutdoorWMO(mogpFlags, adtId, rootId, groupId, wmoEntry, atEntry);
+                isOutdoors = IsOutdoorWMO(mogpFlags, wmoEntry, atEntry);
             else
                 isOutdoors = true;
 
@@ -2069,21 +2068,27 @@ namespace Game.Maps
 
             // area lookup
             AreaTableRecord areaEntry = null;
-            if (vmapData.areaInfo.HasValue && (z <= mapHeight || mapHeight <= vmapData.floorZ))
+            WMOAreaTableRecord wmoEntry = null;
+
+            // the vmap floor is our floor if either
+            //  - the vmap floor is above the gridmap floor
+            // or
+            //  - we are below the gridmap floor
+            if (vmapData.areaInfo.HasValue && (MathFunctions.fuzzyLt(z, mapHeight - MapConst.GroundHeightTolerance) || mapHeight <= vmapData.floorZ))
             {
-                WMOAreaTableRecord wmoEntry = Global.DB2Mgr.GetWMOAreaTable(vmapData.areaInfo.Value.RootId, vmapData.areaInfo.Value.AdtId, vmapData.areaInfo.Value.GroupId);
+                wmoEntry = Global.DB2Mgr.GetWMOAreaTable(vmapData.areaInfo.Value.RootId, vmapData.areaInfo.Value.AdtId, vmapData.areaInfo.Value.GroupId);
                 if (wmoEntry != null)
                     areaEntry = CliDB.AreaTableStorage.LookupByKey(wmoEntry.AreaTableID);
             }
 
             if (areaEntry != null)
             {
-                data.FloorZ = vmapData.floorZ;
                 data.AreaId = areaEntry.Id;
+                data.FloorZ = vmapData.floorZ;
+                data.outdoors = IsOutdoorWMO(vmapData.areaInfo.Value.MogpFlags, wmoEntry, areaEntry);
             }
             else
             {
-                data.FloorZ = mapHeight;
                 if (gmap != null)
                     data.AreaId = gmap.GetArea(x, y);
                 else
@@ -2094,6 +2099,9 @@ namespace Game.Maps
 
                 if (data.AreaId != 0)
                     areaEntry = CliDB.AreaTableStorage.LookupByKey(data.AreaId);
+
+                data.FloorZ = mapHeight;
+                data.outdoors = true; // @todo default true taken from old GetAreaId check, maybe review
             }
 
             // liquid processing
@@ -5550,6 +5558,7 @@ namespace Game.Maps
 
         public uint AreaId;
         public float FloorZ;
+        public bool outdoors;
         public ZLiquidStatus LiquidStatus;
         public Optional<AreaInfo> areaInfo;
         public Optional<LiquidData> LiquidInfo;

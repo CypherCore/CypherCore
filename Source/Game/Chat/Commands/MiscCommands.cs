@@ -939,7 +939,7 @@ namespace Game.Chat
 
             if (haveVMap)
             {
-                if (map.IsOutdoors(obj.GetPhaseShift(), obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ()))
+                if (obj.IsOutdoors())
                     handler.SendSysMessage(CypherStrings.GpsPositionOutdoors);
                 else
                     handler.SendSysMessage(CypherStrings.GpsPositionIndoors);

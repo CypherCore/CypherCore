@@ -127,6 +127,7 @@ namespace Game.Entities
                 if (area.ParentAreaID != 0)
                     m_zoneId = area.ParentAreaID;
 
+            m_outdoors = data.outdoors;
             m_staticFloorZ = data.FloorZ;
         }
 
@@ -1026,6 +1027,8 @@ namespace Game.Entities
 
         public void GetZoneAndAreaId(out uint zoneid, out uint areaid) { zoneid = m_zoneId; areaid = m_areaId; }
 
+        public bool IsOutdoors() { return m_outdoors; }
+        
         public bool IsInWorldPvpZone()
         {
             switch (GetZoneId())
@@ -2389,6 +2392,7 @@ namespace Game.Entities
         uint m_zoneId;
         uint m_areaId;
         float m_staticFloorZ;
+        bool m_outdoors;
 
         public MovementInfo m_movementInfo;
         string _name;

@@ -4588,12 +4588,10 @@ namespace Game.Spells
 
             if (m_caster.IsTypeId(TypeId.Player) && Global.VMapMgr.IsLineOfSightCalcEnabled())
             {
-                if (m_spellInfo.HasAttribute(SpellAttr0.OutdoorsOnly) &&
-                        !m_caster.GetMap().IsOutdoors(m_caster.GetPhaseShift(), m_caster.posX, m_caster.posY, m_caster.posZ))
+                if (m_spellInfo.HasAttribute(SpellAttr0.OutdoorsOnly) && !m_caster.IsOutdoors())
                     return SpellCastResult.OnlyOutdoors;
 
-                if (m_spellInfo.HasAttribute(SpellAttr0.IndoorsOnly) &&
-                        m_caster.GetMap().IsOutdoors(m_caster.GetPhaseShift(), m_caster.posX, m_caster.posY, m_caster.posZ))
+                if (m_spellInfo.HasAttribute(SpellAttr0.IndoorsOnly) && m_caster.IsOutdoors())
                     return SpellCastResult.OnlyIndoors;
             }
 
