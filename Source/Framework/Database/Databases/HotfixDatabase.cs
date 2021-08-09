@@ -199,7 +199,7 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_CHAR_TITLES_LOCALE, "SELECT ID, Name_lang, Name1_lang FROM char_titles_locale WHERE locale = ?");
 
             // CharacterLoadout.db2
-            PrepareStatement(HotfixStatements.SEL_CHARACTER_LOADOUT, "SELECT ID, RaceMask, ChrClassID, Purpose FROM character_loadout");
+            PrepareStatement(HotfixStatements.SEL_CHARACTER_LOADOUT, "SELECT ID, RaceMask, ChrClassID, Purpose, Unused910 FROM character_loadout");
 
             // CharacterLoadoutItem.db2
             PrepareStatement(HotfixStatements.SEL_CHARACTER_LOADOUT_ITEM, "SELECT ID, CharacterLoadoutID, ItemID FROM character_loadout_item");
