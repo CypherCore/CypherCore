@@ -5256,13 +5256,13 @@ namespace Game.Spells
             }
 
             // Drain Mana
-            if (m_spellInfo.SpellFamilyName == SpellFamilyNames.Warlock && m_spellInfo.SpellFamilyFlags[0].HasAnyFlag<uint>(0x00000010))
+            if (caster.GetGuardianPet() != null && m_spellInfo.SpellFamilyName == SpellFamilyNames.Warlock && m_spellInfo.SpellFamilyFlags[0].HasAnyFlag<uint>(0x00000010))
             {
                 int manaFeedVal = 0;
                 AuraEffect aurEff = GetBase().GetEffect(1);
                 if (aurEff != null)
                     manaFeedVal = aurEff.GetAmount();
-                // Mana Feed - Drain Mana
+
                 if (manaFeedVal > 0)
                 {
                     int feedAmount = MathFunctions.CalculatePct(gainedAmount, manaFeedVal);
