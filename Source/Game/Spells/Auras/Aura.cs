@@ -2547,6 +2547,10 @@ namespace Game.Spells
                 }
                 else
                 {
+                    // skip area update if owner is not in world!
+                    if (!GetUnitOwner().IsInWorld)
+                        continue;
+
                     float radius = effect.CalcRadius(caster);
 
                     if (!GetUnitOwner().HasUnitState(UnitState.Isolated))
