@@ -2771,6 +2771,8 @@ namespace Game.Entities
         {
             m_respawnTime = respawn > 0 ? GameTime.GetGameTime() + respawn : 0;
             m_respawnDelayTime = (uint)(respawn > 0 ? respawn : 0);
+            if (respawn != 0 && !m_spawnedByDefault)
+                UpdateObjectVisibility(true);
         }
 
         public bool IsSpawned()
