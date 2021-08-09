@@ -129,7 +129,7 @@ namespace Game.Entities
 
             m_staticFloorZ = data.FloorZ;
         }
-        
+
         public virtual void BuildCreateUpdateBlockForPlayer(UpdateData data, Player target)
         {
             if (!target)
@@ -249,7 +249,7 @@ namespace Game.Entities
         {
             data.AddDestroyObject(GetGUID());
         }
-        
+
         public void BuildOutOfRangeUpdateBlock(UpdateData data)
         {
             data.AddOutOfRangeGUID(GetGUID());
@@ -575,7 +575,7 @@ namespace Game.Entities
                 //    *data << *areaTrigger->GetMovementScript(); // AreaTriggerMovementScriptInfo
 
                 if (hasOrbit)
-                   areaTrigger.GetCircularMovementInfo().Value.Write(data);
+                    areaTrigger.GetCircularMovementInfo().Value.Write(data);
             }
 
             if (flags.GameObject)
@@ -887,7 +887,7 @@ namespace Game.Entities
         }
 
         public void SetUpdateFieldStatValue<T>(ref T oldValue, T value) where T : new()
-        {      
+        {
             SetUpdateFieldValue(ref oldValue, (T)Math.Max((dynamic)value, 0));
         }
 
@@ -1010,12 +1010,12 @@ namespace Game.Entities
             if (transport)
                 transport.RemovePassenger(this);
         }
-        
-        public uint GetZoneId()  { return m_zoneId; }
-        public uint GetAreaId()  { return m_areaId; }
+
+        public uint GetZoneId() { return m_zoneId; }
+        public uint GetAreaId() { return m_areaId; }
 
         public void GetZoneAndAreaId(out uint zoneid, out uint areaid) { zoneid = m_zoneId; areaid = m_areaId; }
-        
+
         public bool IsInWorldPvpZone()
         {
             switch (GetZoneId())
@@ -1110,7 +1110,7 @@ namespace Game.Entities
 
             return false;
         }
-        
+
         public bool CanSeeOrDetect(WorldObject obj, bool ignoreStealth = false, bool distanceCheck = false, bool checkAlert = false)
         {
             if (this == obj)
@@ -1607,8 +1607,8 @@ namespace Game.Entities
         {
             return a != null && b != null && a.IsInPhase(b);
         }
-        
-        public virtual float GetCombatReach() { return 0.0f;    } // overridden (only) in Unit
+
+        public virtual float GetCombatReach() { return 0.0f; } // overridden (only) in Unit
         public PhaseShift GetPhaseShift() { return _phaseShift; }
         public void SetPhaseShift(PhaseShift phaseShift) { _phaseShift = new PhaseShift(phaseShift); }
         public PhaseShift GetSuppressedPhaseShift() { return _suppressedPhaseShift; }
@@ -1710,7 +1710,7 @@ namespace Game.Entities
         public bool IsPrivateObject() { return !_privateObjectOwner.IsEmpty(); }
         public ObjectGuid GetPrivateObjectOwner() { return _privateObjectOwner; }
         public void SetPrivateObjectOwner(ObjectGuid owner) { _privateObjectOwner = owner; }
-        
+
         public virtual string GetName(Locale locale = Locale.enUS) { return _name; }
         public void SetName(string name) { _name = name; }
 
@@ -1791,9 +1791,9 @@ namespace Game.Entities
         public virtual float GetStationaryZ() { return GetPositionZ(); }
         public virtual float GetStationaryO() { return GetOrientation(); }
 
-        public virtual float GetCollisionHeight() { return 0.0f;    }
+        public virtual float GetCollisionHeight() { return 0.0f; }
         public float GetMidsectionHeight() { return GetCollisionHeight() / 2.0f; }
-        
+
         public virtual bool IsNeverVisibleFor(WorldObject seer) { return !IsInWorld; }
         public virtual bool IsAlwaysVisibleFor(WorldObject seer) { return false; }
         public virtual bool IsInvisibleDueToDespawn() { return false; }
@@ -1941,7 +1941,7 @@ namespace Game.Entities
                 oz += GetCollisionHeight();
             }
             else
-                obj.GetHitSpherePointFor(new (GetPositionX(), GetPositionY(), GetPositionZ() + GetCollisionHeight()), out ox, out oy, out oz);
+                obj.GetHitSpherePointFor(new(GetPositionX(), GetPositionY(), GetPositionZ() + GetCollisionHeight()), out ox, out oy, out oz);
 
             float x, y, z;
             if (IsPlayer())
@@ -1950,7 +1950,7 @@ namespace Game.Entities
                 z += GetCollisionHeight();
             }
             else
-                GetHitSpherePointFor(new (obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ() + obj.GetCollisionHeight()), out x, out y, out z);
+                GetHitSpherePointFor(new(obj.GetPositionX(), obj.GetPositionY(), obj.GetPositionZ() + obj.GetCollisionHeight()), out x, out y, out z);
 
             return GetMap().IsInLineOfSight(GetPhaseShift(), x, y, z, ox, oy, oz, checks, ignoreFlags);
         }
@@ -2094,62 +2094,62 @@ namespace Game.Entities
             switch (GetTypeId())
             {
                 case TypeId.Unit:
+                {
+                    // non fly unit don't must be in air
+                    // non swim unit must be at ground (mostly speedup, because it don't must be in water and water level check less fast
+                    if (!ToCreature().CanFly())
                     {
-                        // non fly unit don't must be in air
-                        // non swim unit must be at ground (mostly speedup, because it don't must be in water and water level check less fast
-                        if (!ToCreature().CanFly())
+                        bool canSwim = ToCreature().CanSwim();
+                        float ground_z = z;
+                        float max_z = canSwim
+                            ? GetMapWaterOrGroundLevel(x, y, z, ref ground_z)
+                            : (ground_z = GetMapHeight(x, y, z));
+                        if (max_z > MapConst.InvalidHeight)
                         {
-                            bool canSwim = ToCreature().CanSwim();
-                            float ground_z = z;
-                            float max_z = canSwim
-                                ? GetMapWaterOrGroundLevel(x, y, z, ref ground_z)
-                                : (ground_z = GetMapHeight(x, y, z));
-                            if (max_z > MapConst.InvalidHeight)
-                            {
-                                if (z > max_z)
-                                    z = max_z;
-                                else if (z < ground_z)
-                                    z = ground_z;
-                            }
-                        }
-                        else
-                        {
-                            float ground_z = GetMapHeight(x, y, z);
-                            if (z < ground_z)
+                            if (z > max_z)
+                                z = max_z;
+                            else if (z < ground_z)
                                 z = ground_z;
                         }
-                        break;
                     }
-                case TypeId.Player:
-                    {
-                        // for server controlled moves playr work same as creature (but it can always swim)
-                        if (!ToPlayer().CanFly())
-                        {
-                            float ground_z = z;
-                            float max_z = GetMapWaterOrGroundLevel(x, y, z, ref ground_z);
-                            if (max_z > MapConst.InvalidHeight)
-                            {
-                                if (z > max_z)
-                                    z = max_z;
-                                else if (z < ground_z)
-                                    z = ground_z;
-                            }
-                        }
-                        else
-                        {
-                            float ground_z = GetMapHeight(x, y, z);
-                            if (z < ground_z)
-                                z = ground_z;
-                        }
-                        break;
-                    }
-                default:
+                    else
                     {
                         float ground_z = GetMapHeight(x, y, z);
-                        if (ground_z > MapConst.InvalidHeight)
+                        if (MathF.Abs(z - ground_z) < GetCollisionHeight())
                             z = ground_z;
-                        break;
                     }
+                    break;
+                }
+                case TypeId.Player:
+                {
+                    // for server controlled moves playr work same as creature (but it can always swim)
+                    if (!ToPlayer().CanFly())
+                    {
+                        float ground_z = z;
+                        float max_z = GetMapWaterOrGroundLevel(x, y, z, ref ground_z);
+                        if (max_z > MapConst.InvalidHeight)
+                        {
+                            if (z > max_z)
+                                z = max_z;
+                            else if (z < ground_z)
+                                z = ground_z;
+                        }
+                    }
+                    else
+                    {
+                        float ground_z = GetMapHeight(x, y, z);
+                        if (MathF.Abs(z - ground_z) < GetCollisionHeight())
+                            z = ground_z;
+                    }
+                    break;
+                }
+                default:
+                {
+                    float ground_z = GetMapHeight(x, y, z);
+                    if (ground_z > MapConst.InvalidHeight)
+                        z = ground_z;
+                    break;
+                }
             }
         }
 
@@ -2359,7 +2359,7 @@ namespace Game.Entities
 
             return GetMap().GetHeight(GetPhaseShift(), x, y, z, vmap, distanceToSearch);
         }
-        
+
         public void SetLocationInstanceId(uint _instanceId) { instanceId = _instanceId; }
 
         #region Fields
@@ -2390,7 +2390,7 @@ namespace Game.Entities
         Transport m_transport;
         Map _currMap;
         uint instanceId;
-        PhaseShift _phaseShift= new();
+        PhaseShift _phaseShift = new();
         PhaseShift _suppressedPhaseShift = new();                   // contains phases for current area but not applied due to conditions
         int _dbPhase;
         public bool IsInWorld { get; set; }
@@ -2463,8 +2463,6 @@ namespace Game.Entities
         {
             jump.Reset();
         }
-
-
 
         public struct TransportInfo
         {

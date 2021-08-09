@@ -461,50 +461,50 @@ namespace Game.Spells
             switch (targetType.GetTarget())
             {
                 case Targets.UnitChannelTarget:
+                {
+                    foreach (ObjectGuid channelTarget in m_originalCaster.m_unitData.ChannelObjects)
                     {
-                        foreach (ObjectGuid channelTarget in m_originalCaster.m_unitData.ChannelObjects)
-                        {
-                            WorldObject target = Global.ObjAccessor.GetUnit(m_caster, channelTarget);
-                            CallScriptObjectTargetSelectHandlers(ref target, effIndex, targetType);
-                            // unit target may be no longer avalible - teleported out of map for example
-                            Unit unitTarget = target ? target.ToUnit() : null;
-                            if (unitTarget)
-                                AddUnitTarget(unitTarget, 1u << (int)effIndex);
-                            else
-                                Log.outDebug(LogFilter.Spells, "SPELL: cannot find channel spell target for spell ID {0}, effect {1}", m_spellInfo.Id, effIndex);
-                        }
-                        break;
-                    }
-                case Targets.DestChannelTarget:
-                    {
-                        if (channeledSpell.m_targets.HasDst())
-                            m_targets.SetDst(channeledSpell.m_targets);
+                        WorldObject target = Global.ObjAccessor.GetUnit(m_caster, channelTarget);
+                        CallScriptObjectTargetSelectHandlers(ref target, effIndex, targetType);
+                        // unit target may be no longer avalible - teleported out of map for example
+                        Unit unitTarget = target ? target.ToUnit() : null;
+                        if (unitTarget)
+                            AddUnitTarget(unitTarget, 1u << (int)effIndex);
                         else
-                        {
-                            List<ObjectGuid> channelObjects = m_originalCaster.m_unitData.ChannelObjects;
-                            WorldObject target = !channelObjects.Empty() ? Global.ObjAccessor.GetWorldObject(m_caster, channelObjects[0]) : null;
-                            if (target != null)
-                            {
-                                CallScriptObjectTargetSelectHandlers(ref target, effIndex, targetType);
-                                if (target)
-                                {
-                                    SpellDestination dest = new(target);
-                                    CallScriptDestinationTargetSelectHandlers(ref dest, effIndex, targetType);
-                                    m_targets.SetDst(dest);
-                                }
-                            }
-                            else
-                                Log.outDebug(LogFilter.Spells, "SPELL: cannot find channel spell destination for spell ID {0}, effect {1}", m_spellInfo.Id, effIndex);
-                        }
-                        break;
+                            Log.outDebug(LogFilter.Spells, "SPELL: cannot find channel spell target for spell ID {0}, effect {1}", m_spellInfo.Id, effIndex);
                     }
-                case Targets.DestChannelCaster:
+                    break;
+                }
+                case Targets.DestChannelTarget:
+                {
+                    if (channeledSpell.m_targets.HasDst())
+                        m_targets.SetDst(channeledSpell.m_targets);
+                    else
                     {
-                        SpellDestination dest = new(channeledSpell.GetCaster());
-                        CallScriptDestinationTargetSelectHandlers(ref dest, effIndex, targetType);
-                        m_targets.SetDst(dest);
-                        break;
+                        List<ObjectGuid> channelObjects = m_originalCaster.m_unitData.ChannelObjects;
+                        WorldObject target = !channelObjects.Empty() ? Global.ObjAccessor.GetWorldObject(m_caster, channelObjects[0]) : null;
+                        if (target != null)
+                        {
+                            CallScriptObjectTargetSelectHandlers(ref target, effIndex, targetType);
+                            if (target)
+                            {
+                                SpellDestination dest = new(target);
+                                CallScriptDestinationTargetSelectHandlers(ref dest, effIndex, targetType);
+                                m_targets.SetDst(dest);
+                            }
+                        }
+                        else
+                            Log.outDebug(LogFilter.Spells, "SPELL: cannot find channel spell destination for spell ID {0}, effect {1}", m_spellInfo.Id, effIndex);
                     }
+                    break;
+                }
+                case Targets.DestChannelCaster:
+                {
+                    SpellDestination dest = new(channeledSpell.GetCaster());
+                    CallScriptDestinationTargetSelectHandlers(ref dest, effIndex, targetType);
+                    m_targets.SetDst(dest);
+                    break;
+                }
                 default:
                     Cypher.Assert(false, "Spell.SelectImplicitChannelTargets: received not implemented target type");
                     break;
@@ -704,18 +704,18 @@ namespace Game.Spells
                     referer = m_targets.GetUnitTarget();
                     break;
                 case SpellTargetReferenceTypes.Last:
+                {
+                    // find last added target for this effect
+                    foreach (var target in m_UniqueTargetInfo)
                     {
-                        // find last added target for this effect
-                        foreach (var target in m_UniqueTargetInfo)
+                        if (Convert.ToBoolean(target.effectMask & (1 << (int)effIndex)))
                         {
-                            if (Convert.ToBoolean(target.effectMask & (1 << (int)effIndex)))
-                            {
-                                referer = Global.ObjAccessor.GetUnit(m_caster, target.targetGUID);
-                                break;
-                            }
+                            referer = Global.ObjAccessor.GetUnit(m_caster, target.targetGUID);
+                            break;
                         }
-                        break;
                     }
+                    break;
+                }
                 default:
                     Cypher.Assert(false, "Spell.SelectImplicitAreaTargets: received not implemented target reference type");
                     return;
@@ -849,39 +849,65 @@ namespace Game.Spells
                     }
                     break;
                 case Targets.DestCasterFishing:
+                {
+                    float minDist = m_spellInfo.GetMinRange(true);
+                    float maxDist = m_spellInfo.GetMaxRange(true);
+                    float dis = (float)RandomHelper.NextDouble() * (maxDist - minDist) + minDist;
+                    float x, y, z;
+                    float angle = (float)RandomHelper.NextDouble() * (MathFunctions.PI * 35.0f / 180.0f) - (float)(Math.PI * 17.5f / 180.0f);
+                    m_caster.GetClosePoint(out x, out y, out z, SharedConst.DefaultPlayerBoundingRadius, dis, angle);
+
+                    float ground = m_caster.GetMapHeight(x, y, z);
+                    float liquidLevel = MapConst.VMAPInvalidHeightValue;
+                    LiquidData liquidData;
+                    if (m_caster.GetMap().GetLiquidStatus(m_caster.GetPhaseShift(), x, y, z, LiquidHeaderTypeFlags.AllLiquids, out liquidData, m_caster.GetCollisionHeight()) != 0)
+                        liquidLevel = liquidData.level;
+
+                    if (liquidLevel <= ground) // When there is no liquid Map.GetWaterOrGroundLevel returns ground level
                     {
-                        float minDist = m_spellInfo.GetMinRange(true);
-                        float maxDist = m_spellInfo.GetMaxRange(true);
-                        float dis = (float)RandomHelper.NextDouble() * (maxDist - minDist) + minDist;
-                        float x, y, z;
-                        float angle = (float)RandomHelper.NextDouble() * (MathFunctions.PI * 35.0f / 180.0f) - (float)(Math.PI * 17.5f / 180.0f);
-                        m_caster.GetClosePoint(out x, out y, out z, SharedConst.DefaultPlayerBoundingRadius, dis, angle);
-
-                        float ground = m_caster.GetMapHeight(x, y, z);
-                        float liquidLevel = MapConst.VMAPInvalidHeightValue;
-                        LiquidData liquidData;
-                        if (m_caster.GetMap().GetLiquidStatus(m_caster.GetPhaseShift(), x, y, z, LiquidHeaderTypeFlags.AllLiquids, out liquidData, m_caster.GetCollisionHeight()) != 0)
-                            liquidLevel = liquidData.level;
-
-                        if (liquidLevel <= ground) // When there is no liquid Map.GetWaterOrGroundLevel returns ground level
-                        {
-                            SendCastResult(SpellCastResult.NotHere);
-                            SendChannelUpdate(0);
-                            Finish(false);
-                            return;
-                        }
-
-                        if (ground + 0.75 > liquidLevel)
-                        {
-                            SendCastResult(SpellCastResult.TooShallow);
-                            SendChannelUpdate(0);
-                            Finish(false);
-                            return;
-                        }
-
-                        dest = new SpellDestination(x, y, liquidLevel, m_caster.GetOrientation());
-                        break;
+                        SendCastResult(SpellCastResult.NotHere);
+                        SendChannelUpdate(0);
+                        Finish(false);
+                        return;
                     }
+
+                    if (ground + 0.75 > liquidLevel)
+                    {
+                        SendCastResult(SpellCastResult.TooShallow);
+                        SendChannelUpdate(0);
+                        Finish(false);
+                        return;
+                    }
+
+                    dest = new SpellDestination(x, y, liquidLevel, m_caster.GetOrientation());
+                    break;
+                }
+                case Targets.DestCasterFrontLeap:
+                {
+                    float dist = m_spellInfo.GetEffect(effIndex).CalcRadius(m_caster);
+                    float angle = targetType.CalcDirectionAngle();
+
+                    Position pos = new(dest.Position);
+
+                    m_caster.MovePositionToFirstCollision(pos, dist, angle);
+                    // Generate path to that point.
+                    if (m_preGeneratedPath == null)
+                        m_preGeneratedPath = new(m_caster);
+
+                    m_preGeneratedPath.SetPathLengthLimit(dist);
+
+                    // Should we use straightline here ? What do we do when we don't have a full path ?
+                    bool pathResult = m_preGeneratedPath.CalculatePath(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), false, true);
+                    if (pathResult && m_preGeneratedPath.GetPathType().HasFlag(PathType.Normal | PathType.Shortcut))
+                    {
+                        pos.posX = m_preGeneratedPath.GetActualEndPosition().X;
+                        pos.posY = m_preGeneratedPath.GetActualEndPosition().Y;
+                        pos.posZ = m_preGeneratedPath.GetActualEndPosition().Z;
+                    }
+
+                    dest.Relocate(pos);
+                    break;
+                }
                 case Targets.DestCasterGround:
                     m_caster.UpdateAllowedPositionZ(dest.Position.GetPositionX(), dest.Position.GetPositionY(), ref dest.Position.posZ);
                     break;
@@ -915,12 +941,12 @@ namespace Game.Spells
                             case Targets.DestCasterBackLeft:
                             case Targets.DestCasterFrontRight:
                             case Targets.DestCasterBackRight:
-                                {
-                                    float DefaultTotemDistance = 3.0f;
-                                    if (!effect.HasRadius() && !effect.HasMaxRadius())
-                                        dist = DefaultTotemDistance;
-                                    break;
-                                }
+                            {
+                                float DefaultTotemDistance = 3.0f;
+                                if (!effect.HasRadius() && !effect.HasMaxRadius())
+                                    dist = DefaultTotemDistance;
+                                break;
+                            }
                             default:
                                 break;
                         }
@@ -3226,7 +3252,39 @@ namespace Game.Spells
             switch (m_spellState)
             {
                 case SpellState.Preparing:
+                {
+                    if (m_timer > 0)
                     {
+                        if (difftime >= m_timer)
+                            m_timer = 0;
+                        else
+                            m_timer -= (int)difftime;
+                    }
+
+                    if (m_timer == 0 && !m_spellInfo.IsNextMeleeSwingSpell() && !IsAutoRepeat())
+                        // don't CheckCast for instant spells - done in spell.prepare, skip duplicate checks, needed for range checks for example
+                        Cast(m_casttime == 0);
+                    break;
+                }
+                case SpellState.Casting:
+                {
+                    if (m_timer != 0)
+                    {
+                        // check if there are alive targets left
+                        if (!UpdateChanneledTargetList())
+                        {
+                            Log.outDebug(LogFilter.Spells, "Channeled spell {0} is removed due to lack of targets", m_spellInfo.Id);
+                            m_timer = 0;
+
+                            // Also remove applied auras
+                            foreach (TargetInfo target in m_UniqueTargetInfo)
+                            {
+                                Unit unit = m_caster.GetGUID() == target.targetGUID ? m_caster : Global.ObjAccessor.GetUnit(m_caster, target.targetGUID);
+                                if (unit)
+                                    unit.RemoveOwnedAura(m_spellInfo.Id, m_originalCasterGUID, 0, AuraRemoveMode.Cancel);
+                            }
+                        }
+
                         if (m_timer > 0)
                         {
                             if (difftime >= m_timer)
@@ -3234,47 +3292,15 @@ namespace Game.Spells
                             else
                                 m_timer -= (int)difftime;
                         }
-
-                        if (m_timer == 0 && !m_spellInfo.IsNextMeleeSwingSpell() && !IsAutoRepeat())
-                            // don't CheckCast for instant spells - done in spell.prepare, skip duplicate checks, needed for range checks for example
-                            Cast(m_casttime == 0);
-                        break;
                     }
-                case SpellState.Casting:
+
+                    if (m_timer == 0)
                     {
-                        if (m_timer != 0)
-                        {
-                            // check if there are alive targets left
-                            if (!UpdateChanneledTargetList())
-                            {
-                                Log.outDebug(LogFilter.Spells, "Channeled spell {0} is removed due to lack of targets", m_spellInfo.Id);
-                                m_timer = 0;
-
-                                // Also remove applied auras
-                                foreach (TargetInfo target in m_UniqueTargetInfo)
-                                {
-                                    Unit unit = m_caster.GetGUID() == target.targetGUID ? m_caster : Global.ObjAccessor.GetUnit(m_caster, target.targetGUID);
-                                    if (unit)
-                                        unit.RemoveOwnedAura(m_spellInfo.Id, m_originalCasterGUID, 0, AuraRemoveMode.Cancel);
-                                }
-                            }
-
-                            if (m_timer > 0)
-                            {
-                                if (difftime >= m_timer)
-                                    m_timer = 0;
-                                else
-                                    m_timer -= (int)difftime;
-                            }
-                        }
-
-                        if (m_timer == 0)
-                        {
-                            SendChannelUpdate(0);
-                            Finish();
-                        }
-                        break;
+                        SendChannelUpdate(0);
+                        Finish();
                     }
+                    break;
+                }
                 default:
                     break;
             }
@@ -3437,22 +3463,22 @@ namespace Game.Spells
                     }
                     break;
                 case SpellCastResult.TooManyOfItem:
+                {
+                    if (param1.HasValue)
+                        packet.FailedArg1 = (int)param1;
+                    else
                     {
-                        if (param1.HasValue)
-                            packet.FailedArg1 = (int)param1;
-                        else
-                        {
-                            uint item = 0;
-                            foreach (SpellEffectInfo effect in spellInfo.GetEffects())
-                                if (effect != null && effect.ItemType != 0)
-                                    item = effect.ItemType;
+                        uint item = 0;
+                        foreach (SpellEffectInfo effect in spellInfo.GetEffects())
+                            if (effect != null && effect.ItemType != 0)
+                                item = effect.ItemType;
 
-                            ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(item);
-                            if (proto != null && proto.GetItemLimitCategory() != 0)
-                                packet.FailedArg1 = (int)proto.GetItemLimitCategory();
-                        }
-                        break;
+                        ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(item);
+                        if (proto != null && proto.GetItemLimitCategory() != 0)
+                            packet.FailedArg1 = (int)proto.GetItemLimitCategory();
                     }
+                    break;
+                }
                 case SpellCastResult.PreventedByMechanic:
                     if (param1.HasValue)
                         packet.FailedArg1 = (int)param1;
@@ -3505,37 +3531,37 @@ namespace Game.Spells
                         packet.FailedArg1 = 0;                              // Unknown
                     break;
                 case SpellCastResult.Reagents:
-                    {
-                        if (param1.HasValue)
-                            packet.FailedArg1 = (int)param1;
-                        else
-                        {
-                            uint missingItem = 0;
-                            for (uint i = 0; i < SpellConst.MaxReagents; i++)
-                            {
-                                if (spellInfo.Reagent[i] <= 0)
-                                    continue;
-
-                                uint itemid = (uint)spellInfo.Reagent[i];
-                                uint itemcount = spellInfo.ReagentCount[i];
-
-                                if (!caster.HasItemCount(itemid, itemcount))
-                                {
-                                    missingItem = itemid;
-                                    break;
-                                }
-                            }
-
-                            packet.FailedArg1 = (int)missingItem;  // first missing item
-                        }
-                        break;
-                    }
-                case SpellCastResult.CantUntalent:
-                    {
-                        Cypher.Assert(param1.HasValue);
+                {
+                    if (param1.HasValue)
                         packet.FailedArg1 = (int)param1;
-                        break;
+                    else
+                    {
+                        uint missingItem = 0;
+                        for (uint i = 0; i < SpellConst.MaxReagents; i++)
+                        {
+                            if (spellInfo.Reagent[i] <= 0)
+                                continue;
+
+                            uint itemid = (uint)spellInfo.Reagent[i];
+                            uint itemcount = spellInfo.ReagentCount[i];
+
+                            if (!caster.HasItemCount(itemid, itemcount))
+                            {
+                                missingItem = itemid;
+                                break;
+                            }
+                        }
+
+                        packet.FailedArg1 = (int)missingItem;  // first missing item
                     }
+                    break;
+                }
+                case SpellCastResult.CantUntalent:
+                {
+                    Cypher.Assert(param1.HasValue);
+                    packet.FailedArg1 = (int)param1;
+                    break;
+                }
                 // TODO: SPELL_FAILED_NOT_STANDING
                 default:
                     break;
@@ -3810,7 +3836,7 @@ namespace Game.Spells
 
             packet.LogData.Initialize(this);
 
-            
+
             m_caster.SendCombatLogMessage(packet);
         }
 
@@ -4851,494 +4877,494 @@ namespace Game.Spells
                 switch (effect.Effect)
                 {
                     case SpellEffectName.Dummy:
+                    {
+                        if (m_spellInfo.Id == 19938)          // Awaken Peon
                         {
-                            if (m_spellInfo.Id == 19938)          // Awaken Peon
-                            {
-                                Unit unit = m_targets.GetUnitTarget();
-                                if (unit == null || !unit.HasAura(17743))
-                                    return SpellCastResult.BadTargets;
-                            }
-                            else if (m_spellInfo.Id == 31789)          // Righteous Defense
-                            {
-                                if (!m_caster.IsTypeId(TypeId.Player))
-                                    return SpellCastResult.DontReport;
-
-                                Unit target = m_targets.GetUnitTarget();
-                                if (target == null || !target.IsFriendlyTo(m_caster) || target.GetAttackers().Empty())
-                                    return SpellCastResult.BadTargets;
-
-                            }
-                            break;
+                            Unit unit = m_targets.GetUnitTarget();
+                            if (unit == null || !unit.HasAura(17743))
+                                return SpellCastResult.BadTargets;
                         }
-                    case SpellEffectName.LearnSpell:
+                        else if (m_spellInfo.Id == 31789)          // Righteous Defense
                         {
-                            if (effect.TargetA.GetTarget() != Targets.UnitPet)
-                                break;
+                            if (!m_caster.IsTypeId(TypeId.Player))
+                                return SpellCastResult.DontReport;
 
-                            Pet pet = m_caster.ToPlayer().GetPet();
-                            if (pet == null)
-                                return SpellCastResult.NoPet;
+                            Unit target = m_targets.GetUnitTarget();
+                            if (target == null || !target.IsFriendlyTo(m_caster) || target.GetAttackers().Empty())
+                                return SpellCastResult.BadTargets;
+
+                        }
+                        break;
+                    }
+                    case SpellEffectName.LearnSpell:
+                    {
+                        if (effect.TargetA.GetTarget() != Targets.UnitPet)
+                            break;
+
+                        Pet pet = m_caster.ToPlayer().GetPet();
+                        if (pet == null)
+                            return SpellCastResult.NoPet;
+
+                        SpellInfo learn_spellproto = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, Difficulty.None);
+
+                        if (learn_spellproto == null)
+                            return SpellCastResult.NotKnown;
+
+                        if (m_spellInfo.SpellLevel > pet.GetLevel())
+                            return SpellCastResult.Lowlevel;
+
+                        break;
+                    }
+                    case SpellEffectName.UnlockGuildVaultTab:
+                    {
+                        if (!m_caster.IsTypeId(TypeId.Player))
+                            return SpellCastResult.BadTargets;
+                        var guild = m_caster.ToPlayer().GetGuild();
+                        if (guild != null)
+                            if (guild.GetLeaderGUID() != m_caster.ToPlayer().GetGUID())
+                                return SpellCastResult.CantDoThatRightNow;
+                        break;
+                    }
+                    case SpellEffectName.LearnPetSpell:
+                    {
+                        // check target only for unit target case
+                        Unit target = m_targets.GetUnitTarget();
+                        if (target != null)
+                        {
+                            if (!m_caster.IsTypeId(TypeId.Player))
+                                return SpellCastResult.BadTargets;
+
+                            Pet pet = target.ToPet();
+                            if (pet == null || pet.GetOwner() != m_caster)
+                                return SpellCastResult.BadTargets;
 
                             SpellInfo learn_spellproto = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, Difficulty.None);
-
                             if (learn_spellproto == null)
                                 return SpellCastResult.NotKnown;
 
                             if (m_spellInfo.SpellLevel > pet.GetLevel())
                                 return SpellCastResult.Lowlevel;
-
-                            break;
                         }
-                    case SpellEffectName.UnlockGuildVaultTab:
-                        {
-                            if (!m_caster.IsTypeId(TypeId.Player))
-                                return SpellCastResult.BadTargets;
-                            var guild = m_caster.ToPlayer().GetGuild();
-                            if (guild != null)
-                                if (guild.GetLeaderGUID() != m_caster.ToPlayer().GetGUID())
-                                    return SpellCastResult.CantDoThatRightNow;
-                            break;
-                        }
-                    case SpellEffectName.LearnPetSpell:
-                        {
-                            // check target only for unit target case
-                            Unit target = m_targets.GetUnitTarget();
-                            if (target != null)
-                            {
-                                if (!m_caster.IsTypeId(TypeId.Player))
-                                    return SpellCastResult.BadTargets;
-
-                                Pet pet = target.ToPet();
-                                if (pet == null || pet.GetOwner() != m_caster)
-                                    return SpellCastResult.BadTargets;
-
-                                SpellInfo learn_spellproto = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, Difficulty.None);
-                                if (learn_spellproto == null)
-                                    return SpellCastResult.NotKnown;
-
-                                if (m_spellInfo.SpellLevel > pet.GetLevel())
-                                    return SpellCastResult.Lowlevel;
-                            }
-                            break;
-                        }
+                        break;
+                    }
                     case SpellEffectName.ApplyGlyph:
+                    {
+                        if (!m_caster.IsTypeId(TypeId.Player))
+                            return SpellCastResult.GlyphNoSpec;
+
+                        Player caster = m_caster.ToPlayer();
+                        if (!caster.HasSpell(m_misc.SpellId))
+                            return SpellCastResult.NotKnown;
+
+                        uint glyphId = (uint)effect.MiscValue;
+                        if (glyphId != 0)
                         {
-                            if (!m_caster.IsTypeId(TypeId.Player))
-                                return SpellCastResult.GlyphNoSpec;
+                            GlyphPropertiesRecord glyphProperties = CliDB.GlyphPropertiesStorage.LookupByKey(glyphId);
+                            if (glyphProperties == null)
+                                return SpellCastResult.InvalidGlyph;
 
-                            Player caster = m_caster.ToPlayer();
-                            if (!caster.HasSpell(m_misc.SpellId))
-                                return SpellCastResult.NotKnown;
+                            List<uint> glyphBindableSpells = Global.DB2Mgr.GetGlyphBindableSpells(glyphId);
+                            if (glyphBindableSpells.Empty())
+                                return SpellCastResult.InvalidGlyph;
 
-                            uint glyphId = (uint)effect.MiscValue;
-                            if (glyphId != 0)
+                            if (!glyphBindableSpells.Contains(m_misc.SpellId))
+                                return SpellCastResult.InvalidGlyph;
+
+                            List<uint> glyphRequiredSpecs = Global.DB2Mgr.GetGlyphRequiredSpecs(glyphId);
+                            if (!glyphRequiredSpecs.Empty())
                             {
-                                GlyphPropertiesRecord glyphProperties = CliDB.GlyphPropertiesStorage.LookupByKey(glyphId);
-                                if (glyphProperties == null)
-                                    return SpellCastResult.InvalidGlyph;
+                                if (caster.GetPrimarySpecialization() == 0)
+                                    return SpellCastResult.GlyphNoSpec;
 
-                                List<uint> glyphBindableSpells = Global.DB2Mgr.GetGlyphBindableSpells(glyphId);
-                                if (glyphBindableSpells.Empty())
-                                    return SpellCastResult.InvalidGlyph;
+                                if (!glyphRequiredSpecs.Contains(caster.GetPrimarySpecialization()))
+                                    return SpellCastResult.GlyphInvalidSpec;
+                            }
 
-                                if (!glyphBindableSpells.Contains(m_misc.SpellId))
-                                    return SpellCastResult.InvalidGlyph;
-
-                                List<uint> glyphRequiredSpecs = Global.DB2Mgr.GetGlyphRequiredSpecs(glyphId);
-                                if (!glyphRequiredSpecs.Empty())
+                            uint replacedGlyph = 0;
+                            foreach (uint activeGlyphId in caster.GetGlyphs(caster.GetActiveTalentGroup()))
+                            {
+                                List<uint> activeGlyphBindableSpells = Global.DB2Mgr.GetGlyphBindableSpells(activeGlyphId);
+                                if (!activeGlyphBindableSpells.Empty())
                                 {
-                                    if (caster.GetPrimarySpecialization() == 0)
-                                        return SpellCastResult.GlyphNoSpec;
-
-                                    if (!glyphRequiredSpecs.Contains(caster.GetPrimarySpecialization()))
-                                        return SpellCastResult.GlyphInvalidSpec;
-                                }
-
-                                uint replacedGlyph = 0;
-                                foreach (uint activeGlyphId in caster.GetGlyphs(caster.GetActiveTalentGroup()))
-                                {
-                                    List<uint> activeGlyphBindableSpells = Global.DB2Mgr.GetGlyphBindableSpells(activeGlyphId);
-                                    if (!activeGlyphBindableSpells.Empty())
+                                    if (activeGlyphBindableSpells.Contains(m_misc.SpellId))
                                     {
-                                        if (activeGlyphBindableSpells.Contains(m_misc.SpellId))
-                                        {
-                                            replacedGlyph = activeGlyphId;
-                                            break;
-                                        }
+                                        replacedGlyph = activeGlyphId;
+                                        break;
                                     }
                                 }
-
-                                foreach (uint activeGlyphId in caster.GetGlyphs(caster.GetActiveTalentGroup()))
-                                {
-                                    if (activeGlyphId == replacedGlyph)
-                                        continue;
-
-                                    if (activeGlyphId == glyphId)
-                                        return SpellCastResult.UniqueGlyph;
-
-                                    if (CliDB.GlyphPropertiesStorage.LookupByKey(activeGlyphId).GlyphExclusiveCategoryID == glyphProperties.GlyphExclusiveCategoryID)
-                                        return SpellCastResult.GlyphExclusiveCategory;
-                                }
                             }
-                            break;
-                        }
-                    case SpellEffectName.FeedPet:
-                        {
-                            if (!m_caster.IsTypeId(TypeId.Player))
-                                return SpellCastResult.BadTargets;
 
-                            Item foodItem = m_targets.GetItemTarget();
-                            if (!foodItem)
-                                return SpellCastResult.BadTargets;
-
-                            Pet pet = m_caster.ToPlayer().GetPet();
-                            if (!pet)
-                                return SpellCastResult.NoPet;
-
-                            if (!pet.HaveInDiet(foodItem.GetTemplate()))
-                                return SpellCastResult.WrongPetFood;
-
-                            if (foodItem.GetTemplate().GetBaseItemLevel() + 30 <= pet.GetLevel())
-                                return SpellCastResult.FoodLowlevel;
-
-                            if (m_caster.IsInCombat() || pet.IsInCombat())
-                                return SpellCastResult.AffectingCombat;
-
-                            break;
-                        }
-                    case SpellEffectName.Charge:
-                        {
-                            if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreCasterAuras) && m_caster.HasUnitState(UnitState.Root))
-                                return SpellCastResult.Rooted;
-
-                            if (GetSpellInfo().NeedsExplicitUnitTarget())
+                            foreach (uint activeGlyphId in caster.GetGlyphs(caster.GetActiveTalentGroup()))
                             {
-                                Unit target = m_targets.GetUnitTarget();
-                                if (target == null)
-                                    return SpellCastResult.DontReport;
+                                if (activeGlyphId == replacedGlyph)
+                                    continue;
 
-                                // first we must check to see if the target is in LoS. A path can usually be built but LoS matters for charge spells
-                                if (!target.IsWithinLOSInMap(m_caster)) //Do full LoS/Path check. Don't exclude m2
-                                    return SpellCastResult.LineOfSight;
+                                if (activeGlyphId == glyphId)
+                                    return SpellCastResult.UniqueGlyph;
 
-                                float objSize = target.GetCombatReach();
-                                float range = m_spellInfo.GetMaxRange(true, m_caster, this) * 1.5f + objSize; // can't be overly strict
+                                if (CliDB.GlyphPropertiesStorage.LookupByKey(activeGlyphId).GlyphExclusiveCategoryID == glyphProperties.GlyphExclusiveCategoryID)
+                                    return SpellCastResult.GlyphExclusiveCategory;
+                            }
+                        }
+                        break;
+                    }
+                    case SpellEffectName.FeedPet:
+                    {
+                        if (!m_caster.IsTypeId(TypeId.Player))
+                            return SpellCastResult.BadTargets;
 
-                                m_preGeneratedPath.SetPathLengthLimit(range);
-                                //first try with raycast, if it fails fall back to normal path
-                                float targetObjectSize = Math.Min(target.GetCombatReach(), 4.0f);
-                                bool result = m_preGeneratedPath.CalculatePath(target.GetPositionX(), target.GetPositionY(), target.GetPositionZ() + targetObjectSize, false, true);
+                        Item foodItem = m_targets.GetItemTarget();
+                        if (!foodItem)
+                            return SpellCastResult.BadTargets;
+
+                        Pet pet = m_caster.ToPlayer().GetPet();
+                        if (!pet)
+                            return SpellCastResult.NoPet;
+
+                        if (!pet.HaveInDiet(foodItem.GetTemplate()))
+                            return SpellCastResult.WrongPetFood;
+
+                        if (foodItem.GetTemplate().GetBaseItemLevel() + 30 <= pet.GetLevel())
+                            return SpellCastResult.FoodLowlevel;
+
+                        if (m_caster.IsInCombat() || pet.IsInCombat())
+                            return SpellCastResult.AffectingCombat;
+
+                        break;
+                    }
+                    case SpellEffectName.Charge:
+                    {
+                        if (!_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.IgnoreCasterAuras) && m_caster.HasUnitState(UnitState.Root))
+                            return SpellCastResult.Rooted;
+
+                        if (GetSpellInfo().NeedsExplicitUnitTarget())
+                        {
+                            Unit target = m_targets.GetUnitTarget();
+                            if (target == null)
+                                return SpellCastResult.DontReport;
+
+                            // first we must check to see if the target is in LoS. A path can usually be built but LoS matters for charge spells
+                            if (!target.IsWithinLOSInMap(m_caster)) //Do full LoS/Path check. Don't exclude m2
+                                return SpellCastResult.LineOfSight;
+
+                            float objSize = target.GetCombatReach();
+                            float range = m_spellInfo.GetMaxRange(true, m_caster, this) * 1.5f + objSize; // can't be overly strict
+
+                            m_preGeneratedPath.SetPathLengthLimit(range);
+                            //first try with raycast, if it fails fall back to normal path
+                            float targetObjectSize = Math.Min(target.GetCombatReach(), 4.0f);
+                            bool result = m_preGeneratedPath.CalculatePath(target.GetPositionX(), target.GetPositionY(), target.GetPositionZ() + targetObjectSize, false, true);
+                            if (m_preGeneratedPath.GetPathType().HasAnyFlag(PathType.Short))
+                                return SpellCastResult.OutOfRange;
+                            else if (!result || m_preGeneratedPath.GetPathType().HasAnyFlag(PathType.NoPath | PathType.Incomplete))
+                            {
+                                result = m_preGeneratedPath.CalculatePath(target.GetPositionX(), target.GetPositionY(), target.GetPositionZ() + targetObjectSize, false, false);
                                 if (m_preGeneratedPath.GetPathType().HasAnyFlag(PathType.Short))
                                     return SpellCastResult.OutOfRange;
                                 else if (!result || m_preGeneratedPath.GetPathType().HasAnyFlag(PathType.NoPath | PathType.Incomplete))
-                                {
-                                    result = m_preGeneratedPath.CalculatePath(target.GetPositionX(), target.GetPositionY(), target.GetPositionZ() + targetObjectSize, false, false);
-                                    if (m_preGeneratedPath.GetPathType().HasAnyFlag(PathType.Short))
-                                        return SpellCastResult.OutOfRange;
-                                    else if (!result || m_preGeneratedPath.GetPathType().HasAnyFlag(PathType.NoPath | PathType.Incomplete))
-                                        return SpellCastResult.NoPath;
-                                    else if (m_preGeneratedPath.IsInvalidDestinationZ(target)) // Check position z, if not in a straight line
-                                        return SpellCastResult.NoPath;
-                                }
-                                else if (m_preGeneratedPath.IsInvalidDestinationZ(target)) // Check position z, if in a straight line
                                     return SpellCastResult.NoPath;
-
-                                m_preGeneratedPath.ReducePathLenghtByDist(objSize); //move back
+                                else if (m_preGeneratedPath.IsInvalidDestinationZ(target)) // Check position z, if not in a straight line
+                                    return SpellCastResult.NoPath;
                             }
-                            break;
+                            else if (m_preGeneratedPath.IsInvalidDestinationZ(target)) // Check position z, if in a straight line
+                                return SpellCastResult.NoPath;
+
+                            m_preGeneratedPath.ReducePathLenghtByDist(objSize); //move back
                         }
+                        break;
+                    }
                     case SpellEffectName.Skinning:
-                        {
-                            if (!m_caster.IsTypeId(TypeId.Player) || m_targets.GetUnitTarget() == null || !m_targets.GetUnitTarget().IsTypeId(TypeId.Unit))
-                                return SpellCastResult.BadTargets;
+                    {
+                        if (!m_caster.IsTypeId(TypeId.Player) || m_targets.GetUnitTarget() == null || !m_targets.GetUnitTarget().IsTypeId(TypeId.Unit))
+                            return SpellCastResult.BadTargets;
 
-                            if (!m_targets.GetUnitTarget().HasUnitFlag(UnitFlags.Skinnable))
-                                return SpellCastResult.TargetUnskinnable;
+                        if (!m_targets.GetUnitTarget().HasUnitFlag(UnitFlags.Skinnable))
+                            return SpellCastResult.TargetUnskinnable;
 
-                            Creature creature = m_targets.GetUnitTarget().ToCreature();
-                            if (!creature.IsCritter() && !creature.loot.IsLooted())
-                                return SpellCastResult.TargetNotLooted;
+                        Creature creature = m_targets.GetUnitTarget().ToCreature();
+                        if (!creature.IsCritter() && !creature.loot.IsLooted())
+                            return SpellCastResult.TargetNotLooted;
 
-                            SkillType skill = creature.GetCreatureTemplate().GetRequiredLootSkill();
+                        SkillType skill = creature.GetCreatureTemplate().GetRequiredLootSkill();
 
-                            ushort skillValue = m_caster.ToPlayer().GetSkillValue(skill);
-                            uint TargetLevel = m_targets.GetUnitTarget().GetLevelForTarget(m_caster);
-                            int ReqValue = (int)(skillValue < 100 ? (TargetLevel - 10) * 10 : TargetLevel * 5);
-                            if (ReqValue > skillValue)
-                                return SpellCastResult.LowCastlevel;
+                        ushort skillValue = m_caster.ToPlayer().GetSkillValue(skill);
+                        uint TargetLevel = m_targets.GetUnitTarget().GetLevelForTarget(m_caster);
+                        int ReqValue = (int)(skillValue < 100 ? (TargetLevel - 10) * 10 : TargetLevel * 5);
+                        if (ReqValue > skillValue)
+                            return SpellCastResult.LowCastlevel;
 
-                            break;
-                        }
+                        break;
+                    }
                     case SpellEffectName.OpenLock:
-                        {
-                            if (effect.TargetA.GetTarget() != Targets.GameobjectTarget &&
-                                effect.TargetA.GetTarget() != Targets.GameobjectItemTarget)
-                                break;
-
-                            if (!m_caster.IsTypeId(TypeId.Player)  // only players can open locks, gather etc.
-                                                                   // we need a go target in case of TARGET_GAMEOBJECT_TARGET
-                                || (effect.TargetA.GetTarget() == Targets.GameobjectTarget && m_targets.GetGOTarget() == null))
-                                return SpellCastResult.BadTargets;
-
-                            Item pTempItem = null;
-                            if (Convert.ToBoolean(m_targets.GetTargetMask() & SpellCastTargetFlags.TradeItem))
-                            {
-                                TradeData pTrade = m_caster.ToPlayer().GetTradeData();
-                                if (pTrade != null)
-                                    pTempItem = pTrade.GetTraderData().GetItem(TradeSlots.NonTraded);
-                            }
-                            else if (Convert.ToBoolean(m_targets.GetTargetMask() & SpellCastTargetFlags.Item))
-                                pTempItem = m_caster.ToPlayer().GetItemByGuid(m_targets.GetItemTargetGUID());
-
-                            // we need a go target, or an openable item target in case of TARGET_GAMEOBJECT_ITEM_TARGET
-                            if (effect.TargetA.GetTarget() == Targets.GameobjectItemTarget &&
-                                m_targets.GetGOTarget() == null && (pTempItem == null || pTempItem.GetTemplate().GetLockID() == 0 || !pTempItem.IsLocked()))
-                                return SpellCastResult.BadTargets;
-
-                            if (m_spellInfo.Id != 1842 || (m_targets.GetGOTarget() != null &&
-                                m_targets.GetGOTarget().GetGoInfo().type != GameObjectTypes.Trap))
-                                if (m_caster.ToPlayer().InBattleground() && // In Battlegroundplayers can use only flags and banners
-                                    !m_caster.ToPlayer().CanUseBattlegroundObject(m_targets.GetGOTarget()))
-                                    return SpellCastResult.TryAgain;
-
-                            // get the lock entry
-                            uint lockId = 0;
-                            GameObject go = m_targets.GetGOTarget();
-                            Item itm = m_targets.GetItemTarget();
-                            if (go != null)
-                            {
-                                lockId = go.GetGoInfo().GetLockId();
-                                if (lockId == 0)
-                                    return SpellCastResult.BadTargets;
-                            }
-                            else if (itm != null)
-                                lockId = itm.GetTemplate().GetLockID();
-
-                            SkillType skillId = SkillType.None;
-                            int reqSkillValue = 0;
-                            int skillValue = 0;
-
-                            // check lock compatibility
-                            SpellCastResult res = CanOpenLock(effect.EffectIndex, lockId, ref skillId, ref reqSkillValue, ref skillValue);
-                            if (res != SpellCastResult.SpellCastOk)
-                                return res;
+                    {
+                        if (effect.TargetA.GetTarget() != Targets.GameobjectTarget &&
+                            effect.TargetA.GetTarget() != Targets.GameobjectItemTarget)
                             break;
+
+                        if (!m_caster.IsTypeId(TypeId.Player)  // only players can open locks, gather etc.
+                                                               // we need a go target in case of TARGET_GAMEOBJECT_TARGET
+                            || (effect.TargetA.GetTarget() == Targets.GameobjectTarget && m_targets.GetGOTarget() == null))
+                            return SpellCastResult.BadTargets;
+
+                        Item pTempItem = null;
+                        if (Convert.ToBoolean(m_targets.GetTargetMask() & SpellCastTargetFlags.TradeItem))
+                        {
+                            TradeData pTrade = m_caster.ToPlayer().GetTradeData();
+                            if (pTrade != null)
+                                pTempItem = pTrade.GetTraderData().GetItem(TradeSlots.NonTraded);
                         }
+                        else if (Convert.ToBoolean(m_targets.GetTargetMask() & SpellCastTargetFlags.Item))
+                            pTempItem = m_caster.ToPlayer().GetItemByGuid(m_targets.GetItemTargetGUID());
+
+                        // we need a go target, or an openable item target in case of TARGET_GAMEOBJECT_ITEM_TARGET
+                        if (effect.TargetA.GetTarget() == Targets.GameobjectItemTarget &&
+                            m_targets.GetGOTarget() == null && (pTempItem == null || pTempItem.GetTemplate().GetLockID() == 0 || !pTempItem.IsLocked()))
+                            return SpellCastResult.BadTargets;
+
+                        if (m_spellInfo.Id != 1842 || (m_targets.GetGOTarget() != null &&
+                            m_targets.GetGOTarget().GetGoInfo().type != GameObjectTypes.Trap))
+                            if (m_caster.ToPlayer().InBattleground() && // In Battlegroundplayers can use only flags and banners
+                                !m_caster.ToPlayer().CanUseBattlegroundObject(m_targets.GetGOTarget()))
+                                return SpellCastResult.TryAgain;
+
+                        // get the lock entry
+                        uint lockId = 0;
+                        GameObject go = m_targets.GetGOTarget();
+                        Item itm = m_targets.GetItemTarget();
+                        if (go != null)
+                        {
+                            lockId = go.GetGoInfo().GetLockId();
+                            if (lockId == 0)
+                                return SpellCastResult.BadTargets;
+                        }
+                        else if (itm != null)
+                            lockId = itm.GetTemplate().GetLockID();
+
+                        SkillType skillId = SkillType.None;
+                        int reqSkillValue = 0;
+                        int skillValue = 0;
+
+                        // check lock compatibility
+                        SpellCastResult res = CanOpenLock(effect.EffectIndex, lockId, ref skillId, ref reqSkillValue, ref skillValue);
+                        if (res != SpellCastResult.SpellCastOk)
+                            return res;
+                        break;
+                    }
                     case SpellEffectName.ResurrectPet:
-                        {
-                            Creature pet = m_caster.GetGuardianPet();
+                    {
+                        Creature pet = m_caster.GetGuardianPet();
 
-                            if (pet != null && pet.IsAlive())
-                                return SpellCastResult.AlreadyHaveSummon;
+                        if (pet != null && pet.IsAlive())
+                            return SpellCastResult.AlreadyHaveSummon;
 
-                            break;
-                        }
+                        break;
+                    }
                     // This is generic summon effect
                     case SpellEffectName.Summon:
+                    {
+                        var SummonProperties = CliDB.SummonPropertiesStorage.LookupByKey(effect.MiscValueB);
+                        if (SummonProperties == null)
+                            break;
+
+                        switch (SummonProperties.Control)
                         {
-                            var SummonProperties = CliDB.SummonPropertiesStorage.LookupByKey(effect.MiscValueB);
-                            if (SummonProperties == null)
+                            case SummonCategory.Pet:
+                                if (!m_spellInfo.HasAttribute(SpellAttr1.DismissPet) && !m_caster.GetPetGUID().IsEmpty())
+                                    return SpellCastResult.AlreadyHaveSummon;
                                 break;
-
-                            switch (SummonProperties.Control)
-                            {
-                                case SummonCategory.Pet:
-                                    if (!m_spellInfo.HasAttribute(SpellAttr1.DismissPet) && !m_caster.GetPetGUID().IsEmpty())
-                                        return SpellCastResult.AlreadyHaveSummon;
-                                    break;
-                                case SummonCategory.Puppet:
-                                    if (!m_caster.GetCharmGUID().IsEmpty())
-                                        return SpellCastResult.AlreadyHaveCharm;
-                                    break;
-                            }
-                            break;
+                            case SummonCategory.Puppet:
+                                if (!m_caster.GetCharmGUID().IsEmpty())
+                                    return SpellCastResult.AlreadyHaveCharm;
+                                break;
                         }
+                        break;
+                    }
                     case SpellEffectName.CreateTamedPet:
+                    {
+                        if (m_targets.GetUnitTarget() != null)
                         {
-                            if (m_targets.GetUnitTarget() != null)
-                            {
-                                if (!m_targets.GetUnitTarget().IsTypeId(TypeId.Player))
-                                    return SpellCastResult.BadTargets;
-                                if (!m_spellInfo.HasAttribute(SpellAttr1.DismissPet) && !m_targets.GetUnitTarget().GetPetGUID().IsEmpty())
-                                    return SpellCastResult.AlreadyHaveSummon;
-                            }
-                            break;
+                            if (!m_targets.GetUnitTarget().IsTypeId(TypeId.Player))
+                                return SpellCastResult.BadTargets;
+                            if (!m_spellInfo.HasAttribute(SpellAttr1.DismissPet) && !m_targets.GetUnitTarget().GetPetGUID().IsEmpty())
+                                return SpellCastResult.AlreadyHaveSummon;
                         }
+                        break;
+                    }
                     case SpellEffectName.SummonPet:
+                    {
+                        if (!m_caster.GetPetGUID().IsEmpty())                  //let warlock do a replacement summon
                         {
-                            if (!m_caster.GetPetGUID().IsEmpty())                  //let warlock do a replacement summon
-                            {
-                                if (m_caster.IsTypeId(TypeId.Player))
-                                {
-                                    if (strict)                         //starting cast, trigger pet stun (cast by pet so it doesn't attack player)
-                                    {
-                                        Pet pet = m_caster.ToPlayer().GetPet();
-                                        if (pet != null)
-                                            pet.CastSpell(pet, 32752, new CastSpellExtraArgs(pet.GetGUID()));
-                                    }
-                                }
-                                else if (!m_spellInfo.HasAttribute(SpellAttr1.DismissPet))
-                                    return SpellCastResult.AlreadyHaveSummon;
-                            }
-
-                            if (!m_caster.GetCharmGUID().IsEmpty())
-                                return SpellCastResult.AlreadyHaveCharm;
-                            break;
-                        }
-                    case SpellEffectName.SummonPlayer:
-                        {
-                            if (!m_caster.IsTypeId(TypeId.Player))
-                                return SpellCastResult.BadTargets;
-                            if (m_caster.ToPlayer().GetTarget().IsEmpty())
-                                return SpellCastResult.BadTargets;
-
-                            Player target = Global.ObjAccessor.FindPlayer(m_caster.ToPlayer().GetTarget());
-                            if (target == null || m_caster.ToPlayer() == target || (!target.IsInSameRaidWith(m_caster.ToPlayer()) && m_spellInfo.Id != 48955)) // refer-a-friend spell
-                                return SpellCastResult.BadTargets;
-
-                            if (target.HasSummonPending())
-                                return SpellCastResult.SummonPending;
-
-                            // check if our map is dungeon
-                            MapRecord map = CliDB.MapStorage.LookupByKey(m_caster.GetMapId());
-                            if (map.IsDungeon())
-                            {
-                                uint mapId = m_caster.GetMap().GetId();
-                                Difficulty difficulty = m_caster.GetMap().GetDifficultyID();
-                                if (map.IsRaid())
-                                {
-                                    InstanceBind targetBind = target.GetBoundInstance(mapId, difficulty);
-                                    if (targetBind != null)
-                                    {
-                                        InstanceBind casterBind = m_caster.ToPlayer().GetBoundInstance(mapId, difficulty);
-                                        if (casterBind != null)
-                                            if (targetBind.perm && targetBind.save != casterBind.save)
-                                                return SpellCastResult.TargetLockedToRaidInstance;
-                                    }
-                                }
-                                InstanceTemplate instance = Global.ObjectMgr.GetInstanceTemplate(mapId);
-                                if (instance == null)
-                                    return SpellCastResult.TargetNotInInstance;
-                                if (!target.Satisfy(Global.ObjectMgr.GetAccessRequirement(mapId, difficulty), mapId))
-                                    return SpellCastResult.BadTargets;
-                            }
-                            break;
-                        }
-                    // RETURN HERE
-                    case SpellEffectName.SummonRafFriend:
-                        {
-                            if (!m_caster.IsTypeId(TypeId.Player))
-                                return SpellCastResult.BadTargets;
-
-                            Player playerCaster = m_caster.ToPlayer();
-                            //
-                            if (playerCaster.GetTarget().IsEmpty())
-                                return SpellCastResult.BadTargets;
-
-                            Player target = Global.ObjAccessor.FindPlayer(playerCaster.GetTarget());
-                            if (target == null ||
-                                !(target.GetSession().GetRecruiterId() == playerCaster.GetSession().GetAccountId() || target.GetSession().GetAccountId() == playerCaster.GetSession().GetRecruiterId()))
-                                return SpellCastResult.BadTargets;
-
-                            break;
-                        }
-                    case SpellEffectName.Leap:
-                    case SpellEffectName.TeleportUnitsFaceCaster:
-                        {
-                            //Do not allow to cast it before BG starts.
                             if (m_caster.IsTypeId(TypeId.Player))
                             {
-                                Battleground bg = m_caster.ToPlayer().GetBattleground();
-                                if (bg)
-                                    if (bg.GetStatus() != BattlegroundStatus.InProgress)
-                                        return SpellCastResult.TryAgain;
+                                if (strict)                         //starting cast, trigger pet stun (cast by pet so it doesn't attack player)
+                                {
+                                    Pet pet = m_caster.ToPlayer().GetPet();
+                                    if (pet != null)
+                                        pet.CastSpell(pet, 32752, new CastSpellExtraArgs(pet.GetGUID()));
+                                }
                             }
-                            break;
+                            else if (!m_spellInfo.HasAttribute(SpellAttr1.DismissPet))
+                                return SpellCastResult.AlreadyHaveSummon;
                         }
-                    case SpellEffectName.StealBeneficialBuff:
-                        {
-                            if (m_targets.GetUnitTarget() == null || m_targets.GetUnitTarget() == m_caster)
-                                return SpellCastResult.BadTargets;
 
-                            break;
-                        }
-                    case SpellEffectName.LeapBack:
+                        if (!m_caster.GetCharmGUID().IsEmpty())
+                            return SpellCastResult.AlreadyHaveCharm;
+                        break;
+                    }
+                    case SpellEffectName.SummonPlayer:
+                    {
+                        if (!m_caster.IsTypeId(TypeId.Player))
+                            return SpellCastResult.BadTargets;
+                        if (m_caster.ToPlayer().GetTarget().IsEmpty())
+                            return SpellCastResult.BadTargets;
+
+                        Player target = Global.ObjAccessor.FindPlayer(m_caster.ToPlayer().GetTarget());
+                        if (target == null || m_caster.ToPlayer() == target || (!target.IsInSameRaidWith(m_caster.ToPlayer()) && m_spellInfo.Id != 48955)) // refer-a-friend spell
+                            return SpellCastResult.BadTargets;
+
+                        if (target.HasSummonPending())
+                            return SpellCastResult.SummonPending;
+
+                        // check if our map is dungeon
+                        MapRecord map = CliDB.MapStorage.LookupByKey(m_caster.GetMapId());
+                        if (map.IsDungeon())
                         {
-                            if (m_caster.HasUnitState(UnitState.Root))
+                            uint mapId = m_caster.GetMap().GetId();
+                            Difficulty difficulty = m_caster.GetMap().GetDifficultyID();
+                            if (map.IsRaid())
                             {
-                                if (m_caster.IsTypeId(TypeId.Player))
-                                    return SpellCastResult.Rooted;
-                                else
-                                    return SpellCastResult.DontReport;
+                                InstanceBind targetBind = target.GetBoundInstance(mapId, difficulty);
+                                if (targetBind != null)
+                                {
+                                    InstanceBind casterBind = m_caster.ToPlayer().GetBoundInstance(mapId, difficulty);
+                                    if (casterBind != null)
+                                        if (targetBind.perm && targetBind.save != casterBind.save)
+                                            return SpellCastResult.TargetLockedToRaidInstance;
+                                }
                             }
-                            break;
+                            InstanceTemplate instance = Global.ObjectMgr.GetInstanceTemplate(mapId);
+                            if (instance == null)
+                                return SpellCastResult.TargetNotInInstance;
+                            if (!target.Satisfy(Global.ObjectMgr.GetAccessRequirement(mapId, difficulty), mapId))
+                                return SpellCastResult.BadTargets;
                         }
+                        break;
+                    }
+                    // RETURN HERE
+                    case SpellEffectName.SummonRafFriend:
+                    {
+                        if (!m_caster.IsTypeId(TypeId.Player))
+                            return SpellCastResult.BadTargets;
+
+                        Player playerCaster = m_caster.ToPlayer();
+                        //
+                        if (playerCaster.GetTarget().IsEmpty())
+                            return SpellCastResult.BadTargets;
+
+                        Player target = Global.ObjAccessor.FindPlayer(playerCaster.GetTarget());
+                        if (target == null ||
+                            !(target.GetSession().GetRecruiterId() == playerCaster.GetSession().GetAccountId() || target.GetSession().GetAccountId() == playerCaster.GetSession().GetRecruiterId()))
+                            return SpellCastResult.BadTargets;
+
+                        break;
+                    }
+                    case SpellEffectName.Leap:
+                    case SpellEffectName.TeleportUnitsFaceCaster:
+                    {
+                        //Do not allow to cast it before BG starts.
+                        if (m_caster.IsTypeId(TypeId.Player))
+                        {
+                            Battleground bg = m_caster.ToPlayer().GetBattleground();
+                            if (bg)
+                                if (bg.GetStatus() != BattlegroundStatus.InProgress)
+                                    return SpellCastResult.TryAgain;
+                        }
+                        break;
+                    }
+                    case SpellEffectName.StealBeneficialBuff:
+                    {
+                        if (m_targets.GetUnitTarget() == null || m_targets.GetUnitTarget() == m_caster)
+                            return SpellCastResult.BadTargets;
+
+                        break;
+                    }
+                    case SpellEffectName.LeapBack:
+                    {
+                        if (m_caster.HasUnitState(UnitState.Root))
+                        {
+                            if (m_caster.IsTypeId(TypeId.Player))
+                                return SpellCastResult.Rooted;
+                            else
+                                return SpellCastResult.DontReport;
+                        }
+                        break;
+                    }
                     case SpellEffectName.Jump:
                     case SpellEffectName.JumpDest:
-                        {
-                            if (m_caster.HasUnitState(UnitState.Root))
-                                return SpellCastResult.Rooted;
-                            break;
-                        }
+                    {
+                        if (m_caster.HasUnitState(UnitState.Root))
+                            return SpellCastResult.Rooted;
+                        break;
+                    }
                     case SpellEffectName.TalentSpecSelect:
+                    {
+                        ChrSpecializationRecord spec = CliDB.ChrSpecializationStorage.LookupByKey(m_misc.SpecializationId);
+                        Player playerCaster = m_caster.ToPlayer();
+                        if (!playerCaster)
+                            return SpellCastResult.TargetNotPlayer;
+
+                        if (spec == null || (spec.ClassID != (uint)m_caster.GetClass() && !spec.IsPetSpecialization()))
+                            return SpellCastResult.NoSpec;
+
+                        if (spec.IsPetSpecialization())
                         {
-                            ChrSpecializationRecord spec = CliDB.ChrSpecializationStorage.LookupByKey(m_misc.SpecializationId);
-                            Player playerCaster = m_caster.ToPlayer();
-                            if (!playerCaster)
-                                return SpellCastResult.TargetNotPlayer;
-
-                            if (spec == null || (spec.ClassID != (uint)m_caster.GetClass() && !spec.IsPetSpecialization()))
-                                return SpellCastResult.NoSpec;
-
-                            if (spec.IsPetSpecialization())
-                            {
-                                Pet pet = player.GetPet();
-                                if (!pet || pet.GetPetType() != PetType.Hunter || pet.GetCharmInfo() == null)
-                                    return SpellCastResult.NoPet;
-                            }
-
-                            // can't change during already started arena/Battleground
-                            Battleground bg = player.GetBattleground();
-                            if (bg)
-                                if (bg.GetStatus() == BattlegroundStatus.InProgress)
-                                    return SpellCastResult.NotInBattleground;
-                            break;
+                            Pet pet = player.GetPet();
+                            if (!pet || pet.GetPetType() != PetType.Hunter || pet.GetCharmInfo() == null)
+                                return SpellCastResult.NoPet;
                         }
+
+                        // can't change during already started arena/Battleground
+                        Battleground bg = player.GetBattleground();
+                        if (bg)
+                            if (bg.GetStatus() == BattlegroundStatus.InProgress)
+                                return SpellCastResult.NotInBattleground;
+                        break;
+                    }
                     case SpellEffectName.RemoveTalent:
-                        {
-                            if (!m_caster.IsTypeId(TypeId.Player))
-                                return SpellCastResult.BadTargets;
+                    {
+                        if (!m_caster.IsTypeId(TypeId.Player))
+                            return SpellCastResult.BadTargets;
 
-                            TalentRecord talent = CliDB.TalentStorage.LookupByKey(m_misc.TalentId);
-                            if (talent == null)
-                                return SpellCastResult.DontReport;
-                            if (m_caster.GetSpellHistory().HasCooldown(talent.SpellID))
-                            {
-                                param1 = talent.SpellID;
-                                return SpellCastResult.CantUntalent;
-                            }
-                            break;
+                        TalentRecord talent = CliDB.TalentStorage.LookupByKey(m_misc.TalentId);
+                        if (talent == null)
+                            return SpellCastResult.DontReport;
+                        if (m_caster.GetSpellHistory().HasCooldown(talent.SpellID))
+                        {
+                            param1 = talent.SpellID;
+                            return SpellCastResult.CantUntalent;
                         }
+                        break;
+                    }
                     case SpellEffectName.GiveArtifactPower:
                     case SpellEffectName.GiveArtifactPowerNoBonus:
-                        {
-                            if (!m_caster.IsTypeId(TypeId.Player))
-                                return SpellCastResult.BadTargets;
+                    {
+                        if (!m_caster.IsTypeId(TypeId.Player))
+                            return SpellCastResult.BadTargets;
 
-                            Aura artifactAura = m_caster.GetAura(PlayerConst.ArtifactsAllWeaponsGeneralWeaponEquippedPassive);
-                            if (artifactAura == null)
-                                return SpellCastResult.NoArtifactEquipped;
-                            Item artifact = m_caster.ToPlayer().GetItemByGuid(artifactAura.GetCastItemGUID());
-                            if (artifact == null)
-                                return SpellCastResult.NoArtifactEquipped;
-                            if (effect.Effect == SpellEffectName.GiveArtifactPower)
-                            {
-                                ArtifactRecord artifactEntry = CliDB.ArtifactStorage.LookupByKey(artifact.GetTemplate().GetArtifactID());
-                                if (artifactEntry == null || artifactEntry.ArtifactCategoryID != effect.MiscValue)
-                                    return SpellCastResult.WrongArtifactEquipped;
-                            }
-                            break;
+                        Aura artifactAura = m_caster.GetAura(PlayerConst.ArtifactsAllWeaponsGeneralWeaponEquippedPassive);
+                        if (artifactAura == null)
+                            return SpellCastResult.NoArtifactEquipped;
+                        Item artifact = m_caster.ToPlayer().GetItemByGuid(artifactAura.GetCastItemGUID());
+                        if (artifact == null)
+                            return SpellCastResult.NoArtifactEquipped;
+                        if (effect.Effect == SpellEffectName.GiveArtifactPower)
+                        {
+                            ArtifactRecord artifactEntry = CliDB.ArtifactStorage.LookupByKey(artifact.GetTemplate().GetArtifactID());
+                            if (artifactEntry == null || artifactEntry.ArtifactCategoryID != effect.MiscValue)
+                                return SpellCastResult.WrongArtifactEquipped;
                         }
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -5352,120 +5378,120 @@ namespace Game.Spells
                 switch (effect.ApplyAuraName)
                 {
                     case AuraType.ModPossessPet:
-                        {
-                            if (!m_caster.IsTypeId(TypeId.Player))
-                                return SpellCastResult.NoPet;
+                    {
+                        if (!m_caster.IsTypeId(TypeId.Player))
+                            return SpellCastResult.NoPet;
 
-                            Pet pet = m_caster.ToPlayer().GetPet();
-                            if (pet == null)
-                                return SpellCastResult.NoPet;
+                        Pet pet = m_caster.ToPlayer().GetPet();
+                        if (pet == null)
+                            return SpellCastResult.NoPet;
 
-                            if (!pet.GetCharmerGUID().IsEmpty())
-                                return SpellCastResult.Charmed;
-                            break;
-                        }
+                        if (!pet.GetCharmerGUID().IsEmpty())
+                            return SpellCastResult.Charmed;
+                        break;
+                    }
                     case AuraType.ModPossess:
                     case AuraType.ModCharm:
                     case AuraType.AoeCharm:
+                    {
+                        if (!m_caster.GetCharmerGUID().IsEmpty())
+                            return SpellCastResult.Charmed;
+
+                        if (effect.ApplyAuraName == AuraType.ModCharm
+                            || effect.ApplyAuraName == AuraType.ModPossess)
                         {
-                            if (!m_caster.GetCharmerGUID().IsEmpty())
+                            if (!m_spellInfo.HasAttribute(SpellAttr1.DismissPet) && !m_caster.GetPetGUID().IsEmpty())
+                                return SpellCastResult.AlreadyHaveSummon;
+
+                            if (!m_caster.GetCharmGUID().IsEmpty())
+                                return SpellCastResult.AlreadyHaveCharm;
+                        }
+
+                        Unit target = m_targets.GetUnitTarget();
+                        if (target != null)
+                        {
+                            if (target.IsTypeId(TypeId.Unit) && target.ToCreature().IsVehicle())
+                                return SpellCastResult.BadImplicitTargets;
+
+                            if (target.IsMounted())
+                                return SpellCastResult.CantBeCharmed;
+
+                            if (!target.GetCharmerGUID().IsEmpty())
                                 return SpellCastResult.Charmed;
 
-                            if (effect.ApplyAuraName == AuraType.ModCharm
-                                || effect.ApplyAuraName == AuraType.ModPossess)
-                            {
-                                if (!m_spellInfo.HasAttribute(SpellAttr1.DismissPet) && !m_caster.GetPetGUID().IsEmpty())
-                                    return SpellCastResult.AlreadyHaveSummon;
+                            if (target.GetOwner() != null && target.GetOwner().IsTypeId(TypeId.Player))
+                                return SpellCastResult.TargetIsPlayerControlled;
 
-                                if (!m_caster.GetCharmGUID().IsEmpty())
-                                    return SpellCastResult.AlreadyHaveCharm;
-                            }
-
-                            Unit target = m_targets.GetUnitTarget();
-                            if (target != null)
-                            {
-                                if (target.IsTypeId(TypeId.Unit) && target.ToCreature().IsVehicle())
-                                    return SpellCastResult.BadImplicitTargets;
-
-                                if (target.IsMounted())
-                                    return SpellCastResult.CantBeCharmed;
-
-                                if (!target.GetCharmerGUID().IsEmpty())
-                                    return SpellCastResult.Charmed;
-
-                                if (target.GetOwner() != null && target.GetOwner().IsTypeId(TypeId.Player))
-                                    return SpellCastResult.TargetIsPlayerControlled;
-
-                                int damage = CalculateDamage(effect.EffectIndex, target);
-                                if (damage != 0 && target.GetLevelForTarget(m_caster) > damage)
-                                    return SpellCastResult.Highlevel;
-                            }
-
-                            break;
+                            int damage = CalculateDamage(effect.EffectIndex, target);
+                            if (damage != 0 && target.GetLevelForTarget(m_caster) > damage)
+                                return SpellCastResult.Highlevel;
                         }
+
+                        break;
+                    }
                     case AuraType.Mounted:
+                    {
+                        if (m_caster.IsInWater() && m_spellInfo.HasAura(AuraType.ModIncreaseMountedFlightSpeed))
+                            return SpellCastResult.OnlyAbovewater;
+
+                        // Ignore map check if spell have AreaId. AreaId already checked and this prevent special mount spells
+                        bool allowMount = !m_caster.GetMap().IsDungeon() || m_caster.GetMap().IsBattlegroundOrArena();
+                        InstanceTemplate it = Global.ObjectMgr.GetInstanceTemplate(m_caster.GetMapId());
+                        if (it != null)
+                            allowMount = it.AllowMount;
+                        if (m_caster.IsTypeId(TypeId.Player) && !allowMount && m_spellInfo.RequiredAreasID == 0)
+                            return SpellCastResult.NoMountsAllowed;
+
+                        if (m_caster.IsInDisallowedMountForm())
                         {
-                            if (m_caster.IsInWater() && m_spellInfo.HasAura(AuraType.ModIncreaseMountedFlightSpeed))
-                                return SpellCastResult.OnlyAbovewater;
-
-                            // Ignore map check if spell have AreaId. AreaId already checked and this prevent special mount spells
-                            bool allowMount = !m_caster.GetMap().IsDungeon() || m_caster.GetMap().IsBattlegroundOrArena();
-                            InstanceTemplate it = Global.ObjectMgr.GetInstanceTemplate(m_caster.GetMapId());
-                            if (it != null)
-                                allowMount = it.AllowMount;
-                            if (m_caster.IsTypeId(TypeId.Player) && !allowMount && m_spellInfo.RequiredAreasID == 0)
-                                return SpellCastResult.NoMountsAllowed;
-
-                            if (m_caster.IsInDisallowedMountForm())
-                            {
-                                SendMountResult(MountResult.Shapeshifted); // mount result gets sent before the cast result
-                                return SpellCastResult.DontReport;
-                            }
-
-                            break;
+                            SendMountResult(MountResult.Shapeshifted); // mount result gets sent before the cast result
+                            return SpellCastResult.DontReport;
                         }
+
+                        break;
+                    }
                     case AuraType.RangedAttackPowerAttackerBonus:
-                        {
-                            if (m_targets.GetUnitTarget() == null)
-                                return SpellCastResult.BadImplicitTargets;
+                    {
+                        if (m_targets.GetUnitTarget() == null)
+                            return SpellCastResult.BadImplicitTargets;
 
-                            // can be casted at non-friendly unit or own pet/charm
-                            if (m_caster.IsFriendlyTo(m_targets.GetUnitTarget()))
-                                return SpellCastResult.TargetFriendly;
+                        // can be casted at non-friendly unit or own pet/charm
+                        if (m_caster.IsFriendlyTo(m_targets.GetUnitTarget()))
+                            return SpellCastResult.TargetFriendly;
 
-                            break;
-                        }
+                        break;
+                    }
                     case AuraType.Fly:
                     case AuraType.ModIncreaseFlightSpeed:
+                    {
+                        // not allow cast fly spells if not have req. skills  (all spells is self target)
+                        // allow always ghost flight spells
+                        if (m_originalCaster != null && m_originalCaster.IsTypeId(TypeId.Player) && m_originalCaster.IsAlive())
                         {
-                            // not allow cast fly spells if not have req. skills  (all spells is self target)
-                            // allow always ghost flight spells
-                            if (m_originalCaster != null && m_originalCaster.IsTypeId(TypeId.Player) && m_originalCaster.IsAlive())
-                            {
-                                BattleField Bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(m_originalCaster.GetZoneId());
-                                var area = CliDB.AreaTableStorage.LookupByKey(m_originalCaster.GetAreaId());
-                                if (area != null)
-                                    if (area.Flags.HasFlag(AreaFlags.NoFlyZone) || (Bf != null && !Bf.CanFlyIn()))
-                                        return SpellCastResult.NotHere;
-                            }
-                            break;
+                            BattleField Bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(m_originalCaster.GetZoneId());
+                            var area = CliDB.AreaTableStorage.LookupByKey(m_originalCaster.GetAreaId());
+                            if (area != null)
+                                if (area.Flags.HasFlag(AreaFlags.NoFlyZone) || (Bf != null && !Bf.CanFlyIn()))
+                                    return SpellCastResult.NotHere;
                         }
+                        break;
+                    }
                     case AuraType.PeriodicManaLeech:
-                        {
-                            if (effect.IsTargetingArea())
-                                break;
-
-                            if (m_targets.GetUnitTarget() == null)
-                                return SpellCastResult.BadImplicitTargets;
-
-                            if (!m_caster.IsTypeId(TypeId.Player) || m_CastItem != null)
-                                break;
-
-                            if (m_targets.GetUnitTarget().GetPowerType() != PowerType.Mana)
-                                return SpellCastResult.BadTargets;
-
+                    {
+                        if (effect.IsTargetingArea())
                             break;
-                        }
+
+                        if (m_targets.GetUnitTarget() == null)
+                            return SpellCastResult.BadImplicitTargets;
+
+                        if (!m_caster.IsTypeId(TypeId.Player) || m_CastItem != null)
+                            break;
+
+                        if (m_targets.GetUnitTarget().GetPowerType() != PowerType.Mana)
+                            return SpellCastResult.BadTargets;
+
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -6113,7 +6139,8 @@ namespace Game.Spells
                             totems -= 1;
                             continue;
                         }
-                    } else
+                    }
+                    else
                         totems -= 1;
                 }
                 if (totems != 0)
@@ -6149,40 +6176,40 @@ namespace Game.Spells
                 {
                     case SpellEffectName.CreateItem:
                     case SpellEffectName.CreateLoot:
+                    {
+                        // m_targets.GetUnitTarget() means explicit cast, otherwise we dont check for possible equip error
+                        Unit target = m_targets.GetUnitTarget() ? m_targets.GetUnitTarget() : m_caster;
+                        if (target != null && target.GetTypeId() == TypeId.Player && !IsTriggered() && effect.ItemType != 0)
                         {
-                            // m_targets.GetUnitTarget() means explicit cast, otherwise we dont check for possible equip error
-                            Unit target = m_targets.GetUnitTarget() ? m_targets.GetUnitTarget() : m_caster;
-                            if (target != null && target.GetTypeId() == TypeId.Player && !IsTriggered() && effect.ItemType != 0)
+                            List<ItemPosCount> dest = new();
+                            InventoryResult msg = target.ToPlayer().CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, effect.ItemType, 1);
+                            if (msg != InventoryResult.Ok)
                             {
-                                List<ItemPosCount> dest = new();
-                                InventoryResult msg = target.ToPlayer().CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, effect.ItemType, 1);
-                                if (msg != InventoryResult.Ok)
+                                ItemTemplate pProto = Global.ObjectMgr.GetItemTemplate(effect.ItemType);
+                                // @todo Needs review
+                                if (pProto != null && pProto.GetItemLimitCategory() == 0)
                                 {
-                                    ItemTemplate pProto = Global.ObjectMgr.GetItemTemplate(effect.ItemType);
-                                    // @todo Needs review
-                                    if (pProto != null && pProto.GetItemLimitCategory() == 0)
+                                    player.SendEquipError(msg, null, null, effect.ItemType);
+                                    return SpellCastResult.DontReport;
+                                }
+                                else
+                                {
+                                    SpellEffectInfo efi;
+                                    if (!(m_spellInfo.SpellFamilyName == SpellFamilyNames.Mage && m_spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x40000000u)))
+                                        return SpellCastResult.TooManyOfItem;
+                                    else if (!target.ToPlayer().HasItemCount(effect.ItemType))
                                     {
                                         player.SendEquipError(msg, null, null, effect.ItemType);
                                         return SpellCastResult.DontReport;
                                     }
-                                    else
-                                    {
-                                        SpellEffectInfo efi;
-                                        if (!(m_spellInfo.SpellFamilyName == SpellFamilyNames.Mage && m_spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x40000000u)))
-                                            return SpellCastResult.TooManyOfItem;
-                                        else if (!target.ToPlayer().HasItemCount(effect.ItemType))
-                                        {
-                                            player.SendEquipError(msg, null, null, effect.ItemType);
-                                            return SpellCastResult.DontReport;
-                                        }
-                                        else if ((efi = m_spellInfo.GetEffect(1)) != null)
-                                            player.CastSpell(m_caster, (uint)efi.CalcValue(), new CastSpellExtraArgs(false));        // move this to anywhere
-                                        return SpellCastResult.DontReport;
-                                    }
+                                    else if ((efi = m_spellInfo.GetEffect(1)) != null)
+                                        player.CastSpell(m_caster, (uint)efi.CalcValue(), new CastSpellExtraArgs(false));        // move this to anywhere
+                                    return SpellCastResult.DontReport;
                                 }
                             }
-                            break;
                         }
+                        break;
+                    }
                     case SpellEffectName.EnchantItem:
                         if (effect.ItemType != 0 && m_targets.GetItemTarget() != null && m_targets.GetItemTarget().IsVellum())
                         {
@@ -6202,230 +6229,230 @@ namespace Game.Spells
                         }
                         goto case SpellEffectName.EnchantItemPrismatic;
                     case SpellEffectName.EnchantItemPrismatic:
+                    {
+                        Item targetItem = m_targets.GetItemTarget();
+                        if (targetItem == null)
+                            return SpellCastResult.ItemNotFound;
+
+                        // required level has to be checked also! Exploit fix
+                        if (targetItem.GetItemLevel(targetItem.GetOwner()) < m_spellInfo.BaseLevel || (targetItem.GetRequiredLevel() != 0 && targetItem.GetRequiredLevel() < m_spellInfo.BaseLevel))
+                            return SpellCastResult.Lowlevel;
+
+                        bool isItemUsable = false;
+                        foreach (ItemEffectRecord itemEffect in targetItem.GetEffects())
                         {
-                            Item targetItem = m_targets.GetItemTarget();
-                            if (targetItem == null)
-                                return SpellCastResult.ItemNotFound;
-
-                            // required level has to be checked also! Exploit fix
-                            if (targetItem.GetItemLevel(targetItem.GetOwner()) < m_spellInfo.BaseLevel || (targetItem.GetRequiredLevel() != 0 && targetItem.GetRequiredLevel() < m_spellInfo.BaseLevel))
-                                return SpellCastResult.Lowlevel;
-
-                            bool isItemUsable = false;
-                            foreach (ItemEffectRecord itemEffect in targetItem.GetEffects())
+                            if (itemEffect.SpellID != 0 && itemEffect.TriggerType == ItemSpelltriggerType.OnUse)
                             {
-                                if (itemEffect.SpellID != 0 && itemEffect.TriggerType == ItemSpelltriggerType.OnUse)
-                                {
-                                    isItemUsable = true;
-                                    break;
-                                }
+                                isItemUsable = true;
+                                break;
                             }
+                        }
 
-                            var enchantEntry = CliDB.SpellItemEnchantmentStorage.LookupByKey(effect.MiscValue);
-                            // do not allow adding usable enchantments to items that have use effect already
-                            if (enchantEntry != null)
+                        var enchantEntry = CliDB.SpellItemEnchantmentStorage.LookupByKey(effect.MiscValue);
+                        // do not allow adding usable enchantments to items that have use effect already
+                        if (enchantEntry != null)
+                        {
+                            for (var s = 0; s < ItemConst.MaxItemEnchantmentEffects; ++s)
                             {
-                                for (var s = 0; s < ItemConst.MaxItemEnchantmentEffects; ++s)
+                                switch (enchantEntry.Effect[s])
                                 {
-                                    switch (enchantEntry.Effect[s])
+                                    case ItemEnchantmentType.UseSpell:
+                                        if (isItemUsable)
+                                            return SpellCastResult.OnUseEnchant;
+                                        break;
+                                    case ItemEnchantmentType.PrismaticSocket:
                                     {
-                                        case ItemEnchantmentType.UseSpell:
-                                            if (isItemUsable)
-                                                return SpellCastResult.OnUseEnchant;
-                                            break;
-                                        case ItemEnchantmentType.PrismaticSocket:
-                                            {
-                                                uint numSockets = 0;
-                                                for (uint socket = 0; socket < ItemConst.MaxGemSockets; ++socket)
-                                                    if (targetItem.GetSocketColor(socket) != 0)
-                                                        ++numSockets;
+                                        uint numSockets = 0;
+                                        for (uint socket = 0; socket < ItemConst.MaxGemSockets; ++socket)
+                                            if (targetItem.GetSocketColor(socket) != 0)
+                                                ++numSockets;
 
-                                                if (numSockets == ItemConst.MaxGemSockets || targetItem.GetEnchantmentId(EnchantmentSlot.Prismatic) != 0)
-                                                    return SpellCastResult.MaxSockets;
-                                                break;
-                                            }
+                                        if (numSockets == ItemConst.MaxGemSockets || targetItem.GetEnchantmentId(EnchantmentSlot.Prismatic) != 0)
+                                            return SpellCastResult.MaxSockets;
+                                        break;
                                     }
                                 }
                             }
-
-                            // Not allow enchant in trade slot for some enchant type
-                            if (targetItem.GetOwner() != m_caster)
-                            {
-                                if (enchantEntry == null)
-                                    return SpellCastResult.Error;
-                                if (enchantEntry.Flags.HasAnyFlag(EnchantmentSlotMask.CanSouldBound))
-                                    return SpellCastResult.NotTradeable;
-                            }
-                            break;
                         }
-                    case SpellEffectName.EnchantItemTemporary:
+
+                        // Not allow enchant in trade slot for some enchant type
+                        if (targetItem.GetOwner() != m_caster)
                         {
-                            Item item = m_targets.GetItemTarget();
-                            if (item == null)
-                                return SpellCastResult.ItemNotFound;
-                            // Not allow enchant in trade slot for some enchant type
-                            if (item.GetOwner() != m_caster)
-                            {
-                                int enchant_id = effect.MiscValue;
-                                var pEnchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchant_id);
-                                if (pEnchant == null)
-                                    return SpellCastResult.Error;
-                                if (pEnchant.Flags.HasAnyFlag(EnchantmentSlotMask.CanSouldBound))
-                                    return SpellCastResult.NotTradeable;
-                            }
-
-                            // Apply item level restriction if the enchanting spell has max level restrition set
-                            if (m_CastItem != null && m_spellInfo.MaxLevel > 0)
-                            {
-                                if (item.GetTemplate().GetBaseItemLevel() < m_CastItem.GetTemplate().GetBaseRequiredLevel())
-                                    return SpellCastResult.Lowlevel;
-                                if (item.GetTemplate().GetBaseItemLevel() > m_spellInfo.MaxLevel)
-                                    return SpellCastResult.Highlevel;
-                            }
-                            break;
+                            if (enchantEntry == null)
+                                return SpellCastResult.Error;
+                            if (enchantEntry.Flags.HasAnyFlag(EnchantmentSlotMask.CanSouldBound))
+                                return SpellCastResult.NotTradeable;
                         }
+                        break;
+                    }
+                    case SpellEffectName.EnchantItemTemporary:
+                    {
+                        Item item = m_targets.GetItemTarget();
+                        if (item == null)
+                            return SpellCastResult.ItemNotFound;
+                        // Not allow enchant in trade slot for some enchant type
+                        if (item.GetOwner() != m_caster)
+                        {
+                            int enchant_id = effect.MiscValue;
+                            var pEnchant = CliDB.SpellItemEnchantmentStorage.LookupByKey(enchant_id);
+                            if (pEnchant == null)
+                                return SpellCastResult.Error;
+                            if (pEnchant.Flags.HasAnyFlag(EnchantmentSlotMask.CanSouldBound))
+                                return SpellCastResult.NotTradeable;
+                        }
+
+                        // Apply item level restriction if the enchanting spell has max level restrition set
+                        if (m_CastItem != null && m_spellInfo.MaxLevel > 0)
+                        {
+                            if (item.GetTemplate().GetBaseItemLevel() < m_CastItem.GetTemplate().GetBaseRequiredLevel())
+                                return SpellCastResult.Lowlevel;
+                            if (item.GetTemplate().GetBaseItemLevel() > m_spellInfo.MaxLevel)
+                                return SpellCastResult.Highlevel;
+                        }
+                        break;
+                    }
                     case SpellEffectName.EnchantHeldItem:
                         // check item existence in effect code (not output errors at offhand hold item effect to main hand for example
                         break;
                     case SpellEffectName.Disenchant:
-                        {
-                            Item item = m_targets.GetItemTarget();
-                            if (!item)
-                                return SpellCastResult.CantBeDisenchanted;
+                    {
+                        Item item = m_targets.GetItemTarget();
+                        if (!item)
+                            return SpellCastResult.CantBeDisenchanted;
 
-                            // prevent disenchanting in trade slot
-                            if (item.GetOwnerGUID() != m_caster.GetGUID())
-                                return SpellCastResult.CantBeDisenchanted;
+                        // prevent disenchanting in trade slot
+                        if (item.GetOwnerGUID() != m_caster.GetGUID())
+                            return SpellCastResult.CantBeDisenchanted;
 
-                            ItemTemplate itemProto = item.GetTemplate();
-                            if (itemProto == null)
-                                return SpellCastResult.CantBeDisenchanted;
+                        ItemTemplate itemProto = item.GetTemplate();
+                        if (itemProto == null)
+                            return SpellCastResult.CantBeDisenchanted;
 
-                            ItemDisenchantLootRecord itemDisenchantLoot = item.GetDisenchantLoot(m_caster.ToPlayer());
-                            if (itemDisenchantLoot == null)
-                                return SpellCastResult.CantBeDisenchanted;
-                            if (itemDisenchantLoot.SkillRequired > player.GetSkillValue(SkillType.Enchanting))
-                                return SpellCastResult.LowCastlevel;
-                            break;
-                        }
+                        ItemDisenchantLootRecord itemDisenchantLoot = item.GetDisenchantLoot(m_caster.ToPlayer());
+                        if (itemDisenchantLoot == null)
+                            return SpellCastResult.CantBeDisenchanted;
+                        if (itemDisenchantLoot.SkillRequired > player.GetSkillValue(SkillType.Enchanting))
+                            return SpellCastResult.LowCastlevel;
+                        break;
+                    }
                     case SpellEffectName.Prospecting:
+                    {
+                        Item item = m_targets.GetItemTarget();
+                        if (!item)
+                            return SpellCastResult.CantBeProspected;
+                        //ensure item is a prospectable ore
+                        if (!Convert.ToBoolean(item.GetTemplate().GetFlags() & ItemFlags.IsProspectable))
+                            return SpellCastResult.CantBeProspected;
+                        //prevent prospecting in trade slot
+                        if (item.GetOwnerGUID() != m_caster.GetGUID())
+                            return SpellCastResult.CantBeProspected;
+                        //Check for enough skill in jewelcrafting
+                        uint item_prospectingskilllevel = item.GetTemplate().GetRequiredSkillRank();
+                        if (item_prospectingskilllevel > player.GetSkillValue(SkillType.Jewelcrafting))
+                            return SpellCastResult.LowCastlevel;
+                        //make sure the player has the required ores in inventory
+                        if (item.GetCount() < 5)
                         {
-                            Item item = m_targets.GetItemTarget();
-                            if (!item)
-                                return SpellCastResult.CantBeProspected;
-                            //ensure item is a prospectable ore
-                            if (!Convert.ToBoolean(item.GetTemplate().GetFlags() & ItemFlags.IsProspectable))
-                                return SpellCastResult.CantBeProspected;
-                            //prevent prospecting in trade slot
-                            if (item.GetOwnerGUID() != m_caster.GetGUID())
-                                return SpellCastResult.CantBeProspected;
-                            //Check for enough skill in jewelcrafting
-                            uint item_prospectingskilllevel = item.GetTemplate().GetRequiredSkillRank();
-                            if (item_prospectingskilllevel > player.GetSkillValue(SkillType.Jewelcrafting))
-                                return SpellCastResult.LowCastlevel;
-                            //make sure the player has the required ores in inventory
-                            if (item.GetCount() < 5)
-                            {
-                                param1 = item.GetEntry();
-                                param2 = 5;
-                                return SpellCastResult.NeedMoreItems;
-                            }
-
-                            if (!LootStorage.Prospecting.HaveLootFor(m_targets.GetItemTargetEntry()))
-                                return SpellCastResult.CantBeProspected;
-
-                            break;
+                            param1 = item.GetEntry();
+                            param2 = 5;
+                            return SpellCastResult.NeedMoreItems;
                         }
+
+                        if (!LootStorage.Prospecting.HaveLootFor(m_targets.GetItemTargetEntry()))
+                            return SpellCastResult.CantBeProspected;
+
+                        break;
+                    }
                     case SpellEffectName.Milling:
+                    {
+                        Item item = m_targets.GetItemTarget();
+                        if (!item)
+                            return SpellCastResult.CantBeMilled;
+                        //ensure item is a millable herb
+                        if (!(item.GetTemplate().GetFlags().HasAnyFlag(ItemFlags.IsMillable)))
+                            return SpellCastResult.CantBeMilled;
+                        //prevent milling in trade slot
+                        if (item.GetOwnerGUID() != m_caster.GetGUID())
+                            return SpellCastResult.CantBeMilled;
+                        //Check for enough skill in inscription
+                        uint item_millingskilllevel = item.GetTemplate().GetRequiredSkillRank();
+                        if (item_millingskilllevel > player.GetSkillValue(SkillType.Inscription))
+                            return SpellCastResult.LowCastlevel;
+                        //make sure the player has the required herbs in inventory
+                        if (item.GetCount() < 5)
                         {
-                            Item item = m_targets.GetItemTarget();
-                            if (!item)
-                                return SpellCastResult.CantBeMilled;
-                            //ensure item is a millable herb
-                            if (!(item.GetTemplate().GetFlags().HasAnyFlag(ItemFlags.IsMillable)))
-                                return SpellCastResult.CantBeMilled;
-                            //prevent milling in trade slot
-                            if (item.GetOwnerGUID() != m_caster.GetGUID())
-                                return SpellCastResult.CantBeMilled;
-                            //Check for enough skill in inscription
-                            uint item_millingskilllevel = item.GetTemplate().GetRequiredSkillRank();
-                            if (item_millingskilllevel > player.GetSkillValue(SkillType.Inscription))
-                                return SpellCastResult.LowCastlevel;
-                            //make sure the player has the required herbs in inventory
-                            if (item.GetCount() < 5)
-                            {
-                                param1 = item.GetEntry();
-                                param2 = 5;
-                                return SpellCastResult.NeedMoreItems;
-                            }
-
-                            if (!LootStorage.Milling.HaveLootFor(m_targets.GetItemTargetEntry()))
-                                return SpellCastResult.CantBeMilled;
-
-                            break;
+                            param1 = item.GetEntry();
+                            param2 = 5;
+                            return SpellCastResult.NeedMoreItems;
                         }
+
+                        if (!LootStorage.Milling.HaveLootFor(m_targets.GetItemTargetEntry()))
+                            return SpellCastResult.CantBeMilled;
+
+                        break;
+                    }
                     case SpellEffectName.WeaponDamage:
                     case SpellEffectName.WeaponDamageNoSchool:
-                        {
-                            if (!m_caster.IsTypeId(TypeId.Player))
-                                return SpellCastResult.TargetNotPlayer;
+                    {
+                        if (!m_caster.IsTypeId(TypeId.Player))
+                            return SpellCastResult.TargetNotPlayer;
 
-                            if (m_attackType != WeaponAttackType.RangedAttack)
-                                break;
-
-                            Item pItem = m_caster.ToPlayer().GetWeaponForAttack(m_attackType);
-                            if (pItem == null || pItem.IsBroken())
-                                return SpellCastResult.EquippedItem;
+                        if (m_attackType != WeaponAttackType.RangedAttack)
                             break;
-                        }
+
+                        Item pItem = m_caster.ToPlayer().GetWeaponForAttack(m_attackType);
+                        if (pItem == null || pItem.IsBroken())
+                            return SpellCastResult.EquippedItem;
+                        break;
+                    }
                     case SpellEffectName.RechargeItem:
+                    {
+                        uint itemId = effect.ItemType;
+
+                        ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(itemId);
+                        if (proto == null)
+                            return SpellCastResult.ItemAtMaxCharges;
+
+                        Item item = player.GetItemByEntry(itemId);
+                        if (item != null)
                         {
-                            uint itemId = effect.ItemType;
-
-                            ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(itemId);
-                            if (proto == null)
-                                return SpellCastResult.ItemAtMaxCharges;
-
-                            Item item = player.GetItemByEntry(itemId);
-                            if (item != null)
-                            {
-                                foreach (ItemEffectRecord itemEffect in item.GetEffects())
-                                    if (itemEffect.LegacySlotIndex <= item.m_itemData.SpellCharges.GetSize() && itemEffect.Charges != 0 && item.GetSpellCharges(itemEffect.LegacySlotIndex) == itemEffect.Charges)
-                                        return SpellCastResult.ItemAtMaxCharges;
-                            }
-                            break;
+                            foreach (ItemEffectRecord itemEffect in item.GetEffects())
+                                if (itemEffect.LegacySlotIndex <= item.m_itemData.SpellCharges.GetSize() && itemEffect.Charges != 0 && item.GetSpellCharges(itemEffect.LegacySlotIndex) == itemEffect.Charges)
+                                    return SpellCastResult.ItemAtMaxCharges;
                         }
+                        break;
+                    }
                     case SpellEffectName.RespecAzeriteEmpoweredItem:
+                    {
+                        Item item = m_targets.GetItemTarget();
+                        if (item == null)
+                            return SpellCastResult.AzeriteEmpoweredOnly;
+
+                        if (item.GetOwnerGUID() != m_caster.GetGUID())
+                            return SpellCastResult.DontReport;
+
+                        AzeriteEmpoweredItem azeriteEmpoweredItem = item.ToAzeriteEmpoweredItem();
+                        if (azeriteEmpoweredItem == null)
+                            return SpellCastResult.AzeriteEmpoweredOnly;
+
+                        bool hasSelections = false;
+                        for (int tier = 0; tier < azeriteEmpoweredItem.GetMaxAzeritePowerTier(); ++tier)
                         {
-                            Item item = m_targets.GetItemTarget();
-                            if (item == null)
-                                return SpellCastResult.AzeriteEmpoweredOnly;
-
-                            if (item.GetOwnerGUID() != m_caster.GetGUID())
-                                return SpellCastResult.DontReport;
-
-                            AzeriteEmpoweredItem azeriteEmpoweredItem = item.ToAzeriteEmpoweredItem();
-                            if (azeriteEmpoweredItem == null)
-                                return SpellCastResult.AzeriteEmpoweredOnly;
-
-                            bool hasSelections = false;
-                            for (int tier = 0; tier < azeriteEmpoweredItem.GetMaxAzeritePowerTier(); ++tier)
+                            if (azeriteEmpoweredItem.GetSelectedAzeritePower(tier) != 0)
                             {
-                                if (azeriteEmpoweredItem.GetSelectedAzeritePower(tier) != 0)
-                                {
-                                    hasSelections = true;
-                                    break;
-                                }
+                                hasSelections = true;
+                                break;
                             }
-
-                            if (!hasSelections)
-                                return SpellCastResult.AzeriteEmpoweredNoChoicesToUndo;
-
-                            if (!m_caster.ToPlayer().HasEnoughMoney(azeriteEmpoweredItem.GetRespecCost()))
-                                return SpellCastResult.DontReport;
-
-                            break;
                         }
+
+                        if (!hasSelections)
+                            return SpellCastResult.AzeriteEmpoweredNoChoicesToUndo;
+
+                        if (!m_caster.ToPlayer().HasEnoughMoney(azeriteEmpoweredItem.GetRespecCost()))
+                            return SpellCastResult.DontReport;
+
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -6667,48 +6694,48 @@ namespace Game.Spells
             switch (effect.Effect)
             {
                 case SpellEffectName.SkinPlayerCorpse:
+                {
+                    if (m_targets.GetCorpseTargetGUID().IsEmpty())
                     {
-                        if (m_targets.GetCorpseTargetGUID().IsEmpty())
-                        {
-                            if (target.IsWithinLOSInMap(m_caster, LineOfSightChecks.All, ModelIgnoreFlags.M2) && target.HasUnitFlag(UnitFlags.Skinnable))
-                                return true;
+                        if (target.IsWithinLOSInMap(m_caster, LineOfSightChecks.All, ModelIgnoreFlags.M2) && target.HasUnitFlag(UnitFlags.Skinnable))
+                            return true;
 
-                            return false;
-                        }
-
-                        Corpse corpse = ObjectAccessor.GetCorpse(m_caster, m_targets.GetCorpseTargetGUID());
-                        if (!corpse)
-                            return false;
-
-                        if (target.GetGUID() != corpse.GetOwnerGUID())
-                            return false;
-
-                        if (!corpse.HasDynamicFlag(UnitDynFlags.Lootable))
-                            return false;
-
-                        if (!corpse.IsWithinLOSInMap(m_caster, LineOfSightChecks.All, ModelIgnoreFlags.M2))
-                            return false;
-
-                        break;
+                        return false;
                     }
+
+                    Corpse corpse = ObjectAccessor.GetCorpse(m_caster, m_targets.GetCorpseTargetGUID());
+                    if (!corpse)
+                        return false;
+
+                    if (target.GetGUID() != corpse.GetOwnerGUID())
+                        return false;
+
+                    if (!corpse.HasDynamicFlag(UnitDynFlags.Lootable))
+                        return false;
+
+                    if (!corpse.IsWithinLOSInMap(m_caster, LineOfSightChecks.All, ModelIgnoreFlags.M2))
+                        return false;
+
+                    break;
+                }
                 default:
+                {
+                    if (losPosition != null)
+                        return target.IsWithinLOS(losPosition.GetPositionX(), losPosition.GetPositionY(), losPosition.GetPositionZ(), LineOfSightChecks.All, ModelIgnoreFlags.M2);
+                    else
                     {
-                        if (losPosition != null)
-                            return target.IsWithinLOS(losPosition.GetPositionX(), losPosition.GetPositionY(), losPosition.GetPositionZ(), LineOfSightChecks.All, ModelIgnoreFlags.M2);
-                        else
-                        {
-                            // Get GO cast coordinates if original caster -> GO
-                            WorldObject caster = null;
-                            if (m_originalCasterGUID.IsGameObject())
-                                caster = m_caster.GetMap().GetGameObject(m_originalCasterGUID);
-                            if (!caster)
-                                caster = m_caster;
-                            if (target != m_caster && !target.IsWithinLOSInMap(caster, LineOfSightChecks.All, ModelIgnoreFlags.M2))
-                                return false;
-                        }
-
-                        break;
+                        // Get GO cast coordinates if original caster -> GO
+                        WorldObject caster = null;
+                        if (m_originalCasterGUID.IsGameObject())
+                            caster = m_caster.GetMap().GetGameObject(m_originalCasterGUID);
+                        if (!caster)
+                            caster = m_caster;
+                        if (target != m_caster && !target.IsWithinLOSInMap(caster, LineOfSightChecks.All, ModelIgnoreFlags.M2))
+                            return false;
                     }
+
+                    break;
+                }
             }
 
             return true;
@@ -6907,37 +6934,37 @@ namespace Game.Spells
                         break;
                     // check key skill (only single first fit case can be)
                     case LockKeyType.Skill:
+                    {
+                        reqKey = true;
+
+                        // wrong locktype, skip
+                        if (effect.MiscValue != lockInfo.Index[j])
+                            continue;
+
+                        skillId = SharedConst.SkillByLockType((LockType)lockInfo.Index[j]);
+
+                        if (skillId != SkillType.None || lockInfo.Index[j] == (uint)LockType.Lockpicking)
                         {
-                            reqKey = true;
+                            reqSkillValue = lockInfo.Skill[j];
 
-                            // wrong locktype, skip
-                            if (effect.MiscValue != lockInfo.Index[j])
-                                continue;
+                            // castitem check: rogue using skeleton keys. the skill values should not be added in this case.
+                            skillValue = 0;
+                            if (!m_CastItem && m_caster.IsTypeId(TypeId.Player))
+                                skillValue = m_caster.ToPlayer().GetSkillValue(skillId);
+                            else if (lockInfo.Index[j] == (uint)LockType.Lockpicking)
+                                skillValue = (int)m_caster.GetLevel() * 5;
 
-                            skillId = SharedConst.SkillByLockType((LockType)lockInfo.Index[j]);
+                            // skill bonus provided by casting spell (mostly item spells)
+                            // add the effect base points modifier from the spell cast (cheat lock / skeleton key etc.)
+                            if (effect.TargetA.GetTarget() == Targets.GameobjectItemTarget || effect.TargetB.GetTarget() == Targets.GameobjectItemTarget)
+                                skillValue += effect.CalcValue();
 
-                            if (skillId != SkillType.None || lockInfo.Index[j] == (uint)LockType.Lockpicking)
-                            {
-                                reqSkillValue = lockInfo.Skill[j];
-
-                                // castitem check: rogue using skeleton keys. the skill values should not be added in this case.
-                                skillValue = 0;
-                                if (!m_CastItem && m_caster.IsTypeId(TypeId.Player))
-                                    skillValue = m_caster.ToPlayer().GetSkillValue(skillId);
-                                else if (lockInfo.Index[j] == (uint)LockType.Lockpicking)
-                                    skillValue = (int)m_caster.GetLevel() * 5;
-
-                                // skill bonus provided by casting spell (mostly item spells)
-                                // add the effect base points modifier from the spell cast (cheat lock / skeleton key etc.)
-                                if (effect.TargetA.GetTarget() == Targets.GameobjectItemTarget || effect.TargetB.GetTarget() == Targets.GameobjectItemTarget)
-                                    skillValue += effect.CalcValue();
-
-                                if (skillValue < reqSkillValue)
-                                    return SpellCastResult.LowCastlevel;
-                            }
-
-                            return SpellCastResult.SpellCastOk;
+                            if (skillValue < reqSkillValue)
+                                return SpellCastResult.LowCastlevel;
                         }
+
+                        return SpellCastResult.SpellCastOk;
+                    }
                 }
             }
 
@@ -8061,56 +8088,56 @@ namespace Game.Spells
             switch (m_Spell.GetState())
             {
                 case SpellState.Finished:
+                {
+                    // spell was finished, check deletable state
+                    if (m_Spell.IsDeletable())
                     {
-                        // spell was finished, check deletable state
-                        if (m_Spell.IsDeletable())
-                        {
-                            // check, if we do have unfinished triggered spells
-                            return true;                                // spell is deletable, finish event
-                        }
-                        // event will be re-added automatically at the end of routine)
-                        break;
+                        // check, if we do have unfinished triggered spells
+                        return true;                                // spell is deletable, finish event
                     }
+                    // event will be re-added automatically at the end of routine)
+                    break;
+                }
                 case SpellState.Delayed:
+                {
+                    // first, check, if we have just started
+                    if (m_Spell.GetDelayStart() != 0)
                     {
-                        // first, check, if we have just started
-                        if (m_Spell.GetDelayStart() != 0)
+                        // run the spell handler and think about what we can do next
+                        ulong t_offset = e_time - m_Spell.GetDelayStart();
+                        ulong n_offset = m_Spell.HandleDelayed(t_offset);
+                        if (n_offset != 0)
                         {
-                            // run the spell handler and think about what we can do next
-                            ulong t_offset = e_time - m_Spell.GetDelayStart();
-                            ulong n_offset = m_Spell.HandleDelayed(t_offset);
-                            if (n_offset != 0)
-                            {
-                                // re-add us to the queue
-                                m_Spell.GetCaster().m_Events.AddEvent(this, m_Spell.GetDelayStart() + n_offset, false);
-                                return false;                       // event not complete
-                            }
-                            // event complete
-                            // finish update event will be re-added automatically at the end of routine)
+                            // re-add us to the queue
+                            m_Spell.GetCaster().m_Events.AddEvent(this, m_Spell.GetDelayStart() + n_offset, false);
+                            return false;                       // event not complete
                         }
+                        // event complete
+                        // finish update event will be re-added automatically at the end of routine)
+                    }
+                    else
+                    {
+                        // delaying had just started, record the moment
+                        m_Spell.SetDelayStart(e_time);
+                        // handle effects on caster if the spell has travel time but also affects the caster in some way
+                        ulong n_offset = m_Spell.HandleDelayed(0);
+                        if (m_Spell.m_spellInfo.LaunchDelay != 0)
+                            Cypher.Assert(n_offset == (ulong)Math.Floor(m_Spell.m_spellInfo.LaunchDelay * 1000.0f));
                         else
-                        {
-                            // delaying had just started, record the moment
-                            m_Spell.SetDelayStart(e_time);
-                            // handle effects on caster if the spell has travel time but also affects the caster in some way
-                            ulong n_offset = m_Spell.HandleDelayed(0);
-                            if (m_Spell.m_spellInfo.LaunchDelay != 0)
-                                Cypher.Assert(n_offset == (ulong)Math.Floor(m_Spell.m_spellInfo.LaunchDelay * 1000.0f));
-                            else
-                                Cypher.Assert(n_offset == m_Spell.GetDelayMoment());
+                            Cypher.Assert(n_offset == m_Spell.GetDelayMoment());
 
-                            // re-plan the event for the delay moment
-                            m_Spell.GetCaster().m_Events.AddEvent(this, e_time + m_Spell.GetDelayMoment(), false);
-                            return false;                               // event not complete
-                        }
-                        break;
+                        // re-plan the event for the delay moment
+                        m_Spell.GetCaster().m_Events.AddEvent(this, e_time + m_Spell.GetDelayMoment(), false);
+                        return false;                               // event not complete
                     }
+                    break;
+                }
                 default:
-                    {
-                        // all other states
-                        // event will be re-added automatically at the end of routine)
-                        break;
-                    }
+                {
+                    // all other states
+                    // event will be re-added automatically at the end of routine)
+                    break;
+                }
             }
 
             // spell processing not complete, plan event on the next update interval

@@ -3722,7 +3722,6 @@ namespace Game.Spells
                 return;
 
             Position pos = destTarget.GetPosition();
-            pos = unitTarget.GetFirstCollisionPosition(unitTarget.GetDistance(pos.posX, pos.posY, pos.posZ + 2.0f), 0.0f);
             unitTarget.NearTeleportTo(pos.posX, pos.posY, pos.posZ, pos.Orientation, unitTarget == m_caster);
         }
 

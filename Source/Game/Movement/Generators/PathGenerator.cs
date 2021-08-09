@@ -977,6 +977,7 @@ namespace Game.Movement
         Detour.dtNavMesh _navMesh;
     }
 
+    [Flags]
     public enum PathType
     {
         Blank = 0x00,   // path not built yet
