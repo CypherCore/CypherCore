@@ -2139,6 +2139,8 @@ namespace Game.Entities
             {
                 m_removedAuras.Remove(m_removedAuras.First());
             }
+
+            m_removedAurasCount = 0;
         }
 
         public bool HasStealthAura() { return HasAuraType(AuraType.ModStealth); }
