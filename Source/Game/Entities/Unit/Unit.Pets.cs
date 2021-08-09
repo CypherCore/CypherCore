@@ -411,11 +411,11 @@ namespace Game.Entities
                         playerCharmer.VehicleSpellInitialize();
                         break;
                     case CharmType.Possess:
-                        AddUnitState(UnitState.Possessed);
                         AddUnitFlag(UnitFlags.PlayerControlled);
                         charmer.AddUnitFlag(UnitFlags.RemoveClientControl);
                         playerCharmer.SetClientControl(this, true);
                         playerCharmer.PossessSpellInitialize();
+                        AddUnitState(UnitState.Possessed);
                         break;
                     case CharmType.Charm:
                         if (IsTypeId(TypeId.Unit) && charmer.GetClass() == Class.Warlock)
@@ -510,11 +510,11 @@ namespace Game.Entities
                         RemoveUnitFlag(UnitFlags.PlayerControlled);
                         break;
                     case CharmType.Possess:
+                        ClearUnitState(UnitState.Possessed);
                         playerCharmer.SetClientControl(this, false);
                         playerCharmer.SetClientControl(charmer, true);
                         charmer.RemoveUnitFlag(UnitFlags.RemoveClientControl);
                         RemoveUnitFlag(UnitFlags.PlayerControlled);
-                        ClearUnitState(UnitState.Possessed);
                         break;
                     case CharmType.Charm:
                         if (IsTypeId(TypeId.Unit) && charmer.GetClass() == Class.Warlock)
@@ -557,7 +557,6 @@ namespace Game.Entities
 
             // reset confused movement for example
             ApplyControlStatesIfNeeded();
-            ClearUnitState(UnitState.Charmed);
         }
 
         public void GetAllMinionsByEntry(List<TempSummon> Minions, uint entry)
@@ -617,6 +616,8 @@ namespace Game.Entities
             }
             else
             {
+                charm.ClearUnitState(UnitState.Charmed);
+
                 if (IsTypeId(TypeId.Player))
                 {
                     if (GetCharmGUID() == charm.GetGUID())
