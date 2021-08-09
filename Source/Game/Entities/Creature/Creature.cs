@@ -3146,13 +3146,14 @@ namespace Game.Entities
 
             if (m_respawnTime == 0 && !map.IsSpawnGroupActive(data.spawnGroupData.groupId))
             {
-                Cypher.Assert(m_respawnCompatibilityMode, $"Creature (SpawnID {spawnId}) trying to load in inactive spawn group {data.spawnGroupData.name}.");
+                // @todo pools need fixing! this is just a temporary crashfix, but they violate dynspawn principles
+                Cypher.Assert(m_respawnCompatibilityMode || Global.PoolMgr.IsPartOfAPool<Creature>(spawnId) != 0, $"Creature (SpawnID {spawnId}) trying to load in inactive spawn group {data.spawnGroupData.name}.");
                 m_respawnTime = GameTime.GetGameTime() + RandomHelper.URand(4, 7);
             }
 
             if (m_respawnTime != 0)                          // respawn on UpdateLoadCreatureFromDB
             {
-                Cypher.Assert(m_respawnCompatibilityMode, $"Creature (SpawnID {spawnId}) trying to load despite a respawn timer in progress.");
+                Cypher.Assert(m_respawnCompatibilityMode || Global.PoolMgr.IsPartOfAPool<Creature>(spawnId) != 0, $"Creature (SpawnID {spawnId}) trying to load despite a respawn timer in progress.");
                 m_deathState = DeathState.Dead;
                 if (CanFly())
                 {
