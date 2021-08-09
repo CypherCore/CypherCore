@@ -2542,7 +2542,7 @@ namespace Game.Spells
                 // non-area aura
                 if (effect.Effect == SpellEffectName.ApplyAura)
                 {
-                    if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(GetUnitOwner(), GetUnitOwner(), condList))
+                    if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(GetUnitOwner(), caster, condList))
                         targetList.Add(GetUnitOwner());
                 }
                 else
@@ -2572,7 +2572,7 @@ namespace Game.Spells
                                 selectionType = SpellTargetCheckTypes.Enemy;
                                 break;
                             case SpellEffectName.ApplyAreaAuraPet:
-                                if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(GetUnitOwner(), GetUnitOwner(), condList))
+                                if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(GetUnitOwner(), caster, condList))
                                     targetList.Add(GetUnitOwner());
                                 goto case SpellEffectName.ApplyAreaAuraOwner;
                             case SpellEffectName.ApplyAreaAuraOwner:
@@ -2580,7 +2580,7 @@ namespace Game.Spells
                                     Unit owner = GetUnitOwner().GetCharmerOrOwner();
                                     if (owner != null)
                                         if (GetUnitOwner().IsWithinDistInMap(owner, radius))
-                                            if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(owner, GetUnitOwner(), condList))
+                                            if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(owner, caster, condList))
                                                 targetList.Add(owner);
                                     break;
                                 }
@@ -2588,13 +2588,13 @@ namespace Game.Spells
                                 {
                                     Unit pet = Global.ObjAccessor.GetUnit(GetUnitOwner(), GetUnitOwner().GetPetGUID());
                                     if (pet != null)
-                                        if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(pet, GetUnitOwner(), condList))
+                                        if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(pet, caster, condList))
                                             targetList.Add(pet);
                                     break;
                                 }
                             case SpellEffectName.ApplyAreaAuraSummons:
                                 {
-                                    if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(GetUnitOwner(), GetUnitOwner(), condList))
+                                    if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(GetUnitOwner(), caster, condList))
                                         targetList.Add(GetUnitOwner());
 
                                     selectionType = SpellTargetCheckTypes.Summoned;
@@ -2604,7 +2604,7 @@ namespace Game.Spells
 
                         if (selectionType != SpellTargetCheckTypes.Default)
                         {
-                            WorldObjectSpellAreaTargetCheck check = new(radius, GetUnitOwner(), caster, GetUnitOwner(), GetSpellInfo(), selectionType, condList, SpellTargetObjectTypes.Unit);
+                            WorldObjectSpellAreaTargetCheck check = new(radius, GetUnitOwner(), caster, caster, GetSpellInfo(), selectionType, condList, SpellTargetObjectTypes.Unit);
                             UnitListSearcher searcher = new(GetUnitOwner(), targetList, check);
                             Cell.VisitAllObjects(GetUnitOwner(), searcher, radius);
 
