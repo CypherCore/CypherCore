@@ -441,6 +441,8 @@ namespace Game.Entities
                         break;
                 }
             }
+
+            AddUnitState(UnitState.Charmed);
             return true;
         }
 
@@ -542,8 +544,7 @@ namespace Game.Entities
                     IsAIEnabled = false;
                 }
 
-                if (!HasUnitState(UnitState.LostControl))
-                    player.SetClientControl(this, true);
+                player.SetClientControl(this, true);
             }
 
             EngageWithTarget(charmer);
@@ -553,6 +554,10 @@ namespace Game.Entities
                 playerCharmer.SendRemoveControlBar();
             else if (IsTypeId(TypeId.Player) || (IsTypeId(TypeId.Unit) && !IsGuardian()))
                 DeleteCharmInfo();
+
+            // reset confused movement for example
+            ApplyControlStatesIfNeeded();
+            ClearUnitState(UnitState.Charmed);
         }
 
         public void GetAllMinionsByEntry(List<TempSummon> Minions, uint entry)

@@ -1142,19 +1142,24 @@ namespace Game.Entities
                         return;
                 }
 
-                // Unit States might have been already cleared but auras still present. I need to check with HasAuraType
-                if (HasAuraType(AuraType.ModStun))
-                    SetStunned(true);
-
-                if (HasAuraType(AuraType.ModRoot) || HasAuraType(AuraType.ModRoot2))
-                    SetRooted(true);
-
-                if (HasAuraType(AuraType.ModConfuse))
-                    SetConfused(true);
-
-                if (HasAuraType(AuraType.ModFear))
-                    SetFeared(true);
+                ApplyControlStatesIfNeeded();
             }
+        }
+
+        void ApplyControlStatesIfNeeded()
+        {
+            // Unit States might have been already cleared but auras still present. I need to check with HasAuraType
+            if (HasUnitState(UnitState.Stunned) || HasAuraType(AuraType.ModStun))
+                SetStunned(true);
+
+            if (HasUnitState(UnitState.Root) || HasAuraType(AuraType.ModRoot) || HasAuraType(AuraType.ModRoot2))
+                SetRooted(true);
+
+            if (HasUnitState(UnitState.Confused) || HasAuraType(AuraType.ModConfuse))
+                SetConfused(true);
+
+            if (HasUnitState(UnitState.Fleeing) || HasAuraType(AuraType.ModFear))
+                SetFeared(true);
         }
 
         void SetStunned(bool apply)
@@ -1250,13 +1255,11 @@ namespace Game.Entities
                 }
             }
 
-            Player player = ToPlayer();
-            if (player)
+            // block / allow control to real player in control (eg charmer)
+            if (IsPlayer())
             {
-                if (apply)
-                    player.SetClientControl(this, false);
-                else if (!HasUnitState(UnitState.LostControl))
-                    player.SetClientControl(this, true);
+                if (m_playerMovingMe)
+                    m_playerMovingMe.SetClientControl(this, !apply);
             }
         }
 
@@ -1278,13 +1281,11 @@ namespace Game.Entities
                 }
             }
 
-            Player player = ToPlayer();
-            if (player)
+            // block / allow control to real player in control (eg charmer)
+            if (IsPlayer())
             {
-                if (apply)
-                    player.SetClientControl(this, false);
-                else if (!HasUnitState(UnitState.LostControl))
-                    player.SetClientControl(this, true);
+                if (m_playerMovingMe)
+                    m_playerMovingMe.SetClientControl(this, !apply);
             }
         }
 

@@ -448,23 +448,23 @@ namespace Framework.Constants
     [Flags]
     public enum UnitState : uint
     {
-        Died = 0x01,                     // Player Has Fake Death Aura
-        MeleeAttacking = 0x02,                     // Player Is Melee Attacking Someone
-        //Melee_Attack_By = 0x04,                     // Player Is Melee Attack By Someone
+        Died = 0x01, // Player Has Fake Death Aura
+        MeleeAttacking = 0x02, // Player Is Melee Attacking Someone
+        Charmed = 0x04, // having any kind of charm aura on self
         Stunned = 0x08,
         Roaming = 0x10,
         Chase = 0x20,
-        //Searching       = 0x40,
+        Focusing = 0x40,
         Fleeing = 0x80,
-        InFlight = 0x100,                     // Player Is In Flight Mode
+        InFlight = 0x100, // Player Is In Flight Mode
         Follow = 0x200,
         Root = 0x400,
         Confused = 0x800,
         Distracted = 0x1000,
-        Isolated = 0x2000,                     // Area Auras Do Not Affect Other Players
+        Isolated = 0x2000, // Area Auras Do Not Affect Other Players
         AttackPlayer = 0x4000,
         Casting = 0x8000,
-        Possessed = 0x10000,
+        Possessed = 0x10000, // being possessed by another unit
         Charging = 0x20000,
         Jumping = 0x40000,
         Move = 0x100000,
@@ -476,8 +476,8 @@ namespace Framework.Constants
         ChaseMove = 0x4000000,
         FollowMove = 0x8000000,
         IgnorePathfinding = 0x10000000,
-        AllStateSupported = Died | MeleeAttacking | Stunned | Roaming | Chase
-                            | Fleeing | InFlight | Follow | Root | Confused
+        AllStateSupported = Died | MeleeAttacking | Charmed | Stunned | Roaming | Chase
+                            | Focusing | Fleeing | InFlight | Follow | Root | Confused
                             | Distracted | Isolated | AttackPlayer | Casting
                             | Possessed | Charging | Jumping | Move | Rotating
                             | Evade | RoamingMove | ConfusedMove | FleeingMove
@@ -486,10 +486,11 @@ namespace Framework.Constants
         Unattackable = InFlight,
         Moving = RoamingMove | ConfusedMove | FleeingMove | ChaseMove | FollowMove,
         Controlled = Confused | Stunned | Fleeing,
+        CantClientControl = Confused | Charmed | Possessed | Fleeing,
         LostControl = Controlled | Possessed | Jumping | Charging,
+        CannotAutoattack = Controlled | Charging | Casting,
         Sightless = LostControl | Evade,
-        CannotAutoattack = LostControl | Casting,
-        CannotTurn = LostControl | Rotating,
+        CannotTurn = LostControl | Rotating | Focusing,
         NotMove = Root | Stunned | Died | Distracted,
 
         AllErasable = AllStateSupported & ~IgnorePathfinding,

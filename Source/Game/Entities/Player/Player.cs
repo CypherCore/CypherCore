@@ -7231,6 +7231,10 @@ namespace Game.Entities
 
         public void SetClientControl(Unit target, bool allowMove)
         {
+            // still affected by some aura that shouldn't allow control, only allow on last such aura to be removed
+            if (allowMove && target.HasUnitState(UnitState.CantClientControl))
+                return;
+
             ControlUpdate packet = new();
             packet.Guid = target.GetGUID();
             packet.On = allowMove;
@@ -7242,6 +7246,7 @@ namespace Game.Entities
             if (allowMove)
                 SetMover(target);
         }
+
         public void SetMover(Unit target)
         {
             m_unitMovedByMe.m_playerMovingMe = null;

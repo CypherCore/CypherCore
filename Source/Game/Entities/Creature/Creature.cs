@@ -2945,7 +2945,7 @@ namespace Game.Entities
             }
 
             if (!noTurnDuringCast)
-                AddUnitState(UnitState.CannotTurn);
+                AddUnitState(UnitState.Focusing);
         }
 
         public override bool IsFocusing(Spell focusSpell = null, bool withDelay = false)
@@ -3000,7 +3000,7 @@ namespace Game.Entities
                 MustReacquireTarget();
 
             if (_focusSpell.GetSpellInfo().HasAttribute(SpellAttr5.DontTurnDuringCast))
-                ClearUnitState(UnitState.CannotTurn);
+                ClearUnitState(UnitState.Focusing);
 
             _focusSpell = null;
             _focusDelay = (!IsPet() && withDelay) ? GameTime.GetGameTimeMS() : 0; // don't allow re-target right away to prevent visual bugs
