@@ -3993,7 +3993,7 @@ namespace Game.Entities
             }
 
             // Sanctified Wrath (bypass damage reduction)
-            if (attacker != null && TakenTotalMod < 1.0f)
+            if (TakenTotalMod < 1.0f)
             {
                 SpellSchoolMask attackSchoolMask = spellProto != null ? spellProto.GetSchoolMask() : damageSchoolMask;
 

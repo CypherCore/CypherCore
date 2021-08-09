@@ -503,7 +503,7 @@ namespace Scripts.Spells.Priest
                     if (rhs == explTarget) // anything > explTarget: always false
                         return -1;
 
-                    return MakeSortTuple(lhs).Equals(rhs) ? 1 : -1;
+                    return MakeSortTuple(lhs).Equals(MakeSortTuple(rhs)) ? 1 : -1;
                 });
 
                 targets.Resize(maxTargets);

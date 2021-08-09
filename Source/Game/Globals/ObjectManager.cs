@@ -3912,7 +3912,7 @@ namespace Game
                 }
 
                 GameObjectOverride gameObjectOverride = new();
-                gameObjectOverride.Faction = result.Read<uint>(1);
+                gameObjectOverride.Faction = result.Read<ushort>(1);
                 gameObjectOverride.Flags = (GameObjectFlags)result.Read<uint>(2);
 
                 _gameObjectOverrideStorage[spawnId] = gameObjectOverride;
