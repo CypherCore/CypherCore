@@ -681,6 +681,7 @@ namespace Game.BattleFields
             // Set creature in world
             m_Map.AddToMap(creature);
             creature.SetActive(true);
+            creature.SetFarVisible(true);
 
             return creature;
         }
@@ -705,6 +706,7 @@ namespace Game.BattleFields
             // Add to world
             m_Map.AddToMap(go);
             go.SetActive(true);
+            go.SetFarVisible(true);
 
             return go;
         }

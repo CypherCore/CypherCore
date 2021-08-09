@@ -990,6 +990,16 @@ namespace Game.Entities
             }
         }
 
+        bool IsFarVisible() { return m_isFarVisible; }
+
+        public void SetFarVisible(bool on)
+        {
+            if (IsPlayer())
+                return;
+
+            m_isFarVisible = on;
+        }
+
         bool IsVisibilityOverridden() { return m_visibilityDistanceOverride.HasValue; }
 
         public void SetVisibilityDistanceOverride(VisibilityDistanceType type)
@@ -1053,9 +1063,9 @@ namespace Game.Entities
 
         public float GetVisibilityRange()
         {
-            if (IsVisibilityOverridden() && !IsTypeId(TypeId.Player))
+            if (IsVisibilityOverridden() && !IsPlayer())
                 return m_visibilityDistanceOverride.Value;
-            else if (IsActiveObject() && !IsTypeId(TypeId.Player))
+            else if (IsFarVisible() && !IsPlayer())
                 return SharedConst.MaxVisibilityDistance;
             else
                 return GetMap().GetVisibilityRange();
@@ -1063,26 +1073,26 @@ namespace Game.Entities
 
         public float GetSightRange(WorldObject target = null)
         {
-            if (IsTypeId(TypeId.Player) || IsTypeId(TypeId.Unit))
+            if (IsPlayer() || IsCreature())
             {
-                if (IsTypeId(TypeId.Player))
+                if (IsPlayer())
                 {
-                    if (target != null && target.IsVisibilityOverridden() && !target.IsTypeId(TypeId.Player))
+                    if (target != null && target.IsVisibilityOverridden() && !target.IsPlayer())
                         return target.m_visibilityDistanceOverride.Value;
-                    else if (target != null && target.IsActiveObject() && !target.IsTypeId(TypeId.Player))
+                    else if (target != null && target.IsFarVisible() && !target.IsPlayer())
                         return SharedConst.MaxVisibilityDistance;
                     else if (ToPlayer().GetCinematicMgr().IsOnCinematic())
                         return SharedConst.DefaultVisibilityInstance;
                     else
                         return GetMap().GetVisibilityRange();
                 }
-                else if (IsTypeId(TypeId.Unit))
+                else if (IsCreature())
                     return ToCreature().m_SightDistance;
                 else
                     return SharedConst.SightRangeUnit;
             }
 
-            if (IsTypeId(TypeId.DynamicObject) && IsActiveObject())
+            if (IsDynObject() && IsActiveObject())
             {
                 return GetMap().GetVisibilityRange();
             }
@@ -2383,6 +2393,7 @@ namespace Game.Entities
         public MovementInfo m_movementInfo;
         string _name;
         protected bool m_isActive;
+        bool m_isFarVisible;
         Optional<float> m_visibilityDistanceOverride;
         bool m_isWorldObject;
         public ZoneScript m_zoneScript;
