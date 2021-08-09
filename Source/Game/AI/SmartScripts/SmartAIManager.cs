@@ -1397,6 +1397,15 @@ namespace Game.AI
                     }
                     break;
                 }
+                case SmartActions.EnableTempGobj:
+                {
+                    if (e.Action.enableTempGO.duration == 0)
+                    {
+                        Log.outError(LogFilter.Sql, $"Entry {e.EntryOrGuid} SourceType {e.GetScriptType()} Event {e.EventId} Action {e.GetActionType()} does not specify duration");
+                        return false;
+                    }
+                    break;
+                }
                 case SmartActions.SetMovementSpeed:
                 {
                     if (e.Action.movementSpeed.movementType >= (int)MovementGeneratorType.Max)
@@ -1456,7 +1465,6 @@ namespace Game.AI
                 case SmartActions.RemoveUnitFlag:
                 case SmartActions.Playmovie:
                 case SmartActions.MoveToPos:
-                case SmartActions.RespawnTarget:
                 case SmartActions.CloseGossip:
                 case SmartActions.TriggerTimedEvent:
                 case SmartActions.RemoveTimedEvent:
@@ -2437,7 +2445,7 @@ namespace Game.AI
         public Flee flee;
 
         [FieldOffset(4)]
-        public RespawnTarget respawnTarget;
+        public EnableTempGO enableTempGO;
 
         [FieldOffset(4)]
         public MoveToPos moveToPos;
@@ -2899,9 +2907,9 @@ namespace Game.AI
         {
             public uint fleeTime;
         }
-        public struct RespawnTarget
+        public struct EnableTempGO
         {
-            public uint goRespawnTime;
+            public uint duration;
         }
         public struct MoveToPos
         {

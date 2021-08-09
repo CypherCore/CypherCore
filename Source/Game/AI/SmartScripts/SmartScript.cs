@@ -1420,19 +1420,18 @@ namespace Game.AI
                     }
                     break;
                 }
-                case SmartActions.RespawnTarget:
+                case SmartActions.EnableTempGobj:
                 {
                     foreach (var target in targets)
                     {
                         if (IsCreature(target))
-                            target.ToCreature().Respawn();
+                            Log.outWarn(LogFilter.Sql, $"Invalid creature target '{target.GetName()}' (entry {target.GetEntry()}, spawnId {target.ToCreature().GetSpawnId()}) specified for SMART_ACTION_ENABLE_TEMP_GOBJ");
                         else if (IsGameObject(target))
                         {
-                            // do not modify respawndelay of already spawned gameobjects
                             if (target.ToGameObject().IsSpawnedByDefault())
-                                target.ToGameObject().Respawn();
+                                Log.outWarn(LogFilter.Sql, $"Invalid gameobject target '{target.GetName()}' (entry {target.GetEntry()}, spawnId {target.ToGameObject().GetSpawnId()}) for SMART_ACTION_ENABLE_TEMP_GOBJ - the object is spawned by default");
                             else
-                                target.ToGameObject().SetRespawnTime((int)e.Action.respawnTarget.goRespawnTime);
+                                target.ToGameObject().SetRespawnTime((int)e.Action.enableTempGO.duration);
                         }
                     }
                     break;
