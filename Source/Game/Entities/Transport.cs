@@ -115,10 +115,11 @@ namespace Game.Entities
             _triggeredArrivalEvent = false;
             _triggeredDepartureEvent = false;
 
-            if (m_goTemplateAddon != null)
+            GameObjectOverride goOverride = GetGameObjectOverride();
+            if (goOverride != null)
             {
-                SetFaction(m_goTemplateAddon.faction);
-                SetFlags((GameObjectFlags)m_goTemplateAddon.flags);
+                SetFaction(goOverride.Faction);
+                SetFlags(goOverride.Flags);
             }
 
             m_goValue.Transport.PathProgress = 0;

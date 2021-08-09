@@ -3845,18 +3845,18 @@ namespace Game
                 }
 
                 GameObjectTemplateAddon gameObjectAddon = new();
-                gameObjectAddon.faction = result.Read<ushort>(1);
-                gameObjectAddon.flags = result.Read<uint>(2);
-                gameObjectAddon.mingold = result.Read<uint>(3);
-                gameObjectAddon.maxgold = result.Read<uint>(4);
+                gameObjectAddon.Faction = result.Read<ushort>(1);
+                gameObjectAddon.Flags = (GameObjectFlags)result.Read<uint>(2);
+                gameObjectAddon.Mingold = result.Read<uint>(3);
+                gameObjectAddon.Maxgold = result.Read<uint>(4);
                 gameObjectAddon.WorldEffectID = result.Read<uint>(5);
                 gameObjectAddon.AIAnimKitID = result.Read<uint>(6);
 
                 // checks
-                if (gameObjectAddon.faction != 0 && !CliDB.FactionTemplateStorage.ContainsKey(gameObjectAddon.faction))
-                    Log.outError(LogFilter.Sql, $"GameObject (Entry: {entry}) has invalid faction ({gameObjectAddon.faction}) defined in `gameobject_template_addon`.");
+                if (gameObjectAddon.Faction != 0 && !CliDB.FactionTemplateStorage.ContainsKey(gameObjectAddon.Faction))
+                    Log.outError(LogFilter.Sql, $"GameObject (Entry: {entry}) has invalid faction ({gameObjectAddon.Faction}) defined in `gameobject_template_addon`.");
 
-                if (gameObjectAddon.maxgold > 0)
+                if (gameObjectAddon.Maxgold > 0)
                 {
                     switch (got.type)
                     {
@@ -3887,6 +3887,43 @@ namespace Game
             while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} game object template addons in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
+        }
+        public void LoadGameObjectOverrides()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            //                                   0        1        2
+            var result = DB.World.Query("SELECT spawnId, faction, flags FROM gameobject_overrides");
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 gameobject faction and flags overrides. DB table `gameobject_overrides` is empty.");
+                return;
+            }
+
+            uint count = 0;
+            do
+            {
+                ulong spawnId = result.Read<ulong>(0);
+                GameObjectData goData = GetGameObjectData(spawnId);
+                if (goData == null)
+                {
+                    Log.outError(LogFilter.Sql, $"GameObject (SpawnId: {spawnId}) does not exist but has a record in `gameobject_overrides`");
+                    continue;
+                }
+
+                GameObjectOverride gameObjectOverride = new();
+                gameObjectOverride.Faction = result.Read<uint>(1);
+                gameObjectOverride.Flags = (GameObjectFlags)result.Read<uint>(2);
+
+                _gameObjectOverrideStorage[spawnId] = gameObjectOverride;
+
+                if (gameObjectOverride.Faction != 0 && !CliDB.FactionTemplateStorage.ContainsKey(gameObjectOverride.Faction))
+                    Log.outError(LogFilter.Sql, $"GameObject (SpawnId: {spawnId}) has invalid faction ({gameObjectOverride.Faction}) defined in `gameobject_overrides`.");
+
+                ++count;
+            } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {count} gameobject faction and flags overrides in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
         public void LoadGameObjects()
         {
@@ -4379,6 +4416,10 @@ namespace Game
         public GameObjectTemplateAddon GetGameObjectTemplateAddon(uint entry)
         {
             return _gameObjectTemplateAddonStorage.LookupByKey(entry);
+        }
+        public GameObjectOverride GetGameObjectOverride(ulong spawnId)
+        {
+            return _gameObjectOverrideStorage.LookupByKey(spawnId);
         }
         public Dictionary<uint, GameObjectTemplate> GetGameObjectTemplates()
         {
@@ -10261,6 +10302,7 @@ namespace Game
         Dictionary<uint, GameObjectTemplate> _gameObjectTemplateStorage = new();
         Dictionary<ulong, GameObjectData> gameObjectDataStorage = new();
         Dictionary<ulong, GameObjectTemplateAddon> _gameObjectTemplateAddonStorage = new();
+        Dictionary<ulong, GameObjectOverride> _gameObjectOverrideStorage = new();
         Dictionary<ulong, GameObjectAddon> _gameObjectAddonStorage = new();
         MultiMap<uint, uint> _gameObjectQuestItemStorage = new();
         List<uint> _gameObjectForQuestStorage = new();

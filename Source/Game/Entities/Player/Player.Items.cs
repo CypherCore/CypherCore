@@ -6084,7 +6084,7 @@ namespace Game.Entities
                     {
                         GameObjectTemplateAddon addon = go.GetTemplateAddon();
                         if (addon != null)
-                            loot.GenerateMoneyLoot(addon.mingold, addon.maxgold);
+                            loot.GenerateMoneyLoot(addon.Mingold, addon.Maxgold);
                     }
 
                     if (loot_type == LootType.Fishing)

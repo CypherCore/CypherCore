@@ -254,11 +254,15 @@ namespace Game.Entities
 
             SetObjectScale(goInfo.size);
 
+            GameObjectOverride goOverride = GetGameObjectOverride();
+            if (goOverride != null)
+            {
+                SetFaction(goOverride.Faction);
+                SetFlags(goOverride.Flags);
+            }
+
             if (m_goTemplateAddon != null)
             {
-                SetFaction(m_goTemplateAddon.faction);
-                SetFlags((GameObjectFlags)m_goTemplateAddon.flags);
-
                 if (m_goTemplateAddon.WorldEffectID != 0)
                 {
                     m_updateFlag.GameObject = true;
@@ -435,425 +439,436 @@ namespace Game.Entities
             switch (m_lootState)
             {
                 case LootState.NotReady:
+                {
+                    switch (GetGoType())
                     {
-                        switch (GetGoType())
+                        case GameObjectTypes.Trap:
                         {
-                            case GameObjectTypes.Trap:
-                                {
-                                    // Arming Time for GAMEOBJECT_TYPE_TRAP (6)
-                                    GameObjectTemplate goInfo = GetGoInfo();
+                            // Arming Time for GAMEOBJECT_TYPE_TRAP (6)
+                            GameObjectTemplate goInfo = GetGoInfo();
 
-                                    // Bombs
-                                    Unit owner = GetOwner();
-                                    if (goInfo.Trap.charges == 2)
-                                        m_cooldownTime = GameTime.GetGameTimeMS() + 10 * Time.InMilliseconds;   // Hardcoded tooltip value
-                                    else if (owner)
-                                    {
-                                        if (owner.IsInCombat())
-                                            m_cooldownTime = GameTime.GetGameTimeMS() + goInfo.Trap.startDelay * Time.InMilliseconds;
-                                    }
-                                    m_lootState = LootState.Ready;
-                                    break;
-                                }
-                            case GameObjectTypes.Transport:
-                                if (m_goValue.Transport.AnimationInfo.Path == null)
-                                    break;
-
-                                m_goValue.Transport.PathProgress += diff;
-
-                                if (GetGoState() == GameObjectState.TransportActive)
-                                {
-                                    m_goValue.Transport.PathProgress += diff;
-                                    /* TODO: Fix movement in unloaded grid - currently GO will just disappear
-                                    public uint timer = m_goValue.Transport.PathProgress % GetTransportPeriod();
-                                    TransportAnimationEntry const* node = m_goValue.Transport.AnimationInfo.GetAnimNode(timer);
-                                    if (node && m_goValue.Transport.CurrentSeg != node.TimeSeg)
-                                    {
-                                    m_goValue.Transport.CurrentSeg = node.TimeSeg;
-
-                                    G3D.Quat rotation = m_goValue.Transport.AnimationInfo.GetAnimRotation(timer);
-                                    G3D.Vector3 pos = rotation.toRotationMatrix()
-                                    G3D.Matrix3.fromEulerAnglesZYX(GetOrientation(), 0.0f, 0.0f)
-                                    G3D.Vector3(node.X, node.Y, node.Z);
-
-                                    pos += G3D.Vector3(GetStationaryX(), GetStationaryY(), GetStationaryZ());
-
-                                    G3D.Vector3 src(GetPositionX(), GetPositionY(), GetPositionZ());
-
-                                    TC_LOG_DEBUG("misc", "Src: {0} Dest: {1}", src.toString().c_str(), pos.toString().c_str());
-
-                                    GetMap().GameObjectRelocation(this, pos.x, pos.y, pos.z, GetOrientation());
-                                    }
-                                    */
-                                    if (!m_goValue.Transport.StopFrames.Empty())
-                                    {
-                                        uint visualStateBefore = (m_goValue.Transport.StateUpdateTimer / 20000) & 1;
-                                        m_goValue.Transport.StateUpdateTimer += diff;
-                                        uint visualStateAfter = (m_goValue.Transport.StateUpdateTimer / 20000) & 1;
-                                        if (visualStateBefore != visualStateAfter)
-                                        {
-                                            m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Level);
-                                            m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.State);
-                                            ForceUpdateFieldChange();
-                                        }
-                                    }
-                                }
+                            // Bombs
+                            Unit owner = GetOwner();
+                            if (goInfo.Trap.charges == 2)
+                                m_cooldownTime = GameTime.GetGameTimeMS() + 10 * Time.InMilliseconds;   // Hardcoded tooltip value
+                            else if (owner)
+                            {
+                                if (owner.IsInCombat())
+                                    m_cooldownTime = GameTime.GetGameTimeMS() + goInfo.Trap.startDelay * Time.InMilliseconds;
+                            }
+                            m_lootState = LootState.Ready;
+                            break;
+                        }
+                        case GameObjectTypes.Transport:
+                            if (m_goValue.Transport.AnimationInfo.Path == null)
                                 break;
-                            case GameObjectTypes.FishingNode:
+
+                            m_goValue.Transport.PathProgress += diff;
+
+                            if (GetGoState() == GameObjectState.TransportActive)
+                            {
+                                m_goValue.Transport.PathProgress += diff;
+                                /* TODO: Fix movement in unloaded grid - currently GO will just disappear
+                                public uint timer = m_goValue.Transport.PathProgress % GetTransportPeriod();
+                                TransportAnimationEntry const* node = m_goValue.Transport.AnimationInfo.GetAnimNode(timer);
+                                if (node && m_goValue.Transport.CurrentSeg != node.TimeSeg)
                                 {
-                                    // fishing code (bobber ready)
-                                    if (GameTime.GetGameTime() > m_respawnTime - 5)
+                                m_goValue.Transport.CurrentSeg = node.TimeSeg;
+
+                                G3D.Quat rotation = m_goValue.Transport.AnimationInfo.GetAnimRotation(timer);
+                                G3D.Vector3 pos = rotation.toRotationMatrix()
+                                G3D.Matrix3.fromEulerAnglesZYX(GetOrientation(), 0.0f, 0.0f)
+                                G3D.Vector3(node.X, node.Y, node.Z);
+
+                                pos += G3D.Vector3(GetStationaryX(), GetStationaryY(), GetStationaryZ());
+
+                                G3D.Vector3 src(GetPositionX(), GetPositionY(), GetPositionZ());
+
+                                TC_LOG_DEBUG("misc", "Src: {0} Dest: {1}", src.toString().c_str(), pos.toString().c_str());
+
+                                GetMap().GameObjectRelocation(this, pos.x, pos.y, pos.z, GetOrientation());
+                                }
+                                */
+                                if (!m_goValue.Transport.StopFrames.Empty())
+                                {
+                                    uint visualStateBefore = (m_goValue.Transport.StateUpdateTimer / 20000) & 1;
+                                    m_goValue.Transport.StateUpdateTimer += diff;
+                                    uint visualStateAfter = (m_goValue.Transport.StateUpdateTimer / 20000) & 1;
+                                    if (visualStateBefore != visualStateAfter)
                                     {
-                                        // splash bobber (bobber ready now)
+                                        m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.Level);
+                                        m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.State);
+                                        ForceUpdateFieldChange();
+                                    }
+                                }
+                            }
+                            break;
+                        case GameObjectTypes.FishingNode:
+                        {
+                            // fishing code (bobber ready)
+                            if (GameTime.GetGameTime() > m_respawnTime - 5)
+                            {
+                                // splash bobber (bobber ready now)
+                                Unit caster = GetOwner();
+                                if (caster != null && caster.IsTypeId(TypeId.Player))
+                                {
+                                    SetGoState(GameObjectState.Active);
+                                    SetFlags(GameObjectFlags.NoDespawn);
+
+                                    UpdateData udata = new(caster.GetMapId());
+                                    UpdateObject packet;
+                                    BuildValuesUpdateBlockForPlayer(udata, caster.ToPlayer());
+                                    udata.BuildPacket(out packet);
+                                    caster.ToPlayer().SendPacket(packet);
+
+                                    SendCustomAnim(GetGoAnimProgress());
+                                }
+
+                                m_lootState = LootState.Ready;                 // can be successfully open with some chance
+                            }
+                            return;
+                        }
+                        default:
+                            m_lootState = LootState.Ready;                         // for other GOis same switched without delay to GO_READY
+                            break;
+                    }
+                }
+                goto case LootState.Ready;
+                case LootState.Ready:
+                {
+                    if (m_respawnCompatibilityMode)
+                    {
+                        if (m_respawnTime > 0)                          // timer on
+                        {
+                            long now = GameTime.GetGameTime();
+                            if (m_respawnTime <= now)            // timer expired
+                            {
+                                ObjectGuid dbtableHighGuid = ObjectGuid.Create(HighGuid.GameObject, GetMapId(), GetEntry(), m_spawnId);
+                                long linkedRespawntime = GetMap().GetLinkedRespawnTime(dbtableHighGuid);
+                                if (linkedRespawntime != 0)             // Can't respawn, the master is dead
+                                {
+                                    ObjectGuid targetGuid = Global.ObjectMgr.GetLinkedRespawnGuid(dbtableHighGuid);
+                                    if (targetGuid == dbtableHighGuid) // if linking self, never respawn (check delayed to next day)
+                                        SetRespawnTime(Time.Week);
+                                    else
+                                        m_respawnTime = (now > linkedRespawntime ? now : linkedRespawntime) + RandomHelper.IRand(5, Time.Minute); // else copy time from master and add a little
+                                    SaveRespawnTime(); // also save to DB immediately
+                                    return;
+                                }
+
+                                m_respawnTime = 0;
+                                m_SkillupList.Clear();
+                                m_usetimes = 0;
+
+                                // If nearby linked trap exists, respawn it
+                                GameObject linkedTrap = GetLinkedTrap();
+                                if (linkedTrap)
+                                    linkedTrap.SetLootState(LootState.Ready);
+
+                                switch (GetGoType())
+                                {
+                                    case GameObjectTypes.FishingNode:   //  can't fish now
+                                    {
                                         Unit caster = GetOwner();
                                         if (caster != null && caster.IsTypeId(TypeId.Player))
                                         {
-                                            SetGoState(GameObjectState.Active);
-                                            SetFlags(GameObjectFlags.NoDespawn);
-
-                                            UpdateData udata = new(caster.GetMapId());
-                                            UpdateObject packet;
-                                            BuildValuesUpdateBlockForPlayer(udata, caster.ToPlayer());
-                                            udata.BuildPacket(out packet);
-                                            caster.ToPlayer().SendPacket(packet);
-
-                                            SendCustomAnim(GetGoAnimProgress());
+                                            caster.ToPlayer().RemoveGameObject(this, false);
+                                            caster.ToPlayer().SendPacket(new FishEscaped());
                                         }
-
-                                        m_lootState = LootState.Ready;                 // can be successfully open with some chance
+                                        // can be delete
+                                        m_lootState = LootState.JustDeactivated;
+                                        return;
                                     }
+                                    case GameObjectTypes.Door:
+                                    case GameObjectTypes.Button:
+                                        //we need to open doors if they are closed (add there another condition if this code breaks some usage, but it need to be here for Battlegrounds)
+                                        if (GetGoState() != GameObjectState.Ready)
+                                            ResetDoorOrButton();
+                                        break;
+                                    case GameObjectTypes.FishingHole:
+                                        // Initialize a new max fish count on respawn
+                                        m_goValue.FishingHole.MaxOpens = RandomHelper.URand(GetGoInfo().FishingHole.minRestock, GetGoInfo().FishingHole.maxRestock);
+                                        break;
+                                    default:
+                                        break;
+                                }
+
+                                if (!m_spawnedByDefault)        // despawn timer
+                                {
+                                    // can be despawned or destroyed
+                                    SetLootState(LootState.JustDeactivated);
                                     return;
                                 }
-                            default:
-                                m_lootState = LootState.Ready;                         // for other GOis same switched without delay to GO_READY
-                                break;
-                        }
-                    }
-                    goto case LootState.Ready;
-                case LootState.Ready:
-                    {
-                        if (m_respawnCompatibilityMode)
-                        {
-                            if (m_respawnTime > 0)                          // timer on
-                            {
-                                long now = GameTime.GetGameTime();
-                                if (m_respawnTime <= now)            // timer expired
-                                {
-                                    ObjectGuid dbtableHighGuid = ObjectGuid.Create(HighGuid.GameObject, GetMapId(), GetEntry(), m_spawnId);
-                                    long linkedRespawntime = GetMap().GetLinkedRespawnTime(dbtableHighGuid);
-                                    if (linkedRespawntime != 0)             // Can't respawn, the master is dead
-                                    {
-                                        ObjectGuid targetGuid = Global.ObjectMgr.GetLinkedRespawnGuid(dbtableHighGuid);
-                                        if (targetGuid == dbtableHighGuid) // if linking self, never respawn (check delayed to next day)
-                                            SetRespawnTime(Time.Week);
-                                        else
-                                            m_respawnTime = (now > linkedRespawntime ? now : linkedRespawntime) + RandomHelper.IRand(5, Time.Minute); // else copy time from master and add a little
-                                        SaveRespawnTime(); // also save to DB immediately
-                                        return;
-                                    }
 
-                                    m_respawnTime = 0;
-                                    m_SkillupList.Clear();
-                                    m_usetimes = 0;
+                                // Call AI Reset (required for example in SmartAI to clear one time events)
+                                if (GetAI() != null)
+                                    GetAI().Reset();
 
-                                    // If nearby linked trap exists, respawn it
-                                    GameObject linkedTrap = GetLinkedTrap();
-                                    if (linkedTrap)
-                                        linkedTrap.SetLootState(LootState.Ready);
-
-                                    switch (GetGoType())
-                                    {
-                                        case GameObjectTypes.FishingNode:   //  can't fish now
-                                            {
-                                                Unit caster = GetOwner();
-                                                if (caster != null && caster.IsTypeId(TypeId.Player))
-                                                {
-                                                    caster.ToPlayer().RemoveGameObject(this, false);
-                                                    caster.ToPlayer().SendPacket(new FishEscaped());
-                                                }
-                                                // can be delete
-                                                m_lootState = LootState.JustDeactivated;
-                                                return;
-                                            }
-                                        case GameObjectTypes.Door:
-                                        case GameObjectTypes.Button:
-                                            //we need to open doors if they are closed (add there another condition if this code breaks some usage, but it need to be here for Battlegrounds)
-                                            if (GetGoState() != GameObjectState.Ready)
-                                                ResetDoorOrButton();
-                                            break;
-                                        case GameObjectTypes.FishingHole:
-                                            // Initialize a new max fish count on respawn
-                                            m_goValue.FishingHole.MaxOpens = RandomHelper.URand(GetGoInfo().FishingHole.minRestock, GetGoInfo().FishingHole.maxRestock);
-                                            break;
-                                        default:
-                                            break;
-                                    }
-
-                                    if (!m_spawnedByDefault)        // despawn timer
-                                    {
-                                        // can be despawned or destroyed
-                                        SetLootState(LootState.JustDeactivated);
-                                        return;
-                                    }
-
-                                    // Call AI Reset (required for example in SmartAI to clear one time events)
-                                    if (GetAI() != null)
-                                        GetAI().Reset();
-
-                                    // respawn timer
-                                    uint poolid = GetSpawnId() != 0 ? Global.PoolMgr.IsPartOfAPool<GameObject>(GetSpawnId()) : 0;
-                                    if (poolid != 0)
-                                        Global.PoolMgr.UpdatePool<GameObject>(poolid, GetSpawnId());
-                                    else
-                                        GetMap().AddToMap(this);
-                                }
+                                // respawn timer
+                                uint poolid = GetSpawnId() != 0 ? Global.PoolMgr.IsPartOfAPool<GameObject>(GetSpawnId()) : 0;
+                                if (poolid != 0)
+                                    Global.PoolMgr.UpdatePool<GameObject>(poolid, GetSpawnId());
+                                else
+                                    GetMap().AddToMap(this);
                             }
                         }
+                    }
 
-                        // Set respawn timer
-                        if (!m_respawnCompatibilityMode && m_respawnTime > 0)
-                            SaveRespawnTime(0, false);
+                    // Set respawn timer
+                    if (!m_respawnCompatibilityMode && m_respawnTime > 0)
+                        SaveRespawnTime(0, false);
 
-                        if (IsSpawned())
+                    if (IsSpawned())
+                    {
+                        GameObjectTemplate goInfo = GetGoInfo();
+                        uint max_charges;
+                        if (goInfo.type == GameObjectTypes.Trap)
+                        {
+                            if (GameTime.GetGameTimeMS() < m_cooldownTime)
+                                break;
+
+                            // Type 2 (bomb) does not need to be triggered by a unit and despawns after casting its spell.
+                            if (goInfo.Trap.charges == 2)
+                            {
+                                SetLootState(LootState.Activated);
+                                break;
+                            }
+
+                            // Type 0 despawns after being triggered, type 1 does not.
+                            // @todo This is activation radius. Casting radius must be selected from spell 
+                            float radius;
+                            if (goInfo.Trap.radius == 0f)
+                            {
+                                // Battlegroundgameobjects have data2 == 0 && data5 == 3
+                                if (goInfo.Trap.cooldown != 3)
+                                    break;
+
+                                radius = 3.0f;
+                            }
+                            else
+                                radius = goInfo.Trap.radius / 2.0f;
+
+                            Unit target;
+                            // @todo this hack with search required until GO casting not implemented
+                            Unit owner = GetOwner();
+                            if (owner)
+                            {
+                                // Hunter trap: Search units which are unfriendly to the trap's owner
+                                var checker = new NearestAttackableNoTotemUnitInObjectRangeCheck(this, owner, radius);
+                                var searcher = new UnitLastSearcher(this, checker);
+                                Cell.VisitAllObjects(this, searcher, radius);
+                                target = searcher.GetTarget();
+                            }
+                            else
+                            {
+                                // Environmental trap: Any player
+                                var check = new AnyPlayerInObjectRangeCheck(this, radius);
+                                var searcher = new PlayerSearcher(this, check);
+                                Cell.VisitWorldObjects(this, searcher, radius);
+                                target = searcher.GetTarget();
+                            }
+
+                            if (target)
+                                SetLootState(LootState.Activated, target);
+                        }
+                        else if ((max_charges = goInfo.GetCharges()) != 0)
+                        {
+                            if (m_usetimes >= max_charges)
+                            {
+                                m_usetimes = 0;
+                                SetLootState(LootState.JustDeactivated);      // can be despawned or destroyed
+                            }
+                        }
+                    }
+
+                    break;
+                }
+                case LootState.Activated:
+                {
+                    switch (GetGoType())
+                    {
+                        case GameObjectTypes.Door:
+                        case GameObjectTypes.Button:
+                            if (m_cooldownTime != 0 && GameTime.GetGameTimeMS() >= m_cooldownTime)
+                                ResetDoorOrButton();
+                            break;
+                        case GameObjectTypes.Goober:
+                            if (GameTime.GetGameTimeMS() >= m_cooldownTime)
+                            {
+                                RemoveFlag(GameObjectFlags.InUse);
+
+                                SetLootState(LootState.JustDeactivated);
+                                m_cooldownTime = 0;
+                            }
+                            break;
+                        case GameObjectTypes.Chest:
+                            if (m_groupLootTimer != 0)
+                            {
+                                if (m_groupLootTimer <= diff)
+                                {
+                                    Group group = Global.GroupMgr.GetGroupByGUID(lootingGroupLowGUID);
+                                    if (group)
+                                        group.EndRoll(loot, GetMap());
+
+                                    m_groupLootTimer = 0;
+                                    lootingGroupLowGUID.Clear();
+                                }
+                                else
+                                    m_groupLootTimer -= diff;
+                            }
+                            break;
+                        case GameObjectTypes.Trap:
                         {
                             GameObjectTemplate goInfo = GetGoInfo();
-                            uint max_charges;
-                            if (goInfo.type == GameObjectTypes.Trap)
+                            Unit target = Global.ObjAccessor.GetUnit(this, m_lootStateUnitGUID);
+                            if (goInfo.Trap.charges == 2 && goInfo.Trap.spell != 0)
                             {
-                                if (GameTime.GetGameTimeMS() < m_cooldownTime)
-                                    break;
-
-                                // Type 2 (bomb) does not need to be triggered by a unit and despawns after casting its spell.
-                                if (goInfo.Trap.charges == 2)
-                                {
-                                    SetLootState(LootState.Activated);
-                                    break;
-                                }
-
-                                // Type 0 despawns after being triggered, type 1 does not.
-                                // @todo This is activation radius. Casting radius must be selected from spell 
-                                float radius;
-                                if (goInfo.Trap.radius == 0f)
-                                {
-                                    // Battlegroundgameobjects have data2 == 0 && data5 == 3
-                                    if (goInfo.Trap.cooldown != 3)
-                                        break;
-
-                                    radius = 3.0f;
-                                }
-                                else
-                                    radius = goInfo.Trap.radius / 2.0f;
-
-                                Unit target;
-                                // @todo this hack with search required until GO casting not implemented
-                                Unit owner = GetOwner();
-                                if (owner)
-                                {
-                                    // Hunter trap: Search units which are unfriendly to the trap's owner
-                                    var checker = new NearestAttackableNoTotemUnitInObjectRangeCheck(this, owner, radius);
-                                    var searcher = new UnitLastSearcher(this, checker);
-                                    Cell.VisitAllObjects(this, searcher, radius);
-                                    target = searcher.GetTarget();
-                                }
-                                else
-                                {
-                                    // Environmental trap: Any player
-                                    var check = new AnyPlayerInObjectRangeCheck(this, radius);
-                                    var searcher = new PlayerSearcher(this, check);
-                                    Cell.VisitWorldObjects(this, searcher, radius);
-                                    target = searcher.GetTarget();
-                                }
-
-                                if (target)
-                                    SetLootState(LootState.Activated, target);
+                                //todo NULL target won't work for target type 1
+                                CastSpell(null, goInfo.Trap.spell);
+                                SetLootState(LootState.JustDeactivated);
                             }
-                            else if ((max_charges = goInfo.GetCharges()) != 0)
+                            else if (target)
                             {
-                                if (m_usetimes >= max_charges)
-                                {
-                                    m_usetimes = 0;
-                                    SetLootState(LootState.JustDeactivated);      // can be despawned or destroyed
-                                }
-                            }
-                        }
+                                // Some traps do not have a spell but should be triggered
+                                if (goInfo.Trap.spell != 0)
+                                    CastSpell(target, goInfo.Trap.spell);
 
-                        break;
-                    }
-                case LootState.Activated:
-                    {
-                        switch (GetGoType())
-                        {
-                            case GameObjectTypes.Door:
-                            case GameObjectTypes.Button:
-                                if (m_cooldownTime != 0 && GameTime.GetGameTimeMS() >= m_cooldownTime)
-                                    ResetDoorOrButton();
-                                break;
-                            case GameObjectTypes.Goober:
-                                if (GameTime.GetGameTimeMS() >= m_cooldownTime)
-                                {
-                                    RemoveFlag(GameObjectFlags.InUse);
+                                // Template value or 4 seconds
+                                m_cooldownTime = (GameTime.GetGameTimeMS() + (goInfo.Trap.cooldown != 0 ? goInfo.Trap.cooldown : 4u)) * Time.InMilliseconds;
 
+                                if (goInfo.Trap.charges == 1)
                                     SetLootState(LootState.JustDeactivated);
-                                    m_cooldownTime = 0;
-                                }
-                                break;
-                            case GameObjectTypes.Chest:
-                                if (m_groupLootTimer != 0)
+                                else if (goInfo.Trap.charges == 0)
+                                    SetLootState(LootState.Ready);
+
+                                // Battleground gameobjects have data2 == 0 && data5 == 3
+                                if (goInfo.Trap.radius == 0 && goInfo.Trap.cooldown == 3)
                                 {
-                                    if (m_groupLootTimer <= diff)
+                                    Player player = target.ToPlayer();
+                                    if (player)
                                     {
-                                        Group group = Global.GroupMgr.GetGroupByGUID(lootingGroupLowGUID);
-                                        if (group)
-                                            group.EndRoll(loot, GetMap());
-
-                                        m_groupLootTimer = 0;
-                                        lootingGroupLowGUID.Clear();
+                                        Battleground bg = player.GetBattleground();
+                                        if (bg)
+                                            bg.HandleTriggerBuff(GetGUID());
                                     }
-                                    else
-                                        m_groupLootTimer -= diff;
                                 }
-                                break;
-                            case GameObjectTypes.Trap:
-                                {
-                                    GameObjectTemplate goInfo = GetGoInfo();
-                                    Unit target = Global.ObjAccessor.GetUnit(this, m_lootStateUnitGUID);
-                                    if (goInfo.Trap.charges == 2 && goInfo.Trap.spell != 0)
-                                    {
-                                        //todo NULL target won't work for target type 1
-                                        CastSpell(null, goInfo.Trap.spell);
-                                        SetLootState(LootState.JustDeactivated);
-                                    }
-                                    else if (target)
-                                    {
-                                        // Some traps do not have a spell but should be triggered
-                                        if (goInfo.Trap.spell != 0)
-                                            CastSpell(target, goInfo.Trap.spell);
-
-                                        // Template value or 4 seconds
-                                        m_cooldownTime = (GameTime.GetGameTimeMS() + (goInfo.Trap.cooldown != 0 ? goInfo.Trap.cooldown : 4u)) * Time.InMilliseconds;
-
-                                        if (goInfo.Trap.charges == 1)
-                                            SetLootState(LootState.JustDeactivated);
-                                        else if (goInfo.Trap.charges == 0)
-                                            SetLootState(LootState.Ready);
-
-                                        // Battleground gameobjects have data2 == 0 && data5 == 3
-                                        if (goInfo.Trap.radius == 0 && goInfo.Trap.cooldown == 3)
-                                        {
-                                            Player player = target.ToPlayer();
-                                            if (player)
-                                            {
-                                                Battleground bg = player.GetBattleground();
-                                                if (bg)
-                                                    bg.HandleTriggerBuff(GetGUID());
-                                            }
-                                        }
-                                    }
-                                    break;
-                                }
-                            default:
-                                break;
+                            }
+                            break;
                         }
-                        break;
+                        default:
+                            break;
                     }
+                    break;
+                }
                 case LootState.JustDeactivated:
+                {
+                    // If nearby linked trap exists, despawn it
+                    GameObject linkedTrap = GetLinkedTrap();
+                    if (linkedTrap)
+                        linkedTrap.SetLootState(LootState.JustDeactivated);
+
+                    //if Gameobject should cast spell, then this, but some GOs (type = 10) should be destroyed
+                    if (GetGoType() == GameObjectTypes.Goober)
                     {
-                        // If nearby linked trap exists, despawn it
-                        GameObject linkedTrap = GetLinkedTrap();
-                        if (linkedTrap)
-                            linkedTrap.SetLootState(LootState.JustDeactivated);
+                        uint spellId = GetGoInfo().Goober.spell;
 
-                        //if Gameobject should cast spell, then this, but some GOs (type = 10) should be destroyed
-                        if (GetGoType() == GameObjectTypes.Goober)
+                        if (spellId != 0)
                         {
-                            uint spellId = GetGoInfo().Goober.spell;
-
-                            if (spellId != 0)
+                            foreach (var id in m_unique_users)
                             {
-                                foreach (var id in m_unique_users)
-                                {
-                                    // m_unique_users can contain only player GUIDs
-                                    Player owner = Global.ObjAccessor.GetPlayer(this, id);
-                                    if (owner != null)
-                                        owner.CastSpell(owner, spellId, false);
-                                }
-
-                                m_unique_users.Clear();
-                                m_usetimes = 0;
+                                // m_unique_users can contain only player GUIDs
+                                Player owner = Global.ObjAccessor.GetPlayer(this, id);
+                                if (owner != null)
+                                    owner.CastSpell(owner, spellId, false);
                             }
 
-                            SetGoState(GameObjectState.Ready);
-
-                            //any return here in case Battleground traps
-                            GameObjectTemplateAddon addon = GetTemplateAddon();
-                            if (addon != null)
-                                if (addon.flags.HasAnyFlag((uint)GameObjectFlags.NoDespawn))
-                                    return;
+                            m_unique_users.Clear();
+                            m_usetimes = 0;
                         }
 
-                        loot.Clear();
+                        SetGoState(GameObjectState.Ready);
 
-                        //! If this is summoned by a spell with ie. SPELL_EFFECT_SUMMON_OBJECT_WILD, with or without owner, we check respawn criteria based on spell
-                        //! The GetOwnerGUID() check is mostly for compatibility with hacky scripts - 99% of the time summoning should be done trough spells.
-                        if (GetSpellId() != 0 || !GetOwnerGUID().IsEmpty())
-                        {
-                            SetRespawnTime(0);
-                            Delete();
+                        //any return here in case Battleground traps
+                        GameObjectOverride goOverride = GetGameObjectOverride();
+                        if (goOverride != null && goOverride.Flags.HasFlag(GameObjectFlags.NoDespawn))
                             return;
-                        }
-
-                        SetLootState(LootState.Ready);
-
-                        //burning flags in some Battlegrounds, if you find better condition, just add it
-                        if (GetGoInfo().IsDespawnAtAction() || GetGoAnimProgress() > 0)
-                        {
-                            SendGameObjectDespawn();
-                            //reset flags
-                            GameObjectTemplateAddon addon = GetTemplateAddon();
-                            if (addon != null)
-                                SetFlags((GameObjectFlags)addon.flags);
-                        }
-
-                        if (m_respawnDelayTime == 0)
-                            return;
-
-                        // ToDo: Decide if we should properly despawn these. Maybe they expect to be able to manually respawn from script?
-                        if (!m_spawnedByDefault)
-                        {
-                            m_respawnTime = 0;
-                            DestroyForNearbyPlayers(); // old UpdateObjectVisibility()
-                            return;
-                        }
-
-                        uint respawnDelay = m_respawnDelayTime;
-                        uint scalingMode = WorldConfig.GetUIntValue(WorldCfg.RespawnDynamicMode);
-                        if (scalingMode != 0)
-                            GetMap().ApplyDynamicModeRespawnScaling(this, m_spawnId, ref respawnDelay, scalingMode);
-                        m_respawnTime = GameTime.GetGameTime() + respawnDelay;
-
-                        // if option not set then object will be saved at grid unload
-                        // Otherwise just save respawn time to map object memory
-                        if (WorldConfig.GetBoolValue(WorldCfg.SaveRespawnTimeImmediately))
-                            SaveRespawnTime();
-
-                        if (!m_respawnCompatibilityMode)
-                        {
-                            // Respawn time was just saved if set to save to DB
-                            // If not, we save only to map memory
-                            if (!WorldConfig.GetBoolValue(WorldCfg.SaveRespawnTimeImmediately))
-                                SaveRespawnTime(0, false);
-
-                            // Then despawn
-                            AddObjectToRemoveList();
-                            return;
-                        }
-
-                        DestroyForNearbyPlayers(); // old UpdateObjectVisibility()
-                        break;
                     }
+
+                    loot.Clear();
+
+                    //! If this is summoned by a spell with ie. SPELL_EFFECT_SUMMON_OBJECT_WILD, with or without owner, we check respawn criteria based on spell
+                    //! The GetOwnerGUID() check is mostly for compatibility with hacky scripts - 99% of the time summoning should be done trough spells.
+                    if (GetSpellId() != 0 || !GetOwnerGUID().IsEmpty())
+                    {
+                        SetRespawnTime(0);
+                        Delete();
+                        return;
+                    }
+
+                    SetLootState(LootState.Ready);
+
+                    //burning flags in some Battlegrounds, if you find better condition, just add it
+                    if (GetGoInfo().IsDespawnAtAction() || GetGoAnimProgress() > 0)
+                    {
+                        SendGameObjectDespawn();
+                        //reset flags
+                        GameObjectOverride goOverride = GetGameObjectOverride();
+                        if (goOverride != null)
+                            SetFlags(goOverride.Flags);
+                    }
+
+                    if (m_respawnDelayTime == 0)
+                        return;
+
+                    // ToDo: Decide if we should properly despawn these. Maybe they expect to be able to manually respawn from script?
+                    if (!m_spawnedByDefault)
+                    {
+                        m_respawnTime = 0;
+                        DestroyForNearbyPlayers(); // old UpdateObjectVisibility()
+                        return;
+                    }
+
+                    uint respawnDelay = m_respawnDelayTime;
+                    uint scalingMode = WorldConfig.GetUIntValue(WorldCfg.RespawnDynamicMode);
+                    if (scalingMode != 0)
+                        GetMap().ApplyDynamicModeRespawnScaling(this, m_spawnId, ref respawnDelay, scalingMode);
+                    m_respawnTime = GameTime.GetGameTime() + respawnDelay;
+
+                    // if option not set then object will be saved at grid unload
+                    // Otherwise just save respawn time to map object memory
+                    if (WorldConfig.GetBoolValue(WorldCfg.SaveRespawnTimeImmediately))
+                        SaveRespawnTime();
+
+                    if (!m_respawnCompatibilityMode)
+                    {
+                        // Respawn time was just saved if set to save to DB
+                        // If not, we save only to map memory
+                        if (!WorldConfig.GetBoolValue(WorldCfg.SaveRespawnTimeImmediately))
+                            SaveRespawnTime(0, false);
+
+                        // Then despawn
+                        AddObjectToRemoveList();
+                        return;
+                    }
+
+                    DestroyForNearbyPlayers(); // old UpdateObjectVisibility()
+                    break;
+                }
             }
         }
 
+        public GameObjectOverride GetGameObjectOverride()
+        {
+            if (m_spawnId != 0)
+            {
+                GameObjectOverride goOverride = Global.ObjectMgr.GetGameObjectOverride(m_spawnId);
+                if (goOverride != null)
+                    return goOverride;
+            }
+
+            return m_goTemplateAddon;
+        }
+        
         public void Refresh()
         {
             // not refresh despawned not casted GO (despawned casted GO destroyed in all cases anyway)
@@ -897,9 +912,9 @@ namespace Game.Entities
             SendGameObjectDespawn();
 
             SetGoState(GameObjectState.Ready);
-            GameObjectTemplateAddon addon = GetTemplateAddon();
-            if (addon != null)
-                SetFlags((GameObjectFlags)addon.flags);
+            GameObjectOverride goOverride = GetGameObjectOverride();
+            if (goOverride != null)
+                SetFlags(goOverride.Flags);
 
             uint poolid = GetSpawnId() != 0 ? Global.PoolMgr.IsPartOfAPool<GameObject>(GetSpawnId()) : 0;
             if (poolid != 0)
@@ -1285,28 +1300,28 @@ namespace Game.Entities
                     break;
                 // scan GO chest with loot including quest items
                 case GameObjectTypes.Chest:
+                {
+                    if (LootStorage.Gameobject.HaveQuestLootForPlayer(GetGoInfo().GetLootId(), target))
                     {
-                        if (LootStorage.Gameobject.HaveQuestLootForPlayer(GetGoInfo().GetLootId(), target))
-                        {
-                            Battleground bg = target.GetBattleground();
-                            if (bg)
-                                return bg.CanActivateGO((int)GetEntry(), (uint)target.GetTeam());
-                            return true;
-                        }
-                        break;
+                        Battleground bg = target.GetBattleground();
+                        if (bg)
+                            return bg.CanActivateGO((int)GetEntry(), (uint)target.GetTeam());
+                        return true;
                     }
+                    break;
+                }
                 case GameObjectTypes.Generic:
-                    {
-                        if (target.GetQuestStatus(GetGoInfo().Generic.questID) == QuestStatus.Incomplete)
-                            return true;
-                        break;
-                    }
+                {
+                    if (target.GetQuestStatus(GetGoInfo().Generic.questID) == QuestStatus.Incomplete)
+                        return true;
+                    break;
+                }
                 case GameObjectTypes.Goober:
-                    {
-                        if (target.GetQuestStatus(GetGoInfo().Goober.questID) == QuestStatus.Incomplete)
-                            return true;
-                        break;
-                    }
+                {
+                    if (target.GetQuestStatus(GetGoInfo().Goober.questID) == QuestStatus.Incomplete)
+                        return true;
+                    break;
+                }
                 default:
                     break;
             }
@@ -1435,616 +1450,616 @@ namespace Game.Entities
                     UseDoorOrButton(0, false, user);
                     return;
                 case GameObjectTypes.QuestGiver:                    //2
-                    {
-                        if (!user.IsTypeId(TypeId.Player))
-                            return;
-
-                        Player player = user.ToPlayer();
-
-                        player.PrepareGossipMenu(this, GetGoInfo().QuestGiver.gossipID, true);
-                        player.SendPreparedGossip(this);
+                {
+                    if (!user.IsTypeId(TypeId.Player))
                         return;
-                    }
+
+                    Player player = user.ToPlayer();
+
+                    player.PrepareGossipMenu(this, GetGoInfo().QuestGiver.gossipID, true);
+                    player.SendPreparedGossip(this);
+                    return;
+                }
                 case GameObjectTypes.Trap:                          //6
-                    {
-                        GameObjectTemplate goInfo = GetGoInfo();
-                        if (goInfo.Trap.spell != 0)
-                            CastSpell(user, goInfo.Trap.spell);
+                {
+                    GameObjectTemplate goInfo = GetGoInfo();
+                    if (goInfo.Trap.spell != 0)
+                        CastSpell(user, goInfo.Trap.spell);
 
-                        m_cooldownTime = GameTime.GetGameTimeMS() + (goInfo.Trap.cooldown != 0 ? goInfo.Trap.cooldown : 4) * Time.InMilliseconds;   // template or 4 seconds
+                    m_cooldownTime = GameTime.GetGameTimeMS() + (goInfo.Trap.cooldown != 0 ? goInfo.Trap.cooldown : 4) * Time.InMilliseconds;   // template or 4 seconds
 
-                        if (goInfo.Trap.charges == 1)         // Deactivate after trigger
-                            SetLootState(LootState.JustDeactivated);
+                    if (goInfo.Trap.charges == 1)         // Deactivate after trigger
+                        SetLootState(LootState.JustDeactivated);
 
-                        return;
-                    }
+                    return;
+                }
                 //Sitting: Wooden bench, chairs enzz
                 case GameObjectTypes.Chair:                         //7
+                {
+                    GameObjectTemplate info = GetGoInfo();
+                    if (info == null)
+                        return;
+
+                    if (!user.IsTypeId(TypeId.Player))
+                        return;
+
+                    if (ChairListSlots.Empty())        // this is called once at first chair use to make list of available slots
                     {
-                        GameObjectTemplate info = GetGoInfo();
-                        if (info == null)
-                            return;
-
-                        if (!user.IsTypeId(TypeId.Player))
-                            return;
-
-                        if (ChairListSlots.Empty())        // this is called once at first chair use to make list of available slots
+                        if (info.Chair.chairslots > 0)     // sometimes chairs in DB have error in fields and we dont know number of slots
                         {
-                            if (info.Chair.chairslots > 0)     // sometimes chairs in DB have error in fields and we dont know number of slots
-                            { 
-                                for (uint i = 0; i < info.Chair.chairslots; ++i)
-                                    ChairListSlots[i] = default; // Last user of current slot set to 0 (none sit here yet)
-                            }
-                            else
-                                ChairListSlots[0] = default;     // error in DB, make one default slot
-                        }
-
-                        Player player = user.ToPlayer();
-
-                        // a chair may have n slots. we have to calculate their positions and teleport the player to the nearest one
-                        float lowestDist = SharedConst.DefaultVisibilityDistance;
-
-                        uint nearest_slot = 0;
-                        float x_lowest = GetPositionX();
-                        float y_lowest = GetPositionY();
-
-                        // the object orientation + 1/2 pi
-                        // every slot will be on that straight line
-                        float orthogonalOrientation = GetOrientation() + MathFunctions.PI * 0.5f;
-                        // find nearest slot
-                        bool found_free_slot = false;
-
-                        foreach (var slot in ChairListSlots.ToList())
-                        {
-                            // the distance between this slot and the center of the go - imagine a 1D space
-                            float relativeDistance = (info.size * slot.Key) - (info.size * (info.Chair.chairslots - 1) / 2.0f);
-
-                            float x_i = (float)(GetPositionX() + relativeDistance * Math.Cos(orthogonalOrientation));
-                            float y_i = (float)(GetPositionY() + relativeDistance * Math.Sin(orthogonalOrientation));
-
-                            if (!slot.Value.IsEmpty())
-                            {
-                                Player ChairUser = Global.ObjAccessor.GetPlayer(this, slot.Value);
-                                if (ChairUser != null)
-                                    if (ChairUser.IsSitState() && ChairUser.GetStandState() != UnitStandStateType.Sit && ChairUser.GetExactDist2d(x_i, y_i) < 0.1f)
-                                        continue;        // This seat is already occupied by ChairUser. NOTE: Not sure if the ChairUser.getStandState() != UNIT_STAND_STATE_SIT check is required.
-                                    else
-                                        ChairListSlots[slot.Key] = default; // This seat is unoccupied.
-                                else
-                                    ChairListSlots[slot.Key] = default;     // The seat may of had an occupant, but they're offline.
-                            }
-
-                            found_free_slot = true;
-
-                            // calculate the distance between the player and this slot
-                            float thisDistance = player.GetDistance2d(x_i, y_i);
-
-                            if (thisDistance <= lowestDist)
-                            {
-                                nearest_slot = slot.Key;
-                                lowestDist = thisDistance;
-                                x_lowest = x_i;
-                                y_lowest = y_i;
-                            }
-                        }
-
-                        if (found_free_slot)
-                        {
-                            var guid = ChairListSlots.LookupByKey(nearest_slot);
-                            if (guid.IsEmpty())
-                            {
-                                ChairListSlots[nearest_slot] = player.GetGUID(); //this slot in now used by player
-                                player.TeleportTo(GetMapId(), x_lowest, y_lowest, GetPositionZ(), GetOrientation(), (TeleportToOptions.NotLeaveTransport | TeleportToOptions.NotLeaveCombat | TeleportToOptions.NotUnSummonPet));
-                                player.SetStandState(UnitStandStateType.SitLowChair + (byte)info.Chair.chairheight);
-                                return;
-                            }
+                            for (uint i = 0; i < info.Chair.chairslots; ++i)
+                                ChairListSlots[i] = default; // Last user of current slot set to 0 (none sit here yet)
                         }
                         else
-                            player.GetSession().SendNotification("There's nowhere left for you to sit.");
-
-                        return;
+                            ChairListSlots[0] = default;     // error in DB, make one default slot
                     }
+
+                    Player player = user.ToPlayer();
+
+                    // a chair may have n slots. we have to calculate their positions and teleport the player to the nearest one
+                    float lowestDist = SharedConst.DefaultVisibilityDistance;
+
+                    uint nearest_slot = 0;
+                    float x_lowest = GetPositionX();
+                    float y_lowest = GetPositionY();
+
+                    // the object orientation + 1/2 pi
+                    // every slot will be on that straight line
+                    float orthogonalOrientation = GetOrientation() + MathFunctions.PI * 0.5f;
+                    // find nearest slot
+                    bool found_free_slot = false;
+
+                    foreach (var slot in ChairListSlots.ToList())
+                    {
+                        // the distance between this slot and the center of the go - imagine a 1D space
+                        float relativeDistance = (info.size * slot.Key) - (info.size * (info.Chair.chairslots - 1) / 2.0f);
+
+                        float x_i = (float)(GetPositionX() + relativeDistance * Math.Cos(orthogonalOrientation));
+                        float y_i = (float)(GetPositionY() + relativeDistance * Math.Sin(orthogonalOrientation));
+
+                        if (!slot.Value.IsEmpty())
+                        {
+                            Player ChairUser = Global.ObjAccessor.GetPlayer(this, slot.Value);
+                            if (ChairUser != null)
+                                if (ChairUser.IsSitState() && ChairUser.GetStandState() != UnitStandStateType.Sit && ChairUser.GetExactDist2d(x_i, y_i) < 0.1f)
+                                    continue;        // This seat is already occupied by ChairUser. NOTE: Not sure if the ChairUser.getStandState() != UNIT_STAND_STATE_SIT check is required.
+                                else
+                                    ChairListSlots[slot.Key] = default; // This seat is unoccupied.
+                            else
+                                ChairListSlots[slot.Key] = default;     // The seat may of had an occupant, but they're offline.
+                        }
+
+                        found_free_slot = true;
+
+                        // calculate the distance between the player and this slot
+                        float thisDistance = player.GetDistance2d(x_i, y_i);
+
+                        if (thisDistance <= lowestDist)
+                        {
+                            nearest_slot = slot.Key;
+                            lowestDist = thisDistance;
+                            x_lowest = x_i;
+                            y_lowest = y_i;
+                        }
+                    }
+
+                    if (found_free_slot)
+                    {
+                        var guid = ChairListSlots.LookupByKey(nearest_slot);
+                        if (guid.IsEmpty())
+                        {
+                            ChairListSlots[nearest_slot] = player.GetGUID(); //this slot in now used by player
+                            player.TeleportTo(GetMapId(), x_lowest, y_lowest, GetPositionZ(), GetOrientation(), (TeleportToOptions.NotLeaveTransport | TeleportToOptions.NotLeaveCombat | TeleportToOptions.NotUnSummonPet));
+                            player.SetStandState(UnitStandStateType.SitLowChair + (byte)info.Chair.chairheight);
+                            return;
+                        }
+                    }
+                    else
+                        player.GetSession().SendNotification("There's nowhere left for you to sit.");
+
+                    return;
+                }
                 //big gun, its a spell/aura
                 case GameObjectTypes.Goober:                        //10
+                {
+                    GameObjectTemplate info = GetGoInfo();
+
+                    if (user.IsTypeId(TypeId.Player))
                     {
-                        GameObjectTemplate info = GetGoInfo();
-
-                        if (user.IsTypeId(TypeId.Player))
-                        {
-                            Player player = user.ToPlayer();
-
-                            if (info.Goober.pageID != 0)                    // show page...
-                            {
-                                PageTextPkt data = new();
-                                data.GameObjectGUID = GetGUID();
-                                player.SendPacket(data);
-                            }
-                            else if (info.Goober.gossipID != 0)
-                            {
-                                player.PrepareGossipMenu(this, info.Goober.gossipID);
-                                player.SendPreparedGossip(this);
-                            }
-
-                            if (info.Goober.eventID != 0)
-                            {
-                                Log.outDebug(LogFilter.Scripts, "Goober ScriptStart id {0} for GO entry {1} (GUID {2}).", info.Goober.eventID, GetEntry(), GetSpawnId());
-                                GetMap().ScriptsStart(ScriptsType.Event, info.Goober.eventID, player, this);
-                                EventInform(info.Goober.eventID, user);
-                            }
-
-                            // possible quest objective for active quests
-                            if (info.Goober.questID != 0 && Global.ObjectMgr.GetQuestTemplate(info.Goober.questID) != null)
-                            {
-                                //Quest require to be active for GO using
-                                if (player.GetQuestStatus(info.Goober.questID) != QuestStatus.Incomplete)
-                                    break;
-                            }
-
-                            Group group = player.GetGroup();
-                            if (group)
-                            {
-                                for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
-                                {
-                                    Player member = refe.GetSource();
-                                    if (member)
-                                        if (member.IsAtGroupRewardDistance(this))
-                                            member.KillCreditGO(info.entry, GetGUID());
-                                }
-                            }
-                            else
-                                player.KillCreditGO(info.entry, GetGUID());
-                        }
-
-                        uint trapEntry = info.Goober.linkedTrap;
-                        if (trapEntry != 0)
-                            TriggeringLinkedGameObject(trapEntry, user);
-
-                        AddFlag(GameObjectFlags.InUse);
-                        SetLootState(LootState.Activated, user);
-
-                        // this appear to be ok, however others exist in addition to this that should have custom (ex: 190510, 188692, 187389)
-                        if (info.Goober.customAnim != 0)
-                            SendCustomAnim(GetGoAnimProgress());
-                        else
-                            SetGoState(GameObjectState.Active);
-
-                        m_cooldownTime = GameTime.GetGameTimeMS() + info.GetAutoCloseTime();
-
-                        // cast this spell later if provided
-                        spellId = info.Goober.spell;
-                        spellCaster = null;
-
-                        break;
-                    }
-                case GameObjectTypes.Camera:                        //13
-                    {
-                        GameObjectTemplate info = GetGoInfo();
-                        if (info == null)
-                            return;
-
-                        if (!user.IsTypeId(TypeId.Player))
-                            return;
-
                         Player player = user.ToPlayer();
 
-                        if (info.Camera._camera != 0)
-                            player.SendCinematicStart(info.Camera._camera);
-
-                        if (info.Camera.eventID != 0)
+                        if (info.Goober.pageID != 0)                    // show page...
                         {
-                            GetMap().ScriptsStart(ScriptsType.Event, info.Camera.eventID, player, this);
-                            EventInform(info.Camera.eventID, user);
+                            PageTextPkt data = new();
+                            data.GameObjectGUID = GetGUID();
+                            player.SendPacket(data);
+                        }
+                        else if (info.Goober.gossipID != 0)
+                        {
+                            player.PrepareGossipMenu(this, info.Goober.gossipID);
+                            player.SendPreparedGossip(this);
                         }
 
-                        return;
+                        if (info.Goober.eventID != 0)
+                        {
+                            Log.outDebug(LogFilter.Scripts, "Goober ScriptStart id {0} for GO entry {1} (GUID {2}).", info.Goober.eventID, GetEntry(), GetSpawnId());
+                            GetMap().ScriptsStart(ScriptsType.Event, info.Goober.eventID, player, this);
+                            EventInform(info.Goober.eventID, user);
+                        }
+
+                        // possible quest objective for active quests
+                        if (info.Goober.questID != 0 && Global.ObjectMgr.GetQuestTemplate(info.Goober.questID) != null)
+                        {
+                            //Quest require to be active for GO using
+                            if (player.GetQuestStatus(info.Goober.questID) != QuestStatus.Incomplete)
+                                break;
+                        }
+
+                        Group group = player.GetGroup();
+                        if (group)
+                        {
+                            for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
+                            {
+                                Player member = refe.GetSource();
+                                if (member)
+                                    if (member.IsAtGroupRewardDistance(this))
+                                        member.KillCreditGO(info.entry, GetGUID());
+                            }
+                        }
+                        else
+                            player.KillCreditGO(info.entry, GetGUID());
                     }
+
+                    uint trapEntry = info.Goober.linkedTrap;
+                    if (trapEntry != 0)
+                        TriggeringLinkedGameObject(trapEntry, user);
+
+                    AddFlag(GameObjectFlags.InUse);
+                    SetLootState(LootState.Activated, user);
+
+                    // this appear to be ok, however others exist in addition to this that should have custom (ex: 190510, 188692, 187389)
+                    if (info.Goober.customAnim != 0)
+                        SendCustomAnim(GetGoAnimProgress());
+                    else
+                        SetGoState(GameObjectState.Active);
+
+                    m_cooldownTime = GameTime.GetGameTimeMS() + info.GetAutoCloseTime();
+
+                    // cast this spell later if provided
+                    spellId = info.Goober.spell;
+                    spellCaster = null;
+
+                    break;
+                }
+                case GameObjectTypes.Camera:                        //13
+                {
+                    GameObjectTemplate info = GetGoInfo();
+                    if (info == null)
+                        return;
+
+                    if (!user.IsTypeId(TypeId.Player))
+                        return;
+
+                    Player player = user.ToPlayer();
+
+                    if (info.Camera._camera != 0)
+                        player.SendCinematicStart(info.Camera._camera);
+
+                    if (info.Camera.eventID != 0)
+                    {
+                        GetMap().ScriptsStart(ScriptsType.Event, info.Camera.eventID, player, this);
+                        EventInform(info.Camera.eventID, user);
+                    }
+
+                    return;
+                }
                 //fishing bobber
                 case GameObjectTypes.FishingNode:                   //17
-                    {
-                        Player player = user.ToPlayer();
-                        if (player == null)
-                            return;
-
-                        if (player.GetGUID() != GetOwnerGUID())
-                            return;
-
-                        switch (GetLootState())
-                        {
-                            case LootState.Ready:                              // ready for loot
-                                {
-                                    uint zone, subzone;
-                                    GetZoneAndAreaId(out zone, out subzone);
-
-                                    int zone_skill = Global.ObjectMgr.GetFishingBaseSkillLevel(subzone);
-                                    if (zone_skill == 0)
-                                        zone_skill = Global.ObjectMgr.GetFishingBaseSkillLevel(zone);
-
-                                    //provide error, no fishable zone or area should be 0
-                                    if (zone_skill == 0)
-                                        Log.outError(LogFilter.Sql, "Fishable areaId {0} are not properly defined in `skill_fishing_base_level`.", subzone);
-
-                                    int skill = player.GetSkillValue(SkillType.Fishing);
-
-                                    int chance;
-                                    if (skill < zone_skill)
-                                    {
-                                        chance = (int)(Math.Pow((double)skill / zone_skill, 2) * 100);
-                                        if (chance < 1)
-                                            chance = 1;
-                                    }
-                                    else
-                                        chance = 100;
-
-                                    int roll = RandomHelper.IRand(1, 100);
-
-                                    Log.outDebug(LogFilter.Server, "Fishing check (skill: {0} zone min skill: {1} chance {2} roll: {3}", skill, zone_skill, chance, roll);
-
-                                    player.UpdateFishingSkill();
-
-                                    // @todo find reasonable value for fishing hole search
-                                    GameObject fishingPool = LookupFishingHoleAround(20.0f + SharedConst.ContactDistance);
-
-                                    // If fishing skill is high enough, or if fishing on a pool, send correct loot.
-                                    // Fishing pools have no skill requirement as of patch 3.3.0 (undocumented change).
-                                    if (chance >= roll || fishingPool)
-                                    {
-                                        // @todo I do not understand this hack. Need some explanation.
-                                        // prevent removing GO at spell cancel
-                                        RemoveFromOwner();
-                                        SetOwnerGUID(player.GetGUID());
-
-                                        if (fishingPool)
-                                        {
-                                            fishingPool.Use(player);
-                                            SetLootState(LootState.JustDeactivated);
-                                        }
-                                        else
-                                            player.SendLoot(GetGUID(), LootType.Fishing);
-                                    }
-                                    else// If fishing skill is too low, send junk loot.
-                                        player.SendLoot(GetGUID(), LootType.FishingJunk);
-                                    break;
-                                }
-                            case LootState.JustDeactivated:                   // nothing to do, will be deleted at next update
-                                break;
-                            default:
-                                {
-                                    SetLootState(LootState.JustDeactivated);
-                                    player.SendPacket(new FishNotHooked());
-                                    break;
-                                }
-                        }
-
-                        player.FinishSpell(CurrentSpellTypes.Channeled);
+                {
+                    Player player = user.ToPlayer();
+                    if (player == null)
                         return;
+
+                    if (player.GetGUID() != GetOwnerGUID())
+                        return;
+
+                    switch (GetLootState())
+                    {
+                        case LootState.Ready:                              // ready for loot
+                        {
+                            uint zone, subzone;
+                            GetZoneAndAreaId(out zone, out subzone);
+
+                            int zone_skill = Global.ObjectMgr.GetFishingBaseSkillLevel(subzone);
+                            if (zone_skill == 0)
+                                zone_skill = Global.ObjectMgr.GetFishingBaseSkillLevel(zone);
+
+                            //provide error, no fishable zone or area should be 0
+                            if (zone_skill == 0)
+                                Log.outError(LogFilter.Sql, "Fishable areaId {0} are not properly defined in `skill_fishing_base_level`.", subzone);
+
+                            int skill = player.GetSkillValue(SkillType.Fishing);
+
+                            int chance;
+                            if (skill < zone_skill)
+                            {
+                                chance = (int)(Math.Pow((double)skill / zone_skill, 2) * 100);
+                                if (chance < 1)
+                                    chance = 1;
+                            }
+                            else
+                                chance = 100;
+
+                            int roll = RandomHelper.IRand(1, 100);
+
+                            Log.outDebug(LogFilter.Server, "Fishing check (skill: {0} zone min skill: {1} chance {2} roll: {3}", skill, zone_skill, chance, roll);
+
+                            player.UpdateFishingSkill();
+
+                            // @todo find reasonable value for fishing hole search
+                            GameObject fishingPool = LookupFishingHoleAround(20.0f + SharedConst.ContactDistance);
+
+                            // If fishing skill is high enough, or if fishing on a pool, send correct loot.
+                            // Fishing pools have no skill requirement as of patch 3.3.0 (undocumented change).
+                            if (chance >= roll || fishingPool)
+                            {
+                                // @todo I do not understand this hack. Need some explanation.
+                                // prevent removing GO at spell cancel
+                                RemoveFromOwner();
+                                SetOwnerGUID(player.GetGUID());
+
+                                if (fishingPool)
+                                {
+                                    fishingPool.Use(player);
+                                    SetLootState(LootState.JustDeactivated);
+                                }
+                                else
+                                    player.SendLoot(GetGUID(), LootType.Fishing);
+                            }
+                            else// If fishing skill is too low, send junk loot.
+                                player.SendLoot(GetGUID(), LootType.FishingJunk);
+                            break;
+                        }
+                        case LootState.JustDeactivated:                   // nothing to do, will be deleted at next update
+                            break;
+                        default:
+                        {
+                            SetLootState(LootState.JustDeactivated);
+                            player.SendPacket(new FishNotHooked());
+                            break;
+                        }
                     }
 
+                    player.FinishSpell(CurrentSpellTypes.Channeled);
+                    return;
+                }
+
                 case GameObjectTypes.Ritual:              //18
+                {
+                    if (!user.IsTypeId(TypeId.Player))
+                        return;
+
+                    Player player = user.ToPlayer();
+
+                    Unit owner = GetOwner();
+
+                    GameObjectTemplate info = GetGoInfo();
+
+                    // ritual owner is set for GO's without owner (not summoned)
+                    if (m_ritualOwner == null && owner == null)
+                        m_ritualOwner = player;
+
+                    if (owner != null)
                     {
-                        if (!user.IsTypeId(TypeId.Player))
+                        if (!owner.IsTypeId(TypeId.Player))
                             return;
 
-                        Player player = user.ToPlayer();
+                        // accept only use by player from same group as owner, excluding owner itself (unique use already added in spell effect)
+                        if (player == owner.ToPlayer() || (info.Ritual.castersGrouped != 0 && !player.IsInSameRaidWith(owner.ToPlayer())))
+                            return;
 
-                        Unit owner = GetOwner();
+                        // expect owner to already be channeling, so if not...
+                        if (owner.GetCurrentSpell(CurrentSpellTypes.Channeled) == null)
+                            return;
 
-                        GameObjectTemplate info = GetGoInfo();
+                        // in case summoning ritual caster is GO creator
+                        spellCaster = owner;
+                    }
+                    else
+                    {
+                        if (player != m_ritualOwner && (info.Ritual.castersGrouped != 0 && !player.IsInSameRaidWith(m_ritualOwner)))
+                            return;
 
-                        // ritual owner is set for GO's without owner (not summoned)
-                        if (m_ritualOwner == null && owner == null)
-                            m_ritualOwner = player;
+                        spellCaster = player;
+                    }
 
-                        if (owner != null)
+                    AddUniqueUse(player);
+
+                    if (info.Ritual.animSpell != 0)
+                    {
+                        player.CastSpell(player, info.Ritual.animSpell, true);
+
+                        // for this case, summoningRitual.spellId is always triggered
+                        triggered = true;
+                    }
+
+                    // full amount unique participants including original summoner
+                    if (GetUniqueUseCount() == info.Ritual.casters)
+                    {
+                        if (m_ritualOwner != null)
+                            spellCaster = m_ritualOwner;
+
+                        spellId = info.Ritual.spell;
+
+                        if (spellId == 62330)                       // GO store nonexistent spell, replace by expected
                         {
-                            if (!owner.IsTypeId(TypeId.Player))
-                                return;
-
-                            // accept only use by player from same group as owner, excluding owner itself (unique use already added in spell effect)
-                            if (player == owner.ToPlayer() || (info.Ritual.castersGrouped != 0 && !player.IsInSameRaidWith(owner.ToPlayer())))
-                                return;
-
-                            // expect owner to already be channeling, so if not...
-                            if (owner.GetCurrentSpell(CurrentSpellTypes.Channeled) == null)
-                                return;
-
-                            // in case summoning ritual caster is GO creator
-                            spellCaster = owner;
-                        }
-                        else
-                        {
-                            if (player != m_ritualOwner && (info.Ritual.castersGrouped != 0 && !player.IsInSameRaidWith(m_ritualOwner)))
-                                return;
-
-                            spellCaster = player;
-                        }
-
-                        AddUniqueUse(player);
-
-                        if (info.Ritual.animSpell != 0)
-                        {
-                            player.CastSpell(player, info.Ritual.animSpell, true);
-
-                            // for this case, summoningRitual.spellId is always triggered
+                            // spell have reagent and mana cost but it not expected use its
+                            // it triggered spell in fact casted at currently channeled GO
+                            spellId = 61993;
                             triggered = true;
                         }
 
-                        // full amount unique participants including original summoner
-                        if (GetUniqueUseCount() == info.Ritual.casters)
-                        {
-                            if (m_ritualOwner != null)
-                                spellCaster = m_ritualOwner;
-
-                            spellId = info.Ritual.spell;
-
-                            if (spellId == 62330)                       // GO store nonexistent spell, replace by expected
+                        // Cast casterTargetSpell at a random GO user
+                        // on the current DB there is only one gameobject that uses this (Ritual of Doom)
+                        // and its required target number is 1 (outter for loop will run once)
+                        if (info.Ritual.casterTargetSpell != 0 && info.Ritual.casterTargetSpell != 1) // No idea why this field is a bool in some cases
+                            for (uint i = 0; i < info.Ritual.casterTargetSpellTargets; i++)
                             {
-                                // spell have reagent and mana cost but it not expected use its
-                                // it triggered spell in fact casted at currently channeled GO
-                                spellId = 61993;
-                                triggered = true;
+                                // m_unique_users can contain only player GUIDs
+                                Player target = Global.ObjAccessor.GetPlayer(this, m_unique_users.SelectRandom());
+                                if (target != null)
+                                    spellCaster.CastSpell(target, info.Ritual.casterTargetSpell, true);
                             }
 
-                            // Cast casterTargetSpell at a random GO user
-                            // on the current DB there is only one gameobject that uses this (Ritual of Doom)
-                            // and its required target number is 1 (outter for loop will run once)
-                            if (info.Ritual.casterTargetSpell != 0 && info.Ritual.casterTargetSpell != 1) // No idea why this field is a bool in some cases
-                                for (uint i = 0; i < info.Ritual.casterTargetSpellTargets; i++)
-                                {
-                                    // m_unique_users can contain only player GUIDs
-                                    Player target = Global.ObjAccessor.GetPlayer(this, m_unique_users.SelectRandom());
-                                    if (target != null)
-                                        spellCaster.CastSpell(target, info.Ritual.casterTargetSpell, true);
-                                }
+                        // finish owners spell
+                        if (owner != null)
+                            owner.FinishSpell(CurrentSpellTypes.Channeled);
 
-                            // finish owners spell
-                            if (owner != null)
-                                owner.FinishSpell(CurrentSpellTypes.Channeled);
-
-                            // can be deleted now, if
-                            if (info.Ritual.ritualPersistent == 0)
-                                SetLootState(LootState.JustDeactivated);
-                            else
-                            {
-                                // reset ritual for this GO
-                                m_ritualOwner = null;
-                                m_unique_users.Clear();
-                                m_usetimes = 0;
-                            }
-                        }
+                        // can be deleted now, if
+                        if (info.Ritual.ritualPersistent == 0)
+                            SetLootState(LootState.JustDeactivated);
                         else
-                            return;
-
-                        // go to end function to spell casting
-                        break;
+                        {
+                            // reset ritual for this GO
+                            m_ritualOwner = null;
+                            m_unique_users.Clear();
+                            m_usetimes = 0;
+                        }
                     }
+                    else
+                        return;
+
+                    // go to end function to spell casting
+                    break;
+                }
                 case GameObjectTypes.SpellCaster:                   //22
+                {
+                    GameObjectTemplate info = GetGoInfo();
+                    if (info == null)
+                        return;
+
+                    if (info.SpellCaster.partyOnly != 0)
                     {
-                        GameObjectTemplate info = GetGoInfo();
-                        if (info == null)
+                        Unit caster = GetOwner();
+                        if (caster == null || !caster.IsTypeId(TypeId.Player))
                             return;
 
-                        if (info.SpellCaster.partyOnly != 0)
-                        {
-                            Unit caster = GetOwner();
-                            if (caster == null || !caster.IsTypeId(TypeId.Player))
-                                return;
-
-                            if (!user.IsTypeId(TypeId.Player) || !user.ToPlayer().IsInSameRaidWith(caster.ToPlayer()))
-                                return;
-                        }
-
-                        user.RemoveAurasByType(AuraType.Mounted);
-                        spellId = info.SpellCaster.spell;
-
-                        AddUse();
-                        break;
+                        if (!user.IsTypeId(TypeId.Player) || !user.ToPlayer().IsInSameRaidWith(caster.ToPlayer()))
+                            return;
                     }
+
+                    user.RemoveAurasByType(AuraType.Mounted);
+                    spellId = info.SpellCaster.spell;
+
+                    AddUse();
+                    break;
+                }
                 case GameObjectTypes.MeetingStone:                  //23
-                    {
-                        GameObjectTemplate info = GetGoInfo();
+                {
+                    GameObjectTemplate info = GetGoInfo();
 
-                        if (!user.IsTypeId(TypeId.Player))
+                    if (!user.IsTypeId(TypeId.Player))
+                        return;
+
+                    Player player = user.ToPlayer();
+
+                    Player targetPlayer = Global.ObjAccessor.FindPlayer(player.GetTarget());
+
+                    // accept only use by player from same raid as caster, except caster itself
+                    if (targetPlayer == null || targetPlayer == player || !targetPlayer.IsInSameRaidWith(player))
+                        return;
+
+                    //required lvl checks!
+                    var userLevels = Global.DB2Mgr.GetContentTuningData(info.ContentTuningId, player.m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+                    if (userLevels.HasValue)
+                        if (player.GetLevel() < userLevels.Value.MaxLevel)
                             return;
 
-                        Player player = user.ToPlayer();
-
-                        Player targetPlayer = Global.ObjAccessor.FindPlayer(player.GetTarget());
-
-                        // accept only use by player from same raid as caster, except caster itself
-                        if (targetPlayer == null || targetPlayer == player || !targetPlayer.IsInSameRaidWith(player))
+                    var targetLevels = Global.DB2Mgr.GetContentTuningData(info.ContentTuningId, targetPlayer.m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
+                    if (targetLevels.HasValue)
+                        if (targetPlayer.GetLevel() < targetLevels.Value.MaxLevel)
                             return;
 
-                        //required lvl checks!
-                        var userLevels = Global.DB2Mgr.GetContentTuningData(info.ContentTuningId, player.m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
-                        if (userLevels.HasValue)
-                            if (player.GetLevel() < userLevels.Value.MaxLevel)
-                                return;
+                    if (info.entry == 194097)
+                        spellId = 61994;                            // Ritual of Summoning
+                    else
+                        spellId = 23598;// 59782;                            // Summoning Stone Effect
 
-                        var targetLevels = Global.DB2Mgr.GetContentTuningData(info.ContentTuningId, targetPlayer.m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
-                        if (targetLevels.HasValue)
-                            if (targetPlayer.GetLevel() < targetLevels.Value.MaxLevel)
-                                return;
-
-                        if (info.entry == 194097)
-                            spellId = 61994;                            // Ritual of Summoning
-                        else
-                            spellId = 23598;// 59782;                            // Summoning Stone Effect
-
-                        break;
-                    }
+                    break;
+                }
 
                 case GameObjectTypes.FlagStand:                     // 24
+                {
+                    if (!user.IsTypeId(TypeId.Player))
+                        return;
+
+                    Player player = user.ToPlayer();
+
+                    if (player.CanUseBattlegroundObject(this))
                     {
-                        if (!user.IsTypeId(TypeId.Player))
+                        // in Battlegroundcheck
+                        Battleground bg = player.GetBattleground();
+                        if (!bg)
                             return;
 
-                        Player player = user.ToPlayer();
+                        if (player.GetVehicle() != null)
+                            return;
 
-                        if (player.CanUseBattlegroundObject(this))
-                        {
-                            // in Battlegroundcheck
-                            Battleground bg = player.GetBattleground();
-                            if (!bg)
-                                return;
-
-                            if (player.GetVehicle() != null)
-                                return;
-
-                            player.RemoveAurasByType(AuraType.ModStealth);
-                            player.RemoveAurasByType(AuraType.ModInvisibility);
-                            // BG flag click
-                            // AB:
-                            // 15001
-                            // 15002
-                            // 15003
-                            // 15004
-                            // 15005
-                            bg.EventPlayerClickedOnFlag(player, this);
-                            return;                                     //we don;t need to delete flag ... it is despawned!
-                        }
-                        break;
+                        player.RemoveAurasByType(AuraType.ModStealth);
+                        player.RemoveAurasByType(AuraType.ModInvisibility);
+                        // BG flag click
+                        // AB:
+                        // 15001
+                        // 15002
+                        // 15003
+                        // 15004
+                        // 15005
+                        bg.EventPlayerClickedOnFlag(player, this);
+                        return;                                     //we don;t need to delete flag ... it is despawned!
                     }
+                    break;
+                }
 
                 case GameObjectTypes.FishingHole:                   // 25
-                    {
-                        if (!user.IsTypeId(TypeId.Player))
-                            return;
-
-                        Player player = user.ToPlayer();
-
-                        player.SendLoot(GetGUID(), LootType.Fishinghole);
-                        player.UpdateCriteria(CriteriaTypes.FishInGameobject, GetGoInfo().entry);
+                {
+                    if (!user.IsTypeId(TypeId.Player))
                         return;
-                    }
+
+                    Player player = user.ToPlayer();
+
+                    player.SendLoot(GetGUID(), LootType.Fishinghole);
+                    player.UpdateCriteria(CriteriaTypes.FishInGameobject, GetGoInfo().entry);
+                    return;
+                }
 
                 case GameObjectTypes.FlagDrop:                      // 26
+                {
+                    if (!user.IsTypeId(TypeId.Player))
+                        return;
+
+                    Player player = user.ToPlayer();
+
+                    if (player.CanUseBattlegroundObject(this))
                     {
-                        if (!user.IsTypeId(TypeId.Player))
+                        // in Battlegroundcheck
+                        Battleground bg = player.GetBattleground();
+                        if (!bg)
                             return;
 
-                        Player player = user.ToPlayer();
+                        if (player.GetVehicle() != null)
+                            return;
 
-                        if (player.CanUseBattlegroundObject(this))
+                        player.RemoveAurasByType(AuraType.ModStealth);
+                        player.RemoveAurasByType(AuraType.ModInvisibility);
+                        // BG flag dropped
+                        // WS:
+                        // 179785 - Silverwing Flag
+                        // 179786 - Warsong Flag
+                        // EotS:
+                        // 184142 - Netherstorm Flag
+                        GameObjectTemplate info = GetGoInfo();
+                        if (info != null)
                         {
-                            // in Battlegroundcheck
-                            Battleground bg = player.GetBattleground();
-                            if (!bg)
-                                return;
-
-                            if (player.GetVehicle() != null)
-                                return;
-
-                            player.RemoveAurasByType(AuraType.ModStealth);
-                            player.RemoveAurasByType(AuraType.ModInvisibility);
-                            // BG flag dropped
-                            // WS:
-                            // 179785 - Silverwing Flag
-                            // 179786 - Warsong Flag
-                            // EotS:
-                            // 184142 - Netherstorm Flag
-                            GameObjectTemplate info = GetGoInfo();
-                            if (info != null)
+                            switch (info.entry)
                             {
-                                switch (info.entry)
-                                {
-                                    case 179785:                        // Silverwing Flag
-                                    case 179786:                        // Warsong Flag
-                                        if (bg.GetTypeID(true) == BattlegroundTypeId.WS)
-                                            bg.EventPlayerClickedOnFlag(player, this);
-                                        break;
-                                    case 184142:                        // Netherstorm Flag
-                                        if (bg.GetTypeID(true) == BattlegroundTypeId.EY)
-                                            bg.EventPlayerClickedOnFlag(player, this);
-                                        break;
-                                }
+                                case 179785:                        // Silverwing Flag
+                                case 179786:                        // Warsong Flag
+                                    if (bg.GetTypeID(true) == BattlegroundTypeId.WS)
+                                        bg.EventPlayerClickedOnFlag(player, this);
+                                    break;
+                                case 184142:                        // Netherstorm Flag
+                                    if (bg.GetTypeID(true) == BattlegroundTypeId.EY)
+                                        bg.EventPlayerClickedOnFlag(player, this);
+                                    break;
                             }
-                            //this cause to call return, all flags must be deleted here!!
-                            spellId = 0;
-                            Delete();
                         }
-                        break;
+                        //this cause to call return, all flags must be deleted here!!
+                        spellId = 0;
+                        Delete();
                     }
+                    break;
+                }
                 case GameObjectTypes.BarberChair:                  //32
-                    {
-                        GameObjectTemplate info = GetGoInfo();
-                        if (info == null)
-                            return;
-
-                        if (!user.IsTypeId(TypeId.Player))
-                            return;
-
-                        Player player = user.ToPlayer();
-
-                        player.SendPacket(new EnableBarberShop());
-
-                        // fallback, will always work
-                        player.TeleportTo(GetMapId(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation(), (TeleportToOptions.NotLeaveTransport | TeleportToOptions.NotLeaveCombat | TeleportToOptions.NotUnSummonPet));
-                        player.SetStandState((UnitStandStateType.SitLowChair + (byte)info.BarberChair.chairheight), info.BarberChair.SitAnimKit);
+                {
+                    GameObjectTemplate info = GetGoInfo();
+                    if (info == null)
                         return;
-                    }
+
+                    if (!user.IsTypeId(TypeId.Player))
+                        return;
+
+                    Player player = user.ToPlayer();
+
+                    player.SendPacket(new EnableBarberShop());
+
+                    // fallback, will always work
+                    player.TeleportTo(GetMapId(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation(), (TeleportToOptions.NotLeaveTransport | TeleportToOptions.NotLeaveCombat | TeleportToOptions.NotUnSummonPet));
+                    player.SetStandState((UnitStandStateType.SitLowChair + (byte)info.BarberChair.chairheight), info.BarberChair.SitAnimKit);
+                    return;
+                }
                 case GameObjectTypes.ItemForge:
+                {
+                    GameObjectTemplate info = GetGoInfo();
+                    if (info == null)
+                        return;
+
+                    if (!user.IsTypeId(TypeId.Player))
+                        return;
+
+                    Player player = user.ToPlayer();
+                    PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(info.ItemForge.conditionID1);
+                    if (playerCondition != null)
+                        if (!ConditionManager.IsPlayerMeetingCondition(player, playerCondition))
+                            return;
+
+                    switch (info.ItemForge.ForgeType)
                     {
-                        GameObjectTemplate info = GetGoInfo();
-                        if (info == null)
-                            return;
+                        case 0: // Artifact Forge
+                        case 1: // Relic Forge
+                        {
 
-                        if (!user.IsTypeId(TypeId.Player))
-                            return;
+                            Aura artifactAura = player.GetAura(PlayerConst.ArtifactsAllWeaponsGeneralWeaponEquippedPassive);
+                            Item item = artifactAura != null ? player.GetItemByGuid(artifactAura.GetCastItemGUID()) : null;
+                            if (!item)
+                            {
+                                player.SendPacket(new DisplayGameError(GameError.MustEquipArtifact));
+                                return;
+                            }
 
-                        Player player = user.ToPlayer();
-                        PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(info.ItemForge.conditionID1);
-                        if (playerCondition != null)
-                            if (!ConditionManager.IsPlayerMeetingCondition(player, playerCondition))
+                            OpenArtifactForge openArtifactForge = new();
+                            openArtifactForge.ArtifactGUID = item.GetGUID();
+                            openArtifactForge.ForgeGUID = GetGUID();
+                            player.SendPacket(openArtifactForge);
+                            break;
+                        }
+                        case 2: // Heart Forge
+                        {
+                            Item item = player.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
+                            if (!item)
                                 return;
 
-                        switch (info.ItemForge.ForgeType)
-                        {
-                            case 0: // Artifact Forge
-                            case 1: // Relic Forge
-                                {
-
-                                    Aura artifactAura = player.GetAura(PlayerConst.ArtifactsAllWeaponsGeneralWeaponEquippedPassive);
-                                    Item item = artifactAura != null ? player.GetItemByGuid(artifactAura.GetCastItemGUID()) : null;
-                                    if (!item)
-                                    {
-                                        player.SendPacket(new DisplayGameError(GameError.MustEquipArtifact));
-                                        return;
-                                    }
-
-                                    OpenArtifactForge openArtifactForge = new();
-                                    openArtifactForge.ArtifactGUID = item.GetGUID();
-                                    openArtifactForge.ForgeGUID = GetGUID();
-                                    player.SendPacket(openArtifactForge);
-                                    break;
-                                }
-                            case 2: // Heart Forge
-                                {
-                                    Item item = player.GetItemByEntry(PlayerConst.ItemIdHeartOfAzeroth, ItemSearchLocation.Everywhere);
-                                    if (!item)
-                                        return;
-
-                                    OpenHeartForge openHeartForge = new();
-                                    openHeartForge.ForgeGUID = GetGUID();
-                                    player.SendPacket(openHeartForge);
-                                    break;
-                                }
-                            default:
-                                break;
+                            OpenHeartForge openHeartForge = new();
+                            openHeartForge.ForgeGUID = GetGUID();
+                            player.SendPacket(openHeartForge);
+                            break;
                         }
-                        break;
+                        default:
+                            break;
                     }
+                    break;
+                }
                 case GameObjectTypes.UILink:
-                    {
-                        Player player = user.ToPlayer();
-                        if (!player)
-                            return;
-
-                        GameObjectUILink gameObjectUILink = new();
-                        gameObjectUILink.ObjectGUID = GetGUID();
-                        gameObjectUILink.UILink = (int)GetGoInfo().UILink.UILinkType;
-                        player.SendPacket(gameObjectUILink);
+                {
+                    Player player = user.ToPlayer();
+                    if (!player)
                         return;
-                    }
+
+                    GameObjectUILink gameObjectUILink = new();
+                    gameObjectUILink.ObjectGUID = GetGUID();
+                    gameObjectUILink.UILink = (int)GetGoInfo().UILink.UILinkType;
+                    player.SendPacket(gameObjectUILink);
+                    return;
+                }
                 default:
                     if (GetGoType() >= GameObjectTypes.Max)
                         Log.outError(LogFilter.Server, "GameObject.Use(): unit (type: {0}, guid: {1}, name: {2}) tries to use object (guid: {3}, entry: {4}, name: {5}) of unknown type ({6})",
@@ -2317,81 +2332,81 @@ namespace Game.Entities
                     EnableCollision(true);
                     break;
                 case GameObjectDestructibleState.Damaged:
+                {
+                    EventInform(m_goInfo.DestructibleBuilding.DamagedEvent, eventInvoker);
+                    GetAI().Damaged(eventInvoker, m_goInfo.DestructibleBuilding.DamagedEvent);
+
+                    RemoveFlag(GameObjectFlags.Destroyed);
+                    AddFlag(GameObjectFlags.Damaged);
+
+                    uint modelId = m_goInfo.displayId;
+                    DestructibleModelDataRecord modelData = CliDB.DestructibleModelDataStorage.LookupByKey(m_goInfo.DestructibleBuilding.DestructibleModelRec);
+                    if (modelData != null)
+                        if (modelData.State1Wmo != 0)
+                            modelId = modelData.State1Wmo;
+                    SetDisplayId(modelId);
+
+                    if (setHealth)
                     {
-                        EventInform(m_goInfo.DestructibleBuilding.DamagedEvent, eventInvoker);
-                        GetAI().Damaged(eventInvoker, m_goInfo.DestructibleBuilding.DamagedEvent);
-
-                        RemoveFlag(GameObjectFlags.Destroyed);
-                        AddFlag(GameObjectFlags.Damaged);
-
-                        uint modelId = m_goInfo.displayId;
-                        DestructibleModelDataRecord modelData = CliDB.DestructibleModelDataStorage.LookupByKey(m_goInfo.DestructibleBuilding.DestructibleModelRec);
-                        if (modelData != null)
-                            if (modelData.State1Wmo != 0)
-                                modelId = modelData.State1Wmo;
-                        SetDisplayId(modelId);
-
-                        if (setHealth)
-                        {
-                            m_goValue.Building.Health = 10000;//m_goInfo.DestructibleBuilding.damagedNumHits;
-                            uint maxHealth = m_goValue.Building.MaxHealth;
-                            // in this case current health is 0 anyway so just prevent crashing here
-                            if (maxHealth == 0)
-                                maxHealth = 1;
-                            SetGoAnimProgress(m_goValue.Building.Health * 255 / maxHealth);
-                        }
-                        break;
+                        m_goValue.Building.Health = 10000;//m_goInfo.DestructibleBuilding.damagedNumHits;
+                        uint maxHealth = m_goValue.Building.MaxHealth;
+                        // in this case current health is 0 anyway so just prevent crashing here
+                        if (maxHealth == 0)
+                            maxHealth = 1;
+                        SetGoAnimProgress(m_goValue.Building.Health * 255 / maxHealth);
                     }
+                    break;
+                }
                 case GameObjectDestructibleState.Destroyed:
+                {
+                    EventInform(m_goInfo.DestructibleBuilding.DestroyedEvent, eventInvoker);
+                    GetAI().Destroyed(eventInvoker, m_goInfo.DestructibleBuilding.DestroyedEvent);
+                    if (eventInvoker != null)
                     {
-                        EventInform(m_goInfo.DestructibleBuilding.DestroyedEvent, eventInvoker);
-                        GetAI().Destroyed(eventInvoker, m_goInfo.DestructibleBuilding.DestroyedEvent);
-                        if (eventInvoker != null)
-                        {
-                            Battleground bg = eventInvoker.GetBattleground();
-                            if (bg)
-                                bg.DestroyGate(eventInvoker, this);
-                        }
-
-                        RemoveFlag(GameObjectFlags.Damaged);
-                        AddFlag(GameObjectFlags.Destroyed);
-
-                        uint modelId = m_goInfo.displayId;
-                        DestructibleModelDataRecord modelData = CliDB.DestructibleModelDataStorage.LookupByKey(m_goInfo.DestructibleBuilding.DestructibleModelRec);
-                        if (modelData != null)
-                            if (modelData.State2Wmo != 0)
-                                modelId = modelData.State2Wmo;
-                        SetDisplayId(modelId);
-
-                        if (setHealth)
-                        {
-                            m_goValue.Building.Health = 0;
-                            SetGoAnimProgress(0);
-                        }
-                        EnableCollision(false);
-                        break;
+                        Battleground bg = eventInvoker.GetBattleground();
+                        if (bg)
+                            bg.DestroyGate(eventInvoker, this);
                     }
+
+                    RemoveFlag(GameObjectFlags.Damaged);
+                    AddFlag(GameObjectFlags.Destroyed);
+
+                    uint modelId = m_goInfo.displayId;
+                    DestructibleModelDataRecord modelData = CliDB.DestructibleModelDataStorage.LookupByKey(m_goInfo.DestructibleBuilding.DestructibleModelRec);
+                    if (modelData != null)
+                        if (modelData.State2Wmo != 0)
+                            modelId = modelData.State2Wmo;
+                    SetDisplayId(modelId);
+
+                    if (setHealth)
+                    {
+                        m_goValue.Building.Health = 0;
+                        SetGoAnimProgress(0);
+                    }
+                    EnableCollision(false);
+                    break;
+                }
                 case GameObjectDestructibleState.Rebuilding:
+                {
+                    EventInform(m_goInfo.DestructibleBuilding.RebuildingEvent, eventInvoker);
+                    RemoveFlag(GameObjectFlags.Damaged | GameObjectFlags.Destroyed);
+
+                    uint modelId = m_goInfo.displayId;
+                    DestructibleModelDataRecord modelData = CliDB.DestructibleModelDataStorage.LookupByKey(m_goInfo.DestructibleBuilding.DestructibleModelRec);
+                    if (modelData != null)
+                        if (modelData.State3Wmo != 0)
+                            modelId = modelData.State3Wmo;
+                    SetDisplayId(modelId);
+
+                    // restores to full health
+                    if (setHealth)
                     {
-                        EventInform(m_goInfo.DestructibleBuilding.RebuildingEvent, eventInvoker);
-                        RemoveFlag(GameObjectFlags.Damaged | GameObjectFlags.Destroyed);
-
-                        uint modelId = m_goInfo.displayId;
-                        DestructibleModelDataRecord modelData = CliDB.DestructibleModelDataStorage.LookupByKey(m_goInfo.DestructibleBuilding.DestructibleModelRec);
-                        if (modelData != null)
-                            if (modelData.State3Wmo != 0)
-                                modelId = modelData.State3Wmo;
-                        SetDisplayId(modelId);
-
-                        // restores to full health
-                        if (setHealth)
-                        {
-                            m_goValue.Building.Health = m_goValue.Building.MaxHealth;
-                            SetGoAnimProgress(255);
-                        }
-                        EnableCollision(true);
-                        break;
+                        m_goValue.Building.Health = m_goValue.Building.MaxHealth;
+                        SetGoAnimProgress(255);
                     }
+                    EnableCollision(true);
+                    break;
+                }
             }
         }
 
@@ -2883,7 +2898,7 @@ namespace Game.Entities
         // There's many places not ready for dynamic spawns. This allows them to live on for now.
         void SetRespawnCompatibilityMode(bool mode = true) { m_respawnCompatibilityMode = mode; }
         public bool GetRespawnCompatibilityMode() { return m_respawnCompatibilityMode; }
-        
+
         #region Fields
         protected GameObjectFieldData m_gameObjectData;
         protected GameObjectValue m_goValue;

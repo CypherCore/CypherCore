@@ -623,7 +623,10 @@ namespace Game
             Global.ObjectMgr.LoadSpawnGroups();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading GameObject Addon Data...");
-            Global.ObjectMgr.LoadGameObjectAddons();                          // must be after LoadGameObjectTemplate() and LoadGameobjects()
+            Global.ObjectMgr.LoadGameObjectAddons();                          // must be after LoadGameObjects()
+
+            Log.outInfo(LogFilter.ServerLoading, "Loading GameObject faction and flags overrides...");
+            Global.ObjectMgr.LoadGameObjectOverrides();                       // must be after LoadGameObjects()
 
             Log.outInfo(LogFilter.ServerLoading, "Loading GameObject Quest Items...");
             Global.ObjectMgr.LoadGameObjectQuestItems();

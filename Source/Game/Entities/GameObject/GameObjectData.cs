@@ -1356,13 +1356,17 @@ namespace Game.Entities
         #endregion
     }
 
-    public class GameObjectTemplateAddon
+    // From `gameobject_template_addon`, `gameobject_overrides`
+    public class GameObjectOverride
     {
-        public uint entry;
-        public uint faction;
-        public uint flags;
-        public uint mingold;
-        public uint maxgold;
+        public uint Faction;
+        public GameObjectFlags Flags;
+    }
+
+    public class GameObjectTemplateAddon : GameObjectOverride
+    {
+        public uint Mingold;
+        public uint Maxgold;
         public uint WorldEffectID;
         public uint AIAnimKitID;
     }

@@ -150,16 +150,17 @@ namespace Game.Chat
                 return false;
 
             uint entry;
+            ulong spawnId = 0;
             if (param1.Equals("guid"))
             {
                 string cValue = handler.ExtractKeyFromLink(args, "Hgameobject");
                 if (cValue.IsEmpty())
                     return false;
 
-                if (!ulong.TryParse(cValue, out ulong guidLow))
+                if (!ulong.TryParse(cValue, out spawnId))
                     return false;
 
-                GameObjectData data = Global.ObjectMgr.GetGameObjectData(guidLow);
+                GameObjectData data = Global.ObjectMgr.GetGameObjectData(spawnId);
                 if (data == null)
                     return false;
                 entry = data.Id;
@@ -216,9 +217,19 @@ namespace Game.Chat
             handler.SendSysMessage(CypherStrings.GoinfoName, name);
             handler.SendSysMessage(CypherStrings.GoinfoSize, gameObjectInfo.size);
 
-            GameObjectTemplateAddon addon = Global.ObjectMgr.GetGameObjectTemplateAddon(entry);
-            if (addon != null)
-                handler.SendSysMessage(CypherStrings.GoinfoAddon, addon.faction, addon.flags);
+            GameObjectOverride goOverride = null;
+            if (spawnId != 0)
+            {
+                GameObjectOverride ovr = Global.ObjectMgr.GetGameObjectOverride(spawnId);
+                if (ovr != null)
+                goOverride = ovr;
+            }
+
+            if (goOverride == null)
+                goOverride = Global.ObjectMgr.GetGameObjectTemplateAddon(entry);
+
+            if (goOverride != null)
+                handler.SendSysMessage(CypherStrings.GoinfoAddon, goOverride.Faction, goOverride.Flags);
 
             handler.SendSysMessage(CypherStrings.ObjectInfoAIInfo, gameObjectInfo.AIName, Global.ObjectMgr.GetScriptName(gameObjectInfo.ScriptId));
 
