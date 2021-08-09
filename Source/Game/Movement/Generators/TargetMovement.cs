@@ -88,11 +88,7 @@ namespace Game.Movement
                 }
 
                 // First check distance
-                if (owner.IsCreature() && owner.ToCreature().CanFly())
-                    targetMoved = !GetTarget().IsInDist(destination.X, destination.Y, destination.Z, distance);
-                else
-                    targetMoved = !GetTarget().IsInDist2d(destination.X, destination.Y, distance);
-
+                targetMoved = !GetTarget().IsInDist(destination.X, destination.Y, destination.Z, distance);
 
                 // then, if the target is in range, check also Line of Sight.
                 if (!targetMoved)
