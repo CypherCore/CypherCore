@@ -333,9 +333,6 @@ namespace Game.Scripting
 
         public override bool IsDatabaseBound() { return true; }
 
-        // Called when the creature tries to spawn. Return false to block spawn and re-evaluate on next tick.
-        public virtual bool CanSpawn(ulong spawnId, uint entry, CreatureTemplate baseTemplate, CreatureTemplate actTemplate, CreatureData cData, Map map) { return true; }
-
         // Called when a CreatureAI object is needed for the creature.
         public virtual CreatureAI GetAI(Creature creature) { return null; }
     }

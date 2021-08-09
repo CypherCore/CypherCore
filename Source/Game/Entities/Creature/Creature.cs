@@ -115,7 +115,7 @@ namespace Game.Entities
 
             return false;
         }
-        
+
         public void SearchFormation()
         {
             if (IsSummon())
@@ -156,7 +156,7 @@ namespace Game.Entities
 
             return m_formation.CanLeaderStartMoving();
         }
-        
+
         public void RemoveCorpse(bool setSpawnTime = true, bool destroyForNearbyPlayers = true)
         {
             if (GetDeathState() != DeathState.Corpse)
@@ -443,47 +443,52 @@ namespace Game.Entities
             {
                 case DeathState.JustRespawned:
                 case DeathState.JustDied:
-                    Log.outError(LogFilter.Unit, "Creature ({0}) in wrong state: {1}", GetGUID().ToString(), m_deathState);
+                    Log.outError(LogFilter.Unit, $"Creature ({GetGUID()}) in wrong state: {m_deathState}");
                     break;
                 case DeathState.Dead:
+                {
+                    if (!m_respawnCompatibilityMode)
                     {
-                        long now = GameTime.GetGameTime();
-                        if (m_respawnTime <= now)
-                        {
-                            // First check if there are any scripts that object to us respawning
-                            if (!Global.ScriptMgr.CanSpawn(GetSpawnId(), GetEntry(), GetCreatureData(), GetMap()))
-                            {
-                                m_respawnTime = now + RandomHelper.URand(4, 7);
-                                break; // Will be rechecked on next Update call after delay expires
-                            }
-
-                            ObjectGuid dbtableHighGuid = ObjectGuid.Create(HighGuid.Creature, GetMapId(), GetEntry(), m_spawnId);
-                            long linkedRespawnTime = GetMap().GetLinkedRespawnTime(dbtableHighGuid);
-                            if (linkedRespawnTime == 0)             // Can respawn
-                                Respawn();
-                            else                                // the master is dead
-                            {
-                                ObjectGuid targetGuid = Global.ObjectMgr.GetLinkedRespawnGuid(dbtableHighGuid);
-                                if (targetGuid == dbtableHighGuid) // if linking self, never respawn (check delayed to next day)
-                                    SetRespawnTime(Time.Week);
-                                else
-                                {
-                                    // else copy time from master and add a little
-                                    long baseRespawnTime = Math.Max(linkedRespawnTime, now);
-                                    long offset = RandomHelper.URand(5, Time.Minute);
-
-                                    // linked guid can be a boss, uses std::numeric_limits<time_t>::max to never respawn in that instance
-                                    // we shall inherit it instead of adding and causing an overflow
-                                    if (baseRespawnTime <= long.MaxValue - offset)
-                                        m_respawnTime = baseRespawnTime + offset;
-                                    else
-                                        m_respawnTime = long.MaxValue;
-                                }
-                                SaveRespawnTime(); // also save to DB immediately
-                            }
-                        }
+                        Log.outError(LogFilter.Unit, $"Creature (GUID: {GetGUID().GetCounter()} Entry: {GetEntry()}) in wrong state: DEAD (3)");
                         break;
                     }
+                    long now = GameTime.GetGameTime();
+                    if (m_respawnTime <= now)
+                    {
+                        // Delay respawn if spawn group is not active
+                        if (m_creatureData != null && !GetMap().IsSpawnGroupActive(m_creatureData.spawnGroupData.groupId))
+                        {
+                            m_respawnTime = now + RandomHelper.URand(4, 7);
+                            break; // Will be rechecked on next Update call after delay expires
+                        }
+
+                        ObjectGuid dbtableHighGuid = ObjectGuid.Create(HighGuid.Creature, GetMapId(), GetEntry(), m_spawnId);
+                        long linkedRespawnTime = GetMap().GetLinkedRespawnTime(dbtableHighGuid);
+                        if (linkedRespawnTime == 0)             // Can respawn
+                            Respawn();
+                        else                                // the master is dead
+                        {
+                            ObjectGuid targetGuid = Global.ObjectMgr.GetLinkedRespawnGuid(dbtableHighGuid);
+                            if (targetGuid == dbtableHighGuid) // if linking self, never respawn (check delayed to next day)
+                                SetRespawnTime(Time.Week);
+                            else
+                            {
+                                // else copy time from master and add a little
+                                long baseRespawnTime = Math.Max(linkedRespawnTime, now);
+                                long offset = RandomHelper.URand(5, Time.Minute);
+
+                                // linked guid can be a boss, uses std::numeric_limits<time_t>::max to never respawn in that instance
+                                // we shall inherit it instead of adding and causing an overflow
+                                if (baseRespawnTime <= long.MaxValue - offset)
+                                    m_respawnTime = baseRespawnTime + offset;
+                                else
+                                    m_respawnTime = long.MaxValue;
+                            }
+                            SaveRespawnTime(); // also save to DB immediately
+                        }
+                    }
+                    break;
+                }
                 case DeathState.Corpse:
                     base.Update(diff);
                     if (m_deathState != DeathState.Corpse)
@@ -651,30 +656,30 @@ namespace Game.Entities
             switch (power)
             {
                 case PowerType.Focus:
-                    {
-                        // For hunter pets.
-                        addvalue = 24 * WorldConfig.GetFloatValue(WorldCfg.RatePowerFocus);
-                        break;
-                    }
+                {
+                    // For hunter pets.
+                    addvalue = 24 * WorldConfig.GetFloatValue(WorldCfg.RatePowerFocus);
+                    break;
+                }
                 case PowerType.Energy:
-                    {
-                        // For deathknight's ghoul.
-                        addvalue = 20;
-                        break;
-                    }
+                {
+                    // For deathknight's ghoul.
+                    addvalue = 20;
+                    break;
+                }
                 case PowerType.Mana:
+                {
+                    // Combat and any controlled creature
+                    if (IsInCombat() || GetCharmerOrOwnerGUID().IsEmpty())
                     {
-                        // Combat and any controlled creature
-                        if (IsInCombat() || GetCharmerOrOwnerGUID().IsEmpty())
-                        {
-                            float ManaIncreaseRate = WorldConfig.GetFloatValue(WorldCfg.RatePowerMana);
-                            addvalue = (27.0f / 5.0f + 17.0f) * ManaIncreaseRate;
-                        }
-                        else
-                            addvalue = maxValue / 3;
-
-                        break;
+                        float ManaIncreaseRate = WorldConfig.GetFloatValue(WorldCfg.RatePowerMana);
+                        addvalue = (27.0f / 5.0f + 17.0f) * ManaIncreaseRate;
                     }
+                    else
+                        addvalue = maxValue / 3;
+
+                    break;
+                }
                 default:
                     return;
             }
@@ -1133,7 +1138,7 @@ namespace Game.Entities
 
             return false;
         }
-        
+
         public void StartPickPocketRefillTimer()
         {
             _pickpocketLootRestore = GameTime.GetGameTime() + WorldConfig.GetIntValue(WorldCfg.CreaturePickpocketRefill);
@@ -2495,7 +2500,7 @@ namespace Game.Entities
             CreatureTemplate cInfo = GetCreatureTemplate();
             CreatureLevelScaling scaling = cInfo.GetLevelScaling(GetMap().GetDifficultyID());
             float baseHealth = Global.DB2Mgr.EvaluateExpectedStat(ExpectedStatType.CreatureHealth, level, cInfo.GetHealthScalingExpansion(), scaling.ContentTuningID, (Class)cInfo.UnitClass);
-            
+
             return (ulong)(baseHealth * cInfo.ModHealth * cInfo.ModHealthExtra);
         }
 
@@ -3046,7 +3051,7 @@ namespace Game.Entities
         }
         public bool IsDungeonBoss() { return (GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.DungeonBoss)); }
         public override bool IsAffectedByDiminishingReturns() { return base.IsAffectedByDiminishingReturns() || GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.AllDiminish); }
-        
+
         public void SetReactState(ReactStates st)
         {
             reactState = st;
@@ -3119,7 +3124,7 @@ namespace Game.Entities
             CreatureData data = Global.ObjectMgr.GetCreatureData(spawnId);
             if (data == null)
             {
-                Log.outError(LogFilter.Sql, "Creature (GUID: {0}) not found in table `creature`, can't load. ", spawnId);
+                Log.outError(LogFilter.Sql, $"Creature (SpawnID: {spawnId}) not found in table `creature`, can't load.");
                 return false;
             }
 
@@ -3128,12 +3133,6 @@ namespace Game.Entities
             m_creatureData = data;
             m_respawnradius = data.spawndist;
             m_respawnDelay = (uint)data.spawntimesecs;
-            // Is the creature script objecting to us spawning? If yes, delay by a little bit (then re-check in ::Update)
-            if (!m_respawnCompatibilityMode && m_respawnTime == 0 && !Global.ScriptMgr.CanSpawn(spawnId, data.Id, data, map))
-            {
-                SaveRespawnTime(RandomHelper.URand(4, 7));
-                return false;
-            }
 
             if (!Create(map.GenerateLowGuid(HighGuid.Creature), map, data.Id, data.spawnPoint, data, 0, !m_respawnCompatibilityMode))
                 return false;
@@ -3146,8 +3145,11 @@ namespace Game.Entities
             m_respawnTime = GetMap().GetCreatureRespawnTime(m_spawnId);
 
             // Is the creature script objecting to us spawning? If yes, delay by a little bit (then re-check in ::Update)
-            if (m_respawnCompatibilityMode && m_respawnTime == 0 && !Global.ScriptMgr.CanSpawn(spawnId, GetEntry(), GetCreatureData(), map))
+            if (m_respawnTime == 0 && !map.IsSpawnGroupActive(data.spawnGroupData.groupId))
+            {
+                Cypher.Assert(m_respawnCompatibilityMode, $"Creature (SpawnID {spawnId}) trying to load in inactive spawn group {data.spawnGroupData.name}.");
                 m_respawnTime = GameTime.GetGameTime() + RandomHelper.URand(4, 7);
+            }
 
             if (m_respawnTime != 0)                          // respawn on UpdateLoadCreatureFromDB
             {
@@ -3236,7 +3238,7 @@ namespace Game.Entities
 
         public (uint nodeId, uint pathId) GetCurrentWaypointInfo() { return _currentWaypointNodeInfo; }
         public void UpdateCurrentWaypointInfo(uint nodeId, uint pathId) { _currentWaypointNodeInfo = (nodeId, pathId); }
-        
+
         public CreatureGroup GetFormation() { return m_formation; }
         public void SetFormation(CreatureGroup formation) { m_formation = formation; }
 

@@ -249,7 +249,7 @@ namespace Game.Maps
                 if (doSpawn)
                     instance.SpawnGroupSpawn(groupId, instance);
                 else // otherwise, set it as inactive so it no longer respawns (but don't despawn it)
-                    instance.SetSpawnGroupActive(groupId, false);
+                    instance.SetSpawnGroupInactive(groupId);
             }
         }
 
