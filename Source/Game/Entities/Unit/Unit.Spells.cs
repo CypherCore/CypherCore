@@ -2895,15 +2895,15 @@ namespace Game.Entities
             return null;
         }
 
-        public bool HandleSpellClick(Unit clicker, sbyte seatId = -1)
+        public void HandleSpellClick(Unit clicker, sbyte seatId = -1)
         {
-            bool result = false;
+            bool spellClickHandled = false;
 
             uint spellClickEntry = GetVehicleKit() != null ? GetVehicleKit().GetCreatureEntry() : GetEntry();
             TriggerCastFlags flags = GetVehicleKit() ? TriggerCastFlags.IgnoreCasterMountedOrOnVehicle : TriggerCastFlags.None;
 
-            var clickPair = Global.ObjectMgr.GetSpellClickInfoMapBounds(spellClickEntry);
-            foreach (var clickInfo in clickPair)
+            var clickBounds = Global.ObjectMgr.GetSpellClickInfoMapBounds(spellClickEntry);
+            foreach (var clickInfo in clickBounds)
             {
                 //! First check simple relations from clicker to clickee
                 if (!clickInfo.IsFitToRequirements(clicker, this))
@@ -2971,14 +2971,12 @@ namespace Game.Entities
                         Aura.TryRefreshStackOrCreate(spellEntry, ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, GetMapId(), spellEntry.Id, GetMap().GenerateLowGuid(HighGuid.Cast)), SpellConst.MaxEffectMask, this, clicker, GetMap().GetDifficultyID(), null, null, origCasterGUID);
                 }
 
-                result = true;
+                spellClickHandled = true;
             }
 
             Creature creature = ToCreature();
             if (creature && creature.IsAIEnabled)
-                creature.GetAI().OnSpellClick(clicker, ref result);
-
-            return result;
+                creature.GetAI().OnSpellClick(clicker, ref spellClickHandled);
         }
 
         public bool HasAura(uint spellId, ObjectGuid casterGUID = default, ObjectGuid itemCasterGUID = default, uint reqEffMask = 0)

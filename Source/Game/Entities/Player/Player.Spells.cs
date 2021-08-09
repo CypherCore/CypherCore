@@ -251,11 +251,11 @@ namespace Game.Entities
             if (!creature.HasNpcFlag(NPCFlags.SpellClick))
                 return false;
 
-            var clickPair = Global.ObjectMgr.GetSpellClickInfoMapBounds(creature.GetEntry());
-            if (clickPair.Empty())
+            var clickBounds = Global.ObjectMgr.GetSpellClickInfoMapBounds(creature.GetEntry());
+            if (clickBounds.Empty())
                 return false;
 
-            foreach (var spellClickInfo in clickPair)
+            foreach (var spellClickInfo in clickBounds)
             {
                 if (!spellClickInfo.IsFitToRequirements(this, creature))
                     return false;

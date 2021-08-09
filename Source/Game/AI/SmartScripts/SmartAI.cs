@@ -895,9 +895,9 @@ namespace Game.AI
             GetScript().ProcessEventsFor(start ? SmartEvents.GameEventStart : SmartEvents.GameEventEnd, null, eventId);
         }
 
-        public override void OnSpellClick(Unit clicker, ref bool result)
+        public override void OnSpellClick(Unit clicker, ref bool spellClickHandled)
         {
-            if (!result)
+            if (!spellClickHandled)
                 return;
 
             GetScript().ProcessEventsFor(SmartEvents.OnSpellclick, clicker);

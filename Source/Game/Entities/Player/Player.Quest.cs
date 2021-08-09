@@ -2900,12 +2900,12 @@ namespace Game.Entities
                     if (!obj.HasNpcFlag(NPCFlags.SpellClick))
                         continue;
 
-                    var clickPair = Global.ObjectMgr.GetSpellClickInfoMapBounds(obj.GetEntry());
-                    foreach (var spell in clickPair)
+                    var clickBounds = Global.ObjectMgr.GetSpellClickInfoMapBounds(obj.GetEntry());
+                    foreach (var spellClickInfo in clickBounds)
                     {
                         //! This code doesn't look right, but it was logically converted to condition system to do the exact
                         //! same thing it did before. It definitely needs to be overlooked for intended functionality.
-                        List<Condition> conds = Global.ConditionMgr.GetConditionsForSpellClickEvent(obj.GetEntry(), spell.spellId);
+                        List<Condition> conds = Global.ConditionMgr.GetConditionsForSpellClickEvent(obj.GetEntry(), spellClickInfo.spellId);
                         if (conds != null)
                         {
                             bool buildUpdateBlock = false;

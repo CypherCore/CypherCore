@@ -470,7 +470,7 @@ namespace Game.AI
 
         public virtual void PassengerBoarded(Unit passenger, sbyte seatId, bool apply) { }
 
-        public virtual void OnSpellClick(Unit clicker, ref bool result) { }
+        public virtual void OnSpellClick(Unit clicker, ref bool spellClickHandled) { }
 
         public virtual bool CanSeeAlways(WorldObject obj) { return false; }
 
