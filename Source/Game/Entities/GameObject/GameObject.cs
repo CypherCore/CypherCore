@@ -1075,6 +1075,12 @@ namespace Game.Entities
             }
             else
             {
+                if (!m_respawnCompatibilityMode)
+                {
+                    Log.outWarn(LogFilter.Sql, $"GameObject {entry} (SpawnID {spawnId}) is not spawned by default, but tries to use a non-hack spawn system. This will not work. Defaulting to compatibility mode.");
+                    m_respawnCompatibilityMode = true;
+                }
+
                 m_spawnedByDefault = false;
                 m_respawnDelayTime = (uint)-data.spawntimesecs;
                 m_respawnTime = 0;
