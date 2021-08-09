@@ -3144,7 +3144,6 @@ namespace Game.Entities
 
             m_respawnTime = GetMap().GetCreatureRespawnTime(m_spawnId);
 
-            // Is the creature script objecting to us spawning? If yes, delay by a little bit (then re-check in ::Update)
             if (m_respawnTime == 0 && !map.IsSpawnGroupActive(data.spawnGroupData.groupId))
             {
                 Cypher.Assert(m_respawnCompatibilityMode, $"Creature (SpawnID {spawnId}) trying to load in inactive spawn group {data.spawnGroupData.name}.");
@@ -3153,6 +3152,7 @@ namespace Game.Entities
 
             if (m_respawnTime != 0)                          // respawn on UpdateLoadCreatureFromDB
             {
+                Cypher.Assert(m_respawnCompatibilityMode, $"Creature (SpawnID {spawnId}) trying to load despite a respawn timer in progress.");
                 m_deathState = DeathState.Dead;
                 if (CanFly())
                 {
