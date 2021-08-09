@@ -562,7 +562,13 @@ namespace Game.Entities
         {
             Cypher.Assert(Passenger.IsInWorld);
             Cypher.Assert(Target != null && Target.GetBase().IsInWorld);
-            Cypher.Assert(Target.GetBase().HasAuraTypeWithCaster(AuraType.ControlVehicle, Passenger.GetGUID()));
+
+            var vehicleAuras = Target.GetBase().GetAuraEffectsByType(AuraType.ControlVehicle);
+            var aurEffect = vehicleAuras.Find(aurEff => aurEff.GetCasterGUID() == Passenger.GetGUID());
+            Cypher.Assert(aurEffect != null);
+
+            var aurApp = aurEffect.GetBase().GetApplicationOfTarget(Target.GetBase().GetGUID());
+            Cypher.Assert(aurApp != null && !aurApp.HasRemoveMode());
 
             Target.RemovePendingEventsForSeat(Seat.Key);
             Target.RemovePendingEventsForPassenger(Passenger);
@@ -622,9 +628,16 @@ namespace Game.Entities
             Passenger.m_movementInfo.transport.seat = Seat.Key;
             Passenger.m_movementInfo.transport.guid = Target.GetBase().GetGUID();
 
-            if (Target.GetBase().IsTypeId(TypeId.Unit) && Passenger.IsTypeId(TypeId.Player) &&
-                Seat.Value.SeatInfo.HasFlag(VehicleSeatFlags.CanControl))
-                Cypher.Assert(Target.GetBase().SetCharmedBy(Passenger, CharmType.Vehicle));  // SMSG_CLIENT_CONTROL
+            if (Target.GetBase().IsTypeId(TypeId.Unit) && Passenger.IsTypeId(TypeId.Player) && Seat.Value.SeatInfo.HasFlag(VehicleSeatFlags.CanControl))
+            {
+                // handles SMSG_CLIENT_CONTROL
+                if (!Target.GetBase().SetCharmedBy(Passenger, CharmType.Vehicle, aurApp))
+                {
+                    // charming failed, probably aura was removed by relocation/scripts/whatever
+                    Abort(0);
+                    return true;
+                }
+            }
 
             Passenger.SendClearTarget();                            // SMSG_BREAK_TARGET
             Passenger.SetControlled(true, UnitState.Root);         // SMSG_FORCE_ROOT - In some cases we send SMSG_SPLINE_MOVE_ROOT here (for creatures)
