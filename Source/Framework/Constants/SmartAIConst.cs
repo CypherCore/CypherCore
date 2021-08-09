@@ -387,7 +387,8 @@ namespace Framework.Constants
         SceneCancel = 130,    // sceneId
         SpawnSpawngroup = 131,    // Group ID, min secs, max secs, spawnflags
         DespawnSpawngroup = 132,    // Group ID, min secs, max secs, spawnflags
-        // 131 - 134 : 3.3.5 reserved
+        RespawnBySpawnId = 133,    // spawnType, spawnId
+        // 134 : 3.3.5 reserved
         PlayCinematic = 135,    // reserved for future uses
         SetMovementSpeed = 136,    // movementType, speedInteger, speedFraction
         PlaySpellVisualKit = 137, // spellVisualKitId, kitType (unknown values, copypaste from packet dumps), duration
