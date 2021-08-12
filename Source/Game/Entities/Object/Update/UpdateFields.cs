@@ -1031,7 +1031,7 @@ namespace Game.Entities
     public class VisibleItem : BaseUpdateData<Unit>
     {
         public UpdateField<uint> ItemID = new(0, 1);
-        public UpdateField<int> ItemModifiedAppearanceID = new(0, 2);
+        public UpdateField<uint> SecondaryItemModifiedAppearanceID = new(0, 2);
         public UpdateField<ushort> ItemAppearanceModID = new(0, 3);
         public UpdateField<ushort> ItemVisual = new(0, 4);
 
@@ -1040,7 +1040,7 @@ namespace Game.Entities
         public void WriteCreate(WorldPacket data, Unit owner, Player receiver)
         {
             data.WriteUInt32(ItemID);
-            data.WriteInt32(ItemModifiedAppearanceID);
+            data.WriteUInt32(SecondaryItemModifiedAppearanceID);
             data.WriteUInt16(ItemAppearanceModID);
             data.WriteUInt16(ItemVisual);
         }
@@ -1062,7 +1062,7 @@ namespace Game.Entities
                 }
                 if (changesMask[2])
                 {
-                    data.WriteInt32(ItemModifiedAppearanceID);
+                    data.WriteUInt32(SecondaryItemModifiedAppearanceID);
                 }
                 if (changesMask[3])
                 {
@@ -1078,7 +1078,7 @@ namespace Game.Entities
         public override void ClearChangesMask()
         {
             ClearChangesMask(ItemID);
-            ClearChangesMask(ItemModifiedAppearanceID);
+            ClearChangesMask(SecondaryItemModifiedAppearanceID);
             ClearChangesMask(ItemAppearanceModID);
             ClearChangesMask(ItemVisual);
             _changesMask.ResetAll();

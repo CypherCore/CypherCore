@@ -180,13 +180,13 @@ namespace Game
                 }
 
                 Item item = Item.NewItemOrBag(proto);
-                if (!item.LoadFromDB(itemGuid, ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(43)), result.GetFields(), itemEntry))
+                if (!item.LoadFromDB(itemGuid, ObjectGuid.Create(HighGuid.Player, result.Read<ulong>(51)), result.GetFields(), itemEntry))
                 {
                     item.Dispose();
                     continue;
                 }
 
-                uint auctionId = result.Read<uint>(44);
+                uint auctionId = result.Read<uint>(52);
                 itemsByAuction.Add(auctionId, item);
 
                 ++count;

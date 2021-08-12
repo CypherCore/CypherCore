@@ -80,9 +80,9 @@ namespace Game.Entities
                         }
 
 
-                        ulong counter = result.Read<ulong>(43);
+                        ulong counter = result.Read<ulong>(51);
                         ObjectGuid bagGuid = counter != 0 ? ObjectGuid.Create(HighGuid.Item, counter) : ObjectGuid.Empty;
-                        byte slot = result.Read<byte>(44);
+                        byte slot = result.Read<byte>(52);
 
                         GetSession().GetCollectionMgr().CheckHeirloomUpgrades(item);
                         GetSession().GetCollectionMgr().AddItemAppearance(item);
@@ -1226,7 +1226,7 @@ namespace Game.Entities
 
                 do
                 {
-                    uint mailId = result.Read<uint>(44);
+                    uint mailId = result.Read<uint>(52);
                     _LoadMailedItem(GetGUID(), this, mailId, mailById[mailId], result.GetFields(), additionalData.LookupByKey(result.Read<ulong>(0)));
                 }
                 while (result.NextRow());
@@ -1260,7 +1260,7 @@ namespace Game.Entities
             }
 
             Item item = Bag.NewItemOrBag(proto);
-            ObjectGuid ownerGuid = fields.Read<ulong>(43) != 0 ? ObjectGuid.Create(HighGuid.Player, fields.Read<ulong>(43)) : ObjectGuid.Empty;
+            ObjectGuid ownerGuid = fields.Read<ulong>(51) != 0 ? ObjectGuid.Create(HighGuid.Player, fields.Read<ulong>(51)) : ObjectGuid.Empty;
             if (!item.LoadFromDB(itemGuid, ownerGuid, fields, itemEntry))
             {
                 Log.outError(LogFilter.Player, $"Player._LoadMailedItems: Item (GUID: {itemGuid}) in mail ({mailId}) doesn't exist, deleted from mail.");
@@ -3446,10 +3446,10 @@ namespace Game.Entities
                         else
                             ss.Append('0');
 
-                        ss.Append($" {(uint)CliDB.ItemStorage.LookupByKey(item.GetVisibleEntry(this)).SubclassID} ");
+                        ss.Append($" {(uint)CliDB.ItemStorage.LookupByKey(item.GetVisibleEntry(this)).SubclassID} {(uint)item.GetVisibleSecondaryModifiedAppearanceId(this)} ");
                     }
                     else
-                        ss.Append("0 0 0 0 ");
+                        ss.Append("0 0 0 0 0 ");
                 }
 
                 stmt.AddValue(index++, ss.ToString());
@@ -3587,10 +3587,10 @@ namespace Game.Entities
                         else
                             ss.Append('0');
 
-                        ss.Append($" {(uint)CliDB.ItemStorage.LookupByKey(item.GetVisibleEntry(this)).SubclassID} ");
+                        ss.Append($" {(uint)CliDB.ItemStorage.LookupByKey(item.GetVisibleEntry(this)).SubclassID} {(uint)item.GetVisibleSecondaryModifiedAppearanceId(this)} ");
                     }
                     else
-                        ss.Append("0 0 0 0 ");
+                        ss.Append("0 0 0 0 0 ");
                 }
 
                 stmt.AddValue(index++, ss.ToString());

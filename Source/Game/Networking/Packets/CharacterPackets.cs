@@ -157,6 +157,7 @@ namespace Game.Networking.Packets
                     VisualItems[slot].DisplayId = equipment.NextUInt32();
                     VisualItems[slot].DisplayEnchantId = equipment.NextUInt32();
                     VisualItems[slot].Subclass = (byte)equipment.NextUInt32();
+                    VisualItems[slot].SecondaryItemModifiedAppearanceID = equipment.NextUInt32();
                 }
             }
 
@@ -262,14 +263,14 @@ namespace Game.Networking.Packets
                 {
                     data.WriteUInt32(DisplayId);
                     data.WriteUInt32(DisplayEnchantId);
-                    data.WriteInt32(ItemModifiedAppearanceID);
+                    data.WriteUInt32(SecondaryItemModifiedAppearanceID);
                     data.WriteUInt8(InvType);
                     data.WriteUInt8(Subclass);
                 }
 
                 public uint DisplayId;
                 public uint DisplayEnchantId;
-                public int ItemModifiedAppearanceID; // also -1 is some special value
+                public uint SecondaryItemModifiedAppearanceID; // also -1 is some special value
                 public byte InvType;
                 public byte Subclass;
             }
