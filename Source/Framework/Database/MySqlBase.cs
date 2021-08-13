@@ -30,7 +30,7 @@ namespace Framework.Database
     {
         public MySqlConnection GetConnection()
         {
-            return new MySqlConnection($"Server={Host};Port={Port};User Id={Username};Password={Password};Database={Database};Allow User Variables=True;Pooling=true;");
+            return new MySqlConnection($"Server={Host};Port={Port};User Id={Username};Password={Password};Database={Database};Allow User Variables=True;Pooling=true;ConnectionIdleTimeout=1800;Command Timeout=0");
         }
 
         public MySqlConnection GetConnectionNoDatabase()
@@ -67,6 +67,8 @@ namespace Framework.Database
                 {
                     connection.Open();
                     Log.outInfo(LogFilter.SqlDriver, $"Connected to MySQL(ver: {connection.ServerVersion}) Database: {_connectionInfo.Database}");
+                    //Connection is good lets set some default values to help with updates.
+                    Apply($"SET GLOBAL max_allowed_packet=1073741824;");
                     return MySqlErrorCode.None;
                 }
             }
@@ -223,10 +225,6 @@ namespace Framework.Database
                 string query = File.ReadAllText(path);
                 if (query.IsEmpty())
                     return false;
-
-                var byteCount = Encoding.UTF8.GetByteCount(query);
-                if (byteCount > 1048576) //Default size limit of querys
-                    Apply($"SET GLOBAL max_allowed_packet={byteCount};");
 
                 using (var connection = _connectionInfo.GetConnection())
                 {
