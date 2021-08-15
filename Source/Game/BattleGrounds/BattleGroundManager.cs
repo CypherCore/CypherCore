@@ -175,14 +175,14 @@ namespace Game.BattleGrounds
             battlefieldStatus.WaitTime = Time.GetMSTimeDiffToNow(joinTime);
         }
 
-        public void BuildBattlegroundStatusFailed(out BattlefieldStatusFailed battlefieldStatus, Battleground bg, Player pPlayer, uint ticketId, GroupJoinBattlegroundResult result, ObjectGuid errorGuid = default)
+        public void BuildBattlegroundStatusFailed(out BattlefieldStatusFailed battlefieldStatus, BattlegroundQueueTypeId queueId, Player pPlayer, uint ticketId, GroupJoinBattlegroundResult result, ObjectGuid errorGuid = default)
         {
             battlefieldStatus = new BattlefieldStatusFailed();
             battlefieldStatus.Ticket.RequesterGuid = pPlayer.GetGUID();
             battlefieldStatus.Ticket.Id = ticketId;
             battlefieldStatus.Ticket.Type = RideType.Battlegrounds;
-            battlefieldStatus.Ticket.Time = (int)pPlayer.GetBattlegroundQueueJoinTime(bg.GetQueueId());
-            battlefieldStatus.QueueID = bg.GetQueueId().GetPacked();
+            battlefieldStatus.Ticket.Time = (int)pPlayer.GetBattlegroundQueueJoinTime(queueId);
+            battlefieldStatus.QueueID = queueId.GetPacked();
             battlefieldStatus.Reason = (int)result;
             if (!errorGuid.IsEmpty() && (result == GroupJoinBattlegroundResult.NotInBattleground || result == GroupJoinBattlegroundResult.JoinTimedOut))
                 battlefieldStatus.ClientID = errorGuid;

@@ -105,7 +105,7 @@ namespace Game
             {
                 if (GetPlayer().IsUsingLfg())
                 {
-                    Global.BattlegroundMgr.BuildBattlegroundStatusFailed(out battlefieldStatusFailed, bg, GetPlayer(), 0, GroupJoinBattlegroundResult.LfgCantUseBattleground);
+                    Global.BattlegroundMgr.BuildBattlegroundStatusFailed(out battlefieldStatusFailed, bgQueueTypeId, GetPlayer(), 0, GroupJoinBattlegroundResult.LfgCantUseBattleground);
                     SendPacket(battlefieldStatusFailed);
                     return;
                 }
@@ -113,7 +113,7 @@ namespace Game
                 // check Deserter debuff
                 if (!GetPlayer().CanJoinToBattleground(bg))
                 {
-                    Global.BattlegroundMgr.BuildBattlegroundStatusFailed(out battlefieldStatusFailed, bg, GetPlayer(), 0, GroupJoinBattlegroundResult.Deserters);
+                    Global.BattlegroundMgr.BuildBattlegroundStatusFailed(out battlefieldStatusFailed, bgQueueTypeId, GetPlayer(), 0, GroupJoinBattlegroundResult.Deserters);
                     SendPacket(battlefieldStatusFailed);
                     return;
                 }
@@ -123,7 +123,7 @@ namespace Game
                 if (bgTypeId != BattlegroundTypeId.RB && bgTypeId != BattlegroundTypeId.RandomEpic && isInRandomBgQueue)
                 {
                     // player is already in random queue
-                    Global.BattlegroundMgr.BuildBattlegroundStatusFailed(out battlefieldStatusFailed, bg, GetPlayer(), 0, GroupJoinBattlegroundResult.InRandomBg);
+                    Global.BattlegroundMgr.BuildBattlegroundStatusFailed(out battlefieldStatusFailed, bgQueueTypeId, GetPlayer(), 0, GroupJoinBattlegroundResult.InRandomBg);
                     SendPacket(battlefieldStatusFailed);
                     return;
                 }
@@ -131,7 +131,7 @@ namespace Game
                 if (_player.InBattlegroundQueue() && !isInRandomBgQueue && (bgTypeId == BattlegroundTypeId.RB || bgTypeId == BattlegroundTypeId.RandomEpic))
                 {
                     // player is already in queue, can't start random queue
-                    Global.BattlegroundMgr.BuildBattlegroundStatusFailed(out battlefieldStatusFailed, bg, GetPlayer(), 0, GroupJoinBattlegroundResult.InNonRandomBg);
+                    Global.BattlegroundMgr.BuildBattlegroundStatusFailed(out battlefieldStatusFailed, bgQueueTypeId, GetPlayer(), 0, GroupJoinBattlegroundResult.InNonRandomBg);
                     SendPacket(battlefieldStatusFailed);
                     return;
                 }
@@ -143,7 +143,7 @@ namespace Game
                 // check if has free queue slots
                 if (!GetPlayer().HasFreeBattlegroundQueueId())
                 {
-                    Global.BattlegroundMgr.BuildBattlegroundStatusFailed(out battlefieldStatusFailed, bg, GetPlayer(), 0, GroupJoinBattlegroundResult.TooManyQueues);
+                    Global.BattlegroundMgr.BuildBattlegroundStatusFailed(out battlefieldStatusFailed, bgQueueTypeId, GetPlayer(), 0, GroupJoinBattlegroundResult.TooManyQueues);
                     SendPacket(battlefieldStatusFailed);
                     return;
                 }
@@ -192,7 +192,7 @@ namespace Game
                     if (err != 0)
                     {
                         BattlefieldStatusFailed battlefieldStatus;
-                        Global.BattlegroundMgr.BuildBattlegroundStatusFailed(out battlefieldStatus, bg, GetPlayer(), 0, err, errorGuid);
+                        Global.BattlegroundMgr.BuildBattlegroundStatusFailed(out battlefieldStatus, bgQueueTypeId, GetPlayer(), 0, err, errorGuid);
                         member.SendPacket(battlefieldStatus);
                         continue;
                     }
@@ -312,7 +312,7 @@ namespace Game
                 {
                     // send bg command result to show nice message
                     BattlefieldStatusFailed battlefieldStatus;
-                    Global.BattlegroundMgr.BuildBattlegroundStatusFailed(out battlefieldStatus, bg, GetPlayer(), battlefieldPort.Ticket.Id, GroupJoinBattlegroundResult.Deserters);
+                    Global.BattlegroundMgr.BuildBattlegroundStatusFailed(out battlefieldStatus, bgQueueTypeId, GetPlayer(), battlefieldPort.Ticket.Id, GroupJoinBattlegroundResult.Deserters);
                     SendPacket(battlefieldStatus);
                     battlefieldPort.AcceptedInvite = false;
                     Log.outDebug(LogFilter.Battleground, "Player {0} ({1}) has a deserter debuff, do not port him to Battleground!", GetPlayer().GetName(), GetPlayer().GetGUID().ToString());
@@ -546,7 +546,7 @@ namespace Game
                 if (err != 0)
                 {
                     BattlefieldStatusFailed battlefieldStatus;
-                    Global.BattlegroundMgr.BuildBattlegroundStatusFailed(out battlefieldStatus, bg, GetPlayer(), 0, err, errorGuid);
+                    Global.BattlegroundMgr.BuildBattlegroundStatusFailed(out battlefieldStatus, bgQueueTypeId, GetPlayer(), 0, err, errorGuid);
                     member.SendPacket(battlefieldStatus);
                     continue;
                 }
