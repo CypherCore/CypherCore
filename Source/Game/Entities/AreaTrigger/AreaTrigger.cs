@@ -381,6 +381,9 @@ namespace Game.Entities
 
         void SearchUnitInBox(List<Unit> targetList)
         {
+            SearchUnits(targetList, GetTemplate().MaxSearchRadius, false);
+
+            Position boxCenter = GetPosition();
             float extentsX, extentsY, extentsZ;
 
             unsafe
@@ -390,24 +393,7 @@ namespace Game.Entities
                 extentsZ = GetTemplate().BoxDatas.Extents[2];
             }
 
-            SearchUnits(targetList, GetTemplate().MaxSearchRadius, false);
-
-            float halfExtentsX = extentsX / 2.0f;
-            float halfExtentsY = extentsY / 2.0f;
-            float halfExtentsZ = extentsZ / 2.0f;
-
-            float minX = GetPositionX() - halfExtentsX;
-            float maxX = GetPositionX() + halfExtentsX;
-
-            float minY = GetPositionY() - halfExtentsY;
-            float maxY = GetPositionY() + halfExtentsY;
-
-            float minZ = GetPositionZ() - halfExtentsZ;
-            float maxZ = GetPositionZ() + halfExtentsZ;
-
-            AxisAlignedBox box = new(new Vector3(minX, minY, minZ), new Vector3(maxX, maxY, maxZ));
-
-            targetList.RemoveAll(unit => !box.contains(new Vector3(unit.GetPositionX(), unit.GetPositionY(), unit.GetPositionZ())));
+            targetList.RemoveAll(unit => !unit.IsWithinBox(boxCenter, extentsX, extentsY, extentsZ));
         }
 
         void SearchUnitInPolygon(List<Unit> targetList)
