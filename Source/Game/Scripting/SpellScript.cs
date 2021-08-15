@@ -288,6 +288,7 @@ namespace Game.Scripting
                         return true;
                     case SpellTargetSelectionCategories.Cone: // AREA
                     case SpellTargetSelectionCategories.Area: // AREA
+                    case SpellTargetSelectionCategories.Line: // AREA
                         return _area;
                     case SpellTargetSelectionCategories.Default:
                         switch (targetInfo.GetObjectType())

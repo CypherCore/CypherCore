@@ -286,7 +286,7 @@ namespace Game.Entities
             return IsInDist2d(center, radius) && Math.Abs(verticalDelta) <= height;
         }
 
-        public bool HasInArc(float arc, Position obj, float border = 2.0f)
+        public bool HasInArc(float arc, Position obj, float border = 2.0f, float? orientation = null)
         {
             // always have self in arc
             if (obj == this)
@@ -296,7 +296,7 @@ namespace Game.Entities
             arc = NormalizeOrientation(arc);
 
             float angle = GetAngle(obj);
-            angle -= GetOrientation();
+            angle -= orientation.HasValue ? orientation.Value : GetOrientation();
 
             // move angle to range -pi ... +pi
             angle = NormalizeOrientation(angle);
@@ -308,13 +308,13 @@ namespace Game.Entities
             return ((angle >= lborder) && (angle <= rborder));
         }
 
-        public bool HasInLine(Position pos, float objSize, float width)
+        public bool HasInLine(Position pos, float objSize, float width, float? orientation = null)
         {
-            if (!HasInArc(MathFunctions.PI, pos))
+            if (!HasInArc(MathFunctions.PI, pos, 2.0f, orientation))
                 return false;
 
             width += objSize;
-            float angle = GetRelativeAngle(pos);
+            float angle = GetAngle(pos) - (orientation.HasValue ? orientation.Value : GetOrientation());
             return Math.Abs(Math.Sin(angle)) * GetExactDist2d(pos.GetPositionX(), pos.GetPositionY()) < width;
         }
 

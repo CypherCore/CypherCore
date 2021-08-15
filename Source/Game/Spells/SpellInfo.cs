@@ -42,7 +42,7 @@ namespace Game.Spells
                     continue;
 
                 _effects[spellEffect.EffectIndex] = new SpellEffectInfo(this, spellEffect);
-            }            
+            }
 
             SpellName = spellName.Name;
 
@@ -255,7 +255,7 @@ namespace Game.Spells
             foreach (SpellEffectRecord spellEffect in effects)
                 _effects[spellEffect.EffectIndex] = new SpellEffectInfo(this, spellEffect);
         }
-        
+
         public bool HasEffect(SpellEffectName effect)
         {
             foreach (SpellEffectInfo eff in _effects)
@@ -934,19 +934,19 @@ namespace Game.Spells
 
                     return zone_id == 4197 || (mapEntry.IsBattleground() && player != null && player.InBattleground()) ? SpellCastResult.SpellCastOk : SpellCastResult.RequiresArea;
                 case 44521:         // Preparation
-                    {
-                        if (player == null)
-                            return SpellCastResult.RequiresArea;
+                {
+                    if (player == null)
+                        return SpellCastResult.RequiresArea;
 
-                        if (mapEntry == null)
-                            return SpellCastResult.IncorrectArea;
+                    if (mapEntry == null)
+                        return SpellCastResult.IncorrectArea;
 
-                        if (!mapEntry.IsBattleground())
-                            return SpellCastResult.RequiresArea;
+                    if (!mapEntry.IsBattleground())
+                        return SpellCastResult.RequiresArea;
 
-                        Battleground bg = player.GetBattleground();
-                        return bg && bg.GetStatus() == BattlegroundStatus.WaitJoin ? SpellCastResult.SpellCastOk : SpellCastResult.RequiresArea;
-                    }
+                    Battleground bg = player.GetBattleground();
+                    return bg && bg.GetStatus() == BattlegroundStatus.WaitJoin ? SpellCastResult.SpellCastOk : SpellCastResult.RequiresArea;
+                }
                 case 32724:         // Gold Team (Alliance)
                 case 32725:         // Green Team (Alliance)
                 case 35774:         // Gold Team (Horde)
@@ -956,19 +956,19 @@ namespace Game.Spells
 
                     return mapEntry.IsBattleArena() && player != null && player.InBattleground() ? SpellCastResult.SpellCastOk : SpellCastResult.RequiresArea;
                 case 32727:        // Arena Preparation
-                    {
-                        if (player == null)
-                            return SpellCastResult.RequiresArea;
+                {
+                    if (player == null)
+                        return SpellCastResult.RequiresArea;
 
-                        if (mapEntry == null)
-                            return SpellCastResult.IncorrectArea;
+                    if (mapEntry == null)
+                        return SpellCastResult.IncorrectArea;
 
-                        if (!mapEntry.IsBattleArena())
-                            return SpellCastResult.RequiresArea;
+                    if (!mapEntry.IsBattleArena())
+                        return SpellCastResult.RequiresArea;
 
-                        Battleground bg = player.GetBattleground();
-                        return bg && bg.GetStatus() == BattlegroundStatus.WaitJoin ? SpellCastResult.SpellCastOk : SpellCastResult.RequiresArea;
-                    }
+                    Battleground bg = player.GetBattleground();
+                    return bg && bg.GetStatus() == BattlegroundStatus.WaitJoin ? SpellCastResult.SpellCastOk : SpellCastResult.RequiresArea;
+                }
             }
 
             // aura limitations
@@ -982,27 +982,27 @@ namespace Game.Spells
                     switch (effect.ApplyAuraName)
                     {
                         case AuraType.ModShapeshift:
+                        {
+                            SpellShapeshiftFormRecord spellShapeshiftForm = CliDB.SpellShapeshiftFormStorage.LookupByKey(effect.MiscValue);
+                            if (spellShapeshiftForm != null)
                             {
-                                SpellShapeshiftFormRecord spellShapeshiftForm = CliDB.SpellShapeshiftFormStorage.LookupByKey(effect.MiscValue);
-                                if (spellShapeshiftForm != null)
-                                {
-                                    uint mountType = spellShapeshiftForm.MountTypeID;
-                                    if (mountType != 0)
-                                        if (player.GetMountCapability(mountType) == null)
-                                            return SpellCastResult.NotHere;
-                                }
-                                break;
+                                uint mountType = spellShapeshiftForm.MountTypeID;
+                                if (mountType != 0)
+                                    if (player.GetMountCapability(mountType) == null)
+                                        return SpellCastResult.NotHere;
                             }
+                            break;
+                        }
                         case AuraType.Mounted:
-                            {
-                                uint mountType = (uint)effect.MiscValueB;
-                                MountRecord mountEntry = Global.DB2Mgr.GetMount(Id);
-                                if (mountEntry != null)
-                                    mountType = mountEntry.MountTypeID;
-                                if (mountType != 0 && player.GetMountCapability(mountType) == null)
-                                    return SpellCastResult.NotHere;
-                                break;
-                            }
+                        {
+                            uint mountType = (uint)effect.MiscValueB;
+                            MountRecord mountEntry = Global.DB2Mgr.GetMount(Id);
+                            if (mountEntry != null)
+                                mountType = mountEntry.MountTypeID;
+                            if (mountType != 0 && player.GetMountCapability(mountType) == null)
+                                return SpellCastResult.NotHere;
+                            break;
+                        }
                     }
                 }
             }
@@ -1451,157 +1451,157 @@ namespace Game.Spells
             switch (SpellFamilyName)
             {
                 case SpellFamilyNames.Generic:
+                {
+                    // Food / Drinks (mostly)
+                    if (HasAuraInterruptFlag(SpellAuraInterruptFlags.Standing))
                     {
-                        // Food / Drinks (mostly)
-                        if (HasAuraInterruptFlag(SpellAuraInterruptFlags.Standing))
+                        bool food = false;
+                        bool drink = false;
+                        foreach (SpellEffectInfo effect in _effects)
                         {
-                            bool food = false;
-                            bool drink = false;
-                            foreach (SpellEffectInfo effect in _effects)
-                            {
-                                if (effect == null || !effect.IsAura())
-                                    continue;
+                            if (effect == null || !effect.IsAura())
+                                continue;
 
-                                switch (effect.ApplyAuraName)
-                                {
-                                    // Food
-                                    case AuraType.ModRegen:
-                                    case AuraType.ObsModHealth:
-                                        food = true;
-                                        break;
-                                    // Drink
-                                    case AuraType.ModPowerRegen:
-                                    case AuraType.ObsModPower:
-                                        drink = true;
-                                        break;
-                                    default:
-                                        break;
-                                }
-                            }
-
-                            if (food && drink)
-                                _spellSpecific = SpellSpecificType.FoodAndDrink;
-                            else if (food)
-                                _spellSpecific = SpellSpecificType.Food;
-                            else if (drink)
-                                _spellSpecific = SpellSpecificType.Drink;
-                        }
-                        // scrolls effects
-                        else
-                        {
-                            SpellInfo firstRankSpellInfo = GetFirstRankSpell();
-                            switch (firstRankSpellInfo.Id)
+                            switch (effect.ApplyAuraName)
                             {
-                                case 8118: // Strength
-                                case 8099: // Stamina
-                                case 8112: // Spirit
-                                case 8096: // Intellect
-                                case 8115: // Agility
-                                case 8091: // Armor
-                                    _spellSpecific = SpellSpecificType.Scroll;
+                                // Food
+                                case AuraType.ModRegen:
+                                case AuraType.ObsModHealth:
+                                    food = true;
+                                    break;
+                                // Drink
+                                case AuraType.ModPowerRegen:
+                                case AuraType.ObsModPower:
+                                    drink = true;
+                                    break;
+                                default:
                                     break;
                             }
                         }
-                        break;
+
+                        if (food && drink)
+                            _spellSpecific = SpellSpecificType.FoodAndDrink;
+                        else if (food)
+                            _spellSpecific = SpellSpecificType.Food;
+                        else if (drink)
+                            _spellSpecific = SpellSpecificType.Drink;
                     }
-                case SpellFamilyNames.Mage:
+                    // scrolls effects
+                    else
                     {
-                        // family flags 18(Molten), 25(Frost/Ice), 28(Mage)
-                        if (SpellFamilyFlags[0].HasAnyFlag(0x12040000u))
-                            _spellSpecific = SpellSpecificType.MageArmor;
-
-                        // Arcane brillance and Arcane intelect (normal check fails because of flags difference)
-                        if (SpellFamilyFlags[0].HasAnyFlag(0x400u))
-                            _spellSpecific = SpellSpecificType.MageArcaneBrillance;
-
-                        SpellEffectInfo effect = GetEffect(0);
-                        if (effect != null && SpellFamilyFlags[0].HasAnyFlag(0x1000000u) && effect.IsAura(AuraType.ModConfuse))
-                            _spellSpecific = SpellSpecificType.MagePolymorph;
-
-                        break;
-                    }
-                case SpellFamilyNames.Warrior:
-                    {
-                        if (Id == 12292) // Death Wish
-                            _spellSpecific = SpellSpecificType.WarriorEnrage;
-
-                        break;
-                    }
-                case SpellFamilyNames.Warlock:
-                    {
-                        // Warlock (Bane of Doom | Bane of Agony | Bane of Havoc)
-                        if (Id == 603 || Id == 980 || Id == 80240)
-                            _spellSpecific = SpellSpecificType.Bane;
-
-                        // only warlock curses have this
-                        if (Dispel == DispelType.Curse)
-                            _spellSpecific = SpellSpecificType.Curse;
-
-                        // Warlock (Demon Armor | Demon Skin | Fel Armor)
-                        if (SpellFamilyFlags[1].HasAnyFlag(0x20000020u) || SpellFamilyFlags[2].HasAnyFlag(0x00000010u))
-                            _spellSpecific = SpellSpecificType.WarlockArmor;
-
-                        //seed of corruption and corruption
-                        if (SpellFamilyFlags[1].HasAnyFlag(0x10u) || SpellFamilyFlags[0].HasAnyFlag(0x2u))
-                            _spellSpecific = SpellSpecificType.WarlockCorruption;
-                        break;
-                    }
-                case SpellFamilyNames.Priest:
-                    {
-                        // Divine Spirit and Prayer of Spirit
-                        if (SpellFamilyFlags[0].HasAnyFlag(0x20u))
-                            _spellSpecific = SpellSpecificType.PriestDivineSpirit;
-
-                        break;
-                    }
-                case SpellFamilyNames.Hunter:
-                    {
-                        // only hunter stings have this
-                        if (Dispel == DispelType.Poison)
-                            _spellSpecific = SpellSpecificType.Sting;
-
-                        // only hunter aspects have this (but not all aspects in hunter family)
-                        if (SpellFamilyFlags & new FlagArray128(0x00200000, 0x00000000, 0x00001010, 0x00000000))
-                            _spellSpecific = SpellSpecificType.Aspect;
-
-                        break;
-                    }
-                case SpellFamilyNames.Paladin:
-                    {
-                        // Collection of all the seal family flags. No other paladin spell has any of those.
-                        if (SpellFamilyFlags[1].HasAnyFlag(0xA2000800))
-                            _spellSpecific = SpellSpecificType.Seal;
-
-                        if (SpellFamilyFlags[0].HasAnyFlag(0x00002190u))
-                            _spellSpecific = SpellSpecificType.Hand;
-
-                        // Judgement
-                        if (Id == 20271)
-                            _spellSpecific = SpellSpecificType.Judgement;
-
-                        // only paladin auras have this (for palaldin class family)
-                        switch (Id)
+                        SpellInfo firstRankSpellInfo = GetFirstRankSpell();
+                        switch (firstRankSpellInfo.Id)
                         {
-                            case 465:    // Devotion Aura
-                            case 32223:  // Crusader Aura
-                            case 183435: // Retribution Aura
-                            case 317920: // Concentration Aura
-                                _spellSpecific = SpellSpecificType.Aura;
-                                break;
-                            default:
+                            case 8118: // Strength
+                            case 8099: // Stamina
+                            case 8112: // Spirit
+                            case 8096: // Intellect
+                            case 8115: // Agility
+                            case 8091: // Armor
+                                _spellSpecific = SpellSpecificType.Scroll;
                                 break;
                         }
-
-                        break;
                     }
-                case SpellFamilyNames.Shaman:
+                    break;
+                }
+                case SpellFamilyNames.Mage:
+                {
+                    // family flags 18(Molten), 25(Frost/Ice), 28(Mage)
+                    if (SpellFamilyFlags[0].HasAnyFlag(0x12040000u))
+                        _spellSpecific = SpellSpecificType.MageArmor;
+
+                    // Arcane brillance and Arcane intelect (normal check fails because of flags difference)
+                    if (SpellFamilyFlags[0].HasAnyFlag(0x400u))
+                        _spellSpecific = SpellSpecificType.MageArcaneBrillance;
+
+                    SpellEffectInfo effect = GetEffect(0);
+                    if (effect != null && SpellFamilyFlags[0].HasAnyFlag(0x1000000u) && effect.IsAura(AuraType.ModConfuse))
+                        _spellSpecific = SpellSpecificType.MagePolymorph;
+
+                    break;
+                }
+                case SpellFamilyNames.Warrior:
+                {
+                    if (Id == 12292) // Death Wish
+                        _spellSpecific = SpellSpecificType.WarriorEnrage;
+
+                    break;
+                }
+                case SpellFamilyNames.Warlock:
+                {
+                    // Warlock (Bane of Doom | Bane of Agony | Bane of Havoc)
+                    if (Id == 603 || Id == 980 || Id == 80240)
+                        _spellSpecific = SpellSpecificType.Bane;
+
+                    // only warlock curses have this
+                    if (Dispel == DispelType.Curse)
+                        _spellSpecific = SpellSpecificType.Curse;
+
+                    // Warlock (Demon Armor | Demon Skin | Fel Armor)
+                    if (SpellFamilyFlags[1].HasAnyFlag(0x20000020u) || SpellFamilyFlags[2].HasAnyFlag(0x00000010u))
+                        _spellSpecific = SpellSpecificType.WarlockArmor;
+
+                    //seed of corruption and corruption
+                    if (SpellFamilyFlags[1].HasAnyFlag(0x10u) || SpellFamilyFlags[0].HasAnyFlag(0x2u))
+                        _spellSpecific = SpellSpecificType.WarlockCorruption;
+                    break;
+                }
+                case SpellFamilyNames.Priest:
+                {
+                    // Divine Spirit and Prayer of Spirit
+                    if (SpellFamilyFlags[0].HasAnyFlag(0x20u))
+                        _spellSpecific = SpellSpecificType.PriestDivineSpirit;
+
+                    break;
+                }
+                case SpellFamilyNames.Hunter:
+                {
+                    // only hunter stings have this
+                    if (Dispel == DispelType.Poison)
+                        _spellSpecific = SpellSpecificType.Sting;
+
+                    // only hunter aspects have this (but not all aspects in hunter family)
+                    if (SpellFamilyFlags & new FlagArray128(0x00200000, 0x00000000, 0x00001010, 0x00000000))
+                        _spellSpecific = SpellSpecificType.Aspect;
+
+                    break;
+                }
+                case SpellFamilyNames.Paladin:
+                {
+                    // Collection of all the seal family flags. No other paladin spell has any of those.
+                    if (SpellFamilyFlags[1].HasAnyFlag(0xA2000800))
+                        _spellSpecific = SpellSpecificType.Seal;
+
+                    if (SpellFamilyFlags[0].HasAnyFlag(0x00002190u))
+                        _spellSpecific = SpellSpecificType.Hand;
+
+                    // Judgement
+                    if (Id == 20271)
+                        _spellSpecific = SpellSpecificType.Judgement;
+
+                    // only paladin auras have this (for palaldin class family)
+                    switch (Id)
                     {
-                        // family flags 10 (Lightning), 42 (Earth), 37 (Water), proc shield from T2 8 pieces bonus
-                        if (SpellFamilyFlags[1].HasAnyFlag(0x420u) || SpellFamilyFlags[0].HasAnyFlag(0x00000400u) || Id == 23552)
-                            _spellSpecific = SpellSpecificType.ElementalShield;
-
-                        break;
+                        case 465:    // Devotion Aura
+                        case 32223:  // Crusader Aura
+                        case 183435: // Retribution Aura
+                        case 317920: // Concentration Aura
+                            _spellSpecific = SpellSpecificType.Aura;
+                            break;
+                        default:
+                            break;
                     }
+
+                    break;
+                }
+                case SpellFamilyNames.Shaman:
+                {
+                    // family flags 10 (Lightning), 42 (Earth), 37 (Water), proc shield from T2 8 pieces bonus
+                    if (SpellFamilyFlags[1].HasAnyFlag(0x420u) || SpellFamilyFlags[0].HasAnyFlag(0x00000400u) || Id == 23552)
+                        _spellSpecific = SpellSpecificType.ElementalShield;
+
+                    break;
+                }
                 case SpellFamilyNames.Deathknight:
                     if (Id == 48266 || Id == 48263 || Id == 48265)
                         _spellSpecific = SpellSpecificType.Presence;
@@ -1697,307 +1697,307 @@ namespace Game.Spells
                 case SpellFamilyNames.Generic:
                     break;
                 case SpellFamilyNames.Mage:
-                    {
-                        // Frost Nova -- 122
-                        if (SpellFamilyFlags[0].HasAnyFlag(0x40u))
-                            return DiminishingGroup.Root;
-                        // Freeze (Water Elemental) -- 33395
-                        if (SpellFamilyFlags[2].HasAnyFlag(0x200u))
-                            return DiminishingGroup.Root;
+                {
+                    // Frost Nova -- 122
+                    if (SpellFamilyFlags[0].HasAnyFlag(0x40u))
+                        return DiminishingGroup.Root;
+                    // Freeze (Water Elemental) -- 33395
+                    if (SpellFamilyFlags[2].HasAnyFlag(0x200u))
+                        return DiminishingGroup.Root;
 
-                        // Dragon's Breath -- 31661
-                        if (SpellFamilyFlags[0].HasAnyFlag(0x800000u))
-                            return DiminishingGroup.Incapacitate;
-                        // Polymorph -- 118
-                        if (SpellFamilyFlags[0].HasAnyFlag(0x1000000u))
-                            return DiminishingGroup.Incapacitate;
-                        // Ring of Frost -- 82691
-                        if (SpellFamilyFlags[2].HasAnyFlag(0x40u))
-                            return DiminishingGroup.Incapacitate;
-                        // Ice Nova -- 157997
-                        if (SpellFamilyFlags[2].HasAnyFlag(0x800000u))
-                            return DiminishingGroup.Incapacitate;
-                        break;
-                    }
+                    // Dragon's Breath -- 31661
+                    if (SpellFamilyFlags[0].HasAnyFlag(0x800000u))
+                        return DiminishingGroup.Incapacitate;
+                    // Polymorph -- 118
+                    if (SpellFamilyFlags[0].HasAnyFlag(0x1000000u))
+                        return DiminishingGroup.Incapacitate;
+                    // Ring of Frost -- 82691
+                    if (SpellFamilyFlags[2].HasAnyFlag(0x40u))
+                        return DiminishingGroup.Incapacitate;
+                    // Ice Nova -- 157997
+                    if (SpellFamilyFlags[2].HasAnyFlag(0x800000u))
+                        return DiminishingGroup.Incapacitate;
+                    break;
+                }
                 case SpellFamilyNames.Warrior:
-                    {
-                        // Shockwave -- 132168
-                        if (SpellFamilyFlags[1].HasAnyFlag(0x8000u))
-                            return DiminishingGroup.Stun;
-                        // Storm Bolt -- 132169
-                        if (SpellFamilyFlags[2].HasAnyFlag(0x1000u))
-                            return DiminishingGroup.Stun;
+                {
+                    // Shockwave -- 132168
+                    if (SpellFamilyFlags[1].HasAnyFlag(0x8000u))
+                        return DiminishingGroup.Stun;
+                    // Storm Bolt -- 132169
+                    if (SpellFamilyFlags[2].HasAnyFlag(0x1000u))
+                        return DiminishingGroup.Stun;
 
-                        // Intimidating Shout -- 5246
-                        if (SpellFamilyFlags[0].HasAnyFlag(0x40000u))
-                            return DiminishingGroup.Disorient;
-                        break;
-                    }
+                    // Intimidating Shout -- 5246
+                    if (SpellFamilyFlags[0].HasAnyFlag(0x40000u))
+                        return DiminishingGroup.Disorient;
+                    break;
+                }
                 case SpellFamilyNames.Warlock:
-                    {
-                        // Mortal Coil -- 6789
-                        if (SpellFamilyFlags[0].HasAnyFlag(0x80000u))
-                            return DiminishingGroup.Incapacitate;
-                        // Banish -- 710
-                        if (SpellFamilyFlags[1].HasAnyFlag(0x8000000u))
-                            return DiminishingGroup.Incapacitate;
+                {
+                    // Mortal Coil -- 6789
+                    if (SpellFamilyFlags[0].HasAnyFlag(0x80000u))
+                        return DiminishingGroup.Incapacitate;
+                    // Banish -- 710
+                    if (SpellFamilyFlags[1].HasAnyFlag(0x8000000u))
+                        return DiminishingGroup.Incapacitate;
 
-                        // Fear -- 118699
-                        if (SpellFamilyFlags[1].HasAnyFlag(0x400u))
-                            return DiminishingGroup.Disorient;
-                        // Howl of Terror -- 5484
-                        if (SpellFamilyFlags[1].HasAnyFlag(0x8u))
-                            return DiminishingGroup.Disorient;
+                    // Fear -- 118699
+                    if (SpellFamilyFlags[1].HasAnyFlag(0x400u))
+                        return DiminishingGroup.Disorient;
+                    // Howl of Terror -- 5484
+                    if (SpellFamilyFlags[1].HasAnyFlag(0x8u))
+                        return DiminishingGroup.Disorient;
 
-                        // Shadowfury -- 30283
-                        if (SpellFamilyFlags[1].HasAnyFlag(0x1000u))
-                            return DiminishingGroup.Stun;
-                        // Summon Infernal -- 22703
-                        if (SpellFamilyFlags[0].HasAnyFlag(0x1000u))
-                            return DiminishingGroup.Stun;
+                    // Shadowfury -- 30283
+                    if (SpellFamilyFlags[1].HasAnyFlag(0x1000u))
+                        return DiminishingGroup.Stun;
+                    // Summon Infernal -- 22703
+                    if (SpellFamilyFlags[0].HasAnyFlag(0x1000u))
+                        return DiminishingGroup.Stun;
 
-                        // 170995 -- Cripple
-                        if (Id == 170995)
-                            return DiminishingGroup.LimitOnly;
-                        break;
-                    }
+                    // 170995 -- Cripple
+                    if (Id == 170995)
+                        return DiminishingGroup.LimitOnly;
+                    break;
+                }
                 case SpellFamilyNames.WarlockPet:
-                    {
-                        // Fellash -- 115770
-                        // Whiplash -- 6360
-                        if (SpellFamilyFlags[0].HasAnyFlag(0x8000000u))
-                            return DiminishingGroup.AOEKnockback;
+                {
+                    // Fellash -- 115770
+                    // Whiplash -- 6360
+                    if (SpellFamilyFlags[0].HasAnyFlag(0x8000000u))
+                        return DiminishingGroup.AOEKnockback;
 
-                        // Mesmerize (Shivarra pet) -- 115268
-                        // Seduction (Succubus pet) -- 6358
-                        if (SpellFamilyFlags[0].HasAnyFlag(0x2000000u))
-                            return DiminishingGroup.Disorient;
+                    // Mesmerize (Shivarra pet) -- 115268
+                    // Seduction (Succubus pet) -- 6358
+                    if (SpellFamilyFlags[0].HasAnyFlag(0x2000000u))
+                        return DiminishingGroup.Disorient;
 
-                        // Axe Toss (Felguard pet) -- 89766
-                        if (SpellFamilyFlags[1].HasAnyFlag(0x4u))
-                            return DiminishingGroup.Stun;
-                        break;
-                    }
+                    // Axe Toss (Felguard pet) -- 89766
+                    if (SpellFamilyFlags[1].HasAnyFlag(0x4u))
+                        return DiminishingGroup.Stun;
+                    break;
+                }
                 case SpellFamilyNames.Druid:
-                    {
-                        // Maim -- 22570
-                        if (SpellFamilyFlags[1].HasAnyFlag(0x80u))
-                            return DiminishingGroup.Stun;
-                        // Mighty Bash -- 5211
-                        if (SpellFamilyFlags[0].HasAnyFlag(0x2000u))
-                            return DiminishingGroup.Stun;
-                        // Rake -- 163505 -- no flags on the stun
-                        if (Id == 163505)
-                            return DiminishingGroup.Stun;
+                {
+                    // Maim -- 22570
+                    if (SpellFamilyFlags[1].HasAnyFlag(0x80u))
+                        return DiminishingGroup.Stun;
+                    // Mighty Bash -- 5211
+                    if (SpellFamilyFlags[0].HasAnyFlag(0x2000u))
+                        return DiminishingGroup.Stun;
+                    // Rake -- 163505 -- no flags on the stun
+                    if (Id == 163505)
+                        return DiminishingGroup.Stun;
 
-                        // Incapacitating Roar -- 99, no flags on the stun, 14
-                        if (SpellFamilyFlags[1].HasAnyFlag(0x1u))
-                            return DiminishingGroup.Incapacitate;
+                    // Incapacitating Roar -- 99, no flags on the stun, 14
+                    if (SpellFamilyFlags[1].HasAnyFlag(0x1u))
+                        return DiminishingGroup.Incapacitate;
 
-                        // Cyclone -- 33786
-                        if (SpellFamilyFlags[1].HasAnyFlag(0x20u))
-                            return DiminishingGroup.Disorient;
+                    // Cyclone -- 33786
+                    if (SpellFamilyFlags[1].HasAnyFlag(0x20u))
+                        return DiminishingGroup.Disorient;
 
-                        // Solar Beam -- 81261
-                        if (Id == 81261)
-                            return DiminishingGroup.Silence;
+                    // Solar Beam -- 81261
+                    if (Id == 81261)
+                        return DiminishingGroup.Silence;
 
-                        // Typhoon -- 61391
-                        if (SpellFamilyFlags[1].HasAnyFlag(0x1000000u))
-                            return DiminishingGroup.AOEKnockback;
-                        // Ursol's Vortex -- 118283, no family flags
-                        if (Id == 118283)
-                            return DiminishingGroup.AOEKnockback;
+                    // Typhoon -- 61391
+                    if (SpellFamilyFlags[1].HasAnyFlag(0x1000000u))
+                        return DiminishingGroup.AOEKnockback;
+                    // Ursol's Vortex -- 118283, no family flags
+                    if (Id == 118283)
+                        return DiminishingGroup.AOEKnockback;
 
-                        // Entangling Roots -- 339
-                        if (SpellFamilyFlags[0].HasAnyFlag(0x200u))
-                            return DiminishingGroup.Root;
-                        // Mass Entanglement -- 102359
-                        if (SpellFamilyFlags[2].HasAnyFlag(0x4u))
-                            return DiminishingGroup.Root;
-                        break;
-                    }
+                    // Entangling Roots -- 339
+                    if (SpellFamilyFlags[0].HasAnyFlag(0x200u))
+                        return DiminishingGroup.Root;
+                    // Mass Entanglement -- 102359
+                    if (SpellFamilyFlags[2].HasAnyFlag(0x4u))
+                        return DiminishingGroup.Root;
+                    break;
+                }
                 case SpellFamilyNames.Rogue:
-                    {
-                        // Between the Eyes -- 199804
-                        if (SpellFamilyFlags[0].HasAnyFlag(0x800000u))
-                            return DiminishingGroup.Stun;
-                        // Cheap Shot -- 1833
-                        if (SpellFamilyFlags[0].HasAnyFlag(0x400u))
-                            return DiminishingGroup.Stun;
-                        // Kidney Shot -- 408
-                        if (SpellFamilyFlags[0].HasAnyFlag(0x200000u))
-                            return DiminishingGroup.Stun;
+                {
+                    // Between the Eyes -- 199804
+                    if (SpellFamilyFlags[0].HasAnyFlag(0x800000u))
+                        return DiminishingGroup.Stun;
+                    // Cheap Shot -- 1833
+                    if (SpellFamilyFlags[0].HasAnyFlag(0x400u))
+                        return DiminishingGroup.Stun;
+                    // Kidney Shot -- 408
+                    if (SpellFamilyFlags[0].HasAnyFlag(0x200000u))
+                        return DiminishingGroup.Stun;
 
-                        // Gouge -- 1776
-                        if (SpellFamilyFlags[0].HasAnyFlag(0x8u))
-                            return DiminishingGroup.Incapacitate;
-                        // Sap -- 6770
-                        if (SpellFamilyFlags[0].HasAnyFlag(0x80u))
-                            return DiminishingGroup.Incapacitate;
+                    // Gouge -- 1776
+                    if (SpellFamilyFlags[0].HasAnyFlag(0x8u))
+                        return DiminishingGroup.Incapacitate;
+                    // Sap -- 6770
+                    if (SpellFamilyFlags[0].HasAnyFlag(0x80u))
+                        return DiminishingGroup.Incapacitate;
 
-                        // Blind -- 2094
-                        if (SpellFamilyFlags[0].HasAnyFlag(0x1000000u))
-                            return DiminishingGroup.Disorient;
+                    // Blind -- 2094
+                    if (SpellFamilyFlags[0].HasAnyFlag(0x1000000u))
+                        return DiminishingGroup.Disorient;
 
-                        // Garrote -- 1330
-                        if (SpellFamilyFlags[1].HasAnyFlag(0x20000000u))
-                            return DiminishingGroup.Silence;
-                        break;
-                    }
+                    // Garrote -- 1330
+                    if (SpellFamilyFlags[1].HasAnyFlag(0x20000000u))
+                        return DiminishingGroup.Silence;
+                    break;
+                }
                 case SpellFamilyNames.Hunter:
-                    {
-                        // Charge (Tenacity pet) -- 53148, no flags
-                        if (Id == 53148)
-                            return DiminishingGroup.Root;
-                        // Ranger's Net -- 200108
-                        // Tracker's Net -- 212638
-                        if (Id == 200108 || Id == 212638)
-                            return DiminishingGroup.Root;
+                {
+                    // Charge (Tenacity pet) -- 53148, no flags
+                    if (Id == 53148)
+                        return DiminishingGroup.Root;
+                    // Ranger's Net -- 200108
+                    // Tracker's Net -- 212638
+                    if (Id == 200108 || Id == 212638)
+                        return DiminishingGroup.Root;
 
-                        // Binding Shot -- 117526, no flags
-                        if (Id == 117526)
-                            return DiminishingGroup.Stun;
+                    // Binding Shot -- 117526, no flags
+                    if (Id == 117526)
+                        return DiminishingGroup.Stun;
 
-                        // Freezing Trap -- 3355
-                        if (SpellFamilyFlags[0].HasAnyFlag(0x8u))
-                            return DiminishingGroup.Incapacitate;
-                        // Wyvern Sting -- 19386
-                        if (SpellFamilyFlags[1].HasAnyFlag(0x1000u))
-                            return DiminishingGroup.Incapacitate;
+                    // Freezing Trap -- 3355
+                    if (SpellFamilyFlags[0].HasAnyFlag(0x8u))
+                        return DiminishingGroup.Incapacitate;
+                    // Wyvern Sting -- 19386
+                    if (SpellFamilyFlags[1].HasAnyFlag(0x1000u))
+                        return DiminishingGroup.Incapacitate;
 
-                        // Bursting Shot -- 224729
-                        if (SpellFamilyFlags[2].HasAnyFlag(0x40u))
-                            return DiminishingGroup.Disorient;
-                        // Scatter Shot -- 213691
-                        if (SpellFamilyFlags[2].HasAnyFlag(0x8000u))
-                            return DiminishingGroup.Disorient;
+                    // Bursting Shot -- 224729
+                    if (SpellFamilyFlags[2].HasAnyFlag(0x40u))
+                        return DiminishingGroup.Disorient;
+                    // Scatter Shot -- 213691
+                    if (SpellFamilyFlags[2].HasAnyFlag(0x8000u))
+                        return DiminishingGroup.Disorient;
 
-                        // Spider Sting -- 202933
-                        if (Id == 202933)
-                            return DiminishingGroup.Silence;
-                        break;
-                    }
+                    // Spider Sting -- 202933
+                    if (Id == 202933)
+                        return DiminishingGroup.Silence;
+                    break;
+                }
                 case SpellFamilyNames.Paladin:
-                    {
-                        // Repentance -- 20066
-                        if (SpellFamilyFlags[0].HasAnyFlag(0x4u))
-                            return DiminishingGroup.Incapacitate;
+                {
+                    // Repentance -- 20066
+                    if (SpellFamilyFlags[0].HasAnyFlag(0x4u))
+                        return DiminishingGroup.Incapacitate;
 
-                        // Blinding Light -- 105421
-                        if (Id == 105421)
-                            return DiminishingGroup.Disorient;
+                    // Blinding Light -- 105421
+                    if (Id == 105421)
+                        return DiminishingGroup.Disorient;
 
-                        // Avenger's Shield -- 31935
-                        if (SpellFamilyFlags[0].HasAnyFlag(0x4000u))
-                            return DiminishingGroup.Silence;
+                    // Avenger's Shield -- 31935
+                    if (SpellFamilyFlags[0].HasAnyFlag(0x4000u))
+                        return DiminishingGroup.Silence;
 
-                        // Hammer of Justice -- 853
-                        if (SpellFamilyFlags[0].HasAnyFlag(0x800u))
-                            return DiminishingGroup.Stun;
-                        break;
-                    }
+                    // Hammer of Justice -- 853
+                    if (SpellFamilyFlags[0].HasAnyFlag(0x800u))
+                        return DiminishingGroup.Stun;
+                    break;
+                }
                 case SpellFamilyNames.Shaman:
-                    {
-                        // Hex -- 51514
-                        // Hex -- 196942 (Voodoo Totem)
-                        if (SpellFamilyFlags[1].HasAnyFlag(0x8000u))
-                            return DiminishingGroup.Incapacitate;
+                {
+                    // Hex -- 51514
+                    // Hex -- 196942 (Voodoo Totem)
+                    if (SpellFamilyFlags[1].HasAnyFlag(0x8000u))
+                        return DiminishingGroup.Incapacitate;
 
-                        // Thunderstorm -- 51490
-                        if (SpellFamilyFlags[1].HasAnyFlag(0x2000u))
-                            return DiminishingGroup.AOEKnockback;
-                        // Earthgrab Totem -- 64695
-                        if (SpellFamilyFlags[2].HasAnyFlag(0x4000u))
-                            return DiminishingGroup.Root;
+                    // Thunderstorm -- 51490
+                    if (SpellFamilyFlags[1].HasAnyFlag(0x2000u))
+                        return DiminishingGroup.AOEKnockback;
+                    // Earthgrab Totem -- 64695
+                    if (SpellFamilyFlags[2].HasAnyFlag(0x4000u))
+                        return DiminishingGroup.Root;
 
-                        // Lightning Lasso -- 204437
-                        if (SpellFamilyFlags[3].HasAnyFlag(0x2000000u))
-                            return DiminishingGroup.Stun;
-                        break;
-                    }
+                    // Lightning Lasso -- 204437
+                    if (SpellFamilyFlags[3].HasAnyFlag(0x2000000u))
+                        return DiminishingGroup.Stun;
+                    break;
+                }
                 case SpellFamilyNames.Deathknight:
-                    {
-                        // Chains of Ice -- 96294
-                        if (Id == 96294)
-                            return DiminishingGroup.Root;
+                {
+                    // Chains of Ice -- 96294
+                    if (Id == 96294)
+                        return DiminishingGroup.Root;
 
-                        // Blinding Sleet -- 207167
-                        if (Id == 207167)
-                            return DiminishingGroup.Disorient;
+                    // Blinding Sleet -- 207167
+                    if (Id == 207167)
+                        return DiminishingGroup.Disorient;
 
-                        // Strangulate -- 47476
-                        if (SpellFamilyFlags[0].HasAnyFlag(0x200u))
-                            return DiminishingGroup.Silence;
+                    // Strangulate -- 47476
+                    if (SpellFamilyFlags[0].HasAnyFlag(0x200u))
+                        return DiminishingGroup.Silence;
 
-                        // Asphyxiate -- 108194
-                        if (SpellFamilyFlags[2].HasAnyFlag(0x100000u))
-                            return DiminishingGroup.Stun;
-                        // Gnaw (Ghoul) -- 91800, no flags
-                        if (Id == 91800)
-                            return DiminishingGroup.Stun;
-                        // Monstrous Blow (Ghoul w/ Dark Transformation active) -- 91797
-                        if (Id == 91797)
-                            return DiminishingGroup.Stun;
-                        // Winter is Coming -- 207171
-                        if (Id == 207171)
-                            return DiminishingGroup.Stun;
-                        break;
-                    }
+                    // Asphyxiate -- 108194
+                    if (SpellFamilyFlags[2].HasAnyFlag(0x100000u))
+                        return DiminishingGroup.Stun;
+                    // Gnaw (Ghoul) -- 91800, no flags
+                    if (Id == 91800)
+                        return DiminishingGroup.Stun;
+                    // Monstrous Blow (Ghoul w/ Dark Transformation active) -- 91797
+                    if (Id == 91797)
+                        return DiminishingGroup.Stun;
+                    // Winter is Coming -- 207171
+                    if (Id == 207171)
+                        return DiminishingGroup.Stun;
+                    break;
+                }
                 case SpellFamilyNames.Priest:
-                    {
-                        // Holy Word: Chastise -- 200200
-                        if (SpellFamilyFlags[2].HasAnyFlag(0x20u) && GetSpellVisual() == 52021)
-                            return DiminishingGroup.Stun;
-                        // Mind Bomb -- 226943
-                        if (Id == 226943)
-                            return DiminishingGroup.Stun;
+                {
+                    // Holy Word: Chastise -- 200200
+                    if (SpellFamilyFlags[2].HasAnyFlag(0x20u) && GetSpellVisual() == 52021)
+                        return DiminishingGroup.Stun;
+                    // Mind Bomb -- 226943
+                    if (Id == 226943)
+                        return DiminishingGroup.Stun;
 
-                        // Mind Control -- 605
-                        if (SpellFamilyFlags[0].HasAnyFlag(0x20000u) && GetSpellVisual() == 39068)
-                            return DiminishingGroup.Incapacitate;
-                        // Holy Word: Chastise -- 200196
-                        if (SpellFamilyFlags[2].HasAnyFlag(0x20u) && GetSpellVisual() == 52019)
-                            return DiminishingGroup.Incapacitate;
+                    // Mind Control -- 605
+                    if (SpellFamilyFlags[0].HasAnyFlag(0x20000u) && GetSpellVisual() == 39068)
+                        return DiminishingGroup.Incapacitate;
+                    // Holy Word: Chastise -- 200196
+                    if (SpellFamilyFlags[2].HasAnyFlag(0x20u) && GetSpellVisual() == 52019)
+                        return DiminishingGroup.Incapacitate;
 
-                        // Psychic Scream -- 8122
-                        if (SpellFamilyFlags[0].HasAnyFlag(0x10000u))
-                            return DiminishingGroup.Disorient;
+                    // Psychic Scream -- 8122
+                    if (SpellFamilyFlags[0].HasAnyFlag(0x10000u))
+                        return DiminishingGroup.Disorient;
 
-                        // Silence -- 15487
-                        if (SpellFamilyFlags[1].HasAnyFlag(0x200000u) && GetSpellVisual() == 39025)
-                            return DiminishingGroup.Silence;
+                    // Silence -- 15487
+                    if (SpellFamilyFlags[1].HasAnyFlag(0x200000u) && GetSpellVisual() == 39025)
+                        return DiminishingGroup.Silence;
 
-                        // Shining Force -- 204263
-                        if (Id == 204263)
-                            return DiminishingGroup.AOEKnockback;
-                        break;
-                    }
+                    // Shining Force -- 204263
+                    if (Id == 204263)
+                        return DiminishingGroup.AOEKnockback;
+                    break;
+                }
                 case SpellFamilyNames.Monk:
-                    {
-                        // Disable -- 116706, no flags
-                        if (Id == 116706)
-                            return DiminishingGroup.Root;
+                {
+                    // Disable -- 116706, no flags
+                    if (Id == 116706)
+                        return DiminishingGroup.Root;
 
-                        // Fists of Fury -- 120086
-                        if (SpellFamilyFlags[1].HasAnyFlag(0x800000u) && !SpellFamilyFlags[2].HasAnyFlag(0x8u))
-                            return DiminishingGroup.Stun;
-                        // Leg Sweep -- 119381
-                        if (SpellFamilyFlags[1].HasAnyFlag(0x200u))
-                            return DiminishingGroup.Stun;
+                    // Fists of Fury -- 120086
+                    if (SpellFamilyFlags[1].HasAnyFlag(0x800000u) && !SpellFamilyFlags[2].HasAnyFlag(0x8u))
+                        return DiminishingGroup.Stun;
+                    // Leg Sweep -- 119381
+                    if (SpellFamilyFlags[1].HasAnyFlag(0x200u))
+                        return DiminishingGroup.Stun;
 
-                        // Incendiary Breath (honor talent) -- 202274, no flags
-                        if (Id == 202274)
-                            return DiminishingGroup.Incapacitate;
-                        // Paralysis -- 115078
-                        if (SpellFamilyFlags[2].HasAnyFlag(0x800000u))
-                            return DiminishingGroup.Incapacitate;
+                    // Incendiary Breath (honor talent) -- 202274, no flags
+                    if (Id == 202274)
+                        return DiminishingGroup.Incapacitate;
+                    // Paralysis -- 115078
+                    if (SpellFamilyFlags[2].HasAnyFlag(0x800000u))
+                        return DiminishingGroup.Incapacitate;
 
-                        // Song of Chi-Ji -- 198909
-                        if (Id == 198909)
-                            return DiminishingGroup.Disorient;
-                        break;
-                    }
+                    // Song of Chi-Ji -- 198909
+                    if (Id == 198909)
+                        return DiminishingGroup.Disorient;
+                    break;
+                }
                 case SpellFamilyNames.DemonHunter:
                     switch (Id)
                     {
@@ -2112,11 +2112,27 @@ namespace Game.Spells
                 switch (effectInfo.ApplyAuraName)
                 {
                     case AuraType.MechanicImmunityMask:
+                    {
+                        switch (miscVal)
                         {
-                            switch (miscVal)
+                            case 96:   // Free Friend, Uncontrollable Frenzy, Warlord's Presence
                             {
-                                case 96:   // Free Friend, Uncontrollable Frenzy, Warlord's Presence
-                                    {
+                                mechanicImmunityMask |= (uint)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
+
+                                immuneInfo.AuraTypeImmune.Add(AuraType.ModStun);
+                                immuneInfo.AuraTypeImmune.Add(AuraType.ModDecreaseSpeed);
+                                immuneInfo.AuraTypeImmune.Add(AuraType.ModRoot);
+                                immuneInfo.AuraTypeImmune.Add(AuraType.ModConfuse);
+                                immuneInfo.AuraTypeImmune.Add(AuraType.ModFear);
+                                immuneInfo.AuraTypeImmune.Add(AuraType.ModRoot2);
+                                break;
+                            }
+                            case 1615: // Incite Rage, Wolf Spirit, Overload, Lightning Tendrils
+                            {
+                                switch (Id)
+                                {
+                                    case 43292: // Incite Rage
+                                    case 49172: // Wolf Spirit
                                         mechanicImmunityMask |= (uint)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
 
                                         immuneInfo.AuraTypeImmune.Add(AuraType.ModStun);
@@ -2125,221 +2141,205 @@ namespace Game.Spells
                                         immuneInfo.AuraTypeImmune.Add(AuraType.ModConfuse);
                                         immuneInfo.AuraTypeImmune.Add(AuraType.ModFear);
                                         immuneInfo.AuraTypeImmune.Add(AuraType.ModRoot2);
-                                        break;
-                                    }
-                                case 1615: // Incite Rage, Wolf Spirit, Overload, Lightning Tendrils
-                                    {
-                                        switch (Id)
-                                        {
-                                            case 43292: // Incite Rage
-                                            case 49172: // Wolf Spirit
-                                                mechanicImmunityMask |= (uint)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
+                                        goto case 61869;
+                                    // no break intended
+                                    case 61869: // Overload
+                                    case 63481:
+                                    case 61887: // Lightning Tendrils
+                                    case 63486:
+                                        mechanicImmunityMask |= (1 << (int)Mechanics.Interrupt) | (1 << (int)Mechanics.Silence);
 
-                                                immuneInfo.AuraTypeImmune.Add(AuraType.ModStun);
-                                                immuneInfo.AuraTypeImmune.Add(AuraType.ModDecreaseSpeed);
-                                                immuneInfo.AuraTypeImmune.Add(AuraType.ModRoot);
-                                                immuneInfo.AuraTypeImmune.Add(AuraType.ModConfuse);
-                                                immuneInfo.AuraTypeImmune.Add(AuraType.ModFear);
-                                                immuneInfo.AuraTypeImmune.Add(AuraType.ModRoot2);
-                                                goto case 61869;
-                                            // no break intended
-                                            case 61869: // Overload
-                                            case 63481:
-                                            case 61887: // Lightning Tendrils
-                                            case 63486:
-                                                mechanicImmunityMask |= (1 << (int)Mechanics.Interrupt) | (1 << (int)Mechanics.Silence);
-
-                                                immuneInfo.SpellEffectImmune.Add(SpellEffectName.KnockBack);
-                                                immuneInfo.SpellEffectImmune.Add(SpellEffectName.KnockBackDest);
-                                                break;
-                                            default:
-                                                break;
-                                        }
+                                        immuneInfo.SpellEffectImmune.Add(SpellEffectName.KnockBack);
+                                        immuneInfo.SpellEffectImmune.Add(SpellEffectName.KnockBackDest);
                                         break;
-                                    }
-                                case 679:  // Mind Control, Avenging Fury
-                                    {
-                                        if (Id == 57742) // Avenging Fury
-                                        {
-                                            mechanicImmunityMask |= (uint)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
-
-                                            immuneInfo.AuraTypeImmune.Add(AuraType.ModStun);
-                                            immuneInfo.AuraTypeImmune.Add(AuraType.ModDecreaseSpeed);
-                                            immuneInfo.AuraTypeImmune.Add(AuraType.ModRoot);
-                                            immuneInfo.AuraTypeImmune.Add(AuraType.ModConfuse);
-                                            immuneInfo.AuraTypeImmune.Add(AuraType.ModFear);
-                                            immuneInfo.AuraTypeImmune.Add(AuraType.ModRoot2);
-                                        }
+                                    default:
                                         break;
-                                    }
-                                case 1557: // Startling Roar, Warlord Roar, Break Bonds, Stormshield
-                                    {
-                                        if (Id == 64187) // Stormshield
-                                        {
-                                            mechanicImmunityMask |= (1 << (int)Mechanics.Stun);
-                                            immuneInfo.AuraTypeImmune.Add(AuraType.ModStun);
-                                        }
-                                        else
-                                        {
-                                            mechanicImmunityMask |= (uint)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
-
-                                            immuneInfo.AuraTypeImmune.Add(AuraType.ModStun);
-                                            immuneInfo.AuraTypeImmune.Add(AuraType.ModDecreaseSpeed);
-                                            immuneInfo.AuraTypeImmune.Add(AuraType.ModRoot);
-                                            immuneInfo.AuraTypeImmune.Add(AuraType.ModConfuse);
-                                            immuneInfo.AuraTypeImmune.Add(AuraType.ModFear);
-                                            immuneInfo.AuraTypeImmune.Add(AuraType.ModRoot2);
-                                        }
-                                        break;
-                                    }
-                                case 1614: // Fixate
-                                case 1694: // Fixated, Lightning Tendrils
-                                    {
-                                        immuneInfo.SpellEffectImmune.Add(SpellEffectName.AttackMe);
-                                        immuneInfo.AuraTypeImmune.Add(AuraType.ModTaunt);
-                                        break;
-                                    }
-                                case 1630: // Fervor, Berserk
-                                    {
-                                        if (Id == 64112) // Berserk
-                                        {
-                                            immuneInfo.SpellEffectImmune.Add(SpellEffectName.AttackMe);
-                                            immuneInfo.AuraTypeImmune.Add(AuraType.ModTaunt);
-                                        }
-                                        else
-                                        {
-                                            mechanicImmunityMask |= (uint)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
-
-                                            immuneInfo.AuraTypeImmune.Add(AuraType.ModStun);
-                                            immuneInfo.AuraTypeImmune.Add(AuraType.ModDecreaseSpeed);
-                                            immuneInfo.AuraTypeImmune.Add(AuraType.ModRoot);
-                                            immuneInfo.AuraTypeImmune.Add(AuraType.ModConfuse);
-                                            immuneInfo.AuraTypeImmune.Add(AuraType.ModFear);
-                                            immuneInfo.AuraTypeImmune.Add(AuraType.ModRoot2);
-                                        }
-                                        break;
-                                    }
-                                case 477:  // Bladestorm
-                                case 1733: // Bladestorm, Killing Spree
-                                    {
-                                        if (amount == 0)
-                                        {
-                                            mechanicImmunityMask |= (uint)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
-
-                                            immuneInfo.SpellEffectImmune.Add(SpellEffectName.KnockBack);
-                                            immuneInfo.SpellEffectImmune.Add(SpellEffectName.KnockBackDest);
-
-                                            immuneInfo.AuraTypeImmune.Add(AuraType.ModStun);
-                                            immuneInfo.AuraTypeImmune.Add(AuraType.ModDecreaseSpeed);
-                                            immuneInfo.AuraTypeImmune.Add(AuraType.ModRoot);
-                                            immuneInfo.AuraTypeImmune.Add(AuraType.ModConfuse);
-                                            immuneInfo.AuraTypeImmune.Add(AuraType.ModFear);
-                                            immuneInfo.AuraTypeImmune.Add(AuraType.ModRoot2);
-                                        }
-                                        break;
-                                    }
-                                case 878: // Whirlwind, Fog of Corruption, Determination
-                                    {
-                                        if (Id == 66092) // Determination
-                                        {
-                                            mechanicImmunityMask |= (1 << (int)Mechanics.Snare) | (1 << (int)Mechanics.Stun)
-                                                | (1 << (int)Mechanics.Disoriented) | (1 << (int)Mechanics.Freeze);
-
-                                            immuneInfo.AuraTypeImmune.Add(AuraType.ModStun);
-                                            immuneInfo.AuraTypeImmune.Add(AuraType.ModDecreaseSpeed);
-                                        }
-                                        break;
-                                    }
-                                default:
-                                    break;
+                                }
+                                break;
                             }
-
-                            if (immuneInfo.AuraTypeImmune.Empty())
+                            case 679:  // Mind Control, Avenging Fury
                             {
-                                if (miscVal.HasAnyFlag(1 << 10))
-                                    immuneInfo.AuraTypeImmune.Add(AuraType.ModStun);
-                                if (miscVal.HasAnyFlag(1 << 1))
-                                    immuneInfo.AuraTypeImmune.Add(AuraType.Transform);
-
-                                // These flag can be recognized wrong:
-                                if (miscVal.HasAnyFlag(1 << 6))
-                                    immuneInfo.AuraTypeImmune.Add(AuraType.ModDecreaseSpeed);
-                                if (miscVal.HasAnyFlag(1 << 0))
+                                if (Id == 57742) // Avenging Fury
                                 {
+                                    mechanicImmunityMask |= (uint)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
+
+                                    immuneInfo.AuraTypeImmune.Add(AuraType.ModStun);
+                                    immuneInfo.AuraTypeImmune.Add(AuraType.ModDecreaseSpeed);
                                     immuneInfo.AuraTypeImmune.Add(AuraType.ModRoot);
+                                    immuneInfo.AuraTypeImmune.Add(AuraType.ModConfuse);
+                                    immuneInfo.AuraTypeImmune.Add(AuraType.ModFear);
                                     immuneInfo.AuraTypeImmune.Add(AuraType.ModRoot2);
                                 }
-                                if (miscVal.HasAnyFlag(1 << 2))
-                                    immuneInfo.AuraTypeImmune.Add(AuraType.ModConfuse);
-                                if (miscVal.HasAnyFlag(1 << 9))
-                                    immuneInfo.AuraTypeImmune.Add(AuraType.ModFear);
-                                if (miscVal.HasAnyFlag(1 << 7))
-                                    immuneInfo.AuraTypeImmune.Add(AuraType.ModDisarm);
+                                break;
                             }
-                            break;
-                        }
-                    case AuraType.MechanicImmunity:
-                        {
-                            switch (Id)
+                            case 1557: // Startling Roar, Warlord Roar, Break Bonds, Stormshield
                             {
-                                case 42292: // PvP trinket
-                                case 59752: // Every Man for Himself
+                                if (Id == 64187) // Stormshield
+                                {
+                                    mechanicImmunityMask |= (1 << (int)Mechanics.Stun);
+                                    immuneInfo.AuraTypeImmune.Add(AuraType.ModStun);
+                                }
+                                else
+                                {
                                     mechanicImmunityMask |= (uint)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
-                                    immuneInfo.AuraTypeImmune.Add(AuraType.UseNormalMovementSpeed);
-                                    break;
-                                case 34471: // The Beast Within
-                                case 19574: // Bestial Wrath
-                                case 46227: // Medallion of Immunity
-                                case 53490: // Bullheaded
-                                case 65547: // PvP Trinket
-                                case 134946: // Supremacy of the Alliance
-                                case 134956: // Supremacy of the Horde
-                                case 195710: // Honorable Medallion
-                                case 208683: // Gladiator's Medallion
-                                    mechanicImmunityMask |= (uint)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
-                                    break;
-                                case 54508: // Demonic Empowerment
-                                    mechanicImmunityMask |= (1 << (int)Mechanics.Snare) | (1 << (int)Mechanics.Root) | (1 << (int)Mechanics.Stun);
-                                    break;
-                                default:
-                                    if (miscVal < 1)
-                                        return;
 
-                                    mechanicImmunityMask |= 1u << miscVal;
-                                    break;
+                                    immuneInfo.AuraTypeImmune.Add(AuraType.ModStun);
+                                    immuneInfo.AuraTypeImmune.Add(AuraType.ModDecreaseSpeed);
+                                    immuneInfo.AuraTypeImmune.Add(AuraType.ModRoot);
+                                    immuneInfo.AuraTypeImmune.Add(AuraType.ModConfuse);
+                                    immuneInfo.AuraTypeImmune.Add(AuraType.ModFear);
+                                    immuneInfo.AuraTypeImmune.Add(AuraType.ModRoot2);
+                                }
+                                break;
                             }
-                            break;
+                            case 1614: // Fixate
+                            case 1694: // Fixated, Lightning Tendrils
+                            {
+                                immuneInfo.SpellEffectImmune.Add(SpellEffectName.AttackMe);
+                                immuneInfo.AuraTypeImmune.Add(AuraType.ModTaunt);
+                                break;
+                            }
+                            case 1630: // Fervor, Berserk
+                            {
+                                if (Id == 64112) // Berserk
+                                {
+                                    immuneInfo.SpellEffectImmune.Add(SpellEffectName.AttackMe);
+                                    immuneInfo.AuraTypeImmune.Add(AuraType.ModTaunt);
+                                }
+                                else
+                                {
+                                    mechanicImmunityMask |= (uint)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
+
+                                    immuneInfo.AuraTypeImmune.Add(AuraType.ModStun);
+                                    immuneInfo.AuraTypeImmune.Add(AuraType.ModDecreaseSpeed);
+                                    immuneInfo.AuraTypeImmune.Add(AuraType.ModRoot);
+                                    immuneInfo.AuraTypeImmune.Add(AuraType.ModConfuse);
+                                    immuneInfo.AuraTypeImmune.Add(AuraType.ModFear);
+                                    immuneInfo.AuraTypeImmune.Add(AuraType.ModRoot2);
+                                }
+                                break;
+                            }
+                            case 477:  // Bladestorm
+                            case 1733: // Bladestorm, Killing Spree
+                            {
+                                if (amount == 0)
+                                {
+                                    mechanicImmunityMask |= (uint)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
+
+                                    immuneInfo.SpellEffectImmune.Add(SpellEffectName.KnockBack);
+                                    immuneInfo.SpellEffectImmune.Add(SpellEffectName.KnockBackDest);
+
+                                    immuneInfo.AuraTypeImmune.Add(AuraType.ModStun);
+                                    immuneInfo.AuraTypeImmune.Add(AuraType.ModDecreaseSpeed);
+                                    immuneInfo.AuraTypeImmune.Add(AuraType.ModRoot);
+                                    immuneInfo.AuraTypeImmune.Add(AuraType.ModConfuse);
+                                    immuneInfo.AuraTypeImmune.Add(AuraType.ModFear);
+                                    immuneInfo.AuraTypeImmune.Add(AuraType.ModRoot2);
+                                }
+                                break;
+                            }
+                            case 878: // Whirlwind, Fog of Corruption, Determination
+                            {
+                                if (Id == 66092) // Determination
+                                {
+                                    mechanicImmunityMask |= (1 << (int)Mechanics.Snare) | (1 << (int)Mechanics.Stun)
+                                        | (1 << (int)Mechanics.Disoriented) | (1 << (int)Mechanics.Freeze);
+
+                                    immuneInfo.AuraTypeImmune.Add(AuraType.ModStun);
+                                    immuneInfo.AuraTypeImmune.Add(AuraType.ModDecreaseSpeed);
+                                }
+                                break;
+                            }
+                            default:
+                                break;
                         }
+
+                        if (immuneInfo.AuraTypeImmune.Empty())
+                        {
+                            if (miscVal.HasAnyFlag(1 << 10))
+                                immuneInfo.AuraTypeImmune.Add(AuraType.ModStun);
+                            if (miscVal.HasAnyFlag(1 << 1))
+                                immuneInfo.AuraTypeImmune.Add(AuraType.Transform);
+
+                            // These flag can be recognized wrong:
+                            if (miscVal.HasAnyFlag(1 << 6))
+                                immuneInfo.AuraTypeImmune.Add(AuraType.ModDecreaseSpeed);
+                            if (miscVal.HasAnyFlag(1 << 0))
+                            {
+                                immuneInfo.AuraTypeImmune.Add(AuraType.ModRoot);
+                                immuneInfo.AuraTypeImmune.Add(AuraType.ModRoot2);
+                            }
+                            if (miscVal.HasAnyFlag(1 << 2))
+                                immuneInfo.AuraTypeImmune.Add(AuraType.ModConfuse);
+                            if (miscVal.HasAnyFlag(1 << 9))
+                                immuneInfo.AuraTypeImmune.Add(AuraType.ModFear);
+                            if (miscVal.HasAnyFlag(1 << 7))
+                                immuneInfo.AuraTypeImmune.Add(AuraType.ModDisarm);
+                        }
+                        break;
+                    }
+                    case AuraType.MechanicImmunity:
+                    {
+                        switch (Id)
+                        {
+                            case 42292: // PvP trinket
+                            case 59752: // Every Man for Himself
+                                mechanicImmunityMask |= (uint)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
+                                immuneInfo.AuraTypeImmune.Add(AuraType.UseNormalMovementSpeed);
+                                break;
+                            case 34471: // The Beast Within
+                            case 19574: // Bestial Wrath
+                            case 46227: // Medallion of Immunity
+                            case 53490: // Bullheaded
+                            case 65547: // PvP Trinket
+                            case 134946: // Supremacy of the Alliance
+                            case 134956: // Supremacy of the Horde
+                            case 195710: // Honorable Medallion
+                            case 208683: // Gladiator's Medallion
+                                mechanicImmunityMask |= (uint)Mechanics.ImmuneToMovementImpairmentAndLossControlMask;
+                                break;
+                            case 54508: // Demonic Empowerment
+                                mechanicImmunityMask |= (1 << (int)Mechanics.Snare) | (1 << (int)Mechanics.Root) | (1 << (int)Mechanics.Stun);
+                                break;
+                            default:
+                                if (miscVal < 1)
+                                    return;
+
+                                mechanicImmunityMask |= 1u << miscVal;
+                                break;
+                        }
+                        break;
+                    }
                     case AuraType.EffectImmunity:
-                        {
-                            immuneInfo.SpellEffectImmune.Add((SpellEffectName)miscVal);
-                            break;
-                        }
+                    {
+                        immuneInfo.SpellEffectImmune.Add((SpellEffectName)miscVal);
+                        break;
+                    }
                     case AuraType.StateImmunity:
-                        {
-                            immuneInfo.AuraTypeImmune.Add((AuraType)miscVal);
-                            break;
-                        }
+                    {
+                        immuneInfo.AuraTypeImmune.Add((AuraType)miscVal);
+                        break;
+                    }
                     case AuraType.SchoolImmunity:
-                        {
-                            schoolImmunityMask |= (uint)miscVal;
-                            break;
-                        }
+                    {
+                        schoolImmunityMask |= (uint)miscVal;
+                        break;
+                    }
                     case AuraType.ModImmuneAuraApplySchool:
-                        {
-                            applyHarmfulAuraImmunityMask |= (uint)miscVal;
-                            break;
-                        }
+                    {
+                        applyHarmfulAuraImmunityMask |= (uint)miscVal;
+                        break;
+                    }
                     case AuraType.DamageImmunity:
-                        {
-                            damageImmunityMask |= (uint)miscVal;
-                            break;
-                        }
+                    {
+                        damageImmunityMask |= (uint)miscVal;
+                        break;
+                    }
                     case AuraType.DispelImmunity:
-                        {
-                            dispelImmunity = (uint)miscVal;
-                            break;
-                        }
+                    {
+                        dispelImmunity = (uint)miscVal;
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -2359,7 +2359,7 @@ namespace Game.Spells
                     continue;
 
                 loadImmunityInfoFn(effect);
-            }            
+            }
 
             if (HasAttribute(SpellAttr5.UsableWhileStunned))
             {
@@ -2456,7 +2456,7 @@ namespace Game.Spells
 
             uint damageImmunity = immuneInfo.DamageSchoolMask;
             if (damageImmunity != 0)
-            { 
+            {
                 target.ApplySpellImmune(Id, SpellImmunity.Damage, damageImmunity, apply);
 
                 if (apply && (damageImmunity & (uint)SpellSchoolMask.Normal) != 0)
@@ -2793,17 +2793,17 @@ namespace Game.Spells
                             Log.outError(LogFilter.Spells, $"SpellInfo.CalcPowerCost: Unknown power type '{power.PowerType}' in spell {Id}");
                             return null;
                         default:
+                        {
+                            PowerTypeRecord powerTypeEntry = Global.DB2Mgr.GetPowerTypeEntry(power.PowerType);
+                            if (powerTypeEntry != null)
                             {
-                                PowerTypeRecord powerTypeEntry = Global.DB2Mgr.GetPowerTypeEntry(power.PowerType);
-                                if (powerTypeEntry != null)
-                                {
-                                    powerCost += MathFunctions.CalculatePct(powerTypeEntry.MaxBasePower, power.PowerCostPct);
-                                    break;
-                                }
-
-                                Log.outError(LogFilter.Spells, $"SpellInfo.CalcPowerCost: Unknown power type '{power.PowerType}' in spell {Id}");
-                                return default;
+                                powerCost += MathFunctions.CalculatePct(powerTypeEntry.MaxBasePower, power.PowerCostPct);
+                                break;
                             }
+
+                            Log.outError(LogFilter.Spells, $"SpellInfo.CalcPowerCost: Unknown power type '{power.PowerType}' in spell {Id}");
+                            return default;
+                        }
                     }
                 }
             }
@@ -2928,7 +2928,7 @@ namespace Game.Spells
         public List<SpellPowerCost> CalcPowerCost(Unit caster, SpellSchoolMask schoolMask, Spell spell = null)
         {
             List<SpellPowerCost> costs = new();
-            
+
             SpellPowerCost getOrCreatePowerCost(PowerType powerType)
             {
                 var itr = costs.Find(cost =>
@@ -2963,7 +2963,7 @@ namespace Game.Spells
                         cost1.Amount += Math.Min(optionalCost.Amount, remainingPower);
                 }
             }
-            
+
             return costs;
         }
 
@@ -3044,46 +3044,46 @@ namespace Game.Spells
                 switch (mod.Type)
                 {
                     case SpellProcsPerMinuteModType.Haste:
-                        {
-                            ppm *= 1.0f + CalcPPMHasteMod(mod, caster);
-                            break;
-                        }
+                    {
+                        ppm *= 1.0f + CalcPPMHasteMod(mod, caster);
+                        break;
+                    }
                     case SpellProcsPerMinuteModType.Crit:
-                        {
-                            ppm *= 1.0f + CalcPPMCritMod(mod, caster);
-                            break;
-                        }
+                    {
+                        ppm *= 1.0f + CalcPPMCritMod(mod, caster);
+                        break;
+                    }
                     case SpellProcsPerMinuteModType.Class:
-                        {
-                            if (caster.GetClassMask().HasAnyFlag((uint)mod.Param))
-                                ppm *= 1.0f + mod.Coeff;
-                            break;
-                        }
+                    {
+                        if (caster.GetClassMask().HasAnyFlag((uint)mod.Param))
+                            ppm *= 1.0f + mod.Coeff;
+                        break;
+                    }
                     case SpellProcsPerMinuteModType.Spec:
-                        {
-                            Player plrCaster = caster.ToPlayer();
-                            if (plrCaster)
-                                if (plrCaster.GetPrimarySpecialization() == mod.Param)
-                                    ppm *= 1.0f + mod.Coeff;
-                            break;
-                        }
+                    {
+                        Player plrCaster = caster.ToPlayer();
+                        if (plrCaster)
+                            if (plrCaster.GetPrimarySpecialization() == mod.Param)
+                                ppm *= 1.0f + mod.Coeff;
+                        break;
+                    }
                     case SpellProcsPerMinuteModType.Race:
-                        {
-                            if (SharedConst.GetMaskForRace(caster.GetRace()).HasAnyFlag((int)mod.Param))
-                                ppm *= 1.0f + mod.Coeff;
-                            break;
-                        }
+                    {
+                        if (SharedConst.GetMaskForRace(caster.GetRace()).HasAnyFlag((int)mod.Param))
+                            ppm *= 1.0f + mod.Coeff;
+                        break;
+                    }
                     case SpellProcsPerMinuteModType.ItemLevel:
-                        {
-                            ppm *= 1.0f + CalcPPMItemLevelMod(mod, itemLevel);
-                            break;
-                        }
+                    {
+                        ppm *= 1.0f + CalcPPMItemLevelMod(mod, itemLevel);
+                        break;
+                    }
                     case SpellProcsPerMinuteModType.Battleground:
-                        {
-                            if (caster.GetMap().IsBattlegroundOrArena())
-                                ppm *= 1.0f + mod.Coeff;
-                            break;
-                        }
+                    {
+                        if (caster.GetMap().IsBattlegroundOrArena())
+                            ppm *= 1.0f + mod.Coeff;
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -3338,144 +3338,144 @@ namespace Game.Spells
                     // non-positive aura use
                     case SpellEffectName.ApplyAura:
                     case SpellEffectName.ApplyAreaAuraFriend:
+                    {
+                        switch (effect.ApplyAuraName)
                         {
-                            switch (effect.ApplyAuraName)
-                            {
-                                case AuraType.ModDamageDone:            // dependent from bas point sign (negative . negative)
-                                case AuraType.ModStat:
-                                case AuraType.ModSkill:
-                                case AuraType.ModSkill2:
-                                case AuraType.ModDodgePercent:
-                                case AuraType.ModHealingPct:
-                                case AuraType.ModHealingDone:
-                                case AuraType.ModHealingDonePercent:
-                                    if (effect.CalcValue() < 0)
-                                        return false;
-                                    break;
-                                case AuraType.ModDamageTaken:           // dependent from bas point sign (positive . negative)
-                                    if (effect.CalcValue() > 0)
-                                        return false;
-                                    break;
-                                case AuraType.ModCritPct:
-                                case AuraType.ModSpellCritChance:
-                                    if (effect.CalcValue() > 0)
-                                        return true;        // some expected positive spells have SPELL_ATTR1_NEGATIVE
-                                    break;
-                                case AuraType.AddTargetTrigger:
-                                    return true;
-                                case AuraType.PeriodicTriggerSpellWithValue:
-                                case AuraType.PeriodicTriggerSpell:
-                                    if (!deep)
+                            case AuraType.ModDamageDone:            // dependent from bas point sign (negative . negative)
+                            case AuraType.ModStat:
+                            case AuraType.ModSkill:
+                            case AuraType.ModSkill2:
+                            case AuraType.ModDodgePercent:
+                            case AuraType.ModHealingPct:
+                            case AuraType.ModHealingDone:
+                            case AuraType.ModHealingDonePercent:
+                                if (effect.CalcValue() < 0)
+                                    return false;
+                                break;
+                            case AuraType.ModDamageTaken:           // dependent from bas point sign (positive . negative)
+                                if (effect.CalcValue() > 0)
+                                    return false;
+                                break;
+                            case AuraType.ModCritPct:
+                            case AuraType.ModSpellCritChance:
+                                if (effect.CalcValue() > 0)
+                                    return true;        // some expected positive spells have SPELL_ATTR1_NEGATIVE
+                                break;
+                            case AuraType.AddTargetTrigger:
+                                return true;
+                            case AuraType.PeriodicTriggerSpellWithValue:
+                            case AuraType.PeriodicTriggerSpell:
+                                if (!deep)
+                                {
+                                    var spellTriggeredProto = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, Difficulty);
+                                    if (spellTriggeredProto != null)
                                     {
-                                        var spellTriggeredProto = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, Difficulty);
-                                        if (spellTriggeredProto != null)
+                                        // negative targets of main spell return early
+                                        foreach (SpellEffectInfo eff in spellTriggeredProto._effects)
                                         {
-                                            // negative targets of main spell return early
-                                            foreach (SpellEffectInfo eff in spellTriggeredProto._effects)
+                                            if (eff == null || eff.Effect == 0)
+                                                continue;
+                                            // if non-positive trigger cast targeted to positive target this main cast is non-positive
+                                            // this will place this spell auras as debuffs
+                                            if (_IsPositiveTarget(eff.TargetA.GetTarget(), eff.TargetB.GetTarget()) && !spellTriggeredProto._IsPositiveEffect(eff.EffectIndex, true))
+                                                return false;
+                                        }
+                                    }
+                                }
+                                break;
+                            case AuraType.ProcTriggerSpell:
+                                // many positive auras have negative triggered spells at damage for example and this not make it negative (it can be canceled for example)
+                                break;
+                            case AuraType.ModStun:   //have positive and negative spells, we can't sort its correctly at this moment.
+                                bool more = false;
+                                foreach (SpellEffectInfo eff in _effects)
+                                {
+                                    if (eff != null && eff.EffectIndex != 0)
+                                    {
+                                        more = true;
+                                        break;
+                                    }
+                                }
+
+                                if (effIndex == 0 && !more)
+                                    return false;       // but all single stun aura spells is negative
+                                break;
+                            case AuraType.ModPacifySilence:
+                                if (Id == 24740)             // Wisp Costume
+                                    return true;
+                                return false;
+                            case AuraType.ModRoot:
+                            case AuraType.ModRoot2:
+                            case AuraType.ModSilence:
+                            case AuraType.Ghost:
+                            case AuraType.PeriodicLeech:
+                            case AuraType.ModStalked:
+                            case AuraType.PeriodicDamagePercent:
+                            case AuraType.PreventResurrection:
+                            case AuraType.Empathy:
+                                return false;
+                            case AuraType.PeriodicDamage:            // used in positive spells also.
+                                                                     // part of negative spell if casted at self (prevent cancel)
+                                if (effect.TargetA.GetTarget() == Framework.Constants.Targets.UnitCaster)
+                                    return false;
+                                break;
+                            case AuraType.ModDecreaseSpeed:         // used in positive spells also
+                                                                    // part of positive spell if casted at self
+                                if (effect.TargetA.GetTarget() != Framework.Constants.Targets.UnitCaster)
+                                    return false;
+                                // but not this if this first effect (didn't find better check)
+                                if (HasAttribute(SpellAttr0.Negative1) && effIndex == 0)
+                                    return false;
+                                break;
+                            case AuraType.MechanicImmunity:
+                            {
+                                // non-positive immunities
+                                switch ((Mechanics)effect.MiscValue)
+                                {
+                                    case Mechanics.Bandage:
+                                    case Mechanics.Shield:
+                                    case Mechanics.Mount:
+                                    case Mechanics.Invulnerability:
+                                        return false;
+                                }
+                                break;
+                            }
+                            case AuraType.AddFlatModifier:          // mods
+                            case AuraType.AddPctModifier:
+                            {
+                                // non-positive mods
+                                switch ((SpellModOp)effect.MiscValue)
+                                {
+                                    case SpellModOp.PowerCost0: // dependent from bas point sign (negative . positive)
+                                    case SpellModOp.PowerCost1:
+                                    case SpellModOp.PowerCost2:
+                                        if (effect.CalcValue() > 0)
+                                        {
+                                            if (!deep)
                                             {
-                                                if (eff == null || eff.Effect == 0)
-                                                    continue;
-                                                // if non-positive trigger cast targeted to positive target this main cast is non-positive
-                                                // this will place this spell auras as debuffs
-                                                if (_IsPositiveTarget(eff.TargetA.GetTarget(), eff.TargetB.GetTarget()) && !spellTriggeredProto._IsPositiveEffect(eff.EffectIndex, true))
+                                                bool negative = true;
+                                                for (uint i = 0; i < SpellConst.MaxEffects; ++i)
+                                                {
+                                                    if (i != effIndex)
+                                                    {
+                                                        if (_IsPositiveEffect(i, true))
+                                                        {
+                                                            negative = false;
+                                                            break;
+                                                        }
+                                                    }
+                                                }
+                                                if (negative)
                                                     return false;
                                             }
                                         }
-                                    }
-                                    break;
-                                case AuraType.ProcTriggerSpell:
-                                    // many positive auras have negative triggered spells at damage for example and this not make it negative (it can be canceled for example)
-                                    break;
-                                case AuraType.ModStun:   //have positive and negative spells, we can't sort its correctly at this moment.
-                                    bool more = false;
-                                    foreach (SpellEffectInfo eff in _effects)
-                                    {
-                                        if (eff != null && eff.EffectIndex != 0)
-                                        {
-                                            more = true;
-                                            break;
-                                        }
-                                    }
-
-                                    if (effIndex == 0 && !more)
-                                        return false;       // but all single stun aura spells is negative
-                                    break;
-                                case AuraType.ModPacifySilence:
-                                    if (Id == 24740)             // Wisp Costume
-                                        return true;
-                                    return false;
-                                case AuraType.ModRoot:
-                                case AuraType.ModRoot2:
-                                case AuraType.ModSilence:
-                                case AuraType.Ghost:
-                                case AuraType.PeriodicLeech:
-                                case AuraType.ModStalked:
-                                case AuraType.PeriodicDamagePercent:
-                                case AuraType.PreventResurrection:
-                                case AuraType.Empathy:
-                                    return false;
-                                case AuraType.PeriodicDamage:            // used in positive spells also.
-                                                                         // part of negative spell if casted at self (prevent cancel)
-                                    if (effect.TargetA.GetTarget() == Framework.Constants.Targets.UnitCaster)
-                                        return false;
-                                    break;
-                                case AuraType.ModDecreaseSpeed:         // used in positive spells also
-                                                                        // part of positive spell if casted at self
-                                    if (effect.TargetA.GetTarget() != Framework.Constants.Targets.UnitCaster)
-                                        return false;
-                                    // but not this if this first effect (didn't find better check)
-                                    if (HasAttribute(SpellAttr0.Negative1) && effIndex == 0)
-                                        return false;
-                                    break;
-                                case AuraType.MechanicImmunity:
-                                    {
-                                        // non-positive immunities
-                                        switch ((Mechanics)effect.MiscValue)
-                                        {
-                                            case Mechanics.Bandage:
-                                            case Mechanics.Shield:
-                                            case Mechanics.Mount:
-                                            case Mechanics.Invulnerability:
-                                                return false;
-                                        }
                                         break;
-                                    }
-                                case AuraType.AddFlatModifier:          // mods
-                                case AuraType.AddPctModifier:
-                                    {
-                                        // non-positive mods
-                                        switch ((SpellModOp)effect.MiscValue)
-                                        {
-                                            case SpellModOp.PowerCost0: // dependent from bas point sign (negative . positive)
-                                            case SpellModOp.PowerCost1:
-                                            case SpellModOp.PowerCost2:
-                                                if (effect.CalcValue() > 0)
-                                                {
-                                                    if (!deep)
-                                                    {
-                                                        bool negative = true;
-                                                        for (uint i = 0; i < SpellConst.MaxEffects; ++i)
-                                                        {
-                                                            if (i != effIndex)
-                                                            {
-                                                                if (_IsPositiveEffect(i, true))
-                                                                {
-                                                                    negative = false;
-                                                                    break;
-                                                                }
-                                                            }
-                                                        }
-                                                        if (negative)
-                                                            return false;
-                                                    }
-                                                }
-                                                break;
-                                        }
-                                        break;
-                                    }
+                                }
+                                break;
                             }
-                            break;
                         }
+                        break;
+                    }
                 }
 
                 // non-positive targets
@@ -3534,7 +3534,7 @@ namespace Game.Spells
             {
                 SpellEffectInfo effect = _effects[i];
                 if (effect != null)
-                { 
+                {
                     var cur = effect.ImplicitTargetConditions;
                     if (cur == null)
                         continue;
@@ -3562,7 +3562,7 @@ namespace Game.Spells
         {
             return Labels.Contains(labelId);
         }
-        
+
         public static SpellCastTargetFlags GetTargetFlagMask(SpellTargetObjectTypes objType)
         {
             switch (objType)
@@ -3638,14 +3638,14 @@ namespace Game.Spells
                     && !interruptTarget.HasAuraTypeWithAffectMask(AuraType.PreventInterrupt, this)
                     && PreventionType.HasAnyFlag(SpellPreventionType.Silence));
         }
-        
+
         public bool HasAnyAuraInterruptFlag() { return AuraInterruptFlags != SpellAuraInterruptFlags.None || AuraInterruptFlags2 != SpellAuraInterruptFlags2.None; }
         public bool HasAuraInterruptFlag(SpellAuraInterruptFlags flag) { return AuraInterruptFlags.HasAnyFlag(flag); }
         public bool HasAuraInterruptFlag(SpellAuraInterruptFlags2 flag) { return AuraInterruptFlags2.HasAnyFlag(flag); }
 
         public bool HasChannelInterruptFlag(SpellAuraInterruptFlags flag) { return ChannelInterruptFlags.HasAnyFlag(flag); }
         public bool HasChannelInterruptFlag(SpellAuraInterruptFlags2 flag) { return ChannelInterruptFlags2.HasAnyFlag(flag); }
-        
+
         #region Fields
         public uint Id { get; set; }
         public Difficulty Difficulty { get; set; }
@@ -3878,7 +3878,7 @@ namespace Game.Spells
                 if (Scaling.ResourceCoefficient != 0)
                     comboDamage = Scaling.ResourceCoefficient * value;
             }
-            else if(GetScalingExpectedStat() == ExpectedStatType.None)
+            else if (GetScalingExpectedStat() == ExpectedStatType.None)
             {
                 if (caster != null && basePointsPerLevel != 0.0f)
                 {
@@ -4856,9 +4856,9 @@ namespace Game.Spells
             new StaticData(SpellTargetObjectTypes.None, SpellTargetReferenceTypes.None,   SpellTargetSelectionCategories.Nyi,     SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 130
             new StaticData(SpellTargetObjectTypes.Dest, SpellTargetReferenceTypes.Caster, SpellTargetSelectionCategories.Default, SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 131 TARGET_DEST_SUMMONER
             new StaticData(SpellTargetObjectTypes.Dest, SpellTargetReferenceTypes.Target, SpellTargetSelectionCategories.Default, SpellTargetCheckTypes.Ally,     SpellTargetDirectionTypes.None),        // 132 TARGET_DEST_TARGET_ALLY
-            new StaticData(SpellTargetObjectTypes.None, SpellTargetReferenceTypes.None,   SpellTargetSelectionCategories.Nyi,     SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 133
-            new StaticData(SpellTargetObjectTypes.None, SpellTargetReferenceTypes.None,   SpellTargetSelectionCategories.Nyi,     SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 134
-            new StaticData(SpellTargetObjectTypes.None, SpellTargetReferenceTypes.None,   SpellTargetSelectionCategories.Nyi,     SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 135
+            new StaticData(SpellTargetObjectTypes.Unit, SpellTargetReferenceTypes.Dest,   SpellTargetSelectionCategories.Line,    SpellTargetCheckTypes.Ally,     SpellTargetDirectionTypes.None),        // 133 TARGET_UNIT_LINE_CASTER_TO_DEST_ALLY
+            new StaticData(SpellTargetObjectTypes.Unit, SpellTargetReferenceTypes.Dest,   SpellTargetSelectionCategories.Line,    SpellTargetCheckTypes.Enemy,    SpellTargetDirectionTypes.None),        // 134 TARGET_UNIT_LINE_CASTER_TO_DEST_ENEMY
+            new StaticData(SpellTargetObjectTypes.Unit, SpellTargetReferenceTypes.Dest,   SpellTargetSelectionCategories.Line,    SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 135 TARGET_UNIT_LINE_CASTER_TO_DEST
             new StaticData(SpellTargetObjectTypes.None, SpellTargetReferenceTypes.None,   SpellTargetSelectionCategories.Nyi,     SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 136
             new StaticData(SpellTargetObjectTypes.None, SpellTargetReferenceTypes.None,   SpellTargetSelectionCategories.Nyi,     SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 137
             new StaticData(SpellTargetObjectTypes.None, SpellTargetReferenceTypes.None,   SpellTargetSelectionCategories.Nyi,     SpellTargetCheckTypes.Default,  SpellTargetDirectionTypes.None),        // 138

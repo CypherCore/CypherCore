@@ -337,6 +337,7 @@ namespace Game.Spells
                 case SpellTargetSelectionCategories.Nearby:
                 case SpellTargetSelectionCategories.Cone:
                 case SpellTargetSelectionCategories.Area:
+                case SpellTargetSelectionCategories.Line:
                     // targets for effect already selected
                     if (Convert.ToBoolean(effectMask & processedEffectMask))
                         return;
@@ -385,6 +386,9 @@ namespace Game.Spells
                     CheckDst();
 
                     SelectImplicitTrajTargets(effIndex, targetType);
+                    break;
+                case SpellTargetSelectionCategories.Line:
+                    SelectImplicitLineTargets(effIndex, targetType, effectMask);
                     break;
                 case SpellTargetSelectionCategories.Default:
                     switch (targetType.GetObjectType())
@@ -1236,6 +1240,76 @@ namespace Game.Spells
             Vehicle veh = m_caster.GetVehicleKit();
             if (veh != null)
                 veh.SetLastShootPos(m_targets.GetDstPos());
+        }
+
+        void SelectImplicitLineTargets(uint effIndex, SpellImplicitTargetInfo targetType, uint effMask)
+        {
+            List<WorldObject> targets = new();
+            SpellTargetObjectTypes objectType = targetType.GetObjectType();
+            SpellTargetCheckTypes selectionType = targetType.GetCheckType();
+            SpellEffectInfo effect = m_spellInfo.GetEffect(effIndex);
+            if (effect == null)
+                return;
+
+            Position dst;
+            switch (targetType.GetReferenceType())
+            {
+                case SpellTargetReferenceTypes.Src:
+                    dst = m_targets.GetSrcPos();
+                    break;
+                case SpellTargetReferenceTypes.Dest:
+                    dst = m_targets.GetDstPos();
+                    break;
+                case SpellTargetReferenceTypes.Caster:
+                    dst = m_caster;
+                    break;
+                case SpellTargetReferenceTypes.Target:
+                    dst = m_targets.GetUnitTarget();
+                    break;
+                default:
+                    Cypher.Assert(false, "Spell.SelectImplicitLineTargets: received not implemented target reference type");
+                    return;
+            }
+
+            var condList = effect.ImplicitTargetConditions;
+            float radius = effect.CalcRadius(m_caster) * m_spellValue.RadiusMod;
+
+            GridMapTypeMask containerTypeMask = GetSearcherTypeMask(objectType, condList);
+            if (containerTypeMask != 0)
+            {
+                WorldObjectSpellLineTargetCheck check = new(m_caster, dst, m_spellInfo.Width != 0 ? m_spellInfo.Width : m_caster.GetCombatReach(), radius, m_caster, m_spellInfo, selectionType, condList, objectType);
+                WorldObjectListSearcher searcher = new(m_caster, targets, check, containerTypeMask);
+                SearchTargets(searcher, containerTypeMask, m_caster, m_caster, radius);
+
+                CallScriptObjectAreaTargetSelectHandlers(targets, effIndex, targetType);
+
+                if (!targets.Empty())
+                {
+                    // Other special target selection goes here
+                    uint maxTargets = m_spellValue.MaxAffectedTargets;
+                    if (maxTargets != 0)
+                    {
+                        if (maxTargets < targets.Count)
+                        {
+                            targets.Sort(new ObjectDistanceOrderPred(m_caster));
+                            targets.Resize(maxTargets);
+                        }
+                    }
+
+                    foreach (var obj in targets)
+                    {
+                        Unit unit = obj.ToUnit();
+                        if (unit != null)
+                            AddUnitTarget(unit, effMask, false);
+                        else
+                        {
+                            GameObject gObjTarget = obj.ToGameObject();
+                            if (gObjTarget != null)
+                                AddGOTarget(gObjTarget, effMask);
+                        }
+                    }
+                }
+            }
         }
 
         void SelectEffectTypeImplicitTargets(uint effIndex)
@@ -7956,6 +8030,7 @@ namespace Game.Spells
     {
         float _range;
         Position _position;
+
         public WorldObjectSpellNearbyTargetCheck(float range, Unit caster, SpellInfo spellInfo, SpellTargetCheckTypes selectionType, List<Condition> condList, SpellTargetObjectTypes objectType)
             : base(caster, caster, spellInfo, selectionType, condList, objectType)
         {
@@ -7979,6 +8054,7 @@ namespace Game.Spells
     {
         float _range;
         Position _position;
+
         public WorldObjectSpellAreaTargetCheck(float range, Position position, Unit caster, Unit referer, SpellInfo spellInfo, SpellTargetCheckTypes selectionType, List<Condition> condList, SpellTargetObjectTypes objectType)
             : base(caster, referer, spellInfo, selectionType, condList, objectType)
         {
@@ -8068,6 +8144,33 @@ namespace Game.Spells
         }
     }
 
+    public class WorldObjectSpellLineTargetCheck : WorldObjectSpellAreaTargetCheck
+    {
+        Position _srcPosition;
+        Position _dstPosition;
+        float _lineWidth;
+
+        public WorldObjectSpellLineTargetCheck(Position srcPosition, Position dstPosition, float lineWidth, float range, Unit caster, SpellInfo spellInfo, SpellTargetCheckTypes selectionType, List<Condition> condList, SpellTargetObjectTypes objectType)
+            : base(range, caster, caster, caster, spellInfo, selectionType, condList, objectType)
+        {
+            _srcPosition = srcPosition;
+            _dstPosition = dstPosition;
+            _lineWidth = lineWidth;
+        }
+
+        public override bool Invoke(WorldObject target)
+        {
+            float angle = _caster.GetOrientation();
+            if (_srcPosition != _dstPosition)
+                angle = _srcPosition.GetAngle(_dstPosition);
+
+            if (!_caster.HasInLine(target, target.GetCombatReach(), _lineWidth, angle))
+                return false;
+
+            return base.Invoke(target);
+        }
+    }
+    
     public class SpellEvent : BasicEvent
     {
         public SpellEvent(Spell spell)

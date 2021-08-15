@@ -2661,9 +2661,9 @@ namespace Framework.Constants
         Unk130 = 130,
         DestSummoner = 131,
         DestTargetAlly = 132,
-        Unk133 = 133,
-        Unk134 = 134,
-        Unk135 = 135,
+        UnitLineCasterToDestAlly = 133,
+        UnitLineCasterToDestEnemy = 134,
+        UnitLineCasterToDest = 135,
         Unk136 = 136,
         Unk137 = 137,
         Unk138 = 138,
@@ -2690,7 +2690,8 @@ namespace Framework.Constants
         Nearby,
         Cone,
         Area,
-        Traj
+        Traj,
+        Line
     }
 
     public enum SpellTargetReferenceTypes

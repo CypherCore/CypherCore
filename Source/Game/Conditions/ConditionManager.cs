@@ -458,46 +458,46 @@ namespace Game
                             valid = AddToGossipMenuItems(cond);
                             break;
                         case ConditionSourceType.SpellClickEvent:
-                            {
-                                if (!SpellClickEventConditionStore.ContainsKey(cond.SourceGroup))
-                                    SpellClickEventConditionStore[cond.SourceGroup] = new MultiMap<uint, Condition>();
+                        {
+                            if (!SpellClickEventConditionStore.ContainsKey(cond.SourceGroup))
+                                SpellClickEventConditionStore[cond.SourceGroup] = new MultiMap<uint, Condition>();
 
-                                SpellClickEventConditionStore[cond.SourceGroup].Add((uint)cond.SourceEntry, cond);
-                                ++count;
-                                continue;   // do not add to m_AllocatedMemory to avoid double deleting
-                            }
+                            SpellClickEventConditionStore[cond.SourceGroup].Add((uint)cond.SourceEntry, cond);
+                            ++count;
+                            continue;   // do not add to m_AllocatedMemory to avoid double deleting
+                        }
                         case ConditionSourceType.SpellImplicitTarget:
                             valid = AddToSpellImplicitTargetConditions(cond);
                             break;
                         case ConditionSourceType.VehicleSpell:
-                            {
-                                if (!VehicleSpellConditionStore.ContainsKey(cond.SourceGroup))
-                                    VehicleSpellConditionStore[cond.SourceGroup] = new MultiMap<uint, Condition>();
+                        {
+                            if (!VehicleSpellConditionStore.ContainsKey(cond.SourceGroup))
+                                VehicleSpellConditionStore[cond.SourceGroup] = new MultiMap<uint, Condition>();
 
-                                VehicleSpellConditionStore[cond.SourceGroup].Add((uint)cond.SourceEntry, cond);
-                                ++count;
-                                continue;   // do not add to m_AllocatedMemory to avoid double deleting
-                            }
+                            VehicleSpellConditionStore[cond.SourceGroup].Add((uint)cond.SourceEntry, cond);
+                            ++count;
+                            continue;   // do not add to m_AllocatedMemory to avoid double deleting
+                        }
                         case ConditionSourceType.SmartEvent:
-                            {
-                                //! TODO: PAIR_32 ?
-                                var key = Tuple.Create(cond.SourceEntry, cond.SourceId);
-                                if (!SmartEventConditionStore.ContainsKey(key))
-                                    SmartEventConditionStore[key] = new MultiMap<uint, Condition>();
+                        {
+                            //! TODO: PAIR_32 ?
+                            var key = Tuple.Create(cond.SourceEntry, cond.SourceId);
+                            if (!SmartEventConditionStore.ContainsKey(key))
+                                SmartEventConditionStore[key] = new MultiMap<uint, Condition>();
 
-                                SmartEventConditionStore[key].Add(cond.SourceGroup, cond);
-                                ++count;
-                                continue;
-                            }
+                            SmartEventConditionStore[key].Add(cond.SourceGroup, cond);
+                            ++count;
+                            continue;
+                        }
                         case ConditionSourceType.NpcVendor:
-                            {
-                                if (!NpcVendorConditionContainerStore.ContainsKey(cond.SourceGroup))
-                                    NpcVendorConditionContainerStore[cond.SourceGroup] = new MultiMap<uint, Condition>();
+                        {
+                            if (!NpcVendorConditionContainerStore.ContainsKey(cond.SourceGroup))
+                                NpcVendorConditionContainerStore[cond.SourceGroup] = new MultiMap<uint, Condition>();
 
-                                NpcVendorConditionContainerStore[cond.SourceGroup].Add((uint)cond.SourceEntry, cond);
-                                ++count;
-                                continue;
-                            }
+                            NpcVendorConditionContainerStore[cond.SourceGroup].Add((uint)cond.SourceEntry, cond);
+                            ++count;
+                            continue;
+                        }
                         case ConditionSourceType.Phase:
                             valid = AddToPhases(cond);
                             break;
@@ -685,7 +685,7 @@ namespace Game
                         List<PhaseAreaInfo> phases = Global.ObjectMgr.GetPhasesForArea(areaId);
                         if (phases != null)
                         {
-                                foreach (PhaseAreaInfo phase in phases)
+                            foreach (PhaseAreaInfo phase in phases)
                             {
                                 if (phase.PhaseInfo.Id == cond.SourceGroup)
                                 {
@@ -722,288 +722,290 @@ namespace Game
             switch (cond.SourceType)
             {
                 case ConditionSourceType.CreatureLootTemplate:
+                {
+                    if (!LootStorage.Creature.HaveLootFor(cond.SourceGroup))
                     {
-                        if (!LootStorage.Creature.HaveLootFor(cond.SourceGroup))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `creature_loot_template`, ignoring.", cond.ToString());
-                            return false;
-                        }
-
-                        LootTemplate loot = LootStorage.Creature.GetLootForConditionFill(cond.SourceGroup);
-                        ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                        if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, Item does not exist, ignoring.", cond.ToString());
-                            return false;
-                        }
-                        break;
+                        Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `creature_loot_template`, ignoring.", cond.ToString());
+                        return false;
                     }
+
+                    LootTemplate loot = LootStorage.Creature.GetLootForConditionFill(cond.SourceGroup);
+                    ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
+                    if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
+                    {
+                        Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, Item does not exist, ignoring.", cond.ToString());
+                        return false;
+                    }
+                    break;
+                }
                 case ConditionSourceType.DisenchantLootTemplate:
+                {
+                    if (!LootStorage.Disenchant.HaveLootFor(cond.SourceGroup))
                     {
-                        if (!LootStorage.Disenchant.HaveLootFor(cond.SourceGroup))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `disenchant_loot_template`, ignoring.", cond.ToString());
-                            return false;
-                        }
-
-                        LootTemplate loot = LootStorage.Disenchant.GetLootForConditionFill(cond.SourceGroup);
-                        ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                        if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
-                            return false;
-                        }
-                        break;
+                        Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `disenchant_loot_template`, ignoring.", cond.ToString());
+                        return false;
                     }
+
+                    LootTemplate loot = LootStorage.Disenchant.GetLootForConditionFill(cond.SourceGroup);
+                    ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
+                    if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
+                    {
+                        Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
+                        return false;
+                    }
+                    break;
+                }
                 case ConditionSourceType.FishingLootTemplate:
+                {
+                    if (!LootStorage.Fishing.HaveLootFor(cond.SourceGroup))
                     {
-                        if (!LootStorage.Fishing.HaveLootFor(cond.SourceGroup))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `fishing_loot_template`, ignoring.", cond.ToString());
-                            return false;
-                        }
-
-                        LootTemplate loot = LootStorage.Fishing.GetLootForConditionFill(cond.SourceGroup);
-                        ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                        if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
-                            return false;
-                        }
-                        break;
+                        Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `fishing_loot_template`, ignoring.", cond.ToString());
+                        return false;
                     }
+
+                    LootTemplate loot = LootStorage.Fishing.GetLootForConditionFill(cond.SourceGroup);
+                    ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
+                    if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
+                    {
+                        Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
+                        return false;
+                    }
+                    break;
+                }
                 case ConditionSourceType.GameobjectLootTemplate:
+                {
+                    if (!LootStorage.Gameobject.HaveLootFor(cond.SourceGroup))
                     {
-                        if (!LootStorage.Gameobject.HaveLootFor(cond.SourceGroup))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `gameobject_loot_template`, ignoring.", cond.ToString());
-                            return false;
-                        }
-
-                        LootTemplate loot = LootStorage.Gameobject.GetLootForConditionFill(cond.SourceGroup);
-                        ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                        if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
-                            return false;
-                        }
-                        break;
+                        Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `gameobject_loot_template`, ignoring.", cond.ToString());
+                        return false;
                     }
+
+                    LootTemplate loot = LootStorage.Gameobject.GetLootForConditionFill(cond.SourceGroup);
+                    ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
+                    if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
+                    {
+                        Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
+                        return false;
+                    }
+                    break;
+                }
                 case ConditionSourceType.ItemLootTemplate:
+                {
+                    if (!LootStorage.Items.HaveLootFor(cond.SourceGroup))
                     {
-                        if (!LootStorage.Items.HaveLootFor(cond.SourceGroup))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `item_loot_template`, ignoring.", cond.ToString());
-                            return false;
-                        }
-
-                        LootTemplate loot = LootStorage.Items.GetLootForConditionFill(cond.SourceGroup);
-                        ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                        if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
-                            return false;
-                        }
-                        break;
+                        Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `item_loot_template`, ignoring.", cond.ToString());
+                        return false;
                     }
+
+                    LootTemplate loot = LootStorage.Items.GetLootForConditionFill(cond.SourceGroup);
+                    ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
+                    if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
+                    {
+                        Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
+                        return false;
+                    }
+                    break;
+                }
                 case ConditionSourceType.MailLootTemplate:
+                {
+                    if (!LootStorage.Mail.HaveLootFor(cond.SourceGroup))
                     {
-                        if (!LootStorage.Mail.HaveLootFor(cond.SourceGroup))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `mail_loot_template`, ignoring.", cond.ToString());
-                            return false;
-                        }
-
-                        LootTemplate loot = LootStorage.Mail.GetLootForConditionFill(cond.SourceGroup);
-                        ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                        if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
-                            return false;
-                        }
-                        break;
+                        Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `mail_loot_template`, ignoring.", cond.ToString());
+                        return false;
                     }
+
+                    LootTemplate loot = LootStorage.Mail.GetLootForConditionFill(cond.SourceGroup);
+                    ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
+                    if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
+                    {
+                        Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
+                        return false;
+                    }
+                    break;
+                }
                 case ConditionSourceType.MillingLootTemplate:
+                {
+                    if (!LootStorage.Milling.HaveLootFor(cond.SourceGroup))
                     {
-                        if (!LootStorage.Milling.HaveLootFor(cond.SourceGroup))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `milling_loot_template`, ignoring.", cond.ToString());
-                            return false;
-                        }
-
-                        LootTemplate loot = LootStorage.Milling.GetLootForConditionFill(cond.SourceGroup);
-                        ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                        if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
-                            return false;
-                        }
-                        break;
+                        Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `milling_loot_template`, ignoring.", cond.ToString());
+                        return false;
                     }
+
+                    LootTemplate loot = LootStorage.Milling.GetLootForConditionFill(cond.SourceGroup);
+                    ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
+                    if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
+                    {
+                        Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
+                        return false;
+                    }
+                    break;
+                }
                 case ConditionSourceType.PickpocketingLootTemplate:
+                {
+                    if (!LootStorage.Pickpocketing.HaveLootFor(cond.SourceGroup))
                     {
-                        if (!LootStorage.Pickpocketing.HaveLootFor(cond.SourceGroup))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `pickpocketing_loot_template`, ignoring.", cond.ToString());
-                            return false;
-                        }
-
-                        LootTemplate loot = LootStorage.Pickpocketing.GetLootForConditionFill(cond.SourceGroup);
-                        ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                        if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
-                            return false;
-                        }
-                        break;
+                        Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `pickpocketing_loot_template`, ignoring.", cond.ToString());
+                        return false;
                     }
+
+                    LootTemplate loot = LootStorage.Pickpocketing.GetLootForConditionFill(cond.SourceGroup);
+                    ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
+                    if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
+                    {
+                        Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
+                        return false;
+                    }
+                    break;
+                }
                 case ConditionSourceType.ProspectingLootTemplate:
+                {
+                    if (!LootStorage.Prospecting.HaveLootFor(cond.SourceGroup))
                     {
-                        if (!LootStorage.Prospecting.HaveLootFor(cond.SourceGroup))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `prospecting_loot_template`, ignoring.", cond.ToString());
-                            return false;
-                        }
-
-                        LootTemplate loot = LootStorage.Prospecting.GetLootForConditionFill(cond.SourceGroup);
-                        ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                        if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
-                            return false;
-                        }
-                        break;
+                        Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `prospecting_loot_template`, ignoring.", cond.ToString());
+                        return false;
                     }
+
+                    LootTemplate loot = LootStorage.Prospecting.GetLootForConditionFill(cond.SourceGroup);
+                    ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
+                    if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
+                    {
+                        Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
+                        return false;
+                    }
+                    break;
+                }
                 case ConditionSourceType.ReferenceLootTemplate:
+                {
+                    if (!LootStorage.Reference.HaveLootFor(cond.SourceGroup))
                     {
-                        if (!LootStorage.Reference.HaveLootFor(cond.SourceGroup))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `reference_loot_template`, ignoring.", cond.ToString());
-                            return false;
-                        }
-
-                        LootTemplate loot = LootStorage.Reference.GetLootForConditionFill(cond.SourceGroup);
-                        ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                        if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
-                            return false;
-                        }
-                        break;
+                        Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `reference_loot_template`, ignoring.", cond.ToString());
+                        return false;
                     }
+
+                    LootTemplate loot = LootStorage.Reference.GetLootForConditionFill(cond.SourceGroup);
+                    ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
+                    if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
+                    {
+                        Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
+                        return false;
+                    }
+                    break;
+                }
                 case ConditionSourceType.SkinningLootTemplate:
+                {
+                    if (!LootStorage.Skinning.HaveLootFor(cond.SourceGroup))
                     {
-                        if (!LootStorage.Skinning.HaveLootFor(cond.SourceGroup))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `skinning_loot_template`, ignoring.", cond.ToString());
-                            return false;
-                        }
-
-                        LootTemplate loot = LootStorage.Skinning.GetLootForConditionFill(cond.SourceGroup);
-                        ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                        if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
-                            return false;
-                        }
-                        break;
+                        Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `skinning_loot_template`, ignoring.", cond.ToString());
+                        return false;
                     }
+
+                    LootTemplate loot = LootStorage.Skinning.GetLootForConditionFill(cond.SourceGroup);
+                    ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
+                    if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
+                    {
+                        Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
+                        return false;
+                    }
+                    break;
+                }
                 case ConditionSourceType.SpellLootTemplate:
+                {
+                    if (!LootStorage.Spell.HaveLootFor(cond.SourceGroup))
                     {
-                        if (!LootStorage.Spell.HaveLootFor(cond.SourceGroup))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `spell_loot_template`, ignoring.", cond.ToString());
-                            return false;
-                        }
-
-                        LootTemplate loot = LootStorage.Spell.GetLootForConditionFill(cond.SourceGroup);
-                        ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                        if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
-                            return false;
-                        }
-                        break;
+                        Log.outError(LogFilter.Sql, "{0} SourceGroup in `condition` table, does not exist in `spell_loot_template`, ignoring.", cond.ToString());
+                        return false;
                     }
+
+                    LootTemplate loot = LootStorage.Spell.GetLootForConditionFill(cond.SourceGroup);
+                    ItemTemplate pItemProto = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
+                    if (pItemProto == null && !loot.IsReference((uint)cond.SourceEntry))
+                    {
+                        Log.outError(LogFilter.Sql, "{0} SourceType, SourceEntry in `condition` table, item does not exist, ignoring.", cond.ToString());
+                        return false;
+                    }
+                    break;
+                }
                 case ConditionSourceType.SpellImplicitTarget:
+                {
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)cond.SourceEntry, Difficulty.None);
+                    if (spellInfo == null)
                     {
-                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)cond.SourceEntry, Difficulty.None);
-                        if (spellInfo == null)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table does not exist in `spell.dbc`, ignoring.", cond.ToString());
-                            return false;
-                        }
-
-                        if ((cond.SourceGroup > SpellConst.MaxEffectMask) || cond.SourceGroup == 0)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} in `condition` table, has incorrect SourceGroup (spell effectMask) set, ignoring.", cond.ToString());
-                            return false;
-                        }
-
-                        uint origGroup = cond.SourceGroup;
-
-                        for (byte i = 0; i < SpellConst.MaxEffects; ++i)
-                        {
-                            if (((1 << i) & cond.SourceGroup) == 0)
-                                continue;
-
-                            SpellEffectInfo effect = spellInfo.GetEffect(i);
-                            if (effect == null)
-                                continue;
-
-                            if (effect.ChainTargets > 0)
-                                continue;
-
-                            switch (effect.TargetA.GetSelectionCategory())
-                            {
-                                case SpellTargetSelectionCategories.Nearby:
-                                case SpellTargetSelectionCategories.Cone:
-                                case SpellTargetSelectionCategories.Area:
-                                case SpellTargetSelectionCategories.Traj:
-                                    continue;
-                                default:
-                                    break;
-                            }
-
-                            switch (effect.TargetB.GetSelectionCategory())
-                            {
-                                case SpellTargetSelectionCategories.Nearby:
-                                case SpellTargetSelectionCategories.Cone:
-                                case SpellTargetSelectionCategories.Area:
-                                case SpellTargetSelectionCategories.Traj:
-                                    continue;
-                                default:
-                                    break;
-                            }
-
-                            Log.outError(LogFilter.Sql, "SourceEntry {0} SourceGroup {1} in `condition` table - spell {2} does not have implicit targets of types: _AREA_, _CONE_, _NEARBY_, _CHAIN_ for effect {3}, SourceGroup needs correction, ignoring.", cond.SourceEntry, origGroup, cond.SourceEntry, i);
-                            cond.SourceGroup &= ~(uint)(1 << i);
-                        }
-                        // all effects were removed, no need to add the condition at all
-                        if (cond.SourceGroup == 0)
-                            return false;
-                        break;
+                        Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table does not exist in `spell.dbc`, ignoring.", cond.ToString());
+                        return false;
                     }
+
+                    if ((cond.SourceGroup > SpellConst.MaxEffectMask) || cond.SourceGroup == 0)
+                    {
+                        Log.outError(LogFilter.Sql, "{0} in `condition` table, has incorrect SourceGroup (spell effectMask) set, ignoring.", cond.ToString());
+                        return false;
+                    }
+
+                    uint origGroup = cond.SourceGroup;
+
+                    for (byte i = 0; i < SpellConst.MaxEffects; ++i)
+                    {
+                        if (((1 << i) & cond.SourceGroup) == 0)
+                            continue;
+
+                        SpellEffectInfo effect = spellInfo.GetEffect(i);
+                        if (effect == null)
+                            continue;
+
+                        if (effect.ChainTargets > 0)
+                            continue;
+
+                        switch (effect.TargetA.GetSelectionCategory())
+                        {
+                            case SpellTargetSelectionCategories.Nearby:
+                            case SpellTargetSelectionCategories.Cone:
+                            case SpellTargetSelectionCategories.Area:
+                            case SpellTargetSelectionCategories.Traj:
+                            case SpellTargetSelectionCategories.Line:
+                                continue;
+                            default:
+                                break;
+                        }
+
+                        switch (effect.TargetB.GetSelectionCategory())
+                        {
+                            case SpellTargetSelectionCategories.Nearby:
+                            case SpellTargetSelectionCategories.Cone:
+                            case SpellTargetSelectionCategories.Area:
+                            case SpellTargetSelectionCategories.Traj:
+                            case SpellTargetSelectionCategories.Line:
+                                continue;
+                            default:
+                                break;
+                        }
+
+                        Log.outError(LogFilter.Sql, "SourceEntry {0} SourceGroup {1} in `condition` table - spell {2} does not have implicit targets of types: _AREA_, _CONE_, _NEARBY_, _CHAIN_ for effect {3}, SourceGroup needs correction, ignoring.", cond.SourceEntry, origGroup, cond.SourceEntry, i);
+                        cond.SourceGroup &= ~(uint)(1 << i);
+                    }
+                    // all effects were removed, no need to add the condition at all
+                    if (cond.SourceGroup == 0)
+                        return false;
+                    break;
+                }
                 case ConditionSourceType.CreatureTemplateVehicle:
+                {
+                    if (Global.ObjectMgr.GetCreatureTemplate((uint)cond.SourceEntry) == null)
                     {
-                        if (Global.ObjectMgr.GetCreatureTemplate((uint)cond.SourceEntry) == null)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table does not exist in `creature_template`, ignoring.", cond.ToString());
-                            return false;
-                        }
-                        break;
+                        Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table does not exist in `creature_template`, ignoring.", cond.ToString());
+                        return false;
                     }
+                    break;
+                }
                 case ConditionSourceType.Spell:
                 case ConditionSourceType.SpellProc:
+                {
+                    SpellInfo spellProto = Global.SpellMgr.GetSpellInfo((uint)cond.SourceEntry, Difficulty.None);
+                    if (spellProto == null)
                     {
-                        SpellInfo spellProto = Global.SpellMgr.GetSpellInfo((uint)cond.SourceEntry, Difficulty.None);
-                        if (spellProto == null)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table does not exist in `spell.dbc`, ignoring.", cond.ToString());
-                            return false;
-                        }
-                        break;
+                        Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table does not exist in `spell.dbc`, ignoring.", cond.ToString());
+                        return false;
                     }
+                    break;
+                }
                 case ConditionSourceType.QuestAvailable:
                     if (Global.ObjectMgr.GetQuestTemplate((uint)cond.SourceEntry) == null)
                     {
@@ -1038,20 +1040,20 @@ namespace Game
                     }
                     break;
                 case ConditionSourceType.NpcVendor:
+                {
+                    if (Global.ObjectMgr.GetCreatureTemplate(cond.SourceGroup) == null)
                     {
-                        if (Global.ObjectMgr.GetCreatureTemplate(cond.SourceGroup) == null)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table does not exist in `creature_template`, ignoring.", cond.ToString());
-                            return false;
-                        }
-                        ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
-                        if (itemTemplate == null)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table item does not exist, ignoring.", cond.ToString());
-                            return false;
-                        }
-                        break;
+                        Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table does not exist in `creature_template`, ignoring.", cond.ToString());
+                        return false;
                     }
+                    ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate((uint)cond.SourceEntry);
+                    if (itemTemplate == null)
+                    {
+                        Log.outError(LogFilter.Sql, "{0} SourceEntry in `condition` table item does not exist, ignoring.", cond.ToString());
+                        return false;
+                    }
+                    break;
+                }
                 case ConditionSourceType.TerrainSwap:
                     if (!CliDB.MapStorage.ContainsKey((uint)cond.SourceEntry))
                     {
@@ -1090,96 +1092,96 @@ namespace Game
             switch (cond.ConditionType)
             {
                 case ConditionTypes.Aura:
+                {
+                    if (!Global.SpellMgr.HasSpellInfo(cond.ConditionValue1, Difficulty.None))
                     {
-                        if (!Global.SpellMgr.HasSpellInfo(cond.ConditionValue1, Difficulty.None))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has non existing spell (Id: {1}), skipped", cond.ToString(), cond.ConditionValue1);
-                            return false;
-                        }
-
-                        if (cond.ConditionValue2 > 2)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has non existing effect index ({1}) (must be 0..2), skipped", cond.ToString(), cond.ConditionValue2);
-                            return false;
-                        }
-                        break;
+                        Log.outError(LogFilter.Sql, "{0} has non existing spell (Id: {1}), skipped", cond.ToString(), cond.ConditionValue1);
+                        return false;
                     }
+
+                    if (cond.ConditionValue2 > 2)
+                    {
+                        Log.outError(LogFilter.Sql, "{0} has non existing effect index ({1}) (must be 0..2), skipped", cond.ToString(), cond.ConditionValue2);
+                        return false;
+                    }
+                    break;
+                }
                 case ConditionTypes.Item:
+                {
+                    ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(cond.ConditionValue1);
+                    if (proto == null)
                     {
-                        ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(cond.ConditionValue1);
-                        if (proto == null)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} Item ({1}) does not exist, skipped", cond.ToString(), cond.ConditionValue1);
-                            return false;
-                        }
-
-                        if (cond.ConditionValue2 == 0)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} Zero item count in ConditionValue2, skipped", cond.ToString());
-                            return false;
-                        }
-                        break;
+                        Log.outError(LogFilter.Sql, "{0} Item ({1}) does not exist, skipped", cond.ToString(), cond.ConditionValue1);
+                        return false;
                     }
+
+                    if (cond.ConditionValue2 == 0)
+                    {
+                        Log.outError(LogFilter.Sql, "{0} Zero item count in ConditionValue2, skipped", cond.ToString());
+                        return false;
+                    }
+                    break;
+                }
                 case ConditionTypes.ItemEquipped:
+                {
+                    ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(cond.ConditionValue1);
+                    if (proto == null)
                     {
-                        ItemTemplate proto = Global.ObjectMgr.GetItemTemplate(cond.ConditionValue1);
-                        if (proto == null)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} Item ({1}) does not exist, skipped.", cond.ToString(true), cond.ConditionValue1);
-                            return false;
-                        }
-                        break;
+                        Log.outError(LogFilter.Sql, "{0} Item ({1}) does not exist, skipped.", cond.ToString(true), cond.ConditionValue1);
+                        return false;
                     }
+                    break;
+                }
                 case ConditionTypes.Zoneid:
+                {
+                    AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(cond.ConditionValue1);
+                    if (areaEntry == null)
                     {
-                        AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(cond.ConditionValue1);
-                        if (areaEntry == null)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} Area ({1}) does not exist, skipped.", cond.ToString(true), cond.ConditionValue1);
-                            return false;
-                        }
-
-                        if (areaEntry.ParentAreaID != 0)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} requires to be in area ({1}) which is a subzone but zone expected, skipped.", cond.ToString(true), cond.ConditionValue1);
-                            return false;
-                        }
-                        break;
+                        Log.outError(LogFilter.Sql, "{0} Area ({1}) does not exist, skipped.", cond.ToString(true), cond.ConditionValue1);
+                        return false;
                     }
+
+                    if (areaEntry.ParentAreaID != 0)
+                    {
+                        Log.outError(LogFilter.Sql, "{0} requires to be in area ({1}) which is a subzone but zone expected, skipped.", cond.ToString(true), cond.ConditionValue1);
+                        return false;
+                    }
+                    break;
+                }
                 case ConditionTypes.ReputationRank:
+                {
+                    if (!CliDB.FactionStorage.ContainsKey(cond.ConditionValue1))
                     {
-                        if (!CliDB.FactionStorage.ContainsKey(cond.ConditionValue1))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has non existing faction ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
-                            return false;
-                        }
-                        break;
+                        Log.outError(LogFilter.Sql, "{0} has non existing faction ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
+                        return false;
                     }
+                    break;
+                }
                 case ConditionTypes.Team:
+                {
+                    if (cond.ConditionValue1 != (uint)Team.Alliance && cond.ConditionValue1 != (uint)Team.Horde)
                     {
-                        if (cond.ConditionValue1 != (uint)Team.Alliance && cond.ConditionValue1 != (uint)Team.Horde)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} specifies unknown team ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
-                            return false;
-                        }
-                        break;
+                        Log.outError(LogFilter.Sql, "{0} specifies unknown team ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
+                        return false;
                     }
+                    break;
+                }
                 case ConditionTypes.Skill:
+                {
+                    SkillLineRecord pSkill = CliDB.SkillLineStorage.LookupByKey(cond.ConditionValue1);
+                    if (pSkill == null)
                     {
-                        SkillLineRecord pSkill = CliDB.SkillLineStorage.LookupByKey(cond.ConditionValue1);
-                        if (pSkill == null)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} specifies non-existing skill ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
-                            return false;
-                        }
-
-                        if (cond.ConditionValue2 < 1 || cond.ConditionValue2 > Global.WorldMgr.GetConfigMaxSkillValue())
-                        {
-                            Log.outError(LogFilter.Sql, "{0} specifies skill ({1}) with invalid value ({1}), skipped.", cond.ToString(true), cond.ConditionValue1, cond.ConditionValue2);
-                            return false;
-                        }
-                        break;
+                        Log.outError(LogFilter.Sql, "{0} specifies non-existing skill ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
+                        return false;
                     }
+
+                    if (cond.ConditionValue2 < 1 || cond.ConditionValue2 > Global.WorldMgr.GetConfigMaxSkillValue())
+                    {
+                        Log.outError(LogFilter.Sql, "{0} specifies skill ({1}) with invalid value ({1}), skipped.", cond.ToString(true), cond.ConditionValue1, cond.ConditionValue2);
+                        return false;
+                    }
+                    break;
+                }
                 case ConditionTypes.Queststate:
                     if (cond.ConditionValue2 >= (1 << (int)QuestStatus.Max))
                     {
@@ -1198,363 +1200,363 @@ namespace Game
                 case ConditionTypes.QuestNone:
                 case ConditionTypes.QuestComplete:
                 case ConditionTypes.DailyQuestDone:
+                {
+                    if (Global.ObjectMgr.GetQuestTemplate(cond.ConditionValue1) == null)
                     {
-                        if (Global.ObjectMgr.GetQuestTemplate(cond.ConditionValue1) == null)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} points to non-existing quest ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
-                            return false;
-                        }
-                        break;
-                    }
-                case ConditionTypes.ActiveEvent:
-                    {
-                        var events = Global.GameEventMgr.GetEventMap();
-                        if (cond.ConditionValue1 >= events.Length || !events[cond.ConditionValue1].IsValid())
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has non existing event id ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
-                            return false;
-                        }
-                        break;
-                    }
-                case ConditionTypes.Achievement:
-                    {
-                        AchievementRecord achievement = CliDB.AchievementStorage.LookupByKey(cond.ConditionValue1);
-                        if (achievement == null)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has non existing achivement id ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
-                            return false;
-                        }
-                        break;
-                    }
-                case ConditionTypes.Class:
-                    {
-                        if (Convert.ToBoolean(cond.ConditionValue1 & ~(uint)Class.ClassMaskAllPlayable))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has non existing classmask ({1}), skipped.", cond.ToString(true), cond.ConditionValue1 & ~(uint)Class.ClassMaskAllPlayable);
-                            return false;
-                        }
-                        break;
-                    }
-                case ConditionTypes.Race:
-                    {
-                        if (Convert.ToBoolean(cond.ConditionValue1 & ~SharedConst.RaceMaskAllPlayable))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has non existing racemask ({1}), skipped.", cond.ToString(true), cond.ConditionValue1 & ~SharedConst.RaceMaskAllPlayable);
-                            return false;
-                        }
-                        break;
-                    }
-                case ConditionTypes.Gender:
-                    {
-                        if (!Player.IsValidGender((Gender)cond.ConditionValue1))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has invalid gender ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
-                            return false;
-                        }
-                        break;
-                    }
-                case ConditionTypes.Mapid:
-                    {
-                        MapRecord me = CliDB.MapStorage.LookupByKey(cond.ConditionValue1);
-                        if (me == null)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has non existing map ({1}), skipped", cond.ToString(true), cond.ConditionValue1);
-                            return false;
-                        }
-                        break;
-                    }
-                case ConditionTypes.Spell:
-                    {
-                        if (!Global.SpellMgr.HasSpellInfo(cond.ConditionValue1, Difficulty.None))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has non existing spell (Id: {1}), skipped", cond.ToString(true), cond.ConditionValue1);
-                            return false;
-                        }
-                        break;
-                    }
-                case ConditionTypes.Level:
-                    {
-                        if (cond.ConditionValue2 >= (uint)ComparisionType.Max)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has invalid ComparisionType ({1}), skipped.", cond.ToString(true), cond.ConditionValue2);
-                            return false;
-                        }
-                        break;
-                    }
-                case ConditionTypes.DrunkenState:
-                    {
-                        if (cond.ConditionValue1 > (uint)DrunkenState.Smashed)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has invalid state ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
-                            return false;
-                        }
-                        break;
-                    }
-                case ConditionTypes.NearCreature:
-                    {
-                        if (Global.ObjectMgr.GetCreatureTemplate(cond.ConditionValue1) == null)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has non existing creature template entry ({1}), skipped", cond.ToString(true), cond.ConditionValue1);
-                            return false;
-                        }
-                        break;
-                    }
-                case ConditionTypes.NearGameobject:
-                    {
-                        if (Global.ObjectMgr.GetGameObjectTemplate(cond.ConditionValue1) == null)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has non existing gameobject template entry ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
-                            return false;
-                        }
-                        break;
-                    }
-                case ConditionTypes.ObjectEntryGuid:
-                    {
-                        switch ((TypeId)cond.ConditionValue1)
-                        {
-                            case TypeId.Unit:
-                                if (cond.ConditionValue2 != 0 && Global.ObjectMgr.GetCreatureTemplate(cond.ConditionValue2) == null)
-                                {
-                                    Log.outError(LogFilter.Sql, "{0} has non existing creature template entry ({1}), skipped.", cond.ToString(true), cond.ConditionValue2);
-                                    return false;
-                                }
-                                if (cond.ConditionValue3 != 0)
-                                {
-                                    CreatureData creatureData = Global.ObjectMgr.GetCreatureData(cond.ConditionValue3);
-                                    if (creatureData != null)
-                                    {
-                                        if (cond.ConditionValue2 != 0 && creatureData.Id != cond.ConditionValue2)
-                                        {
-                                            Log.outError(LogFilter.Sql, "{0} has guid {1} set but does not match creature entry ({1}), skipped.", cond.ToString(true), cond.ConditionValue3, cond.ConditionValue2);
-                                            return false;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        Log.outError(LogFilter.Sql, "{0} has non existing creature guid ({1}), skipped.", cond.ToString(true), cond.ConditionValue3);
-                                        return false;
-                                    }
-                                }
-                                break;
-                            case TypeId.GameObject:
-                                if (cond.ConditionValue2 != 0 && Global.ObjectMgr.GetGameObjectTemplate(cond.ConditionValue2) == null)
-                                {
-                                    Log.outError(LogFilter.Sql, "{0} has non existing gameobject template entry ({1}), skipped.", cond.ToString(true), cond.ConditionValue2);
-                                    return false;
-                                }
-                                if (cond.ConditionValue3 != 0)
-                                {
-                                    GameObjectData goData = Global.ObjectMgr.GetGameObjectData(cond.ConditionValue3);
-                                    if (goData != null)
-                                    {
-                                        if (cond.ConditionValue2 != 0 && goData.Id != cond.ConditionValue2)
-                                        {
-                                            Log.outError(LogFilter.Sql, "{0} has guid {1} set but does not match gameobject entry ({1}), skipped.", cond.ToString(true), cond.ConditionValue3, cond.ConditionValue2);
-                                            return false;
-                                        }
-                                    }
-                                    else
-                                    {
-                                        Log.outError(LogFilter.Sql, "{0} has non existing gameobject guid ({1}), skipped.", cond.ToString(true), cond.ConditionValue3);
-                                        return false;
-                                    }
-                                }
-                                break;
-                            case TypeId.Player:
-                            case TypeId.Corpse:
-                                if (cond.ConditionValue2 != 0)
-                                    LogUselessConditionValue(cond, 2, cond.ConditionValue2);
-                                if (cond.ConditionValue3 != 0)
-                                    LogUselessConditionValue(cond, 3, cond.ConditionValue3);
-                                break;
-                            default:
-                                Log.outError(LogFilter.Sql, "{0} has wrong typeid set ({1}), skipped", cond.ToString(true), cond.ConditionValue1);
-                                return false;
-                        }
-                        break;
-                    }
-                case ConditionTypes.TypeMask:
-                    {
-                        if (cond.ConditionValue1 == 0 || Convert.ToBoolean(cond.ConditionValue1 & ~(uint)(TypeMask.Unit | TypeMask.Player | TypeMask.GameObject | TypeMask.Corpse)))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has invalid typemask set ({1}), skipped.", cond.ToString(true), cond.ConditionValue2);
-                            return false;
-                        }
-                        break;
-                    }
-                case ConditionTypes.RelationTo:
-                    {
-                        if (cond.ConditionValue1 >= cond.GetMaxAvailableConditionTargets())
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has invalid ConditionValue1(ConditionTarget selection) ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
-                            return false;
-                        }
-                        if (cond.ConditionValue1 == cond.ConditionTarget)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has ConditionValue1(ConditionTarget selection) set to self ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
-                            return false;
-                        }
-                        if (cond.ConditionValue2 >= (uint)RelationType.Max)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has invalid ConditionValue2(RelationType) ({1}), skipped.", cond.ToString(true), cond.ConditionValue2);
-                            return false;
-                        }
-                        break;
-                    }
-                case ConditionTypes.ReactionTo:
-                    {
-                        if (cond.ConditionValue1 >= cond.GetMaxAvailableConditionTargets())
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has invalid ConditionValue1(ConditionTarget selection) ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
-                            return false;
-                        }
-                        if (cond.ConditionValue1 == cond.ConditionTarget)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has ConditionValue1(ConditionTarget selection) set to self ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
-                            return false;
-                        }
-                        if (cond.ConditionValue2 == 0)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has invalid ConditionValue2(rankMask) ({1}), skipped.", cond.ToString(true), cond.ConditionValue2);
-                            return false;
-                        }
-                        break;
-                    }
-                case ConditionTypes.DistanceTo:
-                    {
-                        if (cond.ConditionValue1 >= cond.GetMaxAvailableConditionTargets())
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has invalid ConditionValue1(ConditionTarget selection) ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
-                            return false;
-                        }
-                        if (cond.ConditionValue1 == cond.ConditionTarget)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has ConditionValue1(ConditionTarget selection) set to self ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
-                            return false;
-                        }
-                        if (cond.ConditionValue3 >= (uint)ComparisionType.Max)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has invalid ComparisionType ({1}), skipped.", cond.ToString(true), cond.ConditionValue3);
-                            return false;
-                        }
-                        break;
-                    }
-                case ConditionTypes.HpVal:
-                    {
-                        if (cond.ConditionValue2 >= (uint)ComparisionType.Max)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has invalid ComparisionType ({1}), skipped.", cond.ToString(true), cond.ConditionValue2);
-                            return false;
-                        }
-                        break;
-                    }
-                case ConditionTypes.HpPct:
-                    {
-                        if (cond.ConditionValue1 > 100)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has too big percent value ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
-                            return false;
-                        }
-                        if (cond.ConditionValue2 >= (uint)ComparisionType.Max)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has invalid ComparisionType ({1}), skipped.", cond.ToString(true), cond.ConditionValue2);
-                            return false;
-                        }
-                        break;
-                    }
-                case ConditionTypes.WorldState:
-                    {
-                        if (Global.WorldMgr.GetWorldState((WorldStates)cond.ConditionValue1) == 0)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has non existing world state in value1 ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
-                            return false;
-                        }
-                        break;
-                    }
-                case ConditionTypes.PhaseId:
-                    {
-                        if (!CliDB.PhaseStorage.ContainsKey(cond.ConditionValue1))
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has nonexistent phaseid in value1 ({1}), skipped", cond.ToString(true), cond.ConditionValue1);
-                            return false;
-                        }
-                        break;
-                    }
-                case ConditionTypes.Title:
-                    {
-                        CharTitlesRecord titleEntry = CliDB.CharTitlesStorage.LookupByKey(cond.ConditionValue1);
-                        if (titleEntry == null)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has non existing title in value1 ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
-                            return false;
-                        }
-                        break;
-                    }
-                case ConditionTypes.SpawnmaskDeprecated:
-                    {
-                        Log.outError(LogFilter.Sql, $"{cond.ToString(true)} using deprecated condition type CONDITION_SPAWNMASK.");
+                        Log.outError(LogFilter.Sql, "{0} points to non-existing quest ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
                         return false;
                     }
+                    break;
+                }
+                case ConditionTypes.ActiveEvent:
+                {
+                    var events = Global.GameEventMgr.GetEventMap();
+                    if (cond.ConditionValue1 >= events.Length || !events[cond.ConditionValue1].IsValid())
+                    {
+                        Log.outError(LogFilter.Sql, "{0} has non existing event id ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
+                        return false;
+                    }
+                    break;
+                }
+                case ConditionTypes.Achievement:
+                {
+                    AchievementRecord achievement = CliDB.AchievementStorage.LookupByKey(cond.ConditionValue1);
+                    if (achievement == null)
+                    {
+                        Log.outError(LogFilter.Sql, "{0} has non existing achivement id ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
+                        return false;
+                    }
+                    break;
+                }
+                case ConditionTypes.Class:
+                {
+                    if (Convert.ToBoolean(cond.ConditionValue1 & ~(uint)Class.ClassMaskAllPlayable))
+                    {
+                        Log.outError(LogFilter.Sql, "{0} has non existing classmask ({1}), skipped.", cond.ToString(true), cond.ConditionValue1 & ~(uint)Class.ClassMaskAllPlayable);
+                        return false;
+                    }
+                    break;
+                }
+                case ConditionTypes.Race:
+                {
+                    if (Convert.ToBoolean(cond.ConditionValue1 & ~SharedConst.RaceMaskAllPlayable))
+                    {
+                        Log.outError(LogFilter.Sql, "{0} has non existing racemask ({1}), skipped.", cond.ToString(true), cond.ConditionValue1 & ~SharedConst.RaceMaskAllPlayable);
+                        return false;
+                    }
+                    break;
+                }
+                case ConditionTypes.Gender:
+                {
+                    if (!Player.IsValidGender((Gender)cond.ConditionValue1))
+                    {
+                        Log.outError(LogFilter.Sql, "{0} has invalid gender ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
+                        return false;
+                    }
+                    break;
+                }
+                case ConditionTypes.Mapid:
+                {
+                    MapRecord me = CliDB.MapStorage.LookupByKey(cond.ConditionValue1);
+                    if (me == null)
+                    {
+                        Log.outError(LogFilter.Sql, "{0} has non existing map ({1}), skipped", cond.ToString(true), cond.ConditionValue1);
+                        return false;
+                    }
+                    break;
+                }
+                case ConditionTypes.Spell:
+                {
+                    if (!Global.SpellMgr.HasSpellInfo(cond.ConditionValue1, Difficulty.None))
+                    {
+                        Log.outError(LogFilter.Sql, "{0} has non existing spell (Id: {1}), skipped", cond.ToString(true), cond.ConditionValue1);
+                        return false;
+                    }
+                    break;
+                }
+                case ConditionTypes.Level:
+                {
+                    if (cond.ConditionValue2 >= (uint)ComparisionType.Max)
+                    {
+                        Log.outError(LogFilter.Sql, "{0} has invalid ComparisionType ({1}), skipped.", cond.ToString(true), cond.ConditionValue2);
+                        return false;
+                    }
+                    break;
+                }
+                case ConditionTypes.DrunkenState:
+                {
+                    if (cond.ConditionValue1 > (uint)DrunkenState.Smashed)
+                    {
+                        Log.outError(LogFilter.Sql, "{0} has invalid state ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
+                        return false;
+                    }
+                    break;
+                }
+                case ConditionTypes.NearCreature:
+                {
+                    if (Global.ObjectMgr.GetCreatureTemplate(cond.ConditionValue1) == null)
+                    {
+                        Log.outError(LogFilter.Sql, "{0} has non existing creature template entry ({1}), skipped", cond.ToString(true), cond.ConditionValue1);
+                        return false;
+                    }
+                    break;
+                }
+                case ConditionTypes.NearGameobject:
+                {
+                    if (Global.ObjectMgr.GetGameObjectTemplate(cond.ConditionValue1) == null)
+                    {
+                        Log.outError(LogFilter.Sql, "{0} has non existing gameobject template entry ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
+                        return false;
+                    }
+                    break;
+                }
+                case ConditionTypes.ObjectEntryGuid:
+                {
+                    switch ((TypeId)cond.ConditionValue1)
+                    {
+                        case TypeId.Unit:
+                            if (cond.ConditionValue2 != 0 && Global.ObjectMgr.GetCreatureTemplate(cond.ConditionValue2) == null)
+                            {
+                                Log.outError(LogFilter.Sql, "{0} has non existing creature template entry ({1}), skipped.", cond.ToString(true), cond.ConditionValue2);
+                                return false;
+                            }
+                            if (cond.ConditionValue3 != 0)
+                            {
+                                CreatureData creatureData = Global.ObjectMgr.GetCreatureData(cond.ConditionValue3);
+                                if (creatureData != null)
+                                {
+                                    if (cond.ConditionValue2 != 0 && creatureData.Id != cond.ConditionValue2)
+                                    {
+                                        Log.outError(LogFilter.Sql, "{0} has guid {1} set but does not match creature entry ({1}), skipped.", cond.ToString(true), cond.ConditionValue3, cond.ConditionValue2);
+                                        return false;
+                                    }
+                                }
+                                else
+                                {
+                                    Log.outError(LogFilter.Sql, "{0} has non existing creature guid ({1}), skipped.", cond.ToString(true), cond.ConditionValue3);
+                                    return false;
+                                }
+                            }
+                            break;
+                        case TypeId.GameObject:
+                            if (cond.ConditionValue2 != 0 && Global.ObjectMgr.GetGameObjectTemplate(cond.ConditionValue2) == null)
+                            {
+                                Log.outError(LogFilter.Sql, "{0} has non existing gameobject template entry ({1}), skipped.", cond.ToString(true), cond.ConditionValue2);
+                                return false;
+                            }
+                            if (cond.ConditionValue3 != 0)
+                            {
+                                GameObjectData goData = Global.ObjectMgr.GetGameObjectData(cond.ConditionValue3);
+                                if (goData != null)
+                                {
+                                    if (cond.ConditionValue2 != 0 && goData.Id != cond.ConditionValue2)
+                                    {
+                                        Log.outError(LogFilter.Sql, "{0} has guid {1} set but does not match gameobject entry ({1}), skipped.", cond.ToString(true), cond.ConditionValue3, cond.ConditionValue2);
+                                        return false;
+                                    }
+                                }
+                                else
+                                {
+                                    Log.outError(LogFilter.Sql, "{0} has non existing gameobject guid ({1}), skipped.", cond.ToString(true), cond.ConditionValue3);
+                                    return false;
+                                }
+                            }
+                            break;
+                        case TypeId.Player:
+                        case TypeId.Corpse:
+                            if (cond.ConditionValue2 != 0)
+                                LogUselessConditionValue(cond, 2, cond.ConditionValue2);
+                            if (cond.ConditionValue3 != 0)
+                                LogUselessConditionValue(cond, 3, cond.ConditionValue3);
+                            break;
+                        default:
+                            Log.outError(LogFilter.Sql, "{0} has wrong typeid set ({1}), skipped", cond.ToString(true), cond.ConditionValue1);
+                            return false;
+                    }
+                    break;
+                }
+                case ConditionTypes.TypeMask:
+                {
+                    if (cond.ConditionValue1 == 0 || Convert.ToBoolean(cond.ConditionValue1 & ~(uint)(TypeMask.Unit | TypeMask.Player | TypeMask.GameObject | TypeMask.Corpse)))
+                    {
+                        Log.outError(LogFilter.Sql, "{0} has invalid typemask set ({1}), skipped.", cond.ToString(true), cond.ConditionValue2);
+                        return false;
+                    }
+                    break;
+                }
+                case ConditionTypes.RelationTo:
+                {
+                    if (cond.ConditionValue1 >= cond.GetMaxAvailableConditionTargets())
+                    {
+                        Log.outError(LogFilter.Sql, "{0} has invalid ConditionValue1(ConditionTarget selection) ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
+                        return false;
+                    }
+                    if (cond.ConditionValue1 == cond.ConditionTarget)
+                    {
+                        Log.outError(LogFilter.Sql, "{0} has ConditionValue1(ConditionTarget selection) set to self ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
+                        return false;
+                    }
+                    if (cond.ConditionValue2 >= (uint)RelationType.Max)
+                    {
+                        Log.outError(LogFilter.Sql, "{0} has invalid ConditionValue2(RelationType) ({1}), skipped.", cond.ToString(true), cond.ConditionValue2);
+                        return false;
+                    }
+                    break;
+                }
+                case ConditionTypes.ReactionTo:
+                {
+                    if (cond.ConditionValue1 >= cond.GetMaxAvailableConditionTargets())
+                    {
+                        Log.outError(LogFilter.Sql, "{0} has invalid ConditionValue1(ConditionTarget selection) ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
+                        return false;
+                    }
+                    if (cond.ConditionValue1 == cond.ConditionTarget)
+                    {
+                        Log.outError(LogFilter.Sql, "{0} has ConditionValue1(ConditionTarget selection) set to self ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
+                        return false;
+                    }
+                    if (cond.ConditionValue2 == 0)
+                    {
+                        Log.outError(LogFilter.Sql, "{0} has invalid ConditionValue2(rankMask) ({1}), skipped.", cond.ToString(true), cond.ConditionValue2);
+                        return false;
+                    }
+                    break;
+                }
+                case ConditionTypes.DistanceTo:
+                {
+                    if (cond.ConditionValue1 >= cond.GetMaxAvailableConditionTargets())
+                    {
+                        Log.outError(LogFilter.Sql, "{0} has invalid ConditionValue1(ConditionTarget selection) ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
+                        return false;
+                    }
+                    if (cond.ConditionValue1 == cond.ConditionTarget)
+                    {
+                        Log.outError(LogFilter.Sql, "{0} has ConditionValue1(ConditionTarget selection) set to self ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
+                        return false;
+                    }
+                    if (cond.ConditionValue3 >= (uint)ComparisionType.Max)
+                    {
+                        Log.outError(LogFilter.Sql, "{0} has invalid ComparisionType ({1}), skipped.", cond.ToString(true), cond.ConditionValue3);
+                        return false;
+                    }
+                    break;
+                }
+                case ConditionTypes.HpVal:
+                {
+                    if (cond.ConditionValue2 >= (uint)ComparisionType.Max)
+                    {
+                        Log.outError(LogFilter.Sql, "{0} has invalid ComparisionType ({1}), skipped.", cond.ToString(true), cond.ConditionValue2);
+                        return false;
+                    }
+                    break;
+                }
+                case ConditionTypes.HpPct:
+                {
+                    if (cond.ConditionValue1 > 100)
+                    {
+                        Log.outError(LogFilter.Sql, "{0} has too big percent value ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
+                        return false;
+                    }
+                    if (cond.ConditionValue2 >= (uint)ComparisionType.Max)
+                    {
+                        Log.outError(LogFilter.Sql, "{0} has invalid ComparisionType ({1}), skipped.", cond.ToString(true), cond.ConditionValue2);
+                        return false;
+                    }
+                    break;
+                }
+                case ConditionTypes.WorldState:
+                {
+                    if (Global.WorldMgr.GetWorldState((WorldStates)cond.ConditionValue1) == 0)
+                    {
+                        Log.outError(LogFilter.Sql, "{0} has non existing world state in value1 ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
+                        return false;
+                    }
+                    break;
+                }
+                case ConditionTypes.PhaseId:
+                {
+                    if (!CliDB.PhaseStorage.ContainsKey(cond.ConditionValue1))
+                    {
+                        Log.outError(LogFilter.Sql, "{0} has nonexistent phaseid in value1 ({1}), skipped", cond.ToString(true), cond.ConditionValue1);
+                        return false;
+                    }
+                    break;
+                }
+                case ConditionTypes.Title:
+                {
+                    CharTitlesRecord titleEntry = CliDB.CharTitlesStorage.LookupByKey(cond.ConditionValue1);
+                    if (titleEntry == null)
+                    {
+                        Log.outError(LogFilter.Sql, "{0} has non existing title in value1 ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
+                        return false;
+                    }
+                    break;
+                }
+                case ConditionTypes.SpawnmaskDeprecated:
+                {
+                    Log.outError(LogFilter.Sql, $"{cond.ToString(true)} using deprecated condition type CONDITION_SPAWNMASK.");
+                    return false;
+                }
                 case ConditionTypes.UnitState:
+                {
+                    if (cond.ConditionValue1 > (uint)UnitState.AllStateSupported)
                     {
-                        if (cond.ConditionValue1 > (uint)UnitState.AllStateSupported)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has non existing UnitState in value1 ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
-                            return false;
-                        }
-                        break;
+                        Log.outError(LogFilter.Sql, "{0} has non existing UnitState in value1 ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
+                        return false;
                     }
+                    break;
+                }
                 case ConditionTypes.CreatureType:
+                {
+                    if (cond.ConditionValue1 == 0 || cond.ConditionValue1 > (uint)CreatureType.GasCloud)
                     {
-                        if (cond.ConditionValue1 == 0 || cond.ConditionValue1 > (uint)CreatureType.GasCloud)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has non existing CreatureType in value1 ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
-                            return false;
-                        }
-                        break;
+                        Log.outError(LogFilter.Sql, "{0} has non existing CreatureType in value1 ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
+                        return false;
                     }
+                    break;
+                }
                 case ConditionTypes.RealmAchievement:
+                {
+                    AchievementRecord achievement = CliDB.AchievementStorage.LookupByKey(cond.ConditionValue1);
+                    if (achievement == null)
                     {
-                        AchievementRecord achievement = CliDB.AchievementStorage.LookupByKey(cond.ConditionValue1);
-                        if (achievement == null)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has non existing realm first achivement id ({1}), skipped.", cond.ToString(), cond.ConditionValue1);
-                            return false;
-                        }
-                        break;
+                        Log.outError(LogFilter.Sql, "{0} has non existing realm first achivement id ({1}), skipped.", cond.ToString(), cond.ConditionValue1);
+                        return false;
                     }
+                    break;
+                }
                 case ConditionTypes.StandState:
+                {
+                    bool valid;
+                    switch (cond.ConditionValue1)
                     {
-                        bool valid;
-                        switch (cond.ConditionValue1)
-                        {
-                            case 0:
-                                valid = cond.ConditionValue2 <= (uint)UnitStandStateType.Submerged;
-                                break;
-                            case 1:
-                                valid = cond.ConditionValue2 <= 1;
-                                break;
-                            default:
-                                valid = false;
-                                break;
-                        }
-                        if (!valid)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} has non-existing stand state ({1},{2}), skipped.", cond.ToString(true), cond.ConditionValue1, cond.ConditionValue2);
-                            return false;
-                        }
-                        break;
+                        case 0:
+                            valid = cond.ConditionValue2 <= (uint)UnitStandStateType.Submerged;
+                            break;
+                        case 1:
+                            valid = cond.ConditionValue2 <= 1;
+                            break;
+                        default:
+                            valid = false;
+                            break;
                     }
+                    if (!valid)
+                    {
+                        Log.outError(LogFilter.Sql, "{0} has non-existing stand state ({1},{2}), skipped.", cond.ToString(true), cond.ConditionValue1, cond.ConditionValue2);
+                        return false;
+                    }
+                    break;
+                }
                 case ConditionTypes.ObjectiveComplete:
+                {
+                    QuestObjective obj = Global.ObjectMgr.GetQuestObjective(cond.ConditionValue1);
+                    if (obj == null)
                     {
-                        QuestObjective obj = Global.ObjectMgr.GetQuestObjective(cond.ConditionValue1);
-                        if (obj == null)
-                        {
-                            Log.outError(LogFilter.Sql, "{0} points to non-existing quest objective ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
-                            return false;
-                        }
-                        break;
+                        Log.outError(LogFilter.Sql, "{0} points to non-existing quest objective ({1}), skipped.", cond.ToString(true), cond.ConditionValue1);
+                        return false;
                     }
+                    break;
+                }
                 case ConditionTypes.PetType:
                     if (cond.ConditionValue1 >= (1 << (int)PetType.Max))
                     {
@@ -1684,24 +1686,24 @@ namespace Game
                     return Global.LFGMgr.InLfgDungeonMap(player.GetGUID(), player.GetMapId(), player.GetMap().GetDifficultyID()) &&
                         Global.LFGMgr.SelectedRandomLfgDungeon(player.GetGUID()) ? 1 : 0u;
                 case PlayerConditionLfgStatus.InLFGFirstRandomDungeon:
-                    {
-                        if (!Global.LFGMgr.InLfgDungeonMap(player.GetGUID(), player.GetMapId(), player.GetMap().GetDifficultyID()))
-                            return 0;
-
-                        uint selectedRandomDungeon = Global.LFGMgr.GetSelectedRandomDungeon(player.GetGUID());
-                        if (selectedRandomDungeon == 0)
-                            return 0;
-
-                        DungeonFinding.LfgReward reward = Global.LFGMgr.GetRandomDungeonReward(selectedRandomDungeon, player.GetLevel());
-                        if (reward != null)
-                        {
-                            Quest quest = Global.ObjectMgr.GetQuestTemplate(reward.firstQuest);
-                            if (quest != null)
-                                if (player.CanRewardQuest(quest, false))
-                                    return 1;
-                        }
+                {
+                    if (!Global.LFGMgr.InLfgDungeonMap(player.GetGUID(), player.GetMapId(), player.GetMap().GetDifficultyID()))
                         return 0;
+
+                    uint selectedRandomDungeon = Global.LFGMgr.GetSelectedRandomDungeon(player.GetGUID());
+                    if (selectedRandomDungeon == 0)
+                        return 0;
+
+                    DungeonFinding.LfgReward reward = Global.LFGMgr.GetRandomDungeonReward(selectedRandomDungeon, player.GetLevel());
+                    if (reward != null)
+                    {
+                        Quest quest = Global.ObjectMgr.GetQuestTemplate(reward.firstQuest);
+                        if (quest != null)
+                            if (player.CanRewardQuest(quest, false))
+                                return 1;
                     }
+                    return 0;
+                }
                 case PlayerConditionLfgStatus.PartialClear:
                     break;
                 case PlayerConditionLfgStatus.StrangerCount:
@@ -2220,28 +2222,28 @@ namespace Game
             switch (valueType)
             {
                 case WorldStateExpressionValueType.Constant:
-                    {
-                        value = buffer.ReadInt32();
-                        break;
-                    }
+                {
+                    value = buffer.ReadInt32();
+                    break;
+                }
                 case WorldStateExpressionValueType.WorldState:
-                    {
-                        uint worldStateId = buffer.ReadUInt32();
-                        value = (int)Global.WorldMgr.GetWorldState(worldStateId);
-                        break;
-                    }
+                {
+                    uint worldStateId = buffer.ReadUInt32();
+                    value = (int)Global.WorldMgr.GetWorldState(worldStateId);
+                    break;
+                }
                 case WorldStateExpressionValueType.Function:
-                    {
-                        var functionType = (WorldStateExpressionFunctions)buffer.ReadUInt32();
-                        int arg1 = EvalSingleValue(buffer, player);
-                        int arg2 = EvalSingleValue(buffer, player);
+                {
+                    var functionType = (WorldStateExpressionFunctions)buffer.ReadUInt32();
+                    int arg1 = EvalSingleValue(buffer, player);
+                    int arg2 = EvalSingleValue(buffer, player);
 
-                        if (functionType >= WorldStateExpressionFunctions.Max)
-                            return 0;
+                    if (functionType >= WorldStateExpressionFunctions.Max)
+                        return 0;
 
-                        value = WorldStateExpressionFunction(functionType, player, arg1, arg2);
-                        break;
-                    }
+                    value = WorldStateExpressionFunction(functionType, player, arg1, arg2);
+                    break;
+                }
                 default:
                     break;
             }
