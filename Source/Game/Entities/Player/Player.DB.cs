@@ -433,7 +433,7 @@ namespace Game.Entities
                 if (childSkillLines != null)
                 {
                     foreach (var childItr in childSkillLines)
-                    { 
+                    {
                         if (mSkillStatus.Count >= SkillConst.MaxPlayerSkills)
                             break;
 
@@ -674,9 +674,9 @@ namespace Game.Entities
             {
                 do
                 {
-                    uint quest_id = result.Read<uint>(0);
+                    uint questId = result.Read<uint>(0);
                     // used to be new, no delete?
-                    Quest quest = Global.ObjectMgr.GetQuestTemplate(quest_id);
+                    Quest quest = Global.ObjectMgr.GetQuestTemplate(questId);
                     if (quest != null)
                     {
                         // find or create
@@ -689,7 +689,7 @@ namespace Game.Entities
                         {
                             questStatusData.Status = QuestStatus.Incomplete;
                             Log.outError(LogFilter.Player, "Player {0} (GUID: {1}) has invalid quest {2} status ({3}), replaced by QUEST_STATUS_INCOMPLETE(3).",
-                                GetName(), GetGUID().ToString(), quest_id, qstatus);
+                                GetName(), GetGUID().ToString(), questId, qstatus);
                         }
 
                         questStatusData.Explored = result.Read<byte>(2) > 0;
@@ -697,9 +697,9 @@ namespace Game.Entities
                         long acceptTime = result.Read<long>(3);
                         long endTime = result.Read<long>(4);
 
-                        if (quest.LimitTime != 0 && !GetQuestRewardStatus(quest_id))
+                        if (quest.LimitTime != 0 && !GetQuestRewardStatus(questId))
                         {
-                            AddTimedQuest(quest_id);
+                            AddTimedQuest(questId);
 
                             if (endTime <= GameTime.GetGameTime())
                                 questStatusData.Timer = 1;
@@ -713,7 +713,11 @@ namespace Game.Entities
                         if (slot < SharedConst.MaxQuestLogSize && questStatusData.Status != QuestStatus.None)
                         {
                             questStatusData.Slot = slot;
-                            SetQuestSlot(slot, quest_id);
+
+                            foreach (QuestObjective obj in quest.Objectives)
+                                m_questObjectiveStatus.Add((obj.Type, obj.ObjectID), new QuestObjectiveStatusData() { QuestStatusPair = (questId, questStatusData), Objective = obj });
+
+                            SetQuestSlot(slot, questId);
                             SetQuestSlotEndTime(slot, endTime);
                             SetQuestSlotAcceptTime(slot, acceptTime);
 
@@ -725,8 +729,8 @@ namespace Game.Entities
                             ++slot;
                         }
 
-                        m_QuestStatus[quest_id] = questStatusData;
-                        Log.outDebug(LogFilter.ServerLoading, "Quest status is {0} for quest {1} for player (GUID: {2})", questStatusData.Status, quest_id, GetGUID().ToString());
+                        m_QuestStatus[questId] = questStatusData;
+                        Log.outDebug(LogFilter.ServerLoading, "Quest status is {0} for quest {1} for player (GUID: {2})", questStatusData.Status, questId, GetGUID().ToString());
                     }
                 }
                 while (result.NextRow());
@@ -755,7 +759,6 @@ namespace Game.Entities
                         if (objective != null)
                         {
                             int data = result.Read<int>(2);
-                            m_questObjectiveStatus.Add((objective.Type, objective.ObjectID), new QuestObjectiveStatusData() { QuestStatusPair = (questID, questStatusData), Objective = objective });
                             if (!objective.IsStoringFlag())
                                 SetQuestSlotCounter(questStatusData.Slot, storageIndex, (ushort)data);
                             else if (data != 0)
@@ -2543,7 +2546,7 @@ namespace Game.Entities
             float orientation = result.Read<float>(fieldIndex++);
             string taximask = result.Read<string>(fieldIndex++);
             byte cinematic = result.Read<byte>(fieldIndex++);
-            uint totaltime = result.Read<uint> (fieldIndex++);
+            uint totaltime = result.Read<uint>(fieldIndex++);
             uint leveltime = result.Read<uint>(fieldIndex++);
             float rest_bonus = result.Read<float>(fieldIndex++);
             long logout_time = result.Read<long>(fieldIndex++);
@@ -2677,7 +2680,7 @@ namespace Game.Entities
 
                     ChrCustomizationChoice choice = new();
                     choice.ChrCustomizationOptionID = customizationsResult.Read<uint>(0);
-                    choice.ChrCustomizationChoiceID = customizationsResult.Read<uint>(1); 
+                    choice.ChrCustomizationChoiceID = customizationsResult.Read<uint>(1);
                     customizations.Add(choice);
 
                 } while (customizationsResult.NextRow());
@@ -3207,7 +3210,8 @@ namespace Game.Entities
                     default:
                     case 0:
                         break;             // disable
-                    case 1: SetGameMaster(true);
+                    case 1:
+                        SetGameMaster(true);
                         break;             // enable
                     case 2:                                         // save state
                         if (extra_flags.HasAnyFlag(PlayerExtraFlags.GMOn))
@@ -3218,7 +3222,8 @@ namespace Game.Entities
                 switch (WorldConfig.GetIntValue(WorldCfg.GmVisibleState))
                 {
                     default:
-                    case 0: SetGMVisible(false);
+                    case 0:
+                        SetGMVisible(false);
                         break;             // invisible
                     case 1:
                         break;             // visible
@@ -3233,7 +3238,8 @@ namespace Game.Entities
                     default:
                     case 0:
                         break;                 // disable
-                    case 1: SetGMChat(true);
+                    case 1:
+                        SetGMChat(true);
                         break;                 // enable
                     case 2:                                         // save state
                         if (extra_flags.HasAnyFlag(PlayerExtraFlags.GMChat))
@@ -3246,7 +3252,8 @@ namespace Game.Entities
                     default:
                     case 0:
                         break;         // disable
-                    case 1: SetAcceptWhispers(true);
+                    case 1:
+                        SetAcceptWhispers(true);
                         break;         // enable
                     case 2:                                         // save state
                         if (extra_flags.HasAnyFlag(PlayerExtraFlags.AcceptWhispers))
@@ -3810,385 +3817,385 @@ namespace Game.Entities
             {
                 // Completely remove from the database
                 case CharDeleteMethod.Remove:
+                {
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_COD_ITEM_MAIL);
+                    stmt.AddValue(0, guid);
+                    SQLResult resultMail = DB.Characters.Query(stmt);
+                    if (!resultMail.IsEmpty())
                     {
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_COD_ITEM_MAIL);
-                        stmt.AddValue(0, guid);
-                        SQLResult resultMail = DB.Characters.Query(stmt);
-                        if (!resultMail.IsEmpty())
-                        {
-                            MultiMap<uint, Item> itemsByMail = new();
+                        MultiMap<uint, Item> itemsByMail = new();
 
-                            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS);
+                        stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS);
+                        stmt.AddValue(0, guid);
+                        SQLResult resultItems = DB.Characters.Query(stmt);
+
+                        if (!resultItems.IsEmpty())
+                        {
+                            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_ARTIFACT);
                             stmt.AddValue(0, guid);
-                            SQLResult resultItems = DB.Characters.Query(stmt);
+                            SQLResult artifactResult = DB.Characters.Query(stmt);
 
-                            if (!resultItems.IsEmpty())
+                            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE);
+                            stmt.AddValue(0, guid);
+                            SQLResult azeriteResult = DB.Characters.Query(stmt);
+
+                            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE_MILESTONE_POWER);
+                            stmt.AddValue(0, guid);
+                            SQLResult azeriteItemMilestonePowersResult = DB.Characters.Query(stmt);
+
+                            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE_UNLOCKED_ESSENCE);
+                            stmt.AddValue(0, guid);
+                            SQLResult azeriteItemUnlockedEssencesResult = DB.Characters.Query(stmt);
+
+                            stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE_EMPOWERED);
+                            stmt.AddValue(0, guid);
+                            SQLResult azeriteEmpoweredItemResult = DB.Characters.Query(stmt);
+
+                            Dictionary<ulong, ItemAdditionalLoadInfo> additionalData = new();
+                            ItemAdditionalLoadInfo.Init(additionalData, artifactResult, azeriteResult, azeriteItemMilestonePowersResult, azeriteItemUnlockedEssencesResult, azeriteEmpoweredItemResult);
+
+                            do
                             {
-                                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_ARTIFACT);
-                                stmt.AddValue(0, guid);
-                                SQLResult artifactResult = DB.Characters.Query(stmt);
+                                uint mailId = resultItems.Read<uint>(44);
+                                Item mailItem = _LoadMailedItem(playerGuid, null, mailId, null, resultItems.GetFields(), additionalData.LookupByKey(resultItems.Read<ulong>(0)));
+                                if (mailItem != null)
+                                    itemsByMail.Add(mailId, mailItem);
 
-                                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE);
-                                stmt.AddValue(0, guid);
-                                SQLResult azeriteResult = DB.Characters.Query(stmt);
+                            } while (resultItems.NextRow());
+                        }
 
-                                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE_MILESTONE_POWER);
-                                stmt.AddValue(0, guid);
-                                SQLResult azeriteItemMilestonePowersResult = DB.Characters.Query(stmt);
+                        do
+                        {
+                            uint mail_id = resultMail.Read<uint>(0);
+                            MailMessageType mailType = (MailMessageType)resultMail.Read<byte>(1);
+                            ushort mailTemplateId = resultMail.Read<ushort>(2);
+                            uint sender = resultMail.Read<uint>(3);
+                            string subject = resultMail.Read<string>(4);
+                            string body = resultMail.Read<string>(5);
+                            ulong money = resultMail.Read<ulong>(6);
+                            bool has_items = resultMail.Read<bool>(7);
 
-                                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE_UNLOCKED_ESSENCE);
-                                stmt.AddValue(0, guid);
-                                SQLResult azeriteItemUnlockedEssencesResult = DB.Characters.Query(stmt);
+                            // We can return mail now
+                            // So firstly delete the old one
+                            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_MAIL_BY_ID);
+                            stmt.AddValue(0, mail_id);
+                            trans.Append(stmt);
 
-                                stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_MAILITEMS_AZERITE_EMPOWERED);
-                                stmt.AddValue(0, guid);
-                                SQLResult azeriteEmpoweredItemResult = DB.Characters.Query(stmt);
-
-                                Dictionary<ulong, ItemAdditionalLoadInfo> additionalData = new();
-                                ItemAdditionalLoadInfo.Init(additionalData, artifactResult, azeriteResult, azeriteItemMilestonePowersResult, azeriteItemUnlockedEssencesResult, azeriteEmpoweredItemResult);
-
-                                do
+                            // Mail is not from player
+                            if (mailType != MailMessageType.Normal)
+                            {
+                                if (has_items)
                                 {
-                                    uint mailId = resultItems.Read<uint>(44);
-                                    Item mailItem = _LoadMailedItem(playerGuid, null, mailId, null, resultItems.GetFields(), additionalData.LookupByKey(resultItems.Read<ulong>(0)));
-                                    if (mailItem != null)
-                                        itemsByMail.Add(mailId, mailItem);
-
-                                } while (resultItems.NextRow());
+                                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_MAIL_ITEM_BY_ID);
+                                    stmt.AddValue(0, mail_id);
+                                    trans.Append(stmt);
+                                }
+                                continue;
                             }
 
-                            do
+                            MailDraft draft = new(subject, body);
+                            if (mailTemplateId != 0)
+                                draft = new MailDraft(mailTemplateId, false);    // items are already included
+
+                            var itemsList = itemsByMail.LookupByKey(mail_id);
+                            if (itemsList != null)
                             {
-                                uint mail_id = resultMail.Read<uint>(0);
-                                MailMessageType mailType = (MailMessageType)resultMail.Read<byte>(1);
-                                ushort mailTemplateId = resultMail.Read<ushort>(2);
-                                uint sender = resultMail.Read<uint>(3);
-                                string subject = resultMail.Read<string>(4);
-                                string body = resultMail.Read<string>(5);
-                                ulong money = resultMail.Read<ulong>(6);
-                                bool has_items = resultMail.Read<bool>(7);
+                                foreach (Item item in itemsList)
+                                    draft.AddItem(item);
 
-                                // We can return mail now
-                                // So firstly delete the old one
-                                stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_MAIL_BY_ID);
-                                stmt.AddValue(0, mail_id);
-                                trans.Append(stmt);
-
-                                // Mail is not from player
-                                if (mailType != MailMessageType.Normal)
-                                {
-                                    if (has_items)
-                                    {
-                                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_MAIL_ITEM_BY_ID);
-                                        stmt.AddValue(0, mail_id);
-                                        trans.Append(stmt);
-                                    }
-                                    continue;
-                                }
-
-                                MailDraft draft = new(subject, body);
-                                if (mailTemplateId != 0)
-                                    draft = new MailDraft(mailTemplateId, false);    // items are already included
-
-                                var itemsList = itemsByMail.LookupByKey(mail_id);
-                                if (itemsList != null)
-                                {
-                                    foreach (Item item in itemsList)
-                                        draft.AddItem(item);
-
-                                    itemsByMail.Remove(mail_id);
-                                }
-
-                                stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_MAIL_ITEM_BY_ID);
-                                stmt.AddValue(0, mail_id);
-                                trans.Append(stmt);
-
-                                uint pl_account = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(ObjectGuid.Create(HighGuid.Player, guid));
-
-                                draft.AddMoney(money).SendReturnToSender(pl_account, guid, sender, trans);
+                                itemsByMail.Remove(mail_id);
                             }
-                            while (resultMail.NextRow());
 
-                            // Free remaining items
-                            foreach (var pair in itemsByMail)
-                                pair.Value.Dispose();
+                            stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_MAIL_ITEM_BY_ID);
+                            stmt.AddValue(0, mail_id);
+                            trans.Append(stmt);
+
+                            uint pl_account = Global.CharacterCacheStorage.GetCharacterAccountIdByGuid(ObjectGuid.Create(HighGuid.Player, guid));
+
+                            draft.AddMoney(money).SendReturnToSender(pl_account, guid, sender, trans);
                         }
+                        while (resultMail.NextRow());
 
-                        // Unsummon and delete for pets in world is not required: player deleted from CLI or character list with not loaded pet.
-                        // NOW we can finally clear other DB data related to character
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_PETS);
-                        stmt.AddValue(0, guid);
-                        SQLResult resultPets = DB.Characters.Query(stmt);
-
-                        if (!resultPets.IsEmpty())
-                        {
-                            do
-                            {
-                                uint petguidlow = resultPets.Read<uint>(0);
-                                Pet.DeleteFromDB(petguidlow);
-                            } while (resultPets.NextRow());
-                        }
-
-                        // Delete char from social list of online chars
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_SOCIAL);
-                        stmt.AddValue(0, guid);
-                        SQLResult resultFriends = DB.Characters.Query(stmt);
-
-                        if (!resultFriends.IsEmpty())
-                        {
-                            do
-                            {
-                                Player playerFriend = Global.ObjAccessor.FindPlayer(ObjectGuid.Create(HighGuid.Player, resultFriends.Read<ulong>(0)));
-                                if (playerFriend)
-                                {
-                                    playerFriend.GetSocial().RemoveFromSocialList(playerGuid, SocialFlag.All);
-                                    Global.SocialMgr.SendFriendStatus(playerFriend, FriendsResult.Removed, playerGuid);
-                                }
-                            } while (resultFriends.NextRow());
-                        }
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_CUSTOMIZATIONS);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PLAYER_ACCOUNT_DATA);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_DECLINED_NAME);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_ACTION);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_ARENA_STATS);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_AURA_EFFECT);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_AURA);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PLAYER_BGDATA);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_BATTLEGROUND_RANDOM);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_CUF_PROFILES);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PLAYER_CURRENCY);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_GIFT);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PLAYER_HOMEBIND);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_INSTANCE);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_INVENTORY);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_QUESTSTATUS);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_QUESTSTATUS_OBJECTIVES);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_QUESTSTATUS_REWARDED);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_REPUTATION);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_SPELL);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_SPELL_COOLDOWNS);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_GEMS_BY_OWNER);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_TRANSMOG_BY_OWNER);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_ARTIFACT_BY_OWNER);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_ARTIFACT_POWERS_BY_OWNER);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_MODIFIERS_BY_OWNER);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_BY_OWNER);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_MILESTONE_POWER_BY_OWNER);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_UNLOCKED_ESSENCE_BY_OWNER);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_EMPOWERED_BY_OWNER);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_BY_OWNER);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_SOCIAL_BY_FRIEND);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_SOCIAL_BY_GUID);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_MAIL);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_MAIL_ITEMS);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_PET_BY_OWNER);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_PET_DECLINEDNAME_BY_OWNER);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_ACHIEVEMENTS);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_ACHIEVEMENT_PROGRESS);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_EQUIPMENTSETS);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_TRANSMOG_OUTFITS);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GUILD_EVENTLOG_BY_PLAYER);
-                        stmt.AddValue(0, guid);
-                        stmt.AddValue(1, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GUILD_BANK_EVENTLOG_BY_PLAYER);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_GLYPHS);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_QUESTSTATUS_DAILY);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_QUESTSTATUS_WEEKLY);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_QUESTSTATUS_MONTHLY);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_QUESTSTATUS_SEASONAL);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_TALENT);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_SKILLS);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_STATS);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_VOID_STORAGE_ITEM_BY_CHAR_GUID);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_FISHINGSTEPS);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_FAVORITE_AUCTIONS_BY_CHAR);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_AURA_STORED_LOCATIONS_BY_GUID);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
-
-                        Corpse.DeleteFromDB(playerGuid, trans);
-
-                        Garrison.DeleteFromDB(guid, trans);
-
-                        Global.CharacterCacheStorage.DeleteCharacterCacheEntry(playerGuid, name);
-                        break;
+                        // Free remaining items
+                        foreach (var pair in itemsByMail)
+                            pair.Value.Dispose();
                     }
+
+                    // Unsummon and delete for pets in world is not required: player deleted from CLI or character list with not loaded pet.
+                    // NOW we can finally clear other DB data related to character
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_PETS);
+                    stmt.AddValue(0, guid);
+                    SQLResult resultPets = DB.Characters.Query(stmt);
+
+                    if (!resultPets.IsEmpty())
+                    {
+                        do
+                        {
+                            uint petguidlow = resultPets.Read<uint>(0);
+                            Pet.DeleteFromDB(petguidlow);
+                        } while (resultPets.NextRow());
+                    }
+
+                    // Delete char from social list of online chars
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.SEL_CHAR_SOCIAL);
+                    stmt.AddValue(0, guid);
+                    SQLResult resultFriends = DB.Characters.Query(stmt);
+
+                    if (!resultFriends.IsEmpty())
+                    {
+                        do
+                        {
+                            Player playerFriend = Global.ObjAccessor.FindPlayer(ObjectGuid.Create(HighGuid.Player, resultFriends.Read<ulong>(0)));
+                            if (playerFriend)
+                            {
+                                playerFriend.GetSocial().RemoveFromSocialList(playerGuid, SocialFlag.All);
+                                Global.SocialMgr.SendFriendStatus(playerFriend, FriendsResult.Removed, playerGuid);
+                            }
+                        } while (resultFriends.NextRow());
+                    }
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_CUSTOMIZATIONS);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PLAYER_ACCOUNT_DATA);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_DECLINED_NAME);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_ACTION);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_ARENA_STATS);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_AURA_EFFECT);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_AURA);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PLAYER_BGDATA);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_BATTLEGROUND_RANDOM);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_CUF_PROFILES);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PLAYER_CURRENCY);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_GIFT);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_PLAYER_HOMEBIND);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_INSTANCE);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_INVENTORY);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_QUESTSTATUS);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_QUESTSTATUS_OBJECTIVES);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_QUESTSTATUS_REWARDED);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_REPUTATION);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_SPELL);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_SPELL_COOLDOWNS);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_GEMS_BY_OWNER);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_TRANSMOG_BY_OWNER);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_ARTIFACT_BY_OWNER);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_ARTIFACT_POWERS_BY_OWNER);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_MODIFIERS_BY_OWNER);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_BY_OWNER);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_MILESTONE_POWER_BY_OWNER);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_UNLOCKED_ESSENCE_BY_OWNER);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_AZERITE_EMPOWERED_BY_OWNER);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_ITEM_INSTANCE_BY_OWNER);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_SOCIAL_BY_FRIEND);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_SOCIAL_BY_GUID);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_MAIL);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_MAIL_ITEMS);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_PET_BY_OWNER);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_PET_DECLINEDNAME_BY_OWNER);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_ACHIEVEMENTS);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_ACHIEVEMENT_PROGRESS);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_EQUIPMENTSETS);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_TRANSMOG_OUTFITS);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GUILD_EVENTLOG_BY_PLAYER);
+                    stmt.AddValue(0, guid);
+                    stmt.AddValue(1, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_GUILD_BANK_EVENTLOG_BY_PLAYER);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_GLYPHS);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_QUESTSTATUS_DAILY);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_QUESTSTATUS_WEEKLY);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_QUESTSTATUS_MONTHLY);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_QUESTSTATUS_SEASONAL);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_TALENT);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_SKILLS);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_STATS);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_VOID_STORAGE_ITEM_BY_CHAR_GUID);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHAR_FISHINGSTEPS);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_FAVORITE_AUCTIONS_BY_CHAR);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.DEL_CHARACTER_AURA_STORED_LOCATIONS_BY_GUID);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
+
+                    Corpse.DeleteFromDB(playerGuid, trans);
+
+                    Garrison.DeleteFromDB(guid, trans);
+
+                    Global.CharacterCacheStorage.DeleteCharacterCacheEntry(playerGuid, name);
+                    break;
+                }
                 // The character gets unlinked from the account, the name gets freed up and appears as deleted ingame
                 case CharDeleteMethod.Unlink:
-                    {
-                        stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_DELETE_INFO);
-                        stmt.AddValue(0, guid);
-                        trans.Append(stmt);
+                {
+                    stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_DELETE_INFO);
+                    stmt.AddValue(0, guid);
+                    trans.Append(stmt);
 
-                        Global.CharacterCacheStorage.UpdateCharacterInfoDeleted(playerGuid, true);
-                        break;
-                    }
+                    Global.CharacterCacheStorage.UpdateCharacterInfoDeleted(playerGuid, true);
+                    break;
+                }
                 default:
                     Log.outError(LogFilter.Player, "Player:DeleteFromDB: Unsupported delete method: {0}.", charDelete_method);
 
