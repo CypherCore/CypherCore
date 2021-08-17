@@ -4,7 +4,7 @@ public class GameTime
 {
     static long StartTime = Time.UnixTime;
 
-    static long _gameTime = 0;
+    static long _gameTime = Time.UnixTime;
     static uint _gameMSTime = 0;
 
     static DateTime _gameTimeSystemPoint = DateTime.MinValue;
