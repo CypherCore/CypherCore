@@ -3609,6 +3609,7 @@ namespace Game.Spells
 
             Unit target = aurApp.GetTarget();
 
+            // handle stack rules
             if (target.IsTypeId(TypeId.Player))
             {
                 target.ToPlayer().UpdateMeleeHitChances();
@@ -3616,8 +3617,9 @@ namespace Game.Spells
             }
             else
             {
-                target.ModMeleeHitChance += (apply) ? GetAmount() : (-GetAmount());
-                target.ModRangedHitChance += (apply) ? GetAmount() : (-GetAmount());
+                float value = target.GetTotalAuraModifier(AuraType.ModHitChance);
+                target.ModMeleeHitChance = value;
+                target.ModRangedHitChance = value;
             }
         }
 
