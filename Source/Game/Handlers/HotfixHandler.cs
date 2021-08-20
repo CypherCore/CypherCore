@@ -107,6 +107,9 @@ namespace Game
                                     hotfixData.Size = (uint)blobData.Length;
                                     hotfixQueryResponse.HotfixContent.WriteBytes(blobData);
                                 }
+                                else
+                                    // Do not send Status::Valid when we don't have a hotfix blob for current locale
+                                    hotfixData.Record.HotfixStatus = storage != null ? HotfixRecord.Status.RecordRemoved : HotfixRecord.Status.Invalid;
                             }
                         }
 
