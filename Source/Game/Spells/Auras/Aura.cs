@@ -2544,6 +2544,10 @@ namespace Game.Spells
 
         public override void FillTargetMap(ref Dictionary<Unit, uint> targets, Unit caster)
         {
+            Unit refe = caster;
+            if (refe == null)
+                refe = GetUnitOwner();
+
             foreach (SpellEffectInfo effect in GetSpellInfo().GetEffects())
             {
                 if (effect == null || !HasEffect(effect.EffectIndex))
@@ -2554,78 +2558,74 @@ namespace Game.Spells
                 // non-area aura
                 if (effect.Effect == SpellEffectName.ApplyAura)
                 {
-                    if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(GetUnitOwner(), caster, condList))
+                    if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(GetUnitOwner(), refe, condList))
                         targetList.Add(GetUnitOwner());
                 }
                 else
                 {
-                    Cypher.Assert(caster != null, $"Area aura (Id: {GetSpellInfo().Id}) has nullptr caster ({GetCasterGUID()})");
-                    Cypher.Assert(GetCasterGUID() == GetUnitOwner().GetGUID(), $"Area aura (Id: {GetSpellInfo().Id}) has owner ({GetUnitOwner().GetGUID()}) different to caster ({GetCasterGUID()})");
-
                     // skip area update if owner is not in world!
                     if (!GetUnitOwner().IsInWorld)
                         continue;
 
+                    if (GetUnitOwner().HasUnitState(UnitState.Isolated))
+                        continue;
+
                     float radius = effect.CalcRadius(caster);
-
-                    if (!GetUnitOwner().HasUnitState(UnitState.Isolated))
+                    SpellTargetCheckTypes selectionType = SpellTargetCheckTypes.Default;
+                    switch (effect.Effect)
                     {
-                        SpellTargetCheckTypes selectionType = SpellTargetCheckTypes.Default;
-                        switch (effect.Effect)
+                        case SpellEffectName.ApplyAreaAuraParty:
+                        case SpellEffectName.ApplyAreaAuraPartyNonrandom:
+                            selectionType = SpellTargetCheckTypes.Party;
+                            break;
+                        case SpellEffectName.ApplyAreaAuraRaid:
+                            selectionType = SpellTargetCheckTypes.Raid;
+                            break;
+                        case SpellEffectName.ApplyAreaAuraFriend:
+                            selectionType = SpellTargetCheckTypes.Ally;
+                            break;
+                        case SpellEffectName.ApplyAreaAuraEnemy:
+                            selectionType = SpellTargetCheckTypes.Enemy;
+                            break;
+                        case SpellEffectName.ApplyAreaAuraPet:
+                            if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(GetUnitOwner(), caster, condList))
+                                targetList.Add(GetUnitOwner());
+                            goto case SpellEffectName.ApplyAreaAuraOwner;
+                        case SpellEffectName.ApplyAreaAuraOwner:
                         {
-                            case SpellEffectName.ApplyAreaAuraParty:
-                            case SpellEffectName.ApplyAreaAuraPartyNonrandom:
-                                    selectionType = SpellTargetCheckTypes.Party;
-                                    break;
-                            case SpellEffectName.ApplyAreaAuraRaid:
-                                selectionType = SpellTargetCheckTypes.Raid;
-                                break;
-                            case SpellEffectName.ApplyAreaAuraFriend:
-                                selectionType = SpellTargetCheckTypes.Ally;
-                                break;
-                            case SpellEffectName.ApplyAreaAuraEnemy:
-                                selectionType = SpellTargetCheckTypes.Enemy;
-                                break;
-                            case SpellEffectName.ApplyAreaAuraPet:
-                                if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(GetUnitOwner(), caster, condList))
-                                    targetList.Add(GetUnitOwner());
-                                goto case SpellEffectName.ApplyAreaAuraOwner;
-                            case SpellEffectName.ApplyAreaAuraOwner:
-                                {
-                                    Unit owner = GetUnitOwner().GetCharmerOrOwner();
-                                    if (owner != null)
-                                        if (GetUnitOwner().IsWithinDistInMap(owner, radius))
-                                            if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(owner, caster, condList))
-                                                targetList.Add(owner);
-                                    break;
-                                }
-                            case SpellEffectName.ApplyAuraOnPet:
-                                {
-                                    Unit pet = Global.ObjAccessor.GetUnit(GetUnitOwner(), GetUnitOwner().GetPetGUID());
-                                    if (pet != null)
-                                        if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(pet, caster, condList))
-                                            targetList.Add(pet);
-                                    break;
-                                }
-                            case SpellEffectName.ApplyAreaAuraSummons:
-                                {
-                                    if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(GetUnitOwner(), caster, condList))
-                                        targetList.Add(GetUnitOwner());
-
-                                    selectionType = SpellTargetCheckTypes.Summoned;
-                                    break;
-                                }
+                            Unit owner = GetUnitOwner().GetCharmerOrOwner();
+                            if (owner != null)
+                                if (GetUnitOwner().IsWithinDistInMap(owner, radius))
+                                    if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(owner, caster, condList))
+                                        targetList.Add(owner);
+                            break;
                         }
-
-                        if (selectionType != SpellTargetCheckTypes.Default)
+                        case SpellEffectName.ApplyAuraOnPet:
                         {
-                            WorldObjectSpellAreaTargetCheck check = new(radius, GetUnitOwner(), caster, caster, GetSpellInfo(), selectionType, condList, SpellTargetObjectTypes.Unit);
-                            UnitListSearcher searcher = new(GetUnitOwner(), targetList, check);
-                            Cell.VisitAllObjects(GetUnitOwner(), searcher, radius);
-
-                            // by design WorldObjectSpellAreaTargetCheck allows not-in-world units (for spells) but for auras it is not acceptable
-                            targetList.RemoveAll(unit => !unit.IsSelfOrInSameMap(GetUnitOwner()));
+                            Unit pet = Global.ObjAccessor.GetUnit(GetUnitOwner(), GetUnitOwner().GetPetGUID());
+                            if (pet != null)
+                                if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(pet, caster, condList))
+                                    targetList.Add(pet);
+                            break;
                         }
+                        case SpellEffectName.ApplyAreaAuraSummons:
+                        {
+                            if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(GetUnitOwner(), caster, condList))
+                                targetList.Add(GetUnitOwner());
+
+                            selectionType = SpellTargetCheckTypes.Summoned;
+                            break;
+                        }
+                    }
+
+                    if (selectionType != SpellTargetCheckTypes.Default)
+                    {
+                        WorldObjectSpellAreaTargetCheck check = new(radius, GetUnitOwner(), caster, caster, GetSpellInfo(), selectionType, condList, SpellTargetObjectTypes.Unit);
+                        UnitListSearcher searcher = new(GetUnitOwner(), targetList, check);
+                        Cell.VisitAllObjects(GetUnitOwner(), searcher, radius);
+
+                        // by design WorldObjectSpellAreaTargetCheck allows not-in-world units (for spells) but for auras it is not acceptable
+                        targetList.RemoveAll(unit => !unit.IsSelfOrInSameMap(GetUnitOwner()));
                     }
                 }
 
