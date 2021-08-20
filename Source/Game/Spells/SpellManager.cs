@@ -1423,6 +1423,10 @@ namespace Game.Entities
                             Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has wrong `HitMask` set: {1}", spellInfo.Id, procEntry.HitMask);
                         if (procEntry.HitMask != 0 && !(Convert.ToBoolean(procEntry.ProcFlags & ProcFlags.TakenHitMask) || (Convert.ToBoolean(procEntry.ProcFlags & ProcFlags.DoneHitMask) && (procEntry.SpellPhaseMask == 0 || Convert.ToBoolean(procEntry.SpellPhaseMask & (ProcFlagsSpellPhase.Hit | ProcFlagsSpellPhase.Finish))))))
                             Log.outError(LogFilter.Sql, "`spell_proc` table entry for spellId {0} has `HitMask` value defined, but it won't be used for defined `ProcFlags` and `SpellPhaseMask` values", spellInfo.Id);
+                        for (uint i = 0; i < SpellConst.MaxEffects; ++i)
+                            if ((procEntry.DisableEffectsMask & (1u << (int)i)) != 0 && (!spellInfo.HasEffect((SpellEffectName)i) || !spellInfo.GetEffect(i).IsAura()))
+                                Log.outError(LogFilter.Sql, $"The `spell_proc` table entry for spellId {spellInfo.Id} has DisableEffectsMask with effect {i}, but effect {i} is not an aura effect");
+
                         if (procEntry.AttributesMask.HasFlag(ProcAttributes.ReqSpellmod))
                         {
                             bool found = false;
@@ -1474,6 +1478,7 @@ namespace Game.Entities
 
                 bool addTriggerFlag = false;
                 ProcFlagsSpellType procSpellTypeMask = ProcFlagsSpellType.None;
+                uint nonProcMask = 0;
                 foreach (SpellEffectInfo effect in spellInfo.GetEffects())
                 {
                     if (effect == null || !effect.IsEffect())
@@ -1484,7 +1489,11 @@ namespace Game.Entities
                         continue;
 
                     if (!IsTriggerAura(auraName))
+                    {
+                        // explicitly disable non proccing auras to avoid losing charges on self proc
+                        nonProcMask |= 1u << (int)effect.EffectIndex;
                         continue;
+                    }
 
                     procSpellTypeMask |= GetSpellTypeMask(auraName);
                     if (IsAlwaysTriggeredAura(auraName))
@@ -1504,7 +1513,6 @@ namespace Game.Entities
                                 break;
                         }
                     }
-                    break;
                 }
 
                 if (procSpellTypeMask == 0)
@@ -1563,7 +1571,7 @@ namespace Game.Entities
                 }
 
                 procEntry.AttributesMask = 0;
-                procEntry.DisableEffectsMask = 0;
+                procEntry.DisableEffectsMask = nonProcMask;
                 if (spellInfo.ProcFlags.HasAnyFlag(ProcFlags.Kill))
                     procEntry.AttributesMask |= ProcAttributes.ReqExpOrHonor;
                 if (addTriggerFlag)
