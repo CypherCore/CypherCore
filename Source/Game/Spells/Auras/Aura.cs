@@ -965,9 +965,21 @@ namespace Game.Spells
                 return false;
 
             // Check if aura is single target, not only spell info
-            if (GetCasterGUID() != GetOwner().GetGUID() || IsSingleTarget())
-                if (GetSpellInfo().IsSingleTarget())
+            if (GetCasterGUID() != GetOwner().GetGUID())
+            {
+                // owner == caster for area auras, check for possible bad data in DB
+                foreach (SpellEffectInfo effect in GetSpellInfo().GetEffects())
+                {
+                    if (effect == null || !effect.IsEffect())
+                        continue;
+
+                    if (effect.IsTargetingArea() || effect.IsAreaAuraEffect())
+                        return false;
+                }
+
+                if (IsSingleTarget() || GetSpellInfo().IsSingleTarget())
                     return false;
+            }
 
             if (GetSpellInfo().HasAttribute(SpellCustomAttributes.AuraCannotBeSaved))
                 return false;
@@ -2547,6 +2559,9 @@ namespace Game.Spells
                 }
                 else
                 {
+                    Cypher.Assert(caster != null, $"Area aura (Id: {GetSpellInfo().Id}) has nullptr caster ({GetCasterGUID()})");
+                    Cypher.Assert(GetCasterGUID() == GetUnitOwner().GetGUID(), $"Area aura (Id: {GetSpellInfo().Id}) has owner ({GetUnitOwner().GetGUID()}) different to caster ({GetCasterGUID()})");
+
                     // skip area update if owner is not in world!
                     if (!GetUnitOwner().IsInWorld)
                         continue;

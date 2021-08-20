@@ -2962,6 +2962,13 @@ namespace Game.Entities
                     if (effect.TargetA.GetSelectionCategory() == SpellTargetSelectionCategories.Cone || effect.TargetB.GetSelectionCategory() == SpellTargetSelectionCategories.Cone)
                         if (MathFunctions.fuzzyEq(spellInfo.ConeAngle, 0.0f))
                             spellInfo.ConeAngle = 90.0f;
+
+                    // Area auras may not target area (they're self cast)
+                    if (effect.IsAreaAuraEffect() && effect.IsTargetingArea())
+                    {
+                        effect.TargetA = new(Targets.UnitCaster);
+                        effect.TargetB = new();
+                    }
                 }
 
                 // disable proc for magnet auras, they're handled differently
