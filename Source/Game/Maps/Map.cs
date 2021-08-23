@@ -2085,7 +2085,6 @@ namespace Game.Maps
             {
                 data.AreaId = areaEntry.Id;
                 data.FloorZ = vmapData.floorZ;
-                data.outdoors = IsOutdoorWMO(vmapData.areaInfo.Value.MogpFlags, wmoEntry, areaEntry);
             }
             else
             {
@@ -2101,8 +2100,12 @@ namespace Game.Maps
                     areaEntry = CliDB.AreaTableStorage.LookupByKey(data.AreaId);
 
                 data.FloorZ = mapHeight;
-                data.outdoors = true; // @todo default true taken from old GetAreaId check, maybe review
             }
+
+            if (vmapData.areaInfo.HasValue)
+                data.outdoors = IsOutdoorWMO(vmapData.areaInfo.Value.MogpFlags, wmoEntry, areaEntry);
+            else
+                data.outdoors = true; // @todo default true taken from old GetAreaId check, maybe review
 
             // liquid processing
             data.LiquidStatus = ZLiquidStatus.NoWater;
