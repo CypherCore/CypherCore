@@ -4277,6 +4277,7 @@ namespace Game.Achievements
                     {
                         Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type CRITERIA_DATA_TYPE_MAP_ID ({2}) contains an unknown map entry in value1 ({3}), ignored.",
                             criteria.Id, criteria.Entry.Type, DataType, MapId.Id);
+                        return false;
                     }
                     return true;
                 case CriteriaDataType.SPlayerClassRace:
