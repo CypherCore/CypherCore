@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Framework.Database;
+using Framework.IO;
 using Game.Conditions;
 using Game.DataStorage;
 using Game.Entities;
@@ -25,7 +26,7 @@ using Game.Loots;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using Framework.IO;
+using System.Linq;
 
 namespace Game
 {
@@ -582,17 +583,40 @@ namespace Game
                     if (effect == null)
                         continue;
 
-                    // check if effect is already a part of some shared mask
-                    bool found = false;
-                    foreach (var value in sharedMasks)
+                    // additional checks by condition type
+                    if ((conditionEffMask & (1 << i)) != 0)
                     {
-                        if (((1 << i) & value) != 0)
+                        switch (cond.ConditionType)
                         {
-                            found = true;
-                            break;
+                            case ConditionTypes.ObjectEntryGuid:
+                            {
+                                SpellCastTargetFlags implicitTargetMask = SpellInfo.GetTargetFlagMask(effect.TargetA.GetObjectType()) | SpellInfo.GetTargetFlagMask(effect.TargetB.GetObjectType());
+                                if (implicitTargetMask.HasFlag(SpellCastTargetFlags.UnitMask) && cond.ConditionValue1 != (uint)TypeId.Unit && cond.ConditionValue1 != (uint)TypeId.Player)
+                                {
+                                    Log.outError(LogFilter.Sql, $"{cond} in `condition` table - spell {spellInfo.Id} EFFECT_{i} - target requires ConditionValue1 to be either TYPEID_UNIT ({(uint)TypeId.Unit}) or TYPEID_PLAYER ({(uint)TypeId.Player})");
+                                    return;
+                                }
+
+                                if (implicitTargetMask.HasFlag(SpellCastTargetFlags.GameobjectMask) && cond.ConditionValue1 != (uint)TypeId.GameObject)
+                                {
+                                    Log.outError(LogFilter.Sql, $"{cond} in `condition` table - spell {spellInfo.Id} EFFECT_{i} - target requires ConditionValue1 to be TYPEID_GAMEOBJECT ({(uint)TypeId.GameObject})");
+                                    return;
+                                }
+
+                                if (implicitTargetMask.HasFlag(SpellCastTargetFlags.CorpseMask) && cond.ConditionValue1 != (uint)TypeId.Corpse)
+                                {
+                                    Log.outError(LogFilter.Sql, $"{cond} in `condition` table - spell {spellInfo.Id} EFFECT_{i} - target requires ConditionValue1 to be TYPEID_CORPSE ({(uint)TypeId.Corpse})");
+                                    return;
+                                }
+                                break;
+                            }
+                            default:
+                                break;
                         }
                     }
-                    if (found)
+
+                    // check if effect is already a part of some shared mask
+                    if (sharedMasks.Any(mask => !!Convert.ToBoolean(mask & (1 << i))))
                         continue;
 
                     // build new shared mask with found effect
@@ -610,15 +634,15 @@ namespace Game
                     sharedMasks.Add(sharedMask);
                 }
 
-                foreach (var value in sharedMasks)
+                foreach (var effectMask in sharedMasks)
                 {
                     // some effect indexes should have same data
-                    uint commonMask = (value & conditionEffMask);
+                    uint commonMask = (effectMask & conditionEffMask);
                     if (commonMask != 0)
                     {
                         byte firstEffIndex = 0;
                         for (; firstEffIndex < SpellConst.MaxEffects; ++firstEffIndex)
-                            if (((1 << firstEffIndex) & value) != 0)
+                            if (((1 << firstEffIndex) & effectMask) != 0)
                                 break;
 
                         if (firstEffIndex >= SpellConst.MaxEffects)
@@ -635,7 +659,7 @@ namespace Game
                         if (sharedList != null)
                         {
                             // we have overlapping masks in db
-                            if (conditionEffMask != value)
+                            if (conditionEffMask != effectMask)
                             {
                                 Log.outError(LogFilter.Sql, "{0} in `condition` table, has incorrect SourceGroup {1} (spell effectMask) set - " +
                                    "effect masks are overlapping (all SourceGroup values having given bit set must be equal) - ignoring.", cond.ToString(), cond.SourceGroup);

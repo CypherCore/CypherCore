@@ -1345,6 +1345,7 @@ namespace Framework.Constants
         NoActions = 4
     }
 
+    [Flags]
     public enum SpellCastTargetFlags
     {
         None = 0x0,
