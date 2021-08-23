@@ -484,7 +484,10 @@ namespace Game.Entities
             if (petType == PetType.Hunter) // Hunter pets have focus
                 SetPowerType(PowerType.Focus);
             else if (IsPetGhoul() || IsPetAbomination()) // DK pets have energy
+            {
                 SetPowerType(PowerType.Energy);
+                SetFullPower(PowerType.Energy);
+            }
             else if (IsPetImp() || IsPetFelhunter() || IsPetVoidwalker() || IsPetSuccubus() || IsPetDoomguard() || IsPetFelguard()) // Warlock pets have energy (since 5.x)
                 SetPowerType(PowerType.Energy);
             else
