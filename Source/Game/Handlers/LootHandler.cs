@@ -106,7 +106,7 @@ namespace Game
                     player.SendNewItem(resultValue.item, resultValue.count, false, false, true);
                     player.UpdateCriteria(CriteriaTypes.LootItem, resultValue.item.GetEntry(), resultValue.count);
                     player.UpdateCriteria(CriteriaTypes.LootType, resultValue.item.GetEntry(), resultValue.count, (ulong)resultValue.lootType);
-                    player.UpdateCriteria(CriteriaTypes.LootEpicItem, resultValue.item.GetEntry(), resultValue.count);
+                    player.UpdateCriteria(CriteriaTypes.LootAnyItem, resultValue.item.GetEntry(), resultValue.count);
                 }
             }
         }
@@ -553,7 +553,7 @@ namespace Game
                 target.SendNewItem(resultValue.item, resultValue.count, false, false, true);
                 target.UpdateCriteria(CriteriaTypes.LootItem, resultValue.item.GetEntry(), resultValue.count);
                 target.UpdateCriteria(CriteriaTypes.LootType, resultValue.item.GetEntry(), resultValue.count, (ulong)resultValue.lootType);
-                target.UpdateCriteria(CriteriaTypes.LootEpicItem, resultValue.item.GetEntry(), resultValue.count);
+                target.UpdateCriteria(CriteriaTypes.LootAnyItem, resultValue.item.GetEntry(), resultValue.count);
             }
         }
 

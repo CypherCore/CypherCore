@@ -5259,6 +5259,7 @@ namespace Game.Entities
             }
 
             UpdateCriteria(CriteriaTypes.ReachLevel);
+            UpdateCriteria(CriteriaTypes.ActivelyReachLevel, level);
 
             PushQuests();
 

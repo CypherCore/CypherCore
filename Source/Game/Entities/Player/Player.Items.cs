@@ -1268,7 +1268,7 @@ namespace Game.Entities
             if (item != null)
             {
                 ItemAddedQuestCheck(itemId, count);
-                UpdateCriteria(CriteriaTypes.ReceiveEpicItem, itemId, count);
+                UpdateCriteria(CriteriaTypes.ObtainAnyItem, itemId, count);
                 UpdateCriteria(CriteriaTypes.OwnItem, itemId, 1);
 
                 item.AddItemFlag(ItemFieldFlags.NewItem);
@@ -1539,7 +1539,7 @@ namespace Game.Entities
             if (pItem != null)
             {
                 ItemAddedQuestCheck(item, 1);
-                UpdateCriteria(CriteriaTypes.ReceiveEpicItem, item, 1);
+                UpdateCriteria(CriteriaTypes.ObtainAnyItem, item, 1);
                 return EquipItem(pos, pItem, update);
             }
 
@@ -1648,7 +1648,7 @@ namespace Game.Entities
 
             // only for full equip instead adding to stack
             UpdateCriteria(CriteriaTypes.EquipItem, pItem.GetEntry());
-            UpdateCriteria(CriteriaTypes.EquipEpicItem, slot, pItem.GetEntry());
+            UpdateCriteria(CriteriaTypes.EquipItemInSlot, slot, pItem.GetEntry());
 
             UpdateAverageItemLevelEquipped();
 
@@ -1776,7 +1776,7 @@ namespace Game.Entities
                     CheckTitanGripPenalty();
 
                 UpdateCriteria(CriteriaTypes.EquipItem, pItem.GetEntry());
-                UpdateCriteria(CriteriaTypes.EquipEpicItem, slot, pItem.GetEntry());
+                UpdateCriteria(CriteriaTypes.EquipItemInSlot, slot, pItem.GetEntry());
             }
         }
         public void SendEquipError(InventoryResult msg, Item item1 = null, Item item2 = null, uint itemId = 0)
@@ -4236,7 +4236,7 @@ namespace Game.Entities
         {
             // update quest counters
             ItemAddedQuestCheck(pItem.GetEntry(), pItem.GetCount());
-            UpdateCriteria(CriteriaTypes.ReceiveEpicItem, pItem.GetEntry(), pItem.GetCount());
+            UpdateCriteria(CriteriaTypes.ObtainAnyItem, pItem.GetEntry(), pItem.GetCount());
 
             // store item
             Item pLastItem = StoreItem(dest, pItem, update);
@@ -5934,7 +5934,7 @@ namespace Game.Entities
                     SendNewItem(newitem, item.count, false, false, true);
                     UpdateCriteria(CriteriaTypes.LootItem, item.itemid, item.count);
                     UpdateCriteria(CriteriaTypes.LootType, item.itemid, item.count, (ulong)loot.loot_type);
-                    UpdateCriteria(CriteriaTypes.LootEpicItem, item.itemid, item.count);
+                    UpdateCriteria(CriteriaTypes.LootAnyItem, item.itemid, item.count);
                 }
                 else
                     aeResult.Add(newitem, item.count, loot.loot_type);

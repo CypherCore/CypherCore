@@ -106,8 +106,8 @@ namespace Game.Achievements
                     case CriteriaTypes.QuestAbandoned:
                     case CriteriaTypes.FlightPathsTaken:
                     case CriteriaTypes.AcceptedSummonings:
-                    case CriteriaTypes.LootEpicItem:
-                    case CriteriaTypes.ReceiveEpicItem:
+                    case CriteriaTypes.LootAnyItem:
+                    case CriteriaTypes.ObtainAnyItem:
                     case CriteriaTypes.Death:
                     case CriteriaTypes.CompleteDailyQuest:
                     case CriteriaTypes.CompleteBattleground:
@@ -139,7 +139,6 @@ namespace Game.Achievements
                     case CriteriaTypes.OnLogin:
                     case CriteriaTypes.PlaceGarrisonBuilding:
                     case CriteriaTypes.UpgradeGarrisonBuilding:
-                    case CriteriaTypes.OwnBattlePetCount:
                     case CriteriaTypes.HonorLevelReached:
                     case CriteriaTypes.PrestigeReached:
                     case CriteriaTypes.CompleteQuestAccumulate:
@@ -258,11 +257,12 @@ namespace Game.Achievements
                     case CriteriaTypes.LearnSpell:
                     case CriteriaTypes.ExploreArea:
                     case CriteriaTypes.VisitBarberShop:
-                    case CriteriaTypes.EquipEpicItem:
+                    case CriteriaTypes.EquipItemInSlot:
                     case CriteriaTypes.EquipItem:
                     case CriteriaTypes.CompleteAchievement:
                     case CriteriaTypes.RecruitGarrisonFollower:
                     case CriteriaTypes.OwnBattlePet:
+                    case CriteriaTypes.ActivelyReachLevel:
                         SetCriteriaProgress(criteria, 1, referencePlayer);
                         break;
                     case CriteriaTypes.BuyBankSlot:
@@ -352,6 +352,9 @@ namespace Game.Achievements
                             }
                             break;
                         }
+                    case CriteriaTypes.OwnBattlePetCount:
+                        SetCriteriaProgress(criteria, referencePlayer.GetSession().GetBattlePetMgr().GetPetUniqueSpeciesCount(), referencePlayer);
+                        break;
                     case CriteriaTypes.ReachGuildLevel:
                         SetCriteriaProgress(criteria, miscValue1, referencePlayer);
                         break;
@@ -447,6 +450,8 @@ namespace Game.Achievements
                     case CriteriaTypes.MythicKeystoneCompleted:
                     case CriteriaTypes.ApplyConduit:
                     case CriteriaTypes.ConvertItemsToCurrency:
+                    case CriteriaTypes.ExpansionLevel:
+                    case CriteriaTypes.OwnItemModifiedAppearance:
                         break;                                   // Not implemented yet :(
                 }
 
@@ -794,7 +799,7 @@ namespace Game.Achievements
                 case CriteriaTypes.GainReputation:
                 case CriteriaTypes.GainExaltedReputation:
                 case CriteriaTypes.VisitBarberShop:
-                case CriteriaTypes.EquipEpicItem:
+                case CriteriaTypes.EquipItemInSlot:
                 case CriteriaTypes.RollNeedOnLoot:
                 case CriteriaTypes.RollGreedOnLoot:
                 case CriteriaTypes.HkClass:
@@ -835,6 +840,7 @@ namespace Game.Achievements
                 case CriteriaTypes.OwnBattlePet:
                 case CriteriaTypes.HonorLevelReached:
                 case CriteriaTypes.PrestigeReached:
+                case CriteriaTypes.ActivelyReachLevel:
                 case CriteriaTypes.TransmogSetUnlocked:
                     return progress.Counter >= 1;
                 case CriteriaTypes.LearnSkillLevel:
@@ -939,11 +945,13 @@ namespace Game.Achievements
                 case CriteriaTypes.HighestHitDealt:
                 case CriteriaTypes.HighestHitReceived:
                 case CriteriaTypes.HonorableKill:
+                case CriteriaTypes.LootAnyItem:
                 case CriteriaTypes.LootMoney:
                 case CriteriaTypes.LoseDuel:
                 case CriteriaTypes.MoneyFromQuestReward:
                 case CriteriaTypes.MoneyFromVendors:
                 case CriteriaTypes.NumberOfTalentResets:
+                case CriteriaTypes.ObtainAnyItem:
                 case CriteriaTypes.QuestAbandoned:
                 case CriteriaTypes.ReachGuildLevel:
                 case CriteriaTypes.RollGreed:
@@ -974,6 +982,7 @@ namespace Game.Achievements
                 case CriteriaTypes.KnownFactions:
                 case CriteriaTypes.ReachLevel:
                 case CriteriaTypes.OnLogin:
+                case CriteriaTypes.OwnBattlePetCount:
                     break;
                 case CriteriaTypes.CompleteAchievement:
                     if (!RequiredAchievementSatisfied(criteria.Entry.Asset))
@@ -1118,8 +1127,9 @@ namespace Game.Achievements
                     if (miscValue1 != 0 && miscValue1 != criteria.Entry.Asset)
                         return false;
                     break;
-                case CriteriaTypes.EquipEpicItem:
-                    // miscValue1 = itemSlot miscValue2 = itemid
+                case CriteriaTypes.EquipItemInSlot:
+                case CriteriaTypes.AppearanceUnlockedBySlot:
+                    // miscValue1 = EquipmentSlot miscValue2 = itemid | itemModifiedAppearanceId
                     if (miscValue2 == 0 || miscValue1 != criteria.Entry.Asset)
                         return false;
                     break;
@@ -1164,16 +1174,6 @@ namespace Game.Achievements
                     if (miscValue1 != 0 && miscValue1 != criteria.Entry.Asset)
                         return false;
                     break;
-                case CriteriaTypes.LootEpicItem:
-                case CriteriaTypes.ReceiveEpicItem:
-                    {
-                        if (miscValue1 == 0)
-                            return false;
-                        ItemTemplate proto = Global.ObjectMgr.GetItemTemplate((uint)miscValue1);
-                        if (proto == null || proto.GetQuality() < ItemQuality.Epic)
-                            return false;
-                        break;
-                    }
                 case CriteriaTypes.HkClass:
                     if (miscValue1 == 0 || miscValue1 != criteria.Entry.Asset)
                         return false;
@@ -1187,6 +1187,7 @@ namespace Game.Achievements
                         return false;
                     break;
                 case CriteriaTypes.HonorableKillAtArea:
+                case CriteriaTypes.TravelledToArea:
                     if (miscValue1 == 0 || miscValue1 != criteria.Entry.Asset)
                         return false;
                     break;
@@ -1202,11 +1203,20 @@ namespace Game.Achievements
                 case CriteriaTypes.HighestTeamRating:
                     return false;
                 case CriteriaTypes.PlaceGarrisonBuilding:
+                case CriteriaTypes.ConstructGarrisonBuilding:
                     if (miscValue1 != criteria.Entry.Asset)
                         return false;
                     break;
-                case CriteriaTypes.TravelledToArea:
+                case CriteriaTypes.RecruitGarrisonFollower:
                     if (miscValue1 != criteria.Entry.Asset)
+                        return false;
+                    break;
+                case CriteriaTypes.TransmogSetUnlocked:
+                    if (miscValue1 != criteria.Entry.Asset)
+                        return false;
+                    break;
+                case CriteriaTypes.ActivelyReachLevel:
+                    if (miscValue1 == 0 || miscValue1 != criteria.Entry.Asset)
                         return false;
                     break;
                 default:
@@ -3860,7 +3870,7 @@ namespace Game.Achievements
                 case CriteriaTypes.LootItem:
                 case CriteriaTypes.ExploreArea:
                 case CriteriaTypes.GainReputation:
-                case CriteriaTypes.EquipEpicItem:
+                case CriteriaTypes.EquipItemInSlot:
                 case CriteriaTypes.HkClass:
                 case CriteriaTypes.HkRace:
                 case CriteriaTypes.DoEmote:
@@ -4089,7 +4099,7 @@ namespace Game.Achievements
                 case CriteriaTypes.CastSpell2:
                 case CriteriaTypes.BeSpellTarget:
                 case CriteriaTypes.BeSpellTarget2:
-                case CriteriaTypes.EquipEpicItem:
+                case CriteriaTypes.EquipItemInSlot:
                 case CriteriaTypes.RollNeedOnLoot:
                 case CriteriaTypes.RollGreedOnLoot:
                 case CriteriaTypes.BgObjectiveCapture:
@@ -4099,8 +4109,8 @@ namespace Game.Achievements
                 case CriteriaTypes.GetKillingBlows:
                 case CriteriaTypes.ReachLevel:
                 case CriteriaTypes.OnLogin:
-                case CriteriaTypes.LootEpicItem:
-                case CriteriaTypes.ReceiveEpicItem:
+                case CriteriaTypes.LootAnyItem:
+                case CriteriaTypes.ObtainAnyItem:
                     break;
                 default:
                     if (DataType != CriteriaDataType.Script)
@@ -4402,7 +4412,7 @@ namespace Game.Achievements
                     {
                         Criteria entry = Global.CriteriaMgr.GetCriteria(criteriaId);
 
-                        uint itemId = entry.Entry.Type == CriteriaTypes.EquipEpicItem ? miscValue2 : miscValue1;
+                        uint itemId = entry.Entry.Type == CriteriaTypes.EquipItemInSlot ? miscValue2 : miscValue1;
                         ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemId);
                         if (itemTemplate == null)
                             return false;
