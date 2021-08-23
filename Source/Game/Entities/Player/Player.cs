@@ -1774,7 +1774,7 @@ namespace Game.Entities
                 }
 
                 // remove arena spell coldowns/buffs now to also remove pet's cooldowns before it's temporarily unsummoned
-                if (mEntry.IsBattleArena())
+                if (mEntry.IsBattleArena() && !IsGameMaster())
                 {
                     RemoveArenaSpellCooldowns(true);
                     RemoveArenaAuras();
