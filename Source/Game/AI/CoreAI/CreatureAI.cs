@@ -252,13 +252,13 @@ namespace Game.AI
             List<KeyValuePair<int, int>> outOfBounds = new();
 
             Position startPosition = owner.GetPosition();
-            if (!CheckBoundary(startPosition)) // fall back to creature position
+            if (!IsInBoundary(startPosition)) // fall back to creature position
             {
                 startPosition = me.GetPosition();
-                if (!CheckBoundary(startPosition))
+                if (!IsInBoundary(startPosition))
                 {
                     startPosition = me.GetHomePosition();
-                    if (!CheckBoundary(startPosition)) // fall back to creature home position
+                    if (!IsInBoundary(startPosition)) // fall back to creature home position
                         return CypherStrings.CreatureNoInteriorPointFound;
                 }
             }
@@ -281,7 +281,7 @@ namespace Game.AI
                     if (!alreadyChecked.Contains(next)) // never check a coordinate twice
                     {
                         Position nextPos = new(startPosition.GetPositionX() + next.Key * SharedConst.BoundaryVisualizeStepSize, startPosition.GetPositionY() + next.Value * SharedConst.BoundaryVisualizeStepSize, startPosition.GetPositionZ());
-                        if (CheckBoundary(nextPos))
+                        if (IsInBoundary(nextPos))
                             Q.Add(next);
                         else
                         {
@@ -314,7 +314,7 @@ namespace Game.AI
             return boundsWarning ? CypherStrings.CreatureMovementMaybeUnbounded : 0;
         }
 
-        public bool CheckBoundary(Position who = null)
+        public bool IsInBoundary(Position who = null)
         {
             if (_boundary == null)
                 return true;
@@ -327,7 +327,7 @@ namespace Game.AI
 
         public bool CheckInRoom()
         {
-            if (CheckBoundary())
+            if (IsInBoundary())
                 return true;
             else
             {

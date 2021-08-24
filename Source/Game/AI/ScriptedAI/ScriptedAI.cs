@@ -529,7 +529,7 @@ namespace Game.AI
             foreach (var pair in me.GetCombatManager().GetPvECombatRefs())
             {
                 Unit target = pair.Value.GetOther(me);
-                if (target.IsControlledByPlayer() && !CheckBoundary(target))
+                if (target.IsControlledByPlayer() && !IsInBoundary(target))
                         target.NearTeleportTo(x, y, z, 0);
             }
         }
@@ -604,7 +604,7 @@ namespace Game.AI
         public override void JustDied(Unit killer) { _JustDied(); }
         public override void JustReachedHome() { _JustReachedHome(); }
 
-        public override bool CanAIAttack(Unit victim) { return CheckBoundary(victim); }
+        public override bool CanAIAttack(Unit victim) { return IsInBoundary(victim); }
 
         public void _JustReachedHome() { me.SetActive(false); }
     }
