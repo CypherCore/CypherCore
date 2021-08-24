@@ -1813,12 +1813,15 @@ namespace Game
             if (!fields.IsNull(60))
                 creature.Movement.Ground = (CreatureGroundMovementType)fields.Read<byte>(60);
 
-            creature.Movement.Swim = fields.Read<bool>(61);
+            if (!fields.IsNull(61))
+                creature.Movement.Swim = fields.Read<bool>(61);
+
             if (!fields.IsNull(62))
                 creature.Movement.Flight = (CreatureFlightMovementType)fields.Read<byte>(62);
 
+            if (!fields.IsNull(63))
+                creature.Movement.Rooted = fields.Read<bool>(63);
 
-            creature.Movement.Rooted = fields.Read<uint>(63);
             creature.HoverHeight = fields.Read<float>(64);
             creature.ModHealth = fields.Read<float>(65);
             creature.ModHealthExtra = fields.Read<float>(66);
@@ -4966,7 +4969,7 @@ namespace Game
         }
         public CreatureMovementData GetCreatureMovementOverride(ulong spawnId)
         {
-            return creatureMovementOverrides.lookupbykey(spawnId);
+            return creatureMovementOverrides.LookupByKey(spawnId);
         }
         public EquipmentInfo GetEquipmentInfo(uint entry, int id)
         {

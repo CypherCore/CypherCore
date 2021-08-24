@@ -1824,7 +1824,10 @@ namespace Game.Entities
                 if (m_formation != null && m_formation.GetLeader() == this)
                     m_formation.FormationReset(true);
 
-                if ((CanFly() || IsFlying()))
+                bool needsFalling = IsFlying() || IsHovering();
+                SetHover(false);
+
+                if (needsFalling)
                     GetMotionMaster().MoveFall();
 
                 base.SetDeathState(DeathState.Corpse);
@@ -2848,7 +2851,7 @@ namespace Game.Entities
             {
                 SetCanFly(false);
                 SetDisableGravity(false);
-                if (CanHover() || HasAuraType(AuraType.Hover))
+                if (IsAlive() && (CanHover() || HasAuraType(AuraType.Hover)))
                     SetHover(true);
             }
 

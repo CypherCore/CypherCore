@@ -989,7 +989,9 @@ namespace Game.Entities
             else
             {
                 RemoveUnitMovementFlag(MovementFlag.Hover);
-                if (hoverHeight != 0)
+
+                //! Dying creatures will MoveFall from setDeathState
+                if (hoverHeight != 0 && (!IsDying() || !IsUnit()))
                 {
                     float newZ = GetPositionZ() - hoverHeight;
                     UpdateAllowedPositionZ(GetPositionX(), GetPositionY(), ref newZ);

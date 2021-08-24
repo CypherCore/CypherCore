@@ -362,12 +362,10 @@ namespace Game.Entities
             Rooted = false;
         }
 
-
-
-        bool IsGroundAllowed() { return Ground != CreatureGroundMovementType.None; }
-        bool IsSwimAllowed() { return Swim; }
-        bool IsFlightAllowed() { return Flight != CreatureFlightMovementType.None; }
-        bool IsRooted() { return Rooted; }
+        public bool IsGroundAllowed() { return Ground != CreatureGroundMovementType.None; }
+        public bool IsSwimAllowed() { return Swim; }
+        public bool IsFlightAllowed() { return Flight != CreatureFlightMovementType.None; }
+        public bool IsRooted() { return Rooted; }
 
         public override string ToString()
         {
