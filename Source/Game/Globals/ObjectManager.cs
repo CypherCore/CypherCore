@@ -42,8 +42,8 @@ namespace Game
         {
             for (var i = 0; i < SharedConst.MaxCreatureDifficulties; ++i)
             {
-                _difficultyEntries[i] = new List<uint>();
-                _hasDifficultyEntries[i] = new List<uint>();
+                difficultyEntries[i] = new List<uint>();
+                hasDifficultyEntries[i] = new List<uint>();
             }
         }
 
@@ -594,7 +594,7 @@ namespace Game
             uint oldMSTime = Time.GetMSTime();
 
             gossipMenuItemsStorage.Clear();
-            
+
             //                                          0         1              2             3             4                        5             6
             SQLResult result = DB.World.Query("SELECT o.MenuId, o.OptionIndex, o.OptionIcon, o.OptionText, o.OptionBroadcastTextId, o.OptionType, o.OptionNpcFlag, " +
                 //   7                8              9            10           11          12
@@ -1045,7 +1045,7 @@ namespace Game
             SQLResult result = DB.World.Query(
               "SELECT DISTINCT(ScriptName) FROM battleground_template WHERE ScriptName <> '' " +
               "UNION SELECT DISTINCT(ScriptName) FROM conversation_template WHERE ScriptName <> '' " +
-              "UNION SELECT DISTINCT(ScriptName) FROM creature WHERE ScriptName <> '' " +        
+              "UNION SELECT DISTINCT(ScriptName) FROM creature WHERE ScriptName <> '' " +
               "UNION SELECT DISTINCT(ScriptName) FROM creature_template WHERE ScriptName <> '' " +
               "UNION SELECT DISTINCT(ScriptName) FROM criteria_data WHERE ScriptName <> '' AND type = 11 " +
               "UNION SELECT DISTINCT(ScriptName) FROM gameobject WHERE ScriptName <> '' " +
@@ -1162,261 +1162,261 @@ namespace Game
                 switch (tmp.command)
                 {
                     case ScriptCommands.Talk:
+                    {
+                        if (tmp.Talk.ChatType > ChatMsg.RaidBossWhisper)
                         {
-                            if (tmp.Talk.ChatType > ChatMsg.RaidBossWhisper)
-                            {
-                                Log.outError(LogFilter.Sql, "Table `{0}` has invalid talk type (datalong = {1}) in SCRIPT_COMMAND_TALK for script id {2}",
-                                    tableName, tmp.Talk.ChatType, tmp.id);
-                                continue;
-                            }
-                            if (!CliDB.BroadcastTextStorage.ContainsKey((uint)tmp.Talk.TextID))
-                            {
-                                Log.outError(LogFilter.Sql, "Table `{0}` has invalid talk text id (dataint = {1}) in SCRIPT_COMMAND_TALK for script id {2}",
-                                    tableName, tmp.Talk.TextID, tmp.id);
-                                continue;
-                            }
-                            break;
+                            Log.outError(LogFilter.Sql, "Table `{0}` has invalid talk type (datalong = {1}) in SCRIPT_COMMAND_TALK for script id {2}",
+                                tableName, tmp.Talk.ChatType, tmp.id);
+                            continue;
                         }
+                        if (!CliDB.BroadcastTextStorage.ContainsKey((uint)tmp.Talk.TextID))
+                        {
+                            Log.outError(LogFilter.Sql, "Table `{0}` has invalid talk text id (dataint = {1}) in SCRIPT_COMMAND_TALK for script id {2}",
+                                tableName, tmp.Talk.TextID, tmp.id);
+                            continue;
+                        }
+                        break;
+                    }
 
                     case ScriptCommands.Emote:
+                    {
+                        if (!CliDB.EmotesStorage.ContainsKey(tmp.Emote.EmoteID))
                         {
-                            if (!CliDB.EmotesStorage.ContainsKey(tmp.Emote.EmoteID))
-                            {
-                                Log.outError(LogFilter.Sql, "Table `{0}` has invalid emote id (datalong = {1}) in SCRIPT_COMMAND_EMOTE for script id {2}",
-                                    tableName, tmp.Emote.EmoteID, tmp.id);
-                                continue;
-                            }
-                            break;
+                            Log.outError(LogFilter.Sql, "Table `{0}` has invalid emote id (datalong = {1}) in SCRIPT_COMMAND_EMOTE for script id {2}",
+                                tableName, tmp.Emote.EmoteID, tmp.id);
+                            continue;
                         }
+                        break;
+                    }
 
                     case ScriptCommands.TeleportTo:
+                    {
+                        if (!CliDB.MapStorage.ContainsKey(tmp.TeleportTo.MapID))
                         {
-                            if (!CliDB.MapStorage.ContainsKey(tmp.TeleportTo.MapID))
-                            {
-                                Log.outError(LogFilter.Sql, "Table `{0}` has invalid map (Id: {1}) in SCRIPT_COMMAND_TELEPORT_TO for script id {2}",
-                                    tableName, tmp.TeleportTo.MapID, tmp.id);
-                                continue;
-                            }
-
-                            if (!GridDefines.IsValidMapCoord(tmp.TeleportTo.DestX, tmp.TeleportTo.DestY, tmp.TeleportTo.DestZ, tmp.TeleportTo.Orientation))
-                            {
-                                Log.outError(LogFilter.Sql, "Table `{0}` has invalid coordinates (X: {1} Y: {2} Z: {3} O: {4}) in SCRIPT_COMMAND_TELEPORT_TO for script id {5}",
-                                    tableName, tmp.TeleportTo.DestX, tmp.TeleportTo.DestY, tmp.TeleportTo.DestZ, tmp.TeleportTo.Orientation, tmp.id);
-                                continue;
-                            }
-                            break;
+                            Log.outError(LogFilter.Sql, "Table `{0}` has invalid map (Id: {1}) in SCRIPT_COMMAND_TELEPORT_TO for script id {2}",
+                                tableName, tmp.TeleportTo.MapID, tmp.id);
+                            continue;
                         }
+
+                        if (!GridDefines.IsValidMapCoord(tmp.TeleportTo.DestX, tmp.TeleportTo.DestY, tmp.TeleportTo.DestZ, tmp.TeleportTo.Orientation))
+                        {
+                            Log.outError(LogFilter.Sql, "Table `{0}` has invalid coordinates (X: {1} Y: {2} Z: {3} O: {4}) in SCRIPT_COMMAND_TELEPORT_TO for script id {5}",
+                                tableName, tmp.TeleportTo.DestX, tmp.TeleportTo.DestY, tmp.TeleportTo.DestZ, tmp.TeleportTo.Orientation, tmp.id);
+                            continue;
+                        }
+                        break;
+                    }
 
                     case ScriptCommands.QuestExplored:
+                    {
+                        Quest quest = GetQuestTemplate(tmp.QuestExplored.QuestID);
+                        if (quest == null)
                         {
-                            Quest quest = GetQuestTemplate(tmp.QuestExplored.QuestID);
-                            if (quest == null)
-                            {
-                                Log.outError(LogFilter.Sql, "Table `{0}` has invalid quest (ID: {1}) in SCRIPT_COMMAND_QUEST_EXPLORED in `datalong` for script id {2}",
-                                    tableName, tmp.QuestExplored.QuestID, tmp.id);
-                                continue;
-                            }
-
-                            if (!quest.HasSpecialFlag(QuestSpecialFlags.ExplorationOrEvent))
-                            {
-                                Log.outError(LogFilter.Sql, "Table `{0}` has quest (ID: {1}) in SCRIPT_COMMAND_QUEST_EXPLORED in `datalong` for script id {2}, but quest not have flag QUEST_SPECIAL_FLAGS_EXPLORATION_OR_EVENT in quest flags. Script command or quest flags wrong. Quest modified to require objective.",
-                                    tableName, tmp.QuestExplored.QuestID, tmp.id);
-
-                                // this will prevent quest completing without objective
-                                quest.SetSpecialFlag(QuestSpecialFlags.ExplorationOrEvent);
-
-                                // continue; - quest objective requirement set and command can be allowed
-                            }
-
-                            if (tmp.QuestExplored.Distance > SharedConst.DefaultVisibilityDistance)
-                            {
-                                Log.outError(LogFilter.Sql, "Table `{0}` has too large distance ({1}) for exploring objective complete in `datalong2` in SCRIPT_COMMAND_QUEST_EXPLORED in `datalong` for script id {2}",
-                                    tableName, tmp.QuestExplored.Distance, tmp.id);
-                                continue;
-                            }
-
-                            if (tmp.QuestExplored.Distance != 0 && tmp.QuestExplored.Distance > SharedConst.DefaultVisibilityDistance)
-                            {
-                                Log.outError(LogFilter.Sql, "Table `{0}` has too large distance ({1}) for exploring objective complete in `datalong2` in SCRIPT_COMMAND_QUEST_EXPLORED in `datalong` for script id {2}, max distance is {3} or 0 for disable distance check",
-                                    tableName, tmp.QuestExplored.Distance, tmp.id, SharedConst.DefaultVisibilityDistance);
-                                continue;
-                            }
-
-                            if (tmp.QuestExplored.Distance != 0 && tmp.QuestExplored.Distance < SharedConst.InteractionDistance)
-                            {
-                                Log.outError(LogFilter.Sql, "Table `{0}` has too small distance ({1}) for exploring objective complete in `datalong2` in SCRIPT_COMMAND_QUEST_EXPLORED in `datalong` for script id {2}, min distance is {3} or 0 for disable distance check",
-                                    tableName, tmp.QuestExplored.Distance, tmp.id, SharedConst.InteractionDistance);
-                                continue;
-                            }
-
-                            break;
+                            Log.outError(LogFilter.Sql, "Table `{0}` has invalid quest (ID: {1}) in SCRIPT_COMMAND_QUEST_EXPLORED in `datalong` for script id {2}",
+                                tableName, tmp.QuestExplored.QuestID, tmp.id);
+                            continue;
                         }
+
+                        if (!quest.HasSpecialFlag(QuestSpecialFlags.ExplorationOrEvent))
+                        {
+                            Log.outError(LogFilter.Sql, "Table `{0}` has quest (ID: {1}) in SCRIPT_COMMAND_QUEST_EXPLORED in `datalong` for script id {2}, but quest not have flag QUEST_SPECIAL_FLAGS_EXPLORATION_OR_EVENT in quest flags. Script command or quest flags wrong. Quest modified to require objective.",
+                                tableName, tmp.QuestExplored.QuestID, tmp.id);
+
+                            // this will prevent quest completing without objective
+                            quest.SetSpecialFlag(QuestSpecialFlags.ExplorationOrEvent);
+
+                            // continue; - quest objective requirement set and command can be allowed
+                        }
+
+                        if (tmp.QuestExplored.Distance > SharedConst.DefaultVisibilityDistance)
+                        {
+                            Log.outError(LogFilter.Sql, "Table `{0}` has too large distance ({1}) for exploring objective complete in `datalong2` in SCRIPT_COMMAND_QUEST_EXPLORED in `datalong` for script id {2}",
+                                tableName, tmp.QuestExplored.Distance, tmp.id);
+                            continue;
+                        }
+
+                        if (tmp.QuestExplored.Distance != 0 && tmp.QuestExplored.Distance > SharedConst.DefaultVisibilityDistance)
+                        {
+                            Log.outError(LogFilter.Sql, "Table `{0}` has too large distance ({1}) for exploring objective complete in `datalong2` in SCRIPT_COMMAND_QUEST_EXPLORED in `datalong` for script id {2}, max distance is {3} or 0 for disable distance check",
+                                tableName, tmp.QuestExplored.Distance, tmp.id, SharedConst.DefaultVisibilityDistance);
+                            continue;
+                        }
+
+                        if (tmp.QuestExplored.Distance != 0 && tmp.QuestExplored.Distance < SharedConst.InteractionDistance)
+                        {
+                            Log.outError(LogFilter.Sql, "Table `{0}` has too small distance ({1}) for exploring objective complete in `datalong2` in SCRIPT_COMMAND_QUEST_EXPLORED in `datalong` for script id {2}, min distance is {3} or 0 for disable distance check",
+                                tableName, tmp.QuestExplored.Distance, tmp.id, SharedConst.InteractionDistance);
+                            continue;
+                        }
+
+                        break;
+                    }
 
                     case ScriptCommands.KillCredit:
+                    {
+                        if (GetCreatureTemplate(tmp.KillCredit.CreatureEntry) == null)
                         {
-                            if (GetCreatureTemplate(tmp.KillCredit.CreatureEntry) == null)
-                            {
-                                Log.outError(LogFilter.Sql, "Table `{0}` has invalid creature (Entry: {1}) in SCRIPT_COMMAND_KILL_CREDIT for script id {2}",
-                                    tableName, tmp.KillCredit.CreatureEntry, tmp.id);
-                                continue;
-                            }
-                            break;
+                            Log.outError(LogFilter.Sql, "Table `{0}` has invalid creature (Entry: {1}) in SCRIPT_COMMAND_KILL_CREDIT for script id {2}",
+                                tableName, tmp.KillCredit.CreatureEntry, tmp.id);
+                            continue;
                         }
+                        break;
+                    }
 
                     case ScriptCommands.RespawnGameobject:
+                    {
+                        GameObjectData data = GetGameObjectData(tmp.RespawnGameObject.GOGuid);
+                        if (data == null)
                         {
-                            GameObjectData data = GetGameObjectData(tmp.RespawnGameObject.GOGuid);
-                            if (data == null)
-                            {
-                                Log.outError(LogFilter.Sql, "Table `{0}` has invalid gameobject (GUID: {1}) in SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id {2}",
-                                    tableName, tmp.RespawnGameObject.GOGuid, tmp.id);
-                                continue;
-                            }
-
-                            GameObjectTemplate info = GetGameObjectTemplate(data.Id);
-                            if (info == null)
-                            {
-                                Log.outError(LogFilter.Sql, "Table `{0}` has gameobject with invalid entry (GUID: {1} Entry: {2}) in SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id {3}",
-                                    tableName, tmp.RespawnGameObject.GOGuid, data.Id, tmp.id);
-                                continue;
-                            }
-
-                            if (info.type == GameObjectTypes.FishingNode || info.type == GameObjectTypes.FishingHole || info.type == GameObjectTypes.Door ||
-                                info.type == GameObjectTypes.Button || info.type == GameObjectTypes.Trap)
-                            {
-                                Log.outError(LogFilter.Sql, "Table `{0}` have gameobject type ({1}) unsupported by command SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id {2}",
-                                    tableName, info.entry, tmp.id);
-                                continue;
-                            }
-                            break;
+                            Log.outError(LogFilter.Sql, "Table `{0}` has invalid gameobject (GUID: {1}) in SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id {2}",
+                                tableName, tmp.RespawnGameObject.GOGuid, tmp.id);
+                            continue;
                         }
+
+                        GameObjectTemplate info = GetGameObjectTemplate(data.Id);
+                        if (info == null)
+                        {
+                            Log.outError(LogFilter.Sql, "Table `{0}` has gameobject with invalid entry (GUID: {1} Entry: {2}) in SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id {3}",
+                                tableName, tmp.RespawnGameObject.GOGuid, data.Id, tmp.id);
+                            continue;
+                        }
+
+                        if (info.type == GameObjectTypes.FishingNode || info.type == GameObjectTypes.FishingHole || info.type == GameObjectTypes.Door ||
+                            info.type == GameObjectTypes.Button || info.type == GameObjectTypes.Trap)
+                        {
+                            Log.outError(LogFilter.Sql, "Table `{0}` have gameobject type ({1}) unsupported by command SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id {2}",
+                                tableName, info.entry, tmp.id);
+                            continue;
+                        }
+                        break;
+                    }
 
                     case ScriptCommands.TempSummonCreature:
+                    {
+                        if (!GridDefines.IsValidMapCoord(tmp.TempSummonCreature.PosX, tmp.TempSummonCreature.PosY, tmp.TempSummonCreature.PosZ, tmp.TempSummonCreature.Orientation))
                         {
-                            if (!GridDefines.IsValidMapCoord(tmp.TempSummonCreature.PosX, tmp.TempSummonCreature.PosY, tmp.TempSummonCreature.PosZ, tmp.TempSummonCreature.Orientation))
-                            {
-                                Log.outError(LogFilter.Sql, "Table `{0}` has invalid coordinates (X: {1} Y: {2} Z: {3} O: {4}) in SCRIPT_COMMAND_TEMP_SUMMON_CREATURE for script id {5}",
-                                    tableName, tmp.TempSummonCreature.PosX, tmp.TempSummonCreature.PosY, tmp.TempSummonCreature.PosZ, tmp.TempSummonCreature.Orientation, tmp.id);
-                                continue;
-                            }
-
-                            if (GetCreatureTemplate(tmp.TempSummonCreature.CreatureEntry) == null)
-                            {
-                                Log.outError(LogFilter.Sql, "Table `{0}` has invalid creature (Entry: {1}) in SCRIPT_COMMAND_TEMP_SUMMON_CREATURE for script id {2}",
-                                    tableName, tmp.TempSummonCreature.CreatureEntry, tmp.id);
-                                continue;
-                            }
-                            break;
+                            Log.outError(LogFilter.Sql, "Table `{0}` has invalid coordinates (X: {1} Y: {2} Z: {3} O: {4}) in SCRIPT_COMMAND_TEMP_SUMMON_CREATURE for script id {5}",
+                                tableName, tmp.TempSummonCreature.PosX, tmp.TempSummonCreature.PosY, tmp.TempSummonCreature.PosZ, tmp.TempSummonCreature.Orientation, tmp.id);
+                            continue;
                         }
+
+                        if (GetCreatureTemplate(tmp.TempSummonCreature.CreatureEntry) == null)
+                        {
+                            Log.outError(LogFilter.Sql, "Table `{0}` has invalid creature (Entry: {1}) in SCRIPT_COMMAND_TEMP_SUMMON_CREATURE for script id {2}",
+                                tableName, tmp.TempSummonCreature.CreatureEntry, tmp.id);
+                            continue;
+                        }
+                        break;
+                    }
 
                     case ScriptCommands.OpenDoor:
                     case ScriptCommands.CloseDoor:
+                    {
+                        GameObjectData data = GetGameObjectData(tmp.ToggleDoor.GOGuid);
+                        if (data == null)
                         {
-                            GameObjectData data = GetGameObjectData(tmp.ToggleDoor.GOGuid);
-                            if (data == null)
-                            {
-                                Log.outError(LogFilter.Sql, "Table `{0}` has invalid gameobject (GUID: {1}) in {2} for script id {3}",
-                                    tableName, tmp.ToggleDoor.GOGuid, tmp.command, tmp.id);
-                                continue;
-                            }
-
-                            GameObjectTemplate info = GetGameObjectTemplate(data.Id);
-                            if (info == null)
-                            {
-                                Log.outError(LogFilter.Sql, "Table `{0}` has gameobject with invalid entry (GUID: {1} Entry: {2}) in {3} for script id {4}",
-                                    tableName, tmp.ToggleDoor.GOGuid, data.Id, tmp.command, tmp.id);
-                                continue;
-                            }
-
-                            if (info.type != GameObjectTypes.Door)
-                            {
-                                Log.outError(LogFilter.Sql, "Table `{0}` has gameobject type ({1}) non supported by command {2} for script id {3}",
-                                    tableName, info.entry, tmp.command, tmp.id);
-                                continue;
-                            }
-
-                            break;
+                            Log.outError(LogFilter.Sql, "Table `{0}` has invalid gameobject (GUID: {1}) in {2} for script id {3}",
+                                tableName, tmp.ToggleDoor.GOGuid, tmp.command, tmp.id);
+                            continue;
                         }
+
+                        GameObjectTemplate info = GetGameObjectTemplate(data.Id);
+                        if (info == null)
+                        {
+                            Log.outError(LogFilter.Sql, "Table `{0}` has gameobject with invalid entry (GUID: {1} Entry: {2}) in {3} for script id {4}",
+                                tableName, tmp.ToggleDoor.GOGuid, data.Id, tmp.command, tmp.id);
+                            continue;
+                        }
+
+                        if (info.type != GameObjectTypes.Door)
+                        {
+                            Log.outError(LogFilter.Sql, "Table `{0}` has gameobject type ({1}) non supported by command {2} for script id {3}",
+                                tableName, info.entry, tmp.command, tmp.id);
+                            continue;
+                        }
+
+                        break;
+                    }
 
                     case ScriptCommands.RemoveAura:
+                    {
+                        if (!Global.SpellMgr.HasSpellInfo(tmp.RemoveAura.SpellID, Difficulty.None))
                         {
-                            if (!Global.SpellMgr.HasSpellInfo(tmp.RemoveAura.SpellID, Difficulty.None))
-                            {
-                                Log.outError(LogFilter.Sql, "Table `{0}` using non-existent spell (id: {1}) in SCRIPT_COMMAND_REMOVE_AURA for script id {2}",
-                                    tableName, tmp.RemoveAura.SpellID, tmp.id);
-                                continue;
-                            }
-                            if (Convert.ToBoolean((int)tmp.RemoveAura.Flags & ~0x1))                    // 1 bits (0, 1)
-                            {
-                                Log.outError(LogFilter.Sql, "Table `{0}` using unknown flags in datalong2 ({1}) in SCRIPT_COMMAND_REMOVE_AURA for script id {2}",
-                                    tableName, tmp.RemoveAura.Flags, tmp.id);
-                                continue;
-                            }
-                            break;
+                            Log.outError(LogFilter.Sql, "Table `{0}` using non-existent spell (id: {1}) in SCRIPT_COMMAND_REMOVE_AURA for script id {2}",
+                                tableName, tmp.RemoveAura.SpellID, tmp.id);
+                            continue;
                         }
+                        if (Convert.ToBoolean((int)tmp.RemoveAura.Flags & ~0x1))                    // 1 bits (0, 1)
+                        {
+                            Log.outError(LogFilter.Sql, "Table `{0}` using unknown flags in datalong2 ({1}) in SCRIPT_COMMAND_REMOVE_AURA for script id {2}",
+                                tableName, tmp.RemoveAura.Flags, tmp.id);
+                            continue;
+                        }
+                        break;
+                    }
 
                     case ScriptCommands.CastSpell:
+                    {
+                        if (!Global.SpellMgr.HasSpellInfo(tmp.CastSpell.SpellID, Difficulty.None))
                         {
-                            if (!Global.SpellMgr.HasSpellInfo(tmp.CastSpell.SpellID, Difficulty.None))
-                            {
-                                Log.outError(LogFilter.Sql, "Table `{0}` using non-existent spell (id: {1}) in SCRIPT_COMMAND_CAST_SPELL for script id {2}",
-                                    tableName, tmp.CastSpell.SpellID, tmp.id);
-                                continue;
-                            }
-                            if ((int)tmp.CastSpell.Flags > 4)                      // targeting type
-                            {
-                                Log.outError(LogFilter.Sql, "Table `{0}` using unknown target in datalong2 ({1}) in SCRIPT_COMMAND_CAST_SPELL for script id {2}",
-                                    tableName, tmp.CastSpell.Flags, tmp.id);
-                                continue;
-                            }
-                            if ((int)tmp.CastSpell.Flags != 4 && Convert.ToBoolean(tmp.CastSpell.CreatureEntry & ~0x1))                      // 1 bit (0, 1)
-                            {
-                                Log.outError(LogFilter.Sql, "Table `{0}` using unknown flags in dataint ({1}) in SCRIPT_COMMAND_CAST_SPELL for script id {2}",
-                                    tableName, tmp.CastSpell.CreatureEntry, tmp.id);
-                                continue;
-                            }
-                            else if ((int)tmp.CastSpell.Flags == 4 && GetCreatureTemplate((uint)tmp.CastSpell.CreatureEntry) == null)
-                            {
-                                Log.outError(LogFilter.Sql, "Table `{0}` using invalid creature entry in dataint ({1}) in SCRIPT_COMMAND_CAST_SPELL for script id {2}",
-                                    tableName, tmp.CastSpell.CreatureEntry, tmp.id);
-                                continue;
-                            }
-                            break;
+                            Log.outError(LogFilter.Sql, "Table `{0}` using non-existent spell (id: {1}) in SCRIPT_COMMAND_CAST_SPELL for script id {2}",
+                                tableName, tmp.CastSpell.SpellID, tmp.id);
+                            continue;
                         }
+                        if ((int)tmp.CastSpell.Flags > 4)                      // targeting type
+                        {
+                            Log.outError(LogFilter.Sql, "Table `{0}` using unknown target in datalong2 ({1}) in SCRIPT_COMMAND_CAST_SPELL for script id {2}",
+                                tableName, tmp.CastSpell.Flags, tmp.id);
+                            continue;
+                        }
+                        if ((int)tmp.CastSpell.Flags != 4 && Convert.ToBoolean(tmp.CastSpell.CreatureEntry & ~0x1))                      // 1 bit (0, 1)
+                        {
+                            Log.outError(LogFilter.Sql, "Table `{0}` using unknown flags in dataint ({1}) in SCRIPT_COMMAND_CAST_SPELL for script id {2}",
+                                tableName, tmp.CastSpell.CreatureEntry, tmp.id);
+                            continue;
+                        }
+                        else if ((int)tmp.CastSpell.Flags == 4 && GetCreatureTemplate((uint)tmp.CastSpell.CreatureEntry) == null)
+                        {
+                            Log.outError(LogFilter.Sql, "Table `{0}` using invalid creature entry in dataint ({1}) in SCRIPT_COMMAND_CAST_SPELL for script id {2}",
+                                tableName, tmp.CastSpell.CreatureEntry, tmp.id);
+                            continue;
+                        }
+                        break;
+                    }
 
                     case ScriptCommands.CreateItem:
+                    {
+                        if (GetItemTemplate(tmp.CreateItem.ItemEntry) == null)
                         {
-                            if (GetItemTemplate(tmp.CreateItem.ItemEntry) == null)
-                            {
-                                Log.outError(LogFilter.Sql, "Table `{0}` has nonexistent item (entry: {1}) in SCRIPT_COMMAND_CREATE_ITEM for script id {2}",
-                                    tableName, tmp.CreateItem.ItemEntry, tmp.id);
-                                continue;
-                            }
-                            if (tmp.CreateItem.Amount == 0)
-                            {
-                                Log.outError(LogFilter.Sql, "Table `{0}` SCRIPT_COMMAND_CREATE_ITEM but amount is {1} for script id {2}",
-                                    tableName, tmp.CreateItem.Amount, tmp.id);
-                                continue;
-                            }
-                            break;
+                            Log.outError(LogFilter.Sql, "Table `{0}` has nonexistent item (entry: {1}) in SCRIPT_COMMAND_CREATE_ITEM for script id {2}",
+                                tableName, tmp.CreateItem.ItemEntry, tmp.id);
+                            continue;
                         }
+                        if (tmp.CreateItem.Amount == 0)
+                        {
+                            Log.outError(LogFilter.Sql, "Table `{0}` SCRIPT_COMMAND_CREATE_ITEM but amount is {1} for script id {2}",
+                                tableName, tmp.CreateItem.Amount, tmp.id);
+                            continue;
+                        }
+                        break;
+                    }
                     case ScriptCommands.PlayAnimkit:
+                    {
+                        if (!CliDB.AnimKitStorage.ContainsKey(tmp.PlayAnimKit.AnimKitID))
                         {
-                            if (!CliDB.AnimKitStorage.ContainsKey(tmp.PlayAnimKit.AnimKitID))
-                            {
-                                Log.outError(LogFilter.Sql, "Table `{0}` has invalid AnimKid id (datalong = {1}) in SCRIPT_COMMAND_PLAY_ANIMKIT for script id {2}",
-                                    tableName, tmp.PlayAnimKit.AnimKitID, tmp.id);
-                                continue;
-                            }
-                            break;
+                            Log.outError(LogFilter.Sql, "Table `{0}` has invalid AnimKid id (datalong = {1}) in SCRIPT_COMMAND_PLAY_ANIMKIT for script id {2}",
+                                tableName, tmp.PlayAnimKit.AnimKitID, tmp.id);
+                            continue;
                         }
+                        break;
+                    }
                     case ScriptCommands.FieldSetDeprecated:
                     case ScriptCommands.FlagSetDeprecated:
                     case ScriptCommands.FlagRemoveDeprecated:
-                        {
-                            Log.outError(LogFilter.Sql, $"Table `{tableName}` uses deprecated direct updatefield modify command {tmp.command} for script id {tmp.id}");
-                            continue;
-                        }
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `{tableName}` uses deprecated direct updatefield modify command {tmp.command} for script id {tmp.id}");
+                        continue;
+                    }
                     default:
                         break;
                 }
@@ -1744,10 +1744,10 @@ namespace Game
             LoadCreatureTemplateModels();
 
             // Checking needs to be done after loading because of the difficulty self referencing
-            foreach (var template in _creatureTemplateStorage.Values)
+            foreach (var template in creatureTemplateStorage.Values)
                 CheckCreatureTemplate(template);
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} creature definitions in {1} ms", _creatureTemplateStorage.Count, Time.GetMSTimeDiffToNow(time));
+            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} creature definitions in {1} ms", creatureTemplateStorage.Count, Time.GetMSTimeDiffToNow(time));
         }
         public void LoadCreatureTemplate(SQLFields fields)
         {
@@ -1809,27 +1809,36 @@ namespace Game
             creature.MaxGold = fields.Read<uint>(57);
             creature.AIName = fields.Read<string>(58);
             creature.MovementType = fields.Read<uint>(59);
-            creature.InhabitType = (InhabitType)fields.Read<uint>(60);
-            creature.HoverHeight = fields.Read<float>(61);
-            creature.ModHealth = fields.Read<float>(62);
-            creature.ModHealthExtra = fields.Read<float>(63);
-            creature.ModMana = fields.Read<float>(64);
-            creature.ModManaExtra = fields.Read<float>(65);
-            creature.ModArmor = fields.Read<float>(66);
-            creature.ModDamage = fields.Read<float>(67);
-            creature.ModExperience = fields.Read<float>(68);
-            creature.RacialLeader = fields.Read<bool>(69);
-            creature.MovementId = fields.Read<uint>(70);
-            creature.CreatureDifficultyID = fields.Read<int>(71);
-            creature.WidgetSetID = fields.Read<int>(72);
-            creature.WidgetSetUnitConditionID = fields.Read<int>(73);
-            creature.RegenHealth = fields.Read<bool>(74);
-            creature.MechanicImmuneMask = fields.Read<uint>(75);
-            creature.SpellSchoolImmuneMask = fields.Read<uint>(76);
-            creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(77);
-            creature.ScriptID = GetScriptId(fields.Read<string>(78));
 
-            _creatureTemplateStorage[entry] = creature;
+            if (!fields.IsNull(60))
+                creature.Movement.Ground = (CreatureGroundMovementType)fields.Read<byte>(60);
+
+            creature.Movement.Swim = fields.Read<bool>(61);
+            if (!fields.IsNull(62))
+                creature.Movement.Flight = (CreatureFlightMovementType)fields.Read<byte>(62);
+
+
+            creature.Movement.Rooted = fields.Read<uint>(63);
+            creature.HoverHeight = fields.Read<float>(64);
+            creature.ModHealth = fields.Read<float>(65);
+            creature.ModHealthExtra = fields.Read<float>(66);
+            creature.ModMana = fields.Read<float>(67);
+            creature.ModManaExtra = fields.Read<float>(68);
+            creature.ModArmor = fields.Read<float>(69);
+            creature.ModDamage = fields.Read<float>(70);
+            creature.ModExperience = fields.Read<float>(71);
+            creature.RacialLeader = fields.Read<bool>(72);
+            creature.MovementId = fields.Read<uint>(73);
+            creature.CreatureDifficultyID = fields.Read<int>(74);
+            creature.WidgetSetID = fields.Read<int>(75);
+            creature.WidgetSetUnitConditionID = fields.Read<int>(76);
+            creature.RegenHealth = fields.Read<bool>(77);
+            creature.MechanicImmuneMask = fields.Read<uint>(78);
+            creature.SpellSchoolImmuneMask = fields.Read<uint>(79);
+            creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(80);
+            creature.ScriptID = GetScriptId(fields.Read<string>(81));
+
+            creatureTemplateStorage[entry] = creature;
         }
 
         void LoadCreatureTemplateModels()
@@ -2120,7 +2129,7 @@ namespace Game
                 uint item = result.Read<uint>(1);
                 uint idx = result.Read<uint>(2);
 
-                if (!_creatureTemplateStorage.ContainsKey(entry))
+                if (!creatureTemplateStorage.ContainsKey(entry))
                 {
                     Log.outError(LogFilter.Sql, "Table `creature_questitem` has data for nonexistent creature (entry: {0}, idx: {1}), skipped", entry, idx);
                     continue;
@@ -2132,7 +2141,7 @@ namespace Game
                     continue;
                 }
 
-                _creatureQuestItemStorage.Add(entry, item);
+                creatureQuestItemStorage.Add(entry, item);
 
                 ++count;
             }
@@ -2224,6 +2233,42 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} equipment templates in {1} ms", count, Time.GetMSTimeDiffToNow(time));
         }
+        public void LoadCreatureMovementOverrides()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            creatureMovementOverrides.Clear();
+
+            SQLResult result = DB.World.Query("SELECT SpawnId, Ground, Swim, Flight, Rooted from creature_movement_override");
+            if (result.IsEmpty())
+            {
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creature movement overrides. DB table `creature_movement_override` is empty!");
+                return;
+            }
+
+            do
+            {
+                ulong spawnId = result.Read<ulong>(0);
+                if (GetCreatureData(spawnId) == null)
+                {
+                    Log.outError(LogFilter.Sql, $"Creature (GUID: {spawnId}) does not exist but has a record in `creature_movement_override`");
+                    continue;
+                }
+
+                CreatureMovementData movement = new();
+                movement.Ground = (CreatureGroundMovementType)result.Read<byte>(1);
+                movement.Swim = result.Read<bool>(2);
+                movement.Flight = (CreatureFlightMovementType)result.Read<byte>(3);
+                movement.Rooted = result.Read<bool>(4);
+
+                CheckCreatureMovement("creature_movement_override", spawnId, movement);
+
+                creatureMovementOverrides[spawnId] = movement;
+            }
+            while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {creatureMovementOverrides.Count} movement overrides in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+        }
         public void LoadCreatureClassLevelStats()
         {
             var time = Time.GetMSTime();
@@ -2258,7 +2303,7 @@ namespace Game
                 ++count;
             } while (result.NextRow());
 
-            foreach (var creatureTemplate in _creatureTemplateStorage.Values)
+            foreach (var creatureTemplate in creatureTemplateStorage.Values)
             {
                 for (short lvl = creatureTemplate.Minlevel; lvl <= creatureTemplate.Maxlevel; ++lvl)
                 {
@@ -2352,7 +2397,7 @@ namespace Game
                 uint entry = result.Read<uint>(0);
                 Difficulty difficulty = (Difficulty)result.Read<byte>(1);
 
-                var template = _creatureTemplateStorage.LookupByKey(entry);
+                var template = creatureTemplateStorage.LookupByKey(entry);
                 if (template == null)
                 {
                     Log.outError(LogFilter.Sql, $"Creature template (Entry: {entry}) does not exist but has a record in `creature_template_scaling`");
@@ -2395,20 +2440,20 @@ namespace Game
                 for (uint diff2 = 0; diff2 < SharedConst.MaxCreatureDifficulties && ok2; ++diff2)
                 {
                     ok2 = false;
-                    if (_difficultyEntries[diff2].Contains(cInfo.Entry))
+                    if (difficultyEntries[diff2].Contains(cInfo.Entry))
                     {
                         Log.outError(LogFilter.Sql, "Creature (Entry: {0}) is listed as `difficulty_entry_{1}` of another creature, but itself lists {2} in `difficulty_entry_{3}`.",
                             cInfo.Entry, diff2 + 1, cInfo.DifficultyEntry[diff], diff + 1);
                         continue;
                     }
 
-                    if (_difficultyEntries[diff2].Contains(cInfo.DifficultyEntry[diff]))
+                    if (difficultyEntries[diff2].Contains(cInfo.DifficultyEntry[diff]))
                     {
                         Log.outError(LogFilter.Sql, "Creature (Entry: {0}) already listed as `difficulty_entry_{1}` for another entry.", cInfo.DifficultyEntry[diff], diff2 + 1);
                         continue;
                     }
 
-                    if (_hasDifficultyEntries[diff2].Contains(cInfo.DifficultyEntry[diff]))
+                    if (hasDifficultyEntries[diff2].Contains(cInfo.DifficultyEntry[diff]))
                     {
                         Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has `difficulty_entry_{1}`={2} but creature entry {3} has itself a value in `difficulty_entry_{4}`.",
                             cInfo.Entry, diff + 1, cInfo.DifficultyEntry[diff], cInfo.DifficultyEntry[diff], diff2 + 1);
@@ -2532,8 +2577,8 @@ namespace Game
                     continue;
                 }
 
-                _hasDifficultyEntries[diff].Add(cInfo.Entry);
-                _difficultyEntries[diff].Add(cInfo.DifficultyEntry[diff]);
+                hasDifficultyEntries[diff].Add(cInfo.Entry);
+                difficultyEntries[diff].Add(cInfo.DifficultyEntry[diff]);
                 ok = true;
             }
 
@@ -2606,11 +2651,7 @@ namespace Game
                 cInfo.Family = CreatureFamily.None;
             }
 
-            if (cInfo.InhabitType <= 0 || cInfo.InhabitType > InhabitType.Anywhere)
-            {
-                Log.outError(LogFilter.Sql, "Creature (Entry: {0}) has wrong value ({1}) in `InhabitType`, creature will not correctly walk/swim/fly.", cInfo.Entry, cInfo.InhabitType);
-                cInfo.InhabitType = InhabitType.Anywhere;
-            }
+            CheckCreatureMovement("creature_template_movement", cInfo.Entry, cInfo.Movement);
 
             if (cInfo.HoverHeight < 0.0f)
             {
@@ -2676,6 +2717,20 @@ namespace Game
 
             cInfo.ModDamage *= Creature._GetDamageMod(cInfo.Rank);
         }
+        void CheckCreatureMovement(string table, ulong id, CreatureMovementData creatureMovement)
+        {
+            if (creatureMovement.Ground >= CreatureGroundMovementType.Max)
+            {
+                Log.outError(LogFilter.Sql, $"`{table}`.`Ground` wrong value ({creatureMovement.Ground}) for Id {id}, setting to Run.");
+                creatureMovement.Ground = CreatureGroundMovementType.Run;
+            }
+
+            if (creatureMovement.Flight >= CreatureFlightMovementType.Max)
+            {
+                Log.outError(LogFilter.Sql, $"`{table}`.`Flight` wrong value ({creatureMovement.Flight}) for Id {id}, setting to None.");
+                creatureMovement.Flight = CreatureFlightMovementType.None;
+            }
+        }
         public void LoadLinkedRespawn()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -2701,157 +2756,157 @@ namespace Game
                 switch ((CreatureLinkedRespawnType)linkType)
                 {
                     case CreatureLinkedRespawnType.CreatureToCreature:
+                    {
+                        CreatureData slave = GetCreatureData(guidLow);
+                        if (slave == null)
                         {
-                            CreatureData slave = GetCreatureData(guidLow);
-                            if (slave == null)
-                            {
-                                Log.outError(LogFilter.Sql, "Couldn't get creature data for GUIDLow {0}", guidLow);
-                                error = true;
-                                break;
-                            }
-
-                            CreatureData master = GetCreatureData(linkedGuidLow);
-                            if (master == null)
-                            {
-                                Log.outError(LogFilter.Sql, "Couldn't get creature data for GUIDLow {0}", linkedGuidLow);
-                                error = true;
-                                break;
-                            }
-
-                            MapRecord map = CliDB.MapStorage.LookupByKey(master.spawnPoint.GetMapId());
-                            if (map == null || !map.Instanceable() || (master.spawnPoint.GetMapId() != slave.spawnPoint.GetMapId()))
-                            {
-                                Log.outError(LogFilter.Sql, "Creature '{0}' linking to '{1}' on an unpermitted map.", guidLow, linkedGuidLow);
-                                error = true;
-                                break;
-                            }
-
-                            // they must have a possibility to meet (normal/heroic difficulty)
-                            if (!master.spawnDifficulties.Intersect(slave.spawnDifficulties).Any())
-                            {
-                                Log.outError(LogFilter.Sql, "LinkedRespawn: Creature '{0}' linking to '{1}' with not corresponding spawnMask", guidLow, linkedGuidLow);
-                                error = true;
-                                break;
-                            }
-
-                            guid = ObjectGuid.Create(HighGuid.Creature, slave.spawnPoint.GetMapId(), slave.Id, guidLow);
-                            linkedGuid = ObjectGuid.Create(HighGuid.Creature, master.spawnPoint.GetMapId(), master.Id, linkedGuidLow);
+                            Log.outError(LogFilter.Sql, "Couldn't get creature data for GUIDLow {0}", guidLow);
+                            error = true;
                             break;
                         }
+
+                        CreatureData master = GetCreatureData(linkedGuidLow);
+                        if (master == null)
+                        {
+                            Log.outError(LogFilter.Sql, "Couldn't get creature data for GUIDLow {0}", linkedGuidLow);
+                            error = true;
+                            break;
+                        }
+
+                        MapRecord map = CliDB.MapStorage.LookupByKey(master.spawnPoint.GetMapId());
+                        if (map == null || !map.Instanceable() || (master.spawnPoint.GetMapId() != slave.spawnPoint.GetMapId()))
+                        {
+                            Log.outError(LogFilter.Sql, "Creature '{0}' linking to '{1}' on an unpermitted map.", guidLow, linkedGuidLow);
+                            error = true;
+                            break;
+                        }
+
+                        // they must have a possibility to meet (normal/heroic difficulty)
+                        if (!master.spawnDifficulties.Intersect(slave.spawnDifficulties).Any())
+                        {
+                            Log.outError(LogFilter.Sql, "LinkedRespawn: Creature '{0}' linking to '{1}' with not corresponding spawnMask", guidLow, linkedGuidLow);
+                            error = true;
+                            break;
+                        }
+
+                        guid = ObjectGuid.Create(HighGuid.Creature, slave.spawnPoint.GetMapId(), slave.Id, guidLow);
+                        linkedGuid = ObjectGuid.Create(HighGuid.Creature, master.spawnPoint.GetMapId(), master.Id, linkedGuidLow);
+                        break;
+                    }
                     case CreatureLinkedRespawnType.CreatureToGO:
+                    {
+                        CreatureData slave = GetCreatureData(guidLow);
+                        if (slave == null)
                         {
-                            CreatureData slave = GetCreatureData(guidLow);
-                            if (slave == null)
-                            {
-                                Log.outError(LogFilter.Sql, "Couldn't get creature data for GUIDLow {0}", guidLow);
-                                error = true;
-                                break;
-                            }
-
-                            GameObjectData master = GetGameObjectData(linkedGuidLow);
-                            if (master == null)
-                            {
-                                Log.outError(LogFilter.Sql, "Couldn't get gameobject data for GUIDLow {0}", linkedGuidLow);
-                                error = true;
-                                break;
-                            }
-
-                            MapRecord map = CliDB.MapStorage.LookupByKey(master.spawnPoint.GetMapId());
-                            if (map == null || !map.Instanceable() || (master.spawnPoint.GetMapId() != slave.spawnPoint.GetMapId()))
-                            {
-                                Log.outError(LogFilter.Sql, "Creature '{0}' linking to '{1}' on an unpermitted map.", guidLow, linkedGuidLow);
-                                error = true;
-                                break;
-                            }
-
-                            // they must have a possibility to meet (normal/heroic difficulty)
-                            if (!master.spawnDifficulties.Intersect(slave.spawnDifficulties).Any())
-                            {
-                                Log.outError(LogFilter.Sql, "LinkedRespawn: Creature '{0}' linking to '{1}' with not corresponding spawnMask", guidLow, linkedGuidLow);
-                                error = true;
-                                break;
-                            }
-
-                            guid = ObjectGuid.Create(HighGuid.Creature, slave.spawnPoint.GetMapId(), slave.Id, guidLow);
-                            linkedGuid = ObjectGuid.Create(HighGuid.GameObject, master.spawnPoint.GetMapId(), master.Id, linkedGuidLow);
+                            Log.outError(LogFilter.Sql, "Couldn't get creature data for GUIDLow {0}", guidLow);
+                            error = true;
                             break;
                         }
+
+                        GameObjectData master = GetGameObjectData(linkedGuidLow);
+                        if (master == null)
+                        {
+                            Log.outError(LogFilter.Sql, "Couldn't get gameobject data for GUIDLow {0}", linkedGuidLow);
+                            error = true;
+                            break;
+                        }
+
+                        MapRecord map = CliDB.MapStorage.LookupByKey(master.spawnPoint.GetMapId());
+                        if (map == null || !map.Instanceable() || (master.spawnPoint.GetMapId() != slave.spawnPoint.GetMapId()))
+                        {
+                            Log.outError(LogFilter.Sql, "Creature '{0}' linking to '{1}' on an unpermitted map.", guidLow, linkedGuidLow);
+                            error = true;
+                            break;
+                        }
+
+                        // they must have a possibility to meet (normal/heroic difficulty)
+                        if (!master.spawnDifficulties.Intersect(slave.spawnDifficulties).Any())
+                        {
+                            Log.outError(LogFilter.Sql, "LinkedRespawn: Creature '{0}' linking to '{1}' with not corresponding spawnMask", guidLow, linkedGuidLow);
+                            error = true;
+                            break;
+                        }
+
+                        guid = ObjectGuid.Create(HighGuid.Creature, slave.spawnPoint.GetMapId(), slave.Id, guidLow);
+                        linkedGuid = ObjectGuid.Create(HighGuid.GameObject, master.spawnPoint.GetMapId(), master.Id, linkedGuidLow);
+                        break;
+                    }
                     case CreatureLinkedRespawnType.GOToGO:
+                    {
+                        GameObjectData slave = GetGameObjectData(guidLow);
+                        if (slave == null)
                         {
-                            GameObjectData slave = GetGameObjectData(guidLow);
-                            if (slave == null)
-                            {
-                                Log.outError(LogFilter.Sql, "Couldn't get gameobject data for GUIDLow {0}", guidLow);
-                                error = true;
-                                break;
-                            }
-
-                            GameObjectData master = GetGameObjectData(linkedGuidLow);
-                            if (master == null)
-                            {
-                                Log.outError(LogFilter.Sql, "Couldn't get gameobject data for GUIDLow {0}", linkedGuidLow);
-                                error = true;
-                                break;
-                            }
-
-                            MapRecord map = CliDB.MapStorage.LookupByKey(master.spawnPoint.GetMapId());
-                            if (map == null || !map.Instanceable() || (master.spawnPoint.GetMapId() != slave.spawnPoint.GetMapId()))
-                            {
-                                Log.outError(LogFilter.Sql, "Creature '{0}' linking to '{1}' on an unpermitted map.", guidLow, linkedGuidLow);
-                                error = true;
-                                break;
-                            }
-
-                            // they must have a possibility to meet (normal/heroic difficulty)
-                            if (!master.spawnDifficulties.Intersect(slave.spawnDifficulties).Any())
-                            {
-                                Log.outError(LogFilter.Sql, "LinkedRespawn: Creature '{0}' linking to '{1}' with not corresponding spawnMask", guidLow, linkedGuidLow);
-                                error = true;
-                                break;
-                            }
-
-                            guid = ObjectGuid.Create(HighGuid.GameObject, slave.spawnPoint.GetMapId(), slave.Id, guidLow);
-                            linkedGuid = ObjectGuid.Create(HighGuid.GameObject, master.spawnPoint.GetMapId(), master.Id, linkedGuidLow);
+                            Log.outError(LogFilter.Sql, "Couldn't get gameobject data for GUIDLow {0}", guidLow);
+                            error = true;
                             break;
                         }
+
+                        GameObjectData master = GetGameObjectData(linkedGuidLow);
+                        if (master == null)
+                        {
+                            Log.outError(LogFilter.Sql, "Couldn't get gameobject data for GUIDLow {0}", linkedGuidLow);
+                            error = true;
+                            break;
+                        }
+
+                        MapRecord map = CliDB.MapStorage.LookupByKey(master.spawnPoint.GetMapId());
+                        if (map == null || !map.Instanceable() || (master.spawnPoint.GetMapId() != slave.spawnPoint.GetMapId()))
+                        {
+                            Log.outError(LogFilter.Sql, "Creature '{0}' linking to '{1}' on an unpermitted map.", guidLow, linkedGuidLow);
+                            error = true;
+                            break;
+                        }
+
+                        // they must have a possibility to meet (normal/heroic difficulty)
+                        if (!master.spawnDifficulties.Intersect(slave.spawnDifficulties).Any())
+                        {
+                            Log.outError(LogFilter.Sql, "LinkedRespawn: Creature '{0}' linking to '{1}' with not corresponding spawnMask", guidLow, linkedGuidLow);
+                            error = true;
+                            break;
+                        }
+
+                        guid = ObjectGuid.Create(HighGuid.GameObject, slave.spawnPoint.GetMapId(), slave.Id, guidLow);
+                        linkedGuid = ObjectGuid.Create(HighGuid.GameObject, master.spawnPoint.GetMapId(), master.Id, linkedGuidLow);
+                        break;
+                    }
                     case CreatureLinkedRespawnType.GOToCreature:
+                    {
+                        GameObjectData slave = GetGameObjectData(guidLow);
+                        if (slave == null)
                         {
-                            GameObjectData slave = GetGameObjectData(guidLow);
-                            if (slave == null)
-                            {
-                                Log.outError(LogFilter.Sql, "Couldn't get gameobject data for GUIDLow {0}", guidLow);
-                                error = true;
-                                break;
-                            }
-
-                            CreatureData master = GetCreatureData(linkedGuidLow);
-                            if (master == null)
-                            {
-                                Log.outError(LogFilter.Sql, "Couldn't get creature data for GUIDLow {0}", linkedGuidLow);
-                                error = true;
-                                break;
-                            }
-
-                            MapRecord map = CliDB.MapStorage.LookupByKey(master.spawnPoint.GetMapId());
-                            if (map == null || !map.Instanceable() || (master.spawnPoint.GetMapId() != slave.spawnPoint.GetMapId()))
-                            {
-                                Log.outError(LogFilter.Sql, "Creature '{0}' linking to '{1}' on an unpermitted map.", guidLow, linkedGuidLow);
-                                error = true;
-                                break;
-                            }
-
-                            // they must have a possibility to meet (normal/heroic difficulty)
-                            if (!master.spawnDifficulties.Intersect(slave.spawnDifficulties).Any())
-                            {
-                                Log.outError(LogFilter.Sql, "LinkedRespawn: Creature '{0}' linking to '{1}' with not corresponding spawnMask", guidLow, linkedGuidLow);
-                                error = true;
-                                break;
-                            }
-
-                            guid = ObjectGuid.Create(HighGuid.GameObject, slave.spawnPoint.GetMapId(), slave.Id, guidLow);
-                            linkedGuid = ObjectGuid.Create(HighGuid.Creature, master.spawnPoint.GetMapId(), master.Id, linkedGuidLow);
+                            Log.outError(LogFilter.Sql, "Couldn't get gameobject data for GUIDLow {0}", guidLow);
+                            error = true;
                             break;
                         }
+
+                        CreatureData master = GetCreatureData(linkedGuidLow);
+                        if (master == null)
+                        {
+                            Log.outError(LogFilter.Sql, "Couldn't get creature data for GUIDLow {0}", linkedGuidLow);
+                            error = true;
+                            break;
+                        }
+
+                        MapRecord map = CliDB.MapStorage.LookupByKey(master.spawnPoint.GetMapId());
+                        if (map == null || !map.Instanceable() || (master.spawnPoint.GetMapId() != slave.spawnPoint.GetMapId()))
+                        {
+                            Log.outError(LogFilter.Sql, "Creature '{0}' linking to '{1}' on an unpermitted map.", guidLow, linkedGuidLow);
+                            error = true;
+                            break;
+                        }
+
+                        // they must have a possibility to meet (normal/heroic difficulty)
+                        if (!master.spawnDifficulties.Intersect(slave.spawnDifficulties).Any())
+                        {
+                            Log.outError(LogFilter.Sql, "LinkedRespawn: Creature '{0}' linking to '{1}' with not corresponding spawnMask", guidLow, linkedGuidLow);
+                            error = true;
+                            break;
+                        }
+
+                        guid = ObjectGuid.Create(HighGuid.GameObject, slave.spawnPoint.GetMapId(), slave.Id, guidLow);
+                        linkedGuid = ObjectGuid.Create(HighGuid.Creature, master.spawnPoint.GetMapId(), master.Id, linkedGuidLow);
+                        break;
+                    }
 
                 }
 
@@ -2865,7 +2920,7 @@ namespace Game
         {
             uint oldMSTime = Time.GetMSTime();
 
-            _npcTextStorage.Clear();
+            npcTextStorage.Clear();
 
             SQLResult result = DB.World.Query("SELECT ID, Probability0, Probability1, Probability2, Probability3, Probability4, Probability5, Probability6, Probability7, " +
                 "BroadcastTextID0, BroadcastTextID1, BroadcastTextID2, BroadcastTextID3, BroadcastTextID4, BroadcastTextID5, BroadcastTextID6, BroadcastTextID7 FROM npc_text");
@@ -2912,10 +2967,10 @@ namespace Game
                         npcText.Data[i].Probability = 0;
                     }
                 }
-                _npcTextStorage[textID] = npcText;
+                npcTextStorage[textID] = npcText;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} npc texts in {1} ms", _npcTextStorage.Count, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} npc texts in {1} ms", npcTextStorage.Count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
         public void LoadTrainers()
@@ -2923,7 +2978,7 @@ namespace Game
             uint oldMSTime = Time.GetMSTime();
 
             // For reload case
-            _trainers.Clear();
+            trainers.Clear();
 
             MultiMap<uint, TrainerSpell> spellsByTrainer = new();
             SQLResult trainerSpellsResult = DB.World.Query("SELECT TrainerId, SpellId, MoneyCost, ReqSkillLine, ReqSkillRank, ReqAbility1, ReqAbility2, ReqAbility3, ReqLevel FROM trainer_spell");
@@ -2990,7 +3045,7 @@ namespace Game
                         spellsByTrainer.Remove(trainerId);
                     }
 
-                    _trainers.Add(trainerId, new Trainer(trainerId, trainerType, greeting, spells));
+                    trainers.Add(trainerId, new Trainer(trainerId, trainerType, greeting, spells));
 
                 } while (trainersResult.NextRow());
             }
@@ -3013,7 +3068,7 @@ namespace Game
                     if (!SharedConst.IsValidLocale(locale) || locale == Locale.enUS)
                         continue;
 
-                    Trainer trainer = _trainers.LookupByKey(trainerId);
+                    Trainer trainer = trainers.LookupByKey(trainerId);
                     if (trainer != null)
                         trainer.AddGreetingLocale(locale, trainerLocalesResult.Read<String>(2));
                     else
@@ -3022,7 +3077,7 @@ namespace Game
                 } while (trainerLocalesResult.NextRow());
             }
 
-            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_trainers.Count} Trainers in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {trainers.Count} Trainers in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
         public void LoadCreatureTrainers()
         {
@@ -3234,7 +3289,7 @@ namespace Game
                 CreatureData data = new();
                 data.spawnId = guid;
                 data.Id = entry;
-                data.spawnPoint = new WorldLocation(result.Read<ushort>(2), result.Read<float>(3), result.Read<float>(4), result.Read<float>(5), result.Read<float>(6));                    
+                data.spawnPoint = new WorldLocation(result.Read<ushort>(2), result.Read<float>(3), result.Read<float>(4), result.Read<float>(5), result.Read<float>(6));
                 data.displayid = result.Read<uint>(7);
                 data.equipmentId = result.Read<sbyte>(8);
                 data.spawntimesecs = result.Read<int>(9);
@@ -3274,7 +3329,7 @@ namespace Game
                 bool ok = true;
                 for (uint diff = 0; diff < SharedConst.MaxCreatureDifficulties && ok; ++diff)
                 {
-                    if (_difficultyEntries[diff].Contains(data.Id))
+                    if (difficultyEntries[diff].Contains(data.Id))
                     {
                         Log.outError(LogFilter.Sql, "Table `creature` have creature (GUID: {0}) that listed as difficulty {1} template (entry: {2}) in `creaturetemplate`, skipped.", guid, diff + 1, data.Id);
                         ok = false;
@@ -3471,7 +3526,7 @@ namespace Game
         }
         public List<uint> GetCreatureQuestItemList(uint id)
         {
-            return _creatureQuestItemStorage.LookupByKey(id);
+            return creatureQuestItemStorage.LookupByKey(id);
         }
         public CreatureAddon GetCreatureAddon(ulong lowguid)
         {
@@ -3479,7 +3534,7 @@ namespace Game
         }
         public CreatureTemplate GetCreatureTemplate(uint entry)
         {
-            return _creatureTemplateStorage.LookupByKey(entry);
+            return creatureTemplateStorage.LookupByKey(entry);
         }
         public CreatureAddon GetCreatureTemplateAddon(uint entry)
         {
@@ -3495,7 +3550,7 @@ namespace Game
         }
         public Dictionary<uint, CreatureTemplate> GetCreatureTemplates()
         {
-            return _creatureTemplateStorage;
+            return creatureTemplateStorage;
         }
         public Dictionary<ulong, CreatureData> GetAllCreatureData() { return creatureDataStorage; }
         public CreatureData GetCreatureData(ulong guid)
@@ -3573,7 +3628,7 @@ namespace Game
                 RemoveCreatureFromGrid(guid, data);
                 OnDeleteSpawnData(data);
             }
-            
+
             creatureDataStorage.Remove(guid);
         }
         public CreatureBaseStats GetCreatureBaseStats(uint level, uint unitClass)
@@ -3608,7 +3663,7 @@ namespace Game
                         });
 
                         if (creatureModel != null)
-                           model = creatureModel;
+                            model = creatureModel;
                     }
                     return minfotmp;
                 }
@@ -3622,7 +3677,7 @@ namespace Game
         }
         public NpcText GetNpcText(uint textId)
         {
-            return _npcTextStorage.LookupByKey(textId);
+            return npcTextStorage.LookupByKey(textId);
         }
 
         //GameObjects
@@ -3759,18 +3814,18 @@ namespace Game
                                 CheckGOLockId(got, got.Camera.open, 0);
                             break;
                         case GameObjectTypes.MapObjTransport:              //15
+                        {
+                            if (got.MoTransport.taxiPathID != 0)
                             {
-                                if (got.MoTransport.taxiPathID != 0)
-                                {
-                                    if (got.MoTransport.taxiPathID >= CliDB.TaxiPathNodesByPath.Count || CliDB.TaxiPathNodesByPath[got.MoTransport.taxiPathID].Empty())
-                                        Log.outError(LogFilter.Sql, "GameObject (Entry: {0} GoType: {1}) have data0={2} but TaxiPath (Id: {3}) not exist.",
-                                        entry, got.type, got.MoTransport.taxiPathID, got.MoTransport.taxiPathID);
-                                }
-                                int transportMap = got.MoTransport.SpawnMap;
-                                if (transportMap != 0)
-                                    _transportMaps.Add((ushort)transportMap);
-                                break;
+                                if (got.MoTransport.taxiPathID >= CliDB.TaxiPathNodesByPath.Count || CliDB.TaxiPathNodesByPath[got.MoTransport.taxiPathID].Empty())
+                                    Log.outError(LogFilter.Sql, "GameObject (Entry: {0} GoType: {1}) have data0={2} but TaxiPath (Id: {3}) not exist.",
+                                    entry, got.type, got.MoTransport.taxiPathID, got.MoTransport.taxiPathID);
                             }
+                            int transportMap = got.MoTransport.SpawnMap;
+                            if (transportMap != 0)
+                                _transportMaps.Add((ushort)transportMap);
+                            break;
+                        }
                         case GameObjectTypes.SpellCaster:               //22
                                                                         // always must have spell
                             CheckGOSpellId(got, got.SpellCaster.spell, 0);
@@ -3799,12 +3854,12 @@ namespace Game
                             }
                             break;
                         case GameObjectTypes.GarrisonBuilding:
-                            {
-                                int transportMap = got.garrisonBuilding.SpawnMap;
-                                if (transportMap != 0)
-                                    _transportMaps.Add((ushort)transportMap);
-                            }
-                            break;
+                        {
+                            int transportMap = got.garrisonBuilding.SpawnMap;
+                            if (transportMap != 0)
+                                _transportMaps.Add((ushort)transportMap);
+                        }
+                        break;
                         case GameObjectTypes.GatheringNode:
                             if (got.GatheringNode.open != 0)
                                 CheckGOLockId(got, got.GatheringNode.open, 0);
@@ -4279,30 +4334,30 @@ namespace Game
                     case GameObjectTypes.QuestGiver:
                         break;
                     case GameObjectTypes.Chest:
-                        {
-                            // scan GO chest with loot including quest items
-                            uint lootId = pair.Value.GetLootId();
+                    {
+                        // scan GO chest with loot including quest items
+                        uint lootId = pair.Value.GetLootId();
 
-                            // find quest loot for GO
-                            if (pair.Value.Chest.questID != 0 || Loots.LootStorage.Gameobject.HaveQuestLootFor(lootId))
-                                break;
+                        // find quest loot for GO
+                        if (pair.Value.Chest.questID != 0 || Loots.LootStorage.Gameobject.HaveQuestLootFor(lootId))
+                            break;
 
-                            continue;
-                        }
+                        continue;
+                    }
                     case GameObjectTypes.Generic:
-                        {
-                            if (pair.Value.Generic.questID > 0)            //quests objects
-                                break;
+                    {
+                        if (pair.Value.Generic.questID > 0)            //quests objects
+                            break;
 
-                            continue;
-                        }
+                        continue;
+                    }
                     case GameObjectTypes.Goober:
-                        {
-                            if (pair.Value.Goober.questID > 0)              //quests objects
-                                break;
+                    {
+                        if (pair.Value.Goober.questID > 0)              //quests objects
+                            break;
 
-                            continue;
-                        }
+                        continue;
+                    }
                     default:
                         continue;
                 }
@@ -4395,7 +4450,7 @@ namespace Game
         {
             GameObjectData data = GetGameObjectData(guid);
             if (data != null)
-            { 
+            {
                 RemoveGameObjectFromGrid(guid, data);
                 OnDeleteSpawnData(data);
             }
@@ -4760,7 +4815,7 @@ namespace Game
         }
         public Trainer GetTrainer(uint trainerId)
         {
-            return _trainers.LookupByKey(trainerId);
+            return trainers.LookupByKey(trainerId);
         }
         public void AddVendorItem(uint entry, VendorItem vItem, bool persist = true)
         {
@@ -4908,6 +4963,10 @@ namespace Game
         public VendorItemData GetNpcVendorItemList(uint entry)
         {
             return cacheVendorItemStorage.LookupByKey(entry);
+        }
+        public CreatureMovementData GetCreatureMovementOverride(ulong spawnId)
+        {
+            return creatureMovementOverrides.lookupbykey(spawnId);
         }
         public EquipmentInfo GetEquipmentInfo(uint entry, int id)
         {
@@ -5196,27 +5255,27 @@ namespace Game
                 switch (creditType)
                 {
                     case EncounterCreditType.KillCreature:
+                    {
+                        CreatureTemplate creatureInfo = GetCreatureTemplate(creditEntry);
+                        if (creatureInfo == null)
                         {
-                            CreatureTemplate creatureInfo = GetCreatureTemplate(creditEntry);
-                            if (creatureInfo == null)
+                            Log.outError(LogFilter.Sql, "Table `instance_encounters` has an invalid creature (entry {0}) linked to the encounter {1} ({2}), skipped!",
+                                creditEntry, entry, dungeonEncounter.Name[Global.WorldMgr.GetDefaultDbcLocale()]);
+                            continue;
+                        }
+                        creatureInfo.FlagsExtra |= CreatureFlagsExtra.DungeonBoss;
+                        for (byte diff = 0; diff < SharedConst.MaxCreatureDifficulties; ++diff)
+                        {
+                            uint diffEntry = creatureInfo.DifficultyEntry[diff];
+                            if (diffEntry != 0)
                             {
-                                Log.outError(LogFilter.Sql, "Table `instance_encounters` has an invalid creature (entry {0}) linked to the encounter {1} ({2}), skipped!",
-                                    creditEntry, entry, dungeonEncounter.Name[Global.WorldMgr.GetDefaultDbcLocale()]);
-                                continue;
+                                CreatureTemplate diffInfo = GetCreatureTemplate(diffEntry);
+                                if (diffInfo != null)
+                                    diffInfo.FlagsExtra |= CreatureFlagsExtra.DungeonBoss;
                             }
-                            creatureInfo.FlagsExtra |= CreatureFlagsExtra.DungeonBoss;
-                            for (byte diff = 0; diff < SharedConst.MaxCreatureDifficulties; ++diff)
-                            {
-                                uint diffEntry = creatureInfo.DifficultyEntry[diff];
-                                if (diffEntry != 0)
-                                {
-                                    CreatureTemplate diffInfo = GetCreatureTemplate(diffEntry);
-                                    if (diffInfo != null)
-                                        diffInfo.FlagsExtra |= CreatureFlagsExtra.DungeonBoss;
-                                }
                         }
                         break;
-                        }
+                    }
                     case EncounterCreditType.CastSpell:
                         if (!Global.SpellMgr.HasSpellInfo(creditEntry, Difficulty.None))
                         {
@@ -5520,7 +5579,7 @@ namespace Game
             return null;
         }
         public List<InstanceSpawnGroupInfo> GetSpawnGroupsForInstance(uint instanceId) { return _instanceSpawnGroupStorage.LookupByKey(instanceId); }
-        
+
         //Player
         public void LoadPlayerInfo()
         {
@@ -5666,7 +5725,7 @@ namespace Game
                         }
                     }
                 }
-            }            
+            }
             Log.outInfo(LogFilter.ServerLoading, "Loading Player Create Items Override Data...");
             {
                 //                                         0     1      2       3
@@ -7870,8 +7929,8 @@ namespace Game
         public List<uint> GetExclusiveQuestGroupBounds(int exclusiveGroupId)
         {
             return _exclusiveQuestGroups.LookupByKey(exclusiveGroupId);
-        }        
-        
+        }
+
         //Spells /Skills / Phases
         public void LoadPhases()
         {
@@ -7894,7 +7953,7 @@ namespace Game
         public void UnloadPhaseConditions()
         {
             foreach (var pair in _phaseInfoByArea)
-                    pair.Value.Conditions.Clear();
+                pair.Value.Conditions.Clear();
         }
         void LoadTerrainWorldMaps()
         {
@@ -8410,7 +8469,7 @@ namespace Game
             uint oldMSTime = Time.GetMSTime();
 
             _questRequestItemsLocaleStorage.Clear(); // need for reload case
-                                                   //                                               0     1          2
+                                                     //                                               0     1          2
             SQLResult result = DB.World.Query("SELECT Id, locale, CompletionText FROM quest_request_items_locale");
             if (result.IsEmpty())
                 return;
@@ -9664,7 +9723,7 @@ namespace Game
 
             // Initialize Query data for creatures
             if (mask.HasAnyFlag(QueryDataGroup.Creatures))
-                foreach (var creaturePair in _creatureTemplateStorage)
+                foreach (var creaturePair in creatureTemplateStorage)
                     creaturePair.Value.InitializeQueryData();
 
             // Initialize Query Data for gameobjects
@@ -10062,7 +10121,7 @@ namespace Game
 
         public List<TempSummonData> GetSummonGroup(uint summonerId, SummonerType summonerType, byte group)
         {
-            Tuple<uint, SummonerType,byte> key = Tuple.Create(summonerId, summonerType, group);
+            Tuple<uint, SummonerType, byte> key = Tuple.Create(summonerId, summonerType, group);
             return _tempSummonDataStorage.LookupByKey(key);
         }
 
@@ -10282,21 +10341,22 @@ namespace Game
         Dictionary<uint, PointOfInterest> pointsOfInterestStorage = new();
 
         //Creature
-        Dictionary<uint, CreatureTemplate> _creatureTemplateStorage = new();
+        Dictionary<uint, CreatureTemplate> creatureTemplateStorage = new();
         Dictionary<uint, CreatureModelInfo> creatureModelStorage = new();
         Dictionary<ulong, CreatureData> creatureDataStorage = new();
         Dictionary<ulong, CreatureAddon> creatureAddonStorage = new();
-        MultiMap<uint, uint> _creatureQuestItemStorage = new();
+        MultiMap<uint, uint> creatureQuestItemStorage = new();
         Dictionary<uint, CreatureAddon> creatureTemplateAddonStorage = new();
+        Dictionary<ulong, CreatureMovementData> creatureMovementOverrides = new();
         MultiMap<uint, Tuple<uint, EquipmentInfo>> equipmentInfoStorage = new();
         Dictionary<ObjectGuid, ObjectGuid> linkedRespawnStorage = new();
         Dictionary<uint, CreatureBaseStats> creatureBaseStatsStorage = new();
         Dictionary<uint, VendorItemData> cacheVendorItemStorage = new();
-        Dictionary<uint, Trainer> _trainers = new();
+        Dictionary<uint, Trainer> trainers = new();
         Dictionary<(uint creatureId, uint gossipMenuId, uint gossipOptionIndex), uint> _creatureDefaultTrainers = new();
-        List<uint>[] _difficultyEntries = new List<uint>[SharedConst.MaxCreatureDifficulties]; // already loaded difficulty 1 value in creatures, used in CheckCreatureTemplate
-        List<uint>[] _hasDifficultyEntries = new List<uint>[SharedConst.MaxCreatureDifficulties]; // already loaded creatures with difficulty 1 values, used in CheckCreatureTemplate
-        Dictionary<uint, NpcText> _npcTextStorage = new();
+        List<uint>[] difficultyEntries = new List<uint>[SharedConst.MaxCreatureDifficulties]; // already loaded difficulty 1 value in creatures, used in CheckCreatureTemplate
+        List<uint>[] hasDifficultyEntries = new List<uint>[SharedConst.MaxCreatureDifficulties]; // already loaded creatures with difficulty 1 values, used in CheckCreatureTemplate
+        Dictionary<uint, NpcText> npcTextStorage = new();
 
         //GameObject
         Dictionary<uint, GameObjectTemplate> _gameObjectTemplateStorage = new();
@@ -10689,7 +10749,7 @@ namespace Game
         public uint SpawnGroupId;
         public InstanceSpawnGroupFlags Flags;
     }
-    
+
     public class SpellClickInfo
     {
         public uint spellId;
@@ -10762,7 +10822,7 @@ namespace Game
         public List<QuestPOIBlobPoint> Points;
         public bool AlwaysAllowMergingBlobs;
 
-        public QuestPOIBlobData(int blobIndex, int objectiveIndex, int questObjectiveID, int questObjectID, int mapID, int uiMapID, int priority, int flags, 
+        public QuestPOIBlobData(int blobIndex, int objectiveIndex, int questObjectiveID, int questObjectID, int mapID, int uiMapID, int priority, int flags,
             int worldEffectID, int playerConditionID, int navigationPlayerConditionID, int spawnTrackingID, List<QuestPOIBlobPoint> points, bool alwaysAllowMergingBlobs)
         {
             BlobIndex = blobIndex;
@@ -10779,11 +10839,11 @@ namespace Game
             SpawnTrackingID = spawnTrackingID;
             Points = points;
             AlwaysAllowMergingBlobs = alwaysAllowMergingBlobs;
-        } 
+        }
     }
 
     public class QuestPOIBlobPoint
-    {  
+    {
         public int X;
         public int Y;
         public int Z;

@@ -121,5 +121,10 @@ namespace Framework.Database
 
             return values;
         }
+
+        public bool IsNull(int column)
+        {
+            return _currentRow[column] == DBNull.Value;
+        }
     }
 }

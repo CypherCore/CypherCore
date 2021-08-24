@@ -74,7 +74,7 @@ namespace Game.Entities
         public uint MaxGold;
         public string AIName;
         public uint MovementType;
-        public InhabitType InhabitType;
+        public CreatureMovementData Movement;
         public float HoverHeight;
         public float ModHealth;
         public float ModHealthExtra;
@@ -347,6 +347,34 @@ namespace Game.Entities
         public CreatureData() : base(SpawnObjectType.Creature) { }
     }
 
+    public class CreatureMovementData
+    {
+        public CreatureGroundMovementType Ground;
+        public CreatureFlightMovementType Flight;
+        public bool Swim;
+        public bool Rooted;
+
+        public CreatureMovementData()
+        {
+            Ground = CreatureGroundMovementType.Run;
+            Flight = CreatureFlightMovementType.None;
+            Swim = true;
+            Rooted = false;
+        }
+
+
+
+        bool IsGroundAllowed() { return Ground != CreatureGroundMovementType.None; }
+        bool IsSwimAllowed() { return Swim; }
+        bool IsFlightAllowed() { return Flight != CreatureFlightMovementType.None; }
+        bool IsRooted() { return Rooted; }
+
+        public override string ToString()
+        {
+            return $"Ground: {Ground}, Swim: {Swim}, Flight: {Flight} {(Rooted ? ", Rooted" : "")}";
+        }
+    }
+    
     public class CreatureModelInfo
     {
         public float BoundingRadius;

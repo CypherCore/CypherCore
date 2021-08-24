@@ -375,4 +375,22 @@ namespace Framework.Constants
         MembersAssistMember = (MembersAssistLeader | LeaderAssistsMember), // every member will assist if any member is attacked
         IdleInFormation = 0x200, // The member will follow the leader when pathing idly
     }
+
+    public enum CreatureGroundMovementType
+    {
+        None,
+        Run,
+        Hover,
+
+        Max
+    }
+
+    public enum CreatureFlightMovementType
+    {
+        None,
+        DisableGravity,
+        CanFly,
+
+        Max
+    }
 }

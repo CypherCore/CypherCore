@@ -416,7 +416,7 @@ namespace Game.Entities
                 ApplySpellImmune(0, SpellImmunity.Effect, SpellEffectName.AttackMe, true);
             }
 
-            if (cInfo.InhabitType.HasAnyFlag(InhabitType.Root))
+            if (GetMovementTemplate().IsRooted())
                 SetControlled(true, UnitState.Root);
 
             UpdateMovementFlags();
@@ -2311,7 +2311,7 @@ namespace Game.Entities
                 dist += GetCombatReach() + victim.GetCombatReach();
 
                 // to prevent creatures in air ignore attacks because distance is already too high...
-                if (GetCreatureTemplate().InhabitType.HasAnyFlag(InhabitType.Air))
+                if (GetMovementTemplate().IsFlightAllowed())
                     return victim.IsInDist2d(m_homePosition, dist);
                 else
                     return victim.IsInDist(m_homePosition, dist);
@@ -2356,7 +2356,7 @@ namespace Game.Entities
                 //! Check using InhabitType as movement flags are assigned dynamically
                 //! basing on whether the creature is in air or not
                 //! Set MovementFlag_Hover. Otherwise do nothing.
-                if (Convert.ToBoolean(m_unitData.AnimTier & (byte)UnitBytes1Flags.Hover) && !Convert.ToBoolean(GetCreatureTemplate().InhabitType & InhabitType.Air))
+                if (CanHover())
                     AddUnitMovementFlag(MovementFlag.Hover);
             }
 
@@ -2463,6 +2463,15 @@ namespace Game.Entities
 
         bool IsSpawnedOnTransport() { return m_creatureData != null && m_creatureData.spawnPoint.GetMapId() != GetMapId(); }
 
+        public CreatureMovementData GetMovementTemplate()
+        {
+            CreatureMovementData movementOverride = Global.ObjectMgr.GetCreatureMovementOverride(m_spawnId);
+            if (movementOverride != null)
+                return movementOverride;
+
+            return GetCreatureTemplate().Movement;
+        }
+        
         public void AllLootRemovedFromCorpse()
         {
             if (loot.loot_type != LootType.Skinning && !IsPet() && GetCreatureTemplate().SkinLootId != 0 && HasLootRecipient())
@@ -2822,25 +2831,31 @@ namespace Game.Entities
             // Set the movement flags if the creature is in that mode. (Only fly if actually in air, only swim if in water, etc)
             float ground = GetFloorZ();
 
-            bool isInAir = (MathFunctions.fuzzyGt(GetPositionZ(), ground + MapConst.GroundHeightTolerance) || MathFunctions.fuzzyLt(GetPositionZ(), ground - MapConst.GroundHeightTolerance)); // Can be underground too, prevent the falling
+            bool canHover = CanHover();
+            bool isInAir = (MathFunctions.fuzzyGt(GetPositionZ(), ground + (canHover ? m_unitData.HoverHeight : 0.0f) + MapConst.GroundHeightTolerance) || MathFunctions.fuzzyLt(GetPositionZ(), ground - MapConst.GroundHeightTolerance)); // Can be underground too, prevent the falling
 
-            if (GetCreatureTemplate().InhabitType.HasAnyFlag(InhabitType.Air) && isInAir && !IsFalling())
+            if (GetMovementTemplate().IsFlightAllowed() && isInAir && !IsFalling())
             {
-                if (GetCreatureTemplate().InhabitType.HasAnyFlag(InhabitType.Ground))
+                if (GetMovementTemplate().Flight == CreatureFlightMovementType.CanFly)
                     SetCanFly(true);
                 else
                     SetDisableGravity(true);
+
+                if (!HasAuraType(AuraType.Hover))
+                    SetHover(false);
             }
             else
             {
                 SetCanFly(false);
                 SetDisableGravity(false);
+                if (CanHover() || HasAuraType(AuraType.Hover))
+                    SetHover(true);
             }
 
             if (!isInAir)
                 SetFall(false);
 
-            SetSwim(GetCreatureTemplate().InhabitType.HasAnyFlag(InhabitType.Water) && IsInWater());
+            SetSwim(GetMovementTemplate().IsSwimAllowed() && IsInWater());
         }
 
         public override void SetObjectScale(float scale)
@@ -3034,18 +3049,12 @@ namespace Game.Entities
         {
             return GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.Guard);
         }
-        public bool CanWalk()
-        {
-            return GetCreatureTemplate().InhabitType.HasAnyFlag(InhabitType.Ground);
-        }
-        public override bool CanSwim()
-        {
-            return GetCreatureTemplate().InhabitType.HasAnyFlag(InhabitType.Water);
-        }
-        public override bool CanFly()
-        {
-            return GetCreatureTemplate().InhabitType.HasAnyFlag(InhabitType.Air);
-        }
+
+        public bool CanWalk() { return GetMovementTemplate().IsGroundAllowed(); }
+        public override bool CanSwim() { return GetMovementTemplate().IsSwimAllowed() || IsPet();}
+        public override bool CanFly()  { return GetMovementTemplate().IsFlightAllowed(); }
+        bool CanHover() { return GetMovementTemplate().Ground == CreatureGroundMovementType.Hover; }
+        
         public bool IsDungeonBoss() { return (GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.DungeonBoss)); }
         public override bool IsAffectedByDiminishingReturns() { return base.IsAffectedByDiminishingReturns() || GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.AllDiminish); }
 

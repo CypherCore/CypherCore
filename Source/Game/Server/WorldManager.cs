@@ -616,6 +616,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Creature Addon Data...");
             Global.ObjectMgr.LoadCreatureAddons();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading Creature Movement Overrides...");
+            Global.ObjectMgr.LoadCreatureMovementOverrides();                 // must be after LoadCreatures()
+
             Log.outInfo(LogFilter.ServerLoading, "Loading GameObjects...");
             Global.ObjectMgr.LoadGameObjects();
 

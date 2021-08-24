@@ -1173,7 +1173,7 @@ namespace Framework.Constants
         BanAccountYoubannedmessageWorld = 11006,
         BanAccountYoupermbannedmessageWorld = 11007,
 
-        NpcinfoInhabitType = 11008,
+        NpcinfoMovementData = 11008,
         NpcinfoFlagsExtra = 11009,
         InstanceLoginGamemasterException = 11010,
 

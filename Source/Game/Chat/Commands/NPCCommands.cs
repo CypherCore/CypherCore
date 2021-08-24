@@ -148,7 +148,7 @@ namespace Game.Chat
             handler.SendSysMessage(CypherStrings.NpcinfoLevel, target.GetLevel());
             handler.SendSysMessage(CypherStrings.NpcinfoEquipment, target.GetCurrentEquipmentId(), target.GetOriginalEquipmentId());
             handler.SendSysMessage(CypherStrings.NpcinfoHealth, target.GetCreateHealth(), target.GetMaxHealth(), target.GetHealth());
-            handler.SendSysMessage(CypherStrings.NpcinfoInhabitType, cInfo.InhabitType);
+            handler.SendSysMessage(CypherStrings.NpcinfoMovementData, target.GetMovementTemplate().ToString());
 
             handler.SendSysMessage(CypherStrings.NpcinfoUnitFieldFlags, (uint)target.m_unitData.Flags);
             foreach (UnitFlags value in Enum.GetValues(typeof(UnitFlags)))

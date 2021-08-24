@@ -169,6 +169,15 @@ namespace Game.Chat
             return true;
         }
 
+        [Command("creature_movement_override", RBACPermissions.CommandReloadCreatureMovementOverride, true)]
+        static bool HandleReloadCreatureMovementOverrideCommand(StringArguments args, CommandHandler handler)
+        {
+            Log.outInfo(LogFilter.Server, "Re-Loading Creature movement overrides...");
+            Global.ObjectMgr.LoadCreatureMovementOverrides();
+            handler.SendGlobalGMSysMessage("DB table `creature_movement_override` reloaded.");
+            return true;
+        }
+
         [Command("creature_onkill_reputation", RBACPermissions.CommandReloadCreatureOnkillReputation, true)]
         static bool HandleReloadOnKillReputationCommand(StringArguments args, CommandHandler handler)
         {
@@ -902,7 +911,7 @@ namespace Game.Chat
             handler.SendGlobalGMSysMessage("Vehicle templates reloaded.");
             return true;
         }
-        
+
         [Command("vehicle_template_accessory", RBACPermissions.CommandReloadVehicleTemplateAccessory, true)]
         static bool HandleReloadVehicleTemplateAccessoryCommand(StringArguments args, CommandHandler handler)
         {
@@ -985,6 +994,7 @@ namespace Game.Chat
                 HandleReloadCypherStringCommand(args, handler);
                 HandleReloadGameTeleCommand(args, handler);
 
+                HandleReloadCreatureMovementOverrideCommand(args, handler);
                 HandleReloadCreatureSummonGroupsCommand(args, handler);
 
                 HandleReloadVehicleAccessoryCommand(args, handler);
