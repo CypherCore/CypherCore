@@ -201,6 +201,7 @@ namespace Game.Entities
                         transport.CalculatePassengerPosition(ref x, ref y, ref z, ref o);
                 }
 
+                UpdateAllowedPositionZ(x, y, ref z);
                 SetHomePosition(x, y, z, o);
                 GetMap().CreatureRelocation(this, x, y, z, o);
             }
@@ -897,11 +898,7 @@ namespace Game.Entities
             LoadCreaturesAddon();
 
             //! Need to be called after LoadCreaturesAddon - MOVEMENTFLAG_HOVER is set there
-            if (HasUnitMovementFlag(MovementFlag.Hover))
-            {
-                //! Relocate again with updated Z coord
-                posZ += m_unitData.HoverHeight;
-            }
+            posZ += GetHoverOffset();
 
             LastUsedScriptID = GetScriptId();
 
@@ -2825,7 +2822,7 @@ namespace Game.Entities
             // Set the movement flags if the creature is in that mode. (Only fly if actually in air, only swim if in water, etc)
             float ground = GetFloorZ();
 
-            bool isInAir = (MathFunctions.fuzzyGt(GetPositionZMinusOffset(), ground + MapConst.GroundHeightTolerance) || MathFunctions.fuzzyLt(GetPositionZMinusOffset(), ground - MapConst.GroundHeightTolerance)); // Can be underground too, prevent the falling
+            bool isInAir = (MathFunctions.fuzzyGt(GetPositionZ(), ground + MapConst.GroundHeightTolerance) || MathFunctions.fuzzyLt(GetPositionZ(), ground - MapConst.GroundHeightTolerance)); // Can be underground too, prevent the falling
 
             if (GetCreatureTemplate().InhabitType.HasAnyFlag(InhabitType.Air) && isInAir && !IsFalling())
             {
@@ -3138,7 +3135,7 @@ namespace Game.Entities
                 return false;
 
             //We should set first home position, because then AI calls home movement
-            SetHomePosition(data.spawnPoint);
+            SetHomePosition(this);
 
             m_deathState = DeathState.Alive;
 

@@ -1016,12 +1016,6 @@ namespace Game.Maps
             var oldcell = player.GetCurrentCell();
             var newcell = new Cell(x, y);
 
-            //! If hovering, always increase our server-side Z position
-            //! Client automatically projects correct position based on Z coord sent in monster move
-            //! and HoverHeight sent in object updates
-            if (player.HasUnitMovementFlag(MovementFlag.Hover))
-                z += player.m_unitData.HoverHeight;
-
             player.Relocate(x, y, z, orientation);
             if (player.IsVehicle())
                 player.GetVehicleKit().RelocatePassengers();
@@ -1051,12 +1045,6 @@ namespace Game.Maps
 
             if (!respawnRelocationOnFail && GetGrid(new_cell.GetGridX(), new_cell.GetGridY()) == null)
                 return;
-
-            //! If hovering, always increase our server-side Z position
-            //! Client automatically projects correct position based on Z coord sent in monster move
-            //! and HoverHeight sent in object updates
-            if (creature.HasUnitMovementFlag(MovementFlag.Hover))
-                z += creature.m_unitData.HoverHeight;
 
             Cell old_cell = creature.GetCurrentCell();
             // delay creature move for grid/cell to grid/cell moves

@@ -198,7 +198,7 @@ namespace Game.Entities
                 return;
 
             MoveSplineInit init = new(this);
-            init.MoveTo(GetPositionX(), GetPositionY(), GetPositionZMinusOffset(), false);
+            init.MoveTo(GetPositionX(), GetPositionY(), GetPositionZ(), false);
             init.SetFacing(ori);
             init.Launch();
         }
@@ -616,6 +616,11 @@ namespace Game.Entities
                 GetVehicleKit().RelocatePassengers();
         }
 
+        public float GetHoverOffset()
+        {
+            return HasUnitMovementFlag(MovementFlag.Hover) ? m_unitData.HoverHeight : 0.0f;
+        }
+        
         public bool IsWithinBoundaryRadius(Unit obj)
         {
             if (!obj || !IsInMap(obj) || !IsInPhase(obj))
@@ -1575,15 +1580,6 @@ namespace Game.Entities
             data.PlayHoverAnim = enable;
 
             SendMessageToSet(data, true);
-        }
-
-        public float GetPositionZMinusOffset()
-        {
-            float offset = 0.0f;
-            if (HasUnitMovementFlag(MovementFlag.Hover))
-                offset = m_unitData.HoverHeight;
-
-            return GetPositionZ() - offset;
         }
 
         public Unit GetUnitBeingMoved()

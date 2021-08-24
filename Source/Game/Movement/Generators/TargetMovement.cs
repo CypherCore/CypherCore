@@ -141,30 +141,39 @@ namespace Game.Movement
             float x, y, z;
             if (updateDestination || _path == null)
             {
+                float size = owner.GetCombatReach();
+                float hoverDiff = owner.GetHoverOffset() - GetTarget().GetHoverOffset();
                 if (_offset == 0)
                 {
                     if (GetTarget().IsWithinDistInMap(owner, SharedConst.ContactDistance))
                         return;
 
                     // to nearest contact position
-                    GetTarget().GetContactPoint(owner, out x, out y, out z);
+                    if (hoverDiff != 0f)
+                        size = size > hoverDiff ? MathF.Sqrt(size * size - hoverDiff * hoverDiff) : 0.0f;
+
+                    GetTarget().GetNearPoint(owner, out x, out y, out z, size, SharedConst.ContactDistance, GetTarget().GetAngle(owner));
                 }
                 else
                 {
                     float distance = _offset + 1.0f;
-                    float size = owner.GetCombatReach();
 
                     if (owner.IsPet() && GetTarget().GetTypeId() == TypeId.Player)
                     {
                         distance = 1.0f;
                         size = 1.0f;
                     }
+                    else if (hoverDiff != 0)
+                        size = size > hoverDiff ? MathF.Sqrt(size * size - hoverDiff * hoverDiff) : 0.0f;
 
                     if (GetTarget().IsWithinDistInMap(owner, distance))
                         return;
 
                     GetTarget().GetClosePoint(out x, out y, out z, size, _offset, _angle);
                 }
+
+                if (owner.IsHovering())
+                    owner.UpdateAllowedPositionZ(x, y, ref z);
             }
             else
             {

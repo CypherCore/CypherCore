@@ -67,6 +67,7 @@ namespace Game.AI
                 owner.GetHomePosition(out x, out y, out z, out o);
                 init.SetFacing(o);
             }
+            owner.UpdateAllowedPositionZ(x, y, ref z);
             init.MoveTo(x, y, z);
             init.SetWalk(false);
             init.Launch();

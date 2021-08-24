@@ -2095,7 +2095,9 @@ namespace Game.Entities
 
         public void UpdateGroundPositionZ(float x, float y, ref float z)
         {
-            z = GetMapHeight(x, y, z);
+            float newZ = GetMapHeight(x, y, z);
+            if (newZ > MapConst.InvalidHeight)
+                z = newZ + (IsUnit() ? ToUnit().GetHoverOffset() : 0.0f);
         }
 
         public void UpdateAllowedPositionZ(float x, float y, ref float z)
@@ -2104,65 +2106,44 @@ namespace Game.Entities
             if (GetTransport())
                 return;
 
-            switch (GetTypeId())
+            Unit unit = ToUnit();
+            if (unit != null)
             {
-                case TypeId.Unit:
+                if (!unit.CanFly())
                 {
-                    // non fly unit don't must be in air
-                    // non swim unit must be at ground (mostly speedup, because it don't must be in water and water level check less fast
-                    if (!ToCreature().CanFly())
-                    {
-                        bool canSwim = ToCreature().CanSwim();
-                        float ground_z = z;
-                        float max_z = canSwim
-                            ? GetMapWaterOrGroundLevel(x, y, z, ref ground_z)
-                            : (ground_z = GetMapHeight(x, y, z));
-                        if (max_z > MapConst.InvalidHeight)
-                        {
-                            if (z > max_z)
-                                z = max_z;
-                            else if (z < ground_z)
-                                z = ground_z;
-                        }
-                    }
+                    bool canSwim = unit.CanSwim();
+                    float groundZ = z;
+                    float max_z;
+                    if (canSwim)
+                        max_z = GetMapWaterOrGroundLevel(x, y, z, ref groundZ);
                     else
+                        max_z = groundZ = GetMapHeight(x, y, z);
+
+                    if (max_z > MapConst.InvalidHeight)
                     {
-                        float ground_z = GetMapHeight(x, y, z);
-                        if (MathF.Abs(z - ground_z) < GetCollisionHeight())
-                            z = ground_z;
+                        // hovering units cannot go below their hover height
+                        float hoverOffset = unit.GetHoverOffset();
+                        max_z += hoverOffset;
+                        groundZ += hoverOffset;
+
+                        if (z > max_z)
+                            z = max_z;
+                        else if (z < groundZ)
+                            z = groundZ;
                     }
-                    break;
                 }
-                case TypeId.Player:
+                else
                 {
-                    // for server controlled moves playr work same as creature (but it can always swim)
-                    if (!ToPlayer().CanFly())
-                    {
-                        float ground_z = z;
-                        float max_z = GetMapWaterOrGroundLevel(x, y, z, ref ground_z);
-                        if (max_z > MapConst.InvalidHeight)
-                        {
-                            if (z > max_z)
-                                z = max_z;
-                            else if (z < ground_z)
-                                z = ground_z;
-                        }
-                    }
-                    else
-                    {
-                        float ground_z = GetMapHeight(x, y, z);
-                        if (MathF.Abs(z - ground_z) < GetCollisionHeight())
-                            z = ground_z;
-                    }
-                    break;
-                }
-                default:
-                {
-                    float ground_z = GetMapHeight(x, y, z);
-                    if (ground_z > MapConst.InvalidHeight)
+                    float ground_z = GetMapHeight(x, y, z) + unit.GetHoverOffset();
+                    if (z < ground_z)
                         z = ground_z;
-                    break;
                 }
+            }
+            else
+            {
+                float ground_z = GetMapHeight(x, y, z);
+                if (ground_z > MapConst.InvalidHeight)
+                    z = ground_z;
             }
         }
 

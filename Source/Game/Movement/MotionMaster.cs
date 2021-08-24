@@ -286,7 +286,7 @@ namespace Game.Movement
             {
                 // we are already close enough. We just need to turn toward the target without changing position.
                 MoveSplineInit init = new(_owner);
-                init.MoveTo(_owner.GetPositionX(), _owner.GetPositionY(), _owner.GetPositionZMinusOffset());
+                init.MoveTo(_owner.GetPositionX(), _owner.GetPositionY(), _owner.GetPositionZ());
                 init.SetFacing(target);
                 init.Launch();
                 StartMovement(new EffectMovementGenerator(id), MovementSlot.Active);
@@ -440,7 +440,7 @@ namespace Game.Movement
                 if (_owner.IsFlying())
                     point.Z = z;
                 else
-                    point.Z = _owner.GetMapHeight(point.X, point.Y, z);
+                    point.Z = _owner.GetMapHeight(point.X, point.Y, z) + _owner.GetHoverOffset();
 
                 init.args.path[i] = point;
             }
@@ -536,7 +536,7 @@ namespace Game.Movement
             }
 
             MoveSplineInit init = new(_owner);
-            init.MoveTo(_owner.GetPositionX(), _owner.GetPositionY(), tz, false);
+            init.MoveTo(_owner.GetPositionX(), _owner.GetPositionY(), tz + _owner.GetHoverOffset(), false);
             init.SetFall();
             init.Launch();
             StartMovement(new EffectMovementGenerator(id), MovementSlot.Controlled);

@@ -264,10 +264,7 @@ namespace Game
                 return;
             }
 
-            float z = loc.GetPositionZ();
-            if (GetPlayer().HasUnitMovementFlag(MovementFlag.Hover))
-                z += GetPlayer().m_unitData.HoverHeight;
-
+            float z = loc.GetPositionZ() + GetPlayer().GetHoverOffset();
             GetPlayer().Relocate(loc.GetPositionX(), loc.GetPositionY(), z, loc.GetOrientation());
             GetPlayer().SetFallInformation(0, GetPlayer().GetPositionZ());
 

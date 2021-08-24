@@ -1531,7 +1531,7 @@ namespace Game.Entities
 
             float dx = GetPositionX() - obj.GetPositionX();
             float dy = GetPositionY() - obj.GetPositionY();
-            float dz = GetPositionZMinusOffset() - obj.GetPositionZMinusOffset();
+            float dz = GetPositionZ() - obj.GetPositionZ();
             float distsq = (dx * dx) + (dy * dy) + (dz * dz);
 
             float maxdist = GetMeleeRange(obj) + GetTotalAuraModifier(AuraType.ModAutoAttackRange);
