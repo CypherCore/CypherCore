@@ -74,7 +74,7 @@ namespace Game.Entities
         public uint MaxGold;
         public string AIName;
         public uint MovementType;
-        public CreatureMovementData Movement;
+        public CreatureMovementData Movement = new();
         public float HoverHeight;
         public float ModHealth;
         public float ModHealthExtra;
