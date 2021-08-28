@@ -2281,7 +2281,8 @@ namespace Game.Spells
                         {
                             for (uint i = 0; i < SpellConst.MaxEffects; ++i)
                             {
-                                if ((effectMask & (1 << (int)i)) != 0 && !m_spellInfo.IsPositiveEffect(i))
+                                // mod duration only for effects applying aura!
+                                if ((aura_effmask & (1 << (int)i)) != 0 && !m_spellInfo.IsPositiveEffect(i))
                                 {
                                     positive = false;
                                     break;

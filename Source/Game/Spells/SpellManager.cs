@@ -2615,7 +2615,6 @@ namespace Game.Entities
 
                     foreach (SpellInfo spellInfo in spells)
                     {
-                        // TODO: validate attributes
                         if (attributes.HasAnyFlag((uint)SpellCustomAttributes.ShareDamage))
                         {
                             if (!spellInfo.HasEffect(SpellEffectName.SchoolDamage))
@@ -2763,9 +2762,6 @@ namespace Game.Entities
                                 break;
                             }
                     }
-
-                    if (!spellInfo._IsPositiveEffect(effect.EffectIndex, false))
-                        spellInfo.NegativeEffects[(int)effect.EffectIndex] = true;
                 }
 
                 // spells ignoring hit result should not be binary
@@ -2853,6 +2849,8 @@ namespace Game.Entities
                     spellInfo.SchoolMask &= ~SpellSchoolMask.Normal;
                     spellInfo.AttributesCu |= SpellCustomAttributes.SchoolmaskNormalWithMagic;
                 }
+
+                spellInfo.InitializeSpellPositivity();
 
                 if (talentSpells.Contains(spellInfo.Id))
                     spellInfo.AttributesCu |= SpellCustomAttributes.IsTalent;

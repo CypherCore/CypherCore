@@ -3251,22 +3251,42 @@ namespace Game.Spells
             ExplicitTargetMask = (uint)targetMask;
         }
 
-        public bool _IsPositiveEffect(uint effIndex, bool deep)
+        public bool _isPositiveTarget(SpellInfo spellInfo, uint effIndex)
         {
-            // not found a single positive spell with this attribute
-            if (HasAttribute(SpellAttr0.Negative1))
+            SpellEffectInfo effect = spellInfo.GetEffect(effIndex);
+            if (effect == null || !effect.IsEffect())
+                return true;
+
+            return (effect.TargetA.GetCheckType() != SpellTargetCheckTypes.Enemy &&
+                effect.TargetB.GetCheckType() != SpellTargetCheckTypes.Enemy);
+        }
+
+        bool _isPositiveEffectImpl(SpellInfo spellInfo, uint effIndex, List<Tuple<SpellInfo, uint>> visited)
+        {
+            SpellEffectInfo effect = spellInfo.GetEffect(effIndex);
+            if (effect == null || !effect.IsEffect())
+                return true;
+
+            // attribute may be already set in DB
+            if (!spellInfo.IsPositiveEffect(effIndex))
                 return false;
 
-            switch (SpellFamilyName)
+            // passive auras like talents are all positive
+            if (spellInfo.IsPassive())
+                return true;
+
+            // not found a single positive spell with this attribute
+            if (spellInfo.HasAttribute(SpellAttr0.Negative1))
+                return false;
+
+            visited.Add(Tuple.Create(spellInfo, effIndex));
+
+            int bp = effect.CalcValue();
+            switch (spellInfo.SpellFamilyName)
             {
                 case SpellFamilyNames.Generic:
-                    switch (Id)
+                    switch (spellInfo.Id)
                     {
-                        case 29214: // Wrath of the Plaguebringer
-                        case 34700: // Allergic Reaction
-                        case 41914: // Parasitic Shadowfiend (Illidan)
-                        case 41917: // Parasitic Shadowfiend (Illidan)
-                        case 54836: // Wrath of the Plaguebringer
                         case 61987: // Avenging Wrath Marker
                         case 61988: // Divine Shield exclude aura
                             return false;
@@ -3278,253 +3298,421 @@ namespace Game.Spells
                         case 61834: // Manabonked! (minigob)
                         case 73523: // Rigor Mortis
                             return true;
+                        default:
+                            break;
                     }
                     break;
-                case SpellFamilyNames.Mage:
-                    // Arcane Missiles
-                    if (SpellFamilyFlags[0] == 0x00000800)
+                case SpellFamilyNames.Warrior:
+                    // Slam, Execute
+                    if ((spellInfo.SpellFamilyFlags[0] & 0x20200000) != 0)
                         return false;
                     break;
-                case SpellFamilyNames.Priest:
-                    switch (Id)
-                    {
-                        case 64844: // Divine Hymn
-                        case 64904: // Hymn of Hope
-                        case 47585: // Dispersion
-                            return true;
-                    }
-                    break;
                 case SpellFamilyNames.Rogue:
-                    switch (Id)
+                    switch (spellInfo.Id)
                     {
                         // Envenom must be considered as a positive effect even though it deals damage
-                        case 32645:     // Envenom
+                        case 32645: // Envenom
                             return true;
+                        default:
+                            break;
                     }
+                    break;
+                default:
                     break;
             }
 
-            if (Mechanic == Mechanics.ImmuneShield)
-                return true;
+            switch (spellInfo.Mechanic)
+            {
+                case Mechanics.ImmuneShield:
+                    return true;
+                default:
+                    break;
+            }
 
             // Special case: effects which determine positivity of whole spell
-            foreach (SpellEffectInfo effectInfo in _effects)
-                if (effectInfo != null && effectInfo.IsAura() && effectInfo.ApplyAuraName == AuraType.ModStealth)
-                    return true;
-
-            SpellEffectInfo effect = GetEffect(effIndex);
-            if (effect != null)
+            if (spellInfo.HasAttribute(SpellAttr1.DontRefreshDurationOnRecast))
             {
-                switch (effect.Effect)
+                // check for targets, there seems to be an assortment of dummy triggering spells that should be negative
+                foreach (SpellEffectInfo otherEffect in spellInfo.GetEffects())
+                    if (otherEffect != null && !_isPositiveTarget(spellInfo, otherEffect.EffectIndex))
+                        return false;
+            }
+
+            foreach (SpellEffectInfo otherEffect in spellInfo.GetEffects())
+            {
+                if (otherEffect == null)
+                    continue;
+
+                switch (otherEffect.Effect)
                 {
-                    case SpellEffectName.Dummy:
-                        // some explicitly required dummy effect sets
-                        switch (Id)
-                        {
-                            case 28441:
-                                return false; // AB Effect 000
-                        }
-                        break;
-                    // always positive effects (check before target checks that provided non-positive result in some case for positive effects)
                     case SpellEffectName.Heal:
                     case SpellEffectName.LearnSpell:
                     case SpellEffectName.SkillStep:
                     case SpellEffectName.HealPct:
                     case SpellEffectName.EnergizePct:
                         return true;
-                    case SpellEffectName.ApplyAreaAuraEnemy:
-                        return false;
+                    case SpellEffectName.Instakill:
+                        if (otherEffect.EffectIndex != effIndex && // for spells like 38044: instakill effect is negative but auras on target must count as buff
+                            otherEffect.TargetA.GetTarget() == effect.TargetA.GetTarget() &&
+                            otherEffect.TargetB.GetTarget() == effect.TargetB.GetTarget())
+                            return false;
+                        break;
+                    default:
+                        break;
+                }
 
-                    // non-positive aura use
-                    case SpellEffectName.ApplyAura:
-                    case SpellEffectName.ApplyAreaAuraFriend:
+                if (otherEffect.IsAura())
+                {
+                    switch (otherEffect.ApplyAuraName)
                     {
-                        switch (effect.ApplyAuraName)
-                        {
-                            case AuraType.ModDamageDone:            // dependent from bas point sign (negative . negative)
-                            case AuraType.ModStat:
-                            case AuraType.ModSkill:
-                            case AuraType.ModSkill2:
-                            case AuraType.ModDodgePercent:
-                            case AuraType.ModHealingPct:
-                            case AuraType.ModHealingDone:
-                            case AuraType.ModHealingDonePercent:
-                                if (effect.CalcValue() < 0)
-                                    return false;
-                                break;
-                            case AuraType.ModDamageTaken:           // dependent from bas point sign (positive . negative)
-                                if (effect.CalcValue() > 0)
-                                    return false;
-                                break;
-                            case AuraType.ModCritPct:
-                            case AuraType.ModSpellCritChance:
-                                if (effect.CalcValue() > 0)
-                                    return true;        // some expected positive spells have SPELL_ATTR1_NEGATIVE
-                                break;
-                            case AuraType.AddTargetTrigger:
-                                return true;
-                            case AuraType.PeriodicTriggerSpellWithValue:
-                            case AuraType.PeriodicTriggerSpell:
-                                if (!deep)
-                                {
-                                    var spellTriggeredProto = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, Difficulty);
-                                    if (spellTriggeredProto != null)
-                                    {
-                                        // negative targets of main spell return early
-                                        foreach (SpellEffectInfo eff in spellTriggeredProto._effects)
-                                        {
-                                            if (eff == null || eff.Effect == 0)
-                                                continue;
-                                            // if non-positive trigger cast targeted to positive target this main cast is non-positive
-                                            // this will place this spell auras as debuffs
-                                            if (_IsPositiveTarget(eff.TargetA.GetTarget(), eff.TargetB.GetTarget()) && !spellTriggeredProto._IsPositiveEffect(eff.EffectIndex, true))
-                                                return false;
-                                        }
-                                    }
-                                }
-                                break;
-                            case AuraType.ProcTriggerSpell:
-                                // many positive auras have negative triggered spells at damage for example and this not make it negative (it can be canceled for example)
-                                break;
-                            case AuraType.ModStun:   //have positive and negative spells, we can't sort its correctly at this moment.
-                                bool more = false;
-                                foreach (SpellEffectInfo eff in _effects)
-                                {
-                                    if (eff != null && eff.EffectIndex != 0)
-                                    {
-                                        more = true;
-                                        break;
-                                    }
-                                }
+                        case AuraType.ModStealth:
+                        case AuraType.ModUnattackable:
+                            return true;
+                        case AuraType.SchoolHealAbsorb:
+                        case AuraType.ChannelDeathItem:
+                        case AuraType.Empathy:
+                            return false;
+                        default:
+                            break;
+                    }
+                }
+            }
 
-                                if (effIndex == 0 && !more)
-                                    return false;       // but all single stun aura spells is negative
-                                break;
-                            case AuraType.ModPacifySilence:
-                                if (Id == 24740)             // Wisp Costume
-                                    return true;
+            switch (effect.Effect)
+            {
+                case SpellEffectName.WeaponDamage:
+                case SpellEffectName.WeaponDamageNoSchool:
+                case SpellEffectName.NormalizedWeaponDmg:
+                case SpellEffectName.WeaponPercentDamage:
+                case SpellEffectName.SchoolDamage:
+                case SpellEffectName.EnvironmentalDamage:
+                case SpellEffectName.HealthLeech:
+                case SpellEffectName.Instakill:
+                case SpellEffectName.PowerDrain:
+                case SpellEffectName.StealBeneficialBuff:
+                case SpellEffectName.InterruptCast:
+                case SpellEffectName.Pickpocket:
+                case SpellEffectName.GameObjectDamage:
+                case SpellEffectName.DurabilityDamage:
+                case SpellEffectName.DurabilityDamagePct:
+                case SpellEffectName.ApplyAreaAuraEnemy:
+                case SpellEffectName.Tamecreature:
+                case SpellEffectName.Distract:
+                    return false;
+                case SpellEffectName.Energize:
+                case SpellEffectName.EnergizePct:
+                case SpellEffectName.HealPct:
+                case SpellEffectName.HealMaxHealth:
+                case SpellEffectName.HealMechanical:
+                    return true;
+                case SpellEffectName.KnockBack:
+                case SpellEffectName.Charge:
+                case SpellEffectName.PersistentAreaAura:
+                case SpellEffectName.AttackMe:
+                case SpellEffectName.PowerBurn:
+                    // check targets
+                    if (!_isPositiveTarget(spellInfo, effIndex))
+                        return false;
+                    break;
+                case SpellEffectName.Dispel:
+                    // non-positive dispel
+                    switch ((DispelType)effect.MiscValue)
+                    {
+                        case DispelType.Stealth:
+                        case DispelType.Invisibility:
+                        case DispelType.Enrage:
+                            return false;
+                        default:
+                            break;
+                    }
+
+                    // also check targets
+                    if (!_isPositiveTarget(spellInfo, effIndex))
+                        return false;
+                    break;
+                case SpellEffectName.DispelMechanic:
+                    if (!_isPositiveTarget(spellInfo, effIndex))
+                    {
+                        // non-positive mechanic dispel on negative target
+                        switch ((Mechanics)effect.MiscValue)
+                        {
+                            case Mechanics.Bandage:
+                            case Mechanics.Shield:
+                            case Mechanics.Mount:
+                            case Mechanics.Invulnerability:
                                 return false;
-                            case AuraType.ModRoot:
-                            case AuraType.ModRoot2:
-                            case AuraType.ModSilence:
-                            case AuraType.Ghost:
-                            case AuraType.PeriodicLeech:
-                            case AuraType.ModStalked:
-                            case AuraType.PeriodicDamagePercent:
-                            case AuraType.PreventResurrection:
-                            case AuraType.Empathy:
-                                return false;
-                            case AuraType.PeriodicDamage:            // used in positive spells also.
-                                                                     // part of negative spell if casted at self (prevent cancel)
-                                if (effect.TargetA.GetTarget() == Framework.Constants.Targets.UnitCaster)
-                                    return false;
+                            default:
                                 break;
-                            case AuraType.ModDecreaseSpeed:         // used in positive spells also
-                                                                    // part of positive spell if casted at self
-                                if (effect.TargetA.GetTarget() != Framework.Constants.Targets.UnitCaster)
-                                    return false;
-                                // but not this if this first effect (didn't find better check)
-                                if (HasAttribute(SpellAttr0.Negative1) && effIndex == 0)
-                                    return false;
-                                break;
-                            case AuraType.MechanicImmunity:
+                        }
+                    }
+                    break;
+                case SpellEffectName.Threat:
+                case SpellEffectName.ModifyThreatPercent:
+                    // check targets AND basepoints
+                    if (!_isPositiveTarget(spellInfo, effIndex) && bp > 0)
+                        return false;
+                    break;
+                default:
+                    break;
+            }
+
+            if (effect.IsAura())
+            {
+                // non-positive aura use
+                switch (effect.ApplyAuraName)
+                {
+                    case AuraType.ModDamageDone:            // dependent from basepoint sign (negative . negative)
+                    case AuraType.ModStat:
+                    case AuraType.ModSkill:
+                    case AuraType.ModSkill2:
+                    case AuraType.ModDodgePercent:
+                    case AuraType.ModHealingPct:
+                    case AuraType.ModHealingDone:
+                    case AuraType.ModDamageDoneCreature:
+                    case AuraType.ObsModHealth:
+                    case AuraType.ObsModPower:
+                    case AuraType.ModCritPct:
+                    case AuraType.ModHitChance:
+                    case AuraType.ModSpellHitChance:
+                    case AuraType.ModSpellCritChance:
+                    case AuraType.ModRangedHaste:
+                    case AuraType.ModCastingSpeedNotStack:
+                    case AuraType.HasteSpells:
+                    case AuraType.ModResistance:
+                    case AuraType.ModRecoveryRateBySpellLabel:
+                    case AuraType.ModDetectRange:
+                    case AuraType.ModIncreaseHealthPercent:
+                    case AuraType.ModTotalStatPercentage:
+                    case AuraType.ModIncreaseSwimSpeed:
+                        if (bp < 0)
+                            return false;
+                        break;
+                    case AuraType.ModAttackspeed:            // some buffs have negative bp, check both target and bp
+                    case AuraType.ModMeleeHaste:
+                    case AuraType.ModResistancePct:
+                    case AuraType.ModRating:
+                    case AuraType.ModAttackPower:
+                    case AuraType.ModRangedAttackPower:
+                    case AuraType.ModDamagePercentDone:
+                        if (!_isPositiveTarget(spellInfo, effIndex) && bp < 0)
+                            return false;
+                        break;
+                    case AuraType.ModDamageTaken:           // dependent from basepoint sign (positive . negative)
+                    case AuraType.ModMeleeDamageTaken:
+                    case AuraType.ModMeleeDamageTakenPct:
+                    case AuraType.ModCooldown:
+                    case AuraType.ModChargeCooldown:
+                    case AuraType.ModPowerCostSchool:
+                    case AuraType.ModPowerCostSchoolPct:
+                        if (bp > 0)
+                            return false;
+                        break;
+                    case AuraType.ModDamagePercentTaken:   // check targets and basepoints (ex Recklessness)
+                        if (!_isPositiveTarget(spellInfo, effIndex) && bp > 0)
+                            return false;
+                        break;
+                    case AuraType.AddTargetTrigger:
+                        return true;
+                    case AuraType.PeriodicTriggerSpellWithValue:
+                    case AuraType.PeriodicTriggerSpell:
+                        if (!_isPositiveTarget(spellInfo, effIndex))
+                        {
+                            SpellInfo spellTriggeredProto = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, spellInfo.Difficulty);
+                            if (spellTriggeredProto != null)
                             {
-                                // non-positive immunities
-                                switch ((Mechanics)effect.MiscValue)
+                                // negative targets of main spell return early
+                                foreach (SpellEffectInfo spellTriggeredEffect in spellTriggeredProto.GetEffects())
                                 {
-                                    case Mechanics.Bandage:
-                                    case Mechanics.Shield:
-                                    case Mechanics.Mount:
-                                    case Mechanics.Invulnerability:
+                                    if (spellTriggeredEffect == null)
+                                        continue;
+
+                                    // already seen this
+                                    if (visited.Contains(Tuple.Create(spellTriggeredProto, spellTriggeredEffect.EffectIndex)))
+                                        continue;
+
+                                    if (!spellTriggeredEffect.IsEffect())
+                                        continue;
+
+                                    // if non-positive trigger cast targeted to positive target this main cast is non-positive
+                                    // this will place this spell auras as debuffs
+                                    if (_isPositiveTarget(spellTriggeredProto, spellTriggeredEffect.EffectIndex) && !_isPositiveEffectImpl(spellTriggeredProto, spellTriggeredEffect.EffectIndex, visited))
                                         return false;
                                 }
-                                break;
-                            }
-                            case AuraType.AddFlatModifier:          // mods
-                            case AuraType.AddPctModifier:
-                            {
-                                // non-positive mods
-                                switch ((SpellModOp)effect.MiscValue)
-                                {
-                                    case SpellModOp.PowerCost0: // dependent from bas point sign (negative . positive)
-                                    case SpellModOp.PowerCost1:
-                                    case SpellModOp.PowerCost2:
-                                        if (effect.CalcValue() > 0)
-                                        {
-                                            if (!deep)
-                                            {
-                                                bool negative = true;
-                                                for (uint i = 0; i < SpellConst.MaxEffects; ++i)
-                                                {
-                                                    if (i != effIndex)
-                                                    {
-                                                        if (_IsPositiveEffect(i, true))
-                                                        {
-                                                            negative = false;
-                                                            break;
-                                                        }
-                                                    }
-                                                }
-                                                if (negative)
-                                                    return false;
-                                            }
-                                        }
-                                        break;
-                                }
-                                break;
                             }
                         }
                         break;
-                    }
-                }
-
-                // non-positive targets
-                if (!_IsPositiveTarget(effect.TargetA.GetTarget(), effect.TargetB.GetTarget()))
-                    return false;
-
-                // negative spell if triggered spell is negative
-                if (!deep && effect.ApplyAuraName == 0 && effect.TriggerSpell != 0)
-                {
-                    SpellInfo spellTriggeredProto = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, Difficulty);
-                    if (spellTriggeredProto != null)
-                        if (!spellTriggeredProto._IsPositiveSpell())
+                    case AuraType.ModStun:
+                    case AuraType.Transform:
+                    case AuraType.ModDecreaseSpeed:
+                    case AuraType.ModFear:
+                    case AuraType.ModTaunt:
+                    // special auras: they may have non negative target but still need to be marked as debuff
+                    // checked again after all effects (SpellInfo::_InitializeSpellPositivity)
+                    case AuraType.ModPacify:
+                    case AuraType.ModPacifySilence:
+                    case AuraType.ModDisarm:
+                    case AuraType.ModDisarmOffhand:
+                    case AuraType.ModDisarmRanged:
+                    case AuraType.ModCharm:
+                    case AuraType.AoeCharm:
+                    case AuraType.ModPossess:
+                    case AuraType.ModLanguage:
+                    case AuraType.DamageShield:
+                    case AuraType.ProcTriggerSpell:
+                    case AuraType.ModAttackerMeleeHitChance:
+                    case AuraType.ModAttackerRangedHitChance:
+                    case AuraType.ModAttackerSpellHitChance:
+                    case AuraType.ModAttackerMeleeCritChance:
+                    case AuraType.ModAttackerRangedCritChance:
+                    case AuraType.ModAttackerSpellAndWeaponCritChance:
+                        // have positive and negative spells, check target
+                        if (!_isPositiveTarget(spellInfo, effIndex))
                             return false;
+                        break;
+                    case AuraType.ModConfuse:
+                    case AuraType.ModRoot:
+                    case AuraType.ModRoot2:
+                    case AuraType.ModSilence:
+                    case AuraType.ModDetaunt:
+                    case AuraType.Ghost:
+                    case AuraType.ModLeech:
+                    case AuraType.PeriodicManaLeech:
+                    case AuraType.ModStalked:
+                    case AuraType.PreventResurrection:
+                    case AuraType.PeriodicDamage:
+                    case AuraType.PeriodicWeaponPercentDamage:
+                    case AuraType.PeriodicDamagePercent:
+                    case AuraType.MeleeAttackPowerAttackerBonus:
+                    case AuraType.RangedAttackPowerAttackerBonus:
+                        return false;
+                    case AuraType.MechanicImmunity:
+                    {
+                        // non-positive immunities
+                        switch ((Mechanics)effect.MiscValue)
+                        {
+                            case Mechanics.Bandage:
+                            case Mechanics.Shield:
+                            case Mechanics.Mount:
+                            case Mechanics.Invulnerability:
+                                return false;
+                            default:
+                                break;
+                        }
+                        break;
+                    }
+                    case AuraType.AddFlatModifier:          // mods
+                    case AuraType.AddPctModifier:
+                    case AuraType.AddFlatModifierBySpellLabel:
+                    case AuraType.AddPctModifierBySpellLabel:
+                    {
+                        switch ((SpellModOp)effect.MiscValue)
+                        {
+                            case SpellModOp.ChangeCastTime:        // dependent from basepoint sign (positive . negative)
+                            case SpellModOp.Period:
+                            case SpellModOp.PowerCostOnMiss:
+                            case SpellModOp.StartCooldown:
+                                if (bp > 0)
+                                    return false;
+                                break;
+                            case SpellModOp.Cooldown:
+                            case SpellModOp.PowerCost0:
+                            case SpellModOp.PowerCost1:
+                            case SpellModOp.PowerCost2:
+                                if (!spellInfo.IsPositive() && bp > 0) // dependent on prev effects too (ex Arcane Power)
+                                    return false;
+                                break;
+                            case SpellModOp.PointsIndex0:          // always positive
+                            case SpellModOp.PointsIndex1:
+                            case SpellModOp.PointsIndex2:
+                            case SpellModOp.PointsIndex3:
+                            case SpellModOp.PointsIndex4:
+                            case SpellModOp.Points:
+                            case SpellModOp.Hate:
+                            case SpellModOp.ChainAmplitude:
+                            case SpellModOp.Amplitude:
+                                return true;
+                            case SpellModOp.Duration:
+                            case SpellModOp.CritChance:
+                            case SpellModOp.HealingAndDamage:
+                            case SpellModOp.ChainTargets:
+                                if (!spellInfo.IsPositive() && bp < 0) // dependent on prev effects too
+                                    return false;
+                                break;
+                            default:                                // dependent from basepoint sign (negative . negative)
+                                if (bp < 0)
+                                    return false;
+                                break;
+                        }
+                        break;
+                    }
+                    default:
+                        break;
                 }
             }
+
+            // negative spell if triggered spell is negative
+            if (effect.ApplyAuraName == 0 && effect.TriggerSpell != 0)
+            {
+                SpellInfo spellTriggeredProto = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, spellInfo.Difficulty);
+                if (spellTriggeredProto != null)
+                {
+                    // spells with at least one negative effect are considered negative
+                    // some self-applied spells have negative effects but in self casting case negative check ignored.
+                    foreach (SpellEffectInfo spellTriggeredEffect in spellTriggeredProto.GetEffects())
+                    {
+                        if (spellTriggeredEffect == null)
+                            continue;
+
+                        // already seen this
+                        if (visited.Contains(Tuple.Create(spellTriggeredProto, spellTriggeredEffect.EffectIndex)))
+                            continue;
+
+                        if (!spellTriggeredEffect.IsEffect())
+                            continue;
+
+                        if (!_isPositiveEffectImpl(spellTriggeredProto, spellTriggeredEffect.EffectIndex, visited))
+                            return false;
+                    }
+                }
+            }
+
             // ok, positive
             return true;
         }
 
-        public bool _IsPositiveSpell()
+        public void InitializeSpellPositivity()
         {
-            // spells with at least one negative effect are considered negative
-            // some self-applied spells have negative effects but in self casting case negative check ignored.
-            for (byte i = 0; i < SpellConst.MaxEffects; ++i)
-                if (!_IsPositiveEffect(i, true))
-                    return false;
-            return true;
-        }
+            List<Tuple<SpellInfo, uint>> visited = new();
 
-        bool _IsPositiveTarget(Targets targetA, Targets targetB)
-        {
-            // non-positive targets
-            switch (targetA)
+            for (byte i = 0; i < SpellConst.MaxEffects; ++i)
+                if (!_isPositiveEffectImpl(this, i, visited))
+                    NegativeEffects[i] = true;
+
+
+            // additional checks after effects marked
+            foreach (SpellEffectInfo effect in GetEffects())
             {
-                case Framework.Constants.Targets.UnitNearbyEnemy:
-                case Framework.Constants.Targets.UnitTargetEnemy:
-                case Framework.Constants.Targets.UnitSrcAreaEnemy:
-                case Framework.Constants.Targets.UnitDestAreaEnemy:
-                case Framework.Constants.Targets.UnitConeEnemy24:
-                case Framework.Constants.Targets.UnitConeEnemy104:
-                case Framework.Constants.Targets.DestDynobjEnemy:
-                case Framework.Constants.Targets.DestTargetEnemy:
-                    return false;
-                default:
-                    break;
+                if (effect == null || !effect.IsEffect() || !IsPositiveEffect(effect.EffectIndex))
+                    continue;
+
+                switch (effect.ApplyAuraName)
+                {
+                    // has other non positive effect?
+                    // then it should be marked negative despite of targets (ex 8510, 8511, 8893, 10267)
+                    case AuraType.Dummy:
+                    case AuraType.ModStun:
+                    case AuraType.ModFear:
+                    case AuraType.ModTaunt:
+                    case AuraType.Transform:
+                    case AuraType.ModAttackspeed:
+                    case AuraType.ModDecreaseSpeed:
+                        if (!IsPositive())
+                            NegativeEffects[(int)effect.EffectIndex] = true;
+                        break;
+                    default:
+                        break;
+                }
             }
-            if (targetB != 0)
-                return _IsPositiveTarget(targetB, 0);
-            return true;
         }
 
         public void _UnloadImplicitTargetConditionLists()
