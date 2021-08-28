@@ -1938,8 +1938,6 @@ namespace Game.Spells
             ProcFlags procVictim = m_procVictim;
             ProcFlagsHit hitMask = ProcFlagsHit.None;
 
-            m_spellAura = null;
-
             //Spells with this flag cannot trigger if effect is cast on self
             bool canEffectTrigger = !m_spellInfo.HasAttribute(SpellAttr3.CantTriggerProc) && unitTarget.CanProc() && (CanExecuteTriggersOnHit(mask) || missInfo == SpellMissInfo.Immune || missInfo == SpellMissInfo.Immune2);
 
@@ -2228,10 +2226,7 @@ namespace Game.Spells
                 }
             }
 
-            uint aura_effmask = 0;
-            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
-                if (effect != null && (Convert.ToBoolean(effectMask & (1 << (int)effect.EffectIndex)) && effect.IsUnitOwnedAuraEffect()))
-                    aura_effmask |= (1u << (int)effect.EffectIndex);
+            uint aura_effmask = Aura.BuildEffectMaskForOwner(m_spellInfo, effectMask, unit);
 
             // Get Data Needed for Diminishing Returns, some effects may have multiple auras, so this must be done on spell hit, not aura add
             DiminishingGroup diminishGroup = m_spellInfo.GetDiminishingReturnsGroupForSpell();
@@ -2256,19 +2251,35 @@ namespace Game.Spells
                             basePoints[auraSpellEffect.EffectIndex] = (m_spellValue.CustomBasePointsMask & (1 << (int)auraSpellEffect.EffectIndex)) != 0 ?
                                 m_spellValue.EffectBasePoints[auraSpellEffect.EffectIndex] : auraSpellEffect.CalcBaseValue(m_originalCaster, unit, m_castItemEntry, m_castItemLevel);
 
-                    bool refresh;
-                    bool resetPeriodicTimer = !_triggeredCastFlags.HasAnyFlag(TriggerCastFlags.DontResetPeriodicTimer);
-                    m_spellAura = Aura.TryRefreshStackOrCreate(m_spellInfo, m_castId, effectMask, unit,
-                        m_originalCaster, GetCastDifficulty(), out refresh, basePoints, m_CastItem, ObjectGuid.Empty, resetPeriodicTimer, ObjectGuid.Empty, m_castItemEntry, m_castItemLevel);
-                    if (m_spellAura != null)
+                    AuraCreateInfo createInfo = null;
+                    if (spellAura == null)
+                    {
+                        bool resetPeriodicTimer = !_triggeredCastFlags.HasFlag(TriggerCastFlags.DontResetPeriodicTimer);
+                        uint allAuraEffectMask = Aura.BuildEffectMaskForOwner(m_spellInfo, SpellConst.MaxEffectMask, unit);
+
+                        createInfo = new(m_castId, m_spellInfo, GetCastDifficulty(), allAuraEffectMask, unit);
+                        createInfo.SetCaster(m_originalCaster);
+                        createInfo.SetBaseAmount(basePoints);
+                        createInfo.SetCastItem(m_castItemGUID, m_castItemEntry, m_castItemLevel);
+                        createInfo.SetPeriodicReset(resetPeriodicTimer);
+                        createInfo.SetOwnerEffectMask(aura_effmask);                       
+
+                        Aura aura = Aura.TryRefreshStackOrCreate(createInfo);
+                        if (aura != null)
+                            spellAura = aura.ToUnitAura();
+                    }
+                    else
+                        spellAura.AddStaticApplication(unit, aura_effmask);
+
+                    if (spellAura != null)
                     {
                         // Set aura stack amount to desired value
                         if (m_spellValue.AuraStackAmount > 1)
                         {
-                            if (!refresh)
-                                m_spellAura.SetStackAmount((byte)m_spellValue.AuraStackAmount);
+                            if (createInfo != null && createInfo.IsRefresh)
+                                spellAura.SetStackAmount((byte)m_spellValue.AuraStackAmount);
                             else
-                                m_spellAura.ModStackAmount(m_spellValue.AuraStackAmount);
+                                spellAura.ModStackAmount(m_spellValue.AuraStackAmount);
                         }
 
                         // Now Reduce spell duration using data received at spell hit
@@ -2287,12 +2298,13 @@ namespace Game.Spells
                             }
                         }
 
-                        int duration = m_spellAura.GetMaxDuration();
+                        int duration = spellAura.GetMaxDuration();
 
                         // unit is immune to aura if it was diminished to 0 duration
                         if (!positive && !unit.ApplyDiminishingToDuration(m_spellInfo, ref duration, m_originalCaster, diminishLevel))
                         {
-                            m_spellAura.Remove();
+                            spellAura.Remove();
+                            spellAura = null;
                             bool found = false;
                             foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
                                 if (effect != null && (Convert.ToBoolean(effectMask & (1 << (int)effect.EffectIndex)) && effect.Effect != SpellEffectName.ApplyAura))
@@ -2302,7 +2314,7 @@ namespace Game.Spells
                         }
                         else
                         {
-                            ((UnitAura)m_spellAura).SetDiminishGroup(diminishGroup);
+                            spellAura.SetDiminishGroup(diminishGroup);
 
                             duration = m_originalCaster.ModSpellDuration(m_spellInfo, unit, duration, positive, effectMask);
                             if (duration > 0)
@@ -2320,7 +2332,7 @@ namespace Game.Spells
                                     {
                                         if (effect != null)
                                         {
-                                            AuraEffect eff = m_spellAura.GetEffect(effect.EffectIndex);
+                                            AuraEffect eff = spellAura.GetEffect(effect.EffectIndex);
                                             if (eff != null)
                                             {
                                                 int period = eff.GetPeriod();
@@ -2336,12 +2348,11 @@ namespace Game.Spells
                                 }
                             }
 
-                            if (duration != m_spellAura.GetMaxDuration())
+                            if (duration != spellAura.GetMaxDuration())
                             {
-                                m_spellAura.SetMaxDuration(duration);
-                                m_spellAura.SetDuration(duration);
+                                spellAura.SetMaxDuration(duration);
+                                spellAura.SetDuration(duration);
                             }
-                            m_spellAura._RegisterForTargets();
                         }
                     }
                 }
@@ -3216,8 +3227,6 @@ namespace Game.Spells
 
         void _handle_immediate_phase()
         {
-            m_spellAura = null;
-
             // handle some immediate features of the spell here
             HandleThreatSpells();
 
@@ -7632,7 +7641,8 @@ namespace Game.Spells
         SpellEffectHandleMode effectHandleMode;
         public SpellEffectInfo effectInfo;
         // used in effects handlers
-        public Aura m_spellAura;
+        internal UnitAura spellAura;
+        internal DynObjAura dynObjAura;
 
         // -------------------------------------------
         GameObject focusObject;

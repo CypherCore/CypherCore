@@ -707,11 +707,10 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
-            if (m_spellAura == null || unitTarget == null)
+            if (spellAura == null || unitTarget == null)
                 return;
 
-            Cypher.Assert(unitTarget == m_spellAura.GetOwner());
-            m_spellAura._ApplyEffectForTargets(effIndex);
+            spellAura._ApplyEffectForTargets(effIndex);
         }
 
         [SpellEffectHandler(SpellEffectName.ApplyAreaAuraEnemy)]
@@ -727,10 +726,10 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.HitTarget)
                 return;
 
-            if (m_spellAura == null || unitTarget == null)
+            if (spellAura == null || unitTarget == null)
                 return;
-            Cypher.Assert(unitTarget == m_spellAura.GetOwner());
-            m_spellAura._ApplyEffectForTargets(effIndex);
+
+            spellAura._ApplyEffectForTargets(effIndex);
         }
 
         [SpellEffectHandler(SpellEffectName.UnlearnSpecialization)]
@@ -1150,30 +1149,46 @@ namespace Game.Spells
             if (effectHandleMode != SpellEffectHandleMode.Hit)
                 return;
 
-            if (m_spellAura == null)
+            // only handle at last effect
+            for (uint i = effIndex + 1; i < SpellConst.MaxEffects; ++i)
             {
-                Unit caster = m_caster.GetEntry() == SharedConst.WorldTrigger ? m_originalCaster : m_caster;
-                float radius = effectInfo.CalcRadius(caster);
-
-                // Caster not in world, might be spell triggered from aura removal
-                if (!caster.IsInWorld)
-                    return;
-                DynamicObject dynObj = new(false);
-                if (!dynObj.CreateDynamicObject(caster.GetMap().GenerateLowGuid(HighGuid.DynamicObject), caster, m_spellInfo, destTarget, radius, DynamicObjectType.AreaSpell, m_SpellVisual))
-                    return;
-
-                Aura aura = Aura.TryCreate(m_spellInfo, m_castId, SpellConst.MaxEffectMask, dynObj, caster, GetCastDifficulty(), m_spellValue.EffectBasePoints, null, ObjectGuid.Empty, ObjectGuid.Empty, m_castItemEntry, m_castItemLevel);
-                if (aura != null)
-                {
-                    m_spellAura = aura;
-                    m_spellAura._RegisterForTargets();
-                }
-                else
+                SpellEffectInfo otherEffect = m_spellInfo.GetEffect(i);
+                if (otherEffect != null && otherEffect.IsEffect(SpellEffectName.PersistentAreaAura))
                     return;
             }
 
-            Cypher.Assert(m_spellAura.GetDynobjOwner());
-            m_spellAura._ApplyEffectForTargets(effIndex);
+            Cypher.Assert(dynObjAura == null);
+
+            Unit caster = m_caster.GetEntry() == SharedConst.WorldTrigger ? m_originalCaster : m_caster;
+            float radius = effectInfo.CalcRadius(caster);
+
+            // Caster not in world, might be spell triggered from aura removal
+            if (!caster.IsInWorld)
+                return;
+
+            DynamicObject dynObj = new(false);
+            if (!dynObj.CreateDynamicObject(caster.GetMap().GenerateLowGuid(HighGuid.DynamicObject), caster, m_spellInfo, destTarget, radius, DynamicObjectType.AreaSpell, m_SpellVisual))
+            {
+                dynObj.Dispose();
+                return;
+            }
+
+            AuraCreateInfo createInfo = new(m_castId, m_spellInfo, GetCastDifficulty(), SpellConst.MaxEffectMask, dynObj);
+            createInfo.SetCaster(caster);
+            createInfo.SetBaseAmount(m_spellValue.EffectBasePoints);
+            createInfo.SetCastItem(m_castItemGUID, m_castItemEntry, m_castItemLevel);
+
+            Aura aura = Aura.TryCreate(createInfo);
+            if (aura != null)
+            {
+                dynObjAura = aura.ToDynObjAura();
+                dynObjAura._RegisterForTargets();
+            }
+            else
+                return;
+
+            Cypher.Assert(dynObjAura.GetDynobjOwner());
+            dynObjAura._ApplyEffectForTargets(effIndex);
         }
 
         [SpellEffectHandler(SpellEffectName.Energize)]

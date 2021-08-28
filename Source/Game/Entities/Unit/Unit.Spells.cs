@@ -2885,8 +2885,15 @@ namespace Game.Entities
                     effMask &= ~(uint)(1 << i);
             }
 
+            if (effMask == 0)
+                return null;
+
             ObjectGuid castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, GetMapId(), spellInfo.Id, GetMap().GenerateLowGuid(HighGuid.Cast));
-            Aura aura = Aura.TryRefreshStackOrCreate(spellInfo, castId, effMask, target, this, GetMap().GetDifficultyID());
+
+            AuraCreateInfo createInfo = new(castId, spellInfo, GetMap().GetDifficultyID(), effMask, target);
+            createInfo.SetCaster(this);
+
+            Aura aura = Aura.TryRefreshStackOrCreate(createInfo);
             if (aura != null)
             {
                 aura.ApplyForTargets();
@@ -2952,15 +2959,21 @@ namespace Game.Entities
                     }
                     else    // This can happen during Player._LoadAuras
                     {
-                        int[] bp0 = new int[SpellConst.MaxEffects];
+                        int[] bp = new int[SpellConst.MaxEffects];
                         foreach (SpellEffectInfo effect in spellEntry.GetEffects())
                         {
                             if (effect != null)
-                                bp0[effect.EffectIndex] = effect.BasePoints;
+                                bp[effect.EffectIndex] = effect.BasePoints;
                         }
 
-                        bp0[i] = seatId;
-                        Aura.TryRefreshStackOrCreate(spellEntry, ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, GetMapId(), spellEntry.Id, GetMap().GenerateLowGuid(HighGuid.Cast)), SpellConst.MaxEffectMask, this, clicker, GetMap().GetDifficultyID(), bp0, null, origCasterGUID);
+                        bp[i] = seatId;
+
+                        AuraCreateInfo createInfo = new(ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, GetMapId(), spellEntry.Id, GetMap().GenerateLowGuid(HighGuid.Cast)), spellEntry, GetMap().GetDifficultyID(), SpellConst.MaxEffectMask, this);
+                        createInfo.SetCaster(clicker);
+                        createInfo.SetBaseAmount(bp);
+                        createInfo.SetCasterGUID(origCasterGUID);
+
+                        Aura.TryRefreshStackOrCreate(createInfo);
                     }
                 }
                 else
@@ -2968,7 +2981,13 @@ namespace Game.Entities
                     if (IsInMap(caster))
                         caster.CastSpell(target, spellEntry.Id, new CastSpellExtraArgs().SetOriginalCaster(origCasterGUID));
                     else
-                        Aura.TryRefreshStackOrCreate(spellEntry, ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, GetMapId(), spellEntry.Id, GetMap().GenerateLowGuid(HighGuid.Cast)), SpellConst.MaxEffectMask, this, clicker, GetMap().GetDifficultyID(), null, null, origCasterGUID);
+                    {
+                        AuraCreateInfo createInfo = new(ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, GetMapId(), spellEntry.Id, GetMap().GenerateLowGuid(HighGuid.Cast)), spellEntry, GetMap().GetDifficultyID(), SpellConst.MaxEffectMask, this);
+                        createInfo.SetCaster(clicker);
+                        createInfo.SetCasterGUID(origCasterGUID);
+
+                        Aura.TryRefreshStackOrCreate(createInfo);
+                    }
                 }
 
                 spellClickHandled = true;
@@ -3340,7 +3359,11 @@ namespace Game.Entities
                         if (aura.IsSingleTarget())
                             aura.UnregisterSingleTarget();
 
-                        Aura newAura = Aura.TryRefreshStackOrCreate(aura.GetSpellInfo(), aura.GetCastGUID(), effMask, stealer, null, aura.GetCastDifficulty(), baseDamage, null, aura.GetCasterGUID());
+                        AuraCreateInfo createInfo = new(aura.GetCastGUID(), aura.GetSpellInfo(), aura.GetCastDifficulty(), effMask, stealer);
+                        createInfo.SetCasterGUID(aura.GetCasterGUID());
+                        createInfo.SetBaseAmount(baseDamage);
+
+                        Aura newAura = Aura.TryRefreshStackOrCreate(createInfo);
                         if (newAura != null)
                         {
                             // created aura must not be single target aura, so stealer won't loose it on recast
@@ -3431,7 +3454,7 @@ namespace Game.Entities
                     aura.Remove();
             }
         }
-        // All aura base removes should go threw this function!
+        // All aura base removes should go through this function!
         public void RemoveOwnedAura(KeyValuePair<uint, Aura> keyValuePair, AuraRemoveMode removeMode = AuraRemoveMode.Default)
         {
             Aura aura = keyValuePair.Value;
@@ -4239,41 +4262,32 @@ namespace Game.Entities
             }
         }
 
-        public Aura _TryStackingOrRefreshingExistingAura(SpellInfo newAura, uint effMask, Unit caster, int[] baseAmount = null, Item castItem = null, ObjectGuid casterGUID = default, bool resetPeriodicTimer = true, ObjectGuid castItemGuid = default, uint castItemId = 0, int castItemLevel = -1)
+        public Aura _TryStackingOrRefreshingExistingAura(AuraCreateInfo createInfo)
         {
-            Cypher.Assert(!casterGUID.IsEmpty() || caster);
+            Cypher.Assert(!createInfo.CasterGUID.IsEmpty() || createInfo.Caster);
 
             // Check if these can stack anyway
-            if (casterGUID.IsEmpty() && !newAura.IsStackableOnOneSlotWithDifferentCasters())
-                casterGUID = caster.GetGUID();
+            if (createInfo.CasterGUID.IsEmpty() && !createInfo.GetSpellInfo().IsStackableOnOneSlotWithDifferentCasters())
+                createInfo.CasterGUID = createInfo.Caster.GetGUID();
 
             // passive and Incanter's Absorption and auras with different type can stack with themselves any number of times
-            if (!newAura.IsMultiSlotAura())
+            if (!createInfo.GetSpellInfo().IsMultiSlotAura())
             {
                 // check if cast item changed
-                if (castItem != null)
-                {
-                    castItemGuid = castItem.GetGUID();
-                    castItemId = castItem.GetEntry();
-                    Player owner = castItem.GetOwner();
-                    if (owner)
-                        castItemLevel = (int)castItem.GetItemLevel(owner);
-                    else if (castItem.GetOwnerGUID() == caster.GetGUID())
-                        castItemLevel = (int)castItem.GetItemLevel(caster.ToPlayer());
-                }
+                ObjectGuid castItemGUID = createInfo.CastItemGUID;
 
                 // find current aura from spell and change it's stackamount, or refresh it's duration
-                Aura foundAura = GetOwnedAura(newAura.Id, casterGUID, (newAura.HasAttribute(SpellCustomAttributes.EnchantProc) ? castItemGuid : ObjectGuid.Empty), 0);
+                Aura foundAura = GetOwnedAura(createInfo.GetSpellInfo().Id, createInfo.CasterGUID, createInfo.GetSpellInfo().HasAttribute(SpellCustomAttributes.EnchantProc) ? castItemGUID : ObjectGuid.Empty, 0);
                 if (foundAura != null)
                 {
                     // effect masks do not match
                     // extremely rare case
                     // let's just recreate aura
-                    if (effMask != foundAura.GetEffectMask())
+                    if (createInfo.GetAuraEffectMask() != foundAura.GetEffectMask())
                         return null;
 
                     // update basepoints with new values - effect amount will be recalculated in ModStackAmount
-                    foreach (SpellEffectInfo effect in newAura.GetEffects())
+                    foreach (SpellEffectInfo effect in createInfo.GetSpellInfo().GetEffects())
                     {
                         if (effect == null)
                             continue;
@@ -4283,8 +4297,8 @@ namespace Game.Entities
                             continue;
 
                         int bp;
-                        if (baseAmount != null)
-                            bp = baseAmount[effect.EffectIndex];
+                        if (createInfo.BaseAmount != null)
+                            bp = createInfo.BaseAmount[effect.EffectIndex];
                         else
                             bp = effect.BasePoints;
 
@@ -4292,15 +4306,15 @@ namespace Game.Entities
                     }
 
                     // correct cast item guid if needed
-                    if (castItemGuid != foundAura.GetCastItemGUID())
+                    if (castItemGUID != foundAura.GetCastItemGUID())
                     {
-                        foundAura.SetCastItemGUID(castItemGuid);
-                        foundAura.SetCastItemId(castItemId);
-                        foundAura.SetCastItemLevel(castItemLevel);
+                        foundAura.SetCastItemGUID(castItemGUID);
+                        foundAura.SetCastItemId(createInfo.CastItemId);
+                        foundAura.SetCastItemLevel(createInfo.CastItemLevel);
                     }
 
                     // try to increase stack amount
-                    foundAura.ModStackAmount(1, AuraRemoveMode.Default, resetPeriodicTimer);
+                    foundAura.ModStackAmount(1, AuraRemoveMode.Default, createInfo.ResetPeriodicTimer);
                     return foundAura;
                 }
             }

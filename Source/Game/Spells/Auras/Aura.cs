@@ -189,6 +189,37 @@ namespace Game.Spells
             SetNeedClientUpdate();
         }
 
+        public void UpdateApplyEffectMask(uint newEffMask)
+        {
+            if (_effectsToApply == newEffMask)
+                return;
+
+            uint removeEffMask = (_effectsToApply ^ newEffMask) & (~newEffMask);
+            uint addEffMask = (_effectsToApply ^ newEffMask) & (~_effectsToApply);
+
+            // quick check, removes application completely
+            if (removeEffMask == _effectsToApply && addEffMask == 0)
+            {
+                _target._UnapplyAura(this, AuraRemoveMode.Default);
+                return;
+            }
+
+            for (uint i = 0; i < SpellConst.MaxEffects; ++i)
+            {
+                // update real effects only if they were applied already
+                if ((_effectMask & (1 << (int)i)) == 0)
+                    continue;
+
+                if ((removeEffMask & (1 << (int)i)) != 0)
+                    _HandleEffect(i, false);
+
+                if ((addEffMask & (1 << (int)i)) != 0)
+                    _HandleEffect(i, true);
+            }
+
+            _effectsToApply = newEffMask;
+        }
+
         public void SetNeedClientUpdate()
         {
             if (_needClientUpdate || GetRemoveMode() != AuraRemoveMode.None)
@@ -294,21 +325,21 @@ namespace Game.Spells
     {
         const int UPDATE_TARGET_MAP_INTERVAL = 500;
 
-        public Aura(SpellInfo spellproto, ObjectGuid castId, WorldObject owner, Unit caster, Difficulty castDifficulty, Item castItem, ObjectGuid casterGUID, ObjectGuid castItemGuid, uint castItemId, int castItemLevel)
+        public Aura(AuraCreateInfo createInfo)
         {
-            m_spellInfo = spellproto;
-            m_castDifficulty = castDifficulty;
-            m_castGuid = castId;
-            m_casterGuid = !casterGUID.IsEmpty() ? casterGUID : caster.GetGUID();
-            m_castItemGuid = castItem != null ? castItem.GetGUID() : castItemGuid;
-            m_castItemId = castItem != null ? castItem.GetEntry() : castItemId;
-            m_castItemLevel = castItemLevel;
-            m_spellVisual = new SpellCastVisual(caster ? caster.GetCastSpellXSpellVisualId(spellproto) : spellproto.GetSpellXSpellVisualId(), 0);
+            m_spellInfo = createInfo._spellInfo;
+            m_castDifficulty = createInfo._castDifficulty;
+            m_castGuid = createInfo._castId;
+            m_casterGuid = createInfo.CasterGUID.IsEmpty() ? createInfo.Caster.GetGUID() : createInfo.CasterGUID;
+            m_castItemGuid = createInfo.CastItemGUID;
+            m_castItemId = createInfo.CastItemId;
+            m_castItemLevel = createInfo.CastItemLevel;
+            m_spellVisual = new SpellCastVisual(createInfo.Caster ? createInfo.Caster.GetCastSpellXSpellVisualId(createInfo._spellInfo) : createInfo._spellInfo.GetSpellXSpellVisualId(), 0);
             m_applyTime = GameTime.GetGameTime();
-            m_owner = owner;
+            m_owner = createInfo._owner;
             m_timeCla = 0;
             m_updateTargetMapInterval = 0;
-            m_casterLevel = caster != null ? caster.GetLevel() : m_spellInfo.SpellLevel;
+            m_casterLevel = createInfo.Caster ? createInfo.Caster.GetLevel() : m_spellInfo.SpellLevel;
             m_procCharges = 0;
             m_stackAmount = 1;
             m_isRemoved = false;
@@ -324,9 +355,9 @@ namespace Game.Spells
             if (!m_periodicCosts.Empty())
                 m_timeCla = 1 * Time.InMilliseconds;
 
-            m_maxDuration = CalcMaxDuration(caster);
+            m_maxDuration = CalcMaxDuration(createInfo.Caster);
             m_duration = m_maxDuration;
-            m_procCharges = CalcMaxCharges(caster);
+            m_procCharges = CalcMaxCharges(createInfo.Caster);
             m_isUsingCharges = m_procCharges != 0;
             // m_casterLevel = cast item level/caster level, caster level should be saved to db, confirmed with sniffs
         }
@@ -411,7 +442,7 @@ namespace Game.Spells
             Cypher.Assert(app == auraApp);
             m_applications.Remove(target.GetGUID());
 
-            m_removedApplications.Add(auraApp);
+            _removedApplications.Add(auraApp);
 
             // reset cooldown state for spells
             if (caster != null && GetSpellInfo().IsCooldownStartedOnEvent())
@@ -465,9 +496,17 @@ namespace Game.Spells
                 {
                     // needs readding - remove now, will be applied in next update cycle
                     // (dbcs do not have auras which apply on same type of targets but have different radius, so this is not really needed)
-                    if (app.Value.GetEffectMask() != existing.Value || !CanBeAppliedOn(existing.Key))
+                    if (!CanBeAppliedOn(existing.Key))
+                    {
                         targetsToRemove.Add(app.Value.GetTarget());
-                    // nothing todo - aura already applied
+                        continue;
+                    }
+
+                    // needs to add/remove effects from application, don't remove from map so it gets updated
+                    if (app.Value.GetEffectMask() != existing.Value)
+                        continue;
+
+                    // nothing to do - aura already applied
                     // remove from auras to register list
                     targets.Remove(existing.Key);
                 }
@@ -475,28 +514,6 @@ namespace Game.Spells
             // register auras for units
             foreach (var unit in targets.Keys.ToList())
             {
-                // aura mustn't be already applied on target
-                AuraApplication aurApp = GetApplicationOfTarget(unit.GetGUID());
-                if (aurApp != null)
-                {
-                    // the core created 2 different units with same guid
-                    // this is a major failue, which i can't fix right now
-                    // let's remove one unit from aura list
-                    // this may cause area aura "bouncing" between 2 units after each update
-                    // but because we know the reason of a crash we can remove the assertion for now
-                    if (aurApp.GetTarget() != unit)
-                    {
-                        // remove from auras to register list
-                        targets.Remove(unit);
-                        continue;
-                    }
-                    else
-                    {
-                        // ok, we have one unit twice in target map (impossible, but...)
-                        Cypher.Assert(false);
-                    }
-                }
-
                 var value = targets[unit];
 
                 bool addUnit = true;
@@ -506,8 +523,9 @@ namespace Game.Spells
                     if (unit.IsImmunedToSpellEffect(GetSpellInfo(), effIndex, caster))
                         value &= ~(1u << effIndex);
                 }
-                if (value == 0 || unit.IsImmunedToSpell(GetSpellInfo(), caster)
-                    || !CanBeAppliedOn(unit))
+
+                
+                if (value == 0 || unit.IsImmunedToSpell(GetSpellInfo(), caster) || !CanBeAppliedOn(unit))
                     addUnit = false;
 
                 if (addUnit && !unit.IsHighestExclusiveAura(this, true))
@@ -541,6 +559,7 @@ namespace Game.Spells
                         }
                     }
                 }
+
                 if (!addUnit)
                     targets.Remove(unit);
                 else
@@ -553,6 +572,14 @@ namespace Game.Spells
                             m_owner.GetName(), m_owner.IsInWorld ? (int)m_owner.GetMap().GetId() : -1,
                             unit.GetName(), unit.IsInWorld ? (int)unit.GetMap().GetId() : -1);
                     }
+
+                    AuraApplication aurApp = GetApplicationOfTarget(unit.GetGUID());
+                    if (aurApp != null)
+                    {
+                        // aura is already applied, this means we need to update effects of current application
+                        unit._UnapplyAura(aurApp, AuraRemoveMode.Default);
+                    }
+
                     unit._CreateAuraApplication(this, value);
                 }
             }
@@ -854,17 +881,17 @@ namespace Game.Spells
             Unit caster = GetCaster();
 
             List<AuraApplication> applications = GetApplicationList();
-            foreach (var appt in applications)
-                if (!appt.HasRemoveMode())
-                    HandleAuraSpecificMods(appt, caster, false, true);
+            foreach (var aurApp in applications)
+                if (!aurApp.HasRemoveMode())
+                    HandleAuraSpecificMods(aurApp, caster, false, true);
 
-            foreach (AuraEffect effect in GetAuraEffects())
-                if (effect != null)
-                    effect.ChangeAmount(effect.CalculateAmount(caster), false, true);
+            foreach (AuraEffect aurEff in GetAuraEffects())
+                if (aurEff != null)
+                    aurEff.ChangeAmount(aurEff.CalculateAmount(caster), false, true);
 
-            foreach (var app in applications)
-                if (!app.HasRemoveMode())
-                    HandleAuraSpecificMods(app, caster, true, true);
+            foreach (var aurApp in applications)
+                if (!aurApp.HasRemoveMode())
+                    HandleAuraSpecificMods(aurApp, caster, true, true);
 
             SetNeedClientUpdateForTargets();
         }
@@ -956,6 +983,14 @@ namespace Game.Spells
             return GetSpellInfo().IsDeathPersistent();
         }
 
+        public bool IsRemovedOnShapeLost(Unit target)
+        {
+            return GetCasterGUID() == target.GetGUID()
+                && m_spellInfo.Stances != 0
+                && !m_spellInfo.HasAttribute(SpellAttr2.NotNeedShapeshift)
+                && !m_spellInfo.HasAttribute(SpellAttr0.NotShapeshift);
+        }
+        
         public bool CanBeSaved()
         {
             if (IsPassive())
@@ -1135,10 +1170,10 @@ namespace Game.Spells
         public List<AuraApplication> GetApplicationList()
         {
             var applicationList = new List<AuraApplication>();
-            foreach (var app in m_applications.Values)
+            foreach (var aurApp in m_applications.Values)
             {
-                if (app.GetEffectMask() != 0)
-                    applicationList.Add(app);
+                if (aurApp.GetEffectMask() != 0)
+                    applicationList.Add(aurApp);
             }
 
             return applicationList;
@@ -1816,7 +1851,7 @@ namespace Game.Spells
 
         void _DeleteRemovedApplications()
         {
-            m_removedApplications.Clear();
+            _removedApplications.Clear();
         }
 
         public void LoadScripts()
@@ -2308,13 +2343,6 @@ namespace Game.Spells
         public byte GetStackAmount() { return m_stackAmount; }
         public byte GetCasterLevel() { return (byte)m_casterLevel; }
 
-        public bool IsRemovedOnShapeLost(Unit target)
-        {
-            return GetCasterGUID() == target.GetGUID()
-                    && m_spellInfo.Stances != 0
-                    && !m_spellInfo.HasAttribute(SpellAttr2.NotNeedShapeshift)
-                    && !m_spellInfo.HasAttribute(SpellAttr0.NotShapeshift);
-        }
         public bool IsRemoved() { return m_isRemoved; }
 
         public bool IsSingleTarget() { return m_isSingleTarget; }
@@ -2334,9 +2362,10 @@ namespace Game.Spells
         public uint GetEffectMask()
         {
             uint effMask = 0;
-            foreach (AuraEffect effect in GetAuraEffects())
-                if (effect != null)
-                    effMask |= (uint)(1 << (int)effect.GetEffIndex());
+            foreach (AuraEffect aurEff in GetAuraEffects())
+                if (aurEff != null)
+                    effMask |= (uint)(1 << (int)aurEff.GetEffIndex());
+
             return effMask;
         }
 
@@ -2353,6 +2382,11 @@ namespace Game.Spells
 
         public void SetLastProcAttemptTime(DateTime lastProcAttemptTime) { m_lastProcAttemptTime = lastProcAttemptTime; }
         public void SetLastProcSuccessTime(DateTime lastProcSuccessTime) { m_lastProcSuccessTime = lastProcSuccessTime; }
+
+        public UnitAura ToUnitAura() { if (GetAuraType() == AuraObjectType.Unit) return (UnitAura)this; else return null; }
+
+        public DynObjAura ToDynObjAura() { if (GetAuraType() == AuraObjectType.DynObj) return (DynObjAura)this; else return null; }
+
 
         //Static Methods
         public static uint BuildEffectMaskForOwner(SpellInfo spellProto, uint availableEffectMask, WorldObject owner)
@@ -2382,22 +2416,23 @@ namespace Game.Spells
             }
             return (effMask & availableEffectMask);
         }
-        public static Aura TryRefreshStackOrCreate(SpellInfo spellproto, ObjectGuid castId, uint tryEffMask, WorldObject owner, Unit caster, Difficulty castDifficulty, int[] baseAmount = null, Item castItem = null, ObjectGuid casterGUID = default, bool resetPeriodicTimer = true, ObjectGuid castItemGuid = default, uint castItemId = 0, int castItemLevel = -1)
+        public static Aura TryRefreshStackOrCreate(AuraCreateInfo createInfo)
         {
-            return TryRefreshStackOrCreate(spellproto, castId, tryEffMask, owner, caster, castDifficulty, out _, baseAmount, castItem, casterGUID, resetPeriodicTimer, castItemGuid, castItemId, castItemLevel);
-        }
-        public static Aura TryRefreshStackOrCreate(SpellInfo spellproto, ObjectGuid castId, uint tryEffMask, WorldObject owner, Unit caster, Difficulty castDifficulty, out bool refresh, int[] baseAmount, Item castItem = null, ObjectGuid casterGUID = default, bool resetPeriodicTimer = true, ObjectGuid castItemGuid = default, uint castItemId = 0, int castItemLevel = -1)
-        {
-            Cypher.Assert(spellproto != null);
-            Cypher.Assert(owner != null);
-            Cypher.Assert(caster || !casterGUID.IsEmpty());
-            Cypher.Assert(tryEffMask <= SpellConst.MaxEffectMask);
-            refresh = false;
+            Cypher.Assert(createInfo.Caster != null || !createInfo.CasterGUID.IsEmpty());
 
-            uint effMask = BuildEffectMaskForOwner(spellproto, tryEffMask, owner);
+            createInfo.IsRefresh = false;
+
+            createInfo._auraEffectMask = BuildEffectMaskForOwner(createInfo.GetSpellInfo(), createInfo.GetAuraEffectMask(), createInfo.GetOwner());
+            createInfo._targetEffectMask &= createInfo._auraEffectMask;
+
+            uint effMask = createInfo._auraEffectMask;
+            if (createInfo._targetEffectMask != 0)
+                effMask = createInfo._targetEffectMask;
+
             if (effMask == 0)
                 return null;
-            Aura foundAura = owner.ToUnit()._TryStackingOrRefreshingExistingAura(spellproto, effMask, caster, baseAmount, castItem, casterGUID, resetPeriodicTimer, castItemGuid, castItemId, castItemLevel);
+
+            Aura foundAura = createInfo.GetOwner().ToUnit()._TryStackingOrRefreshingExistingAura(createInfo);
             if (foundAura != null)
             {
                 // we've here aura, which script triggered removal after modding stack amount
@@ -2405,65 +2440,95 @@ namespace Game.Spells
                 if (foundAura.IsRemoved())
                     return null;
 
-                refresh = true;
+                createInfo.IsRefresh = true;
+
+                // add owner
+                Unit unit = createInfo.GetOwner().ToUnit();
+
+                // check effmask on owner application (if existing)
+                AuraApplication aurApp = foundAura.GetApplicationOfTarget(unit.GetGUID());
+                if (aurApp != null)
+                    aurApp.UpdateApplyEffectMask(effMask);
                 return foundAura;
             }
             else
-                return Create(spellproto, castId, effMask, owner, caster, castDifficulty, baseAmount, castItem, casterGUID, castItemGuid, castItemId, castItemLevel);
+                return Create(createInfo);
         }
-        public static Aura TryCreate(SpellInfo spellproto, ObjectGuid castId, uint tryEffMask, WorldObject owner, Unit caster, Difficulty castDifficulty, int[] baseAmount, Item castItem = null, ObjectGuid casterGUID = default, ObjectGuid castItemGuid = default, uint castItemId = 0, int castItemLevel = -1)
+
+        public static Aura TryCreate(AuraCreateInfo createInfo)
         {
-            Cypher.Assert(spellproto != null);
-            Cypher.Assert(owner != null);
-            Cypher.Assert(caster != null || !casterGUID.IsEmpty());
-            Cypher.Assert(tryEffMask <= SpellConst.MaxEffectMask);
-            uint effMask = BuildEffectMaskForOwner(spellproto, tryEffMask, owner);
+            Cypher.Assert(createInfo.Caster != null || !createInfo.CasterGUID.IsEmpty());
+
+            uint effMask = createInfo._auraEffectMask;
+            if (createInfo._targetEffectMask != 0)
+                effMask = createInfo._targetEffectMask;
+
+            effMask = BuildEffectMaskForOwner(createInfo.GetSpellInfo(), effMask, createInfo.GetOwner());
             if (effMask == 0)
                 return null;
-            return Create(spellproto, castId, effMask, owner, caster, castDifficulty, baseAmount, castItem, casterGUID, castItemGuid, castItemId, castItemLevel);
+
+            return Create(createInfo);
         }
-        public static Aura Create(SpellInfo spellproto, ObjectGuid castId, uint effMask, WorldObject owner, Unit caster, Difficulty castDifficulty, int[] baseAmount, Item castItem, ObjectGuid casterGUID, ObjectGuid castItemGuid, uint castItemId, int castItemLevel)
+
+        public static Aura Create(AuraCreateInfo createInfo)
         {
-            Cypher.Assert(effMask != 0);
-            Cypher.Assert(spellproto != null);
-            Cypher.Assert(owner != null);
-            Cypher.Assert(caster != null || !casterGUID.IsEmpty());
-            Cypher.Assert(effMask <= SpellConst.MaxEffectMask);
+            Cypher.Assert(createInfo.Caster != null || !createInfo.CasterGUID.IsEmpty());
+
             // try to get caster of aura
-            if (!casterGUID.IsEmpty())
+            if (!createInfo.CasterGUID.IsEmpty())
             {
-                if (owner.GetGUID() == casterGUID)
-                    caster = owner.ToUnit();
+                if (createInfo.GetOwner().GetGUID() == createInfo.CasterGUID)
+                    createInfo.Caster = createInfo.GetOwner().ToUnit();
                 else
-                    caster = Global.ObjAccessor.GetUnit(owner, casterGUID);
+                    createInfo.Caster = Global.ObjAccessor.GetUnit(createInfo.GetOwner(), createInfo.CasterGUID);
             }
             else
-                casterGUID = caster.GetGUID();
+                createInfo.CasterGUID = createInfo.Caster.GetGUID();
 
             // check if aura can be owned by owner
-            if (owner.IsTypeMask(TypeMask.Unit))
-                if (!owner.IsInWorld || owner.ToUnit().IsDuringRemoveFromWorld())
+            if (createInfo.GetOwner().IsTypeMask(TypeMask.Unit))
+                if (!createInfo.GetOwner().IsInWorld || createInfo.GetOwner().ToUnit().IsDuringRemoveFromWorld())
                     // owner not in world so don't allow to own not self casted single target auras
-                    if (casterGUID != owner.GetGUID() && spellproto.IsSingleTarget())
+                    if (createInfo.CasterGUID != createInfo.GetOwner().GetGUID() && createInfo.GetSpellInfo().IsSingleTarget())
                         return null;
 
             Aura aura;
-            switch (owner.GetTypeId())
+            switch (createInfo.GetOwner().GetTypeId())
             {
                 case TypeId.Unit:
                 case TypeId.Player:
-                    aura = new UnitAura(spellproto, castId, effMask, owner, caster, castDifficulty, baseAmount, castItem, casterGUID, castItemGuid, castItemId, castItemLevel);
+                    aura = new UnitAura(createInfo);
+
+                    // aura can be removed in Unit::_AddAura call
+                    if (aura.IsRemoved())
+                        return null;
+
+                    // add owner
+                    uint effMask = createInfo._auraEffectMask;
+                    if (createInfo._targetEffectMask != 0)
+                        effMask = createInfo._targetEffectMask;
+
+                    effMask = BuildEffectMaskForOwner(createInfo.GetSpellInfo(), effMask, createInfo.GetOwner());
+                    Cypher.Assert(effMask != 0);
+
+                    Unit unit = createInfo.GetOwner().ToUnit();
+                    aura.ToUnitAura().AddStaticApplication(unit, effMask);
                     break;
                 case TypeId.DynamicObject:
-                    aura = new DynObjAura(spellproto, castId, effMask, owner, caster, castDifficulty, baseAmount, castItem, casterGUID, castItemGuid, castItemId, castItemLevel);
+                    createInfo._auraEffectMask = BuildEffectMaskForOwner(createInfo.GetSpellInfo(), createInfo._auraEffectMask, createInfo.GetOwner());
+                    Cypher.Assert(createInfo._auraEffectMask != 0);
+
+                    aura = new DynObjAura(createInfo);
                     break;
                 default:
                     Cypher.Assert(false);
                     return null;
             }
-            // aura can be removed in Unit:_AddAura call
+
+            // scripts, etc.
             if (aura.IsRemoved())
                 return null;
+
             return aura;
         }
 
@@ -2504,19 +2569,18 @@ namespace Game.Spells
         DateTime m_lastProcAttemptTime;
         DateTime m_lastProcSuccessTime;
 
-        List<AuraApplication> m_removedApplications = new();
+        List<AuraApplication> _removedApplications = new();
         #endregion
     }
 
     public class UnitAura : Aura
     {
-        public UnitAura(SpellInfo spellproto, ObjectGuid castId, uint effMask, WorldObject owner, Unit caster, Difficulty castDifficulty, int[] baseAmount, Item castItem, ObjectGuid casterGUID, ObjectGuid castItemGuid, uint castItemId, int castItemLevel)
-            : base(spellproto, castId, owner, caster, castDifficulty, castItem, casterGUID, castItemGuid, castItemId, castItemLevel)
+        public UnitAura(AuraCreateInfo createInfo) : base(createInfo)
         {
             m_AuraDRGroup = DiminishingGroup.None;
             LoadScripts();
-            _InitEffects(effMask, caster, baseAmount);
-            GetUnitOwner()._AddAura(this, caster);
+            _InitEffects(createInfo._auraEffectMask, createInfo.Caster, createInfo.BaseAmount);
+            GetUnitOwner()._AddAura(this, createInfo.Caster);
         }
 
         public override void _ApplyForTarget(Unit target, Unit caster, AuraApplication aurApp)
@@ -2548,95 +2612,110 @@ namespace Game.Spells
             if (refe == null)
                 refe = GetUnitOwner();
 
+            // add non area aura targets
+            // static applications go through spell system first, so we assume they meet conditions
+            foreach (var targetPair in _staticApplications)
+            {
+                Unit target = Global.ObjAccessor.GetUnit(GetUnitOwner(), targetPair.Key);
+                if (target != null)
+                    targets.Add(target, targetPair.Value);
+            }
+
             foreach (SpellEffectInfo effect in GetSpellInfo().GetEffects())
             {
                 if (effect == null || !HasEffect(effect.EffectIndex))
                     continue;
 
-                List<Unit> targetList = new();
-                var condList = effect.ImplicitTargetConditions;
-                // non-area aura
+                // area auras only
                 if (effect.Effect == SpellEffectName.ApplyAura)
-                {
-                    if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(GetUnitOwner(), refe, condList))
-                        targetList.Add(GetUnitOwner());
-                }
-                else
-                {
-                    // skip area update if owner is not in world!
-                    if (!GetUnitOwner().IsInWorld)
-                        continue;
+                    continue;
 
-                    if (GetUnitOwner().HasUnitState(UnitState.Isolated))
-                        continue;
+                // skip area update if owner is not in world!
+                if (!GetUnitOwner().IsInWorld)
+                    continue;
 
-                    float radius = effect.CalcRadius(caster);
-                    SpellTargetCheckTypes selectionType = SpellTargetCheckTypes.Default;
-                    switch (effect.Effect)
+                if (GetUnitOwner().HasUnitState(UnitState.Isolated))
+                    continue;
+
+                List<Unit> units = new();
+                var condList = effect.ImplicitTargetConditions;
+
+                float radius = effect.CalcRadius(refe);
+                SpellTargetCheckTypes selectionType = SpellTargetCheckTypes.Default;
+                switch (effect.Effect)
+                {
+                    case SpellEffectName.ApplyAreaAuraParty:
+                    case SpellEffectName.ApplyAreaAuraPartyNonrandom:
+                        selectionType = SpellTargetCheckTypes.Party;
+                        break;
+                    case SpellEffectName.ApplyAreaAuraRaid:
+                        selectionType = SpellTargetCheckTypes.Raid;
+                        break;
+                    case SpellEffectName.ApplyAreaAuraFriend:
+                        selectionType = SpellTargetCheckTypes.Ally;
+                        break;
+                    case SpellEffectName.ApplyAreaAuraEnemy:
+                        selectionType = SpellTargetCheckTypes.Enemy;
+                        break;
+                    case SpellEffectName.ApplyAreaAuraPet:
+                        if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(GetUnitOwner(), refe, condList))
+                            units.Add(GetUnitOwner());
+                        goto case SpellEffectName.ApplyAreaAuraOwner;
+                    /* fallthrough */
+                    case SpellEffectName.ApplyAreaAuraOwner:
                     {
-                        case SpellEffectName.ApplyAreaAuraParty:
-                        case SpellEffectName.ApplyAreaAuraPartyNonrandom:
-                            selectionType = SpellTargetCheckTypes.Party;
-                            break;
-                        case SpellEffectName.ApplyAreaAuraRaid:
-                            selectionType = SpellTargetCheckTypes.Raid;
-                            break;
-                        case SpellEffectName.ApplyAreaAuraFriend:
-                            selectionType = SpellTargetCheckTypes.Ally;
-                            break;
-                        case SpellEffectName.ApplyAreaAuraEnemy:
-                            selectionType = SpellTargetCheckTypes.Enemy;
-                            break;
-                        case SpellEffectName.ApplyAreaAuraPet:
-                            if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(GetUnitOwner(), refe, condList))
-                                targetList.Add(GetUnitOwner());
-                            goto case SpellEffectName.ApplyAreaAuraOwner;
-                        case SpellEffectName.ApplyAreaAuraOwner:
-                        {
-                            Unit owner = GetUnitOwner().GetCharmerOrOwner();
-                            if (owner != null)
-                                if (GetUnitOwner().IsWithinDistInMap(owner, radius))
-                                    if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(owner, refe, condList))
-                                        targetList.Add(owner);
-                            break;
-                        }
-                        case SpellEffectName.ApplyAuraOnPet:
-                        {
-                            Unit pet = Global.ObjAccessor.GetUnit(GetUnitOwner(), GetUnitOwner().GetPetGUID());
-                            if (pet != null)
-                                if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(pet, refe, condList))
-                                    targetList.Add(pet);
-                            break;
-                        }
-                        case SpellEffectName.ApplyAreaAuraSummons:
-                        {
-                            if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(GetUnitOwner(), refe, condList))
-                                targetList.Add(GetUnitOwner());
-
-                            selectionType = SpellTargetCheckTypes.Summoned;
-                            break;
-                        }
+                        Unit owner = GetUnitOwner().GetCharmerOrOwner();
+                        if (owner != null)
+                            if (GetUnitOwner().IsWithinDistInMap(owner, radius))
+                                if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(owner, refe, condList))
+                                    units.Add(owner);
+                        break;
                     }
-
-                    if (selectionType != SpellTargetCheckTypes.Default)
+                    case SpellEffectName.ApplyAuraOnPet:
                     {
-                        WorldObjectSpellAreaTargetCheck check = new(radius, GetUnitOwner(), refe, GetUnitOwner(), GetSpellInfo(), selectionType, condList, SpellTargetObjectTypes.Unit);
-                        UnitListSearcher searcher = new(GetUnitOwner(), targetList, check);
-                        Cell.VisitAllObjects(GetUnitOwner(), searcher, radius);
-
-                        // by design WorldObjectSpellAreaTargetCheck allows not-in-world units (for spells) but for auras it is not acceptable
-                        targetList.RemoveAll(unit => !unit.IsSelfOrInSameMap(GetUnitOwner()));
+                        Unit pet = Global.ObjAccessor.GetUnit(GetUnitOwner(), GetUnitOwner().GetPetGUID());
+                        if (pet  != null)
+                            if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(pet, refe, condList))
+                                units.Add(pet);
+                        break;
+                    }
+                    case SpellEffectName.ApplyAreaAuraSummons:
+                    {
+                        if (condList == null || Global.ConditionMgr.IsObjectMeetToConditions(GetUnitOwner(), refe, condList))
+                            units.Add(GetUnitOwner());
+                        selectionType = SpellTargetCheckTypes.Summoned;
+                        break;
                     }
                 }
 
-                foreach (var unit in targetList)
+                if (selectionType != SpellTargetCheckTypes.Default)
                 {
-                    if (targets.ContainsKey(unit))
-                        targets[unit] |= (1u << (int)effect.EffectIndex);
-                    else
-                        targets[unit] = (1u << (int)effect.EffectIndex);
+                    WorldObjectSpellAreaTargetCheck check = new(radius, GetUnitOwner(), refe, GetUnitOwner(), GetSpellInfo(), selectionType, condList, SpellTargetObjectTypes.Unit);
+                    UnitListSearcher searcher = new(GetUnitOwner(), units, check);
+                    Cell.VisitAllObjects(GetUnitOwner(), searcher, radius);
+
+                    // by design WorldObjectSpellAreaTargetCheck allows not-in-world units (for spells) but for auras it is not acceptable
+                    units.RemoveAll(unit => !unit.IsSelfOrInSameMap(GetUnitOwner()));
                 }
+
+                foreach (Unit unit in units)
+                    targets[unit] |= 1u << (int)effect.EffectIndex;
             }
+        }
+
+        public void AddStaticApplication(Unit target, uint effMask)
+        {
+            // only valid for non-area auras
+            foreach (SpellEffectInfo effect in GetSpellInfo().GetEffects())
+            {
+                if (effect != null && (effMask & (1u << (int)effect.EffectIndex)) != 0 && effect.Effect != SpellEffectName.ApplyAura)
+                    effMask &= ~(1u << (int)effect.EffectIndex);
+            }
+
+            if (effMask == 0)
+                return;
+
+            _staticApplications[target.GetGUID()] |= effMask;
         }
 
         // Allow Apply Aura Handler to modify and access m_AuraDRGroup
@@ -2644,18 +2723,18 @@ namespace Game.Spells
         public DiminishingGroup GetDiminishGroup() { return m_AuraDRGroup; }
 
         DiminishingGroup m_AuraDRGroup;              // Diminishing
+        Dictionary<ObjectGuid, uint> _staticApplications = new(); // non-area auras
     }
 
     public class DynObjAura : Aura
     {
-        public DynObjAura(SpellInfo spellproto, ObjectGuid castId, uint effMask, WorldObject owner, Unit caster, Difficulty castDifficulty, int[] baseAmount, Item castItem, ObjectGuid casterGUID, ObjectGuid castItemGuid, uint castItemId, int castItemLevel)
-            : base(spellproto, castId, owner, caster, castDifficulty, castItem, casterGUID, castItemGuid, castItemId, castItemLevel)
+        public DynObjAura(AuraCreateInfo createInfo) : base(createInfo)
         {
             LoadScripts();
             Cypher.Assert(GetDynobjOwner() != null);
             Cypher.Assert(GetDynobjOwner().IsInWorld);
-            Cypher.Assert(GetDynobjOwner().GetMap() == caster.GetMap());
-            _InitEffects(effMask, caster, baseAmount);
+            Cypher.Assert(GetDynobjOwner().GetMap() == createInfo.Caster.GetMap());
+            _InitEffects(createInfo._auraEffectMask, createInfo.Caster, createInfo.BaseAmount);
             GetDynobjOwner().SetAura(this);
 
         }
@@ -2693,12 +2772,7 @@ namespace Game.Spells
                 targetList.RemoveAll(unit => !unit.IsSelfOrInSameMap(GetDynobjOwner()));
 
                 foreach (var unit in targetList)
-                {
-                    if (targets.ContainsKey(unit))
-                        targets[unit] |= (1u << (int)effect.EffectIndex);
-                    else
-                        targets[unit] = (1u << (int)effect.EffectIndex);
-                }
+                    targets[unit] |= 1u << (int)effect.EffectIndex;
             }
         }
     }
@@ -2773,5 +2847,52 @@ namespace Game.Spells
     {
         public int[] Amounts = new int[SpellConst.MaxEffects];
         public int[] BaseAmounts = new int[SpellConst.MaxEffects];
+    }
+
+    public class AuraCreateInfo
+    {
+        public ObjectGuid CasterGUID;
+        public Unit Caster;
+        public int[] BaseAmount;
+        public ObjectGuid CastItemGUID;
+        public uint CastItemId = 0;
+        public int CastItemLevel = -1;
+        public bool IsRefresh;
+        public bool ResetPeriodicTimer = true;
+
+        internal ObjectGuid _castId;
+        internal SpellInfo _spellInfo;
+        internal Difficulty _castDifficulty;
+        internal uint _auraEffectMask;
+        internal WorldObject _owner;
+
+        internal uint _targetEffectMask;
+
+        public AuraCreateInfo(ObjectGuid castId, SpellInfo spellInfo, Difficulty castDifficulty, uint auraEffMask, WorldObject owner)
+        {
+            _castId = castId;
+            _spellInfo = spellInfo;
+            _castDifficulty = castDifficulty;
+            _auraEffectMask = auraEffMask;
+            _owner = owner;
+
+            Cypher.Assert(spellInfo != null);
+            Cypher.Assert(auraEffMask != 0);
+            Cypher.Assert(owner != null);
+
+            Cypher.Assert(auraEffMask <= SpellConst.MaxEffectMask);
+        }
+
+        public void SetCasterGUID(ObjectGuid guid) { CasterGUID = guid; }
+        public void SetCaster(Unit caster) { Caster = caster; }
+        public void SetBaseAmount(int[] bp) { BaseAmount = bp; }
+        public void SetCastItem(ObjectGuid guid, uint itemId, int itemLevel) { CastItemGUID = guid; CastItemId = itemId; CastItemLevel = itemLevel; }
+        public void SetPeriodicReset(bool reset) { ResetPeriodicTimer = reset; }
+        public void SetOwnerEffectMask(uint effMask) { _targetEffectMask = effMask; }
+        public void SetAuraEffectMask(uint effMask) { _auraEffectMask = effMask; }
+
+        public SpellInfo GetSpellInfo() { return _spellInfo; }
+        public uint GetAuraEffectMask() { return _auraEffectMask; }
+        public WorldObject GetOwner() { return _owner; }
     }
 }

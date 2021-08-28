@@ -724,18 +724,22 @@ namespace Game.Scripting
         void PreventHitHeal() { SetHitHeal(0); }
         public Spell GetSpell() { return m_spell; }
         // returns current spell hit target aura
-        public Aura GetHitAura()
+        public Aura GetHitAura(bool dynObjAura = false)
         {
             if (!IsInTargetHook())
             {
                 Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.GetHitAura was called, but function has no effect in current hook!", m_scriptName, m_scriptSpellId);
                 return null;
             }
-            if (m_spell.m_spellAura == null)
+
+            Aura aura = m_spell.spellAura;
+            if (dynObjAura)
+                aura = m_spell.dynObjAura;
+
+            if (aura == null || aura.IsRemoved())
                 return null;
-            if (m_spell.m_spellAura.IsRemoved())
-                return null;
-            return m_spell.m_spellAura;
+
+            return aura;
         }
         // prevents applying aura on current spell hit target
         public void PreventHitAura()
@@ -745,8 +749,14 @@ namespace Game.Scripting
                 Log.outError(LogFilter.Scripts, "Script: `{0}` Spell: `{1}`: function SpellScript.PreventHitAura was called, but function has no effect in current hook!", m_scriptName, m_scriptSpellId);
                 return;
             }
-            if (m_spell.m_spellAura != null)
-                m_spell.m_spellAura.Remove();
+
+            UnitAura unitAura = m_spell.spellAura;
+            if (unitAura != null)
+                unitAura.Remove();
+
+            DynObjAura dynAura = m_spell.dynObjAura;
+            if (dynAura != null)
+                dynAura.Remove();
         }
 
         // prevents effect execution on current spell hit target
