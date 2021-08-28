@@ -2201,15 +2201,12 @@ namespace Game.Spells
                 if (m_spellInfo.HasHitDelay() && unit.HasUnitFlag(UnitFlags.NonAttackable) && unit.GetCharmerOrOwnerGUID() != m_caster.GetGUID())
                     return SpellMissInfo.Evade;
 
-                if (m_caster._IsValidAttackTarget(unit, m_spellInfo))
+                if (m_caster.IsValidAttackTarget(unit, m_spellInfo))
                     unit.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.HostileActionReceived);
                 else if (m_caster.IsFriendlyTo(unit))
                 {
                     // for delayed spells ignore negative spells (after duel end) for friendly targets
-                    // @todo this cause soul transfer bugged
-                    // 63881 - Malady of the Mind jump spell (Yogg-Saron)
-                    // 45034 - Curse of Boundless Agony jump spell (Kalecgos)
-                    if (m_spellInfo.HasHitDelay() && unit.IsPlayer() && !IsPositive() && m_spellInfo.Id != 63881 && m_spellInfo.Id != 45034)
+                    if (m_spellInfo.HasHitDelay() && unit.IsPlayer() && !IsPositive() && !m_caster.IsValidSpellAttackTarget(unit, m_spellInfo))
                         return SpellMissInfo.Evade;
 
                     // assisting case, healing and resurrection
@@ -7936,7 +7933,7 @@ namespace Game.Spells
             Corpse corpseTarget = obj.ToCorpse();
             if (corpseTarget != null)
             {
-                // use ofter for party/assistance checks
+                // use owner for party/assistance checks
                 Player owner = Global.ObjAccessor.FindPlayer(corpseTarget.GetOwnerGUID());
                 if (owner != null)
                     unitTarget = owner;
@@ -7946,24 +7943,25 @@ namespace Game.Spells
 
             if (unitTarget != null)
             {
+                // do only faction checks here
                 switch (_targetSelectionType)
                 {
                     case SpellTargetCheckTypes.Enemy:
                         if (unitTarget.IsTotem())
                             return false;
-                        if (!_caster._IsValidAttackTarget(unitTarget, _spellInfo))
+                        if (!_caster.IsValidAttackTarget(unitTarget, _spellInfo, null, false))
                             return false;
                         break;
                     case SpellTargetCheckTypes.Ally:
                         if (unitTarget.IsTotem())
                             return false;
-                        if (!_caster._IsValidAssistTarget(unitTarget, _spellInfo))
+                        if (!_caster.IsValidAssistTarget(unitTarget, _spellInfo))
                             return false;
                         break;
                     case SpellTargetCheckTypes.Party:
                         if (unitTarget.IsTotem())
                             return false;
-                        if (!_caster._IsValidAssistTarget(unitTarget, _spellInfo))
+                        if (!_caster.IsValidAssistTarget(unitTarget, _spellInfo))
                             return false;
                         if (!_referer.IsInPartyWith(unitTarget))
                             return false;
@@ -7974,7 +7972,7 @@ namespace Game.Spells
                             return false;
                         if (unitTarget.IsTotem())
                             return false;
-                        if (!_caster._IsValidAssistTarget(unitTarget, _spellInfo))
+                        if (!_caster.IsValidAssistTarget(unitTarget, _spellInfo))
                             return false;
                         if (!_referer.IsInRaidWith(unitTarget))
                             return false;
@@ -8009,6 +8007,19 @@ namespace Game.Spells
                         break;
                     default:
                         break;
+                }
+
+                // then check actual spell positivity to determine if the target is valid
+                // (negative spells may be targeted on allies)
+                if (_spellInfo.IsPositive())
+                {
+                    if (!_caster.IsValidSpellAssistTarget(unitTarget, _spellInfo))
+                        return false;
+                }
+                else
+                {
+                    if (!_caster.IsValidSpellAttackTarget(unitTarget, _spellInfo))
+                        return false;
                 }
             }
             if (_condSrcInfo == null)

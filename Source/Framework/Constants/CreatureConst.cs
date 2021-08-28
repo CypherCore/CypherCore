@@ -161,6 +161,7 @@ namespace Framework.Constants
         ContributionCollector = 0x400,
     }
 
+    [Flags]
     public enum CreatureTypeFlags : uint
     {
         TameablePet = 0x01, // Makes the mob tameable (must also be a beast and have family set)

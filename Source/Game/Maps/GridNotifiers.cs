@@ -1916,7 +1916,7 @@ namespace Game.Maps
             if (!u.IsTargetableForAttack(false))
                 return false;
 
-            if (!i_obj.IsWithinDistInMap(u, i_range) || i_funit._IsValidAttackTarget(u, null, i_obj))
+            if (!i_obj.IsWithinDistInMap(u, i_range) || i_funit.IsValidAttackTarget(u))
                 return false;
 
             i_range = i_obj.GetDistance(u);
@@ -2088,7 +2088,7 @@ namespace Game.Maps
             if (_spellInfo != null && _spellInfo.HasAttribute(SpellAttr3.OnlyTargetPlayers) && !u.IsPlayer())
                 return false;
 
-            if (!i_funit._IsValidAttackTarget(u, _spellInfo, i_obj.GetTypeId() == TypeId.DynamicObject ? i_obj : null))
+            if (!i_funit.IsValidAttackTarget(u, _spellInfo))
                 return false;
 
             float searchRadius = i_range;

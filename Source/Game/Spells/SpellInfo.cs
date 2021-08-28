@@ -1186,12 +1186,12 @@ namespace Game.Spells
                 if (Convert.ToBoolean(neededTargets & (SpellCastTargetFlags.UnitEnemy | SpellCastTargetFlags.UnitAlly | SpellCastTargetFlags.UnitRaid | SpellCastTargetFlags.UnitParty | SpellCastTargetFlags.UnitMinipet | SpellCastTargetFlags.UnitPassenger)))
                 {
                     if (Convert.ToBoolean(neededTargets & SpellCastTargetFlags.UnitEnemy))
-                        if (caster._IsValidAttackTarget(unitTarget, this))
+                        if (caster.IsValidAttackTarget(unitTarget, this))
                             return SpellCastResult.SpellCastOk;
                     if (neededTargets.HasAnyFlag(SpellCastTargetFlags.UnitAlly)
                         || (neededTargets.HasAnyFlag(SpellCastTargetFlags.UnitParty) && caster.IsInPartyWith(unitTarget))
                         || (neededTargets.HasAnyFlag(SpellCastTargetFlags.UnitRaid) && caster.IsInRaidWith(unitTarget)))
-                        if (caster._IsValidAssistTarget(unitTarget, this))
+                        if (caster.IsValidAssistTarget(unitTarget, this))
                             return SpellCastResult.SpellCastOk;
                     if (Convert.ToBoolean(neededTargets & SpellCastTargetFlags.UnitMinipet))
                         if (unitTarget.GetGUID() == caster.GetCritterGUID())
