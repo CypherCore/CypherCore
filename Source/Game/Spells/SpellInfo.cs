@@ -2657,14 +2657,16 @@ namespace Game.Spells
         public int GetDuration()
         {
             if (DurationEntry == null)
-                return 0;
+                return IsPassive() ? -1 : 0;
+
             return (DurationEntry.Duration == -1) ? -1 : Math.Abs(DurationEntry.Duration);
         }
 
         public int GetMaxDuration()
         {
             if (DurationEntry == null)
-                return 0;
+                return IsPassive() ? -1 : 0;
+
             return (DurationEntry.MaxDuration == -1) ? -1 : Math.Abs(DurationEntry.MaxDuration);
         }
 
@@ -4019,18 +4021,6 @@ namespace Game.Spells
                 Effect == SpellEffectName.ApplyAreaAuraPartyNonrandom)
                 return true;
             return false;
-        }
-
-        public bool IsFarUnitTargetEffect()
-        {
-            return (Effect == SpellEffectName.SummonPlayer)
-                || (Effect == SpellEffectName.SummonRafFriend)
-                || (Effect == SpellEffectName.Resurrect);
-        }
-
-        bool IsFarDestTargetEffect()
-        {
-            return Effect == SpellEffectName.TeleportUnits;
         }
 
         public bool IsUnitOwnedAuraEffect()

@@ -909,7 +909,7 @@ namespace Game.Spells
                 if (unitTarget.HasAura(48920) && ((uint)(unitTarget.GetHealth() + (ulong)addhealth) >= unitTarget.GetMaxHealth()))
                     unitTarget.RemoveAura(48920);
 
-                m_damage -= addhealth;
+                m_healing -= addhealth;
             }
         }
 

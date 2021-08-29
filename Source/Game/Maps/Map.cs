@@ -2836,8 +2836,16 @@ namespace Game.Maps
             return _toggledSpawnGroupIds.Contains(groupId) != !data.flags.HasAnyFlag(SpawnGroupFlags.ManualSpawn);
         }
 
+        public void AddFarSpellCallback(FarSpellCallback callback)
+        {
+            _farSpellCallbacks.Enqueue(new FarSpellCallback(callback));
+        }
+
         public virtual void DelayedUpdate(uint diff)
         {
+            while (_farSpellCallbacks.TryDequeue(out FarSpellCallback callback))
+                callback(this);
+
             for (var i = 0; i < _transports.Count; ++i)
             {
                 Transport transport = _transports[i];
@@ -4985,6 +4993,9 @@ namespace Game.Maps
         List<Corpse> _corpseBones = new();
 
         List<WorldObject> _updateObjects = new();
+
+        delegate void FarSpellCallback(Map map);
+        Queue<FarSpellCallback> _farSpellCallbacks = new();
         #endregion
     }
 

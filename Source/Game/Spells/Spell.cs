@@ -1314,8 +1314,7 @@ namespace Game.Spells
 
         void SelectEffectTypeImplicitTargets(uint effIndex)
         {
-            // special case for SPELL_EFFECT_SUMMON_RAF_FRIEND and SPELL_EFFECT_SUMMON_PLAYER
-            // @todo this is a workaround - target shouldn't be stored in target map for those spells
+            // special case for SPELL_EFFECT_SUMMON_RAF_FRIEND and SPELL_EFFECT_SUMMON_PLAYER, queue them on map for later execution
             SpellEffectInfo effect = m_spellInfo.GetEffect(effIndex);
             if (effect == null)
                 return;
@@ -1329,8 +1328,29 @@ namespace Game.Spells
 
                         CallScriptObjectTargetSelectHandlers(ref rafTarget, effIndex, new SpellImplicitTargetInfo());
 
-                        if (rafTarget != null && rafTarget.IsTypeId(TypeId.Player))
-                            AddUnitTarget(rafTarget.ToUnit(), (uint)(1 << (int)effIndex), false);
+                        // scripts may modify the target - recheck
+                        if (rafTarget != null && rafTarget.IsPlayer())
+                        {
+                            // target is not stored in target map for those spells
+                            // since we're completely skipping AddUnitTarget logic, we need to check immunity manually
+                            // eg. aura 21546 makes target immune to summons
+                            Player player = rafTarget.ToPlayer();
+                            if (player.IsImmunedToSpellEffect(m_spellInfo, effIndex, null))
+                                return;
+
+                            rafTarget.GetMap().AddFarSpellCallback(map =>
+                            {
+                                Player player = Global.ObjAccessor.GetPlayer(map, rafTarget.GetGUID());
+                                if (player == null)
+                                    return;
+
+                                // check immunity again in case it changed during update
+                                if (player.IsImmunedToSpellEffect(GetSpellInfo(), effIndex, null))
+                                    return;
+
+                                HandleEffects(player, null, null, effIndex, SpellEffectHandleMode.HitTarget);
+                            });
+                        }
                     }
                     return;
                 default:
@@ -1633,7 +1653,7 @@ namespace Game.Spells
                         m_procVictim = ProcFlags.TakenRangedAutoAttack;
                     }
                     break;
-                    // For other spells trigger procflags are set in Spell.DoAllEffectOnTarget
+                    // For other spells trigger procflags are set in Spell::TargetInfo::DoDamageAndTriggers
                     // Because spell positivity is dependant on target
             }
 
@@ -1644,7 +1664,7 @@ namespace Game.Spells
             {
                 m_procAttacker |= ProcFlags.DoneTrapActivation;
 
-                // also fill up other flags (DoAllEffectOnTarget only fills up flag if both are not set)
+                // also fill up other flags (TargetInfo::DoDamageAndTriggers only fills up flag if both are not set)
                 m_procAttacker |= ProcFlags.DoneSpellMagicDmgClassNeg;
                 m_procVictim |= ProcFlags.TakenSpellMagicDmgClassNeg;
             }
@@ -1690,31 +1710,27 @@ namespace Game.Spells
             ObjectGuid targetGUID = target.GetGUID();
 
             // Lookup target in already in list
-            foreach (var ihit in m_UniqueTargetInfo)
+            var index = m_UniqueTargetInfo.FindIndex(target => target.TargetGUID == targetGUID);
+            if (index != -1) // Found in list
             {
-                if (targetGUID == ihit.targetGUID)             // Found in list
-                {
-                    ihit.effectMask |= effectMask;             // Immune effects removed from mask
-                    return;
-                }
+                // Immune effects removed from mask
+                m_UniqueTargetInfo[index].EffectMask |= effectMask;
+                return;
             }
 
             // This is new target calculate data for him
 
             // Get spell hit result on target
             TargetInfo targetInfo = new();
-            targetInfo.targetGUID = targetGUID;                         // Store target GUID
-            targetInfo.effectMask = effectMask;                         // Store all effects not immune
-            targetInfo.processed = false;                              // Effects not apply on target
-            targetInfo.alive = target.IsAlive();
-            targetInfo.damage = 0;
-            targetInfo.crit = false;
+            targetInfo.TargetGUID = targetGUID;                         // Store target GUID
+            targetInfo.EffectMask = effectMask;                         // Store all effects not immune
+            targetInfo.IsAlive = target.IsAlive();
 
             // Calculate hit result
             if (m_originalCaster != null)
-                targetInfo.missCondition = m_originalCaster.SpellHitResult(target, m_spellInfo, m_canReflect && !(IsPositive() && m_caster.IsFriendlyTo(target)));
+                targetInfo.MissCondition = m_originalCaster.SpellHitResult(target, m_spellInfo, m_canReflect && !(IsPositive() && m_caster.IsFriendlyTo(target)));
             else
-                targetInfo.missCondition = SpellMissInfo.Evade;
+                targetInfo.MissCondition = SpellMissInfo.Evade;
 
             // Spell have speed - need calculate incoming time
             // Incoming time is zero for self casts. At least I think so.
@@ -1731,29 +1747,29 @@ namespace Game.Spells
                     hitDelay += dist / m_spellInfo.Speed;
                 }
 
-                targetInfo.timeDelay = (ulong)Math.Floor(hitDelay * 1000.0f);
+                targetInfo.TimeDelay = (ulong)Math.Floor(hitDelay * 1000.0f);
             }
             else
-                targetInfo.timeDelay = 0L;
+                targetInfo.TimeDelay = 0L;
 
             // If target reflect spell back to caster
-            if (targetInfo.missCondition == SpellMissInfo.Reflect)
+            if (targetInfo.MissCondition == SpellMissInfo.Reflect)
             {
                 // Calculate reflected spell result on caster
-                targetInfo.reflectResult = m_caster.SpellHitResult(m_caster, m_spellInfo, false);
+                targetInfo.ReflectResult = m_caster.SpellHitResult(m_caster, m_spellInfo, false);
 
                 // Proc spell reflect aura when missile hits the original target
-                target.m_Events.AddEvent(new ProcReflectDelayed(target, m_originalCasterGUID), target.m_Events.CalculateTime(targetInfo.timeDelay));
+                target.m_Events.AddEvent(new ProcReflectDelayed(target, m_originalCasterGUID), target.m_Events.CalculateTime(targetInfo.TimeDelay));
 
                 // Increase time interval for reflected spells by 1.5
-                targetInfo.timeDelay += targetInfo.timeDelay >> 1;
+                targetInfo.TimeDelay += targetInfo.TimeDelay >> 1;
             }
             else
-                targetInfo.reflectResult = SpellMissInfo.None;
+                targetInfo.ReflectResult = SpellMissInfo.None;
 
             // Calculate minimum incoming time
-            if (targetInfo.timeDelay != 0 && (m_delayMoment == 0 || m_delayMoment > targetInfo.timeDelay))
-                m_delayMoment = targetInfo.timeDelay;
+            if (targetInfo.TimeDelay != 0 && (m_delayMoment == 0 || m_delayMoment > targetInfo.TimeDelay))
+                m_delayMoment = targetInfo.TimeDelay;
 
             // Add target to list
             m_UniqueTargetInfo.Add(targetInfo);
@@ -1775,20 +1791,18 @@ namespace Game.Spells
             ObjectGuid targetGUID = go.GetGUID();
 
             // Lookup target in already in list
-            foreach (var ihit in m_UniqueGOTargetInfo)
+            var index = m_UniqueGOTargetInfo.FindIndex(target => target.TargetGUID == targetGUID);
+            if (index != -1) // Found in list
             {
-                if (targetGUID == ihit.targetGUID)                 // Found in list
-                {
-                    ihit.effectMask |= effectMask;                 // Add only effect mask
-                    return;
-                }
+                // Add only effect mask
+                m_UniqueGOTargetInfo[index].EffectMask |= effectMask;
+                return;
             }
 
             // This is new target calculate data for him
             GOTargetInfo target = new();
-            target.targetGUID = targetGUID;
-            target.effectMask = effectMask;
-            target.processed = false;                              // Effects not apply on target
+            target.TargetGUID = targetGUID;
+            target.EffectMask = effectMask;
 
             // Spell have speed - need calculate incoming time
             if (m_caster != go)
@@ -1803,14 +1817,14 @@ namespace Game.Spells
                     hitDelay += dist / m_spellInfo.Speed;
                 }
 
-                target.timeDelay = (ulong)Math.Floor(hitDelay * 1000.0f);
+                target.TimeDelay = (ulong)Math.Floor(hitDelay * 1000.0f);
             }
             else
-                target.timeDelay = 0UL;
+                target.TimeDelay = 0UL;
 
             // Calculate minimum incoming time
-            if (target.timeDelay != 0 && (m_delayMoment == 0 || m_delayMoment > target.timeDelay))
-                m_delayMoment = target.timeDelay;
+            if (target.TimeDelay != 0 && (m_delayMoment == 0 || m_delayMoment > target.TimeDelay))
+                m_delayMoment = target.TimeDelay;
 
             // Add target to list
             m_UniqueGOTargetInfo.Add(target);
@@ -1830,20 +1844,19 @@ namespace Game.Spells
                 return;
 
             // Lookup target in already in list
-            foreach (var ihit in m_UniqueItemInfo)
+            var index = m_UniqueItemInfo.FindIndex(target => target.TargetItem == item);
+            if (index != -1) // Found in list
             {
-                if (item == ihit.item)                            // Found in list
-                {
-                    ihit.effectMask |= effectMask;                 // Add only effect mask
-                    return;
-                }
+                // Add only effect mask
+                m_UniqueItemInfo[index].EffectMask |= effectMask;
+                return;
             }
 
             // This is new target add data
 
             ItemTargetInfo target = new();
-            target.item = item;
-            target.effectMask = effectMask;
+            target.TargetItem = item;
+            target.EffectMask = effectMask;
 
             m_UniqueItemInfo.Add(target);
         }
@@ -1855,328 +1868,34 @@ namespace Game.Spells
 
         public long GetUnitTargetCountForEffect(uint effect)
         {
-            return m_UniqueTargetInfo.Count(targetInfo => (targetInfo.effectMask & (1 << (int)effect)) != 0);
+            return m_UniqueTargetInfo.Count(targetInfo => (targetInfo.EffectMask & (1 << (int)effect)) != 0);
         }
 
         public long GetGameObjectTargetCountForEffect(uint effect)
         {
-            return m_UniqueGOTargetInfo.Count(targetInfo => (targetInfo.effectMask & (1 << (int)effect)) != 0);
+            return m_UniqueGOTargetInfo.Count(targetInfo => (targetInfo.EffectMask & (1 << (int)effect)) != 0);
         }
 
         public long GetItemTargetCountForEffect(uint effect)
         {
-            return m_UniqueItemInfo.Count(targetInfo => (targetInfo.effectMask & (1 << (int)effect)) != 0);
+            return m_UniqueItemInfo.Count(targetInfo => (targetInfo.EffectMask & (1 << (int)effect)) != 0);
         }
 
-        void DoAllEffectOnTarget(TargetInfo target)
+        SpellMissInfo PreprocessSpellHit(Unit unit, TargetInfo hitInfo)
         {
-            if (target == null || target.processed)
-                return;
-
-            target.processed = true;                               // Target checked in apply effects procedure
-
-            // Get mask of effects for target
-            uint mask = target.effectMask;
-
-            Unit unit = m_caster.GetGUID() == target.targetGUID ? m_caster : Global.ObjAccessor.GetUnit(m_caster, target.targetGUID);
-            if (!unit && target.targetGUID.IsPlayer()) // only players may be targeted across maps
-            {
-                uint farMask = 0;
-                // create far target mask
-                foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
-                {
-                    if (effect != null && effect.IsFarUnitTargetEffect())
-                        if (Convert.ToBoolean((1 << (int)effect.EffectIndex) & mask))
-                            farMask |= (1u << (int)effect.EffectIndex);
-                }
-
-                if (farMask == 0)
-                    return;
-
-                // find unit in world
-                unit = Global.ObjAccessor.FindPlayer(target.targetGUID);
-                if (unit == null)
-                    return;
-
-                // do far effects on the unit
-                // can't use default call because of threading, do stuff as fast as possible
-                foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
-                    if (effect != null && Convert.ToBoolean(farMask & (1 << (int)effect.EffectIndex)))
-                        HandleEffects(unit, null, null, effect.EffectIndex, SpellEffectHandleMode.HitTarget);
-                return;
-            }
-
-            if (!unit)
-                return;
-
-            if (unit.IsAlive() != target.alive)
-                return;
-
-            if (GetState() == SpellState.Delayed && !IsPositive() && (GameTime.GetGameTimeMS() - target.timeDelay) <= unit.LastSanctuaryTime)
-                return;                                             // No missinfo in that case
-
-            // Get original caster (if exist) and calculate damage/healing from him data
-            Unit caster = m_originalCaster ?? m_caster;
-
-            // Skip if m_originalCaster not avaiable
-            if (caster == null)
-                return;
-
-            SpellMissInfo missInfo = target.missCondition;
-
-            // Need init unitTarget by default unit (can changed in code on reflect)
-            // Or on missInfo != SPELL_MISS_NONE unitTarget undefined (but need in trigger subsystem)
-            unitTarget = unit;
-            targetMissInfo = missInfo;
-
-            // Reset damage/healing counter
-            m_damage = target.damage;
-            m_healing = -target.damage;
-
-            // Fill base trigger info
-            ProcFlags procAttacker = m_procAttacker;
-            ProcFlags procVictim = m_procVictim;
-            ProcFlagsHit hitMask = ProcFlagsHit.None;
-
-            //Spells with this flag cannot trigger if effect is cast on self
-            bool canEffectTrigger = !m_spellInfo.HasAttribute(SpellAttr3.CantTriggerProc) && unitTarget.CanProc() && (CanExecuteTriggersOnHit(mask) || missInfo == SpellMissInfo.Immune || missInfo == SpellMissInfo.Immune2);
-
-            Unit spellHitTarget = null;
-
-            if (missInfo == SpellMissInfo.None)                          // In case spell hit target, do all effect on that target
-                spellHitTarget = unit;
-            else if (missInfo == SpellMissInfo.Reflect)                // In case spell reflect from target, do all effect on caster (if hit)
-            {
-                if (target.reflectResult == SpellMissInfo.None)       // If reflected spell hit caster -> do all effect on him
-                    spellHitTarget = m_caster;
-            }
-
-            PrepareScriptHitHandlers();
-            CallScriptBeforeHitHandlers(missInfo);
-
-            bool enablePvP = false; // need to check PvP state before spell effects, but act on it afterwards
-
-            if (spellHitTarget != null)
-            {
-                // if target is flagged for pvp also flag caster if a player
-                if (unit.IsPvP() && m_caster.IsTypeId(TypeId.Player))
-                    enablePvP = true; // Decide on PvP flagging now, but act on it later.
-                SpellMissInfo missInfo2 = DoSpellHitOnUnit(spellHitTarget, mask);
-                if (missInfo2 != SpellMissInfo.None)
-                {
-                    if (missInfo2 != SpellMissInfo.Miss)
-                        m_caster.SendSpellMiss(unit, m_spellInfo.Id, missInfo2);
-                    m_damage = 0;
-                    spellHitTarget = null;
-                }
-            }
-
-            // Do not take combo points on dodge and miss
-            if (missInfo != SpellMissInfo.None && m_needComboPoints && m_targets.GetUnitTargetGUID() == target.targetGUID)
-                m_needComboPoints = false;
-
-            // Trigger info was not filled in spell.preparedatafortriggersystem - we do it now
-            if (canEffectTrigger && procAttacker == 0 && procVictim == 0)
-            {
-                bool positive = true;
-                if (m_damage > 0)
-                    positive = false;
-                else if (m_healing == 0)
-                {
-                    for (byte i = 0; i < SpellConst.MaxEffects; ++i)
-                    {
-                        // in case of immunity, check all effects to choose correct procFlags, as none has technically hit
-                        if (target.effectMask != 0 && !Convert.ToBoolean(target.effectMask & (1 << i)))
-                            continue;
-
-                        if (!m_spellInfo.IsPositiveEffect(i))
-                        {
-                            positive = false;
-                            break;
-                        }
-                    }
-                }
-
-                switch (m_spellInfo.DmgClass)
-                {
-                    case SpellDmgClass.Magic:
-                        if (positive)
-                        {
-                            procAttacker |= ProcFlags.DoneSpellMagicDmgClassPos;
-                            procVictim |= ProcFlags.TakenSpellMagicDmgClassPos;
-                        }
-                        else
-                        {
-                            procAttacker |= ProcFlags.DoneSpellMagicDmgClassNeg;
-                            procVictim |= ProcFlags.TakenSpellMagicDmgClassNeg;
-                        }
-                        break;
-                    case SpellDmgClass.None:
-                        if (positive)
-                        {
-                            procAttacker |= ProcFlags.DoneSpellNoneDmgClassPos;
-                            procVictim |= ProcFlags.TakenSpellNoneDmgClassPos;
-                        }
-                        else
-                        {
-                            procAttacker |= ProcFlags.DoneSpellNoneDmgClassNeg;
-                            procVictim |= ProcFlags.TakenSpellNoneDmgClassNeg;
-                        }
-                        break;
-                }
-            }
-            CallScriptOnHitHandlers();
-
-            // All calculated do it!
-            // Do healing and triggers
-            if (m_healing > 0)
-            {
-                bool crit = target.crit;
-                uint addhealth = (uint)m_healing;
-                if (crit)
-                {
-                    hitMask |= ProcFlagsHit.Critical;
-                    addhealth = (uint)Unit.SpellCriticalHealingBonus(caster, m_spellInfo, (int)addhealth, null);
-                }
-                else
-                    hitMask |= ProcFlagsHit.Normal;
-
-                HealInfo healInfo = new(caster, unitTarget, addhealth, m_spellInfo, m_spellInfo.GetSchoolMask());
-                caster.HealBySpell(healInfo, crit);
-                unitTarget.GetThreatManager().ForwardThreatForAssistingMe(caster, healInfo.GetEffectiveHeal() * 0.5f, m_spellInfo);
-                m_healing = (int)healInfo.GetEffectiveHeal();
-
-                // Do triggers for unit
-                if (canEffectTrigger)
-                    Unit.ProcSkillsAndAuras(caster, unitTarget, procAttacker, procVictim, ProcFlagsSpellType.Heal, ProcFlagsSpellPhase.Hit, hitMask, this, null, healInfo);
-            }
-            // Do damage and triggers
-            else if (m_damage > 0)
-            {
-                // Fill base damage struct (unitTarget - is real spell target)
-                SpellNonMeleeDamage damageInfo = new(caster, unitTarget, m_spellInfo, m_SpellVisual, m_spellSchoolMask, m_castId);
-
-                // Check damage immunity
-                if (unitTarget.IsImmunedToDamage(m_spellInfo))
-                {
-                    hitMask = ProcFlagsHit.Immune;
-                    m_damage = 0;
-                    // no packet found in sniffs
-                }
-                else
-                {
-                    // Add bonuses and fill damageInfo struct
-                    caster.CalculateSpellDamageTaken(damageInfo, m_damage, m_spellInfo, m_attackType, target.crit);
-                    Unit.DealDamageMods(damageInfo.attacker, damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
-
-                    hitMask |= Unit.CreateProcHitMask(damageInfo, missInfo);
-                    procVictim |= ProcFlags.TakenDamage;
-
-                    m_damage = (int)damageInfo.damage;
-
-                    caster.DealSpellDamage(damageInfo, true);
-
-                    // Send log damage message to client
-                    caster.SendSpellNonMeleeDamageLog(damageInfo);
-                }
-
-                // Do triggers for unit
-                if (canEffectTrigger)
-                {
-                    DamageInfo spellDamageInfo = new(damageInfo, DamageEffectType.SpellDirect, m_attackType, hitMask);
-                    Unit.ProcSkillsAndAuras(caster, unitTarget, procAttacker, procVictim, ProcFlagsSpellType.Damage, ProcFlagsSpellPhase.Hit, hitMask, this, spellDamageInfo, null);
-
-                    if (caster.IsPlayer() && !m_spellInfo.HasAttribute(SpellAttr0.StopAttackTarget) && !m_spellInfo.HasAttribute(SpellAttr4.SuppressWeaponProcs) &&
-                        (m_spellInfo.DmgClass == SpellDmgClass.Melee || m_spellInfo.DmgClass == SpellDmgClass.Ranged))
-                        caster.ToPlayer().CastItemCombatSpell(spellDamageInfo);
-                }
-            }
-            // Passive spell hits/misses or active spells only misses (only triggers)
-            else
-            {
-                // Fill base damage struct (unitTarget - is real spell target)
-                SpellNonMeleeDamage damageInfo = new(caster, unitTarget, m_spellInfo, m_SpellVisual, m_spellSchoolMask);
-                hitMask |= Unit.CreateProcHitMask(damageInfo, missInfo);
-                // Do triggers for unit
-                if (canEffectTrigger)
-                {
-                    DamageInfo spellNoDamageInfo = new(damageInfo, DamageEffectType.NoDamage, m_attackType, hitMask);
-                    Unit.ProcSkillsAndAuras(caster, unitTarget, procAttacker, procVictim, ProcFlagsSpellType.NoDmgHeal, ProcFlagsSpellPhase.Hit, hitMask, this, spellNoDamageInfo, null);
-
-                    if (caster.IsPlayer() && !m_spellInfo.HasAttribute(SpellAttr0.StopAttackTarget) && !m_spellInfo.HasAttribute(SpellAttr4.SuppressWeaponProcs) &&
-                        (m_spellInfo.DmgClass == SpellDmgClass.Melee || m_spellInfo.DmgClass == SpellDmgClass.Ranged))
-                        caster.ToPlayer().CastItemCombatSpell(spellNoDamageInfo);
-                }
-
-                // Failed Pickpocket, reveal rogue
-                if (missInfo == SpellMissInfo.Resist && m_spellInfo.HasAttribute(SpellCustomAttributes.PickPocket) && unitTarget.IsTypeId(TypeId.Unit))
-                {
-                    m_caster.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Interacting);
-                    unitTarget.ToCreature().EngageWithTarget(m_caster);
-                }
-            }
-
-            // set hitmask for finish procs
-            m_hitMask |= hitMask;
-
-            // spellHitTarget can be null if spell is missed in DoSpellHitOnUnit
-            if (missInfo != SpellMissInfo.Evade && spellHitTarget && !m_caster.IsFriendlyTo(unit) && (!IsPositive() || m_spellInfo.HasEffect(SpellEffectName.Dispel)))
-            {
-                m_caster.AttackedTarget(unit, m_spellInfo.HasInitialAggro());
-
-                if (!unit.IsStandState())
-                    unit.SetStandState(UnitStandStateType.Stand);
-            }
-
-            // Check for SPELL_ATTR7_INTERRUPT_ONLY_NONPLAYER
-            if (missInfo == SpellMissInfo.None && m_spellInfo.HasAttribute(SpellAttr7.InterruptOnlyNonplayer) && !unit.IsTypeId(TypeId.Player))
-                caster.CastSpell(unit, 32747, new CastSpellExtraArgs(true));
-
-            if (spellHitTarget != null)
-            {
-                //AI functions
-                if (spellHitTarget.IsTypeId(TypeId.Unit))
-                    if (spellHitTarget.ToCreature().IsAIEnabled)
-                        spellHitTarget.ToCreature().GetAI().SpellHit(m_caster, m_spellInfo);
-
-                if (m_caster.IsTypeId(TypeId.Unit) && m_caster.ToCreature().IsAIEnabled)
-                    m_caster.ToCreature().GetAI().SpellHitTarget(spellHitTarget, m_spellInfo);
-
-                // Needs to be called after dealing damage/healing to not remove breaking on damage auras
-                DoTriggersOnSpellHit(spellHitTarget, mask);
-
-                // if target is fallged for pvp also flag caster if a player
-                if (enablePvP)
-                    m_caster.ToPlayer().UpdatePvP(true);
-
-                CallScriptAfterHitHandlers();
-            }
-        }
-
-        SpellMissInfo DoSpellHitOnUnit(Unit unit, uint effectMask)
-        {
-            if (unit == null || effectMask == 0)
+            if (unit == null)
                 return SpellMissInfo.Evade;
 
             // Target may have begun evading between launch and hit phases - re-check now
             Creature creatureTarget = unit.ToCreature();
-            if (creatureTarget != null)
-                if (creatureTarget.IsEvadingAttacks())
-                    return SpellMissInfo.Evade;
+            if (creatureTarget != null && creatureTarget.IsEvadingAttacks())
+                return SpellMissInfo.Evade;
 
             // For delayed spells immunity may be applied between missile launch and hit - check immunity for that case
             if (m_spellInfo.HasHitDelay() && unit.IsImmunedToSpell(m_spellInfo, m_caster))
                 return SpellMissInfo.Immune;
 
-            // disable effects to which unit is immune
-            SpellMissInfo returnVal = SpellMissInfo.Immune;
-            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
-                if (effect != null && Convert.ToBoolean(effectMask & (1 << (int)effect.EffectIndex)))
-                    if (unit.IsImmunedToSpellEffect(m_spellInfo, effect.EffectIndex, m_caster))
-                        effectMask &= (uint)~(1 << (int)effect.EffectIndex);
-
-            if (effectMask == 0)
-                return returnVal;
+            CallScriptBeforeHitHandlers(hitInfo.MissCondition);
 
             Player player = unit.ToPlayer();
             if (player != null)
@@ -2186,11 +1905,11 @@ namespace Game.Spells
                 player.UpdateCriteria(CriteriaTypes.BeSpellTarget2, m_spellInfo.Id);
             }
 
-            player = m_caster.ToPlayer();
-            if (player != null)
+            Player casterPlayer = m_caster.ToPlayer();
+            if (casterPlayer)
             {
-                player.StartCriteriaTimer(CriteriaStartEvent.CastSpell, m_spellInfo.Id);
-                player.UpdateCriteria(CriteriaTypes.CastSpell2, m_spellInfo.Id, 0, 0, unit);
+                casterPlayer.StartCriteriaTimer(CriteriaStartEvent.CastSpell, m_spellInfo.Id);
+                casterPlayer.UpdateCriteria(CriteriaTypes.CastSpell2, m_spellInfo.Id, 0, 0, unit);
             }
 
             if (m_caster != unit)
@@ -2217,52 +1936,95 @@ namespace Game.Spells
                             playerOwner.UpdatePvP(true);
                         }
                     }
-                    if (unit.IsInCombat() && m_spellInfo.HasInitialAggro())
+
+                    if (m_originalCaster && unit.IsInCombat() && m_spellInfo.HasInitialAggro())
                     {
-                        if (m_caster.HasUnitFlag(UnitFlags.PvpAttackable))               // only do explicit combat forwarding for PvP enabled units
-                            m_caster.GetCombatManager().InheritCombatStatesFrom(unit);    // for creature v creature combat, the threat forward does it for us
-                        unit.GetThreatManager().ForwardThreatForAssistingMe(m_caster, 0.0f, null, true);
+                        if (m_originalCaster.HasUnitFlag(UnitFlags.PvpAttackable))               // only do explicit combat forwarding for PvP enabled units
+                            m_originalCaster.GetCombatManager().InheritCombatStatesFrom(unit);    // for creature v creature combat, the threat forward does it for us
+                        unit.GetThreatManager().ForwardThreatForAssistingMe(m_originalCaster, 0.0f, null, true);
                     }
                 }
             }
 
-            uint aura_effmask = Aura.BuildEffectMaskForOwner(m_spellInfo, effectMask, unit);
+            // original caster for auras
+            WorldObject origCaster = m_caster;
+            if (m_originalCaster)
+                origCaster = m_originalCaster;
 
-            // Get Data Needed for Diminishing Returns, some effects may have multiple auras, so this must be done on spell hit, not aura add
-            DiminishingGroup diminishGroup = m_spellInfo.GetDiminishingReturnsGroupForSpell();
-
-            DiminishingLevels diminishLevel = DiminishingLevels.Level1;
-            if (diminishGroup != 0 && aura_effmask != 0)
+            // check immunity due to diminishing returns
+            if (Aura.BuildEffectMaskForOwner(m_spellInfo, SpellConst.MaxEffectMask, unit) != 0)
             {
-                diminishLevel = unit.GetDiminishing(diminishGroup);
-                DiminishingReturnsType type = m_spellInfo.GetDiminishingReturnsGroupType();
-                // Increase Diminishing on unit, current informations for actually casts will use values above
-                if (type == DiminishingReturnsType.All || (type == DiminishingReturnsType.Player && unit.IsAffectedByDiminishingReturns()))
-                    unit.IncrDiminishing(m_spellInfo);
+                foreach (SpellEffectInfo auraSpellEffect in m_spellInfo.GetEffects())
+            if (auraSpellEffect != null)
+                    hitInfo.AuraBasePoints[auraSpellEffect.EffectIndex] = (m_spellValue.CustomBasePointsMask & (1 << (int)auraSpellEffect.EffectIndex)) != 0 ?
+                    m_spellValue.EffectBasePoints[auraSpellEffect.EffectIndex] :
+                    auraSpellEffect.CalcBaseValue(m_originalCaster, unit, m_castItemEntry, m_castItemLevel);
+
+                // Get Data Needed for Diminishing Returns, some effects may have multiple auras, so this must be done on spell hit, not aura add
+                hitInfo.DRGroup = m_spellInfo.GetDiminishingReturnsGroupForSpell();
+
+                DiminishingLevels diminishLevel = DiminishingLevels.Level1;
+                if (hitInfo.DRGroup != 0)
+                {
+                    diminishLevel = unit.GetDiminishing(hitInfo.DRGroup);
+                    DiminishingReturnsType type = m_spellInfo.GetDiminishingReturnsGroupType();
+                    // Increase Diminishing on unit, current informations for actually casts will use values above
+                    if (type == DiminishingReturnsType.All || (type == DiminishingReturnsType.Player && unit.IsAffectedByDiminishingReturns()))
+                        unit.IncrDiminishing(m_spellInfo);
+                }
+
+                // Now Reduce spell duration using data received at spell hit
+                // check whatever effects we're going to apply, diminishing returns only apply to negative aura effects
+                hitInfo.Positive = true;
+                if (origCaster == unit || !origCaster.IsFriendlyTo(unit))
+                {
+                    foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
+                    {
+                        // mod duration only for effects applying aura!
+                        if (effect != null && (hitInfo.EffectMask & (1 << (int)effect.EffectIndex)) != 0 &&
+                            effect.IsUnitOwnedAuraEffect() && !m_spellInfo.IsPositiveEffect(effect.EffectIndex))
+                        {
+                            hitInfo.Positive = false;
+                            break;
+                        }
+                    }
+                }
+
+                hitInfo.AuraDuration = m_spellInfo.GetMaxDuration();
+
+                // unit is immune to aura if it was diminished to 0 duration
+                if (!hitInfo.Positive && !unit.ApplyDiminishingToDuration(m_spellInfo, ref hitInfo.AuraDuration, origCaster, diminishLevel))
+                    if (m_spellInfo.GetEffects().All(effInfo => effInfo == null || !effInfo.IsEffect() || effInfo.IsEffect(SpellEffectName.ApplyAura)))
+                        return SpellMissInfo.Immune;
             }
 
+            return SpellMissInfo.None;
+        }
+
+        public void DoSpellEffectHit(Unit unit, uint effIndex, TargetInfo hitInfo)
+        {
+            uint aura_effmask = Aura.BuildEffectMaskForOwner(m_spellInfo, 1u << (int)effIndex, unit);
             if (aura_effmask != 0)
             {
-                if (m_originalCaster != null)
-                {
-                    int[] basePoints = new int[SpellConst.MaxEffects];
-                    foreach (SpellEffectInfo auraSpellEffect in m_spellInfo.GetEffects())
-                        if (auraSpellEffect != null)
-                            basePoints[auraSpellEffect.EffectIndex] = (m_spellValue.CustomBasePointsMask & (1 << (int)auraSpellEffect.EffectIndex)) != 0 ?
-                                m_spellValue.EffectBasePoints[auraSpellEffect.EffectIndex] : auraSpellEffect.CalcBaseValue(m_originalCaster, unit, m_castItemEntry, m_castItemLevel);
+                WorldObject caster = m_caster;
+                if (m_originalCaster)
+                    caster = m_originalCaster;
 
+                if (caster != null)
+                {
                     AuraCreateInfo createInfo = null;
+
                     if (spellAura == null)
                     {
                         bool resetPeriodicTimer = !_triggeredCastFlags.HasFlag(TriggerCastFlags.DontResetPeriodicTimer);
                         uint allAuraEffectMask = Aura.BuildEffectMaskForOwner(m_spellInfo, SpellConst.MaxEffectMask, unit);
 
                         createInfo = new(m_castId, m_spellInfo, GetCastDifficulty(), allAuraEffectMask, unit);
-                        createInfo.SetCaster(m_originalCaster);
-                        createInfo.SetBaseAmount(basePoints);
+                        createInfo.SetCasterGUID(caster.GetGUID());
+                        createInfo.SetBaseAmount(hitInfo.AuraBasePoints);
                         createInfo.SetCastItem(m_castItemGUID, m_castItemEntry, m_castItemLevel);
                         createInfo.SetPeriodicReset(resetPeriodicTimer);
-                        createInfo.SetOwnerEffectMask(aura_effmask);                       
+                        createInfo.SetOwnerEffectMask(aura_effmask);
 
                         Aura aura = Aura.TryRefreshStackOrCreate(createInfo);
                         if (aura != null)
@@ -2271,101 +2033,69 @@ namespace Game.Spells
                     else
                         spellAura.AddStaticApplication(unit, aura_effmask);
 
+                    bool refresh = false;
+                    if (createInfo != null)
+                        refresh = createInfo.IsRefresh;
+
                     if (spellAura != null)
                     {
                         // Set aura stack amount to desired value
                         if (m_spellValue.AuraStackAmount > 1)
                         {
-                            if (createInfo != null && createInfo.IsRefresh)
+                            if (!refresh)
                                 spellAura.SetStackAmount((byte)m_spellValue.AuraStackAmount);
                             else
                                 spellAura.ModStackAmount(m_spellValue.AuraStackAmount);
                         }
 
-                        // Now Reduce spell duration using data received at spell hit
-                        // check whatever effects we're going to apply, diminishing returns only apply to negative aura effects
-                        bool positive = true;
-                        if (m_originalCaster == unit || !m_originalCaster.IsFriendlyTo(unit))
+                        spellAura.SetDiminishGroup(hitInfo.DRGroup);
+
+                        hitInfo.AuraDuration = caster.ModSpellDuration(m_spellInfo, unit, hitInfo.AuraDuration, hitInfo.Positive, spellAura.GetEffectMask());
+
+                        if (hitInfo.AuraDuration > 0)
                         {
-                            for (uint i = 0; i < SpellConst.MaxEffects; ++i)
+                            hitInfo.AuraDuration *= (int)m_spellValue.DurationMul;
+
+                            // Haste modifies duration of channeled spells
+                            if (m_spellInfo.IsChanneled())
+                                caster.ModSpellDurationTime(m_spellInfo, hitInfo.AuraDuration, this);
+                            else if (m_spellInfo.HasAttribute(SpellAttr5.HasteAffectDuration))
                             {
-                                // mod duration only for effects applying aura!
-                                if ((aura_effmask & (1 << (int)i)) != 0 && !m_spellInfo.IsPositiveEffect(i))
+                                int origDuration = hitInfo.AuraDuration;
+                                hitInfo.AuraDuration = 0;
+                                foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
                                 {
-                                    positive = false;
-                                    break;
-                                }
-                            }
-                        }
-
-                        int duration = spellAura.GetMaxDuration();
-
-                        // unit is immune to aura if it was diminished to 0 duration
-                        if (!positive && !unit.ApplyDiminishingToDuration(m_spellInfo, ref duration, m_originalCaster, diminishLevel))
-                        {
-                            spellAura.Remove();
-                            spellAura = null;
-                            bool found = false;
-                            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
-                                if (effect != null && (Convert.ToBoolean(effectMask & (1 << (int)effect.EffectIndex)) && effect.Effect != SpellEffectName.ApplyAura))
-                                    found = true;
-                            if (!found)
-                                return SpellMissInfo.Immune;
-                        }
-                        else
-                        {
-                            spellAura.SetDiminishGroup(diminishGroup);
-
-                            duration = m_originalCaster.ModSpellDuration(m_spellInfo, unit, duration, positive, effectMask);
-                            if (duration > 0)
-                            {
-                                duration = (int)(duration * m_spellValue.DurationMul);
-
-                                // Haste modifies duration of channeled spells
-                                if (m_spellInfo.IsChanneled())
-                                    m_originalCaster.ModSpellDurationTime(m_spellInfo, ref duration, this);
-                                else if (m_spellInfo.HasAttribute(SpellAttr5.HasteAffectDuration))
-                                {
-                                    int origDuration = duration;
-                                    duration = 0;
-                                    foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
+                                    if (effect != null)
                                     {
-                                        if (effect != null)
+                                        AuraEffect eff = spellAura.GetEffect(effect.EffectIndex);
+                                        if (eff != null)
                                         {
-                                            AuraEffect eff = spellAura.GetEffect(effect.EffectIndex);
-                                            if (eff != null)
-                                            {
-                                                int period = eff.GetPeriod();
-                                                if (period != 0)  // period is hastened by UNIT_MOD_CAST_SPEED
-                                                    duration = Math.Max(Math.Max(origDuration / period, 1) * period, duration);
-                                            }
+                                            int period = eff.GetPeriod();
+                                            if (period != 0)  // period is hastened by UNIT_MOD_CAST_SPEED
+                                                hitInfo.AuraDuration = Math.Max(Math.Max(origDuration / period, 1) * period, hitInfo.AuraDuration);
                                         }
                                     }
-
-                                    // if there is no periodic effect
-                                    if (duration == 0)
-                                        duration = (int)(origDuration * m_originalCaster.m_unitData.ModCastingSpeed);
                                 }
-                            }
 
-                            if (duration != spellAura.GetMaxDuration())
-                            {
-                                spellAura.SetMaxDuration(duration);
-                                spellAura.SetDuration(duration);
+                                // if there is no periodic effect
+                                if (hitInfo.AuraDuration == 0)
+                                    hitInfo.AuraDuration = (int)(origDuration * m_originalCaster.m_unitData.ModCastingSpeed);
                             }
+                        }
+
+                        if (hitInfo.AuraDuration != spellAura.GetMaxDuration())
+                        {
+                            spellAura.SetMaxDuration(hitInfo.AuraDuration);
+                            spellAura.SetDuration(hitInfo.AuraDuration);
                         }
                     }
                 }
             }
 
-            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
-                if (effect != null && Convert.ToBoolean(effectMask & (1 << (int)effect.EffectIndex)))
-                    HandleEffects(unit, null, null, effect.EffectIndex, SpellEffectHandleMode.HitTarget);
-
-            return SpellMissInfo.None;
+            HandleEffects(unit, null, null, effIndex, SpellEffectHandleMode.HitTarget);
         }
 
-        void DoTriggersOnSpellHit(Unit unit, uint effMask)
+        public void DoTriggersOnSpellHit(Unit unit, uint effMask)
         {
             // handle SPELL_AURA_ADD_TARGET_TRIGGER auras
             // this is executed after spell proc spells on target hit
@@ -2414,53 +2144,6 @@ namespace Game.Spells
                         unit.CastSpell(unit, (uint)id, new CastSpellExtraArgs(m_caster.GetGUID()));
                 }
             }
-        }
-
-        void DoAllEffectOnTarget(GOTargetInfo target)
-        {
-            if (target.processed)                                  // Check target
-                return;
-
-            target.processed = true;                               // Target checked in apply effects procedure
-
-            uint effectMask = target.effectMask;
-            if (effectMask == 0)
-                return;
-
-            GameObject go = m_caster.GetMap().GetGameObject(target.targetGUID);
-            if (go == null)
-                return;
-
-            PrepareScriptHitHandlers();
-            CallScriptBeforeHitHandlers(SpellMissInfo.None);
-
-            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
-                if (effect != null && Convert.ToBoolean(effectMask & (1 << (int)effect.EffectIndex)))
-                    HandleEffects(null, null, go, effect.EffectIndex, SpellEffectHandleMode.HitTarget);
-
-            if (go.GetAI() != null)
-                go.GetAI().SpellHit(m_caster, m_spellInfo);
-
-            CallScriptOnHitHandlers();
-            CallScriptAfterHitHandlers();
-        }
-
-        void DoAllEffectOnTarget(ItemTargetInfo target)
-        {
-            uint effectMask = target.effectMask;
-            if (target.item == null || effectMask == 0)
-                return;
-
-            PrepareScriptHitHandlers();
-            CallScriptBeforeHitHandlers(SpellMissInfo.None);
-
-            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
-                if (effect != null && Convert.ToBoolean(effectMask & (1 << (int)effect.EffectIndex)))
-                    HandleEffects(null, target.item, null, effect.EffectIndex, SpellEffectHandleMode.HitTarget);
-
-            CallScriptOnHitHandlers();
-
-            CallScriptAfterHitHandlers();
         }
 
         bool UpdateChanneledTargetList()
@@ -2877,9 +2560,9 @@ namespace Game.Spells
                 if (target != null)
                 {
                     uint aura_effmask = 0;
-                    for (byte i = 0; i < SpellConst.MaxEffects; ++i)
-                        if (m_spellInfo.GetEffect(i) != null && m_spellInfo.GetEffect(i).IsUnitOwnedAuraEffect())
-                            aura_effmask |= 1u << i;
+                    foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
+                        if (effect != null && effect.IsUnitOwnedAuraEffect())
+                            aura_effmask |= 1u << (int)effect.EffectIndex;
 
                     if (aura_effmask != 0)
                     {
@@ -2970,8 +2653,6 @@ namespace Game.Spells
             // CAST SPELL
             if (!m_spellInfo.HasAttribute(SpellAttr12.StartCooldownOnCastStart))
                 SendSpellCooldown();
-
-            PrepareScriptHitHandlers();
 
             if (m_spellInfo.LaunchDelay == 0)
             {
@@ -3067,6 +2748,20 @@ namespace Game.Spells
                     caster.GetAI().OnSuccessfulSpellCast(GetSpellInfo());
         }
 
+        void DoProcessTargetContainer<T>(List<T> targetContainer) where T : TargetInfoBase
+        {
+            foreach (TargetInfoBase target in targetContainer)
+                target.PreprocessTarget(this);
+
+            for (uint i = 0; i < SpellConst.MaxEffects; ++i)
+                foreach (TargetInfoBase target in targetContainer)
+                    if ((target.EffectMask & (1 << (int)i)) != 0)
+                        target.DoTargetSpellHit(this, i);
+
+            foreach (TargetInfoBase target in targetContainer)
+                target.DoDamageAndTriggers(this);
+        }
+
         void HandleImmediate()
         {
             // start channeling if applicable
@@ -3107,13 +2802,9 @@ namespace Game.Spells
             if (m_UniqueTargetInfo.Empty())
                 m_hitMask = ProcFlagsHit.Normal;
             else
-            {
-                foreach (var ihit in m_UniqueTargetInfo)
-                    DoAllEffectOnTarget(ihit);
-            }
+                DoProcessTargetContainer(m_UniqueTargetInfo);
 
-            foreach (var ihit in m_UniqueGOTargetInfo)
-                DoAllEffectOnTarget(ihit);
+            DoProcessTargetContainer(m_UniqueGOTargetInfo);
 
             FinishTargetProcessing();
 
@@ -3176,30 +2867,43 @@ namespace Game.Spells
             }
 
             // now recheck units targeting correctness (need before any effects apply to prevent adding immunity at first effect not allow apply second spell effect and similar cases)
-            foreach (var ihit in m_UniqueTargetInfo)
             {
-                if (!ihit.processed)
+                Func<TargetInfo, bool> selectedCondition = target =>
                 {
-                    if (single_missile || ihit.timeDelay <= offset)
+                    if (single_missile || target.TimeDelay <= offset)
                     {
-                        ihit.timeDelay = offset;
-                        DoAllEffectOnTarget(ihit);
+                        target.TimeDelay = offset;
+                        return true;
                     }
-                    else if (next_time == 0 || ihit.timeDelay < next_time)
-                        next_time = ihit.timeDelay;
-                }
+                    else if (next_time == 0 || target.TimeDelay < next_time)
+                        next_time = target.TimeDelay;
+                    return false;
+                };
+                List<TargetInfo> delayedTargets = new();
+                delayedTargets.AddRange(m_UniqueTargetInfo.Where(selectedCondition));
+
+                m_UniqueTargetInfo.RemoveAll(new Predicate<TargetInfo>(selectedCondition));
+
+                DoProcessTargetContainer(delayedTargets);
             }
 
             // now recheck gameobject targeting correctness
-            foreach (var ighit in m_UniqueGOTargetInfo)
             {
-                if (!ighit.processed)
+                Func<GOTargetInfo, bool> selectedCondition = goTarget =>
                 {
-                    if (single_missile || ighit.timeDelay <= offset)
-                        DoAllEffectOnTarget(ighit);
-                    else if (next_time == 0 || ighit.timeDelay < next_time)
-                        next_time = ighit.timeDelay;
-                }
+                    if (single_missile || goTarget.TimeDelay <= offset)
+                    {
+                        goTarget.TimeDelay = offset;
+                        return true;
+                    }
+                    else if (next_time == 0 || goTarget.TimeDelay < next_time)
+                        next_time = goTarget.TimeDelay;
+                    return false;
+                };
+
+                List<GOTargetInfo> delayedTargets = new(m_UniqueGOTargetInfo.Where(selectedCondition));
+
+                m_UniqueGOTargetInfo.RemoveAll(new Predicate<GOTargetInfo>(selectedCondition));
             }
 
             FinishTargetProcessing();
@@ -3230,8 +2934,6 @@ namespace Game.Spells
             // handle some immediate features of the spell here
             HandleThreatSpells();
 
-            PrepareScriptHitHandlers();
-
             // handle effects with SPELL_EFFECT_HANDLE_HIT mode
             foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
             {
@@ -3244,8 +2946,7 @@ namespace Game.Spells
             }
 
             // process items
-            foreach (var ihit in m_UniqueItemInfo)
-                DoAllEffectOnTarget(ihit);
+            DoProcessTargetContainer(m_UniqueItemInfo);
         }
 
         void _handle_finish_phase()
@@ -3947,7 +3648,7 @@ namespace Game.Spells
             }
 
             foreach (GOTargetInfo targetInfo in m_UniqueGOTargetInfo)
-                data.HitTargets.Add(targetInfo.targetGUID); // Always hits
+                data.HitTargets.Add(targetInfo.TargetGUID); // Always hits
 
             // Reset m_needAliveTargetMask for non channeled spell
             if (!m_spellInfo.IsChanneled())
@@ -4237,7 +3938,7 @@ namespace Game.Spells
 
             foreach (GOTargetInfo target in m_UniqueGOTargetInfo)
                 if ((target.effectMask & channelAuraMask) != 0)
-                    m_caster.AddChannelObject(target.targetGUID);
+                    m_caster.AddChannelObject(target.TargetGUID);
 
             m_caster.SetChannelSpellId(m_spellInfo.Id);
             m_caster.SetChannelVisual(m_SpellVisual);
@@ -4360,20 +4061,14 @@ namespace Game.Spells
                         ObjectGuid targetGUID = m_targets.GetUnitTargetGUID();
                         if (!targetGUID.IsEmpty())
                         {
-                            foreach (var ihit in m_UniqueTargetInfo)
+                            var ihit = m_UniqueTargetInfo.FirstOrDefault(targetInfo => targetInfo.TargetGUID == targetGUID && targetInfo.MissCondition != SpellMissInfo.None);
+                            if (ihit != null)
                             {
-                                if (ihit.targetGUID == targetGUID)
-                                {
-                                    if (ihit.missCondition != SpellMissInfo.None)
-                                    {
-                                        hit = false;
-                                        //lower spell cost on fail (by talent aura)
-                                        Player modOwner = m_caster.ToPlayer().GetSpellModOwner();
-                                        if (modOwner)
-                                            modOwner.ApplySpellMod(m_spellInfo, SpellModOp.PowerCostOnMiss, ref cost.Amount);
-                                    }
-                                    break;
-                                }
+                                hit = false;
+                                //lower spell cost on fail (by talent aura)
+                                Player modOwner = m_caster.ToPlayer().GetSpellModOwner();
+                                if (modOwner != null)
+                                    modOwner.ApplySpellMod(m_spellInfo, SpellModOp.PowerCostOnMiss, ref cost.Amount);
                             }
                         }
                     }
@@ -4551,7 +4246,7 @@ namespace Game.Spells
             Log.outDebug(LogFilter.Spells, "Spell {0}, added an additional {1} threat for {2} {3} target(s)", m_spellInfo.Id, threat, IsPositive() ? "assisting" : "harming", m_UniqueTargetInfo.Count);
         }
 
-        void HandleEffects(Unit pUnitTarget, Item pItemTarget, GameObject pGOTarget, uint i, SpellEffectHandleMode mode)
+        public void HandleEffects(Unit pUnitTarget, Item pItemTarget, GameObject pGOTarget, uint i, SpellEffectHandleMode mode)
         {
             effectHandleMode = mode;
             unitTarget = pUnitTarget;
@@ -6802,7 +6497,7 @@ namespace Game.Spells
                         return target.IsWithinLOS(losPosition.GetPositionX(), losPosition.GetPositionY(), losPosition.GetPositionZ(), LineOfSightChecks.All, ModelIgnoreFlags.M2);
                     else
                     {
-                        // Get GO cast coordinates if original caster -> GO
+                        // Get GO cast coordinates if original caster . GO
                         WorldObject caster = null;
                         if (m_originalCasterGUID.IsGameObject())
                             caster = m_caster.GetMap().GetGameObject(m_originalCasterGUID);
@@ -6858,7 +6553,7 @@ namespace Game.Spells
             return true;
         }
 
-        bool IsPositive()
+        public bool IsPositive()
         {
             return m_spellInfo.IsPositive() && (m_triggeredByAuraSpell == null || m_triggeredByAuraSpell.IsPositive());
         }
@@ -6867,23 +6562,6 @@ namespace Game.Spells
         {
             return m_SpellVisual.SpellXSpellVisualID != 0 || m_SpellVisual.ScriptVisualID != 0 || m_spellInfo.IsChanneled() ||
                 m_spellInfo.HasAttribute(SpellAttr8.AuraSendAmount) || m_spellInfo.HasHitDelay() || (m_triggeredByAuraSpell == null && !IsTriggered());
-        }
-
-        bool HaveTargetsForEffect(byte effect)
-        {
-            foreach (var targetInfo in m_UniqueTargetInfo)
-                if (Convert.ToBoolean(targetInfo.effectMask & (1 << effect)))
-                    return true;
-
-            foreach (var targetInfo in m_UniqueGOTargetInfo)
-                if (Convert.ToBoolean(targetInfo.effectMask & (1 << effect)))
-                    return true;
-
-            foreach (var targetInfo in m_UniqueItemInfo)
-                if (Convert.ToBoolean(targetInfo.effectMask & (1 << effect)))
-                    return true;
-
-            return false;
         }
 
         bool IsValidDeadOrAliveTarget(Unit target)
@@ -6907,80 +6585,84 @@ namespace Game.Spells
                 HandleEffects(null, null, null, effect.EffectIndex, SpellEffectHandleMode.Launch);
             }
 
-            float[] multiplier = new float[SpellConst.MaxEffects];
-            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
-                if (effect != null && Convert.ToBoolean(m_applyMultiplierMask & (1 << (int)effect.EffectIndex)))
-                    multiplier[effect.EffectIndex] = effect.CalcDamageMultiplier(m_originalCaster, this);
-
             PrepareTargetProcessing();
 
-            foreach (var ihit in m_UniqueTargetInfo)
+            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
             {
-                TargetInfo target = ihit;
-
-                uint mask = target.effectMask;
-                if (mask == 0)
+                if (effect == null)
                     continue;
 
-                DoAllEffectOnLaunchTarget(target, multiplier);
+                float multiplier = 1.0f;
+                if ((m_applyMultiplierMask & (1 << (int)effect.EffectIndex)) != 0)
+                    multiplier = effect.CalcDamageMultiplier(m_originalCaster, this);
+
+                foreach (TargetInfo target in m_UniqueTargetInfo)
+                {
+                    uint mask = target.EffectMask;
+                    if ((mask & (1 << (int)effect.EffectIndex)) == 0)
+                        continue;
+
+                    DoEffectOnLaunchTarget(target, multiplier, effect);
+                }
             }
 
             FinishTargetProcessing();
         }
 
-        void DoAllEffectOnLaunchTarget(TargetInfo targetInfo, float[] multiplier)
+        void DoEffectOnLaunchTarget(TargetInfo targetInfo, float multiplier, SpellEffectInfo effect)
         {
             Unit unit = null;
             // In case spell hit target, do all effect on that target
-            if (targetInfo.missCondition == SpellMissInfo.None)
-                unit = m_caster.GetGUID() == targetInfo.targetGUID ? m_caster : Global.ObjAccessor.GetUnit(m_caster, targetInfo.targetGUID);
+            if (targetInfo.MissCondition == SpellMissInfo.None)
+                unit = m_caster.GetGUID() == targetInfo.TargetGUID ? m_caster : Global.ObjAccessor.GetUnit(m_caster, targetInfo.TargetGUID);
             // In case spell reflect from target, do all effect on caster (if hit)
-            else if (targetInfo.missCondition == SpellMissInfo.Reflect && targetInfo.reflectResult == SpellMissInfo.None)
+            else if (targetInfo.MissCondition == SpellMissInfo.Reflect && targetInfo.ReflectResult == SpellMissInfo.None)
                 unit = m_caster;
             if (unit == null)
                 return;
 
             // This will only cause combat - the target will engage once the projectile hits (in DoAllEffectOnTarget)
-            if (targetInfo.missCondition != SpellMissInfo.Evade && !m_caster.IsFriendlyTo(unit) && (!m_spellInfo.IsPositive() || m_spellInfo.HasEffect(SpellEffectName.Dispel)) && (m_spellInfo.HasInitialAggro() || unit.IsEngaged()))
+            if (targetInfo.MissCondition != SpellMissInfo.Evade && !m_caster.IsFriendlyTo(unit) && (!m_spellInfo.IsPositive() || m_spellInfo.HasEffect(SpellEffectName.Dispel)) && (m_spellInfo.HasInitialAggro() || unit.IsEngaged()))
                 m_caster.SetInCombatWith(unit);
 
-            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
+            m_damage = 0;
+            m_healing = 0;
+
+            HandleEffects(unit, null, null, effect.EffectIndex, SpellEffectHandleMode.LaunchTarget);
+
+            if (m_damage > 0)
             {
-                if (effect != null && Convert.ToBoolean(targetInfo.effectMask & (1 << (int)effect.EffectIndex)))
+                if (effect.IsTargetingArea() || effect.IsAreaAuraEffect() || effect.IsEffect(SpellEffectName.PersistentAreaAura))
                 {
-                    m_damage = 0;
-                    m_healing = 0;
+                    m_damage = unit.CalculateAOEAvoidance(m_damage, (uint)m_spellInfo.SchoolMask, m_caster.GetGUID());
 
-                    HandleEffects(unit, null, null, effect.EffectIndex, SpellEffectHandleMode.LaunchTarget);
-
-                    if (m_damage > 0)
+                    if (m_caster.IsPlayer())
                     {
-                        if (effect.IsTargetingArea() || effect.IsAreaAuraEffect() || effect.IsEffect(SpellEffectName.PersistentAreaAura))
-                        {
-                            m_damage = unit.CalculateAOEAvoidance(m_damage, (uint)m_spellInfo.SchoolMask, m_caster.GetGUID());
-
-                            if (m_caster.IsPlayer())
-                            {
-                                long targetAmount = GetUnitTargetCountForEffect(effect.EffectIndex);
-                                if (targetAmount > 20)
-                                    m_damage = (int)(m_damage * 20 / targetAmount);
-                            }
-                        }
+                        // cap damage of player AOE
+                        long targetAmount = GetUnitTargetCountForEffect(effect.EffectIndex);
+                        if (targetAmount > 20)
+                            m_damage = (int)(m_damage * 20 / targetAmount);
                     }
 
-                    if (Convert.ToBoolean(m_applyMultiplierMask & (1 << (int)effect.EffectIndex)))
-                    {
-                        m_damage = (int)(m_damage * m_damageMultipliers[effect.EffectIndex]);
-                        m_damageMultipliers[effect.EffectIndex] *= multiplier[effect.EffectIndex];
-                    }
-                    targetInfo.damage += m_damage;
                 }
             }
 
+            if ((m_applyMultiplierMask & (1 << (int)effect.EffectIndex)) != 0)
+            {
+                m_damage = (int)(m_damage * m_damageMultipliers[effect.EffectIndex]);
+                m_healing = (int)(m_healing * m_damageMultipliers[effect.EffectIndex]);
+
+                m_damageMultipliers[effect.EffectIndex] *= multiplier;
+            }
+
+            targetInfo.Damage += m_damage;
+            targetInfo.Healing += m_healing;
+
             float critChance = m_spellValue.CriticalChance;
-            if (critChance == 0.0f)
+            if (critChance == 0)
                 critChance = m_caster.SpellCritChanceDone(this, null, m_spellSchoolMask, m_attackType);
-            targetInfo.crit = RandomHelper.randChance(unit.SpellCritChanceTaken(m_caster, this, null, m_spellSchoolMask, critChance, m_attackType));
+
+            targetInfo.IsCrit = RandomHelper.randChance(unit.SpellCritChanceTaken(m_caster, this, null, m_spellSchoolMask, critChance, m_attackType));
         }
 
         SpellCastResult CanOpenLock(uint effIndex, uint lockId, ref SkillType skillId, ref int reqSkillValue, ref int skillValue)
@@ -7159,12 +6841,6 @@ namespace Game.Spells
             return retVal;
         }
 
-        void PrepareScriptHitHandlers()
-        {
-            foreach (var script in m_loadedScripts)
-                script._InitHit();
-        }
-
         bool CallScriptEffectHandlers(uint effIndex, SpellEffectHandleMode mode)
         {
             // execute script effect handler hooks and check if effects was prevented
@@ -7172,6 +6848,8 @@ namespace Game.Spells
 
             foreach (var script in m_loadedScripts)
             {
+                script._InitHit();
+
                 SpellScriptHookType hookType;
                 List<SpellScript.EffectHandler> effList;
                 switch (mode)
@@ -7225,10 +6903,11 @@ namespace Game.Spells
             }
         }
 
-        void CallScriptBeforeHitHandlers(SpellMissInfo missInfo)
+        public void CallScriptBeforeHitHandlers(SpellMissInfo missInfo)
         {
             foreach (var script in m_loadedScripts)
             {
+                script._InitHit();
                 script._PrepareScriptCall(SpellScriptHookType.BeforeHit);
 
                 foreach (var hook in script.BeforeHit)
@@ -7238,7 +6917,7 @@ namespace Game.Spells
             }
         }
 
-        void CallScriptOnHitHandlers()
+        public void CallScriptOnHitHandlers()
         {
             foreach (var script in m_loadedScripts)
             {
@@ -7251,7 +6930,7 @@ namespace Game.Spells
             }
         }
 
-        void CallScriptAfterHitHandlers()
+        public void CallScriptAfterHitHandlers()
         {
             foreach (var script in m_loadedScripts)
             {
@@ -7339,7 +7018,7 @@ namespace Game.Spells
             return true;
         }
 
-        bool CanExecuteTriggersOnHit(uint effMask, SpellInfo triggeredByAura = null)
+        public bool CanExecuteTriggersOnHit(uint effMask, SpellInfo triggeredByAura = null)
         {
             bool only_on_caster = (triggeredByAura != null && triggeredByAura.HasAttribute(SpellAttr4.ProcOnlyOnCaster));
             // If triggeredByAura has SPELL_ATTR4_PROC_ONLY_ON_CASTER then it can only proc on a casted spell with TARGET_UNIT_CASTER
@@ -7607,8 +7286,8 @@ namespace Game.Spells
         public Spell m_selfContainer;
 
         //Spell data
-        SpellSchoolMask m_spellSchoolMask;                  // Spell school (can be overwrite for some spells (wand shoot for example)
-        WeaponAttackType m_attackType;                      // For weapon based attack
+        internal SpellSchoolMask m_spellSchoolMask;                  // Spell school (can be overwrite for some spells (wand shoot for example)
+        internal WeaponAttackType m_attackType;                      // For weapon based attack
 
         List<SpellPowerCost> m_powerCost = new();
         int m_casttime;                                   // Calculated spell cast time initialized only in Spell.prepare
@@ -7626,7 +7305,7 @@ namespace Game.Spells
         // These vars are used in both delayed spell system and modified immediate spell system
         bool m_referencedFromCurrentSpell;
         bool m_executedCurrently;
-        bool m_needComboPoints;
+        internal bool m_needComboPoints;
         uint m_applyMultiplierMask;
         float[] m_damageMultipliers = new float[SpellConst.MaxEffects];
 
@@ -7636,7 +7315,7 @@ namespace Game.Spells
         public GameObject gameObjTarget;
         public WorldLocation destTarget;
         public int damage;
-        SpellMissInfo targetMissInfo;
+        public SpellMissInfo targetMissInfo;
         float _variance;
         SpellEffectHandleMode effectHandleMode;
         public SpellEffectInfo effectInfo;
@@ -7654,9 +7333,9 @@ namespace Game.Spells
         // ******************************************
         // Spell trigger system
         // ******************************************
-        ProcFlags m_procAttacker;                // Attacker trigger flags
-        ProcFlags m_procVictim;                  // Victim   trigger flags
-        ProcFlagsHit m_hitMask;
+        internal ProcFlags m_procAttacker;                // Attacker trigger flags
+        internal ProcFlags m_procVictim;                  // Victim   trigger flags
+        internal ProcFlagsHit m_hitMask;
 
         // *****************************************
         // Spell target subsystem
@@ -7842,33 +7521,391 @@ namespace Game.Spells
         public Position TransportOffset;
     }
 
-    public class TargetInfo
+    public class TargetInfoBase
     {
-        public ObjectGuid targetGUID;
-        public ulong timeDelay;
-        public int damage;
+        public uint EffectMask;
 
-        public SpellMissInfo missCondition;
-        public SpellMissInfo reflectResult;
-
-        public uint effectMask;
-        public bool processed;
-        public bool alive;
-        public bool crit;
+        public virtual void PreprocessTarget(Spell spell) { }
+        public virtual void DoTargetSpellHit(Spell spell, uint effIndex) { }
+        public virtual void DoDamageAndTriggers(Spell spell) { }
     }
 
-    public class GOTargetInfo
+    public class TargetInfo : TargetInfoBase
     {
-        public ObjectGuid targetGUID;
-        public ulong timeDelay;
-        public uint effectMask;
-        public bool processed;
+        public ObjectGuid TargetGUID;
+        public ulong TimeDelay;
+        public int Damage;
+        public int Healing;
+
+        public SpellMissInfo MissCondition;
+        public SpellMissInfo ReflectResult;
+
+        public bool IsAlive;
+        public bool IsCrit;
+
+        // info set at PreprocessTarget, used by DoTargetSpellHit
+        public DiminishingGroup DRGroup;
+        public int AuraDuration;
+        public int[] AuraBasePoints = new int[SpellConst.MaxEffects];
+        public bool Positive = true;
+
+        Unit _spellHitTarget; // changed for example by reflect
+        bool _enablePVP;         // need to enable PVP at DoDamageAndTriggers?
+
+        public override void PreprocessTarget(Spell spell)
+        {
+            Unit unit = spell.GetCaster().GetGUID() == TargetGUID ? spell.GetCaster().ToUnit() : Global.ObjAccessor.GetUnit(spell.GetCaster(), TargetGUID);
+            if (unit == null)
+                return;
+
+            // Need init unitTarget by default unit (can changed in code on reflect)
+            spell.unitTarget = unit;
+
+            // Reset damage/healing counter
+            spell.m_damage = Damage;
+            spell.m_healing = Healing;
+
+            _spellHitTarget = null;
+            if (MissCondition == SpellMissInfo.None)
+                _spellHitTarget = unit;
+            else if (MissCondition == SpellMissInfo.Reflect && ReflectResult == SpellMissInfo.None)
+                _spellHitTarget = spell.GetCaster().ToUnit();
+
+            _enablePVP = false; // need to check PvP state before spell effects, but act on it afterwards
+            if (_spellHitTarget)
+            {
+                // if target is flagged for pvp also flag caster if a player
+                if (unit.IsPvP() && spell.GetCaster().IsPlayer())
+                    _enablePVP = true; // Decide on PvP flagging now, but act on it later.
+
+                SpellMissInfo missInfo = spell.PreprocessSpellHit(_spellHitTarget, this);
+                if (missInfo != SpellMissInfo.None)
+                {
+                    if (missInfo != SpellMissInfo.Miss)
+                        spell.GetCaster().ToUnit().SendSpellMiss(unit, spell.m_spellInfo.Id, missInfo);
+                    spell.m_damage = 0;
+                    _spellHitTarget = null;
+                }
+            }
+
+            spell.CallScriptOnHitHandlers();
+
+            // scripts can modify damage/healing for current target, save them
+            Damage = spell.m_damage;
+            Healing = spell.m_healing;
+        }
+
+        public override void DoTargetSpellHit(Spell spell, uint effIndex)
+        {
+            Unit unit = spell.GetCaster().GetGUID() == TargetGUID ? spell.GetCaster().ToUnit() : Global.ObjAccessor.GetUnit(spell.GetCaster(), TargetGUID);
+            if (unit == null)
+                return;
+
+            // Need init unitTarget by default unit (can changed in code on reflect)
+            // Or on missInfo != SPELL_MISS_NONE unitTarget undefined (but need in trigger subsystem)
+            spell.unitTarget = unit;
+            spell.targetMissInfo = MissCondition;
+
+            // Reset damage/healing counter
+            spell.m_damage = Damage;
+            spell.m_healing = Healing;
+
+            if (unit.IsAlive() != IsAlive)
+                return;
+
+            if (spell.GetState() == SpellState.Delayed && !spell.IsPositive() && (GameTime.GetGameTimeMS() - TimeDelay) <= unit.LastSanctuaryTime)
+                return;                                             // No missinfo in that case
+
+            if (_spellHitTarget)
+                spell.DoSpellEffectHit(_spellHitTarget, effIndex, this);
+
+            // scripts can modify damage/healing for current target, save them
+            Damage = spell.m_damage;
+            Healing = spell.m_healing;
+        }
+
+        public override void DoDamageAndTriggers(Spell spell)
+        {
+            Unit unit = spell.GetCaster().GetGUID() == TargetGUID ? spell.GetCaster() : Global.ObjAccessor.GetUnit(spell.GetCaster(), TargetGUID);
+            if (unit == null)
+                return;
+
+            // other targets executed before this one changed pointer
+            spell.unitTarget = unit;
+            if (_spellHitTarget)
+                spell.unitTarget = _spellHitTarget;
+
+            // Reset damage/healing counter
+            spell.m_damage = Damage;
+            spell.m_healing = Healing;
+
+            // Get original caster (if exist) and calculate damage/healing from him data
+            // Skip if m_originalCaster not available
+            Unit caster = spell.GetOriginalCaster() ? spell.GetOriginalCaster() : spell.GetCaster();
+            if (caster == null)
+                return;
+
+            // Fill base trigger info
+            ProcFlags procAttacker = spell.m_procAttacker;
+            ProcFlags procVictim = spell.m_procVictim;
+            ProcFlagsSpellType procSpellType = ProcFlagsSpellType.None;
+            ProcFlagsHit hitMask = ProcFlagsHit.None;
+
+            // Spells with this flag cannot trigger if effect is cast on self
+            bool canEffectTrigger = !spell.m_spellInfo.HasAttribute(SpellAttr3.CantTriggerProc) && spell.unitTarget.CanProc() &&
+                (spell.CanExecuteTriggersOnHit(EffectMask) || MissCondition == SpellMissInfo.Immune || MissCondition == SpellMissInfo.Immune2);
+
+            // Trigger info was not filled in Spell::prepareDataForTriggerSystem - we do it now
+            if (canEffectTrigger && procAttacker == 0 && procVictim == 0)
+            {
+                bool positive = true;
+                if (spell.m_damage > 0)
+                    positive = false;
+                else if (spell.m_healing == 0)
+                {
+                    for (uint i = 0; i < SpellConst.MaxEffects; ++i)
+                    {
+                        // in case of immunity, check all effects to choose correct procFlags, as none has technically hit
+                        if (EffectMask != 0 && (EffectMask & (1 << (int)i)) == 0)
+                            continue;
+
+                        if (!spell.m_spellInfo.IsPositiveEffect(i))
+                        {
+                            positive = false;
+                            break;
+                        }
+                    }
+                }
+
+                switch (spell.m_spellInfo.DmgClass)
+                {
+                    case SpellDmgClass.Magic:
+                        if (positive)
+                        {
+                            procAttacker |= ProcFlags.DoneSpellMagicDmgClassPos;
+                            procVictim |= ProcFlags.TakenSpellMagicDmgClassPos;
+                        }
+                        else
+                        {
+                            procAttacker |= ProcFlags.DoneSpellMagicDmgClassNeg;
+                            procVictim |= ProcFlags.TakenSpellMagicDmgClassNeg;
+                        }
+                        break;
+                    case SpellDmgClass.None:
+                        if (positive)
+                        {
+                            procAttacker |= ProcFlags.DoneSpellNoneDmgClassPos;
+                            procVictim |= ProcFlags.TakenSpellNoneDmgClassPos;
+                        }
+                        else
+                        {
+                            procAttacker |= ProcFlags.DoneSpellNoneDmgClassNeg;
+                            procVictim |= ProcFlags.TakenSpellNoneDmgClassNeg;
+                        }
+                        break;
+                }
+            }
+
+            // All calculated do it!
+            // Do healing
+            DamageInfo spellDamageInfo = null;
+            HealInfo healInfo = null;
+            if (spell.m_healing > 0)
+            {
+                int addhealth = spell.m_healing;
+                if (IsCrit)
+                {
+                    hitMask |= ProcFlagsHit.Critical;
+                    addhealth = Unit.SpellCriticalHealingBonus(caster, spell.m_spellInfo, addhealth, null);
+                }
+                else
+                    hitMask |= ProcFlagsHit.Normal;
+
+                healInfo = new(caster, spell.unitTarget, (uint)addhealth, spell.m_spellInfo, spell.m_spellInfo.GetSchoolMask());
+                caster.HealBySpell(healInfo, IsCrit);
+                spell.unitTarget.GetThreatManager().ForwardThreatForAssistingMe(caster, healInfo.GetEffectiveHeal() * 0.5f, spell.m_spellInfo);
+                spell.m_healing = (int)healInfo.GetEffectiveHeal();
+
+                procSpellType |= ProcFlagsSpellType.Heal;
+            }
+
+            // Do damage
+            if (spell.m_damage > 0)
+            {
+                // Fill base damage struct (unitTarget - is real spell target)
+                SpellNonMeleeDamage damageInfo = new(caster, spell.unitTarget, spell.m_spellInfo, spell.m_SpellVisual, spell.m_spellSchoolMask, spell.m_castId);
+                // Check damage immunity
+                if (spell.unitTarget.IsImmunedToDamage(spell.m_spellInfo))
+                {
+                    hitMask = ProcFlagsHit.Immune;
+                    spell.m_damage = 0;
+
+                    // no packet found in sniffs
+                }
+                else
+                {
+                    // Add bonuses and fill damageInfo struct
+                    caster.CalculateSpellDamageTaken(damageInfo, spell.m_damage, spell.m_spellInfo, spell.m_attackType, IsCrit);
+                    Unit.DealDamageMods(damageInfo.attacker, damageInfo.target, ref damageInfo.damage, ref damageInfo.absorb);
+
+                    hitMask |= createProcHitMask(damageInfo, MissCondition);
+                    procVictim |= ProcFlags.TakenDamage;
+
+                    spell.m_damage = (int)damageInfo.damage;
+
+                    caster.DealSpellDamage(damageInfo, true);
+
+                    // Send log damage message to client
+                    caster.SendSpellNonMeleeDamageLog(damageInfo);
+                }
+
+                // Do triggers for unit
+                if (canEffectTrigger)
+                {
+                    spellDamageInfo = new(damageInfo, DamageEffectType.SpellDirect, spell.m_attackType, hitMask);
+                    procSpellType |= ProcFlagsSpellType.Damage;
+
+                    if (caster.IsPlayer() && !spell.m_spellInfo.HasAttribute(SpellAttr0.StopAttackTarget) && !spell.m_spellInfo.HasAttribute(SpellAttr4.SuppressWeaponProcs) &&
+                        (spell.m_spellInfo.DmgClass == SpellDmgClass.Melee || spell.m_spellInfo.DmgClass == SpellDmgClass.Ranged))
+                        caster.ToPlayer().CastItemCombatSpell(spellDamageInfo);
+                }
+            }
+
+            // Passive spell hits/misses or active spells only misses (only triggers)
+            if (spell.m_damage <= 0 && spell.m_healing <= 0)
+            {
+                // Fill base damage struct (unitTarget - is real spell target)
+                SpellNonMeleeDamage damageInfo = new(caster, spell.unitTarget, spell.m_spellInfo, spell.m_SpellVisual, spell.m_spellSchoolMask);
+                hitMask |= createProcHitMask(damageInfo, MissCondition);
+                // Do triggers for unit
+                if (canEffectTrigger)
+                {
+                    spellDamageInfo = new(damageInfo, DamageEffectType.NoDamage, spell.m_attackType, hitMask);
+                    procSpellType |= ProcFlagsSpellType.NoDmgHeal;
+                }
+
+                // Failed Pickpocket, reveal rogue
+                if (MissCondition == SpellMissInfo.Resist && spell.m_spellInfo.HasAttribute(SpellCustomAttributes.PickPocket) && spell.unitTarget.IsCreature())
+                {
+                    Unit unitCaster = spell.GetCaster().ToUnit();
+                    unitCaster.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Interacting);
+                    spell.unitTarget.ToCreature().EngageWithTarget(unitCaster);
+                }
+            }
+
+            // Do triggers for unit
+            if (canEffectTrigger)
+            {
+                Unit.ProcSkillsAndAuras(caster, spell.unitTarget, procAttacker, procVictim, procSpellType, ProcFlagsSpellPhase.Hit, hitMask, spell, spellDamageInfo, healInfo);
+
+                // item spells (spell hit of non-damage spell may also activate items, for example seal of corruption hidden hit)
+                if (caster.IsPlayer() && procSpellType.HasFlag(ProcFlagsSpellType.Damage | ProcFlagsSpellType.NoDmgHeal))
+                {
+                    if (spell.m_spellInfo.DmgClass == SpellDmgClass.Melee || spell.m_spellInfo.DmgClass == SpellDmgClass.Ranged)
+                        if (!spell.m_spellInfo.HasAttribute(SpellAttr0.StopAttackTarget) && !spell.m_spellInfo.HasAttribute(SpellAttr4.SuppressWeaponProcs))
+                            caster.ToPlayer().CastItemCombatSpell(spellDamageInfo);
+                }
+            }
+
+            // set hitmask for finish procs
+            spell.m_hitMask |= hitMask;
+
+            // Do not take combo points on dodge and miss
+            if (MissCondition != SpellMissInfo.None && spell.m_needComboPoints && spell.m_targets.GetUnitTargetGUID() == TargetGUID)
+                spell.m_needComboPoints = false;
+
+            // _spellHitTarget can be null if spell is missed in DoSpellHitOnUnit
+            if (MissCondition != SpellMissInfo.Evade && _spellHitTarget && !spell.GetCaster().IsFriendlyTo(unit) && (!spell.IsPositive() || spell.m_spellInfo.HasEffect(SpellEffectName.Dispel)))
+            {
+                Unit unitCaster = spell.GetCaster().ToUnit();
+                if (unitCaster != null)
+                    unitCaster.AttackedTarget(unit, spell.m_spellInfo.HasInitialAggro());
+
+                if (!unit.IsStandState())
+                    unit.SetStandState(UnitStandStateType.Stand);
+            }
+
+            // Check for SPELL_ATTR7_INTERRUPT_ONLY_NONPLAYER
+            if (MissCondition == SpellMissInfo.None && spell.m_spellInfo.HasAttribute(SpellAttr7.InterruptOnlyNonplayer) && !unit.IsPlayer())
+                caster.CastSpell(unit, SPELL_INTERRUPT_NONPLAYER, true);
+
+            if (_spellHitTarget)
+            {
+                //AI functions
+                if (_spellHitTarget.IsCreature())
+                {
+                    if (_spellHitTarget.ToCreature().IsAIEnabled)
+                    {
+                        if (spell.GetCaster().IsGameObject())
+                            _spellHitTarget.ToCreature().GetAI().SpellHit(spell.GetCaster().ToGameObject(), spell.m_spellInfo);
+                        else
+                            _spellHitTarget.ToCreature().GetAI().SpellHit(spell.GetCaster().ToUnit(), spell.m_spellInfo);
+                    }
+                }
+
+                if (spell.GetCaster().IsCreature() && spell.GetCaster().ToCreature().IsAIEnabled)
+                    spell.GetCaster().ToCreature().GetAI().SpellHitTarget(_spellHitTarget, spell.m_spellInfo);
+                else if (spell.GetCaster().IsGameObject() && spell.GetCaster().ToGameObject().GetAI() != null)
+                    spell.GetCaster().ToGameObject().GetAI().SpellHitTarget(_spellHitTarget, spell.m_spellInfo);
+
+                // Needs to be called after dealing damage/healing to not remove breaking on damage auras
+                spell.DoTriggersOnSpellHit(_spellHitTarget, EffectMask);
+
+                if (_enablePVP)
+                    spell.GetCaster().ToPlayer().UpdatePvP(true);
+            }
+
+            spell.CallScriptAfterHitHandlers();
+        }
     }
 
-    public class ItemTargetInfo
+    public class GOTargetInfo : TargetInfoBase
     {
-        public Item item;
-        public uint effectMask;
+        public ObjectGuid TargetGUID;
+        public ulong TimeDelay;
+
+        public override void DoTargetSpellHit(Spell spell, uint effIndex)
+        {
+            GameObject go = spell.GetCaster().GetGUID() == TargetGUID ? spell.GetCaster().ToGameObject() : ObjectAccessor.GetGameObject(spell.GetCaster(), TargetGUID);
+            if (go == null)
+                return;
+
+            spell.CallScriptBeforeHitHandlers(SpellMissInfo.None);
+
+            spell.HandleEffects(null, null, go, effIndex, SpellEffectHandleMode.HitTarget);
+
+            //AI functions
+            if (go.GetAI() != null)
+            {
+                if (spell.GetCaster().IsGameObject())
+                    go.GetAI().SpellHit(spell.GetCaster().ToGameObject(), spell.m_spellInfo);
+                else
+                    go.GetAI().SpellHit(spell.GetCaster().ToUnit(), spell.m_spellInfo);
+            }
+
+            if (spell.GetCaster().IsCreature() && spell.GetCaster().ToCreature().IsAIEnabled)
+                spell.GetCaster().ToCreature().GetAI().SpellHitTarget(go, spell.m_spellInfo);
+            else if (spell.GetCaster().IsGameObject() && spell.GetCaster().ToGameObject().GetAI() != null)
+                spell.GetCaster().ToGameObject().GetAI().SpellHitTarget(go, spell.m_spellInfo);
+
+            spell.CallScriptOnHitHandlers();
+            spell.CallScriptAfterHitHandlers();
+        }
+    }
+
+    public class ItemTargetInfo : TargetInfoBase
+    {
+        public Item TargetItem;
+
+        public override void DoTargetSpellHit(Spell spell, uint effIndex)
+        {
+            spell.CallScriptBeforeHitHandlers(SpellMissInfo.None);
+
+            spell.HandleEffects(null, TargetItem, null, effIndex, SpellEffectHandleMode.HitTarget);
+
+            spell.CallScriptOnHitHandlers();
+            spell.CallScriptAfterHitHandlers();
+        }
     }
 
     public class SpellValue

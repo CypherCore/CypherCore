@@ -541,7 +541,7 @@ namespace Game.Chat
             if (selected.IsEmpty())
                 return _session.GetPlayer();
 
-            return Global.ObjAccessor.FindPlayer(selected);
+            return Global.ObjAccessor.FindConnectedPlayer(selected);
         }
         public Unit GetSelectedUnit()
         {
