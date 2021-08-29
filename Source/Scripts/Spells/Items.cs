@@ -1380,7 +1380,7 @@ namespace Scripts.Spells.Items
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
         {
-            if (eventInfo.GetTypeMask().HasFlag(ProcFlags.DoneRangedAutoAttack | ProcFlags.DoneSpellRangedDmgClass))
+            if (eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.DoneRangedAutoAttack | ProcFlags.DoneSpellRangedDmgClass))
             {
                 // in that case, do not cast heal spell
                 PreventDefaultAction();

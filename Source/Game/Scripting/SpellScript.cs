@@ -536,7 +536,8 @@ namespace Game.Scripting
         // methods allowing interaction with Spell object
         //
         // methods useable during all spell handling phases
-        public Unit GetCaster() { return m_spell.GetCaster(); }
+        public Unit GetCaster() { return m_spell.GetCaster().ToUnit(); }
+        public GameObject GetGObjCaster() { return m_spell.GetCaster().ToGameObject(); }
         public Unit GetOriginalCaster() { return m_spell.GetOriginalCaster(); }
         public SpellInfo GetSpellInfo() { return m_spell.GetSpellInfo(); }
         public Difficulty GetCastDifficulty() { return m_spell.GetCastDifficulty(); }
@@ -1453,7 +1454,23 @@ namespace Game.Scripting
         // returns guid of object which casted the aura (m_originalCaster of the Spell class)
         public ObjectGuid GetCasterGUID() { return m_aura.GetCasterGUID(); }
         // returns unit which casted the aura or null if not avalible (caster logged out for example)
-        public Unit GetCaster() { return m_aura.GetCaster(); }
+        public Unit GetCaster()
+        {
+            WorldObject caster = m_aura.GetCaster();
+            if (caster != null)
+                return caster.ToUnit();
+
+            return null;
+        }
+        // returns gameobject which cast the aura or NULL if not available
+        public GameObject GetGObjCaster()
+        {
+            WorldObject caster = m_aura.GetCaster();
+            if (caster != null)
+                return caster.ToGameObject();
+
+            return null;
+        }
         // returns object on which aura was casted, target for non-area auras, area aura source for area auras
         public WorldObject GetOwner() { return m_aura.GetOwner(); }
         // returns owner if it's unit or unit derived object, null otherwise (only for persistent area auras null is returned)

@@ -345,9 +345,9 @@ namespace Game.Spells
             m_targetMask &= ~SpellCastTargetFlags.DestLocation;
         }
 
-        public void Update(Unit caster)
+        public void Update(WorldObject caster)
         {
-            m_objectTarget = !m_objectTargetGUID.IsEmpty() ? ((m_objectTargetGUID == caster.GetGUID()) ? caster : Global.ObjAccessor.GetWorldObject(caster, m_objectTargetGUID)) : null;
+            m_objectTarget = (m_objectTargetGUID == caster.GetGUID()) ? caster : Global.ObjAccessor.GetWorldObject(caster, m_objectTargetGUID);
 
             m_itemTarget = null;
             if (caster is Player)
@@ -402,7 +402,6 @@ namespace Game.Spells
         public bool HasSrc() { return Convert.ToBoolean(m_targetMask & SpellCastTargetFlags.SourceLocation); }
         public bool HasDst() { return Convert.ToBoolean(m_targetMask & SpellCastTargetFlags.DestLocation); }
         public bool HasTraj() { return m_speed != 0; }
-
 
         public float GetPitch() { return m_pitch; }
         public void SetPitch(float pitch) { m_pitch = pitch; }

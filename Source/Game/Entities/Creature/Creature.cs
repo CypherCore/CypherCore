@@ -2039,7 +2039,7 @@ namespace Game.Entities
                         ApplySpellImmune(placeholderSpellId, SpellImmunity.School, 1u << i, true);
         }
 
-        public override bool IsImmunedToSpell(SpellInfo spellInfo, Unit caster)
+        public override bool IsImmunedToSpell(SpellInfo spellInfo, WorldObject caster)
         {
             if (spellInfo == null)
                 return false;
@@ -2063,7 +2063,7 @@ namespace Game.Entities
             return base.IsImmunedToSpell(spellInfo, caster);
         }
 
-        public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, uint index, Unit caster)
+        public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, uint index, WorldObject caster)
         {
             SpellEffectInfo effect = spellInfo.GetEffect(index);
             if (effect == null)

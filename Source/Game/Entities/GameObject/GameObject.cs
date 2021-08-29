@@ -423,6 +423,8 @@ namespace Game.Entities
 
         public override void Update(uint diff)
         {
+            m_Events.Update(diff);
+
             if (GetAI() != null)
                 GetAI().UpdateAI(diff);
             else if (!AIM_Initialize())
@@ -730,8 +732,9 @@ namespace Game.Entities
                             else if (target)
                             {
                                 // Some traps do not have a spell but should be triggered
+                                CastSpellExtraArgs args = new(GetOwnerGUID());
                                 if (goInfo.Trap.spell != 0)
-                                    CastSpell(target, goInfo.Trap.spell);
+                                    CastSpell(target, goInfo.Trap.spell, args);
 
                                 // Template value or 4 seconds
                                 m_cooldownTime = (GameTime.GetGameTimeMS() + (goInfo.Trap.cooldown != 0 ? goInfo.Trap.cooldown : 4u)) * Time.InMilliseconds;
@@ -1201,11 +1204,6 @@ namespace Game.Entities
         }
 
         public Transport ToTransport() { return GetGoInfo().type == GameObjectTypes.MapObjTransport ? (this as Transport) : null; }
-
-        public Unit GetOwner()
-        {
-            return Global.ObjAccessor.GetUnit(this, GetOwnerGUID());
-        }
 
         public override void SaveRespawnTime(uint forceDelay = 0, bool savetodb = true)
         {
@@ -2089,69 +2087,6 @@ namespace Game.Entities
                 CastSpell(user, spellId);
         }
 
-        public void CastSpell(Unit target, uint spellId, bool triggered = true)
-        {
-            CastSpell(target, spellId, triggered ? TriggerCastFlags.FullMask : TriggerCastFlags.None);
-        }
-
-        public void CastSpell(Unit target, uint spellId, TriggerCastFlags triggered)
-        {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetMap().GetDifficultyID());
-            if (spellInfo == null)
-                return;
-
-            bool self = false;
-            foreach (SpellEffectInfo effect in spellInfo.GetEffects())
-            {
-                if (effect != null && effect.TargetA.GetTarget() == Targets.UnitCaster)
-                {
-                    self = true;
-                    break;
-                }
-            }
-
-            if (self)
-            {
-                if (target != null)
-                    target.CastSpell(target, spellInfo.Id, new CastSpellExtraArgs(triggered));
-                return;
-            }
-
-            //summon world trigger
-            Creature trigger = SummonTrigger(GetPositionX(), GetPositionY(), GetPositionZ(), 0, (uint)(spellInfo.CalcCastTime() + 100));
-            if (!trigger)
-                return;
-
-            // remove immunity flags, to allow spell to target anything
-            trigger.SetImmuneToAll(false);
-
-            PhasingHandler.InheritPhaseShift(trigger, this);
-
-            CastSpellExtraArgs args = new(triggered);
-            Unit owner = GetOwner();
-            if (owner)
-            {
-                trigger.SetFaction(owner.GetFaction());
-                if (owner.HasUnitFlag(UnitFlags.PvpAttackable))
-                    trigger.AddUnitFlag(UnitFlags.PvpAttackable);
-                // copy pvp state flags from owner
-                trigger.SetPvpFlags(owner.GetPvpFlags());
-                // needed for GO casts for proper target validation checks
-                trigger.SetOwnerGUID(owner.GetGUID());
-
-                args.OriginalCaster = owner.GetGUID();
-                trigger.CastSpell(target ?? trigger, spellInfo.Id, args);
-            }
-            else
-            {
-                trigger.SetFaction(spellInfo.IsPositive() ? 35 : 14u);
-                // Set owner guid for target if no owner available - needed by trigger auras
-                // - trigger gets despawned and there's no caster avalible (see AuraEffect.TriggerSpell())
-                args.OriginalCaster = target ? target.GetGUID() : ObjectGuid.Empty;
-                trigger.CastSpell(target ?? trigger, spellInfo.Id, args);
-            }
-        }
-
         public void SendCustomAnim(uint anim)
         {
             GameObjectCustomAnim customAnim = new();
@@ -2266,7 +2201,7 @@ namespace Game.Entities
             SetWorldRotation(quat.X, quat.Y, quat.Z, quat.W);
         }
 
-        public void ModifyHealth(int change, Unit attackerOrHealer = null, uint spellId = 0)
+        public void ModifyHealth(int change, WorldObject attackerOrHealer = null, uint spellId = 0)
         {
             if (m_goValue.Building.MaxHealth == 0 || change == 0)
                 return;
@@ -2285,9 +2220,8 @@ namespace Game.Entities
             // Set the health bar, value = 255 * healthPct;
             SetGoAnimProgress(m_goValue.Building.Health * 255 / m_goValue.Building.MaxHealth);
 
-            Player player = attackerOrHealer.GetCharmerOrOwnerPlayerOrPlayerItself();
-
             // dealing damage, send packet
+            Player player = attackerOrHealer != null ? attackerOrHealer.GetCharmerOrOwnerPlayerOrPlayerItself() : null;
             if (player != null)
             {
                 DestructibleBuildingDamage packet = new();
@@ -2311,10 +2245,10 @@ namespace Game.Entities
             if (newState == GetDestructibleState())
                 return;
 
-            SetDestructibleState(newState, player, false);
+            SetDestructibleState(newState, attackerOrHealer, false);
         }
 
-        public void SetDestructibleState(GameObjectDestructibleState state, Player eventInvoker = null, bool setHealth = false)
+        public void SetDestructibleState(GameObjectDestructibleState state, WorldObject attackerOrHealer = null, bool setHealth = false)
         {
             // the user calling this must know he is already operating on destructible gameobject
             Cypher.Assert(GetGoType() == GameObjectTypes.DestructibleBuilding);
@@ -2333,8 +2267,8 @@ namespace Game.Entities
                     break;
                 case GameObjectDestructibleState.Damaged:
                 {
-                    EventInform(m_goInfo.DestructibleBuilding.DamagedEvent, eventInvoker);
-                    GetAI().Damaged(eventInvoker, m_goInfo.DestructibleBuilding.DamagedEvent);
+                    EventInform(m_goInfo.DestructibleBuilding.DamagedEvent, attackerOrHealer);
+                    GetAI().Damaged(attackerOrHealer, m_goInfo.DestructibleBuilding.DamagedEvent);
 
                     RemoveFlag(GameObjectFlags.Destroyed);
                     AddFlag(GameObjectFlags.Damaged);
@@ -2359,13 +2293,14 @@ namespace Game.Entities
                 }
                 case GameObjectDestructibleState.Destroyed:
                 {
-                    EventInform(m_goInfo.DestructibleBuilding.DestroyedEvent, eventInvoker);
-                    GetAI().Destroyed(eventInvoker, m_goInfo.DestructibleBuilding.DestroyedEvent);
-                    if (eventInvoker != null)
+                    EventInform(m_goInfo.DestructibleBuilding.DestroyedEvent, attackerOrHealer);
+                    GetAI().Destroyed(attackerOrHealer, m_goInfo.DestructibleBuilding.DestroyedEvent);
+
+                    if (attackerOrHealer != null && attackerOrHealer.IsPlayer())
                     {
-                        Battleground bg = eventInvoker.GetBattleground();
-                        if (bg)
-                            bg.DestroyGate(eventInvoker, this);
+                        var bg = attackerOrHealer.ToPlayer().GetBattleground();
+                        if (bg != null)
+                            bg.DestroyGate(attackerOrHealer.ToPlayer(), this);
                     }
 
                     RemoveFlag(GameObjectFlags.Damaged);
@@ -2388,7 +2323,7 @@ namespace Game.Entities
                 }
                 case GameObjectDestructibleState.Rebuilding:
                 {
-                    EventInform(m_goInfo.DestructibleBuilding.RebuildingEvent, eventInvoker);
+                    EventInform(m_goInfo.DestructibleBuilding.RebuildingEvent, attackerOrHealer);
                     RemoveFlag(GameObjectFlags.Damaged | GameObjectFlags.Destroyed);
 
                     uint modelId = m_goInfo.displayId;
@@ -2769,7 +2704,7 @@ namespace Game.Entities
             m_spawnedByDefault = false;                     // all object with owner is despawned after delay
             SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.CreatedBy), owner);
         }
-        public ObjectGuid GetOwnerGUID() { return m_gameObjectData.CreatedBy; }
+        public override ObjectGuid GetOwnerGUID() { return m_gameObjectData.CreatedBy; }
 
         public void SetSpellId(uint id)
         {
@@ -2871,8 +2806,8 @@ namespace Game.Entities
 
         public uint GetDisplayId() { return m_gameObjectData.DisplayID; }
 
-        public uint GetFaction() { return m_gameObjectData.FactionTemplate; }
-        public void SetFaction(uint faction) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.FactionTemplate), faction); }
+        public override uint GetFaction() { return m_gameObjectData.FactionTemplate; }
+        public override void SetFaction(uint faction) { SetUpdateFieldValue(m_values.ModifyValue(m_gameObjectData).ModifyValue(m_gameObjectData.FactionTemplate), faction); }
 
         public override float GetStationaryX() { return StationaryPosition.GetPositionX(); }
         public override float GetStationaryY() { return StationaryPosition.GetPositionY(); }

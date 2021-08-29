@@ -55,7 +55,7 @@ namespace Game.Entities
         protected float[][] m_weaponDamage = new float[(int)WeaponAttackType.Max][];
 
         uint[] m_baseAttackSpeed = new uint[(int)WeaponAttackType.Max];
-        float[] m_modAttackSpeedPct = new float[(int)WeaponAttackType.Max];
+        internal float[] m_modAttackSpeedPct = new float[(int)WeaponAttackType.Max];
         protected uint[] m_attackTimer = new uint[(int)WeaponAttackType.Max];
 
         CombatManager m_combatManager;
@@ -117,7 +117,6 @@ namespace Game.Entities
         float[] m_floatStatNegBuff = new float[(int)Stats.Max];
         public ObjectGuid[] m_SummonSlot = new ObjectGuid[7];
         public ObjectGuid[] m_ObjectSlot = new ObjectGuid[4];
-        public EventSystem m_Events = new();
         public UnitTypeMask UnitTypeMask { get; set; }
         UnitState m_state;
         protected LiquidTypeRecord _lastLiquid;
@@ -498,14 +497,14 @@ namespace Game.Entities
 
     public class DispelInfo
     {
-        public DispelInfo(Unit dispeller, uint dispellerSpellId, byte chargesRemoved)
+        public DispelInfo(WorldObject dispeller, uint dispellerSpellId, byte chargesRemoved)
         {
-            _dispellerUnit = dispeller;
+            _dispeller = dispeller;
             _dispellerSpell = dispellerSpellId;
             _chargesRemoved = chargesRemoved;
         }
 
-        public Unit GetDispeller() { return _dispellerUnit; }
+        public WorldObject GetDispeller() { return _dispeller; }
         uint GetDispellerSpellId() { return _dispellerSpell; }
         public byte GetRemovedCharges() { return _chargesRemoved; }
         public void SetRemovedCharges(byte amount)
@@ -513,7 +512,7 @@ namespace Game.Entities
             _chargesRemoved = amount;
         }
 
-        Unit _dispellerUnit;
+        WorldObject _dispeller;
         uint _dispellerSpell;
         byte _chargesRemoved;
     }
@@ -553,23 +552,5 @@ namespace Game.Entities
     public class DeclinedName
     {
         public StringArray name = new(SharedConst.MaxDeclinedNameCases);
-    }
-
-    class CombatLogSender : IDoWork<Player>
-    {
-        CombatLogServerPacket i_message;
-
-        public CombatLogSender(CombatLogServerPacket msg)
-        {
-            i_message = msg;
-        }
-
-        public void Invoke(Player player)
-        {
-            i_message.Clear();
-            i_message.SetAdvancedCombatLogging(player.IsAdvancedCombatLoggingEnabled());
-
-            player.SendPacket(i_message);
-        }
     }
 }

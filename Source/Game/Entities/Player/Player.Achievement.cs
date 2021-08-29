@@ -66,10 +66,10 @@ namespace Game.Entities
             m_questObjectiveCriteriaMgr.ResetCriteria(failEvent, failAsset, evenIfCriteriaComplete);
         }
 
-        public void UpdateCriteria(CriteriaTypes type, ulong miscValue1 = 0, ulong miscValue2 = 0, ulong miscValue3 = 0, Unit unit = null)
+        public void UpdateCriteria(CriteriaTypes type, ulong miscValue1 = 0, ulong miscValue2 = 0, ulong miscValue3 = 0, WorldObject refe = null)
         {
-            m_achievementSys.UpdateCriteria(type, miscValue1, miscValue2, miscValue3, unit, this);
-            m_questObjectiveCriteriaMgr.UpdateCriteria(type, miscValue1, miscValue2, miscValue3, unit, this);
+            m_achievementSys.UpdateCriteria(type, miscValue1, miscValue2, miscValue3, refe, this);
+            m_questObjectiveCriteriaMgr.UpdateCriteria(type, miscValue1, miscValue2, miscValue3, refe, this);
 
             // Update only individual achievement criteria here, otherwise we may get multiple updates
             // from a single boss kill
@@ -78,11 +78,11 @@ namespace Game.Entities
 
             Scenario scenario = GetScenario();
             if (scenario != null)
-                scenario.UpdateCriteria(type, miscValue1, miscValue2, miscValue3, unit, this);
+                scenario.UpdateCriteria(type, miscValue1, miscValue2, miscValue3, refe, this);
 
             Guild guild = Global.GuildMgr.GetGuildById(GetGuildId());
             if (guild)
-                guild.UpdateCriteria(type, miscValue1, miscValue2, miscValue3, unit, this);
+                guild.UpdateCriteria(type, miscValue1, miscValue2, miscValue3, refe, this);
         }
 
         public void CompletedAchievement(AchievementRecord entry)

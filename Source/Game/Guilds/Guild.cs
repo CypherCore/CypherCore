@@ -2331,9 +2331,9 @@ namespace Game.Guilds
             return m_achievementSys.HasAchieved(achievementId);
         }
 
-        public void UpdateCriteria(CriteriaTypes type, ulong miscValue1, ulong miscValue2, ulong miscValue3, Unit unit, Player player)
+        public void UpdateCriteria(CriteriaTypes type, ulong miscValue1, ulong miscValue2, ulong miscValue3, WorldObject refe, Player player)
         {
-            m_achievementSys.UpdateCriteria(type, miscValue1, miscValue2, miscValue3, unit, player);
+            m_achievementSys.UpdateCriteria(type, miscValue1, miscValue2, miscValue3, refe, player);
         }
 
         public void HandleNewsSetSticky(WorldSession session, uint newsId, bool sticky)

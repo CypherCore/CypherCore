@@ -288,7 +288,9 @@ namespace Game.Entities
         public uint GetTextureKitId() { return _textureKitId; }
 
         public ObjectGuid GetCreatorGuid() { return _creatorGuid; }
-
+        public override ObjectGuid GetOwnerGUID() { return GetCreatorGuid(); }
+        public override uint GetFaction() { return 0; }
+        
         public override float GetStationaryX() { return _stationaryPosition.GetPositionX(); }
         public override float GetStationaryY() { return _stationaryPosition.GetPositionY(); }
         public override float GetStationaryZ() { return _stationaryPosition.GetPositionZ(); }

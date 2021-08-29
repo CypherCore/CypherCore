@@ -1463,7 +1463,7 @@ namespace Scripts.World.NpcSpecial
         public override void Reset() { }
         public override void JustEngagedWith(Unit who) { }
 
-        public override void OnPossess(bool apply)
+        public void OnPossess(bool apply)
         {
             if (apply)
             {

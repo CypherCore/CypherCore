@@ -4994,7 +4994,7 @@ namespace Game.Maps
 
         List<WorldObject> _updateObjects = new();
 
-        delegate void FarSpellCallback(Map map);
+        public delegate void FarSpellCallback(Map map);
         Queue<FarSpellCallback> _farSpellCallbacks = new();
         #endregion
     }

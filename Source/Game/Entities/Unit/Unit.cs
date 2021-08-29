@@ -1394,101 +1394,6 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ShapeshiftForm), (byte)form);
         }
 
-        public int CalcSpellDuration(SpellInfo spellProto)
-        {
-            sbyte comboPoints = (sbyte)(m_playerMovingMe != null ? m_playerMovingMe.GetComboPoints() : 0);
-
-            int minduration = spellProto.GetDuration();
-            int maxduration = spellProto.GetMaxDuration();
-
-            int duration;
-
-            if (comboPoints != 0 && minduration != -1 && minduration != maxduration)
-                duration = minduration + (maxduration - minduration) * comboPoints / 5;
-            else
-                duration = minduration;
-
-            return duration;
-        }
-
-        public int ModSpellDuration(SpellInfo spellProto, Unit target, int duration, bool positive, uint effectMask)
-        {
-            // don't mod permanent auras duration
-            if (duration < 0)
-                return duration;
-
-            // some auras are not affected by duration modifiers
-            if (spellProto.HasAttribute(SpellAttr7.IgnoreDurationMods))
-                return duration;
-
-            // cut duration only of negative effects
-            if (!positive)
-            {
-                uint mechanic = spellProto.GetSpellMechanicMaskByEffectMask(effectMask);
-
-                int durationMod;
-                int durationMod_always = 0;
-                int durationMod_not_stack = 0;
-
-                for (byte i = 1; i <= (int)Mechanics.Enraged; ++i)
-                {
-                    if (!Convert.ToBoolean(mechanic & 1 << i))
-                        continue;
-                    // Find total mod value (negative bonus)
-                    int new_durationMod_always = target.GetTotalAuraModifierByMiscValue(AuraType.MechanicDurationMod, i);
-                    // Find max mod (negative bonus)
-                    int new_durationMod_not_stack = target.GetMaxNegativeAuraModifierByMiscValue(AuraType.MechanicDurationModNotStack, i);
-                    // Check if mods applied before were weaker
-                    if (new_durationMod_always < durationMod_always)
-                        durationMod_always = new_durationMod_always;
-                    if (new_durationMod_not_stack < durationMod_not_stack)
-                        durationMod_not_stack = new_durationMod_not_stack;
-                }
-
-                // Select strongest negative mod
-                if (durationMod_always > durationMod_not_stack)
-                    durationMod = durationMod_not_stack;
-                else
-                    durationMod = durationMod_always;
-
-                if (durationMod != 0)
-                    MathFunctions.AddPct(ref duration, durationMod);
-
-                // there are only negative mods currently
-                durationMod_always = target.GetTotalAuraModifierByMiscValue(AuraType.ModAuraDurationByDispel, (int)spellProto.Dispel);
-                durationMod_not_stack = target.GetMaxNegativeAuraModifierByMiscValue(AuraType.ModAuraDurationByDispelNotStack, (int)spellProto.Dispel);
-
-                durationMod = 0;
-                if (durationMod_always > durationMod_not_stack)
-                    durationMod += durationMod_not_stack;
-                else
-                    durationMod += durationMod_always;
-
-                if (durationMod != 0)
-                    MathFunctions.AddPct(ref duration, durationMod);
-            }
-            else
-            {
-                // else positive mods here, there are no currently
-                // when there will be, change GetTotalAuraModifierByMiscValue to GetTotalPositiveAuraModifierByMiscValue
-
-                // Mixology - duration boost
-                if (target.IsTypeId(TypeId.Player))
-                {
-                    if (spellProto.SpellFamilyName == SpellFamilyNames.Potion && (
-                       Global.SpellMgr.IsSpellMemberOfSpellGroup(spellProto.Id, SpellGroup.ElixirBattle) ||
-                       Global.SpellMgr.IsSpellMemberOfSpellGroup(spellProto.Id, SpellGroup.ElixirGuardian)))
-                    {
-                        SpellEffectInfo effect = spellProto.GetEffect(0);
-                        if (target.HasAura(53042) && effect != null && target.HasSpell(effect.TriggerSpell))
-                            duration *= 2;
-                    }
-                }
-            }
-
-            return Math.Max(duration, 0);
-        }
-
         // creates aura application instance and registers it in lists
         // aura application effects are handled separately to prevent aura list corruption
         public AuraApplication _CreateAuraApplication(Aura aura, uint effMask)
@@ -1528,8 +1433,8 @@ namespace Game.Entities
             return aurApp;
         }
 
-        bool HasInterruptFlag(SpellAuraInterruptFlags flags) { return m_interruptMask.HasFlag(flags); }
-        bool HasInterruptFlag(SpellAuraInterruptFlags2 flags) { return m_interruptMask2.HasFlag(flags); }
+        bool HasInterruptFlag(SpellAuraInterruptFlags flags) { return m_interruptMask.HasAnyFlag(flags); }
+        bool HasInterruptFlag(SpellAuraInterruptFlags2 flags) { return m_interruptMask2.HasAnyFlag(flags); }
         
         public void AddInterruptMask(SpellAuraInterruptFlags flags, SpellAuraInterruptFlags2 flags2)
         {
@@ -1647,26 +1552,6 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.SheatheState), (byte)sheathed);
             if (sheathed == SheathState.Unarmed)
                 RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Sheathing);
-        }
-
-        public FactionTemplateRecord GetFactionTemplateEntry()
-        {
-            FactionTemplateRecord entry = CliDB.FactionTemplateStorage.LookupByKey(GetFaction());
-            if (entry == null)
-            {
-                Player player = ToPlayer();
-                if (player != null)
-                    Log.outError(LogFilter.Unit, "Player {0} has invalid faction (faction template id) #{1}", player.GetName(), GetFaction());
-                else
-                {
-                    Creature creature = ToCreature();
-                    if (creature != null)
-                        Log.outError(LogFilter.Unit, "Creature (template id: {0}) has invalid faction (faction template id) #{1}", creature.GetCreatureTemplate().Entry, GetFaction());
-                    else
-                        Log.outError(LogFilter.Unit, "Unit (name={0}, type={1}) has invalid faction (faction template id) #{2}", GetName(), GetTypeId(), GetFaction());
-                }
-            }
-            return entry;
         }
 
         public bool IsInFeralForm()
@@ -1902,17 +1787,9 @@ namespace Game.Entities
         public uint GetMountDisplayId() { return m_unitData.MountDisplayID; }
         public void SetMountDisplayId(uint mountDisplayId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MountDisplayID), mountDisplayId); }
 
-        public virtual Unit GetOwner()
-        {
-            ObjectGuid ownerid = GetOwnerGUID();
-            if (!ownerid.IsEmpty())
-                return Global.ObjAccessor.GetUnit(this, ownerid);
-
-            return null;
-        }
         public virtual float GetFollowAngle() { return MathFunctions.PiOver2; }
 
-        public ObjectGuid GetOwnerGUID() { return m_unitData.SummonedBy; }
+        public override ObjectGuid GetOwnerGUID() { return m_unitData.SummonedBy; }
         public void SetOwnerGUID(ObjectGuid owner)
         {
             if (GetOwnerGUID() == owner)
@@ -1947,17 +1824,9 @@ namespace Game.Entities
         public void SetCritterGUID(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Critter), guid); }
         public ObjectGuid GetBattlePetCompanionGUID() { return m_unitData.BattlePetCompanionGUID; }
         public void SetBattlePetCompanionGUID(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BattlePetCompanionGUID), guid); }
-        public ObjectGuid GetCharmerOrOwnerGUID()
+        public override ObjectGuid GetCharmerOrOwnerGUID()
         {
             return !GetCharmerGUID().IsEmpty() ? GetCharmerGUID() : GetOwnerGUID();
-        }
-        public ObjectGuid GetCharmerOrOwnerOrOwnGUID()
-        {
-            ObjectGuid guid = GetCharmerOrOwnerGUID();
-            if (!guid.IsEmpty())
-                return guid;
-
-            return GetGUID();
         }
         public Unit GetCharmer()
         {
@@ -1965,22 +1834,6 @@ namespace Game.Entities
             if (!charmerid.IsEmpty())
                 return Global.ObjAccessor.GetUnit(this, charmerid);
             return null;
-        }
-        public Unit GetCharmerOrOwnerOrSelf()
-        {
-            Unit u = GetCharmerOrOwner();
-            if (u != null)
-                return u;
-
-            return this;
-        }
-        public Player GetCharmerOrOwnerPlayerOrPlayerItself()
-        {
-            ObjectGuid guid = GetCharmerOrOwnerGUID();
-            if (guid.IsPlayer())
-                return Global.ObjAccessor.FindPlayer(guid);
-
-            return IsTypeId(TypeId.Player) ? ToPlayer() : null;
         }
         public Unit GetCharmerOrOwner()
         {
@@ -2044,16 +1897,6 @@ namespace Game.Entities
             else
                 return ToCreature().GetCreatureTemplate().CreatureType;
         }
-        public Player GetAffectingPlayer()
-        {
-            if (GetCharmerOrOwnerGUID().IsEmpty())
-                return IsTypeId(TypeId.Player) ? ToPlayer() : null;
-
-            Unit owner = GetCharmerOrOwner();
-            if (owner != null)
-                return owner.GetCharmerOrOwnerPlayerOrPlayerItself();
-            return null;
-        }
 
         public void DeMorph()
         {
@@ -2079,7 +1922,7 @@ namespace Game.Entities
         }
         public bool HasUnitState(UnitState f)
         {
-            return m_state.HasFlag(f);
+            return m_state.HasAnyFlag(f);
         }
         public void ClearUnitState(UnitState f)
         {
@@ -2113,146 +1956,8 @@ namespace Game.Entities
             return false;
         }
 
-        //Faction
-        public bool IsNeutralToAll()
-        {
-            var my_faction = GetFactionTemplateEntry();
-            if (my_faction == null || my_faction.Faction == 0)
-                return true;
-
-            var raw_faction = CliDB.FactionStorage.LookupByKey(my_faction.Faction);
-            if (raw_faction != null && raw_faction.ReputationIndex >= 0)
-                return false;
-
-            return my_faction.IsNeutralToAll();
-        }
-        public bool IsHostileTo(Unit unit)
-        {
-            return GetReactionTo(unit) <= ReputationRank.Hostile;
-        }
-        public bool IsFriendlyTo(Unit unit)
-        {
-            return GetReactionTo(unit) >= ReputationRank.Friendly;
-        }
-        public ReputationRank GetReactionTo(Unit target)
-        {
-            // always friendly to self
-            if (this == target)
-                return ReputationRank.Friendly;
-
-            // always friendly to charmer or owner
-            if (GetCharmerOrOwnerOrSelf() == target.GetCharmerOrOwnerOrSelf())
-                return ReputationRank.Friendly;
-
-            if (HasUnitFlag(UnitFlags.PvpAttackable))
-            {
-                if (target.HasUnitFlag(UnitFlags.PvpAttackable))
-                {
-                    Player selfPlayerOwner = GetAffectingPlayer();
-                    Player targetPlayerOwner = target.GetAffectingPlayer();
-
-                    if (selfPlayerOwner != null && targetPlayerOwner != null)
-                    {
-                        // always friendly to other unit controlled by player, or to the player himself
-                        if (selfPlayerOwner == targetPlayerOwner)
-                            return ReputationRank.Friendly;
-
-                        // duel - always hostile to opponent
-                        if (selfPlayerOwner.duel != null && selfPlayerOwner.duel.opponent == targetPlayerOwner && selfPlayerOwner.duel.startTime != 0)
-                            return ReputationRank.Hostile;
-
-                        // same group - checks dependant only on our faction - skip FFA_PVP for example
-                        if (selfPlayerOwner.IsInRaidWith(targetPlayerOwner))
-                            return ReputationRank.Friendly; // return true to allow config option AllowTwoSide.Interaction.Group to work
-                    }
-
-                    // check FFA_PVP
-                    if (IsFFAPvP() && target.IsFFAPvP())
-                        return ReputationRank.Hostile;
-
-                    if (selfPlayerOwner != null)
-                    {
-                        var targetFactionTemplateEntry = target.GetFactionTemplateEntry();
-                        if (targetFactionTemplateEntry != null)
-                        {
-                            if (!selfPlayerOwner.HasUnitFlag2(UnitFlags2.IgnoreReputation))
-                            {
-                                var targetFactionEntry = CliDB.FactionStorage.LookupByKey(targetFactionTemplateEntry.Faction);
-                                if (targetFactionEntry != null)
-                                {
-                                    if (targetFactionEntry.CanHaveReputation())
-                                    {
-                                        // check contested flags
-                                        if (Convert.ToBoolean(targetFactionTemplateEntry.Flags & (uint)FactionTemplateFlags.ContestedGuard)
-                                            && selfPlayerOwner.HasPlayerFlag(PlayerFlags.ContestedPVP))
-                                            return ReputationRank.Hostile;
-
-                                        // if faction has reputation, hostile state depends only from AtWar state
-                                        if (selfPlayerOwner.GetReputationMgr().IsAtWar(targetFactionEntry))
-                                            return ReputationRank.Hostile;
-                                        return ReputationRank.Friendly;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            // do checks dependant only on our faction
-            return GetFactionReactionTo(GetFactionTemplateEntry(), target);
-        }
-        ReputationRank GetFactionReactionTo(FactionTemplateRecord factionTemplateEntry, Unit target)
-        {
-            // always neutral when no template entry found
-            if (factionTemplateEntry == null)
-                return ReputationRank.Neutral;
-
-            var targetFactionTemplateEntry = target.GetFactionTemplateEntry();
-            if (targetFactionTemplateEntry == null)
-                return ReputationRank.Neutral;
-
-            Player targetPlayerOwner = target.GetAffectingPlayer();
-            if (targetPlayerOwner != null)
-            {
-                // check contested flags
-                if (Convert.ToBoolean(factionTemplateEntry.Flags & (uint)FactionTemplateFlags.ContestedGuard)
-                    && targetPlayerOwner.HasPlayerFlag(PlayerFlags.ContestedPVP))
-                    return ReputationRank.Hostile;
-                ReputationRank repRank = targetPlayerOwner.GetReputationMgr().GetForcedRankIfAny(factionTemplateEntry);
-                if (repRank != ReputationRank.None)
-                    return repRank;
-                if (!target.HasUnitFlag2(UnitFlags2.IgnoreReputation))
-                {
-                    var factionEntry = CliDB.FactionStorage.LookupByKey(factionTemplateEntry.Faction);
-                    if (factionEntry != null)
-                    {
-                        if (factionEntry.CanHaveReputation())
-                        {
-                            // CvP case - check reputation, don't allow state higher than neutral when at war
-                            repRank = targetPlayerOwner.GetReputationMgr().GetRank(factionEntry);
-                            if (targetPlayerOwner.GetReputationMgr().IsAtWar(factionEntry))
-                                repRank = (ReputationRank)Math.Min((int)ReputationRank.Neutral, (int)repRank);
-                            return repRank;
-                        }
-                    }
-                }
-            }
-
-            // common faction based check
-            if (factionTemplateEntry.IsHostileTo(targetFactionTemplateEntry))
-                return ReputationRank.Hostile;
-            if (factionTemplateEntry.IsFriendlyTo(targetFactionTemplateEntry))
-                return ReputationRank.Friendly;
-            if (targetFactionTemplateEntry.IsFriendlyTo(factionTemplateEntry))
-                return ReputationRank.Friendly;
-            if (Convert.ToBoolean(factionTemplateEntry.Flags & (uint)FactionTemplateFlags.HostileByDefault))
-                return ReputationRank.Hostile;
-            // neutral by default
-            return ReputationRank.Neutral;
-        }
-
-        public uint GetFaction() { return m_unitData.FactionTemplate; }
-        public void SetFaction(uint faction) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.FactionTemplate), faction); }
+        public override uint GetFaction() { return m_unitData.FactionTemplate; }
+        public override void SetFaction(uint faction) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.FactionTemplate), faction); }
 
         public void RestoreFaction()
         {
@@ -2834,60 +2539,58 @@ namespace Game.Entities
                     }
                 }
 
-                if (damagetype != DamageEffectType.NoDamage)
+                if (damagetype != DamageEffectType.NoDamage && damagetype != DamageEffectType.DOT)
                 {
                     if (victim != attacker && (spellProto == null || !(spellProto.HasAttribute(SpellAttr7.NoPushbackOnDamage) || spellProto.HasAttribute(SpellAttr3.TreatAsPeriodic))))
                     {
-                        if (damagetype != DamageEffectType.DOT)
+                        Spell spell = victim.GetCurrentSpell(CurrentSpellTypes.Generic);
+                        if (spell != null)
                         {
-                            Spell spell = victim.GetCurrentSpell(CurrentSpellTypes.Generic);
-                            if (spell != null)
+                            if (spell.GetState() == SpellState.Preparing)
                             {
-                                if (spell.GetState() == SpellState.Preparing)
+                                bool isCastInterrupted()
                                 {
-                                    bool isCastInterrupted()
-                                    {
-                                        if (damage == 0)
-                                            return spell.m_spellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.ZeroDamageCancels);
+                                    if (damage == 0)
+                                        return spell.m_spellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.ZeroDamageCancels);
 
-                                        if (victim.IsPlayer() && spell.m_spellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.DamageCancelsPlayerOnly))
-                                            return true;
+                                    if (victim.IsPlayer() && spell.m_spellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.DamageCancelsPlayerOnly))
+                                        return true;
 
-                                        if (spell.m_spellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.DamageCancels))
-                                            return true;
+                                    if (spell.m_spellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.DamageCancels))
+                                        return true;
 
+                                    return false;
+                                };
+
+                                bool isCastDelayed()
+                                {
+                                    if (damage == 0)
                                         return false;
-                                    };
 
-                                    bool isCastDelayed()
-                                    {
-                                        if (damage == 0)
-                                            return false;
+                                    if (victim.IsPlayer() && spell.m_spellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.DamagePushbackPlayerOnly))
+                                        return true;
 
-                                        if (victim.IsPlayer() && spell.m_spellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.DamagePushbackPlayerOnly))
-                                            return true;
+                                    if (spell.m_spellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.DamagePushback))
+                                        return true;
 
-                                        if (spell.m_spellInfo.InterruptFlags.HasAnyFlag(SpellInterruptFlags.DamagePushback))
-                                            return true;
-
-                                        return false;
-                                    }
-
-                                    if (isCastInterrupted())
-                                        victim.InterruptNonMeleeSpells(false);
-                                    else if (isCastDelayed())
-                                        spell.Delayed();
+                                    return false;
                                 }
-                            }
 
-                            if (damage != 0 && victim.IsPlayer())
-                            {
-                                Spell spell1 = victim.GetCurrentSpell(CurrentSpellTypes.Channeled);
-                                if (spell1 != null)
-                                    if (spell1.GetState() == SpellState.Casting && spell1.m_spellInfo.HasChannelInterruptFlag(SpellAuraInterruptFlags.DamageChannelDuration))
-                                        spell1.DelayedChannel();
+                                if (isCastInterrupted())
+                                    victim.InterruptNonMeleeSpells(false);
+                                else if (isCastDelayed())
+                                    spell.Delayed();
                             }
                         }
+
+                        if (damage != 0 && victim.IsPlayer())
+                        {
+                            Spell spell1 = victim.GetCurrentSpell(CurrentSpellTypes.Channeled);
+                            if (spell1 != null)
+                                if (spell1.GetState() == SpellState.Casting && spell1.m_spellInfo.HasChannelInterruptFlag(SpellAuraInterruptFlags.DamageChannelDuration))
+                                    spell1.DelayedChannel();
+                        }
+
                     }
                 }
 
@@ -3322,6 +3025,47 @@ namespace Game.Entities
             return nearMembers[randTarget];
         }
 
+        public uint GetComboPoints() { return (uint)GetPower(PowerType.ComboPoints); }
+        
+        public void AddComboPoints(sbyte count, Spell spell = null)
+        {
+            if (count == 0)
+                return;
+
+            sbyte comboPoints = (sbyte)(spell != null ? spell.m_comboPointGain : GetPower(PowerType.ComboPoints));
+
+            comboPoints += count;
+
+            if (comboPoints > 5)
+                comboPoints = 5;
+            else if (comboPoints < 0)
+                comboPoints = 0;
+
+            if (!spell)
+                SetPower(PowerType.ComboPoints, comboPoints);
+            else
+                spell.m_comboPointGain = comboPoints;
+        }
+
+        void GainSpellComboPoints(sbyte count)
+        {
+            if (count == 0)
+                return;
+
+            sbyte cp = (sbyte)GetPower(PowerType.ComboPoints);
+
+            cp += count;
+            if (cp > 5) cp = 5;
+            else if (cp < 0) cp = 0;
+
+            SetPower(PowerType.ComboPoints, cp);
+        }
+
+        public void ClearComboPoints()
+        {
+            SetPower(PowerType.ComboPoints, 0);
+        }
+
         public void ClearAllReactives()
         {
             for (ReactiveType i = 0; i < ReactiveType.Max; ++i)
@@ -3411,22 +3155,25 @@ namespace Game.Entities
             return (uint)damageResisted;
         }
 
-        static float CalculateAverageResistReduction(Unit attacker, SpellSchoolMask schoolMask, Unit victim, SpellInfo spellInfo = null)
+        static float CalculateAverageResistReduction(WorldObject caster, SpellSchoolMask schoolMask, Unit victim, SpellInfo spellInfo = null)
         {
             float victimResistance = victim.GetResistance(schoolMask);
 
-            if (attacker != null)
+            if (caster != null)
             {
                 // pets inherit 100% of masters penetration
-                // excluding traps
-                Player player = attacker.GetSpellModOwner();
-                if (player != null && attacker.GetEntry() != SharedConst.WorldTrigger)
+                Player player = caster.GetSpellModOwner();
+                if (player != null)
                 {
                     victimResistance += player.GetTotalAuraModifierByMiscMask(AuraType.ModTargetResistance, (int)schoolMask);
                     victimResistance -= player.GetSpellPenetrationItemMod();
                 }
                 else
-                    victimResistance += attacker.GetTotalAuraModifierByMiscMask(AuraType.ModTargetResistance, (int)schoolMask);
+                {
+                    Unit unitCaster = caster.ToUnit();
+                    if (unitCaster != null)
+                        victimResistance += unitCaster.GetTotalAuraModifierByMiscMask(AuraType.ModTargetResistance, (int)schoolMask);
+                }
             }
 
             // holy resistance exists in pve and comes from level difference, ignore template values
@@ -3440,12 +3187,13 @@ namespace Game.Entities
             victimResistance = Math.Max(victimResistance, 0.0f);
 
             // level-based resistance does not apply to binary spells, and cannot be overcome by spell penetration
-            if (attacker != null && (spellInfo == null || !spellInfo.HasAttribute(SpellCustomAttributes.BinarySpell)))
-                victimResistance += Math.Max(((float)victim.GetLevelForTarget(attacker) - (float)attacker.GetLevelForTarget(victim)) * 5.0f, 0.0f);
+            // gameobject caster -- should it have level based resistance?
+            if (caster != null && !caster.IsGameObject() && (spellInfo == null || !spellInfo.HasAttribute(SpellCustomAttributes.BinarySpell)))
+                victimResistance += Math.Max(((float)victim.GetLevelForTarget(caster) - (float)caster.GetLevelForTarget(victim)) * 5.0f, 0.0f);
 
             uint bossLevel = 83;
             float bossResistanceConstant = 510.0f;
-            uint level = attacker != null ? victim.GetLevelForTarget(attacker) : attacker.GetLevel();
+            uint level = caster ? victim.GetLevelForTarget(caster) : victim.GetLevel();
             float resistanceConstant;
 
             if (level == bossLevel)

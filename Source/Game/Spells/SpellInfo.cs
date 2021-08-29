@@ -1010,7 +1010,7 @@ namespace Game.Spells
             return SpellCastResult.SpellCastOk;
         }
 
-        public SpellCastResult CheckTarget(Unit caster, WorldObject target, bool Implicit = true)
+        public SpellCastResult CheckTarget(WorldObject caster, WorldObject target, bool Implicit = true)
         {
             if (HasAttribute(SpellAttr1.CantTargetSelf) && caster == target)
                 return SpellCastResult.BadTargets;
@@ -1112,7 +1112,7 @@ namespace Game.Spells
             }
 
             // check GM mode and GM invisibility - only for player casts (npc casts are controlled by AI) and negative spells
-            if (unitTarget != caster && (caster.IsControlledByPlayer() || !IsPositive()) && unitTarget.IsTypeId(TypeId.Player))
+            if (unitTarget != caster && (caster.GetAffectingPlayer() != null || !IsPositive()) && unitTarget.IsTypeId(TypeId.Player))
             {
                 if (!unitTarget.ToPlayer().IsVisible())
                     return SpellCastResult.BmOrInvisgod;
@@ -1132,13 +1132,17 @@ namespace Game.Spells
             him, because it would be it's passenger, there's no such case where this gets to fail legitimacy, this problem
             cannot be solved from within the check in other way since target type cannot be called for the spell currently
             Spell examples: [ID - 52864 Devour Water, ID - 52862 Devour Wind, ID - 49370 Wyrmrest Defender: Destabilize Azure Dragonshrine Effect] */
-            if (!caster.IsVehicle() && caster.GetCharmerOrOwner() != target)
+            Unit unitCaster = caster.ToUnit();
+            if (unitCaster != null)
             {
-                if (TargetAuraState != 0 && !unitTarget.HasAuraState(TargetAuraState, this, caster))
-                    return SpellCastResult.TargetAurastate;
+                if (!unitCaster.IsVehicle() && unitCaster.GetCharmerOrOwner() != target)
+                {
+                    if (TargetAuraState != 0 && !unitTarget.HasAuraState(TargetAuraState, this, unitCaster))
+                        return SpellCastResult.TargetAurastate;
 
-                if (ExcludeTargetAuraState != 0 && unitTarget.HasAuraState(ExcludeTargetAuraState, this, caster))
-                    return SpellCastResult.TargetAurastate;
+                    if (ExcludeTargetAuraState != 0 && unitTarget.HasAuraState(ExcludeTargetAuraState, this, unitCaster))
+                        return SpellCastResult.TargetAurastate;
+                }
             }
 
             if (TargetAuraSpell != 0 && !unitTarget.HasAura(TargetAuraSpell))
@@ -1170,7 +1174,7 @@ namespace Game.Spells
             return SpellCastResult.SpellCastOk;
         }
 
-        public SpellCastResult CheckExplicitTarget(Unit caster, WorldObject target, Item itemTarget = null)
+        public SpellCastResult CheckExplicitTarget(WorldObject caster, WorldObject target, Item itemTarget = null)
         {
             SpellCastTargetFlags neededTargets = GetExplicitTargetMask();
             if (target == null)
@@ -1183,22 +1187,27 @@ namespace Game.Spells
             Unit unitTarget = target.ToUnit();
             if (unitTarget != null)
             {
-                if (Convert.ToBoolean(neededTargets & (SpellCastTargetFlags.UnitEnemy | SpellCastTargetFlags.UnitAlly | SpellCastTargetFlags.UnitRaid | SpellCastTargetFlags.UnitParty | SpellCastTargetFlags.UnitMinipet | SpellCastTargetFlags.UnitPassenger)))
+                if (neededTargets.HasAnyFlag(SpellCastTargetFlags.UnitEnemy | SpellCastTargetFlags.UnitAlly | SpellCastTargetFlags.UnitRaid | SpellCastTargetFlags.UnitParty | SpellCastTargetFlags.UnitMinipet | SpellCastTargetFlags.UnitPassenger))
                 {
-                    if (Convert.ToBoolean(neededTargets & SpellCastTargetFlags.UnitEnemy))
+                    Unit unitCaster = caster.ToUnit();
+                    if (neededTargets.HasFlag(SpellCastTargetFlags.UnitEnemy))
                         if (caster.IsValidAttackTarget(unitTarget, this))
                             return SpellCastResult.SpellCastOk;
-                    if (neededTargets.HasAnyFlag(SpellCastTargetFlags.UnitAlly)
-                        || (neededTargets.HasAnyFlag(SpellCastTargetFlags.UnitParty) && caster.IsInPartyWith(unitTarget))
-                        || (neededTargets.HasAnyFlag(SpellCastTargetFlags.UnitRaid) && caster.IsInRaidWith(unitTarget)))
+
+                    if (neededTargets.HasFlag(SpellCastTargetFlags.UnitAlly)
+                        || (neededTargets.HasFlag(SpellCastTargetFlags.UnitParty) && unitCaster != null && unitCaster.IsInPartyWith(unitTarget))
+                        || (neededTargets.HasFlag(SpellCastTargetFlags.UnitRaid) && unitCaster != null && unitCaster.IsInRaidWith(unitTarget)))
                         if (caster.IsValidAssistTarget(unitTarget, this))
                             return SpellCastResult.SpellCastOk;
-                    if (Convert.ToBoolean(neededTargets & SpellCastTargetFlags.UnitMinipet))
-                        if (unitTarget.GetGUID() == caster.GetCritterGUID())
+
+                    if (neededTargets.HasFlag(SpellCastTargetFlags.UnitMinipet) && unitCaster != null)
+                        if (unitTarget.GetGUID() == unitCaster.GetCritterGUID())
                             return SpellCastResult.SpellCastOk;
-                    if (Convert.ToBoolean(neededTargets & SpellCastTargetFlags.UnitPassenger))
-                        if (unitTarget.IsOnVehicle(caster))
+
+                    if (neededTargets.HasFlag(SpellCastTargetFlags.UnitPassenger) && unitCaster != null)
+                        if (unitTarget.IsOnVehicle(unitCaster))
                             return SpellCastResult.SpellCastOk;
+
                     return SpellCastResult.BadTargets;
                 }
             }
@@ -2625,7 +2634,7 @@ namespace Game.Spells
             return RangeEntry.RangeMin[positive ? 1 : 0];
         }
 
-        public float GetMaxRange(bool positive = false, Unit caster = null, Spell spell = null)
+        public float GetMaxRange(bool positive = false, WorldObject caster = null, Spell spell = null)
         {
             if (RangeEntry == null)
                 return 0.0f;
@@ -2640,7 +2649,7 @@ namespace Game.Spells
             return range;
         }
 
-        public int CalcDuration(Unit caster = null)
+        public int CalcDuration(WorldObject caster = null)
         {
             int duration = GetDuration();
 
@@ -2733,8 +2742,13 @@ namespace Game.Spells
             return RecoveryTime > CategoryRecoveryTime ? RecoveryTime : CategoryRecoveryTime;
         }
 
-        public SpellPowerCost CalcPowerCost(PowerType powerType, bool optionalCost, Unit caster, SpellSchoolMask schoolMask, Spell spell = null)
+        public SpellPowerCost CalcPowerCost(PowerType powerType, bool optionalCost, WorldObject caster, SpellSchoolMask schoolMask, Spell spell = null)
         {
+            // gameobject casts don't use power
+            Unit unitCaster = caster.ToUnit();
+            if (unitCaster == null)
+                return null;
+
             var spellPowerRecord = PowerCosts.FirstOrDefault(spellPowerEntry => spellPowerEntry?.PowerType == powerType);
             if (spellPowerRecord == null)
                 return null;
@@ -2742,9 +2756,14 @@ namespace Game.Spells
             return CalcPowerCost(spellPowerRecord, optionalCost, caster, schoolMask, spell);
         }
 
-        public SpellPowerCost CalcPowerCost(SpellPowerRecord power, bool optionalCost, Unit caster, SpellSchoolMask schoolMask, Spell spell = null)
+        public SpellPowerCost CalcPowerCost(SpellPowerRecord power, bool optionalCost, WorldObject caster, SpellSchoolMask schoolMask, Spell spell = null)
         {
-            if (power.RequiredAuraSpellID != 0 && !caster.HasAura(power.RequiredAuraSpellID))
+            // gameobject casts don't use power
+            Unit unitCaster = caster.ToUnit();
+            if (!unitCaster)
+                return null;
+
+            if (power.RequiredAuraSpellID != 0 && !unitCaster.HasAura(power.RequiredAuraSpellID))
                 return null;
 
             SpellPowerCost cost = new();
@@ -2756,14 +2775,14 @@ namespace Game.Spells
                 if (power.PowerType == PowerType.Health)
                 {
                     cost.Power = PowerType.Health;
-                    cost.Amount = (int)caster.GetHealth();
+                    cost.Amount = (int)unitCaster.GetHealth();
                     return cost;
                 }
                 // Else drain all power
                 if (power.PowerType < PowerType.Max)
                 {
                     cost.Power = power.PowerType;
-                    cost.Amount = caster.GetPower(cost.Power);
+                    cost.Amount = unitCaster.GetPower(cost.Power);
                     return cost;
                 }
 
@@ -2784,12 +2803,12 @@ namespace Game.Spells
                         // health as power used
                         case PowerType.Health:
                             if (MathFunctions.fuzzyEq(power.PowerCostPct, 0.0f))
-                                powerCost += (int)MathFunctions.CalculatePct(caster.GetMaxHealth(), power.PowerCostMaxPct);
+                                powerCost += (int)MathFunctions.CalculatePct(unitCaster.GetMaxHealth(), power.PowerCostMaxPct);
                             else
-                                powerCost += (int)MathFunctions.CalculatePct(caster.GetMaxHealth(), power.PowerCostPct);
+                                powerCost += (int)MathFunctions.CalculatePct(unitCaster.GetMaxHealth(), power.PowerCostPct);
                             break;
                         case PowerType.Mana:
-                            powerCost += (int)MathFunctions.CalculatePct(caster.GetCreateMana(), power.PowerCostPct);
+                            powerCost += (int)MathFunctions.CalculatePct(unitCaster.GetCreateMana(), power.PowerCostPct);
                             break;
                         case PowerType.AlternatePower:
                             Log.outError(LogFilter.Spells, $"SpellInfo.CalcPowerCost: Unknown power type '{power.PowerType}' in spell {Id}");
@@ -2812,7 +2831,7 @@ namespace Game.Spells
             else
             {
                 powerCost = (int)power.OptionalCost;
-                powerCost += caster.GetTotalAuraModifier(AuraType.ModAdditionalPowerCost, aurEff =>
+                powerCost += unitCaster.GetTotalAuraModifier(AuraType.ModAdditionalPowerCost, aurEff =>
                 {
                     return aurEff.GetMiscValue() == (int)power.PowerType && aurEff.IsAffectingSpell(this);
                 });
@@ -2824,7 +2843,7 @@ namespace Game.Spells
             if (HasAttribute(SpellAttr4.SpellVsExtendCost))
             {
                 uint speed = 0;
-                SpellShapeshiftFormRecord ss = CliDB.SpellShapeshiftFormStorage.LookupByKey(caster.GetShapeshiftForm());
+                SpellShapeshiftFormRecord ss = CliDB.SpellShapeshiftFormStorage.LookupByKey(unitCaster.GetShapeshiftForm());
                 if (ss != null)
                     speed = ss.CombatRoundTime;
                 else
@@ -2833,7 +2852,7 @@ namespace Game.Spells
                     if (!HasAttribute(SpellAttr3.MainHand) && HasAttribute(SpellAttr3.ReqOffhand))
                         slot = WeaponAttackType.OffAttack;
 
-                    speed = caster.GetBaseAttackTime(slot);
+                    speed = unitCaster.GetBaseAttackTime(slot);
                 }
 
                 powerCost += (int)speed / 100;
@@ -2844,7 +2863,7 @@ namespace Game.Spells
                 if (!optionalCost)
                 {
                     // Flat mod from caster auras by spell school and power type
-                    foreach (AuraEffect aura in caster.GetAuraEffectsByType(AuraType.ModPowerCostSchool))
+                    foreach (AuraEffect aura in unitCaster.GetAuraEffectsByType(AuraType.ModPowerCostSchool))
                     {
                         if ((aura.GetMiscValue() & (int)schoolMask) == 0)
                             continue;
@@ -2857,7 +2876,7 @@ namespace Game.Spells
                 }
 
                 // PCT mod from user auras by spell school and power type
-                foreach (var schoolCostPct in caster.GetAuraEffectsByType(AuraType.ModPowerCostSchoolPct))
+                foreach (var schoolCostPct in unitCaster.GetAuraEffectsByType(AuraType.ModPowerCostSchoolPct))
                 {
                     if ((schoolCostPct.GetMiscValue() & (int)schoolMask) == 0)
                         continue;
@@ -2870,7 +2889,7 @@ namespace Game.Spells
             }
 
             // Apply cost mod by spell
-            Player modOwner = caster.GetSpellModOwner();
+            Player modOwner = unitCaster.GetSpellModOwner();
             if (modOwner != null)
             {
                 SpellModOp mod = SpellModOp.Max;
@@ -2904,19 +2923,19 @@ namespace Game.Spells
                 }
             }
 
-            if (!caster.IsControlledByPlayer() && MathFunctions.fuzzyEq(power.PowerCostPct, 0.0f) && SpellLevel != 0 && power.PowerType == PowerType.Mana)
+            if (!unitCaster.IsControlledByPlayer() && MathFunctions.fuzzyEq(power.PowerCostPct, 0.0f) && SpellLevel != 0 && power.PowerType == PowerType.Mana)
             {
                 if (HasAttribute(SpellAttr0.LevelDamageCalculation))
                 {
                     GtNpcManaCostScalerRecord spellScaler = CliDB.NpcManaCostScalerGameTable.GetRow(SpellLevel);
-                    GtNpcManaCostScalerRecord casterScaler = CliDB.NpcManaCostScalerGameTable.GetRow(caster.GetLevel());
+                    GtNpcManaCostScalerRecord casterScaler = CliDB.NpcManaCostScalerGameTable.GetRow(unitCaster.GetLevel());
                     if (spellScaler != null && casterScaler != null)
                         powerCost *= (int)(casterScaler.Scaler / spellScaler.Scaler);
                 }
             }
 
             if (power.PowerType == PowerType.Mana)
-                powerCost = (int)((float)powerCost * (1.0f + caster.m_unitData.ManaCostMultiplier));
+                powerCost = (int)((float)powerCost * (1.0f + unitCaster.m_unitData.ManaCostMultiplier));
 
             // power cost cannot become negative if initially positive
             if (initiallyNegative != (powerCost < 0))
@@ -2927,42 +2946,41 @@ namespace Game.Spells
             return cost;
         }
 
-        public List<SpellPowerCost> CalcPowerCost(Unit caster, SpellSchoolMask schoolMask, Spell spell = null)
+        public List<SpellPowerCost> CalcPowerCost(WorldObject caster, SpellSchoolMask schoolMask, Spell spell = null)
         {
             List<SpellPowerCost> costs = new();
-
-            SpellPowerCost getOrCreatePowerCost(PowerType powerType)
+            if (caster.IsUnit())
             {
-                var itr = costs.Find(cost =>
+                SpellPowerCost getOrCreatePowerCost(PowerType powerType)
                 {
-                    return cost.Power == powerType;
-                });
-                if (itr != null)
-                    return itr;
+                    var itr = costs.Find(cost => cost.Power == powerType);
+                    if (itr != null)
+                        return itr;
 
-                SpellPowerCost cost = new();
-                cost.Power = powerType;
-                cost.Amount = 0;
-                costs.Add(cost);
-                return costs.Last();
-            }
+                    SpellPowerCost cost = new();
+                    cost.Power = powerType;
+                    cost.Amount = 0;
+                    costs.Add(cost);
+                    return costs.Last();
+                }
 
-            foreach (SpellPowerRecord power in PowerCosts)
-            {
-                if (power == null)
-                    continue;
-
-                SpellPowerCost cost = CalcPowerCost(power, false, caster, schoolMask, spell);
-                if (cost != null)
-                    getOrCreatePowerCost(cost.Power).Amount += cost.Amount;
-
-                SpellPowerCost optionalCost = CalcPowerCost(power, true, caster, schoolMask, spell);
-                if (optionalCost != null)
+                foreach (SpellPowerRecord power in PowerCosts)
                 {
-                    SpellPowerCost cost1 = getOrCreatePowerCost(optionalCost.Power);
-                    int remainingPower = caster.GetPower(optionalCost.Power) - cost1.Amount;
-                    if (remainingPower > 0)
-                        cost1.Amount += Math.Min(optionalCost.Amount, remainingPower);
+                    if (power == null)
+                        continue;
+
+                    SpellPowerCost cost = CalcPowerCost(power, false, caster, schoolMask, spell);
+                    if (cost != null)
+                        getOrCreatePowerCost(cost.Power).Amount += cost.Amount;
+
+                    SpellPowerCost optionalCost = CalcPowerCost(power, true, caster, schoolMask, spell);
+                    if (optionalCost != null)
+                    {
+                        SpellPowerCost cost1 = getOrCreatePowerCost(optionalCost.Power);
+                        int remainingPower = caster.ToUnit().GetPower(optionalCost.Power) - cost1.Amount;
+                        if (remainingPower > 0)
+                            cost1.Amount += Math.Min(optionalCost.Amount, remainingPower);
+                    }
                 }
             }
 
@@ -3195,11 +3213,10 @@ namespace Game.Spells
             return false;
         }
 
-        public uint GetSpellXSpellVisualId(Unit caster = null)
+        public uint GetSpellXSpellVisualId(WorldObject caster = null)
         {
             foreach (SpellXSpellVisualRecord visual in _visuals)
             {
-
                 PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(visual.CasterPlayerConditionID);
                 if (playerCondition == null || (caster && caster.GetTypeId() == TypeId.Player && ConditionManager.IsPlayerMeetingCondition(caster.ToPlayer(), playerCondition)))
                     return visual.Id;
@@ -3208,7 +3225,7 @@ namespace Game.Spells
             return 0;
         }
 
-        public uint GetSpellVisual(Unit caster = null)
+        public uint GetSpellVisual(WorldObject caster = null)
         {
             var visual = CliDB.SpellXSpellVisualStorage.LookupByKey(GetSpellXSpellVisualId(caster));
             if (visual != null)
@@ -3817,13 +3834,13 @@ namespace Game.Spells
         public bool HasAttribute(SpellAttr14 attribute) { return Convert.ToBoolean(AttributesEx14 & attribute); }
         public bool HasAttribute(SpellCustomAttributes attribute) { return Convert.ToBoolean(AttributesCu & attribute); }
 
-        public bool CanBeInterrupted(Unit interruptCaster, Unit interruptTarget)
+        public bool CanBeInterrupted(WorldObject interruptCaster, Unit interruptTarget)
         {
             return HasAttribute(SpellAttr7.CanAlwaysBeInterrupted)
                 || HasChannelInterruptFlag(SpellAuraInterruptFlags.Damage | SpellAuraInterruptFlags.EnteringCombat)
                 || (interruptTarget.IsPlayer() && InterruptFlags.HasFlag(SpellInterruptFlags.DamageCancelsPlayerOnly))
                 || InterruptFlags.HasFlag(SpellInterruptFlags.DamageCancels)
-                || interruptCaster.HasAuraTypeWithMiscvalue(AuraType.AllowInterruptSpell, (int)Id)
+                || interruptCaster.IsUnit() && interruptCaster.ToUnit().HasAuraTypeWithMiscvalue(AuraType.AllowInterruptSpell, (int)Id)
                 || ((interruptTarget.GetMechanicImmunityMask() & (1 << (int)Mechanics.Interrupt)) == 0
                     && !interruptTarget.HasAuraTypeWithAffectMask(AuraType.PreventInterrupt, this)
                     && PreventionType.HasAnyFlag(SpellPreventionType.Silence));
@@ -4028,12 +4045,12 @@ namespace Game.Spells
             return IsAreaAuraEffect() || Effect == SpellEffectName.ApplyAura || Effect == SpellEffectName.ApplyAuraOnPet;
         }
 
-        public int CalcValue(Unit caster = null, int? bp = null, Unit target = null, uint castItemId = 0, int itemLevel = -1)
+        public int CalcValue(WorldObject caster = null, int? bp = null, Unit target = null, uint castItemId = 0, int itemLevel = -1)
         {
             return CalcValue(out _, caster, bp, target, castItemId, itemLevel);
         }
 
-        public int CalcValue(out float variance, Unit caster = null, int? bp = null, Unit target = null, uint castItemId = 0, int itemLevel = -1)
+        public int CalcValue(out float variance, WorldObject caster = null, int? bp = null, Unit target = null, uint castItemId = 0, int itemLevel = -1)
         {
             variance = 0.0f;
             float basePointsPerLevel = RealPointsPerLevel;
@@ -4041,6 +4058,10 @@ namespace Game.Spells
             int basePoints = CalcBaseValue(caster, target, castItemId, itemLevel);
             float value = bp.HasValue ? bp.Value : basePoints;
             float comboDamage = PointsPerResource;
+
+            Unit casterUnit = null;
+            if (caster != null)
+                casterUnit = caster.ToUnit();
 
             if (Scaling.Variance != 0)
             {
@@ -4058,9 +4079,9 @@ namespace Game.Spells
             }
             else if (GetScalingExpectedStat() == ExpectedStatType.None)
             {
-                if (caster != null && basePointsPerLevel != 0.0f)
+                if (casterUnit != null && basePointsPerLevel != 0.0f)
                 {
-                    int level = (int)caster.GetLevel();
+                    int level = (int)casterUnit.GetLevel();
                     if (level > (int)_spellInfo.MaxLevel && _spellInfo.MaxLevel > 0)
                         level = (int)_spellInfo.MaxLevel;
 
@@ -4072,31 +4093,32 @@ namespace Game.Spells
                 }
             }
             // random damage
-            if (caster)
+            if (casterUnit != null)
             {
                 // bonus amount from combo points
-                if (caster.m_playerMovingMe && comboDamage != 0)
+                if (comboDamage != 0)
                 {
-                    uint comboPoints = caster.m_playerMovingMe.GetComboPoints();
+                    uint comboPoints = casterUnit.GetComboPoints();
                     if (comboPoints != 0)
                         value += comboDamage * comboPoints;
                 }
 
-                value = caster.ApplyEffectModifiers(_spellInfo, EffectIndex, value);
+                if (caster != null)
+                    value = caster.ApplyEffectModifiers(_spellInfo, EffectIndex, value);
             }
 
             return (int)Math.Round(value);
         }
 
-        public int CalcBaseValue(Unit caster, Unit target, uint itemId, int itemLevel)
+        public int CalcBaseValue(WorldObject caster, Unit target, uint itemId, int itemLevel)
         {
             if (Scaling.Coefficient != 0.0f)
             {
                 uint level = _spellInfo.SpellLevel;
                 if (target && _spellInfo.IsPositiveEffect(EffectIndex) && (Effect == SpellEffectName.ApplyAura))
                     level = target.GetLevel();
-                else if (caster)
-                    level = caster.GetLevel();
+                else if (caster != null && caster.IsUnit())
+                    level = caster.ToUnit().GetLevel();
 
                 if (_spellInfo.BaseLevel != 0 && !_spellInfo.HasAttribute(SpellAttr11.ScalesWithItemLevel) && _spellInfo.HasAttribute(SpellAttr10.UseSpellBaseLevelForScaling))
                     level = _spellInfo.BaseLevel;
@@ -4188,7 +4210,7 @@ namespace Game.Spells
                     if (contentTuning != null)
                         expansion = contentTuning.ExpansionID;
 
-                    uint level = caster ? caster.GetLevel() : 1;
+                    uint level = caster != null && caster.IsUnit() ? caster.ToUnit().GetLevel() : 1;
                     tempValue = Global.DB2Mgr.EvaluateExpectedStat(stat, level, expansion, 0, Class.None) * BasePoints / 100.0f;
                 }
 
@@ -4196,7 +4218,7 @@ namespace Game.Spells
             }
         }
 
-        public float CalcValueMultiplier(Unit caster, Spell spell = null)
+        public float CalcValueMultiplier(WorldObject caster, Spell spell = null)
         {
             float multiplier = Amplitude;
             Player modOwner = (caster != null ? caster.GetSpellModOwner() : null);
@@ -4205,7 +4227,7 @@ namespace Game.Spells
             return multiplier;
         }
 
-        public float CalcDamageMultiplier(Unit caster, Spell spell = null)
+        public float CalcDamageMultiplier(WorldObject caster, Spell spell = null)
         {
             float multiplierPercent = ChainAmplitude * 100.0f;
             Player modOwner = (caster != null ? caster.GetSpellModOwner() : null);
@@ -4224,7 +4246,7 @@ namespace Game.Spells
             return MaxRadiusEntry != null;
         }
 
-        public float CalcRadius(Unit caster = null, Spell spell = null)
+        public float CalcRadius(WorldObject caster = null, Spell spell = null)
         {
             SpellRadiusRecord entry = RadiusEntry;
             if (!HasRadius() && HasMaxRadius())
@@ -4241,7 +4263,10 @@ namespace Game.Spells
 
             if (caster != null)
             {
-                radius += entry.RadiusPerLevel * caster.GetLevel();
+                Unit casterUnit = caster.ToUnit();
+                if (casterUnit != null)
+                    radius += entry.RadiusPerLevel * casterUnit.GetLevel();
+
                 radius = Math.Min(radius, entry.RadiusMax);
                 Player modOwner = caster.GetSpellModOwner();
                 if (modOwner != null)

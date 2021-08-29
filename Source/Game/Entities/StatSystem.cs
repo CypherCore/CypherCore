@@ -788,7 +788,7 @@ namespace Game.Entities
         public void SetRangedWeaponAttackPower(int attackPower) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.RangedWeaponAttackPower), attackPower); }
 
         //Chances
-        float MeleeSpellMissChance(Unit victim, WeaponAttackType attType, SpellInfo spellInfo)
+        public override float MeleeSpellMissChance(Unit victim, WeaponAttackType attType, SpellInfo spellInfo)
         {
             //calculate miss chance
             float missChance = victim.GetUnitMissChance();

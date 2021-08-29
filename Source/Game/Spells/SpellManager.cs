@@ -494,7 +494,7 @@ namespace Game.Entities
             }
 
             // always trigger for these types
-            if (eventInfo.GetTypeMask().HasFlag(ProcFlags.Killed | ProcFlags.Kill | ProcFlags.Death))
+            if (eventInfo.GetTypeMask().HasAnyFlag(ProcFlags.Killed | ProcFlags.Kill | ProcFlags.Death))
                 return true;
 
             // Do not consider autoattacks as triggered spells

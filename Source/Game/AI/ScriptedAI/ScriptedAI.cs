@@ -373,30 +373,6 @@ namespace Game.AI
             _isCombatMovementAllowed = allowMovement;
         }
 
-        // Called at any Damage from any attacker (before damage apply)
-        public override void DamageTaken(Unit attacker, ref uint damage) { }
-
-        //Called at creature death
-        public override void JustDied(Unit killer) { }
-
-        //Called at creature killing another unit
-        public override void KilledUnit(Unit victim) { }
-
-        // Called when the creature summon successfully other creature
-        public override void JustSummoned(Creature summon) { }
-
-        // Called when a summoned creature is despawned
-        public override void SummonedCreatureDespawn(Creature summon) { }
-
-        // Called when hit by a spell
-        public override void SpellHit(Unit caster, SpellInfo spell) { }
-
-        // Called when spell hits a target
-        public override void SpellHitTarget(Unit target, SpellInfo spell) { }
-
-        // Called when AI is temporarily replaced or put back when possess is applied or removed
-        public virtual void OnPossess(bool apply) { }
-
         public static Creature GetClosestCreatureWithEntry(WorldObject source, uint entry, float maxSearchRange, bool alive = true)
         {
             return source.FindNearestCreature(entry, maxSearchRange, alive);
@@ -406,12 +382,6 @@ namespace Game.AI
         {
             return source.FindNearestGameObject(entry, maxSearchRange);
         }
-
-        //Called at creature reset either by death or evade
-        public override void Reset() { }
-
-        //Called at creature aggro either by MoveInLOS or Attack Start
-        public override void JustEngagedWith(Unit victim) { }
 
         public bool HealthBelowPct(int pct) { return me.HealthBelowPct(pct); }
         public bool HealthAbovePct(int pct) { return me.HealthAbovePct(pct); }

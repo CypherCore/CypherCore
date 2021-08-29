@@ -3482,7 +3482,7 @@ namespace Game.Entities
             SetFaction(rEntry != null ? (uint)rEntry.FactionID : 0);
         }
 
-        public void SetResurrectRequestData(Unit caster, uint health, uint mana, uint appliedAura)
+        public void SetResurrectRequestData(WorldObject caster, uint health, uint mana, uint appliedAura)
         {
             Cypher.Assert(!IsResurrectRequested());
             _resurrectionData = new ResurrectionData();
@@ -3633,7 +3633,7 @@ namespace Game.Entities
             return false;
         }
 
-        public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, uint index, Unit caster)
+        public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, uint index, WorldObject caster)
         {
             SpellEffectInfo effect = spellInfo.GetEffect(index);
             if (effect == null || !effect.IsEffect())
@@ -6636,46 +6636,6 @@ namespace Game.Entities
 
             return m_auraBaseFlatMod[(int)modGroup] * m_auraBasePctMod[(int)modGroup];
         }
-
-        public void AddComboPoints(sbyte count, Spell spell = null)
-        {
-            if (count == 0)
-                return;
-
-            sbyte comboPoints = spell != null ? spell.m_comboPointGain : (sbyte)GetPower(PowerType.ComboPoints);
-
-            comboPoints += count;
-
-            if (comboPoints > 5)
-                comboPoints = 5;
-            else if (comboPoints < 0)
-                comboPoints = 0;
-
-            if (spell == null)
-                SetPower(PowerType.ComboPoints, comboPoints);
-            else
-                spell.m_comboPointGain = comboPoints;
-        }
-        public void GainSpellComboPoints(sbyte count)
-        {
-            if (count == 0)
-                return;
-
-            sbyte cp = (sbyte)GetPower(PowerType.ComboPoints);
-            cp += count;
-
-            if (cp > 5)
-                cp = 5;
-            else if (cp < 0)
-                cp = 0;
-
-            SetPower(PowerType.ComboPoints, cp);
-        }
-        public void ClearComboPoints()
-        {
-            SetPower(PowerType.ComboPoints, 0);
-        }
-        public byte GetComboPoints() { return (byte)GetPower(PowerType.ComboPoints); }
 
         public byte GetDrunkValue() { return m_playerData.Inebriation; }
         public void SetDrunkValue(byte newDrunkValue, uint itemId = 0)

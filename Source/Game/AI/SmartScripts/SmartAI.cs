@@ -1118,9 +1118,9 @@ namespace Game.AI
             GetScript().ProcessEventsFor(SmartEvents.RewardQuest, player, quest.Id, opt, false, null, me);
         }
 
-        public override void Destroyed(Player player, uint eventId)
+        public override void Destroyed(WorldObject attacker, uint eventId)
         {
-            GetScript().ProcessEventsFor(SmartEvents.Death, player, eventId, 0, false, null, me);
+            GetScript().ProcessEventsFor(SmartEvents.Death, attacker != null ? attacker.ToUnit() : null, eventId, 0, false, null, me);
         }
 
         public override void SetData(uint id, uint value) { SetData(id, value, null); }

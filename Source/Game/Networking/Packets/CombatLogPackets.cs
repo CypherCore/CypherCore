@@ -23,7 +23,7 @@ using System.Collections.Generic;
 
 namespace Game.Networking.Packets
 {
-    class CombatLogServerPacket : ServerPacket
+    public class CombatLogServerPacket : ServerPacket
     {
         public CombatLogServerPacket(ServerOpcodes opcode, ConnectionType connection = ConnectionType.Realm) : base(opcode, connection)
         {

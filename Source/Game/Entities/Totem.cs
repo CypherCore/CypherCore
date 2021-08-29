@@ -143,7 +143,7 @@ namespace Game.Entities
             AddObjectToRemoveList();
         }
 
-        public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, uint index, Unit caster)
+        public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, uint index, WorldObject caster)
         {
             // @todo possibly all negative auras immune?
             if (GetEntry() == 5925)

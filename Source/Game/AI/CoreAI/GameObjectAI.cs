@@ -81,8 +81,8 @@ namespace Game.AI
         // prevents achievement tracking if returning true
         public virtual bool OnReportUse(Player player) { return false; }
 
-        public virtual void Destroyed(Player player, uint eventId) { }
-        public virtual void Damaged(Player player, uint eventId) { }
+        public virtual void Destroyed(WorldObject attacker, uint eventId) { }
+        public virtual void Damaged(WorldObject attacker, uint eventId) { }
 
         public virtual void SetData64(uint id, ulong value) { }
         public virtual ulong GetData64(uint id) { return 0; }
@@ -93,6 +93,13 @@ namespace Game.AI
         public virtual void OnLootStateChanged(uint state, Unit unit) { }
         public virtual void OnStateChanged(GameObjectState state) { }
         public virtual void EventInform(uint eventId) { }
-        public virtual void SpellHit(Unit unit, SpellInfo spellInfo) { }
+
+        // Called when hit by a spell
+        public virtual void SpellHit(Unit caster, SpellInfo spellInfo) { }
+        public virtual void SpellHit(GameObject caster, SpellInfo spellInfo) { }
+
+        // Called when spell hits a target
+        public virtual void SpellHitTarget(Unit target, SpellInfo spellInfo) { }
+        public virtual void SpellHitTarget(GameObject target, SpellInfo spellInfo) { }
     }
 }

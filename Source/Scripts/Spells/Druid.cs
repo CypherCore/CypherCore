@@ -906,7 +906,7 @@ namespace Scripts.Spells.Druid
             if (caster != null)
             {
                 // 0.01 * $AP * cp
-                byte cp = caster.ToPlayer().GetComboPoints();
+                byte cp = (byte)caster.ToPlayer().GetComboPoints();
 
                 // Idol of Feral Shadows. Can't be handled as SpellMod due its dependency from CPs
                 AuraEffect idol = caster.GetAuraEffect(SpellIds.IdolOfFeralShadows, 0);

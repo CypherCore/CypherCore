@@ -540,7 +540,7 @@ namespace Game
                 return;
 
             // always invisible or hidden faction can't change war state
-            if (factionState.Flags.HasFlag(ReputationFlags.Hidden | ReputationFlags.Header))
+            if (factionState.Flags.HasAnyFlag(ReputationFlags.Hidden | ReputationFlags.Header))
                 return;
 
             SetAtWar(factionState, on);
@@ -577,7 +577,7 @@ namespace Game
         void SetInactive(FactionState faction, bool inactive)
         {
             // always invisible or hidden faction can't be inactive
-            if (faction.Flags.HasFlag(ReputationFlags.Hidden | ReputationFlags.Header) || !faction.Flags.HasFlag(ReputationFlags.Visible))
+            if (faction.Flags.HasAnyFlag(ReputationFlags.Hidden | ReputationFlags.Header) || !faction.Flags.HasFlag(ReputationFlags.Visible))
                 return;
 
             // already set

@@ -330,7 +330,7 @@ namespace Game.Spells
             m_spellInfo = createInfo._spellInfo;
             m_castDifficulty = createInfo._castDifficulty;
             m_castGuid = createInfo._castId;
-            m_casterGuid = createInfo.CasterGUID.IsEmpty() ? createInfo.Caster.GetGUID() : createInfo.CasterGUID;
+            m_casterGuid = createInfo.CasterGUID;
             m_castItemGuid = createInfo.CastItemGUID;
             m_castItemId = createInfo.CastItemId;
             m_castItemLevel = createInfo.CastItemLevel;
@@ -2457,8 +2457,6 @@ namespace Game.Spells
 
         public static Aura TryCreate(AuraCreateInfo createInfo)
         {
-            Cypher.Assert(createInfo.Caster != null || !createInfo.CasterGUID.IsEmpty());
-
             uint effMask = createInfo._auraEffectMask;
             if (createInfo._targetEffectMask != 0)
                 effMask = createInfo._targetEffectMask;
@@ -2472,17 +2470,25 @@ namespace Game.Spells
 
         public static Aura Create(AuraCreateInfo createInfo)
         {
-            Cypher.Assert(createInfo.Caster != null || !createInfo.CasterGUID.IsEmpty());
-
             // try to get caster of aura
             if (!createInfo.CasterGUID.IsEmpty())
             {
-                if (createInfo.GetOwner().GetGUID() == createInfo.CasterGUID)
-                    createInfo.Caster = createInfo.GetOwner().ToUnit();
+                // world gameobjects can't own auras and they send empty casterguid
+                // checked on sniffs with spell 22247
+                if (createInfo.CasterGUID.IsGameObject())
+                {
+                    createInfo.Caster = null;
+                    createInfo.CasterGUID.Clear();
+                }
                 else
-                    createInfo.Caster = Global.ObjAccessor.GetUnit(createInfo.GetOwner(), createInfo.CasterGUID);
+                {
+                    if (createInfo._owner.GetGUID() == createInfo.CasterGUID)
+                        createInfo.Caster = createInfo._owner.ToUnit();
+                    else
+                        createInfo.Caster = Global.ObjAccessor.GetUnit(createInfo._owner, createInfo.CasterGUID);
+                }
             }
-            else
+            else if (createInfo.Caster != null)
                 createInfo.CasterGUID = createInfo.Caster.GetGUID();
 
             // check if aura can be owned by owner

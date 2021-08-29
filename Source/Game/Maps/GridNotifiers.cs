@@ -2577,27 +2577,26 @@ namespace Game.Maps
 
     class GameObjectFocusCheck : ICheck<GameObject>
     {
-        public GameObjectFocusCheck(Unit unit, uint focusId)
+        public GameObjectFocusCheck(WorldObject caster, uint focusId)
         {
-            i_unit = unit;
-            i_focusId = focusId;
+            _caster = caster;
+            _focusId = focusId;
         }
 
         public bool Invoke(GameObject go)
         {
-            if (go.GetGoInfo().GetSpellFocusType() != i_focusId)
+            if (go.GetGoInfo().GetSpellFocusType() != _focusId)
                 return false;
 
             if (!go.IsSpawned())
                 return false;
 
             float dist = go.GetGoInfo().GetSpellFocusRadius() / 2.0f;
-
-            return go.IsWithinDistInMap(i_unit, dist);
+            return go.IsWithinDistInMap(_caster, dist);
         }
 
-        Unit i_unit;
-        uint i_focusId;
+        WorldObject _caster;
+        uint _focusId;
     }
 
     // Find the nearest Fishing hole and return true only if source object is in range of hole
@@ -2697,7 +2696,7 @@ namespace Game.Maps
 
     public class AnyDeadUnitObjectInRangeCheck<T> : ICheck<T> where T : WorldObject
     {
-        public AnyDeadUnitObjectInRangeCheck(Unit searchObj, float range)
+        public AnyDeadUnitObjectInRangeCheck(WorldObject searchObj, float range)
         {
             i_searchObj = searchObj;
             i_range = range;
@@ -2720,16 +2719,14 @@ namespace Game.Maps
             return false;
         }
 
-        Unit i_searchObj;
+        WorldObject i_searchObj;
         float i_range;
     }
 
     public class AnyDeadUnitSpellTargetInRangeCheck<T> : AnyDeadUnitObjectInRangeCheck<T> where T : WorldObject
     {
-        public AnyDeadUnitSpellTargetInRangeCheck(Unit searchObj, float range, SpellInfo spellInfo, SpellTargetCheckTypes check, SpellTargetObjectTypes objectType)
-            : base(searchObj, range)
+        public AnyDeadUnitSpellTargetInRangeCheck(WorldObject searchObj, float range, SpellInfo spellInfo, SpellTargetCheckTypes check, SpellTargetObjectTypes objectType) : base(searchObj, range)
         {
-            i_spellInfo = spellInfo;
             i_check = new WorldObjectSpellTargetCheck(searchObj, searchObj, spellInfo, check, null, objectType);
         }
 
@@ -2738,7 +2735,6 @@ namespace Game.Maps
             return base.Invoke(obj) && i_check.Invoke(obj);
         }
 
-        SpellInfo i_spellInfo;
         WorldObjectSpellTargetCheck i_check;
     }
 

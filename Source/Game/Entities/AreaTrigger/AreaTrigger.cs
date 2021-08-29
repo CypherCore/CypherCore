@@ -491,6 +491,15 @@ namespace Game.Entities
             return Global.ObjAccessor.GetUnit(this, _targetGuid);
         }
 
+        public override uint GetFaction()
+        {
+            Unit caster = GetCaster();
+            if (caster)
+                return caster.GetFaction();
+
+            return 0;
+        }
+        
         void UpdatePolygonOrientation()
         {
             float newOrientation = GetOrientation();
@@ -1002,6 +1011,7 @@ namespace Game.Entities
 
         public AreaTriggerMiscTemplate GetMiscTemplate() { return _areaTriggerMiscTemplate; }
 
+        public override ObjectGuid GetOwnerGUID() { return GetCasterGuid(); }
         public ObjectGuid GetCasterGuid() { return m_areaTriggerData.Caster; }
 
         public Vector3 GetRollPitchYaw() { return _rollPitchYaw; }

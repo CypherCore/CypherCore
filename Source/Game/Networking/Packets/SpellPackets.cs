@@ -1181,21 +1181,25 @@ namespace Game.Networking.Packets
 
         public void Initialize(Spell spell)
         {
-            Health = (long)spell.GetCaster().GetHealth();
-            AttackPower = (int)spell.GetCaster().GetTotalAttackPowerValue(spell.GetCaster().GetClass() == Class.Hunter ? WeaponAttackType.RangedAttack : WeaponAttackType.BaseAttack);
-            SpellPower = spell.GetCaster().SpellBaseDamageBonusDone(SpellSchoolMask.Spell);
-            Armor = spell.GetCaster().GetArmor();
-            PowerType primaryPowerType = spell.GetCaster().GetPowerType();
-            bool primaryPowerAdded = false;
-            foreach (SpellPowerCost cost in spell.GetPowerCost())
+            Unit unitCaster = spell.GetCaster().ToUnit();
+            if (unitCaster != null)
             {
-                PowerData.Add(new SpellLogPowerData((int)cost.Power, spell.GetCaster().GetPower(cost.Power), cost.Amount));
-                if (cost.Power == primaryPowerType)
-                    primaryPowerAdded = true;
-            }
+                Health = (long)unitCaster.GetHealth();
+                AttackPower = (int)unitCaster.GetTotalAttackPowerValue(unitCaster.GetClass() == Class.Hunter ? WeaponAttackType.RangedAttack : WeaponAttackType.BaseAttack);
+                SpellPower = unitCaster.SpellBaseDamageBonusDone(SpellSchoolMask.Spell);
+                Armor = unitCaster.GetArmor();
+                PowerType primaryPowerType = unitCaster.GetPowerType();
+                bool primaryPowerAdded = false;
+                foreach (SpellPowerCost cost in spell.GetPowerCost())
+                {
+                    PowerData.Add(new SpellLogPowerData((int)cost.Power, unitCaster.GetPower(cost.Power), (int)cost.Amount));
+                    if (cost.Power == primaryPowerType)
+                        primaryPowerAdded = true;
+                }
 
-            if (!primaryPowerAdded)
-                PowerData.Insert(0, new SpellLogPowerData((int)primaryPowerType, spell.GetCaster().GetPower(primaryPowerType), 0));
+                if (!primaryPowerAdded)
+                    PowerData.Insert(0, new SpellLogPowerData((int)primaryPowerType, unitCaster.GetPower(primaryPowerType), 0));
+            }
         }
 
         public void Write(WorldPacket data)

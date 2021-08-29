@@ -490,7 +490,7 @@ namespace Game.AI
                                 _me.CastSpell(target.ToUnit(), e.Action.cast.spell, new CastSpellExtraArgs(triggerFlag));
                             }
                             else if (_go)
-                                _go.CastSpell(target.ToUnit(), e.Action.cast.spell, triggerFlag);
+                                _go.CastSpell(target.ToUnit(), e.Action.cast.spell, new CastSpellExtraArgs(triggerFlag));
                         }
                         else
                             Log.outDebug(LogFilter.ScriptsAi, "Spell {0} not casted because it has flag SMARTCAST_AURA_NOT_PRESENT and the target (Guid: {1} Entry: {2} Type: {3}) already has the aura",

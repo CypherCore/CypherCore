@@ -226,6 +226,12 @@ namespace Game.Entities
             }
         }
 
+        public override uint GetFaction()
+        {
+            Cypher.Assert(_caster != null);
+            return _caster.GetFaction();
+        }
+        
         void BindToCaster()
         {
             Cypher.Assert(_caster == null);
@@ -312,6 +318,7 @@ namespace Game.Entities
         public Unit GetCaster() { return _caster; }
         public uint GetSpellId() { return m_dynamicObjectData.SpellID; }
         public ObjectGuid GetCasterGUID() { return m_dynamicObjectData.Caster; }
+        public override ObjectGuid GetOwnerGUID() { return GetCasterGUID(); }
         public float GetRadius() { return m_dynamicObjectData.Radius; }
 
         DynamicObjectData m_dynamicObjectData;

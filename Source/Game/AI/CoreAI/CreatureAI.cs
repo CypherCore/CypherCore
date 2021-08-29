@@ -399,10 +399,12 @@ namespace Game.AI
         public virtual void JustUnregisteredAreaTrigger(AreaTrigger areaTrigger) { }
 
         // Called when hit by a spell
-        public virtual void SpellHit(Unit caster, SpellInfo spell) { }
+        public virtual void SpellHit(Unit caster, SpellInfo spellInfo) { }
+        public virtual void SpellHit(GameObject caster, SpellInfo spellInfo) { }
 
         // Called when spell hits a target
-        public virtual void SpellHitTarget(Unit target, SpellInfo spell) { }
+        public virtual void SpellHitTarget(Unit target, SpellInfo spellInfo) { }
+        public virtual void SpellHitTarget(GameObject target, SpellInfo spellInfo) { }
 
         public virtual bool IsEscorted() { return false; }
 
@@ -459,7 +461,7 @@ namespace Game.AI
         public virtual void QuestReward(Player player, Quest quest, LootItemType type, uint opt) { }
 
         /// == Waypoints system =============================
-
+        /// 
         public virtual void WaypointPathStarted(uint pathId) { }
 
         public virtual void WaypointStarted(uint nodeId, uint pathId) { }
@@ -478,7 +480,6 @@ namespace Game.AI
         // If a PlayerAI* is returned, that AI is placed on the player instead of the default charm AI
         // Object destruction is handled by Unit::RemoveCharmedBy
         public virtual PlayerAI GetAIForCharmedPlayer(Player who) { return null; }
-
 
         /// <summary>
         /// Should return true if the NPC is target of an escort quest

@@ -32,19 +32,6 @@ namespace Game.Entities
 
         public void SetInstantCast(bool set) { _instantCast = set; }
         public bool CanInstantCast() { return _instantCast; }
-        
-        // function uses real base points (typically value - 1)
-        public int CalculateSpellDamage(Unit target, SpellInfo spellProto, uint effect_index, int? basePoints = null, uint castItemId = 0, int itemLevel = -1)
-        {
-            SpellEffectInfo effect = spellProto.GetEffect(effect_index);
-            return effect != null ? effect.CalcValue(this, basePoints, target, castItemId, itemLevel) : 0;
-        }
-        public int CalculateSpellDamage(Unit target, SpellInfo spellProto, uint effect_index, out float variance, int? basePoints = null, uint castItemId = 0, int itemLevel = -1)
-        {
-            SpellEffectInfo effect = spellProto.GetEffect(effect_index);
-            variance = 0.0f;
-            return effect != null ? effect.CalcValue(out variance, this, basePoints, target, castItemId, itemLevel) : 0;
-        }
 
         public int SpellBaseDamageBonusDone(SpellSchoolMask schoolMask)
         {
@@ -754,66 +741,8 @@ namespace Game.Entities
             return Math.Max(crit_chance, 0.0f);
         }
 
-        // Calculate spell hit result can be:
-        // Every spell can: Evade/Immune/Reflect/Sucesful hit
-        // For melee based spells:
-        //   Miss
-        //   Dodge
-        //   Parry
-        // For spells
-        //   Resist
-        public SpellMissInfo SpellHitResult(Unit victim, SpellInfo spellInfo, bool canReflect = false)
-        {
-            // All positive spells can`t miss
-            // @todo client not show miss log for this spells - so need find info for this in dbc and use it!
-            if (spellInfo.IsPositive()
-                && (!IsHostileTo(victim)))  // prevent from affecting enemy by "positive" spell
-                return SpellMissInfo.None;
-
-            if (this == victim)
-                return SpellMissInfo.None;
-
-            // Return evade for units in evade mode
-            if (victim.IsTypeId(TypeId.Unit) && victim.ToCreature().IsEvadingAttacks())
-                return SpellMissInfo.Evade;
-
-            // Try victim reflect spell
-            if (canReflect)
-            {
-                int reflectchance = victim.GetTotalAuraModifier(AuraType.ReflectSpells);
-                reflectchance += victim.GetTotalAuraModifierByMiscMask(AuraType.ReflectSpellsSchool, (int)spellInfo.GetSchoolMask());
-
-                if (reflectchance > 0 && RandomHelper.randChance(reflectchance))
-                    return SpellMissInfo.Reflect;
-            }
-
-            if (spellInfo.HasAttribute(SpellAttr3.IgnoreHitResult))
-                return SpellMissInfo.None;
-
-            // Check for immune
-            if (victim.IsImmunedToSpell(spellInfo, this))
-                return SpellMissInfo.Immune;
-
-            // Damage immunity is only checked if the spell has damage effects, this immunity must not prevent aura apply
-            // returns SPELL_MISS_IMMUNE in that case, for other spells, the SMSG_SPELL_GO must show hit
-            if (spellInfo.HasOnlyDamageEffects() && victim.IsImmunedToDamage(spellInfo))
-                return SpellMissInfo.Immune;
-
-            switch (spellInfo.DmgClass)
-            {
-                case SpellDmgClass.Ranged:
-                case SpellDmgClass.Melee:
-                    return MeleeSpellHitResult(victim, spellInfo);
-                case SpellDmgClass.None:
-                    return SpellMissInfo.None;
-                case SpellDmgClass.Magic:
-                    return MagicSpellHitResult(victim, spellInfo);
-            }
-            return SpellMissInfo.None;
-        }
-
         // Melee based spells hit result calculations
-        SpellMissInfo MeleeSpellHitResult(Unit victim, SpellInfo spellInfo)
+        public override SpellMissInfo MeleeSpellHitResult(Unit victim, SpellInfo spellInfo)
         {
             WeaponAttackType attType = WeaponAttackType.BaseAttack;
 
@@ -947,142 +876,6 @@ namespace Game.Entities
             }
 
             return SpellMissInfo.None;
-        }
-
-        SpellMissInfo MagicSpellHitResult(Unit victim, SpellInfo spell)
-        {
-            // Can`t miss on dead target (on skinning for example)
-            if (!victim.IsAlive() && !victim.IsTypeId(TypeId.Player))
-                return SpellMissInfo.None;
-
-            SpellSchoolMask schoolMask = spell.GetSchoolMask();
-            // PvP - PvE spell misschances per leveldif > 2
-            int lchance = victim.IsTypeId(TypeId.Player) ? 7 : 11;
-            int thisLevel = (int)GetLevelForTarget(victim);
-            if (IsTypeId(TypeId.Unit) && ToCreature().IsTrigger())
-                thisLevel = (int)Math.Max(thisLevel, spell.SpellLevel);
-            int leveldif = (int)(victim.GetLevelForTarget(this)) - thisLevel;
-            int levelBasedHitDiff = leveldif;
-
-            // Base hit chance from attacker and victim levels
-            int modHitChance;
-            if (levelBasedHitDiff >= 0)
-            {
-                if (!victim.IsTypeId(TypeId.Player))
-                {
-                    modHitChance = 94 - 3 * Math.Min(levelBasedHitDiff, 3);
-                    levelBasedHitDiff -= 3;
-                }
-                else
-                {
-                    modHitChance = 96 - Math.Min(levelBasedHitDiff, 2);
-                    levelBasedHitDiff -= 2;
-                }
-                if (levelBasedHitDiff > 0)
-                    modHitChance -= lchance * Math.Min(levelBasedHitDiff, 7);
-            }
-            else
-                modHitChance = 97 - levelBasedHitDiff;
-
-            // Spellmod from SpellModOp.HitChance
-            Player modOwner = GetSpellModOwner();
-            if (modOwner != null)
-                modOwner.ApplySpellMod(spell, SpellModOp.HitChance, ref modHitChance);
-
-            // Spells with SPELL_ATTR3_IGNORE_HIT_RESULT will ignore target's avoidance effects
-            if (!spell.HasAttribute(SpellAttr3.IgnoreHitResult))
-            {
-                // Chance hit from victim SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE auras
-                modHitChance += victim.GetTotalAuraModifierByMiscMask(AuraType.ModAttackerSpellHitChance, (int)schoolMask);
-            }
-
-            int HitChance = modHitChance * 100;
-            // Increase hit chance from attacker SPELL_AURA_MOD_SPELL_HIT_CHANCE and attacker ratings
-            HitChance += (int)(modHitChance * 100.0f);
-
-            MathFunctions.RoundToInterval(ref HitChance, 0, 10000);
-
-            int tmp = 10000 - HitChance;
-
-            int rand = RandomHelper.IRand(0, 9999);
-            if (tmp > 0 && rand < tmp)
-                return SpellMissInfo.Miss;
-
-            // Spells with SPELL_ATTR3_IGNORE_HIT_RESULT will additionally fully ignore
-            // resist and deflect chances
-            if (spell.HasAttribute(SpellAttr3.IgnoreHitResult))
-                return SpellMissInfo.None;
-
-            // Chance resist mechanic (select max value from every mechanic spell effect)
-            int resist_chance = victim.GetMechanicResistChance(spell) * 100;
-
-            // Roll chance
-            if (resist_chance > 0 && rand < (tmp += resist_chance))
-                return SpellMissInfo.Resist;
-
-            // cast by caster in front of victim
-            if (!victim.HasUnitState(UnitState.Controlled) && (victim.HasInArc(MathFunctions.PI, this) || victim.HasAuraType(AuraType.IgnoreHitDirection)))
-            {
-                int deflect_chance = victim.GetTotalAuraModifier(AuraType.DeflectSpells) * 100;
-                if (deflect_chance > 0 && rand < (tmp += deflect_chance))
-                    return SpellMissInfo.Deflect;
-            }
-
-            return SpellMissInfo.None;
-        }
-
-        public void CastSpell(SpellCastTargets targets, uint spellId, CastSpellExtraArgs args)
-        {
-            if (args == null)
-                args = new CastSpellExtraArgs();
-
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, args.CastDifficulty != Difficulty.None ? args.CastDifficulty : GetMap().GetDifficultyID());
-            if (spellInfo == null)
-            {
-                Log.outError(LogFilter.Unit, $"CastSpell: unknown spell {spellId} by caster: {GetGUID()}");
-                return;
-            }
-
-            Spell spell = new(this, spellInfo, args.TriggerFlags, args.OriginalCaster);
-            foreach (var pair in args.SpellValueOverrides)
-                spell.SetSpellValue(pair.Key, pair.Value);
-
-            spell.m_CastItem = args.CastItem;
-            spell.Prepare(targets, args.TriggeringAura);
-        }
-
-        public void CastSpell(WorldObject target, uint spellId, bool triggered)
-        {
-            CastSpell(target, spellId, new CastSpellExtraArgs(triggered));
-        }
-
-        public void CastSpell(WorldObject target, uint spellId, CastSpellExtraArgs args = null)
-        {
-            SpellCastTargets targets = new();
-            if (target)
-            {
-                Unit unitTarget = target.ToUnit();
-                GameObject goTarget = target.ToGameObject();
-                if (unitTarget != null)
-                    targets.SetUnitTarget(unitTarget);
-                else if (goTarget != null)
-                    targets.SetGOTarget(goTarget);
-                else
-                {
-                    Log.outError(LogFilter.Unit, $"CastSpell: Invalid target {target.GetGUID()} passed to spell cast by {GetGUID()}");
-                    return;
-                }
-            }
-
-            CastSpell(targets, spellId, args);
-        }
-
-        public void CastSpell(Position dest, uint spellId, CastSpellExtraArgs args = null)
-        {
-            SpellCastTargets targets = new();
-            targets.SetDst(dest);
-
-            CastSpell(targets, spellId, args);
         }
 
         public void FinishSpell(CurrentSpellTypes spellType, bool ok = true)
@@ -1223,7 +1016,7 @@ namespace Game.Entities
             return spellInfo;
         }
 
-        public uint GetCastSpellXSpellVisualId(SpellInfo spellInfo)
+        public override uint GetCastSpellXSpellVisualId(SpellInfo spellInfo)
         {
             var visualOverrides = GetAuraEffectsByType(AuraType.OverrideSpellVisual);
             foreach (AuraEffect effect in visualOverrides)
@@ -1239,7 +1032,7 @@ namespace Game.Entities
                 }
             }
 
-            return spellInfo.GetSpellXSpellVisualId(this);
+            return base.GetCastSpellXSpellVisualId(spellInfo);
         }
 
         public SpellHistory GetSpellHistory() { return _spellHistory; }
@@ -1520,7 +1313,7 @@ namespace Game.Entities
                 }
             }
         }
-        public virtual bool IsImmunedToSpell(SpellInfo spellInfo, Unit caster)
+        public virtual bool IsImmunedToSpell(SpellInfo spellInfo, WorldObject caster)
         {
             if (spellInfo == null)
                 return false;
@@ -1617,7 +1410,7 @@ namespace Game.Entities
 
             return mask;
         }
-        public virtual bool IsImmunedToSpellEffect(SpellInfo spellInfo, uint index, Unit caster)
+        public virtual bool IsImmunedToSpellEffect(SpellInfo spellInfo, uint index, WorldObject caster)
         {
             if (spellInfo == null)
                 return false;
@@ -1887,87 +1680,10 @@ namespace Game.Entities
                 if (GetCurrentSpell(i) != null && GetCurrentSpell(i).m_spellInfo.Id != except_spellid)
                     InterruptSpell(i, false);
         }
-        public void ModSpellCastTime(SpellInfo spellInfo, ref int castTime, Spell spell = null)
-        {
-            if (spellInfo == null || castTime < 0)
-                return;
-
-            // called from caster
-            Player modOwner = GetSpellModOwner();
-            if (modOwner != null)
-                modOwner.ApplySpellMod(spellInfo, SpellModOp.ChangeCastTime, ref castTime, spell);
-
-            if (!(spellInfo.HasAttribute(SpellAttr0.Ability | SpellAttr0.Tradespell) || spellInfo.HasAttribute(SpellAttr3.NoDoneBonus))
-                && (IsTypeId(TypeId.Player) && spellInfo.SpellFamilyName != 0) || IsTypeId(TypeId.Unit))
-                castTime = CanInstantCast() ? 0 : (int)(castTime * m_unitData.ModCastingSpeed);
-            else if (spellInfo.HasAttribute(SpellAttr0.ReqAmmo) && !spellInfo.HasAttribute(SpellAttr2.AutorepeatFlag))
-                castTime = (int)(castTime * m_modAttackSpeedPct[(int)WeaponAttackType.RangedAttack]);
-            else if (Global.SpellMgr.IsPartOfSkillLine(SkillType.Cooking, spellInfo.Id) && HasAura(67556)) // cooking with Chef Hat.
-                castTime = 500;
-        }
-        public void ModSpellDurationTime(SpellInfo spellInfo, ref int duration, Spell spell = null)
-        {
-            if (spellInfo == null || duration < 0)
-                return;
-
-            if (spellInfo.IsChanneled() && !spellInfo.HasAttribute(SpellAttr5.HasteAffectDuration))
-                return;
-
-            // called from caster
-            Player modOwner = GetSpellModOwner();
-            if (modOwner)
-                modOwner.ApplySpellMod(spellInfo, SpellModOp.ChangeCastTime, ref duration, spell);
-
-            if (!(spellInfo.HasAttribute(SpellAttr0.Ability) || spellInfo.HasAttribute(SpellAttr0.Tradespell) || spellInfo.HasAttribute(SpellAttr3.NoDoneBonus)) &&
-                (IsTypeId(TypeId.Player) && spellInfo.SpellFamilyName != 0) || IsTypeId(TypeId.Unit))
-                duration = (int)(duration * m_unitData.ModCastingSpeed);
-            else if (spellInfo.HasAttribute(SpellAttr0.ReqAmmo) && !spellInfo.HasAttribute(SpellAttr2.AutorepeatFlag))
-                duration = (int)(duration * m_modAttackSpeedPct[(int)WeaponAttackType.RangedAttack]);
-        }
-        public float ApplyEffectModifiers(SpellInfo spellProto, uint effect_index, float value)
-        {
-            Player modOwner = GetSpellModOwner();
-            if (modOwner != null)
-            {
-                modOwner.ApplySpellMod(spellProto, SpellModOp.Points, ref value);
-                switch (effect_index)
-                {
-                    case 0:
-                        modOwner.ApplySpellMod(spellProto, SpellModOp.PointsIndex0, ref value);
-                        break;
-                    case 1:
-                        modOwner.ApplySpellMod(spellProto, SpellModOp.PointsIndex1, ref value);
-                        break;
-                    case 2:
-                        modOwner.ApplySpellMod(spellProto, SpellModOp.PointsIndex2, ref value);
-                        break;
-                    case 3:
-                        modOwner.ApplySpellMod(spellProto, SpellModOp.PointsIndex3, ref value);
-                        break;
-                    case 4:
-                        modOwner.ApplySpellMod(spellProto, SpellModOp.PointsIndex4, ref value);
-                        break;
-                }
-            }
-            return value;
-        }
 
         public ushort GetMaxSkillValueForLevel(Unit target = null)
         {
             return (ushort)(target != null ? GetLevelForTarget(target) : GetLevel() * 5);
-        }
-        public Player GetSpellModOwner()
-        {
-            if (IsTypeId(TypeId.Player))
-                return ToPlayer();
-
-            if (HasUnitTypeMask(UnitTypeMask.Pet | UnitTypeMask.Totem | UnitTypeMask.Guardian))
-            {
-                Unit owner = GetOwner();
-                if (owner != null && owner.IsTypeId(TypeId.Player))
-                    return owner.ToPlayer();
-            }
-            return null;
         }
 
         public Spell GetCurrentSpell(CurrentSpellTypes spellType)
@@ -2283,7 +1999,6 @@ namespace Game.Entities
 
                     // update for out of range group members (on 1 slot use)
                     aura.SetNeedClientUpdateForTargets();
-                    Log.outDebug(LogFilter.Spells, "Aura {0} partially interrupted on {1}, new duration: {2} ms", aura.GetId(), GetGUID().ToString(), aura.GetDuration());
                 }
             }
         }
@@ -2641,7 +2356,7 @@ namespace Game.Entities
                 diminish.HitCount = currentLevel + 1;
         }
 
-        public bool ApplyDiminishingToDuration(SpellInfo auraSpellInfo, ref int duration, Unit caster, DiminishingLevels previousLevel)
+        public bool ApplyDiminishingToDuration(SpellInfo auraSpellInfo, ref int duration, WorldObject caster, DiminishingLevels previousLevel)
         {
             DiminishingGroup group = auraSpellInfo.GetDiminishingReturnsGroupForSpell();
             if (duration == -1 || group == DiminishingGroup.None)
@@ -2656,7 +2371,7 @@ namespace Game.Entities
             if (limitDuration > 0 && duration > limitDuration)
             {
                 Unit target = targetOwner ?? this;
-                Unit source = casterOwner ?? caster;
+                WorldObject source = casterOwner ?? caster;
 
                 if (target.IsAffectedByDiminishingReturns() && source.IsPlayer())
                     duration = limitDuration;
@@ -2863,15 +2578,15 @@ namespace Game.Entities
             if (spellInfo == null)
                 return null;
 
-            if (!target.IsAlive() && !spellInfo.IsPassive() && !spellInfo.HasAttribute(SpellAttr2.CanTargetDead))
-                return null;
-
             return AddAura(spellInfo, SpellConst.MaxEffectMask, target);
         }
 
         public Aura AddAura(SpellInfo spellInfo, uint effMask, Unit target)
         {
             if (spellInfo == null)
+                return null;
+
+            if (!target.IsAlive() && !spellInfo.IsPassive() && !spellInfo.HasAttribute(SpellAttr2.CanTargetDead))
                 return null;
 
             if (target.IsImmunedToSpell(spellInfo, this))
@@ -3037,29 +2752,6 @@ namespace Game.Entities
             return false;
         }
 
-        // target dependent range checks
-        public float GetSpellMaxRangeForTarget(Unit target, SpellInfo spellInfo)
-        {
-            if (spellInfo.RangeEntry == null)
-                return 0;
-            if (spellInfo.RangeEntry.RangeMax[0] == spellInfo.RangeEntry.RangeMax[1])
-                return spellInfo.GetMaxRange();
-            if (!target)
-                return spellInfo.GetMaxRange(true);
-            return spellInfo.GetMaxRange(!IsHostileTo(target));
-        }
-
-        public float GetSpellMinRangeForTarget(Unit target, SpellInfo spellInfo)
-        {
-            if (spellInfo.RangeEntry == null)
-                return 0;
-            if (spellInfo.RangeEntry.RangeMin[0] == spellInfo.RangeEntry.RangeMin[1])
-                return spellInfo.GetMinRange();
-            if (!target)
-                return spellInfo.GetMinRange(true);
-            return spellInfo.GetMinRange(!IsHostileTo(target));
-        }
-
         public bool HasAuraType(AuraType auraType)
         {
             return !m_modAuras.LookupByKey(auraType).Empty();
@@ -3177,7 +2869,7 @@ namespace Game.Entities
             return null;
         }
 
-        public List<DispelableAura> GetDispellableAuraList(Unit caster, uint dispelMask, bool isReflect = false)
+        public List<DispelableAura> GetDispellableAuraList(WorldObject caster, uint dispelMask, bool isReflect = false)
         {
             List<DispelableAura> dispelList = new();
 
@@ -3311,7 +3003,7 @@ namespace Game.Entities
                 }
             }
         }
-        public void RemoveAurasDueToSpellBySteal(uint spellId, ObjectGuid casterGUID, Unit stealer)
+        public void RemoveAurasDueToSpellBySteal(uint spellId, ObjectGuid casterGUID, WorldObject stealer)
         {
             var range = m_ownedAuras.LookupByKey(spellId);
             foreach (var aura in range)
@@ -3344,39 +3036,43 @@ namespace Game.Entities
                     // Cast duration to unsigned to prevent permanent aura's such as Righteous Fury being permanently added to caster
                     uint dur = (uint)Math.Min(2u * Time.Minute * Time.InMilliseconds, aura.GetDuration());
 
-                    Aura oldAura = stealer.GetAura(aura.GetId(), aura.GetCasterGUID());
-                    if (oldAura != null)
+                    Unit unitStealer = stealer.ToUnit();
+                    if (unitStealer != null)
                     {
-                        if (stealCharge)
-                            oldAura.ModCharges(1);
-                        else
-                            oldAura.ModStackAmount(1);
-                        oldAura.SetDuration((int)dur);
-                    }
-                    else
-                    {
-                        // single target state must be removed before aura creation to preserve existing single target aura
-                        if (aura.IsSingleTarget())
-                            aura.UnregisterSingleTarget();
-
-                        AuraCreateInfo createInfo = new(aura.GetCastGUID(), aura.GetSpellInfo(), aura.GetCastDifficulty(), effMask, stealer);
-                        createInfo.SetCasterGUID(aura.GetCasterGUID());
-                        createInfo.SetBaseAmount(baseDamage);
-
-                        Aura newAura = Aura.TryRefreshStackOrCreate(createInfo);
-                        if (newAura != null)
+                        Aura oldAura = unitStealer.GetAura(aura.GetId(), aura.GetCasterGUID());
+                        if (oldAura != null)
                         {
-                            // created aura must not be single target aura, so stealer won't loose it on recast
-                            if (newAura.IsSingleTarget())
+                            if (stealCharge)
+                                oldAura.ModCharges(1);
+                            else
+                                oldAura.ModStackAmount(1);
+                            oldAura.SetDuration((int)dur);
+                        }
+                        else
+                        {
+                            // single target state must be removed before aura creation to preserve existing single target aura
+                            if (aura.IsSingleTarget())
+                                aura.UnregisterSingleTarget();
+
+                            AuraCreateInfo createInfo = new(aura.GetCastGUID(), aura.GetSpellInfo(), aura.GetCastDifficulty(), effMask, stealer);
+                            createInfo.SetCasterGUID(aura.GetCasterGUID());
+                            createInfo.SetBaseAmount(baseDamage);
+
+                            Aura newAura = Aura.TryRefreshStackOrCreate(createInfo);
+                            if (newAura != null)
                             {
-                                newAura.UnregisterSingleTarget();
-                                // bring back single target aura status to the old aura
-                                aura.SetIsSingleTarget(true);
-                                caster.GetSingleCastAuras().Add(aura);
+                                // created aura must not be single target aura, so stealer won't loose it on recast
+                                if (newAura.IsSingleTarget())
+                                {
+                                    newAura.UnregisterSingleTarget();
+                                    // bring back single target aura status to the old aura
+                                    aura.SetIsSingleTarget(true);
+                                    caster.GetSingleCastAuras().Add(aura);
+                                }
+                                // FIXME: using aura.GetMaxDuration() maybe not blizzlike but it fixes stealing of spells like Innervate
+                                newAura.SetLoadedState(aura.GetMaxDuration(), (int)dur, stealCharge ? 1 : aura.GetCharges(), 1, recalculateMask, damage);
+                                newAura.ApplyForTargets();
                             }
-                            // FIXME: using aura.GetMaxDuration() maybe not blizzlike but it fixes stealing of spells like Innervate
-                            newAura.SetLoadedState(aura.GetMaxDuration(), (int)dur, stealCharge ? 1 : aura.GetCharges(), 1, recalculateMask, damage);
-                            newAura.ApplyForTargets();
                         }
                     }
 
@@ -3524,7 +3220,7 @@ namespace Game.Entities
                 }
             }
         }
-        public void RemoveAurasDueToSpellByDispel(uint spellId, uint dispellerSpellId, ObjectGuid casterGUID, Unit dispeller, byte chargesRemoved = 1)
+        public void RemoveAurasDueToSpellByDispel(uint spellId, uint dispellerSpellId, ObjectGuid casterGUID, WorldObject dispeller, byte chargesRemoved = 1)
         {
             foreach (var pair in GetOwnedAuras())
             {
@@ -4270,6 +3966,14 @@ namespace Game.Entities
             if (createInfo.CasterGUID.IsEmpty() && !createInfo.GetSpellInfo().IsStackableOnOneSlotWithDifferentCasters())
                 createInfo.CasterGUID = createInfo.Caster.GetGUID();
 
+            // world gameobjects can't own auras and they send empty casterguid
+            // checked on sniffs with spell 22247
+            if (createInfo.CasterGUID.IsGameObject())
+            {
+                createInfo.Caster = null;
+                createInfo.CasterGUID.Clear();
+            }
+
             // passive and Incanter's Absorption and auras with different type can stack with themselves any number of times
             if (!createInfo.GetSpellInfo().IsMultiSlotAura())
             {
@@ -4612,7 +4316,7 @@ namespace Game.Entities
             });
         }
 
-        int GetMaxNegativeAuraModifierByMiscValue(AuraType auratype, int miscValue)
+        public int GetMaxNegativeAuraModifierByMiscValue(AuraType auratype, int miscValue)
         {
             return GetMaxNegativeAuraModifier(auratype, aurEff =>
             {
