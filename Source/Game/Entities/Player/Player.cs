@@ -1425,13 +1425,16 @@ namespace Game.Entities
 
             float percent = 100.0f;
 
-            float repMod = noQuestBonus ? 0.0f : GetTotalAuraModifier(AuraType.ModReputationGain);
+            if (!noBonuses)
+            {
+                float repMod = noQuestBonus ? 0.0f : GetTotalAuraModifier(AuraType.ModReputationGain);
 
-            // faction specific auras only seem to apply to kills
-            if (source == ReputationSource.Kill)
-                repMod += GetTotalAuraModifierByMiscValue(AuraType.ModFactionReputationGain, faction);
+                // faction specific auras only seem to apply to kills
+                if (source == ReputationSource.Kill)
+                    repMod += GetTotalAuraModifierByMiscValue(AuraType.ModFactionReputationGain, faction);
 
-            percent += rep > 0 ? repMod : -repMod;
+                percent += rep > 0 ? repMod : -repMod;
+            }
 
             float rate;
             switch (source)
