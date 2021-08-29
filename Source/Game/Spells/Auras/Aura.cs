@@ -2721,6 +2721,9 @@ namespace Game.Spells
             if (effMask == 0)
                 return;
 
+            if (!_staticApplications.ContainsKey(target.GetGUID()))
+                _staticApplications[target.GetGUID()] = 0;
+
             _staticApplications[target.GetGUID()] |= effMask;
         }
 
