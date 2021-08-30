@@ -188,49 +188,6 @@ namespace Game.Spells
                                     return;
                                 break;
                             }
-                            // Gargoyle Strike
-                            case 51963:
-                            {
-                                damage = 60;
-                                // about +4 base spell dmg per level
-                                if (unitCaster && unitCaster.GetLevel() >= 60)
-                                    damage += (int)((unitCaster.GetLevel() - 60) * 4);
-                                break;
-                            }
-                        }
-                        break;
-                    }
-                    case SpellFamilyNames.Warrior:
-                    {
-                        if (unitCaster == null)
-                            break;
-
-                        // Victory Rush
-                        if (m_spellInfo.Id == 34428)
-                            MathFunctions.ApplyPct(ref damage, unitCaster.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack));
-                        // Shockwave
-                        else if (m_spellInfo.Id == 46968)
-                        {
-                            int pct = unitCaster.CalculateSpellDamage(unitTarget, m_spellInfo, 2);
-                            if (pct > 0)
-                                damage += (int)MathFunctions.CalculatePct(unitCaster.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack), pct);
-                            break;
-                        }
-                        break;
-                    }
-                    case SpellFamilyNames.Deathknight:
-                    {
-                        if (unitCaster == null)
-                            break;
-
-                        // Blood Boil - bonus for diseased targets
-                        if (m_spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x00040000u))
-                        {
-                            if (unitTarget.GetAuraEffect(AuraType.PeriodicDamage, SpellFamilyNames.Deathknight, new FlagArray128(0, 0, 0x00000002), unitCaster.GetGUID()) != null)
-                            {
-                                damage += m_damage / 2;
-                                damage += (int)(unitCaster.GetTotalAttackPowerValue(WeaponAttackType.BaseAttack) * 0.035f);
-                            }
                         }
                         break;
                     }
@@ -2548,45 +2505,6 @@ namespace Game.Spells
 
             switch (m_spellInfo.SpellFamilyName)
             {
-                case SpellFamilyNames.Warrior:
-                {
-                    // Devastate (player ones)
-                    if (m_spellInfo.SpellFamilyFlags[1].HasAnyFlag(0x40u))
-                    {
-                        // Player can apply only 58567 Sunder Armor effect.
-                        bool needCast = !unitTarget.HasAura(58567, m_caster.GetGUID());
-                        if (needCast)
-                            m_caster.CastSpell(unitTarget, 58567, true);
-
-                        Aura aur = unitTarget.GetAura(58567, m_caster.GetGUID());
-                        if (aur != null)
-                        {
-                            int num = (needCast ? 0 : 1);
-                            if (num != 0)
-                                aur.ModStackAmount(num);
-                            fixed_bonus += (aur.GetStackAmount() - 1) * CalculateDamage(2, unitTarget);
-                        }
-                    }
-                    break;
-                }
-                case SpellFamilyNames.Rogue:
-                {
-                    // Hemorrhage
-                    if (m_spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x2000000u))
-                    {
-                        if (m_caster.IsTypeId(TypeId.Player))
-                            m_caster.ToPlayer().AddComboPoints(1, this);
-                        // 50% more damage with daggers
-                        if (unitCaster.IsPlayer())
-                        {
-                            Item item = unitCaster.ToPlayer().GetWeaponForAttack(m_attackType, true);
-                            if (item != null)
-                                if (item.GetTemplate().GetSubClass() == (uint)ItemSubClassWeapon.Dagger)
-                                    totalDamagePercentMod *= 1.5f;
-                        }
-                    }
-                    break;
-                }
                 case SpellFamilyNames.Shaman:
                 {
                     // Skyshatter Harness item set bonus
@@ -2594,42 +2512,6 @@ namespace Game.Spells
                     AuraEffect aurEff = unitCaster.IsScriptOverriden(m_spellInfo, 5634);
                     if (aurEff != null)
                         unitCaster.CastSpell((WorldObject)null, 38430, new CastSpellExtraArgs(aurEff));
-                    break;
-                }
-                case SpellFamilyNames.Druid:
-                {
-                    // Mangle (Cat): CP
-                    if (m_spellInfo.SpellFamilyFlags[1].HasAnyFlag(0x400u))
-                    {
-                        if (m_caster.IsTypeId(TypeId.Player))
-                            m_caster.ToPlayer().AddComboPoints(1, this);
-                    }
-                    break;
-                }
-                case SpellFamilyNames.Hunter:
-                {
-                    // Kill Shot - bonus damage from Ranged Attack Power
-                    if (m_spellInfo.SpellFamilyFlags[1].HasAnyFlag(0x800000u))
-                        spell_bonus += (int)(0.45f * unitCaster.GetTotalAttackPowerValue(WeaponAttackType.RangedAttack));
-                    break;
-                }
-                case SpellFamilyNames.Deathknight:
-                {
-                    // Blood Strike
-                    if (m_spellInfo.SpellFamilyFlags[0].HasAnyFlag(0x400000u))
-                    {
-                        SpellEffectInfo effect = m_spellInfo.GetEffect(2);
-                        if (effect != null)
-                        {
-                            float bonusPct = effect.CalcValue(m_caster) * unitTarget.GetDiseasesByCaster(m_caster.GetGUID()) / 2.0f;
-                            // Death Knight T8 Melee 4P Bonus
-                            AuraEffect aurEff = unitCaster.GetAuraEffect(64736, 0);
-                            if (aurEff != null)
-                                MathFunctions.AddPct(ref bonusPct, aurEff.GetAmount());
-                            MathFunctions.AddPct(ref totalDamagePercentMod, bonusPct);
-                        }
-                        break;
-                    }
                     break;
                 }
             }
