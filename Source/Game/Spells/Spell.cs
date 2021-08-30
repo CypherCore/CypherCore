@@ -4358,7 +4358,7 @@ namespace Game.Spells
             bool preventDefault = CallScriptEffectHandlers(i, mode);
 
             if (!preventDefault)
-                Global.SpellMgr.GetSpellEffectHandler(effect).Invoke(this, i);
+                Global.SpellMgr.GetSpellEffectHandler(effect).Invoke(this);
         }
 
         public static Spell ExtractSpellFromEvent(BasicEvent basicEvent)
@@ -5026,7 +5026,7 @@ namespace Game.Spells
                         int skillValue = 0;
 
                         // check lock compatibility
-                        SpellCastResult res = CanOpenLock(effect.EffectIndex, lockId, ref skillId, ref reqSkillValue, ref skillValue);
+                        SpellCastResult res = CanOpenLock(effect, lockId, ref skillId, ref reqSkillValue, ref skillValue);
                         if (res != SpellCastResult.SpellCastOk)
                             return res;
                         break;
@@ -6852,7 +6852,7 @@ namespace Game.Spells
             targetInfo.IsCrit = RandomHelper.randChance(critChance);
         }
 
-        SpellCastResult CanOpenLock(uint effIndex, uint lockId, ref SkillType skillId, ref int reqSkillValue, ref int skillValue)
+        SpellCastResult CanOpenLock(SpellEffectInfo effect, uint lockId, ref SkillType skillId, ref int reqSkillValue, ref int skillValue)
         {
             if (lockId == 0)                                             // possible case for GO and maybe for items.
                 return SpellCastResult.SpellCastOk;
@@ -6866,10 +6866,6 @@ namespace Game.Spells
 
             if (lockInfo == null)
                 return SpellCastResult.BadTargets;
-
-            SpellEffectInfo effect = m_spellInfo.GetEffect(effIndex);
-            if (effect == null)
-                return SpellCastResult.BadTargets; // no idea about correct error
 
             bool reqKey = false;                                    // some locks not have reqs
 

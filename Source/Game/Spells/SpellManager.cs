@@ -4017,7 +4017,7 @@ namespace Game.Entities
 
         public delegate void AuraEffectHandler(AuraEffect effect, AuraApplication aurApp, AuraEffectHandleModes mode, bool apply);
         Dictionary<AuraType, AuraEffectHandler> AuraEffectHandlers = new();
-        public delegate void SpellEffectHandler(Spell spell, uint effectIndex);
+        public delegate void SpellEffectHandler(Spell spell);
         Dictionary<SpellEffectName, SpellEffectHandler> SpellEffectsHandlers = new();
 
         public MultiMap<uint, uint> PetFamilySpellsStorage = new();

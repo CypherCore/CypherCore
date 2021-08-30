@@ -1429,7 +1429,7 @@ namespace Scripts.Spells.Items
                     return;
             }
 
-            CreateItem(effIndex, newitemid, ItemContext.None);
+            CreateItem(newitemid, ItemContext.None);
         }
 
         public override void Register()
