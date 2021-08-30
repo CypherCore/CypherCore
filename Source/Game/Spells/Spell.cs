@@ -1993,10 +1993,10 @@ namespace Game.Spells
             if (Aura.BuildEffectMaskForOwner(m_spellInfo, SpellConst.MaxEffectMask, unit) != 0)
             {
                 foreach (SpellEffectInfo auraSpellEffect in m_spellInfo.GetEffects())
-            if (auraSpellEffect != null)
-                    hitInfo.AuraBasePoints[auraSpellEffect.EffectIndex] = (m_spellValue.CustomBasePointsMask & (1 << (int)auraSpellEffect.EffectIndex)) != 0 ?
-                    m_spellValue.EffectBasePoints[auraSpellEffect.EffectIndex] :
-                    auraSpellEffect.CalcBaseValue(m_originalCaster, unit, m_castItemEntry, m_castItemLevel);
+                    if (auraSpellEffect != null)
+                        hitInfo.AuraBasePoints[auraSpellEffect.EffectIndex] = (m_spellValue.CustomBasePointsMask & (1 << (int)auraSpellEffect.EffectIndex)) != 0 ?
+                        m_spellValue.EffectBasePoints[auraSpellEffect.EffectIndex] :
+                        auraSpellEffect.CalcBaseValue(m_originalCaster, unit, m_castItemEntry, m_castItemLevel);
 
                 // Get Data Needed for Diminishing Returns, some effects may have multiple auras, so this must be done on spell hit, not aura add
                 hitInfo.DRGroup = m_spellInfo.GetDiminishingReturnsGroupForSpell();
@@ -2664,7 +2664,7 @@ namespace Game.Spells
                 SetExecutedCurrently(false);
                 return;
             }
-            
+
             Unit unitCaster = m_caster.ToUnit();
             if (unitCaster != null)
             {
@@ -3185,7 +3185,7 @@ namespace Game.Spells
                         && charm.m_unitData.CreatedBySpell == m_spellInfo.Id)
                         ((Puppet)charm).UnSummon();
             }
-            
+
             Creature creatureCaster = unitCaster.ToCreature();
             if (creatureCaster != null)
                 creatureCaster.ReleaseFocus(this);
@@ -3805,51 +3805,32 @@ namespace Game.Spells
 
         void SendSpellExecuteLog()
         {
+            if (_executeLogEffects.Empty())
+                return;
+
             SpellExecuteLog spellExecuteLog = new();
 
             spellExecuteLog.Caster = m_caster.GetGUID();
             spellExecuteLog.SpellID = m_spellInfo.Id;
-
-            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
-            {
-                if (effect == null)
-                    continue;
-
-                if (_powerDrainTargets[effect.EffectIndex].Empty() && _extraAttacksTargets[effect.EffectIndex].Empty() &&
-                    _durabilityDamageTargets[effect.EffectIndex].Empty() && _genericVictimTargets[effect.EffectIndex].Empty() &&
-                    _tradeSkillTargets[effect.EffectIndex].Empty() && _feedPetTargets[effect.EffectIndex].Empty())
-                    continue;
-
-                SpellExecuteLog.SpellLogEffect spellLogEffect = new();
-                spellLogEffect.Effect = (int)effect.Effect;
-                spellLogEffect.PowerDrainTargets = _powerDrainTargets[effect.EffectIndex];
-                spellLogEffect.ExtraAttacksTargets = _extraAttacksTargets[effect.EffectIndex];
-                spellLogEffect.DurabilityDamageTargets = _durabilityDamageTargets[effect.EffectIndex];
-                spellLogEffect.GenericVictimTargets = _genericVictimTargets[effect.EffectIndex];
-                spellLogEffect.TradeSkillTargets = _tradeSkillTargets[effect.EffectIndex];
-                spellLogEffect.FeedPetTargets = _feedPetTargets[effect.EffectIndex];
-                spellExecuteLog.Effects.Add(spellLogEffect);
-            }
-
+            spellExecuteLog.Effects = _executeLogEffects.Values.ToList();
             spellExecuteLog.LogData.Initialize(this);
 
-            if (!spellExecuteLog.Effects.Empty())
-                m_caster.SendCombatLogMessage(spellExecuteLog);
-
-            CleanupExecuteLogList();
+            m_caster.SendCombatLogMessage(spellExecuteLog);
         }
 
-        void CleanupExecuteLogList()
+        SpellLogEffect GetExecuteLogEffect(SpellEffectName effect)
         {
-            _powerDrainTargets.Clear();
-            _extraAttacksTargets.Clear();
-            _durabilityDamageTargets.Clear();
-            _genericVictimTargets.Clear();
-            _tradeSkillTargets.Clear();
-            _feedPetTargets.Clear();
+            var spellLogEffect = _executeLogEffects.LookupByKey(effect);
+            if (spellLogEffect != null)
+                return spellLogEffect;
+
+            SpellLogEffect executeLogEffect = new();
+            executeLogEffect.Effect = (int)effect;
+            _executeLogEffects.Add(effect, executeLogEffect);
+            return executeLogEffect;
         }
 
-        void ExecuteLogEffectTakeTargetPower(uint effIndex, Unit target, PowerType powerType, uint points, float amplitude)
+        void ExecuteLogEffectTakeTargetPower(SpellEffectName effect, Unit target, PowerType powerType, uint points, float amplitude)
         {
             SpellLogEffectPowerDrainParams spellLogEffectPowerDrainParams;
 
@@ -3858,19 +3839,19 @@ namespace Game.Spells
             spellLogEffectPowerDrainParams.PowerType = (uint)powerType;
             spellLogEffectPowerDrainParams.Amplitude = amplitude;
 
-            _powerDrainTargets.Add(effIndex, spellLogEffectPowerDrainParams);
+            GetExecuteLogEffect(effect).PowerDrainTargets.Add(spellLogEffectPowerDrainParams);
         }
 
-        void ExecuteLogEffectExtraAttacks(uint effIndex, Unit victim, uint numAttacks)
+        void ExecuteLogEffectExtraAttacks(SpellEffectName effect, Unit victim, uint numAttacks)
         {
             SpellLogEffectExtraAttacksParams spellLogEffectExtraAttacksParams;
             spellLogEffectExtraAttacksParams.Victim = victim.GetGUID();
             spellLogEffectExtraAttacksParams.NumAttacks = numAttacks;
 
-            _extraAttacksTargets.Add(effIndex, spellLogEffectExtraAttacksParams);
+            GetExecuteLogEffect(effect).ExtraAttacksTargets.Add(spellLogEffectExtraAttacksParams);
         }
 
-        void ExecuteLogEffectInterruptCast(uint effIndex, Unit victim, uint spellId)
+        void SendSpellInterruptLog(Unit victim, uint spellId)
         {
             SpellInterruptLog data = new();
             data.Caster = m_caster.GetGUID();
@@ -3881,62 +3862,62 @@ namespace Game.Spells
             m_caster.SendMessageToSet(data, true);
         }
 
-        void ExecuteLogEffectDurabilityDamage(uint effIndex, Unit victim, int itemId, int amount)
+        void ExecuteLogEffectDurabilityDamage(SpellEffectName effect, Unit victim, int itemId, int amount)
         {
             SpellLogEffectDurabilityDamageParams spellLogEffectDurabilityDamageParams;
             spellLogEffectDurabilityDamageParams.Victim = victim.GetGUID();
             spellLogEffectDurabilityDamageParams.ItemID = itemId;
             spellLogEffectDurabilityDamageParams.Amount = amount;
 
-            _durabilityDamageTargets.Add(effIndex, spellLogEffectDurabilityDamageParams);
+            GetExecuteLogEffect(effect).DurabilityDamageTargets.Add(spellLogEffectDurabilityDamageParams);
         }
 
-        void ExecuteLogEffectOpenLock(uint effIndex, WorldObject obj)
+        void ExecuteLogEffectOpenLock(SpellEffectName effect, WorldObject obj)
         {
             SpellLogEffectGenericVictimParams spellLogEffectGenericVictimParams;
             spellLogEffectGenericVictimParams.Victim = obj.GetGUID();
 
-            _genericVictimTargets.Add(effIndex, spellLogEffectGenericVictimParams);
+            GetExecuteLogEffect(effect).GenericVictimTargets.Add(spellLogEffectGenericVictimParams);
         }
 
-        void ExecuteLogEffectCreateItem(uint effIndex, uint entry)
+        void ExecuteLogEffectCreateItem(SpellEffectName effect, uint entry)
         {
             SpellLogEffectTradeSkillItemParams spellLogEffectTradeSkillItemParams;
             spellLogEffectTradeSkillItemParams.ItemID = (int)entry;
 
-            _tradeSkillTargets.Add(effIndex, spellLogEffectTradeSkillItemParams);
+            GetExecuteLogEffect(effect).TradeSkillTargets.Add(spellLogEffectTradeSkillItemParams);
         }
 
-        void ExecuteLogEffectDestroyItem(uint effIndex, uint entry)
+        void ExecuteLogEffectDestroyItem(SpellEffectName effect, uint entry)
         {
             SpellLogEffectFeedPetParams spellLogEffectFeedPetParams;
             spellLogEffectFeedPetParams.ItemID = (int)entry;
 
-            _feedPetTargets.Add(effIndex, spellLogEffectFeedPetParams);
+            GetExecuteLogEffect(effect).FeedPetTargets.Add(spellLogEffectFeedPetParams);
         }
 
-        void ExecuteLogEffectSummonObject(uint effIndex, WorldObject obj)
+        void ExecuteLogEffectSummonObject(SpellEffectName effect, WorldObject obj)
         {
             SpellLogEffectGenericVictimParams spellLogEffectGenericVictimParams;
             spellLogEffectGenericVictimParams.Victim = obj.GetGUID();
 
-            _genericVictimTargets.Add(effIndex, spellLogEffectGenericVictimParams);
+            GetExecuteLogEffect(effect).GenericVictimTargets.Add(spellLogEffectGenericVictimParams);
         }
 
-        void ExecuteLogEffectUnsummonObject(uint effIndex, WorldObject obj)
+        void ExecuteLogEffectUnsummonObject(SpellEffectName effect, WorldObject obj)
         {
             SpellLogEffectGenericVictimParams spellLogEffectGenericVictimParams;
             spellLogEffectGenericVictimParams.Victim = obj.GetGUID();
 
-            _genericVictimTargets.Add(effIndex, spellLogEffectGenericVictimParams);
+            GetExecuteLogEffect(effect).GenericVictimTargets.Add(spellLogEffectGenericVictimParams);
         }
 
-        void ExecuteLogEffectResurrect(uint effIndex, Unit target)
+        void ExecuteLogEffectResurrect(SpellEffectName effect, Unit target)
         {
             SpellLogEffectGenericVictimParams spellLogEffectGenericVictimParams;
             spellLogEffectGenericVictimParams.Victim = target.GetGUID();
 
-            _genericVictimTargets.Add(effIndex, spellLogEffectGenericVictimParams);
+            GetExecuteLogEffect(effect).GenericVictimTargets.Add(spellLogEffectGenericVictimParams);
         }
 
         void SendInterrupted(byte result)
@@ -4591,8 +4572,8 @@ namespace Game.Spells
             // also, such casts shouldn't be sent to client
             if (!(m_spellInfo.IsPassive() && (m_targets.GetUnitTarget() == null || m_targets.GetUnitTarget() == m_caster)))
             {
-                    // Check explicit target for m_originalCaster - todo: get rid of such workarounds
-                    WorldObject caster = m_caster;
+                // Check explicit target for m_originalCaster - todo: get rid of such workarounds
+                WorldObject caster = m_caster;
                 if (m_originalCaster != null)
                     caster = m_originalCaster;
 
@@ -4608,21 +4589,21 @@ namespace Game.Spells
                 if (castResult != SpellCastResult.SpellCastOk)
                     return castResult;
 
-                    // If it's not a melee spell, check if vision is obscured by SPELL_AURA_INTERFERE_TARGETTING
-                    if (m_spellInfo.DmgClass != SpellDmgClass.Melee)
+                // If it's not a melee spell, check if vision is obscured by SPELL_AURA_INTERFERE_TARGETTING
+                if (m_spellInfo.DmgClass != SpellDmgClass.Melee)
+                {
+                    Unit unitCaster1 = m_caster.ToUnit();
+                    if (unitCaster1 != null)
                     {
-                        Unit unitCaster1 = m_caster.ToUnit();
-                        if (unitCaster1 != null)
-                        {
-                            foreach (var auraEffect in unitCaster1.GetAuraEffectsByType(AuraType.InterfereTargetting))
-                                if (!unitCaster1.IsFriendlyTo(auraEffect.GetCaster()) && !unitTarget.HasAura(auraEffect.GetId(), auraEffect.GetCasterGUID()))
-                                    return SpellCastResult.VisionObscured;
+                        foreach (var auraEffect in unitCaster1.GetAuraEffectsByType(AuraType.InterfereTargetting))
+                            if (!unitCaster1.IsFriendlyTo(auraEffect.GetCaster()) && !unitTarget.HasAura(auraEffect.GetId(), auraEffect.GetCasterGUID()))
+                                return SpellCastResult.VisionObscured;
 
-                            foreach (var auraEffect in unitTarget.GetAuraEffectsByType(AuraType.InterfereTargetting))
-                                if (!unitCaster1.IsFriendlyTo(auraEffect.GetCaster()) && (!unitTarget.HasAura(auraEffect.GetId(), auraEffect.GetCasterGUID()) || !unitCaster1.HasAura(auraEffect.GetId(), auraEffect.GetCasterGUID())))
-                                    return SpellCastResult.VisionObscured;
-                        }
+                        foreach (var auraEffect in unitTarget.GetAuraEffectsByType(AuraType.InterfereTargetting))
+                            if (!unitCaster1.IsFriendlyTo(auraEffect.GetCaster()) && (!unitTarget.HasAura(auraEffect.GetId(), auraEffect.GetCasterGUID()) || !unitCaster1.HasAura(auraEffect.GetId(), auraEffect.GetCasterGUID())))
+                                return SpellCastResult.VisionObscured;
                     }
+                }
 
                 if (unitTarget != m_caster)
                 {
@@ -4634,9 +4615,9 @@ namespace Game.Spells
                     if (m_spellInfo.HasAttribute(SpellCustomAttributes.ReqTargetFacingCaster) && !unitTarget.HasInArc(MathFunctions.PI, m_caster))
                         return SpellCastResult.NotInfront;
 
-                        // Ignore LOS for gameobjects casts
-                        if (!m_caster.IsGameObject())
-                        {
+                    // Ignore LOS for gameobjects casts
+                    if (!m_caster.IsGameObject())
+                    {
                         WorldObject losTarget = m_caster;
                         if (IsTriggered() && m_triggeredByAuraSpell != null)
                         {
@@ -6859,7 +6840,7 @@ namespace Game.Spells
 
             targetInfo.Damage += m_damage;
             targetInfo.Healing += m_healing;
-            
+
             float critChance = m_spellValue.CriticalChance;
             if (m_originalCaster != null)
             {
@@ -7481,12 +7462,7 @@ namespace Game.Spells
         }
 
         #region Fields
-        MultiMap<uint, SpellLogEffectPowerDrainParams> _powerDrainTargets = new();
-        MultiMap<uint, SpellLogEffectExtraAttacksParams> _extraAttacksTargets = new();
-        MultiMap<uint, SpellLogEffectDurabilityDamageParams> _durabilityDamageTargets = new();
-        MultiMap<uint, SpellLogEffectGenericVictimParams> _genericVictimTargets = new();
-        MultiMap<uint, SpellLogEffectTradeSkillItemParams> _tradeSkillTargets = new();
-        MultiMap<uint, SpellLogEffectFeedPetParams> _feedPetTargets = new();
+        Dictionary<SpellEffectName, SpellLogEffect> _executeLogEffects = new();
         PathGenerator m_preGeneratedPath;
 
         public SpellInfo m_spellInfo;
@@ -8377,7 +8353,7 @@ namespace Game.Spells
     }
 
     public class WorldObjectSpellConeTargetCheck : WorldObjectSpellAreaTargetCheck
-    {  
+    {
         float _coneAngle;
         float _lineWidth;
 
@@ -8463,7 +8439,7 @@ namespace Game.Spells
             return base.Invoke(target);
         }
     }
-    
+
     public class SpellEvent : BasicEvent
     {
         public SpellEvent(Spell spell)
@@ -8668,5 +8644,18 @@ namespace Game.Spells
             SpellValueOverrides.Add(mod, val);
             return this;
         }
+    }
+
+    public class SpellLogEffect
+    {
+        public int Effect;
+
+        public List<SpellLogEffectPowerDrainParams> PowerDrainTargets = new();
+        public List<SpellLogEffectExtraAttacksParams> ExtraAttacksTargets = new();
+        public List<SpellLogEffectDurabilityDamageParams> DurabilityDamageTargets = new();
+        public List<SpellLogEffectGenericVictimParams> GenericVictimTargets = new();
+        public List<SpellLogEffectTradeSkillItemParams> TradeSkillTargets = new();
+        public List<SpellLogEffectFeedPetParams> FeedPetTargets = new();
+
     }
 }

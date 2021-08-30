@@ -32,7 +32,6 @@ using Game.Movement;
 using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace Game.Spells
 {
@@ -83,7 +82,7 @@ namespace Game.Spells
 
             int health = damage;
             int mana = effectInfo.MiscValue;
-            ExecuteLogEffectResurrect(effIndex, target);
+            ExecuteLogEffectResurrect(effectInfo.Effect, target);
             target.SetResurrectRequestData(m_caster, (uint)health, (uint)mana, 0);
             SendResurrectRequest(target);
         }
@@ -821,7 +820,7 @@ namespace Game.Spells
 
                 unitCaster.EnergizeBySpell(unitCaster, m_spellInfo, gain, powerType);
             }
-            ExecuteLogEffectTakeTargetPower(effIndex, unitTarget, powerType, (uint)newDamage, gainMultiplier);
+            ExecuteLogEffectTakeTargetPower(effectInfo.Effect, unitTarget, powerType, (uint)newDamage, gainMultiplier);
         }
 
         [SpellEffectHandler(SpellEffectName.SendEvent)]
@@ -888,7 +887,7 @@ namespace Game.Spells
             float dmgMultiplier = effectInfo.CalcValueMultiplier(unitCaster, this);
 
             // add log data before multiplication (need power amount, not damage)
-            ExecuteLogEffectTakeTargetPower(effIndex, unitTarget, powerType, (uint)newDamage, 0.0f);
+            ExecuteLogEffectTakeTargetPower(effectInfo.Effect, unitTarget, powerType, (uint)newDamage, 0.0f);
 
             newDamage = (int)(newDamage * dmgMultiplier);
 
@@ -1131,7 +1130,7 @@ namespace Game.Spells
                 return;
 
             DoCreateItem(effIndex, effectInfo.ItemType, m_spellInfo.HasAttribute(SpellAttr0.Tradespell) ? ItemContext.TradeSkill : ItemContext.None);
-            ExecuteLogEffectCreateItem(effIndex, effectInfo.ItemType);
+            ExecuteLogEffectCreateItem(effectInfo.Effect, effectInfo.ItemType);
         }
 
         [SpellEffectHandler(SpellEffectName.CreateLoot)]
@@ -1485,7 +1484,7 @@ namespace Game.Spells
                     }
                 }
             }
-            ExecuteLogEffectOpenLock(effIndex, gameObjTarget != null ? gameObjTarget : (WorldObject)itemTarget);
+            ExecuteLogEffectOpenLock(effectInfo.Effect, gameObjTarget != null ? gameObjTarget : (WorldObject)itemTarget);
         }
 
         [SpellEffectHandler(SpellEffectName.SummonChangeItem)]
@@ -1699,7 +1698,7 @@ namespace Game.Spells
                 case SummonCategory.Unk:
                     if (Convert.ToBoolean(properties.Flags & SummonPropFlags.Unk10))
                     {
-                        SummonGuardian(effIndex, entry, properties, numSummons, privateObjectOwner);
+                        SummonGuardian(effectInfo, entry, properties, numSummons, privateObjectOwner);
                         break;
                     }
                     switch (properties.Title)
@@ -1708,9 +1707,9 @@ namespace Game.Spells
                         case SummonTitle.Guardian:
                         case SummonTitle.Runeblade:
                         case SummonTitle.Minion:
-                            SummonGuardian(effIndex, entry, properties, numSummons, privateObjectOwner);
+                            SummonGuardian(effectInfo, entry, properties, numSummons, privateObjectOwner);
                             break;
-                            // Summons a vehicle, but doesn't force anyone to enter it (see SUMMON_CATEGORY_VEHICLE)
+                        // Summons a vehicle, but doesn't force anyone to enter it (see SUMMON_CATEGORY_VEHICLE)
                         case SummonTitle.Vehicle:
                         case SummonTitle.Mount:
                         {
@@ -1781,14 +1780,14 @@ namespace Game.Spells
                                     summon.SetCreatedBySpell(m_spellInfo.Id);
                                 }
 
-                                ExecuteLogEffectSummonObject(effIndex, summon);
+                                ExecuteLogEffectSummonObject(effectInfo.Effect, summon);
                             }
                             return;
                         }
                     }//switch
                     break;
                 case SummonCategory.Pet:
-                    SummonGuardian(effIndex, entry, properties, numSummons, privateObjectOwner);
+                    SummonGuardian(effectInfo, entry, properties, numSummons, privateObjectOwner);
                     break;
                 case SummonCategory.Puppet:
                 {
@@ -1839,7 +1838,7 @@ namespace Game.Spells
             if (summon != null)
             {
                 summon.SetCreatorGUID(caster.GetGUID());
-                ExecuteLogEffectSummonObject(effIndex, summon);
+                ExecuteLogEffectSummonObject(effectInfo.Effect, summon);
             }
         }
 
@@ -2394,7 +2393,7 @@ namespace Game.Spells
             {
                 SummonPropertiesRecord properties = CliDB.SummonPropertiesStorage.LookupByKey(67);
                 if (properties != null)
-                    SummonGuardian(effIndex, petentry, properties, 1, ObjectGuid.Empty);
+                    SummonGuardian(effectInfo, petentry, properties, 1, ObjectGuid.Empty);
                 return;
             }
 
@@ -2449,7 +2448,7 @@ namespace Game.Spells
             if (!string.IsNullOrEmpty(new_name))
                 pet.SetName(new_name);
 
-            ExecuteLogEffectSummonObject(effIndex, pet);
+            ExecuteLogEffectSummonObject(effectInfo.Effect, pet);
         }
 
         [SpellEffectHandler(SpellEffectName.LearnPetSpell)]
@@ -2796,7 +2795,7 @@ namespace Game.Spells
                             else if (m_spellInfo.DmgClass == SpellDmgClass.Melee)
                                 Unit.ProcSkillsAndAuras(unitCaster, unitTarget, ProcFlags.DoneSpellMeleeDmgClass, ProcFlags.TakenSpellMeleeDmgClass, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Hit, ProcFlagsHit.Interrupt, null, null, null);
                         }
-                        ExecuteLogEffectInterruptCast(effIndex, unitTarget, curSpellInfo.Id);
+                        SendSpellInterruptLog(unitTarget, curSpellInfo.Id);
                         unitTarget.InterruptSpell(i, false);
                     }
                 }
@@ -2834,7 +2833,7 @@ namespace Game.Spells
             go.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
             go.SetSpellId(m_spellInfo.Id);
 
-            ExecuteLogEffectSummonObject(effIndex, go);
+            ExecuteLogEffectSummonObject(effectInfo.Effect, go);
 
             // Wild object not have owner and check clickable by players
             map.AddToMap(go);
@@ -2857,7 +2856,7 @@ namespace Game.Spells
                 linkedTrap.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
                 linkedTrap.SetSpellId(m_spellInfo.Id);
 
-                ExecuteLogEffectSummonObject(effIndex, linkedTrap);
+                ExecuteLogEffectSummonObject(effectInfo.Effect, linkedTrap);
             }
         }
 
@@ -3395,7 +3394,7 @@ namespace Game.Spells
             go.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
             go.SetSpellId(m_spellInfo.Id);
 
-            ExecuteLogEffectSummonObject(effIndex, go);
+            ExecuteLogEffectSummonObject(effectInfo.Effect, go);
 
             caster.AddGameObject(go);
             map.AddToMap(go);
@@ -3666,7 +3665,7 @@ namespace Game.Spells
             if (!pet.IsAlive())
                 return;
 
-            ExecuteLogEffectDestroyItem(effIndex, foodItem.GetEntry());
+            ExecuteLogEffectDestroyItem(effectInfo.Effect, foodItem.GetEntry());
 
             int pct;
             int levelDiff = (int)pet.GetLevel() - (int)foodItem.GetTemplate().GetBaseItemLevel();
@@ -3699,7 +3698,7 @@ namespace Game.Spells
 
             Pet pet = unitTarget.ToPet();
 
-            ExecuteLogEffectUnsummonObject(effIndex, pet);
+            ExecuteLogEffectUnsummonObject(effectInfo.Effect, pet);
             pet.GetOwner().RemovePet(pet, PetSaveMode.NotInSlot);
         }
 
@@ -3751,7 +3750,7 @@ namespace Game.Spells
             go.SetSpellId(m_spellInfo.Id);
             unitCaster.AddGameObject(go);
 
-            ExecuteLogEffectSummonObject(effIndex, go);
+            ExecuteLogEffectSummonObject(effectInfo.Effect, go);
 
             map.AddToMap(go);
 
@@ -3778,7 +3777,7 @@ namespace Game.Spells
             uint health = (uint)target.CountPctFromMaxHealth(damage);
             uint mana = (uint)MathFunctions.CalculatePct(target.GetMaxPower(PowerType.Mana), damage);
 
-            ExecuteLogEffectResurrect(effIndex, target);
+            ExecuteLogEffectResurrect(effectInfo.Effect, target);
 
             target.SetResurrectRequestData(m_caster, health, mana, 0);
             SendResurrectRequest(target);
@@ -3798,7 +3797,7 @@ namespace Game.Spells
 
             unitTarget.ExtraAttacks = (uint)damage;
 
-            ExecuteLogEffectExtraAttacks(effIndex, unitTarget, (uint)damage);
+            ExecuteLogEffectExtraAttacks(effectInfo.Effect, unitTarget, (uint)damage);
         }
 
         [SpellEffectHandler(SpellEffectName.Parry)]
@@ -4403,7 +4402,7 @@ namespace Game.Spells
             if (slot < 0)
             {
                 unitTarget.ToPlayer().DurabilityPointsLossAll(damage, (slot < -1));
-                ExecuteLogEffectDurabilityDamage(effIndex, unitTarget, -1, -1);
+                ExecuteLogEffectDurabilityDamage(effectInfo.Effect, unitTarget, -1, -1);
                 return;
             }
 
@@ -4415,7 +4414,7 @@ namespace Game.Spells
             if (item != null)
             {
                 unitTarget.ToPlayer().DurabilityPointsLoss(item, damage);
-                ExecuteLogEffectDurabilityDamage(effIndex, unitTarget, (int)item.GetEntry(), slot);
+                ExecuteLogEffectDurabilityDamage(effectInfo.Effect, unitTarget, (int)item.GetEntry(), slot);
             }
         }
 
@@ -4572,7 +4571,7 @@ namespace Game.Spells
             go.SetOwnerGUID(unitCaster.GetGUID());
             go.SetSpellId(m_spellInfo.Id);
 
-            ExecuteLogEffectSummonObject(effIndex, go);
+            ExecuteLogEffectSummonObject(effectInfo.Effect, go);
 
             Log.outDebug(LogFilter.Spells, "AddObject at SpellEfects.cpp EffectTransmitted");
 
@@ -4585,7 +4584,7 @@ namespace Game.Spells
                 linkedTrap.SetSpellId(m_spellInfo.Id);
                 linkedTrap.SetOwnerGUID(unitCaster.GetGUID());
 
-                ExecuteLogEffectSummonObject(effIndex, linkedTrap);
+                ExecuteLogEffectSummonObject(effectInfo.Effect, linkedTrap);
             }
         }
 
@@ -4960,7 +4959,7 @@ namespace Game.Spells
             gameObjTarget.SetDestructibleState((GameObjectDestructibleState)effectInfo.MiscValue, m_caster, true);
         }
 
-        void SummonGuardian(uint i, uint entry, SummonPropertiesRecord properties, uint numGuardians, ObjectGuid privateObjectOwner)
+        void SummonGuardian(SpellEffectInfo effect, uint entry, SummonPropertiesRecord properties, uint numGuardians, ObjectGuid privateObjectOwner)
         {
             if (unitCaster == null)
                 return;
@@ -5025,7 +5024,7 @@ namespace Game.Spells
 
                 summon.GetAI().EnterEvadeMode();
 
-                ExecuteLogEffectSummonObject(i, summon);
+                ExecuteLogEffectSummonObject(effect.Effect, summon);
             }
         }
 
@@ -5330,7 +5329,7 @@ namespace Game.Spells
             go.SetSpellId(m_spellInfo.Id);
             go.SetPrivateObjectOwner(m_caster.GetGUID());
 
-            ExecuteLogEffectSummonObject(effIndex, go);
+            ExecuteLogEffectSummonObject(effectInfo.Effect, go);
 
             map.AddToMap(go);
 
@@ -5342,7 +5341,7 @@ namespace Game.Spells
                 linkedTrap.SetRespawnTime(duration > 0 ? duration / Time.InMilliseconds : 0);
                 linkedTrap.SetSpellId(m_spellInfo.Id);
 
-                ExecuteLogEffectSummonObject(effIndex, linkedTrap);
+                ExecuteLogEffectSummonObject(effectInfo.Effect, linkedTrap);
             }
         }
 
@@ -5374,7 +5373,7 @@ namespace Game.Spells
             if (resurrectAura != 0 && target.HasAura(resurrectAura))
                 return;
 
-            ExecuteLogEffectResurrect(effIndex, target);
+            ExecuteLogEffectResurrect(effectInfo.Effect, target);
             target.SetResurrectRequestData(m_caster, health, mana, resurrectAura);
             SendResurrectRequest(target);
         }
@@ -5495,7 +5494,7 @@ namespace Game.Spells
             bonusList.Add(collectionMgr.GetHeirloomBonus(m_misc.Data0));
 
             DoCreateItem(effIndex, m_misc.Data0, ItemContext.None, bonusList);
-            ExecuteLogEffectCreateItem(effIndex, m_misc.Data0);
+            ExecuteLogEffectCreateItem(effectInfo.Effect, m_misc.Data0);
         }
 
         [SpellEffectHandler(SpellEffectName.ActivateGarrisonBuilding)]

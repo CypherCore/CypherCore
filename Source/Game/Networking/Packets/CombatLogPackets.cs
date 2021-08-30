@@ -18,6 +18,7 @@
 using Framework.Constants;
 using Framework.Dynamic;
 using Game.Entities;
+using Game.Spells;
 using System;
 using System.Collections.Generic;
 
@@ -190,18 +191,6 @@ namespace Game.Networking.Packets
         public ObjectGuid Caster;
         public uint SpellID;
         public List<SpellLogEffect> Effects = new();
-
-        public class SpellLogEffect
-        {
-            public int Effect;
-
-            public List<SpellLogEffectPowerDrainParams> PowerDrainTargets = new();
-            public List<SpellLogEffectExtraAttacksParams> ExtraAttacksTargets = new();
-            public List<SpellLogEffectDurabilityDamageParams> DurabilityDamageTargets = new();
-            public List<SpellLogEffectGenericVictimParams> GenericVictimTargets = new();
-            public List<SpellLogEffectTradeSkillItemParams> TradeSkillTargets = new();
-            public List<SpellLogEffectFeedPetParams> FeedPetTargets = new();
-        }
     }
 
     class SpellHealLog : CombatLogServerPacket
@@ -639,9 +628,9 @@ namespace Game.Networking.Packets
         public uint OriginalDamage;
         public bool Unk;
     }
-    
+
     //Structs
-    struct SpellLogEffectPowerDrainParams
+    public struct SpellLogEffectPowerDrainParams
     {
         public ObjectGuid Victim;
         public uint Points;
@@ -649,30 +638,30 @@ namespace Game.Networking.Packets
         public float Amplitude;
     }
 
-    struct SpellLogEffectExtraAttacksParams
+    public struct SpellLogEffectExtraAttacksParams
     {
         public ObjectGuid Victim;
         public uint NumAttacks;
     }
 
-    struct SpellLogEffectDurabilityDamageParams
+    public struct SpellLogEffectDurabilityDamageParams
     {
         public ObjectGuid Victim;
         public int ItemID;
         public int Amount;
     }
 
-    struct SpellLogEffectGenericVictimParams
+    public struct SpellLogEffectGenericVictimParams
     {
         public ObjectGuid Victim;
     }
 
-    struct SpellLogEffectTradeSkillItemParams
+    public struct SpellLogEffectTradeSkillItemParams
     {
         public int ItemID;
     }
 
-    struct SpellLogEffectFeedPetParams
+    public struct SpellLogEffectFeedPetParams
     {
         public int ItemID;
     }
