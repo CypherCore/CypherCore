@@ -2705,7 +2705,12 @@ namespace Game.Spells
                 }
 
                 foreach (Unit unit in units)
+                {
+                    if (!targets.ContainsKey(unit))
+                        targets[unit] = 0;
+
                     targets[unit] |= 1u << (int)effect.EffectIndex;
+                }
             }
         }
 
@@ -2781,7 +2786,12 @@ namespace Game.Spells
                 targetList.RemoveAll(unit => !unit.IsSelfOrInSameMap(GetDynobjOwner()));
 
                 foreach (var unit in targetList)
+                {
+                    if (!targets.ContainsKey(unit))
+                        targets[unit] = 0;
+
                     targets[unit] |= 1u << (int)effect.EffectIndex;
+                }
             }
         }
     }

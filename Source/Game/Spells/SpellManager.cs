@@ -73,19 +73,6 @@ namespace Game.Entities
                         if (spellEffect == null)
                             continue;
 
-                        var parameters = methodInfo.GetParameters();
-                        if (parameters.Length < 1)
-                        {
-                            Log.outError(LogFilter.ServerLoading, "Method: {0} has wrong parameter count: {1} Should be 1. Can't load SpellEffect.", methodInfo.Name, parameters.Length);
-                            continue;
-                        }
-
-                        if (parameters[0].ParameterType != typeof(uint))
-                        {
-                            Log.outError(LogFilter.ServerLoading, "Method: {0} has wrong parameter Types: ({1}) Should be (uint). Can't load SpellEffect.", methodInfo.Name, parameters[0].ParameterType);
-                            continue;
-                        }
-
                         if (SpellEffectsHandlers.ContainsKey(spellEffect.EffectName))
                         {
                             Log.outError(LogFilter.ServerLoading, "Tried to override SpellEffectsHandler of {0} with {1} (EffectName {2}).", SpellEffectsHandlers[spellEffect.EffectName].ToString(), methodInfo.Name, spellEffect.EffectName);
@@ -95,6 +82,12 @@ namespace Game.Entities
                         SpellEffectsHandlers.Add(spellEffect.EffectName, (SpellEffectHandler)methodInfo.CreateDelegate(typeof(SpellEffectHandler)));
                     }
                 }
+            }
+
+            if (SpellEffectsHandlers.Count == 0)
+            {
+                Log.outFatal(LogFilter.ServerLoading, "Could'nt find any SpellEffectHandlers. Dev needs to check this out.");
+                Global.WorldMgr.ShutdownServ(0, ShutdownMask.Force, ShutdownExitCode.Error);
             }
         }
 
