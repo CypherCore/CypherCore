@@ -3771,30 +3771,6 @@ namespace Game.Entities
 
         public virtual SpellSchoolMask GetMeleeDamageSchoolMask(WeaponAttackType attackType = WeaponAttackType.BaseAttack) { return SpellSchoolMask.None; }
 
-        float CalculateDefaultCoefficient(SpellInfo spellInfo, DamageEffectType damagetype)
-        {
-            // Damage over Time spells bonus calculation
-            float DotFactor = 1.0f;
-            if (damagetype == DamageEffectType.DOT)
-            {
-
-                int DotDuration = spellInfo.GetDuration();
-                if (!spellInfo.IsChanneled() && DotDuration > 0)
-                    DotFactor = DotDuration / 15000.0f;
-
-                uint DotTicks = spellInfo.GetMaxTicks();
-                if (DotTicks != 0)
-                    DotFactor /= DotTicks;
-            }
-
-            uint CastingTime = (uint)(spellInfo.IsChanneled() ? spellInfo.GetDuration() : spellInfo.CalcCastTime());
-            // Distribute Damage over multiple effects, reduce by AoE
-            CastingTime = GetCastingTimeForBonus(spellInfo, damagetype, CastingTime);
-
-            // As wowwiki says: C = (Cast Time / 3.5)
-            return (CastingTime / 3500.0f) * DotFactor;
-        }
-
         public virtual void UpdateDamageDoneMods(WeaponAttackType attackType)
         {
             UnitMods unitMod = attackType switch
