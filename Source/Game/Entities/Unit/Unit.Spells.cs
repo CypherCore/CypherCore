@@ -2195,13 +2195,10 @@ namespace Game.Entities
                 }
 
                 // turn off snare auras by setting amount to 0
-                foreach (SpellEffectInfo effect in aura.GetSpellInfo().GetEffects())
+                foreach (SpellEffectInfo spellEffectInfo in aura.GetSpellInfo().GetEffects())
                 {
-                    if (effect == null || !effect.IsEffect())
-                        continue;
-
-                    if (Convert.ToBoolean((1 << (int)effect.EffectIndex) & pair.Value.GetEffectMask()))
-                        aura.GetEffect(effect.EffectIndex).ChangeAmount(0);
+                    if (spellEffectInfo != null && pair.Value.HasEffect(spellEffectInfo.EffectIndex) && spellEffectInfo.Mechanic == Mechanics.Snare)
+                        aura.GetEffect(spellEffectInfo.EffectIndex).ChangeAmount(0);
                 }
             }
         }
@@ -2646,9 +2643,9 @@ namespace Game.Entities
                 if (spellInfo.Mechanic != 0 && Convert.ToBoolean(mechanicMask & (1 << (int)spellInfo.Mechanic)))
                     return true;
 
-                foreach (SpellEffectInfo effect in spellInfo.GetEffects())
-                    if (effect != null && effect.Effect != 0 && effect.Mechanic != 0)
-                        if (Convert.ToBoolean(mechanicMask & (1 << (int)effect.Mechanic)))
+                foreach (SpellEffectInfo spellEffectInfo in spellInfo.GetEffects())
+                    if (spellEffectInfo != null && pair.Value.HasEffect(spellEffectInfo.EffectIndex) && spellEffectInfo.IsEffect() && spellEffectInfo.Mechanic != 0)
+                        if ((mechanicMask & (1 << (int)spellEffectInfo.Mechanic)) != 0)
                             return true;
             }
 
