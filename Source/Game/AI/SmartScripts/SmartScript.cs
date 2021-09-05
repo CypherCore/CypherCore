@@ -2804,7 +2804,7 @@ namespace Game.AI
                     if (baseObject != null)
                     {
                         var stored = GetStoredTargetList(e.Target.stored.id, baseObject);
-                        if (!stored.Empty())
+                        if (stored != null)
                             targets.AddRange(stored);
                     }
 

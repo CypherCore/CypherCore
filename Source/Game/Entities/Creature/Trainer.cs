@@ -170,6 +170,6 @@ namespace Game.Entities
         uint _id;
         TrainerType _type;
         List<TrainerSpell> _spells;
-        Array<string> _greeting = new((int)Locale.Total);
+        string[] _greeting = new string[(int)Locale.Total];
     }
 }
