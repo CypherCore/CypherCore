@@ -207,7 +207,7 @@ namespace Game.Entities
                     if (++i == m_TaxiDestinations.Count - 1)
                         return false;   // if we are left with only 1 known node on the path don't change the spline, its our final destination anyway
 
-                    m_TaxiDestinations.RemoveRange(i, m_TaxiDestinations.Count - 1);
+                    m_TaxiDestinations.RemoveRange(i, m_TaxiDestinations.Count - i);
                     return true;
                 }
             }
