@@ -143,17 +143,16 @@ namespace Game.Entities
             AddObjectToRemoveList();
         }
 
-        public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, uint index, WorldObject caster)
+        public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, SpellEffectInfo spellEffectInfo, WorldObject caster)
         {
             // @todo possibly all negative auras immune?
             if (GetEntry() == 5925)
                 return false;
 
-            SpellEffectInfo effect = spellInfo.GetEffect(index);
-            if (effect == null)
+            if (spellEffectInfo == null)
                 return true;
 
-            switch (effect.ApplyAuraName)
+            switch (spellEffectInfo.ApplyAuraName)
             {
                 case AuraType.PeriodicDamage:
                 case AuraType.PeriodicLeech:
@@ -164,7 +163,7 @@ namespace Game.Entities
                     break;
             }
 
-            return base.IsImmunedToSpellEffect(spellInfo, index, caster);
+            return base.IsImmunedToSpellEffect(spellInfo, spellEffectInfo, caster);
         }
 
         public uint GetSpell(byte slot = 0) { return m_spells[slot]; }

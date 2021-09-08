@@ -37,7 +37,7 @@ namespace Game.Spells
 {
     public partial class Spell
     {
-        [SpellEffectHandler(SpellEffectName.Null)]
+        [SpellEffectHandler(SpellEffectName.None)]
         [SpellEffectHandler(SpellEffectName.Portal)]
         [SpellEffectHandler(SpellEffectName.BindSight)]
         [SpellEffectHandler(SpellEffectName.CallPet)]
@@ -1155,12 +1155,9 @@ namespace Game.Spells
                 return;
 
             // only handle at last effect
-            for (uint i = effectInfo.EffectIndex + 1; i < SpellConst.MaxEffects; ++i)
-            {
-                SpellEffectInfo otherEffect = m_spellInfo.GetEffect(i);
-                if (otherEffect != null && otherEffect.IsEffect(SpellEffectName.PersistentAreaAura))
+            for (uint i = effectInfo.EffectIndex + 1; i < m_spellInfo.GetEffects().Count; ++i)
+                if (m_spellInfo.GetEffect(i).IsEffect(SpellEffectName.PersistentAreaAura))
                     return;
-            }
 
             Cypher.Assert(dynObjAura == null);
 
@@ -2482,13 +2479,9 @@ namespace Game.Spells
             // multiple weapon dmg effect workaround
             // execute only the last weapon damage
             // and handle all effects at once
-            for (var j = effectInfo.EffectIndex + 1; j < SpellConst.MaxEffects; ++j)
+            for (var j = effectInfo.EffectIndex + 1; j < m_spellInfo.GetEffects().Count; ++j)
             {
-                var effect = m_spellInfo.GetEffect(j);
-                if (effect == null)
-                    continue;
-
-                switch (effect.Effect)
+                switch (m_spellInfo.GetEffect(j).Effect)
                 {
                     case SpellEffectName.WeaponDamage:
                     case SpellEffectName.WeaponDamageNoSchool:
@@ -2518,23 +2511,20 @@ namespace Game.Spells
 
             bool normalized = false;
             float weaponDamagePercentMod = 1.0f;
-            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
+            foreach (var spellEffectInfo in m_spellInfo.GetEffects())
             {
-                if (effect == null)
-                    continue;
-
-                switch (effect.Effect)
+                switch (spellEffectInfo.Effect)
                 {
                     case SpellEffectName.WeaponDamage:
                     case SpellEffectName.WeaponDamageNoSchool:
-                        fixed_bonus += CalculateDamage(effect.EffectIndex, unitTarget);
+                        fixed_bonus += CalculateDamage(spellEffectInfo, unitTarget);
                         break;
                     case SpellEffectName.NormalizedWeaponDmg:
-                        fixed_bonus += CalculateDamage(effect.EffectIndex, unitTarget);
+                        fixed_bonus += CalculateDamage(spellEffectInfo, unitTarget);
                         normalized = true;
                         break;
                     case SpellEffectName.WeaponPercentDamage:
-                        MathFunctions.ApplyPct(ref weaponDamagePercentMod, CalculateDamage(effect.EffectIndex, unitTarget));
+                        MathFunctions.ApplyPct(ref weaponDamagePercentMod, CalculateDamage(spellEffectInfo, unitTarget));
                         break;
                     default:
                         break;                                      // not weapon damage effect, just skip
@@ -2571,14 +2561,11 @@ namespace Game.Spells
             uint weaponDamage = unitCaster.CalculateDamage(m_attackType, normalized, addPctMods);
 
             // Sequence is important
-            foreach (SpellEffectInfo effect in m_spellInfo.GetEffects())
+            foreach (var spellEffectInfo in m_spellInfo.GetEffects())
             {
-                if (effect == null)
-                    continue;
-
                 // We assume that a spell have at most one fixed_bonus
                 // and at most one weaponDamagePercentMod
-                switch (effect.Effect)
+                switch (spellEffectInfo.Effect)
                 {
                     case SpellEffectName.WeaponDamage:
                     case SpellEffectName.WeaponDamageNoSchool:
@@ -3092,7 +3079,7 @@ namespace Game.Spells
                                     {
                                         // @todo a hack, range = 11, should after some time cast, otherwise too far
                                         unitCaster.CastSpell(parent, 62496, new CastSpellExtraArgs(true));
-                                        unitTarget.CastSpell(parent, (uint)m_spellInfo.GetEffect(0).CalcValue());
+                                        unitTarget.CastSpell(parent, (uint)damage); // DIFFICULTY_NONE, so effect always valid
                                     }
                                 }
                             }

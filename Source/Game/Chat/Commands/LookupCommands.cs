@@ -1121,10 +1121,10 @@ namespace Game.Chat
                             }
 
                             bool known = target && target.HasSpell(spellInfo.Id);
-                            SpellEffectInfo effect = spellInfo.GetEffect(0);
-                            bool learn = effect?.Effect == SpellEffectName.LearnSpell;
+                            SpellEffectInfo spellEffectInfo = spellInfo.GetEffect(0);
+                            bool learn = spellEffectInfo.Effect == SpellEffectName.LearnSpell;
 
-                            SpellInfo learnSpellInfo = effect != null ? Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, spellInfo.Difficulty) : null;
+                            SpellInfo learnSpellInfo = Global.SpellMgr.GetSpellInfo(spellEffectInfo.TriggerSpell, spellInfo.Difficulty);
 
                             bool talent = spellInfo.HasAttribute(SpellCustomAttributes.IsTalent);
                             bool passive = spellInfo.IsPassive();
@@ -1195,10 +1195,10 @@ namespace Game.Chat
                     }
 
                     bool known = target && target.HasSpell(id);
-                    SpellEffectInfo effect = spellInfo.GetEffect(0);
-                    bool learn = (effect.Effect == SpellEffectName.LearnSpell);
+                    SpellEffectInfo spellEffectInfo = spellInfo.GetEffect(0);
+                    bool learn = spellEffectInfo.Effect == SpellEffectName.LearnSpell;
 
-                    SpellInfo learnSpellInfo = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, Difficulty.None);
+                    SpellInfo learnSpellInfo = Global.SpellMgr.GetSpellInfo(spellEffectInfo.TriggerSpell, Difficulty.None);
 
                     bool talent = spellInfo.HasAttribute(SpellCustomAttributes.IsTalent);
                     bool passive = spellInfo.IsPassive();

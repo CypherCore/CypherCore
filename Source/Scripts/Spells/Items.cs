@@ -380,11 +380,6 @@ namespace Scripts.Spells.Items
         public const uint JomGabbar = 29602;
         public const uint BattleTrance = 45040;
         public const uint WorldQuellerFocus = 90900;
-        public const uint AzureWaterStrider = 118089;
-        public const uint CrimsonWaterStrider = 127271;
-        public const uint OrangeWaterStrider = 127272;
-        public const uint JadeWaterStrider = 127274;
-        public const uint GoldenWaterStrider = 127278;
         public const uint BrutalKinship1 = 144671;
         public const uint BrutalKinship2 = 145738;
     }
@@ -1302,7 +1297,7 @@ namespace Scripts.Spells.Items
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return spellInfo.GetEffect(0) != null;
+            return !spellInfo.GetEffects().Empty();
         }
 
         bool CheckProc(ProcEventInfo eventInfo)
@@ -3346,7 +3341,7 @@ namespace Scripts.Spells.Items
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return spellInfo.GetEffect(1) != null;
+            return spellInfo.GetEffects().Count > 1;
         }
 
         public override bool Load()
@@ -3358,7 +3353,7 @@ namespace Scripts.Spells.Items
         {
             Item artifact = GetOwner().ToPlayer().GetItemByGuid(GetAura().GetCastItemGUID());
             if (artifact)
-                amount = (int)(GetSpellInfo().GetEffect(1).BasePoints * artifact.GetTotalPurchasedArtifactPowers() / 100);
+                amount = (int)(GetEffectInfo(1).BasePoints * artifact.GetTotalPurchasedArtifactPowers() / 100);
         }
 
         public override void Register()
@@ -3372,7 +3367,7 @@ namespace Scripts.Spells.Items
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return spellInfo.GetEffect(1) != null;
+            return spellInfo.GetEffects().Count > 1;
         }
 
         public override bool Load()
@@ -3476,9 +3471,9 @@ namespace Scripts.Spells.Items
     [Script] // 127278 - Golden Water Strider
     class spell_item_water_strider : AuraScript
     {
-        public override bool Validate(SpellInfo spell)
+        public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.AzureWaterStrider, SpellIds.CrimsonWaterStrider, SpellIds.OrangeWaterStrider, SpellIds.JadeWaterStrider, SpellIds.GoldenWaterStrider);
+            return spellInfo.GetEffects().Count > 1;
         }
 
         void OnRemove(AuraEffect effect, AuraEffectHandleModes mode)

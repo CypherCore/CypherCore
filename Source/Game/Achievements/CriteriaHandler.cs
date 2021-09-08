@@ -4175,14 +4175,13 @@ namespace Game.Achievements
                             criteria.Id, criteria.Entry.Type, DataType, Aura.SpellId);
                         return false;
                     }
-                    SpellEffectInfo effect = spellEntry.GetEffect(Aura.EffectIndex);
-                    if (effect == null)
+                    if (spellEntry.GetEffects().Count <= Aura.EffectIndex)
                     {
                         Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type {2} has wrong spell effect index in value2 ({3}), ignored.",
                             criteria.Id, criteria.Entry.Type, DataType, Aura.EffectIndex);
                         return false;
                     }
-                    if (effect.ApplyAuraName == 0)
+                    if (spellEntry.GetEffect(Aura.EffectIndex).ApplyAuraName == 0)
                     {
                         Log.outError(LogFilter.Sql, "Table `criteria_data` (Entry: {0} Type: {1}) for data type {2} has non-aura spell effect (ID: {3} Effect: {4}), ignores.",
                             criteria.Id, criteria.Entry.Type, DataType, Aura.SpellId, Aura.EffectIndex);

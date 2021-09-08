@@ -410,7 +410,7 @@ namespace Scripts.Spells.Druid
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.IncarnationKingOfTheJungle)
-            && Global.SpellMgr.GetSpellInfo(SpellIds.IncarnationKingOfTheJungle, Difficulty.None).GetEffect(1) != null;
+            && Global.SpellMgr.GetSpellInfo(SpellIds.IncarnationKingOfTheJungle, Difficulty.None).GetEffects().Count > 1;
         }
 
         void HandleHitTargetBurn(uint effIndex)
@@ -1570,8 +1570,7 @@ namespace Scripts.Spells.Druid
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            SpellEffectInfo effectInfo = spellInfo.GetEffect(2);
-            if (effectInfo == null || effectInfo.IsEffect() || effectInfo.CalcValue() <= 0)
+            if (spellInfo.GetEffects().Count <= 2 || spellInfo.GetEffect(2).IsEffect() || spellInfo.GetEffect(2).CalcValue() <= 0)
                 return false;
             return true;
         }
@@ -1587,7 +1586,7 @@ namespace Scripts.Spells.Druid
                 return true;
             });
 
-            int maxTargets = GetSpellInfo().GetEffect(2).CalcValue(GetCaster());
+            int maxTargets = GetEffectInfo(2).CalcValue(GetCaster());
 
             if (targets.Count > maxTargets)
             {
@@ -1626,7 +1625,7 @@ namespace Scripts.Spells.Druid
                 return;
 
             // calculate from base damage, not from aurEff.GetAmount() (already modified)
-            float damage = caster.CalculateSpellDamage(GetUnitOwner(), GetSpellInfo(), aurEff.GetEffIndex());
+            float damage = caster.CalculateSpellDamage(GetUnitOwner(), aurEff.GetSpellEffectInfo());
 
             // Wild Growth = first tick gains a 6% bonus, reduced by 2% each tick
             float reduction = 2.0f;

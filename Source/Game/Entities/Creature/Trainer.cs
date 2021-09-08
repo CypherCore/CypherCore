@@ -129,13 +129,13 @@ namespace Game.Entities
             // check ranks
             bool hasLearnSpellEffect = false;
             bool knowsAllLearnedSpells = true;
-            foreach (SpellEffectInfo spellEffect in Global.SpellMgr.GetSpellInfo(trainerSpell.SpellId, Difficulty.None).GetEffects())
+            foreach (var spellEffectInfo in Global.SpellMgr.GetSpellInfo(trainerSpell.SpellId, Difficulty.None).GetEffects())
             {
-                if (spellEffect == null || !spellEffect.IsEffect(SpellEffectName.LearnSpell))
+                if (!spellEffectInfo.IsEffect(SpellEffectName.LearnSpell))
                     continue;
 
                 hasLearnSpellEffect = true;
-                if (!player.HasSpell(spellEffect.TriggerSpell))
+                if (!player.HasSpell(spellEffectInfo.TriggerSpell))
                     knowsAllLearnedSpells = false;
             }
 

@@ -127,12 +127,12 @@ namespace Scripts.Spells.DeathKnight
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.RunicPowerEnergize, SpellIds.VolatileShielding);
+            return ValidateSpellInfo(SpellIds.RunicPowerEnergize, SpellIds.VolatileShielding) && spellInfo.GetEffects().Count > 1;
         }
 
         public override bool Load()
         {
-            absorbPct = GetSpellInfo().GetEffect(1).CalcValue(GetCaster());
+            absorbPct = GetEffectInfo(1).CalcValue(GetCaster());
             maxHealth = GetCaster().GetMaxHealth();
             absorbedAmount = 0;
             return true;
@@ -427,7 +427,7 @@ namespace Scripts.Spells.DeathKnight
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.DeathStrikeEnabler, SpellIds.DeathStrikeHeal, SpellIds.BloodShieldMastery, SpellIds.BloodShieldAbsorb, SpellIds.RecentlyUsedDeathStrike, SpellIds.Frost, SpellIds.DeathStrikeOffhand)
-                && spellInfo.GetEffect(1) != null && spellInfo.GetEffect(2) != null;
+                && spellInfo.GetEffects().Count > 2;
         }
 
         void HandleDummy(uint effIndex)
@@ -437,12 +437,10 @@ namespace Scripts.Spells.DeathKnight
             AuraEffect enabler = caster.GetAuraEffect(SpellIds.DeathStrikeEnabler, 0, GetCaster().GetGUID());
             if (enabler != null)
             {
-                SpellInfo spellInfo = GetSpellInfo();
-
                 // Heals you for 25% of all damage taken in the last 5 sec,
-                int heal = MathFunctions.CalculatePct(enabler.CalculateAmount(GetCaster()), spellInfo.GetEffect(1).CalcValue(GetCaster()));
+                int heal = MathFunctions.CalculatePct(enabler.CalculateAmount(GetCaster()), GetEffectInfo(1).CalcValue(GetCaster()));
                 // minimum 7.0% of maximum health.
-                int pctOfMaxHealth = MathFunctions.CalculatePct(spellInfo.GetEffect(2).CalcValue(GetCaster()), caster.GetMaxHealth());
+                int pctOfMaxHealth = MathFunctions.CalculatePct(GetEffectInfo(2).CalcValue(GetCaster()), caster.GetMaxHealth());
                 heal = Math.Max(heal, pctOfMaxHealth);
 
                 caster.CastSpell(caster, SpellIds.DeathStrikeHeal, new CastSpellExtraArgs(TriggerCastFlags.FullMask).AddSpellMod(SpellValueMod.BasePoint0, heal));
@@ -530,7 +528,7 @@ namespace Scripts.Spells.DeathKnight
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.CorpseExplosionTriggered);
+            return ValidateSpellInfo(SpellIds.CorpseExplosionTriggered) && spellInfo.GetEffects().Count > 2;
         }
 
         void HandleDamage(uint effIndex)

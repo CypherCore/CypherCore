@@ -69,7 +69,7 @@ namespace Game.Entities
             return DoneAdvertisedBenefit;
         }
 
-        public uint SpellDamageBonusDone(Unit victim, SpellInfo spellProto, uint pdamage, DamageEffectType damagetype, SpellEffectInfo effect, uint stack = 1)
+        public uint SpellDamageBonusDone(Unit victim, SpellInfo spellProto, uint pdamage, DamageEffectType damagetype, SpellEffectInfo spellEffectInfo, uint stack = 1)
         {
             if (spellProto == null || victim == null || damagetype == DamageEffectType.Direct)
                 return pdamage;
@@ -83,7 +83,7 @@ namespace Game.Entities
             {
                 Unit owner = GetOwner();
                 if (owner != null)
-                    return owner.SpellDamageBonusDone(victim, spellProto, pdamage, damagetype, effect, stack);
+                    return owner.SpellDamageBonusDone(victim, spellProto, pdamage, damagetype, spellEffectInfo, stack);
             }
 
             int DoneTotal = 0;
@@ -100,9 +100,9 @@ namespace Game.Entities
                 DoneAdvertisedBenefit += ((Guardian)this).GetBonusDamage();
 
             // Check for table values
-            if (effect.BonusCoefficientFromAP > 0.0f)
+            if (spellEffectInfo.BonusCoefficientFromAP > 0.0f)
             {
-                float ApCoeffMod = effect.BonusCoefficientFromAP;
+                float ApCoeffMod = spellEffectInfo.BonusCoefficientFromAP;
                 Player modOwner = GetSpellModOwner();
                 if (modOwner)
                 {
@@ -130,7 +130,7 @@ namespace Game.Entities
             }
 
             // Default calculation
-            float coeff = effect.BonusCoefficient;
+            float coeff = spellEffectInfo.BonusCoefficient;
             if (DoneAdvertisedBenefit != 0)
             {
                 Player modOwner1 = GetSpellModOwner();
@@ -382,14 +382,14 @@ namespace Game.Entities
             return damage;
         }
 
-        public uint SpellHealingBonusDone(Unit victim, SpellInfo spellProto, uint healamount, DamageEffectType damagetype, SpellEffectInfo effect, uint stack = 1)
+        public uint SpellHealingBonusDone(Unit victim, SpellInfo spellProto, uint healamount, DamageEffectType damagetype, SpellEffectInfo spellEffectInfo, uint stack = 1)
         {
             // For totems get healing bonus from owner (statue isn't totem in fact)
             if (IsTypeId(TypeId.Unit) && IsTotem())
             {
                 Unit owner = GetOwner();
                 if (owner)
-                    return owner.SpellHealingBonusDone(victim, spellProto, healamount, damagetype, effect, stack);
+                    return owner.SpellHealingBonusDone(victim, spellProto, healamount, damagetype, spellEffectInfo, stack);
             }
 
             // No bonus healing for potion spells
@@ -428,14 +428,14 @@ namespace Game.Entities
                 DoneAdvertisedBenefit += (uint)((Guardian)this).GetBonusDamage();
 
             // Check for table values
-            float coeff = effect.BonusCoefficient;
-            if (effect.BonusCoefficientFromAP > 0.0f)
+            float coeff = spellEffectInfo.BonusCoefficient;
+            if (spellEffectInfo.BonusCoefficientFromAP > 0.0f)
             {
                 WeaponAttackType attType = (spellProto.IsRangedWeaponSpell() && spellProto.DmgClass != SpellDmgClass.Melee) ? WeaponAttackType.RangedAttack : WeaponAttackType.BaseAttack;
                 float APbonus = (float)victim.GetTotalAuraModifier(attType == WeaponAttackType.BaseAttack ? AuraType.MeleeAttackPowerAttackerBonus : AuraType.RangedAttackPowerAttackerBonus);
                 APbonus += GetTotalAttackPowerValue(attType);
 
-                DoneTotal += (int)(effect.BonusCoefficientFromAP * stack * APbonus);
+                DoneTotal += (int)(spellEffectInfo.BonusCoefficientFromAP * stack * APbonus);
             }
             else if (coeff <= 0.0f) // no AP and no SP coefs, skip
             {
@@ -458,12 +458,9 @@ namespace Game.Entities
                 DoneTotal += (int)(DoneAdvertisedBenefit * coeff * stack);
             }
 
-            foreach (SpellEffectInfo eff in spellProto.GetEffects())
+            foreach (var otherSpellEffectInfo in spellProto.GetEffects())
             {
-                if (eff == null)
-                    continue;
-
-                switch (eff.ApplyAuraName)
+                switch (otherSpellEffectInfo.ApplyAuraName)
                 {
                     // Bonus healing does not apply to these spells
                     case AuraType.PeriodicLeech:
@@ -471,7 +468,7 @@ namespace Game.Entities
                         DoneTotal = 0;
                         break;
                 }
-                if (eff.Effect == SpellEffectName.HealthLeech)
+                if (otherSpellEffectInfo.IsEffect(SpellEffectName.HealthLeech))
                     DoneTotal = 0;
             }
 
@@ -1247,14 +1244,14 @@ namespace Game.Entities
             }
 
             bool immuneToAllEffects = true;
-            foreach (SpellEffectInfo effect in spellInfo.GetEffects())
+            foreach (var spellEffectInfo in spellInfo.GetEffects())
             {
                 // State/effect immunities applied by aura expect full spell immunity
                 // Ignore effects with mechanic, they are supposed to be checked separately
-                if (effect == null || !effect.IsEffect())
+                if (!spellEffectInfo.IsEffect())
                     continue;
 
-                if (!IsImmunedToSpellEffect(spellInfo, effect.EffectIndex, caster))
+                if (!IsImmunedToSpellEffect(spellInfo, spellEffectInfo, caster))
                 {
                     immuneToAllEffects = false;
                     break;
@@ -1313,22 +1310,20 @@ namespace Game.Entities
 
             return mask;
         }
-        public virtual bool IsImmunedToSpellEffect(SpellInfo spellInfo, uint index, WorldObject caster)
+        public virtual bool IsImmunedToSpellEffect(SpellInfo spellInfo, SpellEffectInfo spellEffectInfo, WorldObject caster)
         {
             if (spellInfo == null)
                 return false;
 
-            SpellEffectInfo effect = spellInfo.GetEffect(index);
-            if (effect == null || !effect.IsEffect())
+            if (spellEffectInfo == null || !spellEffectInfo.IsEffect())
                 return false;
 
             // If m_immuneToEffect type contain this effect type, IMMUNE effect.
-            uint eff = (uint)effect.Effect;
             var effectList = m_spellImmune[(int)SpellImmunity.Effect];
-            if (effectList.ContainsKey(eff))
+            if (effectList.ContainsKey((uint)spellEffectInfo.Effect))
                 return true;
 
-            uint mechanic = (uint)effect.Mechanic;
+            uint mechanic = (uint)spellEffectInfo.Mechanic;
             if (mechanic != 0)
             {
                 var mechanicList = m_spellImmune[(int)SpellImmunity.Mechanic];
@@ -1338,7 +1333,7 @@ namespace Game.Entities
 
             if (!spellInfo.HasAttribute(SpellAttr3.IgnoreHitResult))
             {
-                uint aura = (uint)effect.ApplyAuraName;
+                uint aura = (uint)spellEffectInfo.ApplyAuraName;
                 if (aura != 0)
                 {
                     var list = m_spellImmune[(int)SpellImmunity.State];
@@ -1351,7 +1346,7 @@ namespace Game.Entities
                         var immuneAuraApply = GetAuraEffectsByType(AuraType.ModImmuneAuraApplySchool);
                         foreach (var auraEffect in immuneAuraApply)
                             if (Convert.ToBoolean(auraEffect.GetMiscValue() & (int)spellInfo.GetSchoolMask()) &&  // Check school
-                                ((caster && !IsFriendlyTo(caster)) || !spellInfo.IsPositiveEffect(index)))                       // Harmful
+                                ((caster && !IsFriendlyTo(caster)) || !spellInfo.IsPositiveEffect(spellEffectInfo.EffectIndex)))                       // Harmful
                                 return true;
                     }
                 }
@@ -2195,9 +2190,9 @@ namespace Game.Entities
                 }
 
                 // turn off snare auras by setting amount to 0
-                foreach (SpellEffectInfo spellEffectInfo in aura.GetSpellInfo().GetEffects())
+                foreach (var spellEffectInfo in aura.GetSpellInfo().GetEffects())
                 {
-                    if (spellEffectInfo != null && pair.Value.HasEffect(spellEffectInfo.EffectIndex) && spellEffectInfo.Mechanic == Mechanics.Snare)
+                    if (pair.Value.HasEffect(spellEffectInfo.EffectIndex) && spellEffectInfo.Mechanic == Mechanics.Snare)
                         aura.GetEffect(spellEffectInfo.EffectIndex).ChangeAmount(0);
                 }
             }
@@ -2492,12 +2487,13 @@ namespace Game.Entities
             if (target.IsImmunedToSpell(spellInfo, this))
                 return null;
 
-            for (byte i = 0; i < SpellConst.MaxEffects; ++i)
+            foreach (var spellEffectInfo in spellInfo.GetEffects())
             {
-                if (!Convert.ToBoolean(effMask & (1 << i)))
+                if ((effMask & (1 << (int)spellEffectInfo.EffectIndex)) == 0)
                     continue;
-                if (target.IsImmunedToSpellEffect(spellInfo, i, this))
-                    effMask &= ~(uint)(1 << i);
+
+                if (target.IsImmunedToSpellEffect(spellInfo, spellEffectInfo, this))
+                    effMask &= ~(1u << (int)spellEffectInfo.EffectIndex);
             }
 
             if (effMask == 0)
@@ -2546,12 +2542,9 @@ namespace Game.Entities
                 {
                     byte i = 0;
                     bool valid = false;
-                    foreach (SpellEffectInfo effect in spellEntry.GetEffects())
+                    foreach (var spellEffectInfo in spellEntry.GetEffects())
                     {
-                        if (effect == null)
-                            continue;
-
-                        if (effect.ApplyAuraName == AuraType.ControlVehicle)
+                        if (spellEffectInfo.ApplyAuraName == AuraType.ControlVehicle)
                         {
                             valid = true;
                             break;
@@ -2575,11 +2568,8 @@ namespace Game.Entities
                     else    // This can happen during Player._LoadAuras
                     {
                         int[] bp = new int[SpellConst.MaxEffects];
-                        foreach (SpellEffectInfo effect in spellEntry.GetEffects())
-                        {
-                            if (effect != null)
-                                bp[effect.EffectIndex] = effect.BasePoints;
-                        }
+                        foreach (var spellEffectInfo in spellEntry.GetEffects())
+                                bp[spellEffectInfo.EffectIndex] = spellEffectInfo.BasePoints;
 
                         bp[i] = seatId;
 
@@ -2643,7 +2633,7 @@ namespace Game.Entities
                 if (spellInfo.Mechanic != 0 && Convert.ToBoolean(mechanicMask & (1 << (int)spellInfo.Mechanic)))
                     return true;
 
-                foreach (SpellEffectInfo spellEffectInfo in spellInfo.GetEffects())
+                foreach (var spellEffectInfo in spellInfo.GetEffects())
                     if (spellEffectInfo != null && pair.Value.HasEffect(spellEffectInfo.EffectIndex) && spellEffectInfo.IsEffect() && spellEffectInfo.Mechanic != 0)
                         if ((mechanicMask & (1 << (int)spellEffectInfo.Mechanic)) != 0)
                             return true;
@@ -3891,22 +3881,19 @@ namespace Game.Entities
                         return null;
 
                     // update basepoints with new values - effect amount will be recalculated in ModStackAmount
-                    foreach (SpellEffectInfo effect in createInfo.GetSpellInfo().GetEffects())
+                    foreach (var spellEffectInfo in createInfo.GetSpellInfo().GetEffects())
                     {
-                        if (effect == null)
-                            continue;
-
-                        AuraEffect eff = foundAura.GetEffect(effect.EffectIndex);
-                        if (eff == null)
+                        AuraEffect auraEff = foundAura.GetEffect(spellEffectInfo.EffectIndex);
+                        if (auraEff == null)
                             continue;
 
                         int bp;
                         if (createInfo.BaseAmount != null)
-                            bp = createInfo.BaseAmount[effect.EffectIndex];
+                            bp = createInfo.BaseAmount[spellEffectInfo.EffectIndex];
                         else
-                            bp = effect.BasePoints;
+                            bp = spellEffectInfo.BasePoints;
 
-                        eff.m_baseAmount = bp;
+                        auraEff.m_baseAmount = bp;
                     }
 
                     // correct cast item guid if needed

@@ -2219,11 +2219,11 @@ namespace Game.Entities
                 SpellInfo transform = Global.SpellMgr.GetSpellInfo(unit.GetTransForm(), unit.GetMap().GetDifficultyID());
                 if (transform != null)
                 {
-                    foreach (SpellEffectInfo effect in transform.GetEffects())
+                    foreach (var spellEffectInfo in transform.GetEffects())
                     {
-                        if (effect != null && effect.IsAura(AuraType.Transform))
+                        if (spellEffectInfo.IsAura(AuraType.Transform))
                         {
-                            CreatureTemplate transformInfo = Global.ObjectMgr.GetCreatureTemplate((uint)effect.MiscValue);
+                            CreatureTemplate transformInfo = Global.ObjectMgr.GetCreatureTemplate((uint)spellEffectInfo.MiscValue);
                             if (transformInfo != null)
                             {
                                 cinfo = transformInfo;

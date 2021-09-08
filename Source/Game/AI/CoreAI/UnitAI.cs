@@ -345,13 +345,9 @@ namespace Game.AI
                 }
                 else
                 {
-                    foreach (SpellEffectInfo effect in spellInfo.GetEffects())
+                    foreach (var spellEffectInfo in spellInfo.GetEffects())
                     {
-                        if (effect == null)
-                            continue;
-
-                        var targetType = effect.TargetA.GetTarget();
-
+                        var targetType = spellEffectInfo.TargetA.GetTarget();
                         if (targetType == Targets.UnitTargetEnemy || targetType == Targets.DestTargetEnemy)
                         {
                             if (AIInfo.target < AITarget.Victim)
@@ -363,7 +359,7 @@ namespace Game.AI
                                 AIInfo.target = AITarget.Enemy;
                         }
 
-                        if (effect.Effect == SpellEffectName.ApplyAura)
+                        if (spellEffectInfo.IsEffect(SpellEffectName.ApplyAura))
                         {
                             if (targetType == Targets.UnitTargetEnemy)
                             {
@@ -384,73 +380,70 @@ namespace Game.AI
                 AIInfo.Effects = 0;
                 AIInfo.Targets = 0;
 
-                foreach (SpellEffectInfo effect in spellInfo.GetEffects())
+                foreach (var spellEffectInfo in spellInfo.GetEffects())
                 {
-                    if (effect == null)
-                        continue;
-
                     // Spell targets self.
-                    if (effect.TargetA.GetTarget() == Targets.UnitCaster)
+                    if (spellEffectInfo.TargetA.GetTarget() == Targets.UnitCaster)
                         AIInfo.Targets |= 1 << ((int)SelectTargetType.Self - 1);
 
                     // Spell targets a single enemy.
-                    if (effect.TargetA.GetTarget() == Targets.UnitTargetEnemy ||
-                        effect.TargetA.GetTarget() == Targets.DestTargetEnemy)
+                    if (spellEffectInfo.TargetA.GetTarget() == Targets.UnitTargetEnemy ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.DestTargetEnemy)
                         AIInfo.Targets |= 1 << ((int)SelectTargetType.SingleEnemy - 1);
 
                     // Spell targets AoE at enemy.
-                    if (effect.TargetA.GetTarget() == Targets.UnitSrcAreaEnemy ||
-                        effect.TargetA.GetTarget() == Targets.UnitDestAreaEnemy ||
-                        effect.TargetA.GetTarget() == Targets.SrcCaster ||
-                        effect.TargetA.GetTarget() == Targets.DestDynobjEnemy)
+                    if (spellEffectInfo.TargetA.GetTarget() == Targets.UnitSrcAreaEnemy ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.UnitDestAreaEnemy ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.SrcCaster ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.DestDynobjEnemy)
                         AIInfo.Targets |= 1 << ((int)SelectTargetType.AoeEnemy - 1);
 
                     // Spell targets an enemy.
-                    if (effect.TargetA.GetTarget() == Targets.UnitTargetEnemy ||
-                        effect.TargetA.GetTarget() == Targets.DestTargetEnemy ||
-                        effect.TargetA.GetTarget() == Targets.UnitSrcAreaEnemy ||
-                        effect.TargetA.GetTarget() == Targets.UnitDestAreaEnemy ||
-                        effect.TargetA.GetTarget() == Targets.SrcCaster ||
-                        effect.TargetA.GetTarget() == Targets.DestDynobjEnemy)
+                    if (spellEffectInfo.TargetA.GetTarget() == Targets.UnitTargetEnemy ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.DestTargetEnemy ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.UnitSrcAreaEnemy ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.UnitDestAreaEnemy ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.SrcCaster ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.DestDynobjEnemy)
                         AIInfo.Targets |= 1 << ((int)SelectTargetType.AnyEnemy - 1);
 
                     // Spell targets a single friend (or self).
-                    if (effect.TargetA.GetTarget() == Targets.UnitCaster ||
-                        effect.TargetA.GetTarget() == Targets.UnitTargetAlly ||
-                        effect.TargetA.GetTarget() == Targets.UnitTargetParty)
+                    if (spellEffectInfo.TargetA.GetTarget() == Targets.UnitCaster ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.UnitTargetAlly ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.UnitTargetParty)
                         AIInfo.Targets |= 1 << ((int)SelectTargetType.SingleFriend - 1);
 
                     // Spell targets AoE friends.
-                    if (effect.TargetA.GetTarget() == Targets.UnitCasterAreaParty ||
-                        effect.TargetA.GetTarget() == Targets.UnitLastTargetAreaParty ||
-                        effect.TargetA.GetTarget() == Targets.SrcCaster)
+                    if (spellEffectInfo.TargetA.GetTarget() == Targets.UnitCasterAreaParty ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.UnitLastTargetAreaParty ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.SrcCaster)
                         AIInfo.Targets |= 1 << ((int)SelectTargetType.AoeFriend - 1);
 
                     // Spell targets any friend (or self).
-                    if (effect.TargetA.GetTarget() == Targets.UnitCaster ||
-                        effect.TargetA.GetTarget() == Targets.UnitTargetAlly ||
-                        effect.TargetA.GetTarget() == Targets.UnitTargetParty ||
-                        effect.TargetA.GetTarget() == Targets.UnitCasterAreaParty ||
-                        effect.TargetA.GetTarget() == Targets.UnitLastTargetAreaParty ||
-                        effect.TargetA.GetTarget() == Targets.SrcCaster)
+                    if (spellEffectInfo.TargetA.GetTarget() == Targets.UnitCaster ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.UnitTargetAlly ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.UnitTargetParty ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.UnitCasterAreaParty ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.UnitLastTargetAreaParty ||
+                        spellEffectInfo.TargetA.GetTarget() == Targets.SrcCaster)
                         AIInfo.Targets |= 1 << ((int)SelectTargetType.AnyFriend - 1);
 
                     // Make sure that this spell includes a damage effect.
-                    if (effect.Effect == SpellEffectName.SchoolDamage ||
-                        effect.Effect == SpellEffectName.Instakill ||
-                        effect.Effect == SpellEffectName.EnvironmentalDamage ||
-                        effect.Effect == SpellEffectName.HealthLeech)
+                    if (spellEffectInfo.Effect == SpellEffectName.SchoolDamage ||
+                        spellEffectInfo.Effect == SpellEffectName.Instakill ||
+                        spellEffectInfo.Effect == SpellEffectName.EnvironmentalDamage ||
+                        spellEffectInfo.Effect == SpellEffectName.HealthLeech)
                         AIInfo.Effects |= 1 << ((int)SelectEffect.Damage - 1);
 
                     // Make sure that this spell includes a healing effect (or an apply aura with a periodic heal).
-                    if (effect.Effect == SpellEffectName.Heal ||
-                        effect.Effect == SpellEffectName.HealMaxHealth ||
-                        effect.Effect == SpellEffectName.HealMechanical ||
-                        (effect.Effect == SpellEffectName.ApplyAura && effect.ApplyAuraName == AuraType.PeriodicHeal))
+                    if (spellEffectInfo.Effect == SpellEffectName.Heal ||
+                        spellEffectInfo.Effect == SpellEffectName.HealMaxHealth ||
+                        spellEffectInfo.Effect == SpellEffectName.HealMechanical ||
+                        (spellEffectInfo.Effect == SpellEffectName.ApplyAura && spellEffectInfo.ApplyAuraName == AuraType.PeriodicHeal))
                         AIInfo.Effects |= 1 << ((int)SelectEffect.Healing - 1);
 
                     // Make sure that this spell applies an aura.
-                    if (effect.Effect == SpellEffectName.ApplyAura)
+                    if (spellEffectInfo.Effect == SpellEffectName.ApplyAura)
                         AIInfo.Effects |= 1 << ((int)SelectEffect.Aura - 1);
                 }
 

@@ -1447,11 +1447,16 @@ namespace Game
                     continue;
                 }
 
-                byte i = (byte)((script.Key >> 24) & 0x000000FF);
+                byte spellEffIndex = (byte)((script.Key >> 24) & 0x000000FF);
+                if (spellEffIndex >= spellInfo.GetEffects().Count)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `spell_scripts` has too high effect index {spellEffIndex} for spell (Id: {spellId}) as script id");
+                    continue;
+                }
+
                 //check for correct spellEffect
-                SpellEffectInfo effect = spellInfo.GetEffect(i);
-                if (effect != null && (effect.Effect == 0 || (effect.Effect != SpellEffectName.ScriptEffect && effect.Effect != SpellEffectName.Dummy)))
-                    Log.outError(LogFilter.Sql, "Table `spell_scripts` - spell {0} effect {1} is not SPELL_EFFECT_SCRIPT_EFFECT or SPELL_EFFECT_DUMMY", spellId, i);
+                if (spellInfo.GetEffect(spellEffIndex).Effect == 0 || (spellInfo.GetEffect(spellEffIndex).Effect != SpellEffectName.ScriptEffect && spellInfo.GetEffect(spellEffIndex).Effect != SpellEffectName.Dummy))
+                    Log.outError(LogFilter.Sql, $"Table `spell_scripts` - spell {spellId} effect {spellEffIndex} is not SPELL_EFFECT_SCRIPT_EFFECT or SPELL_EFFECT_DUMMY");
             }
         }
         public void LoadEventScripts()
@@ -1473,11 +1478,11 @@ namespace Game
                 SpellInfo spell = Global.SpellMgr.GetSpellInfo(spellNameEntry.Id, Difficulty.None);
                 if (spell != null)
                 {
-                    foreach (SpellEffectInfo effect in spell.GetEffects())
+                    foreach (var spellEffectInfo in spell.GetEffects())
                     {
-                        if (effect != null && effect.Effect == SpellEffectName.SendEvent)
-                            if (effect.MiscValue != 0)
-                                evt_scripts.Add((uint)effect.MiscValue);
+                        if (spellEffectInfo.IsEffect(SpellEffectName.SendEvent))
+                            if (spellEffectInfo.MiscValue != 0)
+                                evt_scripts.Add((uint)spellEffectInfo.MiscValue);
                     }
                 }
             }
@@ -7516,12 +7521,12 @@ namespace Game
                 if (spellInfo == null)
                     continue;
 
-                foreach (SpellEffectInfo effect in spellInfo.GetEffects())
+                foreach (var spellEffectInfo in spellInfo.GetEffects())
                 {
-                    if (effect == null || effect.Effect != SpellEffectName.QuestComplete)
+                    if (spellEffectInfo.Effect != SpellEffectName.QuestComplete)
                         continue;
 
-                    uint questId = (uint)effect.MiscValue;
+                    uint questId = (uint)spellEffectInfo.MiscValue;
                     Quest quest = GetQuestTemplate(questId);
 
                     // some quest referenced in spells not exist (outdated spells)

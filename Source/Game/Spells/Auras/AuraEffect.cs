@@ -2097,8 +2097,8 @@ namespace Game.Spells
                     }
 
                     //some spell has one aura of mount and one of vehicle
-                    foreach (SpellEffectInfo effect in GetSpellInfo().GetEffects())
-                        if (effect != null && GetSpellEffectInfo().Effect == SpellEffectName.Summon && effect.MiscValue == GetMiscValue())
+                    foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
+                        if (spellEffectInfo.IsEffect(SpellEffectName.Summon) && spellEffectInfo.MiscValue == GetMiscValue())
                             displayId = 0;
                 }
 
@@ -4910,7 +4910,7 @@ namespace Game.Spells
 
             // Consecrate ticks can miss and will not show up in the combat log
             // dynobj auras must always have a caster
-            if (GetSpellEffectInfo().Effect == SpellEffectName.PersistentAreaAura &&
+            if (GetSpellEffectInfo().IsEffect(SpellEffectName.PersistentAreaAura) &&
                 caster.SpellHitResult(target, GetSpellInfo(), false) != SpellMissInfo.None)
                 return;
 
@@ -4982,7 +4982,7 @@ namespace Game.Spells
                 damage = Unit.SpellCriticalDamageBonus(caster, m_spellInfo, damage, target);
 
             // Calculate armor mitigation
-            if (Unit.IsDamageReducedByArmor(GetSpellInfo().GetSchoolMask(), GetSpellInfo(), (sbyte)GetEffIndex()))
+            if (Unit.IsDamageReducedByArmor(GetSpellInfo().GetSchoolMask(), GetSpellInfo(), GetSpellEffectInfo()))
             {
                 uint damageReducedArmor = Unit.CalcArmorReducedDamage(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetAttackType(), GetBase().GetCasterLevel());
                 cleanDamage.mitigated_damage += damage - damageReducedArmor;
@@ -4991,7 +4991,7 @@ namespace Game.Spells
 
             if (!GetSpellInfo().HasAttribute(SpellAttr4.FixedDamage))
             {
-                if (GetSpellEffectInfo().IsTargetingArea() || GetSpellEffectInfo().IsAreaAuraEffect() || GetSpellEffectInfo().Effect == SpellEffectName.PersistentAreaAura)
+                if (GetSpellEffectInfo().IsTargetingArea() || GetSpellEffectInfo().IsAreaAuraEffect() || GetSpellEffectInfo().IsEffect(SpellEffectName.PersistentAreaAura))
                     damage = (uint)target.CalculateAOEAvoidance((int)damage, (uint)m_spellInfo.SchoolMask, GetBase().GetCastItemGUID());
             }
 
@@ -5043,7 +5043,7 @@ namespace Game.Spells
             }
 
             // dynobj auras must always have a caster
-            if (GetSpellEffectInfo().Effect == SpellEffectName.PersistentAreaAura &&
+            if (GetSpellEffectInfo().IsEffect(SpellEffectName.PersistentAreaAura) &&
                 caster.SpellHitResult(target, GetSpellInfo(), false) != SpellMissInfo.None)
                 return;
 
@@ -5064,7 +5064,7 @@ namespace Game.Spells
                 damage = Unit.SpellCriticalDamageBonus(caster, m_spellInfo, damage, target);
 
             // Calculate armor mitigation
-            if (Unit.IsDamageReducedByArmor(GetSpellInfo().GetSchoolMask(), GetSpellInfo(), (sbyte)GetEffIndex()))
+            if (Unit.IsDamageReducedByArmor(GetSpellInfo().GetSchoolMask(), GetSpellInfo(), GetSpellEffectInfo()))
             {
                 uint damageReducedArmor = Unit.CalcArmorReducedDamage(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetAttackType(), GetBase().GetCasterLevel());
                 cleanDamage.mitigated_damage += damage - damageReducedArmor;
@@ -5073,7 +5073,7 @@ namespace Game.Spells
 
             if (!GetSpellInfo().HasAttribute(SpellAttr4.FixedDamage))
             {
-                if (GetSpellEffectInfo().IsTargetingArea() || GetSpellEffectInfo().IsAreaAuraEffect() || GetSpellEffectInfo().Effect == SpellEffectName.PersistentAreaAura)
+                if (GetSpellEffectInfo().IsTargetingArea() || GetSpellEffectInfo().IsAreaAuraEffect() || GetSpellEffectInfo().IsEffect(SpellEffectName.PersistentAreaAura))
                     damage = (uint)target.CalculateAOEAvoidance((int)damage, (uint)m_spellInfo.SchoolMask, GetBase().GetCastItemGUID());
             }
 
@@ -5236,7 +5236,7 @@ namespace Game.Spells
                 return;
             }
 
-            if (GetSpellEffectInfo().Effect == SpellEffectName.PersistentAreaAura &&
+            if (GetSpellEffectInfo().IsEffect(SpellEffectName.PersistentAreaAura) &&
                 caster.SpellHitResult(target, GetSpellInfo(), false) != SpellMissInfo.None)
                 return;
 
@@ -5648,11 +5648,11 @@ namespace Game.Spells
             else
             {
                 List<uint> summonedEntries = new();
-                foreach (var spellEffect in triggerSpellInfo.GetEffects())
+                foreach (var spellEffectInfo in triggerSpellInfo.GetEffects())
                 {
-                    if (spellEffect != null && spellEffect.Effect == SpellEffectName.Summon)
+                    if (spellEffectInfo.IsEffect(SpellEffectName.Summon))
                     {
-                        uint summonEntry = (uint)spellEffect.MiscValue;
+                        uint summonEntry = (uint)spellEffectInfo.MiscValue;
                         if (summonEntry != 0)
                             summonedEntries.Add(summonEntry);
 

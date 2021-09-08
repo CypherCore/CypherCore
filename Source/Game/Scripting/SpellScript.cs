@@ -134,7 +134,7 @@ namespace Game.Scripting
         public virtual void Register() { }
         // Function called on server startup, if returns false script won't be used in core
         // use for: dbc/template data presence/correctness checks
-        public virtual bool Validate(SpellInfo spellEntry) { return true; }
+        public virtual bool Validate(SpellInfo spellInfo) { return true; }
         // Function called when script is created, if returns false script will be unloaded afterwards
         // use for: initializing local script variables (DO NOT USE CONSTRUCTOR FOR THIS PURPOSE!)
         public virtual bool Load() { return true; }
@@ -194,15 +194,15 @@ namespace Game.Scripting
 
             public override bool CheckEffect(SpellInfo spellEntry, uint effIndex)
             {
-                SpellEffectInfo effect = spellEntry.GetEffect(effIndex);
-                if (effect == null)
+                if (spellEntry.GetEffects().Count <= effIndex)
                     return false;
 
-                if (effect.Effect == 0 && _effName == 0)
+                SpellEffectInfo spellEffectInfo = spellEntry.GetEffect(effIndex);
+                if (spellEffectInfo.Effect == 0 && _effName == 0)
                     return true;
-                if (effect.Effect == 0)
+                if (spellEffectInfo.Effect == 0)
                     return false;
-                return (_effName == SpellEffectName.Any) || (effect.Effect == _effName);
+                return (_effName == SpellEffectName.Any) || (spellEffectInfo.Effect == _effName);
             }
 
             public void Call(uint effIndex)
@@ -267,16 +267,16 @@ namespace Game.Scripting
                 _dest = dest;
             }
 
-            public override bool CheckEffect(SpellInfo spellEntry, uint effIndex)
+            public override bool CheckEffect(SpellInfo spellEntry, uint effIndexToCheck)
             {
                 if (_targetType == 0)
                     return false;
 
-                SpellEffectInfo effect = spellEntry.GetEffect(effIndex);
-                if (effect == null)
+                if (spellEntry.GetEffects().Count <= effIndexToCheck)
                     return false;
 
-                if (effect.TargetA.GetTarget() != _targetType && effect.TargetB.GetTarget() != _targetType)
+                SpellEffectInfo spellEffectInfo = spellEntry.GetEffect(effIndexToCheck);
+                if (spellEffectInfo.TargetA.GetTarget() != _targetType && spellEffectInfo.TargetB.GetTarget() != _targetType)
                     return false;
 
                 SpellImplicitTargetInfo targetInfo = new(_targetType);
@@ -896,15 +896,17 @@ namespace Game.Scripting
 
             public override bool CheckEffect(SpellInfo spellEntry, uint effIndex)
             {
-                SpellEffectInfo effect = spellEntry.GetEffect(effIndex);
-                if (effect == null)
+                if (spellEntry.GetEffects().Count <= effIndex)
                     return false;
 
-                if (effect.ApplyAuraName == 0 && effAurName == 0)
+                SpellEffectInfo spellEffectInfo = spellEntry.GetEffect(effIndex);
+                if (spellEffectInfo.ApplyAuraName == 0 && effAurName == 0)
                     return true;
-                if (effect.ApplyAuraName == 0)
+
+                if (spellEffectInfo.ApplyAuraName == 0)
                     return false;
-                return (effAurName == AuraType.Any) || (effect.ApplyAuraName == effAurName);
+
+                return (effAurName == AuraType.Any) || (spellEffectInfo.ApplyAuraName == effAurName);
             }
 
             AuraType effAurName;
@@ -1448,6 +1450,12 @@ namespace Game.Scripting
 
         // returns proto of the spell
         public SpellInfo GetSpellInfo() { return m_aura.GetSpellInfo(); }
+
+        public SpellEffectInfo GetEffectInfo(uint effIndex)
+        {
+            return m_aura.GetSpellInfo().GetEffect(effIndex);
+        }
+
         // returns spellid of the spell
         public uint GetId() { return m_aura.GetId(); }
 

@@ -20,6 +20,7 @@ using Game.Entities;
 using Game.Scripting;
 using Game.Spells;
 using System;
+using System.Collections.Generic;
 
 namespace Scripts.Spells.Monk
 {
@@ -304,14 +305,15 @@ namespace Scripts.Spells.Monk
     {
         float _period;
 
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.StaggerDamageAura)
+            && !Global.SpellMgr.GetSpellInfo(SpellIds.StaggerDamageAura, Difficulty.None).GetEffects().Empty();
+        }
+
         public override bool Load()
         {
-            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(SpellIds.StaggerDamageAura, GetCastDifficulty());
-            SpellEffectInfo effInfo = spellInfo?.GetEffect(0);
-            if (effInfo == null)
-                return false;
-
-            _period = (float)effInfo.ApplyAuraPeriod;
+            _period = (float)Global.SpellMgr.GetSpellInfo(SpellIds.StaggerDamageAura, GetCastDifficulty()).GetEffect(0).ApplyAuraPeriod;
             return true;
         }
 

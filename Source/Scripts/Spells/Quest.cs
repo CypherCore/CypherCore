@@ -673,14 +673,19 @@ namespace Scripts.Spells.Quest
     [Script]
     class spell_q12683_take_sputum_sample : SpellScript
     {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return spellInfo.GetEffects().Count > 1;
+        }
+
         void HandleDummy(uint effIndex)
         {
-            uint reqAuraId = (uint)GetSpellInfo().GetEffect(1).CalcValue();
+            uint reqAuraId = (uint)GetEffectInfo(1).CalcValue();
 
             Unit caster = GetCaster();
             if (caster.HasAuraEffect(reqAuraId, 0))
             {
-                uint spellId = (uint)GetSpellInfo().GetEffect(0).CalcValue();
+                uint spellId = (uint)GetEffectInfo(0).CalcValue();
                 caster.CastSpell(caster, spellId, true);
             }
         }
@@ -1451,7 +1456,7 @@ namespace Scripts.Spells.Quest
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
+            return !spellInfo.GetEffects().Empty() && ValidateSpellInfo((uint)spellInfo.GetEffect(0).CalcValue());
         }
 
         void HandleEffectDummy(uint effIndex)
@@ -1612,7 +1617,7 @@ namespace Scripts.Spells.Quest
     {
         void ModDest(ref SpellDestination dest)
         {
-            float dist = GetSpellInfo().GetEffect(0).CalcRadius(GetCaster());
+            float dist = GetEffectInfo(0).CalcRadius(GetCaster());
             float angle = RandomHelper.FRand(0.75f, 1.25f) * MathFunctions.PI;
 
             Position pos = GetCaster().GetNearPosition(dist, angle);

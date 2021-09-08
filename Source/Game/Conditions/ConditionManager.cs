@@ -577,35 +577,31 @@ namespace Game
             {
                 uint conditionEffMask = cond.SourceGroup;
                 List<uint> sharedMasks = new();
-                for (byte i = 0; i < SpellConst.MaxEffects; ++i)
+                foreach (var spellEffectInfo in spellInfo.GetEffects())
                 {
-                    SpellEffectInfo effect = spellInfo.GetEffect(i);
-                    if (effect == null)
-                        continue;
-
                     // additional checks by condition type
-                    if ((conditionEffMask & (1 << i)) != 0)
+                    if ((conditionEffMask & (1 << (int)spellEffectInfo.EffectIndex)) != 0)
                     {
                         switch (cond.ConditionType)
                         {
                             case ConditionTypes.ObjectEntryGuid:
                             {
-                                SpellCastTargetFlags implicitTargetMask = SpellInfo.GetTargetFlagMask(effect.TargetA.GetObjectType()) | SpellInfo.GetTargetFlagMask(effect.TargetB.GetObjectType());
+                                SpellCastTargetFlags implicitTargetMask = SpellInfo.GetTargetFlagMask(spellEffectInfo.TargetA.GetObjectType()) | SpellInfo.GetTargetFlagMask(spellEffectInfo.TargetB.GetObjectType());
                                 if (implicitTargetMask.HasFlag(SpellCastTargetFlags.UnitMask) && cond.ConditionValue1 != (uint)TypeId.Unit && cond.ConditionValue1 != (uint)TypeId.Player)
                                 {
-                                    Log.outError(LogFilter.Sql, $"{cond} in `condition` table - spell {spellInfo.Id} EFFECT_{i} - target requires ConditionValue1 to be either TYPEID_UNIT ({(uint)TypeId.Unit}) or TYPEID_PLAYER ({(uint)TypeId.Player})");
+                                    Log.outError(LogFilter.Sql, $"{cond} in `condition` table - spell {spellInfo.Id} EFFECT_{spellEffectInfo.EffectIndex} - target requires ConditionValue1 to be either TYPEID_UNIT ({(uint)TypeId.Unit}) or TYPEID_PLAYER ({(uint)TypeId.Player})");
                                     return;
                                 }
 
                                 if (implicitTargetMask.HasFlag(SpellCastTargetFlags.GameobjectMask) && cond.ConditionValue1 != (uint)TypeId.GameObject)
                                 {
-                                    Log.outError(LogFilter.Sql, $"{cond} in `condition` table - spell {spellInfo.Id} EFFECT_{i} - target requires ConditionValue1 to be TYPEID_GAMEOBJECT ({(uint)TypeId.GameObject})");
+                                    Log.outError(LogFilter.Sql, $"{cond} in `condition` table - spell {spellInfo.Id} EFFECT_{spellEffectInfo.EffectIndex} - target requires ConditionValue1 to be TYPEID_GAMEOBJECT ({(uint)TypeId.GameObject})");
                                     return;
                                 }
 
                                 if (implicitTargetMask.HasFlag(SpellCastTargetFlags.CorpseMask) && cond.ConditionValue1 != (uint)TypeId.Corpse)
                                 {
-                                    Log.outError(LogFilter.Sql, $"{cond} in `condition` table - spell {spellInfo.Id} EFFECT_{i} - target requires ConditionValue1 to be TYPEID_CORPSE ({(uint)TypeId.Corpse})");
+                                    Log.outError(LogFilter.Sql, $"{cond} in `condition` table - spell {spellInfo.Id} EFFECT_{spellEffectInfo.EffectIndex} - target requires ConditionValue1 to be TYPEID_CORPSE ({(uint)TypeId.Corpse})");
                                     return;
                                 }
                                 break;
@@ -616,21 +612,16 @@ namespace Game
                     }
 
                     // check if effect is already a part of some shared mask
-                    if (sharedMasks.Any(mask => !!Convert.ToBoolean(mask & (1 << i))))
+                    if (sharedMasks.Any(mask => !!Convert.ToBoolean(mask & (1 << (int)spellEffectInfo.EffectIndex))))
                         continue;
 
                     // build new shared mask with found effect
-                    uint sharedMask = (uint)(1 << i);
-                    List<Condition> cmp = effect.ImplicitTargetConditions;
-                    for (byte effIndex = (byte)(i + 1); effIndex < SpellConst.MaxEffects; ++effIndex)
-                    {
-                        SpellEffectInfo inner = spellInfo.GetEffect(effIndex);
-                        if (inner == null)
-                            continue;
+                    uint sharedMask = (uint)(1 << (int)spellEffectInfo.EffectIndex);
+                    List<Condition> cmp = spellEffectInfo.ImplicitTargetConditions;
+                    for (uint effIndex = spellEffectInfo.EffectIndex + 1; effIndex < spellInfo.GetEffects().Count; ++effIndex)
+                        if (spellInfo.GetEffect(effIndex).ImplicitTargetConditions == cmp)
+                            sharedMask |= (uint)(1 << (int)effIndex);
 
-                        if (inner.ImplicitTargetConditions == cmp)
-                            sharedMask |= (uint)(1 << effIndex);
-                    }
                     sharedMasks.Add(sharedMask);
                 }
 
@@ -645,15 +636,11 @@ namespace Game
                             if (((1 << firstEffIndex) & effectMask) != 0)
                                 break;
 
-                        if (firstEffIndex >= SpellConst.MaxEffects)
+                        if (firstEffIndex >= spellInfo.GetEffects().Count)
                             return;
 
-                        SpellEffectInfo effect = spellInfo.GetEffect(firstEffIndex);
-                        if (effect == null)
-                            continue;
-
                         // get shared data
-                        List<Condition> sharedList = effect.ImplicitTargetConditions;
+                        List<Condition> sharedList = spellInfo.GetEffect(firstEffIndex).ImplicitTargetConditions;
 
                         // there's already data entry for that sharedMask
                         if (sharedList != null)
@@ -672,15 +659,11 @@ namespace Game
                             // add new list, create new shared mask
                             sharedList = new List<Condition>();
                             bool assigned = false;
-                            for (byte i = firstEffIndex; i < SpellConst.MaxEffects; ++i)
+                            for (uint i = firstEffIndex; i < spellInfo.GetEffects().Count; ++i)
                             {
-                                SpellEffectInfo eff = spellInfo.GetEffect(i);
-                                if (eff == null)
-                                    continue;
-
-                                if (((1 << i) & commonMask) != 0)
+                                if (((1 << (int)i) & commonMask) != 0)
                                 {
-                                    eff.ImplicitTargetConditions = sharedList;
+                                    spellInfo.GetEffect(i).ImplicitTargetConditions = sharedList;
                                     assigned = true;
                                 }
                             }
@@ -966,19 +949,15 @@ namespace Game
 
                     uint origGroup = cond.SourceGroup;
 
-                    for (byte i = 0; i < SpellConst.MaxEffects; ++i)
+                    foreach (SpellEffectInfo spellEffectInfo in spellInfo.GetEffects())
                     {
-                        if (((1 << i) & cond.SourceGroup) == 0)
+                        if (((1 << (int)spellEffectInfo.EffectIndex) & cond.SourceGroup) == 0)
                             continue;
 
-                        SpellEffectInfo effect = spellInfo.GetEffect(i);
-                        if (effect == null)
+                        if (spellEffectInfo.ChainTargets > 0)
                             continue;
 
-                        if (effect.ChainTargets > 0)
-                            continue;
-
-                        switch (effect.TargetA.GetSelectionCategory())
+                        switch (spellEffectInfo.TargetA.GetSelectionCategory())
                         {
                             case SpellTargetSelectionCategories.Nearby:
                             case SpellTargetSelectionCategories.Cone:
@@ -990,7 +969,7 @@ namespace Game
                                 break;
                         }
 
-                        switch (effect.TargetB.GetSelectionCategory())
+                        switch (spellEffectInfo.TargetB.GetSelectionCategory())
                         {
                             case SpellTargetSelectionCategories.Nearby:
                             case SpellTargetSelectionCategories.Cone:
@@ -1002,8 +981,8 @@ namespace Game
                                 break;
                         }
 
-                        Log.outError(LogFilter.Sql, "SourceEntry {0} SourceGroup {1} in `condition` table - spell {2} does not have implicit targets of types: _AREA_, _CONE_, _NEARBY_, _CHAIN_ for effect {3}, SourceGroup needs correction, ignoring.", cond.SourceEntry, origGroup, cond.SourceEntry, i);
-                        cond.SourceGroup &= ~(uint)(1 << i);
+                        Log.outError(LogFilter.Sql, "SourceEntry {0} SourceGroup {1} in `condition` table - spell {2} does not have implicit targets of types: _AREA_, _CONE_, _NEARBY_, _CHAIN_ for effect {3}, SourceGroup needs correction, ignoring.", cond.SourceEntry, origGroup, cond.SourceEntry, spellEffectInfo.EffectIndex);
+                        cond.SourceGroup &= ~(1u << (int)spellEffectInfo.EffectIndex);
                     }
                     // all effects were removed, no need to add the condition at all
                     if (cond.SourceGroup == 0)

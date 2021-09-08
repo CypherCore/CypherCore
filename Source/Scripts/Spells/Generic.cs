@@ -529,7 +529,7 @@ namespace Scripts.Spells.Generic
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            if (!spellInfo.GetEffect(0).IsAura() || spellInfo.GetEffect(0).ApplyAuraName != AuraType.ModPowerRegen)
+            if (spellInfo.GetEffects().Empty() || !spellInfo.GetEffect(0).IsAura(AuraType.ModPowerRegen))
             {
                 Log.outError(LogFilter.Spells, "Aura {GetId()} structure has been changed - first aura is no longer SPELL_AURA_MOD_POWER_REGEN");
                 return false;
@@ -625,7 +625,7 @@ namespace Scripts.Spells.Generic
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(spellInfo.GetEffect(0).TriggerSpell);
+            return !spellInfo.GetEffects().Empty() && ValidateSpellInfo(spellInfo.GetEffect(0).TriggerSpell);
         }
 
         void PeriodicTick(AuraEffect aurEff)
@@ -634,7 +634,7 @@ namespace Scripts.Spells.Generic
             if (!RandomHelper.randChance(GetSpellInfo().ProcChance))
                 return;
 
-            GetTarget().CastSpell((Unit)null, GetSpellInfo().GetEffect(aurEff.GetEffIndex()).TriggerSpell, true);
+            GetTarget().CastSpell(null, aurEff.GetSpellEffectInfo().TriggerSpell, true);
         }
 
         public override void Register()
@@ -896,19 +896,19 @@ namespace Scripts.Spells.Generic
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo((uint)spellInfo.GetEffect(2).CalcValue());
+            return spellInfo.GetEffects().Count > 2 && ValidateSpellInfo((uint)spellInfo.GetEffect(2).CalcValue());
         }
 
         void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit caster = GetCaster();
             if (caster)
-                caster.CastSpell(GetTarget(), (uint)GetSpellInfo().GetEffect(2).CalcValue());
+                caster.CastSpell(GetTarget(), (uint)GetEffectInfo(2).CalcValue());
         }
 
         void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            GetTarget().RemoveAurasDueToSpell((uint)GetSpellInfo().GetEffect(2).CalcValue(), GetCasterGUID());
+            GetTarget().RemoveAurasDueToSpell((uint)GetEffectInfo(2).CalcValue(), GetCasterGUID());
         }
 
         public override void Register()
@@ -1565,19 +1565,20 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_gift_of_naaru : AuraScript
     {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return spellInfo.GetEffects().Count > 1;
+        }
+
         void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
             if (!GetCaster() || aurEff.GetTotalTicks() == 0)
                 return;
 
-            SpellEffectInfo eff1 = GetSpellInfo().GetEffect(1);
-            if (eff1 != null)
-            {
-                float healPct = eff1.CalcValue() / 100.0f;
-                float heal = healPct * GetCaster().GetMaxHealth();
-                int healTick = (int)Math.Floor(heal / aurEff.GetTotalTicks());
-                amount += healTick;
-            }
+            float healPct = GetEffectInfo(1).CalcValue() / 100.0f;
+            float heal = healPct * GetCaster().GetMaxHealth();
+            int healTick = (int)Math.Floor(heal / aurEff.GetTotalTicks());
+            amount += healTick;
         }
 
         public override void Register()
@@ -1785,7 +1786,7 @@ namespace Scripts.Spells.Generic
             if (spell.HasEffect(SpellEffectName.ScriptEffect))
                 OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, SpellConst.EffectFirstFound, SpellEffectName.ScriptEffect));
 
-            if (spell.GetEffect(0).Effect == SpellEffectName.Charge)
+            if (spell.GetEffect(0).IsEffect(SpellEffectName.Charge))
                 OnEffectHitTarget.Add(new EffectHandler(HandleChargeEffect, 0, SpellEffectName.Charge));
         }
     }
@@ -1816,7 +1817,7 @@ namespace Scripts.Spells.Generic
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(spellInfo.GetEffect(0).TriggerSpell);
+            return !spellInfo.GetEffects().Empty() && ValidateSpellInfo(spellInfo.GetEffect(0).TriggerSpell);
         }
 
         void PeriodicTick(AuraEffect aurEff)
@@ -1825,7 +1826,7 @@ namespace Scripts.Spells.Generic
 
             CastSpellExtraArgs args = new(aurEff);
             args.AddSpellMod(SpellValueMod.MaxTargets, (int)aurEff.GetTickNumber() / 10 + 1);
-            GetTarget().CastSpell((Unit)null, GetSpellInfo().GetEffect(aurEff.GetEffIndex()).TriggerSpell, args);
+            GetTarget().CastSpell((Unit)null, aurEff.GetSpellEffectInfo().TriggerSpell, args);
         }
 
         public override void Register()
@@ -1980,6 +1981,11 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_oracle_wolvar_reputation : SpellScript
     {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return spellInfo.GetEffects().Count > 1;
+        }
+        
         public override bool Load()
         {
             return GetCaster().IsTypeId(TypeId.Player);
@@ -1988,7 +1994,7 @@ namespace Scripts.Spells.Generic
         void HandleDummy(uint effIndex)
         {
             Player player = GetCaster().ToPlayer();
-            uint factionId = (uint)GetEffectInfo(effIndex).CalcValue();
+            uint factionId = (uint)GetEffectInfo().CalcValue();
             int repChange = GetEffectInfo(1).CalcValue();
 
             FactionRecord factionEntry = CliDB.FactionStorage.LookupByKey(factionId);
@@ -2291,11 +2297,16 @@ namespace Scripts.Spells.Generic
     [Script] // 62418 Impale
     class spell_gen_remove_on_health_pct : AuraScript
     {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return spellInfo.GetEffects().Count > 1;
+        }
+        
         void PeriodicTick(AuraEffect aurEff)
         {
             // they apply damage so no need to check for ticks here
 
-            if (GetTarget().HealthAbovePct(GetSpellInfo().GetEffect(1).CalcValue()))
+            if (GetTarget().HealthAbovePct(GetEffectInfo(1).CalcValue()))
             {
                 Remove(AuraRemoveMode.EnemySpell);
                 PreventDefaultAction();
@@ -2318,7 +2329,7 @@ namespace Scripts.Spells.Generic
         void PeriodicTick(AuraEffect aurEff)
         {
             // if it has only periodic effect, allow 1 tick
-            bool onlyEffect = GetSpellInfo().GetEffects().Length == 1;
+            bool onlyEffect = GetSpellInfo().GetEffects().Count == 1;
             if (onlyEffect && aurEff.GetTickNumber() <= 1)
                 return;
 
@@ -3042,9 +3053,12 @@ namespace Scripts.Spells.Generic
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            SpellEffectInfo effect = spellInfo.GetEffect(0);
-            if (effect == null || effect.CalcValue() < 1)
+            if (spellInfo.GetEffects().Empty())
                 return false;
+
+            if (spellInfo.GetEffect(0).CalcValue() < 1)
+                return false;
+
             return true;
         }
 
@@ -3236,7 +3250,7 @@ namespace Scripts.Spells.Generic
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo((uint)RequiredMixologySpells.Mixology);
+            return ValidateSpellInfo((uint)RequiredMixologySpells.Mixology) && !spellInfo.GetEffects().Empty();
         }
 
         public override bool Load()
@@ -3252,7 +3266,7 @@ namespace Scripts.Spells.Generic
 
         void CalculateAmount(AuraEffect aurEff, ref int amount, ref bool canBeRecalculated)
         {
-            if (GetCaster().HasAura((uint)RequiredMixologySpells.Mixology) && GetCaster().HasSpell(GetSpellInfo().GetEffect(0).TriggerSpell))
+            if (GetCaster().HasAura((uint)RequiredMixologySpells.Mixology) && GetCaster().HasSpell(GetEffectInfo(0).TriggerSpell))
             {
                 switch ((RequiredMixologySpells)GetId())
                 {
@@ -3596,14 +3610,14 @@ namespace Scripts.Spells.Generic
     [Script] // 99947 - Face Rage
     class spell_gen_face_rage : AuraScript
     {
-        public override bool Validate(SpellInfo spell)
+        public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.FaceRage);
+            return ValidateSpellInfo(SpellIds.FaceRage) && spellInfo.GetEffects().Count > 2;
         }
 
         void OnRemove(AuraEffect effect, AuraEffectHandleModes mode)
         {
-            GetTarget().RemoveAurasDueToSpell(GetSpellInfo().GetEffect(2).TriggerSpell);
+            GetTarget().RemoveAurasDueToSpell(GetEffectInfo(2).TriggerSpell);
         }
 
         public override void Register()

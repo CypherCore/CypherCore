@@ -294,9 +294,9 @@ namespace Game
                             return;
                         }
 
-                        foreach (SpellEffectInfo effect in spellInfo.GetEffects())
+                        foreach (var spellEffectInfo in spellInfo.GetEffects())
                         {
-                            if (effect != null && (effect.TargetA.GetTarget() == Targets.UnitSrcAreaEnemy || effect.TargetA.GetTarget() == Targets.UnitDestAreaEnemy || effect.TargetA.GetTarget() == Targets.DestDynobjEnemy))
+                            if (spellEffectInfo.TargetA.GetTarget() == Targets.UnitSrcAreaEnemy || spellEffectInfo.TargetA.GetTarget() == Targets.UnitDestAreaEnemy || spellEffectInfo.TargetA.GetTarget() == Targets.DestDynobjEnemy)
                                 return;
                         }
 

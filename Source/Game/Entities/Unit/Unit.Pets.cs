@@ -226,12 +226,12 @@ namespace Game.Entities
                     SpellInfo spInfo = Global.SpellMgr.GetSpellInfo(minion.ToTotem().GetSpell(), GetMap().GetDifficultyID());
                     if (spInfo != null)
                     {
-                        foreach (SpellEffectInfo effect in spInfo.GetEffects())
+                        foreach (var spellEffectInfo in spInfo.GetEffects())
                         {
-                            if (effect == null || effect.Effect != SpellEffectName.Summon)
+                            if (spellEffectInfo == null || !spellEffectInfo.IsEffect(SpellEffectName.Summon))
                                 continue;
 
-                            RemoveAllMinionsByEntry((uint)effect.MiscValue);
+                            RemoveAllMinionsByEntry((uint)spellEffectInfo.MiscValue);
                         }
                     }
                 }

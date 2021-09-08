@@ -1682,18 +1682,17 @@ namespace Game.Entities
 
             return null;
         }
-        public int CalculateSpellDamage(Unit target, SpellInfo spellProto, uint effIndex, int? basePoints = null, uint castItemId = 0, int itemLevel = -1)
+        public int CalculateSpellDamage(Unit target, SpellEffectInfo spellEffectInfo, int? basePoints = null, uint castItemId = 0, int itemLevel = -1)
         {
-            return CalculateSpellDamage(out _, target, spellProto, effIndex, basePoints, castItemId, itemLevel);
+            return CalculateSpellDamage(out _, target, spellEffectInfo, basePoints, castItemId, itemLevel);
         }
 
         // function uses real base points (typically value - 1)
-        public int CalculateSpellDamage(out float variance, Unit target, SpellInfo spellProto, uint effIndex, int? basePoints = null, uint castItemId = 0, int itemLevel = -1)
+        public int CalculateSpellDamage(out float variance, Unit target, SpellEffectInfo spellEffectInfo, int? basePoints = null, uint castItemId = 0, int itemLevel = -1)
         {
-            SpellEffectInfo effect = spellProto.GetEffect(effIndex);
             variance = 0.0f;
 
-            return effect != null ? effect.CalcValue(out variance, this, basePoints, target, castItemId, itemLevel) : 0;
+            return spellEffectInfo != null ? spellEffectInfo.CalcValue(out variance, this, basePoints, target, castItemId, itemLevel) : 0;
         }
 
         public float GetSpellMaxRangeForTarget(Unit target, SpellInfo spellInfo)

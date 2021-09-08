@@ -1711,8 +1711,8 @@ namespace Game.Entities
                                 // special check to filter things like Shield Wall, the aura is not permanent and must stay even without required item
                                 if (!spellInfo.IsPassive())
                                 {
-                                    foreach (SpellEffectInfo effect in spellInfo.GetEffects())
-                                        if (effect != null && effect.IsAura())
+                                    foreach (var spellEffectInfo in spellInfo.GetEffects())
+                                        if (spellEffectInfo.IsAura())
                                             return true;
                                 }
                             }
@@ -2284,9 +2284,9 @@ namespace Game.Entities
             // passive spells which apply aura and have an item requirement are to be added manually, instead of casted
             if (spellInfo.EquippedItemClass >= 0)
             {
-                foreach (SpellEffectInfo effectInfo in spellInfo.GetEffects())
+                foreach (var spellEffectInfo in spellInfo.GetEffects())
                 {
-                    if (effectInfo != null && effectInfo.IsAura())
+                    if (spellEffectInfo.IsAura())
                     {
                         if (!HasAura(spellInfo.Id) && HasItemFitToSpellRequirements(spellInfo))
                             AddAura(spellInfo.Id, this);
@@ -3289,10 +3289,10 @@ namespace Game.Entities
 
                             int effectPct = Math.Max(0, 100 - (lvlDifference * lvlPenaltyFactor));
 
-                            for (byte i = 0; i < SpellConst.MaxEffects; ++i)
+                            foreach (var spellEffectInfo in spellInfo.GetEffects())
                             {
-                                if (spellInfo.GetEffect(i).IsEffect())
-                                    args.AddSpellMod(SpellValueMod.BasePoint0 + i, MathFunctions.CalculatePct(spellInfo.GetEffect(i).CalcValue(this), effectPct));
+                                if (spellEffectInfo.IsEffect())
+                                    args.AddSpellMod(SpellValueMod.BasePoint0 + (int)spellEffectInfo.EffectIndex, MathFunctions.CalculatePct(spellEffectInfo.CalcValue(this), effectPct));
                             }
                         }
 

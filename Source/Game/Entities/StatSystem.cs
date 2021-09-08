@@ -1005,12 +1005,12 @@ namespace Game.Entities
                 return 0;
 
             int resistMech = 0;
-            foreach (SpellEffectInfo effect in spellInfo.GetEffects())
+            foreach (var spellEffectInfo in spellInfo.GetEffects())
             {
-                if (effect == null || !effect.IsEffect())
+                if (!spellEffectInfo.IsEffect())
                     break;
 
-                int effect_mech = (int)spellInfo.GetEffectMechanic(effect.EffectIndex);
+                int effect_mech = (int)spellInfo.GetEffectMechanic(spellEffectInfo.EffectIndex);
                 if (effect_mech != 0)
                 {
                     int temp = GetTotalAuraModifierByMiscValue(AuraType.ModMechanicResistance, effect_mech);
@@ -1538,21 +1538,18 @@ namespace Game.Entities
             if (chrSpec == null)
                 return;
 
-            for (uint i = 0; i < PlayerConst.MaxMasterySpells; ++i)
+            foreach (uint masterySpellId in chrSpec.MasterySpellID)
             {
-                Aura aura = GetAura(chrSpec.MasterySpellID[i]);
+                Aura aura = GetAura(masterySpellId);
                 if (aura != null)
                 {
-                    foreach (SpellEffectInfo effect in aura.GetSpellInfo().GetEffects())
+                    foreach (var spellEffectInfo in aura.GetSpellInfo().GetEffects())
                     {
-                        if (effect == null)
-                            continue;
-
-                        float mult = effect.BonusCoefficient;
+                        float mult = spellEffectInfo.BonusCoefficient;
                         if (MathFunctions.fuzzyEq(mult, 0.0f))
                             continue;
 
-                        aura.GetEffect(effect.EffectIndex).ChangeAmount((int)(value * mult));
+                        aura.GetEffect(spellEffectInfo.EffectIndex).ChangeAmount((int)(value * mult));
                     }
                 }
             }

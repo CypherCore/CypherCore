@@ -107,9 +107,9 @@ namespace Game.Entities
 
             // check learned spells state
             bool found = false;
-            foreach (SpellEffectInfo eff in spellInfo.GetEffects())
+            foreach (var spellEffectInfo in spellInfo.GetEffects())
             {
-                if (eff != null && eff.Effect == SpellEffectName.LearnSpell && !HasSpell(eff.TriggerSpell))
+                if (spellEffectInfo.IsEffect(SpellEffectName.LearnSpell) && !HasSpell(spellEffectInfo.TriggerSpell))
                 {
                     found = true;
                     break;
@@ -121,9 +121,6 @@ namespace Game.Entities
                 return;
 
             SpellEffectInfo effect = spellInfo.GetEffect(0);
-            if (effect == null)
-                return;
-
             uint learned_0 = effect.TriggerSpell;
             if (!HasSpell(learned_0))
             {

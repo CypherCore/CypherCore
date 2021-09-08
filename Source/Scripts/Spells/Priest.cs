@@ -115,7 +115,7 @@ namespace Scripts.Spells.Priest
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.AtonementHeal);
+            return ValidateSpellInfo(SpellIds.AtonementHeal) && spellInfo.GetEffects().Count > 1;
         }
 
         bool CheckProc(ProcEventInfo eventInfo)
@@ -133,7 +133,7 @@ namespace Scripts.Spells.Priest
                 Unit target = Global.ObjAccessor.GetUnit(GetTarget(), targetGuid);
                 if (target)
                 {
-                    if (target.GetExactDist(GetTarget()) < GetSpellInfo().GetEffect(1).CalcValue())
+                    if (target.GetExactDist(GetTarget()) < GetEffectInfo(1).CalcValue())
                         GetTarget().CastSpell(target, SpellIds.AtonementHeal, args);
 
                     return false;
@@ -242,12 +242,12 @@ namespace Scripts.Spells.Priest
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.GuardianSpiritHeal);
+            return ValidateSpellInfo(SpellIds.GuardianSpiritHeal) && spellInfo.GetEffects().Count > 1;
         }
 
         public override bool Load()
         {
-            healPct = (uint)GetSpellInfo().GetEffect(1).CalcValue();
+            healPct = (uint)GetEffectInfo(1).CalcValue();
             return true;
         }
 
@@ -285,10 +285,9 @@ namespace Scripts.Spells.Priest
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.Heal, SpellIds.FlashHeal, SpellIds.PrayerOfHealing, SpellIds.Renew, SpellIds.Smite, SpellIds.HolyWordChastise, SpellIds.HolyWordSanctify, SpellIds.HolyWordSerenity)
-                && Global.SpellMgr.GetSpellInfo(SpellIds.HolyWordSerenity, Difficulty.None).GetEffect(1) != null
-                && Global.SpellMgr.GetSpellInfo(SpellIds.HolyWordSanctify, Difficulty.None).GetEffect(2) != null
-                && Global.SpellMgr.GetSpellInfo(SpellIds.HolyWordSanctify, Difficulty.None).GetEffect(3) != null
-                && Global.SpellMgr.GetSpellInfo(SpellIds.HolyWordChastise, Difficulty.None).GetEffect(1) != null;
+                && Global.SpellMgr.GetSpellInfo(SpellIds.HolyWordSerenity, Difficulty.None).GetEffects().Count > 1
+                && Global.SpellMgr.GetSpellInfo(SpellIds.HolyWordSanctify, Difficulty.None).GetEffects().Count > 3
+                && Global.SpellMgr.GetSpellInfo(SpellIds.HolyWordChastise, Difficulty.None).GetEffects().Count > 1;
         }
 
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
@@ -480,16 +479,12 @@ namespace Scripts.Spells.Priest
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.Atonement, SpellIds.AtonementTriggered, SpellIds.Trinity);
+            return ValidateSpellInfo(SpellIds.Atonement, SpellIds.AtonementTriggered, SpellIds.Trinity) && spellInfo.GetEffects().Count > 3;
         }
 
         void OnTargetSelect(List<WorldObject> targets)
         {
-            SpellEffectInfo eff2 = GetEffectInfo(2);
-            if (eff2 == null)
-                return;
-
-            uint maxTargets = (uint)(eff2.CalcValue(GetCaster()) + 1); // adding 1 for explicit target unit
+            uint maxTargets = (uint)(GetEffectInfo(2).CalcValue(GetCaster()) + 1); // adding 1 for explicit target unit
             if (targets.Count > maxTargets)
             {
                 Unit explTarget = GetExplTargetUnit();
@@ -516,11 +511,7 @@ namespace Scripts.Spells.Priest
             if (caster.HasAura(SpellIds.Trinity))
                 return;
 
-            SpellEffectInfo effect3 = GetEffectInfo(3);
-            if (effect3 == null)
-                return;
-
-            int durationPct = effect3.CalcValue(caster);
+            int durationPct = GetEffectInfo(3).CalcValue(caster);
             if (caster.HasAura(SpellIds.Atonement))
                 caster.CastSpell(GetHitUnit(), SpellIds.AtonementTriggered, new CastSpellExtraArgs(SpellValueMod.DurationPct, durationPct).SetTriggerFlags(TriggerCastFlags.FullMask));
         }
@@ -622,7 +613,7 @@ namespace Scripts.Spells.Priest
         public override bool Validate(SpellInfo spellInfo)
         {
             return ValidateSpellInfo(SpellIds.PrayerOfMendingHeal, SpellIds.PrayerOfMendingAura)
-                && Global.SpellMgr.GetSpellInfo(SpellIds.PrayerOfMendingHeal, Difficulty.None).GetEffect(0) != null;
+                && !Global.SpellMgr.GetSpellInfo(SpellIds.PrayerOfMendingHeal, Difficulty.None).GetEffects().Empty();
         }
 
         public override bool Load()

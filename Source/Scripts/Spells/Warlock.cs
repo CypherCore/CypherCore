@@ -199,26 +199,22 @@ namespace Scripts.Spells.Warlock
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.GlyphOfDemonTraining, SpellIds.DevourMagicHeal);
+            return ValidateSpellInfo(SpellIds.GlyphOfDemonTraining, SpellIds.DevourMagicHeal) && spellInfo.GetEffects().Count > 1;
         }
 
         void OnSuccessfulDispel(uint effIndex)
         {
-            SpellEffectInfo effect = GetSpellInfo().GetEffect(1);
-            if (effect != null)
-            {
-                Unit caster = GetCaster();
-                CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-                args.AddSpellMod(SpellValueMod.BasePoint0, effect.CalcValue(caster));
+            Unit caster = GetCaster();
+            CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+            args.AddSpellMod(SpellValueMod.BasePoint0, GetEffectInfo(1).CalcValue(caster));
 
-                caster.CastSpell(caster, SpellIds.DevourMagicHeal, args);
+            caster.CastSpell(caster, SpellIds.DevourMagicHeal, args);
 
-                // Glyph of Felhunter
-                Unit owner = caster.GetOwner();
-                if (owner)
-                    if (owner.GetAura(SpellIds.GlyphOfDemonTraining) != null)
-                        owner.CastSpell(owner, SpellIds.DevourMagicHeal, args);
-            }
+            // Glyph of Felhunter
+            Unit owner = caster.GetOwner();
+            if (owner)
+                if (owner.GetAura(SpellIds.GlyphOfDemonTraining) != null)
+                    owner.CastSpell(owner, SpellIds.DevourMagicHeal, args);
         }
 
         public override void Register()
@@ -370,7 +366,7 @@ namespace Scripts.Spells.Warlock
             if (caster == null)
                 return;
 
-            amount = caster.SpellBaseDamageBonusDone(GetSpellInfo().GetSchoolMask()) * GetSpellInfo().GetEffect(0).CalcValue(caster) / 100;
+            amount = caster.SpellBaseDamageBonusDone(GetSpellInfo().GetSchoolMask()) * GetEffectInfo(0).CalcValue(caster) / 100;
         }
         
         void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)

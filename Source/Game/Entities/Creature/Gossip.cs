@@ -444,9 +444,9 @@ namespace Game.Misc
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(quest.RewardSpell, Difficulty.None);
             if (spellInfo != null)
             {
-                foreach (SpellEffectInfo effect in spellInfo.GetEffects())
-                    if (effect != null && effect.IsEffect(SpellEffectName.LearnSpell))
-                        packet.LearnSpells.Add(effect.TriggerSpell);
+                foreach (var spellEffectInfo in spellInfo.GetEffects())
+                    if (spellEffectInfo.IsEffect(SpellEffectName.LearnSpell))
+                        packet.LearnSpells.Add(spellEffectInfo.TriggerSpell);
             }
 
             quest.BuildQuestRewards(packet.Rewards, _session.GetPlayer());

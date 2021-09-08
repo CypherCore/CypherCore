@@ -2045,12 +2045,12 @@ namespace Game.Entities
                 return false;
 
             bool immunedToAllEffects = true;
-            foreach (SpellEffectInfo effect in spellInfo.GetEffects())
+            foreach (var spellEffectInfo in spellInfo.GetEffects())
             {
-                if (effect == null || !effect.IsEffect())
+                if (!spellEffectInfo.IsEffect())
                     continue;
 
-                if (!IsImmunedToSpellEffect(spellInfo, effect.EffectIndex, caster))
+                if (!IsImmunedToSpellEffect(spellInfo, spellEffectInfo, caster))
                 {
                     immunedToAllEffects = false;
                     break;
@@ -2063,16 +2063,12 @@ namespace Game.Entities
             return base.IsImmunedToSpell(spellInfo, caster);
         }
 
-        public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, uint index, WorldObject caster)
+        public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, SpellEffectInfo spellEffectInfo, WorldObject caster)
         {
-            SpellEffectInfo effect = spellInfo.GetEffect(index);
-            if (effect == null)
+            if (GetCreatureTemplate().CreatureType == CreatureType.Mechanical && spellEffectInfo.IsEffect(SpellEffectName.Heal))
                 return true;
 
-            if (GetCreatureTemplate().CreatureType == CreatureType.Mechanical && effect.Effect == SpellEffectName.Heal)
-                return true;
-
-            return base.IsImmunedToSpellEffect(spellInfo, index, caster);
+            return base.IsImmunedToSpellEffect(spellInfo, spellEffectInfo, caster);
         }
 
         public bool IsElite()

@@ -2087,7 +2087,7 @@ namespace Framework.Constants
     public enum SpellEffectName
     {
         Any = -1,
-        Null = 0,
+        None = 0,
         Instakill = 1,
         SchoolDamage = 2,
         Dummy = 3,

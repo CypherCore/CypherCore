@@ -3636,19 +3636,16 @@ namespace Game.Entities
             return false;
         }
 
-        public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, uint index, WorldObject caster)
+        public override bool IsImmunedToSpellEffect(SpellInfo spellInfo, SpellEffectInfo spellEffectInfo, WorldObject caster)
         {
-            SpellEffectInfo effect = spellInfo.GetEffect(index);
-            if (effect == null || !effect.IsEffect())
-                return false;
-
             // players are immune to taunt (the aura and the spell effect).
-            if (effect.IsAura(AuraType.ModTaunt))
-                return true;
-            if (effect.IsEffect(SpellEffectName.AttackMe))
+            if (spellEffectInfo.IsAura(AuraType.ModTaunt))
                 return true;
 
-            return base.IsImmunedToSpellEffect(spellInfo, index, caster);
+            if (spellEffectInfo.IsEffect(SpellEffectName.AttackMe))
+                return true;
+
+            return base.IsImmunedToSpellEffect(spellInfo, spellEffectInfo, caster);
         }
 
         void RegenerateAll()

@@ -129,9 +129,9 @@ namespace Game.Spells
             if (IsSelfcasted() || caster == null || !caster.IsFriendlyTo(GetTarget()))
             {
                 bool negativeFound = false;
-                foreach (SpellEffectInfo effect in GetBase().GetSpellInfo().GetEffects())
+                foreach (var spellEffectInfo in GetBase().GetSpellInfo().GetEffects())
                 {
-                    if (effect != null && (Convert.ToBoolean((1 << (int)effect.EffectIndex) & effMask) && !GetBase().GetSpellInfo().IsPositiveEffect(effect.EffectIndex)))
+                    if (((1 << (int)spellEffectInfo.EffectIndex) & effMask) != 0 && !GetBase().GetSpellInfo().IsPositiveEffect(spellEffectInfo.EffectIndex))
                     {
                         negativeFound = true;
                         break;
@@ -144,9 +144,9 @@ namespace Game.Spells
             else
             {
                 bool positiveFound = false;
-                foreach (SpellEffectInfo effect in GetBase().GetSpellInfo().GetEffects())
+                foreach (var spellEffectInfo in GetBase().GetSpellInfo().GetEffects())
                 {
-                    if (effect != null && (Convert.ToBoolean((1 << (int)effect.EffectIndex) & effMask) && GetBase().GetSpellInfo().IsPositiveEffect(effect.EffectIndex)))
+                    if (((1 << (int)spellEffectInfo.EffectIndex) & effMask) != 0 && GetBase().GetSpellInfo().IsPositiveEffect(spellEffectInfo.EffectIndex))
                     {
                         positiveFound = true;
                         break;
@@ -380,10 +380,10 @@ namespace Game.Spells
             // shouldn't be in constructor - functions in AuraEffect.AuraEffect use polymorphism
             _effects = new AuraEffect[SpellConst.MaxEffects];
 
-            foreach (SpellEffectInfo effect in GetSpellInfo().GetEffects())
+            foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
             {
-                if (effect != null && Convert.ToBoolean(effMask & (1 << (int)effect.EffectIndex)))
-                    _effects[effect.EffectIndex] = new AuraEffect(this, effect, baseAmount != null ? baseAmount[effect.EffectIndex] : null, caster);
+                if ((effMask & (1 << (int)spellEffectInfo.EffectIndex)) != 0)
+                    _effects[spellEffectInfo.EffectIndex] = new AuraEffect(this, spellEffectInfo, baseAmount != null ? baseAmount[spellEffectInfo.EffectIndex] : null, caster);
             }
         }
         
@@ -518,10 +518,10 @@ namespace Game.Spells
 
                 bool addUnit = true;
                 // check target immunities
-                for (byte effIndex = 0; effIndex < SpellConst.MaxEffects; ++effIndex)
+                foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
                 {
-                    if (unit.IsImmunedToSpellEffect(GetSpellInfo(), effIndex, caster))
-                        value &= ~(1u << effIndex);
+                    if (unit.IsImmunedToSpellEffect(GetSpellInfo(), spellEffectInfo, caster))
+                        value &= ~(1u << (int)spellEffectInfo.EffectIndex);
                 }
 
                 
@@ -954,9 +954,9 @@ namespace Game.Spells
         public bool HasMoreThanOneEffectForType(AuraType auraType)
         {
             uint count = 0;
-            foreach (SpellEffectInfo effect in GetSpellInfo().GetEffects())
+            foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
             {
-                if (effect != null && HasEffect(effect.EffectIndex) && effect.ApplyAuraName == auraType)
+                if (HasEffect(spellEffectInfo.EffectIndex) && spellEffectInfo.ApplyAuraName == auraType)
                     ++count;
             }
 
@@ -965,9 +965,9 @@ namespace Game.Spells
 
         public bool IsArea()
         {
-            foreach (SpellEffectInfo effect in GetSpellInfo().GetEffects())
+            foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
             {
-                if (effect != null && HasEffect(effect.EffectIndex) && effect.IsAreaAuraEffect())
+                if (HasEffect(spellEffectInfo.EffectIndex) && spellEffectInfo.IsAreaAuraEffect())
                     return true;
             }
             return false;
@@ -1003,12 +1003,12 @@ namespace Game.Spells
             if (GetCasterGUID() != GetOwner().GetGUID())
             {
                 // owner == caster for area auras, check for possible bad data in DB
-                foreach (SpellEffectInfo effect in GetSpellInfo().GetEffects())
+                foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
                 {
-                    if (effect == null || !effect.IsEffect())
+                    if (!spellEffectInfo.IsEffect())
                         continue;
 
-                    if (effect.IsTargetingArea() || effect.IsAreaAuraEffect())
+                    if (spellEffectInfo.IsTargetingArea() || spellEffectInfo.IsAreaAuraEffect())
                         return false;
                 }
 
@@ -1496,17 +1496,17 @@ namespace Game.Spells
             if (IsPassive() && sameCaster && (m_spellInfo.IsDifferentRankOf(existingSpellInfo) || (m_spellInfo.Id == existingSpellInfo.Id && m_castItemGuid.IsEmpty())))
                 return false;
 
-            foreach (SpellEffectInfo effect in existingSpellInfo.GetEffects())
+            foreach (var spellEffectInfo in existingSpellInfo.GetEffects())
             {
                 // prevent remove triggering aura by triggered aura
-                if (effect != null && effect.TriggerSpell == GetId())
+                if (spellEffectInfo.TriggerSpell == GetId())
                     return true;
             }
 
-            foreach (SpellEffectInfo effect in GetSpellInfo().GetEffects())
+            foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
             {
                 // prevent remove triggered aura by triggering aura refresh
-                if (effect != null && effect.TriggerSpell == existingAura.GetId())
+                if (spellEffectInfo.TriggerSpell == existingAura.GetId())
                     return true;
             }
 
@@ -1544,35 +1544,40 @@ namespace Game.Spells
                     return true;
 
                 // check same periodic auras
-                for (byte i = 0; i < SpellConst.MaxEffects; i++)
+                bool hasPeriodicNonAreaEffect(SpellInfo spellInfo)
                 {
-                    SpellEffectInfo effect = m_spellInfo.GetEffect(i);
-                    if (effect == null)
-                        continue;
-
-                    switch (effect.ApplyAuraName)
+                    foreach (var spellEffectInfo in spellInfo.GetEffects())
                     {
-                        // DOT or HOT from different casters will stack
-                        case AuraType.PeriodicDamage:
-                        case AuraType.PeriodicDummy:
-                        case AuraType.PeriodicHeal:
-                        case AuraType.PeriodicTriggerSpell:
-                        case AuraType.PeriodicEnergize:
-                        case AuraType.PeriodicManaLeech:
-                        case AuraType.PeriodicLeech:
-                        case AuraType.PowerBurn:
-                        case AuraType.ObsModPower:
-                        case AuraType.ObsModHealth:
-                        case AuraType.PeriodicTriggerSpellWithValue:
-                            SpellEffectInfo existingEffect = m_spellInfo.GetEffect(i);
-                            // periodic auras which target areas are not allowed to stack this way (replenishment for example)
-                            if (effect.IsTargetingArea() || (existingEffect != null && existingEffect.IsTargetingArea()))
+                        switch (spellEffectInfo.ApplyAuraName)
+                        {
+                            // DOT or HOT from different casters will stack
+                            case AuraType.PeriodicDamage:
+                            case AuraType.PeriodicDummy:
+                            case AuraType.PeriodicHeal:
+                            case AuraType.PeriodicTriggerSpell:
+                            case AuraType.PeriodicEnergize:
+                            case AuraType.PeriodicManaLeech:
+                            case AuraType.PeriodicLeech:
+                            case AuraType.PowerBurn:
+                            case AuraType.ObsModPower:
+                            case AuraType.ObsModHealth:
+                            case AuraType.PeriodicTriggerSpellWithValue:
+                            {
+                                // periodic auras which target areas are not allowed to stack this way (replenishment for example)
+                                if (spellEffectInfo.IsTargetingArea())
+                                    return false;
+
+                                return true;
+                            }
+                            default:
                                 break;
-                            return true;
-                        default:
-                            break;
+                        }
                     }
+                    return false;
                 }
+
+                if (hasPeriodicNonAreaEffect(m_spellInfo) && hasPeriodicNonAreaEffect(existingSpellInfo))
+                    return true;
             }
 
             if (HasEffectType(AuraType.ControlVehicle) && existingAura.HasEffectType(AuraType.ControlVehicle))
@@ -2398,17 +2403,17 @@ namespace Game.Spells
             {
                 case TypeId.Unit:
                 case TypeId.Player:
-                    foreach (SpellEffectInfo effect in spellProto.GetEffects())
+                    foreach (var spellEffectInfo in spellProto.GetEffects())
                     {
-                        if (effect != null && effect.IsUnitOwnedAuraEffect())
-                            effMask |= (uint)(1 << (int)effect.EffectIndex);
+                        if (spellEffectInfo.IsUnitOwnedAuraEffect())
+                            effMask |= (1u << (int)spellEffectInfo.EffectIndex);
                     }
                     break;
                 case TypeId.DynamicObject:
-                    foreach (SpellEffectInfo effect in spellProto.GetEffects())
+                    foreach (var spellEffectInfo in spellProto.GetEffects())
                     {
-                        if (effect != null && effect.Effect == SpellEffectName.PersistentAreaAura)
-                            effMask |= (uint)(1 << (int)effect.EffectIndex);
+                        if (spellEffectInfo.Effect == SpellEffectName.PersistentAreaAura)
+                            effMask |= (1u << (int)spellEffectInfo.EffectIndex);
                     }
                     break;
                 default:
@@ -2627,13 +2632,13 @@ namespace Game.Spells
                     targets.Add(target, targetPair.Value);
             }
 
-            foreach (SpellEffectInfo effect in GetSpellInfo().GetEffects())
+            foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
             {
-                if (effect == null || !HasEffect(effect.EffectIndex))
+                if (!HasEffect(spellEffectInfo.EffectIndex))
                     continue;
 
                 // area auras only
-                if (effect.Effect == SpellEffectName.ApplyAura)
+                if (spellEffectInfo.Effect == SpellEffectName.ApplyAura)
                     continue;
 
                 // skip area update if owner is not in world!
@@ -2644,11 +2649,11 @@ namespace Game.Spells
                     continue;
 
                 List<Unit> units = new();
-                var condList = effect.ImplicitTargetConditions;
+                var condList = spellEffectInfo.ImplicitTargetConditions;
 
-                float radius = effect.CalcRadius(refe);
+                float radius = spellEffectInfo.CalcRadius(refe);
                 SpellTargetCheckTypes selectionType = SpellTargetCheckTypes.Default;
-                switch (effect.Effect)
+                switch (spellEffectInfo.Effect)
                 {
                     case SpellEffectName.ApplyAreaAuraParty:
                     case SpellEffectName.ApplyAreaAuraPartyNonrandom:
@@ -2709,7 +2714,7 @@ namespace Game.Spells
                     if (!targets.ContainsKey(unit))
                         targets[unit] = 0;
 
-                    targets[unit] |= 1u << (int)effect.EffectIndex;
+                    targets[unit] |= 1u << (int)spellEffectInfo.EffectIndex;
                 }
             }
         }
@@ -2717,10 +2722,10 @@ namespace Game.Spells
         public void AddStaticApplication(Unit target, uint effMask)
         {
             // only valid for non-area auras
-            foreach (SpellEffectInfo effect in GetSpellInfo().GetEffects())
+            foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
             {
-                if (effect != null && (effMask & (1u << (int)effect.EffectIndex)) != 0 && effect.Effect != SpellEffectName.ApplyAura)
-                    effMask &= ~(1u << (int)effect.EffectIndex);
+                if ((effMask & (1u << (int)spellEffectInfo.EffectIndex)) != 0 && spellEffectInfo.IsEffect(SpellEffectName.ApplyAura))
+                    effMask &= ~(1u << (int)spellEffectInfo.EffectIndex);
             }
 
             if (effMask == 0)
@@ -2765,18 +2770,18 @@ namespace Game.Spells
             Unit dynObjOwnerCaster = GetDynobjOwner().GetCaster();
             float radius = GetDynobjOwner().GetRadius();
 
-            foreach (SpellEffectInfo effect in GetSpellInfo().GetEffects())
+            foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
             {
-                if (effect == null || !HasEffect(effect.EffectIndex))
+                if (!HasEffect(spellEffectInfo.EffectIndex))
                     continue;
 
                 // we can't use effect type like area auras to determine check type, check targets
-                SpellTargetCheckTypes selectionType = effect.TargetA.GetCheckType();
-                if (effect.TargetB.GetReferenceType() == SpellTargetReferenceTypes.Dest)
-                    selectionType = effect.TargetB.GetCheckType();
+                SpellTargetCheckTypes selectionType = spellEffectInfo.TargetA.GetCheckType();
+                if (spellEffectInfo.TargetB.GetReferenceType() == SpellTargetReferenceTypes.Dest)
+                    selectionType = spellEffectInfo.TargetB.GetCheckType();
 
                 List<Unit> targetList = new();
-                var condList = effect.ImplicitTargetConditions;
+                var condList = spellEffectInfo.ImplicitTargetConditions;
 
                 WorldObjectSpellAreaTargetCheck check = new(radius, GetDynobjOwner(), dynObjOwnerCaster, dynObjOwnerCaster, GetSpellInfo(), selectionType, condList, SpellTargetObjectTypes.Unit);
                 UnitListSearcher searcher = new(GetDynobjOwner(), targetList, check);
@@ -2790,7 +2795,7 @@ namespace Game.Spells
                     if (!targets.ContainsKey(unit))
                         targets[unit] = 0;
 
-                    targets[unit] |= 1u << (int)effect.EffectIndex;
+                    targets[unit] |= 1u << (int)spellEffectInfo.EffectIndex;
                 }
             }
         }

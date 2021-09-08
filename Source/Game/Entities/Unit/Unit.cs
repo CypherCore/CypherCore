@@ -2089,7 +2089,7 @@ namespace Game.Entities
                 RemoveDynamicUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelObjects), index);
         }
 
-        public static bool IsDamageReducedByArmor(SpellSchoolMask schoolMask, SpellInfo spellInfo = null, sbyte effIndex = -1)
+        public static bool IsDamageReducedByArmor(SpellSchoolMask schoolMask, SpellInfo spellInfo = null, SpellEffectInfo spellEffectInfo = null)
         {
             // only physical spells damage gets reduced by armor
             if ((schoolMask & SpellSchoolMask.Normal) == 0)
@@ -2101,16 +2101,12 @@ namespace Game.Entities
                 if (spellInfo.HasAttribute(SpellCustomAttributes.IgnoreArmor))
                     return false;
 
-                if (effIndex != -1)
+                // bleeding effects are not reduced by armor
+                if (spellEffectInfo != null)
                 {
-                    // bleeding effects are not reduced by armor
-                    SpellEffectInfo effect = spellInfo.GetEffect((uint)effIndex);
-                    if (effect != null)
-                    {
-                        if (effect.ApplyAuraName == AuraType.PeriodicDamage || effect.Effect == SpellEffectName.SchoolDamage)
-                            if (spellInfo.GetEffectMechanicMask((byte)effIndex).HasAnyFlag((1u << (int)Mechanics.Bleed)))
-                                return false;
-                    }
+                    if (spellEffectInfo.ApplyAuraName == AuraType.PeriodicDamage || spellEffectInfo.Effect == SpellEffectName.SchoolDamage)
+                        if (spellInfo.GetEffectMechanicMask(spellEffectInfo.EffectIndex).HasAnyFlag((1u << (int)Mechanics.Bleed)))
+                            return false;
                 }
             }
 

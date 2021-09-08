@@ -1046,13 +1046,13 @@ namespace Game.AI
                         return false;
 
                     SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(e.Action.cast.spell, Difficulty.None);
-                    foreach (SpellEffectInfo effect in spellInfo.GetEffects())
+                    foreach (var spellEffectInfo in spellInfo.GetEffects())
                     {
-                        if (effect != null && (effect.IsEffect(SpellEffectName.KillCredit) || effect.IsEffect(SpellEffectName.KillCredit2)))
+                        if (spellEffectInfo.IsEffect(SpellEffectName.KillCredit) || spellEffectInfo.IsEffect(SpellEffectName.KillCredit2))
                         {
-                            if (effect.TargetA.GetTarget() == Targets.UnitCaster)
+                            if (spellEffectInfo.TargetA.GetTarget() == Targets.UnitCaster)
                                 Log.outError(LogFilter.Sql, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} Effect: SPELL_EFFECT_KILL_CREDIT: (SpellId: {4} targetA: {5} - targetB: {6}) has invalid target for this Action",
-                                e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.Action.cast.spell, effect.TargetA.GetTarget(), effect.TargetB.GetTarget());
+                                e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.Action.cast.spell, spellEffectInfo.TargetA.GetTarget(), spellEffectInfo.TargetB.GetTarget());
                         }
                     }
                     break;

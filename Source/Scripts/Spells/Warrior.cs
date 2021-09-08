@@ -302,7 +302,7 @@ namespace Scripts.Spells.Warrior
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.Stoicism);
+            return ValidateSpellInfo(SpellIds.Stoicism) && spellInfo.GetEffects().Count > 1;
         }
 
         void HandleProc(ProcEventInfo eventInfo)
@@ -310,7 +310,7 @@ namespace Scripts.Spells.Warrior
             PreventDefaultAction();
 
             Unit target = eventInfo.GetActionTarget();
-            int bp0 = (int)MathFunctions.CalculatePct(target.GetMaxHealth(), GetSpellInfo().GetEffect(1).CalcValue());
+            int bp0 = (int)MathFunctions.CalculatePct(target.GetMaxHealth(), GetEffectInfo(1).CalcValue());
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
             args.AddSpellMod(SpellValueMod.BasePoint0, bp0);
             target.CastSpell((Unit)null, SpellIds.Stoicism, args);
@@ -378,7 +378,7 @@ namespace Scripts.Spells.Warrior
             if (!ValidateSpellInfo(SpellIds.Shockwave, SpellIds.ShockwaveStun))
                 return false;
 
-            return spellInfo.GetEffect(0) != null && spellInfo.GetEffect(3) != null;
+            return spellInfo.GetEffects().Count > 3;
         }
 
         public override bool Load()
@@ -395,8 +395,8 @@ namespace Scripts.Spells.Warrior
         // Cooldown reduced by 20 sec if it strikes at least 3 targets.
         void HandleAfterCast()
         {
-            if (_targetCount >= (uint)GetSpellInfo().GetEffect(0).CalcValue())
-                GetCaster().ToPlayer().GetSpellHistory().ModifyCooldown(GetSpellInfo().Id, TimeSpan.FromSeconds(-GetSpellInfo().GetEffect(3).CalcValue()));
+            if (_targetCount >= (uint)GetEffectInfo(0).CalcValue())
+                GetCaster().ToPlayer().GetSpellHistory().ModifyCooldown(GetSpellInfo().Id, TimeSpan.FromSeconds(-GetEffectInfo(3).CalcValue()));
         }
 
         public override void Register()

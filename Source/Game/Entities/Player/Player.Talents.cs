@@ -91,9 +91,9 @@ namespace Game.Entities
             RemoveSpell(talent.SpellID, true);
 
             // search for spells that the talent teaches and unlearn them
-            foreach (SpellEffectInfo effect in spellInfo.GetEffects())
-                if (effect != null && effect.TriggerSpell > 0 && effect.Effect == SpellEffectName.LearnSpell)
-                    RemoveSpell(effect.TriggerSpell, true);
+            foreach (var spellEffectInfo in spellInfo.GetEffects())
+                if (spellEffectInfo.IsEffect(SpellEffectName.LearnSpell) && spellEffectInfo.TriggerSpell > 0)
+                    RemoveSpell(spellEffectInfo.TriggerSpell, true);
 
             if (talent.OverridesSpellID != 0)
                 RemoveOverrideSpell(talent.OverridesSpellID, talent.SpellID);
@@ -301,9 +301,9 @@ namespace Game.Entities
                 RemoveSpell(talentInfo.SpellID, true);
 
                 // search for spells that the talent teaches and unlearn them
-                foreach (SpellEffectInfo effect in spellInfo.GetEffects())
-                    if (effect != null && effect.TriggerSpell > 0 && effect.Effect == SpellEffectName.LearnSpell)
-                        RemoveSpell(effect.TriggerSpell, true);
+                foreach (var spellEffectInfo in spellInfo.GetEffects())
+                    if (spellEffectInfo.IsEffect(SpellEffectName.LearnSpell) && spellEffectInfo.TriggerSpell > 0)
+                        RemoveSpell(spellEffectInfo.TriggerSpell, true);
 
                 if (talentInfo.OverridesSpellID != 0)
                     RemoveOverrideSpell(talentInfo.OverridesSpellID, talentInfo.SpellID);
@@ -318,9 +318,9 @@ namespace Game.Entities
                 RemoveSpell(talentInfo.SpellID, true);
 
                 // search for spells that the talent teaches and unlearn them
-                foreach (SpellEffectInfo effect in spellInfo.GetEffects())
-                    if (effect != null && effect.TriggerSpell > 0 && effect.Effect == SpellEffectName.LearnSpell)
-                        RemoveSpell(effect.TriggerSpell, true);
+                foreach (var spellEffectInfo in spellInfo.GetEffects())
+                    if (spellEffectInfo.IsEffect(SpellEffectName.LearnSpell) && spellEffectInfo.TriggerSpell > 0)
+                        RemoveSpell(spellEffectInfo.TriggerSpell, true);
 
                 if (talentInfo.OverridesSpellID != 0)
                     RemoveOverrideSpell(talentInfo.OverridesSpellID, talentInfo.SpellID);

@@ -151,7 +151,7 @@ namespace Scripts.Spells.Mage
 
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.ArcaneBarrageR3, SpellIds.ArcaneBarrageEnergize) && spellInfo.GetEffect(1) != null;
+            return ValidateSpellInfo(SpellIds.ArcaneBarrageR3, SpellIds.ArcaneBarrageEnergize) && spellInfo.GetEffects().Count > 1;
         }
 
         void ConsumeArcaneCharges()
@@ -214,8 +214,10 @@ namespace Scripts.Spells.Mage
             if (!ValidateSpellInfo(SpellIds.ArcaneMage, SpellIds.Reverberate))
                 return false;
 
-            SpellEffectInfo damageEffect = spellInfo.GetEffect(1);
-            return damageEffect != null && damageEffect.IsEffect(SpellEffectName.SchoolDamage);
+            if (spellInfo.GetEffects().Count <= 1)
+                return false;
+
+            return spellInfo.GetEffect(1).IsEffect(SpellEffectName.SchoolDamage);
         }
 
         void CheckRequiredAuraForBaselineEnergize(uint effIndex)
@@ -319,7 +321,7 @@ namespace Scripts.Spells.Mage
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return spellInfo.GetEffect(2) != null && ValidateSpellInfo(SpellIds.CauterizeDot, SpellIds.Cauterized, spellInfo.GetEffect(2).TriggerSpell);
+            return spellInfo.GetEffects().Count > 2 && ValidateSpellInfo(SpellIds.CauterizeDot, SpellIds.Cauterized, spellInfo.GetEffect(2).TriggerSpell);
         }
 
         void HandleAbsorb(AuraEffect aurEff, DamageInfo dmgInfo, ref uint absorbAmount)
@@ -335,7 +337,7 @@ namespace Scripts.Spells.Mage
             }
 
             GetTarget().SetHealth(GetTarget().CountPctFromMaxHealth(effectInfo.GetAmount()));
-            GetTarget().CastSpell(GetTarget(), GetSpellInfo().GetEffect(2).TriggerSpell, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
+            GetTarget().CastSpell(GetTarget(), GetEffectInfo(2).TriggerSpell, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
             GetTarget().CastSpell(GetTarget(), SpellIds.CauterizeDot, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
             GetTarget().CastSpell(GetTarget(), SpellIds.Cauterized, new CastSpellExtraArgs(TriggerCastFlags.FullMask));
         }
@@ -517,15 +519,11 @@ namespace Scripts.Spells.Mage
             {
                 // Thermal Void
                 Aura thermalVoid = caster.GetAura(SpellIds.ThermalVoid);
-                if (thermalVoid != null)
+                if (!thermalVoid.GetSpellInfo().GetEffects().Empty())
                 {
-                    SpellEffectInfo thermalVoidEffect = thermalVoid.GetSpellInfo().GetEffect(0);
-                    if (thermalVoidEffect != null)
-                    {
-                        Aura icyVeins = caster.GetAura(SpellIds.IcyVeins);
-                        if (icyVeins != null)
-                            icyVeins.SetDuration(icyVeins.GetDuration() + thermalVoidEffect.CalcValue(caster) * Time.InMilliseconds);
-                    }
+                    Aura icyVeins = caster.GetAura(SpellIds.IcyVeins);
+                    if (icyVeins != null)
+                        icyVeins.SetDuration(icyVeins.GetDuration() + thermalVoid.GetSpellInfo().GetEffect(0).CalcValue(caster) * Time.InMilliseconds);
                 }
 
                 // Chain Reaction
@@ -750,7 +748,7 @@ namespace Scripts.Spells.Mage
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.RingOfFrostSummon, SpellIds.RingOfFrostFreeze);
+            return ValidateSpellInfo(SpellIds.RingOfFrostSummon, SpellIds.RingOfFrostFreeze) && !Global.SpellMgr.GetSpellInfo(SpellIds.RingOfFrostSummon, GetCastDifficulty()).GetEffects().Empty();
         }
 
         void HandleEffectPeriodic(AuraEffect aurEff)
@@ -806,7 +804,7 @@ namespace Scripts.Spells.Mage
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.RingOfFrostSummon, SpellIds.RingOfFrostFreeze);
+            return ValidateSpellInfo(SpellIds.RingOfFrostSummon, SpellIds.RingOfFrostFreeze) && !Global.SpellMgr.GetSpellInfo(SpellIds.RingOfFrostSummon, GetCastDifficulty()).GetEffects().Empty();
         }
 
         void FilterTargets(List<WorldObject> targets)
