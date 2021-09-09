@@ -45,6 +45,7 @@ namespace Scripts.Spells.Mage
         public const uint ConjureRefreshment = 116136;
         public const uint ConjureRefreshmentTable = 167145;
         public const uint DradonhawkForm = 32818;
+        public const uint EverwarmSocks = 320913;
         public const uint FingersOfFrost = 44544;
         public const uint FrostNova = 122;
         public const uint GiraffeForm = 32816;
@@ -492,6 +493,34 @@ namespace Scripts.Spells.Mage
         }
     }
 
+    [Script] // 45438 - Ice Block
+    class spell_mage_ice_block : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.EverwarmSocks);
+        }
+
+        void PreventStunWithEverwarmSocks(ref WorldObject target)
+        {
+            if (GetCaster().HasAura(SpellIds.EverwarmSocks))
+                target = null;
+        }
+
+        void PreventEverwarmSocks(ref WorldObject target)
+        {
+            if (!GetCaster().HasAura(SpellIds.EverwarmSocks))
+                target = null;
+        }
+
+        public override void Register()
+        {
+            OnObjectTargetSelect.Add(new ObjectTargetSelectHandler(PreventStunWithEverwarmSocks, 0, Targets.UnitCaster));
+            OnObjectTargetSelect.Add(new ObjectTargetSelectHandler(PreventEverwarmSocks, 5, Targets.UnitCaster));
+            OnObjectTargetSelect.Add(new ObjectTargetSelectHandler(PreventEverwarmSocks, 6, Targets.UnitCaster));
+        }
+    }
+    
     [Script] // Ice Lance - 30455
     class spell_mage_ice_lance : SpellScript
     {
@@ -747,7 +776,7 @@ namespace Scripts.Spells.Mage
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.RingOfFrostSummon, SpellIds.RingOfFrostFreeze) && !Global.SpellMgr.GetSpellInfo(SpellIds.RingOfFrostSummon, GetCastDifficulty()).GetEffects().Empty();
+            return ValidateSpellInfo(SpellIds.RingOfFrostSummon, SpellIds.RingOfFrostFreeze) && !Global.SpellMgr.GetSpellInfo(SpellIds.RingOfFrostSummon, Difficulty.None).GetEffects().Empty();
         }
 
         void HandleEffectPeriodic(AuraEffect aurEff)
@@ -803,7 +832,7 @@ namespace Scripts.Spells.Mage
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.RingOfFrostSummon, SpellIds.RingOfFrostFreeze) && !Global.SpellMgr.GetSpellInfo(SpellIds.RingOfFrostSummon, GetCastDifficulty()).GetEffects().Empty();
+            return ValidateSpellInfo(SpellIds.RingOfFrostSummon, SpellIds.RingOfFrostFreeze) && !Global.SpellMgr.GetSpellInfo(SpellIds.RingOfFrostSummon, Difficulty.None).GetEffects().Empty();
         }
 
         void FilterTargets(List<WorldObject> targets)
