@@ -1897,6 +1897,8 @@ namespace Game.Entities
                             }
                         }
                     }
+                    else
+                        m_items[slot] = null;
 
                     SetInvSlot(slot, ObjectGuid.Empty);
 
@@ -5438,6 +5440,9 @@ namespace Game.Entities
                         if (pProto != null && pProto.GetItemSet() != 0)
                             Item.RemoveItemsSetItem(this, pProto);
 
+                        // clear m_items so weapons for example can be registered as unequipped
+                        m_items[slot] = null;
+
                         _ApplyItemMods(pItem, slot, false);
                     }
 
@@ -5462,7 +5467,10 @@ namespace Game.Entities
                         // equipment visual show
                         SetVisibleItemSlot(slot, null);
                     }
-                    m_items[slot] = null;
+
+                    // clear for rest of items (ie nonequippable)
+                    if (slot >= InventorySlots.BagEnd)
+                        m_items[slot] = null;
                 }
                 else if ((pBag = GetBagByPos(bag)) != null)
                     pBag.RemoveItem(slot, update);
