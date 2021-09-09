@@ -4633,7 +4633,6 @@ namespace Game.Spells
                 if (apply)
                 {
                     CastSpellExtraArgs args = new(this);
-
                     if (GetAmount() != 0) // If amount avalible cast with basepoints (Crypt Fever for example)
                         args.AddSpellMod(SpellValueMod.BasePoint0, GetAmount());
 
@@ -4642,7 +4641,7 @@ namespace Game.Spells
                 else
                 {
                     ObjectGuid casterGUID = triggeredSpellInfo.NeedsToBeTriggeredByCaster(m_spellInfo) ? GetCasterGUID() : target.GetGUID();
-                    target.RemoveAura(triggeredSpellId, casterGUID, 0, aurApp.GetRemoveMode());
+                    target.RemoveAura(triggeredSpellId, casterGUID);
                 }
             }
             else if (mode.HasAnyFlag(AuraEffectHandleModes.Reapply) && apply)
