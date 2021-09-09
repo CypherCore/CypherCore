@@ -813,10 +813,8 @@ namespace Game.Entities
             else
                 missChance -= ModMeleeHitChance;
 
-            // Limit miss chance to 60%
-            missChance = Math.Min(missChance, 60f);
-
-            // miss chance from SPELL_AURA_MOD_ATTACKER_xxx_HIT_CHANCE can exceed 60% miss cap (eg aura 50240)
+            // miss chance from auras after calculating skill based miss
+            missChance -= GetTotalAuraModifier(AuraType.ModHitChance);
             if (attType == WeaponAttackType.RangedAttack)
                 missChance -= victim.GetTotalAuraModifier(AuraType.ModAttackerRangedHitChance);
             else
@@ -1885,14 +1883,12 @@ namespace Game.Entities
 
         public void UpdateMeleeHitChances()
         {
-            ModMeleeHitChance = 7.5f + GetTotalAuraModifier(AuraType.ModHitChance);
-            ModMeleeHitChance += GetRatingBonusValue(CombatRating.HitMelee);
+            ModMeleeHitChance = 7.5f + GetRatingBonusValue(CombatRating.HitMelee);
         }
 
         public void UpdateRangedHitChances()
         {
-            ModRangedHitChance = 7.5f + GetTotalAuraModifier(AuraType.ModHitChance);
-            ModRangedHitChance += GetRatingBonusValue(CombatRating.HitRanged);
+            ModRangedHitChance = 7.5f + GetRatingBonusValue(CombatRating.HitRanged);
         }
 
         public void UpdateSpellHitChances()

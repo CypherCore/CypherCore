@@ -3609,28 +3609,6 @@ namespace Game.Spells
             target.UpdateAllWeaponDependentCritAuras();
         }
 
-        [AuraEffectHandler(AuraType.ModHitChance)]
-        void HandleModHitChance(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
-        {
-            if (!mode.HasAnyFlag((AuraEffectHandleModes.ChangeAmountMask | AuraEffectHandleModes.Stat)))
-                return;
-
-            Unit target = aurApp.GetTarget();
-
-            // handle stack rules
-            if (target.IsTypeId(TypeId.Player))
-            {
-                target.ToPlayer().UpdateMeleeHitChances();
-                target.ToPlayer().UpdateRangedHitChances();
-            }
-            else
-            {
-                float value = target.GetTotalAuraModifier(AuraType.ModHitChance);
-                target.ModMeleeHitChance = value;
-                target.ModRangedHitChance = value;
-            }
-        }
-
         [AuraEffectHandler(AuraType.ModSpellHitChance)]
         void HandleModSpellHitChance(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
