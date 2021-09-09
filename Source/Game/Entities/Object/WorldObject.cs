@@ -2338,7 +2338,7 @@ namespace Game.Entities
                 return false;
 
             // ignore immunity flags when assisting
-            if (isPositiveSpell && !bySpell.HasAttribute(SpellAttr6.AssistIgnoreImmuneFlag))
+            if (bySpell == null || (isPositiveSpell && !bySpell.HasAttribute(SpellAttr6.AssistIgnoreImmuneFlag)))
             {
                 if (unit != null && !unit.HasUnitFlag(UnitFlags.PvpAttackable) && unitTarget != null && unitTarget.IsImmuneToNPC())
                     return false;
@@ -2346,7 +2346,7 @@ namespace Game.Entities
                 if (unitTarget != null && !unitTarget.HasUnitFlag(UnitFlags.PvpAttackable) && unit && unit.IsImmuneToNPC())
                     return false;
 
-                if (!bySpell.HasAttribute(SpellAttr8.AttackIgnoreImmuneToPCFlag))
+                if (bySpell == null || !bySpell.HasAttribute(SpellAttr8.AttackIgnoreImmuneToPCFlag))
                 {
                     if (unit != null && unit.HasUnitFlag(UnitFlags.PvpAttackable) && unitTarget && unitTarget.IsImmuneToPC())
                         return false;
