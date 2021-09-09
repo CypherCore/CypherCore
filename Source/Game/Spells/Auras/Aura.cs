@@ -2634,7 +2634,10 @@ namespace Game.Spells
             foreach (var targetPair in _staticApplications)
             {
                 Unit target = Global.ObjAccessor.GetUnit(GetUnitOwner(), targetPair.Key);
-                if (target != null)
+                if (target == null && targetPair.Key == GetUnitOwner().GetGUID())
+                    target = GetUnitOwner();
+
+                if (target)
                     targets.Add(target, targetPair.Value);
             }
 
