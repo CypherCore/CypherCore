@@ -562,11 +562,6 @@ namespace Game.Entities
                                 m_SkillupList.Clear();
                                 m_usetimes = 0;
 
-                                // If nearby linked trap exists, respawn it
-                                GameObject linkedTrap = GetLinkedTrap();
-                                if (linkedTrap)
-                                    linkedTrap.SetLootState(LootState.Ready);
-
                                 switch (GetGoType())
                                 {
                                     case GameObjectTypes.FishingNode:   //  can't fish now
@@ -768,7 +763,7 @@ namespace Game.Entities
                     // If nearby linked trap exists, despawn it
                     GameObject linkedTrap = GetLinkedTrap();
                     if (linkedTrap)
-                        linkedTrap.SetLootState(LootState.JustDeactivated);
+                        linkedTrap.DespawnOrUnsummon();
 
                     //if Gameobject should cast spell, then this, but some GOs (type = 10) should be destroyed
                     if (GetGoType() == GameObjectTypes.Goober)
