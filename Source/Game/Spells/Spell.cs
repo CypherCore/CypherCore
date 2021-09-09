@@ -2895,42 +2895,40 @@ namespace Game.Spells
 
             // now recheck units targeting correctness (need before any effects apply to prevent adding immunity at first effect not allow apply second spell effect and similar cases)
             {
-                Func<TargetInfo, bool> selectedCondition = target =>
+                List<TargetInfo> delayedTargets = new();
+                m_UniqueTargetInfo.RemoveAll(target =>
                 {
                     if (single_missile || target.TimeDelay <= offset)
                     {
                         target.TimeDelay = offset;
+                        delayedTargets.Add(target);
                         return true;
                     }
                     else if (next_time == 0 || target.TimeDelay < next_time)
                         next_time = target.TimeDelay;
                     return false;
-                };
-                List<TargetInfo> delayedTargets = new();
-                delayedTargets.AddRange(m_UniqueTargetInfo.Where(selectedCondition));
-
-                m_UniqueTargetInfo.RemoveAll(new Predicate<TargetInfo>(selectedCondition));
+                });
 
                 DoProcessTargetContainer(delayedTargets);
             }
 
             // now recheck gameobject targeting correctness
             {
-                Func<GOTargetInfo, bool> selectedCondition = goTarget =>
+                List<GOTargetInfo> delayedGOTargets = new();
+                m_UniqueGOTargetInfo.RemoveAll(goTarget =>
                 {
                     if (single_missile || goTarget.TimeDelay <= offset)
                     {
                         goTarget.TimeDelay = offset;
+                        delayedGOTargets.Add(goTarget);
                         return true;
                     }
                     else if (next_time == 0 || goTarget.TimeDelay < next_time)
                         next_time = goTarget.TimeDelay;
                     return false;
-                };
+                });
 
-                List<GOTargetInfo> delayedTargets = new(m_UniqueGOTargetInfo.Where(selectedCondition));
-
-                m_UniqueGOTargetInfo.RemoveAll(new Predicate<GOTargetInfo>(selectedCondition));
+                DoProcessTargetContainer(delayedGOTargets);
             }
 
             FinishTargetProcessing();
