@@ -328,7 +328,7 @@ namespace Game.Entities
             if (meleeAttack)
                 AddUnitState(UnitState.MeleeAttacking);
 
-            if (creature != null && !IsPet())
+            if (creature != null && !IsControlledByPlayer())
             {
                 EngageWithTarget(victim); // ensure that anything we're attacking has threat
 
