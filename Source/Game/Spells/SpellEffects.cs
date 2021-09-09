@@ -705,26 +705,16 @@ namespace Game.Spells
             if (spellAura == null || unitTarget == null)
                 return;
 
-            spellAura._ApplyEffectForTargets(effectInfo.EffectIndex);
-        }
+            // register target/effect on aura
+            AuraApplication aurApp = spellAura.GetApplicationOfTarget(unitTarget.GetGUID());
+            if (aurApp == null)
+                aurApp = unitTarget._CreateAuraApplication(spellAura, 1u << (int)effectInfo.EffectIndex);
+            else
+                aurApp.UpdateApplyEffectMask(aurApp.GetEffectsToApply() | 1u << (int)effectInfo.EffectIndex);
 
-        [SpellEffectHandler(SpellEffectName.ApplyAreaAuraEnemy)]
-        [SpellEffectHandler(SpellEffectName.ApplyAreaAuraFriend)]
-        [SpellEffectHandler(SpellEffectName.ApplyAreaAuraOwner)]
-        [SpellEffectHandler(SpellEffectName.ApplyAreaAuraParty)]
-        [SpellEffectHandler(SpellEffectName.ApplyAreaAuraPet)]
-        [SpellEffectHandler(SpellEffectName.ApplyAreaAuraRaid)]
-        [SpellEffectHandler(SpellEffectName.ApplyAreaAuraPartyNonrandom)]
-        [SpellEffectHandler(SpellEffectName.ApplyAreaAuraSummons)]
-        void EffectApplyAreaAura()
-        {
-            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
-                return;
-
-            if (spellAura == null || unitTarget == null)
-                return;
-
-            spellAura._ApplyEffectForTargets(effectInfo.EffectIndex);
+            // apply effect on target (skip for reapply)
+            if (!aurApp.HasEffect(effectInfo.EffectIndex))
+                unitTarget._ApplyAuraEffect(spellAura, effectInfo.EffectIndex);
         }
 
         [SpellEffectHandler(SpellEffectName.UnlearnSpecialization)]
