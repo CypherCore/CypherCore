@@ -275,6 +275,19 @@ namespace Game.Entities
             }
         }
 
+        public uint GetRequireLOS() => type switch
+        {
+            GameObjectTypes.Button => Button.requireLOS,
+            GameObjectTypes.QuestGiver => QuestGiver.requireLOS,
+            GameObjectTypes.Chest => Chest.requireLOS,
+            GameObjectTypes.Trap => Trap.requireLOS,
+            GameObjectTypes.Goober => Goober.requireLOS,
+            GameObjectTypes.FlagStand => FlagStand.requireLOS,
+            GameObjectTypes.NewFlag => NewFlag.requireLOS,
+            GameObjectTypes.GatheringNode => GatheringNode.requireLOS,
+            _ => 0,
+        };
+
         public uint GetLockId()
         {
             switch (type)

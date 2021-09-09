@@ -6557,6 +6557,12 @@ namespace Game.Spells
             if (m_spellInfo.HasAttribute(SpellAttr2.CanTargetNotInLos) || Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_spellInfo.Id, null, (byte)DisableFlags.SpellLOS))
                 return true;
 
+            // check if gameobject ignores LOS
+            GameObject gobCaster = m_caster.ToGameObject();
+            if (gobCaster != null)
+                if (!gobCaster.GetGoInfo().GetRequireLOS())
+                    return true;
+
             // if spell is triggered, need to check for LOS disable on the aura triggering it and inherit that behaviour
             if (IsTriggered() && m_triggeredByAuraSpell != null && (m_triggeredByAuraSpell.HasAttribute(SpellAttr2.CanTargetNotInLos) || Global.DisableMgr.IsDisabledFor(DisableType.Spell, m_triggeredByAuraSpell.Id, null, (byte)DisableFlags.SpellLOS)))
                 return true;

@@ -1464,7 +1464,7 @@ namespace Framework.Constants
         All = (Normal | Magic),
     }
 
-    [System.Flags]
+    [Flags]
     public enum SpellCastFlags : uint
     {
         None = 0x0,
