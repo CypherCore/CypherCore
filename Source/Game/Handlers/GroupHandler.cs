@@ -394,10 +394,10 @@ namespace Game
             switch (packet.RollType)
             {
                 case RollType.Need:
-                    GetPlayer().UpdateCriteria(CriteriaTypes.RollNeed, 1);
+                    GetPlayer().UpdateCriteria(CriteriaType.RollAnyNeed, 1);
                     break;
                 case RollType.Greed:
-                    GetPlayer().UpdateCriteria(CriteriaTypes.RollGreed, 1);
+                    GetPlayer().UpdateCriteria(CriteriaType.RollAnyGreed, 1);
                     break;
             }
         }

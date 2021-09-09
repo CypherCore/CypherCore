@@ -728,13 +728,13 @@ namespace Game.Entities
             {
                 int transmogSlot = Item.ItemTransmogrificationSlots[(int)item.inventoryType];
                 if (transmogSlot >= 0)
-                    _owner.GetPlayer().UpdateCriteria(CriteriaTypes.AppearanceUnlockedBySlot, (ulong)transmogSlot, itemModifiedAppearance.Id);
+                    _owner.GetPlayer().UpdateCriteria(CriteriaType.LearnAnyTransmogInSlot, (ulong)transmogSlot, itemModifiedAppearance.Id);
             }
 
             var sets = Global.DB2Mgr.GetTransmogSetsForItemModifiedAppearance(itemModifiedAppearance.Id);
             foreach (TransmogSetRecord set in sets)
                 if (IsSetCompleted(set.Id))
-                    _owner.GetPlayer().UpdateCriteria(CriteriaTypes.TransmogSetUnlocked, set.TransmogSetGroupID);
+                    _owner.GetPlayer().UpdateCriteria(CriteriaType.CollectTransmogSetFromGroup, set.TransmogSetGroupID);
         }
 
         void AddTemporaryAppearance(ObjectGuid itemGuid, ItemModifiedAppearanceRecord itemModifiedAppearance)

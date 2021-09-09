@@ -266,7 +266,7 @@ namespace Game
             player.SendMailResult(0, MailResponseType.Send, MailResponseResult.Ok);
 
             player.ModifyMoney(-reqmoney);
-            player.UpdateCriteria(CriteriaTypes.GoldSpentForMail, cost);
+            player.UpdateCriteria(CriteriaType.MoneySpentOnPostage, cost);
 
             bool needItemDelay = false;
 

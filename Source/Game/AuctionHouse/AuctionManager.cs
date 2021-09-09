@@ -1318,8 +1318,8 @@ namespace Game
                 Player owner = Global.ObjAccessor.FindConnectedPlayer(auction.Owner);
                 if (owner != null)
                 {
-                    owner.UpdateCriteria(CriteriaTypes.GoldEarnedByAuctions, profit);
-                    owner.UpdateCriteria(CriteriaTypes.HighestAuctionSold, profit);
+                    owner.UpdateCriteria(CriteriaType.MoneyEarnedFromAuctions, profit);
+                    owner.UpdateCriteria(CriteriaType.HighestAuctionSale, profit);
                     owner.GetSession().SendAuctionClosedNotification(auction, (float)WorldConfig.GetIntValue(WorldCfg.MailDeliveryDelay), true);
                 }
 
@@ -1460,7 +1460,7 @@ namespace Game
                     bidder.SendPacket(packet);
 
                     // FIXME: for offline player need also
-                    bidder.UpdateCriteria(CriteriaTypes.WonAuctions, 1);
+                    bidder.UpdateCriteria(CriteriaType.AuctionsWon, 1);
                 }
 
                 mail.SendMailTo(trans, new MailReceiver(bidder, auction.Bidder), new MailSender(this), MailCheckMask.Copied);
@@ -1488,8 +1488,8 @@ namespace Game
                 //FIXME: what do if owner offline
                 if (owner)
                 {
-                    owner.UpdateCriteria(CriteriaTypes.GoldEarnedByAuctions, profit);
-                    owner.UpdateCriteria(CriteriaTypes.HighestAuctionSold, auction.BidAmount);
+                    owner.UpdateCriteria(CriteriaType.MoneyEarnedFromAuctions, profit);
+                    owner.UpdateCriteria(CriteriaType.HighestAuctionSale, auction.BidAmount);
                     //send auction owner notification, bidder must be current!
                     owner.GetSession().SendAuctionClosedNotification(auction, (float)WorldConfig.GetIntValue(WorldCfg.MailDeliveryDelay), true);
                 }

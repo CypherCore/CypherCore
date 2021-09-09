@@ -137,7 +137,7 @@ namespace Game
                     {
                         if (success)
                         {
-                            GetPlayer().UpdateCriteria(CriteriaTypes.WonAuctions, 1);
+                            GetPlayer().UpdateCriteria(CriteriaType.AuctionsWon, 1);
                             SendAuctionCommandResult(0, AuctionCommand.PlaceBid, AuctionResult.Ok, throttle.DelayUntilNext);
                         }
                         else
@@ -435,7 +435,7 @@ namespace Game
                 {
                     if (success)
                     {
-                        GetPlayer().UpdateCriteria(CriteriaTypes.HighestAuctionBid, placeBid.BidAmount);
+                        GetPlayer().UpdateCriteria(CriteriaType.HighestAuctionBid, placeBid.BidAmount);
                         SendAuctionCommandResult(placeBid.AuctionID, AuctionCommand.PlaceBid, AuctionResult.Ok, throttle.DelayUntilNext);
                     }
                     else
@@ -740,7 +740,7 @@ namespace Game
                 {
                     if (success)
                     {
-                        GetPlayer().UpdateCriteria(CriteriaTypes.CreateAuction, 1);
+                        GetPlayer().UpdateCriteria(CriteriaType.ItemsPostedAtAuction, 1);
                         SendAuctionCommandResult(auctionId, AuctionCommand.SellItem, AuctionResult.Ok, throttle.DelayUntilNext);
                     }
                     else
@@ -886,7 +886,7 @@ namespace Game
                 {
                     if (success)
                     {
-                        GetPlayer().UpdateCriteria(CriteriaTypes.CreateAuction, 1);
+                        GetPlayer().UpdateCriteria(CriteriaType.ItemsPostedAtAuction, 1);
                         SendAuctionCommandResult(auctionId, AuctionCommand.SellItem, AuctionResult.Ok, throttle.DelayUntilNext);
                     }
                     else

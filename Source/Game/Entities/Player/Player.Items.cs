@@ -1268,8 +1268,8 @@ namespace Game.Entities
             if (item != null)
             {
                 ItemAddedQuestCheck(itemId, count);
-                UpdateCriteria(CriteriaTypes.ObtainAnyItem, itemId, count);
-                UpdateCriteria(CriteriaTypes.OwnItem, itemId, 1);
+                UpdateCriteria(CriteriaType.ObtainAnyItem, itemId, count);
+                UpdateCriteria(CriteriaType.AcquireItem, itemId, 1);
 
                 item.AddItemFlag(ItemFieldFlags.NewItem);
 
@@ -1539,7 +1539,7 @@ namespace Game.Entities
             if (pItem != null)
             {
                 ItemAddedQuestCheck(item, 1);
-                UpdateCriteria(CriteriaTypes.ObtainAnyItem, item, 1);
+                UpdateCriteria(CriteriaType.ObtainAnyItem, item, 1);
                 return EquipItem(pos, pItem, update);
             }
 
@@ -1647,8 +1647,8 @@ namespace Game.Entities
                 CheckTitanGripPenalty();
 
             // only for full equip instead adding to stack
-            UpdateCriteria(CriteriaTypes.EquipItem, pItem.GetEntry());
-            UpdateCriteria(CriteriaTypes.EquipItemInSlot, slot, pItem.GetEntry());
+            UpdateCriteria(CriteriaType.EquipItem, pItem.GetEntry());
+            UpdateCriteria(CriteriaType.EquipItemInSlot, slot, pItem.GetEntry());
 
             UpdateAverageItemLevelEquipped();
 
@@ -1775,8 +1775,8 @@ namespace Game.Entities
                 if (slot == EquipmentSlot.MainHand || slot == EquipmentSlot.OffHand)
                     CheckTitanGripPenalty();
 
-                UpdateCriteria(CriteriaTypes.EquipItem, pItem.GetEntry());
-                UpdateCriteria(CriteriaTypes.EquipItemInSlot, slot, pItem.GetEntry());
+                UpdateCriteria(CriteriaType.EquipItem, pItem.GetEntry());
+                UpdateCriteria(CriteriaType.EquipItemInSlot, slot, pItem.GetEntry());
             }
         }
         public void SendEquipError(InventoryResult msg, Item item1 = null, Item item2 = null, uint itemId = 0)
@@ -3423,7 +3423,7 @@ namespace Game.Entities
                         guild.AddGuildNews(GuildNews.ItemPurchased, GetGUID(), 0, item);
                 }
 
-                UpdateCriteria(CriteriaTypes.BoughtItemFromVendor, 1);
+                UpdateCriteria(CriteriaType.BuyItemsFromVendors, 1);
                 return true;
             }
 
@@ -4238,7 +4238,7 @@ namespace Game.Entities
         {
             // update quest counters
             ItemAddedQuestCheck(pItem.GetEntry(), pItem.GetCount());
-            UpdateCriteria(CriteriaTypes.ObtainAnyItem, pItem.GetEntry(), pItem.GetCount());
+            UpdateCriteria(CriteriaType.ObtainAnyItem, pItem.GetEntry(), pItem.GetCount());
 
             // store item
             Item pLastItem = StoreItem(dest, pItem, update);
@@ -5941,9 +5941,9 @@ namespace Game.Entities
                 if (aeResult == null)
                 {
                     SendNewItem(newitem, item.count, false, false, true);
-                    UpdateCriteria(CriteriaTypes.LootItem, item.itemid, item.count);
-                    UpdateCriteria(CriteriaTypes.LootType, item.itemid, item.count, (ulong)loot.loot_type);
-                    UpdateCriteria(CriteriaTypes.LootAnyItem, item.itemid, item.count);
+                    UpdateCriteria(CriteriaType.LootItem, item.itemid, item.count);
+                    UpdateCriteria(CriteriaType.GetLootByType, item.itemid, item.count, (ulong)loot.loot_type);
+                    UpdateCriteria(CriteriaType.LootAnyItem, item.itemid, item.count);
                 }
                 else
                     aeResult.Add(newitem, item.count, loot.loot_type);

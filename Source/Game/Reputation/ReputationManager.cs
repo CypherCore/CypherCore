@@ -473,11 +473,11 @@ namespace Game
                 if (factionEntry.FriendshipRepID == 0 && paragonReputation == null)
                     UpdateRankCounters(old_rank, new_rank);
 
-                _player.UpdateCriteria(CriteriaTypes.KnownFactions, factionEntry.Id);
-                _player.UpdateCriteria(CriteriaTypes.GainReputation, factionEntry.Id);
-                _player.UpdateCriteria(CriteriaTypes.GainExaltedReputation, factionEntry.Id);
-                _player.UpdateCriteria(CriteriaTypes.GainReveredReputation, factionEntry.Id);
-                _player.UpdateCriteria(CriteriaTypes.GainHonoredReputation, factionEntry.Id);
+                _player.UpdateCriteria(CriteriaType.TotalFactionsEncountered, factionEntry.Id);
+                _player.UpdateCriteria(CriteriaType.ReputationGained, factionEntry.Id);
+                _player.UpdateCriteria(CriteriaType.TotalExaltedFactions, factionEntry.Id);
+                _player.UpdateCriteria(CriteriaType.TotalReveredFactions, factionEntry.Id);
+                _player.UpdateCriteria(CriteriaType.TotalHonoredFactions, factionEntry.Id);
 
                 return true;
             }

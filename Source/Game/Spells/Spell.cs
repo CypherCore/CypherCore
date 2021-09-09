@@ -1897,15 +1897,15 @@ namespace Game.Spells
             if (player != null)
             {
                 player.StartCriteriaTimer(CriteriaStartEvent.BeSpellTarget, m_spellInfo.Id);
-                player.UpdateCriteria(CriteriaTypes.BeSpellTarget, m_spellInfo.Id, 0, 0, m_caster);
-                player.UpdateCriteria(CriteriaTypes.BeSpellTarget2, m_spellInfo.Id);
+                player.UpdateCriteria(CriteriaType.BeSpellTarget, m_spellInfo.Id, 0, 0, m_caster);
+                player.UpdateCriteria(CriteriaType.GainAura, m_spellInfo.Id);
             }
 
             Player casterPlayer = m_caster.ToPlayer();
             if (casterPlayer)
             {
                 casterPlayer.StartCriteriaTimer(CriteriaStartEvent.CastSpell, m_spellInfo.Id);
-                casterPlayer.UpdateCriteria(CriteriaTypes.CastSpell2, m_spellInfo.Id, 0, 0, unit);
+                casterPlayer.UpdateCriteria(CriteriaType.LandTargetedSpellOnTarget, m_spellInfo.Id, 0, 0, unit);
             }
 
             if (m_caster != unit)
@@ -2648,10 +2648,10 @@ namespace Game.Spells
                 if (!Convert.ToBoolean(_triggeredCastFlags & TriggerCastFlags.IgnoreCastItem) && m_CastItem != null)
                 {
                     player.StartCriteriaTimer(CriteriaStartEvent.UseItem, m_CastItem.GetEntry());
-                    player.UpdateCriteria(CriteriaTypes.UseItem, m_CastItem.GetEntry());
+                    player.UpdateCriteria(CriteriaType.UseItem, m_CastItem.GetEntry());
                 }
 
-                player.UpdateCriteria(CriteriaTypes.CastSpell, m_spellInfo.Id);
+                player.UpdateCriteria(CriteriaType.CastSpell, m_spellInfo.Id);
             }
 
             Item targetItem = m_targets.GetItemTarget();

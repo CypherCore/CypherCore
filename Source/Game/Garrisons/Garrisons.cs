@@ -397,7 +397,7 @@ namespace Game.Garrisons
                     _owner.SendPacket(buildingRemoved);
                 }
 
-                _owner.UpdateCriteria(CriteriaTypes.PlaceGarrisonBuilding, garrBuildingId);
+                _owner.UpdateCriteria(CriteriaType.PlaceGarrisonBuilding, garrBuildingId);
             }
 
             _owner.SendPacket(placeBuildingResult);
@@ -477,7 +477,7 @@ namespace Game.Garrisons
                     buildingActivated.GarrPlotInstanceID = garrPlotInstanceId;
                     _owner.SendPacket(buildingActivated);
 
-                    _owner.UpdateCriteria(CriteriaTypes.UpgradeGarrisonBuilding, plot.BuildingInfo.PacketInfo.Value.GarrBuildingID);
+                    _owner.UpdateCriteria(CriteriaType.ActivateAnyGarrisonBuilding, plot.BuildingInfo.PacketInfo.Value.GarrBuildingID);
                 }
             }
         }
@@ -514,7 +514,7 @@ namespace Game.Garrisons
             addFollowerResult.Follower = follower.PacketInfo;
             _owner.SendPacket(addFollowerResult);
 
-            _owner.UpdateCriteria(CriteriaTypes.RecruitGarrisonFollower, follower.PacketInfo.DbID);
+            _owner.UpdateCriteria(CriteriaType.RecruitGarrisonFollower, follower.PacketInfo.DbID);
         }
 
         public Follower GetFollower(ulong dbId)

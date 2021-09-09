@@ -1342,7 +1342,7 @@ namespace Game.DungeonFinding
 
                 // Update achievements
                 if (dungeon.difficulty == Difficulty.Heroic)
-                    player.UpdateCriteria(CriteriaTypes.UseLfdToGroupWithPlayers, 1);
+                    player.UpdateCriteria(CriteriaType.CompletedLFGDungeonWithStrangers, 1);
 
                 LfgReward reward = GetRandomDungeonReward(rDungeonId, player.GetLevel());
                 if (reward == null)

@@ -57,9 +57,9 @@ namespace Game.Achievements
         /// <param name="miscValue3"></param>
         /// <param name="refe"></param>
         /// <param name="referencePlayer"></param>
-        public void UpdateCriteria(CriteriaTypes type, ulong miscValue1 = 0, ulong miscValue2 = 0, ulong miscValue3 = 0, WorldObject refe = null, Player referencePlayer = null)
+        public void UpdateCriteria(CriteriaType type, ulong miscValue1 = 0, ulong miscValue2 = 0, ulong miscValue3 = 0, WorldObject refe = null, Player referencePlayer = null)
         {
-            if (type >= CriteriaTypes.TotalTypes)
+            if (type >= CriteriaType.Count)
             {
                 Log.outDebug(LogFilter.Achievement, "UpdateCriteria: Wrong criteria type {0}", type);
                 return;
@@ -96,109 +96,111 @@ namespace Game.Achievements
                 switch (type)
                 {
                     // std. case: increment at 1
-                    case CriteriaTypes.WinBg:
-                    case CriteriaTypes.NumberOfTalentResets:
-                    case CriteriaTypes.LoseDuel:
-                    case CriteriaTypes.CreateAuction:
-                    case CriteriaTypes.WonAuctions:    //FIXME: for online player only currently
-                    case CriteriaTypes.RollNeed:
-                    case CriteriaTypes.RollGreed:
-                    case CriteriaTypes.QuestAbandoned:
-                    case CriteriaTypes.FlightPathsTaken:
-                    case CriteriaTypes.AcceptedSummonings:
-                    case CriteriaTypes.LootAnyItem:
-                    case CriteriaTypes.ObtainAnyItem:
-                    case CriteriaTypes.Death:
-                    case CriteriaTypes.CompleteDailyQuest:
-                    case CriteriaTypes.CompleteBattleground:
-                    case CriteriaTypes.DeathAtMap:
-                    case CriteriaTypes.DeathInDungeon:
-                    case CriteriaTypes.KilledByCreature:
-                    case CriteriaTypes.KilledByPlayer:
-                    case CriteriaTypes.DeathsFrom:
-                    case CriteriaTypes.BeSpellTarget:
-                    case CriteriaTypes.BeSpellTarget2:
-                    case CriteriaTypes.CastSpell:
-                    case CriteriaTypes.CastSpell2:
-                    case CriteriaTypes.WinRatedArena:
-                    case CriteriaTypes.UseItem:
-                    case CriteriaTypes.RollNeedOnLoot:
-                    case CriteriaTypes.RollGreedOnLoot:
-                    case CriteriaTypes.DoEmote:
-                    case CriteriaTypes.UseGameobject:
-                    case CriteriaTypes.FishInGameobject:
-                    case CriteriaTypes.WinDuel:
-                    case CriteriaTypes.HkClass:
-                    case CriteriaTypes.HkRace:
-                    case CriteriaTypes.BgObjectiveCapture:
-                    case CriteriaTypes.HonorableKill:
-                    case CriteriaTypes.SpecialPvpKill:
-                    case CriteriaTypes.GetKillingBlows:
-                    case CriteriaTypes.HonorableKillAtArea:
-                    case CriteriaTypes.WinArena: // This also behaves like ACHIEVEMENT_CRITERIA_TYPE_WIN_RATED_ARENA
-                    case CriteriaTypes.OnLogin:
-                    case CriteriaTypes.PlaceGarrisonBuilding:
-                    case CriteriaTypes.UpgradeGarrisonBuilding:
-                    case CriteriaTypes.HonorLevelReached:
-                    case CriteriaTypes.PrestigeReached:
-                    case CriteriaTypes.CompleteQuestAccumulate:
-                    case CriteriaTypes.BoughtItemFromVendor:
-                    case CriteriaTypes.SoldItemToVendor:
-                    case CriteriaTypes.TravelledToArea:
+                    case CriteriaType.WinBattleground:
+                    case CriteriaType.TotalRespecs:
+                    case CriteriaType.LoseDuel:
+                    case CriteriaType.ItemsPostedAtAuction:
+                    case CriteriaType.AuctionsWon:    /* FIXME: for online player only currently */
+                    case CriteriaType.RollAnyNeed:
+                    case CriteriaType.RollAnyGreed:
+                    case CriteriaType.AbandonAnyQuest:
+                    case CriteriaType.BuyTaxi:
+                    case CriteriaType.AcceptSummon:
+                    case CriteriaType.LootAnyItem:
+                    case CriteriaType.ObtainAnyItem:
+                    case CriteriaType.DieAnywhere:
+                    case CriteriaType.CompleteDailyQuest:
+                    case CriteriaType.ParticipateInBattleground:
+                    case CriteriaType.DieOnMap:
+                    case CriteriaType.DieInInstance:
+                    case CriteriaType.KilledByCreature:
+                    case CriteriaType.KilledByPlayer:
+                    case CriteriaType.DieFromEnviromentalDamage:
+                    case CriteriaType.BeSpellTarget:
+                    case CriteriaType.GainAura:
+                    case CriteriaType.CastSpell:
+                    case CriteriaType.LandTargetedSpellOnTarget:
+                    case CriteriaType.WinAnyRankedArena:
+                    case CriteriaType.UseItem:
+                    case CriteriaType.RollNeed:
+                    case CriteriaType.RollGreed:
+                    case CriteriaType.DoEmote:
+                    case CriteriaType.UseGameobject:
+                    case CriteriaType.CatchFishInFishingHole:
+                    case CriteriaType.WinDuel:
+                    case CriteriaType.DeliverKillingBlowToClass:
+                    case CriteriaType.DeliverKillingBlowToRace:
+                    case CriteriaType.TrackedWorldStateUIModified:
+                    case CriteriaType.EarnHonorableKill:
+                    case CriteriaType.KillPlayer:
+                    case CriteriaType.DeliveredKillingBlow:
+                    case CriteriaType.PVPKillInArea:
+                    case CriteriaType.WinArena: // This also behaves like CriteriaType.WinAnyRankedArena
+                    case CriteriaType.Login:
+                    case CriteriaType.PlaceGarrisonBuilding:
+                    case CriteriaType.ActivateAnyGarrisonBuilding:
+                    case CriteriaType.HonorLevelIncrease:
+                    case CriteriaType.PrestigeLevelIncrease:
+                    case CriteriaType.LearnAnyTransmogInSlot:
+                    case CriteriaType.CollectTransmogSetFromGroup:
+                    case CriteriaType.CompleteAnyReplayQuest:
+                    case CriteriaType.BuyItemsFromVendors:
+                    case CriteriaType.SellItemsToVendors:
+                    case CriteriaType.EnterTopLevelArea:
                         SetCriteriaProgress(criteria, 1, referencePlayer, ProgressType.Accumulate);
                         break;
                     // std case: increment at miscValue1
-                    case CriteriaTypes.MoneyFromVendors:
-                    case CriteriaTypes.GoldSpentForTalents:
-                    case CriteriaTypes.MoneyFromQuestReward:
-                    case CriteriaTypes.GoldSpentForTravelling:
-                    case CriteriaTypes.GoldSpentAtBarber:
-                    case CriteriaTypes.GoldSpentForMail:
-                    case CriteriaTypes.LootMoney:
-                    case CriteriaTypes.GoldEarnedByAuctions: //FIXME: for online player only currently
-                    case CriteriaTypes.TotalDamageReceived:
-                    case CriteriaTypes.TotalHealingReceived:
-                    case CriteriaTypes.UseLfdToGroupWithPlayers:
-                    case CriteriaTypes.DamageDone:
-                    case CriteriaTypes.HealingDone:
-                    case CriteriaTypes.HeartOfAzerothArtifactPowerEarned:
+                    case CriteriaType.MoneyEarnedFromSales:
+                    case CriteriaType.MoneySpentOnRespecs:
+                    case CriteriaType.MoneyEarnedFromQuesting:
+                    case CriteriaType.MoneySpentOnTaxis:
+                    case CriteriaType.MoneySpentAtBarberShop:
+                    case CriteriaType.MoneySpentOnPostage:
+                    case CriteriaType.MoneyLootedFromCreatures:
+                    case CriteriaType.MoneyEarnedFromAuctions:/* FIXME: for online player only currently */
+                    case CriteriaType.TotalDamageTaken:
+                    case CriteriaType.TotalHealReceived:
+                    case CriteriaType.CompletedLFGDungeonWithStrangers:
+                    case CriteriaType.DamageDealt:
+                    case CriteriaType.HealingDone:
+                    case CriteriaType.EarnArtifactXPForAzeriteItem:
                         SetCriteriaProgress(criteria, miscValue1, referencePlayer, ProgressType.Accumulate);
                         break;
-                    case CriteriaTypes.KillCreature:
-                    case CriteriaTypes.KillCreatureType:
-                    case CriteriaTypes.LootType:
-                    case CriteriaTypes.OwnItem:
-                    case CriteriaTypes.LootItem:
-                    case CriteriaTypes.Currency:
+                    case CriteriaType.KillCreature:
+                    case CriteriaType.KillAnyCreature:
+                    case CriteriaType.GetLootByType:
+                    case CriteriaType.AcquireItem:
+                    case CriteriaType.LootItem:
+                    case CriteriaType.CurrencyGained:
                         SetCriteriaProgress(criteria, miscValue2, referencePlayer, ProgressType.Accumulate);
                         break;
                     // std case: high value at miscValue1
-                    case CriteriaTypes.HighestAuctionBid:
-                    case CriteriaTypes.HighestAuctionSold: //FIXME: for online player only currently
-                    case CriteriaTypes.HighestHitDealt:
-                    case CriteriaTypes.HighestHitReceived:
-                    case CriteriaTypes.HighestHealCasted:
-                    case CriteriaTypes.HighestHealingReceived:
-                    case CriteriaTypes.HeartOfAzerothLevelReached:
+                    case CriteriaType.HighestAuctionBid:
+                    case CriteriaType.HighestAuctionSale: /* FIXME: for online player only currently */
+                    case CriteriaType.HighestDamageDone:
+                    case CriteriaType.HighestDamageTaken:
+                    case CriteriaType.HighestHealCast:
+                    case CriteriaType.HighestHealReceived:
+                    case CriteriaType.AzeriteLevelReached:
                         SetCriteriaProgress(criteria, miscValue1, referencePlayer, ProgressType.Highest);
                         break;
-                    case CriteriaTypes.ReachLevel:
+                    case CriteriaType.ReachLevel:
                         SetCriteriaProgress(criteria, referencePlayer.GetLevel(), referencePlayer);
                         break;
-                    case CriteriaTypes.ReachSkillLevel:
+                    case CriteriaType.SkillRaised:
                         uint skillvalue = referencePlayer.GetBaseSkillValue((SkillType)criteria.Entry.Asset);
                         if (skillvalue != 0)
                             SetCriteriaProgress(criteria, skillvalue, referencePlayer);
                         break;
-                    case CriteriaTypes.LearnSkillLevel:
+                    case CriteriaType.AchieveSkillStep:
                         uint maxSkillvalue = referencePlayer.GetPureMaxSkillValue((SkillType)criteria.Entry.Asset);
                         if (maxSkillvalue != 0)
                             SetCriteriaProgress(criteria, maxSkillvalue, referencePlayer);
                         break;
-                    case CriteriaTypes.CompleteQuestCount:
+                    case CriteriaType.CompleteQuestsCount:
                         SetCriteriaProgress(criteria, (uint)referencePlayer.GetRewardedQuestCount(), referencePlayer);
                         break;
-                    case CriteriaTypes.CompleteDailyQuestDaily:
+                    case CriteriaType.CompleteAnyDailyQuestPerDay:
                     {
                         long nextDailyResetTime = Global.WorldMgr.GetNextDailyQuestsResetTime();
                         CriteriaProgress progress = GetCriteriaProgress(criteria);
@@ -228,7 +230,7 @@ namespace Game.Achievements
                         SetCriteriaProgress(criteria, 1, referencePlayer, progressType);
                         break;
                     }
-                    case CriteriaTypes.CompleteQuestsInZone:
+                    case CriteriaType.CompleteQuestsInZone:
                     {
                         if (miscValue1 != 0)
                         {
@@ -249,37 +251,37 @@ namespace Game.Achievements
                         }
                         break;
                     }
-                    case CriteriaTypes.FallWithoutDying:
+                    case CriteriaType.MaxDistFallenWithoutDying:
                         // miscValue1 is the ingame fallheight*100 as stored in dbc
                         SetCriteriaProgress(criteria, miscValue1, referencePlayer);
                         break;
-                    case CriteriaTypes.CompleteQuest:
-                    case CriteriaTypes.LearnSpell:
-                    case CriteriaTypes.ExploreArea:
-                    case CriteriaTypes.VisitBarberShop:
-                    case CriteriaTypes.EquipItemInSlot:
-                    case CriteriaTypes.EquipItem:
-                    case CriteriaTypes.CompleteAchievement:
-                    case CriteriaTypes.RecruitGarrisonFollower:
-                    case CriteriaTypes.OwnBattlePet:
-                    case CriteriaTypes.ActivelyReachLevel:
+                    case CriteriaType.CompleteQuest:
+                    case CriteriaType.LearnOrKnowSpell:
+                    case CriteriaType.RevealWorldMapOverlay:
+                    case CriteriaType.GotHaircut:
+                    case CriteriaType.EquipItemInSlot:
+                    case CriteriaType.EquipItem:
+                    case CriteriaType.EarnAchievement:
+                    case CriteriaType.RecruitGarrisonFollower:
+                    case CriteriaType.LearnedNewPet:
+                    case CriteriaType.ActivelyReachLevel:
                         SetCriteriaProgress(criteria, 1, referencePlayer);
                         break;
-                    case CriteriaTypes.BuyBankSlot:
+                    case CriteriaType.BankSlotsPurchased:
                         SetCriteriaProgress(criteria, referencePlayer.GetBankBagSlotCount(), referencePlayer);
                         break;
-                    case CriteriaTypes.GainReputation:
+                    case CriteriaType.ReputationGained:
                     {
                         int reputation = referencePlayer.GetReputationMgr().GetReputation(criteria.Entry.Asset);
                         if (reputation > 0)
                             SetCriteriaProgress(criteria, (uint)reputation, referencePlayer);
                         break;
                     }
-                    case CriteriaTypes.GainExaltedReputation:
+                    case CriteriaType.TotalExaltedFactions:
                         SetCriteriaProgress(criteria, referencePlayer.GetReputationMgr().GetExaltedFactionCount(), referencePlayer);
                         break;
-                    case CriteriaTypes.LearnSkilllineSpells:
-                    case CriteriaTypes.LearnSkillLine:
+                    case CriteriaType.LearnSpellFromSkillLine:
+                    case CriteriaType.LearnTradeskillSkillLine:
                     {
                         uint spellCount = 0;
                         foreach (var spell in referencePlayer.GetSpellMap())
@@ -298,27 +300,27 @@ namespace Game.Achievements
                         SetCriteriaProgress(criteria, spellCount, referencePlayer);
                         break;
                     }
-                    case CriteriaTypes.GainReveredReputation:
+                    case CriteriaType.TotalReveredFactions:
                         SetCriteriaProgress(criteria, referencePlayer.GetReputationMgr().GetReveredFactionCount(), referencePlayer);
                         break;
-                    case CriteriaTypes.GainHonoredReputation:
+                    case CriteriaType.TotalHonoredFactions:
                         SetCriteriaProgress(criteria, referencePlayer.GetReputationMgr().GetHonoredFactionCount(), referencePlayer);
                         break;
-                    case CriteriaTypes.KnownFactions:
+                    case CriteriaType.TotalFactionsEncountered:
                         SetCriteriaProgress(criteria, referencePlayer.GetReputationMgr().GetVisibleFactionCount(), referencePlayer);
                         break;
-                    case CriteriaTypes.EarnHonorableKill:
+                    case CriteriaType.HonorableKills:
                         SetCriteriaProgress(criteria, referencePlayer.m_activePlayerData.LifetimeHonorableKills, referencePlayer);
                         break;
-                    case CriteriaTypes.HighestGoldValueOwned:
+                    case CriteriaType.MostMoneyOwned:
                         SetCriteriaProgress(criteria, referencePlayer.GetMoney(), referencePlayer, ProgressType.Highest);
                         break;
-                    case CriteriaTypes.EarnAchievementPoints:
+                    case CriteriaType.EarnAchievementPoints:
                         if (miscValue1 == 0)
                             continue;
                         SetCriteriaProgress(criteria, miscValue1, referencePlayer, ProgressType.Accumulate);
                         break;
-                    case CriteriaTypes.HighestPersonalRating:
+                    case CriteriaType.EarnPersonalArenaRating:
                     {
                         uint reqTeamType = criteria.Entry.Asset;
 
@@ -352,106 +354,96 @@ namespace Game.Achievements
                         }
                         break;
                     }
-                    case CriteriaTypes.OwnBattlePetCount:
+                    case CriteriaType.UniquePetsOwned:
                         SetCriteriaProgress(criteria, referencePlayer.GetSession().GetBattlePetMgr().GetPetUniqueSpeciesCount(), referencePlayer);
                         break;
-                    case CriteriaTypes.ReachGuildLevel:
+                    case CriteriaType.GuildAttainedLevel:
                         SetCriteriaProgress(criteria, miscValue1, referencePlayer);
                         break;
-                    case CriteriaTypes.TransmogSetUnlocked:
-                        if (miscValue1 != criteria.Entry.Asset)
-                            continue;
-                        SetCriteriaProgress(criteria, 1, referencePlayer, ProgressType.Accumulate);
-                        break;
-                    case CriteriaTypes.AppearanceUnlockedBySlot:
-                        if (miscValue2 == 0 /*login case*/ || miscValue1 != criteria.Entry.Asset)
-                            continue;
-                        SetCriteriaProgress(criteria, 1, referencePlayer, ProgressType.Accumulate);
-                        break;
                     // FIXME: not triggered in code as result, need to implement
-                    case CriteriaTypes.CompleteRaid:
-                    case CriteriaTypes.PlayArena:
-                    case CriteriaTypes.HighestTeamRating:
-                    case CriteriaTypes.OwnRank:
-                    case CriteriaTypes.SpentGoldGuildRepairs:
-                    case CriteriaTypes.CraftItemsGuild:
-                    case CriteriaTypes.CatchFromPool:
-                    case CriteriaTypes.BuyGuildBankSlots:
-                    case CriteriaTypes.EarnGuildAchievementPoints:
-                    case CriteriaTypes.WinRatedBattleground:
-                    case CriteriaTypes.ReachBgRating:
-                    case CriteriaTypes.BuyGuildTabard:
-                    case CriteriaTypes.CompleteQuestsGuild:
-                    case CriteriaTypes.HonorableKillsGuild:
-                    case CriteriaTypes.KillCreatureTypeGuild:
-                    case CriteriaTypes.CompleteArchaeologyProjects:
-                    case CriteriaTypes.CompleteGuildChallengeType:
-                    case CriteriaTypes.CompleteGuildChallenge:
-                    case CriteriaTypes.LfrDungeonsCompleted:
-                    case CriteriaTypes.LfrLeaves:
-                    case CriteriaTypes.LfrVoteKicksInitiatedByPlayer:
-                    case CriteriaTypes.LfrVoteKicksNotInitByPlayer:
-                    case CriteriaTypes.BeKickedFromLfr:
-                    case CriteriaTypes.CountOfLfrQueueBoostsByTank:
-                    case CriteriaTypes.CompleteScenarioCount:
-                    case CriteriaTypes.CompleteScenario:
-                    case CriteriaTypes.CaptureBattlePet:
-                    case CriteriaTypes.WinPetBattle:
-                    case CriteriaTypes.LevelBattlePet:
-                    case CriteriaTypes.CaptureBattlePetCredit:
-                    case CriteriaTypes.LevelBattlePetCredit:
-                    case CriteriaTypes.EnterArea:
-                    case CriteriaTypes.LeaveArea:
-                    case CriteriaTypes.CompleteDungeonEncounter:
-                    case CriteriaTypes.ConstructGarrisonBuilding:
-                    case CriteriaTypes.UpgradeGarrison:
-                    case CriteriaTypes.StartGarrisonMission:
-                    case CriteriaTypes.CompleteGarrisonMissionCount:
-                    case CriteriaTypes.CompleteGarrisonMission:
-                    case CriteriaTypes.RecruitGarrisonFollowerCount:
-                    case CriteriaTypes.LearnGarrisonBlueprintCount:
-                    case CriteriaTypes.CompleteGarrisonShipment:
-                    case CriteriaTypes.RaiseGarrisonFollowerItemLevel:
-                    case CriteriaTypes.RaiseGarrisonFollowerLevel:
-                    case CriteriaTypes.OwnToy:
-                    case CriteriaTypes.OwnToyCount:
-                    case CriteriaTypes.OwnHeirlooms:
-                    case CriteriaTypes.SurveyGameobject:
-                    case CriteriaTypes.ClearDigsite:
-                    case CriteriaTypes.ManualCompleteCriteria:
-                    case CriteriaTypes.CompleteChallengeModeGuild:
-                    case CriteriaTypes.DefeatCreatureGroup:
-                    case CriteriaTypes.CompleteChallengeMode:
-                    case CriteriaTypes.SendEvent:
-                    case CriteriaTypes.CookRecipesGuild:
-                    case CriteriaTypes.EarnPetBattleAchievementPoints:
-                    case CriteriaTypes.SendEventScenario:
-                    case CriteriaTypes.ReleaseSpirit:
-                    case CriteriaTypes.OwnPet:
-                    case CriteriaTypes.GarrisonCompleteDungeonEncounter:
-                    case CriteriaTypes.CompleteLfgDungeon:
-                    case CriteriaTypes.LfgVoteKicksInitiatedByPlayer:
-                    case CriteriaTypes.LfgVoteKicksNotInitByPlayer:
-                    case CriteriaTypes.BeKickedFromLfg:
-                    case CriteriaTypes.LfgLeaves:
-                    case CriteriaTypes.CountOfLfgQueueBoostsByTank:
-                    case CriteriaTypes.ReachAreatriggerWithActionset:
-                    case CriteriaTypes.StartOrderHallMission:
-                    case CriteriaTypes.RecruitGarrisonFollowerWithQuality:
-                    case CriteriaTypes.ArtifactPowerEarned:
-                    case CriteriaTypes.ArtifactTraitsUnlocked:
-                    case CriteriaTypes.OrderHallTalentLearned:
-                    case CriteriaTypes.OrderHallRecruitTroop:
-                    case CriteriaTypes.CompleteWorldQuest:
-                    case CriteriaTypes.GainParagonReputation:
-                    case CriteriaTypes.EarnHonorXp:
-                    case CriteriaTypes.RelicTalentUnlocked:
-                    case CriteriaTypes.ReachAccountHonorLevel:
-                    case CriteriaTypes.MythicKeystoneCompleted:
-                    case CriteriaTypes.ApplyConduit:
-                    case CriteriaTypes.ConvertItemsToCurrency:
-                    case CriteriaTypes.ExpansionLevel:
-                    case CriteriaTypes.OwnItemModifiedAppearance:
+                    case CriteriaType.RunInstance:
+                    case CriteriaType.ParticipateInArena:
+                    case CriteriaType.EarnTeamArenaRating:
+                    case CriteriaType.EarnTitle:
+                    case CriteriaType.MoneySpentOnGuildRepair:
+                    case CriteriaType.CreatedItemsByCastingSpell:
+                    case CriteriaType.FishInAnyPool:
+                    case CriteriaType.GuildBankTabsPurchased:
+                    case CriteriaType.EarnGuildAchievementPoints:
+                    case CriteriaType.WinAnyBattleground:
+                    case CriteriaType.EarnBattlegroundRating:
+                    case CriteriaType.GuildTabardCreated:
+                    case CriteriaType.CompleteQuestsCountForGuild:
+                    case CriteriaType.HonorableKillsForGuild:
+                    case CriteriaType.KillAnyCreatureForGuild:
+                    case CriteriaType.CompleteAnyResearchProject:
+                    case CriteriaType.CompleteGuildChallenge:
+                    case CriteriaType.CompleteAnyGuildChallenge:
+                    case CriteriaType.CompletedLFRDungeon:
+                    case CriteriaType.AbandonedLFRDungeon:
+                    case CriteriaType.KickInitiatorInLFRDungeon:
+                    case CriteriaType.KickVoterInLFRDungeon:
+                    case CriteriaType.KickTargetInLFRDungeon:
+                    case CriteriaType.GroupedTankLeftEarlyInLFRDungeon:
+                    case CriteriaType.CompleteAnyScenario:
+                    case CriteriaType.CompleteScenario:
+                    case CriteriaType.AccountObtainPetThroughBattle:
+                    case CriteriaType.WinPetBattle:
+                    case CriteriaType.BattlePetReachLevel:
+                    case CriteriaType.PlayerObtainPetThroughBattle:
+                    case CriteriaType.ActivelyEarnPetLevel:
+                    case CriteriaType.EnterArea:
+                    case CriteriaType.LeaveArea:
+                    case CriteriaType.DefeatDungeonEncounter:
+                    case CriteriaType.ActivateGarrisonBuilding:
+                    case CriteriaType.UpgradeGarrison:
+                    case CriteriaType.StartAnyGarrisonMissionWithFollowerType:
+                    case CriteriaType.SucceedAnyGarrisonMissionWithFollowerType:
+                    case CriteriaType.SucceedGarrisonMission:
+                    case CriteriaType.RecruitAnyGarrisonFollower:
+                    case CriteriaType.LearnAnyGarrisonBlueprint:
+                    case CriteriaType.CollectGarrisonShipment:
+                    case CriteriaType.ItemLevelChangedForGarrisonFollower:
+                    case CriteriaType.LevelChangedForGarrisonFollower:
+                    case CriteriaType.LearnToy:
+                    case CriteriaType.LearnAnyToy:
+                    case CriteriaType.LearnAnyHeirloom:
+                    case CriteriaType.FindResearchObject:
+                    case CriteriaType.ExhaustAnyResearchSite:
+                    case CriteriaType.CompleteInternalCriteria:
+                    case CriteriaType.CompleteAnyChallengeMode:
+                    case CriteriaType.KilledAllUnitsInSpawnRegion:
+                    case CriteriaType.CompleteChallengeMode:
+                    case CriteriaType.PlayerTriggerGameEvent:
+                    case CriteriaType.CreatedItemsByCastingSpellWithLimit:
+                    case CriteriaType.BattlePetAchievementPointsEarned:
+                    case CriteriaType.AnyoneTriggerGameEventScenario:
+                    case CriteriaType.ReleasedSpirit:
+                    case CriteriaType.AccountKnownPet:
+                    case CriteriaType.DefeatDungeonEncounterWhileElegibleForLoot:
+                    case CriteriaType.CompletedLFGDungeon:
+                    case CriteriaType.KickInitiatorInLFGDungeon:
+                    case CriteriaType.KickVoterInLFGDungeon:
+                    case CriteriaType.KickTargetInLFGDungeon:
+                    case CriteriaType.AbandonedLFGDungeon:
+                    case CriteriaType.GroupedTankLeftEarlyInLFGDungeon:
+                    case CriteriaType.EnterAreaTriggerWithActionSet:
+                    case CriteriaType.StartGarrisonMission:
+                    case CriteriaType.QualityUpgradedForGarrisonFollower:
+                    case CriteriaType.EarnArtifactXP:
+                    case CriteriaType.AnyArtifactPowerRankPurchased:
+                    case CriteriaType.CompleteResearchGarrisonTalent:
+                    case CriteriaType.RecruitAnyGarrisonTroop:
+                    case CriteriaType.CompleteAnyWorldQuest:
+                    case CriteriaType.ParagonLevelIncreaseWithFaction:
+                    case CriteriaType.PlayerHasEarnedHonor:
+                    case CriteriaType.ChooseRelicTalent:
+                    case CriteriaType.AccountHonorLevelReached:
+                    case CriteriaType.MythicPlusCompleted:
+                    case CriteriaType.SocketAnySoulbindConduit:
+                    case CriteriaType.ObtainAnyItemWithCurrencyValue:
+                    case CriteriaType.EarnExpansionLevel:
+                    case CriteriaType.LearnTransmog:
                         break;                                   // Not implemented yet :(
                 }
 
@@ -770,86 +762,86 @@ namespace Game.Achievements
 
             switch (criteria.Entry.Type)
             {
-                case CriteriaTypes.WinBg:
-                case CriteriaTypes.KillCreature:
-                case CriteriaTypes.ReachLevel:
-                case CriteriaTypes.ReachGuildLevel:
-                case CriteriaTypes.ReachSkillLevel:
-                case CriteriaTypes.CompleteQuestCount:
-                case CriteriaTypes.CompleteDailyQuestDaily:
-                case CriteriaTypes.CompleteQuestsInZone:
-                case CriteriaTypes.DamageDone:
-                case CriteriaTypes.HealingDone:
-                case CriteriaTypes.CompleteDailyQuest:
-                case CriteriaTypes.FallWithoutDying:
-                case CriteriaTypes.BeSpellTarget:
-                case CriteriaTypes.BeSpellTarget2:
-                case CriteriaTypes.CastSpell:
-                case CriteriaTypes.CastSpell2:
-                case CriteriaTypes.BgObjectiveCapture:
-                case CriteriaTypes.HonorableKillAtArea:
-                case CriteriaTypes.HonorableKill:
-                case CriteriaTypes.EarnHonorableKill:
-                case CriteriaTypes.OwnItem:
-                case CriteriaTypes.WinRatedArena:
-                case CriteriaTypes.HighestPersonalRating:
-                case CriteriaTypes.UseItem:
-                case CriteriaTypes.LootItem:
-                case CriteriaTypes.BuyBankSlot:
-                case CriteriaTypes.GainReputation:
-                case CriteriaTypes.GainExaltedReputation:
-                case CriteriaTypes.VisitBarberShop:
-                case CriteriaTypes.EquipItemInSlot:
-                case CriteriaTypes.RollNeedOnLoot:
-                case CriteriaTypes.RollGreedOnLoot:
-                case CriteriaTypes.HkClass:
-                case CriteriaTypes.HkRace:
-                case CriteriaTypes.DoEmote:
-                case CriteriaTypes.EquipItem:
-                case CriteriaTypes.MoneyFromQuestReward:
-                case CriteriaTypes.LootMoney:
-                case CriteriaTypes.UseGameobject:
-                case CriteriaTypes.SpecialPvpKill:
-                case CriteriaTypes.FishInGameobject:
-                case CriteriaTypes.LearnSkilllineSpells:
-                case CriteriaTypes.LearnSkillLine:
-                case CriteriaTypes.WinDuel:
-                case CriteriaTypes.LootType:
-                case CriteriaTypes.UseLfdToGroupWithPlayers:
-                case CriteriaTypes.GetKillingBlows:
-                case CriteriaTypes.Currency:
-                case CriteriaTypes.PlaceGarrisonBuilding:
-                case CriteriaTypes.OwnBattlePetCount:
-                case CriteriaTypes.AppearanceUnlockedBySlot:
-                case CriteriaTypes.GainParagonReputation:
-                case CriteriaTypes.EarnHonorXp:
-                case CriteriaTypes.RelicTalentUnlocked:
-                case CriteriaTypes.ReachAccountHonorLevel:
-                case CriteriaTypes.HeartOfAzerothArtifactPowerEarned:
-                case CriteriaTypes.HeartOfAzerothLevelReached:
-                case CriteriaTypes.CompleteQuestAccumulate:
-                case CriteriaTypes.BoughtItemFromVendor:
-                case CriteriaTypes.SoldItemToVendor:
-                case CriteriaTypes.TravelledToArea:
+                case CriteriaType.WinBattleground:
+                case CriteriaType.KillCreature:
+                case CriteriaType.ReachLevel:
+                case CriteriaType.GuildAttainedLevel:
+                case CriteriaType.SkillRaised:
+                case CriteriaType.CompleteQuestsCount:
+                case CriteriaType.CompleteAnyDailyQuestPerDay:
+                case CriteriaType.CompleteQuestsInZone:
+                case CriteriaType.DamageDealt:
+                case CriteriaType.HealingDone:
+                case CriteriaType.CompleteDailyQuest:
+                case CriteriaType.MaxDistFallenWithoutDying:
+                case CriteriaType.BeSpellTarget:
+                case CriteriaType.GainAura:
+                case CriteriaType.CastSpell:
+                case CriteriaType.LandTargetedSpellOnTarget:
+                case CriteriaType.TrackedWorldStateUIModified:
+                case CriteriaType.PVPKillInArea:
+                case CriteriaType.EarnHonorableKill:
+                case CriteriaType.HonorableKills:
+                case CriteriaType.AcquireItem:
+                case CriteriaType.WinAnyRankedArena:
+                case CriteriaType.EarnPersonalArenaRating:
+                case CriteriaType.UseItem:
+                case CriteriaType.LootItem:
+                case CriteriaType.BankSlotsPurchased:
+                case CriteriaType.ReputationGained:
+                case CriteriaType.TotalExaltedFactions:
+                case CriteriaType.GotHaircut:
+                case CriteriaType.EquipItemInSlot:
+                case CriteriaType.RollNeed:
+                case CriteriaType.RollGreed:
+                case CriteriaType.DeliverKillingBlowToClass:
+                case CriteriaType.DeliverKillingBlowToRace:
+                case CriteriaType.DoEmote:
+                case CriteriaType.EquipItem:
+                case CriteriaType.MoneyEarnedFromQuesting:
+                case CriteriaType.MoneyLootedFromCreatures:
+                case CriteriaType.UseGameobject:
+                case CriteriaType.KillPlayer:
+                case CriteriaType.CatchFishInFishingHole:
+                case CriteriaType.LearnSpellFromSkillLine:
+                case CriteriaType.WinDuel:
+                case CriteriaType.GetLootByType:
+                case CriteriaType.LearnTradeskillSkillLine:
+                case CriteriaType.CompletedLFGDungeonWithStrangers:
+                case CriteriaType.DeliveredKillingBlow:
+                case CriteriaType.CurrencyGained:
+                case CriteriaType.PlaceGarrisonBuilding:
+                case CriteriaType.UniquePetsOwned:
+                case CriteriaType.LearnAnyTransmogInSlot:
+                case CriteriaType.ParagonLevelIncreaseWithFaction:
+                case CriteriaType.PlayerHasEarnedHonor:
+                case CriteriaType.ChooseRelicTalent:
+                case CriteriaType.AccountHonorLevelReached:
+                case CriteriaType.EarnArtifactXPForAzeriteItem:
+                case CriteriaType.AzeriteLevelReached:
+                case CriteriaType.CompleteAnyReplayQuest:
+                case CriteriaType.BuyItemsFromVendors:
+                case CriteriaType.SellItemsToVendors:
+                case CriteriaType.EnterTopLevelArea:
                     return progress.Counter >= requiredAmount;
-                case CriteriaTypes.CompleteAchievement:
-                case CriteriaTypes.CompleteQuest:
-                case CriteriaTypes.LearnSpell:
-                case CriteriaTypes.ExploreArea:
-                case CriteriaTypes.RecruitGarrisonFollower:
-                case CriteriaTypes.OwnBattlePet:
-                case CriteriaTypes.HonorLevelReached:
-                case CriteriaTypes.PrestigeReached:
-                case CriteriaTypes.ActivelyReachLevel:
-                case CriteriaTypes.TransmogSetUnlocked:
+                case CriteriaType.EarnAchievement:
+                case CriteriaType.CompleteQuest:
+                case CriteriaType.LearnOrKnowSpell:
+                case CriteriaType.RevealWorldMapOverlay:
+                case CriteriaType.RecruitGarrisonFollower:
+                case CriteriaType.LearnedNewPet:
+                case CriteriaType.HonorLevelIncrease:
+                case CriteriaType.PrestigeLevelIncrease:
+                case CriteriaType.ActivelyReachLevel:
+                case CriteriaType.CollectTransmogSetFromGroup:
                     return progress.Counter >= 1;
-                case CriteriaTypes.LearnSkillLevel:
+                case CriteriaType.AchieveSkillStep:
                     return progress.Counter >= (requiredAmount * 75);
-                case CriteriaTypes.EarnAchievementPoints:
+                case CriteriaType.EarnAchievementPoints:
                     return progress.Counter >= 9000;
-                case CriteriaTypes.WinArena:
+                case CriteriaType.WinArena:
                     return requiredAmount != 0 && progress.Counter >= requiredAmount;
-                case CriteriaTypes.OnLogin:
+                case CriteriaType.Login:
                     return true;
                 // handle all statistic-only criteria here
                 default:
@@ -927,85 +919,85 @@ namespace Game.Achievements
         {
             switch (criteria.Entry.Type)
             {
-                case CriteriaTypes.AcceptedSummonings:
-                case CriteriaTypes.CompleteDailyQuest:
-                case CriteriaTypes.CreateAuction:
-                case CriteriaTypes.FallWithoutDying:
-                case CriteriaTypes.FlightPathsTaken:
-                case CriteriaTypes.GetKillingBlows:
-                case CriteriaTypes.GoldEarnedByAuctions:
-                case CriteriaTypes.GoldSpentAtBarber:
-                case CriteriaTypes.GoldSpentForMail:
-                case CriteriaTypes.GoldSpentForTalents:
-                case CriteriaTypes.GoldSpentForTravelling:
-                case CriteriaTypes.HighestAuctionBid:
-                case CriteriaTypes.HighestAuctionSold:
-                case CriteriaTypes.HighestHealingReceived:
-                case CriteriaTypes.HighestHealCasted:
-                case CriteriaTypes.HighestHitDealt:
-                case CriteriaTypes.HighestHitReceived:
-                case CriteriaTypes.HonorableKill:
-                case CriteriaTypes.LootAnyItem:
-                case CriteriaTypes.LootMoney:
-                case CriteriaTypes.LoseDuel:
-                case CriteriaTypes.MoneyFromQuestReward:
-                case CriteriaTypes.MoneyFromVendors:
-                case CriteriaTypes.NumberOfTalentResets:
-                case CriteriaTypes.ObtainAnyItem:
-                case CriteriaTypes.QuestAbandoned:
-                case CriteriaTypes.ReachGuildLevel:
-                case CriteriaTypes.RollGreed:
-                case CriteriaTypes.RollNeed:
-                case CriteriaTypes.SpecialPvpKill:
-                case CriteriaTypes.TotalDamageReceived:
-                case CriteriaTypes.TotalHealingReceived:
-                case CriteriaTypes.UseLfdToGroupWithPlayers:
-                case CriteriaTypes.VisitBarberShop:
-                case CriteriaTypes.WinDuel:
-                case CriteriaTypes.WinRatedArena:
-                case CriteriaTypes.WonAuctions:
-                case CriteriaTypes.CompleteQuestAccumulate:
-                case CriteriaTypes.BoughtItemFromVendor:
-                case CriteriaTypes.SoldItemToVendor:
+                case CriteriaType.AcceptSummon:
+                case CriteriaType.CompleteDailyQuest:
+                case CriteriaType.ItemsPostedAtAuction:
+                case CriteriaType.MaxDistFallenWithoutDying:
+                case CriteriaType.BuyTaxi:
+                case CriteriaType.DeliveredKillingBlow:
+                case CriteriaType.MoneyEarnedFromAuctions:
+                case CriteriaType.MoneySpentAtBarberShop:
+                case CriteriaType.MoneySpentOnPostage:
+                case CriteriaType.MoneySpentOnRespecs:
+                case CriteriaType.MoneySpentOnTaxis:
+                case CriteriaType.HighestAuctionBid:
+                case CriteriaType.HighestAuctionSale:
+                case CriteriaType.HighestHealReceived:
+                case CriteriaType.HighestHealCast:
+                case CriteriaType.HighestDamageDone:
+                case CriteriaType.HighestDamageTaken:
+                case CriteriaType.EarnHonorableKill:
+                case CriteriaType.LootAnyItem:
+                case CriteriaType.MoneyLootedFromCreatures:
+                case CriteriaType.LoseDuel:
+                case CriteriaType.MoneyEarnedFromQuesting:
+                case CriteriaType.MoneyEarnedFromSales:
+                case CriteriaType.TotalRespecs:
+                case CriteriaType.ObtainAnyItem:
+                case CriteriaType.AbandonAnyQuest:
+                case CriteriaType.GuildAttainedLevel:
+                case CriteriaType.RollAnyGreed:
+                case CriteriaType.RollAnyNeed:
+                case CriteriaType.KillPlayer:
+                case CriteriaType.TotalDamageTaken:
+                case CriteriaType.TotalHealReceived:
+                case CriteriaType.CompletedLFGDungeonWithStrangers:
+                case CriteriaType.GotHaircut:
+                case CriteriaType.WinDuel:
+                case CriteriaType.WinAnyRankedArena:
+                case CriteriaType.AuctionsWon:
+                case CriteriaType.CompleteAnyReplayQuest:
+                case CriteriaType.BuyItemsFromVendors:
+                case CriteriaType.SellItemsToVendors:
                     if (miscValue1 == 0)
                         return false;
                     break;
-                case CriteriaTypes.BuyBankSlot:
-                case CriteriaTypes.CompleteDailyQuestDaily:
-                case CriteriaTypes.CompleteQuestCount:
-                case CriteriaTypes.EarnAchievementPoints:
-                case CriteriaTypes.GainExaltedReputation:
-                case CriteriaTypes.GainHonoredReputation:
-                case CriteriaTypes.GainReveredReputation:
-                case CriteriaTypes.HighestGoldValueOwned:
-                case CriteriaTypes.HighestPersonalRating:
-                case CriteriaTypes.KnownFactions:
-                case CriteriaTypes.ReachLevel:
-                case CriteriaTypes.OnLogin:
-                case CriteriaTypes.OwnBattlePetCount:
+                case CriteriaType.BankSlotsPurchased:
+                case CriteriaType.CompleteAnyDailyQuestPerDay:
+                case CriteriaType.CompleteQuestsCount:
+                case CriteriaType.EarnAchievementPoints:
+                case CriteriaType.TotalExaltedFactions:
+                case CriteriaType.TotalHonoredFactions:
+                case CriteriaType.TotalReveredFactions:
+                case CriteriaType.MostMoneyOwned:
+                case CriteriaType.EarnPersonalArenaRating:
+                case CriteriaType.TotalFactionsEncountered:
+                case CriteriaType.ReachLevel:
+                case CriteriaType.Login:
+                case CriteriaType.UniquePetsOwned:
                     break;
-                case CriteriaTypes.CompleteAchievement:
+                case CriteriaType.EarnAchievement:
                     if (!RequiredAchievementSatisfied(criteria.Entry.Asset))
                         return false;
                     break;
-                case CriteriaTypes.WinBg:
-                case CriteriaTypes.CompleteBattleground:
-                case CriteriaTypes.DeathAtMap:
+                case CriteriaType.WinBattleground:
+                case CriteriaType.ParticipateInBattleground:
+                case CriteriaType.DieOnMap:
                     if (miscValue1 == 0 || criteria.Entry.Asset != referencePlayer.GetMapId())
                         return false;
                     break;
-                case CriteriaTypes.KillCreature:
-                case CriteriaTypes.KilledByCreature:
+                case CriteriaType.KillCreature:
+                case CriteriaType.KilledByCreature:
                     if (miscValue1 == 0 || criteria.Entry.Asset != miscValue1)
                         return false;
                     break;
-                case CriteriaTypes.ReachSkillLevel:
-                case CriteriaTypes.LearnSkillLevel:
+                case CriteriaType.SkillRaised:
+                case CriteriaType.AchieveSkillStep:
                     // update at loading or specific skill update
                     if (miscValue1 != 0 && miscValue1 != criteria.Entry.Asset)
                         return false;
                     break;
-                case CriteriaTypes.CompleteQuestsInZone:
+                case CriteriaType.CompleteQuestsInZone:
                     if (miscValue1 != 0)
                     {
                         Quest quest = Global.ObjectMgr.GetQuestTemplate((uint)miscValue1);
@@ -1013,13 +1005,13 @@ namespace Game.Achievements
                             return false;
                     }
                     break;
-                case CriteriaTypes.Death:
+                case CriteriaType.DieAnywhere:
                 {
                     if (miscValue1 == 0)
                         return false;
                     break;
                 }
-                case CriteriaTypes.DeathInDungeon:
+                case CriteriaType.DieInInstance:
                 {
                     if (miscValue1 == 0)
                         return false;
@@ -1033,15 +1025,15 @@ namespace Game.Achievements
                         return false;
                     break;
                 }
-                case CriteriaTypes.KilledByPlayer:
+                case CriteriaType.KilledByPlayer:
                     if (miscValue1 == 0 || !refe || !refe.IsTypeId(TypeId.Player))
                         return false;
                     break;
-                case CriteriaTypes.DeathsFrom:
+                case CriteriaType.DieFromEnviromentalDamage:
                     if (miscValue1 == 0 || miscValue2 != criteria.Entry.Asset)
                         return false;
                     break;
-                case CriteriaTypes.CompleteQuest:
+                case CriteriaType.CompleteQuest:
                 {
                     // if miscValues != 0, it contains the questID.
                     if (miscValue1 != 0)
@@ -1061,37 +1053,37 @@ namespace Game.Achievements
                             return false;
                     break;
                 }
-                case CriteriaTypes.BeSpellTarget:
-                case CriteriaTypes.BeSpellTarget2:
-                case CriteriaTypes.CastSpell:
-                case CriteriaTypes.CastSpell2:
+                case CriteriaType.BeSpellTarget:
+                case CriteriaType.GainAura:
+                case CriteriaType.CastSpell:
+                case CriteriaType.LandTargetedSpellOnTarget:
                     if (miscValue1 == 0 || miscValue1 != criteria.Entry.Asset)
                         return false;
                     break;
-                case CriteriaTypes.LearnSpell:
+                case CriteriaType.LearnOrKnowSpell:
                     if (miscValue1 != 0 && miscValue1 != criteria.Entry.Asset)
                         return false;
 
                     if (!referencePlayer.HasSpell(criteria.Entry.Asset))
                         return false;
                     break;
-                case CriteriaTypes.LootType:
+                case CriteriaType.GetLootByType:
                     // miscValue1 = itemId - miscValue2 = count of item loot
                     // miscValue3 = loot_type (note: 0 = LOOT_CORPSE and then it ignored)
                     if (miscValue1 == 0 || miscValue2 == 0 || miscValue3 == 0 || miscValue3 != criteria.Entry.Asset)
                         return false;
                     break;
-                case CriteriaTypes.OwnItem:
+                case CriteriaType.AcquireItem:
                     if (miscValue1 != 0 && criteria.Entry.Asset != miscValue1)
                         return false;
                     break;
-                case CriteriaTypes.UseItem:
-                case CriteriaTypes.LootItem:
-                case CriteriaTypes.EquipItem:
+                case CriteriaType.UseItem:
+                case CriteriaType.LootItem:
+                case CriteriaType.EquipItem:
                     if (miscValue1 == 0 || criteria.Entry.Asset != miscValue1)
                         return false;
                     break;
-                case CriteriaTypes.ExploreArea:
+                case CriteriaType.RevealWorldMapOverlay:
                 {
                     WorldMapOverlayRecord worldOverlayEntry = CliDB.WorldMapOverlayStorage.LookupByKey(criteria.Entry.Asset);
                     if (worldOverlayEntry == null)
@@ -1123,18 +1115,18 @@ namespace Game.Achievements
                         return false;
                     break;
                 }
-                case CriteriaTypes.GainReputation:
+                case CriteriaType.ReputationGained:
                     if (miscValue1 != 0 && miscValue1 != criteria.Entry.Asset)
                         return false;
                     break;
-                case CriteriaTypes.EquipItemInSlot:
-                case CriteriaTypes.AppearanceUnlockedBySlot:
+                case CriteriaType.EquipItemInSlot:
+                case CriteriaType.LearnAnyTransmogInSlot:
                     // miscValue1 = EquipmentSlot miscValue2 = itemid | itemModifiedAppearanceId
                     if (miscValue2 == 0 || miscValue1 != criteria.Entry.Asset)
                         return false;
                     break;
-                case CriteriaTypes.RollNeedOnLoot:
-                case CriteriaTypes.RollGreedOnLoot:
+                case CriteriaType.RollNeed:
+                case CriteriaType.RollGreed:
                 {
                     // miscValue1 = itemid miscValue2 = diced value
                     if (miscValue1 == 0 || miscValue2 != criteria.Entry.Asset)
@@ -1145,12 +1137,12 @@ namespace Game.Achievements
                         return false;
                     break;
                 }
-                case CriteriaTypes.DoEmote:
+                case CriteriaType.DoEmote:
                     if (miscValue1 == 0 || miscValue1 != criteria.Entry.Asset)
                         return false;
                     break;
-                case CriteriaTypes.DamageDone:
-                case CriteriaTypes.HealingDone:
+                case CriteriaType.DamageDealt:
+                case CriteriaType.HealingDone:
                     if (miscValue1 == 0)
                         return false;
 
@@ -1164,58 +1156,58 @@ namespace Game.Achievements
                             return false;
                     }
                     break;
-                case CriteriaTypes.UseGameobject:
-                case CriteriaTypes.FishInGameobject:
+                case CriteriaType.UseGameobject:
+                case CriteriaType.CatchFishInFishingHole:
                     if (miscValue1 == 0 || miscValue1 != criteria.Entry.Asset)
                         return false;
                     break;
-                case CriteriaTypes.LearnSkilllineSpells:
-                case CriteriaTypes.LearnSkillLine:
+                case CriteriaType.LearnSpellFromSkillLine:
+                case CriteriaType.LearnTradeskillSkillLine:
                     if (miscValue1 != 0 && miscValue1 != criteria.Entry.Asset)
                         return false;
                     break;
-                case CriteriaTypes.HkClass:
+                case CriteriaType.DeliverKillingBlowToClass:
                     if (miscValue1 == 0 || miscValue1 != criteria.Entry.Asset)
                         return false;
                     break;
-                case CriteriaTypes.HkRace:
+                case CriteriaType.DeliverKillingBlowToRace:
                     if (miscValue1 == 0 || miscValue1 != criteria.Entry.Asset)
                         return false;
                     break;
-                case CriteriaTypes.BgObjectiveCapture:
+                case CriteriaType.TrackedWorldStateUIModified:
                     if (miscValue1 == 0 || miscValue1 != criteria.Entry.Asset)
                         return false;
                     break;
-                case CriteriaTypes.HonorableKillAtArea:
-                case CriteriaTypes.TravelledToArea:
+                case CriteriaType.PVPKillInArea:
+                case CriteriaType.EnterTopLevelArea:
                     if (miscValue1 == 0 || miscValue1 != criteria.Entry.Asset)
                         return false;
                     break;
-                case CriteriaTypes.Currency:
+                case CriteriaType.CurrencyGained:
                     if (miscValue1 == 0 || miscValue2 == 0 || (long)miscValue2 < 0
                         || miscValue1 != criteria.Entry.Asset)
                         return false;
                     break;
-                case CriteriaTypes.WinArena:
+                case CriteriaType.WinArena:
                     if (miscValue1 != criteria.Entry.Asset)
                         return false;
                     break;
-                case CriteriaTypes.HighestTeamRating:
+                case CriteriaType.EarnTeamArenaRating:
                     return false;
-                case CriteriaTypes.PlaceGarrisonBuilding:
-                case CriteriaTypes.ConstructGarrisonBuilding:
+                case CriteriaType.PlaceGarrisonBuilding:
+                case CriteriaType.ActivateGarrisonBuilding:
                     if (miscValue1 != criteria.Entry.Asset)
                         return false;
                     break;
-                case CriteriaTypes.RecruitGarrisonFollower:
+                case CriteriaType.RecruitGarrisonFollower:
                     if (miscValue1 != criteria.Entry.Asset)
                         return false;
                     break;
-                case CriteriaTypes.TransmogSetUnlocked:
+                case CriteriaType.CollectTransmogSetFromGroup:
                     if (miscValue1 != criteria.Entry.Asset)
                         return false;
                     break;
-                case CriteriaTypes.ActivelyReachLevel:
+                case CriteriaType.ActivelyReachLevel:
                     if (miscValue1 == 0 || miscValue1 != criteria.Entry.Asset)
                         return false;
                     break;
@@ -3533,7 +3525,7 @@ namespace Game.Achievements
         public virtual bool RequiredAchievementSatisfied(uint achievementId) { return false; }
 
         public virtual string GetOwnerInfo() { return ""; }
-        public virtual List<Criteria> GetCriteriaByType(CriteriaTypes type, uint asset) { return null; }
+        public virtual List<Criteria> GetCriteriaByType(CriteriaType type, uint asset) { return null; }
     }
 
     public class CriteriaManager : Singleton<CriteriaManager>
@@ -3547,18 +3539,18 @@ namespace Game.Achievements
         MultiMap<uint, CriteriaTree> _criteriaTreeByCriteria = new();
 
         // store criterias by type to speed up lookup
-        MultiMap<CriteriaTypes, Criteria> _criteriasByType = new();
-        MultiMap<uint, Criteria>[] _criteriasByAsset = new MultiMap<uint, Criteria>[(int)CriteriaTypes.TotalTypes];
-        MultiMap<CriteriaTypes, Criteria> _guildCriteriasByType = new();
-        MultiMap<CriteriaTypes, Criteria> _scenarioCriteriasByType = new();
-        MultiMap<CriteriaTypes, Criteria> _questObjectiveCriteriasByType = new();
+        MultiMap<CriteriaType, Criteria> _criteriasByType = new();
+        MultiMap<uint, Criteria>[] _criteriasByAsset = new MultiMap<uint, Criteria>[(int)CriteriaType.Count];
+        MultiMap<CriteriaType, Criteria> _guildCriteriasByType = new();
+        MultiMap<CriteriaType, Criteria> _scenarioCriteriasByType = new();
+        MultiMap<CriteriaType, Criteria> _questObjectiveCriteriasByType = new();
 
         MultiMap<CriteriaStartEvent, Criteria> _criteriasByTimedType = new();
         MultiMap<int, Criteria>[] _criteriasByFailEvent = new MultiMap<int, Criteria>[(int)CriteriaFailEvent.Max];
 
         CriteriaManager()
         {
-            for (var i = 0; i < (int)CriteriaTypes.TotalTypes; ++i)
+            for (var i = 0; i < (int)CriteriaType.Count; ++i)
                 _criteriasByAsset[i] = new MultiMap<uint, Criteria>();
         }
 
@@ -3683,8 +3675,8 @@ namespace Game.Achievements
             uint questObjectiveCriterias = 0;
             foreach (CriteriaRecord criteriaEntry in CliDB.CriteriaStorage.Values)
             {
-                Cypher.Assert(criteriaEntry.Type < CriteriaTypes.TotalTypes,
-                    $"CRITERIA_TYPE_TOTAL must be greater than or equal to {criteriaEntry.Type + 1} but is currently equal to {CriteriaTypes.TotalTypes}");
+                Cypher.Assert(criteriaEntry.Type < CriteriaType.Count,
+                    $"CRITERIA_TYPE_TOTAL must be greater than or equal to {criteriaEntry.Type + 1} but is currently equal to {CriteriaType.Count}");
                 Cypher.Assert(criteriaEntry.StartEvent < (byte)CriteriaStartEvent.Max, $"CRITERIA_TYPE_TOTAL must be greater than or equal to {criteriaEntry.StartEvent + 1} but is currently equal to {CriteriaStartEvent.Max}");
                 Cypher.Assert(criteriaEntry.FailEvent < (byte)CriteriaFailEvent.Max, $"CRITERIA_CONDITION_MAX must be greater than or equal to {criteriaEntry.FailEvent + 1} but is currently equal to {CriteriaFailEvent.Max}");
 
@@ -3725,7 +3717,7 @@ namespace Game.Achievements
                     _criteriasByType.Add(criteriaEntry.Type, criteria);
                     if (IsCriteriaTypeStoredByAsset(criteriaEntry.Type))
                     {
-                        if (criteriaEntry.Type != CriteriaTypes.ExploreArea)
+                        if (criteriaEntry.Type != CriteriaType.RevealWorldMapOverlay)
                             _criteriasByAsset[(int)criteriaEntry.Type].Add(criteriaEntry.Asset, criteria);
                         else
                         {
@@ -3850,48 +3842,48 @@ namespace Game.Achievements
             return _criteriaModifiers.LookupByKey(modifierTreeId);
         }
 
-        bool IsCriteriaTypeStoredByAsset(CriteriaTypes type)
+        bool IsCriteriaTypeStoredByAsset(CriteriaType type)
         {
             switch (type)
             {
-                case CriteriaTypes.KillCreature:
-                case CriteriaTypes.WinBg:
-                case CriteriaTypes.ReachSkillLevel:
-                case CriteriaTypes.CompleteAchievement:
-                case CriteriaTypes.CompleteQuestsInZone:
-                case CriteriaTypes.CompleteBattleground:
-                case CriteriaTypes.KilledByCreature:
-                case CriteriaTypes.CompleteQuest:
-                case CriteriaTypes.BeSpellTarget:
-                case CriteriaTypes.CastSpell:
-                case CriteriaTypes.BgObjectiveCapture:
-                case CriteriaTypes.HonorableKillAtArea:
-                case CriteriaTypes.LearnSpell:
-                case CriteriaTypes.OwnItem:
-                case CriteriaTypes.LearnSkillLevel:
-                case CriteriaTypes.UseItem:
-                case CriteriaTypes.LootItem:
-                case CriteriaTypes.ExploreArea:
-                case CriteriaTypes.GainReputation:
-                case CriteriaTypes.EquipItemInSlot:
-                case CriteriaTypes.HkClass:
-                case CriteriaTypes.HkRace:
-                case CriteriaTypes.DoEmote:
-                case CriteriaTypes.EquipItem:
-                case CriteriaTypes.UseGameobject:
-                case CriteriaTypes.BeSpellTarget2:
-                case CriteriaTypes.FishInGameobject:
-                case CriteriaTypes.LearnSkilllineSpells:
-                case CriteriaTypes.LootType:
-                case CriteriaTypes.CastSpell2:
-                case CriteriaTypes.LearnSkillLine:
+                case CriteriaType.KillCreature:
+                case CriteriaType.WinBattleground:
+                case CriteriaType.SkillRaised:
+                case CriteriaType.EarnAchievement:
+                case CriteriaType.CompleteQuestsInZone:
+                case CriteriaType.ParticipateInBattleground:
+                case CriteriaType.KilledByCreature:
+                case CriteriaType.CompleteQuest:
+                case CriteriaType.BeSpellTarget:
+                case CriteriaType.CastSpell:
+                case CriteriaType.TrackedWorldStateUIModified:
+                case CriteriaType.PVPKillInArea:
+                case CriteriaType.LearnOrKnowSpell:
+                case CriteriaType.AcquireItem:
+                case CriteriaType.AchieveSkillStep:
+                case CriteriaType.UseItem:
+                case CriteriaType.LootItem:
+                case CriteriaType.RevealWorldMapOverlay:
+                case CriteriaType.ReputationGained:
+                case CriteriaType.EquipItemInSlot:
+                case CriteriaType.DeliverKillingBlowToClass:
+                case CriteriaType.DeliverKillingBlowToRace:
+                case CriteriaType.DoEmote:
+                case CriteriaType.EquipItem:
+                case CriteriaType.UseGameobject:
+                case CriteriaType.GainAura:
+                case CriteriaType.CatchFishInFishingHole:
+                case CriteriaType.LearnSpellFromSkillLine:
+                case CriteriaType.GetLootByType:
+                case CriteriaType.LandTargetedSpellOnTarget:
+                case CriteriaType.LearnTradeskillSkillLine:
                     return true;
                 default:
                     return false;
             }
         }
 
-        public List<Criteria> GetPlayerCriteriaByType(CriteriaTypes type, uint asset)
+        public List<Criteria> GetPlayerCriteriaByType(CriteriaType type, uint asset)
         {
             if (asset != 0 && IsCriteriaTypeStoredByAsset(type))
             {
@@ -3902,17 +3894,17 @@ namespace Game.Achievements
             return _criteriasByType.LookupByKey(type);
         }
 
-        public List<Criteria> GetGuildCriteriaByType(CriteriaTypes type)
+        public List<Criteria> GetGuildCriteriaByType(CriteriaType type)
         {
             return _guildCriteriasByType.LookupByKey(type);
         }
 
-        public List<Criteria> GetScenarioCriteriaByType(CriteriaTypes type)
+        public List<Criteria> GetScenarioCriteriaByType(CriteriaType type)
         {
             return _scenarioCriteriasByType.LookupByKey(type);
         }
 
-        public List<Criteria> GetQuestObjectiveCriteriaByType(CriteriaTypes type)
+        public List<Criteria> GetQuestObjectiveCriteriaByType(CriteriaType type)
         {
             return _questObjectiveCriteriasByType[type];
         }
@@ -3937,16 +3929,16 @@ namespace Game.Achievements
             return _criteriaDataMap.LookupByKey(criteria.Id);
         }
 
-        public static bool IsGroupCriteriaType(CriteriaTypes type)
+        public static bool IsGroupCriteriaType(CriteriaType type)
         {
             switch (type)
             {
-                case CriteriaTypes.KillCreature:
-                case CriteriaTypes.WinBg:
-                case CriteriaTypes.BeSpellTarget:         // NYI
-                case CriteriaTypes.WinRatedArena:
-                case CriteriaTypes.BeSpellTarget2:        // NYI
-                case CriteriaTypes.WinRatedBattleground:  // NYI
+                case CriteriaType.KillCreature:
+                case CriteriaType.WinBattleground:
+                case CriteriaType.BeSpellTarget:       // NYI
+                case CriteriaType.WinAnyRankedArena:
+                case CriteriaType.GainAura:            // NYI
+                case CriteriaType.WinAnyBattleground:  // NYI
                     return true;
                 default:
                     break;
@@ -4088,37 +4080,37 @@ namespace Game.Achievements
 
             switch (criteria.Entry.Type)
             {
-                case CriteriaTypes.KillCreature:
-                case CriteriaTypes.KillCreatureType:
-                case CriteriaTypes.WinBg:
-                case CriteriaTypes.FallWithoutDying:
-                case CriteriaTypes.CompleteQuest:          // only hardcoded list
-                case CriteriaTypes.CastSpell:
-                case CriteriaTypes.WinRatedArena:
-                case CriteriaTypes.DoEmote:
-                case CriteriaTypes.SpecialPvpKill:
-                case CriteriaTypes.WinDuel:
-                case CriteriaTypes.LootType:
-                case CriteriaTypes.CastSpell2:
-                case CriteriaTypes.BeSpellTarget:
-                case CriteriaTypes.BeSpellTarget2:
-                case CriteriaTypes.EquipItemInSlot:
-                case CriteriaTypes.RollNeedOnLoot:
-                case CriteriaTypes.RollGreedOnLoot:
-                case CriteriaTypes.BgObjectiveCapture:
-                case CriteriaTypes.HonorableKill:
-                case CriteriaTypes.CompleteDailyQuest:    // only Children's Week achievements
-                case CriteriaTypes.UseItem:                // only Children's Week achievements
-                case CriteriaTypes.GetKillingBlows:
-                case CriteriaTypes.ReachLevel:
-                case CriteriaTypes.OnLogin:
-                case CriteriaTypes.LootAnyItem:
-                case CriteriaTypes.ObtainAnyItem:
+                case CriteriaType.KillCreature:
+                case CriteriaType.KillAnyCreature:
+                case CriteriaType.WinBattleground:
+                case CriteriaType.MaxDistFallenWithoutDying:
+                case CriteriaType.CompleteQuest:          // only hardcoded list
+                case CriteriaType.CastSpell:
+                case CriteriaType.WinAnyRankedArena:
+                case CriteriaType.DoEmote:
+                case CriteriaType.KillPlayer:
+                case CriteriaType.WinDuel:
+                case CriteriaType.GetLootByType:
+                case CriteriaType.LandTargetedSpellOnTarget:
+                case CriteriaType.BeSpellTarget:
+                case CriteriaType.GainAura:
+                case CriteriaType.EquipItemInSlot:
+                case CriteriaType.RollNeed:
+                case CriteriaType.RollGreed:
+                case CriteriaType.TrackedWorldStateUIModified:
+                case CriteriaType.EarnHonorableKill:
+                case CriteriaType.CompleteDailyQuest:    // only Children's Week achievements
+                case CriteriaType.UseItem:                // only Children's Week achievements
+                case CriteriaType.DeliveredKillingBlow:
+                case CriteriaType.ReachLevel:
+                case CriteriaType.Login:
+                case CriteriaType.LootAnyItem:
+                case CriteriaType.ObtainAnyItem:
                     break;
                 default:
                     if (DataType != CriteriaDataType.Script)
                     {
-                        Log.outError(LogFilter.Sql, "Table `criteria_data` has data for non-supported criteria type (Entry: {0} Type: {1}), ignored.", criteria.Id, (CriteriaTypes)criteria.Entry.Type);
+                        Log.outError(LogFilter.Sql, "Table `criteria_data` has data for non-supported criteria type (Entry: {0} Type: {1}), ignored.", criteria.Id, (CriteriaType)criteria.Entry.Type);
                         return false;
                     }
                     break;
@@ -4436,7 +4428,7 @@ namespace Game.Achievements
                 {
                     Criteria entry = Global.CriteriaMgr.GetCriteria(criteriaId);
 
-                    uint itemId = entry.Entry.Type == CriteriaTypes.EquipItemInSlot ? miscValue2 : miscValue1;
+                    uint itemId = entry.Entry.Type == CriteriaType.EquipItemInSlot ? miscValue2 : miscValue1;
                     ItemTemplate itemTemplate = Global.ObjectMgr.GetItemTemplate(itemId);
                     if (itemTemplate == null)
                         return false;

@@ -605,7 +605,7 @@ namespace Game.Maps
         }
 
         // Update Achievement Criteria for all players in instance
-        public void DoUpdateCriteria(CriteriaTypes type, uint miscValue1 = 0, uint miscValue2 = 0, Unit unit = null)
+        public void DoUpdateCriteria(CriteriaType type, uint miscValue1 = 0, uint miscValue2 = 0, Unit unit = null)
         {
             var PlayerList = instance.GetPlayers();
 

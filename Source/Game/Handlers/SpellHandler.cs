@@ -264,7 +264,7 @@ namespace Game
                 if (go.GetAI().GossipHello(GetPlayer()))
                     return;
 
-                GetPlayer().UpdateCriteria(CriteriaTypes.UseGameobject, go.GetEntry());
+                GetPlayer().UpdateCriteria(CriteriaType.UseGameobject, go.GetEntry());
             }
         }
 

@@ -139,11 +139,11 @@ namespace Game.Entities
                     ApplyModUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TodayHonorableKills), (ushort)1, true);
                     // and those in a lifetime
                     ApplyModUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.LifetimeHonorableKills), 1u, true);
-                    UpdateCriteria(CriteriaTypes.EarnHonorableKill);
-                    UpdateCriteria(CriteriaTypes.HkClass, (uint)victim.GetClass());
-                    UpdateCriteria(CriteriaTypes.HkRace, (uint)victim.GetRace());
-                    UpdateCriteria(CriteriaTypes.HonorableKillAtArea, GetAreaId());
-                    UpdateCriteria(CriteriaTypes.HonorableKill, 1, 0, 0, victim);
+                    UpdateCriteria(CriteriaType.HonorableKills);
+                    UpdateCriteria(CriteriaType.DeliverKillingBlowToClass, (uint)victim.GetClass());
+                    UpdateCriteria(CriteriaType.DeliverKillingBlowToRace, (uint)victim.GetRace());
+                    UpdateCriteria(CriteriaType.PVPKillInArea, GetAreaId());
+                    UpdateCriteria(CriteriaType.EarnHonorableKill, 1, 0, 0, victim);
                 }
                 else
                 {
@@ -290,7 +290,7 @@ namespace Game.Entities
             SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.HonorLevel), level);
             UpdateHonorNextLevel();
 
-            UpdateCriteria(CriteriaTypes.HonorLevelReached);
+            UpdateCriteria(CriteriaType.HonorLevelIncrease);
         }
 
         void UpdateHonorNextLevel()

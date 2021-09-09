@@ -1033,6 +1033,9 @@ namespace Game
 
             m_playerLoading.Clear();
 
+            // Handle Login-Achievements (should be handled after loading)
+            _player.UpdateCriteria(CriteriaType.Login, 1);
+
             Global.ScriptMgr.OnPlayerLogin(pCurrChar);
         }
 
@@ -1357,7 +1360,7 @@ namespace Game
             SendPacket(new BarberShopResult(BarberShopResult.ResultEnum.Success));
 
             _player.ModifyMoney(-cost);
-            _player.UpdateCriteria(CriteriaTypes.GoldSpentAtBarber, (ulong)cost);
+            _player.UpdateCriteria(CriteriaType.MoneySpentAtBarberShop, (ulong)cost);
 
             if (_player.GetNativeSex() != (Gender)packet.NewSex)
             {
@@ -1368,7 +1371,7 @@ namespace Game
 
             _player.SetCustomizations(packet.Customizations);
 
-            _player.UpdateCriteria(CriteriaTypes.VisitBarberShop, 1);
+            _player.UpdateCriteria(CriteriaType.GotHaircut, 1);
 
             _player.SetStandState(UnitStandStateType.Stand);
 

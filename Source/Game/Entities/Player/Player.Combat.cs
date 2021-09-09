@@ -491,8 +491,8 @@ namespace Game.Entities
                     }
                     break;
                 case DuelCompleteType.Won:
-                    UpdateCriteria(CriteriaTypes.LoseDuel, 1);
-                    duel.opponent.UpdateCriteria(CriteriaTypes.WinDuel, 1);
+                    UpdateCriteria(CriteriaType.LoseDuel, 1);
+                    duel.opponent.UpdateCriteria(CriteriaType.WinDuel, 1);
 
                     // Credit for quest Death's Challenge
                     if (GetClass() == Class.Deathknight && duel.opponent.GetQuestStatus(12733) == QuestStatus.Incomplete)

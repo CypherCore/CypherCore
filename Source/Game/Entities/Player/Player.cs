@@ -653,9 +653,9 @@ namespace Game.Entities
 
                 InitializeSelfResurrectionSpells();
 
-                UpdateCriteria(CriteriaTypes.DeathAtMap, 1);
-                UpdateCriteria(CriteriaTypes.Death, 1);
-                UpdateCriteria(CriteriaTypes.DeathInDungeon, 1);
+                UpdateCriteria(CriteriaType.DieOnMap, 1);
+                UpdateCriteria(CriteriaType.DieAnywhere, 1);
+                UpdateCriteria(CriteriaType.DieInInstance, 1);
 
                 // reset all death criterias
                 ResetCriteria(CriteriaFailEvent.Death, 0);
@@ -1213,7 +1213,7 @@ namespace Game.Entities
                 playerCurrency.TrackedQuantity = (uint)newTrackedCount;
 
                 if (count > 0)
-                    UpdateCriteria(CriteriaTypes.Currency, (uint)id, (uint)count);
+                    UpdateCriteria(CriteriaType.CurrencyGained, (uint)id, (uint)count);
 
                 _currencyStorage[(uint)id] = playerCurrency;
 
@@ -2036,7 +2036,7 @@ namespace Game.Entities
 
                         // recheck alive, might have died of EnvironmentalDamage, avoid cases when player die in fact like Spirit of Redemption case
                         if (IsAlive() && final_damage < original_health)
-                            UpdateCriteria(CriteriaTypes.FallWithoutDying, (uint)z_diff * 100);
+                            UpdateCriteria(CriteriaType.MaxDistFallenWithoutDying, (uint)z_diff * 100);
                     }
 
                     //Z given by moveinfo, LastZ, FallTime, WaterZ, MapZ, Damage, Safefall reduction
@@ -2134,7 +2134,7 @@ namespace Game.Entities
 
             m_summon_expire = 0;
 
-            UpdateCriteria(CriteriaTypes.AcceptedSummonings, 1);
+            UpdateCriteria(CriteriaType.AcceptSummon, 1);
             RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.Summon);
 
             m_summon_location.SetOrientation(GetOrientation());
@@ -3980,7 +3980,7 @@ namespace Game.Entities
                     SendDurabilityLoss(this, 10);
                 }
 
-                UpdateCriteria(CriteriaTypes.DeathsFrom, 1, (ulong)type);
+                UpdateCriteria(CriteriaType.DieFromEnviromentalDamage, 1, (ulong)type);
             }
 
             return final_damage;
@@ -5106,7 +5106,7 @@ namespace Game.Entities
         {
             MoneyChanged((uint)value);
             SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.Coinage), value);
-            UpdateCriteria(CriteriaTypes.HighestGoldValueOwned);
+            UpdateCriteria(CriteriaType.MostMoneyOwned);
         }
 
         //Target
@@ -5258,8 +5258,8 @@ namespace Game.Entities
                 DB.Characters.CommitTransaction(trans);
             }
 
-            UpdateCriteria(CriteriaTypes.ReachLevel);
-            UpdateCriteria(CriteriaTypes.ActivelyReachLevel, level);
+            UpdateCriteria(CriteriaType.ReachLevel);
+            UpdateCriteria(CriteriaType.ActivelyReachLevel, level);
 
             PushQuests();
 
@@ -6173,7 +6173,7 @@ namespace Game.Entities
             {
                 SetUpdateFieldFlagValue(ref m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.ExploredZones, (int)offset), val);
 
-                UpdateCriteria(CriteriaTypes.ExploreArea, GetAreaId());
+                UpdateCriteria(CriteriaType.RevealWorldMapOverlay, GetAreaId());
 
                 var areaLevels = Global.DB2Mgr.GetContentTuningData(areaEntry.ContentTuningID, m_playerData.CtrOptions.GetValue().ContentTuningConditionMask);
                 if (areaLevels.HasValue)
@@ -6845,21 +6845,21 @@ namespace Game.Entities
             }
 
             //Checks and preparations done, DO FLIGHT
-            UpdateCriteria(CriteriaTypes.FlightPathsTaken, 1);
+            UpdateCriteria(CriteriaType.BuyTaxi, 1);
 
             if (WorldConfig.GetBoolValue(WorldCfg.InstantTaxi))
             {
                 var lastPathNode = CliDB.TaxiNodesStorage.LookupByKey(nodes[^1]);
                 m_taxi.ClearTaxiDestinations();
                 ModifyMoney(-totalcost);
-                UpdateCriteria(CriteriaTypes.GoldSpentForTravelling, totalcost);
+                UpdateCriteria(CriteriaType.MoneySpentOnTaxis, totalcost);
                 TeleportTo(lastPathNode.ContinentID, lastPathNode.Pos.X, lastPathNode.Pos.Y, lastPathNode.Pos.Z, GetOrientation());
                 return false;
             }
             else
             {
                 ModifyMoney(-firstcost);
-                UpdateCriteria(CriteriaTypes.GoldSpentForTravelling, firstcost);
+                UpdateCriteria(CriteriaType.MoneySpentOnTaxis, firstcost);
                 GetSession().SendActivateTaxiReply();
                 GetSession().SendDoFlight(mount_display_id, sourcepath);
             }

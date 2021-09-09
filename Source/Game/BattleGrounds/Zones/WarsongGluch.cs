@@ -762,10 +762,10 @@ namespace Game.BattleGrounds.Zones
             switch (type)
             {
                 case ScoreType.FlagCaptures:                           // flags captured
-                    player.UpdateCriteria(CriteriaTypes.BgObjectiveCapture, WSObjectives.CaptureFlag);
+                    player.UpdateCriteria(CriteriaType.TrackedWorldStateUIModified, WSObjectives.CaptureFlag);
                     break;
                 case ScoreType.FlagReturns:                            // flags returned
-                    player.UpdateCriteria(CriteriaTypes.BgObjectiveCapture, WSObjectives.ReturnFlag);
+                    player.UpdateCriteria(CriteriaType.TrackedWorldStateUIModified, WSObjectives.ReturnFlag);
                     break;
                 default:
                     break;

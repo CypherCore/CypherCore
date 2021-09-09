@@ -297,7 +297,7 @@ namespace Game.BattlePets
             updates.Add(pet);
             SendUpdates(updates, true);
 
-            _owner.GetPlayer().UpdateCriteria(CriteriaTypes.OwnBattlePet, species);
+            _owner.GetPlayer().UpdateCriteria(CriteriaType.LearnedNewPet, species);
         }
 
         public void RemovePet(ObjectGuid guid)

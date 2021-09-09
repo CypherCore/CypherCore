@@ -535,8 +535,8 @@ namespace Game.Entities
             if (!noCost)
             {
                 ModifyMoney(-cost);
-                UpdateCriteria(CriteriaTypes.GoldSpentForTalents, cost);
-                UpdateCriteria(CriteriaTypes.NumberOfTalentResets, 1);
+                UpdateCriteria(CriteriaType.MoneySpentOnRespecs, cost);
+                UpdateCriteria(CriteriaType.TotalRespecs, 1);
 
                 SetTalentResetCost(cost);
                 SetTalentResetTime(GameTime.GetGameTime());

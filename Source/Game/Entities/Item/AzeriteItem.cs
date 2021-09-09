@@ -274,7 +274,7 @@ namespace Game.Entities
 
                 SetUpdateFieldValue(m_values.ModifyValue(m_azeriteItemData).ModifyValue(m_azeriteItemData.Xp), currentXP);
 
-                owner.UpdateCriteria(CriteriaTypes.HeartOfAzerothArtifactPowerEarned, xp);
+                owner.UpdateCriteria(CriteriaType.EarnArtifactXPForAzeriteItem, xp);
 
                 // changing azerite level changes item level, need to update stats
                 if (m_azeriteItemData.Level != level)
@@ -284,7 +284,7 @@ namespace Game.Entities
 
                     SetUpdateFieldValue(m_values.ModifyValue(m_azeriteItemData).ModifyValue(m_azeriteItemData.Level), level);
                     UnlockDefaultMilestones();
-                    owner.UpdateCriteria(CriteriaTypes.HeartOfAzerothLevelReached, level);
+                    owner.UpdateCriteria(CriteriaType.AzeriteLevelReached, level);
 
                     if (IsEquipped())
                         owner._ApplyItemBonuses(this, GetSlot(), true);

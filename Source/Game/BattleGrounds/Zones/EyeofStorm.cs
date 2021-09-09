@@ -839,7 +839,7 @@ namespace Game.BattleGrounds.Zones
             switch (type)
             {
                 case ScoreType.FlagCaptures:
-                    player.UpdateCriteria(CriteriaTypes.BgObjectiveCapture, EotSMisc.ObjectiveCaptureFlag);
+                    player.UpdateCriteria(CriteriaType.TrackedWorldStateUIModified, EotSMisc.ObjectiveCaptureFlag);
                     break;
                 default:
                     break;

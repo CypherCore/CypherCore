@@ -140,7 +140,7 @@ namespace Game
 
             GetPlayer().SetBankBagSlotCount((byte)slot);
             GetPlayer().ModifyMoney(-price);
-            GetPlayer().UpdateCriteria(CriteriaTypes.BuyBankSlot);
+            GetPlayer().UpdateCriteria(CriteriaType.BankSlotsPurchased);
         }
 
         public void SendShowBank(ObjectGuid guid)

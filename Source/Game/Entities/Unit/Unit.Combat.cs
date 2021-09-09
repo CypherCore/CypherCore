@@ -843,7 +843,7 @@ namespace Game.Entities
             {
                 Player killerPlayer = attacker.GetCharmerOrOwnerPlayerOrPlayerItself();
                 if (killerPlayer != null)
-                    killerPlayer.UpdateCriteria(CriteriaTypes.GetKillingBlows, 1, 0, 0, victim);
+                    killerPlayer.UpdateCriteria(CriteriaType.DeliveredKillingBlow, 1, 0, 0, victim);
             }
 
             if (!skipSettingDeathState)
@@ -983,9 +983,9 @@ namespace Game.Entities
             if (attacker != null && victim.IsPlayer())
             {
                 if (attacker.IsCreature())
-                    victim.ToPlayer().UpdateCriteria(CriteriaTypes.KilledByCreature, attacker.GetEntry());
+                    victim.ToPlayer().UpdateCriteria(CriteriaType.KilledByCreature, attacker.GetEntry());
                 else if (attacker.IsPlayer() && victim != attacker)
-                    victim.ToPlayer().UpdateCriteria(CriteriaTypes.KilledByPlayer, 1, (ulong)attacker.ToPlayer().GetTeam());
+                    victim.ToPlayer().UpdateCriteria(CriteriaType.KilledByPlayer, 1, (ulong)attacker.ToPlayer().GetTeam());
             }
 
             // Hook for OnPVPKill Event

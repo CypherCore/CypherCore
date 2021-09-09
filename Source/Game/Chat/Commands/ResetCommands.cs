@@ -52,7 +52,7 @@ namespace Game.Chat
                 return false;
 
             target.ResetHonorStats();
-            target.UpdateCriteria(CriteriaTypes.EarnHonorableKill);
+            target.UpdateCriteria(CriteriaType.HonorableKills);
 
             return true;
         }

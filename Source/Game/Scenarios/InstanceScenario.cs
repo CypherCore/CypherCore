@@ -66,7 +66,7 @@ namespace Game.Scenarios
                 switch (criteria.Entry.Type)
                 {
                     // Blizzard only appears to store creature kills
-                    case CriteriaTypes.KillCreature:
+                    case CriteriaType.KillCreature:
                         break;
                     default:
                         continue;
@@ -130,7 +130,7 @@ namespace Game.Scenarios
                     switch (criteria.Entry.Type)
                     {
                         // Blizzard appears to only stores creatures killed progress for unknown reasons. Either technical shortcoming or intentional
-                        case CriteriaTypes.KillCreature:
+                        case CriteriaType.KillCreature:
                             break;
                         default:
                             continue;

@@ -1921,7 +1921,7 @@ namespace Game.Entities
                     Player player = user.ToPlayer();
 
                     player.SendLoot(GetGUID(), LootType.Fishinghole);
-                    player.UpdateCriteria(CriteriaTypes.FishInGameobject, GetGoInfo().entry);
+                    player.UpdateCriteria(CriteriaType.CatchFishInFishingHole, GetGoInfo().entry);
                     return;
                 }
 

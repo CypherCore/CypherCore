@@ -472,7 +472,7 @@ namespace Game
 
                 GetPlayer().SetQuestSlot(packet.Entry, 0);
 
-                GetPlayer().UpdateCriteria(CriteriaTypes.QuestAbandoned, 1);
+                GetPlayer().UpdateCriteria(CriteriaType.AbandonAnyQuest, 1);
             }
         }
 

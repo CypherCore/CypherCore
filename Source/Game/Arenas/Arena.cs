@@ -253,8 +253,8 @@ namespace Game.Arenas
                         {
                             // update achievement BEFORE personal rating update
                             uint rating = player.GetArenaPersonalRating(winnerArenaTeam.GetSlot());
-                            player.UpdateCriteria(CriteriaTypes.WinRatedArena, rating != 0 ? rating : 1);
-                            player.UpdateCriteria(CriteriaTypes.WinRatedArena, GetMapId());
+                            player.UpdateCriteria(CriteriaType.WinAnyRankedArena, rating != 0 ? rating : 1);
+                            player.UpdateCriteria(CriteriaType.WinArena, GetMapId());
 
                             // Last standing - Rated 5v5 arena & be solely alive player
                             if (GetArenaType() == ArenaTypes.Team5v5 && aliveWinners == 1 && player.IsAlive())
@@ -268,7 +268,7 @@ namespace Game.Arenas
                                 {
                                     Guild guild = Global.GuildMgr.GetGuildById(guildId);
                                     if (guild)
-                                        guild.UpdateCriteria(CriteriaTypes.WinRatedArena, Math.Max(winnerArenaTeam.GetRating(), 1), 0, 0, null, player);
+                                        guild.UpdateCriteria(CriteriaType.WinAnyRankedArena, Math.Max(winnerArenaTeam.GetRating(), 1), 0, 0, null, player);
                                 }
                             }
 

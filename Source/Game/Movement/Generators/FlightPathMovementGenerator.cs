@@ -157,7 +157,7 @@ namespace Game.Movement
                         player.m_taxi.NextTaxiDestination();
                         if (!_pointsForPathSwitch.Empty())
                         {
-                            player.UpdateCriteria(CriteriaTypes.GoldSpentForTravelling, (uint)_pointsForPathSwitch[0].Cost);
+                            player.UpdateCriteria(CriteriaType.MoneySpentOnTaxis, (uint)_pointsForPathSwitch[0].Cost);
                             player.ModifyMoney(-_pointsForPathSwitch[0].Cost);
                         }
                     }

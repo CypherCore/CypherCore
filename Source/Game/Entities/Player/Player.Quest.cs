@@ -1056,7 +1056,7 @@ namespace Game.Entities
                 ModifyMoney(moneyRew);
 
                 if (moneyRew > 0)
-                    UpdateCriteria(CriteriaTypes.MoneyFromQuestReward, (uint)(moneyRew));
+                    UpdateCriteria(CriteriaType.MoneyEarnedFromQuesting, (uint)moneyRew);
             }
 
             // honor reward
@@ -1091,8 +1091,8 @@ namespace Game.Entities
                 SetDailyQuestStatus(questId);
                 if (quest.IsDaily())
                 {
-                    UpdateCriteria(CriteriaTypes.CompleteDailyQuest, questId);
-                    UpdateCriteria(CriteriaTypes.CompleteDailyQuestDaily, questId);
+                    UpdateCriteria(CriteriaType.CompleteDailyQuest, questId);
+                    UpdateCriteria(CriteriaType.CompleteAnyDailyQuestPerDay, questId);
                 }
             }
             else if (quest.IsWeekly())
@@ -1147,11 +1147,11 @@ namespace Game.Entities
             }
 
             if (quest.QuestSortID > 0)
-                UpdateCriteria(CriteriaTypes.CompleteQuestsInZone, quest.Id);
+                UpdateCriteria(CriteriaType.CompleteQuestsInZone, quest.Id);
 
-            UpdateCriteria(CriteriaTypes.CompleteQuestCount);
-            UpdateCriteria(CriteriaTypes.CompleteQuest, quest.Id);
-            UpdateCriteria(CriteriaTypes.CompleteQuestAccumulate, 1);
+            UpdateCriteria(CriteriaType.CompleteQuestsCount);
+            UpdateCriteria(CriteriaType.CompleteQuest, quest.Id);
+            UpdateCriteria(CriteriaType.CompleteAnyReplayQuest, 1);
 
             // make full db save
             SaveToDB(false);
@@ -2232,7 +2232,7 @@ namespace Game.Entities
             }
 
             StartCriteriaTimer(CriteriaStartEvent.KillNPC, real_entry);   // MUST BE CALLED FIRST
-            UpdateCriteria(CriteriaTypes.KillCreature, real_entry, addKillCount, 0, killed);
+            UpdateCriteria(CriteriaType.KillCreature, real_entry, addKillCount, 0, killed);
 
             UpdateQuestObjectiveProgress(QuestObjectiveType.Monster, (int)entry, 1, guid);
         }

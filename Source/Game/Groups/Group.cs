@@ -1174,7 +1174,7 @@ namespace Game.Groups
 
                         if (player && player.GetSession())
                         {
-                            player.UpdateCriteria(CriteriaTypes.RollNeedOnLoot, roll.itemid, maxresul);
+                            player.UpdateCriteria(CriteriaType.RollNeed, roll.itemid, maxresul);
 
                             List<ItemPosCount> dest = new();
                             LootItem item = (roll.itemSlot >= roll.GetLoot().items.Count ? roll.GetLoot().quest_items[roll.itemSlot - roll.GetLoot().items.Count] : roll.GetLoot().items[roll.itemSlot]);
@@ -1237,7 +1237,7 @@ namespace Game.Groups
 
                         if (player && player.GetSession() != null)
                         {
-                            player.UpdateCriteria(CriteriaTypes.RollGreedOnLoot, roll.itemid, maxresul);
+                            player.UpdateCriteria(CriteriaType.RollGreed, roll.itemid, maxresul);
 
                             LootItem item = roll.itemSlot >= roll.GetLoot().items.Count ? roll.GetLoot().quest_items[roll.itemSlot - roll.GetLoot().items.Count] : roll.GetLoot().items[roll.itemSlot];
 
@@ -1264,7 +1264,7 @@ namespace Game.Groups
                                 item.is_looted = true;
                                 roll.GetLoot().NotifyItemRemoved(roll.itemSlot);
                                 roll.GetLoot().unlootedCount--;
-                                player.UpdateCriteria(CriteriaTypes.CastSpell, 13262); // Disenchant
+                                player.UpdateCriteria(CriteriaType.CastSpell, 13262); // Disenchant
 
                                 ItemDisenchantLootRecord disenchant = roll.GetItemDisenchantLoot(player);
 

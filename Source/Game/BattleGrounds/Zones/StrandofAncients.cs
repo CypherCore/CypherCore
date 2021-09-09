@@ -927,7 +927,7 @@ namespace Game.BattleGrounds.Zones
                             Player player = Global.ObjAccessor.FindPlayer(pair.Key);
                             if (player)
                                 if (player.GetTeamId() == Attackers)
-                                    player.UpdateCriteria(CriteriaTypes.BeSpellTarget, 65246);
+                                    player.UpdateCriteria(CriteriaType.BeSpellTarget, 65246);
                         }
 
                         Attackers = (Attackers == TeamId.Alliance) ? TeamId.Horde : TeamId.Alliance;
@@ -959,7 +959,7 @@ namespace Game.BattleGrounds.Zones
                             Player player = Global.ObjAccessor.FindPlayer(pair.Key);
                             if (player)
                                 if (player.GetTeamId() == Attackers && RoundScores[1].winner == Attackers)
-                                    player.UpdateCriteria(CriteriaTypes.BeSpellTarget, 65246);
+                                    player.UpdateCriteria(CriteriaType.BeSpellTarget, 65246);
                         }
 
                         if (RoundScores[0].time == RoundScores[1].time)
@@ -1096,10 +1096,10 @@ namespace Game.BattleGrounds.Zones
             switch (type)
             {
                 case ScoreType.DestroyedDemolisher:
-                    player.UpdateCriteria(CriteriaTypes.BgObjectiveCapture, (uint)SAObjectives.DemolishersDestroyed);
+                    player.UpdateCriteria(CriteriaType.TrackedWorldStateUIModified, (uint)SAObjectives.DemolishersDestroyed);
                     break;
                 case ScoreType.DestroyedWall:
-                    player.UpdateCriteria(CriteriaTypes.BgObjectiveCapture, (uint)SAObjectives.GatesDestroyed);
+                    player.UpdateCriteria(CriteriaType.TrackedWorldStateUIModified, (uint)SAObjectives.GatesDestroyed);
                     break;
                 default:
                     break;

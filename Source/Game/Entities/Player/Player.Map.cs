@@ -147,7 +147,7 @@ namespace Game.Entities
 
             PushQuests();
 
-            UpdateCriteria(CriteriaTypes.TravelledToArea, newArea);
+            UpdateCriteria(CriteriaType.EnterTopLevelArea, newArea);
         }
 
         public void UpdateZone(uint newZone, uint newArea)

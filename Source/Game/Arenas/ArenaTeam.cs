@@ -559,7 +559,7 @@ namespace Game.Arenas
                 {
                     Player player = Global.ObjAccessor.FindPlayer(member.Guid);
                     if (player)
-                        player.UpdateCriteria(CriteriaTypes.HighestTeamRating, stats.Rating, type);
+                        player.UpdateCriteria(CriteriaType.EarnTeamArenaRating, stats.Rating, type);
                 }
             }
 
@@ -834,7 +834,7 @@ namespace Game.Arenas
             if (player)
             {
                 player.SetArenaTeamInfoField(ArenaTeam.GetSlotByType(type), ArenaTeamInfoType.PersonalRating, PersonalRating);
-                player.UpdateCriteria(CriteriaTypes.HighestPersonalRating, PersonalRating, type);
+                player.UpdateCriteria(CriteriaType.EarnPersonalArenaRating, PersonalRating, type);
             }
         }
 

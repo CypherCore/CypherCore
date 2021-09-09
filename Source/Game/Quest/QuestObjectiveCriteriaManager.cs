@@ -36,7 +36,7 @@ namespace Game
         public void CheckAllQuestObjectiveCriteria(Player referencePlayer)
         {
             // suppress sending packets
-            for (CriteriaTypes i = 0; i < CriteriaTypes.TotalTypes; ++i)
+            for (CriteriaType i = 0; i < CriteriaType.Count; ++i)
                 UpdateCriteria(i, 0, 0, 0, null, referencePlayer);
         }
 
@@ -329,7 +329,7 @@ namespace Game
             return $"{_owner.GetGUID()} {_owner.GetName()}";
         }
 
-        public override List<Criteria> GetCriteriaByType(CriteriaTypes type, uint asset)
+        public override List<Criteria> GetCriteriaByType(CriteriaType type, uint asset)
         {
             return Global.CriteriaMgr.GetQuestObjectiveCriteriaByType(type);
         }

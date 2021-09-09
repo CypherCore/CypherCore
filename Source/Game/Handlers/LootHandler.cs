@@ -104,9 +104,9 @@ namespace Game
                 foreach (var resultValue in aeResult.GetByOrder())
                 {
                     player.SendNewItem(resultValue.item, resultValue.count, false, false, true);
-                    player.UpdateCriteria(CriteriaTypes.LootItem, resultValue.item.GetEntry(), resultValue.count);
-                    player.UpdateCriteria(CriteriaTypes.LootType, resultValue.item.GetEntry(), resultValue.count, (ulong)resultValue.lootType);
-                    player.UpdateCriteria(CriteriaTypes.LootAnyItem, resultValue.item.GetEntry(), resultValue.count);
+                    player.UpdateCriteria(CriteriaType.LootItem, resultValue.item.GetEntry(), resultValue.count);
+                    player.UpdateCriteria(CriteriaType.GetLootByType, resultValue.item.GetEntry(), resultValue.count, (ulong)resultValue.lootType);
+                    player.UpdateCriteria(CriteriaType.LootAnyItem, resultValue.item.GetEntry(), resultValue.count);
                 }
             }
         }
@@ -202,7 +202,7 @@ namespace Game
                         ulong goldMod = MathFunctions.CalculatePct(goldPerPlayer, pl.GetTotalAuraModifierByMiscValue(AuraType.ModMoneyGain, 1));
 
                         pl.ModifyMoney((long)(goldPerPlayer + goldMod));
-                        pl.UpdateCriteria(CriteriaTypes.LootMoney, goldPerPlayer);
+                        pl.UpdateCriteria(CriteriaType.MoneyLootedFromCreatures, goldPerPlayer);
 
                         LootMoneyNotify packet = new();
                         packet.Money = goldPerPlayer;
@@ -216,7 +216,7 @@ namespace Game
                     ulong goldMod = MathFunctions.CalculatePct(loot.gold, player.GetTotalAuraModifierByMiscValue(AuraType.ModMoneyGain, 1));
 
                     player.ModifyMoney((long)(loot.gold + goldMod));
-                    player.UpdateCriteria(CriteriaTypes.LootMoney, loot.gold);
+                    player.UpdateCriteria(CriteriaType.MoneyLootedFromCreatures, loot.gold);
 
                     LootMoneyNotify packet = new();
                     packet.Money = loot.gold;
@@ -551,9 +551,9 @@ namespace Game
             foreach (var resultValue in aeResult.GetByOrder())
             {
                 target.SendNewItem(resultValue.item, resultValue.count, false, false, true);
-                target.UpdateCriteria(CriteriaTypes.LootItem, resultValue.item.GetEntry(), resultValue.count);
-                target.UpdateCriteria(CriteriaTypes.LootType, resultValue.item.GetEntry(), resultValue.count, (ulong)resultValue.lootType);
-                target.UpdateCriteria(CriteriaTypes.LootAnyItem, resultValue.item.GetEntry(), resultValue.count);
+                target.UpdateCriteria(CriteriaType.LootItem, resultValue.item.GetEntry(), resultValue.count);
+                target.UpdateCriteria(CriteriaType.GetLootByType, resultValue.item.GetEntry(), resultValue.count, (ulong)resultValue.lootType);
+                target.UpdateCriteria(CriteriaType.LootAnyItem, resultValue.item.GetEntry(), resultValue.count);
             }
         }
 

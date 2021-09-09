@@ -99,11 +99,11 @@ namespace Game.Entities
                 uint guildId = victim.GetMap().GetOwnerGuildId();
                 var guild = Global.GuildMgr.GetGuildById(guildId);
                 if (guild != null)
-                    guild.UpdateCriteria(CriteriaTypes.KillCreature, victim.GetEntry(), 1, 0, victim, _killer);
+                    guild.UpdateCriteria(CriteriaType.KillCreature, victim.GetEntry(), 1, 0, victim, _killer);
 
                 Scenario scenario = victim.GetScenario();
                 if (scenario != null)
-                    scenario.UpdateCriteria(CriteriaTypes.KillCreature, victim.GetEntry(), 1, 0, victim, _killer);
+                    scenario.UpdateCriteria(CriteriaType.KillCreature, victim.GetEntry(), 1, 0, victim, _killer);
             }
         }
 
@@ -208,7 +208,7 @@ namespace Game.Entities
                 if (target != null)
                 {
                     player.KilledMonster(target.GetCreatureTemplate(), target.GetGUID());
-                    player.UpdateCriteria(CriteriaTypes.KillCreatureType, (ulong)target.GetCreatureType(), 1, 0, target);
+                    player.UpdateCriteria(CriteriaType.KillAnyCreature, (ulong)target.GetCreatureType(), 1, 0, target);
                 }
             }
         }
@@ -271,7 +271,7 @@ namespace Game.Entities
                             if (_killer == member || member.IsAtGroupRewardDistance(_victim))
                             {
                                 _RewardPlayer(member, isDungeon);
-                                member.UpdateCriteria(CriteriaTypes.SpecialPvpKill, 1, 0, 0, _victim);
+                                member.UpdateCriteria(CriteriaType.KillPlayer, 1, 0, 0, _victim);
                             }
                         }
                     }

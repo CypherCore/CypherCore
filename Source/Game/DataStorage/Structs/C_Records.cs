@@ -480,7 +480,7 @@ namespace Game.DataStorage
     public sealed class CriteriaRecord
     {
         public uint Id;
-        public CriteriaTypes Type;
+        public CriteriaType Type;
         public uint Asset;
         public uint ModifierTreeId;
         public byte StartEvent;

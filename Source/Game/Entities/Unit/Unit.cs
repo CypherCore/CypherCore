@@ -2402,13 +2402,13 @@ namespace Game.Entities
                             bg.UpdatePlayerScore(killer, ScoreType.DamageDone, damage);
                     }
 
-                    killer.UpdateCriteria(CriteriaTypes.DamageDone, health > damage ? damage : health, 0, 0, victim);
-                    killer.UpdateCriteria(CriteriaTypes.HighestHitDealt, damage);
+                    killer.UpdateCriteria(CriteriaType.DamageDealt, health > damage ? damage : health, 0, 0, victim);
+                    killer.UpdateCriteria(CriteriaType.HighestDamageDone, damage);
                 }
             }
 
             if (victim.IsPlayer())
-                victim.ToPlayer().UpdateCriteria(CriteriaTypes.HighestHitReceived, damage);
+                victim.ToPlayer().UpdateCriteria(CriteriaType.HighestDamageTaken, damage);
 
             if (attacker != null)
                 damage = (uint)(damage / victim.GetHealthMultiplierForTarget(attacker));
@@ -2430,7 +2430,7 @@ namespace Game.Entities
                 killed = true;
 
                 if (victim.IsPlayer() && victim != attacker)
-                    victim.ToPlayer().UpdateCriteria(CriteriaTypes.TotalDamageReceived, health);
+                    victim.ToPlayer().UpdateCriteria(CriteriaType.TotalDamageTaken, health);
 
                 if (damagetype != DamageEffectType.NoDamage && damagetype != DamageEffectType.Self && victim.HasAuraType(AuraType.SchoolAbsorbOverkill))
                 {
@@ -2499,7 +2499,7 @@ namespace Game.Entities
             else
             {
                 if (victim.IsTypeId(TypeId.Player))
-                    victim.ToPlayer().UpdateCriteria(CriteriaTypes.TotalDamageReceived, damage);
+                    victim.ToPlayer().UpdateCriteria(CriteriaType.TotalDamageTaken, damage);
 
                 victim.ModifyHealth(-(int)damage);
 

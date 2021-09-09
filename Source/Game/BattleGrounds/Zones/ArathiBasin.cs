@@ -683,10 +683,10 @@ namespace Game.BattleGrounds.Zones
             switch (type)
             {
                 case ScoreType.BasesAssaulted:
-                    player.UpdateCriteria(CriteriaTypes.BgObjectiveCapture, (uint)ABObjectives.AssaultBase);
+                    player.UpdateCriteria(CriteriaType.TrackedWorldStateUIModified, (uint)ABObjectives.AssaultBase);
                     break;
                 case ScoreType.BasesDefended:
-                    player.UpdateCriteria(CriteriaTypes.BgObjectiveCapture, (uint)ABObjectives.DefendBase);
+                    player.UpdateCriteria(CriteriaType.TrackedWorldStateUIModified, (uint)ABObjectives.DefendBase);
                     break;
                 default:
                     break;

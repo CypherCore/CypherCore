@@ -450,8 +450,8 @@ namespace Game
                             return;
                         }
 
-                        _player.UpdateCriteria(CriteriaTypes.MoneyFromVendors, money);
-                        _player.UpdateCriteria(CriteriaTypes.SoldItemToVendor, 1);
+                        _player.UpdateCriteria(CriteriaType.MoneyEarnedFromSales, money);
+                        _player.UpdateCriteria(CriteriaType.SellItemsToVendors, 1);
 
                         if (packet.Amount < pItem.GetCount())               // need split items
                         {
@@ -1062,7 +1062,7 @@ namespace Game
             if (entry != null)
             {
                 GetBattlePetMgr().AddPet(entry.Id, entry.CreatureID, BattlePetMgr.RollPetBreed(entry.Id), BattlePetMgr.GetDefaultPetQuality(entry.Id));
-                _player.UpdateCriteria(CriteriaTypes.OwnBattlePetCount);
+                _player.UpdateCriteria(CriteriaType.UniquePetsOwned);
             }
 
             GetPlayer().DestroyItem(item.GetBagSlot(), item.GetSlot(), true);

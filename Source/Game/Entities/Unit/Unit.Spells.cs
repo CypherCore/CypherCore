@@ -1813,17 +1813,17 @@ namespace Game.Entities
 
                     // use the actual gain, as the overheal shall not be counted, skip gain 0 (it ignored anyway in to criteria)
                     if (gain != 0)
-                        bgPlayer.UpdateCriteria(CriteriaTypes.HealingDone, (uint)gain, 0, 0, victim);
+                        bgPlayer.UpdateCriteria(CriteriaType.HealingDone, (uint)gain, 0, 0, victim);
 
-                    bgPlayer.UpdateCriteria(CriteriaTypes.HighestHealCasted, addhealth);
+                    bgPlayer.UpdateCriteria(CriteriaType.HighestHealCast, addhealth);
                 }
             }
 
             Player player = victim.ToPlayer();
             if (player != null)
             {
-                player.UpdateCriteria(CriteriaTypes.TotalHealingReceived, (uint)gain);
-                player.UpdateCriteria(CriteriaTypes.HighestHealingReceived, addhealth);
+                player.UpdateCriteria(CriteriaType.TotalHealReceived, (uint)gain);
+                player.UpdateCriteria(CriteriaType.HighestHealReceived, addhealth);
             }
 
             if (gain != 0)

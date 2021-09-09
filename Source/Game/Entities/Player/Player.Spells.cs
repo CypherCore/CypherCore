@@ -436,7 +436,7 @@ namespace Game.Entities
             }
 
             UpdateSkillEnchantments(skillId, value, new_value);
-            UpdateCriteria(CriteriaTypes.ReachSkillLevel, skillId);
+            UpdateCriteria(CriteriaType.SkillRaised, skillId);
             Log.outDebug(LogFilter.Player, "Player:UpdateSkillPro Chance={0:F3}% taken", chance / 10.0f);
             return true;
         }
@@ -1071,8 +1071,8 @@ namespace Game.Entities
                     if (newVal > currVal)
                         UpdateSkillEnchantments(id, currVal, (ushort)newVal);
 
-                    UpdateCriteria(CriteriaTypes.ReachSkillLevel, id);
-                    UpdateCriteria(CriteriaTypes.LearnSkillLevel, id);
+                    UpdateCriteria(CriteriaType.SkillRaised, id);
+                    UpdateCriteria(CriteriaType.AchieveSkillStep, id);
 
                     // update skill state
                     if (skillStatusData.State == SkillState.Unchanged)
@@ -1202,8 +1202,8 @@ namespace Game.Entities
 
                 if (newVal != 0)
                 {
-                    UpdateCriteria(CriteriaTypes.ReachSkillLevel, id);
-                    UpdateCriteria(CriteriaTypes.LearnSkillLevel, id);
+                    UpdateCriteria(CriteriaType.SkillRaised, id);
+                    UpdateCriteria(CriteriaType.AchieveSkillStep, id);
 
                     // temporary bonuses
                     foreach (var auraEffect in GetAuraEffectsByType(AuraType.ModSkill))
@@ -2636,11 +2636,11 @@ namespace Game.Entities
                 // not ranked skills
                 foreach (var _spell_idx in skill_bounds)
                 {
-                    UpdateCriteria(CriteriaTypes.LearnSkillLine, _spell_idx.SkillLine);
-                    UpdateCriteria(CriteriaTypes.LearnSkilllineSpells, _spell_idx.SkillLine);
+                    UpdateCriteria(CriteriaType.LearnTradeskillSkillLine, _spell_idx.SkillLine);
+                    UpdateCriteria(CriteriaType.LearnSpellFromSkillLine, _spell_idx.SkillLine);
                 }
 
-                UpdateCriteria(CriteriaTypes.LearnSpell, spellId);
+                UpdateCriteria(CriteriaType.LearnOrKnowSpell, spellId);
             }
 
             // needs to be when spell is already learned, to prevent infinite recursion crashes
@@ -2653,7 +2653,7 @@ namespace Game.Entities
                 if (entry.SummonSpellID == spellId && GetSession().GetBattlePetMgr().GetPetCount(entry.Id) == 0)
                 {
                     GetSession().GetBattlePetMgr().AddPet(entry.Id, entry.CreatureID, BattlePetMgr.RollPetBreed(entry.Id), BattlePetMgr.GetDefaultPetQuality(entry.Id));
-                    UpdateCriteria(CriteriaTypes.OwnBattlePetCount);
+                    UpdateCriteria(CriteriaType.UniquePetsOwned);
                     break;
                 }
             }

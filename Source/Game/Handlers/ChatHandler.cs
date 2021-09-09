@@ -593,7 +593,7 @@ namespace Game
 
             Unit unit = Global.ObjAccessor.GetUnit(GetPlayer(), packet.Target);
 
-            GetPlayer().UpdateCriteria(CriteriaTypes.DoEmote, (uint)packet.EmoteID, 0, 0, unit);
+            GetPlayer().UpdateCriteria(CriteriaType.DoEmote, (uint)packet.EmoteID, 0, 0, unit);
 
             // Send scripted event call
             if (unit)

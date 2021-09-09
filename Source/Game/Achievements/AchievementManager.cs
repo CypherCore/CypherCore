@@ -45,7 +45,7 @@ namespace Game.Achievements
         public void CheckAllAchievementCriteria(Player referencePlayer)
         {
             // suppress sending packets
-            for (CriteriaTypes i = 0; i < CriteriaTypes.TotalTypes; ++i)
+            for (CriteriaType i = 0; i < CriteriaType.Count; ++i)
                 UpdateCriteria(i, 0, 0, 0, null, referencePlayer);
         }
 
@@ -533,8 +533,8 @@ namespace Game.Achievements
             if (!achievement.Flags.HasAnyFlag(AchievementFlags.TrackingFlag))
                 _achievementPoints += achievement.Points;
 
-            UpdateCriteria(CriteriaTypes.CompleteAchievement, achievement.Id, 0, 0, null, referencePlayer);
-            UpdateCriteria(CriteriaTypes.EarnAchievementPoints, achievement.Points, 0, 0, null, referencePlayer);
+            UpdateCriteria(CriteriaType.EarnAchievement, achievement.Id, 0, 0, null, referencePlayer);
+            UpdateCriteria(CriteriaType.EarnAchievementPoints, achievement.Points, 0, 0, null, referencePlayer);
 
             // reward items and titles if any
             AchievementReward reward = Global.AchievementMgr.GetAchievementReward(achievement);
@@ -705,7 +705,7 @@ namespace Game.Achievements
             _owner.SendPacket(data);
         }
 
-        public override List<Criteria> GetCriteriaByType(CriteriaTypes type, uint asset)
+        public override List<Criteria> GetCriteriaByType(CriteriaType type, uint asset)
         {
             return Global.CriteriaMgr.GetPlayerCriteriaByType(type, asset);
         }
@@ -1014,8 +1014,8 @@ namespace Game.Achievements
             if (!achievement.Flags.HasAnyFlag(AchievementFlags.TrackingFlag))
                 _achievementPoints += achievement.Points;
 
-            UpdateCriteria(CriteriaTypes.CompleteAchievement, achievement.Id, 0, 0, null, referencePlayer);
-            UpdateCriteria(CriteriaTypes.EarnAchievementPoints, achievement.Points, 0, 0, null, referencePlayer);
+            UpdateCriteria(CriteriaType.EarnAchievement, achievement.Id, 0, 0, null, referencePlayer);
+            UpdateCriteria(CriteriaType.EarnAchievementPoints, achievement.Points, 0, 0, null, referencePlayer);
         }
 
         public override void SendCriteriaUpdate(Criteria entry, CriteriaProgress progress, TimeSpan timeElapsed, bool timedCompleted)
@@ -1069,7 +1069,7 @@ namespace Game.Achievements
             _owner.BroadcastPacket(data);
         }
 
-        public override List<Criteria> GetCriteriaByType(CriteriaTypes type, uint asset)
+        public override List<Criteria> GetCriteriaByType(CriteriaType type, uint asset)
         {
             return Global.CriteriaMgr.GetGuildCriteriaByType(type);
         }
