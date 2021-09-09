@@ -7977,7 +7977,8 @@ namespace Game.Spells
                             if ((effMask & (1 << (int)i)) != 0 && aurApp.HasEffect(i))
                                 effMask &= ~(1u << (int)i);
 
-                        _spellHitTarget._ApplyAura(aurApp, effMask);
+                        if (effMask != 0)
+                            _spellHitTarget._ApplyAura(aurApp, effMask);
                     }
                 }
 
