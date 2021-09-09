@@ -77,6 +77,12 @@ namespace Scripts.Spells.Quest
         //Stoppingthespread
         public const uint Flames = 39199;
 
+        //BattleStandard
+        public const uint PlantHordeBattleStandard = 59643;
+        public const uint HordeBattleStandardState = 59642;
+        public const uint AllianceBattleStandardState = 4339;
+        public const uint JumpRocketBlast = 4340;
+
         //Chumthewatersummons
         public const uint SummonAngryKvaldir = 66737;
         public const uint SummonNorthSeaMako = 66738;
@@ -917,12 +923,22 @@ namespace Scripts.Spells.Quest
         void HandleDummy(uint effIndex)
         {
             Unit caster = GetCaster();
+            Unit target = GetHitUnit();
+            uint triggeredSpellID = SpellIds.AllianceBattleStandardState;
+
+            caster.HandleEmoteCommand(Emote.OneshotRoar);
             if (caster.IsVehicle())
             {
                 Unit player = caster.GetVehicleKit().GetPassenger(0);
                 if (player)
                     player.ToPlayer().KilledMonsterCredit(CreatureIds.KingOfTheMountaintKc);
             }
+
+            if (GetSpellInfo().Id == SpellIds.PlantHordeBattleStandard)
+                triggeredSpellID = SpellIds.HordeBattleStandardState;
+
+            target.RemoveAllAuras();
+            target.CastSpell(target, triggeredSpellID, true);
         }
 
         public override void Register()
@@ -931,6 +947,26 @@ namespace Scripts.Spells.Quest
         }
     }
 
+    [Script]
+    class spell_q13280_13283_jump_jets : SpellScript
+    {
+        void HandleCast()
+        {
+            Unit caster = GetCaster();
+            if (caster.IsVehicle())
+            {
+                Unit rocketBunny = caster.GetVehicleKit().GetPassenger(1);
+                if (rocketBunny != null)
+                    rocketBunny.CastSpell(rocketBunny, SpellIds.JumpRocketBlast, true);
+            }
+        }
+
+        public override void Register()
+        {
+            OnCast.Add(new CastHandler(HandleCast));
+        }
+    }
+    
     [Script]
     class spell_q14112_14145_chum_the_water : SpellScript
     {
