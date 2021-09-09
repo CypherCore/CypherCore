@@ -7700,7 +7700,7 @@ namespace Game.Spells
                 if (missInfo != SpellMissInfo.None)
                 {
                     if (missInfo != SpellMissInfo.Miss)
-                        spell.GetCaster().ToUnit().SendSpellMiss(unit, spell.m_spellInfo.Id, missInfo);
+                        spell.GetCaster().SendSpellMiss(unit, spell.m_spellInfo.Id, missInfo);
                     spell.m_damage = 0;
                     spell.m_healing = 0;
                     _spellHitTarget = null;

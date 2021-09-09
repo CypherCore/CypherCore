@@ -2028,6 +2028,15 @@ namespace Game.Entities
             return SpellMissInfo.None;
         }
 
+        public void SendSpellMiss(Unit target, uint spellID, SpellMissInfo missInfo)
+        {
+            SpellMissLog spellMissLog = new();
+            spellMissLog.SpellID = spellID;
+            spellMissLog.Caster = GetGUID();
+            spellMissLog.Entries.Add(new SpellLogMissEntry(target.GetGUID(), (byte)missInfo));
+            SendMessageToSet(spellMissLog, true);
+        }
+
         public FactionTemplateRecord GetFactionTemplateEntry()
         {
             var entry = CliDB.FactionTemplateStorage.LookupByKey(GetFaction());
