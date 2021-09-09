@@ -1987,7 +1987,7 @@ namespace Game.Spells
                     }
                 }
 
-                hitInfo.AuraDuration = m_spellInfo.GetMaxDuration();
+                hitInfo.AuraDuration = Aura.CalcMaxDuration(m_spellInfo, origCaster);
 
                 // unit is immune to aura if it was diminished to 0 duration
                 if (!hitInfo.Positive && !unit.ApplyDiminishingToDuration(m_spellInfo, ref hitInfo.AuraDuration, origCaster, diminishLevel))
@@ -2009,14 +2009,21 @@ namespace Game.Spells
 
                 if (caster != null)
                 {
-                    AuraCreateInfo createInfo = null;
+                    // delayed spells with multiple targets need to create a new aura object, otherwise we'll access a deleted aura
+                    if (m_spellInfo.HasHitDelay() && !m_spellInfo.IsChanneled())
+                    {
+                        spellAura = null;
+                        Aura aura = unit.GetAura(m_spellInfo.Id, caster.GetGUID(), m_CastItem ? m_CastItem.GetGUID() : ObjectGuid.Empty, aura_effmask);
+                        if (aura != null)
+                            spellAura = aura.ToUnitAura();
+                    }
 
                     if (spellAura == null)
                     {
                         bool resetPeriodicTimer = !_triggeredCastFlags.HasFlag(TriggerCastFlags.DontResetPeriodicTimer);
                         uint allAuraEffectMask = Aura.BuildEffectMaskForOwner(m_spellInfo, SpellConst.MaxEffectMask, unit);
 
-                        createInfo = new(m_castId, m_spellInfo, GetCastDifficulty(), allAuraEffectMask, unit);
+                        AuraCreateInfo createInfo = new(m_castId, m_spellInfo, GetCastDifficulty(), allAuraEffectMask, unit);
                         createInfo.SetCasterGUID(caster.GetGUID());
                         createInfo.SetBaseAmount(hitInfo.AuraBasePoints);
                         createInfo.SetCastItem(m_castItemGUID, m_castItemEntry, m_castItemLevel);
@@ -2025,63 +2032,59 @@ namespace Game.Spells
 
                         Aura aura = Aura.TryRefreshStackOrCreate(createInfo);
                         if (aura != null)
+                        {
                             spellAura = aura.ToUnitAura();
+
+                            // Set aura stack amount to desired value
+                            if (m_spellValue.AuraStackAmount > 1)
+                            {
+                                if (!createInfo.IsRefresh)
+                                    spellAura.SetStackAmount((byte)m_spellValue.AuraStackAmount);
+                                else
+                                    spellAura.ModStackAmount(m_spellValue.AuraStackAmount);
+                            }
+
+
+                            spellAura.SetDiminishGroup(hitInfo.DRGroup);
+
+                            hitInfo.AuraDuration = caster.ModSpellDuration(m_spellInfo, unit, hitInfo.AuraDuration, hitInfo.Positive, spellAura.GetEffectMask());
+
+                            if (hitInfo.AuraDuration > 0)
+                            {
+                                hitInfo.AuraDuration *= (int)m_spellValue.DurationMul;
+
+                                // Haste modifies duration of channeled spells
+                                if (m_spellInfo.IsChanneled())
+                                    caster.ModSpellDurationTime(m_spellInfo, ref hitInfo.AuraDuration, this);
+                                else if (m_spellInfo.HasAttribute(SpellAttr5.HasteAffectDuration))
+                                {
+                                    int origDuration = hitInfo.AuraDuration;
+                                    hitInfo.AuraDuration = 0;
+                                    foreach (AuraEffect auraEff in spellAura.GetAuraEffects())
+                                    {
+                                        if (auraEff != null)
+                                        {
+                                            int period = auraEff.GetPeriod();
+                                            if (period != 0)  // period is hastened by UNIT_MOD_CAST_SPEED
+                                                hitInfo.AuraDuration = Math.Max(Math.Max(origDuration / period, 1) * period, hitInfo.AuraDuration);
+                                        }
+                                    }
+
+                                    // if there is no periodic effect
+                                    if (hitInfo.AuraDuration == 0)
+                                        hitInfo.AuraDuration = (int)(origDuration * m_originalCaster.m_unitData.ModCastingSpeed);
+                                }
+                            }
+
+                            if (hitInfo.AuraDuration != spellAura.GetMaxDuration())
+                            {
+                                spellAura.SetMaxDuration(hitInfo.AuraDuration);
+                                spellAura.SetDuration(hitInfo.AuraDuration);
+                            }
+                        }
                     }
                     else
                         spellAura.AddStaticApplication(unit, aura_effmask);
-
-                    bool refresh = false;
-                    if (createInfo != null)
-                        refresh = createInfo.IsRefresh;
-
-                    if (spellAura != null)
-                    {
-                        // Set aura stack amount to desired value
-                        if (m_spellValue.AuraStackAmount > 1)
-                        {
-                            if (!refresh)
-                                spellAura.SetStackAmount((byte)m_spellValue.AuraStackAmount);
-                            else
-                                spellAura.ModStackAmount(m_spellValue.AuraStackAmount);
-                        }
-
-                        spellAura.SetDiminishGroup(hitInfo.DRGroup);
-
-                        hitInfo.AuraDuration = caster.ModSpellDuration(m_spellInfo, unit, hitInfo.AuraDuration, hitInfo.Positive, spellAura.GetEffectMask());
-
-                        if (hitInfo.AuraDuration > 0)
-                        {
-                            hitInfo.AuraDuration *= (int)m_spellValue.DurationMul;
-
-                            // Haste modifies duration of channeled spells
-                            if (m_spellInfo.IsChanneled())
-                                caster.ModSpellDurationTime(m_spellInfo, ref hitInfo.AuraDuration, this);
-                            else if (m_spellInfo.HasAttribute(SpellAttr5.HasteAffectDuration))
-                            {
-                                int origDuration = hitInfo.AuraDuration;
-                                hitInfo.AuraDuration = 0;
-                                foreach (AuraEffect auraEff in spellAura.GetAuraEffects())
-                                {
-                                    if (auraEff != null)
-                                    {
-                                        int period = auraEff.GetPeriod();
-                                        if (period != 0)  // period is hastened by UNIT_MOD_CAST_SPEED
-                                            hitInfo.AuraDuration = Math.Max(Math.Max(origDuration / period, 1) * period, hitInfo.AuraDuration);
-                                    }
-                                }
-
-                                // if there is no periodic effect
-                                if (hitInfo.AuraDuration == 0)
-                                    hitInfo.AuraDuration = (int)(origDuration * m_originalCaster.m_unitData.ModCastingSpeed);
-                            }
-                        }
-
-                        if (hitInfo.AuraDuration != spellAura.GetMaxDuration())
-                        {
-                            spellAura.SetMaxDuration(hitInfo.AuraDuration);
-                            spellAura.SetDuration(hitInfo.AuraDuration);
-                        }
-                    }
                 }
             }
 
@@ -2809,10 +2812,12 @@ namespace Game.Spells
                 else if (duration == -1)
                     SendChannelStart((uint)duration);
 
-                m_spellState = SpellState.Casting;
-
-                // GameObjects shouldn't cast channeled spells
-                m_caster.ToUnit().AddInterruptMask(m_spellInfo.ChannelInterruptFlags, m_spellInfo.ChannelInterruptFlags2);
+                if (duration != 0)
+                {
+                    m_spellState = SpellState.Casting;
+                    // GameObjects shouldn't cast channeled spells
+                    m_caster.ToUnit().AddInterruptMask(m_spellInfo.ChannelInterruptFlags, m_spellInfo.ChannelInterruptFlags2);
+                }
             }
 
             PrepareTargetProcessing();

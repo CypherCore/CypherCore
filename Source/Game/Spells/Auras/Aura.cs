@@ -721,7 +721,12 @@ namespace Game.Spells
             }
         }
 
-        int CalcMaxDuration(Unit caster)
+        public int CalcMaxDuration(Unit caster)
+        {
+            return CalcMaxDuration(GetSpellInfo(), caster);
+        }
+
+        public static int CalcMaxDuration(SpellInfo spellInfo, WorldObject caster)
         {
             Player modOwner = null;
             int maxDuration;
@@ -729,17 +734,18 @@ namespace Game.Spells
             if (caster != null)
             {
                 modOwner = caster.GetSpellModOwner();
-                maxDuration = caster.CalcSpellDuration(m_spellInfo);
+                maxDuration = caster.CalcSpellDuration(spellInfo);
             }
             else
-                maxDuration = m_spellInfo.GetDuration();
+                maxDuration = spellInfo.GetDuration();
 
-            if (IsPassive() && m_spellInfo.DurationEntry == null)
+            if (spellInfo.IsPassive() && spellInfo.DurationEntry == null)
                 maxDuration = -1;
 
             // IsPermanent() checks max duration (which we are supposed to calculate here)
             if (maxDuration != -1 && modOwner != null)
-                modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.Duration, ref maxDuration);
+                modOwner.ApplySpellMod(spellInfo, SpellModOp.Duration, ref maxDuration);
+
             return maxDuration;
         }
 
