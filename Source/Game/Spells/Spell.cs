@@ -3624,37 +3624,25 @@ namespace Game.Spells
             {
                 castData.RemainingRunes.HasValue = true;
                 RuneData runeData = castData.RemainingRunes.Value;
-                //TODO: There is a crash caused by a spell with CAST_FLAG_RUNE_LIST casted by a creature
-                //The creature is the mover of a player, so HandleCastSpellOpcode uses it as the caster
+
                 Player player = m_caster.ToPlayer();
-                if (player)
+                runeData.Start = m_runesState; // runes state before
+                runeData.Count = player.GetRunesState(); // runes state after
+                for (byte i = 0; i < player.GetMaxPower(PowerType.Runes); ++i)
                 {
-                    runeData.Start = m_runesState; // runes state before
-                    runeData.Count = player.GetRunesState(); // runes state after
-                    for (byte i = 0; i < player.GetMaxPower(PowerType.Runes); ++i)
-                    {
-                        // float casts ensure the division is performed on floats as we need float result
-                        float baseCd = player.GetRuneBaseCooldown();
-                        runeData.Cooldowns.Add((byte)((baseCd - player.GetRuneCooldown(i)) / baseCd * 255)); // rune cooldown passed
-                    }
-                }
-                else
-                {
-                    runeData.Start = 0;
-                    runeData.Count = 0;
-                    for (byte i = 0; i < player.GetMaxPower(PowerType.Runes); ++i)
-                        runeData.Cooldowns.Add(0);
+                    // float casts ensure the division is performed on floats as we need float result
+                    float baseCd = (float)player.GetRuneBaseCooldown();
+                    runeData.Cooldowns.Add((byte)((baseCd - (float)player.GetRuneCooldown(i)) / baseCd * 255)); // rune cooldown passed
                 }
             }
 
-            if (Convert.ToBoolean(castFlags & SpellCastFlags.AdjustMissile))
+            if (castFlags.HasFlag(SpellCastFlags.AdjustMissile))
             {
                 castData.MissileTrajectory.TravelTime = (uint)m_delayMoment;
                 castData.MissileTrajectory.Pitch = m_targets.GetPitch();
             }
 
             packet.LogData.Initialize(this);
-
 
             m_caster.SendCombatLogMessage(packet);
         }
