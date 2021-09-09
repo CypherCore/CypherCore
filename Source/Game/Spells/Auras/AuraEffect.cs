@@ -1711,39 +1711,38 @@ namespace Game.Spells
 
             Unit target = aurApp.GetTarget();
 
+            //Prevent handling aura twice
             AuraType type = GetAuraType();
 
-            //Prevent handling aura twice
             if (apply ? target.GetAuraEffectsByType(type).Count > 1 : target.HasAuraType(type))
                 return;
 
-            Action<Unit> flagAddFn = null;
-            Action<Unit> flagRemoveFn = null;
+            Action<Unit> flagChangeFunc = null;
             byte slot;
             WeaponAttackType attType;
             switch (type)
             {
                 case AuraType.ModDisarm:
                     if (apply)
-                        flagAddFn = unit => { unit.AddUnitFlag(UnitFlags.Disarmed); };
+                        flagChangeFunc = unit => { unit.AddUnitFlag(UnitFlags.Disarmed); };
                     else
-                        flagRemoveFn = unit => { unit.RemoveUnitFlag(UnitFlags.Disarmed); };
+                        flagChangeFunc = unit => { unit.RemoveUnitFlag(UnitFlags.Disarmed); };
                     slot = EquipmentSlot.MainHand;
                     attType = WeaponAttackType.BaseAttack;
                     break;
                 case AuraType.ModDisarmOffhand:
                     if (apply)
-                        flagAddFn = unit => { unit.AddUnitFlag2(UnitFlags2.DisarmOffhand); };
+                        flagChangeFunc = unit => { unit.AddUnitFlag2(UnitFlags2.DisarmOffhand); };
                     else
-                        flagRemoveFn = unit => { unit.RemoveUnitFlag2(UnitFlags2.DisarmOffhand); };
+                        flagChangeFunc = unit => { unit.RemoveUnitFlag2(UnitFlags2.DisarmOffhand); };
                     slot = EquipmentSlot.OffHand;
                     attType = WeaponAttackType.OffAttack;
                     break;
                 case AuraType.ModDisarmRanged:
                     if (apply)
-                        flagAddFn = unit => { unit.AddUnitFlag2(UnitFlags2.DisarmRanged); };
+                        flagChangeFunc = unit => { unit.AddUnitFlag2(UnitFlags2.DisarmRanged); };
                     else
-                        flagRemoveFn = unit => { unit.RemoveUnitFlag2(UnitFlags2.DisarmRanged); };
+                        flagChangeFunc = unit => { unit.RemoveUnitFlag2(UnitFlags2.DisarmRanged); };
                     slot = EquipmentSlot.MainHand;
                     attType = WeaponAttackType.RangedAttack;
                     break;
@@ -1751,8 +1750,8 @@ namespace Game.Spells
                     return;
             }
 
-            // if disarm aura is to be removed, remove the flag first to reapply damage/aura mods
-            flagRemoveFn?.Invoke(target);
+            // set/remove flag before weapon bonuses so it's properly reflected in CanUseAttackType
+            flagChangeFunc?.Invoke(target);
 
             // Handle damage modification, shapeshifted druids are not affected
             if (target.IsTypeId(TypeId.Player) && !target.IsInFeralForm())
@@ -1773,9 +1772,6 @@ namespace Game.Spells
                     }
                 }
             }
-
-            // if disarm effects should be applied, wait to set flag until damage mods are unapplied
-            flagAddFn?.Invoke(target);
 
             if (target.IsTypeId(TypeId.Unit) && target.ToCreature().GetCurrentEquipmentId() != 0)
                 target.UpdateDamagePhysical(attType);

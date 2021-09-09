@@ -1868,13 +1868,15 @@ namespace Game.Entities
                 {
                     if (slot < InventorySlots.BagEnd)
                     {
-                        ItemTemplate pProto = pItem.GetTemplate();
                         // item set bonuses applied only at equip and removed at unequip, and still active for broken items
-
+                        ItemTemplate pProto = pItem.GetTemplate();
                         if (pProto != null && pProto.GetItemSet() != 0)
                             Item.RemoveItemsSetItem(this, pProto);
 
+                        // remove here before _ApplyItemMods (for example to register correct damages of unequipped weapon)
+                        m_items[slot] = null;
                         _ApplyItemMods(pItem, slot, false, update);
+
                         pItem.RemoveItemFlag2(ItemFieldFlags2.Equipped);
 
                         // remove item dependent auras and casts (only weapon and armor slots)
@@ -1896,7 +1898,6 @@ namespace Game.Entities
                         }
                     }
 
-                    m_items[slot] = null;
                     SetInvSlot(slot, ObjectGuid.Empty);
 
                     if (slot < EquipmentSlot.End)
@@ -3593,7 +3594,6 @@ namespace Game.Entities
             if (ratingMult != null)
                 combatRatingMultiplier = CliDB.GetIlvlStatMultiplier(ratingMult, proto.GetInventoryType());
 
-            // req. check at equip, but allow use for extended range if range limit max level, set proper level
             for (byte i = 0; i < ItemConst.MaxStats; ++i)
             {
                 int statType = item.GetItemStatType(i);
