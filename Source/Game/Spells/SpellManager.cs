@@ -1550,6 +1550,11 @@ namespace Game.Entities
                         case AuraType.ModBlockPercent:
                             procEntry.HitMask = ProcFlagsHit.Block;
                             break;
+                        // proc auras with another aura reducing hit chance (eg 63767) only proc on missed attack
+                        case AuraType.ModHitChance:
+                            if (spellEffectInfo.CalcValue() <= -100)
+                                procEntry.HitMask = ProcFlagsHit.Miss;
+                            break;
                         default:
                             continue;
                     }
