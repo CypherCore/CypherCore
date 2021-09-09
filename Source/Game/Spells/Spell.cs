@@ -6560,7 +6560,7 @@ namespace Game.Spells
             // check if gameobject ignores LOS
             GameObject gobCaster = m_caster.ToGameObject();
             if (gobCaster != null)
-                if (!gobCaster.GetGoInfo().GetRequireLOS())
+                if (gobCaster.GetGoInfo().GetRequireLOS() == 0)
                     return true;
 
             // if spell is triggered, need to check for LOS disable on the aura triggering it and inherit that behaviour

@@ -704,7 +704,7 @@ namespace Game.Entities
             return Global.ObjectMgr.GetItemTemplate(GetEntry());
         }
 
-        public Player GetOwner()
+        public override Player GetOwner()
         {
             return Global.ObjAccessor.FindPlayer(GetOwnerGUID());
         }
@@ -2475,7 +2475,7 @@ namespace Game.Entities
 
         public BonusData GetBonus() { return _bonusData; }
 
-        public ObjectGuid GetOwnerGUID() { return m_itemData.Owner; }
+        public override ObjectGuid GetOwnerGUID() { return m_itemData.Owner; }
         public void SetOwnerGUID(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.Owner), guid); }
         public ObjectGuid GetContainedIn() { return m_itemData.ContainedIn; }
         public void SetContainedIn(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_itemData).ModifyValue(m_itemData.ContainedIn), guid); }

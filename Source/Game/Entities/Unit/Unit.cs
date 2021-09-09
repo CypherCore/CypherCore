@@ -1835,7 +1835,7 @@ namespace Game.Entities
                 return Global.ObjAccessor.GetUnit(this, charmerid);
             return null;
         }
-        public Unit GetCharmerOrOwner()
+        public override Unit GetCharmerOrOwner()
         {
             return !GetCharmerGUID().IsEmpty() ? GetCharmer() : GetOwner();
         }

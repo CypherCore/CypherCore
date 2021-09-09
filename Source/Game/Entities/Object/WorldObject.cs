@@ -1611,7 +1611,7 @@ namespace Game.Entities
             return Global.ObjAccessor.GetUnit(this, GetOwnerGUID());
         }
 
-        public Unit GetCharmerOrOwner()
+        public virtual Unit GetCharmerOrOwner()
         {
             Unit unit = ToUnit();
             if (unit != null)

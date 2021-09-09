@@ -3669,7 +3669,7 @@ namespace Game.Spells
                 switch (spellEffectInfo.ApplyAuraName)
                 {
                     // has other non positive effect?
-                    // then it should be marked negative despite of targets (ex 8510, 8511, 8893, 10267)
+                    // then it should be marked negative if has same target as negative effect (ex 8510, 8511, 8893, 10267)
                     case AuraType.Dummy:
                     case AuraType.ModStun:
                     case AuraType.ModFear:
