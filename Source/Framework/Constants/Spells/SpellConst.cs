@@ -1894,8 +1894,8 @@ namespace Framework.Constants
         Unk10 = 0x400, // 10
         HerbGatheringMining = 0x800, // 11
         UseSpellBaseLevelForScaling = 0x1000, // 12
-        ResetColldownOnEncounterEnd = 0x2000, // 13
-        Unk14 = 0x4000, // 14
+        ResetCooldownOnEncounterEnd = 0x2000, // 13
+        RollingPeriodic = 0x4000, // 14
         Unk15 = 0x8000, // 15
         Unk16 = 0x10000, // 16
         CanDodgeParryWhileCasting = 0x20000, // 17
@@ -2067,6 +2067,7 @@ namespace Framework.Constants
         DirectDamage = 0x100,
         Charge = 0x200,
         PickPocket = 0x400,
+        DeprecatedRollingPeriodic = 0x800, // DO NOT REUSE
         DeprecatedNegativeEff0 = 0x1000, // DO NOT REUSE
         DeprecatedNegativeEff1 = 0x2000, // DO NOT REUSE
         DeprecatedNegativeEff2 = 0x4000, // DO NOT REUSE

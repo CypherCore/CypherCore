@@ -58,6 +58,7 @@ namespace Game.Spells
                     targetList.Add(app.GetTarget());
             }
         }
+
         void GetApplicationList(out List<AuraApplication> applicationList)
         {
             applicationList = new List<AuraApplication>();
@@ -118,6 +119,17 @@ namespace Game.Spells
                     break;
                 default:
                     break;
+            }
+
+            if (GetSpellInfo().HasAttribute(SpellAttr10.RollingPeriodic))
+            {
+                var periodicAuras = GetBase().GetUnitOwner().GetAuraEffectsByType(GetAuraType());
+                amount = periodicAuras.Aggregate(0, (val, aurEff) =>
+                {
+                    if (aurEff.GetCasterGUID() == GetCasterGUID() && aurEff.GetId() == GetId() && aurEff.GetEffIndex() == GetEffIndex() && aurEff.GetTotalTicks() > 0)
+                        val += aurEff.GetAmount() * (int)aurEff.GetRemainingTicks() / (int)aurEff.GetTotalTicks();
+                    return val;
+                });
             }
 
             GetBase().CallScriptEffectCalcAmountHandlers(this, ref amount, ref m_canBeRecalculated);

@@ -904,10 +904,8 @@ namespace Scripts.Spells.Shaman
             int amount = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
             amount /= (int)spellInfo.GetMaxTicks();
 
-            // Add remaining ticks to damage done
             Unit caster = eventInfo.GetActor();
             Unit target = eventInfo.GetProcTarget();
-            amount += (int)target.GetRemainingPeriodicAmount(caster.GetGUID(), SpellIds.Electrified, AuraType.PeriodicDamage);
 
             CastSpellExtraArgs args = new(aurEff);
             args.AddSpellMod(SpellValueMod.BasePoint0, amount);
@@ -940,10 +938,8 @@ namespace Scripts.Spells.Shaman
             int amount = (int)MathFunctions.CalculatePct(damageInfo.GetDamage(), aurEff.GetAmount());
             amount /= (int)spellInfo.GetMaxTicks();
 
-            // Add remaining ticks to damage done
             Unit caster = eventInfo.GetActor();
             Unit target = eventInfo.GetProcTarget();
-            amount += (int)target.GetRemainingPeriodicAmount(caster.GetGUID(), SpellIds.LavaBurstBonusDamage, AuraType.PeriodicDamage);
 
             CastSpellExtraArgs args = new(aurEff);
             args.AddSpellMod(SpellValueMod.BasePoint0, amount);
@@ -1008,10 +1004,8 @@ namespace Scripts.Spells.Shaman
             int amount = (int)MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
             amount /= (int)spellInfo.GetMaxTicks();
 
-            // Add remaining ticks to healing done
             Unit caster = eventInfo.GetActor();
             Unit target = eventInfo.GetProcTarget();
-            amount += (int)target.GetRemainingPeriodicAmount(caster.GetGUID(), SpellIds.ChainedHeal, AuraType.PeriodicHeal);
 
             CastSpellExtraArgs args = new(aurEff);
             args.AddSpellMod(SpellValueMod.BasePoint0, amount);

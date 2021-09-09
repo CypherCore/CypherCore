@@ -868,10 +868,8 @@ namespace Scripts.Spells.Priest
             int amount = (int)MathFunctions.CalculatePct(healInfo.GetHeal(), aurEff.GetAmount());
             amount /= (int)spellInfo.GetMaxTicks();
 
-            // Add remaining ticks to healing done
             Unit caster = eventInfo.GetActor();
             Unit target = eventInfo.GetProcTarget();
-            amount += (int)target.GetRemainingPeriodicAmount(caster.GetGUID(), SpellIds.BlessedHealing, AuraType.PeriodicHeal);
 
             CastSpellExtraArgs args = new(aurEff);
             args.AddSpellMod(SpellValueMod.BasePoint0, amount);

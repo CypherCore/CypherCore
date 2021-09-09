@@ -2370,22 +2370,6 @@ namespace Game.Entities
                 m_Diminishing[i].Clear();
         }
 
-        public uint GetRemainingPeriodicAmount(ObjectGuid caster, uint spellId, AuraType auraType, int effectIndex = 0)
-        {
-            uint amount = 0;
-            var periodicAuras = GetAuraEffectsByType(auraType);
-            foreach (var aurEff in periodicAuras)
-            {
-                if (aurEff.GetCasterGUID() != caster || aurEff.GetId() != spellId || aurEff.GetEffIndex() != effectIndex || aurEff.GetTotalTicks() == 0)
-                    continue;
-
-                amount += (uint)((aurEff.GetAmount() * aurEff.GetRemainingTicks()) / aurEff.GetTotalTicks());
-                break;
-            }
-
-            return amount;
-        }
-
         // Interrupts
         public void InterruptNonMeleeSpells(bool withDelayed, uint spell_id = 0, bool withInstant = true)
         {
