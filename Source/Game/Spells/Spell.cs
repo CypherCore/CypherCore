@@ -1919,7 +1919,7 @@ namespace Game.Spells
                 else if (m_caster.IsFriendlyTo(unit))
                 {
                     // for delayed spells ignore negative spells (after duel end) for friendly targets
-                    if (m_spellInfo.HasHitDelay() && unit.IsPlayer() && !IsPositive() && !m_caster.IsValidSpellAttackTarget(unit, m_spellInfo))
+                    if (m_spellInfo.HasHitDelay() && unit.IsPlayer() && !IsPositive() && !m_caster.IsValidAssistTarget(unit, m_spellInfo))
                         return SpellMissInfo.Evade;
 
                     // assisting case, healing and resurrection
@@ -7702,6 +7702,7 @@ namespace Game.Spells
                     if (missInfo != SpellMissInfo.Miss)
                         spell.GetCaster().ToUnit().SendSpellMiss(unit, spell.m_spellInfo.Id, missInfo);
                     spell.m_damage = 0;
+                    spell.m_healing = 0;
                     _spellHitTarget = null;
                 }
             }
@@ -7966,6 +7967,21 @@ namespace Game.Spells
                 else if (spell.GetCaster().IsGameObject() && spell.GetCaster().ToGameObject().GetAI() != null)
                     spell.GetCaster().ToGameObject().GetAI().SpellHitTarget(_spellHitTarget, spell.m_spellInfo);
 
+                if (spell.spellAura != null)
+                {
+                    AuraApplication aurApp = spell.spellAura.GetApplicationOfTarget(_spellHitTarget.GetGUID());
+                    if (aurApp != null)
+                    {
+                        // only apply unapplied effects (for reapply case)
+                        uint effMask = EffectMask & aurApp.GetEffectsToApply();
+                        for (uint i = 0; i < spell.m_spellInfo.GetEffects().Count; ++i)
+                            if ((effMask & (1 << (int)i)) != 0 && aurApp.HasEffect(i))
+                                effMask &= ~(1u << (int)i);
+
+                        _spellHitTarget._ApplyAura(aurApp, effMask);
+                    }
+                }
+
                 // Needs to be called after dealing damage/healing to not remove breaking on damage auras
                 spell.DoTriggersOnSpellHit(_spellHitTarget, EffectMask);
 
@@ -8120,7 +8136,7 @@ namespace Game.Spells
                     case SpellTargetCheckTypes.Enemy:
                         if (unitTarget.IsTotem())
                             return false;
-                        if (!_caster.IsValidAttackTarget(unitTarget, _spellInfo, false))
+                        if (!_caster.IsValidAttackTarget(unitTarget, _spellInfo))
                             return false;
                         break;
                     case SpellTargetCheckTypes.Ally:
@@ -8185,19 +8201,6 @@ namespace Game.Spells
                         break;
                     default:
                         break;
-                }
-
-                // then check actual spell positivity to determine if the target is valid
-                // (negative spells may be targeted on allies)
-                if (_spellInfo.IsPositive())
-                {
-                    if (!_caster.IsValidSpellAssistTarget(unitTarget, _spellInfo))
-                        return false;
-                }
-                else
-                {
-                    if (!_caster.IsValidSpellAttackTarget(unitTarget, _spellInfo))
-                        return false;
                 }
             }
             if (_condSrcInfo == null)

@@ -2277,12 +2277,20 @@ namespace Game.Entities
         }
 
         // function based on function Unit::CanAttack from 13850 client
-        public bool IsValidAttackTarget(WorldObject target, SpellInfo bySpell = null, bool spellCheck = true)
+        public bool IsValidAttackTarget(WorldObject target, SpellInfo bySpell = null)
         {
             Cypher.Assert(target != null);
 
-            // can't attack self
-            if (this == target)
+            // some positive spells can be casted at hostile target
+            bool isPositiveSpell = bySpell != null && bySpell.IsPositive();
+
+            // can't attack self (spells can, attribute check)
+            if (bySpell == null && this == target)
+                return false;
+
+            // can't attack unattackable units
+            Unit unitTarget = target.ToUnit();
+            if (unitTarget != null && unitTarget.HasUnitState(UnitState.Unattackable))
                 return false;
 
             // can't attack GMs
@@ -2290,10 +2298,57 @@ namespace Game.Entities
                 return false;
 
             Unit unit = ToUnit();
-            Unit targetUnit = target.ToUnit();
+            // visibility checks (only units)
+            if (unit != null)
+            {
+                // can't attack invisible
+                if (bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanTargetInvisible))
+                {
+                    if (!unit.CanSeeOrDetect(target, bySpell != null && bySpell.IsAffectingArea()))
+                        return false;
+                }
+            }
+
+            // can't attack dead
+            if ((bySpell == null || !bySpell.IsAllowingDeadTarget()) && unitTarget != null && !unitTarget.IsAlive())
+                return false;
+
+            // can't attack untargetable
+            if ((bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanTargetUntargetable)) && unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.NotSelectable))
+                return false;
+
+            Player playerAttacker = ToPlayer();
+            if (playerAttacker != null)
+            {
+                if (playerAttacker.HasPlayerFlag(PlayerFlags.Uber))
+                    return false;
+            }
+
+            // check flags
+            if (unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.NonAttackable | UnitFlags.TaxiFlight | UnitFlags.NotAttackable1 | UnitFlags.Unk16))
+                return false;
+
+            // ignore immunity flags when assisting
+            if (isPositiveSpell && !bySpell.HasAttribute(SpellAttr6.AssistIgnoreImmuneFlag))
+            {
+                if (unit != null && !unit.HasUnitFlag(UnitFlags.PvpAttackable) && unitTarget != null && unitTarget.IsImmuneToNPC())
+                    return false;
+
+                if (unitTarget != null && !unitTarget.HasUnitFlag(UnitFlags.PvpAttackable) && unit && unit.IsImmuneToNPC())
+                    return false;
+
+                if (!bySpell.HasAttribute(SpellAttr8.AttackIgnoreImmuneToPCFlag))
+                {
+                    if (unit != null && unit.HasUnitFlag(UnitFlags.PvpAttackable) && unitTarget && unitTarget.IsImmuneToPC())
+                        return false;
+
+                    if (unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.PvpAttackable) && unit && unit.IsImmuneToPC())
+                        return false;
+                }
+            }
 
             // CvC case - can attack each other only when one of them is hostile
-            if (unit && !unit.HasUnitFlag(UnitFlags.PvpAttackable) && targetUnit && !targetUnit.HasUnitFlag(UnitFlags.PvpAttackable))
+            if (unit && !unit.HasUnitFlag(UnitFlags.PvpAttackable) && unitTarget != null && !unitTarget.HasUnitFlag(UnitFlags.PvpAttackable))
                 return IsHostileTo(target) || target.IsHostileTo(this);
 
             // PvP, PvC, CvP case
@@ -2301,14 +2356,14 @@ namespace Game.Entities
             if (IsFriendlyTo(target) || target.IsFriendlyTo(this))
                 return false;
 
-            Player playerAffectingAttacker = unit && unit.HasUnitFlag(UnitFlags.PvpAttackable) ? GetAffectingPlayer() : null;
-            Player playerAffectingTarget = targetUnit && targetUnit.HasUnitFlag(UnitFlags.PvpAttackable) ? target.GetAffectingPlayer() : null;
+            Player playerAffectingAttacker = unit != null && unit.HasUnitFlag(UnitFlags.PvpAttackable) ? GetAffectingPlayer() : null;
+            Player playerAffectingTarget = unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.PvpAttackable) ? target.GetAffectingPlayer() : null;
 
             // Not all neutral creatures can be attacked (even some unfriendly faction does not react aggresive to you, like Sporaggar)
             if ((playerAffectingAttacker && !playerAffectingTarget) || (!playerAffectingAttacker && playerAffectingTarget))
             {
                 Player player = playerAffectingAttacker ? playerAffectingAttacker : playerAffectingTarget;
-                Unit creature = playerAffectingAttacker ? targetUnit : unit;
+                Unit creature = playerAffectingAttacker ? unitTarget : unit;
                 if (creature != null)
                 {
                     if (creature.IsContestedGuard() && player.HasPlayerFlag(PlayerFlags.ContestedPVP))
@@ -2337,86 +2392,6 @@ namespace Game.Entities
             if (creatureAttacker && creatureAttacker.GetCreatureTemplate().TypeFlags.HasFlag(CreatureTypeFlags.TreatAsRaidUnit))
                 return false;
 
-            if (bySpell == null)
-                spellCheck = false;
-
-            if (spellCheck && !IsValidSpellAttackTarget(target, bySpell))
-                return false;
-
-            return true;
-        }
-
-        public bool IsValidSpellAttackTarget(WorldObject target, SpellInfo bySpell)
-        {
-            Cypher.Assert(target != null);
-            Cypher.Assert(bySpell != null);
-
-            // can't attack unattackable units
-            Unit unitTarget = target.ToUnit();
-            if (unitTarget && unitTarget.HasUnitState(UnitState.Unattackable))
-                return false;
-
-            Unit unit = ToUnit();
-            // visibility checks (only units)
-            if (unit)
-            {
-                // can't attack invisible
-                if (!bySpell.HasAttribute(SpellAttr6.CanTargetInvisible))
-                {
-                    if (!unit.CanSeeOrDetect(target, bySpell.IsAffectingArea()))
-                        return false;
-
-                    /*
-                    else if (!obj)
-                    {
-                        // ignore stealth for aoe spells. Ignore stealth if target is player and unit in combat with same player
-                        bool const ignoreStealthCheck = (bySpell && bySpell.IsAffectingArea()) ||
-                            (target.GetTypeId() == TYPEID_PLAYER && target.HasStealthAura() && IsInCombatWith(target));
-
-                        if (!CanSeeOrDetect(target, ignoreStealthCheck))
-                            return false;
-                    }
-                    */
-                }
-            }
-
-            // can't attack dead
-            if (!bySpell.IsAllowingDeadTarget() && unitTarget && !unitTarget.IsAlive())
-                return false;
-
-            // can't attack untargetable
-            if (!bySpell.HasAttribute(SpellAttr6.CanTargetInvisible) && unitTarget && unitTarget.HasUnitFlag(UnitFlags.NotSelectable))
-                return false;
-
-            Player playerAttacker = ToPlayer();
-            if (playerAttacker != null)
-            {
-                if (playerAttacker.HasPlayerFlag(PlayerFlags.Uber))
-                    return false;
-            }
-
-            // check flags
-            if (unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.NonAttackable | UnitFlags.TaxiFlight | UnitFlags.NotAttackable1 | UnitFlags.Unk16))
-                return false;
-
-            if (unit != null && !unit.HasUnitFlag(UnitFlags.PvpAttackable) && unitTarget && unitTarget.IsImmuneToNPC())
-                return false;
-
-            if (unitTarget != null && !unitTarget.HasUnitFlag(UnitFlags.PvpAttackable) && unit && unit.IsImmuneToNPC())
-                return false;
-
-            if (!bySpell.HasAttribute(SpellAttr8.AttackIgnoreImmuneToPCFlag))
-            {
-                if (unit && unit.HasUnitFlag(UnitFlags.PvpAttackable) && unitTarget && unitTarget.IsImmuneToPC())
-                    return false;
-
-                if (unitTarget && unitTarget.HasUnitFlag(UnitFlags.PvpAttackable) && unit && unit.IsImmuneToPC())
-                    return false;
-            }
-
-            // check duel - before sanctuary checks
-            Player playerAffectingAttacker = unit && unit.HasUnitFlag(UnitFlags.PvpAttackable) ? GetAffectingPlayer() : null;
-            Player playerAffectingTarget = unitTarget && unitTarget.HasUnitFlag(UnitFlags.PvpAttackable) ? target.GetAffectingPlayer() : null;
             if (playerAffectingAttacker && playerAffectingTarget)
                 if (playerAffectingAttacker.duel != null && playerAffectingAttacker.duel.opponent == playerAffectingTarget && playerAffectingAttacker.duel.startTime != 0)
                     return true;
@@ -2447,35 +2422,20 @@ namespace Game.Entities
         {
             Cypher.Assert(target);
 
+            // some negative spells can be casted at friendly target
+            bool isNegativeSpell = bySpell != null && !bySpell.IsPositive();
+
             // can assist to self
             if (this == target)
                 return true;
 
-            // can't assist GMs
-            if (target.IsPlayer() && target.ToPlayer().IsGameMaster())
-                return false;
-
-            // can't assist non-friendly targets
-            if (GetReactionTo(target) < ReputationRank.Neutral && target.GetReactionTo(this) < ReputationRank.Neutral && (!ToCreature() || !ToCreature().GetCreatureTemplate().TypeFlags.HasFlag(CreatureTypeFlags.TreatAsRaidUnit)))
-                return false;
-
-            if (bySpell == null)
-                spellCheck = false;
-
-            if (spellCheck && !IsValidSpellAssistTarget(target, bySpell))
-                return false;
-
-            return true;
-        }
-
-        public bool IsValidSpellAssistTarget(WorldObject target, SpellInfo bySpell)
-        {
-            Cypher.Assert(target != null);
-            Cypher.Assert(bySpell != null);
-
             // can't assist unattackable units
             Unit unitTarget = target.ToUnit();
             if (unitTarget && unitTarget.HasUnitState(UnitState.Unattackable))
+                return false;
+
+            // can't assist GMs
+            if (target.IsPlayer() && target.ToPlayer().IsGameMaster())
                 return false;
 
             // can't assist own vehicle or passenger
@@ -2490,39 +2450,48 @@ namespace Game.Entities
             }
 
             // can't assist invisible
-            if (!bySpell.HasAttribute(SpellAttr6.CanTargetInvisible) && !CanSeeOrDetect(target, bySpell.IsAffectingArea()))
+            if ((bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanTargetInvisible)) && !CanSeeOrDetect(target, bySpell != null && bySpell.IsAffectingArea()))
                 return false;
 
             // can't assist dead
-            if (!bySpell.IsAllowingDeadTarget() && unitTarget && !unitTarget.IsAlive())
+            if ((bySpell == null || !bySpell.IsAllowingDeadTarget()) && unitTarget && !unitTarget.IsAlive())
                 return false;
 
             // can't assist untargetable
-            if (!bySpell.HasAttribute(SpellAttr6.CanTargetUntargetable) && unitTarget && unitTarget.HasUnitFlag(UnitFlags.NotSelectable))
+            if ((bySpell == null || !bySpell.HasAttribute(SpellAttr6.CanTargetUntargetable)) && unitTarget && unitTarget.HasUnitFlag(UnitFlags.NotSelectable))
                 return false;
 
-            if (!bySpell.HasAttribute(SpellAttr6.AssistIgnoreImmuneFlag))
+            // check flags for negative spells
+            if (isNegativeSpell && unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.NonAttackable | UnitFlags.TaxiFlight | UnitFlags.NotAttackable1 | UnitFlags.Unk16))
+                return false;
+
+            if (isNegativeSpell || bySpell == null || !bySpell.HasAttribute(SpellAttr6.AssistIgnoreImmuneFlag))
             {
-                if (unit && unit.HasUnitFlag(UnitFlags.PvpAttackable))
+                if (unit != null && unit.HasUnitFlag(UnitFlags.PvpAttackable))
                 {
-                    if (unitTarget && unitTarget.IsImmuneToPC())
-                        return false;
+                    if (bySpell == null || !bySpell.HasAttribute(SpellAttr8.AttackIgnoreImmuneToPCFlag))
+                        if (unitTarget != null && unitTarget.IsImmuneToPC())
+                            return false;
                 }
                 else
                 {
-                    if (unitTarget && unitTarget.IsImmuneToNPC())
+                    if (unitTarget != null && unitTarget.IsImmuneToNPC())
                         return false;
                 }
             }
 
+            // can't assist non-friendly targets
+            if (GetReactionTo(target) < ReputationRank.Neutral && target.GetReactionTo(this) < ReputationRank.Neutral && (!ToCreature() || !ToCreature().GetCreatureTemplate().TypeFlags.HasFlag(CreatureTypeFlags.TreatAsRaidUnit)))
+                return false;
+
             // PvP case
-            if (unitTarget && unitTarget.HasUnitFlag(UnitFlags.PvpAttackable))
+            if (unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.PvpAttackable))
             {
                 Player targetPlayerOwner = target.GetAffectingPlayer();
-                if (unit && unit.HasUnitFlag(UnitFlags.PvpAttackable))
+                if (unit != null && unit.HasUnitFlag(UnitFlags.PvpAttackable))
                 {
                     Player selfPlayerOwner = GetAffectingPlayer();
-                    if (selfPlayerOwner && targetPlayerOwner)
+                    if (selfPlayerOwner != null && targetPlayerOwner != null)
                     {
                         // can't assist player which is dueling someone
                         if (selfPlayerOwner != targetPlayerOwner && targetPlayerOwner.duel != null)
@@ -2534,21 +2503,23 @@ namespace Game.Entities
 
                     // can't assist player out of sanctuary from sanctuary if has pvp enabled
                     if (unitTarget.IsPvP())
-                        if (unit && unit.IsInSanctuary() && !unitTarget.IsInSanctuary())
+                        if (unit != null && unit.IsInSanctuary() && !unitTarget.IsInSanctuary())
                             return false;
                 }
             }
             // PvC case - player can assist creature only if has specific type flags
             // !target.HasFlag(UNIT_FIELD_FLAGS, UnitFlags.PvpAttackable) &&
-            else if (unit && unit.HasUnitFlag(UnitFlags.PvpAttackable))
+            else if (unit != null && unit.HasUnitFlag(UnitFlags.PvpAttackable))
             {
-                if (!bySpell.HasAttribute(SpellAttr6.AssistIgnoreImmuneFlag))
-                    if (unitTarget && !unitTarget.IsPvP())
+                if (bySpell == null || !bySpell.HasAttribute(SpellAttr6.AssistIgnoreImmuneFlag))
+                {
+                    if (unitTarget != null && !unitTarget.IsPvP())
                     {
                         Creature creatureTarget = target.ToCreature();
                         if (creatureTarget != null)
                             return (creatureTarget.GetCreatureTemplate().TypeFlags.HasFlag(CreatureTypeFlags.TreatAsRaidUnit) || creatureTarget.GetCreatureTemplate().TypeFlags.HasFlag(CreatureTypeFlags.CanAssist));
                     }
+                }
             }
 
             return true;

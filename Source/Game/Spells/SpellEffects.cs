@@ -711,10 +711,6 @@ namespace Game.Spells
                 aurApp = unitTarget._CreateAuraApplication(spellAura, 1u << (int)effectInfo.EffectIndex);
             else
                 aurApp.UpdateApplyEffectMask(aurApp.GetEffectsToApply() | 1u << (int)effectInfo.EffectIndex);
-
-            // apply effect on target (skip for reapply)
-            if (!aurApp.HasEffect(effectInfo.EffectIndex))
-                unitTarget._ApplyAuraEffect(spellAura, effectInfo.EffectIndex);
         }
 
         [SpellEffectHandler(SpellEffectName.UnlearnSpecialization)]
