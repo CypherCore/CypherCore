@@ -234,18 +234,11 @@ namespace Game.Entities
                         MaxSearchRadius = (float)Math.Sqrt(BoxDatas.Extents[0] * BoxDatas.Extents[0] / 4 + BoxDatas.Extents[1] * BoxDatas.Extents[1] / 4);
                         break;
                     }
+                // Polygon is SpellMisc based, can't init MaxSearchRadius
                 case AreaTriggerTypes.Polygon:
                     {
                         if (PolygonDatas.Height <= 0.0f)
                             PolygonDatas.Height = 1.0f;
-
-                        foreach (Vector2 vertice in PolygonVertices)
-                        {
-                            float pointDist = vertice.GetLength();
-
-                            if (pointDist > MaxSearchRadius)
-                                MaxSearchRadius = pointDist;
-                        }
 
                         break;
                     }
@@ -272,8 +265,6 @@ namespace Game.Entities
         public uint ScriptId;
         public float MaxSearchRadius;
 
-        public List<Vector2> PolygonVertices = new();
-        public List<Vector2> PolygonVerticesTarget = new();
         public List<AreaTriggerAction> Actions = new();
     }
 
@@ -289,6 +280,22 @@ namespace Game.Entities
 
         public bool HasSplines() { return SplinePoints.Count >= 2; }
 
+        public float GetPolygonMaxSearchRadius()
+        {
+            Position center = new(0.0f, 0.0f);
+            float maxSearchRadius = 0.0f;
+
+            foreach (var vertice in PolygonVertices)
+            {
+                float pointDist = center.GetExactDist2d(vertice.X, vertice.Y);
+
+                if (pointDist > maxSearchRadius)
+                    maxSearchRadius = pointDist;
+            }
+
+            return maxSearchRadius;
+        }
+        
         public uint MiscId;
         public uint AreaTriggerEntry;
 
@@ -310,6 +317,9 @@ namespace Game.Entities
         public AreaTriggerOrbitInfo OrbitInfo;
 
         public AreaTriggerTemplate Template;
+
+        public List<Vector2> PolygonVertices = new();
+        public List<Vector2> PolygonVerticesTarget = new();
         public List<Vector3> SplinePoints = new();
     }
 

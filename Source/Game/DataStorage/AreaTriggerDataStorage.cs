@@ -31,8 +31,8 @@ namespace Game.DataStorage
         public void LoadAreaTriggerTemplates()
         {
             uint oldMSTime = Time.GetMSTime();
-            MultiMap<uint, Vector2> verticesByAreaTrigger = new();
-            MultiMap<uint, Vector2> verticesTargetByAreaTrigger = new();
+            MultiMap<uint, Vector2> verticesBySpellMisc = new();
+            MultiMap<uint, Vector2> verticesTargetBySpellMisc = new();
             MultiMap<uint, Vector3> splinesBySpellMisc = new();
             MultiMap<AreaTriggerId, AreaTriggerAction> actionsByAreaTrigger = new();
 
@@ -80,20 +80,20 @@ namespace Game.DataStorage
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 AreaTrigger templates actions. DB table `areatrigger_template_actions` is empty.");
             }
 
-            //                                           0              1    2         3         4               5
-            SQLResult vertices = DB.World.Query("SELECT AreaTriggerId, Idx, VerticeX, VerticeY, VerticeTargetX, VerticeTargetY FROM `areatrigger_template_polygon_vertices` ORDER BY `AreaTriggerId`, `Idx`");
+            //                                           0            1    2         3         4               5
+            SQLResult vertices = DB.World.Query("SELECT SpellMiscId, Idx, VerticeX, VerticeY, VerticeTargetX, VerticeTargetY FROM `spell_areatrigger_vertices` ORDER BY `SpellMiscId`, `Idx`");
             if (!vertices.IsEmpty())
             {
                 do
                 {
-                    uint areaTriggerId = vertices.Read<uint>(0);
+                    uint spellMiscId = vertices.Read<uint>(0);
 
-                    verticesByAreaTrigger.Add(areaTriggerId, new Vector2(vertices.Read<float>(2), vertices.Read<float>(3)));
+                    verticesBySpellMisc.Add(spellMiscId, new Vector2(vertices.Read<float>(2), vertices.Read<float>(3)));
 
                     if (!vertices.IsNull(4) && !vertices.IsNull(5))
-                        verticesTargetByAreaTrigger.Add(areaTriggerId, new Vector2(vertices.Read<float>(4), vertices.Read<float>(5)));
+                        verticesTargetBySpellMisc.Add(spellMiscId, new Vector2(vertices.Read<float>(4), vertices.Read<float>(5)));
                     else if (vertices.IsNull(4) != vertices.IsNull(5))
-                        Log.outError(LogFilter.Sql, "Table `areatrigger_template_polygon_vertices` has listed invalid target vertices (AreaTrigger: {0}, Index: {1}).", areaTriggerId, vertices.Read<uint>(1));
+                        Log.outError(LogFilter.Sql, $"Table `spell_areatrigger_vertices` has listed invalid target vertices (SpellMiscId: {spellMiscId}, Index: {vertices.Read<uint>(1)}).");
                 }
                 while (vertices.NextRow());
             }
@@ -153,11 +153,6 @@ namespace Game.DataStorage
                     }
 
                     areaTriggerTemplate.ScriptId = Global.ObjectMgr.GetScriptId(templates.Read<string>(10));
-                    if (!areaTriggerTemplate.Id.IsServerSide)
-                    {
-                        areaTriggerTemplate.PolygonVertices = verticesByAreaTrigger[areaTriggerTemplate.Id.Id];
-                        areaTriggerTemplate.PolygonVerticesTarget = verticesTargetByAreaTrigger[areaTriggerTemplate.Id.Id];
-                    }
                     areaTriggerTemplate.Actions = actionsByAreaTrigger[areaTriggerTemplate.Id];
 
                     areaTriggerTemplate.InitMaxSearchRadius();
@@ -207,6 +202,8 @@ namespace Game.DataStorage
                     miscTemplate.TimeToTarget = areatriggerSpellMiscs.Read<uint>(9);
                     miscTemplate.TimeToTargetScale = areatriggerSpellMiscs.Read<uint>(10);
 
+                    miscTemplate.PolygonVertices = verticesBySpellMisc[miscTemplate.MiscId];
+                    miscTemplate.PolygonVerticesTarget = verticesTargetBySpellMisc[miscTemplate.MiscId];
                     miscTemplate.SplinePoints = splinesBySpellMisc[miscTemplate.MiscId];
 
                     _areaTriggerTemplateSpellMisc[miscTemplate.MiscId] = miscTemplate;

@@ -107,6 +107,11 @@ namespace Game.Entities
 
             SetObjectScale(1.0f);
 
+            if (GetTemplate().IsPolygon())
+                _maxSearchRadius = GetMiscTemplate().GetPolygonMaxSearchRadius();
+            else
+                _maxSearchRadius = GetTemplate().MaxSearchRadius;
+
             SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.Caster), caster.GetGUID());
             SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.CreatingEffectGUID), castId);
 
@@ -118,7 +123,7 @@ namespace Game.Entities
             SetUpdateFieldValue(ref spellCastVisual.ScriptVisualID, spellVisual.ScriptVisualID);
 
             SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.TimeToTargetScale), GetMiscTemplate().TimeToTargetScale != 0 ? GetMiscTemplate().TimeToTargetScale : m_areaTriggerData.Duration);
-            SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.BoundsRadius2D), GetTemplate().MaxSearchRadius);
+            SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.BoundsRadius2D), GetMaxSearchRadius());
             SetUpdateFieldValue(m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.DecalPropertiesID), GetMiscTemplate().DecalPropertiesId);
 
             ScaleCurve extraScaleCurve = m_values.ModifyValue(m_areaTriggerData).ModifyValue(m_areaTriggerData.ExtraScaleCurve);
@@ -356,12 +361,12 @@ namespace Game.Entities
             if (IsServerSide())
             {
                 var searcher = new PlayerListSearcher(this, targetList, check);
-                Cell.VisitWorldObjects(this, searcher, GetTemplate().MaxSearchRadius);
+                Cell.VisitWorldObjects(this, searcher, GetMaxSearchRadius());
             }
             else
             {
                 var searcher = new UnitListSearcher(this, targetList, check);
-                Cell.VisitAllObjects(this, searcher, GetTemplate().MaxSearchRadius);
+                Cell.VisitAllObjects(this, searcher, GetMaxSearchRadius());
             }
         }
 
@@ -381,7 +386,7 @@ namespace Game.Entities
 
         void SearchUnitInBox(List<Unit> targetList)
         {
-            SearchUnits(targetList, GetTemplate().MaxSearchRadius, false);
+            SearchUnits(targetList, GetMaxSearchRadius(), false);
 
             Position boxCenter = GetPosition();
             float extentsX, extentsY, extentsZ;
@@ -398,7 +403,7 @@ namespace Game.Entities
 
         void SearchUnitInPolygon(List<Unit> targetList)
         {
-            SearchUnits(targetList, GetTemplate().MaxSearchRadius, false);
+            SearchUnits(targetList, GetMaxSearchRadius(), false);
 
             float height = GetTemplate().PolygonDatas.Height;
             float minZ = GetPositionZ() - height;
@@ -409,7 +414,7 @@ namespace Game.Entities
 
         void SearchUnitInCylinder(List<Unit> targetList)
         {
-            SearchUnits(targetList, GetTemplate().MaxSearchRadius, false);
+            SearchUnits(targetList, GetMaxSearchRadius(), false);
 
             float height = GetTemplate().CylinderDatas.Height;
             float minZ = GetPositionZ() - height;
@@ -508,7 +513,7 @@ namespace Game.Entities
             if (MathFunctions.fuzzyEq(_previousCheckOrientation, newOrientation))
                 return;
 
-            _polygonVertices = GetTemplate().PolygonVertices;
+            _polygonVertices = GetMiscTemplate().PolygonVertices;
 
             float angleSin = (float)Math.Sin(newOrientation);
             float angleCos = (float)Math.Cos(newOrientation);
@@ -1014,6 +1019,7 @@ namespace Game.Entities
         public override ObjectGuid GetOwnerGUID() { return GetCasterGuid(); }
         public ObjectGuid GetCasterGuid() { return m_areaTriggerData.Caster; }
 
+        float GetMaxSearchRadius() { return _maxSearchRadius; }
         public Vector3 GetRollPitchYaw() { return _rollPitchYaw; }
         public Vector3 GetTargetRollPitchYaw() { return _targetRollPitchYaw; }
 
@@ -1029,6 +1035,7 @@ namespace Game.Entities
 
         AuraEffect _aurEff;
 
+        float _maxSearchRadius;
         int _duration;
         int _totalDuration;
         uint _timeSinceCreated;
