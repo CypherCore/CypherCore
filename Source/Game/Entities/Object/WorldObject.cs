@@ -439,32 +439,33 @@ namespace Game.Entities
             if (flags.AreaTrigger)
             {
                 AreaTrigger areaTrigger = ToAreaTrigger();
-                AreaTriggerMiscTemplate areaTriggerMiscTemplate = areaTrigger.GetMiscTemplate();
+                AreaTriggerCreateProperties createProperties = areaTrigger.GetCreateProperties();
                 AreaTriggerTemplate areaTriggerTemplate = areaTrigger.GetTemplate();
+                AreaTriggerShapeInfo shape = areaTrigger.GetShape();
 
                 data.WriteUInt32(areaTrigger.GetTimeSinceCreated());
 
                 data.WriteVector3(areaTrigger.GetRollPitchYaw());
 
-                bool hasAbsoluteOrientation = areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasAbsoluteOrientation);
-                bool hasDynamicShape = areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasDynamicShape);
-                bool hasAttached = areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasAttached);
-                bool hasFaceMovementDir = areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasFaceMovementDir);
-                bool hasFollowsTerrain = areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasFollowsTerrain);
-                bool hasUnk1 = areaTriggerTemplate.HasFlag(AreaTriggerFlags.Unk1);
-                bool hasTargetRollPitchYaw = areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasTargetRollPitchYaw);
-                bool hasScaleCurveID = areaTriggerMiscTemplate.ScaleCurveId != 0;
-                bool hasMorphCurveID = areaTriggerMiscTemplate.MorphCurveId != 0;
-                bool hasFacingCurveID = areaTriggerMiscTemplate.FacingCurveId != 0;
-                bool hasMoveCurveID = areaTriggerMiscTemplate.MoveCurveId != 0;
-                bool hasAnimation = areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasAnimID);
-                bool hasUnk3 = areaTriggerTemplate.HasFlag(AreaTriggerFlags.Unk3);
-                bool hasAnimKitID = areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasAnimKitID);
+                bool hasAbsoluteOrientation = areaTriggerTemplate != null && areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasAbsoluteOrientation);
+                bool hasDynamicShape = areaTriggerTemplate != null && areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasDynamicShape);
+                bool hasAttached = areaTriggerTemplate != null && areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasAttached);
+                bool hasFaceMovementDir = areaTriggerTemplate != null && areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasFaceMovementDir);
+                bool hasFollowsTerrain = areaTriggerTemplate != null && areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasFollowsTerrain);
+                bool hasUnk1 = areaTriggerTemplate != null && areaTriggerTemplate.HasFlag(AreaTriggerFlags.Unk1);
+                bool hasTargetRollPitchYaw = areaTriggerTemplate != null && areaTriggerTemplate.HasFlag(AreaTriggerFlags.HasTargetRollPitchYaw);
+                bool hasScaleCurveID = createProperties != null && createProperties.ScaleCurveId != 0;
+                bool hasMorphCurveID = createProperties != null && createProperties.MorphCurveId != 0;
+                bool hasFacingCurveID = createProperties != null && createProperties.FacingCurveId != 0;
+                bool hasMoveCurveID = createProperties != null && createProperties.MoveCurveId != 0;
+                bool hasAnimation = createProperties != null && createProperties.AnimId != 0;
+                bool hasUnk3 = areaTriggerTemplate != null && areaTriggerTemplate.HasFlag(AreaTriggerFlags.Unk3);
+                bool hasAnimKitID = createProperties != null && createProperties.AnimKitId != 0;
                 bool hasAnimProgress = false;
-                bool hasAreaTriggerSphere = areaTriggerTemplate.IsSphere();
-                bool hasAreaTriggerBox = areaTriggerTemplate.IsBox();
-                bool hasAreaTriggerPolygon = areaTriggerTemplate.IsPolygon();
-                bool hasAreaTriggerCylinder = areaTriggerTemplate.IsCylinder();
+                bool hasAreaTriggerSphere = shape.IsSphere();
+                bool hasAreaTriggerBox = shape.IsBox();
+                bool hasAreaTriggerPolygon = createProperties != null && shape.IsPolygon();
+                bool hasAreaTriggerCylinder = shape.IsCylinder();
                 bool hasAreaTriggerSpline = areaTrigger.HasSplines();
                 bool hasOrbit = areaTrigger.HasOrbit();
                 bool hasMovementScript = false;
@@ -509,68 +510,68 @@ namespace Game.Entities
                     data.WriteVector3(areaTrigger.GetTargetRollPitchYaw());
 
                 if (hasScaleCurveID)
-                    data.WriteUInt32(areaTriggerMiscTemplate.ScaleCurveId);
+                    data.WriteUInt32(createProperties.ScaleCurveId);
 
                 if (hasMorphCurveID)
-                    data.WriteUInt32(areaTriggerMiscTemplate.MorphCurveId);
+                    data.WriteUInt32(createProperties.MorphCurveId);
 
                 if (hasFacingCurveID)
-                    data.WriteUInt32(areaTriggerMiscTemplate.FacingCurveId);
+                    data.WriteUInt32(createProperties.FacingCurveId);
 
                 if (hasMoveCurveID)
-                    data.WriteUInt32(areaTriggerMiscTemplate.MoveCurveId);
+                    data.WriteUInt32(createProperties.MoveCurveId);
 
                 if (hasAnimation)
-                    data.WriteUInt32(areaTriggerMiscTemplate.AnimId);
+                    data.WriteUInt32(createProperties.AnimId);
 
                 if (hasAnimKitID)
-                    data.WriteUInt32(areaTriggerMiscTemplate.AnimKitId);
+                    data.WriteUInt32(createProperties.AnimKitId);
 
                 if (hasAnimProgress)
                     data.WriteUInt32(0);
 
                 if (hasAreaTriggerSphere)
                 {
-                    data.WriteFloat(areaTriggerTemplate.SphereDatas.Radius);
-                    data.WriteFloat(areaTriggerTemplate.SphereDatas.RadiusTarget);
+                    data.WriteFloat(shape.SphereDatas.Radius);
+                    data.WriteFloat(shape.SphereDatas.RadiusTarget);
                 }
 
                 if (hasAreaTriggerBox)
                 {
                     unsafe
                     {
-                        data.WriteFloat(areaTriggerTemplate.BoxDatas.Extents[0]);
-                        data.WriteFloat(areaTriggerTemplate.BoxDatas.Extents[1]);
-                        data.WriteFloat(areaTriggerTemplate.BoxDatas.Extents[2]);
+                        data.WriteFloat(shape.BoxDatas.Extents[0]);
+                        data.WriteFloat(shape.BoxDatas.Extents[1]);
+                        data.WriteFloat(shape.BoxDatas.Extents[2]);
 
-                        data.WriteFloat(areaTriggerTemplate.BoxDatas.ExtentsTarget[0]);
-                        data.WriteFloat(areaTriggerTemplate.BoxDatas.ExtentsTarget[1]);
-                        data.WriteFloat(areaTriggerTemplate.BoxDatas.ExtentsTarget[2]);
+                        data.WriteFloat(shape.BoxDatas.ExtentsTarget[0]);
+                        data.WriteFloat(shape.BoxDatas.ExtentsTarget[1]);
+                        data.WriteFloat(shape.BoxDatas.ExtentsTarget[2]);
                     }
                 }
 
                 if (hasAreaTriggerPolygon)
                 {
-                    data.WriteInt32(areaTriggerTemplate.PolygonVertices.Count);
-                    data.WriteInt32(areaTriggerTemplate.PolygonVerticesTarget.Count);
-                    data.WriteFloat(areaTriggerTemplate.PolygonDatas.Height);
-                    data.WriteFloat(areaTriggerTemplate.PolygonDatas.HeightTarget);
+                    data.WriteInt32(createProperties.PolygonVertices.Count);
+                    data.WriteInt32(createProperties.PolygonVerticesTarget.Count);
+                    data.WriteFloat(shape.PolygonDatas.Height);
+                    data.WriteFloat(shape.PolygonDatas.HeightTarget);
 
-                    foreach (var vertice in areaTriggerTemplate.PolygonVertices)
+                    foreach (var vertice in createProperties.PolygonVertices)
                         data.WriteVector2(vertice);
 
-                    foreach (var vertice in areaTriggerTemplate.PolygonVerticesTarget)
+                    foreach (var vertice in createProperties.PolygonVerticesTarget)
                         data.WriteVector2(vertice);
                 }
 
                 if (hasAreaTriggerCylinder)
                 {
-                    data.WriteFloat(areaTriggerTemplate.CylinderDatas.Radius);
-                    data.WriteFloat(areaTriggerTemplate.CylinderDatas.RadiusTarget);
-                    data.WriteFloat(areaTriggerTemplate.CylinderDatas.Height);
-                    data.WriteFloat(areaTriggerTemplate.CylinderDatas.HeightTarget);
-                    data.WriteFloat(areaTriggerTemplate.CylinderDatas.LocationZOffset);
-                    data.WriteFloat(areaTriggerTemplate.CylinderDatas.LocationZOffsetTarget);
+                    data.WriteFloat(shape.CylinderDatas.Radius);
+                    data.WriteFloat(shape.CylinderDatas.RadiusTarget);
+                    data.WriteFloat(shape.CylinderDatas.Height);
+                    data.WriteFloat(shape.CylinderDatas.HeightTarget);
+                    data.WriteFloat(shape.CylinderDatas.LocationZOffset);
+                    data.WriteFloat(shape.CylinderDatas.LocationZOffsetTarget);
                 }
 
                 //if (hasMovementScript)

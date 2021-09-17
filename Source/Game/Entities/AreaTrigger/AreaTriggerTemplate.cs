@@ -138,43 +138,6 @@ namespace Game.Entities
         }
     }
 
-    public struct AreaTriggerOrbitInfo
-    {
-        public void Write(WorldPacket data)
-        {
-            data.WriteBit(PathTarget.HasValue);
-            data.WriteBit(Center.HasValue);
-            data.WriteBit(CounterClockwise);
-            data.WriteBit(CanLoop);
-
-            data.WriteUInt32(TimeToTarget);
-            data.WriteInt32(ElapsedTimeForMovement);
-            data.WriteUInt32(StartDelay);
-            data.WriteFloat(Radius);
-            data.WriteFloat(BlendFromRadius);
-            data.WriteFloat(InitialAngle);
-            data.WriteFloat(ZOffset);
-
-            if (PathTarget.HasValue)
-                data.WritePackedGuid(PathTarget.Value);
-
-            if (Center.HasValue)
-                data.WriteVector3(Center.Value);
-        }
-
-        public Optional<ObjectGuid> PathTarget;
-        public Optional<Vector3> Center;
-        public bool CounterClockwise;
-        public bool CanLoop;
-        public uint TimeToTarget;
-        public int ElapsedTimeForMovement;
-        public uint StartDelay;
-        public float Radius;
-        public float BlendFromRadius;
-        public float InitialAngle;
-        public float ZOffset;
-    }
-
     public struct AreaTriggerMovementScriptInfo
     {
         public uint SpellScriptID;
@@ -218,59 +181,87 @@ namespace Game.Entities
         }
     }
 
-    public class AreaTriggerTemplate : AreaTriggerData
-    {
-        public unsafe void InitMaxSearchRadius()
+    public class AreaTriggerShapeInfo : AreaTriggerData
+    {  
+        public AreaTriggerTypes TriggerType;
+
+        public AreaTriggerShapeInfo()
+        {
+            TriggerType = AreaTriggerTypes.Max;
+        }
+
+        public unsafe float GetMaxSearchRadius()
         {
             switch (TriggerType)
             {
                 case AreaTriggerTypes.Sphere:
-                    {
-                        MaxSearchRadius = Math.Max(SphereDatas.Radius, SphereDatas.RadiusTarget);
-                        break;
-                    }
+                    return Math.Max(SphereDatas.Radius, SphereDatas.RadiusTarget);
                 case AreaTriggerTypes.Box:
-                    {
-                        MaxSearchRadius = (float)Math.Sqrt(BoxDatas.Extents[0] * BoxDatas.Extents[0] / 4 + BoxDatas.Extents[1] * BoxDatas.Extents[1] / 4);
-                        break;
-                    }
-                // Polygon is SpellMisc based, can't init MaxSearchRadius
-                case AreaTriggerTypes.Polygon:
-                    {
-                        if (PolygonDatas.Height <= 0.0f)
-                            PolygonDatas.Height = 1.0f;
-
-                        break;
-                    }
+                    return MathF.Sqrt(BoxDatas.Extents[0] * BoxDatas.Extents[0] / 4 + BoxDatas.Extents[1] * BoxDatas.Extents[1] / 4);
                 case AreaTriggerTypes.Cylinder:
-                    {
-                        MaxSearchRadius = CylinderDatas.Radius;
-                        break;
-                    }
-                default:
-                    break;
+                    return CylinderDatas.Radius;
             }
-        }
 
-        public bool HasFlag(AreaTriggerFlags flag) { return Flags.HasAnyFlag(flag); }
+            return 0.0f;
+        }
 
         public bool IsSphere() { return TriggerType == AreaTriggerTypes.Sphere; }
         public bool IsBox() { return TriggerType == AreaTriggerTypes.Box; }
         public bool IsPolygon() { return TriggerType == AreaTriggerTypes.Polygon; }
         public bool IsCylinder() { return TriggerType == AreaTriggerTypes.Cylinder; }
-
-        public AreaTriggerId Id;
-        public AreaTriggerTypes TriggerType;
-        public AreaTriggerFlags Flags;
-        public uint ScriptId;
-        public float MaxSearchRadius;
-
-        public List<AreaTriggerAction> Actions = new();
     }
 
-    public unsafe class AreaTriggerMiscTemplate
+    public struct AreaTriggerOrbitInfo
     {
-        public AreaTriggerMiscTemplate()
+        public void Write(WorldPacket data)
+        {
+            data.WriteBit(PathTarget.HasValue);
+            data.WriteBit(Center.HasValue);
+            data.WriteBit(CounterClockwise);
+            data.WriteBit(CanLoop);
+
+            data.WriteUInt32(TimeToTarget);
+            data.WriteInt32(ElapsedTimeForMovement);
+            data.WriteUInt32(StartDelay);
+            data.WriteFloat(Radius);
+            data.WriteFloat(BlendFromRadius);
+            data.WriteFloat(InitialAngle);
+            data.WriteFloat(ZOffset);
+
+            if (PathTarget.HasValue)
+                data.WritePackedGuid(PathTarget.Value);
+
+            if (Center.HasValue)
+                data.WriteVector3(Center.Value);
+        }
+
+        public Optional<ObjectGuid> PathTarget;
+        public Optional<Vector3> Center;
+        public bool CounterClockwise;
+        public bool CanLoop;
+        public uint TimeToTarget;
+        public int ElapsedTimeForMovement;
+        public uint StartDelay;
+        public float Radius;
+        public float BlendFromRadius;
+        public float InitialAngle;
+        public float ZOffset;
+    }
+
+    public class AreaTriggerTemplate
+    {
+        public AreaTriggerId Id;
+        public AreaTriggerFlags Flags;
+        public uint ScriptId;
+
+        public List<AreaTriggerAction> Actions = new();
+
+        public bool HasFlag(AreaTriggerFlags flag) { return Flags.HasAnyFlag(flag); }
+    }
+
+    public unsafe class AreaTriggerCreateProperties
+    {
+        public AreaTriggerCreateProperties()
         {
             // legacy code from before it was known what each curve field does
             ExtraScale.Raw.Data[5] = 1065353217;
@@ -280,24 +271,29 @@ namespace Game.Entities
 
         public bool HasSplines() { return SplinePoints.Count >= 2; }
 
-        public float GetPolygonMaxSearchRadius()
+        public float GetMaxSearchRadius()
         {
-            Position center = new(0.0f, 0.0f);
-            float maxSearchRadius = 0.0f;
-
-            foreach (var vertice in PolygonVertices)
+            if (Shape.TriggerType == AreaTriggerTypes.Polygon)
             {
-                float pointDist = center.GetExactDist2d(vertice.X, vertice.Y);
+                Position center = new(0.0f, 0.0f);
+                float maxSearchRadius = 0.0f;
 
-                if (pointDist > maxSearchRadius)
-                    maxSearchRadius = pointDist;
+                foreach (var vertice in PolygonVertices)
+                {
+                    float pointDist = center.GetExactDist2d(vertice.X, vertice.Y);
+
+                    if (pointDist > maxSearchRadius)
+                        maxSearchRadius = pointDist;
+                }
+
+                return maxSearchRadius;
             }
 
-            return maxSearchRadius;
+            return Shape.GetMaxSearchRadius();
         }
         
-        public uint MiscId;
-        public uint AreaTriggerEntry;
+        public uint Id;
+        public AreaTriggerTemplate Template;
 
         public uint MoveCurveId;
         public uint ScaleCurveId;
@@ -314,13 +310,12 @@ namespace Game.Entities
 
         public AreaTriggerScaleInfo OverrideScale = new();
         public AreaTriggerScaleInfo ExtraScale = new();
-        public AreaTriggerOrbitInfo OrbitInfo;
 
-        public AreaTriggerTemplate Template;
-
+        public AreaTriggerShapeInfo Shape;
         public List<Vector2> PolygonVertices = new();
         public List<Vector2> PolygonVerticesTarget = new();
         public List<Vector3> SplinePoints = new();
+        public Optional<AreaTriggerOrbitInfo> OrbitInfo;
     }
 
     public class AreaTriggerSpawn
@@ -331,6 +326,8 @@ namespace Game.Entities
         public uint PhaseId;
         public uint PhaseGroup;
         public byte PhaseUseFlags;
+
+        public AreaTriggerShapeInfo Shape;
     }
 
     public struct AreaTriggerAction

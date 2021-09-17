@@ -31,9 +31,9 @@ namespace Game.DataStorage
         public void LoadAreaTriggerTemplates()
         {
             uint oldMSTime = Time.GetMSTime();
-            MultiMap<uint, Vector2> verticesBySpellMisc = new();
-            MultiMap<uint, Vector2> verticesTargetBySpellMisc = new();
-            MultiMap<uint, Vector3> splinesBySpellMisc = new();
+            MultiMap<uint, Vector2> verticesByCreateProperties = new();
+            MultiMap<uint, Vector2> verticesTargetByCreateProperties = new();
+            MultiMap<uint, Vector3> splinesByCreateProperties = new();
             MultiMap<AreaTriggerId, AreaTriggerAction> actionsByAreaTrigger = new();
 
             //                                                       0         1             2            3           4
@@ -80,65 +80,56 @@ namespace Game.DataStorage
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 AreaTrigger templates actions. DB table `areatrigger_template_actions` is empty.");
             }
 
-            //                                           0            1    2         3         4               5
-            SQLResult vertices = DB.World.Query("SELECT SpellMiscId, Idx, VerticeX, VerticeY, VerticeTargetX, VerticeTargetY FROM `spell_areatrigger_vertices` ORDER BY `SpellMiscId`, `Idx`");
+            //                                           0                              1    2         3         4               5
+            SQLResult vertices = DB.World.Query("SELECT AreaTriggerCreatePropertiesId, Idx, VerticeX, VerticeY, VerticeTargetX, VerticeTargetY FROM `areatrigger_create_properties_polygon_vertex` ORDER BY `AreaTriggerCreatePropertiesId`, `Idx`");
             if (!vertices.IsEmpty())
             {
                 do
                 {
-                    uint spellMiscId = vertices.Read<uint>(0);
+                    uint areaTriggerCreatePropertiesId = vertices.Read<uint>(0);
 
-                    verticesBySpellMisc.Add(spellMiscId, new Vector2(vertices.Read<float>(2), vertices.Read<float>(3)));
+                    verticesByCreateProperties.Add(areaTriggerCreatePropertiesId, new Vector2(vertices.Read<float>(2), vertices.Read<float>(3)));
 
                     if (!vertices.IsNull(4) && !vertices.IsNull(5))
-                        verticesTargetBySpellMisc.Add(spellMiscId, new Vector2(vertices.Read<float>(4), vertices.Read<float>(5)));
+                        verticesTargetByCreateProperties.Add(areaTriggerCreatePropertiesId, new Vector2(vertices.Read<float>(4), vertices.Read<float>(5)));
                     else if (vertices.IsNull(4) != vertices.IsNull(5))
-                        Log.outError(LogFilter.Sql, $"Table `spell_areatrigger_vertices` has listed invalid target vertices (SpellMiscId: {spellMiscId}, Index: {vertices.Read<uint>(1)}).");
+                        Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties_polygon_vertex` has listed invalid target vertices (AreaTriggerCreatePropertiesId: {areaTriggerCreatePropertiesId}, Index: {vertices.Read<uint>(1)}).");
                 }
                 while (vertices.NextRow());
             }
             else
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 AreaTrigger templates polygon vertices. DB table `areatrigger_template_polygon_vertices` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 AreaTrigger polygon polygon vertices. DB table `areatrigger_create_properties_polygon_vertex` is empty.");
             }
 
-            //                                         0            1  2  3
-            SQLResult splines = DB.World.Query("SELECT SpellMiscId, X, Y, Z FROM `spell_areatrigger_splines` ORDER BY `SpellMiscId`, `Idx`");
+            //                                         0                              1  2  3
+            SQLResult splines = DB.World.Query("SELECT AreaTriggerCreatePropertiesId, X, Y, Z FROM `areatrigger_create_properties_spline_point` ORDER BY `AreaTriggerCreatePropertiesId`, `Idx`");
             if (!splines.IsEmpty())
             {
                 do
                 {
-                    uint spellMiscId = splines.Read<uint>(0);
-
+                    uint areaTriggerCreatePropertiesId = splines.Read<uint>(0);
                     Vector3 spline = new(splines.Read<float>(1), splines.Read<float>(2), splines.Read<float>(3));
 
-                    splinesBySpellMisc.Add(spellMiscId, spline);
+                    splinesByCreateProperties.Add(areaTriggerCreatePropertiesId, spline);
                 }
                 while (splines.NextRow());
             }
             else
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 AreaTrigger templates splines. DB table `spell_areatrigger_splines` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 AreaTrigger splines. DB table `areatrigger_create_properties_spline_point` is empty.");
             }
 
-            //                                            0   1             2     3      4      5      6      7      8      9      10
-            SQLResult templates = DB.World.Query("SELECT Id, IsServerSide, Type, Flags, Data0, Data1, Data2, Data3, Data4, Data5, ScriptName FROM `areatrigger_template`");
+            //                                            0   1             2      3
+            SQLResult templates = DB.World.Query("SELECT Id, IsServerSide, Flags, ScriptName FROM `areatrigger_template`");
             if (!templates.IsEmpty())
             {
                 do
                 {
                     AreaTriggerTemplate areaTriggerTemplate = new();
                     areaTriggerTemplate.Id = new(templates.Read<uint>(0), templates.Read<byte>(1) == 1);
-                    AreaTriggerTypes type = (AreaTriggerTypes)templates.Read<byte>(2);
 
-                    if (type >= AreaTriggerTypes.Max)
-                    {
-                        Log.outError(LogFilter.Sql, $"Table `areatrigger_template` has listed areatrigger (Id: {areaTriggerTemplate.Id.Id}, IsServerSide: {areaTriggerTemplate.Id.IsServerSide}) with invalid type {type}.");
-                        continue;
-                    }
-
-                    areaTriggerTemplate.TriggerType = type;
-                    areaTriggerTemplate.Flags = (AreaTriggerFlags)templates.Read<uint>(3);
+                    areaTriggerTemplate.Flags = (AreaTriggerFlags)templates.Read<uint>(2);
 
                     if (areaTriggerTemplate.Id.IsServerSide && areaTriggerTemplate.Flags != 0)
                     {
@@ -146,36 +137,39 @@ namespace Game.DataStorage
                         continue;
                     }
 
-                    unsafe
-                    {
-                        for (byte i = 0; i < SharedConst.MaxAreatriggerEntityData; ++i)
-                            areaTriggerTemplate.DefaultDatas.Data[i] = templates.Read<float>(4 + i);
-                    }
-
-                    areaTriggerTemplate.ScriptId = Global.ObjectMgr.GetScriptId(templates.Read<string>(10));
+                    areaTriggerTemplate.ScriptId = Global.ObjectMgr.GetScriptId(templates.Read<string>(3));
                     areaTriggerTemplate.Actions = actionsByAreaTrigger[areaTriggerTemplate.Id];
 
-                    areaTriggerTemplate.InitMaxSearchRadius();
                     _areaTriggerTemplateStore[areaTriggerTemplate.Id] = areaTriggerTemplate;
                 }
                 while (templates.NextRow());
             }
 
-            //                                                        0            1              2            3             4             5              6       7          8                  9             10
-            SQLResult areatriggerSpellMiscs = DB.World.Query("SELECT SpellMiscId, AreaTriggerId, MoveCurveId, ScaleCurveId, MorphCurveId, FacingCurveId, AnimId, AnimKitId, DecalPropertiesId, TimeToTarget, TimeToTargetScale FROM `spell_areatrigger`");
-            if (!areatriggerSpellMiscs.IsEmpty())
+            //                                                              0   1              2            3             4             5              6       7          8                  9             10
+            SQLResult areatriggerCreateProperties = DB.World.Query("SELECT Id, AreaTriggerId, MoveCurveId, ScaleCurveId, MorphCurveId, FacingCurveId, AnimId, AnimKitId, DecalPropertiesId, TimeToTarget, TimeToTargetScale, " +
+                //11     12          13          14          15          16          17
+                "Shape, ShapeData0, ShapeData1, ShapeData2, ShapeData3, ShapeData4, ShapeData5 FROM `areatrigger_create_properties`");
+            if (!areatriggerCreateProperties.IsEmpty())
             {
                 do
                 {
-                    AreaTriggerMiscTemplate miscTemplate = new();
-                    miscTemplate.MiscId = areatriggerSpellMiscs.Read<uint>(0);
+                    AreaTriggerCreateProperties createProperties = new();
+                    createProperties.Id = areatriggerCreateProperties.Read<uint>(0);
 
-                    uint areatriggerId = areatriggerSpellMiscs.Read<uint>(1);
-                    miscTemplate.Template = GetAreaTriggerTemplate(new AreaTriggerId(areatriggerId, false));
+                    uint areatriggerId = areatriggerCreateProperties.Read<uint>(1);
+                    createProperties.Template = GetAreaTriggerTemplate(new AreaTriggerId(areatriggerId, false));
 
-                    if (miscTemplate.Template == null)
+                    AreaTriggerTypes shape = (AreaTriggerTypes)areatriggerCreateProperties.Read<byte>(11);
+
+                    if (areatriggerId != 0 && createProperties.Template == null)
                     {
-                        Log.outError(LogFilter.Sql, "Table `spell_areatrigger` reference invalid AreaTriggerId {0} for miscId {1}", areatriggerId, miscTemplate.MiscId);
+                        Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties` reference invalid AreaTriggerId {areatriggerId} for AreaTriggerCreatePropertiesId {createProperties.Id}");
+                        continue;
+                    }
+
+                    if (shape >= AreaTriggerTypes.Max)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties` has listed areatrigger create properties {createProperties.Id} with invalid shape {shape}.");
                         continue;
                     }
 
@@ -183,50 +177,61 @@ namespace Game.DataStorage
                     {
                         if (value != 0 && !CliDB.CurveStorage.ContainsKey(value))
                         {
-                            Log.outError(LogFilter.Sql, "Table `spell_areatrigger` has listed areatrigger (MiscId: {0}, Id: {1}) with invalid Curve ({2}), set to 0!", miscTemplate.MiscId, areatriggerId, value);
+                            Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties` has listed areatrigger (AreaTriggerCreatePropertiesId: {createProperties.Id}, Id: {areatriggerId}) with invalid Curve ({value}), set to 0!");
                             return 0;
                         }
 
                         return value;
                     }
 
-                    miscTemplate.MoveCurveId = ValidateAndSetCurve(areatriggerSpellMiscs.Read<uint>(2));
-                    miscTemplate.ScaleCurveId = ValidateAndSetCurve(areatriggerSpellMiscs.Read<uint>(3));
-                    miscTemplate.MorphCurveId = ValidateAndSetCurve(areatriggerSpellMiscs.Read<uint>(4));
-                    miscTemplate.FacingCurveId = ValidateAndSetCurve(areatriggerSpellMiscs.Read<uint>(5));
+                    createProperties.MoveCurveId = ValidateAndSetCurve(areatriggerCreateProperties.Read<uint>(2));
+                    createProperties.ScaleCurveId = ValidateAndSetCurve(areatriggerCreateProperties.Read<uint>(3));
+                    createProperties.MorphCurveId = ValidateAndSetCurve(areatriggerCreateProperties.Read<uint>(4));
+                    createProperties.FacingCurveId = ValidateAndSetCurve(areatriggerCreateProperties.Read<uint>(5));
 
-                    miscTemplate.AnimId = areatriggerSpellMiscs.Read<uint>(6);
-                    miscTemplate.AnimKitId = areatriggerSpellMiscs.Read<uint>(7);
-                    miscTemplate.DecalPropertiesId = areatriggerSpellMiscs.Read<uint>(8);
+                    createProperties.AnimId = areatriggerCreateProperties.Read<uint>(6);
+                    createProperties.AnimKitId = areatriggerCreateProperties.Read<uint>(7);
+                    createProperties.DecalPropertiesId = areatriggerCreateProperties.Read<uint>(8);
 
-                    miscTemplate.TimeToTarget = areatriggerSpellMiscs.Read<uint>(9);
-                    miscTemplate.TimeToTargetScale = areatriggerSpellMiscs.Read<uint>(10);
+                    createProperties.TimeToTarget = areatriggerCreateProperties.Read<uint>(9);
+                    createProperties.TimeToTargetScale = areatriggerCreateProperties.Read<uint>(10);
 
-                    miscTemplate.PolygonVertices = verticesBySpellMisc[miscTemplate.MiscId];
-                    miscTemplate.PolygonVerticesTarget = verticesTargetBySpellMisc[miscTemplate.MiscId];
-                    miscTemplate.SplinePoints = splinesBySpellMisc[miscTemplate.MiscId];
+                    createProperties.Shape.TriggerType = shape;
+                    unsafe
+                    {
+                        for (byte i = 0; i < SharedConst.MaxAreatriggerEntityData; ++i)
+                            createProperties.Shape.DefaultDatas.Data[i] = areatriggerCreateProperties.Read<float>(12 + i);
+                    }
 
-                    _areaTriggerTemplateSpellMisc[miscTemplate.MiscId] = miscTemplate;
+                    if (shape == AreaTriggerTypes.Polygon)
+                        if (createProperties.Shape.PolygonDatas.Height <= 0.0f)
+                            createProperties.Shape.PolygonDatas.Height = 1.0f;
+
+                    createProperties.PolygonVertices = verticesByCreateProperties[createProperties.Id];
+                    createProperties.PolygonVerticesTarget = verticesTargetByCreateProperties[createProperties.Id];
+                    createProperties.SplinePoints = splinesByCreateProperties[createProperties.Id];
+
+                    _areaTriggerCreateProperties[createProperties.Id] = createProperties;
                 }
-                while (areatriggerSpellMiscs.NextRow());
+                while (areatriggerCreateProperties.NextRow());
             }
             else
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Spell AreaTrigger templates. DB table `spell_areatrigger` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 AreaTrigger create properties. DB table `areatrigger_create_properties` is empty.");
             }
 
-            //                                                       0            1           2             3                4             5        6                 7
-            SQLResult circularMovementInfos = DB.World.Query("SELECT SpellMiscId, StartDelay, CircleRadius, BlendFromRadius, InitialAngle, ZOffset, CounterClockwise, CanLoop FROM `spell_areatrigger_circular` ORDER BY `SpellMiscId`");
+            //                                                       0                               1           2             3                4             5        6                 7
+            SQLResult circularMovementInfos = DB.World.Query("SELECT AreaTriggerCreatePropertiesId, StartDelay, CircleRadius, BlendFromRadius, InitialAngle, ZOffset, CounterClockwise, CanLoop FROM `areatrigger_create_properties_orbit` ORDER BY `SpellMiscId`");
             if (!circularMovementInfos.IsEmpty())
             {
                 do
                 {
-                    uint spellMiscId = circularMovementInfos.Read<uint>(0);
+                    uint areaTriggerCreatePropertiesId = circularMovementInfos.Read<uint>(0);
 
-                    var atSpellMisc = _areaTriggerTemplateSpellMisc.LookupByKey(spellMiscId);
-                    if (atSpellMisc == null)
+                    var createProperties = _areaTriggerCreateProperties.LookupByKey(areaTriggerCreatePropertiesId);
+                    if (createProperties == null)
                     {
-                        Log.outError(LogFilter.Sql, $"Table `spell_areatrigger_circular` reference invalid SpellMiscId {spellMiscId}");
+                        Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties_orbit` reference invalid AreaTriggerCreatePropertiesId {areaTriggerCreatePropertiesId}");
                         continue;
                     }
 
@@ -236,41 +241,41 @@ namespace Game.DataStorage
                     orbitInfo.Radius = circularMovementInfos.Read<float>(2);
                     if (!float.IsInfinity(orbitInfo.Radius))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `spell_areatrigger_circular` has listed areatrigger (MiscId: {spellMiscId}) with invalid Radius ({orbitInfo.Radius}), set to 0!");
+                        Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties_orbit` has listed areatrigger (AreaTriggerCreatePropertiesId: {areaTriggerCreatePropertiesId}) with invalid Radius ({orbitInfo.Radius}), set to 0!");
                         orbitInfo.Radius = 0.0f;
                     }
 
                     orbitInfo.BlendFromRadius = circularMovementInfos.Read<float>(3);
                     if (!float.IsInfinity(orbitInfo.BlendFromRadius))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `spell_areatrigger_circular` has listed areatrigger (MiscId: {spellMiscId}) with invalid BlendFromRadius ({orbitInfo.BlendFromRadius}), set to 0!");
+                        Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties_orbit` has listed areatrigger (AreaTriggerCreatePropertiesId: {areaTriggerCreatePropertiesId}) with invalid BlendFromRadius ({orbitInfo.BlendFromRadius}), set to 0!");
                         orbitInfo.BlendFromRadius = 0.0f;
                     }
 
                     orbitInfo.InitialAngle = circularMovementInfos.Read<float>(4);
                     if (!float.IsInfinity(orbitInfo.InitialAngle))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `spell_areatrigger_circular` has listed areatrigger (MiscId: {spellMiscId}) with invalid InitialAngle ({orbitInfo.InitialAngle}), set to 0!");
+                        Log.outError(LogFilter.Sql, $"Table `areatrigger_create_properties_orbit` has listed areatrigger (AreaTriggerCreatePropertiesId: {areaTriggerCreatePropertiesId}) with invalid InitialAngle ({orbitInfo.InitialAngle}), set to 0!");
                         orbitInfo.InitialAngle = 0.0f;
                     }
 
                     orbitInfo.ZOffset = circularMovementInfos.Read<float>(5);
                     if (!float.IsInfinity(orbitInfo.ZOffset))
                     {
-                        Log.outError(LogFilter.Sql, $"Table `spell_areatrigger_circular` has listed areatrigger (MiscId: {spellMiscId}) with invalid ZOffset ({orbitInfo.ZOffset}), set to 0!");
+                        Log.outError(LogFilter.Sql, $"Table `spell_areatrigger_circular` has listed areatrigger (MiscId: {areaTriggerCreatePropertiesId}) with invalid ZOffset ({orbitInfo.ZOffset}), set to 0!");
                         orbitInfo.ZOffset = 0.0f;
                     }
 
                     orbitInfo.CounterClockwise = circularMovementInfos.Read<bool>(6);
                     orbitInfo.CanLoop = circularMovementInfos.Read<bool>(7);
 
-                    atSpellMisc.OrbitInfo = orbitInfo;
+                    createProperties.OrbitInfo.Set(orbitInfo);
                 }
                 while (circularMovementInfos.NextRow());
             }
             else
             {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 AreaTrigger templates circular movement infos. DB table `spell_areatrigger_circular` is empty.");
+                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 AreaTrigger templates circular movement infos. DB table `areatrigger_create_properties_orbit` is empty.");
             }
 
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {_areaTriggerTemplateStore.Count} spell areatrigger templates in {Time.GetMSTimeDiffToNow(oldMSTime)} ms.");
@@ -281,7 +286,9 @@ namespace Game.DataStorage
             uint oldMSTime = Time.GetMSTime();
             // Load area trigger positions (to put them on the server)
             //                                            0        1              2             3      4     5     6     7            8              9        10
-            SQLResult templates = DB.World.Query("SELECT SpawnId, AreaTriggerId, IsServerSide, MapId, PosX, PosY, PosZ, Orientation, PhaseUseFlags, PhaseId, PhaseGroup FROM `areatrigger`");
+            SQLResult templates = DB.World.Query("SELECT SpawnId, AreaTriggerId, IsServerSide, MapId, PosX, PosY, PosZ, Orientation, PhaseUseFlags, PhaseId, PhaseGroup " +
+                //11     12          13          14          15          16          17
+                "Shape, ShapeData0, ShapeData1, ShapeData2, ShapeData3, ShapeData4, ShapeData5 FROM `areatrigger`");
             if (!templates.IsEmpty())
             {
                 do
@@ -289,6 +296,7 @@ namespace Game.DataStorage
                     ulong spawnId = templates.Read<ulong>(0);
                     AreaTriggerId areaTriggerId = new(templates.Read<uint>(1), templates.Read<byte>(2) == 1);
                     WorldLocation location = new(templates.Read<uint>(3), templates.Read<float>(4), templates.Read<float>(5), templates.Read<float>(6), templates.Read<float>(7));
+                    AreaTriggerTypes shape = (AreaTriggerTypes)templates.Read<byte>(11);
 
                     if (GetAreaTriggerTemplate(areaTriggerId) == null)
                     {
@@ -302,6 +310,12 @@ namespace Game.DataStorage
                         continue;
                     }
 
+                    if (shape >= AreaTriggerTypes.Max)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `areatrigger` has listed areatrigger SpawnId: {spawnId} with invalid shape {shape}.");
+                        continue;
+                    }
+
                     AreaTriggerSpawn spawn = new();
                     spawn.SpawnId = spawnId;
                     spawn.Id = areaTriggerId;
@@ -310,6 +324,13 @@ namespace Game.DataStorage
                     spawn.PhaseUseFlags = templates.Read<byte>(8);
                     spawn.PhaseId = templates.Read<uint>(9);
                     spawn.PhaseGroup = templates.Read<uint>(10);
+
+                    spawn.Shape.TriggerType = shape;
+                    unsafe
+                    {
+                        for (var i = 0; i < SharedConst.MaxAreatriggerEntityData; ++i)
+                            spawn.Shape.DefaultDatas.Data[i] = templates.Read<float>(12 + i);
+                    }
 
                     // Add the trigger to a map::cell map, which is later used by GridLoader to query
                     CellCoord cellCoord = GridDefines.ComputeCellCoord(spawn.Location.GetPositionX(), spawn.Location.GetPositionY());
@@ -331,9 +352,9 @@ namespace Game.DataStorage
            return _areaTriggerTemplateStore.LookupByKey(areaTriggerId);
         }
 
-        public AreaTriggerMiscTemplate GetAreaTriggerMiscTemplate(uint spellMiscValue)
+        public AreaTriggerCreateProperties GetAreaTriggerCreateProperties(uint spellMiscValue)
         {
-            return _areaTriggerTemplateSpellMisc.LookupByKey(spellMiscValue);
+            return _areaTriggerCreateProperties.LookupByKey(spellMiscValue);
         }
 
         public SortedSet<ulong> GetAreaTriggersForMapAndCell(uint mapId, uint cellId)
@@ -349,6 +370,6 @@ namespace Game.DataStorage
         Dictionary<(uint mapId, uint cellId), SortedSet<ulong>> _areaTriggerSpawnsByLocation = new();
         Dictionary<ulong, AreaTriggerSpawn> _areaTriggerSpawnsBySpawnId = new();
         Dictionary<AreaTriggerId, AreaTriggerTemplate> _areaTriggerTemplateStore = new();
-        Dictionary<uint, AreaTriggerMiscTemplate> _areaTriggerTemplateSpellMisc = new();
+        Dictionary<uint, AreaTriggerCreateProperties> _areaTriggerCreateProperties = new();
     }
 }
