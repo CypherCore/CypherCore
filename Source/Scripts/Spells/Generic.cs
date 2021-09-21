@@ -2550,19 +2550,19 @@ namespace Scripts.Spells.Generic
         public override bool Load()
         {
             // OriginalCaster is always available in Spell.prepare
-            return GetOriginalCaster().IsTypeId(TypeId.Player);
+            return GetGObjCaster().GetOwnerGUID().IsPlayer();
         }
 
         void AchievementCredit(uint effIndex)
         {
             // but in effect handling OriginalCaster can become null
-            Unit originalCaster = GetOriginalCaster();
-            if (originalCaster)
+            Unit owner = GetGObjCaster().GetOwner();
+            if (owner != null)
             {
                 GameObject go = GetHitGObj();
                 if (go)
                     if (go.GetGoInfo().type == GameObjectTypes.DestructibleBuilding)
-                        originalCaster.CastSpell(originalCaster, SpellIds.PlantChargesCreditAchievement, true);
+                        owner.CastSpell(null, SpellIds.PlantChargesCreditAchievement, true);
             }
         }
 
