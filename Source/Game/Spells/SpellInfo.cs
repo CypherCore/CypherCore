@@ -4119,30 +4119,20 @@ namespace Game.Spells
                         }
                     }
 
-                    if (IsAura(AuraType.ModRating) && (MiscValue & ((1 << (int)CombatRating.Corruption) | 1 << ((int)CombatRating.CorruptionResistance))) == 0)
+                    if (Scaling.Class == -6)
                     {
-                        GtGenericMultByILvlRecord ratingMult = CliDB.CombatRatingsMultByILvlGameTable.GetRow(effectiveItemLevel);
-                        if (ratingMult != null)
+                        GtGenericMultByILvlRecord staminaMult = CliDB.StaminaMultByILvlGameTable.GetRow(effectiveItemLevel);
+                        if (staminaMult != null)
                         {
                             ItemSparseRecord itemSparse = CliDB.ItemSparseStorage.LookupByKey(itemId);
                             if (itemSparse != null)
-                                tempValue *= CliDB.GetIlvlStatMultiplier(ratingMult, itemSparse.inventoryType);
-                        }
-                        else if (IsAura(AuraType.ModStat) && MiscValue == (int)Stats.Stamina)
-                        {
-                            GtGenericMultByILvlRecord staminaMult = CliDB.StaminaMultByILvlGameTable.GetRow(effectiveItemLevel);
-                            if (staminaMult != null)
-                            {
-                                ItemSparseRecord itemSparse = CliDB.ItemSparseStorage.LookupByKey(itemId);
-                                if (itemSparse != null)
-                                    tempValue *= CliDB.GetIlvlStatMultiplier(staminaMult, itemSparse.inventoryType);
-                            }
+                                tempValue *= CliDB.GetIlvlStatMultiplier(staminaMult, itemSparse.inventoryType);
                         }
                     }
                 }
 
                 tempValue *= Scaling.Coefficient;
-                if (tempValue != 0.0f && tempValue < 1.0f)
+                if (tempValue > 0.0f && tempValue < 1.0f)
                     tempValue = 1.0f;
 
                 return (int)Math.Round(tempValue);
@@ -4283,7 +4273,7 @@ namespace Game.Spells
                     return ExpectedStatType.PlayerHealth;
                 case SpellEffectName.Energize:
                 case SpellEffectName.PowerBurn:
-                    if (MiscValue == 0)
+                    if (MiscValue == (int)PowerType.Mana)
                         return ExpectedStatType.PlayerMana;
                     return ExpectedStatType.None;
                 case SpellEffectName.PowerDrain:
@@ -4344,7 +4334,7 @@ namespace Game.Spells
                         case AuraType.ModPowerRegen:
                         case AuraType.PowerBurn:
                         case AuraType.ModMaxPower:
-                            if (MiscValue == 0)
+                            if (MiscValue == (int)PowerType.Mana)
                                 return ExpectedStatType.PlayerMana;
                             return ExpectedStatType.None;
                         default:
