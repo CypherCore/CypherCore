@@ -2084,10 +2084,9 @@ namespace Game.Spells
                         }
                     }
                     else
-                    {
-                        hitInfo.HitAura = spellAura;
                         spellAura.AddStaticApplication(unit, aura_effmask);
-                    }
+
+                    hitInfo.HitAura = spellAura;
                 }
             }
 
