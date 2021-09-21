@@ -142,7 +142,7 @@ namespace Game.Movement
             if (updateDestination || _path == null)
             {
                 float size = owner.GetCombatReach();
-                float hoverDiff = owner.GetHoverOffset() - GetTarget().GetHoverOffset();
+                float hoverDiff = Math.Abs(owner.GetHoverOffset() - GetTarget().GetHoverOffset());
                 if (_offset == 0)
                 {
                     if (GetTarget().IsWithinDistInMap(owner, SharedConst.ContactDistance))
