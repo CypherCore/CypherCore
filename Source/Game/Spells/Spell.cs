@@ -2084,7 +2084,10 @@ namespace Game.Spells
                         }
                     }
                     else
+                    {
+                        hitInfo.HitAura = spellAura;
                         spellAura.AddStaticApplication(unit, aura_effmask);
+                    }
                 }
             }
 
@@ -7663,6 +7666,7 @@ namespace Game.Spells
         public int AuraDuration;
         public int[] AuraBasePoints = new int[SpellConst.MaxEffects];
         public bool Positive = true;
+        public UnitAura HitAura;
 
         Unit _spellHitTarget; // changed for example by reflect
         bool _enablePVP;         // need to enable PVP at DoDamageAndTriggers?
@@ -7964,9 +7968,9 @@ namespace Game.Spells
                 else if (spell.GetCaster().IsGameObject() && spell.GetCaster().ToGameObject().GetAI() != null)
                     spell.GetCaster().ToGameObject().GetAI().SpellHitTarget(_spellHitTarget, spell.m_spellInfo);
 
-                if (spell.spellAura != null)
+                if (HitAura != null)
                 {
-                    AuraApplication aurApp = spell.spellAura.GetApplicationOfTarget(_spellHitTarget.GetGUID());
+                    AuraApplication aurApp = HitAura.GetApplicationOfTarget(_spellHitTarget.GetGUID());
                     if (aurApp != null)
                     {
                         // only apply unapplied effects (for reapply case)
