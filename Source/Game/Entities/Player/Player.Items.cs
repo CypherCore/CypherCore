@@ -3817,7 +3817,7 @@ namespace Game.Entities
 
         void ApplyItemEquipSpell(Item item, bool apply, bool formChange = false)
         {
-            if (item == null)
+            if (item == null || item.GetTemplate().GetFlags().HasFlag(ItemFlags.Legacy))
                 return;
 
             foreach (ItemEffectRecord effectData in item.GetEffects())

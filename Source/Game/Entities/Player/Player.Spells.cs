@@ -1470,20 +1470,51 @@ namespace Game.Entities
 
         public void CastItemUseSpell(Item item, SpellCastTargets targets, ObjectGuid castCount, uint[] misc)
         {
-            // special learning case
-            if (item.GetBonus().EffectCount >= 2)
+            if (!item.GetTemplate().GetFlags().HasFlag(ItemFlags.Legacy))
             {
-                if (item.GetEffect(0).SpellID == 483 || item.GetEffect(0).SpellID == 55884)
+                // special learning case
+                if (item.GetBonus().EffectCount >= 2)
                 {
-                    uint learn_spell_id = (uint)item.GetEffect(0).SpellID;
-                    uint learning_spell_id = (uint)item.GetEffect(1).SpellID;
+                    if (item.GetEffect(0).SpellID == 483 || item.GetEffect(0).SpellID == 55884)
+                    {
+                        uint learn_spell_id = (uint)item.GetEffect(0).SpellID;
+                        uint learning_spell_id = (uint)item.GetEffect(1).SpellID;
 
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(learn_spell_id, Difficulty.None);
+                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(learn_spell_id, Difficulty.None);
+                        if (spellInfo == null)
+                        {
+                            Log.outError(LogFilter.Player, "Player.CastItemUseSpell: Item (Entry: {0}) in have wrong spell id {1}, ignoring ", item.GetEntry(), learn_spell_id);
+                            SendEquipError(InventoryResult.InternalBagError, item);
+                            return;
+                        }
+
+                        Spell spell = new(this, spellInfo, TriggerCastFlags.None);
+
+                        SpellPrepare spellPrepare = new();
+                        spellPrepare.ClientCastID = castCount;
+                        spellPrepare.ServerCastID = spell.m_castId;
+                        SendPacket(spellPrepare);
+
+                        spell.m_fromClient = true;
+                        spell.m_CastItem = item;
+                        spell.SetSpellValue(SpellValueMod.BasePoint0, (int)learning_spell_id);
+                        spell.Prepare(targets);
+                        return;
+                    }
+                }
+
+                // item spells casted at use
+                foreach (ItemEffectRecord effectData in item.GetEffects())
+                {
+                    // wrong triggering type
+                    if (effectData.TriggerType != ItemSpelltriggerType.OnUse)
+                        continue;
+
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)effectData.SpellID, Difficulty.None);
                     if (spellInfo == null)
                     {
-                        Log.outError(LogFilter.Player, "Player.CastItemUseSpell: Item (Entry: {0}) in have wrong spell id {1}, ignoring ", item.GetEntry(), learn_spell_id);
-                        SendEquipError(InventoryResult.InternalBagError, item);
-                        return;
+                        Log.outError(LogFilter.Player, "Player.CastItemUseSpell: Item (Entry: {0}) in have wrong spell id {1}, ignoring", item.GetEntry(), effectData.SpellID);
+                        continue;
                     }
 
                     Spell spell = new(this, spellInfo, TriggerCastFlags.None);
@@ -1495,39 +1526,11 @@ namespace Game.Entities
 
                     spell.m_fromClient = true;
                     spell.m_CastItem = item;
-                    spell.SetSpellValue(SpellValueMod.BasePoint0, (int)learning_spell_id);
+                    spell.m_misc.Data0 = misc[0];
+                    spell.m_misc.Data1 = misc[1];
                     spell.Prepare(targets);
                     return;
                 }
-            }
-
-            // item spells casted at use
-            foreach (ItemEffectRecord effectData in item.GetEffects())
-            {
-                // wrong triggering type
-                if (effectData.TriggerType != ItemSpelltriggerType.OnUse)
-                    continue;
-
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)effectData.SpellID, Difficulty.None);
-                if (spellInfo == null)
-                {
-                    Log.outError(LogFilter.Player, "Player.CastItemUseSpell: Item (Entry: {0}) in have wrong spell id {1}, ignoring", item.GetEntry(), effectData.SpellID);
-                    continue;
-                }
-
-                Spell spell = new(this, spellInfo, TriggerCastFlags.None);
-
-                SpellPrepare spellPrepare = new();
-                spellPrepare.ClientCastID = castCount;
-                spellPrepare.ServerCastID = spell.m_castId;
-                SendPacket(spellPrepare);
-
-                spell.m_fromClient = true;
-                spell.m_CastItem = item;
-                spell.m_misc.Data0 = misc[0];
-                spell.m_misc.Data1 = misc[1];
-                spell.Prepare(targets);
-                return;
             }
 
             // Item enchantments spells casted at use
@@ -1563,7 +1566,7 @@ namespace Game.Entities
                     spell.Prepare(targets);
                     return;
                 }
-            }
+            }            
         }
 
         public uint GetLastPotionId() { return m_lastPotionId; }
@@ -1786,6 +1789,9 @@ namespace Game.Entities
 
         void ApplyItemObtainSpells(Item item, bool apply)
         {
+            if (item.GetTemplate().GetFlags().HasFlag(ItemFlags.Legacy))
+                return;
+
             foreach (ItemEffectRecord effect in item.GetEffects())
             {
                 if (effect.TriggerType != ItemSpelltriggerType.OnObtain) // On obtain trigger
@@ -3179,35 +3185,38 @@ namespace Game.Entities
             bool canTrigger = damageInfo.GetHitMask().HasAnyFlag(ProcFlagsHit.Normal | ProcFlagsHit.Critical | ProcFlagsHit.Absorb);
             if (canTrigger)
             {
-                foreach (ItemEffectRecord effectData in item.GetEffects())
+                if (!item.GetTemplate().GetFlags().HasFlag(ItemFlags.Legacy))
                 {
-                    // wrong triggering type
-                    if (effectData.TriggerType != ItemSpelltriggerType.ChanceOnHit)
-                        continue;
-
-                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)effectData.SpellID, Difficulty.None);
-                    if (spellInfo == null)
+                    foreach (ItemEffectRecord effectData in item.GetEffects())
                     {
-                        Log.outError(LogFilter.Player, "WORLD: unknown Item spellid {0}", effectData.SpellID);
-                        continue;
+                        // wrong triggering type
+                        if (effectData.TriggerType != ItemSpelltriggerType.ChanceOnHit)
+                            continue;
+
+                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo((uint)effectData.SpellID, Difficulty.None);
+                        if (spellInfo == null)
+                        {
+                            Log.outError(LogFilter.Player, "WORLD: unknown Item spellid {0}", effectData.SpellID);
+                            continue;
+                        }
+
+                        // not allow proc extra attack spell at extra attack
+                        if (ExtraAttacks != 0 && spellInfo.HasEffect(SpellEffectName.AddExtraAttacks))
+                            return;
+
+                        float chance = spellInfo.ProcChance;
+
+                        if (proto.SpellPPMRate != 0)
+                        {
+                            uint WeaponSpeed = GetBaseAttackTime(damageInfo.GetAttackType());
+                            chance = GetPPMProcChance(WeaponSpeed, proto.SpellPPMRate, spellInfo);
+                        }
+                        else if (chance > 100.0f)
+                            chance = GetWeaponProcChance();
+
+                        if (RandomHelper.randChance(chance) && Global.ScriptMgr.OnCastItemCombatSpell(this, damageInfo.GetVictim(), spellInfo, item))
+                            CastSpell(damageInfo.GetVictim(), spellInfo.Id, item);
                     }
-
-                    // not allow proc extra attack spell at extra attack
-                    if (ExtraAttacks != 0 && spellInfo.HasEffect(SpellEffectName.AddExtraAttacks))
-                        return;
-
-                    float chance = spellInfo.ProcChance;
-
-                    if (proto.SpellPPMRate != 0)
-                    {
-                        uint WeaponSpeed = GetBaseAttackTime(damageInfo.GetAttackType());
-                        chance = GetPPMProcChance(WeaponSpeed, proto.SpellPPMRate, spellInfo);
-                    }
-                    else if (chance > 100.0f)
-                        chance = GetWeaponProcChance();
-
-                    if (RandomHelper.randChance(chance) && Global.ScriptMgr.OnCastItemCombatSpell(this, damageInfo.GetVictim(), spellInfo, item))
-                        CastSpell(damageInfo.GetVictim(), spellInfo.Id, item);
                 }
             }
 

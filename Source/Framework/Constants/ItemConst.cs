@@ -14,6 +14,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+using System;
 
 namespace Framework.Constants
 {
@@ -884,6 +885,7 @@ namespace Framework.Constants
         Equipped = 0x1
     }
 
+    [Flags]
     public enum ItemFlags : long
     {
         NoPickup = 0x01,
@@ -894,7 +896,7 @@ namespace Framework.Constants
         NoUserDestroy = 0x20, // Item Can Not Be Destroyed, Except By Using Spell (Item Can Be Reagent For Spell)
         Playercast = 0x40, // Item's spells are castable by players
         NoEquipCooldown = 0x80, // No Default 30 Seconds Cooldown When Equipped
-        Legacy = 0x100,
+        Legacy = 0x100, // Effects are disabled
         IsWrapper = 0x200, // Item Can Wrap Other Items
         UsesResources = 0x400,
         MultiDrop = 0x800, // Looting This Item Does Not Remove It From Available Loot
