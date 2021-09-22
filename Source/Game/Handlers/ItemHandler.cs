@@ -390,6 +390,12 @@ namespace Game
                 return;
             }
 
+            if (creature.GetCreatureTemplate().FlagsExtra.HasFlag(CreatureFlagsExtra.NoSellVendor))
+            {
+                _player.SendSellError(SellResult.CantSellToThisMerchant, creature, packet.ItemGUID);
+                return;
+            }
+
             // remove fake death
             if (pl.HasUnitState(UnitState.Died))
                 pl.RemoveAurasByType(AuraType.FeignDeath);

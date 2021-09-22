@@ -1144,12 +1144,13 @@ namespace Framework.Constants
 
     public enum SellResult
     {
-        CantFindItem = 1,
-        CantSellItem = 2,       // Merchant Doesn'T Like That Item
-        CantFindVendor = 3,       // Merchant Doesn'T Like You
-        YouDontOwnThatItem = 4,       // You Don'T Own That Item
+        CantFindItem = 1, // The item was not found.
+        CantSellItem = 2, // The merchant doesn't want that item.
+        CantFindVendor = 3, // The merchant doesn't like you.
+        YouDontOwnThatItem = 4, // You don't own that item.
         Unk = 5,       // Nothing Appears...
-        OnlyEmptyBag = 6        // Can Only Do With Empty Bags
+        OnlyEmptyBag = 6, // You can only do that with empty bags.
+        CantSellToThisMerchant = 7        // You cannot sell items to this merchant.
     }
 
     public enum EnchantmentSlot

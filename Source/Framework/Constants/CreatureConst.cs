@@ -212,7 +212,7 @@ namespace Framework.Constants
         NoMoveFlagsUpdate = 0x200, // Creature won't update movement flags
         GhostVisibility = 0x400,       // creature will be only visible for dead players
         UseOffhandAttack = 0x800, // creature will use offhand attacks
-        Unused12 = 0x1000,
+        NoSellVendor = 0x1000,       // players can't sell items to this vendor
         Unused13 = 0x2000,
         Worldevent = 0x4000,       // Custom Flag For World Event Creatures (Left Room For Merging)
         Guard = 0x8000,       // Creature Is Guard
@@ -234,7 +234,7 @@ namespace Framework.Constants
         Unused31 = 0x80000000,
 
         // Masks
-        AllUnused = (Unused12 | Unused13 | Unused16 | Unused22 | Unused23 | Unused24 | Unused25 | Unused26 | Unused27 | Unused31),
+        AllUnused = (Unused13 | Unused16 | Unused22 | Unused23 | Unused24 | Unused25 | Unused26 | Unused27 | Unused31),
 
         DBAllowed = (0xFFFFFFFF & ~(AllUnused | DungeonBoss))
     }
