@@ -894,7 +894,7 @@ namespace Framework.Constants
         NoUserDestroy = 0x20, // Item Can Not Be Destroyed, Except By Using Spell (Item Can Be Reagent For Spell)
         Playercast = 0x40, // Item's spells are castable by players
         NoEquipCooldown = 0x80, // No Default 30 Seconds Cooldown When Equipped
-        MultiLootQuest = 0x100,
+        Legacy = 0x100,
         IsWrapper = 0x200, // Item Can Wrap Other Items
         UsesResources = 0x400,
         MultiDrop = 0x800, // Looting This Item Does Not Remove It From Available Loot
@@ -906,7 +906,7 @@ namespace Framework.Constants
         NoCreator = 0x20000,
         IsProspectable = 0x40000, // Item Can Be Prospected
         UniqueEquippable = 0x80000, // You Can Only Equip One Of These
-        IgnoreForAuras = 0x100000,
+        DisableAutoQuotes = 0x100000, // Disables quotes around item description in tooltip
         IgnoreDefaultArenaRestrictions = 0x200000, // Item Can Be Used During Arena Match
         NoDurabilityLoss = 0x400000, // Some Thrown weapons have it (and only Thrown) but not all
         UseWhenShapeshifted = 0x800000, // Item Can Be Used In Shapeshift Forms
@@ -1004,7 +1004,14 @@ namespace Framework.Constants
         DisplayOnlyOnDefinedRaces = 0x80,
         RegulatedCommodity = 0x100,
         CreateLootImmediately = 0x200,
-        GenerateLootSpecItem = 0x400
+        GenerateLootSpecItem = 0x400,
+        HiddenInRewardsSummaries = 0x800,
+        DisallowWhileLevelLinked = 0x1000,
+        DisallowEnchant = 0x2000,
+        SquishUsingItemLevelAsPlayerLevel = 0x4000,
+        AlwaysShowPriceInTooltip = 0x8000,
+        CosmeticItem = 0x10000,
+        NoSpellEffectTooltipPrefixes = 0x20000
     }
 
     public enum ItemFlagsCustom
