@@ -52,7 +52,7 @@ namespace Framework.Database
             PrepareStatement(LoginStatements.SEL_ACCOUNT_BY_ID, "SELECT 1 FROM account WHERE id = ?");
             PrepareStatement(LoginStatements.INS_IP_BANNED, "INSERT INTO ip_banned (ip, bandate, unbandate, bannedby, banreason) VALUES (?, UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+?, ?, ?)");
             PrepareStatement(LoginStatements.DEL_IP_NOT_BANNED, "DELETE FROM ip_banned WHERE ip = ?");
-            PrepareStatement(LoginStatements.INS_ACCOUNT_BANNED, "INSERT INTO account_banned VALUES (?, UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+?, ?, ?, 1)");
+            PrepareStatement(LoginStatements.INS_ACCOUNT_BANNED, "INSERT INTO account_banned (id, bandate, unbandate, bannedby, banreason, active) VALUES (?, UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+?, ?, ?, 1)");
             PrepareStatement(LoginStatements.UPD_ACCOUNT_NOT_BANNED, "UPDATE account_banned SET active = 0 WHERE id = ? AND active != 0");
             PrepareStatement(LoginStatements.DEL_REALM_CHARACTERS_BY_REALM, "DELETE FROM realmcharacters WHERE acctid = ? AND realmid = ?");
             PrepareStatement(LoginStatements.DEL_REALM_CHARACTERS, "DELETE FROM realmcharacters WHERE acctid = ?");
