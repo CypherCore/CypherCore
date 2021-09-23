@@ -642,9 +642,15 @@ namespace Scripts.Spells.Items
             caster.CastSpell(target, spellId, new CastSpellExtraArgs(aurEff));
         }
 
+        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().RemoveAurasDueToSpell(SpellIds.MoteOfAnger);
+        }
+        
         public override void Register()
         {
             OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
 
         int _stackAmount;
@@ -1831,10 +1837,16 @@ namespace Scripts.Spells.Items
             }
         }
 
+        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().RemoveAurasDueToSpell(SpellIds.ShadowmourneSoulFragment);
+        }
+        
         public override void Register()
         {
             DoCheckProc.Add(new CheckProcHandler(CheckProc));
             OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
+            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
 
@@ -3095,9 +3107,15 @@ namespace Scripts.Spells.Items
                 caster.CastSpell(target, _triggerSpell, new CastSpellExtraArgs(aurEff));
         }
 
+        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().RemoveAurasDueToSpell(_stackSpell);
+        }
+        
         public override void Register()
         {
             OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.PeriodicTriggerSpell));
+            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.PeriodicTriggerSpell, AuraEffectHandleModes.Real));
         }
 
         uint _stackSpell;
