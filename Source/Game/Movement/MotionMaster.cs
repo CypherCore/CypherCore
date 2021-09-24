@@ -359,7 +359,7 @@ namespace Game.Movement
             float dist = 2 * moveTimeHalf * speedXY;
             float max_height = -MoveSpline.ComputeFallElevation(moveTimeHalf, false, -speedZ);
 
-            _owner.GetNearPoint(_owner, out x, out y, out z, _owner.GetCombatReach(), dist, _owner.GetAbsoluteAngle(srcX, srcY) + MathFunctions.PI);
+            _owner.GetNearPoint(_owner, out x, out y, out z, dist, _owner.GetAbsoluteAngle(srcX, srcY) + MathFunctions.PI);
 
             MoveSplineInit init = new(_owner);
             init.MoveTo(x, y, z);
@@ -381,7 +381,7 @@ namespace Game.Movement
 
             float moveTimeHalf = (float)(speedZ / gravity);
             float dist = 2 * moveTimeHalf * speedXY;
-            _owner.GetNearPoint2D(out float x, out float y, dist, _owner.GetOrientation() + angle);
+            _owner.GetNearPoint2D(null, out float x, out float y, dist, _owner.GetOrientation() + angle);
             float z = _owner.GetPositionZ();
             _owner.UpdateAllowedPositionZ(x, y, ref z);
             MoveJump(x, y, z, 0.0f, speedXY, speedZ);

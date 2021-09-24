@@ -3146,18 +3146,43 @@ namespace Game.Entities
             }
         }
 
-        public void GetNearPoint2D(out float x, out float y, float distance2d, float absAngle)
+        public void GetNearPoint2D(WorldObject searcher, out float x, out float y, float distance2d, float absAngle)
         {
-            x = (float)(GetPositionX() + (GetCombatReach() + distance2d) * Math.Cos(absAngle));
-            y = (float)(GetPositionY() + (GetCombatReach() + distance2d) * Math.Sin(absAngle));
+            float effectiveReach = GetCombatReach();
+
+            if (searcher)
+            {
+                effectiveReach += searcher.GetCombatReach();
+
+                if (this != searcher)
+                {
+                    float myHover = 0.0f;
+                    float searcherHover = 0.0f;
+
+                    Unit unit = ToUnit();
+                    if (unit != null)
+                        myHover = unit.GetHoverOffset();
+
+                    Unit searchUnit = searcher.ToUnit();
+                    if (searchUnit != null)
+                        searcherHover = searchUnit.GetHoverOffset();
+
+                    float hoverDelta = myHover - searcherHover;
+                    if (hoverDelta != 0.0f)
+                        effectiveReach = MathF.Sqrt(effectiveReach * effectiveReach - hoverDelta * hoverDelta);
+                }
+            }
+
+            x = GetPositionX() + (effectiveReach + distance2d) * MathF.Cos(absAngle);
+            y = GetPositionY() + (effectiveReach + distance2d) * MathF.Sin(absAngle);
 
             GridDefines.NormalizeMapCoord(ref x);
             GridDefines.NormalizeMapCoord(ref y);
         }
 
-        public void GetNearPoint(WorldObject searcher, out float x, out float y, out float z, float searcher_size, float distance2d, float absAngle)
+        public void GetNearPoint(WorldObject searcher, out float x, out float y, out float z, float distance2d, float absAngle)
         {
-            GetNearPoint2D(out x, out y, distance2d + searcher_size, absAngle);
+            GetNearPoint2D(searcher, out x, out y, distance2d, absAngle);
             z = GetPositionZ();
             (searcher ?? this).UpdateAllowedPositionZ(x, y, ref z);
 
@@ -3177,7 +3202,7 @@ namespace Game.Entities
             // loop in a circle to look for a point in LoS using small steps
             for (float angle = MathFunctions.PI / 8; angle < Math.PI * 2; angle += MathFunctions.PI / 8)
             {
-                GetNearPoint2D(out x, out y, distance2d + searcher_size, absAngle + angle);
+                GetNearPoint2D(searcher, out x, out y, distance2d, absAngle + angle);
                 z = GetPositionZ();
                 (searcher ?? this).UpdateAllowedPositionZ(x, y, ref z);
                 if (IsWithinLOS(x, y, z))
@@ -3193,7 +3218,7 @@ namespace Game.Entities
         public void GetClosePoint(out float x, out float y, out float z, float size, float distance2d = 0, float relAngle = 0)
         {
             // angle calculated from current orientation
-            GetNearPoint(null, out x, out y, out z, size, distance2d, GetOrientation() + relAngle);
+            GetNearPoint(null, out x, out y, out z, distance2d + size, GetOrientation() + relAngle);
         }
 
         public Position GetNearPosition(float dist, float angle)
@@ -3220,7 +3245,7 @@ namespace Game.Entities
         public void GetContactPoint(WorldObject obj, out float x, out float y, out float z, float distance2d = 0.5f)
         {
             // angle to face `obj` to `this` using distance includes size of `obj`
-            GetNearPoint(obj, out x, out y, out z, obj.GetCombatReach(), distance2d, GetAbsoluteAngle(obj));
+            GetNearPoint(obj, out x, out y, out z, distance2d, GetAbsoluteAngle(obj));
         }
 
         public void MovePosition(Position pos, float dist, float angle)
