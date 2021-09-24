@@ -277,7 +277,7 @@ namespace Game.Movement
             float distanceToTravel = _owner.GetExactDist2d(target) - distance;
             if (distanceToTravel > 0.0f)
             {
-                float angle = _owner.GetAngle(target);
+                float angle = _owner.GetAbsoluteAngle(target);
                 float destx = _owner.GetPositionX() + distanceToTravel * (float)Math.Cos(angle);
                 float desty = _owner.GetPositionY() + distanceToTravel * (float)Math.Sin(angle);
                 MovePoint(id, destx, desty, target.GetPositionZ());
@@ -359,7 +359,7 @@ namespace Game.Movement
             float dist = 2 * moveTimeHalf * speedXY;
             float max_height = -MoveSpline.ComputeFallElevation(moveTimeHalf, false, -speedZ);
 
-            _owner.GetNearPoint(_owner, out x, out y, out z, _owner.GetCombatReach(), dist, _owner.GetAngle(srcX, srcY) + MathFunctions.PI);
+            _owner.GetNearPoint(_owner, out x, out y, out z, _owner.GetCombatReach(), dist, _owner.GetAbsoluteAngle(srcX, srcY) + MathFunctions.PI);
 
             MoveSplineInit init = new(_owner);
             init.MoveTo(x, y, z);
@@ -427,7 +427,7 @@ namespace Game.Movement
         {
             float step = 2 * MathFunctions.PI / stepCount * (clockwise ? -1.0f : 1.0f);
             Position pos = new(x, y, z, 0.0f);
-            float angle = pos.GetAngle(_owner.GetPositionX(), _owner.GetPositionY());
+            float angle = pos.GetAbsoluteAngle(_owner.GetPositionX(), _owner.GetPositionY());
 
             MoveSplineInit init = new(_owner);
             init.args.path = new Vector3[stepCount];

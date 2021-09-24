@@ -158,7 +158,7 @@ namespace Game.AI
             // Face the unit (stealthed player) and set distracted state for 5 seconds
             me.GetMotionMaster().MoveDistract(5 * Time.InMilliseconds);
             me.StopMoving();
-            me.SetFacingTo(me.GetAngle(who));
+            me.SetFacingTo(me.GetAbsoluteAngle(who));
         }
 
         // Called for reaction at stopping attack at no attackers or targets

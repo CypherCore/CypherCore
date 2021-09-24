@@ -889,7 +889,7 @@ namespace Game.Entities
             if (GetTemplate() != null && GetTemplate().HasFlag(AreaTriggerFlags.HasFaceMovementDir))
             {
                 Vector3 nextPoint = _spline.GetPoint(lastPositionIndex + 1);
-                orientation = GetAngle(nextPoint.X, nextPoint.Y);
+                orientation = GetAbsoluteAngle(nextPoint.X, nextPoint.Y);
             }
 
             GetMap().AreaTriggerRelocation(this, currentPosition.X, currentPosition.Y, currentPosition.Z, orientation);

@@ -806,7 +806,7 @@ namespace Game.Chat
                     return false;
 
                 Player chr = handler.GetSession().GetPlayer();
-                float followAngle = (creature.GetAngle(chr) - chr.GetOrientation()) * 180.0f / MathF.PI;
+                float followAngle = (creature.GetAbsoluteAngle(chr) - chr.GetOrientation()) * 180.0f / MathF.PI;
                 float followDist = MathF.Sqrt(MathF.Pow(chr.GetPositionX() - creature.GetPositionX(), 2f) + MathF.Pow(chr.GetPositionY() - creature.GetPositionY(), 2f));
                 uint groupAI = 0;
                 FormationMgr.AddFormationMember(lowguid, followAngle, followDist, leaderGUID, groupAI);

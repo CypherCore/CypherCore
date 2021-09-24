@@ -1927,7 +1927,7 @@ namespace Game.Spells
                 unitTarget.GetMotionMaster().MoveDistract((uint)(damage * Time.InMilliseconds));
 
             unitTarget.StopMoving();
-            unitTarget.SetFacingTo(unitTarget.GetAngle(destTarget));
+            unitTarget.SetFacingTo(unitTarget.GetAbsoluteAngle(destTarget));
         }
 
         [SpellEffectHandler(SpellEffectName.Pickpocket)]
@@ -4863,7 +4863,7 @@ namespace Game.Spells
                     summon.SetFaction(unitCaster.GetFaction());
 
                 if (summon.HasUnitTypeMask(UnitTypeMask.Minion) && m_targets.HasDst())
-                    ((Minion)summon).SetFollowAngle(unitCaster.GetAngle(summon.GetPosition()));
+                    ((Minion)summon).SetFollowAngle(unitCaster.GetAbsoluteAngle(summon.GetPosition()));
 
                 if (summon.GetEntry() == 27893)
                 {

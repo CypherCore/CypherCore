@@ -431,7 +431,7 @@ namespace Scripts.World.GameObjects
             me.UseDoorOrButton();
             int Random = (int)(RandomHelper.Rand32() % (CreatureIds.PrisonEntry.Length / sizeof(uint)));
 
-            Creature creature = player.SummonCreature(CreatureIds.PrisonEntry[Random], me.GetPositionX(), me.GetPositionY(), me.GetPositionZ(), me.GetAngle(player), TempSummonType.TimedDespawnOutOfCombat, 30000);
+            Creature creature = player.SummonCreature(CreatureIds.PrisonEntry[Random], me.GetPositionX(), me.GetPositionY(), me.GetPositionZ(), me.GetAbsoluteAngle(player), TempSummonType.TimedDespawnOutOfCombat, 30000);
             if (creature)
             {
                 if (!creature.IsHostileTo(player))
@@ -485,7 +485,7 @@ namespace Scripts.World.GameObjects
             me.UseDoorOrButton();
             int Random = (int)(RandomHelper.Rand32() % CreatureIds.StasisEntry.Length / sizeof(uint));
 
-            player.SummonCreature(CreatureIds.StasisEntry[Random], me.GetPositionX(), me.GetPositionY(), me.GetPositionZ(), me.GetAngle(player), TempSummonType.TimedDespawnOutOfCombat, 30000);
+            player.SummonCreature(CreatureIds.StasisEntry[Random], me.GetPositionX(), me.GetPositionY(), me.GetPositionZ(), me.GetAbsoluteAngle(player), TempSummonType.TimedDespawnOutOfCombat, 30000);
 
             return false;
         }
@@ -953,8 +953,8 @@ namespace Scripts.World.GameObjects
         public override bool GossipHello(Player player)
         {
             player.SendLoot(me.GetGUID(), LootType.Corpse);
-            me.SummonCreature(CreatureIds.HiveAmbusher, me.GetPositionX() + 1, me.GetPositionY(), me.GetPositionZ(), me.GetAngle(player), TempSummonType.TimedOrDeadDespawn, 60000);
-            me.SummonCreature(CreatureIds.HiveAmbusher, me.GetPositionX(), me.GetPositionY() + 1, me.GetPositionZ(), me.GetAngle(player), TempSummonType.TimedOrDeadDespawn, 60000);
+            me.SummonCreature(CreatureIds.HiveAmbusher, me.GetPositionX() + 1, me.GetPositionY(), me.GetPositionZ(), me.GetAbsoluteAngle(player), TempSummonType.TimedOrDeadDespawn, 60000);
+            me.SummonCreature(CreatureIds.HiveAmbusher, me.GetPositionX(), me.GetPositionY() + 1, me.GetPositionZ(), me.GetAbsoluteAngle(player), TempSummonType.TimedOrDeadDespawn, 60000);
             return true;
         }
     }

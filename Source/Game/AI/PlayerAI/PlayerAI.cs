@@ -1296,7 +1296,7 @@ namespace Game.AI
 
                 if (me.IsStopped() && !me.HasUnitState(UnitState.CannotTurn))
                 {
-                    float targetAngle = me.GetAngle(target);
+                    float targetAngle = me.GetAbsoluteAngle(target);
                     if (_forceFacing || Math.Abs(me.GetOrientation() - targetAngle) > 0.4f)
                     {
                         me.SetFacingTo(targetAngle);

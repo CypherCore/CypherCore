@@ -2099,7 +2099,7 @@ namespace Scripts.World.NpcSpecial
                         _isSearching = false;
                         _target = target.GetGUID();
                         me.SetWalk(true);
-                        me.GetMotionMaster().MovePoint(TrainWrecker.MoveidChase, target.GetNearPosition(3.0f, target.GetAngle(me)));
+                        me.GetMotionMaster().MovePoint(TrainWrecker.MoveidChase, target.GetNearPosition(3.0f, target.GetAbsoluteAngle(me)));
                     }
                     else
                         _timer = 3 * Time.InMilliseconds;

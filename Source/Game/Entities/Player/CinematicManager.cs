@@ -136,7 +136,7 @@ namespace Game.Entities
                 lastPosition = new Position(cam.locations.X, cam.locations.Y, cam.locations.Z, cam.locations.W);
                 lastTimestamp = cam.timeStamp;
             }
-            float angle = lastPosition.GetAngle(nextPosition);
+            float angle = lastPosition.GetAbsoluteAngle(nextPosition);
             angle -= lastPosition.GetOrientation();
             if (angle < 0)
                 angle += 2 * MathFunctions.PI;

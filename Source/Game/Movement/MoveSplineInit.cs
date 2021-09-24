@@ -192,7 +192,7 @@ namespace Game.Movement
 
         public void SetFacing(Unit target)
         {
-            args.facing.angle = unit.GetAngle(target);
+            args.facing.angle = unit.GetAbsoluteAngle(target);
             args.facing.target = target.GetGUID();
             args.facing.type = MonsterMoveType.FacingTarget;
         }

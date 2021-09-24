@@ -152,7 +152,7 @@ namespace Game.Movement
                     if (hoverDiff != 0f)
                         size = size > hoverDiff ? MathF.Sqrt(size * size - hoverDiff * hoverDiff) : 0.0f;
 
-                    GetTarget().GetNearPoint(owner, out x, out y, out z, size, SharedConst.ContactDistance, GetTarget().GetAngle(owner));
+                    GetTarget().GetNearPoint(owner, out x, out y, out z, size, SharedConst.ContactDistance, GetTarget().GetAbsoluteAngle(owner));
                 }
                 else
                 {

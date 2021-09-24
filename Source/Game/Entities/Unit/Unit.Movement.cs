@@ -188,7 +188,7 @@ namespace Game.Entities
         public void SetInFront(WorldObject target)
         {
             if (!HasUnitState(UnitState.CannotTurn))
-                Orientation = GetAngle(target.GetPosition());
+                Orientation = GetAbsoluteAngle(target.GetPosition());
         }
 
         public void SetFacingTo(float ori, bool force = true)
@@ -210,7 +210,7 @@ namespace Game.Entities
                 return;
 
             // @todo figure out under what conditions creature will move towards object instead of facing it where it currently is.
-            SetFacingTo(GetAngle(obj));
+            SetFacingTo(GetAbsoluteAngle(obj));
         }
 
         public void MonsterMoveWithSpeed(float x, float y, float z, float speed, bool generatePath = false, bool forceDestination = false)
@@ -387,7 +387,7 @@ namespace Game.Entities
             float x, y, z;
             obj.GetContactPoint(this, out x, out y, out z);
             float speedXY = GetExactDist2d(x, y) * 10.0f / speedZ;
-            GetMotionMaster().MoveJump(x, y, z, GetAngle(obj), speedXY, speedZ, EventId.Jump, withOrientation);
+            GetMotionMaster().MoveJump(x, y, z, GetAbsoluteAngle(obj), speedXY, speedZ, EventId.Jump, withOrientation);
         }
 
         public void UpdateSpeed(UnitMoveType mtype)
@@ -629,19 +629,6 @@ namespace Game.Entities
             float objBoundaryRadius = Math.Max(obj.GetBoundingRadius(), SharedConst.MinMeleeReach);
 
             return IsInDist(obj, objBoundaryRadius);
-        }
-
-        public void GetRandomContactPoint(Unit obj, out float x, out float y, out float z, float distance2dMin, float distance2dMax)
-        {
-            float combat_reach = GetCombatReach();
-            if (combat_reach < 0.1f)
-                combat_reach = SharedConst.DefaultPlayerCombatReach;
-
-            int attacker_number = GetAttackers().Count;
-            if (attacker_number > 0)
-                --attacker_number;
-            GetNearPoint(obj, out x, out y, out z, obj.GetCombatReach(), distance2dMin + (distance2dMax - distance2dMin) * (float)RandomHelper.NextDouble()
-                , GetAngle(obj.GetPosition()) + (attacker_number != 0 ? MathFunctions.PiOver2 - MathFunctions.PI * (float)RandomHelper.NextDouble() * (float)attacker_number / combat_reach * 0.3f : 0.0f));
         }
 
         public bool SetDisableGravity(bool disable)

@@ -2973,7 +2973,7 @@ namespace Game.Entities
             Vector3 vObj = new(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ());
             Vector3 contactPoint = vThis + (vObj - vThis).directionOrZero() * Math.Min(dest.GetExactDist(GetPosition()), GetCombatReach());
 
-            return new Position(contactPoint.X, contactPoint.Y, contactPoint.Z, GetAngle(contactPoint.X, contactPoint.Y));
+            return new Position(contactPoint.X, contactPoint.Y, contactPoint.Z, GetAbsoluteAngle(contactPoint.X, contactPoint.Y));
         }
 
         void GetHitSpherePointFor(Position dest, out float x, out float y, out float z)
@@ -3047,7 +3047,7 @@ namespace Game.Entities
             if (size == 0)
                 size = GetCombatReach() / 2;
 
-            float angle = pos1.GetAngle(pos2);
+            float angle = pos1.GetAbsoluteAngle(pos2);
 
             // not using sqrt() for performance
             return (size * size) >= GetExactDist2dSq(pos1.GetPositionX() + (float)Math.Cos(angle) * dist, pos1.GetPositionY() + (float)Math.Sin(angle) * dist);
@@ -3159,7 +3159,7 @@ namespace Game.Entities
         {
             GetNearPoint2D(out x, out y, distance2d + searcher_size, absAngle);
             z = GetPositionZ();
-            UpdateAllowedPositionZ(x, y, ref z);
+            (searcher ?? this).UpdateAllowedPositionZ(x, y, ref z);
 
             // if detection disabled, return first point
             if (!WorldConfig.GetBoolValue(WorldCfg.DetectPosCollision))
@@ -3179,7 +3179,7 @@ namespace Game.Entities
             {
                 GetNearPoint2D(out x, out y, distance2d + searcher_size, absAngle + angle);
                 z = GetPositionZ();
-                UpdateAllowedPositionZ(x, y, ref z);
+                (searcher ?? this).UpdateAllowedPositionZ(x, y, ref z);
                 if (IsWithinLOS(x, y, z))
                     return;
             }
@@ -3190,10 +3190,10 @@ namespace Game.Entities
             z = first_z;
         }
 
-        public void GetClosePoint(out float x, out float y, out float z, float size, float distance2d = 0, float angle = 0)
+        public void GetClosePoint(out float x, out float y, out float z, float size, float distance2d = 0, float relAngle = 0)
         {
             // angle calculated from current orientation
-            GetNearPoint(null, out x, out y, out z, size, distance2d, GetOrientation() + angle);
+            GetNearPoint(null, out x, out y, out z, size, distance2d, GetOrientation() + relAngle);
         }
 
         public Position GetNearPosition(float dist, float angle)
@@ -3220,7 +3220,7 @@ namespace Game.Entities
         public void GetContactPoint(WorldObject obj, out float x, out float y, out float z, float distance2d = 0.5f)
         {
             // angle to face `obj` to `this` using distance includes size of `obj`
-            GetNearPoint(obj, out x, out y, out z, obj.GetCombatReach(), distance2d, GetAngle(obj));
+            GetNearPoint(obj, out x, out y, out z, obj.GetCombatReach(), distance2d, GetAbsoluteAngle(obj));
         }
 
         public void MovePosition(Position pos, float dist, float angle)

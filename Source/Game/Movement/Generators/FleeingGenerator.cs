@@ -135,7 +135,7 @@ namespace Game.Movement
             {
                 casterDistance = fleeTarget.GetDistance(owner);
                 if (casterDistance > 0.2f)
-                    casterAngle = fleeTarget.GetAngle(owner);
+                    casterAngle = fleeTarget.GetAbsoluteAngle(owner);
                 else
                     casterAngle = RandomHelper.FRand(0.0f, 2.0f * MathF.PI);
             }

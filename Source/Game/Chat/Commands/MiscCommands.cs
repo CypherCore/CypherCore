@@ -366,7 +366,7 @@ namespace Game.Chat
                 float x, y, z;
                 target.GetContactPoint(_player, out x, out y, out z);
 
-                _player.TeleportTo(target.GetMapId(), x, y, z, _player.GetAngle(target), TeleportToOptions.GMMode);
+                _player.TeleportTo(target.GetMapId(), x, y, z, _player.GetAbsoluteAngle(target), TeleportToOptions.GMMode);
                 PhasingHandler.InheritPhaseShift(_player, target);
                 _player.UpdateObjectVisibility();
             }
