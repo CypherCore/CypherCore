@@ -1709,7 +1709,7 @@ namespace Game.Spells
                                     // randomize position for multiple summons
                                     pos = caster.GetRandomPoint(destTarget, radius);
 
-                                summon = caster.SummonCreature(entry, pos, summonType, (uint)duration, 0, privateObjectOwner);
+                                summon = caster.SummonCreature(entry, pos, summonType, (uint)duration, 0, m_spellInfo.Id, privateObjectOwner);
                                 if (summon == null)
                                     continue;
 
@@ -1717,7 +1717,6 @@ namespace Game.Spells
                                 {
                                     summon.SetOwnerGUID(caster.GetGUID());
                                     summon.SetFaction(caster.GetFaction());
-                                    summon.SetCreatedBySpell(m_spellInfo.Id);
                                 }
 
                                 ExecuteLogEffectSummonObject(effectInfo.Effect, summon);
