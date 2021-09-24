@@ -185,7 +185,7 @@ namespace Game.Entities
         }
         public float GetExactDistSq(float x, float y, float z)
         {
-            float dz = posZ - z;
+            float dz = z - posZ;
 
             return GetExactDist2dSq(x, y) + dz * dz;
         }
@@ -207,8 +207,8 @@ namespace Game.Entities
         }
         public float GetExactDist2dSq(float x, float y)
         {
-            float dx = posX - x;
-            float dy = posY - y;
+            float dx = x - posX;
+            float dy = y - posY;
 
             return dx * dx + dy * dy;
         }
@@ -225,9 +225,7 @@ namespace Game.Entities
             float dx = x - GetPositionX();
             float dy = y - GetPositionY();
 
-            float ang = (float)Math.Atan2(dy, dx);
-            ang = ang >= 0 ? ang : 2 * MathFunctions.PI + ang;
-            return ang;
+            return NormalizeOrientation(MathF.Atan2(dy, dx));
         }
         public float GetAbsoluteAngle(Position pos)
         {
