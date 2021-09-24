@@ -1873,8 +1873,6 @@ namespace Game.Entities
                         if (pProto != null && pProto.GetItemSet() != 0)
                             Item.RemoveItemsSetItem(this, pProto);
 
-                        // remove here before _ApplyItemMods (for example to register correct damages of unequipped weapon)
-                        m_items[slot] = null;
                         _ApplyItemMods(pItem, slot, false, update);
 
                         pItem.RemoveItemFlag2(ItemFieldFlags2.Equipped);
@@ -1897,9 +1895,8 @@ namespace Game.Entities
                             }
                         }
                     }
-                    else
-                        m_items[slot] = null;
 
+                    m_items[slot] = null;
                     SetInvSlot(slot, ObjectGuid.Empty);
 
                     if (slot < EquipmentSlot.End)
@@ -3811,7 +3808,7 @@ namespace Game.Entities
             }
 
             WeaponAttackType attType = GetAttackBySlot(slot, proto.GetInventoryType());
-            if (attType != WeaponAttackType.Max && CanUseAttackType(attType))
+            if (attType != WeaponAttackType.Max)
                 _ApplyWeaponDamage(slot, item, apply);
         }
 
@@ -5440,9 +5437,6 @@ namespace Game.Entities
                         if (pProto != null && pProto.GetItemSet() != 0)
                             Item.RemoveItemsSetItem(this, pProto);
 
-                        // clear m_items so weapons for example can be registered as unequipped
-                        m_items[slot] = null;
-
                         _ApplyItemMods(pItem, slot, false);
                     }
 
@@ -5467,10 +5461,8 @@ namespace Game.Entities
                         // equipment visual show
                         SetVisibleItemSlot(slot, null);
                     }
-
-                    // clear for rest of items (ie nonequippable)
-                    if (slot >= InventorySlots.BagEnd)
-                        m_items[slot] = null;
+                    
+                    m_items[slot] = null;
                 }
                 else if ((pBag = GetBagByPos(bag)) != null)
                     pBag.RemoveItem(slot, update);

@@ -295,7 +295,7 @@ namespace Game.Entities
         {
             ItemTemplate proto = item.GetTemplate();
             WeaponAttackType attType = GetAttackBySlot(slot, proto.GetInventoryType());
-            if (attType == WeaponAttackType.Max)
+            if (!IsInFeralForm() && apply && !CanUseAttackType(attType))
                 return;
 
             float damage = 0.0f;
