@@ -4967,7 +4967,7 @@ namespace Game.Spells
                 damage = Unit.SpellCriticalDamageBonus(caster, m_spellInfo, damage, target);
 
             // Calculate armor mitigation
-            if (Unit.IsDamageReducedByArmor(GetSpellInfo().GetSchoolMask(), GetSpellInfo(), GetSpellEffectInfo()))
+            if (Unit.IsDamageReducedByArmor(GetSpellInfo().GetSchoolMask(), GetSpellInfo()))
             {
                 uint damageReducedArmor = Unit.CalcArmorReducedDamage(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetAttackType(), GetBase().GetCasterLevel());
                 cleanDamage.mitigated_damage += damage - damageReducedArmor;
@@ -5049,7 +5049,7 @@ namespace Game.Spells
                 damage = Unit.SpellCriticalDamageBonus(caster, m_spellInfo, damage, target);
 
             // Calculate armor mitigation
-            if (Unit.IsDamageReducedByArmor(GetSpellInfo().GetSchoolMask(), GetSpellInfo(), GetSpellEffectInfo()))
+            if (Unit.IsDamageReducedByArmor(GetSpellInfo().GetSchoolMask(), GetSpellInfo()))
             {
                 uint damageReducedArmor = Unit.CalcArmorReducedDamage(caster, target, damage, GetSpellInfo(), GetSpellInfo().GetAttackType(), GetBase().GetCasterLevel());
                 cleanDamage.mitigated_damage += damage - damageReducedArmor;

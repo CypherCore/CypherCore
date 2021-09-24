@@ -2089,28 +2089,13 @@ namespace Game.Entities
                 RemoveDynamicUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.ChannelObjects), index);
         }
 
-        public static bool IsDamageReducedByArmor(SpellSchoolMask schoolMask, SpellInfo spellInfo = null, SpellEffectInfo spellEffectInfo = null)
+        public static bool IsDamageReducedByArmor(SpellSchoolMask schoolMask, SpellInfo spellInfo = null)
         {
             // only physical spells damage gets reduced by armor
             if ((schoolMask & SpellSchoolMask.Normal) == 0)
                 return false;
 
-            if (spellInfo != null)
-            {
-                // there are spells with no specific attribute but they have "ignores armor" in tooltip
-                if (spellInfo.HasAttribute(SpellCustomAttributes.IgnoreArmor))
-                    return false;
-
-                // bleeding effects are not reduced by armor
-                if (spellEffectInfo != null)
-                {
-                    if (spellEffectInfo.ApplyAuraName == AuraType.PeriodicDamage || spellEffectInfo.Effect == SpellEffectName.SchoolDamage)
-                        if (spellInfo.GetEffectMechanicMask(spellEffectInfo.EffectIndex).HasAnyFlag((1u << (int)Mechanics.Bleed)))
-                            return false;
-                }
-            }
-
-            return true;
+            return spellInfo == null || !spellInfo.HasAttribute(SpellCustomAttributes.IgnoreArmor);
         }
 
         public override UpdateFieldFlag GetUpdateFieldFlagsFor(Player target)

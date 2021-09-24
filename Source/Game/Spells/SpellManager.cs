@@ -2630,6 +2630,10 @@ namespace Game.Entities
             {
                 foreach (var spellEffectInfo in spellInfo.GetEffects())
                 {
+                    // all bleed effects and spells ignore armor
+                    if ((spellInfo.GetEffectMechanicMask(spellEffectInfo.EffectIndex) & (1 << (int)Mechanics.Bleed)) != 0)
+                        spellInfo.AttributesCu |= SpellCustomAttributes.IgnoreArmor;
+
                     switch (spellEffectInfo.ApplyAuraName)
                     {
                         case AuraType.ModPossess:
