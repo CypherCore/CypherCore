@@ -141,7 +141,6 @@ namespace Game.Movement
             float x, y, z;
             if (updateDestination || _path == null)
             {
-                float hoverDiff = Math.Abs(owner.GetHoverOffset() - GetTarget().GetHoverOffset());
                 if (_offset == 0)
                 {
                     if (GetTarget().IsWithinDistInMap(owner, SharedConst.ContactDistance))

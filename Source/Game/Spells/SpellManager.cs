@@ -2905,7 +2905,15 @@ namespace Game.Entities
                         spellInfo.AttributesCu &= ~SpellCustomAttributes.CanCrit;
             }
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded spell custom attributes in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
+            // add custom attribute to liquid auras
+            foreach (var liquid in CliDB.LiquidTypeStorage.Values)
+            {
+                if (liquid.SpellID != 0)
+                    foreach (SpellInfo spellInfo in _GetSpellInfo(liquid.SpellID))
+                        spellInfo.AttributesCu |= SpellCustomAttributes.AuraCannotBeSaved;
+            }
+
+            Log.outInfo(LogFilter.ServerLoading, "Loaded SpellInfo custom attributes in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
         void ApplySpellFix(int[] spellIds, Action<SpellInfo> fix)

@@ -3169,7 +3169,7 @@ namespace Game.Entities
 
                     float hoverDelta = myHover - searcherHover;
                     if (hoverDelta != 0.0f)
-                        effectiveReach = MathF.Sqrt(effectiveReach * effectiveReach - hoverDelta * hoverDelta);
+                        effectiveReach = MathF.Sqrt(Math.Max(effectiveReach * effectiveReach - hoverDelta * hoverDelta, 0.0f));
                 }
             }
 
