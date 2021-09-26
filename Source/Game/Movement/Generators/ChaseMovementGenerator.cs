@@ -49,6 +49,7 @@ namespace Game.Movement
         {
             owner.AddUnitState(UnitState.Chase);
             owner.SetWalk(false);
+            _path = null;
         }
 
         public bool Update(Unit owner, uint diff)
@@ -187,18 +188,18 @@ namespace Game.Movement
                 cOwner.SetCannotReachTarget(false);
         }
 
-        public MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Chase; }
-
         public void Reset(Unit owner) { Initialize(owner); }
+
+        public MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Chase; }
 
         public void UnitSpeedChanged() { _lastTargetPosition.Relocate(0.0f, 0.0f, 0.0f); }
 
         static bool IsMutualChase(Unit owner, Unit target)
         {
-            IMovementGenerator gen = target.GetMotionMaster().TopOrNull();
-            if (gen == null || gen.GetMovementGeneratorType() != MovementGeneratorType.Chase)
+            if (target.GetMotionMaster().GetCurrentMovementGeneratorType() != MovementGeneratorType.Chase)
                 return false;
-            return ((ChaseMovementGenerator)gen).GetTarget() == owner;
+
+            return ((ChaseMovementGenerator)target.GetMotionMaster().Top()).GetTarget() == owner;
         }
 
         static bool PositionOkay(Unit owner, Unit target, float? minDistance, float? maxDistance, ChaseAngle? angle)

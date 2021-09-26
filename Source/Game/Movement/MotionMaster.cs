@@ -35,13 +35,19 @@ namespace Game.Movement
         {
             _owner = me;
             _top = -1;
-            _cleanFlag = MMCleanFlag.None;
+            _cleanFlag = MotionMasterCleanFlag.None;
 
             for (byte i = 0; i < (int)MovementSlot.Max; ++i)
             {
                 _slot[i] = null;
                 _initialize[i] = true;
             }
+        }
+
+        public IMovementGenerator Top()
+        {
+            Cypher.Assert(!Empty());
+            return _slot[_top];
         }
 
         public void Initialize()
@@ -61,7 +67,7 @@ namespace Game.Movement
         {
             if (_owner.IsTypeId(TypeId.Unit))
             {
-                IMovementGenerator movement = AISelector.SelectMovementAI(_owner.ToCreature());
+                IMovementGenerator movement = AISelector.SelectMovementAI(_owner);
                 StartMovement(movement ?? staticIdleMovement, MovementSlot.Idle);
             }
             else
@@ -75,14 +81,14 @@ namespace Game.Movement
 
             Cypher.Assert(!Empty());
 
-            _cleanFlag |= MMCleanFlag.Update;
+            _cleanFlag |= MotionMasterCleanFlag.Update;
             if (!Top().Update(_owner, diff))
             {
-                _cleanFlag &= ~MMCleanFlag.Update;
+                _cleanFlag &= ~MotionMasterCleanFlag.Update;
                 MovementExpired();
             }
             else
-                _cleanFlag &= ~MMCleanFlag.Update;
+                _cleanFlag &= ~MotionMasterCleanFlag.Update;
 
             if (!_expireList.Empty())
                 ClearExpireList();
@@ -90,12 +96,12 @@ namespace Game.Movement
 
         public void Clear(bool reset = true)
         {
-            if (Convert.ToBoolean(_cleanFlag & MMCleanFlag.Update))
+            if (Convert.ToBoolean(_cleanFlag & MotionMasterCleanFlag.Update))
             {
                 if (reset)
-                    _cleanFlag |= MMCleanFlag.Reset;
+                    _cleanFlag |= MotionMasterCleanFlag.Reset;
                 else
-                    _cleanFlag &= ~MMCleanFlag.Reset;
+                    _cleanFlag &= ~MotionMasterCleanFlag.Reset;
                 DelayedClean();
             }
             else
@@ -107,7 +113,7 @@ namespace Game.Movement
             if (Empty() || slot >= MovementSlot.Max)
                 return;
 
-            if (_cleanFlag.HasAnyFlag(MMCleanFlag.Update))
+            if (_cleanFlag.HasAnyFlag(MotionMasterCleanFlag.Update))
                 DelayedClean(slot);
             else
                 DirectClean(slot);
@@ -115,12 +121,12 @@ namespace Game.Movement
 
         public void MovementExpired(bool reset = true)
         {
-            if (Convert.ToBoolean(_cleanFlag & MMCleanFlag.Update))
+            if (Convert.ToBoolean(_cleanFlag & MotionMasterCleanFlag.Update))
             {
                 if (reset)
-                    _cleanFlag |= MMCleanFlag.Reset;
+                    _cleanFlag |= MotionMasterCleanFlag.Reset;
                 else
-                    _cleanFlag &= ~MMCleanFlag.Reset;
+                    _cleanFlag &= ~MotionMasterCleanFlag.Reset;
                 DelayedExpire();
             }
             else
@@ -130,7 +136,11 @@ namespace Game.Movement
         public MovementGeneratorType GetCurrentMovementGeneratorType()
         {
             if (Empty())
-                return MovementGeneratorType.Idle;
+                return MovementGeneratorType.Max;
+
+            IMovementGenerator movement = Top();
+            if (movement == null)
+                return MovementGeneratorType.Max;
 
             return Top().GetMovementGeneratorType();
         }
@@ -654,7 +664,7 @@ namespace Game.Movement
             if (curr != null)
             {
                 _slot[(int)slot] = null; // in case a new one is generated in this slot during directdelete
-                if (_top == (int)slot && Convert.ToBoolean(_cleanFlag & MMCleanFlag.Update))
+                if (_top == (int)slot && Convert.ToBoolean(_cleanFlag & MotionMasterCleanFlag.Update))
                     DelayedDelete(curr);
                 else
                     DirectDelete(curr);
@@ -794,26 +804,15 @@ namespace Game.Movement
                 Initialize();
             else if (NeedInitTop())
                 InitTop();
-            else if (_cleanFlag.HasAnyFlag(MMCleanFlag.Reset))
+            else if (_cleanFlag.HasAnyFlag(MotionMasterCleanFlag.Reset))
                 Top().Reset(_owner);
 
-            _cleanFlag &= ~MMCleanFlag.Reset;
+            _cleanFlag &= ~MotionMasterCleanFlag.Reset;
         }
 
         public bool Empty() { return (_top < 0); }
 
         int Size() { return _top + 1; }
-
-        public IMovementGenerator TopOrNull()
-        {
-            return Empty() ? null : Top();
-        }
-        
-        public IMovementGenerator Top()
-        {
-            Cypher.Assert(!Empty());
-            return _slot[_top];
-        }
 
         public static uint SplineId
         {
@@ -829,7 +828,7 @@ namespace Game.Movement
 
         Unit _owner { get; }
         IMovementGenerator[] _slot = new IMovementGenerator[(int)MovementSlot.Max];
-        MMCleanFlag _cleanFlag;
+        MotionMasterCleanFlag _cleanFlag;
         bool[] _initialize = new bool[(int)MovementSlot.Max];
         int _top;
         List<IMovementGenerator> _expireList = new();
@@ -841,7 +840,7 @@ namespace Game.Movement
         public ObjectGuid Target;
     }
 
-    enum MMCleanFlag
+    enum MotionMasterCleanFlag
     {
         None = 0,
         Update = 1, // Clear or Expire called from update

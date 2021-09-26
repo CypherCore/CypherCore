@@ -43,6 +43,7 @@ namespace Game.Movement
                 _wanderDistance = owner.GetRespawnRadius();
 
             _timer.Reset(0);
+            _path = null;
         }
 
         public override void DoReset(Creature owner)
@@ -59,6 +60,7 @@ namespace Game.Movement
             {
                 _interrupt = true;
                 owner.StopMoving();
+                _path = null;
                 return true;
             }
             else
@@ -87,6 +89,7 @@ namespace Game.Movement
             {
                 _interrupt = true;
                 owner.StopMoving();
+                _path = null;
                 return;
             }
 
@@ -100,9 +103,11 @@ namespace Game.Movement
             uint resetTimer = RandomHelper.randChance(50) ? RandomHelper.URand(5000, 10000) : RandomHelper.URand(1000, 2000);
 
             if (_path == null)
+            {
                 _path = new PathGenerator(owner);
+                _path.SetPathLengthLimit(30.0f);
+            }
 
-            _path.SetPathLengthLimit(30.0f);
             bool result = _path.CalculatePath(position.GetPositionX(), position.GetPositionY(), position.GetPositionZ());
             if (!result || _path.GetPathType().HasAnyFlag(PathType.NoPath))
             {

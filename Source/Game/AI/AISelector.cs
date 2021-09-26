@@ -97,10 +97,11 @@ namespace Game.AI
             return new NullCreatureAI(creature);
         }
 
-        public static IMovementGenerator SelectMovementAI(Creature creature)
+        public static IMovementGenerator SelectMovementAI(Unit unit)
         {
-            MovementGeneratorType type = MovementGeneratorType.Idle;
-            if (creature.GetPlayerMovingMe() == null)
+            MovementGeneratorType type = unit.GetDefaultMovementType();
+            Creature creature = unit.ToCreature();
+            if (creature != null && creature.GetPlayerMovingMe() == null)
                 type = creature.GetDefaultMovementType();
 
             return type switch

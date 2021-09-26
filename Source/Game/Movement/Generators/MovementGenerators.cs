@@ -55,14 +55,17 @@ namespace Game.Movement
             DoInitialize((T)owner);
             IsActive = true;
         }
+
         public virtual void Finalize(Unit owner)
         {
             DoFinalize((T)owner);
         }
+
         public virtual void Reset(Unit owner)
         {
             DoReset((T)owner);
         }
+
         public virtual bool Update(Unit owner, uint diff)
         {
             return DoUpdate((T)owner, diff);

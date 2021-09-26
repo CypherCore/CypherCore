@@ -40,6 +40,7 @@ namespace Game.Movement
             owner.AddUnitFlag(UnitFlags.Fleeing);
             owner.AddUnitState(UnitState.Fleeing);
             SetTargetLocation(owner);
+            _path = null;
         }
 
         public override void DoReset(T owner)
@@ -56,6 +57,7 @@ namespace Game.Movement
             {
                 _interrupt = true;
                 owner.StopMoving();
+                _path = null;
                 return true;
             }
             else
@@ -94,6 +96,7 @@ namespace Game.Movement
             {
                 _interrupt = true;
                 owner.StopMoving();
+                _path = null;
                 return;
             }
 
@@ -110,9 +113,11 @@ namespace Game.Movement
             }
 
             if (_path == null)
+            {
                 _path = new PathGenerator(owner);
+                _path.SetPathLengthLimit(30.0f);
+            }
 
-            _path.SetPathLengthLimit(30.0f);
             bool result = _path.CalculatePath(destination.GetPositionX(), destination.GetPositionY(), destination.GetPositionZ());
             if (!result || _path.GetPathType().HasAnyFlag(PathType.NoPath))
             {
@@ -216,6 +221,11 @@ namespace Game.Movement
             // This calls grant-parent Update method hiden by FleeingMovementGenerator.Update(Creature &, uint32) version
             // This is done instead of casting Unit& to Creature& and call parent method, then we can use Unit directly
             return base.Update(owner, diff);
+        }
+
+        public override MovementGeneratorType GetMovementGeneratorType()
+        {
+            return MovementGeneratorType.TimedFleeing;
         }
 
         TimeTracker _totalFleeTime;

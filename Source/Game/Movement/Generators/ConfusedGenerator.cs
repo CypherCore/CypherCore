@@ -39,6 +39,7 @@ namespace Game.Movement
 
             _timer.Reset(0);
             _reference = owner.GetPosition();
+            _path = null;
         }
 
         public override void DoReset(T owner)
@@ -55,6 +56,7 @@ namespace Game.Movement
             {
                 _interrupt = true;
                 owner.StopMoving();
+                _path = null;
                 return true;
             }
             else
@@ -73,9 +75,11 @@ namespace Game.Movement
                 owner.MovePositionToFirstCollision(destination, distance, angle);
 
                 if (_path == null)
+                {
                     _path = new PathGenerator(owner);
+                    _path.SetPathLengthLimit(30.0f);
+                }
 
-                _path.SetPathLengthLimit(30.0f);
                 bool result = _path.CalculatePath(destination.GetPositionX(), destination.GetPositionY(), destination.GetPositionZ());
                 if (!result || _path.GetPathType().HasAnyFlag(PathType.NoPath))
                 {

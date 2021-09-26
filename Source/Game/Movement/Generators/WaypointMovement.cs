@@ -257,7 +257,7 @@ namespace Game.Movement
                 // check if there is a wait time for the next movement
                 if (!_nextMoveTime.Passed())
                 {
-                    // dont update wait timer while moving
+                    // update timer since it's not moving
                     _nextMoveTime.Update((int)diff);
                     if (_nextMoveTime.Passed())
                     {
@@ -268,7 +268,7 @@ namespace Game.Movement
                 else // if it's not moving and there is no timer, assume node is reached
                 {
                     OnArrived(creature); // hooks and wait timer reset (if necessary)
-                    _isArrivalDone = true; // signals that the next move will happen after reaching a node
+                    _isArrivalDone = true; // signals to future StartMove that it reached a node
 
                     if (_nextMoveTime.Passed())
                         StartMove(creature); // check path status, get next point and move if necessary & can

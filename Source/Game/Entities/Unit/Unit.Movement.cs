@@ -150,6 +150,11 @@ namespace Game.Entities
 
         public float GetSpeedRate(UnitMoveType mtype) { return m_speed_rate[(int)mtype]; }
 
+        public virtual MovementGeneratorType GetDefaultMovementType()
+        {
+            return MovementGeneratorType.Idle;
+        }
+        
         public void StopMoving()
         {
             ClearUnitState(UnitState.Moving);
@@ -523,10 +528,9 @@ namespace Game.Entities
 
                 if (creature.HasUnitTypeMask(UnitTypeMask.Minion) && !creature.IsInCombat())
                 {
-                    var top = creature.GetMotionMaster().TopOrNull();
-                    if (top != null && top.GetMovementGeneratorType() == MovementGeneratorType.Follow)
+                    if (GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Follow)
                     {
-                        Unit followed = ((AbstractFollower)top).GetTarget();
+                        Unit followed = ((AbstractFollower)GetMotionMaster().Top()).GetTarget();
                         if (followed != null && followed.GetGUID() == GetOwnerGUID() && !followed.IsInCombat())
                         {
                             float ownerSpeed = followed.GetSpeedRate(mtype);

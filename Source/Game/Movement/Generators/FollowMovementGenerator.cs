@@ -44,6 +44,7 @@ namespace Game.Movement
         {
             owner.AddUnitState(UnitState.Follow);
             UpdatePetSpeed(owner);
+            _path = null;
         }
 
         public bool Update(Unit owner, uint diff)
