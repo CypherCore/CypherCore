@@ -4112,7 +4112,7 @@ namespace Game.AI
                 return false;
 
             bool smart = true;
-            if (creature != null && creature.GetAIName() != "SmartAI")
+            if (creature.GetAI<SmartAI>() == null)
                 smart = false;
 
             if (!smart && !silent)
@@ -4127,7 +4127,7 @@ namespace Game.AI
                 return false;
 
             bool smart = true;
-            if (gameObject != null && gameObject.GetAIName() != "SmartGameObjectAI")
+            if (gameObject.GetAI<SmartAI>() == null)
                 smart = false;
 
             if (!smart && !silent)
