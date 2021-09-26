@@ -44,7 +44,7 @@ namespace Game.Chat
                 return false;
 
             Quest quest = Global.ObjectMgr.GetQuestTemplate(entry);
-            if (quest == null)
+            if (quest == null || Global.DisableMgr.IsDisabledFor(DisableType.Quest, entry, null))
             {
                 handler.SendSysMessage(CypherStrings.CommandQuestNotfound, entry);
                 return false;
@@ -86,7 +86,7 @@ namespace Game.Chat
             Quest quest = Global.ObjectMgr.GetQuestTemplate(entry);
 
             // If player doesn't have the quest
-            if (quest == null || player.GetQuestStatus(entry) == QuestStatus.None)
+            if (quest == null || player.GetQuestStatus(entry) == QuestStatus.None || Global.DisableMgr.IsDisabledFor(DisableType.Quest, entry, null))
             {
                 handler.SendSysMessage(CypherStrings.CommandQuestNotfound, entry);
                 return false;
@@ -240,7 +240,7 @@ namespace Game.Chat
             Quest quest = Global.ObjectMgr.GetQuestTemplate(entry);
 
             // If player doesn't have the quest
-            if (quest == null || player.GetQuestStatus(entry) != QuestStatus.Complete)
+            if (quest == null || player.GetQuestStatus(entry) != QuestStatus.Complete || Global.DisableMgr.IsDisabledFor(DisableType.Quest, entry, null))
             {
                 handler.SendSysMessage(CypherStrings.CommandQuestNotfound, entry);
                 return false;

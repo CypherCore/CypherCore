@@ -367,12 +367,6 @@ namespace Game
                     }
                     return false;
                 case DisableType.Quest:
-                    if (refe == null)
-                        return true;
-                    Player player1 = refe.ToPlayer();
-                    if (player1 != null)
-                        if (player1.IsGameMaster())
-                            return false;
                     return true;
                 case DisableType.Battleground:
                 case DisableType.OutdoorPVP:
