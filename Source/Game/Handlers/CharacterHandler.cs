@@ -509,6 +509,13 @@ namespace Game
                         return;
                     }
 
+                    // Check name uniqueness in the same step as saving to database
+                    if (Global.CharacterCacheStorage.GetCharacterCacheByName(createInfo.Name) != null)
+                    {
+                        SendCharCreate(ResponseCodes.CharCreateNameInUse);
+                        return;
+                    }
+
                     Player newChar = new(this);
                     newChar.GetMotionMaster().Initialize();
                     if (!newChar.Create(Global.ObjectMgr.GetGenerator(HighGuid.Player).Generate(), createInfo))
