@@ -804,6 +804,11 @@ namespace Game.Movement
 
         int Size() { return _top + 1; }
 
+        public IMovementGenerator TopOrNull()
+        {
+            return Empty() ? null : Top();
+        }
+        
         public IMovementGenerator Top()
         {
             Cypher.Assert(!Empty());

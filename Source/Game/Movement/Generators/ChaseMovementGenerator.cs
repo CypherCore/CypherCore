@@ -73,12 +73,12 @@ namespace Game.Movement
                 return true;
             }
 
-            bool   mutualChase     = IsMutualChase(owner, target);
-            float  hitboxSum       = owner.GetCombatReach() + target.GetCombatReach();
-            float  minRange        = _range.HasValue ? _range.Value.MinRange + hitboxSum : SharedConst.ContactDistance;
-            float  minTarget       = (_range.HasValue ? _range.Value.MinTolerance : 0.0f) + hitboxSum;
-            float  maxRange        = _range.HasValue ? _range.Value.MaxRange + hitboxSum : owner.GetMeleeRange(target); // melee range already includes hitboxes
-            float  maxTarget       = _range.HasValue ? _range.Value.MaxTolerance + hitboxSum : SharedConst.ContactDistance + hitboxSum;
+            bool mutualChase = IsMutualChase(owner, target);
+            float hitboxSum = owner.GetCombatReach() + target.GetCombatReach();
+            float minRange = _range.HasValue ? _range.Value.MinRange + hitboxSum : SharedConst.ContactDistance;
+            float minTarget = (_range.HasValue ? _range.Value.MinTolerance : 0.0f) + hitboxSum;
+            float maxRange = _range.HasValue ? _range.Value.MaxRange + hitboxSum : owner.GetMeleeRange(target); // melee range already includes hitboxes
+            float maxTarget = _range.HasValue ? _range.Value.MaxTolerance + hitboxSum : SharedConst.ContactDistance + hitboxSum;
             ChaseAngle? angle = mutualChase ? null : _angle;
 
             // if we're already moving, periodically check if we're already in the expected range...
@@ -195,7 +195,7 @@ namespace Game.Movement
 
         static bool IsMutualChase(Unit owner, Unit target)
         {
-            IMovementGenerator gen = target.GetMotionMaster().Top();
+            IMovementGenerator gen = target.GetMotionMaster().TopOrNull();
             if (gen == null || gen.GetMovementGeneratorType() != MovementGeneratorType.Chase)
                 return false;
             return ((ChaseMovementGenerator)gen).GetTarget() == owner;

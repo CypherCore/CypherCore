@@ -523,7 +523,7 @@ namespace Game.Entities
 
                 if (creature.HasUnitTypeMask(UnitTypeMask.Minion) && !creature.IsInCombat())
                 {
-                    var top = creature.GetMotionMaster().Top();
+                    var top = creature.GetMotionMaster().TopOrNull();
                     if (top != null && top.GetMovementGeneratorType() == MovementGeneratorType.Follow)
                     {
                         Unit followed = ((AbstractFollower)top).GetTarget();
