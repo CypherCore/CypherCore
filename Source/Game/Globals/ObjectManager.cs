@@ -3319,7 +3319,7 @@ namespace Game
                 data.phaseGroup = result.Read<uint>(25);
                 data.terrainSwapMap = result.Read<int>(26);
                 data.ScriptId = GetScriptId(result.Read<string>(27));
-                data.spawnGroupData = _spawnGroupDataStorage[0];
+                data.spawnGroupData = _spawnGroupDataStorage[IsTransportMap(data.spawnPoint.GetMapId()) ? 1 : 0]; // transport spawns default to compatibility group
 
                 var mapEntry = CliDB.MapStorage.LookupByKey(data.spawnPoint.GetMapId());
                 if (mapEntry == null)
@@ -4063,7 +4063,7 @@ namespace Game
                 data.rotation.Z = result.Read<float>(9);
                 data.rotation.W = result.Read<float>(10);
                 data.spawntimesecs = result.Read<int>(11);
-                data.spawnGroupData = _spawnGroupDataStorage[0];
+                data.spawnGroupData = _spawnGroupDataStorage[IsTransportMap(data.spawnPoint.GetMapId()) ? 1 : 0]; // transport spawns default to compatibility group
 
                 var mapEntry = CliDB.MapStorage.LookupByKey(data.spawnPoint.GetMapId());
                 if (mapEntry == null)

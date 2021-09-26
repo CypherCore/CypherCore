@@ -657,12 +657,13 @@ namespace Game.Chat
                     data.Id = id;
                     data.spawnPoint.Relocate(chr.GetTransOffsetX(), chr.GetTransOffsetY(), chr.GetTransOffsetZ(), chr.GetTransOffsetO());
                     data.spawnGroupData = new();
-                    // @todo: add phases
 
-                    Creature _creature = trans.CreateNPCPassenger(guid, data);
-                    _creature.SaveToDB((uint)trans.GetGoInfo().MoTransport.SpawnMap, new List<Difficulty>() { map.GetDifficultyID() });
-
-                    Global.ObjectMgr.AddCreatureToGrid(guid, data);
+                    Creature creaturePassenger = trans.CreateNPCPassenger(guid, data);
+                    if (creaturePassenger != null)
+                    {
+                        creaturePassenger.SaveToDB((uint)trans.GetGoInfo().MoTransport.SpawnMap, new List<Difficulty>() { map.GetDifficultyID() });
+                        Global.ObjectMgr.AddCreatureToGrid(guid, data);
+                    }
                     return true;
                 }
 

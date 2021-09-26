@@ -318,6 +318,8 @@ namespace Game.Entities
         public Creature CreateNPCPassenger(ulong guid, CreatureData data)
         {
             Map map = GetMap();
+            if (map.GetCreatureRespawnTime(guid) != 0)
+                return null;
 
             Creature creature = Creature.CreateCreatureFromDB(guid, map, false, true);
             if (!creature)
@@ -359,6 +361,8 @@ namespace Game.Entities
         GameObject CreateGOPassenger(ulong guid, GameObjectData data)
         {
             Map map = GetMap();
+            if (map.GetGORespawnTime(guid) != 0)
+                return null;
 
             GameObject go = CreateGameObjectFromDB(guid, map, false);
             if (!go)
