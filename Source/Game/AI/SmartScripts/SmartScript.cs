@@ -481,7 +481,7 @@ namespace Game.AI
 
                                     if (_me.GetDistance(target) > spellInfo.GetMaxRange(true) ||
                                         _me.GetDistance(target) < spellInfo.GetMinRange(true) ||
-                                        !_me.IsWithinLOSInMap(target) || !hasPower)
+                                        !_me.IsWithinLOSInMap(target) || !hasPower || _me.HasUnitFlag(UnitFlags.Silenced))
                                         allowMove = true;
 
                                     ((SmartAI)_me.GetAI()).SetCombatMove(allowMove);
