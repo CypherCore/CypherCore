@@ -19,6 +19,7 @@ using Framework.Constants;
 using Framework.Database;
 using Game.DataStorage;
 using Game.Entities;
+using Game.Movement;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
@@ -717,7 +718,7 @@ namespace Game.AI
                     }
                     case SmartEvents.Movementinform:
                     {
-                        if (e.Event.movementInform.type >= (uint)MovementGeneratorType.Max)
+                        if (MotionMaster.IsInvalidMovementGeneratorType((MovementGeneratorType)e.Event.movementInform.type))
                         {
                             Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses invalid Motion type {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.Event.movementInform.type);
                             return false;

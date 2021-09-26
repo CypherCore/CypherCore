@@ -110,7 +110,7 @@ namespace Game.Movement
 
         public void Clear(MovementSlot slot)
         {
-            if (Empty() || slot >= MovementSlot.Max)
+            if (Empty() || IsInvalidMovementSlot(slot))
                 return;
 
             if (_cleanFlag.HasAnyFlag(MotionMasterCleanFlag.Update))
@@ -147,7 +147,7 @@ namespace Game.Movement
 
         public MovementGeneratorType GetMotionSlotType(MovementSlot slot)
         {
-            if (Empty() || slot >= MovementSlot.Max || _slot[(int)slot] == null)
+            if (Empty() || IsInvalidMovementSlot(slot) || _slot[(int)slot] == null)
                 return MovementGeneratorType.Max;
 
             return _slot[(int)slot].GetMovementGeneratorType();
@@ -155,7 +155,7 @@ namespace Game.Movement
 
         public IMovementGenerator GetMotionSlot(MovementSlot slot)
         {
-            if (Empty() || slot >= MovementSlot.Max || _slot[(int)slot] == null)
+            if (Empty() || IsInvalidMovementSlot(slot) || _slot[(int)slot] == null)
                 return null;
 
             return _slot[(int)slot];
@@ -814,7 +814,8 @@ namespace Game.Movement
             return (movement == staticIdleMovement);
         }
 
-        bool IsInvalidMovementGeneratorType(MovementGeneratorType type) { return type == MovementGeneratorType.MaxDB || type == MovementGeneratorType.Max; }
+        public static bool IsInvalidMovementGeneratorType(MovementGeneratorType type) { return type == MovementGeneratorType.MaxDB || type >= MovementGeneratorType.Max; }
+        public static bool IsInvalidMovementSlot(MovementSlot slot) { return slot >= MovementSlot.Max; }
 
         static uint splineId;
 

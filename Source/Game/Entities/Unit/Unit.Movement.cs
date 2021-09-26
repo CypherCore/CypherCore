@@ -169,7 +169,7 @@ namespace Game.Entities
 
         public void PauseMovement(uint timer = 0, MovementSlot slot = 0, bool forced = true)
         {
-            if (slot >= MovementSlot.Max)
+            if (MotionMaster.IsInvalidMovementSlot(slot))
                 return;
 
             IMovementGenerator movementGenerator = GetMotionMaster().GetMotionSlot(slot);
@@ -182,7 +182,7 @@ namespace Game.Entities
 
         public void ResumeMovement(uint timer = 0, MovementSlot slot = 0)
         {
-            if (slot >= MovementSlot.Max)
+            if (MotionMaster.IsInvalidMovementSlot(slot))
                 return;
 
             IMovementGenerator movementGenerator = GetMotionMaster().GetMotionSlot(slot);
