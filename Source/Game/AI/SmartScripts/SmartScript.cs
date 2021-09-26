@@ -4127,7 +4127,7 @@ namespace Game.AI
                 return false;
 
             bool smart = true;
-            if (gameObject.GetAI<SmartAI>() == null)
+            if (gameObject.GetAI<SmartGameObjectAI>() == null)
                 smart = false;
 
             if (!smart && !silent)

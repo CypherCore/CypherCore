@@ -1644,7 +1644,7 @@ namespace Game
                 if (item.GetPos() == dstPos)
                     continue;
 
-                if (_player.CanEquipItem(ItemConst.NullSlot, out dstPos, item, false) != InventoryResult.Ok)
+                if (_player.CanEquipItem(i, out dstPos, item, true) != InventoryResult.Ok)
                     continue;
 
                 GetPlayer().SwapItem(item.GetPos(), dstPos);
