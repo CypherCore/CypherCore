@@ -645,7 +645,6 @@ namespace Game.AI
             if (who != null && me.Attack(who, _canAutoAttack))
             {
                 me.GetMotionMaster().Clear(MovementSlot.Active);
-                me.PauseMovement();
 
                 if (_canCombatMove)
                 {
