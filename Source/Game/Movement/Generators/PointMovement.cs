@@ -173,43 +173,4 @@ namespace Game.Movement
                 owner.GetMotionMaster().MoveSeekAssistanceDistract(WorldConfig.GetUIntValue(WorldCfg.CreatureFamilyAssistanceDelay));
         }
     }
-
-    public class EffectMovementGenerator : IMovementGenerator
-    {
-        public EffectMovementGenerator(uint Id, uint arrivalSpellId = 0, ObjectGuid arrivalSpellTargetGuid = default)
-        {
-            _pointId = Id;
-            _arrivalSpellId = arrivalSpellId;
-            _arrivalSpellTargetGuid = arrivalSpellTargetGuid;
-        }
-
-        public void Initialize(Unit owner) { }
-
-        public void Reset(Unit owner) { }
-
-        public bool Update(Unit owner, uint diff)
-        {
-            return !owner.MoveSpline.Finalized();
-        }
-
-        public void Finalize(Unit owner)
-        {
-            MovementInform(owner);
-        }
-
-        public void MovementInform(Unit owner)
-        {
-            if (_arrivalSpellId != 0)
-                owner.CastSpell(Global.ObjAccessor.GetUnit(owner, _arrivalSpellTargetGuid), _arrivalSpellId, true); 
-            
-            if (owner.ToCreature() && owner.ToCreature().GetAI() != null)
-                owner.ToCreature().GetAI().MovementInform(MovementGeneratorType.Effect, _pointId);
-        }
-
-        public MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Effect; }
-
-        uint _pointId;
-        uint _arrivalSpellId;
-        ObjectGuid _arrivalSpellTargetGuid;
-    }
 }

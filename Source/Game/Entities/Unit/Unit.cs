@@ -999,7 +999,7 @@ namespace Game.Entities
             init.MoveTo(pos.GetPositionX(), pos.GetPositionY(), height, false);
             init.SetFacing(GetOrientation());
             init.SetTransportExit();
-            init.Launch();
+            GetMotionMaster().LaunchMoveSpline(init, EventId.VehicleExit, MovementSlot.Controlled);
 
             if (player != null)
                 player.ResummonPetTemporaryUnSummonedIfAny();

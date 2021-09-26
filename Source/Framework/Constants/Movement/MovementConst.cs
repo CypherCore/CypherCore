@@ -59,6 +59,11 @@ namespace Framework.Constants
         /// and had a path already generated - using it in PointMovementGenerator will not
         /// create a new spline and launch it
         public const uint ChargePrepath = 1005;
+
+        public const uint Face = 1006;
+        public const uint VehicleBoard = 1007;
+        public const uint VehicleExit = 1008;
+
         public const uint SmartRandomPoint = 0xFFFFFE;
         public const uint SmartEscortLastOCCPoint = 0xFFFFFF;
     }

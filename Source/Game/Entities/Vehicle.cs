@@ -641,7 +641,7 @@ namespace Game.Entities
             init.MoveTo(veSeat.AttachmentOffset.X, veSeat.AttachmentOffset.Y, veSeat.AttachmentOffset.Z, false, true);
             init.SetFacing(0.0f);
             init.SetTransportEnter();
-            init.Launch();
+            Passenger.GetMotionMaster().LaunchMoveSpline(init, EventId.VehicleBoard, MovementSlot.Controlled);
 
             Creature creature = Target.GetBase().ToCreature();
             if (creature != null)

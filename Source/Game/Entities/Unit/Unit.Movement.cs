@@ -205,7 +205,7 @@ namespace Game.Entities
             MoveSplineInit init = new(this);
             init.MoveTo(GetPositionX(), GetPositionY(), GetPositionZ(), false);
             init.SetFacing(ori);
-            init.Launch();
+            GetMotionMaster().LaunchMoveSpline(init, EventId.Face, MovementSlot.Controlled);
         }
 
         public void SetFacingToObject(WorldObject obj, bool force = true)
@@ -223,7 +223,7 @@ namespace Game.Entities
             MoveSplineInit init = new(this);
             init.MoveTo(x, y, z, generatePath, forceDestination);
             init.SetVelocity(speed);
-            init.Launch();
+            GetMotionMaster().LaunchMoveSpline(init, 0, MovementSlot.Active, MovementGeneratorType.Point);
         }
 
         public void KnockbackFrom(float x, float y, float speedXY, float speedZ, SpellEffectExtraData spellEffectExtraData = null)

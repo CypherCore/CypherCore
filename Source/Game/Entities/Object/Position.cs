@@ -353,6 +353,10 @@ namespace Game.Entities
         {
             return new(position.posX, position.posY);
         }
+        public static implicit operator Vector3(Position position)
+        {
+            return new(position.posX, position.posY, position.posZ);
+        }
     }
 
     public class WorldLocation : Position

@@ -202,18 +202,20 @@ namespace Game.Movement
 
         public void MoveTargetedHome()
         {
+            Creature owner = _owner.ToCreature();
+            if (owner == null)
+            {
+                Log.outError(LogFilter.Movement, $"MotionMaster::MoveTargetedHome: '{_owner.GetGUID()}', attempted to move towards target home.");
+                return;
+            }
+
             Clear(false);
 
-            if (_owner.IsTypeId(TypeId.Unit) && _owner.ToCreature().GetCharmerOrOwnerGUID().IsEmpty())
-            {
+            Unit target = owner.GetCharmerOrOwner();
+            if (target == null)
                 StartMovement(new HomeMovementGenerator<Creature>(), MovementSlot.Active);
-            }
-            else if (_owner.IsTypeId(TypeId.Unit) && !_owner.ToCreature().GetCharmerOrOwnerGUID().IsEmpty())
-            {
-                Unit target = _owner.ToCreature().GetCharmerOrOwner();
-                if (target)
-                    StartMovement(new FollowMovementGenerator(target, SharedConst.PetFollowDist, new ChaseAngle(SharedConst.PetFollowAngle)), MovementSlot.Active);
-            }
+            else
+                StartMovement(new FollowMovementGenerator(target, SharedConst.PetFollowDist, new ChaseAngle(SharedConst.PetFollowAngle)), MovementSlot.Active);
         }
 
         public void MoveRandom(float spawndist = 0.0f)
@@ -230,8 +232,6 @@ namespace Game.Movement
             if (!target || target == _owner)
                 return;
 
-            Log.outDebug(LogFilter.Misc, $"{(_owner.IsPlayer() ? "Player" : "Creature")} (Entry: {_owner.GetEntry()}, {_owner.GetGUID()}) follows {(target.IsPlayer() ? "player" : "creature")} (Entry {target.GetEntry()}, {target.GetGUID()}).");
-
             StartMovement(new FollowMovementGenerator(target, dist, angle), slot);
         }
 
@@ -241,8 +241,6 @@ namespace Game.Movement
         {
             if (!target || target == _owner)
                 return;
-
-            Log.outDebug(LogFilter.Misc, $"{(_owner.IsPlayer() ? "Player" : "Creature")} (Entry: {_owner.GetEntry()}, {_owner.GetGUID()}) chase to {(target.IsPlayer() ? "player" : "creature")} (Entry: {target.GetEntry()}, {target.GetGUID()})");
 
             StartMovement(new ChaseMovementGenerator(target, dist, angle), MovementSlot.Active);
         }
@@ -260,15 +258,15 @@ namespace Game.Movement
             if (!enemy)
                 return;
 
-            if (_owner.IsTypeId(TypeId.Player))
-                StartMovement(new FleeingGenerator<Player>(enemy.GetGUID()), MovementSlot.Controlled);
-            else
+            if (_owner.IsCreature())
             {
                 if (time != 0)
                     StartMovement(new TimedFleeingGenerator(enemy.GetGUID(), time), MovementSlot.Controlled);
                 else
                     StartMovement(new FleeingGenerator<Creature>(enemy.GetGUID()), MovementSlot.Controlled);
             }
+            else
+                StartMovement(new FleeingGenerator<Player>(enemy.GetGUID()), MovementSlot.Controlled);
         }
 
         public void MovePoint(uint id, Position pos, bool generatePath = true, float? finalOrient = null)
@@ -300,33 +298,25 @@ namespace Game.Movement
                 MoveSplineInit init = new(_owner);
                 init.MoveTo(_owner.GetPositionX(), _owner.GetPositionY(), _owner.GetPositionZ());
                 init.SetFacing(target);
-                init.Launch();
-                StartMovement(new EffectMovementGenerator(id), MovementSlot.Active);
+                StartMovement(new GenericMovementGenerator(init, MovementGeneratorType.Effect, id), MovementSlot.Active);
             }
         }
 
         public void MoveLand(uint id, Position pos)
         {
-            float x, y, z;
-            pos.GetPosition(out x, out y, out z);
-
             MoveSplineInit init = new(_owner);
-            init.MoveTo(x, y, z);
+            init.MoveTo(pos);
             init.SetAnimation(AnimType.ToGround);
-            init.Launch();
-            StartMovement(new EffectMovementGenerator(id), MovementSlot.Active);
+            StartMovement(new GenericMovementGenerator(init, MovementGeneratorType.Effect, id), MovementSlot.Active);
         }
 
         public void MoveTakeoff(uint id, Position pos)
         {
-            float x, y, z;
-            pos.GetPosition(out x, out y, out z);
-
             MoveSplineInit init = new(_owner);
-            init.MoveTo(x, y, z);
+            init.MoveTo(pos);
             init.SetAnimation(AnimType.ToFly);
-            init.Launch();
-            StartMovement(new EffectMovementGenerator(id), MovementSlot.Active);
+
+            StartMovement(new GenericMovementGenerator(init, MovementGeneratorType.Effect, id), MovementSlot.Active);
         }
 
         public void MoveCharge(float x, float y, float z, float speed = SPEED_CHARGE, uint id = EventId.Charge, bool generatePath = false, Unit target = null, SpellEffectExtraData spellEffectExtraData = null)
@@ -381,8 +371,7 @@ namespace Game.Movement
             if (spellEffectExtraData != null)
                 init.SetSpellEffectExtraData(spellEffectExtraData);
 
-            init.Launch();
-            StartMovement(new EffectMovementGenerator(0), MovementSlot.Controlled);
+            StartMovement(new GenericMovementGenerator(init, MovementGeneratorType.Effect, 0), MovementSlot.Controlled);
         }
 
         public void MoveJumpTo(float angle, float speedXY, float speedZ)
@@ -422,7 +411,6 @@ namespace Game.Movement
                 init.SetFacing(o);
             if (spellEffectExtraData != null)
                 init.SetSpellEffectExtraData(spellEffectExtraData);
-            init.Launch();
 
             uint arrivalSpellId = 0;
             ObjectGuid arrivalSpellTargetGuid = ObjectGuid.Empty;
@@ -432,7 +420,7 @@ namespace Game.Movement
                 arrivalSpellTargetGuid = arrivalCast.Target;
             }
 
-            StartMovement(new EffectMovementGenerator(id, arrivalSpellId, arrivalSpellTargetGuid), MovementSlot.Controlled);
+            StartMovement(new GenericMovementGenerator(init, MovementGeneratorType.Effect, id, arrivalSpellId, arrivalSpellTargetGuid), MovementSlot.Controlled);
         }
 
         public void MoveCirclePath(float x, float y, float z, float radius, bool clockwise, byte stepCount)
@@ -469,7 +457,7 @@ namespace Game.Movement
                 init.SetCyclic();
             }
 
-            init.Launch();
+            StartMovement(new GenericMovementGenerator(init, MovementGeneratorType.Effect, 0), MovementSlot.Active);
         }
 
         void MoveSmoothPath(uint pointId, Vector3[] pathPoints, int pathSize, bool walk = false, bool fly = false)
@@ -484,14 +472,11 @@ namespace Game.Movement
 
             init.MovebyPath(pathPoints);
             init.SetWalk(walk);
-            init.Launch();
 
             // This code is not correct
-            // EffectMovementGenerator does not affect UNIT_STATE_ROAMING | UNIT_STATE_ROAMING_MOVE
+            // GenericMovementGenerator does not affect UNIT_STATE_ROAMING | UNIT_STATE_ROAMING_MOVE
             // need to call PointMovementGenerator with various pointIds
-            StartMovement(new EffectMovementGenerator(pointId), MovementSlot.Active);
-            //Position pos(pathPoints[pathSize - 1].x, pathPoints[pathSize - 1].y, pathPoints[pathSize - 1].z);
-            //MovePoint(EVENT_CHARGE_PREPATH, pos, false);
+            StartMovement(new GenericMovementGenerator(init, MovementGeneratorType.Effect, pointId), MovementSlot.Active);
         }
 
         public void MoveAlongSplineChain(uint pointId, uint dbChainId, bool walk)
@@ -550,29 +535,28 @@ namespace Game.Movement
             MoveSplineInit init = new(_owner);
             init.MoveTo(_owner.GetPositionX(), _owner.GetPositionY(), tz + _owner.GetHoverOffset(), false);
             init.SetFall();
-            init.Launch();
-            StartMovement(new EffectMovementGenerator(id), MovementSlot.Controlled);
+            StartMovement(new GenericMovementGenerator(init, MovementGeneratorType.Effect, id), MovementSlot.Controlled);
         }
 
         public void MoveSeekAssistance(float x, float y, float z)
         {
-            if (_owner.IsTypeId(TypeId.Player))
-                Log.outError(LogFilter.Server, "Player {0} attempt to seek assistance", _owner.GetGUID().ToString());
-            else
+            if (_owner.IsCreature())
             {
                 _owner.AttackStop();
                 _owner.CastStop();
                 _owner.ToCreature().SetReactState(ReactStates.Passive);
                 StartMovement(new AssistanceMovementGenerator(x, y, z), MovementSlot.Active);
             }
+            else
+                Log.outError(LogFilter.Server, $"MotionMaster::MoveSeekAssistance: {_owner.GetGUID()}, attempted to seek assistance");
         }
 
         public void MoveSeekAssistanceDistract(uint time)
         {
-            if (_owner.IsTypeId(TypeId.Player))
-                Log.outError(LogFilter.Server, "Player {0} attempt to call distract after assistance", _owner.GetGUID().ToString());
-            else
+            if (_owner.IsCreature())
                 StartMovement(new AssistanceDistractMovementGenerator(time), MovementSlot.Active);
+            else
+                Log.outError(LogFilter.Server, $"MotionMaster::MoveSeekAssistanceDistract: {_owner.GetGUID()} attempted to call distract after assistance");
         }
 
         public void MoveTaxiFlight(uint path, uint pathnode)
@@ -581,22 +565,17 @@ namespace Game.Movement
             {
                 if (path < CliDB.TaxiPathNodesByPath.Count)
                 {
-                    Log.outDebug(LogFilter.Server, "{0} taxi to (Path {1} node {2})", _owner.GetName(), path, pathnode);
-                    FlightPathMovementGenerator mgen = new();
-                    mgen.LoadPath(_owner.ToPlayer());
-                    StartMovement(mgen, MovementSlot.Controlled);
+                    Log.outDebug(LogFilter.Server, $"MotionMaster::MoveTaxiFlight: {_owner.GetGUID()} taxi to Path Id: {path} (node {pathnode})");
+                    FlightPathMovementGenerator movement = new();
+                    movement.LoadPath(_owner.ToPlayer());
+                    StartMovement(movement, MovementSlot.Controlled);
                 }
                 else
-                {
-                    Log.outDebug(LogFilter.Server, "{0} attempt taxi to (not existed Path {1} node {2})",
-                    _owner.GetName(), path, pathnode);
-                }
+                    Log.outError(LogFilter.Movement, $"MotionMaster::MoveTaxiFlight: '{_owner.GetGUID()}', attempted taxi to non-existing path Id: {path} (node: {pathnode})");
+
             }
             else
-            {
-                Log.outDebug(LogFilter.Server, "Creature (Entry: {0} GUID: {1}) attempt taxi to (Path {2} node {3})",
-                _owner.GetEntry(), _owner.GetGUID().ToString(), path, pathnode);
-            }
+                Log.outError(LogFilter.Movement, $"MotionMaster::MoveTaxiFlight: '{_owner.GetGUID()}', attempted taxi to path Id: {path} (node: {pathnode})");
         }
 
         public void MoveDistract(uint timer)
@@ -632,6 +611,17 @@ namespace Game.Movement
         {
             if (_owner.GetTypeId() == TypeId.Unit)
                 StartMovement(new FormationMovementGenerator(id, destination, moveType, forceRun, forceOrientation), MovementSlot.Active);
+        }
+
+        public void LaunchMoveSpline(MoveSplineInit init, uint id = 0, MovementSlot slot = MovementSlot.Active, MovementGeneratorType type = MovementGeneratorType.Effect)
+        {
+            if (IsInvalidMovementGeneratorType(type))
+            {
+                Log.outDebug(LogFilter.Movement, $"MotionMaster::LaunchMoveSpline: '{_owner.GetGUID()}', tried to launch a spline with an invalid MovementGeneratorType: {type} (Id: {id}, Slot: {slot})");
+                return;
+            }
+
+            StartMovement(new GenericMovementGenerator(init, type, id), slot);
         }
 
         void Pop()
@@ -823,6 +813,8 @@ namespace Game.Movement
         {
             return (movement == staticIdleMovement);
         }
+
+        bool IsInvalidMovementGeneratorType(MovementGeneratorType type) { return type == MovementGeneratorType.MaxDB || type == MovementGeneratorType.Max; }
 
         static uint splineId;
 
