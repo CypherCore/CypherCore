@@ -204,8 +204,12 @@ namespace Game.Entities
 
             MoveSplineInit init = new(this);
             init.MoveTo(GetPositionX(), GetPositionY(), GetPositionZ(), false);
+            if (GetTransport())
+                init.DisableTransportPathTransformations(); // It makes no sense to target global orientation
             init.SetFacing(ori);
-            GetMotionMaster().LaunchMoveSpline(init, EventId.Face, MovementSlot.Controlled);
+
+            //GetMotionMaster().LaunchMoveSpline(init, EventId.Face, MovementSlot.Controlled);
+            init.Launch();
         }
 
         public void SetFacingToObject(WorldObject obj, bool force = true)
@@ -215,7 +219,12 @@ namespace Game.Entities
                 return;
 
             // @todo figure out under what conditions creature will move towards object instead of facing it where it currently is.
-            SetFacingTo(GetAbsoluteAngle(obj));
+            MoveSplineInit init = new(this);
+            init.MoveTo(GetPositionX(), GetPositionY(), GetPositionZ(), false);
+            init.SetFacing(GetAbsoluteAngle(obj));   // when on transport, GetAbsoluteAngle will still return global coordinates (and angle) that needs transforming
+
+            //GetMotionMaster().LaunchMoveSpline(init, EventId.Face, MovementSlot.Controlled);
+            init.Launch();
         }
 
         public void MonsterMoveWithSpeed(float x, float y, float z, float speed, bool generatePath = false, bool forceDestination = false)
