@@ -933,10 +933,11 @@ namespace Game.Chat
                         handler.SendSysMessage($"{target.GetName()} ({target.GetGUID()}, SpawnID {(target.IsCreature() ? target.ToCreature().GetSpawnId() : 0)}) is not engaged, but still has a threat list? Well, here it is:");
 
                     count = 0;
+                    Unit fixateVictim = mgr.GetFixateTarget();
                     foreach (ThreatReference refe in mgr.GetSortedThreatList())
                     {
                         Unit unit = refe.GetVictim();
-                        handler.SendSysMessage($"   {++count}.   {unit.GetName()}   ({unit.GetGUID()})  - threat {refe.GetThreat()}[{refe.GetTauntState()}][{refe.GetOnlineState()}]");
+                        handler.SendSysMessage($"   {++count}.   {unit.GetName()}   ({unit.GetGUID()})  - threat {refe.GetThreat()}[{(unit == fixateVictim ? "FIXATE" : refe.GetTauntState())}][{refe.GetOnlineState()}]");
                     }
                     handler.SendSysMessage("End of threat list.");
                 }

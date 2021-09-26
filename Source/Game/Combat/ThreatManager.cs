@@ -37,6 +37,7 @@ namespace Game.Combat
         List<ThreatReference> _sortedThreatList = new();
         Dictionary<ObjectGuid, ThreatReference> _myThreatListEntries = new();
         ThreatReference _currentVictimRef;
+        ThreatReference _fixateRef;
 
         Dictionary<ObjectGuid, ThreatReference> _threatenedByMe = new(); // these refs are entries for myself on other units' threat lists
         public float[] _singleSchoolModifiers = new float[(int)SpellSchools.Max]; // most spells are single school - we pre-calculate these and store them
@@ -387,10 +388,38 @@ namespace Game.Combat
             while (!_myThreatListEntries.Empty());
         }
 
+        public void FixateTarget(Unit target)
+        {
+            if (target)
+            {
+                var it = _myThreatListEntries.LookupByKey(target.GetGUID());
+                if (it != null)
+                {
+                    _fixateRef = it;
+                    return;
+                }
+            }
+            _fixateRef = null;
+        }
+
+        public Unit GetFixateTarget()
+        {
+            if (_fixateRef != null)
+                return _fixateRef.GetVictim();
+            else
+                return null;
+        }
+
+        public void ClearFixate() { FixateTarget(null); }
+
         ThreatReference ReselectVictim()
         {
+            // fixated target is always preferred
+            if (_fixateRef != null && _fixateRef.IsAvailable())
+                return _fixateRef;
+
             ThreatReference oldVictimRef = _currentVictimRef;
-            if (oldVictimRef != null && !oldVictimRef.IsAvailable())
+            if (oldVictimRef != null && oldVictimRef.IsOffline())
                 oldVictimRef = null;
 
             // in 99% of cases - we won't need to actually look at anything beyond the first element
@@ -640,6 +669,8 @@ namespace Game.Combat
 
             if (_currentVictimRef == refe)
                 _currentVictimRef = null;
+            if (_fixateRef == refe)
+                _fixateRef = null;
 
             _sortedThreatList.Remove(refe);
             _sortedThreatList.Sort();
