@@ -536,10 +536,10 @@ namespace Game.Entities
             return Global.BattlegroundMgr.GetBattleground(GetBattlegroundId(), m_bgData.bgTypeID);
         }
 
-        public bool InBattlegroundQueue()
+        public bool InBattlegroundQueue(bool ignoreArena = false)
         {
             for (byte i = 0; i < SharedConst.MaxPlayerBGQueues; ++i)
-                if (m_bgBattlegroundQueueID[i].bgQueueTypeId != default)
+                if (m_bgBattlegroundQueueID[i].bgQueueTypeId != default && (!ignoreArena || m_bgBattlegroundQueueID[i].bgQueueTypeId.BattlemasterListId != (ushort)BattlegroundTypeId.AA))
                     return true;
             return false;
         }

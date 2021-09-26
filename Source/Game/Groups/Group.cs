@@ -1768,7 +1768,7 @@ namespace Game.Groups
                 if (isInRandomBgQueue)
                     return GroupJoinBattlegroundResult.InRandomBg;
                 // don't let join to bg queue random if someone from the group is already in bg queue
-                if ((bgOrTemplate.GetTypeID() == BattlegroundTypeId.RB || bgOrTemplate.GetTypeID() == BattlegroundTypeId.RandomEpic) && member.InBattlegroundQueue() && !isInRandomBgQueue)
+                if ((bgOrTemplate.GetTypeID() == BattlegroundTypeId.RB || bgOrTemplate.GetTypeID() == BattlegroundTypeId.RandomEpic) && member.InBattlegroundQueue(true) && !isInRandomBgQueue)
                     return GroupJoinBattlegroundResult.InNonRandomBg;
                 // check for deserter debuff in case not arena queue
                 if (bgOrTemplate.GetTypeID() != BattlegroundTypeId.AA && !member.CanJoinToBattleground(bgOrTemplate))
