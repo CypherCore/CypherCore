@@ -152,7 +152,7 @@ namespace Game.Collision
         {
             AreaAndLiquidData data = new();
 
-            Vector3 v = new(x, y, z +0.5f);
+            Vector3 v = new(x, y, z + 0.5f);
             DynamicTreeLocationInfoCallback intersectionCallBack = new(phaseShift);
             impl.IntersectPoint(v, intersectionCallBack);
             if (intersectionCallBack.GetLocationInfo().hitModel != null)

@@ -286,7 +286,7 @@ namespace Game.DataStorage
             uint oldMSTime = Time.GetMSTime();
             // Load area trigger positions (to put them on the server)
             //                                            0        1              2             3      4     5     6     7            8              9        10
-            SQLResult templates = DB.World.Query("SELECT SpawnId, AreaTriggerId, IsServerSide, MapId, PosX, PosY, PosZ, Orientation, PhaseUseFlags, PhaseId, PhaseGroup " +
+            SQLResult templates = DB.World.Query("SELECT SpawnId, AreaTriggerId, IsServerSide, MapId, PosX, PosY, PosZ, Orientation, PhaseUseFlags, PhaseId, PhaseGroup, " +
                 //11     12          13          14          15          16          17
                 "Shape, ShapeData0, ShapeData1, ShapeData2, ShapeData3, ShapeData4, ShapeData5 FROM `areatrigger`");
             if (!templates.IsEmpty())

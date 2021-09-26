@@ -41,7 +41,8 @@ namespace Game.Spells
                 if (spellEffect == null)
                     continue;
 
-                _effects.Add(new SpellEffectInfo(this, spellEffect));
+                _effects.EnsureWritableListIndex(spellEffect.EffectIndex, new SpellEffectInfo(this));
+                _effects[(int)spellEffect.EffectIndex] = new SpellEffectInfo(this, spellEffect);
             }
 
             SpellName = spellName.Name;
@@ -252,7 +253,10 @@ namespace Game.Spells
             SpellName = spellName.Name;
 
             foreach (SpellEffectRecord spellEffect in effects)
-                _effects.Add(new SpellEffectInfo(this, spellEffect));
+            {
+                _effects.EnsureWritableListIndex(spellEffect.EffectIndex, new SpellEffectInfo(this));
+                _effects[(int)spellEffect.EffectIndex] = new SpellEffectInfo(this, spellEffect);
+            }
         }
 
         public bool HasEffect(SpellEffectName effect)
@@ -307,6 +311,9 @@ namespace Game.Spells
 
         public bool IsExplicitDiscovery()
         {
+            if (GetEffects().Count < 2)
+                return false;
+
             return ((GetEffect(0).Effect == SpellEffectName.CreateRandomItem
                 || GetEffect(0).Effect == SpellEffectName.CreateLoot)
                 && GetEffect(1).Effect == SpellEffectName.ScriptEffect)
@@ -3917,37 +3924,40 @@ namespace Game.Spells
 
     public class SpellEffectInfo
     {
-        public SpellEffectInfo(SpellInfo spellInfo, SpellEffectRecord effect)
+        public SpellEffectInfo(SpellInfo spellInfo, SpellEffectRecord effect = null)
         {
             _spellInfo = spellInfo;
-            EffectIndex = effect.EffectIndex;
-            Effect = (SpellEffectName)effect.Effect;
-            ApplyAuraName = (AuraType)effect.EffectAura;
-            ApplyAuraPeriod = effect.EffectAuraPeriod;
-            BasePoints = (int)effect.EffectBasePoints;
-            RealPointsPerLevel = effect.EffectRealPointsPerLevel;
-            PointsPerResource = effect.EffectPointsPerResource;
-            Amplitude = effect.EffectAmplitude;
-            ChainAmplitude = effect.EffectChainAmplitude;
-            BonusCoefficient = effect.EffectBonusCoefficient;
-            MiscValue = effect.EffectMiscValue[0];
-            MiscValueB = effect.EffectMiscValue[1];
-            Mechanic = (Mechanics)effect.EffectMechanic;
-            PositionFacing = effect.EffectPosFacing;
-            TargetA = new SpellImplicitTargetInfo((Targets)effect.ImplicitTarget[0]);
-            TargetB = new SpellImplicitTargetInfo((Targets)effect.ImplicitTarget[1]);
-            RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(effect.EffectRadiusIndex[0]);
-            MaxRadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(effect.EffectRadiusIndex[1]);
-            ChainTargets = effect.EffectChainTargets;
-            ItemType = effect.EffectItemType;
-            TriggerSpell = effect.EffectTriggerSpell;
-            SpellClassMask = effect.EffectSpellClassMask;
-            BonusCoefficientFromAP = effect.BonusCoefficientFromAP;
-            Scaling.Class = effect.ScalingClass;
-            Scaling.Coefficient = effect.Coefficient;
-            Scaling.Variance = effect.Variance;
-            Scaling.ResourceCoefficient = effect.ResourceCoefficient;
-            EffectAttributes = effect.EffectAttributes;
+            if (effect != null)
+            {
+                EffectIndex = effect.EffectIndex;
+                Effect = (SpellEffectName)effect.Effect;
+                ApplyAuraName = (AuraType)effect.EffectAura;
+                ApplyAuraPeriod = effect.EffectAuraPeriod;
+                BasePoints = (int)effect.EffectBasePoints;
+                RealPointsPerLevel = effect.EffectRealPointsPerLevel;
+                PointsPerResource = effect.EffectPointsPerResource;
+                Amplitude = effect.EffectAmplitude;
+                ChainAmplitude = effect.EffectChainAmplitude;
+                BonusCoefficient = effect.EffectBonusCoefficient;
+                MiscValue = effect.EffectMiscValue[0];
+                MiscValueB = effect.EffectMiscValue[1];
+                Mechanic = (Mechanics)effect.EffectMechanic;
+                PositionFacing = effect.EffectPosFacing;
+                TargetA = new SpellImplicitTargetInfo((Targets)effect.ImplicitTarget[0]);
+                TargetB = new SpellImplicitTargetInfo((Targets)effect.ImplicitTarget[1]);
+                RadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(effect.EffectRadiusIndex[0]);
+                MaxRadiusEntry = CliDB.SpellRadiusStorage.LookupByKey(effect.EffectRadiusIndex[1]);
+                ChainTargets = effect.EffectChainTargets;
+                ItemType = effect.EffectItemType;
+                TriggerSpell = effect.EffectTriggerSpell;
+                SpellClassMask = effect.EffectSpellClassMask;
+                BonusCoefficientFromAP = effect.BonusCoefficientFromAP;
+                Scaling.Class = effect.ScalingClass;
+                Scaling.Coefficient = effect.Coefficient;
+                Scaling.Variance = effect.Variance;
+                Scaling.ResourceCoefficient = effect.ResourceCoefficient;
+                EffectAttributes = effect.EffectAttributes;
+            }
 
             ImplicitTargetConditions = null;
 
@@ -4669,8 +4679,8 @@ namespace Game.Spells
         public int MiscValueB;
         public Mechanics Mechanic;
         public float PositionFacing;
-        public SpellImplicitTargetInfo TargetA;
-        public SpellImplicitTargetInfo TargetB;
+        public SpellImplicitTargetInfo TargetA = new();
+        public SpellImplicitTargetInfo TargetB = new();
         public SpellRadiusRecord RadiusEntry;
         public SpellRadiusRecord MaxRadiusEntry;
         public int ChainTargets;

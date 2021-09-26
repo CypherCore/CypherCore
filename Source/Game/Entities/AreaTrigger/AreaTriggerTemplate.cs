@@ -311,7 +311,7 @@ namespace Game.Entities
         public AreaTriggerScaleInfo OverrideScale = new();
         public AreaTriggerScaleInfo ExtraScale = new();
 
-        public AreaTriggerShapeInfo Shape;
+        public AreaTriggerShapeInfo Shape = new();
         public List<Vector2> PolygonVertices = new();
         public List<Vector2> PolygonVerticesTarget = new();
         public List<Vector3> SplinePoints = new();
@@ -327,7 +327,7 @@ namespace Game.Entities
         public uint PhaseGroup;
         public byte PhaseUseFlags;
 
-        public AreaTriggerShapeInfo Shape;
+        public AreaTriggerShapeInfo Shape = new();
     }
 
     public struct AreaTriggerAction

@@ -2462,7 +2462,7 @@ namespace Game.Entities
                         Log.outError(LogFilter.Sql, $"Serverside spell {spellId} difficulty {difficulty} has invalid max radius id {effect.EffectRadiusIndex[1]} at index {effect.EffectIndex}, set to 0");
                     }
 
-                    spellEffects[(spellId, difficulty)].Add(effect);
+                    spellEffects.Add((spellId, difficulty), effect);
 
                 } while (effectsResult.NextRow());
             }

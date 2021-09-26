@@ -282,7 +282,7 @@ namespace Game.Collision
         public GameObjectModel GetHitModel() { return _hitModel; }
 
         PhaseShift _phaseShift;
-        LocationInfo _locationInfo;
-        GameObjectModel _hitModel;
+        LocationInfo _locationInfo = new();
+        GameObjectModel _hitModel = new();
     }
 }
