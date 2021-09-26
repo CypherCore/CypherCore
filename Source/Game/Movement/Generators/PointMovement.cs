@@ -135,7 +135,7 @@ namespace Game.Movement
             }
         }
 
-        public override void UnitSpeedChanged()
+        public void UnitSpeedChanged()
         {
             _recalculateSpeed = true;
         }
@@ -183,16 +183,16 @@ namespace Game.Movement
             _arrivalSpellTargetGuid = arrivalSpellTargetGuid;
         }
 
-        public override void Initialize(Unit owner) { }
+        public void Initialize(Unit owner) { }
 
-        public override void Reset(Unit owner) { }
+        public void Reset(Unit owner) { }
 
-        public override bool Update(Unit owner, uint diff)
+        public bool Update(Unit owner, uint diff)
         {
             return !owner.MoveSpline.Finalized();
         }
 
-        public override void Finalize(Unit owner)
+        public void Finalize(Unit owner)
         {
             MovementInform(owner);
         }
@@ -206,7 +206,7 @@ namespace Game.Movement
                 owner.ToCreature().GetAI().MovementInform(MovementGeneratorType.Effect, _pointId);
         }
 
-        public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Effect; }
+        public MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Effect; }
 
         uint _pointId;
         uint _arrivalSpellId;

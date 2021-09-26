@@ -4887,7 +4887,7 @@ namespace Game.Spells
                             else if (m_preGeneratedPath.IsInvalidDestinationZ(target)) // Check position z, if in a straight line
                                 return SpellCastResult.NoPath;
 
-                            m_preGeneratedPath.ReducePathLenghtByDist(objSize); //move back
+                            m_preGeneratedPath.ShortenPathUntilDist(target, objSize); //move back
                         }
                         break;
                     }

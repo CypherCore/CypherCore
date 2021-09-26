@@ -133,7 +133,7 @@ namespace Game.Movement
                 MovementInform(owner);
         }
 
-        public override void UnitSpeedChanged()
+        public void UnitSpeedChanged()
         {
             _recalculateSpeed = true;
         }

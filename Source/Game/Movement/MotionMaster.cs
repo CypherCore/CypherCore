@@ -28,7 +28,7 @@ namespace Game.Movement
     public class MotionMaster
     {
         public const double gravity = 19.29110527038574;
-        public const float SPEED_CHARGE  =  42.0f;
+        public const float SPEED_CHARGE = 42.0f;
         IdleMovementGenerator staticIdleMovement = new();
 
         public MotionMaster(Unit me)
@@ -139,7 +139,7 @@ namespace Game.Movement
         {
             if (Empty() || slot >= MovementSlot.Max || _slot[(int)slot] == null)
                 return MovementGeneratorType.Max;
-            
+
             return _slot[(int)slot].GetMovementGeneratorType();
         }
 
@@ -202,7 +202,7 @@ namespace Game.Movement
             {
                 Unit target = _owner.ToCreature().GetCharmerOrOwner();
                 if (target)
-                    StartMovement(new FollowMovementGenerator<Creature>(target, SharedConst.PetFollowDist, SharedConst.PetFollowAngle), MovementSlot.Active);
+                    StartMovement(new FollowMovementGenerator(target, SharedConst.PetFollowDist, new ChaseAngle(SharedConst.PetFollowAngle)), MovementSlot.Active);
             }
         }
 
@@ -212,27 +212,29 @@ namespace Game.Movement
                 StartMovement(new RandomMovementGenerator(spawndist), MovementSlot.Idle);
         }
 
-        public void MoveFollow(Unit target, float dist = 0.0f, float angle = 0.0f, MovementSlot slot = MovementSlot.Idle)
+        public void MoveFollow(Unit target, float dist, float angle = 0.0f, MovementSlot slot = MovementSlot.Idle) { MoveFollow(target, dist, new ChaseAngle(angle), slot); }
+
+        public void MoveFollow(Unit target, float dist, ChaseAngle angle, MovementSlot slot = MovementSlot.Idle)
         {
             // ignore movement request if target not exist
             if (!target || target == _owner)
                 return;
 
-            if (_owner.IsTypeId(TypeId.Player))
-                StartMovement(new FollowMovementGenerator<Player>(target, dist, angle), slot);
-            else
-                StartMovement(new FollowMovementGenerator<Creature>(target, dist, angle), slot);
+            Log.outDebug(LogFilter.Misc, $"{(_owner.IsPlayer() ? "Player" : "Creature")} (Entry: {_owner.GetEntry()}, {_owner.GetGUID()}) follows {(target.IsPlayer() ? "player" : "creature")} (Entry {target.GetEntry()}, {target.GetGUID()}).");
+
+            StartMovement(new FollowMovementGenerator(target, dist, angle), slot);
         }
 
-        public void MoveChase(Unit target, float dist = 0.0f, float angle = 0.0f)
+        public void MoveChase(Unit target, float dist, float angle = 0.0f) { MoveChase(target, new ChaseRange(dist), new ChaseAngle(angle)); }
+
+        public void MoveChase(Unit target, ChaseRange? dist = null, ChaseAngle? angle = null)
         {
             if (!target || target == _owner)
                 return;
 
-            if (_owner.IsTypeId(TypeId.Player))
-                StartMovement(new ChaseMovementGenerator<Player>(target, dist, angle), MovementSlot.Active);
-            else
-                StartMovement(new ChaseMovementGenerator<Creature>(target, dist, angle), MovementSlot.Active);
+            Log.outDebug(LogFilter.Misc, $"{(_owner.IsPlayer() ? "Player" : "Creature")} (Entry: {_owner.GetEntry()}, {_owner.GetGUID()}) chase to {(target.IsPlayer() ? "player" : "creature")} (Entry: {target.GetEntry()}, {target.GetGUID()})");
+
+            StartMovement(new ChaseMovementGenerator(target, dist, angle), MovementSlot.Active);
         }
 
         public void MoveConfused()
@@ -839,5 +841,60 @@ namespace Game.Movement
         None = 0,
         Update = 1, // Clear or Expire called from update
         Reset = 2  // Flag if need top().Reset()
+    }
+
+    public struct ChaseRange
+    {
+        // this contains info that informs how we should path!
+        public float MinRange;     // we have to move if we are within this range...    (min. attack range)
+        public float MinTolerance; // ...and if we are, we will move this far away
+        public float MaxRange;     // we have to move if we are outside this range...   (max. attack range)
+        public float MaxTolerance; // ...and if we are, we will move into this range
+
+        public ChaseRange(float range)
+        {
+            MinRange = range > SharedConst.ContactDistance ? 0 : range - SharedConst.ContactDistance;
+            MinTolerance = range;
+            MaxRange = range + SharedConst.ContactDistance;
+            MaxTolerance = range;
+        }
+
+        public ChaseRange(float min, float max)
+        {
+            MinRange = min;
+            MinTolerance = Math.Min(min + SharedConst.ContactDistance, (min + max) / 2);
+            MaxRange = max;
+            MaxTolerance = Math.Max(max - SharedConst.ContactDistance, MinTolerance);
+        }
+
+        public ChaseRange(float min, float tMin, float tMax, float max)
+        {
+            MinRange = min;
+            MinTolerance = tMin;
+            MaxRange = max;
+            MaxTolerance = tMax;
+        }
+    }
+
+    public struct ChaseAngle
+    {
+        public float RelativeAngle; // we want to be at this angle relative to the target (0 = front, M_PI = back)
+        public float Tolerance;     // but we'll tolerate anything within +- this much
+
+        public ChaseAngle(float angle, float tol = MathFunctions.PiOver4)
+        {
+            RelativeAngle = Position.NormalizeOrientation(angle);
+            Tolerance = tol;
+        }
+
+        public float UpperBound() { return Position.NormalizeOrientation(RelativeAngle + Tolerance); }
+
+        public float LowerBound() { return Position.NormalizeOrientation(RelativeAngle - Tolerance); }
+
+        public bool IsAngleOkay(float relAngle)
+        {
+            float diff = Math.Abs(relAngle - RelativeAngle);
+            return (Math.Min(diff, (2 * MathF.PI) - diff) <= Tolerance);
+        }
     }
 }

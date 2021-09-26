@@ -864,43 +864,52 @@ namespace Game.Movement
             return (p1 - p2).GetLengthSquared();
         }
 
-        public void ReducePathLenghtByDist(float dist)
+        public void ShortenPathUntilDist(Position pos, float dist) { ShortenPathUntilDist(new Vector3(pos.posX, pos.posY, pos.posZ), dist); }
+
+        public void ShortenPathUntilDist(Vector3 target, float dist)
         {
-            if (GetPathType() == PathType.Blank)
+            if (GetPathType() == PathType.Blank || _pathPoints.Length < 2)
             {
-                Log.outError(LogFilter.Maps, "PathGenerator.ReducePathLenghtByDist called before path was built");
+                Log.outError(LogFilter.Maps, "PathGenerator.ReducePathLengthByDist called before path was successfully built");
                 return;
             }
 
-            if (_pathPoints.Length < 2) // path building failure
+            float distSq = dist * dist;
+
+            // the first point of the path must be outside the specified range
+            // (this should have really been checked by the caller...)
+            if ((_pathPoints[0] - target).GetLengthSquared() < distSq)
                 return;
 
-            int i = _pathPoints.Length;
-            Vector3 nextVec = _pathPoints[--i];
-            while (i > 0)
+            // check if we even need to do anything
+            if ((_pathPoints[0] - target).GetLengthSquared() >= distSq)
+                return;
+
+            int i = _pathPoints.Length - 1;
+            // find the first i s.t.:
+            //  - _pathPoints[i] is still too close
+            //  - _pathPoints[i-1] is too far away
+            // => the end point is somewhere on the line between the two
+            while (true)
             {
-                Vector3 currVec = _pathPoints[--i];
-                Vector3 diffVec = (nextVec - currVec);
-                float len = diffVec.GetLength();
-                if (len > dist)
+                // we know that pathPoints[i] is too close already (from the previous iteration)
+                if ((_pathPoints[i - 1] - target).GetLengthSquared() >= distSq)
+                    break; // bingo!
+
+                if (--i == 0)
                 {
-                    float step = dist / len;
-                    // same as nextVec
-                    _pathPoints[i + 1] -= diffVec * step;
-                    _sourceUnit.UpdateAllowedPositionZ(_pathPoints[i + 1].X, _pathPoints[i + 1].Y, ref _pathPoints[i + 1].Z);
-                    Array.Resize(ref _pathPoints, i + 2);
-                    break;
-                }
-                else if (i == 0) // at second point
-                {
-                    _pathPoints[1] = _pathPoints[0];
+                    // no point found that fulfills the condition
+                    _pathPoints[0] = _pathPoints[1];
                     Array.Resize(ref _pathPoints, 2);
-                    break;
+                    return;
                 }
-
-                dist -= len;
-                nextVec = currVec; // we're going backwards
             }
+
+            // ok, _pathPoints[i] is too close, _pathPoints[i-1] is not, so our target point is somewhere between the two...
+            //   ... settle for a guesstimate since i'm not confident in doing trig on every chase motion tick...
+            // (@todo review this)
+            _pathPoints[i] += (_pathPoints[i - 1] - _pathPoints[i]).directionOrZero() * (dist - (_pathPoints[i] - target).GetLength());
+            Array.Resize(ref _pathPoints, i + 1);
         }
 
         public bool IsInvalidDestinationZ(Unit target)

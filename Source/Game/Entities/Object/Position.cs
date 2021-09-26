@@ -235,7 +235,7 @@ namespace Game.Entities
             return GetAbsoluteAngle(pos.GetPositionX(), pos.GetPositionY());
         }
 
-        float ToAbsoluteAngle(float relAngle)
+        public float ToAbsoluteAngle(float relAngle)
         {
             return NormalizeOrientation(relAngle + Orientation);
         }

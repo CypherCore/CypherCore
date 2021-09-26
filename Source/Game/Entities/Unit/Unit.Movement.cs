@@ -406,57 +406,57 @@ namespace Game.Entities
                 case UnitMoveType.Walk:
                     return;
                 case UnitMoveType.Run:
+                {
+                    if (IsMounted()) // Use on mount auras
                     {
-                        if (IsMounted()) // Use on mount auras
-                        {
-                            main_speed_mod = GetMaxPositiveAuraModifier(AuraType.ModIncreaseMountedSpeed);
-                            stack_bonus = GetTotalAuraMultiplier(AuraType.ModMountedSpeedAlways);
-                            non_stack_bonus += GetMaxPositiveAuraModifier(AuraType.ModMountedSpeedNotStack) / 100.0f;
-                        }
-                        else
-                        {
-                            main_speed_mod = GetMaxPositiveAuraModifier(AuraType.ModIncreaseSpeed);
-                            stack_bonus = GetTotalAuraMultiplier(AuraType.ModSpeedAlways);
-                            non_stack_bonus += GetMaxPositiveAuraModifier(AuraType.ModSpeedNotStack) / 100.0f;
-                        }
-                        break;
+                        main_speed_mod = GetMaxPositiveAuraModifier(AuraType.ModIncreaseMountedSpeed);
+                        stack_bonus = GetTotalAuraMultiplier(AuraType.ModMountedSpeedAlways);
+                        non_stack_bonus += GetMaxPositiveAuraModifier(AuraType.ModMountedSpeedNotStack) / 100.0f;
                     }
+                    else
+                    {
+                        main_speed_mod = GetMaxPositiveAuraModifier(AuraType.ModIncreaseSpeed);
+                        stack_bonus = GetTotalAuraMultiplier(AuraType.ModSpeedAlways);
+                        non_stack_bonus += GetMaxPositiveAuraModifier(AuraType.ModSpeedNotStack) / 100.0f;
+                    }
+                    break;
+                }
                 case UnitMoveType.Swim:
-                    {
-                        main_speed_mod = GetMaxPositiveAuraModifier(AuraType.ModIncreaseSwimSpeed);
-                        break;
-                    }
+                {
+                    main_speed_mod = GetMaxPositiveAuraModifier(AuraType.ModIncreaseSwimSpeed);
+                    break;
+                }
                 case UnitMoveType.Flight:
+                {
+                    if (IsTypeId(TypeId.Unit) && IsControlledByPlayer()) // not sure if good for pet
                     {
-                        if (IsTypeId(TypeId.Unit) && IsControlledByPlayer()) // not sure if good for pet
-                        {
-                            main_speed_mod = GetMaxPositiveAuraModifier(AuraType.ModIncreaseVehicleFlightSpeed);
-                            stack_bonus = GetTotalAuraMultiplier(AuraType.ModVehicleSpeedAlways);
+                        main_speed_mod = GetMaxPositiveAuraModifier(AuraType.ModIncreaseVehicleFlightSpeed);
+                        stack_bonus = GetTotalAuraMultiplier(AuraType.ModVehicleSpeedAlways);
 
-                            // for some spells this mod is applied on vehicle owner
-                            int owner_speed_mod = 0;
+                        // for some spells this mod is applied on vehicle owner
+                        int owner_speed_mod = 0;
 
-                            Unit owner = GetCharmer();
-                            if (owner != null)
-                                owner_speed_mod = owner.GetMaxPositiveAuraModifier(AuraType.ModIncreaseVehicleFlightSpeed);
+                        Unit owner = GetCharmer();
+                        if (owner != null)
+                            owner_speed_mod = owner.GetMaxPositiveAuraModifier(AuraType.ModIncreaseVehicleFlightSpeed);
 
-                            main_speed_mod = Math.Max(main_speed_mod, owner_speed_mod);
-                        }
-                        else if (IsMounted())
-                        {
-                            main_speed_mod = GetMaxPositiveAuraModifier(AuraType.ModIncreaseMountedFlightSpeed);
-                            stack_bonus = GetTotalAuraMultiplier(AuraType.ModMountedFlightSpeedAlways);
-                        }
-                        else             // Use not mount (shapeshift for example) auras (should stack)
-                            main_speed_mod = GetTotalAuraModifier(AuraType.ModIncreaseFlightSpeed) + GetTotalAuraModifier(AuraType.ModIncreaseVehicleFlightSpeed);
-
-                        non_stack_bonus += GetMaxPositiveAuraModifier(AuraType.ModFlightSpeedNotStack) / 100.0f;
-
-                        // Update speed for vehicle if available
-                        if (IsTypeId(TypeId.Player) && GetVehicle() != null)
-                            GetVehicleBase().UpdateSpeed(UnitMoveType.Flight);
-                        break;
+                        main_speed_mod = Math.Max(main_speed_mod, owner_speed_mod);
                     }
+                    else if (IsMounted())
+                    {
+                        main_speed_mod = GetMaxPositiveAuraModifier(AuraType.ModIncreaseMountedFlightSpeed);
+                        stack_bonus = GetTotalAuraMultiplier(AuraType.ModMountedFlightSpeedAlways);
+                    }
+                    else             // Use not mount (shapeshift for example) auras (should stack)
+                        main_speed_mod = GetTotalAuraModifier(AuraType.ModIncreaseFlightSpeed) + GetTotalAuraModifier(AuraType.ModIncreaseVehicleFlightSpeed);
+
+                    non_stack_bonus += GetMaxPositiveAuraModifier(AuraType.ModFlightSpeedNotStack) / 100.0f;
+
+                    // Update speed for vehicle if available
+                    if (IsTypeId(TypeId.Player) && GetVehicle() != null)
+                        GetVehicleBase().UpdateSpeed(UnitMoveType.Flight);
+                    break;
+                }
                 default:
                     Log.outError(LogFilter.Unit, "Unit.UpdateSpeed: Unsupported move type ({0})", mtype);
                     return;
@@ -472,71 +472,70 @@ namespace Game.Entities
                 case UnitMoveType.Run:
                 case UnitMoveType.Swim:
                 case UnitMoveType.Flight:
+                {
+                    // Set creature speed rate
+                    if (IsTypeId(TypeId.Unit))
+                        speed *= ToCreature().GetCreatureTemplate().SpeedRun;    // at this point, MOVE_WALK is never reached
+
+                    // Normalize speed by 191 aura SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED if need
+                    // @todo possible affect only on MOVE_RUN
+                    int normalization = GetMaxPositiveAuraModifier(AuraType.UseNormalMovementSpeed);
+                    if (normalization != 0)
                     {
-                        // Set creature speed rate
-                        if (IsTypeId(TypeId.Unit))
+                        Creature creature1 = ToCreature();
+                        if (creature1)
                         {
-                            Unit pOwner = GetCharmerOrOwner();
-                            if ((IsPet() || IsGuardian()) && !IsInCombat() && pOwner != null) // Must check for owner or crash on "Tame Beast"
-                            {
-                                // For every yard over 5, increase speed by 0.01
-                                //  to help prevent pet from lagging behind and despawning
-                                float dist = GetDistance(pOwner);
-                                float base_rate = 1.00f; // base speed is 100% of owner speed
-
-                                if (dist < 5)
-                                    dist = 5;
-
-                                float mult = base_rate + ((dist - 5) * 0.01f);
-
-                                speed *= pOwner.GetSpeedRate(mtype) * mult; // pets derive speed from owner when not in combat
-                            }
-                            else
-                                speed *= ToCreature().GetCreatureTemplate().SpeedRun;    // at this point, MOVE_WALK is never reached
+                            uint immuneMask = creature1.GetCreatureTemplate().MechanicImmuneMask;
+                            if (Convert.ToBoolean(immuneMask & (1 << ((int)Mechanics.Snare - 1))) || Convert.ToBoolean(immuneMask & (1 << ((int)Mechanics.Daze - 1))))
+                                break;
                         }
 
-                        // Normalize speed by 191 aura SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED if need
-                        // @todo possible affect only on MOVE_RUN
-                        int normalization = GetMaxPositiveAuraModifier(AuraType.UseNormalMovementSpeed);
-                        if (normalization != 0)
-                        {
-                            Creature creature = ToCreature();
-                            if (creature)
-                            {
-                                uint immuneMask = creature.GetCreatureTemplate().MechanicImmuneMask;
-                                if (Convert.ToBoolean(immuneMask & (1 << ((int)Mechanics.Snare - 1))) || Convert.ToBoolean(immuneMask & (1 << ((int)Mechanics.Daze - 1))))
-                                    break;
-                            }
-
-                            // Use speed from aura
-                            float max_speed = normalization / (IsControlledByPlayer() ? SharedConst.playerBaseMoveSpeed[(int)mtype] : SharedConst.baseMoveSpeed[(int)mtype]);
-                            if (speed > max_speed)
-                                speed = max_speed;
-                        }
-
-                        if (mtype == UnitMoveType.Run)
-                        {
-                            // force minimum speed rate @ aura 437 SPELL_AURA_MOD_MINIMUM_SPEED_RATE
-                            int minSpeedMod1 = GetMaxPositiveAuraModifier(AuraType.ModMinimumSpeedRate);
-                            if (minSpeedMod1 != 0)
-                            {
-                                float minSpeed = minSpeedMod1 / (IsControlledByPlayer() ? SharedConst.playerBaseMoveSpeed[(int)mtype] : SharedConst.baseMoveSpeed[(int)mtype]);
-                                if (speed < minSpeed)
-                                    speed = minSpeed;
-                            }
-                        }
-
-                        break;
+                        // Use speed from aura
+                        float max_speed = normalization / (IsControlledByPlayer() ? SharedConst.playerBaseMoveSpeed[(int)mtype] : SharedConst.baseMoveSpeed[(int)mtype]);
+                        if (speed > max_speed)
+                            speed = max_speed;
                     }
+
+                    if (mtype == UnitMoveType.Run)
+                    {
+                        // force minimum speed rate @ aura 437 SPELL_AURA_MOD_MINIMUM_SPEED_RATE
+                        int minSpeedMod1 = GetMaxPositiveAuraModifier(AuraType.ModMinimumSpeedRate);
+                        if (minSpeedMod1 != 0)
+                        {
+                            float minSpeed = minSpeedMod1 / (IsControlledByPlayer() ? SharedConst.playerBaseMoveSpeed[(int)mtype] : SharedConst.baseMoveSpeed[(int)mtype]);
+                            if (speed < minSpeed)
+                                speed = minSpeed;
+                        }
+                    }
+
+                    break;
+                }
                 default:
                     break;
             }
 
-            // for creature case, we check explicit if mob searched for assistance
-            if (IsTypeId(TypeId.Unit))
+            Creature creature = ToCreature();
+            if (creature != null)
             {
+                // for creature case, we check explicit if mob searched for assistance
                 if (ToCreature().HasSearchedAssistance())
                     speed *= 0.66f;                                 // best guessed value, so this will be 33% reduction. Based off initial speed, mob can then "run", "walk fast" or "walk".
+
+                if (creature.HasUnitTypeMask(UnitTypeMask.Minion) && !creature.IsInCombat())
+                {
+                    var top = creature.GetMotionMaster().Top();
+                    if (top != null && top.GetMovementGeneratorType() == MovementGeneratorType.Follow)
+                    {
+                        Unit followed = ((AbstractFollower)top).GetTarget();
+                        if (followed != null && followed.GetGUID() == GetOwnerGUID() && !followed.IsInCombat())
+                        {
+                            float ownerSpeed = followed.GetSpeedRate(mtype);
+                            if (speed < ownerSpeed || creature.IsWithinDist3d(followed, 10.0f))
+                                speed = ownerSpeed;
+                            speed *= Math.Min(Math.Max(1.0f, 0.75f + (GetDistance(followed) - SharedConst.PetFollowDist) * 0.05f), 1.3f);
+                        }
+                    }
+                }
             }
 
             // Apply strongest slow aura mod to speed

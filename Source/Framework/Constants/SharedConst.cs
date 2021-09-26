@@ -208,7 +208,7 @@ namespace Framework.Constants
         /// </summary>
         public const int MaxPetStables = 4;
         public const float PetFollowDist = 1.0f;
-        public const float PetFollowAngle = MathFunctions.PiOver2;
+        public const float PetFollowAngle = MathF.PI;
         public const int MaxSpellCharm = 4;
         public const int ActionBarIndexStart = 0;
         public const byte ActionBarIndexPetSpellStart = 3;

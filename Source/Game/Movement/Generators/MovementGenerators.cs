@@ -18,51 +18,52 @@
 using Framework.Constants;
 using Framework.Dynamic;
 using Game.Entities;
+using Framework.GameMath;
 
 namespace Game.Movement
 {
-    public abstract class IMovementGenerator
+    public interface IMovementGenerator
     {
-        public abstract void Finalize(Unit owner);
+        public void Finalize(Unit owner);
 
-        public abstract void Initialize(Unit owner);
+        public void Initialize(Unit owner);
 
-        public abstract void Reset(Unit owner);
+        public void Reset(Unit owner);
 
-        public abstract bool Update(Unit owner, uint time_diff);
+        public bool Update(Unit owner, uint time_diff);
 
-        public abstract MovementGeneratorType GetMovementGeneratorType();
+        public MovementGeneratorType GetMovementGeneratorType();
 
-        public virtual void UnitSpeedChanged() { }
+        public void UnitSpeedChanged() { }
 
-        public virtual void Pause(uint timer = 0) { }
+        public void Pause(uint timer = 0) { }
 
-        public virtual void Resume(uint overrideTimer = 0) { }
+        public void Resume(uint overrideTimer = 0) { }
 
         // used by Evade code for select point to evade with expected restart default movement
-        public virtual bool GetResetPosition(Unit u, out float x, out float y, out float z)
+        public bool GetResetPosition(Unit u, out float x, out float y, out float z)
         {
-            x = y = z = 0.0f; 
+            x = y = z = 0.0f;
             return false;
         }
     }
 
     public abstract class MovementGeneratorMedium<T> : IMovementGenerator where T : Unit
     {
-        public override void Initialize(Unit owner)
+        public virtual void Initialize(Unit owner)
         {
             DoInitialize((T)owner);
             IsActive = true;
         }
-        public override void Finalize(Unit owner)
+        public virtual void Finalize(Unit owner)
         {
             DoFinalize((T)owner);
         }
-        public override void Reset(Unit owner)
+        public virtual void Reset(Unit owner)
         {
             DoReset((T)owner);
         }
-        public override bool Update(Unit owner, uint diff)
+        public virtual bool Update(Unit owner, uint diff)
         {
             return DoUpdate((T)owner, diff);
         }
@@ -73,23 +74,7 @@ namespace Game.Movement
         public abstract void DoFinalize(T owner);
         public abstract void DoReset(T owner);
         public abstract bool DoUpdate(T owner, uint diff);
-    }
 
-    public class FollowerReference : Reference<Unit, ITargetedMovementGeneratorBase>
-    {
-        public override void TargetObjectBuildLink()
-        {
-            GetTarget().AddFollower(this);
-        }
-
-        public override void TargetObjectDestroyLink()
-        {
-            GetTarget().RemoveFollower(this);
-        }
-
-        public override void SourceObjectDestroyLink()
-        {
-            GetSource().StopFollowing();
-        }
+        public virtual MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Max; }
     }
 }

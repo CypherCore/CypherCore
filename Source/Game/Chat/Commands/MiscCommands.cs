@@ -1245,11 +1245,7 @@ namespace Game.Chat
                         break;
                     case MovementGeneratorType.Chase:
                         {
-                            Unit target;
-                            if (unit.IsTypeId(TypeId.Player))
-                                target = ((ChaseMovementGenerator<Player>)movementGenerator).GetTarget();
-                            else
-                                target = ((ChaseMovementGenerator<Creature>)movementGenerator).GetTarget();
+                            Unit target = ((ChaseMovementGenerator)movementGenerator).GetTarget();
 
                             if (!target)
                                 handler.SendSysMessage(CypherStrings.MovegensChaseNull);
@@ -1261,11 +1257,7 @@ namespace Game.Chat
                         }
                     case MovementGeneratorType.Follow:
                         {
-                            Unit target;
-                            if (unit.IsTypeId(TypeId.Player))
-                                target = ((FollowMovementGenerator<Player>)movementGenerator).GetTarget();
-                            else
-                                target = ((FollowMovementGenerator<Creature>)movementGenerator).GetTarget();
+                            Unit target = ((FollowMovementGenerator)movementGenerator).GetTarget();
 
                             if (!target)
                                 handler.SendSysMessage(CypherStrings.MovegensFollowNull);

@@ -982,8 +982,7 @@ namespace Game.Chat
                     return false;
                 }
 
-                FollowMovementGenerator<Creature> mgen = (FollowMovementGenerator<Creature>)creature.GetMotionMaster().Top();
-
+                FollowMovementGenerator mgen = (FollowMovementGenerator)creature.GetMotionMaster().Top();
                 if (mgen.GetTarget() != player)
                 {
                     handler.SendSysMessage(CypherStrings.CreatureNotFollowYou, creature.GetName());

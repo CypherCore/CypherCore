@@ -1471,14 +1471,16 @@ namespace Game.Entities
             }
         }
 
-        public bool IsWithinMeleeRange(Unit obj)
+        public bool IsWithinMeleeRange(Unit obj) { return IsWithinMeleeRangeAt(GetPosition(), obj); }
+        
+        public bool IsWithinMeleeRangeAt(Position pos, Unit obj)
         {
             if (!obj || !IsInMap(obj) || !IsInPhase(obj))
                 return false;
 
-            float dx = GetPositionX() - obj.GetPositionX();
-            float dy = GetPositionY() - obj.GetPositionY();
-            float dz = GetPositionZ() - obj.GetPositionZ();
+            float dx = pos.GetPositionX() - obj.GetPositionX();
+            float dy = pos.GetPositionY() - obj.GetPositionY();
+            float dz = pos.GetPositionZ() - obj.GetPositionZ();
             float distsq = (dx * dx) + (dy * dy) + (dz * dz);
 
             float maxdist = GetMeleeRange(obj) + GetTotalAuraModifier(AuraType.ModAutoAttackRange);

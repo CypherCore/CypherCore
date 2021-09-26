@@ -22,27 +22,27 @@ namespace Game.Movement
 {
     public class IdleMovementGenerator : IMovementGenerator
     {
-        public override void Initialize(Unit owner)
+        public void Initialize(Unit owner)
         {
             Reset(owner);
         }
 
-        public override void Reset(Unit owner)
+        public void Reset(Unit owner)
         {
             if (!owner.IsStopped())
                 owner.StopMoving();
         }
 
-        public override bool Update(Unit owner, uint diff)
+        public bool Update(Unit owner, uint diff)
         {
             return true;
         }
 
-        public override void Finalize(Unit owner)
+        public void Finalize(Unit owner)
         {
         }
 
-        public override MovementGeneratorType GetMovementGeneratorType()
+        public MovementGeneratorType GetMovementGeneratorType()
         {
             return MovementGeneratorType.Idle;
         }
@@ -59,7 +59,7 @@ namespace Game.Movement
             _direction = direction;
         }
 
-        public override void Initialize(Unit owner)
+        public void Initialize(Unit owner)
         {
             if (!owner.IsStopped())
                 owner.StopMoving();
@@ -71,9 +71,9 @@ namespace Game.Movement
             owner.AttackStop();
         }
 
-        public override void Reset(Unit owner) { }
+        public void Reset(Unit owner) { }
 
-        public override bool Update(Unit owner, uint diff)
+        public bool Update(Unit owner, uint diff)
         {
             float angle = owner.GetOrientation();
             angle += diff * MathFunctions.TwoPi / _maxDuration * (_direction == RotateDirection.Left ? 1.0f : -1.0f);
@@ -90,14 +90,14 @@ namespace Game.Movement
             return true;
         }
 
-        public override void Finalize(Unit owner)
+        public void Finalize(Unit owner)
         {
             owner.ClearUnitState(UnitState.Rotating);
             if (owner.IsTypeId(TypeId.Unit))
                 owner.ToCreature().GetAI().MovementInform(MovementGeneratorType.Rotate, 0);
         }
 
-        public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Rotate; }
+        public MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Rotate; }
 
         uint _duration;
         uint _maxDuration;
@@ -111,7 +111,7 @@ namespace Game.Movement
             _timer = timer;
         }
 
-        public override void Initialize(Unit owner)
+        public void Initialize(Unit owner)
         {
             // Distracted creatures stand up if not standing
             if (!owner.IsStandState())
@@ -120,9 +120,9 @@ namespace Game.Movement
             owner.AddUnitState(UnitState.Distracted);
         }
 
-        public override void Reset(Unit owner) { }
+        public void Reset(Unit owner) { }
 
-        public override bool Update(Unit owner, uint diff)
+        public bool Update(Unit owner, uint diff)
         {
             if (diff > _timer)
                 return false;
@@ -131,7 +131,7 @@ namespace Game.Movement
             return true;
         }
 
-        public override void Finalize(Unit owner)
+        public virtual void Finalize(Unit owner)
         {
             owner.ClearUnitState(UnitState.Distracted);
 
@@ -143,7 +143,7 @@ namespace Game.Movement
             }
         }
 
-        public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Distract; }
+        public virtual MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Distract; }
 
         uint _timer;
     }

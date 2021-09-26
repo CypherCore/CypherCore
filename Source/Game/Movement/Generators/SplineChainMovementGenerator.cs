@@ -75,7 +75,7 @@ namespace Game.Movement
             }
         }
 
-        public override void Initialize(Unit me)
+        public void Initialize(Unit me)
         {
             if (_chainSize != 0)
             {
@@ -114,7 +114,7 @@ namespace Game.Movement
             }
         }
 
-        public override void Finalize(Unit me)
+        public void Finalize(Unit me)
         {
             if (!finished)
                 return;
@@ -124,7 +124,7 @@ namespace Game.Movement
                 cMe.GetAI().MovementInform(MovementGeneratorType.SplineChain, _id);
         }
 
-        public override bool Update(Unit me, uint diff)
+        public bool Update(Unit me, uint diff)
         {
             if (finished)
                 return false;
@@ -169,9 +169,9 @@ namespace Game.Movement
             return new SplineChainResumeInfo(_id, _chain, _walk, (byte)(_nextIndex - 1), (byte)(me.MoveSpline.CurrentSplineIdx()), _msToNext);
         }
 
-        public override void Reset(Unit owner) { }
+        public void Reset(Unit owner) { }
 
-        public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.SplineChain; }
+        public MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.SplineChain; }
 
         uint _id;
         List<SplineChainLink> _chain = new();

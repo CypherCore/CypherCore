@@ -284,7 +284,7 @@ namespace Game.Movement
                 creature.GetAI().MovementInform(MovementGeneratorType.Waypoint, (uint)_currentNode);
         }
 
-        public override bool GetResetPosition(Unit u, out float x, out float y, out float z)
+        public bool GetResetPosition(Unit u, out float x, out float y, out float z)
         {
             x = y = z = 0;
             // prevent a crash at empty waypoint path.
@@ -301,13 +301,13 @@ namespace Game.Movement
             return true;
         }
 
-        public override void Pause(uint timer = 0)
+        public void Pause(uint timer = 0)
         {
             _stalled = timer == 0;
             _nextMoveTime.Reset(timer != 0 ? (int)timer : 1);
         }
 
-        public override void Resume(uint overrideTimer = 0)
+        public void Resume(uint overrideTimer = 0)
         {
             _stalled = false;
             if (overrideTimer != 0)
@@ -321,7 +321,7 @@ namespace Game.Movement
 
         public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Waypoint; }
 
-        public override void UnitSpeedChanged() { _recalculateSpeed = true; }
+        public void UnitSpeedChanged() { _recalculateSpeed = true; }
 
         TimeTrackerSmall _nextMoveTime;
         bool _recalculateSpeed;

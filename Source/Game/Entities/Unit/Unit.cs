@@ -44,7 +44,6 @@ namespace Game.Entities
             m_combatManager = new CombatManager(this);
             m_threatManager = new ThreatManager(this);
             _spellHistory = new SpellHistory(this);
-            m_FollowingRefManager = new RefManager<Unit, ITargetedMovementGeneratorBase>();
 
             ObjectTypeId = TypeId.Unit;
             ObjectTypeMask |= TypeMask.Unit;
@@ -453,6 +452,8 @@ namespace Game.Entities
                 RemoveAllControlled();
 
                 RemoveAreaAurasDueToLeaveWorld();
+
+                RemoveAllFollowers();
 
                 if (!GetCharmerGUID().IsEmpty())
                 {
@@ -1312,6 +1313,13 @@ namespace Game.Entities
 
         public Totem ToTotem() { return IsTotem() ? (this as Totem) : null; }
         public TempSummon ToTempSummon() { return IsSummon() ? (this as TempSummon) : null; }
+
+        void RemoveAllFollowers()
+        {
+            while (!m_followingMe.Empty())
+                m_followingMe[0].SetTarget(null);
+        }
+
         public virtual void SetDeathState(DeathState s)
         {
             // Death state needs to be updated before RemoveAllAurasOnDeath() is called, to prevent entering combat
@@ -1563,11 +1571,8 @@ namespace Game.Entities
 
         public bool IsCharmedOwnedByPlayerOrPlayer() { return GetCharmerOrOwnerOrOwnGUID().IsPlayer(); }
 
-        public void AddFollower(FollowerReference pRef)
-        {
-            m_FollowingRefManager.InsertFirst(pRef);
-        }
-        public void RemoveFollower(FollowerReference pRef) { } //nothing to do yet
+        public void FollowerAdded(AbstractFollower f) { m_followingMe.Add(f); }
+        public void FollowerRemoved(AbstractFollower f) { m_followingMe.Remove(f); }
 
         public uint GetCreatureTypeMask()
         {
