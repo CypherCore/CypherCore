@@ -16,13 +16,9 @@
  */
 
 using Framework.Constants;
+using Game.AI;
 using Game.Entities;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Framework.GameMath;
 
 namespace Game.Movement
 {
@@ -95,6 +91,7 @@ namespace Game.Movement
                         _path = null;
                         owner.StopMoving();
                         owner.SetInFront(target);
+                        DoMovementInform(owner, target);
                         return true;
                     }
                 }
@@ -106,6 +103,7 @@ namespace Game.Movement
                 _path = null;
                 owner.ClearUnitState(UnitState.ChaseMove);
                 owner.SetInFront(target);
+                DoMovementInform(owner, target);
             }
 
             // if the target moved, we have to consider whether to adjust
@@ -210,6 +208,17 @@ namespace Game.Movement
             if (maxDistance.HasValue && distSq > MathF.Sqrt(maxDistance.Value))
                 return false;
             return !angle.HasValue || angle.Value.IsAngleOkay(target.GetRelativeAngle(owner));
+        }
+
+        static void DoMovementInform(Unit owner, Unit target)
+        {
+            Creature cOwner = owner.ToCreature();
+            if (cOwner != null)
+            {
+                CreatureAI ai = cOwner.GetAI();
+                if (ai != null)
+                    ai.MovementInform(MovementGeneratorType.Chase, (uint)target.GetGUID().GetCounter());
+            }
         }
     }
 }

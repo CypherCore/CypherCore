@@ -16,7 +16,7 @@
  */
 
 using Framework.Constants;
-using Framework.GameMath;
+using Game.AI;
 using Game.Entities;
 using System;
 
@@ -75,6 +75,7 @@ namespace Game.Movement
                     {
                         _path = null;
                         owner.StopMoving();
+                        DoMovementInform(owner, target);
                         return true;
                     }
                 }
@@ -84,6 +85,7 @@ namespace Game.Movement
             {
                 _path = null;
                 owner.ClearUnitState(UnitState.FollowMove);
+                DoMovementInform(owner, target);
             }
 
             if (_lastTargetPosition.GetExactDistSq(target.GetPosition()) > 0.0f)
@@ -174,6 +176,16 @@ namespace Game.Movement
                 return false;
 
             return !angle.HasValue || angle.Value.IsAngleOkay(target.GetRelativeAngle(owner));
+        }
+
+        static void DoMovementInform(Unit owner, Unit target)
+        {
+            if (!owner.IsCreature())
+                return;
+
+            UnitAI ai = owner.GetAI();
+            if (ai != null)
+                ((CreatureAI)ai).MovementInform(MovementGeneratorType.Follow, (uint)target.GetGUID().GetCounter());
         }
     }
 }
