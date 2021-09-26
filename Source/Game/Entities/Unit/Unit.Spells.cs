@@ -2622,36 +2622,36 @@ namespace Game.Entities
         {
             return !m_modAuras.LookupByKey(auraType).Empty();
         }
-        public bool HasAuraTypeWithCaster(AuraType auratype, ObjectGuid caster)
+        public bool HasAuraTypeWithCaster(AuraType auraType, ObjectGuid caster)
         {
-            var mTotalAuraList = GetAuraEffectsByType(auratype);
-            foreach (var aura in mTotalAuraList)
-                if (caster == aura.GetCasterGUID())
+            foreach (var auraEffect in GetAuraEffectsByType(auraType))
+                if (caster == auraEffect.GetCasterGUID())
                     return true;
+
             return false;
         }
-        public bool HasAuraTypeWithMiscvalue(AuraType auratype, int miscvalue)
+        public bool HasAuraTypeWithMiscvalue(AuraType auraType, int miscvalue)
         {
-            var mTotalAuraList = GetAuraEffectsByType(auratype);
-            foreach (var aura in mTotalAuraList)
-                if (miscvalue == aura.GetMiscValue())
+            foreach (var auraEffect in GetAuraEffectsByType(auraType))
+                if (miscvalue == auraEffect.GetMiscValue())
                     return true;
+
             return false;
         }
-        public bool HasAuraTypeWithAffectMask(AuraType auratype, SpellInfo affectedSpell)
+        public bool HasAuraTypeWithAffectMask(AuraType auraType, SpellInfo affectedSpell)
         {
-            var mTotalAuraList = GetAuraEffectsByType(auratype);
-            foreach (var aura in mTotalAuraList)
-                if (aura.IsAffectingSpell(affectedSpell))
+            foreach (var auraEffect in GetAuraEffectsByType(auraType))
+                if (auraEffect.IsAffectingSpell(affectedSpell))
                     return true;
+
             return false;
         }
-        public bool HasAuraTypeWithValue(AuraType auratype, int value)
+        public bool HasAuraTypeWithValue(AuraType auraType, int value)
         {
-            var mTotalAuraList = GetAuraEffectsByType(auratype);
-            foreach (var aura in mTotalAuraList)
-                if (value == aura.GetAmount())
+            foreach (var auraEffect in GetAuraEffectsByType(auraType))
+                if (value == auraEffect.GetAmount())
                     return true;
+
             return false;
         }
 
@@ -4008,24 +4008,24 @@ namespace Game.Entities
             return m_modAuras.LookupByKey(type);
         }
 
-        public int GetTotalAuraModifier(AuraType auratype)
+        public int GetTotalAuraModifier(AuraType auraType)
         {
-            return GetTotalAuraModifier(auratype, aurEff => true);
+            return GetTotalAuraModifier(auraType, aurEff => true);
         }
 
-        public int GetTotalAuraModifier(AuraType auratype, Func<AuraEffect, bool> predicate)
+        public int GetTotalAuraModifier(AuraType auraType, Func<AuraEffect, bool> predicate)
         {
             Dictionary<SpellGroup, int> sameEffectSpellGroup = new();
             int modifier = 0;
 
-            var mTotalAuraList = GetAuraEffectsByType(auratype);
+            var mTotalAuraList = GetAuraEffectsByType(auraType);
             foreach (AuraEffect aurEff in mTotalAuraList)
             {
                 if (predicate(aurEff))
                 {
                     // Check if the Aura Effect has a the Same Effect Stack Rule and if so, use the highest amount of that SpellGroup
                     // If the Aura Effect does not have this Stack Rule, it returns false so we can add to the multiplier as usual
-                    if (!Global.SpellMgr.AddSameEffectStackRuleSpellGroups(aurEff.GetSpellInfo(), auratype, aurEff.GetAmount(), sameEffectSpellGroup))
+                    if (!Global.SpellMgr.AddSameEffectStackRuleSpellGroups(aurEff.GetSpellInfo(), auraType, aurEff.GetAmount(), sameEffectSpellGroup))
                         modifier += aurEff.GetAmount();
                 }
             }
@@ -4037,14 +4037,14 @@ namespace Game.Entities
             return modifier;
         }
 
-        public float GetTotalAuraMultiplier(AuraType auratype)
+        public float GetTotalAuraMultiplier(AuraType auraType)
         {
-            return GetTotalAuraMultiplier(auratype, aurEff => true);
+            return GetTotalAuraMultiplier(auraType, aurEff => true);
         }
 
-        public float GetTotalAuraMultiplier(AuraType auratype, Func<AuraEffect, bool> predicate)
+        public float GetTotalAuraMultiplier(AuraType auraType, Func<AuraEffect, bool> predicate)
         {
-            var mTotalAuraList = GetAuraEffectsByType(auratype);
+            var mTotalAuraList = GetAuraEffectsByType(auraType);
             if (mTotalAuraList.Empty())
                 return 1.0f;
 
@@ -4057,7 +4057,7 @@ namespace Game.Entities
                 {
                     // Check if the Aura Effect has a the Same Effect Stack Rule and if so, use the highest amount of that SpellGroup
                     // If the Aura Effect does not have this Stack Rule, it returns false so we can add to the multiplier as usual
-                    if (!Global.SpellMgr.AddSameEffectStackRuleSpellGroups(aurEff.GetSpellInfo(), auratype, aurEff.GetAmount(), sameEffectSpellGroup))
+                    if (!Global.SpellMgr.AddSameEffectStackRuleSpellGroups(aurEff.GetSpellInfo(), auraType, aurEff.GetAmount(), sameEffectSpellGroup))
                         MathFunctions.AddPct(ref multiplier, aurEff.GetAmount());
                 }
             }
@@ -4069,14 +4069,14 @@ namespace Game.Entities
             return multiplier;
         }
 
-        public int GetMaxPositiveAuraModifier(AuraType auratype)
+        public int GetMaxPositiveAuraModifier(AuraType auraType)
         {
-            return GetMaxPositiveAuraModifier(auratype, aurEff => true);
+            return GetMaxPositiveAuraModifier(auraType, aurEff => true);
         }
 
-        public int GetMaxPositiveAuraModifier(AuraType auratype, Func<AuraEffect, bool> predicate)
+        public int GetMaxPositiveAuraModifier(AuraType auraType, Func<AuraEffect, bool> predicate)
         {
-            var mTotalAuraList = GetAuraEffectsByType(auratype);
+            var mTotalAuraList = GetAuraEffectsByType(auraType);
             if (mTotalAuraList.Empty())
                 return 0;
 
@@ -4090,14 +4090,14 @@ namespace Game.Entities
             return modifier;
         }
 
-        public int GetMaxNegativeAuraModifier(AuraType auratype)
+        public int GetMaxNegativeAuraModifier(AuraType auraType)
         {
-            return GetMaxNegativeAuraModifier(auratype, aurEff => true);
+            return GetMaxNegativeAuraModifier(auraType, aurEff => true);
         }
 
-        public int GetMaxNegativeAuraModifier(AuraType auratype, Func<AuraEffect, bool> predicate)
+        public int GetMaxNegativeAuraModifier(AuraType auraType, Func<AuraEffect, bool> predicate)
         {
-            var mTotalAuraList = GetAuraEffectsByType(auratype);
+            var mTotalAuraList = GetAuraEffectsByType(auraType);
             if (mTotalAuraList.Empty())
                 return 0;
 
@@ -4109,9 +4109,9 @@ namespace Game.Entities
             return modifier;
         }
 
-        public int GetTotalAuraModifierByMiscMask(AuraType auratype, int miscMask)
+        public int GetTotalAuraModifierByMiscMask(AuraType auraType, int miscMask)
         {
-            return GetTotalAuraModifier(auratype, aurEff =>
+            return GetTotalAuraModifier(auraType, aurEff =>
             {
                 if ((aurEff.GetMiscValue() & miscMask) != 0)
                     return true;
@@ -4119,9 +4119,9 @@ namespace Game.Entities
             });
         }
 
-        public float GetTotalAuraMultiplierByMiscMask(AuraType auratype, uint miscMask)
+        public float GetTotalAuraMultiplierByMiscMask(AuraType auraType, uint miscMask)
         {
-            return GetTotalAuraMultiplier(auratype, aurEff =>
+            return GetTotalAuraMultiplier(auraType, aurEff =>
             {
                 if ((aurEff.GetMiscValue() & miscMask) != 0)
                     return true;
@@ -4129,9 +4129,9 @@ namespace Game.Entities
             });
         }
 
-        public int GetMaxPositiveAuraModifierByMiscMask(AuraType auratype, uint miscMask, AuraEffect except = null)
+        public int GetMaxPositiveAuraModifierByMiscMask(AuraType auraType, uint miscMask, AuraEffect except = null)
         {
-            return GetMaxPositiveAuraModifier(auratype, aurEff =>
+            return GetMaxPositiveAuraModifier(auraType, aurEff =>
             {
                 if (except != aurEff && (aurEff.GetMiscValue() & miscMask) != 0)
                     return true;
@@ -4139,9 +4139,9 @@ namespace Game.Entities
             });
         }
 
-        public int GetMaxNegativeAuraModifierByMiscMask(AuraType auratype, uint miscMask)
+        public int GetMaxNegativeAuraModifierByMiscMask(AuraType auraType, uint miscMask)
         {
-            return GetMaxNegativeAuraModifier(auratype, aurEff =>
+            return GetMaxNegativeAuraModifier(auraType, aurEff =>
             {
                 if ((aurEff.GetMiscValue() & miscMask) != 0)
                     return true;
@@ -4149,9 +4149,9 @@ namespace Game.Entities
             });
         }
 
-        public int GetTotalAuraModifierByMiscValue(AuraType auratype, int miscValue)
+        public int GetTotalAuraModifierByMiscValue(AuraType auraType, int miscValue)
         {
-            return GetTotalAuraModifier(auratype, aurEff =>
+            return GetTotalAuraModifier(auraType, aurEff =>
             {
                 if (aurEff.GetMiscValue() == miscValue)
                     return true;
@@ -4159,9 +4159,9 @@ namespace Game.Entities
             });
         }
 
-        public float GetTotalAuraMultiplierByMiscValue(AuraType auratype, int miscValue)
+        public float GetTotalAuraMultiplierByMiscValue(AuraType auraType, int miscValue)
         {
-            return GetTotalAuraMultiplier(auratype, aurEff =>
+            return GetTotalAuraMultiplier(auraType, aurEff =>
             {
                 if (aurEff.GetMiscValue() == miscValue)
                     return true;
@@ -4169,9 +4169,9 @@ namespace Game.Entities
             });
         }
 
-        int GetMaxPositiveAuraModifierByMiscValue(AuraType auratype, int miscValue)
+        int GetMaxPositiveAuraModifierByMiscValue(AuraType auraType, int miscValue)
         {
-            return GetMaxPositiveAuraModifier(auratype, aurEff =>
+            return GetMaxPositiveAuraModifier(auraType, aurEff =>
             {
                 if (aurEff.GetMiscValue() == miscValue)
                     return true;
@@ -4179,9 +4179,9 @@ namespace Game.Entities
             });
         }
 
-        public int GetMaxNegativeAuraModifierByMiscValue(AuraType auratype, int miscValue)
+        public int GetMaxNegativeAuraModifierByMiscValue(AuraType auraType, int miscValue)
         {
-            return GetMaxNegativeAuraModifier(auratype, aurEff =>
+            return GetMaxNegativeAuraModifier(auraType, aurEff =>
             {
                 if (aurEff.GetMiscValue() == miscValue)
                     return true;

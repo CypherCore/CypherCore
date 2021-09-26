@@ -346,23 +346,20 @@ namespace Game.Combat
         public void TauntUpdate()
         {
             var tauntEffects = _owner.GetAuraEffectsByType(AuraType.ModTaunt);
-            ThreatReference tauntRef = null;
+            TauntState state = TauntState.Taunt;
+            Dictionary<ObjectGuid, TauntState> tauntStates = new();
+
             // Only the last taunt effect applied by something still on our threat list is considered
             foreach (var auraEffect in tauntEffects)
-            {
-                var refe = _myThreatListEntries.LookupByKey(auraEffect.GetCasterGUID());
-                if (refe == null)
-                    continue;
-
-                if (!refe.IsAvailable())
-                    continue;
-
-                tauntRef = refe;
-                break;
-            }
+                tauntStates[auraEffect.GetCasterGUID()] = state++;
 
             foreach (var pair in _myThreatListEntries)
-                pair.Value.UpdateTauntState(pair.Value == tauntRef);
+            {
+                if (tauntStates.TryGetValue(pair.Key, out TauntState tauntState))
+                    pair.Value.UpdateTauntState(tauntState);
+                else
+                    pair.Value.UpdateTauntState();
+            }
         }
 
         public void ResetAllThreat()
@@ -716,9 +713,9 @@ namespace Game.Combat
 
     public enum TauntState
     {
-        Detaunt = -1,
-        None = 0,
-        Taunt = 1
+        Detaunt = 0,
+        None = 1,
+        Taunt = 2
     }
     public enum OnlineState
     {
@@ -822,27 +819,17 @@ namespace Game.Combat
             return OnlineState.Online;
         }
 
-        public void UpdateTauntState(bool victimIsTaunting)
+        public void UpdateTauntState(TauntState state = TauntState.None)
         {
-            if (victimIsTaunting)
-            {
-                _taunted = TauntState.Taunt;
-                ListNotifyChanged();
-                return;
-            }
-
             // Check for SPELL_AURA_MOD_DETAUNT (applied from owner to victim)
-            foreach (AuraEffect eff in _victim.GetAuraEffectsByType(AuraType.ModDetaunt))
-            {
-                if (eff.GetCasterGUID() == _owner.GetGUID())
-                {
-                    _taunted = TauntState.Detaunt;
-                    ListNotifyChanged();
-                    return;
-                }
-            }
+            if (state < TauntState.Taunt && _victim.HasAuraTypeWithCaster(AuraType.ModDetaunt, _owner.GetGUID()))
+                state = TauntState.Detaunt;
 
-            _taunted = TauntState.None;
+            if (state == _taunted)
+                return;
+
+            Extensions.Swap(ref state, ref _taunted);
+
             ListNotifyChanged();
         }
 
@@ -859,8 +846,8 @@ namespace Game.Combat
         public bool IsOnline() { return (_online >= OnlineState.Online); }
         public bool IsAvailable() { return (_online > OnlineState.Offline); }
         public bool IsOffline() { return (_online <= OnlineState.Offline); }
-        public TauntState GetTauntState() { return _taunted; }
-        public bool IsTaunting() { return _taunted == TauntState.Taunt; }
+        public TauntState GetTauntState() { return IsTaunting() ? TauntState.Taunt : _taunted; }
+        public bool IsTaunting() { return _taunted >= TauntState.Taunt; }
         public bool IsDetaunted() { return _taunted == TauntState.Detaunt; }
 
         public void SetThreat(float amount) 
