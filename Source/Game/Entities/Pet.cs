@@ -209,14 +209,14 @@ namespace Game.Entities
                     petlevel = owner.GetLevel();
 
                     SetClass(Class.Mage);
-                    SetUnitFlags(UnitFlags.PvpAttackable); // this enables popup window (pet dismiss, cancel)
+                    SetUnitFlags(UnitFlags.PlayerControlled); // this enables popup window (pet dismiss, cancel)
                     break;
                 case PetType.Hunter:
                     SetClass(Class.Warrior);
                     SetGender(Gender.None);
                     SetSheath(SheathState.Melee);
                     SetPetFlags(result.Read<bool>(9) ? UnitPetFlags.CanBeAbandoned : UnitPetFlags.CanBeRenamed | UnitPetFlags.CanBeAbandoned);
-                    SetUnitFlags(UnitFlags.PvpAttackable); // this enables popup window (pet abandon, cancel)
+                    SetUnitFlags(UnitFlags.PlayerControlled); // this enables popup window (pet abandon, cancel)
                     break;
                 default:
                     if (!IsPetGhoul())

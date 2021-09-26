@@ -217,7 +217,7 @@ namespace Game.Entities
             if ((RealmType)WorldConfig.GetIntValue(WorldCfg.GameType) == RealmType.PVP || (RealmType)WorldConfig.GetIntValue(WorldCfg.GameType) == RealmType.RPPVP)
             {
                 AddPvpFlag(UnitPVPStateFlags.PvP);
-                AddUnitFlag(UnitFlags.PvpAttackable);
+                AddUnitFlag(UnitFlags.PlayerControlled);
             }
 
             AddUnitFlag2(UnitFlags2.RegeneratePower);
@@ -5814,7 +5814,7 @@ namespace Game.Entities
             UnitFlags.Stunned | UnitFlags.InCombat | UnitFlags.Disarmed |
             UnitFlags.Confused | UnitFlags.Fleeing | UnitFlags.NotSelectable |
             UnitFlags.Skinnable | UnitFlags.Mount | UnitFlags.TaxiFlight);
-            AddUnitFlag(UnitFlags.PvpAttackable);   // must be set
+            AddUnitFlag(UnitFlags.PlayerControlled);   // must be set
 
             AddUnitFlag2(UnitFlags2.RegeneratePower);// must be set
 

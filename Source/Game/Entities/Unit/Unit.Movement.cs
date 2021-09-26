@@ -54,7 +54,7 @@ namespace Game.Entities
             // Mirror client behavior, if this method returns false then client will not use swimming animation and for players will apply gravity as if there was no water
             if (HasUnitFlag(UnitFlags.CannotSwim))
                 return false;
-            if (HasUnitFlag(UnitFlags.PvpAttackable)) // is player
+            if (HasUnitFlag(UnitFlags.PlayerControlled)) // is player
                 return true;
             if (HasUnitFlag2((UnitFlags2)0x1000000))
                 return false;

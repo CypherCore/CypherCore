@@ -1935,7 +1935,7 @@ namespace Game.Spells
 
                     if (m_originalCaster && unit.IsInCombat() && m_spellInfo.HasInitialAggro())
                     {
-                        if (m_originalCaster.HasUnitFlag(UnitFlags.PvpAttackable))               // only do explicit combat forwarding for PvP enabled units
+                        if (m_originalCaster.HasUnitFlag(UnitFlags.PlayerControlled))               // only do explicit combat forwarding for PvP enabled units
                             m_originalCaster.GetCombatManager().InheritCombatStatesFrom(unit);    // for creature v creature combat, the threat forward does it for us
                         unit.GetThreatManager().ForwardThreatForAssistingMe(m_originalCaster, 0.0f, null, true);
                     }
@@ -2337,7 +2337,7 @@ namespace Game.Spells
             }
 
             // focus if not controlled creature
-            if (m_caster.GetTypeId() == TypeId.Unit && !m_caster.ToUnit().HasUnitFlag(UnitFlags.PlayerControlled))
+            if (m_caster.GetTypeId() == TypeId.Unit && !m_caster.ToUnit().HasUnitFlag(UnitFlags.Possessed))
             {
                 if (!(m_spellInfo.IsNextMeleeSwingSpell() || IsAutoRepeat()))
                 {
@@ -2600,7 +2600,7 @@ namespace Game.Spells
 
             // if the spell allows the creature to turn while casting, then adjust server-side orientation to face the target now
             // client-side orientation is handled by the client itself, as the cast target is targeted due to Creature::FocusTarget
-            if (m_caster.IsTypeId(TypeId.Unit) && !m_caster.ToUnit().HasUnitFlag(UnitFlags.PlayerControlled))
+            if (m_caster.IsTypeId(TypeId.Unit) && !m_caster.ToUnit().HasUnitFlag(UnitFlags.Possessed))
             {
                 if (!m_spellInfo.HasAttribute(SpellAttr5.DontTurnDuringCast))
                 {

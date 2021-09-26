@@ -2843,11 +2843,11 @@ namespace Game.Entities
                 {
                     List<CombatReference> toEnd = new();
                     foreach (var pair in m_combatManager.GetPvECombatRefs())
-                        if (pair.Value.GetOther(this).HasUnitFlag(UnitFlags.PvpAttackable))
+                        if (pair.Value.GetOther(this).HasUnitFlag(UnitFlags.PlayerControlled))
                             toEnd.Add(pair.Value);
 
                     foreach (var pair in m_combatManager.GetPvPCombatRefs())
-                        if (pair.Value.GetOther(this).HasUnitFlag(UnitFlags.PvpAttackable))
+                        if (pair.Value.GetOther(this).HasUnitFlag(UnitFlags.PlayerControlled))
                             toEnd.Add(pair.Value);
 
                     foreach (CombatReference refe in toEnd)
@@ -2877,11 +2877,11 @@ namespace Game.Entities
                 {
                     List<CombatReference> toEnd = new();
                     foreach (var pair in m_combatManager.GetPvECombatRefs())
-                        if (!pair.Value.GetOther(this).HasUnitFlag(UnitFlags.PvpAttackable))
+                        if (!pair.Value.GetOther(this).HasUnitFlag(UnitFlags.PlayerControlled))
                             toEnd.Add(pair.Value);
 
                     foreach (var pair in m_combatManager.GetPvPCombatRefs())
-                        if (!pair.Value.GetOther(this).HasUnitFlag(UnitFlags.PvpAttackable))
+                        if (!pair.Value.GetOther(this).HasUnitFlag(UnitFlags.PlayerControlled))
                             toEnd.Add(pair.Value);
 
                     foreach (CombatReference refe in toEnd)

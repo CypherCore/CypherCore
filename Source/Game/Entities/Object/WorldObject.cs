@@ -2085,9 +2085,9 @@ namespace Game.Entities
 
             Unit unit = ToUnit();
             Unit targetUnit = target.ToUnit();
-            if (unit && unit.HasUnitFlag(UnitFlags.PvpAttackable))
+            if (unit && unit.HasUnitFlag(UnitFlags.PlayerControlled))
             {
-                if (targetUnit && targetUnit.HasUnitFlag(UnitFlags.PvpAttackable))
+                if (targetUnit && targetUnit.HasUnitFlag(UnitFlags.PlayerControlled))
                 {
                     if (selfPlayerOwner && targetPlayerOwner)
                     {
@@ -2341,24 +2341,24 @@ namespace Game.Entities
             // ignore immunity flags when assisting
             if (bySpell == null || (isPositiveSpell && !bySpell.HasAttribute(SpellAttr6.AssistIgnoreImmuneFlag)))
             {
-                if (unit != null && !unit.HasUnitFlag(UnitFlags.PvpAttackable) && unitTarget != null && unitTarget.IsImmuneToNPC())
+                if (unit != null && !unit.HasUnitFlag(UnitFlags.PlayerControlled) && unitTarget != null && unitTarget.IsImmuneToNPC())
                     return false;
 
-                if (unitTarget != null && !unitTarget.HasUnitFlag(UnitFlags.PvpAttackable) && unit && unit.IsImmuneToNPC())
+                if (unitTarget != null && !unitTarget.HasUnitFlag(UnitFlags.PlayerControlled) && unit && unit.IsImmuneToNPC())
                     return false;
 
                 if (bySpell == null || !bySpell.HasAttribute(SpellAttr8.AttackIgnoreImmuneToPCFlag))
                 {
-                    if (unit != null && unit.HasUnitFlag(UnitFlags.PvpAttackable) && unitTarget && unitTarget.IsImmuneToPC())
+                    if (unit != null && unit.HasUnitFlag(UnitFlags.PlayerControlled) && unitTarget && unitTarget.IsImmuneToPC())
                         return false;
 
-                    if (unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.PvpAttackable) && unit && unit.IsImmuneToPC())
+                    if (unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.PlayerControlled) && unit && unit.IsImmuneToPC())
                         return false;
                 }
             }
 
             // CvC case - can attack each other only when one of them is hostile
-            if (unit && !unit.HasUnitFlag(UnitFlags.PvpAttackable) && unitTarget != null && !unitTarget.HasUnitFlag(UnitFlags.PvpAttackable))
+            if (unit && !unit.HasUnitFlag(UnitFlags.PlayerControlled) && unitTarget != null && !unitTarget.HasUnitFlag(UnitFlags.PlayerControlled))
                 return IsHostileTo(target) || target.IsHostileTo(this);
 
             // PvP, PvC, CvP case
@@ -2366,8 +2366,8 @@ namespace Game.Entities
             if (IsFriendlyTo(target) || target.IsFriendlyTo(this))
                 return false;
 
-            Player playerAffectingAttacker = unit != null && unit.HasUnitFlag(UnitFlags.PvpAttackable) ? GetAffectingPlayer() : null;
-            Player playerAffectingTarget = unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.PvpAttackable) ? target.GetAffectingPlayer() : null;
+            Player playerAffectingAttacker = unit != null && unit.HasUnitFlag(UnitFlags.PlayerControlled) ? GetAffectingPlayer() : null;
+            Player playerAffectingTarget = unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.PlayerControlled) ? target.GetAffectingPlayer() : null;
 
             // Not all neutral creatures can be attacked (even some unfriendly faction does not react aggresive to you, like Sporaggar)
             if ((playerAffectingAttacker && !playerAffectingTarget) || (!playerAffectingAttacker && playerAffectingTarget))
@@ -2408,7 +2408,7 @@ namespace Game.Entities
 
             // PvP case - can't attack when attacker or target are in sanctuary
             // however, 13850 client doesn't allow to attack when one of the unit's has sanctuary flag and is pvp
-            if (unitTarget && unitTarget.HasUnitFlag(UnitFlags.PvpAttackable) && unit && unit.HasUnitFlag(UnitFlags.PvpAttackable) && (unitTarget.IsInSanctuary() || unit.IsInSanctuary()))
+            if (unitTarget && unitTarget.HasUnitFlag(UnitFlags.PlayerControlled) && unit && unit.HasUnitFlag(UnitFlags.PlayerControlled) && (unitTarget.IsInSanctuary() || unit.IsInSanctuary()))
                 return false;
 
             // additional checks - only PvP case
@@ -2477,7 +2477,7 @@ namespace Game.Entities
 
             if (isNegativeSpell || bySpell == null || !bySpell.HasAttribute(SpellAttr6.AssistIgnoreImmuneFlag))
             {
-                if (unit != null && unit.HasUnitFlag(UnitFlags.PvpAttackable))
+                if (unit != null && unit.HasUnitFlag(UnitFlags.PlayerControlled))
                 {
                     if (bySpell == null || !bySpell.HasAttribute(SpellAttr8.AttackIgnoreImmuneToPCFlag))
                         if (unitTarget != null && unitTarget.IsImmuneToPC())
@@ -2495,10 +2495,10 @@ namespace Game.Entities
                 return false;
 
             // PvP case
-            if (unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.PvpAttackable))
+            if (unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.PlayerControlled))
             {
                 Player targetPlayerOwner = target.GetAffectingPlayer();
-                if (unit != null && unit.HasUnitFlag(UnitFlags.PvpAttackable))
+                if (unit != null && unit.HasUnitFlag(UnitFlags.PlayerControlled))
                 {
                     Player selfPlayerOwner = GetAffectingPlayer();
                     if (selfPlayerOwner != null && targetPlayerOwner != null)
@@ -2519,7 +2519,7 @@ namespace Game.Entities
             }
             // PvC case - player can assist creature only if has specific type flags
             // !target.HasFlag(UNIT_FIELD_FLAGS, UnitFlags.PvpAttackable) &&
-            else if (unit != null && unit.HasUnitFlag(UnitFlags.PvpAttackable))
+            else if (unit != null && unit.HasUnitFlag(UnitFlags.PlayerControlled))
             {
                 if (bySpell == null || !bySpell.HasAttribute(SpellAttr6.AssistIgnoreImmuneFlag))
                 {

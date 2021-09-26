@@ -517,7 +517,7 @@ namespace Game.Entities
             if (attType != WeaponAttackType.BaseAttack && attType != WeaponAttackType.OffAttack)
                 return;
 
-            if (IsTypeId(TypeId.Unit) && !HasUnitFlag(UnitFlags.PlayerControlled) && !HasUnitFlag2(UnitFlags2.DisableTurn))
+            if (IsTypeId(TypeId.Unit) && !HasUnitFlag(UnitFlags.Possessed) && !HasUnitFlag2(UnitFlags2.DisableTurn))
                 SetFacingToObject(victim, false); // update client side facing to face the target (prevents visual glitches when casting untargeted spells)
 
             // melee attack spell casted at main hand attack only - no normal melee dmg dealt
@@ -600,7 +600,7 @@ namespace Game.Entities
             if (attType != WeaponAttackType.BaseAttack && attType != WeaponAttackType.OffAttack)
                 return;                                             // ignore ranged case
 
-            if (IsTypeId(TypeId.Unit) && !HasUnitFlag(UnitFlags.PlayerControlled) && !HasUnitFlag2(UnitFlags2.DisableTurn))
+            if (IsTypeId(TypeId.Unit) && !HasUnitFlag(UnitFlags.Possessed) && !HasUnitFlag2(UnitFlags2.DisableTurn))
                 SetFacingToObject(victim, false); // update client side facing to face the target (prevents visual glitches when casting untargeted spells)
 
             CalcDamageInfo damageInfo = new();

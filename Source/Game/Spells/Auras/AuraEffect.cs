@@ -4543,13 +4543,13 @@ namespace Game.Spells
             {
                 target.SetFaction((uint)GetMiscValue());
                 if (target.IsTypeId(TypeId.Player))
-                    target.RemoveUnitFlag(UnitFlags.PvpAttackable);
+                    target.RemoveUnitFlag(UnitFlags.PlayerControlled);
             }
             else
             {
                 target.RestoreFaction();
                 if (target.IsTypeId(TypeId.Player))
-                    target.AddUnitFlag(UnitFlags.PvpAttackable);
+                    target.AddUnitFlag(UnitFlags.PlayerControlled);
             }
         }
 

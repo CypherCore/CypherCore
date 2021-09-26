@@ -1021,7 +1021,7 @@ namespace Scripts.World.NpcSpecial
                     if (Patient)
                     {
                         //303, this flag appear to be required for client side item.spell to work (TARGET_SINGLE_FRIEND)
-                        Patient.AddUnitFlag(UnitFlags.PvpAttackable);
+                        Patient.AddUnitFlag(UnitFlags.PlayerControlled);
 
                         Patients.Add(Patient.GetGUID());
                         ((npc_injured_patient)Patient.GetAI()).DoctorGUID = me.GetGUID();

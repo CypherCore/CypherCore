@@ -51,7 +51,7 @@ namespace Framework.Constants
         ServerControlled = 0x01,
         NonAttackable = 0x02,
         RemoveClientControl = 0x04, // This is a legacy flag used to disable movement player's movement while controlling other units, SMSG_CLIENT_CONTROL replaces this functionality clientside now. CONFUSED and FLEEING flags have the same effect on client movement asDISABLE_MOVE_CONTROL in addition to preventing spell casts/autoattack (they all allow climbing steeper hills and emotes while moving)
-        PvpAttackable = 0x08,
+        PlayerControlled = 0x08, //controlled by player, use _IMMUNE_TO_PC instead of _IMMUNE_TO_NPC
         Rename = 0x10,
         Preparation = 0x20,
         Unk6 = 0x40,
@@ -72,7 +72,7 @@ namespace Framework.Constants
         Disarmed = 0x200000,
         Confused = 0x400000,
         Fleeing = 0x800000,
-        PlayerControlled = 0x1000000,
+        Possessed = 0x1000000, // under direct client control by a player (possess or vehicle)
         NotSelectable = 0x2000000,
         Skinnable = 0x4000000,
         Mount = 0x8000000,

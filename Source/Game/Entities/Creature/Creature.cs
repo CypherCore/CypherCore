@@ -1693,7 +1693,7 @@ namespace Game.Entities
                 return false;
 
             // This set of checks is should be done only for creatures
-            if ((IsImmuneToNPC() && !who.HasUnitFlag(UnitFlags.PvpAttackable)) || (IsImmuneToPC() && who.HasUnitFlag(UnitFlags.PvpAttackable)))
+            if ((IsImmuneToNPC() && !who.HasUnitFlag(UnitFlags.PlayerControlled)) || (IsImmuneToPC() && who.HasUnitFlag(UnitFlags.PlayerControlled)))
                 return false;
 
             // Do not attack non-combat pets

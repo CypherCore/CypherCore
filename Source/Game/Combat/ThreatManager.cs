@@ -782,7 +782,7 @@ namespace Game.Combat
             if (a.IsCreature() && a.ToCreature().IsTrigger())
                 return false;
 
-            if (a.HasUnitFlag(UnitFlags.PvpAttackable))
+            if (a.HasUnitFlag(UnitFlags.PlayerControlled))
             {
                 if (b.HasUnitFlag(UnitFlags.ImmuneToPc))
                     return false;

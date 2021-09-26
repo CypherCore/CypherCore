@@ -81,7 +81,7 @@ namespace Game.Chat
 
             player.SetPvpFlags(UnitPVPStateFlags.PvP);
 
-            player.SetUnitFlags(UnitFlags.PvpAttackable);
+            player.SetUnitFlags(UnitFlags.PlayerControlled);
 
             //-1 is default value
             player.SetWatchedFactionIndex(0xFFFFFFFF);
