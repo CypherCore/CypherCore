@@ -225,7 +225,7 @@ namespace Game.Collision
             return false;
         }
 
-        public bool GetLiquidLevel(uint mapId, float x, float y, float z, uint reqLiquidType, ref float level, ref float floor, ref uint type)
+        public bool GetLiquidLevel(uint mapId, float x, float y, float z, uint reqLiquidType, ref float level, ref float floor, ref uint type, ref uint mogpFlags)
         {
             if (!Global.DisableMgr.IsDisabledFor(DisableType.VMAP, mapId, null, (byte)DisableFlags.VmapLiquidStatus))
             {
@@ -239,6 +239,7 @@ namespace Game.Collision
                         floor = info.ground_Z;
                         Cypher.Assert(floor < float.MaxValue);
                         type = info.hitModel.GetLiquidType();  // entry from LiquidType.dbc
+                        mogpFlags = info.hitModel.GetMogpFlags();
                         if (reqLiquidType != 0 && !Convert.ToBoolean(Global.DB2Mgr.GetLiquidFlags(type) & reqLiquidType))
                             return false;
                         if (info.hitInstance.GetLiquidLevel(pos, info, ref level))

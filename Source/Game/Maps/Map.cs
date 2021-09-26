@@ -1713,7 +1713,7 @@ namespace Game.Maps
             if (gmap != null)
             {
                 float gridHeight = gmap.GetHeight(x, y);
-                if (z > gridHeight)
+                if (MathFunctions.fuzzyGe(z, gridHeight - MapConst.GroundHeightTolerance))
                     mapHeight = gridHeight;
             }
 
@@ -1763,50 +1763,14 @@ namespace Game.Maps
             return -500.0f;
         }
 
-        private bool IsOutdoorWMO(uint mogpFlags, WMOAreaTableRecord wmoEntry, AreaTableRecord atEntry)
+        public static bool IsInWMOInterior(uint mogpFlags)
         {
-            if (wmoEntry != null && atEntry != null)
-            {
-                if (atEntry.Flags.HasFlag(AreaFlags.Outside))
-                    return true;
-                if (atEntry.Flags.HasFlag(AreaFlags.Inside))
-                    return false;
-            }
-
-            if (wmoEntry != null)
-            {
-                if (Convert.ToBoolean(wmoEntry.Flags & 4))
-                    return true;
-                if ((wmoEntry.Flags & 2) != 0)
-                    return false;
-            }
-
-            return (mogpFlags & 0x8) != 0;
+            return (mogpFlags & 0x2000) != 0;
         }
 
-        public bool IsOutdoors(PhaseShift phaseShift, float x, float y, float z)
+        private bool GetAreaInfo(PhaseShift phaseShift, float x, float y, float z, out uint mogpflags, out int adtId, out int rootId, out int groupId)
         {
-            uint mogpFlags;
-            int adtId, rootId, groupId;
-
-            // no wmo found? . outside by default
-            if (!GetAreaInfo(phaseShift, x, y, z, out mogpFlags, out adtId, out rootId, out groupId))
-                return true;
-
-            AreaTableRecord atEntry = null;
-            WMOAreaTableRecord wmoEntry = Global.DB2Mgr.GetWMOAreaTable(rootId, adtId, groupId);
-            if (wmoEntry != null)
-            {
-                Log.outDebug(LogFilter.Maps, "Got WMOAreaTableEntry! flag {0}, areaid {1}", wmoEntry.Flags,
-                    wmoEntry.AreaTableID);
-                atEntry = CliDB.AreaTableStorage.LookupByKey(wmoEntry.AreaTableID);
-            }
-            return IsOutdoorWMO(mogpFlags, wmoEntry, atEntry);
-        }
-
-        private bool GetAreaInfo(PhaseShift phaseShift, float x, float y, float z, out uint flags, out int adtId, out int rootId, out int groupId)
-        {
-            flags = 0;
+            mogpflags = 0;
             adtId = 0;
             rootId = 0;
             groupId = 0;
@@ -1832,7 +1796,7 @@ namespace Game.Maps
                 if (hasDynamicAreaInfo && dynamic_z > vmap_z)
                 {
                     check_z = dynamic_z;
-                    flags = dflags;
+                    mogpflags = dflags;
                     adtId = dadtId;
                     rootId = drootId;
                     groupId = dgroupId;
@@ -1840,7 +1804,7 @@ namespace Game.Maps
                 else
                 {
                     check_z = vmap_z;
-                    flags = vflags;
+                    mogpflags = vflags;
                     adtId = vadtId;
                     rootId = vrootId;
                     groupId = vgroupId;
@@ -1849,7 +1813,7 @@ namespace Game.Maps
             else if (hasDynamicAreaInfo)
             {
                 check_z = dynamic_z;
-                flags = dflags;
+                mogpflags = dflags;
                 adtId = dadtId;
                 rootId = drootId;
                 groupId = dgroupId;
@@ -1863,7 +1827,8 @@ namespace Game.Maps
                 if (gmap != null)
                 {
                     float mapHeight = gmap.GetHeight(x, y);
-                    if (z > mapHeight && mapHeight > check_z)
+                    // z + 2.0f condition taken from GetHeight(), not sure if it's such a great choice...
+                    if (z + 2.0f > mapHeight && mapHeight > check_z)
                         return false;
                 }
                 return true;
@@ -1874,44 +1839,38 @@ namespace Game.Maps
 
         public uint GetAreaId(PhaseShift phaseShift, float x, float y, float z)
         {
-            return GetAreaId(phaseShift, x, y, z, out _);
-        }
-
-        public uint GetAreaId(PhaseShift phaseShift, float x, float y, float z, out bool isOutdoors)
-        {
             uint mogpFlags;
             int adtId, rootId, groupId;
-            WMOAreaTableRecord wmoEntry = null;
-            AreaTableRecord atEntry = null;
-            bool haveAreaInfo = false;
+            float vmapZ = z;
+            bool hasVmapArea = GetAreaInfo(phaseShift, x, y, vmapZ, out mogpFlags, out adtId, out rootId, out groupId);
+
+            uint gridAreaId = 0;
+            float gridMapHeight = MapConst.InvalidHeight;
+            GridMap gmap = GetGridMap(PhasingHandler.GetTerrainMapId(phaseShift, this, x, y), x, y);
+            if (gmap != null)
+            {
+                gridAreaId = gmap.GetArea(x, y);
+                gridMapHeight = gmap.GetHeight(x, y);
+            }
+
             uint areaId = 0;
 
-            if (GetAreaInfo(phaseShift, x, y, z, out mogpFlags, out adtId, out rootId, out groupId))
+            // floor is the height we are closer to (but only if above)
+            if (hasVmapArea && MathFunctions.fuzzyGe(z, vmapZ - MapConst.GroundHeightTolerance) && (MathFunctions.fuzzyLt(z, gridMapHeight - MapConst.GroundHeightTolerance) || vmapZ > gridMapHeight))
             {
-                haveAreaInfo = true;
-                wmoEntry = Global.DB2Mgr.GetWMOAreaTable(rootId, adtId, groupId);
+                // wmo found
+                var wmoEntry = Global.DB2Mgr.GetWMOAreaTable(rootId, adtId, groupId);
                 if (wmoEntry != null)
-                {
                     areaId = wmoEntry.AreaTableID;
-                    atEntry = CliDB.AreaTableStorage.LookupByKey(wmoEntry.AreaTableID);
-                }
+
+                if (areaId == 0)
+                    areaId = gridAreaId;
             }
+            else
+                areaId = gridAreaId;
 
             if (areaId == 0)
-            {
-                GridMap gmap = GetGridMap(PhasingHandler.GetTerrainMapId(phaseShift, this, x, y), x, y);
-                if (gmap != null)
-                    areaId = gmap.GetArea(x, y);
-
-                // this used while not all *.map files generated (instances)
-                if (areaId == 0)
-                    areaId = i_mapRecord.AreaTableID;
-            }
-
-            if (haveAreaInfo)
-                isOutdoors = IsOutdoorWMO(mogpFlags, wmoEntry, atEntry);
-            else
-                isOutdoors = true;
+                areaId = i_mapRecord.AreaTableID;
 
             return areaId;
         }
@@ -1942,15 +1901,6 @@ namespace Game.Maps
 
         public void GetZoneAndAreaId(PhaseShift phaseShift, out uint zoneid, out uint areaid, Position pos) { GetZoneAndAreaId(phaseShift, out zoneid, out areaid, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ()); }
 
-        private LiquidHeaderTypeFlags GetTerrainType(PhaseShift phaseShift, float x, float y)
-        {
-            GridMap gmap = GetGridMap(PhasingHandler.GetTerrainMapId(phaseShift, this, x, y), x, y);
-            if (gmap != null)
-                return gmap.GetTerrainType(x, y);
-
-            return LiquidHeaderTypeFlags.NoWater;
-        }
-
         public ZLiquidStatus GetLiquidStatus(PhaseShift phaseShift, float x, float y, float z, LiquidHeaderTypeFlags reqLiquidType, float collisionHeight = MapConst.DefaultCollesionHeight)
         {
             return GetLiquidStatus(phaseShift, x, y, z, reqLiquidType, out _, collisionHeight);
@@ -1963,13 +1913,17 @@ namespace Game.Maps
             float liquid_level = MapConst.InvalidHeight;
             float ground_level = MapConst.InvalidHeight;
             uint liquid_type = 0;
+            uint mogpFlags = 0;
+            bool useGridLiquid = true;
             uint terrainMapId = PhasingHandler.GetTerrainMapId(phaseShift, this, x, y);
-            if (Global.VMapMgr.GetLiquidLevel(terrainMapId, x, y, z, (byte)reqLiquidType, ref liquid_level, ref ground_level, ref liquid_type))
+
+            if (Global.VMapMgr.GetLiquidLevel(terrainMapId, x, y, z, (byte)reqLiquidType, ref liquid_level, ref ground_level, ref liquid_type, ref mogpFlags))
             {
+                useGridLiquid = !IsInWMOInterior(mogpFlags);
                 Log.outDebug(LogFilter.Maps, "getLiquidStatus(): vmap liquid level: {0} ground: {1} type: {2}",
                     liquid_level, ground_level, liquid_type);
                 // Check water level and ground level
-                if (liquid_level > ground_level && z > ground_level - 2)
+                if (liquid_level > ground_level && MathFunctions.fuzzyGe(z, ground_level - MapConst.GroundHeightTolerance))
                 {
                     // All ok in water . store data
                     // hardcoded in client like this
@@ -2022,21 +1976,24 @@ namespace Game.Maps
                 }
             }
 
-            GridMap gmap = GetGridMap(terrainMapId, x, y);
-            if (gmap != null)
+            if (useGridLiquid)
             {
-                var map_data = new LiquidData();
-                ZLiquidStatus map_result = gmap.GetLiquidStatus(x, y, z, reqLiquidType, map_data, collisionHeight);
-                // Not override LIQUID_MAP_ABOVE_WATER with LIQUID_MAP_NO_WATER:
-                if (map_result != ZLiquidStatus.NoWater && (map_data.level > ground_level))
+                GridMap gmap = GetGridMap(terrainMapId, x, y);
+                if (gmap != null)
                 {
-                    // hardcoded in client like this
-                    if (GetId() == 530 && map_data.entry == 2)
-                        map_data.entry = 15;
+                    var map_data = new LiquidData();
+                    ZLiquidStatus map_result = gmap.GetLiquidStatus(x, y, z, reqLiquidType, map_data, collisionHeight);
+                    // Not override LIQUID_MAP_ABOVE_WATER with LIQUID_MAP_NO_WATER:
+                    if (map_result != ZLiquidStatus.NoWater && (map_data.level > ground_level))
+                    {
+                        // hardcoded in client like this
+                        if (GetId() == 530 && map_data.entry == 2)
+                            map_data.entry = 15;
 
-                    data = map_data;
+                        data = map_data;
 
-                    return map_result;
+                        return map_result;
+                    }
                 }
             }
             return result;
@@ -2045,66 +2002,92 @@ namespace Game.Maps
         public void GetFullTerrainStatusForPosition(PhaseShift phaseShift, float x, float y, float z, PositionFullTerrainStatus data, LiquidHeaderTypeFlags reqLiquidType, float collisionHeight = MapConst.DefaultCollesionHeight)
         {
             uint terrainMapId = PhasingHandler.GetTerrainMapId(phaseShift, this, x, y);
-            AreaAndLiquidData vmapData = Global.VMapMgr.GetAreaAndLiquidData(terrainMapId, x, y, z, (byte)reqLiquidType);
-            if (vmapData.areaInfo.HasValue)
-                data.areaInfo.Set(new PositionFullTerrainStatus.AreaInfo(vmapData.areaInfo.Value.AdtId, vmapData.areaInfo.Value.RootId, vmapData.areaInfo.Value.GroupId, vmapData.areaInfo.Value.MogpFlags));
-
-            float mapHeight = MapConst.InvalidHeight;
             GridMap gmap = GetGridMap(terrainMapId, x, y);
+            AreaAndLiquidData vmapData = Global.VMapMgr.GetAreaAndLiquidData(terrainMapId, x, y, z, (byte)reqLiquidType);
+            AreaAndLiquidData dynData = _dynamicTree.GetAreaAndLiquidData(x, y, z, phaseShift, (byte)reqLiquidType);
+
+            uint gridAreaId = 0;
+            float gridMapHeight = MapConst.InvalidHeight;
             if (gmap != null)
-                mapHeight = gmap.GetHeight(x, y);
-
-            // area lookup
-            AreaTableRecord areaEntry = null;
-            WMOAreaTableRecord wmoEntry = null;
-
-            // the vmap floor is our floor if either
-            //  - the vmap floor is above the gridmap floor
-            // or
-            //  - we are below the gridmap floor
-            if (vmapData.areaInfo.HasValue && (MathFunctions.fuzzyLt(z, mapHeight - MapConst.GroundHeightTolerance) || mapHeight <= vmapData.floorZ))
             {
-                wmoEntry = Global.DB2Mgr.GetWMOAreaTable(vmapData.areaInfo.Value.RootId, vmapData.areaInfo.Value.AdtId, vmapData.areaInfo.Value.GroupId);
-                if (wmoEntry != null)
-                    areaEntry = CliDB.AreaTableStorage.LookupByKey(wmoEntry.AreaTableID);
+                gridAreaId = gmap.GetArea(x, y);
+                gridMapHeight = gmap.GetHeight(x, y);
             }
 
-            if (areaEntry != null)
+            bool useGridLiquid = true;
+            AreaAndLiquidData wmoData = null;
+
+            // floor is the height we are closer to (but only if above)
+            data.FloorZ = MapConst.InvalidHeight;
+            if (gridMapHeight > MapConst.InvalidHeight && MathFunctions.fuzzyGe(z, gridMapHeight - MapConst.GroundHeightTolerance))
+                data.FloorZ = gridMapHeight;
+            if (vmapData.floorZ > MapConst.InvalidHeight &&
+                MathFunctions.fuzzyGe(z, vmapData.floorZ - MapConst.GroundHeightTolerance) &&
+                (MathFunctions.fuzzyLt(z, gridMapHeight - MapConst.GroundHeightTolerance) || vmapData.floorZ > gridMapHeight))
             {
-                data.AreaId = areaEntry.Id;
                 data.FloorZ = vmapData.floorZ;
+                wmoData = vmapData;
+            }
+
+            // NOTE: Objects will not detect a case when a wmo providing area/liquid despawns from under them
+            // but this is fine as these kind of objects are not meant to be spawned and despawned a lot
+            // example: Lich King platform
+            if (dynData.floorZ > MapConst.InvalidHeight &&
+                MathFunctions.fuzzyGe(z, dynData.floorZ - MapConst.GroundHeightTolerance) &&
+                (MathFunctions.fuzzyLt(z, gridMapHeight - MapConst.GroundHeightTolerance) || dynData.floorZ > gridMapHeight) &&
+                (MathFunctions.fuzzyLt(z, vmapData.floorZ - MapConst.GroundHeightTolerance) || dynData.floorZ > vmapData.floorZ))
+            {
+                data.FloorZ = dynData.floorZ;
+                wmoData = dynData;
+            }
+
+            if (wmoData != null)
+            {
+                if (wmoData.areaInfo.HasValue)
+                {
+                    data.areaInfo.Set(new PositionFullTerrainStatus.AreaInfo(wmoData.areaInfo.Value.AdtId, wmoData.areaInfo.Value.RootId, wmoData.areaInfo.Value.GroupId, wmoData.areaInfo.Value.MogpFlags));
+                    // wmo found
+                    var wmoEntry = Global.DB2Mgr.GetWMOAreaTable(wmoData.areaInfo.Value.RootId, wmoData.areaInfo.Value.AdtId, wmoData.areaInfo.Value.GroupId);
+                    data.outdoors = (wmoData.areaInfo.Value.MogpFlags & 0x8) != 0;
+                    if (wmoEntry != null)
+                    {
+                        data.AreaId = wmoEntry.AreaTableID;
+                        if ((wmoEntry.Flags & 4) != 0)
+                            data.outdoors = true;
+                        else if ((wmoEntry.Flags & 2) != 0)
+                            data.outdoors = false;
+                    }
+
+                    if (data.AreaId == 0)
+                        data.AreaId = gridAreaId;
+
+                    useGridLiquid = !IsInWMOInterior(wmoData.areaInfo.Value.MogpFlags);
+                }
             }
             else
             {
-                if (gmap != null)
-                    data.AreaId = gmap.GetArea(x, y);
-                else
-                    data.AreaId = 0;
-
-                if (data.AreaId == 0)
-                    data.AreaId = i_mapRecord.AreaTableID;
-
-                if (data.AreaId != 0)
-                    areaEntry = CliDB.AreaTableStorage.LookupByKey(data.AreaId);
-
-                data.FloorZ = mapHeight;
+                data.outdoors = true;
+                data.AreaId = gridAreaId;
+                var areaEntry1 = CliDB.AreaTableStorage.LookupByKey(data.AreaId);
+                if (areaEntry1 != null)
+                    data.outdoors = (areaEntry1.Flags & (AreaFlags.Inside | AreaFlags.Outside)) != AreaFlags.Inside;
             }
 
-            if (vmapData.areaInfo.HasValue)
-                data.outdoors = IsOutdoorWMO(vmapData.areaInfo.Value.MogpFlags, wmoEntry, areaEntry);
-            else
-                data.outdoors = true; // @todo default true taken from old GetAreaId check, maybe review
+            if (data.AreaId == 0)
+                data.AreaId = i_mapRecord.AreaTableID;
+
+            var areaEntry = CliDB.AreaTableStorage.LookupByKey(data.AreaId);
 
             // liquid processing
             data.LiquidStatus = ZLiquidStatus.NoWater;
-            if (vmapData.liquidInfo.HasValue && vmapData.liquidInfo.Value.Level > vmapData.floorZ && z > vmapData.floorZ)
+            if (wmoData != null && wmoData.liquidInfo.HasValue && wmoData.liquidInfo.Value.Level > wmoData.floorZ)
             {
-                uint liquidType = vmapData.liquidInfo.Value.LiquidType;
+                uint liquidType = wmoData.liquidInfo.Value.LiquidType;
                 if (GetId() == 530 && liquidType == 2) // gotta love blizzard hacks
                     liquidType = 15;
 
                 uint liquidFlagType = 0;
-                LiquidTypeRecord liquidData = CliDB.LiquidTypeStorage.LookupByKey(liquidType);
+                var liquidData = CliDB.LiquidTypeStorage.LookupByKey(liquidType);
                 if (liquidData != null)
                     liquidFlagType = liquidData.SoundBank;
 
@@ -2113,12 +2096,12 @@ namespace Game.Maps
                     uint overrideLiquid = areaEntry.LiquidTypeID[liquidFlagType];
                     if (overrideLiquid == 0 && areaEntry.ParentAreaID != 0)
                     {
-                        AreaTableRecord zoneEntry = CliDB.AreaTableStorage.LookupByKey(areaEntry.ParentAreaID);
+                        var zoneEntry = CliDB.AreaTableStorage.LookupByKey(areaEntry.ParentAreaID);
                         if (zoneEntry != null)
                             overrideLiquid = zoneEntry.LiquidTypeID[liquidFlagType];
                     }
 
-                    LiquidTypeRecord overrideData = CliDB.LiquidTypeStorage.LookupByKey(overrideLiquid);
+                    var overrideData = CliDB.LiquidTypeStorage.LookupByKey(overrideLiquid);
                     if (overrideData != null)
                     {
                         liquidType = overrideLiquid;
@@ -2126,14 +2109,13 @@ namespace Game.Maps
                     }
                 }
 
-                var liquidInfo = new LiquidData();
-                liquidInfo.level = vmapData.liquidInfo.Value.Level;
-                liquidInfo.depth_level = vmapData.floorZ;
-                liquidInfo.entry = liquidType;
-                liquidInfo.type_flags = (LiquidHeaderTypeFlags)(1u << (int)liquidFlagType);
-                data.LiquidInfo.Set(liquidInfo);
+                data.LiquidInfo.HasValue = true;
+                data.LiquidInfo.Value.level = wmoData.liquidInfo.Value.Level;
+                data.LiquidInfo.Value.depth_level = wmoData.floorZ;
+                data.LiquidInfo.Value.entry = liquidType;
+                data.LiquidInfo.Value.type_flags = (LiquidHeaderTypeFlags)(1 << (int)liquidFlagType);
 
-                float delta = vmapData.liquidInfo.Value.Level - z;
+                float delta = wmoData.liquidInfo.Value.Level - z;
                 if (delta > collisionHeight)
                     data.LiquidStatus = ZLiquidStatus.UnderWater;
                 else if (delta > 0.0f)
@@ -2144,11 +2126,11 @@ namespace Game.Maps
                     data.LiquidStatus = ZLiquidStatus.AboveWater;
             }
             // look up liquid data from grid map
-            if (gmap != null && (data.LiquidStatus == ZLiquidStatus.AboveWater || data.LiquidStatus == ZLiquidStatus.NoWater))
+            if (gmap != null && useGridLiquid)
             {
                 LiquidData gridMapLiquid = new();
                 ZLiquidStatus gridMapStatus = gmap.GetLiquidStatus(x, y, z, reqLiquidType, gridMapLiquid, collisionHeight);
-                if (gridMapStatus != ZLiquidStatus.NoWater && (gridMapLiquid.level > vmapData.floorZ))
+                if (gridMapStatus != ZLiquidStatus.NoWater && (wmoData == null || gridMapLiquid.level > wmoData.floorZ))
                 {
                     if (GetId() == 530 && gridMapLiquid.entry == 2)
                         gridMapLiquid.entry = 15;
@@ -2629,7 +2611,7 @@ namespace Game.Maps
                 else // value changed, update heap position
                 {
                     Cypher.Assert(now < next.respawnTime); // infinite loop guard
-                    //_respawnTimes.decrease(next->handle);
+                    //_respawnTimes.decrease(next.handle);
                 }
             }
         }

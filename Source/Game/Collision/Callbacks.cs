@@ -26,6 +26,7 @@ namespace Game.Collision
     {
         public virtual void Invoke(Vector3 point, uint entry) { }
         public virtual void Invoke(Vector3 point, IModel entry) { }
+        public virtual void Invoke(Vector3 point, GameObjectModel obj) { }
         public virtual bool Invoke(Ray ray, uint entry, ref float distance, bool pStopAtFirstHit) { return false; }
         public virtual bool Invoke(Ray r, IModel obj, ref float distance) { return false; }
     }
@@ -106,10 +107,7 @@ namespace Game.Collision
         }
         public override bool Invoke(Ray ray, uint entry, ref float distance, bool pStopAtFirstHit)
         {
-            bool result = IntersectTriangle(triangles[(int)entry], vertices, ray, ref distance);
-            if (result)
-                hit = true;
-
+            hit = IntersectTriangle(triangles[(int)entry], vertices, ray, ref distance) || hit;
             return hit;
         }
 
@@ -265,5 +263,26 @@ namespace Game.Collision
 
         PhaseShift _phaseShift;
         AreaInfo _areaInfo;
+    }
+
+    public class DynamicTreeLocationInfoCallback : WorkerCallback
+    {
+        public DynamicTreeLocationInfoCallback(PhaseShift phaseShift)
+        {
+            _phaseShift = phaseShift;
+        }
+
+        public override void Invoke(Vector3 p, GameObjectModel obj)
+        {
+            if (obj.GetLocationInfo(p, _locationInfo, _phaseShift))
+                _hitModel = obj;
+        }
+
+        public LocationInfo GetLocationInfo() { return _locationInfo; }
+        public GameObjectModel GetHitModel() { return _hitModel; }
+
+        PhaseShift _phaseShift;
+        LocationInfo _locationInfo;
+        GameObjectModel _hitModel;
     }
 }

@@ -139,6 +139,51 @@ namespace Game.Collision
             }
         }
 
+        public bool GetLocationInfo(Vector3 point, LocationInfo info, PhaseShift phaseShift)
+        {
+            if (!IsCollisionEnabled() || !owner.IsSpawned() || !IsMapObject())
+                return false;
+
+            if (!owner.IsInPhase(phaseShift))
+                return false;
+
+            if (!iBound.contains(point))
+                return false;
+
+            // child bounds are defined in object space:
+            Vector3 pModel = iInvRot * (point - iPos) * iInvScale;
+            Vector3 zDirModel = iInvRot * new Vector3(0.0f, 0.0f, -1.0f);
+            float zDist;
+            if (iModel.GetLocationInfo(pModel, zDirModel, out zDist, info))
+            {
+                Vector3 modelGround = pModel + zDist * zDirModel;
+                float world_Z = ((modelGround * iInvRot) * iScale + iPos).Z;
+                if (info.ground_Z < world_Z)
+                {
+                    info.ground_Z = world_Z;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public bool GetLiquidLevel(Vector3 point, LocationInfo info, ref float liqHeight)
+        {
+            // child bounds are defined in object space:
+            Vector3 pModel = iInvRot * (point - iPos) * iInvScale;
+            //Vector3 zDirModel = iInvRot * Vector3(0.f, 0.f, -1.f);
+            float zDist;
+            if (info.hitModel.GetLiquidLevel(pModel, out zDist))
+            {
+                // calculate world height (zDist in model coords):
+                // assume WMO not tilted (wouldn't make much sense anyway)
+                liqHeight = zDist * iScale + iPos.Z;
+                return true;
+            }
+            return false;
+        }
+        
         public bool UpdatePosition()
         {
             if (iModel == null)
@@ -177,7 +222,8 @@ namespace Game.Collision
         public void EnableCollision(bool enable) { _collisionEnabled = enable; }
         bool IsCollisionEnabled() { return _collisionEnabled; }
         public bool IsMapObject() { return isWmo; }
-
+        public byte GetNameSetId() { return owner.GetNameSetId(); }
+        
         public static void LoadGameObjectModelList()
         {
             uint oldMSTime = Time.GetMSTime();

@@ -774,7 +774,10 @@ namespace Game.Movement
         void NormalizePath()
         {
             for (uint i = 0; i < _pathPoints.Length; ++i)
+            {
+                _pathPoints[i].Z += _sourceUnit.GetCollisionHeight();
                 _sourceUnit.UpdateAllowedPositionZ(_pathPoints[i].X, _pathPoints[i].Y, ref _pathPoints[i].Z);
+            }
         }
 
         void BuildShortcut()

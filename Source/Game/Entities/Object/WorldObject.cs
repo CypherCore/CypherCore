@@ -3306,8 +3306,9 @@ namespace Game.Entities
                 return;
             }
 
+            float halfHeight = GetCollisionHeight() * 0.5f;
             UpdateAllowedPositionZ(destx, desty, ref destz);
-            bool col = Global.VMapMgr.GetObjectHitPos(PhasingHandler.GetTerrainMapId(GetPhaseShift(), GetMap(), pos.posX, pos.posY), pos.posX, pos.posY, pos.posZ, destx, desty, destz, out destx, out desty, out destz, -0.5f);
+            bool col = Global.VMapMgr.GetObjectHitPos(PhasingHandler.GetTerrainMapId(GetPhaseShift(), GetMap(), pos.posX, pos.posY), pos.posX, pos.posY, pos.posZ + halfHeight, destx, desty, destz + halfHeight, out destx, out desty, out destz, -0.5f);
 
             // collision occured
             if (col)
@@ -3319,7 +3320,7 @@ namespace Game.Entities
             }
 
             // check dynamic collision
-            col = GetMap().GetObjectHitPos(GetPhaseShift(), pos.posX, pos.posY, pos.posZ, destx, desty, destz, out destx, out desty, out destz, -0.5f);
+            col = GetMap().GetObjectHitPos(GetPhaseShift(), pos.posX, pos.posY, pos.posZ + halfHeight, destx, desty, destz + halfHeight, out destx, out desty, out destz, -0.5f);
 
             // Collided with a gameobject
             if (col)
@@ -3363,11 +3364,7 @@ namespace Game.Entities
 
         float GetMapWaterOrGroundLevel(float x, float y, float z, ref float ground)
         {
-            Unit unit = ToUnit();
-            if (unit != null)
-                return GetMap().GetWaterOrGroundLevel(GetPhaseShift(), x, y, z, ref ground, !unit.HasAuraType(AuraType.WaterWalk), GetCollisionHeight());
-
-            return z;
+            return GetMap().GetWaterOrGroundLevel(GetPhaseShift(), x, y, z, ref ground, IsTypeMask(TypeMask.Unit) ? !ToUnit().HasAuraType(AuraType.WaterWalk) : false, GetCollisionHeight());
         }
 
         public float GetMapHeight(float x, float y, float z, bool vmap = true, float distanceToSearch = MapConst.DefaultHeightSearch)

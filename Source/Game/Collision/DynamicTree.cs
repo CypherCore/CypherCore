@@ -148,6 +148,31 @@ namespace Game.Collision
             return false;
         }
 
+        public AreaAndLiquidData GetAreaAndLiquidData(float x, float y, float z, PhaseShift phaseShift, byte reqLiquidType)
+        {
+            AreaAndLiquidData data = new();
+
+            Vector3 v = new(x, y, z +0.5f);
+            DynamicTreeLocationInfoCallback intersectionCallBack = new(phaseShift);
+            impl.IntersectPoint(v, intersectionCallBack);
+            if (intersectionCallBack.GetLocationInfo().hitModel != null)
+            {
+                data.floorZ = intersectionCallBack.GetLocationInfo().ground_Z;
+                uint liquidType = intersectionCallBack.GetLocationInfo().hitModel.GetLiquidType();
+                float liquidLevel = 0;
+                if (reqLiquidType == 0 || (Global.DB2Mgr.GetLiquidFlags(liquidType) & reqLiquidType) != 0)
+                    if (intersectionCallBack.GetHitModel().GetLiquidLevel(v, intersectionCallBack.GetLocationInfo(), ref liquidLevel))
+                        data.liquidInfo.Set(new AreaAndLiquidData.LiquidInfo(liquidType, liquidLevel));
+
+                data.areaInfo.Set(new AreaAndLiquidData.AreaInfo(intersectionCallBack.GetHitModel().GetNameSetId(),
+                    intersectionCallBack.GetLocationInfo().rootId,
+                    (int)intersectionCallBack.GetLocationInfo().hitModel.GetWmoID(),
+                    intersectionCallBack.GetLocationInfo().hitModel.GetMogpFlags()));
+            }
+
+            return data;
+        }
+        
         DynTreeImpl impl;
     }
 

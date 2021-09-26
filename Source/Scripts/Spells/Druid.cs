@@ -1449,7 +1449,7 @@ namespace Scripts.Spells.Druid
         {
             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell_id, difficulty);
 
-            if (requireOutdoors && !targetPlayer.GetMap().IsOutdoors(targetPlayer.GetPhaseShift(), targetPlayer.GetPositionX(), targetPlayer.GetPositionY(), targetPlayer.GetPositionZ()))
+            if (requireOutdoors && !targetPlayer.IsOutdoors())
                 return SpellCastResult.OnlyOutdoors;
 
             return spellInfo.CheckLocation(targetPlayer.GetMapId(), targetPlayer.GetZoneId(), targetPlayer.GetAreaId(), targetPlayer);

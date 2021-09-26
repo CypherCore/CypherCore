@@ -69,6 +69,12 @@ namespace Game.Maps
                 return LoadResult.ReadFromFileFailed;
             }
 
+            if (header.holesSize != 0 && !LoadHolesData(reader, header.holesOffset))
+            {
+                Log.outError(LogFilter.Maps, "Error loading map holes data");
+                return LoadResult.ReadFromFileFailed;
+            }
+
             return LoadResult.Success;
         }
 
@@ -207,6 +213,15 @@ namespace Game.Maps
             return true;
         }
 
+        bool LoadHolesData(BinaryReader reader, uint offset)
+        {
+            reader.BaseStream.Seek(offset, SeekOrigin.Begin);
+
+            _holes = reader.ReadArray<byte>(16 * 16 * 8);
+
+            return true;
+        }
+
         public ushort GetArea(float x, float y)
         {
             if (_areaMap == null)
@@ -238,6 +253,9 @@ namespace Game.Maps
             y -= y_int;
             x_int &= (MapConst.MapResolution - 1);
             y_int &= (MapConst.MapResolution - 1);
+
+            if (IsHole(x_int, y_int))
+                return MapConst.InvalidHeight;
 
             float a, b, c;
             if (x + y < 1)
@@ -304,6 +322,10 @@ namespace Game.Maps
             y -= y_int;
             x_int &= (MapConst.MapResolution - 1);
             y_int &= (MapConst.MapResolution - 1);
+
+            if (IsHole(x_int, y_int))
+                return MapConst.InvalidHeight;
+
             int a, b, c;
 
             unsafe
@@ -377,6 +399,10 @@ namespace Game.Maps
             y -= y_int;
             x_int &= (MapConst.MapResolution - 1);
             y_int &= (MapConst.MapResolution - 1);
+
+            if (IsHole(x_int, y_int))
+                return MapConst.InvalidHeight;
+
             int a, b, c;
             unsafe
             {
@@ -435,6 +461,19 @@ namespace Game.Maps
             }
         }
 
+        bool IsHole(int row, int col)
+        {
+            if (_holes == null)
+                return false;
+
+            int cellRow = row / 8;     // 8 squares per cell
+            int cellCol = col / 8;
+            int holeRow = row % 8;
+            int holeCol = col % 8;
+
+            return (_holes[cellRow * 16 * 8 + cellCol * 8 + holeRow] & (1 << holeCol)) != 0;
+        }
+        
         public float GetMinHeight(float x, float y)
         {
             if (_minHeightPlanes == null)
@@ -483,19 +522,6 @@ namespace Game.Maps
                 return MapConst.InvalidHeight;
 
             return _liquidMap[cx_int * _liquidWidth + cy_int];
-        }
-
-        // Why does this return LIQUID data?
-        public LiquidHeaderTypeFlags GetTerrainType(float x, float y)
-        {
-            if (_liquidFlags == null)
-                return LiquidHeaderTypeFlags.NoWater;
-
-            x = 16 * (32 - x / MapConst.SizeofGrids);
-            y = 16 * (32 - y / MapConst.SizeofGrids);
-            int lx = (int)x & 15;
-            int ly = (int)y & 15;
-            return (LiquidHeaderTypeFlags)_liquidFlags[lx * 16 + ly];
         }
 
         // Get water state on map
@@ -625,6 +651,8 @@ namespace Game.Maps
         byte _liquidOffY;
         byte _liquidWidth;
         byte _liquidHeight;
+
+        byte[] _holes;
         #endregion
     }
 
