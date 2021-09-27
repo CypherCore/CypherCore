@@ -4292,6 +4292,7 @@ namespace Game.Spells
             itemTarget = pItemTarget;
             gameObjTarget = pGOTarget;
             destTarget = m_destTargets[spellEffectInfo.EffectIndex].Position;
+            effectInfo = spellEffectInfo;
             unitCaster = m_originalCaster ? m_originalCaster : m_caster.ToUnit();
 
             damage = CalculateDamage(spellEffectInfo, unitTarget, out _variance);
