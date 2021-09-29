@@ -48,14 +48,14 @@ namespace Game.Movement
 
         public override void Initialize(Unit owner)
         {
-            if (HasFlag(MovementGeneratorFlags.Deactivated)) // Resume spline is not supported
+            if (HasFlag(MovementGeneratorFlags.Deactivated) && !HasFlag(MovementGeneratorFlags.InitializationPending)) // Resume spline is not supported
             {
                 RemoveFlag(MovementGeneratorFlags.Deactivated);
                 AddFlag(MovementGeneratorFlags.Finalized);
                 return;
             }
 
-            RemoveFlag(MovementGeneratorFlags.InitializationPending);
+            RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Deactivated);
             AddFlag(MovementGeneratorFlags.Initialized);
 
             _duration.Reset(_splineInit.Launch());
