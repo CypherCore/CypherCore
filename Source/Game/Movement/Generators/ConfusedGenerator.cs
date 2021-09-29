@@ -36,7 +36,7 @@ namespace Game.Movement
 
         public override void DoInitialize(T owner)
         {
-            RemoveFlag(MovementGeneratorFlags.InitializationPending);
+            RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated);
             AddFlag(MovementGeneratorFlags.Initialized);
 
             if (!owner || !owner.IsAlive())

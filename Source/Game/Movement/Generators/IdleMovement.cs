@@ -76,7 +76,7 @@ namespace Game.Movement
 
         public override void Initialize(Unit owner)
         {
-            RemoveFlag(MovementGeneratorFlags.InitializationPending);
+            RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Deactivated);
             AddFlag(MovementGeneratorFlags.Initialized);
             
             owner.StopMoving();
@@ -161,7 +161,7 @@ namespace Game.Movement
 
         public override void Initialize(Unit owner)
         {
-            RemoveFlag(MovementGeneratorFlags.InitializationPending);
+            RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Deactivated);
             AddFlag(MovementGeneratorFlags.Initialized);
 
             // Distracted creatures stand up if not standing

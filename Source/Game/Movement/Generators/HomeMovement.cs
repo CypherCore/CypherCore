@@ -33,7 +33,7 @@ namespace Game.AI
 
         public override void DoInitialize(T owner)
         {
-            RemoveFlag(MovementGeneratorFlags.InitializationPending);
+            RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Deactivated);
             AddFlag(MovementGeneratorFlags.Initialized);
 
             SetTargetLocation(owner);

@@ -40,7 +40,7 @@ namespace Game.Movement
 
         public override void DoInitialize(T owner)
         {
-            RemoveFlag(MovementGeneratorFlags.InitializationPending);
+            RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Deactivated);
             AddFlag(MovementGeneratorFlags.Initialized);
 
             if (_movementId == EventId.ChargePrepath)
@@ -84,7 +84,6 @@ namespace Game.Movement
         {
             RemoveFlag(MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated);
 
-            owner.StopMoving();
             DoInitialize(owner);
         }
 

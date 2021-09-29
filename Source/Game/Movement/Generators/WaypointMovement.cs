@@ -95,7 +95,7 @@ namespace Game.Movement
 
         public override void DoInitialize(Creature owner)
         {
-            RemoveFlag(MovementGeneratorFlags.InitializationPending);
+            RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated);
 
             if (_loadedFromDB)
             {
