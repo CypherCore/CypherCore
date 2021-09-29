@@ -223,7 +223,11 @@ namespace Game.Movement
             if (target.GetMotionMaster().GetCurrentMovementGeneratorType() != MovementGeneratorType.Chase)
                 return false;
 
-            return ((ChaseMovementGenerator)target.GetMotionMaster().GetCurrentMovementGenerator())._abstractFollower.GetTarget() == owner;
+            ChaseMovementGenerator movement = target.GetMotionMaster().GetCurrentMovementGenerator() as ChaseMovementGenerator;
+            if (movement != null)
+                return movement.GetTarget() == owner;
+
+            return false;
         }
 
         static bool PositionOkay(Unit owner, Unit target, float? minDistance, float? maxDistance, ChaseAngle? angle)
@@ -244,6 +248,11 @@ namespace Game.Movement
             Creature creatureOwner = owner.ToCreature();
             if (creatureOwner.IsAIEnabled && creatureOwner.GetAI() != null)
                 creatureOwner.GetAI().MovementInform(MovementGeneratorType.Chase, (uint)target.GetGUID().GetCounter());
+        }
+
+        public Unit GetTarget()
+        {
+            return _abstractFollower.GetTarget();
         }
     }
 }
