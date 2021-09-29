@@ -1922,11 +1922,7 @@ namespace Game.Spells
             if (unitTarget.HasUnitState(UnitState.Confused | UnitState.Stunned | UnitState.Fleeing))
                 return;
 
-            if (unitTarget.IsTypeId(TypeId.Unit))
-                unitTarget.GetMotionMaster().MoveDistract((uint)(damage * Time.InMilliseconds));
-
-            unitTarget.StopMoving();
-            unitTarget.SetFacingTo(unitTarget.GetAbsoluteAngle(destTarget));
+            unitTarget.GetMotionMaster().MoveDistract((uint)(damage * Time.InMilliseconds), unitTarget.GetAbsoluteAngle(destTarget));
         }
 
         [SpellEffectHandler(SpellEffectName.Pickpocket)]

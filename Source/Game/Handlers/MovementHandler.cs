@@ -324,22 +324,21 @@ namespace Game
             }
 
             // flight fast teleport case
-            if (GetPlayer().GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Flight)
+            if (GetPlayer().IsInFlight())
             {
                 if (!GetPlayer().InBattleground())
                 {
                     if (!seamlessTeleport)
                     {
                         // short preparations to continue flight
-                        IMovementGenerator movementGenerator = GetPlayer().GetMotionMaster().Top();
+                        MovementGenerator movementGenerator = GetPlayer().GetMotionMaster().GetCurrentMovementGenerator();
                         movementGenerator.Initialize(GetPlayer());
                     }
                     return;
                 }
 
                 // Battlegroundstate prepare, stop flight
-                GetPlayer().GetMotionMaster().MovementExpired();
-                GetPlayer().CleanupAfterTaxiFlight();
+                GetPlayer().FinishTaxiFlight();
             }
 
             // resurrect character at enter into instance where his corpse exist after add to map
@@ -719,13 +718,12 @@ namespace Game
                 TaxiNodesRecord curDestNode = CliDB.TaxiNodesStorage.LookupByKey(curDest);
 
                 // far teleport case
-                if (curDestNode != null && curDestNode.ContinentID != GetPlayer().GetMapId())
+                if (curDestNode != null && curDestNode.ContinentID != GetPlayer().GetMapId() && GetPlayer().GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Flight)
                 {
-                    if (GetPlayer().GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Flight)
+                    FlightPathMovementGenerator flight = GetPlayer().GetMotionMaster().GetCurrentMovementGenerator() as FlightPathMovementGenerator;
+                    if (flight != null)
                     {
                         // short preparations to continue flight
-                        FlightPathMovementGenerator flight = (FlightPathMovementGenerator)GetPlayer().GetMotionMaster().Top();
-
                         flight.SetCurrentNodeAfterTeleport();
                         TaxiPathNodeRecord node = flight.GetPath()[(int)flight.GetCurrentNode()];
                         flight.SkipCurrentNode();

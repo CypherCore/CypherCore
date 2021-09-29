@@ -29,15 +29,21 @@ namespace Game.Movement
             _moveType = moveType;
             _run = run;
             _orientation = orientation;
+
+            Mode = MovementGeneratorMode.Default;
+            Priority = MovementGeneratorPriority.Normal;
+            Flags = MovementGeneratorFlags.InitializationPending;
+            BaseUnitState = UnitState.Roaming;
         }
 
         public override void DoInitialize(Creature owner)
         {
-            owner.AddUnitState(UnitState.Roaming);
+            RemoveFlag(MovementGeneratorFlags.InitializationPending);
+            AddFlag(MovementGeneratorFlags.Initialized);
 
             if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting())
             {
-                _interrupt = true;
+                AddFlag(MovementGeneratorFlags.Interrupted);
                 owner.StopMoving();
                 return;
             }
@@ -73,6 +79,8 @@ namespace Game.Movement
 
         public override void DoReset(Creature owner)
         {
+            RemoveFlag(MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated);
+
             owner.StopMoving();
             DoInitialize(owner);
         }
@@ -84,15 +92,14 @@ namespace Game.Movement
 
             if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting())
             {
-                _interrupt = true;
+                AddFlag(MovementGeneratorFlags.Interrupted);
                 owner.StopMoving();
                 return true;
             }
 
-            if ((_interrupt && owner.MoveSpline.Finalized()) || (_recalculateSpeed && !owner.MoveSpline.Finalized()))
+            if ((HasFlag(MovementGeneratorFlags.Interrupted) && owner.MoveSpline.Finalized()) || (HasFlag(MovementGeneratorFlags.SpeedUpdatePending) && !owner.MoveSpline.Finalized()))
             {
-                _recalculateSpeed = false;
-                _interrupt = false;
+                RemoveFlag(MovementGeneratorFlags.Interrupted | MovementGeneratorFlags.SpeedUpdatePending);
 
                 owner.AddUnitState(UnitState.RoamingMove);
 
@@ -122,20 +129,34 @@ namespace Game.Movement
                 init.Launch();
             }
 
-            return !owner.MoveSpline.Finalized();
+            if (owner.MoveSpline.Finalized())
+            {
+                RemoveFlag(MovementGeneratorFlags.Transitory);
+                AddFlag(MovementGeneratorFlags.InformEnabled);
+                return false;
+            }
+            return true;
         }
 
-        public override void DoFinalize(Creature owner)
+        public override void DoDeactivate(Creature owner)
         {
-            owner.ClearUnitState(UnitState.Roaming | UnitState.RoamingMove);
+            AddFlag(MovementGeneratorFlags.Deactivated);
+            owner.ClearUnitState(UnitState.RoamingMove);
+        }
 
-            if (owner.MoveSpline.Finalized())
+        public override void DoFinalize(Creature owner, bool active, bool movementInform)
+        {
+            AddFlag(MovementGeneratorFlags.Finalized);
+            if (active)
+                owner.ClearUnitState(UnitState.RoamingMove);
+
+            if (movementInform && HasFlag(MovementGeneratorFlags.InformEnabled))
                 MovementInform(owner);
         }
 
-        public void UnitSpeedChanged()
+        public override void UnitSpeedChanged()
         {
-            _recalculateSpeed = true;
+            AddFlag(MovementGeneratorFlags.SpeedUpdatePending);
         }
 
         public override MovementGeneratorType GetMovementGeneratorType()
@@ -154,7 +175,5 @@ namespace Game.Movement
         WaypointMoveType _moveType;
         bool _run;
         bool _orientation;
-        bool _recalculateSpeed;
-        bool _interrupt;
     }
 }

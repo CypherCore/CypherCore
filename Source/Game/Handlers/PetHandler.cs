@@ -141,7 +141,7 @@ namespace Game
                     {
                         case CommandStates.Stay:                          //flat=1792  //STAY
                             pet.StopMoving();
-                            pet.GetMotionMaster().Clear(false);
+                            pet.GetMotionMaster().Clear();
                             pet.GetMotionMaster().MoveIdle();
                             charmInfo.SetCommandState(CommandStates.Stay);
 
@@ -249,7 +249,7 @@ namespace Game
                             break;
                         case CommandStates.MoveTo:
                             pet.StopMoving();
-                            pet.GetMotionMaster().Clear(false);
+                            pet.GetMotionMaster().Clear();
                             pet.GetMotionMaster().MovePoint(0, x, y, z);
                             charmInfo.SetCommandState(CommandStates.MoveTo);
 

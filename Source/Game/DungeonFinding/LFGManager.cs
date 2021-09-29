@@ -1264,11 +1264,7 @@ namespace Game.DungeonFinding
                 if (!player.GetMap().IsDungeon())
                     player.SetBattlegroundEntryPoint();
 
-                if (player.IsInFlight())
-                {
-                    player.GetMotionMaster().MovementExpired();
-                    player.CleanupAfterTaxiFlight();
-                }
+                player.FinishTaxiFlight();
 
                 if (!player.TeleportTo(mapid, x, y, z, orientation))
                     error = LfgTeleportResult.NoReturnLocation;

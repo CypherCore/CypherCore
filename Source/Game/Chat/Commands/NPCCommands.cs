@@ -976,23 +976,23 @@ namespace Game.Chat
                     return false;
                 }
 
-                if (/*creature.GetMotionMaster().empty() ||*/
-                    creature.GetMotionMaster().GetCurrentMovementGeneratorType() != MovementGeneratorType.Follow)
+                MovementGenerator movement = creature.GetMotionMaster().GetMovementGenerator(a =>
+                {
+                    if (a.GetMovementGeneratorType() == MovementGeneratorType.Follow)
+                    {
+                        FollowMovementGenerator followMovement = a as FollowMovementGenerator;
+                        return followMovement != null && followMovement.GetTarget() == player;
+                    }
+                    return false;
+                });
+
+                if (movement != null)
                 {
                     handler.SendSysMessage(CypherStrings.CreatureNotFollowYou, creature.GetName());
                     return false;
                 }
 
-                FollowMovementGenerator mgen = (FollowMovementGenerator)creature.GetMotionMaster().Top();
-                if (mgen.GetTarget() != player)
-                {
-                    handler.SendSysMessage(CypherStrings.CreatureNotFollowYou, creature.GetName());
-                    return false;
-                }
-
-                // reset movement
-                creature.GetMotionMaster().MovementExpired(true);
-
+                creature.GetMotionMaster().Remove(movement);
                 handler.SendSysMessage(CypherStrings.CreatureNotFollowYouNow, creature.GetName());
                 return true;
             }

@@ -22,7 +22,7 @@ using System;
 
 namespace Game.Movement
 {
-    class ChaseMovementGenerator : AbstractFollower, IMovementGenerator
+    class ChaseMovementGenerator : MovementGenerator
     {
         static uint RANGE_CHECK_INTERVAL = 100; // time (ms) until we attempt to recalculate
 
@@ -30,32 +30,49 @@ namespace Game.Movement
         ChaseAngle? _angle;
 
         PathGenerator _path;
-        Position _lastTargetPosition;
+        Position _lastTargetPosition = new();
         uint _rangeCheckTimer = RANGE_CHECK_INTERVAL;
         bool _movingTowards = true;
         bool _mutualChase = true;
 
-        public ChaseMovementGenerator(Unit target, ChaseRange? range, ChaseAngle? angle) : base(target)
+        AbstractFollower _abstractFollower;
+
+        public ChaseMovementGenerator(Unit target, ChaseRange? range, ChaseAngle? angle)
         {
+            _abstractFollower = new AbstractFollower(target);
             _range = range;
             _angle = angle;
+
+            Mode = MovementGeneratorMode.Default;
+            Priority = MovementGeneratorPriority.Normal;
+            Flags = MovementGeneratorFlags.InitializationPending;
+            BaseUnitState = UnitState.Chase;
         }
 
-        public void Initialize(Unit owner)
+        public override void Initialize(Unit owner)
         {
-            owner.AddUnitState(UnitState.Chase);
+            RemoveFlag(MovementGeneratorFlags.InitializationPending);
+            AddFlag(MovementGeneratorFlags.Initialized);
+
             owner.SetWalk(false);
             _path = null;
+            _lastTargetPosition.Relocate(0.0f, 0.0f, 0.0f);
         }
 
-        public bool Update(Unit owner, uint diff)
+        public override void Reset(Unit owner)
+        {
+            RemoveFlag(MovementGeneratorFlags.Deactivated);
+            Initialize(owner);
+        }
+
+        public override bool Update(Unit owner, uint diff)
         {
             // owner might be dead or gone (can we even get nullptr here?)
             if (!owner || !owner.IsAlive())
                 return false;
 
             // our target might have gone away
-            Unit target = GetTarget();
+            Unit target = _abstractFollower.GetTarget();
             if (!target)
                 return false;
 
@@ -154,6 +171,7 @@ namespace Game.Movement
                     {
                         if (cOwner)
                             cOwner.SetCannotReachTarget(true);
+
                         owner.StopMoving();
                         return true;
                     }
@@ -178,26 +196,34 @@ namespace Game.Movement
             return true;
         }
 
-        public void Finalize(Unit owner)
+        public override void Deactivate(Unit owner)
         {
-            owner.ClearUnitState(UnitState.Chase | UnitState.ChaseMove);
-            Creature cOwner = owner.ToCreature();
-            if (cOwner != null)
-                cOwner.SetCannotReachTarget(false);
+            AddFlag(MovementGeneratorFlags.Deactivated);
+            owner.ClearUnitState(UnitState.ChaseMove);
         }
 
-        public void Reset(Unit owner) { Initialize(owner); }
+        public override void Finalize(Unit owner, bool active, bool movementInform)
+        {
+            AddFlag(MovementGeneratorFlags.Finalized);
+            if (active)
+            {
+                owner.ClearUnitState(UnitState.ChaseMove);
+                Creature cOwner = owner.ToCreature();
+                if (cOwner != null)
+                    cOwner.SetCannotReachTarget(false);
+            }
+        }
 
-        public MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Chase; }
+        public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Chase; }
 
-        public void UnitSpeedChanged() { _lastTargetPosition.Relocate(0.0f, 0.0f, 0.0f); }
+        public override void UnitSpeedChanged() { _lastTargetPosition.Relocate(0.0f, 0.0f, 0.0f); }
 
         static bool IsMutualChase(Unit owner, Unit target)
         {
             if (target.GetMotionMaster().GetCurrentMovementGeneratorType() != MovementGeneratorType.Chase)
                 return false;
 
-            return ((ChaseMovementGenerator)target.GetMotionMaster().Top()).GetTarget() == owner;
+            return ((ChaseMovementGenerator)target.GetMotionMaster().GetCurrentMovementGenerator())._abstractFollower.GetTarget() == owner;
         }
 
         static bool PositionOkay(Unit owner, Unit target, float? minDistance, float? maxDistance, ChaseAngle? angle)
@@ -212,13 +238,12 @@ namespace Game.Movement
 
         static void DoMovementInform(Unit owner, Unit target)
         {
-            Creature cOwner = owner.ToCreature();
-            if (cOwner != null)
-            {
-                CreatureAI ai = cOwner.GetAI();
-                if (ai != null)
-                    ai.MovementInform(MovementGeneratorType.Chase, (uint)target.GetGUID().GetCounter());
-            }
+            if (!owner.IsCreature())
+                return;
+
+            Creature creatureOwner = owner.ToCreature();
+            if (creatureOwner.IsAIEnabled && creatureOwner.GetAI() != null)
+                creatureOwner.GetAI().MovementInform(MovementGeneratorType.Chase, (uint)target.GetGUID().GetCounter());
         }
     }
 }

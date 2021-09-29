@@ -17,11 +17,23 @@
 
 namespace Framework.Constants
 {
+    public enum MovementGeneratorMode
+    {
+        Default = 0,
+        Override
+    }
+
+    public enum MovementGeneratorPriority
+    {
+        None = 0,
+        Normal,
+        Highest
+    }
+
     public enum MovementSlot
     {
-        Idle,
+        Default = 0,
         Active,
-        Controlled,
         Max
     }
 
@@ -50,6 +62,41 @@ namespace Framework.Constants
         Max
     }
 
+    public enum MotionMasterFlags
+    {
+        None = 0x0,
+        Update = 0x1, // Update in progress
+        StaticInitializationPending = 0x2
+    }
+
+    public enum MotionMasterDelayedActionType
+    {
+        Clear = 0,
+        ClearSlot,
+        ClearMode,
+        ClearPriority,
+        Add,
+        Remove,
+        RemoveType,
+        Initialize
+    }
+
+    public enum MovementGeneratorFlags
+    {
+        None = 0x000,
+        InitializationPending = 0x001,
+        Initialized = 0x002,
+        SpeedUpdatePending = 0x004,
+        Interrupted = 0x008,
+        Paused = 0x010,
+        TimedPaused = 0x020,
+        Deactivated = 0x040,
+        InformEnabled = 0x080,
+        Finalized = 0x100,
+
+        Transitory = SpeedUpdatePending | Interrupted
+    }
+
     public struct EventId
     {
         public const uint Charge = 1003;
@@ -63,6 +110,7 @@ namespace Framework.Constants
         public const uint Face = 1006;
         public const uint VehicleBoard = 1007;
         public const uint VehicleExit = 1008;
+        public const uint AssistMove = 1009;
 
         public const uint SmartRandomPoint = 0xFFFFFE;
         public const uint SmartEscortLastOCCPoint = 0xFFFFFF;

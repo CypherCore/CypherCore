@@ -44,21 +44,6 @@ namespace Game.AI
             return Global.ObjAccessor.GetPlayer(me, _playerGUID);
         }
 
-        public override void AttackStart(Unit target)
-        {
-            if (target == null)
-                return;
-
-            if (me.Attack(target, true))
-            {
-                if (me.GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Point)
-                    me.GetMotionMaster().MovementExpired();
-
-                if (IsCombatMovementAllowed())
-                    me.GetMotionMaster().MoveChase(target);
-            }
-        }
-
         //see followerAI
         bool AssistPlayerInCombatAgainst(Unit who)
         {
@@ -236,7 +221,7 @@ namespace Game.AI
                         else if (_resume)
                         {
                             _resume = false;
-                            IMovementGenerator movementGenerator = me.GetMotionMaster().GetMotionSlot(MovementSlot.Idle);
+                            MovementGenerator movementGenerator = me.GetMotionMaster().GetCurrentMovementGenerator(MovementSlot.Default);
                             if (movementGenerator != null)
                                 movementGenerator.Resume(0);
                         }
@@ -436,7 +421,7 @@ namespace Game.AI
                 Log.outError(LogFilter.Scripts, $"EscortAI.Start: (script: {me.GetScriptName()}, creature entry: {me.GetEntry()}) is set to return home after waypoint end and instant respawn at waypoint end. Creature will never despawn.");
 
             me.GetMotionMaster().MoveIdle();
-            me.GetMotionMaster().Clear(MovementSlot.Active);
+            me.GetMotionMaster().Clear(MovementGeneratorPriority.Normal);
 
             //disable npcflags
             me.SetNpcFlags(NPCFlags.None);
@@ -464,7 +449,7 @@ namespace Game.AI
             if (on)
             {
                 AddEscortState(EscortState.Paused);
-                IMovementGenerator movementGenerator = me.GetMotionMaster().GetMotionSlot(MovementSlot.Idle);
+                MovementGenerator movementGenerator = me.GetMotionMaster().GetCurrentMovementGenerator(MovementSlot.Default);
                 if (movementGenerator != null)
                     movementGenerator.Pause(0);
             }

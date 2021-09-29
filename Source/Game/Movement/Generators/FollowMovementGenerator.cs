@@ -22,7 +22,7 @@ using System;
 
 namespace Game.Movement
 {
-    public class FollowMovementGenerator : AbstractFollower, IMovementGenerator
+    public class FollowMovementGenerator : MovementGenerator
     {
         static uint CHECK_INTERVAL = 500;
         static float FOLLOW_RANGE_TOLERANCE = 1.0f;
@@ -34,27 +34,46 @@ namespace Game.Movement
         PathGenerator _path;
         Position _lastTargetPosition;
 
-        public FollowMovementGenerator(Unit target, float range, ChaseAngle angle) : base(target)
+        AbstractFollower _abstractFollower;
+
+        public FollowMovementGenerator(Unit target, float range, ChaseAngle angle)
         {
+            _abstractFollower = new AbstractFollower(target);
             _range = range;
             _angle = angle;
+            _lastTargetPosition = new();
+
+            Mode = MovementGeneratorMode.Default;
+            Priority = MovementGeneratorPriority.Normal;
+            Flags = MovementGeneratorFlags.InitializationPending;
+            BaseUnitState = UnitState.Follow;
         }
 
-        public void Initialize(Unit owner)
+        public override void Initialize(Unit owner)
         {
-            owner.AddUnitState(UnitState.Follow);
+            RemoveFlag(MovementGeneratorFlags.InitializationPending);
+            AddFlag(MovementGeneratorFlags.Initialized);
+
+            owner.StopMoving();
             UpdatePetSpeed(owner);
             _path = null;
+            _lastTargetPosition.Relocate(0.0f, 0.0f, 0.0f);
         }
 
-        public bool Update(Unit owner, uint diff)
+        public override void Reset(Unit owner)
+        {
+            RemoveFlag(MovementGeneratorFlags.Deactivated);
+            Initialize(owner);
+        }
+
+        public override bool Update(Unit owner, uint diff)
         {
             // owner might be dead or gone
-            if (!owner.IsAlive())
+            if (owner == null || !owner.IsAlive())
                 return false;
 
             // our target might have gone away
-            Unit target = GetTarget();
+            Unit target = _abstractFollower.GetTarget();
             if (target == null)
                 return false;
 
@@ -144,10 +163,20 @@ namespace Game.Movement
             return true;
         }
 
-        public void Finalize(Unit owner)
+        public override void Deactivate(Unit owner)
         {
-            owner.ClearUnitState(UnitState.Follow | UnitState.FollowMove);
-            UpdatePetSpeed(owner);
+            AddFlag(MovementGeneratorFlags.Deactivated);
+            owner.ClearUnitState(UnitState.FollowMove);
+        }
+
+        public override void Finalize(Unit owner, bool active, bool movementInform)
+        {
+            AddFlag(MovementGeneratorFlags.Finalized);
+            if (active)
+            {
+                owner.ClearUnitState(UnitState.FollowMove);
+                UpdatePetSpeed(owner);
+            }
         }
 
         void UpdatePetSpeed(Unit owner)
@@ -155,7 +184,7 @@ namespace Game.Movement
             Pet oPet = owner.ToPet();
             if (oPet != null)
             {
-                if (!GetTarget() || GetTarget().GetGUID() == owner.GetOwnerGUID())
+                if (!_abstractFollower.GetTarget() || _abstractFollower.GetTarget().GetGUID() == owner.GetOwnerGUID())
                 {
                     oPet.UpdateSpeed(UnitMoveType.Run);
                     oPet.UpdateSpeed(UnitMoveType.Walk);
@@ -164,11 +193,16 @@ namespace Game.Movement
             }
         }
 
-        public void Reset(Unit owner) { }
+        public Unit GetTarget()
+        {
+            return _abstractFollower.GetTarget();
+        }
 
-        public MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Follow; }
 
-        public void UnitSpeedChanged() { _lastTargetPosition.Relocate(0.0f, 0.0f, 0.0f); }
+
+        public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Follow; }
+
+        public override void UnitSpeedChanged() { _lastTargetPosition.Relocate(0.0f, 0.0f, 0.0f); }
 
         static bool PositionOkay(Unit owner, Unit target, float range, ChaseAngle? angle = null)
         {
@@ -183,9 +217,9 @@ namespace Game.Movement
             if (!owner.IsCreature())
                 return;
 
-            UnitAI ai = owner.GetAI();
-            if (ai != null)
-                ((CreatureAI)ai).MovementInform(MovementGeneratorType.Follow, (uint)target.GetGUID().GetCounter());
+            Creature creatureOwner = owner.ToCreature();
+            if (creatureOwner.IsAIEnabled && creatureOwner.GetAI() != null)
+                creatureOwner.GetAI().MovementInform(MovementGeneratorType.Follow, (uint)target.GetGUID().GetCounter());
         }
     }
 }

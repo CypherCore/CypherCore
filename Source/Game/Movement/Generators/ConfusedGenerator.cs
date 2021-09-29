@@ -26,14 +26,23 @@ namespace Game.Movement
         public ConfusedGenerator()
         {
             _timer = new TimeTracker();
+            _reference = new();
+
+            Mode = MovementGeneratorMode.Default;
+            Priority = MovementGeneratorPriority.Highest;
+            Flags = MovementGeneratorFlags.InitializationPending;
+            BaseUnitState = UnitState.Confused;
         }
 
         public override void DoInitialize(T owner)
         {
+            RemoveFlag(MovementGeneratorFlags.InitializationPending);
+            AddFlag(MovementGeneratorFlags.Initialized);
+
             if (!owner || !owner.IsAlive())
                 return;
 
-            owner.AddUnitState(UnitState.Confused);
+            // TODO: UNIT_FIELD_FLAGS should not be handled by generators
             owner.AddUnitFlag(UnitFlags.Confused);
             owner.StopMoving();
 
@@ -44,6 +53,7 @@ namespace Game.Movement
 
         public override void DoReset(T owner)
         {
+            RemoveFlag(MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated);
             DoInitialize(owner);
         }
 
@@ -54,20 +64,19 @@ namespace Game.Movement
 
             if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting())
             {
-                _interrupt = true;
+                AddFlag(MovementGeneratorFlags.Interrupted);
                 owner.StopMoving();
                 _path = null;
                 return true;
             }
             else
-                _interrupt = false;
+                RemoveFlag(MovementGeneratorFlags.Interrupted);
 
             // waiting for next move
             _timer.Update(diff);
-            if (!_interrupt && _timer.Passed() && owner.MoveSpline.Finalized())
+            if ((HasFlag(MovementGeneratorFlags.SpeedUpdatePending) && !owner.MoveSpline.Finalized()) || (_timer.Passed() && owner.MoveSpline.Finalized()))
             {
-                // start moving
-                owner.AddUnitState(UnitState.ConfusedMove);
+                RemoveFlag(MovementGeneratorFlags.Transitory);
 
                 Position destination = new(_reference);
                 float distance = (float)(4.0f * RandomHelper.FRand(0.0f, 1.0f) - 2.0f);
@@ -87,6 +96,8 @@ namespace Game.Movement
                     return true;
                 }
 
+                owner.AddUnitState(UnitState.ConfusedMove);
+
                 MoveSplineInit init = new(owner);
                 init.MovebyPath(_path.GetPath());
                 init.SetWalk(true);
@@ -97,20 +108,31 @@ namespace Game.Movement
             return true;
         }
 
-        public override void DoFinalize(T owner)
+        public override void DoDeactivate(T owner)
         {
-            if (owner.IsTypeId(TypeId.Player))
+            AddFlag(MovementGeneratorFlags.Deactivated);
+            owner.ClearUnitState(UnitState.ConfusedMove);
+        }
+
+        public override void DoFinalize(T owner, bool active, bool movementInform)
+        {
+            AddFlag(MovementGeneratorFlags.Finalized);
+
+            if (active)
             {
-                owner.RemoveUnitFlag(UnitFlags.Confused);
-                owner.ClearUnitState(UnitState.Confused);
-                owner.StopMoving();
-            }
-            else if (owner.IsTypeId(TypeId.Unit))
-            {
-                owner.RemoveUnitFlag(UnitFlags.Confused);
-                owner.ClearUnitState(UnitState.Confused | UnitState.ConfusedMove);
-                if (owner.GetVictim())
-                    owner.SetTarget(owner.GetVictim().GetGUID());
+                if (owner.IsPlayer())
+                {
+                    owner.RemoveUnitFlag(UnitFlags.Confused);
+                    owner.StopMoving();
+                }
+
+                else
+                {
+                    owner.RemoveUnitFlag(UnitFlags.Confused);
+                    owner.ClearUnitState(UnitState.ConfusedMove);
+                    if (owner.GetVictim())
+                        owner.SetTarget(owner.GetVictim().GetGUID());
+                }
             }
         }
 
@@ -119,9 +141,10 @@ namespace Game.Movement
             return MovementGeneratorType.Confused;
         }
 
+        public override void UnitSpeedChanged() { AddFlag(MovementGeneratorFlags.SpeedUpdatePending); }
+
         PathGenerator _path;
         TimeTracker _timer;
         Position _reference;
-        bool _interrupt;
     }
 }

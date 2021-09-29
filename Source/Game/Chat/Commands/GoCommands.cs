@@ -97,13 +97,9 @@ namespace Game.Chat.Commands
 
             // stop flight if need
             if (player.IsInFlight())
-            {
-                player.GetMotionMaster().MovementExpired();
-                player.CleanupAfterTaxiFlight();
-            }
-            // save only in non-flight case
+                player.FinishTaxiFlight();            
             else
-                player.SaveRecallPosition();
+                player.SaveRecallPosition(); // save only in non-flight case
 
             player.TeleportTo(mapId, x, y, z, o);
 
@@ -137,13 +133,9 @@ namespace Game.Chat.Commands
 
             // stop flight if need
             if (player.IsInFlight())
-            {
-                player.GetMotionMaster().MovementExpired();
-                player.CleanupAfterTaxiFlight();
-            }
-            // save only in non-flight case
+                player.FinishTaxiFlight();            
             else
-                player.SaveRecallPosition();
+                player.SaveRecallPosition(); // save only in non-flight case
 
             player.TeleportTo(gy.Loc);
             return true;
@@ -179,13 +171,9 @@ namespace Game.Chat.Commands
 
             // stop flight if need
             if (player.IsInFlight())
-            {
-                player.GetMotionMaster().MovementExpired();
-                player.CleanupAfterTaxiFlight();
-            }
-            // save only in non-flight case
+                player.FinishTaxiFlight();
             else
-                player.SaveRecallPosition();
+                player.SaveRecallPosition(); // save only in non-flight case
 
             Map map = Global.MapMgr.CreateBaseMap(mapId);
             float z = Math.Max(map.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), map.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
@@ -227,13 +215,9 @@ namespace Game.Chat.Commands
 
             // stop flight if need
             if (player.IsInFlight())
-            {
-                player.GetMotionMaster().MovementExpired();
-                player.CleanupAfterTaxiFlight();
-            }
-            // save only in non-flight case
+                player.FinishTaxiFlight();            
             else
-                player.SaveRecallPosition();
+                player.SaveRecallPosition(); // save only in non-flight case
 
             player.TeleportTo(goData.spawnPoint);
             return true;
@@ -287,13 +271,9 @@ namespace Game.Chat.Commands
 
             // stop flight if need
             if (player.IsInFlight())
-            {
-                player.GetMotionMaster().MovementExpired();
-                player.CleanupAfterTaxiFlight();
-            }
-            // save only in non-flight case
+                player.FinishTaxiFlight();
             else
-                player.SaveRecallPosition();
+                player.SaveRecallPosition(); // save only in non-flight case
 
             Map map = Global.MapMgr.CreateBaseMap(mapId);
             z = Math.Max(map.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), map.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
@@ -333,13 +313,9 @@ namespace Game.Chat.Commands
 
             // stop flight if need
             if (player.IsInFlight())
-            {
-                player.GetMotionMaster().MovementExpired();
-                player.CleanupAfterTaxiFlight();
-            }
-            // save only in non-flight case
+                player.FinishTaxiFlight();
             else
-                player.SaveRecallPosition();
+                player.SaveRecallPosition(); // save only in non-flight case
 
             player.TeleportTo(node.ContinentID, node.Pos.X, node.Pos.Y, node.Pos.Z, player.GetOrientation());
             return true;
@@ -372,13 +348,9 @@ namespace Game.Chat.Commands
 
             // stop flight if need
             if (player.IsInFlight())
-            {
-                player.GetMotionMaster().MovementExpired();
-                player.CleanupAfterTaxiFlight();
-            }
-            // save only in non-flight case
+                player.FinishTaxiFlight();
             else
-                player.SaveRecallPosition();
+                player.SaveRecallPosition(); // save only in non-flight case
 
             player.TeleportTo(at.ContinentID, at.Pos.X, at.Pos.Y, at.Pos.Z, player.GetOrientation());
             return true;
@@ -439,13 +411,9 @@ namespace Game.Chat.Commands
 
             // stop flight if need
             if (player.IsInFlight())
-            {
-                player.GetMotionMaster().MovementExpired();
-                player.CleanupAfterTaxiFlight();
-            }
-            // save only in non-flight case
+                player.FinishTaxiFlight();
             else
-                player.SaveRecallPosition();
+                player.SaveRecallPosition(); // save only in non-flight case
 
             float z = Math.Max(map.GetStaticHeight(PhasingHandler.EmptyPhaseShift, x, y, MapConst.MaxHeight), map.GetWaterLevel(PhasingHandler.EmptyPhaseShift, x, y));
 
@@ -501,13 +469,9 @@ namespace Game.Chat.Commands
 
             // stop flight if need
             if (player.IsInFlight())
-            {
-                player.GetMotionMaster().MovementExpired();
-                player.CleanupAfterTaxiFlight();
-            }
-            // save only in non-flight case
+                player.FinishTaxiFlight();
             else
-                player.SaveRecallPosition();
+                player.SaveRecallPosition(); // save only in non-flight case
 
             player.TeleportTo(mapId, x, y, z, ort);
             return true;
@@ -548,13 +512,12 @@ namespace Game.Chat.Commands
             }
 
             Player player = handler.GetSession().GetPlayer();
+
+            // stop flight if need
             if (player.IsInFlight())
-            {
-                player.GetMotionMaster().MovementExpired();
-                player.CleanupAfterTaxiFlight();
-            }
+                player.FinishTaxiFlight();
             else
-                player.SaveRecallPosition();
+                player.SaveRecallPosition(); // save only in non-flight case
 
             ticket.TeleportTo(player);
             return true;
@@ -592,13 +555,9 @@ namespace Game.Chat.Commands
 
             // stop flight if need
             if (player.IsInFlight())
-            {
-                player.GetMotionMaster().MovementExpired();
-                player.CleanupAfterTaxiFlight();
-            }
-            // save only in non-flight case
+                player.FinishTaxiFlight();
             else
-                player.SaveRecallPosition();
+                player.SaveRecallPosition(); // save only in non-flight case
 
             player.TeleportTo(player.GetMapId(), x, y, z, o);
             return true;

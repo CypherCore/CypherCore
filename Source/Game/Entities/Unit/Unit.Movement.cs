@@ -172,11 +172,11 @@ namespace Game.Entities
             if (MotionMaster.IsInvalidMovementSlot(slot))
                 return;
 
-            IMovementGenerator movementGenerator = GetMotionMaster().GetMotionSlot(slot);
+            MovementGenerator movementGenerator = GetMotionMaster().GetCurrentMovementGenerator(slot);
             if (movementGenerator != null)
                 movementGenerator.Pause(timer);
 
-            if (forced)
+            if (forced && GetMotionMaster().GetCurrentSlot() == slot)
                 StopMoving();
         }
 
@@ -185,7 +185,7 @@ namespace Game.Entities
             if (MotionMaster.IsInvalidMovementSlot(slot))
                 return;
 
-            IMovementGenerator movementGenerator = GetMotionMaster().GetMotionSlot(slot);
+            MovementGenerator movementGenerator = GetMotionMaster().GetCurrentMovementGenerator(slot);
             if (movementGenerator != null)
                 movementGenerator.Resume(timer);
         }
@@ -208,7 +208,7 @@ namespace Game.Entities
                 init.DisableTransportPathTransformations(); // It makes no sense to target global orientation
             init.SetFacing(ori);
 
-            //GetMotionMaster().LaunchMoveSpline(init, EventId.Face, MovementSlot.Controlled);
+            //GetMotionMaster().LaunchMoveSpline(init, EventId.Face, MovementGeneratorPriority.Highest);
             init.Launch();
         }
 
@@ -223,7 +223,7 @@ namespace Game.Entities
             init.MoveTo(GetPositionX(), GetPositionY(), GetPositionZ(), false);
             init.SetFacing(GetAbsoluteAngle(obj));   // when on transport, GetAbsoluteAngle will still return global coordinates (and angle) that needs transforming
 
-            //GetMotionMaster().LaunchMoveSpline(init, EventId.Face, MovementSlot.Controlled);
+            //GetMotionMaster().LaunchMoveSpline(init, EventId.Face, MovementGeneratorPriority.Highest);
             init.Launch();
         }
 
@@ -232,7 +232,7 @@ namespace Game.Entities
             MoveSplineInit init = new(this);
             init.MoveTo(x, y, z, generatePath, forceDestination);
             init.SetVelocity(speed);
-            GetMotionMaster().LaunchMoveSpline(init, 0, MovementSlot.Active, MovementGeneratorType.Point);
+            GetMotionMaster().LaunchMoveSpline(init, 0, MovementGeneratorPriority.Normal, MovementGeneratorType.Point);
         }
 
         public void KnockbackFrom(float x, float y, float speedXY, float speedZ, SpellEffectExtraData spellEffectExtraData = null)
@@ -539,7 +539,7 @@ namespace Game.Entities
                 {
                     if (GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Follow)
                     {
-                        Unit followed = ((AbstractFollower)GetMotionMaster().Top()).GetTarget();
+                        Unit followed = (GetMotionMaster().GetCurrentMovementGenerator() as FollowMovementGenerator).GetTarget();
                         if (followed != null && followed.GetGUID() == GetOwnerGUID() && !followed.IsInCombat())
                         {
                             float ownerSpeed = followed.GetSpeedRate(mtype);
@@ -1254,8 +1254,7 @@ namespace Game.Entities
             {
                 if (IsAlive())
                 {
-                    if (GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Fleeing)
-                        GetMotionMaster().MovementExpired();
+                    GetMotionMaster().Remove(MovementGeneratorType.Fleeing);
                     if (GetVictim() != null)
                         SetTarget(GetVictim().GetGUID());
                 }
@@ -1280,8 +1279,7 @@ namespace Game.Entities
             {
                 if (IsAlive())
                 {
-                    if (GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Confused)
-                        GetMotionMaster().MovementExpired();
+                    GetMotionMaster().Remove(MovementGeneratorType.Confused);
                     if (GetVictim() != null)
                         SetTarget(GetVictim().GetGUID());
                 }

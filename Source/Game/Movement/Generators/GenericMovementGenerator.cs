@@ -21,7 +21,7 @@ using System;
 
 namespace Game.Movement
 {
-    class GenericMovementGenerator : IMovementGenerator
+    class GenericMovementGenerator : MovementGenerator
     {
         MoveSplineInit _splineInit;
         MovementGeneratorType _type;
@@ -39,25 +39,59 @@ namespace Game.Movement
             _duration = new();
             _arrivalSpellId = arrivalSpellId;
             _arrivalSpellTargetGuid = arrivalSpellTargetGuid;
+
+            Mode = MovementGeneratorMode.Default;
+            Priority = MovementGeneratorPriority.Normal;
+            Flags = MovementGeneratorFlags.InitializationPending;
+            BaseUnitState = UnitState.Roaming;
         }
 
-        public void Initialize(Unit owner)
+        public override void Initialize(Unit owner)
         {
+            if (HasFlag(MovementGeneratorFlags.Deactivated)) // Resume spline is not supported
+            {
+                RemoveFlag(MovementGeneratorFlags.Deactivated);
+                AddFlag(MovementGeneratorFlags.Finalized);
+                return;
+            }
+
+            RemoveFlag(MovementGeneratorFlags.InitializationPending);
+            AddFlag(MovementGeneratorFlags.Initialized);
+
             _duration.Reset(_splineInit.Launch());
         }
 
-        public bool Update(Unit owner, uint diff)
+        public override void Reset(Unit owner)
         {
-            _duration.Update((int)diff);
-            if (_duration.Passed())
-                return false;
-
-            return !owner.MoveSpline.Finalized();
+            Initialize(owner);
         }
 
-        public void Finalize(Unit owner)
+        public override bool Update(Unit owner, uint diff)
         {
-            MovementInform(owner);
+            if (!owner || HasFlag(MovementGeneratorFlags.Finalized))
+                return false;
+
+            _duration.Update((int)diff);
+            if (_duration.Passed() || owner.MoveSpline.Finalized())
+            {
+                AddFlag(MovementGeneratorFlags.InformEnabled);
+                return false;
+            }
+
+            return true;
+        }
+
+        public override void Deactivate(Unit owner)
+        {
+            AddFlag(MovementGeneratorFlags.Deactivated);
+        }
+
+        public override void Finalize(Unit owner, bool active, bool movementInform)
+        {
+            AddFlag(MovementGeneratorFlags.Finalized);
+
+            if (movementInform && HasFlag(MovementGeneratorFlags.InformEnabled))
+                MovementInform(owner);
         }
 
         void MovementInform(Unit owner)
@@ -66,13 +100,10 @@ namespace Game.Movement
                 owner.CastSpell(Global.ObjAccessor.GetUnit(owner, _arrivalSpellTargetGuid), _arrivalSpellId, true);
 
             Creature creature = owner.ToCreature();
-            if (creature != null)
-                if (creature.GetAI() != null)
-                    creature.GetAI().MovementInform(_type, _pointId);
+            if (creature != null && creature.GetAI() != null)
+                creature.GetAI().MovementInform(_type, _pointId);
         }
 
-        public void Reset(Unit owner) { }
-
-        public MovementGeneratorType GetMovementGeneratorType() { return _type; }
+        public override MovementGeneratorType GetMovementGeneratorType() { return _type; }
     }
 }

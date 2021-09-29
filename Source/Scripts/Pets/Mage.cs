@@ -189,8 +189,8 @@ namespace Scripts.Pets
                 me.CombatStop(true);
                 if (owner && !me.HasUnitState(UnitState.Follow))
                 {
-                    me.GetMotionMaster().Clear(false);
-                    me.GetMotionMaster().MoveFollow(owner, SharedConst.PetFollowDist, me.GetFollowAngle(), MovementSlot.Active);
+                    me.GetMotionMaster().Clear();
+                    me.GetMotionMaster().MoveFollow(owner, SharedConst.PetFollowDist, me.GetFollowAngle());
                 }
             }
         }

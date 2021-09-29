@@ -24,18 +24,26 @@ namespace Game.Movement
 {
     public class RandomMovementGenerator : MovementGeneratorMedium<Creature>
     {
-        public RandomMovementGenerator(float spawn_dist = 0.0f)
+        public RandomMovementGenerator(float spawnDist = 0.0f)
         {
             _timer = new TimeTracker();
-            _wanderDistance = spawn_dist;
+            _reference = new();
+            _wanderDistance = spawnDist;
+
+            Mode = MovementGeneratorMode.Default;
+            Priority = MovementGeneratorPriority.Normal;
+            Flags = MovementGeneratorFlags.InitializationPending;
+            BaseUnitState = UnitState.Roaming;
         }
 
         public override void DoInitialize(Creature owner)
         {
+            RemoveFlag(MovementGeneratorFlags.InitializationPending);
+            AddFlag(MovementGeneratorFlags.Initialized);
+
             if (owner == null || !owner.IsAlive())
                 return;
 
-            owner.AddUnitState(UnitState.Roaming);
             _reference = owner.GetPosition();
             owner.StopMoving();
 
@@ -48,36 +56,52 @@ namespace Game.Movement
 
         public override void DoReset(Creature owner)
         {
+            RemoveFlag(MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated);
             DoInitialize(owner);
         }
 
         public override bool DoUpdate(Creature owner, uint diff)
         {
             if (!owner || !owner.IsAlive())
-                return false;
+                return true;
 
             if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting())
             {
-                _interrupt = true;
+                AddFlag(MovementGeneratorFlags.Interrupted);
                 owner.StopMoving();
                 _path = null;
                 return true;
             }
             else
-                _interrupt = false;
+                RemoveFlag(MovementGeneratorFlags.Interrupted);
 
             _timer.Update(diff);
-            if (!_interrupt && _timer.Passed() && owner.MoveSpline.Finalized())
+            if ((HasFlag(MovementGeneratorFlags.SpeedUpdatePending) && !owner.MoveSpline.Finalized()) || (_timer.Passed() && owner.MoveSpline.Finalized()))
+            {
+                RemoveFlag(MovementGeneratorFlags.Transitory);
                 SetRandomLocation(owner);
+            }
 
             return true;
         }
 
-        public override void DoFinalize(Creature owner)
+        public override void DoDeactivate(Creature owner)
         {
-            owner.ClearUnitState(UnitState.Roaming);
-            owner.StopMoving();
-            owner.SetWalk(false);
+            AddFlag(MovementGeneratorFlags.Deactivated);
+            owner.ClearUnitState(UnitState.RoamingMove);
+        }
+
+        public override void DoFinalize(Creature owner, bool active, bool movementInform)
+        {
+            AddFlag(MovementGeneratorFlags.Finalized);
+            if (active)
+            {
+                owner.ClearUnitState(UnitState.RoamingMove);
+                owner.StopMoving();
+
+                // TODO: Research if this modification is needed, which most likely isnt
+                owner.SetWalk(false);
+            }
         }
 
         void SetRandomLocation(Creature owner)
@@ -87,13 +111,11 @@ namespace Game.Movement
 
             if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting())
             {
-                _interrupt = true;
+                AddFlag(MovementGeneratorFlags.Interrupted);
                 owner.StopMoving();
                 _path = null;
                 return;
             }
-
-            owner.AddUnitState(UnitState.RoamingMove);
 
             Position position = new(_reference);
             float distance = RandomHelper.FRand(0.0f, 1.0f) * _wanderDistance;
@@ -115,6 +137,8 @@ namespace Game.Movement
                 return;
             }
 
+            owner.AddUnitState(UnitState.RoamingMove);
+
             MoveSplineInit init = new(owner);
             init.MovebyPath(_path.GetPath());
             init.SetWalk(true);
@@ -125,6 +149,8 @@ namespace Game.Movement
             owner.SignalFormationMovement(position);
         }
 
+        public override void UnitSpeedChanged() { AddFlag(MovementGeneratorFlags.SpeedUpdatePending); }
+
         public override MovementGeneratorType GetMovementGeneratorType()
         {
             return MovementGeneratorType.Random;
@@ -134,6 +160,5 @@ namespace Game.Movement
         TimeTracker _timer;
         Position _reference;
         float _wanderDistance;
-        bool _interrupt;
     }
 }

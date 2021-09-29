@@ -1511,7 +1511,7 @@ namespace Game.AI
                 case SmartActions.RemoveAllGameobjects:
                 case SmartActions.SpawnSpawngroup:
                 case SmartActions.DespawnSpawngroup:
-                case SmartActions.StopMotion:
+                case SmartActions.RemoveMovement:
                     break;
                 default:
                     Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Not handled action_type({0}), event_type({1}), Entry {2} SourceType {3} Event {4}, skipped.", e.GetActionType(), e.GetEventType(), e.EntryOrGuid, e.GetScriptType(), e.EventId);
@@ -2515,7 +2515,7 @@ namespace Game.AI
         public RandomTimedEvent randomTimedEvent;
 
         [FieldOffset(4)]
-        public StopMotion stopMotion;
+        public RemoveMovement removeMovement;
 
         [FieldOffset(4)]
         public RespawnData respawnData;
@@ -3022,10 +3022,10 @@ namespace Game.AI
             public uint minId;
             public uint maxId;
         }
-        public struct StopMotion
+        public struct RemoveMovement
         {
-            public uint stopMovement;
-            public uint movementExpired;
+            public uint movementType;
+            public uint forced;
         }
         public struct RespawnData
         {

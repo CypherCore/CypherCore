@@ -4875,7 +4875,6 @@ namespace Game.Maps
                             if (!cSource.IsAlive())
                                 return;
 
-                            cSource.GetMotionMaster().MovementExpired();
                             cSource.GetMotionMaster().MoveIdle();
 
                             switch ((MovementGeneratorType)step.script.Movement.MovementType)

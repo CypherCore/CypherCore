@@ -354,13 +354,9 @@ namespace Game.Chat
 
                 // stop flight if need
                 if (_player.IsInFlight())
-                {
-                    _player.GetMotionMaster().MovementExpired();
-                    _player.CleanupAfterTaxiFlight();
-                }
-                // save only in non-flight case
+                    _player.FinishTaxiFlight();
                 else
-                    _player.SaveRecallPosition();
+                    _player.SaveRecallPosition(); // save only in non-flight case
 
                 // to point to see at target with same orientation
                 float x, y, z;
@@ -387,13 +383,9 @@ namespace Game.Chat
 
                 // stop flight if need
                 if (_player.IsInFlight())
-                {
-                    _player.GetMotionMaster().MovementExpired();
-                    _player.CleanupAfterTaxiFlight();
-                }
-                // save only in non-flight case
+                    _player.FinishTaxiFlight();
                 else
-                    _player.SaveRecallPosition();
+                    _player.SaveRecallPosition(); // save only in non-flight case
 
                 loc.SetOrientation(_player.GetOrientation());
                 _player.TeleportTo(loc);
@@ -1216,20 +1208,19 @@ namespace Game.Chat
 
             handler.SendSysMessage(CypherStrings.MovegensList, (unit.IsTypeId(TypeId.Player) ? "Player" : "Creature"), unit.GetGUID().ToString());
 
-            MotionMaster motionMaster = unit.GetMotionMaster();
-            float x, y, z;
-            motionMaster.GetDestination(out x, out y, out z);
-
-            for (byte i = 0; i < (int)MovementSlot.Max; ++i)
+            if (unit.GetMotionMaster().Empty())
             {
-                IMovementGenerator movementGenerator = motionMaster.GetMotionSlot(i);
-                if (movementGenerator == null)
-                {
-                    handler.SendSysMessage("Empty");
-                    continue;
-                }
+                handler.SendSysMessage("Empty");
+                return true;
+            }
 
-                switch (movementGenerator.GetMovementGeneratorType())
+            float x, y, z;
+            unit.GetMotionMaster().GetDestination(out x, out y, out z);
+
+            var list = unit.GetMotionMaster().GetMovementGeneratorsInformation();
+            foreach (MovementGeneratorInformation info in list)
+            {
+                switch (info.Type)
                 {
                     case MovementGeneratorType.Idle:
                         handler.SendSysMessage(CypherStrings.MovegensIdle);
@@ -1244,45 +1235,33 @@ namespace Game.Chat
                         handler.SendSysMessage(CypherStrings.MovegensConfused);
                         break;
                     case MovementGeneratorType.Chase:
-                        {
-                            Unit target = ((ChaseMovementGenerator)movementGenerator).GetTarget();
-
-                            if (!target)
-                                handler.SendSysMessage(CypherStrings.MovegensChaseNull);
-                            else if (target.IsTypeId(TypeId.Player))
-                                handler.SendSysMessage(CypherStrings.MovegensChasePlayer, target.GetName(), target.GetGUID().ToString());
-                            else
-                                handler.SendSysMessage(CypherStrings.MovegensChaseCreature, target.GetName(), target.GetGUID().ToString());
-                            break;
-                        }
+                        if (info.TargetGUID.IsEmpty())
+                            handler.SendSysMessage(CypherStrings.MovegensChaseNull);
+                        else if (info.TargetGUID.IsPlayer())
+                            handler.SendSysMessage(CypherStrings.MovegensChasePlayer, info.TargetName, info.TargetGUID.ToString());
+                        else
+                            handler.SendSysMessage(CypherStrings.MovegensChaseCreature, info.TargetName, info.TargetGUID.ToString());
+                        break;
                     case MovementGeneratorType.Follow:
-                        {
-                            Unit target = ((FollowMovementGenerator)movementGenerator).GetTarget();
-
-                            if (!target)
-                                handler.SendSysMessage(CypherStrings.MovegensFollowNull);
-                            else if (target.IsTypeId(TypeId.Player))
-                                handler.SendSysMessage(CypherStrings.MovegensFollowPlayer, target.GetName(), target.GetGUID().ToString());
-                            else
-                                handler.SendSysMessage(CypherStrings.MovegensFollowCreature, target.GetName(), target.GetGUID().ToString());
-                            break;
-                        }
+                        if (info.TargetGUID.IsEmpty())
+                            handler.SendSysMessage(CypherStrings.MovegensFollowNull);
+                        else if (info.TargetGUID.IsPlayer())
+                            handler.SendSysMessage(CypherStrings.MovegensFollowPlayer, info.TargetName, info.TargetGUID.ToString());
+                        else
+                            handler.SendSysMessage(CypherStrings.MovegensFollowCreature, info.TargetName, info.TargetGUID.ToString());
+                        break;
                     case MovementGeneratorType.Home:
-                        {
-                            if (unit.IsTypeId(TypeId.Unit))
-                                handler.SendSysMessage(CypherStrings.MovegensHomeCreature, x, y, z);
-                            else
-                                handler.SendSysMessage(CypherStrings.MovegensHomePlayer);
-                            break;
-                        }
+                        if (unit.IsTypeId(TypeId.Unit))
+                            handler.SendSysMessage(CypherStrings.MovegensHomeCreature, x, y, z);
+                        else
+                            handler.SendSysMessage(CypherStrings.MovegensHomePlayer);
+                        break;
                     case MovementGeneratorType.Flight:
                         handler.SendSysMessage(CypherStrings.MovegensFlight);
                         break;
                     case MovementGeneratorType.Point:
-                        {
-                            handler.SendSysMessage(CypherStrings.MovegensPoint, x, y, z);
-                            break;
-                        }
+                        handler.SendSysMessage(CypherStrings.MovegensPoint, x, y, z);
+                        break;
                     case MovementGeneratorType.Fleeing:
                         handler.SendSysMessage(CypherStrings.MovegensFear);
                         break;
@@ -1293,7 +1272,7 @@ namespace Game.Chat
                         handler.SendSysMessage(CypherStrings.MovegensEffect);
                         break;
                     default:
-                        handler.SendSysMessage(CypherStrings.MovegensUnknown, movementGenerator.GetMovementGeneratorType());
+                        handler.SendSysMessage(CypherStrings.MovegensUnknown, info.Type);
                         break;
                 }
             }
@@ -1915,11 +1894,7 @@ namespace Game.Chat
             }
 
             // stop flight if need
-            if (target.IsInFlight())
-            {
-                target.GetMotionMaster().MovementExpired();
-                target.CleanupAfterTaxiFlight();
-            }
+            target.FinishTaxiFlight();
 
             target.Recall();
             return true;
@@ -2162,14 +2137,10 @@ namespace Game.Chat
                     target.SendSysMessage(CypherStrings.SummonedBy, handler.PlayerLink(_player.GetName()));
 
                 // stop flight if need
-                if (target.IsInFlight())
-                {
-                    target.GetMotionMaster().MovementExpired();
-                    target.CleanupAfterTaxiFlight();
-                }
-                // save only in non-flight case
+                if (_player.IsInFlight())
+                    _player.FinishTaxiFlight();
                 else
-                    target.SaveRecallPosition();
+                    _player.SaveRecallPosition(); // save only in non-flight case
 
                 // before GM
                 float x, y, z;

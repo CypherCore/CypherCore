@@ -96,7 +96,7 @@ namespace Scripts.Pets
                 float x = me.GetPositionX() + 20 * (float)Math.Cos(me.GetOrientation());
                 float y = me.GetPositionY() + 20 * (float)Math.Sin(me.GetOrientation());
                 float z = me.GetPositionZ() + 40;
-                me.GetMotionMaster().Clear(false);
+                me.GetMotionMaster().Clear();
                 me.GetMotionMaster().MovePoint(0, x, y, z);
 
                 // Despawn as soon as possible

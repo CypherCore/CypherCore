@@ -353,11 +353,8 @@ namespace Game.Entities
 
             if (IsTypeId(TypeId.Unit))
             {
-                IMovementGenerator movementGenerator = GetMotionMaster().GetMotionSlot(MovementSlot.Idle);
-                if (movementGenerator != null)
-                    movementGenerator.Pause(0);
-
-                GetMotionMaster().Clear(MovementSlot.Active);
+                PauseMovement(0, 0, false);
+                GetMotionMaster().Clear(MovementGeneratorPriority.Normal);
 
                 StopMoving();
 
@@ -476,7 +473,7 @@ namespace Game.Entities
                 RestoreFaction();
 
             ///@todo Handle SLOT_IDLE motion resume
-            GetMotionMaster().InitDefault();
+            GetMotionMaster().InitializeDefault();
 
             Creature creature = ToCreature();
             if (creature)
@@ -546,8 +543,6 @@ namespace Game.Entities
 
                 player.SetClientControl(this, true);
             }
-
-            EngageWithTarget(charmer);
 
             // a guardian should always have charminfo
             if (playerCharmer && this != charmer.GetFirstControlled())

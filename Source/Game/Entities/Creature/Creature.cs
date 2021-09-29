@@ -110,7 +110,7 @@ namespace Game.Entities
 
         public bool IsReturningHome()
         {
-            if (GetMotionMaster().GetMotionSlotType(MovementSlot.Active) == MovementGeneratorType.Home)
+            if (GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Home)
                 return true;
 
             return false;
@@ -551,8 +551,7 @@ namespace Game.Entities
                         {
                             Unit charmer = Global.ObjAccessor.GetUnit(this, LastCharmerGUID);
                             if (charmer)
-                                if (CanStartAttack(charmer, true))
-                                    i_AI.AttackStart(charmer);
+                                EngageWithTarget(charmer);
                         }
 
                         LastCharmerGUID.Clear();
@@ -1917,7 +1916,8 @@ namespace Game.Entities
                         SetNativeDisplayId(display.CreatureDisplayID, display.DisplayScale);
                     }
 
-                    GetMotionMaster().InitDefault();
+                    GetMotionMaster().InitializeDefault();
+
                     //Re-initialize reactstate that could be altered by movementgenerators
                     InitializeReactState();
 

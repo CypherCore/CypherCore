@@ -158,7 +158,7 @@ namespace Game.AI
         {
             if (!HasEscortState(SmartEscortState.Escorting))
             {
-                me.PauseMovement(delay, MovementSlot.Idle, forced);
+                me.PauseMovement(delay, MovementSlot.Default, forced);
                 if (me.GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Waypoint)
                 {
                     var (nodeId, pathId) = me.GetCurrentWaypointInfo();
@@ -597,8 +597,11 @@ namespace Game.AI
             CreatureGroup formation = me.GetFormation();
             if (formation == null || formation.GetLeader() == me || !formation.IsFormed())
             {
-                if (me.GetMotionMaster().GetMotionSlotType(MovementSlot.Idle) != MovementGeneratorType.Waypoint && me.GetWaypointPath() != 0)
-                    me.GetMotionMaster().MovePath(me.GetWaypointPath(), true);
+                if (me.GetMotionMaster().GetCurrentMovementGeneratorType(MovementSlot.Default) != MovementGeneratorType.Waypoint)
+                {
+                    if (me.GetWaypointPath() != 0)
+                        me.GetMotionMaster().MovePath(me.GetWaypointPath(), true);
+                }
                 else
                     me.ResumeMovement();
             }
@@ -644,7 +647,8 @@ namespace Game.AI
 
             if (who != null && me.Attack(who, _canAutoAttack))
             {
-                me.GetMotionMaster().Clear(MovementSlot.Active);
+                me.GetMotionMaster().Clear(MovementGeneratorPriority.Normal);
+                me.PauseMovement();
 
                 if (_canCombatMove)
                 {
@@ -826,13 +830,20 @@ namespace Game.AI
 
             if (me.IsEngaged())
             {
-                if (on && !me.HasReactState(ReactStates.Passive) && me.GetVictim() && me.GetMotionMaster().GetMotionSlotType(MovementSlot.Active) == MovementGeneratorType.Max)
+                if (on)
                 {
-                    SetRun(_run);
-                    me.GetMotionMaster().MoveChase(me.GetVictim());
+                    if (!me.HasReactState(ReactStates.Passive) && me.GetVictim() && !me.GetMotionMaster().HasMovementGenerator(movement => movement.Mode == MovementGeneratorMode.Default && movement.Priority == MovementGeneratorPriority.Normal))
+                    {
+                        SetRun(_run);
+                        me.GetMotionMaster().MoveChase(me.GetVictim());
+                    }
                 }
-                else if (!on && me.GetMotionMaster().GetMotionSlotType(MovementSlot.Active) == MovementGeneratorType.Chase)
-                    me.GetMotionMaster().Clear(MovementSlot.Active);
+                else
+                {
+                    var movement = me.GetMotionMaster().GetMovementGenerator(a => a.GetMovementGeneratorType() == MovementGeneratorType.Chase && a.Mode == MovementGeneratorMode.Default && a.Priority == MovementGeneratorPriority.Normal);
+                    if (movement != null)
+                        me.GetMotionMaster().Remove(movement);
+                }
             }
         }
 

@@ -381,7 +381,7 @@ namespace Framework.Constants
         LoadEquipment = 124,    // id
         TriggerRandomTimedEvent = 125,    // id min range, id max range
         RemoveAllGameobjects = 126,
-        StopMotion = 127,	  // stopMoving, movementExpired
+        RemoveMovement = 127,	  // movementType, forced
         PlayAnimkit = 128,
         ScenePlay = 129,    // sceneId
         SceneCancel = 130,    // sceneId

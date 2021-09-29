@@ -22,62 +22,86 @@ using Framework.GameMath;
 
 namespace Game.Movement
 {
-    public interface IMovementGenerator
+    public abstract class MovementGenerator
     {
-        public void Finalize(Unit owner);
+        public MovementGeneratorMode Mode;
+        public MovementGeneratorPriority Priority;
+        public MovementGeneratorFlags Flags;
+        public UnitState BaseUnitState;
 
-        public void Initialize(Unit owner);
+        // on top first update
+        public virtual void Initialize(Unit owner) { }
 
-        public void Reset(Unit owner);
+        // on top reassign
+        public virtual void Reset(Unit owner) { }
 
-        public bool Update(Unit owner, uint time_diff);
+        // on top on MotionMaster::Update
+        public abstract bool Update(Unit owner, uint diff);
 
-        public MovementGeneratorType GetMovementGeneratorType();
+        // on current top if another movement replaces
+        public virtual void Deactivate(Unit owner) { }
 
-        public void UnitSpeedChanged() { }
+        // on movement delete
+        public virtual void Finalize(Unit owner, bool active, bool movementInform) { }
 
-        public void Pause(uint timer = 0) { }
+        public abstract MovementGeneratorType GetMovementGeneratorType();
 
-        public void Resume(uint overrideTimer = 0) { }
+        public virtual void UnitSpeedChanged() { }
+
+        // timer in ms
+        public virtual void Pause(uint timer = 0) { }
+
+        // timer in ms
+        public virtual void Resume(uint overrideTimer = 0) { }
 
         // used by Evade code for select point to evade with expected restart default movement
-        public bool GetResetPosition(Unit u, out float x, out float y, out float z)
+        public virtual bool GetResetPosition(Unit u, out float x, out float y, out float z)
         {
             x = y = z = 0.0f;
             return false;
         }
+
+        public void AddFlag(MovementGeneratorFlags flag) { Flags |= flag; }
+        public bool HasFlag(MovementGeneratorFlags flag) { return (Flags & flag) != 0; }
+        public void RemoveFlag(MovementGeneratorFlags flag) { Flags &= ~flag; }
     }
 
-    public abstract class MovementGeneratorMedium<T> : IMovementGenerator where T : Unit
+    public abstract class MovementGeneratorMedium<T> : MovementGenerator where T : Unit
     {
-        public virtual void Initialize(Unit owner)
+        public override void Initialize(Unit owner)
         {
             DoInitialize((T)owner);
             IsActive = true;
         }
 
-        public virtual void Finalize(Unit owner)
-        {
-            DoFinalize((T)owner);
-        }
-
-        public virtual void Reset(Unit owner)
+        public override void Reset(Unit owner)
         {
             DoReset((T)owner);
         }
 
-        public virtual bool Update(Unit owner, uint diff)
+        public override bool Update(Unit owner, uint diff)
         {
             return DoUpdate((T)owner, diff);
+        }
+
+        public override void Deactivate(Unit owner)
+        {
+            DoDeactivate((T)owner);
+        }
+
+        public override void Finalize(Unit owner, bool active, bool movementInform)
+        {
+            DoFinalize((T)owner, active, movementInform);
         }
 
         public bool IsActive { get; set; }
 
         public abstract void DoInitialize(T owner);
-        public abstract void DoFinalize(T owner);
+        public abstract void DoFinalize(T owner, bool active, bool movementInform);
         public abstract void DoReset(T owner);
         public abstract bool DoUpdate(T owner, uint diff);
+        public abstract void DoDeactivate(T owner);
 
-        public virtual MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Max; }
+        public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Max; }
     }
 }

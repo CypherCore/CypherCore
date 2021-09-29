@@ -171,7 +171,7 @@ namespace Game.Entities
             }
 
             UpdateSplineMovement(diff);
-            GetMotionMaster().UpdateMotion(diff);
+            GetMotionMaster().Update(diff);
         }
 
         void _UpdateSpells(uint diff)
@@ -999,7 +999,7 @@ namespace Game.Entities
             init.MoveTo(pos.GetPositionX(), pos.GetPositionY(), height, false);
             init.SetFacing(GetOrientation());
             init.SetTransportExit();
-            GetMotionMaster().LaunchMoveSpline(init, EventId.VehicleExit, MovementSlot.Controlled);
+            GetMotionMaster().LaunchMoveSpline(init, EventId.VehicleExit, MovementGeneratorPriority.Highest);
 
             if (player != null)
                 player.ResummonPetTemporaryUnSummonedIfAny();
@@ -1353,7 +1353,7 @@ namespace Game.Entities
                     //  * Using 'call pet' on dead pets
                     //  * Using 'call stabled pet'
                     //  * Logging in with dead pets
-                    GetMotionMaster().Clear(false);
+                    GetMotionMaster().Clear();
                     GetMotionMaster().MoveIdle();
                 }
                 StopMoving();

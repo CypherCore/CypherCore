@@ -130,7 +130,7 @@ namespace Game
             if (GetPlayer().HasUnitState(UnitState.Died))
                 GetPlayer().RemoveAurasByType(AuraType.FeignDeath);
 
-            GetPlayer().GetMotionMaster().Clear(MovementSlot.Controlled);
+            GetPlayer().GetMotionMaster().Remove(MovementGeneratorType.Flight);
 
             if (mountDisplayId != 0)
                 GetPlayer().Mount(mountDisplayId);
@@ -235,11 +235,11 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.TaxiRequestEarlyLanding, Processing = PacketProcessing.ThreadSafe)]
         void HandleTaxiRequestEarlyLanding(TaxiRequestEarlyLanding taxiRequestEarlyLanding)
         {
-            if (GetPlayer().GetMotionMaster().GetCurrentMovementGeneratorType() == MovementGeneratorType.Flight)
+            FlightPathMovementGenerator flight = GetPlayer().GetMotionMaster().GetCurrentMovementGenerator() as FlightPathMovementGenerator;
+            if (flight != null)
             {
                 if (GetPlayer().m_taxi.RequestEarlyLanding())
                 {
-                    FlightPathMovementGenerator flight = (FlightPathMovementGenerator)GetPlayer().GetMotionMaster().Top();
                     flight.LoadPath(GetPlayer(), flight.GetPath()[(int)flight.GetCurrentNode()].NodeIndex);
                     flight.Reset(GetPlayer());
                 }

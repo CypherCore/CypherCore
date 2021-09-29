@@ -2323,7 +2323,7 @@ namespace Scripts.World.NpcSpecial
             init.DisableTransportPathTransformations();
             init.MoveTo(x, y, z, false);
             init.SetFacing(o);
-            who.GetMotionMaster().LaunchMoveSpline(init, EventId.VehicleBoard, MovementSlot.Controlled);
+            who.GetMotionMaster().LaunchMoveSpline(init, EventId.VehicleBoard, MovementGeneratorPriority.Highest);
             who.m_Events.AddEvent(new CastFoodSpell(who, SpellIds.ChairSpells[who.GetEntry()]), who.m_Events.CalculateTime(1000));
             Creature creature = who.ToCreature();
             if (creature)

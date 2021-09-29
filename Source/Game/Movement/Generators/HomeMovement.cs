@@ -23,67 +23,96 @@ namespace Game.AI
 {
     public class HomeMovementGenerator<T> : MovementGeneratorMedium<T> where T : Creature
     {
+        public HomeMovementGenerator()
+        {
+            Mode = MovementGeneratorMode.Default;
+            Priority = MovementGeneratorPriority.Normal;
+            Flags = MovementGeneratorFlags.InitializationPending;
+            BaseUnitState = UnitState.Roaming;
+        }
+
         public override void DoInitialize(T owner)
         {
+            RemoveFlag(MovementGeneratorFlags.InitializationPending);
+            AddFlag(MovementGeneratorFlags.Initialized);
+
             SetTargetLocation(owner);
         }
 
         public override void DoReset(T owner) 
         {
+            RemoveFlag(MovementGeneratorFlags.Deactivated);
             DoInitialize(owner);
         }
 
         public override bool DoUpdate(T owner, uint diff)
         {
-            _arrived = _skipToHome || owner.MoveSpline.Finalized();
-            return !_arrived;
+            if (HasFlag(MovementGeneratorFlags.Interrupted) || owner.MoveSpline.Finalized())
+            {
+                AddFlag(MovementGeneratorFlags.InformEnabled);
+                return false;
+            }
+            return true;
         }
 
-        public override void DoFinalize(T owner)
+        public override void DoDeactivate(T owner)
         {
-            if (_arrived)
+            AddFlag(MovementGeneratorFlags.Deactivated);
+            owner.ClearUnitState(UnitState.RoamingMove);
+        }
+
+        public override void DoFinalize(T owner, bool active, bool movementInform)
+        {
+            if (!owner.IsCreature())
+                return;
+
+            AddFlag(MovementGeneratorFlags.Finalized);
+            if (active)
+                owner.ClearUnitState(UnitState.RoamingMove | UnitState.Evade);
+
+            if (movementInform && HasFlag(MovementGeneratorFlags.InformEnabled))
             {
-                owner.ClearUnitState(UnitState.Evade);
                 owner.SetWalk(true);
+                owner.SetSpawnHealth();
                 owner.LoadCreaturesAddon();
                 owner.GetAI().JustReachedHome();
-                owner.SetSpawnHealth();
             }
         }
 
         void SetTargetLocation(T owner)
         {
+            // if we are ROOT/STUNNED/DISTRACTED even after aura clear, finalize on next update - otherwise we would get stuck in evade
             if (owner.HasUnitState(UnitState.Root | UnitState.Stunned | UnitState.Distracted))
-            { // if we are ROOT/STUNNED/DISTRACTED even after aura clear, finalize on next update - otherwise we would get stuck in evade
-                _skipToHome = true;
+            {
+                AddFlag(MovementGeneratorFlags.Interrupted);
                 return;
             }
 
+            owner.ClearUnitState(UnitState.AllErasable & ~UnitState.Evade);
+            owner.AddUnitState(UnitState.RoamingMove);
+
+            Position destination = owner.GetHomePosition();
             MoveSplineInit init = new(owner);
-            float x, y, z, o;
-            // at apply we can select more nice return points base at current movegen
-            if (owner.GetMotionMaster().Empty() || !owner.GetMotionMaster().Top().GetResetPosition(owner, out x, out y, out z))
-            {
-                owner.GetHomePosition(out x, out y, out z, out o);
-                init.SetFacing(o);
-            }
-            owner.UpdateAllowedPositionZ(x, y, ref z);
-            init.MoveTo(x, y, z);
+            /*
+             * TODO: maybe this never worked, who knows, top is always this generator, so this code calls GetResetPosition on itself
+             *
+             * if (owner->GetMotionMaster()->empty() || !owner->GetMotionMaster()->top()->GetResetPosition(owner, x, y, z))
+             * {
+             *     owner->GetHomePosition(x, y, z, o);
+             *     init.SetFacing(o);
+             * }
+             */
+
+            owner.UpdateAllowedPositionZ(destination.posX, destination.posY, ref destination.posZ);
+            init.MoveTo(destination);
+            init.SetFacing(destination.GetOrientation());
             init.SetWalk(false);
             init.Launch();
-
-            _skipToHome = false;
-            _arrived = false;
-
-            owner.ClearUnitState(UnitState.AllErasable & ~UnitState.Evade);
         }
 
         public override MovementGeneratorType GetMovementGeneratorType()
         {
             return MovementGeneratorType.Home;
         }
-
-        bool _arrived;
-        bool _skipToHome;
     }
 }

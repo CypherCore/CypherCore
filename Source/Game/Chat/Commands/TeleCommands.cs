@@ -35,40 +35,35 @@ namespace Game.Chat
             if (args.Empty())
                 return false;
 
-            Player me = handler.GetPlayer();
+            Player player = handler.GetPlayer();
 
             GameTele tele = handler.ExtractGameTeleFromLink(args);
-
             if (tele == null)
             {
                 handler.SendSysMessage(CypherStrings.CommandTeleNotfound);
                 return false;
             }
 
-            if (me.IsInCombat() && !handler.GetSession().HasPermission(RBACPermissions.CommandTeleName))
+            if (player.IsInCombat() && !handler.GetSession().HasPermission(RBACPermissions.CommandTeleName))
             {
                 handler.SendSysMessage(CypherStrings.YouInCombat);
                 return false;
             }
 
             var map = CliDB.MapStorage.LookupByKey(tele.mapId);
-            if (map == null || (map.IsBattlegroundOrArena() && (me.GetMapId() != tele.mapId || !me.IsGameMaster())))
+            if (map == null || (map.IsBattlegroundOrArena() && (player.GetMapId() != tele.mapId || !player.IsGameMaster())))
             {
                 handler.SendSysMessage(CypherStrings.CannotTeleToBg);
                 return false;
             }
 
             // stop flight if need
-            if (me.IsInFlight())
-            {
-                me.GetMotionMaster().MovementExpired();
-                me.CleanupAfterTaxiFlight();
-            }
-            // save only in non-flight case
+            if (player.IsInFlight())
+                player.FinishTaxiFlight();
             else
-                me.SaveRecallPosition();
+                player.SaveRecallPosition(); // save only in non-flight case
 
-            me.TeleportTo(tele.mapId, tele.posX, tele.posY, tele.posZ, tele.orientation);
+            player.TeleportTo(tele.mapId, tele.posX, tele.posY, tele.posZ, tele.orientation);
             return true;
         }
 
@@ -196,13 +191,9 @@ namespace Game.Chat
 
                 // stop flight if need
                 if (player.IsInFlight())
-                {
-                    player.GetMotionMaster().MovementExpired();
-                    player.CleanupAfterTaxiFlight();
-                }
-                // save only in non-flight case
+                    player.FinishTaxiFlight();
                 else
-                    player.SaveRecallPosition();
+                    player.SaveRecallPosition(); // save only in non-flight case
 
                 player.TeleportTo(tele.mapId, tele.posX, tele.posY, tele.posZ, tele.orientation);
             }
@@ -270,13 +261,9 @@ namespace Game.Chat
 
                 // stop flight if need
                 if (target.IsInFlight())
-                {
-                    target.GetMotionMaster().MovementExpired();
-                    target.CleanupAfterTaxiFlight();
-                }
-                // save only in non-flight case
+                    target.FinishTaxiFlight();
                 else
-                    target.SaveRecallPosition();
+                    target.SaveRecallPosition(); // save only in non-flight case
 
                 target.TeleportTo(tele.mapId, tele.posX, tele.posY, tele.posZ, tele.orientation);
             }

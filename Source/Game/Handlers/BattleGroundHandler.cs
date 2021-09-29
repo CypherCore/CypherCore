@@ -345,11 +345,7 @@ namespace Game
                     GetPlayer().SpawnCorpseBones();
                 }
                 // stop taxi flight at port
-                if (GetPlayer().IsInFlight())
-                {
-                    GetPlayer().GetMotionMaster().MovementExpired();
-                    GetPlayer().CleanupAfterTaxiFlight();
-                }
+                GetPlayer().FinishTaxiFlight();
 
                 BattlefieldStatusActive battlefieldStatus;
                 Global.BattlegroundMgr.BuildBattlegroundStatusActive(out battlefieldStatus, bg, GetPlayer(), battlefieldPort.Ticket.Id, GetPlayer().GetBattlegroundQueueJoinTime(bgQueueTypeId), bg.GetArenaType());

@@ -156,9 +156,7 @@ namespace Game.AI
             me.SendAIReaction(AiReaction.Alert);
 
             // Face the unit (stealthed player) and set distracted state for 5 seconds
-            me.GetMotionMaster().MoveDistract(5 * Time.InMilliseconds);
-            me.StopMoving();
-            me.SetFacingTo(me.GetAbsoluteAngle(who));
+            me.GetMotionMaster().MoveDistract(5 * Time.InMilliseconds, me.GetAbsoluteAngle(who));
         }
 
         // Called for reaction at stopping attack at no attackers or targets
@@ -174,8 +172,8 @@ namespace Game.AI
                 Unit owner = me.GetCharmerOrOwner();
                 if (owner != null)
                 {
-                    me.GetMotionMaster().Clear(false);
-                    me.GetMotionMaster().MoveFollow(owner, SharedConst.PetFollowDist, me.GetFollowAngle(), MovementSlot.Active);
+                    me.GetMotionMaster().Clear();
+                    me.GetMotionMaster().MoveFollow(owner, SharedConst.PetFollowDist, me.GetFollowAngle());
                 }
                 else
                 {

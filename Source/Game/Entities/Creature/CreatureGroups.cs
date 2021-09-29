@@ -266,7 +266,8 @@ namespace Game.Entities
                         creature.GetMotionMaster().Initialize();
                     else
                         creature.GetMotionMaster().MoveIdle();
-                    Log.outDebug(LogFilter.Unit, "Set {0} movement for member GUID: {1}", dismiss ? "default" : "idle", creature.GetGUID().ToString());
+
+                    Log.outDebug(LogFilter.Unit, $"CreatureGroup::FormationReset: Set {(dismiss ? "default" : "idle")} movement for member {creature.GetGUID()}");
                 }
             }
 
@@ -314,20 +315,20 @@ namespace Game.Entities
                 if (!member.IsFlying())
                     member.UpdateGroundPositionZ(dx, dy, ref dz);
 
-                Position point = new(dx, dy, dz, destination.GetOrientation());
-
-                member.GetMotionMaster().MoveFormation(id, point, moveType, !member.IsWithinDist(_leader, dist + 5.0f), orientation);
                 member.SetHomePosition(dx, dy, dz, pathangle);
+
+                Position point = new(dx, dy, dz, destination.GetOrientation());
+                member.GetMotionMaster().MoveFormation(id, point, moveType, !member.IsWithinDist(_leader, dist + 5.0f), orientation);
             }
         }
 
         public bool CanLeaderStartMoving()
         {
-            foreach (var itr in _members)
+            foreach (var pair in _members)
             {
-                if (itr.Key != _leader && itr.Key.IsAlive())
+                if (pair.Key != _leader && pair.Key.IsAlive())
                 {
-                    if (itr.Key.IsEngaged() || itr.Key.IsReturningHome())
+                    if (pair.Key.IsEngaged() || pair.Key.IsReturningHome())
                         return false;
                 }
             }

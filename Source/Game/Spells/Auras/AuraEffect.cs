@@ -2439,8 +2439,6 @@ namespace Game.Spells
         [AuraEffectHandler(AuraType.ModPossessPet)]
         void HandleModPossessPet(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
-            // Used by spell "Eyes of the Beast"
-
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                 return;
 
@@ -2459,9 +2457,6 @@ namespace Game.Spells
                 if (caster.ToPlayer().GetPet() != pet)
                     return;
 
-                // Must clear current motion or pet leashes back to owner after a few yards
-                //  when under spell 'Eyes of the Beast'
-                pet.GetMotionMaster().Clear();
                 pet.SetCharmedBy(caster, CharmType.Possess, aurApp);
             }
             else
@@ -2475,13 +2470,9 @@ namespace Game.Spells
                     // Reinitialize the pet bar or it will appear greyed out
                     caster.ToPlayer().PetSpellInitialize();
 
-                    // Follow owner only if not fighting or owner didn't click "stay" at new location
-                    // This may be confusing because pet bar shows "stay" when under the spell but it retains
-                    //  the "follow" flag. Player MUST click "stay" while under the spell.
+                    // TODO: remove this
                     if (pet.GetVictim() == null && !pet.GetCharmInfo().HasCommandState(CommandStates.Stay))
-                    {
                         pet.GetMotionMaster().MoveFollow(caster, SharedConst.PetFollowDist, pet.GetFollowAngle());
-                    }
                 }
             }
         }

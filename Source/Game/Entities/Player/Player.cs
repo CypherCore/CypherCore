@@ -2120,11 +2120,7 @@ namespace Game.Entities
                 return;
 
             // stop taxi flight at summon
-            if (IsInFlight())
-            {
-                GetMotionMaster().MovementExpired();
-                CleanupAfterTaxiFlight();
-            }
+            FinishTaxiFlight();
 
             // drop flag at summon
             // this code can be reached only when GM is summoning player who carries flag, because player should be immune to summoning spells when he carries flag
@@ -6880,9 +6876,18 @@ namespace Game.Entities
             return ActivateTaxiPathTo(nodes, null, spellid);
         }
 
+        public void FinishTaxiFlight()
+        {
+            if (!IsInFlight())
+                return;
+
+            GetMotionMaster().Remove(MovementGeneratorType.Flight);
+            m_taxi.ClearTaxiDestinations(); // not destinations, clear source node
+        }
+
         public void CleanupAfterTaxiFlight()
         {
-            m_taxi.ClearTaxiDestinations();        // not destinations, clear source node
+            m_taxi.ClearTaxiDestinations(); // not destinations, clear source node
             Dismount();
             RemoveUnitFlag(UnitFlags.RemoveClientControl | UnitFlags.TaxiFlight);
         }
@@ -7206,13 +7211,8 @@ namespace Game.Entities
         public void SetMover(Unit target)
         {
             m_unitMovedByMe.m_playerMovingMe = null;
-            if (m_unitMovedByMe.IsCreature())
-                m_unitMovedByMe.GetMotionMaster().Initialize();
-
             m_unitMovedByMe = target;
             m_unitMovedByMe.m_playerMovingMe = this;
-            if (m_unitMovedByMe.IsCreature())
-                m_unitMovedByMe.GetMotionMaster().Initialize();
 
             MoveSetActiveMover packet = new();
             packet.MoverGUID = target.GetGUID();

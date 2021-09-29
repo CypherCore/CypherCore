@@ -22,31 +22,36 @@ namespace Game.Movement
 {
     public class PointMovementGenerator<T> : MovementGeneratorMedium<T> where T : Unit
     {
-        public PointMovementGenerator(uint id, float x, float y, float z, bool generatePath, float speed = 0.0f, Unit faceTarget = null, SpellEffectExtraData spellEffectExtraData = null, float? finalOrient = null)
+        public PointMovementGenerator(uint id, float x, float y, float z, bool generatePath, float speed = 0.0f, float? finalOrient = null, Unit faceTarget = null, SpellEffectExtraData spellEffectExtraData = null)
         {
             _movementId = id;
             _destination = new Position(x, y, z);
             _speed = speed;
+            _generatePath = generatePath;
+            _finalOrient = finalOrient;
             _faceTarget = faceTarget;
             _spellEffectExtra = spellEffectExtraData;
-            _generatePath = generatePath;
-            _recalculateSpeed = false;
-            _finalOrient = finalOrient;
+
+            Mode = MovementGeneratorMode.Default;
+            Priority = MovementGeneratorPriority.Normal;
+            Flags = MovementGeneratorFlags.InitializationPending;
+            BaseUnitState = UnitState.Roaming;
         }
 
         public override void DoInitialize(T owner)
         {
+            RemoveFlag(MovementGeneratorFlags.InitializationPending);
+            AddFlag(MovementGeneratorFlags.Initialized);
+
             if (_movementId == EventId.ChargePrepath)
             {
-                owner.AddUnitState(UnitState.Roaming | UnitState.RoamingMove);
+                owner.AddUnitState(UnitState.RoamingMove);
                 return;
             }
 
-            owner.AddUnitState(UnitState.Roaming);
-
             if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting())
             {
-                _interrupt = true;
+                AddFlag(MovementGeneratorFlags.Interrupted);
                 owner.StopMoving();
                 return;
             }
@@ -77,6 +82,8 @@ namespace Game.Movement
 
         public override void DoReset(T owner)
         {
+            RemoveFlag(MovementGeneratorFlags.Transitory | MovementGeneratorFlags.Deactivated);
+
             owner.StopMoving();
             DoInitialize(owner);
         }
@@ -87,19 +94,25 @@ namespace Game.Movement
                 return false;
 
             if (_movementId == EventId.ChargePrepath)
-                return !owner.MoveSpline.Finalized();
+            {
+                if (owner.MoveSpline.Finalized())
+                {
+                    AddFlag(MovementGeneratorFlags.InformEnabled);
+                    return false;
+                }
+                return true;
+            }
 
             if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting())
             {
-                _interrupt = true;
+                AddFlag(MovementGeneratorFlags.Interrupted);
                 owner.StopMoving();
                 return true;
             }
 
-            if ((_interrupt && owner.MoveSpline.Finalized()) || (_recalculateSpeed && !owner.MoveSpline.Finalized()))
+            if ((HasFlag(MovementGeneratorFlags.Interrupted) && owner.MoveSpline.Finalized()) || (HasFlag(MovementGeneratorFlags.SpeedUpdatePending) && !owner.MoveSpline.Finalized()))
             {
-                _recalculateSpeed = false;
-                _interrupt = false;
+                RemoveFlag(MovementGeneratorFlags.Interrupted | MovementGeneratorFlags.SpeedUpdatePending);
 
                 owner.AddUnitState(UnitState.RoamingMove);
 
@@ -115,14 +128,28 @@ namespace Game.Movement
                     creature.SignalFormationMovement(_destination, _movementId);
             }
 
-            return !owner.MoveSpline.Finalized();
+            if (owner.MoveSpline.Finalized())
+            {
+                RemoveFlag(MovementGeneratorFlags.Transitory);
+                AddFlag(MovementGeneratorFlags.InformEnabled);
+                return false;
+            }
+            return true;
         }
 
-        public override void DoFinalize(T owner)
+        public override void DoDeactivate(T owner)
         {
-            owner.ClearUnitState(UnitState.Roaming | UnitState.RoamingMove);
+            AddFlag(MovementGeneratorFlags.Deactivated);
+            owner.ClearUnitState(UnitState.RoamingMove);
+        }
 
-            if (owner.MoveSpline.Finalized())
+        public override void DoFinalize(T owner, bool active, bool movementInform)
+        {
+            AddFlag(MovementGeneratorFlags.Finalized);
+            if (active)
+                owner.ClearUnitState(UnitState.RoamingMove);
+
+            if (movementInform && HasFlag(MovementGeneratorFlags.InformEnabled))
                 MovementInform(owner);
         }
 
@@ -135,11 +162,13 @@ namespace Game.Movement
             }
         }
 
-        public void UnitSpeedChanged()
+        public override void UnitSpeedChanged()
         {
-            _recalculateSpeed = true;
+            AddFlag(MovementGeneratorFlags.SpeedUpdatePending);
         }
 
+        public uint GetId() { return _movementId; }
+        
         public override MovementGeneratorType GetMovementGeneratorType()
         {
             return MovementGeneratorType.Point;
@@ -148,29 +177,33 @@ namespace Game.Movement
         uint _movementId;
         Position _destination;
         float _speed;
-        Unit _faceTarget;
-        SpellEffectExtraData _spellEffectExtra;
         bool _generatePath;
-        bool _recalculateSpeed;
-        bool _interrupt;
         //! if set then unit will turn to specified _orient in provided _pos
         float? _finalOrient;
+        Unit _faceTarget;
+        SpellEffectExtraData _spellEffectExtra;
     }
 
     public class AssistanceMovementGenerator : PointMovementGenerator<Creature>
     {
-        public AssistanceMovementGenerator(float x, float y, float z) : base(0, x, y, z, true) { }
+        public AssistanceMovementGenerator(uint id, float x, float y, float z) : base(id, x, y, z, true) { }
+
+        public override void Finalize(Unit owner, bool active, bool movementInform)
+        {
+            AddFlag(MovementGeneratorFlags.Finalized);
+            if (active)
+                owner.ClearUnitState(UnitState.RoamingMove);
+
+            if (movementInform && HasFlag(MovementGeneratorFlags.InformEnabled))
+            {
+                Creature ownerCreature = owner.ToCreature();
+                ownerCreature.SetNoCallAssistance(false);
+                ownerCreature.CallAssistance();
+                if (ownerCreature.IsAlive())
+                    ownerCreature.GetMotionMaster().MoveSeekAssistanceDistract(WorldConfig.GetUIntValue(WorldCfg.CreatureFamilyAssistanceDelay));
+            }
+        }
 
         public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Assistance; }
-
-        public override void Finalize(Unit owner)
-        {
-            owner.ClearUnitState(UnitState.Roaming);
-            owner.StopMoving();
-            owner.ToCreature().SetNoCallAssistance(false);
-            owner.ToCreature().CallAssistance();
-            if (owner.IsAlive())
-                owner.GetMotionMaster().MoveSeekAssistanceDistract(WorldConfig.GetUIntValue(WorldCfg.CreatureFamilyAssistanceDelay));
-        }
     }
 }

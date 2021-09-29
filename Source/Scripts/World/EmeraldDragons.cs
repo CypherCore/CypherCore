@@ -186,13 +186,13 @@ namespace Scripts.World.EmeraldDragons
                 if (target)
                 {
                     _roamTimer = RandomHelper.URand(15000, 30000);
-                    me.GetMotionMaster().Clear(false);
+                    me.GetMotionMaster().Clear();
                     me.GetMotionMaster().MoveChase(target, 0.2f);
                 }
                 else
                 {
                     _roamTimer = 2500;
-                    me.GetMotionMaster().Clear(false);
+                    me.GetMotionMaster().Clear();
                     me.GetMotionMaster().MoveRandom(25.0f);
                 }
                 // Seeping fog movement is slow enough for a player to be able to walk backwards and still outpace it
