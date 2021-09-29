@@ -3276,6 +3276,8 @@ namespace Game.Spells
                     {
                         case 61987: // Avenging Wrath Marker
                         case 61988: // Divine Shield exclude aura
+                        case 72410: // Rune of Blood, Saurfang, Icecrown Citadel
+                        case 71204: // Touch of Insignificance, Lady Deathwhisper, Icecrown Citadel
                             return false;
                         case 30877: // Tag Murloc
                         case 61716: // Rabbit Costume
@@ -3355,6 +3357,8 @@ namespace Game.Spells
                         case AuraType.SchoolHealAbsorb:
                         case AuraType.ChannelDeathItem:
                         case AuraType.Empathy:
+                        case AuraType.ModSpellDamageFromCaster:
+                        case AuraType.PreventsFleeing:
                             return false;
                         default:
                             break;
@@ -3488,6 +3492,7 @@ namespace Game.Spells
                     case AuraType.ModChargeCooldown:
                     case AuraType.ModPowerCostSchool:
                     case AuraType.ModPowerCostSchoolPct:
+                    case AuraType.ModMechanicDamageTakenPercent:
                         if (bp > 0)
                             return false;
                         break;
