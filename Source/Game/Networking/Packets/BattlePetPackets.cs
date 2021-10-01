@@ -172,6 +172,18 @@ namespace Game.Networking.Packets
         public FlagsControlType ControlType;
     }
 
+    class BattlePetClearFanfare : ClientPacket
+    {
+        public BattlePetClearFanfare(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            PetGuid = _worldPacket.ReadPackedGuid();
+        }
+
+        public ObjectGuid PetGuid;
+    }
+    
     class CageBattlePet : ClientPacket
     {
         public CageBattlePet(WorldPacket packet) : base(packet) { }

@@ -77,6 +77,12 @@ namespace Game
             }
         }
 
+        [WorldPacketHandler(ClientOpcodes.BattlePetClearFanfare)]
+        void HandleBattlePetClearFanfare(BattlePetClearFanfare battlePetClearFanfare)
+        {
+            GetBattlePetMgr().ClearFanfare(battlePetClearFanfare.PetGuid);
+        }
+
         [WorldPacketHandler(ClientOpcodes.CageBattlePet)]
         void HandleCageBattlePet(CageBattlePet cageBattlePet)
         {

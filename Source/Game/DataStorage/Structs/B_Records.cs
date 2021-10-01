@@ -73,7 +73,9 @@ namespace Game.DataStorage
         public int CardUIModelSceneID;
         public int LoadoutUIModelSceneID;
         public int CovenantID;
-    }
+
+        public BattlePetSpeciesFlags GetFlags() { return (BattlePetSpeciesFlags)Flags; }
+}
 
     public sealed class BattlePetSpeciesStateRecord
     {

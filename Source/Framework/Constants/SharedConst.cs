@@ -51,7 +51,7 @@ namespace Framework.Constants
         /// </summary>
         public const int MaxBattlePetSpeciesId = 3159;
         public const int MaxPetBattleSlots = 3;
-        public const int MaxBattlePetsPerSpecies = 3;
+        public const int DefaultMaxBattlePetsPerSpecies = 3;
         public const int BattlePetCageItemId = 82800;
         public const int DefaultSummonBattlePetSpell = 118301;
 
@@ -2822,5 +2822,19 @@ namespace Framework.Constants
         POIs = 0x10,
 
         All = 0xFF
+    }
+
+    public enum BattlePetDbFlags : ushort
+    {
+        None = 0x00,
+        Favorite = 0x01,
+        Converted = 0x02,
+        Revoked = 0x04,
+        LockedForConvert = 0x08,
+        Ability0Selection = 0x10,
+        Ability1Selection = 0x20,
+        Ability2Selection = 0x40,
+        FanfareNeeded = 0x80,
+        DisplayOverridden = 0x100
     }
 }

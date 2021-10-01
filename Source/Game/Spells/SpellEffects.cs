@@ -5439,7 +5439,7 @@ namespace Game.Spells
                 return;
             }
 
-            if (battlePetMgr.GetPetCount(speciesId) >= SharedConst.MaxBattlePetsPerSpecies)
+            if (battlePetMgr.HasMaxPetCount(speciesEntry))
             {
                 battlePetMgr.SendError(BattlePetError.CantHaveMorePetsOfThatType, creatureId); // or speciesEntry.CreatureID
                 SendCastResult(SpellCastResult.CantAddBattlePet);

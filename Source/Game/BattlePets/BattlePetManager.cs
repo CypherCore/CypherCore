@@ -151,9 +151,9 @@ namespace Game.BattlePets
                     BattlePetSpeciesRecord speciesEntry = CliDB.BattlePetSpeciesStorage.LookupByKey(species);
                     if (speciesEntry != null)
                     {
-                        if (GetPetCount(species) >= SharedConst.MaxBattlePetsPerSpecies)
+                        if (HasMaxPetCount(speciesEntry))
                         {
-                            Log.outError(LogFilter.Misc, "Battlenet account with id {0} has more than 3 battle pets of species {1}", _owner.GetBattlenetAccountId(), species);
+                            Log.outError(LogFilter.Misc, "Battlenet account with id {0} has more than maximum battle pets of species {1}", _owner.GetBattlenetAccountId(), species);
                             continue;
                         }
 
@@ -277,6 +277,9 @@ namespace Game.BattlePets
             if (battlePetSpecies == null) // should never happen
                 return;
 
+            if (!battlePetSpecies.GetFlags().HasFlag(BattlePetSpeciesFlags.WellKnown)) // Not learnable
+                return;
+
             BattlePet pet = new();
             pet.PacketInfo.Guid = ObjectGuid.Create(HighGuid.BattlePet, Global.ObjectMgr.GetGenerator(HighGuid.BattlePet).Generate());
             pet.PacketInfo.Species = species;
@@ -314,11 +317,38 @@ namespace Game.BattlePets
                     _owner.GetPlayer().RemoveSpell(speciesEntry.SummonSpellID);*/
         }
 
+        public void ClearFanfare(ObjectGuid guid)
+        {
+            BattlePet pet = GetPet(guid);
+            if (pet == null)
+                return;
+
+            pet.PacketInfo.Flags &= (ushort)~BattlePetDbFlags.FanfareNeeded;
+
+            if (pet.SaveInfo != BattlePetSaveInfo.New)
+                pet.SaveInfo = BattlePetSaveInfo.Changed;
+        }
+
+        bool IsPetInSlot(ObjectGuid guid)
+        {
+            foreach (BattlePetSlot slot in _slots)
+                if (slot.Pet.Guid == guid)
+                    return true;
+
+            return false;
+        }
+
         public byte GetPetCount(uint species)
         {
             return (byte)_pets.Values.Count(battlePet => battlePet.PacketInfo.Species == species && battlePet.SaveInfo != BattlePetSaveInfo.Removed);
         }
 
+        public bool HasMaxPetCount(BattlePetSpeciesRecord speciesEntry)
+        {
+            int maxPetsPerSpecies = speciesEntry.GetFlags().HasFlag(BattlePetSpeciesFlags.LegacyAccountUnique) ? 1 : SharedConst.DefaultMaxBattlePetsPerSpecies;
+            return GetPetCount(speciesEntry.Id) >= maxPetsPerSpecies;
+        }
+        
         public uint GetPetUniqueSpeciesCount()
         {
             HashSet<uint> speciesIds = new();
@@ -358,6 +388,17 @@ namespace Game.BattlePets
             if (pet == null)
                 return;
 
+            var battlePetSpecies = CliDB.BattlePetSpeciesStorage.LookupByKey(pet.PacketInfo.Species);
+            if (battlePetSpecies != null)
+                if (battlePetSpecies.GetFlags().HasFlag(BattlePetSpeciesFlags.NotTradable))
+                    return;
+
+            if (IsPetInSlot(guid))
+                return;
+
+            if (pet.PacketInfo.Health < pet.PacketInfo.MaxHealth)
+                return;
+
             List<ItemPosCount> dest = new();
 
             if (_owner.GetPlayer().CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, SharedConst.BattlePetCageItemId, 1) != InventoryResult.Ok)
@@ -372,7 +413,6 @@ namespace Game.BattlePets
             item.SetModifier(ItemModifier.BattlePetLevel, pet.PacketInfo.Level);
             item.SetModifier(ItemModifier.BattlePetDisplayId, pet.PacketInfo.CreatureID);
 
-            // FIXME: "You create: ." - item name missing in chat
             _owner.GetPlayer().SendNewItem(item, 1, true, false);
 
             RemovePet(guid);
