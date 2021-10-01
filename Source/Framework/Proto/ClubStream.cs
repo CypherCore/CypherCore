@@ -44,52 +44,53 @@ namespace Bgs.Protocol.Club.V1 {
             "IAEoCRIyCgZhY2Nlc3MYBiABKAsyIi5iZ3MucHJvdG9jb2wuY2x1Yi52MS5T",
             "dHJlYW1BY2Nlc3MSUQoLdm9pY2VfbGV2ZWwYByABKA4yJi5iZ3MucHJvdG9j",
             "b2wuY2x1Yi52MS5TdHJlYW1Wb2ljZUxldmVsOhRWT0lDRV9MRVZFTF9ESVNB",
-            "QkxFRBIVCg1jcmVhdGlvbl90aW1lGAggASgEInAKDk1lbnRpb25Db250ZW50",
-            "EgsKA2FsbBgBIAEoCBIMCgRoZXJlGAIgASgIEjEKCW1lbWJlcl9pZBgDIAMo",
-            "CzIeLmJncy5wcm90b2NvbC5jbHViLnYxLk1lbWJlcklkEhAKBHJvbGUYBCAD",
-            "KA1CAhABIl4KFENyZWF0ZU1lc3NhZ2VPcHRpb25zEg8KB2NvbnRlbnQYAiAB",
-            "KAkSNQoHbWVudGlvbhgDIAEoCzIkLmJncy5wcm90b2NvbC5jbHViLnYxLk1l",
-            "bnRpb25Db250ZW50IlIKGkNsdWJTdHJlYW1NZXNzYWdlQ29udGFpbmVyEjQK",
-            "B21lc3NhZ2UYASADKAsyIy5iZ3MucHJvdG9jb2wuY2x1Yi52MS5TdHJlYW1N",
-            "ZXNzYWdlIpEBCgxDb250ZW50Q2hhaW4SDwoHY29udGVudBgFIAEoCRImCgVl",
-            "bWJlZBgGIAMoCzIXLmJncy5wcm90b2NvbC5FbWJlZEluZm8SNQoHbWVudGlv",
-            "bhgHIAEoCzIkLmJncy5wcm90b2NvbC5jbHViLnYxLk1lbnRpb25Db250ZW50",
-            "EhEKCWVkaXRfdGltZRgIIAEoBCKNAgoNU3RyZWFtTWVzc2FnZRIjCgJpZBgD",
-            "IAEoCzIXLmJncy5wcm90b2NvbC5NZXNzYWdlSWQSNwoGYXV0aG9yGAQgASgL",
-            "MicuYmdzLnByb3RvY29sLmNsdWIudjEuTWVtYmVyRGVzY3JpcHRpb24SOQoN",
-            "Y29udGVudF9jaGFpbhgGIAMoCzIiLmJncy5wcm90b2NvbC5jbHViLnYxLkNv",
-            "bnRlbnRDaGFpbhI6CglkZXN0cm95ZXIYDyABKAsyJy5iZ3MucHJvdG9jb2wu",
-            "Y2x1Yi52MS5NZW1iZXJEZXNjcmlwdGlvbhIRCglkZXN0cm95ZWQYECABKAgS",
-            "FAoMZGVzdHJveV90aW1lGBEgASgEIsUCCg1TdHJlYW1NZW50aW9uEg8KB2Ns",
-            "dWJfaWQYASABKAQSEQoJc3RyZWFtX2lkGAIgASgEEisKCm1lc3NhZ2VfaWQY",
-            "AyABKAsyFy5iZ3MucHJvdG9jb2wuTWVzc2FnZUlkEjcKBmF1dGhvchgEIAEo",
-            "CzInLmJncy5wcm90b2NvbC5jbHViLnYxLk1lbWJlckRlc2NyaXB0aW9uEhEK",
-            "CWRlc3Ryb3llZBgFIAEoCBIuCgptZW50aW9uX2lkGAYgASgLMhouYmdzLnBy",
-            "b3RvY29sLlRpbWVTZXJpZXNJZBIxCgltZW1iZXJfaWQYByABKAsyHi5iZ3Mu",
-            "cHJvdG9jb2wuY2x1Yi52MS5NZW1iZXJJZBI0CgdtZXNzYWdlGAggASgLMiMu",
-            "YmdzLnByb3RvY29sLmNsdWIudjEuU3RyZWFtTWVzc2FnZSJaCgpTdHJlYW1W",
-            "aWV3Eg8KB2NsdWJfaWQYASABKAQSEQoJc3RyZWFtX2lkGAIgASgEEigKBm1h",
-            "cmtlchgDIAEoCzIYLmJncy5wcm90b2NvbC5WaWV3TWFya2VyIj0KFVN0cmVh",
-            "bUFkdmFuY2VWaWV3VGltZRIRCglzdHJlYW1faWQYASABKAQSEQoJdmlld190",
-            "aW1lGAIgASgEIjgKD1N0cmVhbUV2ZW50VGltZRIRCglzdHJlYW1faWQYASAB",
-            "KAQSEgoKZXZlbnRfdGltZRgCIAEoBCJhChFTdHJlYW1NZW50aW9uVmlldxIP",
-            "CgdjbHViX2lkGAEgASgEEhEKCXN0cmVhbV9pZBgCIAEoBBIoCgZtYXJrZXIY",
-            "AyABKAsyGC5iZ3MucHJvdG9jb2wuVmlld01hcmtlciLpAQoSU3RyZWFtU3Rh",
-            "dGVPcHRpb25zEi0KCWF0dHJpYnV0ZRgBIAMoCzIaLmJncy5wcm90b2NvbC52",
-            "Mi5BdHRyaWJ1dGUSDAoEbmFtZRgCIAEoCRIPCgdzdWJqZWN0GAMgASgJEjIK",
-            "BmFjY2VzcxgEIAEoCzIiLmJncy5wcm90b2NvbC5jbHViLnYxLlN0cmVhbUFj",
-            "Y2VzcxJRCgt2b2ljZV9sZXZlbBgFIAEoDjImLmJncy5wcm90b2NvbC5jbHVi",
-            "LnYxLlN0cmVhbVZvaWNlTGV2ZWw6FFZPSUNFX0xFVkVMX0RJU0FCTEVEIqQC",
-            "ChVTdHJlYW1TdGF0ZUFzc2lnbm1lbnQSEQoJc3RyZWFtX2lkGAEgASgEEi0K",
-            "CWF0dHJpYnV0ZRgCIAMoCzIaLmJncy5wcm90b2NvbC52Mi5BdHRyaWJ1dGUS",
-            "DAoEbmFtZRgDIAEoCRIPCgdzdWJqZWN0GAQgASgJEjIKBmFjY2VzcxgFIAEo",
-            "CzIiLmJncy5wcm90b2NvbC5jbHViLnYxLlN0cmVhbUFjY2VzcxIjChtzdHJl",
-            "YW1fc3Vic2NyaXB0aW9uX3JlbW92ZWQYBiABKAgSUQoLdm9pY2VfbGV2ZWwY",
-            "ByABKA4yJi5iZ3MucHJvdG9jb2wuY2x1Yi52MS5TdHJlYW1Wb2ljZUxldmVs",
-            "OhRWT0lDRV9MRVZFTF9ESVNBQkxFRCKZAQoVU3RyZWFtVHlwaW5nSW5kaWNh",
-            "dG9yEjEKCWF1dGhvcl9pZBgBIAEoCzIeLmJncy5wcm90b2NvbC5jbHViLnYx",
-            "Lk1lbWJlcklkEj4KCWluZGljYXRvchgCIAEoDjIdLmJncy5wcm90b2NvbC5U",
-            "eXBpbmdJbmRpY2F0b3I6DFRZUElOR19TVEFSVBINCgVlcG9jaBgDIAEoBA=="));
+            "QkxFRBIVCg1jcmVhdGlvbl90aW1lGAggASgEIi0KEVN0cmVhbURlc2NyaXB0",
+            "aW9uEgoKAmlkGAIgASgEEgwKBG5hbWUYBCABKAkicAoOTWVudGlvbkNvbnRl",
+            "bnQSCwoDYWxsGAEgASgIEgwKBGhlcmUYAiABKAgSMQoJbWVtYmVyX2lkGAMg",
+            "AygLMh4uYmdzLnByb3RvY29sLmNsdWIudjEuTWVtYmVySWQSEAoEcm9sZRgE",
+            "IAMoDUICEAEiXgoUQ3JlYXRlTWVzc2FnZU9wdGlvbnMSDwoHY29udGVudBgC",
+            "IAEoCRI1CgdtZW50aW9uGAMgASgLMiQuYmdzLnByb3RvY29sLmNsdWIudjEu",
+            "TWVudGlvbkNvbnRlbnQiUgoaQ2x1YlN0cmVhbU1lc3NhZ2VDb250YWluZXIS",
+            "NAoHbWVzc2FnZRgBIAMoCzIjLmJncy5wcm90b2NvbC5jbHViLnYxLlN0cmVh",
+            "bU1lc3NhZ2UikQEKDENvbnRlbnRDaGFpbhIPCgdjb250ZW50GAUgASgJEiYK",
+            "BWVtYmVkGAYgAygLMhcuYmdzLnByb3RvY29sLkVtYmVkSW5mbxI1CgdtZW50",
+            "aW9uGAcgASgLMiQuYmdzLnByb3RvY29sLmNsdWIudjEuTWVudGlvbkNvbnRl",
+            "bnQSEQoJZWRpdF90aW1lGAggASgEIo0CCg1TdHJlYW1NZXNzYWdlEiMKAmlk",
+            "GAMgASgLMhcuYmdzLnByb3RvY29sLk1lc3NhZ2VJZBI3CgZhdXRob3IYBCAB",
+            "KAsyJy5iZ3MucHJvdG9jb2wuY2x1Yi52MS5NZW1iZXJEZXNjcmlwdGlvbhI5",
+            "Cg1jb250ZW50X2NoYWluGAYgAygLMiIuYmdzLnByb3RvY29sLmNsdWIudjEu",
+            "Q29udGVudENoYWluEjoKCWRlc3Ryb3llchgPIAEoCzInLmJncy5wcm90b2Nv",
+            "bC5jbHViLnYxLk1lbWJlckRlc2NyaXB0aW9uEhEKCWRlc3Ryb3llZBgQIAEo",
+            "CBIUCgxkZXN0cm95X3RpbWUYESABKAQixQIKDVN0cmVhbU1lbnRpb24SDwoH",
+            "Y2x1Yl9pZBgBIAEoBBIRCglzdHJlYW1faWQYAiABKAQSKwoKbWVzc2FnZV9p",
+            "ZBgDIAEoCzIXLmJncy5wcm90b2NvbC5NZXNzYWdlSWQSNwoGYXV0aG9yGAQg",
+            "ASgLMicuYmdzLnByb3RvY29sLmNsdWIudjEuTWVtYmVyRGVzY3JpcHRpb24S",
+            "EQoJZGVzdHJveWVkGAUgASgIEi4KCm1lbnRpb25faWQYBiABKAsyGi5iZ3Mu",
+            "cHJvdG9jb2wuVGltZVNlcmllc0lkEjEKCW1lbWJlcl9pZBgHIAEoCzIeLmJn",
+            "cy5wcm90b2NvbC5jbHViLnYxLk1lbWJlcklkEjQKB21lc3NhZ2UYCCABKAsy",
+            "Iy5iZ3MucHJvdG9jb2wuY2x1Yi52MS5TdHJlYW1NZXNzYWdlIloKClN0cmVh",
+            "bVZpZXcSDwoHY2x1Yl9pZBgBIAEoBBIRCglzdHJlYW1faWQYAiABKAQSKAoG",
+            "bWFya2VyGAMgASgLMhguYmdzLnByb3RvY29sLlZpZXdNYXJrZXIiPQoVU3Ry",
+            "ZWFtQWR2YW5jZVZpZXdUaW1lEhEKCXN0cmVhbV9pZBgBIAEoBBIRCgl2aWV3",
+            "X3RpbWUYAiABKAQiOAoPU3RyZWFtRXZlbnRUaW1lEhEKCXN0cmVhbV9pZBgB",
+            "IAEoBBISCgpldmVudF90aW1lGAIgASgEImEKEVN0cmVhbU1lbnRpb25WaWV3",
+            "Eg8KB2NsdWJfaWQYASABKAQSEQoJc3RyZWFtX2lkGAIgASgEEigKBm1hcmtl",
+            "chgDIAEoCzIYLmJncy5wcm90b2NvbC5WaWV3TWFya2VyIukBChJTdHJlYW1T",
+            "dGF0ZU9wdGlvbnMSLQoJYXR0cmlidXRlGAEgAygLMhouYmdzLnByb3RvY29s",
+            "LnYyLkF0dHJpYnV0ZRIMCgRuYW1lGAIgASgJEg8KB3N1YmplY3QYAyABKAkS",
+            "MgoGYWNjZXNzGAQgASgLMiIuYmdzLnByb3RvY29sLmNsdWIudjEuU3RyZWFt",
+            "QWNjZXNzElEKC3ZvaWNlX2xldmVsGAUgASgOMiYuYmdzLnByb3RvY29sLmNs",
+            "dWIudjEuU3RyZWFtVm9pY2VMZXZlbDoUVk9JQ0VfTEVWRUxfRElTQUJMRUQi",
+            "pAIKFVN0cmVhbVN0YXRlQXNzaWdubWVudBIRCglzdHJlYW1faWQYASABKAQS",
+            "LQoJYXR0cmlidXRlGAIgAygLMhouYmdzLnByb3RvY29sLnYyLkF0dHJpYnV0",
+            "ZRIMCgRuYW1lGAMgASgJEg8KB3N1YmplY3QYBCABKAkSMgoGYWNjZXNzGAUg",
+            "ASgLMiIuYmdzLnByb3RvY29sLmNsdWIudjEuU3RyZWFtQWNjZXNzEiMKG3N0",
+            "cmVhbV9zdWJzY3JpcHRpb25fcmVtb3ZlZBgGIAEoCBJRCgt2b2ljZV9sZXZl",
+            "bBgHIAEoDjImLmJncy5wcm90b2NvbC5jbHViLnYxLlN0cmVhbVZvaWNlTGV2",
+            "ZWw6FFZPSUNFX0xFVkVMX0RJU0FCTEVEIpkBChVTdHJlYW1UeXBpbmdJbmRp",
+            "Y2F0b3ISMQoJYXV0aG9yX2lkGAEgASgLMh4uYmdzLnByb3RvY29sLmNsdWIu",
+            "djEuTWVtYmVySWQSPgoJaW5kaWNhdG9yGAIgASgOMh0uYmdzLnByb3RvY29s",
+            "LlR5cGluZ0luZGljYXRvcjoMVFlQSU5HX1NUQVJUEg0KBWVwb2NoGAMgASgE"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Bgs.Protocol.Club.V1.ClubEnumReflection.Descriptor, global::Bgs.Protocol.Club.V1.ClubMemberReflection.Descriptor, global::Bgs.Protocol.V2.AttributeTypesReflection.Descriptor, global::Bgs.Protocol.EmbedTypesReflection.Descriptor, global::Bgs.Protocol.EventViewTypesReflection.Descriptor, global::Bgs.Protocol.MessageTypesReflection.Descriptor, global::Bgs.Protocol.EtsTypesReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
@@ -97,6 +98,7 @@ namespace Bgs.Protocol.Club.V1 {
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.StreamAccess), global::Bgs.Protocol.Club.V1.StreamAccess.Parser, new[]{ "Role" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.CreateStreamOptions), global::Bgs.Protocol.Club.V1.CreateStreamOptions.Parser, new[]{ "Attribute", "Name", "Subject", "Access", "VoiceLevel" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.Stream), global::Bgs.Protocol.Club.V1.Stream.Parser, new[]{ "ClubId", "Id", "Attribute", "Name", "Subject", "Access", "VoiceLevel", "CreationTime" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.StreamDescription), global::Bgs.Protocol.Club.V1.StreamDescription.Parser, new[]{ "Id", "Name" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.MentionContent), global::Bgs.Protocol.Club.V1.MentionContent.Parser, new[]{ "All", "Here", "MemberId", "Role" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.CreateMessageOptions), global::Bgs.Protocol.Club.V1.CreateMessageOptions.Parser, new[]{ "Content", "Mention" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.ClubStreamMessageContainer), global::Bgs.Protocol.Club.V1.ClubStreamMessageContainer.Parser, new[]{ "Message" }, null, null, null, null),
@@ -1059,6 +1061,190 @@ namespace Bgs.Protocol.Club.V1 {
 
   }
 
+  public sealed partial class StreamDescription : pb::IMessage<StreamDescription> {
+    private static readonly pb::MessageParser<StreamDescription> _parser = new pb::MessageParser<StreamDescription>(() => new StreamDescription());
+    private pb::UnknownFieldSet _unknownFields;
+    private int _hasBits0;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<StreamDescription> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Bgs.Protocol.Club.V1.ClubStreamReflection.Descriptor.MessageTypes[4]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StreamDescription() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StreamDescription(StreamDescription other) : this() {
+      _hasBits0 = other._hasBits0;
+      id_ = other.id_;
+      name_ = other.name_;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public StreamDescription Clone() {
+      return new StreamDescription(this);
+    }
+
+    /// <summary>Field number for the "id" field.</summary>
+    public const int IdFieldNumber = 2;
+    private readonly static ulong IdDefaultValue = 0UL;
+
+    private ulong id_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public ulong Id {
+      get { if ((_hasBits0 & 1) != 0) { return id_; } else { return IdDefaultValue; } }
+      set {
+        _hasBits0 |= 1;
+        id_ = value;
+      }
+    }
+    /// <summary>Gets whether the "id" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasId {
+      get { return (_hasBits0 & 1) != 0; }
+    }
+    /// <summary>Clears the value of the "id" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearId() {
+      _hasBits0 &= ~1;
+    }
+
+    /// <summary>Field number for the "name" field.</summary>
+    public const int NameFieldNumber = 4;
+    private readonly static string NameDefaultValue = "";
+
+    private string name_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string Name {
+      get { return name_ ?? NameDefaultValue; }
+      set {
+        name_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+    /// <summary>Gets whether the "name" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasName {
+      get { return name_ != null; }
+    }
+    /// <summary>Clears the value of the "name" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearName() {
+      name_ = null;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as StreamDescription);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(StreamDescription other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (Id != other.Id) return false;
+      if (Name != other.Name) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (HasId) hash ^= Id.GetHashCode();
+      if (HasName) hash ^= Name.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (HasId) {
+        output.WriteRawTag(16);
+        output.WriteUInt64(Id);
+      }
+      if (HasName) {
+        output.WriteRawTag(34);
+        output.WriteString(Name);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (HasId) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt64Size(Id);
+      }
+      if (HasName) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(Name);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(StreamDescription other) {
+      if (other == null) {
+        return;
+      }
+      if (other.HasId) {
+        Id = other.Id;
+      }
+      if (other.HasName) {
+        Name = other.Name;
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 16: {
+            Id = input.ReadUInt64();
+            break;
+          }
+          case 34: {
+            Name = input.ReadString();
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
   public sealed partial class MentionContent : pb::IMessage<MentionContent> {
     private static readonly pb::MessageParser<MentionContent> _parser = new pb::MessageParser<MentionContent>(() => new MentionContent());
     private pb::UnknownFieldSet _unknownFields;
@@ -1068,7 +1254,7 @@ namespace Bgs.Protocol.Club.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Club.V1.ClubStreamReflection.Descriptor.MessageTypes[4]; }
+      get { return global::Bgs.Protocol.Club.V1.ClubStreamReflection.Descriptor.MessageTypes[5]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1293,7 +1479,7 @@ namespace Bgs.Protocol.Club.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Club.V1.ClubStreamReflection.Descriptor.MessageTypes[5]; }
+      get { return global::Bgs.Protocol.Club.V1.ClubStreamReflection.Descriptor.MessageTypes[6]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1478,7 +1664,7 @@ namespace Bgs.Protocol.Club.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Club.V1.ClubStreamReflection.Descriptor.MessageTypes[6]; }
+      get { return global::Bgs.Protocol.Club.V1.ClubStreamReflection.Descriptor.MessageTypes[7]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1600,7 +1786,7 @@ namespace Bgs.Protocol.Club.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Club.V1.ClubStreamReflection.Descriptor.MessageTypes[7]; }
+      get { return global::Bgs.Protocol.Club.V1.ClubStreamReflection.Descriptor.MessageTypes[8]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1848,7 +2034,7 @@ namespace Bgs.Protocol.Club.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Club.V1.ClubStreamReflection.Descriptor.MessageTypes[8]; }
+      get { return global::Bgs.Protocol.Club.V1.ClubStreamReflection.Descriptor.MessageTypes[9]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2185,7 +2371,7 @@ namespace Bgs.Protocol.Club.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Club.V1.ClubStreamReflection.Descriptor.MessageTypes[9]; }
+      get { return global::Bgs.Protocol.Club.V1.ClubStreamReflection.Descriptor.MessageTypes[10]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2631,7 +2817,7 @@ namespace Bgs.Protocol.Club.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Club.V1.ClubStreamReflection.Descriptor.MessageTypes[10]; }
+      get { return global::Bgs.Protocol.Club.V1.ClubStreamReflection.Descriptor.MessageTypes[11]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2860,7 +3046,7 @@ namespace Bgs.Protocol.Club.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Club.V1.ClubStreamReflection.Descriptor.MessageTypes[11]; }
+      get { return global::Bgs.Protocol.Club.V1.ClubStreamReflection.Descriptor.MessageTypes[12]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -3045,7 +3231,7 @@ namespace Bgs.Protocol.Club.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Club.V1.ClubStreamReflection.Descriptor.MessageTypes[12]; }
+      get { return global::Bgs.Protocol.Club.V1.ClubStreamReflection.Descriptor.MessageTypes[13]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -3230,7 +3416,7 @@ namespace Bgs.Protocol.Club.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Club.V1.ClubStreamReflection.Descriptor.MessageTypes[13]; }
+      get { return global::Bgs.Protocol.Club.V1.ClubStreamReflection.Descriptor.MessageTypes[14]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -3459,7 +3645,7 @@ namespace Bgs.Protocol.Club.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Club.V1.ClubStreamReflection.Descriptor.MessageTypes[14]; }
+      get { return global::Bgs.Protocol.Club.V1.ClubStreamReflection.Descriptor.MessageTypes[15]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -3747,7 +3933,7 @@ namespace Bgs.Protocol.Club.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Club.V1.ClubStreamReflection.Descriptor.MessageTypes[15]; }
+      get { return global::Bgs.Protocol.Club.V1.ClubStreamReflection.Descriptor.MessageTypes[16]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -4117,7 +4303,7 @@ namespace Bgs.Protocol.Club.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Club.V1.ClubStreamReflection.Descriptor.MessageTypes[16]; }
+      get { return global::Bgs.Protocol.Club.V1.ClubStreamReflection.Descriptor.MessageTypes[17]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]

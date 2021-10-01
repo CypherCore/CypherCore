@@ -26,20 +26,25 @@ namespace Bgs.Protocol {
           string.Concat(
             "CjliZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxfZXh0ZW5zaW9ucy9zZXJ2aWNl",
             "X29wdGlvbnMucHJvdG8SDGJncy5wcm90b2NvbBogZ29vZ2xlL3Byb3RvYnVm",
-            "L2Rlc2NyaXB0b3IucHJvdG8iUQoRQkdTU2VydmljZU9wdGlvbnMSFwoPZGVz",
-            "Y3JpcHRvcl9uYW1lGAEgASgJEg8KB3ZlcnNpb24YBCABKA0SEgoKc2hhcmRf",
-            "bmFtZRgFIAEoCSJNChFTREtTZXJ2aWNlT3B0aW9ucxIPCgdpbmJvdW5kGAEg",
-            "ASgIEhAKCG91dGJvdW5kGAIgASgIEhUKDXVzZV9jbGllbnRfaWQYAyABKAg6",
-            "WwoPc2VydmljZV9vcHRpb25zEh8uZ29vZ2xlLnByb3RvYnVmLlNlcnZpY2VP",
-            "cHRpb25zGJC/BSABKAsyHy5iZ3MucHJvdG9jb2wuQkdTU2VydmljZU9wdGlv",
-            "bnM6XwoTc2RrX3NlcnZpY2Vfb3B0aW9ucxIfLmdvb2dsZS5wcm90b2J1Zi5T",
-            "ZXJ2aWNlT3B0aW9ucxiRvwUgASgLMh8uYmdzLnByb3RvY29sLlNES1NlcnZp",
-            "Y2VPcHRpb25zQiQKDWJuZXQucHJvdG9jb2xCE1NlcnZpY2VPcHRpb25zUHJv",
-            "dG8="));
+            "L2Rlc2NyaXB0b3IucHJvdG8isAIKEUJHU1NlcnZpY2VPcHRpb25zEhcKD2Rl",
+            "c2NyaXB0b3JfbmFtZRgBIAEoCRIPCgd2ZXJzaW9uGAQgASgNEhIKCnNoYXJk",
+            "X25hbWUYBSABKAkSHwoXcmVzb2x2ZV9jbGllbnRfaW5zdGFuY2UYBiABKAgS",
+            "SwoEdHlwZRgHIAEoDjIrLmJncy5wcm90b2NvbC5CR1NTZXJ2aWNlT3B0aW9u",
+            "cy5TZXJ2aWNlVHlwZToQU0VSVklDRV9UWVBFX1JQQxIQCghhcGlfdHlwZRgI",
+            "IAEoCSJdCgtTZXJ2aWNlVHlwZRIUChBTRVJWSUNFX1RZUEVfUlBDEAASFgoS",
+            "U0VSVklDRV9UWVBFX0VWRU5UEAESIAocU0VSVklDRV9UWVBFX0VWRU5UX0JS",
+            "T0FEQ0FTVBACIk0KEVNES1NlcnZpY2VPcHRpb25zEg8KB2luYm91bmQYASAB",
+            "KAgSEAoIb3V0Ym91bmQYAiABKAgSFQoNdXNlX2NsaWVudF9pZBgDIAEoCDpb",
+            "Cg9zZXJ2aWNlX29wdGlvbnMSHy5nb29nbGUucHJvdG9idWYuU2VydmljZU9w",
+            "dGlvbnMYkL8FIAEoCzIfLmJncy5wcm90b2NvbC5CR1NTZXJ2aWNlT3B0aW9u",
+            "czpfChNzZGtfc2VydmljZV9vcHRpb25zEh8uZ29vZ2xlLnByb3RvYnVmLlNl",
+            "cnZpY2VPcHRpb25zGJG/BSABKAsyHy5iZ3MucHJvdG9jb2wuU0RLU2Vydmlj",
+            "ZU9wdGlvbnNCJAoNYm5ldC5wcm90b2NvbEITU2VydmljZU9wdGlvbnNQcm90",
+            "bw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Google.Protobuf.DescriptorReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pb::Extension[] { ServiceOptionsExtensions.ServiceOptions_, ServiceOptionsExtensions.SdkServiceOptions }, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.BGSServiceOptions), global::Bgs.Protocol.BGSServiceOptions.Parser, new[]{ "DescriptorName", "Version", "ShardName" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.BGSServiceOptions), global::Bgs.Protocol.BGSServiceOptions.Parser, new[]{ "DescriptorName", "Version", "ShardName", "ResolveClientInstance", "Type", "ApiType" }, null, new[]{ typeof(global::Bgs.Protocol.BGSServiceOptions.Types.ServiceType) }, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.SDKServiceOptions), global::Bgs.Protocol.SDKServiceOptions.Parser, new[]{ "Inbound", "Outbound", "UseClientId" }, null, null, null, null)
           }));
     }
@@ -85,6 +90,9 @@ namespace Bgs.Protocol {
       descriptorName_ = other.descriptorName_;
       version_ = other.version_;
       shardName_ = other.shardName_;
+      resolveClientInstance_ = other.resolveClientInstance_;
+      type_ = other.type_;
+      apiType_ = other.apiType_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -163,6 +171,77 @@ namespace Bgs.Protocol {
       shardName_ = null;
     }
 
+    /// <summary>Field number for the "resolve_client_instance" field.</summary>
+    public const int ResolveClientInstanceFieldNumber = 6;
+    private readonly static bool ResolveClientInstanceDefaultValue = false;
+
+    private bool resolveClientInstance_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool ResolveClientInstance {
+      get { if ((_hasBits0 & 2) != 0) { return resolveClientInstance_; } else { return ResolveClientInstanceDefaultValue; } }
+      set {
+        _hasBits0 |= 2;
+        resolveClientInstance_ = value;
+      }
+    }
+    /// <summary>Gets whether the "resolve_client_instance" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasResolveClientInstance {
+      get { return (_hasBits0 & 2) != 0; }
+    }
+    /// <summary>Clears the value of the "resolve_client_instance" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearResolveClientInstance() {
+      _hasBits0 &= ~2;
+    }
+
+    /// <summary>Field number for the "type" field.</summary>
+    public const int TypeFieldNumber = 7;
+    private readonly static global::Bgs.Protocol.BGSServiceOptions.Types.ServiceType TypeDefaultValue = global::Bgs.Protocol.BGSServiceOptions.Types.ServiceType.Rpc;
+
+    private global::Bgs.Protocol.BGSServiceOptions.Types.ServiceType type_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Bgs.Protocol.BGSServiceOptions.Types.ServiceType Type {
+      get { if ((_hasBits0 & 4) != 0) { return type_; } else { return TypeDefaultValue; } }
+      set {
+        _hasBits0 |= 4;
+        type_ = value;
+      }
+    }
+    /// <summary>Gets whether the "type" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasType {
+      get { return (_hasBits0 & 4) != 0; }
+    }
+    /// <summary>Clears the value of the "type" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearType() {
+      _hasBits0 &= ~4;
+    }
+
+    /// <summary>Field number for the "api_type" field.</summary>
+    public const int ApiTypeFieldNumber = 8;
+    private readonly static string ApiTypeDefaultValue = "";
+
+    private string apiType_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string ApiType {
+      get { return apiType_ ?? ApiTypeDefaultValue; }
+      set {
+        apiType_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+    /// <summary>Gets whether the "api_type" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasApiType {
+      get { return apiType_ != null; }
+    }
+    /// <summary>Clears the value of the "api_type" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearApiType() {
+      apiType_ = null;
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as BGSServiceOptions);
@@ -179,6 +258,9 @@ namespace Bgs.Protocol {
       if (DescriptorName != other.DescriptorName) return false;
       if (Version != other.Version) return false;
       if (ShardName != other.ShardName) return false;
+      if (ResolveClientInstance != other.ResolveClientInstance) return false;
+      if (Type != other.Type) return false;
+      if (ApiType != other.ApiType) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -188,6 +270,9 @@ namespace Bgs.Protocol {
       if (HasDescriptorName) hash ^= DescriptorName.GetHashCode();
       if (HasVersion) hash ^= Version.GetHashCode();
       if (HasShardName) hash ^= ShardName.GetHashCode();
+      if (HasResolveClientInstance) hash ^= ResolveClientInstance.GetHashCode();
+      if (HasType) hash ^= Type.GetHashCode();
+      if (HasApiType) hash ^= ApiType.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -213,6 +298,18 @@ namespace Bgs.Protocol {
         output.WriteRawTag(42);
         output.WriteString(ShardName);
       }
+      if (HasResolveClientInstance) {
+        output.WriteRawTag(48);
+        output.WriteBool(ResolveClientInstance);
+      }
+      if (HasType) {
+        output.WriteRawTag(56);
+        output.WriteEnum((int) Type);
+      }
+      if (HasApiType) {
+        output.WriteRawTag(66);
+        output.WriteString(ApiType);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -229,6 +326,15 @@ namespace Bgs.Protocol {
       }
       if (HasShardName) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(ShardName);
+      }
+      if (HasResolveClientInstance) {
+        size += 1 + 1;
+      }
+      if (HasType) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) Type);
+      }
+      if (HasApiType) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(ApiType);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -249,6 +355,15 @@ namespace Bgs.Protocol {
       }
       if (other.HasShardName) {
         ShardName = other.ShardName;
+      }
+      if (other.HasResolveClientInstance) {
+        ResolveClientInstance = other.ResolveClientInstance;
+      }
+      if (other.HasType) {
+        Type = other.Type;
+      }
+      if (other.HasApiType) {
+        ApiType = other.ApiType;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -273,9 +388,34 @@ namespace Bgs.Protocol {
             ShardName = input.ReadString();
             break;
           }
+          case 48: {
+            ResolveClientInstance = input.ReadBool();
+            break;
+          }
+          case 56: {
+            Type = (global::Bgs.Protocol.BGSServiceOptions.Types.ServiceType) input.ReadEnum();
+            break;
+          }
+          case 66: {
+            ApiType = input.ReadString();
+            break;
+          }
         }
       }
     }
+
+    #region Nested types
+    /// <summary>Container for nested types declared in the BGSServiceOptions message type.</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static partial class Types {
+      public enum ServiceType {
+        [pbr::OriginalName("SERVICE_TYPE_RPC")] Rpc = 0,
+        [pbr::OriginalName("SERVICE_TYPE_EVENT")] Event = 1,
+        [pbr::OriginalName("SERVICE_TYPE_EVENT_BROADCAST")] EventBroadcast = 2,
+      }
+
+    }
+    #endregion
 
   }
 

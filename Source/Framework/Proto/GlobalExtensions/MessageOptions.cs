@@ -26,16 +26,15 @@ namespace Bgs.Protocol {
           string.Concat(
             "CjliZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxfZXh0ZW5zaW9ucy9tZXNzYWdl",
             "X29wdGlvbnMucHJvdG8SDGJncy5wcm90b2NvbBogZ29vZ2xlL3Byb3RvYnVm",
-            "L2Rlc2NyaXB0b3IucHJvdG8iZAoRQkdTTWVzc2FnZU9wdGlvbnMSGwoTY3Vz",
+            "L2Rlc2NyaXB0b3IucHJvdG8iSgoRQkdTTWVzc2FnZU9wdGlvbnMSGwoTY3Vz",
             "dG9tX3NlbGVjdF9zaGFyZBgBIAEoCBIYChBjdXN0b21fdmFsaWRhdG9yGAIg",
-            "ASgIEhgKEGNsaWVudF9pZF9mYW5vdXQYAyABKAg6WwoPbWVzc2FnZV9vcHRp",
-            "b25zEh8uZ29vZ2xlLnByb3RvYnVmLk1lc3NhZ2VPcHRpb25zGJC/BSABKAsy",
-            "Hy5iZ3MucHJvdG9jb2wuQkdTTWVzc2FnZU9wdGlvbnNCJAoNYm5ldC5wcm90",
-            "b2NvbEITTWVzc2FnZU9wdGlvbnNQcm90bw=="));
+            "ASgIOlsKD21lc3NhZ2Vfb3B0aW9ucxIfLmdvb2dsZS5wcm90b2J1Zi5NZXNz",
+            "YWdlT3B0aW9ucxiQvwUgASgLMh8uYmdzLnByb3RvY29sLkJHU01lc3NhZ2VP",
+            "cHRpb25zQiQKDWJuZXQucHJvdG9jb2xCE01lc3NhZ2VPcHRpb25zUHJvdG8="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Google.Protobuf.DescriptorReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pb::Extension[] { MessageOptionsExtensions.MessageOptions_ }, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.BGSMessageOptions), global::Bgs.Protocol.BGSMessageOptions.Parser, new[]{ "CustomSelectShard", "CustomValidator", "ClientIdFanout" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.BGSMessageOptions), global::Bgs.Protocol.BGSMessageOptions.Parser, new[]{ "CustomSelectShard", "CustomValidator" }, null, null, null, null)
           }));
     }
     #endregion
@@ -77,7 +76,6 @@ namespace Bgs.Protocol {
       _hasBits0 = other._hasBits0;
       customSelectShard_ = other.customSelectShard_;
       customValidator_ = other.customValidator_;
-      clientIdFanout_ = other.clientIdFanout_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -134,30 +132,6 @@ namespace Bgs.Protocol {
       _hasBits0 &= ~2;
     }
 
-    /// <summary>Field number for the "client_id_fanout" field.</summary>
-    public const int ClientIdFanoutFieldNumber = 3;
-    private readonly static bool ClientIdFanoutDefaultValue = false;
-
-    private bool clientIdFanout_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool ClientIdFanout {
-      get { if ((_hasBits0 & 4) != 0) { return clientIdFanout_; } else { return ClientIdFanoutDefaultValue; } }
-      set {
-        _hasBits0 |= 4;
-        clientIdFanout_ = value;
-      }
-    }
-    /// <summary>Gets whether the "client_id_fanout" field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool HasClientIdFanout {
-      get { return (_hasBits0 & 4) != 0; }
-    }
-    /// <summary>Clears the value of the "client_id_fanout" field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void ClearClientIdFanout() {
-      _hasBits0 &= ~4;
-    }
-
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as BGSMessageOptions);
@@ -173,7 +147,6 @@ namespace Bgs.Protocol {
       }
       if (CustomSelectShard != other.CustomSelectShard) return false;
       if (CustomValidator != other.CustomValidator) return false;
-      if (ClientIdFanout != other.ClientIdFanout) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -182,7 +155,6 @@ namespace Bgs.Protocol {
       int hash = 1;
       if (HasCustomSelectShard) hash ^= CustomSelectShard.GetHashCode();
       if (HasCustomValidator) hash ^= CustomValidator.GetHashCode();
-      if (HasClientIdFanout) hash ^= ClientIdFanout.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -204,10 +176,6 @@ namespace Bgs.Protocol {
         output.WriteRawTag(16);
         output.WriteBool(CustomValidator);
       }
-      if (HasClientIdFanout) {
-        output.WriteRawTag(24);
-        output.WriteBool(ClientIdFanout);
-      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -220,9 +188,6 @@ namespace Bgs.Protocol {
         size += 1 + 1;
       }
       if (HasCustomValidator) {
-        size += 1 + 1;
-      }
-      if (HasClientIdFanout) {
         size += 1 + 1;
       }
       if (_unknownFields != null) {
@@ -242,9 +207,6 @@ namespace Bgs.Protocol {
       if (other.HasCustomValidator) {
         CustomValidator = other.CustomValidator;
       }
-      if (other.HasClientIdFanout) {
-        ClientIdFanout = other.ClientIdFanout;
-      }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
@@ -262,10 +224,6 @@ namespace Bgs.Protocol {
           }
           case 16: {
             CustomValidator = input.ReadBool();
-            break;
-          }
-          case 24: {
-            ClientIdFanout = input.ReadBool();
             break;
           }
         }

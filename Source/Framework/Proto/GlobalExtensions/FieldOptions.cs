@@ -27,52 +27,55 @@ namespace Bgs.Protocol {
             "CjdiZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxfZXh0ZW5zaW9ucy9maWVsZF9v",
             "cHRpb25zLnByb3RvEgxiZ3MucHJvdG9jb2waIGdvb2dsZS9wcm90b2J1Zi9k",
             "ZXNjcmlwdG9yLnByb3RvGi9iZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxfZXh0",
-            "ZW5zaW9ucy9yYW5nZS5wcm90byJmCg9CR1NGaWVsZE9wdGlvbnMSLAoDbG9n",
-            "GAEgASgOMhcuYmdzLnByb3RvY29sLkxvZ09wdGlvbjoGSElEREVOEhEKCXNo",
-            "YXJkX2tleRgCIAEoCBISCgpmYW5vdXRfa2V5GAMgASgIIqoDChBGaWVsZFJl",
-            "c3RyaWN0aW9uEjYKBnNpZ25lZBgBIAEoCzIkLmJncy5wcm90b2NvbC5TaWdu",
-            "ZWRGaWVsZFJlc3RyaWN0aW9uSAASOgoIdW5zaWduZWQYAiABKAsyJi5iZ3Mu",
-            "cHJvdG9jb2wuVW5zaWduZWRGaWVsZFJlc3RyaWN0aW9uSAASNAoFZmxvYXQY",
-            "AyABKAsyIy5iZ3MucHJvdG9jb2wuRmxvYXRGaWVsZFJlc3RyaWN0aW9uSAAS",
-            "NgoGc3RyaW5nGAQgASgLMiQuYmdzLnByb3RvY29sLlN0cmluZ0ZpZWxkUmVz",
-            "dHJpY3Rpb25IABI6CghyZXBlYXRlZBgFIAEoCzImLmJncy5wcm90b2NvbC5S",
-            "ZXBlYXRlZEZpZWxkUmVzdHJpY3Rpb25IABI4CgdtZXNzYWdlGAYgASgLMiUu",
-            "YmdzLnByb3RvY29sLk1lc3NhZ2VGaWVsZFJlc3RyaWN0aW9uSAASNgoJZW50",
-            "aXR5X2lkGAcgASgLMiEuYmdzLnByb3RvY29sLkVudGl0eUlkUmVzdHJpY3Rp",
-            "b25IAEIGCgR0eXBlIvoCChhSZXBlYXRlZEZpZWxkUmVzdHJpY3Rpb24SLAoE",
-            "c2l6ZRgBIAEoCzIeLmJncy5wcm90b2NvbC5VbnNpZ25lZEludFJhbmdlEg4K",
-            "BnVuaXF1ZRgCIAEoCBI2CgZzaWduZWQYAyABKAsyJC5iZ3MucHJvdG9jb2wu",
-            "U2lnbmVkRmllbGRSZXN0cmljdGlvbkgAEjoKCHVuc2lnbmVkGAQgASgLMiYu",
-            "YmdzLnByb3RvY29sLlVuc2lnbmVkRmllbGRSZXN0cmljdGlvbkgAEjQKBWZs",
-            "b2F0GAUgASgLMiMuYmdzLnByb3RvY29sLkZsb2F0RmllbGRSZXN0cmljdGlv",
-            "bkgAEjYKBnN0cmluZxgGIAEoCzIkLmJncy5wcm90b2NvbC5TdHJpbmdGaWVs",
-            "ZFJlc3RyaWN0aW9uSAASNgoJZW50aXR5X2lkGAcgASgLMiEuYmdzLnByb3Rv",
-            "Y29sLkVudGl0eUlkUmVzdHJpY3Rpb25IAEIGCgR0eXBlIlcKFlNpZ25lZEZp",
-            "ZWxkUmVzdHJpY3Rpb24SLAoGbGltaXRzGAEgASgLMhwuYmdzLnByb3RvY29s",
-            "LlNpZ25lZEludFJhbmdlEg8KB2V4Y2x1ZGUYAiADKBIiWwoYVW5zaWduZWRG",
-            "aWVsZFJlc3RyaWN0aW9uEi4KBmxpbWl0cxgBIAEoCzIeLmJncy5wcm90b2Nv",
-            "bC5VbnNpZ25lZEludFJhbmdlEg8KB2V4Y2x1ZGUYAiADKAQiUgoVRmxvYXRG",
-            "aWVsZFJlc3RyaWN0aW9uEigKBmxpbWl0cxgBIAEoCzIYLmJncy5wcm90b2Nv",
-            "bC5GbG9hdFJhbmdlEg8KB2V4Y2x1ZGUYAiADKAIiVwoWU3RyaW5nRmllbGRS",
-            "ZXN0cmljdGlvbhIsCgRzaXplGAEgASgLMh4uYmdzLnByb3RvY29sLlVuc2ln",
-            "bmVkSW50UmFuZ2USDwoHZXhjbHVkZRgCIAMoCSLHAQoTRW50aXR5SWRSZXN0",
-            "cmljdGlvbhIOCgZuZWVkZWQYASABKAgSOQoEa2luZBgCIAEoDjImLmJncy5w",
-            "cm90b2NvbC5FbnRpdHlJZFJlc3RyaWN0aW9uLktpbmQ6A0FOWSJlCgRLaW5k",
-            "EgcKA0FOWRAAEgsKB0FDQ09VTlQQARIQCgxHQU1FX0FDQ09VTlQQAhIbChdB",
-            "Q0NPVU5UX09SX0dBTUVfQUNDT1VOVBADEgsKB1NFUlZJQ0UQBBILCgdDSEFO",
-            "TkVMEAUiKQoXTWVzc2FnZUZpZWxkUmVzdHJpY3Rpb24SDgoGbmVlZGVkGAEg",
-            "ASgIKiAKCUxvZ09wdGlvbhIKCgZISURERU4QARIHCgNIRVgQAjpVCg1maWVs",
-            "ZF9vcHRpb25zEh0uZ29vZ2xlLnByb3RvYnVmLkZpZWxkT3B0aW9ucxiQvwUg",
-            "ASgLMh0uYmdzLnByb3RvY29sLkJHU0ZpZWxkT3B0aW9uczpOCgV2YWxpZBId",
-            "Lmdvb2dsZS5wcm90b2J1Zi5GaWVsZE9wdGlvbnMYkb8FIAEoCzIeLmJncy5w",
-            "cm90b2NvbC5GaWVsZFJlc3RyaWN0aW9uQiIKDWJuZXQucHJvdG9jb2xCEUZp",
-            "ZWxkT3B0aW9uc1Byb3Rv"));
+            "ZW5zaW9ucy9yYW5nZS5wcm90byKaAQoPQkdTRmllbGRPcHRpb25zEiwKA2xv",
+            "ZxgBIAEoDjIXLmJncy5wcm90b2NvbC5Mb2dPcHRpb246BkhJRERFThIRCglz",
+            "aGFyZF9rZXkYAiABKAgSEgoKZmFub3V0X2tleRgDIAEoCBIbChNjbGllbnRf",
+            "aW5zdGFuY2Vfa2V5GAQgASgIEhUKDXJlYWxpemVkX2VudW0YBSABKAki4QMK",
+            "EEZpZWxkUmVzdHJpY3Rpb24SNgoGc2lnbmVkGAEgASgLMiQuYmdzLnByb3Rv",
+            "Y29sLlNpZ25lZEZpZWxkUmVzdHJpY3Rpb25IABI6Cgh1bnNpZ25lZBgCIAEo",
+            "CzImLmJncy5wcm90b2NvbC5VbnNpZ25lZEZpZWxkUmVzdHJpY3Rpb25IABI0",
+            "CgVmbG9hdBgDIAEoCzIjLmJncy5wcm90b2NvbC5GbG9hdEZpZWxkUmVzdHJp",
+            "Y3Rpb25IABI2CgZzdHJpbmcYBCABKAsyJC5iZ3MucHJvdG9jb2wuU3RyaW5n",
+            "RmllbGRSZXN0cmljdGlvbkgAEjoKCHJlcGVhdGVkGAUgASgLMiYuYmdzLnBy",
+            "b3RvY29sLlJlcGVhdGVkRmllbGRSZXN0cmljdGlvbkgAEjgKB21lc3NhZ2UY",
+            "BiABKAsyJS5iZ3MucHJvdG9jb2wuTWVzc2FnZUZpZWxkUmVzdHJpY3Rpb25I",
+            "ABI2CgllbnRpdHlfaWQYByABKAsyIS5iZ3MucHJvdG9jb2wuRW50aXR5SWRS",
+            "ZXN0cmljdGlvbkgAEjUKBWJ5dGVzGAggASgLMiQuYmdzLnByb3RvY29sLlN0",
+            "cmluZ0ZpZWxkUmVzdHJpY3Rpb25IAEIGCgR0eXBlIrEDChhSZXBlYXRlZEZp",
+            "ZWxkUmVzdHJpY3Rpb24SLAoEc2l6ZRgBIAEoCzIeLmJncy5wcm90b2NvbC5V",
+            "bnNpZ25lZEludFJhbmdlEg4KBnVuaXF1ZRgCIAEoCBI2CgZzaWduZWQYAyAB",
+            "KAsyJC5iZ3MucHJvdG9jb2wuU2lnbmVkRmllbGRSZXN0cmljdGlvbkgAEjoK",
+            "CHVuc2lnbmVkGAQgASgLMiYuYmdzLnByb3RvY29sLlVuc2lnbmVkRmllbGRS",
+            "ZXN0cmljdGlvbkgAEjQKBWZsb2F0GAUgASgLMiMuYmdzLnByb3RvY29sLkZs",
+            "b2F0RmllbGRSZXN0cmljdGlvbkgAEjYKBnN0cmluZxgGIAEoCzIkLmJncy5w",
+            "cm90b2NvbC5TdHJpbmdGaWVsZFJlc3RyaWN0aW9uSAASNgoJZW50aXR5X2lk",
+            "GAcgASgLMiEuYmdzLnByb3RvY29sLkVudGl0eUlkUmVzdHJpY3Rpb25IABI1",
+            "CgVieXRlcxgIIAEoCzIkLmJncy5wcm90b2NvbC5TdHJpbmdGaWVsZFJlc3Ry",
+            "aWN0aW9uSABCBgoEdHlwZSJXChZTaWduZWRGaWVsZFJlc3RyaWN0aW9uEiwK",
+            "BmxpbWl0cxgBIAEoCzIcLmJncy5wcm90b2NvbC5TaWduZWRJbnRSYW5nZRIP",
+            "CgdleGNsdWRlGAIgAygSIlsKGFVuc2lnbmVkRmllbGRSZXN0cmljdGlvbhIu",
+            "CgZsaW1pdHMYASABKAsyHi5iZ3MucHJvdG9jb2wuVW5zaWduZWRJbnRSYW5n",
+            "ZRIPCgdleGNsdWRlGAIgAygEIlIKFUZsb2F0RmllbGRSZXN0cmljdGlvbhIo",
+            "CgZsaW1pdHMYASABKAsyGC5iZ3MucHJvdG9jb2wuRmxvYXRSYW5nZRIPCgdl",
+            "eGNsdWRlGAIgAygCIlcKFlN0cmluZ0ZpZWxkUmVzdHJpY3Rpb24SLAoEc2l6",
+            "ZRgBIAEoCzIeLmJncy5wcm90b2NvbC5VbnNpZ25lZEludFJhbmdlEg8KB2V4",
+            "Y2x1ZGUYAiADKAkixwEKE0VudGl0eUlkUmVzdHJpY3Rpb24SDgoGbmVlZGVk",
+            "GAEgASgIEjkKBGtpbmQYAiABKA4yJi5iZ3MucHJvdG9jb2wuRW50aXR5SWRS",
+            "ZXN0cmljdGlvbi5LaW5kOgNBTlkiZQoES2luZBIHCgNBTlkQABILCgdBQ0NP",
+            "VU5UEAESEAoMR0FNRV9BQ0NPVU5UEAISGwoXQUNDT1VOVF9PUl9HQU1FX0FD",
+            "Q09VTlQQAxILCgdTRVJWSUNFEAQSCwoHQ0hBTk5FTBAFIikKF01lc3NhZ2VG",
+            "aWVsZFJlc3RyaWN0aW9uEg4KBm5lZWRlZBgBIAEoCCogCglMb2dPcHRpb24S",
+            "CgoGSElEREVOEAESBwoDSEVYEAI6VQoNZmllbGRfb3B0aW9ucxIdLmdvb2ds",
+            "ZS5wcm90b2J1Zi5GaWVsZE9wdGlvbnMYkL8FIAEoCzIdLmJncy5wcm90b2Nv",
+            "bC5CR1NGaWVsZE9wdGlvbnM6TgoFdmFsaWQSHS5nb29nbGUucHJvdG9idWYu",
+            "RmllbGRPcHRpb25zGJG/BSABKAsyHi5iZ3MucHJvdG9jb2wuRmllbGRSZXN0",
+            "cmljdGlvbkIiCg1ibmV0LnByb3RvY29sQhFGaWVsZE9wdGlvbnNQcm90bw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Google.Protobuf.DescriptorReflection.Descriptor, global::Bgs.Protocol.RangeReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Bgs.Protocol.LogOption), }, new pb::Extension[] { FieldOptionsExtensions.FieldOptions_, FieldOptionsExtensions.Valid }, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.BGSFieldOptions), global::Bgs.Protocol.BGSFieldOptions.Parser, new[]{ "Log", "ShardKey", "FanoutKey" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.FieldRestriction), global::Bgs.Protocol.FieldRestriction.Parser, new[]{ "Signed", "Unsigned", "Float", "String", "Repeated", "Message", "EntityId" }, new[]{ "Type" }, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.RepeatedFieldRestriction), global::Bgs.Protocol.RepeatedFieldRestriction.Parser, new[]{ "Size", "Unique", "Signed", "Unsigned", "Float", "String", "EntityId" }, new[]{ "Type" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.BGSFieldOptions), global::Bgs.Protocol.BGSFieldOptions.Parser, new[]{ "Log", "ShardKey", "FanoutKey", "ClientInstanceKey", "RealizedEnum" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.FieldRestriction), global::Bgs.Protocol.FieldRestriction.Parser, new[]{ "Signed", "Unsigned", "Float", "String", "Repeated", "Message", "EntityId", "Bytes" }, new[]{ "Type" }, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.RepeatedFieldRestriction), global::Bgs.Protocol.RepeatedFieldRestriction.Parser, new[]{ "Size", "Unique", "Signed", "Unsigned", "Float", "String", "EntityId", "Bytes" }, new[]{ "Type" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.SignedFieldRestriction), global::Bgs.Protocol.SignedFieldRestriction.Parser, new[]{ "Limits", "Exclude" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.UnsignedFieldRestriction), global::Bgs.Protocol.UnsignedFieldRestriction.Parser, new[]{ "Limits", "Exclude" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.FloatFieldRestriction), global::Bgs.Protocol.FloatFieldRestriction.Parser, new[]{ "Limits", "Exclude" }, null, null, null, null),
@@ -131,6 +134,8 @@ namespace Bgs.Protocol {
       log_ = other.log_;
       shardKey_ = other.shardKey_;
       fanoutKey_ = other.fanoutKey_;
+      clientInstanceKey_ = other.clientInstanceKey_;
+      realizedEnum_ = other.realizedEnum_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -211,6 +216,53 @@ namespace Bgs.Protocol {
       _hasBits0 &= ~4;
     }
 
+    /// <summary>Field number for the "client_instance_key" field.</summary>
+    public const int ClientInstanceKeyFieldNumber = 4;
+    private readonly static bool ClientInstanceKeyDefaultValue = false;
+
+    private bool clientInstanceKey_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool ClientInstanceKey {
+      get { if ((_hasBits0 & 8) != 0) { return clientInstanceKey_; } else { return ClientInstanceKeyDefaultValue; } }
+      set {
+        _hasBits0 |= 8;
+        clientInstanceKey_ = value;
+      }
+    }
+    /// <summary>Gets whether the "client_instance_key" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasClientInstanceKey {
+      get { return (_hasBits0 & 8) != 0; }
+    }
+    /// <summary>Clears the value of the "client_instance_key" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearClientInstanceKey() {
+      _hasBits0 &= ~8;
+    }
+
+    /// <summary>Field number for the "realized_enum" field.</summary>
+    public const int RealizedEnumFieldNumber = 5;
+    private readonly static string RealizedEnumDefaultValue = "";
+
+    private string realizedEnum_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string RealizedEnum {
+      get { return realizedEnum_ ?? RealizedEnumDefaultValue; }
+      set {
+        realizedEnum_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+    /// <summary>Gets whether the "realized_enum" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasRealizedEnum {
+      get { return realizedEnum_ != null; }
+    }
+    /// <summary>Clears the value of the "realized_enum" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearRealizedEnum() {
+      realizedEnum_ = null;
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as BGSFieldOptions);
@@ -227,6 +279,8 @@ namespace Bgs.Protocol {
       if (Log != other.Log) return false;
       if (ShardKey != other.ShardKey) return false;
       if (FanoutKey != other.FanoutKey) return false;
+      if (ClientInstanceKey != other.ClientInstanceKey) return false;
+      if (RealizedEnum != other.RealizedEnum) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -236,6 +290,8 @@ namespace Bgs.Protocol {
       if (HasLog) hash ^= Log.GetHashCode();
       if (HasShardKey) hash ^= ShardKey.GetHashCode();
       if (HasFanoutKey) hash ^= FanoutKey.GetHashCode();
+      if (HasClientInstanceKey) hash ^= ClientInstanceKey.GetHashCode();
+      if (HasRealizedEnum) hash ^= RealizedEnum.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -261,6 +317,14 @@ namespace Bgs.Protocol {
         output.WriteRawTag(24);
         output.WriteBool(FanoutKey);
       }
+      if (HasClientInstanceKey) {
+        output.WriteRawTag(32);
+        output.WriteBool(ClientInstanceKey);
+      }
+      if (HasRealizedEnum) {
+        output.WriteRawTag(42);
+        output.WriteString(RealizedEnum);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -277,6 +341,12 @@ namespace Bgs.Protocol {
       }
       if (HasFanoutKey) {
         size += 1 + 1;
+      }
+      if (HasClientInstanceKey) {
+        size += 1 + 1;
+      }
+      if (HasRealizedEnum) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(RealizedEnum);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -297,6 +367,12 @@ namespace Bgs.Protocol {
       }
       if (other.HasFanoutKey) {
         FanoutKey = other.FanoutKey;
+      }
+      if (other.HasClientInstanceKey) {
+        ClientInstanceKey = other.ClientInstanceKey;
+      }
+      if (other.HasRealizedEnum) {
+        RealizedEnum = other.RealizedEnum;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -319,6 +395,14 @@ namespace Bgs.Protocol {
           }
           case 24: {
             FanoutKey = input.ReadBool();
+            break;
+          }
+          case 32: {
+            ClientInstanceKey = input.ReadBool();
+            break;
+          }
+          case 42: {
+            RealizedEnum = input.ReadString();
             break;
           }
         }
@@ -373,6 +457,9 @@ namespace Bgs.Protocol {
           break;
         case TypeOneofCase.EntityId:
           EntityId = other.EntityId.Clone();
+          break;
+        case TypeOneofCase.Bytes:
+          Bytes = other.Bytes.Clone();
           break;
       }
 
@@ -545,6 +632,29 @@ namespace Bgs.Protocol {
       }
     }
 
+    /// <summary>Field number for the "bytes" field.</summary>
+    public const int BytesFieldNumber = 8;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Bgs.Protocol.StringFieldRestriction Bytes {
+      get { return HasBytes ? (global::Bgs.Protocol.StringFieldRestriction) type_ : null; }
+      set {
+        type_ = value;
+        typeCase_ = value == null ? TypeOneofCase.None : TypeOneofCase.Bytes;
+      }
+    }
+    /// <summary>Gets whether the "bytes" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasBytes {
+      get { return typeCase_ == TypeOneofCase.Bytes; }
+    }
+    /// <summary> Clears the value of the oneof if it's currently set to "bytes" </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearBytes() {
+      if (HasBytes) {
+        ClearType();
+      }
+    }
+
     private object type_;
     /// <summary>Enum of possible cases for the "type" oneof.</summary>
     public enum TypeOneofCase {
@@ -556,6 +666,7 @@ namespace Bgs.Protocol {
       Repeated = 5,
       Message = 6,
       EntityId = 7,
+      Bytes = 8,
     }
     private TypeOneofCase typeCase_ = TypeOneofCase.None;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -589,6 +700,7 @@ namespace Bgs.Protocol {
       if (!object.Equals(Repeated, other.Repeated)) return false;
       if (!object.Equals(Message, other.Message)) return false;
       if (!object.Equals(EntityId, other.EntityId)) return false;
+      if (!object.Equals(Bytes, other.Bytes)) return false;
       if (TypeCase != other.TypeCase) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
@@ -603,6 +715,7 @@ namespace Bgs.Protocol {
       if (HasRepeated) hash ^= Repeated.GetHashCode();
       if (HasMessage) hash ^= Message.GetHashCode();
       if (HasEntityId) hash ^= EntityId.GetHashCode();
+      if (HasBytes) hash ^= Bytes.GetHashCode();
       hash ^= (int) typeCase_;
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
@@ -645,6 +758,10 @@ namespace Bgs.Protocol {
         output.WriteRawTag(58);
         output.WriteMessage(EntityId);
       }
+      if (HasBytes) {
+        output.WriteRawTag(66);
+        output.WriteMessage(Bytes);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -673,6 +790,9 @@ namespace Bgs.Protocol {
       }
       if (HasEntityId) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(EntityId);
+      }
+      if (HasBytes) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Bytes);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -727,6 +847,12 @@ namespace Bgs.Protocol {
             EntityId = new global::Bgs.Protocol.EntityIdRestriction();
           }
           EntityId.MergeFrom(other.EntityId);
+          break;
+        case TypeOneofCase.Bytes:
+          if (Bytes == null) {
+            Bytes = new global::Bgs.Protocol.StringFieldRestriction();
+          }
+          Bytes.MergeFrom(other.Bytes);
           break;
       }
 
@@ -804,6 +930,15 @@ namespace Bgs.Protocol {
             EntityId = subBuilder;
             break;
           }
+          case 66: {
+            global::Bgs.Protocol.StringFieldRestriction subBuilder = new global::Bgs.Protocol.StringFieldRestriction();
+            if (HasBytes) {
+              subBuilder.MergeFrom(Bytes);
+            }
+            input.ReadMessage(subBuilder);
+            Bytes = subBuilder;
+            break;
+          }
         }
       }
     }
@@ -854,6 +989,9 @@ namespace Bgs.Protocol {
           break;
         case TypeOneofCase.EntityId:
           EntityId = other.EntityId.Clone();
+          break;
+        case TypeOneofCase.Bytes:
+          Bytes = other.Bytes.Clone();
           break;
       }
 
@@ -1025,6 +1163,29 @@ namespace Bgs.Protocol {
       }
     }
 
+    /// <summary>Field number for the "bytes" field.</summary>
+    public const int BytesFieldNumber = 8;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Bgs.Protocol.StringFieldRestriction Bytes {
+      get { return HasBytes ? (global::Bgs.Protocol.StringFieldRestriction) type_ : null; }
+      set {
+        type_ = value;
+        typeCase_ = value == null ? TypeOneofCase.None : TypeOneofCase.Bytes;
+      }
+    }
+    /// <summary>Gets whether the "bytes" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasBytes {
+      get { return typeCase_ == TypeOneofCase.Bytes; }
+    }
+    /// <summary> Clears the value of the oneof if it's currently set to "bytes" </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearBytes() {
+      if (HasBytes) {
+        ClearType();
+      }
+    }
+
     private object type_;
     /// <summary>Enum of possible cases for the "type" oneof.</summary>
     public enum TypeOneofCase {
@@ -1034,6 +1195,7 @@ namespace Bgs.Protocol {
       Float = 5,
       String = 6,
       EntityId = 7,
+      Bytes = 8,
     }
     private TypeOneofCase typeCase_ = TypeOneofCase.None;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1067,6 +1229,7 @@ namespace Bgs.Protocol {
       if (!object.Equals(Float, other.Float)) return false;
       if (!object.Equals(String, other.String)) return false;
       if (!object.Equals(EntityId, other.EntityId)) return false;
+      if (!object.Equals(Bytes, other.Bytes)) return false;
       if (TypeCase != other.TypeCase) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
@@ -1081,6 +1244,7 @@ namespace Bgs.Protocol {
       if (HasFloat) hash ^= Float.GetHashCode();
       if (HasString) hash ^= String.GetHashCode();
       if (HasEntityId) hash ^= EntityId.GetHashCode();
+      if (HasBytes) hash ^= Bytes.GetHashCode();
       hash ^= (int) typeCase_;
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
@@ -1123,6 +1287,10 @@ namespace Bgs.Protocol {
         output.WriteRawTag(58);
         output.WriteMessage(EntityId);
       }
+      if (HasBytes) {
+        output.WriteRawTag(66);
+        output.WriteMessage(Bytes);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -1151,6 +1319,9 @@ namespace Bgs.Protocol {
       }
       if (HasEntityId) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(EntityId);
+      }
+      if (HasBytes) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Bytes);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -1202,6 +1373,12 @@ namespace Bgs.Protocol {
             EntityId = new global::Bgs.Protocol.EntityIdRestriction();
           }
           EntityId.MergeFrom(other.EntityId);
+          break;
+        case TypeOneofCase.Bytes:
+          if (Bytes == null) {
+            Bytes = new global::Bgs.Protocol.StringFieldRestriction();
+          }
+          Bytes.MergeFrom(other.Bytes);
           break;
       }
 
@@ -1270,6 +1447,15 @@ namespace Bgs.Protocol {
             }
             input.ReadMessage(subBuilder);
             EntityId = subBuilder;
+            break;
+          }
+          case 66: {
+            global::Bgs.Protocol.StringFieldRestriction subBuilder = new global::Bgs.Protocol.StringFieldRestriction();
+            if (HasBytes) {
+              subBuilder.MergeFrom(Bytes);
+            }
+            input.ReadMessage(subBuilder);
+            Bytes = subBuilder;
             break;
           }
         }

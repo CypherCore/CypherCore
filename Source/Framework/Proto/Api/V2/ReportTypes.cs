@@ -25,44 +25,49 @@ namespace Bgs.Protocol.Report.V2 {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "CjJiZ3MvbG93L3BiL2NsaWVudC9hcGkvY2xpZW50L3YyL3JlcG9ydF90eXBl",
-            "cy5wcm90bxIWYmdzLnByb3RvY29sLnJlcG9ydC52MholYmdzL2xvdy9wYi9j",
-            "bGllbnQvYWNjb3VudF90eXBlcy5wcm90bxohYmdzL2xvdy9wYi9jbGllbnQv",
-            "cnBjX3R5cGVzLnByb3RvGiViZ3MvbG93L3BiL2NsaWVudC9tZXNzYWdlX3R5",
-            "cGVzLnByb3RvGjliZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxfZXh0ZW5zaW9u",
-            "cy9tZXNzYWdlX29wdGlvbnMucHJvdG8aN2Jncy9sb3cvcGIvY2xpZW50L2ds",
-            "b2JhbF9leHRlbnNpb25zL2ZpZWxkX29wdGlvbnMucHJvdG8aOGJncy9sb3cv",
-            "cGIvY2xpZW50L2dsb2JhbF9leHRlbnNpb25zL21ldGhvZF9vcHRpb25zLnBy",
-            "b3RvGjliZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxfZXh0ZW5zaW9ucy9zZXJ2",
-            "aWNlX29wdGlvbnMucHJvdG8iQwoKUmVwb3J0SXRlbRItCgptZXNzYWdlX2lk",
-            "GAEgASgLMhcuYmdzLnByb3RvY29sLk1lc3NhZ2VJZEgAQgYKBHR5cGUi/wEK",
-            "C1VzZXJPcHRpb25zEjUKCXRhcmdldF9pZBgBIAEoCzIiLmJncy5wcm90b2Nv",
-            "bC5hY2NvdW50LnYxLkFjY291bnRJZBJACgR0eXBlGAIgASgOMiEuYmdzLnBy",
-            "b3RvY29sLnJlcG9ydC52Mi5Jc3N1ZVR5cGU6D0lTU1VFX1RZUEVfU1BBTRJF",
-            "CgZzb3VyY2UYAyABKA4yIi5iZ3MucHJvdG9jb2wucmVwb3J0LnYyLlVzZXJT",
-            "b3VyY2U6EVVTRVJfU09VUkNFX09USEVSEjAKBGl0ZW0YBCABKAsyIi5iZ3Mu",
-            "cHJvdG9jb2wucmVwb3J0LnYyLlJlcG9ydEl0ZW0i7AEKC0NsdWJPcHRpb25z",
-            "Eg8KB2NsdWJfaWQYASABKAQSEQoJc3RyZWFtX2lkGAIgASgEEkAKBHR5cGUY",
-            "AyABKA4yIS5iZ3MucHJvdG9jb2wucmVwb3J0LnYyLklzc3VlVHlwZToPSVNT",
-            "VUVfVFlQRV9TUEFNEkUKBnNvdXJjZRgEIAEoDjIiLmJncy5wcm90b2NvbC5y",
-            "ZXBvcnQudjIuQ2x1YlNvdXJjZToRQ0xVQl9TT1VSQ0VfT1RIRVISMAoEaXRl",
-            "bRgFIAEoCzIiLmJncy5wcm90b2NvbC5yZXBvcnQudjIuUmVwb3J0SXRlbSqN",
-            "AQoJSXNzdWVUeXBlEhMKD0lTU1VFX1RZUEVfU1BBTRAAEhkKFUlTU1VFX1RZ",
-            "UEVfSEFSQVNTTUVOVBABEiAKHElTU1VFX1RZUEVfT0ZGRU5TSVZFX0NPTlRF",
-            "TlQQAxIWChJJU1NVRV9UWVBFX0hBQ0tJTkcQBBIWChJJU1NVRV9UWVBFX0JP",
-            "VFRJTkcQBSrBAQoKVXNlclNvdXJjZRIVChFVU0VSX1NPVVJDRV9PVEhFUhAA",
-            "EhcKE1VTRVJfU09VUkNFX1dISVNQRVIQARIXChNVU0VSX1NPVVJDRV9QUk9G",
-            "SUxFEAISGgoWVVNFUl9TT1VSQ0VfQkFUVExFX1RBRxADEhQKEFVTRVJfU09V",
-            "UkNFX0NIQVQQBBIhCh1VU0VSX1NPVVJDRV9GUklFTkRfSU5WSVRBVElPThAF",
-            "EhUKEVVTRVJfU09VUkNFX1ZPSUNFEAYqdAoKQ2x1YlNvdXJjZRIVChFDTFVC",
-            "X1NPVVJDRV9PVEhFUhAAEhcKE0NMVUJfU09VUkNFX01FU1NBR0UQARIZChVD",
-            "TFVCX1NPVVJDRV9DTFVCX05BTUUQAhIbChdDTFVCX1NPVVJDRV9TVFJFQU1f",
-            "TkFNRRADQgOAAQA="));
+            "cy5wcm90bxIWYmdzLnByb3RvY29sLnJlcG9ydC52Mho1YmdzL2xvdy9wYi9j",
+            "bGllbnQvYXBpL2NsaWVudC92Mi9hdHRyaWJ1dGVfdHlwZXMucHJvdG8aJWJn",
+            "cy9sb3cvcGIvY2xpZW50L2FjY291bnRfdHlwZXMucHJvdG8aIWJncy9sb3cv",
+            "cGIvY2xpZW50L3JwY190eXBlcy5wcm90bxolYmdzL2xvdy9wYi9jbGllbnQv",
+            "bWVzc2FnZV90eXBlcy5wcm90bxo5YmdzL2xvdy9wYi9jbGllbnQvZ2xvYmFs",
+            "X2V4dGVuc2lvbnMvbWVzc2FnZV9vcHRpb25zLnByb3RvGjdiZ3MvbG93L3Bi",
+            "L2NsaWVudC9nbG9iYWxfZXh0ZW5zaW9ucy9maWVsZF9vcHRpb25zLnByb3Rv",
+            "GjhiZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxfZXh0ZW5zaW9ucy9tZXRob2Rf",
+            "b3B0aW9ucy5wcm90bxo5YmdzL2xvdy9wYi9jbGllbnQvZ2xvYmFsX2V4dGVu",
+            "c2lvbnMvc2VydmljZV9vcHRpb25zLnByb3RvIkMKClJlcG9ydEl0ZW0SLQoK",
+            "bWVzc2FnZV9pZBgBIAEoCzIXLmJncy5wcm90b2NvbC5NZXNzYWdlSWRIAEIG",
+            "CgR0eXBlIv8BCgtVc2VyT3B0aW9ucxI1Cgl0YXJnZXRfaWQYASABKAsyIi5i",
+            "Z3MucHJvdG9jb2wuYWNjb3VudC52MS5BY2NvdW50SWQSQAoEdHlwZRgCIAEo",
+            "DjIhLmJncy5wcm90b2NvbC5yZXBvcnQudjIuSXNzdWVUeXBlOg9JU1NVRV9U",
+            "WVBFX1NQQU0SRQoGc291cmNlGAMgASgOMiIuYmdzLnByb3RvY29sLnJlcG9y",
+            "dC52Mi5Vc2VyU291cmNlOhFVU0VSX1NPVVJDRV9PVEhFUhIwCgRpdGVtGAQg",
+            "ASgLMiIuYmdzLnByb3RvY29sLnJlcG9ydC52Mi5SZXBvcnRJdGVtIuwBCgtD",
+            "bHViT3B0aW9ucxIPCgdjbHViX2lkGAEgASgEEhEKCXN0cmVhbV9pZBgCIAEo",
+            "BBJACgR0eXBlGAMgASgOMiEuYmdzLnByb3RvY29sLnJlcG9ydC52Mi5Jc3N1",
+            "ZVR5cGU6D0lTU1VFX1RZUEVfU1BBTRJFCgZzb3VyY2UYBCABKA4yIi5iZ3Mu",
+            "cHJvdG9jb2wucmVwb3J0LnYyLkNsdWJTb3VyY2U6EUNMVUJfU09VUkNFX09U",
+            "SEVSEjAKBGl0ZW0YBSABKAsyIi5iZ3MucHJvdG9jb2wucmVwb3J0LnYyLlJl",
+            "cG9ydEl0ZW0ikwEKDUVudGl0eU9wdGlvbnMSKAoJZW50aXR5X2lkGAEgASgJ",
+            "QhWK+SsGIgQKAggBivkrByIFCgMQyAESKQoLZW50aXR5X3R5cGUYAiABKAlC",
+            "FIr5KwYiBAoCCAGK+SsGIgQKAhBkEi0KCWF0dHJpYnV0ZRgFIAMoCzIaLmJn",
+            "cy5wcm90b2NvbC52Mi5BdHRyaWJ1dGUqjQEKCUlzc3VlVHlwZRITCg9JU1NV",
+            "RV9UWVBFX1NQQU0QABIZChVJU1NVRV9UWVBFX0hBUkFTU01FTlQQARIgChxJ",
+            "U1NVRV9UWVBFX09GRkVOU0lWRV9DT05URU5UEAMSFgoSSVNTVUVfVFlQRV9I",
+            "QUNLSU5HEAQSFgoSSVNTVUVfVFlQRV9CT1RUSU5HEAUqwQEKClVzZXJTb3Vy",
+            "Y2USFQoRVVNFUl9TT1VSQ0VfT1RIRVIQABIXChNVU0VSX1NPVVJDRV9XSElT",
+            "UEVSEAESFwoTVVNFUl9TT1VSQ0VfUFJPRklMRRACEhoKFlVTRVJfU09VUkNF",
+            "X0JBVFRMRV9UQUcQAxIUChBVU0VSX1NPVVJDRV9DSEFUEAQSIQodVVNFUl9T",
+            "T1VSQ0VfRlJJRU5EX0lOVklUQVRJT04QBRIVChFVU0VSX1NPVVJDRV9WT0lD",
+            "RRAGKnQKCkNsdWJTb3VyY2USFQoRQ0xVQl9TT1VSQ0VfT1RIRVIQABIXChND",
+            "TFVCX1NPVVJDRV9NRVNTQUdFEAESGQoVQ0xVQl9TT1VSQ0VfQ0xVQl9OQU1F",
+            "EAISGwoXQ0xVQl9TT1VSQ0VfU1RSRUFNX05BTUUQA0IDgAEA"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor, global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.MessageTypesReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::Bgs.Protocol.V2.AttributeTypesReflection.Descriptor, global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor, global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.MessageTypesReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Bgs.Protocol.Report.V2.IssueType), typeof(global::Bgs.Protocol.Report.V2.UserSource), typeof(global::Bgs.Protocol.Report.V2.ClubSource), }, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Report.V2.ReportItem), global::Bgs.Protocol.Report.V2.ReportItem.Parser, new[]{ "MessageId" }, new[]{ "Type" }, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Report.V2.UserOptions), global::Bgs.Protocol.Report.V2.UserOptions.Parser, new[]{ "TargetId", "Type", "Source", "Item" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Report.V2.ClubOptions), global::Bgs.Protocol.Report.V2.ClubOptions.Parser, new[]{ "ClubId", "StreamId", "Type", "Source", "Item" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Report.V2.ClubOptions), global::Bgs.Protocol.Report.V2.ClubOptions.Parser, new[]{ "ClubId", "StreamId", "Type", "Source", "Item" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Report.V2.EntityOptions), global::Bgs.Protocol.Report.V2.EntityOptions.Parser, new[]{ "EntityId", "EntityType", "Attribute" }, null, null, null, null)
           }));
     }
     #endregion
@@ -850,6 +855,207 @@ namespace Bgs.Protocol.Report.V2 {
               Item = new global::Bgs.Protocol.Report.V2.ReportItem();
             }
             input.ReadMessage(Item);
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
+  public sealed partial class EntityOptions : pb::IMessage<EntityOptions> {
+    private static readonly pb::MessageParser<EntityOptions> _parser = new pb::MessageParser<EntityOptions>(() => new EntityOptions());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<EntityOptions> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Bgs.Protocol.Report.V2.ReportTypesReflection.Descriptor.MessageTypes[3]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public EntityOptions() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public EntityOptions(EntityOptions other) : this() {
+      entityId_ = other.entityId_;
+      entityType_ = other.entityType_;
+      attribute_ = other.attribute_.Clone();
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public EntityOptions Clone() {
+      return new EntityOptions(this);
+    }
+
+    /// <summary>Field number for the "entity_id" field.</summary>
+    public const int EntityIdFieldNumber = 1;
+    private readonly static string EntityIdDefaultValue = "";
+
+    private string entityId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string EntityId {
+      get { return entityId_ ?? EntityIdDefaultValue; }
+      set {
+        entityId_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+    /// <summary>Gets whether the "entity_id" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasEntityId {
+      get { return entityId_ != null; }
+    }
+    /// <summary>Clears the value of the "entity_id" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearEntityId() {
+      entityId_ = null;
+    }
+
+    /// <summary>Field number for the "entity_type" field.</summary>
+    public const int EntityTypeFieldNumber = 2;
+    private readonly static string EntityTypeDefaultValue = "";
+
+    private string entityType_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string EntityType {
+      get { return entityType_ ?? EntityTypeDefaultValue; }
+      set {
+        entityType_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+    /// <summary>Gets whether the "entity_type" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasEntityType {
+      get { return entityType_ != null; }
+    }
+    /// <summary>Clears the value of the "entity_type" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearEntityType() {
+      entityType_ = null;
+    }
+
+    /// <summary>Field number for the "attribute" field.</summary>
+    public const int AttributeFieldNumber = 5;
+    private static readonly pb::FieldCodec<global::Bgs.Protocol.V2.Attribute> _repeated_attribute_codec
+        = pb::FieldCodec.ForMessage(42, global::Bgs.Protocol.V2.Attribute.Parser);
+    private readonly pbc::RepeatedField<global::Bgs.Protocol.V2.Attribute> attribute_ = new pbc::RepeatedField<global::Bgs.Protocol.V2.Attribute>();
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pbc::RepeatedField<global::Bgs.Protocol.V2.Attribute> Attribute {
+      get { return attribute_; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as EntityOptions);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(EntityOptions other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (EntityId != other.EntityId) return false;
+      if (EntityType != other.EntityType) return false;
+      if(!attribute_.Equals(other.attribute_)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (HasEntityId) hash ^= EntityId.GetHashCode();
+      if (HasEntityType) hash ^= EntityType.GetHashCode();
+      hash ^= attribute_.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (HasEntityId) {
+        output.WriteRawTag(10);
+        output.WriteString(EntityId);
+      }
+      if (HasEntityType) {
+        output.WriteRawTag(18);
+        output.WriteString(EntityType);
+      }
+      attribute_.WriteTo(output, _repeated_attribute_codec);
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (HasEntityId) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(EntityId);
+      }
+      if (HasEntityType) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(EntityType);
+      }
+      size += attribute_.CalculateSize(_repeated_attribute_codec);
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(EntityOptions other) {
+      if (other == null) {
+        return;
+      }
+      if (other.HasEntityId) {
+        EntityId = other.EntityId;
+      }
+      if (other.HasEntityType) {
+        EntityType = other.EntityType;
+      }
+      attribute_.Add(other.attribute_);
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            EntityId = input.ReadString();
+            break;
+          }
+          case 18: {
+            EntityType = input.ReadString();
+            break;
+          }
+          case 42: {
+            attribute_.AddEntriesFrom(input, _repeated_attribute_codec);
             break;
           }
         }

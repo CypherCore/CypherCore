@@ -35,126 +35,122 @@ namespace Bgs.Protocol.Friends.V1 {
             "ZWxkX29wdGlvbnMucHJvdG8aOGJncy9sb3cvcGIvY2xpZW50L2dsb2JhbF9l",
             "eHRlbnNpb25zL21ldGhvZF9vcHRpb25zLnByb3RvGjliZ3MvbG93L3BiL2Ns",
             "aWVudC9nbG9iYWxfZXh0ZW5zaW9ucy9zZXJ2aWNlX29wdGlvbnMucHJvdG8i",
-            "gQEKEFN1YnNjcmliZVJlcXVlc3QSKAoIYWdlbnRfaWQYASABKAsyFi5iZ3Mu",
-            "cHJvdG9jb2wuRW50aXR5SWQSEQoJb2JqZWN0X2lkGAIgAigEEjAKB2Zvcndh",
-            "cmQYAyABKAsyGy5iZ3MucHJvdG9jb2wuT2JqZWN0QWRkcmVzc0ICGAEigwEK",
-            "ElVuc3Vic2NyaWJlUmVxdWVzdBIoCghhZ2VudF9pZBgBIAEoCzIWLmJncy5w",
-            "cm90b2NvbC5FbnRpdHlJZBIRCglvYmplY3RfaWQYAiABKAQSMAoHZm9yd2Fy",
-            "ZBgDIAEoCzIbLmJncy5wcm90b2NvbC5PYmplY3RBZGRyZXNzQgIYASKiAQoV",
-            "U2VuZEludml0YXRpb25SZXF1ZXN0Ei4KDmFnZW50X2lkZW50aXR5GAEgASgL",
-            "MhYuYmdzLnByb3RvY29sLklkZW50aXR5EikKCXRhcmdldF9pZBgCIAIoCzIW",
-            "LmJncy5wcm90b2NvbC5FbnRpdHlJZBIuCgZwYXJhbXMYAyACKAsyHi5iZ3Mu",
-            "cHJvdG9jb2wuSW52aXRhdGlvblBhcmFtcyJaChdSZXZva2VJbnZpdGF0aW9u",
-            "UmVxdWVzdBIoCghhZ2VudF9pZBgBIAEoCzIWLmJncy5wcm90b2NvbC5FbnRp",
-            "dHlJZBIVCg1pbnZpdGF0aW9uX2lkGAIgASgGIp0BChdBY2NlcHRJbnZpdGF0",
-            "aW9uUmVxdWVzdBIoCghhZ2VudF9pZBgBIAEoCzIWLmJncy5wcm90b2NvbC5F",
-            "bnRpdHlJZBIVCg1pbnZpdGF0aW9uX2lkGAMgAigGEkEKB29wdGlvbnMYBCAB",
-            "KAsyMC5iZ3MucHJvdG9jb2wuZnJpZW5kcy52MS5BY2NlcHRJbnZpdGF0aW9u",
-            "T3B0aW9ucyJbChhEZWNsaW5lSW52aXRhdGlvblJlcXVlc3QSKAoIYWdlbnRf",
-            "aWQYASABKAsyFi5iZ3MucHJvdG9jb2wuRW50aXR5SWQSFQoNaW52aXRhdGlv",
-            "bl9pZBgDIAIoBiJrChdJZ25vcmVJbnZpdGF0aW9uUmVxdWVzdBIoCghhZ2Vu",
-            "dF9pZBgBIAEoCzIWLmJncy5wcm90b2NvbC5FbnRpdHlJZBIVCg1pbnZpdGF0",
-            "aW9uX2lkGAMgAigGEg8KB3Byb2dyYW0YBCABKAciagoTUmVtb3ZlRnJpZW5k",
-            "UmVxdWVzdBIoCghhZ2VudF9pZBgBIAEoCzIWLmJncy5wcm90b2NvbC5FbnRp",
-            "dHlJZBIpCgl0YXJnZXRfaWQYAiACKAsyFi5iZ3MucHJvdG9jb2wuRW50aXR5",
-            "SWQiRwobUmV2b2tlQWxsSW52aXRhdGlvbnNSZXF1ZXN0EigKCGFnZW50X2lk",
-            "GAIgASgLMhYuYmdzLnByb3RvY29sLkVudGl0eUlkImkKElZpZXdGcmllbmRz",
-            "UmVxdWVzdBIoCghhZ2VudF9pZBgBIAEoCzIWLmJncy5wcm90b2NvbC5FbnRp",
-            "dHlJZBIpCgl0YXJnZXRfaWQYAiACKAsyFi5iZ3MucHJvdG9jb2wuRW50aXR5",
-            "SWQiTwoTVmlld0ZyaWVuZHNSZXNwb25zZRI4CgdmcmllbmRzGAEgAygLMicu",
-            "YmdzLnByb3RvY29sLmZyaWVuZHMudjEuRnJpZW5kT2ZGcmllbmQimwEKGFVw",
-            "ZGF0ZUZyaWVuZFN0YXRlUmVxdWVzdBIoCghhZ2VudF9pZBgBIAEoCzIWLmJn",
-            "cy5wcm90b2NvbC5FbnRpdHlJZBIpCgl0YXJnZXRfaWQYAiACKAsyFi5iZ3Mu",
-            "cHJvdG9jb2wuRW50aXR5SWQSKgoJYXR0cmlidXRlGAMgAygLMhcuYmdzLnBy",
-            "b3RvY29sLkF0dHJpYnV0ZSJAChRHZXRGcmllbmRMaXN0UmVxdWVzdBIoCghh",
-            "Z2VudF9pZBgCIAEoCzIWLmJncy5wcm90b2NvbC5FbnRpdHlJZCJJChVHZXRG",
-            "cmllbmRMaXN0UmVzcG9uc2USMAoHZnJpZW5kcxgBIAMoCzIfLmJncy5wcm90",
-            "b2NvbC5mcmllbmRzLnYxLkZyaWVuZCKAAQoXQ3JlYXRlRnJpZW5kc2hpcFJl",
-            "cXVlc3QSKAoIYWdlbnRfaWQYASABKAsyFi5iZ3MucHJvdG9jb2wuRW50aXR5",
-            "SWQSKQoJdGFyZ2V0X2lkGAIgASgLMhYuYmdzLnByb3RvY29sLkVudGl0eUlk",
-            "EhAKBHJvbGUYAyADKA1CAhABIqMBChJGcmllbmROb3RpZmljYXRpb24SLwoG",
-            "dGFyZ2V0GAEgAigLMh8uYmdzLnByb3RvY29sLmZyaWVuZHMudjEuRnJpZW5k",
-            "EioKCmFjY291bnRfaWQYBSABKAsyFi5iZ3MucHJvdG9jb2wuRW50aXR5SWQS",
-            "MAoHZm9yd2FyZBgGIAEoCzIbLmJncy5wcm90b2NvbC5PYmplY3RBZGRyZXNz",
-            "QgIYASK2AQodVXBkYXRlRnJpZW5kU3RhdGVOb3RpZmljYXRpb24SNwoOY2hh",
-            "bmdlZF9mcmllbmQYASACKAsyHy5iZ3MucHJvdG9jb2wuZnJpZW5kcy52MS5G",
-            "cmllbmQSKgoKYWNjb3VudF9pZBgFIAEoCzIWLmJncy5wcm90b2NvbC5FbnRp",
-            "dHlJZBIwCgdmb3J3YXJkGAYgASgLMhsuYmdzLnByb3RvY29sLk9iamVjdEFk",
-            "ZHJlc3NCAhgBIsoBChZJbnZpdGF0aW9uTm90aWZpY2F0aW9uEj8KCmludml0",
-            "YXRpb24YASACKAsyKy5iZ3MucHJvdG9jb2wuZnJpZW5kcy52MS5SZWNlaXZl",
-            "ZEludml0YXRpb24SEQoGcmVhc29uGAMgASgNOgEwEioKCmFjY291bnRfaWQY",
-            "BSABKAsyFi5iZ3MucHJvdG9jb2wuRW50aXR5SWQSMAoHZm9yd2FyZBgGIAEo",
-            "CzIbLmJncy5wcm90b2NvbC5PYmplY3RBZGRyZXNzQgIYASK8AQofU2VudElu",
-            "dml0YXRpb25BZGRlZE5vdGlmaWNhdGlvbhIqCgphY2NvdW50X2lkGAEgASgL",
-            "MhYuYmdzLnByb3RvY29sLkVudGl0eUlkEjsKCmludml0YXRpb24YAiABKAsy",
-            "Jy5iZ3MucHJvdG9jb2wuZnJpZW5kcy52MS5TZW50SW52aXRhdGlvbhIwCgdm",
-            "b3J3YXJkGAMgASgLMhsuYmdzLnByb3RvY29sLk9iamVjdEFkZHJlc3NCAhgB",
-            "IqgBCiFTZW50SW52aXRhdGlvblJlbW92ZWROb3RpZmljYXRpb24SKgoKYWNj",
-            "b3VudF9pZBgBIAEoCzIWLmJncy5wcm90b2NvbC5FbnRpdHlJZBIVCg1pbnZp",
-            "dGF0aW9uX2lkGAIgASgGEg4KBnJlYXNvbhgDIAEoDRIwCgdmb3J3YXJkGAQg",
-            "ASgLMhsuYmdzLnByb3RvY29sLk9iamVjdEFkZHJlc3NCAhgBMoYLCg5Gcmll",
-            "bmRzU2VydmljZRJqCglTdWJzY3JpYmUSKS5iZ3MucHJvdG9jb2wuZnJpZW5k",
-            "cy52MS5TdWJzY3JpYmVSZXF1ZXN0GiouYmdzLnByb3RvY29sLmZyaWVuZHMu",
-            "djEuU3Vic2NyaWJlUmVzcG9uc2UiBoL5KwIIARJeCg5TZW5kSW52aXRhdGlv",
-            "bhIuLmJncy5wcm90b2NvbC5mcmllbmRzLnYxLlNlbmRJbnZpdGF0aW9uUmVx",
-            "dWVzdBoULmJncy5wcm90b2NvbC5Ob0RhdGEiBoL5KwIIAhJiChBBY2NlcHRJ",
-            "bnZpdGF0aW9uEjAuYmdzLnByb3RvY29sLmZyaWVuZHMudjEuQWNjZXB0SW52",
-            "aXRhdGlvblJlcXVlc3QaFC5iZ3MucHJvdG9jb2wuTm9EYXRhIgaC+SsCCAMS",
-            "YgoQUmV2b2tlSW52aXRhdGlvbhIwLmJncy5wcm90b2NvbC5mcmllbmRzLnYx",
-            "LlJldm9rZUludml0YXRpb25SZXF1ZXN0GhQuYmdzLnByb3RvY29sLk5vRGF0",
-            "YSIGgvkrAggEEmcKEURlY2xpbmVJbnZpdGF0aW9uEjEuYmdzLnByb3RvY29s",
-            "LmZyaWVuZHMudjEuRGVjbGluZUludml0YXRpb25SZXF1ZXN0GhQuYmdzLnBy",
-            "b3RvY29sLk5vRGF0YSIJiAIBgvkrAggFEmIKEElnbm9yZUludml0YXRpb24S",
-            "MC5iZ3MucHJvdG9jb2wuZnJpZW5kcy52MS5JZ25vcmVJbnZpdGF0aW9uUmVx",
-            "dWVzdBoULmJncy5wcm90b2NvbC5Ob0RhdGEiBoL5KwIIBhJaCgxSZW1vdmVG",
-            "cmllbmQSLC5iZ3MucHJvdG9jb2wuZnJpZW5kcy52MS5SZW1vdmVGcmllbmRS",
-            "ZXF1ZXN0GhQuYmdzLnByb3RvY29sLk5vRGF0YSIGgvkrAggIEnAKC1ZpZXdG",
-            "cmllbmRzEisuYmdzLnByb3RvY29sLmZyaWVuZHMudjEuVmlld0ZyaWVuZHNS",
-            "ZXF1ZXN0GiwuYmdzLnByb3RvY29sLmZyaWVuZHMudjEuVmlld0ZyaWVuZHNS",
-            "ZXNwb25zZSIGgvkrAggJEmQKEVVwZGF0ZUZyaWVuZFN0YXRlEjEuYmdzLnBy",
-            "b3RvY29sLmZyaWVuZHMudjEuVXBkYXRlRnJpZW5kU3RhdGVSZXF1ZXN0GhQu",
-            "YmdzLnByb3RvY29sLk5vRGF0YSIGgvkrAggKElgKC1Vuc3Vic2NyaWJlEisu",
-            "YmdzLnByb3RvY29sLmZyaWVuZHMudjEuVW5zdWJzY3JpYmVSZXF1ZXN0GhQu",
-            "YmdzLnByb3RvY29sLk5vRGF0YSIGgvkrAggLEmoKFFJldm9rZUFsbEludml0",
-            "YXRpb25zEjQuYmdzLnByb3RvY29sLmZyaWVuZHMudjEuUmV2b2tlQWxsSW52",
-            "aXRhdGlvbnNSZXF1ZXN0GhQuYmdzLnByb3RvY29sLk5vRGF0YSIGgvkrAggM",
-            "EnYKDUdldEZyaWVuZExpc3QSLS5iZ3MucHJvdG9jb2wuZnJpZW5kcy52MS5H",
-            "ZXRGcmllbmRMaXN0UmVxdWVzdBouLmJncy5wcm90b2NvbC5mcmllbmRzLnYx",
-            "LkdldEZyaWVuZExpc3RSZXNwb25zZSIGgvkrAggNEmIKEENyZWF0ZUZyaWVu",
-            "ZHNoaXASMC5iZ3MucHJvdG9jb2wuZnJpZW5kcy52MS5DcmVhdGVGcmllbmRz",
-            "aGlwUmVxdWVzdBoULmJncy5wcm90b2NvbC5Ob0RhdGEiBoL5KwIIDho9gvkr",
-            "JgokYm5ldC5wcm90b2NvbC5mcmllbmRzLkZyaWVuZHNTZXJ2aWNlgvkrCSoH",
-            "ZnJpZW5kc4r5KwIQATLMBgoPRnJpZW5kc0xpc3RlbmVyEl8KDU9uRnJpZW5k",
-            "QWRkZWQSKy5iZ3MucHJvdG9jb2wuZnJpZW5kcy52MS5GcmllbmROb3RpZmlj",
-            "YXRpb24aGS5iZ3MucHJvdG9jb2wuTk9fUkVTUE9OU0UiBoL5KwIIARJhCg9P",
-            "bkZyaWVuZFJlbW92ZWQSKy5iZ3MucHJvdG9jb2wuZnJpZW5kcy52MS5Gcmll",
-            "bmROb3RpZmljYXRpb24aGS5iZ3MucHJvdG9jb2wuTk9fUkVTUE9OU0UiBoL5",
-            "KwIIAhJvChlPblJlY2VpdmVkSW52aXRhdGlvbkFkZGVkEi8uYmdzLnByb3Rv",
-            "Y29sLmZyaWVuZHMudjEuSW52aXRhdGlvbk5vdGlmaWNhdGlvbhoZLmJncy5w",
-            "cm90b2NvbC5OT19SRVNQT05TRSIGgvkrAggDEnEKG09uUmVjZWl2ZWRJbnZp",
-            "dGF0aW9uUmVtb3ZlZBIvLmJncy5wcm90b2NvbC5mcmllbmRzLnYxLkludml0",
-            "YXRpb25Ob3RpZmljYXRpb24aGS5iZ3MucHJvdG9jb2wuTk9fUkVTUE9OU0Ui",
-            "BoL5KwIIBBJ0ChVPblNlbnRJbnZpdGF0aW9uQWRkZWQSOC5iZ3MucHJvdG9j",
-            "b2wuZnJpZW5kcy52MS5TZW50SW52aXRhdGlvbkFkZGVkTm90aWZpY2F0aW9u",
-            "GhkuYmdzLnByb3RvY29sLk5PX1JFU1BPTlNFIgaC+SsCCAUSeAoXT25TZW50",
-            "SW52aXRhdGlvblJlbW92ZWQSOi5iZ3MucHJvdG9jb2wuZnJpZW5kcy52MS5T",
-            "ZW50SW52aXRhdGlvblJlbW92ZWROb3RpZmljYXRpb24aGS5iZ3MucHJvdG9j",
-            "b2wuTk9fUkVTUE9OU0UiBoL5KwIIBhJwChNPblVwZGF0ZUZyaWVuZFN0YXRl",
-            "EjYuYmdzLnByb3RvY29sLmZyaWVuZHMudjEuVXBkYXRlRnJpZW5kU3RhdGVO",
-            "b3RpZmljYXRpb24aGS5iZ3MucHJvdG9jb2wuTk9fUkVTUE9OU0UiBoL5KwII",
-            "BxovgvkrJQojYm5ldC5wcm90b2NvbC5mcmllbmRzLkZyaWVuZHNOb3RpZnmK",
-            "+SsCCAFCNQoYYm5ldC5wcm90b2NvbC5mcmllbmRzLnYxQhNGcmllbmRzU2Vy",
-            "dmljZVByb3RvgAEAiAEB"));
+            "VwoQU3Vic2NyaWJlUmVxdWVzdBIwCghhZ2VudF9pZBgBIAEoCzIWLmJncy5w",
+            "cm90b2NvbC5FbnRpdHlJZEIGgvkrAiABEhEKCW9iamVjdF9pZBgCIAIoBCJZ",
+            "ChJVbnN1YnNjcmliZVJlcXVlc3QSMAoIYWdlbnRfaWQYASABKAsyFi5iZ3Mu",
+            "cHJvdG9jb2wuRW50aXR5SWRCBoL5KwIgARIRCglvYmplY3RfaWQYAiABKAQi",
+            "qgEKFVNlbmRJbnZpdGF0aW9uUmVxdWVzdBI2Cg5hZ2VudF9pZGVudGl0eRgB",
+            "IAEoCzIWLmJncy5wcm90b2NvbC5JZGVudGl0eUIGgvkrAiABEikKCXRhcmdl",
+            "dF9pZBgCIAIoCzIWLmJncy5wcm90b2NvbC5FbnRpdHlJZBIuCgZwYXJhbXMY",
+            "AyACKAsyHi5iZ3MucHJvdG9jb2wuSW52aXRhdGlvblBhcmFtcyJiChdSZXZv",
+            "a2VJbnZpdGF0aW9uUmVxdWVzdBIwCghhZ2VudF9pZBgBIAEoCzIWLmJncy5w",
+            "cm90b2NvbC5FbnRpdHlJZEIGgvkrAiABEhUKDWludml0YXRpb25faWQYAiAB",
+            "KAYipQEKF0FjY2VwdEludml0YXRpb25SZXF1ZXN0EjAKCGFnZW50X2lkGAEg",
+            "ASgLMhYuYmdzLnByb3RvY29sLkVudGl0eUlkQgaC+SsCIAESFQoNaW52aXRh",
+            "dGlvbl9pZBgDIAIoBhJBCgdvcHRpb25zGAQgASgLMjAuYmdzLnByb3RvY29s",
+            "LmZyaWVuZHMudjEuQWNjZXB0SW52aXRhdGlvbk9wdGlvbnMiYwoYRGVjbGlu",
+            "ZUludml0YXRpb25SZXF1ZXN0EjAKCGFnZW50X2lkGAEgASgLMhYuYmdzLnBy",
+            "b3RvY29sLkVudGl0eUlkQgaC+SsCIAESFQoNaW52aXRhdGlvbl9pZBgDIAIo",
+            "BiJiChdJZ25vcmVJbnZpdGF0aW9uUmVxdWVzdBIwCghhZ2VudF9pZBgBIAEo",
+            "CzIWLmJncy5wcm90b2NvbC5FbnRpdHlJZEIGgvkrAiABEhUKDWludml0YXRp",
+            "b25faWQYAyACKAYicgoTUmVtb3ZlRnJpZW5kUmVxdWVzdBIwCghhZ2VudF9p",
+            "ZBgBIAEoCzIWLmJncy5wcm90b2NvbC5FbnRpdHlJZEIGgvkrAiABEikKCXRh",
+            "cmdldF9pZBgCIAIoCzIWLmJncy5wcm90b2NvbC5FbnRpdHlJZCJPChtSZXZv",
+            "a2VBbGxJbnZpdGF0aW9uc1JlcXVlc3QSMAoIYWdlbnRfaWQYAiABKAsyFi5i",
+            "Z3MucHJvdG9jb2wuRW50aXR5SWRCBoL5KwIQASJxChJWaWV3RnJpZW5kc1Jl",
+            "cXVlc3QSMAoIYWdlbnRfaWQYASABKAsyFi5iZ3MucHJvdG9jb2wuRW50aXR5",
+            "SWRCBoL5KwIgARIpCgl0YXJnZXRfaWQYAiACKAsyFi5iZ3MucHJvdG9jb2wu",
+            "RW50aXR5SWQiTwoTVmlld0ZyaWVuZHNSZXNwb25zZRI4CgdmcmllbmRzGAEg",
+            "AygLMicuYmdzLnByb3RvY29sLmZyaWVuZHMudjEuRnJpZW5kT2ZGcmllbmQi",
+            "owEKGFVwZGF0ZUZyaWVuZFN0YXRlUmVxdWVzdBIwCghhZ2VudF9pZBgBIAEo",
+            "CzIWLmJncy5wcm90b2NvbC5FbnRpdHlJZEIGgvkrAiABEikKCXRhcmdldF9p",
+            "ZBgCIAIoCzIWLmJncy5wcm90b2NvbC5FbnRpdHlJZBIqCglhdHRyaWJ1dGUY",
+            "AyADKAsyFy5iZ3MucHJvdG9jb2wuQXR0cmlidXRlIkgKFEdldEZyaWVuZExp",
+            "c3RSZXF1ZXN0EjAKCGFnZW50X2lkGAIgASgLMhYuYmdzLnByb3RvY29sLkVu",
+            "dGl0eUlkQgaC+SsCEAEiSQoVR2V0RnJpZW5kTGlzdFJlc3BvbnNlEjAKB2Zy",
+            "aWVuZHMYASADKAsyHy5iZ3MucHJvdG9jb2wuZnJpZW5kcy52MS5GcmllbmQi",
+            "nAEKF0NyZWF0ZUZyaWVuZHNoaXBSZXF1ZXN0EjAKCGFnZW50X2lkGAEgASgL",
+            "MhYuYmdzLnByb3RvY29sLkVudGl0eUlkQgaC+SsCEAESKQoJdGFyZ2V0X2lk",
+            "GAIgASgLMhYuYmdzLnByb3RvY29sLkVudGl0eUlkEiQKBHJvbGUYAyADKA1C",
+            "FhABivkrBioECgIIAYr5KwYqBAoCEAEicQoSRnJpZW5kTm90aWZpY2F0aW9u",
+            "Ei8KBnRhcmdldBgBIAIoCzIfLmJncy5wcm90b2NvbC5mcmllbmRzLnYxLkZy",
+            "aWVuZBIqCgphY2NvdW50X2lkGAUgASgLMhYuYmdzLnByb3RvY29sLkVudGl0",
+            "eUlkIoQBCh1VcGRhdGVGcmllbmRTdGF0ZU5vdGlmaWNhdGlvbhI3Cg5jaGFu",
+            "Z2VkX2ZyaWVuZBgBIAIoCzIfLmJncy5wcm90b2NvbC5mcmllbmRzLnYxLkZy",
+            "aWVuZBIqCgphY2NvdW50X2lkGAUgASgLMhYuYmdzLnByb3RvY29sLkVudGl0",
+            "eUlkIpgBChZJbnZpdGF0aW9uTm90aWZpY2F0aW9uEj8KCmludml0YXRpb24Y",
+            "ASACKAsyKy5iZ3MucHJvdG9jb2wuZnJpZW5kcy52MS5SZWNlaXZlZEludml0",
+            "YXRpb24SEQoGcmVhc29uGAMgASgNOgEwEioKCmFjY291bnRfaWQYBSABKAsy",
+            "Fi5iZ3MucHJvdG9jb2wuRW50aXR5SWQiigEKH1NlbnRJbnZpdGF0aW9uQWRk",
+            "ZWROb3RpZmljYXRpb24SKgoKYWNjb3VudF9pZBgBIAEoCzIWLmJncy5wcm90",
+            "b2NvbC5FbnRpdHlJZBI7CgppbnZpdGF0aW9uGAIgASgLMicuYmdzLnByb3Rv",
+            "Y29sLmZyaWVuZHMudjEuU2VudEludml0YXRpb24idgohU2VudEludml0YXRp",
+            "b25SZW1vdmVkTm90aWZpY2F0aW9uEioKCmFjY291bnRfaWQYASABKAsyFi5i",
+            "Z3MucHJvdG9jb2wuRW50aXR5SWQSFQoNaW52aXRhdGlvbl9pZBgCIAEoBhIO",
+            "CgZyZWFzb24YAyABKA0yyAsKDkZyaWVuZHNTZXJ2aWNlEnAKCVN1YnNjcmli",
+            "ZRIpLmJncy5wcm90b2NvbC5mcmllbmRzLnYxLlN1YnNjcmliZVJlcXVlc3Qa",
+            "Ki5iZ3MucHJvdG9jb2wuZnJpZW5kcy52MS5TdWJzY3JpYmVSZXNwb25zZSIM",
+            "gvkrAggBgvkrAhABEmQKDlNlbmRJbnZpdGF0aW9uEi4uYmdzLnByb3RvY29s",
+            "LmZyaWVuZHMudjEuU2VuZEludml0YXRpb25SZXF1ZXN0GhQuYmdzLnByb3Rv",
+            "Y29sLk5vRGF0YSIMgvkrAggCgvkrAhABEmgKEEFjY2VwdEludml0YXRpb24S",
+            "MC5iZ3MucHJvdG9jb2wuZnJpZW5kcy52MS5BY2NlcHRJbnZpdGF0aW9uUmVx",
+            "dWVzdBoULmJncy5wcm90b2NvbC5Ob0RhdGEiDIL5KwIIA4L5KwIQARJoChBS",
+            "ZXZva2VJbnZpdGF0aW9uEjAuYmdzLnByb3RvY29sLmZyaWVuZHMudjEuUmV2",
+            "b2tlSW52aXRhdGlvblJlcXVlc3QaFC5iZ3MucHJvdG9jb2wuTm9EYXRhIgyC",
+            "+SsCCASC+SsCEAESbQoRRGVjbGluZUludml0YXRpb24SMS5iZ3MucHJvdG9j",
+            "b2wuZnJpZW5kcy52MS5EZWNsaW5lSW52aXRhdGlvblJlcXVlc3QaFC5iZ3Mu",
+            "cHJvdG9jb2wuTm9EYXRhIg+IAgGC+SsCCAWC+SsCEAESaAoQSWdub3JlSW52",
+            "aXRhdGlvbhIwLmJncy5wcm90b2NvbC5mcmllbmRzLnYxLklnbm9yZUludml0",
+            "YXRpb25SZXF1ZXN0GhQuYmdzLnByb3RvY29sLk5vRGF0YSIMgvkrAggGgvkr",
+            "AhABEmAKDFJlbW92ZUZyaWVuZBIsLmJncy5wcm90b2NvbC5mcmllbmRzLnYx",
+            "LlJlbW92ZUZyaWVuZFJlcXVlc3QaFC5iZ3MucHJvdG9jb2wuTm9EYXRhIgyC",
+            "+SsCCAiC+SsCEAESdgoLVmlld0ZyaWVuZHMSKy5iZ3MucHJvdG9jb2wuZnJp",
+            "ZW5kcy52MS5WaWV3RnJpZW5kc1JlcXVlc3QaLC5iZ3MucHJvdG9jb2wuZnJp",
+            "ZW5kcy52MS5WaWV3RnJpZW5kc1Jlc3BvbnNlIgyC+SsCCAmC+SsCEAESagoR",
+            "VXBkYXRlRnJpZW5kU3RhdGUSMS5iZ3MucHJvdG9jb2wuZnJpZW5kcy52MS5V",
+            "cGRhdGVGcmllbmRTdGF0ZVJlcXVlc3QaFC5iZ3MucHJvdG9jb2wuTm9EYXRh",
+            "IgyC+SsCCAqC+SsCEAESXgoLVW5zdWJzY3JpYmUSKy5iZ3MucHJvdG9jb2wu",
+            "ZnJpZW5kcy52MS5VbnN1YnNjcmliZVJlcXVlc3QaFC5iZ3MucHJvdG9jb2wu",
+            "Tm9EYXRhIgyC+SsCCAuC+SsCEAESagoUUmV2b2tlQWxsSW52aXRhdGlvbnMS",
+            "NC5iZ3MucHJvdG9jb2wuZnJpZW5kcy52MS5SZXZva2VBbGxJbnZpdGF0aW9u",
+            "c1JlcXVlc3QaFC5iZ3MucHJvdG9jb2wuTm9EYXRhIgaC+SsCCAwSdgoNR2V0",
+            "RnJpZW5kTGlzdBItLmJncy5wcm90b2NvbC5mcmllbmRzLnYxLkdldEZyaWVu",
+            "ZExpc3RSZXF1ZXN0Gi4uYmdzLnByb3RvY29sLmZyaWVuZHMudjEuR2V0RnJp",
+            "ZW5kTGlzdFJlc3BvbnNlIgaC+SsCCA0SYgoQQ3JlYXRlRnJpZW5kc2hpcBIw",
+            "LmJncy5wcm90b2NvbC5mcmllbmRzLnYxLkNyZWF0ZUZyaWVuZHNoaXBSZXF1",
+            "ZXN0GhQuYmdzLnByb3RvY29sLk5vRGF0YSIGgvkrAggOGkOC+SsmCiRibmV0",
+            "LnByb3RvY29sLmZyaWVuZHMuRnJpZW5kc1NlcnZpY2WC+SsJKgdmcmllbmRz",
+            "gvkrAjABivkrAhABMswGCg9GcmllbmRzTGlzdGVuZXISXwoNT25GcmllbmRB",
+            "ZGRlZBIrLmJncy5wcm90b2NvbC5mcmllbmRzLnYxLkZyaWVuZE5vdGlmaWNh",
+            "dGlvbhoZLmJncy5wcm90b2NvbC5OT19SRVNQT05TRSIGgvkrAggBEmEKD09u",
+            "RnJpZW5kUmVtb3ZlZBIrLmJncy5wcm90b2NvbC5mcmllbmRzLnYxLkZyaWVu",
+            "ZE5vdGlmaWNhdGlvbhoZLmJncy5wcm90b2NvbC5OT19SRVNQT05TRSIGgvkr",
+            "AggCEm8KGU9uUmVjZWl2ZWRJbnZpdGF0aW9uQWRkZWQSLy5iZ3MucHJvdG9j",
+            "b2wuZnJpZW5kcy52MS5JbnZpdGF0aW9uTm90aWZpY2F0aW9uGhkuYmdzLnBy",
+            "b3RvY29sLk5PX1JFU1BPTlNFIgaC+SsCCAMScQobT25SZWNlaXZlZEludml0",
+            "YXRpb25SZW1vdmVkEi8uYmdzLnByb3RvY29sLmZyaWVuZHMudjEuSW52aXRh",
+            "dGlvbk5vdGlmaWNhdGlvbhoZLmJncy5wcm90b2NvbC5OT19SRVNQT05TRSIG",
+            "gvkrAggEEnQKFU9uU2VudEludml0YXRpb25BZGRlZBI4LmJncy5wcm90b2Nv",
+            "bC5mcmllbmRzLnYxLlNlbnRJbnZpdGF0aW9uQWRkZWROb3RpZmljYXRpb24a",
+            "GS5iZ3MucHJvdG9jb2wuTk9fUkVTUE9OU0UiBoL5KwIIBRJ4ChdPblNlbnRJ",
+            "bnZpdGF0aW9uUmVtb3ZlZBI6LmJncy5wcm90b2NvbC5mcmllbmRzLnYxLlNl",
+            "bnRJbnZpdGF0aW9uUmVtb3ZlZE5vdGlmaWNhdGlvbhoZLmJncy5wcm90b2Nv",
+            "bC5OT19SRVNQT05TRSIGgvkrAggGEnAKE09uVXBkYXRlRnJpZW5kU3RhdGUS",
+            "Ni5iZ3MucHJvdG9jb2wuZnJpZW5kcy52MS5VcGRhdGVGcmllbmRTdGF0ZU5v",
+            "dGlmaWNhdGlvbhoZLmJncy5wcm90b2NvbC5OT19SRVNQT05TRSIGgvkrAggH",
+            "Gi+C+SslCiNibmV0LnByb3RvY29sLmZyaWVuZHMuRnJpZW5kc05vdGlmeYr5",
+            "KwIIAUI1ChhibmV0LnByb3RvY29sLmZyaWVuZHMudjFCE0ZyaWVuZHNTZXJ2",
+            "aWNlUHJvdG+AAQCIAQE="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Bgs.Protocol.AttributeTypesReflection.Descriptor, global::Bgs.Protocol.EntityTypesReflection.Descriptor, global::Bgs.Protocol.Friends.V1.FriendsTypesReflection.Descriptor, global::Bgs.Protocol.InvitationTypesReflection.Descriptor, global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.SubscribeRequest), global::Bgs.Protocol.Friends.V1.SubscribeRequest.Parser, new[]{ "AgentId", "ObjectId", "Forward" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.UnsubscribeRequest), global::Bgs.Protocol.Friends.V1.UnsubscribeRequest.Parser, new[]{ "AgentId", "ObjectId", "Forward" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.SubscribeRequest), global::Bgs.Protocol.Friends.V1.SubscribeRequest.Parser, new[]{ "AgentId", "ObjectId" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.UnsubscribeRequest), global::Bgs.Protocol.Friends.V1.UnsubscribeRequest.Parser, new[]{ "AgentId", "ObjectId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.SendInvitationRequest), global::Bgs.Protocol.Friends.V1.SendInvitationRequest.Parser, new[]{ "AgentIdentity", "TargetId", "Params" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.RevokeInvitationRequest), global::Bgs.Protocol.Friends.V1.RevokeInvitationRequest.Parser, new[]{ "AgentId", "InvitationId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.AcceptInvitationRequest), global::Bgs.Protocol.Friends.V1.AcceptInvitationRequest.Parser, new[]{ "AgentId", "InvitationId", "Options" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.DeclineInvitationRequest), global::Bgs.Protocol.Friends.V1.DeclineInvitationRequest.Parser, new[]{ "AgentId", "InvitationId" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.IgnoreInvitationRequest), global::Bgs.Protocol.Friends.V1.IgnoreInvitationRequest.Parser, new[]{ "AgentId", "InvitationId", "Program" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.IgnoreInvitationRequest), global::Bgs.Protocol.Friends.V1.IgnoreInvitationRequest.Parser, new[]{ "AgentId", "InvitationId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.RemoveFriendRequest), global::Bgs.Protocol.Friends.V1.RemoveFriendRequest.Parser, new[]{ "AgentId", "TargetId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.RevokeAllInvitationsRequest), global::Bgs.Protocol.Friends.V1.RevokeAllInvitationsRequest.Parser, new[]{ "AgentId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.ViewFriendsRequest), global::Bgs.Protocol.Friends.V1.ViewFriendsRequest.Parser, new[]{ "AgentId", "TargetId" }, null, null, null, null),
@@ -163,11 +159,11 @@ namespace Bgs.Protocol.Friends.V1 {
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.GetFriendListRequest), global::Bgs.Protocol.Friends.V1.GetFriendListRequest.Parser, new[]{ "AgentId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.GetFriendListResponse), global::Bgs.Protocol.Friends.V1.GetFriendListResponse.Parser, new[]{ "Friends" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.CreateFriendshipRequest), global::Bgs.Protocol.Friends.V1.CreateFriendshipRequest.Parser, new[]{ "AgentId", "TargetId", "Role" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.FriendNotification), global::Bgs.Protocol.Friends.V1.FriendNotification.Parser, new[]{ "Target", "AccountId", "Forward" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.UpdateFriendStateNotification), global::Bgs.Protocol.Friends.V1.UpdateFriendStateNotification.Parser, new[]{ "ChangedFriend", "AccountId", "Forward" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.InvitationNotification), global::Bgs.Protocol.Friends.V1.InvitationNotification.Parser, new[]{ "Invitation", "Reason", "AccountId", "Forward" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.SentInvitationAddedNotification), global::Bgs.Protocol.Friends.V1.SentInvitationAddedNotification.Parser, new[]{ "AccountId", "Invitation", "Forward" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.SentInvitationRemovedNotification), global::Bgs.Protocol.Friends.V1.SentInvitationRemovedNotification.Parser, new[]{ "AccountId", "InvitationId", "Reason", "Forward" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.FriendNotification), global::Bgs.Protocol.Friends.V1.FriendNotification.Parser, new[]{ "Target", "AccountId" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.UpdateFriendStateNotification), global::Bgs.Protocol.Friends.V1.UpdateFriendStateNotification.Parser, new[]{ "ChangedFriend", "AccountId" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.InvitationNotification), global::Bgs.Protocol.Friends.V1.InvitationNotification.Parser, new[]{ "Invitation", "Reason", "AccountId" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.SentInvitationAddedNotification), global::Bgs.Protocol.Friends.V1.SentInvitationAddedNotification.Parser, new[]{ "AccountId", "Invitation" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Friends.V1.SentInvitationRemovedNotification), global::Bgs.Protocol.Friends.V1.SentInvitationRemovedNotification.Parser, new[]{ "AccountId", "InvitationId", "Reason" }, null, null, null, null)
           }));
     }
     #endregion
@@ -203,7 +199,6 @@ namespace Bgs.Protocol.Friends.V1 {
       _hasBits0 = other._hasBits0;
       agentId_ = other.HasAgentId ? other.agentId_.Clone() : null;
       objectId_ = other.objectId_;
-      forward_ = other.HasForward ? other.forward_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -257,30 +252,6 @@ namespace Bgs.Protocol.Friends.V1 {
       _hasBits0 &= ~1;
     }
 
-    /// <summary>Field number for the "forward" field.</summary>
-    public const int ForwardFieldNumber = 3;
-    private global::Bgs.Protocol.ObjectAddress forward_;
-    [global::System.ObsoleteAttribute]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Bgs.Protocol.ObjectAddress Forward {
-      get { return forward_; }
-      set {
-        forward_ = value;
-      }
-    }
-    /// <summary>Gets whether the forward field is set</summary>
-    [global::System.ObsoleteAttribute]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool HasForward {
-      get { return forward_ != null; }
-    }
-    /// <summary>Clears the value of the forward field</summary>
-    [global::System.ObsoleteAttribute]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void ClearForward() {
-      forward_ = null;
-    }
-
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as SubscribeRequest);
@@ -296,7 +267,6 @@ namespace Bgs.Protocol.Friends.V1 {
       }
       if (!object.Equals(AgentId, other.AgentId)) return false;
       if (ObjectId != other.ObjectId) return false;
-      if (!object.Equals(Forward, other.Forward)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -305,7 +275,6 @@ namespace Bgs.Protocol.Friends.V1 {
       int hash = 1;
       if (HasAgentId) hash ^= AgentId.GetHashCode();
       if (HasObjectId) hash ^= ObjectId.GetHashCode();
-      if (HasForward) hash ^= Forward.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -327,10 +296,6 @@ namespace Bgs.Protocol.Friends.V1 {
         output.WriteRawTag(16);
         output.WriteUInt64(ObjectId);
       }
-      if (HasForward) {
-        output.WriteRawTag(26);
-        output.WriteMessage(Forward);
-      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -344,9 +309,6 @@ namespace Bgs.Protocol.Friends.V1 {
       }
       if (HasObjectId) {
         size += 1 + pb::CodedOutputStream.ComputeUInt64Size(ObjectId);
-      }
-      if (HasForward) {
-        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Forward);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -368,12 +330,6 @@ namespace Bgs.Protocol.Friends.V1 {
       if (other.HasObjectId) {
         ObjectId = other.ObjectId;
       }
-      if (other.HasForward) {
-        if (!HasForward) {
-          Forward = new global::Bgs.Protocol.ObjectAddress();
-        }
-        Forward.MergeFrom(other.Forward);
-      }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
@@ -394,13 +350,6 @@ namespace Bgs.Protocol.Friends.V1 {
           }
           case 16: {
             ObjectId = input.ReadUInt64();
-            break;
-          }
-          case 26: {
-            if (!HasForward) {
-              Forward = new global::Bgs.Protocol.ObjectAddress();
-            }
-            input.ReadMessage(Forward);
             break;
           }
         }
@@ -438,7 +387,6 @@ namespace Bgs.Protocol.Friends.V1 {
       _hasBits0 = other._hasBits0;
       agentId_ = other.HasAgentId ? other.agentId_.Clone() : null;
       objectId_ = other.objectId_;
-      forward_ = other.HasForward ? other.forward_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -492,30 +440,6 @@ namespace Bgs.Protocol.Friends.V1 {
       _hasBits0 &= ~1;
     }
 
-    /// <summary>Field number for the "forward" field.</summary>
-    public const int ForwardFieldNumber = 3;
-    private global::Bgs.Protocol.ObjectAddress forward_;
-    [global::System.ObsoleteAttribute]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Bgs.Protocol.ObjectAddress Forward {
-      get { return forward_; }
-      set {
-        forward_ = value;
-      }
-    }
-    /// <summary>Gets whether the forward field is set</summary>
-    [global::System.ObsoleteAttribute]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool HasForward {
-      get { return forward_ != null; }
-    }
-    /// <summary>Clears the value of the forward field</summary>
-    [global::System.ObsoleteAttribute]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void ClearForward() {
-      forward_ = null;
-    }
-
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as UnsubscribeRequest);
@@ -531,7 +455,6 @@ namespace Bgs.Protocol.Friends.V1 {
       }
       if (!object.Equals(AgentId, other.AgentId)) return false;
       if (ObjectId != other.ObjectId) return false;
-      if (!object.Equals(Forward, other.Forward)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -540,7 +463,6 @@ namespace Bgs.Protocol.Friends.V1 {
       int hash = 1;
       if (HasAgentId) hash ^= AgentId.GetHashCode();
       if (HasObjectId) hash ^= ObjectId.GetHashCode();
-      if (HasForward) hash ^= Forward.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -562,10 +484,6 @@ namespace Bgs.Protocol.Friends.V1 {
         output.WriteRawTag(16);
         output.WriteUInt64(ObjectId);
       }
-      if (HasForward) {
-        output.WriteRawTag(26);
-        output.WriteMessage(Forward);
-      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -579,9 +497,6 @@ namespace Bgs.Protocol.Friends.V1 {
       }
       if (HasObjectId) {
         size += 1 + pb::CodedOutputStream.ComputeUInt64Size(ObjectId);
-      }
-      if (HasForward) {
-        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Forward);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -603,12 +518,6 @@ namespace Bgs.Protocol.Friends.V1 {
       if (other.HasObjectId) {
         ObjectId = other.ObjectId;
       }
-      if (other.HasForward) {
-        if (!HasForward) {
-          Forward = new global::Bgs.Protocol.ObjectAddress();
-        }
-        Forward.MergeFrom(other.Forward);
-      }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
@@ -629,13 +538,6 @@ namespace Bgs.Protocol.Friends.V1 {
           }
           case 16: {
             ObjectId = input.ReadUInt64();
-            break;
-          }
-          case 26: {
-            if (!HasForward) {
-              Forward = new global::Bgs.Protocol.ObjectAddress();
-            }
-            input.ReadMessage(Forward);
             break;
           }
         }
@@ -1514,7 +1416,6 @@ namespace Bgs.Protocol.Friends.V1 {
       _hasBits0 = other._hasBits0;
       agentId_ = other.HasAgentId ? other.agentId_.Clone() : null;
       invitationId_ = other.invitationId_;
-      program_ = other.program_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -1568,30 +1469,6 @@ namespace Bgs.Protocol.Friends.V1 {
       _hasBits0 &= ~1;
     }
 
-    /// <summary>Field number for the "program" field.</summary>
-    public const int ProgramFieldNumber = 4;
-    private readonly static uint ProgramDefaultValue = 0;
-
-    private uint program_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public uint Program {
-      get { if ((_hasBits0 & 2) != 0) { return program_; } else { return ProgramDefaultValue; } }
-      set {
-        _hasBits0 |= 2;
-        program_ = value;
-      }
-    }
-    /// <summary>Gets whether the "program" field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool HasProgram {
-      get { return (_hasBits0 & 2) != 0; }
-    }
-    /// <summary>Clears the value of the "program" field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void ClearProgram() {
-      _hasBits0 &= ~2;
-    }
-
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as IgnoreInvitationRequest);
@@ -1607,7 +1484,6 @@ namespace Bgs.Protocol.Friends.V1 {
       }
       if (!object.Equals(AgentId, other.AgentId)) return false;
       if (InvitationId != other.InvitationId) return false;
-      if (Program != other.Program) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -1616,7 +1492,6 @@ namespace Bgs.Protocol.Friends.V1 {
       int hash = 1;
       if (HasAgentId) hash ^= AgentId.GetHashCode();
       if (HasInvitationId) hash ^= InvitationId.GetHashCode();
-      if (HasProgram) hash ^= Program.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -1638,10 +1513,6 @@ namespace Bgs.Protocol.Friends.V1 {
         output.WriteRawTag(25);
         output.WriteFixed64(InvitationId);
       }
-      if (HasProgram) {
-        output.WriteRawTag(37);
-        output.WriteFixed32(Program);
-      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -1655,9 +1526,6 @@ namespace Bgs.Protocol.Friends.V1 {
       }
       if (HasInvitationId) {
         size += 1 + 8;
-      }
-      if (HasProgram) {
-        size += 1 + 4;
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -1679,9 +1547,6 @@ namespace Bgs.Protocol.Friends.V1 {
       if (other.HasInvitationId) {
         InvitationId = other.InvitationId;
       }
-      if (other.HasProgram) {
-        Program = other.Program;
-      }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
@@ -1702,10 +1567,6 @@ namespace Bgs.Protocol.Friends.V1 {
           }
           case 25: {
             InvitationId = input.ReadFixed64();
-            break;
-          }
-          case 37: {
-            Program = input.ReadFixed32();
             break;
           }
         }
@@ -3070,7 +2931,6 @@ namespace Bgs.Protocol.Friends.V1 {
     public FriendNotification(FriendNotification other) : this() {
       target_ = other.HasTarget ? other.target_.Clone() : null;
       accountId_ = other.HasAccountId ? other.accountId_.Clone() : null;
-      forward_ = other.HasForward ? other.forward_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -3121,30 +2981,6 @@ namespace Bgs.Protocol.Friends.V1 {
       accountId_ = null;
     }
 
-    /// <summary>Field number for the "forward" field.</summary>
-    public const int ForwardFieldNumber = 6;
-    private global::Bgs.Protocol.ObjectAddress forward_;
-    [global::System.ObsoleteAttribute]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Bgs.Protocol.ObjectAddress Forward {
-      get { return forward_; }
-      set {
-        forward_ = value;
-      }
-    }
-    /// <summary>Gets whether the forward field is set</summary>
-    [global::System.ObsoleteAttribute]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool HasForward {
-      get { return forward_ != null; }
-    }
-    /// <summary>Clears the value of the forward field</summary>
-    [global::System.ObsoleteAttribute]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void ClearForward() {
-      forward_ = null;
-    }
-
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as FriendNotification);
@@ -3160,7 +2996,6 @@ namespace Bgs.Protocol.Friends.V1 {
       }
       if (!object.Equals(Target, other.Target)) return false;
       if (!object.Equals(AccountId, other.AccountId)) return false;
-      if (!object.Equals(Forward, other.Forward)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -3169,7 +3004,6 @@ namespace Bgs.Protocol.Friends.V1 {
       int hash = 1;
       if (HasTarget) hash ^= Target.GetHashCode();
       if (HasAccountId) hash ^= AccountId.GetHashCode();
-      if (HasForward) hash ^= Forward.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -3191,10 +3025,6 @@ namespace Bgs.Protocol.Friends.V1 {
         output.WriteRawTag(42);
         output.WriteMessage(AccountId);
       }
-      if (HasForward) {
-        output.WriteRawTag(50);
-        output.WriteMessage(Forward);
-      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -3208,9 +3038,6 @@ namespace Bgs.Protocol.Friends.V1 {
       }
       if (HasAccountId) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(AccountId);
-      }
-      if (HasForward) {
-        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Forward);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -3235,12 +3062,6 @@ namespace Bgs.Protocol.Friends.V1 {
         }
         AccountId.MergeFrom(other.AccountId);
       }
-      if (other.HasForward) {
-        if (!HasForward) {
-          Forward = new global::Bgs.Protocol.ObjectAddress();
-        }
-        Forward.MergeFrom(other.Forward);
-      }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
@@ -3264,13 +3085,6 @@ namespace Bgs.Protocol.Friends.V1 {
               AccountId = new global::Bgs.Protocol.EntityId();
             }
             input.ReadMessage(AccountId);
-            break;
-          }
-          case 50: {
-            if (!HasForward) {
-              Forward = new global::Bgs.Protocol.ObjectAddress();
-            }
-            input.ReadMessage(Forward);
             break;
           }
         }
@@ -3306,7 +3120,6 @@ namespace Bgs.Protocol.Friends.V1 {
     public UpdateFriendStateNotification(UpdateFriendStateNotification other) : this() {
       changedFriend_ = other.HasChangedFriend ? other.changedFriend_.Clone() : null;
       accountId_ = other.HasAccountId ? other.accountId_.Clone() : null;
-      forward_ = other.HasForward ? other.forward_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -3357,30 +3170,6 @@ namespace Bgs.Protocol.Friends.V1 {
       accountId_ = null;
     }
 
-    /// <summary>Field number for the "forward" field.</summary>
-    public const int ForwardFieldNumber = 6;
-    private global::Bgs.Protocol.ObjectAddress forward_;
-    [global::System.ObsoleteAttribute]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Bgs.Protocol.ObjectAddress Forward {
-      get { return forward_; }
-      set {
-        forward_ = value;
-      }
-    }
-    /// <summary>Gets whether the forward field is set</summary>
-    [global::System.ObsoleteAttribute]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool HasForward {
-      get { return forward_ != null; }
-    }
-    /// <summary>Clears the value of the forward field</summary>
-    [global::System.ObsoleteAttribute]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void ClearForward() {
-      forward_ = null;
-    }
-
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as UpdateFriendStateNotification);
@@ -3396,7 +3185,6 @@ namespace Bgs.Protocol.Friends.V1 {
       }
       if (!object.Equals(ChangedFriend, other.ChangedFriend)) return false;
       if (!object.Equals(AccountId, other.AccountId)) return false;
-      if (!object.Equals(Forward, other.Forward)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -3405,7 +3193,6 @@ namespace Bgs.Protocol.Friends.V1 {
       int hash = 1;
       if (HasChangedFriend) hash ^= ChangedFriend.GetHashCode();
       if (HasAccountId) hash ^= AccountId.GetHashCode();
-      if (HasForward) hash ^= Forward.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -3427,10 +3214,6 @@ namespace Bgs.Protocol.Friends.V1 {
         output.WriteRawTag(42);
         output.WriteMessage(AccountId);
       }
-      if (HasForward) {
-        output.WriteRawTag(50);
-        output.WriteMessage(Forward);
-      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -3444,9 +3227,6 @@ namespace Bgs.Protocol.Friends.V1 {
       }
       if (HasAccountId) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(AccountId);
-      }
-      if (HasForward) {
-        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Forward);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -3471,12 +3251,6 @@ namespace Bgs.Protocol.Friends.V1 {
         }
         AccountId.MergeFrom(other.AccountId);
       }
-      if (other.HasForward) {
-        if (!HasForward) {
-          Forward = new global::Bgs.Protocol.ObjectAddress();
-        }
-        Forward.MergeFrom(other.Forward);
-      }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
@@ -3500,13 +3274,6 @@ namespace Bgs.Protocol.Friends.V1 {
               AccountId = new global::Bgs.Protocol.EntityId();
             }
             input.ReadMessage(AccountId);
-            break;
-          }
-          case 50: {
-            if (!HasForward) {
-              Forward = new global::Bgs.Protocol.ObjectAddress();
-            }
-            input.ReadMessage(Forward);
             break;
           }
         }
@@ -3545,7 +3312,6 @@ namespace Bgs.Protocol.Friends.V1 {
       invitation_ = other.HasInvitation ? other.invitation_.Clone() : null;
       reason_ = other.reason_;
       accountId_ = other.HasAccountId ? other.accountId_.Clone() : null;
-      forward_ = other.HasForward ? other.forward_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -3620,30 +3386,6 @@ namespace Bgs.Protocol.Friends.V1 {
       accountId_ = null;
     }
 
-    /// <summary>Field number for the "forward" field.</summary>
-    public const int ForwardFieldNumber = 6;
-    private global::Bgs.Protocol.ObjectAddress forward_;
-    [global::System.ObsoleteAttribute]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Bgs.Protocol.ObjectAddress Forward {
-      get { return forward_; }
-      set {
-        forward_ = value;
-      }
-    }
-    /// <summary>Gets whether the forward field is set</summary>
-    [global::System.ObsoleteAttribute]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool HasForward {
-      get { return forward_ != null; }
-    }
-    /// <summary>Clears the value of the forward field</summary>
-    [global::System.ObsoleteAttribute]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void ClearForward() {
-      forward_ = null;
-    }
-
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as InvitationNotification);
@@ -3660,7 +3402,6 @@ namespace Bgs.Protocol.Friends.V1 {
       if (!object.Equals(Invitation, other.Invitation)) return false;
       if (Reason != other.Reason) return false;
       if (!object.Equals(AccountId, other.AccountId)) return false;
-      if (!object.Equals(Forward, other.Forward)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -3670,7 +3411,6 @@ namespace Bgs.Protocol.Friends.V1 {
       if (HasInvitation) hash ^= Invitation.GetHashCode();
       if (HasReason) hash ^= Reason.GetHashCode();
       if (HasAccountId) hash ^= AccountId.GetHashCode();
-      if (HasForward) hash ^= Forward.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -3696,10 +3436,6 @@ namespace Bgs.Protocol.Friends.V1 {
         output.WriteRawTag(42);
         output.WriteMessage(AccountId);
       }
-      if (HasForward) {
-        output.WriteRawTag(50);
-        output.WriteMessage(Forward);
-      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -3716,9 +3452,6 @@ namespace Bgs.Protocol.Friends.V1 {
       }
       if (HasAccountId) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(AccountId);
-      }
-      if (HasForward) {
-        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Forward);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -3745,12 +3478,6 @@ namespace Bgs.Protocol.Friends.V1 {
           AccountId = new global::Bgs.Protocol.EntityId();
         }
         AccountId.MergeFrom(other.AccountId);
-      }
-      if (other.HasForward) {
-        if (!HasForward) {
-          Forward = new global::Bgs.Protocol.ObjectAddress();
-        }
-        Forward.MergeFrom(other.Forward);
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -3779,13 +3506,6 @@ namespace Bgs.Protocol.Friends.V1 {
               AccountId = new global::Bgs.Protocol.EntityId();
             }
             input.ReadMessage(AccountId);
-            break;
-          }
-          case 50: {
-            if (!HasForward) {
-              Forward = new global::Bgs.Protocol.ObjectAddress();
-            }
-            input.ReadMessage(Forward);
             break;
           }
         }
@@ -3821,7 +3541,6 @@ namespace Bgs.Protocol.Friends.V1 {
     public SentInvitationAddedNotification(SentInvitationAddedNotification other) : this() {
       accountId_ = other.HasAccountId ? other.accountId_.Clone() : null;
       invitation_ = other.HasInvitation ? other.invitation_.Clone() : null;
-      forward_ = other.HasForward ? other.forward_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -3872,30 +3591,6 @@ namespace Bgs.Protocol.Friends.V1 {
       invitation_ = null;
     }
 
-    /// <summary>Field number for the "forward" field.</summary>
-    public const int ForwardFieldNumber = 3;
-    private global::Bgs.Protocol.ObjectAddress forward_;
-    [global::System.ObsoleteAttribute]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Bgs.Protocol.ObjectAddress Forward {
-      get { return forward_; }
-      set {
-        forward_ = value;
-      }
-    }
-    /// <summary>Gets whether the forward field is set</summary>
-    [global::System.ObsoleteAttribute]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool HasForward {
-      get { return forward_ != null; }
-    }
-    /// <summary>Clears the value of the forward field</summary>
-    [global::System.ObsoleteAttribute]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void ClearForward() {
-      forward_ = null;
-    }
-
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as SentInvitationAddedNotification);
@@ -3911,7 +3606,6 @@ namespace Bgs.Protocol.Friends.V1 {
       }
       if (!object.Equals(AccountId, other.AccountId)) return false;
       if (!object.Equals(Invitation, other.Invitation)) return false;
-      if (!object.Equals(Forward, other.Forward)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -3920,7 +3614,6 @@ namespace Bgs.Protocol.Friends.V1 {
       int hash = 1;
       if (HasAccountId) hash ^= AccountId.GetHashCode();
       if (HasInvitation) hash ^= Invitation.GetHashCode();
-      if (HasForward) hash ^= Forward.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -3942,10 +3635,6 @@ namespace Bgs.Protocol.Friends.V1 {
         output.WriteRawTag(18);
         output.WriteMessage(Invitation);
       }
-      if (HasForward) {
-        output.WriteRawTag(26);
-        output.WriteMessage(Forward);
-      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -3959,9 +3648,6 @@ namespace Bgs.Protocol.Friends.V1 {
       }
       if (HasInvitation) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(Invitation);
-      }
-      if (HasForward) {
-        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Forward);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -3986,12 +3672,6 @@ namespace Bgs.Protocol.Friends.V1 {
         }
         Invitation.MergeFrom(other.Invitation);
       }
-      if (other.HasForward) {
-        if (!HasForward) {
-          Forward = new global::Bgs.Protocol.ObjectAddress();
-        }
-        Forward.MergeFrom(other.Forward);
-      }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
@@ -4015,13 +3695,6 @@ namespace Bgs.Protocol.Friends.V1 {
               Invitation = new global::Bgs.Protocol.Friends.V1.SentInvitation();
             }
             input.ReadMessage(Invitation);
-            break;
-          }
-          case 26: {
-            if (!HasForward) {
-              Forward = new global::Bgs.Protocol.ObjectAddress();
-            }
-            input.ReadMessage(Forward);
             break;
           }
         }
@@ -4060,7 +3733,6 @@ namespace Bgs.Protocol.Friends.V1 {
       accountId_ = other.HasAccountId ? other.accountId_.Clone() : null;
       invitationId_ = other.invitationId_;
       reason_ = other.reason_;
-      forward_ = other.HasForward ? other.forward_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -4138,30 +3810,6 @@ namespace Bgs.Protocol.Friends.V1 {
       _hasBits0 &= ~2;
     }
 
-    /// <summary>Field number for the "forward" field.</summary>
-    public const int ForwardFieldNumber = 4;
-    private global::Bgs.Protocol.ObjectAddress forward_;
-    [global::System.ObsoleteAttribute]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Bgs.Protocol.ObjectAddress Forward {
-      get { return forward_; }
-      set {
-        forward_ = value;
-      }
-    }
-    /// <summary>Gets whether the forward field is set</summary>
-    [global::System.ObsoleteAttribute]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool HasForward {
-      get { return forward_ != null; }
-    }
-    /// <summary>Clears the value of the forward field</summary>
-    [global::System.ObsoleteAttribute]
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void ClearForward() {
-      forward_ = null;
-    }
-
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as SentInvitationRemovedNotification);
@@ -4178,7 +3826,6 @@ namespace Bgs.Protocol.Friends.V1 {
       if (!object.Equals(AccountId, other.AccountId)) return false;
       if (InvitationId != other.InvitationId) return false;
       if (Reason != other.Reason) return false;
-      if (!object.Equals(Forward, other.Forward)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -4188,7 +3835,6 @@ namespace Bgs.Protocol.Friends.V1 {
       if (HasAccountId) hash ^= AccountId.GetHashCode();
       if (HasInvitationId) hash ^= InvitationId.GetHashCode();
       if (HasReason) hash ^= Reason.GetHashCode();
-      if (HasForward) hash ^= Forward.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -4214,10 +3860,6 @@ namespace Bgs.Protocol.Friends.V1 {
         output.WriteRawTag(24);
         output.WriteUInt32(Reason);
       }
-      if (HasForward) {
-        output.WriteRawTag(34);
-        output.WriteMessage(Forward);
-      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -4234,9 +3876,6 @@ namespace Bgs.Protocol.Friends.V1 {
       }
       if (HasReason) {
         size += 1 + pb::CodedOutputStream.ComputeUInt32Size(Reason);
-      }
-      if (HasForward) {
-        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Forward);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -4260,12 +3899,6 @@ namespace Bgs.Protocol.Friends.V1 {
       }
       if (other.HasReason) {
         Reason = other.Reason;
-      }
-      if (other.HasForward) {
-        if (!HasForward) {
-          Forward = new global::Bgs.Protocol.ObjectAddress();
-        }
-        Forward.MergeFrom(other.Forward);
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -4291,13 +3924,6 @@ namespace Bgs.Protocol.Friends.V1 {
           }
           case 24: {
             Reason = input.ReadUInt32();
-            break;
-          }
-          case 34: {
-            if (!HasForward) {
-              Forward = new global::Bgs.Protocol.ObjectAddress();
-            }
-            input.ReadMessage(Forward);
             break;
           }
         }

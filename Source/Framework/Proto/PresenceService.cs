@@ -33,70 +33,63 @@ namespace Bgs.Protocol.Presence.V1 {
             "ZW5zaW9ucy9maWVsZF9vcHRpb25zLnByb3RvGjhiZ3MvbG93L3BiL2NsaWVu",
             "dC9nbG9iYWxfZXh0ZW5zaW9ucy9tZXRob2Rfb3B0aW9ucy5wcm90bxo5Ymdz",
             "L2xvdy9wYi9jbGllbnQvZ2xvYmFsX2V4dGVuc2lvbnMvc2VydmljZV9vcHRp",
-            "b25zLnByb3RvIukBChBTdWJzY3JpYmVSZXF1ZXN0EigKCGFnZW50X2lkGAEg",
-            "ASgLMhYuYmdzLnByb3RvY29sLkVudGl0eUlkEikKCWVudGl0eV9pZBgCIAIo",
-            "CzIWLmJncy5wcm90b2NvbC5FbnRpdHlJZBIRCglvYmplY3RfaWQYAyACKAQS",
-            "JQoHcHJvZ3JhbRgEIAMoB0IUivkrBioECgIIAYr5KwYqBAoCEGQSRgoDa2V5",
-            "GAYgAygLMiIuYmdzLnByb3RvY29sLnByZXNlbmNlLnYxLkZpZWxkS2V5QhWK",
-            "+SsGKgQKAggBivkrByoFCgMQ9AMiSQocU3Vic2NyaWJlTm90aWZpY2F0aW9u",
-            "UmVxdWVzdBIpCgllbnRpdHlfaWQYASACKAsyFi5iZ3MucHJvdG9jb2wuRW50",
-            "aXR5SWQifAoSVW5zdWJzY3JpYmVSZXF1ZXN0EigKCGFnZW50X2lkGAEgASgL",
-            "MhYuYmdzLnByb3RvY29sLkVudGl0eUlkEikKCWVudGl0eV9pZBgCIAIoCzIW",
-            "LmJncy5wcm90b2NvbC5FbnRpdHlJZBIRCglvYmplY3RfaWQYAyABKAQiugEK",
-            "DVVwZGF0ZVJlcXVlc3QSKQoJZW50aXR5X2lkGAEgAigLMhYuYmdzLnByb3Rv",
-            "Y29sLkVudGl0eUlkEkEKD2ZpZWxkX29wZXJhdGlvbhgCIAMoCzIoLmJncy5w",
-            "cm90b2NvbC5wcmVzZW5jZS52MS5GaWVsZE9wZXJhdGlvbhIRCglub19jcmVh",
-            "dGUYAyABKAgSKAoIYWdlbnRfaWQYBCABKAsyFi5iZ3MucHJvdG9jb2wuRW50",
-            "aXR5SWQilAEKDFF1ZXJ5UmVxdWVzdBIpCgllbnRpdHlfaWQYASACKAsyFi5i",
-            "Z3MucHJvdG9jb2wuRW50aXR5SWQSLwoDa2V5GAIgAygLMiIuYmdzLnByb3Rv",
-            "Y29sLnByZXNlbmNlLnYxLkZpZWxkS2V5EigKCGFnZW50X2lkGAMgASgLMhYu",
-            "YmdzLnByb3RvY29sLkVudGl0eUlkIj8KDVF1ZXJ5UmVzcG9uc2USLgoFZmll",
-            "bGQYAiADKAsyHy5iZ3MucHJvdG9jb2wucHJlc2VuY2UudjEuRmllbGQiWAoQ",
-            "T3duZXJzaGlwUmVxdWVzdBIpCgllbnRpdHlfaWQYASACKAsyFi5iZ3MucHJv",
-            "dG9jb2wuRW50aXR5SWQSGQoRcmVsZWFzZV9vd25lcnNoaXAYAiABKAgihQIK",
-            "FUJhdGNoU3Vic2NyaWJlUmVxdWVzdBIoCghhZ2VudF9pZBgBIAEoCzIWLmJn",
-            "cy5wcm90b2NvbC5FbnRpdHlJZBJACgllbnRpdHlfaWQYAiADKAsyFi5iZ3Mu",
-            "cHJvdG9jb2wuRW50aXR5SWRCFYr5KwYqBAoCCAGK+SsHKgUKAxD6ARIlCgdw",
-            "cm9ncmFtGAMgAygHQhSK+SsGKgQKAggBivkrBioECgIQZBJGCgNrZXkYBCAD",
-            "KAsyIi5iZ3MucHJvdG9jb2wucHJlc2VuY2UudjEuRmllbGRLZXlCFYr5KwYq",
-            "BAoCCAGK+SsHKgUKAxD0AxIRCglvYmplY3RfaWQYBSABKAQiTAoPU3Vic2Ny",
-            "aWJlUmVzdWx0EikKCWVudGl0eV9pZBgBIAEoCzIWLmJncy5wcm90b2NvbC5F",
-            "bnRpdHlJZBIOCgZyZXN1bHQYAiABKA0iXQoWQmF0Y2hTdWJzY3JpYmVSZXNw",
-            "b25zZRJDChBzdWJzY3JpYmVfZmFpbGVkGAEgAygLMikuYmdzLnByb3RvY29s",
-            "LnByZXNlbmNlLnYxLlN1YnNjcmliZVJlc3VsdCKYAQoXQmF0Y2hVbnN1YnNj",
-            "cmliZVJlcXVlc3QSKAoIYWdlbnRfaWQYASABKAsyFi5iZ3MucHJvdG9jb2wu",
-            "RW50aXR5SWQSQAoJZW50aXR5X2lkGAIgAygLMhYuYmdzLnByb3RvY29sLkVu",
-            "dGl0eUlkQhWK+SsGKgQKAggBivkrByoFCgMQ+gESEQoJb2JqZWN0X2lkGAMg",
-            "ASgEMuAGCg9QcmVzZW5jZVNlcnZpY2USVQoJU3Vic2NyaWJlEiouYmdzLnBy",
-            "b3RvY29sLnByZXNlbmNlLnYxLlN1YnNjcmliZVJlcXVlc3QaFC5iZ3MucHJv",
-            "dG9jb2wuTm9EYXRhIgaC+SsCCAESWQoLVW5zdWJzY3JpYmUSLC5iZ3MucHJv",
-            "dG9jb2wucHJlc2VuY2UudjEuVW5zdWJzY3JpYmVSZXF1ZXN0GhQuYmdzLnBy",
-            "b3RvY29sLk5vRGF0YSIGgvkrAggCEk8KBlVwZGF0ZRInLmJncy5wcm90b2Nv",
-            "bC5wcmVzZW5jZS52MS5VcGRhdGVSZXF1ZXN0GhQuYmdzLnByb3RvY29sLk5v",
-            "RGF0YSIGgvkrAggDEmAKBVF1ZXJ5EiYuYmdzLnByb3RvY29sLnByZXNlbmNl",
-            "LnYxLlF1ZXJ5UmVxdWVzdBonLmJncy5wcm90b2NvbC5wcmVzZW5jZS52MS5R",
-            "dWVyeVJlc3BvbnNlIgaC+SsCCAQSVQoJT3duZXJzaGlwEiouYmdzLnByb3Rv",
-            "Y29sLnByZXNlbmNlLnYxLk93bmVyc2hpcFJlcXVlc3QaFC5iZ3MucHJvdG9j",
-            "b2wuTm9EYXRhIgaC+SsCCAUSbQoVU3Vic2NyaWJlTm90aWZpY2F0aW9uEjYu",
-            "YmdzLnByb3RvY29sLnByZXNlbmNlLnYxLlN1YnNjcmliZU5vdGlmaWNhdGlv",
-            "blJlcXVlc3QaFC5iZ3MucHJvdG9jb2wuTm9EYXRhIgaC+SsCCAcSewoOQmF0",
-            "Y2hTdWJzY3JpYmUSLy5iZ3MucHJvdG9jb2wucHJlc2VuY2UudjEuQmF0Y2hT",
-            "dWJzY3JpYmVSZXF1ZXN0GjAuYmdzLnByb3RvY29sLnByZXNlbmNlLnYxLkJh",
-            "dGNoU3Vic2NyaWJlUmVzcG9uc2UiBoL5KwIICBJjChBCYXRjaFVuc3Vic2Ny",
-            "aWJlEjEuYmdzLnByb3RvY29sLnByZXNlbmNlLnYxLkJhdGNoVW5zdWJzY3Jp",
-            "YmVSZXF1ZXN0GhQuYmdzLnByb3RvY29sLk5vRGF0YSIGgvkrAggJGkCC+Sso",
-            "CiZibmV0LnByb3RvY29sLnByZXNlbmNlLlByZXNlbmNlU2VydmljZYL5Kwoq",
-            "CHByZXNlbmNlivkrAhABQgOAAQA="));
+            "b25zLnByb3RvIvEBChBTdWJzY3JpYmVSZXF1ZXN0EjAKCGFnZW50X2lkGAEg",
+            "ASgLMhYuYmdzLnByb3RvY29sLkVudGl0eUlkQgaC+SsCIAESKQoJZW50aXR5",
+            "X2lkGAIgAigLMhYuYmdzLnByb3RvY29sLkVudGl0eUlkEhEKCW9iamVjdF9p",
+            "ZBgDIAIoBBIlCgdwcm9ncmFtGAQgAygHQhSK+SsGKgQKAggAivkrBioECgIQ",
+            "ZBJGCgNrZXkYBiADKAsyIi5iZ3MucHJvdG9jb2wucHJlc2VuY2UudjEuRmll",
+            "bGRLZXlCFYr5KwYqBAoCCACK+SsHKgUKAxD0AyKEAQoSVW5zdWJzY3JpYmVS",
+            "ZXF1ZXN0EjAKCGFnZW50X2lkGAEgASgLMhYuYmdzLnByb3RvY29sLkVudGl0",
+            "eUlkQgaC+SsCIAESKQoJZW50aXR5X2lkGAIgAigLMhYuYmdzLnByb3RvY29s",
+            "LkVudGl0eUlkEhEKCW9iamVjdF9pZBgDIAEoBCLCAQoNVXBkYXRlUmVxdWVz",
+            "dBIpCgllbnRpdHlfaWQYASACKAsyFi5iZ3MucHJvdG9jb2wuRW50aXR5SWQS",
+            "QQoPZmllbGRfb3BlcmF0aW9uGAIgAygLMiguYmdzLnByb3RvY29sLnByZXNl",
+            "bmNlLnYxLkZpZWxkT3BlcmF0aW9uEhEKCW5vX2NyZWF0ZRgDIAEoCBIwCghh",
+            "Z2VudF9pZBgEIAEoCzIWLmJncy5wcm90b2NvbC5FbnRpdHlJZEIGgvkrAiAB",
+            "IrIBCgxRdWVyeVJlcXVlc3QSKQoJZW50aXR5X2lkGAEgAigLMhYuYmdzLnBy",
+            "b3RvY29sLkVudGl0eUlkEkUKA2tleRgCIAMoCzIiLmJncy5wcm90b2NvbC5w",
+            "cmVzZW5jZS52MS5GaWVsZEtleUIUivkrBioECgIIAIr5KwYqBAoCEGQSMAoI",
+            "YWdlbnRfaWQYAyABKAsyFi5iZ3MucHJvdG9jb2wuRW50aXR5SWRCBoL5KwIg",
+            "ASI/Cg1RdWVyeVJlc3BvbnNlEi4KBWZpZWxkGAIgAygLMh8uYmdzLnByb3Rv",
+            "Y29sLnByZXNlbmNlLnYxLkZpZWxkIo0CChVCYXRjaFN1YnNjcmliZVJlcXVl",
+            "c3QSMAoIYWdlbnRfaWQYASABKAsyFi5iZ3MucHJvdG9jb2wuRW50aXR5SWRC",
+            "BoL5KwIgARJACgllbnRpdHlfaWQYAiADKAsyFi5iZ3MucHJvdG9jb2wuRW50",
+            "aXR5SWRCFYr5KwYqBAoCCAGK+SsHKgUKAxD6ARIlCgdwcm9ncmFtGAMgAygH",
+            "QhSK+SsGKgQKAggAivkrBioECgIQZBJGCgNrZXkYBCADKAsyIi5iZ3MucHJv",
+            "dG9jb2wucHJlc2VuY2UudjEuRmllbGRLZXlCFYr5KwYqBAoCCACK+SsHKgUK",
+            "AxD0AxIRCglvYmplY3RfaWQYBSABKAQiTAoPU3Vic2NyaWJlUmVzdWx0EikK",
+            "CWVudGl0eV9pZBgBIAEoCzIWLmJncy5wcm90b2NvbC5FbnRpdHlJZBIOCgZy",
+            "ZXN1bHQYAiABKA0iXQoWQmF0Y2hTdWJzY3JpYmVSZXNwb25zZRJDChBzdWJz",
+            "Y3JpYmVfZmFpbGVkGAEgAygLMikuYmdzLnByb3RvY29sLnByZXNlbmNlLnYx",
+            "LlN1YnNjcmliZVJlc3VsdCKgAQoXQmF0Y2hVbnN1YnNjcmliZVJlcXVlc3QS",
+            "MAoIYWdlbnRfaWQYASABKAsyFi5iZ3MucHJvdG9jb2wuRW50aXR5SWRCBoL5",
+            "KwIgARJACgllbnRpdHlfaWQYAiADKAsyFi5iZ3MucHJvdG9jb2wuRW50aXR5",
+            "SWRCFYr5KwYqBAoCCAGK+SsHKgUKAxD6ARIRCglvYmplY3RfaWQYAyABKAQy",
+            "0AUKD1ByZXNlbmNlU2VydmljZRJbCglTdWJzY3JpYmUSKi5iZ3MucHJvdG9j",
+            "b2wucHJlc2VuY2UudjEuU3Vic2NyaWJlUmVxdWVzdBoULmJncy5wcm90b2Nv",
+            "bC5Ob0RhdGEiDIL5KwIIAYL5KwIQAxJfCgtVbnN1YnNjcmliZRIsLmJncy5w",
+            "cm90b2NvbC5wcmVzZW5jZS52MS5VbnN1YnNjcmliZVJlcXVlc3QaFC5iZ3Mu",
+            "cHJvdG9jb2wuTm9EYXRhIgyC+SsCCAKC+SsCEAMSVQoGVXBkYXRlEicuYmdz",
+            "LnByb3RvY29sLnByZXNlbmNlLnYxLlVwZGF0ZVJlcXVlc3QaFC5iZ3MucHJv",
+            "dG9jb2wuTm9EYXRhIgyC+SsCCAOC+SsCEAMSZgoFUXVlcnkSJi5iZ3MucHJv",
+            "dG9jb2wucHJlc2VuY2UudjEuUXVlcnlSZXF1ZXN0GicuYmdzLnByb3RvY29s",
+            "LnByZXNlbmNlLnYxLlF1ZXJ5UmVzcG9uc2UiDIL5KwIIBIL5KwIQAxKBAQoO",
+            "QmF0Y2hTdWJzY3JpYmUSLy5iZ3MucHJvdG9jb2wucHJlc2VuY2UudjEuQmF0",
+            "Y2hTdWJzY3JpYmVSZXF1ZXN0GjAuYmdzLnByb3RvY29sLnByZXNlbmNlLnYx",
+            "LkJhdGNoU3Vic2NyaWJlUmVzcG9uc2UiDIL5KwIICIL5KwIQAxJpChBCYXRj",
+            "aFVuc3Vic2NyaWJlEjEuYmdzLnByb3RvY29sLnByZXNlbmNlLnYxLkJhdGNo",
+            "VW5zdWJzY3JpYmVSZXF1ZXN0GhQuYmdzLnByb3RvY29sLk5vRGF0YSIMgvkr",
+            "AggJgvkrAhADGlGC+SsoCiZibmV0LnByb3RvY29sLnByZXNlbmNlLlByZXNl",
+            "bmNlU2VydmljZYL5KxUqE3ByZXNlbmNlX2FnZ3JlZ2F0b3KC+SsCMAGK+SsC",
+            "EAFCA4ABAA=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Bgs.Protocol.EntityTypesReflection.Descriptor, global::Bgs.Protocol.Presence.V1.PresenceTypesReflection.Descriptor, global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Presence.V1.SubscribeRequest), global::Bgs.Protocol.Presence.V1.SubscribeRequest.Parser, new[]{ "AgentId", "EntityId", "ObjectId", "Program", "Key" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Presence.V1.SubscribeNotificationRequest), global::Bgs.Protocol.Presence.V1.SubscribeNotificationRequest.Parser, new[]{ "EntityId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Presence.V1.UnsubscribeRequest), global::Bgs.Protocol.Presence.V1.UnsubscribeRequest.Parser, new[]{ "AgentId", "EntityId", "ObjectId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Presence.V1.UpdateRequest), global::Bgs.Protocol.Presence.V1.UpdateRequest.Parser, new[]{ "EntityId", "FieldOperation", "NoCreate", "AgentId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Presence.V1.QueryRequest), global::Bgs.Protocol.Presence.V1.QueryRequest.Parser, new[]{ "EntityId", "Key", "AgentId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Presence.V1.QueryResponse), global::Bgs.Protocol.Presence.V1.QueryResponse.Parser, new[]{ "Field" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Presence.V1.OwnershipRequest), global::Bgs.Protocol.Presence.V1.OwnershipRequest.Parser, new[]{ "EntityId", "ReleaseOwnership" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Presence.V1.BatchSubscribeRequest), global::Bgs.Protocol.Presence.V1.BatchSubscribeRequest.Parser, new[]{ "AgentId", "EntityId", "Program", "Key", "ObjectId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Presence.V1.SubscribeResult), global::Bgs.Protocol.Presence.V1.SubscribeResult.Parser, new[]{ "EntityId", "Result" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Presence.V1.BatchSubscribeResponse), global::Bgs.Protocol.Presence.V1.BatchSubscribeResponse.Parser, new[]{ "SubscribeFailed" }, null, null, null, null),
@@ -380,151 +373,6 @@ namespace Bgs.Protocol.Presence.V1 {
 
   }
 
-  public sealed partial class SubscribeNotificationRequest : pb::IMessage<SubscribeNotificationRequest> {
-    private static readonly pb::MessageParser<SubscribeNotificationRequest> _parser = new pb::MessageParser<SubscribeNotificationRequest>(() => new SubscribeNotificationRequest());
-    private pb::UnknownFieldSet _unknownFields;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pb::MessageParser<SubscribeNotificationRequest> Parser { get { return _parser; } }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Presence.V1.PresenceServiceReflection.Descriptor.MessageTypes[1]; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    pbr::MessageDescriptor pb::IMessage.Descriptor {
-      get { return Descriptor; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public SubscribeNotificationRequest() {
-      OnConstruction();
-    }
-
-    partial void OnConstruction();
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public SubscribeNotificationRequest(SubscribeNotificationRequest other) : this() {
-      entityId_ = other.HasEntityId ? other.entityId_.Clone() : null;
-      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public SubscribeNotificationRequest Clone() {
-      return new SubscribeNotificationRequest(this);
-    }
-
-    /// <summary>Field number for the "entity_id" field.</summary>
-    public const int EntityIdFieldNumber = 1;
-    private global::Bgs.Protocol.EntityId entityId_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Bgs.Protocol.EntityId EntityId {
-      get { return entityId_; }
-      set {
-        entityId_ = value;
-      }
-    }
-    /// <summary>Gets whether the entity_id field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool HasEntityId {
-      get { return entityId_ != null; }
-    }
-    /// <summary>Clears the value of the entity_id field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void ClearEntityId() {
-      entityId_ = null;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override bool Equals(object other) {
-      return Equals(other as SubscribeNotificationRequest);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool Equals(SubscribeNotificationRequest other) {
-      if (ReferenceEquals(other, null)) {
-        return false;
-      }
-      if (ReferenceEquals(other, this)) {
-        return true;
-      }
-      if (!object.Equals(EntityId, other.EntityId)) return false;
-      return Equals(_unknownFields, other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override int GetHashCode() {
-      int hash = 1;
-      if (HasEntityId) hash ^= EntityId.GetHashCode();
-      if (_unknownFields != null) {
-        hash ^= _unknownFields.GetHashCode();
-      }
-      return hash;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override string ToString() {
-      return pb::JsonFormatter.ToDiagnosticString(this);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void WriteTo(pb::CodedOutputStream output) {
-      if (HasEntityId) {
-        output.WriteRawTag(10);
-        output.WriteMessage(EntityId);
-      }
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(output);
-      }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int CalculateSize() {
-      int size = 0;
-      if (HasEntityId) {
-        size += 1 + pb::CodedOutputStream.ComputeMessageSize(EntityId);
-      }
-      if (_unknownFields != null) {
-        size += _unknownFields.CalculateSize();
-      }
-      return size;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(SubscribeNotificationRequest other) {
-      if (other == null) {
-        return;
-      }
-      if (other.HasEntityId) {
-        if (!HasEntityId) {
-          EntityId = new global::Bgs.Protocol.EntityId();
-        }
-        EntityId.MergeFrom(other.EntityId);
-      }
-      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(pb::CodedInputStream input) {
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
-            break;
-          case 10: {
-            if (!HasEntityId) {
-              EntityId = new global::Bgs.Protocol.EntityId();
-            }
-            input.ReadMessage(EntityId);
-            break;
-          }
-        }
-      }
-    }
-
-  }
-
   public sealed partial class UnsubscribeRequest : pb::IMessage<UnsubscribeRequest> {
     private static readonly pb::MessageParser<UnsubscribeRequest> _parser = new pb::MessageParser<UnsubscribeRequest>(() => new UnsubscribeRequest());
     private pb::UnknownFieldSet _unknownFields;
@@ -534,7 +382,7 @@ namespace Bgs.Protocol.Presence.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Presence.V1.PresenceServiceReflection.Descriptor.MessageTypes[2]; }
+      get { return global::Bgs.Protocol.Presence.V1.PresenceServiceReflection.Descriptor.MessageTypes[1]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -766,7 +614,7 @@ namespace Bgs.Protocol.Presence.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Presence.V1.PresenceServiceReflection.Descriptor.MessageTypes[3]; }
+      get { return global::Bgs.Protocol.Presence.V1.PresenceServiceReflection.Descriptor.MessageTypes[2]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1017,7 +865,7 @@ namespace Bgs.Protocol.Presence.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Presence.V1.PresenceServiceReflection.Descriptor.MessageTypes[4]; }
+      get { return global::Bgs.Protocol.Presence.V1.PresenceServiceReflection.Descriptor.MessageTypes[3]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1226,7 +1074,7 @@ namespace Bgs.Protocol.Presence.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Presence.V1.PresenceServiceReflection.Descriptor.MessageTypes[5]; }
+      get { return global::Bgs.Protocol.Presence.V1.PresenceServiceReflection.Descriptor.MessageTypes[4]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1339,194 +1187,6 @@ namespace Bgs.Protocol.Presence.V1 {
 
   }
 
-  public sealed partial class OwnershipRequest : pb::IMessage<OwnershipRequest> {
-    private static readonly pb::MessageParser<OwnershipRequest> _parser = new pb::MessageParser<OwnershipRequest>(() => new OwnershipRequest());
-    private pb::UnknownFieldSet _unknownFields;
-    private int _hasBits0;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pb::MessageParser<OwnershipRequest> Parser { get { return _parser; } }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Presence.V1.PresenceServiceReflection.Descriptor.MessageTypes[6]; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    pbr::MessageDescriptor pb::IMessage.Descriptor {
-      get { return Descriptor; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public OwnershipRequest() {
-      OnConstruction();
-    }
-
-    partial void OnConstruction();
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public OwnershipRequest(OwnershipRequest other) : this() {
-      _hasBits0 = other._hasBits0;
-      entityId_ = other.HasEntityId ? other.entityId_.Clone() : null;
-      releaseOwnership_ = other.releaseOwnership_;
-      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public OwnershipRequest Clone() {
-      return new OwnershipRequest(this);
-    }
-
-    /// <summary>Field number for the "entity_id" field.</summary>
-    public const int EntityIdFieldNumber = 1;
-    private global::Bgs.Protocol.EntityId entityId_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Bgs.Protocol.EntityId EntityId {
-      get { return entityId_; }
-      set {
-        entityId_ = value;
-      }
-    }
-    /// <summary>Gets whether the entity_id field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool HasEntityId {
-      get { return entityId_ != null; }
-    }
-    /// <summary>Clears the value of the entity_id field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void ClearEntityId() {
-      entityId_ = null;
-    }
-
-    /// <summary>Field number for the "release_ownership" field.</summary>
-    public const int ReleaseOwnershipFieldNumber = 2;
-    private readonly static bool ReleaseOwnershipDefaultValue = false;
-
-    private bool releaseOwnership_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool ReleaseOwnership {
-      get { if ((_hasBits0 & 1) != 0) { return releaseOwnership_; } else { return ReleaseOwnershipDefaultValue; } }
-      set {
-        _hasBits0 |= 1;
-        releaseOwnership_ = value;
-      }
-    }
-    /// <summary>Gets whether the "release_ownership" field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool HasReleaseOwnership {
-      get { return (_hasBits0 & 1) != 0; }
-    }
-    /// <summary>Clears the value of the "release_ownership" field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void ClearReleaseOwnership() {
-      _hasBits0 &= ~1;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override bool Equals(object other) {
-      return Equals(other as OwnershipRequest);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool Equals(OwnershipRequest other) {
-      if (ReferenceEquals(other, null)) {
-        return false;
-      }
-      if (ReferenceEquals(other, this)) {
-        return true;
-      }
-      if (!object.Equals(EntityId, other.EntityId)) return false;
-      if (ReleaseOwnership != other.ReleaseOwnership) return false;
-      return Equals(_unknownFields, other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override int GetHashCode() {
-      int hash = 1;
-      if (HasEntityId) hash ^= EntityId.GetHashCode();
-      if (HasReleaseOwnership) hash ^= ReleaseOwnership.GetHashCode();
-      if (_unknownFields != null) {
-        hash ^= _unknownFields.GetHashCode();
-      }
-      return hash;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override string ToString() {
-      return pb::JsonFormatter.ToDiagnosticString(this);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void WriteTo(pb::CodedOutputStream output) {
-      if (HasEntityId) {
-        output.WriteRawTag(10);
-        output.WriteMessage(EntityId);
-      }
-      if (HasReleaseOwnership) {
-        output.WriteRawTag(16);
-        output.WriteBool(ReleaseOwnership);
-      }
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(output);
-      }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int CalculateSize() {
-      int size = 0;
-      if (HasEntityId) {
-        size += 1 + pb::CodedOutputStream.ComputeMessageSize(EntityId);
-      }
-      if (HasReleaseOwnership) {
-        size += 1 + 1;
-      }
-      if (_unknownFields != null) {
-        size += _unknownFields.CalculateSize();
-      }
-      return size;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(OwnershipRequest other) {
-      if (other == null) {
-        return;
-      }
-      if (other.HasEntityId) {
-        if (!HasEntityId) {
-          EntityId = new global::Bgs.Protocol.EntityId();
-        }
-        EntityId.MergeFrom(other.EntityId);
-      }
-      if (other.HasReleaseOwnership) {
-        ReleaseOwnership = other.ReleaseOwnership;
-      }
-      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(pb::CodedInputStream input) {
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
-            break;
-          case 10: {
-            if (!HasEntityId) {
-              EntityId = new global::Bgs.Protocol.EntityId();
-            }
-            input.ReadMessage(EntityId);
-            break;
-          }
-          case 16: {
-            ReleaseOwnership = input.ReadBool();
-            break;
-          }
-        }
-      }
-    }
-
-  }
-
   public sealed partial class BatchSubscribeRequest : pb::IMessage<BatchSubscribeRequest> {
     private static readonly pb::MessageParser<BatchSubscribeRequest> _parser = new pb::MessageParser<BatchSubscribeRequest>(() => new BatchSubscribeRequest());
     private pb::UnknownFieldSet _unknownFields;
@@ -1536,7 +1196,7 @@ namespace Bgs.Protocol.Presence.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Presence.V1.PresenceServiceReflection.Descriptor.MessageTypes[7]; }
+      get { return global::Bgs.Protocol.Presence.V1.PresenceServiceReflection.Descriptor.MessageTypes[5]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1785,7 +1445,7 @@ namespace Bgs.Protocol.Presence.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Presence.V1.PresenceServiceReflection.Descriptor.MessageTypes[8]; }
+      get { return global::Bgs.Protocol.Presence.V1.PresenceServiceReflection.Descriptor.MessageTypes[6]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1972,7 +1632,7 @@ namespace Bgs.Protocol.Presence.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Presence.V1.PresenceServiceReflection.Descriptor.MessageTypes[9]; }
+      get { return global::Bgs.Protocol.Presence.V1.PresenceServiceReflection.Descriptor.MessageTypes[7]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2094,7 +1754,7 @@ namespace Bgs.Protocol.Presence.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Presence.V1.PresenceServiceReflection.Descriptor.MessageTypes[10]; }
+      get { return global::Bgs.Protocol.Presence.V1.PresenceServiceReflection.Descriptor.MessageTypes[8]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]

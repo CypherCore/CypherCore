@@ -25,21 +25,22 @@ namespace Bgs.Protocol.UserManager.V1 {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "CipiZ3MvbG93L3BiL2NsaWVudC91c2VyX21hbmFnZXJfdHlwZXMucHJvdG8S",
-            "HGJncy5wcm90b2NvbC51c2VyX21hbmFnZXIudjEaJGJncy9sb3cvcGIvY2xp",
-            "ZW50L2VudGl0eV90eXBlcy5wcm90bxonYmdzL2xvdy9wYi9jbGllbnQvYXR0",
-            "cmlidXRlX3R5cGVzLnByb3RvIrQBCgxSZWNlbnRQbGF5ZXISKQoJZW50aXR5",
-            "X2lkGAEgAigLMhYuYmdzLnByb3RvY29sLkVudGl0eUlkEg8KB3Byb2dyYW0Y",
-            "AiABKAkSGAoQdGltZXN0YW1wX3BsYXllZBgDIAEoBhIrCgphdHRyaWJ1dGVz",
-            "GAQgAygLMhcuYmdzLnByb3RvY29sLkF0dHJpYnV0ZRINCgJpZBgFIAEoBzoB",
-            "MBISCgdjb3VudGVyGAYgASgHOgEwInIKDUJsb2NrZWRQbGF5ZXISKgoKYWNj",
-            "b3VudF9pZBgBIAIoCzIWLmJncy5wcm90b2NvbC5FbnRpdHlJZBIMCgRuYW1l",
-            "GAIgASgJEhAKBHJvbGUYAyADKA1CAhABEhUKCnByaXZpbGVnZXMYBCABKAQ6",
-            "ATA="));
+            "HGJncy5wcm90b2NvbC51c2VyX21hbmFnZXIudjEaN2Jncy9sb3cvcGIvY2xp",
+            "ZW50L2dsb2JhbF9leHRlbnNpb25zL2ZpZWxkX29wdGlvbnMucHJvdG8aJGJn",
+            "cy9sb3cvcGIvY2xpZW50L2VudGl0eV90eXBlcy5wcm90bxonYmdzL2xvdy9w",
+            "Yi9jbGllbnQvYXR0cmlidXRlX3R5cGVzLnByb3RvIqUBCgxSZWNlbnRQbGF5",
+            "ZXISKQoJZW50aXR5X2lkGAEgAigLMhYuYmdzLnByb3RvY29sLkVudGl0eUlk",
+            "Eg8KB3Byb2dyYW0YAiABKAkSGAoQdGltZXN0YW1wX3BsYXllZBgDIAEoBhIr",
+            "CgphdHRyaWJ1dGVzGAQgAygLMhcuYmdzLnByb3RvY29sLkF0dHJpYnV0ZRIS",
+            "Cgdjb3VudGVyGAYgASgHOgEwIoEBCg1CbG9ja2VkUGxheWVyEioKCmFjY291",
+            "bnRfaWQYASACKAsyFi5iZ3MucHJvdG9jb2wuRW50aXR5SWQSGgoKYmF0dGxl",
+            "X3RhZxgCIAEoCUIGgvkrAggBEhAKBHJvbGUYAyADKA1CAhgBEhYKCnByaXZp",
+            "bGVnZXMYBCABKARCAhgBUAA="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Bgs.Protocol.EntityTypesReflection.Descriptor, global::Bgs.Protocol.AttributeTypesReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.EntityTypesReflection.Descriptor, global::Bgs.Protocol.AttributeTypesReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.UserManager.V1.RecentPlayer), global::Bgs.Protocol.UserManager.V1.RecentPlayer.Parser, new[]{ "EntityId", "Program", "TimestampPlayed", "Attributes", "Id", "Counter" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.UserManager.V1.BlockedPlayer), global::Bgs.Protocol.UserManager.V1.BlockedPlayer.Parser, new[]{ "AccountId", "Name", "Role", "Privileges" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.UserManager.V1.RecentPlayer), global::Bgs.Protocol.UserManager.V1.RecentPlayer.Parser, new[]{ "EntityId", "Program", "TimestampPlayed", "Attributes", "Counter" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.UserManager.V1.BlockedPlayer), global::Bgs.Protocol.UserManager.V1.BlockedPlayer.Parser, new[]{ "AccountId", "BattleTag", "Role", "Privileges" }, null, null, null, null)
           }));
     }
     #endregion
@@ -77,7 +78,6 @@ namespace Bgs.Protocol.UserManager.V1 {
       program_ = other.program_;
       timestampPlayed_ = other.timestampPlayed_;
       attributes_ = other.attributes_.Clone();
-      id_ = other.id_;
       counter_ = other.counter_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
@@ -165,30 +165,6 @@ namespace Bgs.Protocol.UserManager.V1 {
       get { return attributes_; }
     }
 
-    /// <summary>Field number for the "id" field.</summary>
-    public const int IdFieldNumber = 5;
-    private readonly static uint IdDefaultValue = 0;
-
-    private uint id_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public uint Id {
-      get { if ((_hasBits0 & 2) != 0) { return id_; } else { return IdDefaultValue; } }
-      set {
-        _hasBits0 |= 2;
-        id_ = value;
-      }
-    }
-    /// <summary>Gets whether the "id" field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool HasId {
-      get { return (_hasBits0 & 2) != 0; }
-    }
-    /// <summary>Clears the value of the "id" field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void ClearId() {
-      _hasBits0 &= ~2;
-    }
-
     /// <summary>Field number for the "counter" field.</summary>
     public const int CounterFieldNumber = 6;
     private readonly static uint CounterDefaultValue = 0;
@@ -196,21 +172,21 @@ namespace Bgs.Protocol.UserManager.V1 {
     private uint counter_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public uint Counter {
-      get { if ((_hasBits0 & 4) != 0) { return counter_; } else { return CounterDefaultValue; } }
+      get { if ((_hasBits0 & 2) != 0) { return counter_; } else { return CounterDefaultValue; } }
       set {
-        _hasBits0 |= 4;
+        _hasBits0 |= 2;
         counter_ = value;
       }
     }
     /// <summary>Gets whether the "counter" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCounter {
-      get { return (_hasBits0 & 4) != 0; }
+      get { return (_hasBits0 & 2) != 0; }
     }
     /// <summary>Clears the value of the "counter" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCounter() {
-      _hasBits0 &= ~4;
+      _hasBits0 &= ~2;
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -230,7 +206,6 @@ namespace Bgs.Protocol.UserManager.V1 {
       if (Program != other.Program) return false;
       if (TimestampPlayed != other.TimestampPlayed) return false;
       if(!attributes_.Equals(other.attributes_)) return false;
-      if (Id != other.Id) return false;
       if (Counter != other.Counter) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
@@ -242,7 +217,6 @@ namespace Bgs.Protocol.UserManager.V1 {
       if (HasProgram) hash ^= Program.GetHashCode();
       if (HasTimestampPlayed) hash ^= TimestampPlayed.GetHashCode();
       hash ^= attributes_.GetHashCode();
-      if (HasId) hash ^= Id.GetHashCode();
       if (HasCounter) hash ^= Counter.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
@@ -270,10 +244,6 @@ namespace Bgs.Protocol.UserManager.V1 {
         output.WriteFixed64(TimestampPlayed);
       }
       attributes_.WriteTo(output, _repeated_attributes_codec);
-      if (HasId) {
-        output.WriteRawTag(45);
-        output.WriteFixed32(Id);
-      }
       if (HasCounter) {
         output.WriteRawTag(53);
         output.WriteFixed32(Counter);
@@ -296,9 +266,6 @@ namespace Bgs.Protocol.UserManager.V1 {
         size += 1 + 8;
       }
       size += attributes_.CalculateSize(_repeated_attributes_codec);
-      if (HasId) {
-        size += 1 + 4;
-      }
       if (HasCounter) {
         size += 1 + 4;
       }
@@ -326,9 +293,6 @@ namespace Bgs.Protocol.UserManager.V1 {
         TimestampPlayed = other.TimestampPlayed;
       }
       attributes_.Add(other.attributes_);
-      if (other.HasId) {
-        Id = other.Id;
-      }
       if (other.HasCounter) {
         Counter = other.Counter;
       }
@@ -360,10 +324,6 @@ namespace Bgs.Protocol.UserManager.V1 {
           }
           case 34: {
             attributes_.AddEntriesFrom(input, _repeated_attributes_codec);
-            break;
-          }
-          case 45: {
-            Id = input.ReadFixed32();
             break;
           }
           case 53: {
@@ -404,7 +364,7 @@ namespace Bgs.Protocol.UserManager.V1 {
     public BlockedPlayer(BlockedPlayer other) : this() {
       _hasBits0 = other._hasBits0;
       accountId_ = other.HasAccountId ? other.accountId_.Clone() : null;
-      name_ = other.name_;
+      battleTag_ = other.battleTag_;
       role_ = other.role_.Clone();
       privileges_ = other.privileges_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
@@ -436,34 +396,35 @@ namespace Bgs.Protocol.UserManager.V1 {
       accountId_ = null;
     }
 
-    /// <summary>Field number for the "name" field.</summary>
-    public const int NameFieldNumber = 2;
-    private readonly static string NameDefaultValue = "";
+    /// <summary>Field number for the "battle_tag" field.</summary>
+    public const int BattleTagFieldNumber = 2;
+    private readonly static string BattleTagDefaultValue = "";
 
-    private string name_;
+    private string battleTag_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public string Name {
-      get { return name_ ?? NameDefaultValue; }
+    public string BattleTag {
+      get { return battleTag_ ?? BattleTagDefaultValue; }
       set {
-        name_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+        battleTag_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
       }
     }
-    /// <summary>Gets whether the "name" field is set</summary>
+    /// <summary>Gets whether the "battle_tag" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool HasName {
-      get { return name_ != null; }
+    public bool HasBattleTag {
+      get { return battleTag_ != null; }
     }
-    /// <summary>Clears the value of the "name" field</summary>
+    /// <summary>Clears the value of the "battle_tag" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void ClearName() {
-      name_ = null;
+    public void ClearBattleTag() {
+      battleTag_ = null;
     }
 
     /// <summary>Field number for the "role" field.</summary>
     public const int RoleFieldNumber = 3;
     private static readonly pb::FieldCodec<uint> _repeated_role_codec
-        = pb::FieldCodec.ForUInt32(26);
+        = pb::FieldCodec.ForUInt32(24);
     private readonly pbc::RepeatedField<uint> role_ = new pbc::RepeatedField<uint>();
+    [global::System.ObsoleteAttribute]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public pbc::RepeatedField<uint> Role {
       get { return role_; }
@@ -474,6 +435,7 @@ namespace Bgs.Protocol.UserManager.V1 {
     private readonly static ulong PrivilegesDefaultValue = 0UL;
 
     private ulong privileges_;
+    [global::System.ObsoleteAttribute]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public ulong Privileges {
       get { if ((_hasBits0 & 1) != 0) { return privileges_; } else { return PrivilegesDefaultValue; } }
@@ -483,11 +445,13 @@ namespace Bgs.Protocol.UserManager.V1 {
       }
     }
     /// <summary>Gets whether the "privileges" field is set</summary>
+    [global::System.ObsoleteAttribute]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasPrivileges {
       get { return (_hasBits0 & 1) != 0; }
     }
     /// <summary>Clears the value of the "privileges" field</summary>
+    [global::System.ObsoleteAttribute]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearPrivileges() {
       _hasBits0 &= ~1;
@@ -507,7 +471,7 @@ namespace Bgs.Protocol.UserManager.V1 {
         return true;
       }
       if (!object.Equals(AccountId, other.AccountId)) return false;
-      if (Name != other.Name) return false;
+      if (BattleTag != other.BattleTag) return false;
       if(!role_.Equals(other.role_)) return false;
       if (Privileges != other.Privileges) return false;
       return Equals(_unknownFields, other._unknownFields);
@@ -517,7 +481,7 @@ namespace Bgs.Protocol.UserManager.V1 {
     public override int GetHashCode() {
       int hash = 1;
       if (HasAccountId) hash ^= AccountId.GetHashCode();
-      if (HasName) hash ^= Name.GetHashCode();
+      if (HasBattleTag) hash ^= BattleTag.GetHashCode();
       hash ^= role_.GetHashCode();
       if (HasPrivileges) hash ^= Privileges.GetHashCode();
       if (_unknownFields != null) {
@@ -537,9 +501,9 @@ namespace Bgs.Protocol.UserManager.V1 {
         output.WriteRawTag(10);
         output.WriteMessage(AccountId);
       }
-      if (HasName) {
+      if (HasBattleTag) {
         output.WriteRawTag(18);
-        output.WriteString(Name);
+        output.WriteString(BattleTag);
       }
       role_.WriteTo(output, _repeated_role_codec);
       if (HasPrivileges) {
@@ -557,8 +521,8 @@ namespace Bgs.Protocol.UserManager.V1 {
       if (HasAccountId) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(AccountId);
       }
-      if (HasName) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(Name);
+      if (HasBattleTag) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(BattleTag);
       }
       size += role_.CalculateSize(_repeated_role_codec);
       if (HasPrivileges) {
@@ -581,8 +545,8 @@ namespace Bgs.Protocol.UserManager.V1 {
         }
         AccountId.MergeFrom(other.AccountId);
       }
-      if (other.HasName) {
-        Name = other.Name;
+      if (other.HasBattleTag) {
+        BattleTag = other.BattleTag;
       }
       role_.Add(other.role_);
       if (other.HasPrivileges) {
@@ -607,7 +571,7 @@ namespace Bgs.Protocol.UserManager.V1 {
             break;
           }
           case 18: {
-            Name = input.ReadString();
+            BattleTag = input.ReadString();
             break;
           }
           case 26:

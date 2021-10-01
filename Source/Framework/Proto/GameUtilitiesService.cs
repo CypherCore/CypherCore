@@ -26,103 +26,85 @@ namespace Bgs.Protocol.GameUtilities.V1 {
           string.Concat(
             "Ci5iZ3MvbG93L3BiL2NsaWVudC9nYW1lX3V0aWxpdGllc19zZXJ2aWNlLnBy",
             "b3RvEh5iZ3MucHJvdG9jb2wuZ2FtZV91dGlsaXRpZXMudjEaJ2Jncy9sb3cv",
-            "cGIvY2xpZW50L2F0dHJpYnV0ZV90eXBlcy5wcm90bxosYmdzL2xvdy9wYi9j",
-            "bGllbnQvY29udGVudF9oYW5kbGVfdHlwZXMucHJvdG8aJGJncy9sb3cvcGIv",
-            "Y2xpZW50L2VudGl0eV90eXBlcy5wcm90bxosYmdzL2xvdy9wYi9jbGllbnQv",
-            "Z2FtZV91dGlsaXRpZXNfdHlwZXMucHJvdG8aIWJncy9sb3cvcGIvY2xpZW50",
-            "L3JwY190eXBlcy5wcm90bxo5YmdzL2xvdy9wYi9jbGllbnQvZ2xvYmFsX2V4",
-            "dGVuc2lvbnMvbWVzc2FnZV9vcHRpb25zLnByb3RvGjdiZ3MvbG93L3BiL2Ns",
-            "aWVudC9nbG9iYWxfZXh0ZW5zaW9ucy9maWVsZF9vcHRpb25zLnByb3RvGjhi",
-            "Z3MvbG93L3BiL2NsaWVudC9nbG9iYWxfZXh0ZW5zaW9ucy9tZXRob2Rfb3B0",
-            "aW9ucy5wcm90bxo5YmdzL2xvdy9wYi9jbGllbnQvZ2xvYmFsX2V4dGVuc2lv",
-            "bnMvc2VydmljZV9vcHRpb25zLnByb3RvIpECCg1DbGllbnRSZXF1ZXN0EioK",
-            "CWF0dHJpYnV0ZRgBIAMoCzIXLmJncy5wcm90b2NvbC5BdHRyaWJ1dGUSJQoE",
-            "aG9zdBgCIAEoCzIXLmJncy5wcm90b2NvbC5Qcm9jZXNzSWQSKgoKYWNjb3Vu",
-            "dF9pZBgDIAEoCzIWLmJncy5wcm90b2NvbC5FbnRpdHlJZBIvCg9nYW1lX2Fj",
-            "Y291bnRfaWQYBCABKAsyFi5iZ3MucHJvdG9jb2wuRW50aXR5SWQSDwoHcHJv",
-            "Z3JhbRgFIAEoBxI/CgtjbGllbnRfaW5mbxgGIAEoCzIqLmJncy5wcm90b2Nv",
-            "bC5nYW1lX3V0aWxpdGllcy52MS5DbGllbnRJbmZvIjwKDkNsaWVudFJlc3Bv",
-            "bnNlEioKCWF0dHJpYnV0ZRgBIAMoCzIXLmJncy5wcm90b2NvbC5BdHRyaWJ1",
-            "dGUicwoNU2VydmVyUmVxdWVzdBIqCglhdHRyaWJ1dGUYASADKAsyFy5iZ3Mu",
-            "cHJvdG9jb2wuQXR0cmlidXRlEg8KB3Byb2dyYW0YAiACKAcSJQoEaG9zdBgD",
-            "IAEoCzIXLmJncy5wcm90b2NvbC5Qcm9jZXNzSWQiPAoOU2VydmVyUmVzcG9u",
-            "c2USKgoJYXR0cmlidXRlGAEgAygLMhcuYmdzLnByb3RvY29sLkF0dHJpYnV0",
-            "ZSLHAQodUHJlc2VuY2VDaGFubmVsQ3JlYXRlZFJlcXVlc3QSIgoCaWQYASAC",
-            "KAsyFi5iZ3MucHJvdG9jb2wuRW50aXR5SWQSLwoPZ2FtZV9hY2NvdW50X2lk",
-            "GAMgASgLMhYuYmdzLnByb3RvY29sLkVudGl0eUlkEioKCmFjY291bnRfaWQY",
-            "BCABKAsyFi5iZ3MucHJvdG9jb2wuRW50aXR5SWQSJQoEaG9zdBgFIAEoCzIX",
-            "LmJncy5wcm90b2NvbC5Qcm9jZXNzSWQijQEKGUdldFBsYXllclZhcmlhYmxl",
-            "c1JlcXVlc3QSSQoQcGxheWVyX3ZhcmlhYmxlcxgBIAMoCzIvLmJncy5wcm90",
-            "b2NvbC5nYW1lX3V0aWxpdGllcy52MS5QbGF5ZXJWYXJpYWJsZXMSJQoEaG9z",
-            "dBgCIAEoCzIXLmJncy5wcm90b2NvbC5Qcm9jZXNzSWQiZwoaR2V0UGxheWVy",
-            "VmFyaWFibGVzUmVzcG9uc2USSQoQcGxheWVyX3ZhcmlhYmxlcxgBIAMoCzIv",
-            "LmJncy5wcm90b2NvbC5nYW1lX3V0aWxpdGllcy52MS5QbGF5ZXJWYXJpYWJs",
-            "ZXMiiwEKHUdhbWVBY2NvdW50T25saW5lTm90aWZpY2F0aW9uEi8KD2dhbWVf",
-            "YWNjb3VudF9pZBgBIAIoCzIWLmJncy5wcm90b2NvbC5FbnRpdHlJZBIlCgRo",
-            "b3N0GAIgASgLMhcuYmdzLnByb3RvY29sLlByb2Nlc3NJZBISCgpzZXNzaW9u",
-            "X2lkGAMgASgJIowBCh5HYW1lQWNjb3VudE9mZmxpbmVOb3RpZmljYXRpb24S",
-            "LwoPZ2FtZV9hY2NvdW50X2lkGAEgAigLMhYuYmdzLnByb3RvY29sLkVudGl0",
-            "eUlkEiUKBGhvc3QYAiABKAsyFy5iZ3MucHJvdG9jb2wuUHJvY2Vzc0lkEhIK",
-            "CnNlc3Npb25faWQYAyABKAkiQwoaR2V0QWNoaWV2ZW1lbnRzRmlsZVJlcXVl",
-            "c3QSJQoEaG9zdBgBIAEoCzIXLmJncy5wcm90b2NvbC5Qcm9jZXNzSWQiUgob",
-            "R2V0QWNoaWV2ZW1lbnRzRmlsZVJlc3BvbnNlEjMKDmNvbnRlbnRfaGFuZGxl",
-            "GAEgASgLMhsuYmdzLnByb3RvY29sLkNvbnRlbnRIYW5kbGUicwofR2V0QWxs",
-            "VmFsdWVzRm9yQXR0cmlidXRlUmVxdWVzdBIVCg1hdHRyaWJ1dGVfa2V5GAEg",
-            "ASgJEigKCGFnZW50X2lkGAIgASgLMhYuYmdzLnByb3RvY29sLkVudGl0eUlk",
-            "Eg8KB3Byb2dyYW0YBSABKAciUgogR2V0QWxsVmFsdWVzRm9yQXR0cmlidXRl",
-            "UmVzcG9uc2USLgoPYXR0cmlidXRlX3ZhbHVlGAEgAygLMhUuYmdzLnByb3Rv",
-            "Y29sLlZhcmlhbnQiVwoYUmVnaXN0ZXJVdGlsaXRpZXNSZXF1ZXN0EioKCWF0",
-            "dHJpYnV0ZRgBIAMoCzIXLmJncy5wcm90b2NvbC5BdHRyaWJ1dGUSDwoHcHJv",
-            "Z3JhbRgCIAEoByIuChlSZWdpc3RlclV0aWxpdGllc1Jlc3BvbnNlEhEKCWNs",
-            "aWVudF9pZBgBIAEoCSIcChpVbnJlZ2lzdGVyVXRpbGl0aWVzUmVxdWVzdDKx",
-            "CwoUR2FtZVV0aWxpdGllc1NlcnZpY2USfQoUUHJvY2Vzc0NsaWVudFJlcXVl",
-            "c3QSLS5iZ3MucHJvdG9jb2wuZ2FtZV91dGlsaXRpZXMudjEuQ2xpZW50UmVx",
-            "dWVzdBouLmJncy5wcm90b2NvbC5nYW1lX3V0aWxpdGllcy52MS5DbGllbnRS",
-            "ZXNwb25zZSIGgvkrAggBEnUKFlByZXNlbmNlQ2hhbm5lbENyZWF0ZWQSPS5i",
-            "Z3MucHJvdG9jb2wuZ2FtZV91dGlsaXRpZXMudjEuUHJlc2VuY2VDaGFubmVs",
-            "Q3JlYXRlZFJlcXVlc3QaFC5iZ3MucHJvdG9jb2wuTm9EYXRhIgaC+SsCCAIS",
-            "kwEKEkdldFBsYXllclZhcmlhYmxlcxI5LmJncy5wcm90b2NvbC5nYW1lX3V0",
-            "aWxpdGllcy52MS5HZXRQbGF5ZXJWYXJpYWJsZXNSZXF1ZXN0GjouYmdzLnBy",
-            "b3RvY29sLmdhbWVfdXRpbGl0aWVzLnYxLkdldFBsYXllclZhcmlhYmxlc1Jl",
-            "c3BvbnNlIgaC+SsCCAMSfQoUUHJvY2Vzc1NlcnZlclJlcXVlc3QSLS5iZ3Mu",
-            "cHJvdG9jb2wuZ2FtZV91dGlsaXRpZXMudjEuU2VydmVyUmVxdWVzdBouLmJn",
-            "cy5wcm90b2NvbC5nYW1lX3V0aWxpdGllcy52MS5TZXJ2ZXJSZXNwb25zZSIG",
-            "gvkrAggGEncKE09uR2FtZUFjY291bnRPbmxpbmUSPS5iZ3MucHJvdG9jb2wu",
-            "Z2FtZV91dGlsaXRpZXMudjEuR2FtZUFjY291bnRPbmxpbmVOb3RpZmljYXRp",
-            "b24aGS5iZ3MucHJvdG9jb2wuTk9fUkVTUE9OU0UiBoL5KwIIBxJ5ChRPbkdh",
-            "bWVBY2NvdW50T2ZmbGluZRI+LmJncy5wcm90b2NvbC5nYW1lX3V0aWxpdGll",
-            "cy52MS5HYW1lQWNjb3VudE9mZmxpbmVOb3RpZmljYXRpb24aGS5iZ3MucHJv",
-            "dG9jb2wuTk9fUkVTUE9OU0UiBoL5KwIICBKWAQoTR2V0QWNoaWV2ZW1lbnRz",
-            "RmlsZRI6LmJncy5wcm90b2NvbC5nYW1lX3V0aWxpdGllcy52MS5HZXRBY2hp",
-            "ZXZlbWVudHNGaWxlUmVxdWVzdBo7LmJncy5wcm90b2NvbC5nYW1lX3V0aWxp",
-            "dGllcy52MS5HZXRBY2hpZXZlbWVudHNGaWxlUmVzcG9uc2UiBoL5KwIICRKl",
-            "AQoYR2V0QWxsVmFsdWVzRm9yQXR0cmlidXRlEj8uYmdzLnByb3RvY29sLmdh",
-            "bWVfdXRpbGl0aWVzLnYxLkdldEFsbFZhbHVlc0ZvckF0dHJpYnV0ZVJlcXVl",
-            "c3QaQC5iZ3MucHJvdG9jb2wuZ2FtZV91dGlsaXRpZXMudjEuR2V0QWxsVmFs",
-            "dWVzRm9yQXR0cmlidXRlUmVzcG9uc2UiBoL5KwIIChKQAQoRUmVnaXN0ZXJV",
-            "dGlsaXRpZXMSOC5iZ3MucHJvdG9jb2wuZ2FtZV91dGlsaXRpZXMudjEuUmVn",
-            "aXN0ZXJVdGlsaXRpZXNSZXF1ZXN0GjkuYmdzLnByb3RvY29sLmdhbWVfdXRp",
-            "bGl0aWVzLnYxLlJlZ2lzdGVyVXRpbGl0aWVzUmVzcG9uc2UiBoL5KwIICxJ0",
+            "cGIvY2xpZW50L2F0dHJpYnV0ZV90eXBlcy5wcm90bxokYmdzL2xvdy9wYi9j",
+            "bGllbnQvZW50aXR5X3R5cGVzLnByb3RvGixiZ3MvbG93L3BiL2NsaWVudC9n",
+            "YW1lX3V0aWxpdGllc190eXBlcy5wcm90bxohYmdzL2xvdy9wYi9jbGllbnQv",
+            "cnBjX3R5cGVzLnByb3RvGjliZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxfZXh0",
+            "ZW5zaW9ucy9tZXNzYWdlX29wdGlvbnMucHJvdG8aN2Jncy9sb3cvcGIvY2xp",
+            "ZW50L2dsb2JhbF9leHRlbnNpb25zL2ZpZWxkX29wdGlvbnMucHJvdG8aOGJn",
+            "cy9sb3cvcGIvY2xpZW50L2dsb2JhbF9leHRlbnNpb25zL21ldGhvZF9vcHRp",
+            "b25zLnByb3RvGjliZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxfZXh0ZW5zaW9u",
+            "cy9zZXJ2aWNlX29wdGlvbnMucHJvdG8inQIKDUNsaWVudFJlcXVlc3QSKgoJ",
+            "YXR0cmlidXRlGAEgAygLMhcuYmdzLnByb3RvY29sLkF0dHJpYnV0ZRIpCgRo",
+            "b3N0GAIgASgLMhcuYmdzLnByb3RvY29sLlByb2Nlc3NJZEICGAESKgoKYWNj",
+            "b3VudF9pZBgDIAEoCzIWLmJncy5wcm90b2NvbC5FbnRpdHlJZBIvCg9nYW1l",
+            "X2FjY291bnRfaWQYBCABKAsyFi5iZ3MucHJvdG9jb2wuRW50aXR5SWQSDwoH",
+            "cHJvZ3JhbRgFIAEoBxI/CgtjbGllbnRfaW5mbxgGIAEoCzIqLmJncy5wcm90",
+            "b2NvbC5nYW1lX3V0aWxpdGllcy52MS5DbGllbnRJbmZvOgaC+SsCCAEiPAoO",
+            "Q2xpZW50UmVzcG9uc2USKgoJYXR0cmlidXRlGAEgAygLMhcuYmdzLnByb3Rv",
+            "Y29sLkF0dHJpYnV0ZSJ3Cg1TZXJ2ZXJSZXF1ZXN0EioKCWF0dHJpYnV0ZRgB",
+            "IAMoCzIXLmJncy5wcm90b2NvbC5BdHRyaWJ1dGUSDwoHcHJvZ3JhbRgCIAIo",
+            "BxIpCgRob3N0GAMgASgLMhcuYmdzLnByb3RvY29sLlByb2Nlc3NJZEICGAEi",
+            "PAoOU2VydmVyUmVzcG9uc2USKgoJYXR0cmlidXRlGAEgAygLMhcuYmdzLnBy",
+            "b3RvY29sLkF0dHJpYnV0ZSLLAQodUHJlc2VuY2VDaGFubmVsQ3JlYXRlZFJl",
+            "cXVlc3QSIgoCaWQYASACKAsyFi5iZ3MucHJvdG9jb2wuRW50aXR5SWQSLwoP",
+            "Z2FtZV9hY2NvdW50X2lkGAMgASgLMhYuYmdzLnByb3RvY29sLkVudGl0eUlk",
+            "EioKCmFjY291bnRfaWQYBCABKAsyFi5iZ3MucHJvdG9jb2wuRW50aXR5SWQS",
+            "KQoEaG9zdBgFIAEoCzIXLmJncy5wcm90b2NvbC5Qcm9jZXNzSWRCAhgBIo8B",
+            "Ch1HYW1lQWNjb3VudE9ubGluZU5vdGlmaWNhdGlvbhIvCg9nYW1lX2FjY291",
+            "bnRfaWQYASACKAsyFi5iZ3MucHJvdG9jb2wuRW50aXR5SWQSKQoEaG9zdBgC",
+            "IAEoCzIXLmJncy5wcm90b2NvbC5Qcm9jZXNzSWRCAhgBEhIKCnNlc3Npb25f",
+            "aWQYAyABKAkikAEKHkdhbWVBY2NvdW50T2ZmbGluZU5vdGlmaWNhdGlvbhIv",
+            "Cg9nYW1lX2FjY291bnRfaWQYASACKAsyFi5iZ3MucHJvdG9jb2wuRW50aXR5",
+            "SWQSKQoEaG9zdBgCIAEoCzIXLmJncy5wcm90b2NvbC5Qcm9jZXNzSWRCAhgB",
+            "EhIKCnNlc3Npb25faWQYAyABKAkikgEKH0dldEFsbFZhbHVlc0ZvckF0dHJp",
+            "YnV0ZVJlcXVlc3QSLAoNYXR0cmlidXRlX2tleRgBIAEoCUIVivkrBiIECgII",
+            "AYr5KwciBQoDEIACEigKCGFnZW50X2lkGAIgASgLMhYuYmdzLnByb3RvY29s",
+            "LkVudGl0eUlkEg8KB3Byb2dyYW0YBSABKAc6BoL5KwIIASJSCiBHZXRBbGxW",
+            "YWx1ZXNGb3JBdHRyaWJ1dGVSZXNwb25zZRIuCg9hdHRyaWJ1dGVfdmFsdWUY",
+            "ASADKAsyFS5iZ3MucHJvdG9jb2wuVmFyaWFudCJhChhSZWdpc3RlclV0aWxp",
+            "dGllc1JlcXVlc3QSKgoJYXR0cmlidXRlGAEgAygLMhcuYmdzLnByb3RvY29s",
+            "LkF0dHJpYnV0ZRIZCgdwcm9ncmFtGAIgASgHQgiK+SsEEgIQACIuChlSZWdp",
+            "c3RlclV0aWxpdGllc1Jlc3BvbnNlEhEKCWNsaWVudF9pZBgBIAEoCSIcChpV",
+            "bnJlZ2lzdGVyVXRpbGl0aWVzUmVxdWVzdDKOCQoUR2FtZVV0aWxpdGllc1Nl",
+            "cnZpY2USfQoUUHJvY2Vzc0NsaWVudFJlcXVlc3QSLS5iZ3MucHJvdG9jb2wu",
+            "Z2FtZV91dGlsaXRpZXMudjEuQ2xpZW50UmVxdWVzdBouLmJncy5wcm90b2Nv",
+            "bC5nYW1lX3V0aWxpdGllcy52MS5DbGllbnRSZXNwb25zZSIGgvkrAggBEnUK",
+            "FlByZXNlbmNlQ2hhbm5lbENyZWF0ZWQSPS5iZ3MucHJvdG9jb2wuZ2FtZV91",
+            "dGlsaXRpZXMudjEuUHJlc2VuY2VDaGFubmVsQ3JlYXRlZFJlcXVlc3QaFC5i",
+            "Z3MucHJvdG9jb2wuTm9EYXRhIgaC+SsCCAISfQoUUHJvY2Vzc1NlcnZlclJl",
+            "cXVlc3QSLS5iZ3MucHJvdG9jb2wuZ2FtZV91dGlsaXRpZXMudjEuU2VydmVy",
+            "UmVxdWVzdBouLmJncy5wcm90b2NvbC5nYW1lX3V0aWxpdGllcy52MS5TZXJ2",
+            "ZXJSZXNwb25zZSIGgvkrAggGEncKE09uR2FtZUFjY291bnRPbmxpbmUSPS5i",
+            "Z3MucHJvdG9jb2wuZ2FtZV91dGlsaXRpZXMudjEuR2FtZUFjY291bnRPbmxp",
+            "bmVOb3RpZmljYXRpb24aGS5iZ3MucHJvdG9jb2wuTk9fUkVTUE9OU0UiBoL5",
+            "KwIIBxJ5ChRPbkdhbWVBY2NvdW50T2ZmbGluZRI+LmJncy5wcm90b2NvbC5n",
+            "YW1lX3V0aWxpdGllcy52MS5HYW1lQWNjb3VudE9mZmxpbmVOb3RpZmljYXRp",
+            "b24aGS5iZ3MucHJvdG9jb2wuTk9fUkVTUE9OU0UiBoL5KwIICBKlAQoYR2V0",
+            "QWxsVmFsdWVzRm9yQXR0cmlidXRlEj8uYmdzLnByb3RvY29sLmdhbWVfdXRp",
+            "bGl0aWVzLnYxLkdldEFsbFZhbHVlc0ZvckF0dHJpYnV0ZVJlcXVlc3QaQC5i",
+            "Z3MucHJvdG9jb2wuZ2FtZV91dGlsaXRpZXMudjEuR2V0QWxsVmFsdWVzRm9y",
+            "QXR0cmlidXRlUmVzcG9uc2UiBoL5KwIIChKWAQoRUmVnaXN0ZXJVdGlsaXRp",
+            "ZXMSOC5iZ3MucHJvdG9jb2wuZ2FtZV91dGlsaXRpZXMudjEuUmVnaXN0ZXJV",
+            "dGlsaXRpZXNSZXF1ZXN0GjkuYmdzLnByb3RvY29sLmdhbWVfdXRpbGl0aWVz",
+            "LnYxLlJlZ2lzdGVyVXRpbGl0aWVzUmVzcG9uc2UiDIL5KwIIC4L5KwIQAxJ6",
             "ChNVbnJlZ2lzdGVyVXRpbGl0aWVzEjouYmdzLnByb3RvY29sLmdhbWVfdXRp",
             "bGl0aWVzLnYxLlVucmVnaXN0ZXJVdGlsaXRpZXNSZXF1ZXN0GhkuYmdzLnBy",
-            "b3RvY29sLk5PX1JFU1BPTlNFIgaC+SsCCAwaUIL5KywKKmJuZXQucHJvdG9j",
-            "b2wuZ2FtZV91dGlsaXRpZXMuR2FtZVV0aWxpdGllc4L5KxAqDmdhbWVfdXRp",
-            "bGl0aWVzivkrAggBivkrAhABQkIKH2JuZXQucHJvdG9jb2wuZ2FtZV91dGls",
-            "aXRpZXMudjFCGUdhbWVVdGlsaXRpZXNTZXJ2aWNlUHJvdG+AAQCIAQE="));
+            "b3RvY29sLk5PX1JFU1BPTlNFIgyC+SsCCAyC+SsCEAMaUIL5KywKKmJuZXQu",
+            "cHJvdG9jb2wuZ2FtZV91dGlsaXRpZXMuR2FtZVV0aWxpdGllc4L5KxAqDmdh",
+            "bWVfdXRpbGl0aWVzivkrAggBivkrAhABQkIKH2JuZXQucHJvdG9jb2wuZ2Ft",
+            "ZV91dGlsaXRpZXMudjFCGUdhbWVVdGlsaXRpZXNTZXJ2aWNlUHJvdG+AAQCI",
+            "AQE="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Bgs.Protocol.AttributeTypesReflection.Descriptor, global::Bgs.Protocol.ContentHandleTypesReflection.Descriptor, global::Bgs.Protocol.EntityTypesReflection.Descriptor, global::Bgs.Protocol.GameUtilities.V1.GameUtilitiesTypesReflection.Descriptor, global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::Bgs.Protocol.AttributeTypesReflection.Descriptor, global::Bgs.Protocol.EntityTypesReflection.Descriptor, global::Bgs.Protocol.GameUtilities.V1.GameUtilitiesTypesReflection.Descriptor, global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.GameUtilities.V1.ClientRequest), global::Bgs.Protocol.GameUtilities.V1.ClientRequest.Parser, new[]{ "Attribute", "Host", "AccountId", "GameAccountId", "Program", "ClientInfo" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.GameUtilities.V1.ClientResponse), global::Bgs.Protocol.GameUtilities.V1.ClientResponse.Parser, new[]{ "Attribute" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.GameUtilities.V1.ServerRequest), global::Bgs.Protocol.GameUtilities.V1.ServerRequest.Parser, new[]{ "Attribute", "Program", "Host" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.GameUtilities.V1.ServerResponse), global::Bgs.Protocol.GameUtilities.V1.ServerResponse.Parser, new[]{ "Attribute" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.GameUtilities.V1.PresenceChannelCreatedRequest), global::Bgs.Protocol.GameUtilities.V1.PresenceChannelCreatedRequest.Parser, new[]{ "Id", "GameAccountId", "AccountId", "Host" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.GameUtilities.V1.GetPlayerVariablesRequest), global::Bgs.Protocol.GameUtilities.V1.GetPlayerVariablesRequest.Parser, new[]{ "PlayerVariables", "Host" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.GameUtilities.V1.GetPlayerVariablesResponse), global::Bgs.Protocol.GameUtilities.V1.GetPlayerVariablesResponse.Parser, new[]{ "PlayerVariables" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.GameUtilities.V1.GameAccountOnlineNotification), global::Bgs.Protocol.GameUtilities.V1.GameAccountOnlineNotification.Parser, new[]{ "GameAccountId", "Host", "SessionId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.GameUtilities.V1.GameAccountOfflineNotification), global::Bgs.Protocol.GameUtilities.V1.GameAccountOfflineNotification.Parser, new[]{ "GameAccountId", "Host", "SessionId" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.GameUtilities.V1.GetAchievementsFileRequest), global::Bgs.Protocol.GameUtilities.V1.GetAchievementsFileRequest.Parser, new[]{ "Host" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.GameUtilities.V1.GetAchievementsFileResponse), global::Bgs.Protocol.GameUtilities.V1.GetAchievementsFileResponse.Parser, new[]{ "ContentHandle" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.GameUtilities.V1.GetAllValuesForAttributeRequest), global::Bgs.Protocol.GameUtilities.V1.GetAllValuesForAttributeRequest.Parser, new[]{ "AttributeKey", "AgentId", "Program" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.GameUtilities.V1.GetAllValuesForAttributeResponse), global::Bgs.Protocol.GameUtilities.V1.GetAllValuesForAttributeResponse.Parser, new[]{ "AttributeValue" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.GameUtilities.V1.RegisterUtilitiesRequest), global::Bgs.Protocol.GameUtilities.V1.RegisterUtilitiesRequest.Parser, new[]{ "Attribute", "Program" }, null, null, null, null),
@@ -188,6 +170,7 @@ namespace Bgs.Protocol.GameUtilities.V1 {
     /// <summary>Field number for the "host" field.</summary>
     public const int HostFieldNumber = 2;
     private global::Bgs.Protocol.ProcessId host_;
+    [global::System.ObsoleteAttribute]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::Bgs.Protocol.ProcessId Host {
       get { return host_; }
@@ -196,11 +179,13 @@ namespace Bgs.Protocol.GameUtilities.V1 {
       }
     }
     /// <summary>Gets whether the host field is set</summary>
+    [global::System.ObsoleteAttribute]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasHost {
       get { return host_ != null; }
     }
     /// <summary>Clears the value of the host field</summary>
+    [global::System.ObsoleteAttribute]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearHost() {
       host_ = null;
@@ -670,6 +655,7 @@ namespace Bgs.Protocol.GameUtilities.V1 {
     /// <summary>Field number for the "host" field.</summary>
     public const int HostFieldNumber = 3;
     private global::Bgs.Protocol.ProcessId host_;
+    [global::System.ObsoleteAttribute]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::Bgs.Protocol.ProcessId Host {
       get { return host_; }
@@ -678,11 +664,13 @@ namespace Bgs.Protocol.GameUtilities.V1 {
       }
     }
     /// <summary>Gets whether the host field is set</summary>
+    [global::System.ObsoleteAttribute]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasHost {
       get { return host_ != null; }
     }
     /// <summary>Clears the value of the host field</summary>
+    [global::System.ObsoleteAttribute]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearHost() {
       host_ = null;
@@ -1027,6 +1015,7 @@ namespace Bgs.Protocol.GameUtilities.V1 {
     /// <summary>Field number for the "host" field.</summary>
     public const int HostFieldNumber = 5;
     private global::Bgs.Protocol.ProcessId host_;
+    [global::System.ObsoleteAttribute]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::Bgs.Protocol.ProcessId Host {
       get { return host_; }
@@ -1035,11 +1024,13 @@ namespace Bgs.Protocol.GameUtilities.V1 {
       }
     }
     /// <summary>Gets whether the host field is set</summary>
+    [global::System.ObsoleteAttribute]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasHost {
       get { return host_ != null; }
     }
     /// <summary>Clears the value of the host field</summary>
+    [global::System.ObsoleteAttribute]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearHost() {
       host_ = null;
@@ -1201,292 +1192,6 @@ namespace Bgs.Protocol.GameUtilities.V1 {
 
   }
 
-  public sealed partial class GetPlayerVariablesRequest : pb::IMessage<GetPlayerVariablesRequest> {
-    private static readonly pb::MessageParser<GetPlayerVariablesRequest> _parser = new pb::MessageParser<GetPlayerVariablesRequest>(() => new GetPlayerVariablesRequest());
-    private pb::UnknownFieldSet _unknownFields;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pb::MessageParser<GetPlayerVariablesRequest> Parser { get { return _parser; } }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.GameUtilities.V1.GameUtilitiesServiceReflection.Descriptor.MessageTypes[5]; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    pbr::MessageDescriptor pb::IMessage.Descriptor {
-      get { return Descriptor; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public GetPlayerVariablesRequest() {
-      OnConstruction();
-    }
-
-    partial void OnConstruction();
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public GetPlayerVariablesRequest(GetPlayerVariablesRequest other) : this() {
-      playerVariables_ = other.playerVariables_.Clone();
-      host_ = other.HasHost ? other.host_.Clone() : null;
-      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public GetPlayerVariablesRequest Clone() {
-      return new GetPlayerVariablesRequest(this);
-    }
-
-    /// <summary>Field number for the "player_variables" field.</summary>
-    public const int PlayerVariablesFieldNumber = 1;
-    private static readonly pb::FieldCodec<global::Bgs.Protocol.GameUtilities.V1.PlayerVariables> _repeated_playerVariables_codec
-        = pb::FieldCodec.ForMessage(10, global::Bgs.Protocol.GameUtilities.V1.PlayerVariables.Parser);
-    private readonly pbc::RepeatedField<global::Bgs.Protocol.GameUtilities.V1.PlayerVariables> playerVariables_ = new pbc::RepeatedField<global::Bgs.Protocol.GameUtilities.V1.PlayerVariables>();
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::RepeatedField<global::Bgs.Protocol.GameUtilities.V1.PlayerVariables> PlayerVariables {
-      get { return playerVariables_; }
-    }
-
-    /// <summary>Field number for the "host" field.</summary>
-    public const int HostFieldNumber = 2;
-    private global::Bgs.Protocol.ProcessId host_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Bgs.Protocol.ProcessId Host {
-      get { return host_; }
-      set {
-        host_ = value;
-      }
-    }
-    /// <summary>Gets whether the host field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool HasHost {
-      get { return host_ != null; }
-    }
-    /// <summary>Clears the value of the host field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void ClearHost() {
-      host_ = null;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override bool Equals(object other) {
-      return Equals(other as GetPlayerVariablesRequest);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool Equals(GetPlayerVariablesRequest other) {
-      if (ReferenceEquals(other, null)) {
-        return false;
-      }
-      if (ReferenceEquals(other, this)) {
-        return true;
-      }
-      if(!playerVariables_.Equals(other.playerVariables_)) return false;
-      if (!object.Equals(Host, other.Host)) return false;
-      return Equals(_unknownFields, other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override int GetHashCode() {
-      int hash = 1;
-      hash ^= playerVariables_.GetHashCode();
-      if (HasHost) hash ^= Host.GetHashCode();
-      if (_unknownFields != null) {
-        hash ^= _unknownFields.GetHashCode();
-      }
-      return hash;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override string ToString() {
-      return pb::JsonFormatter.ToDiagnosticString(this);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void WriteTo(pb::CodedOutputStream output) {
-      playerVariables_.WriteTo(output, _repeated_playerVariables_codec);
-      if (HasHost) {
-        output.WriteRawTag(18);
-        output.WriteMessage(Host);
-      }
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(output);
-      }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int CalculateSize() {
-      int size = 0;
-      size += playerVariables_.CalculateSize(_repeated_playerVariables_codec);
-      if (HasHost) {
-        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Host);
-      }
-      if (_unknownFields != null) {
-        size += _unknownFields.CalculateSize();
-      }
-      return size;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(GetPlayerVariablesRequest other) {
-      if (other == null) {
-        return;
-      }
-      playerVariables_.Add(other.playerVariables_);
-      if (other.HasHost) {
-        if (!HasHost) {
-          Host = new global::Bgs.Protocol.ProcessId();
-        }
-        Host.MergeFrom(other.Host);
-      }
-      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(pb::CodedInputStream input) {
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
-            break;
-          case 10: {
-            playerVariables_.AddEntriesFrom(input, _repeated_playerVariables_codec);
-            break;
-          }
-          case 18: {
-            if (!HasHost) {
-              Host = new global::Bgs.Protocol.ProcessId();
-            }
-            input.ReadMessage(Host);
-            break;
-          }
-        }
-      }
-    }
-
-  }
-
-  public sealed partial class GetPlayerVariablesResponse : pb::IMessage<GetPlayerVariablesResponse> {
-    private static readonly pb::MessageParser<GetPlayerVariablesResponse> _parser = new pb::MessageParser<GetPlayerVariablesResponse>(() => new GetPlayerVariablesResponse());
-    private pb::UnknownFieldSet _unknownFields;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pb::MessageParser<GetPlayerVariablesResponse> Parser { get { return _parser; } }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.GameUtilities.V1.GameUtilitiesServiceReflection.Descriptor.MessageTypes[6]; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    pbr::MessageDescriptor pb::IMessage.Descriptor {
-      get { return Descriptor; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public GetPlayerVariablesResponse() {
-      OnConstruction();
-    }
-
-    partial void OnConstruction();
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public GetPlayerVariablesResponse(GetPlayerVariablesResponse other) : this() {
-      playerVariables_ = other.playerVariables_.Clone();
-      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public GetPlayerVariablesResponse Clone() {
-      return new GetPlayerVariablesResponse(this);
-    }
-
-    /// <summary>Field number for the "player_variables" field.</summary>
-    public const int PlayerVariablesFieldNumber = 1;
-    private static readonly pb::FieldCodec<global::Bgs.Protocol.GameUtilities.V1.PlayerVariables> _repeated_playerVariables_codec
-        = pb::FieldCodec.ForMessage(10, global::Bgs.Protocol.GameUtilities.V1.PlayerVariables.Parser);
-    private readonly pbc::RepeatedField<global::Bgs.Protocol.GameUtilities.V1.PlayerVariables> playerVariables_ = new pbc::RepeatedField<global::Bgs.Protocol.GameUtilities.V1.PlayerVariables>();
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public pbc::RepeatedField<global::Bgs.Protocol.GameUtilities.V1.PlayerVariables> PlayerVariables {
-      get { return playerVariables_; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override bool Equals(object other) {
-      return Equals(other as GetPlayerVariablesResponse);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool Equals(GetPlayerVariablesResponse other) {
-      if (ReferenceEquals(other, null)) {
-        return false;
-      }
-      if (ReferenceEquals(other, this)) {
-        return true;
-      }
-      if(!playerVariables_.Equals(other.playerVariables_)) return false;
-      return Equals(_unknownFields, other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override int GetHashCode() {
-      int hash = 1;
-      hash ^= playerVariables_.GetHashCode();
-      if (_unknownFields != null) {
-        hash ^= _unknownFields.GetHashCode();
-      }
-      return hash;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override string ToString() {
-      return pb::JsonFormatter.ToDiagnosticString(this);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void WriteTo(pb::CodedOutputStream output) {
-      playerVariables_.WriteTo(output, _repeated_playerVariables_codec);
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(output);
-      }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int CalculateSize() {
-      int size = 0;
-      size += playerVariables_.CalculateSize(_repeated_playerVariables_codec);
-      if (_unknownFields != null) {
-        size += _unknownFields.CalculateSize();
-      }
-      return size;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(GetPlayerVariablesResponse other) {
-      if (other == null) {
-        return;
-      }
-      playerVariables_.Add(other.playerVariables_);
-      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(pb::CodedInputStream input) {
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
-            break;
-          case 10: {
-            playerVariables_.AddEntriesFrom(input, _repeated_playerVariables_codec);
-            break;
-          }
-        }
-      }
-    }
-
-  }
-
   public sealed partial class GameAccountOnlineNotification : pb::IMessage<GameAccountOnlineNotification> {
     private static readonly pb::MessageParser<GameAccountOnlineNotification> _parser = new pb::MessageParser<GameAccountOnlineNotification>(() => new GameAccountOnlineNotification());
     private pb::UnknownFieldSet _unknownFields;
@@ -1495,7 +1200,7 @@ namespace Bgs.Protocol.GameUtilities.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.GameUtilities.V1.GameUtilitiesServiceReflection.Descriptor.MessageTypes[7]; }
+      get { return global::Bgs.Protocol.GameUtilities.V1.GameUtilitiesServiceReflection.Descriptor.MessageTypes[5]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1547,6 +1252,7 @@ namespace Bgs.Protocol.GameUtilities.V1 {
     /// <summary>Field number for the "host" field.</summary>
     public const int HostFieldNumber = 2;
     private global::Bgs.Protocol.ProcessId host_;
+    [global::System.ObsoleteAttribute]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::Bgs.Protocol.ProcessId Host {
       get { return host_; }
@@ -1555,11 +1261,13 @@ namespace Bgs.Protocol.GameUtilities.V1 {
       }
     }
     /// <summary>Gets whether the host field is set</summary>
+    [global::System.ObsoleteAttribute]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasHost {
       get { return host_ != null; }
     }
     /// <summary>Clears the value of the host field</summary>
+    [global::System.ObsoleteAttribute]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearHost() {
       host_ = null;
@@ -1724,7 +1432,7 @@ namespace Bgs.Protocol.GameUtilities.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.GameUtilities.V1.GameUtilitiesServiceReflection.Descriptor.MessageTypes[8]; }
+      get { return global::Bgs.Protocol.GameUtilities.V1.GameUtilitiesServiceReflection.Descriptor.MessageTypes[6]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1776,6 +1484,7 @@ namespace Bgs.Protocol.GameUtilities.V1 {
     /// <summary>Field number for the "host" field.</summary>
     public const int HostFieldNumber = 2;
     private global::Bgs.Protocol.ProcessId host_;
+    [global::System.ObsoleteAttribute]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public global::Bgs.Protocol.ProcessId Host {
       get { return host_; }
@@ -1784,11 +1493,13 @@ namespace Bgs.Protocol.GameUtilities.V1 {
       }
     }
     /// <summary>Gets whether the host field is set</summary>
+    [global::System.ObsoleteAttribute]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasHost {
       get { return host_ != null; }
     }
     /// <summary>Clears the value of the host field</summary>
+    [global::System.ObsoleteAttribute]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearHost() {
       host_ = null;
@@ -1945,296 +1656,6 @@ namespace Bgs.Protocol.GameUtilities.V1 {
 
   }
 
-  public sealed partial class GetAchievementsFileRequest : pb::IMessage<GetAchievementsFileRequest> {
-    private static readonly pb::MessageParser<GetAchievementsFileRequest> _parser = new pb::MessageParser<GetAchievementsFileRequest>(() => new GetAchievementsFileRequest());
-    private pb::UnknownFieldSet _unknownFields;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pb::MessageParser<GetAchievementsFileRequest> Parser { get { return _parser; } }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.GameUtilities.V1.GameUtilitiesServiceReflection.Descriptor.MessageTypes[9]; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    pbr::MessageDescriptor pb::IMessage.Descriptor {
-      get { return Descriptor; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public GetAchievementsFileRequest() {
-      OnConstruction();
-    }
-
-    partial void OnConstruction();
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public GetAchievementsFileRequest(GetAchievementsFileRequest other) : this() {
-      host_ = other.HasHost ? other.host_.Clone() : null;
-      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public GetAchievementsFileRequest Clone() {
-      return new GetAchievementsFileRequest(this);
-    }
-
-    /// <summary>Field number for the "host" field.</summary>
-    public const int HostFieldNumber = 1;
-    private global::Bgs.Protocol.ProcessId host_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Bgs.Protocol.ProcessId Host {
-      get { return host_; }
-      set {
-        host_ = value;
-      }
-    }
-    /// <summary>Gets whether the host field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool HasHost {
-      get { return host_ != null; }
-    }
-    /// <summary>Clears the value of the host field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void ClearHost() {
-      host_ = null;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override bool Equals(object other) {
-      return Equals(other as GetAchievementsFileRequest);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool Equals(GetAchievementsFileRequest other) {
-      if (ReferenceEquals(other, null)) {
-        return false;
-      }
-      if (ReferenceEquals(other, this)) {
-        return true;
-      }
-      if (!object.Equals(Host, other.Host)) return false;
-      return Equals(_unknownFields, other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override int GetHashCode() {
-      int hash = 1;
-      if (HasHost) hash ^= Host.GetHashCode();
-      if (_unknownFields != null) {
-        hash ^= _unknownFields.GetHashCode();
-      }
-      return hash;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override string ToString() {
-      return pb::JsonFormatter.ToDiagnosticString(this);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void WriteTo(pb::CodedOutputStream output) {
-      if (HasHost) {
-        output.WriteRawTag(10);
-        output.WriteMessage(Host);
-      }
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(output);
-      }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int CalculateSize() {
-      int size = 0;
-      if (HasHost) {
-        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Host);
-      }
-      if (_unknownFields != null) {
-        size += _unknownFields.CalculateSize();
-      }
-      return size;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(GetAchievementsFileRequest other) {
-      if (other == null) {
-        return;
-      }
-      if (other.HasHost) {
-        if (!HasHost) {
-          Host = new global::Bgs.Protocol.ProcessId();
-        }
-        Host.MergeFrom(other.Host);
-      }
-      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(pb::CodedInputStream input) {
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
-            break;
-          case 10: {
-            if (!HasHost) {
-              Host = new global::Bgs.Protocol.ProcessId();
-            }
-            input.ReadMessage(Host);
-            break;
-          }
-        }
-      }
-    }
-
-  }
-
-  public sealed partial class GetAchievementsFileResponse : pb::IMessage<GetAchievementsFileResponse> {
-    private static readonly pb::MessageParser<GetAchievementsFileResponse> _parser = new pb::MessageParser<GetAchievementsFileResponse>(() => new GetAchievementsFileResponse());
-    private pb::UnknownFieldSet _unknownFields;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pb::MessageParser<GetAchievementsFileResponse> Parser { get { return _parser; } }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.GameUtilities.V1.GameUtilitiesServiceReflection.Descriptor.MessageTypes[10]; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    pbr::MessageDescriptor pb::IMessage.Descriptor {
-      get { return Descriptor; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public GetAchievementsFileResponse() {
-      OnConstruction();
-    }
-
-    partial void OnConstruction();
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public GetAchievementsFileResponse(GetAchievementsFileResponse other) : this() {
-      contentHandle_ = other.HasContentHandle ? other.contentHandle_.Clone() : null;
-      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public GetAchievementsFileResponse Clone() {
-      return new GetAchievementsFileResponse(this);
-    }
-
-    /// <summary>Field number for the "content_handle" field.</summary>
-    public const int ContentHandleFieldNumber = 1;
-    private global::Bgs.Protocol.ContentHandle contentHandle_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Bgs.Protocol.ContentHandle ContentHandle {
-      get { return contentHandle_; }
-      set {
-        contentHandle_ = value;
-      }
-    }
-    /// <summary>Gets whether the content_handle field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool HasContentHandle {
-      get { return contentHandle_ != null; }
-    }
-    /// <summary>Clears the value of the content_handle field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void ClearContentHandle() {
-      contentHandle_ = null;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override bool Equals(object other) {
-      return Equals(other as GetAchievementsFileResponse);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool Equals(GetAchievementsFileResponse other) {
-      if (ReferenceEquals(other, null)) {
-        return false;
-      }
-      if (ReferenceEquals(other, this)) {
-        return true;
-      }
-      if (!object.Equals(ContentHandle, other.ContentHandle)) return false;
-      return Equals(_unknownFields, other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override int GetHashCode() {
-      int hash = 1;
-      if (HasContentHandle) hash ^= ContentHandle.GetHashCode();
-      if (_unknownFields != null) {
-        hash ^= _unknownFields.GetHashCode();
-      }
-      return hash;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override string ToString() {
-      return pb::JsonFormatter.ToDiagnosticString(this);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void WriteTo(pb::CodedOutputStream output) {
-      if (HasContentHandle) {
-        output.WriteRawTag(10);
-        output.WriteMessage(ContentHandle);
-      }
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(output);
-      }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int CalculateSize() {
-      int size = 0;
-      if (HasContentHandle) {
-        size += 1 + pb::CodedOutputStream.ComputeMessageSize(ContentHandle);
-      }
-      if (_unknownFields != null) {
-        size += _unknownFields.CalculateSize();
-      }
-      return size;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(GetAchievementsFileResponse other) {
-      if (other == null) {
-        return;
-      }
-      if (other.HasContentHandle) {
-        if (!HasContentHandle) {
-          ContentHandle = new global::Bgs.Protocol.ContentHandle();
-        }
-        ContentHandle.MergeFrom(other.ContentHandle);
-      }
-      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(pb::CodedInputStream input) {
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
-            break;
-          case 10: {
-            if (!HasContentHandle) {
-              ContentHandle = new global::Bgs.Protocol.ContentHandle();
-            }
-            input.ReadMessage(ContentHandle);
-            break;
-          }
-        }
-      }
-    }
-
-  }
-
   public sealed partial class GetAllValuesForAttributeRequest : pb::IMessage<GetAllValuesForAttributeRequest> {
     private static readonly pb::MessageParser<GetAllValuesForAttributeRequest> _parser = new pb::MessageParser<GetAllValuesForAttributeRequest>(() => new GetAllValuesForAttributeRequest());
     private pb::UnknownFieldSet _unknownFields;
@@ -2244,7 +1665,7 @@ namespace Bgs.Protocol.GameUtilities.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.GameUtilities.V1.GameUtilitiesServiceReflection.Descriptor.MessageTypes[11]; }
+      get { return global::Bgs.Protocol.GameUtilities.V1.GameUtilitiesServiceReflection.Descriptor.MessageTypes[7]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2471,7 +1892,7 @@ namespace Bgs.Protocol.GameUtilities.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.GameUtilities.V1.GameUtilitiesServiceReflection.Descriptor.MessageTypes[12]; }
+      get { return global::Bgs.Protocol.GameUtilities.V1.GameUtilitiesServiceReflection.Descriptor.MessageTypes[8]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2593,7 +2014,7 @@ namespace Bgs.Protocol.GameUtilities.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.GameUtilities.V1.GameUtilitiesServiceReflection.Descriptor.MessageTypes[13]; }
+      get { return global::Bgs.Protocol.GameUtilities.V1.GameUtilitiesServiceReflection.Descriptor.MessageTypes[9]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2756,7 +2177,7 @@ namespace Bgs.Protocol.GameUtilities.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.GameUtilities.V1.GameUtilitiesServiceReflection.Descriptor.MessageTypes[14]; }
+      get { return global::Bgs.Protocol.GameUtilities.V1.GameUtilitiesServiceReflection.Descriptor.MessageTypes[10]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -2897,7 +2318,7 @@ namespace Bgs.Protocol.GameUtilities.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.GameUtilities.V1.GameUtilitiesServiceReflection.Descriptor.MessageTypes[15]; }
+      get { return global::Bgs.Protocol.GameUtilities.V1.GameUtilitiesServiceReflection.Descriptor.MessageTypes[11]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]

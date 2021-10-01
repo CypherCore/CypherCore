@@ -26,50 +26,51 @@ namespace Bgs.Protocol.Club.V1 {
           string.Concat(
             "CiFiZ3MvbG93L3BiL2NsaWVudC9jbHViX3JvbGUucHJvdG8SFGJncy5wcm90",
             "b2NvbC5jbHViLnYxGiJiZ3MvbG93L3BiL2NsaWVudC9yb2xlX3R5cGVzLnBy",
-            "b3RvIq8LChBDbHViUHJpdmlsZWdlU2V0EhMKC2Nhbl9kZXN0cm95GAEgASgI",
+            "b3RvIscLChBDbHViUHJpdmlsZWdlU2V0EhMKC2Nhbl9kZXN0cm95GAEgASgI",
             "EhkKEWNhbl9zZXRfYXR0cmlidXRlGAogASgIEhQKDGNhbl9zZXRfbmFtZRgL",
             "IAEoCBIbChNjYW5fc2V0X2Rlc2NyaXB0aW9uGAwgASgIEhYKDmNhbl9zZXRf",
             "YXZhdGFyGA0gASgIEhkKEWNhbl9zZXRfYnJvYWRjYXN0GA4gASgIEh0KFWNh",
-            "bl9zZXRfcHJpdmFjeV9sZXZlbBgPIAEoCBIXCg9jYW5fa2lja19tZW1iZXIY",
-            "HiABKAgSJAocY2FuX3NldF9vd25fbWVtYmVyX2F0dHJpYnV0ZRgfIAEoCBIm",
-            "Ch5jYW5fc2V0X290aGVyX21lbWJlcl9hdHRyaWJ1dGUYICABKAgSHwoXY2Fu",
-            "X3NldF9vd25fdm9pY2Vfc3RhdGUYISABKAgSIgoaY2FuX3NldF9vd25fcHJl",
-            "c2VuY2VfbGV2ZWwYIiABKAgSIQoZY2FuX3NldF9vd25fd2hpc3Blcl9sZXZl",
-            "bBgjIAEoCBIfChdjYW5fc2V0X293bl9tZW1iZXJfbm90ZRgkIAEoCBIhChlj",
-            "YW5fc2V0X290aGVyX21lbWJlcl9ub3RlGCUgASgIEhUKDWNhbl91c2Vfdm9p",
-            "Y2UYMiABKAgSJQodY2FuX3ZvaWNlX211dGVfbWVtYmVyX2Zvcl9hbGwYMyAB",
-            "KAgSGgoSY2FuX2dldF9pbnZpdGF0aW9uGEYgASgIEhsKE2Nhbl9zZW5kX2lu",
-            "dml0YXRpb24YRyABKAgSIQoZY2FuX3NlbmRfZ3Vlc3RfaW52aXRhdGlvbhhI",
-            "IAEoCBIhChljYW5fcmV2b2tlX293bl9pbnZpdGF0aW9uGEkgASgIEiMKG2Nh",
-            "bl9yZXZva2Vfb3RoZXJfaW52aXRhdGlvbhhKIAEoCBIaChJjYW5fZ2V0X3N1",
-            "Z2dlc3Rpb24YWiABKAgSGgoSY2FuX3N1Z2dlc3RfbWVtYmVyGFsgASgIEhoK",
-            "EmNhbl9hcHByb3ZlX21lbWJlchhcIAEoCBIWCg5jYW5fZ2V0X3RpY2tldBhu",
-            "IAEoCBIZChFjYW5fY3JlYXRlX3RpY2tldBhvIAEoCBIaChJjYW5fZGVzdHJv",
-            "eV90aWNrZXQYcCABKAgSFAoLY2FuX2dldF9iYW4YggEgASgIEhQKC2Nhbl9h",
-            "ZGRfYmFuGIMBIAEoCBIXCg5jYW5fcmVtb3ZlX2JhbhiEASABKAgSGgoRY2Fu",
-            "X2NyZWF0ZV9zdHJlYW0YjAEgASgIEhsKEmNhbl9kZXN0cm95X3N0cmVhbRiN",
-            "ASABKAgSIAoXY2FuX3NldF9zdHJlYW1fcG9zaXRpb24YjgEgASgIEiEKGGNh",
-            "bl9zZXRfc3RyZWFtX2F0dHJpYnV0ZRiPASABKAgSHAoTY2FuX3NldF9zdHJl",
-            "YW1fbmFtZRiQASABKAgSHwoWY2FuX3NldF9zdHJlYW1fc3ViamVjdBiRASAB",
-            "KAgSHgoVY2FuX3NldF9zdHJlYW1fYWNjZXNzGJIBIAEoCBIjChpjYW5fc2V0",
-            "X3N0cmVhbV92b2ljZV9sZXZlbBiTASABKAgSGwoSY2FuX2NyZWF0ZV9tZXNz",
-            "YWdlGLQBIAEoCBIgChdjYW5fZGVzdHJveV9vd25fbWVzc2FnZRi1ASABKAgS",
-            "IgoZY2FuX2Rlc3Ryb3lfb3RoZXJfbWVzc2FnZRi2ASABKAgSHQoUY2FuX2Vk",
-            "aXRfb3duX21lc3NhZ2UYtwEgASgIEhgKD2Nhbl9waW5fbWVzc2FnZRi4ASAB",
-            "KAgSGAoPY2FuX21lbnRpb25fYWxsGLkBIAEoCBIZChBjYW5fbWVudGlvbl9o",
-            "ZXJlGLoBIAEoCBIbChJjYW5fbWVudGlvbl9tZW1iZXIYuwEgASgIEhkKEGNh",
-            "bl9tZW50aW9uX3JvbGUYvAEgASgIIrkBCghDbHViUm9sZRIKCgJpZBgBIAEo",
-            "DRImCgVzdGF0ZRgCIAEoCzIXLmJncy5wcm90b2NvbC5Sb2xlU3RhdGUSOQoJ",
-            "cHJpdmlsZWdlGAMgASgLMiYuYmdzLnByb3RvY29sLmNsdWIudjEuQ2x1YlBy",
-            "aXZpbGVnZVNldBIiChphbHdheXNfZ3JhbnRfc3RyZWFtX2FjY2VzcxgEIAEo",
-            "CBIaChJhbGxvd19pbl9jbHViX3Nsb3QYBSABKAgilAEKC0NsdWJSb2xlU2V0",
-            "EiwKBHJvbGUYASADKAsyHi5iZ3MucHJvdG9jb2wuY2x1Yi52MS5DbHViUm9s",
-            "ZRIYCgxkZWZhdWx0X3JvbGUYBSADKA1CAhABEiwKJGFzc2lnbm1lbnRfcmVz",
-            "cGVjdHNfcmVsZWdhdGlvbl9jaGFpbhgGIAEoCBIPCgdzdWJ0eXBlGAcgASgJ"));
+            "bl9zZXRfcHJpdmFjeV9sZXZlbBgPIAEoCBIWCg5jYW5fYWRkX21lbWJlchgd",
+            "IAEoCBIXCg9jYW5fa2lja19tZW1iZXIYHiABKAgSJAocY2FuX3NldF9vd25f",
+            "bWVtYmVyX2F0dHJpYnV0ZRgfIAEoCBImCh5jYW5fc2V0X290aGVyX21lbWJl",
+            "cl9hdHRyaWJ1dGUYICABKAgSHwoXY2FuX3NldF9vd25fdm9pY2Vfc3RhdGUY",
+            "ISABKAgSIgoaY2FuX3NldF9vd25fcHJlc2VuY2VfbGV2ZWwYIiABKAgSIQoZ",
+            "Y2FuX3NldF9vd25fd2hpc3Blcl9sZXZlbBgjIAEoCBIfChdjYW5fc2V0X293",
+            "bl9tZW1iZXJfbm90ZRgkIAEoCBIhChljYW5fc2V0X290aGVyX21lbWJlcl9u",
+            "b3RlGCUgASgIEhUKDWNhbl91c2Vfdm9pY2UYMiABKAgSJQodY2FuX3ZvaWNl",
+            "X211dGVfbWVtYmVyX2Zvcl9hbGwYMyABKAgSGgoSY2FuX2dldF9pbnZpdGF0",
+            "aW9uGEYgASgIEhsKE2Nhbl9zZW5kX2ludml0YXRpb24YRyABKAgSIQoZY2Fu",
+            "X3NlbmRfZ3Vlc3RfaW52aXRhdGlvbhhIIAEoCBIhChljYW5fcmV2b2tlX293",
+            "bl9pbnZpdGF0aW9uGEkgASgIEiMKG2Nhbl9yZXZva2Vfb3RoZXJfaW52aXRh",
+            "dGlvbhhKIAEoCBIaChJjYW5fZ2V0X3N1Z2dlc3Rpb24YWiABKAgSGgoSY2Fu",
+            "X3N1Z2dlc3RfbWVtYmVyGFsgASgIEhoKEmNhbl9hcHByb3ZlX21lbWJlchhc",
+            "IAEoCBIWCg5jYW5fZ2V0X3RpY2tldBhuIAEoCBIZChFjYW5fY3JlYXRlX3Rp",
+            "Y2tldBhvIAEoCBIaChJjYW5fZGVzdHJveV90aWNrZXQYcCABKAgSFAoLY2Fu",
+            "X2dldF9iYW4YggEgASgIEhQKC2Nhbl9hZGRfYmFuGIMBIAEoCBIXCg5jYW5f",
+            "cmVtb3ZlX2JhbhiEASABKAgSGgoRY2FuX2NyZWF0ZV9zdHJlYW0YjAEgASgI",
+            "EhsKEmNhbl9kZXN0cm95X3N0cmVhbRiNASABKAgSIAoXY2FuX3NldF9zdHJl",
+            "YW1fcG9zaXRpb24YjgEgASgIEiEKGGNhbl9zZXRfc3RyZWFtX2F0dHJpYnV0",
+            "ZRiPASABKAgSHAoTY2FuX3NldF9zdHJlYW1fbmFtZRiQASABKAgSHwoWY2Fu",
+            "X3NldF9zdHJlYW1fc3ViamVjdBiRASABKAgSHgoVY2FuX3NldF9zdHJlYW1f",
+            "YWNjZXNzGJIBIAEoCBIjChpjYW5fc2V0X3N0cmVhbV92b2ljZV9sZXZlbBiT",
+            "ASABKAgSGwoSY2FuX2NyZWF0ZV9tZXNzYWdlGLQBIAEoCBIgChdjYW5fZGVz",
+            "dHJveV9vd25fbWVzc2FnZRi1ASABKAgSIgoZY2FuX2Rlc3Ryb3lfb3RoZXJf",
+            "bWVzc2FnZRi2ASABKAgSHQoUY2FuX2VkaXRfb3duX21lc3NhZ2UYtwEgASgI",
+            "EhgKD2Nhbl9waW5fbWVzc2FnZRi4ASABKAgSGAoPY2FuX21lbnRpb25fYWxs",
+            "GLkBIAEoCBIZChBjYW5fbWVudGlvbl9oZXJlGLoBIAEoCBIbChJjYW5fbWVu",
+            "dGlvbl9tZW1iZXIYuwEgASgIEhkKEGNhbl9tZW50aW9uX3JvbGUYvAEgASgI",
+            "IrkBCghDbHViUm9sZRIKCgJpZBgBIAEoDRImCgVzdGF0ZRgCIAEoCzIXLmJn",
+            "cy5wcm90b2NvbC5Sb2xlU3RhdGUSOQoJcHJpdmlsZWdlGAMgASgLMiYuYmdz",
+            "LnByb3RvY29sLmNsdWIudjEuQ2x1YlByaXZpbGVnZVNldBIiChphbHdheXNf",
+            "Z3JhbnRfc3RyZWFtX2FjY2VzcxgEIAEoCBIaChJhbGxvd19pbl9jbHViX3Ns",
+            "b3QYBSABKAgilAEKC0NsdWJSb2xlU2V0EiwKBHJvbGUYASADKAsyHi5iZ3Mu",
+            "cHJvdG9jb2wuY2x1Yi52MS5DbHViUm9sZRIYCgxkZWZhdWx0X3JvbGUYBSAD",
+            "KA1CAhABEiwKJGFzc2lnbm1lbnRfcmVzcGVjdHNfcmVsZWdhdGlvbl9jaGFp",
+            "bhgGIAEoCBIPCgdzdWJ0eXBlGAcgASgJ"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Bgs.Protocol.RoleTypesReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.ClubPrivilegeSet), global::Bgs.Protocol.Club.V1.ClubPrivilegeSet.Parser, new[]{ "CanDestroy", "CanSetAttribute", "CanSetName", "CanSetDescription", "CanSetAvatar", "CanSetBroadcast", "CanSetPrivacyLevel", "CanKickMember", "CanSetOwnMemberAttribute", "CanSetOtherMemberAttribute", "CanSetOwnVoiceState", "CanSetOwnPresenceLevel", "CanSetOwnWhisperLevel", "CanSetOwnMemberNote", "CanSetOtherMemberNote", "CanUseVoice", "CanVoiceMuteMemberForAll", "CanGetInvitation", "CanSendInvitation", "CanSendGuestInvitation", "CanRevokeOwnInvitation", "CanRevokeOtherInvitation", "CanGetSuggestion", "CanSuggestMember", "CanApproveMember", "CanGetTicket", "CanCreateTicket", "CanDestroyTicket", "CanGetBan", "CanAddBan", "CanRemoveBan", "CanCreateStream", "CanDestroyStream", "CanSetStreamPosition", "CanSetStreamAttribute", "CanSetStreamName", "CanSetStreamSubject", "CanSetStreamAccess", "CanSetStreamVoiceLevel", "CanCreateMessage", "CanDestroyOwnMessage", "CanDestroyOtherMessage", "CanEditOwnMessage", "CanPinMessage", "CanMentionAll", "CanMentionHere", "CanMentionMember", "CanMentionRole" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.ClubPrivilegeSet), global::Bgs.Protocol.Club.V1.ClubPrivilegeSet.Parser, new[]{ "CanDestroy", "CanSetAttribute", "CanSetName", "CanSetDescription", "CanSetAvatar", "CanSetBroadcast", "CanSetPrivacyLevel", "CanAddMember", "CanKickMember", "CanSetOwnMemberAttribute", "CanSetOtherMemberAttribute", "CanSetOwnVoiceState", "CanSetOwnPresenceLevel", "CanSetOwnWhisperLevel", "CanSetOwnMemberNote", "CanSetOtherMemberNote", "CanUseVoice", "CanVoiceMuteMemberForAll", "CanGetInvitation", "CanSendInvitation", "CanSendGuestInvitation", "CanRevokeOwnInvitation", "CanRevokeOtherInvitation", "CanGetSuggestion", "CanSuggestMember", "CanApproveMember", "CanGetTicket", "CanCreateTicket", "CanDestroyTicket", "CanGetBan", "CanAddBan", "CanRemoveBan", "CanCreateStream", "CanDestroyStream", "CanSetStreamPosition", "CanSetStreamAttribute", "CanSetStreamName", "CanSetStreamSubject", "CanSetStreamAccess", "CanSetStreamVoiceLevel", "CanCreateMessage", "CanDestroyOwnMessage", "CanDestroyOtherMessage", "CanEditOwnMessage", "CanPinMessage", "CanMentionAll", "CanMentionHere", "CanMentionMember", "CanMentionRole" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.ClubRole), global::Bgs.Protocol.Club.V1.ClubRole.Parser, new[]{ "Id", "State", "Privilege", "AlwaysGrantStreamAccess", "AllowInClubSlot" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.ClubRoleSet), global::Bgs.Protocol.Club.V1.ClubRoleSet.Parser, new[]{ "Role", "DefaultRole", "AssignmentRespectsRelegationChain", "Subtype" }, null, null, null, null)
           }));
@@ -114,6 +115,7 @@ namespace Bgs.Protocol.Club.V1 {
       canSetAvatar_ = other.canSetAvatar_;
       canSetBroadcast_ = other.canSetBroadcast_;
       canSetPrivacyLevel_ = other.canSetPrivacyLevel_;
+      canAddMember_ = other.canAddMember_;
       canKickMember_ = other.canKickMember_;
       canSetOwnMemberAttribute_ = other.canSetOwnMemberAttribute_;
       canSetOtherMemberAttribute_ = other.canSetOtherMemberAttribute_;
@@ -331,6 +333,30 @@ namespace Bgs.Protocol.Club.V1 {
       _hasBits0 &= ~64;
     }
 
+    /// <summary>Field number for the "can_add_member" field.</summary>
+    public const int CanAddMemberFieldNumber = 29;
+    private readonly static bool CanAddMemberDefaultValue = false;
+
+    private bool canAddMember_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool CanAddMember {
+      get { if ((_hasBits0 & 128) != 0) { return canAddMember_; } else { return CanAddMemberDefaultValue; } }
+      set {
+        _hasBits0 |= 128;
+        canAddMember_ = value;
+      }
+    }
+    /// <summary>Gets whether the "can_add_member" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasCanAddMember {
+      get { return (_hasBits0 & 128) != 0; }
+    }
+    /// <summary>Clears the value of the "can_add_member" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearCanAddMember() {
+      _hasBits0 &= ~128;
+    }
+
     /// <summary>Field number for the "can_kick_member" field.</summary>
     public const int CanKickMemberFieldNumber = 30;
     private readonly static bool CanKickMemberDefaultValue = false;
@@ -338,21 +364,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canKickMember_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanKickMember {
-      get { if ((_hasBits0 & 128) != 0) { return canKickMember_; } else { return CanKickMemberDefaultValue; } }
+      get { if ((_hasBits0 & 256) != 0) { return canKickMember_; } else { return CanKickMemberDefaultValue; } }
       set {
-        _hasBits0 |= 128;
+        _hasBits0 |= 256;
         canKickMember_ = value;
       }
     }
     /// <summary>Gets whether the "can_kick_member" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanKickMember {
-      get { return (_hasBits0 & 128) != 0; }
+      get { return (_hasBits0 & 256) != 0; }
     }
     /// <summary>Clears the value of the "can_kick_member" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanKickMember() {
-      _hasBits0 &= ~128;
+      _hasBits0 &= ~256;
     }
 
     /// <summary>Field number for the "can_set_own_member_attribute" field.</summary>
@@ -362,21 +388,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canSetOwnMemberAttribute_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanSetOwnMemberAttribute {
-      get { if ((_hasBits0 & 256) != 0) { return canSetOwnMemberAttribute_; } else { return CanSetOwnMemberAttributeDefaultValue; } }
+      get { if ((_hasBits0 & 512) != 0) { return canSetOwnMemberAttribute_; } else { return CanSetOwnMemberAttributeDefaultValue; } }
       set {
-        _hasBits0 |= 256;
+        _hasBits0 |= 512;
         canSetOwnMemberAttribute_ = value;
       }
     }
     /// <summary>Gets whether the "can_set_own_member_attribute" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanSetOwnMemberAttribute {
-      get { return (_hasBits0 & 256) != 0; }
+      get { return (_hasBits0 & 512) != 0; }
     }
     /// <summary>Clears the value of the "can_set_own_member_attribute" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanSetOwnMemberAttribute() {
-      _hasBits0 &= ~256;
+      _hasBits0 &= ~512;
     }
 
     /// <summary>Field number for the "can_set_other_member_attribute" field.</summary>
@@ -386,21 +412,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canSetOtherMemberAttribute_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanSetOtherMemberAttribute {
-      get { if ((_hasBits0 & 512) != 0) { return canSetOtherMemberAttribute_; } else { return CanSetOtherMemberAttributeDefaultValue; } }
+      get { if ((_hasBits0 & 1024) != 0) { return canSetOtherMemberAttribute_; } else { return CanSetOtherMemberAttributeDefaultValue; } }
       set {
-        _hasBits0 |= 512;
+        _hasBits0 |= 1024;
         canSetOtherMemberAttribute_ = value;
       }
     }
     /// <summary>Gets whether the "can_set_other_member_attribute" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanSetOtherMemberAttribute {
-      get { return (_hasBits0 & 512) != 0; }
+      get { return (_hasBits0 & 1024) != 0; }
     }
     /// <summary>Clears the value of the "can_set_other_member_attribute" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanSetOtherMemberAttribute() {
-      _hasBits0 &= ~512;
+      _hasBits0 &= ~1024;
     }
 
     /// <summary>Field number for the "can_set_own_voice_state" field.</summary>
@@ -410,21 +436,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canSetOwnVoiceState_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanSetOwnVoiceState {
-      get { if ((_hasBits0 & 1024) != 0) { return canSetOwnVoiceState_; } else { return CanSetOwnVoiceStateDefaultValue; } }
+      get { if ((_hasBits0 & 2048) != 0) { return canSetOwnVoiceState_; } else { return CanSetOwnVoiceStateDefaultValue; } }
       set {
-        _hasBits0 |= 1024;
+        _hasBits0 |= 2048;
         canSetOwnVoiceState_ = value;
       }
     }
     /// <summary>Gets whether the "can_set_own_voice_state" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanSetOwnVoiceState {
-      get { return (_hasBits0 & 1024) != 0; }
+      get { return (_hasBits0 & 2048) != 0; }
     }
     /// <summary>Clears the value of the "can_set_own_voice_state" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanSetOwnVoiceState() {
-      _hasBits0 &= ~1024;
+      _hasBits0 &= ~2048;
     }
 
     /// <summary>Field number for the "can_set_own_presence_level" field.</summary>
@@ -434,21 +460,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canSetOwnPresenceLevel_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanSetOwnPresenceLevel {
-      get { if ((_hasBits0 & 2048) != 0) { return canSetOwnPresenceLevel_; } else { return CanSetOwnPresenceLevelDefaultValue; } }
+      get { if ((_hasBits0 & 4096) != 0) { return canSetOwnPresenceLevel_; } else { return CanSetOwnPresenceLevelDefaultValue; } }
       set {
-        _hasBits0 |= 2048;
+        _hasBits0 |= 4096;
         canSetOwnPresenceLevel_ = value;
       }
     }
     /// <summary>Gets whether the "can_set_own_presence_level" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanSetOwnPresenceLevel {
-      get { return (_hasBits0 & 2048) != 0; }
+      get { return (_hasBits0 & 4096) != 0; }
     }
     /// <summary>Clears the value of the "can_set_own_presence_level" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanSetOwnPresenceLevel() {
-      _hasBits0 &= ~2048;
+      _hasBits0 &= ~4096;
     }
 
     /// <summary>Field number for the "can_set_own_whisper_level" field.</summary>
@@ -458,21 +484,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canSetOwnWhisperLevel_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanSetOwnWhisperLevel {
-      get { if ((_hasBits0 & 4096) != 0) { return canSetOwnWhisperLevel_; } else { return CanSetOwnWhisperLevelDefaultValue; } }
+      get { if ((_hasBits0 & 8192) != 0) { return canSetOwnWhisperLevel_; } else { return CanSetOwnWhisperLevelDefaultValue; } }
       set {
-        _hasBits0 |= 4096;
+        _hasBits0 |= 8192;
         canSetOwnWhisperLevel_ = value;
       }
     }
     /// <summary>Gets whether the "can_set_own_whisper_level" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanSetOwnWhisperLevel {
-      get { return (_hasBits0 & 4096) != 0; }
+      get { return (_hasBits0 & 8192) != 0; }
     }
     /// <summary>Clears the value of the "can_set_own_whisper_level" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanSetOwnWhisperLevel() {
-      _hasBits0 &= ~4096;
+      _hasBits0 &= ~8192;
     }
 
     /// <summary>Field number for the "can_set_own_member_note" field.</summary>
@@ -482,21 +508,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canSetOwnMemberNote_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanSetOwnMemberNote {
-      get { if ((_hasBits0 & 8192) != 0) { return canSetOwnMemberNote_; } else { return CanSetOwnMemberNoteDefaultValue; } }
+      get { if ((_hasBits0 & 16384) != 0) { return canSetOwnMemberNote_; } else { return CanSetOwnMemberNoteDefaultValue; } }
       set {
-        _hasBits0 |= 8192;
+        _hasBits0 |= 16384;
         canSetOwnMemberNote_ = value;
       }
     }
     /// <summary>Gets whether the "can_set_own_member_note" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanSetOwnMemberNote {
-      get { return (_hasBits0 & 8192) != 0; }
+      get { return (_hasBits0 & 16384) != 0; }
     }
     /// <summary>Clears the value of the "can_set_own_member_note" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanSetOwnMemberNote() {
-      _hasBits0 &= ~8192;
+      _hasBits0 &= ~16384;
     }
 
     /// <summary>Field number for the "can_set_other_member_note" field.</summary>
@@ -506,21 +532,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canSetOtherMemberNote_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanSetOtherMemberNote {
-      get { if ((_hasBits0 & 16384) != 0) { return canSetOtherMemberNote_; } else { return CanSetOtherMemberNoteDefaultValue; } }
+      get { if ((_hasBits0 & 32768) != 0) { return canSetOtherMemberNote_; } else { return CanSetOtherMemberNoteDefaultValue; } }
       set {
-        _hasBits0 |= 16384;
+        _hasBits0 |= 32768;
         canSetOtherMemberNote_ = value;
       }
     }
     /// <summary>Gets whether the "can_set_other_member_note" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanSetOtherMemberNote {
-      get { return (_hasBits0 & 16384) != 0; }
+      get { return (_hasBits0 & 32768) != 0; }
     }
     /// <summary>Clears the value of the "can_set_other_member_note" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanSetOtherMemberNote() {
-      _hasBits0 &= ~16384;
+      _hasBits0 &= ~32768;
     }
 
     /// <summary>Field number for the "can_use_voice" field.</summary>
@@ -530,21 +556,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canUseVoice_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanUseVoice {
-      get { if ((_hasBits0 & 32768) != 0) { return canUseVoice_; } else { return CanUseVoiceDefaultValue; } }
+      get { if ((_hasBits0 & 65536) != 0) { return canUseVoice_; } else { return CanUseVoiceDefaultValue; } }
       set {
-        _hasBits0 |= 32768;
+        _hasBits0 |= 65536;
         canUseVoice_ = value;
       }
     }
     /// <summary>Gets whether the "can_use_voice" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanUseVoice {
-      get { return (_hasBits0 & 32768) != 0; }
+      get { return (_hasBits0 & 65536) != 0; }
     }
     /// <summary>Clears the value of the "can_use_voice" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanUseVoice() {
-      _hasBits0 &= ~32768;
+      _hasBits0 &= ~65536;
     }
 
     /// <summary>Field number for the "can_voice_mute_member_for_all" field.</summary>
@@ -554,21 +580,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canVoiceMuteMemberForAll_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanVoiceMuteMemberForAll {
-      get { if ((_hasBits0 & 65536) != 0) { return canVoiceMuteMemberForAll_; } else { return CanVoiceMuteMemberForAllDefaultValue; } }
+      get { if ((_hasBits0 & 131072) != 0) { return canVoiceMuteMemberForAll_; } else { return CanVoiceMuteMemberForAllDefaultValue; } }
       set {
-        _hasBits0 |= 65536;
+        _hasBits0 |= 131072;
         canVoiceMuteMemberForAll_ = value;
       }
     }
     /// <summary>Gets whether the "can_voice_mute_member_for_all" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanVoiceMuteMemberForAll {
-      get { return (_hasBits0 & 65536) != 0; }
+      get { return (_hasBits0 & 131072) != 0; }
     }
     /// <summary>Clears the value of the "can_voice_mute_member_for_all" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanVoiceMuteMemberForAll() {
-      _hasBits0 &= ~65536;
+      _hasBits0 &= ~131072;
     }
 
     /// <summary>Field number for the "can_get_invitation" field.</summary>
@@ -578,21 +604,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canGetInvitation_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanGetInvitation {
-      get { if ((_hasBits0 & 131072) != 0) { return canGetInvitation_; } else { return CanGetInvitationDefaultValue; } }
+      get { if ((_hasBits0 & 262144) != 0) { return canGetInvitation_; } else { return CanGetInvitationDefaultValue; } }
       set {
-        _hasBits0 |= 131072;
+        _hasBits0 |= 262144;
         canGetInvitation_ = value;
       }
     }
     /// <summary>Gets whether the "can_get_invitation" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanGetInvitation {
-      get { return (_hasBits0 & 131072) != 0; }
+      get { return (_hasBits0 & 262144) != 0; }
     }
     /// <summary>Clears the value of the "can_get_invitation" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanGetInvitation() {
-      _hasBits0 &= ~131072;
+      _hasBits0 &= ~262144;
     }
 
     /// <summary>Field number for the "can_send_invitation" field.</summary>
@@ -602,21 +628,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canSendInvitation_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanSendInvitation {
-      get { if ((_hasBits0 & 262144) != 0) { return canSendInvitation_; } else { return CanSendInvitationDefaultValue; } }
+      get { if ((_hasBits0 & 524288) != 0) { return canSendInvitation_; } else { return CanSendInvitationDefaultValue; } }
       set {
-        _hasBits0 |= 262144;
+        _hasBits0 |= 524288;
         canSendInvitation_ = value;
       }
     }
     /// <summary>Gets whether the "can_send_invitation" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanSendInvitation {
-      get { return (_hasBits0 & 262144) != 0; }
+      get { return (_hasBits0 & 524288) != 0; }
     }
     /// <summary>Clears the value of the "can_send_invitation" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanSendInvitation() {
-      _hasBits0 &= ~262144;
+      _hasBits0 &= ~524288;
     }
 
     /// <summary>Field number for the "can_send_guest_invitation" field.</summary>
@@ -626,21 +652,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canSendGuestInvitation_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanSendGuestInvitation {
-      get { if ((_hasBits0 & 524288) != 0) { return canSendGuestInvitation_; } else { return CanSendGuestInvitationDefaultValue; } }
+      get { if ((_hasBits0 & 1048576) != 0) { return canSendGuestInvitation_; } else { return CanSendGuestInvitationDefaultValue; } }
       set {
-        _hasBits0 |= 524288;
+        _hasBits0 |= 1048576;
         canSendGuestInvitation_ = value;
       }
     }
     /// <summary>Gets whether the "can_send_guest_invitation" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanSendGuestInvitation {
-      get { return (_hasBits0 & 524288) != 0; }
+      get { return (_hasBits0 & 1048576) != 0; }
     }
     /// <summary>Clears the value of the "can_send_guest_invitation" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanSendGuestInvitation() {
-      _hasBits0 &= ~524288;
+      _hasBits0 &= ~1048576;
     }
 
     /// <summary>Field number for the "can_revoke_own_invitation" field.</summary>
@@ -650,21 +676,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canRevokeOwnInvitation_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanRevokeOwnInvitation {
-      get { if ((_hasBits0 & 1048576) != 0) { return canRevokeOwnInvitation_; } else { return CanRevokeOwnInvitationDefaultValue; } }
+      get { if ((_hasBits0 & 2097152) != 0) { return canRevokeOwnInvitation_; } else { return CanRevokeOwnInvitationDefaultValue; } }
       set {
-        _hasBits0 |= 1048576;
+        _hasBits0 |= 2097152;
         canRevokeOwnInvitation_ = value;
       }
     }
     /// <summary>Gets whether the "can_revoke_own_invitation" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanRevokeOwnInvitation {
-      get { return (_hasBits0 & 1048576) != 0; }
+      get { return (_hasBits0 & 2097152) != 0; }
     }
     /// <summary>Clears the value of the "can_revoke_own_invitation" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanRevokeOwnInvitation() {
-      _hasBits0 &= ~1048576;
+      _hasBits0 &= ~2097152;
     }
 
     /// <summary>Field number for the "can_revoke_other_invitation" field.</summary>
@@ -674,21 +700,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canRevokeOtherInvitation_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanRevokeOtherInvitation {
-      get { if ((_hasBits0 & 2097152) != 0) { return canRevokeOtherInvitation_; } else { return CanRevokeOtherInvitationDefaultValue; } }
+      get { if ((_hasBits0 & 4194304) != 0) { return canRevokeOtherInvitation_; } else { return CanRevokeOtherInvitationDefaultValue; } }
       set {
-        _hasBits0 |= 2097152;
+        _hasBits0 |= 4194304;
         canRevokeOtherInvitation_ = value;
       }
     }
     /// <summary>Gets whether the "can_revoke_other_invitation" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanRevokeOtherInvitation {
-      get { return (_hasBits0 & 2097152) != 0; }
+      get { return (_hasBits0 & 4194304) != 0; }
     }
     /// <summary>Clears the value of the "can_revoke_other_invitation" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanRevokeOtherInvitation() {
-      _hasBits0 &= ~2097152;
+      _hasBits0 &= ~4194304;
     }
 
     /// <summary>Field number for the "can_get_suggestion" field.</summary>
@@ -698,21 +724,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canGetSuggestion_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanGetSuggestion {
-      get { if ((_hasBits0 & 4194304) != 0) { return canGetSuggestion_; } else { return CanGetSuggestionDefaultValue; } }
+      get { if ((_hasBits0 & 8388608) != 0) { return canGetSuggestion_; } else { return CanGetSuggestionDefaultValue; } }
       set {
-        _hasBits0 |= 4194304;
+        _hasBits0 |= 8388608;
         canGetSuggestion_ = value;
       }
     }
     /// <summary>Gets whether the "can_get_suggestion" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanGetSuggestion {
-      get { return (_hasBits0 & 4194304) != 0; }
+      get { return (_hasBits0 & 8388608) != 0; }
     }
     /// <summary>Clears the value of the "can_get_suggestion" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanGetSuggestion() {
-      _hasBits0 &= ~4194304;
+      _hasBits0 &= ~8388608;
     }
 
     /// <summary>Field number for the "can_suggest_member" field.</summary>
@@ -722,21 +748,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canSuggestMember_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanSuggestMember {
-      get { if ((_hasBits0 & 8388608) != 0) { return canSuggestMember_; } else { return CanSuggestMemberDefaultValue; } }
+      get { if ((_hasBits0 & 16777216) != 0) { return canSuggestMember_; } else { return CanSuggestMemberDefaultValue; } }
       set {
-        _hasBits0 |= 8388608;
+        _hasBits0 |= 16777216;
         canSuggestMember_ = value;
       }
     }
     /// <summary>Gets whether the "can_suggest_member" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanSuggestMember {
-      get { return (_hasBits0 & 8388608) != 0; }
+      get { return (_hasBits0 & 16777216) != 0; }
     }
     /// <summary>Clears the value of the "can_suggest_member" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanSuggestMember() {
-      _hasBits0 &= ~8388608;
+      _hasBits0 &= ~16777216;
     }
 
     /// <summary>Field number for the "can_approve_member" field.</summary>
@@ -746,21 +772,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canApproveMember_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanApproveMember {
-      get { if ((_hasBits0 & 16777216) != 0) { return canApproveMember_; } else { return CanApproveMemberDefaultValue; } }
+      get { if ((_hasBits0 & 33554432) != 0) { return canApproveMember_; } else { return CanApproveMemberDefaultValue; } }
       set {
-        _hasBits0 |= 16777216;
+        _hasBits0 |= 33554432;
         canApproveMember_ = value;
       }
     }
     /// <summary>Gets whether the "can_approve_member" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanApproveMember {
-      get { return (_hasBits0 & 16777216) != 0; }
+      get { return (_hasBits0 & 33554432) != 0; }
     }
     /// <summary>Clears the value of the "can_approve_member" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanApproveMember() {
-      _hasBits0 &= ~16777216;
+      _hasBits0 &= ~33554432;
     }
 
     /// <summary>Field number for the "can_get_ticket" field.</summary>
@@ -770,21 +796,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canGetTicket_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanGetTicket {
-      get { if ((_hasBits0 & 33554432) != 0) { return canGetTicket_; } else { return CanGetTicketDefaultValue; } }
+      get { if ((_hasBits0 & 67108864) != 0) { return canGetTicket_; } else { return CanGetTicketDefaultValue; } }
       set {
-        _hasBits0 |= 33554432;
+        _hasBits0 |= 67108864;
         canGetTicket_ = value;
       }
     }
     /// <summary>Gets whether the "can_get_ticket" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanGetTicket {
-      get { return (_hasBits0 & 33554432) != 0; }
+      get { return (_hasBits0 & 67108864) != 0; }
     }
     /// <summary>Clears the value of the "can_get_ticket" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanGetTicket() {
-      _hasBits0 &= ~33554432;
+      _hasBits0 &= ~67108864;
     }
 
     /// <summary>Field number for the "can_create_ticket" field.</summary>
@@ -794,21 +820,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canCreateTicket_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanCreateTicket {
-      get { if ((_hasBits0 & 67108864) != 0) { return canCreateTicket_; } else { return CanCreateTicketDefaultValue; } }
+      get { if ((_hasBits0 & 134217728) != 0) { return canCreateTicket_; } else { return CanCreateTicketDefaultValue; } }
       set {
-        _hasBits0 |= 67108864;
+        _hasBits0 |= 134217728;
         canCreateTicket_ = value;
       }
     }
     /// <summary>Gets whether the "can_create_ticket" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanCreateTicket {
-      get { return (_hasBits0 & 67108864) != 0; }
+      get { return (_hasBits0 & 134217728) != 0; }
     }
     /// <summary>Clears the value of the "can_create_ticket" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanCreateTicket() {
-      _hasBits0 &= ~67108864;
+      _hasBits0 &= ~134217728;
     }
 
     /// <summary>Field number for the "can_destroy_ticket" field.</summary>
@@ -818,21 +844,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canDestroyTicket_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanDestroyTicket {
-      get { if ((_hasBits0 & 134217728) != 0) { return canDestroyTicket_; } else { return CanDestroyTicketDefaultValue; } }
+      get { if ((_hasBits0 & 268435456) != 0) { return canDestroyTicket_; } else { return CanDestroyTicketDefaultValue; } }
       set {
-        _hasBits0 |= 134217728;
+        _hasBits0 |= 268435456;
         canDestroyTicket_ = value;
       }
     }
     /// <summary>Gets whether the "can_destroy_ticket" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanDestroyTicket {
-      get { return (_hasBits0 & 134217728) != 0; }
+      get { return (_hasBits0 & 268435456) != 0; }
     }
     /// <summary>Clears the value of the "can_destroy_ticket" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanDestroyTicket() {
-      _hasBits0 &= ~134217728;
+      _hasBits0 &= ~268435456;
     }
 
     /// <summary>Field number for the "can_get_ban" field.</summary>
@@ -842,21 +868,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canGetBan_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanGetBan {
-      get { if ((_hasBits0 & 268435456) != 0) { return canGetBan_; } else { return CanGetBanDefaultValue; } }
+      get { if ((_hasBits0 & 536870912) != 0) { return canGetBan_; } else { return CanGetBanDefaultValue; } }
       set {
-        _hasBits0 |= 268435456;
+        _hasBits0 |= 536870912;
         canGetBan_ = value;
       }
     }
     /// <summary>Gets whether the "can_get_ban" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanGetBan {
-      get { return (_hasBits0 & 268435456) != 0; }
+      get { return (_hasBits0 & 536870912) != 0; }
     }
     /// <summary>Clears the value of the "can_get_ban" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanGetBan() {
-      _hasBits0 &= ~268435456;
+      _hasBits0 &= ~536870912;
     }
 
     /// <summary>Field number for the "can_add_ban" field.</summary>
@@ -866,21 +892,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canAddBan_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanAddBan {
-      get { if ((_hasBits0 & 536870912) != 0) { return canAddBan_; } else { return CanAddBanDefaultValue; } }
+      get { if ((_hasBits0 & 1073741824) != 0) { return canAddBan_; } else { return CanAddBanDefaultValue; } }
       set {
-        _hasBits0 |= 536870912;
+        _hasBits0 |= 1073741824;
         canAddBan_ = value;
       }
     }
     /// <summary>Gets whether the "can_add_ban" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanAddBan {
-      get { return (_hasBits0 & 536870912) != 0; }
+      get { return (_hasBits0 & 1073741824) != 0; }
     }
     /// <summary>Clears the value of the "can_add_ban" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanAddBan() {
-      _hasBits0 &= ~536870912;
+      _hasBits0 &= ~1073741824;
     }
 
     /// <summary>Field number for the "can_remove_ban" field.</summary>
@@ -890,21 +916,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canRemoveBan_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanRemoveBan {
-      get { if ((_hasBits0 & 1073741824) != 0) { return canRemoveBan_; } else { return CanRemoveBanDefaultValue; } }
+      get { if ((_hasBits0 & -2147483648) != 0) { return canRemoveBan_; } else { return CanRemoveBanDefaultValue; } }
       set {
-        _hasBits0 |= 1073741824;
+        _hasBits0 |= -2147483648;
         canRemoveBan_ = value;
       }
     }
     /// <summary>Gets whether the "can_remove_ban" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanRemoveBan {
-      get { return (_hasBits0 & 1073741824) != 0; }
+      get { return (_hasBits0 & -2147483648) != 0; }
     }
     /// <summary>Clears the value of the "can_remove_ban" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanRemoveBan() {
-      _hasBits0 &= ~1073741824;
+      _hasBits0 &= ~-2147483648;
     }
 
     /// <summary>Field number for the "can_create_stream" field.</summary>
@@ -914,21 +940,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canCreateStream_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanCreateStream {
-      get { if ((_hasBits0 & -2147483648) != 0) { return canCreateStream_; } else { return CanCreateStreamDefaultValue; } }
+      get { if ((_hasBits1 & 1) != 0) { return canCreateStream_; } else { return CanCreateStreamDefaultValue; } }
       set {
-        _hasBits0 |= -2147483648;
+        _hasBits1 |= 1;
         canCreateStream_ = value;
       }
     }
     /// <summary>Gets whether the "can_create_stream" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanCreateStream {
-      get { return (_hasBits0 & -2147483648) != 0; }
+      get { return (_hasBits1 & 1) != 0; }
     }
     /// <summary>Clears the value of the "can_create_stream" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanCreateStream() {
-      _hasBits0 &= ~-2147483648;
+      _hasBits1 &= ~1;
     }
 
     /// <summary>Field number for the "can_destroy_stream" field.</summary>
@@ -938,21 +964,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canDestroyStream_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanDestroyStream {
-      get { if ((_hasBits1 & 1) != 0) { return canDestroyStream_; } else { return CanDestroyStreamDefaultValue; } }
+      get { if ((_hasBits1 & 2) != 0) { return canDestroyStream_; } else { return CanDestroyStreamDefaultValue; } }
       set {
-        _hasBits1 |= 1;
+        _hasBits1 |= 2;
         canDestroyStream_ = value;
       }
     }
     /// <summary>Gets whether the "can_destroy_stream" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanDestroyStream {
-      get { return (_hasBits1 & 1) != 0; }
+      get { return (_hasBits1 & 2) != 0; }
     }
     /// <summary>Clears the value of the "can_destroy_stream" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanDestroyStream() {
-      _hasBits1 &= ~1;
+      _hasBits1 &= ~2;
     }
 
     /// <summary>Field number for the "can_set_stream_position" field.</summary>
@@ -962,21 +988,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canSetStreamPosition_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanSetStreamPosition {
-      get { if ((_hasBits1 & 2) != 0) { return canSetStreamPosition_; } else { return CanSetStreamPositionDefaultValue; } }
+      get { if ((_hasBits1 & 4) != 0) { return canSetStreamPosition_; } else { return CanSetStreamPositionDefaultValue; } }
       set {
-        _hasBits1 |= 2;
+        _hasBits1 |= 4;
         canSetStreamPosition_ = value;
       }
     }
     /// <summary>Gets whether the "can_set_stream_position" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanSetStreamPosition {
-      get { return (_hasBits1 & 2) != 0; }
+      get { return (_hasBits1 & 4) != 0; }
     }
     /// <summary>Clears the value of the "can_set_stream_position" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanSetStreamPosition() {
-      _hasBits1 &= ~2;
+      _hasBits1 &= ~4;
     }
 
     /// <summary>Field number for the "can_set_stream_attribute" field.</summary>
@@ -986,21 +1012,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canSetStreamAttribute_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanSetStreamAttribute {
-      get { if ((_hasBits1 & 4) != 0) { return canSetStreamAttribute_; } else { return CanSetStreamAttributeDefaultValue; } }
+      get { if ((_hasBits1 & 8) != 0) { return canSetStreamAttribute_; } else { return CanSetStreamAttributeDefaultValue; } }
       set {
-        _hasBits1 |= 4;
+        _hasBits1 |= 8;
         canSetStreamAttribute_ = value;
       }
     }
     /// <summary>Gets whether the "can_set_stream_attribute" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanSetStreamAttribute {
-      get { return (_hasBits1 & 4) != 0; }
+      get { return (_hasBits1 & 8) != 0; }
     }
     /// <summary>Clears the value of the "can_set_stream_attribute" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanSetStreamAttribute() {
-      _hasBits1 &= ~4;
+      _hasBits1 &= ~8;
     }
 
     /// <summary>Field number for the "can_set_stream_name" field.</summary>
@@ -1010,21 +1036,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canSetStreamName_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanSetStreamName {
-      get { if ((_hasBits1 & 8) != 0) { return canSetStreamName_; } else { return CanSetStreamNameDefaultValue; } }
+      get { if ((_hasBits1 & 16) != 0) { return canSetStreamName_; } else { return CanSetStreamNameDefaultValue; } }
       set {
-        _hasBits1 |= 8;
+        _hasBits1 |= 16;
         canSetStreamName_ = value;
       }
     }
     /// <summary>Gets whether the "can_set_stream_name" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanSetStreamName {
-      get { return (_hasBits1 & 8) != 0; }
+      get { return (_hasBits1 & 16) != 0; }
     }
     /// <summary>Clears the value of the "can_set_stream_name" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanSetStreamName() {
-      _hasBits1 &= ~8;
+      _hasBits1 &= ~16;
     }
 
     /// <summary>Field number for the "can_set_stream_subject" field.</summary>
@@ -1034,21 +1060,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canSetStreamSubject_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanSetStreamSubject {
-      get { if ((_hasBits1 & 16) != 0) { return canSetStreamSubject_; } else { return CanSetStreamSubjectDefaultValue; } }
+      get { if ((_hasBits1 & 32) != 0) { return canSetStreamSubject_; } else { return CanSetStreamSubjectDefaultValue; } }
       set {
-        _hasBits1 |= 16;
+        _hasBits1 |= 32;
         canSetStreamSubject_ = value;
       }
     }
     /// <summary>Gets whether the "can_set_stream_subject" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanSetStreamSubject {
-      get { return (_hasBits1 & 16) != 0; }
+      get { return (_hasBits1 & 32) != 0; }
     }
     /// <summary>Clears the value of the "can_set_stream_subject" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanSetStreamSubject() {
-      _hasBits1 &= ~16;
+      _hasBits1 &= ~32;
     }
 
     /// <summary>Field number for the "can_set_stream_access" field.</summary>
@@ -1058,21 +1084,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canSetStreamAccess_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanSetStreamAccess {
-      get { if ((_hasBits1 & 32) != 0) { return canSetStreamAccess_; } else { return CanSetStreamAccessDefaultValue; } }
+      get { if ((_hasBits1 & 64) != 0) { return canSetStreamAccess_; } else { return CanSetStreamAccessDefaultValue; } }
       set {
-        _hasBits1 |= 32;
+        _hasBits1 |= 64;
         canSetStreamAccess_ = value;
       }
     }
     /// <summary>Gets whether the "can_set_stream_access" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanSetStreamAccess {
-      get { return (_hasBits1 & 32) != 0; }
+      get { return (_hasBits1 & 64) != 0; }
     }
     /// <summary>Clears the value of the "can_set_stream_access" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanSetStreamAccess() {
-      _hasBits1 &= ~32;
+      _hasBits1 &= ~64;
     }
 
     /// <summary>Field number for the "can_set_stream_voice_level" field.</summary>
@@ -1082,21 +1108,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canSetStreamVoiceLevel_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanSetStreamVoiceLevel {
-      get { if ((_hasBits1 & 64) != 0) { return canSetStreamVoiceLevel_; } else { return CanSetStreamVoiceLevelDefaultValue; } }
+      get { if ((_hasBits1 & 128) != 0) { return canSetStreamVoiceLevel_; } else { return CanSetStreamVoiceLevelDefaultValue; } }
       set {
-        _hasBits1 |= 64;
+        _hasBits1 |= 128;
         canSetStreamVoiceLevel_ = value;
       }
     }
     /// <summary>Gets whether the "can_set_stream_voice_level" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanSetStreamVoiceLevel {
-      get { return (_hasBits1 & 64) != 0; }
+      get { return (_hasBits1 & 128) != 0; }
     }
     /// <summary>Clears the value of the "can_set_stream_voice_level" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanSetStreamVoiceLevel() {
-      _hasBits1 &= ~64;
+      _hasBits1 &= ~128;
     }
 
     /// <summary>Field number for the "can_create_message" field.</summary>
@@ -1106,21 +1132,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canCreateMessage_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanCreateMessage {
-      get { if ((_hasBits1 & 128) != 0) { return canCreateMessage_; } else { return CanCreateMessageDefaultValue; } }
+      get { if ((_hasBits1 & 256) != 0) { return canCreateMessage_; } else { return CanCreateMessageDefaultValue; } }
       set {
-        _hasBits1 |= 128;
+        _hasBits1 |= 256;
         canCreateMessage_ = value;
       }
     }
     /// <summary>Gets whether the "can_create_message" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanCreateMessage {
-      get { return (_hasBits1 & 128) != 0; }
+      get { return (_hasBits1 & 256) != 0; }
     }
     /// <summary>Clears the value of the "can_create_message" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanCreateMessage() {
-      _hasBits1 &= ~128;
+      _hasBits1 &= ~256;
     }
 
     /// <summary>Field number for the "can_destroy_own_message" field.</summary>
@@ -1130,21 +1156,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canDestroyOwnMessage_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanDestroyOwnMessage {
-      get { if ((_hasBits1 & 256) != 0) { return canDestroyOwnMessage_; } else { return CanDestroyOwnMessageDefaultValue; } }
+      get { if ((_hasBits1 & 512) != 0) { return canDestroyOwnMessage_; } else { return CanDestroyOwnMessageDefaultValue; } }
       set {
-        _hasBits1 |= 256;
+        _hasBits1 |= 512;
         canDestroyOwnMessage_ = value;
       }
     }
     /// <summary>Gets whether the "can_destroy_own_message" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanDestroyOwnMessage {
-      get { return (_hasBits1 & 256) != 0; }
+      get { return (_hasBits1 & 512) != 0; }
     }
     /// <summary>Clears the value of the "can_destroy_own_message" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanDestroyOwnMessage() {
-      _hasBits1 &= ~256;
+      _hasBits1 &= ~512;
     }
 
     /// <summary>Field number for the "can_destroy_other_message" field.</summary>
@@ -1154,21 +1180,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canDestroyOtherMessage_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanDestroyOtherMessage {
-      get { if ((_hasBits1 & 512) != 0) { return canDestroyOtherMessage_; } else { return CanDestroyOtherMessageDefaultValue; } }
+      get { if ((_hasBits1 & 1024) != 0) { return canDestroyOtherMessage_; } else { return CanDestroyOtherMessageDefaultValue; } }
       set {
-        _hasBits1 |= 512;
+        _hasBits1 |= 1024;
         canDestroyOtherMessage_ = value;
       }
     }
     /// <summary>Gets whether the "can_destroy_other_message" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanDestroyOtherMessage {
-      get { return (_hasBits1 & 512) != 0; }
+      get { return (_hasBits1 & 1024) != 0; }
     }
     /// <summary>Clears the value of the "can_destroy_other_message" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanDestroyOtherMessage() {
-      _hasBits1 &= ~512;
+      _hasBits1 &= ~1024;
     }
 
     /// <summary>Field number for the "can_edit_own_message" field.</summary>
@@ -1178,21 +1204,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canEditOwnMessage_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanEditOwnMessage {
-      get { if ((_hasBits1 & 1024) != 0) { return canEditOwnMessage_; } else { return CanEditOwnMessageDefaultValue; } }
+      get { if ((_hasBits1 & 2048) != 0) { return canEditOwnMessage_; } else { return CanEditOwnMessageDefaultValue; } }
       set {
-        _hasBits1 |= 1024;
+        _hasBits1 |= 2048;
         canEditOwnMessage_ = value;
       }
     }
     /// <summary>Gets whether the "can_edit_own_message" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanEditOwnMessage {
-      get { return (_hasBits1 & 1024) != 0; }
+      get { return (_hasBits1 & 2048) != 0; }
     }
     /// <summary>Clears the value of the "can_edit_own_message" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanEditOwnMessage() {
-      _hasBits1 &= ~1024;
+      _hasBits1 &= ~2048;
     }
 
     /// <summary>Field number for the "can_pin_message" field.</summary>
@@ -1202,21 +1228,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canPinMessage_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanPinMessage {
-      get { if ((_hasBits1 & 2048) != 0) { return canPinMessage_; } else { return CanPinMessageDefaultValue; } }
+      get { if ((_hasBits1 & 4096) != 0) { return canPinMessage_; } else { return CanPinMessageDefaultValue; } }
       set {
-        _hasBits1 |= 2048;
+        _hasBits1 |= 4096;
         canPinMessage_ = value;
       }
     }
     /// <summary>Gets whether the "can_pin_message" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanPinMessage {
-      get { return (_hasBits1 & 2048) != 0; }
+      get { return (_hasBits1 & 4096) != 0; }
     }
     /// <summary>Clears the value of the "can_pin_message" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanPinMessage() {
-      _hasBits1 &= ~2048;
+      _hasBits1 &= ~4096;
     }
 
     /// <summary>Field number for the "can_mention_all" field.</summary>
@@ -1226,21 +1252,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canMentionAll_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanMentionAll {
-      get { if ((_hasBits1 & 4096) != 0) { return canMentionAll_; } else { return CanMentionAllDefaultValue; } }
+      get { if ((_hasBits1 & 8192) != 0) { return canMentionAll_; } else { return CanMentionAllDefaultValue; } }
       set {
-        _hasBits1 |= 4096;
+        _hasBits1 |= 8192;
         canMentionAll_ = value;
       }
     }
     /// <summary>Gets whether the "can_mention_all" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanMentionAll {
-      get { return (_hasBits1 & 4096) != 0; }
+      get { return (_hasBits1 & 8192) != 0; }
     }
     /// <summary>Clears the value of the "can_mention_all" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanMentionAll() {
-      _hasBits1 &= ~4096;
+      _hasBits1 &= ~8192;
     }
 
     /// <summary>Field number for the "can_mention_here" field.</summary>
@@ -1250,21 +1276,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canMentionHere_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanMentionHere {
-      get { if ((_hasBits1 & 8192) != 0) { return canMentionHere_; } else { return CanMentionHereDefaultValue; } }
+      get { if ((_hasBits1 & 16384) != 0) { return canMentionHere_; } else { return CanMentionHereDefaultValue; } }
       set {
-        _hasBits1 |= 8192;
+        _hasBits1 |= 16384;
         canMentionHere_ = value;
       }
     }
     /// <summary>Gets whether the "can_mention_here" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanMentionHere {
-      get { return (_hasBits1 & 8192) != 0; }
+      get { return (_hasBits1 & 16384) != 0; }
     }
     /// <summary>Clears the value of the "can_mention_here" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanMentionHere() {
-      _hasBits1 &= ~8192;
+      _hasBits1 &= ~16384;
     }
 
     /// <summary>Field number for the "can_mention_member" field.</summary>
@@ -1274,21 +1300,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canMentionMember_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanMentionMember {
-      get { if ((_hasBits1 & 16384) != 0) { return canMentionMember_; } else { return CanMentionMemberDefaultValue; } }
+      get { if ((_hasBits1 & 32768) != 0) { return canMentionMember_; } else { return CanMentionMemberDefaultValue; } }
       set {
-        _hasBits1 |= 16384;
+        _hasBits1 |= 32768;
         canMentionMember_ = value;
       }
     }
     /// <summary>Gets whether the "can_mention_member" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanMentionMember {
-      get { return (_hasBits1 & 16384) != 0; }
+      get { return (_hasBits1 & 32768) != 0; }
     }
     /// <summary>Clears the value of the "can_mention_member" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanMentionMember() {
-      _hasBits1 &= ~16384;
+      _hasBits1 &= ~32768;
     }
 
     /// <summary>Field number for the "can_mention_role" field.</summary>
@@ -1298,21 +1324,21 @@ namespace Bgs.Protocol.Club.V1 {
     private bool canMentionRole_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool CanMentionRole {
-      get { if ((_hasBits1 & 32768) != 0) { return canMentionRole_; } else { return CanMentionRoleDefaultValue; } }
+      get { if ((_hasBits1 & 65536) != 0) { return canMentionRole_; } else { return CanMentionRoleDefaultValue; } }
       set {
-        _hasBits1 |= 32768;
+        _hasBits1 |= 65536;
         canMentionRole_ = value;
       }
     }
     /// <summary>Gets whether the "can_mention_role" field is set</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasCanMentionRole {
-      get { return (_hasBits1 & 32768) != 0; }
+      get { return (_hasBits1 & 65536) != 0; }
     }
     /// <summary>Clears the value of the "can_mention_role" field</summary>
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearCanMentionRole() {
-      _hasBits1 &= ~32768;
+      _hasBits1 &= ~65536;
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -1335,6 +1361,7 @@ namespace Bgs.Protocol.Club.V1 {
       if (CanSetAvatar != other.CanSetAvatar) return false;
       if (CanSetBroadcast != other.CanSetBroadcast) return false;
       if (CanSetPrivacyLevel != other.CanSetPrivacyLevel) return false;
+      if (CanAddMember != other.CanAddMember) return false;
       if (CanKickMember != other.CanKickMember) return false;
       if (CanSetOwnMemberAttribute != other.CanSetOwnMemberAttribute) return false;
       if (CanSetOtherMemberAttribute != other.CanSetOtherMemberAttribute) return false;
@@ -1389,6 +1416,7 @@ namespace Bgs.Protocol.Club.V1 {
       if (HasCanSetAvatar) hash ^= CanSetAvatar.GetHashCode();
       if (HasCanSetBroadcast) hash ^= CanSetBroadcast.GetHashCode();
       if (HasCanSetPrivacyLevel) hash ^= CanSetPrivacyLevel.GetHashCode();
+      if (HasCanAddMember) hash ^= CanAddMember.GetHashCode();
       if (HasCanKickMember) hash ^= CanKickMember.GetHashCode();
       if (HasCanSetOwnMemberAttribute) hash ^= CanSetOwnMemberAttribute.GetHashCode();
       if (HasCanSetOtherMemberAttribute) hash ^= CanSetOtherMemberAttribute.GetHashCode();
@@ -1470,6 +1498,10 @@ namespace Bgs.Protocol.Club.V1 {
       if (HasCanSetPrivacyLevel) {
         output.WriteRawTag(120);
         output.WriteBool(CanSetPrivacyLevel);
+      }
+      if (HasCanAddMember) {
+        output.WriteRawTag(232, 1);
+        output.WriteBool(CanAddMember);
       }
       if (HasCanKickMember) {
         output.WriteRawTag(240, 1);
@@ -1664,6 +1696,9 @@ namespace Bgs.Protocol.Club.V1 {
       if (HasCanSetPrivacyLevel) {
         size += 1 + 1;
       }
+      if (HasCanAddMember) {
+        size += 2 + 1;
+      }
       if (HasCanKickMember) {
         size += 2 + 1;
       }
@@ -1818,6 +1853,9 @@ namespace Bgs.Protocol.Club.V1 {
       }
       if (other.HasCanSetPrivacyLevel) {
         CanSetPrivacyLevel = other.CanSetPrivacyLevel;
+      }
+      if (other.HasCanAddMember) {
+        CanAddMember = other.CanAddMember;
       }
       if (other.HasCanKickMember) {
         CanKickMember = other.CanKickMember;
@@ -1979,6 +2017,10 @@ namespace Bgs.Protocol.Club.V1 {
           }
           case 120: {
             CanSetPrivacyLevel = input.ReadBool();
+            break;
+          }
+          case 232: {
+            CanAddMember = input.ReadBool();
             break;
           }
           case 240: {

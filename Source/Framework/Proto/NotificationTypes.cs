@@ -34,27 +34,31 @@ namespace Bgs.Protocol.Notification.V1 {
             "dGVuc2lvbnMvZmllbGRfb3B0aW9ucy5wcm90bxo4YmdzL2xvdy9wYi9jbGll",
             "bnQvZ2xvYmFsX2V4dGVuc2lvbnMvbWV0aG9kX29wdGlvbnMucHJvdG8aOWJn",
             "cy9sb3cvcGIvY2xpZW50L2dsb2JhbF9leHRlbnNpb25zL3NlcnZpY2Vfb3B0",
-            "aW9ucy5wcm90byJLCgZUYXJnZXQSMwoIaWRlbnRpdHkYASABKAsyIS5iZ3Mu",
-            "cHJvdG9jb2wuYWNjb3VudC52MS5JZGVudGl0eRIMCgR0eXBlGAIgASgJIp0B",
-            "CgxTdWJzY3JpcHRpb24SNAoGdGFyZ2V0GAEgAygLMiQuYmdzLnByb3RvY29s",
-            "Lm5vdGlmaWNhdGlvbi52MS5UYXJnZXQSNQoKc3Vic2NyaWJlchgCIAEoCzIh",
-            "LmJncy5wcm90b2NvbC5hY2NvdW50LnYxLklkZW50aXR5EiAKEWRlbGl2ZXJ5",
-            "X3JlcXVpcmVkGAMgASgIOgVmYWxzZSKhAwoMTm90aWZpY2F0aW9uEikKCXNl",
-            "bmRlcl9pZBgBIAEoCzIWLmJncy5wcm90b2NvbC5FbnRpdHlJZBIpCgl0YXJn",
-            "ZXRfaWQYAiACKAsyFi5iZ3MucHJvdG9jb2wuRW50aXR5SWQSDAoEdHlwZRgD",
-            "IAIoCRIqCglhdHRyaWJ1dGUYBCADKAsyFy5iZ3MucHJvdG9jb2wuQXR0cmli",
-            "dXRlEjEKEXNlbmRlcl9hY2NvdW50X2lkGAUgASgLMhYuYmdzLnByb3RvY29s",
-            "LkVudGl0eUlkEjEKEXRhcmdldF9hY2NvdW50X2lkGAYgASgLMhYuYmdzLnBy",
-            "b3RvY29sLkVudGl0eUlkEhkKEXNlbmRlcl9iYXR0bGVfdGFnGAcgASgJEhkK",
-            "EXRhcmdldF9iYXR0bGVfdGFnGAggASgJEiUKBHBlZXIYCSABKAsyFy5iZ3Mu",
-            "cHJvdG9jb2wuUHJvY2Vzc0lkEj4KE2ZvcndhcmRpbmdfaWRlbnRpdHkYCiAB",
-            "KAsyIS5iZ3MucHJvdG9jb2wuYWNjb3VudC52MS5JZGVudGl0eQ=="));
+            "aW9ucy5wcm90byJeCgZUYXJnZXQSPgoIaWRlbnRpdHkYASABKAsyLC5iZ3Mu",
+            "cHJvdG9jb2wubm90aWZpY2F0aW9uLnYxLlRhcmdldElkZW50aXR5EgwKBHR5",
+            "cGUYAiABKAk6BoL5KwIQASKHAQoOVGFyZ2V0SWRlbnRpdHkSMwoHYWNjb3Vu",
+            "dBgBIAEoCzIiLmJncy5wcm90b2NvbC5hY2NvdW50LnYxLkFjY291bnRJZBJA",
+            "CgxnYW1lX2FjY291bnQYAiABKAsyKi5iZ3MucHJvdG9jb2wuYWNjb3VudC52",
+            "MS5HYW1lQWNjb3VudEhhbmRsZSKaAQoMU3Vic2NyaXB0aW9uEjQKBnRhcmdl",
+            "dBgBIAMoCzIkLmJncy5wcm90b2NvbC5ub3RpZmljYXRpb24udjEuVGFyZ2V0",
+            "EjUKCnN1YnNjcmliZXIYAiABKAsyIS5iZ3MucHJvdG9jb2wuYWNjb3VudC52",
+            "MS5JZGVudGl0eRIdChFkZWxpdmVyeV9yZXF1aXJlZBgDIAEoCEICGAEikgMK",
+            "DE5vdGlmaWNhdGlvbhIpCglzZW5kZXJfaWQYASABKAsyFi5iZ3MucHJvdG9j",
+            "b2wuRW50aXR5SWQSKQoJdGFyZ2V0X2lkGAIgAigLMhYuYmdzLnByb3RvY29s",
+            "LkVudGl0eUlkEgwKBHR5cGUYAyACKAkSKgoJYXR0cmlidXRlGAQgAygLMhcu",
+            "YmdzLnByb3RvY29sLkF0dHJpYnV0ZRIxChFzZW5kZXJfYWNjb3VudF9pZBgF",
+            "IAEoCzIWLmJncy5wcm90b2NvbC5FbnRpdHlJZBIxChF0YXJnZXRfYWNjb3Vu",
+            "dF9pZBgGIAEoCzIWLmJncy5wcm90b2NvbC5FbnRpdHlJZBIhChFzZW5kZXJf",
+            "YmF0dGxlX3RhZxgHIAEoCUIGgvkrAggBEiEKEXRhcmdldF9iYXR0bGVfdGFn",
+            "GAggASgJQgaC+SsCCAESPgoTZm9yd2FyZGluZ19pZGVudGl0eRgKIAEoCzIh",
+            "LmJncy5wcm90b2NvbC5hY2NvdW50LnYxLklkZW50aXR5OgaC+SsCCAE="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor, global::Bgs.Protocol.AttributeTypesReflection.Descriptor, global::Bgs.Protocol.EntityTypesReflection.Descriptor, global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Notification.V1.Target), global::Bgs.Protocol.Notification.V1.Target.Parser, new[]{ "Identity", "Type" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Notification.V1.TargetIdentity), global::Bgs.Protocol.Notification.V1.TargetIdentity.Parser, new[]{ "Account", "GameAccount" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Notification.V1.Subscription), global::Bgs.Protocol.Notification.V1.Subscription.Parser, new[]{ "Target", "Subscriber", "DeliveryRequired" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Notification.V1.Notification), global::Bgs.Protocol.Notification.V1.Notification.Parser, new[]{ "SenderId", "TargetId", "Type", "Attribute", "SenderAccountId", "TargetAccountId", "SenderBattleTag", "TargetBattleTag", "Peer", "ForwardingIdentity" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Notification.V1.Notification), global::Bgs.Protocol.Notification.V1.Notification.Parser, new[]{ "SenderId", "TargetId", "Type", "Attribute", "SenderAccountId", "TargetAccountId", "SenderBattleTag", "TargetBattleTag", "ForwardingIdentity" }, null, null, null, null)
           }));
     }
     #endregion
@@ -98,9 +102,9 @@ namespace Bgs.Protocol.Notification.V1 {
 
     /// <summary>Field number for the "identity" field.</summary>
     public const int IdentityFieldNumber = 1;
-    private global::Bgs.Protocol.Account.V1.Identity identity_;
+    private global::Bgs.Protocol.Notification.V1.TargetIdentity identity_;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Bgs.Protocol.Account.V1.Identity Identity {
+    public global::Bgs.Protocol.Notification.V1.TargetIdentity Identity {
       get { return identity_; }
       set {
         identity_ = value;
@@ -211,7 +215,7 @@ namespace Bgs.Protocol.Notification.V1 {
       }
       if (other.HasIdentity) {
         if (!HasIdentity) {
-          Identity = new global::Bgs.Protocol.Account.V1.Identity();
+          Identity = new global::Bgs.Protocol.Notification.V1.TargetIdentity();
         }
         Identity.MergeFrom(other.Identity);
       }
@@ -231,13 +235,202 @@ namespace Bgs.Protocol.Notification.V1 {
             break;
           case 10: {
             if (!HasIdentity) {
-              Identity = new global::Bgs.Protocol.Account.V1.Identity();
+              Identity = new global::Bgs.Protocol.Notification.V1.TargetIdentity();
             }
             input.ReadMessage(Identity);
             break;
           }
           case 18: {
             Type = input.ReadString();
+            break;
+          }
+        }
+      }
+    }
+
+  }
+
+  public sealed partial class TargetIdentity : pb::IMessage<TargetIdentity> {
+    private static readonly pb::MessageParser<TargetIdentity> _parser = new pb::MessageParser<TargetIdentity>(() => new TargetIdentity());
+    private pb::UnknownFieldSet _unknownFields;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pb::MessageParser<TargetIdentity> Parser { get { return _parser; } }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public static pbr::MessageDescriptor Descriptor {
+      get { return global::Bgs.Protocol.Notification.V1.NotificationTypesReflection.Descriptor.MessageTypes[1]; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    pbr::MessageDescriptor pb::IMessage.Descriptor {
+      get { return Descriptor; }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public TargetIdentity() {
+      OnConstruction();
+    }
+
+    partial void OnConstruction();
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public TargetIdentity(TargetIdentity other) : this() {
+      account_ = other.HasAccount ? other.account_.Clone() : null;
+      gameAccount_ = other.HasGameAccount ? other.gameAccount_.Clone() : null;
+      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public TargetIdentity Clone() {
+      return new TargetIdentity(this);
+    }
+
+    /// <summary>Field number for the "account" field.</summary>
+    public const int AccountFieldNumber = 1;
+    private global::Bgs.Protocol.Account.V1.AccountId account_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Bgs.Protocol.Account.V1.AccountId Account {
+      get { return account_; }
+      set {
+        account_ = value;
+      }
+    }
+    /// <summary>Gets whether the account field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasAccount {
+      get { return account_ != null; }
+    }
+    /// <summary>Clears the value of the account field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearAccount() {
+      account_ = null;
+    }
+
+    /// <summary>Field number for the "game_account" field.</summary>
+    public const int GameAccountFieldNumber = 2;
+    private global::Bgs.Protocol.Account.V1.GameAccountHandle gameAccount_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Bgs.Protocol.Account.V1.GameAccountHandle GameAccount {
+      get { return gameAccount_; }
+      set {
+        gameAccount_ = value;
+      }
+    }
+    /// <summary>Gets whether the game_account field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasGameAccount {
+      get { return gameAccount_ != null; }
+    }
+    /// <summary>Clears the value of the game_account field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearGameAccount() {
+      gameAccount_ = null;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override bool Equals(object other) {
+      return Equals(other as TargetIdentity);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Equals(TargetIdentity other) {
+      if (ReferenceEquals(other, null)) {
+        return false;
+      }
+      if (ReferenceEquals(other, this)) {
+        return true;
+      }
+      if (!object.Equals(Account, other.Account)) return false;
+      if (!object.Equals(GameAccount, other.GameAccount)) return false;
+      return Equals(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override int GetHashCode() {
+      int hash = 1;
+      if (HasAccount) hash ^= Account.GetHashCode();
+      if (HasGameAccount) hash ^= GameAccount.GetHashCode();
+      if (_unknownFields != null) {
+        hash ^= _unknownFields.GetHashCode();
+      }
+      return hash;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public override string ToString() {
+      return pb::JsonFormatter.ToDiagnosticString(this);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void WriteTo(pb::CodedOutputStream output) {
+      if (HasAccount) {
+        output.WriteRawTag(10);
+        output.WriteMessage(Account);
+      }
+      if (HasGameAccount) {
+        output.WriteRawTag(18);
+        output.WriteMessage(GameAccount);
+      }
+      if (_unknownFields != null) {
+        _unknownFields.WriteTo(output);
+      }
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public int CalculateSize() {
+      int size = 0;
+      if (HasAccount) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Account);
+      }
+      if (HasGameAccount) {
+        size += 1 + pb::CodedOutputStream.ComputeMessageSize(GameAccount);
+      }
+      if (_unknownFields != null) {
+        size += _unknownFields.CalculateSize();
+      }
+      return size;
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(TargetIdentity other) {
+      if (other == null) {
+        return;
+      }
+      if (other.HasAccount) {
+        if (!HasAccount) {
+          Account = new global::Bgs.Protocol.Account.V1.AccountId();
+        }
+        Account.MergeFrom(other.Account);
+      }
+      if (other.HasGameAccount) {
+        if (!HasGameAccount) {
+          GameAccount = new global::Bgs.Protocol.Account.V1.GameAccountHandle();
+        }
+        GameAccount.MergeFrom(other.GameAccount);
+      }
+      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
+    }
+
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void MergeFrom(pb::CodedInputStream input) {
+      uint tag;
+      while ((tag = input.ReadTag()) != 0) {
+        switch(tag) {
+          default:
+            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
+            break;
+          case 10: {
+            if (!HasAccount) {
+              Account = new global::Bgs.Protocol.Account.V1.AccountId();
+            }
+            input.ReadMessage(Account);
+            break;
+          }
+          case 18: {
+            if (!HasGameAccount) {
+              GameAccount = new global::Bgs.Protocol.Account.V1.GameAccountHandle();
+            }
+            input.ReadMessage(GameAccount);
             break;
           }
         }
@@ -255,7 +448,7 @@ namespace Bgs.Protocol.Notification.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Notification.V1.NotificationTypesReflection.Descriptor.MessageTypes[1]; }
+      get { return global::Bgs.Protocol.Notification.V1.NotificationTypesReflection.Descriptor.MessageTypes[2]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -320,6 +513,7 @@ namespace Bgs.Protocol.Notification.V1 {
     private readonly static bool DeliveryRequiredDefaultValue = false;
 
     private bool deliveryRequired_;
+    [global::System.ObsoleteAttribute]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool DeliveryRequired {
       get { if ((_hasBits0 & 1) != 0) { return deliveryRequired_; } else { return DeliveryRequiredDefaultValue; } }
@@ -329,11 +523,13 @@ namespace Bgs.Protocol.Notification.V1 {
       }
     }
     /// <summary>Gets whether the "delivery_required" field is set</summary>
+    [global::System.ObsoleteAttribute]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public bool HasDeliveryRequired {
       get { return (_hasBits0 & 1) != 0; }
     }
     /// <summary>Clears the value of the "delivery_required" field</summary>
+    [global::System.ObsoleteAttribute]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public void ClearDeliveryRequired() {
       _hasBits0 &= ~1;
@@ -462,7 +658,7 @@ namespace Bgs.Protocol.Notification.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.Notification.V1.NotificationTypesReflection.Descriptor.MessageTypes[2]; }
+      get { return global::Bgs.Protocol.Notification.V1.NotificationTypesReflection.Descriptor.MessageTypes[3]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -487,7 +683,6 @@ namespace Bgs.Protocol.Notification.V1 {
       targetAccountId_ = other.HasTargetAccountId ? other.targetAccountId_.Clone() : null;
       senderBattleTag_ = other.senderBattleTag_;
       targetBattleTag_ = other.targetBattleTag_;
-      peer_ = other.HasPeer ? other.peer_.Clone() : null;
       forwardingIdentity_ = other.HasForwardingIdentity ? other.forwardingIdentity_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
@@ -660,27 +855,6 @@ namespace Bgs.Protocol.Notification.V1 {
       targetBattleTag_ = null;
     }
 
-    /// <summary>Field number for the "peer" field.</summary>
-    public const int PeerFieldNumber = 9;
-    private global::Bgs.Protocol.ProcessId peer_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Bgs.Protocol.ProcessId Peer {
-      get { return peer_; }
-      set {
-        peer_ = value;
-      }
-    }
-    /// <summary>Gets whether the peer field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool HasPeer {
-      get { return peer_ != null; }
-    }
-    /// <summary>Clears the value of the peer field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void ClearPeer() {
-      peer_ = null;
-    }
-
     /// <summary>Field number for the "forwarding_identity" field.</summary>
     public const int ForwardingIdentityFieldNumber = 10;
     private global::Bgs.Protocol.Account.V1.Identity forwardingIdentity_;
@@ -723,7 +897,6 @@ namespace Bgs.Protocol.Notification.V1 {
       if (!object.Equals(TargetAccountId, other.TargetAccountId)) return false;
       if (SenderBattleTag != other.SenderBattleTag) return false;
       if (TargetBattleTag != other.TargetBattleTag) return false;
-      if (!object.Equals(Peer, other.Peer)) return false;
       if (!object.Equals(ForwardingIdentity, other.ForwardingIdentity)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
@@ -739,7 +912,6 @@ namespace Bgs.Protocol.Notification.V1 {
       if (HasTargetAccountId) hash ^= TargetAccountId.GetHashCode();
       if (HasSenderBattleTag) hash ^= SenderBattleTag.GetHashCode();
       if (HasTargetBattleTag) hash ^= TargetBattleTag.GetHashCode();
-      if (HasPeer) hash ^= Peer.GetHashCode();
       if (HasForwardingIdentity) hash ^= ForwardingIdentity.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
@@ -783,10 +955,6 @@ namespace Bgs.Protocol.Notification.V1 {
         output.WriteRawTag(66);
         output.WriteString(TargetBattleTag);
       }
-      if (HasPeer) {
-        output.WriteRawTag(74);
-        output.WriteMessage(Peer);
-      }
       if (HasForwardingIdentity) {
         output.WriteRawTag(82);
         output.WriteMessage(ForwardingIdentity);
@@ -820,9 +988,6 @@ namespace Bgs.Protocol.Notification.V1 {
       }
       if (HasTargetBattleTag) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(TargetBattleTag);
-      }
-      if (HasPeer) {
-        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Peer);
       }
       if (HasForwardingIdentity) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(ForwardingIdentity);
@@ -871,12 +1036,6 @@ namespace Bgs.Protocol.Notification.V1 {
       }
       if (other.HasTargetBattleTag) {
         TargetBattleTag = other.TargetBattleTag;
-      }
-      if (other.HasPeer) {
-        if (!HasPeer) {
-          Peer = new global::Bgs.Protocol.ProcessId();
-        }
-        Peer.MergeFrom(other.Peer);
       }
       if (other.HasForwardingIdentity) {
         if (!HasForwardingIdentity) {
@@ -937,13 +1096,6 @@ namespace Bgs.Protocol.Notification.V1 {
           }
           case 66: {
             TargetBattleTag = input.ReadString();
-            break;
-          }
-          case 74: {
-            if (!HasPeer) {
-              Peer = new global::Bgs.Protocol.ProcessId();
-            }
-            input.ReadMessage(Peer);
             break;
           }
           case 82: {

@@ -26,14 +26,21 @@ namespace Bgs.Protocol {
           string.Concat(
             "CjhiZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxfZXh0ZW5zaW9ucy9tZXRob2Rf",
             "b3B0aW9ucy5wcm90bxIMYmdzLnByb3RvY29sGiBnb29nbGUvcHJvdG9idWYv",
-            "ZGVzY3JpcHRvci5wcm90byIeChBCR1NNZXRob2RPcHRpb25zEgoKAmlkGAEg",
-            "ASgNOlgKDm1ldGhvZF9vcHRpb25zEh4uZ29vZ2xlLnByb3RvYnVmLk1ldGhv",
-            "ZE9wdGlvbnMYkL8FIAEoCzIeLmJncy5wcm90b2NvbC5CR1NNZXRob2RPcHRp",
-            "b25zQiMKDWJuZXQucHJvdG9jb2xCEk1ldGhvZE9wdGlvbnNQcm90bw=="));
+            "ZGVzY3JpcHRvci5wcm90bxoxYmdzL2xvdy9wYi9jbGllbnQvZ2xvYmFsX2V4",
+            "dGVuc2lvbnMvcm91dGluZy5wcm90byKVAgoQQkdTTWV0aG9kT3B0aW9ucxIK",
+            "CgJpZBgBIAEoDRJqChdjbGllbnRfaWRlbnRpdHlfcm91dGluZxgCIAEoDjIn",
+            "LmJncy5wcm90b2NvbC5DbGllbnRJZGVudGl0eVJvdXRpbmdUeXBlOiBDTElF",
+            "TlRfSURFTlRJVFlfUk9VVElOR19ESVNBQkxFRBIVCg1lbmFibGVfZmFub3V0",
+            "GAMgASgIEiEKGWxlZ2FjeV9mYW5vdXRfcmVwbGFjZW1lbnQYBCABKAkSEwoL",
+            "Zm9yd2FyZF9rZXkYBSABKAkSEgoKaWRlbXBvdGVudBgGIAEoCBImCh5oYW5k",
+            "bGVfZGVzdGluYXRpb25fdW5yZWFjaGFibGUYByABKAg6WAoObWV0aG9kX29w",
+            "dGlvbnMSHi5nb29nbGUucHJvdG9idWYuTWV0aG9kT3B0aW9ucxiQvwUgASgL",
+            "Mh4uYmdzLnByb3RvY29sLkJHU01ldGhvZE9wdGlvbnNCIwoNYm5ldC5wcm90",
+            "b2NvbEISTWV0aG9kT3B0aW9uc1Byb3Rv"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Google.Protobuf.DescriptorReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::Google.Protobuf.DescriptorReflection.Descriptor, global::Bgs.Protocol.RoutingReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, new pb::Extension[] { MethodOptionsExtensions.MethodOptions_ }, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.BGSMethodOptions), global::Bgs.Protocol.BGSMethodOptions.Parser, new[]{ "Id" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.BGSMethodOptions), global::Bgs.Protocol.BGSMethodOptions.Parser, new[]{ "Id", "ClientIdentityRouting", "EnableFanout", "LegacyFanoutReplacement", "ForwardKey", "Idempotent", "HandleDestinationUnreachable" }, null, null, null, null)
           }));
     }
     #endregion
@@ -74,6 +81,12 @@ namespace Bgs.Protocol {
     public BGSMethodOptions(BGSMethodOptions other) : this() {
       _hasBits0 = other._hasBits0;
       id_ = other.id_;
+      clientIdentityRouting_ = other.clientIdentityRouting_;
+      enableFanout_ = other.enableFanout_;
+      legacyFanoutReplacement_ = other.legacyFanoutReplacement_;
+      forwardKey_ = other.forwardKey_;
+      idempotent_ = other.idempotent_;
+      handleDestinationUnreachable_ = other.handleDestinationUnreachable_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -106,6 +119,148 @@ namespace Bgs.Protocol {
       _hasBits0 &= ~1;
     }
 
+    /// <summary>Field number for the "client_identity_routing" field.</summary>
+    public const int ClientIdentityRoutingFieldNumber = 2;
+    private readonly static global::Bgs.Protocol.ClientIdentityRoutingType ClientIdentityRoutingDefaultValue = global::Bgs.Protocol.ClientIdentityRoutingType.ClientIdentityRoutingDisabled;
+
+    private global::Bgs.Protocol.ClientIdentityRoutingType clientIdentityRouting_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Bgs.Protocol.ClientIdentityRoutingType ClientIdentityRouting {
+      get { if ((_hasBits0 & 2) != 0) { return clientIdentityRouting_; } else { return ClientIdentityRoutingDefaultValue; } }
+      set {
+        _hasBits0 |= 2;
+        clientIdentityRouting_ = value;
+      }
+    }
+    /// <summary>Gets whether the "client_identity_routing" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasClientIdentityRouting {
+      get { return (_hasBits0 & 2) != 0; }
+    }
+    /// <summary>Clears the value of the "client_identity_routing" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearClientIdentityRouting() {
+      _hasBits0 &= ~2;
+    }
+
+    /// <summary>Field number for the "enable_fanout" field.</summary>
+    public const int EnableFanoutFieldNumber = 3;
+    private readonly static bool EnableFanoutDefaultValue = false;
+
+    private bool enableFanout_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool EnableFanout {
+      get { if ((_hasBits0 & 4) != 0) { return enableFanout_; } else { return EnableFanoutDefaultValue; } }
+      set {
+        _hasBits0 |= 4;
+        enableFanout_ = value;
+      }
+    }
+    /// <summary>Gets whether the "enable_fanout" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasEnableFanout {
+      get { return (_hasBits0 & 4) != 0; }
+    }
+    /// <summary>Clears the value of the "enable_fanout" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearEnableFanout() {
+      _hasBits0 &= ~4;
+    }
+
+    /// <summary>Field number for the "legacy_fanout_replacement" field.</summary>
+    public const int LegacyFanoutReplacementFieldNumber = 4;
+    private readonly static string LegacyFanoutReplacementDefaultValue = "";
+
+    private string legacyFanoutReplacement_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string LegacyFanoutReplacement {
+      get { return legacyFanoutReplacement_ ?? LegacyFanoutReplacementDefaultValue; }
+      set {
+        legacyFanoutReplacement_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+    /// <summary>Gets whether the "legacy_fanout_replacement" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasLegacyFanoutReplacement {
+      get { return legacyFanoutReplacement_ != null; }
+    }
+    /// <summary>Clears the value of the "legacy_fanout_replacement" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearLegacyFanoutReplacement() {
+      legacyFanoutReplacement_ = null;
+    }
+
+    /// <summary>Field number for the "forward_key" field.</summary>
+    public const int ForwardKeyFieldNumber = 5;
+    private readonly static string ForwardKeyDefaultValue = "";
+
+    private string forwardKey_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string ForwardKey {
+      get { return forwardKey_ ?? ForwardKeyDefaultValue; }
+      set {
+        forwardKey_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+    /// <summary>Gets whether the "forward_key" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasForwardKey {
+      get { return forwardKey_ != null; }
+    }
+    /// <summary>Clears the value of the "forward_key" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearForwardKey() {
+      forwardKey_ = null;
+    }
+
+    /// <summary>Field number for the "idempotent" field.</summary>
+    public const int IdempotentFieldNumber = 6;
+    private readonly static bool IdempotentDefaultValue = false;
+
+    private bool idempotent_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool Idempotent {
+      get { if ((_hasBits0 & 8) != 0) { return idempotent_; } else { return IdempotentDefaultValue; } }
+      set {
+        _hasBits0 |= 8;
+        idempotent_ = value;
+      }
+    }
+    /// <summary>Gets whether the "idempotent" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasIdempotent {
+      get { return (_hasBits0 & 8) != 0; }
+    }
+    /// <summary>Clears the value of the "idempotent" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearIdempotent() {
+      _hasBits0 &= ~8;
+    }
+
+    /// <summary>Field number for the "handle_destination_unreachable" field.</summary>
+    public const int HandleDestinationUnreachableFieldNumber = 7;
+    private readonly static bool HandleDestinationUnreachableDefaultValue = false;
+
+    private bool handleDestinationUnreachable_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HandleDestinationUnreachable {
+      get { if ((_hasBits0 & 16) != 0) { return handleDestinationUnreachable_; } else { return HandleDestinationUnreachableDefaultValue; } }
+      set {
+        _hasBits0 |= 16;
+        handleDestinationUnreachable_ = value;
+      }
+    }
+    /// <summary>Gets whether the "handle_destination_unreachable" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasHandleDestinationUnreachable {
+      get { return (_hasBits0 & 16) != 0; }
+    }
+    /// <summary>Clears the value of the "handle_destination_unreachable" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearHandleDestinationUnreachable() {
+      _hasBits0 &= ~16;
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as BGSMethodOptions);
@@ -120,6 +275,12 @@ namespace Bgs.Protocol {
         return true;
       }
       if (Id != other.Id) return false;
+      if (ClientIdentityRouting != other.ClientIdentityRouting) return false;
+      if (EnableFanout != other.EnableFanout) return false;
+      if (LegacyFanoutReplacement != other.LegacyFanoutReplacement) return false;
+      if (ForwardKey != other.ForwardKey) return false;
+      if (Idempotent != other.Idempotent) return false;
+      if (HandleDestinationUnreachable != other.HandleDestinationUnreachable) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -127,6 +288,12 @@ namespace Bgs.Protocol {
     public override int GetHashCode() {
       int hash = 1;
       if (HasId) hash ^= Id.GetHashCode();
+      if (HasClientIdentityRouting) hash ^= ClientIdentityRouting.GetHashCode();
+      if (HasEnableFanout) hash ^= EnableFanout.GetHashCode();
+      if (HasLegacyFanoutReplacement) hash ^= LegacyFanoutReplacement.GetHashCode();
+      if (HasForwardKey) hash ^= ForwardKey.GetHashCode();
+      if (HasIdempotent) hash ^= Idempotent.GetHashCode();
+      if (HasHandleDestinationUnreachable) hash ^= HandleDestinationUnreachable.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -144,6 +311,30 @@ namespace Bgs.Protocol {
         output.WriteRawTag(8);
         output.WriteUInt32(Id);
       }
+      if (HasClientIdentityRouting) {
+        output.WriteRawTag(16);
+        output.WriteEnum((int) ClientIdentityRouting);
+      }
+      if (HasEnableFanout) {
+        output.WriteRawTag(24);
+        output.WriteBool(EnableFanout);
+      }
+      if (HasLegacyFanoutReplacement) {
+        output.WriteRawTag(34);
+        output.WriteString(LegacyFanoutReplacement);
+      }
+      if (HasForwardKey) {
+        output.WriteRawTag(42);
+        output.WriteString(ForwardKey);
+      }
+      if (HasIdempotent) {
+        output.WriteRawTag(48);
+        output.WriteBool(Idempotent);
+      }
+      if (HasHandleDestinationUnreachable) {
+        output.WriteRawTag(56);
+        output.WriteBool(HandleDestinationUnreachable);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -154,6 +345,24 @@ namespace Bgs.Protocol {
       int size = 0;
       if (HasId) {
         size += 1 + pb::CodedOutputStream.ComputeUInt32Size(Id);
+      }
+      if (HasClientIdentityRouting) {
+        size += 1 + pb::CodedOutputStream.ComputeEnumSize((int) ClientIdentityRouting);
+      }
+      if (HasEnableFanout) {
+        size += 1 + 1;
+      }
+      if (HasLegacyFanoutReplacement) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(LegacyFanoutReplacement);
+      }
+      if (HasForwardKey) {
+        size += 1 + pb::CodedOutputStream.ComputeStringSize(ForwardKey);
+      }
+      if (HasIdempotent) {
+        size += 1 + 1;
+      }
+      if (HasHandleDestinationUnreachable) {
+        size += 1 + 1;
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -169,6 +378,24 @@ namespace Bgs.Protocol {
       if (other.HasId) {
         Id = other.Id;
       }
+      if (other.HasClientIdentityRouting) {
+        ClientIdentityRouting = other.ClientIdentityRouting;
+      }
+      if (other.HasEnableFanout) {
+        EnableFanout = other.EnableFanout;
+      }
+      if (other.HasLegacyFanoutReplacement) {
+        LegacyFanoutReplacement = other.LegacyFanoutReplacement;
+      }
+      if (other.HasForwardKey) {
+        ForwardKey = other.ForwardKey;
+      }
+      if (other.HasIdempotent) {
+        Idempotent = other.Idempotent;
+      }
+      if (other.HasHandleDestinationUnreachable) {
+        HandleDestinationUnreachable = other.HandleDestinationUnreachable;
+      }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
@@ -182,6 +409,30 @@ namespace Bgs.Protocol {
             break;
           case 8: {
             Id = input.ReadUInt32();
+            break;
+          }
+          case 16: {
+            ClientIdentityRouting = (global::Bgs.Protocol.ClientIdentityRoutingType) input.ReadEnum();
+            break;
+          }
+          case 24: {
+            EnableFanout = input.ReadBool();
+            break;
+          }
+          case 34: {
+            LegacyFanoutReplacement = input.ReadString();
+            break;
+          }
+          case 42: {
+            ForwardKey = input.ReadString();
+            break;
+          }
+          case 48: {
+            Idempotent = input.ReadBool();
+            break;
+          }
+          case 56: {
+            HandleDestinationUnreachable = input.ReadBool();
             break;
           }
         }

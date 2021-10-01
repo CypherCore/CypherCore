@@ -33,23 +33,22 @@ namespace Bgs.Protocol.Report.V1 {
             "bnMvZmllbGRfb3B0aW9ucy5wcm90bxo4YmdzL2xvdy9wYi9jbGllbnQvZ2xv",
             "YmFsX2V4dGVuc2lvbnMvbWV0aG9kX29wdGlvbnMucHJvdG8aOWJncy9sb3cv",
             "cGIvY2xpZW50L2dsb2JhbF9leHRlbnNpb25zL3NlcnZpY2Vfb3B0aW9ucy5w",
-            "cm90byJcChFTZW5kUmVwb3J0UmVxdWVzdBIuCgZyZXBvcnQYASACKAsyHi5i",
-            "Z3MucHJvdG9jb2wucmVwb3J0LnYxLlJlcG9ydBIPCgdwcm9ncmFtGAIgASgN",
-            "OgaC+SsCEAEipQEKE1N1Ym1pdFJlcG9ydFJlcXVlc3QSPAoIYWdlbnRfaWQY",
-            "ASABKAsyKi5iZ3MucHJvdG9jb2wuYWNjb3VudC52MS5HYW1lQWNjb3VudEhh",
-            "bmRsZRI3CgtyZXBvcnRfdHlwZRgCIAEoCzIiLmJncy5wcm90b2NvbC5yZXBv",
-            "cnQudjEuUmVwb3J0VHlwZRIPCgdwcm9ncmFtGAMgASgNOgaC+SsCEAEy/QEK",
-            "DVJlcG9ydFNlcnZpY2USVQoKU2VuZFJlcG9ydBIpLmJncy5wcm90b2NvbC5y",
-            "ZXBvcnQudjEuU2VuZFJlcG9ydFJlcXVlc3QaFC5iZ3MucHJvdG9jb2wuTm9E",
-            "YXRhIgaC+SsCCAESWQoMU3VibWl0UmVwb3J0EisuYmdzLnByb3RvY29sLnJl",
-            "cG9ydC52MS5TdWJtaXRSZXBvcnRSZXF1ZXN0GhQuYmdzLnByb3RvY29sLk5v",
-            "RGF0YSIGgvkrAggCGjqC+SskCiJibmV0LnByb3RvY29sLnJlcG9ydC5SZXBv",
-            "cnRTZXJ2aWNlgvkrCCoGcmVwb3J0ivkrAhABQgOAAQA="));
+            "cm90byJDChFTZW5kUmVwb3J0UmVxdWVzdBIuCgZyZXBvcnQYASACKAsyHi5i",
+            "Z3MucHJvdG9jb2wucmVwb3J0LnYxLlJlcG9ydCKMAQoTU3VibWl0UmVwb3J0",
+            "UmVxdWVzdBI8CghhZ2VudF9pZBgBIAEoCzIqLmJncy5wcm90b2NvbC5hY2Nv",
+            "dW50LnYxLkdhbWVBY2NvdW50SGFuZGxlEjcKC3JlcG9ydF90eXBlGAIgASgL",
+            "MiIuYmdzLnByb3RvY29sLnJlcG9ydC52MS5SZXBvcnRUeXBlMv0BCg1SZXBv",
+            "cnRTZXJ2aWNlElUKClNlbmRSZXBvcnQSKS5iZ3MucHJvdG9jb2wucmVwb3J0",
+            "LnYxLlNlbmRSZXBvcnRSZXF1ZXN0GhQuYmdzLnByb3RvY29sLk5vRGF0YSIG",
+            "gvkrAggBElkKDFN1Ym1pdFJlcG9ydBIrLmJncy5wcm90b2NvbC5yZXBvcnQu",
+            "djEuU3VibWl0UmVwb3J0UmVxdWVzdBoULmJncy5wcm90b2NvbC5Ob0RhdGEi",
+            "BoL5KwIIAho6gvkrJAoiYm5ldC5wcm90b2NvbC5yZXBvcnQuUmVwb3J0U2Vy",
+            "dmljZYL5KwgqBnJlcG9ydIr5KwIQAUIDgAEA"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor, global::Bgs.Protocol.Report.V1.ReportTypesReflection.Descriptor, global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Report.V1.SendReportRequest), global::Bgs.Protocol.Report.V1.SendReportRequest.Parser, new[]{ "Report", "Program" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Report.V1.SubmitReportRequest), global::Bgs.Protocol.Report.V1.SubmitReportRequest.Parser, new[]{ "AgentId", "ReportType", "Program" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Report.V1.SendReportRequest), global::Bgs.Protocol.Report.V1.SendReportRequest.Parser, new[]{ "Report" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Report.V1.SubmitReportRequest), global::Bgs.Protocol.Report.V1.SubmitReportRequest.Parser, new[]{ "AgentId", "ReportType" }, null, null, null, null)
           }));
     }
     #endregion
@@ -59,7 +58,6 @@ namespace Bgs.Protocol.Report.V1 {
   public sealed partial class SendReportRequest : pb::IMessage<SendReportRequest> {
     private static readonly pb::MessageParser<SendReportRequest> _parser = new pb::MessageParser<SendReportRequest>(() => new SendReportRequest());
     private pb::UnknownFieldSet _unknownFields;
-    private int _hasBits0;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pb::MessageParser<SendReportRequest> Parser { get { return _parser; } }
 
@@ -82,9 +80,7 @@ namespace Bgs.Protocol.Report.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public SendReportRequest(SendReportRequest other) : this() {
-      _hasBits0 = other._hasBits0;
       report_ = other.HasReport ? other.report_.Clone() : null;
-      program_ = other.program_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -114,30 +110,6 @@ namespace Bgs.Protocol.Report.V1 {
       report_ = null;
     }
 
-    /// <summary>Field number for the "program" field.</summary>
-    public const int ProgramFieldNumber = 2;
-    private readonly static uint ProgramDefaultValue = 0;
-
-    private uint program_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public uint Program {
-      get { if ((_hasBits0 & 1) != 0) { return program_; } else { return ProgramDefaultValue; } }
-      set {
-        _hasBits0 |= 1;
-        program_ = value;
-      }
-    }
-    /// <summary>Gets whether the "program" field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool HasProgram {
-      get { return (_hasBits0 & 1) != 0; }
-    }
-    /// <summary>Clears the value of the "program" field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void ClearProgram() {
-      _hasBits0 &= ~1;
-    }
-
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as SendReportRequest);
@@ -152,7 +124,6 @@ namespace Bgs.Protocol.Report.V1 {
         return true;
       }
       if (!object.Equals(Report, other.Report)) return false;
-      if (Program != other.Program) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -160,7 +131,6 @@ namespace Bgs.Protocol.Report.V1 {
     public override int GetHashCode() {
       int hash = 1;
       if (HasReport) hash ^= Report.GetHashCode();
-      if (HasProgram) hash ^= Program.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -178,10 +148,6 @@ namespace Bgs.Protocol.Report.V1 {
         output.WriteRawTag(10);
         output.WriteMessage(Report);
       }
-      if (HasProgram) {
-        output.WriteRawTag(16);
-        output.WriteUInt32(Program);
-      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -192,9 +158,6 @@ namespace Bgs.Protocol.Report.V1 {
       int size = 0;
       if (HasReport) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(Report);
-      }
-      if (HasProgram) {
-        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(Program);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -212,9 +175,6 @@ namespace Bgs.Protocol.Report.V1 {
           Report = new global::Bgs.Protocol.Report.V1.Report();
         }
         Report.MergeFrom(other.Report);
-      }
-      if (other.HasProgram) {
-        Program = other.Program;
       }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
@@ -234,10 +194,6 @@ namespace Bgs.Protocol.Report.V1 {
             input.ReadMessage(Report);
             break;
           }
-          case 16: {
-            Program = input.ReadUInt32();
-            break;
-          }
         }
       }
     }
@@ -247,7 +203,6 @@ namespace Bgs.Protocol.Report.V1 {
   public sealed partial class SubmitReportRequest : pb::IMessage<SubmitReportRequest> {
     private static readonly pb::MessageParser<SubmitReportRequest> _parser = new pb::MessageParser<SubmitReportRequest>(() => new SubmitReportRequest());
     private pb::UnknownFieldSet _unknownFields;
-    private int _hasBits0;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pb::MessageParser<SubmitReportRequest> Parser { get { return _parser; } }
 
@@ -270,10 +225,8 @@ namespace Bgs.Protocol.Report.V1 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public SubmitReportRequest(SubmitReportRequest other) : this() {
-      _hasBits0 = other._hasBits0;
       agentId_ = other.HasAgentId ? other.agentId_.Clone() : null;
       reportType_ = other.HasReportType ? other.reportType_.Clone() : null;
-      program_ = other.program_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -324,30 +277,6 @@ namespace Bgs.Protocol.Report.V1 {
       reportType_ = null;
     }
 
-    /// <summary>Field number for the "program" field.</summary>
-    public const int ProgramFieldNumber = 3;
-    private readonly static uint ProgramDefaultValue = 0;
-
-    private uint program_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public uint Program {
-      get { if ((_hasBits0 & 1) != 0) { return program_; } else { return ProgramDefaultValue; } }
-      set {
-        _hasBits0 |= 1;
-        program_ = value;
-      }
-    }
-    /// <summary>Gets whether the "program" field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool HasProgram {
-      get { return (_hasBits0 & 1) != 0; }
-    }
-    /// <summary>Clears the value of the "program" field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void ClearProgram() {
-      _hasBits0 &= ~1;
-    }
-
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as SubmitReportRequest);
@@ -363,7 +292,6 @@ namespace Bgs.Protocol.Report.V1 {
       }
       if (!object.Equals(AgentId, other.AgentId)) return false;
       if (!object.Equals(ReportType, other.ReportType)) return false;
-      if (Program != other.Program) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -372,7 +300,6 @@ namespace Bgs.Protocol.Report.V1 {
       int hash = 1;
       if (HasAgentId) hash ^= AgentId.GetHashCode();
       if (HasReportType) hash ^= ReportType.GetHashCode();
-      if (HasProgram) hash ^= Program.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -394,10 +321,6 @@ namespace Bgs.Protocol.Report.V1 {
         output.WriteRawTag(18);
         output.WriteMessage(ReportType);
       }
-      if (HasProgram) {
-        output.WriteRawTag(24);
-        output.WriteUInt32(Program);
-      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -411,9 +334,6 @@ namespace Bgs.Protocol.Report.V1 {
       }
       if (HasReportType) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(ReportType);
-      }
-      if (HasProgram) {
-        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(Program);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -438,9 +358,6 @@ namespace Bgs.Protocol.Report.V1 {
         }
         ReportType.MergeFrom(other.ReportType);
       }
-      if (other.HasProgram) {
-        Program = other.Program;
-      }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
@@ -464,10 +381,6 @@ namespace Bgs.Protocol.Report.V1 {
               ReportType = new global::Bgs.Protocol.Report.V1.ReportType();
             }
             input.ReadMessage(ReportType);
-            break;
-          }
-          case 24: {
-            Program = input.ReadUInt32();
             break;
           }
         }

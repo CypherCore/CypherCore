@@ -39,13 +39,14 @@ namespace Bgs.Protocol.Presence.V1 {
             "LnYxLlByZXNlbmNlU3RhdGUijQEKGFN0YXRlQ2hhbmdlZE5vdGlmaWNhdGlv",
             "bhI5Cg1zdWJzY3JpYmVyX2lkGAEgASgLMiIuYmdzLnByb3RvY29sLmFjY291",
             "bnQudjEuQWNjb3VudElkEjYKBXN0YXRlGAIgAygLMicuYmdzLnByb3RvY29s",
-            "LnByZXNlbmNlLnYxLlByZXNlbmNlU3RhdGUylgIKEFByZXNlbmNlTGlzdGVu",
-            "ZXISYQoLT25TdWJzY3JpYmUSLy5iZ3MucHJvdG9jb2wucHJlc2VuY2UudjEu",
+            "LnByZXNlbmNlLnYxLlByZXNlbmNlU3RhdGUyogIKEFByZXNlbmNlTGlzdGVu",
+            "ZXISZwoLT25TdWJzY3JpYmUSLy5iZ3MucHJvdG9jb2wucHJlc2VuY2UudjEu",
             "U3Vic2NyaWJlTm90aWZpY2F0aW9uGhkuYmdzLnByb3RvY29sLk5PX1JFU1BP",
-            "TlNFIgaC+SsCCAESZwoOT25TdGF0ZUNoYW5nZWQSMi5iZ3MucHJvdG9jb2wu",
-            "cHJlc2VuY2UudjEuU3RhdGVDaGFuZ2VkTm90aWZpY2F0aW9uGhkuYmdzLnBy",
-            "b3RvY29sLk5PX1JFU1BPTlNFIgaC+SsCCAIaNoL5KywKKmJuZXQucHJvdG9j",
-            "b2wucHJlc2VuY2UudjEuUHJlc2VuY2VMaXN0ZW5lcor5KwIIAQ=="));
+            "TlNFIgyC+SsCCAGC+SsCOAESbQoOT25TdGF0ZUNoYW5nZWQSMi5iZ3MucHJv",
+            "dG9jb2wucHJlc2VuY2UudjEuU3RhdGVDaGFuZ2VkTm90aWZpY2F0aW9uGhku",
+            "YmdzLnByb3RvY29sLk5PX1JFU1BPTlNFIgyC+SsCCAKC+SsCOAEaNoL5KywK",
+            "KmJuZXQucHJvdG9jb2wucHJlc2VuY2UudjEuUHJlc2VuY2VMaXN0ZW5lcor5",
+            "KwIIAQ=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Bgs.Protocol.Presence.V1.PresenceTypesReflection.Descriptor, global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor, global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {

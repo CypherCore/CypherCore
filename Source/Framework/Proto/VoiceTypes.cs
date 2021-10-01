@@ -34,10 +34,12 @@ namespace Bgs.Protocol {
             "X01VVEVEEAEqowEKD1ZvaWNlTXV0ZVJlYXNvbhIaChZWT0lDRV9NVVRFX1JF",
             "QVNPTl9OT05FEAASMgouVk9JQ0VfTVVURV9SRUFTT05fUEFSRU5UQUxfQ09O",
             "VFJPTF9MSVNURU5fT05MWRABEh8KG1ZPSUNFX01VVEVfUkVBU09OX1JFUVVF",
-            "U1RFRBACEh8KG1ZPSUNFX01VVEVfUkVBU09OX1NRVUVMQ0hFRBAD"));
+            "U1RFRBACEh8KG1ZPSUNFX01VVEVfUkVBU09OX1NRVUVMQ0hFRBADKkQKFFZv",
+            "aWNlUHJvdmlkZXJWZXJzaW9uEhUKEVZPSUNFX1BST1ZJREVSX1Y0EAASFQoR",
+            "Vk9JQ0VfUFJPVklERVJfVjUQAQ=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
-          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Bgs.Protocol.VoiceJoinType), typeof(global::Bgs.Protocol.VoiceMuteReason), }, null, new pbr::GeneratedClrTypeInfo[] {
+          new pbr::GeneratedClrTypeInfo(new[] {typeof(global::Bgs.Protocol.VoiceJoinType), typeof(global::Bgs.Protocol.VoiceMuteReason), typeof(global::Bgs.Protocol.VoiceProviderVersion), }, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.VoiceCredentials), global::Bgs.Protocol.VoiceCredentials.Parser, new[]{ "VoiceId", "Token", "Url", "JoinType", "MuteReason" }, null, null, null, null)
           }));
     }
@@ -55,6 +57,11 @@ namespace Bgs.Protocol {
     [pbr::OriginalName("VOICE_MUTE_REASON_PARENTAL_CONTROL_LISTEN_ONLY")] ParentalControlListenOnly = 1,
     [pbr::OriginalName("VOICE_MUTE_REASON_REQUESTED")] Requested = 2,
     [pbr::OriginalName("VOICE_MUTE_REASON_SQUELCHED")] Squelched = 3,
+  }
+
+  public enum VoiceProviderVersion {
+    [pbr::OriginalName("VOICE_PROVIDER_V4")] VoiceProviderV4 = 0,
+    [pbr::OriginalName("VOICE_PROVIDER_V5")] VoiceProviderV5 = 1,
   }
 
   #endregion

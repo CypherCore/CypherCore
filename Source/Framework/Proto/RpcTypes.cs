@@ -37,22 +37,25 @@ namespace Bgs.Protocol {
             "CglvYmplY3RfaWQYAiABKAQ6ATAiCAoGTm9EYXRhInkKCUVycm9ySW5mbxIz",
             "Cg5vYmplY3RfYWRkcmVzcxgBIAIoCzIbLmJncy5wcm90b2NvbC5PYmplY3RB",
             "ZGRyZXNzEg4KBnN0YXR1cxgCIAIoDRIUCgxzZXJ2aWNlX2hhc2gYAyACKA0S",
-            "EQoJbWV0aG9kX2lkGAQgAigNIi4KDEZhbm91dFRhcmdldBIRCgljbGllbnRf",
-            "aWQYASABKAkSCwoDa2V5GAIgASgMIvUCCgZIZWFkZXISEgoKc2VydmljZV9p",
-            "ZBgBIAIoDRIRCgltZXRob2RfaWQYAiABKA0SDQoFdG9rZW4YAyACKA0SFAoJ",
-            "b2JqZWN0X2lkGAQgASgEOgEwEg8KBHNpemUYBSABKA06ATASEQoGc3RhdHVz",
-            "GAYgASgNOgEwEiYKBWVycm9yGAcgAygLMhcuYmdzLnByb3RvY29sLkVycm9y",
-            "SW5mbxIPCgd0aW1lb3V0GAggASgEEhMKC2lzX3Jlc3BvbnNlGAkgASgIEjAK",
-            "D2ZvcndhcmRfdGFyZ2V0cxgKIAMoCzIXLmJncy5wcm90b2NvbC5Qcm9jZXNz",
-            "SWQSFAoMc2VydmljZV9oYXNoGAsgASgHEhEKCWNsaWVudF9pZBgNIAEoCRIx",
-            "Cg1mYW5vdXRfdGFyZ2V0GA4gAygLMhouYmdzLnByb3RvY29sLkZhbm91dFRh",
-            "cmdldBIfChdjbGllbnRfaWRfZmFub3V0X3RhcmdldBgPIAMoCSLqAQoLS2Fm",
-            "a2FIZWFkZXISFAoMc2VydmljZV9oYXNoGAEgASgHEhEKCW1ldGhvZF9pZBgC",
-            "IAEoDRINCgV0b2tlbhgDIAEoDRIUCglvYmplY3RfaWQYBCABKAQ6ATASDwoE",
-            "c2l6ZRgFIAEoDToBMBIRCgZzdGF0dXMYBiABKA06ATASDwoHdGltZW91dBgH",
-            "IAEoBBIvCg5mb3J3YXJkX3RhcmdldBgIIAEoCzIXLmJncy5wcm90b2NvbC5Q",
-            "cm9jZXNzSWQSFAoMcmV0dXJuX3RvcGljGAkgASgJEhEKCWNsaWVudF9pZBgL",
-            "IAEoCUIZCg1ibmV0LnByb3RvY29sQghScGNQcm90b1AAUAFQAlAD"));
+            "EQoJbWV0aG9kX2lkGAQgAigNIkEKDEZhbm91dFRhcmdldBIRCgljbGllbnRf",
+            "aWQYASABKAkSCwoDa2V5GAIgASgMEhEKCW9iamVjdF9pZBgDIAEoBCLnAwoG",
+            "SGVhZGVyEhIKCnNlcnZpY2VfaWQYASACKA0SEQoJbWV0aG9kX2lkGAIgASgN",
+            "Eg0KBXRva2VuGAMgAigNEhQKCW9iamVjdF9pZBgEIAEoBDoBMBIPCgRzaXpl",
+            "GAUgASgNOgEwEhEKBnN0YXR1cxgGIAEoDToBMBImCgVlcnJvchgHIAMoCzIX",
+            "LmJncy5wcm90b2NvbC5FcnJvckluZm8SDwoHdGltZW91dBgIIAEoBBITCgtp",
+            "c19yZXNwb25zZRgJIAEoCBIwCg9mb3J3YXJkX3RhcmdldHMYCiADKAsyFy5i",
+            "Z3MucHJvdG9jb2wuUHJvY2Vzc0lkEhQKDHNlcnZpY2VfaGFzaBgLIAEoBxIR",
+            "CgljbGllbnRfaWQYDSABKAkSMQoNZmFub3V0X3RhcmdldBgOIAMoCzIaLmJn",
+            "cy5wcm90b2NvbC5GYW5vdXRUYXJnZXQSHwoXY2xpZW50X2lkX2Zhbm91dF90",
+            "YXJnZXQYDyADKAkSFQoNY2xpZW50X3JlY29yZBgQIAEoDBIXCg9vcmlnaW5h",
+            "bF9zZW5kZXIYESABKAwSFAoMc2VuZGVyX3Rva2VuGBIgASgNEhQKDHJvdXRl",
+            "cl9sYWJlbBgTIAEoDRIUCgxlcnJvcl9yZWFzb24YFCABKAki6gEKC0thZmth",
+            "SGVhZGVyEhQKDHNlcnZpY2VfaGFzaBgBIAEoBxIRCgltZXRob2RfaWQYAiAB",
+            "KA0SDQoFdG9rZW4YAyABKA0SFAoJb2JqZWN0X2lkGAQgASgEOgEwEg8KBHNp",
+            "emUYBSABKA06ATASEQoGc3RhdHVzGAYgASgNOgEwEg8KB3RpbWVvdXQYByAB",
+            "KAQSLwoOZm9yd2FyZF90YXJnZXQYCCABKAsyFy5iZ3MucHJvdG9jb2wuUHJv",
+            "Y2Vzc0lkEhQKDHJldHVybl90b3BpYxgJIAEoCRIRCgljbGllbnRfaWQYCyAB",
+            "KAlCGQoNYm5ldC5wcm90b2NvbEIIUnBjUHJvdG9QAFABUAJQAw=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
@@ -62,8 +65,8 @@ namespace Bgs.Protocol {
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.ObjectAddress), global::Bgs.Protocol.ObjectAddress.Parser, new[]{ "Host", "ObjectId" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.NoData), global::Bgs.Protocol.NoData.Parser, null, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.ErrorInfo), global::Bgs.Protocol.ErrorInfo.Parser, new[]{ "ObjectAddress", "Status", "ServiceHash", "MethodId" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.FanoutTarget), global::Bgs.Protocol.FanoutTarget.Parser, new[]{ "ClientId", "Key" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Header), global::Bgs.Protocol.Header.Parser, new[]{ "ServiceId", "MethodId", "Token", "ObjectId", "Size", "Status", "Error", "Timeout", "IsResponse", "ForwardTargets", "ServiceHash", "ClientId", "FanoutTarget", "ClientIdFanoutTarget" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.FanoutTarget), global::Bgs.Protocol.FanoutTarget.Parser, new[]{ "ClientId", "Key", "ObjectId" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Header), global::Bgs.Protocol.Header.Parser, new[]{ "ServiceId", "MethodId", "Token", "ObjectId", "Size", "Status", "Error", "Timeout", "IsResponse", "ForwardTargets", "ServiceHash", "ClientId", "FanoutTarget", "ClientIdFanoutTarget", "ClientRecord", "OriginalSender", "SenderToken", "RouterLabel", "ErrorReason" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.KafkaHeader), global::Bgs.Protocol.KafkaHeader.Parser, new[]{ "ServiceHash", "MethodId", "Token", "ObjectId", "Size", "Status", "Timeout", "ForwardTarget", "ReturnTopic", "ClientId" }, null, null, null, null)
           }));
     }
@@ -1103,6 +1106,7 @@ namespace Bgs.Protocol {
   public sealed partial class FanoutTarget : pb::IMessage<FanoutTarget> {
     private static readonly pb::MessageParser<FanoutTarget> _parser = new pb::MessageParser<FanoutTarget>(() => new FanoutTarget());
     private pb::UnknownFieldSet _unknownFields;
+    private int _hasBits0;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pb::MessageParser<FanoutTarget> Parser { get { return _parser; } }
 
@@ -1125,8 +1129,10 @@ namespace Bgs.Protocol {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public FanoutTarget(FanoutTarget other) : this() {
+      _hasBits0 = other._hasBits0;
       clientId_ = other.clientId_;
       key_ = other.key_;
+      objectId_ = other.objectId_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -1181,6 +1187,30 @@ namespace Bgs.Protocol {
       key_ = null;
     }
 
+    /// <summary>Field number for the "object_id" field.</summary>
+    public const int ObjectIdFieldNumber = 3;
+    private readonly static ulong ObjectIdDefaultValue = 0UL;
+
+    private ulong objectId_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public ulong ObjectId {
+      get { if ((_hasBits0 & 1) != 0) { return objectId_; } else { return ObjectIdDefaultValue; } }
+      set {
+        _hasBits0 |= 1;
+        objectId_ = value;
+      }
+    }
+    /// <summary>Gets whether the "object_id" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasObjectId {
+      get { return (_hasBits0 & 1) != 0; }
+    }
+    /// <summary>Clears the value of the "object_id" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearObjectId() {
+      _hasBits0 &= ~1;
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as FanoutTarget);
@@ -1196,6 +1226,7 @@ namespace Bgs.Protocol {
       }
       if (ClientId != other.ClientId) return false;
       if (Key != other.Key) return false;
+      if (ObjectId != other.ObjectId) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -1204,6 +1235,7 @@ namespace Bgs.Protocol {
       int hash = 1;
       if (HasClientId) hash ^= ClientId.GetHashCode();
       if (HasKey) hash ^= Key.GetHashCode();
+      if (HasObjectId) hash ^= ObjectId.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -1225,6 +1257,10 @@ namespace Bgs.Protocol {
         output.WriteRawTag(18);
         output.WriteBytes(Key);
       }
+      if (HasObjectId) {
+        output.WriteRawTag(24);
+        output.WriteUInt64(ObjectId);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -1238,6 +1274,9 @@ namespace Bgs.Protocol {
       }
       if (HasKey) {
         size += 1 + pb::CodedOutputStream.ComputeBytesSize(Key);
+      }
+      if (HasObjectId) {
+        size += 1 + pb::CodedOutputStream.ComputeUInt64Size(ObjectId);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -1256,6 +1295,9 @@ namespace Bgs.Protocol {
       if (other.HasKey) {
         Key = other.Key;
       }
+      if (other.HasObjectId) {
+        ObjectId = other.ObjectId;
+      }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
@@ -1273,6 +1315,10 @@ namespace Bgs.Protocol {
           }
           case 18: {
             Key = input.ReadBytes();
+            break;
+          }
+          case 24: {
+            ObjectId = input.ReadUInt64();
             break;
           }
         }
@@ -1322,6 +1368,11 @@ namespace Bgs.Protocol {
       clientId_ = other.clientId_;
       fanoutTarget_ = other.fanoutTarget_.Clone();
       clientIdFanoutTarget_ = other.clientIdFanoutTarget_.Clone();
+      clientRecord_ = other.clientRecord_;
+      originalSender_ = other.originalSender_;
+      senderToken_ = other.senderToken_;
+      routerLabel_ = other.routerLabel_;
+      errorReason_ = other.errorReason_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -1609,6 +1660,123 @@ namespace Bgs.Protocol {
       get { return clientIdFanoutTarget_; }
     }
 
+    /// <summary>Field number for the "client_record" field.</summary>
+    public const int ClientRecordFieldNumber = 16;
+    private readonly static pb::ByteString ClientRecordDefaultValue = pb::ByteString.Empty;
+
+    private pb::ByteString clientRecord_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pb::ByteString ClientRecord {
+      get { return clientRecord_ ?? ClientRecordDefaultValue; }
+      set {
+        clientRecord_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+    /// <summary>Gets whether the "client_record" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasClientRecord {
+      get { return clientRecord_ != null; }
+    }
+    /// <summary>Clears the value of the "client_record" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearClientRecord() {
+      clientRecord_ = null;
+    }
+
+    /// <summary>Field number for the "original_sender" field.</summary>
+    public const int OriginalSenderFieldNumber = 17;
+    private readonly static pb::ByteString OriginalSenderDefaultValue = pb::ByteString.Empty;
+
+    private pb::ByteString originalSender_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public pb::ByteString OriginalSender {
+      get { return originalSender_ ?? OriginalSenderDefaultValue; }
+      set {
+        originalSender_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+    /// <summary>Gets whether the "original_sender" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasOriginalSender {
+      get { return originalSender_ != null; }
+    }
+    /// <summary>Clears the value of the "original_sender" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearOriginalSender() {
+      originalSender_ = null;
+    }
+
+    /// <summary>Field number for the "sender_token" field.</summary>
+    public const int SenderTokenFieldNumber = 18;
+    private readonly static uint SenderTokenDefaultValue = 0;
+
+    private uint senderToken_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public uint SenderToken {
+      get { if ((_hasBits0 & 512) != 0) { return senderToken_; } else { return SenderTokenDefaultValue; } }
+      set {
+        _hasBits0 |= 512;
+        senderToken_ = value;
+      }
+    }
+    /// <summary>Gets whether the "sender_token" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasSenderToken {
+      get { return (_hasBits0 & 512) != 0; }
+    }
+    /// <summary>Clears the value of the "sender_token" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearSenderToken() {
+      _hasBits0 &= ~512;
+    }
+
+    /// <summary>Field number for the "router_label" field.</summary>
+    public const int RouterLabelFieldNumber = 19;
+    private readonly static uint RouterLabelDefaultValue = 0;
+
+    private uint routerLabel_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public uint RouterLabel {
+      get { if ((_hasBits0 & 1024) != 0) { return routerLabel_; } else { return RouterLabelDefaultValue; } }
+      set {
+        _hasBits0 |= 1024;
+        routerLabel_ = value;
+      }
+    }
+    /// <summary>Gets whether the "router_label" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasRouterLabel {
+      get { return (_hasBits0 & 1024) != 0; }
+    }
+    /// <summary>Clears the value of the "router_label" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearRouterLabel() {
+      _hasBits0 &= ~1024;
+    }
+
+    /// <summary>Field number for the "error_reason" field.</summary>
+    public const int ErrorReasonFieldNumber = 20;
+    private readonly static string ErrorReasonDefaultValue = "";
+
+    private string errorReason_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public string ErrorReason {
+      get { return errorReason_ ?? ErrorReasonDefaultValue; }
+      set {
+        errorReason_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
+      }
+    }
+    /// <summary>Gets whether the "error_reason" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasErrorReason {
+      get { return errorReason_ != null; }
+    }
+    /// <summary>Clears the value of the "error_reason" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearErrorReason() {
+      errorReason_ = null;
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as Header);
@@ -1636,6 +1804,11 @@ namespace Bgs.Protocol {
       if (ClientId != other.ClientId) return false;
       if(!fanoutTarget_.Equals(other.fanoutTarget_)) return false;
       if(!clientIdFanoutTarget_.Equals(other.clientIdFanoutTarget_)) return false;
+      if (ClientRecord != other.ClientRecord) return false;
+      if (OriginalSender != other.OriginalSender) return false;
+      if (SenderToken != other.SenderToken) return false;
+      if (RouterLabel != other.RouterLabel) return false;
+      if (ErrorReason != other.ErrorReason) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -1656,6 +1829,11 @@ namespace Bgs.Protocol {
       if (HasClientId) hash ^= ClientId.GetHashCode();
       hash ^= fanoutTarget_.GetHashCode();
       hash ^= clientIdFanoutTarget_.GetHashCode();
+      if (HasClientRecord) hash ^= ClientRecord.GetHashCode();
+      if (HasOriginalSender) hash ^= OriginalSender.GetHashCode();
+      if (HasSenderToken) hash ^= SenderToken.GetHashCode();
+      if (HasRouterLabel) hash ^= RouterLabel.GetHashCode();
+      if (HasErrorReason) hash ^= ErrorReason.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -1713,6 +1891,26 @@ namespace Bgs.Protocol {
       }
       fanoutTarget_.WriteTo(output, _repeated_fanoutTarget_codec);
       clientIdFanoutTarget_.WriteTo(output, _repeated_clientIdFanoutTarget_codec);
+      if (HasClientRecord) {
+        output.WriteRawTag(130, 1);
+        output.WriteBytes(ClientRecord);
+      }
+      if (HasOriginalSender) {
+        output.WriteRawTag(138, 1);
+        output.WriteBytes(OriginalSender);
+      }
+      if (HasSenderToken) {
+        output.WriteRawTag(144, 1);
+        output.WriteUInt32(SenderToken);
+      }
+      if (HasRouterLabel) {
+        output.WriteRawTag(152, 1);
+        output.WriteUInt32(RouterLabel);
+      }
+      if (HasErrorReason) {
+        output.WriteRawTag(162, 1);
+        output.WriteString(ErrorReason);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -1755,6 +1953,21 @@ namespace Bgs.Protocol {
       }
       size += fanoutTarget_.CalculateSize(_repeated_fanoutTarget_codec);
       size += clientIdFanoutTarget_.CalculateSize(_repeated_clientIdFanoutTarget_codec);
+      if (HasClientRecord) {
+        size += 2 + pb::CodedOutputStream.ComputeBytesSize(ClientRecord);
+      }
+      if (HasOriginalSender) {
+        size += 2 + pb::CodedOutputStream.ComputeBytesSize(OriginalSender);
+      }
+      if (HasSenderToken) {
+        size += 2 + pb::CodedOutputStream.ComputeUInt32Size(SenderToken);
+      }
+      if (HasRouterLabel) {
+        size += 2 + pb::CodedOutputStream.ComputeUInt32Size(RouterLabel);
+      }
+      if (HasErrorReason) {
+        size += 2 + pb::CodedOutputStream.ComputeStringSize(ErrorReason);
+      }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
       }
@@ -1800,6 +2013,21 @@ namespace Bgs.Protocol {
       }
       fanoutTarget_.Add(other.fanoutTarget_);
       clientIdFanoutTarget_.Add(other.clientIdFanoutTarget_);
+      if (other.HasClientRecord) {
+        ClientRecord = other.ClientRecord;
+      }
+      if (other.HasOriginalSender) {
+        OriginalSender = other.OriginalSender;
+      }
+      if (other.HasSenderToken) {
+        SenderToken = other.SenderToken;
+      }
+      if (other.HasRouterLabel) {
+        RouterLabel = other.RouterLabel;
+      }
+      if (other.HasErrorReason) {
+        ErrorReason = other.ErrorReason;
+      }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
@@ -1865,6 +2093,26 @@ namespace Bgs.Protocol {
           }
           case 122: {
             clientIdFanoutTarget_.AddEntriesFrom(input, _repeated_clientIdFanoutTarget_codec);
+            break;
+          }
+          case 130: {
+            ClientRecord = input.ReadBytes();
+            break;
+          }
+          case 138: {
+            OriginalSender = input.ReadBytes();
+            break;
+          }
+          case 144: {
+            SenderToken = input.ReadUInt32();
+            break;
+          }
+          case 152: {
+            RouterLabel = input.ReadUInt32();
+            break;
+          }
+          case 162: {
+            ErrorReason = input.ReadString();
             break;
           }
         }

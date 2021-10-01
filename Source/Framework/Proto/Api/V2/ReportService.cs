@@ -33,21 +33,22 @@ namespace Bgs.Protocol.Report.V2 {
             "b3cvcGIvY2xpZW50L2dsb2JhbF9leHRlbnNpb25zL2ZpZWxkX29wdGlvbnMu",
             "cHJvdG8aOGJncy9sb3cvcGIvY2xpZW50L2dsb2JhbF9leHRlbnNpb25zL21l",
             "dGhvZF9vcHRpb25zLnByb3RvGjliZ3MvbG93L3BiL2NsaWVudC9nbG9iYWxf",
-            "ZXh0ZW5zaW9ucy9zZXJ2aWNlX29wdGlvbnMucHJvdG8igAIKE1N1Ym1pdFJl",
+            "ZXh0ZW5zaW9ucy9zZXJ2aWNlX29wdGlvbnMucHJvdG8iqAIKE1N1Ym1pdFJl",
             "cG9ydFJlcXVlc3QSNAoIYWdlbnRfaWQYASABKAsyIi5iZ3MucHJvdG9jb2wu",
             "YWNjb3VudC52MS5BY2NvdW50SWQSGAoQdXNlcl9kZXNjcmlwdGlvbhgCIAEo",
-            "CRIPCgdwcm9ncmFtGAMgASgNEjsKDHVzZXJfb3B0aW9ucxgKIAEoCzIjLmJn",
-            "cy5wcm90b2NvbC5yZXBvcnQudjIuVXNlck9wdGlvbnNIABI7CgxjbHViX29w",
-            "dGlvbnMYCyABKAsyIy5iZ3MucHJvdG9jb2wucmVwb3J0LnYyLkNsdWJPcHRp",
-            "b25zSAA6BoL5KwIQAUIGCgR0eXBlMqkBCg1SZXBvcnRTZXJ2aWNlElkKDFN1",
-            "Ym1pdFJlcG9ydBIrLmJncy5wcm90b2NvbC5yZXBvcnQudjIuU3VibWl0UmVw",
-            "b3J0UmVxdWVzdBoULmJncy5wcm90b2NvbC5Ob0RhdGEiBoL5KwIIARo9gvkr",
-            "JwolYm5ldC5wcm90b2NvbC5yZXBvcnQudjIuUmVwb3J0U2VydmljZYL5Kwgq",
-            "BnJlcG9ydIr5KwIQAUIDgAEA"));
+            "CRI7Cgx1c2VyX29wdGlvbnMYCiABKAsyIy5iZ3MucHJvdG9jb2wucmVwb3J0",
+            "LnYyLlVzZXJPcHRpb25zSAASOwoMY2x1Yl9vcHRpb25zGAsgASgLMiMuYmdz",
+            "LnByb3RvY29sLnJlcG9ydC52Mi5DbHViT3B0aW9uc0gAEj8KDmVudGl0eV9v",
+            "cHRpb25zGBQgASgLMiUuYmdzLnByb3RvY29sLnJlcG9ydC52Mi5FbnRpdHlP",
+            "cHRpb25zSABCBgoEdHlwZTKpAQoNUmVwb3J0U2VydmljZRJZCgxTdWJtaXRS",
+            "ZXBvcnQSKy5iZ3MucHJvdG9jb2wucmVwb3J0LnYyLlN1Ym1pdFJlcG9ydFJl",
+            "cXVlc3QaFC5iZ3MucHJvdG9jb2wuTm9EYXRhIgaC+SsCCAEaPYL5KycKJWJu",
+            "ZXQucHJvdG9jb2wucmVwb3J0LnYyLlJlcG9ydFNlcnZpY2WC+SsIKgZyZXBv",
+            "cnSK+SsCEAFCA4ABAA=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Bgs.Protocol.Account.V1.AccountTypesReflection.Descriptor, global::Bgs.Protocol.Report.V2.ReportTypesReflection.Descriptor, global::Bgs.Protocol.RpcTypesReflection.Descriptor, global::Bgs.Protocol.MessageOptionsReflection.Descriptor, global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.MethodOptionsReflection.Descriptor, global::Bgs.Protocol.ServiceOptionsReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Report.V2.SubmitReportRequest), global::Bgs.Protocol.Report.V2.SubmitReportRequest.Parser, new[]{ "AgentId", "UserDescription", "Program", "UserOptions", "ClubOptions" }, new[]{ "Type" }, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Report.V2.SubmitReportRequest), global::Bgs.Protocol.Report.V2.SubmitReportRequest.Parser, new[]{ "AgentId", "UserDescription", "UserOptions", "ClubOptions", "EntityOptions" }, new[]{ "Type" }, null, null, null)
           }));
     }
     #endregion
@@ -57,7 +58,6 @@ namespace Bgs.Protocol.Report.V2 {
   public sealed partial class SubmitReportRequest : pb::IMessage<SubmitReportRequest> {
     private static readonly pb::MessageParser<SubmitReportRequest> _parser = new pb::MessageParser<SubmitReportRequest>(() => new SubmitReportRequest());
     private pb::UnknownFieldSet _unknownFields;
-    private int _hasBits0;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pb::MessageParser<SubmitReportRequest> Parser { get { return _parser; } }
 
@@ -80,16 +80,17 @@ namespace Bgs.Protocol.Report.V2 {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public SubmitReportRequest(SubmitReportRequest other) : this() {
-      _hasBits0 = other._hasBits0;
       agentId_ = other.HasAgentId ? other.agentId_.Clone() : null;
       userDescription_ = other.userDescription_;
-      program_ = other.program_;
       switch (other.TypeCase) {
         case TypeOneofCase.UserOptions:
           UserOptions = other.UserOptions.Clone();
           break;
         case TypeOneofCase.ClubOptions:
           ClubOptions = other.ClubOptions.Clone();
+          break;
+        case TypeOneofCase.EntityOptions:
+          EntityOptions = other.EntityOptions.Clone();
           break;
       }
 
@@ -145,30 +146,6 @@ namespace Bgs.Protocol.Report.V2 {
       userDescription_ = null;
     }
 
-    /// <summary>Field number for the "program" field.</summary>
-    public const int ProgramFieldNumber = 3;
-    private readonly static uint ProgramDefaultValue = 0;
-
-    private uint program_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public uint Program {
-      get { if ((_hasBits0 & 1) != 0) { return program_; } else { return ProgramDefaultValue; } }
-      set {
-        _hasBits0 |= 1;
-        program_ = value;
-      }
-    }
-    /// <summary>Gets whether the "program" field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool HasProgram {
-      get { return (_hasBits0 & 1) != 0; }
-    }
-    /// <summary>Clears the value of the "program" field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void ClearProgram() {
-      _hasBits0 &= ~1;
-    }
-
     /// <summary>Field number for the "user_options" field.</summary>
     public const int UserOptionsFieldNumber = 10;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -215,12 +192,36 @@ namespace Bgs.Protocol.Report.V2 {
       }
     }
 
+    /// <summary>Field number for the "entity_options" field.</summary>
+    public const int EntityOptionsFieldNumber = 20;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public global::Bgs.Protocol.Report.V2.EntityOptions EntityOptions {
+      get { return HasEntityOptions ? (global::Bgs.Protocol.Report.V2.EntityOptions) type_ : null; }
+      set {
+        type_ = value;
+        typeCase_ = value == null ? TypeOneofCase.None : TypeOneofCase.EntityOptions;
+      }
+    }
+    /// <summary>Gets whether the "entity_options" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasEntityOptions {
+      get { return typeCase_ == TypeOneofCase.EntityOptions; }
+    }
+    /// <summary> Clears the value of the oneof if it's currently set to "entity_options" </summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearEntityOptions() {
+      if (HasEntityOptions) {
+        ClearType();
+      }
+    }
+
     private object type_;
     /// <summary>Enum of possible cases for the "type" oneof.</summary>
     public enum TypeOneofCase {
       None = 0,
       UserOptions = 10,
       ClubOptions = 11,
+      EntityOptions = 20,
     }
     private TypeOneofCase typeCase_ = TypeOneofCase.None;
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -249,9 +250,9 @@ namespace Bgs.Protocol.Report.V2 {
       }
       if (!object.Equals(AgentId, other.AgentId)) return false;
       if (UserDescription != other.UserDescription) return false;
-      if (Program != other.Program) return false;
       if (!object.Equals(UserOptions, other.UserOptions)) return false;
       if (!object.Equals(ClubOptions, other.ClubOptions)) return false;
+      if (!object.Equals(EntityOptions, other.EntityOptions)) return false;
       if (TypeCase != other.TypeCase) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
@@ -261,9 +262,9 @@ namespace Bgs.Protocol.Report.V2 {
       int hash = 1;
       if (HasAgentId) hash ^= AgentId.GetHashCode();
       if (HasUserDescription) hash ^= UserDescription.GetHashCode();
-      if (HasProgram) hash ^= Program.GetHashCode();
       if (HasUserOptions) hash ^= UserOptions.GetHashCode();
       if (HasClubOptions) hash ^= ClubOptions.GetHashCode();
+      if (HasEntityOptions) hash ^= EntityOptions.GetHashCode();
       hash ^= (int) typeCase_;
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
@@ -286,10 +287,6 @@ namespace Bgs.Protocol.Report.V2 {
         output.WriteRawTag(18);
         output.WriteString(UserDescription);
       }
-      if (HasProgram) {
-        output.WriteRawTag(24);
-        output.WriteUInt32(Program);
-      }
       if (HasUserOptions) {
         output.WriteRawTag(82);
         output.WriteMessage(UserOptions);
@@ -297,6 +294,10 @@ namespace Bgs.Protocol.Report.V2 {
       if (HasClubOptions) {
         output.WriteRawTag(90);
         output.WriteMessage(ClubOptions);
+      }
+      if (HasEntityOptions) {
+        output.WriteRawTag(162, 1);
+        output.WriteMessage(EntityOptions);
       }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
@@ -312,14 +313,14 @@ namespace Bgs.Protocol.Report.V2 {
       if (HasUserDescription) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(UserDescription);
       }
-      if (HasProgram) {
-        size += 1 + pb::CodedOutputStream.ComputeUInt32Size(Program);
-      }
       if (HasUserOptions) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(UserOptions);
       }
       if (HasClubOptions) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(ClubOptions);
+      }
+      if (HasEntityOptions) {
+        size += 2 + pb::CodedOutputStream.ComputeMessageSize(EntityOptions);
       }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
@@ -341,9 +342,6 @@ namespace Bgs.Protocol.Report.V2 {
       if (other.HasUserDescription) {
         UserDescription = other.UserDescription;
       }
-      if (other.HasProgram) {
-        Program = other.Program;
-      }
       switch (other.TypeCase) {
         case TypeOneofCase.UserOptions:
           if (UserOptions == null) {
@@ -356,6 +354,12 @@ namespace Bgs.Protocol.Report.V2 {
             ClubOptions = new global::Bgs.Protocol.Report.V2.ClubOptions();
           }
           ClubOptions.MergeFrom(other.ClubOptions);
+          break;
+        case TypeOneofCase.EntityOptions:
+          if (EntityOptions == null) {
+            EntityOptions = new global::Bgs.Protocol.Report.V2.EntityOptions();
+          }
+          EntityOptions.MergeFrom(other.EntityOptions);
           break;
       }
 
@@ -381,10 +385,6 @@ namespace Bgs.Protocol.Report.V2 {
             UserDescription = input.ReadString();
             break;
           }
-          case 24: {
-            Program = input.ReadUInt32();
-            break;
-          }
           case 82: {
             global::Bgs.Protocol.Report.V2.UserOptions subBuilder = new global::Bgs.Protocol.Report.V2.UserOptions();
             if (HasUserOptions) {
@@ -401,6 +401,15 @@ namespace Bgs.Protocol.Report.V2 {
             }
             input.ReadMessage(subBuilder);
             ClubOptions = subBuilder;
+            break;
+          }
+          case 162: {
+            global::Bgs.Protocol.Report.V2.EntityOptions subBuilder = new global::Bgs.Protocol.Report.V2.EntityOptions();
+            if (HasEntityOptions) {
+              subBuilder.MergeFrom(EntityOptions);
+            }
+            input.ReadMessage(subBuilder);
+            EntityOptions = subBuilder;
             break;
           }
         }

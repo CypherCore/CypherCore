@@ -91,17 +91,17 @@ namespace Bgs.Protocol.Club.V1 {
             "GAkgASgJIoQBCg5TdHJlYW1TZXR0aW5ncxIRCglzdHJlYW1faWQYASABKAQS",
             "XwoGZmlsdGVyGAIgASgOMi4uYmdzLnByb3RvY29sLmNsdWIudjEuU3RyZWFt",
             "Tm90aWZpY2F0aW9uRmlsdGVyOh9TVFJFQU1fTk9USUZJQ0FUSU9OX0ZJTFRF",
-            "Ul9OT05FIpsBCgxDbHViU2V0dGluZ3MSNAoGc3RyZWFtGAEgAygLMiQuYmdz",
+            "Ul9OT05FIsEBCgxDbHViU2V0dGluZ3MSNAoGc3RyZWFtGAEgAygLMiQuYmdz",
             "LnByb3RvY29sLmNsdWIudjEuU3RyZWFtU2V0dGluZ3MSJgoec3RyZWFtX25v",
             "dGlmaWNhdGlvbl9maWx0ZXJfYWxsGAIgASgIEi0KCWF0dHJpYnV0ZRgDIAMo",
-            "CzIaLmJncy5wcm90b2NvbC52Mi5BdHRyaWJ1dGUilgEKE0NsdWJTZXR0aW5n",
-            "c09wdGlvbnMSOAoGc3RyZWFtGAEgAygLMiQuYmdzLnByb3RvY29sLmNsdWIu",
-            "djEuU3RyZWFtU2V0dGluZ3NCAhgBEjQKCHNldHRpbmdzGAIgASgLMiIuYmdz",
-            "LnByb3RvY29sLmNsdWIudjEuQ2x1YlNldHRpbmdzEg8KB3ZlcnNpb24YAyAB",
-            "KA0iiAEKFkNsdWJTZXR0aW5nc0Fzc2lnbm1lbnQSOAoGc3RyZWFtGAEgAygL",
-            "MiQuYmdzLnByb3RvY29sLmNsdWIudjEuU3RyZWFtU2V0dGluZ3NCAhgBEjQK",
-            "CHNldHRpbmdzGAIgASgLMiIuYmdzLnByb3RvY29sLmNsdWIudjEuQ2x1YlNl",
-            "dHRpbmdz"));
+            "CzIaLmJncy5wcm90b2NvbC52Mi5BdHRyaWJ1dGUSJAoccHVzaF9ub3RpZmlj",
+            "YXRpb25fZmlsdGVyX2FsbBgEIAEoCCKWAQoTQ2x1YlNldHRpbmdzT3B0aW9u",
+            "cxI4CgZzdHJlYW0YASADKAsyJC5iZ3MucHJvdG9jb2wuY2x1Yi52MS5TdHJl",
+            "YW1TZXR0aW5nc0ICGAESNAoIc2V0dGluZ3MYAiABKAsyIi5iZ3MucHJvdG9j",
+            "b2wuY2x1Yi52MS5DbHViU2V0dGluZ3MSDwoHdmVyc2lvbhgDIAEoDSKIAQoW",
+            "Q2x1YlNldHRpbmdzQXNzaWdubWVudBI4CgZzdHJlYW0YASADKAsyJC5iZ3Mu",
+            "cHJvdG9jb2wuY2x1Yi52MS5TdHJlYW1TZXR0aW5nc0ICGAESNAoIc2V0dGlu",
+            "Z3MYAiABKAsyIi5iZ3MucHJvdG9jb2wuY2x1Yi52MS5DbHViU2V0dGluZ3M="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { global::Bgs.Protocol.Club.V1.ClubEnumReflection.Descriptor, global::Bgs.Protocol.Club.V1.ClubRoleReflection.Descriptor, global::Bgs.Protocol.Club.V1.ClubMemberReflection.Descriptor, global::Bgs.Protocol.Club.V1.ClubStreamReflection.Descriptor, global::Bgs.Protocol.V2.AttributeTypesReflection.Descriptor, global::Bgs.Protocol.EventViewTypesReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
@@ -116,7 +116,7 @@ namespace Bgs.Protocol.Club.V1 {
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.ClubStateOptions), global::Bgs.Protocol.Club.V1.ClubStateOptions.Parser, new[]{ "Attribute", "Name", "Description", "Broadcast", "Avatar", "PrivacyLevel", "StreamPosition", "ShortName" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.ClubStateAssignment), global::Bgs.Protocol.Club.V1.ClubStateAssignment.Parser, new[]{ "ClubId", "Attribute", "Name", "Description", "Broadcast", "Avatar", "PrivacyLevel", "StreamPosition", "ShortName" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.StreamSettings), global::Bgs.Protocol.Club.V1.StreamSettings.Parser, new[]{ "StreamId", "Filter" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.ClubSettings), global::Bgs.Protocol.Club.V1.ClubSettings.Parser, new[]{ "Stream", "StreamNotificationFilterAll", "Attribute" }, null, null, null, null),
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.ClubSettings), global::Bgs.Protocol.Club.V1.ClubSettings.Parser, new[]{ "Stream", "StreamNotificationFilterAll", "Attribute", "PushNotificationFilterAll" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.ClubSettingsOptions), global::Bgs.Protocol.Club.V1.ClubSettingsOptions.Parser, new[]{ "Stream", "Settings", "Version" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.ClubSettingsAssignment), global::Bgs.Protocol.Club.V1.ClubSettingsAssignment.Parser, new[]{ "Stream", "Settings" }, null, null, null, null)
           }));
@@ -3742,6 +3742,7 @@ namespace Bgs.Protocol.Club.V1 {
       stream_ = other.stream_.Clone();
       streamNotificationFilterAll_ = other.streamNotificationFilterAll_;
       attribute_ = other.attribute_.Clone();
+      pushNotificationFilterAll_ = other.pushNotificationFilterAll_;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
 
@@ -3794,6 +3795,30 @@ namespace Bgs.Protocol.Club.V1 {
       get { return attribute_; }
     }
 
+    /// <summary>Field number for the "push_notification_filter_all" field.</summary>
+    public const int PushNotificationFilterAllFieldNumber = 4;
+    private readonly static bool PushNotificationFilterAllDefaultValue = false;
+
+    private bool pushNotificationFilterAll_;
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool PushNotificationFilterAll {
+      get { if ((_hasBits0 & 2) != 0) { return pushNotificationFilterAll_; } else { return PushNotificationFilterAllDefaultValue; } }
+      set {
+        _hasBits0 |= 2;
+        pushNotificationFilterAll_ = value;
+      }
+    }
+    /// <summary>Gets whether the "push_notification_filter_all" field is set</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public bool HasPushNotificationFilterAll {
+      get { return (_hasBits0 & 2) != 0; }
+    }
+    /// <summary>Clears the value of the "push_notification_filter_all" field</summary>
+    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
+    public void ClearPushNotificationFilterAll() {
+      _hasBits0 &= ~2;
+    }
+
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public override bool Equals(object other) {
       return Equals(other as ClubSettings);
@@ -3810,6 +3835,7 @@ namespace Bgs.Protocol.Club.V1 {
       if(!stream_.Equals(other.stream_)) return false;
       if (StreamNotificationFilterAll != other.StreamNotificationFilterAll) return false;
       if(!attribute_.Equals(other.attribute_)) return false;
+      if (PushNotificationFilterAll != other.PushNotificationFilterAll) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
 
@@ -3819,6 +3845,7 @@ namespace Bgs.Protocol.Club.V1 {
       hash ^= stream_.GetHashCode();
       if (HasStreamNotificationFilterAll) hash ^= StreamNotificationFilterAll.GetHashCode();
       hash ^= attribute_.GetHashCode();
+      if (HasPushNotificationFilterAll) hash ^= PushNotificationFilterAll.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
       }
@@ -3838,6 +3865,10 @@ namespace Bgs.Protocol.Club.V1 {
         output.WriteBool(StreamNotificationFilterAll);
       }
       attribute_.WriteTo(output, _repeated_attribute_codec);
+      if (HasPushNotificationFilterAll) {
+        output.WriteRawTag(32);
+        output.WriteBool(PushNotificationFilterAll);
+      }
       if (_unknownFields != null) {
         _unknownFields.WriteTo(output);
       }
@@ -3851,6 +3882,9 @@ namespace Bgs.Protocol.Club.V1 {
         size += 1 + 1;
       }
       size += attribute_.CalculateSize(_repeated_attribute_codec);
+      if (HasPushNotificationFilterAll) {
+        size += 1 + 1;
+      }
       if (_unknownFields != null) {
         size += _unknownFields.CalculateSize();
       }
@@ -3867,6 +3901,9 @@ namespace Bgs.Protocol.Club.V1 {
         StreamNotificationFilterAll = other.StreamNotificationFilterAll;
       }
       attribute_.Add(other.attribute_);
+      if (other.HasPushNotificationFilterAll) {
+        PushNotificationFilterAll = other.PushNotificationFilterAll;
+      }
       _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
     }
 
@@ -3888,6 +3925,10 @@ namespace Bgs.Protocol.Club.V1 {
           }
           case 26: {
             attribute_.AddEntriesFrom(input, _repeated_attribute_codec);
+            break;
+          }
+          case 32: {
+            PushNotificationFilterAll = input.ReadBool();
             break;
           }
         }

@@ -27,22 +27,20 @@ namespace Bgs.Protocol {
             "CiNiZ3MvbG93L3BiL2NsaWVudC9lbWJlZF90eXBlcy5wcm90bxIMYmdzLnBy",
             "b3RvY29sIjgKCkVtYmVkSW1hZ2USCwoDdXJsGAEgASgJEg0KBXdpZHRoGAIg",
             "ASgNEg4KBmhlaWdodBgDIAEoDSIYCghQcm92aWRlchIMCgRuYW1lGAEgASgJ",
-            "IhYKB0Zhdmljb24SCwoDdXJsGAEgASgJIjsKCUVtYmVkSFRNTBIPCgdjb250",
-            "ZW50GAEgASgJEg0KBXdpZHRoGAIgASgNEg4KBmhlaWdodBgDIAEoDSL5AQoJ",
-            "RW1iZWRJbmZvEg0KBXRpdGxlGAEgASgJEgwKBHR5cGUYAiABKAkSFAoMb3Jp",
-            "Z2luYWxfdXJsGAMgASgJEisKCXRodW1ibmFpbBgEIAEoCzIYLmJncy5wcm90",
-            "b2NvbC5FbWJlZEltYWdlEigKCHByb3ZpZGVyGAUgASgLMhYuYmdzLnByb3Rv",
-            "Y29sLlByb3ZpZGVyEhMKC2Rlc2NyaXB0aW9uGAYgASgJEiYKB2Zhdmljb24Y",
-            "ByABKAsyFS5iZ3MucHJvdG9jb2wuRmF2aWNvbhIlCgRodG1sGAggASgLMhcu",
-            "YmdzLnByb3RvY29sLkVtYmVkSFRNTA=="));
+            "IjsKCUVtYmVkSFRNTBIPCgdjb250ZW50GAEgASgJEg0KBXdpZHRoGAIgASgN",
+            "Eg4KBmhlaWdodBgDIAEoDSLRAQoJRW1iZWRJbmZvEg0KBXRpdGxlGAEgASgJ",
+            "EgwKBHR5cGUYAiABKAkSFAoMb3JpZ2luYWxfdXJsGAMgASgJEisKCXRodW1i",
+            "bmFpbBgEIAEoCzIYLmJncy5wcm90b2NvbC5FbWJlZEltYWdlEigKCHByb3Zp",
+            "ZGVyGAUgASgLMhYuYmdzLnByb3RvY29sLlByb3ZpZGVyEhMKC2Rlc2NyaXB0",
+            "aW9uGAYgASgJEiUKBGh0bWwYCCABKAsyFy5iZ3MucHJvdG9jb2wuRW1iZWRI",
+            "VE1M"));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
           new pbr::FileDescriptor[] { },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.EmbedImage), global::Bgs.Protocol.EmbedImage.Parser, new[]{ "Url", "Width", "Height" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Provider), global::Bgs.Protocol.Provider.Parser, new[]{ "Name" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Favicon), global::Bgs.Protocol.Favicon.Parser, new[]{ "Url" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.EmbedHTML), global::Bgs.Protocol.EmbedHTML.Parser, new[]{ "Content", "Width", "Height" }, null, null, null, null),
-            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.EmbedInfo), global::Bgs.Protocol.EmbedInfo.Parser, new[]{ "Title", "Type", "OriginalUrl", "Thumbnail", "Provider", "Description", "Favicon", "Html" }, null, null, null, null)
+            new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.EmbedInfo), global::Bgs.Protocol.EmbedInfo.Parser, new[]{ "Title", "Type", "OriginalUrl", "Thumbnail", "Provider", "Description", "Html" }, null, null, null, null)
           }));
     }
     #endregion
@@ -415,147 +413,6 @@ namespace Bgs.Protocol {
 
   }
 
-  public sealed partial class Favicon : pb::IMessage<Favicon> {
-    private static readonly pb::MessageParser<Favicon> _parser = new pb::MessageParser<Favicon>(() => new Favicon());
-    private pb::UnknownFieldSet _unknownFields;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pb::MessageParser<Favicon> Parser { get { return _parser; } }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.EmbedTypesReflection.Descriptor.MessageTypes[2]; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    pbr::MessageDescriptor pb::IMessage.Descriptor {
-      get { return Descriptor; }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public Favicon() {
-      OnConstruction();
-    }
-
-    partial void OnConstruction();
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public Favicon(Favicon other) : this() {
-      url_ = other.url_;
-      _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public Favicon Clone() {
-      return new Favicon(this);
-    }
-
-    /// <summary>Field number for the "url" field.</summary>
-    public const int UrlFieldNumber = 1;
-    private readonly static string UrlDefaultValue = "";
-
-    private string url_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public string Url {
-      get { return url_ ?? UrlDefaultValue; }
-      set {
-        url_ = pb::ProtoPreconditions.CheckNotNull(value, "value");
-      }
-    }
-    /// <summary>Gets whether the "url" field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool HasUrl {
-      get { return url_ != null; }
-    }
-    /// <summary>Clears the value of the "url" field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void ClearUrl() {
-      url_ = null;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override bool Equals(object other) {
-      return Equals(other as Favicon);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool Equals(Favicon other) {
-      if (ReferenceEquals(other, null)) {
-        return false;
-      }
-      if (ReferenceEquals(other, this)) {
-        return true;
-      }
-      if (Url != other.Url) return false;
-      return Equals(_unknownFields, other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override int GetHashCode() {
-      int hash = 1;
-      if (HasUrl) hash ^= Url.GetHashCode();
-      if (_unknownFields != null) {
-        hash ^= _unknownFields.GetHashCode();
-      }
-      return hash;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public override string ToString() {
-      return pb::JsonFormatter.ToDiagnosticString(this);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void WriteTo(pb::CodedOutputStream output) {
-      if (HasUrl) {
-        output.WriteRawTag(10);
-        output.WriteString(Url);
-      }
-      if (_unknownFields != null) {
-        _unknownFields.WriteTo(output);
-      }
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public int CalculateSize() {
-      int size = 0;
-      if (HasUrl) {
-        size += 1 + pb::CodedOutputStream.ComputeStringSize(Url);
-      }
-      if (_unknownFields != null) {
-        size += _unknownFields.CalculateSize();
-      }
-      return size;
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(Favicon other) {
-      if (other == null) {
-        return;
-      }
-      if (other.HasUrl) {
-        Url = other.Url;
-      }
-      _unknownFields = pb::UnknownFieldSet.MergeFrom(_unknownFields, other._unknownFields);
-    }
-
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void MergeFrom(pb::CodedInputStream input) {
-      uint tag;
-      while ((tag = input.ReadTag()) != 0) {
-        switch(tag) {
-          default:
-            _unknownFields = pb::UnknownFieldSet.MergeFieldFrom(_unknownFields, input);
-            break;
-          case 10: {
-            Url = input.ReadString();
-            break;
-          }
-        }
-      }
-    }
-
-  }
-
   public sealed partial class EmbedHTML : pb::IMessage<EmbedHTML> {
     private static readonly pb::MessageParser<EmbedHTML> _parser = new pb::MessageParser<EmbedHTML>(() => new EmbedHTML());
     private pb::UnknownFieldSet _unknownFields;
@@ -565,7 +422,7 @@ namespace Bgs.Protocol {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.EmbedTypesReflection.Descriptor.MessageTypes[3]; }
+      get { return global::Bgs.Protocol.EmbedTypesReflection.Descriptor.MessageTypes[2]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -789,7 +646,7 @@ namespace Bgs.Protocol {
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
     public static pbr::MessageDescriptor Descriptor {
-      get { return global::Bgs.Protocol.EmbedTypesReflection.Descriptor.MessageTypes[4]; }
+      get { return global::Bgs.Protocol.EmbedTypesReflection.Descriptor.MessageTypes[3]; }
     }
 
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
@@ -812,7 +669,6 @@ namespace Bgs.Protocol {
       thumbnail_ = other.HasThumbnail ? other.thumbnail_.Clone() : null;
       provider_ = other.HasProvider ? other.provider_.Clone() : null;
       description_ = other.description_;
-      favicon_ = other.HasFavicon ? other.favicon_.Clone() : null;
       html_ = other.HasHtml ? other.html_.Clone() : null;
       _unknownFields = pb::UnknownFieldSet.Clone(other._unknownFields);
     }
@@ -956,27 +812,6 @@ namespace Bgs.Protocol {
       description_ = null;
     }
 
-    /// <summary>Field number for the "favicon" field.</summary>
-    public const int FaviconFieldNumber = 7;
-    private global::Bgs.Protocol.Favicon favicon_;
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public global::Bgs.Protocol.Favicon Favicon {
-      get { return favicon_; }
-      set {
-        favicon_ = value;
-      }
-    }
-    /// <summary>Gets whether the favicon field is set</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public bool HasFavicon {
-      get { return favicon_ != null; }
-    }
-    /// <summary>Clears the value of the favicon field</summary>
-    [global::System.Diagnostics.DebuggerNonUserCodeAttribute]
-    public void ClearFavicon() {
-      favicon_ = null;
-    }
-
     /// <summary>Field number for the "html" field.</summary>
     public const int HtmlFieldNumber = 8;
     private global::Bgs.Protocol.EmbedHTML html_;
@@ -1017,7 +852,6 @@ namespace Bgs.Protocol {
       if (!object.Equals(Thumbnail, other.Thumbnail)) return false;
       if (!object.Equals(Provider, other.Provider)) return false;
       if (Description != other.Description) return false;
-      if (!object.Equals(Favicon, other.Favicon)) return false;
       if (!object.Equals(Html, other.Html)) return false;
       return Equals(_unknownFields, other._unknownFields);
     }
@@ -1031,7 +865,6 @@ namespace Bgs.Protocol {
       if (HasThumbnail) hash ^= Thumbnail.GetHashCode();
       if (HasProvider) hash ^= Provider.GetHashCode();
       if (HasDescription) hash ^= Description.GetHashCode();
-      if (HasFavicon) hash ^= Favicon.GetHashCode();
       if (HasHtml) hash ^= Html.GetHashCode();
       if (_unknownFields != null) {
         hash ^= _unknownFields.GetHashCode();
@@ -1070,10 +903,6 @@ namespace Bgs.Protocol {
         output.WriteRawTag(50);
         output.WriteString(Description);
       }
-      if (HasFavicon) {
-        output.WriteRawTag(58);
-        output.WriteMessage(Favicon);
-      }
       if (HasHtml) {
         output.WriteRawTag(66);
         output.WriteMessage(Html);
@@ -1103,9 +932,6 @@ namespace Bgs.Protocol {
       }
       if (HasDescription) {
         size += 1 + pb::CodedOutputStream.ComputeStringSize(Description);
-      }
-      if (HasFavicon) {
-        size += 1 + pb::CodedOutputStream.ComputeMessageSize(Favicon);
       }
       if (HasHtml) {
         size += 1 + pb::CodedOutputStream.ComputeMessageSize(Html);
@@ -1144,12 +970,6 @@ namespace Bgs.Protocol {
       }
       if (other.HasDescription) {
         Description = other.Description;
-      }
-      if (other.HasFavicon) {
-        if (!HasFavicon) {
-          Favicon = new global::Bgs.Protocol.Favicon();
-        }
-        Favicon.MergeFrom(other.Favicon);
       }
       if (other.HasHtml) {
         if (!HasHtml) {
@@ -1196,13 +1016,6 @@ namespace Bgs.Protocol {
           }
           case 50: {
             Description = input.ReadString();
-            break;
-          }
-          case 58: {
-            if (!HasFavicon) {
-              Favicon = new global::Bgs.Protocol.Favicon();
-            }
-            input.ReadMessage(Favicon);
             break;
           }
           case 66: {

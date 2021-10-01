@@ -25,19 +25,20 @@ namespace Bgs.Protocol.Club.V1 {
       byte[] descriptorData = global::System.Convert.FromBase64String(
           string.Concat(
             "CiBiZ3MvbG93L3BiL2NsaWVudC9jbHViX2Jhbi5wcm90bxIUYmdzLnByb3Rv",
-            "Y29sLmNsdWIudjEaI2Jncy9sb3cvcGIvY2xpZW50L2NsdWJfbWVtYmVyLnBy",
-            "b3RvGjViZ3MvbG93L3BiL2NsaWVudC9hcGkvY2xpZW50L3YyL2F0dHJpYnV0",
-            "ZV90eXBlcy5wcm90byKBAQoNQWRkQmFuT3B0aW9ucxIxCgl0YXJnZXRfaWQY",
-            "ASABKAsyHi5iZ3MucHJvdG9jb2wuY2x1Yi52MS5NZW1iZXJJZBItCglhdHRy",
-            "aWJ1dGUYAiADKAsyGi5iZ3MucHJvdG9jb2wudjIuQXR0cmlidXRlEg4KBnJl",
-            "YXNvbhgDIAEoCSLZAQoHQ2x1YkJhbhIqCgJpZBgBIAEoCzIeLmJncy5wcm90",
-            "b2NvbC5jbHViLnYxLk1lbWJlcklkEhIKCmJhdHRsZV90YWcYAiABKAkSOAoH",
-            "Y3JlYXRvchgDIAEoCzInLmJncy5wcm90b2NvbC5jbHViLnYxLk1lbWJlckRl",
-            "c2NyaXB0aW9uEi0KCWF0dHJpYnV0ZRgEIAMoCzIaLmJncy5wcm90b2NvbC52",
-            "Mi5BdHRyaWJ1dGUSDgoGcmVhc29uGAUgASgJEhUKDWNyZWF0aW9uX3RpbWUY",
-            "BiABKAQ="));
+            "Y29sLmNsdWIudjEaN2Jncy9sb3cvcGIvY2xpZW50L2dsb2JhbF9leHRlbnNp",
+            "b25zL2ZpZWxkX29wdGlvbnMucHJvdG8aI2Jncy9sb3cvcGIvY2xpZW50L2Ns",
+            "dWJfbWVtYmVyLnByb3RvGjViZ3MvbG93L3BiL2NsaWVudC9hcGkvY2xpZW50",
+            "L3YyL2F0dHJpYnV0ZV90eXBlcy5wcm90byKBAQoNQWRkQmFuT3B0aW9ucxIx",
+            "Cgl0YXJnZXRfaWQYASABKAsyHi5iZ3MucHJvdG9jb2wuY2x1Yi52MS5NZW1i",
+            "ZXJJZBItCglhdHRyaWJ1dGUYAiADKAsyGi5iZ3MucHJvdG9jb2wudjIuQXR0",
+            "cmlidXRlEg4KBnJlYXNvbhgDIAEoCSLhAQoHQ2x1YkJhbhIqCgJpZBgBIAEo",
+            "CzIeLmJncy5wcm90b2NvbC5jbHViLnYxLk1lbWJlcklkEhoKCmJhdHRsZV90",
+            "YWcYAiABKAlCBoL5KwIIARI4CgdjcmVhdG9yGAMgASgLMicuYmdzLnByb3Rv",
+            "Y29sLmNsdWIudjEuTWVtYmVyRGVzY3JpcHRpb24SLQoJYXR0cmlidXRlGAQg",
+            "AygLMhouYmdzLnByb3RvY29sLnYyLkF0dHJpYnV0ZRIOCgZyZWFzb24YBSAB",
+            "KAkSFQoNY3JlYXRpb25fdGltZRgGIAEoBA=="));
       descriptor = pbr::FileDescriptor.FromGeneratedCode(descriptorData,
-          new pbr::FileDescriptor[] { global::Bgs.Protocol.Club.V1.ClubMemberReflection.Descriptor, global::Bgs.Protocol.V2.AttributeTypesReflection.Descriptor, },
+          new pbr::FileDescriptor[] { global::Bgs.Protocol.FieldOptionsReflection.Descriptor, global::Bgs.Protocol.Club.V1.ClubMemberReflection.Descriptor, global::Bgs.Protocol.V2.AttributeTypesReflection.Descriptor, },
           new pbr::GeneratedClrTypeInfo(null, null, new pbr::GeneratedClrTypeInfo[] {
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.AddBanOptions), global::Bgs.Protocol.Club.V1.AddBanOptions.Parser, new[]{ "TargetId", "Attribute", "Reason" }, null, null, null, null),
             new pbr::GeneratedClrTypeInfo(typeof(global::Bgs.Protocol.Club.V1.ClubBan), global::Bgs.Protocol.Club.V1.ClubBan.Parser, new[]{ "Id", "BattleTag", "Creator", "Attribute", "Reason", "CreationTime" }, null, null, null, null)
