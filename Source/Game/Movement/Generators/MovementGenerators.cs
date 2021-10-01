@@ -16,13 +16,12 @@
  */
 
 using Framework.Constants;
-using Framework.Dynamic;
 using Game.Entities;
-using Framework.GameMath;
+using System;
 
 namespace Game.Movement
 {
-    public abstract class MovementGenerator
+    public abstract class MovementGenerator : IEquatable<MovementGenerator>
     {
         public MovementGeneratorMode Mode;
         public MovementGeneratorPriority Priority;
@@ -64,6 +63,19 @@ namespace Game.Movement
         public void AddFlag(MovementGeneratorFlags flag) { Flags |= flag; }
         public bool HasFlag(MovementGeneratorFlags flag) { return (Flags & flag) != 0; }
         public void RemoveFlag(MovementGeneratorFlags flag) { Flags &= ~flag; }
+
+        public bool Equals(MovementGenerator other)
+        {
+            if (Mode == other.Mode && Priority == other.Priority)
+                return true;
+
+            return false;
+        }
+
+        public int GetHashCode(MovementGenerator obj)
+        {
+            return obj.Mode.GetHashCode() ^ obj.Priority.GetHashCode();
+        }
     }
 
     public abstract class MovementGeneratorMedium<T> : MovementGenerator where T : Unit

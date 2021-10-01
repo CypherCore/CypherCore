@@ -30,12 +30,15 @@ namespace Game.Movement
     {
         public int Compare(MovementGenerator a, MovementGenerator b)
         {
+            if (a.Equals(b))
+                return 0;
+
             if (a.Mode > b.Mode)
                 return 1;
             else if (a.Mode == b.Mode)
-                return a.Priority > b.Priority ? 1 : -1;
+                return a.Priority.CompareTo(b.Priority);
 
-            return 0;
+            return -1;
         }
     }
     
@@ -77,6 +80,7 @@ namespace Game.Movement
         Unit _owner { get; }
         MovementGenerator _defaultGenerator { get; set; }
         SortedSet<MovementGenerator> _generators { get; } = new(new MovementGeneratorComparator());
+        
         MultiMap<uint, MovementGenerator> _baseUnitStatesMap { get; } = new();
         Queue<MotionMasterDelayedAction> _delayedActions { get; } = new();
         MotionMasterFlags _flags { get; set; }
