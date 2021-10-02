@@ -1121,10 +1121,9 @@ namespace Game.Chat
                             }
 
                             bool known = target && target.HasSpell(spellInfo.Id);
-                            SpellEffectInfo spellEffectInfo = spellInfo.GetEffect(0);
-                            bool learn = spellEffectInfo.Effect == SpellEffectName.LearnSpell;
+                            var spellEffectInfo = spellInfo.GetEffects().Find(spelleffectInfo => spelleffectInfo.IsEffect(SpellEffectName.LearnSpell));
 
-                            SpellInfo learnSpellInfo = Global.SpellMgr.GetSpellInfo(spellEffectInfo.TriggerSpell, spellInfo.Difficulty);
+                            SpellInfo learnSpellInfo = spellEffectInfo != null ? Global.SpellMgr.GetSpellInfo(spellEffectInfo.TriggerSpell, spellInfo.Difficulty) : null;
 
                             bool talent = spellInfo.HasAttribute(SpellCustomAttributes.IsTalent);
                             bool passive = spellInfo.IsPassive();
@@ -1132,7 +1131,7 @@ namespace Game.Chat
 
                             // unit32 used to prevent interpreting public byte as char at output
                             // find rank of learned spell for learning spell, or talent rank
-                            uint rank = learn && learnSpellInfo != null ? learnSpellInfo.GetRank() : spellInfo.GetRank();
+                            uint rank = learnSpellInfo != null ? learnSpellInfo.GetRank() : spellInfo.GetRank();
 
                             // send spell in "id - [name, rank N] [talent] [passive] [learn] [known]" format
                             StringBuilder ss = new();
@@ -1152,7 +1151,7 @@ namespace Game.Chat
                                 ss.Append(handler.GetCypherString(CypherStrings.Talent));
                             if (passive)
                                 ss.Append(handler.GetCypherString(CypherStrings.Passive));
-                            if (learn)
+                            if (learnSpellInfo != null)
                                 ss.Append(handler.GetCypherString(CypherStrings.Learn));
                             if (known)
                                 ss.Append(handler.GetCypherString(CypherStrings.Known));
@@ -1195,8 +1194,7 @@ namespace Game.Chat
                     }
 
                     bool known = target && target.HasSpell(id);
-                    SpellEffectInfo spellEffectInfo = spellInfo.GetEffect(0);
-                    bool learn = spellEffectInfo.Effect == SpellEffectName.LearnSpell;
+                    var spellEffectInfo = spellInfo.GetEffects().Find(spelleffectInfo => spelleffectInfo.IsEffect(SpellEffectName.LearnSpell));
 
                     SpellInfo learnSpellInfo = Global.SpellMgr.GetSpellInfo(spellEffectInfo.TriggerSpell, Difficulty.None);
 
@@ -1206,7 +1204,7 @@ namespace Game.Chat
 
                     // unit32 used to prevent interpreting public byte as char at output
                     // find rank of learned spell for learning spell, or talent rank
-                    uint rank = learn && learnSpellInfo != null ? learnSpellInfo.GetRank() : spellInfo.GetRank();
+                    uint rank = learnSpellInfo != null ? learnSpellInfo.GetRank() : spellInfo.GetRank();
 
                     // send spell in "id - [name, rank N] [talent] [passive] [learn] [known]" format
                     StringBuilder ss = new();
@@ -1226,7 +1224,7 @@ namespace Game.Chat
                         ss.Append(handler.GetCypherString(CypherStrings.Talent));
                     if (passive)
                         ss.Append(handler.GetCypherString(CypherStrings.Passive));
-                    if (learn)
+                    if (learnSpellInfo != null)
                         ss.Append(handler.GetCypherString(CypherStrings.Learn));
                     if (known)
                         ss.Append(handler.GetCypherString(CypherStrings.Known));
