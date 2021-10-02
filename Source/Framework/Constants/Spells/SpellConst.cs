@@ -34,6 +34,9 @@ namespace Framework.Constants
         public const float TrajectoryMissileSize = 3.0f;
 
         public const int MaxPowersPerSpell = 4;
+
+        public const uint VisualKitFood = 406;
+        public const uint VisualKitDrink = 438;
     }
 
 

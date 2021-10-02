@@ -3647,6 +3647,7 @@ namespace Game.Entities
         void RegenerateAll()
         {
             m_regenTimerCount += RegenTimer;
+            m_foodEmoteTimerCount += RegenTimer;
 
             for (PowerType power = PowerType.Mana; power < PowerType.Max; power++)// = power + 1)
                 if (power != PowerType.Runes)
@@ -3683,6 +3684,32 @@ namespace Game.Entities
             }
 
             RegenTimer = 0;
+
+            // Handles the emotes for drinking and eating.
+            // According to sniffs there is a background timer going on that repeats independed from the time window where the aura applies.
+            // That's why we dont need to reset the timer on apply. In sniffs I have seen that the first call for the spell visual is totally random, then after
+            // 5 seconds over and over again which confirms my theory that we have a independed timer.
+            if (m_foodEmoteTimerCount >= 5000)
+            {
+                List<AuraEffect> auraList = GetAuraEffectsByType(AuraType.ModRegen);
+                auraList.AddRange(GetAuraEffectsByType(AuraType.ModPowerRegen));
+
+                foreach (var auraEffect in auraList)
+                {
+                    // Food emote comes above drinking emote if we have to decide (mage regen food for example)
+                    if (auraEffect.GetBase().HasEffectType(AuraType.ModRegen) && auraEffect.GetSpellInfo().HasAuraInterruptFlag(SpellAuraInterruptFlags.Standing))
+                    {
+                        SendPlaySpellVisualKit(SpellConst.VisualKitFood, 0, 0);
+                        break;
+                    }
+                    else if (auraEffect.GetBase().HasEffectType(AuraType.ModPowerRegen) && auraEffect.GetSpellInfo().HasAuraInterruptFlag(SpellAuraInterruptFlags.Standing))
+                    {
+                        SendPlaySpellVisualKit(SpellConst.VisualKitDrink, 0, 0);
+                        break;
+                    }
+                }
+                m_foodEmoteTimerCount -= 5000;
+            }
         }
         void Regenerate(PowerType power)
         {

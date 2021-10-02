@@ -157,6 +157,7 @@ namespace Game.Entities
         byte m_swingErrorMsg;
         uint m_combatExitTime;
         uint m_regenTimerCount;
+        uint m_foodEmoteTimerCount;
         uint m_weaponChangeTimer;
 
         //Quest
