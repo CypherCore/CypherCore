@@ -197,6 +197,9 @@ namespace Game.Entities
             m_createTime = GameTime.GetGameTime();
             UpdatePositionData();
 
+            // set initial homebind position
+            SetHomebind(this, GetAreaId());
+
             PowerType powertype = cEntry.DisplayPower;
 
             SetObjectScale(1.0f);

@@ -599,11 +599,8 @@ namespace Game.Entities
                 }
             }
 
-            if (!ok)
+            void saveHomebindToDb()
             {
-                homebind = new WorldLocation(info.MapId, info.PositionX, info.PositionY, info.PositionZ, info.Orientation);
-                homebindAreaId = info.ZoneId;
-
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_PLAYER_HOMEBIND);
                 stmt.AddValue(0, GetGUID().GetCounter());
                 stmt.AddValue(1, homebind.GetMapId());
@@ -612,6 +609,29 @@ namespace Game.Entities
                 stmt.AddValue(4, homebind.posY);
                 stmt.AddValue(5, homebind.posZ);
                 DB.Characters.Execute(stmt);
+            };
+
+            if (!ok && HasAtLoginFlag(AtLoginFlags.FirstLogin))
+            {
+                homebind = new WorldLocation(info.MapId, info.PositionX, info.PositionY, info.PositionZ, info.Orientation);
+                homebindAreaId = info.ZoneId;
+
+                saveHomebindToDb();
+                ok = true;
+            }
+
+            if (!ok)
+            {
+                WorldSafeLocsEntry loc = Global.ObjectMgr.GetDefaultGraveYard(GetTeam());
+                if (loc == null && GetRace() == Race.PandarenNeutral)
+                    loc = Global.ObjectMgr.GetWorldSafeLoc(3295); // The Wandering Isle, Starting Area GY
+
+                Cypher.Assert(loc != null, "Missing fallback graveyard location for faction {GetTeamId()}");
+
+                homebind = new WorldLocation(loc.Loc.GetMapId(), loc.Loc.posX, loc.Loc.posY, loc.Loc.posZ);
+                homebindAreaId = Global.MapMgr.GetAreaId(PhasingHandler.EmptyPhaseShift, loc.Loc);
+
+                saveHomebindToDb();
             }
 
             Log.outDebug(LogFilter.Player, "Setting player home position - mapid: {0}, areaid: {1}, {2}",
@@ -2703,6 +2723,8 @@ namespace Game.Entities
             SetPlayerFlagsEx(playerFlagsEx);
             SetWatchedFactionIndex(watchedFaction);
 
+            atLoginFlags = (AtLoginFlags)at_login;
+
             if (!GetSession().ValidateAppearance(GetRace(), GetClass(), gender, customizations))
             {
                 Log.outError(LogFilter.Player, "Player {0} has wrong Appearance values (Hair/Skin/Color), can't be loaded.", guid.ToString());
@@ -3049,8 +3071,6 @@ namespace Game.Entities
                 Log.outError(LogFilter.Player, "Player can have not more {0} stable slots, but have in DB {1}", 4, m_stableSlots);
                 m_stableSlots = 4;
             }
-
-            atLoginFlags = (AtLoginFlags)at_login;
 
             // Honor system
             // Update Honor kills data

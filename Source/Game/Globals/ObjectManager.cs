@@ -802,7 +802,7 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, $"Loaded {_worldSafeLocs.Count} world locations {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
-        WorldSafeLocsEntry GetDefaultGraveYard(Team team)
+        public WorldSafeLocsEntry GetDefaultGraveYard(Team team)
         {
             if (team == Team.Horde)
                 return GetWorldSafeLoc(10);
@@ -810,6 +810,7 @@ namespace Game
                 return GetWorldSafeLoc(4);
             else return null;
         }
+
         public WorldSafeLocsEntry GetClosestGraveYard(WorldLocation location, Team team, WorldObject conditionObject)
         {
             float x, y, z;
