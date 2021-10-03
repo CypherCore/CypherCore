@@ -16,6 +16,7 @@
  */
 
 using Framework.Constants;
+using Framework.Dynamic;
 using Game.Achievements;
 using Game.BattleGrounds;
 using Game.Chat;
@@ -26,7 +27,6 @@ using Game.Mails;
 using Game.Maps;
 using Game.Misc;
 using Game.Spells;
-using System;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -269,15 +269,8 @@ namespace Game.Entities
 
     public class PlayerInfo
     {
-        public uint MapId;
-        public uint ZoneId;
-        public float PositionX;
-        public float PositionY;
-        public float PositionZ;
-        public float Orientation;
-
-        public uint DisplayId_m;
-        public uint DisplayId_f;
+        public CreatePosition createPosition;
+        public Optional<CreatePosition> createPositionNPE;
 
         public List<PlayerCreateInfoItem> item = new();
         public List<uint> customSpells = new();
@@ -286,6 +279,12 @@ namespace Game.Entities
         public List<SkillRaceClassInfoRecord> skills = new();
 
         public PlayerLevelInfo[] levelInfo = new PlayerLevelInfo[WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel)];
+
+        public struct CreatePosition
+        {
+            public WorldLocation Loc;
+            public ulong? TransportGuid;
+        }
     }
 
     public class PlayerCreateInfoItem

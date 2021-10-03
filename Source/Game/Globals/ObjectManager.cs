@@ -5598,8 +5598,8 @@ namespace Game
             var time = Time.GetMSTime();
             // Load playercreate
             {
-                //                                         0     1      2    3     4           5           6           7
-                SQLResult result = DB.World.Query("SELECT race, class, map, zone, position_x, position_y, position_z, orientation FROM playercreateinfo");
+                //                                         0     1      2    3           4           5           6            7        8               9               10              11               12
+                SQLResult result = DB.World.Query("SELECT race, class, map, position_x, position_y, position_z, orientation, npe_map, npe_position_x, npe_position_y, npe_position_z, npe_orientation, npe_transport_guid FROM playercreateinfo");
 
                 if (result.IsEmpty())
                 {
@@ -5613,11 +5613,10 @@ namespace Game
                     uint currentrace = result.Read<uint>(0);
                     uint currentclass = result.Read<uint>(1);
                     uint mapId = result.Read<uint>(2);
-                    uint zoneId = result.Read<uint>(3);
-                    float positionX = result.Read<float>(4);
-                    float positionY = result.Read<float>(5);
-                    float positionZ = result.Read<float>(6);
-                    float orientation = result.Read<float>(7);
+                    float positionX = result.Read<float>(3);
+                    float positionY = result.Read<float>(4);
+                    float positionZ = result.Read<float>(5);
+                    float orientation = result.Read<float>(6);
 
                     if (!CliDB.ChrRacesStorage.ContainsKey(currentrace))
                     {
@@ -5644,32 +5643,43 @@ namespace Game
                         continue;
                     }
 
-                    ChrModelRecord maleModel = Global.DB2Mgr.GetChrModel((Race)currentrace, Gender.Male);
-                    if (maleModel == null)
+                    if (Global.DB2Mgr.GetChrModel((Race)currentrace, Gender.Male) == null)
                     {
                         Log.outError(LogFilter.Sql, $"Missing male model for race {currentrace}, ignoring.");
                         continue;
                     }
 
-                    ChrModelRecord femaleModel = Global.DB2Mgr.GetChrModel((Race)currentrace, Gender.Female);
-                    if (femaleModel == null)
+                    if (Global.DB2Mgr.GetChrModel((Race)currentrace, Gender.Female) == null)
                     {
                         Log.outError(LogFilter.Sql, $"Missing female model for race {currentrace}, ignoring.");
                         continue;
                     }
 
-                    PlayerInfo pInfo = new();
-                    pInfo.MapId = mapId;
-                    pInfo.ZoneId = zoneId;
-                    pInfo.PositionX = positionX;
-                    pInfo.PositionY = positionY;
-                    pInfo.PositionZ = positionZ;
-                    pInfo.Orientation = orientation;
+                    PlayerInfo info = new();
+                    info.createPosition.Loc = new WorldLocation(mapId, positionX, positionY, positionZ, orientation);
 
-                    pInfo.DisplayId_m = maleModel.DisplayID;
-                    pInfo.DisplayId_f = femaleModel.DisplayID;
+                    if (!result.IsNull(7))
+                {
+                        info.createPositionNPE.HasValue = true;
 
-                    _playerInfo[currentrace][currentclass] = pInfo;
+                        info.createPositionNPE.Value.Loc = new WorldLocation(result.Read<uint>(7), result.Read<float>(8), result.Read<float>(9), result.Read<float>(10), result.Read<float>(11));
+                        if (!result.IsNull(12))
+                            info.createPositionNPE.Value.TransportGuid = result.Read<ulong>(12);
+
+                        if (!CliDB.MapStorage.ContainsKey(info.createPositionNPE.Value.Loc.GetMapId()))
+                        {
+                            Log.outError(LogFilter.Sql, $"Invalid NPE map id {info.createPositionNPE.Value.Loc.GetMapId()} for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
+                            info.createPositionNPE.HasValue = false;
+                        }
+
+                        if (info.createPositionNPE.HasValue && info.createPositionNPE.Value.TransportGuid.HasValue && Global.TransportMgr.GetTransportSpawn(info.createPositionNPE.Value.TransportGuid.Value) == null)
+                        {
+                            Log.outError(LogFilter.Sql, $"Invalid NPE transport spawn id {info.createPositionNPE.Value.TransportGuid.Value} for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
+                            info.createPositionNPE.HasValue = false; // remove entire NPE data - assume user put transport offsets into npe_position fields
+                        }
+                    }
+
+                    _playerInfo[currentrace][currentclass] = info;
 
                     ++count;
                 } while (result.NextRow());
@@ -6074,10 +6084,6 @@ namespace Game
                         if (pInfo == null)
                             continue;
 
-                        // skip non loaded combinations
-                        if (pInfo.DisplayId_m == 0 || pInfo.DisplayId_f == 0)
-                            continue;
-
                         // skip expansion races if not playing with expansion
                         if (WorldConfig.GetIntValue(WorldCfg.Expansion) < (int)Expansion.BurningCrusade && (race == (int)Race.BloodElf || race == (int)Race.Draenei))
                             continue;
@@ -6221,7 +6227,7 @@ namespace Game
                 return null;
 
             PlayerInfo pInfo = _playerInfo[(int)race][(int)_class];
-            if (pInfo.DisplayId_m == 0 || pInfo.DisplayId_f == 0)
+            if (pInfo == null)
                 return null;
 
             if (level <= WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel))

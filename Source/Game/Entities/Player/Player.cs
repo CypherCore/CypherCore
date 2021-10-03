@@ -176,8 +176,6 @@ namespace Game.Entities
                 return false;
             }
 
-            Relocate(info.PositionX, info.PositionY, info.PositionZ, info.Orientation);
-
             var cEntry = CliDB.ChrClassesStorage.LookupByKey(createInfo.ClassId);
             if (cEntry == null)
             {
@@ -193,8 +191,28 @@ namespace Game.Entities
                 return false;
             }
 
-            SetMap(Global.MapMgr.CreateMap(info.MapId, this));
+            var position = createInfo.UseNPE && info.createPositionNPE.HasValue ? info.createPositionNPE.Value : info.createPosition;
+
             m_createTime = GameTime.GetGameTime();
+            m_createMode = createInfo.UseNPE && info.createPositionNPE.HasValue ? PlayerCreateMode.NPE : PlayerCreateMode.Normal;
+
+            Relocate(position.Loc);
+
+            SetMap(Global.MapMgr.CreateMap(position.Loc.GetMapId(), this));
+
+            if (position.TransportGuid.HasValue)
+            {
+                Transport transport = Global.ObjAccessor.FindTransport(ObjectGuid.Create(HighGuid.Transport, position.TransportGuid.Value));
+                if (transport != null)
+                {
+                    transport.AddPassenger(this);
+                    m_movementInfo.transport.pos.Relocate(position.Loc);
+                    position.Loc.GetPosition(out float x, out float y, out float z, out float o);
+                    transport.CalculatePassengerPosition(ref x, ref y, ref z, ref o);
+                    Relocate(x, y, z, o);
+                }
+            }
+
             UpdatePositionData();
 
             // set initial homebind position
@@ -5332,28 +5350,15 @@ namespace Game.Entities
 
         public void InitDisplayIds()
         {
-            PlayerInfo info = Global.ObjectMgr.GetPlayerInfo(GetRace(), GetClass());
-            if (info == null)
+            ChrModelRecord model = Global.DB2Mgr.GetChrModel(GetRace(), GetNativeSex());
+            if (model == null)
             {
-                Log.outError(LogFilter.Player, "Player {0} has incorrect race/class pair. Can't init display ids.", GetGUID().ToString());
+                Log.outError(LogFilter.Player, $"Player {GetGUID()} has incorrect race/gender pair. Can't init display ids.");
                 return;
             }
 
-            switch (GetNativeSex())
-            {
-                case Gender.Female:
-                    SetDisplayId(info.DisplayId_f);
-                    SetNativeDisplayId(info.DisplayId_f);
-                    break;
-                case Gender.Male:
-                    SetDisplayId(info.DisplayId_m);
-                    SetNativeDisplayId(info.DisplayId_m);
-                    break;
-                default:
-                    Log.outError(LogFilter.Player, "Player {0} ({1}) has invalid gender {2}", GetName(), GetGUID().ToString(), GetNativeSex());
-                    return;
-            }
-
+            SetDisplayId(model.DisplayID);
+            SetNativeDisplayId(model.DisplayID);
             SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.StateAnimID), Global.DB2Mgr.GetEmptyAnimStateID());
         }
 

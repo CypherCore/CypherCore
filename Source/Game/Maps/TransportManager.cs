@@ -526,7 +526,7 @@ namespace Game.Maps
             return _transportAnimations.LookupByKey(entry);
         }
 
-        TransportSpawn GetTransportSpawn(ulong spawnId)
+        public TransportSpawn GetTransportSpawn(ulong spawnId)
         {
             return _transportSpawns.LookupByKey(spawnId);
         }
@@ -649,7 +649,7 @@ namespace Game.Maps
         public uint TotalTime;
     }
 
-    public struct TransportSpawn
+    public class TransportSpawn
     {
         public ulong SpawnId;
         public uint TransportGameObjectId; // entry in respective _template table

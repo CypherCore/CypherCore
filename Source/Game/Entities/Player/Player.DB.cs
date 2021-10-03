@@ -613,8 +613,17 @@ namespace Game.Entities
 
             if (!ok && HasAtLoginFlag(AtLoginFlags.FirstLogin))
             {
-                homebind = new WorldLocation(info.MapId, info.PositionX, info.PositionY, info.PositionZ, info.Orientation);
-                homebindAreaId = info.ZoneId;
+                var createPosition = m_createMode == PlayerCreateMode.NPE && info.createPositionNPE.HasValue ? info.createPositionNPE.Value : info.createPosition;
+
+                homebind = new WorldLocation(createPosition.Loc.GetMapId(), createPosition.Loc);
+                if (createPosition.TransportGuid.HasValue)
+                {
+                    Transport transport = Global.ObjAccessor.FindTransport(ObjectGuid.Create(HighGuid.Transport, createPosition.TransportGuid.Value));
+                    if (transport != null)
+                        transport.CalculatePassengerPosition(ref homebind.posX, ref homebind.posY, ref homebind.posZ, ref homebind.Orientation);
+                }
+
+                homebindAreaId = Global.MapMgr.GetAreaId(PhasingHandler.EmptyPhaseShift, homebind);
 
                 saveHomebindToDb();
                 ok = true;
