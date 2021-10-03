@@ -5755,7 +5755,7 @@ namespace Game.Spells
                 playerTarget.RemoveStoredAuraTeleportLocation(GetSpellInfo().Id);
         }
 
-        [AuraEffectHandler(AuraType.StoreTeleportReturnPoint)]
+        [AuraEffectHandler(AuraType.CosmeticMounted)]
         void HandleCosmeticMounted(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
             if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
