@@ -2373,12 +2373,6 @@ namespace Game.Chat
                 return true;
             }
 
-            if (location_str == "startzone")
-            {
-                player.TeleportTo(player.GetStartPosition());
-                return true;
-            }
-
             //Not a supported argument
             return false;
         }

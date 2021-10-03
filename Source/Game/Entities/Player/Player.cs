@@ -1857,14 +1857,6 @@ namespace Game.Entities
             ScheduleDelayedOperation(PlayerDelayedOperations.BGGroupRestore);
             return TeleportTo(m_bgData.joinPos);
         }
-        public WorldLocation GetStartPosition()
-        {
-            PlayerInfo info = Global.ObjectMgr.GetPlayerInfo(GetRace(), GetClass());
-            uint mapId = info.MapId;
-            if (GetClass() == Class.Deathknight && HasSpell(50977))
-                mapId = 0;
-            return new WorldLocation(mapId, info.PositionX, info.PositionY, info.PositionZ, 0);
-        }
 
         public uint GetStartLevel(Race race, Class playerClass, Optional<uint> characterTemplateId = default)
         {
