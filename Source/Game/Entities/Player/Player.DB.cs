@@ -3613,7 +3613,7 @@ namespace Game.Entities
                 stmt.AddValue(index++, GetHonorLevel());
                 stmt.AddValue(index++, m_activePlayerData.RestInfo[(int)RestTypes.Honor].StateID);
                 stmt.AddValue(index++, finiteAlways(_restMgr.GetRestBonus(RestTypes.Honor)));
-                stmt.AddValue(index++, Global.WorldMgr.GetRealm().Build);
+                stmt.AddValue(index++, Global.RealmMgr.GetMinorMajorBugfixVersionForBuild(Global.WorldMgr.GetRealm().Build));
 
                 // Index
                 stmt.AddValue(index, GetGUID().GetCounter());
