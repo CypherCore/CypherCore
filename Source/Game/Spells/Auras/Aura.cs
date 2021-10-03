@@ -1246,7 +1246,7 @@ namespace Game.Spells
                             if (spell < 0)
                                 target.RemoveAurasDueToSpell((uint)-spell);
                             else if (removeMode != AuraRemoveMode.Death)
-                                target.CastSpell(target, (uint)spell, new CastSpellExtraArgs(GetCasterGUID()));
+                                target.CastSpell(target, (uint)spell, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(GetCasterGUID()));
                         }
                     }
                     spellTriggered = Global.SpellMgr.GetSpellLinked((int)GetId() + (int)SpellLinkedType.Aura);

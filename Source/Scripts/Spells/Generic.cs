@@ -1673,7 +1673,7 @@ namespace Scripts.Spells.Generic
                 return;
 
             // final heal
-            GetTarget().CastSpell(GetTarget(), _spellId, new CastSpellExtraArgs(aurEff, GetCasterGUID()));
+            GetTarget().CastSpell(GetTarget(), _spellId, new CastSpellExtraArgs(aurEff).SetOriginalCaster(GetCasterGUID()));
         }
 
         public override void Register()
@@ -2861,7 +2861,7 @@ namespace Scripts.Spells.Generic
 
             // on stack 15 cast the achievement crediting spell
             if (GetStackAmount() >= 15)
-                target.CastSpell(target, SpellIds.TurkeyVengeance, new CastSpellExtraArgs(aurEff, GetCasterGUID()));
+                target.CastSpell(target, SpellIds.TurkeyVengeance, new CastSpellExtraArgs(aurEff).SetOriginalCaster(GetCasterGUID()));
         }
 
         void OnPeriodic(AuraEffect aurEff)

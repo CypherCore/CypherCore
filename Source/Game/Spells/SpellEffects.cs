@@ -359,7 +359,8 @@ namespace Game.Spells
                 }
             }
 
-            CastSpellExtraArgs args = new(m_originalCasterGUID);
+            CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+            args.SetOriginalCaster(m_originalCasterGUID);
             // set basepoints for trigger with value effect
             if (effectInfo.Effect == SpellEffectName.TriggerSpellWithValue)
                 for (int i = 0; i < SpellConst.MaxEffects; ++i)
@@ -413,7 +414,8 @@ namespace Game.Spells
                 }
             }
 
-            CastSpellExtraArgs args = new(m_originalCasterGUID);
+            CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+            args.SetOriginalCaster(m_originalCasterGUID);
             // set basepoints for trigger with value effect
             if (effectInfo.Effect == SpellEffectName.TriggerMissileSpellWithValue)
                 for (int i = 0; i < SpellConst.MaxEffects; ++i)
@@ -455,7 +457,8 @@ namespace Game.Spells
                     case 52463: // Hide In Mine Car
                     case 52349: // Overtake
                     {
-                        CastSpellExtraArgs args1 = new(m_originalCasterGUID);
+                        CastSpellExtraArgs args1 = new(TriggerCastFlags.FullMask);
+                        args1.SetOriginalCaster(m_originalCasterGUID);
                         args1.AddSpellMod(SpellValueMod.BasePoint0, damage);
                         unitTarget.CastSpell(unitTarget, spellInfo.Id, args1);
                         return;
@@ -466,7 +469,7 @@ namespace Game.Spells
             switch (spellInfo.Id)
             {
                 case 72298: // Malleable Goo Summon
-                    unitTarget.CastSpell(unitTarget, spellInfo.Id, new CastSpellExtraArgs(m_originalCasterGUID));
+                    unitTarget.CastSpell(unitTarget, spellInfo.Id, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(m_originalCasterGUID));
                     return;
             }
 
@@ -3090,7 +3093,7 @@ namespace Game.Spells
                             Aura chargesAura = m_caster.ToCreature().GetAura(59907);
                             if (chargesAura != null)
                             {
-                                m_caster.CastSpell(unitTarget, spell_heal, new CastSpellExtraArgs(m_caster.ToCreature().ToTempSummon().GetSummonerGUID()));
+                                m_caster.CastSpell(unitTarget, spell_heal, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(m_caster.ToCreature().ToTempSummon().GetSummonerGUID()));
                                 if (chargesAura.ModCharges(-1))
                                     m_caster.ToCreature().ToTempSummon().UnSummon();
                             }
@@ -3919,7 +3922,7 @@ namespace Game.Spells
                     unitCaster.Attack(unitTarget, true);
 
                 if (effectInfo.TriggerSpell != 0)
-                    m_caster.CastSpell(unitTarget, effectInfo.TriggerSpell, new CastSpellExtraArgs(m_originalCasterGUID));
+                    m_caster.CastSpell(unitTarget, effectInfo.TriggerSpell, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(m_originalCasterGUID));
             }
         }
 
@@ -3947,7 +3950,7 @@ namespace Game.Spells
             else if (effectHandleMode == SpellEffectHandleMode.Hit)
             {
                 if (effectInfo.TriggerSpell != 0)
-                    m_caster.CastSpell(destTarget, effectInfo.TriggerSpell, new CastSpellExtraArgs(m_originalCasterGUID));
+                    m_caster.CastSpell(destTarget, effectInfo.TriggerSpell, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(m_originalCasterGUID));
             }
         }
 

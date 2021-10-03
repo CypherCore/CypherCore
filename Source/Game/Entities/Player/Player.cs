@@ -2480,7 +2480,7 @@ namespace Game.Entities
                     break;
                 case GossipOption.Spirithealer:
                     if (IsDead())
-                        source.ToCreature().CastSpell(source.ToCreature(), 17251, new CastSpellExtraArgs(GetGUID()));
+                        source.ToCreature().CastSpell(source.ToCreature(), 17251, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(GetGUID()));
                     break;
                 case GossipOption.Questgiver:
                     PrepareQuestMenu(guid);
@@ -3552,7 +3552,7 @@ namespace Game.Entities
             SetPower(PowerType.LunarPower, 0);
 
             if (resurrectAura != 0)
-                CastSpell(this, resurrectAura, new CastSpellExtraArgs(resurrectGUID));
+                CastSpell(this, resurrectAura, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(resurrectGUID));
 
             SpawnCorpseBones();
         }

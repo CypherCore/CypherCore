@@ -2139,7 +2139,7 @@ namespace Game.Spells
                     if (id < 0)
                         unit.RemoveAurasDueToSpell((uint)-id);
                     else
-                        unit.CastSpell(unit, (uint)id, new CastSpellExtraArgs(m_caster.GetGUID()));
+                        unit.CastSpell(unit, (uint)id, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(m_caster.GetGUID()));
                 }
             }
         }
@@ -5027,7 +5027,7 @@ namespace Game.Spells
                                 {
                                     Pet pet = unitCaster.ToPlayer().GetPet();
                                     if (pet != null)
-                                        pet.CastSpell(pet, 32752, new CastSpellExtraArgs(pet.GetGUID()));
+                                        pet.CastSpell(pet, 32752, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(pet.GetGUID()));
                                 }
                             }
                             else if (!m_spellInfo.HasAttribute(SpellAttr1.DismissPet))
@@ -8504,19 +8504,6 @@ namespace Game.Spells
         {
             TriggerFlags = TriggerCastFlags.FullMask;
             TriggeringAura = eff;
-        }
-
-        public CastSpellExtraArgs(ObjectGuid origCaster)
-        {
-            TriggerFlags = TriggerCastFlags.FullMask;
-            OriginalCaster = origCaster;
-        }
-
-        public CastSpellExtraArgs(AuraEffect eff, ObjectGuid origCaster)
-        {
-            TriggerFlags = TriggerCastFlags.FullMask;
-            TriggeringAura = eff;
-            OriginalCaster = origCaster;
         }
 
         public CastSpellExtraArgs(Difficulty castDifficulty)

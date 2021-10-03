@@ -219,7 +219,7 @@ namespace Scripts.Spells.Shaman
         {
             PreventDefaultAction();
 
-            GetTarget().CastSpell(GetTarget(), SpellIds.EarthShieldHeal, new CastSpellExtraArgs(aurEff, GetCasterGUID()));
+            GetTarget().CastSpell(GetTarget(), SpellIds.EarthShieldHeal, new CastSpellExtraArgs(aurEff).SetOriginalCaster(GetCasterGUID()));
         }
 
         public override void Register()

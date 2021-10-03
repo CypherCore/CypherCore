@@ -727,7 +727,8 @@ namespace Game.Entities
                             else if (target)
                             {
                                 // Some traps do not have a spell but should be triggered
-                                CastSpellExtraArgs args = new(GetOwnerGUID());
+                                CastSpellExtraArgs args = new();
+                                args.SetOriginalCaster(GetOwnerGUID());
                                 if (goInfo.Trap.spell != 0)
                                     CastSpell(target, goInfo.Trap.spell, args);
 

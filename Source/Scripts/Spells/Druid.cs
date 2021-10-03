@@ -732,7 +732,7 @@ namespace Scripts.Spells.Druid
                 }
             }
 
-            target.CastSpell(target, SpellIds.LifebloomFinalHeal, new CastSpellExtraArgs(aurEff, GetCasterGUID()));
+            target.CastSpell(target, SpellIds.LifebloomFinalHeal, new CastSpellExtraArgs(aurEff).SetOriginalCaster(GetCasterGUID()));
         }
 
         void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
@@ -955,7 +955,7 @@ namespace Scripts.Spells.Druid
         void AfterApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
             Unit target = GetTarget();
-            target.CastSpell(target, SpellIds.SavageRoar, new CastSpellExtraArgs(aurEff, GetCasterGUID()));
+            target.CastSpell(target, SpellIds.SavageRoar, new CastSpellExtraArgs(aurEff).SetOriginalCaster(GetCasterGUID()));
         }
 
         void AfterRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
