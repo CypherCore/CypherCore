@@ -36,13 +36,14 @@ namespace Game.Spells
 {
     public partial class Spell : IDisposable
     {
-        public Spell(WorldObject caster, SpellInfo info, TriggerCastFlags triggerFlags, ObjectGuid originalCasterGUID = default)
+        public Spell(WorldObject caster, SpellInfo info, TriggerCastFlags triggerFlags, ObjectGuid originalCasterGUID = default, ObjectGuid originalCastId = default)
         {
             m_spellInfo = info;
             m_caster = (info.HasAttribute(SpellAttr6.CastByCharmer) && caster.GetCharmerOrOwner() != null ? caster.GetCharmerOrOwner() : caster);
             m_spellValue = new SpellValue(m_spellInfo, caster);
             m_castItemLevel = -1;
             m_castId = ObjectGuid.Create(HighGuid.Cast, SpellCastSource.Normal, m_caster.GetMapId(), m_spellInfo.Id, m_caster.GetMap().GenerateLowGuid(HighGuid.Cast));
+            m_originalCastId = originalCastId;
             m_SpellVisual.SpellXSpellVisualID = caster.GetCastSpellXSpellVisualId(m_spellInfo);
 
             m_customError = SpellCustomErrors.None;
@@ -2106,7 +2107,9 @@ namespace Game.Spells
                 {
                     if (CanExecuteTriggersOnHit(effMask, hit.triggeredByAura) && RandomHelper.randChance(hit.chance))
                     {
-                        m_caster.CastSpell(unit, hit.triggeredSpell.Id, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetCastDifficulty(hit.triggeredSpell.Difficulty));
+                        m_caster.CastSpell(unit, hit.triggeredSpell.Id, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
+                            .SetOriginalCastId(m_castId)
+                            .SetCastDifficulty(hit.triggeredSpell.Difficulty));
                         Log.outDebug(LogFilter.Spells, "Spell {0} triggered spell {1} by SPELL_AURA_ADD_TARGET_TRIGGER aura", m_spellInfo.Id, hit.triggeredSpell.Id);
 
                         // SPELL_AURA_ADD_TARGET_TRIGGER auras shouldn't trigger auras without duration
@@ -2139,7 +2142,7 @@ namespace Game.Spells
                     if (id < 0)
                         unit.RemoveAurasDueToSpell((uint)-id);
                     else
-                        unit.CastSpell(unit, (uint)id, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(m_caster.GetGUID()));
+                        unit.CastSpell(unit, (uint)id, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(m_caster.GetGUID()).SetOriginalCastId(m_castId));
                 }
             }
         }
@@ -2727,7 +2730,7 @@ namespace Game.Spells
                             unitCaster.RemoveAurasDueToSpell((uint)-spellId);
                     }
                     else
-                        m_caster.CastSpell(m_targets.GetUnitTarget() ?? m_caster, (uint)spellId, new CastSpellExtraArgs(true));
+                        m_caster.CastSpell(m_targets.GetUnitTarget() ?? m_caster, (uint)spellId, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
                 }
             }
 
@@ -5027,7 +5030,11 @@ namespace Game.Spells
                                 {
                                     Pet pet = unitCaster.ToPlayer().GetPet();
                                     if (pet != null)
-                                        pet.CastSpell(pet, 32752, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(pet.GetGUID()));
+                                    {
+                                        pet.CastSpell(pet, 32752, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
+                                            .SetOriginalCaster(pet.GetGUID())
+                                            .SetOriginalCastId(m_castId));
+                                    }
                                 }
                             }
                             else if (!m_spellInfo.HasAttribute(SpellAttr1.DismissPet))
@@ -6058,7 +6065,7 @@ namespace Game.Spells
                                         return SpellCastResult.DontReport;
                                     }
                                     else if (m_spellInfo.GetEffects().Count > 1)
-                                        player.CastSpell(m_caster, (uint)m_spellInfo.GetEffect(1).CalcValue(), new CastSpellExtraArgs(false));        // move this to anywhere
+                                        player.CastSpell(m_caster, (uint)m_spellInfo.GetEffect(1).CalcValue(), new CastSpellExtraArgs().SetOriginalCastId(m_castId));        // move this to anywhere
                                     return SpellCastResult.DontReport;
                                 }
                             }
@@ -7389,7 +7396,7 @@ namespace Game.Spells
         public bool m_fromClient;
         public SpellCastFlagsEx m_castFlagsEx;
         public SpellMisc m_misc;
-        public Networking.Packets.SpellCastVisual m_SpellVisual;
+        public SpellCastVisual m_SpellVisual;
         public SpellCastTargets m_targets;
         public sbyte m_comboPointGain;
         public SpellCustomErrors m_customError;
@@ -7947,7 +7954,7 @@ namespace Game.Spells
 
             // Check for SPELL_ATTR7_INTERRUPT_ONLY_NONPLAYER
             if (MissCondition == SpellMissInfo.None && spell.m_spellInfo.HasAttribute(SpellAttr7.InterruptOnlyNonplayer) && !unit.IsPlayer())
-                caster.CastSpell(unit, 32747, true);
+                caster.CastSpell(unit, 32747, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(spell.m_castId));
 
             if (_spellHitTarget)
             {
@@ -8481,9 +8488,11 @@ namespace Game.Spells
         public AuraEffect TriggeringAura;
         public ObjectGuid OriginalCaster = ObjectGuid.Empty;
         public Difficulty CastDifficulty;
+        public ObjectGuid OriginalCastId = ObjectGuid.Empty;
         public Dictionary<SpellValueMod, int> SpellValueOverrides = new();
 
         public CastSpellExtraArgs() { }
+
         public CastSpellExtraArgs(bool triggered)
         {
             TriggerFlags = triggered ? TriggerCastFlags.FullMask : TriggerCastFlags.None;
@@ -8503,7 +8512,7 @@ namespace Game.Spells
         public CastSpellExtraArgs(AuraEffect eff)
         {
             TriggerFlags = TriggerCastFlags.FullMask;
-            TriggeringAura = eff;
+            SetTriggeringAura(eff);
         }
 
         public CastSpellExtraArgs(Difficulty castDifficulty)
@@ -8521,26 +8530,40 @@ namespace Game.Spells
             TriggerFlags = flag;
             return this;
         }
+
         public CastSpellExtraArgs SetCastItem(Item item)
         {
             CastItem = item;
             return this;
         }
+
         public CastSpellExtraArgs SetTriggeringAura(AuraEffect triggeringAura)
         {
             TriggeringAura = triggeringAura;
+            if (triggeringAura != null)
+                OriginalCastId = triggeringAura.GetBase().GetCastId();
+
             return this;
         }
+
         public CastSpellExtraArgs SetOriginalCaster(ObjectGuid guid)
         {
             OriginalCaster = guid;
             return this;
         }
+
         public CastSpellExtraArgs SetCastDifficulty(Difficulty castDifficulty)
         {
             CastDifficulty = castDifficulty;
             return this;
         }
+
+        public CastSpellExtraArgs SetOriginalCastId(ObjectGuid castId)
+        {
+            OriginalCastId = castId;
+            return this;
+        }
+
         public CastSpellExtraArgs AddSpellMod(SpellValueMod mod, int val)
         {
             SpellValueOverrides.Add(mod, val);

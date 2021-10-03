@@ -642,7 +642,8 @@ namespace Game.Entities
                         switch (action.ActionType)
                         {
                             case AreaTriggerActionTypes.Cast:
-                                caster.CastSpell(unit, action.Param, true);
+                                caster.CastSpell(unit, action.Param, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
+                                    .SetOriginalCastId(m_areaTriggerData.CreatingEffectGUID._value.IsCast() ? m_areaTriggerData.CreatingEffectGUID : ObjectGuid.Empty));
                                 break;
                             case AreaTriggerActionTypes.AddAura:
                                 caster.AddAura(action.Param, unit);

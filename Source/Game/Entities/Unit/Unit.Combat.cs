@@ -570,9 +570,7 @@ namespace Game.Entities
                 }
                 else
                 {
-                    CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-                    args.TriggeringAura = meleeAttackAuraEffect;
-                    CastSpell(victim, meleeAttackSpellId, args);
+                    CastSpell(victim, meleeAttackSpellId, new CastSpellExtraArgs(meleeAttackAuraEffect));
 
                     HitInfo hitInfo = HitInfo.AffectsVictim | HitInfo.NoAnimation;
                     if (attType == WeaponAttackType.OffAttack)

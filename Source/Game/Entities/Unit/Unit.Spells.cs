@@ -2920,7 +2920,7 @@ namespace Game.Entities
                             if (aura.IsSingleTarget())
                                 aura.UnregisterSingleTarget();
 
-                            AuraCreateInfo createInfo = new(aura.GetCastGUID(), aura.GetSpellInfo(), aura.GetCastDifficulty(), effMask, stealer);
+                            AuraCreateInfo createInfo = new(aura.GetCastId(), aura.GetSpellInfo(), aura.GetCastDifficulty(), effMask, stealer);
                             createInfo.SetCasterGUID(aura.GetCasterGUID());
                             createInfo.SetBaseAmount(baseDamage);
 
@@ -3903,7 +3903,7 @@ namespace Game.Entities
                 {
                     Unit caster = aura.GetCaster();
                     if (caster && caster.IsTypeId(TypeId.Player))
-                        Spell.SendCastResult(caster.ToPlayer(), aura.GetSpellInfo(), aura.GetSpellVisual(), aura.GetCastGUID(), SpellCastResult.AuraBounced);
+                        Spell.SendCastResult(caster.ToPlayer(), aura.GetSpellInfo(), aura.GetSpellVisual(), aura.GetCastId(), SpellCastResult.AuraBounced);
                 }
 
                 aura.Remove();

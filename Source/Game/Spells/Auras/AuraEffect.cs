@@ -2117,7 +2117,7 @@ namespace Game.Spells
                 {
                     var mountCapability = CliDB.MountCapabilityStorage.LookupByKey(GetAmount());
                     if (mountCapability != null)
-                        target.CastSpell(target, mountCapability.ModSpellAuraID, new CastSpellExtraArgs(true));
+                        target.CastSpell(target, mountCapability.ModSpellAuraID, new CastSpellExtraArgs(this));
                 }
             }
             else
@@ -4270,14 +4270,14 @@ namespace Game.Spells
                                     break;
                                 case 91604: // Restricted Flight Area
                                     if (aurApp.GetRemoveMode() == AuraRemoveMode.Expire)
-                                        target.CastSpell(target, 58601, new CastSpellExtraArgs(true));
+                                        target.CastSpell(target, 58601, new CastSpellExtraArgs(this));
                                     break;
                             }
                             break;
                         case SpellFamilyNames.Deathknight:
                             // Summon Gargoyle (Dismiss Gargoyle at remove)
                             if (GetId() == 61777)
-                                target.CastSpell(target, (uint)GetAmount(), new CastSpellExtraArgs(true));
+                                target.CastSpell(target, (uint)GetAmount(), new CastSpellExtraArgs(this));
                             break;
                         default:
                             break;
@@ -4309,7 +4309,8 @@ namespace Game.Spells
                                 CastSpellExtraArgs args = new();
                                 args.TriggerFlags = TriggerCastFlags.FullMask;
                                 args.OriginalCaster = GetCasterGUID();
-                                args.CastDifficulty = spell.Difficulty;
+                                args.OriginalCastId = GetBase().GetCastId();
+                                args.CastDifficulty = GetBase().GetCastDifficulty();
 
                                 for (uint i = 0; i < spell.StackAmount; ++i)
                                     caster.CastSpell(target, spell.Id, args);
@@ -4327,7 +4328,8 @@ namespace Game.Spells
                                 SpellInfo spell = Global.SpellMgr.GetSpellInfo(spellId, GetBase().GetCastDifficulty());
                                 CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
                                 args.OriginalCaster = GetCasterGUID();
-                                args.CastDifficulty = spell.Difficulty;
+                                args.OriginalCastId = GetBase().GetCastId();
+                                args.CastDifficulty = GetBase().GetCastDifficulty();
 
                                 for (uint i = 0; i < spell.StackAmount; ++i)
                                     caster.CastSpell(target, spell.Id, args);
@@ -4383,7 +4385,7 @@ namespace Game.Spells
                                     target.PlayDirectSound(14970, target.ToPlayer());
                                 // continue in 58205
                                 else
-                                    target.CastSpell(target, 58205, new CastSpellExtraArgs(true));
+                                    target.CastSpell(target, 58205, new CastSpellExtraArgs(this));
                             }
                             break;
                         // LK Intro VO (2)
@@ -4645,7 +4647,7 @@ namespace Game.Spells
                     break;
             }
 
-            target.CastSpell(target, triggerSpell, new CastSpellExtraArgs(true));
+            target.CastSpell(target, triggerSpell, new CastSpellExtraArgs(this));
         }
 
         [AuraEffectHandler(AuraType.TriggerSpellOnPowerAmount)]
@@ -4674,7 +4676,7 @@ namespace Game.Spells
                     break;
             }
 
-            target.CastSpell(target, triggerSpell, new CastSpellExtraArgs(true));
+            target.CastSpell(target, triggerSpell, new CastSpellExtraArgs(this));
         }
 
         [AuraEffectHandler(AuraType.OpenStable)]
@@ -5066,7 +5068,7 @@ namespace Game.Spells
             uint resist = damageInfo.GetResist();
 
             // SendSpellNonMeleeDamageLog expects non-absorbed/non-resisted damage
-            SpellNonMeleeDamage log = new(caster, target, GetSpellInfo(), GetBase().GetSpellVisual(), GetSpellInfo().GetSchoolMask(), GetBase().GetCastGUID());
+            SpellNonMeleeDamage log = new(caster, target, GetSpellInfo(), GetBase().GetSpellVisual(), GetSpellInfo().GetSchoolMask(), GetBase().GetCastId());
             log.damage = damage;
             log.originalDamage = (uint)dmg;
             log.absorb = absorb;
@@ -5338,7 +5340,7 @@ namespace Game.Spells
 
             SpellInfo spellProto = GetSpellInfo();
             // maybe has to be sent different to client, but not by SMSG_PERIODICAURALOG
-            SpellNonMeleeDamage damageInfo = new(caster, target, spellProto, GetBase().GetSpellVisual(), spellProto.SchoolMask, GetBase().GetCastGUID());
+            SpellNonMeleeDamage damageInfo = new(caster, target, spellProto, GetBase().GetSpellVisual(), spellProto.SchoolMask, GetBase().GetCastId());
             // no SpellDamageBonus for burn mana
             caster.CalculateSpellDamageTaken(damageInfo, (int)(gain * dmgMultiplier), spellProto);
 
@@ -5438,7 +5440,7 @@ namespace Game.Spells
                 return;
             }
 
-            SpellNonMeleeDamage damageInfo = new(target, triggerTarget, GetSpellInfo(), GetBase().GetSpellVisual(), GetSpellInfo().SchoolMask, GetBase().GetCastGUID());
+            SpellNonMeleeDamage damageInfo = new(target, triggerTarget, GetSpellInfo(), GetBase().GetSpellVisual(), GetSpellInfo().SchoolMask, GetBase().GetCastId());
             int damage = (int)target.SpellDamageBonusDone(triggerTarget, GetSpellInfo(), (uint)GetAmount(), DamageEffectType.SpellDirect, GetSpellEffectInfo());
             damage = (int)triggerTarget.SpellDamageBonusTaken(target, GetSpellInfo(), (uint)damage, DamageEffectType.SpellDirect);
             target.CalculateSpellDamageTaken(damageInfo, damage, GetSpellInfo());
@@ -5615,8 +5617,7 @@ namespace Game.Spells
             // on apply cast summon spell
             if (apply)
             {
-                CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-                args.TriggeringAura = this;
+                CastSpellExtraArgs args = new(this);
                 args.CastDifficulty = triggerSpellInfo.Difficulty;
                 target.CastSpell(target, triggerSpellInfo.Id, args);
             }

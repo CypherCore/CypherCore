@@ -160,9 +160,9 @@ namespace Game.Entities
         public bool IsAnyTypeGameObject() { return IsGameObject() || IsMOTransport(); }
         public bool IsParty() { return GetHigh() == HighGuid.Party; }
         public bool IsGuild() { return GetHigh() == HighGuid.Guild; }
-        bool IsSceneObject() { return GetHigh() == HighGuid.SceneObject; }
-        bool IsConversation() { return GetHigh() == HighGuid.Conversation; }
-        bool IsCast() { return GetHigh() == HighGuid.Cast; }
+        public bool IsSceneObject() { return GetHigh() == HighGuid.SceneObject; }
+        public bool IsConversation() { return GetHigh() == HighGuid.Conversation; }
+        public bool IsCast() { return GetHigh() == HighGuid.Cast; }
 
         public TypeId GetTypeId() { return GetTypeId(GetHigh()); }
         bool HasEntry() { return HasEntry(GetHigh()); }

@@ -289,7 +289,7 @@ namespace Game.Spells
                         unitTarget.RemoveAurasByType(AuraType.ModStun);
 
                         // Cast Lesser Invisibility
-                        unitTarget.CastSpell(unitTarget, 7870, true);
+                        unitTarget.CastSpell(unitTarget, 7870, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
                         return;
                     }
                     // Brittle Armor - (need add max stack of 24575 Brittle Armor)
@@ -301,7 +301,7 @@ namespace Game.Spells
                             return;
 
                         for (uint j = 0; j < spell.StackAmount; ++j)
-                            m_caster.CastSpell(unitTarget, spell.Id, true);
+                            m_caster.CastSpell(unitTarget, spell.Id, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
                         return;
                     }
                     // Mercurial Shield - (need add max stack of 26464 Mercurial Shield)
@@ -313,7 +313,7 @@ namespace Game.Spells
                             return;
 
                         for (uint j = 0; j < spell.StackAmount; ++j)
-                            m_caster.CastSpell(unitTarget, spell.Id, true);
+                            m_caster.CastSpell(unitTarget, spell.Id, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
                         return;
                     }
                 }
@@ -361,6 +361,7 @@ namespace Game.Spells
 
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
             args.SetOriginalCaster(m_originalCasterGUID);
+            args.SetOriginalCastId(m_castId);
             // set basepoints for trigger with value effect
             if (effectInfo.Effect == SpellEffectName.TriggerSpellWithValue)
                 for (int i = 0; i < SpellConst.MaxEffects; ++i)
@@ -416,6 +417,7 @@ namespace Game.Spells
 
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
             args.SetOriginalCaster(m_originalCasterGUID);
+            args.SetOriginalCastId(m_castId);
             // set basepoints for trigger with value effect
             if (effectInfo.Effect == SpellEffectName.TriggerMissileSpellWithValue)
                 for (int i = 0; i < SpellConst.MaxEffects; ++i)
@@ -459,6 +461,7 @@ namespace Game.Spells
                     {
                         CastSpellExtraArgs args1 = new(TriggerCastFlags.FullMask);
                         args1.SetOriginalCaster(m_originalCasterGUID);
+                        args1.SetOriginalCastId(m_castId);
                         args1.AddSpellMod(SpellValueMod.BasePoint0, damage);
                         unitTarget.CastSpell(unitTarget, spellInfo.Id, args1);
                         return;
@@ -469,11 +472,14 @@ namespace Game.Spells
             switch (spellInfo.Id)
             {
                 case 72298: // Malleable Goo Summon
-                    unitTarget.CastSpell(unitTarget, spellInfo.Id, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(m_originalCasterGUID));
+                    unitTarget.CastSpell(unitTarget, spellInfo.Id, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
+                        .SetOriginalCaster(m_originalCasterGUID)
+                        .SetOriginalCastId(m_castId));
                     return;
             }
 
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+            args.SetOriginalCastId(m_castId);
             // set basepoints for trigger with value effect
             if (effectInfo.Effect == SpellEffectName.ForceCastWithValue)
                 for (int i = 0; i < SpellConst.MaxEffects; ++i)
@@ -498,7 +504,7 @@ namespace Game.Spells
 
             Finish();
 
-            m_caster.CastSpell((Unit)null, spellInfo.Id, new CastSpellExtraArgs(false));
+            m_caster.CastSpell((Unit)null, spellInfo.Id, new CastSpellExtraArgs().SetOriginalCastId(m_castId));
         }
 
         void CalculateJumpSpeeds(SpellEffectInfo effInfo, float dist, out float speedXY, out float speedZ)
@@ -611,9 +617,9 @@ namespace Game.Spells
                     if (r >= 70)                                  // 7/12 success
                     {
                         if (r < 100)                              // 4/12 evil twin
-                            m_caster.CastSpell(m_caster, 23445, true);
+                            m_caster.CastSpell(m_caster, 23445, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
                         else                                        // 1/12 fire
-                            m_caster.CastSpell(m_caster, 23449, true);
+                            m_caster.CastSpell(m_caster, 23449, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
                     }
                     return;
                 }
@@ -627,36 +633,44 @@ namespace Game.Spells
                         {
                             case 1:
                                 // soul split - evil
-                                m_caster.CastSpell(m_caster, 36900, true);
+                                m_caster.CastSpell(m_caster, 36900, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
+                            .SetOriginalCastId(m_castId));
                                 break;
                             case 2:
                                 // soul split - good
-                                m_caster.CastSpell(m_caster, 36901, true);
+                                m_caster.CastSpell(m_caster, 36901, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
+                            .SetOriginalCastId(m_castId));
                                 break;
                             case 3:
                                 // Increase the size
-                                m_caster.CastSpell(m_caster, 36895, true);
+                                m_caster.CastSpell(m_caster, 36895, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
+                            .SetOriginalCastId(m_castId));
                                 break;
                             case 4:
                                 // Decrease the size
-                                m_caster.CastSpell(m_caster, 36893, true);
+                                m_caster.CastSpell(m_caster, 36893, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
+                            .SetOriginalCastId(m_castId));
                                 break;
                             case 5:
                             // Transform
                             {
                                 if (m_caster.ToPlayer().GetTeam() == Team.Alliance)
-                                    m_caster.CastSpell(m_caster, 36897, true);
+                                    m_caster.CastSpell(m_caster, 36897, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
+                                .SetOriginalCastId(m_castId));
                                 else
-                                    m_caster.CastSpell(m_caster, 36899, true);
+                                    m_caster.CastSpell(m_caster, 36899, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
+                                .SetOriginalCastId(m_castId));
                                 break;
                             }
                             case 6:
                                 // chicken
-                                m_caster.CastSpell(m_caster, 36940, true);
+                                m_caster.CastSpell(m_caster, 36940, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
+                            .SetOriginalCastId(m_castId));
                                 break;
                             case 7:
                                 // evil twin
-                                m_caster.CastSpell(m_caster, 23445, true);
+                                m_caster.CastSpell(m_caster, 23445, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
+                            .SetOriginalCastId(m_castId));
                                 break;
                         }
                     }
@@ -672,23 +686,23 @@ namespace Game.Spells
                         {
                             case 1:
                                 // soul split - evil
-                                m_caster.CastSpell(m_caster, 36900, true);
+                                m_caster.CastSpell(m_caster, 36900, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
                                 break;
                             case 2:
                                 // soul split - good
-                                m_caster.CastSpell(m_caster, 36901, true);
+                                m_caster.CastSpell(m_caster, 36901, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
                                 break;
                             case 3:
                                 // Increase the size
-                                m_caster.CastSpell(m_caster, 36895, true);
+                                m_caster.CastSpell(m_caster, 36895, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
                                 break;
                             case 4:
                             // Transform
                             {
                                 if (m_caster.ToPlayer().GetTeam() == Team.Alliance)
-                                    m_caster.CastSpell(m_caster, 36897, true);
+                                    m_caster.CastSpell(m_caster, 36897, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
                                 else
-                                    m_caster.CastSpell(m_caster, 36899, true);
+                                    m_caster.CastSpell(m_caster, 36899, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
                                 break;
                             }
                         }
@@ -1761,6 +1775,7 @@ namespace Game.Spells
                     }
 
                     CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+                    args.SetOriginalCastId(m_castId);
 
                     // if we have small value, it indicates seat position
                     if (basePoints > 0 && basePoints < SharedConst.MaxVehicleSeats)
@@ -2744,7 +2759,7 @@ namespace Game.Spells
 
                             uint spell_id = RandomHelper.Rand32(20) != 0 ? 8854u : 8855u;
 
-                            m_caster.CastSpell(m_caster, spell_id, new CastSpellExtraArgs(true));
+                            m_caster.CastSpell(m_caster, spell_id, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
                             return;
                         }
                         // Brittle Armor - need remove one 24575 Brittle Armor aura
@@ -2778,7 +2793,7 @@ namespace Game.Spells
                                 return;
 
                             // Shadow Flame
-                            m_caster.CastSpell(unitTarget, 22682, new CastSpellExtraArgs(true));
+                            m_caster.CastSpell(unitTarget, 22682, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
                             return;
                         }
                         // Mirren's Drinking Hat
@@ -2850,7 +2865,7 @@ namespace Game.Spells
                                 if (m_caster.ToPlayer().GetItemByPos(bag, slot).GetCount() == 1) m_caster.ToPlayer().RemoveItem(bag, slot, true);
                                 else m_caster.ToPlayer().GetItemByPos(bag, slot).SetCount(m_caster.ToPlayer().GetItemByPos(bag, slot).GetCount() - 1);
                                 // Spell 42518 (Braufest - Gratisprobe des Braufest herstellen)
-                                m_caster.CastSpell(m_caster, 42518, new CastSpellExtraArgs(true));
+                                m_caster.CastSpell(m_caster, 42518, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
                                 return;
                             }
                             break;
@@ -2862,7 +2877,7 @@ namespace Game.Spells
                             //Workaround for Range ... should be global for every ScriptEffect
                             float radius = effectInfo.CalcRadius();
                             if (unitTarget != null && unitTarget.IsTypeId(TypeId.Player) && unitTarget.GetDistance(m_caster) >= radius && !unitTarget.HasAura(46394) && unitTarget != m_caster)
-                                unitTarget.CastSpell(unitTarget, 46394, new CastSpellExtraArgs(true));
+                                unitTarget.CastSpell(unitTarget, 46394, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
 
                             break;
                         }
@@ -2880,7 +2895,7 @@ namespace Game.Spells
                                 case 2: spellId = 46738; break;
                                 case 3: spellId = 46736; break;
                             }
-                            unitTarget.CastSpell(unitTarget, spellId, new CastSpellExtraArgs(true));
+                            unitTarget.CastSpell(unitTarget, spellId, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
                             break;
                         }
                         // 5, 000 Gold
@@ -2925,7 +2940,7 @@ namespace Game.Spells
                                 default: return;
                             }
 
-                            unitTarget.CastSpell(unitTarget, iTmpSpellId, new CastSpellExtraArgs(true));
+                            unitTarget.CastSpell(unitTarget, iTmpSpellId, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
                             Creature npc = unitTarget.ToCreature();
                             npc.LoadEquipment();
                             return;
@@ -2947,9 +2962,9 @@ namespace Game.Spells
                             if (unitTarget == null)
                                 return;
                             if (unitTarget.HasAura(51845))
-                                unitTarget.CastSpell(m_caster, 51856, new CastSpellExtraArgs(true));
+                                unitTarget.CastSpell(m_caster, 51856, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
                             else
-                                m_caster.CastSpell(unitTarget, 51855, new CastSpellExtraArgs(true));
+                                m_caster.CastSpell(unitTarget, 51855, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
                             break;
                         }
                         // Summon Ghouls On Scarlet Crusade
@@ -2963,7 +2978,7 @@ namespace Game.Spells
                             for (byte i = 0; i < 15; ++i)
                             {
                                 m_caster.GetRandomPoint(destTarget, radius, out x, out y, out z);
-                                m_caster.CastSpell(new Position(x, y, z), 54522, new CastSpellExtraArgs(true));
+                                m_caster.CastSpell(new Position(x, y, z), 54522, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
                             }
                             break;
                         }
@@ -2974,11 +2989,11 @@ namespace Game.Spells
                             return;
                         case 52479: // Gift of the Harvester
                             if (unitTarget != null && unitCaster != null)
-                                unitCaster.CastSpell(unitTarget, Convert.ToBoolean(RandomHelper.IRand(0, 1)) ? (uint)damage : 52505, new CastSpellExtraArgs(true));
+                                unitCaster.CastSpell(unitTarget, Convert.ToBoolean(RandomHelper.IRand(0, 1)) ? (uint)damage : 52505, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
                             return;
                         case 53110: // Devour Humanoid
                             if (unitTarget != null)
-                                unitTarget.CastSpell(m_caster, (uint)damage, new CastSpellExtraArgs(true));
+                                unitTarget.CastSpell(m_caster, (uint)damage, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
                             return;
                         case 57347: // Retrieving (Wintergrasp RP-GG pickup spell)
                         {
@@ -3009,7 +3024,7 @@ namespace Game.Spells
                             uint questID = (uint)m_spellInfo.GetEffect(1).CalcValue();
 
                             if (unitTarget.ToPlayer().GetQuestStatus(questID) == QuestStatus.Complete)
-                                unitTarget.CastSpell(unitTarget, spellID, new CastSpellExtraArgs(true));
+                                unitTarget.CastSpell(unitTarget, spellID, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
 
                             return;
                         }
@@ -3041,10 +3056,10 @@ namespace Game.Spells
 
                             // return from top
                             if (unitTarget.ToPlayer().GetAreaId() == 4637)
-                                unitTarget.CastSpell(unitTarget, 59316, new CastSpellExtraArgs(true));
+                                unitTarget.CastSpell(unitTarget, 59316, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
                             // teleport atop
                             else
-                                unitTarget.CastSpell(unitTarget, 59314, new CastSpellExtraArgs(true));
+                                unitTarget.CastSpell(unitTarget, 59314, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
 
                             return;
                         }
@@ -3062,8 +3077,8 @@ namespace Game.Spells
                                     if (parent != null)
                                     {
                                         // @todo a hack, range = 11, should after some time cast, otherwise too far
-                                        unitCaster.CastSpell(parent, 62496, new CastSpellExtraArgs(true));
-                                        unitTarget.CastSpell(parent, (uint)damage); // DIFFICULTY_NONE, so effect always valid
+                                        unitCaster.CastSpell(parent, 62496, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
+                                        unitTarget.CastSpell(parent, (uint)damage, new CastSpellExtraArgs().SetOriginalCastId(m_castId)); // DIFFICULTY_NONE, so effect always valid
                                     }
                                 }
                             }
@@ -3093,7 +3108,9 @@ namespace Game.Spells
                             Aura chargesAura = m_caster.ToCreature().GetAura(59907);
                             if (chargesAura != null)
                             {
-                                m_caster.CastSpell(unitTarget, spell_heal, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(m_caster.ToCreature().ToTempSummon().GetSummonerGUID()));
+                                m_caster.CastSpell(unitTarget, spell_heal, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
+                                    .SetOriginalCaster(m_caster.ToCreature().ToTempSummon().GetSummonerGUID())
+                                    .SetOriginalCastId(m_castId));
                                 if (chargesAura.ModCharges(-1))
                                     m_caster.ToCreature().ToTempSummon().UnSummon();
                             }
@@ -3122,6 +3139,7 @@ namespace Game.Spells
                                 if (totem != null && totem.IsTotem())
                                 {
                                     CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+                                    args.SetOriginalCastId(m_castId);
                                     args.AddSpellMod(SpellValueMod.BasePoint0, damage);
                                     m_caster.CastSpell(totem, 55277, args);
                                 }
@@ -3154,8 +3172,8 @@ namespace Game.Spells
                                         45683                             // Polymorph
                             };
 
-                            m_caster.CastSpell(m_caster, spellPlayer[RandomHelper.IRand(0, 4)], true);
-                            unitTarget.CastSpell(unitTarget, spellTarget[RandomHelper.IRand(0, 4)], true);
+                            m_caster.CastSpell(m_caster, spellPlayer[RandomHelper.IRand(0, 4)], new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
+                            unitTarget.CastSpell(unitTarget, spellTarget[RandomHelper.IRand(0, 4)], new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
                             break;
                         }
                     }
@@ -3400,7 +3418,7 @@ namespace Game.Spells
 
             GlyphPropertiesRecord glyphProperties = CliDB.GlyphPropertiesStorage.LookupByKey(glyphId);
             if (glyphProperties != null)
-                player.CastSpell(player, glyphProperties.SpellID, true);
+                player.CastSpell(player, glyphProperties.SpellID, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
 
             ActiveGlyphs activeGlyphs = new();
             activeGlyphs.Glyphs.Add(new GlyphBinding(m_misc.SpellId, (ushort)glyphId));
@@ -3489,7 +3507,7 @@ namespace Game.Spells
             {
                 currentDrunk = 100;
                 if (RandomHelper.randChance() < 25.0f)
-                    player.CastSpell(player, 67468, false);    // Drunken Vomit
+                    player.CastSpell(player, 67468, new CastSpellExtraArgs().SetOriginalCastId(m_castId));    // Drunken Vomit
             }
             else
                 currentDrunk += (byte)drunkMod;
@@ -3536,6 +3554,7 @@ namespace Game.Spells
             // @todo fix crash when a spell has two effects, both pointed at the same item target
 
             CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+            args.SetOriginalCastId(m_castId);
             args.AddSpellMod(SpellValueMod.BasePoint0, pct);
             m_caster.CastSpell(pet, effectInfo.TriggerSpell, args);
         }
@@ -3922,7 +3941,9 @@ namespace Game.Spells
                     unitCaster.Attack(unitTarget, true);
 
                 if (effectInfo.TriggerSpell != 0)
-                    m_caster.CastSpell(unitTarget, effectInfo.TriggerSpell, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(m_originalCasterGUID));
+                    m_caster.CastSpell(unitTarget, effectInfo.TriggerSpell, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
+                        .SetOriginalCaster(m_originalCasterGUID)
+                        .SetOriginalCastId(m_castId));
             }
         }
 
@@ -3950,7 +3971,9 @@ namespace Game.Spells
             else if (effectHandleMode == SpellEffectHandleMode.Hit)
             {
                 if (effectInfo.TriggerSpell != 0)
-                    m_caster.CastSpell(destTarget, effectInfo.TriggerSpell, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(m_originalCasterGUID));
+                    m_caster.CastSpell(destTarget, effectInfo.TriggerSpell, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
+                        .SetOriginalCaster(m_originalCasterGUID)
+                        .SetOriginalCastId(m_castId));
             }
         }
 
@@ -4235,6 +4258,7 @@ namespace Game.Spells
             if (mana != 0)
             {
                 CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+                args.SetOriginalCastId(m_castId);
                 args.AddSpellMod(SpellValueMod.BasePoint0, mana);
                 unitCaster.CastSpell(m_caster, 39104, args);
             }
@@ -5043,6 +5067,7 @@ namespace Game.Spells
                     continue;
 
                 CastSpellExtraArgs args = new(TriggerCastFlags.IgnoreGCD | TriggerCastFlags.IgnoreCastInProgress | TriggerCastFlags.CastDirectly | TriggerCastFlags.DontReportCastError);
+                args.OriginalCastId = m_castId;
                 args.CastDifficulty = GetCastDifficulty();
                 m_caster.CastSpell(m_caster, spellInfo.Id, args);
             }
@@ -5131,7 +5156,7 @@ namespace Game.Spells
             if (!m_caster.IsTypeId(TypeId.Player) || unitTarget == null || !unitTarget.IsTypeId(TypeId.Player))
                 return;
 
-            m_caster.CastSpell(unitTarget, effectInfo.TriggerSpell, true);
+            m_caster.CastSpell(unitTarget, effectInfo.TriggerSpell, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
         }
 
         [SpellEffectHandler(SpellEffectName.UnlockGuildVaultTab)]

@@ -242,7 +242,7 @@ namespace Game.Spells
             Aura aura = GetBase();
 
             AuraDataInfo auraData = auraInfo.AuraData.Value;
-            auraData.CastID = aura.GetCastGUID();
+            auraData.CastID = aura.GetCastId();
             auraData.SpellID = (int)aura.GetId();
             auraData.Visual= aura.GetSpellVisual();
             auraData.Flags = GetFlags();
@@ -329,7 +329,7 @@ namespace Game.Spells
         {
             m_spellInfo = createInfo._spellInfo;
             m_castDifficulty = createInfo._castDifficulty;
-            m_castGuid = createInfo._castId;
+            m_castId = createInfo._castId;
             m_casterGuid = createInfo.CasterGUID;
             m_castItemGuid = createInfo.CastItemGUID;
             m_castItemId = createInfo.CastItemId;
@@ -1212,7 +1212,7 @@ namespace Game.Spells
                     else if (spellArea.flags.HasAnyFlag(SpellAreaFlag.AutoCast))
                     {
                         if (!target.HasAura(spellArea.spellId))
-                            target.CastSpell(target, spellArea.spellId, new CastSpellExtraArgs(true));
+                            target.CastSpell(target, spellArea.spellId, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(GetCastId()));
                     }
                 }
             }
@@ -1246,7 +1246,9 @@ namespace Game.Spells
                             if (spell < 0)
                                 target.RemoveAurasDueToSpell((uint)-spell);
                             else if (removeMode != AuraRemoveMode.Death)
-                                target.CastSpell(target, (uint)spell, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCaster(GetCasterGUID()));
+                                target.CastSpell(target, (uint)spell, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
+                                    .SetOriginalCaster(GetCasterGUID())
+                                    .SetOriginalCastId(GetCastId()));
                         }
                     }
                     spellTriggered = Global.SpellMgr.GetSpellLinked((int)GetId() + (int)SpellLinkedType.Aura);
@@ -1294,11 +1296,11 @@ namespace Game.Spells
                                 break;
                             case 33572: // Gronn Lord's Grasp, becomes stoned
                                 if (GetStackAmount() >= 5 && !target.HasAura(33652))
-                                    target.CastSpell(target, 33652, new CastSpellExtraArgs(true));
+                                    target.CastSpell(target, 33652, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(GetCastId()));
                                 break;
                             case 50836: //Petrifying Grip, becomes stoned
                                 if (GetStackAmount() >= 5 && !target.HasAura(50812))
-                                    target.CastSpell(target, 50812, new CastSpellExtraArgs(true));
+                                    target.CastSpell(target, 50812, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(GetCastId()));
                                 break;
                             case 60970: // Heroic Fury (remove Intercept cooldown)
                                 if (target.IsTypeId(TypeId.Player))
@@ -1371,6 +1373,7 @@ namespace Game.Spells
                                 {
                                     float multiplier = aurEff.GetAmount();
                                     CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+                                    args.SetOriginalCastId(GetCastId());
                                     args.AddSpellMod(SpellValueMod.BasePoint0, MathFunctions.CalculatePct(caster.GetMaxPower(PowerType.Mana), multiplier));
                                     caster.CastSpell(caster, 47755, args);
                                 }
@@ -1433,7 +1436,7 @@ namespace Game.Spells
                             if (target.HasAura(70755))
                             {
                                 if (apply)
-                                    target.CastSpell(target, 71166, new CastSpellExtraArgs(true));
+                                    target.CastSpell(target, 71166, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(GetCastId()));
                                 else
                                     target.RemoveAurasDueToSpell(71166);
                             }
@@ -2280,7 +2283,7 @@ namespace Game.Spells
         public SpellInfo GetSpellInfo() { return m_spellInfo; }
         public uint GetId() { return m_spellInfo.Id; }
         public Difficulty GetCastDifficulty() { return m_castDifficulty; }
-        public ObjectGuid GetCastGUID() { return m_castGuid; }
+        public ObjectGuid GetCastId() { return m_castId; }
         public ObjectGuid GetCasterGUID() { return m_casterGuid; }
         public ObjectGuid GetCastItemGUID() { return m_castItemGuid; }
         public uint GetCastItemId() { return m_castItemId; }
@@ -2553,7 +2556,7 @@ namespace Game.Spells
         List<AuraScript> m_loadedScripts = new();
         SpellInfo m_spellInfo;
         Difficulty m_castDifficulty;
-        ObjectGuid m_castGuid;
+        ObjectGuid m_castId;
         ObjectGuid m_casterGuid;
         ObjectGuid m_castItemGuid;
         uint m_castItemId;
