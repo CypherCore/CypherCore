@@ -1623,6 +1623,7 @@ namespace Framework.Constants
     }
 
     // PhaseUseFlags fields in different db2s
+    [Flags]
     public enum PhaseUseFlagsValues : byte
     {
         None = 0x0,

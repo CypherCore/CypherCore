@@ -517,6 +517,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Transport animations and rotations...");
             Global.TransportMgr.LoadTransportAnimationAndRotation();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading Transport spawns...");
+            Global.TransportMgr.LoadTransportSpawns();
+
             Log.outInfo(LogFilter.ServerLoading, "Loading Spell Rank Data...");
             Global.SpellMgr.LoadSpellRanks();
 

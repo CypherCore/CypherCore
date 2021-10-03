@@ -96,6 +96,83 @@ namespace Game.Maps
                 AddPathRotationToTransport(rot.GameObjectsID, rot.TimeIndex, rot);
         }
 
+        public void LoadTransportSpawns()
+        {
+            if (_transportTemplates.Empty())
+                return;
+
+            uint oldMSTime = Time.GetMSTime();
+
+            SQLResult result = DB.World.Query("SELECT guid, entry, phaseUseFlags, phaseid, phasegroup FROM transports");
+
+            uint count = 0;
+            if (!result.IsEmpty())
+            {
+                do
+                {
+                    ulong guid = result.Read<ulong>(0);
+                    uint entry = result.Read<uint>(1);
+                    PhaseUseFlagsValues phaseUseFlags = (PhaseUseFlagsValues)result.Read<byte>(2);
+                    uint phaseId = result.Read<uint>(3);
+                    uint phaseGroupId = result.Read<uint>(4);
+
+                    if (GetTransportTemplate(entry) == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `transports` have transport (GUID: {guid} Entry: {entry}) with unknown gameobject `entry` set, skipped.");
+                        continue;
+                    }
+
+                    if ((phaseUseFlags & ~PhaseUseFlagsValues.All) != 0)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `transports` have transport (GUID: {guid} Entry: {entry}) with unknown `phaseUseFlags` set, removed unknown value.");
+                        phaseUseFlags &= PhaseUseFlagsValues.All;
+                    }
+
+                    if (phaseUseFlags.HasFlag(PhaseUseFlagsValues.AlwaysVisible) && phaseUseFlags.HasFlag(PhaseUseFlagsValues.Inverse))
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `transports` have transport (GUID: {guid} Entry: {entry}) has both `phaseUseFlags` PHASE_USE_FLAGS_ALWAYS_VISIBLE and PHASE_USE_FLAGS_INVERSE, removing PHASE_USE_FLAGS_INVERSE.");
+                        phaseUseFlags &= ~PhaseUseFlagsValues.Inverse;
+                    }
+
+                    if (phaseGroupId != 0 && phaseId != 0)
+                    {
+                        Log.outError(LogFilter.Sql, $"Table `transports` have transport (GUID: {guid} Entry: {entry}) with both `phaseid` and `phasegroup` set, `phasegroup` set to 0");
+                        phaseGroupId = 0;
+                    }
+
+                    if (phaseId != 0)
+                    {
+                        if (!CliDB.PhaseStorage.ContainsKey(phaseId))
+                        {
+                            Log.outError(LogFilter.Sql, $"Table `transports` have transport (GUID: {guid} Entry: {entry}) with `phaseid` {phaseId} does not exist, set to 0");
+                            phaseId = 0;
+                        }
+                    }
+
+                    if (phaseGroupId != 0)
+                    {
+                        if (Global.DB2Mgr.GetPhasesForGroup(phaseGroupId) == null)
+                        {
+                            Log.outError(LogFilter.Sql, $"Table `transports` have transport (GUID: {guid} Entry: {entry}) with `phaseGroup` {phaseGroupId} does not exist, set to 0");
+                            phaseGroupId = 0;
+                        }
+                    }
+
+                    TransportSpawn spawn = new();
+                    spawn.SpawnId = guid;
+                    spawn.TransportGameObjectId = entry;
+                    spawn.PhaseUseFlags = phaseUseFlags;
+                    spawn.PhaseId = phaseId;
+                    spawn.PhaseGroup = phaseGroupId;
+
+                    _transportSpawns[guid] = spawn;
+
+                } while (result.NextRow());
+            }
+
+            Log.outInfo(LogFilter.ServerLoading, $"Spawned {count} continent transports in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+        }
+
         void GeneratePath(GameObjectTemplate goInfo, TransportTemplate transport)
         {
             uint pathId = goInfo.MoTransport.taxiPathID;
@@ -414,69 +491,14 @@ namespace Game.Maps
 
         public void SpawnContinentTransports()
         {
-            if (_transportTemplates.Empty())
-                return;
-
             uint oldMSTime = Time.GetMSTime();
 
-            SQLResult result = DB.World.Query("SELECT guid, entry, phaseUseFlags, phaseid, phasegroup FROM transports");
-
             uint count = 0;
-            if (!result.IsEmpty())
-            {
-                do
-                {
-                    ulong guid = result.Read<ulong>(0);
-                    uint entry = result.Read<uint>(1);
-                    PhaseUseFlagsValues phaseUseFlags = (PhaseUseFlagsValues)result.Read<byte>(2);
-                    uint phaseId = result.Read<uint>(3);
-                    uint phaseGroupId = result.Read<uint>(4);
 
-                    if (Convert.ToBoolean(phaseUseFlags & ~PhaseUseFlagsValues.All))
-                    {
-                        Log.outError(LogFilter.Sql, $"Table `transports` have transport (GUID: {guid} Entry: {entry}) with unknown `phaseUseFlags` set, removed unknown value.");
-                        phaseUseFlags &= PhaseUseFlagsValues.All;
-                    }
-
-                    if (phaseUseFlags.HasAnyFlag(PhaseUseFlagsValues.AlwaysVisible) && phaseUseFlags.HasAnyFlag(PhaseUseFlagsValues.Inverse))
-                    {
-                        Log.outError(LogFilter.Sql, $"Table `transports` have transport (GUID: {guid} Entry: {entry}) has both `phaseUseFlags` PHASE_USE_FLAGS_ALWAYS_VISIBLE and PHASE_USE_FLAGS_INVERSE," +
-                            " removing PHASE_USE_FLAGS_INVERSE.");
-                        phaseUseFlags &= ~PhaseUseFlagsValues.Inverse;
-                    }
-
-                    if (phaseGroupId != 0 && phaseId != 0)
-                    {
-                        Log.outError(LogFilter.Sql, $"Table `transports` have transport (GUID: {guid} Entry: {entry}) with both `phaseid` and `phasegroup` set, `phasegroup` set to 0");
-                        phaseGroupId = 0;
-                    }
-
-                    if (phaseId != 0)
-                    {
-                        if (!CliDB.PhaseStorage.ContainsKey(phaseId))
-                        {
-                            Log.outError(LogFilter.Sql, $"Table `transports` have transport (GUID: {guid} Entry: {entry}) with `phaseid` {phaseId} does not exist, set to 0");
-                            phaseId = 0;
-                        }
-                    }
-
-                    if (phaseGroupId != 0)
-                    {
-                        if (Global.DB2Mgr.GetPhasesForGroup(phaseGroupId).Empty())
-                        {
-                            Log.outError(LogFilter.Sql, $"Table `transports` have transport (GUID: {guid} Entry: {entry}) with `phaseGroup` {phaseGroupId} does not exist, set to 0");
-                            phaseGroupId = 0;
-                        }
-                    }
-
-                    TransportTemplate tInfo = GetTransportTemplate(entry);
-                    if (tInfo != null)
-                        if (!tInfo.inInstance)
-                            if (CreateTransport(entry, guid, null, phaseUseFlags, phaseId, phaseGroupId))
-                                ++count;
-
-                } while (result.NextRow());
-            }
+            foreach (var pair in _transportSpawns)
+                if (!GetTransportTemplate(pair.Value.TransportGameObjectId).inInstance)
+                    if (CreateTransport(pair.Value.TransportGameObjectId, pair.Value.SpawnId, null, pair.Value.PhaseUseFlags, pair.Value.PhaseId, pair.Value.PhaseGroup))
+                        ++count;
 
             Log.outInfo(LogFilter.ServerLoading, "Spawned {0} continent transports in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
@@ -490,8 +512,8 @@ namespace Game.Maps
                 return;
 
             // create transports
-            foreach (var entry in mapTransports)
-                CreateTransport(entry, 0, map);
+            foreach (var transportGameObjectId in mapTransports)
+                CreateTransport(transportGameObjectId, 0, map);
         }
 
         public TransportTemplate GetTransportTemplate(uint entry)
@@ -504,6 +526,11 @@ namespace Game.Maps
             return _transportAnimations.LookupByKey(entry);
         }
 
+        TransportSpawn GetTransportSpawn(ulong spawnId)
+        {
+            return _transportSpawns.LookupByKey(spawnId);
+        }
+        
         public void AddPathRotationToTransport(uint transportEntry, uint timeSeg, TransportRotationRecord node)
         {
             if (!_transportAnimations.ContainsKey(transportEntry))
@@ -515,6 +542,7 @@ namespace Game.Maps
         Dictionary<uint, TransportTemplate> _transportTemplates = new();
         MultiMap<uint, uint> _instanceTransports = new();
         Dictionary<uint, TransportAnimation> _transportAnimations = new();
+        Dictionary<ulong, TransportSpawn> _transportSpawns = new();
     }
 
     public class SplineRawInitializer
@@ -619,5 +647,14 @@ namespace Game.Maps
         public Dictionary<uint, TransportAnimationRecord> Path = new();
         public Dictionary<uint, TransportRotationRecord> Rotations = new();
         public uint TotalTime;
+    }
+
+    public struct TransportSpawn
+    {
+        public ulong SpawnId;
+        public uint TransportGameObjectId; // entry in respective _template table
+        public PhaseUseFlagsValues PhaseUseFlags;
+        public uint PhaseId;
+        public uint PhaseGroup;
     }
 }
