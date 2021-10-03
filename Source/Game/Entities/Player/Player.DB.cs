@@ -2987,18 +2987,11 @@ namespace Game.Entities
                         map = Global.MapMgr.CreateMap(mapId, this);
                     }
                 }
-                else
-                {
-                    Log.outError(LogFilter.Player, "Player {0} {1} Map: {2}, {3}. Areatrigger not found.", GetName(), guid.ToString(), mapId, GetPosition());
-                    RelocateToHomebind();
-                    map = null;
-                }
             }
 
             if (!map)
             {
-                mapId = info.MapId;
-                Relocate(info.PositionX, info.PositionY, info.PositionZ, 0.0f);
+                RelocateToHomebind();
                 map = Global.MapMgr.CreateMap(mapId, this);
                 if (!map)
                 {
