@@ -784,4 +784,10 @@ namespace Framework.Constants
         Contested = 3,
         Combat = 4
     }
+
+    public enum PlayerCreateMode
+    {
+        Normal = 0,
+        NPE = 1
+    }
 }

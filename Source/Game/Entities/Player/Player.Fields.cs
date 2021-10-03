@@ -196,6 +196,9 @@ namespace Game.Entities
         public PlayerData m_playerData;
         public ActivePlayerData m_activePlayerData;
 
+        long m_createTime;
+        PlayerCreateMode m_createMode;
+
         uint m_nextSave;
         byte m_cinematic;
 

@@ -194,6 +194,7 @@ namespace Game.Entities
             }
 
             SetMap(Global.MapMgr.CreateMap(info.MapId, this));
+            m_createTime = GameTime.GetGameTime();
             UpdatePositionData();
 
             PowerType powertype = cEntry.DisplayPower;

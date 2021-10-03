@@ -2551,6 +2551,8 @@ namespace Game.Entities
             uint mapId = result.Read<ushort>(fieldIndex++);
             float orientation = result.Read<float>(fieldIndex++);
             string taximask = result.Read<string>(fieldIndex++);
+            long createTime = result.Read<long>(fieldIndex++);
+            PlayerCreateMode createMode = (PlayerCreateMode)result.Read<byte>(fieldIndex++);
             byte cinematic = result.Read<byte>(fieldIndex++);
             uint totaltime = result.Read<uint>(fieldIndex++);
             uint leveltime = result.Read<uint>(fieldIndex++);
@@ -3030,6 +3032,8 @@ namespace Game.Entities
 
             SetDrunkValue(newDrunkValue);
 
+            m_createTime = createTime;
+            m_createMode = createMode;
             m_cinematic = cinematic;
             m_PlayedTimeTotal = totaltime;
             m_PlayedTimeLevel = leveltime;
@@ -3385,6 +3389,8 @@ namespace Game.Entities
                     ss.Append(m_taxi.m_taximask[i] + " ");
 
                 stmt.AddValue(index++, ss.ToString());
+                stmt.AddValue(index++, m_createTime);
+                stmt.AddValue(index++, (byte)m_createMode);
                 stmt.AddValue(index++, m_cinematic);
                 stmt.AddValue(index++, m_PlayedTimeTotal);
                 stmt.AddValue(index++, m_PlayedTimeLevel);
