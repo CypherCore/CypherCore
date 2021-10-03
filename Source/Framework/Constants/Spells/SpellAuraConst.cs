@@ -508,7 +508,7 @@ namespace Framework.Constants
         AllowInterruptSpell = 484, // NYI
         ModMovementForceMagnitude = 485,
         Unk486 = 486,
-        Unk487 = 487,
+        CosmeticMounted = 487,
         Unk488 = 488,
         Unk489 = 489,
         Unk490 = 490,

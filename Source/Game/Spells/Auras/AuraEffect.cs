@@ -460,7 +460,7 @@ namespace Game.Spells
         {
             return target.SpellCritChanceTaken(caster, null, this, GetSpellInfo().GetSchoolMask(), CalcPeriodicCritChance(caster), GetSpellInfo().GetAttackType());
         }
-        
+
         public bool IsAffectingSpell(SpellInfo spell)
         {
             if (spell == null)
@@ -544,21 +544,21 @@ namespace Game.Spells
                 case AuraType.ModStun:
                 case AuraType.ModRoot:
                 case AuraType.Transform:
-                    {
-                        DamageInfo damageInfo = eventInfo.GetDamageInfo();
-                        if (damageInfo == null || damageInfo.GetDamage() == 0)
-                            return false;
+                {
+                    DamageInfo damageInfo = eventInfo.GetDamageInfo();
+                    if (damageInfo == null || damageInfo.GetDamage() == 0)
+                        return false;
 
-                        // Spell own damage at apply won't break CC
-                        if (spellInfo != null && spellInfo == GetSpellInfo())
-                        {
-                            Aura aura = GetBase();
-                            // called from spellcast, should not have ticked yet
-                            if (aura.GetDuration() == aura.GetMaxDuration())
-                                return false;
-                        }
-                        break;
+                    // Spell own damage at apply won't break CC
+                    if (spellInfo != null && spellInfo == GetSpellInfo())
+                    {
+                        Aura aura = GetBase();
+                        // called from spellcast, should not have ticked yet
+                        if (aura.GetDuration() == aura.GetMaxDuration())
+                            return false;
                     }
+                    break;
+                }
                 case AuraType.MechanicImmunity:
                 case AuraType.ModMechanicResistance:
                     // compare mechanic
@@ -578,19 +578,19 @@ namespace Game.Spells
                     break;
                 case AuraType.ModPowerCostSchool:
                 case AuraType.ModPowerCostSchoolPct:
-                    {
-                        // Skip melee hits and spells with wrong school or zero cost
-                        if (spellInfo == null || !Convert.ToBoolean((int)spellInfo.GetSchoolMask() & GetMiscValue()) // School Check
-                            || !eventInfo.GetProcSpell())
-                            return false;
+                {
+                    // Skip melee hits and spells with wrong school or zero cost
+                    if (spellInfo == null || !Convert.ToBoolean((int)spellInfo.GetSchoolMask() & GetMiscValue()) // School Check
+                        || !eventInfo.GetProcSpell())
+                        return false;
 
-                        // Costs Check
-                        var costs = eventInfo.GetProcSpell().GetPowerCost();
-                        var m = costs.Find(cost => cost.Amount > 0);
-                        if (m == null)
-                            return false;
-                        break;
-                    }
+                    // Costs Check
+                    var costs = eventInfo.GetProcSpell().GetPowerCost();
+                    var m = costs.Find(cost => cost.Amount > 0);
+                    if (m == null)
+                        return false;
+                    break;
+                }
                 case AuraType.ReflectSpellsSchool:
                     // Skip melee hits and spells with wrong school
                     if (spellInfo == null || !Convert.ToBoolean((int)spellInfo.GetSchoolMask() & GetMiscValue()))
@@ -598,15 +598,15 @@ namespace Game.Spells
                     break;
                 case AuraType.ProcTriggerSpell:
                 case AuraType.ProcTriggerSpellWithValue:
-                    {
-                        // Don't proc extra attacks while already processing extra attack spell
-                        uint triggerSpellId = GetSpellEffectInfo().TriggerSpell;
-                        SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId, GetBase().GetCastDifficulty());
-                        if (triggeredSpellInfo != null)
-                            if (aurApp.GetTarget().ExtraAttacks != 0 && triggeredSpellInfo.HasEffect(SpellEffectName.AddExtraAttacks))
-                                return false;
-                        break;
-                    }
+                {
+                    // Don't proc extra attacks while already processing extra attack spell
+                    uint triggerSpellId = GetSpellEffectInfo().TriggerSpell;
+                    SpellInfo triggeredSpellInfo = Global.SpellMgr.GetSpellInfo(triggerSpellId, GetBase().GetCastDifficulty());
+                    if (triggeredSpellInfo != null)
+                        if (aurApp.GetTarget().ExtraAttacks != 0 && triggeredSpellInfo.HasEffect(SpellEffectName.AddExtraAttacks))
+                            return false;
+                    break;
+                }
                 case AuraType.ModSpellCritChance:
                     // skip spells that can't crit
                     if (spellInfo == null || !spellInfo.HasAttribute(SpellCustomAttributes.CanCrit))
@@ -810,7 +810,7 @@ namespace Game.Spells
         public void SetAmount(int amount) { _amount = amount; m_canBeRecalculated = false; }
 
         public float? GetEstimatedAmount() { return _estimatedAmount; }
-        
+
         public int GetPeriodicTimer() { return _periodicTimer; }
         public void SetPeriodicTimer(int periodicTimer) { _periodicTimer = periodicTimer; }
 
@@ -1215,15 +1215,15 @@ namespace Game.Spells
                     case ShapeShiftForm.FlightFormEpic:
                     case ShapeShiftForm.FlightForm:
                     case ShapeShiftForm.MoonkinForm:
-                        {
-                            // remove movement affects
-                            target.RemoveAurasByShapeShift();
+                    {
+                        // remove movement affects
+                        target.RemoveAurasByShapeShift();
 
-                            // and polymorphic affects
-                            if (target.IsPolymorphed())
-                                target.RemoveAurasDueToSpell(target.GetTransForm());
-                            break;
-                        }
+                        // and polymorphic affects
+                        if (target.IsPolymorphed())
+                            target.RemoveAurasDueToSpell(target.GetTransForm());
+                        break;
+                    }
                     default:
                         break;
                 }
@@ -1359,57 +1359,57 @@ namespace Game.Spells
                         {
                             // Orb of Deception
                             case 16739:
-                                {
-                                    if (!target.IsTypeId(TypeId.Player))
-                                        return;
+                            {
+                                if (!target.IsTypeId(TypeId.Player))
+                                    return;
 
-                                    switch (target.GetRace())
-                                    {
-                                        // Blood Elf
-                                        case Race.BloodElf:
-                                            target.SetDisplayId(target.GetGender() == Gender.Female ? 17830 : 17829u);
-                                            break;
-                                        // Orc
-                                        case Race.Orc:
-                                            target.SetDisplayId(target.GetGender() == Gender.Female ? 10140 : 10139u);
-                                            break;
-                                        // Troll
-                                        case Race.Troll:
-                                            target.SetDisplayId(target.GetGender() == Gender.Female ? 10134 : 10135u);
-                                            break;
-                                        // Tauren
-                                        case Race.Tauren:
-                                            target.SetDisplayId(target.GetGender() == Gender.Female ? 10147 : 10136u);
-                                            break;
-                                        // Undead
-                                        case Race.Undead:
-                                            target.SetDisplayId(target.GetGender() == Gender.Female ? 10145 : 10146u);
-                                            break;
-                                        // Draenei
-                                        case Race.Draenei:
-                                            target.SetDisplayId(target.GetGender() == Gender.Female ? 17828 : 17827u);
-                                            break;
-                                        // Dwarf
-                                        case Race.Dwarf:
-                                            target.SetDisplayId(target.GetGender() == Gender.Female ? 10142 : 10141u);
-                                            break;
-                                        // Gnome
-                                        case Race.Gnome:
-                                            target.SetDisplayId(target.GetGender() == Gender.Female ? 10149 : 10148u);
-                                            break;
-                                        // Human
-                                        case Race.Human:
-                                            target.SetDisplayId(target.GetGender() == Gender.Female ? 10138 : 10137u);
-                                            break;
-                                        // Night Elf
-                                        case Race.NightElf:
-                                            target.SetDisplayId(target.GetGender() == Gender.Female ? 10144 : 10143u);
-                                            break;
-                                        default:
-                                            break;
-                                    }
-                                    break;
+                                switch (target.GetRace())
+                                {
+                                    // Blood Elf
+                                    case Race.BloodElf:
+                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 17830 : 17829u);
+                                        break;
+                                    // Orc
+                                    case Race.Orc:
+                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 10140 : 10139u);
+                                        break;
+                                    // Troll
+                                    case Race.Troll:
+                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 10134 : 10135u);
+                                        break;
+                                    // Tauren
+                                    case Race.Tauren:
+                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 10147 : 10136u);
+                                        break;
+                                    // Undead
+                                    case Race.Undead:
+                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 10145 : 10146u);
+                                        break;
+                                    // Draenei
+                                    case Race.Draenei:
+                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 17828 : 17827u);
+                                        break;
+                                    // Dwarf
+                                    case Race.Dwarf:
+                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 10142 : 10141u);
+                                        break;
+                                    // Gnome
+                                    case Race.Gnome:
+                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 10149 : 10148u);
+                                        break;
+                                    // Human
+                                    case Race.Human:
+                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 10138 : 10137u);
+                                        break;
+                                    // Night Elf
+                                    case Race.NightElf:
+                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 10144 : 10143u);
+                                        break;
+                                    default:
+                                        break;
                                 }
+                                break;
+                            }
                             // Murloc costume
                             case 42365:
                                 target.SetDisplayId(21723);
@@ -1418,57 +1418,57 @@ namespace Game.Spells
                             case 50517:
                             // Corsair Costume
                             case 51926:
-                                {
-                                    if (!target.IsTypeId(TypeId.Player))
-                                        return;
+                            {
+                                if (!target.IsTypeId(TypeId.Player))
+                                    return;
 
-                                    switch (target.GetRace())
-                                    {
-                                        // Blood Elf
-                                        case Race.BloodElf:
-                                            target.SetDisplayId(target.GetGender() == Gender.Female ? 25043 : 25032u);
-                                            break;
-                                        // Orc
-                                        case Race.Orc:
-                                            target.SetDisplayId(target.GetGender() == Gender.Female ? 25050 : 25039u);
-                                            break;
-                                        // Troll
-                                        case Race.Troll:
-                                            target.SetDisplayId(target.GetGender() == Gender.Female ? 25052 : 25041u);
-                                            break;
-                                        // Tauren
-                                        case Race.Tauren:
-                                            target.SetDisplayId(target.GetGender() == Gender.Female ? 25051 : 25040u);
-                                            break;
-                                        // Undead
-                                        case Race.Undead:
-                                            target.SetDisplayId(target.GetGender() == Gender.Female ? 25053 : 25042u);
-                                            break;
-                                        // Draenei
-                                        case Race.Draenei:
-                                            target.SetDisplayId(target.GetGender() == Gender.Female ? 25044 : 25033u);
-                                            break;
-                                        // Dwarf
-                                        case Race.Dwarf:
-                                            target.SetDisplayId(target.GetGender() == Gender.Female ? 25045 : 25034u);
-                                            break;
-                                        // Gnome
-                                        case Race.Gnome:
-                                            target.SetDisplayId(target.GetGender() == Gender.Female ? 25035 : 25046u);
-                                            break;
-                                        // Human
-                                        case Race.Human:
-                                            target.SetDisplayId(target.GetGender() == Gender.Female ? 25037 : 25048u);
-                                            break;
-                                        // Night Elf
-                                        case Race.NightElf:
-                                            target.SetDisplayId(target.GetGender() == Gender.Female ? 25038 : 25049u);
-                                            break;
-                                        default:
-                                            break;
-                                    }
-                                    break;
+                                switch (target.GetRace())
+                                {
+                                    // Blood Elf
+                                    case Race.BloodElf:
+                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 25043 : 25032u);
+                                        break;
+                                    // Orc
+                                    case Race.Orc:
+                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 25050 : 25039u);
+                                        break;
+                                    // Troll
+                                    case Race.Troll:
+                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 25052 : 25041u);
+                                        break;
+                                    // Tauren
+                                    case Race.Tauren:
+                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 25051 : 25040u);
+                                        break;
+                                    // Undead
+                                    case Race.Undead:
+                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 25053 : 25042u);
+                                        break;
+                                    // Draenei
+                                    case Race.Draenei:
+                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 25044 : 25033u);
+                                        break;
+                                    // Dwarf
+                                    case Race.Dwarf:
+                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 25045 : 25034u);
+                                        break;
+                                    // Gnome
+                                    case Race.Gnome:
+                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 25035 : 25046u);
+                                        break;
+                                    // Human
+                                    case Race.Human:
+                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 25037 : 25048u);
+                                        break;
+                                    // Night Elf
+                                    case Race.NightElf:
+                                        target.SetDisplayId(target.GetGender() == Gender.Female ? 25038 : 25049u);
+                                        break;
+                                    default:
+                                        break;
                                 }
+                                break;
+                            }
                             // Pygmy Oil
                             case 53806:
                                 target.SetDisplayId(22512);
@@ -4095,38 +4095,38 @@ namespace Game.Spells
                                 caster.CastSpell(caster, 13138, new CastSpellExtraArgs(this));
                             break;
                         case 34026:   // kill command
-                            {
-                                Unit pet = target.GetGuardianPet();
-                                if (pet == null)
-                                    break;
-
-                                target.CastSpell(target, 34027, new CastSpellExtraArgs(this));
-
-                                // set 3 stacks and 3 charges (to make all auras not disappear at once)
-                                Aura owner_aura = target.GetAura(34027, GetCasterGUID());
-                                Aura pet_aura = pet.GetAura(58914, GetCasterGUID());
-                                if (owner_aura != null)
-                                {
-                                    owner_aura.SetStackAmount((byte)owner_aura.GetSpellInfo().StackAmount);
-                                    if (pet_aura != null)
-                                    {
-                                        pet_aura.SetCharges(0);
-                                        pet_aura.SetStackAmount((byte)owner_aura.GetSpellInfo().StackAmount);
-                                    }
-                                }
+                        {
+                            Unit pet = target.GetGuardianPet();
+                            if (pet == null)
                                 break;
+
+                            target.CastSpell(target, 34027, new CastSpellExtraArgs(this));
+
+                            // set 3 stacks and 3 charges (to make all auras not disappear at once)
+                            Aura owner_aura = target.GetAura(34027, GetCasterGUID());
+                            Aura pet_aura = pet.GetAura(58914, GetCasterGUID());
+                            if (owner_aura != null)
+                            {
+                                owner_aura.SetStackAmount((byte)owner_aura.GetSpellInfo().StackAmount);
+                                if (pet_aura != null)
+                                {
+                                    pet_aura.SetCharges(0);
+                                    pet_aura.SetStackAmount((byte)owner_aura.GetSpellInfo().StackAmount);
+                                }
                             }
+                            break;
+                        }
                         case 37096:                                     // Blood Elf Illusion
+                        {
+                            if (caster != null)
                             {
-                                if (caster != null)
-                                {
-                                    if (caster.GetGender() == Gender.Female)
-                                        caster.CastSpell(target, 37095, new CastSpellExtraArgs(this)); // Blood Elf Disguise
-                                    else
-                                        caster.CastSpell(target, 37093, new CastSpellExtraArgs(this));
-                                }
-                                break;
+                                if (caster.GetGender() == Gender.Female)
+                                    caster.CastSpell(target, 37095, new CastSpellExtraArgs(this)); // Blood Elf Disguise
+                                else
+                                    caster.CastSpell(target, 37093, new CastSpellExtraArgs(this));
                             }
+                            break;
+                        }
                         case 39850:                                     // Rocket Blast
                             if (RandomHelper.randChance(20))                       // backfire stun
                                 target.CastSpell(target, 51581, new CastSpellExtraArgs(this));
@@ -4235,29 +4235,29 @@ namespace Game.Spells
                                     }
                                     break;
                                 case 36730:                                     // Flame Strike
-                                    {
-                                        target.CastSpell(target, 36731, new CastSpellExtraArgs(this));
-                                        break;
-                                    }
+                                {
+                                    target.CastSpell(target, 36731, new CastSpellExtraArgs(this));
+                                    break;
+                                }
                                 case 44191:                                     // Flame Strike
+                                {
+                                    if (target.GetMap().IsDungeon())
                                     {
-                                        if (target.GetMap().IsDungeon())
-                                        {
-                                            uint spellId = (uint)(target.GetMap().IsHeroic() ? 46163 : 44190);
+                                        uint spellId = (uint)(target.GetMap().IsHeroic() ? 46163 : 44190);
 
-                                            target.CastSpell(target, spellId, new CastSpellExtraArgs(this));
-                                        }
-                                        break;
+                                        target.CastSpell(target, spellId, new CastSpellExtraArgs(this));
                                     }
+                                    break;
+                                }
                                 case 43681: // Inactive
-                                    {
-                                        if (!target.IsTypeId(TypeId.Player) || aurApp.GetRemoveMode() != AuraRemoveMode.Expire)
-                                            return;
+                                {
+                                    if (!target.IsTypeId(TypeId.Player) || aurApp.GetRemoveMode() != AuraRemoveMode.Expire)
+                                        return;
 
-                                        if (target.GetMap().IsBattleground())
-                                            target.ToPlayer().LeaveBattleground();
-                                        break;
-                                    }
+                                    if (target.GetMap().IsBattleground())
+                                        target.ToPlayer().LeaveBattleground();
+                                    break;
+                                }
                                 case 42783: // Wrath of the Astromancer
                                     target.CastSpell(target, (uint)GetAmount(), new CastSpellExtraArgs(this));
                                     break;
@@ -4290,117 +4290,117 @@ namespace Game.Spells
             switch (m_spellInfo.SpellFamilyName)
             {
                 case SpellFamilyNames.Generic:
-                    {
-                        if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
-                            break;
-                        switch (GetId())
-                        {
-                            // Recently Bandaged
-                            case 11196:
-                                target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, (uint)GetMiscValue(), apply);
-                                break;
-                            // Unstable Power
-                            case 24658:
-                                {
-                                    uint spellId = 24659;
-                                    if (apply && caster != null)
-                                    {
-                                        SpellInfo spell = Global.SpellMgr.GetSpellInfo(spellId, GetBase().GetCastDifficulty());
-                                        CastSpellExtraArgs args = new();
-                                        args.TriggerFlags = TriggerCastFlags.FullMask;
-                                        args.OriginalCaster = GetCasterGUID();
-                                        args.CastDifficulty = spell.Difficulty;
-
-                                        for (uint i = 0; i < spell.StackAmount; ++i)
-                                            caster.CastSpell(target, spell.Id, args);
-                                        break;
-                                    }
-                                    target.RemoveAurasDueToSpell(spellId);
-                                    break;
-                                }
-                            // Restless Strength
-                            case 24661:
-                                {
-                                    uint spellId = 24662;
-                                    if (apply && caster != null)
-                                    {
-                                        SpellInfo spell = Global.SpellMgr.GetSpellInfo(spellId, GetBase().GetCastDifficulty());
-                                        CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-                                        args.OriginalCaster = GetCasterGUID();
-                                        args.CastDifficulty = spell.Difficulty;
-
-                                        for (uint i = 0; i < spell.StackAmount; ++i)
-                                            caster.CastSpell(target, spell.Id, args);
-                                        break;
-                                    }
-                                    target.RemoveAurasDueToSpell(spellId);
-                                    break;
-                                }
-                            // Tag Murloc
-                            case 30877:
-                                {
-                                    // Tag/untag Blacksilt Scout
-                                    target.SetEntry((uint)(apply ? 17654 : 17326));
-                                    break;
-                                }
-                            case 57819: // Argent Champion
-                            case 57820: // Ebon Champion
-                            case 57821: // Champion of the Kirin Tor
-                            case 57822: // Wyrmrest Champion
-                                {
-                                    if (!caster || !caster.IsTypeId(TypeId.Player))
-                                        break;
-
-                                    uint FactionID = 0;
-
-                                    if (apply)
-                                    {
-                                        switch (m_spellInfo.Id)
-                                        {
-                                            case 57819:
-                                                FactionID = 1106; // Argent Crusade
-                                                break;
-                                            case 57820:
-                                                FactionID = 1098;// Knights of the Ebon Blade
-                                                break;
-                                            case 57821:
-                                                FactionID = 1090; // Kirin Tor
-                                                break;
-                                            case 57822:
-                                                FactionID = 1091; // The Wyrmrest Accord
-                                                break;
-                                        }
-                                    }
-                                    caster.ToPlayer().SetChampioningFaction(FactionID);
-                                    break;
-                                }
-                            // LK Intro VO (1)
-                            case 58204:
-                                if (target.IsTypeId(TypeId.Player))
-                                {
-                                    // Play part 1
-                                    if (apply)
-                                        target.PlayDirectSound(14970, target.ToPlayer());
-                                    // continue in 58205
-                                    else
-                                        target.CastSpell(target, 58205, new CastSpellExtraArgs(true));
-                                }
-                                break;
-                            // LK Intro VO (2)
-                            case 58205:
-                                if (target.IsTypeId(TypeId.Player))
-                                {
-                                    // Play part 2
-                                    if (apply)
-                                        target.PlayDirectSound(14971, target.ToPlayer());
-                                    // Play part 3
-                                    else
-                                        target.PlayDirectSound(14972, target.ToPlayer());
-                                }
-                                break;
-                        }
+                {
+                    if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
                         break;
+                    switch (GetId())
+                    {
+                        // Recently Bandaged
+                        case 11196:
+                            target.ApplySpellImmune(GetId(), SpellImmunity.Mechanic, (uint)GetMiscValue(), apply);
+                            break;
+                        // Unstable Power
+                        case 24658:
+                        {
+                            uint spellId = 24659;
+                            if (apply && caster != null)
+                            {
+                                SpellInfo spell = Global.SpellMgr.GetSpellInfo(spellId, GetBase().GetCastDifficulty());
+                                CastSpellExtraArgs args = new();
+                                args.TriggerFlags = TriggerCastFlags.FullMask;
+                                args.OriginalCaster = GetCasterGUID();
+                                args.CastDifficulty = spell.Difficulty;
+
+                                for (uint i = 0; i < spell.StackAmount; ++i)
+                                    caster.CastSpell(target, spell.Id, args);
+                                break;
+                            }
+                            target.RemoveAurasDueToSpell(spellId);
+                            break;
+                        }
+                        // Restless Strength
+                        case 24661:
+                        {
+                            uint spellId = 24662;
+                            if (apply && caster != null)
+                            {
+                                SpellInfo spell = Global.SpellMgr.GetSpellInfo(spellId, GetBase().GetCastDifficulty());
+                                CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
+                                args.OriginalCaster = GetCasterGUID();
+                                args.CastDifficulty = spell.Difficulty;
+
+                                for (uint i = 0; i < spell.StackAmount; ++i)
+                                    caster.CastSpell(target, spell.Id, args);
+                                break;
+                            }
+                            target.RemoveAurasDueToSpell(spellId);
+                            break;
+                        }
+                        // Tag Murloc
+                        case 30877:
+                        {
+                            // Tag/untag Blacksilt Scout
+                            target.SetEntry((uint)(apply ? 17654 : 17326));
+                            break;
+                        }
+                        case 57819: // Argent Champion
+                        case 57820: // Ebon Champion
+                        case 57821: // Champion of the Kirin Tor
+                        case 57822: // Wyrmrest Champion
+                        {
+                            if (!caster || !caster.IsTypeId(TypeId.Player))
+                                break;
+
+                            uint FactionID = 0;
+
+                            if (apply)
+                            {
+                                switch (m_spellInfo.Id)
+                                {
+                                    case 57819:
+                                        FactionID = 1106; // Argent Crusade
+                                        break;
+                                    case 57820:
+                                        FactionID = 1098;// Knights of the Ebon Blade
+                                        break;
+                                    case 57821:
+                                        FactionID = 1090; // Kirin Tor
+                                        break;
+                                    case 57822:
+                                        FactionID = 1091; // The Wyrmrest Accord
+                                        break;
+                                }
+                            }
+                            caster.ToPlayer().SetChampioningFaction(FactionID);
+                            break;
+                        }
+                        // LK Intro VO (1)
+                        case 58204:
+                            if (target.IsTypeId(TypeId.Player))
+                            {
+                                // Play part 1
+                                if (apply)
+                                    target.PlayDirectSound(14970, target.ToPlayer());
+                                // continue in 58205
+                                else
+                                    target.CastSpell(target, 58205, new CastSpellExtraArgs(true));
+                            }
+                            break;
+                        // LK Intro VO (2)
+                        case 58205:
+                            if (target.IsTypeId(TypeId.Player))
+                            {
+                                // Play part 2
+                                if (apply)
+                                    target.PlayDirectSound(14971, target.ToPlayer());
+                                // Play part 3
+                                else
+                                    target.PlayDirectSound(14972, target.ToPlayer());
+                            }
+                            break;
                     }
+                    break;
+                }
             }
         }
 
@@ -4903,47 +4903,47 @@ namespace Game.Spells
             switch (GetAuraType())
             {
                 case AuraType.PeriodicDamage:
+                {
+                    if (caster != null)
+                        damage = caster.SpellDamageBonusDone(target, GetSpellInfo(), damage, DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses);
+
+                    damage = target.SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DamageEffectType.DOT);
+
+                    // There is a Chance to make a Soul Shard when Drain soul does damage
+                    if (caster != null && GetSpellInfo().SpellFamilyName == SpellFamilyNames.Warlock && GetSpellInfo().SpellFamilyFlags[0].HasAnyFlag(0x00004000u))
                     {
-                        if (caster != null)
-                            damage = caster.SpellDamageBonusDone(target, GetSpellInfo(), damage, DamageEffectType.DOT, GetSpellEffectInfo(), stackAmountForBonuses);
-
-                        damage = target.SpellDamageBonusTaken(caster, GetSpellInfo(), damage, DamageEffectType.DOT);
-
-                        // There is a Chance to make a Soul Shard when Drain soul does damage
-                        if (caster != null && GetSpellInfo().SpellFamilyName == SpellFamilyNames.Warlock && GetSpellInfo().SpellFamilyFlags[0].HasAnyFlag(0x00004000u))
-                        {
-                            if (caster.IsTypeId(TypeId.Player) && caster.ToPlayer().IsHonorOrXPTarget(target))
-                                caster.CastSpell(caster, 95810, new CastSpellExtraArgs(this));
-                        }
-                        else if (GetSpellInfo().SpellFamilyName == SpellFamilyNames.Generic)
-                        {
-                            switch (GetId())
-                            {
-                                case 70911: // Unbound Plague
-                                case 72854: // Unbound Plague
-                                case 72855: // Unbound Plague
-                                case 72856: // Unbound Plague
-                                    damage *= (uint)Math.Pow(1.25f, _ticksDone);
-                                    break;
-                                default:
-                                    break;
-                            }
-                        }
-                        break;
+                        if (caster.IsTypeId(TypeId.Player) && caster.ToPlayer().IsHonorOrXPTarget(target))
+                            caster.CastSpell(caster, 95810, new CastSpellExtraArgs(this));
                     }
+                    else if (GetSpellInfo().SpellFamilyName == SpellFamilyNames.Generic)
+                    {
+                        switch (GetId())
+                        {
+                            case 70911: // Unbound Plague
+                            case 72854: // Unbound Plague
+                            case 72855: // Unbound Plague
+                            case 72856: // Unbound Plague
+                                damage *= (uint)Math.Pow(1.25f, _ticksDone);
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    break;
+                }
                 case AuraType.PeriodicWeaponPercentDamage:
-                    {
-                        WeaponAttackType attackType = GetSpellInfo().GetAttackType();
+                {
+                    WeaponAttackType attackType = GetSpellInfo().GetAttackType();
 
-                        damage = MathFunctions.CalculatePct(caster.CalculateDamage(attackType, false, true), GetAmount());
+                    damage = MathFunctions.CalculatePct(caster.CalculateDamage(attackType, false, true), GetAmount());
 
-                        // Add melee damage bonuses (also check for negative)
-                        if (caster != null)
-                            damage = caster.MeleeDamageBonusDone(target, damage, attackType, DamageEffectType.DOT, GetSpellInfo());
+                    // Add melee damage bonuses (also check for negative)
+                    if (caster != null)
+                        damage = caster.MeleeDamageBonusDone(target, damage, attackType, DamageEffectType.DOT, GetSpellInfo());
 
-                        damage = target.MeleeDamageBonusTaken(caster, damage, attackType, DamageEffectType.DOT, GetSpellInfo());
-                        break;
-                    }
+                    damage = target.MeleeDamageBonusTaken(caster, damage, attackType, DamageEffectType.DOT, GetSpellInfo());
+                    break;
+                }
                 case AuraType.PeriodicDamagePercent:
                     // ceil obtained value, it may happen that 10 ticks for 10% damage may not kill owner
                     damage = (uint)Math.Ceiling(MathFunctions.CalculatePct((float)target.GetMaxHealth(), (float)damage));
@@ -5383,7 +5383,7 @@ namespace Game.Spells
             float critChance = modOwner.SpellCritChanceDone(null, this, GetSpellInfo().GetSchoolMask(), GetSpellInfo().GetAttackType());
             return Math.Max(0.0f, critChance);
         }
-        
+
         void HandleBreakableCCAuraProc(AuraApplication aurApp, ProcEventInfo eventInfo)
         {
             int damageLeft = (int)(GetAmount() - eventInfo.GetDamageInfo().GetDamage());
@@ -5752,6 +5752,24 @@ namespace Game.Spells
                 playerTarget.AddStoredAuraTeleportLocation(GetSpellInfo().Id);
             else if (!playerTarget.GetSession().IsLogingOut())
                 playerTarget.RemoveStoredAuraTeleportLocation(GetSpellInfo().Id);
+        }
+
+        [AuraEffectHandler(AuraType.StoreTeleportReturnPoint)]
+        void HandleCosmeticMounted(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
+                return;
+
+            if (apply)
+                aurApp.GetTarget().SetCosmeticMountDisplayId((uint)GetMiscValue());
+            else
+                aurApp.GetTarget().SetCosmeticMountDisplayId(0); // set cosmetic mount to 0, even if multiple auras are active; tested with zandalari racial + divine steed
+
+            Player playerTarget = aurApp.GetTarget().ToPlayer();
+            if (playerTarget == null)
+                return;
+
+            playerTarget.SendMovementSetCollisionHeight(playerTarget.GetCollisionHeight(), UpdateCollisionHeightReason.Force);
         }
         #endregion
     }

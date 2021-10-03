@@ -1301,6 +1301,7 @@ namespace Game.Entities
 
         public void Mount(uint mount, uint VehicleId = 0, uint creatureEntry = 0)
         {
+            RemoveAurasByType(AuraType.CosmeticMounted);
             if (mount != 0)
                 SetMountDisplayId(mount);
 

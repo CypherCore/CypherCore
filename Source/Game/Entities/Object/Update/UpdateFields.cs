@@ -1159,7 +1159,7 @@ namespace Game.Entities
         public UpdateField<uint> NativeDisplayID = new(32, 53);
         public UpdateField<float> NativeXDisplayScale = new(32, 54);
         public UpdateField<uint> MountDisplayID = new(32, 55);
-        public UpdateField<int> CosmeticMountDisplayID = new(32, 56);
+        public UpdateField<uint> CosmeticMountDisplayID = new(32, 56);
         public UpdateField<float> MinDamage = new(32, 57);
         public UpdateField<float> MaxDamage = new(32, 58);
         public UpdateField<float> MinOffHandDamage = new(32, 59);
@@ -1319,7 +1319,7 @@ namespace Game.Entities
             data.WriteUInt32(NativeDisplayID);
             data.WriteFloat(NativeXDisplayScale);
             data.WriteUInt32(MountDisplayID);
-            data.WriteInt32(CosmeticMountDisplayID);
+            data.WriteUInt32(CosmeticMountDisplayID);
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner) || fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Empath))
             {
                 data.WriteFloat(MinDamage);
@@ -1732,7 +1732,7 @@ namespace Game.Entities
                 }
                 if (changesMask[56])
                 {
-                    data.WriteInt32(CosmeticMountDisplayID);
+                    data.WriteUInt32(CosmeticMountDisplayID);
                 }
                 if (changesMask[57])
                 {

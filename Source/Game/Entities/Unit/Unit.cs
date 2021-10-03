@@ -1791,7 +1791,9 @@ namespace Game.Entities
         }
         public uint GetMountDisplayId() { return m_unitData.MountDisplayID; }
         public void SetMountDisplayId(uint mountDisplayId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MountDisplayID), mountDisplayId); }
-
+        uint GetCosmeticMountDisplayId() { return m_unitData.CosmeticMountDisplayID; }
+        public void SetCosmeticMountDisplayId(uint mountDisplayId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CosmeticMountDisplayID), mountDisplayId); }
+        
         public virtual float GetFollowAngle() { return MathFunctions.PiOver2; }
 
         public override ObjectGuid GetOwnerGUID() { return m_unitData.SummonedBy; }

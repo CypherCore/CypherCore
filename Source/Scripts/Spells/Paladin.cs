@@ -40,9 +40,12 @@ namespace Scripts.Spells.Paladin
         public const uint ConcentractionAura = 19746;
         public const uint DivinePurposeProc = 90174;
         public const uint DivineSteedHuman = 221883;
+        public const uint DivineSteedDwarf = 276111;
         public const uint DivineSteedDraenei = 221887;
+        public const uint DivineSteedDarkIronDwarf = 276112;
         public const uint DivineSteedBloodelf = 221886;
         public const uint DivineSteedTauren = 221885;
+        public const uint DivineSteedZandalariTroll = 294133;
         public const uint DivineStormDamage = 224239;
         public const uint EnduringLight = 40471;
         public const uint EnduringJudgement = 40472;
@@ -193,7 +196,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            OnEffectProc .Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy));
+            OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy));
         }
     }
 
@@ -240,7 +243,7 @@ namespace Scripts.Spells.Paladin
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.DivineSteedHuman, SpellIds.DivineSteedDraenei, SpellIds.DivineSteedBloodelf, SpellIds.DivineSteedTauren);
+            return ValidateSpellInfo(SpellIds.DivineSteedHuman, SpellIds.DivineSteedDwarf, SpellIds.DivineSteedDraenei, SpellIds.DivineSteedDarkIronDwarf, SpellIds.DivineSteedBloodelf, SpellIds.DivineSteedTauren, SpellIds.DivineSteedZandalariTroll);
         }
 
         void HandleOnCast()
@@ -250,14 +253,27 @@ namespace Scripts.Spells.Paladin
             uint spellId = SpellIds.DivineSteedHuman;
             switch (caster.GetRace())
             {
+                case Race.Human:
+                    spellId = SpellIds.DivineSteedHuman;
+                    break;
+                case Race.Dwarf:
+                    spellId = SpellIds.DivineSteedDwarf;
+                    break;
                 case Race.Draenei:
+                case Race.LightforgedDraenei:
                     spellId = SpellIds.DivineSteedDraenei;
+                    break;
+                case Race.DarkIronDwarf:
+                    spellId = SpellIds.DivineSteedDarkIronDwarf;
                     break;
                 case Race.BloodElf:
                     spellId = SpellIds.DivineSteedBloodelf;
                     break;
                 case Race.Tauren:
                     spellId = SpellIds.DivineSteedTauren;
+                    break;
+                case Race.ZandalariTroll:
+                    spellId = SpellIds.DivineSteedZandalariTroll;
                     break;
                 default:
                     break;
@@ -318,8 +334,8 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            DoCheckEffectProc .Add(new CheckEffectProcHandler(CheckEffectProc, 0, AuraType.Dummy));
-            OnEffectProc .Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy));
+            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckEffectProc, 0, AuraType.Dummy));
+            OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy));
         }
     }
 
@@ -418,7 +434,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            OnHit .Add(new HitHandler(HandleOnHit));
+            OnHit.Add(new HitHandler(HandleOnHit));
         }
     }
 
@@ -439,7 +455,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            OnHit .Add(new HitHandler(HandleOnHit));
+            OnHit.Add(new HitHandler(HandleOnHit));
         }
     }
 
@@ -688,8 +704,8 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            DoCheckEffectProc .Add(new CheckEffectProcHandler(CheckEffectProc, 0, AuraType.Dummy));
-            OnEffectProc .Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy));
+            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckEffectProc, 0, AuraType.Dummy));
+            OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy));
         }
     }
 
@@ -708,7 +724,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            OnEffectProc .Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy));
+            OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy));
         }
     }
 
@@ -726,7 +742,7 @@ namespace Scripts.Spells.Paladin
 
         public override void Register()
         {
-            DoCheckEffectProc .Add(new CheckEffectProcHandler(CheckEffectProc, 0, AuraType.ProcTriggerSpell));
+            DoCheckEffectProc.Add(new CheckEffectProcHandler(CheckEffectProc, 0, AuraType.ProcTriggerSpell));
         }
     }
 
