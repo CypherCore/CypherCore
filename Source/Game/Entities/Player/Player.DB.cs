@@ -3425,7 +3425,6 @@ namespace Game.Entities
                 stmt.AddValue(index++, (ushort)m_ExtraFlags);
                 stmt.AddValue(index++, m_stableSlots);
                 stmt.AddValue(index++, (ushort)atLoginFlags);
-                stmt.AddValue(index++, GetZoneId());
                 stmt.AddValue(index++, m_deathExpireTime);
 
                 ss.Clear();
