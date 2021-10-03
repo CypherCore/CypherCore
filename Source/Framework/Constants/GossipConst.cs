@@ -45,28 +45,52 @@ namespace Framework.Constants
 
     public enum GossipOptionIcon
     {
-        Chat = 0,                    // White Chat Bubble
-        Vendor = 1,                    // Brown Bag
-        Taxi = 2,                    // Flightmarker (Paperplane)
-        Trainer = 3,                    // Brown Book (Trainer)
-        Interact1 = 4,                    // Golden Interaction Wheel
-        Interact2 = 5,                    // Golden Interaction Wheel
-        MoneyBag = 6,                    // Brown Bag (With Gold Coin In Lower Corner)
-        Talk = 7,                    // White Chat Bubble (With "..." Inside)
-        Tabard = 8,                    // White Tabard
-        Battle = 9,                    // Two Crossed Swords
-        Dot = 10,                   // Yellow Dot/Point
-        Chat11 = 11,                   // White Chat Bubble
-        Chat12 = 12,                   // White Chat Bubble
-        Chat13 = 13,                   // White Chat Bubble
-        Unk14 = 14,                   // Invalid - Do Not Use
-        Unk15 = 15,                   // Invalid - Do Not Use
-        Chat16 = 16,                   // White Chat Bubble
-        Chat17 = 17,                   // White Chat Bubble
-        Chat18 = 18,                   // White Chat Bubble
-        Chat19 = 19,                   // White Chat Bubble
-        Chat20 = 20,                   // White Chat Bubble
-        Chat21 = 21,                   // transmogrifier?
+        None = 0,    // White chat bubble. Default
+        Vendor = 1,    // Brown bag
+        TaxiNode = 2,    // White wing
+        Trainer = 3,    // Brown book
+        SpiritHealer = 4,    // Golden interaction wheel (with red center)
+        Binder = 5,    // Golden interaction wheel
+        Banker = 6,    // Brown bag (with gold coin in lower corner)
+        PetitionVendor = 7,    // White chat bubble (with "..." inside)
+        TabardVendor = 8,    // White tabard
+        BattleMaster = 9,    // Two crossed swords
+        Auctioneer = 10,   // Stack of gold coins
+        TalentMaster = 11,   // White chat bubble
+        StableMaster = 12,   // White chat bubble
+        PetSpecializationMaster = 13,   // White chat bubble
+        GuildBanker = 14,   // White chat bubble
+        SpellClick = 15,   // White chat bubble
+        DisableXPGain = 16,   // White chat bubble
+        EnableXPGain = 17,   // White chat bubble
+        Mailbox = 18,   // White chat bubble
+        WorldPVPQueue = 19,   // White chat bubble
+        DungeonFinder = 20,   // White chat bubble
+        ArtifactRespec = 21,   // White chat bubble
+        CemeterySelect = 22,   // White chat bubble
+        SpecializationMaster = 23,   // White chat bubble
+        GlyphMaster = 24,   // White chat bubble
+        ScenarioQueue = 25,   // White chat bubble
+        GarrisonArchitect = 26,   // White chat bubble
+        GarrisonMission = 27,   // White chat bubble
+        GarrisonShipment = 28,   // Brown document
+        GarrisonTradeskill = 29,   // White chat bubble
+        GarrisonRecruitment = 30,   // White chat bubble
+        AdventureMap = 31,   // White chat bubble
+        GarrisonTalent = 32,   // White chat bubble
+        ContributionCollector = 33,   // White chat bubble
+        Transmogrify = 34,   // Purple helm
+        AzeriteRespec = 35,   // White chat bubble
+        IslandsQueue = 36,   // White chat bubble
+        UIItemInteraction = 37,   // White chat bubble
+        WorldMap = 38,   // White chat bubble
+        Unk39 = 39,   // 
+        ChromieTime = 40,   // White chat bubble
+        Unk41 = 41,   // 
+        RuneforgeCrafting = 42,   // White chat bubble
+        GuideRecruiter = 43,   // White chat bubble
+        RuneforgeUpgrading = 44,   // White chat bubble
+        CovenantRenown = 45,   // White chat bubble
         Max
     }
 

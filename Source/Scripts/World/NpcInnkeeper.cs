@@ -72,7 +72,7 @@ namespace Scripts.World.NpcInnkeeper
                         localizedEntry = Gossip.LocaleTrickOrTreat0;
                         break;
                 }
-                player.AddGossipItem(GossipOptionIcon.Chat, localizedEntry, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+                player.AddGossipItem(GossipOptionIcon.None, localizedEntry, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
             }
 
             if (me.IsQuestGiver())
@@ -116,7 +116,7 @@ namespace Scripts.World.NpcInnkeeper
                     default: localizedEntry = Gossip.LocaleInnkeeper0;
                         break;
                 }
-                player.AddGossipItem(GossipOptionIcon.Interact1, localizedEntry, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInn);
+                player.AddGossipItem(GossipOptionIcon.Binder, localizedEntry, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInn);
             }
 
             player.TalkedToCreature(me.GetEntry(), me.GetGUID());

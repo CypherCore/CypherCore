@@ -631,7 +631,7 @@ namespace Game
                 if (gMenuItem.OptionIcon >= GossipOptionIcon.Max)
                 {
                     Log.outError(LogFilter.Sql, $"Table gossip_menu_option for MenuId {gMenuItem.MenuId}, OptionIndex {gMenuItem.OptionIndex} has unknown icon id {gMenuItem.OptionIcon}. Replacing with GossipOptionIcon.Chat");
-                    gMenuItem.OptionIcon = GossipOptionIcon.Chat;
+                    gMenuItem.OptionIcon = GossipOptionIcon.None;
                 }
 
                 if (gMenuItem.OptionBroadcastTextId != 0)

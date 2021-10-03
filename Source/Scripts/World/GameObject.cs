@@ -607,8 +607,8 @@ namespace Scripts.World.GameObjects
             if (me.GetGoType() == GameObjectTypes.QuestGiver) /* != GAMEOBJECT_TYPE_QUESTGIVER) */
                 player.PrepareQuestMenu(me.GetGUID()); /* return true*/
 
-            player.AddGossipItem(GossipOptionIcon.Chat, GossipConst.GossipFelCrystalforgeItem1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef);
-            player.AddGossipItem(GossipOptionIcon.Chat, GossipConst.GossipFelCrystalforgeItem5, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+            player.AddGossipItem(GossipOptionIcon.None, GossipConst.GossipFelCrystalforgeItem1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef);
+            player.AddGossipItem(GossipOptionIcon.None, GossipConst.GossipFelCrystalforgeItem5, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
 
             player.SendGossipMenu(GossipConst.GossipFelCrystalforgeText, me.GetGUID());
 
@@ -623,17 +623,17 @@ namespace Scripts.World.GameObjects
             {
                 case eTradeskill.GossipActionInfoDef:
                     player.CastSpell(player, SpellIds.Create1FlaskOfBeast, false);
-                    player.AddGossipItem(GossipOptionIcon.Chat, GossipConst.GossipFelCrystalforgeItemReturn, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
+                    player.AddGossipItem(GossipOptionIcon.None, GossipConst.GossipFelCrystalforgeItemReturn, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
                     player.SendGossipMenu(GossipConst.GossipFelCrystalforgeItemTextReturn, me.GetGUID());
                     break;
                 case eTradeskill.GossipActionInfoDef + 1:
                     player.CastSpell(player, SpellIds.Create5FlaskOfBeast, false);
-                    player.AddGossipItem(GossipOptionIcon.Chat, GossipConst.GossipFelCrystalforgeItemReturn, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
+                    player.AddGossipItem(GossipOptionIcon.None, GossipConst.GossipFelCrystalforgeItemReturn, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
                     player.SendGossipMenu(GossipConst.GossipFelCrystalforgeItemTextReturn, me.GetGUID());
                     break;
                 case eTradeskill.GossipActionInfoDef + 2:
-                    player.AddGossipItem(GossipOptionIcon.Chat, GossipConst.GossipFelCrystalforgeItem1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef);
-                    player.AddGossipItem(GossipOptionIcon.Chat, GossipConst.GossipFelCrystalforgeItem5, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+                    player.AddGossipItem(GossipOptionIcon.None, GossipConst.GossipFelCrystalforgeItem1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef);
+                    player.AddGossipItem(GossipOptionIcon.None, GossipConst.GossipFelCrystalforgeItem5, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
                     player.SendGossipMenu(GossipConst.GossipFelCrystalforgeText, me.GetGUID());
                     break;
             }
@@ -651,8 +651,8 @@ namespace Scripts.World.GameObjects
             if (me.GetGoType() == GameObjectTypes.QuestGiver) /* != GAMEOBJECT_TYPE_QUESTGIVER) */
                 player.PrepareQuestMenu(me.GetGUID()); /* return true*/
 
-            player.AddGossipItem(GossipOptionIcon.Chat, GossipConst.GossipBashirCrystalforgeItem1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef);
-            player.AddGossipItem(GossipOptionIcon.Chat, GossipConst.GossipBashirCrystalforgeItem5, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+            player.AddGossipItem(GossipOptionIcon.None, GossipConst.GossipBashirCrystalforgeItem1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef);
+            player.AddGossipItem(GossipOptionIcon.None, GossipConst.GossipBashirCrystalforgeItem5, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
 
             player.SendGossipMenu(GossipConst.GossipBashirCrystalforgeText, me.GetGUID());
 
@@ -667,17 +667,17 @@ namespace Scripts.World.GameObjects
             {
                 case eTradeskill.GossipActionInfoDef:
                     player.CastSpell(player, SpellIds.Create1FlaskOfSorcerer, false);
-                    player.AddGossipItem(GossipOptionIcon.Chat, GossipConst.GossipBashirCrystalforgeItemReturn, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
+                    player.AddGossipItem(GossipOptionIcon.None, GossipConst.GossipBashirCrystalforgeItemReturn, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
                     player.SendGossipMenu(GossipConst.GossipBashirCrystalforgeItemTextReturn, me.GetGUID());
                     break;
                 case eTradeskill.GossipActionInfoDef + 1:
                     player.CastSpell(player, SpellIds.Create5FlaskOfSorcerer, false);
-                    player.AddGossipItem(GossipOptionIcon.Chat, GossipConst.GossipBashirCrystalforgeItemReturn, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
+                    player.AddGossipItem(GossipOptionIcon.None, GossipConst.GossipBashirCrystalforgeItemReturn, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 2);
                     player.SendGossipMenu(GossipConst.GossipBashirCrystalforgeItemTextReturn, me.GetGUID());
                     break;
                 case eTradeskill.GossipActionInfoDef + 2:
-                    player.AddGossipItem(GossipOptionIcon.Chat, GossipConst.GossipBashirCrystalforgeItem1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef);
-                    player.AddGossipItem(GossipOptionIcon.Chat, GossipConst.GossipBashirCrystalforgeItem5, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+                    player.AddGossipItem(GossipOptionIcon.None, GossipConst.GossipBashirCrystalforgeItem1, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef);
+                    player.AddGossipItem(GossipOptionIcon.None, GossipConst.GossipBashirCrystalforgeItem5, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
                     player.SendGossipMenu(GossipConst.GossipBashirCrystalforgeText, me.GetGUID());
                     break;
             }
@@ -909,7 +909,7 @@ namespace Scripts.World.GameObjects
             QuestStatus status = player.GetQuestStatus(QuestIds.DoingYourDuty);
             if (status == QuestStatus.Incomplete || status == QuestStatus.Complete || status == QuestStatus.Rewarded)
             {
-                player.AddGossipItem(GossipOptionIcon.Chat, GossipConst.GossipUseOuthouse, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
+                player.AddGossipItem(GossipOptionIcon.None, GossipConst.GossipUseOuthouse, eTradeskill.GossipSenderMain, eTradeskill.GossipActionInfoDef + 1);
                 player.SendGossipMenu(GossipConst.GossipOuthouseVacant, me.GetGUID());
             }
             else
