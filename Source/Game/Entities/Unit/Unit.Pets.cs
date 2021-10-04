@@ -183,7 +183,14 @@ namespace Game.Entities
                     SetCritterGUID(minion.GetGUID());
                     Player thisPlayer = ToPlayer();
                     if (thisPlayer != null)
-                        minion.SetBattlePetCompanionGUID(thisPlayer.m_activePlayerData.SummonedBattlePetGUID);
+                    {
+                        var pet = thisPlayer.GetSession().GetBattlePetMgr().GetPet(thisPlayer.m_activePlayerData.SummonedBattlePetGUID);
+                        if (pet != null)
+                        {
+                            minion.SetBattlePetCompanionGUID(thisPlayer.m_activePlayerData.SummonedBattlePetGUID);
+                            minion.SetWildBattlePetLevel(pet.PacketInfo.Level);
+                        }
+                    }
                 }
 
                 // PvP, FFAPvP

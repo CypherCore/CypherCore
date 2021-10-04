@@ -107,15 +107,26 @@ namespace Game.BattlePets
             do
             {
                 uint speciesId = result.Read<uint>(0);
-                byte quality = result.Read<byte>(1);
+                BattlePetBreedQuality quality = (BattlePetBreedQuality)result.Read<byte>(1);
 
-                if (!CliDB.BattlePetSpeciesStorage.ContainsKey(speciesId))
+                var battlePetSpecies = CliDB.BattlePetSpeciesStorage.LookupByKey(speciesId);
+                if (battlePetSpecies == null)
                 {
-                    Log.outError(LogFilter.Sql, "Non-existing BattlePetSpecies.db2 entry {0} was referenced in `battle_pet_quality` by row ({1}, {2}).", speciesId, speciesId, quality);
+                    Log.outError(LogFilter.Sql, $"Non-existing BattlePetSpecies.db2 entry {speciesId} was referenced in `battle_pet_quality` by row ({speciesId}, {quality}).");
                     continue;
                 }
 
-                // TODO: verify quality (0 - 3 for player pets or 0 - 5 for both player and tamer pets) if needed
+                if (quality >= BattlePetBreedQuality.Max)
+                {
+                    Log.outError(LogFilter.Sql, $"BattlePetSpecies.db2 entry {speciesId} was referenced in `battle_pet_quality` with non-existing quality {quality}).");
+                    continue;
+                }
+
+                if (battlePetSpecies.GetFlags().HasFlag(BattlePetSpeciesFlags.WellKnown) && quality > BattlePetBreedQuality.Rare)
+                {
+                    Log.outError(LogFilter.Sql, $"Learnable BattlePetSpecies.db2 entry {speciesId} was referenced in `battle_pet_quality` with invalid quality {quality}. Maximum allowed quality is BattlePetBreedQuality::Rare.");
+                    continue;
+                }
 
                 _defaultQualityPerSpecies[speciesId] = quality;
             } while (result.NextRow());
@@ -132,10 +143,10 @@ namespace Game.BattlePets
             return list.SelectRandom();
         }
 
-        public static byte GetDefaultPetQuality(uint species)
+        public static BattlePetBreedQuality GetDefaultPetQuality(uint species)
         {
             if (!_defaultQualityPerSpecies.ContainsKey(species))
-                return 0; // default poor
+                return BattlePetBreedQuality.Poor; // Default
 
             return _defaultQualityPerSpecies[species];
         }
@@ -260,7 +271,7 @@ namespace Game.BattlePets
         public void AddPet(uint species, uint creatureId, ushort level = 1)
         {
             ushort breed = 3;// default B/B
-            byte quality = 0;
+            BattlePetBreedQuality quality = 0;
 
             if (_availableBreedsPerSpecies.ContainsKey(species))
                 breed = _availableBreedsPerSpecies[species].SelectRandom();
@@ -271,7 +282,7 @@ namespace Game.BattlePets
             AddPet(species, creatureId, breed, quality, level);
         }
 
-        public void AddPet(uint species, uint creatureId, ushort breed, byte quality, ushort level = 1)
+        public void AddPet(uint species, uint creatureId, ushort breed, BattlePetBreedQuality quality, ushort level = 1)
         {
             BattlePetSpeciesRecord battlePetSpecies = CliDB.BattlePetSpeciesStorage.LookupByKey(species);
             if (battlePetSpecies == null) // should never happen
@@ -288,7 +299,7 @@ namespace Game.BattlePets
             pet.PacketInfo.Exp = 0;
             pet.PacketInfo.Flags = 0;
             pet.PacketInfo.Breed = breed;
-            pet.PacketInfo.Quality = quality;
+            pet.PacketInfo.Quality = (byte)quality;
             pet.PacketInfo.Name = "";
             pet.CalculateStats();
             pet.PacketInfo.Health = pet.PacketInfo.MaxHealth;
@@ -456,6 +467,7 @@ namespace Game.BattlePets
 
             // TODO: set proper CreatureID for spell DEFAULT_SUMMON_BATTLE_PET_SPELL (default EffectMiscValueA is 40721 - Murkimus the Gladiator)
             _owner.GetPlayer().SetSummonedBattlePetGUID(guid);
+            _owner.GetPlayer().SetCurrentBattlePetBreedQuality(pet.PacketInfo.Quality);
             _owner.GetPlayer().CastSpell(_owner.GetPlayer(), speciesEntry.SummonSpellID != 0 ? speciesEntry.SummonSpellID : SharedConst.DefaultSummonBattlePetSpell);
 
             // TODO: set pet level, quality... update fields
@@ -469,6 +481,7 @@ namespace Game.BattlePets
             {
                 pet.DespawnOrUnsummon();
                 ownerPlayer.SetSummonedBattlePetGUID(ObjectGuid.Empty);
+                ownerPlayer.SetCurrentBattlePetBreedQuality((byte)BattlePetBreedQuality.Poor);
             }
         }
 
@@ -519,7 +532,7 @@ namespace Game.BattlePets
         static Dictionary<uint, Dictionary<BattlePetState, int>> _battlePetBreedStates = new();
         static Dictionary<uint, Dictionary<BattlePetState, int>> _battlePetSpeciesStates = new();
         static MultiMap<uint, byte> _availableBreedsPerSpecies = new();
-        static Dictionary<uint, byte> _defaultQualityPerSpecies = new();
+        static Dictionary<uint, BattlePetBreedQuality> _defaultQualityPerSpecies = new();
 
         public class BattlePet
         {

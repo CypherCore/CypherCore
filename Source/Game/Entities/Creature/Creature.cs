@@ -1416,6 +1416,21 @@ namespace Game.Entities
             SetStatFlatModifier(UnitMods.Armor, UnitModifierFlatType.Base, armor);
         }
 
+        void SelectWildBattlePetLevel()
+        {
+            if (IsWildBattlePet())
+            {
+                byte wildBattlePetLevel = 1;
+
+                var areaTable = CliDB.AreaTableStorage.LookupByKey(GetZoneId());
+                if (areaTable != null)
+                    if (areaTable.WildBattlePetLevelMin > 0)
+                        wildBattlePetLevel = (byte)RandomHelper.URand(areaTable.WildBattlePetLevelMin, areaTable.WildBattlePetLevelMax);
+
+                SetWildBattlePetLevel(wildBattlePetLevel);
+            }
+        }
+
         float _GetHealthMod(CreatureEliteType Rank)
         {
             switch (Rank)                                           // define rates for each elite rank
@@ -3165,6 +3180,8 @@ namespace Game.Entities
             }
 
             SetSpawnHealth();
+
+            SelectWildBattlePetLevel();
 
             // checked at creature_template loading
             DefaultMovementType = (MovementGeneratorType)data.movementType;

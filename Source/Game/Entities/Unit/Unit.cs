@@ -767,6 +767,7 @@ namespace Game.Entities
         public bool IsTabardDesigner() { return HasNpcFlag(NPCFlags.TabardDesigner); }
         public bool IsAuctioner() { return HasNpcFlag(NPCFlags.Auctioneer); }
         public bool IsArmorer() { return HasNpcFlag(NPCFlags.Repair); }
+        public bool IsWildBattlePet() { return HasNpcFlag(NPCFlags.WildBattlePet); }
         public bool IsServiceProvider()
         {
             return HasNpcFlag(NPCFlags.Vendor | NPCFlags.Trainer | NPCFlags.FlightMaster |
@@ -1831,6 +1832,10 @@ namespace Game.Entities
         public void SetCritterGUID(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Critter), guid); }
         public ObjectGuid GetBattlePetCompanionGUID() { return m_unitData.BattlePetCompanionGUID; }
         public void SetBattlePetCompanionGUID(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BattlePetCompanionGUID), guid); }
+
+        public void SetWildBattlePetLevel(uint wildBattlePetLevel) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.WildBattlePetLevel), wildBattlePetLevel); }
+        public uint GetWildBattlePetLevel() { return m_unitData.WildBattlePetLevel; }
+        
         public override ObjectGuid GetCharmerOrOwnerGUID()
         {
             return !GetCharmerGUID().IsEmpty() ? GetCharmerGUID() : GetOwnerGUID();

@@ -72,4 +72,16 @@ namespace Framework.Constants
         New = 2,
         Removed = 3
     }
+
+    public enum BattlePetBreedQuality
+    {
+        Poor = 0,
+        Common = 1,
+        Uncommon = 2,
+        Rare = 3,
+        Epic = 4,
+        Legendary = 5,
+
+        Max
+    }
 }

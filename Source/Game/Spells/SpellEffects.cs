@@ -2973,13 +2973,9 @@ namespace Game.Spells
                             if (!m_targets.HasDst())
                                 return;
 
-                            float x, y, z;
                             float radius = effectInfo.CalcRadius();
                             for (byte i = 0; i < 15; ++i)
-                            {
-                                m_caster.GetRandomPoint(destTarget, radius, out x, out y, out z);
-                                m_caster.CastSpell(new Position(x, y, z), 54522, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
-                            }
+                                m_caster.CastSpell(m_caster.GetRandomPoint(destTarget, radius), 54522, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
                             break;
                         }
                         case 52173: // Coyote Spirit Despawn
@@ -5446,7 +5442,7 @@ namespace Game.Spells
 
             uint speciesId = m_CastItem.GetModifier(ItemModifier.BattlePetSpeciesId);
             ushort breed = (ushort)(m_CastItem.GetModifier(ItemModifier.BattlePetBreedData) & 0xFFFFFF);
-            byte quality = (byte)((m_CastItem.GetModifier(ItemModifier.BattlePetBreedData) >> 24) & 0xFF);
+            BattlePetBreedQuality quality = (BattlePetBreedQuality)((m_CastItem.GetModifier(ItemModifier.BattlePetBreedData) >> 24) & 0xFF);
             ushort level = (ushort)m_CastItem.GetModifier(ItemModifier.BattlePetLevel);
             uint creatureId = m_CastItem.GetModifier(ItemModifier.BattlePetDisplayId);
 
