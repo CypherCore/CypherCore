@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Framework.Dynamic;
+using Game.AI;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
@@ -69,6 +70,7 @@ namespace Scripts.Spells.Shaman
         public const uint TotemicPowerAttackPower = 28826;
         public const uint TotemicPowerArmor = 28827;
         public const uint WindfuryAttack = 25504;
+        public const uint WindRush = 192082;
 
         //Misc
         public const uint HunterInsanity = 95809;
@@ -1037,6 +1039,66 @@ namespace Scripts.Spells.Shaman
         public override void Register()
         {
             OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.Dummy));
+        }
+    }
+
+    // 192078 - Wind Rush Totem (Spell)
+    [Script] //  12676 - AreaTriggerId
+    class areatrigger_sha_wind_rush_totem : AreaTriggerEntityScript
+    {
+        public areatrigger_sha_wind_rush_totem() : base("areatrigger_sha_wind_rush_totem") { }
+
+        class areatrigger_sha_wind_rush_totemAI : AreaTriggerAI
+        {
+            static int REFRESH_TIME = 4500;
+
+            int _refreshTimer;
+
+            public areatrigger_sha_wind_rush_totemAI(AreaTrigger areatrigger) : base(areatrigger)
+            {
+                _refreshTimer = REFRESH_TIME;
+            }
+
+            public override void OnUpdate(uint diff)
+            {
+                _refreshTimer -= (int)diff;
+                if (_refreshTimer <= 0)
+                {
+                    Unit caster = at.GetCaster();
+                    if (caster != null)
+                    {
+                        foreach (ObjectGuid guid in at.GetInsideUnits())
+                        {
+                            Unit unit = Global.ObjAccessor.GetUnit(caster, guid);
+                            if (unit != null)
+                            {
+                                if (!caster.IsFriendlyTo(unit))
+                                    continue;
+
+                                caster.CastSpell(unit, SpellIds.WindRush, true);
+                            }
+                        }
+                    }
+                    _refreshTimer += REFRESH_TIME;
+                }
+            }
+
+            public override void OnUnitEnter(Unit unit)
+            {
+                Unit caster = at.GetCaster();
+                if (caster != null)
+                {
+                    if (!caster.IsFriendlyTo(unit))
+                        return;
+
+                    caster.CastSpell(unit, SpellIds.WindRush, true);
+                }
+            }
+        }
+
+        public override AreaTriggerAI GetAI(AreaTrigger areatrigger)
+        {
+            return new areatrigger_sha_wind_rush_totemAI(areatrigger);
         }
     }
 }
