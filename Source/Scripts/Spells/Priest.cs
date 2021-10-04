@@ -661,8 +661,7 @@ namespace Scripts.Spells.Priest
                 int stackAmount = GetStackAmount();
                 if (stackAmount > 1)
                 {
-                    CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-                    args.TriggeringAura = aurEff;
+                    CastSpellExtraArgs args = new(aurEff);
                     args.OriginalCaster = caster.GetGUID();
                     args.AddSpellMod(SpellValueMod.BasePoint0, stackAmount - 1);
                     target.CastSpell(target, SpellIds.PrayerOfMendingJump, args);
@@ -1003,11 +1002,9 @@ namespace Scripts.Spells.Priest
             }
             else
             {
-                SpellCastTargets targets = new SpellCastTargets();
-                targets.SetDst(destPos);
                 CastSpellExtraArgs args = new CastSpellExtraArgs(TriggerCastFlags.FullMask);
                 args.CastDifficulty = GetCastDifficulty();
-                GetCaster().CastSpell(targets, SpellIds.AngelicFeatherAreatrigger, args);
+                GetCaster().CastSpell(destPos, SpellIds.AngelicFeatherAreatrigger, args);
             }
         }
 
