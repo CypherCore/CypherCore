@@ -149,7 +149,7 @@ namespace Framework.Constants
     }
 
     public enum NPCFlags2
-    { 
+    {
         None = 0x00,
         ItemUpgradeMaster = 0x01,
         GarrisonArchitect = 0x02,
@@ -393,5 +393,11 @@ namespace Framework.Constants
         CanFly,
 
         Max
+    }
+
+    public enum VendorInventoryReason
+    {
+        None = 0,
+        Empty = 1
     }
 }

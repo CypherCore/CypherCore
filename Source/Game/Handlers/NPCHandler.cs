@@ -564,6 +564,8 @@ namespace Game
                     break;
             }
 
+            packet.Reason = (byte)(count != 0 ? VendorInventoryReason.None : VendorInventoryReason.Empty);
+
             SendPacket(packet);
         }
     }

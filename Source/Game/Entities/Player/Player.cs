@@ -2294,14 +2294,6 @@ namespace Game.Entities
                             if (!IsDead())
                                 canTalk = false;
                             break;
-                        case GossipOption.Vendor:
-                            VendorItemData vendorItems = creature.GetVendorItems();
-                            if (vendorItems == null || vendorItems.Empty())
-                            {
-                                Log.outError(LogFilter.Sql, "Creature (GUID: {0}, Entry: {1}) have UNIT_NPC_FLAG_VENDOR but have empty trading item list.", creature.GetGUID().ToString(), creature.GetEntry());
-                                canTalk = false;
-                            }
-                            break;
                         case GossipOption.Learndualspec:
                             canTalk = false;
                             break;
@@ -2324,8 +2316,9 @@ namespace Game.Entities
                         case GossipOption.Questgiver:
                             canTalk = false;
                             break;
-                        case GossipOption.Trainer:
                         case GossipOption.Gossip:
+                        case GossipOption.Vendor:
+                        case GossipOption.Trainer:
                         case GossipOption.Spiritguide:
                         case GossipOption.Innkeeper:
                         case GossipOption.Banker:
