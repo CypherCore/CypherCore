@@ -89,7 +89,7 @@ namespace Game.Chat
 
             uint scenePackageId = args.NextUInt32();
             if (!uint.TryParse(args.NextString(""), out uint flags))
-                flags = (uint)SceneFlags.Unk16;
+                flags = (uint)SceneFlags.None;
 
             Player target = handler.GetSelectedPlayerOrSelf();
             if (!target)

@@ -85,7 +85,7 @@ namespace Game.Entities
             return sceneInstanceID;
         }
 
-        public uint PlaySceneByPackageId(uint sceneScriptPackageId, SceneFlags playbackflags = SceneFlags.Unk16, Position position = null)
+        public uint PlaySceneByPackageId(uint sceneScriptPackageId, SceneFlags playbackflags, Position position = null)
         {
             SceneTemplate sceneTemplate = new();
             sceneTemplate.SceneId = 0;
@@ -128,6 +128,8 @@ namespace Game.Entities
                 GetPlayer().SendSysMessage(CypherStrings.CommandSceneDebugCancel, sceneInstanceID);
 
             SceneTemplate sceneTemplate = GetSceneTemplateFromInstanceId(sceneInstanceID);
+            if (sceneTemplate.PlaybackFlags.HasFlag(SceneFlags.NotCancelable))
+                return;
 
             // Must be done before removing aura
             RemoveSceneInstanceId(sceneInstanceID);
@@ -137,7 +139,7 @@ namespace Game.Entities
 
             Global.ScriptMgr.OnSceneCancel(GetPlayer(), sceneInstanceID, sceneTemplate);
 
-            if (sceneTemplate.PlaybackFlags.HasAnyFlag(SceneFlags.CancelAtEnd))
+            if (sceneTemplate.PlaybackFlags.HasFlag(SceneFlags.FadeToBlackscreenOnCancel))
                 CancelScene(sceneInstanceID, false);
         }
 
@@ -159,7 +161,7 @@ namespace Game.Entities
 
             Global.ScriptMgr.OnSceneComplete(GetPlayer(), sceneInstanceID, sceneTemplate);
 
-            if (sceneTemplate.PlaybackFlags.HasAnyFlag(SceneFlags.CancelAtEnd))
+            if (sceneTemplate.PlaybackFlags.HasFlag(SceneFlags.FadeToBlackscreenOnComplete))
                 CancelScene(sceneInstanceID, false);
         }
 
@@ -246,7 +248,7 @@ namespace Game.Entities
 
         Player GetPlayer() { return _player; }
 
-        void RecreateScene(uint sceneScriptPackageId, SceneFlags playbackflags = SceneFlags.Unk16, Position position = null)
+        void RecreateScene(uint sceneScriptPackageId, SceneFlags playbackflags, Position position = null)
         {
             CancelSceneByPackageId(sceneScriptPackageId);
             PlaySceneByPackageId(sceneScriptPackageId, playbackflags, position);

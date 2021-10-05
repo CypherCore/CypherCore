@@ -2778,12 +2778,13 @@ namespace Framework.Constants
 
     public enum SceneFlags
     {
-        Unk1 = 0x01,
-        CancelAtEnd = 0x02,
+        None = 0x00,
+        PlayerNonInteractablePhased = 0x01, // Sets UNIT_FLAG_IMMUNE_TO_PC + UNIT_FLAG_IMMUNE_TO_NPC + UNIT_FLAG_PACIFIED
+        FadeToBlackscreenOnComplete = 0x02,
         NotCancelable = 0x04,
-        Unk8 = 0x08,
-        Unk16 = 0x10, // 16, most common value
-        Unk32 = 0x20
+        FadeToBlackscreenOnCancel = 0x08,
+
+        IgnoreTransport = 0x20
     }
 
     public enum WorldMapTransformsFlags

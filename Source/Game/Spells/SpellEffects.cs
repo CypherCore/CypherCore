@@ -5586,7 +5586,7 @@ namespace Game.Spells
             if (!m_caster.IsTypeId(TypeId.Player))
                 return;
 
-            m_caster.ToPlayer().GetSceneMgr().PlaySceneByPackageId((uint)effectInfo.MiscValue, SceneFlags.Unk1, destTarget);
+            m_caster.ToPlayer().GetSceneMgr().PlaySceneByPackageId((uint)effectInfo.MiscValue, SceneFlags.PlayerNonInteractablePhased, destTarget);
         }
 
         [SpellEffectHandler(SpellEffectName.PlayScene)]
