@@ -699,7 +699,7 @@ namespace Game.Entities
                 ToCreature().GetAI().JustUnregisteredAreaTrigger(areaTrigger);
         }
 
-        AreaTrigger GetAreaTrigger(uint spellId)
+        public AreaTrigger GetAreaTrigger(uint spellId)
         {
             List<AreaTrigger> areaTriggers = GetAreaTriggers(spellId);
             return areaTriggers.Empty() ? null : areaTriggers[0];

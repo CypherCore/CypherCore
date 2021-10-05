@@ -16,13 +16,13 @@
  */
 
 using Framework.Constants;
+using Game.AI;
+using Game.DataStorage;
 using Game.Entities;
 using Game.Scripting;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using Game.DataStorage;
 
 namespace Scripts.Spells.Paladin
 {
@@ -38,6 +38,11 @@ namespace Scripts.Spells.Paladin
         public const uint BlessingOfLowerCityShaman = 37881;
         public const uint BlindingLightEffect = 105421;
         public const uint ConcentractionAura = 19746;
+        public const uint ConsecratedGroundPassive = 204054;
+        public const uint ConsecratedGroundSlow = 204242;
+        public const uint Consecration = 26573;
+        public const uint ConsecrationDamage = 81297;
+        public const uint ConsecrationProtectionAura = 188370;
         public const uint DivinePurposeProc = 90174;
         public const uint DivineSteedHuman = 221883;
         public const uint DivineSteedDwarf = 276111;
@@ -56,6 +61,7 @@ namespace Scripts.Spells.Paladin
         public const uint Forbearance = 25771;
         public const uint GuardianOfAcientKings = 86659;
         public const uint HammerOfJustice = 853;
+        public const uint HammerOfTheRighteousAoe = 88263;
         public const uint HandOfSacrifice = 6940;
         public const uint HolyMending = 64891;
         public const uint HolyPowerArmor = 28790;
@@ -181,6 +187,57 @@ namespace Scripts.Spells.Paladin
         }
     }
 
+    [Script] // 26573 - Consecration
+    class spell_pal_consecration : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ConsecrationDamage, SpellIds.ConsecrationProtectionAura, SpellIds.ConsecratedGroundPassive, SpellIds.ConsecratedGroundSlow);
+        }
+
+        void HandleEffectPeriodic(AuraEffect aurEff)
+        {
+            AreaTrigger at = GetTarget().GetAreaTrigger(SpellIds.Consecration);
+            if (at != null)
+                GetTarget().CastSpell(at.GetPosition(), SpellIds.ConsecrationDamage, new CastSpellExtraArgs());
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(HandleEffectPeriodic, 0, AuraType.PeriodicDummy));
+        }
+    }
+
+    // 26573 - Consecration
+    [Script] //  9228 - AreaTriggerId
+    class areatrigger_pal_consecration : AreaTriggerAI
+    {
+        public areatrigger_pal_consecration(AreaTrigger areatrigger) : base(areatrigger) { }
+
+        public override void OnUnitEnter(Unit unit)
+        {
+            Unit caster = at.GetCaster();
+            if (caster != null)
+            {
+                // 243597 is also being cast as protection, but CreateObject is not sent, either serverside areatrigger for this aura or unused - also no visual is seen
+                if (unit == caster && caster.IsPlayer() && caster.ToPlayer().GetPrimarySpecialization() == (uint)TalentSpecialization.PaladinProtection)
+                    caster.CastSpell(caster, SpellIds.ConsecrationProtectionAura);
+
+                if (caster.IsValidAttackTarget(unit))
+                    if (caster.HasAura(SpellIds.ConsecratedGroundPassive))
+                        caster.CastSpell(unit, SpellIds.ConsecratedGroundSlow);
+            }
+        }
+
+        public override void OnUnitExit(Unit unit)
+        {
+            if (at.GetCasterGuid() == unit.GetGUID())
+                unit.RemoveAurasDueToSpell(SpellIds.ConsecrationProtectionAura, at.GetCasterGuid());
+
+            unit.RemoveAurasDueToSpell(SpellIds.ConsecratedGroundSlow, at.GetCasterGuid());
+        }
+    }
+
     [Script] // 196926 - Crusader Might
     class spell_pal_crusader_might : AuraScript
     {
@@ -288,8 +345,7 @@ namespace Scripts.Spells.Paladin
         }
     }
 
-    // 224239 - Divine Storm
-    [Script]
+    [Script] // 224239 - Divine Storm
     class spell_pal_divine_storm : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -339,7 +395,6 @@ namespace Scripts.Spells.Paladin
         }
     }
 
-
     [Script] // -85043 - Grand Crusader
     class spell_pal_grand_crusader : AuraScript
     {
@@ -365,8 +420,7 @@ namespace Scripts.Spells.Paladin
         }
     }
 
-    // 54968 - Glyph of Holy Light
-    [Script]
+    [Script] // 54968 - Glyph of Holy Light
     class spell_pal_glyph_of_holy_light : SpellScript
     {
         void FilterTargets(List<WorldObject> targets)
@@ -386,8 +440,27 @@ namespace Scripts.Spells.Paladin
         }
     }
 
-    // 6940 - Hand of Sacrifice
-    [Script]
+    [Script] // 53595 - Hammer of the Righteous
+    class spell_pal_hammer_of_the_righteous : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ConsecrationProtectionAura, SpellIds.HammerOfTheRighteousAoe);
+        }
+
+        void HandleAoEHit(uint effIndex)
+        {
+            if (GetCaster().HasAura(SpellIds.ConsecrationProtectionAura))
+                GetCaster().CastSpell(GetHitUnit(), SpellIds.HammerOfTheRighteousAoe);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleAoEHit, 0, SpellEffectName.SchoolDamage));
+        }
+    }
+
+    [Script] // 6940 - Hand of Sacrifice
     class spell_pal_hand_of_sacrifice : AuraScript
     {
         int remainingAmount;
@@ -459,8 +532,7 @@ namespace Scripts.Spells.Paladin
         }
     }
 
-    // 20473 - Holy Shock
-    [Script]
+    [Script] // 20473 - Holy Shock
     class spell_pal_holy_shock : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -521,8 +593,7 @@ namespace Scripts.Spells.Paladin
         }
     }
 
-    // 37705 - Healing Discount
-    [Script]
+    [Script] // 37705 - Healing Discount
     class spell_pal_item_healing_discount : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -585,8 +656,7 @@ namespace Scripts.Spells.Paladin
         }
     }
 
-    // 633 - Lay on Hands
-    [Script]
+    [Script] // 633 - Lay on Hands
     class spell_pal_lay_on_hands : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -621,8 +691,7 @@ namespace Scripts.Spells.Paladin
         }
     }
 
-    // 53651 - Beacon of Light
-    [Script]
+    [Script] // 53651 - Beacon of Light
     class spell_pal_light_s_beacon : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
