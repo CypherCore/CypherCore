@@ -130,7 +130,8 @@ namespace Game
                 EnumCharactersResult.RaceUnlock raceUnlock = new();
                 raceUnlock.RaceID = requirement.Key;
                 raceUnlock.HasExpansion = (byte)GetAccountExpansion() >= requirement.Value.Expansion;
-                raceUnlock.HasAchievement = requirement.Value.AchievementId != 0 /*|| HasAchievement(requirement.Value.AchievementId)*/;
+                raceUnlock.HasAchievement = requirement.Value.AchievementId != 0 && (WorldConfig.GetBoolValue(WorldCfg.CharacterCreatingDisableAlliedRaceAchievementRequirement)
+                    /* || HasAccountAchievement(requirement.second.AchievementId)*/);
                 charResult.RaceUnlockData.Add(raceUnlock);
             }
 
@@ -797,16 +798,28 @@ namespace Game
             if (pCurrChar.GetCinematic() == 0)
             {
                 pCurrChar.SetCinematic(1);
-                ChrClassesRecord cEntry = CliDB.ChrClassesStorage.LookupByKey(pCurrChar.GetClass());
-                if (cEntry != null)
+                var playerInfo = Global.ObjectMgr.GetPlayerInfo(pCurrChar.GetRace(), pCurrChar.GetClass());
+                if (playerInfo != null)
                 {
-                    ChrRacesRecord rEntry = CliDB.ChrRacesStorage.LookupByKey(pCurrChar.GetRace());
-                    if (pCurrChar.GetClass() == Class.DemonHunter) // @todo: find a more generic solution
-                        pCurrChar.SendMovieStart(469);
-                    else if (cEntry.CinematicSequenceID != 0)
-                        pCurrChar.SendCinematicStart(cEntry.CinematicSequenceID);
-                    else if (rEntry != null)
-                        pCurrChar.SendCinematicStart(rEntry.CinematicSequenceID);
+                    switch (pCurrChar.GetCreateMode())
+                    {
+                        case PlayerCreateMode.Normal:
+                            if (playerInfo.introMovieId.HasValue)
+                                pCurrChar.SendMovieStart(playerInfo.introMovieId.Value);
+                            else if (playerInfo.introSceneId.HasValue)
+                                pCurrChar.GetSceneMgr().PlayScene(playerInfo.introSceneId.Value);
+                            else if (CliDB.ChrClassesStorage.TryGetValue((uint)pCurrChar.GetClass(), out ChrClassesRecord chrClassesRecord) && chrClassesRecord.CinematicSequenceID != 0)
+                                pCurrChar.SendCinematicStart(chrClassesRecord.CinematicSequenceID);
+                            else if (CliDB.ChrRacesStorage.TryGetValue((uint)pCurrChar.GetRace(), out ChrRacesRecord chrRacesRecord) && chrRacesRecord.CinematicSequenceID != 0)
+                                pCurrChar.SendCinematicStart(chrRacesRecord.CinematicSequenceID);
+                            break;
+                        case PlayerCreateMode.NPE:
+                            if (playerInfo.introSceneIdNPE.HasValue)
+                                pCurrChar.GetSceneMgr().PlayScene(playerInfo.introSceneIdNPE.Value);
+                            break;
+                        default:
+                            break;
+                    }
                 }
             }
 

@@ -1384,6 +1384,7 @@ namespace Framework.Constants
         CalculateCreatureZoneAreaData,
         CalculateGameobjectZoneAreaData,
         CastUnstuck,
+        CharacterCreatingDisableAlliedRaceAchievementRequirement,
         CharacterCreatingDisabled,
         CharacterCreatingDisabledClassmask,
         CharacterCreatingDisabledRacemask,

@@ -278,6 +278,10 @@ namespace Game.Entities
         public List<PlayerCreateInfoAction> action = new();
         public List<SkillRaceClassInfoRecord> skills = new();
 
+        public Optional<uint> introMovieId;
+        public Optional<uint> introSceneId;
+        public Optional<uint> introSceneIdNPE;
+
         public PlayerLevelInfo[] levelInfo = new PlayerLevelInfo[WorldConfig.GetIntValue(WorldCfg.MaxPlayerLevel)];
 
         public struct CreatePosition

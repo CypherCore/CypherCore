@@ -6415,6 +6415,8 @@ namespace Game.Entities
             m_lastFallZ = z;
         }
 
+        public PlayerCreateMode GetCreateMode() { return m_createMode;  }
+        
         public byte GetCinematic() { return m_cinematic; }
         public void SetCinematic(byte cine) { m_cinematic = cine; }
 

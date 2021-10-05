@@ -5598,9 +5598,8 @@ namespace Game
             var time = Time.GetMSTime();
             // Load playercreate
             {
-                //                                         0     1      2    3           4           5           6            7        8               9               10              11               12
-                SQLResult result = DB.World.Query("SELECT race, class, map, position_x, position_y, position_z, orientation, npe_map, npe_position_x, npe_position_y, npe_position_z, npe_orientation, npe_transport_guid FROM playercreateinfo");
-
+                //                                         0     1      2    3           4           5           6            7        8               9               10              11               12                  13              14              15
+                SQLResult result = DB.World.Query("SELECT race, class, map, position_x, position_y, position_z, orientation, npe_map, npe_position_x, npe_position_y, npe_position_z, npe_orientation, npe_transport_guid, intro_movie_id, intro_scene_id, npe_intro_scene_id FROM playercreateinfo");
                 if (result.IsEmpty())
                 {
                     Log.outInfo(LogFilter.ServerLoading, "Loaded 0 player create definitions. DB table `playercreateinfo` is empty.");
@@ -5659,7 +5658,7 @@ namespace Game
                     info.createPosition.Loc = new WorldLocation(mapId, positionX, positionY, positionZ, orientation);
 
                     if (!result.IsNull(7))
-                {
+                    {
                         info.createPositionNPE.HasValue = true;
 
                         info.createPositionNPE.Value.Loc = new WorldLocation(result.Read<uint>(7), result.Read<float>(8), result.Read<float>(9), result.Read<float>(10), result.Read<float>(11));
@@ -5677,6 +5676,33 @@ namespace Game
                             Log.outError(LogFilter.Sql, $"Invalid NPE transport spawn id {info.createPositionNPE.Value.TransportGuid.Value} for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
                             info.createPositionNPE.HasValue = false; // remove entire NPE data - assume user put transport offsets into npe_position fields
                         }
+                    }
+
+                    if (!result.IsNull(13))
+                    {
+                        uint introMovieId = result.Read<uint>(13);
+                        if (CliDB.MovieStorage.ContainsKey(introMovieId))
+                            info.introMovieId.Set(introMovieId);
+                        else
+                            Log.outError(LogFilter.Sql, $"Invalid intro movie id {introMovieId} for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
+                    }
+
+                    if (!result.IsNull(14))
+                    {
+                        uint introSceneId = result.Read<uint>(14);
+                        if (GetSceneTemplate(introSceneId) != null)
+                            info.introSceneId.Set(introSceneId);
+                        else
+                            Log.outError(LogFilter.Sql, $"Invalid intro scene id {introSceneId} for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
+                    }
+
+                    if (!result.IsNull(15))
+                    {
+                        uint introSceneId = result.Read<uint>(15);
+                        if (GetSceneTemplate(introSceneId) != null)
+                            info.introSceneIdNPE.Set(introSceneId);
+                        else
+                            Log.outError(LogFilter.Sql, $"Invalid NPE intro scene id {introSceneId} for class {currentclass} race {currentrace} pair in `playercreateinfo` table, ignoring.");
                     }
 
                     _playerInfo[currentrace][currentclass] = info;

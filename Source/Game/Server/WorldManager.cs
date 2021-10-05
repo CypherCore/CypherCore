@@ -724,6 +724,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading linked spells...");
             Global.SpellMgr.LoadSpellLinked();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading Scenes Templates..."); // must be before LoadPlayerInfo
+            Global.ObjectMgr.LoadSceneTemplates();
+
             Log.outInfo(LogFilter.ServerLoading, "Loading Player Create Data...");
             Global.ObjectMgr.LoadPlayerInfo();
 
@@ -741,9 +744,6 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Conversation Templates...");
             Global.ConversationDataStorage.LoadConversationTemplates();
-
-            Log.outInfo(LogFilter.ServerLoading, "Loading Scenes Templates...");
-            Global.ObjectMgr.LoadSceneTemplates();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Player Choices...");
             Global.ObjectMgr.LoadPlayerChoices();
