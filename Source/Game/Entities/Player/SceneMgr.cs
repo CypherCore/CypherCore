@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Game.DataStorage;
+using Game.Networking;
 using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
@@ -28,6 +29,7 @@ namespace Game.Entities
         Player _player;
         Dictionary<uint, SceneTemplate> _scenesByInstance = new();
         uint _standaloneSceneInstanceID;
+        List<ServerPacket> _delayedScenes = new();
         bool _isDebuggingScenes;
 
         public SceneMgr(Player player)
@@ -69,8 +71,12 @@ namespace Game.Entities
             playScene.Location = position;
             playScene.TransportGUID = GetPlayer().GetTransGUID();
             playScene.Encrypted = sceneTemplate.Encrypted;
+            playScene.Write();
 
-            GetPlayer().SendPacket(playScene);
+            if (GetPlayer().IsInWorld)
+                GetPlayer().SendPacket(playScene);
+            else
+                _delayedScenes.Add(playScene);
 
             AddInstanceIdToSceneMap(sceneInstanceID, sceneTemplate);
 
@@ -228,6 +234,14 @@ namespace Game.Entities
                     ++activeSceneCount;
 
             return activeSceneCount;
+        }
+
+        public void TriggerDelayedScenes()
+        {
+            foreach (var playScene in _delayedScenes)
+                GetPlayer().SendPacket(playScene);
+
+            _delayedScenes.Clear();
         }
 
         Player GetPlayer() { return _player; }

@@ -718,21 +718,24 @@ namespace Game.Entities
 
             if (flags.ActivePlayer)
             {
-                bool HasSceneInstanceIDs = false;
+                Player player = ToPlayer();
+
+                bool HasSceneInstanceIDs = !player.GetSceneMgr().GetSceneTemplateByInstanceMap().Empty();
                 bool HasRuneState = ToUnit().GetPowerIndex(PowerType.Runes) != (int)PowerType.Max;
 
                 data.WriteBit(HasSceneInstanceIDs);
                 data.WriteBit(HasRuneState);
                 data.FlushBits();
-                //if (HasSceneInstanceIDs)
-                //{
-                //    *data << uint(SceneInstanceIDs.size());
-                //    for (std::size_t i = 0; i < SceneInstanceIDs.size(); ++i)
-                //        *data << uint(SceneInstanceIDs[i]);
-                //}
+
+                if (HasSceneInstanceIDs)
+                {
+                    data.WriteInt32(player.GetSceneMgr().GetSceneTemplateByInstanceMap().Count);
+                    foreach (var pair in player.GetSceneMgr().GetSceneTemplateByInstanceMap())
+                        data.WriteUInt32(pair.Key);
+                }
+
                 if (HasRuneState)
                 {
-                    Player player = ToPlayer();
                     float baseCd = player.GetRuneBaseCooldown();
                     uint maxRunes = (uint)player.GetMaxPower(PowerType.Runes);
 

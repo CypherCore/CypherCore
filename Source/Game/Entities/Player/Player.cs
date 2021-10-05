@@ -5655,6 +5655,8 @@ namespace Game.Entities
                 else
                     ClearQuestSharingInfo();
             }
+
+            GetSceneMgr().TriggerDelayedScenes();
         }
 
         public void RemoveSocial()
