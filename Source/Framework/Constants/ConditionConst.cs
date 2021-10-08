@@ -102,7 +102,8 @@ namespace Framework.Constants
         TerrainSwap = 25,
         Phase = 26,
         Graveyard = 27,
-        Max = 28
+        AreaTrigger = 28,
+        Max
     }
 
     public enum RelationType

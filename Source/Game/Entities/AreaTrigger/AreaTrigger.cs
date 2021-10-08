@@ -355,6 +355,13 @@ namespace Game.Entities
                     break;
             }
 
+            if (GetTemplate() != null)
+            {
+                var conditions = Global.ConditionMgr.GetConditionsForAreaTrigger(GetTemplate().Id.Id, GetTemplate().Id.IsServerSide);
+                if (!conditions.Empty())
+                    targetList.RemoveAll(target => !Global.ConditionMgr.IsObjectMeetToConditions(target, conditions));
+            }
+
             HandleUnitEnterExit(targetList);
         }
 
