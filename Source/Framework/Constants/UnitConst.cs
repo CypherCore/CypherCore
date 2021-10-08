@@ -396,7 +396,8 @@ namespace Framework.Constants
         MaxTargets,
         AuraStack,
         CritChance,
-        DurationPct
+        DurationPct,
+        Duration
     }
 
     public enum CombatRating

@@ -2048,34 +2048,39 @@ namespace Game.Spells
 
                             spellAura.SetDiminishGroup(hitInfo.DRGroup);
 
-                            hitInfo.AuraDuration = caster.ModSpellDuration(m_spellInfo, unit, hitInfo.AuraDuration, hitInfo.Positive, spellAura.GetEffectMask());
-
-                            if (hitInfo.AuraDuration > 0)
+                            if (!m_spellValue.Duration.HasValue)
                             {
-                                hitInfo.AuraDuration *= (int)m_spellValue.DurationMul;
+                                hitInfo.AuraDuration *= caster.ModSpellDuration(m_spellInfo, unit, hitInfo.AuraDuration, hitInfo.Positive, spellAura.GetEffectMask());
 
-                                // Haste modifies duration of channeled spells
-                                if (m_spellInfo.IsChanneled())
-                                    caster.ModSpellDurationTime(m_spellInfo, ref hitInfo.AuraDuration, this);
-                                else if (m_spellInfo.HasAttribute(SpellAttr5.HasteAffectDuration))
+                                if (hitInfo.AuraDuration > 0)
                                 {
-                                    int origDuration = hitInfo.AuraDuration;
-                                    hitInfo.AuraDuration = 0;
-                                    foreach (AuraEffect auraEff in spellAura.GetAuraEffects())
-                                    {
-                                        if (auraEff != null)
-                                        {
-                                            int period = auraEff.GetPeriod();
-                                            if (period != 0)  // period is hastened by UNIT_MOD_CAST_SPEED
-                                                hitInfo.AuraDuration = Math.Max(Math.Max(origDuration / period, 1) * period, hitInfo.AuraDuration);
-                                        }
-                                    }
+                                    hitInfo.AuraDuration *= (int)m_spellValue.DurationMul;
 
-                                    // if there is no periodic effect
-                                    if (hitInfo.AuraDuration == 0)
-                                        hitInfo.AuraDuration = (int)(origDuration * m_originalCaster.m_unitData.ModCastingSpeed);
+                                    // Haste modifies duration of channeled spells
+                                    if (m_spellInfo.IsChanneled())
+                                        caster.ModSpellDurationTime(m_spellInfo, ref hitInfo.AuraDuration, this);
+                                    else if (m_spellInfo.HasAttribute(SpellAttr5.HasteAffectDuration))
+                                    {
+                                        int origDuration = hitInfo.AuraDuration;
+                                        hitInfo.AuraDuration = 0;
+                                        foreach (AuraEffect auraEff in spellAura.GetAuraEffects())
+                                        {
+                                            if (auraEff != null)
+                                            {
+                                                int period = auraEff.GetPeriod();
+                                                if (period != 0)  // period is hastened by UNIT_MOD_CAST_SPEED
+                                                    hitInfo.AuraDuration = Math.Max(Math.Max(origDuration / period, 1) * period, hitInfo.AuraDuration);
+                                            }
+                                        }
+
+                                        // if there is no periodic effect
+                                        if (hitInfo.AuraDuration == 0)
+                                            hitInfo.AuraDuration = (int)(origDuration * m_originalCaster.m_unitData.ModCastingSpeed);
+                                    }
                                 }
                             }
+                            else
+                                hitInfo.AuraDuration = m_spellValue.Duration.Value;
 
                             if (hitInfo.AuraDuration != spellAura.GetMaxDuration())
                             {
@@ -2799,23 +2804,29 @@ namespace Game.Spells
             if (m_spellInfo.IsChanneled())
             {
                 int duration = m_spellInfo.GetDuration();
-                if (duration > 0)
+                if (duration > 0 || m_spellValue.Duration.HasValue)
                 {
-                    // First mod_duration then haste - see Missile Barrage
-                    // Apply duration mod
-                    Player modOwner = m_caster.GetSpellModOwner();
-                    if (modOwner != null)
-                        modOwner.ApplySpellMod(m_spellInfo, SpellModOp.Duration, ref duration);
+                    if (!m_spellValue.Duration.HasValue)
+                    {
+                        // First mod_duration then haste - see Missile Barrage
+                        // Apply duration mod
+                        Player modOwner = m_caster.GetSpellModOwner();
+                        if (modOwner != null)
+                            modOwner.ApplySpellMod(m_spellInfo, SpellModOp.Duration, ref duration);
 
-                    duration = (int)(duration * m_spellValue.DurationMul);
+                        duration = (int)(duration * m_spellValue.DurationMul);
 
-                    // Apply haste mods
-                    m_caster.ModSpellDurationTime(m_spellInfo, ref duration, this);
+                        // Apply haste mods
+                        m_caster.ModSpellDurationTime(m_spellInfo, ref duration, this);
+                    }
+                    else
+                        duration = m_spellValue.Duration.Value;
 
+                    m_channeledDuration = duration;
                     SendChannelStart((uint)duration);
                 }
                 else if (duration == -1)
-                    SendChannelStart((uint)duration);
+                    SendChannelStart(unchecked((uint)duration));
 
                 if (duration != 0)
                 {
@@ -6424,7 +6435,10 @@ namespace Game.Spells
                 return;
 
             //check pushback reduce
-            int delaytime = MathFunctions.CalculatePct(m_spellInfo.GetDuration(), 25); // channeling delay is normally 25% of its time per hit
+            // should be affected by modifiers, not take the dbc duration.
+            int duration = ((m_channeledDuration > 0) ? m_channeledDuration : m_spellInfo.GetDuration());
+
+            int delaytime = MathFunctions.CalculatePct(duration, 25); // channeling delay is normally 25% of its time per hit
             int delayReduce = 100;                                    // must be initialized to 100 for percent modifiers
 
             Player player = unitCaster.GetSpellModOwner();
@@ -6878,6 +6892,9 @@ namespace Game.Spells
                     break;
                 case SpellValueMod.DurationPct:
                     m_spellValue.DurationMul = (float)value / 100.0f;
+                    break;
+                case SpellValueMod.Duration:
+                    m_spellValue.Duration.Set(value);
                     break;
             }
         }
@@ -7415,6 +7432,7 @@ namespace Game.Spells
 
         List<SpellPowerCost> m_powerCost = new();
         int m_casttime;                                   // Calculated spell cast time initialized only in Spell.prepare
+        int m_channeledDuration;                          // Calculated channeled spell duration in order to calculate correct pushback.
         bool m_canReflect;                                  // can reflect this spell?
         bool m_autoRepeat;
         byte m_runesState;
@@ -8073,6 +8091,7 @@ namespace Game.Spells
         public int AuraStackAmount;
         public float DurationMul;
         public float CriticalChance;
+        public Optional<int> Duration;
     }
 
     // Spell modifier (used for modify other spells)
