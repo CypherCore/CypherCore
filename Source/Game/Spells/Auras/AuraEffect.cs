@@ -1684,9 +1684,9 @@ namespace Game.Spells
                 return;
 
             if (apply)
-                target.AddUnitFlag(UnitFlags.NonAttackable);
+                target.AddUnitFlag(UnitFlags.NonAttackable2);
             else
-                target.RemoveUnitFlag(UnitFlags.NonAttackable);
+                target.RemoveUnitFlag(UnitFlags.NonAttackable2);
 
             // call functions which may have additional effects after chainging state of unit
             if (apply && mode.HasAnyFlag(AuraEffectHandleModes.Real))

@@ -64,7 +64,7 @@ namespace Framework.Constants
         Silenced = 0x2000,
         CannotSwim = 0x4000,
         Unk15 = 0x8000,
-        Unk16 = 0x10000,
+        NonAttackable2 = 0x10000,
         Pacified = 0x20000,
         Stunned = 0x40000,
         InCombat = 0x80000,
