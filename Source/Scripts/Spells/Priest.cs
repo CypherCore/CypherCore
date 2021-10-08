@@ -333,7 +333,7 @@ namespace Scripts.Spells.Priest
             OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
         }
     }
-    
+
     [Script] // 40438 - Priest Tier 6 Trinket
     class spell_pri_item_t6_trinket : AuraScript
     {
@@ -541,7 +541,7 @@ namespace Scripts.Spells.Priest
             return unit != null && unit.IsFullHealth();
         }
     }
-    
+
     [Script] // 17 - Power Word: Shield
     class spell_pri_power_word_shield : AuraScript
     {
@@ -551,7 +551,7 @@ namespace Scripts.Spells.Priest
                 SpellIds.VoidShield, SpellIds.VoidShieldEffect, SpellIds.Atonement, SpellIds.Trinity, SpellIds.AtonementTriggered, SpellIds.AtonementTriggeredPowerTrinity, SpellIds.ShieldDisciplinePassive,
                 SpellIds.ShieldDisciplineEnergize);
         }
-        
+
         void CalculateAmount(AuraEffect auraEffect, ref int amount, ref bool canBeRecalculated)
         {
             canBeRecalculated = false;
@@ -634,7 +634,7 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            OnEffectHit .Add(new EffectHandler(HandleEffectDummy, 0, SpellEffectName.Dummy));
+            OnEffectHitTarget.Add(new EffectHandler(HandleEffectDummy, 0, SpellEffectName.Dummy));
         }
     }
 
@@ -738,7 +738,7 @@ namespace Scripts.Spells.Priest
 
         public override void Register()
         {
-            OnObjectAreaTargetSelect .Add(new ObjectAreaTargetSelectHandler(OnTargetSelect, 0, Targets.UnitSrcAreaAlly));
+            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(OnTargetSelect, 0, Targets.UnitSrcAreaAlly));
             OnEffectHitTarget.Add(new EffectHandler(HandleJump, 0, SpellEffectName.Dummy));
         }
     }
@@ -790,7 +790,7 @@ namespace Scripts.Spells.Priest
             OnEffectHitTarget.Add(new EffectHandler(HandleEffectHit, 0, SpellEffectName.Heal));
         }
     }
-    
+
     [Script] // 28809 - Greater Heal
     class spell_pri_t3_4p_bonus : AuraScript
     {
