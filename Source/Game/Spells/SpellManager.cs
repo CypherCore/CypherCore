@@ -2283,9 +2283,6 @@ namespace Game.Entities
                 if (spellNameEntry == null)
                     continue;
 
-                var labels = new List<SpellLabelRecord>(data.Value.Labels); // copy, need to ensure source remains unmodified
-                var visuals = new List<SpellXSpellVisualRecord>(data.Value.Visuals); // copy, need to ensure source remains unmodified
-
                 // fill blanks
                 DifficultyRecord difficultyEntry = CliDB.DifficultyStorage.LookupByKey(data.Key.difficulty);
                 if (difficultyEntry != null)
@@ -2301,8 +2298,14 @@ namespace Game.Entities
                             if (data.Value.AuraRestrictions == null)
                                 data.Value.AuraRestrictions = fallbackData.AuraRestrictions;
 
+                            if (data.Value.CastingRequirements == null)
+                                data.Value.CastingRequirements = fallbackData.CastingRequirements;
+
                             if (data.Value.Categories == null)
                                 data.Value.Categories = fallbackData.Categories;
+
+                            if (data.Value.ClassOptions == null)
+                                data.Value.ClassOptions = fallbackData.ClassOptions;
 
                             if (data.Value.Cooldowns == null)
                                 data.Value.Cooldowns = fallbackData.Cooldowns;
@@ -2311,10 +2314,14 @@ namespace Game.Entities
                                 if (data.Value.Effects[i] == null)
                                     data.Value.Effects[i] = fallbackData.Effects[i];
 
+                            if (data.Value.EquippedItems == null)
+                                data.Value.EquippedItems = fallbackData.EquippedItems;
+
                             if (data.Value.Interrupts == null)
                                 data.Value.Interrupts = fallbackData.Interrupts;
 
-                            labels.AddRange(fallbackData.Labels);
+                            if (data.Value.Labels.Empty())
+                                data.Value.Labels = fallbackData.Labels;
 
                             if (data.Value.Levels == null)
                                 data.Value.Levels = fallbackData.Levels;
@@ -2326,10 +2333,25 @@ namespace Game.Entities
                                 if (data.Value.Powers[i] == null)
                                     data.Value.Powers[i] = fallbackData.Powers[i];
 
+                            if (data.Value.Reagents == null)
+                                data.Value.Reagents = fallbackData.Reagents;
+
+                            if (data.Value.Scaling == null)
+                                data.Value.Scaling = fallbackData.Scaling;
+
+                            if (data.Value.Shapeshift == null)
+                                data.Value.Shapeshift = fallbackData.Shapeshift;
+
                             if (data.Value.TargetRestrictions == null)
                                 data.Value.TargetRestrictions = fallbackData.TargetRestrictions;
 
-                            visuals.AddRange(fallbackData.Visuals);
+                            if (data.Value.Totems == null)
+                                data.Value.Totems = fallbackData.Totems;
+
+                            // visuals fall back only to first difficulty that defines any visual
+                            // they do not stack all difficulties in fallback chain
+                            if (data.Value.Visuals.Empty())
+                                data.Value.Visuals = fallbackData.Visuals;
                         }
 
                         difficultyEntry = CliDB.DifficultyStorage.LookupByKey(difficultyEntry.FallbackDifficultyID);
@@ -2340,7 +2362,7 @@ namespace Game.Entities
                 //second key = id
 
 
-                mSpellInfoMap.Add(spellNameEntry.Id, new SpellInfo(spellNameEntry, data.Key.difficulty, data.Value, labels, visuals));
+                mSpellInfoMap.Add(spellNameEntry.Id, new SpellInfo(spellNameEntry, data.Key.difficulty, data.Value));
             }
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded SpellInfo store in {0} ms", Time.GetMSTimeDiffToNow(oldMSTime));

@@ -31,7 +31,7 @@ namespace Game.Spells
 {
     public class SpellInfo
     {
-        public SpellInfo(SpellNameRecord spellName, Difficulty difficulty, SpellInfoLoadHelper data, List<SpellLabelRecord> labels, List<SpellXSpellVisualRecord> visuals)
+        public SpellInfo(SpellNameRecord spellName, Difficulty difficulty, SpellInfoLoadHelper data)
         {
             Id = spellName.Id;
             Difficulty = difficulty;
@@ -76,9 +76,6 @@ namespace Game.Spells
                 ContentTuningId = _misc.ContentTuningID;
                 ShowFutureSpellPlayerConditionID = (uint)_misc.ShowFutureSpellPlayerConditionID;
             }
-
-            if (visuals != null)
-                _visuals = visuals;
 
             // SpellScalingEntry
             SpellScalingRecord _scaling = data.Scaling;
@@ -185,7 +182,7 @@ namespace Game.Spells
                 ChannelInterruptFlags2 = (SpellAuraInterruptFlags2)_interrupt.ChannelInterruptFlags[1];
             }
 
-            foreach (var label in labels)
+            foreach (var label in data.Labels)
                 Labels.Add(label.LabelID);
 
             // SpellLevelsEntry
@@ -241,6 +238,8 @@ namespace Game.Spells
                     Totem[i] = _totem.Totem[i];
                 }
             }
+
+            _visuals = data.Visuals;
 
             _spellSpecific = SpellSpecificType.Normal;
             _auraState = AuraStateType.None;
