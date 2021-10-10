@@ -1471,8 +1471,8 @@ namespace Game.AI
                                 slot[2].ItemId = e.Action.equip.slot3;
                             }
 
-                            for (int i = 0; i < SharedConst.MaxEquipmentItems; ++i)
-                                if (e.Action.equip.mask == 0 || (e.Action.equip.mask & (1 << i)) != 0)
+                            for (uint i = 0; i < SharedConst.MaxEquipmentItems; ++i)
+                                if (e.Action.equip.mask == 0 || (e.Action.equip.mask & (1 << (int)i)) != 0)
                                     npc.SetVirtualItem(i, slot[i].ItemId, slot[i].AppearanceModId, slot[i].ItemVisual);
                         }
                     }
