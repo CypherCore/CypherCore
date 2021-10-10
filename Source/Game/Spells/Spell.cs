@@ -2285,7 +2285,7 @@ namespace Game.Spells
             if (Convert.ToBoolean(_triggeredCastFlags & TriggerCastFlags.IgnoreComboPoints) || m_CastItem != null)
                 m_needComboPoints = false;
 
-            uint param1 = 0, param2 = 0;
+            int param1 = 0, param2 = 0;
             SpellCastResult result = CheckCast(true, ref param1, ref param2);
             // target is checked in too many locations and with different results to handle each of them
             // handle just the general SPELL_FAILED_BAD_TARGETS result which is the default result for most DBC target checks
@@ -2534,7 +2534,7 @@ namespace Game.Spells
             // skip check if done already (for instant cast spells for example)
             if (!skipCheck)
             {
-                void cleanupSpell(SpellCastResult result, uint? param1 = null, uint? param2 = null)
+                void cleanupSpell(SpellCastResult result, int? param1 = null, int? param2 = null)
                 {
                     SendCastResult(result, param1, param2);
                     SendInterrupted(0);
@@ -2547,7 +2547,7 @@ namespace Game.Spells
                 }
 
 
-                uint param1 = 0, param2 = 0;
+                int param1 = 0, param2 = 0;
                 SpellCastResult castResult = CheckCast(false, ref param1, ref param2);
                 if (castResult != SpellCastResult.SpellCastOk)
                 {
@@ -3204,7 +3204,7 @@ namespace Game.Spells
                 unitCaster.AttackStop();
         }
 
-        static void FillSpellCastFailedArgs<T>(T packet, ObjectGuid castId, SpellInfo spellInfo, SpellCastResult result, SpellCustomErrors customError, uint? param1, uint? param2, Player caster) where T : CastFailedBase
+        static void FillSpellCastFailedArgs<T>(T packet, ObjectGuid castId, SpellInfo spellInfo, SpellCastResult result, SpellCustomErrors customError, int? param1, int? param2, Player caster) where T : CastFailedBase
         {
             packet.CastID = castId;
             packet.SpellID = (int)spellInfo.Id;
@@ -3399,7 +3399,7 @@ namespace Game.Spells
             }
         }
 
-        public void SendCastResult(SpellCastResult result, uint? param1 = null, uint? param2 = null)
+        public void SendCastResult(SpellCastResult result, int? param1 = null, int? param2 = null)
         {
             if (result == SpellCastResult.SpellCastOk)
                 return;
@@ -3419,7 +3419,7 @@ namespace Game.Spells
             m_caster.ToPlayer().SendPacket(castFailed);
         }
 
-        public void SendPetCastResult(SpellCastResult result, uint? param1 = null, uint? param2 = null)
+        public void SendPetCastResult(SpellCastResult result, int? param1 = null, int? param2 = null)
         {
             if (result == SpellCastResult.SpellCastOk)
                 return;
@@ -3436,7 +3436,7 @@ namespace Game.Spells
             owner.ToPlayer().SendPacket(petCastFailed);
         }
 
-        public static void SendCastResult(Player caster, SpellInfo spellInfo, SpellCastVisual spellVisual, ObjectGuid castCount, SpellCastResult result, SpellCustomErrors customError = SpellCustomErrors.None, uint? param1 = null, uint? param2 = null)
+        public static void SendCastResult(Player caster, SpellInfo spellInfo, SpellCastVisual spellVisual, ObjectGuid castCount, SpellCastResult result, SpellCustomErrors customError = SpellCustomErrors.None, int? param1 = null, int? param2 = null)
         {
             if (result == SpellCastResult.SpellCastOk)
                 return;
@@ -4328,11 +4328,11 @@ namespace Game.Spells
 
         public SpellCastResult CheckCast(bool strict)
         {
-            uint param1 = 0, param2 = 0;
+            int param1 = 0, param2 = 0;
             return CheckCast(strict, ref param1, ref param2);
         }
 
-        public SpellCastResult CheckCast(bool strict, ref uint param1, ref uint param2)
+        public SpellCastResult CheckCast(bool strict, ref int param1, ref int param2)
         {
             SpellCastResult castResult;
 
@@ -5194,7 +5194,7 @@ namespace Game.Spells
 
                         if (playerCaster.GetSpellHistory().HasCooldown(talent.SpellID))
                         {
-                            param1 = talent.SpellID;
+                            param1 = (int)talent.SpellID;
                             return SpellCastResult.CantUntalent;
                         }
                         break;
@@ -5430,7 +5430,7 @@ namespace Game.Spells
             return CheckCast(true);
         }
 
-        SpellCastResult CheckCasterAuras(ref uint param1)
+        SpellCastResult CheckCasterAuras(ref int param1)
         {
             Unit unitCaster = (m_originalCaster ? m_originalCaster : m_caster.ToUnit());
             if (unitCaster == null)
@@ -5468,7 +5468,7 @@ namespace Game.Spells
             }*/
 
             // spell has attribute usable while having a cc state, check if caster has allowed mechanic auras, another mechanic types must prevent cast spell
-            SpellCastResult mechanicCheck(AuraType auraType, ref uint _param1)
+            SpellCastResult mechanicCheck(AuraType auraType, ref int _param1)
             {
                 bool foundNotMechanic = false;
                 var auras = unitCaster.GetAuraEffectsByType(auraType);
@@ -5480,9 +5480,9 @@ namespace Game.Spells
                         foundNotMechanic = true;
 
                         // fill up aura mechanic info to send client proper error message
-                        _param1 = (uint)aurEff.GetSpellEffectInfo().Mechanic;
+                        _param1 = (int)aurEff.GetSpellEffectInfo().Mechanic;
                         if (_param1 == 0)
-                            _param1 = (uint)aurEff.GetSpellInfo().Mechanic;
+                            _param1 = (int)aurEff.GetSpellInfo().Mechanic;
 
                         break;
                     }
@@ -5554,7 +5554,7 @@ namespace Game.Spells
             return SpellCastResult.SpellCastOk;
         }
 
-        bool CheckSpellCancelsAuraEffect(AuraType auraType, ref uint param1)
+        bool CheckSpellCancelsAuraEffect(AuraType auraType, ref int param1)
         {
             Unit unitCaster = (m_originalCaster ? m_originalCaster : m_caster.ToUnit());
             if (unitCaster == null)
@@ -5570,9 +5570,9 @@ namespace Game.Spells
                 if (m_spellInfo.SpellCancelsAuraEffect(aurEff))
                     continue;
 
-                param1 = (uint)aurEff.GetSpellEffectInfo().Mechanic;
+                param1 = (int)aurEff.GetSpellEffectInfo().Mechanic;
                 if (param1 == 0)
-                    param1 = (uint)aurEff.GetSpellInfo().Mechanic;
+                    param1 = (int)aurEff.GetSpellInfo().Mechanic;
 
                 return false;
             }
@@ -5580,42 +5580,42 @@ namespace Game.Spells
             return true;
         }
 
-        bool CheckSpellCancelsCharm(ref uint param1)
+        bool CheckSpellCancelsCharm(ref int param1)
         {
             return CheckSpellCancelsAuraEffect(AuraType.ModCharm, ref param1) ||
                 CheckSpellCancelsAuraEffect(AuraType.AoeCharm, ref param1) ||
                 CheckSpellCancelsAuraEffect(AuraType.ModPossess, ref param1);
         }
 
-        bool CheckSpellCancelsStun(ref uint param1)
+        bool CheckSpellCancelsStun(ref int param1)
         {
             return CheckSpellCancelsAuraEffect(AuraType.ModStun, ref param1) &&
                  CheckSpellCancelsAuraEffect(AuraType.ModStunDisableGravity, ref param1);
         }
 
-        bool CheckSpellCancelsSilence(ref uint param1)
+        bool CheckSpellCancelsSilence(ref int param1)
         {
             return CheckSpellCancelsAuraEffect(AuraType.ModSilence, ref param1) ||
                 CheckSpellCancelsAuraEffect(AuraType.ModPacifySilence, ref param1);
         }
 
-        bool CheckSpellCancelsPacify(ref uint param1)
+        bool CheckSpellCancelsPacify(ref int param1)
         {
             return CheckSpellCancelsAuraEffect(AuraType.ModPacify, ref param1) ||
                 CheckSpellCancelsAuraEffect(AuraType.ModPacifySilence, ref param1);
         }
 
-        bool CheckSpellCancelsFear(ref uint param1)
+        bool CheckSpellCancelsFear(ref int param1)
         {
             return CheckSpellCancelsAuraEffect(AuraType.ModFear, ref param1);
         }
 
-        bool CheckSpellCancelsConfuse(ref uint param1)
+        bool CheckSpellCancelsConfuse(ref int param1)
         {
             return CheckSpellCancelsAuraEffect(AuraType.ModConfuse, ref param1);
         }
 
-        bool CheckSpellCancelsNoActions(ref uint param1)
+        bool CheckSpellCancelsNoActions(ref int param1)
         {
             return CheckSpellCancelsAuraEffect(AuraType.ModNoActions, ref param1);
         }
@@ -5855,7 +5855,7 @@ namespace Game.Spells
             return SpellCastResult.SpellCastOk;
         }
 
-        SpellCastResult CheckItems(ref uint param1, ref uint param2)
+        SpellCastResult CheckItems(ref int param1, ref int param2)
         {
             Player player = m_caster.ToPlayer();
             if (!player)
@@ -5998,7 +5998,7 @@ namespace Game.Spells
                         }
                         if (!player.HasItemCount(itemid, itemcount))
                         {
-                            param1 = itemid;
+                            param1 = (int)itemid;
                             return SpellCastResult.Reagents;
                         }
                     }
@@ -6226,7 +6226,7 @@ namespace Game.Spells
                         //make sure the player has the required ores in inventory
                         if (item.GetCount() < 5)
                         {
-                            param1 = item.GetEntry();
+                            param1 = (int)item.GetEntry();
                             param2 = 5;
                             return SpellCastResult.NeedMoreItems;
                         }
@@ -6254,7 +6254,7 @@ namespace Game.Spells
                         //make sure the player has the required herbs in inventory
                         if (item.GetCount() < 5)
                         {
-                            param1 = item.GetEntry();
+                            param1 = (int)item.GetEntry();
                             param2 = 5;
                             return SpellCastResult.NeedMoreItems;
                         }
