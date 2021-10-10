@@ -2405,7 +2405,7 @@ namespace Game.AI
                         if (playerTarget != null)
                         {
                             Conversation conversation = Conversation.CreateConversation(e.Action.conversation.id, playerTarget,
-                                playerTarget, new List<ObjectGuid>() { playerTarget.GetGUID() }, null);
+                                playerTarget, playerTarget.GetGUID(), null);
                             if (!conversation)
                                 Log.outWarn(LogFilter.ScriptsAi, $"SmartScript.ProcessAction: SMART_ACTION_CREATE_CONVERSATION: id {e.Action.conversation.id}, baseObject {baseObject?.GetName()}, target {playerTarget.GetName()} - failed to create");
                         }

@@ -123,7 +123,7 @@ namespace Game.Chat
                 return false;
             }
 
-            return Conversation.CreateConversation(conversationEntry, target, target, new List<ObjectGuid>() { target.GetGUID() }) != null;
+            return Conversation.CreateConversation(conversationEntry, target, target, target.GetGUID()) != null;
         }
 
         [Command("entervehicle", RBACPermissions.CommandDebugEntervehicle)]

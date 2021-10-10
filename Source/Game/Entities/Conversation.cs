@@ -59,14 +59,6 @@ namespace Game.Entities
             }
         }
 
-        public override bool IsNeverVisibleFor(WorldObject seer)
-        {
-            if (!_participants.Contains(seer.GetGUID()))
-                return true;
-
-            return base.IsNeverVisibleFor(seer);
-        }
-
         public override void Update(uint diff)
         {
             if (GetDuration() > diff)
@@ -96,7 +88,7 @@ namespace Game.Entities
             }
         }
 
-        public static Conversation CreateConversation(uint conversationEntry, Unit creator, Position pos, List<ObjectGuid> participants, SpellInfo spellInfo = null)
+        public static Conversation CreateConversation(uint conversationEntry, Unit creator, Position pos, ObjectGuid privateObjectOwner, SpellInfo spellInfo = null)
         {
             ConversationTemplate conversationTemplate = Global.ConversationDataStorage.GetConversationTemplate(conversationEntry);
             if (conversationTemplate == null)
@@ -105,19 +97,19 @@ namespace Game.Entities
             ulong lowGuid = creator.GetMap().GenerateLowGuid(HighGuid.Conversation);
 
             Conversation conversation = new();
-            if (!conversation.Create(lowGuid, conversationEntry, creator.GetMap(), creator, pos, participants, spellInfo))
+            if (!conversation.Create(lowGuid, conversationEntry, creator.GetMap(), creator, pos, privateObjectOwner, spellInfo))
                 return null;
 
             return conversation;
         }
 
-        bool Create(ulong lowGuid, uint conversationEntry, Map map, Unit creator, Position pos, List<ObjectGuid> participants, SpellInfo spellInfo = null)
+        bool Create(ulong lowGuid, uint conversationEntry, Map map, Unit creator, Position pos, ObjectGuid privateObjectOwner, SpellInfo spellInfo = null)
         {
             ConversationTemplate conversationTemplate = Global.ConversationDataStorage.GetConversationTemplate(conversationEntry);
             //ASSERT(conversationTemplate);
 
             _creatorGuid = creator.GetGUID();
-            _participants = participants;
+            SetPrivateObjectOwner(privateObjectOwner);
 
             SetMap(map);
             Relocate(pos);
@@ -212,11 +204,6 @@ namespace Game.Entities
             SetUpdateFieldValue(ref actorField.Type, ConversationActorType.WorldObjectActor);
         }
 
-        void AddParticipant(ObjectGuid participantGuid)
-        {
-            _participants.Add(participantGuid);
-        }
-
         public uint GetScriptId()
         {
             return Global.ConversationDataStorage.GetConversationTemplate(GetEntry()).ScriptId;
@@ -303,6 +290,5 @@ namespace Game.Entities
         ObjectGuid _creatorGuid;
         uint _duration;
         uint _textureKitId;
-        List<ObjectGuid> _participants = new();
     }
 }

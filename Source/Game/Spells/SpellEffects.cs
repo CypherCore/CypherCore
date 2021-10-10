@@ -5333,7 +5333,7 @@ namespace Game.Spells
             if (unitCaster == null || !m_targets.HasDst())
                 return;
 
-            Conversation.CreateConversation((uint)effectInfo.MiscValue, unitCaster, destTarget.GetPosition(), new List<ObjectGuid>() { GetCaster().GetGUID() }, GetSpellInfo());
+            Conversation.CreateConversation((uint)effectInfo.MiscValue, unitCaster, destTarget.GetPosition(), ObjectGuid.Empty, GetSpellInfo());
         }
 
         [SpellEffectHandler(SpellEffectName.AddGarrisonFollower)]
@@ -5681,7 +5681,7 @@ namespace Game.Spells
             if (unitCaster == null || unitTarget == null || !unitTarget.IsPlayer())
                 return;
 
-            Conversation.CreateConversation((uint)effectInfo.MiscValue, unitCaster, unitTarget.GetPosition(), new List<ObjectGuid>() { unitTarget.GetGUID() }, GetSpellInfo());
+            Conversation.CreateConversation((uint)effectInfo.MiscValue, unitCaster, unitTarget.GetPosition(), unitTarget.GetGUID(), GetSpellInfo());
         }
 
         [SpellEffectHandler(SpellEffectName.SendChatMessage)]
