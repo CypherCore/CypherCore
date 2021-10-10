@@ -1473,7 +1473,7 @@ namespace Game.AI
 
                             for (int i = 0; i < SharedConst.MaxEquipmentItems; ++i)
                                 if (e.Action.equip.mask == 0 || (e.Action.equip.mask & (1 << i)) != 0)
-                                    npc.SetVirtualItem(0, slot[i].ItemId, slot[i].AppearanceModId, slot[i].ItemVisual);
+                                    npc.SetVirtualItem(i, slot[i].ItemId, slot[i].AppearanceModId, slot[i].ItemVisual);
                         }
                     }
                     break;
