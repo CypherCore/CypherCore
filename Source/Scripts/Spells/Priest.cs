@@ -1015,45 +1015,35 @@ namespace Scripts.Spells.Priest
     }
 
     [Script] // Angelic Feather areatrigger - created by SPELL_PRIEST_ANGELIC_FEATHER_AREATRIGGER
-    class areatrigger_pri_angelic_feather : AreaTriggerEntityScript
+    class areatrigger_pri_angelic_feather : AreaTriggerAI
     {
-        public areatrigger_pri_angelic_feather() : base("areatrigger_pri_angelic_feather") { }
+        public areatrigger_pri_angelic_feather(AreaTrigger areatrigger) : base(areatrigger) { }
 
-        class areatrigger_pri_angelic_featherAI : AreaTriggerAI
+        // Called when the AreaTrigger has just been initialized, just before added to map
+        public override void OnInitialize()
         {
-            public areatrigger_pri_angelic_featherAI(AreaTrigger areatrigger) : base(areatrigger) { }
-
-            // Called when the AreaTrigger has just been initialized, just before added to map
-            public override void OnInitialize()
+            Unit caster = at.GetCaster();
+            if (caster)
             {
-                Unit caster = at.GetCaster();
-                if (caster)
-                {
-                    List<AreaTrigger> areaTriggers = caster.GetAreaTriggers(SpellIds.AngelicFeatherAreatrigger);
+                List<AreaTrigger> areaTriggers = caster.GetAreaTriggers(SpellIds.AngelicFeatherAreatrigger);
 
-                    if (areaTriggers.Count >= 3)
-                        areaTriggers.First().SetDuration(0);
-                }
-            }
-
-            public override void OnUnitEnter(Unit unit)
-            {
-                Unit caster = at.GetCaster();
-                if (caster)
-                {
-                    if (caster.IsFriendlyTo(unit))
-                    {
-                        // If target already has aura, increase duration to max 130% of initial duration
-                        caster.CastSpell(unit, SpellIds.AngelicFeatherAura, true);
-                        at.SetDuration(0);
-                    }
-                }
+                if (areaTriggers.Count >= 3)
+                    areaTriggers.First().SetDuration(0);
             }
         }
 
-        public override AreaTriggerAI GetAI(AreaTrigger areatrigger)
+        public override void OnUnitEnter(Unit unit)
         {
-            return new areatrigger_pri_angelic_featherAI(areatrigger);
+            Unit caster = at.GetCaster();
+            if (caster)
+            {
+                if (caster.IsFriendlyTo(unit))
+                {
+                    // If target already has aura, increase duration to max 130% of initial duration
+                    caster.CastSpell(unit, SpellIds.AngelicFeatherAura, true);
+                    at.SetDuration(0);
+                }
+            }
         }
     }
 }

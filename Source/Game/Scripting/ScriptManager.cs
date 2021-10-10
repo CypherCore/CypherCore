@@ -133,6 +133,9 @@ namespace Game.Scripting
                             case nameof(GameObjectAI):
                                 genericType = typeof(GenericGameObjectScript<>).MakeGenericType(type);
                                 break;
+                            case nameof(AreaTriggerAI):
+                                genericType = typeof(GenericAreaTriggerScript<>).MakeGenericType(type);
+                                break;
                             case "SpellScriptLoader":
                             case "AuraScriptLoader":
                             case "WorldScript":

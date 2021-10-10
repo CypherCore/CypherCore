@@ -368,6 +368,24 @@ namespace Game.Scripting
         public virtual GameObjectAI GetAI(GameObject go) { return null; }
     }
 
+    public class GenericAreaTriggerScript<AI> : AreaTriggerEntityScript where AI : AreaTriggerAI
+    {
+        public GenericAreaTriggerScript(string name, object[] args) : base(name)
+        {
+            _args = args;
+        }
+
+        public override AreaTriggerAI GetAI(AreaTrigger me)
+        {
+            if (me.GetInstanceScript() != null)
+                return GetInstanceAI<AI>(me);
+            else
+                return (AI)Activator.CreateInstance(typeof(AI), new object[] { me }.Combine(_args));
+        }
+
+        object[] _args;
+    }
+
     public class AreaTriggerScript : ScriptObject
     {
         public AreaTriggerScript(string name) : base(name)

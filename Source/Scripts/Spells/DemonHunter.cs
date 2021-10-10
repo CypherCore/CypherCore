@@ -64,35 +64,20 @@ namespace Scripts.Spells.DemonHunter
     [Script("areatrigger_dh_sigil_of_silence", SpellIds.SigilOfSilenceAoe)]
     [Script("areatrigger_dh_sigil_of_misery", SpellIds.SigilOfMiseryAoe)]
     [Script("areatrigger_dh_sigil_of_flame", SpellIds.SigilOfFlameAoe)]
-    class areatrigger_dh_generic_sigil : AreaTriggerEntityScript
+    class areatrigger_dh_generic_sigil : AreaTriggerAI
     {
         uint _trigger;
 
-        public areatrigger_dh_generic_sigil(string script, uint trigger) : base(script)
+        public areatrigger_dh_generic_sigil(AreaTrigger at, uint trigger) : base(at)
         {
             _trigger = trigger;
         }
 
-        class areatrigger_dh_generic_sigilAI : AreaTriggerAI
+        public override void OnRemove()
         {
-            uint _trigger;
-
-            public areatrigger_dh_generic_sigilAI(AreaTrigger at, uint trigger) : base(at)
-            {
-                _trigger = trigger;
-            }
-
-            public override void OnRemove()
-            {
-                Unit caster = at.GetCaster();
-                if (caster != null)
-                    caster.CastSpell(at.GetPosition(), _trigger, new CastSpellExtraArgs());
-            }
-        }
-
-        public override AreaTriggerAI GetAI(AreaTrigger at)
-        {
-            return new areatrigger_dh_generic_sigilAI(at, _trigger);
+            Unit caster = at.GetCaster();
+            if (caster != null)
+                caster.CastSpell(at.GetPosition(), _trigger, new CastSpellExtraArgs());
         }
     }
 
