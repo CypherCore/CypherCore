@@ -208,6 +208,8 @@ namespace Game.Spells
                 }
             }
 
+            ReagentsCurrency = data.ReagentsCurrency;
+
             // SpellShapeshiftEntry
             SpellShapeshiftRecord _shapeshift = data.Shapeshift;
             if (_shapeshift != null)
@@ -3883,6 +3885,7 @@ namespace Game.Spells
         public uint[] TotemCategory = new uint[SpellConst.MaxTotems];
         public int[] Reagent = new int[SpellConst.MaxReagents];
         public uint[] ReagentCount = new uint[SpellConst.MaxReagents];
+        public List<SpellReagentsCurrencyRecord> ReagentsCurrency = new();
         public ItemClass EquippedItemClass { get; set; }
         public int EquippedItemSubClassMask { get; set; }
         public int EquippedItemInventoryTypeMask { get; set; }

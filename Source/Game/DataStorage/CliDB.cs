@@ -293,6 +293,7 @@ namespace Game.DataStorage
             SpellRadiusStorage = ReadDB2<SpellRadiusRecord>("SpellRadius.db2", HotfixStatements.SEL_SPELL_RADIUS);
             SpellRangeStorage = ReadDB2<SpellRangeRecord>("SpellRange.db2", HotfixStatements.SEL_SPELL_RANGE, HotfixStatements.SEL_SPELL_RANGE_LOCALE);
             SpellReagentsStorage = ReadDB2<SpellReagentsRecord>("SpellReagents.db2", HotfixStatements.SEL_SPELL_REAGENTS);
+            SpellReagentsCurrencyStorage = ReadDB2<SpellReagentsCurrencyRecord>("SpellReagentsCurrency.db2", HotfixStatements.SEL_SPELL_REAGENTS_CURRENCY);
             SpellScalingStorage = ReadDB2<SpellScalingRecord>("SpellScaling.db2", HotfixStatements.SEL_SPELL_SCALING);
             SpellShapeshiftStorage = ReadDB2<SpellShapeshiftRecord>("SpellShapeshift.db2", HotfixStatements.SEL_SPELL_SHAPESHIFT);
             SpellShapeshiftFormStorage = ReadDB2<SpellShapeshiftFormRecord>("SpellShapeshiftForm.db2", HotfixStatements.SEL_SPELL_SHAPESHIFT_FORM, HotfixStatements.SEL_SPELL_SHAPESHIFT_FORM_LOCALE);
@@ -665,6 +666,7 @@ namespace Game.DataStorage
         public static DB6Storage<SpellRadiusRecord> SpellRadiusStorage;
         public static DB6Storage<SpellRangeRecord> SpellRangeStorage;
         public static DB6Storage<SpellReagentsRecord> SpellReagentsStorage;
+        public static DB6Storage<SpellReagentsCurrencyRecord> SpellReagentsCurrencyStorage;
         public static DB6Storage<SpellScalingRecord> SpellScalingStorage;
         public static DB6Storage<SpellShapeshiftRecord> SpellShapeshiftStorage;
         public static DB6Storage<SpellShapeshiftFormRecord> SpellShapeshiftFormStorage;

@@ -2255,6 +2255,9 @@ namespace Game.Entities
             foreach (SpellReagentsRecord reagents in CliDB.SpellReagentsStorage.Values)
                 GetLoadHelper(reagents.SpellID, 0).Reagents = reagents;
 
+            foreach (SpellReagentsCurrencyRecord reagentsCurrency in CliDB.SpellReagentsCurrencyStorage.Values)
+                GetLoadHelper((uint)reagentsCurrency.SpellID, 0).ReagentsCurrency.Add(reagentsCurrency);
+
             foreach (SpellScalingRecord scaling in CliDB.SpellScalingStorage.Values)
                 GetLoadHelper(scaling.SpellID, 0).Scaling = scaling;
 
@@ -2335,6 +2338,9 @@ namespace Game.Entities
 
                             if (data.Value.Reagents == null)
                                 data.Value.Reagents = fallbackData.Reagents;
+
+                            if (data.Value.ReagentsCurrency.Empty())
+                                data.Value.ReagentsCurrency = fallbackData.ReagentsCurrency;
 
                             if (data.Value.Scaling == null)
                                 data.Value.Scaling = fallbackData.Scaling;
@@ -4672,6 +4678,7 @@ namespace Game.Entities
         public SpellMiscRecord Misc;
         public SpellPowerRecord[] Powers = new SpellPowerRecord[SpellConst.MaxPowersPerSpell];
         public SpellReagentsRecord Reagents;
+        public List<SpellReagentsCurrencyRecord> ReagentsCurrency = new();
         public SpellScalingRecord Scaling;
         public SpellShapeshiftRecord Shapeshift;
         public SpellTargetRestrictionsRecord TargetRestrictions;

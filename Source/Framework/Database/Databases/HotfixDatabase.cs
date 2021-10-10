@@ -1048,6 +1048,9 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_SPELL_REAGENTS, "SELECT ID, SpellID, Reagent1, Reagent2, Reagent3, Reagent4, Reagent5, Reagent6, Reagent7, Reagent8, " +        
                 "ReagentCount1, ReagentCount2, ReagentCount3, ReagentCount4, ReagentCount5, ReagentCount6, ReagentCount7, ReagentCount8 FROM spell_reagents");
 
+            // SpellReagentsCurrency.db2
+            PrepareStatement(HotfixStatements.SEL_SPELL_REAGENTS_CURRENCY, "SELECT ID, SpellID, CurrencyTypesID, CurrencyCount FROM spell_reagents_currency");
+
             // SpellScaling.db2
             PrepareStatement(HotfixStatements.SEL_SPELL_SCALING, "SELECT ID, SpellID, MinScalingLevel, MaxScalingLevel, ScalesFromItemLevel FROM spell_scaling");
 
@@ -1748,6 +1751,8 @@ namespace Framework.Database
         SEL_SPELL_RANGE_LOCALE,
 
         SEL_SPELL_REAGENTS,
+
+        SEL_SPELL_REAGENTS_CURRENCY,
 
         SEL_SPELL_SCALING,
 

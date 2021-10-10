@@ -482,6 +482,14 @@ namespace Game.DataStorage
         public ushort[] ReagentCount = new ushort[SpellConst.MaxReagents];
     }
 
+    public sealed class SpellReagentsCurrencyRecord
+    {
+        public uint Id;
+        public int SpellID;
+        public ushort CurrencyTypesID;
+        public ushort CurrencyCount;
+    }
+
     public sealed class SpellScalingRecord
     {
         public uint Id;

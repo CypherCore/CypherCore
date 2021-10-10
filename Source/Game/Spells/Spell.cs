@@ -3367,7 +3367,6 @@ namespace Game.Spells
                         packet.FailedArg1 = (int)param1;
                     else
                     {
-                        uint missingItem = 0;
                         for (uint i = 0; i < SpellConst.MaxReagents; i++)
                         {
                             if (spellInfo.Reagent[i] <= 0)
@@ -3378,12 +3377,25 @@ namespace Game.Spells
 
                             if (!caster.HasItemCount(itemid, itemcount))
                             {
-                                missingItem = itemid;
+                                packet.FailedArg1 = (int)itemid;  // first missing item
                                 break;
                             }
                         }
+                    }
 
-                        packet.FailedArg1 = (int)missingItem;  // first missing item
+                    if (param2.HasValue)
+                        packet.FailedArg2 = (int)param2;
+                    else if (!param1.HasValue)
+                    {
+                        foreach (var reagentsCurrency in spellInfo.ReagentsCurrency)
+                        {
+                            if (!caster.HasCurrency(reagentsCurrency.CurrencyTypesID, reagentsCurrency.CurrencyCount))
+                            {
+                                packet.FailedArg1 = -1;
+                                packet.FailedArg2 = reagentsCurrency.CurrencyTypesID;
+                                break;
+                            }
+                        }
                     }
                     break;
                 }
@@ -4240,6 +4252,9 @@ namespace Game.Spells
 
                 p_caster.DestroyItemCount(itemid, itemcount, true);
             }
+
+            foreach (var reagentsCurrency in m_spellInfo.ReagentsCurrency)
+                p_caster.ModifyCurrency((CurrencyTypes)reagentsCurrency.CurrencyTypesID, -reagentsCurrency.CurrencyCount, false, true);
         }
 
         void HandleThreatSpells()
@@ -5999,6 +6014,17 @@ namespace Game.Spells
                         if (!player.HasItemCount(itemid, itemcount))
                         {
                             param1 = (int)itemid;
+                            return SpellCastResult.Reagents;
+                        }
+                    }
+
+                    foreach (var reagentsCurrency in m_spellInfo.ReagentsCurrency)
+                    {
+                        if (!player.HasCurrency(reagentsCurrency.CurrencyTypesID, reagentsCurrency.CurrencyCount))
+                        {
+                            param1 = -1;
+                            param2 = reagentsCurrency.CurrencyTypesID;
+
                             return SpellCastResult.Reagents;
                         }
                     }
