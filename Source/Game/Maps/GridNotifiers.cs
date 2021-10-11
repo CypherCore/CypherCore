@@ -1341,6 +1341,7 @@ namespace Game.Maps
         WorldObject _searcher;
         ICheck<WorldObject> i_check;
     }
+
     public class WorldObjectListSearcher : Notifier
     {
         public WorldObjectListSearcher(WorldObject searcher, List<WorldObject> objects, ICheck<WorldObject> check, GridMapTypeMask mapTypeMask = GridMapTypeMask.All)
@@ -2642,6 +2643,23 @@ namespace Game.Maps
         ObjectGuid _casterGUID;
     }
 
+    class ObjectEntryAndPrivateOwnerIfExistsCheck : ICheck<WorldObject>
+    {
+        ObjectGuid _ownerGUID;
+        uint _entry;
+
+        public ObjectEntryAndPrivateOwnerIfExistsCheck(ObjectGuid ownerGUID, uint entry)
+        {
+            _ownerGUID = ownerGUID;
+            _entry = entry;
+        }
+
+        public bool Invoke(WorldObject obj)
+        {
+            return obj.GetEntry() == _entry && (!obj.IsPrivateObject() || obj.GetPrivateObjectOwner() == _ownerGUID);
+        }
+    }
+    
     class GameObjectFocusCheck : ICheck<GameObject>
     {
         public GameObjectFocusCheck(WorldObject caster, uint focusId)

@@ -5336,6 +5336,28 @@ namespace Game.Spells
             Conversation.CreateConversation((uint)effectInfo.MiscValue, unitCaster, destTarget.GetPosition(), ObjectGuid.Empty, GetSpellInfo());
         }
 
+        [SpellEffectHandler(SpellEffectName.CancelConversation)]
+        void EffectCancelConversation()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            if (!unitTarget)
+                return;
+
+            List<WorldObject> objs = new();
+            ObjectEntryAndPrivateOwnerIfExistsCheck check = new(unitTarget.GetGUID(), (uint)effectInfo.MiscValue);
+            WorldObjectListSearcher checker = new(unitTarget, objs, check, GridMapTypeMask.Conversation);
+            Cell.VisitGridObjects(unitTarget, checker, 100.0f);
+
+            foreach (WorldObject obj in objs)
+            {
+                Conversation convo = obj.ToConversation();
+                if (convo != null)
+                    convo.Remove();
+            }
+        }
+
         [SpellEffectHandler(SpellEffectName.AddGarrisonFollower)]
         void EffectAddGarrisonFollower()
         {

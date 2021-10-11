@@ -80,7 +80,7 @@ namespace Game.Entities
             base.Update(diff);
         }
 
-        void Remove()
+        public void Remove()
         {
             if (IsInWorld)
             {
