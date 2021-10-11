@@ -107,11 +107,13 @@ namespace Framework.Constants
         GameObject = 0x08,
         Player = 0x10,
         AreaTrigger = 0x20,
-        Conversation = 0x40,
-        All = 0x7F,
+        SceneObject = 0x40,
+        Conversation = 0x80,
 
-        //GameObjects, Creatures(except pets), DynamicObject, Corpse(Bones), AreaTrigger
-        AllGrid = GameObject | Creature | DynamicObject | Corpse | AreaTrigger | Conversation,
+        All = 0xFF,
+
+        //GameObjects, Creatures(except pets), DynamicObject, Corpse(Bones), AreaTrigger, SceneObject
+        AllGrid = GameObject | Creature | DynamicObject | Corpse | AreaTrigger | SceneObject | Conversation,
 
         //Player, Pets, Corpse(resurrectable), DynamicObject(farsight)
         AllWorld = Player | Creature | Corpse | DynamicObject

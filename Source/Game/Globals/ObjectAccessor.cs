@@ -51,6 +51,8 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
                 return GetAreaTrigger(p, guid);
             case HighGuid.Corpse:
                 return GetCorpse(p, guid);
+            case HighGuid.SceneObject:
+                return GetSceneObject(p, guid);
             case HighGuid.Conversation:
                 return GetConversation(p, guid);
             default:
@@ -91,6 +93,10 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
             case HighGuid.AreaTrigger:
                 if (typemask.HasAnyFlag(TypeMask.AreaTrigger))
                     return GetAreaTrigger(p, guid);
+                break;
+            case HighGuid.SceneObject:
+                if (typemask.HasAnyFlag(TypeMask.SceneObject))
+                    return GetSceneObject(p, guid);
                 break;
             case HighGuid.Conversation:
                 if (typemask.HasAnyFlag(TypeMask.Conversation))
@@ -133,6 +139,11 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
         return u.GetMap().GetAreaTrigger(guid);
     }
 
+    static SceneObject GetSceneObject(WorldObject u, ObjectGuid guid)
+    {
+        return u.GetMap().GetSceneObject(guid);
+    }
+    
     static Conversation GetConversation(WorldObject u, ObjectGuid guid)
     {
         return u.GetMap().GetConversation(guid);

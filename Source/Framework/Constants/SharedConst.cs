@@ -2839,4 +2839,10 @@ namespace Framework.Constants
         FanfareNeeded = 0x80,
         DisplayOverridden = 0x100
     }
+
+    public enum SceneType
+    {
+        Normal = 0,
+        PetBattle = 1
+    }
 }

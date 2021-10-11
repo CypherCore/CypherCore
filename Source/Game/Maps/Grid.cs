@@ -292,6 +292,7 @@ namespace Game.Maps
                     visitor.Visit(_container.dynamicObjects);
                     visitor.Visit(_container.corpses);
                     visitor.Visit(_container.areaTriggers);
+                    visitor.Visit(_container.sceneObjects);
                     visitor.Visit(_container.conversations);
                     visitor.Visit(_container.worldObjects);
                     break;
@@ -349,7 +350,7 @@ namespace Game.Maps
         MultiTypeContainer _objects;
 
         /// <summary>
-        /// Holds all Grid objects - GameObjects, Creatures(except pets), DynamicObject, Corpse(Bones), AreaTrigger, Conversation
+        /// Holds all Grid objects - GameObjects, Creatures(except pets), DynamicObject, Corpse(Bones), AreaTrigger, Conversation, SceneObject
         /// </summary>
         MultiTypeContainer _container;
     }
@@ -379,6 +380,9 @@ namespace Game.Maps
                 case TypeId.AreaTrigger:
                     areaTriggers.Add((AreaTrigger)obj);
                     break;
+                case TypeId.SceneObject:
+                    sceneObjects.Add((SceneObject)obj);
+                    break;
                 case TypeId.Conversation:
                     conversations.Add((Conversation)obj);
                     break;
@@ -407,6 +411,9 @@ namespace Game.Maps
                     break;
                 case TypeId.AreaTrigger:
                     areaTriggers.Remove((AreaTrigger)obj);
+                    break;
+                case TypeId.SceneObject:
+                    sceneObjects.Remove((SceneObject)obj);
                     break;
                 case TypeId.Conversation:
                     conversations.Remove((Conversation)obj);
@@ -447,6 +454,7 @@ namespace Game.Maps
         public List<Corpse> corpses = new();
         public List<DynamicObject> dynamicObjects = new();
         public List<AreaTrigger> areaTriggers = new();
+        public List<SceneObject> sceneObjects = new();
         public List<Conversation> conversations = new();
         public List<GameObject> gameObjects = new();
         public List<WorldObject> worldObjects = new();

@@ -20,14 +20,14 @@ using Framework.Dynamic;
 using Framework.GameMath;
 using Game.AI;
 using Game.BattleFields;
+using Game.DataStorage;
 using Game.Maps;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.Scenarios;
+using Game.Spells;
 using System;
 using System.Collections.Generic;
-using Game.DataStorage;
-using Game.Spells;
 
 namespace Game.Entities
 {
@@ -155,6 +155,7 @@ namespace Game.Entities
                 case HighGuid.Corpse:
                 case HighGuid.DynamicObject:
                 case HighGuid.AreaTrigger:
+                case HighGuid.SceneObject:
                 case HighGuid.Conversation:
                     updateType = UpdateType.CreateObject2;
                     break;
@@ -606,11 +607,11 @@ namespace Game.Entities
             //        *data << ObjectGuid(ReplaceObject);
             //}
 
-            //if (flags.SceneObject)
-            //{
-            //    data.WriteBit(HasLocalScriptData);
-            //    data.WriteBit(HasPetBattleFullUpdate);
-            //    data.FlushBits();
+            if (flags.SceneObject)
+            {
+                data.WriteBit(false); // HasLocalScriptData
+                data.WriteBit(false); // HasPetBattleFullUpdate
+                data.FlushBits();
 
             //    if (HasLocalScriptData)
             //    {
@@ -714,7 +715,7 @@ namespace Game.Entities
             //        data.WriteBit(CanAwardXP);
             //        data.FlushBits();
             //    }
-            //}
+            }
 
             if (flags.ActivePlayer)
             {

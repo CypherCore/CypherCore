@@ -5566,7 +5566,7 @@ namespace Game.Entities
             WriteUpdate(data, _changesMask, false, owner, receiver);
         }
 
-        void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, WorldObject owner, Player receiver)
+        public void WriteUpdate(WorldPacket data, UpdateMask changesMask, bool ignoreNestedChangesMask, WorldObject owner, Player receiver)
         {
             data.WriteBits(_changesMask.GetBlock(0), 5);
 

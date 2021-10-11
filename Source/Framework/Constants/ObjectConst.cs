@@ -50,7 +50,7 @@ namespace Framework.Constants
         DynamicObject = 0x200,
         Corpse = 0x400,
         AreaTrigger = 0x800,
-        Sceneobject = 0x1000,
+        SceneObject = 0x1000,
         Conversation = 0x2000,
         Seer = Player | Unit | DynamicObject
     }

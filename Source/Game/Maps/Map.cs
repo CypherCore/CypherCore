@@ -21,7 +21,6 @@ using Framework.Dynamic;
 using Framework.GameMath;
 using Game.BattleGrounds;
 using Game.Collision;
-using Game.Combat;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Groups;
@@ -3824,14 +3823,21 @@ namespace Game.Maps
             return (AreaTrigger)_objectsStore.LookupByKey(guid);
         }
 
+        public SceneObject GetSceneObject(ObjectGuid guid)
+        {
+            return _objectsStore.LookupByKey(guid) as SceneObject;
+        }
+        
         public Conversation GetConversation(ObjectGuid guid)
         {
             return (Conversation)_objectsStore.LookupByKey(guid);
         }
+
         public Player GetPlayer(ObjectGuid guid)
         {
             return Global.ObjAccessor.GetPlayer(this, guid);
         }
+
         public Corpse GetCorpse(ObjectGuid guid)
         {
             if (!guid.IsCorpse())

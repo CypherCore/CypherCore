@@ -31,6 +31,7 @@ namespace Game.Maps
         public virtual void Visit(IList<WorldObject> objs) { }
         public virtual void Visit(IList<Creature> objs) { }
         public virtual void Visit(IList<AreaTrigger> objs) { }
+        public virtual void Visit(IList<SceneObject> objs) { }
         public virtual void Visit(IList<Conversation> objs) { }
         public virtual void Visit(IList<GameObject> objs) { }
         public virtual void Visit(IList<DynamicObject> objs) { }
@@ -66,6 +67,7 @@ namespace Game.Maps
         public void Visit(IList<WorldObject> collection) { _notifier.Visit(collection); }
         public void Visit(IList<Creature> creatures) { _notifier.Visit(creatures); }
         public void Visit(IList<AreaTrigger> areatriggers) { _notifier.Visit(areatriggers); }
+        public void Visit(IList<SceneObject> sceneObjects) { _notifier.Visit(sceneObjects); }
         public void Visit(IList<Conversation> conversations) { _notifier.Visit(conversations); }
         public void Visit(IList<GameObject> gameobjects) { _notifier.Visit(gameobjects); }
         public void Visit(IList<DynamicObject> dynamicobjects) { _notifier.Visit(dynamicobjects); }
@@ -767,6 +769,19 @@ namespace Game.Maps
             }
         }
 
+        public override void Visit(IList<SceneObject> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.SceneObject))
+                return;
+
+            for (var i = 0; i < objs.Count; ++i)
+            {
+                SceneObject sceneObject = objs[i];
+                if (sceneObject.IsInPhase(_searcher))
+                    i_do.Invoke(sceneObject);
+            }
+        }
+
         public override void Visit(IList<Conversation> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Conversation))
@@ -1129,6 +1144,29 @@ namespace Game.Maps
             }
         }
 
+        public override void Visit(IList<SceneObject> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.SceneObject))
+                return;
+
+            // already found
+            if (i_object)
+                return;
+
+            for (var i = 0; i < objs.Count; ++i)
+            {
+                SceneObject sceneObject = objs[i];
+                if (!sceneObject.IsInPhase(_searcher))
+                    continue;
+
+                if (i_check.Invoke(sceneObject))
+                {
+                    i_object = sceneObject;
+                    return;
+                }
+            }
+        }
+
         public override void Visit(IList<Conversation> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Conversation))
@@ -1264,6 +1302,22 @@ namespace Game.Maps
             }
         }
 
+        public override void Visit(IList<SceneObject> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.SceneObject))
+                return;
+
+            for (var i = 0; i < objs.Count; ++i)
+            {
+                SceneObject sceneObject = objs[i];
+                if (!sceneObject.IsInPhase(_searcher))
+                    continue;
+
+                if (i_check.Invoke(sceneObject))
+                    i_object = sceneObject;
+            }
+        }
+
         public override void Visit(IList<Conversation> objs)
         {
             if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Conversation))
@@ -1372,6 +1426,19 @@ namespace Game.Maps
                 AreaTrigger areaTrigger = objs[i];
                 if (i_check.Invoke(areaTrigger))
                     i_objects.Add(areaTrigger);
+            }
+        }
+
+        public override void Visit(IList<SceneObject> objs)
+        {
+            if (!i_mapTypeMask.HasAnyFlag(GridMapTypeMask.Conversation))
+                return;
+
+            for (var i = 0; i < objs.Count; ++i)
+            {
+                SceneObject sceneObject = objs[i];
+                if (i_check.Invoke(sceneObject))
+                    i_objects.Add(sceneObject);
             }
         }
 

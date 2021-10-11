@@ -16,7 +16,6 @@
  */
 
 using Framework.Constants;
-using Framework.Dynamic;
 using Framework.GameMath;
 using Game.BattleGrounds;
 using Game.BattlePets;
@@ -32,6 +31,7 @@ using Game.Movement;
 using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.Spells
 {
@@ -5589,6 +5589,54 @@ namespace Game.Spells
             m_caster.ToPlayer().GetSceneMgr().PlaySceneByPackageId((uint)effectInfo.MiscValue, SceneFlags.PlayerNonInteractablePhased, destTarget);
         }
 
+        bool IsUnitTargetSceneObjectAura(Spell spell, TargetInfo target)
+        {
+            if (target.TargetGUID != spell.GetCaster().GetGUID())
+                return false;
+
+            foreach (SpellEffectInfo spellEffectInfo in spell.GetSpellInfo().GetEffects())
+                if ((target.EffectMask & (1 << (int)spellEffectInfo.EffectIndex)) != 0 && spellEffectInfo.IsUnitOwnedAuraEffect())
+                    return true;
+
+            return false;
+        }
+
+        [SpellEffectHandler(SpellEffectName.CreateSceneObject)]
+        void EffectCreateSceneObject()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.Hit)
+                return;
+
+            if (!unitCaster || !m_targets.HasDst())
+                return;
+
+            SceneObject sceneObject = SceneObject.CreateSceneObject((uint)effectInfo.MiscValue, unitCaster, destTarget.GetPosition(), ObjectGuid.Empty);
+            if (sceneObject != null)
+            {
+                bool hasAuraTargetingCaster = m_UniqueTargetInfo.Any(target => IsUnitTargetSceneObjectAura(this, target));
+                if (hasAuraTargetingCaster)
+                    sceneObject.SetCreatedBySpellCast(m_castId);
+            }
+        }
+
+        [SpellEffectHandler(SpellEffectName.CreatePersonalSceneObject)]
+        void EffectCreatePrivateSceneObject()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.Hit)
+                return;
+
+            if (!unitCaster || !m_targets.HasDst())
+                return;
+
+            SceneObject sceneObject = SceneObject.CreateSceneObject((uint)effectInfo.MiscValue, unitCaster, destTarget.GetPosition(), unitCaster.GetGUID());
+            if (sceneObject != null)
+            {
+                bool hasAuraTargetingCaster = m_UniqueTargetInfo.Any(target => IsUnitTargetSceneObjectAura(this, target));
+                if (hasAuraTargetingCaster)
+                    sceneObject.SetCreatedBySpellCast(m_castId);
+            }
+        }
+        
         [SpellEffectHandler(SpellEffectName.PlayScene)]
         void EffectPlayScene()
         {
