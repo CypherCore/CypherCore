@@ -760,7 +760,7 @@ namespace Game.Scripting
         public virtual AreaTriggerAI GetAI(AreaTrigger at) { return null; }
     }
 
-    class ConversationScript : ScriptObject
+    public class ConversationScript : ScriptObject
     {
         public ConversationScript(string name) : base(name)
         {
@@ -771,6 +771,9 @@ namespace Game.Scripting
 
         // Called when Conversation is created but not added to Map yet.
         public virtual void OnConversationCreate(Conversation conversation, Unit creator) { }
+
+        // Called when player sends CMSG_CONVERSATION_LINE_STARTED with valid conversation guid
+        public virtual void OnConversationLineStarted(Conversation conversation, uint lineId, Player sender) { }
     }
 
     public class SceneScript : ScriptObject

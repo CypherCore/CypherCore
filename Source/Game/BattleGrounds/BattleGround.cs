@@ -351,7 +351,7 @@ namespace Game.BattleGrounds
 
                 StartTimer timer = new();
                 timer.Type = TimerType.Pvp;
-                timer.TimeRemaining = countdownMaxForBGType - (GetElapsedTime() / 1000);
+                timer.TimeLeft = countdownMaxForBGType - (GetElapsedTime() / 1000);
                 timer.TotalTime = countdownMaxForBGType;
 
                 foreach (var guid in GetPlayers().Keys)
@@ -1059,7 +1059,7 @@ namespace Game.BattleGrounds
                     uint countdownMaxForBGType = IsArena() ? BattlegroundConst.ArenaCountdownMax : BattlegroundConst.BattlegroundCountdownMax;
                     StartTimer timer = new();
                     timer.Type = TimerType.Pvp;
-                    timer.TimeRemaining = countdownMaxForBGType - (GetElapsedTime() / 1000);
+                    timer.TimeLeft = countdownMaxForBGType - (GetElapsedTime() / 1000);
                     timer.TotalTime = countdownMaxForBGType;
 
                     player.SendPacket(timer);

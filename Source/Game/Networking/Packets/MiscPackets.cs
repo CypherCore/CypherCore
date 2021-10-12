@@ -1239,15 +1239,29 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt32((uint)Type);
-            _worldPacket.WriteUInt32(TimeRemaining);
+            _worldPacket.WriteUInt32(TimeLeft);
             _worldPacket.WriteUInt32(TotalTime);
         }
 
-        public uint TimeRemaining;
-        public uint TotalTime;
         public TimerType Type;
+        public uint TimeLeft;
+        public uint TotalTime;
     }
 
+    class ConversationLineStarted : ClientPacket
+    {
+        public ObjectGuid ConversationGUID;
+        public uint LineID;
+
+        public ConversationLineStarted(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            ConversationGUID = _worldPacket.ReadPackedGuid();
+            LineID = _worldPacket.ReadUInt32();
+        }
+    }
+    
     class DisplayGameError : ServerPacket
     {
         public DisplayGameError(GameError error) : base(ServerOpcodes.DisplayGameError)

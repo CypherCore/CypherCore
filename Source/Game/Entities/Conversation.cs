@@ -122,7 +122,7 @@ namespace Game.Entities
             SetObjectScale(1.0f);
 
             SetUpdateFieldValue(m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.LastLineEndTime), conversationTemplate.LastLineEndTime);
-            _duration = conversationTemplate.LastLineEndTime;
+            _duration = conversationTemplate.LastLineEndTime + 10 * Time.InMilliseconds;
             _textureKitId = conversationTemplate.TextureKitId;
 
             if (conversationTemplate.Actors != null)
@@ -197,7 +197,7 @@ namespace Game.Entities
             return true;
         }
 
-        void AddActor(ObjectGuid actorGuid, ushort actorIdx)
+        public void AddActor(ObjectGuid actorGuid, ushort actorIdx)
         {
             ConversationActorField actorField = m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.Actors, actorIdx);
             SetUpdateFieldValue(ref actorField.ActorGUID, actorGuid);

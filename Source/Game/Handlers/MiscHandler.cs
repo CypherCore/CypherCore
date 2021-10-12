@@ -23,7 +23,6 @@ using Game.Entities;
 using Game.Groups;
 using Game.Guilds;
 using Game.Maps;
-using Game.Misc;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.PvP;
@@ -452,6 +451,14 @@ namespace Game
         {
             if (_player.PlayerTalkClass.GetInteractionData().SourceGuid == closeInteraction.SourceGuid)
                 _player.PlayerTalkClass.GetInteractionData().Reset();
+        }
+
+        [WorldPacketHandler(ClientOpcodes.ConversationLineStarted)]
+        void HandleConversationLineStarted(ConversationLineStarted conversationLineStarted)
+        {
+            Conversation convo = ObjectAccessor.GetConversation(_player, conversationLineStarted.ConversationGUID);
+            if (convo != null)
+                Global.ScriptMgr.OnConversationLineStarted(convo, conversationLineStarted.LineID, _player);
         }
 
         [WorldPacketHandler(ClientOpcodes.ChatUnregisterAllAddonPrefixes)]

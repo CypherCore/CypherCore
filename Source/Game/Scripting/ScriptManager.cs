@@ -1117,6 +1117,14 @@ namespace Game.Scripting
             RunScript<ConversationScript>(script => script.OnConversationCreate(conversation, creator), conversation.GetScriptId());
         }
 
+        public void OnConversationLineStarted(Conversation conversation, uint lineId, Player sender)
+        {
+            Cypher.Assert(conversation != null);
+            Cypher.Assert(sender != null);
+
+            RunScript<ConversationScript>(script => script.OnConversationLineStarted(conversation, lineId, sender), conversation.GetScriptId());
+        }
+
         //SceneScript
         public void OnSceneStart(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {

@@ -144,7 +144,7 @@ public class ObjectAccessor : Singleton<ObjectAccessor>
         return u.GetMap().GetSceneObject(guid);
     }
     
-    static Conversation GetConversation(WorldObject u, ObjectGuid guid)
+    public static Conversation GetConversation(WorldObject u, ObjectGuid guid)
     {
         return u.GetMap().GetConversation(guid);
     }
