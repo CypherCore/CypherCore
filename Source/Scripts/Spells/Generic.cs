@@ -275,6 +275,10 @@ namespace Scripts.Spells.Generic
         // AuraprocRemovespells
         public const uint FaceRage = 99947;
         public const uint ImpatientMind = 187213;
+
+        //enum DefenderOfAzerothData
+        public const uint DeathGateTeleportStormwind = 316999;
+        public const uint DeathGateTeleportOrgrimmar = 317000;
     }
 
     struct CreatureIds
@@ -304,6 +308,12 @@ namespace Scripts.Spells.Generic
 
         //VendorBarkTrigger
         public const uint AmphitheaterVendor = 30098;
+
+        //DefenderOfAzerothData
+        public const uint Nazgrim = 161706;
+        public const uint Trollbane = 161707;
+        public const uint Whitemane = 161708;
+        public const uint Morgaine = 161709;
     }
 
     struct ModelIds
@@ -362,6 +372,10 @@ namespace Scripts.Spells.Generic
         public const uint A_ValiantOfUndercity = 13695;
         public const uint ValiantOfSilvermoon = 13711;
         public const uint A_ValiantOfSilvermoon = 13696;
+
+        //DefenderOfAzerothData
+        public const uint DefenderOfAzerothAlliance = 58902;
+        public const uint DefenderOfAzerothHorde = 58903;
     }
 
     struct Misc
@@ -818,53 +832,53 @@ namespace Scripts.Spells.Generic
             switch (effIndex)
             {
                 case 0: // On spells wich trigger the damaging spell (and also the visual)
-                    {
-                        uint spellId;
+                {
+                    uint spellId;
 
-                        switch (GetSpellInfo().Id)
-                        {
-                            case SpellIds.BreakShieldTriggerUnk:
-                            case SpellIds.BreakShieldTriggerCampaingWarhorse:
-                                spellId = SpellIds.BreakShieldDamage10k;
-                                break;
-                            case SpellIds.BreakShieldTriggerFactionMounts:
-                                spellId = SpellIds.BreakShieldDamage2k;
-                                break;
-                            default:
-                                return;
-                        }
-                        Unit rider = GetCaster().GetCharmer();
-                        if (rider)
-                            rider.CastSpell(target, spellId, false);
-                        else
-                            GetCaster().CastSpell(target, spellId, false);
-                        break;
-                    }
-                case 1: // On damaging spells, for removing a defend layer
+                    switch (GetSpellInfo().Id)
                     {
-                        var auras = target.GetAppliedAuras();
-                        foreach (var pair in auras)
+                        case SpellIds.BreakShieldTriggerUnk:
+                        case SpellIds.BreakShieldTriggerCampaingWarhorse:
+                            spellId = SpellIds.BreakShieldDamage10k;
+                            break;
+                        case SpellIds.BreakShieldTriggerFactionMounts:
+                            spellId = SpellIds.BreakShieldDamage2k;
+                            break;
+                        default:
+                            return;
+                    }
+                    Unit rider = GetCaster().GetCharmer();
+                    if (rider)
+                        rider.CastSpell(target, spellId, false);
+                    else
+                        GetCaster().CastSpell(target, spellId, false);
+                    break;
+                }
+                case 1: // On damaging spells, for removing a defend layer
+                {
+                    var auras = target.GetAppliedAuras();
+                    foreach (var pair in auras)
+                    {
+                        Aura aura = pair.Value.GetBase();
+                        if (aura != null)
                         {
-                            Aura aura = pair.Value.GetBase();
-                            if (aura != null)
+                            if (aura.GetId() == 62552 || aura.GetId() == 62719 || aura.GetId() == 64100 || aura.GetId() == 66482)
                             {
-                                if (aura.GetId() == 62552 || aura.GetId() == 62719 || aura.GetId() == 64100 || aura.GetId() == 66482)
+                                aura.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
+                                // Remove dummys from rider (Necessary for updating visual shields)
+                                Unit rider = target.GetCharmer();
+                                if (rider)
                                 {
-                                    aura.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
-                                    // Remove dummys from rider (Necessary for updating visual shields)
-                                    Unit rider = target.GetCharmer();
-                                    if (rider)
-                                    {
-                                        Aura defend = rider.GetAura(aura.GetId());
-                                        if (defend != null)
-                                            defend.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
-                                    }
-                                    break;
+                                    Aura defend = rider.GetAura(aura.GetId());
+                                    if (defend != null)
+                                        defend.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
                                 }
+                                break;
                             }
                         }
-                        break;
                     }
+                    break;
+                }
                 default:
                     break;
             }
@@ -1065,51 +1079,51 @@ namespace Scripts.Spells.Generic
                 case SpellIds.WeaponAura:
                 case SpellIds.Weapon2Aura:
                 case SpellIds.Weapon3Aura:
-                    {
-                        prevItem = target.GetVirtualItemId(0);
+                {
+                    prevItem = target.GetVirtualItemId(0);
 
-                        Player player = caster.ToPlayer();
-                        if (player)
-                        {
-                            Item mainItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
-                            if (mainItem)
-                                target.SetVirtualItem(0, mainItem.GetEntry());
-                        }
-                        else
-                            target.SetVirtualItem(0, caster.GetVirtualItemId(0));
-                        break;
+                    Player player = caster.ToPlayer();
+                    if (player)
+                    {
+                        Item mainItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
+                        if (mainItem)
+                            target.SetVirtualItem(0, mainItem.GetEntry());
                     }
+                    else
+                        target.SetVirtualItem(0, caster.GetVirtualItemId(0));
+                    break;
+                }
                 case SpellIds.OffhandAura:
                 case SpellIds.Offhand2Aura:
-                    {
-                        prevItem = target.GetVirtualItemId(1);
+                {
+                    prevItem = target.GetVirtualItemId(1);
 
-                        Player player = caster.ToPlayer();
-                        if (player)
-                        {
-                            Item offItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
-                            if (offItem)
-                                target.SetVirtualItem(1, offItem.GetEntry());
-                        }
-                        else
-                            target.SetVirtualItem(1, caster.GetVirtualItemId(1));
-                        break;
+                    Player player = caster.ToPlayer();
+                    if (player)
+                    {
+                        Item offItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.OffHand);
+                        if (offItem)
+                            target.SetVirtualItem(1, offItem.GetEntry());
                     }
+                    else
+                        target.SetVirtualItem(1, caster.GetVirtualItemId(1));
+                    break;
+                }
                 case SpellIds.RangedAura:
-                    {
-                        prevItem = target.GetVirtualItemId(2);
+                {
+                    prevItem = target.GetVirtualItemId(2);
 
-                        Player player = caster.ToPlayer();
-                        if (player)
-                        {
-                            Item rangedItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
-                            if (rangedItem)
-                                target.SetVirtualItem(2, rangedItem.GetEntry());
-                        }
-                        else
-                            target.SetVirtualItem(2, caster.GetVirtualItemId(2));
-                        break;
+                    Player player = caster.ToPlayer();
+                    if (player)
+                    {
+                        Item rangedItem = player.GetItemByPos(InventorySlots.Bag0, EquipmentSlot.MainHand);
+                        if (rangedItem)
+                            target.SetVirtualItem(2, rangedItem.GetEntry());
                     }
+                    else
+                        target.SetVirtualItem(2, caster.GetVirtualItemId(2));
+                    break;
+                }
                 default:
                     break;
             }
@@ -1697,58 +1711,58 @@ namespace Scripts.Spells.Generic
             switch (effIndex)
             {
                 case 0: // On spells wich trigger the damaging spell (and also the visual)
+                {
+                    uint spellId;
+
+                    switch (GetSpellInfo().Id)
                     {
-                        uint spellId;
-
-                        switch (GetSpellInfo().Id)
-                        {
-                            case SpellIds.TriggerTrialChampion:
-                                spellId = SpellIds.Charging20k1;
-                                break;
-                            case SpellIds.TriggerFactionMounts:
-                                spellId = SpellIds.ChargingEffect8k5;
-                                break;
-                            default:
-                                return;
-                        }
-
-                        // If target isn't a training dummy there's a chance of failing the charge
-                        if (!target.IsCharmedOwnedByPlayerOrPlayer() && RandomHelper.randChance(12.5f))
-                            spellId = SpellIds.MissEffect;
-
-                        Unit vehicle = GetCaster().GetVehicleBase();
-                        if (vehicle)
-                            vehicle.CastSpell(target, spellId, false);
-                        else
-                            GetCaster().CastSpell(target, spellId, false);
-                        break;
+                        case SpellIds.TriggerTrialChampion:
+                            spellId = SpellIds.Charging20k1;
+                            break;
+                        case SpellIds.TriggerFactionMounts:
+                            spellId = SpellIds.ChargingEffect8k5;
+                            break;
+                        default:
+                            return;
                     }
+
+                    // If target isn't a training dummy there's a chance of failing the charge
+                    if (!target.IsCharmedOwnedByPlayerOrPlayer() && RandomHelper.randChance(12.5f))
+                        spellId = SpellIds.MissEffect;
+
+                    Unit vehicle = GetCaster().GetVehicleBase();
+                    if (vehicle)
+                        vehicle.CastSpell(target, spellId, false);
+                    else
+                        GetCaster().CastSpell(target, spellId, false);
+                    break;
+                }
                 case 1: // On damaging spells, for removing a defend layer
                 case 2:
+                {
+                    var auras = target.GetAppliedAuras();
+                    foreach (var pair in auras)
                     {
-                        var auras = target.GetAppliedAuras();
-                        foreach (var pair in auras)
+                        Aura aura = pair.Value.GetBase();
+                        if (aura != null)
                         {
-                            Aura aura = pair.Value.GetBase();
-                            if (aura != null)
+                            if (aura.GetId() == 62552 || aura.GetId() == 62719 || aura.GetId() == 64100 || aura.GetId() == 66482)
                             {
-                                if (aura.GetId() == 62552 || aura.GetId() == 62719 || aura.GetId() == 64100 || aura.GetId() == 66482)
+                                aura.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
+                                // Remove dummys from rider (Necessary for updating visual shields)
+                                Unit rider = target.GetCharmer();
+                                if (rider)
                                 {
-                                    aura.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
-                                    // Remove dummys from rider (Necessary for updating visual shields)
-                                    Unit rider = target.GetCharmer();
-                                    if (rider)
-                                    {
-                                        Aura defend = rider.GetAura(aura.GetId());
-                                        if (defend != null)
-                                            defend.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
-                                    }
-                                    break;
+                                    Aura defend = rider.GetAura(aura.GetId());
+                                    if (defend != null)
+                                        defend.ModStackAmount(-1, AuraRemoveMode.EnemySpell);
                                 }
+                                break;
                             }
                         }
-                        break;
                     }
+                    break;
+                }
             }
         }
 
@@ -1985,7 +1999,7 @@ namespace Scripts.Spells.Generic
         {
             return spellInfo.GetEffects().Count > 1;
         }
-        
+
         public override bool Load()
         {
             return GetCaster().IsTypeId(TypeId.Player);
@@ -2301,7 +2315,7 @@ namespace Scripts.Spells.Generic
         {
             return spellInfo.GetEffects().Count > 1;
         }
-        
+
         void PeriodicTick(AuraEffect aurEff)
         {
             // they apply damage so no need to check for ticks here
@@ -3642,6 +3656,73 @@ namespace Scripts.Spells.Generic
         public override void Register()
         {
             OnEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.ProcTriggerSpell, AuraEffectHandleModes.Real));
+        }
+    }
+
+    [Script]
+    class spell_defender_of_azeroth_death_gate_selector : SpellScript
+    {
+        (WorldLocation, uint) StormwindInnLoc = (new WorldLocation(0, -8868.1f, 675.82f, 97.9f, 5.164778709411621093f), 5148);
+        (WorldLocation, uint) OrgrimmarInnLoc = (new WorldLocation(1, 1573.18f, -4441.62f, 16.06f, 1.818284034729003906f), 8618);
+
+        public override bool Validate(SpellInfo spell)
+        {
+            return ValidateSpellInfo(SpellIds.DeathGateTeleportStormwind, SpellIds.DeathGateTeleportOrgrimmar);
+        }
+
+        void HandleDummy(uint effIndex)
+        {
+            Player player = GetHitUnit().ToPlayer();
+            if (player == null)
+                return;
+
+            if (player.GetQuestStatus(QuestIds.DefenderOfAzerothAlliance) == QuestStatus.None && player.GetQuestStatus(QuestIds.DefenderOfAzerothHorde) == QuestStatus.None)
+                return;
+
+            (WorldLocation Loc, uint AreaId) bindLoc = player.GetTeam() == Team.Alliance ? StormwindInnLoc : OrgrimmarInnLoc;
+            player.SetHomebind(bindLoc.Loc, bindLoc.AreaId);
+            player.SendBindPointUpdate();
+            player.SendPlayerBound(player.GetGUID(), bindLoc.AreaId);
+
+            player.CastSpell(player, player.GetTeam() == Team.Alliance ? SpellIds.DeathGateTeleportStormwind : SpellIds.DeathGateTeleportOrgrimmar);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
+        }
+    }
+
+    [Script]
+    class spell_defender_of_azeroth_speak_with_mograine : SpellScript
+    {
+        void HandleDummy(uint effIndex)
+        {
+            if (!GetCaster())
+                return;
+
+            Player player = GetCaster().ToPlayer();
+            if (player == null)
+                return;
+
+            Creature nazgrim = GetHitUnit().FindNearestCreature(CreatureIds.Nazgrim, 10.0f);
+            if (nazgrim != null)
+                nazgrim.HandleEmoteCommand(Emote.OneshotPoint, player);
+
+            Creature trollbane = GetHitUnit().FindNearestCreature(CreatureIds.Trollbane, 10.0f);
+            if (trollbane != null)
+                trollbane.HandleEmoteCommand(Emote.OneshotPoint, player);
+
+            Creature whitemane = GetHitUnit().FindNearestCreature(CreatureIds.Whitemane, 10.0f);
+            if (whitemane != null)
+                whitemane.HandleEmoteCommand(Emote.OneshotPoint, player);
+
+            // @TODO: spawntracking - show death gate for casting player
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleDummy, 0, SpellEffectName.Dummy));
         }
     }
 }
