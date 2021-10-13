@@ -126,7 +126,7 @@ namespace Game.Movement
             // if the target moved, we have to consider whether to adjust
             if (_lastTargetPosition != target.GetPosition() || mutualChase != _mutualChase)
             {
-                _lastTargetPosition = target.GetPosition();
+                _lastTargetPosition.Relocate(target.GetPosition());
                 _mutualChase = mutualChase;
                 if (owner.HasUnitState(UnitState.ChaseMove) || !PositionOkay(owner, target, minRange, maxRange, angle))
                 {

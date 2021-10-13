@@ -2736,7 +2736,7 @@ namespace Game.Spells
             // only valid for non-area auras
             foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
             {
-                if ((effMask & (1u << (int)spellEffectInfo.EffectIndex)) != 0 && spellEffectInfo.IsEffect(SpellEffectName.ApplyAura))
+                if ((effMask & (1u << (int)spellEffectInfo.EffectIndex)) != 0 && !spellEffectInfo.IsEffect(SpellEffectName.ApplyAura))
                     effMask &= ~(1u << (int)spellEffectInfo.EffectIndex);
             }
 

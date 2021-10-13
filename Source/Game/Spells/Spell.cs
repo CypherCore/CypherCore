@@ -2050,7 +2050,7 @@ namespace Game.Spells
 
                             if (!m_spellValue.Duration.HasValue)
                             {
-                                hitInfo.AuraDuration *= caster.ModSpellDuration(m_spellInfo, unit, hitInfo.AuraDuration, hitInfo.Positive, spellAura.GetEffectMask());
+                                hitInfo.AuraDuration = caster.ModSpellDuration(m_spellInfo, unit, hitInfo.AuraDuration, hitInfo.Positive, spellAura.GetEffectMask());
 
                                 if (hitInfo.AuraDuration > 0)
                                 {
