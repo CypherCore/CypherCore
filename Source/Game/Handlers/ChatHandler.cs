@@ -579,7 +579,7 @@ namespace Game
                     // Only allow text-emotes for "dead" entities (feign death included)
                     if (GetPlayer().HasUnitState(UnitState.Died))
                         break;
-                    GetPlayer().HandleEmoteCommand(emoteAnim, packet.SpellVisualKitIDs);
+                    GetPlayer().HandleEmoteCommand(emoteAnim, null, packet.SpellVisualKitIDs);
                     break;
             }
 
