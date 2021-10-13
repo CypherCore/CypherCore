@@ -509,7 +509,7 @@ namespace Game
                             valid = AddToPhases(cond);
                             break;
                         case ConditionSourceType.AreaTrigger:
-                            areaTriggerConditionContainerStorage.Add(Tuple.Create((int)cond.SourceGroup, cond.SourceEntry != 0), cond);
+                            areaTriggerConditionContainerStorage.Add(Tuple.Create(cond.SourceGroup, cond.SourceEntry != 0), cond);
                             ++count;
                             continue;
                         default:
@@ -2426,7 +2426,7 @@ namespace Game
         Dictionary<uint, MultiMap<uint, Condition>> spellClickEventConditionStorage = new();
         Dictionary<uint, MultiMap<uint, Condition>> npcVendorConditionContainerStorage = new();
         Dictionary<Tuple<int, uint>, MultiMap<uint, Condition>> smartEventConditionStorage = new();
-        MultiMap<Tuple<int, bool>, Condition> areaTriggerConditionContainerStorage = new();
+        MultiMap<Tuple<uint, bool>, Condition> areaTriggerConditionContainerStorage = new();
 
         public string[] StaticSourceTypeData =
         {

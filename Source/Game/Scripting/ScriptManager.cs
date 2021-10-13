@@ -163,6 +163,7 @@ namespace Game.Scripting
                             case "OnlyOnceAreaTriggerScript":
                             case "SceneScript":
                             case "QuestScript":
+                            case "ConversationScript":
                                 if (!attribute.Name.IsEmpty())
                                     name = attribute.Name;
 
