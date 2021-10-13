@@ -16,6 +16,7 @@
  */
 
 using Framework.Constants;
+using Framework.Dynamic;
 using Framework.GameMath;
 using Game.BattleGrounds;
 using Game.BattlePets;
@@ -712,6 +713,40 @@ namespace Game.Spells
             }
         }
 
+        [SpellEffectHandler(SpellEffectName.TeleportWithSpellVisualKitLoadingScreen)]
+        void EffectTeleportUnitsWithVisualLoadingScreen()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.HitTarget)
+                return;
+
+            if (!unitTarget)
+                return;
+
+            // If not exist data for dest location - return
+            if (!m_targets.HasDst())
+            {
+                Log.outError(LogFilter.Spells, $"Spell::EffectTeleportUnitsWithVisualLoadingScreen - does not have a destination for spellId {m_spellInfo.Id}.");
+                return;
+            }
+
+            // Init dest coordinates
+            WorldLocation targetDest = new WorldLocation(destTarget);
+            if (targetDest.GetMapId() == 0xFFFFFFFF)
+                targetDest.SetMapId(unitTarget.GetMapId());
+
+            if (targetDest.GetOrientation() == 0 && m_targets.GetUnitTarget())
+                targetDest.SetOrientation(m_targets.GetUnitTarget().GetOrientation());
+
+            if (effectInfo.MiscValueB != 0)
+            {
+                Player playerTarget = unitTarget.ToPlayer();
+                if (playerTarget != null)
+                    playerTarget.SendPacket(new SpellVisualLoadScreen(effectInfo.MiscValueB, effectInfo.MiscValue));
+            }
+
+            unitTarget.m_Events.AddEventAtOffset(new DelayedSpellTeleportEvent(unitTarget, targetDest, unitTarget == m_caster ? TeleportToOptions.Spell : 0, m_spellInfo.Id), TimeSpan.FromMilliseconds(effectInfo.MiscValue));
+        }
+        
         [SpellEffectHandler(SpellEffectName.ApplyAura)]
         [SpellEffectHandler(SpellEffectName.ApplyAuraOnPet)]
         void EffectApplyAura()
@@ -5813,5 +5848,37 @@ namespace Game.Spells
         Aura _aura;
         int _chance;
         byte _charges;
+    }
+
+    class DelayedSpellTeleportEvent : BasicEvent
+    {
+        Unit _target;
+        WorldLocation _targetDest;
+        TeleportToOptions _options;
+        uint _spellId;
+
+        public DelayedSpellTeleportEvent(Unit target, WorldLocation targetDest, TeleportToOptions options, uint spellId)
+        {
+            _target = target;
+            _targetDest = targetDest;
+            _options = options;
+            _spellId = spellId;
+        }
+
+        public override bool Execute(ulong e_time, uint p_time)
+        {
+            if (_targetDest.GetMapId() == _target.GetMapId())
+                _target.NearTeleportTo(_targetDest, (_options & TeleportToOptions.Spell) != 0);
+            else
+            {
+                Player player = _target.ToPlayer();
+                if (player != null)
+                    player.TeleportTo(_targetDest, _options);
+                else
+                    Log.outError(LogFilter.Spells, $"Spell::EffectTeleportUnitsWithVisualLoadingScreen - spellId {_spellId} attempted to teleport creature to a different map.");
+            }
+
+            return true;
+        }
     }
 }

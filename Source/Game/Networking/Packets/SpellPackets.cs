@@ -778,6 +778,24 @@ namespace Game.Networking.Packets
         public bool MountedVisual;
     }
 
+    class SpellVisualLoadScreen : ServerPacket
+    {
+        public int SpellVisualKitID;
+        public int Delay;
+
+        public SpellVisualLoadScreen(int spellVisualKitId, int delay) : base(ServerOpcodes.SpellVisualLoadScreen, ConnectionType.Instance)
+        {
+            SpellVisualKitID = spellVisualKitId;
+            Delay = delay;
+        }
+
+        public override void Write()
+        {
+            _worldPacket.WriteInt32(SpellVisualKitID);
+            _worldPacket.WriteInt32(Delay);
+        }
+    }
+    
     public class CancelCast : ClientPacket
     {
         public CancelCast(WorldPacket packet) : base(packet) { }
