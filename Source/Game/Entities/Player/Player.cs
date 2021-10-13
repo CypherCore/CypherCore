@@ -2837,6 +2837,12 @@ namespace Game.Entities
             SendPacket(packet);
         }
 
+        public void SendPlayerBound(ObjectGuid binderGuid, uint areaId)
+        {
+            PlayerBound packet = new(binderGuid, areaId);
+            SendPacket(packet);
+        }
+
         //Misc
         public uint GetTotalPlayedTime() { return m_PlayedTimeTotal; }
         public uint GetLevelPlayedTime() { return m_PlayedTimeLevel; }

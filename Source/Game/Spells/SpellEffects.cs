@@ -5159,8 +5159,7 @@ namespace Game.Spells
             Log.outDebug(LogFilter.Spells, "EffectBind: New homebind MapId: {0}, AreaId: {1}, {2}, ", homeLoc.GetMapId(), areaId, homeLoc);
 
             // zone update
-            PlayerBound packet = new(m_caster.GetGUID(), areaId);
-            player.SendPacket(packet);
+            player.SendPlayerBound(m_caster.GetGUID(), areaId);
         }
 
         [SpellEffectHandler(SpellEffectName.TeleportToReturnPoint)]
