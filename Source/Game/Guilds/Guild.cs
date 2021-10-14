@@ -2172,8 +2172,9 @@ namespace Game.Guilds
                     itemInfo.Slot = slot;
                     itemInfo.Item.ItemID = tabItem ? tabItem.GetEntry() : 0;
                     itemInfo.Count = (int)(tabItem ? tabItem.GetCount() : 0);
+                    itemInfo.EnchantmentID = (int)(tabItem ? tabItem.GetEnchantmentId(EnchantmentSlot.Perm) : 0);
                     itemInfo.Charges = tabItem ? Math.Abs(tabItem.GetSpellCharges()) : 0;
-                    itemInfo.OnUseEnchantmentID = 0/*int32(tabItem.GetItemSuffixFactor())*/;
+                    itemInfo.OnUseEnchantmentID = (int)(tabItem ? tabItem.GetEnchantmentId(EnchantmentSlot.Use) : 0);
                     itemInfo.Flags = 0;
                     itemInfo.Locked = false;
 
