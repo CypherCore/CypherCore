@@ -179,6 +179,9 @@ namespace Game.Chat
             handler.SendSysMessage(CypherStrings.NpcinfoArmor, target.GetArmor());
             handler.SendSysMessage(CypherStrings.NpcinfoPosition, target.GetPositionX(), target.GetPositionY(), target.GetPositionZ());
             handler.SendSysMessage(CypherStrings.ObjectInfoAIInfo, target.GetAIName(), target.GetScriptName());
+            var ai = target.GetAI();
+            if (ai != null)
+                handler.SendSysMessage(CypherStrings.ObjectInfoAIType, nameof(ai));
             handler.SendSysMessage(CypherStrings.NpcinfoFlagsExtra, cInfo.FlagsExtra);
             foreach (uint value in Enum.GetValues(typeof(CreatureFlagsExtra)))
                 if (cInfo.FlagsExtra.HasAnyFlag((CreatureFlagsExtra)value))

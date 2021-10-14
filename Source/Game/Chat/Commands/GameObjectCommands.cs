@@ -203,16 +203,16 @@ namespace Game.Chat
             handler.SendSysMessage(CypherStrings.GoinfoType, type);
             handler.SendSysMessage(CypherStrings.GoinfoLootid, lootId);
             handler.SendSysMessage(CypherStrings.GoinfoDisplayid, displayId);
-            WorldObject obj = handler.GetSelectedObject();
-            if (obj != null)
+
+            if (thisGO != null)
             {
-                if (obj.IsGameObject() && obj.ToGameObject().GetGameObjectData() != null && obj.ToGameObject().GetGameObjectData().spawnGroupData.groupId != 0)
+                if (thisGO.GetGameObjectData() != null && thisGO.GetGameObjectData().spawnGroupData.groupId != 0)
                 {
-                    SpawnGroupTemplateData groupData = obj.ToGameObject().GetGameObjectData().spawnGroupData;
-                    handler.SendSysMessage(CypherStrings.SpawninfoGroupId, groupData.name, groupData.groupId, groupData.flags, obj.GetMap().IsSpawnGroupActive(groupData.groupId));
+                    SpawnGroupTemplateData groupData = thisGO.ToGameObject().GetGameObjectData().spawnGroupData;
+                    handler.SendSysMessage(CypherStrings.SpawninfoGroupId, groupData.name, groupData.groupId, groupData.flags, thisGO.GetMap().IsSpawnGroupActive(groupData.groupId));
                 }
-                if (obj.IsGameObject())
-                    handler.SendSysMessage(CypherStrings.SpawninfoCompatibilityMode, obj.ToGameObject().GetRespawnCompatibilityMode());
+                
+                handler.SendSysMessage(CypherStrings.SpawninfoCompatibilityMode, thisGO.GetRespawnCompatibilityMode());
             }
             handler.SendSysMessage(CypherStrings.GoinfoName, name);
             handler.SendSysMessage(CypherStrings.GoinfoSize, gameObjectInfo.size);
@@ -232,6 +232,9 @@ namespace Game.Chat
                 handler.SendSysMessage(CypherStrings.GoinfoAddon, goOverride.Faction, goOverride.Flags);
 
             handler.SendSysMessage(CypherStrings.ObjectInfoAIInfo, gameObjectInfo.AIName, Global.ObjectMgr.GetScriptName(gameObjectInfo.ScriptId));
+            var ai = thisGO != null ? thisGO.GetAI() : null;
+            if (ai != null)
+                handler.SendSysMessage(CypherStrings.ObjectInfoAIType, nameof(ai));
 
             GameObjectDisplayInfoRecord modelInfo = CliDB.GameObjectDisplayInfoStorage.LookupByKey(displayId);
             if (modelInfo != null)

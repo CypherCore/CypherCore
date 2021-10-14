@@ -1094,6 +1094,7 @@ namespace Framework.Constants
         ListRespawnsOverdue = 5080,
         ListRespawnsCreatures = 5081,
         ListRespawnsGameobjects = 5082,
+        ObjectInfoAIType = 5083,
 
         NpcinfoUnitFieldFlags2 = 5084,
         NpcinfoUnitFieldFlags3 = 5085,
