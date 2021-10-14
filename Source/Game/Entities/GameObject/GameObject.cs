@@ -2292,11 +2292,12 @@ namespace Game.Entities
                     EventInform(m_goInfo.DestructibleBuilding.DestroyedEvent, attackerOrHealer);
                     GetAI().Destroyed(attackerOrHealer, m_goInfo.DestructibleBuilding.DestroyedEvent);
 
-                    if (attackerOrHealer != null && attackerOrHealer.IsPlayer())
+                    Player player = attackerOrHealer != null ? attackerOrHealer.GetCharmerOrOwnerPlayerOrPlayerItself() : null;
+                    if (player)
                     {
-                        var bg = attackerOrHealer.ToPlayer().GetBattleground();
+                        Battleground bg = player.GetBattleground();
                         if (bg != null)
-                            bg.DestroyGate(attackerOrHealer.ToPlayer(), this);
+                            bg.DestroyGate(player, this);
                     }
 
                     RemoveFlag(GameObjectFlags.Damaged);
