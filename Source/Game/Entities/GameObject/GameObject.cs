@@ -435,7 +435,10 @@ namespace Game.Entities
                 if (m_despawnDelay > diff)
                     m_despawnDelay -= diff;
                 else
+                {
+                    m_despawnDelay = 0;
                     DespawnOrUnsummon(TimeSpan.FromMilliseconds(0), m_despawnRespawnTime);
+                }
             }
 
             switch (m_lootState)
@@ -896,9 +899,11 @@ namespace Game.Entities
             }
             else
             {
-                uint respawnDelay = (uint)((forceRespawnTime > TimeSpan.Zero) ? forceRespawnTime.TotalSeconds : m_respawnDelayTime);
-                if (m_goData != null && respawnDelay != 0)
+                if (m_goData != null)
+                {
+                    uint respawnDelay = (uint)((forceRespawnTime > TimeSpan.Zero) ? forceRespawnTime.TotalSeconds : m_respawnDelayTime);
                     SaveRespawnTime(respawnDelay);
+                }
                 Delete();
             }
         }
