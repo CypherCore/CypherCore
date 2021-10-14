@@ -214,42 +214,6 @@ namespace Game.Spells
             if (!unitTarget && !gameObjTarget && !itemTarget)
                 return;
 
-            // selection by spell family
-            switch (m_spellInfo.SpellFamilyName)
-            {
-                case SpellFamilyNames.Paladin:
-                    switch (m_spellInfo.Id)
-                    {
-                        case 31789:                                 // Righteous Defense (step 1)
-                        {
-                            // Clear targets for eff 1
-                            foreach (var hit in m_UniqueTargetInfo)
-                                hit.EffectMask &= ~Convert.ToUInt32(1 << 1);
-
-                            // not empty (checked), copy
-                            var attackers = unitTarget.GetAttackers();
-
-                            // remove invalid attackers
-                            foreach (var att in attackers)
-                                if (!att.IsValidAttackTarget(m_caster))
-                                    attackers.Remove(att);
-
-                            // selected from list 3
-                            int maxTargets = Math.Min(3, attackers.Count);
-                            for (uint i = 0; i < maxTargets; ++i)
-                            {
-                                Unit attacker = attackers.SelectRandom();
-                                AddUnitTarget(attacker, 1 << 1);
-                                attackers.Remove(attacker);
-                            }
-
-                            // now let next effect cast spell at each target.
-                            return;
-                        }
-                    }
-                    break;
-            }
-
             // pet auras
             if (m_caster.GetTypeId() == TypeId.Player)
             {
