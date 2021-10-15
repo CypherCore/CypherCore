@@ -2069,7 +2069,7 @@ namespace Game.Maps
                 data.AreaId = gridAreaId;
                 var areaEntry1 = CliDB.AreaTableStorage.LookupByKey(data.AreaId);
                 if (areaEntry1 != null)
-                    data.outdoors = (areaEntry1.Flags & (AreaFlags.Inside | AreaFlags.Outside)) != AreaFlags.Inside;
+                    data.outdoors = ((AreaFlags)areaEntry1.Flags[0] & (AreaFlags.Inside | AreaFlags.Outside)) != AreaFlags.Inside;
             }
 
             if (data.AreaId == 0)

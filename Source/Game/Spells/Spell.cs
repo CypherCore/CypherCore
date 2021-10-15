@@ -5347,7 +5347,7 @@ namespace Game.Spells
                             BattleField Bf = Global.BattleFieldMgr.GetBattlefieldToZoneId(m_originalCaster.GetZoneId());
                             var area = CliDB.AreaTableStorage.LookupByKey(m_originalCaster.GetAreaId());
                             if (area != null)
-                                if (area.Flags.HasFlag(AreaFlags.NoFlyZone) || (Bf != null && !Bf.CanFlyIn()))
+                                if (area.HasFlag(AreaFlags.NoFlyZone) || (Bf != null && !Bf.CanFlyIn()))
                                     return SpellCastResult.NotHere;
                         }
                         break;

@@ -1464,7 +1464,7 @@ namespace Game.Achievements
                     uint zoneId = referencePlayer.GetAreaId();
                     AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(zoneId);
                     if (areaEntry != null)
-                        if (areaEntry.Flags.HasFlag(AreaFlags.Unk9))
+                        if (areaEntry.HasFlag(AreaFlags.Unk9))
                             zoneId = areaEntry.ParentAreaID;
                     if (zoneId != reqValue)
                         return false;
@@ -1477,7 +1477,7 @@ namespace Game.Achievements
                     uint zoneId = refe.GetAreaId();
                     AreaTableRecord areaEntry = CliDB.AreaTableStorage.LookupByKey(zoneId);
                     if (areaEntry != null)
-                        if (areaEntry.Flags.HasFlag(AreaFlags.Unk9))
+                        if (areaEntry.HasFlag(AreaFlags.Unk9))
                             zoneId = areaEntry.ParentAreaID;
                     if (zoneId != reqValue)
                         return false;
