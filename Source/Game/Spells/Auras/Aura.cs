@@ -1468,6 +1468,10 @@ namespace Game.Spells
 
         bool CanBeAppliedOn(Unit target)
         {
+            foreach (uint label in GetSpellInfo().Labels)
+                if (target.HasAuraTypeWithMiscvalue(AuraType.SuppressItemPassiveEffectBySpellLabel, (int)label))
+                    return false;
+
             // unit not in world or during remove from world
             if (!target.IsInWorld || target.IsDuringRemoveFromWorld())
             {

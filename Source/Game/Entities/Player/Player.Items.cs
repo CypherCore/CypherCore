@@ -3889,6 +3889,9 @@ namespace Game.Entities
             foreach (ItemEffectRecord effectData in pItem.GetEffects())
             {
                 SpellInfo effectSpellInfo = Global.SpellMgr.GetSpellInfo((uint)effectData.SpellID, Difficulty.None);
+                if (effectSpellInfo == null)
+                    continue;
+
                 // apply proc cooldown to equip auras if we have any
                 if (effectData.TriggerType == ItemSpelltriggerType.OnEquip)
                 {

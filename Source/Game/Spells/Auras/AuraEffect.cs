@@ -5772,6 +5772,22 @@ namespace Game.Spells
 
             playerTarget.SendMovementSetCollisionHeight(playerTarget.GetCollisionHeight(), UpdateCollisionHeightReason.Force);
         }
+
+        [AuraEffectHandler(AuraType.SuppressItemPassiveEffectBySpellLabel)]
+        void HandleSuppressItemPassiveEffectBySpellLabel(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
+                return;
+
+            List<Aura> suppressedAuras = new();
+            foreach (var appliedAura in aurApp.GetTarget().GetOwnedAuras())
+                if (appliedAura.Value.GetSpellInfo().HasLabel((uint)GetMiscValue()))
+                    suppressedAuras.Add(appliedAura.Value);
+
+            // Refresh applications
+            foreach (Aura aura in suppressedAuras)
+                aura.ApplyForTargets();
+        }
         #endregion
     }
 
