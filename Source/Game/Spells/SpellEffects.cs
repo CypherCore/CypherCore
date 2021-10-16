@@ -5120,7 +5120,7 @@ namespace Game.Spells
             player.SetHomebind(homeLoc, areaId);
             player.SendBindPointUpdate();
 
-            Log.outDebug(LogFilter.Spells, "EffectBind: New homebind MapId: {0}, AreaId: {1}, {2}, ", homeLoc.GetMapId(), areaId, homeLoc);
+            Log.outDebug(LogFilter.Spells, $"EffectBind: New homebind: {homeLoc}, AreaId: {areaId}");
 
             // zone update
             player.SendPlayerBound(m_caster.GetGUID(), areaId);

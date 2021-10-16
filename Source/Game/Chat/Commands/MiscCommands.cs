@@ -2362,8 +2362,7 @@ namespace Game.Chat
 
             if (location_str == "inn")
             {
-                var home = player.GetHomebind();
-                player.TeleportTo(home.GetMapId(), home.GetPositionX(), home.GetPositionY(), home.GetPositionZ(), player.GetOrientation());
+                player.TeleportTo(player.GetHomebind());
                 return true;
             }
 

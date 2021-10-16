@@ -820,7 +820,7 @@ namespace Game.Spells
                 case Targets.DestHome:
                     Player playerCaster = m_caster.ToPlayer();
                     if (playerCaster != null)
-                        dest = new SpellDestination(playerCaster.GetHomebind().posX, playerCaster.GetHomebind().posY, playerCaster.GetHomebind().posZ, playerCaster.GetOrientation(), playerCaster.GetHomebind().GetMapId());
+                        dest = new SpellDestination(playerCaster.GetHomebind());
                     break;
                 case Targets.DestDb:
                     SpellTargetPosition st = Global.SpellMgr.GetSpellTargetPosition(m_spellInfo.Id, spellEffectInfo.EffectIndex);

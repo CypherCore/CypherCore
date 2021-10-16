@@ -1605,9 +1605,7 @@ namespace Game.Maps
                     if (!pl.IsBeingTeleportedFar())
                     {
                         // this is happening for bg
-                        Log.outError(LogFilter.Maps,
-                            "Map.UnloadAll: player {0} is still in map {1} during unload, this should not happen!",
-                            pl.GetName(), GetId());
+                        Log.outError(LogFilter.Maps, $"Map.UnloadAll: player {pl.GetName()} is still in map {GetId()} during unload, this should not happen!");
                         pl.TeleportTo(pl.GetHomebind());
                     }
                 }

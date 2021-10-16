@@ -577,18 +577,13 @@ namespace Game.Entities
             bool ok = false;
             if (!result.IsEmpty())
             {
-                homebind = new WorldLocation();
-
-                homebind.SetMapId(result.Read<uint>(0));
+                homebind.WorldRelocate(result.Read<uint>(0), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4), result.Read<float>(5));
                 homebindAreaId = result.Read<uint>(1);
-                homebind.posX = result.Read<float>(2);
-                homebind.posY = result.Read<float>(3);
-                homebind.posZ = result.Read<float>(4);
 
                 var map = CliDB.MapStorage.LookupByKey(homebind.GetMapId());
 
                 // accept saved data only for valid position (and non instanceable), and accessable
-                if (GridDefines.IsValidMapCoord(homebind.GetMapId(), homebind.posX, homebind.posY, homebind.posZ) &&
+                if (GridDefines.IsValidMapCoord(homebind) &&
                     !map.Instanceable() && GetSession().GetExpansion() >= map.Expansion())
                     ok = true;
                 else
@@ -605,9 +600,10 @@ namespace Game.Entities
                 stmt.AddValue(0, GetGUID().GetCounter());
                 stmt.AddValue(1, homebind.GetMapId());
                 stmt.AddValue(2, homebindAreaId);
-                stmt.AddValue(3, homebind.posX);
-                stmt.AddValue(4, homebind.posY);
-                stmt.AddValue(5, homebind.posZ);
+                stmt.AddValue(3, homebind.GetPositionX());
+                stmt.AddValue(4, homebind.GetPositionY());
+                stmt.AddValue(5, homebind.GetPositionZ());
+                stmt.AddValue(6, homebind.GetOrientation());
                 DB.Characters.Execute(stmt);
             };
 
@@ -615,12 +611,16 @@ namespace Game.Entities
             {
                 var createPosition = m_createMode == PlayerCreateMode.NPE && info.createPositionNPE.HasValue ? info.createPositionNPE.Value : info.createPosition;
 
-                homebind = new WorldLocation(createPosition.Loc.GetMapId(), createPosition.Loc);
+                homebind.WorldRelocate(createPosition.Loc);
                 if (createPosition.TransportGuid.HasValue)
                 {
                     Transport transport = Global.ObjAccessor.FindTransport(ObjectGuid.Create(HighGuid.Transport, createPosition.TransportGuid.Value));
                     if (transport != null)
-                        transport.CalculatePassengerPosition(ref homebind.posX, ref homebind.posY, ref homebind.posZ, ref homebind.Orientation);
+                    {
+                        float orientation = homebind.GetOrientation();
+                        transport.CalculatePassengerPosition(ref homebind.posX, ref homebind.posY, ref homebind.posZ, ref orientation);
+                        homebind.SetOrientation(orientation);
+                    }
                 }
 
                 homebindAreaId = Global.MapMgr.GetAreaId(PhasingHandler.EmptyPhaseShift, homebind);
@@ -637,14 +637,13 @@ namespace Game.Entities
 
                 Cypher.Assert(loc != null, "Missing fallback graveyard location for faction {GetTeamId()}");
 
-                homebind = new WorldLocation(loc.Loc.GetMapId(), loc.Loc.posX, loc.Loc.posY, loc.Loc.posZ);
+                homebind.WorldRelocate(loc.Loc);
                 homebindAreaId = Global.MapMgr.GetAreaId(PhasingHandler.EmptyPhaseShift, loc.Loc);
 
                 saveHomebindToDb();
             }
 
-            Log.outDebug(LogFilter.Player, "Setting player home position - mapid: {0}, areaid: {1}, {2}",
-                homebind.GetMapId(), homebindAreaId, homebind);
+            Log.outDebug(LogFilter.Player, $"Setting player home position - mapid: {homebind.GetMapId()}, areaid: {homebindAreaId}, {homebind}");
 
             return true;
         }
@@ -2774,7 +2773,7 @@ namespace Game.Entities
             SetRaidDifficultyID(CheckLoadedRaidDifficultyID(raidDifficulty));
             SetLegacyRaidDifficultyID(CheckLoadedLegacyRaidDifficultyID(legacyRaidDifficulty));
 
-            var RelocateToHomebind = new Action(() => { mapId = (ushort)homebind.GetMapId(); instance_id = 0; Relocate(homebind); });
+            var RelocateToHomebind = new Action(() => { instance_id = 0; Relocate(homebind); });
 
             _LoadGroup(holder.GetResult(PlayerLoginQueryLoad.Group));
 

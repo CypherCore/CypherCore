@@ -2808,17 +2808,18 @@ namespace Game.Entities
         }
         public void SetHomebind(WorldLocation loc, uint areaId)
         {
-            homebind = loc;
+            homebind.WorldRelocate(loc);
             homebindAreaId = areaId;
 
             // update sql homebind
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_PLAYER_HOMEBIND);
             stmt.AddValue(0, homebind.GetMapId());
             stmt.AddValue(1, homebindAreaId);
-            stmt.AddValue(2, homebind.posX);
-            stmt.AddValue(3, homebind.posY);
-            stmt.AddValue(4, homebind.posZ);
-            stmt.AddValue(5, GetGUID().GetCounter());
+            stmt.AddValue(2, homebind.GetPositionX());
+            stmt.AddValue(3, homebind.GetPositionY());
+            stmt.AddValue(4, homebind.GetPositionZ());
+            stmt.AddValue(5, homebind.GetOrientation());
+            stmt.AddValue(6, GetGUID().GetCounter());
             DB.Characters.Execute(stmt);
         }
         public void SetBindPoint(ObjectGuid guid)
@@ -2829,9 +2830,7 @@ namespace Game.Entities
         public void SendBindPointUpdate()
         {
             BindPointUpdate packet = new();
-            packet.BindPosition.X = homebind.GetPositionX();
-            packet.BindPosition.Y = homebind.GetPositionY();
-            packet.BindPosition.Z = homebind.GetPositionZ();
+            packet.BindPosition = new (homebind.GetPositionX(), homebind.GetPositionY(), homebind.GetPositionZ());
             packet.BindMapID = homebind.GetMapId();
             packet.BindAreaID = homebindAreaId;
             SendPacket(packet);

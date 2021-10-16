@@ -233,7 +233,7 @@ namespace Game.Entities
 
         // Recall position
         WorldLocation m_recall_location;
-        WorldLocation homebind;
+        WorldLocation homebind = new();
         uint homebindAreaId;
         uint m_HomebindTimer;
 

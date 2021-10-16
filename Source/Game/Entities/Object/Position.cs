@@ -427,5 +427,10 @@ namespace Game.Entities
         {
             return this;
         }
+
+        public override string ToString()
+        {
+            return $"X: {posX} Y: {posY} Z: {posZ} O: {Orientation} MapId: {_mapId}";
+        }
     }
 }
