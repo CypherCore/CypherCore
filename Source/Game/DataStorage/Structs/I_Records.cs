@@ -344,7 +344,7 @@ namespace Game.DataStorage
         public LocalizedString Display;
         public int ExpansionID;
         public float DmgVariance;
-        public uint InstanceBound;
+        public uint LimitCategory;
         public uint DurationInInventory;
         public float QualityModifier;
         public uint BagFamily;
@@ -367,10 +367,10 @@ namespace Game.DataStorage
         public ushort ItemNameDescriptionID;
         public ushort RequiredTransmogHoliday;
         public ushort RequiredHoliday;
-        public ushort LimitCategory;
         public ushort GemProperties;
         public ushort SocketMatchEnchantmentId;
         public ushort TotemCategoryID;
+        public ushort InstanceBound;
         public ushort[] ZoneBound = new ushort[2];
         public ushort ItemSet;
         public ushort LockID;
