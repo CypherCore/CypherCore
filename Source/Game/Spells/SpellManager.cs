@@ -2228,7 +2228,7 @@ namespace Game.Entities
                 GetLoadHelper(interrupts.SpellID, interrupts.DifficultyID).Interrupts = interrupts;
 
             foreach (SpellLabelRecord label in CliDB.SpellLabelStorage.Values)
-                GetLoadHelper(label.LabelID, 0).Labels.Add(label);
+                GetLoadHelper(label.SpellID, 0).Labels.Add(label);
 
             foreach (SpellLevelsRecord levels in CliDB.SpellLevelsStorage.Values)
                 GetLoadHelper(levels.SpellID, levels.DifficultyID).Levels = levels;
