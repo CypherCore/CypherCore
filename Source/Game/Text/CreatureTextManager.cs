@@ -106,7 +106,7 @@ namespace Game
                     }
                 }
 
-                if (temp.TextRange > CreatureTextRange.World)
+                if (temp.TextRange > CreatureTextRange.Personal)
                 {
                     Log.outError(LogFilter.Sql, "CreatureTextMgr: Entry {0}, Group {1}, Id {2} in table `creature_text` has incorrect TextRange {3}.", temp.creatureId, temp.groupId, temp.id, temp.TextRange);
                     temp.TextRange = CreatureTextRange.Normal;
@@ -339,6 +339,12 @@ namespace Game
                         }
                         return;
                     }
+                case CreatureTextRange.Personal:
+                    if (whisperTarget == null || !whisperTarget.IsPlayer())
+                        return;
+
+                    whisperTarget.ToPlayer().SendPacket(data);
+                    return;
                 case CreatureTextRange.Normal:
                 default:
                     break;
@@ -485,6 +491,12 @@ namespace Game
                         }
                         return;
                     }
+                case CreatureTextRange.Personal:
+                    if (whisperTarget == null || !whisperTarget.IsPlayer())
+                        return;
+
+                    localizer.Invoke(whisperTarget.ToPlayer());
+                    return;
                 case CreatureTextRange.Normal:
                 default:
                     break;
@@ -540,7 +552,8 @@ namespace Game
         Area = 1,
         Zone = 2,
         Map = 3,
-        World = 4
+        World = 4,
+        Personal = 5
     }
 
     public class CreatureTextLocalizer : IDoWork<Player>
