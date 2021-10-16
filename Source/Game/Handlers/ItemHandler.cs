@@ -1059,16 +1059,17 @@ namespace Game
             if (!item)
                 return;
 
-            if (item.GetBonus().EffectCount < 2)
-                return;
-
-            uint spellToLearn = (uint)item.GetEffect(1).SpellID;
-
-            var entry = Global.SpellMgr.GetBattlePetSpecies(spellToLearn);
-            if (entry != null)
+            foreach (var itemEffect in item.GetEffects())
             {
-                GetBattlePetMgr().AddPet(entry.Id, BattlePetMgr.SelectPetDisplay(entry), BattlePetMgr.RollPetBreed(entry.Id), BattlePetMgr.GetDefaultPetQuality(entry.Id));
-                _player.UpdateCriteria(CriteriaType.UniquePetsOwned);
+                if (itemEffect.TriggerType != ItemSpelltriggerType.LearnSpellId)
+                    continue;
+
+                var entry = Global.SpellMgr.GetBattlePetSpecies((uint)itemEffect.SpellID);
+                if (entry != null)
+                {
+                    GetBattlePetMgr().AddPet(entry.Id, BattlePetMgr.SelectPetDisplay(entry), BattlePetMgr.RollPetBreed(entry.Id), BattlePetMgr.GetDefaultPetQuality(entry.Id));
+                    _player.UpdateCriteria(CriteriaType.UniquePetsOwned);
+                }
             }
 
             GetPlayer().DestroyItem(item.GetBagSlot(), item.GetSlot(), true);

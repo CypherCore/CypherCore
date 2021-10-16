@@ -1816,10 +1816,22 @@ namespace Game.Spells
 
             Player player = unitTarget.ToPlayer();
 
-            uint spellToLearn = (m_spellInfo.Id == 483 || m_spellInfo.Id == 55884) ? (uint)damage : effectInfo.TriggerSpell;
-            player.LearnSpell(spellToLearn, false);
+            if (m_CastItem != null && effectInfo.TriggerSpell == 0)
+            {
+                foreach (var itemEffect in m_CastItem.GetEffects())
+                {
+                    if (itemEffect.TriggerType != ItemSpelltriggerType.LearnSpellId)
+                        continue;
 
-            Log.outDebug(LogFilter.Spells, "Spell: Player {0} has learned spell {1} from NpcGUID={2}", player.GetGUID().ToString(), spellToLearn, m_caster.GetGUID().ToString());
+                    player.LearnSpell((uint)itemEffect.SpellID, false);
+                }
+            }
+
+            if (effectInfo.TriggerSpell != 0)
+            {
+                player.LearnSpell(effectInfo.TriggerSpell, false);
+                Log.outDebug(LogFilter.Spells, $"Spell: {player.GetGUID()} has learned spell {effectInfo.TriggerSpell} from {m_caster.GetGUID()}");
+            }
         }
 
         [SpellEffectHandler(SpellEffectName.Dispel)]

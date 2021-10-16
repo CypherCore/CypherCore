@@ -2592,11 +2592,6 @@ namespace Game.Entities
         public void SetChildItem(ObjectGuid childItem) { m_childItem = childItem; }
 
         public ItemEffectRecord[] GetEffects() { return _bonusData.Effects[0.._bonusData.EffectCount]; }
-        public ItemEffectRecord GetEffect(int i)
-        {
-            Cypher.Assert(i < _bonusData.EffectCount, $"Attempted to get effect at index {i} but item has only {_bonusData.EffectCount} effects!");
-            return _bonusData.Effects[i];
-        }
 
         //Static
         public static bool ItemCanGoIntoBag(ItemTemplate pProto, ItemTemplate pBagProto)

@@ -1472,37 +1472,6 @@ namespace Game.Entities
         {
             if (!item.GetTemplate().GetFlags().HasFlag(ItemFlags.Legacy))
             {
-                // special learning case
-                if (item.GetBonus().EffectCount >= 2)
-                {
-                    if (item.GetEffect(0).SpellID == 483 || item.GetEffect(0).SpellID == 55884)
-                    {
-                        uint learn_spell_id = (uint)item.GetEffect(0).SpellID;
-                        uint learning_spell_id = (uint)item.GetEffect(1).SpellID;
-
-                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(learn_spell_id, Difficulty.None);
-                        if (spellInfo == null)
-                        {
-                            Log.outError(LogFilter.Player, "Player.CastItemUseSpell: Item (Entry: {0}) in have wrong spell id {1}, ignoring ", item.GetEntry(), learn_spell_id);
-                            SendEquipError(InventoryResult.InternalBagError, item);
-                            return;
-                        }
-
-                        Spell spell = new(this, spellInfo, TriggerCastFlags.None);
-
-                        SpellPrepare spellPrepare = new();
-                        spellPrepare.ClientCastID = castCount;
-                        spellPrepare.ServerCastID = spell.m_castId;
-                        SendPacket(spellPrepare);
-
-                        spell.m_fromClient = true;
-                        spell.m_CastItem = item;
-                        spell.SetSpellValue(SpellValueMod.BasePoint0, (int)learning_spell_id);
-                        spell.Prepare(targets);
-                        return;
-                    }
-                }
-
                 // item spells casted at use
                 foreach (ItemEffectRecord effectData in item.GetEffects())
                 {
