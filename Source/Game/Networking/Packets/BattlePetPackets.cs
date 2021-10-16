@@ -125,7 +125,7 @@ namespace Game.Networking.Packets
 
             if (_worldPacket.HasBit())
             {
-                Declined = new DeclinedName();
+                DeclinedName.Set(new DeclinedName());
 
                 byte[] declinedNameLengths = new byte[SharedConst.MaxDeclinedNameCases];
 
@@ -133,7 +133,7 @@ namespace Game.Networking.Packets
                     declinedNameLengths[i] = _worldPacket.ReadBits<byte>(7);
 
                 for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
-                    Declined.name[i] = _worldPacket.ReadString(declinedNameLengths[i]);
+                    DeclinedName.Value.name[i] = _worldPacket.ReadString(declinedNameLengths[i]);
             }
 
             Name = _worldPacket.ReadString(nameLength);
@@ -141,7 +141,7 @@ namespace Game.Networking.Packets
 
         public ObjectGuid PetGuid;
         public string Name;
-        public DeclinedName Declined;
+        public Optional<DeclinedName> DeclinedName;
     }
 
     class BattlePetDeletePet : ClientPacket

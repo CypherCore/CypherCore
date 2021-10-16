@@ -179,6 +179,14 @@ namespace Game.BattlePets
                         pet.PacketInfo.Flags = petsResult.Read<ushort>(7);
                         pet.PacketInfo.Name = petsResult.Read<string>(8);
                         pet.PacketInfo.CreatureID = speciesEntry.CreatureID;
+
+                        if (!petsResult.IsNull(9))
+                        {
+                            pet.DeclinedName = new();
+                            for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
+                                pet.DeclinedName.name[i] = petsResult.Read<string>(9 + i);
+                        }
+
                         pet.SaveInfo = BattlePetSaveInfo.Unchanged;
                         pet.CalculateStats();
                         _pets[pet.PacketInfo.Guid.GetCounter()] = pet;
@@ -223,6 +231,19 @@ namespace Game.BattlePets
                         stmt.AddValue(8, pair.Value.PacketInfo.Flags);
                         stmt.AddValue(9, pair.Value.PacketInfo.Name);
                         trans.Append(stmt);
+
+                        if (pair.Value.DeclinedName != null)
+                        {
+                            stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_BATTLE_PET_DECLINED_NAME);
+                            stmt.AddValue(0, pair.Key);
+
+                            for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
+                                stmt.AddValue(i + 1, pair.Value.DeclinedName.name[i]);
+
+                            trans.Append(stmt);
+                        }
+
+
                         pair.Value.SaveInfo = BattlePetSaveInfo.Unchanged;
                         break;
                     case BattlePetSaveInfo.Changed:
@@ -236,9 +257,29 @@ namespace Game.BattlePets
                         stmt.AddValue(6, _owner.GetBattlenetAccountId());
                         stmt.AddValue(7, pair.Key);
                         trans.Append(stmt);
+
+                        stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_BATTLE_PET_DECLINED_NAME);
+                        stmt.AddValue(0, pair.Key);
+                        trans.Append(stmt);
+
+                        if (pair.Value.DeclinedName != null)
+                        {
+                            stmt = DB.Login.GetPreparedStatement(LoginStatements.INS_BATTLE_PET_DECLINED_NAME);
+                            stmt.AddValue(0, pair.Key);
+
+                            for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; i++)
+                                stmt.AddValue(i + 1, pair.Value.DeclinedName.name[i]);
+
+                            trans.Append(stmt);
+                        }
+
                         pair.Value.SaveInfo = BattlePetSaveInfo.Unchanged;
                         break;
                     case BattlePetSaveInfo.Removed:
+                        stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_BATTLE_PET_DECLINED_NAME);
+                        stmt.AddValue(0, pair.Key);
+                        trans.Append(stmt);
+
                         stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_BATTLE_PETS);
                         stmt.AddValue(0, _owner.GetBattlenetAccountId());
                         stmt.AddValue(1, pair.Key);
@@ -340,6 +381,22 @@ namespace Game.BattlePets
                 pet.SaveInfo = BattlePetSaveInfo.Changed;
         }
 
+        public void ModifyName(ObjectGuid guid, string name, DeclinedName declinedName)
+        {
+            BattlePet pet = GetPet(guid);
+            if (pet == null)
+                return;
+
+            pet.PacketInfo.Name = name;
+
+            pet.DeclinedName = new DeclinedName();
+            if (declinedName != null)
+                pet.DeclinedName = declinedName;
+
+            if (pet.SaveInfo != BattlePetSaveInfo.New)
+                pet.SaveInfo = BattlePetSaveInfo.Changed;
+        }
+        
         bool IsPetInSlot(ObjectGuid guid)
         {
             foreach (BattlePetSlot slot in _slots)
@@ -582,6 +639,7 @@ namespace Game.BattlePets
             }
 
             public BattlePetStruct PacketInfo;
+            public DeclinedName DeclinedName;
             public BattlePetSaveInfo SaveInfo;
         }
     }
