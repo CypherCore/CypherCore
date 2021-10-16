@@ -1051,9 +1051,14 @@ namespace Game.Entities
             if (!HasUnitState(UnitState.Casting))
                 return false;
 
+            Spell spell = GetCurrentSpell(CurrentSpellTypes.Generic);
+            if (spell != null)
+                if (CanCastSpellWhileMoving(spell.GetSpellInfo()))
+                    return false;
+
             // channeled spells during channel stage (after the initial cast timer) allow movement with a specific spell attribute
-            Spell spell = m_currentSpells.LookupByKey(CurrentSpellTypes.Channeled);
-            if (spell)
+            spell = m_currentSpells.LookupByKey(CurrentSpellTypes.Channeled);
+            if (spell != null)
                 if (spell.GetState() != SpellState.Finished && spell.IsChannelActive())
                     if (spell.GetSpellInfo().IsMoveAllowedChannel())
                         return false;
@@ -1406,6 +1411,21 @@ namespace Game.Entities
             return false;
         }
 
+        public bool CanCastSpellWhileMoving(SpellInfo spellInfo)
+        {
+            if (HasAuraTypeWithAffectMask(AuraType.CastWhileWalking, spellInfo))
+                return true;
+
+            if (HasAuraType(AuraType.CastWhileWalkingAll))
+                return true;
+
+            foreach (uint label in spellInfo.Labels)
+                if (HasAuraTypeWithMiscvalue(AuraType.CastWhileWalkingBySpellLabel, (int)label))
+                    return true;
+
+            return false;
+        }
+        
         public static void ProcSkillsAndAuras(Unit actor, Unit actionTarget, ProcFlags typeMaskActor, ProcFlags typeMaskActionTarget, ProcFlagsSpellType spellTypeMask, ProcFlagsSpellPhase spellPhaseMask, ProcFlagsHit hitMask, Spell spell, DamageInfo damageInfo, HealInfo healInfo)
         {
             WeaponAttackType attType = damageInfo != null ? damageInfo.GetAttackType() : WeaponAttackType.BaseAttack;
@@ -2777,13 +2797,13 @@ namespace Game.Entities
             return dispelList;
         }
 
+        bool IsInterruptFlagIgnoredForSpell(SpellAuraInterruptFlags flag, Unit unit, SpellInfo spellInfo)
+        {
+            return flag == SpellAuraInterruptFlags.Moving && unit.CanCastSpellWhileMoving(spellInfo);
+        }
         bool IsInterruptFlagIgnoredForSpell(SpellAuraInterruptFlags2 flag, Unit unit, SpellInfo spellInfo)
         {
             return false;
-        }
-        bool IsInterruptFlagIgnoredForSpell(SpellAuraInterruptFlags flag, Unit unit, SpellInfo spellInfo)
-        {
-            return flag == SpellAuraInterruptFlags.Moving && unit.HasAuraTypeWithAffectMask(AuraType.CastWhileWalking, spellInfo);
         }
         
         public void RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags flag, uint except = 0)

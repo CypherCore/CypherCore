@@ -398,7 +398,7 @@ namespace Framework.Constants
         ModifyFallDamagePct = 374,
         ModPossessPet = 375,
         ModCurrencyGainFromSource = 376, // NYI
-        CastWhileWalking2 = 377, // NYI
+        CastWhileWalkingAll = 377, // Enables casting all spells while moving
         Unk378 = 378,
         ModManaRegenPct = 379,
         Unk380 = 380,

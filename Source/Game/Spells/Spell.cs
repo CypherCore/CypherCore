@@ -2332,8 +2332,8 @@ namespace Game.Spells
             // exception are only channeled spells that have no casttime and SPELL_ATTR5_CAN_CHANNEL_WHEN_MOVING
             // (even if they are interrupted on moving, spells with almost immediate effect get to have their effect processed before movement interrupter kicks in)
             // don't cancel spells which are affected by a SPELL_AURA_CAST_WHILE_WALKING effect
-            if (((m_spellInfo.IsChanneled() || m_casttime != 0) && m_caster.IsPlayer() && !(m_caster.ToPlayer().IsCharmed() && m_caster.ToPlayer().GetCharmerGUID().IsCreature()) && m_caster.ToPlayer().IsMoving() &&
-                m_spellInfo.InterruptFlags.HasFlag(SpellInterruptFlags.Movement)) && !m_caster.ToPlayer().HasAuraTypeWithAffectMask(AuraType.CastWhileWalking, m_spellInfo))
+            if (((m_spellInfo.IsChanneled() || m_casttime != 0) && m_caster.IsPlayer() && !(m_caster.ToUnit().IsCharmed() && m_caster.ToUnit().GetCharmerGUID().IsCreature()) && m_caster.ToUnit().IsMoving() &&
+                m_spellInfo.InterruptFlags.HasFlag(SpellInterruptFlags.Movement)) && !m_caster.ToUnit().CanCastSpellWhileMoving(m_spellInfo))
             {
                 // 1. Has casttime, 2. Or doesn't have flag to allow movement during channel
                 if (m_casttime != 0 || !m_spellInfo.IsMoveAllowedChannel())
@@ -3059,9 +3059,9 @@ namespace Game.Spells
             // check if the player caster has moved before the spell finished
             // with the exception of spells affected with SPELL_AURA_CAST_WHILE_WALKING effect
             if ((m_caster.IsTypeId(TypeId.Player) && m_timer != 0) &&
-                m_caster.ToPlayer().IsMoving() && (m_spellInfo.InterruptFlags.HasFlag(SpellInterruptFlags.Movement)) &&
-                (m_spellInfo.HasEffect(SpellEffectName.Stuck) || !m_caster.ToPlayer().HasUnitMovementFlag(MovementFlag.FallingFar)) &&
-                !m_caster.ToPlayer().HasAuraTypeWithAffectMask(AuraType.CastWhileWalking, m_spellInfo))
+                m_caster.ToUnit().IsMoving() && (m_spellInfo.InterruptFlags.HasFlag(SpellInterruptFlags.Movement)) &&
+                (!m_spellInfo.HasEffect(SpellEffectName.Stuck) || !m_caster.ToUnit().HasUnitMovementFlag(MovementFlag.FallingFar)) &&
+                !m_caster.ToUnit().CanCastSpellWhileMoving(m_spellInfo))
             {
                 // don't cancel for melee, autorepeat, triggered and instant spells
                 if (!m_spellInfo.IsNextMeleeSwingSpell() && !IsAutoRepeat() && !IsTriggered() && !(IsChannelActive() && m_spellInfo.IsMoveAllowedChannel()))
@@ -3069,7 +3069,7 @@ namespace Game.Spells
                     // if charmed by creature, trust the AI not to cheat and allow the cast to proceed
                     // @todo this is a hack, "creature" movesplines don't differentiate turning/moving right now
                     // however, checking what type of movement the spline is for every single spline would be really expensive
-                    if (!m_caster.ToPlayer().GetCharmerGUID().IsCreature())
+                    if (!m_caster.ToUnit().GetCharmerGUID().IsCreature())
                         Cancel();
                 }
             }
@@ -4500,7 +4500,9 @@ namespace Game.Spells
                 // cancel autorepeat spells if cast start when moving
                 // (not wand currently autorepeat cast delayed to moving stop anyway in spell update code)
                 // Do not cancel spells which are affected by a SPELL_AURA_CAST_WHILE_WALKING effect
-                if (unitCaster.IsPlayer() && unitCaster.ToPlayer().IsMoving() && (!unitCaster.IsCharmed() || !unitCaster.GetCharmerGUID().IsCreature()) && !unitCaster.HasAuraTypeWithAffectMask(AuraType.CastWhileWalking, m_spellInfo))
+                if (unitCaster.IsPlayer() && unitCaster.ToPlayer().IsMoving()
+                    && (!unitCaster.IsCharmed() || !unitCaster.GetCharmerGUID().IsCreature())
+                    && !unitCaster.CanCastSpellWhileMoving(m_spellInfo))
                 {
                     // skip stuck spell to allow use it in falling case and apply spell limitations at movement
                     if ((!unitCaster.HasUnitMovementFlag(MovementFlag.FallingFar) || !m_spellInfo.HasEffect(SpellEffectName.Stuck)) &&
