@@ -243,7 +243,7 @@ namespace Game.Networking.Packets
             data .WritePackedGuid( Guid);
             data.WriteUInt32(Species);
             data.WriteUInt32(CreatureID);
-            data.WriteUInt32(CollarID);
+            data.WriteUInt32(DisplayID);
             data.WriteUInt16(Breed);
             data.WriteUInt16(Level);
             data.WriteUInt16(Exp);
@@ -255,7 +255,7 @@ namespace Game.Networking.Packets
             data .WriteUInt8( Quality);
             data.WriteBits(Name.GetByteCount(), 7);
             data.WriteBit(OwnerInfo.HasValue); // HasOwnerInfo
-            data.WriteBit(Name.IsEmpty()); // NoRename
+            data.WriteBit(false); // NoRename
             data.FlushBits();
 
             data.WriteString(Name);
@@ -278,7 +278,7 @@ namespace Game.Networking.Packets
         public ObjectGuid Guid;
         public uint Species;
         public uint CreatureID;
-        public uint CollarID;
+        public uint DisplayID;
         public ushort Breed;
         public ushort Level;
         public ushort Exp;

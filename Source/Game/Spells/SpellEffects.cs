@@ -5454,46 +5454,41 @@ namespace Game.Spells
             if (!m_CastItem || !m_caster || !m_caster.IsTypeId(TypeId.Player))
                 return;
 
-            Player plr = m_caster.ToPlayer();
-
-            // are we allowed to learn battle pets without it?
-            /*if (plr.HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_PET_BATTLES_UNLOCKED))
-                return; // send some error*/
-
             uint speciesId = m_CastItem.GetModifier(ItemModifier.BattlePetSpeciesId);
             ushort breed = (ushort)(m_CastItem.GetModifier(ItemModifier.BattlePetBreedData) & 0xFFFFFF);
             BattlePetBreedQuality quality = (BattlePetBreedQuality)((m_CastItem.GetModifier(ItemModifier.BattlePetBreedData) >> 24) & 0xFF);
             ushort level = (ushort)m_CastItem.GetModifier(ItemModifier.BattlePetLevel);
-            uint creatureId = m_CastItem.GetModifier(ItemModifier.BattlePetDisplayId);
+            uint displayId = m_CastItem.GetModifier(ItemModifier.BattlePetDisplayId);
 
             BattlePetSpeciesRecord speciesEntry = CliDB.BattlePetSpeciesStorage.LookupByKey(speciesId);
             if (speciesEntry == null)
                 return;
 
+            Player plr = m_caster.ToPlayer();
             BattlePetMgr battlePetMgr = plr.GetSession().GetBattlePetMgr();
             if (battlePetMgr == null)
                 return;
 
-            // TODO: This means if you put your highest lvl pet into cage, you won't be able to uncage it again which is probably wrong.
-            // We will need to store maxLearnedLevel somewhere to avoid this behaviour.
             if (battlePetMgr.GetMaxPetLevel() < level)
             {
-                battlePetMgr.SendError(BattlePetError.TooHighLevelToUncage, creatureId); // or speciesEntry.CreatureID
+                battlePetMgr.SendError(BattlePetError.TooHighLevelToUncage, speciesEntry.CreatureID);
                 SendCastResult(SpellCastResult.CantAddBattlePet);
                 return;
             }
 
             if (battlePetMgr.HasMaxPetCount(speciesEntry))
             {
-                battlePetMgr.SendError(BattlePetError.CantHaveMorePetsOfThatType, creatureId); // or speciesEntry.CreatureID
+                battlePetMgr.SendError(BattlePetError.CantHaveMorePetsOfThatType, speciesEntry.CreatureID);
                 SendCastResult(SpellCastResult.CantAddBattlePet);
                 return;
             }
 
-            battlePetMgr.AddPet(speciesId, creatureId, breed, quality, level);
+            battlePetMgr.AddPet(speciesId, displayId, breed, quality, level);
 
             if (!plr.HasSpell(speciesEntry.SummonSpellID))
                 plr.LearnSpell(speciesEntry.SummonSpellID, false);
+
+            plr.SendPlaySpellVisual(plr, SharedConst.SpellVisualUncagePet, 0, 0, 0.0f, false);
 
             plr.DestroyItem(m_CastItem.GetBagSlot(), m_CastItem.GetSlot(), true);
             m_CastItem = null;

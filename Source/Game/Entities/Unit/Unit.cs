@@ -1069,11 +1069,12 @@ namespace Game.Entities
             SendMessageToSet(cancelSpellVisual, true);
         }
 
-        public void SendPlaySpellVisual(ObjectGuid targetGuid, uint spellVisualId, uint missReason, uint reflectStatus, float travelSpeed, bool speedAsTime = false)
+        public void SendPlaySpellVisual(Unit target, uint spellVisualId, uint missReason, uint reflectStatus, float travelSpeed, bool speedAsTime = false)
         {
             PlaySpellVisual playSpellVisual = new();
             playSpellVisual.Source = GetGUID();
-            playSpellVisual.Target = targetGuid; // exclusive with TargetPosition
+            playSpellVisual.Target = target.GetGUID();
+            playSpellVisual.TargetPosition = target.GetPosition();
             playSpellVisual.SpellVisualID = spellVisualId;
             playSpellVisual.TravelSpeed = travelSpeed;
             playSpellVisual.MissReason = (ushort)missReason;
@@ -1086,7 +1087,7 @@ namespace Game.Entities
         {
             PlaySpellVisual playSpellVisual = new();
             playSpellVisual.Source = GetGUID();
-            playSpellVisual.TargetPosition = targetPosition; // exclusive with Target
+            playSpellVisual.TargetPosition = targetPosition;
             playSpellVisual.LaunchDelay = launchDelay;
             playSpellVisual.SpellVisualID = spellVisualId;
             playSpellVisual.TravelSpeed = travelSpeed;

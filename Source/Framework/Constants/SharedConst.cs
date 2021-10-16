@@ -54,6 +54,7 @@ namespace Framework.Constants
         public const int DefaultMaxBattlePetsPerSpecies = 3;
         public const int BattlePetCageItemId = 82800;
         public const int DefaultSummonBattlePetSpell = 118301;
+        public const int SpellVisualUncagePet = 222;
 
         /// <summary>
         /// Lfg Const

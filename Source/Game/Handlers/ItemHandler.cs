@@ -1067,7 +1067,7 @@ namespace Game
             var entry = Global.SpellMgr.GetBattlePetSpecies(spellToLearn);
             if (entry != null)
             {
-                GetBattlePetMgr().AddPet(entry.Id, entry.CreatureID, BattlePetMgr.RollPetBreed(entry.Id), BattlePetMgr.GetDefaultPetQuality(entry.Id));
+                GetBattlePetMgr().AddPet(entry.Id, BattlePetMgr.SelectPetDisplay(entry), BattlePetMgr.RollPetBreed(entry.Id), BattlePetMgr.GetDefaultPetQuality(entry.Id));
                 _player.UpdateCriteria(CriteriaType.UniquePetsOwned);
             }
 

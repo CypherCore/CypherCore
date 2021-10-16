@@ -151,6 +151,22 @@ namespace Game.BattlePets
             return _defaultQualityPerSpecies[species];
         }
 
+        public static uint SelectPetDisplay(BattlePetSpeciesRecord speciesEntry)
+        {
+            CreatureTemplate creatureTemplate = Global.ObjectMgr.GetCreatureTemplate(speciesEntry.CreatureID);
+            if (creatureTemplate != null)
+            {
+                if (!speciesEntry.GetFlags().HasFlag(BattlePetSpeciesFlags.RandomDisplay))
+                {
+                    CreatureModel creatureModel = creatureTemplate.GetRandomValidModel();
+                    if (creatureModel != null)
+                        return creatureModel.CreatureDisplayID;
+                }
+            }
+
+            return 0;
+        }
+        
         public void LoadFromDB(SQLResult petsResult, SQLResult slotsResult)
         {
             if (!petsResult.IsEmpty())
@@ -172,19 +188,20 @@ namespace Game.BattlePets
                         pet.PacketInfo.Guid = ObjectGuid.Create(HighGuid.BattlePet, petsResult.Read<ulong>(0));
                         pet.PacketInfo.Species = species;
                         pet.PacketInfo.Breed = petsResult.Read<ushort>(2);
-                        pet.PacketInfo.Level = petsResult.Read<ushort>(3);
-                        pet.PacketInfo.Exp = petsResult.Read<ushort>(4);
-                        pet.PacketInfo.Health = petsResult.Read<uint>(5);
-                        pet.PacketInfo.Quality = petsResult.Read<byte>(6);
-                        pet.PacketInfo.Flags = petsResult.Read<ushort>(7);
-                        pet.PacketInfo.Name = petsResult.Read<string>(8);
+                        pet.PacketInfo.DisplayID = petsResult.Read<uint>(3);
+                        pet.PacketInfo.Level = petsResult.Read<ushort>(4);
+                        pet.PacketInfo.Exp = petsResult.Read<ushort>(5);
+                        pet.PacketInfo.Health = petsResult.Read<uint>(6);
+                        pet.PacketInfo.Quality = petsResult.Read<byte>(7);
+                        pet.PacketInfo.Flags = petsResult.Read<ushort>(8);
+                        pet.PacketInfo.Name = petsResult.Read<string>(9);
                         pet.PacketInfo.CreatureID = speciesEntry.CreatureID;
 
-                        if (!petsResult.IsNull(9))
+                        if (!petsResult.IsNull(10))
                         {
                             pet.DeclinedName = new();
                             for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
-                                pet.DeclinedName.name[i] = petsResult.Read<string>(9 + i);
+                                pet.DeclinedName.name[i] = petsResult.Read<string>(10 + i);
                         }
 
                         pet.SaveInfo = BattlePetSaveInfo.Unchanged;
@@ -224,12 +241,13 @@ namespace Game.BattlePets
                         stmt.AddValue(1, _owner.GetBattlenetAccountId());
                         stmt.AddValue(2, pair.Value.PacketInfo.Species);
                         stmt.AddValue(3, pair.Value.PacketInfo.Breed);
-                        stmt.AddValue(4, pair.Value.PacketInfo.Level);
-                        stmt.AddValue(5, pair.Value.PacketInfo.Exp);
-                        stmt.AddValue(6, pair.Value.PacketInfo.Health);
-                        stmt.AddValue(7, pair.Value.PacketInfo.Quality);
-                        stmt.AddValue(8, pair.Value.PacketInfo.Flags);
-                        stmt.AddValue(9, pair.Value.PacketInfo.Name);
+                        stmt.AddValue(4, pair.Value.PacketInfo.DisplayID);
+                        stmt.AddValue(5, pair.Value.PacketInfo.Level);
+                        stmt.AddValue(6, pair.Value.PacketInfo.Exp);
+                        stmt.AddValue(7, pair.Value.PacketInfo.Health);
+                        stmt.AddValue(8, pair.Value.PacketInfo.Quality);
+                        stmt.AddValue(9, pair.Value.PacketInfo.Flags);
+                        stmt.AddValue(10, pair.Value.PacketInfo.Name);
                         trans.Append(stmt);
 
                         if (pair.Value.DeclinedName != null)
@@ -309,21 +327,7 @@ namespace Game.BattlePets
             return _pets.LookupByKey(guid.GetCounter());
         }
 
-        public void AddPet(uint species, uint creatureId, ushort level = 1)
-        {
-            ushort breed = 3;// default B/B
-            BattlePetBreedQuality quality = 0;
-
-            if (_availableBreedsPerSpecies.ContainsKey(species))
-                breed = _availableBreedsPerSpecies[species].SelectRandom();
-
-            if (_defaultQualityPerSpecies.ContainsKey(species))
-                quality = _defaultQualityPerSpecies[species];
-
-            AddPet(species, creatureId, breed, quality, level);
-        }
-
-        public void AddPet(uint species, uint creatureId, ushort breed, BattlePetBreedQuality quality, ushort level = 1)
+        public void AddPet(uint species, uint display, ushort breed, BattlePetBreedQuality quality, ushort level = 1)
         {
             BattlePetSpeciesRecord battlePetSpecies = CliDB.BattlePetSpeciesStorage.LookupByKey(species);
             if (battlePetSpecies == null) // should never happen
@@ -335,7 +339,8 @@ namespace Game.BattlePets
             BattlePet pet = new();
             pet.PacketInfo.Guid = ObjectGuid.Create(HighGuid.BattlePet, Global.ObjectMgr.GetGenerator(HighGuid.BattlePet).Generate());
             pet.PacketInfo.Species = species;
-            pet.PacketInfo.CreatureID = creatureId;
+            pet.PacketInfo.CreatureID = battlePetSpecies.CreatureID;
+            pet.PacketInfo.DisplayID = display;
             pet.PacketInfo.Level = level;
             pet.PacketInfo.Exp = 0;
             pet.PacketInfo.Flags = 0;
@@ -479,7 +484,7 @@ namespace Game.BattlePets
             item.SetModifier(ItemModifier.BattlePetSpeciesId, pet.PacketInfo.Species);
             item.SetModifier(ItemModifier.BattlePetBreedData, (uint)(pet.PacketInfo.Breed | (pet.PacketInfo.Quality << 24)));
             item.SetModifier(ItemModifier.BattlePetLevel, pet.PacketInfo.Level);
-            item.SetModifier(ItemModifier.BattlePetDisplayId, pet.PacketInfo.CreatureID);
+            item.SetModifier(ItemModifier.BattlePetDisplayId, pet.PacketInfo.DisplayID);
 
             _owner.GetPlayer().SendNewItem(item, 1, true, false);
 
@@ -526,8 +531,6 @@ namespace Game.BattlePets
             _owner.GetPlayer().SetSummonedBattlePetGUID(guid);
             _owner.GetPlayer().SetCurrentBattlePetBreedQuality(pet.PacketInfo.Quality);
             _owner.GetPlayer().CastSpell(_owner.GetPlayer(), speciesEntry.SummonSpellID != 0 ? speciesEntry.SummonSpellID : SharedConst.DefaultSummonBattlePetSpell);
-
-            // TODO: set pet level, quality... update fields
         }
 
         public void DismissPet()

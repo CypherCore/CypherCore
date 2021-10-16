@@ -2658,7 +2658,7 @@ namespace Game.Entities
             {
                 if (entry.SummonSpellID == spellId && GetSession().GetBattlePetMgr().GetPetCount(entry.Id) == 0)
                 {
-                    GetSession().GetBattlePetMgr().AddPet(entry.Id, entry.CreatureID, BattlePetMgr.RollPetBreed(entry.Id), BattlePetMgr.GetDefaultPetQuality(entry.Id));
+                    GetSession().GetBattlePetMgr().AddPet(entry.Id, BattlePetMgr.SelectPetDisplay(entry), BattlePetMgr.RollPetBreed(entry.Id), BattlePetMgr.GetDefaultPetQuality(entry.Id));
                     UpdateCriteria(CriteriaType.UniquePetsOwned);
                     break;
                 }
