@@ -1070,6 +1070,7 @@ namespace Game.AI
                     }
                     // no break
                     goto case SmartActions.AddAura;
+                case SmartActions.SelfCast:
                 case SmartActions.AddAura:
                     if (!IsSpellValid(e, e.Action.cast.spell))
                         return false;

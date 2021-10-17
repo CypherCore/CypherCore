@@ -498,6 +498,39 @@ namespace Game.AI
                     }
                     break;
                 }
+                case SmartActions.SelfCast:
+                {
+                    if (targets.Empty())
+                        break;
+
+                    if (e.Action.cast.targetsLimit != 0)
+                        targets.RandomResize(e.Action.cast.targetsLimit);
+
+                    TriggerCastFlags triggerFlags = TriggerCastFlags.None;
+                    if (e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.Triggered))
+                    {
+                        if (e.Action.cast.triggerFlags != 0)
+                            triggerFlags = (TriggerCastFlags)e.Action.cast.triggerFlags;
+                        else
+                            triggerFlags = TriggerCastFlags.FullMask;
+                    }
+
+                    foreach (WorldObject target in targets)
+                    {
+                        Unit uTarget = target.ToUnit();
+                        if (uTarget == null)
+                            continue;
+
+                        if (!e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.AuraNotPresent) || !uTarget.HasAura(e.Action.cast.spell))
+                        {
+                            if (e.Action.cast.castFlags.HasAnyFlag((uint)SmartCastFlags.InterruptPrevious))
+                                uTarget.InterruptNonMeleeSpells(false);
+
+                            uTarget.CastSpell(uTarget, e.Action.cast.spell, new CastSpellExtraArgs(triggerFlags));
+                        }
+                    }
+                    break;
+                }
                 case SmartActions.InvokerCast:
                 {
                     Unit tempLastInvoker = GetLastInvoker(unit);
@@ -507,7 +540,7 @@ namespace Game.AI
                     if (targets.Empty())
                         break;
 
-                    if (e.Action.cast.targetsLimit > 0 && targets.Count > e.Action.cast.targetsLimit)
+                    if (e.Action.cast.targetsLimit != 0)
                         targets.RandomResize(e.Action.cast.targetsLimit);
 
                     foreach (var target in targets)

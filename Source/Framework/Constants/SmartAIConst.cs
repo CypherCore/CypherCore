@@ -339,7 +339,7 @@ namespace Framework.Constants
         AddNpcFlag = 82,     // Flags
         RemoveNpcFlag = 83,     // Flags
         SimpleTalk = 84,     // Groupid, Can Be Used To Make Players Say Groupid, TextOver Event Is Not Triggered, Whisper Can Not Be Used (Target Units Will Say The Text)
-        InvokerCast = 85,     // Spellid, Castflags,   If Avaliable, Last Used Invoker Will Cast Spellid With Castflags On Targets
+        SelfCast = 85,     // Spellid, Castflags
         CrossCast = 86,     // Spellid, Castflags, Castertargettype, Castertarget Param1, Castertarget Param2, Castertarget Param3, ( + The Origonal Target Fields As Destination Target),   Castertargets Will Cast Spellid On All Targets (Use With Caution If Targeting Multiple * Multiple Units)
         CallRandomTimedActionlist = 87,     // Script9 Ids 1-9
         CallRandomRangeTimedActionlist = 88,     // Script9 Id Min, Max
@@ -388,7 +388,7 @@ namespace Framework.Constants
         SpawnSpawngroup = 131,    // Group ID, min secs, max secs, spawnflags
         DespawnSpawngroup = 132,    // Group ID, min secs, max secs, spawnflags
         RespawnBySpawnId = 133,    // spawnType, spawnId
-        // 134 : 3.3.5 reserved
+        InvokerCast = 134, // spellID, castFlags
         PlayCinematic = 135,    // reserved for future uses
         SetMovementSpeed = 136,    // movementType, speedInteger, speedFraction
         PlaySpellVisualKit = 137, // spellVisualKitId, kitType (unknown values, copypaste from packet dumps), duration
