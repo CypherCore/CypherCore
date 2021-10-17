@@ -1064,12 +1064,9 @@ namespace Game
                 if (itemEffect.TriggerType != ItemSpelltriggerType.LearnSpellId)
                     continue;
 
-                var entry = Global.SpellMgr.GetBattlePetSpecies((uint)itemEffect.SpellID);
-                if (entry != null)
-                {
-                    GetBattlePetMgr().AddPet(entry.Id, BattlePetMgr.SelectPetDisplay(entry), BattlePetMgr.RollPetBreed(entry.Id), BattlePetMgr.GetDefaultPetQuality(entry.Id));
-                    _player.UpdateCriteria(CriteriaType.UniquePetsOwned);
-                }
+                var speciesEntry = Global.SpellMgr.GetBattlePetSpecies((uint)itemEffect.SpellID);
+                if (speciesEntry != null)
+                    GetBattlePetMgr().AddPet(speciesEntry.Id, BattlePetMgr.SelectPetDisplay(speciesEntry), BattlePetMgr.RollPetBreed(speciesEntry.Id), BattlePetMgr.GetDefaultPetQuality(speciesEntry.Id));
             }
 
             GetPlayer().DestroyItem(item.GetBagSlot(), item.GetSlot(), true);

@@ -357,6 +357,7 @@ namespace Game.BattlePets
             updates.Add(pet);
             SendUpdates(updates, true);
 
+            _owner.GetPlayer().UpdateCriteria(CriteriaType.UniquePetsOwned);
             _owner.GetPlayer().UpdateCriteria(CriteriaType.LearnedNewPet, species);
         }
 

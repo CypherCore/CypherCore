@@ -1824,6 +1824,11 @@ namespace Game.Spells
                         continue;
 
                     player.LearnSpell((uint)itemEffect.SpellID, false);
+
+                    var speciesEntry = Global.SpellMgr.GetBattlePetSpecies((uint)itemEffect.SpellID);
+                    if (speciesEntry != null)
+                        player.GetSession().GetBattlePetMgr().AddPet(speciesEntry.Id, BattlePetMgr.SelectPetDisplay(speciesEntry), BattlePetMgr.RollPetBreed(speciesEntry.Id), BattlePetMgr.GetDefaultPetQuality(speciesEntry.Id));
+
                 }
             }
 
@@ -5497,8 +5502,9 @@ namespace Game.Spells
 
             battlePetMgr.AddPet(speciesId, displayId, breed, quality, level);
 
-            if (!plr.HasSpell(speciesEntry.SummonSpellID))
-                plr.LearnSpell(speciesEntry.SummonSpellID, false);
+            if (speciesEntry.SummonSpellID != 0)
+                if (!plr.HasSpell(speciesEntry.SummonSpellID))
+                    plr.LearnSpell(speciesEntry.SummonSpellID, false);
 
             plr.SendPlaySpellVisual(plr, SharedConst.SpellVisualUncagePet, 0, 0, 0.0f, false);
 

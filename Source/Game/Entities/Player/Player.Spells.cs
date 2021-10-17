@@ -2622,17 +2622,6 @@ namespace Game.Entities
             if (Global.DB2Mgr.GetMount(spellId) != null)
                 GetSession().GetCollectionMgr().AddMount(spellId, MountStatusFlags.None, false, !IsInWorld);
 
-            // need to add Battle pets automatically into pet journal
-            foreach (BattlePetSpeciesRecord entry in CliDB.BattlePetSpeciesStorage.Values)
-            {
-                if (entry.SummonSpellID == spellId && GetSession().GetBattlePetMgr().GetPetCount(entry.Id) == 0)
-                {
-                    GetSession().GetBattlePetMgr().AddPet(entry.Id, BattlePetMgr.SelectPetDisplay(entry), BattlePetMgr.RollPetBreed(entry.Id), BattlePetMgr.GetDefaultPetQuality(entry.Id));
-                    UpdateCriteria(CriteriaType.UniquePetsOwned);
-                    break;
-                }
-            }
-
             // return true (for send learn packet) only if spell active (in case ranked spells) and not replace old spell
             return active && !disabled && !superceded_old;
         }
