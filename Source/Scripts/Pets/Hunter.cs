@@ -20,6 +20,7 @@ using Game.AI;
 using Game.Entities;
 using Game.Scripting;
 using Game.Spells;
+using System.Collections.Generic;
 
 namespace Scripts.Pets
 {
@@ -30,7 +31,6 @@ namespace Scripts.Pets
             public const uint CripplingPoison = 30981;   // Viper
             public const uint DeadlyPoisonPassive = 34657;   // Venomous Snake
             public const uint MindNumbingPoison = 25810;    // Viper
-
         }
 
         struct CreatureIds
@@ -47,69 +47,70 @@ namespace Scripts.Pets
 
             public override void Reset()
             {
-                _spellTimer = 0;
-
-                CreatureTemplate Info = me.GetCreatureTemplate();
-
-                _isViper = Info.Entry == CreatureIds.Viper ? true : false;
+                _isViper = me.GetEntry() == CreatureIds.Viper ? true : false;
 
                 me.SetMaxHealth((uint)(107 * (me.GetLevel() - 40) * 0.025f));
                 // Add delta to make them not all hit the same time
-                uint delta = (RandomHelper.Rand32() % 7) * 100;
-                me.SetBaseAttackTime(WeaponAttackType.BaseAttack, Info.BaseAttackTime + delta);
-                //me.SetStatFloatValue(UnitFields.RangedAttackPower, (float)Info.AttackPower);
+                me.SetBaseAttackTime(WeaponAttackType.BaseAttack, me.GetBaseAttackTime(WeaponAttackType.BaseAttack) + RandomHelper.URand(0, 6) * Time.InMilliseconds);
 
-                // Start attacking attacker of owner on first ai update after spawn - move in line of sight may choose better target
-                if (!me.GetVictim() && me.IsSummon())
-                {
-                    Unit owner = me.ToTempSummon().GetSummoner();
-                    if (owner)
-                        if (owner.GetAttackerForHelper())
-                            AttackStart(owner.GetAttackerForHelper());
-                }
-
-                if (!_isViper)
+                if (!_isViper && !me.HasAura(SpellIds.DeadlyPoisonPassive))
                     DoCast(me, SpellIds.DeadlyPoisonPassive, new CastSpellExtraArgs(true));
             }
 
             // Redefined for random target selection:
-            public override void MoveInLineOfSight(Unit who)
-            {
-                if (!me.GetVictim() && me.CanCreatureAttack(who))
-                {
-                    if (me.GetDistanceZ(who) > SharedConst.CreatureAttackRangeZ)
-                        return;
-
-                    float attackRadius = me.GetAttackDistance(who);
-                    if (me.IsWithinDistInMap(who, attackRadius) && me.IsWithinLOSInMap(who))
-                    {
-                        if ((RandomHelper.Rand32() % 5) == 0)
-                        {
-                            me.SetAttackTimer(WeaponAttackType.BaseAttack, (RandomHelper.Rand32() % 10) * 100);
-                            _spellTimer = (RandomHelper.Rand32() % 10) * 100;
-                            AttackStart(who);
-                        }
-                    }
-                }
-            }
+            public override void MoveInLineOfSight(Unit who) { }
 
             public override void UpdateAI(uint diff)
             {
-                if (!UpdateVictim() || !me.GetVictim())
-                    return;
-
-                if (me.GetVictim().HasBreakableByDamageCrowdControlAura(me))
-                {
+                if (me.GetVictim() && me.GetVictim().HasBreakableByDamageCrowdControlAura())
+                { // don't break cc
+                    me.GetThreatManager().ClearFixate();
                     me.InterruptNonMeleeSpells(false);
+                    me.AttackStop();
                     return;
                 }
 
-                //Viper
+                if (me.IsSummon() && !me.GetThreatManager().GetFixateTarget())
+                { // find new target
+                    Unit summoner = me.ToTempSummon().GetSummoner();
+
+                    List<Unit> targets = new();
+                    foreach (var pair in summoner.GetCombatManager().GetPvPCombatRefs())
+                    {
+                        Unit enemy = pair.Value.GetOther(summoner);
+                        if (!enemy.HasBreakableByDamageCrowdControlAura() && me.CanCreatureAttack(enemy) && me.IsWithinDistInMap(enemy, me.GetAttackDistance(enemy)))
+                            targets.Add(enemy);
+                    }
+
+                    if (targets.Empty())
+                    {
+                        foreach (var pair in summoner.GetCombatManager().GetPvECombatRefs())
+                        {
+                            Unit enemy = pair.Value.GetOther(summoner);
+                            if (!enemy.HasBreakableByDamageCrowdControlAura() && me.CanCreatureAttack(enemy) && me.IsWithinDistInMap(enemy, me.GetAttackDistance(enemy)))
+                                targets.Add(enemy);
+                        }
+                    }
+
+                    foreach (Unit target in targets)
+                        me.EngageWithTarget(target);
+
+                    if (!targets.Empty())
+                    {
+                        Unit target = targets.SelectRandom();
+                        me.GetThreatManager().FixateTarget(target);
+                    }
+                }
+
+                if (!UpdateVictim())
+                    return;
+
+                // Viper
                 if (_isViper)
                 {
                     if (_spellTimer <= diff)
                     {
-                        if (RandomHelper.IRand(0, 2) == 0) //33% chance to cast
+                        if (RandomHelper.URand(0, 2) == 0) // 33% chance to cast
                             DoCastVictim(RandomHelper.RAND(SpellIds.MindNumbingPoison, SpellIds.CripplingPoison));
 
                         _spellTimer = 3000;
