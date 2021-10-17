@@ -30,7 +30,7 @@ namespace Game.Movement
         ChaseAngle? _angle;
 
         PathGenerator _path;
-        Position _lastTargetPosition = new();
+        Position _lastTargetPosition;
         uint _rangeCheckTimer = RANGE_CHECK_INTERVAL;
         bool _movingTowards = true;
         bool _mutualChase = true;
@@ -56,7 +56,7 @@ namespace Game.Movement
 
             owner.SetWalk(false);
             _path = null;
-            _lastTargetPosition.Relocate(0.0f, 0.0f, 0.0f);
+            _lastTargetPosition = null;
         }
 
         public override void Reset(Unit owner)
@@ -84,6 +84,7 @@ namespace Game.Movement
             if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting())
             {
                 owner.StopMoving();
+                _lastTargetPosition = null;
                 return true;
             }
 
@@ -124,9 +125,9 @@ namespace Game.Movement
             }
 
             // if the target moved, we have to consider whether to adjust
-            if (_lastTargetPosition != target.GetPosition() || mutualChase != _mutualChase)
+            if (_lastTargetPosition == null || target.GetPosition() != _lastTargetPosition || mutualChase != _mutualChase)
             {
-                _lastTargetPosition.Relocate(target.GetPosition());
+                _lastTargetPosition = new(target.GetPosition());
                 _mutualChase = mutualChase;
                 if (owner.HasUnitState(UnitState.ChaseMove) || !PositionOkay(owner, target, minRange, maxRange, angle))
                 {
@@ -216,7 +217,7 @@ namespace Game.Movement
 
         public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Chase; }
 
-        public override void UnitSpeedChanged() { _lastTargetPosition.Relocate(0.0f, 0.0f, 0.0f); }
+        public override void UnitSpeedChanged() { _lastTargetPosition = null; }
 
         static bool IsMutualChase(Unit owner, Unit target)
         {

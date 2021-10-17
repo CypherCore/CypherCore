@@ -41,7 +41,6 @@ namespace Game.Movement
             _abstractFollower = new AbstractFollower(target);
             _range = range;
             _angle = angle;
-            _lastTargetPosition = new();
 
             Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Normal;
@@ -57,7 +56,7 @@ namespace Game.Movement
             owner.StopMoving();
             UpdatePetSpeed(owner);
             _path = null;
-            _lastTargetPosition.Relocate(0.0f, 0.0f, 0.0f);
+            _lastTargetPosition = null;
         }
 
         public override void Reset(Unit owner)
@@ -80,6 +79,7 @@ namespace Game.Movement
             if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting())
             {
                 owner.StopMoving();
+                _lastTargetPosition = null;
                 return true;
             }
 
@@ -107,9 +107,9 @@ namespace Game.Movement
                 DoMovementInform(owner, target);
             }
 
-            if (_lastTargetPosition.GetExactDistSq(target.GetPosition()) > 0.0f)
+            if (_lastTargetPosition == null || _lastTargetPosition.GetExactDistSq(target.GetPosition()) > 0.0f)
             {
-                _lastTargetPosition = target.GetPosition();
+                _lastTargetPosition = new(target.GetPosition());
                 if (owner.HasUnitState(UnitState.FollowMove) || !PositionOkay(owner, target, _range + FOLLOW_RANGE_TOLERANCE))
                 {
                     if (_path == null)
@@ -202,7 +202,7 @@ namespace Game.Movement
 
         public override MovementGeneratorType GetMovementGeneratorType() { return MovementGeneratorType.Follow; }
 
-        public override void UnitSpeedChanged() { _lastTargetPosition.Relocate(0.0f, 0.0f, 0.0f); }
+        public override void UnitSpeedChanged() { _lastTargetPosition = null; }
 
         static bool PositionOkay(Unit owner, Unit target, float range, ChaseAngle? angle = null)
         {
