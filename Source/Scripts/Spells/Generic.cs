@@ -111,6 +111,12 @@ namespace Scripts.Spells.Generic
         public const uint OmenHandL = 26649;
         public const uint Normal = 26636;
 
+        //EtherealPet
+        public const uint ProcTriggerOnKillAura = 50051;
+        public const uint EtherealPetAura = 50055;
+        public const uint CreateToken = 50063;
+        public const uint StealEssenceVisual = 50101;
+
         //Fishingspells
         public const uint FishingNoFishingPole = 131476;
         public const uint FishingWithPole = 131490;
@@ -286,6 +292,9 @@ namespace Scripts.Spells.Generic
         //EluneCandle
         public const uint Omen = 15467;
 
+        //EtherealPet
+        public const uint EtherealSoulTrader = 27914;
+
         //TournamentMounts
         public const uint StormwindSteed = 33217;
         public const uint IronforgeRam = 33316;
@@ -327,6 +336,10 @@ namespace Scripts.Spells.Generic
 
     struct TextIds
     {
+        //EtherealPet
+        public const uint SayStealEssence = 1;
+        public const uint SayCreateToken = 2;
+
         //VendorBarkTrigger
         public const uint SayAmphitheaterVendor = 0;
     }
@@ -1518,6 +1531,102 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    // 50051 - Ethereal Pet Aura
+    [Script]
+    class spell_ethereal_pet_aura : AuraScript
+    {
+        bool CheckProc(ProcEventInfo eventInfo)
+        {
+            uint levelDiff = (uint)Math.Abs(GetTarget().GetLevel() - eventInfo.GetProcTarget().GetLevel());
+            return levelDiff <= 9;
+        }
+
+        void HandleProc(AuraEffect aurEff, ProcEventInfo eventInfo)
+        {
+            PreventDefaultAction();
+
+            List<TempSummon> minionList = new();
+            GetUnitOwner().GetAllMinionsByEntry(minionList, CreatureIds.EtherealSoulTrader);
+            foreach (Creature minion in minionList)
+            {
+                if (minion.IsAIEnabled)
+                {
+                    minion.GetAI().Talk(TextIds.SayStealEssence);
+                    minion.CastSpell(eventInfo.GetProcTarget(), SpellIds.StealEssenceVisual);
+                }
+            }
+        }
+
+        public override void Register()
+        {
+            DoCheckProc.Add(new CheckProcHandler(CheckProc));
+            OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.ProcTriggerSpell));
+        }
+    }
+
+    // 50052 - Ethereal Pet onSummon
+    [Script]
+    class spell_ethereal_pet_onsummon : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.ProcTriggerOnKillAura);
+        }
+
+        void HandleScriptEffect(uint effIndex)
+        {
+            Unit target = GetHitUnit();
+            target.CastSpell(target, SpellIds.ProcTriggerOnKillAura, true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+
+    // 50055 - Ethereal Pet Aura Remove
+    [Script]
+    class spell_ethereal_pet_aura_remove : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.EtherealPetAura);
+        }
+
+        void HandleScriptEffect(uint effIndex)
+        {
+            GetHitUnit().RemoveAurasDueToSpell(SpellIds.EtherealPetAura);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+
+    // 50101 - Ethereal Pet OnKill Steal Essence
+    [Script]
+    class spell_steal_essence_visual : AuraScript
+    {
+        void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit caster = GetCaster();
+            if (caster != null)
+            {
+                caster.CastSpell(caster, SpellIds.CreateToken, true);
+                Creature soulTrader = caster.ToCreature();
+                if (soulTrader != null)
+                    soulTrader.GetAI().Talk(TextIds.SayCreateToken);
+            }
+        }
+
+        public override void Register()
+        {
+            AfterEffectRemove.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
+    
     [Script] // 131474 - Fishing
     class spell_gen_fishing : SpellScript
     {

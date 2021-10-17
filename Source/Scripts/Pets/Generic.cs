@@ -26,13 +26,22 @@ namespace Scripts.Pets
     {
         struct SpellIds
         {
+            //Mojo
             public const uint FeelingFroggy = 43906;
             public const uint SeductionVisual = 43919;
+
+            //SoulTrader
+            public const uint EtherealOnSummon = 50052;
+            public const uint EtherealPetRemoveAura = 50055;
         }
 
         struct TextIds
         {
+            //Mojo
             public const uint SayMojo = 0;
+
+            //SoulTrader
+            public const uint SaySoulTraderInto = 0;
         }
 
         [Script]
@@ -80,6 +89,28 @@ namespace Scripts.Pets
             }
 
             ObjectGuid _victimGUID;
+        }
+
+        [Script]
+        class npc_pet_gen_soul_trader : ScriptedAI
+        {
+            public npc_pet_gen_soul_trader(Creature creature) : base(creature) { }
+
+            public override void LeavingWorld()
+            {
+                Unit owner = me.GetOwner();
+                if (owner != null)
+                    DoCast(owner, SpellIds.EtherealPetRemoveAura);
+            }
+
+            public override void JustAppeared()
+            {
+                Talk(TextIds.SaySoulTraderInto);
+
+                Unit owner = me.GetOwner();
+                if (owner != null)
+                    DoCast(owner, SpellIds.EtherealOnSummon);
+            }
         }
     }
 }
