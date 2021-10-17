@@ -598,13 +598,14 @@ namespace Scripts.Spells.Druid
         {
             if (spellMod == null)
             {
-                spellMod = new SpellModifier(GetAura());
-                spellMod.op = SpellModOp.PeriodicHealingAndDamage;
-                spellMod.type = SpellModType.Flat;
-                spellMod.spellId = GetId();
-                spellMod.mask = aurEff.GetSpellEffectInfo().SpellClassMask;
+                SpellModifierByClassMask mod = new(GetAura());
+                mod.op = SpellModOp.PeriodicHealingAndDamage;
+                mod.type = SpellModType.Flat;
+                mod.spellId = GetId();
+                mod.mask = aurEff.GetSpellEffectInfo().SpellClassMask;
+                spellMod = mod;
             }
-            spellMod.value = aurEff.GetAmount() / 7;
+            (spellMod as SpellModifierByClassMask).value = aurEff.GetAmount() / 7;
         }
 
         public override void Register()

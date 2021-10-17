@@ -239,8 +239,8 @@ namespace Framework.Constants
         ArenaPreparation = 215,
         HasteSpells = 216,
         ModMeleeHaste2 = 217,
-        AddPctModifierBySpellLabel = 218, //NYI
-        AddFlatModifierBySpellLabel = 219, //NYI
+        AddPctModifierBySpellLabel = 218,
+        AddFlatModifierBySpellLabel = 219,
         ModAbilitySchoolMask = 220, //NYI
         ModDetaunt = 221,
         RemoveTransmogCost = 222,

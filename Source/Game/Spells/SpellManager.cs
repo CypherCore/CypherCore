@@ -1421,7 +1421,8 @@ namespace Game.Entities
                                 if (!spellEffectInfo.IsAura())
                                     continue;
 
-                                if (spellEffectInfo.ApplyAuraName == AuraType.AddPctModifier || spellEffectInfo.ApplyAuraName == AuraType.AddFlatModifier)
+                                if (spellEffectInfo.ApplyAuraName == AuraType.AddPctModifier || spellEffectInfo.ApplyAuraName == AuraType.AddFlatModifier
+                                    || spellEffectInfo.ApplyAuraName == AuraType.AddPctModifierBySpellLabel || spellEffectInfo.ApplyAuraName == AuraType.AddFlatModifierBySpellLabel)
                                 {
                                     found = true;
                                     break;

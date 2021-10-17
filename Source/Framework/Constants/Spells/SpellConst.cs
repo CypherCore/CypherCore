@@ -400,6 +400,8 @@ namespace Framework.Constants
     {
         Flat = 0,                            // SPELL_AURA_ADD_FLAT_MODIFIER
         Pct = 1,                             // SPELL_AURA_ADD_PCT_MODIFIER
+        LabelFlat = 2,                            // SPELL_AURA_ADD_FLAT_MODIFIER_BY_SPELL_LABEL
+        LabelPct = 3,                            // SPELL_AURA_ADD_PCT_MODIFIER_BY_SPELL_LABEL
         End
     }
 

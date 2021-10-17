@@ -8129,18 +8129,40 @@ namespace Game.Spells
         {
             op = SpellModOp.HealingAndDamage;
             type = SpellModType.Flat;
-            value = 0;
-            mask = new FlagArray128();
             spellId = 0;
             ownerAura = _ownerAura;
         }
 
         public SpellModOp op { get; set; }
         public SpellModType type { get; set; }
-        public int value { get; set; }
-        public FlagArray128 mask { get; set; }
         public uint spellId { get; set; }
         public Aura ownerAura { get; set; }
+    }
+
+    public class SpellModifierByClassMask : SpellModifier
+    {
+        public SpellModifierByClassMask(Aura _ownerAura) : base(_ownerAura)
+        {
+            value = 0;
+            mask = new FlagArray128();
+        }
+
+        public int value;
+        public FlagArray128 mask;
+    }
+
+    public class SpellFlatModifierByLabel : SpellModifier
+    {
+        public SpellFlatModByLabel value = new();
+
+        public SpellFlatModifierByLabel(Aura _ownerAura) : base(_ownerAura) { }
+    }
+
+    class SpellPctModifierByLabel : SpellModifier
+    {
+        public SpellPctModByLabel value = new();
+
+        public SpellPctModifierByLabel(Aura _ownerAura) : base(_ownerAura) { }
     }
 
     public class WorldObjectSpellTargetCheck : ICheck<WorldObject>

@@ -259,14 +259,43 @@ namespace Game.Spells
                 case AuraType.AddPctModifier:
                     if (m_spellmod == null)
                     {
-                        m_spellmod = new SpellModifier(GetBase());
-                        m_spellmod.op = (SpellModOp)GetMiscValue();
+                        SpellModifierByClassMask spellmod = new SpellModifierByClassMask(GetBase());
+                        spellmod.op = (SpellModOp)GetMiscValue();
 
-                        m_spellmod.type = GetAuraType() == AuraType.AddPctModifier ? SpellModType.Pct : SpellModType.Flat;
-                        m_spellmod.spellId = GetId();
-                        m_spellmod.mask = GetSpellEffectInfo().SpellClassMask;
+                        spellmod.type = GetAuraType() == AuraType.AddPctModifier ? SpellModType.Pct : SpellModType.Flat;
+                        spellmod.spellId = GetId();
+                        spellmod.mask = GetSpellEffectInfo().SpellClassMask;
+                        m_spellmod = spellmod;
                     }
-                    m_spellmod.value = GetAmount();
+                    (m_spellmod as SpellModifierByClassMask).value = GetAmount();
+                    break;
+                case AuraType.AddFlatModifierBySpellLabel:
+                    if (m_spellmod == null)
+                    {
+                        SpellFlatModifierByLabel spellmod = new SpellFlatModifierByLabel(GetBase());
+                        spellmod.op = (SpellModOp)GetMiscValue();
+
+                        spellmod.type = SpellModType.LabelFlat;
+                        spellmod.spellId = GetId();
+                        spellmod.value.ModIndex = GetMiscValue();
+                        spellmod.value.LabelID = GetMiscValueB();
+                        m_spellmod = spellmod;
+                    }
+                    (m_spellmod as SpellFlatModifierByLabel).value.ModifierValue = GetAmount();
+                    break;
+                case AuraType.AddPctModifierBySpellLabel:
+                    if (m_spellmod == null)
+                    {
+                        SpellPctModifierByLabel spellmod = new SpellPctModifierByLabel(GetBase());
+                        spellmod.op = (SpellModOp)GetMiscValue();
+
+                        spellmod.type = SpellModType.LabelPct;
+                        spellmod.spellId = GetId();
+                        spellmod.value.ModIndex = GetMiscValue();
+                        spellmod.value.LabelID = GetMiscValueB();
+                        m_spellmod = spellmod;
+                    }
+                    (m_spellmod as SpellPctModifierByLabel).value.ModifierValue = 1.0f + MathFunctions.CalculatePct(1.0f, GetAmount());
                     break;
                 default:
                     break;

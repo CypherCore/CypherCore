@@ -660,9 +660,22 @@ namespace Game.Spells
             if (affectSpell == null)
                 return false;
 
-            // TEMP: dont use IsAffected - !familyName and !familyFlags are not valid options for spell mods
-            // TODO: investigate if the !familyName and !familyFlags conditions are even valid for all other (nonmod) uses of SpellInfo::IsAffected
-            return affectSpell.SpellFamilyName == SpellFamilyName && mod.mask & SpellFamilyFlags;
+            switch (mod.type)
+            {
+                case SpellModType.Flat:
+                case SpellModType.Pct:
+                    // TEMP: dont use IsAffected - !familyName and !familyFlags are not valid options for spell mods
+                    // TODO: investigate if the !familyName and !familyFlags conditions are even valid for all other (nonmod) uses of SpellInfo::IsAffected
+                    return affectSpell.SpellFamilyName == SpellFamilyName && (mod as SpellModifierByClassMask).mask & SpellFamilyFlags;
+                case SpellModType.LabelFlat:
+                    return HasLabel((uint)(mod as SpellFlatModifierByLabel).value.LabelID);
+                case SpellModType.LabelPct:
+                    return HasLabel((uint)(mod as SpellPctModifierByLabel).value.LabelID);
+                default:
+                    break;
+            }
+
+            return false;
         }
 
         public bool CanPierceImmuneAura(SpellInfo auraSpellInfo)
