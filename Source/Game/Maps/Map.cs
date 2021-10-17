@@ -769,6 +769,19 @@ namespace Game.Maps
                     foreach (Unit unit in toVisit)
                         VisitNearbyCellsOf(unit, grid_object_update, world_object_update);
                 }
+
+                { // Update any creatures that own auras the player has applications of
+                    List<Unit> toVisit = new();
+                    foreach (var pair in player.GetAppliedAuras())
+                    {
+                        Unit caster = pair.Value.GetBase().GetCaster();
+                        if (caster != null)
+                            if (!caster.IsPlayer() && !caster.IsWithinDistInMap(player, GetVisibilityRange(), false))
+                                toVisit.Add(caster);
+                    }
+                    foreach (Unit unit in toVisit)
+                        VisitNearbyCellsOf(unit, grid_object_update, world_object_update);
+                }
             }
 
             for (var i = 0; i < m_activeNonPlayers.Count; ++i)
