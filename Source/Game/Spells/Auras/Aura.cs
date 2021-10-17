@@ -1638,6 +1638,11 @@ namespace Game.Spells
             m_procCooldown = cooldownEnd;
         }
 
+        public void ResetProcCooldown()
+        {
+            m_procCooldown = DateTime.Now;
+        }
+
         public void PrepareProcToTrigger(AuraApplication aurApp, ProcEventInfo eventInfo, DateTime now)
         {
             bool prepare = CallScriptPrepareProcHandlers(aurApp, eventInfo);
