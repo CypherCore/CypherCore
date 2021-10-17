@@ -490,7 +490,7 @@ namespace Game.AI
                 case SmartTargets.InvokerParty:
                     if (e.GetScriptType() != SmartScriptType.TimedActionlist && e.GetEventType() != SmartEvents.Link && !EventHasInvoker(e.Event.type))
                     {
-                        Log.outError(LogFilter.Sql, $"SmartAIMgr: Entry {e.EntryOrGuid} SourceType {e.GetScriptType()} Event {e.GetEventType()} Action {e.GetActionType()} has invoker target, but action does not provide any invoker!");
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: Entry {e.EntryOrGuid} SourceType {e.GetScriptType()} Event {e.GetEventType()} Action {e.GetActionType()} has invoker target, but event does not provide any invoker!");
                         // allow this to load for now
                         // return false;
                     }
@@ -1064,8 +1064,16 @@ namespace Game.AI
                         return false;
                     break;
                 }
-                case SmartActions.AddAura:
                 case SmartActions.InvokerCast:
+                    if (e.GetScriptType() != SmartScriptType.TimedActionlist && e.GetEventType() != SmartEvents.Link && !EventHasInvoker(e.Event.type))
+                    {
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} has invoker cast action, but event does not provide any invoker!");
+                        // allow this to load for now
+                        // return false;
+                    }
+                    // no break
+                    goto case SmartActions.AddAura;
+                case SmartActions.AddAura:
                     if (!IsSpellValid(e, e.Action.cast.spell))
                         return false;
                     break;
