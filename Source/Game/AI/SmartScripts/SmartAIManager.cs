@@ -435,8 +435,7 @@ namespace Game.AI
         static bool IsTargetValid(SmartScriptHolder e)
         {
             if (Math.Abs(e.Target.o) > 2 * MathFunctions.PI)
-                Log.outError(LogFilter.Sql, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} has abs(`target.o` = {4}) > 2*PI (orientation is expressed in radians)",
-                    e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.Target.o);
+                Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} has abs(`target.o` = {e.Target.o}) > 2*PI (orientation is expressed in radians)");
 
             if (e.GetActionType() == SmartActions.InstallAiTemplate)
                 return true; // AI template has special handling
@@ -448,7 +447,7 @@ namespace Game.AI
                 {
                     if (e.Target.unitDistance.creature != 0 && Global.ObjectMgr.GetCreatureTemplate(e.Target.unitDistance.creature) == null)
                     {
-                        Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent Creature entry {4} as target_param1, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.Target.unitDistance.creature);
+                        Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent Creature entry {e.Target.unitDistance.creature} as target_param1, skipped.");
                         return false;
                     }
                     break;
@@ -458,7 +457,7 @@ namespace Game.AI
                 {
                     if (e.Target.goDistance.entry != 0 && Global.ObjectMgr.GetGameObjectTemplate(e.Target.goDistance.entry) == null)
                     {
-                        Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent GameObject entry {4} as target_param1, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.Target.goDistance.entry);
+                        Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent GameObject entry {e.Target.goDistance.entry} as target_param1, skipped.");
                         return false;
                     }
                     break;
@@ -480,7 +479,7 @@ namespace Game.AI
                 {
                     if (e.Target.playerDistance.dist == 0)
                     {
-                        Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} has maxDist 0 as target_param1, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType());
+                        Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} has maxDist 0 as target_param1, skipped.");
                         return false;
                     }
                     break;
@@ -604,12 +603,12 @@ namespace Game.AI
                             SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(e.Event.spellHit.spell, Difficulty.None);
                             if (spellInfo == null)
                             {
-                                Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent Spell entry {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.Event.spellHit.spell);
+                                Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent Spell entry {e.Event.spellHit.spell}, skipped.");
                                 return false;
                             }
                             if (e.Event.spellHit.school != 0 && ((SpellSchoolMask)e.Event.spellHit.school & spellInfo.SchoolMask) != spellInfo.SchoolMask)
                             {
-                                Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses Spell entry {4} with invalid school mask, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.Event.spellHit.spell);
+                                Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses Spell entry {e.Event.spellHit.spell} with invalid school mask, skipped.");
                                 return false;
                             }
                         }
@@ -624,12 +623,12 @@ namespace Game.AI
                     case SmartEvents.Respawn:
                         if (e.Event.respawn.type == (uint)SmartRespawnCondition.Map && CliDB.MapStorage.LookupByKey(e.Event.respawn.map) == null)
                         {
-                            Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent Map entry {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.Event.respawn.map);
+                            Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent Map entry {e.Event.respawn.map}, skipped.");
                             return false;
                         }
                         if (e.Event.respawn.type == (uint)SmartRespawnCondition.Area && !CliDB.AreaTableStorage.ContainsKey(e.Event.respawn.area))
                         {
-                            Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent Area entry {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.Event.respawn.area);
+                            Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent Area entry {e.Event.respawn.area}, skipped.");
                             return false;
                         }
                         break;
@@ -720,7 +719,7 @@ namespace Game.AI
                     {
                         if (MotionMaster.IsInvalidMovementGeneratorType((MovementGeneratorType)e.Event.movementInform.type))
                         {
-                            Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses invalid Motion type {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.Event.movementInform.type);
+                            Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses invalid Motion type {e.Event.movementInform.type}, skipped.");
                             return false;
                         }
                         break;
@@ -789,7 +788,7 @@ namespace Game.AI
                     {
                         if (e.Event.doAction.eventId > EventId.Charge)
                         {
-                            Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses invalid event id {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.Event.doAction.eventId);
+                            Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses invalid event id {e.Event.doAction.eventId}, skipped.");
                             return false;
                         }
                         break;
@@ -800,7 +799,7 @@ namespace Game.AI
 
                         if (e.Event.friendlyHealthPct.maxHpPct > 100 || e.Event.friendlyHealthPct.minHpPct > 100)
                         {
-                            Log.outError(LogFilter.Sql, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} has pct value above 100, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType());
+                            Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} has pct value above 100, skipped.");
                             return false;
                         }
 
@@ -815,7 +814,7 @@ namespace Game.AI
                             case SmartTargets.PlayerDistance:
                                 break;
                             default:
-                                Log.outError(LogFilter.Sql, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses invalid target_type {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.GetTargetType());
+                                Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses invalid target_type {e.GetTargetType()}, skipped.");
                                 return false;
                         }
                         break;
@@ -950,7 +949,7 @@ namespace Game.AI
                 case SmartActions.SetFaction:
                     if (e.Action.faction.factionID != 0 && CliDB.FactionTemplateStorage.LookupByKey(e.Action.faction.factionID) == null)
                     {
-                        Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent Faction {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.Action.faction.factionID);
+                        Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent Faction {e.Action.faction.factionID}, skipped.");
                         return false;
                     }
                     break;
@@ -960,7 +959,7 @@ namespace Game.AI
                     {
                         if (e.Action.morphOrMount.creature > 0 && Global.ObjectMgr.GetCreatureTemplate(e.Action.morphOrMount.creature) == null)
                         {
-                            Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent Creature entry {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.Action.morphOrMount.creature);
+                            Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent Creature entry {e.Action.morphOrMount.creature}, skipped.");
                             return false;
                         }
 
@@ -968,12 +967,12 @@ namespace Game.AI
                         {
                             if (e.Action.morphOrMount.creature != 0)
                             {
-                                Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} has ModelID set with also set CreatureId, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType());
+                                Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} has ModelID set with also set CreatureId, skipped.");
                                 return false;
                             }
                             else if (!CliDB.CreatureDisplayInfoStorage.ContainsKey(e.Action.morphOrMount.model))
                             {
-                                Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent Model id {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.Action.morphOrMount.model);
+                                Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent Model id {e.Action.morphOrMount.model}, skipped.");
                                 return false;
                             }
                         }
@@ -994,8 +993,7 @@ namespace Game.AI
 
                     if (e.Action.animKit.type > 3)
                     {
-                        Log.outError(LogFilter.Sql, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses invalid AnimKit type {4}, skipped.",
-                            e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.Action.animKit.type);
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses invalid AnimKit type {e.Action.animKit.type}, skipped.");
                         return false;
                     }
                     break;
@@ -1012,7 +1010,7 @@ namespace Game.AI
                 {
                     if (!CliDB.TaxiPathStorage.ContainsKey(e.Action.taxi.id))
                     {
-                        Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses invalid Taxi path ID {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.Action.taxi.id);
+                        Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses invalid Taxi path ID {e.Action.taxi.id}, skipped.");
                         return false;
                     }
                     break;
@@ -1052,8 +1050,7 @@ namespace Game.AI
                         if (spellEffectInfo.IsEffect(SpellEffectName.KillCredit) || spellEffectInfo.IsEffect(SpellEffectName.KillCredit2))
                         {
                             if (spellEffectInfo.TargetA.GetTarget() == Targets.UnitCaster)
-                                Log.outError(LogFilter.Sql, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} Effect: SPELL_EFFECT_KILL_CREDIT: (SpellId: {4} targetA: {5} - targetB: {6}) has invalid target for this Action",
-                                e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.Action.cast.spell, spellEffectInfo.TargetA.GetTarget(), spellEffectInfo.TargetB.GetTarget());
+                                Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} Effect: SPELL_EFFECT_KILL_CREDIT: (SpellId: {e.Action.cast.spell} targetA: {spellEffectInfo.TargetA.GetTarget()} - targetB: {spellEffectInfo.TargetB.GetTarget()}) has invalid target for this Action");
                         }
                     }
                     break;
@@ -1084,32 +1081,32 @@ namespace Game.AI
                     {
                         if (!qid.HasSpecialFlag(QuestSpecialFlags.ExplorationOrEvent))
                         {
-                            Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} SpecialFlags for Quest entry {4} does not include FLAGS_EXPLORATION_OR_EVENT(2), skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.Action.quest.questId);
+                            Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} SpecialFlags for Quest entry {e.Action.quest.questId} does not include FLAGS_EXPLORATION_OR_EVENT(2), skipped.");
                             return false;
                         }
                     }
                     else
                     {
-                        Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent Quest entry {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.Action.quest.questId);
+                        Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent Quest entry {e.Action.quest.questId}, skipped.");
                         return false;
                     }
                     break;
                 case SmartActions.SetEventPhase:
                     if (e.Action.setEventPhase.phase >= (uint)SmartPhase.Max)
                     {
-                        Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} attempts to set phase {4}. Phase mask cannot be used past phase {5}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.Action.setEventPhase.phase, SmartPhase.Max - 1);
+                        Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} attempts to set phase {e.Action.setEventPhase.phase}. Phase mask cannot be used past phase {SmartPhase.Max - 1}, skipped.");
                         return false;
                     }
                     break;
                 case SmartActions.IncEventPhase:
                     if (e.Action.incEventPhase.inc == 0 && e.Action.incEventPhase.dec == 0)
                     {
-                        Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} is incrementing phase by 0, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType());
+                        Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} is incrementing phase by 0, skipped.");
                         return false;
                     }
                     else if (e.Action.incEventPhase.inc > (uint)SmartPhase.Max || e.Action.incEventPhase.dec > (uint)SmartPhase.Max)
                     {
-                        Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} attempts to increment phase by too large value, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType());
+                        Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} attempts to increment phase by too large value, skipped.");
                         return false;
                     }
                     break;
@@ -1137,7 +1134,7 @@ namespace Game.AI
                     if (e.Action.randomPhaseRange.phaseMin >= (uint)SmartPhase.Max ||
                         e.Action.randomPhaseRange.phaseMax >= (uint)SmartPhase.Max)
                     {
-                        Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} attempts to set invalid phase, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType());
+                        Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} attempts to set invalid phase, skipped.");
                         return false;
                     }
                     if (!IsMinMaxValid(e, e.Action.randomPhaseRange.phaseMin, e.Action.randomPhaseRange.phaseMax))
@@ -1150,7 +1147,7 @@ namespace Game.AI
 
                     if (e.Action.summonCreature.type < (uint)TempSummonType.TimedOrDeadDespawn || e.Action.summonCreature.type > (uint)TempSummonType.ManualDespawn)
                     {
-                        Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses incorrect TempSummonType {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.Action.summonCreature.type);
+                        Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses incorrect TempSummonType {e.Action.summonCreature.type}, skipped.");
                         return false;
                     }
                     break;
@@ -1160,7 +1157,7 @@ namespace Game.AI
 
                     if (e.GetTargetType() == SmartTargets.Position)
                     {
-                        Log.outError(LogFilter.Sql, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses incorrect TargetType {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.GetTargetType());
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses incorrect TargetType {e.GetTargetType()}, skipped.");
                         return false;
                     }
                     break;
@@ -1171,7 +1168,7 @@ namespace Game.AI
                 case SmartActions.SetSheath:
                     if (e.Action.setSheath.sheath != 0 && e.Action.setSheath.sheath >= (uint)SheathState.Max)
                     {
-                        Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses incorrect Sheath state {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.Action.setSheath.sheath);
+                        Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses incorrect Sheath state {e.Action.setSheath.sheath}, skipped.");
                         return false;
                     }
                     break;
@@ -1205,7 +1202,7 @@ namespace Game.AI
                 case SmartActions.Teleport:
                     if (!CliDB.MapStorage.ContainsKey(e.Action.teleport.mapID))
                     {
-                        Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent Map entry {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.Action.teleport.mapID);
+                        Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent Map entry {e.Action.teleport.mapID}, skipped.");
                         return false;
                     }
                     break;
@@ -1259,7 +1256,7 @@ namespace Game.AI
                 case SmartActions.RemovePower:
                     if (e.Action.power.powerType > (int)PowerType.Max)
                     {
-                        Log.outError(LogFilter.Sql, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent Power {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.Action.power.powerType);
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses non-existent Power {e.Action.power.powerType}, skipped.");
                         return false;
                     }
                     break;
@@ -1270,14 +1267,14 @@ namespace Game.AI
                     var events = Global.GameEventMgr.GetEventMap();
                     if (eventId < 1 || eventId >= events.Length)
                     {
-                        Log.outError(LogFilter.Sql, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent event, eventId {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.Action.gameEventStop.id);
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses non-existent event, eventId {e.Action.gameEventStop.id}, skipped.");
                         return false;
                     }
 
                     GameEventData eventData = events[eventId];
                     if (!eventData.IsValid())
                     {
-                        Log.outError(LogFilter.Sql, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent event, eventId {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.Action.gameEventStop.id);
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses non-existent event, eventId {e.Action.gameEventStop.id}, skipped.");
                         return false;
                     }
                     break;
@@ -1289,14 +1286,14 @@ namespace Game.AI
                     var events = Global.GameEventMgr.GetEventMap();
                     if (eventId < 1 || eventId >= events.Length)
                     {
-                        Log.outError(LogFilter.Sql, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent event, eventId {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.Action.gameEventStart.id);
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses non-existent event, eventId {e.Action.gameEventStart.id}, skipped.");
                         return false;
                     }
 
                     GameEventData eventData = events[eventId];
                     if (!eventData.IsValid())
                     {
-                        Log.outError(LogFilter.Sql, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent event, eventId {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.Action.gameEventStart.id);
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses non-existent event, eventId {e.Action.gameEventStart.id}, skipped.");
                         return false;
                     }
                     break;
@@ -1319,14 +1316,14 @@ namespace Game.AI
                 {
                     if (e.Action.setInstanceData.type > 1)
                     {
-                        Log.outError(LogFilter.Sql, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses invalid data type {4} (value range 0-1), skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.Action.setInstanceData.type);
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses invalid data type {e.Action.setInstanceData.type} (value range 0-1), skipped.");
                         return false;
                     }
                     else if (e.Action.setInstanceData.type == 1)
                     {
                         if (e.Action.setInstanceData.data > (int)EncounterState.ToBeDecided)
                         {
-                            Log.outError(LogFilter.Sql, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses invalid boss state {4} (value range 0-5), skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), e.Action.setInstanceData.data);
+                            Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses invalid boss state {e.Action.setInstanceData.data} (value range 0-5), skipped.");
                             return false;
                         }
                     }
@@ -1532,8 +1529,7 @@ namespace Game.AI
         {
             if (!CliDB.AnimKitStorage.ContainsKey(entry))
             {
-                Log.outError(LogFilter.Sql, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent AnimKit entry {4}, skipped.",
-                    e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), entry);
+                Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} uses non-existent AnimKit entry {entry}, skipped.");
                 return false;
             }
             return true;
@@ -1563,7 +1559,7 @@ namespace Game.AI
                             CreatureData data = Global.ObjectMgr.GetCreatureData(guid);
                             if (data == null)
                             {
-                                Log.outError(LogFilter.Sql, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} using non-existent Creature guid {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), guid);
+                                Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} using non-existent Creature guid {guid}, skipped.");
                                 return false;
                             }
                             else
@@ -1577,7 +1573,7 @@ namespace Game.AI
 
             if (entry == 0 || !Global.CreatureTextMgr.TextExist(entry, (byte)id))
             {
-                Log.outError(LogFilter.Sql, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} using non-existent Text id {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), id);
+                Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} using non-existent Text id {id}, skipped.");
                 return false;
             }
 
@@ -1587,7 +1583,7 @@ namespace Game.AI
         {
             if (Global.ObjectMgr.GetCreatureTemplate(entry) == null)
             {
-                Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent Creature entry {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), entry);
+                Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent Creature entry {entry}, skipped.");
                 return false;
             }
             return true;
@@ -1596,7 +1592,7 @@ namespace Game.AI
         {
             if (Global.ObjectMgr.GetGameObjectTemplate(entry) == null)
             {
-                Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent GameObject entry {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), entry);
+                Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent GameObject entry {entry}, skipped.");
                 return false;
             }
             return true;
@@ -1605,7 +1601,7 @@ namespace Game.AI
         {
             if (Global.ObjectMgr.GetQuestTemplate(entry) == null)
             {
-                Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent Quest entry {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), entry);
+                Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent Quest entry {entry}, skipped.");
                 return false;
             }
             return true;
@@ -1614,7 +1610,7 @@ namespace Game.AI
         {
             if (!Global.SpellMgr.HasSpellInfo(entry, Difficulty.None))
             {
-                Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent Spell entry {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), entry);
+                Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent Spell entry {entry}, skipped.");
                 return false;
             }
             return true;
@@ -1623,7 +1619,7 @@ namespace Game.AI
         {
             if (max < min)
             {
-                Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses min/max params wrong ({4}/{5}), skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), min, max);
+                Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses min/max params wrong ({min}/{max}), skipped.");
                 return false;
             }
             return true;
@@ -1632,7 +1628,7 @@ namespace Game.AI
         {
             if (data == 0)
             {
-                Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} Parameter can not be NULL, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType());
+                Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} Parameter can not be NULL, skipped.");
                 return false;
             }
             return true;
@@ -1641,7 +1637,7 @@ namespace Game.AI
         {
             if (!CliDB.EmotesStorage.ContainsKey(entry))
             {
-                Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent Emote entry {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), entry);
+                Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent Emote entry {entry}, skipped.");
                 return false;
             }
             return true;
@@ -1650,7 +1646,7 @@ namespace Game.AI
         {
             if (!CliDB.ItemSparseStorage.ContainsKey(entry))
             {
-                Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent Item entry {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), entry);
+                Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent Item entry {entry}, skipped.");
                 return false;
             }
             return true;
@@ -1659,7 +1655,7 @@ namespace Game.AI
         {
             if (!CliDB.EmotesTextStorage.ContainsKey(entry))
             {
-                Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent Text Emote entry {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), entry);
+                Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent Text Emote entry {entry}, skipped.");
                 return false;
             }
             return true;
@@ -1668,7 +1664,7 @@ namespace Game.AI
         {
             if (!CliDB.AreaTriggerStorage.ContainsKey(entry))
             {
-                Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent AreaTrigger entry {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), entry);
+                Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent AreaTrigger entry {entry}, skipped.");
                 return false;
             }
             return true;
@@ -1677,7 +1673,7 @@ namespace Game.AI
         {
             if (!CliDB.SoundKitStorage.ContainsKey(entry))
             {
-                Log.outError(LogFilter.ScriptsAi, "SmartAIMgr: Entry {0} SourceType {1} Event {2} Action {3} uses non-existent Sound entry {4}, skipped.", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType(), entry);
+                Log.outError(LogFilter.ScriptsAi, $"SmartAIMgr: {e} uses non-existent Sound entry {entry}, skipped.");
                 return false;
             }
             return true;
