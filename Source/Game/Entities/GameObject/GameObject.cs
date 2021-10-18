@@ -306,7 +306,7 @@ namespace Game.Entities
                 case GameObjectTypes.Transport:
                     m_goValue.Transport.AnimationInfo = Global.TransportMgr.GetTransportAnimInfo(goInfo.entry);
                     m_goValue.Transport.PathProgress = Time.GetMSTime();
-                    if (m_goValue.Transport.AnimationInfo.Path != null)
+                    if (!m_goValue.Transport.AnimationInfo.Path.Empty())
                         m_goValue.Transport.PathProgress -= m_goValue.Transport.PathProgress % GetTransportPeriod();    // align to period
                     m_goValue.Transport.CurrentSeg = 0;
                     m_goValue.Transport.StateUpdateTimer = 0;
@@ -465,7 +465,7 @@ namespace Game.Entities
                             break;
                         }
                         case GameObjectTypes.Transport:
-                            if (m_goValue.Transport.AnimationInfo.Path == null)
+                            if (m_goValue.Transport.AnimationInfo.Path.Empty())
                                 break;
 
                             m_goValue.Transport.PathProgress += diff;
@@ -2390,7 +2390,7 @@ namespace Game.Entities
         public virtual uint GetTransportPeriod()
         {
             Cypher.Assert(GetGoInfo().type == GameObjectTypes.Transport);
-            if (m_goValue.Transport.AnimationInfo.Path != null)
+            if (!m_goValue.Transport.AnimationInfo.Path.Empty())
                 return m_goValue.Transport.AnimationInfo.TotalTime;
 
             return 0;
