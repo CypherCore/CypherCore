@@ -99,58 +99,64 @@ namespace Game.Chat
                 switch (obj.Type)
                 {
                     case QuestObjectiveType.Item:
+                    {
+                        uint curItemCount = player.GetItemCount((uint)obj.ObjectID, true);
+                        List<ItemPosCount> dest = new();
+                        InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, (uint)obj.ObjectID, (uint)(obj.Amount - curItemCount));
+                        if (msg == InventoryResult.Ok)
                         {
-                            uint curItemCount = player.GetItemCount((uint)obj.ObjectID, true);
-                            List<ItemPosCount> dest = new();
-                            InventoryResult msg = player.CanStoreNewItem(ItemConst.NullBag, ItemConst.NullSlot, dest, (uint)obj.ObjectID, (uint)(obj.Amount - curItemCount));
-                            if (msg == InventoryResult.Ok)
-                            {
-                                Item item = player.StoreNewItem(dest, (uint)obj.ObjectID, true);
-                                player.SendNewItem(item, (uint)(obj.Amount - curItemCount), true, false);
-                            }
-                            break;
+                            Item item = player.StoreNewItem(dest, (uint)obj.ObjectID, true);
+                            player.SendNewItem(item, (uint)(obj.Amount - curItemCount), true, false);
                         }
+                        break;
+                    }
                     case QuestObjectiveType.Monster:
-                        {
-                            CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate((uint)obj.ObjectID);
-                            if (creatureInfo != null)
-                                for (int z = 0; z < obj.Amount; ++z)
-                                    player.KilledMonster(creatureInfo, ObjectGuid.Empty);
-                            break;
-                        }
-                    case QuestObjectiveType.GameObject:
-                        {
+                    {
+                        CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate((uint)obj.ObjectID);
+                        if (creatureInfo != null)
                             for (int z = 0; z < obj.Amount; ++z)
-                                player.KillCreditGO((uint)obj.ObjectID);
-                            break;
-                        }
+                                player.KilledMonster(creatureInfo, ObjectGuid.Empty);
+                        break;
+                    }
+                    case QuestObjectiveType.GameObject:
+                    {
+                        for (int z = 0; z < obj.Amount; ++z)
+                            player.KillCreditGO((uint)obj.ObjectID);
+                        break;
+                    }
                     case QuestObjectiveType.MinReputation:
+                    {
+                        int curRep = player.GetReputationMgr().GetReputation((uint)obj.ObjectID);
+                        if (curRep < obj.Amount)
                         {
-                            int curRep = player.GetReputationMgr().GetReputation((uint)obj.ObjectID);
-                            if (curRep < obj.Amount)
-                            {
-                                FactionRecord factionEntry = CliDB.FactionStorage.LookupByKey(obj.ObjectID);
-                                if (factionEntry != null)
-                                    player.GetReputationMgr().SetReputation(factionEntry, obj.Amount);
-                            }
-                            break;
+                            FactionRecord factionEntry = CliDB.FactionStorage.LookupByKey(obj.ObjectID);
+                            if (factionEntry != null)
+                                player.GetReputationMgr().SetReputation(factionEntry, obj.Amount);
                         }
+                        break;
+                    }
                     case QuestObjectiveType.MaxReputation:
+                    {
+                        int curRep = player.GetReputationMgr().GetReputation((uint)obj.ObjectID);
+                        if (curRep > obj.Amount)
                         {
-                            int curRep = player.GetReputationMgr().GetReputation((uint)obj.ObjectID);
-                            if (curRep > obj.Amount)
-                            {
-                                FactionRecord factionEntry = CliDB.FactionStorage.LookupByKey(obj.ObjectID);
-                                if (factionEntry != null)
-                                    player.GetReputationMgr().SetReputation(factionEntry, obj.Amount);
-                            }
-                            break;
+                            FactionRecord factionEntry = CliDB.FactionStorage.LookupByKey(obj.ObjectID);
+                            if (factionEntry != null)
+                                player.GetReputationMgr().SetReputation(factionEntry, obj.Amount);
                         }
+                        break;
+                    }
                     case QuestObjectiveType.Money:
-                        {
-                            player.ModifyMoney(obj.Amount);
-                            break;
-                        }
+                    {
+                        player.ModifyMoney(obj.Amount);
+                        break;
+                    }
+                    case QuestObjectiveType.PlayerKills:
+                    {
+                        for (var z = 0; z < obj.Amount; ++z)
+                            player.KilledPlayerCredit(ObjectGuid.Empty);
+                        break;
+                    }
                 }
 
             }
