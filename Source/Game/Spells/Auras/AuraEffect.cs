@@ -3315,21 +3315,14 @@ namespace Game.Spells
 
             Unit target = aurApp.GetTarget();
 
-            if (apply)
-            {
-                target.HandleStatFlatModifier(UnitMods.Health, UnitModifierFlatType.Total, GetAmount(), apply);
-                target.ModifyHealth(GetAmount());
-            }
-            else
-            {
-                if (target.GetHealth() > 0)
-                {
-                    int value = (int)Math.Min(target.GetHealth() - 1, (ulong)GetAmount());
-                    target.ModifyHealth(-value);
-                }
+            int amt = apply ? GetAmount() : -GetAmount();
+            if (amt < 0)
+                target.ModifyHealth(Math.Max((int)(1 - target.GetHealth()), amt));
 
-                target.HandleStatFlatModifier(UnitMods.Health, UnitModifierFlatType.Total, GetAmount(), apply);
-            }
+            target.HandleStatFlatModifier(UnitMods.Health, UnitModifierFlatType.Total, GetAmount(), apply);
+
+            if (amt > 0)
+                target.ModifyHealth(amt);
         }
 
         void HandleAuraModIncreaseMaxHealth(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
