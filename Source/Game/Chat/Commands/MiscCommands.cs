@@ -1559,8 +1559,8 @@ namespace Game.Chat
             // Position data print
             uint mapId;
             uint areaId;
-            string areaName = handler.GetCypherString(CypherStrings.Unknown);
-            string zoneName = handler.GetCypherString(CypherStrings.Unknown);
+            string areaName = null;
+            string zoneName = null;
 
             // Guild data print variables defined so that they exist, but are not necessarily used
             ulong guildId = 0;
@@ -1769,17 +1769,23 @@ namespace Game.Chat
             AreaTableRecord area = CliDB.AreaTableStorage.LookupByKey(areaId);
             if (area != null)
             {
-                areaName = area.AreaName[locale];
+                zoneName = area.AreaName[locale];
 
                 AreaTableRecord zone = CliDB.AreaTableStorage.LookupByKey(area.ParentAreaID);
                 if (zone != null)
+                {
+                    areaName = zoneName;
                     zoneName = zone.AreaName[locale];
+                }
             }
 
-            if (target)
-                handler.SendSysMessage(CypherStrings.PinfoChrMap, map.MapName[locale],
-                    (!zoneName.IsEmpty() ? zoneName : handler.GetCypherString(CypherStrings.Unknown)),
-                    (!areaName.IsEmpty() ? areaName : handler.GetCypherString(CypherStrings.Unknown)));
+            if (zoneName == null)
+                zoneName = handler.GetCypherString(CypherStrings.Unknown);
+
+            if (areaName != null)
+                handler.SendSysMessage(CypherStrings.PinfoChrMapWithArea, map.MapName[locale], zoneName, areaName);
+            else
+                handler.SendSysMessage(CypherStrings.PinfoChrMap, map.MapName[locale], zoneName);
 
             // Output XVII. - XVIX. if they are not empty
             if (!guildName.IsEmpty())

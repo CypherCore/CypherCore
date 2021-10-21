@@ -799,6 +799,7 @@ namespace Framework.Constants
         PinfoChrPlayedtime = 853,
         PinfoChrMails = 854,
         PinfoChrLevelHigh = 871,
+        PinfoChrMapWithArea = 882,
 
         CharacterGenderMale = 855,
         CharacterGenderFemale = 856,
@@ -828,7 +829,8 @@ namespace Framework.Constants
         //                                  = 879, See PinfoChrRegmails
         AccountSecType = 880,
         RbacEmailRequired = 881,
-        // Room For In-Game Strings           882-999 Not Used
+        //                                  = 882, LANG_PINFO_CHR_MAP_WITH_AREA
+        // Room For In-Game Strings           883-999 Not Used
 
         // Level 4 (Cli Only Commands)
         CommandExit = 1000,
