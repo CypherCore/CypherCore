@@ -358,10 +358,13 @@ namespace Game.AI
 
         public void SetRun(bool on = true)
         {
-            if (on && !_running)
-                me.SetWalk(false);
-            else if (!on && _running)
-                me.SetWalk(true);
+            if (on == _running)
+                return;
+
+            foreach (var node in _path.nodes)
+                node.moveType = on ? WaypointMoveType.Run : WaypointMoveType.Walk;
+
+            me.SetWalk(!on);
 
             _running = on;
         }
