@@ -765,8 +765,13 @@ namespace Game.AI
 
         public void SetRun(bool run)
         {
+            if (run == _run)
+                return;
+
             me.SetWalk(!run);
             _run = run;
+            foreach (var node in _path.nodes)
+                node.moveType = run ? WaypointMoveType.Run : WaypointMoveType.Walk;
         }
 
         public void SetDisableGravity(bool disable = true)
