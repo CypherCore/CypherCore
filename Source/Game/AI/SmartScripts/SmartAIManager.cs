@@ -490,8 +490,7 @@ namespace Game.AI
                     if (e.GetScriptType() != SmartScriptType.TimedActionlist && e.GetEventType() != SmartEvents.Link && !EventHasInvoker(e.Event.type))
                     {
                         Log.outError(LogFilter.Sql, $"SmartAIMgr: Entry {e.EntryOrGuid} SourceType {e.GetScriptType()} Event {e.GetEventType()} Action {e.GetActionType()} has invoker target, but event does not provide any invoker!");
-                        // allow this to load for now
-                        // return false;
+                        return false;
                     }
                     break;
                 case SmartTargets.PlayerRange:
@@ -1065,8 +1064,7 @@ namespace Game.AI
                     if (e.GetScriptType() != SmartScriptType.TimedActionlist && e.GetEventType() != SmartEvents.Link && !EventHasInvoker(e.Event.type))
                     {
                         Log.outError(LogFilter.Sql, $"SmartAIMgr: {e} has invoker cast action, but event does not provide any invoker!");
-                        // allow this to load for now
-                        // return false;
+                        return false;
                     }
                     // no break
                     goto case SmartActions.AddAura;
