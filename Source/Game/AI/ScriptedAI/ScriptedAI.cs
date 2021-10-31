@@ -668,14 +668,14 @@ namespace Game.AI
 
         public void Summon(Creature summon) { Add(summon.GetGUID()); }
 
-        public void DoZoneInCombat(uint entry = 0, float maxRangeToNearestTarget = 250.0f)
+        public void DoZoneInCombat(uint entry = 0)
         {
             foreach (var id in this)
             {
                 Creature summon = ObjectAccessor.GetCreature(_me, id);
                 if (summon && summon.IsAIEnabled && (entry == 0 || summon.GetEntry() == entry))
                 {
-                    summon.GetAI().DoZoneInCombat(null, maxRangeToNearestTarget);
+                    summon.GetAI().DoZoneInCombat(null);
                 }
             }
         }

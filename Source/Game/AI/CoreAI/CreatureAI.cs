@@ -58,7 +58,7 @@ namespace Game.AI
             Global.CreatureTextMgr.SendChat(me, (byte)id, whisperTarget);
         }
 
-        public void DoZoneInCombat(Creature creature = null, float maxRangeToNearestTarget = 250.0f)
+        public void DoZoneInCombat(Creature creature = null)
         {
             if (!creature)
                 creature = me;
