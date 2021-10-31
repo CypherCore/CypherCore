@@ -958,33 +958,25 @@ namespace Game.AI
                 }
                 case SmartActions.SetInCombatWithZone:
                 {
-                    foreach (var target in targets)
+                    if (_me != null && _me.IsAIEnabled)
                     {
-                        if (IsCreature(target))
-                        {
-                            Creature creature = target.ToCreature();
-                            if (creature.IsAIEnabled)
-                                creature.GetAI().DoZoneInCombat();
-                            Log.outDebug(LogFilter.ScriptsAi, $"SmartScript.ProcessAction: SMART_ACTION_SET_IN_COMBAT_WITH_ZONE: Creature: {_me.GetGUID()}, Target: {target.GetGUID()}");
-                        }
+                        _me.GetAI().DoZoneInCombat();
+                        Log.outDebug(LogFilter.ScriptsAi, $"SmartScript.ProcessAction: SMART_ACTION_SET_IN_COMBAT_WITH_ZONE: Creature: {_me.GetGUID()}");
                     }
 
                     break;
                 }
                 case SmartActions.CallForHelp:
                 {
-                    foreach (var target in targets)
+                    if (_me != null)
                     {
-                        if (IsCreature(target))
+                        _me.CallForHelp(e.Action.callHelp.range);
+                        if (e.Action.callHelp.withEmote != 0)
                         {
-                            target.ToCreature().CallForHelp(e.Action.callHelp.range);
-                            if (e.Action.callHelp.withEmote != 0)
-                            {
-                                var builder = new BroadcastTextBuilder(_me, ChatMsg.Emote, (uint)BroadcastTextIds.CallForHelp, _me.GetGender());
-                                Global.CreatureTextMgr.SendChatPacket(_me, builder, ChatMsg.MonsterEmote);
-                            }
-                            Log.outDebug(LogFilter.ScriptsAi, $"SmartScript.ProcessAction: SMART_ACTION_CALL_FOR_HELP: Creature: {_me.GetGUID()}, Target: {target.GetGUID()}");
+                            var builder = new BroadcastTextBuilder(_me, ChatMsg.Emote, (uint)BroadcastTextIds.CallForHelp, _me.GetGender());
+                            Global.CreatureTextMgr.SendChatPacket(_me, builder, ChatMsg.MonsterEmote);
                         }
+                        Log.outDebug(LogFilter.ScriptsAi, $"SmartScript.ProcessAction: SMART_ACTION_CALL_FOR_HELP: Creature: {_me.GetGUID()}");
                     }
                     break;
                 }
