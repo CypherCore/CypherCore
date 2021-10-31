@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Framework.Dynamic;
+using Game.Combat;
 using Game.Entities;
 using Game.Maps;
 using Game.Spells;
@@ -63,41 +64,10 @@ namespace Game.AI
                 creature = me;
 
             Map map = creature.GetMap();
-            if (creature.CanHaveThreatList())
+            if (!map.IsDungeon())                                  //use IsDungeon instead of Instanceable, in case Battlegrounds will be instantiated
             {
-                if (!map.IsDungeon())                                  //use IsDungeon instead of Instanceable, in case Battlegrounds will be instantiated
-                {
-                    Log.outError(LogFilter.Server, "DoZoneInCombat call for map that isn't an instance (creature entry = {0})", creature.IsTypeId(TypeId.Unit) ? creature.ToCreature().GetEntry() : 0);
-                    return;
-                }
-
-                if (!creature.HasReactState(ReactStates.Passive) && creature.GetVictim() == null)
-                {
-                    Unit nearTarget = creature.SelectNearestTarget(maxRangeToNearestTarget);
-                    if (nearTarget != null)
-                        creature.GetAI().AttackStart(nearTarget);
-                    else if (creature.IsSummon())
-                    {
-                        Unit summoner = creature.ToTempSummon().GetSummoner();
-                        if (summoner != null)
-                        {
-                            if (creature.IsFriendlyTo(summoner))
-                            {
-                                Unit target = summoner.GetAttackerForHelper();
-                                if (target != null && creature.IsHostileTo(target))
-                                    creature.GetAI().AttackStart(target);
-                            }
-                        }
-                    }
-                }
-
-                // Intended duplicated check, the code above this should select a victim
-                // If it can't find a suitable attack target then we should error out.
-                if (!creature.HasReactState(ReactStates.Passive) && creature.GetVictim() == null)
-                {
-                    Log.outError(LogFilter.Server, "DoZoneInCombat called for creature that has empty threat list (creature entry = {0})", creature.GetEntry());
-                    return;
-                }
+                Log.outError(LogFilter.Server, "DoZoneInCombat call for map that isn't an instance (creature entry = {0})", creature.IsTypeId(TypeId.Unit) ? creature.ToCreature().GetEntry() : 0);
+                return;
             }
 
             var playerList = map.GetPlayers();
@@ -105,8 +75,21 @@ namespace Game.AI
                 return;
 
             foreach (var player in playerList)
-                if (player != null && player.IsAlive())
+            {
+                if (player != null)
+                {
+                    if (!player.IsAlive() || !CombatManager.CanBeginCombat(creature, player))
+                        continue;
+
                     creature.EngageWithTarget(player);
+                    foreach (Unit pet in player.m_Controlled)
+                        creature.EngageWithTarget(pet);
+
+                    Unit vehicle = player.GetVehicleBase();
+                    if (vehicle != null)
+                        creature.EngageWithTarget(vehicle);
+                }
+            }
         }
 
         public virtual void MoveInLineOfSight_Safe(Unit who)
