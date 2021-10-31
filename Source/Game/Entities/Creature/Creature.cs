@@ -746,12 +746,9 @@ namespace Game.Entities
                 return false;
             }
 
-            if (ai == null)
-                ai = AISelector.SelectAI(this);
-
-            SetAI(ai);
-
             InitializeMovementAI();
+
+            SetAI(ai != null ? ai : AISelector.SelectAI(this));
 
             i_AI.InitializeAI();
 
