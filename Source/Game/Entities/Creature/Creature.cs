@@ -2176,10 +2176,15 @@ namespace Game.Entities
 
         public void CallForHelp(float radius)
         {
-            if (radius <= 0.0f || GetVictim() == null || IsPet() || IsCharmed())
+            if (radius <= 0.0f || !IsEngaged() || IsPet() || IsCharmed())
                 return;
 
-            var u_do = new CallOfHelpCreatureInRangeDo(this, GetVictim(), radius);
+            Unit target = GetThreatManager().GetCurrentVictim();
+            if (target == null)
+                target = GetThreatManager().GetAnyTarget();
+            Cypher.Assert(target != null, $"Creature {GetEntry()} ({GetName()}) is engaged without threat list");
+
+            var u_do = new CallOfHelpCreatureInRangeDo(this, target, radius);
             var worker = new CreatureWorker(this, u_do);
             Cell.VisitGridObjects(this, worker, radius);
         }
