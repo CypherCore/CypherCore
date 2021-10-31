@@ -1892,8 +1892,24 @@ namespace Game.Entities
         
         public override ObjectGuid GetCharmerOrOwnerGUID()
         {
-            return !GetCharmerGUID().IsEmpty() ? GetCharmerGUID() : GetOwnerGUID();
+            return IsCharmed() ? GetCharmerGUID() : GetOwnerGUID();
         }
+
+        Player GetControllingPlayer()
+        {
+            ObjectGuid guid = GetCharmerOrOwnerGUID();
+            if (!guid.IsEmpty())
+            {
+                Unit master = Global.ObjAccessor.GetUnit(this, guid);
+                if (master != null)
+                    return master.GetControllingPlayer();
+
+                return null;
+            }
+            else
+                return ToPlayer();
+        }
+        
         public Unit GetCharmer()
         {
             ObjectGuid charmerid = GetCharmerGUID();
@@ -1901,6 +1917,7 @@ namespace Game.Entities
                 return Global.ObjAccessor.GetUnit(this, charmerid);
             return null;
         }
+
         public override Unit GetCharmerOrOwner()
         {
             return !GetCharmerGUID().IsEmpty() ? GetCharmer() : GetOwner();
@@ -2423,7 +2440,7 @@ namespace Game.Entities
                     return 0;
 
                 // prevent kill only if killed in duel and killed by opponent or opponent controlled creature
-                if (victim.ToPlayer().duel.opponent == attacker || victim.ToPlayer().duel.opponent.GetGUID() == attacker.GetOwnerGUID())
+                if (victim.ToPlayer().duel.opponent == attacker.GetControllingPlayer())
                     damage = health - 1;
 
                 duel_hasEnded = true;
@@ -2437,7 +2454,7 @@ namespace Game.Entities
                         return 0;
 
                     // prevent kill only if killed in duel and killed by opponent or opponent controlled creature
-                    if (victimRider.duel.opponent == attacker || victimRider.duel.opponent.GetGUID() == attacker.GetCharmerGUID())
+                    if (victimRider.duel.opponent == attacker.GetControllingPlayer())
                         damage = health - 1;
 
                     duel_wasMounted = true;
