@@ -88,7 +88,7 @@ namespace Game.Combat
             return false;
         }
 
-        Unit GetAnyTarget()
+        public Unit GetAnyTarget()
         {
             if (!_pveRefs.Empty())
                 return _pveRefs.First().Value.GetOther(_owner);

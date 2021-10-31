@@ -2182,6 +2182,8 @@ namespace Game.Entities
             Unit target = GetThreatManager().GetCurrentVictim();
             if (target == null)
                 target = GetThreatManager().GetAnyTarget();
+            if (target == null)
+                target = GetCombatManager().GetAnyTarget();
             Cypher.Assert(target != null, $"Creature {GetEntry()} ({GetName()}) is engaged without threat list");
 
             var u_do = new CallOfHelpCreatureInRangeDo(this, target, radius);
