@@ -85,6 +85,9 @@ namespace Game.Movement
             {
                 owner.StopMoving();
                 _lastTargetPosition = null;
+                Creature cOwner = owner.ToCreature();
+                if (cOwner != null)
+                    cOwner.SetCannotReachTarget(false);
                 return true;
             }
 
@@ -119,6 +122,9 @@ namespace Game.Movement
             if (owner.HasUnitState(UnitState.ChaseMove) && owner.MoveSpline.Finalized())
             {
                 _path = null;
+                Creature cOwner = owner.ToCreature();
+                if (cOwner != null)
+                    cOwner.SetCannotReachTarget(false);
                 owner.ClearUnitState(UnitState.ChaseMove);
                 owner.SetInFront(target);
                 DoMovementInform(owner, target);
@@ -201,6 +207,9 @@ namespace Game.Movement
         {
             AddFlag(MovementGeneratorFlags.Deactivated);
             owner.ClearUnitState(UnitState.ChaseMove);
+            Creature cOwner = owner.ToCreature();
+            if (cOwner != null)
+                cOwner.SetCannotReachTarget(false);
         }
 
         public override void Finalize(Unit owner, bool active, bool movementInform)
