@@ -867,19 +867,41 @@ namespace Game.DungeonFinding
         void MakeNewGroup(LfgProposal proposal)
         {
             List<ObjectGuid> players = new();
+            List<ObjectGuid> tankPlayers = new();
+            List<ObjectGuid> healPlayers = new();
+            List<ObjectGuid> dpsPlayers = new();
             List<ObjectGuid> playersToTeleport = new();
 
             foreach (var it in proposal.players)
             {
                 ObjectGuid guid = it.Key;
                 if (guid == proposal.leader)
-                    players.Insert(0, guid);
-                else
                     players.Add(guid);
-
+                else
+                {
+                    switch (it.Value.role & ~LfgRoles.Leader)
+                    {
+                        case LfgRoles.Tank:
+                            tankPlayers.Add(guid);
+                            break;
+                        case LfgRoles.Healer:
+                            healPlayers.Add(guid);
+                            break;
+                        case LfgRoles.Damage:
+                            dpsPlayers.Add(guid);
+                            break;
+                        default:
+                            Cypher.Assert(false, $"Invalid LFG role {it.Value.role}");
+                            break;
+                    }
+                }
                 if (proposal.isNew || GetGroup(guid) != proposal.group)
                     playersToTeleport.Add(guid);
             }
+
+            players.AddRange(tankPlayers);
+            players.AddRange(healPlayers);
+            players.AddRange(dpsPlayers);
 
             // Set the dungeon difficulty
             LFGDungeonData dungeon = GetLFGDungeon(proposal.dungeonId);
