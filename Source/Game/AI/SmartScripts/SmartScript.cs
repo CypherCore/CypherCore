@@ -958,7 +958,7 @@ namespace Game.AI
                 }
                 case SmartActions.SetInCombatWithZone:
                 {
-                    if (_me != null && _me.IsAIEnabled)
+                    if (_me != null && _me.IsAIEnabled())
                     {
                         _me.GetAI().DoZoneInCombat();
                         Log.outDebug(LogFilter.ScriptsAi, $"SmartScript.ProcessAction: SMART_ACTION_SET_IN_COMBAT_WITH_ZONE: Creature: {_me.GetGUID()}");

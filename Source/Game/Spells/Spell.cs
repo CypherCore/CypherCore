@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Framework.Dynamic;
+using Game.AI;
 using Game.BattleFields;
 using Game.BattleGrounds;
 using Game.Conditions;
@@ -2507,8 +2508,11 @@ namespace Game.Spells
                         {
                             Creature cControlled = controlled.ToCreature();
                             if (cControlled != null)
-                                if (cControlled.IsAIEnabled)
-                                    cControlled.GetAI().OwnerAttacked(target);
+                            {
+                                CreatureAI controlledAI = cControlled.GetAI();
+                                if (controlledAI != null)
+                                    controlledAI.OwnerAttacked(target);
+                            }
                         }
                     }
                 }
@@ -2778,7 +2782,7 @@ namespace Game.Spells
             // Call CreatureAI hook OnSuccessfulSpellCast
             Creature caster = m_originalCaster.ToCreature();
             if (caster)
-                if (caster.IsAIEnabled)
+                if (caster.IsAIEnabled())
                     caster.GetAI().OnSuccessfulSpellCast(GetSpellInfo());
         }
 
@@ -8005,18 +8009,20 @@ namespace Game.Spells
             if (_spellHitTarget)
             {
                 //AI functions
-                if (_spellHitTarget.IsCreature())
+                Creature cHitTarget = _spellHitTarget.ToCreature();
+                if (cHitTarget != null)
                 {
-                    if (_spellHitTarget.ToCreature().IsAIEnabled)
+                    CreatureAI hitTargetAI = cHitTarget.GetAI();
+                    if (hitTargetAI != null)
                     {
                         if (spell.GetCaster().IsGameObject())
-                            _spellHitTarget.ToCreature().GetAI().SpellHit(spell.GetCaster().ToGameObject(), spell.m_spellInfo);
+                            hitTargetAI.SpellHit(spell.GetCaster().ToGameObject(), spell.m_spellInfo);
                         else
-                            _spellHitTarget.ToCreature().GetAI().SpellHit(spell.GetCaster().ToUnit(), spell.m_spellInfo);
+                            hitTargetAI.SpellHit(spell.GetCaster().ToUnit(), spell.m_spellInfo);
                     }
                 }
 
-                if (spell.GetCaster().IsCreature() && spell.GetCaster().ToCreature().IsAIEnabled)
+                if (spell.GetCaster().IsCreature() && spell.GetCaster().ToCreature().IsAIEnabled())
                     spell.GetCaster().ToCreature().GetAI().SpellHitTarget(_spellHitTarget, spell.m_spellInfo);
                 else if (spell.GetCaster().IsGameObject() && spell.GetCaster().ToGameObject().GetAI() != null)
                     spell.GetCaster().ToGameObject().GetAI().SpellHitTarget(_spellHitTarget, spell.m_spellInfo);
@@ -8072,7 +8078,7 @@ namespace Game.Spells
                     go.GetAI().SpellHit(spell.GetCaster().ToUnit(), spell.m_spellInfo);
             }
 
-            if (spell.GetCaster().IsCreature() && spell.GetCaster().ToCreature().IsAIEnabled)
+            if (spell.GetCaster().IsCreature() && spell.GetCaster().ToCreature().IsAIEnabled())
                 spell.GetCaster().ToCreature().GetAI().SpellHitTarget(go, spell.m_spellInfo);
             else if (spell.GetCaster().IsGameObject() && spell.GetCaster().ToGameObject().GetAI() != null)
                 spell.GetCaster().ToGameObject().GetAI().SpellHitTarget(go, spell.m_spellInfo);

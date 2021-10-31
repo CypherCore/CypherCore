@@ -165,68 +165,68 @@ namespace Game
                             charmInfo.SetIsFollowing(false);
                             break;
                         case CommandStates.Attack:                        //spellid=1792  //ATTACK
+                        {
+                            // Can't attack if owner is pacified
+                            if (GetPlayer().HasAuraType(AuraType.ModPacify))
                             {
-                                // Can't attack if owner is pacified
-                                if (GetPlayer().HasAuraType(AuraType.ModPacify))
-                                {
-                                    // @todo Send proper error message to client
+                                // @todo Send proper error message to client
+                                return;
+                            }
+
+                            // only place where pet can be player
+                            Unit TargetUnit = Global.ObjAccessor.GetUnit(GetPlayer(), guid2);
+                            if (!TargetUnit)
+                                return;
+
+                            Unit owner = pet.GetOwner();
+                            if (owner)
+                                if (!owner.IsValidAttackTarget(TargetUnit))
                                     return;
-                                }
 
-                                // only place where pet can be player
-                                Unit TargetUnit = Global.ObjAccessor.GetUnit(GetPlayer(), guid2);
-                                if (!TargetUnit)
-                                    return;
+                            pet.ClearUnitState(UnitState.Follow);
+                            // This is true if pet has no target or has target but targets differs.
+                            if (pet.GetVictim() != TargetUnit || !pet.GetCharmInfo().IsCommandAttack())
+                            {
+                                if (pet.GetVictim())
+                                    pet.AttackStop();
 
-                                Unit owner = pet.GetOwner();
-                                if (owner)
-                                    if (!owner.IsValidAttackTarget(TargetUnit))
-                                        return;
-
-                                pet.ClearUnitState(UnitState.Follow);
-                                // This is true if pet has no target or has target but targets differs.
-                                if (pet.GetVictim() != TargetUnit || !pet.GetCharmInfo().IsCommandAttack())
+                                if (!pet.IsTypeId(TypeId.Player) && pet.ToCreature().IsAIEnabled())
                                 {
-                                    if (pet.GetVictim())
-                                        pet.AttackStop();
+                                    charmInfo.SetIsCommandAttack(true);
+                                    charmInfo.SetIsAtStay(false);
+                                    charmInfo.SetIsFollowing(false);
+                                    charmInfo.SetIsCommandFollow(false);
+                                    charmInfo.SetIsReturning(false);
 
-                                    if (!pet.IsTypeId(TypeId.Player) && pet.ToCreature().IsAIEnabled)
+                                    CreatureAI AI = pet.ToCreature().GetAI();
+                                    if (AI is PetAI)
+                                        ((PetAI)AI)._AttackStart(TargetUnit); // force target switch
+                                    else
+                                        AI.AttackStart(TargetUnit);
+
+                                    //10% chance to play special pet attack talk, else growl
+                                    if (pet.IsPet() && pet.ToPet().GetPetType() == PetType.Summon && pet != TargetUnit && RandomHelper.IRand(0, 100) < 10)
+                                        pet.SendPetTalk(PetTalk.Attack);
+                                    else
                                     {
-                                        charmInfo.SetIsCommandAttack(true);
-                                        charmInfo.SetIsAtStay(false);
-                                        charmInfo.SetIsFollowing(false);
-                                        charmInfo.SetIsCommandFollow(false);
-                                        charmInfo.SetIsReturning(false);
-
-                                        CreatureAI AI = pet.ToCreature().GetAI();
-                                        if (AI is PetAI)
-                                            ((PetAI)AI)._AttackStart(TargetUnit); // force target switch
-                                        else
-                                            AI.AttackStart(TargetUnit);
-
-                                        //10% chance to play special pet attack talk, else growl
-                                        if (pet.IsPet() && pet.ToPet().GetPetType() == PetType.Summon && pet != TargetUnit && RandomHelper.IRand(0, 100) < 10)
-                                            pet.SendPetTalk(PetTalk.Attack);
-                                        else
-                                        {
-                                            // 90% chance for pet and 100% chance for charmed creature
-                                            pet.SendPetAIReaction(guid1);
-                                        }
-                                    }
-                                    else                                // charmed player
-                                    {
-                                        charmInfo.SetIsCommandAttack(true);
-                                        charmInfo.SetIsAtStay(false);
-                                        charmInfo.SetIsFollowing(false);
-                                        charmInfo.SetIsCommandFollow(false);
-                                        charmInfo.SetIsReturning(false);
-
-                                        pet.Attack(TargetUnit, true);
+                                        // 90% chance for pet and 100% chance for charmed creature
                                         pet.SendPetAIReaction(guid1);
                                     }
                                 }
-                                break;
+                                else                                // charmed player
+                                {
+                                    charmInfo.SetIsCommandAttack(true);
+                                    charmInfo.SetIsAtStay(false);
+                                    charmInfo.SetIsFollowing(false);
+                                    charmInfo.SetIsCommandFollow(false);
+                                    charmInfo.SetIsReturning(false);
+
+                                    pet.Attack(TargetUnit, true);
+                                    pet.SendPetAIReaction(guid1);
+                                }
                             }
+                            break;
+                        }
                         case CommandStates.Abandon:                       // abandon (hunter pet) or dismiss (summoned pet)
                             if (pet.GetCharmerGUID() == GetPlayer().GetGUID())
                                 GetPlayer().StopCastingCharm();
@@ -280,127 +280,127 @@ namespace Game
                 case ActiveStates.Disabled:                                  // 0x81    spell (disabled), ignore
                 case ActiveStates.Passive:                                   // 0x01
                 case ActiveStates.Enabled:                                   // 0xC1    spell
+                {
+                    Unit unit_target = null;
+
+                    if (!guid2.IsEmpty())
+                        unit_target = Global.ObjAccessor.GetUnit(GetPlayer(), guid2);
+
+                    // do not cast unknown spells
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellid, pet.GetMap().GetDifficultyID());
+                    if (spellInfo == null)
                     {
-                        Unit unit_target = null;
+                        Log.outError(LogFilter.Network, "WORLD: unknown PET spell id {0}", spellid);
+                        return;
+                    }
 
-                        if (!guid2.IsEmpty())
-                            unit_target = Global.ObjAccessor.GetUnit(GetPlayer(), guid2);
-
-                        // do not cast unknown spells
-                        SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellid, pet.GetMap().GetDifficultyID());
-                        if (spellInfo == null)
-                        {
-                            Log.outError(LogFilter.Network, "WORLD: unknown PET spell id {0}", spellid);
+                    foreach (var spellEffectInfo in spellInfo.GetEffects())
+                    {
+                        if (spellEffectInfo.TargetA.GetTarget() == Targets.UnitSrcAreaEnemy || spellEffectInfo.TargetA.GetTarget() == Targets.UnitDestAreaEnemy || spellEffectInfo.TargetA.GetTarget() == Targets.DestDynobjEnemy)
                             return;
-                        }
+                    }
 
-                        foreach (var spellEffectInfo in spellInfo.GetEffects())
+                    // do not cast not learned spells
+                    if (!pet.HasSpell(spellid) || spellInfo.IsPassive())
+                        return;
+
+                    //  Clear the flags as if owner clicked 'attack'. AI will reset them
+                    //  after AttackStart, even if spell failed
+                    if (pet.GetCharmInfo() != null)
+                    {
+                        pet.GetCharmInfo().SetIsAtStay(false);
+                        pet.GetCharmInfo().SetIsCommandAttack(true);
+                        pet.GetCharmInfo().SetIsReturning(false);
+                        pet.GetCharmInfo().SetIsFollowing(false);
+                    }
+
+                    Spell spell = new(pet, spellInfo, TriggerCastFlags.None);
+
+                    SpellCastResult result = spell.CheckPetCast(unit_target);
+
+                    //auto turn to target unless possessed
+                    if (result == SpellCastResult.UnitNotInfront && !pet.IsPossessed() && !pet.IsVehicle())
+                    {
+                        Unit unit_target2 = spell.m_targets.GetUnitTarget();
+                        if (unit_target)
                         {
-                            if (spellEffectInfo.TargetA.GetTarget() == Targets.UnitSrcAreaEnemy || spellEffectInfo.TargetA.GetTarget() == Targets.UnitDestAreaEnemy || spellEffectInfo.TargetA.GetTarget() == Targets.DestDynobjEnemy)
-                                return;
+                            if (!pet.IsFocusing())
+                                pet.SetInFront(unit_target);
+                            Player player = unit_target.ToPlayer();
+                            if (player)
+                                pet.SendUpdateToPlayer(player);
                         }
-
-                        // do not cast not learned spells
-                        if (!pet.HasSpell(spellid) || spellInfo.IsPassive())
-                            return;
-
-                        //  Clear the flags as if owner clicked 'attack'. AI will reset them
-                        //  after AttackStart, even if spell failed
-                        if (pet.GetCharmInfo() != null)
+                        else if (unit_target2)
                         {
-                            pet.GetCharmInfo().SetIsAtStay(false);
-                            pet.GetCharmInfo().SetIsCommandAttack(true);
-                            pet.GetCharmInfo().SetIsReturning(false);
-                            pet.GetCharmInfo().SetIsFollowing(false);
+                            if (!pet.IsFocusing())
+                                pet.SetInFront(unit_target2);
+                            Player player = unit_target2.ToPlayer();
+                            if (player)
+                                pet.SendUpdateToPlayer(player);
                         }
-
-                        Spell spell = new(pet, spellInfo, TriggerCastFlags.None);
-
-                        SpellCastResult result = spell.CheckPetCast(unit_target);
-
-                        //auto turn to target unless possessed
-                        if (result == SpellCastResult.UnitNotInfront && !pet.IsPossessed() && !pet.IsVehicle())
+                        Unit powner = pet.GetCharmerOrOwner();
+                        if (powner)
                         {
-                            Unit unit_target2 = spell.m_targets.GetUnitTarget();
-                            if (unit_target)
-                            {
-                                if (!pet.IsFocusing())
-                                    pet.SetInFront(unit_target);
-                                Player player = unit_target.ToPlayer();
-                                if (player)
-                                    pet.SendUpdateToPlayer(player);
-                            }
-                            else if (unit_target2)
-                            {
-                                if (!pet.IsFocusing())
-                                    pet.SetInFront(unit_target2);
-                                Player player = unit_target2.ToPlayer();
-                                if (player)
-                                    pet.SendUpdateToPlayer(player);
-                            }
-                            Unit powner = pet.GetCharmerOrOwner();
-                            if (powner)
-                            {
-                                Player player = powner.ToPlayer();
-                                if (player)
-                                    pet.SendUpdateToPlayer(player);
-                            }
-
-                            result = SpellCastResult.SpellCastOk;
+                            Player player = powner.ToPlayer();
+                            if (player)
+                                pet.SendUpdateToPlayer(player);
                         }
 
-                        if (result == SpellCastResult.SpellCastOk)
-                        {
-                            unit_target = spell.m_targets.GetUnitTarget();
+                        result = SpellCastResult.SpellCastOk;
+                    }
 
-                            //10% chance to play special pet attack talk, else growl
-                            //actually this only seems to happen on special spells, fire shield for imp, torment for voidwalker, but it's stupid to check every spell
-                            if (pet.IsPet() && (pet.ToPet().GetPetType() == PetType.Summon) && (pet != unit_target) && (RandomHelper.IRand(0, 100) < 10))
-                                pet.SendPetTalk(PetTalk.SpecialSpell);
-                            else
-                            {
-                                pet.SendPetAIReaction(guid1);
-                            }
+                    if (result == SpellCastResult.SpellCastOk)
+                    {
+                        unit_target = spell.m_targets.GetUnitTarget();
 
-                            if (unit_target && !GetPlayer().IsFriendlyTo(unit_target) && !pet.IsPossessed() && !pet.IsVehicle())
-                            {
-                                // This is true if pet has no target or has target but targets differs.
-                                if (pet.GetVictim() != unit_target)
-                                {
-                                    pet.GetMotionMaster().Clear();
-                                    if (pet.ToCreature().IsAIEnabled)
-                                    {
-                                        CreatureAI AI = pet.ToCreature().GetAI();
-                                        PetAI petAI = (PetAI)AI;
-                                        if (petAI != null)
-                                            petAI._AttackStart(unit_target); // force victim switch
-                                        else
-                                            AI.AttackStart(unit_target);
-                                    }
-                                }
-                            }
-
-                            spell.Prepare(spell.m_targets);
-                        }
+                        //10% chance to play special pet attack talk, else growl
+                        //actually this only seems to happen on special spells, fire shield for imp, torment for voidwalker, but it's stupid to check every spell
+                        if (pet.IsPet() && (pet.ToPet().GetPetType() == PetType.Summon) && (pet != unit_target) && (RandomHelper.IRand(0, 100) < 10))
+                            pet.SendPetTalk(PetTalk.SpecialSpell);
                         else
                         {
-                            if (pet.IsPossessed() || pet.IsVehicle()) // @todo: confirm this check
-                                Spell.SendCastResult(GetPlayer(), spellInfo, spell.m_SpellVisual, spell.m_castId, result);
-                            else
-                                spell.SendPetCastResult(result);
-
-                            if (!pet.GetSpellHistory().HasCooldown(spellid))
-                                pet.GetSpellHistory().ResetCooldown(spellid, true);
-
-                            spell.Finish(false);
-                            spell.Dispose();
-
-                            // reset specific flags in case of spell fail. AI will reset other flags
-                            if (pet.GetCharmInfo() != null)
-                                pet.GetCharmInfo().SetIsCommandAttack(false);
+                            pet.SendPetAIReaction(guid1);
                         }
-                        break;
+
+                        if (unit_target && !GetPlayer().IsFriendlyTo(unit_target) && !pet.IsPossessed() && !pet.IsVehicle())
+                        {
+                            // This is true if pet has no target or has target but targets differs.
+                            if (pet.GetVictim() != unit_target)
+                            {
+                                pet.GetMotionMaster().Clear();
+                                CreatureAI ai = pet.ToCreature().GetAI();
+                                if (ai != null)
+                                {
+                                    PetAI petAI = (PetAI)ai;
+                                    if (petAI != null)
+                                        petAI._AttackStart(unit_target); // force victim switch
+                                    else
+                                        ai.AttackStart(unit_target);
+                                }
+                            }
+                        }
+
+                        spell.Prepare(spell.m_targets);
                     }
+                    else
+                    {
+                        if (pet.IsPossessed() || pet.IsVehicle()) // @todo: confirm this check
+                            Spell.SendCastResult(GetPlayer(), spellInfo, spell.m_SpellVisual, spell.m_castId, result);
+                        else
+                            spell.SendPetCastResult(result);
+
+                        if (!pet.GetSpellHistory().HasCooldown(spellid))
+                            pet.GetSpellHistory().ResetCooldown(spellid, true);
+
+                        spell.Finish(false);
+                        spell.Dispose();
+
+                        // reset specific flags in case of spell fail. AI will reset other flags
+                        if (pet.GetCharmInfo() != null)
+                            pet.GetCharmInfo().SetIsCommandAttack(false);
+                    }
+                    break;
+                }
                 default:
                     Log.outError(LogFilter.Network, "WORLD: unknown PET flag Action {0} and spellid {1}.", flag, spellid);
                     break;

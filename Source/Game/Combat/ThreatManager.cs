@@ -16,6 +16,7 @@
  */
 
 using Framework.Constants;
+using Game.AI;
 using Game.Entities;
 using Game.Networking.Packets;
 using Game.Spells;
@@ -198,7 +199,7 @@ namespace Game.Combat
         static void SaveCreatureHomePositionIfNeed(Creature c)
         {
             MovementGeneratorType movetype = c.GetMotionMaster().GetCurrentMovementGeneratorType();
-            if (movetype == MovementGeneratorType.Waypoint || movetype == MovementGeneratorType.Point || (c.IsAIEnabled && c.GetAI().IsEscorted()))
+            if (movetype == MovementGeneratorType.Waypoint || movetype == MovementGeneratorType.Point || (c.IsAIEnabled() && c.GetAI().IsEscorted()))
                 c.SetHomePosition(c.GetPosition());
         }
 
@@ -311,8 +312,9 @@ namespace Game.Combat
                 Creature cOwner = _owner.ToCreature();
                 Cypher.Assert(cOwner != null); // if we got here the owner can have a threat list, and must be a creature!
                 SaveCreatureHomePositionIfNeed(cOwner);
-                if (cOwner.IsAIEnabled)
-                    cOwner.GetAI().JustEngagedWith(target);
+                CreatureAI ownerAI = cOwner.GetAI();
+                if (ownerAI != null)
+                    ownerAI.JustEngagedWith(target);
             }
         }
 
@@ -835,7 +837,7 @@ namespace Game.Combat
             if (!FlagsAllowFighting(_owner, _victim) || !FlagsAllowFighting(_victim, _owner))
                 return OnlineState.Offline;
 
-            if (_owner.IsAIEnabled && !_owner.GetAI().CanAIAttack(_victim))
+            if (_owner.IsAIEnabled() && !_owner.GetAI().CanAIAttack(_victim))
                 return OnlineState.Offline;
 
             // next, check suppression (immunity to chosen melee attack school)

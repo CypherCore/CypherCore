@@ -78,7 +78,7 @@ namespace Game.Chat
                 return false;
             }
 
-            if (!creatureTarget.IsAIEnabled)
+            if (!creatureTarget.IsAIEnabled())
             {
                 handler.SendSysMessage(CypherStrings.CreatureNotAiEnabled);
                 return false;

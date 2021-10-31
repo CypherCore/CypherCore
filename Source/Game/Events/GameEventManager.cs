@@ -1749,7 +1749,7 @@ namespace Game
             for (var i = 0; i < objs.Count; ++i)
             {
                 Creature creature = objs[i];
-                if (creature.IsInWorld && creature.IsAIEnabled)
+                if (creature.IsInWorld && creature.IsAIEnabled())
                     creature.GetAI().OnGameEvent(_activate, _eventId);
             }
         }

@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Framework.Dynamic;
+using Game.AI;
 using Game.BattleGrounds;
 using Game.DataStorage;
 using Game.Movement;
@@ -361,7 +362,7 @@ namespace Game.Entities
             if (unit.IsFlying())
                 _me.CastSpell(unit, SharedConst.VehicleSpellParachute, true);
 
-            if (_me.IsTypeId(TypeId.Unit) && _me.ToCreature().IsAIEnabled)
+            if (_me.IsTypeId(TypeId.Unit) && _me.ToCreature().IsAIEnabled())
                 _me.ToCreature().GetAI().PassengerBoarded(unit, seat.Key, false);
 
             if (GetBase().IsTypeId(TypeId.Unit))
@@ -646,8 +647,9 @@ namespace Game.Entities
             Creature creature = Target.GetBase().ToCreature();
             if (creature != null)
             {
-                if (creature.IsAIEnabled)
-                    creature.GetAI().PassengerBoarded(Passenger, Seat.Key, true);
+                CreatureAI ai = creature.GetAI();
+                if (ai != null)
+                    ai.PassengerBoarded(Passenger, Seat.Key, true);
 
                 Global.ScriptMgr.OnAddPassenger(Target, Passenger, Seat.Key);
 

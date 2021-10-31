@@ -463,7 +463,18 @@ namespace Game.AI
 
         public virtual void Reset() { }
 
-        public virtual void OnCharmed(bool apply) { }
+        /// <summary>
+        // Called when unit's charm state changes with isNew = false
+        // Implementation should call me->ScheduleAIChange() if AI replacement is desired
+        // If this call is made, AI will be replaced on the next tick
+        // When replacement is made, OnCharmed is called with isNew = true
+        /// </summary>
+        /// <param name="apply"></param>
+        public virtual void OnCharmed(bool isNew)
+        {
+            if (!isNew)
+                me.ScheduleAIChange();
+        }
 
         public virtual bool ShouldSparWith(Unit target) { return false; }
 

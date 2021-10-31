@@ -44,13 +44,20 @@ namespace Game.AI
             _moveInLineOfSightLocked = false;
         }
 
-        public override void OnCharmed(bool apply)
+        public override void OnCharmed(bool isNew)
         {
-            if (apply)
+            if (isNew && !me.IsCharmed() && !me.LastCharmerGUID.IsEmpty())
             {
-                me.NeedChangeAI = true;
-                me.IsAIEnabled = false;
+                if (!me.HasReactState(ReactStates.Passive))
+                {
+                    Unit lastCharmer = Global.ObjAccessor.GetUnit(me, me.LastCharmerGUID);
+                    if (lastCharmer != null)
+                        me.EngageWithTarget(lastCharmer);
+                }
+                me.LastCharmerGUID.Clear();
             }
+
+            base.OnCharmed(isNew);
         }
 
         public void Talk(uint id, WorldObject whisperTarget = null)

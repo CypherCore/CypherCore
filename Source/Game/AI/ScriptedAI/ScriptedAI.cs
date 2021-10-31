@@ -673,7 +673,7 @@ namespace Game.AI
             foreach (var id in this)
             {
                 Creature summon = ObjectAccessor.GetCreature(_me, id);
-                if (summon && summon.IsAIEnabled && (entry == 0 || summon.GetEntry() == entry))
+                if (summon && summon.IsAIEnabled() && (entry == 0 || summon.GetEntry() == entry))
                 {
                     summon.GetAI().DoZoneInCombat(null);
                 }
@@ -760,7 +760,7 @@ namespace Game.AI
             foreach (var guid in summons)
             {
                 Creature summon = ObjectAccessor.GetCreature(_me, guid);
-                if (summon && summon.IsAIEnabled)
+                if (summon && summon.IsAIEnabled())
                     summon.GetAI().DoAction(action);
             }
         }

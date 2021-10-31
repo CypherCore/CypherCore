@@ -76,12 +76,6 @@ namespace Game.AI
                 me.RemoveDynamicFlag(UnitDynFlags.Lootable);
         }
 
-        public override void OnCharmed(bool apply)
-        {
-            me.NeedChangeAI = true;
-            me.IsAIEnabled = false;
-        }
-
         public override void MoveInLineOfSight(Unit who) { }
 
         public override void EnterEvadeMode(EvadeReason why) { }
@@ -98,7 +92,7 @@ namespace Game.AI
         public override void AttackStart(Unit unit) { }
         public override void UpdateAI(uint diff) { }
         public override void EnterEvadeMode(EvadeReason why) { }
-        public override void OnCharmed(bool apply) { }
+        public override void OnCharmed(bool isNew) { }
     }
 
     public class CritterAI : PassiveAI

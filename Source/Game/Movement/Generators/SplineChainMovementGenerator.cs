@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Framework.GameMath;
+using Game.AI;
 using Game.Entities;
 using System;
 using System.Collections.Generic;
@@ -164,9 +165,9 @@ namespace Game.Movement
 
             if (movementInform && HasFlag(MovementGeneratorFlags.InformEnabled))
             {
-                Creature ownerCreature = owner.ToCreature();
-                if (ownerCreature != null && ownerCreature.IsAIEnabled)
-                    ownerCreature.GetAI().MovementInform(MovementGeneratorType.SplineChain, _id);
+                CreatureAI ai = owner.ToCreature().GetAI();
+                if (ai != null)
+                    ai.MovementInform(MovementGeneratorType.SplineChain, _id);
             }
         }
 

@@ -601,12 +601,6 @@ namespace Game.AI
                 }
         }
 
-        public override void OnCharmed(bool apply)
-        {
-            me.NeedChangeAI = true;
-            me.IsAIEnabled = false;
-        }
-
         void ClearCharmInfoFlags()
         {
             // Quick access to set all flags to FALSE

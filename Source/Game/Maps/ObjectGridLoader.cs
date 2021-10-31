@@ -217,7 +217,7 @@ namespace Game.Maps
                 {
                     creature.CombatStop();
                     creature.GetThreatManager().ClearAllThreat();
-                    if (creature.IsAIEnabled)
+                    if (creature.IsAIEnabled())
                         creature.GetAI().EnterEvadeMode();
                 }
             }

@@ -58,13 +58,6 @@ namespace Game.Entities
             _currentWaypointNodeInfo = new();
         }
 
-        public override void Dispose()
-        {
-            i_AI = null;
-
-            base.Dispose();
-        }
-
         public override void AddToWorld()
         {
             // Register the creature for guid lookup
@@ -170,8 +163,9 @@ namespace Game.Entities
                 //DestroyForNearbyPlayers(); // old UpdateObjectVisibility()
                 loot.Clear();
                 uint respawnDelay = m_respawnDelay;
-                if (IsAIEnabled)
-                    GetAI().CorpseRemoved(respawnDelay);
+                CreatureAI ai = GetAI();
+                if (ai != null)
+                    ai.CorpseRemoved(respawnDelay);
 
                 if (destroyForNearbyPlayers)
                     DestroyForNearbyPlayers();
@@ -429,7 +423,7 @@ namespace Game.Entities
 
         public override void Update(uint diff)
         {
-            if (IsAIEnabled && triggerJustAppeared && m_deathState != DeathState.Dead)
+            if (IsAIEnabled() && triggerJustAppeared && m_deathState != DeathState.Dead)
             {
                 if (m_respawnCompatibilityMode && VehicleKit != null)
                     VehicleKit.Reset();
@@ -541,24 +535,8 @@ namespace Game.Entities
                         m_shouldReacquireTarget = false;
                     }
 
-                    // if creature is charmed, switch to charmed AI (and back)
-                    if (NeedChangeAI)
-                    {
-                        UpdateCharmAI();
-                        NeedChangeAI = false;
-                        IsAIEnabled = true;
-                        if (!IsInEvadeMode() && !LastCharmerGUID.IsEmpty())
-                        {
-                            Unit charmer = Global.ObjAccessor.GetUnit(this, LastCharmerGUID);
-                            if (charmer)
-                                EngageWithTarget(charmer);
-                        }
-
-                        LastCharmerGUID.Clear();
-                    }
-
                     // periodic check to see if the creature has passed an evade boundary
-                    if (IsAIEnabled && !IsInEvadeMode() && IsEngaged())
+                    if (IsAIEnabled() && !IsInEvadeMode() && IsEngaged())
                     {
                         if (diff >= m_boundaryCheckTime)
                         {
@@ -593,13 +571,10 @@ namespace Game.Entities
                         }
                     }
 
-                    if (!IsInEvadeMode() && IsAIEnabled)
-                    {
-                        // do not allow the AI to be changed during update
-                        m_AI_locked = true;
-                        i_AI.UpdateAI(diff);
-                        m_AI_locked = false;
-                    }
+                    // do not allow the AI to be changed during update
+                    m_AI_locked = true;
+                    base.AIUpdateTick(diff);
+                    m_AI_locked = false;
 
                     if (!IsAlive())
                         break;
@@ -633,8 +608,11 @@ namespace Game.Entities
                     {
                         m_cannotReachTimer += diff;
                         if (m_cannotReachTimer >= SharedConst.CreatureNoPathEvadeTime)
-                            if (IsAIEnabled)
-                                GetAI().EnterEvadeMode(EvadeReason.NoPath);
+                        {
+                            CreatureAI ai = GetAI();
+                            if (ai != null)
+                                ai.EnterEvadeMode(EvadeReason.NoPath);
+                        }
                     }
                     break;
             }
@@ -747,19 +725,15 @@ namespace Game.Entities
             }
         }
 
-        bool AIDestory()
+        bool DestoryAI()
         {
             if (m_AI_locked)
             {
-                Log.outDebug(LogFilter.Scripts, "AIM_Destroy: failed to destroy, locked.");
+                Log.outDebug(LogFilter.Scripts, "DestroyAI: failed to destroy, locked.");
                 return false;
             }
 
-            Cypher.Assert(i_disabledAI == null, "The disabled AI wasn't cleared!");
-
-            i_AI = null;
-
-            IsAIEnabled = false;
+            SetAI(null);
             return true;
         }
 
@@ -772,14 +746,15 @@ namespace Game.Entities
                 return false;
             }
 
-            AIDestory();
+            if (ai == null)
+                ai = AISelector.SelectAI(this);
+
+            SetAI(ai);
 
             InitializeMovementAI();
 
-            i_AI = ai ?? AISelector.SelectAI(this);
-
-            IsAIEnabled = true;
             i_AI.InitializeAI();
+
             // Initialize vehicle
             if (GetVehicleKit() != null)
                 GetVehicleKit().Reset();
@@ -1108,10 +1083,11 @@ namespace Game.Entities
 
         public bool IsEscortNPC(bool onlyIfActive = true)
         {
-            if (!IsAIEnabled)
-                return false;
+            CreatureAI ai = GetAI();
+            if (ai != null)
+                return ai.IsEscortNPC(onlyIfActive);
 
-            return GetAI().IsEscortNPC(onlyIfActive);
+            return false;
         }
 
         public override bool IsMovementPreventedByCasting()
@@ -1695,7 +1671,7 @@ namespace Game.Entities
 
         public override bool CanAlwaysSee(WorldObject obj)
         {
-            if (IsAIEnabled && GetAI<CreatureAI>().CanSeeAlways(obj))
+            if (IsAIEnabled() && GetAI<CreatureAI>().CanSeeAlways(obj))
                 return true;
 
             return false;
@@ -1936,8 +1912,9 @@ namespace Game.Entities
                     //Re-initialize reactstate that could be altered by movementgenerators
                     InitializeReactState();
 
-                    if (IsAIEnabled) // reset the AI to be sure no dirty or uninitialized values will be used till next tick
-                        GetAI().Reset();
+                    UnitAI ai = GetAI();
+                    if (ai != null) // reset the AI to be sure no dirty or uninitialized values will be used till next tick
+                        ai.Reset();
 
                     triggerJustAppeared = true;
 
@@ -2299,7 +2276,7 @@ namespace Game.Entities
             if (!victim.IsInAccessiblePlaceFor(this))
                 return false;
 
-            if (IsAIEnabled && !GetAI().CanAIAttack(victim))
+            if (IsAIEnabled() && !GetAI().CanAIAttack(victim))
                 return false;
 
             // we cannot attack in evade mode

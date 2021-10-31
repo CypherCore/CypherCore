@@ -45,11 +45,11 @@ namespace Game.Maps
 
             if (!c.HasUnitState(UnitState.Sightless))
             {
-                if (c.IsAIEnabled && c.CanSeeOrDetect(u, false, true))
+                if (c.IsAIEnabled() && c.CanSeeOrDetect(u, false, true))
                     c.GetAI().MoveInLineOfSight_Safe(u);
                 else
                 {
-                    if (u.IsTypeId(TypeId.Player) && u.HasStealthAura() && c.IsAIEnabled && c.CanSeeOrDetect(u, false, true, true))
+                    if (u.IsTypeId(TypeId.Player) && u.HasStealthAura() && c.IsAIEnabled() && c.CanSeeOrDetect(u, false, true, true))
                         c.GetAI().TriggerAlert(u);
                 }
             }
@@ -939,8 +939,7 @@ namespace Game.Maps
             if (!u.IsWithinLOSInMap(i_enemy))
                 return;
 
-            if (u.GetAI() != null)
-                u.GetAI().AttackStart(i_enemy);
+            u.EngageWithTarget(i_enemy);
         }
 
         Unit i_funit;

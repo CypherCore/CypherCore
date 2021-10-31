@@ -86,7 +86,7 @@ namespace Game.Chat
                 return false;
 
             Creature target = handler.GetSelectedCreature();
-            if (!target || !target.IsAIEnabled || target.GetAI() == null)
+            if (!target || !target.IsAIEnabled())
                 return false;
 
             string fill_str = args.NextString();

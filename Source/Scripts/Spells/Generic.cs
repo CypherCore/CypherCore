@@ -1549,7 +1549,7 @@ namespace Scripts.Spells.Generic
             GetUnitOwner().GetAllMinionsByEntry(minionList, CreatureIds.EtherealSoulTrader);
             foreach (Creature minion in minionList)
             {
-                if (minion.IsAIEnabled)
+                if (minion.IsAIEnabled())
                 {
                     minion.GetAI().Talk(TextIds.SayStealEssence);
                     minion.CastSpell(eventInfo.GetProcTarget(), SpellIds.StealEssenceVisual);

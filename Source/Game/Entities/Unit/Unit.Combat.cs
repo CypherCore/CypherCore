@@ -16,10 +16,10 @@
  */
 
 using Framework.Constants;
+using Game.AI;
 using Game.BattleFields;
 using Game.BattleGrounds;
 using Game.Combat;
-using Game.DataStorage;
 using Game.Loots;
 using Game.Maps;
 using Game.Networking.Packets;
@@ -354,8 +354,11 @@ namespace Game.Entities
                 {
                     Creature cControlled = controlled.ToCreature();
                     if (cControlled != null)
-                        if (cControlled.IsAIEnabled)
-                            cControlled.GetAI().OwnerAttacked(victim);
+                    {
+                        CreatureAI controlledAI = cControlled.GetAI();
+                        if (controlledAI != null)
+                            controlledAI.OwnerAttacked(victim);
+                    }
                 }
             }
             return true;
@@ -880,7 +883,7 @@ namespace Game.Entities
                     plrVictim.SendDurabilityLoss(plrVictim, loss);
                 }
                 // Call KilledUnit for creatures
-                if (attacker != null && attacker.IsCreature() && attacker.IsAIEnabled)
+                if (attacker != null && attacker.IsCreature() && attacker.IsAIEnabled())
                     attacker.ToCreature().GetAI().KilledUnit(victim);
 
                 // last damage from non duel opponent or opponent controlled creature
@@ -907,19 +910,20 @@ namespace Game.Entities
                 }
 
                 // Call KilledUnit for creatures, this needs to be called after the lootable flag is set
-                if (attacker != null && attacker.IsCreature() && attacker.IsAIEnabled)
+                if (attacker != null && attacker.IsCreature() && attacker.IsAIEnabled())
                     attacker.ToCreature().GetAI().KilledUnit(victim);
 
                 // Call creature just died function
-                if (creature.IsAIEnabled)
-                    creature.GetAI().JustDied(attacker);
+                CreatureAI ai = creature.GetAI();
+                if (ai != null)
+                    ai.JustDied(attacker);
 
                 TempSummon summon = creature.ToTempSummon();
                 if (summon != null)
                 {
                     Unit summoner = summon.GetSummoner();
                     if (summoner != null)
-                        if (summoner.IsTypeId(TypeId.Unit) && summoner.IsAIEnabled)
+                        if (summoner.IsTypeId(TypeId.Unit) && summoner.IsAIEnabled())
                             summoner.ToCreature().GetAI().SummonedCreatureDies(creature, attacker);
                 }
 

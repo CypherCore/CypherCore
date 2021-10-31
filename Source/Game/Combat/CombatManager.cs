@@ -16,6 +16,7 @@
  */
 
 using Framework.Constants;
+using Game.AI;
 using Game.Entities;
 using System.Collections.Generic;
 using System.Linq;
@@ -209,8 +210,11 @@ namespace Game.Combat
                 pair.Value.Suppress(_owner);
 
             if (UpdateOwnerCombatState())
-                if (_owner.IsAIEnabled)
-                    _owner.GetAI().JustExitedCombat();
+            {
+                UnitAI ownerAI = _owner.GetAI();
+                if (ownerAI != null)
+                    ownerAI.JustExitedCombat();
+            }
         }
 
         public void EndAllPvECombat()
@@ -230,8 +234,9 @@ namespace Game.Combat
 
         public static void NotifyAICombat(Unit me, Unit other)
         {
-            if (!me.IsAIEnabled)
+            if (!me.IsAIEnabled())
                 return;
+
             me.GetAI().JustEnteredCombat(other);
 
             Creature cMe = me.ToCreature();
@@ -334,10 +339,18 @@ namespace Game.Combat
             bool needSecondAI = second.GetCombatManager().UpdateOwnerCombatState();
 
             // ...and if that happened, also notify the AI of it...
-            if (needFirstAI && first.IsAIEnabled)
-                first.GetAI().JustExitedCombat();
-            if (needSecondAI && second.IsAIEnabled)
-                second.GetAI().JustExitedCombat();
+            if (needFirstAI)
+            {
+                UnitAI firstAI = first.GetAI();
+                if (firstAI != null)
+                    firstAI.JustExitedCombat();
+            }
+            if (needSecondAI)
+            {
+                UnitAI secondAI = second.GetAI();
+                if (secondAI != null)
+                    secondAI.JustExitedCombat();
+            }
         }
 
         public Unit GetOther(Unit me) { return (first == me) ? second : first; }
@@ -383,12 +396,15 @@ namespace Game.Combat
                 CombatManager.NotifyAICombat(second, first);
         }
 
-        void SuppressFor(Unit who)
+        public void SuppressFor(Unit who)
         {
             Suppress(who);
             if (who.GetCombatManager().UpdateOwnerCombatState())
-                if (who.IsAIEnabled)
-                    who.GetAI().JustExitedCombat();
+            {
+                UnitAI ai = who.GetAI();
+                if (ai != null)
+                    ai.JustExitedCombat();
+            }
         }
 
         // suppressed combat refs do not generate a combat state for one side of the relation

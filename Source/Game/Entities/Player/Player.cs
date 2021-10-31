@@ -390,14 +390,7 @@ namespace Game.Entities
                         aura.SetDuration(aura.GetSpellInfo().GetMaxDuration());
             }
 
-            if (IsAIEnabled && GetAI() != null)
-                GetAI().UpdateAI(diff);
-            else if (NeedChangeAI)
-            {
-                UpdateCharmAI();
-                NeedChangeAI = false;
-                IsAIEnabled = GetAI() != null;
-            }
+            AIUpdateTick(diff);
 
             // Update items that have just a limited lifetime
             if (now > m_Last_tick)
@@ -5175,6 +5168,7 @@ namespace Game.Entities
             if (guildId != 0)
             {
                 SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.GuildGUID), ObjectGuid.Create(HighGuid.Guild, guildId));
+                SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.GuildClubMemberID), GetGUID().GetCounter());
                 AddPlayerFlag(PlayerFlags.GuildLevelEnabled);
             }
             else

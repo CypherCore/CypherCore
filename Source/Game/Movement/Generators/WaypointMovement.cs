@@ -16,6 +16,7 @@
  */
 
 using Framework.Constants;
+using Game.AI;
 using Game.Entities;
 using System.Collections.Generic;
 using System.Linq;
@@ -116,8 +117,9 @@ namespace Game.Movement
             _nextMoveTime.Reset(1000);
 
             // inform AI
-            if (owner.IsAIEnabled)
-                owner.GetAI().WaypointPathStarted(_path.id);
+            CreatureAI ai = owner.GetAI();
+            if (ai != null)
+                ai.WaypointPathStarted(_path.id);
         }
 
         public override void DoReset(Creature owner)
@@ -230,8 +232,9 @@ namespace Game.Movement
 
         void MovementInform(Creature owner)
         {
-            if (owner.IsAIEnabled)
-                owner.GetAI().MovementInform(MovementGeneratorType.Waypoint, (uint)_currentNode);
+            CreatureAI ai = owner.GetAI();
+            if (ai != null)
+                ai.MovementInform(MovementGeneratorType.Waypoint, (uint)_currentNode);
         }
 
         void OnArrived(Creature owner)
@@ -255,10 +258,11 @@ namespace Game.Movement
             }
 
             // inform AI
-            if (owner.IsAIEnabled)
+            CreatureAI ai = owner.GetAI();
+            if (ai != null)
             {
-                owner.GetAI().MovementInform(MovementGeneratorType.Waypoint, (uint)_currentNode);
-                owner.GetAI().WaypointReached(waypoint.id, _path.id);
+                ai.MovementInform(MovementGeneratorType.Waypoint, (uint)_currentNode);
+                ai.WaypointReached(waypoint.id, _path.id);
             }
 
             owner.UpdateCurrentWaypointInfo(waypoint.id, _path.id);
@@ -284,8 +288,9 @@ namespace Game.Movement
                 {
                     Cypher.Assert(_currentNode < _path.nodes.Count, $"WaypointMovementGenerator.StartMove: tried to reference a node id ({_currentNode}) which is not included in path ({_path.id})");
                     // inform AI
-                    if (owner.IsAIEnabled)
-                        owner.GetAI().WaypointStarted(_path.nodes[_currentNode].id, _path.id);
+                    CreatureAI ai = owner.GetAI();
+                    if (ai != null)
+                        ai.WaypointStarted(_path.nodes[_currentNode].id, _path.id);
                 }
                 else
                 {
@@ -314,8 +319,9 @@ namespace Game.Movement
                     owner.UpdateCurrentWaypointInfo(0, 0);
 
                     // inform AI
-                    if (owner.IsAIEnabled)
-                        owner.GetAI().WaypointPathEnded(currentWaypoint.id, _path.id);
+                    CreatureAI ai = owner.GetAI();
+                    if (ai != null)
+                        ai.WaypointPathEnded(currentWaypoint.id, _path.id);
                     return;
                 }
             }
@@ -324,8 +330,9 @@ namespace Game.Movement
                 AddFlag(MovementGeneratorFlags.Initialized);
 
                 // inform AI
-                if (owner.IsAIEnabled)
-                    owner.GetAI().WaypointStarted(_path.nodes[_currentNode].id, _path.id);
+                CreatureAI ai = owner.GetAI();
+                if (ai != null)
+                    ai.WaypointStarted(_path.nodes[_currentNode].id, _path.id);
             }
 
             Cypher.Assert(_currentNode < _path.nodes.Count, $"WaypointMovementGenerator.StartMove: tried to reference a node id ({_currentNode}) which is not included in path ({_path.id})");

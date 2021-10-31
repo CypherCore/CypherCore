@@ -655,8 +655,6 @@ namespace Game.AI
             return null;
         }
 
-        public override void OnCharmed(bool apply) { }
-
         // helper functions to determine player info
         public bool IsHealer(Player who = null)
         {
@@ -710,7 +708,14 @@ namespace Game.AI
         {
             Unit charmer = me.GetCharmer();
             if (charmer)
-                return charmer.IsAIEnabled ? charmer.GetAI().SelectTarget(SelectAggroTarget.Random, 0, new ValidTargetSelectPredicate(this)) : charmer.GetVictim();
+            {
+                UnitAI charmerAI = charmer.GetAI();
+                if (charmerAI != null)
+                    return charmerAI.SelectTarget(SelectAggroTarget.Random, 0, new ValidTargetSelectPredicate(this));
+
+                return charmer.GetVictim();
+            }
+
             return null;
         }
 
@@ -1344,9 +1349,9 @@ namespace Game.AI
             }
         }
 
-        public override void OnCharmed(bool apply)
+        public override void OnCharmed(bool isNew)
         {
-            if (apply)
+            if (me.IsCharmed())
             {
                 me.CastStop();
                 me.AttackStop();
@@ -1362,6 +1367,8 @@ namespace Game.AI
                 me.GetMotionMaster().Clear();
                 me.StopMoving();
             }
+
+            base.OnCharmed(isNew);
         }
     }
 

@@ -217,9 +217,9 @@ namespace Game.Movement
             if (!owner.IsCreature())
                 return;
 
-            Creature creatureOwner = owner.ToCreature();
-            if (creatureOwner.IsAIEnabled && creatureOwner.GetAI() != null)
-                creatureOwner.GetAI().MovementInform(MovementGeneratorType.Follow, (uint)target.GetGUID().GetCounter());
+            CreatureAI ai = owner.ToCreature().GetAI();
+            if (ai != null)
+                ai.MovementInform(MovementGeneratorType.Follow, (uint)target.GetGUID().GetCounter());
         }
     }
 }

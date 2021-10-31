@@ -36,8 +36,6 @@ namespace Game.Entities
         //AI
         protected UnitAI i_AI;
         protected UnitAI i_disabledAI;
-        public bool IsAIEnabled { get; set; }
-        public bool NeedChangeAI { get; set; }
 
         //Movement
         protected float[] m_speed_rate = new float[(int)UnitMoveType.Max];

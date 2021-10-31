@@ -714,17 +714,18 @@ namespace Game.AI
             GetScript().ProcessEventsFor(apply ? SmartEvents.PassengerBoarded : SmartEvents.PassengerRemoved, passenger, (uint)seatId, 0, apply);
         }
 
-        public override void OnCharmed(bool apply)
+        public override void OnCharmed(bool isNew)
         {
-            if (apply) // do this before we change charmed state, as charmed state might prevent these things from processing
+            bool charmed = me.IsCharmed();
+            if (charmed) // do this before we change charmed state, as charmed state might prevent these things from processing
             {
                 if (HasEscortState(SmartEscortState.Escorting | SmartEscortState.Paused | SmartEscortState.Returning))
                     EndPath(true);
             }
 
-            _isCharmed = apply;
+            _isCharmed = charmed;
 
-            if (!apply && !me.IsInEvadeMode())
+            if (!charmed && !me.IsInEvadeMode())
             {
                 if (_repeatWaypointPath)
                     StartPath(_run, GetScript().GetPathId(), true);
@@ -736,7 +737,7 @@ namespace Game.AI
                     AttackStart(charmer);
             }
 
-            GetScript().ProcessEventsFor(SmartEvents.Charmed, null, 0, 0, apply);
+            GetScript().ProcessEventsFor(SmartEvents.Charmed, null, 0, 0, charmed);
         }
 
         public override void DoAction(int param)

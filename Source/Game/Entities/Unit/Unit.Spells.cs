@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Framework.Dynamic;
+using Game.AI;
 using Game.BattleGrounds;
 using Game.Networking.Packets;
 using Game.Spells;
@@ -1801,14 +1802,13 @@ namespace Game.Entities
             Unit victim = healInfo.GetTarget();
             uint addhealth = healInfo.GetHeal();
 
-            if (healer)
-            {
-                if (victim.IsAIEnabled)
-                    victim.GetAI().HealReceived(healer, addhealth);
+            UnitAI victimAI = victim.GetAI();
+            if (victimAI != null)
+                victimAI.HealReceived(healer, addhealth);
 
-                if (healer.IsAIEnabled)
-                    healer.GetAI().HealDone(victim, addhealth);
-            }
+            UnitAI healerAI = healer != null ? healer.GetAI() : null;
+            if (healerAI != null)
+                healerAI.HealDone(victim, addhealth);
 
             if (addhealth != 0)
                 gain = (int)victim.ModifyHealth(addhealth);
@@ -2424,7 +2424,7 @@ namespace Game.Entities
                     spell.SetReferencedFromCurrent(false);
                 }
 
-                if (IsCreature() && IsAIEnabled)
+                if (IsCreature() && IsAIEnabled())
                     ToCreature().GetAI().OnSpellCastInterrupt(spell.GetSpellInfo());
             }
         }
@@ -2595,7 +2595,7 @@ namespace Game.Entities
             }
 
             Creature creature = ToCreature();
-            if (creature && creature.IsAIEnabled)
+            if (creature && creature.IsAIEnabled())
                 creature.GetAI().OnSpellClick(clicker, ref spellClickHandled);
         }
 

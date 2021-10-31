@@ -327,8 +327,8 @@ namespace Scripts.Spells.Quest
                 if (!creatureTarget.IsPet() && creatureTarget.GetEntry() == _originalEntry)
                 {
                     creatureTarget.UpdateEntry(_newEntry);
-                    if (_shouldAttack && creatureTarget.IsAIEnabled)
-                        creatureTarget.GetAI().AttackStart(GetCaster());
+                    if (_shouldAttack)
+                        creatureTarget.EngageWithTarget(GetCaster());
 
                     if (_despawnTime != 0)
                         creatureTarget.DespawnOrUnsummon(_despawnTime);

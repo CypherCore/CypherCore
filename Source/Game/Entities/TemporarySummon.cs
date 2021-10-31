@@ -207,9 +207,9 @@ namespace Game.Entities
             Unit owner = GetSummoner();
             if (owner != null)
             {
-                if (owner.IsTypeId(TypeId.Unit) && owner.ToCreature().IsAIEnabled)
+                if (owner.IsTypeId(TypeId.Unit) && owner.ToCreature().IsAIEnabled())
                     owner.ToCreature().GetAI().JustSummoned(this);
-                if (IsAIEnabled)
+                if (IsAIEnabled())
                     GetAI().IsSummonedBy(owner);
             }
         }
@@ -243,7 +243,7 @@ namespace Game.Entities
             }
 
             Unit owner = GetSummoner();
-            if (owner != null && owner.IsTypeId(TypeId.Unit) && owner.ToCreature().IsAIEnabled)
+            if (owner != null && owner.IsTypeId(TypeId.Unit) && owner.ToCreature().IsAIEnabled())
                 owner.ToCreature().GetAI().SummonedCreatureDespawn(this);
 
             AddObjectToRemoveList();

@@ -172,6 +172,9 @@ namespace Game.Entities
 
             UpdateSplineMovement(diff);
             GetMotionMaster().Update(diff);
+
+            if (i_AI == null && (!IsPlayer() || IsCharmed()))
+                UpdateCharmAI();
         }
 
         void _UpdateSpells(uint diff)
@@ -438,8 +441,9 @@ namespace Game.Entities
             if (IsInWorld)
             {
                 m_duringRemoveFromWorld = true;
-                if (IsAIEnabled)
-                    GetAI().LeavingWorld();
+                UnitAI ai = GetAI();
+                if (ai != null)
+                    ai.LeavingWorld();
 
                 if (IsVehicle())
                     RemoveVehicleKit(true);
@@ -537,14 +541,14 @@ namespace Game.Entities
         public void _RegisterDynObject(DynamicObject dynObj)
         {
             m_dynObj.Add(dynObj);
-            if (IsTypeId(TypeId.Unit) && IsAIEnabled)
+            if (IsTypeId(TypeId.Unit) && IsAIEnabled())
                 ToCreature().GetAI().JustRegisteredDynObject(dynObj);
         }
 
         public void _UnregisterDynObject(DynamicObject dynObj)
         {
             m_dynObj.Remove(dynObj);
-            if (IsTypeId(TypeId.Unit) && IsAIEnabled)
+            if (IsTypeId(TypeId.Unit) && IsAIEnabled())
                 ToCreature().GetAI().JustUnregisteredDynObject(dynObj);
         }
 
@@ -611,7 +615,7 @@ namespace Game.Entities
                     GetSpellHistory().StartCooldown(createBySpell, 0, null, true);
             }
 
-            if (IsTypeId(TypeId.Unit) && ToCreature().IsAIEnabled)
+            if (IsTypeId(TypeId.Unit) && ToCreature().IsAIEnabled())
                 ToCreature().GetAI().JustSummonedGameobject(gameObj);
         }
 
@@ -646,7 +650,7 @@ namespace Game.Entities
 
             m_gameObj.Remove(gameObj);
 
-            if (IsTypeId(TypeId.Unit) && ToCreature().IsAIEnabled)
+            if (IsTypeId(TypeId.Unit) && ToCreature().IsAIEnabled())
                 ToCreature().GetAI().SummonedGameobjectDespawn(gameObj);
 
             if (del)
@@ -694,14 +698,14 @@ namespace Game.Entities
         public void _RegisterAreaTrigger(AreaTrigger areaTrigger)
         {
             m_areaTrigger.Add(areaTrigger);
-            if (IsTypeId(TypeId.Unit) && IsAIEnabled)
+            if (IsTypeId(TypeId.Unit) && IsAIEnabled())
                 ToCreature().GetAI().JustRegisteredAreaTrigger(areaTrigger);
         }
 
         public void _UnregisterAreaTrigger(AreaTrigger areaTrigger)
         {
             m_areaTrigger.Remove(areaTrigger);
-            if (IsTypeId(TypeId.Unit) && IsAIEnabled)
+            if (IsTypeId(TypeId.Unit) && IsAIEnabled())
                 ToCreature().GetAI().JustUnregisteredAreaTrigger(areaTrigger);
         }
 
@@ -1160,8 +1164,51 @@ namespace Game.Entities
             return m_vehicle != null && m_vehicle == vehicle.GetVehicleKit();
         }
 
+        public bool IsAIEnabled() { return i_AI != null; }
+
         public virtual UnitAI GetAI() { return i_AI; }
-        public void SetAI(UnitAI newAI) { i_AI = newAI; }
+
+        public void AIUpdateTick(uint diff, bool force = false)
+        {
+            if (diff == 0) // some places call with diff = 0, which does nothing (for now), see PR #22296
+                return;
+
+            UnitAI ai = GetAI();
+            if (ai != null)
+                ai.UpdateAI(diff);
+        }
+
+        public void SetAI(UnitAI newAI)
+        {
+            if (i_AI != null)
+                AIUpdateTick(0, true); // old AI gets a final tick if enabled
+
+            i_AI = newAI;
+            AIUpdateTick(0, true); // new AI gets its initial tick
+        }
+
+        public void ScheduleAIChange()
+        {
+            bool charmed = IsCharmed();
+            // if charm is applied, we can't have disabled AI already, and vice versa
+            if (charmed)
+                Cypher.Assert(i_disabledAI == null, "Attempt to schedule charm AI change on unit that already has disabled AI");
+            else if (!IsPlayer())
+                Cypher.Assert(i_disabledAI != null, "Attempt to schedule charm ID change on unit that doesn't have disabled AI");
+
+            if (charmed)
+                i_disabledAI = i_AI;
+            else
+                i_AI = null;
+        }
+
+        void RestoreDisabledAI()
+        {
+            Cypher.Assert(IsPlayer() || i_disabledAI != null, "Attempt to restore disabled AI on creature without disabled AI");
+            i_AI = i_disabledAI;
+            AIUpdateTick(0, true);
+        }
+
 
         public bool IsPossessing()
         {
@@ -2270,11 +2317,13 @@ namespace Game.Entities
 
         public static uint DealDamage(Unit attacker, Unit victim, uint damage, CleanDamage cleanDamage = null, DamageEffectType damagetype = DamageEffectType.Direct, SpellSchoolMask damageSchoolMask = SpellSchoolMask.Normal, SpellInfo spellProto = null, bool durabilityLoss = true)
         {
-            if (victim.IsAIEnabled)
-                victim.GetAI().DamageTaken(attacker, ref damage);
+            UnitAI victimAI = victim.GetAI();
+            if (victimAI != null)
+                victimAI.DamageTaken(attacker, ref damage);
 
-            if (attacker != null && attacker.IsAIEnabled)
-                attacker.GetAI().DamageDealt(victim, ref damage, damagetype);
+            UnitAI attackerAI = attacker ? attacker.GetAI() : null;
+            if (attackerAI != null)
+                attackerAI.DamageDealt(victim, ref damage, damagetype);
 
             // Hook for OnDamage Event
             Global.ScriptMgr.OnDamage(attacker, victim, ref damage);
@@ -2288,8 +2337,11 @@ namespace Game.Entities
                     {
                         Creature cControlled = controlled.ToCreature();
                         if (cControlled != null)
-                            if (cControlled.IsAIEnabled)
-                                cControlled.GetAI().OwnerAttackedBy(attacker);
+                        {
+                            CreatureAI controlledAI = cControlled.GetAI();
+                            if (controlledAI != null)
+                                controlledAI.OwnerAttackedBy(attacker);
+                        }
                     }
                 }
 

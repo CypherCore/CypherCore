@@ -322,11 +322,12 @@ namespace Game.AI
 
         public override void AttackStart(Unit victim) { }
 
-        public override void OnCharmed(bool apply)
+        public override void OnCharmed(bool isNew)
         {
-            if (!me.GetVehicleKit().IsVehicleInUse() && !apply && _hasConditions)//was used and has conditions
+            bool charmed = me.IsCharmed();
+            if (!me.GetVehicleKit().IsVehicleInUse() && !charmed && _hasConditions)//was used and has conditions
                 _doDismiss = true;//needs reset
-            else if (apply)
+            else if (charmed)
                 _doDismiss = false;//in use again
 
             _dismissTimer = VEHICLE_DISMISS_TIME;//reset timer

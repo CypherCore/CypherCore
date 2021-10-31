@@ -48,83 +48,48 @@ namespace Game.Entities
 
         public void UpdateCharmAI()
         {
-            switch (GetTypeId())
+            if (IsCharmed())
             {
-                case TypeId.Unit:
-                    if (i_disabledAI != null) // disabled AI must be primary AI
+                UnitAI newAI = null;
+                if (IsPlayer())
+                {
+                    Unit charmer = GetCharmer();
+                    if (charmer != null)
                     {
-                        if (!IsCharmed())
+                        // first, we check if the creature's own AI specifies an override playerai for its owned players
+                        Creature creatureCharmer = charmer.ToCreature();
+                        if (creatureCharmer != null)
                         {
-                            i_AI = i_disabledAI;
-                            i_disabledAI = null;
-
-                            if (IsTypeId(TypeId.Unit))
-                                ToCreature().GetAI().OnCharmed(false);
-                        }
-                    }
-                    else
-                    {
-                        if (IsCharmed())
-                        {
-                            i_disabledAI = i_AI;
-                            if (IsPossessed() || IsVehicle())
-                                i_AI = new PossessedAI(ToCreature());
-                            else
-                                i_AI = new PetAI(ToCreature());
-                        }
-                    }
-                    break;
-                case TypeId.Player:
-                    {
-                        if (IsCharmed()) // if we are currently being charmed, then we should apply charm AI
-                        {
-                            i_disabledAI = i_AI;
-
-                            UnitAI newAI = null;
-                            // first, we check if the creature's own AI specifies an override playerai for its owned players
-                            Unit charmer = GetCharmer();
-                            if (charmer)
-                            {
-                                Creature creatureCharmer = charmer.ToCreature();
-                                if (creatureCharmer)
-                                {
-                                    PlayerAI charmAI = creatureCharmer.IsAIEnabled ? creatureCharmer.GetAI().GetAIForCharmedPlayer(ToPlayer()) : null;
-                                    if (charmAI != null)
-                                        newAI = charmAI;
-                                }
-                                else
-                                {
-                                    Log.outError(LogFilter.Misc, "Attempt to assign charm AI to player {0} who is charmed by non-creature {1}.", GetGUID().ToString(), GetCharmerGUID().ToString());
-                                }
-                            }
-                            if (newAI == null) // otherwise, we default to the generic one
-                                newAI = new SimpleCharmedPlayerAI(ToPlayer());
-                            i_AI = newAI;
-                            newAI.OnCharmed(true);
+                            CreatureAI charmerAI = creatureCharmer.GetAI();
+                            if (charmerAI != null)
+                                newAI = charmerAI.GetAIForCharmedPlayer(ToPlayer());
                         }
                         else
-                        {
-                            if (i_AI != null)
-                            {
-                                // we allow the charmed PlayerAI to clean up
-                                i_AI.OnCharmed(false);
-                            }
-                            else
-                            {
-                                Log.outError(LogFilter.Misc, "Attempt to remove charm AI from player {0} who doesn't currently have charm AI.", GetGUID().ToString());
-                            }
-                            // and restore our previous PlayerAI (if we had one)
-                            i_AI = i_disabledAI;
-                            i_disabledAI = null;
-                            // IsAIEnabled gets handled in the caller
-                        }
-                        break;
+                            Log.outError(LogFilter.Misc, $"Attempt to assign charm AI to player {GetGUID()} who is charmed by non-creature {GetCharmerGUID()}.");
                     }
-                default:
-                    Log.outError(LogFilter.Misc, "Attempt to update charm AI for unit {0}, which is neither player nor creature.", GetGUID().ToString());
-                    break;
-            }
+                    if (newAI == null) // otherwise, we default to the generic one
+                        newAI = new SimpleCharmedPlayerAI(ToPlayer());
+                }
+                else
+                {
+                    Cypher.Assert(IsCreature());
+                    if (IsPossessed() || IsVehicle())
+                        newAI = new PossessedAI(ToCreature());
+                    else
+                        newAI = new PetAI(ToCreature());
+                }
 
+                Cypher.Assert(newAI != null);
+                i_AI = newAI;
+                newAI.OnCharmed(true);
+                AIUpdateTick(0, true);
+            }
+            else
+            {
+                RestoreDisabledAI();
+                if (i_AI != null)
+                    i_AI.OnCharmed(true);
+            }
         }
 
         public void SetMinion(Minion minion, bool apply)
@@ -365,7 +330,12 @@ namespace Game.Entities
 
                 StopMoving();
 
-                ToCreature().GetAI().OnCharmed(true);
+                // AI will schedule its own change if appropriate
+                UnitAI ai = GetAI();
+                if (ai != null)
+                    ai.OnCharmed(false);
+                else
+                    ScheduleAIChange();
             }
             else
             {
@@ -378,12 +348,11 @@ namespace Game.Entities
                     if (charmer.IsTypeId(TypeId.Unit)) // we are charmed by a creature
                     {
                         // change AI to charmed AI on next Update tick
-                        NeedChangeAI = true;
-                        if (IsAIEnabled)
-                        {
-                            IsAIEnabled = false;
-                            player.GetAI().OnCharmed(true);
-                        }
+                        UnitAI ai = GetAI();
+                        if (ai != null)
+                            ai.OnCharmed(false);
+                        else
+                            player.ScheduleAIChange();
                     }
 
                     player.SetClientControl(this, false);
@@ -482,17 +451,9 @@ namespace Game.Entities
             ///@todo Handle SLOT_IDLE motion resume
             GetMotionMaster().InitializeDefault();
 
-            Creature creature = ToCreature();
-            if (creature)
-            {
-                // Creature will restore its old AI on next update
-                if (creature.GetAI() != null)
-                    creature.GetAI().OnCharmed(false);
-
-                // Vehicle should not attack its passenger after he exists the seat
-                if (type != CharmType.Vehicle)
-                    LastCharmerGUID = charmer ? charmer.GetGUID() : ObjectGuid.Empty;
-            }
+            // Vehicle should not attack its passenger after he exists the seat
+            if (type != CharmType.Vehicle)
+                LastCharmerGUID = charmer.GetGUID();
 
             // If charmer still exists
             if (!charmer)
@@ -539,17 +500,12 @@ namespace Game.Entities
                 }
             }
 
-            Player player = ToPlayer();
-            if (player)
-            {
-                if (charmer.IsTypeId(TypeId.Unit)) // charmed by a creature, this means we had PlayerAI
-                {
-                    NeedChangeAI = true;
-                    IsAIEnabled = false;
-                }
+            if (!IsPlayer() || charmer.IsCreature())
+                GetAI().OnCharmed(false); // AI will potentially schedule a charm ai update
 
+            Player player = ToPlayer();
+            if (player != null)
                 player.SetClientControl(this, true);
-            }
 
             // a guardian should always have charminfo
             if (playerCharmer && this != charmer.GetFirstControlled())
