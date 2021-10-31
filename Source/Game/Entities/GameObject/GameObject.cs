@@ -802,8 +802,17 @@ namespace Game.Entities
                     //! The GetOwnerGUID() check is mostly for compatibility with hacky scripts - 99% of the time summoning should be done trough spells.
                     if (GetSpellId() != 0 || !GetOwnerGUID().IsEmpty())
                     {
-                        SetRespawnTime(0);
-                        Delete();
+                        //Don't delete spell spawned chests, which are not consumed on loot
+                        if (m_respawnTime > 0 && GetGoType() == GameObjectTypes.Chest && !GetGoInfo().IsDespawnAtAction())
+                        {
+                            UpdateObjectVisibility();
+                            SetLootState(LootState.Ready);
+                        }
+                        else
+                        {
+                            SetRespawnTime(0);
+                            Delete();
+                        }
                         return;
                     }
 
