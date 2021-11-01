@@ -1581,7 +1581,7 @@ namespace Game.Spells
                 }
             }
 
-            target.GetThreatManager().UpdateOnlineStates(true, false);
+            target.GetThreatManager().EvaluateSuppressed();
         }
 
         [AuraEffectHandler(AuraType.ModScale)]
@@ -1696,8 +1696,6 @@ namespace Game.Spells
                 if (creature != null)
                     creature.InitializeReactState();
             }
-
-            target.GetThreatManager().UpdateOnlineStates(true, false);
         }
 
         [AuraEffectHandler(AuraType.ModUnattackable)]
@@ -2383,7 +2381,7 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             target.SetControlled(apply, UnitState.Confused);
-            target.GetThreatManager().UpdateOnlineStates(true, false);
+            target.GetThreatManager().EvaluateSuppressed();
         }
 
         [AuraEffectHandler(AuraType.ModFear)]
@@ -2395,7 +2393,7 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             target.SetControlled(apply, UnitState.Fleeing);
-            target.GetThreatManager().UpdateOnlineStates(true, false);
+            target.GetThreatManager().EvaluateSuppressed();
         }
 
         [AuraEffectHandler(AuraType.ModStun)]
@@ -2407,7 +2405,7 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             target.SetControlled(apply, UnitState.Stunned);
-            target.GetThreatManager().UpdateOnlineStates(true, false);
+            target.GetThreatManager().EvaluateSuppressed();
         }
 
         [AuraEffectHandler(AuraType.ModRoot)]
@@ -2420,7 +2418,7 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             target.SetControlled(apply, UnitState.Root);
-            target.GetThreatManager().UpdateOnlineStates(true, false);
+            target.GetThreatManager().EvaluateSuppressed();
         }
 
         [AuraEffectHandler(AuraType.PreventsFleeing)]
@@ -2817,7 +2815,7 @@ namespace Game.Spells
                     target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.StealthOrInvis);
             }
 
-            target.GetThreatManager().UpdateOnlineStates(true, false);
+            target.GetThreatManager().EvaluateSuppressed();
         }
 
         [AuraEffectHandler(AuraType.DamageImmunity)]
@@ -2829,7 +2827,7 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
             m_spellInfo.ApplyAllSpellImmunitiesTo(target, GetSpellEffectInfo(), apply);
 
-            target.GetThreatManager().UpdateOnlineStates(true, false);
+            target.GetThreatManager().EvaluateSuppressed();
         }
 
         [AuraEffectHandler(AuraType.DispelImmunity)]

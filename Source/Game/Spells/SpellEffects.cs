@@ -3217,7 +3217,7 @@ namespace Game.Spells
             {
                 // in dungeons (or for nonplayers), reset this unit on all enemies' threat lists
                 foreach (var pair in unitTarget.GetThreatManager().GetThreatenedByMeList())
-                    pair.Value.SetThreat(0.0f);
+                    pair.Value.ScaleThreat(0.0f);
             }
 
             // makes spells cast before this time fizzle

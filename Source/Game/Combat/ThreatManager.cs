@@ -28,13 +28,13 @@ namespace Game.Combat
 {
     public class ThreatManager
     {
-        public static uint CLIENT_THREAT_UPDATE_INTERVAL = 1000u;
+        public static uint THREAT_UPDATE_INTERVAL = 1000u;
 
         public Unit _owner;
         bool _ownerCanHaveThreatList;
         bool _ownerEngaged;
         
-        uint _updateClientTimer;
+        uint _updateTimer;
         List<ThreatReference> _sortedThreatList = new();
         Dictionary<ObjectGuid, ThreatReference> _myThreatListEntries = new();
         ThreatReference _currentVictimRef;
@@ -68,7 +68,7 @@ namespace Game.Combat
         public ThreatManager(Unit owner)
         {
             _owner = owner;
-            _updateClientTimer = CLIENT_THREAT_UPDATE_INTERVAL;
+            _updateTimer = THREAT_UPDATE_INTERVAL;
 
             for (var i = 0; i < (int)SpellSchools.Max; ++i)
                 _singleSchoolModifiers[i] = 1.0f;
@@ -84,18 +84,21 @@ namespace Game.Combat
             if (!CanHaveThreatList() || !IsEngaged())
                 return;
 
-            if (_updateClientTimer <= tdiff)
+            if (_updateTimer <= tdiff)
             {
-                _updateClientTimer = CLIENT_THREAT_UPDATE_INTERVAL;
-                SendThreatListToClients();
+                UpdateVictim();
+                _updateTimer = THREAT_UPDATE_INTERVAL;
             }
             else
-                _updateClientTimer -= tdiff;
+                _updateTimer -= tdiff;
         }
 
         public Unit GetCurrentVictim()
         {
-            if (_currentVictimRef != null)
+            if (_currentVictimRef != null || _currentVictimRef.ShouldBeOffline())
+                UpdateVictim();
+
+            if (_currentVictimRef != null && !_currentVictimRef.ShouldBeOffline())
                 return _currentVictimRef.GetVictim();
 
             return null;
@@ -108,22 +111,6 @@ namespace Game.Combat
                     return refe.GetVictim();
 
             return null;
-        }
-
-        public Unit SelectVictim()
-        {
-            if (_sortedThreatList.Empty())
-                return null;
-
-            ThreatReference newVictimRef = ReselectVictim();
-            if (newVictimRef != _currentVictimRef)
-            {
-                if (newVictimRef != null)
-                    SendNewVictimToClients(newVictimRef);
-
-                _currentVictimRef = newVictimRef;
-            }
-            return newVictimRef != null ? newVictimRef.GetVictim() : null;
         }
 
         public bool IsThreatListEmpty(bool includeOffline = false)
@@ -186,14 +173,11 @@ namespace Game.Combat
 
         public bool IsThreateningTo(Unit who, bool includeOffline = false) { return IsThreateningTo(who.GetGUID(), includeOffline); }
 
-        public void UpdateOnlineStates(bool meThreateningOthers, bool othersThreateningMe)
+        public void EvaluateSuppressed()
         {
-            if (othersThreateningMe)
-                foreach (var pair in _myThreatListEntries)
-                    pair.Value.UpdateOnlineState();
-            if (meThreateningOthers)
-                foreach (var pair in _threatenedByMe)
-                    pair.Value.UpdateOnlineState();
+            foreach (var pair in _threatenedByMe)
+                if (pair.Value.IsOnline() && pair.Value.ShouldBeSuppressed())
+                    pair.Value.Online = OnlineState.Suppressed;
         }
 
         static void SaveCreatureHomePositionIfNeed(Creature c)
@@ -296,7 +280,13 @@ namespace Game.Combat
             var targetRefe = _myThreatListEntries.LookupByKey(target.GetGUID());
             if (targetRefe != null)
             {
-                targetRefe.AddThreat(amount);
+                // causing threat causes SUPPRESSED threat states to stop being suppressed
+                if (targetRefe.GetOnlineState() == OnlineState.Suppressed)
+                    if (!targetRefe.ShouldBeSuppressed())
+                        targetRefe.Online = OnlineState.Online;
+
+                if (targetRefe.IsOnline())
+                    targetRefe.AddThreat(amount);
                 return;
             }
 
@@ -307,10 +297,10 @@ namespace Game.Combat
 
             if (!_ownerEngaged)
             {
+                Creature cOwner = _owner.ToCreature(); // if we got here the owner can have a threat list, and must be a creature!
                 _ownerEngaged = true;
 
-                Creature cOwner = _owner.ToCreature();
-                Cypher.Assert(cOwner != null); // if we got here the owner can have a threat list, and must be a creature!
+                UpdateVictim();
                 SaveCreatureHomePositionIfNeed(cOwner);
                 CreatureAI ownerAI = cOwner.GetAI();
                 if (ownerAI != null)
@@ -368,14 +358,22 @@ namespace Game.Combat
         public void ResetAllThreat()
         {
             foreach (var pair in _myThreatListEntries)
-                pair.Value.SetThreat(0.0f);
+                pair.Value.ScaleThreat(0.0f);
         }
 
         public void ClearThreat(Unit target)
         {
             var refe = _myThreatListEntries.LookupByKey(target.GetGUID());
             if (refe != null)
-                refe.ClearThreat();
+                ClearThreat(refe);
+        }
+
+        public void ClearThreat(ThreatReference refe)
+        {
+            SendRemoveToClients(refe.GetVictim());
+            refe.UnregisterAndFree();
+            if (_currentVictimRef == null)
+                UpdateVictim();
         }
 
         public void ClearAllThreat()
@@ -386,7 +384,7 @@ namespace Game.Combat
 
             SendClearAllThreatToClients();
             do
-                _myThreatListEntries.First().Value.ClearThreat(false);
+                _myThreatListEntries.First().Value.UnregisterAndFree();
             while (!_myThreatListEntries.Empty());
         }
 
@@ -414,8 +412,24 @@ namespace Game.Combat
 
         public void ClearFixate() { FixateTarget(null); }
 
+        void UpdateVictim()
+        {
+            ThreatReference newVictim = ReselectVictim();
+            bool newHighest = (newVictim != _currentVictimRef);
+
+            _currentVictimRef = newVictim;
+            SendThreatListToClients(newVictim != null && newHighest);
+
+        }
+
         ThreatReference ReselectVictim()
         {
+            if (_sortedThreatList.Empty())
+                return null;
+
+            foreach (var pair in _myThreatListEntries)
+                pair.Value.UpdateOffline();
+
             // fixated target is always preferred
             if (_fixateRef != null && _fixateRef.IsAvailable())
                 return _fixateRef;
@@ -538,30 +552,6 @@ namespace Game.Combat
             return threat;
         }
 
-        void SendClearAllThreatToClients()
-        {
-            ThreatClear threatClear = new();
-            threatClear.UnitGUID = _owner.GetGUID();
-            _owner.SendMessageToSet(threatClear, false);
-        }
-
-        public void SendThreatListToClients()
-        {
-            ThreatUpdate threatUpdate = new();
-            threatUpdate.UnitGUID = _owner.GetGUID();
-            foreach (ThreatReference refe in _sortedThreatList)
-            {
-                if (!refe.IsAvailable()) // @todo check if suppressed threat should get sent for bubble/iceblock/hop etc
-                    continue;
-
-                ThreatInfo threatInfo = new();
-                threatInfo.UnitGUID = refe.GetVictim().GetGUID();
-                threatInfo.Threat = (long)(refe.GetThreat() * 100);
-                threatUpdate.ThreatList.Add(threatInfo);
-            }
-            _owner.SendMessageToSet(threatUpdate, false);
-        }
-
         public void ForwardThreatForAssistingMe(Unit assistant, float baseAmount, SpellInfo spell = null, bool ignoreModifiers = false)
         {
             if (spell != null && spell.HasAttribute(SpellAttr1.NoThreat)) // shortcut, none of the calls would do anything
@@ -570,16 +560,35 @@ namespace Game.Combat
             if (_threatenedByMe.Empty())
                 return;
 
-            float perTarget = baseAmount / _threatenedByMe.Count; // Threat is divided evenly among all targets (LibThreat sourced)
-
+            List<Creature> canBeThreatened = new();
+            List<Creature> cannotBeThreatened = new();
             foreach (var pair in _threatenedByMe)
-                pair.Value.GetOwner().GetThreatManager().AddThreat(assistant, perTarget, spell, ignoreModifiers);
+            {
+                Creature owner = pair.Value.GetOwner();
+                if (!owner.HasBreakableByDamageCrowdControlAura())
+                    canBeThreatened.Add(owner);
+                else
+                    cannotBeThreatened.Add(owner);
+            }
+
+            if (!canBeThreatened.Empty()) // targets under CC cannot gain assist threat - split evenly among the rest
+            {
+                float perTarget = baseAmount / canBeThreatened.Count;
+                foreach (Creature threatened in canBeThreatened)
+                    threatened.GetThreatManager().AddThreat(assistant, perTarget, spell, ignoreModifiers);
+            }
+
+            foreach (Creature threatened in cannotBeThreatened)
+                threatened.GetThreatManager().AddThreat(assistant, 0.0f, spell, true);
         }
 
         public void RemoveMeFromThreatLists()
         {
             while (!_threatenedByMe.Empty())
-                _threatenedByMe.First().Value.ClearThreat();
+            {
+                var refe = _threatenedByMe.FirstOrDefault().Value;
+                refe._mgr.ClearThreat(_owner);
+            }
         }
 
         public void UpdateMyTempModifiers()
@@ -588,9 +597,12 @@ namespace Game.Combat
             foreach (AuraEffect eff in _owner.GetAuraEffectsByType(AuraType.ModTotalThreat))
                 mod += eff.GetAmount();
 
+            if (_threatenedByMe.Empty())
+                return;
+
             foreach (var pair in _threatenedByMe)
             {
-                pair.Value._tempModifier = mod;
+                pair.Value.TempModifier = mod;
                 pair.Value.ListNotifyChanged();
             }
         }
@@ -627,6 +639,13 @@ namespace Game.Combat
                 UpdateRedirectInfo();
         }
 
+        void SendClearAllThreatToClients()
+        {
+            ThreatClear threatClear = new();
+            threatClear.UnitGUID = _owner.GetGUID();
+            _owner.SendMessageToSet(threatClear, false);
+        }
+        
         public void SendRemoveToClients(Unit victim)
         {
             ThreatRemove threatRemove = new();
@@ -635,22 +654,37 @@ namespace Game.Combat
             _owner.SendMessageToSet(threatRemove, false);
         }
 
-        void SendNewVictimToClients(ThreatReference victimRef)
+        void SendThreatListToClients(bool newHighest)
         {
-            HighestThreatUpdate highestThreatUpdate = new();
-            highestThreatUpdate.UnitGUID = _owner.GetGUID();
-            highestThreatUpdate.HighestThreatGUID = victimRef.GetVictim().GetGUID();
-            foreach (ThreatReference refe in _sortedThreatList)
+            void fillSharedPacketDataAndSend(dynamic packet)
             {
-                if (!refe.IsAvailable())
-                    continue;
+                packet.UnitGUID = _owner.GetGUID();
+                packet.ThreatList.reserve(_sortedThreatList.Count);
 
-                ThreatInfo threatInfo = new();
-                threatInfo.UnitGUID = refe.GetVictim().GetGUID();
-                threatInfo.Threat = (long)(refe.GetThreat() * 100);
-                highestThreatUpdate.ThreatList.Add(threatInfo);
+                foreach (ThreatReference refe in _sortedThreatList)
+                {
+                    if (!refe.IsAvailable())
+                        continue;
+
+                    ThreatInfo threatInfo = new();
+                    threatInfo.UnitGUID = refe.GetVictim().GetGUID();
+                    threatInfo.Threat = (long)(refe.GetThreat() * 100);
+                    packet.ThreatList.Add(threatInfo);
+                }
+                _owner.SendMessageToSet(packet, false);
             }
-            _owner.SendMessageToSet(highestThreatUpdate, false);
+
+            if (newHighest)
+            {
+                HighestThreatUpdate highestThreatUpdate = new();
+                highestThreatUpdate.HighestThreatGUID = _currentVictimRef.GetVictim().GetGUID();
+                fillSharedPacketDataAndSend(highestThreatUpdate);
+            }
+            else
+            {
+                ThreatUpdate threatUpdate = new();
+                fillSharedPacketDataAndSend(threatUpdate);
+            }
         }
 
         void PutThreatListRef(ObjectGuid guid, ThreatReference refe)
@@ -661,23 +695,20 @@ namespace Game.Combat
             _sortedThreatList.Sort();
         }
 
-        public void PurgeThreatListRef(ObjectGuid guid, bool sendRemove)
+        public void PurgeThreatListRef(ObjectGuid guid)
         {
             var refe = _myThreatListEntries.LookupByKey(guid);
             if (refe == null)
                 return;
 
             _myThreatListEntries.Remove(guid);
+            _sortedThreatList.Remove(refe);
 
-            if (_currentVictimRef == refe)
-                _currentVictimRef = null;
             if (_fixateRef == refe)
                 _fixateRef = null;
 
-            _sortedThreatList.Remove(refe);
-            _sortedThreatList.Sort();
-            if (sendRemove && refe.IsAvailable())
-                SendRemoveToClients(refe.GetVictim());
+            if (_currentVictimRef == refe)
+                _currentVictimRef = null;
         }
 
         void PutThreatenedByMeRef(ObjectGuid guid, ThreatReference refe)
@@ -759,21 +790,21 @@ namespace Game.Combat
 
     public class ThreatReference : IComparable<ThreatReference>
     {
-        Unit _owner;
-        ThreatManager _mgr;
+        Creature _owner;
+        public ThreatManager _mgr;
         Unit _victim;
+        public OnlineState Online;
         float _baseAmount;
-        public int _tempModifier; // Temporary effects (auras with SPELL_AURA_MOD_TOTAL_THREAT) - set from victim's threatmanager in ThreatManager::UpdateMyTempModifiers
-        OnlineState _online;
+        public int TempModifier; // Temporary effects (auras with SPELL_AURA_MOD_TOTAL_THREAT) - set from victim's threatmanager in ThreatManager::UpdateMyTempModifiers
         TauntState _taunted;
 
         public ThreatReference(ThreatManager mgr, Unit victim, float amount)
         {
-            _owner = mgr._owner;
+            _owner = mgr._owner as Creature;
             _mgr = mgr;
             _victim = victim;
-            _baseAmount = amount;
-            _online = SelectOnlineState();
+            Online = ShouldBeOffline() ? OnlineState.Offline : ShouldBeSuppressed() ? OnlineState.Suppressed : OnlineState.Online;
+            _baseAmount = IsOnline() ? amount : 0.0f;
         }
 
         public void AddThreat(float amount)
@@ -794,17 +825,23 @@ namespace Game.Combat
             ListNotifyChanged();
         }
 
-        public void UpdateOnlineState()
+        public void UpdateOffline()
         {
-            OnlineState onlineState = SelectOnlineState();
-            if (onlineState == _online)
+            bool shouldBeOffline = ShouldBeOffline();
+            if (shouldBeOffline == IsOffline())
                 return;
 
-            _online = onlineState;
-            ListNotifyChanged();
-
-            if (!IsAvailable())
-                _owner.GetThreatManager().SendRemoveToClients(_victim);
+            if (shouldBeOffline)
+            {
+                Online = OnlineState.Offline;
+                ListNotifyChanged();
+                _mgr.SendRemoveToClients(_victim);
+            }
+            else
+            {
+                Online = ShouldBeSuppressed() ? OnlineState.Suppressed : OnlineState.Online;
+                ListNotifyChanged();
+            }
         }
 
         public static bool FlagsAllowFighting(Unit a, Unit b)
@@ -825,31 +862,28 @@ namespace Game.Combat
             return true;
         }
 
-        OnlineState SelectOnlineState()
+        public bool ShouldBeOffline()
         {
-            // first, check all offline conditions
-            if (!_owner.CanSeeOrDetect(_victim)) // not in map/phase, or stealth/invis
-                return OnlineState.Offline;
+            if (!_owner.CanSeeOrDetect(_victim))
+                return true;
 
-            if (_victim.HasUnitState(UnitState.Died)) // feign death
-                return OnlineState.Offline;
+            if (!_owner._IsTargetAcceptable(_victim) || !_owner.CanCreatureAttack(_victim))
+                return true;
 
             if (!FlagsAllowFighting(_owner, _victim) || !FlagsAllowFighting(_victim, _owner))
-                return OnlineState.Offline;
+                return true;
 
-            if (_owner.IsAIEnabled() && !_owner.GetAI().CanAIAttack(_victim))
-                return OnlineState.Offline;
+            return false;
+        }
 
-            // next, check suppression (immunity to chosen melee attack school)
+        public bool ShouldBeSuppressed()
+        {
             if (_victim.IsImmunedToDamage(_owner.GetMeleeDamageSchoolMask()))
-                return OnlineState.Suppressed;
-
-            // or any form of CC that will break on damage - disorient, polymorph, blind etc
+                return true;
             if (_victim.HasBreakableByDamageCrowdControlAura())
-                return OnlineState.Suppressed;
+                return true;
 
-            // no suppression - we're online
-            return OnlineState.Online;
+            return false;
         }
 
         public void UpdateTauntState(TauntState state = TauntState.None)
@@ -866,19 +900,24 @@ namespace Game.Combat
             ListNotifyChanged();
         }
 
-        public void ClearThreat(bool sendRemove = true)
+        public void ClearThreat()
         {
-            _owner.GetThreatManager().PurgeThreatListRef(_victim.GetGUID(), sendRemove);
+            _mgr.ClearThreat(this);
+        }
+
+        public void UnregisterAndFree()
+        {
+            _owner.GetThreatManager().PurgeThreatListRef(_victim.GetGUID());
             _victim.GetThreatManager().PurgeThreatenedByMeRef(_owner.GetGUID());
         }
 
-        public Unit GetOwner() { return _owner; }
+        public Creature GetOwner() { return _owner; }
         public Unit GetVictim() { return _victim; }
-        public float GetThreat() { return Math.Max(_baseAmount + (float)_tempModifier, 0.0f); }
-        public OnlineState GetOnlineState() { return _online; }
-        public bool IsOnline() { return (_online >= OnlineState.Online); }
-        public bool IsAvailable() { return (_online > OnlineState.Offline); }
-        public bool IsOffline() { return (_online <= OnlineState.Offline); }
+        public float GetThreat() { return Math.Max(_baseAmount + (float)TempModifier, 0.0f); }
+        public OnlineState GetOnlineState() { return Online; }
+        public bool IsOnline() { return Online >= OnlineState.Online; }
+        public bool IsAvailable() { return Online > OnlineState.Offline; }
+        public bool IsOffline() { return Online <= OnlineState.Offline; }
         public TauntState GetTauntState() { return IsTaunting() ? TauntState.Taunt : _taunted; }
         public bool IsTaunting() { return _taunted >= TauntState.Taunt; }
         public bool IsDetaunted() { return _taunted == TauntState.Detaunt; }

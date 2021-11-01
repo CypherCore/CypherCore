@@ -152,8 +152,6 @@ namespace Game.Entities
 
         public bool CanHaveThreatList() { return m_threatManager.CanHaveThreatList(); }
 
-        void SendThreatListUpdate() { m_threatManager.SendThreatListToClients(); }
-
         // For NPCs with threat list: Whether there are any enemies on our threat list
         // For other units: Whether we're in combat
         // This value is different from IsInCombat when a projectile spell is midair (combat on launch - threat+aggro on impact)

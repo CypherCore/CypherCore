@@ -419,7 +419,6 @@ namespace Game.Entities
                 AddToNotify(NotifyFlags.VisibilityChanged);
             else
             {
-                m_threatManager.UpdateOnlineStates(true, true);
                 base.UpdateObjectVisibility(true);
                 // call MoveInLineOfSight for nearby creatures
                 AIRelocationNotifier notifier = new(this);
@@ -2882,16 +2881,11 @@ namespace Game.Entities
             {
                 AddUnitFlag(UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc);
                 ValidateAttackersAndOwnTarget();
-                if (keepCombat)
-                    m_threatManager.UpdateOnlineStates(true, true);
-                else
+                if (!keepCombat)
                     m_combatManager.EndAllCombat();
             }
             else
-            {
                 RemoveUnitFlag(UnitFlags.ImmuneToPc | UnitFlags.ImmuneToNpc);
-                m_threatManager.UpdateOnlineStates(true, true);
-            }
         }
 
         public virtual void SetImmuneToAll(bool apply) { SetImmuneToAll(apply, false); }
@@ -2904,9 +2898,7 @@ namespace Game.Entities
             {
                 AddUnitFlag(UnitFlags.ImmuneToPc);
                 ValidateAttackersAndOwnTarget();
-                if (keepCombat)
-                    m_threatManager.UpdateOnlineStates(true, true);
-                else
+                if (!keepCombat)
                 {
                     List<CombatReference> toEnd = new();
                     foreach (var pair in m_combatManager.GetPvECombatRefs())
@@ -2922,10 +2914,7 @@ namespace Game.Entities
                 }
             }
             else
-            {
                 RemoveUnitFlag(UnitFlags.ImmuneToPc);
-                m_threatManager.UpdateOnlineStates(true, true);
-            }
         }
 
         public virtual void SetImmuneToPC(bool apply) { SetImmuneToPC(apply, false); }
@@ -2938,9 +2927,7 @@ namespace Game.Entities
             {
                 AddUnitFlag(UnitFlags.ImmuneToNpc);
                 ValidateAttackersAndOwnTarget();
-                if (keepCombat)
-                    m_threatManager.UpdateOnlineStates(true, true);
-                else
+                if (!keepCombat)
                 {
                     List<CombatReference> toEnd = new();
                     foreach (var pair in m_combatManager.GetPvECombatRefs())
@@ -2956,10 +2943,7 @@ namespace Game.Entities
                 }
             }
             else
-            {
                 RemoveUnitFlag(UnitFlags.ImmuneToNpc);
-                m_threatManager.UpdateOnlineStates(true, true);
-            }
         }
 
         public virtual void SetImmuneToNPC(bool apply) { SetImmuneToNPC(apply, false); }

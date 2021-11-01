@@ -417,7 +417,7 @@ namespace Game.Entities
             LoadCreaturesAddon();
             LoadTemplateImmunities();
 
-            GetThreatManager().UpdateOnlineStates(true, true);
+            GetThreatManager().EvaluateSuppressed();
             return true;
         }
 
@@ -541,7 +541,6 @@ namespace Game.Entities
                         if (diff >= m_boundaryCheckTime)
                         {
                             GetAI().CheckInRoom();
-                            GetThreatManager().UpdateOnlineStates(false, true);
                             m_boundaryCheckTime = 2500;
                         }
                         else
@@ -898,7 +897,7 @@ namespace Game.Entities
             Unit target;
 
             if (CanHaveThreatList())
-                target = GetThreatManager().SelectVictim();
+                target = GetThreatManager().GetCurrentVictim();
             else if (!HasReactState(ReactStates.Passive))
             {
                 // We're a player pet, probably
