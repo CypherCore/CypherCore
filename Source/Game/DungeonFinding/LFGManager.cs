@@ -1253,7 +1253,7 @@ namespace Game.DungeonFinding
                 error = LfgTeleportResult.Exhaustion;
             else if (player.GetVehicle())
                 error = LfgTeleportResult.OnTransport;
-            else if (!player.GetCharmGUID().IsEmpty())
+            else if (!player.GetCharmedGUID().IsEmpty())
                 error = LfgTeleportResult.ImmuneToSummons;
             else if (player.HasAura(9454)) // check Freeze debuff
                 error = LfgTeleportResult.NoReturnLocation;

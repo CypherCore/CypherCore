@@ -1335,7 +1335,7 @@ namespace Game.Entities
                 }
 
                 // if we have charmed npc, stun him also (everywhere)
-                Unit charm = player.GetCharm();
+                Unit charm = player.GetCharmed();
                 if (charm)
                     if (charm.GetTypeId() == TypeId.Unit)
                         charm.AddUnitFlag(UnitFlags.Stunned);
@@ -1383,7 +1383,7 @@ namespace Game.Entities
                     player.ResummonPetTemporaryUnSummonedIfAny();
 
                 // if we have charmed npc, remove stun also
-                Unit charm = player.GetCharm();
+                Unit charm = player.GetCharmed();
                 if (charm)
                     if (charm.GetTypeId() == TypeId.Unit && charm.HasUnitFlag(UnitFlags.Stunned) && !charm.HasUnitState(UnitState.Stunned))
                         charm.RemoveUnitFlag(UnitFlags.Stunned);

@@ -421,7 +421,7 @@ namespace Game
                 return;
             }
 
-            if (pet != GetPlayer().GetGuardianPet() && pet != GetPlayer().GetCharm())
+            if (pet != GetPlayer().GetGuardianPet() && pet != GetPlayer().GetCharmed())
             {
                 Log.outError(LogFilter.Network, "HandlePetCancelAura: {0} is not a pet of player '{1}'", packet.PetGUID.ToString(), GetPlayer().GetName());
                 return;

@@ -465,10 +465,12 @@ namespace Game.Entities
 
                 RemoveAllFollowers();
 
-                if (!GetCharmerGUID().IsEmpty())
-                {
-                    Log.outFatal(LogFilter.Unit, "Unit {0} has charmer guid when removed from world", GetEntry());
-                }
+                if (IsCharmed())
+                    RemoveCharmedBy(null);
+
+                Cypher.Assert(!GetCharmedGUID().IsEmpty(), $"Unit {GetEntry()} has charmed guid when removed from world");
+                Cypher.Assert(!GetCharmerGUID().IsEmpty(), $"Unit {GetEntry()} has charmer guid when removed from world");
+
                 Unit owner = GetOwner();
                 if (owner != null)
                 {
@@ -665,7 +667,7 @@ namespace Game.Entities
             if (m_gameObj.Empty())
                 return;
 
-            for (var i =0; i < m_gameObj.Count; ++i)
+            for (var i = 0; i < m_gameObj.Count; ++i)
             {
                 var obj = m_gameObj[i];
                 if (spellid == 0 || obj.GetSpellId() == spellid)
@@ -797,7 +799,7 @@ namespace Game.Entities
 
             return false;
         }
-        
+
         public void SetHoverHeight(float hoverHeight) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.HoverHeight), hoverHeight); }
 
         public override float GetCollisionHeight()
@@ -1209,31 +1211,17 @@ namespace Game.Entities
             AIUpdateTick(0, true);
         }
 
-
         public bool IsPossessing()
         {
-            Unit u = GetCharm();
+            Unit u = GetCharmed();
             if (u != null)
                 return u.IsPossessed();
             else
                 return false;
         }
-        public Unit GetCharm()
-        {
-            ObjectGuid charm_guid = GetCharmGUID();
-            if (!charm_guid.IsEmpty())
-            {
-                Unit pet = Global.ObjAccessor.GetUnit(this, charm_guid);
-                if (pet != null)
-                    return pet;
 
-                Log.outError(LogFilter.Unit, "Unit.GetCharm: Charmed creature {0} not exist.", charm_guid);
-                SetCharmGUID(ObjectGuid.Empty);
-            }
-
-            return null;
-        }
         public bool IsCharmed() { return !GetCharmerGUID().IsEmpty(); }
+
         public bool IsPossessed() { return HasUnitState(UnitState.Possessed); }
 
         public void OnPhaseChange()
@@ -1498,7 +1486,7 @@ namespace Game.Entities
 
         bool HasInterruptFlag(SpellAuraInterruptFlags flags) { return m_interruptMask.HasAnyFlag(flags); }
         bool HasInterruptFlag(SpellAuraInterruptFlags2 flags) { return m_interruptMask2.HasAnyFlag(flags); }
-        
+
         public void AddInterruptMask(SpellAuraInterruptFlags flags, SpellAuraInterruptFlags2 flags2)
         {
             m_interruptMask |= flags;
@@ -1567,44 +1555,44 @@ namespace Game.Entities
                     displayPower = PowerType.Mana;
                     break;
                 default:
+                {
+                    var powerTypeAuras = GetAuraEffectsByType(AuraType.ModPowerDisplay);
+                    if (!powerTypeAuras.Empty())
                     {
-                        var powerTypeAuras = GetAuraEffectsByType(AuraType.ModPowerDisplay);
-                        if (!powerTypeAuras.Empty())
+                        AuraEffect powerTypeAura = powerTypeAuras.First();
+                        displayPower = (PowerType)powerTypeAura.GetMiscValue();
+                    }
+                    else if (GetTypeId() == TypeId.Player)
+                    {
+                        ChrClassesRecord cEntry = CliDB.ChrClassesStorage.LookupByKey(GetClass());
+                        if (cEntry != null && cEntry.DisplayPower < PowerType.Max)
+                            displayPower = cEntry.DisplayPower;
+                    }
+                    else if (GetTypeId() == TypeId.Unit)
+                    {
+                        Vehicle vehicle = GetVehicleKit();
+                        if (vehicle)
                         {
-                            AuraEffect powerTypeAura = powerTypeAuras.First();
-                            displayPower = (PowerType)powerTypeAura.GetMiscValue();
+                            PowerDisplayRecord powerDisplay = CliDB.PowerDisplayStorage.LookupByKey(vehicle.GetVehicleInfo().PowerDisplayID[0]);
+                            if (powerDisplay != null)
+                                displayPower = (PowerType)powerDisplay.ActualType;
+                            else if (GetClass() == Class.Rogue)
+                                displayPower = PowerType.Energy;
                         }
-                        else if (GetTypeId() == TypeId.Player)
+                        else
                         {
-                            ChrClassesRecord cEntry = CliDB.ChrClassesStorage.LookupByKey(GetClass());
-                            if (cEntry != null && cEntry.DisplayPower < PowerType.Max)
-                                displayPower = cEntry.DisplayPower;
-                        }
-                        else if (GetTypeId() == TypeId.Unit)
-                        {
-                            Vehicle vehicle = GetVehicleKit();
-                            if (vehicle)
+                            Pet pet = ToPet();
+                            if (pet)
                             {
-                                PowerDisplayRecord powerDisplay = CliDB.PowerDisplayStorage.LookupByKey(vehicle.GetVehicleInfo().PowerDisplayID[0]);
-                                if (powerDisplay != null)
-                                    displayPower = (PowerType)powerDisplay.ActualType;
-                                else if (GetClass() == Class.Rogue)
+                                if (pet.GetPetType() == PetType.Hunter) // Hunter pets have focus
+                                    displayPower = PowerType.Focus;
+                                else if (pet.IsPetGhoul() || pet.IsPetAbomination()) // DK pets have energy
                                     displayPower = PowerType.Energy;
                             }
-                            else
-                            {
-                                Pet pet = ToPet();
-                                if (pet)
-                                {
-                                    if (pet.GetPetType() == PetType.Hunter) // Hunter pets have focus
-                                        displayPower = PowerType.Focus;
-                                    else if (pet.IsPetGhoul() || pet.IsPetAbomination()) // DK pets have energy
-                                        displayPower = PowerType.Energy;
-                                }
-                            }
                         }
-                        break;
                     }
+                    break;
+                }
             }
 
             SetPowerType(displayPower);
@@ -1848,7 +1836,7 @@ namespace Game.Entities
         public void SetMountDisplayId(uint mountDisplayId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.MountDisplayID), mountDisplayId); }
         uint GetCosmeticMountDisplayId() { return m_unitData.CosmeticMountDisplayID; }
         public void SetCosmeticMountDisplayId(uint mountDisplayId) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CosmeticMountDisplayID), mountDisplayId); }
-        
+
         public virtual float GetFollowAngle() { return MathFunctions.PiOver2; }
 
         public override ObjectGuid GetOwnerGUID() { return m_unitData.SummonedBy; }
@@ -1876,10 +1864,6 @@ namespace Game.Entities
         public void SetCreatorGUID(ObjectGuid creator) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CreatedBy), creator); }
         public ObjectGuid GetMinionGUID() { return m_unitData.Summon; }
         public void SetMinionGUID(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Summon), guid); }
-        public ObjectGuid GetCharmerGUID() { return m_unitData.CharmedBy; }
-        public void SetCharmerGUID(ObjectGuid owner) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CharmedBy), owner); }
-        public ObjectGuid GetCharmGUID() { return m_unitData.Charm; }
-        public void SetCharmGUID(ObjectGuid charm) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Charm), charm); }
         public ObjectGuid GetPetGUID() { return m_SummonSlot[0]; }
         public void SetPetGUID(ObjectGuid guid) { m_SummonSlot[0] = guid; }
         public ObjectGuid GetCritterGUID() { return m_unitData.Critter; }
@@ -1887,9 +1871,53 @@ namespace Game.Entities
         public ObjectGuid GetBattlePetCompanionGUID() { return m_unitData.BattlePetCompanionGUID; }
         public void SetBattlePetCompanionGUID(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BattlePetCompanionGUID), guid); }
 
-        public void SetWildBattlePetLevel(uint wildBattlePetLevel) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.WildBattlePetLevel), wildBattlePetLevel); }
-        public uint GetWildBattlePetLevel() { return m_unitData.WildBattlePetLevel; }
-        
+        public bool SetCharmerData(Unit unit)
+        {
+            if (!GetCharmerGUID().IsEmpty())
+                return false;
+
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CharmedBy), unit.GetGUID());
+            m_charmer = unit;
+            return true;
+        }
+
+        public bool ClearCharmerData(Unit verify)
+        {
+            if (GetCharmerGUID() != verify.GetGUID())
+                return false;
+
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CharmedBy), ObjectGuid.Empty);
+            m_charmer = null;
+            return true;
+        }
+
+        public ObjectGuid GetCharmerGUID() { return m_unitData.CharmedBy; }
+
+        public Unit GetCharmer() { return m_charmer; }
+
+        public bool SetCharmedData(Unit unit)
+        {
+            if (!GetCharmedGUID().IsEmpty())
+                return false;
+
+            m_charmed = unit;
+            return true;
+        }
+
+        public bool ClearCharmedData(Unit verify)
+        {
+            if (GetCharmedGUID() != verify.GetGUID())
+                return false;
+
+            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Charm), ObjectGuid.Empty);
+            m_charmed = null;
+            return true;
+        }
+
+        public ObjectGuid GetCharmedGUID() { return m_unitData.Charm; }
+
+        public Unit GetCharmed() { return m_charmed; }
+
         public override ObjectGuid GetCharmerOrOwnerGUID()
         {
             return IsCharmed() ? GetCharmerGUID() : GetOwnerGUID();
@@ -1909,19 +1937,14 @@ namespace Game.Entities
             else
                 return ToPlayer();
         }
-        
-        public Unit GetCharmer()
-        {
-            ObjectGuid charmerid = GetCharmerGUID();
-            if (!charmerid.IsEmpty())
-                return Global.ObjAccessor.GetUnit(this, charmerid);
-            return null;
-        }
 
         public override Unit GetCharmerOrOwner()
         {
-            return !GetCharmerGUID().IsEmpty() ? GetCharmer() : GetOwner();
+            return IsCharmed() ? GetCharmer() : GetOwner();
         }
+
+        public void SetWildBattlePetLevel(uint wildBattlePetLevel) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.WildBattlePetLevel), wildBattlePetLevel); }
+        public uint GetWildBattlePetLevel() { return m_unitData.WildBattlePetLevel; }
 
         public bool HasUnitFlag(UnitFlags flags) { return (m_unitData.Flags & (uint)flags) != 0; }
         public void AddUnitFlag(UnitFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Flags), (uint)flags); }
@@ -2823,7 +2846,6 @@ namespace Game.Entities
             }
         }
 
-
         public long ModifyHealth(long dVal)
         {
             long gain = 0;
@@ -2865,6 +2887,7 @@ namespace Game.Entities
 
             return gain;
         }
+
         public long GetHealthGain(long dVal)
         {
             long gain = 0;
@@ -3095,7 +3118,7 @@ namespace Game.Entities
         }
 
         public uint GetComboPoints() { return (uint)GetPower(PowerType.ComboPoints); }
-        
+
         public void AddComboPoints(sbyte count, Spell spell = null)
         {
             if (count == 0)

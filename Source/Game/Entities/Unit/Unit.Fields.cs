@@ -73,6 +73,8 @@ namespace Game.Entities
         //Charm
         public List<Unit> m_Controlled = new();
         List<Player> m_sharedVision = new();
+        Unit m_charmer; // Unit that is charming ME
+        Unit m_charmed; // Unit that is being charmed BY ME
         CharmInfo m_charmInfo;
         protected bool m_ControlledByPlayer;
         public ObjectGuid LastCharmerGUID { get; set; }

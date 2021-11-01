@@ -383,7 +383,7 @@ namespace Game.Entities
             base.InitSummon();
 
             if (GetOwner().IsTypeId(TypeId.Player) && GetOwner().GetMinionGUID() == GetGUID()
-                && GetOwner().GetCharmGUID().IsEmpty())
+                && GetOwner().GetCharmedGUID().IsEmpty())
             {
                 GetOwner().ToPlayer().CharmSpellInitialize();
             }

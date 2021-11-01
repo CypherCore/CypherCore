@@ -28,7 +28,7 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveDismissVehicle, Processing = PacketProcessing.ThreadSafe)]
         void HandleMoveDismissVehicle(MoveDismissVehicle packet)
         {
-            ObjectGuid vehicleGUID = GetPlayer().GetCharmGUID();
+            ObjectGuid vehicleGUID = GetPlayer().GetCharmedGUID();
             if (vehicleGUID.IsEmpty())                                       // something wrong here...
                 return;
 

@@ -970,7 +970,7 @@ namespace Game.Entities
 
         public void StopCastingCharm()
         {
-            Unit charm = GetCharm();
+            Unit charm = GetCharmed();
             if (!charm)
                 return;
 
@@ -981,12 +981,12 @@ namespace Game.Entities
                 else if (charm.IsVehicle())
                     ExitVehicle();
             }
-            if (!GetCharmGUID().IsEmpty())
+            if (!GetCharmedGUID().IsEmpty())
                 charm.RemoveCharmAuras();
 
-            if (!GetCharmGUID().IsEmpty())
+            if (!GetCharmedGUID().IsEmpty())
             {
-                Log.outFatal(LogFilter.Player, "Player {0} (GUID: {1} is not able to uncharm unit (GUID: {2} Entry: {3}, Type: {4})", GetName(), GetGUID(), GetCharmGUID(), charm.GetEntry(), charm.GetTypeId());
+                Log.outFatal(LogFilter.Player, "Player {0} (GUID: {1} is not able to uncharm unit (GUID: {2} Entry: {3}, Type: {4})", GetName(), GetGUID(), GetCharmedGUID(), charm.GetEntry(), charm.GetTypeId());
                 if (!charm.GetCharmerGUID().IsEmpty())
                 {
                     Log.outFatal(LogFilter.Player, "Charmed unit has charmer guid {0}", charm.GetCharmerGUID());
@@ -1036,7 +1036,7 @@ namespace Game.Entities
         }
         public void PossessSpellInitialize()
         {
-            Unit charm = GetCharm();
+            Unit charm = GetCharmed();
             if (!charm)
                 return;
 

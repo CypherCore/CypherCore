@@ -235,7 +235,7 @@ namespace Game.Entities
 
                         SetMinionGUID(unit.GetGUID());
                         // show another pet bar if there is no charm bar
-                        if (GetTypeId() == TypeId.Player && GetCharmGUID().IsEmpty())
+                        if (GetTypeId() == TypeId.Player && GetCharmedGUID().IsEmpty())
                         {
                             if (unit.IsPet())
                                 ToPlayer().PetSpellInitialize();
@@ -501,7 +501,13 @@ namespace Game.Entities
             }
 
             if (!IsPlayer() || charmer.IsCreature())
-                GetAI().OnCharmed(false); // AI will potentially schedule a charm ai update
+            {
+                UnitAI charmedAI = GetAI();
+                if (charmedAI != null)
+                    charmedAI.OnCharmed(false); // AI will potentially schedule a charm ai update
+                else
+                    ScheduleAIChange();
+            }
 
             Player player = ToPlayer();
             if (player != null)
@@ -545,10 +551,8 @@ namespace Game.Entities
             {
                 if (IsTypeId(TypeId.Player))
                 {
-                    if (GetCharmGUID().IsEmpty())
-                        SetCharmGUID(charm.GetGUID());
-                    else
-                        Log.outFatal(LogFilter.Unit, "Player {0} is trying to charm unit {1}, but it already has a charmed unit {2}", GetName(), charm.GetEntry(), GetCharmGUID());
+                    if (!SetCharmedData(charm))
+                        Log.outFatal(LogFilter.Unit, "Player {0} is trying to charm unit {1}, but it already has a charmed unit {2}", GetName(), charm.GetEntry(), GetCharmedGUID());
 
                     charm.m_ControlledByPlayer = true;
                     // @todo maybe we can use this flag to check if controlled by player
@@ -560,9 +564,7 @@ namespace Game.Entities
                 // PvP, FFAPvP
                 charm.SetPvpFlags(GetPvpFlags());
 
-                if (charm.GetCharmGUID().IsEmpty())
-                    charm.SetCharmerGUID(GetGUID());
-                else
+                if (!charm.SetCharmerData(this))
                     Log.outFatal(LogFilter.Unit, "Unit {0} is being charmed, but it already has a charmer {1}", charm.GetEntry(), charm.GetCharmerGUID());
 
                 _isWalkingBeforeCharm = charm.IsWalking();
@@ -578,15 +580,11 @@ namespace Game.Entities
 
                 if (IsTypeId(TypeId.Player))
                 {
-                    if (GetCharmGUID() == charm.GetGUID())
-                        SetCharmGUID(ObjectGuid.Empty);
-                    else
-                        Log.outFatal(LogFilter.Unit, "Player {0} is trying to uncharm unit {1}, but it has another charmed unit {2}", GetName(), charm.GetEntry(), GetCharmGUID());
+                    if (!ClearCharmedData(charm))
+                        Log.outFatal(LogFilter.Unit, "Player {0} is trying to uncharm unit {1}, but it has another charmed unit {2}", GetName(), charm.GetEntry(), GetCharmedGUID());
                 }
 
-                if (charm.GetCharmerGUID() == GetGUID())
-                    charm.SetCharmerGUID(ObjectGuid.Empty);
-                else
+                if (!charm.ClearCharmerData(this))
                     Log.outFatal(LogFilter.Unit, "Unit {0} is being uncharmed, but it has another charmer {1}", charm.GetEntry(), charm.GetCharmerGUID());
 
                 Player player = charm.GetCharmerOrOwnerPlayerOrPlayerItself();
@@ -625,7 +623,7 @@ namespace Game.Entities
         public Unit GetFirstControlled()
         {
             // Sequence: charmed, pet, other guardians
-            Unit unit = GetCharm();
+            Unit unit = GetCharmed();
             if (!unit)
             {
                 ObjectGuid guid = GetMinionGUID();
@@ -665,8 +663,8 @@ namespace Game.Entities
                 Log.outFatal(LogFilter.Unit, "Unit {0} is not able to release its pet {1}", GetEntry(), GetPetGUID());
             if (!GetMinionGUID().IsEmpty())
                 Log.outFatal(LogFilter.Unit, "Unit {0} is not able to release its minion {1}", GetEntry(), GetMinionGUID());
-            if (!GetCharmGUID().IsEmpty())
-                Log.outFatal(LogFilter.Unit, "Unit {0} is not able to release its charm {1}", GetEntry(), GetCharmGUID());
+            if (!GetCharmedGUID().IsEmpty())
+                Log.outFatal(LogFilter.Unit, "Unit {0} is not able to release its charm {1}", GetEntry(), GetCharmedGUID());
             if (!IsPet()) // pets don't use the flag for this
                 RemoveUnitFlag(UnitFlags.PetInCombat); // m_controlled is now empty, so we know none of our minions are in combat
         }

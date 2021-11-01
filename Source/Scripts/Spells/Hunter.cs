@@ -386,7 +386,7 @@ namespace Scripts.Spells.Hunter
                 if (!caster.GetPetGUID().IsEmpty())
                     return SpellCastResult.AlreadyHaveSummon;
 
-                if (!caster.GetCharmGUID().IsEmpty())
+                if (!caster.GetCharmedGUID().IsEmpty())
                     return SpellCastResult.AlreadyHaveCharm;
             }
             else

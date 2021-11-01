@@ -3158,7 +3158,7 @@ namespace Game.Spells
             // Unsummon summon as possessed creatures on spell cancel
             if (m_spellInfo.IsChanneled() && unitCaster.IsTypeId(TypeId.Player))
             {
-                Unit charm = unitCaster.GetCharm();
+                Unit charm = unitCaster.GetCharmed();
                 if (charm != null)
                     if (charm.IsTypeId(TypeId.Unit) && charm.ToCreature().HasUnitTypeMask(UnitTypeMask.Puppet)
                         && charm.m_unitData.CreatedBySpell == m_spellInfo.Id)
@@ -5032,7 +5032,7 @@ namespace Game.Spells
                                     return SpellCastResult.AlreadyHaveSummon;
                                 goto case SummonCategory.Puppet;
                             case SummonCategory.Puppet:
-                                if (!unitCaster.GetCharmGUID().IsEmpty())
+                                if (!unitCaster.GetCharmedGUID().IsEmpty())
                                     return SpellCastResult.AlreadyHaveCharm;
                                 break;
                         }
@@ -5073,7 +5073,7 @@ namespace Game.Spells
                                 return SpellCastResult.AlreadyHaveSummon;
                         }
 
-                        if (!unitCaster.GetCharmGUID().IsEmpty())
+                        if (!unitCaster.GetCharmedGUID().IsEmpty())
                             return SpellCastResult.AlreadyHaveCharm;
                         break;
                     }
@@ -5281,7 +5281,7 @@ namespace Game.Spells
                             if (!m_spellInfo.HasAttribute(SpellAttr1.DismissPet) && !unitCaster1.GetPetGUID().IsEmpty())
                                 return SpellCastResult.AlreadyHaveSummon;
 
-                            if (!unitCaster1.GetCharmGUID().IsEmpty())
+                            if (!unitCaster1.GetCharmedGUID().IsEmpty())
                                 return SpellCastResult.AlreadyHaveCharm;
                         }
 

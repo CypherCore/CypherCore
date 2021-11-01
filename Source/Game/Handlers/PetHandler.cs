@@ -112,7 +112,7 @@ namespace Game
                 return;
             }
 
-            if (pet != GetPlayer().GetPet() && pet != GetPlayer().GetCharm())
+            if (pet != GetPlayer().GetPet() && pet != GetPlayer().GetCharmed())
             {
                 Log.outError(LogFilter.Network, "HandlePetStopAttack: {0} isn't a pet or charmed creature of player {1}", packet.PetGUID.ToString(), GetPlayer().GetName());
                 return;
@@ -609,7 +609,7 @@ namespace Game
                 return;
             }
 
-            if (pet != GetPlayer().GetGuardianPet() && pet != GetPlayer().GetCharm())
+            if (pet != GetPlayer().GetGuardianPet() && pet != GetPlayer().GetCharmed())
             {
                 Log.outError(LogFilter.Network, "WorldSession.HandlePetSpellAutocast: {0} isn't pet of player {1} ({2}).",
                     packet.PetGUID.ToString(), GetPlayer().GetName(), GetPlayer().GetGUID().ToString());
@@ -660,7 +660,7 @@ namespace Game
             }
 
             // This opcode is also sent from charmed and possessed units (players and creatures)
-            if (caster != GetPlayer().GetGuardianPet() && caster != GetPlayer().GetCharm())
+            if (caster != GetPlayer().GetGuardianPet() && caster != GetPlayer().GetCharmed())
             {
                 Log.outError(LogFilter.Network, "WorldSession.HandlePetCastSpell: {0} isn't pet of player {1} ({2}).", petCastSpell.PetGUID.ToString(), GetPlayer().GetName(), GetPlayer().GetGUID().ToString());
                 return;
