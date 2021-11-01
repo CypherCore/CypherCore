@@ -551,8 +551,9 @@ namespace Game.Entities
             {
                 if (IsTypeId(TypeId.Player))
                 {
-                    if (!SetCharmedData(charm))
-                        Log.outFatal(LogFilter.Unit, "Player {0} is trying to charm unit {1}, but it already has a charmed unit {2}", GetName(), charm.GetEntry(), GetCharmedGUID());
+                    Cypher.Assert(GetCharmedGUID().IsEmpty(), $"Player {GetName()} is trying to charm unit {charm.GetEntry()}, but it already has a charmed unit {GetCharmedGUID()}");
+                    SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Charm), charm.GetGUID());
+                    m_charmed = charm;
 
                     charm.m_ControlledByPlayer = true;
                     // @todo maybe we can use this flag to check if controlled by player
@@ -564,8 +565,9 @@ namespace Game.Entities
                 // PvP, FFAPvP
                 charm.SetPvpFlags(GetPvpFlags());
 
-                if (!charm.SetCharmerData(this))
-                    Log.outFatal(LogFilter.Unit, "Unit {0} is being charmed, but it already has a charmer {1}", charm.GetEntry(), charm.GetCharmerGUID());
+                Cypher.Assert(charm.GetCharmerGUID().IsEmpty(), $"Unit {charm.GetEntry()} is being charmed, but it already has a charmer {charm.GetCharmerGUID()}");
+                charm.SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CharmedBy), GetGUID());
+                charm.m_charmer = this;
 
                 _isWalkingBeforeCharm = charm.IsWalking();
                 if (_isWalkingBeforeCharm)
@@ -578,14 +580,16 @@ namespace Game.Entities
             {
                 charm.ClearUnitState(UnitState.Charmed);
 
-                if (IsTypeId(TypeId.Player))
+                if (IsPlayer())
                 {
-                    if (!ClearCharmedData(charm))
-                        Log.outFatal(LogFilter.Unit, "Player {0} is trying to uncharm unit {1}, but it has another charmed unit {2}", GetName(), charm.GetEntry(), GetCharmedGUID());
+                    Cypher.Assert(GetCharmedGUID() == charm.GetGUID(), $"Player {GetName()} is trying to uncharm unit {charm.GetEntry()}, but it has another charmed unit {GetCharmedGUID()}");
+                    SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Charm), ObjectGuid.Empty);
+                    m_charmed = null;
                 }
 
-                if (!charm.ClearCharmerData(this))
-                    Log.outFatal(LogFilter.Unit, "Unit {0} is being uncharmed, but it has another charmer {1}", charm.GetEntry(), charm.GetCharmerGUID());
+                Cypher.Assert(charm.GetCharmerGUID() == GetGUID(), $"Unit {charm.GetEntry()} is being uncharmed, but it has another charmer {charm.GetCharmerGUID()}");
+                charm.SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CharmedBy), ObjectGuid.Empty);
+                charm.m_charmer = null;
 
                 Player player = charm.GetCharmerOrOwnerPlayerOrPlayerItself();
                 if (charm.IsTypeId(TypeId.Player))

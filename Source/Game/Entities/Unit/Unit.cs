@@ -1871,48 +1871,9 @@ namespace Game.Entities
         public ObjectGuid GetBattlePetCompanionGUID() { return m_unitData.BattlePetCompanionGUID; }
         public void SetBattlePetCompanionGUID(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BattlePetCompanionGUID), guid); }
 
-        public bool SetCharmerData(Unit unit)
-        {
-            if (!GetCharmerGUID().IsEmpty())
-                return false;
-
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CharmedBy), unit.GetGUID());
-            m_charmer = unit;
-            return true;
-        }
-
-        public bool ClearCharmerData(Unit verify)
-        {
-            if (GetCharmerGUID() != verify.GetGUID())
-                return false;
-
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CharmedBy), ObjectGuid.Empty);
-            m_charmer = null;
-            return true;
-        }
-
         public ObjectGuid GetCharmerGUID() { return m_unitData.CharmedBy; }
 
         public Unit GetCharmer() { return m_charmer; }
-
-        public bool SetCharmedData(Unit unit)
-        {
-            if (!GetCharmedGUID().IsEmpty())
-                return false;
-
-            m_charmed = unit;
-            return true;
-        }
-
-        public bool ClearCharmedData(Unit verify)
-        {
-            if (GetCharmedGUID() != verify.GetGUID())
-                return false;
-
-            SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Charm), ObjectGuid.Empty);
-            m_charmed = null;
-            return true;
-        }
 
         public ObjectGuid GetCharmedGUID() { return m_unitData.Charm; }
 
