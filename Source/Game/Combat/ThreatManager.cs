@@ -565,7 +565,7 @@ namespace Game.Combat
             foreach (var pair in _threatenedByMe)
             {
                 Creature owner = pair.Value.GetOwner();
-                if (!owner.HasBreakableByDamageCrowdControlAura())
+                if (!owner.HasUnitState(UnitState.Controlled))
                     canBeThreatened.Add(owner);
                 else
                     cannotBeThreatened.Add(owner);
