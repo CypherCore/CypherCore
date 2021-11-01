@@ -1250,7 +1250,7 @@ namespace Game.Spells
 
                         // and polymorphic affects
                         if (target.IsPolymorphed())
-                            target.RemoveAurasDueToSpell(target.GetTransForm());
+                            target.RemoveAurasDueToSpell(target.GetTransformSpell());
                         break;
                     }
                     default:
@@ -1272,7 +1272,7 @@ namespace Game.Spells
 
                 if (modelid > 0)
                 {
-                    SpellInfo transformSpellInfo = Global.SpellMgr.GetSpellInfo(target.GetTransForm(), GetBase().GetCastDifficulty());
+                    SpellInfo transformSpellInfo = Global.SpellMgr.GetSpellInfo(target.GetTransformSpell(), GetBase().GetCastDifficulty());
                     if (transformSpellInfo == null || !GetSpellInfo().IsPositive())
                         target.SetDisplayId(modelid);
                 }
@@ -1377,10 +1377,10 @@ namespace Game.Spells
             if (apply)
             {
                 // update active transform spell only when transform not set or not overwriting negative by positive case
-                SpellInfo transformSpellInfo = Global.SpellMgr.GetSpellInfo(target.GetTransForm(), GetBase().GetCastDifficulty());
+                SpellInfo transformSpellInfo = Global.SpellMgr.GetSpellInfo(target.GetTransformSpell(), GetBase().GetCastDifficulty());
                 if (transformSpellInfo == null || !GetSpellInfo().IsPositive() || transformSpellInfo.IsPositive())
                 {
-                    target.SetTransForm(GetId());
+                    target.SetTransformSpell(GetId());
                     // special case (spell specific functionality)
                     if (GetMiscValue() == 0)
                     {
@@ -1558,8 +1558,8 @@ namespace Game.Spells
             }
             else
             {
-                if (target.GetTransForm() == GetId())
-                    target.SetTransForm(0);
+                if (target.GetTransformSpell() == GetId())
+                    target.SetTransformSpell(0);
 
                 target.RestoreDisplayId(target.IsMounted());
 

@@ -2216,7 +2216,7 @@ namespace Game.Entities
                 CreatureTemplate cinfo = unit.ToCreature().GetCreatureTemplate();
 
                 // this also applies for transform auras
-                SpellInfo transform = Global.SpellMgr.GetSpellInfo(unit.GetTransForm(), unit.GetMap().GetDifficultyID());
+                SpellInfo transform = Global.SpellMgr.GetSpellInfo(unit.GetTransformSpell(), unit.GetMap().GetDifficultyID());
                 if (transform != null)
                 {
                     foreach (var spellEffectInfo in transform.GetEffects())

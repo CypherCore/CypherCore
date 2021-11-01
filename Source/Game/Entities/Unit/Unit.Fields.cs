@@ -125,7 +125,7 @@ namespace Game.Entities
         public Vehicle VehicleKit { get; set; }
         bool canModifyStats;
         public uint LastSanctuaryTime { get; set; }
-        uint m_transform;
+        uint m_transformSpell;
         bool m_cleanupDone; // lock made to not add stuff after cleanup before delete
         bool m_duringRemoveFromWorld; // lock made to not add stuff after begining removing from world
         bool _instantCast;

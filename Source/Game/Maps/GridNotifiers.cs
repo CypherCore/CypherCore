@@ -1905,7 +1905,7 @@ namespace Game.Maps
         public bool Invoke(Creature u)
         {
             if (u.IsAlive() && u.IsInCombat() && !i_obj.IsHostileTo(u) && i_obj.IsWithinDistInMap(u, i_range) &&
-                (u.IsFeared() || u.IsCharmed() || u.IsFrozen() || u.HasUnitState(UnitState.Stunned) || u.HasUnitState(UnitState.Confused)))
+                (u.IsFeared() || u.IsCharmed() || u.HasRootAura() || u.HasUnitState(UnitState.Stunned) || u.HasUnitState(UnitState.Confused)))
                 return true;
             return false;
         }

@@ -258,7 +258,7 @@ namespace Game.Entities
 
         public bool IsInDisallowedMountForm()
         {
-            return IsDisallowedMountForm(GetTransForm(), GetShapeshiftForm(), GetDisplayId());
+            return IsDisallowedMountForm(GetTransformSpell(), GetShapeshiftForm(), GetDisplayId());
         }
 
         public bool IsDisallowedMountForm(uint spellId, ShapeShiftForm form, uint displayId)
@@ -510,8 +510,8 @@ namespace Game.Entities
             base.CleanupsBeforeDelete(finalCleanup);
         }
 
-        public void SetTransForm(uint spellid) { m_transform = spellid; }
-        public uint GetTransForm() { return m_transform; }
+        public void SetTransformSpell(uint spellid) { m_transformSpell = spellid; }
+        public uint GetTransformSpell() { return m_transformSpell; }
 
         public Vehicle GetVehicleKit() { return VehicleKit; }
         public Vehicle GetVehicle() { return m_vehicle; }
