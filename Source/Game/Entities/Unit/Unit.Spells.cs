@@ -1076,7 +1076,7 @@ namespace Game.Entities
             return false;
         }
         
-        bool HasBreakableByDamageAuraType(AuraType type, uint excludeAura)
+        public bool HasBreakableByDamageAuraType(AuraType type, uint excludeAura = 0)
         {
             var auras = GetAuraEffectsByType(type);
             foreach (var eff in auras)

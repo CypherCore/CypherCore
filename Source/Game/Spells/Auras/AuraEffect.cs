@@ -1580,8 +1580,6 @@ namespace Game.Spells
                     }
                 }
             }
-
-            target.GetThreatManager().EvaluateSuppressed();
         }
 
         [AuraEffectHandler(AuraType.ModScale)]
@@ -2381,7 +2379,9 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             target.SetControlled(apply, UnitState.Confused);
-            target.GetThreatManager().EvaluateSuppressed();
+
+            if (apply)
+                target.GetThreatManager().EvaluateSuppressed();
         }
 
         [AuraEffectHandler(AuraType.ModFear)]
@@ -2393,7 +2393,6 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             target.SetControlled(apply, UnitState.Fleeing);
-            target.GetThreatManager().EvaluateSuppressed();
         }
 
         [AuraEffectHandler(AuraType.ModStun)]
@@ -2405,7 +2404,9 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             target.SetControlled(apply, UnitState.Stunned);
-            target.GetThreatManager().EvaluateSuppressed();
+
+            if (apply)
+                target.GetThreatManager().EvaluateSuppressed();
         }
 
         [AuraEffectHandler(AuraType.ModRoot)]
@@ -2418,7 +2419,6 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
 
             target.SetControlled(apply, UnitState.Root);
-            target.GetThreatManager().EvaluateSuppressed();
         }
 
         [AuraEffectHandler(AuraType.PreventsFleeing)]
@@ -2815,7 +2815,8 @@ namespace Game.Spells
                     target.RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags.StealthOrInvis);
             }
 
-            target.GetThreatManager().EvaluateSuppressed();
+            if (apply)
+                target.GetThreatManager().EvaluateSuppressed();
         }
 
         [AuraEffectHandler(AuraType.DamageImmunity)]
@@ -2827,7 +2828,8 @@ namespace Game.Spells
             Unit target = aurApp.GetTarget();
             m_spellInfo.ApplyAllSpellImmunitiesTo(target, GetSpellEffectInfo(), apply);
 
-            target.GetThreatManager().EvaluateSuppressed();
+            if (apply)
+                target.GetThreatManager().EvaluateSuppressed();
         }
 
         [AuraEffectHandler(AuraType.DispelImmunity)]

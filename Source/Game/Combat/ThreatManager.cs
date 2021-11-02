@@ -891,7 +891,11 @@ namespace Game.Combat
         {
             if (_victim.IsImmunedToDamage(_owner.GetMeleeDamageSchoolMask()))
                 return true;
-            if (_victim.HasBreakableByDamageCrowdControlAura())
+
+            if (_victim.HasAuraType(AuraType.ModConfuse))
+                return true;
+
+            if (_victim.HasBreakableByDamageAuraType(AuraType.ModStun))
                 return true;
 
             return false;
