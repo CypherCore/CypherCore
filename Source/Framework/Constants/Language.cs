@@ -956,19 +956,22 @@ namespace Framework.Constants
         GuildInfoBankGold = 1181,
         GuildInfoMotd = 1182,
         GuildInfoExtraInfo = 1183,
-        GuildInfoLevel = 1184,
-        AccountBnetLinked = 1185,
-        AccountOrBnetDoesNotExist = 1186,
-        AccountAlreadyLinked = 1187,
-        AccountBnetUnlinked = 1188,
-        AccountBnetNotLinked = 1189,
-        DisallowTicketsConfig = 1190,
-        BanExists = 1191,
-        ChangeAccountSuccess = 1192,
-        NotInRaidGroup = 1193,
-        GroupRoleChanged = 1194,
-        LeaderCannotBeAssistant = 1195,
-        // Room for more level 3              1196-1198 not used
+        ChangeAccountSuccess = 1184,             // log
+        GroupNotInRaidGroup = 1185,
+        GroupRoleChanged = 1186,
+        LeaderCannotBeAssistant = 1187,
+        BanExists = 1188,
+        CommandNoInstancesMatch = 1189,
+        CommandMultipleInstancesMatch = 1190,
+        CommandMultipleInstancesEntry = 1191,
+        CommandMapNotInstance = 1192,
+        CommandInstanceNoEntrance = 1193,
+        CommandInstanceNoExit = 1194,
+        CommandWentToInstanceGate = 1195,
+        CommandWentToInstanceStart = 1196,
+        CommandGoInstanceFailed = 1197,
+        CommandGoInstanceStartFailed = 1198, // 3.3.5 RESERVED
+                                             // Room for more level 3                1199 not used
 
         // Debug Commands
         CinematicNotExist = 1200,
@@ -976,7 +979,22 @@ namespace Framework.Constants
         DebugAreatriggerOn = 1202,
         DebugAreatriggerOff = 1203,
         DebugAreatriggerEntered = 1204,
-        // 1205-1999 - free
+
+        CommandNoBossesMatch = 1205, // 3.3.5 Reserved
+        CommandMultipleBossesMatch = 1206, // 3.3.5 Reserved
+        CommandMultipleBossesEntry = 1207, // 3.3.5 Reserved
+        CommandBossMultipleSpawns = 1208, // 3.3.5 Reserved
+        CommandBossMultipleSpawnEty = 1209, // 3.3.5 Reserved
+        CommandGoBossFailed = 1210, // 3.3.5 Reserved
+        CommandWentToBoss = 1211, // 3.3.5 Reserved
+        GuildInfoLevel = 1212,
+        AccountBnetLinked = 1213,
+        AccountOrBnetDoesNotExist = 1214,
+        AccountAlreadyLinked = 1215,
+        AccountBnetUnlinked = 1216,
+        AccountBnetNotLinked = 1217,
+        DisallowTicketsConfig = 1218,
+        // 1219-1499 - free
 
         DebugAreatriggerLeft = 1999,
         // Ticket Strings 2003-2028

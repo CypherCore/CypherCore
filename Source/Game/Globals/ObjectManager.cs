@@ -5508,6 +5508,7 @@ namespace Game
             Cypher.Assert(false, $"Spawn data ({data.type},{data.spawnId}) being removed is member of spawn group {data.spawnGroupData.groupId}, but not actually listed in the lookup table for that group!");
         }
 
+        public Dictionary<uint, InstanceTemplate> GetInstanceTemplates() { return instanceTemplateStorage; }
         public InstanceTemplate GetInstanceTemplate(uint mapID)
         {
             return instanceTemplateStorage.LookupByKey(mapID);

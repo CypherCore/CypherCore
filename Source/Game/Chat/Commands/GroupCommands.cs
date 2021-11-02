@@ -387,7 +387,7 @@ namespace Game.Chat
 
                 if (!group.IsRaidGroup())
                 {
-                    handler.SendSysMessage(CypherStrings.NotInRaidGroup, player.GetName());
+                    handler.SendSysMessage(CypherStrings.GroupNotInRaidGroup, player.GetName());
                     return false;
                 }
 
