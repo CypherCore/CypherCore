@@ -283,15 +283,15 @@ namespace Framework.Constants
         CommandGmList = 375,
         CommandGmVisible = 376,
         CommandGo = 377,
-        CommandGoCreature = 378,
-        CommandGoGraveyard = 379,
-        CommandGoGrid = 380,
-        CommandGoObject = 381,
-        CommandGoTaxinode = 382,
-        CommandGoTicket = 383, // Deprecated Since Draenor Don'T Reuse
-        CommandGoTrigger = 384,
-        CommandGoXyz = 385,
-        CommandGoZonexy = 386,
+        //                                                       = 378, // DEPRECATED: DON'T REUSE
+        //                                                       = 379, // DEPRECATED: DON'T REUSE
+        //                                                       = 380, // DEPRECATED: DON'T REUSE
+        //                                                       = 381, // DEPRECATED: DON'T REUSE
+        //                                                       = 382, // DEPRECATED: DON'T REUSE
+        //                                                       = 383, // DEPRECATED: DON'T REUSE
+        //                                                       = 384, // DEPRECATED: DON'T REUSE
+        //                                                       = 385, // DEPRECATED: DON'T REUSE
+        //                                                       = 386, // DEPRECATED: DON'T REUSE
         CommandGobject = 387,
         CommandGobjectActivate = 388,
         CommandGobjectAdd = 389,
@@ -704,9 +704,9 @@ namespace Framework.Constants
         CommandInstanceGetBossState = 796,
         CommandPvpstats = 797,
         CommandModifyXp = 798,
-        CommandGoBugTicket = 799,
-        CommandGoComplaintTicket = 800,
-        CommandGoSuggestionTicket = 801,
+        //                                                       = 799, // DEPRECATED: DON'T REUSE
+        //                                                       = 800, // DEPRECATED: DON'T REUSE
+        //                                                       = 801, // DEPRECATED: DON'T REUSE
         CommandTicketBug = 802,
         CommandTicketComplaint = 803,
         CommandTicketSuggestion = 804,
@@ -739,7 +739,7 @@ namespace Framework.Constants
         CommandTicketResetBug = 831,
         CommandTicketResetComplaint = 832,
         CommandTicketResetSuggestion = 833,
-        CommandGoQuest = 834,
+        //                                                       = 834, // DEPRECATED: DON'T REUSE
         CommandDebugLoadcells = 835,
         CommandDebugBoundary = 836,
         CommandNpcEvade = 837,
@@ -757,7 +757,7 @@ namespace Framework.Constants
         CommandListScenes = 849,
         CommandReloadSceneTemplate = 850,
         CommandReloadAreatriggerTemplate = 851,
-        CommandGoOffset = 852,
+        //                                                       = 852, // DEPRECATED: DON'T REUSE
         CommandReloadConversationTemplate = 853,
         CommandDebugConversation = 854,
         CommandDebugPlayMusic = 855,
@@ -779,7 +779,7 @@ namespace Framework.Constants
         CommandDebugInstancespawn = 871,
         CommandServerDebug = 872,
         CommandReloadCreatureMovementOverride = 873,
-        // 874 previously used, do not reuse
+        //                                                       = 874, // DEPRECATED: DON'T REUSE
         CommandLookupMapId = 875,
         CommandLookupItemId = 876,
         CommandLookupQuestId = 877,
