@@ -2907,7 +2907,7 @@ namespace Game.Entities
                         {
                             bool buildUpdateBlock = false;
                             for (var i = 0; i < conds.Count && !buildUpdateBlock; ++i)
-                                if (conds[i].ConditionType == ConditionTypes.QuestRewarded || conds[i].ConditionType == ConditionTypes.QuestTaken)
+                                if (conds[i].ConditionType == ConditionTypes.QuestRewarded || conds[i].ConditionType == ConditionTypes.QuestTaken || conds[i].ConditionType == ConditionTypes.QuestComplete)
                                     buildUpdateBlock = true;
 
                             if (buildUpdateBlock)
