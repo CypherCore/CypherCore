@@ -5558,7 +5558,7 @@ namespace Game.Maps
 
         public uint AreaId;
         public float FloorZ;
-        public bool outdoors;
+        public bool outdoors = true;
         public ZLiquidStatus LiquidStatus;
         public Optional<AreaInfo> areaInfo;
         public Optional<LiquidData> LiquidInfo;

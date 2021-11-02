@@ -578,7 +578,7 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            RankID = _worldPacket.ReadInt32();
+            RankID = _worldPacket.ReadUInt8();
             RankOrder = _worldPacket.ReadInt32();
             Flags = _worldPacket.ReadUInt32();
             WithdrawGoldLimit = _worldPacket.ReadUInt32();
@@ -597,7 +597,7 @@ namespace Game.Networking.Packets
             OldFlags = _worldPacket.ReadUInt32();
         }
 
-        public int RankID;
+        public byte RankID;
         public int RankOrder;
         public uint WithdrawGoldLimit;
         public uint Flags;

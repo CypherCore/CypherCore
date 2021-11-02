@@ -1106,7 +1106,7 @@ namespace Game
                     break;
                 default:
                     Log.outError(LogFilter.Sql, $"{cond.ToString()} Invalid ConditionSourceType in `condition` table, ignoring.");
-                    break;
+                    return false;
             }
 
             return true;

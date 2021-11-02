@@ -211,47 +211,6 @@ namespace Scripts.World.Areatriggers
     }
 
     [Script]
-    class AreaTrigger_at_last_rites : AreaTriggerScript
-    {
-        public AreaTrigger_at_last_rites() : base("at_last_rites") { }
-
-        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger, bool entered)
-        {
-            if (!(player.GetQuestStatus(QuestIds.LastRites) == QuestStatus.Incomplete ||
-                player.GetQuestStatus(QuestIds.LastRites) == QuestStatus.Complete ||
-                player.GetQuestStatus(QuestIds.BreakingThrough) == QuestStatus.Incomplete ||
-                player.GetQuestStatus(QuestIds.BreakingThrough) == QuestStatus.Complete))
-                return false;
-
-            WorldLocation pPosition;
-
-            switch (areaTrigger.Id)
-            {
-                case 5332:
-                case 5338:
-                    pPosition = new WorldLocation(571, 3733.68f, 3563.25f, 290.812f, 3.665192f);
-                    break;
-                case 5334:
-                    pPosition = new WorldLocation(571, 3802.38f, 3585.95f, 49.5765f, 0.0f);
-                    break;
-                case 5340:
-                    if (player.GetQuestStatus(QuestIds.LastRites) == QuestStatus.Incomplete ||
-                        player.GetQuestStatus(QuestIds.LastRites) == QuestStatus.Complete)
-                        pPosition = new WorldLocation(571, 3687.91f, 3577.28f, 473.342f);
-                    else
-                        pPosition = new WorldLocation(571, 3739.38f, 3567.09f, 341.58f);
-                    break;
-                default:
-                    return false;
-            }
-
-            player.TeleportTo(pPosition);
-
-            return false;
-        }
-    }
-
-    [Script]
     class AreaTrigger_at_sholazar_waygate : AreaTriggerScript
     {
         public AreaTrigger_at_sholazar_waygate() : base("at_sholazar_waygate") { }

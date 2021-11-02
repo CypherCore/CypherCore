@@ -467,8 +467,8 @@ namespace Game.Entities
                 if (IsCharmed())
                     RemoveCharmedBy(null);
 
-                Cypher.Assert(!GetCharmedGUID().IsEmpty(), $"Unit {GetEntry()} has charmed guid when removed from world");
-                Cypher.Assert(!GetCharmerGUID().IsEmpty(), $"Unit {GetEntry()} has charmer guid when removed from world");
+                Cypher.Assert(GetCharmedGUID().IsEmpty(), $"Unit {GetEntry()} has charmed guid when removed from world");
+                Cypher.Assert(GetCharmerGUID().IsEmpty(), $"Unit {GetEntry()} has charmer guid when removed from world");
 
                 Unit owner = GetOwner();
                 if (owner != null)

@@ -659,7 +659,6 @@ namespace Game.Combat
             void fillSharedPacketDataAndSend(dynamic packet)
             {
                 packet.UnitGUID = _owner.GetGUID();
-                packet.ThreatList.reserve(_sortedThreatList.Count);
 
                 foreach (ThreatReference refe in _sortedThreatList)
                 {
