@@ -933,8 +933,14 @@ namespace Game.DungeonFinding
                 grp.SetLfgRoles(pguid, proposal.players.LookupByKey(pguid).role);
 
                 // Add the cooldown spell if queued for a random dungeon
-                if (dungeon.type == LfgType.RandomDungeon)
-                    player.CastSpell(player, SharedConst.LFGSpellDungeonCooldown, false);
+                var dungeons = GetSelectedDungeons(player.GetGUID());
+                if (!dungeons.Empty())
+                {
+                    uint rDungeonId = dungeons[0];
+                    LFGDungeonData rDungeon = GetLFGDungeon(rDungeonId);
+                    if (rDungeon != null && rDungeon.type == LfgType.RandomDungeon)
+                        player.CastSpell(player, SharedConst.LFGSpellDungeonCooldown, false);
+                }
             }
 
             grp.SetDungeonDifficultyID(dungeon.difficulty);
