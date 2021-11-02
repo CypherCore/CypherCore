@@ -33,7 +33,8 @@ namespace Game.Combat
         public Unit _owner;
         bool _ownerCanHaveThreatList;
         bool _ownerEngaged;
-        
+
+        public bool NeedClientUpdate;
         uint _updateTimer;
         List<ThreatReference> _sortedThreatList = new();
         Dictionary<ObjectGuid, ThreatReference> _myThreatListEntries = new();
@@ -415,10 +416,14 @@ namespace Game.Combat
         void UpdateVictim()
         {
             ThreatReference newVictim = ReselectVictim();
-            bool newHighest = (newVictim != _currentVictimRef);
+            bool newHighest = newVictim != null && (newVictim != _currentVictimRef);
 
             _currentVictimRef = newVictim;
-            SendThreatListToClients(newVictim != null && newHighest);
+            if (newHighest || NeedClientUpdate)
+            {
+                SendThreatListToClients(newHighest);
+                NeedClientUpdate = false;
+            }
 
         }
 
@@ -688,6 +693,7 @@ namespace Game.Combat
 
         void PutThreatListRef(ObjectGuid guid, ThreatReference refe)
         {
+            NeedClientUpdate = true;
             Cypher.Assert(!_myThreatListEntries.ContainsKey(guid), $"Duplicate threat reference being inserted on {_owner.GetGUID()} for {guid}!");
             _myThreatListEntries[guid] = refe;
             _sortedThreatList.Add(refe);
@@ -813,6 +819,7 @@ namespace Game.Combat
 
             _baseAmount = Math.Max(_baseAmount + amount, 0.0f);
             ListNotifyChanged();
+            _mgr.NeedClientUpdate = true;
         }
 
         public void ScaleThreat(float factor)
@@ -822,6 +829,7 @@ namespace Game.Combat
 
             _baseAmount *= factor;
             ListNotifyChanged();
+            _mgr.NeedClientUpdate = true;
         }
 
         public void UpdateOffline()
@@ -897,6 +905,7 @@ namespace Game.Combat
             Extensions.Swap(ref state, ref _taunted);
 
             ListNotifyChanged();
+            _mgr.NeedClientUpdate = true;
         }
 
         public void ClearThreat()
