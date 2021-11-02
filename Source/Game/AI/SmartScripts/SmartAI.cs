@@ -732,9 +732,16 @@ namespace Game.AI
                 else
                     me.SetWalk(!_run);
 
-                Unit charmer = me.GetCharmer();
-                if (charmer)
-                    AttackStart(charmer);
+                if (!me.LastCharmerGUID.IsEmpty())
+                {
+                    if (!me.HasReactState(ReactStates.Passive))
+                    {
+                        Unit lastCharmer = Global.ObjAccessor.GetUnit(me, me.LastCharmerGUID);
+                        if (lastCharmer != null)
+                            me.EngageWithTarget(lastCharmer);
+                    }
+                    me.LastCharmerGUID.Clear();
+                }
             }
 
             GetScript().ProcessEventsFor(SmartEvents.Charmed, null, 0, 0, charmed);

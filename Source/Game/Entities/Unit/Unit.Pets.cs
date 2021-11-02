@@ -329,13 +329,6 @@ namespace Game.Entities
                 GetMotionMaster().Clear(MovementGeneratorPriority.Normal);
 
                 StopMoving();
-
-                // AI will schedule its own change if appropriate
-                UnitAI ai = GetAI();
-                if (ai != null)
-                    ai.OnCharmed(false);
-                else
-                    ScheduleAIChange();
             }
             else
             {
@@ -344,16 +337,6 @@ namespace Game.Entities
                 {
                     if (player.IsAFK())
                         player.ToggleAFK();
-
-                    if (charmer.IsTypeId(TypeId.Unit)) // we are charmed by a creature
-                    {
-                        // change AI to charmed AI on next Update tick
-                        UnitAI ai = GetAI();
-                        if (ai != null)
-                            ai.OnCharmed(false);
-                        else
-                            player.ScheduleAIChange();
-                    }
 
                     player.SetClientControl(this, false);
                 }
@@ -416,6 +399,16 @@ namespace Game.Entities
             }
 
             AddUnitState(UnitState.Charmed);
+
+            if (!IsPlayer() || !charmer.IsPlayer())
+            {
+                // AI will schedule its own change if appropriate
+                UnitAI ai = GetAI();
+                if (ai != null)
+                    ai.OnCharmed(false);
+                else
+                    ScheduleAIChange();
+            }
             return true;
         }
 
@@ -424,10 +417,12 @@ namespace Game.Entities
             if (!IsCharmed())
                 return;
 
-            if (!charmer)
+            if (charmer)
+                Cypher.Assert(charmer == GetCharmer());
+            else
                 charmer = GetCharmer();
-            if (charmer != GetCharmer()) // one aura overrides another?
-                return;
+
+            Cypher.Assert(charmer);
 
             CharmType type;
             if (HasUnitState(UnitState.Possessed))
@@ -454,10 +449,6 @@ namespace Game.Entities
             // Vehicle should not attack its passenger after he exists the seat
             if (type != CharmType.Vehicle)
                 LastCharmerGUID = charmer.GetGUID();
-
-            // If charmer still exists
-            if (!charmer)
-                return;
 
             Cypher.Assert(type != CharmType.Possess || charmer.IsTypeId(TypeId.Player));
             Cypher.Assert(type != CharmType.Vehicle || (IsTypeId(TypeId.Unit) && IsVehicle()));
@@ -500,6 +491,20 @@ namespace Game.Entities
                 }
             }
 
+            Player player = ToPlayer();
+            if (player != null)
+                player.SetClientControl(this, true);
+
+            if (playerCharmer && this != charmer.GetFirstControlled())
+                playerCharmer.SendRemoveControlBar();
+
+            // a guardian should always have charminfo
+            if (!IsGuardian())
+                DeleteCharmInfo();
+
+            // reset confused movement for example
+            ApplyControlStatesIfNeeded();
+
             if (!IsPlayer() || charmer.IsCreature())
             {
                 UnitAI charmedAI = GetAI();
@@ -508,19 +513,6 @@ namespace Game.Entities
                 else
                     ScheduleAIChange();
             }
-
-            Player player = ToPlayer();
-            if (player != null)
-                player.SetClientControl(this, true);
-
-            // a guardian should always have charminfo
-            if (playerCharmer && this != charmer.GetFirstControlled())
-                playerCharmer.SendRemoveControlBar();
-            else if (IsTypeId(TypeId.Player) || (IsTypeId(TypeId.Unit) && !IsGuardian()))
-                DeleteCharmInfo();
-
-            // reset confused movement for example
-            ApplyControlStatesIfNeeded();
         }
 
         public void GetAllMinionsByEntry(List<TempSummon> Minions, uint entry)

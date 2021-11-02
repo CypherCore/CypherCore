@@ -41,10 +41,11 @@ namespace Game.Entities
             for (var i = 0; i < SharedConst.ActionBarIndexMax; ++i)
                 PetActionBar[i] = new UnitActionBarEntry();
 
-            if (_unit.IsTypeId(TypeId.Unit))
+            Creature creature = _unit.ToCreature();
+            if (creature != null)
             {
-                _oldReactState = _unit.ToCreature().GetReactState();
-                _unit.ToCreature().SetReactState(ReactStates.Passive);
+                _oldReactState = creature.GetReactState();
+                creature.SetReactState(ReactStates.Passive);
             }
         }
 
