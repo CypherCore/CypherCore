@@ -121,7 +121,9 @@ namespace Game.Maps
                     if (loginInstanceId != 0) // if the player has a saved instance id on login, we either use this instance or relocate him out (return null)
                     {
                         map = FindInstanceMap(loginInstanceId);
-                        return (map && map.GetId() == GetId()) ? map : null; // is this check necessary? or does MapInstanced only find instances of itself?
+                        if (map == null && pSave != null && pSave.GetInstanceId() == loginInstanceId)
+                            map = CreateInstance(loginInstanceId, pSave, pSave.GetDifficultyID(), player.GetTeamId());
+                        return map;
                     }
 
                     InstanceBind groupBind;
@@ -286,7 +288,6 @@ namespace Game.Maps
     {
         public uint Parent;
         public uint ScriptId;
-        public bool AllowMount;
     }
 
     public class InstanceBind
