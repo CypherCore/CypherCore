@@ -2343,20 +2343,20 @@ namespace Game.Entities
                 return false;
 
             // ignore immunity flags when assisting
-            if (bySpell == null || !(isPositiveSpell && bySpell.HasAttribute(SpellAttr6.AssistIgnoreImmuneFlag)))
+            if (unit != null && unitTarget != null && !(isPositiveSpell && bySpell.HasAttribute(SpellAttr6.AssistIgnoreImmuneFlag)))
             {
-                if (unit != null && !unit.HasUnitFlag(UnitFlags.PlayerControlled) && unitTarget != null && unitTarget.IsImmuneToNPC())
+                if (!unit.HasUnitFlag(UnitFlags.PlayerControlled) && unitTarget.IsImmuneToNPC())
                     return false;
 
-                if (unitTarget != null && !unitTarget.HasUnitFlag(UnitFlags.PlayerControlled) && unit && unit.IsImmuneToNPC())
+                if (!unitTarget.HasUnitFlag(UnitFlags.PlayerControlled) && unit.IsImmuneToNPC())
                     return false;
 
                 if (bySpell == null || !bySpell.HasAttribute(SpellAttr8.AttackIgnoreImmuneToPCFlag))
                 {
-                    if (unit != null && unit.HasUnitFlag(UnitFlags.PlayerControlled) && unitTarget && unitTarget.IsImmuneToPC())
+                    if (unit.HasUnitFlag(UnitFlags.PlayerControlled) && unitTarget.IsImmuneToPC())
                         return false;
 
-                    if (unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.PlayerControlled) && unit && unit.IsImmuneToPC())
+                    if (unitTarget.HasUnitFlag(UnitFlags.PlayerControlled) && unit.IsImmuneToPC())
                         return false;
                 }
             }
