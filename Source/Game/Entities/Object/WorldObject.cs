@@ -2343,7 +2343,7 @@ namespace Game.Entities
                 return false;
 
             // ignore immunity flags when assisting
-            if (bySpell == null || (isPositiveSpell && !bySpell.HasAttribute(SpellAttr6.AssistIgnoreImmuneFlag)))
+            if (bySpell == null || !(isPositiveSpell && bySpell.HasAttribute(SpellAttr6.AssistIgnoreImmuneFlag)))
             {
                 if (unit != null && !unit.HasUnitFlag(UnitFlags.PlayerControlled) && unitTarget != null && unitTarget.IsImmuneToNPC())
                     return false;
