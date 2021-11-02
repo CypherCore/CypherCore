@@ -5315,15 +5315,6 @@ namespace Game.Spells
                         if (unitCaster.IsInWater() && m_spellInfo.HasAura(AuraType.ModIncreaseMountedFlightSpeed))
                             return SpellCastResult.OnlyAbovewater;
 
-                        // Ignore map check if spell have AreaId. AreaId already checked and this prevent special mount spells
-                        bool allowMount = !unitCaster.GetMap().IsDungeon() || unitCaster.GetMap().IsBattlegroundOrArena();
-                        InstanceTemplate it = Global.ObjectMgr.GetInstanceTemplate(unitCaster.GetMapId());
-                        if (it != null)
-                            allowMount = it.AllowMount;
-
-                        if (unitCaster.IsTypeId(TypeId.Player) && !allowMount && m_spellInfo.RequiredAreasID == 0)
-                            return SpellCastResult.NoMountsAllowed;
-
                         if (unitCaster.IsInDisallowedMountForm())
                         {
                             SendMountResult(MountResult.Shapeshifted); // mount result gets sent before the cast result

@@ -4993,9 +4993,9 @@ namespace Game
         public void LoadInstanceTemplate()
         {
             var time = Time.GetMSTime();
-            //                                          0     1       2        4
-            SQLResult result = DB.World.Query("SELECT map, parent, script, allowMount FROM instance_template");
 
+            //                                          0     1       2
+            SQLResult result = DB.World.Query("SELECT map, parent, script FROM instance_template");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 instance templates. DB table `instance_template` is empty!");
@@ -5014,7 +5014,6 @@ namespace Game
                 }
 
                 var instanceTemplate = new InstanceTemplate();
-                instanceTemplate.AllowMount = result.Read<bool>(3);
                 instanceTemplate.Parent = result.Read<uint>(1);
                 instanceTemplate.ScriptId = Global.ObjectMgr.GetScriptId(result.Read<string>(2));
 

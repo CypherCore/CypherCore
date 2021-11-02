@@ -351,7 +351,6 @@ namespace Game
                 }
             }
 
-            bool allowMount = !mapEntry.IsDungeon() || mapEntry.IsBattlegroundOrArena();
             if (mInstance != null)
             {
                 // check if this instance has a reset time and send it to player if so
@@ -373,14 +372,7 @@ namespace Game
                 // check if instance is valid
                 if (!GetPlayer().CheckInstanceValidity(false))
                     GetPlayer().m_InstanceValid = false;
-
-                // instance mounting is handled in InstanceTemplate
-                allowMount = mInstance.AllowMount;
             }
-
-            // mount allow check
-            if (!allowMount)
-                GetPlayer().RemoveAurasByType(AuraType.Mounted);
 
             // update zone immediately, otherwise leave channel will cause crash in mtmap
             uint newzone, newarea;
