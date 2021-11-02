@@ -63,9 +63,6 @@ namespace Game.Entities
             // Register the creature for guid lookup
             if (!IsInWorld)
             {
-                if (m_zoneScript != null)
-                    m_zoneScript.OnCreatureCreate(this);
-
                 GetMap().GetObjectsStore().Add(GetGUID(), this);
                 if (m_spawnId != 0)
                     GetMap().GetCreatureBySpawnIdStore().Add(m_spawnId, this);
@@ -75,6 +72,9 @@ namespace Game.Entities
                 InitializeAI();
                 if (IsVehicle())
                     GetVehicleKit().Install();
+
+                if (m_zoneScript != null)
+                    m_zoneScript.OnCreatureCreate(this);
             }
         }
 
