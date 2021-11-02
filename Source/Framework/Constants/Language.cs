@@ -1023,7 +1023,7 @@ namespace Framework.Constants
         Battleground = 5015,
         Arena = 5016,
         Raid = 5017,
-        NpcinfoPhaseIds = 5018,
+        NpcinfoReactState = 5018,
         CommandTempFrozenPlayer = 5019,
         NpcinfoPhases = 5020,
         NpcinfoArmor = 5021,
@@ -1101,8 +1101,9 @@ namespace Framework.Constants
         NpcinfoUnitFieldFlags2 = 5084,
         NpcinfoUnitFieldFlags3 = 5085,
         NpcinfoNpcFlags = 5086,
+        NpcinfoPhaseIds = 5087,
 
-        // Room For More Trinity Strings      5087-6603
+        // Room For More Trinity Strings      5088-6603
 
         // Level Requirement Notifications
         SayReq = 6604,
