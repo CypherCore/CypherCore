@@ -185,7 +185,7 @@ namespace Game.AI
                         else if (IsPlayer(target) && _me != null)
                         {
                             Unit templastInvoker = GetLastInvoker();
-                            Global.CreatureTextMgr.SendChat(_me, (byte)e.Action.talk.textGroupId, IsPlayer(templastInvoker) ? templastInvoker : null, ChatMsg.Addon, Language.Addon, CreatureTextRange.Normal, 0, Team.Other, false, target.ToPlayer());
+                            Global.CreatureTextMgr.SendChat(_me, (byte)e.Action.talk.textGroupId, IsPlayer(templastInvoker) ? templastInvoker : null, ChatMsg.Addon, Language.Addon, CreatureTextRange.Normal, 0, SoundKitPlayType.Normal, Team.Other, false, target.ToPlayer());
                         }
                         Log.outDebug(LogFilter.ScriptsAi, "SmartScript.ProcessAction. SMART_ACTION_SIMPLE_TALK: talker: {0} (GuidLow: {1}), textGroupId: {2}",
                             target.GetName(), target.GetGUID().ToString(), e.Action.talk.textGroupId);

@@ -629,7 +629,7 @@ namespace Game.BattleFields
                     killer.CastSpell(killer, WGSpells.Corporal, true);
                     Creature stalker = GetCreature(StalkerGuid);
                     if (stalker)
-                        Global.CreatureTextMgr.SendChat(stalker, WintergraspText.RankCorporal, killer, ChatMsg.Addon, Language.Addon, CreatureTextRange.Normal, 0, Team.Other, false, killer);
+                        Global.CreatureTextMgr.SendChat(stalker, WintergraspText.RankCorporal, killer, ChatMsg.Addon, Language.Addon, CreatureTextRange.Normal, 0, SoundKitPlayType.Normal, Team.Other, false, killer);
                 }
                 else
                     killer.CastSpell(killer, WGSpells.Recruit, true);
@@ -642,7 +642,7 @@ namespace Game.BattleFields
                     killer.CastSpell(killer, WGSpells.Lieutenant, true);
                     Creature stalker = GetCreature(StalkerGuid);
                     if (stalker)
-                        Global.CreatureTextMgr.SendChat(stalker, WintergraspText.RankFirstLieutenant, killer, ChatMsg.Addon, Language.Addon, CreatureTextRange.Normal, 0, Team.Other, false, killer);
+                        Global.CreatureTextMgr.SendChat(stalker, WintergraspText.RankFirstLieutenant, killer, ChatMsg.Addon, Language.Addon, CreatureTextRange.Normal, 0, SoundKitPlayType.Normal, Team.Other, false, killer);
                 }
                 else
                     killer.CastSpell(killer, WGSpells.Corporal, true);

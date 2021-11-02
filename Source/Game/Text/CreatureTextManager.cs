@@ -67,32 +67,38 @@ namespace Game
                 temp.emote = (Emote)result.Read<uint>(7);
                 temp.duration = result.Read<uint>(8);
                 temp.sound = result.Read<uint>(9);
-                temp.BroadcastTextId = result.Read<uint>(10);
-                temp.TextRange = (CreatureTextRange)result.Read<byte>(11);
+                temp.SoundPlayType = (SoundKitPlayType)result.Read<byte>(10);
+                temp.BroadcastTextId = result.Read<uint>(11);
+                temp.TextRange = (CreatureTextRange)result.Read<byte>(12);
 
                 if (temp.sound != 0)
                 {
                     if (!CliDB.SoundKitStorage.ContainsKey(temp.sound))
                     {
-                        Log.outError(LogFilter.Sql, "GossipManager:  Entry {0}, Group {1} in table `creature_texts` has Sound {2} but sound does not exist.", temp.creatureId, temp.groupId, temp.sound);
+                        Log.outError(LogFilter.Sql, $"GossipManager: Entry {temp.creatureId}, Group {temp.groupId} in table `creature_texts` has Sound {temp.sound} but sound does not exist.");
                         temp.sound = 0;
                     }
                 }
+                if (temp.SoundPlayType >= SoundKitPlayType.Max)
+                {
+                    Log.outError(LogFilter.Sql, $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId} in table `creature_text` has PlayType {temp.SoundPlayType} but does not exist.");
+                    temp.SoundPlayType = SoundKitPlayType.Normal;
+                }
                 if (temp.lang != Language.Universal && !Global.LanguageMgr.IsLanguageExist(temp.lang))
                 {
-                    Log.outError(LogFilter.Sql, "GossipManager:  Entry {0}, Group {1} in table `creature_texts` using Language {2} but Language does not exist.", temp.creatureId, temp.groupId, temp.lang);
+                    Log.outError(LogFilter.Sql, $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId} in table `creature_texts` using Language {temp.lang} but Language does not exist.");
                     temp.lang = Language.Universal;
                 }
                 if (temp.type >= ChatMsg.Max)
                 {
-                    Log.outError(LogFilter.Sql, "GossipManager:  Entry {0}, Group {1} in table `creature_texts` has Type {2} but this Chat Type does not exist.", temp.creatureId, temp.groupId, temp.type);
+                    Log.outError(LogFilter.Sql, $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId} in table `creature_texts` has Type {temp.type} but this Chat Type does not exist.");
                     temp.type = ChatMsg.Say;
                 }
                 if (temp.emote != 0)
                 {
                     if (!CliDB.EmotesStorage.ContainsKey((uint)temp.emote))
                     {
-                        Log.outError(LogFilter.Sql, "GossipManager:  Entry {0}, Group {1} in table `creature_texts` has Emote {2} but emote does not exist.", temp.creatureId, temp.groupId, temp.emote);
+                        Log.outError(LogFilter.Sql, $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId} in table `creature_texts` has Emote {temp.emote} but emote does not exist.");
                         temp.emote = Emote.OneshotNone;
                     }
                 }
@@ -101,14 +107,14 @@ namespace Game
                 {
                     if (!CliDB.BroadcastTextStorage.ContainsKey(temp.BroadcastTextId))
                     {
-                        Log.outError(LogFilter.Sql, "CreatureTextMgr: Entry {0}, Group {1}, Id {2} in table `creature_texts` has non-existing or incompatible BroadcastTextId {3}.", temp.creatureId, temp.groupId, temp.id, temp.BroadcastTextId);
+                        Log.outError(LogFilter.Sql, $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId}, Id {temp.id} in table `creature_texts` has non-existing or incompatible BroadcastTextId {temp.BroadcastTextId}.");
                         temp.BroadcastTextId = 0;
                     }
                 }
 
                 if (temp.TextRange > CreatureTextRange.Personal)
                 {
-                    Log.outError(LogFilter.Sql, "CreatureTextMgr: Entry {0}, Group {1}, Id {2} in table `creature_text` has incorrect TextRange {3}.", temp.creatureId, temp.groupId, temp.id, temp.TextRange);
+                    Log.outError(LogFilter.Sql, $"CreatureTextMgr: Entry {temp.creatureId}, Group {temp.groupId}, Id {temp.id} in table `creature_text` has incorrect TextRange {temp.TextRange}.");
                     temp.TextRange = CreatureTextRange.Normal;
                 }
 
@@ -122,7 +128,7 @@ namespace Game
                 ++textCount;
             } while (result.NextRow());
 
-            Log.outInfo(LogFilter.ServerLoading, "Loaded {0} creature texts for {1} creatures in {2} ms", textCount, creatureCount, Time.GetMSTimeDiffToNow(oldMSTime));
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {textCount} creature texts for {creatureCount} creatures in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
         }
 
         public void LoadCreatureTextLocales()
@@ -159,7 +165,7 @@ namespace Game
         }
 
         public uint SendChat(Creature source, byte textGroup, WorldObject whisperTarget = null, ChatMsg msgType = ChatMsg.Addon, Language language = Language.Addon,
-            CreatureTextRange range = CreatureTextRange.Normal, uint sound = 0, Team team = Team.Other, bool gmOnly = false, Player srcPlr = null)
+            CreatureTextRange range = CreatureTextRange.Normal, uint sound = 0, SoundKitPlayType playType = SoundKitPlayType.Normal, Team team = Team.Other, bool gmOnly = false, Player srcPlr = null)
         {
             if (source == null)
                 return 0;
@@ -196,8 +202,12 @@ namespace Game
             ChatMsg finalType = (msgType == ChatMsg.Addon) ? textEntry.type : msgType;
             Language finalLang = (language == Language.Addon) ? textEntry.lang : language;
             uint finalSound = textEntry.sound;
+            SoundKitPlayType finalPlayType = textEntry.SoundPlayType;
             if (sound != 0)
+            {
                 finalSound = sound;
+                finalPlayType = playType;
+            }
             else
             {
                 BroadcastTextRecord bct = CliDB.BroadcastTextStorage.LookupByKey(textEntry.BroadcastTextId);
@@ -213,7 +223,7 @@ namespace Game
                 range = textEntry.TextRange;
 
             if (finalSound != 0)
-                SendSound(source, finalSound, finalType, whisperTarget, range, team, gmOnly, textEntry.BroadcastTextId);
+                SendSound(source, finalSound, finalType, whisperTarget, range, team, gmOnly, textEntry.BroadcastTextId, finalPlayType);
 
             Unit finalSource = source;
             if (srcPlr)
@@ -256,12 +266,23 @@ namespace Game
             return dist;
         }
 
-        public void SendSound(Creature source, uint sound, ChatMsg msgType, WorldObject whisperTarget = null, CreatureTextRange range = CreatureTextRange.Normal, Team team = Team.Other, bool gmOnly = false, uint keyBroadcastTextId = 0)
+        public void SendSound(Creature source, uint sound, ChatMsg msgType, WorldObject whisperTarget = null, CreatureTextRange range = CreatureTextRange.Normal, Team team = Team.Other, bool gmOnly = false, uint keyBroadcastTextId = 0, SoundKitPlayType playType = SoundKitPlayType.Normal)
         {
             if (sound == 0 || !source)
                 return;
 
-            SendNonChatPacket(source, new PlaySound(source.GetGUID(), sound, keyBroadcastTextId), msgType, whisperTarget, range, team, gmOnly);
+            if (playType == SoundKitPlayType.ObjectSound)
+            {
+                PlayObjectSound pkt = new();
+                pkt.TargetObjectGUID = whisperTarget.GetGUID();
+                pkt.SourceObjectGUID = source.GetGUID();
+                pkt.SoundKitID = sound;
+                pkt.Position = whisperTarget.GetWorldLocation();
+                pkt.BroadcastTextID = (int)keyBroadcastTextId;
+                SendNonChatPacket(source, pkt, msgType, whisperTarget, range, team, gmOnly);
+            }
+            else if (playType == SoundKitPlayType.Normal)
+                SendNonChatPacket(source, new PlaySound(source.GetGUID(), sound, keyBroadcastTextId), msgType, whisperTarget, range, team, gmOnly);
         }
 
         void SendNonChatPacket(WorldObject source, ServerPacket data, ChatMsg msgType, WorldObject whisperTarget, CreatureTextRange range, Team team, bool gmOnly)
@@ -523,6 +544,7 @@ namespace Game
         public Emote emote;
         public uint duration;
         public uint sound;
+        public SoundKitPlayType SoundPlayType;
         public uint BroadcastTextId;
         public CreatureTextRange TextRange;
     }
@@ -554,6 +576,13 @@ namespace Game
         Map = 3,
         World = 4,
         Personal = 5
+    }
+
+    public enum SoundKitPlayType
+    {
+        Normal = 0,
+        ObjectSound = 1,
+        Max = 2,
     }
 
     public class CreatureTextLocalizer : IDoWork<Player>

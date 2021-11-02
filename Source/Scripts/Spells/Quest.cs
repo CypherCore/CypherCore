@@ -16,6 +16,7 @@
  */
 
 using Framework.Constants;
+using Game;
 using Game.Entities;
 using Game.Maps;
 using Game.Scripting;
@@ -1071,9 +1072,9 @@ namespace Scripts.Spells.Quest
                 Creature trigger = target.FindNearestCreature(CreatureIds.IceSpikeBunny, 25.0f);
                 if (trigger)
                 {
-                    Global.CreatureTextMgr.SendChat(trigger, Misc.Say1, target, ChatMsg.Addon, Language.Addon, Game.CreatureTextRange.Normal, 0, Team.Other, false, target);
+                    Global.CreatureTextMgr.SendChat(trigger, Misc.Say1, target, ChatMsg.Addon, Language.Addon, Game.CreatureTextRange.Normal, 0, SoundKitPlayType.Normal, Team.Other, false, target);
                     target.KilledMonsterCredit(CreatureIds.Killcredit);
-                    Global.CreatureTextMgr.SendChat(trigger, Misc.Say2, target, ChatMsg.Addon, Language.Addon, Game.CreatureTextRange.Normal, 0, Team.Other, false, target);
+                    Global.CreatureTextMgr.SendChat(trigger, Misc.Say2, target, ChatMsg.Addon, Language.Addon, Game.CreatureTextRange.Normal, 0, SoundKitPlayType.Normal, Team.Other, false, target);
                 }
             }
         }
