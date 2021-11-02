@@ -108,14 +108,6 @@ namespace Game.Entities
                 m_threatManager.AddThreat(enemy, 0.0f, null, true, true);
             else
                 SetInCombatWith(enemy);
-
-            Creature creature = ToCreature();
-            if (creature != null)
-            {
-                CreatureGroup formation = creature.GetFormation();
-                if (formation != null)
-                    formation.MemberEngagingTarget(creature, enemy);
-            }
         }
 
         public void ClearInCombat() { m_combatManager.EndAllCombat(); }

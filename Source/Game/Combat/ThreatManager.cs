@@ -306,6 +306,10 @@ namespace Game.Combat
                 CreatureAI ownerAI = cOwner.GetAI();
                 if (ownerAI != null)
                     ownerAI.JustEngagedWith(target);
+
+                CreatureGroup formation = cOwner.GetFormation();
+                if (formation != null)
+                    formation.MemberEngagingTarget(cOwner, target);
             }
         }
 
