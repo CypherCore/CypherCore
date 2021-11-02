@@ -38,7 +38,7 @@ namespace Game.Entities
         public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, WorldObject owner, Player receiver)
         {
             data.WriteUInt32(EntryId);
-            data.WriteUInt32(GetViewerDependentDynamicFlags(DynamicFlags, owner, receiver));
+            data.WriteUInt32(GetViewerDependentDynamicFlags(this, owner, receiver));
             data.WriteFloat(Scale);
         }
 
@@ -60,7 +60,7 @@ namespace Game.Entities
                 }
                 if (changesMask[2])
                 {
-                    data.WriteUInt32(GetViewerDependentDynamicFlags(DynamicFlags, owner, receiver));
+                    data.WriteUInt32(GetViewerDependentDynamicFlags(this, owner, receiver));
                 }
                 if (changesMask[3])
                 {
@@ -77,9 +77,9 @@ namespace Game.Entities
             _changesMask.ResetAll();
         }
 
-        uint GetViewerDependentDynamicFlags(uint dynamicFlags, WorldObject obj, Player receiver)
+        uint GetViewerDependentDynamicFlags(ObjectFieldData objectData, WorldObject obj, Player receiver)
         {
-            UnitDynFlags unitDynFlags = (UnitDynFlags)dynamicFlags;
+            UnitDynFlags unitDynFlags = (UnitDynFlags)(uint)objectData.DynamicFlags;
 
             Unit unit = obj.ToUnit();
             if (unit != null)
@@ -1239,9 +1239,9 @@ namespace Game.Entities
 
         public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Unit owner, Player receiver)
         {
-            data.WriteUInt32(GetViewerDependentDisplayId(DisplayID, owner, receiver));
+            data.WriteUInt32(GetViewerDependentDisplayId(this, owner, receiver));
             for (int i = 0; i < 2; ++i)
-                data.WriteUInt32(GetViewerDependentNpcFlags(NpcFlags[i], i, owner, receiver));
+                data.WriteUInt32(GetViewerDependentNpcFlags(this, i, owner, receiver));
 
             data.WriteUInt32(StateSpellVisualID);
             data.WriteUInt32(StateAnimID);
@@ -1297,14 +1297,14 @@ namespace Game.Entities
             data.WriteInt32(ScalingFactionGroup);
             data.WriteInt32(ScalingHealthItemLevelCurveID);
             data.WriteInt32(ScalingDamageItemLevelCurveID);
-            data.WriteUInt32(GetViewerDependentFactionTemplate(FactionTemplate, owner, receiver));
+            data.WriteUInt32(GetViewerDependentFactionTemplate(this, owner, receiver));
             for (int i = 0; i < 3; ++i)
                 VirtualItems[i].WriteCreate(data, owner, receiver);
 
-            data.WriteUInt32(GetViewerDependentFlags(Flags, owner, receiver));
+            data.WriteUInt32(GetViewerDependentFlags(this, owner, receiver));
             data.WriteUInt32(Flags2);
             data.WriteUInt32(Flags3);
-            data.WriteUInt32(GetViewerDependentAuraState(AuraState, owner, receiver));
+            data.WriteUInt32(GetViewerDependentAuraState(this, owner, receiver));
             for (int i = 0; i < 2; ++i)
                 data.WriteUInt32(AttackRoundBaseTime[i]);
 
@@ -1373,7 +1373,7 @@ namespace Game.Entities
                 data.WriteUInt32(BaseHealth);
 
             data.WriteUInt8(SheatheState);
-            data.WriteUInt8((byte)GetViewerDependentPvpFlags(PvpFlags, owner, receiver));
+            data.WriteUInt8((byte)GetViewerDependentPvpFlags(this, owner, receiver));
             data.WriteUInt8(PetFlags);
             data.WriteUInt8(ShapeshiftForm);
             if (fieldVisibilityFlags.HasFlag(UpdateFieldFlag.Owner))
@@ -1529,7 +1529,7 @@ namespace Game.Entities
                 }
                 if (changesMask[5])
                 {
-                    data.WriteUInt32(GetViewerDependentDisplayId(DisplayID, owner, receiver));
+                    data.WriteUInt32(GetViewerDependentDisplayId(this, owner, receiver));
                 }
                 if (changesMask[6])
                 {
@@ -1676,11 +1676,11 @@ namespace Game.Entities
                 }
                 if (changesMask[42])
                 {
-                    data.WriteUInt32(GetViewerDependentFactionTemplate(FactionTemplate, owner, receiver));
+                    data.WriteUInt32(GetViewerDependentFactionTemplate(this, owner, receiver));
                 }
                 if (changesMask[43])
                 {
-                    data.WriteUInt32(GetViewerDependentFlags(Flags, owner, receiver));
+                    data.WriteUInt32(GetViewerDependentFlags(this, owner, receiver));
                 }
                 if (changesMask[44])
                 {
@@ -1692,7 +1692,7 @@ namespace Game.Entities
                 }
                 if (changesMask[46])
                 {
-                    data.WriteUInt32(GetViewerDependentAuraState(AuraState, owner, receiver));
+                    data.WriteUInt32(GetViewerDependentAuraState(this, owner, receiver));
                 }
                 if (changesMask[47])
                 {
@@ -1835,7 +1835,7 @@ namespace Game.Entities
                 }
                 if (changesMask[82])
                 {
-                    data.WriteUInt8((byte)GetViewerDependentPvpFlags(PvpFlags, owner, receiver));
+                    data.WriteUInt8((byte)GetViewerDependentPvpFlags(this, owner, receiver));
                 }
                 if (changesMask[83])
                 {
@@ -1991,7 +1991,7 @@ namespace Game.Entities
                 {
                     if (changesMask[121 + i])
                     {
-                        data.WriteUInt32(GetViewerDependentNpcFlags(NpcFlags[i], i, owner, receiver));
+                        data.WriteUInt32(GetViewerDependentNpcFlags(this, i, owner, receiver));
                     }
                 }
             }
@@ -2209,8 +2209,9 @@ namespace Game.Entities
             _changesMask.ResetAll();
         }
 
-        uint GetViewerDependentDisplayId(uint displayId, Unit unit, Player receiver)
+        uint GetViewerDependentDisplayId(UnitData unitData, Unit unit, Player receiver)
         {
+            uint displayId = unitData.DisplayID;
             if (unit.IsCreature())
             {
                 CreatureTemplate cinfo = unit.ToCreature().GetCreatureTemplate();
@@ -2240,15 +2241,17 @@ namespace Game.Entities
 
             return displayId;
         }
-        uint GetViewerDependentNpcFlags(uint npcFlag, int i, Unit unit, Player receiver)
+        uint GetViewerDependentNpcFlags(UnitData unitData, int i, Unit unit, Player receiver)
         {
+            uint npcFlag = unitData.NpcFlags[i];
             if (i == 0 && unit.IsCreature() && !receiver.CanSeeSpellClickOn(unit.ToCreature()))
                 npcFlag &= ~(uint)NPCFlags.SpellClick;
 
             return npcFlag;
         }
-        uint GetViewerDependentFactionTemplate(uint factionTemplate, Unit unit, Player receiver)
+        uint GetViewerDependentFactionTemplate(UnitData unitData, Unit unit, Player receiver)
         {
+            uint factionTemplate = unitData.FactionTemplate;
             if (unit.IsControlledByPlayer() && receiver != unit && WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGroup) && unit.IsInRaidWith(receiver))
             {
                 FactionTemplateRecord ft1 = unit.GetFactionTemplateEntry();
@@ -2260,21 +2263,23 @@ namespace Game.Entities
 
             return factionTemplate;
         }
-        uint GetViewerDependentFlags(uint flags, Unit unit, Player receiver)
+        uint GetViewerDependentFlags(UnitData unitData, Unit unit, Player receiver)
         {
+            uint flags = unitData.Flags;
             // Gamemasters should be always able to select units - remove not selectable flag
             if (receiver.IsGameMaster())
                 flags &= ~(uint)UnitFlags.NotSelectable;
 
             return flags;
         }
-        uint GetViewerDependentAuraState(uint auraState, Unit unit, Player receiver)
+        uint GetViewerDependentAuraState(UnitData unitData, Unit unit, Player receiver)
         {
             // Check per caster aura states to not enable using a spell in client if specified aura is not by target
             return unit.BuildAuraStateUpdateForTarget(receiver);
         }
-        uint GetViewerDependentPvpFlags(uint pvpFlags, Unit unit, Player receiver)
+        uint GetViewerDependentPvpFlags(UnitData unitData, Unit unit, Player receiver)
         {
+            uint pvpFlags = unitData.PvpFlags;
             if (unit.IsControlledByPlayer() && receiver != unit && WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGroup) && unit.IsInRaidWith(receiver))
             {
                 FactionTemplateRecord ft1 = unit.GetFactionTemplateEntry();
@@ -4930,20 +4935,20 @@ namespace Game.Entities
             }
             data.WritePackedGuid(CreatedBy);
             data.WritePackedGuid(GuildGUID);
-            data.WriteUInt32(GetViewerGameObjectFlags(Flags, owner, receiver));
+            data.WriteUInt32(GetViewerGameObjectFlags(this, owner, receiver));
             Quaternion rotation = ParentRotation;
             data.WriteFloat(rotation.X);
             data.WriteFloat(rotation.Y);
             data.WriteFloat(rotation.Z);
             data.WriteFloat(rotation.W);
             data.WriteUInt32(FactionTemplate);
-            data.WriteInt8(GetViewerGameObjectState(State, owner, receiver));
+            data.WriteInt8(GetViewerGameObjectState(this, owner, receiver));
             data.WriteInt8(TypeID);
             data.WriteUInt8(PercentHealth);
             data.WriteUInt32(ArtKit);
             data.WriteInt32(EnableDoodadSets.Size());
             data.WriteUInt32(CustomParam);
-            data.WriteUInt32(GetViewerGameObjectLevel(Level, owner, receiver));
+            data.WriteUInt32(GetViewerGameObjectLevel(this, owner, receiver));
             data.WriteUInt32(AnimGroupInstance);
             for (int i = 0; i < EnableDoodadSets.Size(); ++i)
             {
@@ -5029,7 +5034,7 @@ namespace Game.Entities
                 }
                 if (changesMask[11])
                 {
-                    data.WriteUInt32(GetViewerGameObjectFlags(Flags, owner, receiver));
+                    data.WriteUInt32(GetViewerGameObjectFlags(this, owner, receiver));
                 }
                 if (changesMask[12])
                 {
@@ -5044,7 +5049,7 @@ namespace Game.Entities
                 }
                 if (changesMask[14])
                 {
-                    data.WriteInt8(GetViewerGameObjectState(State, owner, receiver));
+                    data.WriteInt8(GetViewerGameObjectState(this, owner, receiver));
                 }
                 if (changesMask[15])
                 {
@@ -5064,7 +5069,7 @@ namespace Game.Entities
                 }
                 if (changesMask[19])
                 {
-                    data.WriteUInt32(GetViewerGameObjectLevel(Level, owner, receiver));
+                    data.WriteUInt32(GetViewerGameObjectLevel(this, owner, receiver));
                 }
                 if (changesMask[20])
                 {
@@ -5098,23 +5103,26 @@ namespace Game.Entities
             _changesMask.ResetAll();
         }
 
-        uint GetViewerGameObjectFlags(uint flags, GameObject gameObject, Player receiver)
+        uint GetViewerGameObjectFlags(GameObjectFieldData gameObjectData, GameObject gameObject, Player receiver)
         {
+            uint flags = gameObjectData.Flags;
             if (gameObject.GetGoType() == GameObjectTypes.Chest)
                 if (gameObject.GetGoInfo().Chest.usegrouplootrules != 0 && !gameObject.IsLootAllowedFor(receiver))
                     flags |= (uint)(GameObjectFlags.Locked | GameObjectFlags.NotSelectable);
 
-            return (uint)flags;
+            return flags;
         }
 
-        uint GetViewerGameObjectLevel(uint level, GameObject gameObject, Player receiver)
+        uint GetViewerGameObjectLevel(GameObjectFieldData gameObjectData, GameObject gameObject, Player receiver)
         {
+            uint level = gameObjectData.Level;
             bool isStoppableTransport = gameObject.GetGoType() == GameObjectTypes.Transport && !gameObject.GetGoValue().Transport.StopFrames.Empty();
             return isStoppableTransport ? gameObject.GetGoValue().Transport.PathProgress : level;
         }
 
-        sbyte GetViewerGameObjectState(sbyte state, GameObject gameObject, Player receiver)
+        sbyte GetViewerGameObjectState(GameObjectFieldData gameObjectData, GameObject gameObject, Player receiver)
         {
+            sbyte state = gameObjectData.State;
             bool isStoppableTransport = gameObject.GetGoType() == GameObjectTypes.Transport && !gameObject.GetGoValue().Transport.StopFrames.Empty();
             if (isStoppableTransport && gameObject.GetGoState() == GameObjectState.TransportActive)
                 if (((gameObject.GetGoValue().Transport.StateUpdateTimer / 20000) & 1) != 0)
