@@ -2687,6 +2687,7 @@ namespace Game.Maps
                 return false;
             }
 
+            SetSpawnGroupActive(groupId, true); // start processing respawns for the group
             foreach (var data in Global.ObjectMgr.GetSpawnDataForGroup(groupId))
             {
                 Cypher.Assert(groupData.mapId == data.spawnPoint.GetMapId());
@@ -2739,7 +2740,7 @@ namespace Game.Maps
                         return false;
                 }
             }
-            SetSpawnGroupActive(groupId, true); // start processing respawns for the group
+
             return true;
         }
 
