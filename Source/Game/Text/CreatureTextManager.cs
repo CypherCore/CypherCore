@@ -213,7 +213,7 @@ namespace Game
                 BroadcastTextRecord bct = CliDB.BroadcastTextStorage.LookupByKey(textEntry.BroadcastTextId);
                 if (bct != null)
                 {
-                    uint broadcastTextSoundId = bct.SoundEntriesID[source.GetGender() == Gender.Female ? 1 : 0];
+                    uint broadcastTextSoundId = bct.SoundKitID[source.GetGender() == Gender.Female ? 1 : 0];
                     if (broadcastTextSoundId != 0)
                         finalSound = broadcastTextSoundId;
                 }
