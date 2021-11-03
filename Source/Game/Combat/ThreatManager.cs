@@ -174,11 +174,22 @@ namespace Game.Combat
 
         public bool IsThreateningTo(Unit who, bool includeOffline = false) { return IsThreateningTo(who.GetGUID(), includeOffline); }
 
-        public void EvaluateSuppressed()
+        public void EvaluateSuppressed(bool canExpire = false)
         {
             foreach (var pair in _threatenedByMe)
-                if (pair.Value.IsOnline() && pair.Value.ShouldBeSuppressed())
+            {
+                bool shouldBeSuppressed = pair.Value.ShouldBeSuppressed();
+                if (pair.Value.IsOnline() && shouldBeSuppressed)
+                {
                     pair.Value.Online = OnlineState.Suppressed;
+                    pair.Value.ListNotifyChanged();
+                }
+                else if (canExpire && pair.Value.IsSuppressed() && !shouldBeSuppressed)
+                {
+                    pair.Value.Online = OnlineState.Online;
+                    pair.Value.ListNotifyChanged();
+                }
+            }
         }
 
         static void SaveCreatureHomePositionIfNeed(Creature c)
@@ -281,12 +292,17 @@ namespace Game.Combat
             var targetRefe = _myThreatListEntries.LookupByKey(target.GetGUID());
             if (targetRefe != null)
             {
-                // causing threat causes SUPPRESSED threat states to stop being suppressed
+                // SUPPRESSED threat states don't go back to ONLINE until threat is caused by them (retail behavior)
                 if (targetRefe.GetOnlineState() == OnlineState.Suppressed)
+                {
                     if (!targetRefe.ShouldBeSuppressed())
+                    {
                         targetRefe.Online = OnlineState.Online;
+                        targetRefe.ListNotifyChanged();
+                    }
+                }
 
-                if (targetRefe.IsOnline())
+            if (targetRefe.IsOnline())
                     targetRefe.AddThreat(amount);
                 return;
             }
@@ -358,6 +374,9 @@ namespace Game.Combat
                 else
                     pair.Value.UpdateTauntState();
             }
+
+            // taunt aura update also re-evaluates all suppressed states (retail behavior)
+            EvaluateSuppressed(true);
         }
 
         public void ResetAllThreat()
@@ -889,6 +908,9 @@ namespace Game.Combat
 
         public bool ShouldBeSuppressed()
         {
+            if (IsTaunting()) // a taunting victim can never be suppressed
+                return false;
+
             if (_victim.IsImmunedToDamage(_owner.GetMeleeDamageSchoolMask()))
                 return true;
 
@@ -933,6 +955,7 @@ namespace Game.Combat
         public OnlineState GetOnlineState() { return Online; }
         public bool IsOnline() { return Online >= OnlineState.Online; }
         public bool IsAvailable() { return Online > OnlineState.Offline; }
+        public bool IsSuppressed() { return Online == OnlineState.Suppressed; }
         public bool IsOffline() { return Online <= OnlineState.Offline; }
         public TauntState GetTauntState() { return IsTaunting() ? TauntState.Taunt : _taunted; }
         public bool IsTaunting() { return _taunted >= TauntState.Taunt; }
