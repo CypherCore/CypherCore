@@ -1104,6 +1104,13 @@ namespace Game
                         return false;
                     }
                     break;
+                case ConditionSourceType.ConversationLine:
+                    if (Global.ConversationDataStorage.GetConversationLineTemplate((uint)cond.SourceEntry) == null)
+                    {
+                        Log.outError(LogFilter.Sql, $"{cond} does not exist in `conversation_line_template`, ignoring.");
+                        return false;
+                    }
+                    break;
                 default:
                     Log.outError(LogFilter.Sql, $"{cond.ToString()} Invalid ConditionSourceType in `condition` table, ignoring.");
                     return false;

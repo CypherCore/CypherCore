@@ -164,6 +164,9 @@ namespace Game.Entities
             List<ConversationLine> lines = new();
             foreach (ConversationLineTemplate line in conversationTemplate.Lines)
             {
+                if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.ConversationLine, line.Id, creator))
+                    continue;
+
                 actorIndices.Add(line.ActorIdx);
 
                 ConversationLine lineField = new();

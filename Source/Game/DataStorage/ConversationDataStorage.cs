@@ -192,6 +192,11 @@ namespace Game.DataStorage
             return _conversationTemplateStorage.LookupByKey(conversationId);
         }
 
+        public ConversationLineTemplate GetConversationLineTemplate(uint conversationLineId)
+        {
+            return _conversationLineTemplateStorage.LookupByKey(conversationLineId);
+        }
+
         Dictionary<uint, ConversationTemplate> _conversationTemplateStorage = new();
         Dictionary<uint, ConversationLineTemplate> _conversationLineTemplateStorage = new();
     }

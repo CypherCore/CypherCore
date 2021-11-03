@@ -103,6 +103,7 @@ namespace Framework.Constants
         Phase = 26,
         Graveyard = 27,
         AreaTrigger = 28,
+        ConversationLine = 29,
         Max
     }
 
