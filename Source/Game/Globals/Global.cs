@@ -51,7 +51,6 @@ public static class Global
     //Guild
     public static PetitionManager PetitionMgr { get { return PetitionManager.Instance; } }
     public static GuildManager GuildMgr { get { return GuildManager.Instance; } }
-    public static GuildFinderManager GuildFinderMgr { get { return GuildFinderManager.Instance; } }
 
     //Social
     public static CalendarManager CalendarMgr { get { return CalendarManager.Instance; } }

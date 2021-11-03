@@ -259,36 +259,4 @@ namespace Framework.Constants
         public const uint Arena3v3 = 1200000;
         public const uint Arena5v5 = 2000000;
     }
-
-    public enum GuildFinderOptionsInterest
-    {
-        Questing = 0x01,
-        Dungeons = 0x02,
-        Raids = 0x04,
-        PVP = 0x08,
-        RolePlaying = 0x10,
-        All = Questing | Dungeons | Raids | PVP | RolePlaying
-    }
-
-    public enum GuildFinderOptionsAvailability
-    {
-        Weekdays = 0x1,
-        Weekends = 0x2,
-        Always = Weekdays | Weekends
-    }
-
-    public enum GuildFinderOptionsRoles
-    {
-        Tank = 0x1,
-        Healer = 0x2,
-        DPS = 0x4,
-        All = Tank | Healer | DPS
-    }
-
-    public enum GuildFinderOptionsLevel
-    {
-        Any = 0x1,
-        Max = 0x2,
-        All = Any | Max
-    }
 }

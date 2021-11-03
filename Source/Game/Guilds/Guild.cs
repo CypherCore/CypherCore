@@ -142,8 +142,6 @@ namespace Game.Guilds
 
             DB.Characters.CommitTransaction(trans);
 
-            Global.GuildFinderMgr.DeleteGuild(GetGUID());
-
             Global.GuildMgr.RemoveGuild(m_id);
         }
 
@@ -1586,8 +1584,6 @@ namespace Game.Guilds
             joinNotificationPacket.Name = name;
             joinNotificationPacket.VirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
             BroadcastPacket(joinNotificationPacket);
-
-            Global.GuildFinderMgr.RemoveAllMembershipRequestsFromPlayer(guid);
 
             // Call scripts if member was succesfully added (and stored to database)
             Global.ScriptMgr.OnGuildAddMember(this, player, rankId);

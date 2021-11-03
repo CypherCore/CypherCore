@@ -635,7 +635,6 @@ namespace Game
             Global.ScriptMgr.OnPlayerDelete(charDelete.Guid, initAccountId); // To prevent race conditioning, but as it also makes sense, we hand the accountId over for successful delete.
             // Shouldn't interfere with character deletion though
 
-            Global.GuildFinderMgr.RemoveAllMembershipRequestsFromPlayer(charDelete.Guid);
             Global.CalendarMgr.RemoveAllPlayerEventsAndInvites(charDelete.Guid);
             Player.DeleteFromDB(charDelete.Guid, accountId);
 

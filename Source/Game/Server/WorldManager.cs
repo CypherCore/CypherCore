@@ -818,7 +818,6 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Guilds...");
             Global.GuildMgr.LoadGuilds();
 
-            Global.GuildFinderMgr.LoadFromDB();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading ArenaTeams...");
             Global.ArenaTeamMgr.LoadArenaTeams();

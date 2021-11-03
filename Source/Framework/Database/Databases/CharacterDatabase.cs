@@ -688,11 +688,6 @@ namespace Framework.Database
             PrepareStatement(CharStatements.DEL_CHAR_CUF_PROFILES_BY_ID, "DELETE FROM character_cuf_profiles WHERE guid = ? AND id = ?");
             PrepareStatement(CharStatements.DEL_CHAR_CUF_PROFILES, "DELETE FROM character_cuf_profiles WHERE guid = ?");
 
-            // Guild Finder
-            PrepareStatement(CharStatements.REP_GUILD_FINDER_APPLICANT, "REPLACE INTO guild_finder_applicant (guildId, playerGuid, availability, classRole, interests, comment, submitTime) VALUES(?, ?, ?, ?, ?, ?, ?)");
-            PrepareStatement(CharStatements.DEL_GUILD_FINDER_APPLICANT, "DELETE FROM guild_finder_applicant WHERE guildId = ? AND playerGuid = ?");
-            PrepareStatement(CharStatements.REP_GUILD_FINDER_GUILD_SETTINGS, "REPLACE INTO guild_finder_guild_settings (guildId, availability, classRoles, interests, level, listed, comment) VALUES(?, ?, ?, ?, ?, ?, ?)");
-            PrepareStatement(CharStatements.DEL_GUILD_FINDER_GUILD_SETTINGS, "DELETE FROM guild_finder_guild_settings WHERE guildId = ?");
 
             // Items that hold loot or money
             PrepareStatement(CharStatements.SEL_ITEMCONTAINER_ITEMS, "SELECT container_id, item_id, item_count, follow_rules, ffa, blocked, counted, under_threshold, needs_quest, rnd_bonus, context, bonus_list_ids FROM item_loot_items");
@@ -1352,10 +1347,6 @@ namespace Framework.Database
         DEL_CHAR_CUF_PROFILES_BY_ID,
         DEL_CHAR_CUF_PROFILES,
 
-        REP_GUILD_FINDER_APPLICANT,
-        DEL_GUILD_FINDER_APPLICANT,
-        REP_GUILD_FINDER_GUILD_SETTINGS,
-        DEL_GUILD_FINDER_GUILD_SETTINGS,
 
         REP_CALENDAR_EVENT,
         DEL_CALENDAR_EVENT,
