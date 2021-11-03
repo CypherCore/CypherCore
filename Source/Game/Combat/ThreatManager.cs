@@ -308,9 +308,14 @@ namespace Game.Combat
             }
 
             // ok, we're now in combat - create the threat list reference and push it to the respective managers
-            ThreatReference newRefe = new(this, target, amount);
+            ThreatReference newRefe = new(this, target);
             PutThreatListRef(target.GetGUID(), newRefe);
             target.GetThreatManager().PutThreatenedByMeRef(_owner.GetGUID(), newRefe);
+
+            // afterwards, we evaluate whether this is an online reference (it might not be an acceptable target, but we need to add it to our threat list before we check!)
+            newRefe.UpdateOffline();
+            if (newRefe.IsOnline()) // ...and if the ref is online it also gets the threat it should have
+                newRefe.AddThreat(amount);
 
             if (!_ownerEngaged)
             {
@@ -826,13 +831,12 @@ namespace Game.Combat
         public int TempModifier; // Temporary effects (auras with SPELL_AURA_MOD_TOTAL_THREAT) - set from victim's threatmanager in ThreatManager::UpdateMyTempModifiers
         TauntState _taunted;
 
-        public ThreatReference(ThreatManager mgr, Unit victim, float amount)
+        public ThreatReference(ThreatManager mgr, Unit victim)
         {
             _owner = mgr._owner as Creature;
             _mgr = mgr;
             _victim = victim;
-            Online = ShouldBeOffline() ? OnlineState.Offline : ShouldBeSuppressed() ? OnlineState.Suppressed : OnlineState.Online;
-            _baseAmount = IsOnline() ? amount : 0.0f;
+            Online = ShouldBeSuppressed() ? OnlineState.Suppressed : OnlineState.Online;
         }
 
         public void AddThreat(float amount)
