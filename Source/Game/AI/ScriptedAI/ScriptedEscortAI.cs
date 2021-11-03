@@ -403,6 +403,8 @@ namespace Game.AI
                 return;
             }
 
+            _running = run;
+
             if (!_manualPath && resetWaypoints)
                 FillPointMovementListForCreature();
 
@@ -414,7 +416,6 @@ namespace Game.AI
 
             // set variables
             _activeAttacker = isActiveAttacker;
-            _running = run;
             _playerGUID = playerGUID;
             _escortQuest = quest;
             _instantRespawn = instantRespawn;
