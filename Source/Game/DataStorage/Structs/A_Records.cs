@@ -97,9 +97,9 @@ namespace Game.DataStorage
     public sealed class AnimationDataRecord
     {
         public uint Id;
-        public ushort BehaviorID;
+        public ushort Fallback;
         public byte BehaviorTier;
-        public int Fallback;
+        public int BehaviorID;
         public int[] Flags = new int[2];
     }
 

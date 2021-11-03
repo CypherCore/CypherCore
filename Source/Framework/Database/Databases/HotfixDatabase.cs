@@ -43,7 +43,7 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_ADVENTURE_MAP_POI_LOCALE, "SELECT ID, Title_lang, Description_lang FROM adventure_map_poi_locale WHERE locale = ?");
 
             // AnimationData.db2
-            PrepareStatement(HotfixStatements.SEL_ANIMATION_DATA, "SELECT ID, BehaviorID, BehaviorTier, Fallback, Flags1, Flags2 FROM animation_data");
+            PrepareStatement(HotfixStatements.SEL_ANIMATION_DATA, "SELECT ID, Fallback, BehaviorTier, BehaviorID, Flags1, Flags2 FROM animation_data");
 
             // AnimKit.db2
             PrepareStatement(HotfixStatements.SEL_ANIM_KIT, "SELECT ID, OneShotDuration, OneShotStopAnimKitID, LowDefAnimKitID FROM anim_kit");
