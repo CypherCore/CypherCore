@@ -20,12 +20,14 @@ using Game.Entities;
 using Game.Scripting;
 using Game.Spells;
 using Game.AI;
+using System.Collections.Generic;
 
 namespace Scripts.Spells.DemonHunter
 {
     struct SpellIds
     {
         public const uint ChaosStrikeEnergize = 193840;
+        public const uint FirstBlood = 206416;
         public const uint SigilOfChainsGrip = 208674;
         public const uint SigilOfChainsSlow = 204843;
         public const uint SigilOfChainsTargetSelect = 204834;
@@ -55,6 +57,93 @@ namespace Scripts.Spells.DemonHunter
         public override void Register()
         {
             OnEffectProc.Add(new EffectProcHandler(HandleEffectProc, 0, AuraType.ProcTriggerSpell));
+        }
+    }
+
+    [Script] // 206416 - First Blood
+    class spell_dh_first_blood : AuraScript
+    {
+        ObjectGuid _firstTargetGUID;
+
+        public ObjectGuid GetFirstTarget() { return _firstTargetGUID; }
+        public void SetFirstTarget(ObjectGuid targetGuid) { _firstTargetGUID = targetGuid; }
+
+        public override void Register() { }
+    }
+
+    // 188499 - Blade Dance
+    [Script] // 210152 - Death Sweep
+    class spell_dh_blade_dance : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.FirstBlood);
+        }
+
+        void DecideFirstTarget(List<WorldObject> targetList)
+        {
+            if (targetList.Empty())
+                return;
+
+            Aura aura = GetCaster().GetAura(SpellIds.FirstBlood);
+            if (aura == null)
+                return;
+
+            ObjectGuid firstTargetGUID = ObjectGuid.Empty;
+            ObjectGuid selectedTarget = GetCaster().GetTarget();
+
+            // Prefer the selected target if he is one of the enemies
+            if (targetList.Count > 1 && !selectedTarget.IsEmpty())
+            {
+                var foundObj = targetList.Find(obj => obj.GetGUID() == selectedTarget);
+                if (foundObj != null)
+                    firstTargetGUID = foundObj.GetGUID();
+            }
+
+            if (firstTargetGUID.IsEmpty())
+                firstTargetGUID = targetList[0].GetGUID();
+
+            spell_dh_first_blood script = aura.GetScript<spell_dh_first_blood>(nameof(spell_dh_first_blood));
+            if (script != null)
+                script.SetFirstTarget(firstTargetGUID);
+        }
+
+        public override void Register()
+        {
+            OnObjectAreaTargetSelect.Add(new ObjectAreaTargetSelectHandler(DecideFirstTarget, 0, Targets.UnitSrcAreaEnemy));
+        }
+    }
+
+    // 199552 - Blade Dance
+    // 200685 - Blade Dance
+    // 210153 - Death Sweep
+    [Script] // 210155 - Death Sweep
+    class spell_dh_blade_dance_damage : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.FirstBlood);
+        }
+
+        void HandleHitTarget()
+        {
+            int damage = GetHitDamage();
+
+            AuraEffect aurEff = GetCaster().GetAuraEffect(SpellIds.FirstBlood, 0);
+            if (aurEff != null)
+            {
+                spell_dh_first_blood script = aurEff.GetBase().GetScript<spell_dh_first_blood>(nameof(spell_dh_first_blood));
+                if (script != null)
+                    if (GetHitUnit().GetGUID() == script.GetFirstTarget())
+                        MathFunctions.AddPct(ref damage, aurEff.GetAmount());
+            }
+
+            SetHitDamage(damage);
+        }
+
+        public override void Register()
+        {
+            OnHit.Add(new HitHandler(HandleHitTarget));
         }
     }
 
