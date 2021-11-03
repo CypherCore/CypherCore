@@ -18,9 +18,11 @@
 using Framework.Constants;
 using Game.DataStorage;
 using Game.Maps;
-using Game.Spells;
-using System.Collections.Generic;
 using Game.Networking;
+using Game.Spells;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.Entities
 {
@@ -28,8 +30,6 @@ namespace Game.Entities
     {
         public Conversation() : base(false)
         {
-            _duration = 0;
-
             ObjectTypeMask |= TypeMask.Conversation;
             ObjectTypeId = TypeId.Conversation;
 
@@ -61,9 +61,9 @@ namespace Game.Entities
 
         public override void Update(uint diff)
         {
-            if (GetDuration() > diff)
+            if (GetDuration() > TimeSpan.FromMilliseconds(diff))
             {
-                _duration -= diff;
+                _duration -= TimeSpan.FromMilliseconds(diff);
                 DoWithSuppressingObjectUpdates(() =>
                 {
                     // Only sent in CreateObject
@@ -121,8 +121,6 @@ namespace Game.Entities
             SetEntry(conversationEntry);
             SetObjectScale(1.0f);
 
-            SetUpdateFieldValue(m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.LastLineEndTime), conversationTemplate.LastLineEndTime);
-            _duration = conversationTemplate.LastLineEndTime + 10 * Time.InMilliseconds;
             _textureKitId = conversationTemplate.TextureKitId;
 
             if (conversationTemplate.Actors != null)
@@ -171,15 +169,37 @@ namespace Game.Entities
 
                 ConversationLine lineField = new();
                 lineField.ConversationLineID = line.Id;
-                lineField.StartTime = line.StartTime;
                 lineField.UiCameraID = line.UiCameraID;
                 lineField.ActorIndex = line.ActorIdx;
                 lineField.Flags = line.Flags;
 
+                ConversationLineRecord convoLine = CliDB.ConversationLineStorage.LookupByKey(line.Id); // never null for conversationTemplate->Lines
+
+                for (Locale locale = Locale.enUS; locale < Locale.Total; locale = locale + 1)
+                {
+                    if (locale == Locale.None)
+                        continue;
+
+                    _lineStartTimes[(locale, line.Id)] = _lastLineEndTimes[(int)locale];
+                    if (locale == Locale.enUS)
+                        lineField.StartTime = (uint)_lastLineEndTimes[(int)locale].TotalMilliseconds;
+
+                    int broadcastTextDuration = Global.DB2Mgr.GetBroadcastTextDuration((int)convoLine.BroadcastTextID, locale);
+                    if (broadcastTextDuration != 0)
+                        _lastLineEndTimes[(int)locale] += TimeSpan.FromMilliseconds(broadcastTextDuration);
+
+                    _lastLineEndTimes[(int)locale] += TimeSpan.FromMilliseconds(convoLine.AdditionalDuration);
+                }
+
                 lines.Add(lineField);
             }
 
+            _duration = _lastLineEndTimes.Max();
+            SetUpdateFieldValue(m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.LastLineEndTime), (uint)_duration.TotalMilliseconds);
             SetUpdateFieldValue(m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.Lines), lines);
+
+            // conversations are despawned 5-20s after LastLineEndTime
+            _duration += TimeSpan.FromSeconds(10);
 
             Global.ScriptMgr.OnConversationCreate(this, creator);
 
@@ -205,6 +225,16 @@ namespace Game.Entities
             ConversationActorField actorField = m_values.ModifyValue(m_conversationData).ModifyValue(m_conversationData.Actors, actorIdx);
             SetUpdateFieldValue(ref actorField.ActorGUID, actorGuid);
             SetUpdateFieldValue(ref actorField.Type, ConversationActorType.WorldObjectActor);
+        }
+
+        public TimeSpan GetLineStartTime(Locale locale, int lineId)
+        {
+            return _lineStartTimes.LookupByKey((locale, lineId));
+        }
+
+        public TimeSpan GetLastLineEndTime(Locale locale)
+        {
+            return _lastLineEndTimes[(int)locale];
         }
 
         public uint GetScriptId()
@@ -274,13 +304,13 @@ namespace Game.Entities
             base.ClearUpdateMask(remove);
         }
 
-        uint GetDuration() { return _duration; }
+        TimeSpan GetDuration() { return _duration; }
         public uint GetTextureKitId() { return _textureKitId; }
 
         public ObjectGuid GetCreatorGuid() { return _creatorGuid; }
         public override ObjectGuid GetOwnerGUID() { return GetCreatorGuid(); }
         public override uint GetFaction() { return 0; }
-        
+
         public override float GetStationaryX() { return _stationaryPosition.GetPositionX(); }
         public override float GetStationaryY() { return _stationaryPosition.GetPositionY(); }
         public override float GetStationaryZ() { return _stationaryPosition.GetPositionZ(); }
@@ -291,7 +321,10 @@ namespace Game.Entities
 
         Position _stationaryPosition = new();
         ObjectGuid _creatorGuid;
-        uint _duration;
+        TimeSpan _duration;
         uint _textureKitId;
+
+        Dictionary<(Locale locale, uint lineId), TimeSpan> _lineStartTimes = new();
+        TimeSpan[] _lastLineEndTimes = new TimeSpan[(int)Locale.Total];
     }
 }

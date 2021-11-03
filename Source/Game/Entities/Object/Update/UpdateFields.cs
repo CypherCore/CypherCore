@@ -5622,7 +5622,7 @@ namespace Game.Entities
         public void WriteCreate(WorldPacket data, Conversation owner, Player receiver)
         {
             data.WriteUInt32(ConversationLineID);
-            data.WriteUInt32(StartTime);
+            data.WriteUInt32(GetViewerStartTime(this, owner, receiver));
             data.WriteUInt32(UiCameraID);
             data.WriteUInt8(ActorIndex);
             data.WriteUInt8(Flags);
@@ -5632,11 +5632,23 @@ namespace Game.Entities
         public void WriteUpdate(WorldPacket data, bool ignoreChangesMask, Conversation owner, Player receiver)
         {
             data.WriteUInt32(ConversationLineID);
-            data.WriteUInt32(StartTime);
+            data.WriteUInt32(GetViewerStartTime(this, owner, receiver));
             data.WriteUInt32(UiCameraID);
             data.WriteUInt8(ActorIndex);
             data.WriteUInt8(Flags);
             data.WriteUInt8(ChatType);
+        }
+
+        public uint GetViewerStartTime(ConversationLine conversationLine, Conversation conversation, Player receiver)
+        {
+            uint startTime = conversationLine.StartTime;
+            Locale locale = receiver.GetSession().GetSessionDbLocaleIndex();
+
+            TimeSpan localizedStartTime = conversation.GetLineStartTime(locale, (int)conversationLine.ConversationLineID);
+            if (localizedStartTime != TimeSpan.Zero)
+                startTime = (uint)localizedStartTime.TotalMilliseconds;
+
+            return startTime;
         }
     }
 
@@ -5685,7 +5697,7 @@ namespace Game.Entities
         public void WriteCreate(WorldPacket data, UpdateFieldFlag fieldVisibilityFlags, Conversation owner, Player receiver)
         {
             data.WriteInt32(((List<ConversationLine>)Lines).Count);
-            data.WriteUInt32(LastLineEndTime);
+            data.WriteUInt32(GetViewerLastLineEndTime(this, owner, receiver));
             data.WriteUInt32(Progress);
             for (int i = 0; i < ((List<ConversationLine>)Lines).Count; ++i)
             {
@@ -5751,7 +5763,7 @@ namespace Game.Entities
                 }
                 if (_changesMask[4])
                 {
-                    data.WriteUInt32(LastLineEndTime);
+                    data.WriteUInt32(GetViewerLastLineEndTime(this, owner, receiver));
                 }
                 if (_changesMask[5])
                 {
@@ -5769,6 +5781,12 @@ namespace Game.Entities
             ClearChangesMask(LastLineEndTime);
             ClearChangesMask(Progress);
             _changesMask.ResetAll();
+        }
+
+        public uint GetViewerLastLineEndTime(ConversationData conversationLineData, Conversation conversation, Player receiver)
+        {
+            Locale locale = receiver.GetSession().GetSessionDbLocaleIndex();
+            return (uint)conversation.GetLastLineEndTime(locale).TotalMilliseconds;
         }
     }
 }

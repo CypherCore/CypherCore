@@ -191,6 +191,9 @@ namespace Framework.Database
                 "SoundEntriesID1, SoundEntriesID2, EmoteID1, EmoteID2, EmoteID3, EmoteDelay1, EmoteDelay2, EmoteDelay3 FROM broadcast_text");
             PrepareStatement(HotfixStatements.SEL_BROADCAST_TEXT_LOCALE, "SELECT ID, Text_lang, Text1_lang FROM broadcast_text_locale WHERE locale = ?");
 
+            // BroadcastTextDuration.db2
+            PrepareStatement(HotfixStatements.SEL_BROADCAST_TEXT_DURATION, "SELECT ID, BroadcastTextID, Locale, Duration FROM broadcast_text_duration");
+
             // CfgRegions.db2
             PrepareStatement(HotfixStatements.SEL_CFG_REGIONS, "SELECT ID, Tag, RegionID, Raidorigin, RegionGroupMask, ChallengeOrigin FROM cfg_regions");
 
@@ -1300,6 +1303,8 @@ namespace Framework.Database
 
         SEL_BROADCAST_TEXT,
         SEL_BROADCAST_TEXT_LOCALE,
+
+        SEL_BROADCAST_TEXT_DURATION,
 
         SEL_CFG_REGIONS,
 

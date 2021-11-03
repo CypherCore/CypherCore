@@ -123,6 +123,10 @@ namespace Game.DataStorage
                 }
             }
 
+            foreach (var broadcastTextDuration in BroadcastTextDurationStorage.Values)
+                _broadcastTextDurations[(broadcastTextDuration.BroadcastTextID, (CascLocaleBit)broadcastTextDuration.Locale)] = broadcastTextDuration.Duration;
+
+
             foreach (var uiDisplay in ChrClassUIDisplayStorage.Values)
             {
                 Cypher.Assert(uiDisplay.ChrClassesID < (byte)Class.Max);
@@ -943,6 +947,11 @@ namespace Game.DataStorage
             return broadcastText.Text[SharedConst.DefaultLocale];
         }
 
+        public int GetBroadcastTextDuration(int broadcastTextId, Locale locale = Locale.enUS)
+        {
+            return _broadcastTextDurations.LookupByKey((broadcastTextId, SharedConst.WowLocaleToCascLocaleBit[(int)locale]));
+        }
+        
         public ChrClassUIDisplayRecord GetUiDisplayForClass(Class unitClass)
         {
             Cypher.Assert(unitClass < Class.Max);
@@ -2306,6 +2315,7 @@ namespace Game.DataStorage
         MultiMap<uint, AzeritePowerSetMemberRecord> _azeritePowers = new();
         Dictionary<(uint azeriteUnlockSetId, ItemContext itemContext), byte[]> _azeriteTierUnlockLevels = new();
         Dictionary<(uint itemId, ItemContext itemContext), AzeriteUnlockMappingRecord> _azeriteUnlockMappings = new();
+        Dictionary<(int broadcastTextId, CascLocaleBit cascLocaleBit), int> _broadcastTextDurations = new();
         ChrClassUIDisplayRecord[] _uiDisplayByClass = new ChrClassUIDisplayRecord[(int)Class.Max];
         uint[][] _powersByClass = new uint[(int)Class.Max][];
         MultiMap<uint, ChrCustomizationChoiceRecord> _chrCustomizationChoicesByOption = new();

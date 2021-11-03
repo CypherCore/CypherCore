@@ -121,4 +121,12 @@ namespace Game.DataStorage
         public ushort[] EmoteID = new ushort[3];
         public ushort[] EmoteDelay = new ushort[3];
     }
+
+    public sealed class BroadcastTextDurationRecord
+    {
+        public uint Id;
+        public int BroadcastTextID;
+        public int Locale;
+        public int Duration;
+    }
 }

@@ -400,6 +400,22 @@ namespace Framework.Constants
             return locale < Locale.Total && locale != Locale.None;
         }
 
+        public static CascLocaleBit[] WowLocaleToCascLocaleBit =
+        {
+            CascLocaleBit.enUS,
+            CascLocaleBit.koKR,
+            CascLocaleBit.frFR,
+            CascLocaleBit.deDE,
+            CascLocaleBit.zhCN,
+            CascLocaleBit.zhTW,
+            CascLocaleBit.esES,
+            CascLocaleBit.esMX,
+            CascLocaleBit.ruRU,
+            CascLocaleBit.None,
+            CascLocaleBit.ptBR,
+            CascLocaleBit.itIT
+        };
+
         public static long GetMaskForRace(Race raceId)
         {
             return raceId < Race.Max && raceBits[(int)raceId] >= 0 && raceBits[(int)raceId] < 64 ? (1 << raceBits[(int)raceId]) : 0;
@@ -421,6 +437,27 @@ namespace Framework.Constants
         ptBR = 10,
         itIT = 11,
         Total = 12
+    }
+
+    public enum CascLocaleBit
+    {
+        None = 0,
+        enUS = 1,
+        koKR = 2,
+        Reserved = 3,
+        frFR = 4,
+        deDE = 5,
+        zhCN = 6,
+        esES = 7,
+        zhTW = 8,
+        enGB = 9,
+        enCN = 10,
+        enTW = 11,
+        esMX = 12,
+        ruRU = 13,
+        ptBR = 14,
+        itIT = 15,
+        ptPT = 16
     }
 
     public enum ComparisionType

@@ -93,6 +93,7 @@ namespace Game.DataStorage
             BattlePetSpeciesStateStorage = ReadDB2<BattlePetSpeciesStateRecord>("BattlePetSpeciesState.db2", HotfixStatements.SEL_BATTLE_PET_SPECIES_STATE);
             BattlemasterListStorage = ReadDB2<BattlemasterListRecord>("BattlemasterList.db2", HotfixStatements.SEL_BATTLEMASTER_LIST, HotfixStatements.SEL_BATTLEMASTER_LIST_LOCALE);
             BroadcastTextStorage = ReadDB2<BroadcastTextRecord>("BroadcastText.db2", HotfixStatements.SEL_BROADCAST_TEXT, HotfixStatements.SEL_BROADCAST_TEXT_LOCALE);
+            BroadcastTextDurationStorage = ReadDB2<BroadcastTextDurationRecord>("BroadcastTextDuration.db2", HotfixStatements.SEL_BROADCAST_TEXT_DURATION);
             CfgRegionsStorage = ReadDB2<Cfg_RegionsRecord>("Cfg_Regions.db2", HotfixStatements.SEL_CFG_REGIONS);
             CharTitlesStorage = ReadDB2<CharTitlesRecord>("CharTitles.db2", HotfixStatements.SEL_CHAR_TITLES, HotfixStatements.SEL_CHAR_TITLES_LOCALE);
             CharacterLoadoutStorage = ReadDB2<CharacterLoadoutRecord>("CharacterLoadout.db2", HotfixStatements.SEL_CHARACTER_LOADOUT);
@@ -466,6 +467,7 @@ namespace Game.DataStorage
         public static DB6Storage<BattlePetSpeciesStateRecord> BattlePetSpeciesStateStorage;
         public static DB6Storage<BattlemasterListRecord> BattlemasterListStorage;
         public static DB6Storage<BroadcastTextRecord> BroadcastTextStorage;
+        public static DB6Storage<BroadcastTextDurationRecord> BroadcastTextDurationStorage;
         public static DB6Storage<Cfg_RegionsRecord> CfgRegionsStorage;
         public static DB6Storage<CharTitlesRecord> CharTitlesStorage;
         public static DB6Storage<CharacterLoadoutRecord> CharacterLoadoutStorage;

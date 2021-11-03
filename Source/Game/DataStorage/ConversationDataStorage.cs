@@ -35,7 +35,7 @@ namespace Game.DataStorage
             Dictionary<uint, ConversationActor[]> actorsByConversation = new();
             Dictionary<uint, ulong[]> actorGuidsByConversation = new();
 
-            SQLResult lineTemplates = DB.World.Query("SELECT Id, StartTime, UiCameraID, ActorIdx, Flags FROM conversation_line_template");
+            SQLResult lineTemplates = DB.World.Query("SELECT Id, UiCameraID, ActorIdx, Flags FROM conversation_line_template");
             if (!lineTemplates.IsEmpty())
             {
                 uint oldMSTime = Time.GetMSTime();
@@ -52,10 +52,9 @@ namespace Game.DataStorage
 
                     ConversationLineTemplate conversationLine = new();
                     conversationLine.Id = id;
-                    conversationLine.StartTime = lineTemplates.Read<uint>(1);
-                    conversationLine.UiCameraID = lineTemplates.Read<uint>(2);
-                    conversationLine.ActorIdx = lineTemplates.Read<byte>(3);
-                    conversationLine.Flags = lineTemplates.Read<byte>(4);
+                    conversationLine.UiCameraID = lineTemplates.Read<uint>(1);
+                    conversationLine.ActorIdx = lineTemplates.Read<byte>(2);
+                    conversationLine.Flags = lineTemplates.Read<byte>(3);
 
                     _conversationLineTemplateStorage[id] = conversationLine;
                 }
@@ -140,7 +139,7 @@ namespace Game.DataStorage
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 Conversation actors. DB table `conversation_actors` is empty.");
             }
 
-            SQLResult templateResult = DB.World.Query("SELECT Id, FirstLineId, LastLineEndTime, TextureKitId, ScriptName FROM conversation_template");
+            SQLResult templateResult = DB.World.Query("SELECT Id, FirstLineId, TextureKitId, ScriptName FROM conversation_template");
             if (!templateResult.IsEmpty())
             {
                 uint oldMSTime = Time.GetMSTime();
@@ -150,8 +149,7 @@ namespace Game.DataStorage
                     ConversationTemplate conversationTemplate = new();
                     conversationTemplate.Id = templateResult.Read<uint>(0);
                     conversationTemplate.FirstLineId = templateResult.Read<uint>(1);
-                    conversationTemplate.LastLineEndTime = templateResult.Read<uint>(2);
-                    conversationTemplate.TextureKitId = templateResult.Read<uint>(3);
+                    conversationTemplate.TextureKitId = templateResult.Read<uint>(2);
                     conversationTemplate.ScriptId = Global.ObjectMgr.GetScriptId(templateResult.Read<string>(3));
 
                     conversationTemplate.Actors = actorsByConversation.TryGetValue(conversationTemplate.Id, out var actors) ? actors.ToList() : null;
@@ -211,7 +209,6 @@ namespace Game.DataStorage
     public class ConversationLineTemplate
     {
         public uint Id;          // Link to ConversationLine.db2
-        public uint StartTime;   // Time in ms after conversation creation the line is displayed
         public uint UiCameraID;  // Link to UiCamera.db2
         public byte ActorIdx;    // Index from conversation_actors
         public byte Flags;
@@ -222,7 +219,6 @@ namespace Game.DataStorage
     {
         public uint Id;
         public uint FirstLineId;     // Link to ConversationLine.db2
-        public uint LastLineEndTime; // Time in ms after conversation creation the last line fades out
         public uint TextureKitId;    // Background texture
         public uint ScriptId;
 
