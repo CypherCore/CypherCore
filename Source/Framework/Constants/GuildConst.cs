@@ -15,6 +15,8 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+using System;
+
 namespace Framework.Constants
 {
     public class GuildConst
@@ -49,30 +51,34 @@ namespace Framework.Constants
         public static uint MasterDethroneInactiveDays = 90;
     }
 
+    [Flags]
     public enum GuildRankRights
     {
-        None = 0x00000000,
-        GChatListen = 0x00000001,
-        GChatSpeak = 0x00000002,
-        OffChatListen = 0x00000004,
-        OffChatSpeak = 0x00000008,
-        Invite = 0x00000010,
-        Remove = 0x00000020,
-        Roster = 0x00000040,
-        Promote = 0x00000080,
-        Demote = 0x00000100,
-        Unk200 = 0x00000200,
-        Unk400 = 0x00000400,
-        Unk800 = 0x00000800,
-        SetMotd = 0x00001000,
-        EditPublicNote = 0x00002000,
-        ViewOffNote = 0x00004000,
-        EOffNote = 0x00008000,
-        ModifyGuildInfo = 0x00010000,
-        WithdrawGoldLock = 0x00020000,                   // remove money withdraw capacity
-        WithdrawRepair = 0x00040000,                   // withdraw for repair
-        WithdrawGold = 0x00080000,                   // withdraw gold
-        CreateGuildEvent = 0x00100000,                   // wotlk
+        None = 0x00,
+        GChatListen = 0x01,
+        GChatSpeak = 0x02,
+        OffChatListen = 0x04,
+        OffChatSpeak = 0x08,
+        Invite = 0x10,
+        Remove = 0x20,
+        Roster = 0x40,
+        Promote = 0x80,
+        Demote = 0x100,
+        Unk200 = 0x200,
+        Unk400 = 0x400,
+        Unk800 = 0x800,
+        SetMotd = 0x1000,
+        EditPublicNote = 0x2000,
+        ViewOffNote = 0x4000,
+        EOffNote = 0x8000,
+        ModifyGuildInfo = 0x10000,
+        WithdrawGoldLock = 0x20000,                   // remove money withdraw capacity
+        WithdrawRepair = 0x40000,                   // withdraw for repair
+        WithdrawGold = 0x80000,                   // withdraw gold
+        CreateGuildEvent = 0x100000,                   // wotlk
+        InAuthenticatedRank = 0x200000,
+        EditGuildBankTabInfo = 0x400000,
+        Officer = 0x800000,
         All = 0x00DDFFBF
     }
 
@@ -85,13 +91,14 @@ namespace Framework.Constants
         public const int Initiate = 4;
     }
 
+    [Flags]
     public enum GuildMemberFlags
     {
-        None = 0,
-        Online = 1,
-        AFK = 2,
-        DND = 3,
-        Mobile = 4
+        None = 0x00,
+        Online = 0x01,
+        AFK = 0x02,
+        DND = 0x04,
+        Mobile = 0x08
     }
 
     public enum GuildMemberData

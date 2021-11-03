@@ -104,6 +104,7 @@ namespace Framework.Constants
         Graveyard = 27,
         AreaTrigger = 28,
         ConversationLine = 29,
+        AreatriggerClientTriggered = 30,
         Max
     }
 
