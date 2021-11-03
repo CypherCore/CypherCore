@@ -1111,6 +1111,13 @@ namespace Game
                         return false;
                     }
                     break;
+                case ConditionSourceType.AreatriggerClientTriggered:
+                    if (!CliDB.AreaTriggerStorage.ContainsKey(cond.SourceEntry))
+                    {
+                        Log.outError(LogFilter.Sql, $"{cond} SourceEntry in `condition` table, does not exists in AreaTrigger.db2, ignoring.");
+                        return false;
+                    }
+                    break;
                 default:
                     Log.outError(LogFilter.Sql, $"{cond.ToString()} Invalid ConditionSourceType in `condition` table, ignoring.");
                     return false;

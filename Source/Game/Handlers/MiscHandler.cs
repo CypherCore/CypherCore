@@ -195,6 +195,9 @@ namespace Game
             if (player.IsDebugAreaTriggers)
                 player.SendSysMessage(packet.Entered ? CypherStrings.DebugAreatriggerEntered : CypherStrings.DebugAreatriggerLeft, packet.AreaTriggerID);
 
+            if (!Global.ConditionMgr.IsObjectMeetingNotGroupedConditions(ConditionSourceType.AreatriggerClientTriggered, atEntry.Id, player))
+                return;
+
             if (Global.ScriptMgr.OnAreaTrigger(player, atEntry, packet.Entered))
                 return;
 
