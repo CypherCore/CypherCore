@@ -3282,6 +3282,8 @@ namespace Game.Spells
 
             visited.Add(Tuple.Create(spellInfo, effect.EffectIndex));
 
+            //We need scaling level info for some auras that compute bp 0 or positive but should be debuffs
+            float bpScalePerLevel = effect.RealPointsPerLevel;
             int bp = effect.CalcValue();
             switch (spellInfo.SpellFamilyName)
             {
@@ -3490,7 +3492,7 @@ namespace Game.Spells
                     case AuraType.ModIncreaseHealthPercent:
                     case AuraType.ModTotalStatPercentage:
                     case AuraType.ModIncreaseSwimSpeed:
-                        if (bp < 0)
+                        if (bp < 0 || bpScalePerLevel < 0) //TODO: What if both are 0? Should it be a buff or debuff?
                             return false;
                         break;
                     case AuraType.ModAttackspeed:            // some buffs have negative bp, check both target and bp
