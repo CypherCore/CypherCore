@@ -175,7 +175,7 @@ namespace Scripts.Spells.Priest
                 Aura atonement = caster.GetAura(SpellIds.Atonement);
                 if (atonement != null)
                 {
-                    var script = atonement.GetScript<spell_pri_atonement>("spell_pri_atonement");
+                    var script = atonement.GetScript<spell_pri_atonement>();
                     if (script != null)
                         script.AddAtonementTarget(GetTarget().GetGUID());
                 }
@@ -190,7 +190,7 @@ namespace Scripts.Spells.Priest
                 Aura atonement = caster.GetAura(SpellIds.Atonement);
                 if (atonement != null)
                 {
-                    var script = atonement.GetScript<spell_pri_atonement>("spell_pri_atonement");
+                    var script = atonement.GetScript<spell_pri_atonement>();
                     if (script != null)
                         script.RemoveAtonementTarget(GetTarget().GetGUID());
                 }

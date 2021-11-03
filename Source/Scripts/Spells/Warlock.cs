@@ -491,7 +491,7 @@ namespace Scripts.Spells.Warlock
             spell_warl_soul_swap_override swapSpellScript = null;
             Aura swapOverrideAura = warlock.GetAura(SpellIds.SoulSwapOverride);
             if (swapOverrideAura != null)
-                swapSpellScript = swapOverrideAura.GetScript<spell_warl_soul_swap_override>("spell_warl_soul_swap_override");
+                swapSpellScript = swapOverrideAura.GetScript<spell_warl_soul_swap_override>();
 
             if (swapSpellScript == null)
                 return;
@@ -530,7 +530,7 @@ namespace Scripts.Spells.Warlock
             Aura swapOverride = GetCaster().GetAura(SpellIds.SoulSwapOverride);
             if (swapOverride != null)
             {
-                spell_warl_soul_swap_override swapScript = swapOverride.GetScript<spell_warl_soul_swap_override>("spell_warl_soul_swap_override");
+                spell_warl_soul_swap_override swapScript = swapOverride.GetScript<spell_warl_soul_swap_override>();
                 if (swapScript != null)
                     swapTarget = swapScript.GetOriginalSwapSource();
             }
@@ -552,7 +552,7 @@ namespace Scripts.Spells.Warlock
             Aura swapOverride = GetCaster().GetAura(SpellIds.SoulSwapOverride);
             if (swapOverride != null)
             {
-                spell_warl_soul_swap_override swapScript = swapOverride.GetScript<spell_warl_soul_swap_override>("spell_warl_soul_swap_override");
+                spell_warl_soul_swap_override swapScript = swapOverride.GetScript<spell_warl_soul_swap_override>();
                 if (swapScript == null)
                     return;
                 dotList = swapScript.GetDotList();

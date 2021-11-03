@@ -273,7 +273,7 @@ namespace Scripts.Spells.Shaman
             Aura aura = GetCaster().GetAura(SpellIds.EarthenRagePassive);
             if (aura != null)
             {
-                var earthen_rage_script = aura.GetScript<spell_sha_earthen_rage_passive>("spell_sha_earthen_rage_passive");
+                var earthen_rage_script = aura.GetScript<spell_sha_earthen_rage_passive>();
                 if (earthen_rage_script != null)
                 {
                     Unit procTarget = Global.ObjAccessor.GetUnit(GetCaster(), earthen_rage_script.GetProcTargetGuid());
@@ -393,7 +393,7 @@ namespace Scripts.Spells.Shaman
 
                     summon.CastSpell(summon, SpellIds.HealingRainVisual, true);
 
-                    var script = aura.GetScript<spell_sha_healing_rain_AuraScript>("spell_sha_healing_rain");
+                    var script = aura.GetScript<spell_sha_healing_rain_AuraScript>();
                     if (script != null)
                         script.SetVisualDummy(summon);
                 }

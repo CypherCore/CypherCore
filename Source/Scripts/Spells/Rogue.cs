@@ -49,7 +49,7 @@ namespace Scripts.Spells.Rogue
             Aura aura = GetCaster().GetAura(SpellIds.KillingSpree);
             if (aura != null)
             {
-                var script = aura.GetScript<spell_rog_killing_spree_AuraScript>(nameof(spell_rog_killing_spree_AuraScript));
+                var script = aura.GetScript<spell_rog_killing_spree_AuraScript>();
                 if (script != null)
                     script.AddTarget(GetHitUnit());
             }

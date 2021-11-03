@@ -103,7 +103,7 @@ namespace Scripts.Spells.DemonHunter
             if (firstTargetGUID.IsEmpty())
                 firstTargetGUID = targetList[0].GetGUID();
 
-            spell_dh_first_blood script = aura.GetScript<spell_dh_first_blood>(nameof(spell_dh_first_blood));
+            spell_dh_first_blood script = aura.GetScript<spell_dh_first_blood>();
             if (script != null)
                 script.SetFirstTarget(firstTargetGUID);
         }
@@ -132,7 +132,7 @@ namespace Scripts.Spells.DemonHunter
             AuraEffect aurEff = GetCaster().GetAuraEffect(SpellIds.FirstBlood, 0);
             if (aurEff != null)
             {
-                spell_dh_first_blood script = aurEff.GetBase().GetScript<spell_dh_first_blood>(nameof(spell_dh_first_blood));
+                spell_dh_first_blood script = aurEff.GetBase().GetScript<spell_dh_first_blood>();
                 if (script != null)
                     if (GetHitUnit().GetGUID() == script.GetFirstTarget())
                         MathFunctions.AddPct(ref damage, aurEff.GetAmount());

@@ -362,16 +362,17 @@ namespace Game.Spells
             // m_casterLevel = cast item level/caster level, caster level should be saved to db, confirmed with sniffs
         }
 
-        public T GetScript<T>(string scriptName) where T : AuraScript
+        public T GetScript<T>() where T : AuraScript
         {
-            return (T)GetScriptByName(scriptName);
+            return (T)GetScriptByType(typeof(T));
         }
 
-        public AuraScript GetScriptByName(string scriptName)
+        public AuraScript GetScriptByType(Type type)
         {
             foreach (var auraScript in m_loadedScripts)
-                if (auraScript._GetScriptName().Equals(scriptName))
+                if (auraScript.GetType() == type)
                     return auraScript;
+
             return null;
         }
 
