@@ -91,6 +91,16 @@ namespace Game.DataStorage
         public bool IsGarrison() { return (Flags[0] & MapFlags.Garrison) != 0; }
     }
 
+    public sealed class MapChallengeModeRecord
+    {
+        public LocalizedString Name;
+        public uint Id;
+        public ushort MapID;
+        public byte Flags;
+        public uint ExpansionLevel;
+        public short[] CriteriaCount = new short[3];
+    }
+
     public sealed class MapDifficultyRecord
     {
         public uint Id;
@@ -122,6 +132,13 @@ namespace Game.DataStorage
         public uint PlayerConditionID;
         public int OrderIndex;
         public uint MapDifficultyID;
+    }
+
+    public sealed class MawPowerRecord
+    {
+        public uint Id;
+        public int SpellID;
+        public int MawPowerRarityID;
     }
 
     public sealed class ModifierTreeRecord

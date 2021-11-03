@@ -22,4 +22,12 @@ namespace Game.DataStorage
         public uint Id;
         public byte[] Key = new byte[32];
     }
+
+    public sealed class KeystoneAffixRecord
+    {
+        public uint Id;
+        public LocalizedString Name;
+        public LocalizedString Description;
+        public int FiledataID;
+    }
 }

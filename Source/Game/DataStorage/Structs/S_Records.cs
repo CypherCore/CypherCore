@@ -128,6 +128,15 @@ namespace Game.DataStorage
         public ushort SkillTierID;
     }
 
+    public sealed class SoulbindConduitRankRecord
+    {
+        public uint Id;
+        public int RankIndex;
+        public int SpellID;
+        public float AuraPointsOverride;
+        public uint SoulbindConduitID;
+    }
+
     public sealed class SoundKitRecord
     {
         public uint Id;

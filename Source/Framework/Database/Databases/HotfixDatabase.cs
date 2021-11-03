@@ -341,6 +341,11 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_CRITERIA_TREE, "SELECT ID, Description, Parent, Amount, Operator, CriteriaID, OrderIndex, Flags FROM criteria_tree");
             PrepareStatement(HotfixStatements.SEL_CRITERIA_TREE_LOCALE, "SELECT ID, Description_lang FROM criteria_tree_locale WHERE locale = ?");
 
+            // CurrencyContainer.db2
+            PrepareStatement(HotfixStatements.SEL_CURRENCY_CONTAINER, "SELECT ID, ContainerName, ContainerDescription, MinAmount, MaxAmount, ContainerIconID, " +
+                "ContainerQuality, OnLootSpellVisualKitID, CurrencyTypesID FROM currency_container");
+            PrepareStatement(HotfixStatements.SEL_CURRENCY_CONTAINER_LOCALE, "SELECT ID, ContainerName_lang, ContainerDescription_lang FROM currency_container_locale WHERE locale = ?");
+
             // CurrencyTypes.db2
             PrepareStatement(HotfixStatements.SEL_CURRENCY_TYPES, "SELECT ID, Name, Description, CategoryID, InventoryIconFileID, SpellWeight, SpellCategory, MaxQty, " +
                 "MaxEarnablePerWeek, Quality, FactionID, ItemGroupSoundsID, XpQuestDifficulty, AwardConditionID, MaxQtyWorldStateID, Flags1, Flags2 FROM currency_types");
@@ -463,6 +468,14 @@ namespace Framework.Database
             // GarrFollowerXAbility.db2
             PrepareStatement(HotfixStatements.SEL_GARR_FOLLOWER_X_ABILITY, "SELECT ID, OrderIndex, FactionIndex, GarrAbilityID, GarrFollowerID" +        
                 " FROM garr_follower_x_ability");
+
+            // GarrMission.db2
+            PrepareStatement(HotfixStatements.SEL_GARR_MISSION, "SELECT ID, Name, Location, Description, MapPosX, MapPosY, WorldPosX, WorldPosY, GarrTypeID, " +
+                "GarrMissionTypeID, GarrFollowerTypeID, MaxFollowers, MissionCost, MissionCostCurrencyTypesID, OfferedGarrMissionTextureID, UiTextureKitID, " +
+                "EnvGarrMechanicID, EnvGarrMechanicTypeID, PlayerConditionID, GarrMissionSetID, TargetLevel, TargetItemLevel, MissionDuration, " +
+                "TravelDuration, OfferDuration, BaseCompletionChance, BaseFollowerXP, OvermaxRewardPackID, FollowerDeathChance, AreaID, Flags, " +
+                "AutoMissionScalar, AutoMissionScalarCurveID, AutoCombatantEnvCasterID FROM garr_mission");
+            PrepareStatement(HotfixStatements.SEL_GARR_MISSION_LOCALE, "SELECT ID, Name_lang, Location_lang, Description_lang FROM garr_mission_locale WHERE locale = ?");
 
             // GarrPlot.db2
             PrepareStatement(HotfixStatements.SEL_GARR_PLOT, "SELECT ID, Name, PlotType, HordeConstructObjID, AllianceConstructObjID, Flags, UiCategoryID, " +        
@@ -687,9 +700,34 @@ namespace Framework.Database
             // ItemXItemEffect.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_X_ITEM_EFFECT, "SELECT ID, ItemEffectID, ItemID FROM item_x_item_effect");
 
+            // JournalEncounter.db2
+            PrepareStatement(HotfixStatements.SEL_JOURNAL_ENCOUNTER, "SELECT Name, Description, MapX, MapY, ID, JournalInstanceID, DungeonEncounterID, OrderIndex, " +
+                "FirstSectionID, UiMapID, MapDisplayConditionID, Flags, DifficultyMask FROM journal_encounter");
+            PrepareStatement(HotfixStatements.SEL_JOURNAL_ENCOUNTER_LOCALE, "SELECT ID, Name_lang, Description_lang FROM journal_encounter_locale WHERE locale = ?");
+
+            // JournalEncounterSection.db2
+            PrepareStatement(HotfixStatements.SEL_JOURNAL_ENCOUNTER_SECTION, "SELECT ID, Title, BodyText, JournalEncounterID, OrderIndex, ParentSectionID, " +
+                "FirstChildSectionID, NextSiblingSectionID, Type, IconCreatureDisplayInfoID, UiModelSceneID, SpellID, IconFileDataID, Flags, IconFlags, " +
+                "DifficultyMask FROM journal_encounter_section");
+            PrepareStatement(HotfixStatements.SEL_JOURNAL_ENCOUNTER_SECTION_LOCALE, "SELECT ID, Title_lang, BodyText_lang FROM journal_encounter_section_locale WHERE locale = ?");
+
+            // JournalInstance.db2
+            PrepareStatement(HotfixStatements.SEL_JOURNAL_INSTANCE, "SELECT ID, Name, Description, MapID, BackgroundFileDataID, ButtonFileDataID, " +
+                "ButtonSmallFileDataID, LoreFileDataID, OrderIndex, Flags, AreaID FROM journal_instance");
+            PrepareStatement(HotfixStatements.SEL_JOURNAL_INSTANCE_LOCALE, "SELECT ID, Name_lang, Description_lang FROM journal_instance_locale WHERE locale = ?");
+
+            // JournalTier.db2
+            PrepareStatement(HotfixStatements.SEL_JOURNAL_TIER, "SELECT ID, Name, PlayerConditionID FROM journal_tier");
+            PrepareStatement(HotfixStatements.SEL_JOURNAL_TIER_LOCALE, "SELECT ID, Name_lang FROM journal_tier_locale WHERE locale = ?");
+
+
             // Keychain.db2
             PrepareStatement(HotfixStatements.SEL_KEYCHAIN, "SELECT ID, Key1, Key2, Key3, Key4, Key5, Key6, Key7, Key8, Key9, Key10, Key11, Key12, Key13, Key14, Key15, " +        
                 "Key16, Key17, Key18, Key19, Key20, Key21, Key22, Key23, Key24, Key25, Key26, Key27, Key28, Key29, Key30, Key31, Key32 FROM keychain");
+
+            // KeystoneAffix.db2
+            PrepareStatement(HotfixStatements.SEL_KEYSTONE_AFFIX, "SELECT ID, Name, Description, FiledataID FROM keystone_affix");
+            PrepareStatement(HotfixStatements.SEL_KEYSTONE_AFFIX_LOCALE, "SELECT ID, Name_lang, Description_lang FROM keystone_affix_locale WHERE locale = ?");
 
             // LanguageWords.db2
             PrepareStatement(HotfixStatements.SEL_LANGUAGE_WORDS, "SELECT ID, Word, LanguageID FROM language_words");
@@ -733,6 +771,10 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_MAP_LOCALE, "SELECT ID, MapName_lang, MapDescription0_lang, MapDescription1_lang, PvpShortDescription_lang, " +        
                 "PvpLongDescription_lang FROM map_locale WHERE locale = ?");
 
+            // MapChallengeMode.db2
+            PrepareStatement(HotfixStatements.SEL_MAP_CHALLENGE_MODE, "SELECT Name, ID, MapID, Flags, ExpansionLevel, CriteriaCount1, CriteriaCount2, CriteriaCount3 FROM map_challenge_mode");
+            PrepareStatement(HotfixStatements.SEL_MAP_CHALLENGE_MODE_LOCALE, "SELECT ID, Name_lang FROM map_challenge_mode_locale WHERe locale = ?");
+
             // MapDifficulty.db2
             PrepareStatement(HotfixStatements.SEL_MAP_DIFFICULTY, "SELECT ID, Message, DifficultyID, LockID, ResetInterval, MaxPlayers, ItemContext, " +        
                 "ItemContextPickerID, Flags, ContentTuningID, MapID FROM map_difficulty");
@@ -742,6 +784,9 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_MAP_DIFFICULTY_X_CONDITION, "SELECT ID, FailureDescription, PlayerConditionID, OrderIndex, MapDifficultyID" +
                 " FROM map_difficulty_x_condition");
             PrepareStatement(HotfixStatements.SEL_MAP_DIFFICULTY_X_CONDITION_LOCALE, "SELECT ID, FailureDescription_lang FROM map_difficulty_x_condition_locale WHERE locale = ?");
+
+            // MawPower.db2
+            PrepareStatement(HotfixStatements.SEL_MAW_POWER, "SELECT ID, SpellID, MawPowerRarityID FROM maw_power");
 
             // ModifierTree.db2
             PrepareStatement(HotfixStatements.SEL_MODIFIER_TREE, "SELECT ID, Parent, Operator, Amount, Type, Asset, SecondaryAsset, TertiaryAsset FROM modifier_tree");
@@ -925,6 +970,9 @@ namespace Framework.Database
             // SkillRaceClassInfo.db2
             PrepareStatement(HotfixStatements.SEL_SKILL_RACE_CLASS_INFO, "SELECT ID, RaceMask, SkillID, ClassMask, Flags, Availability, MinLevel, SkillTierID" +        
                 " FROM skill_race_class_info");
+
+            // SoulbindConduitRank.db2
+            PrepareStatement(HotfixStatements.SEL_SOULBIND_CONDUIT_RANK, "SELECT ID, RankIndex, SpellID, AuraPointsOverride, SoulbindConduitID FROM soulbind_conduit_rank");
 
             // SoundKit.db2
             PrepareStatement(HotfixStatements.SEL_SOUND_KIT, "SELECT ID, SoundType, VolumeFloat, Flags, MinDistance, DistanceCutoff, EAXDef, SoundKitAdvancedID, " +        
@@ -1378,6 +1426,9 @@ namespace Framework.Database
         SEL_CRITERIA_TREE,
         SEL_CRITERIA_TREE_LOCALE,
 
+        SEL_CURRENCY_CONTAINER,
+        SEL_CURRENCY_CONTAINER_LOCALE,
+
         SEL_CURRENCY_TYPES,
         SEL_CURRENCY_TYPES_LOCALE,
 
@@ -1438,6 +1489,9 @@ namespace Framework.Database
         SEL_GARR_FOLLOWER_LOCALE,
 
         SEL_GARR_FOLLOWER_X_ABILITY,
+
+        SEL_GARR_MISSION,
+        SEL_GARR_MISSION_LOCALE,
 
         SEL_GARR_PLOT,
 
@@ -1561,7 +1615,22 @@ namespace Framework.Database
 
         SEL_ITEM_X_ITEM_EFFECT,
 
+        SEL_JOURNAL_ENCOUNTER,
+        SEL_JOURNAL_ENCOUNTER_LOCALE,
+
+        SEL_JOURNAL_ENCOUNTER_SECTION,
+        SEL_JOURNAL_ENCOUNTER_SECTION_LOCALE,
+
+        SEL_JOURNAL_INSTANCE,
+        SEL_JOURNAL_INSTANCE_LOCALE,
+
+        SEL_JOURNAL_TIER,
+        SEL_JOURNAL_TIER_LOCALE,
+
         SEL_KEYCHAIN,
+
+        SEL_KEYSTONE_AFFIX,
+        SEL_KEYSTONE_AFFIX_LOCALE,
 
         SEL_LANGUAGE_WORDS,
 
@@ -1583,11 +1652,16 @@ namespace Framework.Database
         SEL_MAP,
         SEL_MAP_LOCALE,
 
+        SEL_MAP_CHALLENGE_MODE,
+        SEL_MAP_CHALLENGE_MODE_LOCALE,
+
         SEL_MAP_DIFFICULTY,
         SEL_MAP_DIFFICULTY_LOCALE,
 
         SEL_MAP_DIFFICULTY_X_CONDITION,
         SEL_MAP_DIFFICULTY_X_CONDITION_LOCALE,
+
+        SEL_MAW_POWER,
 
         SEL_MODIFIER_TREE,
 
@@ -1690,6 +1764,8 @@ namespace Framework.Database
         SEL_SKILL_LINE_ABILITY,
 
         SEL_SKILL_RACE_CLASS_INFO,
+
+        SEL_SOULBIND_CONDUIT_RANK,
 
         SEL_SOUND_KIT,
 

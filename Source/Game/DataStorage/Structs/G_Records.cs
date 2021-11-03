@@ -166,6 +166,42 @@ namespace Game.DataStorage
         public uint GarrFollowerID;
     }
 
+    public sealed class GarrMissionRecord
+    {
+        public uint Id;
+        public LocalizedString Name;
+        public LocalizedString Location;
+        public LocalizedString Description;
+        public Vector2 MapPos;
+        public Vector2 WorldPos;
+        public byte GarrTypeID;
+        public byte GarrMissionTypeID;
+        public byte GarrFollowerTypeID;
+        public byte MaxFollowers;
+        public uint MissionCost;
+        public ushort MissionCostCurrencyTypesID;
+        public byte OfferedGarrMissionTextureID;
+        public ushort UiTextureKitID;
+        public uint EnvGarrMechanicID;
+        public int EnvGarrMechanicTypeID;
+        public uint PlayerConditionID;
+        public int GarrMissionSetID;
+        public sbyte TargetLevel;
+        public ushort TargetItemLevel;
+        public int MissionDuration;
+        public int TravelDuration;
+        public uint OfferDuration;
+        public byte BaseCompletionChance;
+        public uint BaseFollowerXP;
+        public uint OvermaxRewardPackID;
+        public byte FollowerDeathChance;
+        public uint AreaID;
+        public uint Flags;
+        public float AutoMissionScalar;
+        public int AutoMissionScalarCurveID;
+        public int AutoCombatantEnvCasterID;
+    }
+
     public sealed class GarrPlotRecord
     {
         public uint Id;

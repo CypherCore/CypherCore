@@ -249,6 +249,9 @@ namespace Game.DataStorage
                     _expectedStatModsByContentTuning.Add(contentTuningXExpectedStat.ContentTuningID, contentTuningXExpectedStat);
             }
 
+            foreach (CurrencyContainerRecord currencyContainer in CurrencyContainerStorage.Values)
+                _currencyContainers.Add(currencyContainer.CurrencyTypesID, currencyContainer);
+
             foreach (CurvePointRecord curvePoint in CurvePointStorage.Values)
             {
                 if (CurveStorage.ContainsKey(curvePoint.CurveID))
@@ -341,6 +344,9 @@ namespace Game.DataStorage
 
             foreach (var pair in _azeriteEmpoweredItems)
                 LoadAzeriteEmpoweredItemUnlockMappings(azeriteUnlockMappings, pair.Key);
+
+            foreach (JournalTierRecord journalTier in JournalTierStorage.Values)
+                _journalTiersByIndex.Add(journalTier);
 
             foreach (MapDifficultyRecord entry in MapDifficultyStorage.Values)
             {
@@ -488,6 +494,9 @@ namespace Game.DataStorage
                     _skillRaceClassInfoBySkill.Add((uint)entry.SkillID, entry);
             }
 
+            foreach (SoulbindConduitRankRecord soulbindConduitRank in SoulbindConduitRankStorage.Values)
+                _soulbindConduitRanks[Tuple.Create((int)soulbindConduitRank.SoulbindConduitID, soulbindConduitRank.RankIndex)] = soulbindConduitRank;
+
             foreach (var specSpells in SpecializationSpellsStorage.Values)
                 _specializationSpellsBySpec.Add(specSpells.SpecID, specSpells);
 
@@ -522,6 +531,9 @@ namespace Game.DataStorage
 
             foreach (ToyRecord toy in ToyStorage.Values)
                 _toys.Add(toy.ItemID);
+
+            foreach (TransmogIllusionRecord transmogIllusion in TransmogIllusionStorage.Values)
+                _transmogIllusionsByEnchantmentId[(uint)transmogIllusion.SpellItemEnchantmentID] = transmogIllusion;
 
             foreach (TransmogSetItemRecord transmogSetItem in TransmogSetItemStorage.Values)
             {
@@ -1068,6 +1080,15 @@ namespace Game.DataStorage
             return petFamily.Name[locale][0] != '\0' ? petFamily.Name[locale] : "";
         }
 
+        public CurrencyContainerRecord GetCurrencyContainerForCurrencyQuantity(uint currencyId, int quantity)
+        {
+            foreach (var record in _currencyContainers.LookupByKey(currencyId))
+                if (quantity >= record.MinAmount && (record.MaxAmount == 0 || quantity <= record.MaxAmount))
+                    return record;
+
+            return null;
+        }
+        
         static CurveInterpolationMode DetermineCurveType(CurveRecord curve, List<CurvePointRecord> points)
         {
             switch (curve.Type)
@@ -1624,6 +1645,13 @@ namespace Game.DataStorage
             return _itemSpecOverrides.LookupByKey(itemId);
         }
 
+        public JournalTierRecord GetJournalTier(uint index)
+        {
+            if (index < _journalTiersByIndex.Count)
+                return _journalTiersByIndex[(int)index];
+            return null;
+        }
+        
         public LFGDungeonsRecord GetLfgDungeon(uint mapId, Difficulty difficulty)
         {
             foreach (LFGDungeonsRecord dungeon in LFGDungeonsStorage.Values)
@@ -1956,6 +1984,11 @@ namespace Game.DataStorage
             return null;
         }
 
+        public SoulbindConduitRankRecord GetSoulbindConduitRank(int soulbindConduitId, int rank)
+        {
+            return _soulbindConduitRanks.LookupByKey(Tuple.Create(soulbindConduitId, rank));
+        }
+
         public List<SpecializationSpellsRecord> GetSpecializationSpells(uint specId)
         {
             return _specializationSpellsBySpec.LookupByKey(specId);
@@ -2004,6 +2037,11 @@ namespace Game.DataStorage
         public bool IsToyItem(uint toy)
         {
             return _toys.Contains(toy);
+        }
+
+        public TransmogIllusionRecord GetTransmogIllusionForEnchantment(uint spellItemEnchantmentId)
+        {
+            return _transmogIllusionsByEnchantmentId.LookupByKey(spellItemEnchantmentId);
         }
 
         public List<TransmogSetRecord> GetTransmogSetsForItemModifiedAppearance(uint itemModifiedAppearanceId)
@@ -2324,6 +2362,7 @@ namespace Game.DataStorage
         MultiMap<Tuple<byte, byte>, ChrCustomizationOptionRecord> _chrCustomizationOptionsByRaceAndGender = new();
         Dictionary<uint, MultiMap<uint, uint>> _chrCustomizationRequiredChoices = new();
         ChrSpecializationRecord[][] _chrSpecializationsByIndex = new ChrSpecializationRecord[(int)Class.Max + 1][];
+        MultiMap<uint, CurrencyContainerRecord> _currencyContainers = new();
         MultiMap<uint, CurvePointRecord> _curvePoints = new();
         Dictionary<Tuple<uint, byte, byte, byte>, EmotesTextSoundRecord> _emoteTextSounds = new();
         Dictionary<Tuple<uint, int>, ExpectedStatRecord> _expectedStatsByLevel = new();
@@ -2345,6 +2384,7 @@ namespace Game.DataStorage
         MultiMap<uint, uint> _itemToBonusTree = new();
         MultiMap<uint, ItemSetSpellRecord> _itemSetSpells = new();
         MultiMap<uint, ItemSpecOverrideRecord> _itemSpecOverrides = new();
+        List<JournalTierRecord> _journalTiersByIndex = new();
         Dictionary<uint, Dictionary<uint, MapDifficultyRecord>> _mapDifficulties = new();
         MultiMap<uint, Tuple<uint, PlayerConditionRecord>> _mapDifficultyConditions = new();
         Dictionary<uint, MountRecord> _mountsBySpellId = new();
@@ -2364,12 +2404,14 @@ namespace Game.DataStorage
         MultiMap<uint, SkillLineRecord> _skillLinesByParentSkillLine = new();
         MultiMap<uint, SkillLineAbilityRecord> _skillLineAbilitiesBySkillupSkill = new();
         MultiMap<uint, SkillRaceClassInfoRecord> _skillRaceClassInfoBySkill = new();
+        Dictionary<Tuple<int, int>, SoulbindConduitRankRecord> _soulbindConduitRanks = new();
         MultiMap<uint, SpecializationSpellsRecord> _specializationSpellsBySpec = new();
         List<Tuple<int, uint>> _specsBySpecSet = new();
         List<byte> _spellFamilyNames = new();
         MultiMap<uint, SpellProcsPerMinuteModRecord> _spellProcsPerMinuteMods = new();
         List<TalentRecord>[][][] _talentsByPosition = new List<TalentRecord>[(int)Class.Max][][];
         List<uint> _toys = new();
+        Dictionary<uint, TransmogIllusionRecord> _transmogIllusionsByEnchantmentId = new();
         MultiMap<uint, TransmogSetRecord> _transmogSetsByItemModifiedAppearance = new();
         MultiMap<uint, TransmogSetItemRecord> _transmogSetItemsByTransmogSet = new();
         Dictionary<int, UiMapBounds> _uiMapBounds = new();
