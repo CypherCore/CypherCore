@@ -1045,7 +1045,9 @@ namespace Game.Entities
 
             if (!IsAlive())
             {
-                if (!result.IsEmpty() && !HasAtLoginFlag(AtLoginFlags.Resurrect))
+                if (HasAtLoginFlag(AtLoginFlags.Resurrect))
+                    ResurrectPlayer(0.5f);
+                else if (!result.IsEmpty())
                 {
                     _corpseLocation = new WorldLocation(result.Read<ushort>(0), result.Read<float>(1), result.Read<float>(2), result.Read<float>(3), result.Read<float>(4));
                     if (!CliDB.MapStorage.LookupByKey(_corpseLocation.GetMapId()).Instanceable())
@@ -1053,8 +1055,6 @@ namespace Game.Entities
                     else
                         RemovePlayerLocalFlag(PlayerLocalFlags.ReleaseTimer);
                 }
-                else
-                    ResurrectPlayer(0.5f);
             }
 
             RemoveAtLoginFlag(AtLoginFlags.Resurrect);
@@ -3188,6 +3188,10 @@ namespace Game.Entities
 
             GetSpellHistory().LoadFromDB<Player>(holder.GetResult(PlayerLoginQueryLoad.SpellCooldowns), holder.GetResult(PlayerLoginQueryLoad.SpellCharges));
 
+            uint savedHealth = health;
+            if (savedHealth == 0)
+                m_deathState = DeathState.Corpse;
+
             // Spell code allow apply any auras to dead character in load time in aura/spell/item loading
             // Do now before stats re-calculation cleanup for ghost state unexpected auras
             if (!IsAlive())
@@ -3200,7 +3204,7 @@ namespace Game.Entities
             UpdateAllStats();
 
             // restore remembered power/health values (but not more max values)
-            SetHealth(health > GetMaxHealth() ? GetMaxHealth() : health);
+            SetHealth(savedHealth > GetMaxHealth() ? GetMaxHealth() : savedHealth);
             int loadedPowers = 0;
             for (PowerType i = 0; i < PowerType.Max; ++i)
             {

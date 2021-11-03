@@ -4100,6 +4100,7 @@ namespace Game.Entities
             GetMap().AddToMap(corpse);
 
             // convert player body to ghost
+            SetDeathState(DeathState.Dead);
             SetHealth(1);
 
             SetWaterWalking(true);

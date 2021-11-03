@@ -899,7 +899,7 @@ namespace Game
             });
 
             // setting Ghost+speed if dead
-            if (pCurrChar.GetDeathState() != DeathState.Alive)
+            if (pCurrChar.GetDeathState() == DeathState.Dead)
             {
                 // not blizz like, we must correctly save and load player instead...
                 if (pCurrChar.GetRace() == Race.NightElf && !pCurrChar.HasAura(20584))
