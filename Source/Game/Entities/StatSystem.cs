@@ -466,7 +466,7 @@ namespace Game.Entities
         public ulong GetHealth() { return m_unitData.Health; }
         public void SetHealth(ulong val)
         {
-            if (GetDeathState() == DeathState.JustDied)
+            if (GetDeathState() == DeathState.JustDied || GetDeathState() == DeathState.Corpse)
                 val = 0;
             else if (IsTypeId(TypeId.Player) && GetDeathState() == DeathState.Dead)
                 val = 1;
