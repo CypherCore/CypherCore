@@ -173,6 +173,8 @@ namespace Game.Entities
             if (m_TaxiDestinations.Empty())
                 return "";
 
+            Cypher.Assert(m_TaxiDestinations.Count >= 2);
+
             StringBuilder ss = new();
             ss.Append($"{m_flightMasterFactionId} ");
 

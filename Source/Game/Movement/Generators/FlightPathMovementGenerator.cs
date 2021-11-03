@@ -123,6 +123,7 @@ namespace Game.Movement
             if (!active)
                 return;
 
+            owner.m_taxi.ClearTaxiDestinations();
             owner.Dismount();
             owner.RemoveUnitFlag(UnitFlags.RemoveClientControl | UnitFlags.TaxiFlight);
 
