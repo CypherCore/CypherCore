@@ -1694,14 +1694,6 @@ namespace Game.Entities
                 if (!_IsTargetAcceptable(who))
                     return false;
 
-                if (who.IsEngaged() && IsWithinDist(who, SharedConst.AttackDistance))
-                {
-                    Unit victim = who.GetAttackerForHelper();
-                    if (victim != null)
-                        if (IsWithinDistInMap(victim, WorldConfig.GetFloatValue(WorldCfg.CreatureFamilyAssistanceRadius)))
-                            force = true;
-                }
-
                 if (!force && (IsNeutralToAll() || !IsWithinDistInMap(who, GetAttackDistance(who) + m_CombatDistance)))
                     return false;
             }
@@ -2232,14 +2224,8 @@ namespace Game.Entities
                     return false;
             }
 
-            Unit targetVictim = target.GetAttackerForHelper();
-
             // if I'm already fighting target, or I'm hostile towards the target, the target is acceptable
             if (IsEngagedBy(target) || IsHostileTo(target))
-                return true;
-
-            // if the target's victim is friendly, and the target is neutral, the target is acceptable
-            if (targetVictim != null && IsFriendlyTo(targetVictim))
                 return true;
 
             // if the target's victim is not friendly, or the target is friendly, the target is not acceptable
