@@ -704,10 +704,16 @@ namespace Game.Networking.Packets
         {
             _worldPacket.WritePackedGuid(SenderGUID);
             _worldPacket.WriteUInt8((byte)Result);
+
+            _worldPacket.WriteBits(QuestTitle.GetByteCount(), 9);
+            _worldPacket.FlushBits();
+
+            _worldPacket.WriteString(QuestTitle);
         }
 
         public ObjectGuid SenderGUID;
         public QuestPushReason Result;
+        public string QuestTitle;
     }
 
     class QuestPushResult : ClientPacket

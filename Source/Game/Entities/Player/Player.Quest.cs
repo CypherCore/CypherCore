@@ -1290,24 +1290,33 @@ namespace Game.Entities
             return true;
         }
 
-        public bool SatisfyQuestLevel(Quest qInfo, bool msg)
+        bool SatisfyQuestLevel(Quest qInfo, bool msg)
+        {
+            return SatisfyQuestMinLevel(qInfo, msg) && SatisfyQuestMaxLevel(qInfo, msg);
+        }
+
+        public bool SatisfyQuestMinLevel(Quest qInfo, bool msg)
         {
             if (GetLevel() < GetQuestMinLevel(qInfo))
             {
                 if (msg)
                 {
                     SendCanTakeQuestResponse(QuestFailedReasons.FailedLowLevel);
-                    Log.outDebug(LogFilter.Server, "SatisfyQuestLevel: Sent QuestFailedReasons.FailedLowLevel (questId: {0}) because player does not have required (min) level.", qInfo.Id);
+                    Log.outDebug(LogFilter.Server, "SatisfyQuestMinLevel: Sent QuestFailedReasons.FailedLowLevel (questId: {0}) because player does not have required (min) level.", qInfo.Id);
                 }
                 return false;
             }
+            return true;
+        }
 
+        public bool SatisfyQuestMaxLevel(Quest qInfo, bool msg)
+        {
             if (qInfo.MaxLevel > 0 && GetLevel() > qInfo.MaxLevel)
             {
                 if (msg)
                 {
                     SendCanTakeQuestResponse(QuestFailedReasons.None); // There doesn't seem to be a specific response for too high player level
-                    Log.outDebug(LogFilter.Server, "SatisfyQuestLevel: Sent QuestFailedReasons.None (questId: {0}) because player does not have required (max) level.", qInfo.Id);
+                    Log.outDebug(LogFilter.Server, "SatisfyQuestMaxLevel: Sent QuestFailedReasons.None (questId: {0}) because player does not have required (max) level.", qInfo.Id);
                 }
                 return false;
             }
@@ -1326,7 +1335,7 @@ namespace Game.Entities
             return false;
         }
 
-        bool SatisfyQuestDependentQuests(Quest qInfo, bool msg)
+        public bool SatisfyQuestDependentQuests(Quest qInfo, bool msg)
         {
             return SatisfyQuestPreviousQuest(qInfo, msg) && SatisfyQuestDependentPreviousQuests(qInfo, msg);
         }
@@ -1475,20 +1484,6 @@ namespace Game.Entities
                 return false;
             }
 
-            /* @todo 6.x investigate if it's still needed
-            // ReputationObjective2 does not seem to be an objective requirement but a requirement
-            // to be able to accept the quest
-                    uint fIdObj = qInfo.RequiredFactionId2;
-                    if (fIdObj != 0 && GetReputationMgr().GetReputation(fIdObj) >= qInfo.RequiredFactionValue2)
-                    {
-                        if (msg)
-                        {
-                            SendCanTakeQuestResponse(QuestFailedReasons.DontHaveReq);
-                            Log.outDebug(LogFilter.Misc, "SatisfyQuestReputation: Sent QuestFailedReason.None (questId: {0}) because player does not have required reputation (ReputationObjective2).", qInfo.Id);
-                        }
-                        return false;
-                    }
-                    */
             return true;
         }
 
@@ -1626,6 +1621,19 @@ namespace Game.Entities
             return !list.Contains(qInfo.Id);
         }
 
+        public bool SatisfyQuestExpansion(Quest qInfo, bool msg)
+        {
+            if ((int)GetSession().GetExpansion() < qInfo.Expansion)
+            {
+                if (msg)
+                    SendCanTakeQuestResponse(QuestFailedReasons.FailedExpansion);
+
+                Log.outDebug(LogFilter.Misc, $"Player.SatisfyQuestExpansion: Sent QUEST_ERR_FAILED_EXPANSION (QuestID: {qInfo.Id}) because player '{GetName()}' ({GetGUID()}) does not have required expansion.");
+                return false;
+            }
+            return true;
+        }
+        
         public bool SatisfyQuestMonth(Quest qInfo, bool msg)
         {
             if (!qInfo.IsMonthly() || m_monthlyquests.Empty())
@@ -1742,17 +1750,7 @@ namespace Game.Entities
             if (qInfo != null && qInfo.HasFlag(QuestFlags.Sharable))
             {
                 var questStatusData = m_QuestStatus.LookupByKey(quest_id);
-                if (questStatusData != null)
-                {
-                    // in pool and not currently available (wintergrasp weekly, dalaran weekly) - can't share
-                    if (Global.PoolMgr.IsPartOfAPool<Quest>(quest_id) != 0 && !Global.PoolMgr.IsSpawnedObject<Quest>(quest_id))
-                    {
-                        SendPushToPartyResponse(this, QuestPushReason.NotDaily);
-                        return false;
-                    }
-
-                    return true;
-                }
+                return questStatusData != null;
             }
             return false;
         }
@@ -2727,14 +2725,26 @@ namespace Game.Entities
             receiver.SendPacket(packet);
         }
 
-        public void SendPushToPartyResponse(Player player, QuestPushReason reason)
+        public void SendPushToPartyResponse(Player player, QuestPushReason reason, Quest quest = null)
         {
             if (player != null)
             {
-                QuestPushResultResponse data = new();
-                data.SenderGUID = player.GetGUID();
-                data.Result = reason;
-                SendPacket(data);
+                QuestPushResultResponse response = new();
+                response.SenderGUID = player.GetGUID();
+                response.Result = reason;
+                if (quest != null)
+                {
+                    response.QuestTitle = quest.LogTitle;
+                    Locale localeConstant = GetSession().GetSessionDbLocaleIndex();
+                    if (localeConstant != Locale.enUS)
+                    {
+                        QuestTemplateLocale questTemplateLocale = Global.ObjectMgr.GetQuestLocale(quest.Id);
+                        if (questTemplateLocale != null)
+                            ObjectManager.GetLocaleString(questTemplateLocale.LogTitle, localeConstant, ref response.QuestTitle);
+                    }
+                }
+
+                SendPacket(response);
             }
         }
 

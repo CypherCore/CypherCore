@@ -589,14 +589,24 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.PushQuestToParty)]
         void HandlePushQuestToParty(PushQuestToParty packet)
         {
-            if (!GetPlayer().CanShareQuest(packet.QuestID))
-                return;
-
             Quest quest = Global.ObjectMgr.GetQuestTemplate(packet.QuestID);
             if (quest == null)
                 return;
 
             Player sender = GetPlayer();
+
+            if (!_player.CanShareQuest(packet.QuestID))
+            {
+                sender.SendPushToPartyResponse(sender, QuestPushReason.NotAllowed);
+                return;
+            }
+
+            // in pool and not currently available (wintergrasp weekly, dalaran weekly) - can't share
+            if (Global.PoolMgr.IsPartOfAPool<Quest>(packet.QuestID) != 0 && !Global.PoolMgr.IsSpawnedObject<Quest>(packet.QuestID))
+            {
+                sender.SendPushToPartyResponse(sender, QuestPushReason.NotDaily);
+                return;
+            }
 
             Group group = sender.GetGroup();
             if (!group)
@@ -612,39 +622,105 @@ namespace Game
                 if (!receiver || receiver == sender)
                     continue;
 
-                if (!receiver.SatisfyQuestStatus(quest, false))
+                if (!receiver.GetPlayerSharingQuest().IsEmpty())
                 {
-                    sender.SendPushToPartyResponse(receiver, QuestPushReason.OnQuest);
+                    sender.SendPushToPartyResponse(receiver, QuestPushReason.Busy);
                     continue;
                 }
 
-                if (receiver.GetQuestStatus(packet.QuestID) == QuestStatus.Complete)
+                if (!receiver.IsAlive())
                 {
-                    sender.SendPushToPartyResponse(receiver, QuestPushReason.AlreadyDone);
+                    sender.SendPushToPartyResponse(receiver, QuestPushReason.Dead);
+                    receiver.SendPushToPartyResponse(sender, QuestPushReason.DeadToRecipient, quest);
+                    continue;
+                }
+
+                switch (receiver.GetQuestStatus(packet.QuestID))
+                {
+                    case QuestStatus.Rewarded:
+                    {
+                        sender.SendPushToPartyResponse(receiver, QuestPushReason.AlreadyDone);
+                        receiver.SendPushToPartyResponse(sender, QuestPushReason.AlreadyDoneToRecipient, quest);
+                        continue;
+                    }
+                    case QuestStatus.Incomplete:
+                    case QuestStatus.Complete:
+                    {
+                        sender.SendPushToPartyResponse(receiver, QuestPushReason.OnQuest);
+                        receiver.SendPushToPartyResponse(sender, QuestPushReason.OnQuestToRecipient, quest);
+                        continue;
+                    }
+                    default:
+                        break;
+                }
+
+                if (!receiver.SatisfyQuestLog(false))
+                {
+                    sender.SendPushToPartyResponse(receiver, QuestPushReason.LogFull);
+                    receiver.SendPushToPartyResponse(sender, QuestPushReason.LogFullToRecipient, quest);
                     continue;
                 }
 
                 if (!receiver.SatisfyQuestDay(quest, false))
                 {
-                    sender.SendPushToPartyResponse(receiver, QuestPushReason.DifferentServerDaily);
+                    sender.SendPushToPartyResponse(receiver, QuestPushReason.AlreadyDone);
+                    receiver.SendPushToPartyResponse(sender, QuestPushReason.AlreadyDoneToRecipient, quest);
+                    continue;
+                }
+
+                if (!receiver.SatisfyQuestMinLevel(quest, false))
+                {
+                    sender.SendPushToPartyResponse(receiver, QuestPushReason.LowLevel);
+                    receiver.SendPushToPartyResponse(sender, QuestPushReason.LowLevelToRecipient, quest);
+                    continue;
+                }
+
+                if (!receiver.SatisfyQuestMaxLevel(quest, false))
+                {
+                    sender.SendPushToPartyResponse(receiver, QuestPushReason.HighLevel);
+                    receiver.SendPushToPartyResponse(sender, QuestPushReason.HighLevelToRecipient, quest);
+                    continue;
+                }
+
+                if (!receiver.SatisfyQuestClass(quest, false))
+                {
+                    sender.SendPushToPartyResponse(receiver, QuestPushReason.Class);
+                    receiver.SendPushToPartyResponse(sender, QuestPushReason.ClassToRecipient, quest);
+                    continue;
+                }
+
+                if (!receiver.SatisfyQuestRace(quest, false))
+                {
+                    sender.SendPushToPartyResponse(receiver, QuestPushReason.Race);
+                    receiver.SendPushToPartyResponse(sender, QuestPushReason.RaceToRecipient, quest);
+                    continue;
+                }
+
+                if (!receiver.SatisfyQuestReputation(quest, false))
+                {
+                    sender.SendPushToPartyResponse(receiver, QuestPushReason.LowFaction);
+                    receiver.SendPushToPartyResponse(sender, QuestPushReason.LowFactionToRecipient, quest);
+                    continue;
+                }
+
+                if (!receiver.SatisfyQuestDependentQuests(quest, false))
+                {
+                    sender.SendPushToPartyResponse(receiver, QuestPushReason.Prerequisite);
+                    receiver.SendPushToPartyResponse(sender, QuestPushReason.PrerequisiteToRecipient, quest);
+                    continue;
+                }
+
+                if (!receiver.SatisfyQuestExpansion(quest, false))
+                {
+                    sender.SendPushToPartyResponse(receiver, QuestPushReason.Expansion);
+                    receiver.SendPushToPartyResponse(sender, QuestPushReason.ExpansionToRecipient, quest);
                     continue;
                 }
 
                 if (!receiver.CanTakeQuest(quest, false))
                 {
                     sender.SendPushToPartyResponse(receiver, QuestPushReason.Invalid);
-                    continue;
-                }
-
-                if (!receiver.SatisfyQuestLog(false))
-                {
-                    sender.SendPushToPartyResponse(receiver, QuestPushReason.LogFull);
-                    continue;
-                }
-
-                if (!receiver.GetPlayerSharingQuest().IsEmpty())
-                {
-                    sender.SendPushToPartyResponse(receiver, QuestPushReason.Busy);
+                    receiver.SendPushToPartyResponse(sender, QuestPushReason.InvalidToRecipient, quest);
                     continue;
                 }
 
