@@ -658,7 +658,8 @@ namespace Game.Chat
                 return;
             }
 
-            SendToAll(new ChannelSayBuilder(this, lang, what, guid, _channelGuid), !playerInfo.IsModerator() ? guid : ObjectGuid.Empty);
+            Player player = Global.ObjAccessor.FindConnectedPlayer(guid);
+            SendToAll(new ChannelSayBuilder(this, lang, what, guid, _channelGuid), !playerInfo.IsModerator() ? guid : ObjectGuid.Empty, !playerInfo.IsModerator() && player ? player.GetSession().GetAccountGUID() : ObjectGuid.Empty);
         }
 
         public void AddonSay(ObjectGuid guid, string prefix, string what, bool isLogged)
@@ -683,7 +684,9 @@ namespace Game.Chat
                 return;
             }
 
-            SendToAllWithAddon(new ChannelWhisperBuilder(this, isLogged ? Language.AddonLogged : Language.Addon, what, prefix, guid), prefix, !playerInfo.IsModerator() ? guid : ObjectGuid.Empty);
+            Player player = Global.ObjAccessor.FindConnectedPlayer(guid);
+            SendToAllWithAddon(new ChannelWhisperBuilder(this, isLogged ? Language.AddonLogged : Language.Addon, what, prefix, guid), prefix, !playerInfo.IsModerator() ? guid : ObjectGuid.Empty,
+                !playerInfo.IsModerator() && player ? player.GetSession().GetAccountGUID() : ObjectGuid.Empty);
         }
 
         public void Invite(Player player, string newname)
@@ -728,7 +731,7 @@ namespace Game.Chat
                 return;
             }
 
-            if (!newp.GetSocial().HasIgnore(guid))
+            if (!newp.GetSocial().HasIgnore(guid, player.GetSession().GetAccountGUID()))
             {
                 ChannelNameBuilder builder = new(this, new InviteAppend(guid));
                 SendToOne(builder, newp.GetGUID());
@@ -832,7 +835,7 @@ namespace Game.Chat
             }
         }
 
-        void SendToAll(MessageBuilder builder, ObjectGuid guid = default)
+        void SendToAll(MessageBuilder builder, ObjectGuid guid = default, ObjectGuid accountGuid = default)
         {
             LocalizedDo localizer = new(builder);
 
@@ -840,7 +843,7 @@ namespace Game.Chat
             {
                 Player player = Global.ObjAccessor.FindConnectedPlayer(pair.Key);
                 if (player)
-                    if (guid.IsEmpty() || !player.GetSocial().HasIgnore(guid))
+                    if (guid.IsEmpty() || !player.GetSocial().HasIgnore(guid, accountGuid))
                         localizer.Invoke(player);
             }
         }
@@ -869,7 +872,7 @@ namespace Game.Chat
                 localizer.Invoke(player);
         }
 
-        void SendToAllWithAddon(MessageBuilder builder, string addonPrefix, ObjectGuid guid = default)
+        void SendToAllWithAddon(MessageBuilder builder, string addonPrefix, ObjectGuid guid = default, ObjectGuid accountGuid = default)
         {
             LocalizedDo localizer = new(builder);
 
@@ -877,7 +880,7 @@ namespace Game.Chat
             {
                 Player player = Global.ObjAccessor.FindConnectedPlayer(pair.Key);
                 if (player)
-                    if (player.GetSession().IsAddonRegistered(addonPrefix) && (guid.IsEmpty() || !player.GetSocial().HasIgnore(guid)))
+                    if (player.GetSession().IsAddonRegistered(addonPrefix) && (guid.IsEmpty() || !player.GetSocial().HasIgnore(guid, accountGuid)))
                         localizer.Invoke(player);
             }
         }

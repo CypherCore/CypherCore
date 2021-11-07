@@ -223,36 +223,36 @@ namespace Game
                 return;
 
             FriendsResult friendResult = FriendsResult.NotFound;
-            ObjectGuid friendGuid = Global.CharacterCacheStorage.GetCharacterGuidByName(packet.Name);
-            if (!friendGuid.IsEmpty())
+            ObjectGuid friendGuid = ObjectGuid.Empty;
+
+            CharacterCacheEntry characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByName(packet.Name);
+            if (characterInfo != null)
             {
-                CharacterCacheEntry characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByGuid(friendGuid);
-                if (characterInfo != null)
+                friendGuid = characterInfo.Guid;
+                ObjectGuid friendAccountGuid = ObjectGuid.Create(HighGuid.WowAccount, characterInfo.AccountId);
+                Team team = Player.TeamForRace(characterInfo.RaceId);
+                uint friendAccountId = characterInfo.AccountId;
+
+                if (HasPermission(RBACPermissions.AllowGmFriend) || Global.AccountMgr.IsPlayerAccount(Global.AccountMgr.GetSecurity(friendAccountId, (int)Global.WorldMgr.GetRealm().Id.Index)))
                 {
-                    Team team = Player.TeamForRace(characterInfo.RaceId);
-                    uint friendAccountId = characterInfo.AccountId;
-
-                    if (HasPermission(RBACPermissions.AllowGmFriend) || Global.AccountMgr.IsPlayerAccount(Global.AccountMgr.GetSecurity(friendAccountId, (int)Global.WorldMgr.GetRealm().Id.Index)))
+                    if (friendGuid == GetPlayer().GetGUID())
+                        friendResult = FriendsResult.Self;
+                    else if (GetPlayer().GetTeam() != team && !HasPermission(RBACPermissions.TwoSideAddFriend))
+                        friendResult = FriendsResult.Enemy;
+                    else if (GetPlayer().GetSocial().HasFriend(friendGuid))
+                        friendResult = FriendsResult.Already;
+                    else
                     {
-                        if (friendGuid == GetPlayer().GetGUID())
-                            friendResult = FriendsResult.Self;
-                        else if (GetPlayer().GetTeam() != team && !HasPermission(RBACPermissions.TwoSideAddFriend))
-                            friendResult = FriendsResult.Enemy;
-                        else if (GetPlayer().GetSocial().HasFriend(friendGuid))
-                            friendResult = FriendsResult.Already;
+                        Player playerFriend = Global.ObjAccessor.FindPlayer(friendGuid);
+                        if (playerFriend && playerFriend.IsVisibleGloballyFor(GetPlayer()))
+                            friendResult = FriendsResult.AddedOnline;
                         else
-                        {
-                            Player playerFriend = Global.ObjAccessor.FindPlayer(friendGuid);
-                            if (playerFriend && playerFriend.IsVisibleGloballyFor(GetPlayer()))
-                                friendResult = FriendsResult.AddedOnline;
-                            else
-                                friendResult = FriendsResult.AddedOffline;
+                            friendResult = FriendsResult.AddedOffline;
 
-                            if (GetPlayer().GetSocial().AddToSocialList(friendGuid, SocialFlag.Friend))
-                                GetPlayer().GetSocial().SetFriendNote(friendGuid, packet.Notes);
-                            else
-                                friendResult = FriendsResult.ListFull;
-                        }
+                        if (GetPlayer().GetSocial().AddToSocialList(friendGuid, friendAccountGuid, SocialFlag.Friend))
+                            GetPlayer().GetSocial().SetFriendNote(friendGuid, packet.Notes);
+                        else
+                            friendResult = FriendsResult.ListFull;
                     }
                 }
             }
@@ -275,25 +275,29 @@ namespace Game
             if (!ObjectManager.NormalizePlayerName(ref packet.Name))
                 return;
 
-            ObjectGuid IgnoreGuid = Global.CharacterCacheStorage.GetCharacterGuidByName(packet.Name);
+            ObjectGuid ignoreGuid;
             FriendsResult ignoreResult = FriendsResult.IgnoreNotFound;
-            if (IgnoreGuid.IsEmpty())
+
+            CharacterCacheEntry characterInfo = Global.CharacterCacheStorage.GetCharacterCacheByName(packet.Name);
+            if (characterInfo != null)
             {
-                if (IgnoreGuid == GetPlayer().GetGUID())              //not add yourself
+                ignoreGuid = characterInfo.Guid;
+                ObjectGuid ignoreAccountGuid = ObjectGuid.Create(HighGuid.WowAccount, characterInfo.AccountId);
+                if (ignoreGuid == GetPlayer().GetGUID())              //not add yourself
                     ignoreResult = FriendsResult.IgnoreSelf;
-                else if (GetPlayer().GetSocial().HasIgnore(IgnoreGuid))
+                else if (GetPlayer().GetSocial().HasIgnore(ignoreGuid, ignoreAccountGuid))
                     ignoreResult = FriendsResult.IgnoreAlready;
                 else
                 {
                     ignoreResult = FriendsResult.IgnoreAdded;
 
                     // ignore list full
-                    if (!GetPlayer().GetSocial().AddToSocialList(IgnoreGuid, SocialFlag.Ignored))
+                    if (!GetPlayer().GetSocial().AddToSocialList(ignoreGuid, ignoreAccountGuid, SocialFlag.Ignored))
                         ignoreResult = FriendsResult.IgnoreFull;
                 }
             }
 
-            Global.SocialMgr.SendFriendStatus(GetPlayer(), ignoreResult, IgnoreGuid);
+            Global.SocialMgr.SendFriendStatus(GetPlayer(), ignoreResult, ObjectGuid.Empty);
         }
 
         [WorldPacketHandler(ClientOpcodes.DelIgnore)]

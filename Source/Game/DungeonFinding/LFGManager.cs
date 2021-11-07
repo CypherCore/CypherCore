@@ -1789,7 +1789,9 @@ namespace Game.DungeonFinding
         {
             Player plr1 = Global.ObjAccessor.FindPlayer(guid1);
             Player plr2 = Global.ObjAccessor.FindPlayer(guid2);
-            return plr1 && plr2 && (plr1.GetSocial().HasIgnore(guid2) || plr2.GetSocial().HasIgnore(guid1));
+            return plr1 != null && plr2 != null
+                && (plr1.GetSocial().HasIgnore(guid2, plr2.GetSession().GetAccountGUID())
+                    || plr2.GetSocial().HasIgnore(guid1, plr1.GetSession().GetAccountGUID()));
         }
 
         public void SendLfgRoleChosen(ObjectGuid guid, ObjectGuid pguid, LfgRoles roles)

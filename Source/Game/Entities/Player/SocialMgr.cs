@@ -21,6 +21,7 @@ using Game.Networking;
 using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Game.Entities
 {
@@ -47,7 +48,7 @@ namespace Game.Entities
             if (!target)
                 return;
 
-            var playerFriendInfo = player.GetSocial()._playerSocialMap.LookupByKey(friendGUID);
+            var playerFriendInfo = player.GetSocial().PlayerSocialMap.LookupByKey(friendGUID);
             if (playerFriendInfo != null)
                 friendInfo.Note = playerFriendInfo.Note;
 
@@ -103,7 +104,7 @@ namespace Game.Entities
             AccountTypes gmSecLevel = (AccountTypes)WorldConfig.GetIntValue(WorldCfg.GmLevelInWhoList);
             foreach (var pair in _socialMap)
             {
-                var info = pair.Value._playerSocialMap.LookupByKey(player.GetGUID());
+                var info = pair.Value.PlayerSocialMap.LookupByKey(player.GetGUID());
                 if (info != null && info.Flags.HasAnyFlag(SocialFlag.Friend))
                 {
                     Player target = Global.ObjAccessor.FindPlayer(pair.Key);
@@ -136,7 +137,9 @@ namespace Game.Entities
                     ObjectGuid friendAccountGuid = ObjectGuid.Create(HighGuid.WowAccount, result.Read<uint>(1));
                     SocialFlag flags = (SocialFlag)result.Read<byte>(2);
 
-                    social._playerSocialMap[friendGuid] = new FriendInfo(friendAccountGuid, flags, result.Read<string>(3));
+                    social.PlayerSocialMap[friendGuid] = new FriendInfo(friendAccountGuid, flags, result.Read<string>(3));
+                    if (flags.HasFlag(SocialFlag.Ignored))
+                        social.IgnoredAccounts.Add(friendAccountGuid);
                 }
                 while (result.NextRow());
             }
@@ -151,29 +154,31 @@ namespace Game.Entities
 
     public class PlayerSocial
     {
-        public Dictionary<ObjectGuid, FriendInfo> _playerSocialMap = new();
+        public Dictionary<ObjectGuid, FriendInfo> PlayerSocialMap = new();
+        public List<ObjectGuid> IgnoredAccounts = new();
         ObjectGuid m_playerGUID;
 
         uint GetNumberOfSocialsWithFlag(SocialFlag flag)
         {
             uint counter = 0;
-            foreach (var pair in _playerSocialMap)
+            foreach (var pair in PlayerSocialMap)
                 if (pair.Value.Flags.HasAnyFlag(flag))
                     ++counter;
 
             return counter;
         }
 
-        public bool AddToSocialList(ObjectGuid friendGuid, SocialFlag flag)
+        public bool AddToSocialList(ObjectGuid friendGuid, ObjectGuid accountGuid, SocialFlag flag)
         {
             // check client limits
             if (GetNumberOfSocialsWithFlag(flag) >= (((flag & SocialFlag.Friend) != 0) ? SocialManager.FriendLimit : SocialManager.IgnoreLimit))
                 return false;
             
-            var friendInfo = _playerSocialMap.LookupByKey(friendGuid);
+            var friendInfo = PlayerSocialMap.LookupByKey(friendGuid);
             if (friendInfo != null)
             {
                 friendInfo.Flags |= flag;
+                friendInfo.WowAccountGuid = accountGuid;
 
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHARACTER_SOCIAL_FLAGS);
                 stmt.AddValue(0, (byte)friendInfo.Flags);
@@ -185,7 +190,8 @@ namespace Game.Entities
             {
                 FriendInfo fi = new();
                 fi.Flags |= flag;
-                _playerSocialMap[friendGuid] = fi;
+                fi.WowAccountGuid = accountGuid;
+                PlayerSocialMap[friendGuid] = fi;
 
                 PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.INS_CHARACTER_SOCIAL);
                 stmt.AddValue(0, GetPlayerGUID().GetCounter());
@@ -193,12 +199,16 @@ namespace Game.Entities
                 stmt.AddValue(2, (byte)flag);
                 DB.Characters.Execute(stmt);
             }
+
+            if (flag.HasFlag(SocialFlag.Ignored))
+                IgnoredAccounts.Add(accountGuid);
+
             return true;
         }
 
         public void RemoveFromSocialList(ObjectGuid friendGuid, SocialFlag flag)
         {
-            var friendInfo = _playerSocialMap.LookupByKey(friendGuid);
+            var friendInfo = PlayerSocialMap.LookupByKey(friendGuid);
             if (friendInfo == null)                     // not exist
                 return;
 
@@ -211,7 +221,16 @@ namespace Game.Entities
                 stmt.AddValue(1, friendGuid.GetCounter());
                 DB.Characters.Execute(stmt);
 
-                _playerSocialMap.Remove(friendGuid);
+                ObjectGuid accountGuid = friendInfo.WowAccountGuid;
+
+                PlayerSocialMap.Remove(friendGuid);
+
+                if (flag.HasFlag(SocialFlag.Ignored))
+                {
+                    var otherIgnoreForAccount = PlayerSocialMap.Any(social => social.Value.Flags.HasFlag(SocialFlag.Ignored) && social.Value.WowAccountGuid == accountGuid);
+                    if (!otherIgnoreForAccount)
+                        IgnoredAccounts.Remove(accountGuid);
+                }
             }
             else
             {
@@ -225,7 +244,7 @@ namespace Game.Entities
 
         public void SetFriendNote(ObjectGuid friendGuid, string note)
         {
-            if (!_playerSocialMap.ContainsKey(friendGuid))                     // not exist
+            if (!PlayerSocialMap.ContainsKey(friendGuid))                     // not exist
                 return;
 
             PreparedStatement stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHARACTER_SOCIAL_NOTE);
@@ -234,7 +253,7 @@ namespace Game.Entities
             stmt.AddValue(2, friendGuid.GetCounter());
             DB.Characters.Execute(stmt);
 
-            _playerSocialMap[friendGuid].Note = note;
+            PlayerSocialMap[friendGuid].Note = note;
         }
 
         public void SendSocialList(Player player, SocialFlag flags)
@@ -245,7 +264,7 @@ namespace Game.Entities
             ContactList contactList = new();
             contactList.Flags = flags;
 
-            foreach (var v in _playerSocialMap)
+            foreach (var v in PlayerSocialMap)
             {
                 if (!v.Value.Flags.HasAnyFlag(flags))
                     continue;
@@ -264,7 +283,7 @@ namespace Game.Entities
 
         bool _HasContact(ObjectGuid guid, SocialFlag flags)
         {
-            var friendInfo = _playerSocialMap.LookupByKey(guid);
+            var friendInfo = PlayerSocialMap.LookupByKey(guid);
             if (friendInfo != null)
                 return friendInfo.Flags.HasAnyFlag(flags);
 
@@ -276,9 +295,9 @@ namespace Game.Entities
             return _HasContact(friendGuid, SocialFlag.Friend);
         }
 
-        public bool HasIgnore(ObjectGuid ignoreGuid)
+        public bool HasIgnore(ObjectGuid ignoreGuid, ObjectGuid ignoreAccountGuid)
         {
-            return _HasContact(ignoreGuid, SocialFlag.Ignored);
+            return _HasContact(ignoreGuid, SocialFlag.Ignored) || IgnoredAccounts.Contains(ignoreAccountGuid);
         }
 
         ObjectGuid GetPlayerGUID() { return m_playerGUID; }

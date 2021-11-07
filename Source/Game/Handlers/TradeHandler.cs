@@ -642,7 +642,7 @@ namespace Game
                 return;
             }
 
-            if (pOther.GetSocial().HasIgnore(GetPlayer().GetGUID()))
+            if (pOther.GetSocial().HasIgnore(GetPlayer().GetGUID(), GetPlayer().GetSession().GetAccountGUID()))
             {
                 info.Status = TradeStatus.PlayerIgnored;
                 SendTradeStatus(info);

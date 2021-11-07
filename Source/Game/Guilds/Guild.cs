@@ -556,7 +556,7 @@ namespace Game.Guilds
 
             Player player = session.GetPlayer();
             // Do not show invitations from ignored players
-            if (pInvitee.GetSocial().HasIgnore(player.GetGUID()))
+            if (pInvitee.GetSocial().HasIgnore(player.GetGUID(), player.GetSession().GetAccountGUID()))
                 return;
 
             if (!WorldConfig.GetBoolValue(WorldCfg.AllowTwoSideInteractionGuild) && pInvitee.GetTeam() != player.GetTeam())
@@ -1424,7 +1424,7 @@ namespace Game.Guilds
                     Player player = member.FindPlayer();
                     if (player != null)
                         if (player.GetSession() != null && _HasRankRight(player, officerOnly ? GuildRankRights.OffChatListen : GuildRankRights.GChatListen) &&
-                        !player.GetSocial().HasIgnore(session.GetPlayer().GetGUID()))
+                        !player.GetSocial().HasIgnore(session.GetPlayer().GetGUID(), session.GetAccountGUID()))
                             player.SendPacket(data);
                 }
             }
@@ -1442,7 +1442,7 @@ namespace Game.Guilds
                     if (player)
                     {
                         if (player.GetSession() != null && _HasRankRight(player, officerOnly ? GuildRankRights.OffChatListen : GuildRankRights.GChatListen) &&
-                            !player.GetSocial().HasIgnore(session.GetPlayer().GetGUID()) && player.GetSession().IsAddonRegistered(prefix))
+                            !player.GetSocial().HasIgnore(session.GetPlayer().GetGUID(), session.GetAccountGUID()) && player.GetSession().IsAddonRegistered(prefix))
                             player.SendPacket(data);
                     }
                 }
@@ -2710,7 +2710,7 @@ namespace Game.Guilds
             public List<uint> GetTrackedCriteriaIds() { return m_trackedCriteriaIds; }
             public void SetTrackedCriteriaIds(List<uint> criteriaIds) { m_trackedCriteriaIds = criteriaIds; }
             public bool IsTrackingCriteriaId(uint criteriaId) { return m_trackedCriteriaIds.Contains(criteriaId); }
-            public bool IsOnline() { return m_flags.HasAnyFlag(GuildMemberFlags.Online); }
+            public bool IsOnline() { return m_flags.HasFlag(GuildMemberFlags.Online); }
 
             public void UpdateLogoutTime() { m_logoutTime = (ulong)GameTime.GetGameTime(); }
             public bool IsRank(byte rankId) { return m_rankId == rankId; }

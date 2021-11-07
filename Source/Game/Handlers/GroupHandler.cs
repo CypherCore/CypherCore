@@ -84,7 +84,7 @@ namespace Game
                 return;
             }
 
-            if (invitedPlayer.GetSocial().HasIgnore(invitingPlayer.GetGUID()))
+            if (invitedPlayer.GetSocial().HasIgnore(invitingPlayer.GetGUID(), invitingPlayer.GetSession().GetAccountGUID()))
             {
                 SendPartyResult(PartyOperation.Invite, invitedPlayer.GetName(), PartyResult.IgnoringYouS);
                 return;

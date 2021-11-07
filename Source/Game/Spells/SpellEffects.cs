@@ -3236,7 +3236,7 @@ namespace Game.Spells
             Player target = unitTarget.ToPlayer();
 
             // caster or target already have requested duel
-            if (caster.duel != null || target.duel != null || target.GetSocial() == null || target.GetSocial().HasIgnore(caster.GetGUID()))
+            if (caster.duel != null || target.duel != null || target.GetSocial() == null || target.GetSocial().HasIgnore(caster.GetGUID(), caster.GetSession().GetAccountGUID()))
                 return;
 
             // Players can only fight a duel in zones with this flag
