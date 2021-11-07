@@ -287,8 +287,8 @@ namespace Game
             }
         }
 
-        //[WorldPacketHandler(ClientOpcodes.DepositGuildBankItem)]
-        void HandleDepositGuildBankItem(DepositGuildBankItem depositGuildBankItem)
+        [WorldPacketHandler(ClientOpcodes.AutoGuildBankItem)]
+        void HandleAutoGuildBankItem(AutoGuildBankItem depositGuildBankItem)
         {
             if (!GetPlayer().GetGameObjectIfCanInteractWith(depositGuildBankItem.Banker, GameObjectTypes.GuildBank))
                 return;

@@ -1082,9 +1082,9 @@ namespace Game.Networking.Packets
         public bool FullUpdate;
     }
 
-    class DepositGuildBankItem : ClientPacket
+    class AutoGuildBankItem : ClientPacket
     {
-        public DepositGuildBankItem(WorldPacket packet) : base(packet) { }
+        public AutoGuildBankItem(WorldPacket packet) : base(packet) { }
 
         public override void Read()
         {
