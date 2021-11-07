@@ -89,6 +89,10 @@ namespace Game.Networking.Packets
             _worldPacket.WriteBit(IsMuted);
             _worldPacket.WriteBit(ClubFinderEnabled);
             _worldPacket.WriteBit(Unknown901CheckoutRelated);
+            _worldPacket.WriteBit(TextToSpeechFeatureEnabled);
+            _worldPacket.WriteBit(ChatDisabledByDefault);
+            _worldPacket.WriteBit(ChatDisabledByPlayer);
+            _worldPacket.WriteBit(LFGListCustomRequiresAuthenticator);
             _worldPacket.FlushBits();
 
             {
@@ -176,6 +180,10 @@ namespace Game.Networking.Packets
         public bool IsMuted;
         public bool ClubFinderEnabled;
         public bool Unknown901CheckoutRelated;
+        public bool TextToSpeechFeatureEnabled;
+        public bool ChatDisabledByDefault;
+        public bool ChatDisabledByPlayer;
+        public bool LFGListCustomRequiresAuthenticator;
 
         public SocialQueueConfig QuickJoinConfig;
         public SquelchInfo Squelch;
@@ -231,19 +239,6 @@ namespace Game.Networking.Packets
             public uint MaxRecruitmentUses;
             public uint DaysInCycle;
         }
-    }
-
-    public class FeatureSystemStatus2 : ServerPacket
-    {
-        public FeatureSystemStatus2() : base(ServerOpcodes.None) { }
-
-        public override void Write()
-        {
-            _worldPacket.WriteBit(TextToSpeechFeatureEnabled);
-            _worldPacket.FlushBits();
-        }
-
-        public bool TextToSpeechFeatureEnabled;
     }
     
     public class FeatureSystemStatusGlueScreen : ServerPacket

@@ -1112,11 +1112,10 @@ namespace Game
             features.WarModeFeatureEnabled = WorldConfig.GetBoolValue(WorldCfg.FeatureSystemWarModeEnabled);
             features.IsMuted = !CanSpeak();
 
-            SendPacket(features);
 
-            FeatureSystemStatus2 features2 = new();
-            features2.TextToSpeechFeatureEnabled = false;
-            SendPacket(features2);
+            features.TextToSpeechFeatureEnabled = false;
+
+            SendPacket(features);
         }
 
         [WorldPacketHandler(ClientOpcodes.SetFactionAtWar)]
