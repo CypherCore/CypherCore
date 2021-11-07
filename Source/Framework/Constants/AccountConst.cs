@@ -27,10 +27,15 @@ namespace Framework.Constants
         PerCharacterMacrosCache = 0x05,
         PerCharacterLayoutCache = 0x06,
         PerCharacterChatCache = 0x07,
-        Max = 8,
+        GlobalTtsCache = 8,
+        PerCharacterTtsCache = 9,
+        GlobalFlaggedCache = 10,
+        PerCharacterFlaggedCache = 11,
 
-        GlobalCacheMask = 0x15,
-        PerCharacterCacheMask = 0xEA
+        Max = 12,
+
+        GlobalCacheMask = 0x515,
+        PerCharacterCacheMask = 0xAEA
     }
 
     public enum TutorialAction

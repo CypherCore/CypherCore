@@ -58,7 +58,7 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             PlayerGuid = _worldPacket.ReadPackedGuid();
-            DataType = (AccountDataTypes)_worldPacket.ReadBits<uint>(3);
+            DataType = (AccountDataTypes)_worldPacket.ReadBits<uint>(4);
         }
 
         public ObjectGuid PlayerGuid;
@@ -74,7 +74,7 @@ namespace Game.Networking.Packets
             _worldPacket.WritePackedGuid(Player);
             _worldPacket.WriteInt64(Time);
             _worldPacket.WriteUInt32(Size);
-            _worldPacket.WriteBits(DataType, 3);
+            _worldPacket.WriteBits(DataType, 4);
 
             if (CompressedData == null)
                 _worldPacket.WriteUInt32(0);
@@ -102,7 +102,7 @@ namespace Game.Networking.Packets
             PlayerGuid = _worldPacket.ReadPackedGuid();
             Time = _worldPacket.ReadInt64();
             Size = _worldPacket.ReadUInt32();
-            DataType = (AccountDataTypes)_worldPacket.ReadBits<uint>(3);
+            DataType = (AccountDataTypes)_worldPacket.ReadBits<uint>(4);
 
             uint compressedSize = _worldPacket.ReadUInt32();
             if (compressedSize != 0)
