@@ -235,7 +235,7 @@ namespace Game.Networking.Packets
 
     public class FeatureSystemStatus2 : ServerPacket
     {
-        public FeatureSystemStatus2() : base(ServerOpcodes.FeatureSystemStatus2) { }
+        public FeatureSystemStatus2() : base(ServerOpcodes.None) { }
 
         public override void Write()
         {
