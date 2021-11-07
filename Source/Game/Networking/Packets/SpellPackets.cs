@@ -1067,6 +1067,7 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             Guid = _worldPacket.ReadPackedGuid();
+            CastID = _worldPacket.ReadPackedGuid();
             MoveMsgID = _worldPacket.ReadUInt16();
             SpellID = _worldPacket.ReadUInt32();
             Pitch = _worldPacket.ReadFloat();
@@ -1081,6 +1082,7 @@ namespace Game.Networking.Packets
         }
 
         public ObjectGuid Guid;
+        public ObjectGuid CastID;
         public ushort MoveMsgID;
         public uint SpellID;
         public float Pitch;

@@ -613,7 +613,7 @@ namespace Game
         {
             Unit caster = Global.ObjAccessor.GetUnit(GetPlayer(), packet.Guid);
             Spell spell = caster ? caster.GetCurrentSpell(CurrentSpellTypes.Generic) : null;
-            if (!spell || spell.m_spellInfo.Id != packet.SpellID || !spell.m_targets.HasDst() || !spell.m_targets.HasSrc())
+            if (!spell || spell.m_spellInfo.Id != packet.SpellID || spell.m_castId != packet.CastID || !spell.m_targets.HasDst() || !spell.m_targets.HasSrc())
                 return;
 
             Position pos = spell.m_targets.GetSrcPos();
