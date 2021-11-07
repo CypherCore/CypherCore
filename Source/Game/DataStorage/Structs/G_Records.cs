@@ -63,7 +63,7 @@ namespace Game.DataStorage
         public string Name;
         public string Description;
         public byte GarrAbilityCategoryID;
-        public byte GarrFollowerTypeID;
+        public sbyte GarrFollowerTypeID;
         public int IconFileDataID;
         public ushort FactionChangeGarrAbilityID;
         public GarrisonAbilityFlags Flags;
@@ -77,7 +77,7 @@ namespace Game.DataStorage
         public string Description;
         public string Tooltip;
         public byte GarrTypeID;
-        public byte BuildingType;
+        public sbyte BuildingType;
         public uint HordeGameObjectID;
         public uint AllianceGameObjectID;
         public int GarrSiteID;
@@ -116,7 +116,7 @@ namespace Game.DataStorage
         public ushort UiTextureAtlasMemberID;
         public ushort GarrFollItemSetID;
         public byte FollowerClassLimit;
-        public byte Flags;
+        public int Flags;
     }
 
     public sealed class GarrFollowerRecord
@@ -126,14 +126,14 @@ namespace Game.DataStorage
         public string AllianceSourceText;
         public string TitleName;
         public byte GarrTypeID;
-        public byte GarrFollowerTypeID;
+        public sbyte GarrFollowerTypeID;
         public int HordeCreatureID;
         public int AllianceCreatureID;
         public byte HordeGarrFollRaceID;
         public byte AllianceGarrFollRaceID;
         public uint HordeGarrClassSpecID;
         public uint AllianceGarrClassSpecID;
-        public byte Quality;
+        public sbyte Quality;
         public byte FollowerLevel;
         public ushort ItemLevelWeapon;
         public ushort ItemLevelArmor;
@@ -151,7 +151,7 @@ namespace Game.DataStorage
         public uint HordeSlottingBroadcastTextID;
         public uint AllySlottingBroadcastTextID;
         public byte ChrClassID;
-        public byte Flags;
+        public int Flags;
         public byte Gender;
         public int AutoCombatantID;
         public int CovenantID;
@@ -176,7 +176,7 @@ namespace Game.DataStorage
         public Vector2 WorldPos;
         public byte GarrTypeID;
         public byte GarrMissionTypeID;
-        public byte GarrFollowerTypeID;
+        public sbyte GarrFollowerTypeID;
         public byte MaxFollowers;
         public uint MissionCost;
         public ushort MissionCostCurrencyTypesID;
@@ -196,7 +196,7 @@ namespace Game.DataStorage
         public uint OvermaxRewardPackID;
         public byte FollowerDeathChance;
         public uint AreaID;
-        public uint Flags;
+        public int Flags;
         public float AutoMissionScalar;
         public int AutoMissionScalarCurveID;
         public int AutoCombatantEnvCasterID;

@@ -2213,7 +2213,7 @@ namespace Game
                             equipmentInfo.Items[i].ItemId, equipmentInfo.Items[i].AppearanceModId, i + 1, i + 1, entry, id);
                         ItemModifiedAppearanceRecord defaultAppearance = Global.DB2Mgr.GetDefaultItemModifiedAppearance(equipmentInfo.Items[i].ItemId);
                         if (defaultAppearance != null)
-                            equipmentInfo.Items[i].AppearanceModId = defaultAppearance.ItemAppearanceModifierID;
+                            equipmentInfo.Items[i].AppearanceModId = (ushort)defaultAppearance.ItemAppearanceModifierID;
                         else
                             equipmentInfo.Items[i].AppearanceModId = 0;
                         continue;

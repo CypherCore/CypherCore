@@ -230,7 +230,7 @@ namespace Framework.Database
 
             // ChrCustomizationChoice.db2
             PrepareStatement(HotfixStatements.SEL_CHR_CUSTOMIZATION_CHOICE, "SELECT Name, ID, ChrCustomizationOptionID, ChrCustomizationReqID, SortOrder, UiOrderIndex, " +
-                "Flags, SwatchColor1, SwatchColor2 FROM chr_customization_choice");
+                "Flags, AddedInPatch, SwatchColor1, SwatchColor2 FROM chr_customization_choice");
             PrepareStatement(HotfixStatements.SEL_CHR_CUSTOMIZATION_CHOICE_LOCALE, "SELECT ID, Name_lang FROM chr_customization_choice_locale WHERE locale = ?");
 
             // ChrCustomizationDisplayInfo.db2
@@ -244,7 +244,7 @@ namespace Framework.Database
 
             // ChrCustomizationOption.db2
             PrepareStatement(HotfixStatements.SEL_CHR_CUSTOMIZATION_OPTION, "SELECT Name, ID, SecondaryID, Flags, ChrModelID, SortIndex, ChrCustomizationCategoryID, " +
-                "OptionType, BarberShopCostModifier, ChrCustomizationID, ChrCustomizationReqID, UiOrderIndex FROM chr_customization_option");
+                "OptionType, BarberShopCostModifier, ChrCustomizationID, ChrCustomizationReqID, UiOrderIndex, AddedInPatch FROM chr_customization_option");
             PrepareStatement(HotfixStatements.SEL_CHR_CUSTOMIZATION_OPTION_LOCALE, "SELECT ID, Name_lang FROM chr_customization_option_locale WHERE locale = ?");
 
             // ChrCustomizationReq.db2
@@ -285,7 +285,7 @@ namespace Framework.Database
                 " WHERE locale = ?");
 
             // CinematicCamera.db2
-            PrepareStatement(HotfixStatements.SEL_CINEMATIC_CAMERA, "SELECT ID, OriginX, OriginY, OriginZ, SoundID, OriginFacing, FileDataID FROM cinematic_camera");
+            PrepareStatement(HotfixStatements.SEL_CINEMATIC_CAMERA, "SELECT ID, OriginX, OriginY, OriginZ, SoundID, OriginFacing, FileDataID, Unknown915 FROM cinematic_camera");
 
             // CinematicSequences.db2
             PrepareStatement(HotfixStatements.SEL_CINEMATIC_SEQUENCES, "SELECT ID, SoundID, Camera1, Camera2, Camera3, Camera4, Camera5, Camera6, Camera7, Camera8 FROM cinematic_sequences");
@@ -415,7 +415,7 @@ namespace Framework.Database
                 "Enemies4, Friend1, Friend2, Friend3, Friend4 FROM faction_template");
 
             // FriendshipRepReaction.db2
-            PrepareStatement(HotfixStatements.SEL_FRIENDSHIP_REP_REACTION, "SELECT ID, Reaction, FriendshipRepID, ReactionThreshold FROM friendship_rep_reaction");
+            PrepareStatement(HotfixStatements.SEL_FRIENDSHIP_REP_REACTION, "SELECT ID, Reaction, FriendshipRepID, ReactionThreshold, OverrideColor FROM friendship_rep_reaction");
             PrepareStatement(HotfixStatements.SEL_FRIENDSHIP_REP_REACTION_LOCALE, "SELECT ID, Reaction_lang FROM friendship_rep_reaction_locale WHERE locale = ?");
 
             // FriendshipReputation.db2
@@ -523,9 +523,9 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_GUILD_PERK_SPELLS, "SELECT ID, SpellID FROM guild_perk_spells");
 
             // Heirloom.db2
-            PrepareStatement(HotfixStatements.SEL_HEIRLOOM, "SELECT SourceText, ID, ItemID, LegacyUpgradedItemID, StaticUpgradedItemID, SourceTypeEnum, Flags, " +        
-                "LegacyItemID, UpgradeItemID1, UpgradeItemID2, UpgradeItemID3, UpgradeItemID4, UpgradeItemBonusListID1, UpgradeItemBonusListID2, " +        
-                "UpgradeItemBonusListID3, UpgradeItemBonusListID4 FROM heirloom");
+            PrepareStatement(HotfixStatements.SEL_HEIRLOOM, "SELECT SourceText, ID, ItemID, LegacyUpgradedItemID, StaticUpgradedItemID, SourceTypeEnum, Flags, " +
+                "LegacyItemID, UpgradeItemID1, UpgradeItemID2, UpgradeItemID3, UpgradeItemID4, UpgradeItemID5, UpgradeItemID6, UpgradeItemBonusListID1, " +
+                "UpgradeItemBonusListID2, UpgradeItemBonusListID3, UpgradeItemBonusListID4, UpgradeItemBonusListID5, UpgradeItemBonusListID6 FROM heirloom");
             PrepareStatement(HotfixStatements.SEL_HEIRLOOM_LOCALE, "SELECT ID, SourceText_lang FROM heirloom_locale WHERE locale = ?");
 
             // Holidays.db2
@@ -549,7 +549,7 @@ namespace Framework.Database
 
             // Item.db2
             PrepareStatement(HotfixStatements.SEL_ITEM, "SELECT ID, ClassID, SubclassID, Material, InventoryType, SheatheType, SoundOverrideSubclassID, IconFileDataID, " +
-                "ItemGroupSoundsID, ModifiedCraftingReagentItemID FROM item");
+                "ItemGroupSoundsID, ContentTuningID, ModifiedCraftingReagentItemID FROM item");
 
             // ItemAppearance.db2
             PrepareStatement(HotfixStatements.SEL_ITEM_APPEARANCE, "SELECT ID, DisplayType, ItemDisplayInfoID, DefaultIconFileDataID, UiOrder, PlayerConditionID FROM item_appearance");
@@ -726,7 +726,7 @@ namespace Framework.Database
                 "Key16, Key17, Key18, Key19, Key20, Key21, Key22, Key23, Key24, Key25, Key26, Key27, Key28, Key29, Key30, Key31, Key32 FROM keychain");
 
             // KeystoneAffix.db2
-            PrepareStatement(HotfixStatements.SEL_KEYSTONE_AFFIX, "SELECT ID, Name, Description, FiledataID FROM keystone_affix");
+            PrepareStatement(HotfixStatements.SEL_KEYSTONE_AFFIX, "SELECT Name, Description, ID, FiledataID FROM keystone_affix");
             PrepareStatement(HotfixStatements.SEL_KEYSTONE_AFFIX_LOCALE, "SELECT ID, Name_lang, Description_lang FROM keystone_affix_locale WHERE locale = ?");
 
             // LanguageWords.db2
@@ -772,7 +772,7 @@ namespace Framework.Database
                 "PvpLongDescription_lang FROM map_locale WHERE locale = ?");
 
             // MapChallengeMode.db2
-            PrepareStatement(HotfixStatements.SEL_MAP_CHALLENGE_MODE, "SELECT Name, ID, MapID, Flags, ExpansionLevel, CriteriaCount1, CriteriaCount2, CriteriaCount3 FROM map_challenge_mode");
+            PrepareStatement(HotfixStatements.SEL_MAP_CHALLENGE_MODE, "SELECT Name, ID, MapID, Flags, ExpansionLevel, RequiredWorldStateID, CriteriaCount1, CriteriaCount2, CriteriaCount3 FROM map_challenge_mode");
             PrepareStatement(HotfixStatements.SEL_MAP_CHALLENGE_MODE_LOCALE, "SELECT ID, Name_lang FROM map_challenge_mode_locale WHERe locale = ?");
 
             // MapDifficulty.db2
@@ -900,7 +900,7 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_QUEST_INFO_LOCALE, "SELECT ID, InfoName_lang FROM quest_info_locale WHERE locale = ?");
 
             // QuestLineXQuest.db2
-            PrepareStatement(HotfixStatements.SEL_QUEST_LINE_X_QUEST, "SELECT ID, QuestLineID, QuestID, OrderIndex FROM quest_line_x_quest");
+            PrepareStatement(HotfixStatements.SEL_QUEST_LINE_X_QUEST, "SELECT ID, QuestLineID, QuestID, OrderIndex, Flags FROM quest_line_x_quest");
 
             // QuestMoneyReward.db2
             PrepareStatement(HotfixStatements.SEL_QUEST_MONEY_REWARD, "SELECT ID, Difficulty1, Difficulty2, Difficulty3, Difficulty4, Difficulty5, Difficulty6, " +        
@@ -945,13 +945,13 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_SCENARIO_STEP_LOCALE, "SELECT ID, Description_lang, Title_lang FROM scenario_step_locale WHERE locale = ?");
 
             // SceneScript.db2
-            PrepareStatement(HotfixStatements.SEL_SCENE_SCRIPT, "SELECT ID, FirstSceneScriptID, NextSceneScriptID FROM scene_script");
+            PrepareStatement(HotfixStatements.SEL_SCENE_SCRIPT, "SELECT ID, FirstSceneScriptID, NextSceneScriptID, Unknown915 FROM scene_script");
 
             // SceneScriptGlobalText.db2
             PrepareStatement(HotfixStatements.SEL_SCENE_SCRIPT_GLOBAL_TEXT, "SELECT ID, Name, Script FROM scene_script_global_text");
 
             // SceneScriptPackage.db2
-            PrepareStatement(HotfixStatements.SEL_SCENE_SCRIPT_PACKAGE, "SELECT ID, Name FROM scene_script_package");
+            PrepareStatement(HotfixStatements.SEL_SCENE_SCRIPT_PACKAGE, "SELECT ID, Name, Unknown915 FROM scene_script_package");
 
             // SceneScriptText.db2
             PrepareStatement(HotfixStatements.SEL_SCENE_SCRIPT_TEXT, "SELECT ID, Name, Script FROM scene_script_text");

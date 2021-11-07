@@ -501,7 +501,7 @@ namespace Framework.Constants
         CookingSupp = 0x10000
     }
 
-    public enum InventoryType : byte
+    public enum InventoryType : sbyte
     {
         NonEquip = 0,
         Head = 1,

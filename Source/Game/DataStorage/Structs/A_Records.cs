@@ -395,7 +395,7 @@ namespace Game.DataStorage
         public uint AzeritePowerSetID;
         public int AzeritePowerID;
         public int Class;
-        public int Tier;
+        public byte Tier;
         public uint OrderIndex;
     }
 

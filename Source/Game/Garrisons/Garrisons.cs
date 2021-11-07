@@ -430,7 +430,7 @@ namespace Game.Garrisons
                 if (constructing.UpgradeLevel > 1)
                 {
                     // Restore previous level building
-                    uint restored = Global.GarrisonMgr.GetPreviousLevelBuilding(constructing.BuildingType, constructing.UpgradeLevel);
+                    uint restored = Global.GarrisonMgr.GetPreviousLevelBuilding((byte)constructing.BuildingType, constructing.UpgradeLevel);
                     Cypher.Assert(restored != 0);
 
                     GarrisonPlaceBuildingResult placeBuildingResult = new();
@@ -500,7 +500,7 @@ namespace Game.Garrisons
             Follower follower = new();
             follower.PacketInfo.DbID = dbId;
             follower.PacketInfo.GarrFollowerID = garrFollowerId;
-            follower.PacketInfo.Quality = followerEntry.Quality;   // TODO: handle magic upgrades
+            follower.PacketInfo.Quality = (uint)followerEntry.Quality;   // TODO: handle magic upgrades
             follower.PacketInfo.FollowerLevel = followerEntry.FollowerLevel;
             follower.PacketInfo.ItemLevelWeapon = followerEntry.ItemLevelWeapon;
             follower.PacketInfo.ItemLevelArmor = followerEntry.ItemLevelArmor;

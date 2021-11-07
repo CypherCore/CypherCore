@@ -57,13 +57,14 @@ namespace Game.DataStorage
         public sbyte SoundOverrideSubclassID;
         public int IconFileDataID;
         public byte ItemGroupSoundsID;
+        public int ContentTuningID;
         public int ModifiedCraftingReagentItemID;
     }
 
     public sealed class ItemAppearanceRecord
     {
         public uint Id;
-        public byte DisplayType;
+        public int DisplayType;
         public uint ItemDisplayInfoID;
         public int DefaultIconFileDataID;
         public int UiOrder;
@@ -265,10 +266,10 @@ namespace Game.DataStorage
     {
         public uint Id;
         public uint ItemID;
-        public byte ItemAppearanceModifierID;
-        public ushort ItemAppearanceID;
-        public byte OrderIndex;
-        public sbyte TransmogSourceTypeEnum;
+        public int ItemAppearanceModifierID;
+        public int ItemAppearanceID;
+        public int OrderIndex;
+        public byte TransmogSourceTypeEnum;
     }
 
     public sealed class ItemModifiedAppearanceExtraRecord
@@ -399,7 +400,7 @@ namespace Game.DataStorage
         public byte RequiredPVPRank;
         public sbyte RequiredLevel;
         public InventoryType inventoryType;
-        public byte OverallQualityID;
+        public sbyte OverallQualityID;
     }
 
     public sealed class ItemSpecRecord

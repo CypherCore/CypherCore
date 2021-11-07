@@ -58,6 +58,7 @@ namespace Game.DataStorage
         public uint Id;
         public ushort FirstSceneScriptID;
         public ushort NextSceneScriptID;
+        public int Unknown915;
     }
 
     public sealed class SceneScriptGlobalTextRecord
@@ -71,6 +72,7 @@ namespace Game.DataStorage
     {
         public uint Id;
         public string Name;
+        public int Unknown915;
     }
 
     public sealed class SceneScriptTextRecord

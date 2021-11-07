@@ -98,6 +98,7 @@ namespace Game.DataStorage
         public ushort MapID;
         public byte Flags;
         public uint ExpansionLevel;
+        public int RequiredWorldStateID; // maybe?
         public short[] CriteriaCount = new short[3];
     }
 

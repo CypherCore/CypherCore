@@ -134,6 +134,7 @@ namespace Game.DataStorage
         public ushort SortOrder;
         public ushort UiOrderIndex;
         public int Flags;
+        public int AddedInPatch;
         public int[] SwatchColor = new int[2];
     }
 
@@ -174,6 +175,7 @@ namespace Game.DataStorage
         public int ChrCustomizationID;
         public int ChrCustomizationReqID;
         public int UiOrderIndex;
+        public int AddedInPatch;
     }
 
     public sealed class ChrCustomizationReqRecord
@@ -310,6 +312,7 @@ namespace Game.DataStorage
         public uint SoundID;                                         // Sound ID       (voiceover for cinematic)
         public float OriginFacing;                                     // Orientation in map used for basis for M2 co
         public uint FileDataID;                                      // Model
+        public int Unknown915;
     }
 
     public sealed class CinematicSequencesRecord

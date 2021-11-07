@@ -2379,6 +2379,8 @@ namespace Framework.Constants
         CompleteCampaign = 283, // Flags all quests as completed that are assigned to campaign (MiscValueA)
         SendChatMessage = 284, // MiscValue[0] = BroadcastTextID, MiscValue[1] = ChatType
         ModifyKeystone2 = 285,
+        GrantBattlepetExperience = 286,
+        SetGarrisonFollowerLevel = 287,
         TotalSpellEffects
     }
 

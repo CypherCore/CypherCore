@@ -44,7 +44,7 @@ namespace Game.DataStorage
         public uint Id;
         public uint QuestFeedbackEffectID;
         public byte WhenToDisplay;
-        public int TargetType;
+        public byte TargetType;
         public int TargetAsset;
         public uint PlayerConditionID;
         public ushort CombatConditionID;

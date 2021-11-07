@@ -892,7 +892,7 @@ namespace Game
                             var itemModifiedAppearance = CliDB.ItemModifiedAppearanceStorage.LookupByKey(bucketAppearance.Item1);
                             if (itemModifiedAppearance != null)
                             {
-                                if (!knownAppearanceIds.Contains(itemModifiedAppearance.ItemAppearanceID))
+                                if (!knownAppearanceIds.Contains((uint)itemModifiedAppearance.ItemAppearanceID))
                                 {
                                     hasAll = false;
                                     break;

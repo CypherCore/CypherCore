@@ -784,7 +784,7 @@ namespace Game.Entities
         {
             List<uint> appearances = new();
             foreach (int id in _appearances)
-                appearances.Add(CliDB.ItemModifiedAppearanceStorage.LookupByKey(id).ItemAppearanceID);
+                appearances.Add((uint)CliDB.ItemModifiedAppearanceStorage.LookupByKey(id).ItemAppearanceID);
 
             return appearances;
         }

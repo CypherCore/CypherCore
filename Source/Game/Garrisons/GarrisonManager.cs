@@ -52,7 +52,7 @@ namespace Game.Garrisons
                 _garrisonBuildingPlotInstances[MathFunctions.MakePair64(buildingPlotInst.GarrBuildingID, buildingPlotInst.GarrSiteLevelPlotInstID)] = buildingPlotInst.Id;
 
             foreach (GarrBuildingRecord building in CliDB.GarrBuildingStorage.Values)
-                _garrisonBuildingsByType.Add(building.BuildingType, building.Id);
+                _garrisonBuildingsByType.Add((byte)building.BuildingType, building.Id);
 
             for (var i = 0; i < 2; ++i)
                 _garrisonFollowerAbilities[i] = new Dictionary<uint, GarrAbilities>();

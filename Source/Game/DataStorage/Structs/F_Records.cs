@@ -106,6 +106,7 @@ namespace Game.DataStorage
         public LocalizedString Reaction;
         public uint FriendshipRepID;
         public ushort ReactionThreshold;
+        public int OverrideColor;
     }
 
     public sealed class FriendshipReputationRecord

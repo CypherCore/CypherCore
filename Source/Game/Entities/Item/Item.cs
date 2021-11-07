@@ -1991,7 +1991,7 @@ namespace Game.Entities
 
             ItemModifiedAppearanceRecord transmog = CliDB.ItemModifiedAppearanceStorage.LookupByKey(itemModifiedAppearanceId);
             if (transmog != null)
-                return transmog.ItemAppearanceModifierID;
+                return (ushort)transmog.ItemAppearanceModifierID;
 
             return (ushort)GetAppearanceModId();
         }

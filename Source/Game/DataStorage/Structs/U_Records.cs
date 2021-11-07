@@ -25,7 +25,7 @@ namespace Game.DataStorage
         public uint Id;
         public int ParentUiMapID;
         public int Flags;
-        public int System;
+        public uint System;
         public UiMapType Type;
         public int BountySetID;
         public uint BountyDisplayLocation;

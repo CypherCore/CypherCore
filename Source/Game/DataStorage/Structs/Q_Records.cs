@@ -30,7 +30,7 @@ namespace Game.DataStorage
         public uint Id;
         public LocalizedString InfoName;
         public sbyte Type;
-        public byte Modifiers;
+        public int Modifiers;
         public ushort Profession;
     }
 
@@ -40,6 +40,7 @@ namespace Game.DataStorage
         public uint QuestLineID;
         public uint QuestID;
         public uint OrderIndex;
+        public int Flags;
     }
 
     public sealed class QuestMoneyRewardRecord
