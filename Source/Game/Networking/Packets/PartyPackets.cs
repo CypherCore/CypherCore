@@ -54,11 +54,12 @@ namespace Game.Networking.Packets
         public override void Read()
         {
             PartyIndex = _worldPacket.ReadUInt8();
-            ProposedRoles = _worldPacket.ReadUInt32();
-            TargetGUID = _worldPacket.ReadPackedGuid();
 
             uint targetNameLen = _worldPacket.ReadBits<uint>(9);
             uint targetRealmLen = _worldPacket.ReadBits<uint>(9);
+
+            ProposedRoles = _worldPacket.ReadUInt32();
+            TargetGUID = _worldPacket.ReadPackedGuid();
 
             TargetName = _worldPacket.ReadString(targetNameLen);
             TargetRealm = _worldPacket.ReadString(targetRealmLen);

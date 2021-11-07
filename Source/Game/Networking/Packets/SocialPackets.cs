@@ -148,10 +148,13 @@ namespace Game.Networking.Packets
 
         public override void Read()
         {
-            Name = _worldPacket.ReadString(_worldPacket.ReadBits<uint>(9));
+            uint nameLength = _worldPacket.ReadBits<uint>(9);
+            AccountGUID = _worldPacket.ReadPackedGuid();
+            Name = _worldPacket.ReadString(nameLength);
         }
 
         public string Name;
+        public ObjectGuid AccountGUID;
     }
 
     public class DelIgnore : ClientPacket

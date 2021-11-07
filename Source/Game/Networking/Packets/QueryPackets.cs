@@ -666,6 +666,7 @@ namespace Game.Networking.Packets
             data.WriteUInt8((byte)Sex);
             data.WriteUInt8((byte)ClassID);
             data.WriteUInt8(Level);
+            data.WriteUInt8(Unused915);
             data.WriteString(Name);
         }
 
@@ -680,6 +681,7 @@ namespace Game.Networking.Packets
         public Gender Sex = Gender.None;
         public Class ClassID = Class.None;
         public byte Level;
+        public byte Unused915;
         public DeclinedName DeclinedNames = new();
     }
 

@@ -413,7 +413,7 @@ namespace Game.Networking.Packets
                 ListingCreatorGuid = data.ReadPackedGuid();
                 Unknown735 = data.ReadPackedGuid();
 
-                byte titleLength = data.ReadBits<byte>(8);
+                byte titleLength = data.ReadBits<byte>(10);
                 byte descriptionLength = data.ReadBits<byte>(11);
                 byte voiceChatLength = data.ReadBits<byte>(8);
 

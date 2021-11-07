@@ -286,9 +286,11 @@ namespace Game.Networking.Packets
         public override void Write()
         {
             _worldPacket.WriteUInt32(CinematicID);
+            _worldPacket.WritePackedGuid(ConversationGuid);
         }
 
         public uint CinematicID;
+        public ObjectGuid ConversationGuid;
     }
 
     public class TriggerMovie : ServerPacket
