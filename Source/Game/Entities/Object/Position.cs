@@ -332,9 +332,9 @@ namespace Game.Entities
 
             if (Math.Abs(dx) < 0.001f && Math.Abs(dy) < 0.001f)
             {
-                float angle = (float)RandomHelper.NextDouble() * MathFunctions.TwoPi;
-                vcos = (float)Math.Cos(angle);
-                vsin = (float)Math.Sin(angle);
+                float o = NormalizeOrientation(GetOrientation() - MathF.PI);
+                vcos = MathF.Cos(o);
+                vsin = MathF.Sin(o);
             }
             else
             {
