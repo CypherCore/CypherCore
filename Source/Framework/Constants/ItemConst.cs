@@ -1136,6 +1136,7 @@ namespace Framework.Constants
         CantDoThatRightNow2 = 108,// You Can'T Do That Right Now.
         NotInNpe = 109,// Not Available During The Tutorial
         ItemCooldown = 110,// Item Is Not Ready Yet.
+        NotInRatedBattleground = 111,// You can't do that in a rated battleground.
     }
 
     public enum BuyResult

@@ -768,7 +768,9 @@ namespace Framework.Constants
         SpectatorOrCommentator = 308,
         SoulbindConduitLearnFailedInvalidCovenant = 309,
         ShadowlandsRidingRequirement = 310,
-        Unknown = 311,
+        NotInMageTower = 311,
+        GarrisonFollowerAtMinLevel = 312,
+        Unknown = 313,
 
         // Ok Cast Value - Here In Case A Future Version Removes Success And We Need To Use A Custom Value (Not Sent To Client Either Way)
         SpellCastOk = Success
@@ -1305,6 +1307,44 @@ namespace Framework.Constants
         NecessaryConstructNotPresent = 535, // Necessary Construct Not Present
         ThatGuestIsAlreadyCoveredInGelatin = 536, // That Guest Is Already Covered In Gelatin.
         YouNeedToWaitToUseThisItem = 537, // You Need To Wait To Use This Item.
+        ThatAllyAlreadyHasTea = 538, // That Ally Already Has Tea.
+        TargetDoesNotNeedTea = 539, // The Target Does Not Need Tea.
+        TheyDontDeserveYourFancyTea = 540, // They Don'T Deserve Your Fancy Tea!
+        YourGormPrefersToEatDeadThings = 541, // Your Gorm Prefers To Eat Dead Things.
+        YourGormHasAlreadyEatenThatCorpse = 542, // Your Gorm Has Already Eaten That Corpse.
+        YouNeedAGormlingFromNiyaToDoThat = 543, // You Need A Gormling From Niya To Do That.
+        TargetIsAlreadyShrunken = 544, // Target Is Already Shrunken.
+        TargetIsAlreadyEnlarged = 545, // Target Is Already Enlarged.
+        LadyMoonberrysWandIsForEnemiesAndMawrats = 546, // Lady Moonberry'S Wand Is Meant For Enemies And Mawrats.
+        LadyMoonberrysWandIsForEnemies = 547, // Lady Moonberry'S Wand Is Meant For Enemies.
+        TargetIsAlreadyTransformedIntoASnail = 548, // Target Is Already Transformed Into A Snail.
+        YourTargetMustBeBelow50PctHealth = 549, // Your Target Must Be Below 50% Health.
+        LadyMoonberrysWandIsDrainedOfPower = 550, // Lady Moonberry'S Wand Is Drained Of Power.
+        ThisBookHoldsNoRecipesForYourProfession = 551, // This Book Holds No Recipes For Your Profession.
+        YouHaveNoKorthianRelicsInYourInventory = 552, // You Have No Korthian Relics In Your Inventory.
+        YouMustBeInTheRiftToInteractWithThis = 553, // You Must Be In The Rift To Interact With This.
+        CannotSummonWhileInTheRift = 554, // Cannot Summon While In The Rift.
+        YouNeedAnActiveElementalShield = 600, // You Need An Active Elemental Shield.
+        SpeakToArchivistToTurnInRelicFragments = 601, // Speak To The Archivist To Turn In Relic Fragments.
+        RequiresResearchReportsAncientShrines = 602, // Requires Knowledge From Research Reports: Ancient Shrines
+        YourStewardIsNotPresent = 603, // Your Steward Companion Is Not Present.
+        YourStewardHasAlreadyBeenTransformed = 604, // Your Steward Companion Has Already Been Transformed.
+        RequiresKorthianRelics = 605, // Requires Korthian Relics
+        RequiresFullEmpoweredBar = 606, // Requires Full Empowered Bar
+        RequiresYouToBeRidingAYak = 607, // Requires You To Be Riding A Yak.
+        JaithysIsNotACannibal = 609, // Jaithys Is Many Things, But Jaithys Is Not A Cannibal.
+        ThatItemIsPunyUnworthyFindAnother = 610, // That Item Is Puny. Unworthy. Find Another.
+        JaithysHungersOnlyForWeapons = 611, // Jaithys Hungers Only For Weapons. Only Weapons Will Do.
+        ReturnToReliquaryOfRememberanceToSubmitKorthianRelics = 612, // Return To The Reliquary Of Rememberance To Submit Korthian Relics To Archivist Roh-Suir.
+        ShardsOfDominationCanBeRemovedBySoulfireChisel = 615, // Shards Of Domination Can Only Be Removed By The Soulfire Chisel.
+        YouHaveLearnedEverythingFromThatMap = 616, // You Have Learned Everything From That Map.
+        YouMustTargetACritterToHelpItAtoneForItsSins = 617, // You Must Target A Critter To Help It Atone For Its Sins.
+        YouMustBeAMemberOfTheKyrianCovenantOrHaveReachedRenown80WithTheKyrian = 619, // You Must Be A Member Of The Kyrian Covenant Or Have Reached Renown 80 With The Kyrian.
+        YouMustBeAMemberOfTheNecrolordCovenantOrHaveReachedRenown80WithTheNecrolords = 620, // You Must Be A Member Of The Necrolord Covenant Or Have Reached Renown 80 With The Necrolords.
+        YouMustBeAMemberOfTheNightFaeCovenantOrHaveReachedRenown80WithTheNightFae = 621, // You Must Be A Member Of The Night Fae Covenant Or Have Reached Renown 80 With The Night Fae.
+        YouMustBeAMemberOfTheVenthyrCovenantOrHaveReachedRenown80WithTheVenthyr = 622, // You Must Be A Member Of The Venthyr Covenant Or Have Reached Renown 80 With The Venthyr.
+        YouAlreadyHaveThatMuchRenownWithYourActiveCovenant = 627, // You Already Have That Much Renown With Your Active Covenant.
+        CannotExceedTheMaximumForThatCurrency = 628, // Cannot Exceed The Maximum For That Currency.
     }
 
     public enum SpellMissInfo
