@@ -617,6 +617,13 @@ namespace Game.Entities
 
             UpdatePositionData();
 
+            bool isInWater = IsInWater();
+            if (!IsFalling() || isInWater || IsFlying())
+                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.Ground);
+
+            if (isInWater)
+                RemoveAurasWithInterruptFlags(SpellAuraInterruptFlags2.Swimming);
+
             return (relocated || turn);
         }
 

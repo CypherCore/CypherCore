@@ -163,9 +163,9 @@ namespace Framework.Constants
     {
         None = 0,
         Falling = 0x01, // NYI
-        Swimming = 0x02, // NYI
+        Swimming = 0x02,
         NotMoving = 0x04, // NYI
-        Ground = 0x08, // NYI
+        Ground = 0x08,
         Transform = 0x10, // NYI
         Jump = 0x20,
         ChangeSpec = 0x40, // NYI
