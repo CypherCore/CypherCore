@@ -682,7 +682,7 @@ namespace Framework.Constants
         Max = 19,
         All = 127,          // default for class?
         Health = -2,    // (-2 as signed value)
-        MaxPerClass = 6
+        MaxPerClass = 7
     }
 
     public enum Stats

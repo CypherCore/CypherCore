@@ -2309,7 +2309,7 @@ namespace Game.Entities
             stmt.AddValue(index++, GetMaxHealth());
 
             for (byte i = 0; i < (int)PowerType.MaxPerClass; ++i)
-                stmt.AddValue(index++, GetMaxPower((PowerType)i));
+                stmt.AddValue(index++, m_unitData.MaxPower[i]);
 
             for (byte i = 0; i < (int)Stats.Max; ++i)
                 stmt.AddValue(index++, GetStat((Stats)i));
@@ -2317,14 +2317,14 @@ namespace Game.Entities
             for (int i = 0; i < (int)SpellSchools.Max; ++i)
                 stmt.AddValue(index++, GetResistance((SpellSchools)i));
 
-            stmt.AddValue(index++, (float)m_activePlayerData.BlockPercentage);
-            stmt.AddValue(index++, (float)m_activePlayerData.DodgePercentage);
-            stmt.AddValue(index++, (float)m_activePlayerData.ParryPercentage);
-            stmt.AddValue(index++, (float)m_activePlayerData.CritPercentage);
-            stmt.AddValue(index++, (float)m_activePlayerData.RangedCritPercentage);
-            stmt.AddValue(index++, (float)m_activePlayerData.SpellCritPercentage);
-            stmt.AddValue(index++, (int)m_unitData.AttackPower);
-            stmt.AddValue(index++, (int)m_unitData.RangedAttackPower);
+            stmt.AddValue(index++, m_activePlayerData.BlockPercentage);
+            stmt.AddValue(index++, m_activePlayerData.DodgePercentage);
+            stmt.AddValue(index++, m_activePlayerData.ParryPercentage);
+            stmt.AddValue(index++, m_activePlayerData.CritPercentage);
+            stmt.AddValue(index++, m_activePlayerData.RangedCritPercentage);
+            stmt.AddValue(index++, m_activePlayerData.SpellCritPercentage);
+            stmt.AddValue(index++, m_unitData.AttackPower);
+            stmt.AddValue(index++, m_unitData.RangedAttackPower);
             stmt.AddValue(index++, GetBaseSpellPowerBonus());
             stmt.AddValue(index, m_activePlayerData.CombatRatings[(int)CombatRating.ResiliencePlayerDamage]);
 

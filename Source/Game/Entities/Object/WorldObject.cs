@@ -459,10 +459,6 @@ namespace Game.Entities
                 bool hasMorphCurveID = createProperties != null && createProperties.MorphCurveId != 0;
                 bool hasFacingCurveID = createProperties != null && createProperties.FacingCurveId != 0;
                 bool hasMoveCurveID = createProperties != null && createProperties.MoveCurveId != 0;
-                bool hasAnimation = createProperties != null && createProperties.AnimId != 0;
-                bool hasUnk3 = areaTriggerTemplate != null && areaTriggerTemplate.HasFlag(AreaTriggerFlags.Unk3);
-                bool hasAnimKitID = createProperties != null && createProperties.AnimKitId != 0;
-                bool hasAnimProgress = false;
                 bool hasAreaTriggerSphere = shape.IsSphere();
                 bool hasAreaTriggerBox = shape.IsBox();
                 bool hasAreaTriggerPolygon = createProperties != null && shape.IsPolygon();
@@ -482,10 +478,6 @@ namespace Game.Entities
                 data.WriteBit(hasMorphCurveID);
                 data.WriteBit(hasFacingCurveID);
                 data.WriteBit(hasMoveCurveID);
-                data.WriteBit(hasAnimation);
-                data.WriteBit(hasAnimKitID);
-                data.WriteBit(hasUnk3);
-                data.WriteBit(hasAnimProgress);
                 data.WriteBit(hasAreaTriggerSphere);
                 data.WriteBit(hasAreaTriggerBox);
                 data.WriteBit(hasAreaTriggerPolygon);
@@ -493,9 +485,6 @@ namespace Game.Entities
                 data.WriteBit(hasAreaTriggerSpline);
                 data.WriteBit(hasOrbit);
                 data.WriteBit(hasMovementScript);
-
-                if (hasUnk3)
-                    data.WriteBit(false);
 
                 data.FlushBits();
 
@@ -521,15 +510,6 @@ namespace Game.Entities
 
                 if (hasMoveCurveID)
                     data.WriteUInt32(createProperties.MoveCurveId);
-
-                if (hasAnimation)
-                    data.WriteUInt32(createProperties.AnimId);
-
-                if (hasAnimKitID)
-                    data.WriteUInt32(createProperties.AnimKitId);
-
-                if (hasAnimProgress)
-                    data.WriteUInt32(0);
 
                 if (hasAreaTriggerSphere)
                 {

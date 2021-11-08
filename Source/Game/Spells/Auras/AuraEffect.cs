@@ -1943,25 +1943,6 @@ namespace Game.Spells
                 target.RemoveTrackCreatureFlag(1u << (GetMiscValue() - 1));
         }
 
-        [AuraEffectHandler(AuraType.TrackResources)]
-        void HandleAuraTrackResources(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
-        {
-            if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
-                return;
-
-            Player target = aurApp.GetTarget().ToPlayer();
-            if (target == null)
-                return;
-
-            uint bitIndex = (uint)GetMiscValue() - 1;
-            uint index = bitIndex / 32;
-            uint flag = 1u << ((int)bitIndex % 32);
-            if (apply)
-                target.AddTrackResourceFlag(index, flag);
-            else
-                target.RemoveTrackResourceFlag(index, flag);
-        }
-
         [AuraEffectHandler(AuraType.TrackStealthed)]
         void HandleAuraTrackStealthed(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {

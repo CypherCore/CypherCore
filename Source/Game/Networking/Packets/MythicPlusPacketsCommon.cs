@@ -23,7 +23,7 @@ namespace Game.Networking.Packets
     public struct DungeonScoreMapSummary
     {
         public int ChallengeModeID;
-        public int MapScore;
+        public float MapScore;
         public int BestRunLevel;
         public int BestRunDurationMS;
         public bool FinishedSuccess;
@@ -31,7 +31,7 @@ namespace Game.Networking.Packets
         public void Write(WorldPacket data)
         {
             data.WriteInt32(ChallengeModeID);
-            data.WriteInt32(MapScore);
+            data.WriteFloat(MapScore);
             data.WriteInt32(BestRunLevel);
             data.WriteInt32(BestRunDurationMS);
             data.WriteBit(FinishedSuccess);
@@ -41,12 +41,12 @@ namespace Game.Networking.Packets
 
     public class DungeonScoreSummary
     {
-        public int CurrentSeasonScore;
+        public float CurrentSeasonScore;
         public List<DungeonScoreMapSummary> Runs = new();
 
         public void Write(WorldPacket data)
         {
-            data.WriteInt32(CurrentSeasonScore);
+            data.WriteFloat(CurrentSeasonScore);
             data.WriteInt32(Runs.Count);
             foreach (var dungeonScoreMapSummary in Runs)
                 dungeonScoreMapSummary.Write(data);
@@ -93,7 +93,7 @@ namespace Game.Networking.Packets
         public long CompletionDate;
         public int Season;
         public List<MythicPlusMember> Members = new();
-        public int RunScore;
+        public float RunScore;
         public int[] KeystoneAffixIDs = new int[4];
 
         public void Write(WorldPacket data)
@@ -108,7 +108,7 @@ namespace Game.Networking.Packets
                 data.WriteInt32(id);
 
             data.WriteInt32(Members.Count);
-            data.WriteInt32(RunScore);
+            data.WriteFloat(RunScore);
             foreach (var member in Members)
                 member.Write(data);
 
@@ -121,12 +121,12 @@ namespace Game.Networking.Packets
     {
         public int KeystoneAffixID;
         public MythicPlusRun Run = new();
-        public int Score;
+        public float Score;
 
         public void Write(WorldPacket data)
         {
             data.WriteInt32(KeystoneAffixID);
-            data.WriteInt32(Score);
+            data.WriteFloat(Score);
             Run.Write(data);
         }
     }
@@ -135,13 +135,13 @@ namespace Game.Networking.Packets
     {
         public int MapChallengeModeID;
         public List<DungeonScoreBestRunForAffix> BestRuns = new();
-        public int OverAllScore;
+        public float OverAllScore;
 
         public void Write(WorldPacket data)
         {
             data.WriteInt32(MapChallengeModeID);
             data.WriteInt32(BestRuns.Count);
-            data.WriteInt32(OverAllScore);
+            data.WriteFloat(OverAllScore);
             foreach (var bestRun in BestRuns)
                 bestRun.Write(data);
         }
@@ -151,13 +151,13 @@ namespace Game.Networking.Packets
     {
         public int Season;
         public List<DungeonScoreMapData> Maps = new();
-        public int SeasonScore;
+        public float SeasonScore;
 
         public void Write(WorldPacket data)
         {
             data.WriteInt32(Season);
             data.WriteInt32(Maps.Count);
-            data.WriteInt32(SeasonScore);
+            data.WriteFloat(SeasonScore);
             foreach (var map in Maps)
                 map.Write(data);
         }
