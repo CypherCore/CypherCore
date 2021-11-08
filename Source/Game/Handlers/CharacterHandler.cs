@@ -733,6 +733,7 @@ namespace Game
 
             pCurrChar.SetVirtualPlayerRealm(Global.WorldMgr.GetVirtualRealmAddress());
 
+            SendAccountDataTimes(ObjectGuid.Empty, AccountDataTypes.GlobalCacheMask);
             SendTutorialsData();
 
             pCurrChar.GetMotionMaster().Initialize();
@@ -743,15 +744,10 @@ namespace Game
             loginVerifyWorld.Pos = pCurrChar.GetPosition();
             SendPacket(loginVerifyWorld);
 
+            // load player specific part before send times
             LoadAccountData(holder.GetResult(PlayerLoginQueryLoad.AccountData), AccountDataTypes.PerCharacterCacheMask);
 
-            AccountDataTimes accountDataTimes = new();
-            accountDataTimes.PlayerGuid = playerGuid;
-            accountDataTimes.ServerTime = (uint)GameTime.GetGameTime();
-            for (AccountDataTypes i = 0; i < AccountDataTypes.Max; ++i)
-                accountDataTimes.AccountTimes[(int)i] = (uint)GetAccountData(i).Time;
-
-            SendPacket(accountDataTimes);
+            SendAccountDataTimes(playerGuid, AccountDataTypes.AllAccountDataCacheMask);
 
             SendFeatureSystemStatus();
 

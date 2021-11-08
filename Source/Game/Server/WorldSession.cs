@@ -427,6 +427,18 @@ namespace Game
             return _registeredAddonPrefixes.Contains(prefix);
         }
 
+        public void SendAccountDataTimes(ObjectGuid playerGuid, AccountDataTypes mask)
+        {
+            AccountDataTimes accountDataTimes = new();
+            accountDataTimes.PlayerGuid = playerGuid;
+            accountDataTimes.ServerTime = GameTime.GetGameTime();
+            for (int i = 0; i < (int)AccountDataTypes.Max; ++i)
+                if (((int)mask & (1 << i)) != 0)
+                    accountDataTimes.AccountTimes[i] = GetAccountData((AccountDataTypes)i).Time;
+
+            SendPacket(accountDataTimes);
+        }
+
         public void LoadTutorialsData(SQLResult result)
         {
             if (!result.IsEmpty())
@@ -755,6 +767,7 @@ namespace Game
             SendFeatureSystemStatusGlueScreen();
             SendClientCacheVersion(WorldConfig.GetUIntValue(WorldCfg.ClientCacheVersion));
             SendAvailableHotfixes();
+            SendAccountDataTimes(ObjectGuid.Empty, AccountDataTypes.GlobalCacheMask);
             SendTutorialsData();
 
             SQLResult result = holder.GetResult(AccountInfoQueryLoad.GlobalRealmCharacterCounts);

@@ -34,6 +34,7 @@ namespace Framework.Constants
 
         Max = 12,
 
+        AllAccountDataCacheMask = 0xFFF,
         GlobalCacheMask = 0x515,
         PerCharacterCacheMask = 0xAEA
     }
