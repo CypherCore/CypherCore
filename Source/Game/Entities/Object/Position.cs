@@ -325,25 +325,6 @@ namespace Game.Entities
             return Math.Abs(Math.Sin(angle)) * GetExactDist2d(pos.GetPositionX(), pos.GetPositionY()) < width;
         }
 
-        public void GetSinCos(float x, float y, out float vsin, out float vcos)
-        {
-            float dx = GetPositionX() - x;
-            float dy = GetPositionY() - y;
-
-            if (Math.Abs(dx) < 0.001f && Math.Abs(dy) < 0.001f)
-            {
-                float o = NormalizeOrientation(GetOrientation() - MathF.PI);
-                vcos = MathF.Cos(o);
-                vsin = MathF.Sin(o);
-            }
-            else
-            {
-                float dist = (float)Math.Sqrt((dx * dx) + (dy * dy));
-                vcos = dx / dist;
-                vsin = dy / dist;
-            }
-        }
-
         public override string ToString()
         {
             return $"X: {posX} Y: {posY} Z: {posZ} O: {Orientation}";

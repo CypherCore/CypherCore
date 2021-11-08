@@ -656,7 +656,7 @@ namespace Game.Movement
             init.Launch();
         }
 
-        public void MoveKnockbackFrom(float srcX, float srcY, float speedXY, float speedZ, SpellEffectExtraData spellEffectExtraData = null)
+        public void MoveKnockbackFrom(Position origin, float speedXY, float speedZ, SpellEffectExtraData spellEffectExtraData = null)
         {
             //This function may make players fall below map
             if (_owner.IsTypeId(TypeId.Player))
@@ -670,7 +670,7 @@ namespace Game.Movement
             float dist = 2 * moveTimeHalf * speedXY;
             float max_height = -MoveSpline.ComputeFallElevation(moveTimeHalf, false, -speedZ);
 
-            _owner.GetNearPoint(_owner, out x, out y, out z, dist, _owner.GetAbsoluteAngle(srcX, srcY) + MathFunctions.PI);
+            _owner.GetNearPoint(_owner, out x, out y, out z, dist, _owner.GetAbsoluteAngle(origin) + MathFunctions.PI);
 
             MoveSplineInit init = new(_owner);
             init.MoveTo(x, y, z);

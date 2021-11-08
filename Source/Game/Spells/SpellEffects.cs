@@ -4021,18 +4021,18 @@ namespace Game.Spells
             if (speedxy < 0.01f && speedz < 0.01f)
                 return;
 
-            float x, y;
+            Position origin;
             if (effectInfo.Effect == SpellEffectName.KnockBackDest)
             {
                 if (m_targets.HasDst())
-                    destTarget.GetPosition(out x, out y);
+                    origin = new(destTarget.GetPosition());
                 else
                     return;
             }
-            else //if (GetEffect(i].Effect == SPELL_EFFECT_KNOCK_BACK)
-                m_caster.GetPosition(out x, out y);
+            else //if (effectInfo.Effect == SPELL_EFFECT_KNOCK_BACK)
+                origin = new(m_caster.GetPosition());
 
-            unitTarget.KnockbackFrom(x, y, speedxy, speedz);
+            unitTarget.KnockbackFrom(origin, speedxy, speedz);
         }
 
         [SpellEffectHandler(SpellEffectName.LeapBack)]

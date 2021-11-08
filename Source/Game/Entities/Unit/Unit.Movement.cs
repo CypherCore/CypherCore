@@ -235,7 +235,7 @@ namespace Game.Entities
             GetMotionMaster().LaunchMoveSpline(init, 0, MovementGeneratorPriority.Normal, MovementGeneratorType.Point);
         }
 
-        public void KnockbackFrom(float x, float y, float speedXY, float speedZ, SpellEffectExtraData spellEffectExtraData = null)
+        public void KnockbackFrom(Position origin, float speedXY, float speedZ, SpellEffectExtraData spellEffectExtraData = null)
         {
             Player player = ToPlayer();
             if (!player)
@@ -250,11 +250,18 @@ namespace Game.Entities
             }
 
             if (!player)
-                GetMotionMaster().MoveKnockbackFrom(x, y, speedXY, speedZ, spellEffectExtraData);
+                GetMotionMaster().MoveKnockbackFrom(origin, speedXY, speedZ, spellEffectExtraData);
             else
             {
-                float vcos, vsin;
-                GetSinCos(x, y, out vsin, out vcos);
+                float o = GetPosition() == origin ? GetOrientation() + MathF.PI : origin.GetRelativeAngle(this);
+                if (speedXY < 0)
+                {
+                    speedXY = -speedXY;
+                    o = o - MathF.PI;
+                }
+
+                float vcos = MathF.Cos(o);
+                float vsin = MathF.Sin(o);
                 SendMoveKnockBack(player, speedXY, -speedZ, vcos, vsin);
             }
         }
