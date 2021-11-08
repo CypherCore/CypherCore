@@ -676,7 +676,7 @@ namespace Game.Entities
         public struct chest
         {
             public uint open;                                    // 0 open, References: Lock_, NoValue = 0
-            public uint chestLoot;                               // 1 chestLoot, References: Treasure, NoValue = 0
+            public uint chestLoot;                               // 1 chestLoot (legacy/classic), References: Treasure, NoValue = 0
             public uint chestRestockTime;                        // 2 chestRestockTime, int, Min value: 0, Max value: 1800000, Default value: 0
             public uint consumable;                              // 3 consumable, enum { false, true, }; Default: false
             public uint minRestock;                              // 4 minRestock, int, Min value: 0, Max value: 65535, Default value: 0
@@ -978,7 +978,7 @@ namespace Game.Entities
         public struct fishinghole
         {
             public uint radius;                                  // 0 radius, int, Min value: 0, Max value: 50, Default value: 0
-            public uint chestLoot;                               // 1 chestLoot, References: Treasure, NoValue = 0
+            public uint chestLoot;                               // 1 chestLoot (legacy/classic), References: Treasure, NoValue = 0
             public uint minRestock;                              // 2 minRestock, int, Min value: 0, Max value: 65535, Default value: 0
             public uint maxRestock;                              // 3 maxRestock, int, Min value: 0, Max value: 65535, Default value: 0
             public uint open;                                    // 4 open, References: Lock_, NoValue = 0
@@ -1259,7 +1259,7 @@ namespace Game.Entities
         public struct gatheringnode
         {
             public uint open;                                    // 0 open, References: Lock_, NoValue = 0
-            public uint chestLoot;                               // 1 chestLoot, References: Treasure, NoValue = 0
+            public uint chestLoot;                               // 1 chestLoot (legacy/classic), References: Treasure, NoValue = 0
             public uint Unused;                                  // 2 Unused, int, Min value: 0, Max value: 65535, Default value: 0
             public uint notInCombat;                             // 3 notInCombat, enum { false, true, }; Default: false
             public uint trivialSkillLow;                         // 4 trivialSkillLow, int, Min value: 0, Max value: 65535, Default value: 0

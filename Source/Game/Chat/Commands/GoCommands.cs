@@ -42,82 +42,6 @@ namespace Game.Chat.Commands
             return HandleGoTicketCommand<ComplaintTicket>(args, handler);
         }
 
-        [Command("creature", RBACPermissions.CommandGo)]
-        static bool HandleGoCreatureCommand(StringArguments args, CommandHandler handler)
-        {
-            if (args.Empty())
-                return false;
-
-            Player player = handler.GetSession().GetPlayer();
-
-            // "id" or number or [name] Shift-click form |color|Hcreature_entry:creature_id|h[name]|h|r
-            string param1 = handler.ExtractKeyFromLink(args, "Hcreature");
-            if (param1.IsEmpty())
-                return false;
-
-            string whereClause = "";
-
-            // User wants to teleport to the NPC's template entry
-            if (param1.Equals("id"))
-            {
-                // Get the "creature_template.entry"
-                // number or [name] Shift-click form |color|Hcreature_entry:creature_id|h[name]|h|r
-                string id = handler.ExtractKeyFromLink(args, "Hcreature_entry");
-                if (id.IsEmpty())
-                    return false;
-
-                if (!uint.TryParse(id, out uint entry))
-                    return false;
-
-                whereClause += "WHERE id = '" + entry + '\'';
-            }
-            else
-            {
-                ulong.TryParse(param1, out ulong guidLow);
-                if (guidLow != 0)
-                {
-                    whereClause += "WHERE guid = '" + guidLow + '\'';
-                }
-                else
-                {
-                    // param1 is not a number, must be mob's name
-                    whereClause += ", creature_template WHERE creature.id = creature_template.entry AND creature_template.name LIKE '" + args.GetString() + '\'';
-                }
-            }
-
-            SQLResult result = DB.World.Query("SELECT position_x, position_y, position_z, orientation, map FROM creature {0}", whereClause);
-            if (result.IsEmpty())
-            {
-                handler.SendSysMessage(CypherStrings.CommandGocreatnotfound);
-                return false;
-            }
-
-            float x = result.Read<float>(0);
-            float y = result.Read<float>(1);
-            float z = result.Read<float>(2);
-            float o = result.Read<float>(3);
-            uint mapId = result.Read<ushort>(4);
-
-            if (result.NextRow())
-                handler.SendSysMessage(CypherStrings.CommandGocreatmultiple);
-
-            if (!GridDefines.IsValidMapCoord(mapId, x, y, z, o) || Global.ObjectMgr.IsTransportMap(mapId))
-            {
-                handler.SendSysMessage(CypherStrings.InvalidTargetCoord, x, y, mapId);
-                return false;
-            }
-
-            // stop flight if need
-            if (player.IsInFlight())
-                player.FinishTaxiFlight();            
-            else
-                player.SaveRecallPosition(); // save only in non-flight case
-
-            player.TeleportTo(mapId, x, y, z, o);
-
-            return true;
-        }
-
         [Command("graveyard", RBACPermissions.CommandGo)]
         static bool HandleGoGraveyardCommand(StringArguments args, CommandHandler handler)
         {
@@ -153,7 +77,6 @@ namespace Game.Chat.Commands
             return true;
         }
 
-        //teleport to grid
         [Command("grid", RBACPermissions.CommandGo)]
         static bool HandleGoGridCommand(StringArguments args, CommandHandler handler)
         {
@@ -271,47 +194,6 @@ namespace Game.Chat.Commands
 
             handler.SendSysMessage(CypherStrings.CommandGoInstanceFailed, mapId, scriptname, exit.target_mapId);
             return false;
-        }
-
-        //teleport to gameobject
-        [Command("object", RBACPermissions.CommandGo)]
-        static bool HandleGoObjectCommand(StringArguments args, CommandHandler handler)
-        {
-            if (args.Empty())
-                return false;
-
-            Player player = handler.GetSession().GetPlayer();
-
-            // number or [name] Shift-click form |color|Hgameobject:go_guid|h[name]|h|r
-            string id = handler.ExtractKeyFromLink(args, "Hgameobject");
-            if (string.IsNullOrEmpty(id))
-                return false;
-
-            if (!ulong.TryParse(id, out ulong guidLow) || guidLow == 0)
-                return false;
-
-            // by DB guid
-            GameObjectData goData = Global.ObjectMgr.GetGameObjectData(guidLow);
-            if (goData == null)
-            {
-                handler.SendSysMessage(CypherStrings.CommandGoobjnotfound);
-                return false;
-            }
-
-            if (!GridDefines.IsValidMapCoord(goData.spawnPoint) || Global.ObjectMgr.IsTransportMap(goData.spawnPoint.GetMapId()))
-            {
-                handler.SendSysMessage(CypherStrings.InvalidTargetCoord, goData.spawnPoint.GetPositionX(), goData.spawnPoint.GetPositionY(), goData.spawnPoint.GetMapId());
-                return false;
-            }
-
-            // stop flight if need
-            if (player.IsInFlight())
-                player.FinishTaxiFlight();            
-            else
-                player.SaveRecallPosition(); // save only in non-flight case
-
-            player.TeleportTo(goData.spawnPoint);
-            return true;
         }
 
         [Command("offset", RBACPermissions.CommandGo)]
@@ -458,8 +340,8 @@ namespace Game.Chat.Commands
             return true;
         }
 
-        [Command("trigger", RBACPermissions.CommandGo)]
-        static bool HandleGoTriggerCommand(StringArguments args, CommandHandler handler)
+        [Command("areatrigger", RBACPermissions.CommandGo)]
+        static bool HandleGoAreaTriggerCommand(StringArguments args, CommandHandler handler)
         {
             Player player = handler.GetSession().GetPlayer();
 
@@ -640,6 +522,144 @@ namespace Game.Chat.Commands
 
             ticket.TeleportTo(player);
             return true;
+        }
+
+        [CommandGroup("creature", RBACPermissions.CommandGo)]
+        class GoCommandCreature
+        {
+            [Command("", RBACPermissions.CommandGo)]
+            static bool HandleGoCreatureSpawnIdCommand(StringArguments args, CommandHandler handler)
+            {
+                if (args.Empty())
+                    return false;
+
+                Player player = handler.GetSession().GetPlayer();
+
+                // "id" or number or [name] Shift-click form |color|Hcreature_entry:creature_id|h[name]|h|r
+                string param1 = handler.ExtractKeyFromLink(args, "Hcreature");
+                if (param1.IsEmpty())
+                    return false;
+
+                string whereClause = "";
+
+                // User wants to teleport to the NPC's template entry
+                if (param1.Equals("id"))
+                {
+                    // Get the "creature_template.entry"
+                    // number or [name] Shift-click form |color|Hcreature_entry:creature_id|h[name]|h|r
+                    string id = handler.ExtractKeyFromLink(args, "Hcreature_entry");
+                    if (id.IsEmpty())
+                        return false;
+
+                    if (!uint.TryParse(id, out uint entry))
+                        return false;
+
+                    whereClause += "WHERE id = '" + entry + '\'';
+                }
+                else
+                {
+                    ulong.TryParse(param1, out ulong guidLow);
+                    if (guidLow != 0)
+                    {
+                        whereClause += "WHERE guid = '" + guidLow + '\'';
+                    }
+                    else
+                    {
+                        // param1 is not a number, must be mob's name
+                        whereClause += ", creature_template WHERE creature.id = creature_template.entry AND creature_template.name LIKE '" + args.GetString() + '\'';
+                    }
+                }
+
+                SQLResult result = DB.World.Query("SELECT position_x, position_y, position_z, orientation, map FROM creature {0}", whereClause);
+                if (result.IsEmpty())
+                {
+                    handler.SendSysMessage(CypherStrings.CommandGocreatnotfound);
+                    return false;
+                }
+
+                float x = result.Read<float>(0);
+                float y = result.Read<float>(1);
+                float z = result.Read<float>(2);
+                float o = result.Read<float>(3);
+                uint mapId = result.Read<ushort>(4);
+
+                if (result.NextRow())
+                    handler.SendSysMessage(CypherStrings.CommandGocreatmultiple);
+
+                if (!GridDefines.IsValidMapCoord(mapId, x, y, z, o) || Global.ObjectMgr.IsTransportMap(mapId))
+                {
+                    handler.SendSysMessage(CypherStrings.InvalidTargetCoord, x, y, mapId);
+                    return false;
+                }
+
+                // stop flight if need
+                if (player.IsInFlight())
+                    player.FinishTaxiFlight();
+                else
+                    player.SaveRecallPosition(); // save only in non-flight case
+
+                player.TeleportTo(mapId, x, y, z, o);
+
+                return true;
+            }
+
+            [Command("id", RBACPermissions.CommandGo)]
+            static bool HandleGoCreatureCIdCommand(StringArguments args, CommandHandler handler)
+            {
+                //temp fix till rework command system.
+                return HandleGoCreatureSpawnIdCommand(args, handler);
+            }
+        }
+
+        [CommandGroup("gameobject", RBACPermissions.CommandGo)]
+        class GoCommandGameobject
+        {
+            [Command("", RBACPermissions.CommandGo)]
+            static bool HandleGoGameObjectSpawnIdCommand(StringArguments args, CommandHandler handler)
+            {
+                if (args.Empty())
+                    return false;
+
+                Player player = handler.GetSession().GetPlayer();
+
+                // number or [name] Shift-click form |color|Hgameobject:go_guid|h[name]|h|r
+                string id = handler.ExtractKeyFromLink(args, "Hgameobject");
+                if (string.IsNullOrEmpty(id))
+                    return false;
+
+                if (!ulong.TryParse(id, out ulong guidLow) || guidLow == 0)
+                    return false;
+
+                // by DB guid
+                GameObjectData goData = Global.ObjectMgr.GetGameObjectData(guidLow);
+                if (goData == null)
+                {
+                    handler.SendSysMessage(CypherStrings.CommandGoobjnotfound);
+                    return false;
+                }
+
+                if (!GridDefines.IsValidMapCoord(goData.spawnPoint) || Global.ObjectMgr.IsTransportMap(goData.spawnPoint.GetMapId()))
+                {
+                    handler.SendSysMessage(CypherStrings.InvalidTargetCoord, goData.spawnPoint.GetPositionX(), goData.spawnPoint.GetPositionY(), goData.spawnPoint.GetMapId());
+                    return false;
+                }
+
+                // stop flight if need
+                if (player.IsInFlight())
+                    player.FinishTaxiFlight();
+                else
+                    player.SaveRecallPosition(); // save only in non-flight case
+
+                player.TeleportTo(goData.spawnPoint);
+                return true;
+            }
+
+            [Command("id", RBACPermissions.CommandGo)]
+            static bool HandleGoGameObjectGOIdCommand(StringArguments args, CommandHandler handler)
+            {
+                //temp fix till rework command system.
+                return HandleGoGameObjectSpawnIdCommand(args, handler);
+            }
         }
     }
 }
