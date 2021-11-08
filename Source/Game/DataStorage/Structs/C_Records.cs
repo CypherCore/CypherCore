@@ -113,9 +113,9 @@ namespace Game.DataStorage
         public byte AttackPowerPerAgility;
         public byte AttackPowerPerStrength;
         public byte SpellClassSet;
-        public byte ChatColorR;
-        public byte ChatColorG;
-        public byte ChatColorB;
+        public byte ClassColorR;
+        public byte ClassColorG;
+        public byte ClassColorB;
     }
 
     public sealed class ChrClassesXPowerTypesRecord
@@ -234,15 +234,15 @@ namespace Game.DataStorage
         public string NameFemale;
         public string NameLowercase;
         public string NameFemaleLowercase;
-        public string NameS;
-        public string NameFemaleS;
-        public string NameLowercaseS;
-        public string NameFemaleLowercaseS;
-        public string RaceFantasyDescription;
-        public string NameL;
-        public string NameFemaleL;
-        public string NameLowercaseL;
-        public string NameFemaleLowercaseL;
+        public string LoreName;
+        public string LoreNameFemale;
+        public string LoreNameLower;
+        public string LoreNameLowerFemale;
+        public string LoreDescription;
+        public string ShortName;
+        public string ShortNameFemale;
+        public string ShortNameLower;
+        public string ShortNameLowerFemale;
         public int Flags;
         public int FactionID;
         public uint CinematicSequenceID;
