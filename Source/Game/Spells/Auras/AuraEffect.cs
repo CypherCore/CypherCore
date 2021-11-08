@@ -107,10 +107,7 @@ namespace Game.Spells
 
                     var mountCapability = GetBase().GetUnitOwner().GetMountCapability(mountType);
                     if (mountCapability != null)
-                    {
                         amount = (int)mountCapability.Id;
-                        m_canBeRecalculated = false;
-                    }
                     break;
                 case AuraType.ShowConfirmationPromptWithDifficulty:
                     if (caster)
@@ -843,7 +840,7 @@ namespace Game.Spells
         public int GetPeriodicTimer() { return _periodicTimer; }
         public void SetPeriodicTimer(int periodicTimer) { _periodicTimer = periodicTimer; }
 
-        void RecalculateAmount(AuraEffect triggeredBy = null)
+        public void RecalculateAmount(AuraEffect triggeredBy = null)
         {
             if (!CanBeRecalculated())
                 return;
@@ -2053,73 +2050,76 @@ namespace Game.Spells
         [AuraEffectHandler(AuraType.Mounted)]
         void HandleAuraMounted(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {
-            if (!mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountSendForClientMask))
                 return;
 
             Unit target = aurApp.GetTarget();
 
             if (apply)
             {
-                uint creatureEntry = (uint)GetMiscValue();
-                uint displayId = 0;
-                uint vehicleId = 0;
-
-                MountRecord mountEntry = Global.DB2Mgr.GetMount(GetId());
-                if (mountEntry != null)
+                if (mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
                 {
-                    var mountDisplays = Global.DB2Mgr.GetMountDisplays(mountEntry.Id);
-                    if (mountDisplays != null)
+                    uint creatureEntry = (uint)GetMiscValue();
+                    uint displayId = 0;
+                    uint vehicleId = 0;
+
+                    var mountEntry = Global.DB2Mgr.GetMount(GetId());
+                    if (mountEntry != null)
                     {
-                        if (mountEntry.IsSelfMount())
+                        var mountDisplays = Global.DB2Mgr.GetMountDisplays(mountEntry.Id);
+                        if (mountDisplays != null)
                         {
-                            displayId = 73200; //DisplayId: HiddenMount 
-                        }
-                        else
-                        {
-                            List<MountXDisplayRecord> usableDisplays = mountDisplays.Where(mountDisplay =>
+                            if (mountEntry.IsSelfMount())
                             {
-                                Player playerTarget = target.ToPlayer();
-                                if (playerTarget)
+                                displayId = SharedConst.DisplayIdHiddenMount;
+                            }
+                            else
+                            {
+                                var usableDisplays = mountDisplays.Where(mountDisplay =>
                                 {
-                                    PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(mountDisplay.PlayerConditionID);
-                                    if (playerCondition != null)
-                                        return ConditionManager.IsPlayerMeetingCondition(playerTarget, playerCondition);
-                                }
+                                    Player playerTarget = target.ToPlayer();
+                                    if (playerTarget != null)
+                                    {
+                                        var playerCondition = CliDB.PlayerConditionStorage.LookupByKey(mountDisplay.PlayerConditionID);
+                                        if (playerCondition != null)
+                                            return ConditionManager.IsPlayerMeetingCondition(playerTarget, playerCondition);
+                                    }
 
-                                return true;
-                            }).ToList();
+                                    return true;
+                                }).ToList();
 
-                            if (!usableDisplays.Empty())
-                                displayId = usableDisplays.SelectRandom().CreatureDisplayInfoID;
+                                if (!usableDisplays.Empty())
+                                    displayId = usableDisplays.SelectRandom().CreatureDisplayInfoID;
+                            }
                         }
+                        // TODO: CREATE TABLE mount_vehicle (mountId, vehicleCreatureId) for future mounts that are vehicles (new mounts no longer have proper data in MiscValue)
+                        //if (MountVehicle const* mountVehicle = sObjectMgr->GetMountVehicle(mountEntry->Id))
+                        //    creatureEntry = mountVehicle->VehicleCreatureId;
                     }
-                    // TODO: CREATE TABLE mount_vehicle (mountId, vehicleCreatureId) for future mounts that are vehicles (new mounts no longer have proper data in MiscValue)
-                    //if (MountVehicle const* mountVehicle = sObjectMgr.GetMountVehicle(mountEntry.Id))
-                    //    creatureEntry = mountVehicle.VehicleCreatureId;
-                }
 
-                CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(creatureEntry);
-                if (creatureInfo != null)
-                {
-                    vehicleId = creatureInfo.VehicleId;
-
-                    if (displayId == 0)
+                    CreatureTemplate creatureInfo = Global.ObjectMgr.GetCreatureTemplate(creatureEntry);
+                    if (creatureInfo != null)
                     {
-                        CreatureModel model = ObjectManager.ChooseDisplayId(creatureInfo);
-                        Global.ObjectMgr.GetCreatureModelRandomGender(ref model, creatureInfo);
-                        displayId = model.CreatureDisplayID;
+                        vehicleId = creatureInfo.VehicleId;
+
+                        if (displayId == 0)
+                        {
+                            CreatureModel model = ObjectManager.ChooseDisplayId(creatureInfo);
+                            Global.ObjectMgr.GetCreatureModelRandomGender(ref model, creatureInfo);
+                            displayId = model.CreatureDisplayID;
+                        }
+
+                        //some spell has one aura of mount and one of vehicle
+                        foreach (SpellEffectInfo effect in GetSpellInfo().GetEffects())
+                            if (effect.IsEffect(SpellEffectName.Summon) && effect.MiscValue == GetMiscValue())
+                                displayId = 0;
                     }
 
-                    //some spell has one aura of mount and one of vehicle
-                    foreach (var spellEffectInfo in GetSpellInfo().GetEffects())
-                        if (spellEffectInfo.IsEffect(SpellEffectName.Summon) && spellEffectInfo.MiscValue == GetMiscValue())
-                            displayId = 0;
+                    target.Mount(displayId, vehicleId, creatureEntry);
                 }
-
-                target.Mount(displayId, vehicleId, creatureEntry);
 
                 // cast speed aura
-                if (mode.HasAnyFlag(AuraEffectHandleModes.Real))
+                if (mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask))
                 {
                     var mountCapability = CliDB.MountCapabilityStorage.LookupByKey(GetAmount());
                     if (mountCapability != null)
@@ -2128,14 +2128,17 @@ namespace Game.Spells
             }
             else
             {
-                target.Dismount();
+                if (mode.HasAnyFlag(AuraEffectHandleModes.SendForClientMask))
+                    target.Dismount();
+
                 //some mounts like Headless Horseman's Mount or broom stick are skill based spell
                 // need to remove ALL arura related to mounts, this will stop client crash with broom stick
                 // and never endless flying after using Headless Horseman's Mount
                 if (mode.HasAnyFlag(AuraEffectHandleModes.Real))
-                {
                     target.RemoveAurasByType(AuraType.Mounted);
 
+                if (mode.HasAnyFlag(AuraEffectHandleModes.ChangeAmountMask))
+                {
                     // remove speed aura
                     var mountCapability = CliDB.MountCapabilityStorage.LookupByKey(GetAmount());
                     if (mountCapability != null)
@@ -5759,6 +5762,15 @@ namespace Game.Spells
                 playerTarget.RemoveStoredAuraTeleportLocation(GetSpellInfo().Id);
         }
 
+        [AuraEffectHandler(AuraType.MountRestrictions)]
+        void HandleMountRestrictions(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
+        {
+            if (!mode.HasAnyFlag(AuraEffectHandleModes.Real))
+                return;
+
+            aurApp.GetTarget().UpdateMountCapability();
+        }
+        
         [AuraEffectHandler(AuraType.CosmeticMounted)]
         void HandleCosmeticMounted(AuraApplication aurApp, AuraEffectHandleModes mode, bool apply)
         {

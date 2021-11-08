@@ -1069,7 +1069,11 @@ namespace Game.Entities
                     LearnSkillRewardedSpells(id, newVal);
                     // if skill value is going up, update enchantments after setting the new value
                     if (newVal > currVal)
+                    {
                         UpdateSkillEnchantments(id, currVal, (ushort)newVal);
+                        if (id == (uint)SkillType.Riding)
+                            UpdateMountCapability();
+                    }
 
                     UpdateCriteria(CriteriaType.SkillRaised, id);
                     UpdateCriteria(CriteriaType.AchieveSkillStep, id);

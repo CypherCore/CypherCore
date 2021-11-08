@@ -245,6 +245,8 @@ namespace Framework.Constants
 
         public const int WorldTrigger = 12999;
 
+        public const uint DisplayIdHiddenMount = 73200;
+
         public static float[] baseMoveSpeed =
         {
             2.5f,                  // MOVE_WALK

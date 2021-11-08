@@ -742,7 +742,8 @@ namespace Game.Entities
                         if (!mountCapability.Flags.HasAnyFlag(MountCapabilityFlags.Ground))
                             continue;
                     }
-                    else if (!mountCapability.Flags.HasAnyFlag(MountCapabilityFlags.Underwater))
+                    // player is on water surface
+                    else if (!mountCapability.Flags.HasAnyFlag(MountCapabilityFlags.Float))
                         continue;
                 }
                 else if (isInWater)
@@ -783,7 +784,25 @@ namespace Game.Entities
             return null;
         }
 
-        public override void ProcessPositionDataChanged(PositionFullTerrainStatus data)
+        public void UpdateMountCapability()
+        {
+            var mounts = GetAuraEffectsByType(AuraType.Mounted);
+            foreach (AuraEffect aurEff in mounts)
+            {
+                aurEff.RecalculateAmount();
+                if (aurEff.GetAmount() == 0)
+                    aurEff.GetBase().Remove();
+                else
+                {
+                    var capability = CliDB.MountCapabilityStorage.LookupByKey(aurEff.GetAmount());
+                    if (capability != null) // aura may get removed by interrupt flag, reapply
+                        if (!HasAura(capability.ModSpellAuraID))
+                            CastSpell(this, capability.ModSpellAuraID, new CastSpellExtraArgs(aurEff));
+                }
+        }
+    }
+
+    public override void ProcessPositionDataChanged(PositionFullTerrainStatus data)
         {
             base.ProcessPositionDataChanged(data);
             ProcessTerrainStatusUpdate(data.LiquidStatus, data.LiquidInfo);
@@ -800,7 +819,7 @@ namespace Game.Entities
 
         public virtual void ProcessTerrainStatusUpdate(ZLiquidStatus status, Optional<LiquidData> liquidData)
         {
-            if (IsFlying() || !IsControlledByPlayer())
+            if (!IsControlledByPlayer())
                 return;
 
             SetInWater(status.HasAnyFlag(ZLiquidStatus.Swimming));
@@ -817,6 +836,9 @@ namespace Game.Entities
                 if (curLiquid != null && curLiquid.SpellID != 0 && (!player || !player.IsGameMaster()))
                     CastSpell(this, curLiquid.SpellID, true);
                 _lastLiquid = curLiquid;
+
+                // mount capability depends on liquid state change
+                UpdateMountCapability();
             }
         }
 

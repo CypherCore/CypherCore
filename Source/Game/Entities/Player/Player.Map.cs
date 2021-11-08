@@ -148,6 +148,8 @@ namespace Game.Entities
             PushQuests();
 
             UpdateCriteria(CriteriaType.EnterTopLevelArea, newArea);
+
+            UpdateMountCapability();
         }
 
         public void UpdateZone(uint newZone, uint newArea)
