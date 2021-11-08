@@ -20,6 +20,7 @@ using Game.DataStorage;
 using Game.Entities;
 using Game.Scripting;
 using System.Collections.Generic;
+using Game.AI;
 
 namespace Scripts.World.Areatriggers
 {
@@ -47,6 +48,9 @@ namespace Scripts.World.Areatriggers
 
         //Area 52
         public const uint A52Neuralyzer = 34400;
+
+        //Stormwind teleport
+        public const uint DustInTheStormwind = 312593;
     }
 
     struct QuestIds
@@ -95,6 +99,9 @@ namespace Scripts.World.Areatriggers
         //Frostgrips Hollow
         public const uint StormforgedMonitor = 29862;
         public const uint StormforgedEradictor = 29861;
+
+        //Stormwind Teleport
+        public const uint KillCreditTeleportStormwind = 160561;
     }
 
     struct GameObjectIds
@@ -404,6 +411,22 @@ namespace Scripts.World.Areatriggers
             }
 
             return true;
+        }
+    }
+
+    [Script]
+    class areatrigger_stormwind_teleport_unit : AreaTriggerAI
+    {
+        public areatrigger_stormwind_teleport_unit(AreaTrigger areatrigger) : base(areatrigger) { }
+
+        public override void OnUnitEnter(Unit unit)
+        {
+            Player player = unit.ToPlayer();
+            if (player == null)
+                return;
+
+            player.CastSpell(unit, SpellIds.DustInTheStormwind);
+            player.KilledMonsterCredit(CreatureIds.KillCreditTeleportStormwind);
         }
     }
 }
