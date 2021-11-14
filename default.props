@@ -2,11 +2,13 @@
 
   <PropertyGroup>
     <OutputPath>../../Build/$(Configuration)/$(Platform)</OutputPath>
+	<TargetFramework>net6.0</TargetFramework>
     <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
     <AppendTargetFrameworkToOutputPath>False</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>False</AppendRuntimeIdentifierToOutputPath>
     <Platforms>win-x64;linux-x64;mac-x64</Platforms>
     <RuntimeIdentifiers>win10-x64;linux-x64;osx-x64</RuntimeIdentifiers>
+	<LangVersion>latest</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Platform)' == 'win-x64'">

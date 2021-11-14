@@ -1,11 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-	<Platforms>x64</Platforms>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <LangVersion>9.0</LangVersion>
-  </PropertyGroup>
+<Import Project="..\..\default.props" />
+<PropertyGroup>
+  <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+</PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Framework\Framework.csproj" />

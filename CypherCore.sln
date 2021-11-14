@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29926.136
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BNetServer", "Source\BNetServer\BNetServer.csproj", "{EEBFCEE3-CFAC-4D2E-927F-8E24E07A4218}"
 EndProject
@@ -51,42 +51,42 @@ Global
 		{E5DF8709-16D8-4357-976A-DF54AD3DDD66}.Release|mac-x64.Build.0 = Release|mac-x64
 		{E5DF8709-16D8-4357-976A-DF54AD3DDD66}.Release|win-x64.ActiveCfg = Release|win-x64
 		{E5DF8709-16D8-4357-976A-DF54AD3DDD66}.Release|win-x64.Build.0 = Release|win-x64
-		{3B8C9AB8-2DC3-4655-BF67-AE2001D3B4F6}.Debug|linux-x64.ActiveCfg = Debug|x64
-		{3B8C9AB8-2DC3-4655-BF67-AE2001D3B4F6}.Debug|linux-x64.Build.0 = Debug|x64
-		{3B8C9AB8-2DC3-4655-BF67-AE2001D3B4F6}.Debug|mac-x64.ActiveCfg = Debug|x64
-		{3B8C9AB8-2DC3-4655-BF67-AE2001D3B4F6}.Debug|mac-x64.Build.0 = Debug|x64
-		{3B8C9AB8-2DC3-4655-BF67-AE2001D3B4F6}.Debug|win-x64.ActiveCfg = Debug|x64
-		{3B8C9AB8-2DC3-4655-BF67-AE2001D3B4F6}.Debug|win-x64.Build.0 = Debug|x64
-		{3B8C9AB8-2DC3-4655-BF67-AE2001D3B4F6}.Release|linux-x64.ActiveCfg = Release|x64
-		{3B8C9AB8-2DC3-4655-BF67-AE2001D3B4F6}.Release|linux-x64.Build.0 = Release|x64
-		{3B8C9AB8-2DC3-4655-BF67-AE2001D3B4F6}.Release|mac-x64.ActiveCfg = Release|x64
-		{3B8C9AB8-2DC3-4655-BF67-AE2001D3B4F6}.Release|mac-x64.Build.0 = Release|x64
-		{3B8C9AB8-2DC3-4655-BF67-AE2001D3B4F6}.Release|win-x64.ActiveCfg = Release|x64
-		{3B8C9AB8-2DC3-4655-BF67-AE2001D3B4F6}.Release|win-x64.Build.0 = Release|x64
+		{3B8C9AB8-2DC3-4655-BF67-AE2001D3B4F6}.Debug|linux-x64.ActiveCfg = Debug|linux-x64
+		{3B8C9AB8-2DC3-4655-BF67-AE2001D3B4F6}.Debug|linux-x64.Build.0 = Debug|linux-x64
+		{3B8C9AB8-2DC3-4655-BF67-AE2001D3B4F6}.Debug|mac-x64.ActiveCfg = Debug|mac-x64
+		{3B8C9AB8-2DC3-4655-BF67-AE2001D3B4F6}.Debug|mac-x64.Build.0 = Debug|mac-x64
+		{3B8C9AB8-2DC3-4655-BF67-AE2001D3B4F6}.Debug|win-x64.ActiveCfg = Debug|win-x64
+		{3B8C9AB8-2DC3-4655-BF67-AE2001D3B4F6}.Debug|win-x64.Build.0 = Debug|win-x64
+		{3B8C9AB8-2DC3-4655-BF67-AE2001D3B4F6}.Release|linux-x64.ActiveCfg = Release|linux-x64
+		{3B8C9AB8-2DC3-4655-BF67-AE2001D3B4F6}.Release|linux-x64.Build.0 = Release|linux-x64
+		{3B8C9AB8-2DC3-4655-BF67-AE2001D3B4F6}.Release|mac-x64.ActiveCfg = Release|mac-x64
+		{3B8C9AB8-2DC3-4655-BF67-AE2001D3B4F6}.Release|mac-x64.Build.0 = Release|mac-x64
+		{3B8C9AB8-2DC3-4655-BF67-AE2001D3B4F6}.Release|win-x64.ActiveCfg = Release|win-x64
+		{3B8C9AB8-2DC3-4655-BF67-AE2001D3B4F6}.Release|win-x64.Build.0 = Release|win-x64
 		{1899C17C-1FA4-4807-B90E-0336C5748C1A}.Debug|linux-x64.ActiveCfg = Debug|x64
 		{1899C17C-1FA4-4807-B90E-0336C5748C1A}.Debug|linux-x64.Build.0 = Debug|x64
-		{1899C17C-1FA4-4807-B90E-0336C5748C1A}.Debug|mac-x64.ActiveCfg = Debug|x64
-		{1899C17C-1FA4-4807-B90E-0336C5748C1A}.Debug|mac-x64.Build.0 = Debug|x64
-		{1899C17C-1FA4-4807-B90E-0336C5748C1A}.Debug|win-x64.ActiveCfg = Debug|x64
-		{1899C17C-1FA4-4807-B90E-0336C5748C1A}.Debug|win-x64.Build.0 = Debug|x64
-		{1899C17C-1FA4-4807-B90E-0336C5748C1A}.Release|linux-x64.ActiveCfg = Release|x64
-		{1899C17C-1FA4-4807-B90E-0336C5748C1A}.Release|linux-x64.Build.0 = Release|x64
-		{1899C17C-1FA4-4807-B90E-0336C5748C1A}.Release|mac-x64.ActiveCfg = Release|x64
-		{1899C17C-1FA4-4807-B90E-0336C5748C1A}.Release|mac-x64.Build.0 = Release|x64
-		{1899C17C-1FA4-4807-B90E-0336C5748C1A}.Release|win-x64.ActiveCfg = Release|x64
-		{1899C17C-1FA4-4807-B90E-0336C5748C1A}.Release|win-x64.Build.0 = Release|x64
-		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Debug|linux-x64.ActiveCfg = Debug|x64
-		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Debug|linux-x64.Build.0 = Debug|x64
-		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Debug|mac-x64.ActiveCfg = Debug|x64
-		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Debug|mac-x64.Build.0 = Debug|x64
-		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Debug|win-x64.ActiveCfg = Debug|x64
-		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Debug|win-x64.Build.0 = Debug|x64
-		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Release|linux-x64.ActiveCfg = Release|x64
-		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Release|linux-x64.Build.0 = Release|x64
-		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Release|mac-x64.ActiveCfg = Release|x64
-		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Release|mac-x64.Build.0 = Release|x64
-		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Release|win-x64.ActiveCfg = Release|x64
-		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Release|win-x64.Build.0 = Release|x64
+		{1899C17C-1FA4-4807-B90E-0336C5748C1A}.Debug|mac-x64.ActiveCfg = Debug|mac-x64
+		{1899C17C-1FA4-4807-B90E-0336C5748C1A}.Debug|mac-x64.Build.0 = Debug|mac-x64
+		{1899C17C-1FA4-4807-B90E-0336C5748C1A}.Debug|win-x64.ActiveCfg = Debug|win-x64
+		{1899C17C-1FA4-4807-B90E-0336C5748C1A}.Debug|win-x64.Build.0 = Debug|win-x64
+		{1899C17C-1FA4-4807-B90E-0336C5748C1A}.Release|linux-x64.ActiveCfg = Release|linux-x64
+		{1899C17C-1FA4-4807-B90E-0336C5748C1A}.Release|linux-x64.Build.0 = Release|linux-x64
+		{1899C17C-1FA4-4807-B90E-0336C5748C1A}.Release|mac-x64.ActiveCfg = Release|mac-x64
+		{1899C17C-1FA4-4807-B90E-0336C5748C1A}.Release|mac-x64.Build.0 = Release|mac-x64
+		{1899C17C-1FA4-4807-B90E-0336C5748C1A}.Release|win-x64.ActiveCfg = Release|win-x64
+		{1899C17C-1FA4-4807-B90E-0336C5748C1A}.Release|win-x64.Build.0 = Release|win-x64
+		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Debug|linux-x64.ActiveCfg = Debug|linux-x64
+		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Debug|linux-x64.Build.0 = Debug|linux-x64
+		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Debug|mac-x64.ActiveCfg = Debug|mac-x64
+		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Debug|mac-x64.Build.0 = Debug|mac-x64
+		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Debug|win-x64.ActiveCfg = Debug|win-x64
+		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Debug|win-x64.Build.0 = Debug|win-x64
+		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Release|linux-x64.ActiveCfg = Release|linux-x64
+		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Release|linux-x64.Build.0 = Release|linux-x64
+		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Release|mac-x64.ActiveCfg = Release|mac-x64
+		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Release|mac-x64.Build.0 = Release|mac-x64
+		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Release|win-x64.ActiveCfg = Release|win-x64
+		{2F7515AD-18E3-4ACA-A14B-1929F76299E7}.Release|win-x64.Build.0 = Release|win-x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

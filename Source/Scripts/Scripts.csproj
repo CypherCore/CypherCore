@@ -1,9 +1,5 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <TargetFramework>net5.0</TargetFramework>
-	<Platforms>x64</Platforms>
-	<LangVersion>9.0</LangVersion>
-  </PropertyGroup>
+<Import Project="..\..\default.props" />
 
   <ItemGroup>
     <ProjectReference Include="..\Game\Game.csproj" />
