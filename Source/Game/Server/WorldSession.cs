@@ -564,7 +564,7 @@ namespace Game
         public void SendTutorialsData()
         {
             TutorialFlags packet = new();
-            Array.Copy(tutorials, packet.TutorialData, (int)AccountDataTypes.Max);
+            Array.Copy(tutorials, packet.TutorialData, SharedConst.MaxAccountTutorialValues);
             SendPacket(packet);
         }
 

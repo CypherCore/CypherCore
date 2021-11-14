@@ -96,7 +96,7 @@ namespace Game.Combat
 
         public Unit GetCurrentVictim()
         {
-            if (_currentVictimRef != null || _currentVictimRef.ShouldBeOffline())
+            if (_currentVictimRef == null || _currentVictimRef.ShouldBeOffline())
                 UpdateVictim();
 
             if (_currentVictimRef != null && !_currentVictimRef.ShouldBeOffline())

@@ -334,7 +334,7 @@ namespace Game.Networking.Packets
                 _worldPacket.WriteUInt32(TutorialData[i]);
         }
 
-        public uint[] TutorialData = new uint[(int)Tutorials.Max];
+        public uint[] TutorialData = new uint[SharedConst.MaxAccountTutorialValues];
     }
 
     public class TutorialSetFlag : ClientPacket
