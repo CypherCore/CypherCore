@@ -1,16 +1,11 @@
-version: '{build}'
+version: 1.0.{build}
 pull_requests:
   do_not_increment_build_number: true
 
-image: Visual Studio 2019
+image: Visual Studio 2022
 
-clone_script:
-- cmd: git clone -q --branch=master --recursive https://github.com/CypherCore/CypherCore.git C:\projects\CypherCore-master
+before_build:
+- cmd: dotnet restore
 
-build_script:
-- cmd: >-
-    cd "C:/projects/CypherCore-master"
-
-    dotnet restore
-
-    dotnet build /p:Platform=win-x64
+build:
+  verbosity: minimal
