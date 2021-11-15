@@ -196,7 +196,7 @@ namespace Scripts.Spells.Warrior
                 {
                     float range = GetSpellInfo().GetMaxRange(true, GetCaster()) * 1.5f;
 
-                    PathGenerator generatedPath = new PathGenerator(GetCaster());
+                    PathGenerator generatedPath = new(GetCaster());
                     generatedPath.SetPathLengthLimit(range);
 
                     bool result = generatedPath.CalculatePath(dest.GetPositionX(), dest.GetPositionY(), dest.GetPositionZ(), false, true);

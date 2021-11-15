@@ -139,8 +139,8 @@ namespace Scripts.World.Areatriggers
         public const uint TypeWaypoint = 0;
         public const uint DataStart = 0;
 
-        public static Position StormforgedMonitorPosition = new Position(6963.95f, 45.65f, 818.71f, 4.948f);
-        public static Position StormforgedEradictorPosition = new Position(6983.18f, 7.15f, 806.33f, 2.228f);
+        public static Position StormforgedMonitorPosition = new(6963.95f, 45.65f, 818.71f, 4.948f);
+        public static Position StormforgedEradictorPosition = new(6983.18f, 7.15f, 806.33f, 2.228f);
     }
 
     [Script]

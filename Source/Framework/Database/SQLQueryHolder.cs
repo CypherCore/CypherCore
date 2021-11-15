@@ -22,8 +22,8 @@ namespace Framework.Database
 {
     public class SQLQueryHolder<T>
     {
-        public Dictionary<T, PreparedStatement> m_queries = new Dictionary<T, PreparedStatement>();
-        Dictionary<T, SQLResult> _results = new Dictionary<T, SQLResult>();
+        public Dictionary<T, PreparedStatement> m_queries = new();
+        Dictionary<T, SQLResult> _results = new();
 
         public void SetQuery(T index, string sql, params object[] args)
         {

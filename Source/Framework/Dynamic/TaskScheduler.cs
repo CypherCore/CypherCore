@@ -361,7 +361,7 @@ namespace Framework.Dynamic
 
                 // Perfect forward the context to the handler
                 // Use weak references to catch destruction before callbacks.
-                TaskContext context = new TaskContext(_task_holder.Pop(), this);
+                TaskContext context = new(_task_holder.Pop(), this);
 
                 // Invoke the context
                 context.Invoke();
@@ -479,7 +479,7 @@ namespace Framework.Dynamic
 
         public void ModifyIf(Func<Task, bool> filter)
         {
-            List<Task> cache = new List<Task>();
+            List<Task> cache = new();
             foreach (var task in container.Where(filter))
             {
                 if (filter(task))
@@ -498,7 +498,7 @@ namespace Framework.Dynamic
             return container.Empty();
         }
 
-        SortedSet<Task> container = new SortedSet<Task>();
+        SortedSet<Task> container = new();
     }
 
     public class TaskContext

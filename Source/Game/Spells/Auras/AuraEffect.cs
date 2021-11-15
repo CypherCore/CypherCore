@@ -256,7 +256,7 @@ namespace Game.Spells
                 case AuraType.AddPctModifier:
                     if (m_spellmod == null)
                     {
-                        SpellModifierByClassMask spellmod = new SpellModifierByClassMask(GetBase());
+                        SpellModifierByClassMask spellmod = new(GetBase());
                         spellmod.op = (SpellModOp)GetMiscValue();
 
                         spellmod.type = GetAuraType() == AuraType.AddPctModifier ? SpellModType.Pct : SpellModType.Flat;
@@ -269,7 +269,7 @@ namespace Game.Spells
                 case AuraType.AddFlatModifierBySpellLabel:
                     if (m_spellmod == null)
                     {
-                        SpellFlatModifierByLabel spellmod = new SpellFlatModifierByLabel(GetBase());
+                        SpellFlatModifierByLabel spellmod = new(GetBase());
                         spellmod.op = (SpellModOp)GetMiscValue();
 
                         spellmod.type = SpellModType.LabelFlat;
@@ -283,7 +283,7 @@ namespace Game.Spells
                 case AuraType.AddPctModifierBySpellLabel:
                     if (m_spellmod == null)
                     {
-                        SpellPctModifierByLabel spellmod = new SpellPctModifierByLabel(GetBase());
+                        SpellPctModifierByLabel spellmod = new(GetBase());
                         spellmod.op = (SpellModOp)GetMiscValue();
 
                         spellmod.type = SpellModType.LabelPct;

@@ -282,7 +282,7 @@ namespace Framework.Dynamic
         {
             if (group == 0 || group > 8 || Empty())
                 return;
-            MultiMap<uint, uint> delayed = new MultiMap<uint, uint>();
+            MultiMap<uint, uint> delayed = new();
 
             foreach (var pair in _eventMap.KeyValueList)
             {
@@ -411,6 +411,6 @@ namespace Framework.Dynamic
         /// - Bit 24 - 31: Phase
         /// - Pattern: 0xPPGGEEEE
         /// </summary>
-        SortedMultiMap<uint, uint> _eventMap = new SortedMultiMap<uint, uint>();
+        SortedMultiMap<uint, uint> _eventMap = new();
     }
 }

@@ -981,7 +981,7 @@ namespace Scripts.World.GameObjects
             me.UseDoorOrButton();
             if (player.GetQuestStatus(QuestIds.MissingFriends) == QuestStatus.Incomplete)
             {
-                List<Creature> childrenList = new List<Creature>();
+                List<Creature> childrenList = new();
                 me.GetCreatureListWithEntryInGrid(childrenList, CreatureIds.CaptiveChild, SharedConst.InteractionDistance);
                 foreach (Creature creature in childrenList)
                 {

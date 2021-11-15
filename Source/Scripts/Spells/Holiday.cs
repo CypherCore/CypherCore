@@ -189,8 +189,8 @@ namespace Scripts.Spells.Holiday
             bool foundSomeone = false;
             // For nearby players, check if they have the same aura. If so, cast Romantic Picnic (45123)
             // required by achievement and "hearts" visual
-            List<Unit> playerList = new List<Unit>();
-            AnyPlayerInObjectRangeCheck checker = new AnyPlayerInObjectRangeCheck(target, SharedConst.InteractionDistance * 2);
+            List<Unit> playerList = new();
+            AnyPlayerInObjectRangeCheck checker = new(target, SharedConst.InteractionDistance * 2);
             var searcher = new PlayerListSearcher(target, playerList, checker);
             Cell.VisitWorldObjects(target, searcher, SharedConst.InteractionDistance * 2);
             foreach (Player player in playerList)

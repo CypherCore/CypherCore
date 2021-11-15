@@ -91,7 +91,7 @@ namespace Framework.Database
             bool redundancyChecks = ConfigMgr.GetDefaultValue("Updates.Redundancy", true);
             bool archivedRedundancy = ConfigMgr.GetDefaultValue("Updates.Redundancy", true);
 
-            UpdateResult result = new UpdateResult();
+            UpdateResult result = new();
 
             // Count updates
             foreach (var entry in appliedFiles)
@@ -193,7 +193,7 @@ namespace Framework.Database
                 }
 
                 uint speed = 0;
-                AppliedFileEntry file = new AppliedFileEntry(availableQuery.GetFileName(), hash, availableQuery.state, 0);
+                AppliedFileEntry file = new(availableQuery.GetFileName(), hash, availableQuery.state, 0);
 
                 switch (mode)
                 {
@@ -320,7 +320,7 @@ namespace Framework.Database
 
         List<FileEntry> GetFileList()
         {
-            List<FileEntry> fileList = new List<FileEntry>();
+            List<FileEntry> fileList = new();
 
             SQLResult result = _database.Query("SELECT `path`, `state` FROM `updates_include`");
             if (result.IsEmpty())
@@ -350,7 +350,7 @@ namespace Framework.Database
 
         Dictionary<string, AppliedFileEntry> ReceiveAppliedFiles()
         {
-            Dictionary<string, AppliedFileEntry> map = new Dictionary<string, AppliedFileEntry>();
+            Dictionary<string, AppliedFileEntry> map = new();
 
             SQLResult result = _database.Query("SELECT `name`, `hash`, `state`, UNIX_TIMESTAMP(`timestamp`) FROM `updates` ORDER BY `name` ASC");
             if (result.IsEmpty())
@@ -358,7 +358,7 @@ namespace Framework.Database
 
             do
             {
-                AppliedFileEntry entry = new AppliedFileEntry(result.Read<string>(0), result.Read<string>(1), result.Read<string>(2).ToEnum<State>(), result.Read<ulong>(3));
+                AppliedFileEntry entry = new(result.Read<string>(0), result.Read<string>(1), result.Read<string>(2).ToEnum<State>(), result.Read<ulong>(3));
                 map.Add(entry.Name, entry);
             }
             while (result.NextRow());
@@ -368,7 +368,7 @@ namespace Framework.Database
 
         IEnumerable<FileEntry> GetFilesFromDirectory(string directory, State state)
         {
-            Queue<string> queue = new Queue<string>();
+            Queue<string> queue = new();
             queue.Enqueue(directory);
             while (queue.Count > 0)
             {
@@ -395,7 +395,7 @@ namespace Framework.Database
 
         string CalculateHash(string fileName)
         {
-            using (SHA1 sha1 = new SHA1Managed())
+            using (SHA1 sha1 = SHA1.Create())
             {
                 string text = File.ReadAllText(fileName).Replace("\r", "");
                 return sha1.ComputeHash(Encoding.UTF8.GetBytes(text)).ToHexString();

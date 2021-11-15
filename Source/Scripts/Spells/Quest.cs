@@ -1295,9 +1295,9 @@ namespace Scripts.Spells.Quest
         {
             Unit caster = GetCaster();
             // Check for player that is in 65 y range
-            List<Unit> playerList = new List<Unit>();
-            AnyPlayerInObjectRangeCheck checker = new AnyPlayerInObjectRangeCheck(caster, 65.0f);
-            PlayerListSearcher searcher = new PlayerListSearcher(caster, playerList, checker);
+            List<Unit> playerList = new();
+            AnyPlayerInObjectRangeCheck checker = new(caster, 65.0f);
+            PlayerListSearcher searcher = new(caster, playerList, checker);
             Cell.VisitWorldObjects(caster, searcher, 65.0f);
             foreach (Player player in playerList)
             {
@@ -1366,7 +1366,7 @@ namespace Scripts.Spells.Quest
         void SetDest(ref SpellDestination dest)
         {
             // Adjust effect summon position
-            Position offset = new Position(0.0f, 0.0f, 20.0f, 0.0f);
+            Position offset = new(0.0f, 0.0f, 20.0f, 0.0f);
             dest.RelocateOffset(offset);
         }
 
@@ -1426,7 +1426,7 @@ namespace Scripts.Spells.Quest
         void SetDest(ref SpellDestination dest)
         {
             // Adjust effect summon position
-            Position offset = new Position(0.0f, 0.0f, 20.0f, 0.0f);
+            Position offset = new(0.0f, 0.0f, 20.0f, 0.0f);
             dest.RelocateOffset(offset);
         }
 
@@ -1443,7 +1443,7 @@ namespace Scripts.Spells.Quest
         void SetDest(ref SpellDestination dest)
         {
             // Adjust effect summon position
-            Position offset = new Position(0.0f, 0.0f, 2.5f, 0.0f);
+            Position offset = new(0.0f, 0.0f, 2.5f, 0.0f);
             dest.RelocateOffset(offset);
         }
 

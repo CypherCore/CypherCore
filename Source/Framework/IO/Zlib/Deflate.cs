@@ -217,9 +217,9 @@ namespace Framework.IO
 			public ct_data[] dyn_dtree=new ct_data[2*D_CODES+1];	// distance tree
 			public ct_data[] bl_tree=new ct_data[2*BL_CODES+1];		// Huffman tree for bit lengths
 
-			public tree_desc l_desc=new tree_desc();	// desc. for literal tree
-			public tree_desc d_desc=new tree_desc();	// desc. for distance tree
-			public tree_desc bl_desc=new tree_desc();	// desc. for bit length tree
+			public tree_desc l_desc=new();	// desc. for literal tree
+			public tree_desc d_desc=new();	// desc. for distance tree
+			public tree_desc bl_desc=new();	// desc. for bit length tree
 
 			// number of codes at each bit length for an optimal tree
 			public ushort[] bl_count=new ushort[MAX_BITS+1];

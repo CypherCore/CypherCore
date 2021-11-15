@@ -83,7 +83,7 @@ namespace Framework.Database
         }
 
         Task<SQLResult> _result;
-        Queue<QueryCallbackData> _callbacks = new Queue<QueryCallbackData>();
+        Queue<QueryCallbackData> _callbacks = new();
     }
 
     struct QueryCallbackData

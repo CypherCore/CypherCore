@@ -181,7 +181,7 @@ namespace System.Collections.Generic
         {
             get
             {
-                List<TValue> retVal = new List<TValue>();
+                List<TValue> retVal = new();
                 foreach (var item in _interalStorage)
                 {
                     retVal.AddRange(item.Value);
@@ -194,7 +194,7 @@ namespace System.Collections.Generic
         {
             get
             {
-                List<KeyValuePair<TKey, TValue>> retVal = new List<KeyValuePair<TKey, TValue>>();
+                List<KeyValuePair<TKey, TValue>> retVal = new();
                 foreach (var pair in _interalStorage)
                 {
                     foreach (var value in pair.Value)
@@ -259,7 +259,7 @@ namespace System.Collections.Generic
             return new MultiMapEnumerator<TKey, TValue>(this);
         }
 
-        private Dictionary<TKey, List<TValue>> _interalStorage = new Dictionary<TKey, List<TValue>>();
+        private Dictionary<TKey, List<TValue>> _interalStorage = new();
     }
 
     public sealed class SortedMultiMap<TKey, TValue> : IMultiMap<TKey, TValue>, IDictionary<TKey, TValue>
@@ -424,7 +424,7 @@ namespace System.Collections.Generic
         {
             get
             {
-                List<TValue> retVal = new List<TValue>();
+                List<TValue> retVal = new();
                 foreach (var item in _interalStorage)
                 {
                     retVal.AddRange(item.Value);
@@ -437,7 +437,7 @@ namespace System.Collections.Generic
         {
             get
             {
-                List<KeyValuePair<TKey, TValue>> retVal = new List<KeyValuePair<TKey, TValue>>();
+                List<KeyValuePair<TKey, TValue>> retVal = new();
                 foreach (var pair in _interalStorage)
                 {
                     foreach (var value in pair.Value)
@@ -502,6 +502,6 @@ namespace System.Collections.Generic
             return new SortedMultiMapEnumerator<TKey, TValue>(this);
         }
 
-        private SortedDictionary<TKey, List<TValue>> _interalStorage = new SortedDictionary<TKey, List<TValue>>();
+        private SortedDictionary<TKey, List<TValue>> _interalStorage = new();
     }
 }

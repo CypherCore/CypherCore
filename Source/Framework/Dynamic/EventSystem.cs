@@ -120,7 +120,7 @@ namespace Framework.Dynamic
         public SortedMultiMap<ulong, BasicEvent> GetEvents() { return m_events; }
 
         ulong m_time;
-        SortedMultiMap<ulong, BasicEvent> m_events = new SortedMultiMap<ulong, BasicEvent>();
+        SortedMultiMap<ulong, BasicEvent> m_events = new();
     }
 
     public class BasicEvent

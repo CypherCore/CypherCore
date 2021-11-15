@@ -263,7 +263,7 @@ namespace Framework.IO
 
         bool Match(string pattern, out Match m)
         {
-            Regex r = new Regex(pattern);
+            Regex r = new(pattern);
             m = r.Match(activestring);
             return m.Success;
         }

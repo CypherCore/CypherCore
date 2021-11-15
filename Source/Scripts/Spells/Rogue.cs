@@ -109,7 +109,7 @@ namespace Scripts.Spells.Rogue
             _targets.Add(target.GetGUID());
         }
 
-        List<ObjectGuid> _targets = new List<ObjectGuid>();
+        List<ObjectGuid> _targets = new();
     }
 
     [Script] // 2098 - Eviscerate

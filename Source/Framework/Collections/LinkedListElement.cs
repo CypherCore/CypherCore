@@ -66,8 +66,8 @@ namespace Framework.Collections
 
     public class LinkedListHead
     {
-        LinkedListElement _iFirst = new LinkedListElement();
-        LinkedListElement _iLast = new LinkedListElement();
+        LinkedListElement _iFirst = new();
+        LinkedListElement _iLast = new();
         uint _iSize;
 
         public LinkedListHead()

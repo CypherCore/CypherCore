@@ -35,7 +35,7 @@ namespace Framework.Database
             bool updatesEnabled = database.IsAutoUpdateEnabled(_updateFlags);
             _open.Add(() =>
             {
-                MySqlConnectionInfo connectionObject = new MySqlConnectionInfo
+                MySqlConnectionInfo connectionObject = new()
                 {
                     Host = ConfigMgr.GetDefaultValue(baseDBName + "DatabaseInfo.Host", ""),
                     Port = ConfigMgr.GetDefaultValue(baseDBName + "DatabaseInfo.Port", ""),
@@ -161,10 +161,10 @@ namespace Framework.Database
 
         bool _autoSetup;
         DatabaseTypeFlags _updateFlags;
-        List<Func<bool>> _open = new List<Func<bool>>();
-        List<Func<bool>> _populate = new List<Func<bool>>();
-        List<Func<bool>> _update = new List<Func<bool>>();
-        List<Func<bool>> _prepare = new List<Func<bool>>();
+        List<Func<bool>> _open = new();
+        List<Func<bool>> _populate = new();
+        List<Func<bool>> _update = new();
+        List<Func<bool>> _prepare = new();
     }
 
     public enum DatabaseTypeFlags

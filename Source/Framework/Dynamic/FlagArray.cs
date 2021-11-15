@@ -75,21 +75,21 @@ namespace Framework.Dynamic
 
         public static FlagArray128 operator &(FlagArray128 left, FlagArray128 right)
         {
-            FlagArray128 fl = new FlagArray128();
+            FlagArray128 fl = new();
             for (var i = 0; i < left._values.Length; ++i)
                 fl[i] = left._values[i] & right._values[i];
             return fl;
         }
         public static FlagArray128 operator |(FlagArray128 left, FlagArray128 right)
         {
-            FlagArray128 fl = new FlagArray128();
+            FlagArray128 fl = new();
             for (var i = 0; i < left._values.Length; ++i)
                 fl[i] = left._values[i] | right._values[i];
             return fl;
         }
         public static FlagArray128 operator ^(FlagArray128 left, FlagArray128 right)
         {
-            FlagArray128 fl = new FlagArray128();
+            FlagArray128 fl = new();
             for (var i = 0; i < left._values.Length; ++i)
                 fl[i] = left._values[i] ^ right._values[i];
             return fl;

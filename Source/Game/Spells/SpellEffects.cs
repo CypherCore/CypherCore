@@ -694,7 +694,7 @@ namespace Game.Spells
             }
 
             // Init dest coordinates
-            WorldLocation targetDest = new WorldLocation(destTarget);
+            WorldLocation targetDest = new(destTarget);
             if (targetDest.GetMapId() == 0xFFFFFFFF)
                 targetDest.SetMapId(unitTarget.GetMapId());
 

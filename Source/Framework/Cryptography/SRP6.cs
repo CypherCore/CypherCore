@@ -30,7 +30,7 @@ namespace Framework.Cryptography
 
         static SRP6()
         {
-            _sha1 = new SHA1Managed();
+            _sha1 = SHA1.Create();
             _g = new BigInteger(7);
             _N = new BigInteger(new byte[]
             {

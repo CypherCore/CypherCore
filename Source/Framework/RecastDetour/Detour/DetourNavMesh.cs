@@ -354,7 +354,7 @@ public static partial class Detour
             if (header.version != DT_NAVMESH_VERSION)
                 return DT_FAILURE | DT_WRONG_VERSION;
 
-            dtNavMeshParams navMeshParams = new dtNavMeshParams();
+            dtNavMeshParams navMeshParams = new();
             dtVcopy(navMeshParams.orig, header.bmin);
             navMeshParams.tileWidth = header.bmax[0] - header.bmin[0];
             navMeshParams.tileHeight = header.bmax[2] - header.bmin[2];

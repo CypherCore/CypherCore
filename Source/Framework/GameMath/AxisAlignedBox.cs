@@ -251,7 +251,7 @@ namespace Framework.GameMath
         public Vector3 corner(int index)
         {
             // default constructor inits all components to 0
-            Vector3 v = new Vector3();
+            Vector3 v = new();
 
             switch (index)
             {
@@ -312,7 +312,7 @@ namespace Framework.GameMath
 
         public static AxisAlignedBox operator +(AxisAlignedBox box, Vector3 v)
         {
-            AxisAlignedBox outt = new AxisAlignedBox();
+            AxisAlignedBox outt = new();
             outt.Lo = box.Lo + v;
             outt.Hi = box.Hi + v;
             return outt;

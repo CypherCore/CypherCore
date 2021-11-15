@@ -88,23 +88,23 @@ namespace Framework.GameMath
         /// <summary>
         /// 4-Dimentional single-precision floating point zero vector.
         /// </summary>
-        public static readonly Vector3 Zero = new Vector3(0.0f, 0.0f, 0.0f);
+        public static readonly Vector3 Zero = new(0.0f, 0.0f, 0.0f);
 
-        public static readonly Vector3 One = new Vector3(1.0f, 1.0f, 1.0f);
+        public static readonly Vector3 One = new(1.0f, 1.0f, 1.0f);
 
-        public static readonly Vector3 Inf = new Vector3(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity);
+        public static readonly Vector3 Inf = new(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity);
         /// <summary>
         /// 4-Dimentional single-precision floating point X-Axis vector.
         /// </summary>
-        public static readonly Vector3 XAxis = new Vector3(1.0f, 0.0f, 0.0f);
+        public static readonly Vector3 XAxis = new(1.0f, 0.0f, 0.0f);
         /// <summary>
         /// 4-Dimentional single-precision floating point Y-Axis vector.
         /// </summary>
-        public static readonly Vector3 YAxis = new Vector3(0.0f, 1.0f, 0.0f);
+        public static readonly Vector3 YAxis = new(0.0f, 1.0f, 0.0f);
         /// <summary>
         /// 4-Dimentional single-precision floating point Y-Axis vector.
         /// </summary>
-        public static readonly Vector3 ZAxis = new Vector3(0.0f, 0.0f, 1.0f);
+        public static readonly Vector3 ZAxis = new(0.0f, 0.0f, 1.0f);
         #endregion
 
         #region Public properties
@@ -152,7 +152,7 @@ namespace Framework.GameMath
         /// <returns>A <see cref="Vector3"/> that represents the vector specified by the <paramref name="value"/> parameter.</returns>
         public static Vector3 Parse(string value)
         {
-            Regex r = new Regex(@"\((?<x>.*),(?<y>.*),(?<z>.*)\)", RegexOptions.Singleline);
+            Regex r = new(@"\((?<x>.*),(?<y>.*),(?<z>.*)\)", RegexOptions.Singleline);
             Match m = r.Match(value);
             if (m.Success)
             {
@@ -179,7 +179,7 @@ namespace Framework.GameMath
         /// <returns><see langword="true"/> if value was converted successfully; otherwise, <see langword="false"/>.</returns>
         public static bool TryParse(string value, out Vector3 result)
         {
-            Regex r = new Regex(@"\((?<x>.*),(?<y>.*),(?<z>.*)\)", RegexOptions.Singleline);
+            Regex r = new(@"\((?<x>.*),(?<y>.*),(?<z>.*)\)", RegexOptions.Singleline);
             Match m = r.Match(value);
             if (m.Success)
             {
@@ -901,7 +901,7 @@ namespace Framework.GameMath
         /// <returns>A <see cref="System.Collections.Generic.List{T}"/> of single-precision floating point values.</returns>
         public static explicit operator List<float>(Vector3 vector)
         {
-            List<float> list = new List<float>(3);
+            List<float> list = new(3);
             list.Add(vector.X);
             list.Add(vector.Y);
             list.Add(vector.Z);
@@ -915,7 +915,7 @@ namespace Framework.GameMath
         /// <returns>A <see cref="System.Collections.Generic.LinkedList{T}"/> of single-precision floating point values.</returns>
         public static explicit operator LinkedList<float>(Vector3 vector)
         {
-            LinkedList<float> list = new LinkedList<float>();
+            LinkedList<float> list = new();
             list.AddLast(vector.X);
             list.AddLast(vector.Y);
             list.AddLast(vector.Z);
@@ -1089,7 +1089,7 @@ namespace Framework.GameMath
         public override System.ComponentModel.TypeConverter.StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
         {
             StandardValuesCollection svc =
-                new StandardValuesCollection(new object[4] { Vector3.Zero, Vector3.XAxis, Vector3.YAxis, Vector3.ZAxis });
+                new(new object[4] { Vector3.Zero, Vector3.XAxis, Vector3.YAxis, Vector3.ZAxis });
 
             return svc;
         }

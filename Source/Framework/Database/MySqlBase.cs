@@ -48,8 +48,8 @@ namespace Framework.Database
 
     public abstract class MySqlBase<T>
     {
-        Dictionary<T, string> _preparedQueries = new Dictionary<T, string>();
-        ProducerConsumerQueue<ISqlOperation> _queue = new ProducerConsumerQueue<ISqlOperation>();
+        Dictionary<T, string> _preparedQueries = new();
+        ProducerConsumerQueue<ISqlOperation> _queue = new();
 
         MySqlConnectionInfo _connectionInfo;
         DatabaseUpdater<T> _updater;
@@ -115,7 +115,7 @@ namespace Framework.Database
 
         public void Execute(PreparedStatement stmt)
         {
-            PreparedStatementTask task = new PreparedStatementTask(stmt);
+            PreparedStatementTask task = new(stmt);
             _queue.Push(task);
         }
 
@@ -155,7 +155,7 @@ namespace Framework.Database
 
         public QueryCallback AsyncQuery(PreparedStatement stmt)
         {
-            PreparedStatementTask task = new PreparedStatementTask(stmt, true);
+            PreparedStatementTask task = new(stmt, true);
             // Store future result before enqueueing - task might get already processed and deleted before returning from this method
             Task<SQLResult> result = task.GetFuture();
             _queue.Push(task);
@@ -164,7 +164,7 @@ namespace Framework.Database
 
         public Task<SQLQueryHolder<R>> DelayQueryHolder<R>(SQLQueryHolder<R> holder)
         {
-            SQLQueryHolderTask<R> task = new SQLQueryHolderTask<R>(holder);
+            SQLQueryHolderTask<R> task = new(holder);
             // Store future result before enqueueing - task might get already processed and deleted before returning from this method
             Task<SQLQueryHolder<R>> result = task.GetFuture();
             _queue.Push(task);
@@ -178,7 +178,7 @@ namespace Framework.Database
 
         public void PrepareStatement(T statement, string sql)
         {
-            StringBuilder sb = new StringBuilder();
+            StringBuilder sb = new();
             int index = 0;
             for (var i = 0; i < sql.Length; i++)
             {
@@ -257,7 +257,7 @@ namespace Framework.Database
 
         public TransactionCallback AsyncCommitTransaction(SQLTransaction transaction)
         {
-            TransactionWithResultTask task = new TransactionWithResultTask(transaction);
+            TransactionWithResultTask task = new(transaction);
             Task<bool> result = task.GetFuture();
             _queue.Push(task);
             return new TransactionCallback(result);
@@ -304,7 +304,7 @@ namespace Framework.Database
             if (ex.InnerException is MySqlException)
                 code = (MySqlErrorCode)((MySqlException)ex.InnerException).Number;
 
-            StringBuilder stringBuilder = new StringBuilder($"SqlException: MySqlErrorCode: {code} Message: {ex.Message} SqlQuery: {query} ");
+            StringBuilder stringBuilder = new($"SqlException: MySqlErrorCode: {code} Message: {ex.Message} SqlQuery: {query} ");
             if (parameters != null)
             {
                 stringBuilder.Append("Parameters: ");

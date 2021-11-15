@@ -23,7 +23,7 @@ namespace Framework.Database
     public class PreparedStatement
     {
         public string CommandText;
-        public Dictionary<int, object> Parameters = new Dictionary<int, object>();
+        public Dictionary<int, object> Parameters = new();
 
         public PreparedStatement(string commandText)
         {

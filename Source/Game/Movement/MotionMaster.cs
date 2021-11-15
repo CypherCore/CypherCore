@@ -625,14 +625,14 @@ namespace Game.Movement
 
             if (_owner.IsTypeId(TypeId.Player))
             {
-                PointMovementGenerator<Player> movement = new PointMovementGenerator<Player>(id, x, y, z, generatePath, speed, null, target, spellEffectExtraData);
+                PointMovementGenerator<Player> movement = new(id, x, y, z, generatePath, speed, null, target, spellEffectExtraData);
                 movement.Priority = MovementGeneratorPriority.Highest;
                 movement.BaseUnitState = UnitState.Charging;
                 Add(movement);
             }
             else
             {
-                PointMovementGenerator<Creature> movement = new PointMovementGenerator<Creature>(id, x, y, z, generatePath, speed, null, target, spellEffectExtraData);
+                PointMovementGenerator<Creature> movement = new(id, x, y, z, generatePath, speed, null, target, spellEffectExtraData);
                 movement.Priority = MovementGeneratorPriority.Highest;
                 movement.BaseUnitState = UnitState.Charging;
                 Add(movement);
@@ -680,7 +680,7 @@ namespace Game.Movement
             if (spellEffectExtraData != null)
                 init.SetSpellEffectExtraData(spellEffectExtraData);
 
-            GenericMovementGenerator movement = new GenericMovementGenerator(init, MovementGeneratorType.Effect, 0);
+            GenericMovementGenerator movement = new(init, MovementGeneratorType.Effect, 0);
             movement.Priority = MovementGeneratorPriority.Highest;
             Add(movement);
         }
@@ -730,7 +730,7 @@ namespace Game.Movement
                 arrivalSpellTargetGuid = arrivalCast.Target;
             }
 
-            GenericMovementGenerator movement = new GenericMovementGenerator(init, MovementGeneratorType.Effect, id, arrivalSpellId, arrivalSpellTargetGuid);
+            GenericMovementGenerator movement = new(init, MovementGeneratorType.Effect, id, arrivalSpellId, arrivalSpellTargetGuid);
             movement.Priority = MovementGeneratorPriority.Highest;
             movement.BaseUnitState = UnitState.Jumping;
             Add(movement);
@@ -849,7 +849,7 @@ namespace Game.Movement
             init.MoveTo(_owner.GetPositionX(), _owner.GetPositionY(), tz + _owner.GetHoverOffset(), false);
             init.SetFall();
 
-            GenericMovementGenerator movement = new GenericMovementGenerator(init, MovementGeneratorType.Effect, id);
+            GenericMovementGenerator movement = new(init, MovementGeneratorType.Effect, id);
             movement.Priority = MovementGeneratorPriority.Highest;
             Add(movement);
         }
@@ -943,7 +943,7 @@ namespace Game.Movement
                 return;
             }
 
-            GenericMovementGenerator movement = new GenericMovementGenerator(init, type, id);
+            GenericMovementGenerator movement = new(init, type, id);
             movement.Priority = priority;
             Add(movement);
         }

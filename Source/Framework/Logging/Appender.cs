@@ -125,7 +125,7 @@ class FileAppender : Appender, IDisposable
     string _logDir;
     bool _dynamicName;
     FileStream _logStream;
-    object locker = new object();
+    object locker = new();
 }
 
 class DBAppender : Appender
@@ -177,7 +177,7 @@ abstract class Appender
         if (_level == LogLevel.Disabled || (_level != LogLevel.Fatal && _level > message.level))
             return;
 
-        StringBuilder ss = new StringBuilder();
+        StringBuilder ss = new();
 
         if (_flags.HasAnyFlag(AppenderFlags.PrefixTimestamp))
             ss.AppendFormat("{0:MM/dd/yyyy HH:mm:ss} ", message.mtime);

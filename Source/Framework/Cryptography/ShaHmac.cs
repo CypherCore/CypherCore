@@ -26,7 +26,7 @@ namespace Framework.Cryptography
     {
         public Sha256()
         {
-            sha = new SHA256Managed();
+            sha = SHA256.Create();
             sha.Initialize();
         }
 
@@ -69,7 +69,7 @@ namespace Framework.Cryptography
 
     public class HmacHash : HMACSHA1
     {
-        public HmacHash(byte[] key) : base(key, true)
+        public HmacHash(byte[] key) : base(key)
         {
             Initialize();
         }

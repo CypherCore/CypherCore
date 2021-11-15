@@ -95,11 +95,11 @@ namespace Framework.GameMath
         /// <summary>
         /// 4-dimentional single-precision floating point zero matrix.
         /// </summary>
-        public static readonly Matrix2 Zero = new Matrix2(0, 0, 0, 0);
+        public static readonly Matrix2 Zero = new(0, 0, 0, 0);
         /// <summary>
         /// 4-dimentional single-precision floating point identity matrix.
         /// </summary>
-        public static readonly Matrix2 Identity = new Matrix2(1, 0, 0, 1);
+        public static readonly Matrix2 Identity = new(1, 0, 0, 1);
         #endregion
 
         #region Public Properties
@@ -186,7 +186,7 @@ namespace Framework.GameMath
         /// </remarks>
         public static Matrix2 Parse(string value)
         {
-            Regex r = new Regex(regularExp, RegexOptions.Singleline | RegexOptions.IgnorePatternWhitespace);
+            Regex r = new(regularExp, RegexOptions.Singleline | RegexOptions.IgnorePatternWhitespace);
             Match m = r.Match(value);
             if (m.Success)
             {
@@ -219,7 +219,7 @@ namespace Framework.GameMath
         /// </remarks>
         public static bool TryParse(string value, out Matrix2 result)
         {
-            Regex r = new Regex(regularExp, RegexOptions.Singleline);
+            Regex r = new(regularExp, RegexOptions.Singleline);
             Match m = r.Match(value);
             if (m.Success)
             {
@@ -409,7 +409,7 @@ namespace Framework.GameMath
         /// <returns>A new <see cref="Matrix2"/> instance containing the transposed matrix.</returns>
         public static Matrix2 Transpose(Matrix2 m)
         {
-            Matrix2 t = new Matrix2(m);
+            Matrix2 t = new(m);
             t.Transpose();
             return t;
         }

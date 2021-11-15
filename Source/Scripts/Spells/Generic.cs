@@ -2270,7 +2270,7 @@ namespace Scripts.Spells.Generic
             if (player.GetLastPetNumber() != 0)
             {
                 PetType newPetType = (player.GetClass() == Class.Hunter) ? PetType.Hunter : PetType.Summon;
-                Pet newPet = new Pet(player, newPetType);
+                Pet newPet = new(player, newPetType);
                 if (newPet.LoadPetFromDB(player, 0, player.GetLastPetNumber(), true))
                 {
                     // revive the pet if it is dead
@@ -2723,7 +2723,7 @@ namespace Scripts.Spells.Generic
             Unit target = GetHitUnit();
             if (target)
             {
-                SpiritHealerConfirm spiritHealerConfirm = new SpiritHealerConfirm();
+                SpiritHealerConfirm spiritHealerConfirm = new();
                 spiritHealerConfirm.Unit = target.GetGUID();
                 originalCaster.SendPacket(spiritHealerConfirm);
             }
@@ -2972,7 +2972,7 @@ namespace Scripts.Spells.Generic
     [Script]
     class spell_gen_turkey_marker : AuraScript
     {
-        readonly List<uint> _applyTimes = new List<uint>();
+        readonly List<uint> _applyTimes = new();
 
         void OnApply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {

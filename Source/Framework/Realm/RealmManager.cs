@@ -51,7 +51,7 @@ public class RealmManager : Singleton<RealmManager>
         {
             do
             {
-                RealmBuildInfo build = new RealmBuildInfo();
+                RealmBuildInfo build = new();
                 build.MajorVersion = result.Read<uint>(0);
                 build.MinorVersion = result.Read<uint>(1);
                 build.BugfixVersion = result.Read<uint>(2);
@@ -92,7 +92,7 @@ public class RealmManager : Singleton<RealmManager>
     {
         PreparedStatement stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_REALMLIST);
         SQLResult result = DB.Login.Query(stmt);
-        Dictionary<RealmId, string> existingRealms = new Dictionary<RealmId, string>();
+        Dictionary<RealmId, string> existingRealms = new();
         foreach (var p in _realms)
             existingRealms[p.Key] = p.Value.Name;
 
@@ -192,7 +192,7 @@ public class RealmManager : Singleton<RealmManager>
                 realmEntry.PopulationState = Math.Max((int)realm.PopulationLevel, 1);
                 realmEntry.CfgCategoriesID = realm.Timezone;
 
-                ClientVersion version = new ClientVersion();
+                ClientVersion version = new();
                 RealmBuildInfo buildInfo = GetBuildInfo(realm.Build);
                 if (buildInfo != null)
                 {
@@ -235,7 +235,7 @@ public class RealmManager : Singleton<RealmManager>
             if (realm.Value.Build != build)
                 flag |= RealmFlags.VersionMismatch;
 
-            RealmListUpdate realmListUpdate = new RealmListUpdate();
+            RealmListUpdate realmListUpdate = new();
             realmListUpdate.Update.WowRealmAddress = (int)realm.Value.Id.GetAddress();
             realmListUpdate.Update.CfgTimezonesID = 1;
             realmListUpdate.Update.PopulationState = (realm.Value.Flags.HasAnyFlag(RealmFlags.Offline) ? 0 : Math.Max((int)realm.Value.PopulationLevel, 1));
@@ -279,8 +279,8 @@ public class RealmManager : Singleton<RealmManager>
             if (realm.Flags.HasAnyFlag(RealmFlags.Offline) || realm.Build != build)
                 return BattlenetRpcErrorCode.UserServerNotPermittedOnRealm;
 
-            RealmListServerIPAddresses serverAddresses = new RealmListServerIPAddresses();
-            AddressFamily addressFamily = new AddressFamily();
+            RealmListServerIPAddresses serverAddresses = new();
+            AddressFamily addressFamily = new();
             addressFamily.Id = 1;
 
             var address = new Address();
@@ -302,7 +302,7 @@ public class RealmManager : Singleton<RealmManager>
             stmt.AddValue(4, accountName);
             DB.Login.DirectExecute(stmt);
 
-            Bgs.Protocol.Attribute attribute = new Bgs.Protocol.Attribute();
+            Bgs.Protocol.Attribute attribute = new();
             attribute.Name = "Param_RealmJoinTicket";
             attribute.Value = new Bgs.Protocol.Variant();
             attribute.Value.BlobValue = Google.Protobuf.ByteString.CopyFrom(accountName, System.Text.Encoding.UTF8);
@@ -328,9 +328,9 @@ public class RealmManager : Singleton<RealmManager>
     public ICollection<Realm> GetRealms() { return _realms.Values; }
     List<string> GetSubRegions() { return _subRegions; }
 
-    List<RealmBuildInfo> _builds = new List<RealmBuildInfo>();
-    ConcurrentDictionary<RealmId, Realm> _realms = new ConcurrentDictionary<RealmId, Realm>();
-    List<string> _subRegions = new List<string>();
+    List<RealmBuildInfo> _builds = new();
+    ConcurrentDictionary<RealmId, Realm> _realms = new();
+    List<string> _subRegions = new();
     Timer _updateTimer;
 }
 

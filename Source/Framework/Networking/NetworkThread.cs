@@ -27,8 +27,8 @@ namespace Framework.Networking
 
         Thread _thread;
 
-        List<TSocketType> _Sockets = new List<TSocketType>();
-        List<TSocketType> _newSockets = new List<TSocketType>();
+        List<TSocketType> _Sockets = new();
+        List<TSocketType> _newSockets = new();
 
         public void Stop()
         {

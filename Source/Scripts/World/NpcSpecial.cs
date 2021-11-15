@@ -234,7 +234,7 @@ namespace Scripts.World.NpcSpecial
         public const uint StuffingServer = 61795;
         public const uint TurkeyServer = 61796;
         public const uint SweetPotatoesServer = 61797;
-        public static Dictionary<uint, uint> ChairSpells = new Dictionary<uint, uint>()
+        public static Dictionary<uint, uint> ChairSpells = new()
         {
             { CreatureIds.TheCranberryChair, CranberryServer },
             { CreatureIds.ThePieChair, PieServer },
@@ -409,7 +409,7 @@ namespace Scripts.World.NpcSpecial
         };
 
         //alliance run to where
-        public static Position DoctorAllianceRunTo = new Position(-3742.96f, -4531.52f, 11.91f);
+        public static Position DoctorAllianceRunTo = new(-3742.96f, -4531.52f, 11.91f);
 
         public static Position[] DoctorHordeCoords =
         {
@@ -422,7 +422,7 @@ namespace Scripts.World.NpcSpecial
         };
 
         //horde run to where
-        public static Position DoctorHordeRunTo = new Position(-1016.44f, -3508.48f, 62.96f);
+        public static Position DoctorHordeRunTo = new(-1016.44f, -3508.48f, 62.96f);
 
         public static uint[] AllianceSoldierId =
         {
@@ -445,7 +445,7 @@ namespace Scripts.World.NpcSpecial
         public const uint AnimGoLaunchFirework = 3;
         public const uint ZoneMoonglade = 493;
 
-        public static Position omenSummonPos = new Position(7558.993f, -2839.999f, 450.0214f, 4.46f);
+        public static Position omenSummonPos = new(7558.993f, -2839.999f, 450.0214f, 4.46f);
 
         public const uint AuraDurationTimeLeft = 5000;
 
@@ -761,7 +761,7 @@ namespace Scripts.World.NpcSpecial
 
         ObjectGuid DoSearchForTargets(ObjectGuid lastTargetGUID)
         {
-            List<Creature> targets = new List<Creature>();
+            List<Creature> targets = new();
             me.GetCreatureListWithEntryInGrid(targets, CreatureIds.TorchTossingTargetBunny, 60.0f);
             targets.RemoveAll(creature => creature.GetGUID() == lastTargetGUID);
 
@@ -854,7 +854,7 @@ namespace Scripts.World.NpcSpecial
         bool checkNearbyPlayers()
         {
             // Returns true if no nearby player has aura "Test Ribbon Pole Channel".
-            List<Unit> players = new List<Unit>();
+            List<Unit> players = new();
             var check = new UnitAuraCheck<Player>(true, SpellIds.RibbonDanceCosmetic);
             var searcher = new PlayerListSearcher(me, players, check);
             Cell.VisitWorldObjects(me, searcher, 10.0f);
@@ -1055,8 +1055,8 @@ namespace Scripts.World.NpcSpecial
 
         bool Event;
 
-        List<ObjectGuid> Patients = new List<ObjectGuid>();
-        List<Position> Coordinates = new List<Position>();
+        List<ObjectGuid> Patients = new();
+        List<Position> Coordinates = new();
     }
 
     [Script]
@@ -2319,7 +2319,7 @@ namespace Scripts.World.NpcSpecial
                     break;
             }
 
-            MoveSplineInit init = new MoveSplineInit(who);
+            MoveSplineInit init = new(who);
             init.DisableTransportPathTransformations();
             init.MoveTo(x, y, z, false);
             init.SetFacing(o);

@@ -2232,7 +2232,7 @@ namespace Game.Entities
                 return;
             }
 
-            Spell spell = new Spell(this, info, args.TriggerFlags, args.OriginalCaster, args.OriginalCastId);
+            Spell spell = new(this, info, args.TriggerFlags, args.OriginalCaster, args.OriginalCastId);
             foreach (var pair in args.SpellValueOverrides)
                 spell.SetSpellValue(pair.Key, pair.Value);
 

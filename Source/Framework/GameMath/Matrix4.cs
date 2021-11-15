@@ -109,11 +109,11 @@ namespace Framework.GameMath
         /// <summary>
         /// 4-dimentional single-precision floating point zero matrix.
         /// </summary>
-        public static readonly Matrix4 Zero = new Matrix4(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+        public static readonly Matrix4 Zero = new(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
         /// <summary>
         /// 4-dimentional single-precision floating point identity matrix.
         /// </summary>
-        public static readonly Matrix4 Identity = new Matrix4(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
+        public static readonly Matrix4 Identity = new(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
         #endregion
 
         #region Public Properties
@@ -313,7 +313,7 @@ namespace Framework.GameMath
         /// </remarks>
         public static Matrix4 Parse(string value)
         {
-            Regex r = new Regex(regularExp, RegexOptions.Singleline | RegexOptions.IgnorePatternWhitespace);
+            Regex r = new(regularExp, RegexOptions.Singleline | RegexOptions.IgnorePatternWhitespace);
             Match m = r.Match(value);
             if (m.Success)
             {
@@ -360,7 +360,7 @@ namespace Framework.GameMath
         /// </remarks>
         public static bool TryParse(string value, out Matrix4 result)
         {
-            Regex r = new Regex(regularExp, RegexOptions.Singleline);
+            Regex r = new(regularExp, RegexOptions.Singleline);
             Match m = r.Match(value);
             if (m.Success)
             {
@@ -661,7 +661,7 @@ namespace Framework.GameMath
         /// <returns>A new <see cref="Matrix4"/> instance containing the transposed matrix.</returns>
         public static Matrix4 Transpose(Matrix4 m)
         {
-            Matrix4 t = new Matrix4(m);
+            Matrix4 t = new(m);
             t.Transpose();
             return t;
         }
@@ -840,7 +840,7 @@ namespace Framework.GameMath
         /// <returns>A new <see cref="Vector4"/> instance containing the result.</returns>
         public static Vector4 operator *(Matrix4 matrix, Vector4 vector)
         {
-            Vector4 result = new Vector4();
+            Vector4 result = new();
             for (int r = 0; r < 4; ++r)
             {
                 for (int c = 0; c < 4; ++c)

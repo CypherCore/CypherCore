@@ -1139,7 +1139,7 @@ namespace Scripts.Spells.Items
         void HandleDummy(uint effIndex)
         {
             Unit caster = GetCaster();
-            List<uint> possibleSpells = new List<uint>();
+            List<uint> possibleSpells = new();
             switch (caster.GetClass())
             {
                 case Class.Warlock:
@@ -2165,7 +2165,7 @@ namespace Scripts.Spells.Items
     {
         SpellCastResult CheckRequirement()
         {
-            List<TempSummon> ghouls = new List<TempSummon>();
+            List<TempSummon> ghouls = new();
             GetCaster().GetAllMinionsByEntry(ghouls, CreatureIds.Ghoul);
             if (ghouls.Count >= CreatureIds.MaxGhouls)
             {
@@ -3530,7 +3530,7 @@ namespace Scripts.Spells.Items
     {
         void SecondaryEffect()
         {
-            List<uint> availableElixirs = new List<uint>()
+            List<uint> availableElixirs = new()
             {
                 // Battle Elixirs
                 33720, // Onslaught Elixir (28102)
@@ -3599,7 +3599,7 @@ namespace Scripts.Spells.Items
     {
         void SecondaryEffect()
         {
-            List<uint> availableElixirs = new List<uint>()
+            List<uint> availableElixirs = new()
             {
                 43185, // Runic Healing Potion (33447)
                 53750, // Crazy Alchemist's Potion (40077)

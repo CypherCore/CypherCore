@@ -100,23 +100,23 @@ namespace Framework.GameMath
         /// <summary>
         /// 4-Dimentional single-precision floating point zero vector.
         /// </summary>
-        public static readonly Vector4 Zero = new Vector4(0.0f, 0.0f, 0.0f, 0.0f);
+        public static readonly Vector4 Zero = new(0.0f, 0.0f, 0.0f, 0.0f);
         /// <summary>
         /// 4-Dimentional single-precision floating point X-Axis vector.
         /// </summary>
-        public static readonly Vector4 XAxis = new Vector4(1.0f, 0.0f, 0.0f, 0.0f);
+        public static readonly Vector4 XAxis = new(1.0f, 0.0f, 0.0f, 0.0f);
         /// <summary>
         /// 4-Dimentional single-precision floating point Y-Axis vector.
         /// </summary>
-        public static readonly Vector4 YAxis = new Vector4(0.0f, 1.0f, 0.0f, 0.0f);
+        public static readonly Vector4 YAxis = new(0.0f, 1.0f, 0.0f, 0.0f);
         /// <summary>
         /// 4-Dimentional single-precision floating point Y-Axis vector.
         /// </summary>
-        public static readonly Vector4 ZAxis = new Vector4(0.0f, 0.0f, 1.0f, 0.0f);
+        public static readonly Vector4 ZAxis = new(0.0f, 0.0f, 1.0f, 0.0f);
         /// <summary>
         /// 4-Dimentional single-precision floating point Y-Axis vector.
         /// </summary>
-        public static readonly Vector4 WAxis = new Vector4(0.0f, 0.0f, 0.0f, 1.0f);
+        public static readonly Vector4 WAxis = new(0.0f, 0.0f, 0.0f, 1.0f);
         #endregion
 
         #region Public properties
@@ -185,7 +185,7 @@ namespace Framework.GameMath
         /// <returns>A <see cref="Vector4"/> that represents the vector specified by the <paramref name="value"/> parameter.</returns>
         public static Vector4 Parse(string value)
         {
-            Regex r = new Regex(@"\((?<x>.*),(?<y>.*),(?<z>.*),(?<w>.*)\)", RegexOptions.Singleline);
+            Regex r = new(@"\((?<x>.*),(?<y>.*),(?<z>.*),(?<w>.*)\)", RegexOptions.Singleline);
             Match m = r.Match(value);
             if (m.Success)
             {
@@ -213,7 +213,7 @@ namespace Framework.GameMath
         /// <returns><see langword="true"/> if value was converted successfully; otherwise, <see langword="false"/>.</returns>
         public static bool TryParse(string value, out Vector4 result)
         {
-            Regex r = new Regex(@"\((?<x>.*),(?<y>.*),(?<z>.*),(?<w>.*)\)", RegexOptions.Singleline);
+            Regex r = new(@"\((?<x>.*),(?<y>.*),(?<z>.*),(?<w>.*)\)", RegexOptions.Singleline);
             Match m = r.Match(value);
             if (m.Success)
             {
@@ -806,7 +806,7 @@ namespace Framework.GameMath
 
         public static Vector4 operator *(Vector4 vector, Matrix4 M)
         {
-            Vector4 result = new Vector4();
+            Vector4 result = new();
             for (int i = 0; i < 4; ++i)
             {
                 result[i] = 0.0f;
@@ -914,7 +914,7 @@ namespace Framework.GameMath
         /// <returns>A <see cref="System.Collections.Generic.List{T}"/> of single-precision floating point values.</returns>
         public static explicit operator List<float>(Vector4 vector)
         {
-            List<float> list = new List<float>(4);
+            List<float> list = new(4);
             list.Add(vector.X);
             list.Add(vector.Y);
             list.Add(vector.Z);
@@ -929,7 +929,7 @@ namespace Framework.GameMath
         /// <returns>A <see cref="System.Collections.Generic.LinkedList{T}"/> of single-precision floating point values.</returns>
         public static explicit operator LinkedList<float>(Vector4 vector)
         {
-            LinkedList<float> list = new LinkedList<float>();
+            LinkedList<float> list = new();
             list.AddLast(vector.X);
             list.AddLast(vector.Y);
             list.AddLast(vector.Z);
@@ -1025,7 +1025,7 @@ namespace Framework.GameMath
         public override System.ComponentModel.TypeConverter.StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
         {
             StandardValuesCollection svc =
-                new StandardValuesCollection(new object[5] { Vector4.Zero, Vector4.XAxis, Vector4.YAxis, Vector4.ZAxis, Vector4.WAxis });
+                new(new object[5] { Vector4.Zero, Vector4.XAxis, Vector4.YAxis, Vector4.ZAxis, Vector4.WAxis });
 
             return svc;
         }

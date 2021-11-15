@@ -102,11 +102,11 @@ namespace Framework.GameMath
         /// <summary>
         /// 4-dimentional single-precision floating point zero matrix.
         /// </summary>
-        public static readonly Matrix3 Zero = new Matrix3(0, 0, 0, 0, 0, 0, 0, 0, 0);
+        public static readonly Matrix3 Zero = new(0, 0, 0, 0, 0, 0, 0, 0, 0);
         /// <summary>
         /// 4-dimentional single-precision floating point identity matrix.
         /// </summary>
-        public static readonly Matrix3 Identity = new Matrix3(1, 0, 0, 0, 1, 0, 0, 0, 1);
+        public static readonly Matrix3 Identity = new(1, 0, 0, 0, 1, 0, 0, 0, 1);
         #endregion
 
         #region Public Properties
@@ -241,7 +241,7 @@ namespace Framework.GameMath
         /// </remarks>
         public static Matrix3 Parse(string value)
         {
-            Regex r = new Regex(regularExp, RegexOptions.Singleline | RegexOptions.IgnorePatternWhitespace);
+            Regex r = new(regularExp, RegexOptions.Singleline | RegexOptions.IgnorePatternWhitespace);
             Match m = r.Match(value);
             if (m.Success)
             {
@@ -280,7 +280,7 @@ namespace Framework.GameMath
         /// </remarks>
         public static bool TryParse(string value, out Matrix3 result)
         {
-            Regex r = new Regex(regularExp, RegexOptions.Singleline);
+            Regex r = new(regularExp, RegexOptions.Singleline);
             Match m = r.Match(value);
             if (m.Success)
             {
@@ -519,7 +519,7 @@ namespace Framework.GameMath
         /// <returns>A new <see cref="Matrix3"/> instance containing the transposed matrix.</returns>
         public static Matrix3 Transpose(Matrix3 m)
         {
-            Matrix3 t = new Matrix3(m);
+            Matrix3 t = new(m);
             t.Transpose();
             return t;
         }
@@ -530,15 +530,15 @@ namespace Framework.GameMath
 
             fCos = (float)Math.Cos(fYAngle);
             fSin = (float)Math.Sin(fYAngle);
-            Matrix3 kZMat = new Matrix3(fCos, -fSin, 0.0f, fSin, fCos, 0.0f, 0.0f, 0.0f, 1.0f);
+            Matrix3 kZMat = new(fCos, -fSin, 0.0f, fSin, fCos, 0.0f, 0.0f, 0.0f, 1.0f);
 
             fCos = (float)Math.Cos(fPAngle);
             fSin = (float)Math.Sin(fPAngle);
-            Matrix3 kYMat = new Matrix3(fCos, 0.0f, fSin, 0.0f, 1.0f, 0.0f, -fSin, 0.0f, fCos);
+            Matrix3 kYMat = new(fCos, 0.0f, fSin, 0.0f, 1.0f, 0.0f, -fSin, 0.0f, fCos);
 
             fCos = (float)Math.Cos(fRAngle);
             fSin = (float)Math.Sin(fRAngle);
-            Matrix3 kXMat = new Matrix3(1.0f, 0.0f, 0.0f, 0.0f, fCos, -fSin, 0.0f, fSin, fCos);
+            Matrix3 kXMat = new(1.0f, 0.0f, 0.0f, 0.0f, fCos, -fSin, 0.0f, fSin, fCos);
 
             return (kZMat * (kYMat * kXMat));
         }

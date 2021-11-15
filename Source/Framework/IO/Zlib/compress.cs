@@ -26,7 +26,7 @@ namespace Framework.IO
     {
         public static byte[] Compress(byte[] data)
         {
-            ByteBuffer buffer = new ByteBuffer();
+            ByteBuffer buffer = new();
             buffer.WriteUInt8(0x78);
             buffer.WriteUInt8(0x9c);
 

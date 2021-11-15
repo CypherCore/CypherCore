@@ -33,7 +33,7 @@ namespace Framework.Database
 
         public void Append(PreparedStatement stmt)
         {
-            MySqlCommand cmd = new MySqlCommand(stmt.CommandText);
+            MySqlCommand cmd = new(stmt.CommandText);
             foreach (var parameter in stmt.Parameters)
                 cmd.Parameters.AddWithValue("@" + parameter.Key, parameter.Value);
 
@@ -80,7 +80,7 @@ namespace Framework.Database
         }
 
         SQLTransaction m_trans;
-        public static object _deadlockLock = new object();
+        public static object _deadlockLock = new();
     }
 
     class TransactionWithResultTask : TransactionTask
@@ -119,7 +119,7 @@ namespace Framework.Database
 
         public Task<bool> GetFuture() { return m_result.Task; }
 
-        TaskCompletionSource<bool> m_result = new TaskCompletionSource<bool>();
+        TaskCompletionSource<bool> m_result = new();
     }
 
     public class TransactionCallback : ISqlCallback

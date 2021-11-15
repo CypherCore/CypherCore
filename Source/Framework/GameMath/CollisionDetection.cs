@@ -38,7 +38,7 @@ namespace Framework.GameMath
             Inside = true;
             Vector3 MinB = box.Lo;
             Vector3 MaxB = box.Hi;
-            Vector3 MaxT = new Vector3(-1.0f, -1.0f, -1.0f);
+            Vector3 MaxT = new(-1.0f, -1.0f, -1.0f);
 
             // Find candidate planes.
             for (int i = 0; i < 3; ++i)

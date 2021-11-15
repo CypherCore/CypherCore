@@ -19,9 +19,9 @@ namespace Framework.Database
 {
     public static class DB
     {
-        public static LoginDatabase Login = new LoginDatabase();
-        public static CharacterDatabase Characters = new CharacterDatabase();
-        public static WorldDatabase World = new WorldDatabase();
-        public static HotfixDatabase Hotfix = new HotfixDatabase();
+        public static LoginDatabase Login = new();
+        public static CharacterDatabase Characters = new();
+        public static WorldDatabase World = new();
+        public static HotfixDatabase Hotfix = new();
     }
 }

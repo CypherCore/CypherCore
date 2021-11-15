@@ -293,7 +293,7 @@ namespace System.Collections
 
         public Object Clone()
         {
-            BitSet bitArray = new BitSet(_mArray);
+            BitSet bitArray = new(_mArray);
             bitArray._version = _version;
             bitArray._mLength = _mLength;
             return bitArray;

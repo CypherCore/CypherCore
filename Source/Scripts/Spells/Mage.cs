@@ -524,7 +524,7 @@ namespace Scripts.Spells.Mage
     [Script] // Ice Lance - 30455
     class spell_mage_ice_lance : SpellScript
     {
-        List<ObjectGuid> _orderedTargets = new List<ObjectGuid>();
+        List<ObjectGuid> _orderedTargets = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -788,7 +788,7 @@ namespace Scripts.Spells.Mage
 
         void Apply(AuraEffect aurEff, AuraEffectHandleModes mode)
         {
-            List<TempSummon> minions = new List<TempSummon>();
+            List<TempSummon> minions = new();
             GetTarget().GetAllMinionsByEntry(minions, (uint)Global.SpellMgr.GetSpellInfo(SpellIds.RingOfFrostSummon, GetCastDifficulty()).GetEffect(0).MiscValue);
 
             // Get the last summoned RoF, save it and despawn older ones

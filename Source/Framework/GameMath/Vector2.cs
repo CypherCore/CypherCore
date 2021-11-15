@@ -88,15 +88,15 @@ namespace Framework.GameMath
         /// <summary>
         /// 4-Dimentional single-precision floating point zero vector.
         /// </summary>
-        public static readonly Vector2 Zero = new Vector2(0.0f, 0.0f);
+        public static readonly Vector2 Zero = new(0.0f, 0.0f);
         /// <summary>
         /// 4-Dimentional single-precision floating point X-Axis vector.
         /// </summary>
-        public static readonly Vector2 XAxis = new Vector2(1.0f, 0.0f);
+        public static readonly Vector2 XAxis = new(1.0f, 0.0f);
         /// <summary>
         /// 4-Dimentional single-precision floating point Y-Axis vector.
         /// </summary>
-        public static readonly Vector2 YAxis = new Vector2(0.0f, 1.0f);
+        public static readonly Vector2 YAxis = new(0.0f, 1.0f);
         #endregion
 
         #region Public properties
@@ -147,7 +147,7 @@ namespace Framework.GameMath
         /// <returns>A <see cref="Vector2"/> that represents the vector specified by the <paramref name="value"/> parameter.</returns>
         public static Vector2 Parse(string value)
         {
-            Regex r = new Regex(@"\((?<x>.*),(?<y>.*)\)", RegexOptions.Singleline);
+            Regex r = new(@"\((?<x>.*),(?<y>.*)\)", RegexOptions.Singleline);
             Match m = r.Match(value);
             if (m.Success)
             {
@@ -173,7 +173,7 @@ namespace Framework.GameMath
         /// <returns><see langword="true"/> if value was converted successfully; otherwise, <see langword="false"/>.</returns>
         public static bool TryParse(string value, out Vector2 result)
         {
-            Regex r = new Regex(@"\((?<x>.*),(?<y>.*)\)", RegexOptions.Singleline);
+            Regex r = new(@"\((?<x>.*),(?<y>.*)\)", RegexOptions.Singleline);
             Match m = r.Match(value);
             if (m.Success)
             {
@@ -831,7 +831,7 @@ namespace Framework.GameMath
         /// <returns>A <see cref="System.Collections.Generic.List{T}"/> of single-precision floating point values.</returns>
         public static explicit operator List<float>(Vector2 vector)
         {
-            List<float> list = new List<float>();
+            List<float> list = new();
             list.Add(vector.X);
             list.Add(vector.Y);
 
@@ -844,7 +844,7 @@ namespace Framework.GameMath
         /// <returns>A <see cref="System.Collections.Generic.LinkedList{T}"/> of single-precision floating point values.</returns>
         public static explicit operator LinkedList<float>(Vector2 vector)
         {
-            LinkedList<float> list = new LinkedList<float>();
+            LinkedList<float> list = new();
             list.AddLast(vector.X);
             list.AddLast(vector.Y);
 
@@ -938,7 +938,7 @@ namespace Framework.GameMath
         public override System.ComponentModel.TypeConverter.StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
         {
             StandardValuesCollection svc =
-                new StandardValuesCollection(new object[3] { Vector2.Zero, Vector2.XAxis, Vector2.YAxis });
+                new(new object[3] { Vector2.Zero, Vector2.XAxis, Vector2.YAxis });
 
             return svc;
         }

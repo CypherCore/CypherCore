@@ -157,7 +157,7 @@ namespace System
 
         public static List<T> DeserializeObjects<T>(this ICollection<uint> data)
         {
-            List<T> list = new List<T>();
+            List<T> list = new();
 
             if (data.Count == 0)
                 return list;
@@ -261,7 +261,7 @@ namespace System
         public static string ReadCString(this BinaryReader reader)
         {
             byte num;
-            List<byte> temp = new List<byte>();
+            List<byte> temp = new();
 
             while ((num = reader.ReadByte()) != 0)
                 temp.Add(num);

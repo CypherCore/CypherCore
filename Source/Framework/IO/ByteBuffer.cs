@@ -107,7 +107,7 @@ namespace Framework.IO
         public string ReadCString()
         {
             ResetBitPos();
-            StringBuilder tmpString = new StringBuilder();
+            StringBuilder tmpString = new();
             char tmpChar = readStream.ReadChar();
             char tmpEndChar = Convert.ToChar(Encoding.UTF8.GetString(new byte[] { 0 }));
 

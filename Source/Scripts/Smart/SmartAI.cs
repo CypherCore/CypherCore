@@ -35,7 +35,7 @@ namespace Scripts.Smart
                 return false;
 
             Log.outDebug(LogFilter.ScriptsAi, "AreaTrigger {0} is using SmartTrigger script", trigger.Id);
-            SmartScript script = new SmartScript();
+            SmartScript script = new();
             script.OnInitialize(trigger);
             script.ProcessEventsFor(SmartEvents.AreatriggerOntrigger, player, trigger.Id);
             return true;
@@ -60,28 +60,28 @@ namespace Scripts.Smart
 
         public override void OnSceneStart(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
-            SmartScript smartScript = new SmartScript();
+            SmartScript smartScript = new();
             smartScript.OnInitialize(sceneTemplate);
             smartScript.ProcessEventsFor(SmartEvents.SceneStart, player);
         }
 
         public override void OnSceneTriggerEvent(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate, string triggerName)
         {
-            SmartScript smartScript = new SmartScript();
+            SmartScript smartScript = new();
             smartScript.OnInitialize(sceneTemplate);
             smartScript.ProcessEventsFor(SmartEvents.SceneTrigger, player, 0, 0, false, null, null, triggerName);
         }
 
         public override void OnSceneCancel(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
-            SmartScript smartScript = new SmartScript();
+            SmartScript smartScript = new();
             smartScript.OnInitialize(sceneTemplate);
             smartScript.ProcessEventsFor(SmartEvents.SceneCancel, player);
         }
 
         public override void OnSceneComplete(Player player, uint sceneInstanceID, SceneTemplate sceneTemplate)
         {
-            SmartScript smartScript = new SmartScript();
+            SmartScript smartScript = new();
             smartScript.OnInitialize(sceneTemplate);
             smartScript.ProcessEventsFor(SmartEvents.SceneComplete, player);
         }
@@ -95,7 +95,7 @@ namespace Scripts.Smart
         // Called when a quest status change
         public override void OnQuestStatusChange(Player player, Quest quest, QuestStatus oldStatus, QuestStatus newStatus)
         {
-            SmartScript smartScript = new SmartScript();
+            SmartScript smartScript = new();
             smartScript.OnInitialize(quest);
             switch (newStatus)
             {
@@ -123,7 +123,7 @@ namespace Scripts.Smart
             ushort slot = player.FindQuestSlot(quest.Id);
             if (slot < SharedConst.MaxQuestLogSize && player.IsQuestObjectiveComplete(slot, quest, objective))
             {
-                SmartScript smartScript = new SmartScript();
+                SmartScript smartScript = new();
                 smartScript.OnInitialize(quest);
                 smartScript.ProcessEventsFor(SmartEvents.QuestObjCompletion, player, objective.Id);
             }

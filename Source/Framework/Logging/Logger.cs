@@ -61,5 +61,5 @@ class Logger
 
     string name;
     LogLevel level;
-    Dictionary<byte, Appender> appenders = new Dictionary<byte, Appender>();
+    Dictionary<byte, Appender> appenders = new();
 }

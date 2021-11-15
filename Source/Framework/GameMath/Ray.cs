@@ -105,7 +105,7 @@ namespace Framework.GameMath
         /// <returns>A <see cref="Ray"/> that represents the vector specified by the <paramref name="s"/> parameter.</returns>
         public static Ray Parse(string s)
         {
-            Regex r = new Regex(@"\((?<origin>\([^\)]*\)), (?<direction>\([^\)]*\))\)", RegexOptions.None);
+            Regex r = new(@"\((?<origin>\([^\)]*\)), (?<direction>\([^\)]*\))\)", RegexOptions.None);
             Match m = r.Match(s);
             if (m.Success)
             {

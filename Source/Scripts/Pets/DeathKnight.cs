@@ -49,7 +49,7 @@ namespace Scripts.Pets
                     return;
 
                 // Find victim of Summon Gargoyle spell
-                List<Unit> targets = new List<Unit>();
+                List<Unit> targets = new();
                 var u_check = new AnyUnfriendlyUnitInObjectRangeCheck(me, me, 30.0f);
                 var searcher = new UnitListSearcher(me, targets, u_check);
                 Cell.VisitAllObjects(me, searcher, 30.0f);

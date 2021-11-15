@@ -606,7 +606,7 @@ namespace Game.AI
             if (spellInfo == null)
                 return;
 
-            Spell spell = new Spell(me, spellInfo, TriggerCastFlags.CastDirectly);
+            Spell spell = new(me, spellInfo, TriggerCastFlags.CastDirectly);
             if (spell.CheckPetCast(victim) != SpellCastResult.SpellCastOk)
                 return;
 

@@ -111,7 +111,7 @@ namespace Scripts.Spells.Priest
     [Script] // 81749 - Atonement
     public class spell_pri_atonement : AuraScript
     {
-        List<ObjectGuid> _appliedAtonements = new List<ObjectGuid>();
+        List<ObjectGuid> _appliedAtonements = new();
 
         public override bool Validate(SpellInfo spellInfo)
         {
@@ -372,7 +372,7 @@ namespace Scripts.Spells.Priest
         {
             Position destPos = GetHitDest().GetPosition();
 
-            SpellCastTargets targets = new SpellCastTargets();
+            SpellCastTargets targets = new();
             targets.SetDst(destPos);
             targets.SetUnitTarget(GetCaster());
             GetHitUnit().CastSpell(targets, (uint)GetEffectValue(), new CastSpellExtraArgs(GetCastDifficulty()));
@@ -1002,7 +1002,7 @@ namespace Scripts.Spells.Priest
             }
             else
             {
-                CastSpellExtraArgs args = new CastSpellExtraArgs(TriggerCastFlags.FullMask);
+                CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
                 args.CastDifficulty = GetCastDifficulty();
                 GetCaster().CastSpell(destPos, SpellIds.AngelicFeatherAreatrigger, args);
             }

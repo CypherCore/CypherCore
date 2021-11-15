@@ -240,9 +240,9 @@ namespace Framework.IO
 			}
 		}
 
-		private static readonly static_tree_desc static_l_desc=new static_tree_desc(static_ltree, extra_lbits, LITERALS+1, L_CODES, MAX_BITS);
-		private static readonly static_tree_desc static_d_desc=new static_tree_desc(static_dtree, extra_dbits, 0, D_CODES, MAX_BITS);
-		private static readonly static_tree_desc static_bl_desc=new static_tree_desc(null, extra_blbits, 0, BL_CODES, MAX_BL_BITS);
+		private static readonly static_tree_desc static_l_desc=new(static_ltree, extra_lbits, LITERALS+1, L_CODES, MAX_BITS);
+		private static readonly static_tree_desc static_d_desc=new(static_dtree, extra_dbits, 0, D_CODES, MAX_BITS);
+		private static readonly static_tree_desc static_bl_desc=new(null, extra_blbits, 0, BL_CODES, MAX_BL_BITS);
 
 		// ===========================================================================
 		// Local (static) routines in this file.

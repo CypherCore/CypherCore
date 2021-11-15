@@ -278,7 +278,7 @@ namespace Scripts.Spells.Warlock
             if (modOwner)
                 modOwner.ApplySpellMod(GetSpellInfo(), SpellModOp.PowerCost0, ref damage);
 
-            SpellNonMeleeDamage damageInfo = new SpellNonMeleeDamage(caster, caster, GetSpellInfo(), GetAura().GetSpellVisual(), GetSpellInfo().SchoolMask, GetAura().GetCastId());
+            SpellNonMeleeDamage damageInfo = new(caster, caster, GetSpellInfo(), GetAura().GetSpellVisual(), GetSpellInfo().SchoolMask, GetAura().GetCastId());
             damageInfo.periodicLog = true;
             damageInfo.damage = damage;
             caster.DealSpellDamage(damageInfo, false);
@@ -473,7 +473,7 @@ namespace Scripts.Spells.Warlock
         public List<uint> GetDotList() { return _dotList; }
         public Unit GetOriginalSwapSource() { return _swapCaster; }
         public void SetOriginalSwapSource(Unit victim) { _swapCaster = victim; }
-        List<uint> _dotList = new List<uint>();
+        List<uint> _dotList = new();
         Unit _swapCaster;
     }
 
@@ -547,7 +547,7 @@ namespace Scripts.Spells.Warlock
             GetCaster().CastSpell(GetCaster(), SpellIds.SoulSwapModCost, true);
             bool hasGlyph = GetCaster().HasAura(SpellIds.GlyphOfSoulSwap);
 
-            List<uint> dotList = new List<uint>();
+            List<uint> dotList = new();
             Unit swapSource = null;
             Aura swapOverride = GetCaster().GetAura(SpellIds.SoulSwapOverride);
             if (swapOverride != null)
@@ -671,7 +671,7 @@ namespace Scripts.Spells.Warlock
         void HandleDummyTick(AuraEffect aurEff)
         {
             List<AreaTrigger> rainOfFireAreaTriggers = GetTarget().GetAreaTriggers(SpellIds.RainOfFire);
-            List<ObjectGuid> targetsInRainOfFire = new List<ObjectGuid>();
+            List<ObjectGuid> targetsInRainOfFire = new();
 
             foreach (AreaTrigger rainOfFireAreaTrigger in rainOfFireAreaTriggers)
             {

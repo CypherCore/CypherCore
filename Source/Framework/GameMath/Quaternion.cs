@@ -134,27 +134,27 @@ namespace Framework.GameMath
         /// <summary>
         /// Double-precision floating point zero quaternion.
         /// </summary>
-        public static readonly Quaternion Zero = new Quaternion(0, 0, 0, 0);
+        public static readonly Quaternion Zero = new(0, 0, 0, 0);
         /// <summary>
         /// Double-precision floating point identity quaternion.
         /// </summary>
-        public static readonly Quaternion Identity = new Quaternion(0, 0, 0, 1);
+        public static readonly Quaternion Identity = new(0, 0, 0, 1);
         /// <summary>
         /// Double-precision floating point X-Axis quaternion.
         /// </summary>
-        public static readonly Quaternion XAxis = new Quaternion(1, 0, 0, 0);
+        public static readonly Quaternion XAxis = new(1, 0, 0, 0);
         /// <summary>
         /// Double-precision floating point Y-Axis quaternion.
         /// </summary>
-        public static readonly Quaternion YAxis = new Quaternion(0, 1, 0, 0);
+        public static readonly Quaternion YAxis = new(0, 1, 0, 0);
         /// <summary>
         /// Double-precision floating point Z-Axis quaternion.
         /// </summary>
-        public static readonly Quaternion ZAxis = new Quaternion(0, 0, 1, 0);
+        public static readonly Quaternion ZAxis = new(0, 0, 1, 0);
         /// <summary>
         /// Double-precision floating point W-Axis quaternion.
         /// </summary>
-        public static readonly Quaternion WAxis = new Quaternion(0, 0, 0, 1);
+        public static readonly Quaternion WAxis = new(0, 0, 0, 1);
         #endregion
 
         #region Public Properties
@@ -261,7 +261,7 @@ namespace Framework.GameMath
         /// <returns>A <see cref="Quaternion"/> that represents the vector specified by the <paramref name="value"/> parameter.</returns>
         public static Quaternion Parse(string value)
         {
-            Regex r = new Regex(@"\((?<w>.*),(?<x>.*),(?<y>.*),(?<z>.*)\)", RegexOptions.None);
+            Regex r = new(@"\((?<w>.*),(?<x>.*),(?<y>.*),(?<z>.*)\)", RegexOptions.None);
             Match m = r.Match(value);
             if (m.Success)
             {
@@ -289,7 +289,7 @@ namespace Framework.GameMath
         /// <returns><see langword="true"/> if value was converted successfully; otherwise, <see langword="false"/>.</returns>
         public static bool TryParse(string value, out Quaternion result)
         {
-            Regex r = new Regex(@"\((?<x>.*),(?<y>.*),(?<z>.*),(?<w>.*)\)", RegexOptions.None);
+            Regex r = new(@"\((?<x>.*),(?<y>.*),(?<z>.*),(?<w>.*)\)", RegexOptions.None);
             Match m = r.Match(value);
             if (m.Success)
             {
@@ -365,7 +365,7 @@ namespace Framework.GameMath
         /// <returns>A new <see cref="Quaternion"/> containing the result.</returns>
         public static Quaternion Multiply(Quaternion left, Quaternion right)
         {
-            Quaternion result = new Quaternion();
+            Quaternion result = new();
             result.X = left.W * right.X + left.X * right.W + left.Y * right.Z - left.Z * right.Y;
             result.Y = left.W * right.Y + left.Y * right.W + left.Z * right.X - left.X * right.Z;
             result.Z = left.W * right.Z + left.Z * right.W + left.X * right.Y - left.Y * right.X;
@@ -394,7 +394,7 @@ namespace Framework.GameMath
         /// <returns>A <see cref="Quaternion"/> instance to hold the result.</returns>
         public static Quaternion Multiply(Quaternion quaternion, float scalar)
         {
-            Quaternion result = new Quaternion(quaternion);
+            Quaternion result = new(quaternion);
             result.X *= scalar;
             result.Y *= scalar;
             result.Z *= scalar;
@@ -429,7 +429,7 @@ namespace Framework.GameMath
                 throw new DivideByZeroException("Dividing quaternion by zero");
             }
 
-            Quaternion result = new Quaternion(quaternion);
+            Quaternion result = new(quaternion);
             result.X /= scalar;
             result.Y /= scalar;
             result.Z /= scalar;
@@ -508,7 +508,7 @@ namespace Framework.GameMath
         /// <returns>The quaternion's logarithm.</returns>
         public static Quaternion Log(Quaternion quaternion)
         {
-            Quaternion result = new Quaternion(0, 0, 0, 0);
+            Quaternion result = new(0, 0, 0, 0);
 
             if (Math.Abs(quaternion.W) < 1.0)
             {
@@ -539,7 +539,7 @@ namespace Framework.GameMath
         /// <returns>The quaternion's exponent.</returns>
         public Quaternion Exp(Quaternion quaternion)
         {
-            Quaternion result = new Quaternion(0, 0, 0, 0);
+            Quaternion result = new(0, 0, 0, 0);
 
             float angle = (float)System.Math.Sqrt(quaternion.X * quaternion.X + quaternion.Y * quaternion.Y + quaternion.Z * quaternion.Z);
             float sin = (float)System.Math.Sin(angle);

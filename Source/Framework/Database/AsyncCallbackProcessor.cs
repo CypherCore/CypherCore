@@ -26,7 +26,7 @@ namespace Framework.Database
 
     public class AsyncCallbackProcessor<T> where T : ISqlCallback
     {   
-        List<T> _callbacks = new List<T>();
+        List<T> _callbacks = new();
 
         public T AddCallback(T query)
         {

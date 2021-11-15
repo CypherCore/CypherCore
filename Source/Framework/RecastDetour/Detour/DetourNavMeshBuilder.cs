@@ -133,7 +133,7 @@ public static partial class Detour
 
         public byte[] ToBytes()
         {
-            List<byte> bytes = new List<byte>();
+            List<byte> bytes = new();
 
             bytes.AddRange(BitConverter.GetBytes(firstLink));
             for (int i = 0; i < DT_VERTS_PER_POLYGON; ++i)
@@ -196,7 +196,7 @@ public static partial class Detour
 
         public byte[] ToBytes()
         {
-            List<byte> bytes = new List<byte>();
+            List<byte> bytes = new();
 
             bytes.AddRange(BitConverter.GetBytes(vertBase));
             bytes.AddRange(BitConverter.GetBytes(triBase));
@@ -232,7 +232,7 @@ public static partial class Detour
 
         public byte[] ToBytes()
         {
-            List<byte> bytes = new List<byte>();
+            List<byte> bytes = new();
 
             bytes.AddRange(BitConverter.GetBytes(polyRef));
             bytes.AddRange(BitConverter.GetBytes(next));
@@ -270,7 +270,7 @@ public static partial class Detour
 
         public byte[] ToBytes()
         {
-            List<byte> bytes = new List<byte>();
+            List<byte> bytes = new();
             for (int j = 0; j < bmin.Length; ++j)
             {
                 bytes.AddRange(BitConverter.GetBytes(bmin[j]));
@@ -326,7 +326,7 @@ public static partial class Detour
 
         public byte[] ToBytes()
         {
-            List<byte> bytes = new List<byte>();
+            List<byte> bytes = new();
             for (int i = 0; i < 6; ++i)
             {
                 bytes.AddRange(BitConverter.GetBytes(pos[i]));
@@ -412,7 +412,7 @@ public static partial class Detour
 
         public byte[] ToBytes()
         {
-            List<byte> bytes = new List<byte>();
+            List<byte> bytes = new();
 
             bytes.AddRange(BitConverter.GetBytes(magic));
             bytes.AddRange(BitConverter.GetBytes(version));
@@ -537,7 +537,7 @@ public static partial class Detour
 
         public byte[] ToBytes()
         {
-            List<byte> bytes = new List<byte>();
+            List<byte> bytes = new();
 
             bytes.AddRange(header.ToBytes());
             for (int i = 0; i < polys.Length; ++i)
@@ -645,7 +645,7 @@ public static partial class Detour
         ///
         public dtNavMeshParams Clone()
         {
-            dtNavMeshParams copy = new dtNavMeshParams();
+            dtNavMeshParams copy = new();
             for (int i = 0; i < orig.Length; ++i)
             {
                 copy.orig[i] = orig[i];

@@ -95,7 +95,7 @@ namespace Game.Entities
 
             ulong lowGuid = creator.GetMap().GenerateLowGuid(HighGuid.SceneObject);
 
-            SceneObject sceneObject = new SceneObject();
+            SceneObject sceneObject = new();
             if (!sceneObject.Create(lowGuid, SceneType.Normal, sceneId, sceneTemplate != null ? sceneTemplate.ScenePackageId : 0, creator.GetMap(), creator, pos, privateObjectOwner))
             {
                 sceneObject.Dispose();
