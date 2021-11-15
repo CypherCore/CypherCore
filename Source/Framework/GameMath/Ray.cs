@@ -18,6 +18,7 @@
 
 using System;
 using System.ComponentModel;
+using System.Numerics;
 using System.Text.RegularExpressions;
 
 namespace Framework.GameMath
@@ -33,6 +34,8 @@ namespace Framework.GameMath
     public struct Ray : ICloneable
     {
         #region Private Fields
+        private static Vector3 _inf = new(float.PositiveInfinity, float.PositiveInfinity, float.PositiveInfinity);
+
         private Vector3 _origin;
         private Vector3 _direction;
         #endregion
@@ -110,8 +113,8 @@ namespace Framework.GameMath
             if (m.Success)
             {
                 return new Ray(
-                    Vector3.Parse(m.Result("${origin}")),
-                    Vector3.Parse(m.Result("${direction}"))
+                    m.Result("${origin}").ParseVector3(),
+                    m.Result("${direction}").ParseVector3()
                     );
             }
             else
@@ -194,18 +197,14 @@ namespace Framework.GameMath
 
         public Vector3 intersection(Plane plane)
         {
-            float d;
-            Vector3 normal = plane.Normal;
-            plane.getEquation(ref normal, out d);
-            float rate = Direction.dot(normal);
-
+            float rate = Vector3.Dot(Direction, plane.Normal);
             if (rate >= 0.0f)
             {
-                return Vector3.Inf;
+                return _inf;
             }
             else
             {
-                float t = -(d + Origin.dot(normal)) / rate;
+                float t = -(-plane.D + Vector3.Dot(Origin, plane.Normal)) / rate;
                 return Origin + Direction * t;
             }
         }

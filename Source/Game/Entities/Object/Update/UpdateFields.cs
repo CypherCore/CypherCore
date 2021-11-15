@@ -17,13 +17,13 @@
 
 using Framework.Constants;
 using Framework.Dynamic;
-using Framework.GameMath;
 using Game.DataStorage;
 using Game.Networking;
 using Game.Networking.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace Game.Entities
 {

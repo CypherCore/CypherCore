@@ -17,13 +17,13 @@
 
 using Framework.Constants;
 using Framework.Database;
-using Framework.GameMath;
 using Framework.IO;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 using System.Text;
 
 namespace Game.Chat
@@ -614,7 +614,7 @@ namespace Game.Chat
                 Player player = handler.GetPlayer();
                 Map map = player.GetMap();
 
-                GameObject obj = GameObject.CreateGameObject(objectInfo.entry, map, player, Quaternion.fromEulerAnglesZYX(player.GetOrientation(), 0.0f, 0.0f), 255, GameObjectState.Ready);
+                GameObject obj = GameObject.CreateGameObject(objectInfo.entry, map, player, Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(player.GetOrientation(), 0.0f, 0.0f)), 255, GameObjectState.Ready);
                 if (!obj)
                     return false;
 
@@ -658,7 +658,7 @@ namespace Game.Chat
                 if (spawntime != 0)
                     spawntm = spawntime;
 
-                Quaternion rotation = Quaternion.fromEulerAnglesZYX(player.GetOrientation(), 0.0f, 0.0f);
+                Quaternion rotation = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(player.GetOrientation(), 0.0f, 0.0f));
 
                 if (Global.ObjectMgr.GetGameObjectTemplate(id) == null)
                 {

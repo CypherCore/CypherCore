@@ -16,13 +16,13 @@
  */
 
 using Framework.Constants;
-using Framework.GameMath;
 using Game.Entities;
 using Game.Movement;
 using Game.Scripting;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace Scripts.Spells.Warrior
 {

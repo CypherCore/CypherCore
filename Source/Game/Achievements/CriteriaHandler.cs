@@ -18,7 +18,6 @@
 using Framework.Constants;
 using Framework.Database;
 using Game.Arenas;
-using Game.BattleFields;
 using Game.BattleGrounds;
 using Game.DataStorage;
 using Game.Entities;

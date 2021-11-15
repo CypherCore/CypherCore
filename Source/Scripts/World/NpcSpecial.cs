@@ -16,18 +16,18 @@
  */
 
 using Framework.Constants;
-using Framework.GameMath;
+using Framework.Dynamic;
 using Game;
 using Game.AI;
 using Game.Entities;
 using Game.Maps;
+using Game.Movement;
 using Game.Scripting;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Framework.Dynamic;
-using Game.Movement;
+using System.Numerics;
 
 namespace Scripts.World.NpcSpecial
 {
@@ -1929,7 +1929,7 @@ namespace Scripts.World.NpcSpecial
 
                 float displacement = 0.7f;
                 for (byte i = 0; i < 4; i++)
-                    me.SummonGameObject(GetFireworkGameObjectId(), me.GetPositionX() + (i % 2 == 0 ? displacement : -displacement), me.GetPositionY() + (i > 1 ? displacement : -displacement), me.GetPositionZ() + 4.0f, me.GetOrientation(), Quaternion.fromEulerAnglesZYX(me.GetOrientation(), 0.0f, 0.0f), 1);
+                    me.SummonGameObject(GetFireworkGameObjectId(), me.GetPositionX() + (i % 2 == 0 ? displacement : -displacement), me.GetPositionY() + (i > 1 ? displacement : -displacement), me.GetPositionZ() + 4.0f, me.GetOrientation(), Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(me.GetOrientation(), 0.0f, 0.0f)), 1);
             }
             else
                 //me.CastSpell(me, GetFireworkSpell(me.GetEntry()), true);

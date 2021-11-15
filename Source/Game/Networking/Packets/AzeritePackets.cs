@@ -17,7 +17,6 @@
 
 using Framework.Constants;
 using Game.Entities;
-using Framework.Dynamic;
 
 namespace Game.Networking.Packets
 {

@@ -18,7 +18,6 @@
 using Framework.Constants;
 using Framework.Database;
 using Framework.Dynamic;
-using Framework.GameMath;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Maps;
@@ -26,6 +25,7 @@ using Game.Networking.Packets;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Game.Garrisons
 {
@@ -735,7 +735,7 @@ namespace Game.Garrisons
                     if (finalizeInfo != null)
                     {
                         Position pos2 = finalizeInfo.factionInfo[faction].Pos;
-                        GameObject finalizer = GameObject.CreateGameObject(finalizeInfo.factionInfo[faction].GameObjectId, map, pos2, Quaternion.fromEulerAnglesZYX(pos2.GetOrientation(), 0.0f, 0.0f), 255, GameObjectState.Ready);
+                        GameObject finalizer = GameObject.CreateGameObject(finalizeInfo.factionInfo[faction].GameObjectId, map, pos2, Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(pos2.GetOrientation(), 0.0f, 0.0f)), 255, GameObjectState.Ready);
                         if (finalizer)
                         {
                             // set some spell id to make the object delete itself after use

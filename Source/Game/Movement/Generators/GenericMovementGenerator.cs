@@ -17,7 +17,6 @@
 
 using Framework.Constants;
 using Game.Entities;
-using System;
 
 namespace Game.Movement
 {

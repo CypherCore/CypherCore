@@ -17,13 +17,13 @@
 
 using Framework.Constants;
 using Framework.Database;
-using Framework.GameMath;
 using Game.DataStorage;
 using Game.Entities;
 using Game.Movement;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Game.Maps
 {
@@ -186,9 +186,9 @@ namespace Game.Maps
                 allPoints.Add(new Vector3(path[i].Loc.X, path[i].Loc.Y, path[i].Loc.Z));
 
             // Add extra points to allow derivative calculations for all path nodes
-            allPoints.Insert(0, allPoints.First().lerp(allPoints[1], -0.2f));
-            allPoints.Add(allPoints.Last().lerp(allPoints[^2], -0.2f));
-            allPoints.Add(allPoints.Last().lerp(allPoints[^2], -1.0f));
+            allPoints.Insert(0, Vector3.Lerp(allPoints.First(), allPoints[1], -0.2f));
+            allPoints.Add(Vector3.Lerp(allPoints.Last(), allPoints[^2], -0.2f));
+            allPoints.Add(Vector3.Lerp(allPoints.Last(), allPoints[^2], -1.0f));
 
             SplineRawInitializer initer = new(allPoints);
             Spline orientationSpline = new();

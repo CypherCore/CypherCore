@@ -20,6 +20,7 @@ using Framework.GameMath;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Numerics;
 
 namespace Game.Collision
 {
@@ -346,7 +347,7 @@ namespace Game.Collision
         public bool GetObjectHitPos(Vector3 pPos1, Vector3 pPos2, out Vector3 pResultHitPos, float pModifyDist)
         {
             bool result;
-            float maxDist = (pPos2 - pPos1).magnitude();
+            float maxDist = (pPos2 - pPos1).Length();
             // valid map coords should *never ever* produce float overflow, but this would produce NaNs too
             Cypher.Assert(maxDist < float.MaxValue);
             // prevent NaN values which can cause BIH intersection to enter infinite loop
@@ -363,7 +364,7 @@ namespace Game.Collision
                 pResultHitPos = pPos1 + dir * dist;
                 if (pModifyDist < 0)
                 {
-                    if ((pResultHitPos - pPos1).magnitude() > -pModifyDist)
+                    if ((pResultHitPos - pPos1).Length() > -pModifyDist)
                     {
                         pResultHitPos += dir * pModifyDist;
                     }
@@ -388,7 +389,7 @@ namespace Game.Collision
 
         public bool IsInLineOfSight(Vector3 pos1, Vector3 pos2, ModelIgnoreFlags ignoreFlags)
         {
-            float maxDist = (pos2 - pos1).magnitude();
+            float maxDist = (pos2 - pos1).Length();
             // return false if distance is over max float, in case of cheater teleporting to the end of the universe
             if (maxDist == float.MaxValue ||
                 maxDist == float.PositiveInfinity)

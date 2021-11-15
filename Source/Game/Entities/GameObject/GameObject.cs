@@ -17,7 +17,6 @@
 
 using Framework.Constants;
 using Framework.Database;
-using Framework.GameMath;
 using Game.AI;
 using Game.BattleGrounds;
 using Game.Collision;
@@ -25,12 +24,13 @@ using Game.DataStorage;
 using Game.Groups;
 using Game.Loots;
 using Game.Maps;
+using Game.Networking;
 using Game.Networking.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Game.Networking;
+using System.Numerics;
 
 namespace Game.Entities
 {
@@ -246,7 +246,7 @@ namespace Game.Entities
             GameObjectAddon gameObjectAddon = Global.ObjectMgr.GetGameObjectAddon(GetSpawnId());
 
             // For most of gameobjects is (0, 0, 0, 1) quaternion, there are only some transports with not standard rotation
-            Quaternion parentRotation = Quaternion.WAxis;
+            Quaternion parentRotation = Quaternion.Identity;
             if (gameObjectAddon != null)
                 parentRotation = gameObjectAddon.ParentRotation;
 
@@ -2191,8 +2191,9 @@ namespace Game.Entities
 
         public void SetWorldRotation(float qx, float qy, float qz, float qw)
         {
-            Quaternion rotation = new(qx, qy, qz, qw);
-            rotation.unitize();
+            Quaternion rotation = new Quaternion(qx, qy, qz, qw);
+            rotation = Quaternion.Multiply(rotation, 1.0f / MathF.Sqrt(Quaternion.Dot(rotation, rotation)));
+
             m_worldRotation.X = rotation.X;
             m_worldRotation.Y = rotation.Y;
             m_worldRotation.Z = rotation.Z;
@@ -2207,7 +2208,7 @@ namespace Game.Entities
 
         public void SetWorldRotationAngles(float z_rot, float y_rot, float x_rot)
         {
-            Quaternion quat = Quaternion.fromEulerAnglesZYX(z_rot, y_rot, x_rot);
+            Quaternion quat = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(z_rot, y_rot, x_rot));
             SetWorldRotation(quat.X, quat.Y, quat.Z, quat.W);
         }
 

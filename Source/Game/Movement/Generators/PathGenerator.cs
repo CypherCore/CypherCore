@@ -16,10 +16,10 @@
  */
 
 using Framework.Constants;
-using Framework.GameMath;
 using Game.Entities;
 using Game.Maps;
 using System;
+using System.Numerics;
 
 namespace Game.Movement
 {
@@ -481,7 +481,7 @@ namespace Game.Movement
                 Vector3 endVec = new(endPoint[0], endPoint[1], endPoint[2]);
                 Vector3 diffVec = (endVec - startVec);
                 Vector3 prevVec = startVec;
-                float len = diffVec.GetLength();
+                float len = diffVec.Length();
                 diffVec *= 4.0f / len;
                 while (len > 4.0f)
                 {
@@ -861,7 +861,7 @@ namespace Game.Movement
 
         float Dist3DSqr(Vector3 p1, Vector3 p2)
         {
-            return (p1 - p2).GetLengthSquared();
+            return (p1 - p2).LengthSquared();
         }
 
         public void ShortenPathUntilDist(Position pos, float dist) { ShortenPathUntilDist(new Vector3(pos.posX, pos.posY, pos.posZ), dist); }
@@ -878,11 +878,11 @@ namespace Game.Movement
 
             // the first point of the path must be outside the specified range
             // (this should have really been checked by the caller...)
-            if ((_pathPoints[0] - target).GetLengthSquared() < distSq)
+            if ((_pathPoints[0] - target).LengthSquared() < distSq)
                 return;
 
             // check if we even need to do anything
-            if ((_pathPoints[0] - target).GetLengthSquared() >= distSq)
+            if ((_pathPoints[0] - target).LengthSquared() >= distSq)
                 return;
 
             int i = _pathPoints.Length - 1;
@@ -893,7 +893,7 @@ namespace Game.Movement
             while (true)
             {
                 // we know that pathPoints[i] is too close already (from the previous iteration)
-                if ((_pathPoints[i - 1] - target).GetLengthSquared() >= distSq)
+                if ((_pathPoints[i - 1] - target).LengthSquared() >= distSq)
                     break; // bingo!
 
                 if (--i == 0)
@@ -908,7 +908,7 @@ namespace Game.Movement
             // ok, _pathPoints[i] is too close, _pathPoints[i-1] is not, so our target point is somewhere between the two...
             //   ... settle for a guesstimate since i'm not confident in doing trig on every chase motion tick...
             // (@todo review this)
-            _pathPoints[i] += (_pathPoints[i - 1] - _pathPoints[i]).directionOrZero() * (dist - (_pathPoints[i] - target).GetLength());
+            _pathPoints[i] += (_pathPoints[i - 1] - _pathPoints[i]).directionOrZero() * (dist - (_pathPoints[i] - target).Length());
             Array.Resize(ref _pathPoints, i + 1);
         }
 

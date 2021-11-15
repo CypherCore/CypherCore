@@ -16,6 +16,7 @@
  */
 
 using System;
+using System.Numerics;
 
 namespace Framework.GameMath
 {
@@ -26,7 +27,7 @@ namespace Framework.GameMath
             Vector3 normal = Vector3.Zero;
             if (collisionLocationForMovingPointFixedAABox(origin, dir, box, ref location, out Inside, ref normal))
             {
-                return (location - origin).magnitude();
+                return Vector3.Distance(location, origin);
             }
             else
             {
@@ -43,26 +44,26 @@ namespace Framework.GameMath
             // Find candidate planes.
             for (int i = 0; i < 3; ++i)
             {
-                if (origin[i] < MinB[i])
+                if (origin.GetAt(i) < MinB.GetAt(i))
                 {
-                    location[i] = MinB[i];
+                    location.SetAt(MinB.GetAt(i), i);
                     Inside = false;
 
                     // Calculate T distances to candidate planes
-                    if ((uint)dir[i] != 0)
+                    if ((uint)dir.GetAt(i) != 0)
                     {
-                        MaxT[i] = (MinB[i] - origin[i]) / dir[i];
+                        MaxT.SetAt((MinB.GetAt(i) - origin.GetAt(i)) / dir.GetAt(i), i);
                     }
                 }
-                else if (origin[i] > MaxB[i])
+                else if (origin.GetAt(i) > MaxB.GetAt(i))
                 {
-                    location[i] = MaxB[i];
+                    location.SetAt(MaxB.GetAt(i), i);
                     Inside = false;
 
                     // Calculate T distances to candidate planes
-                    if ((uint)dir[i] != 0)
+                    if ((uint)dir.GetAt(i) != 0)
                     {
-                        MaxT[i] = (MaxB[i] - origin[i]) / dir[i];
+                        MaxT.SetAt((MaxB.GetAt(i) - origin.GetAt(i)) / dir.GetAt(i), i);
                     }
                 }
             }
@@ -76,18 +77,18 @@ namespace Framework.GameMath
 
             // Get largest of the maxT's for final choice of intersection
             int WhichPlane = 0;
-            if (MaxT[1] > MaxT[WhichPlane])
+            if (MaxT.Y > MaxT.GetAt(WhichPlane))
             {
                 WhichPlane = 1;
             }
 
-            if (MaxT[2] > MaxT[WhichPlane])
+            if (MaxT.Z > MaxT.GetAt(WhichPlane))
             {
                 WhichPlane = 2;
             }
 
             // Check final candidate actually inside box
-            if (Convert.ToBoolean((uint)MaxT[WhichPlane] & 0x80000000))
+            if (Convert.ToBoolean((uint)MaxT.GetAt(WhichPlane) & 0x80000000))
             {
                 // Miss the box
                 return false;
@@ -97,9 +98,9 @@ namespace Framework.GameMath
             {
                 if (i != WhichPlane)
                 {
-                    location[i] = origin[i] + MaxT[WhichPlane] * dir[i];
-                    if ((location[i] < MinB[i]) ||
-                        (location[i] > MaxB[i]))
+                    location.SetAt(origin.GetAt(i) + MaxT.GetAt(WhichPlane) * dir.GetAt(i), i);
+                    if ((location.GetAt(i) < MinB.GetAt(i)) ||
+                        (location.GetAt(i) > MaxB.GetAt(i)))
                     {
                         // On this plane we're outside the box extents, so
                         // we miss the box
@@ -110,7 +111,7 @@ namespace Framework.GameMath
 
             // Choose the normal to be the plane normal facing into the ray
             normal = Vector3.Zero;
-            normal[WhichPlane] = (float)((dir[WhichPlane] > 0) ? -1.0 : 1.0);
+            normal.SetAt((float)((dir.GetAt(WhichPlane) > 0) ? -1.0 : 1.0), WhichPlane);
 
             return true;
         }

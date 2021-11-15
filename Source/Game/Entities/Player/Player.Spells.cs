@@ -17,7 +17,6 @@
 
 using Framework.Constants;
 using Framework.Dynamic;
-using Game.BattlePets;
 using Game.DataStorage;
 using Game.Networking.Packets;
 using Game.Spells;

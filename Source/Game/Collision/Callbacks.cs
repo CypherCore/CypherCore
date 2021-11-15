@@ -19,6 +19,7 @@ using Framework.Constants;
 using Framework.GameMath;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace Game.Collision
 {
@@ -43,8 +44,8 @@ namespace Game.Collision
             Vector3 lo = vertices[(int)tri.idx0];
             Vector3 hi = lo;
 
-            lo = (lo.Min(vertices[(int)tri.idx1])).Min(vertices[(int)tri.idx2]);
-            hi = (hi.Max(vertices[(int)tri.idx1])).Max(vertices[(int)tri.idx2]);
+            lo = Vector3.Min(Vector3.Min(lo, vertices[(int)tri.idx1]), vertices[(int)tri.idx2]);
+            hi = Vector3.Max(Vector3.Max(hi, vertices[(int)tri.idx1]), vertices[(int)tri.idx2]);
 
             value = new AxisAlignedBox(lo, hi);
         }
@@ -119,8 +120,8 @@ namespace Game.Collision
 
             Vector3 e1 = points[(int)tri.idx1] - points[(int)tri.idx0];
             Vector3 e2 = points[(int)tri.idx2] - points[(int)tri.idx0];
-            Vector3 p = new(ray.Direction.cross(e2));
-            float a = e1.dot(p);
+            Vector3 p = Vector3.Cross(ray.Direction, e2);
+            float a = Vector3.Dot(e1, p);
 
             if (Math.Abs(a) < EPS)
             {
@@ -129,8 +130,8 @@ namespace Game.Collision
             }
 
             float f = 1.0f / a;
-            Vector3 s = new(ray.Origin - points[(int)tri.idx0]);
-            float u = f * s.dot(p);
+            Vector3 s = ray.Origin - points[(int)tri.idx0];
+            float u = f * Vector3.Dot(s, p);
 
             if ((u < 0.0f) || (u > 1.0f))
             {
@@ -138,8 +139,8 @@ namespace Game.Collision
                 return false;
             }
 
-            Vector3 q = new(s.cross(e1));
-            float v = f * ray.Direction.dot(q);
+            Vector3 q = Vector3.Cross(s, e1);
+            float v = f * Vector3.Dot(ray.Direction, q);
 
             if ((v < 0.0f) || ((u + v) > 1.0f))
             {
@@ -147,7 +148,7 @@ namespace Game.Collision
                 return false;
             }
 
-            float t = f * e2.dot(q);
+            float t = f * Vector3.Dot(e2, q);
 
             if ((t > 0.0f) && (t < distance))
             {

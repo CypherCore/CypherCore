@@ -18,10 +18,7 @@
 using Framework.Constants;
 using Game.AI;
 using Game.Entities;
-using Game.Maps;
 using Game.Scripting;
-using System.Collections.Generic;
-using System;
 
 namespace Scripts.Pets
 {

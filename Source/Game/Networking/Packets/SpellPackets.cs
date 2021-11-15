@@ -17,11 +17,11 @@
 
 using Framework.Constants;
 using Framework.Dynamic;
-using Framework.GameMath;
 using Game.Entities;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace Game.Networking.Packets
 {

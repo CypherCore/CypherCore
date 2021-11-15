@@ -16,7 +16,7 @@
  */
 
 using Framework.Constants;
-using Framework.GameMath;
+using System.Numerics;
 
 namespace Game.DataStorage
 {

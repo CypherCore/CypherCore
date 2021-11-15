@@ -17,7 +17,6 @@
 
 using Framework.Constants;
 using Framework.Dynamic;
-using Framework.GameMath;
 using Game.AI;
 using Game.BattleFields;
 using Game.DataStorage;
@@ -28,6 +27,7 @@ using Game.Scenarios;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace Game.Entities
 {

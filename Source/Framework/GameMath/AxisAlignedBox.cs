@@ -16,8 +16,8 @@
  */
 
 using System;
+using System.Numerics;
 using System.Runtime.Serialization;
-using System.Security.Permissions;
 
 namespace Framework.GameMath
 {
@@ -233,14 +233,14 @@ namespace Framework.GameMath
 
         public void merge(AxisAlignedBox a)
         {
-            Lo = Lo.Min(a.Lo);
-            Hi = Hi.Max(a.Hi);
+            Lo = Vector3.Min(_lo, a.Lo);
+            Hi = Vector3.Max(Hi, a.Hi);
         }
 
         public void merge(Vector3 a)
         {
-            _lo = _lo.Min(a);
-            _hi = _hi.Max(a);
+            _lo = Vector3.Min(_lo, a);
+            _hi = Vector3.Max(_hi, a);
         }
 
         public static AxisAlignedBox Zero()

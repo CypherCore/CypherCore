@@ -17,7 +17,6 @@
 
 using Framework.Constants;
 using Game.AI;
-using Game.Movement;
 using Game.Networking.Packets;
 using Game.Spells;
 using System.Collections.Generic;

@@ -16,8 +16,6 @@
  */
 
 using Framework.Constants;
-using Framework.Dynamic;
-using Framework.GameMath;
 using Game.AI;
 using Game.BattleGrounds;
 using Game.Chat;
@@ -32,6 +30,7 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Game.Entities
 {

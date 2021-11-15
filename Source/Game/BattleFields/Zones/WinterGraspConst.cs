@@ -16,8 +16,8 @@
  */
 
 using Framework.Constants;
-using Framework.GameMath;
 using Game.Entities;
+using System.Numerics;
 
 namespace Game.BattleFields
 {

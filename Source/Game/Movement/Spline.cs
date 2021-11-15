@@ -16,10 +16,10 @@
  */
 
 using Framework.Constants;
-using Framework.GameMath;
 using Game.Entities;
 using Game.Maps;
 using System;
+using System.Numerics;
 
 namespace Game.Movement
 {
@@ -139,14 +139,14 @@ namespace Game.Movement
                 if (cyclic_point == 0)
                     points[0] = controls[count - 1];
                 else
-                    points[0] = controls[0].lerp(controls[1], -1);
+                    points[0] = Vector3.Lerp(controls[0], controls[1], -1);
 
                 points[high_index + 1] = controls[cyclic_point];
                 points[high_index + 2] = controls[cyclic_point + 1];
             }
             else
             {
-                points[0] = controls[0].lerp(controls[1], -1);
+                points[0] = Vector3.Lerp(controls[0], controls[1], -1);
                 points[high_index + 1] = controls[count - 1];
             }
 
@@ -219,7 +219,7 @@ namespace Game.Movement
         }
         float SegLengthLinear(int index)
         {
-            return (points[index] - points[index + 1]).GetLength();
+            return (points[index] - points[index + 1]).Length();
         }
         float SegLengthCatmullRom(int index)
         {
@@ -232,7 +232,7 @@ namespace Game.Movement
             while (i <= 3)
             {
                 C_Evaluate(p, i / (float)3, s_catmullRomCoeffs, out nextPos);
-                length += (nextPos - curPos).GetLength();
+                length += (nextPos - curPos).Length();
                 curPos = nextPos;
                 ++i;
             }
@@ -253,7 +253,7 @@ namespace Game.Movement
             while (i <= 3)
             {
                 C_Evaluate(p, i / (float)3, s_Bezier3Coeffs, out nextPos);
-                length += (nextPos - curPos).GetLength();
+                length += (nextPos - curPos).Length();
                 curPos = nextPos;
                 ++i;
             }
@@ -296,25 +296,25 @@ namespace Game.Movement
 
             return i;
         }
-        private static readonly Matrix4 s_catmullRomCoeffs = new(-0.5f, 1.5f, -1.5f, 0.5f, 1.0f, -2.5f, 2.0f, -0.5f, -0.5f, 0.0f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
+        private static readonly Matrix4x4 s_catmullRomCoeffs = new(-0.5f, 1.5f, -1.5f, 0.5f, 1.0f, -2.5f, 2.0f, -0.5f, -0.5f, 0.0f, 0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f);
 
-        private static readonly Matrix4 s_Bezier3Coeffs = new(-1.0f, 3.0f, -3.0f, 1.0f, 3.0f, -6.0f, 3.0f, 0.0f, -3.0f, 3.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f);
+        private static readonly Matrix4x4 s_Bezier3Coeffs = new(-1.0f, 3.0f, -3.0f, 1.0f, 3.0f, -6.0f, 3.0f, 0.0f, -3.0f, 3.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f);
 
-        void C_Evaluate(Span<Vector3> vertice, float t, Matrix4 matr, out Vector3 result)
+        void C_Evaluate(Span<Vector3> vertice, float t, Matrix4x4 matr, out Vector3 result)
         {
             Vector4 tvec = new(t * t * t, t * t, t, 1.0f);
-            Vector4 weights = (tvec * matr);
+            Vector4 weights = Vector4.Transform(tvec, matr);
 
-            result = vertice[0] * weights[0] + vertice[1] * weights[1]
-                   + vertice[2] * weights[2] + vertice[3] * weights[3];
+            result = vertice[0] * weights.X + vertice[1] * weights.Y
+                   + vertice[2] * weights.Z + vertice[3] * weights.W;
         }
-        void C_Evaluate_Derivative(Span<Vector3> vertice, float t, Matrix4 matr, out Vector3 result)
+        void C_Evaluate_Derivative(Span<Vector3> vertice, float t, Matrix4x4 matr, out Vector3 result)
         {
             Vector4 tvec = new(3.0f * t * t, 2.0f * t, 1.0f, 0.0f);
-            Vector4 weights = (tvec * matr);
+            Vector4 weights = Vector4.Transform(tvec, matr);
 
-            result = vertice[0] * weights[0] + vertice[1] * weights[1]
-                   + vertice[2] * weights[2] + vertice[3] * weights[3];
+            result = vertice[0] * weights.X + vertice[1] * weights.Y
+                   + vertice[2] * weights.Z + vertice[3] * weights.W;
         }
 
         public int Length() { return lengths[index_hi];}

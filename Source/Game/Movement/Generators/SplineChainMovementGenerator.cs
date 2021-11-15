@@ -16,11 +16,11 @@
  */
 
 using Framework.Constants;
-using Framework.GameMath;
 using Game.AI;
 using Game.Entities;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace Game.Movement
 {

@@ -182,6 +182,102 @@ namespace System
             return list;
         }
 
+        public static float GetAt(this Vector3 vector, long index)
+        {
+            switch (index)
+            {
+                case 0:
+                    return vector.X;
+                case 1:
+                    return vector.Y;
+                case 2:
+                    return vector.Z;
+                default:
+                    throw new IndexOutOfRangeException();
+            }
+        }
+
+        public static void SetAt(this ref Vector3 vector, float value, long index)
+        {
+            switch (index)
+            {
+                case 0:
+                    vector.X = value;
+                    break;
+                case 1:
+                    vector.Y = value;
+                    break;
+                case 2:
+                    vector.Z = value;
+                    break;
+                default:
+                    throw new IndexOutOfRangeException();
+            }
+        }
+
+        public static int primaryAxis(this Vector3 vector)
+        {
+            var a = 0;
+
+            double nx = Math.Abs(vector.X);
+            double ny = Math.Abs(vector.Y);
+            double nz = Math.Abs(vector.Z);
+
+            if (nx > ny)
+            {
+                if (nx > nz)
+                    a = 0;
+                else
+                    a = 2;
+            }
+            else
+            {
+                if (ny > nz)
+                    a = 1;
+                else
+                    a = 2;
+            }
+
+            return a;
+        }
+
+        public static Vector3 directionOrZero(this Vector3 vector)
+        {
+            float mag = vector.Length();
+            if (mag < 0.0000001f)
+            {
+                return Vector3.Zero;
+            }
+            else if (mag < 1.00001f && mag > 0.99999f)
+            {
+                return vector;
+            }
+            else
+            {
+                return vector * (1.0f / mag);
+            }
+        }
+
+        public static Matrix4x4 fromEulerAnglesZYX(float fYAngle, float fPAngle, float fRAngle)
+        {
+            float fCos = (float)Math.Cos(fYAngle);
+            float fSin = (float)Math.Sin(fYAngle);
+
+            Matrix4x4 kZMat = new(fCos, -fSin, 0, 0, fSin, fCos, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0);
+
+            fCos = (float)Math.Cos(fPAngle);
+            fSin = (float)Math.Sin(fPAngle);
+
+            Matrix4x4 kYMat = new(fCos, 0, fSin, 0, 0, 1, 0, 0, -fSin, 0, fCos, 0, 0, 0, 0, 0);
+
+            fCos = (float)Math.Cos(fRAngle);
+            fSin = (float)Math.Sin(fRAngle);
+
+            Matrix4x4 kXMat = new(1, 0, 0, 0, 0, fCos, -fSin, 0, 0, fSin, fCos, 0, 0, 0, 0, 0);
+
+            return (kZMat * (kYMat * kXMat));
+        }
+
         #region Strings
         public static bool IsEmpty(this string str)
         {
@@ -254,6 +350,24 @@ namespace System
             if (wchar >= 'A' && wchar <= 'Z')                      // LATIN CAPITAL LETTER A - LATIN CAPITAL LETTER Z
                 return true;
             return false;
+        }
+
+        public static Vector3 ParseVector3(this string value)
+        {
+            Regex r = new Regex(@"\((?<x>.*),(?<y>.*),(?<z>.*)\)", RegexOptions.Singleline);
+            Match m = r.Match(value);
+            if (m.Success)
+            {
+                return new Vector3(
+                    float.Parse(m.Result("${x}")),
+                    float.Parse(m.Result("${y}")),
+                    float.Parse(m.Result("${z}"))
+                    );
+            }
+            else
+            {
+                throw new Exception("Unsuccessful Match.");
+            }
         }
         #endregion
 

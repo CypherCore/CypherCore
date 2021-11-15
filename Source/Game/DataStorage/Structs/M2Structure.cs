@@ -17,6 +17,7 @@
 
 using Framework.GameMath;
 using System.IO;
+using System.Numerics;
 
 namespace Game.DataStorage
 {

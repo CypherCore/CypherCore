@@ -19,7 +19,6 @@ using Framework.Constants;
 using Framework.Database;
 using Framework.Dynamic;
 using Game.AI;
-using Game.Combat;
 using Game.DataStorage;
 using Game.Groups;
 using Game.Loots;

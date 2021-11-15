@@ -17,10 +17,10 @@
 
 using Framework.Constants;
 using Framework.Database;
-using Framework.GameMath;
 using Game.Entities;
 using Game.Maps;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace Game.DataStorage
 {

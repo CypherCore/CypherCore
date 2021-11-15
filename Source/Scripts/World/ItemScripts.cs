@@ -16,11 +16,12 @@
  */
 
 using Framework.Constants;
-using Framework.GameMath;
 using Game.Entities;
 using Game.Scripting;
 using Game.Spells;
+using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace Scripts.World.ItemScripts
 {
@@ -235,7 +236,7 @@ namespace Scripts.World.ItemScripts
                 return true;
 
             go.GetClosePoint(out float x, out float y, out float z, go.GetCombatReach() / 3, 7.0f);
-            go.SummonGameObject(GameObjectIds.HighQualityFur, go, Quaternion.fromEulerAnglesZYX(go.GetOrientation(), 0.0f, 0.0f), 1);
+            go.SummonGameObject(GameObjectIds.HighQualityFur, go, Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(go.GetOrientation(), 0.0f, 0.0f)), 1);
             TempSummon summon = player.SummonCreature(CreatureIds.NesingwaryTrapper, x, y, z, go.GetOrientation(), TempSummonType.DeadDespawn, 1000);
             if (summon)
             {

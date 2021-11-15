@@ -21,7 +21,6 @@ using Game.BattleFields;
 using Game.BattleGrounds;
 using Game.DataStorage;
 using Game.Entities;
-using Game.Loots;
 using Game.Maps;
 using Game.Networking.Packets;
 using System;

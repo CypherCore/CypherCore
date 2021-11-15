@@ -16,20 +16,9 @@
  */
 
 using Framework.Constants;
-using Framework.IO;
-using Game.BattleGrounds;
 using Game.DataStorage;
-using Game.Entities;
-using Game.Groups;
-using Game.Guilds;
-using Game.Maps;
-using Game.Misc;
 using Game.Networking;
 using Game.Networking.Packets;
-using Game.PvP;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Linq;
 
 namespace Game

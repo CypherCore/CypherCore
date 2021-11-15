@@ -16,10 +16,10 @@
  */
 
 using Framework.Constants;
-using Framework.GameMath;
+using Framework.Dynamic;
 using System;
 using System.Collections.Generic;
-using Framework.Dynamic;
+using System.Numerics;
 
 namespace Game.Collision
 {

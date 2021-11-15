@@ -17,9 +17,9 @@
 
 using Framework.Constants;
 using Framework.Dynamic;
-using Framework.GameMath;
 using System;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace Game.Movement
 {
@@ -52,7 +52,7 @@ namespace Game.Movement
             effect_start_time = 0;
             spell_effect_extra = args.spellEffectExtra;
             anim_tier = args.animTier;
-            splineIsFacingOnly = args.path.Length == 2 && args.facing.type != MonsterMoveType.Normal && ((args.path[1] - args.path[0]).GetLength() < 0.1f);
+            splineIsFacingOnly = args.path.Length == 2 && args.facing.type != MonsterMoveType.Normal && ((args.path[1] - args.path[0]).Length() < 0.1f);
 
             // Check if its a stop spline
             if (args.flags.HasFlag(SplineFlag.Done))

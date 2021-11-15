@@ -17,7 +17,6 @@
 
 using Framework.Constants;
 using Game.Entities;
-using Game.Maps;
 using Game.Scripting;
 using Game.Spells;
 using System;

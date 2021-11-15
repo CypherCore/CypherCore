@@ -15,11 +15,6 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Framework.Constants;
-using Game.Entities;
-using Game.Networking;
-using Game.Networking.Packets;
-
 namespace Game
 {
     public partial class WorldSession

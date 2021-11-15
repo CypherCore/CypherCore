@@ -17,11 +17,10 @@
 
 using Framework.Collections;
 using Framework.Constants;
-using Framework.GameMath;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using Game.Networking.Packets;
 using Game.Maps;
+using Game.Networking.Packets;
+using System.Numerics;
+using System.Runtime.InteropServices;
 
 namespace Game.Entities
 {

@@ -16,7 +16,6 @@
  */
 
 using Framework.Constants;
-using Framework.GameMath;
 using Game.Chat;
 using Game.DataStorage;
 using Game.Entities;
@@ -27,6 +26,7 @@ using Game.Spells;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Game.AI
 {
@@ -1195,20 +1195,20 @@ namespace Game.AI
                     if (!summoner)
                         break;
 
-                    foreach (var target in targets)
-                    {
-                        Position pos = target.GetPositionWithOffset(new Position(e.Target.x, e.Target.y, e.Target.z, e.Target.o));
-                        Quaternion rot = Quaternion.fromEulerAnglesZYX(pos.GetOrientation(), 0f, 0f);
-                        summoner.SummonGameObject(e.Action.summonGO.entry, pos, rot, e.Action.summonGO.despawnTime, (GameObjectSummonType)e.Action.summonGO.summonType);
-                    }
+                        foreach (var target in targets)
+                        {
+                            Position pos = target.GetPositionWithOffset(new Position(e.Target.x, e.Target.y, e.Target.z, e.Target.o));
+                            Quaternion rot = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(pos.GetOrientation(), 0f, 0f));
+                            summoner.SummonGameObject(e.Action.summonGO.entry, pos, rot, e.Action.summonGO.despawnTime, (GameObjectSummonType)e.Action.summonGO.summonType);
+                        }
 
-                    if (e.GetTargetType() != SmartTargets.Position)
+                        if (e.GetTargetType() != SmartTargets.Position)
+                            break;
+
+                        Quaternion _rot = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(e.Target.o, 0f, 0f));
+                        summoner.SummonGameObject(e.Action.summonGO.entry, new Position(e.Target.x, e.Target.y, e.Target.z, e.Target.o), _rot, e.Action.summonGO.despawnTime, (GameObjectSummonType)e.Action.summonGO.summonType);
                         break;
-
-                    Quaternion _rot = Quaternion.fromEulerAnglesZYX(e.Target.o, 0f, 0f);
-                    summoner.SummonGameObject(e.Action.summonGO.entry, new Position(e.Target.x, e.Target.y, e.Target.z, e.Target.o), _rot, e.Action.summonGO.despawnTime, (GameObjectSummonType)e.Action.summonGO.summonType);
-                    break;
-                }
+                    }
                 case SmartActions.KillUnit:
                 {
                     foreach (var target in targets)

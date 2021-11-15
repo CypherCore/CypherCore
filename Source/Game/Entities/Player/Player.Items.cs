@@ -17,7 +17,6 @@
 
 using Framework.Constants;
 using Framework.Database;
-using Game.Arenas;
 using Game.BattleGrounds;
 using Game.DataStorage;
 using Game.Groups;
@@ -32,7 +31,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Game.BattleFields;
-using Framework.Dynamic;
 
 namespace Game.Entities
 {

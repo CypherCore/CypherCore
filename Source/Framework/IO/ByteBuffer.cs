@@ -15,9 +15,9 @@
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-using Framework.GameMath;
 using System;
 using System.IO;
+using System.Numerics;
 using System.Text;
 
 namespace Framework.IO

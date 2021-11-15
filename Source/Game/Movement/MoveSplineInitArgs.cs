@@ -16,9 +16,8 @@
  */
 
 using Framework.Dynamic;
-using Framework.GameMath;
 using Game.Entities;
-using System;
+using System.Numerics;
 
 namespace Game.Movement
 {
@@ -80,7 +79,7 @@ namespace Game.Movement
         {
             if (path.Length > 2 || facing.type == Framework.Constants.MonsterMoveType.Normal)
                 for (uint i = 0; i < path.Length - 1; ++i)
-                    if ((path[i + 1] - path[i]).GetLength() < 0.1f)
+                    if ((path[i + 1] - path[i]).Length() < 0.1f)
                         return false;
             return true;
         }

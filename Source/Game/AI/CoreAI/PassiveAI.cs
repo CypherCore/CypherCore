@@ -18,7 +18,6 @@
 using Framework.Constants;
 using Game.Entities;
 using Game.Spells;
-using System.Collections.Generic;
 
 namespace Game.AI
 {

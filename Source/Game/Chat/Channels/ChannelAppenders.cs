@@ -19,7 +19,6 @@ using Framework.Constants;
 using Game.Cache;
 using Game.Entities;
 using Game.Maps;
-using Game.Networking;
 using Game.Networking.Packets;
 
 namespace Game.Chat

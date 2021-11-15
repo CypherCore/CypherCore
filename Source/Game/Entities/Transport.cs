@@ -16,12 +16,12 @@
  */
 
 using Framework.Constants;
-using Framework.GameMath;
 using Game.DataStorage;
 using Game.Maps;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace Game.Entities
 {
@@ -132,7 +132,7 @@ namespace Game.Entities
             SetGoAnimProgress(animprogress);
             SetName(goinfo.name);
             SetWorldRotation(0.0f, 0.0f, 0.0f, 1.0f);
-            SetParentRotation(Quaternion.WAxis);
+            SetParentRotation(Quaternion.Identity);
 
             CreateModel();
             return true;

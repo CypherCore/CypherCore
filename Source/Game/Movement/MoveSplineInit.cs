@@ -16,10 +16,10 @@
  */
 
 using Framework.Constants;
-using Framework.GameMath;
 using Game.Entities;
 using Game.Networking.Packets;
 using System;
+using System.Numerics;
 
 namespace Game.Movement
 {
