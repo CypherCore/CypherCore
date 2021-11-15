@@ -67,6 +67,8 @@ namespace Framework.Networking
             try
             {
                 var result = await _stream.ReadAsync(_receiveBuffer, 0, _receiveBuffer.Length);
+                if (result == 0)
+                    return;
                 ReadHandler(_receiveBuffer, result);
             }
             catch (Exception ex)
