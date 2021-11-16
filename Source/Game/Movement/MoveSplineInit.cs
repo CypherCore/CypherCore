@@ -127,7 +127,7 @@ namespace Game.Movement
             // limit the speed in the same way the client does
             float speedLimit()
             {
-                if (args.flags.HasFlag(SplineFlag.Unknown_0x20000000))
+                if (args.flags.HasFlag(SplineFlag.UnlimitedSpeed))
                     return float.MaxValue;
 
                 if (args.flags.HasFlag(SplineFlag.Falling) || args.flags.HasFlag(SplineFlag.Catmullrom) || args.flags.HasFlag(SplineFlag.Flying) || args.flags.HasFlag(SplineFlag.Parabolic))
