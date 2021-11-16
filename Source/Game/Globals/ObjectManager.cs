@@ -7283,6 +7283,7 @@ namespace Game
                             break;
                         case QuestObjectiveType.Money:
                         case QuestObjectiveType.WinPvpPetBattles:
+                        case QuestObjectiveType.ProgressBar:
                             break;
                         default:
                             Log.outError(LogFilter.Sql, "Quest {0} objective {1} has unhandled type {2}", qinfo.Id, obj.Id, obj.Type);

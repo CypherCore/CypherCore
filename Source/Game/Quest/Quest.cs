@@ -145,7 +145,7 @@ namespace Game
 
             if (playerConditionId != 0 && !CliDB.PlayerConditionStorage.ContainsKey(playerConditionId))
             {
-                Log.outError(LogFilter.Sql, $"Table `quest_reward_display_spell` has non-existing PlayerCondition ({spellId}) set for quest {Id}. Set to 0.");
+                Log.outError(LogFilter.Sql, $"Table `quest_reward_display_spell` has non-existing PlayerCondition ({playerConditionId}) set for quest {Id}. and spell {spellId} Set to 0.");
                 playerConditionId = 0;
             }
 
