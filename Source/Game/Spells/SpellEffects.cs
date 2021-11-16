@@ -1823,12 +1823,18 @@ namespace Game.Spells
                     if (itemEffect.TriggerType != ItemSpelltriggerType.LearnSpellId)
                         continue;
 
-                    player.LearnSpell((uint)itemEffect.SpellID, false);
+                    bool dependent = false;
 
                     var speciesEntry = Global.SpellMgr.GetBattlePetSpecies((uint)itemEffect.SpellID);
                     if (speciesEntry != null)
+                    {
                         player.GetSession().GetBattlePetMgr().AddPet(speciesEntry.Id, BattlePetMgr.SelectPetDisplay(speciesEntry), BattlePetMgr.RollPetBreed(speciesEntry.Id), BattlePetMgr.GetDefaultPetQuality(speciesEntry.Id));
+                        // If the spell summons a battle pet, we fake that it has been learned and the battle pet is added
+                        // marking as dependent prevents saving the spell to database (intended)
+                        dependent = true;
+                    }
 
+                    player.LearnSpell((uint)itemEffect.SpellID, dependent);
                 }
             }
 
@@ -5481,8 +5487,8 @@ namespace Game.Spells
             if (speciesEntry == null)
                 return;
 
-            Player plr = m_caster.ToPlayer();
-            BattlePetMgr battlePetMgr = plr.GetSession().GetBattlePetMgr();
+            Player player = m_caster.ToPlayer();
+            BattlePetMgr battlePetMgr = player.GetSession().GetBattlePetMgr();
             if (battlePetMgr == null)
                 return;
 
@@ -5502,13 +5508,9 @@ namespace Game.Spells
 
             battlePetMgr.AddPet(speciesId, displayId, breed, quality, level);
 
-            if (speciesEntry.SummonSpellID != 0)
-                if (!plr.HasSpell(speciesEntry.SummonSpellID))
-                    plr.LearnSpell(speciesEntry.SummonSpellID, false);
+            player.SendPlaySpellVisual(player, SharedConst.SpellVisualUncagePet, 0, 0, 0.0f, false);
 
-            plr.SendPlaySpellVisual(plr, SharedConst.SpellVisualUncagePet, 0, 0, 0.0f, false);
-
-            plr.DestroyItem(m_CastItem.GetBagSlot(), m_CastItem.GetSlot(), true);
+            player.DestroyItem(m_CastItem.GetBagSlot(), m_CastItem.GetSlot(), true);
             m_CastItem = null;
         }
 
