@@ -354,7 +354,6 @@ namespace Game.DataStorage
 
                 _mapDifficulties[entry.MapID][entry.DifficultyID] = entry;
             }
-            _mapDifficulties[0][0] = _mapDifficulties[1][0]; // map 0 is missing from MapDifficulty.dbc so we cheat a bit
 
             List<MapDifficultyXConditionRecord> mapDifficultyConditions = new();
             foreach (var mapDifficultyCondition in MapDifficultyXConditionStorage.Values)
