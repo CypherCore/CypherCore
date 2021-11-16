@@ -221,10 +221,11 @@ namespace Game.AI
                 temp.Target.raw.param1 = result.Read<uint>(22);
                 temp.Target.raw.param2 = result.Read<uint>(23);
                 temp.Target.raw.param3 = result.Read<uint>(24);
-                temp.Target.x = result.Read<float>(25);
-                temp.Target.y = result.Read<float>(26);
-                temp.Target.z = result.Read<float>(27);
-                temp.Target.o = result.Read<float>(28);
+                temp.Target.raw.param4 = result.Read<uint>(25);
+                temp.Target.x = result.Read<float>(26);
+                temp.Target.y = result.Read<float>(27);
+                temp.Target.z = result.Read<float>(28);
+                temp.Target.o = result.Read<float>(29);
 
                 //check target
                 if (!IsTargetValid(temp))
@@ -3233,6 +3234,7 @@ namespace Game.AI
             public uint param1;
             public uint param2;
             public uint param3;
+            public uint param4;
         }
         #endregion
     }
