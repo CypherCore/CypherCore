@@ -2191,7 +2191,7 @@ namespace Game.Entities
                     var summonProperties = CliDB.SummonPropertiesStorage.LookupByKey(effect.EffectMiscValue[1]);
                     if (summonProperties != null)
                     {
-                        if (summonProperties.Slot == (int)SummonSlot.MiniPet && summonProperties.Flags.HasAnyFlag(SummonPropFlags.Companion))
+                        if (summonProperties.Slot == (int)SummonSlot.MiniPet && summonProperties.GetFlags().HasFlag(SummonPropertiesFlags.SummonFromBattlePetJournal))
                         {
                             var battlePetSpecies = battlePetSpeciesByCreature.LookupByKey(effect.EffectMiscValue[0]);
                             if (battlePetSpecies != null)

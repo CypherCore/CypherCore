@@ -217,7 +217,7 @@ namespace Game.Entities
 
                 Global.ScriptMgr.OnRelocate(this, _currentFrame.Node.NodeIndex, _currentFrame.Node.ContinentID, _currentFrame.Node.Loc.X, _currentFrame.Node.Loc.Y, _currentFrame.Node.Loc.Z);
 
-                Log.outDebug(LogFilter.Transport, "Transport {0} ({1}) moved to node {2} {3} {4} {5} {6}", GetEntry(), GetName(), _currentFrame.Node.NodeIndex, _currentFrame.Node.ContinentID, 
+                Log.outDebug(LogFilter.Transport, "Transport {0} ({1}) moved to node {2} {3} {4} {5} {6}", GetEntry(), GetName(), _currentFrame.Node.NodeIndex, _currentFrame.Node.ContinentID,
                     _currentFrame.Node.Loc.X, _currentFrame.Node.Loc.Y, _currentFrame.Node.Loc.Z);
 
                 // Departure event
@@ -418,32 +418,32 @@ namespace Game.Entities
                     case SummonCategory.Wild:
                     case SummonCategory.Ally:
                     case SummonCategory.Unk:
+                    {
+                        switch (properties.Title)
                         {
-                            switch (properties.Title)
-                            {
-                                case SummonTitle.Minion:
-                                case SummonTitle.Guardian:
-                                case SummonTitle.Runeblade:
+                            case SummonTitle.Minion:
+                            case SummonTitle.Guardian:
+                            case SummonTitle.Runeblade:
+                                mask = UnitTypeMask.Guardian;
+                                break;
+                            case SummonTitle.Totem:
+                            case SummonTitle.LightWell:
+                                mask = UnitTypeMask.Totem;
+                                break;
+                            case SummonTitle.Vehicle:
+                            case SummonTitle.Mount:
+                                mask = UnitTypeMask.Summon;
+                                break;
+                            case SummonTitle.Companion:
+                                mask = UnitTypeMask.Minion;
+                                break;
+                            default:
+                                if (properties.GetFlags().HasFlag(SummonPropertiesFlags.JoinSummonerSpawnGroup)) // Mirror Image, Summon Gargoyle
                                     mask = UnitTypeMask.Guardian;
-                                    break;
-                                case SummonTitle.Totem:
-                                case SummonTitle.LightWell:
-                                    mask = UnitTypeMask.Totem;
-                                    break;
-                                case SummonTitle.Vehicle:
-                                case SummonTitle.Mount:
-                                    mask = UnitTypeMask.Summon;
-                                    break;
-                                case SummonTitle.Companion:
-                                    mask = UnitTypeMask.Minion;
-                                    break;
-                                default:
-                                    if (properties.Flags.HasAnyFlag(SummonPropFlags.Unk10)) // Mirror Image, Summon Gargoyle
-                                        mask = UnitTypeMask.Guardian;
-                                    break;
-                            }
-                            break;
+                                break;
                         }
+                        break;
+                    }
                     default:
                         return null;
                 }
@@ -476,7 +476,11 @@ namespace Game.Entities
             if (!summon.Create(map.GenerateLowGuid(HighGuid.Creature), map, entry, new Position(x, y, z, o), null, vehId))
                 return null;
 
-            PhasingHandler.InheritPhaseShift(summon, summoner ? (WorldObject)summoner : this);
+            WorldObject phaseShiftOwner = this;
+            if (summoner != null && !(properties != null && properties.GetFlags().HasFlag(SummonPropertiesFlags.IgnoreSummonerPhase)))
+                phaseShiftOwner = summoner;
+
+            PhasingHandler.InheritPhaseShift(summon, phaseShiftOwner);
 
             summon.SetCreatedBySpell(spellId);
 
@@ -674,7 +678,7 @@ namespace Game.Entities
                   z = nextFrame.Node.Loc.Z,
                   o = nextFrame.InitialOrientation;
 
-            foreach(WorldObject obj in _passengers.ToList())
+            foreach (WorldObject obj in _passengers.ToList())
             {
                 float destX, destY, destZ, destO;
                 obj.m_movementInfo.transport.pos.GetPosition(out destX, out destY, out destZ, out destO);
@@ -723,14 +727,14 @@ namespace Game.Entities
                 switch (passenger.GetTypeId())
                 {
                     case TypeId.Unit:
-                        {
-                            Creature creature = passenger.ToCreature();
-                            GetMap().CreatureRelocation(creature, x, y, z, o, false);
-                            creature.GetTransportHomePosition(out x, out y, out z, out o);
-                            CalculatePassengerPosition(ref x, ref y, ref z, ref o);
-                            creature.SetHomePosition(x, y, z, o);
-                            break;
-                        }
+                    {
+                        Creature creature = passenger.ToCreature();
+                        GetMap().CreatureRelocation(creature, x, y, z, o, false);
+                        creature.GetTransportHomePosition(out x, out y, out z, out o);
+                        CalculatePassengerPosition(ref x, ref y, ref z, ref o);
+                        creature.SetHomePosition(x, y, z, o);
+                        break;
+                    }
                     case TypeId.Player:
                         if (passenger.IsInWorld && !passenger.ToPlayer().IsBeingTeleported())
                         {

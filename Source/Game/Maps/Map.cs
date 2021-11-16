@@ -3979,7 +3979,7 @@ namespace Game.Maps
                                 mask = UnitTypeMask.Minion;
                                 break;
                             default:
-                                if (Convert.ToBoolean(properties.Flags & SummonPropFlags.Unk10)) // Mirror Image, Summon Gargoyle
+                                if (properties.GetFlags().HasFlag(SummonPropertiesFlags.JoinSummonerSpawnGroup)) // Mirror Image, Summon Gargoyle
                                     mask = UnitTypeMask.Guardian;
                                 break;
                         }
@@ -4016,7 +4016,7 @@ namespace Game.Maps
                 return null;
 
             // Set the summon to the summoner's phase
-            if (summoner)
+            if (summoner != null && !(properties != null && properties.GetFlags().HasFlag(SummonPropertiesFlags.IgnoreSummonerPhase)))
                 PhasingHandler.InheritPhaseShift(summon, summoner);
 
             summon.SetCreatedBySpell(spellId);

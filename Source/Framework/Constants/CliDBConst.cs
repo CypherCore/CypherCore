@@ -890,11 +890,11 @@ namespace Framework.Constants
         Arena = 0x80,                // Arena, Both Instanced And World Arenas
         Capital = 0x100,                // Main Capital City Flag
         City = 0x200,                // Only For One Zone Named "City" (Where It Located?)
-        Outland = 0x400,                // Expansion Zones? (Only Eye Of The Storm Not Have This Flag, But Have 0x00004000 Flag)
+        Outland = 0x400,                // Expansion Zones? (Only Eye Of The Storm Not Have This Flag, But Have 0x4000 Flag)
         Sanctuary = 0x800,                // Sanctuary Area (Pvp Disabled)
         NeedFly = 0x1000,                // Unknown
         Unused1 = 0x2000,                // Unused In 3.3.5a
-        Outland2 = 0x4000,                // Expansion Zones? (Only Circle Of Blood Arena Not Have This Flag, But Have 0x00000400 Flag)
+        Outland2 = 0x4000,                // Expansion Zones? (Only Circle Of Blood Arena Not Have This Flag, But Have 0x400 Flag)
         OutdoorPvp = 0x8000,                // Pvp Objective Area? (Death'S Door Also Has This Flag Although It'S No Pvp Object Area)
         ArenaInstance = 0x10000,                // Used By Instanced Arenas Only
         Unused2 = 0x20000,                // Unused In 3.3.5a
@@ -1724,31 +1724,41 @@ namespace Framework.Constants
         CannotUseGameObjects = 0x10000
     }
 
-    public enum SummonPropFlags
+    public enum SummonPropertiesFlags : uint
     {
-        None = 0x00000000,          // 1342 Spells In 3.0.3
-        Unk1 = 0x00000001,          // 75 Spells In 3.0.3, Something Unfriendly
-        Unk2 = 0x00000002,          // 616 Spells In 3.0.3, Something Friendly
-        Unk3 = 0x00000004,          // 22 Spells In 3.0.3, No Idea...
-        Unk4 = 0x00000008,          // 49 Spells In 3.0.3, Some Mounts
-        PersonalSpawn = 0x00000010, // Only Visible to Summoner
-        Unk6 = 0x00000020,          // 0 Spells In 3.3.5, Unused
-        Unk7 = 0x00000040,          // 12 Spells In 3.0.3, No Idea
-        Unk8 = 0x00000080,          // 4 Spells In 3.0.3, No Idea
-        Unk9 = 0x00000100,          // 51 Spells In 3.0.3, No Idea, Many Quest Related
-        Unk10 = 0x00000200,          // 51 Spells In 3.0.3, Something Defensive
-        Unk11 = 0x00000400,          // 3 Spells, Requires Something Near?
-        Unk12 = 0x00000800,          // 30 Spells In 3.0.3, No Idea
-        Unk13 = 0x00001000,          // Lightwell, Jeeves, Gnomish Alarm-O-Bot, Build Vehicles(Wintergrasp)
-        Unk14 = 0x00002000,          // Guides, Player Follows
-        Unk15 = 0x00004000,          // Force Of Nature, Shadowfiend, Feral Spirit, Summon Water Elemental
-        Unk16 = 0x00008000,          // Light/Dark Bullet, Soul/Fiery Consumption, Twisted Visage, Twilight Whelp. Phase Related?
-        PersonalGroupSpawn = 0x00010000, // Only Visible to Summoner's Group
-        Unk18 = 0x00020000,
-        Unk19 = 0x00040000,
-        Unk20 = 0x00080000,
-        Unk21 = 0x00100000,          // Totems
-        Companion = 0x00200000
+        None = 0x00,
+        AttackSummoner = 0x01, // NYI
+        HelpWhenSummonedInCombat = 0x02, // NYI
+        UseLevelOffset = 0x04, // NYI
+        DespawnOnSummonerDeath = 0x08, // NYI
+        OnlyVisibleToSummoner = 0x10,
+        CannotDismissPet = 0x20, // NYI
+        UseDemonTimeout = 0x40, // NYI
+        UnlimitedSummons = 0x80, // NYI
+        UseCreatureLevel = 0x100, // NYI
+        JoinSummonerSpawnGroup = 0x200, // NYI
+        DoNotToggle = 0x400, // NYI
+        DespawnWhenExpired = 0x800, // NYI
+        UseSummonerFaction = 0x1000,
+        DoNotFollowMountedSummoner = 0x2000, // NYI
+        SavePetAutocast = 0x4000, // NYI
+        IgnoreSummonerPhase = 0x8000, // Wild Only
+        OnlyVisibleToSummonerGroup = 0x10000,
+        DespawnOnSummonerLogout = 0x20000, // NYI
+        CastRideVehicleSpellOnSummoner = 0x40000, // NYI
+        GuardianActsLikePet = 0x80000, // NYI
+        DontSnapSessileToGround = 0x100000, // NYI
+        SummonFromBattlePetJournal = 0x200000, // NYI
+        UnitClutter = 0x400000, // NYI
+        DefaultNameColor = 0x800000, // NYI
+        UseOwnInvisibilityDetection = 0x1000000, // NYI. Ignore Owner's Invisibility Detection
+        DespawnWhenReplaced = 0x2000000, // NYI. Totem Slots Only
+        DespawnWhenTeleportingOutOfRange = 0x4000000, // NYI
+        SummonedAtGroupFormationPosition = 0x8000000, // NYI
+        DontDespawnOnSummonerDeath = 0x10000000, // NYI
+        UseTitleAsCreatureName = 0x20000000, // NYI
+        AttackableBySummoner = 0x40000000, // NYI
+        DontDismissWhenEncounterIsAborted = 0x80000000  // NYI
     }
 
     public enum TaxiNodeFlags : byte

@@ -1602,13 +1602,13 @@ namespace Game.Spells
                 caster = m_originalCaster;
 
             ObjectGuid privateObjectOwner = caster.GetGUID();
-            if (!properties.Flags.HasAnyFlag(SummonPropFlags.PersonalSpawn | SummonPropFlags.PersonalGroupSpawn))
+            if (!properties.GetFlags().HasAnyFlag(SummonPropertiesFlags.OnlyVisibleToSummoner | SummonPropertiesFlags.OnlyVisibleToSummonerGroup))
                 privateObjectOwner = ObjectGuid.Empty;
 
             if (caster.IsPrivateObject())
                 privateObjectOwner = caster.GetPrivateObjectOwner();
 
-            if (properties.Flags.HasAnyFlag(SummonPropFlags.PersonalGroupSpawn))
+            if (properties.GetFlags().HasFlag(SummonPropertiesFlags.OnlyVisibleToSummonerGroup))
                 if (caster.IsPlayer() && m_originalCaster.ToPlayer().GetGroup())
                     privateObjectOwner = caster.ToPlayer().GetGroup().GetGUID();
 
@@ -1652,7 +1652,7 @@ namespace Game.Spells
                 case SummonCategory.Wild:
                 case SummonCategory.Ally:
                 case SummonCategory.Unk:
-                    if (Convert.ToBoolean(properties.Flags & SummonPropFlags.Unk10))
+                    if (properties.GetFlags().HasFlag(SummonPropertiesFlags.JoinSummonerSpawnGroup))
                     {
                         SummonGuardian(effectInfo, entry, properties, numSummons, privateObjectOwner);
                         break;
@@ -1730,10 +1730,18 @@ namespace Game.Spells
                                     continue;
 
                                 if (properties.Control == SummonCategory.Ally)
-                                {
                                     summon.SetOwnerGUID(caster.GetGUID());
-                                    summon.SetFaction(caster.GetFaction());
+
+                                uint faction = properties.Faction;
+                                if (properties.GetFlags().HasFlag(SummonPropertiesFlags.UseSummonerFaction)) // TODO: Determine priority between faction and flag
+                                {
+                                    Unit summoner = summon.GetSummoner();
+                                    if (summoner != null)
+                                        faction = summoner.GetFaction();
                                 }
+
+                                if (faction != 0)
+                                    summon.SetFaction(faction);
 
                                 ExecuteLogEffectSummonObject(effectInfo.Effect, summon);
                             }
@@ -1781,12 +1789,6 @@ namespace Game.Spells
                         args.AddSpellMod(SpellValueMod.BasePoint0, basePoints);
 
                     unitCaster.CastSpell(summon, spellId, args);
-
-                    uint faction = properties.Faction;
-                    if (faction == 0)
-                        faction = unitCaster.GetFaction();
-
-                    summon.SetFaction(faction);
                     break;
                 }
             }
@@ -4872,9 +4874,6 @@ namespace Game.Spells
                     return;
                 if (summon.HasUnitTypeMask(UnitTypeMask.Guardian))
                     ((Guardian)summon).InitStatsForLevel(level);
-
-                if (properties != null && properties.Control == SummonCategory.Ally)
-                    summon.SetFaction(unitCaster.GetFaction());
 
                 if (summon.HasUnitTypeMask(UnitTypeMask.Minion) && m_targets.HasDst())
                     ((Minion)summon).SetFollowAngle(unitCaster.GetAbsoluteAngle(summon.GetPosition()));

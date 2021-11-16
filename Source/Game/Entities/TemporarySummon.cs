@@ -171,7 +171,6 @@ namespace Game.Entities
 
             if (owner != null && IsTrigger() && m_spells[0] != 0)
             {
-                SetFaction(owner.GetFaction());
                 SetLevel(owner.GetLevel());
                 if (owner.IsTypeId(TypeId.Player))
                   m_ControlledByPlayer = true;
@@ -196,10 +195,13 @@ namespace Game.Entities
                 }
             }
 
-            if (m_Properties.Faction != 0)
-                SetFaction(m_Properties.Faction);
-            else if (IsVehicle() && owner != null) // properties should be vehicle
-                SetFaction(owner.GetFaction());
+            uint faction = m_Properties.Faction;
+            if (m_Properties.GetFlags().HasFlag(SummonPropertiesFlags.UseSummonerFaction)) // TODO: Determine priority between faction and flag
+                if (owner)
+                    faction = owner.GetFaction();
+
+            if (faction != 0)
+                SetFaction(faction);
         }
 
         public virtual void InitSummon()
@@ -307,7 +309,7 @@ namespace Game.Entities
             SetReactState(ReactStates.Passive);
 
             SetCreatorGUID(GetOwner().GetGUID());
-            SetFaction(GetOwner().GetFaction());
+            SetFaction(GetOwner().GetFaction());// TODO: Is this correct? Overwrite the use of SummonPropertiesFlags::UseSummonerFaction
 
             GetOwner().SetMinion(this, true);
         }

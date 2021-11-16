@@ -588,6 +588,8 @@ namespace Game.DataStorage
         public uint Faction;
         public SummonTitle Title;
         public int Slot;
-        public SummonPropFlags Flags;
+        public uint Flags;
+
+        public SummonPropertiesFlags GetFlags() { return (SummonPropertiesFlags)Flags; }
     }
 }
