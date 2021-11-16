@@ -1658,6 +1658,7 @@ namespace Framework.Constants
         RateXpGuildModifier,
         RateXpKill,
         RateXpBgKill,
+        RateXpBoost,
         RateXpQuest,
         RealmZone,
         ResetDuelCooldowns,
@@ -1736,7 +1737,8 @@ namespace Framework.Constants
         WintergraspPlrMin,
         WintergraspPlrMinLvl,
         WintergraspRestartAfterCrash,
-        WorldBossLevelDiff
+        WorldBossLevelDiff,
+        XpBoostDaymask
     }
 
     public enum TimerType
