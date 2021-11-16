@@ -699,7 +699,7 @@ namespace Game.Entities
 
             Player myPlayerOwner = GetCharmerOrOwnerPlayerOrPlayerItself();
             Player targetPlayerOwner = target.GetCharmerOrOwnerPlayerOrPlayerItself();
-            if (myPlayerOwner && targetPlayerOwner && !(myPlayerOwner.duel != null && myPlayerOwner.duel.opponent == targetPlayerOwner))
+            if (myPlayerOwner && targetPlayerOwner && !(myPlayerOwner.duel != null && myPlayerOwner.duel.Opponent == targetPlayerOwner))
             {
                 myPlayerOwner.UpdatePvP(true);
                 myPlayerOwner.SetContestedPvP(targetPlayerOwner);
@@ -879,7 +879,7 @@ namespace Game.Entities
                 // last damage from non duel opponent or opponent controlled creature
                 if (plrVictim.duel != null)
                 {
-                    plrVictim.duel.opponent.CombatStopWithPets(true);
+                    plrVictim.duel.Opponent.CombatStopWithPets(true);
                     plrVictim.CombatStopWithPets(true);
                     plrVictim.DuelComplete(DuelCompleteType.Interrupted);
                 }

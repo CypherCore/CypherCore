@@ -2080,7 +2080,7 @@ namespace Game.Entities
                             return ReputationRank.Friendly;
 
                         // duel - always hostile to opponent
-                        if (selfPlayerOwner.duel != null && selfPlayerOwner.duel.opponent == targetPlayerOwner && selfPlayerOwner.duel.startTime != 0)
+                        if (selfPlayerOwner.duel != null && selfPlayerOwner.duel.Opponent == targetPlayerOwner && selfPlayerOwner.duel.State == DuelState.InProgress)
                             return ReputationRank.Hostile;
 
                         // same group - checks dependant only on our faction - skip FFA_PVP for example
@@ -2387,7 +2387,7 @@ namespace Game.Entities
                 return false;
 
             if (playerAffectingAttacker && playerAffectingTarget)
-                if (playerAffectingAttacker.duel != null && playerAffectingAttacker.duel.opponent == playerAffectingTarget && playerAffectingAttacker.duel.startTime != 0)
+                if (playerAffectingAttacker.duel != null && playerAffectingAttacker.duel.Opponent == playerAffectingTarget && playerAffectingAttacker.duel.State == DuelState.InProgress)
                     return true;
 
             // PvP case - can't attack when attacker or target are in sanctuary

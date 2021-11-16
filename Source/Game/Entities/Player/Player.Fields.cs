@@ -421,15 +421,19 @@ namespace Game.Entities
 
     public class DuelInfo
     {
-        public Player initiator;
-        public Player opponent;
-        public long startTimer;
-        public long startTime;
-        public long outOfBound;
-        public bool isMounted;
-        public bool isCompleted;
+        public Player Opponent;
+        public Player Initiator;
+        public bool IsMounted;
+        public DuelState State;
+        public long StartTime;
+        public long OutOfBoundsTime;
 
-        public bool IsDueling() { return opponent != null; }
+        public DuelInfo(Player opponent, Player initiator, bool isMounted)
+        {
+            Opponent = opponent;
+            Initiator = initiator;
+            IsMounted = isMounted;
+        }
     }
 
     public class AccessRequirement

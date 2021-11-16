@@ -790,4 +790,12 @@ namespace Framework.Constants
         Normal = 0,
         NPE = 1
     }
+
+    public enum DuelState
+    {
+        Challenged,
+        Countdown,
+        InProgress,
+        Completed
+    }
 }

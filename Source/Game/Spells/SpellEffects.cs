@@ -3299,21 +3299,9 @@ namespace Game.Spells
             target.SendPacket(packet);
 
             // create duel-info
-            DuelInfo duel = new();
-            duel.initiator = caster;
-            duel.opponent = target;
-            duel.startTime = 0;
-            duel.startTimer = 0;
-            duel.isMounted = (GetSpellInfo().Id == 62875); // Mounted Duel
-            caster.duel = duel;
-
-            DuelInfo duel2 = new();
-            duel2.initiator = caster;
-            duel2.opponent = caster;
-            duel2.startTime = 0;
-            duel2.startTimer = 0;
-            duel2.isMounted = (GetSpellInfo().Id == 62875); // Mounted Duel
-            target.duel = duel2;
+            bool isMounted = (GetSpellInfo().Id == 62875);
+            caster.duel = new(target, caster, isMounted);
+            target.duel = new(caster, caster, isMounted);
 
             caster.SetDuelArbiter(go.GetGUID());
             target.SetDuelArbiter(go.GetGUID());

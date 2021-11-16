@@ -264,7 +264,7 @@ namespace Scripts.World.Achievements
                                 player.GetAreaId() == AreaIds.AreaRingOfHordeValiants ||
                                 player.GetAreaId() == AreaIds.AreaRingOfChampions;
 
-            return checkArea && player.duel != null && player.duel.isMounted;
+            return checkArea && player.duel != null && player.duel.IsMounted;
         }
     }
 

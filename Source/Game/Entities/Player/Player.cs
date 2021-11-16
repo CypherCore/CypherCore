@@ -4047,10 +4047,13 @@ namespace Game.Entities
             if (base.IsAlwaysDetectableFor(seer))
                 return true;
 
+            if (duel != null && duel.State != DuelState.Challenged && duel.Opponent == seer)
+                return false;
+
             Player seerPlayer = seer.ToPlayer();
             if (seerPlayer != null)
                 if (IsGroupVisibleFor(seerPlayer))
-                    return !(seerPlayer.duel != null && seerPlayer.duel.startTime != 0 && seerPlayer.duel.opponent == this);
+                    return true;
 
             return false;
         }

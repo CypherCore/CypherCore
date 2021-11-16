@@ -390,18 +390,16 @@ namespace Game.Entities
 
         void UpdateDuelFlag(long currTime)
         {
-            if (duel == null || duel.startTimer == 0 || currTime < duel.startTimer + 3)
-                return;
+            if (duel != null && duel.State == DuelState.Countdown && duel.StartTime <= currTime)
+            {
+                Global.ScriptMgr.OnPlayerDuelStart(this, duel.Opponent);
 
-            Global.ScriptMgr.OnPlayerDuelStart(this, duel.opponent);
+                SetDuelTeam(1);
+                duel.Opponent.SetDuelTeam(2);
 
-            SetDuelTeam(1);
-            duel.opponent.SetDuelTeam(2);
-
-            duel.startTimer = 0;
-            duel.startTime = currTime;
-            duel.opponent.duel.startTimer = 0;
-            duel.opponent.duel.startTime = currTime;
+                duel.State = DuelState.InProgress;
+                duel.Opponent.duel.State = DuelState.InProgress;
+            }
         }
 
         void CheckDuelDistance(long currTime)
@@ -414,11 +412,11 @@ namespace Game.Entities
             if (!obj)
                 return;
 
-            if (duel.outOfBound == 0)
+            if (duel.OutOfBoundsTime == 0)
             {
                 if (!IsWithinDistInMap(obj, 50))
                 {
-                    duel.outOfBound = currTime;
+                    duel.OutOfBoundsTime = currTime + 10;
                     SendPacket(new DuelOutOfBounds());
                 }
             }
@@ -426,10 +424,10 @@ namespace Game.Entities
             {
                 if (IsWithinDistInMap(obj, 40))
                 {
-                    duel.outOfBound = 0;
+                    duel.OutOfBoundsTime = 0;
                     SendPacket(new DuelInBounds());
                 }
-                else if (currTime >= (duel.outOfBound + 10))
+                else if (currTime >= duel.OutOfBoundsTime)
                     DuelComplete(DuelCompleteType.Fled);
             }
         }
@@ -440,26 +438,27 @@ namespace Game.Entities
                 return;
 
             // Check if DuelComplete() has been called already up in the stack and in that case don't do anything else here
-            if (duel.isCompleted || duel.opponent.duel.isCompleted)
+            if (duel.State == DuelState.Completed)
                 return;
 
-            duel.isCompleted = true;
-            duel.opponent.duel.isCompleted = true;
+            Player opponent = duel.Opponent;
+            duel.State = DuelState.Completed;
+            opponent.duel.State = DuelState.Completed;
 
-            Log.outDebug(LogFilter.Player, "Duel Complete {0} {1}", GetName(), duel.opponent.GetName());
+            Log.outDebug(LogFilter.Player, $"Duel Complete {GetName()} {opponent.GetName()}");
 
             DuelComplete duelCompleted = new();
             duelCompleted.Started = type != DuelCompleteType.Interrupted;
             SendPacket(duelCompleted);
 
-            if (duel.opponent.GetSession() != null)
-                duel.opponent.SendPacket(duelCompleted);
+            if (opponent.GetSession() != null)
+                opponent.SendPacket(duelCompleted);
 
             if (type != DuelCompleteType.Interrupted)
             {
                 DuelWinner duelWinner = new();
-                duelWinner.BeatenName = (type == DuelCompleteType.Won ? duel.opponent.GetName() : GetName());
-                duelWinner.WinnerName = (type == DuelCompleteType.Won ? GetName() : duel.opponent.GetName());
+                duelWinner.BeatenName = (type == DuelCompleteType.Won ? opponent.GetName() : GetName());
+                duelWinner.WinnerName = (type == DuelCompleteType.Won ? GetName() : opponent.GetName());
                 duelWinner.BeatenVirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
                 duelWinner.WinnerVirtualRealmAddress = Global.WorldMgr.GetVirtualRealmAddress();
                 duelWinner.Fled = type != DuelCompleteType.Won;
@@ -467,41 +466,41 @@ namespace Game.Entities
                 SendMessageToSet(duelWinner, true);
             }
 
-            duel.opponent.DisablePvpRules();
+            opponent.DisablePvpRules();
             DisablePvpRules();
 
-            Global.ScriptMgr.OnPlayerDuelEnd(duel.opponent, this, type);
+            Global.ScriptMgr.OnPlayerDuelEnd(opponent, this, type);
 
             switch (type)
             {
                 case DuelCompleteType.Fled:
                     // if initiator and opponent are on the same team
                     // or initiator and opponent are not PvP enabled, forcibly stop attacking
-                    if (duel.initiator.GetTeam() == duel.opponent.GetTeam())
+                    if (GetTeam() == opponent.GetTeam())
                     {
-                        duel.initiator.AttackStop();
-                        duel.opponent.AttackStop();
+                        AttackStop();
+                        opponent.AttackStop();
                     }
                     else
                     {
-                        if (!duel.initiator.IsPvP())
-                            duel.initiator.AttackStop();
-                        if (!duel.opponent.IsPvP())
-                            duel.opponent.AttackStop();
+                        if (!IsPvP())
+                            AttackStop();
+                        if (!opponent.IsPvP())
+                            opponent.AttackStop();
                     }
                     break;
                 case DuelCompleteType.Won:
                     UpdateCriteria(CriteriaType.LoseDuel, 1);
-                    duel.opponent.UpdateCriteria(CriteriaType.WinDuel, 1);
+                    opponent.UpdateCriteria(CriteriaType.WinDuel, 1);
 
                     // Credit for quest Death's Challenge
-                    if (GetClass() == Class.Deathknight && duel.opponent.GetQuestStatus(12733) == QuestStatus.Incomplete)
-                        duel.opponent.CastSpell(duel.opponent, 52994, true);
+                    if (GetClass() == Class.Deathknight && opponent.GetQuestStatus(12733) == QuestStatus.Incomplete)
+                        opponent.CastSpell(duel.Opponent, 52994, true);
 
                     // Honor points after duel (the winner) - ImpConfig
                     int amount = WorldConfig.GetIntValue(WorldCfg.HonorAfterDuel);
                     if (amount != 0)
-                        duel.opponent.RewardHonor(null, 1, amount);
+                        opponent.RewardHonor(null, 1, amount);
 
                     break;
                 default:
@@ -510,41 +509,41 @@ namespace Game.Entities
 
             // Victory emote spell
             if (type != DuelCompleteType.Interrupted)
-                duel.opponent.CastSpell(duel.opponent, 52852, true);
+                opponent.CastSpell(duel.Opponent, 52852, true);
 
             //Remove Duel Flag object
             GameObject obj = GetMap().GetGameObject(m_playerData.DuelArbiter);
             if (obj)
-                duel.initiator.RemoveGameObject(obj, true);
+                duel.Initiator.RemoveGameObject(obj, true);
 
             //remove auras
-            var itsAuras = duel.opponent.GetAppliedAuras();
+            var itsAuras = opponent.GetAppliedAuras();
             foreach (var pair in itsAuras)
             {
                 Aura aura = pair.Value.GetBase();
-                if (!pair.Value.IsPositive() && aura.GetCasterGUID() == GetGUID() && aura.GetApplyTime() >= duel.startTime)
-                    duel.opponent.RemoveAura(pair);
+                if (!pair.Value.IsPositive() && aura.GetCasterGUID() == GetGUID() && aura.GetApplyTime() >= duel.StartTime)
+                    opponent.RemoveAura(pair);
             }
 
             var myAuras = GetAppliedAuras();
             foreach (var pair in myAuras)
             {
                 Aura aura = pair.Value.GetBase();
-                if (!pair.Value.IsPositive() && aura.GetCasterGUID() == duel.opponent.GetGUID() && aura.GetApplyTime() >= duel.startTime)
+                if (!pair.Value.IsPositive() && aura.GetCasterGUID() == opponent.GetGUID() && aura.GetApplyTime() >= duel.StartTime)
                     RemoveAura(pair);
             }
 
             // cleanup combo points
             ClearComboPoints();
-            duel.opponent.ClearComboPoints();
+            opponent.ClearComboPoints();
 
             //cleanups
             SetDuelArbiter(ObjectGuid.Empty);
             SetDuelTeam(0);
-            duel.opponent.SetDuelArbiter(ObjectGuid.Empty);
-            duel.opponent.SetDuelTeam(0);
+            opponent.SetDuelArbiter(ObjectGuid.Empty);
+            opponent.SetDuelTeam(0);
 
-            duel.opponent.duel = null;
+            opponent.duel = null;
             duel = null;
         }
         public void SetDuelArbiter(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_playerData).ModifyValue(m_playerData.DuelArbiter), guid); }
@@ -578,7 +577,7 @@ namespace Game.Entities
 
         public void SetContestedPvP(Player attackedPlayer = null)
         {
-            if (attackedPlayer != null && (attackedPlayer == this || (duel != null && duel.opponent == attackedPlayer)))
+            if (attackedPlayer != null && (attackedPlayer == this || (duel != null && duel.Opponent == attackedPlayer)))
                 return;
 
             SetContestedPvPTimer(30000);

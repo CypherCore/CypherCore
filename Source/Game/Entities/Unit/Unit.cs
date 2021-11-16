@@ -982,7 +982,7 @@ namespace Game.Entities
             Player player = ToPlayer();
 
             // If the player is on mounted duel and exits the mount, he should immediatly lose the duel
-            if (player && player.duel != null && player.duel.isMounted)
+            if (player && player.duel != null && player.duel.IsMounted)
                 player.DuelComplete(DuelCompleteType.Fled);
 
             SetControlled(false, UnitState.Root);      // SMSG_MOVE_FORCE_UNROOT, ~MOVEMENTFLAG_ROOT
@@ -2422,7 +2422,7 @@ namespace Game.Entities
                     return 0;
 
                 // prevent kill only if killed in duel and killed by opponent or opponent controlled creature
-                if (victim.ToPlayer().duel.opponent == attacker.GetControllingPlayer())
+                if (victim.ToPlayer().duel.Opponent == attacker.GetControllingPlayer())
                     damage = health - 1;
 
                 duel_hasEnded = true;
@@ -2430,13 +2430,13 @@ namespace Game.Entities
             else if (victim.IsVehicle() && damage >= (health - 1) && victim.GetCharmer() != null && victim.GetCharmer().IsTypeId(TypeId.Player))
             {
                 Player victimRider = victim.GetCharmer().ToPlayer();
-                if (victimRider != null && victimRider.duel != null && victimRider.duel.isMounted)
+                if (victimRider != null && victimRider.duel != null && victimRider.duel.IsMounted)
                 {
                     if (!attacker)
                         return 0;
 
                     // prevent kill only if killed in duel and killed by opponent or opponent controlled creature
-                    if (victimRider.duel.opponent == attacker.GetControllingPlayer())
+                    if (victimRider.duel.Opponent == attacker.GetControllingPlayer())
                         damage = health - 1;
 
                     duel_wasMounted = true;
@@ -2657,7 +2657,7 @@ namespace Game.Entities
                     else
                         he.SetHealth(1);
 
-                    he.duel.opponent.CombatStopWithPets(true);
+                    he.duel.Opponent.CombatStopWithPets(true);
                     he.CombatStopWithPets(true);
 
                     he.CastSpell(he, 7267, true);                  // beg
