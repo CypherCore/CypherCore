@@ -187,8 +187,8 @@ namespace Framework.Database
                 " FROM battlemaster_list_locale WHERE locale = ?");
 
             // BroadcastText.db2
-            PrepareStatement(HotfixStatements.SEL_BROADCAST_TEXT, "SELECT Text, Text1, ID, LanguageID, ConditionID, EmotesID, Flags, ChatBubbleDurationMs, " +
-                "SoundKitID1, SoundKitID2, EmoteID1, EmoteID2, EmoteID3, EmoteDelay1, EmoteDelay2, EmoteDelay3 FROM broadcast_text");
+            PrepareStatement(HotfixStatements.SEL_BROADCAST_TEXT, "SELECT Text, Text1, ID, LanguageID, ConditionID, EmotesID, Flags, ChatBubbleDurationMs, SoundKitID1, " +
+                "SoundKitID2, EmoteID1, EmoteID2, EmoteID3, EmoteDelay1, EmoteDelay2, EmoteDelay3 FROM broadcast_text");
             PrepareStatement(HotfixStatements.SEL_BROADCAST_TEXT_LOCALE, "SELECT ID, Text_lang, Text1_lang FROM broadcast_text_locale WHERE locale = ?");
 
             // BroadcastTextDuration.db2
@@ -263,17 +263,17 @@ namespace Framework.Database
             PrepareStatement(HotfixStatements.SEL_CHR_RACE_X_CHR_MODEL, "SELECT ID, ChrRacesID, ChrModelID FROM chr_race_x_chr_model");
 
             // ChrRaces.db2
-            PrepareStatement(HotfixStatements.SEL_CHR_RACES, "SELECT ID, ClientPrefix, ClientFileString, Name, NameFemale, NameLowercase, NameFemaleLowercase, LoreName, " +
-                "LoreNameFemale, LoreNameLower, LoreNameLowerFemale, LoreDescription, ShortName, ShortNameFemale, ShortNameLower, ShortNameLowerFemale, Flags, " +
-                "FactionID, CinematicSequenceID, ResSicknessSpellID, SplashSoundID, Alliance, RaceRelated, UnalteredVisualRaceID, DefaultClassID, " +
-                "CreateScreenFileDataID, SelectScreenFileDataID, NeutralRaceID, LowResScreenFileDataID, AlteredFormStartVisualKitID1, " +
-                "AlteredFormStartVisualKitID2, AlteredFormStartVisualKitID3, AlteredFormFinishVisualKitID1, AlteredFormFinishVisualKitID2, " +
-                "AlteredFormFinishVisualKitID3, HeritageArmorAchievementID, StartingLevel, UiDisplayOrder, MaleModelFallbackRaceID, " +
-                "FemaleModelFallbackRaceID, MaleTextureFallbackRaceID, FemaleTextureFallbackRaceID, PlayableRaceBit, HelmetAnimScalingRaceID, " +
-                "TransmogrifyDisabledSlotMask, UnalteredVisualCustomizationRaceID, AlteredFormCustomizeOffsetFallback1, AlteredFormCustomizeOffsetFallback2, " +
-                "AlteredFormCustomizeOffsetFallback3, AlteredFormCustomizeRotationFallback, Unknown910_11, Unknown910_12, Unknown910_13, Unknown910_21, " +
-                "Unknown910_22, Unknown910_23, BaseLanguage, CreatureType, MaleModelFallbackSex, FemaleModelFallbackSex, MaleTextureFallbackSex, " +
-                "FemaleTextureFallbackSex FROM chr_races");
+            PrepareStatement(HotfixStatements.SEL_CHR_RACES, "SELECT ID, ClientPrefix, ClientFileString, Name, NameFemale, NameLowercase, NameFemaleLowercase, " +
+                "LoreName, LoreNameFemale, LoreNameLower, LoreNameLowerFemale, LoreDescription, ShortName, ShortNameFemale, ShortNameLower, " +
+                "ShortNameLowerFemale, Flags, FactionID, CinematicSequenceID, ResSicknessSpellID, SplashSoundID, Alliance, RaceRelated, " +
+                "UnalteredVisualRaceID, DefaultClassID, CreateScreenFileDataID, SelectScreenFileDataID, NeutralRaceID, LowResScreenFileDataID, " +
+                "AlteredFormStartVisualKitID1, AlteredFormStartVisualKitID2, AlteredFormStartVisualKitID3, AlteredFormFinishVisualKitID1, " +
+                "AlteredFormFinishVisualKitID2, AlteredFormFinishVisualKitID3, HeritageArmorAchievementID, StartingLevel, UiDisplayOrder, " +
+                "MaleModelFallbackRaceID, FemaleModelFallbackRaceID, MaleTextureFallbackRaceID, FemaleTextureFallbackRaceID, PlayableRaceBit, " +
+                "HelmetAnimScalingRaceID, TransmogrifyDisabledSlotMask, UnalteredVisualCustomizationRaceID, AlteredFormCustomizeOffsetFallback1, " +
+                "AlteredFormCustomizeOffsetFallback2, AlteredFormCustomizeOffsetFallback3, AlteredFormCustomizeRotationFallback, Unknown910_11, " +
+                "Unknown910_12, Unknown910_13, Unknown910_21, Unknown910_22, Unknown910_23, BaseLanguage, CreatureType, MaleModelFallbackSex, " +
+                "FemaleModelFallbackSex, MaleTextureFallbackSex, FemaleTextureFallbackSex FROM chr_races");
             PrepareStatement(HotfixStatements.SEL_CHR_RACES_LOCALE, "SELECT ID, Name_lang, NameFemale_lang, NameLowercase_lang, NameFemaleLowercase_lang, LoreName_lang, " +
                 "LoreNameFemale_lang, LoreNameLower_lang, LoreNameLowerFemale_lang, LoreDescription_lang, ShortName_lang, ShortNameFemale_lang, " +
                 "ShortNameLower_lang, ShortNameLowerFemale_lang FROM chr_races_locale WHERE locale = ?");
