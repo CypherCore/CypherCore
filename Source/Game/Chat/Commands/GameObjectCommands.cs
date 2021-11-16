@@ -149,6 +149,9 @@ namespace Game.Chat
             if (param1.IsEmpty())
                 return false;
 
+            GameObject thisGO = null;
+            GameObjectData data = null;
+
             uint entry;
             ulong spawnId = 0;
             if (param1.Equals("guid"))
@@ -160,10 +163,15 @@ namespace Game.Chat
                 if (!ulong.TryParse(cValue, out spawnId))
                     return false;
 
-                GameObjectData data = Global.ObjectMgr.GetGameObjectData(spawnId);
+                data = Global.ObjectMgr.GetGameObjectData(spawnId);
                 if (data == null)
+                {
+                    handler.SendSysMessage(CypherStrings.CommandObjnotfound, spawnId);
                     return false;
+                }
+
                 entry = data.Id;
+                thisGO = handler.GetObjectFromPlayerMapByDbGuid(spawnId);
             }
             else
             {
@@ -173,13 +181,10 @@ namespace Game.Chat
 
             GameObjectTemplate gameObjectInfo = Global.ObjectMgr.GetGameObjectTemplate(entry);
             if (gameObjectInfo == null)
+            {
+                handler.SendSysMessage(CypherStrings.GameobjectNotExist, entry);
                 return false;
-
-            GameObject thisGO = null;
-            if (handler.GetSession().GetPlayer())
-                thisGO = handler.GetSession().GetPlayer().FindNearestGameObject(entry, 30);
-            else if (handler.GetSelectedObject() != null && handler.GetSelectedObject().IsTypeId(TypeId.GameObject))
-                thisGO = handler.GetSelectedObject().ToGameObject();
+            }
 
             GameObjectTypes type = gameObjectInfo.type;
             uint displayId = gameObjectInfo.displayId;
@@ -190,46 +195,34 @@ namespace Game.Chat
             if (thisGO != null)
             {
                 handler.SendSysMessage(CypherStrings.SpawninfoGuidinfo, thisGO.GetGUID().ToString());
-                handler.SendSysMessage(CypherStrings.SpawninfoSpawnidLocation, thisGO.GetSpawnId(), thisGO.GetPositionX(), thisGO.GetPositionY(), thisGO.GetPositionZ());
-                Player player = handler.GetSession().GetPlayer();
-                if (player != null)
-                {
-                    Position playerPos = player.GetPosition();
-                    float dist = thisGO.GetExactDist(playerPos);
-                    handler.SendSysMessage(CypherStrings.SpawninfoDistancefromplayer, dist);
-                }
-            }
-            handler.SendSysMessage(CypherStrings.GoinfoEntry, entry);
-            handler.SendSysMessage(CypherStrings.GoinfoType, type);
-            handler.SendSysMessage(CypherStrings.GoinfoLootid, lootId);
-            handler.SendSysMessage(CypherStrings.GoinfoDisplayid, displayId);
+                handler.SendSysMessage(CypherStrings.SpawninfoCompatibilityMode, thisGO.GetRespawnCompatibilityMode());
 
-            if (thisGO != null)
-            {
                 if (thisGO.GetGameObjectData() != null && thisGO.GetGameObjectData().spawnGroupData.groupId != 0)
                 {
                     SpawnGroupTemplateData groupData = thisGO.ToGameObject().GetGameObjectData().spawnGroupData;
                     handler.SendSysMessage(CypherStrings.SpawninfoGroupId, groupData.name, groupData.groupId, groupData.flags, thisGO.GetMap().IsSpawnGroupActive(groupData.groupId));
                 }
-                
-                handler.SendSysMessage(CypherStrings.SpawninfoCompatibilityMode, thisGO.GetRespawnCompatibilityMode());
+
+                GameObjectOverride goOverride = Global.ObjectMgr.GetGameObjectOverride(spawnId);
+                if (goOverride == null)
+                    goOverride = Global.ObjectMgr.GetGameObjectTemplateAddon(entry);
+                if (goOverride != null)
+                    handler.SendSysMessage(CypherStrings.GoinfoAddon, goOverride.Faction, goOverride.Flags);
             }
+
+            if (data != null)
+            {
+                data.rotation.toEulerAnglesZYX(out float yaw, out float pitch, out float roll);
+                handler.SendSysMessage(CypherStrings.SpawninfoSpawnidLocation, data.spawnId, data.spawnPoint.GetPositionX(), data.spawnPoint.GetPositionY(), data.spawnPoint.GetPositionZ());
+                handler.SendSysMessage(CypherStrings.SpawninfoRotation, yaw, pitch, roll);
+            }
+
+            handler.SendSysMessage(CypherStrings.GoinfoEntry, entry);
+            handler.SendSysMessage(CypherStrings.GoinfoType, type);
+            handler.SendSysMessage(CypherStrings.GoinfoLootid, lootId);
+            handler.SendSysMessage(CypherStrings.GoinfoDisplayid, displayId);
             handler.SendSysMessage(CypherStrings.GoinfoName, name);
             handler.SendSysMessage(CypherStrings.GoinfoSize, gameObjectInfo.size);
-
-            GameObjectOverride goOverride = null;
-            if (spawnId != 0)
-            {
-                GameObjectOverride ovr = Global.ObjectMgr.GetGameObjectOverride(spawnId);
-                if (ovr != null)
-                goOverride = ovr;
-            }
-
-            if (goOverride == null)
-                goOverride = Global.ObjectMgr.GetGameObjectTemplateAddon(entry);
-
-            if (goOverride != null)
-                handler.SendSysMessage(CypherStrings.GoinfoAddon, goOverride.Faction, goOverride.Flags);
 
             handler.SendSysMessage(CypherStrings.ObjectInfoAIInfo, gameObjectInfo.AIName, Global.ObjectMgr.GetScriptName(gameObjectInfo.ScriptId));
             var ai = thisGO != null ? thisGO.GetAI() : null;

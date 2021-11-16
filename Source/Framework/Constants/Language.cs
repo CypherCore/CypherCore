@@ -1105,7 +1105,7 @@ namespace Framework.Constants
         SpawninfoCompatibilityMode = 5071,
         SpawninfoGuidinfo = 5072,
         SpawninfoSpawnidLocation = 5073,
-        SpawninfoDistancefromplayer = 5074,
+        SpawninfoRotation = 5074,
         SpawngroupBadgroup = 5075,
         SpawngroupSpawncount = 5076,
         ListRespawnsRange = 5077,

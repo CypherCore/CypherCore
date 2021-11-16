@@ -258,6 +258,38 @@ namespace System
             }
         }
 
+        public static void toEulerAnglesZYX(this Quaternion quaternion, out float z, out float y, out float x)
+        {
+            // rot =  cy*cz           cz*sx*sy-cx*sz  cx*cz*sy+sx*sz
+            //        cy*sz           cx*cz+sx*sy*sz -cz*sx+cx*sy*sz
+            //       -sy              cy*sx           cx*cy
+
+            var matrix = Matrix4x4.CreateFromQuaternion(quaternion);
+            if (matrix.M31 < 1.0)
+            {
+                if (matrix.M31 > -1.0)
+                {
+                    z = MathF.Atan2(matrix.M21, matrix.M11);
+                    y = MathF.Asin(-matrix.M31);
+                    x = MathF.Atan2(matrix.M31, matrix.M33);
+                }
+                else
+                {
+                    // WARNING.  Not unique.  ZA - XA = -atan2(r01,r02)
+                    z = -(float)MathF.Atan2(matrix.M12, matrix.M13);
+                    y = MathFunctions.PiOver2;
+                    x = 0.0f;
+                }
+            }
+            else
+            {
+                // WARNING.  Not unique.  ZA + XA = atan2(-r01,-r02)
+                z = (float)MathF.Atan2(-matrix.M12, -matrix.M13);
+                y = -MathFunctions.PiOver2;
+                x = 0.0f;
+            }
+        }
+        
         public static Matrix4x4 fromEulerAnglesZYX(float fYAngle, float fPAngle, float fRAngle)
         {
             float fCos = (float)Math.Cos(fYAngle);
