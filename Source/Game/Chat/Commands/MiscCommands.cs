@@ -360,7 +360,7 @@ namespace Game.Chat
 
                 // to point to see at target with same orientation
                 float x, y, z;
-                target.GetContactPoint(_player, out x, out y, out z);
+                target.GetClosePoint(out x, out y, out z, _player.GetCombatReach(), 1.0f);
 
                 _player.TeleportTo(target.GetMapId(), x, y, z, _player.GetAbsoluteAngle(target), TeleportToOptions.GMMode);
                 PhasingHandler.InheritPhaseShift(_player, target);
