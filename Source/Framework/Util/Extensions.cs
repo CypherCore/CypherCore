@@ -295,17 +295,17 @@ namespace System
             float fCos = (float)Math.Cos(fYAngle);
             float fSin = (float)Math.Sin(fYAngle);
 
-            Matrix4x4 kZMat = new(fCos, -fSin, 0, 0, fSin, fCos, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0);
+            Matrix4x4 kZMat = new(fCos, -fSin, 0, 0, fSin, fCos, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
 
             fCos = (float)Math.Cos(fPAngle);
             fSin = (float)Math.Sin(fPAngle);
 
-            Matrix4x4 kYMat = new(fCos, 0, fSin, 0, 0, 1, 0, 0, -fSin, 0, fCos, 0, 0, 0, 0, 0);
+            Matrix4x4 kYMat = new(fCos, 0, fSin, 0, 0, 1, 0, 0, -fSin, 0, fCos, 0, 0, 0, 0, 1);
 
             fCos = (float)Math.Cos(fRAngle);
             fSin = (float)Math.Sin(fRAngle);
 
-            Matrix4x4 kXMat = new(1, 0, 0, 0, 0, fCos, -fSin, 0, 0, fSin, fCos, 0, 0, 0, 0, 0);
+            Matrix4x4 kXMat = new(1, 0, 0, 0, 0, fCos, -fSin, 0, 0, fSin, fCos, 0, 0, 0, 0, 1);
 
             return (kZMat * (kYMat * kXMat));
         }
