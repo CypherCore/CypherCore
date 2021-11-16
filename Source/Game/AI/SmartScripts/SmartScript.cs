@@ -1195,20 +1195,20 @@ namespace Game.AI
                     if (!summoner)
                         break;
 
-                        foreach (var target in targets)
-                        {
-                            Position pos = target.GetPositionWithOffset(new Position(e.Target.x, e.Target.y, e.Target.z, e.Target.o));
-                            Quaternion rot = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(pos.GetOrientation(), 0f, 0f));
-                            summoner.SummonGameObject(e.Action.summonGO.entry, pos, rot, e.Action.summonGO.despawnTime, (GameObjectSummonType)e.Action.summonGO.summonType);
-                        }
-
-                        if (e.GetTargetType() != SmartTargets.Position)
-                            break;
-
-                        Quaternion _rot = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(e.Target.o, 0f, 0f));
-                        summoner.SummonGameObject(e.Action.summonGO.entry, new Position(e.Target.x, e.Target.y, e.Target.z, e.Target.o), _rot, e.Action.summonGO.despawnTime, (GameObjectSummonType)e.Action.summonGO.summonType);
-                        break;
+                    foreach (var target in targets)
+                    {
+                        Position pos = target.GetPositionWithOffset(new Position(e.Target.x, e.Target.y, e.Target.z, e.Target.o));
+                        Quaternion rot = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(pos.GetOrientation(), 0f, 0f));
+                        summoner.SummonGameObject(e.Action.summonGO.entry, pos, rot, e.Action.summonGO.despawnTime, (GameObjectSummonType)e.Action.summonGO.summonType);
                     }
+
+                    if (e.GetTargetType() != SmartTargets.Position)
+                        break;
+
+                    Quaternion _rot = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(e.Target.o, 0f, 0f));
+                    summoner.SummonGameObject(e.Action.summonGO.entry, new Position(e.Target.x, e.Target.y, e.Target.z, e.Target.o), _rot, e.Action.summonGO.despawnTime, (GameObjectSummonType)e.Action.summonGO.summonType);
+                    break;
+                }
                 case SmartActions.KillUnit:
                 {
                     foreach (var target in targets)
@@ -2726,6 +2726,9 @@ namespace Game.AI
                         if ((e.Target.unitRange.creature == 0 || obj.ToCreature().GetEntry() == e.Target.unitRange.creature) && baseObject.IsInRange(obj, e.Target.unitRange.minDist, e.Target.unitRange.maxDist))
                             targets.Add(obj);
                     }
+
+                    if (e.Target.unitRange.maxSize != 0)
+                        targets.RandomResize(e.Target.unitRange.maxSize);
                     break;
                 }
                 case SmartTargets.CreatureDistance:
@@ -2742,6 +2745,9 @@ namespace Game.AI
                         if (e.Target.unitDistance.creature == 0 || obj.ToCreature().GetEntry() == e.Target.unitDistance.creature)
                             targets.Add(obj);
                     }
+
+                    if (e.Target.unitDistance.maxSize != 0)
+                        targets.RandomResize(e.Target.unitDistance.maxSize);
                     break;
                 }
                 case SmartTargets.GameobjectDistance:
@@ -2758,6 +2764,9 @@ namespace Game.AI
                         if (e.Target.goDistance.entry == 0 || obj.ToGameObject().GetEntry() == e.Target.goDistance.entry)
                             targets.Add(obj);
                     }
+
+                    if (e.Target.goDistance.maxSize != 0)
+                        targets.RandomResize(e.Target.goDistance.maxSize);
                     break;
                 }
                 case SmartTargets.GameobjectRange:
@@ -2774,6 +2783,9 @@ namespace Game.AI
                         if ((e.Target.goRange.entry == 0 && obj.ToGameObject().GetEntry() == e.Target.goRange.entry) && baseObject.IsInRange(obj, e.Target.goRange.minDist, e.Target.goRange.maxDist))
                             targets.Add(obj);
                     }
+
+                    if (e.Target.goRange.maxSize != 0)
+                        targets.RandomResize(e.Target.goRange.maxSize);
                     break;
                 }
                 case SmartTargets.CreatureGuid:

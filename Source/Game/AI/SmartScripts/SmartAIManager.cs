@@ -3163,6 +3163,7 @@ namespace Game.AI
             public uint creature;
             public uint minDist;
             public uint maxDist;
+            public uint maxSize;
         }
         public struct UnitGUID
         {
@@ -3173,6 +3174,7 @@ namespace Game.AI
         {
             public uint creature;
             public uint dist;
+            public uint maxSize;
         }
         public struct PlayerDistance
         {
@@ -3192,6 +3194,7 @@ namespace Game.AI
             public uint entry;
             public uint minDist;
             public uint maxDist;
+            public uint maxSize;
         }
         public struct GoGUID
         {
@@ -3202,6 +3205,7 @@ namespace Game.AI
         {
             public uint entry;
             public uint dist;
+            public uint maxSize;
         }
         public struct Position
         {
