@@ -763,7 +763,7 @@ namespace Framework.Constants
         CommandListScenes = 849,
         CommandReloadSceneTemplate = 850,
         CommandReloadAreatriggerTemplate = 851,
-        //                                                       = 852, // DEPRECATED: DON'T REUSE
+        CommandDebugDummy = 852,
         CommandReloadConversationTemplate = 853,
         CommandDebugConversation = 854,
         CommandDebugPlayMusic = 855,

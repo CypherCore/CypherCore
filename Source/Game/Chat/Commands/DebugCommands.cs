@@ -126,6 +126,13 @@ namespace Game.Chat
             return Conversation.CreateConversation(conversationEntry, target, target, target.GetGUID()) != null;
         }
 
+        [Command("dummy", RBACPermissions.CommandDebugDummy)]
+        static bool HandleDebugDummyCommand(StringArguments args, CommandHandler handler)
+        {
+            handler.SendSysMessage("This command does nothing right now. Edit your local core (DebugCommands.cs) to make it do whatever you need for testing.");
+            return true;
+        }
+
         [Command("entervehicle", RBACPermissions.CommandDebugEntervehicle)]
         static bool HandleDebugEnterVehicleCommand(StringArguments args, CommandHandler handler)
         {
