@@ -195,7 +195,7 @@ namespace Framework.Constants
         /// <summary>
         /// GameObject Const
         /// </summary>
-        public const int MaxGOData = 34;
+        public const int MaxGOData = 35;
         public const uint MaxTransportStopFrames = 9;
 
         /// <summary>

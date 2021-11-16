@@ -3721,8 +3721,8 @@ namespace Game
                 "Data0, Data1, Data2, Data3, Data4, Data5, Data6, Data7, Data8, Data9, Data10, Data11, Data12, " +
                 //21      22      23      24      25      26      27      28      29      30      31      32      33      34      35      36
                 "Data13, Data14, Data15, Data16, Data17, Data18, Data19, Data20, Data21, Data22, Data23, Data24, Data25, Data26, Data27, Data28, " +
-                //37      38       39     40      41      42               43      44
-                "Data29, Data30, Data31, Data32, Data33, ContentTuningId, AIName, ScriptName FROM gameobject_template");
+                //37      38       39     40      41      42      43               44      45
+                "Data29, Data30, Data31, Data32, Data33, Data34, ContentTuningId, AIName, ScriptName FROM gameobject_template");
 
             if (result.IsEmpty())
             {
@@ -3751,9 +3751,9 @@ namespace Game
                             got.Raw.data[x] = result.Read<int>(8 + x);
                     }
 
-                    got.ContentTuningId = result.Read<uint>(42);
-                    got.AIName = result.Read<string>(43);
-                    got.ScriptId = Global.ObjectMgr.GetScriptId(result.Read<string>(44));
+                    got.ContentTuningId = result.Read<uint>(43);
+                    got.AIName = result.Read<string>(44);
+                    got.ScriptId = Global.ObjectMgr.GetScriptId(result.Read<string>(45));
 
                     switch (got.type)
                     {

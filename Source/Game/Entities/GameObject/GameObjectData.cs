@@ -708,6 +708,7 @@ namespace Game.Entities
             public uint turnpersonallootsecurityoff;             // 31 turn personal loot security off, enum { false, true, }; Default: false
             public uint ChestProperties;                         // 32 Chest Properties, References: ChestProperties, NoValue = 0
             public uint chestPushLoot;                           // 33 chest Push Loot, References: Treasure, NoValue = 0
+            public uint ForceSingleLooter;                       // 34 Force Single Looter, enum { false, true, }; Default: false
         }
 
         public struct binder
