@@ -1725,6 +1725,9 @@ namespace Game.Entities
                         UnsummonPetTemporaryIfAny();
                 }
 
+                if (!IsAlive() && options.HasAnyFlag(TeleportToOptions.ReviveAtTeleport))
+                    ResurrectPlayer(0.5f);
+
                 if (!options.HasAnyFlag(TeleportToOptions.NotLeaveCombat))
                     CombatStop();
 
@@ -4522,10 +4525,11 @@ namespace Game.Entities
 
             AreaTableRecord zone = CliDB.AreaTableStorage.LookupByKey(GetAreaId());
 
+            bool shouldResurrect = false;
             // Such zones are considered unreachable as a ghost and the player must be automatically revived
             if ((!IsAlive() && zone != null && zone.HasFlag(AreaFlags.NeedFly)) || GetTransport() != null || GetPositionZ() < GetMap().GetMinHeight(GetPhaseShift(), GetPositionX(), GetPositionY()))
             {
-                ResurrectPlayer(0.5f);
+                shouldResurrect = true;
                 SpawnCorpseBones();
             }
 
@@ -4551,7 +4555,7 @@ namespace Game.Entities
             // and don't show spirit healer location
             if (ClosestGrave != null)
             {
-                TeleportTo(ClosestGrave.Loc);
+                TeleportTo(ClosestGrave.Loc, shouldResurrect ? TeleportToOptions.ReviveAtTeleport : 0);
                 if (IsDead())                                        // not send if alive, because it used in TeleportTo()
                 {
                     DeathReleaseLoc packet = new();
@@ -7024,7 +7028,8 @@ namespace Game.Entities
             return pOther.GetDistance(player) <= WorldConfig.GetFloatValue(WorldCfg.MaxRecruitAFriendDistance);
         }
 
-        public bool IsBeingTeleported() { return mSemaphoreTeleport_Near || mSemaphoreTeleport_Far; }
+        public TeleportToOptions GetTeleportOptions() { return m_teleport_options; }
+        public bool IsBeingTeleported() { return IsBeingTeleportedNear() || IsBeingTeleportedFar(); }
         public bool IsBeingTeleportedNear() { return mSemaphoreTeleport_Near; }
         public bool IsBeingTeleportedFar() { return mSemaphoreTeleport_Far; }
         public bool IsBeingTeleportedSeamlessly() { return IsBeingTeleportedFar() && m_teleport_options.HasAnyFlag(TeleportToOptions.Seamless); }

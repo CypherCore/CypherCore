@@ -220,15 +220,17 @@ namespace Game
 
         void HandleMoveWorldportAck()
         {
+            Player player = GetPlayer();
+
             // ignore unexpected far teleports
-            if (!GetPlayer().IsBeingTeleportedFar())
+            if (!player.IsBeingTeleportedFar())
                 return;
 
-            bool seamlessTeleport = GetPlayer().IsBeingTeleportedSeamlessly();
-            GetPlayer().SetSemaphoreTeleportFar(false);
+            bool seamlessTeleport = player.IsBeingTeleportedSeamlessly();
+            player.SetSemaphoreTeleportFar(false);
 
             // get the teleport destination
-            WorldLocation loc = GetPlayer().GetTeleportDest();
+            WorldLocation loc = player.GetTeleportDest();
 
             // possible errors in the coordinate validity check
             if (!GridDefines.IsValidMapCoord(loc))
@@ -242,112 +244,114 @@ namespace Game
             InstanceTemplate mInstance = Global.ObjectMgr.GetInstanceTemplate(loc.GetMapId());
 
             // reset instance validity, except if going to an instance inside an instance
-            if (!GetPlayer().m_InstanceValid && mInstance == null)
-                GetPlayer().m_InstanceValid = true;
+            if (!player.m_InstanceValid && mInstance == null)
+                player.m_InstanceValid = true;
 
-            Map oldMap = GetPlayer().GetMap();
-            Map newMap = Global.MapMgr.CreateMap(loc.GetMapId(), GetPlayer());
+            Map oldMap = player.GetMap();
+            Map newMap = Global.MapMgr.CreateMap(loc.GetMapId(), player);
 
-            if (GetPlayer().IsInWorld)
+            if (player.IsInWorld)
             {
-                Log.outError(LogFilter.Network, "Player (Name {0}) is still in world when teleported from map {1} to new map {2}", GetPlayer().GetName(), oldMap.GetId(), loc.GetMapId());
-                oldMap.RemovePlayerFromMap(GetPlayer(), false);
+                Log.outError(LogFilter.Network, $"Player (Name {player.GetName()}) is still in world when teleported from map {oldMap.GetId()} to new map {loc.GetMapId()}");
+                oldMap.RemovePlayerFromMap(player, false);
             }
 
             // relocate the player to the teleport destination
             // the CannotEnter checks are done in TeleporTo but conditions may change
             // while the player is in transit, for example the map may get full
-            if (newMap == null || newMap.CannotEnter(GetPlayer()) != 0)
+            if (newMap == null || newMap.CannotEnter(player) != 0)
             {
-                Log.outError(LogFilter.Network, "Map {0} could not be created for {1} ({2}), porting player to homebind", loc.GetMapId(), newMap ? newMap.GetMapName() : "Unknown", GetPlayer().GetGUID().ToString());
-                GetPlayer().TeleportTo(GetPlayer().GetHomebind());
+                Log.outError(LogFilter.Network, $"Map {loc.GetMapId()} could not be created for {(newMap ? newMap.GetMapName() : "Unknown")} ({player.GetGUID()}), porting player to homebind");
+                player.TeleportTo(player.GetHomebind());
                 return;
             }
 
-            float z = loc.GetPositionZ() + GetPlayer().GetHoverOffset();
-            GetPlayer().Relocate(loc.GetPositionX(), loc.GetPositionY(), z, loc.GetOrientation());
-            GetPlayer().SetFallInformation(0, GetPlayer().GetPositionZ());
+            float z = loc.GetPositionZ() + player.GetHoverOffset();
+            player.Relocate(loc.GetPositionX(), loc.GetPositionY(), z, loc.GetOrientation());
+            player.SetFallInformation(0, player.GetPositionZ());
 
-            GetPlayer().ResetMap();
-            GetPlayer().SetMap(newMap);
+            player.ResetMap();
+            player.SetMap(newMap);
 
             ResumeToken resumeToken = new();
-            resumeToken.SequenceIndex = _player.m_movementCounter;
+            resumeToken.SequenceIndex = player.m_movementCounter;
             resumeToken.Reason = seamlessTeleport ? 2 : 1u;
             SendPacket(resumeToken);
 
             if (!seamlessTeleport)
-                GetPlayer().SendInitialPacketsBeforeAddToMap();
+                player.SendInitialPacketsBeforeAddToMap();
 
-            if (!GetPlayer().GetMap().AddPlayerToMap(GetPlayer(), !seamlessTeleport))
+            if (!player.GetMap().AddPlayerToMap(player, !seamlessTeleport))
             {
-                Log.outError(LogFilter.Network, "WORLD: failed to teleport player {0} ({1}) to map {2} ({3}) because of unknown reason!",
-                    GetPlayer().GetName(), GetPlayer().GetGUID().ToString(), loc.GetMapId(), newMap ? newMap.GetMapName() : "Unknown");
-                GetPlayer().ResetMap();
-                GetPlayer().SetMap(oldMap);
-                GetPlayer().TeleportTo(GetPlayer().GetHomebind());
+                Log.outError(LogFilter.Network, $"WORLD: failed to teleport player {player.GetName()} ({player.GetGUID()}) to map {loc.GetMapId()} ({(newMap ? newMap.GetMapName() : "Unknown")}) because of unknown reason!");
+                player.ResetMap();
+                player.SetMap(oldMap);
+                player.TeleportTo(player.GetHomebind());
                 return;
             }
 
             // Battleground state prepare (in case join to BG), at relogin/tele player not invited
             // only add to bg group and object, if the player was invited (else he entered through command)
-            if (GetPlayer().InBattleground())
+            if (player.InBattleground())
             {
                 // cleanup setting if outdated
                 if (!mapEntry.IsBattlegroundOrArena())
                 {
                     // We're not in BG
-                    GetPlayer().SetBattlegroundId(0, BattlegroundTypeId.None);
+                    player.SetBattlegroundId(0, BattlegroundTypeId.None);
                     // reset destination bg team
-                    GetPlayer().SetBGTeam(0);
+                    player.SetBGTeam(0);
                 }
                 // join to bg case
                 else
                 {
-                    Battleground bg = GetPlayer().GetBattleground();
+                    Battleground bg = player.GetBattleground();
                     if (bg)
                     {
-                        if (GetPlayer().IsInvitedForBattlegroundInstance(GetPlayer().GetBattlegroundId()))
-                            bg.AddPlayer(GetPlayer());
+                        if (player.IsInvitedForBattlegroundInstance(player.GetBattlegroundId()))
+                            bg.AddPlayer(player);
                     }
                 }
             }
 
             if (!seamlessTeleport)
-                GetPlayer().SendInitialPacketsAfterAddToMap();
+                player.SendInitialPacketsAfterAddToMap();
             else
             {
-                GetPlayer().UpdateVisibilityForPlayer();
-                Garrison garrison = GetPlayer().GetGarrison();
+                player.UpdateVisibilityForPlayer();
+                Garrison garrison = player.GetGarrison();
                 if (garrison != null)
                     garrison.SendRemoteInfo();
             }
 
             // flight fast teleport case
-            if (GetPlayer().IsInFlight())
+            if (player.IsInFlight())
             {
-                if (!GetPlayer().InBattleground())
+                if (!player.InBattleground())
                 {
                     if (!seamlessTeleport)
                     {
                         // short preparations to continue flight
-                        MovementGenerator movementGenerator = GetPlayer().GetMotionMaster().GetCurrentMovementGenerator();
-                        movementGenerator.Initialize(GetPlayer());
+                        MovementGenerator movementGenerator = player.GetMotionMaster().GetCurrentMovementGenerator();
+                        movementGenerator.Initialize(player);
                     }
                     return;
                 }
 
                 // Battlegroundstate prepare, stop flight
-                GetPlayer().FinishTaxiFlight();
+                player.FinishTaxiFlight();
             }
 
+            if (!player.IsAlive() && player.GetTeleportOptions().HasAnyFlag(TeleportToOptions.ReviveAtTeleport))
+                player.ResurrectPlayer(0.5f);
+
             // resurrect character at enter into instance where his corpse exist after add to map
-            if (mapEntry.IsDungeon() && !GetPlayer().IsAlive())
+            if (mapEntry.IsDungeon() && !player.IsAlive())
             { 
-                if (GetPlayer().GetCorpseLocation().GetMapId() == mapEntry.Id)
+                if (player.GetCorpseLocation().GetMapId() == mapEntry.Id)
                 {
-                    GetPlayer().ResurrectPlayer(0.5f, false);
-                    GetPlayer().SpawnCorpseBones();
+                    player.ResurrectPlayer(0.5f, false);
+                    player.SpawnCorpseBones();
                 }
             }
 
@@ -364,34 +368,33 @@ namespace Game
                         if (timeReset != 0)
                         {
                             uint timeleft = (uint)(timeReset - GameTime.GetGameTime());
-                            GetPlayer().SendInstanceResetWarning(mapEntry.Id, diff, timeleft, true);
+                            player.SendInstanceResetWarning(mapEntry.Id, diff, timeleft, true);
                         }
                     }
                 }
 
                 // check if instance is valid
-                if (!GetPlayer().CheckInstanceValidity(false))
-                    GetPlayer().m_InstanceValid = false;
+                if (!player.CheckInstanceValidity(false))
+                    player.m_InstanceValid = false;
             }
 
             // update zone immediately, otherwise leave channel will cause crash in mtmap
-            uint newzone, newarea;
-            GetPlayer().GetZoneAndAreaId(out newzone, out newarea);
-            GetPlayer().UpdateZone(newzone, newarea);
+            player.GetZoneAndAreaId(out uint newzone, out uint newarea);
+            player.UpdateZone(newzone, newarea);
 
             // honorless target
-            if (GetPlayer().pvpInfo.IsHostile)
-                GetPlayer().CastSpell(GetPlayer(), 2479, true);
+            if (player.pvpInfo.IsHostile)
+                player.CastSpell(player, 2479, true);
 
             // in friendly area
-            else if (GetPlayer().IsPvP() && !GetPlayer().HasPlayerFlag(PlayerFlags.InPVP))
-                GetPlayer().UpdatePvP(false, false);
+            else if (player.IsPvP() && !player.HasPlayerFlag(PlayerFlags.InPVP))
+                player.UpdatePvP(false, false);
 
             // resummon pet
-            GetPlayer().ResummonPetTemporaryUnSummonedIfAny();
+            player.ResummonPetTemporaryUnSummonedIfAny();
 
             //lets process all delayed operations on successful teleport
-            GetPlayer().ProcessDelayedOperations();
+            player.ProcessDelayedOperations();
         }
 
         [WorldPacketHandler(ClientOpcodes.SuspendTokenResponse, Status = SessionStatus.Transfer)]
