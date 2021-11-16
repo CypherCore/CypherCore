@@ -29,6 +29,7 @@ using Game.Misc;
 using Game.Scripting;
 using Game.Spells;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
@@ -2956,21 +2957,23 @@ namespace Game
                     npcText.Data[i].BroadcastTextID = result.Read<uint>(9 + i);
                 }
 
+                BitSet erasedBroadcastTexts = new(SharedConst.MaxNpcTextOptions);
                 for (int i = 0; i < SharedConst.MaxNpcTextOptions; i++)
                 {
                     if (npcText.Data[i].BroadcastTextID != 0)
                     {
                         if (!CliDB.BroadcastTextStorage.ContainsKey(npcText.Data[i].BroadcastTextID))
                         {
-                            Log.outError(LogFilter.Sql, "NPCText (Id: {0}) has a non-existing or incompatible BroadcastText (ID: {1}, Index: {2})", textID, npcText.Data[i].BroadcastTextID, i);
+                            Log.outError(LogFilter.Sql, "NPCText (Id: {0}) has a non-existing BroadcastText (ID: {1}, Index: {2})", textID, npcText.Data[i].BroadcastTextID, i);
                             npcText.Data[i].BroadcastTextID = 0;
+                            erasedBroadcastTexts[i] = true;
                         }
                     }
                 }
 
                 for (byte i = 0; i < SharedConst.MaxNpcTextOptions; i++)
                 {
-                    if (npcText.Data[i].Probability > 0 && npcText.Data[i].BroadcastTextID == 0)
+                    if (npcText.Data[i].Probability > 0 && npcText.Data[i].BroadcastTextID == 0 && !erasedBroadcastTexts[i])
                     {
                         Log.outError(LogFilter.Sql, "NPCText (ID: {0}) has a probability (Index: {1}) set, but no BroadcastTextID to go with it", textID, i);
                         npcText.Data[i].Probability = 0;
