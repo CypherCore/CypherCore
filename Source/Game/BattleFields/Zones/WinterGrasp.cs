@@ -281,6 +281,10 @@ namespace Game.BattleFields
             }
             m_titansRelicGUID.Clear();
 
+            // change collision wall state closed
+            foreach (BfWGGameObjectBuilding building in BuildingsInZone)
+                building.RebuildGate();
+
             // successful defense
             if (endByTimer)
                 UpdateData(GetDefenderTeam() == TeamId.Horde ? WGData.DefH : WGData.DefA, 1);
@@ -1090,7 +1094,7 @@ namespace Game.BattleFields
                     {
                         GameObject go = build.FindNearestGameObject(WGGameObjects.KeepCollisionWall, 50.0f);
                         if (go)
-                            go.SetGoState(GameObjectState.Ready);
+                            go.SetGoState(GameObjectState.Active);
                     }
 
                     // Update worldstate
@@ -1099,6 +1103,20 @@ namespace Game.BattleFields
                 }
                 UpdateCreatureAndGo();
                 build.SetFaction(WGConst.WintergraspFaction[_teamControl]);
+            }
+        }
+
+        public void RebuildGate()
+        {
+            GameObject build = _wg.GetGameObject(_buildGUID);
+            if (build != null)
+            {
+                if (build.IsDestructibleBuilding() && build.GetEntry() == WGGameObjects.VaultGate)
+                {
+                    GameObject go = build.FindNearestGameObject(WGGameObjects.KeepCollisionWall, 50.0f);
+                    if (go != null)
+                        go.SetGoState(GameObjectState.Ready); //not GO_STATE_ACTIVE
+                }
             }
         }
 
