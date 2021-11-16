@@ -40,7 +40,7 @@ namespace Game.BattleGrounds
             _battlegroundTemplate = battlegroundTemplate;
             m_RandomTypeID = BattlegroundTypeId.None;
             m_Status = BattlegroundStatus.None;
-            _winnerTeamId = BattlegroundTeamId.Neutral;
+            _winnerTeamId = PvPTeamId.Neutral;
 
             m_HonorMode = BGHonorMode.Normal;
 
@@ -662,7 +662,7 @@ namespace Game.BattleGrounds
                     SendBroadcastText(BattlegroundBroadcastTexts.AllianceWins, ChatMsg.BgSystemNeutral);
 
                 PlaySoundToAll((uint)BattlegroundSounds.AllianceWins);
-                SetWinner(BattlegroundTeamId.Alliance);
+                SetWinner(PvPTeamId.Alliance);
             }
             else if (winner == Team.Horde)
             {
@@ -670,11 +670,11 @@ namespace Game.BattleGrounds
                     SendBroadcastText(BattlegroundBroadcastTexts.HordeWins, ChatMsg.BgSystemNeutral);
 
                 PlaySoundToAll((uint)BattlegroundSounds.HordeWins);
-                SetWinner(BattlegroundTeamId.Horde);
+                SetWinner(PvPTeamId.Horde);
             }
             else
             {
-                SetWinner(BattlegroundTeamId.Neutral);
+                SetWinner(PvPTeamId.Neutral);
             }
 
             PreparedStatement stmt;
@@ -932,7 +932,7 @@ namespace Game.BattleGrounds
         // this method is called when no players remains in Battleground
         public virtual void Reset()
         {
-            SetWinner(BattlegroundTeamId.Neutral);
+            SetWinner(PvPTeamId.Neutral);
             SetStatus(BattlegroundStatus.WaitQueue);
             SetElapsedTime(0);
             SetRemainingTime(0);
@@ -1027,7 +1027,7 @@ namespace Game.BattleGrounds
                 pvpMatchInitialize.Duration = (int)(GetElapsedTime() - (int)BattlegroundStartTimeIntervals.Delay2m) / Time.InMilliseconds;
                 pvpMatchInitialize.StartTime = GameTime.GetGameTime() - pvpMatchInitialize.Duration;
             }
-            pvpMatchInitialize.ArenaFaction = (byte)(player.GetBGTeam() == Team.Horde ? BattlegroundTeamId.Horde : BattlegroundTeamId.Alliance);
+            pvpMatchInitialize.ArenaFaction = (byte)(player.GetBGTeam() == Team.Horde ? PvPTeamId.Horde : PvPTeamId.Alliance);
             pvpMatchInitialize.BattlemasterListID = (uint)GetTypeID();
             pvpMatchInitialize.Registered = false;
             pvpMatchInitialize.AffectsRating = IsRated();
@@ -1272,8 +1272,8 @@ namespace Game.BattleGrounds
                 pvpLogData.Statistics.Add(playerData);
             }
 
-            pvpLogData.PlayerCount[(int)BattlegroundTeamId.Horde] = (sbyte)GetPlayersCountByTeam(Team.Horde);
-            pvpLogData.PlayerCount[(int)BattlegroundTeamId.Alliance] = (sbyte)GetPlayersCountByTeam(Team.Alliance);
+            pvpLogData.PlayerCount[(int)PvPTeamId.Horde] = (sbyte)GetPlayersCountByTeam(Team.Horde);
+            pvpLogData.PlayerCount[(int)PvPTeamId.Alliance] = (sbyte)GetPlayersCountByTeam(Team.Alliance);
         }
 
         public virtual bool UpdatePlayerScore(Player player, ScoreType type, uint value, bool doAddHonor = true)
@@ -1908,7 +1908,7 @@ namespace Game.BattleGrounds
 
         int GetStartDelayTime() { return m_StartDelayTime; }
         public ArenaTypes GetArenaType() { return m_ArenaType; }
-        BattlegroundTeamId GetWinner() { return _winnerTeamId; }
+        PvPTeamId GetWinner() { return _winnerTeamId; }
         public bool IsRandom() { return m_IsRandom; }
 
         public void SetQueueId(BattlegroundQueueTypeId queueId) { m_queueId = queueId; }
@@ -1922,7 +1922,7 @@ namespace Game.BattleGrounds
         public void SetLastResurrectTime(uint Time) { m_LastResurrectTime = Time; }
         public void SetRated(bool state) { m_IsRated = state; }
         public void SetArenaType(ArenaTypes type) { m_ArenaType = type; }
-        public void SetWinner(BattlegroundTeamId winnerTeamId) { _winnerTeamId = winnerTeamId; }
+        public void SetWinner(PvPTeamId winnerTeamId) { _winnerTeamId = winnerTeamId; }
 
         void ModifyStartDelayTime(int diff) { m_StartDelayTime -= diff; }
         void SetStartDelayTime(BattlegroundStartTimeIntervals Time) { m_StartDelayTime = (int)Time; }
@@ -2041,7 +2041,7 @@ namespace Game.BattleGrounds
         bool m_IsRandom;
 
         public BGHonorMode m_HonorMode;
-        public uint[] m_TeamScores = new uint[SharedConst.BGTeamsCount];
+        public uint[] m_TeamScores = new uint[SharedConst.PvpTeamsCount];
 
         protected ObjectGuid[] BgObjects;// = new Dictionary<int, ObjectGuid>();
         protected ObjectGuid[] BgCreatures;// = new Dictionary<int, ObjectGuid>();
@@ -2063,7 +2063,7 @@ namespace Game.BattleGrounds
         ArenaTypes m_ArenaType;                                 // 2=2v2, 3=3v3, 5=5v5
         bool m_InBGFreeSlotQueue;                         // used to make sure that BG is only once inserted into the BattlegroundMgr.BGFreeSlotQueue[bgTypeId] deque
         bool m_SetDeleteThis;                             // used for safe deletion of the bg after end / all players leave
-        BattlegroundTeamId _winnerTeamId;
+        PvPTeamId _winnerTeamId;
         int m_StartDelayTime;
         bool m_IsRated;                                   // is this battle rated?
         bool m_PrematureCountDown;
@@ -2081,15 +2081,15 @@ namespace Game.BattleGrounds
         uint m_InvitedHorde;
 
         // Raid Group
-        Group[] m_BgRaids = new Group[SharedConst.BGTeamsCount];                   // 0 - Team.Alliance, 1 - Team.Horde
+        Group[] m_BgRaids = new Group[SharedConst.PvpTeamsCount];                   // 0 - Team.Alliance, 1 - Team.Horde
 
         // Players count by team
-        uint[] m_PlayersCount = new uint[SharedConst.BGTeamsCount];
+        uint[] m_PlayersCount = new uint[SharedConst.PvpTeamsCount];
 
         // Arena team ids by team
-        uint[] m_ArenaTeamIds = new uint[SharedConst.BGTeamsCount];
+        uint[] m_ArenaTeamIds = new uint[SharedConst.PvpTeamsCount];
 
-        uint[] m_ArenaTeamMMR = new uint[SharedConst.BGTeamsCount];
+        uint[] m_ArenaTeamMMR = new uint[SharedConst.PvpTeamsCount];
 
         // Start location
         BattlegroundMap m_Map;

@@ -843,7 +843,7 @@ namespace Game.BattleGrounds
     public class BattlegroundTemplate
     {
         public BattlegroundTypeId Id;
-        public WorldSafeLocsEntry[] StartLocation = new WorldSafeLocsEntry[SharedConst.BGTeamsCount];
+        public WorldSafeLocsEntry[] StartLocation = new WorldSafeLocsEntry[SharedConst.PvpTeamsCount];
         public float MaxStartDistSq;
         public byte Weight;
         public uint ScriptId;

@@ -52,7 +52,7 @@ namespace Game.BattleFields
 
             RegisterZone(m_ZoneId);
 
-            for (var team = 0; team < SharedConst.BGTeamsCount; ++team)
+            for (var team = 0; team < SharedConst.PvpTeamsCount; ++team)
             {
                 DefenderPortalList[team] = new List<ObjectGuid>();
                 m_vehicles[team] = new List<ObjectGuid>();
@@ -227,7 +227,7 @@ namespace Game.BattleFields
                     workShop.UpdateGraveyardAndWorkshop();
             }
 
-            for (byte team = 0; team < SharedConst.BGTeamsCount; ++team)
+            for (byte team = 0; team < SharedConst.PvpTeamsCount; ++team)
             {
                 foreach (var guid in m_players[team])
                 {
@@ -358,7 +358,7 @@ namespace Game.BattleFields
                     player.CastSpell(player, WGSpells.DefeatReward, true);
             }
 
-            for (byte team = 0; team < SharedConst.BGTeamsCount; ++team)
+            for (byte team = 0; team < SharedConst.PvpTeamsCount; ++team)
             {
                 foreach (var guid in m_PlayersInWar[team])
                 {
@@ -382,7 +382,7 @@ namespace Game.BattleFields
 
             if (!endByTimer)
             {
-                for (byte team = 0; team < SharedConst.BGTeamsCount; ++team)
+                for (byte team = 0; team < SharedConst.PvpTeamsCount; ++team)
                 {
                     foreach (var guid in m_players[team])
                     {
@@ -582,7 +582,7 @@ namespace Game.BattleFields
 
         bool FindAndRemoveVehicleFromList(Unit vehicle)
         {
-            for (byte i = 0; i < SharedConst.BGTeamsCount; ++i)
+            for (byte i = 0; i < SharedConst.PvpTeamsCount; ++i)
             {
                 if (m_vehicles[i].Contains(vehicle.GetGUID()))
                 {
@@ -798,7 +798,7 @@ namespace Game.BattleFields
 
         public override void SendInitWorldStatesToAll()
         {
-            for (byte team = 0; team < SharedConst.BGTeamsCount; team++)
+            for (byte team = 0; team < SharedConst.PvpTeamsCount; team++)
             {
                 foreach (var guid in m_players[team])
                 {
@@ -1034,10 +1034,10 @@ namespace Game.BattleFields
 
         List<WGWorkshop> Workshops = new();
 
-        List<ObjectGuid>[] DefenderPortalList = new List<ObjectGuid>[SharedConst.BGTeamsCount];
+        List<ObjectGuid>[] DefenderPortalList = new List<ObjectGuid>[SharedConst.PvpTeamsCount];
         List<BfWGGameObjectBuilding> BuildingsInZone = new();
 
-        List<ObjectGuid>[] m_vehicles = new List<ObjectGuid>[SharedConst.BGTeamsCount];
+        List<ObjectGuid>[] m_vehicles = new List<ObjectGuid>[SharedConst.PvpTeamsCount];
         List<ObjectGuid> CanonList = new();
 
         int m_tenacityTeam;
@@ -1489,11 +1489,11 @@ namespace Game.BattleFields
         StaticWintergraspTowerInfo _staticTowerInfo;
 
         // GameObject associations
-        List<ObjectGuid>[] m_GameObjectList = new List<ObjectGuid>[SharedConst.BGTeamsCount];
+        List<ObjectGuid>[] m_GameObjectList = new List<ObjectGuid>[SharedConst.PvpTeamsCount];
 
         // Creature associations
-        List<ObjectGuid>[] m_CreatureBottomList = new List<ObjectGuid>[SharedConst.BGTeamsCount];
-        List<ObjectGuid>[] m_CreatureTopList = new List<ObjectGuid>[SharedConst.BGTeamsCount];
+        List<ObjectGuid>[] m_CreatureBottomList = new List<ObjectGuid>[SharedConst.PvpTeamsCount];
+        List<ObjectGuid>[] m_CreatureTopList = new List<ObjectGuid>[SharedConst.PvpTeamsCount];
         List<ObjectGuid> m_TowerCannonBottomList = new();
         List<ObjectGuid> m_TurretTopList = new();
     }

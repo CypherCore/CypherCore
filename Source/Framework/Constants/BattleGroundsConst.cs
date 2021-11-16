@@ -255,7 +255,7 @@ namespace Framework.Constants
         BgStartL70etc = 11803
     }
 
-    public enum BattlegroundTeamId
+    public enum PvPTeamId
     {
         Horde = 0, // Battleground: Horde,    Arena: Green
         Alliance = 1, // Battleground: Alliance, Arena: Gold

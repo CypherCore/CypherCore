@@ -26,7 +26,7 @@ namespace Game.BattleGrounds
         public BattlegroundScore(ObjectGuid playerGuid, Team team)
         {
             PlayerGuid = playerGuid;
-            TeamId = (int)(team == Team.Alliance ? BattlegroundTeamId.Alliance : BattlegroundTeamId.Horde);
+            TeamId = (int)(team == Team.Alliance ? PvPTeamId.Alliance : PvPTeamId.Horde);
         }
 
         public virtual void UpdateScore(ScoreType type, uint value)

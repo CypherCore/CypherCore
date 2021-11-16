@@ -252,7 +252,7 @@ namespace Game.PvP
 
         void BroadcastWorker(IDoWork<Player> _worker, uint zoneId)
         {
-            for (uint i = 0; i < SharedConst.BGTeamsCount; ++i)
+            for (uint i = 0; i < SharedConst.PvpTeamsCount; ++i)
             {
                 foreach (var guid in m_players[i])
                 {

@@ -42,7 +42,7 @@ namespace Game.BattleGrounds
                     m_QueuedGroups[i][c] = new List<GroupQueueInfo>();
             }
 
-            for (var i = 0; i < SharedConst.BGTeamsCount; ++i)
+            for (var i = 0; i < SharedConst.PvpTeamsCount; ++i)
             {
                 m_WaitTimes[i] = new uint[(int)BattlegroundBracketId.Max][];
                 for (var c = 0; c < (int)BattlegroundBracketId.Max; ++c)
@@ -78,7 +78,7 @@ namespace Game.BattleGrounds
             //compute index (if group is premade or joined a rated match) to queues
             uint index = 0;
             if (!m_queueId.Rated && !isPremade)
-                index += SharedConst.BGTeamsCount;
+                index += SharedConst.PvpTeamsCount;
             if (ginfo.Team == Team.Horde)
                 index++;
             Log.outDebug(LogFilter.Battleground, "Adding Group to BattlegroundQueue bgTypeId : {0}, bracket_id : {1}, index : {2}", m_queueId.BattlemasterListId, bracketId, index);
@@ -243,7 +243,7 @@ namespace Game.BattleGrounds
             {
                 //we must check premade and normal team's queue - because when players from premade are joining bg,
                 //they leave groupinfo so we can't use its players size to find out index
-                for (uint j = index; j < BattlegroundConst.BgQueueTypesCount; j += SharedConst.BGTeamsCount)
+                for (uint j = index; j < BattlegroundConst.BgQueueTypesCount; j += SharedConst.PvpTeamsCount)
                 {
                     foreach (var k in m_QueuedGroups[bracket_id_tmp][j])
                     {
@@ -567,7 +567,7 @@ namespace Game.BattleGrounds
                     m_SelectionPools[TeamId.Horde].AddGroup(horde_group, MaxPlayersPerTeam);
                     //add groups/players from normal queue to size of bigger group
                     uint maxPlayers = Math.Min(m_SelectionPools[TeamId.Alliance].GetPlayerCount(), m_SelectionPools[TeamId.Horde].GetPlayerCount());
-                    for (uint i = 0; i < SharedConst.BGTeamsCount; i++)
+                    for (uint i = 0; i < SharedConst.PvpTeamsCount; i++)
                     {
                         foreach (var groupQueueInfo in m_QueuedGroups[(int)bracket_id][BattlegroundConst.BgQueueNormalAlliance + i])
                         {
@@ -585,7 +585,7 @@ namespace Game.BattleGrounds
             // if first is invited to BG and seconds timer expired, but we can ignore it, because players have only 80 seconds to click to enter bg
             // and when they click or after 80 seconds the queue info is removed from queue
             uint time_before = (uint)(GameTime.GetGameTimeMS() - WorldConfig.GetIntValue(WorldCfg.BattlegroundPremadeGroupWaitForMatch));
-            for (uint i = 0; i < SharedConst.BGTeamsCount; i++)
+            for (uint i = 0; i < SharedConst.PvpTeamsCount; i++)
             {
                 if (!m_QueuedGroups[(int)bracket_id][BattlegroundConst.BgQueuePremadeAlliance + i].Empty())
                 {
@@ -605,8 +605,8 @@ namespace Game.BattleGrounds
         // this method tries to create Battleground or arena with MinPlayersPerTeam against MinPlayersPerTeam
         bool CheckNormalMatch(Battleground bg_template, BattlegroundBracketId bracket_id, uint minPlayers, uint maxPlayers)
         {
-            int[] teamIndex = new int[SharedConst.BGTeamsCount];
-            for (uint i = 0; i < SharedConst.BGTeamsCount; i++)
+            int[] teamIndex = new int[SharedConst.PvpTeamsCount];
+            for (uint i = 0; i < SharedConst.PvpTeamsCount; i++)
             {
                 teamIndex[i] = 0;
                 for (; teamIndex[i] != m_QueuedGroups[(int)bracket_id][BattlegroundConst.BgQueueNormalAlliance + i].Count; ++teamIndex[i])
@@ -634,7 +634,7 @@ namespace Game.BattleGrounds
                 {
                     var groupQueueInfo = m_QueuedGroups[(int)bracket_id][BattlegroundConst.BgQueueNormalAlliance + j][teamIndex[j]];
                     if (groupQueueInfo.IsInvitedToBGInstanceGUID == 0)
-                        if (!m_SelectionPools[j].AddGroup(groupQueueInfo, m_SelectionPools[(j + 1) % SharedConst.BGTeamsCount].GetPlayerCount()))
+                        if (!m_SelectionPools[j].AddGroup(groupQueueInfo, m_SelectionPools[(j + 1) % SharedConst.PvpTeamsCount].GetPlayerCount()))
                             break;
                 }
                 // do not allow to start bg with more than 2 players more on 1 faction
@@ -808,7 +808,7 @@ namespace Game.BattleGrounds
                         return;
                     }
                     // invite those selection pools
-                    for (uint i = 0; i < SharedConst.BGTeamsCount; i++)
+                    for (uint i = 0; i < SharedConst.PvpTeamsCount; i++)
                         foreach (var queueInfo in m_SelectionPools[TeamId.Alliance + i].SelectedGroups)
                             InviteGroupToBG(queueInfo, bg2, queueInfo.Team);
 
@@ -835,7 +835,7 @@ namespace Game.BattleGrounds
                     }
 
                     // invite those selection pools
-                    for (uint i = 0; i < SharedConst.BGTeamsCount; i++)
+                    for (uint i = 0; i < SharedConst.PvpTeamsCount; i++)
                     {
                         foreach (var queueInfo in m_SelectionPools[TeamId.Alliance + i].SelectedGroups)
                             InviteGroupToBG(queueInfo, bg2, queueInfo.Team);
@@ -882,7 +882,7 @@ namespace Game.BattleGrounds
                 int discardTime = (int)(GameTime.GetGameTimeMS() - Global.BattlegroundMgr.GetRatingDiscardTimer());
 
                 // we need to find 2 teams which will play next game
-                GroupQueueInfo[] queueArray = new GroupQueueInfo[SharedConst.BGTeamsCount];
+                GroupQueueInfo[] queueArray = new GroupQueueInfo[SharedConst.PvpTeamsCount];
                 byte found = 0;
                 byte team = 0;
 
@@ -980,14 +980,14 @@ namespace Game.BattleGrounds
         /// </summary>
         List<GroupQueueInfo>[][] m_QueuedGroups = new List<GroupQueueInfo>[(int)BattlegroundBracketId.Max][];
 
-        uint[][][] m_WaitTimes = new uint[SharedConst.BGTeamsCount][][];
-        uint[][] m_WaitTimeLastPlayer = new uint[SharedConst.BGTeamsCount][];
-        uint[][] m_SumOfWaitTimes = new uint[SharedConst.BGTeamsCount][];
+        uint[][][] m_WaitTimes = new uint[SharedConst.PvpTeamsCount][][];
+        uint[][] m_WaitTimeLastPlayer = new uint[SharedConst.PvpTeamsCount][];
+        uint[][] m_SumOfWaitTimes = new uint[SharedConst.PvpTeamsCount][];
 
         // Event handler
         EventSystem m_events = new();
 
-        SelectionPool[] m_SelectionPools = new SelectionPool[SharedConst.BGTeamsCount];
+        SelectionPool[] m_SelectionPools = new SelectionPool[SharedConst.PvpTeamsCount];
         // class to select and invite groups to bg
         class SelectionPool
         {
@@ -1182,7 +1182,7 @@ namespace Game.BattleGrounds
 
             BattlegroundQueueTypeId bgQueueTypeId = bg.GetQueueId();
             uint queueSlot = player.GetBattlegroundQueueIndex(bgQueueTypeId);
-            if (queueSlot < SharedConst.BGTeamsCount)         // player is in queue or in Battleground
+            if (queueSlot < SharedConst.PvpTeamsCount)         // player is in queue or in Battleground
             {
                 // check if player is invited to this bg
                 BattlegroundQueue bgQueue = Global.BattlegroundMgr.GetBattlegroundQueue(bgQueueTypeId);
@@ -1232,7 +1232,7 @@ namespace Game.BattleGrounds
             //bg pointer can be NULL! so use it carefully!
 
             uint queueSlot = player.GetBattlegroundQueueIndex(m_BgQueueTypeId);
-            if (queueSlot < SharedConst.BGTeamsCount)         // player is in queue, or in Battleground
+            if (queueSlot < SharedConst.PvpTeamsCount)         // player is in queue, or in Battleground
             {
                 // check if player is in queue for this BG and if we are removing his invite event
                 BattlegroundQueue bgQueue = Global.BattlegroundMgr.GetBattlegroundQueue(m_BgQueueTypeId);

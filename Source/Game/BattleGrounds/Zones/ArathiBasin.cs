@@ -42,7 +42,7 @@ namespace Game.BattleGrounds.Zones
                 m_BannerTimers[i].teamIndex = 0;
             }
 
-            for (byte i = 0; i < SharedConst.BGTeamsCount; ++i)
+            for (byte i = 0; i < SharedConst.PvpTeamsCount; ++i)
             {
                 m_lastTick[i] = 0;
                 m_HonorScoreTics[i] = 0;
@@ -107,13 +107,13 @@ namespace Game.BattleGrounds.Zones
                         }
                     }
 
-                    for (int team = 0; team < SharedConst.BGTeamsCount; ++team)
+                    for (int team = 0; team < SharedConst.PvpTeamsCount; ++team)
                         if (m_Nodes[node] == team + ABNodeStatus.Occupied)
                             ++team_points[team];
                 }
 
                 // Accumulate points
-                for (int team = 0; team < SharedConst.BGTeamsCount; ++team)
+                for (int team = 0; team < SharedConst.PvpTeamsCount; ++team)
                 {
                     int points = team_points[team];
                     if (points == 0)
@@ -163,7 +163,7 @@ namespace Game.BattleGrounds.Zones
                             UpdateWorldState(ABWorldStates.ResourcesHorde, m_TeamScores[team]);
                         // update achievement flags
                         // we increased m_TeamScores[team] so we just need to check if it is 500 more than other teams resources
-                        int otherTeam = (team + 1) % SharedConst.BGTeamsCount;
+                        int otherTeam = (team + 1) % SharedConst.PvpTeamsCount;
                         if (m_TeamScores[team] > m_TeamScores[otherTeam] + 500)
                             m_TeamScores500Disadvantage[otherTeam] = true;
                     }
@@ -593,7 +593,7 @@ namespace Game.BattleGrounds.Zones
             //call parent's class reset
             base.Reset();
 
-            for (var i = 0; i < SharedConst.BGTeamsCount; ++i)
+            for (var i = 0; i < SharedConst.PvpTeamsCount; ++i)
             {
                 m_TeamScores[i] = 0;
                 m_lastTick[i] = 0;
@@ -727,14 +727,14 @@ namespace Game.BattleGrounds.Zones
         ABNodeStatus[] m_prevNodes = new ABNodeStatus[ABBattlegroundNodes.DynamicNodesCount];
         BannerTimer[] m_BannerTimers = new BannerTimer[ABBattlegroundNodes.DynamicNodesCount];
         uint[] m_NodeTimers = new uint[ABBattlegroundNodes.DynamicNodesCount];
-        uint[] m_lastTick = new uint[SharedConst.BGTeamsCount];
-        uint[] m_HonorScoreTics = new uint[SharedConst.BGTeamsCount];
-        uint[] m_ReputationScoreTics = new uint[SharedConst.BGTeamsCount];
+        uint[] m_lastTick = new uint[SharedConst.PvpTeamsCount];
+        uint[] m_HonorScoreTics = new uint[SharedConst.PvpTeamsCount];
+        uint[] m_ReputationScoreTics = new uint[SharedConst.PvpTeamsCount];
         bool m_IsInformedNearVictory;
         uint m_HonorTics;
         uint m_ReputationTics;
         // need for achievements
-        bool[] m_TeamScores500Disadvantage = new bool[SharedConst.BGTeamsCount];
+        bool[] m_TeamScores500Disadvantage = new bool[SharedConst.PvpTeamsCount];
 
         //Const
         public const uint NotABBGWeekendHonorTicks = 260;

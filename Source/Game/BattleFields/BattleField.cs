@@ -150,7 +150,7 @@ namespace Game.BattleFields
                 if (m_uiKickDontAcceptTimer <= diff)
                 {
                     long now = GameTime.GetGameTime();
-                    for (int team = 0; team < SharedConst.BGTeamsCount; team++)
+                    for (int team = 0; team < SharedConst.PvpTeamsCount; team++)
                     {
                         foreach (var pair in m_InvitedPlayers[team])
                             if (pair.Value <= now)
@@ -158,7 +158,7 @@ namespace Game.BattleFields
                     }
 
                     InvitePlayersInZoneToWar();
-                    for (int team = 0; team < SharedConst.BGTeamsCount; team++)
+                    for (int team = 0; team < SharedConst.PvpTeamsCount; team++)
                     {
                         foreach (var pair in m_PlayersWillBeKick[team])
                             if (pair.Value <= now)
@@ -191,7 +191,7 @@ namespace Game.BattleFields
 
         void InvitePlayersInZoneToQueue()
         {
-            for (byte team = 0; team < SharedConst.BGTeamsCount; ++team)
+            for (byte team = 0; team < SharedConst.PvpTeamsCount; ++team)
             {
                 foreach (var guid in m_players[team])
                 {
@@ -992,7 +992,7 @@ namespace Game.BattleFields
 
         uint m_ControlTeam;
         uint m_GraveyardId;
-        ObjectGuid[] m_SpiritGuide = new ObjectGuid[SharedConst.BGTeamsCount];
+        ObjectGuid[] m_SpiritGuide = new ObjectGuid[SharedConst.PvpTeamsCount];
         List<ObjectGuid> m_ResurrectQueue = new();
         protected BattleField m_Bf;
     }
@@ -1131,7 +1131,7 @@ namespace Game.BattleFields
             {
                 float radius = capturePoint.GetGoInfo().ControlZone.radius;
 
-                for (byte team = 0; team < SharedConst.BGTeamsCount; ++team)
+                for (byte team = 0; team < SharedConst.PvpTeamsCount; ++team)
                 {
                     foreach (var guid in m_activePlayers[team])
                     {
@@ -1246,7 +1246,7 @@ namespace Game.BattleFields
 
         void SendUpdateWorldState(uint field, uint value)
         {
-            for (byte team = 0; team < SharedConst.BGTeamsCount; ++team)
+            for (byte team = 0; team < SharedConst.PvpTeamsCount; ++team)
             {
                 foreach (var guid in m_activePlayers[team])  // send to all players present in the area
                 {
@@ -1292,7 +1292,7 @@ namespace Game.BattleFields
         uint GetTeamId() { return m_team; }
 
         // active Players in the area of the objective, 0 - alliance, 1 - horde
-        HashSet<ObjectGuid>[] m_activePlayers = new HashSet<ObjectGuid>[SharedConst.BGTeamsCount];
+        HashSet<ObjectGuid>[] m_activePlayers = new HashSet<ObjectGuid>[SharedConst.PvpTeamsCount];
 
         // Total shift needed to capture the objective
         float m_maxValue;

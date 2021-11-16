@@ -1148,7 +1148,7 @@ namespace Game.BattleGrounds.Zones
         bool _gateDestroyed;
 
         // Achievement: Not Even a Scratch
-        bool[] _allVehiclesAlive = new bool[SharedConst.BGTeamsCount];
+        bool[] _allVehiclesAlive = new bool[SharedConst.PvpTeamsCount];
     }
 
     class BattlegroundSAScore : BattlegroundScore
