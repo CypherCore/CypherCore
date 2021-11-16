@@ -2012,15 +2012,7 @@ namespace Game.Spells
                 if (caster != null)
                 {
                     // delayed spells with multiple targets need to create a new aura object, otherwise we'll access a deleted aura
-                    if (m_spellInfo.HasHitDelay() && !m_spellInfo.IsChanneled())
-                    {
-                        spellAura = null;
-                        Aura aura = unit.GetAura(m_spellInfo.Id, caster.GetGUID(), m_CastItem ? m_CastItem.GetGUID() : ObjectGuid.Empty, aura_effmask);
-                        if (aura != null)
-                            spellAura = aura.ToUnitAura();
-                    }
-
-                    if (spellAura == null)
+                    if (spellAura == null || (m_spellInfo.HasHitDelay() && !m_spellInfo.IsChanneled()))
                     {
                         bool resetPeriodicTimer = !_triggeredCastFlags.HasFlag(TriggerCastFlags.DontResetPeriodicTimer);
                         uint allAuraEffectMask = Aura.BuildEffectMaskForOwner(m_spellInfo, SpellConst.MaxEffectMask, unit);
