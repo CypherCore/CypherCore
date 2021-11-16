@@ -396,14 +396,17 @@ namespace Game.Scripting
         public override bool IsDatabaseBound() { return true; }
 
         // Called when the area trigger is activated by a player.
-        public virtual bool OnTrigger(Player player, AreaTriggerRecord trigger, bool entered) { return false; }
+        public virtual bool OnTrigger(Player player, AreaTriggerRecord trigger) { return false; }
+
+        // Called when the area trigger is left by a player.
+        public virtual bool OnExit(Player player, AreaTriggerRecord trigger) { return false; }
     }
 
     public class OnlyOnceAreaTriggerScript : AreaTriggerScript
     {
         public OnlyOnceAreaTriggerScript(string name) : base(name) { }
 
-        public override bool OnTrigger(Player player, AreaTriggerRecord trigger, bool entered)
+        public override bool OnTrigger(Player player, AreaTriggerRecord trigger)
         {
             uint triggerId = trigger.Id;
             InstanceScript instance = player.GetInstanceScript();
@@ -414,7 +417,7 @@ namespace Game.Scripting
                 else
                     instance.MarkAreaTriggerDone(triggerId);
             }
-            return _OnTrigger(player, trigger, entered);
+            return _OnTrigger(player, trigger);
         }
 
         void ResetAreaTriggerDone(InstanceScript script, uint triggerId)
@@ -429,7 +432,7 @@ namespace Game.Scripting
                 ResetAreaTriggerDone(instance, trigger.Id);
         }
 
-        public virtual bool _OnTrigger(Player player, AreaTriggerRecord trigger, bool entered) { return false; }
+        public virtual bool _OnTrigger(Player player, AreaTriggerRecord trigger) { return false; }
     }
     
     public class BattlegroundScript : ScriptObject

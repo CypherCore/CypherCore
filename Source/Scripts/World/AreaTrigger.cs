@@ -148,7 +148,7 @@ namespace Scripts.World.Areatriggers
     {
         public AreaTrigger_at_coilfang_waterfall() : base("at_coilfang_waterfall") { }
 
-        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger, bool entered)
+        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
         {
             GameObject go = player.FindNearestGameObject(GameObjectIds.CoilfangWaterfall, 35.0f);
             if (go)
@@ -164,7 +164,7 @@ namespace Scripts.World.Areatriggers
     {
         public AreaTrigger_at_legion_teleporter() : base("at_legion_teleporter") { }
 
-        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger, bool entered)
+        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
         {
             if (player.IsAlive() && !player.IsInCombat())
             {
@@ -191,7 +191,7 @@ namespace Scripts.World.Areatriggers
     {
         public AreaTrigger_at_stormwright_shelf() : base("at_stormwright_shelf") { }
 
-        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger, bool entered)
+        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
         {
             if (!player.IsDead() && player.GetQuestStatus(QuestIds.StrengthOfTheTempest) == QuestStatus.Incomplete)
                 player.CastSpell(player, SpellIds.CreateTruePowerOfTheTempest, false);
@@ -205,7 +205,7 @@ namespace Scripts.World.Areatriggers
     {
         public AreaTrigger_at_scent_larkorwi() : base("at_scent_larkorwi") { }
 
-        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger, bool entered)
+        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
         {
             if (!player.IsDead() && player.GetQuestStatus(QuestIds.ScentOfLarkorwi) == QuestStatus.Incomplete)
             {
@@ -222,7 +222,7 @@ namespace Scripts.World.Areatriggers
     {
         public AreaTrigger_at_sholazar_waygate() : base("at_sholazar_waygate") { }
 
-        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger, bool entered)
+        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
         {
             if (!player.IsDead() && (player.GetQuestStatus(QuestIds.MeetingAGreatOne) != QuestStatus.None ||
                 (player.GetQuestStatus(QuestIds.TheMakersOverlook) == QuestStatus.Rewarded && player.GetQuestStatus(QuestIds.TheMakersPerch) == QuestStatus.Rewarded)))
@@ -248,7 +248,7 @@ namespace Scripts.World.Areatriggers
     {
         public AreaTrigger_at_nats_landing() : base("at_nats_landing") { }
 
-        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger, bool entered)
+        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
         {
             if (!player.IsAlive() || !player.HasAura(SpellIds.FishPaste))
                 return false;
@@ -283,7 +283,7 @@ namespace Scripts.World.Areatriggers
             };
         }
 
-        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger, bool entered)
+        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
         {
             uint triggerId = areaTrigger.Id;
             // Second trigger happened too early after first, skip for now
@@ -327,7 +327,7 @@ namespace Scripts.World.Areatriggers
             };
         }
 
-        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger, bool entered)
+        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
         {
             float x = 0.0f, y = 0.0f, z = 0.0f;
 
@@ -380,7 +380,7 @@ namespace Scripts.World.Areatriggers
             stormforgedEradictorGUID.Clear();
         }
 
-        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger, bool entered)
+        public override bool OnTrigger(Player player, AreaTriggerRecord areaTrigger)
         {
             if (player.GetQuestStatus(QuestIds.TheLonesomeWatcher) != QuestStatus.Incomplete)
                 return false;

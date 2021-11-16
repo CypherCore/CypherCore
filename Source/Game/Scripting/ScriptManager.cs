@@ -706,7 +706,7 @@ namespace Game.Scripting
             Cypher.Assert(player != null);
             Cypher.Assert(trigger != null);
 
-            return RunScriptRet<AreaTriggerScript>(p => p.OnTrigger(player, trigger, entered), Global.ObjectMgr.GetAreaTriggerScriptId(trigger.Id));
+            return RunScriptRet<AreaTriggerScript>(p => entered ? p.OnTrigger(player, trigger) : p.OnExit(player, trigger), Global.ObjectMgr.GetAreaTriggerScriptId(trigger.Id));
         }
 
         //BattlegroundScript

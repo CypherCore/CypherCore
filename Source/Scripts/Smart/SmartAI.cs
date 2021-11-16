@@ -29,7 +29,7 @@ namespace Scripts.Smart
     {
         public SmartTrigger() : base("SmartTrigger") { }
 
-        public override bool OnTrigger(Player player, AreaTriggerRecord trigger, bool entered)
+        public override bool OnTrigger(Player player, AreaTriggerRecord trigger)
         {
             if (!player.IsAlive())
                 return false;
