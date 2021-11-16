@@ -3297,6 +3297,7 @@ namespace Game.Spells
                         case 72410: // Rune of Blood, Saurfang, Icecrown Citadel
                         case 71204: // Touch of Insignificance, Lady Deathwhisper, Icecrown Citadel
                             return false;
+                        case 24732: // Bat Costume
                         case 30877: // Tag Murloc
                         case 61716: // Rabbit Costume
                         case 61734: // Noblegarden Bunny

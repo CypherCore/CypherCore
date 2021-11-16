@@ -506,20 +506,6 @@ namespace Scripts.World.GameObjects
     }
 
     [Script]
-    class go_sacred_fire_of_life : GameObjectAI
-    {
-        public go_sacred_fire_of_life(GameObject go) : base(go) { }
-
-        public override bool GossipHello(Player player)
-        {
-            if (me.GetGoType() == GameObjectTypes.Goober)
-                player.SummonCreature(CreatureIds.Arikara, -5008.338f, -2118.894f, 83.657f, 0.874f, TempSummonType.TimedDespawnOutOfCombat, 30000);
-
-            return true;
-        }
-    }
-
-    [Script]
     class go_shrine_of_the_birds : GameObjectAI
     {
         public go_shrine_of_the_birds(GameObject go) : base(go) { }

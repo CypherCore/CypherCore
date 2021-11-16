@@ -263,7 +263,7 @@ public class Log
         if (level < lowestLogLevel)
             lowestLogLevel = level;
 
-        Logger logger = new Logger(name, level);
+        Logger logger = new(name, level);
 
         int i = 0;
         var ss = new StringArray(tokens[1], ' ');
@@ -348,8 +348,8 @@ public class Log
             appender.setRealmId(id);
     }
 
-    static Dictionary<byte, Appender> appenders = new Dictionary<byte, Appender>();
-    static Dictionary<LogFilter, Logger> loggers = new Dictionary<LogFilter, Logger>();
+    static Dictionary<byte, Appender> appenders = new();
+    static Dictionary<LogFilter, Logger> loggers = new();
     static string m_logsDir;
     static byte AppenderId;
 

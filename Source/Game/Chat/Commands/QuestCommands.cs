@@ -222,7 +222,7 @@ namespace Game.Chat
             }
             else
             {
-                handler.SendSysMessage(CypherStrings.CommandQuestNotfound);
+                handler.SendSysMessage(CypherStrings.CommandQuestNotfound, entry);
                 return false;
             }
         }

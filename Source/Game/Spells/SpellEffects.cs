@@ -710,7 +710,7 @@ namespace Game.Spells
 
             unitTarget.m_Events.AddEventAtOffset(new DelayedSpellTeleportEvent(unitTarget, targetDest, unitTarget == m_caster ? TeleportToOptions.Spell : 0, m_spellInfo.Id), TimeSpan.FromMilliseconds(effectInfo.MiscValue));
         }
-        
+
         [SpellEffectHandler(SpellEffectName.ApplyAura)]
         [SpellEffectHandler(SpellEffectName.ApplyAuraOnPet)]
         void EffectApplyAura()
@@ -3167,9 +3167,6 @@ namespace Game.Spells
                         case 45668:                                 // Ultra-Advanced Proto-Typical Shortening Blaster
                         {
                             if (unitTarget == null || !unitTarget.IsTypeId(TypeId.Unit))
-                                return;
-
-                            if (RandomHelper.randChance(50))                  // chance unknown, using 50
                                 return;
 
                             uint[] spellPlayer = new uint[5]
@@ -5659,7 +5656,7 @@ namespace Game.Spells
                     sceneObject.SetCreatedBySpellCast(m_castId);
             }
         }
-        
+
         [SpellEffectHandler(SpellEffectName.PlayScene)]
         void EffectPlayScene()
         {
