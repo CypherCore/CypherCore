@@ -274,9 +274,9 @@ namespace Framework.Database
                 "AlteredFormCustomizeOffsetFallback3, AlteredFormCustomizeRotationFallback, Unknown910_11, Unknown910_12, Unknown910_13, Unknown910_21, " +
                 "Unknown910_22, Unknown910_23, BaseLanguage, CreatureType, MaleModelFallbackSex, FemaleModelFallbackSex, MaleTextureFallbackSex, " +
                 "FemaleTextureFallbackSex FROM chr_races");
-            PrepareStatement(HotfixStatements.SEL_CHR_RACES_LOCALE, "SELECT ID, Name_lang, NameFemale_lang, NameLowercase_lang, NameFemaleLowercase_lang, NameS_lang, " +
-                "NameFemaleS_lang, NameLowercaseS_lang, NameFemaleLowercaseS_lang, RaceFantasyDescription_lang, NameL_lang, NameFemaleL_lang, " +
-                "NameLowercaseL_lang, NameFemaleLowercaseL_lang FROM chr_races_locale WHERE locale = ?");
+            PrepareStatement(HotfixStatements.SEL_CHR_RACES_LOCALE, "SELECT ID, Name_lang, NameFemale_lang, NameLowercase_lang, NameFemaleLowercase_lang, LoreName_lang, " +
+                "LoreNameFemale_lang, LoreNameLower_lang, LoreNameLowerFemale_lang, LoreDescription_lang, ShortName_lang, ShortNameFemale_lang, " +
+                "ShortNameLower_lang, ShortNameLowerFemale_lang FROM chr_races_locale WHERE locale = ?");
 
             // ChrSpecialization.db2
             PrepareStatement(HotfixStatements.SEL_CHR_SPECIALIZATION, "SELECT Name, FemaleName, Description, ID, ClassID, OrderIndex, PetTalentType, Role, Flags, " +        
