@@ -725,7 +725,7 @@ namespace Game.Networking.Packets
 
         public uint Level = 0;
         public uint HealthDelta = 0;
-        public int[] PowerDelta = new int[6];
+        public int[] PowerDelta = new int[(int)PowerType.MaxPerClass];
         public int[] StatDelta = new int[(int)Stats.Max];
         public int NumNewTalents;
         public int NumNewPvpTalentSlots;

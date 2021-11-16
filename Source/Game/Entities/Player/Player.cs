@@ -5230,6 +5230,7 @@ namespace Game.Entities
             packet.PowerDelta[3] = 0;
             packet.PowerDelta[4] = 0;
             packet.PowerDelta[5] = 0;
+            packet.PowerDelta[6] = 0;
 
             for (Stats i = Stats.Strength; i < Stats.Max; ++i)
                 packet.StatDelta[(int)i] = info.stats[(int)i] - (int)GetCreateStat(i);
