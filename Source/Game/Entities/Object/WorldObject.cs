@@ -137,7 +137,7 @@ namespace Game.Entities
             if (!target)
                 return;
 
-            UpdateType updateType = UpdateType.CreateObject;
+            UpdateType updateType = _isNewObject ? UpdateType.CreateObject2 : UpdateType.CreateObject;
             TypeId tempObjectType = ObjectTypeId;
             CreateObjectBits flags = m_updateFlag;
 
@@ -148,54 +148,12 @@ namespace Game.Entities
                 tempObjectType = TypeId.ActivePlayer;
             }
 
-            switch (GetGUID().GetHigh())
-            {
-                case HighGuid.Player:
-                case HighGuid.Pet:
-                case HighGuid.Corpse:
-                case HighGuid.DynamicObject:
-                case HighGuid.AreaTrigger:
-                case HighGuid.SceneObject:
-                case HighGuid.Conversation:
-                    updateType = UpdateType.CreateObject2;
-                    break;
-                case HighGuid.Creature:
-                case HighGuid.Vehicle:
-                    TempSummon summon = ToUnit().ToTempSummon();
-                    if (summon)
-                        if (summon.GetSummonerGUID().IsPlayer())
-                            updateType = UpdateType.CreateObject2;
-                    break;
-                case HighGuid.GameObject:
-                    if (ToGameObject().GetOwnerGUID().IsPlayer())
-                        updateType = UpdateType.CreateObject2;
-                    break;
-            }
-
             if (!flags.MovementUpdate && !m_movementInfo.transport.guid.IsEmpty())
                 flags.MovementTransport = true;
 
             if (GetAIAnimKitId() != 0 || GetMovementAnimKitId() != 0 || GetMeleeAnimKitId() != 0)
                 flags.AnimKit = true;
 
-            if (flags.Stationary)
-            {
-                // UPDATETYPE_CREATE_OBJECT2 for some gameobject types...
-                if (IsTypeMask(TypeMask.GameObject))
-                {
-                    switch (ToGameObject().GetGoType())
-                    {
-                        case GameObjectTypes.Trap:
-                        case GameObjectTypes.DuelArbiter:
-                        case GameObjectTypes.FlagStand:
-                        case GameObjectTypes.FlagDrop:
-                            updateType = UpdateType.CreateObject2;
-                            break;
-                        default:
-                            break;
-                    }
-                }
-            }
             Unit unit = ToUnit();
             if (unit)
                 if (unit.GetVictim())
