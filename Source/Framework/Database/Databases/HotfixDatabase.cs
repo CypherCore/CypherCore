@@ -1205,6 +1205,13 @@ namespace Framework.Database
             // UiMapXMapArt.db2
             PrepareStatement(HotfixStatements.SEL_UI_MAP_X_MAP_ART, "SELECT ID, PhaseID, UiMapArtID, UiMapID FROM ui_map_x_map_art");
 
+            // UiSplashScreen.db2
+            PrepareStatement(HotfixStatements.SEL_UI_SPLASH_SCREEN, "SELECT ID, Header, TopLeftFeatureTitle, TopLeftFeatureDesc, BottomLeftFeatureTitle, " +
+                "BottomLeftFeatureDesc, RightFeatureTitle, RightFeatureDesc, AllianceQuestID, HordeQuestID, ScreenType, TextureKitID, SoundKitID, " +
+                "PlayerConditionID, CharLevelConditionID, RequiredTimeEventPassed FROM ui_splash_screen");
+            PrepareStatement(HotfixStatements.SEL_UI_SPLASH_SCREEN_LOCALE, "SELECT ID, Header_lang, TopLeftFeatureTitle_lang, TopLeftFeatureDesc_lang, " +
+                "BottomLeftFeatureTitle_lang, BottomLeftFeatureDesc_lang, RightFeatureTitle_lang, RightFeatureDesc_lang FROM ui_splash_screen_locale WHERE locale = ?");
+
             // UnitPowerBar.db2
             PrepareStatement(HotfixStatements.SEL_UNIT_POWER_BAR, "SELECT ID, Name, Cost, OutOfError, ToolTip, MinPower, MaxPower, StartPower, CenterPower, " +        
                 "RegenerationPeace, RegenerationCombat, BarType, Flags, StartInset, EndInset, FileDataID1, FileDataID2, FileDataID3, FileDataID4, " +        
@@ -1894,6 +1901,9 @@ namespace Framework.Database
         SEL_UI_MAP_LINK,
 
         SEL_UI_MAP_X_MAP_ART,
+
+        SEL_UI_SPLASH_SCREEN,
+        SEL_UI_SPLASH_SCREEN_LOCALE,
 
         SEL_UNIT_POWER_BAR,
         SEL_UNIT_POWER_BAR_LOCALE,

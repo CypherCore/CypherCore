@@ -1263,6 +1263,25 @@ namespace Game.Networking.Packets
             LineID = _worldPacket.ReadUInt32();
         }
     }
+
+    class RequestLatestSplashScreen : ClientPacket
+    {
+        public RequestLatestSplashScreen(WorldPacket packet) : base(packet) { }
+
+        public override void Read() { }
+    }
+
+    class SplashScreenShowLatest : ServerPacket
+    {
+        public SplashScreenShowLatest() : base(ServerOpcodes.SplashScreenShowLatest, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WriteUInt32(UISplashScreenID);
+        }
+
+        public uint UISplashScreenID;
+    }
     
     class DisplayGameError : ServerPacket
     {

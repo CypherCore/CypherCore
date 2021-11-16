@@ -464,6 +464,25 @@ namespace Game
                 Global.ScriptMgr.OnConversationLineStarted(convo, conversationLineStarted.LineID, _player);
         }
 
+        [WorldPacketHandler(ClientOpcodes.RequestLatestSplashScreen)]
+        void HandleRequestLatestSplashScreen(RequestLatestSplashScreen requestLatestSplashScreen)
+        {
+            UISplashScreenRecord splashScreen = null;
+            foreach (var itr in CliDB.UISplashScreenStorage.Values)
+            {
+                PlayerConditionRecord playerCondition = CliDB.PlayerConditionStorage.LookupByKey(itr.CharLevelConditionID);
+                if (playerCondition != null)
+                    if (!ConditionManager.IsPlayerMeetingCondition(_player, playerCondition))
+                        continue;
+
+                splashScreen = itr;
+            }
+
+            SplashScreenShowLatest splashScreenShowLatest = new();
+            splashScreenShowLatest.UISplashScreenID = splashScreen != null ? splashScreen.Id : 0;
+            SendPacket(splashScreenShowLatest);
+        }
+        
         [WorldPacketHandler(ClientOpcodes.ChatUnregisterAllAddonPrefixes)]
         void HandleUnregisterAllAddonPrefixes(ChatUnregisterAllAddonPrefixes packet)
         {

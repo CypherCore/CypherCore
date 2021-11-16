@@ -331,6 +331,7 @@ namespace Game.DataStorage
             UiMapAssignmentStorage = ReadDB2<UiMapAssignmentRecord>("UiMapAssignment.db2", HotfixStatements.SEL_UI_MAP_ASSIGNMENT);
             UiMapLinkStorage = ReadDB2<UiMapLinkRecord>("UiMapLink.db2", HotfixStatements.SEL_UI_MAP_LINK);
             UiMapXMapArtStorage = ReadDB2<UiMapXMapArtRecord>("UiMapXMapArt.db2", HotfixStatements.SEL_UI_MAP_X_MAP_ART);
+            UISplashScreenStorage = ReadDB2<UISplashScreenRecord>("UISplashScreen.db2", HotfixStatements.SEL_UI_SPLASH_SCREEN, HotfixStatements.SEL_UI_SPLASH_SCREEN_LOCALE);
             UnitPowerBarStorage = ReadDB2<UnitPowerBarRecord>("UnitPowerBar.db2", HotfixStatements.SEL_UNIT_POWER_BAR, HotfixStatements.SEL_UNIT_POWER_BAR_LOCALE);
             VehicleStorage = ReadDB2<VehicleRecord>("Vehicle.db2", HotfixStatements.SEL_VEHICLE);
             VehicleSeatStorage = ReadDB2<VehicleSeatRecord>("VehicleSeat.db2", HotfixStatements.SEL_VEHICLE_SEAT);
@@ -715,6 +716,7 @@ namespace Game.DataStorage
         public static DB6Storage<UiMapAssignmentRecord> UiMapAssignmentStorage;
         public static DB6Storage<UiMapLinkRecord> UiMapLinkStorage;
         public static DB6Storage<UiMapXMapArtRecord> UiMapXMapArtStorage;
+        public static DB6Storage<UISplashScreenRecord> UISplashScreenStorage;
         public static DB6Storage<UnitPowerBarRecord> UnitPowerBarStorage;
         public static DB6Storage<VehicleRecord> VehicleStorage;
         public static DB6Storage<VehicleSeatRecord> VehicleSeatStorage;
