@@ -393,8 +393,7 @@ namespace Game.Conditions
             if (!condMeets)
                 sourceInfo.mLastFailedCondition = this;
 
-            bool script = Global.ScriptMgr.OnConditionCheck(this, sourceInfo); // Returns true by default.
-            return condMeets && script;
+            return condMeets && Global.ScriptMgr.OnConditionCheck(this, sourceInfo); // Returns true by default.;
         }
 
         public GridMapTypeMask GetSearcherTypeMaskForCondition()

@@ -2848,17 +2848,6 @@ namespace Game.Spells
                             unitTarget.RemoveMovementImpairingAuras(true);
                             break;
                         }
-                        // Plant Warmaul Ogre Banner
-                        case 32307:
-                            Player caster = m_caster.ToPlayer();
-                            if (caster != null)
-                            {
-                                caster.RewardPlayerAndGroupAtEvent(18388, unitTarget);
-                                Creature target = unitTarget.ToCreature();
-                                if (target != null)
-                                    target.DespawnOrUnsummon();
-                            }
-                            break;
                         // Mug Transformation
                         case 41931:
                         {
