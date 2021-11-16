@@ -234,7 +234,12 @@ namespace Game.Movement
         {
             int nodeCount = _path.Count;        //! Number of nodes in path.
             _endMapId = _path[nodeCount - 1].ContinentID; //! MapId of last node
-            _preloadTargetNode = (uint)nodeCount - 3;
+
+            if (nodeCount < 3)
+                _preloadTargetNode = 0;
+            else
+                _preloadTargetNode = (uint)nodeCount - 3;
+
             _endGridX = _path[nodeCount - 1].Loc.X;
             _endGridY = _path[nodeCount - 1].Loc.Y;
         }

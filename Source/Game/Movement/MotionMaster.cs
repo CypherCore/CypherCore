@@ -884,7 +884,8 @@ namespace Game.Movement
                     Log.outDebug(LogFilter.Server, $"MotionMaster::MoveTaxiFlight: {_owner.GetGUID()} taxi to Path Id: {path} (node {pathnode})");
 
                     // Only one FLIGHT_MOTION_TYPE is allowed
-                    Remove(MovementGeneratorType.Flight);
+                    bool hasExisting = HasMovementGenerator(gen => gen.GetMovementGeneratorType() == MovementGeneratorType.Flight);
+                    Cypher.Assert(!hasExisting, "Duplicate flight path movement generator");
 
                     FlightPathMovementGenerator movement = new();
                     movement.LoadPath(_owner.ToPlayer());
