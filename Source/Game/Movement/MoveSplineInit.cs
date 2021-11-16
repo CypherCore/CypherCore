@@ -124,6 +124,20 @@ namespace Game.Movement
                 args.velocity = unit.GetSpeed(SelectSpeedType(moveFlagsForSpeed));
             }
 
+            // limit the speed in the same way the client does
+            float speedLimit()
+            {
+                if (args.flags.HasFlag(SplineFlag.Unknown_0x20000000))
+                    return float.MaxValue;
+
+                if (args.flags.HasFlag(SplineFlag.Falling) || args.flags.HasFlag(SplineFlag.Catmullrom) || args.flags.HasFlag(SplineFlag.Flying) || args.flags.HasFlag(SplineFlag.Parabolic))
+                    return 50.0f;
+
+                return Math.Max(28.0f, unit.GetSpeed(UnitMoveType.Run) * 4.0f);
+            };
+
+            args.velocity = Math.Min(args.velocity, speedLimit());
+
             if (!args.Validate(unit))
                 return 0;
 
