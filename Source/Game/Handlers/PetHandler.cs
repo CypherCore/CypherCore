@@ -481,6 +481,11 @@ namespace Game
                 return;
             }
 
+            List<Unit> pets = new();
+            foreach (Unit controlled in _player.m_Controlled)
+                if (controlled.GetEntry() == pet.GetEntry() && controlled.IsAlive())
+                    pets.Add(controlled);
+
             uint position = packet.Index;
             uint actionData = packet.Action;
 
@@ -489,40 +494,42 @@ namespace Game
 
             Log.outDebug(LogFilter.Network, "Player {0} has changed pet spell action. Position: {1}, Spell: {2}, State: {3}", GetPlayer().GetName(), position, spell_id, act_state);
 
-
-            //if it's act for spell (en/disable/cast) and there is a spell given (0 = remove spell) which pet doesn't know, don't add
-            if (!((act_state == ActiveStates.Enabled || act_state == ActiveStates.Disabled || act_state == ActiveStates.Passive) && spell_id != 0 && !pet.HasSpell(spell_id)))
+            foreach (Unit petControlled in pets)
             {
-                SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell_id, pet.GetMap().GetDifficultyID());
-                if (spellInfo != null)
+                //if it's act for spell (en/disable/cast) and there is a spell given (0 = remove spell) which pet doesn't know, don't add
+                if (!((act_state == ActiveStates.Enabled || act_state == ActiveStates.Disabled || act_state == ActiveStates.Passive) && spell_id != 0 && !petControlled.HasSpell(spell_id)))
                 {
-                    //sign for autocast
-                    if (act_state == ActiveStates.Enabled)
+                    SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spell_id, petControlled.GetMap().GetDifficultyID());
+                    if (spellInfo != null)
                     {
-                        if (pet.GetTypeId() == TypeId.Unit && pet.IsPet())
-                            ((Pet)pet).ToggleAutocast(spellInfo, true);
-                        else
+                        //sign for autocast
+                        if (act_state == ActiveStates.Enabled)
                         {
-                            foreach (var unit in GetPlayer().m_Controlled)
-                                if (unit.GetEntry() == pet.GetEntry())
-                                    unit.GetCharmInfo().ToggleCreatureAutocast(spellInfo, true);
+                            if (petControlled.GetTypeId() == TypeId.Unit && petControlled.IsPet())
+                                ((Pet)petControlled).ToggleAutocast(spellInfo, true);
+                            else
+                            {
+                                foreach (var unit in GetPlayer().m_Controlled)
+                                    if (unit.GetEntry() == petControlled.GetEntry())
+                                        unit.GetCharmInfo().ToggleCreatureAutocast(spellInfo, true);
+                            }
+                        }
+                        //sign for no/turn off autocast
+                        else if (act_state == ActiveStates.Disabled)
+                        {
+                            if (petControlled.GetTypeId() == TypeId.Unit && petControlled.IsPet())
+                                petControlled.ToPet().ToggleAutocast(spellInfo, false);
+                            else
+                            {
+                                foreach (var unit in GetPlayer().m_Controlled)
+                                    if (unit.GetEntry() == petControlled.GetEntry())
+                                        unit.GetCharmInfo().ToggleCreatureAutocast(spellInfo, false);
+                            }
                         }
                     }
-                    //sign for no/turn off autocast
-                    else if (act_state == ActiveStates.Disabled)
-                    {
-                        if (pet.GetTypeId() == TypeId.Unit && pet.IsPet())
-                            pet.ToPet().ToggleAutocast(spellInfo, false);
-                        else
-                        {
-                            foreach (var unit in GetPlayer().m_Controlled)
-                                if (unit.GetEntry() == pet.GetEntry())
-                                    unit.GetCharmInfo().ToggleCreatureAutocast(spellInfo, false);
-                        }
-                    }
-                }
 
-                charmInfo.SetActionBar((byte)position, spell_id, act_state);
+                    charmInfo.SetActionBar((byte)position, spell_id, act_state);
+                }
             }
         }
 
@@ -623,23 +630,31 @@ namespace Game
                 return;
             }
 
-            // do not add not learned spells/ passive spells
-            if (!pet.HasSpell(packet.SpellID) || !spellInfo.IsAutocastable())
-                return;
+            List<Unit> pets = new();
+            foreach (Unit controlled in _player.m_Controlled)
+                if (controlled.GetEntry() == pet.GetEntry() && controlled.IsAlive())
+                    pets.Add(controlled);
 
-            CharmInfo charmInfo = pet.GetCharmInfo();
-            if (charmInfo == null)
+            foreach (Unit petControlled in pets)
             {
-                Log.outError(LogFilter.Network, "WorldSession.HandlePetSpellAutocastOpcod: object {0} is considered pet-like but doesn't have a charminfo!", pet.GetGUID().ToString());
-                return;
+                // do not add not learned spells/ passive spells
+                if (!petControlled.HasSpell(packet.SpellID) || !spellInfo.IsAutocastable())
+                    return;
+
+                CharmInfo charmInfo = petControlled.GetCharmInfo();
+                if (charmInfo == null)
+                {
+                    Log.outError(LogFilter.Network, "WorldSession.HandlePetSpellAutocastOpcod: object {0} is considered pet-like but doesn't have a charminfo!", petControlled.GetGUID().ToString());
+                    return;
+                }
+
+                if (petControlled.IsPet())
+                    petControlled.ToPet().ToggleAutocast(spellInfo, packet.AutocastEnabled);
+                else
+                    charmInfo.ToggleCreatureAutocast(spellInfo, packet.AutocastEnabled);
+
+                charmInfo.SetSpellAutocast(spellInfo, packet.AutocastEnabled);
             }
-
-            if (pet.IsPet())
-                pet.ToPet().ToggleAutocast(spellInfo, packet.AutocastEnabled);
-            else
-                charmInfo.ToggleCreatureAutocast(spellInfo, packet.AutocastEnabled);
-
-            charmInfo.SetSpellAutocast(spellInfo, packet.AutocastEnabled);
         }
 
         [WorldPacketHandler(ClientOpcodes.PetCastSpell, Processing = PacketProcessing.Inplace)]

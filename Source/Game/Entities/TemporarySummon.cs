@@ -321,6 +321,28 @@ namespace Game.Entities
             base.RemoveFromWorld();
         }
 
+        public override void SetDeathState(DeathState s)
+        {
+            base.SetDeathState(s);
+            if (s != DeathState.JustDied || !IsGuardianPet())
+                return;
+
+            Unit owner = GetOwner();
+            if (owner == null || !owner.IsPlayer() || owner.GetMinionGUID() != GetGUID())
+                return;
+
+            foreach (Unit controlled in owner.m_Controlled)
+            {
+                if (controlled.GetEntry() == GetEntry() && controlled.IsAlive())
+                {
+                    owner.SetMinionGUID(controlled.GetGUID());
+                    owner.SetPetGUID(controlled.GetGUID());
+                    owner.ToPlayer().CharmSpellInitialize();
+                    break;
+                }
+            }
+        }
+
         public bool IsGuardianPet()
         {
             return IsPet() || (m_Properties != null && m_Properties.Control == SummonCategory.Pet);
