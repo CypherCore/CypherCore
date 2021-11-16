@@ -81,11 +81,11 @@ namespace Game.Movement
             Spline.EvaluationMode[] modes = new Spline.EvaluationMode[2] { Spline.EvaluationMode.Linear, Spline.EvaluationMode.Catmullrom };
             if (args.flags.HasFlag(SplineFlag.Cyclic))
             {
-                spline.InitCyclicSpline(args.path, args.path.Length, modes[Convert.ToInt32(args.flags.IsSmooth())], 0);
+                spline.InitCyclicSpline(args.path, args.path.Length, modes[Convert.ToInt32(args.flags.IsSmooth())], 0, args.initialOrientation);
             }
             else
             {
-                spline.InitSpline(args.path, args.path.Length, modes[Convert.ToInt32(args.flags.IsSmooth())]);
+                spline.InitSpline(args.path, args.path.Length, modes[Convert.ToInt32(args.flags.IsSmooth())], args.initialOrientation);
             }
 
             // init spline timestamps

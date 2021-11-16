@@ -79,17 +79,18 @@ namespace Game.Movement
         {
             initializer.Initialize(ref m_mode, ref _cyclic, ref points, ref index_lo, ref index_hi);
         }
-        public void InitCyclicSpline(Vector3[] controls, int count, EvaluationMode m, int cyclic_point)
+        public void InitCyclicSpline(Vector3[] controls, int count, EvaluationMode m, int cyclic_point, float orientation)
         {
             m_mode = m;
             _cyclic = true;
 
-            InitSpline(controls, count, m);
+            InitSpline(controls, count, m, orientation);
         }
-        public void InitSpline(Span<Vector3> controls, int count, EvaluationMode m)
+        public void InitSpline(Span<Vector3> controls, int count, EvaluationMode m, float orientation = 0)
         {
             m_mode = m;
             _cyclic = false;
+            initialOrientation = orientation;
 
             switch (m_mode)
             {
@@ -139,14 +140,14 @@ namespace Game.Movement
                 if (cyclic_point == 0)
                     points[0] = controls[count - 1];
                 else
-                    points[0] = Vector3.Lerp(controls[0], controls[1], -1);
+                    points[0] = controls[0] - new Vector3(MathF.Cos(initialOrientation), MathF.Sin(initialOrientation), 0.0f);
 
                 points[high_index + 1] = controls[cyclic_point];
                 points[high_index + 2] = controls[cyclic_point + 1];
             }
             else
             {
-                points[0] = Vector3.Lerp(controls[0], controls[1], -1);
+                points[0] = controls[0] - new Vector3(MathF.Cos(initialOrientation), MathF.Sin(initialOrientation), 0.0f);
                 points[high_index + 1] = controls[count - 1];
             }
 
@@ -360,6 +361,7 @@ namespace Game.Movement
         Vector3[] points = Array.Empty<Vector3>();
         public EvaluationMode m_mode;
         bool _cyclic;
+        float initialOrientation;
         int index_lo;
         int index_hi;
         public enum EvaluationMode
