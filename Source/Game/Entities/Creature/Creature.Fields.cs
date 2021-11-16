@@ -55,7 +55,6 @@ namespace Game.Entities
         bool m_AlreadySearchedAssistance;
         bool m_cannotReachTarget;
         uint m_cannotReachTimer;
-        bool m_AI_locked;
 
         SpellSchoolMask m_meleeDamageSchoolMask;
         public uint m_originalEntry;

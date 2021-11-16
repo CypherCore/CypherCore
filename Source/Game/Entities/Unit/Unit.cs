@@ -1168,27 +1168,28 @@ namespace Game.Entities
 
         public virtual UnitAI GetAI() { return i_AI; }
 
-        public void AIUpdateTick(uint diff, bool force = false)
+        public void AIUpdateTick(uint diff)
         {
-            if (diff == 0) // some places call with diff = 0, which does nothing (for now), see PR #22296
-                return;
-
             UnitAI ai = GetAI();
             if (ai != null)
+            {
+                m_aiLocked = true;
                 ai.UpdateAI(diff);
+                m_aiLocked = false;
+            }
         }
 
         public void SetAI(UnitAI newAI)
         {
-            if (i_AI != null)
-                AIUpdateTick(0, true); // old AI gets a final tick if enabled
+            Cypher.Assert(!m_aiLocked, "Attempt to replace AI during AI update tick");
 
             i_AI = newAI;
-            AIUpdateTick(0, true); // new AI gets its initial tick
         }
 
         public void ScheduleAIChange()
         {
+            Cypher.Assert(!m_aiLocked, "Attempt to schedule AI change during AI update tick");
+
             bool charmed = IsCharmed();
             // if charm is applied, we can't have disabled AI already, and vice versa
             if (charmed)
@@ -1204,9 +1205,9 @@ namespace Game.Entities
 
         void RestoreDisabledAI()
         {
+            Cypher.Assert(!m_aiLocked, "Attempt to restore AI during UpdateAI tick");
             Cypher.Assert(IsPlayer() || i_disabledAI != null, "Attempt to restore disabled AI on creature without disabled AI");
             i_AI = i_disabledAI;
-            AIUpdateTick(0, true);
         }
 
         public bool IsPossessing()

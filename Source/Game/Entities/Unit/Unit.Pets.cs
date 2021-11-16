@@ -81,7 +81,6 @@ namespace Game.Entities
                 Cypher.Assert(newAI != null);
                 i_AI = newAI;
                 newAI.OnCharmed(true);
-                AIUpdateTick(0, true);
             }
             else
             {

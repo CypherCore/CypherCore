@@ -574,9 +574,7 @@ namespace Game.Entities
                     }
 
                     // do not allow the AI to be changed during update
-                    m_AI_locked = true;
-                    base.AIUpdateTick(diff);
-                    m_AI_locked = false;
+                    AIUpdateTick(diff);
 
                     if (!IsAlive())
                         break;
@@ -729,25 +727,12 @@ namespace Game.Entities
 
         bool DestoryAI()
         {
-            if (m_AI_locked)
-            {
-                Log.outDebug(LogFilter.Scripts, "DestroyAI: failed to destroy, locked.");
-                return false;
-            }
-
             SetAI(null);
             return true;
         }
 
         public bool InitializeAI(CreatureAI ai = null)
         {
-            // make sure nothing can change the AI during AI update
-            if (m_AI_locked)
-            {
-                Log.outDebug(LogFilter.Scripts, "InitializeAI: failed to init, locked.");
-                return false;
-            }
-
             InitializeMovementAI();
 
             SetAI(ai != null ? ai : AISelector.SelectAI(this));
