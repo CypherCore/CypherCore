@@ -158,7 +158,10 @@ namespace Framework.Constants
         GarrisonMissionNpc = 0x20,
         TradeskillNpc = 0x40,
         BlackMarketView = 0x80,
+        GarrisonTalentNpc = 0x200,
         ContributionCollector = 0x400,
+        AzeriteRespec = 0x4000,
+        IslandsQueue = 0x8000,
     }
 
     [Flags]
