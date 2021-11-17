@@ -652,7 +652,6 @@ namespace Game.Chat
                     spawntm = spawntime;
 
                 Quaternion rotation = Quaternion.CreateFromRotationMatrix(Extensions.fromEulerAnglesZYX(player.GetOrientation(), 0.0f, 0.0f));
-
                 if (Global.ObjectMgr.GetGameObjectTemplate(id) == null)
                 {
                     handler.SendSysMessage(CypherStrings.GameobjectNotExist, id);

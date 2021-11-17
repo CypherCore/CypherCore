@@ -85,8 +85,8 @@ namespace Game
             Values[WorldCfg.RateXpQuest] = GetDefaultValue("Rate.XP.Quest", 1.0f);
             Values[WorldCfg.RateXpExplore] = GetDefaultValue("Rate.XP.Explore", 1.0f);
 
-            Values[CONFIG_XP_BOOST_DAYMASK] = GetDefaultValue("XP.Boost.Daymask", 0);
-            Values[RATE_XP_BOOST] = GetDefaultValue("XP.Boost.Rate", 2.0f);
+            Values[WorldCfg.XpBoostDaymask] = GetDefaultValue("XP.Boost.Daymask", 0);
+            Values[WorldCfg.RateXpBoost] = GetDefaultValue("XP.Boost.Rate", 2.0f);
 
             Values[WorldCfg.RateRepaircost] = GetDefaultValue("Rate.RepairCost", 1.0f);
             if ((float)Values[WorldCfg.RateRepaircost] < 0.0f)

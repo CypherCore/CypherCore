@@ -204,7 +204,7 @@ namespace Framework.GameMath
             }
             else
             {
-                float t = -(-plane.D + Vector3.Dot(Origin, plane.Normal)) / rate;
+                float t = -(plane.D + Vector3.Dot(Origin, plane.Normal)) / rate;
                 return Origin + Direction * t;
             }
         }

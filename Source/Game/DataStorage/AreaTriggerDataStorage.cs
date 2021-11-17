@@ -189,7 +189,7 @@ namespace Game.DataStorage
                     createProperties.MorphCurveId = ValidateAndSetCurve(areatriggerCreateProperties.Read<uint>(4));
                     createProperties.FacingCurveId = ValidateAndSetCurve(areatriggerCreateProperties.Read<uint>(5));
 
-                    createProperties.AnimId = areatriggerCreateProperties.Read<uint>(6);
+                    createProperties.AnimId = areatriggerCreateProperties.Read<int>(6);
                     createProperties.AnimKitId = areatriggerCreateProperties.Read<uint>(7);
                     createProperties.DecalPropertiesId = areatriggerCreateProperties.Read<uint>(8);
 

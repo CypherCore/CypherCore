@@ -4572,7 +4572,7 @@ namespace Game.Entities
 
         public bool HasCorpse()
         {
-            return _corpseLocation.GetMapId() != 0xFFFFFFFF;
+            return _corpseLocation != null && _corpseLocation.GetMapId() != 0xFFFFFFFF;
         }
         public WorldLocation GetCorpseLocation() { return _corpseLocation; }
 

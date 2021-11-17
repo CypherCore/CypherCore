@@ -300,7 +300,7 @@ namespace Game.Entities
         public uint MorphCurveId;
         public uint FacingCurveId;
 
-        public uint AnimId;
+        public int AnimId;
         public uint AnimKitId;
 
         public uint DecalPropertiesId;
