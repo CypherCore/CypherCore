@@ -1,2 +1,0 @@
--- 
-DELETE FROM `gameobject` WHERE `id` IN (186649,186650) AND `guid` IN (150377,150378);
