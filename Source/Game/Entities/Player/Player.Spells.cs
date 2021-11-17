@@ -2023,6 +2023,11 @@ namespace Game.Entities
             SendPacket(knownSpells);
         }
 
+        void SendUnlearnSpells()
+        {
+            SendPacket(new SendUnlearnSpells());
+        }
+
         public void LearnSpellHighestRank(uint spellid)
         {
             LearnSpell(spellid, false);

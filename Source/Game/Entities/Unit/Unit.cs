@@ -1194,7 +1194,7 @@ namespace Game.Entities
                 Cypher.Assert(i_disabledAI == null, "Attempt to schedule charm AI change on unit that already has disabled AI");
             else if (m_aiLocked)
             {
-                Cypher.Assert(!i_lockedAILifetimeExtension, "Attempt to schedule multiple charm AI changes during one update");
+                Cypher.Assert(i_lockedAILifetimeExtension == null, "Attempt to schedule multiple charm AI changes during one update");
                 i_lockedAILifetimeExtension = i_AI; // AI needs to live just a bit longer to finish its UpdateAI
             }
             else if (!IsPlayer())

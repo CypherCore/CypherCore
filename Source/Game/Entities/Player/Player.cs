@@ -5479,7 +5479,7 @@ namespace Game.Entities
             SendKnownSpells();
 
             // SMSG_SEND_UNLEARN_SPELLS
-            SendPacket(new SendUnlearnSpells());
+            SendUnlearnSpells();
 
             // SMSG_SEND_SPELL_HISTORY
             SendSpellHistory sendSpellHistory = new();
