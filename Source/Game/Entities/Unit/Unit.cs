@@ -1188,12 +1188,15 @@ namespace Game.Entities
 
         public void ScheduleAIChange()
         {
-            Cypher.Assert(!m_aiLocked, "Attempt to schedule AI change during AI update tick");
-
             bool charmed = IsCharmed();
             // if charm is applied, we can't have disabled AI already, and vice versa
             if (charmed)
                 Cypher.Assert(i_disabledAI == null, "Attempt to schedule charm AI change on unit that already has disabled AI");
+            else if (m_aiLocked)
+            {
+                Cypher.Assert(!i_lockedAILifetimeExtension, "Attempt to schedule multiple charm AI changes during one update");
+                i_lockedAILifetimeExtension = i_AI; // AI needs to live just a bit longer to finish its UpdateAI
+            }
             else if (!IsPlayer())
                 Cypher.Assert(i_disabledAI != null, "Attempt to schedule charm ID change on unit that doesn't have disabled AI");
 
@@ -1205,9 +1208,9 @@ namespace Game.Entities
 
         void RestoreDisabledAI()
         {
-            Cypher.Assert(!m_aiLocked, "Attempt to restore AI during UpdateAI tick");
             Cypher.Assert(IsPlayer() || i_disabledAI != null, "Attempt to restore disabled AI on creature without disabled AI");
             i_AI = i_disabledAI;
+            i_lockedAILifetimeExtension = null;
         }
 
         public bool IsPossessing()

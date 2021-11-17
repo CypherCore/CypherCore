@@ -33,6 +33,7 @@ namespace Game.Entities
         //AI
         protected UnitAI i_AI;
         protected UnitAI i_disabledAI;
+        UnitAI i_lockedAILifetimeExtension; // yes, this lifetime extension is terrible
         bool m_aiLocked;
 
         //Movement
