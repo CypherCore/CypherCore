@@ -214,7 +214,7 @@ namespace Game.Networking.Packets
 
         public override void Write()
         {
-            _worldPacket.WriteBits(Result, 3);
+            _worldPacket.WriteBits(Result, 4);
             _worldPacket.WriteUInt32(CreatureID);
         }
 
