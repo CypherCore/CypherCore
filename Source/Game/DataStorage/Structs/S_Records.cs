@@ -555,6 +555,69 @@ namespace Game.DataStorage
         public uint[] Totem = new uint[SpellConst.MaxTotems];
     }
 
+    public sealed class SpellVisualRecord
+    {
+        public uint Id;
+        public float[] MissileCastOffset = new float[3];
+        public float[] MissileImpactOffset = new float[3];
+        public uint AnimEventSoundID;
+        public int Flags;
+        public sbyte MissileAttachment;
+        public sbyte MissileDestinationAttachment;
+        public uint MissileCastPositionerID;
+        public uint MissileImpactPositionerID;
+        public int MissileTargetingKit;
+        public uint HostileSpellVisualID;
+        public uint CasterSpellVisualID;
+        public ushort SpellVisualMissileSetID;
+        public ushort DamageNumberDelay;
+        public uint LowViolenceSpellVisualID;
+        public uint RaidSpellVisualMissileSetID;
+        public int ReducedUnexpectedCameraMovementSpellVisualID;
+    }
+
+    public sealed class SpellVisualEffectNameRecord
+    {
+        public uint Id;
+        public int ModelFileDataID;
+        public float BaseMissileSpeed;
+        public float Scale;
+        public float MinAllowedScale;
+        public float MaxAllowedScale;
+        public float Alpha;
+        public uint Flags;
+        public int TextureFileDataID;
+        public float EffectRadius;
+        public uint Type;
+        public int GenericID;
+        public uint RibbonQualityID;
+        public int DissolveEffectID;
+        public int ModelPosition;
+        public sbyte Unknown901;
+    }
+
+    public sealed class SpellVisualMissileRecord
+    {
+        public float[] CastOffset = new float[3];
+        public float[] ImpactOffset = new float[3];
+        public uint Id;
+        public ushort SpellVisualEffectNameID;
+        public uint SoundEntriesID;
+        public sbyte Attachment;
+        public sbyte DestinationAttachment;
+        public ushort CastPositionerID;
+        public ushort ImpactPositionerID;
+        public int FollowGroundHeight;
+        public uint FollowGroundDropSpeed;
+        public ushort FollowGroundApproach;
+        public uint Flags;
+        public ushort SpellMissileMotionID;
+        public uint AnimKitID;
+        public sbyte ClutterLevel;
+        public int DecayTimeAfterImpact;
+        public uint SpellVisualMissileSetID;
+    }
+
     public sealed class SpellVisualKitRecord
     {
         public uint Id;

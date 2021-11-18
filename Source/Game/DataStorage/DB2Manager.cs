@@ -507,6 +507,9 @@ namespace Game.DataStorage
             foreach (SpellProcsPerMinuteModRecord ppmMod in SpellProcsPerMinuteModStorage.Values)
                 _spellProcsPerMinuteMods.Add(ppmMod.SpellProcsPerMinuteID, ppmMod);
 
+            foreach (SpellVisualMissileRecord spellVisualMissile in SpellVisualMissileStorage.Values)
+                _spellVisualMissilesBySet.Add(spellVisualMissile.SpellVisualMissileSetID, spellVisualMissile);
+
             for (var i = 0; i < (int)Class.Max; ++i)
             {
                 _talentsByPosition[i] = new List<TalentRecord>[PlayerConst.MaxTalentTiers][];
@@ -2009,6 +2012,11 @@ namespace Game.DataStorage
             return _spellProcsPerMinuteMods.LookupByKey(spellprocsPerMinuteId);
         }
 
+        public List<SpellVisualMissileRecord> GetSpellVisualMissiles(int spellVisualMissileSetId)
+        {
+            return _spellVisualMissilesBySet.LookupByKey(spellVisualMissileSetId);
+        }
+        
         public List<TalentRecord> GetTalentsByPosition(Class class_, uint tier, uint column)
         {
             return _talentsByPosition[(int)class_][tier][column];
@@ -2409,6 +2417,7 @@ namespace Game.DataStorage
         List<Tuple<int, uint>> _specsBySpecSet = new();
         List<byte> _spellFamilyNames = new();
         MultiMap<uint, SpellProcsPerMinuteModRecord> _spellProcsPerMinuteMods = new();
+        MultiMap<uint, SpellVisualMissileRecord> _spellVisualMissilesBySet = new();
         List<TalentRecord>[][][] _talentsByPosition = new List<TalentRecord>[(int)Class.Max][][];
         List<uint> _toys = new();
         Dictionary<uint, TransmogIllusionRecord> _transmogIllusionsByEnchantmentId = new();

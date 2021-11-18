@@ -3493,7 +3493,7 @@ namespace Game.Spells
             if (((IsTriggered() && !m_spellInfo.IsAutoRepeatRangedSpell()) || m_triggeredByAuraSpell != null) && !m_fromClient)
                 castFlags |= SpellCastFlags.Pending;
 
-            if (m_spellInfo.HasAttribute(SpellAttr0.ReqAmmo) || m_spellInfo.HasAttribute(SpellCustomAttributes.NeedsAmmoData))
+            if (m_spellInfo.HasAttribute(SpellAttr0.ReqAmmo) || m_spellInfo.HasAttribute(SpellAttr10.UsesRangedSlotCosmeticOnly) || m_spellInfo.HasAttribute(SpellCustomAttributes.NeedsAmmoData))
                 castFlags |= SpellCastFlags.Projectile;
 
             if ((m_caster.IsTypeId(TypeId.Player) || (m_caster.IsTypeId(TypeId.Unit) && m_caster.ToCreature().IsPet())) && m_powerCost.Any(cost => cost.Power != PowerType.Health))
@@ -3594,7 +3594,7 @@ namespace Game.Spells
             if (((IsTriggered() && !m_spellInfo.IsAutoRepeatRangedSpell()) || m_triggeredByAuraSpell != null) && !m_fromClient)
                 castFlags |= SpellCastFlags.Pending;
 
-            if (m_spellInfo.HasAttribute(SpellAttr0.ReqAmmo) || m_spellInfo.HasAttribute(SpellCustomAttributes.NeedsAmmoData))
+            if (m_spellInfo.HasAttribute(SpellAttr0.ReqAmmo) || m_spellInfo.HasAttribute(SpellAttr10.UsesRangedSlotCosmeticOnly) || m_spellInfo.HasAttribute(SpellCustomAttributes.NeedsAmmoData))
                 castFlags |= SpellCastFlags.Projectile;                        // arrows/bullets visual
 
             if ((m_caster.IsTypeId(TypeId.Player) || (m_caster.IsTypeId(TypeId.Unit) && m_caster.ToCreature().IsPet())) && m_powerCost.Any(cost => cost.Power != PowerType.Health))
@@ -3734,6 +3734,8 @@ namespace Game.Spells
                 Unit unitCaster = m_caster.ToUnit();
                 if (unitCaster != null)
                 {
+                    uint nonRangedAmmoDisplayID = 0;
+                    InventoryType nonRangedAmmoInventoryType = 0;
                     for (byte i = (int)WeaponAttackType.BaseAttack; i < (int)WeaponAttackType.Max; ++i)
                     {
                         uint itemId = unitCaster.GetVirtualItemId(i);
@@ -3759,6 +3761,10 @@ namespace Game.Spells
                                             ammoDisplayID = 5998;       // is this need fixing?
                                             ammoInventoryType = InventoryType.Ammo;
                                             break;
+                                        default:
+                                            nonRangedAmmoDisplayID = Global.DB2Mgr.GetItemDisplayId(itemId, unitCaster.GetVirtualItemAppearanceMod(i));
+                                            nonRangedAmmoInventoryType = itemEntry.inventoryType;
+                                            break;
                                     }
 
                                     if (ammoDisplayID != 0)
@@ -3766,6 +3772,12 @@ namespace Game.Spells
                                 }
                             }
                         }
+                    }
+
+                    if (ammoDisplayID == 0 && ammoInventoryType == 0)
+                    {
+                        ammoDisplayID = nonRangedAmmoDisplayID;
+                        ammoInventoryType = nonRangedAmmoInventoryType;
                     }
                 }
             }

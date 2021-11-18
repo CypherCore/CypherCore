@@ -3803,6 +3803,11 @@ namespace Game.Spells
             return false;
         }
 
+        public List<SpellXSpellVisualRecord> GetSpellVisuals()
+        {
+            return _visuals;
+        }
+
         public bool HasAttribute(SpellAttr0 attribute) { return Convert.ToBoolean(Attributes & attribute); }
         public bool HasAttribute(SpellAttr1 attribute) { return Convert.ToBoolean(AttributesEx & attribute); }
         public bool HasAttribute(SpellAttr2 attribute) { return Convert.ToBoolean(AttributesEx2 & attribute); }

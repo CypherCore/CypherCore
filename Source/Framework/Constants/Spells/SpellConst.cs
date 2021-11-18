@@ -1928,7 +1928,7 @@ namespace Framework.Constants
     {
         Unk0 = 0x01, // 0
         Unk1 = 0x02, // 1
-        Unk2 = 0x04, // 2
+        UsesRangedSlotCosmeticOnly = 0x04, // 2
         Unk3 = 0x08, // 3
         WaterSpout = 0x10, // 4
         Unk5 = 0x20, // 5

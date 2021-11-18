@@ -2229,4 +2229,19 @@ namespace Framework.Constants
         HideUntilLearned = 0x4000,
         MatchPlayerHighPetLevel = 0x8000
     }
+
+    public enum SpellVisualEffectNameType
+    {
+        Model = 0,
+        Item = 1,
+        Creature = 2,
+        UnitItemMainHand = 3,
+        UnitItemOffHand = 4,
+        UnitItemRanged = 5,
+        UnitAmmoBasic = 6,
+        UnitAmmoPreferred = 7,
+        UnitItemMainHandIgnoreDisarmed = 8,
+        UnitItemOffHandIgnoreDisarmed = 9,
+        UnitItemRangedIgnoreDisarmed = 10
+    }
 }

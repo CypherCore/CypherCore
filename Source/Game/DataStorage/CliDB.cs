@@ -310,6 +310,9 @@ namespace Game.DataStorage
             SpellShapeshiftFormStorage = ReadDB2<SpellShapeshiftFormRecord>("SpellShapeshiftForm.db2", HotfixStatements.SEL_SPELL_SHAPESHIFT_FORM, HotfixStatements.SEL_SPELL_SHAPESHIFT_FORM_LOCALE);
             SpellTargetRestrictionsStorage = ReadDB2<SpellTargetRestrictionsRecord>("SpellTargetRestrictions.db2", HotfixStatements.SEL_SPELL_TARGET_RESTRICTIONS);
             SpellTotemsStorage = ReadDB2<SpellTotemsRecord>("SpellTotems.db2", HotfixStatements.SEL_SPELL_TOTEMS);
+            SpellVisualStorage = ReadDB2<SpellVisualRecord>("SpellVisual.db2", HotfixStatements.SEL_SPELL_VISUAL);
+            SpellVisualEffectNameStorage = ReadDB2<SpellVisualEffectNameRecord>("SpellVisualEffectName.db2", HotfixStatements.SEL_SPELL_VISUAL_EFFECT_NAME);
+            SpellVisualMissileStorage = ReadDB2<SpellVisualMissileRecord>("SpellVisualMissile.db2", HotfixStatements.SEL_SPELL_VISUAL_MISSILE);
             SpellVisualKitStorage = ReadDB2<SpellVisualKitRecord>("SpellVisualKit.db2", HotfixStatements.SEL_SPELL_VISUAL_KIT);
             SpellXSpellVisualStorage = ReadDB2<SpellXSpellVisualRecord>("SpellXSpellVisual.db2", HotfixStatements.SEL_SPELL_X_SPELL_VISUAL);
             SummonPropertiesStorage = ReadDB2<SummonPropertiesRecord>("SummonProperties.db2", HotfixStatements.SEL_SUMMON_PROPERTIES);
@@ -695,6 +698,9 @@ namespace Game.DataStorage
         public static DB6Storage<SpellShapeshiftFormRecord> SpellShapeshiftFormStorage;
         public static DB6Storage<SpellTargetRestrictionsRecord> SpellTargetRestrictionsStorage;
         public static DB6Storage<SpellTotemsRecord> SpellTotemsStorage;
+        public static DB6Storage<SpellVisualRecord> SpellVisualStorage;
+        public static DB6Storage<SpellVisualEffectNameRecord> SpellVisualEffectNameStorage;
+        public static DB6Storage<SpellVisualMissileRecord> SpellVisualMissileStorage;
         public static DB6Storage<SpellVisualKitRecord> SpellVisualKitStorage;
         public static DB6Storage<SpellXSpellVisualRecord> SpellXSpellVisualStorage;
         public static DB6Storage<SummonPropertiesRecord> SummonPropertiesStorage;

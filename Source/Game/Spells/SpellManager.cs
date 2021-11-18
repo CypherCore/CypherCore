@@ -2897,6 +2897,42 @@ namespace Game.Entities
                 }
 
                 spellInfo._InitializeExplicitTargetMask();
+
+                if (spellInfo.Speed > 0.0f)
+                {
+                    bool visualNeedsAmmo(SpellXSpellVisualRecord spellXspellVisual)
+                    {
+                        SpellVisualRecord spellVisual = CliDB.SpellVisualStorage.LookupByKey(spellXspellVisual.SpellVisualID);
+                        if (spellVisual == null)
+                            return false;
+
+                        var spellVisualMissiles = Global.DB2Mgr.GetSpellVisualMissiles(spellVisual.SpellVisualMissileSetID);
+                        if (spellVisualMissiles.Empty())
+                            return false;
+
+                        foreach (SpellVisualMissileRecord spellVisualMissile in spellVisualMissiles)
+                        {
+                            var spellVisualEffectName = CliDB.SpellVisualEffectNameStorage.LookupByKey(spellVisualMissile.SpellVisualEffectNameID);
+                            if (spellVisualEffectName == null)
+                                continue;
+
+                            SpellVisualEffectNameType type = (SpellVisualEffectNameType)spellVisualEffectName.Type;
+                            if (type == SpellVisualEffectNameType.UnitAmmoBasic || type == SpellVisualEffectNameType.UnitAmmoPreferred)
+                                return true;
+                        }
+
+                        return false;
+                    }
+
+                    foreach (SpellXSpellVisualRecord spellXspellVisual in spellInfo.GetSpellVisuals())
+                    {
+                        if (visualNeedsAmmo(spellXspellVisual))
+                        {
+                            spellInfo.AttributesCu |= SpellCustomAttributes.NeedsAmmoData;
+                            break;
+                        }
+                    }
+                }
             }
 
             // addition for binary spells, omit spells triggering other spells
