@@ -425,7 +425,7 @@ namespace Game.Chat
 
                     if (i == ReputationMgr.ReputationRankThresholds.Length - 1)
                     {
-                        handler.SendSysMessage(CypherStrings.CommandFactionInvparam, rankTxt);
+                        handler.SendSysMessage(CypherStrings.CommandInvalidParam, rankTxt);
                         return false;
                     }
 

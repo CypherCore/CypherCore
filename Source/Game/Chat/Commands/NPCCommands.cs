@@ -1219,6 +1219,12 @@ namespace Game.Chat
                     return false;
                 }
 
+                if (!CliDB.CreatureDisplayInfoStorage.ContainsKey(displayId))
+                {
+                    handler.SendSysMessage(CypherStrings.CommandInvalidParam, args);
+                    return false;
+                }
+
                 creature.SetDisplayId(displayId);
                 creature.SetNativeDisplayId(displayId);
 

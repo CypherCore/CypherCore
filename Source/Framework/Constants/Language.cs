@@ -375,7 +375,7 @@ namespace Framework.Constants
         CommandModifyArena = 306,
         CommandFactionNotfound = 307,
         CommandFactionUnknown = 308,
-        CommandFactionInvparam = 309,
+        CommandInvalidParam = 309,
         CommandFactionDelta = 310,
         FactionList = 311,
         FactionVisible = 312,
