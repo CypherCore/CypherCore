@@ -233,16 +233,21 @@ namespace Game
                         SendChatPlayerNotfoundNotice(target);
                         return;
                     }
-                    if (!sender.IsGameMaster() && sender.GetLevel() < WorldConfig.GetIntValue(WorldCfg.ChatWhisperLevelReq) && !receiver.IsInWhisperWhiteList(sender.GetGUID()))
-                    {
-                        SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.WhisperReq), WorldConfig.GetIntValue(WorldCfg.ChatWhisperLevelReq));
-                        return;
-                    }
 
-                    if (GetPlayer().GetTeam() != receiver.GetTeam() && !HasPermission(RBACPermissions.TwoSideInteractionChat) && !receiver.IsInWhisperWhiteList(sender.GetGUID()))
+                    // Apply checks only if receiver is not already in whitelist and if receiver is not a GM with ".whisper on"
+                    if (!receiver.IsInWhisperWhiteList(sender.GetGUID()) && !receiver.IsGameMasterAcceptingWhispers())
                     {
-                        SendChatPlayerNotfoundNotice(target);
-                        return;
+                        if (!sender.IsGameMaster() && sender.GetLevel() < WorldConfig.GetIntValue(WorldCfg.ChatWhisperLevelReq))
+                        {
+                            SendNotification(Global.ObjectMgr.GetCypherString(CypherStrings.WhisperReq), WorldConfig.GetIntValue(WorldCfg.ChatWhisperLevelReq));
+                            return;
+                        }
+
+                        if (GetPlayer().GetTeam() != receiver.GetTeam() && !HasPermission(RBACPermissions.TwoSideInteractionChat) && !receiver.IsInWhisperWhiteList(sender.GetGUID()))
+                        {
+                            SendChatPlayerNotfoundNotice(target);
+                            return;
+                        }
                     }
 
                     if (GetPlayer().HasAura(1852) && !receiver.IsGameMaster())

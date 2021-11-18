@@ -2156,7 +2156,8 @@ namespace Game.Entities
             else
                 m_ExtraFlags &= ~PlayerExtraFlags.AcceptWhispers;
         }
-        public bool IsGameMaster() { return Convert.ToBoolean(m_ExtraFlags & PlayerExtraFlags.GMOn); }
+        public bool IsGameMaster() { return m_ExtraFlags.HasAnyFlag(PlayerExtraFlags.GMOn); }
+        public bool IsGameMasterAcceptingWhispers() { return IsGameMaster() && IsAcceptWhispers();    }
         public bool CanBeGameMaster() { return GetSession().HasPermission(RBACPermissions.CommandGm); }
         public void SetGameMaster(bool on)
         {
