@@ -6581,9 +6581,9 @@ namespace Game.Entities
             UpdateBaseModGroup(modGroup);
         }
 
-        public override void UpdateDamageDoneMods(WeaponAttackType attackType)
+        public override void UpdateDamageDoneMods(WeaponAttackType attackType, int skipEnchantSlot = -1)
         {
-            base.UpdateDamageDoneMods(attackType);
+            base.UpdateDamageDoneMods(attackType, skipEnchantSlot);
 
             UnitMods unitMod = attackType switch
             {
@@ -6600,6 +6600,9 @@ namespace Game.Entities
 
             for (var slot = EnchantmentSlot.Perm; slot < EnchantmentSlot.Max; ++slot)
             {
+                if (skipEnchantSlot == (int)slot)
+                    continue;
+
                 SpellItemEnchantmentRecord enchantmentEntry = CliDB.SpellItemEnchantmentStorage.LookupByKey(item.GetEnchantmentId(slot));
                 if (enchantmentEntry == null)
                     continue;

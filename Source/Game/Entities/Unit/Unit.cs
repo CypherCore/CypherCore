@@ -3811,7 +3811,7 @@ namespace Game.Entities
 
         public virtual SpellSchoolMask GetMeleeDamageSchoolMask(WeaponAttackType attackType = WeaponAttackType.BaseAttack) { return SpellSchoolMask.None; }
 
-        public virtual void UpdateDamageDoneMods(WeaponAttackType attackType)
+        public virtual void UpdateDamageDoneMods(WeaponAttackType attackType, int skipEnchantSlot = -1)
         {
             UnitMods unitMod = attackType switch
             {

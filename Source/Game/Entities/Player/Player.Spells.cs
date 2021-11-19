@@ -578,7 +578,7 @@ namespace Game.Entities
                         {
                             WeaponAttackType attackType = Player.GetAttackBySlot(item.GetSlot(), item.GetTemplate().GetInventoryType());
                             if (attackType != WeaponAttackType.Max)
-                                UpdateDamageDoneMods(attackType);
+                                UpdateDamageDoneMods(attackType, apply ? -1 : (int)slot);
                         }
                         break;
                         case ItemEnchantmentType.EquipSpell:
@@ -795,7 +795,7 @@ namespace Game.Entities
                         {
                             WeaponAttackType attackType = Player.GetAttackBySlot(item.GetSlot(), item.GetTemplate().GetInventoryType());
                             if (attackType != WeaponAttackType.Max)
-                                UpdateDamageDoneMods(attackType);
+                                UpdateDamageDoneMods(attackType, apply ? -1 : (int)slot);
                             break;
                         }
                         case ItemEnchantmentType.UseSpell:
