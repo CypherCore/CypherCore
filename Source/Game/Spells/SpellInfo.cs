@@ -3296,7 +3296,6 @@ namespace Game.Spells
                         case 64412: // Phase Punch, Algalon the Observer, Ulduar
                         case 72410: // Rune of Blood, Saurfang, Icecrown Citadel
                         case 71204: // Touch of Insignificance, Lady Deathwhisper, Icecrown Citadel
-                        case 70853: // Malleable Goo, Professor Putricide, Icecrown Citadel
                             return false;
                         case 24732: // Bat Costume
                         case 30877: // Tag Murloc
@@ -3504,7 +3503,8 @@ namespace Game.Spells
                     case AuraType.ModAttackPower:
                     case AuraType.ModRangedAttackPower:
                     case AuraType.ModDamagePercentDone:
-                        if (!_isPositiveTarget(effect) && bp < 0)
+                    case AuraType.ModSpeedSlowAll:
+                        if (!_isPositiveTarget(effect) || bp < 0)
                             return false;
                         break;
                     case AuraType.ModDamageTaken:           // dependent from basepoint sign (positive . negative)
