@@ -132,21 +132,28 @@ namespace Scripts.Spells.Quest
         public const uint CreateBearFlank = 56566;
         public const uint BearFlankFail = 56569;
 
-        //ThatsAbominable
-        public const uint IcyGhoulCredit = 59591; // Credit for Icy Ghoul
-        public const uint ViciousGeistsCredit = 60042; // Credit for Vicious Geists
-        public const uint RisenAllianceSoldiersCredit = 60040; // Credit for Risen Alliance Soldiers
+        //BurstAtTheSeams
+        public const uint BloatedAbominationFeignDeath = 52593;
+        public const uint BurstAtTheSeamsBone = 52516;
+        public const uint ExplodeAbominationMeat = 52520;
+        public const uint ExplodeAbominationBloodyMeat = 52523;
+        public const uint TrollExplosion = 52565;
+        public const uint ExplodeTrollMeat = 52578;
+        public const uint ExplodeTrollBloodyMeat = 52580;
 
-        //Burstattheseams
-        public const uint BurstAtTheSeams = 52510; // Burst At The Seams
-        public const uint BurstAtTheSeamsDmg = 52508; // Damage Spell
-        public const uint BurstAtTheSeamsDmg2 = 59580; // Abomination Self Damage Spell
-        public const uint BurstAtTheSeamsBone = 52516; // Burst At The Seams:Bone
-        public const uint BurstAtTheSeamsMeat = 52520; // Explode Abomination:Meat
-        public const uint BurstAtTheSeamsBmeat = 52523; // Explode Abomination:Bloody Meat
-        public const uint DrakkariSkullcrusherCredit = 52590; // Credit For Drakkari Skullcrusher
-        public const uint SummonDrakkariChieftain = 52616; // Summon Drakkari Chieftain
-        public const uint DrakkariChieftainkKillCredit = 52620; // Drakkari Chieftain Kill Credit
+        public const uint BurstAtTheSeams59576 = 59576; //Script/Knockback; That'S Abominable
+        public const uint BurstAtTheSeams59579 = 59579; //Dummy
+        public const uint BurstAtTheSeams52510 = 52510; //Script/Knockback; Fuel For The Fire
+        public const uint BurstAtTheSeams52508 = 52508; //Damage 20000
+        public const uint BurstAtTheSeams59580 = 59580; //Damage 50000
+
+        public const uint AssignGhoulKillCreditToMaster = 59590;
+        public const uint AssignGeistKillCreditToMaster = 60041;
+        public const uint AssignSkeletonKillCreditToMaster = 60039;
+
+        public const uint DrakkariSkullcrusherCredit = 52590;
+        public const uint SummonDrakkariChieftain = 52616;
+        public const uint DrakkariChieftainkKillCredit = 52620;
 
         //Escapefromsilverbrook
         public const uint SummonWorgen = 48681;
@@ -253,14 +260,12 @@ namespace Scripts.Spells.Quest
         public const uint Skytalon = 31583;
         public const uint Decoy = 31578;
 
-        //ThatsAbominable
-        public const uint IcyGhoul = 31142;
-        public const uint RisenAllianceSoldiers = 31205;
-        public const uint ViciousGeist = 31147;
-        public const uint RenimatedAbomination = 31692;
-
         //Burstattheseams
         public const uint DrakkariChieftaink = 29099;
+        public const uint IcyGhoul = 31142;
+        public const uint ViciousGeist = 31147;
+        public const uint RisenAllianceSoldiers = 31205;
+        public const uint RenimatedAbomination = 31692;
 
         //Deathcomesfromonhigh
         public const uint NewAvalonForge = 28525;
@@ -292,11 +297,10 @@ namespace Scripts.Spells.Quest
         //Quest12372
         public const uint WhisperOnHitByForceWhisper = 1;
 
-        //ThatsAbominable
-        public const uint QuestThatsAbominable = 13264;
-
         //BurstAtTheSeams
-        public const uint QuestIdBurstAtTheSeams = 12690;
+        public const uint AreaTheBrokenFront = 4507;
+        public const uint AreaMordRetharTheDeathGate = 4508;
+        public const uint QuestFuelForTheFire = 12690;
     }
 
     // http://www.wowhead.com/quest=55 Morbent Fel
@@ -967,7 +971,7 @@ namespace Scripts.Spells.Quest
             OnCast.Add(new CastHandler(HandleCast));
         }
     }
-    
+
     [Script]
     class spell_q14112_14145_chum_the_water : SpellScript
     {
@@ -1510,50 +1514,11 @@ namespace Scripts.Spells.Quest
     }
 
     [Script]
-    class spell_q13264_thats_abominable : SpellScript
+    class spell_q13264_q13276_q13288_q13289_burst_at_the_seams_59576 : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.IcyGhoulCredit, SpellIds.ViciousGeistsCredit, SpellIds.RisenAllianceSoldiersCredit);
-        }
-
-        void HandleKnockBack(uint effIndex)
-        {
-            PreventHitDefaultEffect(effIndex);
-
-            Creature creature = GetHitCreature();
-            if (creature != null)
-            {
-                Unit charmer = GetCaster().GetCharmerOrOwner();
-                if (charmer != null)
-                {
-                    Player player = charmer.ToPlayer();
-                    if (player != null)
-                        if (player.GetQuestStatus(Misc.QuestThatsAbominable) == QuestStatus.Incomplete)
-                            if (GiveCreditIfValid(player, creature))
-                                creature.KillSelf();
-                }
-            }
-        }
-
-        bool GiveCreditIfValid(Player player, Creature creature)
-        {
-            uint entry = creature.GetEntry();
-
-            switch (entry)
-            {
-                case CreatureIds.IcyGhoul:
-                    player.CastSpell(player, SpellIds.IcyGhoulCredit, true);
-                    return true;
-                case CreatureIds.ViciousGeist:
-                    player.CastSpell(player, SpellIds.ViciousGeistsCredit, true);
-                    return true;
-                case CreatureIds.RisenAllianceSoldiers:
-                    player.CastSpell(player, SpellIds.RisenAllianceSoldiersCredit, true);
-                    return true;
-            }
-
-            return false;
+            return ValidateSpellInfo(SpellIds.BurstAtTheSeams59576, SpellIds.BloatedAbominationFeignDeath, SpellIds.BurstAtTheSeams59579, SpellIds.BurstAtTheSeamsBone, SpellIds.ExplodeAbominationMeat, SpellIds.ExplodeAbominationBloodyMeat);
         }
 
         void HandleScript(uint effIndex)
@@ -1561,53 +1526,174 @@ namespace Scripts.Spells.Quest
             Creature creature = GetCaster().ToCreature();
             if (creature != null)
             {
-                creature.KillSelf();
-                creature.DespawnOrUnsummon();
+                creature.CastSpell(creature, SpellIds.BloatedAbominationFeignDeath, true);
+                creature.CastSpell(creature, SpellIds.BurstAtTheSeams59579, true);
+                creature.CastSpell(creature, SpellIds.BurstAtTheSeamsBone, true);
+                creature.CastSpell(creature, SpellIds.BurstAtTheSeamsBone, true);
+                creature.CastSpell(creature, SpellIds.BurstAtTheSeamsBone, true);
+                creature.CastSpell(creature, SpellIds.ExplodeAbominationMeat, true);
+                creature.CastSpell(creature, SpellIds.ExplodeAbominationBloodyMeat, true);
+                creature.CastSpell(creature, SpellIds.ExplodeAbominationBloodyMeat, true);
+                creature.CastSpell(creature, SpellIds.ExplodeAbominationBloodyMeat, true);
             }
         }
 
         public override void Register()
         {
-            OnEffectHitTarget.Add(new EffectHandler(HandleKnockBack, 1, SpellEffectName.KnockBack));
             OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
         }
     }
-    
+
     [Script]
-    class spell_q12690_burst_at_the_seams : SpellScript
+    class spell_q13264_q13276_q13288_q13289_burst_at_the_seams_59579 : AuraScript
+    {
+        void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit target = GetTarget();
+            target.CastSpell(target, SpellIds.TrollExplosion, true);
+            target.CastSpell(target, SpellIds.ExplodeAbominationMeat, true);
+            target.CastSpell(target, SpellIds.ExplodeTrollMeat, true);
+            target.CastSpell(target, SpellIds.ExplodeTrollMeat, true);
+            target.CastSpell(target, SpellIds.ExplodeTrollBloodyMeat, true);
+            target.CastSpell(target, SpellIds.BurstAtTheSeamsBone, true);
+        }
+
+        void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit target = GetTarget();
+            Unit caster = GetCaster();
+            if (caster != null)
+            {
+                switch (target.GetEntry())
+                {
+                    case CreatureIds.IcyGhoul:
+                        target.CastSpell(caster, SpellIds.AssignGhoulKillCreditToMaster, true);
+                        break;
+                    case CreatureIds.ViciousGeist:
+                        target.CastSpell(caster, SpellIds.AssignGeistKillCreditToMaster, true);
+                        break;
+                    case CreatureIds.RisenAllianceSoldiers:
+                        target.CastSpell(caster, SpellIds.AssignSkeletonKillCreditToMaster, true);
+                        break;
+                }
+            }
+            target.CastSpell(target, SpellIds.BurstAtTheSeams59580, true);
+        }
+
+        public override void Register()
+        {
+            AfterEffectApply.Add(new EffectApplyHandler(HandleApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            AfterEffectRemove.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
+
+    [Script]
+    class spell_q13264_q13276_q13288_q13289_bloated_abom_feign_death : AuraScript
+    {
+        void HandleApply(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit target = GetTarget();
+            target.AddDynamicFlag(UnitDynFlags.Dead);
+            target.AddUnitFlag2(UnitFlags2.FeignDeath);
+
+            Creature creature = target.ToCreature();
+            if (creature != null)
+                creature.SetReactState(ReactStates.Passive);
+        }
+
+        void HandleRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            Unit target = GetTarget();
+            Creature creature = target.ToCreature();
+            if (creature != null)
+            creature.DespawnOrUnsummon();
+        }
+
+        public override void Register()
+        {
+            AfterEffectApply.Add(new EffectApplyHandler(HandleApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            AfterEffectRemove.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
+
+    [Script]
+    class spell_q13264_q13276_q13288_q13289_area_restrict_abom : SpellScript
+    {
+        void HandleScript(uint effIndex)
+        {
+            Creature creature = GetHitCreature();
+            if (creature != null)
+        {
+                uint area = creature.GetAreaId();
+                if (area != Misc.AreaTheBrokenFront && area != Misc.AreaMordRetharTheDeathGate)
+                    creature.DespawnOrUnsummon();
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+
+
+    [Script]
+    class spell_q13264_q13276_q13288_q13289_assign_credit_to_master : SpellScript
+    {
+        void HandleScript(uint effIndex)
+        {
+            Unit target = GetHitUnit();
+            if (target != null)
+            {
+                Unit owner = target.GetOwner();
+                if (owner != null)
+                {
+                    owner.CastSpell(owner, (uint)GetEffectValue(), true);
+                }
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+
+    [Script]
+    class spell_q12690_burst_at_the_seams_52510 : SpellScript
     {
         public override bool Validate(SpellInfo spellInfo)
         {
-            return ValidateSpellInfo(SpellIds.BurstAtTheSeams, SpellIds.BurstAtTheSeamsDmg, SpellIds.BurstAtTheSeamsDmg2,
-                SpellIds.BurstAtTheSeamsBone, SpellIds.BurstAtTheSeamsMeat, SpellIds.BurstAtTheSeamsBmeat);
+            return ValidateSpellInfo(SpellIds.BurstAtTheSeams52510, SpellIds.BurstAtTheSeams52508, SpellIds.BurstAtTheSeams59580, 
+                SpellIds.BurstAtTheSeamsBone, SpellIds.ExplodeAbominationMeat, SpellIds.ExplodeAbominationBloodyMeat);
         }
 
         public override bool Load()
         {
-            return GetCaster().IsTypeId(TypeId.Unit);
+            return GetCaster().GetTypeId() == TypeId.Unit;
         }
 
         void HandleKnockBack(uint effIndex)
         {
             Unit creature = GetHitCreature();
-            if (creature)
+            if (creature != null)
             {
                 Unit charmer = GetCaster().GetCharmerOrOwner();
-                if (charmer)
+                if (charmer != null)
                 {
                     Player player = charmer.ToPlayer();
-                    if (player)
+                    if (player != null)
                     {
-                        if (player.GetQuestStatus(Misc.QuestIdBurstAtTheSeams) == QuestStatus.Incomplete)
+                        if (player.GetQuestStatus(Misc.QuestFuelForTheFire) == QuestStatus.Incomplete)
                         {
                             creature.CastSpell(creature, SpellIds.BurstAtTheSeamsBone, true);
-                            creature.CastSpell(creature, SpellIds.BurstAtTheSeamsMeat, true);
-                            creature.CastSpell(creature, SpellIds.BurstAtTheSeamsBmeat, true);
-                            creature.CastSpell(creature, SpellIds.BurstAtTheSeamsDmg, true);
-                            creature.CastSpell(creature, SpellIds.BurstAtTheSeamsDmg2, true);
+                            creature.CastSpell(creature, SpellIds.ExplodeAbominationMeat, true);
+                            creature.CastSpell(creature, SpellIds.ExplodeAbominationBloodyMeat, true);
+                            creature.CastSpell(creature, SpellIds.BurstAtTheSeams52508, true);
+                            creature.CastSpell(creature, SpellIds.BurstAtTheSeams59580, true);
 
                             player.CastSpell(player, SpellIds.DrakkariSkullcrusherCredit, true);
-                            ushort count = player.GetReqKillOrCastCurrentCount(Misc.QuestIdBurstAtTheSeams, (int)CreatureIds.DrakkariChieftaink);
+                            ushort count = player.GetReqKillOrCastCurrentCount(Misc.QuestFuelForTheFire, (int)CreatureIds.DrakkariChieftaink);
                             if ((count % 20) == 0)
                                 player.CastSpell(player, SpellIds.SummonDrakkariChieftain, true);
                         }
