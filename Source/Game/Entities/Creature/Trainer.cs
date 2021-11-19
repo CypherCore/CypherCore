@@ -102,6 +102,16 @@ namespace Game.Entities
             if (trainerSpellInfo.IsPrimaryProfessionFirstRank() && player.GetFreePrimaryProfessionPoints() == 0)
                 return false;
 
+            foreach (SpellEffectInfo effect in trainerSpellInfo.GetEffects())
+            {
+                if (!effect.IsEffect(SpellEffectName.LearnSpell))
+                    continue;
+
+                SpellInfo learnedSpellInfo = Global.SpellMgr.GetSpellInfo(effect.TriggerSpell, Difficulty.None);
+                if (learnedSpellInfo != null && learnedSpellInfo.IsPrimaryProfessionFirstRank() && player.GetFreePrimaryProfessionPoints() == 0)
+                    return false;
+            }
+
             return true;
         }
 
