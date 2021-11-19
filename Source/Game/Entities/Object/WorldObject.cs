@@ -2439,10 +2439,10 @@ namespace Game.Entities
             // PvP case
             if (unitTarget != null && unitTarget.HasUnitFlag(UnitFlags.PlayerControlled))
             {
-                Player targetPlayerOwner = target.GetAffectingPlayer();
                 if (unit != null && unit.HasUnitFlag(UnitFlags.PlayerControlled))
                 {
                     Player selfPlayerOwner = GetAffectingPlayer();
+                    Player targetPlayerOwner = unitTarget.GetAffectingPlayer();
                     if (selfPlayerOwner != null && targetPlayerOwner != null)
                     {
                         // can't assist player which is dueling someone
@@ -2450,7 +2450,7 @@ namespace Game.Entities
                             return false;
                     }
                     // can't assist player in ffa_pvp zone from outside
-                    if (unitTarget.IsFFAPvP() && unit && !unit.IsFFAPvP())
+                    if (unitTarget.IsFFAPvP() && !unit.IsFFAPvP())
                         return false;
 
                     // can't assist player out of sanctuary from sanctuary if has pvp enabled
