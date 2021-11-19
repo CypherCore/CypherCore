@@ -528,6 +528,27 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    [Script]
+    class spell_gen_arcane_charge : SpellScript
+    {
+        SpellCastResult CheckRequirement()
+        {
+            Unit target = GetExplTargetUnit();
+            if (target != null)
+            {
+                if ((target.GetCreatureTypeMask() & (uint)CreatureType.MaskDemonOrUndead) == 0)
+                    return SpellCastResult.DontReport;
+            }
+
+            return SpellCastResult.SpellCastOk;
+        }
+
+        public override void Register()
+        {
+            OnCheckCast.Add(new CheckCastHandler(CheckRequirement));
+        }
+    }
+
     // 430 Drink
     // 431 Drink
     // 432 Drink
@@ -1624,7 +1645,7 @@ namespace Scripts.Spells.Generic
             AfterEffectRemove.Add(new EffectApplyHandler(HandleRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
-    
+
     [Script] // 131474 - Fishing
     class spell_gen_fishing : SpellScript
     {

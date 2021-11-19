@@ -260,7 +260,7 @@ namespace Framework.Constants
         WildPet = 14,
         Aberration = 15,
 
-        MaskDemonOrUnDead = (1 << (Demon - 1)) | (1 << (Undead - 1)),
+        MaskDemonOrUndead = (1 << (Demon - 1)) | (1 << (Undead - 1)),
         MaskHumanoidOrUndead = (1 << (Humanoid - 1)) | (1 << (Undead - 1)),
         MaskMechanicalOrElemental = (1 << (Mechanical - 1)) | (1 << (Elemental - 1))
     }
