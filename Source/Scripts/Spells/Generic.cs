@@ -787,14 +787,10 @@ namespace Scripts.Spells.Generic
 
         bool CheckProc(ProcEventInfo eventInfo)
         {
-            DamageInfo dmgInfo = eventInfo.GetDamageInfo();
-            if (dmgInfo != null)
-            {
-                Unit caster = eventInfo.GetActionTarget();
-                if (caster)
-                    if (caster.HealthBelowPctDamaged(35, dmgInfo.GetDamage()))
-                        return true;
-            }
+            Unit caster = eventInfo.GetActionTarget();
+            if (caster != null)
+                if (caster.HealthBelowPct(35))
+                    return true;
 
             return false;
         }
