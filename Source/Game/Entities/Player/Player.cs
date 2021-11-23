@@ -6388,7 +6388,7 @@ namespace Game.Entities
             BroadcastTextRecord bct = CliDB.BroadcastTextStorage.LookupByKey(textId);
             if (bct == null)
             {
-                Log.outError(LogFilter.Unit, "WorldObject.MonsterWhisper: `broadcast_text` was not {0} found", textId);
+                Log.outError(LogFilter.Unit, "WorldObject.Whisper: `broadcast_text` was not {0} found", textId);
                 return;
             }
 

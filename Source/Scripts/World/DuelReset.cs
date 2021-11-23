@@ -101,26 +101,33 @@ namespace Scripts.World.DuelReset
             player.GetSpellHistory().ResetCooldowns(pair =>
             {
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(pair.Key, Difficulty.None);
-                uint remainingCooldown = player.GetSpellHistory().GetRemainingCooldown(spellInfo);
-                uint totalCooldown = spellInfo.RecoveryTime;
-                uint categoryCooldown = spellInfo.CategoryRecoveryTime;
+                TimeSpan remainingCooldown = player.GetSpellHistory().GetRemainingCooldown(spellInfo);
+                TimeSpan totalCooldown = TimeSpan.FromMilliseconds(spellInfo.RecoveryTime);
+                TimeSpan categoryCooldown = TimeSpan.FromMilliseconds(spellInfo.CategoryRecoveryTime);
 
-                player.ApplySpellMod(spellInfo, SpellModOp.Cooldown, ref totalCooldown, null);
+                void applySpellMod(ref TimeSpan value)
+                {
+                    int intValue = (int)value.TotalMilliseconds;
+                    player.ApplySpellMod(spellInfo, SpellModOp.Cooldown, ref intValue, null);
+                    value = TimeSpan.FromMilliseconds(intValue);
+                };
+
+                applySpellMod(ref totalCooldown);
 
                 int cooldownMod = player.GetTotalAuraModifier(AuraType.ModCooldown);
                 if (cooldownMod != 0)
-                    totalCooldown += (uint)(cooldownMod * Time.InMilliseconds);
+                    totalCooldown += TimeSpan.FromMilliseconds(cooldownMod);
 
                 if (!spellInfo.HasAttribute(SpellAttr6.IgnoreCategoryCooldownMods))
-                    player.ApplySpellMod(spellInfo, SpellModOp.Cooldown, ref categoryCooldown, null);
+                    applySpellMod(ref categoryCooldown);
 
-                return remainingCooldown > 0
+                return remainingCooldown > TimeSpan.Zero
                     && !pair.Value.OnHold
-                    && TimeSpan.FromMilliseconds(totalCooldown) < TimeSpan.FromMinutes(10)
-                    && TimeSpan.FromMilliseconds(categoryCooldown) < TimeSpan.FromMinutes(10)
-                    && TimeSpan.FromMilliseconds(remainingCooldown) < TimeSpan.FromMinutes(10)
-                    && (onStartDuel ? TimeSpan.FromMilliseconds(totalCooldown - remainingCooldown) > TimeSpan.FromSeconds(30) : true)
-                    && (onStartDuel ? TimeSpan.FromMilliseconds(categoryCooldown - remainingCooldown) > TimeSpan.FromSeconds(30) : true);
+                    && totalCooldown < TimeSpan.FromMinutes(10)
+                    && categoryCooldown < TimeSpan.FromMinutes(10)
+                    && remainingCooldown < TimeSpan.FromMinutes(10)
+                    && (onStartDuel ? totalCooldown - remainingCooldown > TimeSpan.FromSeconds(30) : true)
+                    && (onStartDuel ? categoryCooldown - remainingCooldown > TimeSpan.FromSeconds(30) : true);
             }, true);
 
             // pet cooldowns

@@ -7246,42 +7246,53 @@ namespace Game.Spells
             if (!CanHaveGlobalCooldown(m_caster))
                 return;
 
-            int gcd = (int)m_spellInfo.StartRecoveryTime;
-            if (gcd == 0 || m_spellInfo.StartRecoveryCategory == 0)
+            TimeSpan gcd = TimeSpan.FromMilliseconds(m_spellInfo.StartRecoveryTime);
+            if (gcd == TimeSpan.Zero || m_spellInfo.StartRecoveryCategory == 0)
                 return;
 
             if (m_caster.IsTypeId(TypeId.Player))
                 if (m_caster.ToPlayer().GetCommandStatus(PlayerCommandStates.Cooldown))
                     return;
 
+            TimeSpan MinGCD = TimeSpan.FromMilliseconds(750);
+            TimeSpan MaxGCD = TimeSpan.FromMilliseconds(1500);
+
             // Global cooldown can't leave range 1..1.5 secs
             // There are some spells (mostly not casted directly by player) that have < 1 sec and > 1.5 sec global cooldowns
             // but as tests show are not affected by any spell mods.
-            if (m_spellInfo.StartRecoveryTime >= 750 && m_spellInfo.StartRecoveryTime <= 1500)
+            if (gcd >= MinGCD && gcd <= MaxGCD)
             {
                 // gcd modifier auras are applied only to own spells and only players have such mods
                 Player modOwner = m_caster.GetSpellModOwner();
                 if (modOwner)
-                    modOwner.ApplySpellMod(m_spellInfo, SpellModOp.StartCooldown, ref gcd, this);
+                {
+                    int intGcd = (int)gcd.TotalMilliseconds;
+                    modOwner.ApplySpellMod(m_spellInfo, SpellModOp.StartCooldown, ref intGcd, this);
+                    gcd = TimeSpan.FromMilliseconds(intGcd);
+                }
 
                 bool isMeleeOrRangedSpell = m_spellInfo.DmgClass == SpellDmgClass.Melee || m_spellInfo.DmgClass == SpellDmgClass.Ranged ||
                     m_spellInfo.HasAttribute(SpellAttr0.ReqAmmo) || m_spellInfo.HasAttribute(SpellAttr0.Ability);
 
                 // Apply haste rating
-                if (gcd > 750 && (m_spellInfo.StartRecoveryCategory == 133 && !isMeleeOrRangedSpell))
+                if (gcd > MinGCD && (m_spellInfo.StartRecoveryCategory == 133 && !isMeleeOrRangedSpell))
                 {
-                    gcd = (int)(gcd * m_caster.ToUnit().m_unitData.ModSpellHaste);
-                    MathFunctions.RoundToInterval(ref gcd, 750, 1500);
+                    gcd = TimeSpan.FromMilliseconds(gcd.TotalMilliseconds * m_caster.ToUnit().m_unitData.ModSpellHaste);
+                    int intGcd = (int)gcd.TotalMilliseconds;
+                    MathFunctions.RoundToInterval(ref intGcd, 750, 1500);
+                    gcd = TimeSpan.FromMilliseconds(intGcd);
                 }
 
-                if (gcd > 750 && m_caster.ToUnit().HasAuraTypeWithAffectMask(AuraType.ModGlobalCooldownByHasteRegen, m_spellInfo))
+                if (gcd > MinGCD && m_caster.ToUnit().HasAuraTypeWithAffectMask(AuraType.ModGlobalCooldownByHasteRegen, m_spellInfo))
                 {
-                    gcd = (int)(gcd * m_caster.ToUnit().m_unitData.ModHasteRegen);
-                    MathFunctions.RoundToInterval(ref gcd, 750, 1500);
+                    gcd = TimeSpan.FromMilliseconds(gcd.TotalMilliseconds * m_caster.ToUnit().m_unitData.ModHasteRegen);
+                    int intGcd = (int)gcd.TotalMilliseconds;
+                    MathFunctions.RoundToInterval(ref intGcd, 750, 1500);
+                    gcd = TimeSpan.FromMilliseconds(intGcd);
                 }
             }
 
-            m_caster.ToUnit().GetSpellHistory().AddGlobalCooldown(m_spellInfo, (uint)gcd);
+            m_caster.ToUnit().GetSpellHistory().AddGlobalCooldown(m_spellInfo, gcd);
         }
 
         void CancelGlobalCooldown()

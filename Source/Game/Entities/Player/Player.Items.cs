@@ -1578,7 +1578,7 @@ namespace Game.Entities
                         {
                             m_weaponChangeTimer = spellProto.StartRecoveryTime;
 
-                            GetSpellHistory().AddGlobalCooldown(spellProto, m_weaponChangeTimer);
+                            GetSpellHistory().AddGlobalCooldown(spellProto, TimeSpan.FromMilliseconds(m_weaponChangeTimer));
 
                             SpellCooldownPkt spellCooldown = new();
                             spellCooldown.Caster = GetGUID();
@@ -3912,7 +3912,7 @@ namespace Game.Entities
                     continue;
 
                 // Don't replace longer cooldowns by equip cooldown if we have any.
-                if (GetSpellHistory().GetRemainingCooldown(effectSpellInfo) > 30 * Time.InMilliseconds)
+                if (GetSpellHistory().GetRemainingCooldown(effectSpellInfo) > TimeSpan.FromSeconds(30))
                     continue;
 
                 GetSpellHistory().AddCooldown((uint)effectData.SpellID, pItem.GetEntry(), TimeSpan.FromSeconds(30));
