@@ -139,7 +139,7 @@ namespace Game.Networking.Packets
 
             if (_worldPacket.HasBit())
             {
-                DeclinedName.Set(new DeclinedName());
+                DeclinedNames.Set(new DeclinedName());
 
                 byte[] declinedNameLengths = new byte[SharedConst.MaxDeclinedNameCases];
 
@@ -147,7 +147,7 @@ namespace Game.Networking.Packets
                     declinedNameLengths[i] = _worldPacket.ReadBits<byte>(7);
 
                 for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
-                    DeclinedName.Value.name[i] = _worldPacket.ReadString(declinedNameLengths[i]);
+                    DeclinedNames.Value.name[i] = _worldPacket.ReadString(declinedNameLengths[i]);
             }
 
             Name = _worldPacket.ReadString(nameLength);
@@ -155,9 +155,62 @@ namespace Game.Networking.Packets
 
         public ObjectGuid PetGuid;
         public string Name;
-        public Optional<DeclinedName> DeclinedName;
+        public Optional<DeclinedName> DeclinedNames;
     }
 
+    class QueryBattlePetName : ClientPacket
+    {
+        public QueryBattlePetName(WorldPacket packet) : base(packet) { }
+
+        public override void Read()
+        {
+            BattlePetID = _worldPacket.ReadPackedGuid();
+            UnitGUID = _worldPacket.ReadPackedGuid();
+        }
+
+        public ObjectGuid BattlePetID;
+        public ObjectGuid UnitGUID;
+    }
+
+    class QueryBattlePetNameResponse : ServerPacket
+    {
+        public QueryBattlePetNameResponse() : base(ServerOpcodes.QueryBattlePetNameResponse, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(BattlePetID);
+            _worldPacket.WriteUInt32(CreatureID);
+            _worldPacket.WriteInt64(Timestamp);
+
+            _worldPacket.WriteBit(Allow);
+
+            if (Allow)
+            {
+                _worldPacket.WriteBits(Name.GetByteCount(), 8);
+                _worldPacket.WriteBit(HasDeclined);
+
+                for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
+                    _worldPacket.WriteBits(DeclinedNames.name[i].GetByteCount(), 7);
+
+                for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
+                    _worldPacket.WriteString(DeclinedNames.name[i]);
+
+                _worldPacket.WriteString(Name);
+            }
+
+            _worldPacket.FlushBits();
+        }
+
+        public ObjectGuid BattlePetID;
+        public uint CreatureID;
+        public long Timestamp;
+        public bool Allow;
+
+        public bool HasDeclined;
+        public DeclinedName DeclinedNames;
+        public string Name;
+    }
+    
     class BattlePetDeletePet : ClientPacket
     {
         public BattlePetDeletePet(WorldPacket packet) : base(packet) { }

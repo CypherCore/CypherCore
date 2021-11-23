@@ -147,10 +147,11 @@ namespace Game.Entities
                     Player thisPlayer = ToPlayer();
                     if (thisPlayer != null)
                     {
-                        var pet = thisPlayer.GetSession().GetBattlePetMgr().GetPet(thisPlayer.m_activePlayerData.SummonedBattlePetGUID);
+                        var pet = thisPlayer.GetSession().GetBattlePetMgr().GetPet(thisPlayer.GetSummonedBattlePetGUID());
                         if (pet != null)
                         {
-                            minion.SetBattlePetCompanionGUID(thisPlayer.m_activePlayerData.SummonedBattlePetGUID);
+                            minion.SetBattlePetCompanionGUID(thisPlayer.GetSummonedBattlePetGUID());
+                            minion.SetBattlePetCompanionNameTimestamp((uint)pet.NameTimestamp);
                             minion.SetWildBattlePetLevel(pet.PacketInfo.Level);
                         }
                     }

@@ -195,13 +195,14 @@ namespace Game.BattlePets
                         pet.PacketInfo.Quality = petsResult.Read<byte>(7);
                         pet.PacketInfo.Flags = petsResult.Read<ushort>(8);
                         pet.PacketInfo.Name = petsResult.Read<string>(9);
+                        pet.NameTimestamp = petsResult.Read<long>(10);
                         pet.PacketInfo.CreatureID = speciesEntry.CreatureID;
 
-                        if (!petsResult.IsNull(10))
+                        if (!petsResult.IsNull(11))
                         {
                             pet.DeclinedName = new();
                             for (byte i = 0; i < SharedConst.MaxDeclinedNameCases; ++i)
-                                pet.DeclinedName.name[i] = petsResult.Read<string>(10 + i);
+                                pet.DeclinedName.name[i] = petsResult.Read<string>(11 + i);
                         }
 
                         pet.SaveInfo = BattlePetSaveInfo.Unchanged;
@@ -248,6 +249,7 @@ namespace Game.BattlePets
                         stmt.AddValue(8, pair.Value.PacketInfo.Quality);
                         stmt.AddValue(9, pair.Value.PacketInfo.Flags);
                         stmt.AddValue(10, pair.Value.PacketInfo.Name);
+                        stmt.AddValue(11, pair.Value.NameTimestamp);
                         trans.Append(stmt);
 
                         if (pair.Value.DeclinedName != null)
@@ -272,8 +274,9 @@ namespace Game.BattlePets
                         stmt.AddValue(3, pair.Value.PacketInfo.Quality);
                         stmt.AddValue(4, pair.Value.PacketInfo.Flags);
                         stmt.AddValue(5, pair.Value.PacketInfo.Name);
-                        stmt.AddValue(6, _owner.GetBattlenetAccountId());
-                        stmt.AddValue(7, pair.Key);
+                        stmt.AddValue(6, pair.Value.NameTimestamp);
+                        stmt.AddValue(7, _owner.GetBattlenetAccountId());
+                        stmt.AddValue(8, pair.Key);
                         trans.Append(stmt);
 
                         stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_BATTLE_PET_DECLINED_NAME);
@@ -349,6 +352,7 @@ namespace Game.BattlePets
             pet.PacketInfo.Name = "";
             pet.CalculateStats();
             pet.PacketInfo.Health = pet.PacketInfo.MaxHealth;
+            pet.NameTimestamp = 0;
             pet.SaveInfo = BattlePetSaveInfo.New;
 
             _pets[pet.PacketInfo.Guid.GetCounter()] = pet;
@@ -395,6 +399,7 @@ namespace Game.BattlePets
                 return;
 
             pet.PacketInfo.Name = name;
+            pet.NameTimestamp = !pet.PacketInfo.Name.IsEmpty() ? GameTime.GetGameTime() : 0;
 
             pet.DeclinedName = new DeclinedName();
             if (declinedName != null)
@@ -402,6 +407,14 @@ namespace Game.BattlePets
 
             if (pet.SaveInfo != BattlePetSaveInfo.New)
                 pet.SaveInfo = BattlePetSaveInfo.Changed;
+
+            // Update the timestamp if the battle pet is summoned
+            Player player = _owner.GetPlayer();
+            Creature summonedBattlePet = ObjectAccessor.GetCreatureOrPetOrVehicle(player, player.GetCritterGUID());
+            if (summonedBattlePet != null)
+                if (player.GetSummonedBattlePetGUID() == summonedBattlePet.GetBattlePetCompanionGUID())
+                    if (summonedBattlePet.GetBattlePetCompanionGUID() == guid)
+                        summonedBattlePet.SetBattlePetCompanionNameTimestamp((uint)pet.NameTimestamp);
         }
         
         bool IsPetInSlot(ObjectGuid guid)
@@ -533,20 +546,21 @@ namespace Game.BattlePets
                 return;
 
             // TODO: set proper CreatureID for spell DEFAULT_SUMMON_BATTLE_PET_SPELL (default EffectMiscValueA is 40721 - Murkimus the Gladiator)
-            _owner.GetPlayer().SetSummonedBattlePetGUID(guid);
-            _owner.GetPlayer().SetCurrentBattlePetBreedQuality(pet.PacketInfo.Quality);
-            _owner.GetPlayer().CastSpell(_owner.GetPlayer(), speciesEntry.SummonSpellID != 0 ? speciesEntry.SummonSpellID : SharedConst.DefaultSummonBattlePetSpell);
+            Player player = _owner.GetPlayer();
+            player.SetSummonedBattlePetGUID(guid);
+            player.SetCurrentBattlePetBreedQuality(pet.PacketInfo.Quality);
+            player.CastSpell(_owner.GetPlayer(), speciesEntry.SummonSpellID != 0 ? speciesEntry.SummonSpellID : SharedConst.DefaultSummonBattlePetSpell);
         }
 
         public void DismissPet()
         {
-            Player ownerPlayer = _owner.GetPlayer();
-            Creature pet = ObjectAccessor.GetCreatureOrPetOrVehicle(ownerPlayer, ownerPlayer.GetCritterGUID());
-            if (pet && ownerPlayer.m_activePlayerData.SummonedBattlePetGUID == pet.GetBattlePetCompanionGUID())
+            Player player = _owner.GetPlayer();
+            Creature pet = ObjectAccessor.GetCreatureOrPetOrVehicle(player, player.GetCritterGUID());
+            if (pet && player.GetSummonedBattlePetGUID() == pet.GetBattlePetCompanionGUID())
             {
                 pet.DespawnOrUnsummon();
-                ownerPlayer.SetSummonedBattlePetGUID(ObjectGuid.Empty);
-                ownerPlayer.SetCurrentBattlePetBreedQuality((byte)BattlePetBreedQuality.Poor);
+                player.SetSummonedBattlePetGUID(ObjectGuid.Empty);
+                player.SetCurrentBattlePetBreedQuality((byte)BattlePetBreedQuality.Poor);
             }
         }
 
@@ -669,6 +683,7 @@ namespace Game.BattlePets
             }
 
             public BattlePetStruct PacketInfo;
+            public long NameTimestamp;
             public DeclinedName DeclinedName;
             public BattlePetSaveInfo SaveInfo;
         }
