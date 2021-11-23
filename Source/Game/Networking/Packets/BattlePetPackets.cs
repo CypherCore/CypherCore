@@ -43,7 +43,7 @@ namespace Game.Networking.Packets
         }
 
         public ushort Trap;
-        bool HasJournalLock = true;
+        public bool HasJournalLock = false;
         public List<BattlePetSlot> Slots = new();
         public List<BattlePetStruct> Pets = new();
     }
@@ -55,6 +55,13 @@ namespace Game.Networking.Packets
         public override void Write() { }
     }
 
+    class BattlePetJournalLockDenied : ServerPacket
+    {
+        public BattlePetJournalLockDenied() : base(ServerOpcodes.BattlePetJournalLockDenied) { }
+
+        public override void Write() { }
+    }
+    
     class BattlePetRequestJournal : ClientPacket
     {
         public BattlePetRequestJournal(WorldPacket packet) : base(packet) { }
@@ -62,6 +69,13 @@ namespace Game.Networking.Packets
         public override void Read() { }
     }
 
+    class BattlePetRequestJournalLock : ClientPacket
+    {
+        public BattlePetRequestJournalLock(WorldPacket packet) : base(packet) { }
+
+        public override void Read() { }
+    }
+    
     class BattlePetUpdates : ServerPacket
     {
         public BattlePetUpdates() : base(ServerOpcodes.BattlePetUpdates) { }

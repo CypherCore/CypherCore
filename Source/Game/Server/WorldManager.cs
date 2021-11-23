@@ -205,10 +205,13 @@ namespace Game
                     // prevent decrease sessions count if session queued
                     if (RemoveQueuedPlayer(old))
                         decrease_session = false;
+
+                    m_sessionsByBnetGuid.Remove(old.GetBattlenetAccountGUID(), old);
                 }
             }
 
             m_sessions[s.GetAccountId()] = s;
+            m_sessionsByBnetGuid.Add(s.GetBattlenetAccountGUID(), s);
 
             int Sessions = GetActiveAndQueuedSessionCount();
             uint pLimit = GetPlayerAmountLimit();
@@ -1876,6 +1879,7 @@ namespace Game
 
                     RemoveQueuedPlayer(session);
                     m_sessions.TryRemove(pair.Key, out _);
+                    m_sessionsByBnetGuid.Remove(session.GetBattlenetAccountGUID(), session);
                     session.Dispose();
                 }
             }
@@ -2206,6 +2210,15 @@ namespace Game
             }
         }
 
+        public bool IsBattlePetJournalLockAcquired(ObjectGuid battlenetAccountGuid)
+        {
+            foreach (var sessionForBnet in m_sessionsByBnetGuid.LookupByKey(battlenetAccountGuid))
+                if (sessionForBnet.GetBattlePetMgr().HasJournalLock())
+                    return true;
+
+            return false;
+        }
+
         void LoadWorldStates()
         {
             uint oldMSTime = Time.GetMSTime();
@@ -2429,6 +2442,7 @@ namespace Game
         long blackmarket_timer;
 
         ConcurrentDictionary<uint, WorldSession> m_sessions = new();
+        MultiMap<ObjectGuid, WorldSession> m_sessionsByBnetGuid = new();
         Dictionary<uint, long> m_disconnects = new();
         uint m_maxActiveSessionCount;
         uint m_maxQueuedSessionCount;

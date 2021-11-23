@@ -363,16 +363,14 @@ namespace Game.BattlePets
 
         public void RemovePet(ObjectGuid guid)
         {
+            if (!HasJournalLock())
+                return;
+
             BattlePet pet = GetPet(guid);
             if (pet == null)
                 return;
 
             pet.SaveInfo = BattlePetSaveInfo.Removed;
-
-            // spell is not unlearned on retail
-            /*if (GetPetCount(pet.PacketInfo.Species) == 0)
-                if (BattlePetSpeciesEntry const* speciesEntry = sBattlePetSpeciesStore.LookupEntry(pet.PacketInfo.Species))
-                    _owner.GetPlayer().RemoveSpell(speciesEntry.SummonSpellID);*/
         }
 
         public void ClearFanfare(ObjectGuid guid)
@@ -389,6 +387,9 @@ namespace Game.BattlePets
 
         public void ModifyName(ObjectGuid guid, string name, DeclinedName declinedName)
         {
+            if (!HasJournalLock())
+                return;
+
             BattlePet pet = GetPet(guid);
             if (pet == null)
                 return;
@@ -458,6 +459,9 @@ namespace Game.BattlePets
 
         public void CageBattlePet(ObjectGuid guid)
         {
+            if (!HasJournalLock())
+                return;
+
             BattlePet pet = GetPet(guid);
             if (pet == null)
                 return;
@@ -548,8 +552,12 @@ namespace Game.BattlePets
 
         public void SendJournal()
         {
+            if (!HasJournalLock())
+                SendJournalLockStatus();
+
             BattlePetJournal battlePetJournal = new();
             battlePetJournal.Trap = _trapLevel;
+            battlePetJournal.HasJournalLock = _hasJournalLock;
 
             foreach (var pet in _pets)
                 if (pet.Value.SaveInfo != BattlePetSaveInfo.Removed)
@@ -577,15 +585,33 @@ namespace Game.BattlePets
             _owner.SendPacket(battlePetError);
         }
 
+        public void SendJournalLockStatus()
+        {
+            if (!IsJournalLockAcquired())
+                ToggleJournalLock(true);
+
+            if (HasJournalLock())
+                _owner.SendPacket(new BattlePetJournalLockAcquired());
+            else
+                _owner.SendPacket(new BattlePetJournalLockDenied());
+        }
+
+        public bool IsJournalLockAcquired()
+        {
+            return Global.WorldMgr.IsBattlePetJournalLockAcquired(_owner.GetBattlenetAccountGUID());
+        }
+        
         public BattlePetSlot GetSlot(byte slot) { return slot < _slots.Count ? _slots[slot] : null; }
         WorldSession GetOwner() { return _owner; }
 
         public ushort GetTrapLevel() { return _trapLevel; }
         public List<BattlePetSlot> GetSlots() { return _slots; }
 
-        public bool HasJournalLock() { return true; }
+        public bool HasJournalLock() { return _hasJournalLock; }
+        public void ToggleJournalLock(bool on) { _hasJournalLock = on; }
         
         WorldSession _owner;
+        bool _hasJournalLock;
         ushort _trapLevel;
         Dictionary<ulong, BattlePet> _pets = new();
         List<BattlePetSlot> _slots = new();

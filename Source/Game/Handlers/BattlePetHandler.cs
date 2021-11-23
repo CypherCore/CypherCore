@@ -30,6 +30,15 @@ namespace Game
             GetBattlePetMgr().SendJournal();
         }
 
+        [WorldPacketHandler(ClientOpcodes.BattlePetRequestJournalLock)]
+        void HandleBattlePetRequestJournalLock(BattlePetRequestJournalLock battlePetRequestJournalLock)
+        {
+            GetBattlePetMgr().SendJournalLockStatus();
+
+            if (GetBattlePetMgr().HasJournalLock())
+                GetBattlePetMgr().SendJournal();
+        }
+
         [WorldPacketHandler(ClientOpcodes.BattlePetSetBattleSlot)]
         void HandleBattlePetSetBattleSlot(BattlePetSetBattleSlot battlePetSetBattleSlot)
         {
@@ -57,6 +66,9 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.BattlePetSetFlags)]
         void HandleBattlePetSetFlags(BattlePetSetFlags battlePetSetFlags)
         {
+            if (!GetBattlePetMgr().HasJournalLock())
+                return;
+
             var pet = GetBattlePetMgr().GetPet(battlePetSetFlags.PetGuid);
             if (pet != null)
             {

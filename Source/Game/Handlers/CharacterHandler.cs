@@ -784,8 +784,7 @@ namespace Game
                 pCurrChar.SetGuildLevel(0);
             }
 
-            // TODO: Move this to BattlePetMgr::SendJournalLock() just to have all packets in one file
-            SendPacket(new BattlePetJournalLockAcquired());
+            pCurrChar.GetSession().GetBattlePetMgr().SendJournalLockStatus();
 
             pCurrChar.SendInitialPacketsBeforeAddToMap();
 
