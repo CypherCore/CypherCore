@@ -490,7 +490,6 @@ namespace Game
             Global.ObjectMgr.LoadCreatureLocales();
             Global.ObjectMgr.LoadGameObjectLocales();
             Global.ObjectMgr.LoadQuestTemplateLocale();
-            Global.ObjectMgr.LoadQuestGreetingLocales();
             Global.ObjectMgr.LoadQuestOfferRewardLocale();
             Global.ObjectMgr.LoadQuestRequestItemsLocale();
             Global.ObjectMgr.LoadQuestObjectivesLocale();
@@ -660,6 +659,7 @@ namespace Game
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Quest Greetings...");
             Global.ObjectMgr.LoadQuestGreetings();
+            Global.ObjectMgr.LoadQuestGreetingLocales();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading Objects Pooling Data...");
             Global.PoolMgr.LoadFromDB();
