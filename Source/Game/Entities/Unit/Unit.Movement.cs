@@ -340,8 +340,9 @@ namespace Game.Entities
 
         public bool SetCanTurnWhileFalling(bool enable)
         {
-            if (enable == HasUnitMovementFlag2(MovementFlag2.CanTurnWhileFalling))
-                return false;
+            // Temporarily disabled for short lived auras that unapply before client had time to ACK applying
+            //if (enable == HasUnitMovementFlag2(MovementFlag2.CanTurnWhileFalling))
+                //return false;
 
             if (enable)
                 AddUnitMovementFlag2(MovementFlag2.CanTurnWhileFalling);
@@ -977,8 +978,9 @@ namespace Game.Entities
 
         public bool SetFeatherFall(bool enable)
         {
-            if (enable == HasUnitMovementFlag(MovementFlag.FallingSlow))
-                return false;
+            // Temporarily disabled for short lived auras that unapply before client had time to ACK applying
+            //if (enable == HasUnitMovementFlag(MovementFlag.FallingSlow))
+                //return false;
 
             if (enable)
                 AddUnitMovementFlag(MovementFlag.FallingSlow);
