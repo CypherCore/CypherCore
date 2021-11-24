@@ -727,7 +727,8 @@ namespace Game.Entities
 
         bool DestoryAI()
         {
-            SetAI(null);
+            PopAI();
+            RefreshAI();
             return true;
         }
 

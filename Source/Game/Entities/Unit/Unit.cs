@@ -172,8 +172,10 @@ namespace Game.Entities
             UpdateSplineMovement(diff);
             GetMotionMaster().Update(diff);
 
-            if (i_AI == null && (!IsPlayer() || IsCharmed()))
+            if (GetAI() == null && (!IsPlayer() || IsCharmed()))
                 UpdateCharmAI();
+
+            RefreshAI();
         }
 
         void _UpdateSpells(uint diff)
@@ -1168,6 +1170,8 @@ namespace Game.Entities
 
         public virtual UnitAI GetAI() { return i_AI; }
 
+        public UnitAI GetTopAI() { return i_AIs.Count == 0 ? null : i_AIs.Peek(); }
+
         public void AIUpdateTick(uint diff)
         {
             UnitAI ai = GetAI();
@@ -1179,38 +1183,56 @@ namespace Game.Entities
             }
         }
 
+        public void PushAI(UnitAI newAI)
+        {
+            i_AIs.Push(newAI);
+        }
+
         public void SetAI(UnitAI newAI)
         {
-            Cypher.Assert(!m_aiLocked, "Attempt to replace AI during AI update tick");
+            PushAI(newAI);
+            RefreshAI();
+        }
 
-            i_AI = newAI;
+        public bool PopAI()
+        {
+            if (i_AIs.Count != 0)
+            {
+                i_AIs.Pop();
+                return true;
+            }
+            else
+                return false;
+        }
+
+        public void RefreshAI()
+        {
+            Cypher.Assert(!m_aiLocked, "Tried to change current AI during UpdateAI()");
+            if (i_AIs.Count == 0)
+                i_AI = null;
+            else
+                i_AI = i_AIs.Peek();
         }
 
         public void ScheduleAIChange()
         {
             bool charmed = IsCharmed();
-            // if charm is applied, we can't have disabled AI already, and vice versa
-            if (charmed)
-                Cypher.Assert(i_disabledAI == null, "Attempt to schedule charm AI change on unit that already has disabled AI");
-            else if (m_aiLocked)
-            {
-                Cypher.Assert(i_lockedAILifetimeExtension == null, "Attempt to schedule multiple charm AI changes during one update");
-                i_lockedAILifetimeExtension = i_AI; // AI needs to live just a bit longer to finish its UpdateAI
-            }
-            else if (!IsPlayer())
-                Cypher.Assert(i_disabledAI != null, "Attempt to schedule charm ID change on unit that doesn't have disabled AI");
 
             if (charmed)
-                i_disabledAI = i_AI;
+                PushAI(null);
             else
-                i_AI = null;
+            {
+                RestoreDisabledAI();
+                PushAI(null); //This could actually be PopAI() to get the previous AI but it's required atm to trigger UpdateCharmAI()
+            }
         }
 
         void RestoreDisabledAI()
         {
-            Cypher.Assert(IsPlayer() || i_disabledAI != null, "Attempt to restore disabled AI on creature without disabled AI");
-            i_AI = i_disabledAI;
-            i_lockedAILifetimeExtension = null;
+            // Keep popping the stack until we either reach the bottom or find a valid AI
+            while (PopAI())
+                if (GetTopAI() != null)
+                    return;
         }
 
         public bool IsPossessing()

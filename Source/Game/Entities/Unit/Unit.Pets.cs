@@ -79,14 +79,17 @@ namespace Game.Entities
                 }
 
                 Cypher.Assert(newAI != null);
-                i_AI = newAI;
+                SetAI(newAI);
                 newAI.OnCharmed(true);
             }
             else
             {
                 RestoreDisabledAI();
-                if (i_AI != null)
-                    i_AI.OnCharmed(true);
+                // Hack: this is required because we want to call OnCharmed(true) on the restored AI
+                RefreshAI();
+                UnitAI ai = GetAI();
+                if (ai != null)
+                    ai.OnCharmed(true);
             }
         }
 
