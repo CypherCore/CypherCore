@@ -283,9 +283,12 @@ namespace Game.Chat
             }
 
             Map map = obj.GetMap();
-
             obj.Relocate(x, y, z, obj.GetOrientation());
+
+            // update which cell has this gameobject registered for loading
+            Global.ObjectMgr.RemoveGameObjectFromGrid(guidLow, obj.GetGameObjectData());
             obj.SaveToDB();
+            Global.ObjectMgr.AddGameObjectToGrid(guidLow, obj.GetGameObjectData());
 
             // Generate a completely new spawn with new guid
             // client caches recently deleted objects and brings them back to life
