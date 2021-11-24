@@ -1475,8 +1475,9 @@ namespace Game.Entities
         {
             // can't apply aura on unit which is going to be deleted - to not create a memory leak
             Cypher.Assert(!m_cleanupDone);
-            // aura musn't be removed
-            Cypher.Assert(!aura.IsRemoved());
+            // aura musn't be removed (but it could have been removed by OnEffectHitTarget script handler
+            // casting a spell that killed the target and set deathState to CORPSE)
+            Cypher.Assert(!aura.IsRemoved() || !IsAlive());
 
             // aura mustn't be already applied on target
             Cypher.Assert(!aura.IsAppliedOnTarget(GetGUID()), "Unit._CreateAuraApplication: aura musn't be applied on target");
