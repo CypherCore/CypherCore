@@ -28,6 +28,7 @@ namespace Game.Movement
 
         ChaseRange? _range;
         ChaseAngle? _angle;
+        bool _walk;
 
         PathGenerator _path;
         Position _lastTargetPosition;
@@ -37,11 +38,12 @@ namespace Game.Movement
 
         AbstractFollower _abstractFollower;
 
-        public ChaseMovementGenerator(Unit target, ChaseRange? range, ChaseAngle? angle)
+        public ChaseMovementGenerator(Unit target, ChaseRange? range, ChaseAngle? angle, bool walk = false)
         {
             _abstractFollower = new AbstractFollower(target);
             _range = range;
             _angle = angle;
+            _walk = walk;
 
             Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Normal;
@@ -54,7 +56,7 @@ namespace Game.Movement
             RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Deactivated);
             AddFlag(MovementGeneratorFlags.Initialized);
 
-            owner.SetWalk(false);
+            owner.SetWalk(_walk);
             _path = null;
             _lastTargetPosition = null;
         }
@@ -188,7 +190,7 @@ namespace Game.Movement
 
                     MoveSplineInit init = new(owner);
                     init.MovebyPath(_path.GetPath());
-                    init.SetWalk(false);
+                    init.SetWalk(_walk);
                     init.SetFacing(target);
 
                     init.Launch();
