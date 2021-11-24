@@ -2031,6 +2031,8 @@ namespace Game.Entities
                     float height = movementInfo.Pos.posZ;
                     UpdateGroundPositionZ(movementInfo.Pos.posX, movementInfo.Pos.posY, ref height);
 
+                    damage = (uint)(damage * GetTotalAuraMultiplier(AuraType.ModifyFallDamagePct));
+
                     if (damage > 0)
                     {
                         //Prevent fall damage from being more than the player maximum health
