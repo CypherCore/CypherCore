@@ -982,6 +982,20 @@ namespace Game.Networking.Packets
         public uint TimeSkipped;
     }
 
+    class MoveSkipTime : ServerPacket
+    {
+        public MoveSkipTime() : base(ServerOpcodes.MoveSkipTime, ConnectionType.Instance) { }
+
+        public override void Write()
+        {
+            _worldPacket.WritePackedGuid(MoverGUID);
+            _worldPacket.WriteUInt32(TimeSkipped);
+        }
+
+        public ObjectGuid MoverGUID;
+        public uint TimeSkipped;
+    }
+    
     class SummonResponse : ClientPacket
     {
         public SummonResponse(WorldPacket packet) : base(packet) { }
