@@ -2138,7 +2138,12 @@ namespace Game.Entities
                 target = GetThreatManager().GetAnyTarget();
             if (target == null)
                 target = GetCombatManager().GetAnyTarget();
-            Cypher.Assert(target != null, $"Creature {GetEntry()} ({GetName()}) is engaged without threat list");
+
+            if (target == null)
+            {
+                Log.outError(LogFilter.Unit, $"Creature {GetEntry()} ({GetName()}) is engaged without threat list");
+                return;
+            }
 
             var u_do = new CallOfHelpCreatureInRangeDo(this, target, radius);
             var worker = new CreatureWorker(this, u_do);
