@@ -5755,6 +5755,16 @@ namespace Game.Spells
                     return SpellCastResult.UnitNotInfront;
             }
 
+            GameObject goTarget = m_targets.GetGOTarget();
+            if (goTarget != null)
+            {
+                if (m_caster.GetExactDistSq(goTarget) > maxRange)
+                    return SpellCastResult.OutOfRange;
+
+                if (minRange > 0.0f && m_caster.GetExactDistSq(goTarget) < minRange)
+                    return SpellCastResult.OutOfRange;
+            }
+
             if (m_targets.HasDst() && !m_targets.HasTraj())
             {
                 if (m_caster.GetExactDistSq(m_targets.GetDstPos()) > maxRange)
