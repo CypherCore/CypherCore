@@ -4188,6 +4188,38 @@ namespace Game.Maps
             return creature;
         }
 
+        private GameObject _GetScriptGameObjectSourceOrTarget(WorldObject source, WorldObject target, ScriptInfo scriptInfo, bool bReverse)
+        {
+            GameObject gameobject = null;
+            if (source == null && target == null)
+                Log.outError(LogFilter.MapsScript, $"{scriptInfo.GetDebugInfo()} source and target objects are NULL.");
+            else
+            {
+                if (bReverse)
+                {
+                    // Check target first, then source.
+                    if (target != null)
+                        gameobject = target.ToGameObject();
+                    if (gameobject == null && source != null)
+                        gameobject = source.ToGameObject();
+                }
+                else
+                {
+                    // Check source first, then target.
+                    if (source != null)
+                        gameobject = source.ToGameObject();
+                    if (gameobject == null && target != null)
+                        gameobject = target.ToGameObject();
+                }
+
+                if (gameobject == null)
+                    Log.outError(LogFilter.MapsScript, $"{scriptInfo.GetDebugInfo()} neither source nor target are gameobjects " +
+                        $"(source: TypeId: {(source != null ? source.GetTypeId() : 0)}, Entry: {(source != null ? source.GetEntry() : 0)}, {(source != null ? source.GetGUID() : ObjectGuid.Empty)}; " +
+                        $"target: TypeId: {(target != null ? target.GetTypeId() : 0)}, Entry: {(target != null ? target.GetEntry() : 0)}, {(target != null ? target.GetGUID() : ObjectGuid.Empty)}), skipping.");
+            }
+            return gameobject;
+        }
+        
         private Unit _GetScriptUnit(WorldObject obj, bool isSource, ScriptInfo scriptInfo)
         {
             Unit unit = null;
@@ -4761,10 +4793,16 @@ namespace Game.Maps
 
                     case ScriptCommands.DespawnSelf:
                     {
-                        // Target or source must be Creature.
+                        // First try with target or source creature, then with target or source gameobject
                         Creature cSource = _GetScriptCreatureSourceOrTarget(source, target, step.script, true);
-                        if (cSource)
+                        if (cSource != null)
                             cSource.DespawnOrUnsummon(step.script.DespawnSelf.DespawnDelay);
+                        else
+                        {
+                            GameObject goSource = _GetScriptGameObjectSourceOrTarget(source, target, step.script, true);
+                            if (goSource != null)
+                                goSource.DespawnOrUnsummon(TimeSpan.FromMilliseconds(step.script.DespawnSelf.DespawnDelay));
+                        }
                         break;
                     }
                     case ScriptCommands.LoadPath:
