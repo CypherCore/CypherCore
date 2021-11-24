@@ -399,7 +399,7 @@ namespace Game.BattlePets
                 return;
 
             pet.PacketInfo.Name = name;
-            pet.NameTimestamp = !pet.PacketInfo.Name.IsEmpty() ? GameTime.GetGameTime() : 0;
+            pet.NameTimestamp = GameTime.GetGameTime();
 
             pet.DeclinedName = new DeclinedName();
             if (declinedName != null)

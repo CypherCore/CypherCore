@@ -20,6 +20,7 @@ using Game.BattlePets;
 using Game.Entities;
 using Game.Networking;
 using Game.Networking.Packets;
+using System;
 
 namespace Game
 {
@@ -88,13 +89,14 @@ namespace Game
                 return;
             }
 
-            response.Allow = true;
             response.Name = battlePet.PacketInfo.Name;
             if (battlePet.DeclinedName != null)
             {
                 response.HasDeclined = true;
                 response.DeclinedNames = battlePet.DeclinedName;
             }
+
+            response.Allow = !response.Name.IsEmpty();
 
             SendPacket(response);
         }
