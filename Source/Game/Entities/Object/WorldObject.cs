@@ -3252,6 +3252,8 @@ namespace Game.Entities
             UpdateAllowedPositionZ(destx, desty, ref destz);
             bool col = Global.VMapMgr.GetObjectHitPos(PhasingHandler.GetTerrainMapId(GetPhaseShift(), GetMap(), pos.posX, pos.posY), pos.posX, pos.posY, pos.posZ + halfHeight, destx, desty, destz + halfHeight, out destx, out desty, out destz, -0.5f);
 
+            destz -= halfHeight;
+
             // collision occured
             if (col)
             {
@@ -3263,6 +3265,8 @@ namespace Game.Entities
 
             // check dynamic collision
             col = GetMap().GetObjectHitPos(GetPhaseShift(), pos.posX, pos.posY, pos.posZ + halfHeight, destx, desty, destz + halfHeight, out destx, out desty, out destz, -0.5f);
+
+            destz -= halfHeight;
 
             // Collided with a gameobject
             if (col)
