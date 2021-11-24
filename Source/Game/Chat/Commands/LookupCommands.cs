@@ -1049,8 +1049,9 @@ namespace Game.Chat
                         {
                             ObjectGuid guid = ObjectGuid.Create(HighGuid.Player, result2.Read<ulong>(0));
                             string name = result2.Read<string>(1);
+                            bool online = result2.Read<bool>(2);
 
-                            handler.SendSysMessage(CypherStrings.LookupPlayerCharacter, name, guid.ToString());
+                            handler.SendSysMessage(CypherStrings.LookupPlayerCharacter, name, guid.ToString(), online ? handler.GetCypherString(CypherStrings.Online) : "");
                             ++counter;
                         }
                         while (result2.NextRow() && (limit == -1 || counter < limit));
