@@ -1617,9 +1617,16 @@ namespace Framework.Constants
 
     public enum PhaseEntryFlags : ushort
     {
-        Normal = 0x08,
-        Cosmetic = 0x10,
-        Personal = 0x20
+        ReadOnly = 0x001,
+        InternalPhase = 0x002,
+        Normal = 0x008,
+        Cosmetic = 0x010,
+        Personal = 0x020,
+        Expensive = 0x040,
+        EventsAreObservable = 0x080,
+        UsesPreloadConditions = 0x100,
+        UnshareablePersonal = 0x200,
+        ObjectsAreVisible = 0x400,
     }
 
     // PhaseUseFlags fields in different db2s

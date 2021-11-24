@@ -166,8 +166,8 @@ namespace Game
 
             var checkInversePhaseShift = new Func<PhaseShift, PhaseShift, bool>((phaseShift, excludedPhaseShift) =>
             {
-                if (phaseShift.Flags.HasFlag(PhaseShiftFlags.Unphased) && !excludedPhaseShift.Flags.HasFlag(PhaseShiftFlags.InverseUnphased))
-                    return true;
+                if (phaseShift.Flags.HasFlag(PhaseShiftFlags.Unphased) && excludedPhaseShift.Flags.HasFlag(PhaseShiftFlags.InverseUnphased))
+                    return false;
 
                 foreach (var pair in phaseShift.Phases)
                 {
@@ -175,11 +175,11 @@ namespace Game
                         continue;
 
                     var ExcludedPhaseRef = excludedPhaseShift.Phases.LookupByKey(pair.Key);
-                    if (ExcludedPhaseRef == null || ExcludedPhaseRef.Flags.HasAnyFlag(excludePhasesWithFlag))
-                        return true;
+                    if (ExcludedPhaseRef != null || !ExcludedPhaseRef.Flags.HasAnyFlag(excludePhasesWithFlag))
+                        return false;
                 }
 
-                return false;
+                return true;
             });
 
             if (other.Flags.HasFlag(PhaseShiftFlags.Inverse))
