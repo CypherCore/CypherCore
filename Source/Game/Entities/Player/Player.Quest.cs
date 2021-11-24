@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Framework.Database;
+using Game.AI;
 using Game.Conditions;
 using Game.DataStorage;
 using Game.Groups;
@@ -27,7 +28,6 @@ using Game.Networking.Packets;
 using Game.Spells;
 using System;
 using System.Collections.Generic;
-using Game.AI;
 
 namespace Game.Entities
 {

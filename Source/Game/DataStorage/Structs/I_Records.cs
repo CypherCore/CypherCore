@@ -361,7 +361,7 @@ namespace Game.DataStorage
         public float PriceVariance;
         public float PriceRandomValue;
         public int[] Flags = new int[4];
-        public int FactionRelated;
+        public uint FactionRelated;
         public int ModifiedCraftingReagentItemID;
         public uint ContentTuningID;
         public uint PlayerLevelToItemLevelCurveID;
