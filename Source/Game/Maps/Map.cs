@@ -4666,49 +4666,48 @@ namespace Game.Maps
                     }
                     case ScriptCommands.CastSpell:
                     {
-                        //@todo Allow gameobjects to be targets and casters
                         if (source == null && target == null)
                         {
                             Log.outError(LogFilter.Scripts, "{0} source and target objects are NULL.", step.script.GetDebugInfo());
                             break;
                         }
 
-                        Unit uSource = null;
-                        Unit uTarget = null;
+                        WorldObject uSource = null;
+                        WorldObject uTarget = null;
                         // source/target cast spell at target/source (script.datalong2: 0: s.t 1: s.s 2: t.t 3: t.s
                         switch (step.script.CastSpell.Flags)
                         {
                             case eScriptFlags.CastspellSourceToTarget: // source . target
-                                uSource = source?.ToUnit();
-                                uTarget = target?.ToUnit();
+                                uSource = source;
+                                uTarget = target;
                                 break;
                             case eScriptFlags.CastspellSourceToSource: // source . source
-                                uSource = source?.ToUnit();
+                                uSource = source;
                                 uTarget = uSource;
                                 break;
                             case eScriptFlags.CastspellTargetToTarget: // target . target
-                                uSource = target?.ToUnit();
+                                uSource = target;
                                 uTarget = uSource;
                                 break;
                             case eScriptFlags.CastspellTargetToSource: // target . source
-                                uSource = target?.ToUnit();
-                                uTarget = source?.ToUnit();
+                                uSource = target;
+                                uTarget = source;
                                 break;
                             case eScriptFlags.CastspellSearchCreature: // source . creature with entry
-                                uSource = source?.ToUnit();
+                                uSource = source;
                                 uTarget = uSource?.FindNearestCreature((uint)Math.Abs(step.script.CastSpell.CreatureEntry), step.script.CastSpell.SearchRadius);
                                 break;
                         }
 
-                        if (uSource == null || !uSource.IsTypeMask(TypeMask.Unit))
+                        if (uSource == null)
                         {
-                            Log.outError(LogFilter.Scripts, "{0} no source unit found for spell {1}", step.script.GetDebugInfo(), step.script.CastSpell.SpellID);
+                            Log.outError(LogFilter.Scripts, "{0} no source worldobject found for spell {1}", step.script.GetDebugInfo(), step.script.CastSpell.SpellID);
                             break;
                         }
 
-                        if (uTarget == null || !uTarget.IsTypeMask(TypeMask.Unit))
+                        if (uTarget == null)
                         {
-                            Log.outError(LogFilter.Scripts, "{0} no target unit found for spell {1}", step.script.GetDebugInfo(), step.script.CastSpell.SpellID);
+                            Log.outError(LogFilter.Scripts, "{0} no target worldobject found for spell {1}", step.script.GetDebugInfo(), step.script.CastSpell.SpellID);
                             break;
                         }
 
