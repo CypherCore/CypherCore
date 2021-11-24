@@ -648,7 +648,7 @@ namespace Scripts.Spells.Druid
 
             Unit caster = GetCaster();
             if (caster)
-                amount = MathFunctions.CalculatePct(caster.GetCreatePowers(PowerType.Mana), amount) / (int)aurEff.GetTotalTicks();
+                amount = MathFunctions.CalculatePct(caster.GetCreatePowerValue(PowerType.Mana), amount) / (int)aurEff.GetTotalTicks();
             else
                 amount = 0;
         }

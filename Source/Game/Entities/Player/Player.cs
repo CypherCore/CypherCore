@@ -5830,7 +5830,7 @@ namespace Game.Entities
 
             // save new stats
             for (var i = PowerType.Mana; i < PowerType.Max; ++i)
-                SetMaxPower(i, GetCreatePowers(i));
+                SetMaxPower(i, GetCreatePowerValue(i));
 
             SetMaxHealth(0);                     // stamina bonus will applied later
 
