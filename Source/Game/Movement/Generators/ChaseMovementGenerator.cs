@@ -73,11 +73,7 @@ namespace Game.Movement
 
             // our target might have gone away
             Unit target = _abstractFollower.GetTarget();
-            if (!target)
-                return false;
-
-            // the owner might've selected a different target (feels like we shouldn't check this here...)
-            if (owner.GetVictim() != target)
+            if (target == null || !target.IsInWorld)
                 return false;
 
             // the owner might be unable to move (rooted or casting), pause movement

@@ -73,7 +73,7 @@ namespace Game.Movement
 
             // our target might have gone away
             Unit target = _abstractFollower.GetTarget();
-            if (target == null)
+            if (target == null || !target.IsInWorld)
                 return false;
 
             if (owner.HasUnitState(UnitState.NotMove) || owner.IsMovementPreventedByCasting())
