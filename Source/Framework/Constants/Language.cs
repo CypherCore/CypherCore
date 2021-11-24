@@ -105,7 +105,7 @@ namespace Framework.Constants
         Unknown = 45,
         Error = 46,
         NonExistCharacter = 47,
-        // Unused                           = 48,
+        Online = 48,
         LevelMinrequired = 49,
         LevelMinrequiredAndItem = 50,
         NpcTainerHello = 51,

@@ -533,13 +533,13 @@ namespace Game.Movement
 
         public void MoveChase(Unit target, float dist, float angle = 0.0f) { MoveChase(target, new ChaseRange(dist), new ChaseAngle(angle)); }
         public void MoveChase(Unit target, float dist) { MoveChase(target, new ChaseRange(dist)); }
-        public void MoveChase(Unit target, ChaseRange? dist = null, ChaseAngle? angle = null)
+        public void MoveChase(Unit target, ChaseRange? dist = null, ChaseAngle? angle = null, bool walk = false)
         {
             // Ignore movement request if target not exist
             if (!target || target == _owner)
                 return;
 
-            Add(new ChaseMovementGenerator(target, dist, angle));
+            Add(new ChaseMovementGenerator(target, dist, angle, walk));
         }
 
         public void MoveConfused()

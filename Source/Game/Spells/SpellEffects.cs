@@ -1343,6 +1343,11 @@ namespace Game.Spells
                         return;
                     }
                 }
+                else if (goInfo.type == GameObjectTypes.NewFlag)
+                {
+                    gameObjTarget.Use(player);
+                    return;
+                }
                 else if (m_spellInfo.Id == 1842 && gameObjTarget.GetGoInfo().type == GameObjectTypes.Trap && gameObjTarget.GetOwner() != null)
                 {
                     gameObjTarget.SetLootState(LootState.JustDeactivated);
@@ -2648,7 +2653,8 @@ namespace Game.Spells
                         if (unitCaster != null)
                         {
                             int duration = m_spellInfo.GetDuration();
-                            unitTarget.GetSpellHistory().LockSpellSchool(curSpellInfo.GetSchoolMask(), (uint)unitTarget.ModSpellDuration(m_spellInfo, unitTarget, duration, false, (uint)(1 << (int)effectInfo.EffectIndex)));
+                            duration = unitTarget.ModSpellDuration(m_spellInfo, unitTarget, duration, false, 1u << (int)effectInfo.EffectIndex);
+                            unitTarget.GetSpellHistory().LockSpellSchool(curSpellInfo.GetSchoolMask(), TimeSpan.FromMilliseconds(duration));
                             if (m_spellInfo.DmgClass == SpellDmgClass.Magic)
                                 Unit.ProcSkillsAndAuras(unitCaster, unitTarget, ProcFlags.DoneSpellMagicDmgClassNeg, ProcFlags.TakenSpellMagicDmgClassNeg, ProcFlagsSpellType.MaskAll, ProcFlagsSpellPhase.Hit, ProcFlagsHit.Interrupt, null, null, null);
                             else if (m_spellInfo.DmgClass == SpellDmgClass.Melee)

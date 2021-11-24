@@ -387,7 +387,7 @@ namespace Game.DungeonFinding
                 joinData.result = LfgJoinResult.CantUseDungeons;
             else if (player.HasAura(SharedConst.LFGSpellDungeonDeserter))
                 joinData.result = LfgJoinResult.DeserterPlayer;
-            else if (player.HasAura(SharedConst.LFGSpellDungeonCooldown))
+            else if (!isContinue && player.HasAura(SharedConst.LFGSpellDungeonCooldown))
                 joinData.result = LfgJoinResult.RandomCooldownPlayer;
             else if (dungeons.Empty())
                 joinData.result = LfgJoinResult.NoSlots;
@@ -409,7 +409,7 @@ namespace Game.DungeonFinding
                                 joinData.result = LfgJoinResult.NoLfgObject;
                             if (plrg.HasAura(SharedConst.LFGSpellDungeonDeserter))
                                 joinData.result = LfgJoinResult.DeserterParty;
-                            else if (plrg.HasAura(SharedConst.LFGSpellDungeonCooldown))
+                            else if (!isContinue && plrg.HasAura(SharedConst.LFGSpellDungeonCooldown))
                                 joinData.result = LfgJoinResult.RandomCooldownParty;
                             else if (plrg.InBattleground() || plrg.InArena() || plrg.InBattlegroundQueue())
                                 joinData.result = LfgJoinResult.CantUseDungeons;

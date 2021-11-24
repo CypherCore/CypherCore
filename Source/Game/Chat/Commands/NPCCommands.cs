@@ -239,7 +239,9 @@ namespace Game.Chat
                 return false;
             }
 
+            Global.ObjectMgr.RemoveCreatureFromGrid(lowguid, data);
             data.spawnPoint.Relocate(player);
+            Global.ObjectMgr.AddCreatureToGrid(lowguid, data);
 
             // update position in DB
             PreparedStatement stmt = DB.World.GetPreparedStatement(WorldStatements.UPD_CREATURE_POSITION);

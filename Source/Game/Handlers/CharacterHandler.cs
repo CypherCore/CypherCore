@@ -784,8 +784,7 @@ namespace Game
                 pCurrChar.SetGuildLevel(0);
             }
 
-            // TODO: Move this to BattlePetMgr::SendJournalLock() just to have all packets in one file
-            SendPacket(new BattlePetJournalLockAcquired());
+            pCurrChar.GetSession().GetBattlePetMgr().SendJournalLockStatus();
 
             pCurrChar.SendInitialPacketsBeforeAddToMap();
 
@@ -1998,14 +1997,15 @@ namespace Game
                     }
 
                     // Item conversion
-                    foreach (var it in Global.ObjectMgr.FactionChangeItems)
+                    var itemConversionMap = newTeamId == TeamId.Alliance ? Global.ObjectMgr.FactionChangeItemsHordeToAlliance : Global.ObjectMgr.FactionChangeItemsAllianceToHorde;
+                    foreach (var it in itemConversionMap)
                     {
-                        uint item_alliance = it.Key;
-                        uint item_horde = it.Value;
+                        uint oldItemId = it.Key;
+                        uint newItemId = it.Value;
 
                         stmt = DB.Characters.GetPreparedStatement(CharStatements.UPD_CHAR_INVENTORY_FACTION_CHANGE);
-                        stmt.AddValue(0, (newTeamId == TeamId.Alliance ? item_alliance : item_horde));
-                        stmt.AddValue(1, (newTeamId == TeamId.Alliance ? item_horde : item_alliance));
+                        stmt.AddValue(0, newItemId);
+                        stmt.AddValue(1, oldItemId);
                         stmt.AddValue(2, lowGuid);
                         trans.Append(stmt);
                     }

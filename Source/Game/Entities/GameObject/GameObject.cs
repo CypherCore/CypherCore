@@ -2005,6 +2005,18 @@ namespace Game.Entities
                     player.SetStandState((UnitStandStateType.SitLowChair + (byte)info.BarberChair.chairheight), info.BarberChair.SitAnimKit);
                     return;
                 }
+                case GameObjectTypes.NewFlag:
+                {
+                    GameObjectTemplate info = GetGoInfo();
+                    if (info == null)
+                        return;
+
+                    if (!user.IsPlayer())
+                        return;
+
+                    spellId = info.NewFlag.pickupSpell;
+                    break;
+                }
                 case GameObjectTypes.ItemForge:
                 {
                     GameObjectTemplate info = GetGoInfo();

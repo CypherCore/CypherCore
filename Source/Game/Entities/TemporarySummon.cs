@@ -847,7 +847,7 @@ namespace Game.Entities
 
             UnitMods unitMod = UnitMods.PowerStart + (int)power;
 
-            float value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + GetCreatePowers(power);
+            float value = GetFlatModifierValue(unitMod, UnitModifierFlatType.Base) + GetCreatePowerValue(power);
             value *= GetPctModifierValue(unitMod, UnitModifierPctType.Base);
             value += GetFlatModifierValue(unitMod, UnitModifierFlatType.Total);
             value *= GetPctModifierValue(unitMod, UnitModifierPctType.Total);

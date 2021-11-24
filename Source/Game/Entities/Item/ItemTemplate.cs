@@ -260,6 +260,7 @@ namespace Game.Entities
         public ItemFlags2 GetFlags2() { return (ItemFlags2)ExtendedData.Flags[1]; }
         public ItemFlags3 GetFlags3() { return (ItemFlags3)ExtendedData.Flags[2]; }
         public ItemFlags4 GetFlags4() { return (ItemFlags4)ExtendedData.Flags[3]; }
+        public uint GetOtherFactionItemId() { return ExtendedData.FactionRelated; }
         public float GetPriceRandomValue() { return ExtendedData.PriceRandomValue; }
         public float GetPriceVariance() { return ExtendedData.PriceVariance; }
         public uint GetBuyCount() { return Math.Max(ExtendedData.VendorStackCount, 1u); }

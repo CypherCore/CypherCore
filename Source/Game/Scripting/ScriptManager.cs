@@ -1098,7 +1098,6 @@ namespace Game.Scripting
         {
             int dmg = damage;
             ForEach<UnitScript>(p => p.ModifySpellDamageTaken(target, attacker, ref dmg, spellInfo));
-            ForEach<PlayerScript>(p => p.ModifySpellDamageTaken(target, attacker, ref dmg, spellInfo));
             damage = dmg;
         }
 

@@ -172,8 +172,10 @@ namespace Game.Entities
             UpdateSplineMovement(diff);
             GetMotionMaster().Update(diff);
 
-            if (i_AI == null && (!IsPlayer() || IsCharmed()))
+            if (GetAI() == null && (!IsPlayer() || IsCharmed()))
                 UpdateCharmAI();
+
+            RefreshAI();
         }
 
         void _UpdateSpells(uint diff)
@@ -1168,6 +1170,8 @@ namespace Game.Entities
 
         public virtual UnitAI GetAI() { return i_AI; }
 
+        public UnitAI GetTopAI() { return i_AIs.Count == 0 ? null : i_AIs.Peek(); }
+
         public void AIUpdateTick(uint diff)
         {
             UnitAI ai = GetAI();
@@ -1179,38 +1183,56 @@ namespace Game.Entities
             }
         }
 
+        public void PushAI(UnitAI newAI)
+        {
+            i_AIs.Push(newAI);
+        }
+
         public void SetAI(UnitAI newAI)
         {
-            Cypher.Assert(!m_aiLocked, "Attempt to replace AI during AI update tick");
+            PushAI(newAI);
+            RefreshAI();
+        }
 
-            i_AI = newAI;
+        public bool PopAI()
+        {
+            if (i_AIs.Count != 0)
+            {
+                i_AIs.Pop();
+                return true;
+            }
+            else
+                return false;
+        }
+
+        public void RefreshAI()
+        {
+            Cypher.Assert(!m_aiLocked, "Tried to change current AI during UpdateAI()");
+            if (i_AIs.Count == 0)
+                i_AI = null;
+            else
+                i_AI = i_AIs.Peek();
         }
 
         public void ScheduleAIChange()
         {
             bool charmed = IsCharmed();
-            // if charm is applied, we can't have disabled AI already, and vice versa
-            if (charmed)
-                Cypher.Assert(i_disabledAI == null, "Attempt to schedule charm AI change on unit that already has disabled AI");
-            else if (m_aiLocked)
-            {
-                Cypher.Assert(i_lockedAILifetimeExtension == null, "Attempt to schedule multiple charm AI changes during one update");
-                i_lockedAILifetimeExtension = i_AI; // AI needs to live just a bit longer to finish its UpdateAI
-            }
-            else if (!IsPlayer())
-                Cypher.Assert(i_disabledAI != null, "Attempt to schedule charm ID change on unit that doesn't have disabled AI");
 
             if (charmed)
-                i_disabledAI = i_AI;
+                PushAI(null);
             else
-                i_AI = null;
+            {
+                RestoreDisabledAI();
+                PushAI(null); //This could actually be PopAI() to get the previous AI but it's required atm to trigger UpdateCharmAI()
+            }
         }
 
         void RestoreDisabledAI()
         {
-            Cypher.Assert(IsPlayer() || i_disabledAI != null, "Attempt to restore disabled AI on creature without disabled AI");
-            i_AI = i_disabledAI;
-            i_lockedAILifetimeExtension = null;
+            // Keep popping the stack until we either reach the bottom or find a valid AI
+            while (PopAI())
+                if (GetTopAI() != null)
+                    return;
         }
 
         public bool IsPossessing()
@@ -1453,8 +1475,13 @@ namespace Game.Entities
         {
             // can't apply aura on unit which is going to be deleted - to not create a memory leak
             Cypher.Assert(!m_cleanupDone);
-            // aura musn't be removed
-            Cypher.Assert(!aura.IsRemoved());
+            // just return if the aura has been already removed
+            // this can happen if OnEffectHitTarget() script hook killed the unit or the aura owner (which can be different)
+            if (aura.IsRemoved())
+            {
+                Log.outError(LogFilter.Spells, "Unit::_CreateAuraApplication() called with a removed aura. Check if OnEffectHitTarget() is triggering any spell with apply aura effect (that's not allowed!)");//\nUnit: {}\nAura: {}", GetDebugInfo().c_str(), aura->GetDebugInfo().c_str());
+                return null;
+            }
 
             // aura mustn't be already applied on target
             Cypher.Assert(!aura.IsAppliedOnTarget(GetGUID()), "Unit._CreateAuraApplication: aura musn't be applied on target");
@@ -1906,8 +1933,11 @@ namespace Game.Entities
             return IsCharmed() ? GetCharmer() : GetOwner();
         }
 
-        public void SetWildBattlePetLevel(uint wildBattlePetLevel) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.WildBattlePetLevel), wildBattlePetLevel); }
+        public uint GetBattlePetCompanionNameTimestamp() { return m_unitData.BattlePetCompanionNameTimestamp; }
+        public void SetBattlePetCompanionNameTimestamp(uint timestamp) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.BattlePetCompanionNameTimestamp), timestamp); }
+        
         public uint GetWildBattlePetLevel() { return m_unitData.WildBattlePetLevel; }
+        public void SetWildBattlePetLevel(uint wildBattlePetLevel) { SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.WildBattlePetLevel), wildBattlePetLevel); }
 
         public bool HasUnitFlag(UnitFlags flags) { return (m_unitData.Flags & (uint)flags) != 0; }
         public void AddUnitFlag(UnitFlags flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.Flags), (uint)flags); }

@@ -17,6 +17,7 @@
 
 using Framework.Constants;
 using Framework.Database;
+using Game.AI;
 using Game.Conditions;
 using Game.DataStorage;
 using Game.Groups;
@@ -373,27 +374,27 @@ namespace Game.Entities
                 case HighGuid.Creature:
                 case HighGuid.Pet:
                 case HighGuid.Vehicle:
-                    {
-                        Creature creature = ObjectAccessor.GetCreatureOrPetOrVehicle(this, guid);
-                        if (creature != null)
-                            objectQR = Global.ObjectMgr.GetCreatureQuestRelationBounds(creature.GetEntry());
-                        else
-                            return null;
-                        break;
-                    }
+                {
+                    Creature creature = ObjectAccessor.GetCreatureOrPetOrVehicle(this, guid);
+                    if (creature != null)
+                        objectQR = Global.ObjectMgr.GetCreatureQuestRelationBounds(creature.GetEntry());
+                    else
+                        return null;
+                    break;
+                }
                 case HighGuid.GameObject:
-                    {
-                        //we should obtain map from GetMap() in 99% of cases. Special case
-                        //only for quests which cast teleport spells on player
-                        Map _map = IsInWorld ? GetMap() : Global.MapMgr.FindMap(GetMapId(), GetInstanceId());
-                        Cypher.Assert(_map != null);
-                        GameObject gameObject = _map.GetGameObject(guid);
-                        if (gameObject != null)
-                            objectQR = Global.ObjectMgr.GetGOQuestRelationBounds(gameObject.GetEntry());
-                        else
-                            return null;
-                        break;
-                    }
+                {
+                    //we should obtain map from GetMap() in 99% of cases. Special case
+                    //only for quests which cast teleport spells on player
+                    Map _map = IsInWorld ? GetMap() : Global.MapMgr.FindMap(GetMapId(), GetInstanceId());
+                    Cypher.Assert(_map != null);
+                    GameObject gameObject = _map.GetGameObject(guid);
+                    if (gameObject != null)
+                        objectQR = Global.ObjectMgr.GetGOQuestRelationBounds(gameObject.GetEntry());
+                    else
+                        return null;
+                    break;
+                }
                 default:
                     return null;
             }
@@ -695,26 +696,26 @@ namespace Game.Entities
                 case TypeId.Container:
                 case TypeId.AzeriteItem:
                 case TypeId.AzeriteEmpoweredItem:
+                {
+                    Item item = (Item)questGiver;
+                    Global.ScriptMgr.OnQuestAccept(this, item, quest);
+
+                    // destroy not required for quest finish quest starting item
+                    bool destroyItem = true;
+                    foreach (QuestObjective obj in quest.Objectives)
                     {
-                        Item item = (Item)questGiver;
-                        Global.ScriptMgr.OnQuestAccept(this, item, quest);
-
-                        // destroy not required for quest finish quest starting item
-                        bool destroyItem = true;
-                        foreach (QuestObjective obj in quest.Objectives)
+                        if (obj.Type == QuestObjectiveType.Item && obj.ObjectID == item.GetEntry() && item.GetTemplate().GetMaxCount() > 0)
                         {
-                            if (obj.Type == QuestObjectiveType.Item && obj.ObjectID == item.GetEntry() && item.GetTemplate().GetMaxCount() > 0)
-                            {
-                                destroyItem = false;
-                                break;
-                            }
+                            destroyItem = false;
+                            break;
                         }
-
-                        if (destroyItem)
-                            DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
-
-                        break;
                     }
+
+                    if (destroyItem)
+                        DestroyItem(item.GetBagSlot(), item.GetSlot(), true);
+
+                    break;
+                }
                 case TypeId.GameObject:
                     PlayerTalkClass.ClearMenus();
                     questGiver.ToGameObject().GetAI().QuestAccept(this, quest);
@@ -1633,7 +1634,7 @@ namespace Game.Entities
             }
             return true;
         }
-        
+
         public bool SatisfyQuestMonth(Quest qInfo, bool msg)
         {
             if (!qInfo.IsMonthly() || m_monthlyquests.Empty())
@@ -1852,25 +1853,33 @@ namespace Game.Entities
             switch (questgiver.GetTypeId())
             {
                 case TypeId.GameObject:
+                {
+                    GameObjectAI ai = questgiver.ToGameObject().GetAI();
+                    if (ai != null)
                     {
-                        QuestGiverStatus? questStatus = questgiver.ToGameObject().GetAI().GetDialogStatus(this);
+                        var questStatus = ai.GetDialogStatus(this);
                         if (questStatus.HasValue)
                             return questStatus.Value;
-
-                        qr = Global.ObjectMgr.GetGOQuestRelationBounds(questgiver.GetEntry());
-                        qir = Global.ObjectMgr.GetGOQuestInvolvedRelationBounds(questgiver.GetEntry());
-                        break;
                     }
+
+                    qr = Global.ObjectMgr.GetGOQuestRelationBounds(questgiver.GetEntry());
+                    qir = Global.ObjectMgr.GetGOQuestInvolvedRelationBounds(questgiver.GetEntry());
+                    break;
+                }
                 case TypeId.Unit:
+                {
+                    CreatureAI ai = questgiver.ToCreature().GetAI();
+                    if (ai != null)
                     {
-                        QuestGiverStatus? questStatus = questgiver.ToCreature().GetAI().GetDialogStatus(this);
+                        QuestGiverStatus? questStatus = ai.GetDialogStatus(this);
                         if (questStatus.HasValue)
                             return questStatus.Value;
-
-                        qr = Global.ObjectMgr.GetCreatureQuestRelationBounds(questgiver.GetEntry());
-                        qir = Global.ObjectMgr.GetCreatureQuestInvolvedRelationBounds(questgiver.GetEntry());
-                        break;
                     }
+
+                    qr = Global.ObjectMgr.GetCreatureQuestRelationBounds(questgiver.GetEntry());
+                    qir = Global.ObjectMgr.GetCreatureQuestInvolvedRelationBounds(questgiver.GetEntry());
+                    break;
+                }
                 default:
                     // it's impossible, but check
                     Log.outError(LogFilter.Player, "GetQuestDialogStatus called for unexpected type {0}", questgiver.GetTypeId());

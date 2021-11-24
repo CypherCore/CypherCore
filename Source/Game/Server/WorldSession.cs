@@ -160,6 +160,10 @@ namespace Game
                 // Remove pet
                 _player.RemovePet(null, PetSaveMode.AsCurrent, true);
 
+                ///- Release battle pet journal lock
+                if (_battlePetMgr.HasJournalLock())
+                    _battlePetMgr.ToggleJournalLock(false);
+
                 // Clear whisper whitelist
                 _player.ClearWhisperWhiteList();
 

@@ -335,101 +335,116 @@ namespace Game.Spells
             }
         }
 
-        public void StartCooldown(SpellInfo spellInfo, uint itemId, Spell spell = null, bool onHold = false)
+        public void StartCooldown(SpellInfo spellInfo, uint itemId, Spell spell = null, bool onHold = false, TimeSpan? forcedCooldown = null)
         {
             // init cooldown values
             uint categoryId = 0;
-            int cooldown = -1;
-            int categoryCooldown = -1;
-
-            GetCooldownDurations(spellInfo, itemId, ref cooldown, ref categoryId, ref categoryCooldown);
+            TimeSpan cooldown = TimeSpan.Zero;
+            TimeSpan categoryCooldown = TimeSpan.Zero;
 
             DateTime curTime = GameTime.GetGameTimeSystemPoint();
             DateTime catrecTime;
             DateTime recTime;
             bool needsCooldownPacket = false;
 
+            if (!forcedCooldown.HasValue)
+                GetCooldownDurations(spellInfo, itemId, ref cooldown, ref categoryId, ref categoryCooldown);
+            else
+                cooldown = forcedCooldown.Value;
+
             // overwrite time for selected category
             if (onHold)
             {
                 // use +MONTH as infinite cooldown marker
-                catrecTime = categoryCooldown > 0 ? (curTime + PlayerConst.InfinityCooldownDelay) : curTime;
-                recTime = cooldown > 0 ? (curTime + PlayerConst.InfinityCooldownDelay) : catrecTime;
+                catrecTime = categoryCooldown > TimeSpan.Zero ? (curTime + PlayerConst.InfinityCooldownDelay) : curTime;
+                recTime = cooldown > TimeSpan.Zero ? (curTime + PlayerConst.InfinityCooldownDelay) : catrecTime;
             }
             else
             {
-                // shoot spells used equipped item cooldown values already assigned in GetAttackTime(RANGED_ATTACK)
-                // prevent 0 cooldowns set by another way
-                if (cooldown <= 0 && categoryCooldown <= 0 && (categoryId == 76 || (spellInfo.IsAutoRepeatRangedSpell() && spellInfo.Id != 75)))
-                    cooldown = (int)(uint)_owner.m_unitData.RangedAttackRoundBaseTime;
-
-                // Now we have cooldown data (if found any), time to apply mods
-                Player modOwner = _owner.GetSpellModOwner();
-                if (modOwner)
+                if (!forcedCooldown.HasValue)
                 {
-                    if (cooldown >= 0)
-                        modOwner.ApplySpellMod(spellInfo, SpellModOp.Cooldown, ref cooldown, spell);
+                    // shoot spells used equipped item cooldown values already assigned in SetBaseAttackTime(RANGED_ATTACK)
+                    // prevent 0 cooldowns set by another way
+                    if (cooldown <= TimeSpan.Zero && categoryCooldown <= TimeSpan.Zero && (categoryId == 76 || (spellInfo.IsAutoRepeatRangedSpell() && spellInfo.Id != 75)))
+                        cooldown = TimeSpan.FromMilliseconds(_owner.m_unitData.RangedAttackRoundBaseTime);
 
-                    if (categoryCooldown >= 0 && !spellInfo.HasAttribute(SpellAttr6.IgnoreCategoryCooldownMods))
-                        modOwner.ApplySpellMod(spellInfo, SpellModOp.Cooldown, ref categoryCooldown, spell);
-                }
-
-                if (_owner.HasAuraTypeWithAffectMask(AuraType.ModSpellCooldownByHaste, spellInfo))
-                {
-                    cooldown = (int)(cooldown * _owner.m_unitData.ModSpellHaste);
-                    categoryCooldown = (int)(categoryCooldown * _owner.m_unitData.ModSpellHaste);
-                }
-
-                if (_owner.HasAuraTypeWithAffectMask(AuraType.ModCooldownByHasteRegen, spellInfo))
-                {
-                    cooldown = (int)(cooldown * _owner.m_unitData.ModHasteRegen);
-                    categoryCooldown = (int)(categoryCooldown * _owner.m_unitData.ModHasteRegen);
-                }
-
-                int cooldownMod = _owner.GetTotalAuraModifier(AuraType.ModCooldown);
-                if (cooldownMod != 0)
-                {
-                    // Apply SPELL_AURA_MOD_COOLDOWN only to own spells
-                    Player playerOwner = GetPlayerOwner();
-                    if (!playerOwner || playerOwner.HasSpell(spellInfo.Id))
+                    // Now we have cooldown data (if found any), time to apply mods
+                    Player modOwner = _owner.GetSpellModOwner();
+                    if (modOwner)
                     {
-                        needsCooldownPacket = true;
-                        cooldown += cooldownMod * Time.InMilliseconds;   // SPELL_AURA_MOD_COOLDOWN does not affect category cooldows, verified with shaman shocks
-                    }
-                }
+                        void applySpellMod(ref TimeSpan value)
+                        {
+                            int intValue = (int)value.TotalMilliseconds;
+                            modOwner.ApplySpellMod(spellInfo, SpellModOp.Cooldown, ref intValue, spell);
+                            value = TimeSpan.FromMilliseconds(intValue);
+                        }
 
-                // Apply SPELL_AURA_MOD_SPELL_CATEGORY_COOLDOWN modifiers
-                // Note: This aura applies its modifiers to all cooldowns of spells with set category, not to category cooldown only
-                if (categoryId != 0)
-                {
-                    int categoryModifier = _owner.GetTotalAuraModifierByMiscValue(AuraType.ModSpellCategoryCooldown, (int)categoryId);
-                    if (categoryModifier != 0)
-                    {
-                        if (cooldown > 0)
-                            cooldown += categoryModifier;
+                        if (cooldown >= TimeSpan.Zero)
+                            applySpellMod(ref cooldown);
 
-                        if (categoryCooldown > 0)
-                            categoryCooldown += categoryModifier;
+                        if (categoryCooldown >= TimeSpan.Zero && !spellInfo.HasAttribute(SpellAttr6.IgnoreCategoryCooldownMods))
+                            applySpellMod(ref categoryCooldown);
                     }
 
-                    SpellCategoryRecord categoryEntry = CliDB.SpellCategoryStorage.LookupByKey(categoryId);
-                    if (categoryEntry.Flags.HasAnyFlag(SpellCategoryFlags.CooldownExpiresAtDailyReset))
-                        categoryCooldown = (int)(Time.UnixTimeToDateTime(Global.WorldMgr.GetNextDailyQuestsResetTime()) - GameTime.GetGameTimeSystemPoint()).TotalMilliseconds;
+                    if (_owner.HasAuraTypeWithAffectMask(AuraType.ModSpellCooldownByHaste, spellInfo))
+                    {
+                        cooldown = TimeSpan.FromMilliseconds(cooldown.TotalMilliseconds * _owner.m_unitData.ModSpellHaste);
+                        categoryCooldown = TimeSpan.FromMilliseconds(categoryCooldown.TotalMilliseconds * _owner.m_unitData.ModSpellHaste);
+                    }
+
+                    if (_owner.HasAuraTypeWithAffectMask(AuraType.ModCooldownByHasteRegen, spellInfo))
+                    {
+                        cooldown = TimeSpan.FromMilliseconds(cooldown.TotalMilliseconds * _owner.m_unitData.ModHasteRegen);
+                        categoryCooldown = TimeSpan.FromMilliseconds(categoryCooldown.TotalMilliseconds * _owner.m_unitData.ModHasteRegen);
+                    }
+
+                    int cooldownMod = _owner.GetTotalAuraModifier(AuraType.ModCooldown);
+                    if (cooldownMod != 0)
+                    {
+                        // Apply SPELL_AURA_MOD_COOLDOWN only to own spells
+                        Player playerOwner = GetPlayerOwner();
+                        if (!playerOwner || playerOwner.HasSpell(spellInfo.Id))
+                        {
+                            needsCooldownPacket = true;
+                            cooldown += TimeSpan.FromMilliseconds(cooldownMod);   // SPELL_AURA_MOD_COOLDOWN does not affect category cooldows, verified with shaman shocks
+                        }
+                    }
+
+                    // Apply SPELL_AURA_MOD_SPELL_CATEGORY_COOLDOWN modifiers
+                    // Note: This aura applies its modifiers to all cooldowns of spells with set category, not to category cooldown only
+                    if (categoryId != 0)
+                    {
+                        int categoryModifier = _owner.GetTotalAuraModifierByMiscValue(AuraType.ModSpellCategoryCooldown, (int)categoryId);
+                        if (categoryModifier != 0)
+                        {
+                            if (cooldown > TimeSpan.Zero)
+                                cooldown += TimeSpan.FromMilliseconds(categoryModifier);
+
+                            if (categoryCooldown > TimeSpan.Zero)
+                                categoryCooldown += TimeSpan.FromMilliseconds(categoryModifier);
+                        }
+
+                        SpellCategoryRecord categoryEntry = CliDB.SpellCategoryStorage.LookupByKey(categoryId);
+                        if (categoryEntry.Flags.HasAnyFlag(SpellCategoryFlags.CooldownExpiresAtDailyReset))
+                            categoryCooldown = Time.UnixTimeToDateTime(Global.WorldMgr.GetNextDailyQuestsResetTime()) - GameTime.GetGameTimeSystemPoint();
+                    }
                 }
+                else
+                    needsCooldownPacket = true;
 
                 // replace negative cooldowns by 0
-                if (cooldown < 0)
-                    cooldown = 0;
+                if (cooldown < TimeSpan.Zero)
+                    cooldown = TimeSpan.Zero;
 
-                if (categoryCooldown < 0)
-                    categoryCooldown = 0;
+                if (categoryCooldown < TimeSpan.Zero)
+                    categoryCooldown = TimeSpan.Zero;
 
                 // no cooldown after applying spell mods
-                if (cooldown == 0 && categoryCooldown == 0)
+                if (cooldown == TimeSpan.Zero && categoryCooldown == TimeSpan.Zero)
                     return;
 
-                catrecTime = categoryCooldown != 0 ? curTime + TimeSpan.FromMilliseconds(categoryCooldown) : curTime;
-                recTime = cooldown != 0 ? curTime + TimeSpan.FromMilliseconds(cooldown) : catrecTime;
+                catrecTime = categoryCooldown != TimeSpan.Zero ? curTime + categoryCooldown : curTime;
+                recTime = cooldown != TimeSpan.Zero ? curTime + cooldown : catrecTime;
             }
 
             // self spell cooldown
@@ -445,7 +460,7 @@ namespace Game.Spells
                         SpellCooldownPkt spellCooldown = new();
                         spellCooldown.Caster = _owner.GetGUID();
                         spellCooldown.Flags = SpellCooldownFlags.None;
-                        spellCooldown.SpellCooldowns.Add(new SpellCooldownStruct(spellInfo.Id, (uint)cooldown));
+                        spellCooldown.SpellCooldowns.Add(new SpellCooldownStruct(spellInfo.Id, (uint)cooldown.TotalMilliseconds));
                         playerOwner.SendPacket(spellCooldown);
                     }
                 }
@@ -486,16 +501,20 @@ namespace Game.Spells
         public void AddCooldown(uint spellId, uint itemId, DateTime cooldownEnd, uint categoryId, DateTime categoryEnd, bool onHold = false)
         {
             CooldownEntry cooldownEntry = new();
-            cooldownEntry.SpellId = spellId;
-            cooldownEntry.CooldownEnd = cooldownEnd;
-            cooldownEntry.ItemId = itemId;
-            cooldownEntry.CategoryId = categoryId;
-            cooldownEntry.CategoryEnd = categoryEnd;
-            cooldownEntry.OnHold = onHold;
-            _spellCooldowns[spellId] = cooldownEntry;
+            // scripts can start multiple cooldowns for a given spell, only store the longest one
+            if (cooldownEnd > cooldownEntry.CooldownEnd || categoryEnd > cooldownEntry.CategoryEnd || onHold)
+            {
+                cooldownEntry.SpellId = spellId;
+                cooldownEntry.CooldownEnd = cooldownEnd;
+                cooldownEntry.ItemId = itemId;
+                cooldownEntry.CategoryId = categoryId;
+                cooldownEntry.CategoryEnd = categoryEnd;
+                cooldownEntry.OnHold = onHold;
+                _spellCooldowns[spellId] = cooldownEntry;
 
-            if (categoryId != 0)
-                _categoryCooldowns[categoryId] = cooldownEntry;
+                if (categoryId != 0)
+                    _categoryCooldowns[categoryId] = cooldownEntry;
+            }
         }
 
         public void ModifySpellCooldown(uint spellId, TimeSpan offset)
@@ -623,7 +642,7 @@ namespace Game.Spells
             return _categoryCooldowns.ContainsKey(category);
         }
 
-        public uint GetRemainingCooldown(SpellInfo spellInfo)
+        public TimeSpan GetRemainingCooldown(SpellInfo spellInfo)
         {
             DateTime end;
             var entry = _spellCooldowns.LookupByKey(spellInfo.Id);
@@ -633,23 +652,23 @@ namespace Game.Spells
             {
                 var cooldownEntry = _categoryCooldowns.LookupByKey(spellInfo.GetCategory());
                 if (cooldownEntry == null)
-                    return 0;
+                    return TimeSpan.Zero;
 
                 end = cooldownEntry.CategoryEnd;
             }
 
             DateTime now = GameTime.GetGameTimeSystemPoint();
             if (end < now)
-                return 0;
+                return TimeSpan.Zero;
 
             var remaining = end - now;
-            return (uint)remaining.TotalMilliseconds;
+            return remaining;
         }
 
-        public void LockSpellSchool(SpellSchoolMask schoolMask, uint lockoutTime)
+        public void LockSpellSchool(SpellSchoolMask schoolMask, TimeSpan lockoutTime)
         {
             DateTime now = GameTime.GetGameTimeSystemPoint();
-            DateTime lockoutEnd = now + TimeSpan.FromMilliseconds(lockoutTime);
+            DateTime lockoutEnd = now + lockoutTime;
             for (int i = 0; i < (int)SpellSchools.Max; ++i)
                 if (Convert.ToBoolean((SpellSchoolMask)(1 << i) & schoolMask))
                     _schoolLockouts[i] = lockoutEnd;
@@ -679,7 +698,7 @@ namespace Game.Spells
 
             SpellCooldownPkt spellCooldown = new();
             spellCooldown.Caster = _owner.GetGUID();
-            spellCooldown.Flags = SpellCooldownFlags.None;
+            spellCooldown.Flags = SpellCooldownFlags.LossOfControlUi;
             foreach (uint spellId in knownSpells)
             {
                 SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, _owner.GetMap().GetDifficultyID());
@@ -689,11 +708,14 @@ namespace Game.Spells
                 if (!spellInfo.PreventionType.HasAnyFlag(SpellPreventionType.Silence))
                     continue;
 
-                if (Convert.ToBoolean(schoolMask & spellInfo.GetSchoolMask()) && GetRemainingCooldown(spellInfo) < lockoutTime)
-                {
-                    spellCooldown.SpellCooldowns.Add(new SpellCooldownStruct(spellId, lockoutTime));
+                if ((schoolMask & spellInfo.GetSchoolMask()) == 0)
+                    continue;
+
+                if (GetRemainingCooldown(spellInfo) < lockoutTime)
                     AddCooldown(spellId, 0, lockoutEnd, 0, now);
-                }
+
+                // always send cooldown, even if it will be shorter than already existing cooldown for LossOfControl UI
+                spellCooldown.SpellCooldowns.Add(new SpellCooldownStruct(spellId, (uint)lockoutTime.TotalMilliseconds));
             }
 
             Player player = GetPlayerOwner();
@@ -856,9 +878,9 @@ namespace Game.Spells
             return _globalCooldowns.ContainsKey(spellInfo.StartRecoveryCategory) && _globalCooldowns[spellInfo.StartRecoveryCategory] > GameTime.GetGameTimeSystemPoint();
         }
 
-        public void AddGlobalCooldown(SpellInfo spellInfo, uint duration)
+        public void AddGlobalCooldown(SpellInfo spellInfo, TimeSpan durationMs)
         {
-            _globalCooldowns[spellInfo.StartRecoveryCategory] = GameTime.GetGameTimeSystemPoint() + TimeSpan.FromMilliseconds(duration);
+            _globalCooldowns[spellInfo.StartRecoveryCategory] = GameTime.GetGameTimeSystemPoint() + durationMs;
         }
 
         public void CancelGlobalCooldown(SpellInfo spellInfo)
@@ -900,15 +922,15 @@ namespace Game.Spells
         
         void GetCooldownDurations(SpellInfo spellInfo, uint itemId, ref uint categoryId)
         {
-            int notUsed = 0;
+            TimeSpan notUsed = TimeSpan.Zero;
             GetCooldownDurations(spellInfo, itemId, ref notUsed, ref categoryId, ref notUsed);
         }
 
-        void GetCooldownDurations(SpellInfo spellInfo, uint itemId, ref int cooldown, ref uint categoryId, ref int categoryCooldown)
+        void GetCooldownDurations(SpellInfo spellInfo, uint itemId, ref TimeSpan cooldown, ref uint categoryId, ref TimeSpan categoryCooldown)
         {
-            int tmpCooldown = -1;
+            TimeSpan tmpCooldown = TimeSpan.MinValue;
             uint tmpCategoryId = 0;
-            int tmpCategoryCooldown = -1;
+            TimeSpan tmpCategoryCooldown = TimeSpan.MinValue;
 
             // cooldown information stored in ItemEffect.db2, overriding normal cooldown and category
             if (itemId != 0)
@@ -920,9 +942,9 @@ namespace Game.Spells
                     {
                         if (itemEffect.SpellID == spellInfo.Id)
                         {
-                            tmpCooldown = itemEffect.CoolDownMSec;
+                            tmpCooldown = TimeSpan.FromMilliseconds(itemEffect.CoolDownMSec);
                             tmpCategoryId = itemEffect.SpellCategoryID;
-                            tmpCategoryCooldown = itemEffect.CategoryCoolDownMSec;
+                            tmpCategoryCooldown = TimeSpan.FromMilliseconds(itemEffect.CategoryCoolDownMSec);
                             break;
                         }
                     }
@@ -930,11 +952,11 @@ namespace Game.Spells
             }
 
             // if no cooldown found above then base at DBC data
-            if (tmpCooldown < 0 && tmpCategoryCooldown < 0)
+            if (tmpCooldown < TimeSpan.Zero && tmpCategoryCooldown < TimeSpan.Zero)
             {
-                tmpCooldown = (int)spellInfo.RecoveryTime;
+                tmpCooldown = TimeSpan.FromMilliseconds(spellInfo.RecoveryTime);
                 tmpCategoryId = spellInfo.GetCategory();
-                tmpCategoryCooldown = (int)spellInfo.CategoryRecoveryTime;
+                tmpCategoryCooldown = TimeSpan.FromMilliseconds(spellInfo.CategoryRecoveryTime);
             }
 
             cooldown = tmpCooldown;

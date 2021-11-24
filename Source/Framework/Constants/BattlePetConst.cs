@@ -14,29 +14,22 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+using System;
 
 namespace Framework.Constants
 {
+    [Flags]
+    public enum BattlePetError
+    {
+        CantHaveMorePetsOfThatType = 3, // You can't have any more pets of that type.
+        CantHaveMorePets = 4, // You can't have any more pets.
+        TooHighLevelToUncage = 7, // This pet is too high level for you to uncage.
+    }
+
     public enum FlagsControlType
     {
         Apply = 1,
         Remove = 2
-    }
-
-    public enum BattlePetError
-    {
-        CantHaveMorePetsOfThatType = 3,
-        CantHaveMorePets = 4,
-        TooHighLevelToUncage = 7,
-
-        // TODO: find correct values if possible and needed (also wrong order)
-        DuplicateConvertedPet,
-        NeedToUnlock,
-        BadParam,
-        LockedPetAlreadyExists,
-        Ok,
-        Uncapturable,
-        CantInvalidCharacterGuid
     }
 
     // taken from BattlePetState.db2 - it seems to store some initial values for battle pets

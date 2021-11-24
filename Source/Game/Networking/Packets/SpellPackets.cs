@@ -538,10 +538,12 @@ namespace Game.Networking.Packets
             _worldPacket.WriteUInt32(SpellID);
             _worldPacket.WriteInt32(DeltaTime);
             _worldPacket.WriteBit(IsPet);
+            _worldPacket.WriteBit(WithoutCategoryCooldown);
             _worldPacket.FlushBits();
         }
 
         public bool IsPet;
+        public bool WithoutCategoryCooldown;
         public int DeltaTime;
         public uint SpellID;
     }

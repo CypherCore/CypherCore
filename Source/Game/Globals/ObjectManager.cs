@@ -6539,30 +6539,20 @@ namespace Game
         {
             uint oldMSTime = Time.GetMSTime();
 
-            SQLResult result = DB.World.Query("SELECT alliance_id, horde_id FROM player_factionchange_items");
-
-            if (result.IsEmpty())
-            {
-                Log.outInfo(LogFilter.ServerLoading, "Loaded 0 faction change item pairs. DB table `player_factionchange_items` is empty.");
-                return;
-            }
-
             uint count = 0;
-            do
+            foreach (var itemPair in ItemTemplateStorage)
             {
-                uint alliance = result.Read<uint>(0);
-                uint horde = result.Read<uint>(1);
+                if (itemPair.Value.GetOtherFactionItemId() == 0)
+                    continue;
 
-                if (GetItemTemplate(alliance) == null)
-                    Log.outError(LogFilter.Sql, "Item {0} (alliance_id) referenced in `player_factionchange_items` does not exist, pair skipped!", alliance);
-                else if (GetItemTemplate(horde) == null)
-                    Log.outError(LogFilter.Sql, "Item {0} (horde_id) referenced in `player_factionchange_items` does not exist, pair skipped!", horde);
-                else
-                    FactionChangeItems[alliance] = horde;
+                if (itemPair.Value.GetFlags2().HasFlag(ItemFlags2.FactionHorde))
+                    FactionChangeItemsHordeToAlliance[itemPair.Key] = itemPair.Value.GetOtherFactionItemId();
+
+                if (itemPair.Value.GetFlags2().HasFlag(ItemFlags2.FactionAlliance))
+                    FactionChangeItemsAllianceToHorde[itemPair.Key] = itemPair.Value.GetOtherFactionItemId();
 
                 ++count;
             }
-            while (result.NextRow());
 
             Log.outInfo(LogFilter.ServerLoading, "Loaded {0} faction change item pairs in {1} ms", count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
@@ -10420,7 +10410,8 @@ namespace Game
 
         //Faction Change
         public Dictionary<uint, uint> FactionChangeAchievements = new();
-        public Dictionary<uint, uint> FactionChangeItems = new();
+        public Dictionary<uint, uint> FactionChangeItemsAllianceToHorde = new();
+        public Dictionary<uint, uint> FactionChangeItemsHordeToAlliance = new();
         public Dictionary<uint, uint> FactionChangeQuests = new();
         public Dictionary<uint, uint> FactionChangeReputation = new();
         public Dictionary<uint, uint> FactionChangeSpells = new();

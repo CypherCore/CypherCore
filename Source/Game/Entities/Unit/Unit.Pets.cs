@@ -79,14 +79,17 @@ namespace Game.Entities
                 }
 
                 Cypher.Assert(newAI != null);
-                i_AI = newAI;
+                SetAI(newAI);
                 newAI.OnCharmed(true);
             }
             else
             {
                 RestoreDisabledAI();
-                if (i_AI != null)
-                    i_AI.OnCharmed(true);
+                // Hack: this is required because we want to call OnCharmed(true) on the restored AI
+                RefreshAI();
+                UnitAI ai = GetAI();
+                if (ai != null)
+                    ai.OnCharmed(true);
             }
         }
 
@@ -147,10 +150,11 @@ namespace Game.Entities
                     Player thisPlayer = ToPlayer();
                     if (thisPlayer != null)
                     {
-                        var pet = thisPlayer.GetSession().GetBattlePetMgr().GetPet(thisPlayer.m_activePlayerData.SummonedBattlePetGUID);
+                        var pet = thisPlayer.GetSession().GetBattlePetMgr().GetPet(thisPlayer.GetSummonedBattlePetGUID());
                         if (pet != null)
                         {
-                            minion.SetBattlePetCompanionGUID(thisPlayer.m_activePlayerData.SummonedBattlePetGUID);
+                            minion.SetBattlePetCompanionGUID(thisPlayer.GetSummonedBattlePetGUID());
+                            minion.SetBattlePetCompanionNameTimestamp((uint)pet.NameTimestamp);
                             minion.SetWildBattlePetLevel(pet.PacketInfo.Level);
                         }
                     }
@@ -556,7 +560,7 @@ namespace Game.Entities
                 charm.SetPvpFlags(GetPvpFlags());
 
                 Cypher.Assert(charm.GetCharmerGUID().IsEmpty(), $"Unit {charm.GetEntry()} is being charmed, but it already has a charmer {charm.GetCharmerGUID()}");
-                charm.SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CharmedBy), GetGUID());
+                charm.SetUpdateFieldValue(charm.m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CharmedBy), GetGUID());
                 charm.m_charmer = this;
 
                 _isWalkingBeforeCharm = charm.IsWalking();
@@ -578,7 +582,7 @@ namespace Game.Entities
                 }
 
                 Cypher.Assert(charm.GetCharmerGUID() == GetGUID(), $"Unit {charm.GetEntry()} is being uncharmed, but it has another charmer {charm.GetCharmerGUID()}");
-                charm.SetUpdateFieldValue(m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CharmedBy), ObjectGuid.Empty);
+                charm.SetUpdateFieldValue(charm.m_values.ModifyValue(m_unitData).ModifyValue(m_unitData.CharmedBy), ObjectGuid.Empty);
                 charm.m_charmer = null;
 
                 Player player = charm.GetCharmerOrOwnerPlayerOrPlayerItself();

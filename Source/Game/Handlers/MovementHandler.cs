@@ -694,6 +694,26 @@ namespace Game
         [WorldPacketHandler(ClientOpcodes.MoveTimeSkipped, Processing = PacketProcessing.Inplace)]
         void HandleMoveTimeSkipped(MoveTimeSkipped moveTimeSkipped)
         {
+            Unit mover = GetPlayer().m_unitMovedByMe;
+            if (mover == null)
+            {
+                Log.outWarn(LogFilter.Player, $"WorldSession.HandleMoveTimeSkipped wrong mover state from the unit moved by {GetPlayer().GetGUID()}");
+                return;
+            }
+
+            // prevent tampered movement data
+            if (moveTimeSkipped.MoverGUID != mover.GetGUID())
+            {
+                Log.outWarn(LogFilter.Player, $"WorldSession.HandleMoveTimeSkipped wrong guid from the unit moved by {GetPlayer().GetGUID()}");
+                return;
+            }
+
+            mover.m_movementInfo.Time += moveTimeSkipped.TimeSkipped;
+
+            MoveSkipTime moveSkipTime = new();
+            moveSkipTime.MoverGUID = moveTimeSkipped.MoverGUID;
+            moveSkipTime.TimeSkipped = moveTimeSkipped.TimeSkipped;
+            mover.SendMessageToSet(moveSkipTime, _player);
         }
 
         [WorldPacketHandler(ClientOpcodes.MoveSplineDone, Processing = PacketProcessing.ThreadSafe)]

@@ -286,10 +286,9 @@ namespace Game.Scripting
 
     public class UnitScript : ScriptObject
     {
-        public UnitScript(string name, bool addToScripts = true) : base(name)
+        public UnitScript(string name) : base(name)
         {
-            if (addToScripts)
-                Global.ScriptMgr.AddScript(this);
+            Global.ScriptMgr.AddScript(this);
         }
 
         public virtual void OnHeal(Unit healer, Unit reciever, ref uint gain) { }
@@ -324,9 +323,9 @@ namespace Game.Scripting
         object[] _args;
     }
 
-    public class CreatureScript : UnitScript
+    public class CreatureScript : ScriptObject
     {
-        public CreatureScript(string name) : base(name, false)
+        public CreatureScript(string name) : base(name)
         {
             Global.ScriptMgr.AddScript<CreatureScript>(this);
         }
@@ -582,9 +581,9 @@ namespace Game.Scripting
         public virtual bool OnCheck(Player source, Unit target) { return false; }
     }
 
-    public class PlayerScript : UnitScript
+    public class PlayerScript : ScriptObject
     {
-        public PlayerScript(string name) : base(name, false)
+        public PlayerScript(string name) : base(name)
         {
             Global.ScriptMgr.AddScript(this);
         }

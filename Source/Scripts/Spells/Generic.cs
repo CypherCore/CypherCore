@@ -274,6 +274,9 @@ namespace Scripts.Spells.Generic
         public const uint AchievementPonyup = 3736;
         public const uint MountPony = 29736;
 
+        //CorruptinPlagueEntrys
+        public const uint CorruptingPlague = 40350;
+
         //Kazrogalhellfiremark
         public const uint MarkOfKazrogalHellfire = 189512;
         public const uint MarkOfKazrogalDamageHellfire = 189515;
@@ -317,6 +320,11 @@ namespace Scripts.Spells.Generic
 
         //VendorBarkTrigger
         public const uint AmphitheaterVendor = 30098;
+
+        //CorruptinPlagueEntrys
+        public const uint ApexisFlayer = 22175;
+        public const uint ShardHideBoar = 22180;
+        public const uint AetherRay = 22181;
 
         //DefenderOfAzerothData
         public const uint Nazgrim = 161706;
@@ -3655,6 +3663,58 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    // 40350 - Corrupting Plague
+    class CorruptingPlagueSearcher : ICheck<Unit>
+    {
+        public CorruptingPlagueSearcher(Unit obj, float distance)
+        {
+            _unit = obj;
+            _distance = distance;
+        }
+
+        public bool Invoke(Unit u)
+        {
+            if (_unit.GetDistance2d(u) < _distance &&
+                (u.GetEntry() == CreatureIds.ApexisFlayer || u.GetEntry() == CreatureIds.ShardHideBoar || u.GetEntry() == CreatureIds.AetherRay) &&
+                !u.HasAura(SpellIds.CorruptingPlague))
+                return true;
+
+            return false;
+        }
+
+        Unit _unit;
+        float _distance;
+    }
+    
+    [Script] // 40349 - Corrupting Plague
+    class spell_corrupting_plague_aura : AuraScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.CorruptingPlague);
+        }
+
+        void OnPeriodic(AuraEffect aurEff)
+        {
+            Unit owner = GetTarget();
+
+            List<Creature> targets = new();
+            CorruptingPlagueSearcher creature_check = new(owner, 15.0f);
+            CreatureListSearcher creature_searcher = new(owner, targets, creature_check);
+            Cell.VisitGridObjects(owner, creature_searcher, 15.0f);
+
+            if (!targets.Empty())
+                return;
+
+            PreventDefaultAction();
+        }
+
+        public override void Register()
+        {
+            OnEffectPeriodic.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicTriggerSpell));
+        }
+    }
+    
     [Script] // 169869 - Transformation Sickness
     class spell_gen_decimatus_transformation_sickness : SpellScript
     {

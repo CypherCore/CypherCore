@@ -2031,6 +2031,8 @@ namespace Game.Entities
                     float height = movementInfo.Pos.posZ;
                     UpdateGroundPositionZ(movementInfo.Pos.posX, movementInfo.Pos.posY, ref height);
 
+                    damage = (uint)(damage * GetTotalAuraMultiplier(AuraType.ModifyFallDamagePct));
+
                     if (damage > 0)
                     {
                         //Prevent fall damage from being more than the player maximum health
@@ -5828,7 +5830,7 @@ namespace Game.Entities
 
             // save new stats
             for (var i = PowerType.Mana; i < PowerType.Max; ++i)
-                SetMaxPower(i, GetCreatePowers(i));
+                SetMaxPower(i, GetCreatePowerValue(i));
 
             SetMaxHealth(0);                     // stamina bonus will applied later
 
@@ -6388,7 +6390,7 @@ namespace Game.Entities
             BroadcastTextRecord bct = CliDB.BroadcastTextStorage.LookupByKey(textId);
             if (bct == null)
             {
-                Log.outError(LogFilter.Unit, "WorldObject.MonsterWhisper: `broadcast_text` was not {0} found", textId);
+                Log.outError(LogFilter.Unit, "WorldObject.Whisper: `broadcast_text` was not {0} found", textId);
                 return;
             }
 
@@ -7444,6 +7446,7 @@ namespace Game.Entities
         }
         public void ClearSelfResSpell() { ClearDynamicUpdateFieldValues(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.SelfResSpells)); }
 
+        public ObjectGuid GetSummonedBattlePetGUID() { return m_activePlayerData.SummonedBattlePetGUID; }
         public void SetSummonedBattlePetGUID(ObjectGuid guid) { SetUpdateFieldValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.SummonedBattlePetGUID), guid); }
 
         public void AddTrackCreatureFlag(uint flags) { SetUpdateFieldFlagValue(m_values.ModifyValue(m_activePlayerData).ModifyValue(m_activePlayerData.TrackCreatureMask), flags); }
