@@ -192,7 +192,7 @@ namespace Game.Chat.Commands
                 return true;
             }
 
-            handler.SendSysMessage(CypherStrings.CommandGoInstanceFailed, mapId, scriptname, exit.target_mapId);
+            handler.SendSysMessage(CypherStrings.CommandGoInstanceFailed, mapId, scriptname, exit != null ? exit.target_mapId : -1);
             return false;
         }
 

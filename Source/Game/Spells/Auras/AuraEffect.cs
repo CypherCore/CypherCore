@@ -4240,20 +4240,8 @@ namespace Game.Spells
                                     }
                                     break;
                                 case 36730:                                     // Flame Strike
-                                {
                                     target.CastSpell(target, 36731, new CastSpellExtraArgs(this));
                                     break;
-                                }
-                                case 44191:                                     // Flame Strike
-                                {
-                                    if (target.GetMap().IsDungeon())
-                                    {
-                                        uint spellId = (uint)(target.GetMap().IsHeroic() ? 46163 : 44190);
-
-                                        target.CastSpell(target, spellId, new CastSpellExtraArgs(this));
-                                    }
-                                    break;
-                                }
                                 case 43681: // Inactive
                                 {
                                     if (!target.IsTypeId(TypeId.Player) || aurApp.GetRemoveMode() != AuraRemoveMode.Expire)
