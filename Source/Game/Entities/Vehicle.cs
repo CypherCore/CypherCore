@@ -574,6 +574,11 @@ namespace Game.Entities
                 return true;
             }
 
+            //It's possible that multiple vehicle join
+            //events are executed in the same update
+            if (Passenger.GetVehicle() != null)
+                Passenger.ExitVehicle();
+
             Passenger.SetVehicle(Target);
             Seat.Value.Passenger.Guid = Passenger.GetGUID();
             Seat.Value.Passenger.IsUnselectable = Passenger.HasUnitFlag(UnitFlags.NotSelectable);
