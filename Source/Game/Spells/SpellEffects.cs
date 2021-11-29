@@ -110,7 +110,7 @@ namespace Game.Spells
             data.SpellID = m_spellInfo.Id;
             m_caster.SendMessageToSet(data, true);
 
-            Unit.DealDamage(unitCaster, unitTarget, (uint)unitTarget.GetHealth(), null, DamageEffectType.NoDamage, SpellSchoolMask.Normal, null, false);
+            Unit.Kill(unitCaster, unitTarget, false);
         }
 
         [SpellEffectHandler(SpellEffectName.EnvironmentalDamage)]
