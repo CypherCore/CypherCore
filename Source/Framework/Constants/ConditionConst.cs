@@ -50,8 +50,8 @@ namespace Framework.Constants
         QuestComplete = 28,          // Quest_Id         0              0                  True If Player Has Quest_Id With All Objectives Complete, But Not Yet Rewarded
         NearCreature = 29,           // Creature Entry   Distance       0                  True If There Is A Creature Of Entry In Range
         NearGameobject = 30,         // Gameobject Entry Distance       0                  True If There Is A Gameobject Of Entry In Range
-        ObjectEntryGuid = 31,            // Typeid           Entry          0                  True If Object Is Type Typeid And The Entry Is 0 Or Matches Entry Of The Object
-        TypeMask = 32,               // Typemask         0              0                  True If Object Is Type Object'S Typemask Matches Provided Typemask
+        ObjectEntryGuidLegacy = 31,  // LEGACY_TypeID    Entry          Guid               True If Object Is Type Typeid And The Entry Is 0 Or Matches Entry Of The Object
+        TypeMaskLegacy = 32,         // LEGACY_TypeMask  0              0                  True If Object Is Type Object'S Typemask Matches Provided Typemask
         RelationTo = 33,             // Conditiontarget  Relationtype   0                  True If Object Is In Given Relation With Object Specified By Conditiontarget
         ReactionTo = 34,             // Conditiontarget  Rankmask       0                  True If Object'S Reaction Matches Rankmask Object Specified By Conditiontarget
         DistanceTo = 35,             // Conditiontarget  Distance       Comparisontype     True If Object And Conditiontarget Are Within Distance Given By Parameters
@@ -69,6 +69,9 @@ namespace Framework.Constants
         Queststate = 47,             // quest_id         state_mask     0                  true if player is in any of the provided quest states for the quest (1 = not taken, 2 = completed, 8 = in progress, 32 = failed, 64 = rewarded)
         ObjectiveComplete = 48,      // ID               0              0                  true if player has ID objective complete, but quest not yet rewarded
         DifficultyId = 49,           // Difficulty       0              0                  true is map has difficulty id
+        Gamemaster = 50,             // canBeGM          0              0                  true if player is gamemaster (or can be gamemaster)
+        ObjectEntryGuid = 51,        // TypeID           entry          guid               true if object is type TypeID and the entry is 0 or matches entry of the object or matches guid of the object
+        TypeMask = 52,               // TypeMask         0              0                  true if object is type object's TypeMask matches provided TypeMask
         Max
     }
 

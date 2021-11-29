@@ -134,29 +134,29 @@ namespace Game.Conditions
                     condMeets = Global.GameEventMgr.IsActiveEvent((ushort)ConditionValue1);
                     break;
                 case ConditionTypes.InstanceInfo:
+                {
+                    var map = obj.GetMap();
+                    if (map.IsDungeon())
                     {
-                        var map = obj.GetMap();
-                        if (map.IsDungeon())
+                        InstanceScript instance = ((InstanceMap)map).GetInstanceScript();
+                        if (instance != null)
                         {
-                            InstanceScript instance = ((InstanceMap)map).GetInstanceScript();
-                            if (instance != null)
+                            switch ((InstanceInfo)ConditionValue3)
                             {
-                                switch ((InstanceInfo)ConditionValue3)
-                                {
-                                    case InstanceInfo.Data:
-                                        condMeets = instance.GetData(ConditionValue1) == ConditionValue2;
-                                        break;
-                                    case InstanceInfo.Data64:
-                                        condMeets = instance.GetData64(ConditionValue1) == ConditionValue2;
-                                        break;
-                                    case InstanceInfo.BossState:
-                                        condMeets = instance.GetBossState(ConditionValue1) == (EncounterState)ConditionValue2;
-                                        break;
-                                }
+                                case InstanceInfo.Data:
+                                    condMeets = instance.GetData(ConditionValue1) == ConditionValue2;
+                                    break;
+                                case InstanceInfo.Data64:
+                                    condMeets = instance.GetData64(ConditionValue1) == ConditionValue2;
+                                    break;
+                                case InstanceInfo.BossState:
+                                    condMeets = instance.GetBossState(ConditionValue1) == (EncounterState)ConditionValue2;
+                                    break;
                             }
                         }
-                        break;
                     }
+                    break;
+                }
                 case ConditionTypes.Mapid:
                     condMeets = obj.GetMapId() == ConditionValue1;
                     break;
@@ -204,56 +204,56 @@ namespace Game.Conditions
                     condMeets = Convert.ToBoolean((TypeMask)ConditionValue1 & obj.ObjectTypeMask);
                     break;
                 case ConditionTypes.RelationTo:
+                {
+                    WorldObject toObject = sourceInfo.mConditionTargets[ConditionValue1];
+                    if (toObject != null)
                     {
-                        WorldObject toObject = sourceInfo.mConditionTargets[ConditionValue1];
-                        if (toObject != null)
+                        Unit toUnit = toObject.ToUnit();
+                        if (toUnit != null && unit != null)
                         {
-                            Unit toUnit = toObject.ToUnit();
-                            if (toUnit != null && unit != null)
+                            switch ((RelationType)ConditionValue2)
                             {
-                                switch ((RelationType)ConditionValue2)
-                                {
-                                    case RelationType.Self:
-                                        condMeets = unit == toUnit;
-                                        break;
-                                    case RelationType.InParty:
-                                        condMeets = unit.IsInPartyWith(toUnit);
-                                        break;
-                                    case RelationType.InRaidOrParty:
-                                        condMeets = unit.IsInRaidWith(toUnit);
-                                        break;
-                                    case RelationType.OwnedBy:
-                                        condMeets = unit.GetOwnerGUID() == toUnit.GetGUID();
-                                        break;
-                                    case RelationType.PassengerOf:
-                                        condMeets = unit.IsOnVehicle(toUnit);
-                                        break;
-                                    case RelationType.CreatedBy:
-                                        condMeets = unit.GetCreatorGUID() == toUnit.GetGUID();
-                                        break;
-                                }
+                                case RelationType.Self:
+                                    condMeets = unit == toUnit;
+                                    break;
+                                case RelationType.InParty:
+                                    condMeets = unit.IsInPartyWith(toUnit);
+                                    break;
+                                case RelationType.InRaidOrParty:
+                                    condMeets = unit.IsInRaidWith(toUnit);
+                                    break;
+                                case RelationType.OwnedBy:
+                                    condMeets = unit.GetOwnerGUID() == toUnit.GetGUID();
+                                    break;
+                                case RelationType.PassengerOf:
+                                    condMeets = unit.IsOnVehicle(toUnit);
+                                    break;
+                                case RelationType.CreatedBy:
+                                    condMeets = unit.GetCreatorGUID() == toUnit.GetGUID();
+                                    break;
                             }
                         }
-                        break;
                     }
+                    break;
+                }
                 case ConditionTypes.ReactionTo:
+                {
+                    WorldObject toObject = sourceInfo.mConditionTargets[ConditionValue1];
+                    if (toObject != null)
                     {
-                        WorldObject toObject = sourceInfo.mConditionTargets[ConditionValue1];
-                        if (toObject != null)
-                        {
-                            Unit toUnit = toObject.ToUnit();
-                            if (toUnit != null && unit != null)
-                                condMeets = Convert.ToBoolean((1 << (int)unit.GetReactionTo(toUnit)) & ConditionValue2);
-                        }
-                        break;
+                        Unit toUnit = toObject.ToUnit();
+                        if (toUnit != null && unit != null)
+                            condMeets = Convert.ToBoolean((1 << (int)unit.GetReactionTo(toUnit)) & ConditionValue2);
                     }
+                    break;
+                }
                 case ConditionTypes.DistanceTo:
-                    {
-                        WorldObject toObject = sourceInfo.mConditionTargets[ConditionValue1];
-                        if (toObject != null)
-                            condMeets = MathFunctions.CompareValues((ComparisionType)ConditionValue3, obj.GetDistance(toObject), ConditionValue2);
-                        break;
-                    }
+                {
+                    WorldObject toObject = sourceInfo.mConditionTargets[ConditionValue1];
+                    if (toObject != null)
+                        condMeets = MathFunctions.CompareValues((ComparisionType)ConditionValue3, obj.GetDistance(toObject), ConditionValue2);
+                    break;
+                }
                 case ConditionTypes.Alive:
                     if (unit != null)
                         condMeets = unit.IsAlive();
@@ -281,19 +281,19 @@ namespace Game.Conditions
                         condMeets = unit.HasUnitState((UnitState)ConditionValue1);
                     break;
                 case ConditionTypes.CreatureType:
-                    {
-                        Creature creature = obj.ToCreature();
-                        if (creature)
-                            condMeets = (uint)creature.GetCreatureTemplate().CreatureType == ConditionValue1;
-                        break;
-                    }
+                {
+                    Creature creature = obj.ToCreature();
+                    if (creature)
+                        condMeets = (uint)creature.GetCreatureTemplate().CreatureType == ConditionValue1;
+                    break;
+                }
                 case ConditionTypes.RealmAchievement:
-                    {
-                        AchievementRecord achievement = CliDB.AchievementStorage.LookupByKey(ConditionValue1);
-                        if (achievement != null && Global.AchievementMgr.IsRealmCompleted(achievement))
-                            condMeets = true;
-                        break;
-                    }
+                {
+                    AchievementRecord achievement = CliDB.AchievementStorage.LookupByKey(ConditionValue1);
+                    if (achievement != null && Global.AchievementMgr.IsRealmCompleted(achievement))
+                        condMeets = true;
+                    break;
+                }
                 case ConditionTypes.InWater:
                     if (unit)
                         condMeets = unit.IsInWater();
@@ -302,86 +302,97 @@ namespace Game.Conditions
                     condMeets = obj.GetPhaseShift().HasVisibleMapId(ConditionValue1);
                     break;
                 case ConditionTypes.StandState:
+                {
+                    if (unit)
                     {
-                        if (unit)
-                        {
-                            if (ConditionValue1 == 0)
-                                condMeets = (unit.GetStandState() == (UnitStandStateType)ConditionValue2);
-                            else if (ConditionValue2 == 0)
-                                condMeets = unit.IsStandState();
-                            else if (ConditionValue2 == 1)
-                                condMeets = unit.IsSitState();
-                        }
-                        break;
+                        if (ConditionValue1 == 0)
+                            condMeets = (unit.GetStandState() == (UnitStandStateType)ConditionValue2);
+                        else if (ConditionValue2 == 0)
+                            condMeets = unit.IsStandState();
+                        else if (ConditionValue2 == 1)
+                            condMeets = unit.IsSitState();
                     }
+                    break;
+                }
                 case ConditionTypes.DailyQuestDone:
-                    {
-                        if (player)
-                            condMeets = player.IsDailyQuestDone(ConditionValue1);
-                        break;
-                    }
+                {
+                    if (player)
+                        condMeets = player.IsDailyQuestDone(ConditionValue1);
+                    break;
+                }
                 case ConditionTypes.Charmed:
-                    {
-                        if (unit)
-                            condMeets = unit.IsCharmed();
-                        break;
-                    }
+                {
+                    if (unit)
+                        condMeets = unit.IsCharmed();
+                    break;
+                }
                 case ConditionTypes.PetType:
+                {
+                    if (player)
                     {
-                        if (player)
-                        {
-                            Pet pet = player.GetPet();
-                            if (pet)
-                                condMeets = (((1 << (int)pet.GetPetType()) & ConditionValue1) != 0);
-                        }
-                        break;
+                        Pet pet = player.GetPet();
+                        if (pet)
+                            condMeets = (((1 << (int)pet.GetPetType()) & ConditionValue1) != 0);
                     }
+                    break;
+                }
                 case ConditionTypes.Taxi:
-                    {
-                        if (player)
-                            condMeets = player.IsInFlight();
-                        break;
-                    }
+                {
+                    if (player)
+                        condMeets = player.IsInFlight();
+                    break;
+                }
                 case ConditionTypes.Queststate:
+                {
+                    if (player)
                     {
-                        if (player)
-                        {
-                            if (
-                                (Convert.ToBoolean(ConditionValue2 & (1 << (int)QuestStatus.None)) && (player.GetQuestStatus(ConditionValue1) == QuestStatus.None)) ||
-                                (Convert.ToBoolean(ConditionValue2 & (1 << (int)QuestStatus.Complete)) && (player.GetQuestStatus(ConditionValue1) == QuestStatus.Complete)) ||
-                                (Convert.ToBoolean(ConditionValue2 & (1 << (int)QuestStatus.Incomplete)) && (player.GetQuestStatus(ConditionValue1) == QuestStatus.Incomplete)) ||
-                                (Convert.ToBoolean(ConditionValue2 & (1 << (int)QuestStatus.Failed)) && (player.GetQuestStatus(ConditionValue1) == QuestStatus.Failed)) ||
-                                (Convert.ToBoolean(ConditionValue2 & (1 << (int)QuestStatus.Rewarded)) && player.GetQuestRewardStatus(ConditionValue1))
-                            )
-                                condMeets = true;
-                        }
-                        break;
+                        if (
+                            (Convert.ToBoolean(ConditionValue2 & (1 << (int)QuestStatus.None)) && (player.GetQuestStatus(ConditionValue1) == QuestStatus.None)) ||
+                            (Convert.ToBoolean(ConditionValue2 & (1 << (int)QuestStatus.Complete)) && (player.GetQuestStatus(ConditionValue1) == QuestStatus.Complete)) ||
+                            (Convert.ToBoolean(ConditionValue2 & (1 << (int)QuestStatus.Incomplete)) && (player.GetQuestStatus(ConditionValue1) == QuestStatus.Incomplete)) ||
+                            (Convert.ToBoolean(ConditionValue2 & (1 << (int)QuestStatus.Failed)) && (player.GetQuestStatus(ConditionValue1) == QuestStatus.Failed)) ||
+                            (Convert.ToBoolean(ConditionValue2 & (1 << (int)QuestStatus.Rewarded)) && player.GetQuestRewardStatus(ConditionValue1))
+                        )
+                            condMeets = true;
                     }
+                    break;
+                }
                 case ConditionTypes.ObjectiveComplete:
+                {
+                    if (player)
                     {
-                        if (player)
-                        {
-                            QuestObjective questObj = Global.ObjectMgr.GetQuestObjective(ConditionValue1);
-                            if (questObj == null)
-                                break;
+                        QuestObjective questObj = Global.ObjectMgr.GetQuestObjective(ConditionValue1);
+                        if (questObj == null)
+                            break;
 
-                            Quest quest = Global.ObjectMgr.GetQuestTemplate(questObj.QuestID);
-                            if (quest == null)
-                                break;
+                        Quest quest = Global.ObjectMgr.GetQuestTemplate(questObj.QuestID);
+                        if (quest == null)
+                            break;
 
-                            ushort slot = player.FindQuestSlot(questObj.QuestID);
-                            if (slot >= SharedConst.MaxQuestLogSize)
-                                break;
+                        ushort slot = player.FindQuestSlot(questObj.QuestID);
+                        if (slot >= SharedConst.MaxQuestLogSize)
+                            break;
 
-                            condMeets = (!player.GetQuestRewardStatus(questObj.QuestID) && player.IsQuestObjectiveComplete(slot, quest, questObj));
-                        }
-                        break;
+                        condMeets = (!player.GetQuestRewardStatus(questObj.QuestID) && player.IsQuestObjectiveComplete(slot, quest, questObj));
                     }
+                    break;
+                }
                 case ConditionTypes.DifficultyId:
+                {
+                    condMeets = (uint)obj.GetMap().GetDifficultyID() == ConditionValue1;
+                    break;
+                }
+                case ConditionTypes.Gamemaster:
+                {
+                    if (player != null)
                     {
-                        condMeets = (uint)obj.GetMap().GetDifficultyID() == ConditionValue1;
-                        break;
+                        if (ConditionValue1 == 1)
+                            condMeets = player.CanBeGameMaster();
+                        else
+                            condMeets = player.IsGameMaster();
                     }
+                    break;
+                }
                 default:
                     condMeets = false;
                     break;
@@ -439,6 +450,7 @@ namespace Game.Conditions
                 case ConditionTypes.PetType:
                 case ConditionTypes.Taxi:
                 case ConditionTypes.Queststate:
+                case ConditionTypes.Gamemaster:
                     mask |= GridMapTypeMask.Player;
                     break;
                 case ConditionTypes.UnitState:

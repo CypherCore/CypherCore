@@ -1610,6 +1610,7 @@ namespace Game
                 case ConditionTypes.InWater:
                 case ConditionTypes.Charmed:
                 case ConditionTypes.Taxi:
+                case ConditionTypes.Gamemaster:
                     break;
                 case ConditionTypes.DifficultyId:
                     if (!CliDB.DifficultyStorage.ContainsKey(cond.ConditionValue1))
@@ -2526,7 +2527,10 @@ namespace Game
             new ConditionTypeInfo("On Taxi",              false,false, false),
             new ConditionTypeInfo("Quest state mask",     true, true, false),
             new ConditionTypeInfo("Objective Complete",   true, false, false),
-            new ConditionTypeInfo("Map Difficulty",       true, false, false)
+            new ConditionTypeInfo("Map Difficulty",       true, false, false),
+            new ConditionTypeInfo("Is Gamemaster",        true, false, false),
+            new ConditionTypeInfo("Object Entry or Guid", true, true,  true),
+            new ConditionTypeInfo("Object TypeMask",      true, false, false),
         };
 
         public struct ConditionTypeInfo
