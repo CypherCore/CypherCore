@@ -390,7 +390,7 @@ namespace Scripts.World.NpcSpecial
         };
 
         public const float RangeTripwire = 15.0f;
-        public const float RangeGuardsMark = 50.0f;
+        public const float RangeGuardsMark = 100.0f;
 
         //ChickenCluck
         public const uint FactionFriendly = 35;
@@ -447,7 +447,7 @@ namespace Scripts.World.NpcSpecial
 
         public static Position omenSummonPos = new(7558.993f, -2839.999f, 450.0214f, 4.46f);
 
-        public const uint AuraDurationTimeLeft = 5000;
+        public const uint AuraDurationTimeLeft = 30000;
 
         //Argent squire/gruntling
         public static Tuple<uint, uint>[] bannerSpells =
