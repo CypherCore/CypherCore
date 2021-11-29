@@ -63,7 +63,7 @@ namespace Game
                 }
 
                 uint entry = result.Read<uint>(1);
-                DisableFlags flags = (DisableFlags)result.Read<byte>(2);
+                DisableFlags flags = (DisableFlags)result.Read<ushort>(2);
                 string params_0 = result.Read<string>(3);
                 string params_1 = result.Read<string>(4);
 
@@ -305,6 +305,19 @@ namespace Game
                         (refe.IsCreature() && (spellFlags.HasFlag(DisableFlags.SpellCreature) || (refe.ToUnit().IsPet() && spellFlags.HasFlag(DisableFlags.SpellPet)))) ||
                         (refe.IsGameObject() && spellFlags.HasFlag(DisableFlags.SpellGameobject)))
                         {
+                            if (spellFlags.HasAnyFlag(DisableFlags.SpellArenas | DisableFlags.SpellBattleGrounds))
+                            {
+                                var map = refe.GetMap();
+                                if (map != null)
+                                {
+                                    if (spellFlags.HasFlag(DisableFlags.SpellArenas) && map.IsBattleArena())
+                                        return true;                                    // Current map is Arena and this spell is disabled here
+
+                                    if (spellFlags.HasFlag(DisableFlags.SpellBattleGrounds) && map.IsBattleground())
+                                        return true;                                    // Current map is a Battleground and this spell is disabled here
+                                }
+                            }
+
                             if (spellFlags.HasFlag(DisableFlags.SpellMap))
                             {
                                 List<uint> mapIds = data.param0;
@@ -416,7 +429,9 @@ namespace Game
         SpellArea = 0x20,
         SpellLOS = 0x40,
         SpellGameobject = 0x80,
-        MaxSpell = SpellPlayer | SpellCreature | SpellPet | SpellDeprecatedSpell | SpellMap | SpellArea | SpellLOS | SpellGameobject,
+        SpellArenas = 0x100,
+        SpellBattleGrounds = 0x200,
+        MaxSpell = SpellPlayer | SpellCreature | SpellPet | SpellDeprecatedSpell | SpellMap | SpellArea | SpellLOS | SpellGameobject | SpellArenas | SpellBattleGrounds,
 
         VmapAreaFlag = 0x01,
         VmapHeight = 0x02,
