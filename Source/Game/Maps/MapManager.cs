@@ -154,6 +154,10 @@ namespace Game.Entities
             if (player.IsGameMaster())
                 return EnterState.CanEnter;
 
+            //Other requirements
+            if (!player.Satisfy(Global.ObjectMgr.GetAccessRequirement(mapid, targetDifficulty), mapid, true))
+                return EnterState.CannotEnterUnspecifiedReason;
+
             string mapName = entry.MapName[Global.WorldMgr.GetDefaultDbcLocale()];
 
             Group group = player.GetGroup();
@@ -213,11 +217,7 @@ namespace Game.Entities
                     return EnterState.CannotEnterTooManyInstances;
             }
 
-            //Other requirements
-            if (player.Satisfy(Global.ObjectMgr.GetAccessRequirement(mapid, targetDifficulty), mapid, true))
-                return EnterState.CanEnter;
-            else
-                return EnterState.CannotEnterUnspecifiedReason;
+            return EnterState.CanEnter;
         }
 
         public void Update(uint diff)
