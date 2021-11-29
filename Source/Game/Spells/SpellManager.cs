@@ -3477,6 +3477,7 @@ namespace Game.Entities
             });
 
             ApplySpellFix(new[] {
+                51597, // Summon Scourged Captive
                 56606, // Ride Jokkum
                 61791  // Ride Vehicle (Yogg-Saron)
             }, spellInfo =>
@@ -3485,6 +3486,15 @@ namespace Game.Entities
                 ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
                 {
                     spellEffectInfo.BasePoints = 1;
+                });
+            });
+
+            // Summon Scourged Captive
+            ApplySpellFix(new[] { 51597 }, spellInfo =>
+            {
+                ApplySpellEffectFix(spellInfo, 0, spellEffectInfo =>
+                {
+                    spellEffectInfo.Scaling.Variance = 0.0f;
                 });
             });
 
