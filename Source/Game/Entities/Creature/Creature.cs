@@ -823,7 +823,13 @@ namespace Game.Entities
                 Log.outError(LogFilter.Unit, $"Creature.Create: given coordinates for creature (guidlow {guidlow}, entry {entry}) are not valid ({pos})");
                 return false;
             }
-            UpdatePositionData();
+
+            {
+                // area/zone id is needed immediately for ZoneScript::GetCreatureEntry hook before it is known which creature template to load (no model/scale available yet)
+                PositionFullTerrainStatus positionData = new();
+                GetMap().GetFullTerrainStatusForPosition(GetPhaseShift(), GetPositionX(), GetPositionY(), GetPositionZ(), positionData, LiquidHeaderTypeFlags.AllLiquids, MapConst.DefaultCollesionHeight);
+                ProcessPositionDataChanged(positionData);
+            }
 
             // Allow players to see those units while dead, do it here (mayby altered by addon auras)
             if (cinfo.TypeFlags.HasAnyFlag(CreatureTypeFlags.GhostVisible))

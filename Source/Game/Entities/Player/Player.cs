@@ -213,8 +213,6 @@ namespace Game.Entities
                 }
             }
 
-            UpdatePositionData();
-
             // set initial homebind position
             SetHomebind(this, GetAreaId());
 
@@ -236,6 +234,7 @@ namespace Game.Entities
             SetGender(createInfo.Sex);
             SetPowerType(powertype);
             InitDisplayIds();
+            UpdatePositionData();
             if ((RealmType)WorldConfig.GetIntValue(WorldCfg.GameType) == RealmType.PVP || (RealmType)WorldConfig.GetIntValue(WorldCfg.GameType) == RealmType.RPPVP)
             {
                 AddPvpFlag(UnitPVPStateFlags.PvP);

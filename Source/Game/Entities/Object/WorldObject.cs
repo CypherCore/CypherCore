@@ -115,7 +115,7 @@ namespace Game.Entities
         public void UpdatePositionData()
         {
             PositionFullTerrainStatus data = new();
-            GetMap().GetFullTerrainStatusForPosition(_phaseShift, GetPositionX(), GetPositionY(), GetPositionZ(), data, LiquidHeaderTypeFlags.AllLiquids);
+            GetMap().GetFullTerrainStatusForPosition(_phaseShift, GetPositionX(), GetPositionY(), GetPositionZ(), data, LiquidHeaderTypeFlags.AllLiquids, GetCollisionHeight());
             ProcessPositionDataChanged(data);
         }
 
