@@ -277,6 +277,12 @@ namespace Scripts.Spells.Generic
         //CorruptinPlagueEntrys
         public const uint CorruptingPlague = 40350;
 
+        //FreezingCircleMisc
+        public const uint FreezingCirclePitOfSaronNormal = 69574;
+        public const uint FreezingCirclePitOfSaronHeroic = 70276;
+        public const uint FreezingCircle = 34787;
+        public const uint FreezingCircleScenario = 141383;
+
         //Kazrogalhellfiremark
         public const uint MarkOfKazrogalHellfire = 189512;
         public const uint MarkOfKazrogalDamageHellfire = 189515;
@@ -401,6 +407,9 @@ namespace Scripts.Spells.Generic
     {
         //FungalDecay
         public const int AuraDuration = 12600; // found in sniffs, there is no duration entry we can possibly use
+
+        //FreezingCircleMisc
+        public const uint MapIdBloodInTheSnowScenario = 1130;
     }
 
     [Script]
@@ -3685,7 +3694,7 @@ namespace Scripts.Spells.Generic
         Unit _unit;
         float _distance;
     }
-    
+
     [Script] // 40349 - Corrupting Plague
     class spell_corrupting_plague_aura : AuraScript
     {
@@ -3712,6 +3721,37 @@ namespace Scripts.Spells.Generic
         public override void Register()
         {
             OnEffectPeriodic.Add(new EffectPeriodicHandler(OnPeriodic, 0, AuraType.PeriodicTriggerSpell));
+        }
+    }
+
+    [Script] // 34779 - Freezing Circle
+    class spell_freezing_circle : SpellScript
+    {
+        public override bool Validate(SpellInfo spellInfo)
+        {
+            return ValidateSpellInfo(SpellIds.FreezingCirclePitOfSaronNormal, SpellIds.FreezingCirclePitOfSaronHeroic, SpellIds.FreezingCircle, SpellIds.FreezingCircleScenario);
+        }
+
+        void HandleDamage(uint effIndex)
+        {
+            Unit caster = GetCaster();
+            uint spellId = 0;
+            Map map = caster.GetMap();
+
+            if (map.IsDungeon())
+                spellId = map.IsHeroic() ? SpellIds.FreezingCirclePitOfSaronHeroic : SpellIds.FreezingCirclePitOfSaronNormal;
+            else
+                spellId = map.GetId() == Misc.MapIdBloodInTheSnowScenario ? SpellIds.FreezingCircleScenario : SpellIds.FreezingCircle;
+
+            SpellInfo spellInfo = Global.SpellMgr.GetSpellInfo(spellId, GetCastDifficulty());
+            if (spellInfo != null)
+                if (!spellInfo.GetEffects().Empty())
+                    SetHitDamage(spellInfo.GetEffect(0).CalcValue());
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleDamage, 1, SpellEffectName.SchoolDamage));
         }
     }
     
