@@ -773,9 +773,6 @@ namespace Game.AI
 
         public void SetRun(bool run)
         {
-            if (run == _run)
-                return;
-
             me.SetWalk(!run);
             _run = run;
             foreach (var node in _path.nodes)
