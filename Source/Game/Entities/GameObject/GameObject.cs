@@ -816,7 +816,7 @@ namespace Game.Entities
                         return;
                     }
 
-                    SetLootState(LootState.Ready);
+                    SetLootState(LootState.NotReady);
 
                     //burning flags in some Battlegrounds, if you find better condition, just add it
                     if (GetGoInfo().IsDespawnAtAction() || GetGoAnimProgress() > 0)
