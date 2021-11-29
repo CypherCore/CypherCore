@@ -831,11 +831,10 @@ namespace Game.Entities
                     if (m_respawnDelayTime == 0)
                         return;
 
-                    // ToDo: Decide if we should properly despawn these. Maybe they expect to be able to manually respawn from script?
                     if (!m_spawnedByDefault)
                     {
                         m_respawnTime = 0;
-                        DestroyForNearbyPlayers(); // old UpdateObjectVisibility()
+                        Delete();
                         return;
                     }
 
