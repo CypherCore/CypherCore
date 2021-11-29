@@ -517,7 +517,7 @@ namespace Scripts.Spells.Generic
         }
     }
 
-    [Script]
+    [Script] // 46221 - Animal Blood
     class spell_gen_animal_blood : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)
@@ -548,6 +548,25 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    [Script] // 63471 -Spawn Blood Pool
+    class spell_spawn_blood_pool : SpellScript
+    {
+        void SetDest(ref SpellDestination dest)
+        {
+            Unit caster = GetCaster();
+            Position summonPos = caster.GetPosition();
+            LiquidData liquidStatus;
+            if (caster.GetMap().GetLiquidStatus(caster.GetPhaseShift(), caster.GetPositionX(), caster.GetPositionY(), caster.GetPositionZ(), LiquidHeaderTypeFlags.AllLiquids, out liquidStatus, caster.GetCollisionHeight()) != ZLiquidStatus.NoWater)
+                summonPos.posZ = liquidStatus.level;
+            dest.Relocate(summonPos);
+        }
+
+        public override void Register()
+        {
+            OnDestinationTargetSelect.Add(new DestinationTargetSelectHandler(SetDest, 0, Targets.DestCaster));
+        }
+    }
+    
     [Script]
     class spell_gen_arcane_charge : SpellScript
     {
