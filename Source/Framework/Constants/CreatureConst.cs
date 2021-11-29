@@ -407,6 +407,15 @@ namespace Framework.Constants
         Max
     }
 
+    public enum CreatureRandomMovementType
+    {
+        Walk,
+        CanRun,
+        AlwaysRun,
+
+        Max
+    }
+
     public enum VendorInventoryReason
     {
         None = 0,

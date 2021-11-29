@@ -353,6 +353,7 @@ namespace Game.Entities
         public bool Swim;
         public bool Rooted;
         public CreatureChaseMovementType Chase;
+        public CreatureRandomMovementType Random;
 
         public CreatureMovementData()
         {
@@ -368,10 +369,11 @@ namespace Game.Entities
         public bool IsRooted() { return Rooted; }
 
         public CreatureChaseMovementType GetChase() { return Chase; }
+        public CreatureRandomMovementType GetRandom() { return Random; }
 
         public override string ToString()
         {
-            return $"Ground: {Ground}, Swim: {Swim}, Flight: {Flight} {(Rooted ? ", Rooted" : "")}, Chase: {Chase}";
+            return $"Ground: {Ground}, Swim: {Swim}, Flight: {Flight} {(Rooted ? ", Rooted" : "")}, Chase: {Chase}, Random: {Random}";
         }
     }
     
