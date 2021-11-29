@@ -28,7 +28,6 @@ namespace Game.Movement
 
         ChaseRange? _range;
         ChaseAngle? _angle;
-        bool _walk;
 
         PathGenerator _path;
         Position _lastTargetPosition;
@@ -38,12 +37,11 @@ namespace Game.Movement
 
         AbstractFollower _abstractFollower;
 
-        public ChaseMovementGenerator(Unit target, ChaseRange? range, ChaseAngle? angle, bool walk = false)
+        public ChaseMovementGenerator(Unit target, ChaseRange? range, ChaseAngle? angle)
         {
             _abstractFollower = new AbstractFollower(target);
             _range = range;
             _angle = angle;
-            _walk = walk;
 
             Mode = MovementGeneratorMode.Default;
             Priority = MovementGeneratorPriority.Normal;
@@ -56,7 +54,6 @@ namespace Game.Movement
             RemoveFlag(MovementGeneratorFlags.InitializationPending | MovementGeneratorFlags.Deactivated);
             AddFlag(MovementGeneratorFlags.Initialized);
 
-            owner.SetWalk(_walk);
             _path = null;
             _lastTargetPosition = null;
         }
@@ -186,11 +183,29 @@ namespace Game.Movement
 
                     if (cOwner)
                         cOwner.SetCannotReachTarget(false);
+
                     owner.AddUnitState(UnitState.ChaseMove);
+
+                    bool walk = false;
+                    if (cOwner && !cOwner.IsPet())
+                    {
+                        switch (cOwner.GetMovementTemplate().GetChase())
+                        {
+                            case CreatureChaseMovementType.CanWalk:
+                                if (owner.IsWalking())
+                                    walk = true;
+                                break;
+                            case CreatureChaseMovementType.AlwaysWalk:
+                                walk = true;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
 
                     MoveSplineInit init = new(owner);
                     init.MovebyPath(_path.GetPath());
-                    init.SetWalk(_walk);
+                    init.SetWalk(walk);
                     init.SetFacing(target);
 
                     init.Launch();

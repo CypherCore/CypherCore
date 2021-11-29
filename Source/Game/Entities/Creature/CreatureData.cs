@@ -352,6 +352,7 @@ namespace Game.Entities
         public CreatureFlightMovementType Flight;
         public bool Swim;
         public bool Rooted;
+        public CreatureChaseMovementType Chase;
 
         public CreatureMovementData()
         {
@@ -366,9 +367,11 @@ namespace Game.Entities
         public bool IsFlightAllowed() { return Flight != CreatureFlightMovementType.None; }
         public bool IsRooted() { return Rooted; }
 
+        public CreatureChaseMovementType GetChase() { return Chase; }
+
         public override string ToString()
         {
-            return $"Ground: {Ground}, Swim: {Swim}, Flight: {Flight} {(Rooted ? ", Rooted" : "")}";
+            return $"Ground: {Ground}, Swim: {Swim}, Flight: {Flight} {(Rooted ? ", Rooted" : "")}, Chase: {Chase}";
         }
     }
     

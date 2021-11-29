@@ -1829,24 +1829,27 @@ namespace Game
             if (!fields.IsNull(63))
                 creature.Movement.Rooted = fields.Read<bool>(63);
 
-            creature.HoverHeight = fields.Read<float>(64);
-            creature.ModHealth = fields.Read<float>(65);
-            creature.ModHealthExtra = fields.Read<float>(66);
-            creature.ModMana = fields.Read<float>(67);
-            creature.ModManaExtra = fields.Read<float>(68);
-            creature.ModArmor = fields.Read<float>(69);
-            creature.ModDamage = fields.Read<float>(70);
-            creature.ModExperience = fields.Read<float>(71);
-            creature.RacialLeader = fields.Read<bool>(72);
-            creature.MovementId = fields.Read<uint>(73);
-            creature.CreatureDifficultyID = fields.Read<int>(74);
-            creature.WidgetSetID = fields.Read<int>(75);
-            creature.WidgetSetUnitConditionID = fields.Read<int>(76);
-            creature.RegenHealth = fields.Read<bool>(77);
-            creature.MechanicImmuneMask = fields.Read<uint>(78);
-            creature.SpellSchoolImmuneMask = fields.Read<uint>(79);
-            creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(80);
-            creature.ScriptID = GetScriptId(fields.Read<string>(81));
+            if (!fields.IsNull(64))
+                creature.Movement.Chase = (CreatureChaseMovementType)fields.Read<byte>(64);
+
+            creature.HoverHeight = fields.Read<float>(65);
+            creature.ModHealth = fields.Read<float>(66);
+            creature.ModHealthExtra = fields.Read<float>(67);
+            creature.ModMana = fields.Read<float>(68);
+            creature.ModManaExtra = fields.Read<float>(69);
+            creature.ModArmor = fields.Read<float>(70);
+            creature.ModDamage = fields.Read<float>(71);
+            creature.ModExperience = fields.Read<float>(72);
+            creature.RacialLeader = fields.Read<bool>(73);
+            creature.MovementId = fields.Read<uint>(74);
+            creature.CreatureDifficultyID = fields.Read<int>(75);
+            creature.WidgetSetID = fields.Read<int>(76);
+            creature.WidgetSetUnitConditionID = fields.Read<int>(77);
+            creature.RegenHealth = fields.Read<bool>(78);
+            creature.MechanicImmuneMask = fields.Read<uint>(79);
+            creature.SpellSchoolImmuneMask = fields.Read<uint>(80);
+            creature.FlagsExtra = (CreatureFlagsExtra)fields.Read<uint>(81);
+            creature.ScriptID = GetScriptId(fields.Read<string>(82));
 
             creatureTemplateStorage[entry] = creature;
         }
@@ -2249,7 +2252,7 @@ namespace Game
 
             creatureMovementOverrides.Clear();
 
-            SQLResult result = DB.World.Query("SELECT SpawnId, Ground, Swim, Flight, Rooted from creature_movement_override");
+            SQLResult result = DB.World.Query("SELECT SpawnId, Ground, Swim, Flight, Rooted, Chase from creature_movement_override");
             if (result.IsEmpty())
             {
                 Log.outInfo(LogFilter.ServerLoading, "Loaded 0 creature movement overrides. DB table `creature_movement_override` is empty!");
@@ -2270,6 +2273,7 @@ namespace Game
                 movement.Swim = result.Read<bool>(2);
                 movement.Flight = (CreatureFlightMovementType)result.Read<byte>(3);
                 movement.Rooted = result.Read<bool>(4);
+                movement.Chase = (CreatureChaseMovementType)result.Read<byte>(5);
 
                 CheckCreatureMovement("creature_movement_override", spawnId, movement);
 
@@ -2739,6 +2743,12 @@ namespace Game
             {
                 Log.outError(LogFilter.Sql, $"`{table}`.`Flight` wrong value ({creatureMovement.Flight}) for Id {id}, setting to None.");
                 creatureMovement.Flight = CreatureFlightMovementType.None;
+            }
+
+            if (creatureMovement.Chase >= CreatureChaseMovementType.Max)
+            {
+                Log.outError(LogFilter.Sql, $"`{table}`.`Chase` wrong value ({creatureMovement.Chase}) for Id {id}, setting to Run.");
+                creatureMovement.Chase = CreatureChaseMovementType.Run;
             }
         }
         public void LoadLinkedRespawn()

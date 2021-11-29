@@ -398,6 +398,15 @@ namespace Framework.Constants
         Max
     }
 
+    public enum CreatureChaseMovementType
+    {
+        Run,
+        CanWalk,
+        AlwaysWalk,
+
+        Max
+    }
+
     public enum VendorInventoryReason
     {
         None = 0,
