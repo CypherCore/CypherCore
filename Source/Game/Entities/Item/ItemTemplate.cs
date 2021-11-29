@@ -40,6 +40,15 @@ namespace Game.Entities
             return ExtendedData.Display[locale];
         }
 
+        public bool HasSignature()
+        {
+            return GetMaxStackSize() == 1 &&
+                GetClass() != ItemClass.Consumable &&
+                GetClass() != ItemClass.Quest &&
+                !GetFlags().HasFlag(ItemFlags.NoCreator) &&
+                GetId() != 6948; /*Hearthstone*/
+        }
+        
         public bool CanChangeEquipStateInCombat()
         {
             switch (GetInventoryType())

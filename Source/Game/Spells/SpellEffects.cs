@@ -1031,7 +1031,7 @@ namespace Game.Spells
                 }
 
                 // set the "Crafted by ..." property of the item
-                if (pItem.GetTemplate().GetClass() != ItemClass.Consumable && pItem.GetTemplate().GetClass() != ItemClass.Quest && newitemid != 6265 && newitemid != 6948)
+                if (pItem.GetTemplate().HasSignature())
                     pItem.SetCreator(player.GetGUID());
 
                 // send info to the client
