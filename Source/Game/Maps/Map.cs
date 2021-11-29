@@ -1719,13 +1719,9 @@ namespace Game.Maps
             // find raw .map surface under Z coordinates
             float mapHeight = MapConst.VMAPInvalidHeightValue;
             uint terrainMapId = PhasingHandler.GetTerrainMapId(phaseShift, this, x, y);
-            GridMap gmap = GetGridMap(terrainMapId, x, y);
-            if (gmap != null)
-            {
-                float gridHeight = gmap.GetHeight(x, y);
-                if (MathFunctions.fuzzyGe(z, gridHeight - MapConst.GroundHeightTolerance))
-                    mapHeight = gridHeight;
-            }
+            float gridHeight = GetGridHeight(phaseShift, x, y);
+            if (MathFunctions.fuzzyGe(z, gridHeight - MapConst.GroundHeightTolerance))
+                mapHeight = gridHeight;
 
             float vmapHeight = MapConst.VMAPInvalidHeightValue;
             if (checkVMap)
@@ -1746,8 +1742,10 @@ namespace Game.Maps
                     // or if the distance of the vmap height is less the land height distance
                     if (vmapHeight > mapHeight || Math.Abs(mapHeight - z) > Math.Abs(vmapHeight - z))
                         return vmapHeight;
+
                     return mapHeight; // better use .map surface height
                 }
+
                 return vmapHeight; // we have only vmapHeight (if have)
             }
 
@@ -1764,6 +1762,15 @@ namespace Game.Maps
             return GetHeight(phaseShift, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), vmap, maxSearchDist);
         }
 
+        public float GetGridHeight(PhaseShift phaseShift, float x, float y)
+        {
+            GridMap gmap = GetGridMap(PhasingHandler.GetTerrainMapId(phaseShift, this, x, y), x, y);
+            if (gmap != null)
+                return gmap.GetHeight(x, y);
+
+            return MapConst.VMAPInvalidHeightValue;
+        }
+        
         public float GetMinHeight(PhaseShift phaseShift, float x, float y)
         {
             GridMap grid = GetGridMap(PhasingHandler.GetTerrainMapId(phaseShift, this, x, y), x, y);

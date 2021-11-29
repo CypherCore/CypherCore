@@ -140,7 +140,7 @@ namespace Game.Movement
             }
 
             bool result = _path.CalculatePath(destination.GetPositionX(), destination.GetPositionY(), destination.GetPositionZ());
-            if (!result || _path.GetPathType().HasAnyFlag(PathType.NoPath))
+            if (!result || _path.GetPathType().HasAnyFlag(PathType.NoPath) || _path.GetPathType().HasAnyFlag(PathType.Shortcut))
             {
                 _timer.Reset(100);
                 return;

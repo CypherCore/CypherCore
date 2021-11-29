@@ -529,14 +529,14 @@ namespace Game.Movement
                 // @todo check the exact cases
                 Log.outDebug(LogFilter.Maps, "++ PathGenerator.BuildPointPath FAILED! path sized {0} returned\n", pointCount);
                 BuildShortcut();
-                pathType = PathType.NoPath;
+                pathType |= PathType.NoPath;
                 return;
             }
             else if (pointCount == _pointPathLimit)
             {
                 Log.outDebug(LogFilter.Maps, "++ PathGenerator.BuildPointPath FAILED! path sized {0} returned, lower than limit set to {1}\n", pointCount, _pointPathLimit);
                 BuildShortcut();
-                pathType = PathType.Short;
+                pathType |= PathType.Short;
                 return;
             }
 

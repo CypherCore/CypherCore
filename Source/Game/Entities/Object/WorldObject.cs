@@ -3043,9 +3043,18 @@ namespace Game.Entities
 
         public void UpdateAllowedPositionZ(float x, float y, ref float z)
         {
+            float unused = 0f;
+            UpdateAllowedPositionZ(x, y, ref z, ref unused);
+        }
+
+        public void UpdateAllowedPositionZ(float x, float y, ref float z, ref float groundZ)
+        {
             // TODO: Allow transports to be part of dynamic vmap tree
             if (GetTransport())
+            {
+                groundZ = z;
                 return;
+            }
 
             Unit unit = ToUnit();
             if (unit != null)
@@ -3053,31 +3062,35 @@ namespace Game.Entities
                 if (!unit.CanFly())
                 {
                     bool canSwim = unit.CanSwim();
-                    float groundZ = z;
+                    float ground_z = z;
                     float max_z;
                     if (canSwim)
-                        max_z = GetMapWaterOrGroundLevel(x, y, z, ref groundZ);
+                        max_z = GetMapWaterOrGroundLevel(x, y, z, ref ground_z);
                     else
-                        max_z = groundZ = GetMapHeight(x, y, z);
+                        max_z = ground_z = GetMapHeight(x, y, z);
 
                     if (max_z > MapConst.InvalidHeight)
                     {
                         // hovering units cannot go below their hover height
                         float hoverOffset = unit.GetHoverOffset();
                         max_z += hoverOffset;
-                        groundZ += hoverOffset;
+                        ground_z += hoverOffset;
 
                         if (z > max_z)
                             z = max_z;
-                        else if (z < groundZ)
-                            z = groundZ;
+                        else if (z < ground_z)
+                            z = ground_z;
                     }
+
+                    groundZ = ground_z;
                 }
                 else
                 {
                     float ground_z = GetMapHeight(x, y, z) + unit.GetHoverOffset();
                     if (z < ground_z)
                         z = ground_z;
+
+                    groundZ = ground_z;
                 }
             }
             else
@@ -3085,6 +3098,8 @@ namespace Game.Entities
                 float ground_z = GetMapHeight(x, y, z);
                 if (ground_z > MapConst.InvalidHeight)
                     z = ground_z;
+
+                groundZ = ground_z;
             }
         }
 
@@ -3295,10 +3310,28 @@ namespace Game.Entities
                 }
             }
 
+            float groundZ = MapConst.VMAPInvalidHeightValue;
             GridDefines.NormalizeMapCoord(ref pos.posX);
             GridDefines.NormalizeMapCoord(ref pos.posY);
-            UpdateAllowedPositionZ(destx, desty, ref pos.posZ);
+            UpdateAllowedPositionZ(destx, desty, ref pos.posZ, ref groundZ);
             pos.SetOrientation(GetOrientation());
+
+            // position has no ground under it (or is too far away)
+            if (groundZ <= MapConst.InvalidHeight)
+            {
+                Unit unit = ToUnit();
+                if (unit != null)
+                {
+                    // unit can fly, ignore.
+                    if (unit.CanFly())
+                        return;
+
+                    // fall back to gridHeight if any
+                    float gridHeight = GetMap().GetGridHeight(GetPhaseShift(), pos.posX, pos.posY);
+                    if (gridHeight > MapConst.InvalidHeight)
+                        pos.posZ = gridHeight + unit.GetHoverOffset();
+                }
+            }
         }
 
         public float GetFloorZ()

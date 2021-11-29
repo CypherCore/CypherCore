@@ -900,9 +900,9 @@ namespace Game.Spells
                         pos.posX = m_preGeneratedPath.GetActualEndPosition().X;
                         pos.posY = m_preGeneratedPath.GetActualEndPosition().Y;
                         pos.posZ = m_preGeneratedPath.GetActualEndPosition().Z;
+                        dest.Relocate(pos);
                     }
 
-                    dest.Relocate(pos);
                     break;
                 }
                 case Targets.DestCasterGround:
