@@ -1437,7 +1437,7 @@ namespace Game.Entities
             if (playerUser != null)
             {
                 if (!m_goInfo.IsUsableMounted())
-                    playerUser.Dismount();
+                    playerUser.RemoveAurasByType(AuraType.Mounted);
 
                 playerUser.PlayerTalkClass.ClearMenus();
                 if (GetAI().GossipHello(playerUser))
