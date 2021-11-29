@@ -5445,7 +5445,7 @@ namespace Game.Spells
                 return;
             }
 
-            if (battlePetMgr.HasMaxPetCount(speciesEntry))
+            if (battlePetMgr.HasMaxPetCount(speciesEntry, player.GetGUID()))
             {
                 battlePetMgr.SendError(BattlePetError.CantHaveMorePetsOfThatType, speciesEntry.CreatureID);
                 SendCastResult(SpellCastResult.CantAddBattlePet);

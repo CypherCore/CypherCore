@@ -1059,6 +1059,7 @@ namespace Game
 
             stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BATTLE_PETS);
             stmt.AddValue(0, battlenetAccountId);
+            stmt.AddValue(1, Global.WorldMgr.GetRealmId().Index);
             SetQuery(AccountInfoQueryLoad.BattlePets, stmt);
 
             stmt = DB.Login.GetPreparedStatement(LoginStatements.SEL_BATTLE_PET_SLOTS);

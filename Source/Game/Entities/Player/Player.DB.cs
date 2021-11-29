@@ -3823,6 +3823,8 @@ namespace Game.Entities
             }
 
             SQLTransaction trans = new();
+            SQLTransaction loginTransaction = new();
+
             ulong guildId = Global.CharacterCacheStorage.GetCharacterGuildIdByGuid(playerGuid);
             if (guildId != 0)
             {
@@ -4215,6 +4217,11 @@ namespace Game.Entities
                     stmt.AddValue(0, guid);
                     trans.Append(stmt);
 
+                    stmt = DB.Login.GetPreparedStatement(LoginStatements.DEL_BATTLE_PETS_BY_OWNER);
+                    stmt.AddValue(0, guid);
+                    stmt.AddValue(0, Global.WorldMgr.GetRealmId().Index);
+                    loginTransaction.Append(stmt);
+
                     Corpse.DeleteFromDB(playerGuid, trans);
 
                     Garrison.DeleteFromDB(guid, trans);
@@ -4240,6 +4247,7 @@ namespace Game.Entities
                     return;
             }
 
+            DB.Login.CommitTransaction(loginTransaction);
             DB.Characters.CommitTransaction(trans);
 
             if (updateRealmChars)
