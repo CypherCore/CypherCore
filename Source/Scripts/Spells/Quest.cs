@@ -252,6 +252,7 @@ namespace Scripts.Spells.Quest
 
         //Quest12372
         public const uint WyrmrestTempleCredit = 27698;
+        public const uint WyrmrestDefender = 27629;
 
         //Quest11010 11102 11023        
         public const uint FelCannon2 = 23082;
@@ -1226,7 +1227,7 @@ namespace Scripts.Spells.Quest
         void HandleScript(uint effIndex)
         {
             Creature defender = GetHitCreature();
-            if (defender)
+            if (defender != null && defender.GetEntry() == CreatureIds.WyrmrestDefender)
                 defender.GetAI().Talk(Misc.WhisperOnHitByForceWhisper, defender.GetCharmerOrOwner());
         }
 
