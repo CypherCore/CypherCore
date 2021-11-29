@@ -393,6 +393,12 @@ namespace Game
                             Log.outError(LogFilter.Sql, "`game_event_creature` game event id ({0}) not exist in `game_event`", event_id);
                             continue;
                         }
+
+                        // Log error for pooled object, but still spawn it
+                        uint poolId = Global.PoolMgr.IsPartOfAPool(SpawnObjectType.Creature, guid);
+                        if (poolId != 0)
+                            Log.outError(LogFilter.Sql, $"`game_event_creature`: game event id ({event_id}) contains creature ({guid}) which is part of a pool ({poolId}). This should be spawned in game_event_pool");
+
                         mGameEventCreatureGuids[internal_event_id].Add(guid);
 
                         ++count;
@@ -432,6 +438,12 @@ namespace Game
                             Log.outError(LogFilter.Sql, "`game_event_gameobject` game event id ({0}) not exist in `game_event`", event_id);
                             continue;
                         }
+
+                        // Log error for pooled object, but still spawn it
+                        uint poolId = Global.PoolMgr.IsPartOfAPool(SpawnObjectType.GameObject, guid);
+                        if (poolId != 0)
+                            Log.outError(LogFilter.Sql, $"`game_event_gameobject`: game event id ({event_id}) contains game object ({guid}) which is part of a pool ({poolId}). This should be spawned in game_event_pool");
+
                         mGameEventGameobjectGuids[internal_event_id].Add(guid);
 
                         ++count;
