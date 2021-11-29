@@ -1274,7 +1274,7 @@ namespace Game.DungeonFinding
                 if (!fromOpcode)
                 {
                     // Select a player inside to be teleported to
-                    for (GroupReference refe = group.GetFirstMember(); refe != null && mapid == 0; refe = refe.Next())
+                    for (GroupReference refe = group.GetFirstMember(); refe != null; refe = refe.Next())
                     {
                         Player plrg = refe.GetSource();
                         if (plrg && plrg != player && plrg.GetMapId() == dungeon.map)
