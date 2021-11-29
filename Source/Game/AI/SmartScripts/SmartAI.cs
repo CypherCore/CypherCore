@@ -1098,6 +1098,10 @@ namespace Game.AI
         public override void InitializeAI()
         {
             GetScript().OnInitialize(me);
+
+            // do not call respawn event if go is not spawned
+            if (me.IsSpawned())
+                GetScript().ProcessEventsFor(SmartEvents.Respawn);
         }
 
         public override void Reset()
