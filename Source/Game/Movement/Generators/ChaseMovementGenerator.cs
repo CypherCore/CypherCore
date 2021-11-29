@@ -192,8 +192,7 @@ namespace Game.Movement
                         switch (cOwner.GetMovementTemplate().GetChase())
                         {
                             case CreatureChaseMovementType.CanWalk:
-                                if (owner.IsWalking())
-                                    walk = true;
+                                walk = owner.IsWalking();
                                 break;
                             case CreatureChaseMovementType.AlwaysWalk:
                                 walk = true;
