@@ -2012,7 +2012,7 @@ namespace Game.Spells
                 if (caster != null)
                 {
                     // delayed spells with multiple targets need to create a new aura object, otherwise we'll access a deleted aura
-                    if (spellAura == null || (m_spellInfo.HasHitDelay() && !m_spellInfo.IsChanneled()))
+                    if (hitInfo.HitAura == null)
                     {
                         bool resetPeriodicTimer = !_triggeredCastFlags.HasFlag(TriggerCastFlags.DontResetPeriodicTimer);
                         uint allAuraEffectMask = Aura.BuildEffectMaskForOwner(m_spellInfo, SpellConst.MaxEffectMask, unit);
@@ -2027,23 +2027,23 @@ namespace Game.Spells
                         Aura aura = Aura.TryRefreshStackOrCreate(createInfo);
                         if (aura != null)
                         {
-                            spellAura = aura.ToUnitAura();
+                            hitInfo.HitAura = aura.ToUnitAura();
 
                             // Set aura stack amount to desired value
                             if (m_spellValue.AuraStackAmount > 1)
                             {
                                 if (!createInfo.IsRefresh)
-                                    spellAura.SetStackAmount((byte)m_spellValue.AuraStackAmount);
+                                    hitInfo.HitAura.SetStackAmount((byte)m_spellValue.AuraStackAmount);
                                 else
-                                    spellAura.ModStackAmount(m_spellValue.AuraStackAmount);
+                                    hitInfo.HitAura.ModStackAmount(m_spellValue.AuraStackAmount);
                             }
 
 
-                            spellAura.SetDiminishGroup(hitInfo.DRGroup);
+                            hitInfo.HitAura.SetDiminishGroup(hitInfo.DRGroup);
 
                             if (!m_spellValue.Duration.HasValue)
                             {
-                                hitInfo.AuraDuration = caster.ModSpellDuration(m_spellInfo, unit, hitInfo.AuraDuration, hitInfo.Positive, spellAura.GetEffectMask());
+                                hitInfo.AuraDuration = caster.ModSpellDuration(m_spellInfo, unit, hitInfo.AuraDuration, hitInfo.Positive, hitInfo.HitAura.GetEffectMask());
 
                                 if (hitInfo.AuraDuration > 0)
                                 {
@@ -2056,7 +2056,7 @@ namespace Game.Spells
                                     {
                                         int origDuration = hitInfo.AuraDuration;
                                         hitInfo.AuraDuration = 0;
-                                        foreach (AuraEffect auraEff in spellAura.GetAuraEffects())
+                                        foreach (AuraEffect auraEff in hitInfo.HitAura.GetAuraEffects())
                                         {
                                             if (auraEff != null)
                                             {
@@ -2075,21 +2075,21 @@ namespace Game.Spells
                             else
                                 hitInfo.AuraDuration = m_spellValue.Duration.Value;
 
-                            if (hitInfo.AuraDuration != spellAura.GetMaxDuration())
+                            if (hitInfo.AuraDuration != hitInfo.HitAura.GetMaxDuration())
                             {
-                                spellAura.SetMaxDuration(hitInfo.AuraDuration);
-                                spellAura.SetDuration(hitInfo.AuraDuration);
+                                hitInfo.HitAura.SetMaxDuration(hitInfo.AuraDuration);
+                                hitInfo.HitAura.SetDuration(hitInfo.AuraDuration);
                             }
                         }
                     }
                     else
-                        spellAura.AddStaticApplication(unit, aura_effmask);
-
-                    hitInfo.HitAura = spellAura;
+                        hitInfo.HitAura.AddStaticApplication(unit, aura_effmask);
                 }
             }
 
+            spellAura = hitInfo.HitAura;
             HandleEffects(unit, null, null, spellEffectInfo, SpellEffectHandleMode.HitTarget);
+            spellAura = null;
         }
 
         public void DoTriggersOnSpellHit(Unit unit, uint effMask)
@@ -8070,7 +8070,9 @@ namespace Game.Spells
                     spell.GetCaster().ToPlayer().UpdatePvP(true);
             }
 
+            spell.spellAura = HitAura;
             spell.CallScriptAfterHitHandlers();
+            spell.spellAura = null;
         }
     }
 

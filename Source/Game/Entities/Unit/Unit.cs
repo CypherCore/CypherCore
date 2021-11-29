@@ -900,6 +900,11 @@ namespace Game.Entities
                 }
                 else if (seatId >= 0 && seatId == GetTransSeat())
                     return;
+                else
+                {
+                    //Exit the current vehicle because unit will reenter in a new seat.
+                    m_vehicle.GetBase().RemoveAurasByType(AuraType.ControlVehicle, GetGUID(), aurApp.GetBase());
+                }
             }
 
             if (aurApp.HasRemoveMode())

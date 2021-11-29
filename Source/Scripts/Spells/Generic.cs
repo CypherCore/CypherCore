@@ -277,6 +277,9 @@ namespace Scripts.Spells.Generic
         //CorruptinPlagueEntrys
         public const uint CorruptingPlague = 40350;
 
+        //SiegeTankControl
+        public const uint SiegeTankControl = 47963;
+
         //FreezingCircleMisc
         public const uint FreezingCirclePitOfSaronNormal = 69574;
         public const uint FreezingCirclePitOfSaronHeroic = 70276;
@@ -3724,6 +3727,20 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    [Script]
+    class spell_gen_vehicle_control_link : AuraScript
+    {
+        void OnRemove(AuraEffect aurEff, AuraEffectHandleModes mode)
+        {
+            GetTarget().RemoveAurasDueToSpell(SpellIds.SiegeTankControl); //aurEff->GetAmount()
+        }
+
+        public override void Register()
+        {
+            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 1, AuraType.Dummy, AuraEffectHandleModes.Real));
+        }
+    }
+    
     [Script] // 34779 - Freezing Circle
     class spell_freezing_circle : SpellScript
     {

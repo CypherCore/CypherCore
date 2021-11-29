@@ -233,7 +233,7 @@ namespace Scripts.Spells.Warlock
             {
                 AuraEffect aurEff = aura.GetEffect(1);
                 if (aurEff != null)
-                    aurEff.SetAmount(MathFunctions.CalculatePct(aurEff.GetAmount(), GetHitDamage()));
+                    aurEff.SetAmount(MathFunctions.CalculatePct(GetHitDamage(), aurEff.GetAmount()));
             }
         }
 

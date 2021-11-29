@@ -3822,14 +3822,14 @@ namespace Game.Entities
             if (aura.IsRemoved())
                 return;
 
-            aura.SetIsSingleTarget(caster != null && aura.GetSpellInfo().IsSingleTarget() || aura.HasEffectType(AuraType.ControlVehicle));
+            aura.SetIsSingleTarget(caster != null && aura.GetSpellInfo().IsSingleTarget());
             if (aura.IsSingleTarget())
             {
 
                 // @HACK: Player is not in world during loading auras.
                 //Single target auras are not saved or loaded from database
                 //but may be created as a result of aura links (player mounts with passengers)
-                Cypher.Assert((IsInWorld && !IsDuringRemoveFromWorld()) || (aura.GetCasterGUID() == GetGUID()) || (IsLoading() && aura.HasEffectType(AuraType.ControlVehicle)));
+                Cypher.Assert((IsInWorld && !IsDuringRemoveFromWorld()) || aura.GetCasterGUID() == GetGUID());
 
                 // register single target aura
                 caster.m_scAuras.Add(aura);

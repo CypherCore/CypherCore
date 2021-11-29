@@ -1056,9 +1056,6 @@ namespace Game.Spells
                     break;
             }
 
-            if (HasEffectType(AuraType.ControlVehicle) && aura.HasEffectType(AuraType.ControlVehicle))
-                return true;
-
             return false;
         }
 
