@@ -252,7 +252,7 @@ namespace Game.Entities
 
             var clickBounds = Global.ObjectMgr.GetSpellClickInfoMapBounds(creature.GetEntry());
             if (clickBounds.Empty())
-                return false;
+                return true;
 
             foreach (var spellClickInfo in clickBounds)
             {
