@@ -919,6 +919,11 @@ namespace Game.Entities
 
         public void Delete()
         {
+            // If nearby linked trap exists, despawn it
+            GameObject linkedTrap = GetLinkedTrap();
+            if (linkedTrap != null)
+                linkedTrap.DespawnOrUnsummon();
+
             SetLootState(LootState.NotReady);
             RemoveFromOwner();
 
