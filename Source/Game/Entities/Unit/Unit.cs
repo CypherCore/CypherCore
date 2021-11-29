@@ -2714,12 +2714,6 @@ namespace Game.Entities
             if (!victim.IsAlive() || victim.HasUnitState(UnitState.InFlight) || (victim.IsTypeId(TypeId.Unit) && victim.ToCreature().IsEvadingAttacks()))
                 return;
 
-            // Hmmmm dont like this emotes client must by self do all animations
-            if (damageInfo.HitInfo.HasAnyFlag(HitInfo.CriticalHit))
-                victim.HandleEmoteCommand(Emote.OneshotWoundCritical);
-            if (damageInfo.Blocked != 0 && damageInfo.TargetState != VictimState.Blocks)
-                victim.HandleEmoteCommand(Emote.OneshotParryShield);
-
             if (damageInfo.TargetState == VictimState.Parry &&
                 (!IsTypeId(TypeId.Unit) || !ToCreature().GetCreatureTemplate().FlagsExtra.HasAnyFlag(CreatureFlagsExtra.NoParryHasten)))
             {
