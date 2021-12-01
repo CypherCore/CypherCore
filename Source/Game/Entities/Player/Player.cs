@@ -7122,6 +7122,10 @@ namespace Game.Entities
                 if (_spell_idx.ClassMask != 0 && (_spell_idx.ClassMask & classmask) == 0)
                     continue;
 
+                // skip wrong class and race skill saved in SkillRaceClassInfo.dbc
+                if (Global.DB2Mgr.GetSkillRaceClassInfo(_spell_idx.SkillLine, GetRace(), GetClass()) == null)
+                    continue;
+
                 return true;
             }
 
