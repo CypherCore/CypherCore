@@ -28,6 +28,10 @@ namespace Scripts.Spells.Quest
 {
     struct SpellIds
     {
+        //BendingShinbone
+        public const uint BendingShinbone1 = 8854;
+        public const uint BendingShinbone2 = 8855;
+
         //Thaumaturgychannel        
         public const uint ThaumaturgyChannel = 21029;
 
@@ -355,8 +359,28 @@ namespace Scripts.Spells.Quest
         uint _despawnTime;
     }
 
-    // 9712 - Thaumaturgy Channel
     [Script]
+    class spell_q1846_bending_shinbone : SpellScript
+    {
+        void HandleScriptEffect(uint effIndex)
+        {
+            Item target = GetHitItem();
+            Unit caster = GetCaster();
+            if (!target && !caster.IsPlayer())
+                return;
+
+            uint spellId = RandomHelper.randChance(20) ? SpellIds.BendingShinbone1 : SpellIds.BendingShinbone2;
+            caster.CastSpell(caster, spellId, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
+                .SetOriginalCastId(GetSpell().m_castId));
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+    
+    [Script] // 9712 - Thaumaturgy Channel
     class spell_q2203_thaumaturgy_channel : AuraScript
     {
         public override bool Validate(SpellInfo spellInfo)

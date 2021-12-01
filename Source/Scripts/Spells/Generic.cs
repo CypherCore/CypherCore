@@ -1681,6 +1681,23 @@ namespace Scripts.Spells.Generic
         }
     }
 
+
+    [Script] // 46642 - 5,000 Gold
+    class spell_gen_5000_gold : SpellScript
+    {
+        void HandleScript(uint effIndex)
+        {
+            Player target = GetHitPlayer();
+            if (target != null)
+                target.ModifyMoney(5000 * MoneyConstants.Gold);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+    
     [Script] // 131474 - Fishing
     class spell_gen_fishing : SpellScript
     {
@@ -2437,6 +2454,20 @@ namespace Scripts.Spells.Generic
         }
     }
 
+    [Script]
+    class spell_gen_remove_impairing_auras : SpellScript
+    {
+        void HandleScriptEffect(uint effIndex)
+        {
+            GetHitUnit().RemoveMovementImpairingAuras(true);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+    
     // 23493 - Restoration
     [Script] // 24379 - Restoration
     class spell_gen_restoration : AuraScript

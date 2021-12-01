@@ -553,6 +553,43 @@ namespace Scripts.Spells.DeathKnight
         }
     }
 
+    [Script] // 69961 - Glyph of Scourge Strike
+    class spell_dk_glyph_of_scourge_strike_script : SpellScript
+    {
+        void HandleScriptEffect(uint effIndex)
+        {
+            Unit caster = GetCaster();
+            Unit target = GetHitUnit();
+
+            var mPeriodic = target.GetAuraEffectsByType(AuraType.PeriodicDamage);
+            foreach (var aurEff in mPeriodic)
+            {
+                SpellInfo spellInfo = aurEff.GetSpellInfo();
+                // search our Blood Plague and Frost Fever on target
+                if (spellInfo.SpellFamilyName == SpellFamilyNames.Deathknight && spellInfo.SpellFamilyFlags[2].HasAnyFlag(0x2u) &&
+                    aurEff.GetCasterGUID() == caster.GetGUID())
+                {
+                    int countMin = aurEff.GetBase().GetMaxDuration();
+                    int countMax = spellInfo.GetMaxDuration();
+
+                    // this Glyph
+                    countMax += 9000;
+
+                    if (countMin < countMax)
+                    {
+                        aurEff.GetBase().SetDuration(aurEff.GetBase().GetDuration() + 3000);
+                        aurEff.GetBase().SetMaxDuration(countMin + 3000);
+                    }
+                }
+            }
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+    
     [Script] // 206940 - Mark of Blood
     class spell_dk_mark_of_blood : AuraScript
     {

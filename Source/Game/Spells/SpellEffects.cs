@@ -2748,17 +2748,6 @@ namespace Game.Spells
                                 return;
                             unitTarget.RemoveAurasDueToSpell((uint)effectInfo.CalcValue());
                             break;
-                        // Bending Shinbone
-                        case 8856:
-                        {
-                            if (itemTarget == null && !m_caster.IsTypeId(TypeId.Player))
-                                return;
-
-                            uint spell_id = RandomHelper.Rand32(20) != 0 ? 8854u : 8855u;
-
-                            m_caster.CastSpell(m_caster, spell_id, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
-                            return;
-                        }
                         // Brittle Armor - need remove one 24575 Brittle Armor aura
                         case 24590:
                             unitTarget.RemoveAuraFromStack(24575);
@@ -2792,36 +2781,6 @@ namespace Game.Spells
                             // Shadow Flame
                             m_caster.CastSpell(unitTarget, 22682, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
                             return;
-                        }
-                        // Mirren's Drinking Hat
-                        case 29830:
-                        {
-                            uint item = 0;
-                            switch (RandomHelper.IRand(1, 6))
-                            {
-                                case 1:
-                                case 2:
-                                case 3:
-                                    item = 23584;
-                                    break;            // Loch Modan Lager
-                                case 4:
-                                case 5:
-                                    item = 23585;
-                                    break;            // Stouthammer Lite
-                                case 6:
-                                    item = 23586;
-                                    break;            // Aerie Peak Pale Ale
-                            }
-                            if (item != 0)
-                                DoCreateItem(item);
-                            break;
-                        }
-                        case 20589: // Escape artist
-                        case 30918: // Improved Sprint
-                        {
-                            // Removes snares and roots.
-                            unitTarget.RemoveMovementImpairingAuras(true);
-                            break;
                         }
                         // Mug Transformation
                         case 41931:
@@ -2866,70 +2825,6 @@ namespace Game.Spells
                                 unitTarget.CastSpell(unitTarget, 46394, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
 
                             break;
-                        }
-                        // Goblin Weather Machine
-                        case 46203:
-                        {
-                            if (unitTarget == null)
-                                return;
-
-                            uint spellId = 0;
-                            switch (RandomHelper.IRand(1, 4))
-                            {
-                                case 0: spellId = 46740; break;
-                                case 1: spellId = 46739; break;
-                                case 2: spellId = 46738; break;
-                                case 3: spellId = 46736; break;
-                            }
-                            unitTarget.CastSpell(unitTarget, spellId, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
-                            break;
-                        }
-                        // 5, 000 Gold
-                        case 46642:
-                        {
-                            if (unitTarget == null || !unitTarget.IsTypeId(TypeId.Player))
-                                return;
-
-                            unitTarget.ToPlayer().ModifyMoney(5000 * MoneyConstants.Gold);
-
-                            break;
-                        }
-                        // Death Knight Initiate Visual
-                        case 51519:
-                        {
-                            if (unitTarget == null || !unitTarget.IsTypeId(TypeId.Unit))
-                                return;
-
-                            uint iTmpSpellId;
-                            switch (unitTarget.GetDisplayId())
-                            {
-                                case 25369: iTmpSpellId = 51552; break; // bloodelf female
-                                case 25373: iTmpSpellId = 51551; break; // bloodelf male
-                                case 25363: iTmpSpellId = 51542; break; // draenei female
-                                case 25357: iTmpSpellId = 51541; break; // draenei male
-                                case 25361: iTmpSpellId = 51537; break; // dwarf female
-                                case 25356: iTmpSpellId = 51538; break; // dwarf male
-                                case 25372: iTmpSpellId = 51550; break; // forsaken female
-                                case 25367: iTmpSpellId = 51549; break; // forsaken male
-                                case 25362: iTmpSpellId = 51540; break; // gnome female
-                                case 25359: iTmpSpellId = 51539; break; // gnome male
-                                case 25355: iTmpSpellId = 51534; break; // human female
-                                case 25354: iTmpSpellId = 51520; break; // human male
-                                case 25360: iTmpSpellId = 51536; break; // nightelf female
-                                case 25358: iTmpSpellId = 51535; break; // nightelf male
-                                case 25368: iTmpSpellId = 51544; break; // orc female
-                                case 25364: iTmpSpellId = 51543; break; // orc male
-                                case 25371: iTmpSpellId = 51548; break; // tauren female
-                                case 25366: iTmpSpellId = 51547; break; // tauren male
-                                case 25370: iTmpSpellId = 51545; break; // troll female
-                                case 25365: iTmpSpellId = 51546; break; // troll male
-                                default: return;
-                            }
-
-                            unitTarget.CastSpell(unitTarget, iTmpSpellId, new CastSpellExtraArgs(TriggerCastFlags.FullMask).SetOriginalCastId(m_castId));
-                            Creature npc = unitTarget.ToCreature();
-                            npc.LoadEquipment();
-                            return;
                         }
                         // Emblazon Runeblade
                         case 51770:
@@ -3098,35 +2993,6 @@ namespace Game.Spells
                             }
 
                             return;
-                        }
-                        // Stoneclaw Totem
-                        case 55328: // Rank 1
-                        case 55329: // Rank 2
-                        case 55330: // Rank 3
-                        case 55332: // Rank 4
-                        case 55333: // Rank 5
-                        case 55335: // Rank 6
-                        case 55278: // Rank 7
-                        case 58589: // Rank 8
-                        case 58590: // Rank 9
-                        case 58591: // Rank 10
-                        {
-                            // Cast Absorb on totems
-                            for (byte slot = (int)SummonSlot.Totem; slot < SharedConst.MaxTotemSlot; ++slot)
-                            {
-                                if (unitTarget.m_SummonSlot[slot].IsEmpty())
-                                    continue;
-
-                                Creature totem = unitTarget.GetMap().GetCreature(unitTarget.m_SummonSlot[slot]);
-                                if (totem != null && totem.IsTotem())
-                                {
-                                    CastSpellExtraArgs args = new(TriggerCastFlags.FullMask);
-                                    args.SetOriginalCastId(m_castId);
-                                    args.AddSpellMod(SpellValueMod.BasePoint0, damage);
-                                    m_caster.CastSpell(totem, 55277, args);
-                                }
-                            }
-                            break;
                         }
                         case 45668:                                 // Ultra-Advanced Proto-Typical Shortening Blaster
                         {

@@ -77,6 +77,12 @@ namespace Scripts.Spells.Items
         public const uint SpeedOfTheVrykulHero = 71560; // +700 Haste
         public const uint StrengthOfTheTaunkaHero = 71561;  // +700 Strength
 
+        //GoblinWeatherMachine
+        public const uint PersonalizedWeather1 = 46740;
+        public const uint PersonalizedWeather2 = 46739;
+        public const uint PersonalizedWeather3 = 46738;
+        public const uint PersonalizedWeather4 = 46736;
+
         //Defibrillate
         public const uint GoblinJumperCablesFail = 8338;
         public const uint GoblinJumperCablesXlFail = 23055;
@@ -444,6 +450,11 @@ namespace Scripts.Spells.Items
         public const uint HeartCandy6 = 21823;
         public const uint HeartCandy7 = 21822;
         public const uint HeartCandy8 = 21820;
+
+        //MirrensDrinkingHat
+        public const uint LochModanLager = 23584;
+        public const uint StouthammerLite = 23585;
+        public const uint AeriePeakPaleAle = 23586;
     }
 
     struct QuestIds
@@ -646,7 +657,7 @@ namespace Scripts.Spells.Items
         {
             GetTarget().RemoveAurasDueToSpell(SpellIds.MoteOfAnger);
         }
-        
+
         public override void Register()
         {
             OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.Dummy));
@@ -806,7 +817,7 @@ namespace Scripts.Spells.Items
             DoCheckProc.Add(new CheckProcHandler(CheckProc));
         }
     }
-    
+
     [Script] // 71564 - Deadly Precision
     class spell_item_deadly_precision : AuraScript
     {
@@ -942,6 +953,24 @@ namespace Scripts.Spells.Items
             uint maximum = 100;
 
             GetCaster().ToPlayer().DoRandomRoll(minimum, maximum);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScript, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+
+    [Script] // 46203 - Goblin Weather Machine
+    class spell_item_goblin_weather_machine : SpellScript
+    {
+        void HandleScript(uint effIndex)
+        {
+            Unit target = GetHitUnit();
+
+            uint spellId = RandomHelper.RAND(SpellIds.PersonalizedWeather1, SpellIds.PersonalizedWeather2, SpellIds.PersonalizedWeather3, SpellIds.PersonalizedWeather4);
+            target.CastSpell(target, spellId, new CastSpellExtraArgs(TriggerCastFlags.FullMask)
+                .SetOriginalCastId(GetSpell().m_castId));
         }
 
         public override void Register()
@@ -1106,7 +1135,7 @@ namespace Scripts.Spells.Items
             OnEffectPeriodic.Add(new EffectPeriodicHandler(PeriodicTick, 0, AuraType.PeriodicTriggerSpell));
         }
     }
-    
+
     [Script] // 7434 - Fate Rune of Unsurpassed Vigor
     class spell_item_fate_rune_of_unsurpassed_vigor : AuraScript
     {
@@ -1674,10 +1703,10 @@ namespace Scripts.Spells.Items
         {
             DoCheckAreaTarget.Add(new CheckAreaTargetHandler(CheckCaster));
             AfterEffectApply.Add(new EffectApplyHandler(OnApply, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
-            AfterEffectRemove .Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
+            AfterEffectRemove.Add(new EffectApplyHandler(OnRemove, 0, AuraType.Dummy, AuraEffectHandleModes.Real));
         }
     }
-    
+
     // http://www.wowhead.com/item=6657 Savory Deviate Delight
     [Script] // 8213 Savory Deviate Delight
     class spell_item_savory_deviate_delight : SpellScript
@@ -1841,7 +1870,7 @@ namespace Scripts.Spells.Items
         {
             GetTarget().RemoveAurasDueToSpell(SpellIds.ShadowmourneSoulFragment);
         }
-        
+
         public override void Register()
         {
             DoCheckProc.Add(new CheckProcHandler(CheckProc));
@@ -3043,21 +3072,21 @@ namespace Scripts.Spells.Items
             switch (aurEff.GetId())
             {
                 case SpellIds.DeathChoiceNormalAura:
-                    {
-                        if (str > agi)
-                            caster.CastSpell(caster, SpellIds.DeathChoiceNormalStrength, new CastSpellExtraArgs(aurEff));
-                        else
-                            caster.CastSpell(caster, SpellIds.DeathChoiceNormalAgility, new CastSpellExtraArgs(aurEff));
-                        break;
-                    }
+                {
+                    if (str > agi)
+                        caster.CastSpell(caster, SpellIds.DeathChoiceNormalStrength, new CastSpellExtraArgs(aurEff));
+                    else
+                        caster.CastSpell(caster, SpellIds.DeathChoiceNormalAgility, new CastSpellExtraArgs(aurEff));
+                    break;
+                }
                 case SpellIds.DeathChoiceHeroicAura:
-                    {
-                        if (str > agi)
-                            caster.CastSpell(caster, SpellIds.DeathChoiceHeroicStrength, new CastSpellExtraArgs(aurEff));
-                        else
-                            caster.CastSpell(caster, SpellIds.DeathChoiceHeroicAgility, new CastSpellExtraArgs(aurEff));
-                        break;
-                    }
+                {
+                    if (str > agi)
+                        caster.CastSpell(caster, SpellIds.DeathChoiceHeroicStrength, new CastSpellExtraArgs(aurEff));
+                    else
+                        caster.CastSpell(caster, SpellIds.DeathChoiceHeroicAgility, new CastSpellExtraArgs(aurEff));
+                    break;
+                }
                 default:
                     break;
             }
@@ -3111,7 +3140,7 @@ namespace Scripts.Spells.Items
         {
             GetTarget().RemoveAurasDueToSpell(_stackSpell);
         }
-        
+
         public override void Register()
         {
             OnEffectProc.Add(new EffectProcHandler(HandleProc, 0, AuraType.PeriodicTriggerSpell));
@@ -3241,6 +3270,37 @@ namespace Scripts.Spells.Items
         }
     }
 
+    [Script] // 29830 - Mirren's Drinking Hat
+    class spell_item_mirrens_drinking_hat : SpellScript
+    {
+        void HandleScriptEffect(uint effIndex)
+        {
+            uint itemId = 0;
+            switch (RandomHelper.URand(1, 6))
+            {
+                case 1:
+                case 2:
+                case 3:
+                    itemId = ItemIds.LochModanLager;
+                    break;
+                case 4:
+                case 5:
+                    itemId = ItemIds.StouthammerLite;
+                    break;
+                case 6:
+                    itemId = ItemIds.AeriePeakPaleAle;
+                    break;
+            }
+            if (itemId != 0)
+                CreateItem(itemId, ItemContext.None);
+        }
+
+        public override void Register()
+        {
+            OnEffectHitTarget.Add(new EffectHandler(HandleScriptEffect, 0, SpellEffectName.ScriptEffect));
+        }
+    }
+    
     [Script] // 13180 - Gnomish Mind Control Cap
     class spell_item_mind_control_cap_SpellScript : SpellScript
     {
