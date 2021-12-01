@@ -5648,6 +5648,51 @@ namespace Game.Spells
             playerTarget.SendPacket(packet);
         }
 
+
+        [SpellEffectHandler(SpellEffectName.JumpCharge)]
+        void EffectJumpCharge()
+        {
+            if (effectHandleMode != SpellEffectHandleMode.Launch)
+                return;
+
+            if (unitCaster == null)
+                return;
+
+            if (unitCaster.IsInFlight())
+                return;
+
+            JumpChargeParams jumpParams = Global.ObjectMgr.GetJumpChargeParams(effectInfo.MiscValue);
+            if (jumpParams == null)
+                return;
+
+            float speed = jumpParams.Speed;
+            if (jumpParams.TreatSpeedAsMoveTimeSeconds)
+                speed = unitCaster.GetExactDist2d(destTarget) / jumpParams.Speed;
+
+            Optional<JumpArrivalCastArgs> arrivalCast = new();
+            if (effectInfo.TriggerSpell != 0)
+            {
+                arrivalCast.HasValue = true;
+                arrivalCast.Value.SpellId = effectInfo.TriggerSpell;
+            }
+
+            Optional<SpellEffectExtraData> effectExtra = new();
+            if (jumpParams.SpellVisualId.HasValue || jumpParams.ProgressCurveId.HasValue || jumpParams.ParabolicCurveId.HasValue)
+            {
+                effectExtra.HasValue = true;
+                if (jumpParams.SpellVisualId.HasValue)
+                    effectExtra.Value.SpellVisualId = jumpParams.SpellVisualId.Value;
+
+                if (jumpParams.ProgressCurveId.HasValue)
+                    effectExtra.Value.ProgressCurveId = jumpParams.ProgressCurveId.Value;
+
+                if (jumpParams.ParabolicCurveId.HasValue)
+                    effectExtra.Value.ParabolicCurveId = jumpParams.ParabolicCurveId.Value;
+            }
+
+            unitCaster.GetMotionMaster().MoveJumpWithGravity(destTarget, speed, jumpParams.JumpGravity, EventId.Jump, false, arrivalCast.Value, effectExtra.Value);
+        }
+
         [SpellEffectHandler(SpellEffectName.LearnTransmogSet)]
         void EffectLearnTransmogSet()
         {

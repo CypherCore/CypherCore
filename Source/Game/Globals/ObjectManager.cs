@@ -26,6 +26,7 @@ using Game.Entities;
 using Game.Mails;
 using Game.Maps;
 using Game.Misc;
+using Game.Movement;
 using Game.Scripting;
 using Game.Spells;
 using System;
@@ -9846,6 +9847,77 @@ namespace Game
                 foreach (var poiPair in _questPOIStorage)
                     poiPair.Value.InitializeQueryData();
         }
+        public void LoadJumpChargeParams()
+        {
+            uint oldMSTime = Time.GetMSTime();
+
+            // need for reload case
+            _jumpChargeParams.Clear();
+
+            //                                         0   1      2                            3            4              5                6
+            SQLResult result = DB.World.Query("SELECT id, speed, treatSpeedAsMoveTimeSeconds, jumpGravity, spellVisualId, progressCurveId, parabolicCurveId FROM jump_charge_params");
+            if (result.IsEmpty())
+                return;
+
+            do
+            {
+                int id = result.Read<int>(0);
+                float speed = result.Read<float>(1);
+                bool treatSpeedAsMoveTimeSeconds = result.Read<bool>(2);
+                float jumpGravity = result.Read<float>(3);
+                Optional<uint> spellVisualId = new();
+                Optional<uint> progressCurveId = new();
+                Optional<uint> parabolicCurveId = new();
+
+                if (speed <= 0.0f)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `jump_charge_params` uses invalid speed {speed} for id {id}, set to default charge speed {MotionMaster.SPEED_CHARGE}.");
+                    speed = MotionMaster.SPEED_CHARGE;
+                }
+
+                if (jumpGravity <= 0.0f)
+                {
+                    Log.outError(LogFilter.Sql, $"Table `jump_charge_params` uses invalid jump gravity {jumpGravity} for id {id}, set to default {MotionMaster.gravity}.");
+                    jumpGravity = (float)MotionMaster.gravity;
+                }
+
+                if (!result.IsNull(4))
+                {
+                    if (CliDB.SpellVisualStorage.ContainsKey(result.Read<uint>(4)))
+                        spellVisualId.Set(result.Read<uint>(4));
+                    else
+                        Log.outError(LogFilter.Sql, $"Table `jump_charge_params` references non-existing SpellVisual: {result.Read<uint>(4)} for id {id}, ignored.");
+                }
+
+                if (!result.IsNull(5))
+                {
+                    if (CliDB.CurveStorage.ContainsKey(result.Read<uint>(5)))
+                        progressCurveId.Set(result.Read<uint>(5));
+                    else
+                        Log.outError(LogFilter.Sql, $"Table `jump_charge_params` references non-existing progress Curve: {result.Read<uint>(5)} for id {id}, ignored.");
+                }
+
+                if (!result.IsNull(6))
+                {
+                    if (CliDB.CurveStorage.ContainsKey(result.Read<uint>(6)))
+                        parabolicCurveId.Set(result.Read<uint>(6));
+                    else
+                        Log.outError(LogFilter.Sql, $"Table `jump_charge_params` references non-existing parabolic Curve: {result.Read<uint>(6)} for id {id}, ignored.");
+                }
+
+                JumpChargeParams jumpParams = new();
+                jumpParams.Speed = speed;
+                jumpParams.TreatSpeedAsMoveTimeSeconds = treatSpeedAsMoveTimeSeconds;
+                jumpParams.JumpGravity = jumpGravity;
+                jumpParams.SpellVisualId = spellVisualId;
+                jumpParams.ProgressCurveId = progressCurveId;
+                jumpParams.ParabolicCurveId = parabolicCurveId;
+                _jumpChargeParams[id] = jumpParams;
+
+            } while (result.NextRow());
+
+            Log.outInfo(LogFilter.ServerLoading, $"Loaded {_jumpChargeParams.Count} Player Choice locale strings in {Time.GetMSTimeDiffToNow(oldMSTime)} ms");
+        }
 
         public MailLevelReward GetMailLevelReward(uint level, ulong raceMask)
         {
@@ -10235,6 +10307,11 @@ namespace Game
             return _reservedNamesStorage.Contains(name.ToLower());
         }
 
+        public JumpChargeParams GetJumpChargeParams(int id)
+        {
+            return _jumpChargeParams.LookupByKey(id);
+        }
+        
         //Vehicles
         public void LoadVehicleTemplate()
         {
@@ -10392,6 +10469,7 @@ namespace Game
         Dictionary<uint, PageText> _pageTextStorage = new();
         List<string> _reservedNamesStorage = new();
         Dictionary<uint, SceneTemplate> _sceneTemplateStorage = new();
+        Dictionary<int, JumpChargeParams> _jumpChargeParams = new();
 
         Dictionary<byte, RaceUnlockRequirement> _raceUnlockRequirementStorage = new();
         List<RaceClassAvailability> _classExpansionRequirementStorage = new();

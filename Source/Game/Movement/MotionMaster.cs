@@ -23,6 +23,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using Framework.Dynamic;
 
 namespace Game.Movement
 {
@@ -41,7 +42,7 @@ namespace Game.Movement
             return -1;
         }
     }
-    
+
     public struct MovementGeneratorInformation
     {
         public MovementGeneratorType Type;
@@ -80,7 +81,7 @@ namespace Game.Movement
         Unit _owner { get; }
         MovementGenerator _defaultGenerator { get; set; }
         SortedSet<MovementGenerator> _generators { get; } = new(new MovementGeneratorComparator());
-        
+
         MultiMap<uint, MovementGenerator> _baseUnitStatesMap { get; } = new();
         Queue<MotionMasterDelayedAction> _delayedActions { get; } = new();
         MotionMasterFlags _flags { get; set; }
@@ -736,7 +737,7 @@ namespace Game.Movement
             Add(movement);
         }
 
-        void MoveJumpWithGravity(Position pos, float speedXY, float gravity, uint id = EventId.Jump, bool hasOrientation = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null)
+        public void MoveJumpWithGravity(Position pos, float speedXY, float gravity, uint id = EventId.Jump, bool hasOrientation = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null)
         {
             Log.outDebug(LogFilter.Movement, $"MotionMaster.MoveJumpWithGravity: '{_owner.GetGUID()}', jumps to point Id: {id} ({pos})");
             if (speedXY < 0.01f)
@@ -767,7 +768,7 @@ namespace Game.Movement
             movement.BaseUnitState = UnitState.Jumping;
             Add(movement);
         }
-        
+
         public void MoveCirclePath(float x, float y, float z, float radius, bool clockwise, byte stepCount)
         {
             float step = 2 * MathFunctions.PI / stepCount * (clockwise ? -1.0f : 1.0f);
@@ -1181,6 +1182,19 @@ namespace Game.Movement
         public ObjectGuid Target;
     }
 
+    public class JumpChargeParams
+    {
+        public float Speed;
+
+        public bool TreatSpeedAsMoveTimeSeconds;
+
+        public float JumpGravity;
+
+        public Optional<uint> SpellVisualId;
+        public Optional<uint> ProgressCurveId;
+        public Optional<uint> ParabolicCurveId;
+    }
+    
     public struct ChaseRange
     {
         // this contains info that informs how we should path!

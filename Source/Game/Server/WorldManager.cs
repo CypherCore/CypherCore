@@ -754,6 +754,9 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Loading Player Choices Locales...");
             Global.ObjectMgr.LoadPlayerChoicesLocale();
 
+            Log.outInfo(LogFilter.ServerLoading, "Loading Jump Charge Params...");
+            Global.ObjectMgr.LoadJumpChargeParams();
+
             CharacterDatabaseCleaner.CleanDatabase();
 
             Log.outInfo(LogFilter.ServerLoading, "Loading the max pet number...");
