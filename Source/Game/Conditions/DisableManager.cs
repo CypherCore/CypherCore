@@ -31,7 +31,7 @@ namespace Game
 
         public class DisableData
         {
-            public byte flags;
+            public ushort flags;
             public List<uint> param0 = new();
             public List<uint> param1 = new();
         }
@@ -68,7 +68,7 @@ namespace Game
                 string params_1 = result.Read<string>(4);
 
                 DisableData data = new();
-                data.flags = (byte)flags;
+                data.flags = (ushort)flags;
 
                 switch (type)
                 {
@@ -284,7 +284,7 @@ namespace Game
             Log.outInfo(LogFilter.ServerLoading, "Checked {0} quest disables in {1} ms", m_DisableMap[DisableType.Quest].Count, Time.GetMSTimeDiffToNow(oldMSTime));
         }
 
-        public bool IsDisabledFor(DisableType type, uint entry, WorldObject refe, byte flags = 0)
+        public bool IsDisabledFor(DisableType type, uint entry, WorldObject refe, ushort flags = 0)
         {
             Cypher.Assert(type < DisableType.Max);
             if (!m_DisableMap.ContainsKey(type) || m_DisableMap[type].Empty())

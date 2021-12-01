@@ -652,7 +652,7 @@ namespace Game.Scripting
                 return null;
         }
         // returns: target of current effect if it was Item otherwise null
-        Item GetHitItem()
+        public Item GetHitItem()
         {
             if (!IsInTargetHook())
             {
@@ -1308,7 +1308,7 @@ namespace Game.Scripting
         public List<AuraDispelHandler> AfterDispel = new();
 
         // executed when aura effect is applied with specified mode to target
-        // should be used when when effect handler preventing/replacing is needed, do not use this hook for triggering spellcasts/removing auras etc - may be unsafe
+        // should be used when effect handler preventing/replacing is needed, do not use this hook for triggering spellcasts/removing auras etc - may be unsafe
         // example: OnEffectApply += AuraEffectApplyFn(class.function, EffectIndexSpecifier, EffectAuraNameSpecifier, AuraEffectHandleModes);
         // where function is: void function (AuraEffect aurEff, AuraEffectHandleModes mode);
         public List<EffectApplyHandler> OnEffectApply = new();
@@ -1319,7 +1319,7 @@ namespace Game.Scripting
         public List<EffectApplyHandler> AfterEffectApply = new();
 
         // executed after aura effect is removed with specified mode from target
-        // should be used when when effect handler preventing/replacing is needed, do not use this hook for triggering spellcasts/removing auras etc - may be unsafe
+        // should be used when effect handler preventing/replacing is needed, do not use this hook for triggering spellcasts/removing auras etc - may be unsafe
         // example: OnEffectRemove += AuraEffectRemoveFn(class.function, EffectIndexSpecifier, EffectAuraNameSpecifier, AuraEffectHandleModes);
         // where function is: void function (AuraEffect aurEff, AuraEffectHandleModes mode);
         public List<EffectApplyHandler> OnEffectRemove = new();
