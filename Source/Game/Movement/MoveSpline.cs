@@ -70,8 +70,15 @@ namespace Game.Movement
                 effect_start_time = (int)(Duration() * args.time_perc);
                 if (args.flags.HasFlag(SplineFlag.Parabolic) && effect_start_time < Duration())
                 {
-                    float f_duration = (float)TimeSpan.FromMilliseconds(Duration() - effect_start_time).TotalSeconds;
-                    vertical_acceleration = args.parabolic_amplitude * 8.0f / (f_duration * f_duration);
+                    if (args.parabolic_amplitude != 0.0f)
+                    {
+                        float f_duration = MSToSec((uint)(Duration() - effect_start_time));
+                        vertical_acceleration = args.parabolic_amplitude * 8.0f / (f_duration * f_duration);
+                    }
+                    else if (args.vertical_acceleration != 0.0f)
+                    {
+                        vertical_acceleration = args.vertical_acceleration;
+                    }
                 }
             }
         }

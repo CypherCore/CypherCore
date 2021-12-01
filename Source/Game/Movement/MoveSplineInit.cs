@@ -293,6 +293,15 @@ namespace Game.Movement
         {
             args.time_perc = time_shift;
             args.parabolic_amplitude = amplitude;
+            args.vertical_acceleration = 0.0f;
+            args.flags.EnableParabolic();
+        }
+
+        public void SetParabolicVerticalAcceleration(float vertical_acceleration, float time_shift)
+        {
+            args.time_perc = time_shift;
+            args.parabolic_amplitude = 0.0f;
+            args.vertical_acceleration = vertical_acceleration;
             args.flags.EnableParabolic();
         }
 

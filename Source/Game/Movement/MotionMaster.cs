@@ -736,6 +736,38 @@ namespace Game.Movement
             Add(movement);
         }
 
+        void MoveJumpWithGravity(Position pos, float speedXY, float gravity, uint id = EventId.Jump, bool hasOrientation = false, JumpArrivalCastArgs arrivalCast = null, SpellEffectExtraData spellEffectExtraData = null)
+        {
+            Log.outDebug(LogFilter.Movement, $"MotionMaster.MoveJumpWithGravity: '{_owner.GetGUID()}', jumps to point Id: {id} ({pos})");
+            if (speedXY < 0.01f)
+                return;
+
+            MoveSplineInit init = new(_owner);
+            init.MoveTo(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), false);
+            init.SetParabolicVerticalAcceleration(gravity, 0);
+            init.SetUncompressed();
+            init.SetVelocity(speedXY);
+
+            if (hasOrientation)
+                init.SetFacing(pos.GetOrientation());
+
+            if (spellEffectExtraData != null)
+                init.SetSpellEffectExtraData(spellEffectExtraData);
+
+            uint arrivalSpellId = 0;
+            ObjectGuid arrivalSpellTargetGuid = default;
+            if (arrivalCast != null)
+            {
+                arrivalSpellId = arrivalCast.SpellId;
+                arrivalSpellTargetGuid = arrivalCast.Target;
+            }
+
+            GenericMovementGenerator movement = new GenericMovementGenerator(init, MovementGeneratorType.Effect, id, arrivalSpellId, arrivalSpellTargetGuid);
+            movement.Priority = MovementGeneratorPriority.Highest;
+            movement.BaseUnitState = UnitState.Jumping;
+            Add(movement);
+        }
+        
         public void MoveCirclePath(float x, float y, float z, float radius, bool clockwise, byte stepCount)
         {
             float step = 2 * MathFunctions.PI / stepCount * (clockwise ? -1.0f : 1.0f);

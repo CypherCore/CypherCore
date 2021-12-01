@@ -208,7 +208,7 @@ namespace Game.Networking.Packets
                 data.WriteBits(moveSpline.GetPath().Length, 16);
                 data.WriteBit(false);                                       // HasSplineFilter
                 data.WriteBit(moveSpline.spell_effect_extra.HasValue);  // HasSpellEffectExtraData
-                data.WriteBit(moveSpline.splineflags.HasFlag(SplineFlag.Parabolic));        // HasJumpExtraData
+                bool hasJumpExtraData = data.WriteBit(moveSpline.splineflags.HasFlag(SplineFlag.Parabolic) && (!moveSpline.spell_effect_extra.HasValue || moveSpline.effect_start_time != 0));
                 data.WriteBit(moveSpline.anim_tier.HasValue);                   // HasAnimationTierTransition
                 data.WriteBit(false);                                                   // HasUnknown901
                 data.FlushBits();
@@ -253,7 +253,7 @@ namespace Game.Networking.Packets
                     data.WriteUInt32(moveSpline.spell_effect_extra.Value.ParabolicCurveId);
                 }
 
-                if (moveSpline.splineflags.HasFlag(SplineFlag.Parabolic))
+                if (hasJumpExtraData)
                 {
                     data.WriteFloat(moveSpline.vertical_acceleration);
                     data.WriteInt32(moveSpline.effect_start_time);
@@ -385,7 +385,7 @@ namespace Game.Networking.Packets
 
             movementSpline.MoveTime = (uint)moveSpline.Duration();
 
-            if (splineFlags.HasFlag(SplineFlag.Parabolic))
+            if (splineFlags.HasFlag(SplineFlag.Parabolic) && (!moveSpline.spell_effect_extra.HasValue || moveSpline.effect_start_time != 0))
             {
                 movementSpline.JumpExtraData.HasValue = true;
                 movementSpline.JumpExtraData.Value.JumpGravity = moveSpline.vertical_acceleration;

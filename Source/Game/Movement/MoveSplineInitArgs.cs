@@ -42,6 +42,7 @@ namespace Game.Movement
         public int path_Idx_offset;
         public float velocity;
         public float parabolic_amplitude;
+        public float vertical_acceleration;
         public float time_perc;
         public uint splineId;
         public float initialOrientation;
