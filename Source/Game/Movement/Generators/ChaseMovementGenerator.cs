@@ -168,8 +168,8 @@ namespace Game.Movement
                     if (owner.IsHovering())
                         owner.UpdateAllowedPositionZ(x, y, ref z);
 
-                    bool success = _path.CalculatePath(x, y, z);
-                    if (!success || _path.GetPathType().HasFlag(PathType.NoPath))
+                    bool success = _path.CalculatePath(x, y, z, cOwner.CanFly());
+                    if (!success || _path.GetPathType().HasAnyFlag(PathType.NoPath | PathType.Incomplete))
                     {
                         if (cOwner)
                             cOwner.SetCannotReachTarget(true);
