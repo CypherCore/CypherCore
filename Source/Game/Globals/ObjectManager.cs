@@ -6871,11 +6871,11 @@ namespace Game
             }
 
             // Load `quest_template_addon`
-            //                               0   1         2                 3              4            5            6               7                     8
-            result = DB.World.Query("SELECT ID, MaxLevel, AllowableClasses, SourceSpellID, PrevQuestID, NextQuestID, ExclusiveGroup, RewardMailTemplateID, RewardMailDelay, " +
-                //9               10                   11                     12                     13                   14                   15
+            //                               0   1         2                 3              4            5            6               7                     8                     9
+            result = DB.World.Query("SELECT ID, MaxLevel, AllowableClasses, SourceSpellID, PrevQuestID, NextQuestID, ExclusiveGroup, BreadcrumbForQuestId, RewardMailTemplateID, RewardMailDelay, " +
+                //10               11                   12                     13                     14                   15                   16
                 "RequiredSkillID, RequiredSkillPoints, RequiredMinRepFaction, RequiredMaxRepFaction, RequiredMinRepValue, RequiredMaxRepValue, ProvidedItemCount, " +
-                //16           17
+                //17           18
                 "SpecialFlags, ScriptName FROM quest_template_addon LEFT JOIN quest_mail_sender ON Id=QuestId");
 
             if (result.IsEmpty())
@@ -7543,13 +7543,14 @@ namespace Game
                 }
 
                 // fill additional data stores
-                if (qinfo.PrevQuestId != 0)
+                uint prevQuestId = (uint)Math.Abs(qinfo.PrevQuestId);
+                if (prevQuestId != 0)
                 {
-                    var prevQuestItr = _questTemplates.LookupByKey(qinfo.PrevQuestId);
+                    var prevQuestItr = _questTemplates.LookupByKey(prevQuestId);
                     if (prevQuestItr == null)
-                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has PrevQuestId {qinfo.PrevQuestId}, but no such quest");
+                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has PrevQuestId {prevQuestId}, but no such quest");
                     else if (prevQuestItr.BreadcrumbForQuestId != 0)
-                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} should not be unlocked by breadcrumb quest {qinfo.PrevQuestId}");
+                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} should not be unlocked by breadcrumb quest {prevQuestId}");
                 }
 
                 if (qinfo.NextQuestId != 0)
