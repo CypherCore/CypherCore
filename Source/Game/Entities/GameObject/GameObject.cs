@@ -1161,6 +1161,10 @@ namespace Game.Entities
             stmt.AddValue(1, (uint)CreatureLinkedRespawnType.CreatureToGO);
             trans.Append(stmt);
 
+            stmt = DB.World.GetPreparedStatement(WorldStatements.DEL_GAMEOBJECT_ADDON);
+            stmt.AddValue(0, m_spawnId);
+            trans.Append(stmt);
+
             DB.World.CommitTransaction(trans);
         }
 
