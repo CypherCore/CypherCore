@@ -7544,8 +7544,11 @@ namespace Game
                 // fill additional data stores
                 if (qinfo.PrevQuestId != 0)
                 {
-                    if (!_questTemplates.ContainsKey((uint)Math.Abs(qinfo.PrevQuestId)))
-                        Log.outError(LogFilter.Sql, "Quest {0} has PrevQuestId {1}, but no such quest", qinfo.Id, qinfo.PrevQuestId);
+                    var prevQuestItr = _questTemplates.LookupByKey(qinfo.PrevQuestId);
+                    if (prevQuestItr == null)
+                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} has PrevQuestId {qinfo.PrevQuestId}, but no such quest");
+                    else if (prevQuestItr.BreadcrumbForQuestId != 0)
+                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} should not be unlocked by breadcrumb quest {qinfo.PrevQuestId}");
                 }
 
                 if (qinfo.NextQuestId != 0)
@@ -7557,8 +7560,55 @@ namespace Game
                         nextquest.DependentPreviousQuests.Add(qinfo.Id);
                 }
 
+                uint breadcrumbForQuestId = (uint)Math.Abs(qinfo.BreadcrumbForQuestId);
+                if (breadcrumbForQuestId != 0)
+                {
+                    if (!_questTemplates.ContainsKey(breadcrumbForQuestId))
+                    {
+                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} is a breadcrumb for quest {breadcrumbForQuestId}, but no such quest exists");
+                        qinfo.BreadcrumbForQuestId = 0;
+                    }
+                    if (qinfo.NextQuestId != 0)
+                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} is a breadcrumb, should not unlock quest {qinfo.NextQuestId}");
+                    if (qinfo.ExclusiveGroup != 0)
+                        Log.outError(LogFilter.Sql, $"Quest {qinfo.Id} is a breadcrumb in exclusive group {qinfo.ExclusiveGroup}");
+                }
+
                 if (qinfo.ExclusiveGroup != 0)
                     _exclusiveQuestGroups.Add(qinfo.ExclusiveGroup, qinfo.Id);
+            }
+
+            foreach (var questPair in _questTemplates)
+            {
+                // skip post-loading checks for disabled quests
+                if (Global.DisableMgr.IsDisabledFor(DisableType.Quest, questPair.Key, null))
+                    continue;
+
+                Quest qinfo = questPair.Value;
+                uint qid = qinfo.Id;
+                uint breadcrumbForQuestId = (uint)Math.Abs(qinfo.BreadcrumbForQuestId);
+                List<uint> questSet = new();
+
+                while (breadcrumbForQuestId != 0)
+                {
+                    //a previously visited quest was found as a breadcrumb quest
+                    //breadcrumb loop found!
+                    if (questSet.Contains(qinfo.Id))
+                    {
+                        Log.outError(LogFilter.Sql, $"Breadcrumb quests {qid} and {breadcrumbForQuestId} are in a loop");
+                        qinfo.BreadcrumbForQuestId = 0;
+                        break;
+                    }
+
+                    questSet.Add(qinfo.Id);
+
+                    qinfo = Global.ObjectMgr.GetQuestTemplate(breadcrumbForQuestId);
+
+                    //every quest has a list of every breadcrumb towards it
+                    qinfo.DependentBreadcrumbQuests.Add(qid);
+
+                    breadcrumbForQuestId = (uint)Math.Abs(qinfo.BreadcrumbForQuestId);
+                }
             }
 
             // check QUEST_SPECIAL_FLAGS_EXPLORATION_OR_EVENT for spell with SPELL_EFFECT_QUEST_COMPLETE

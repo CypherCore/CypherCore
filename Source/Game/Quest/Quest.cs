@@ -218,17 +218,18 @@ namespace Game
             PrevQuestId = fields.Read<int>(4);
             NextQuestId = fields.Read<uint>(5);
             ExclusiveGroup = fields.Read<int>(6);
-            RewardMailTemplateId = fields.Read<uint>(7);
-            RewardMailDelay = fields.Read<uint>(8);
-            RequiredSkillId = fields.Read<ushort>(9);
-            RequiredSkillPoints = fields.Read<ushort>(10);
-            RequiredMinRepFaction = fields.Read<ushort>(11);
-            RequiredMaxRepFaction = fields.Read<ushort>(12);
-            RequiredMinRepValue = fields.Read<int>(13);
-            RequiredMaxRepValue = fields.Read<int>(14);
-            SourceItemIdCount = fields.Read<byte>(15);
-            SpecialFlags = (QuestSpecialFlags)fields.Read<byte>(16);
-            ScriptId = Global.ObjectMgr.GetScriptId(fields.Read<string>(17));
+            BreadcrumbForQuestId = fields.Read<int>(7);
+            RewardMailTemplateId = fields.Read<uint>(8);
+            RewardMailDelay = fields.Read<uint>(9);
+            RequiredSkillId = fields.Read<ushort>(10);
+            RequiredSkillPoints = fields.Read<ushort>(11);
+            RequiredMinRepFaction = fields.Read<ushort>(12);
+            RequiredMaxRepFaction = fields.Read<ushort>(13);
+            RequiredMinRepValue = fields.Read<int>(14);
+            RequiredMaxRepValue = fields.Read<int>(15);
+            SourceItemIdCount = fields.Read<byte>(16);
+            SpecialFlags = (QuestSpecialFlags)fields.Read<byte>(17);
+            ScriptId = Global.ObjectMgr.GetScriptId(fields.Read<string>(18));
 
             if (SpecialFlags.HasAnyFlag(QuestSpecialFlags.AutoAccept))
                 Flags |= QuestFlags.AutoAccept;
@@ -699,27 +700,29 @@ namespace Game
         public string OfferRewardText = "";
 
         // quest_template_addon table (custom data)
-        public uint MaxLevel;
+        public uint MaxLevel { get; set; }
         public uint AllowableClasses { get; set; }
         public uint SourceSpellID { get; set; }
-        public int PrevQuestId;
-        public uint NextQuestId;
-        public int ExclusiveGroup;
+        public int PrevQuestId { get; set; }
+        public uint NextQuestId { get; set; }
+        public int ExclusiveGroup { get; set; }
+        public int BreadcrumbForQuestId { get; set; }
         public uint RewardMailTemplateId { get; set; }
         public uint RewardMailDelay { get; set; }
-        public uint RequiredSkillId;
-        public uint RequiredSkillPoints;
-        public uint RequiredMinRepFaction;
-        public int RequiredMinRepValue;
-        public uint RequiredMaxRepFaction;
-        public int RequiredMaxRepValue;
-        public uint SourceItemIdCount;
-        public uint RewardMailSenderEntry;
-        public QuestSpecialFlags SpecialFlags; // custom flags, not sniffed/WDB
+        public uint RequiredSkillId { get; set; }
+        public uint RequiredSkillPoints { get; set; }
+        public uint RequiredMinRepFaction { get; set; }
+        public int RequiredMinRepValue { get; set; }
+        public uint RequiredMaxRepFaction { get; set; }
+        public int RequiredMaxRepValue { get; set; }
+        public uint SourceItemIdCount { get; set; }
+        public uint RewardMailSenderEntry { get; set; }
+        public QuestSpecialFlags SpecialFlags { get; set; } // custom flags, not sniffed/WDB
         public BitArray _usedQuestObjectiveTypes = new((int)QuestObjectiveType.Max);
-        public uint ScriptId;
+        public uint ScriptId { get; set; }
 
         public List<uint> DependentPreviousQuests = new();
+        public List<uint> DependentBreadcrumbQuests = new();
         public QueryQuestInfoResponse QueryData;
 
         uint _rewChoiceItemsCount;

@@ -1338,7 +1338,8 @@ namespace Game.Entities
 
         public bool SatisfyQuestDependentQuests(Quest qInfo, bool msg)
         {
-            return SatisfyQuestPreviousQuest(qInfo, msg) && SatisfyQuestDependentPreviousQuests(qInfo, msg);
+            return SatisfyQuestPreviousQuest(qInfo, msg) && SatisfyQuestDependentPreviousQuests(qInfo, msg) &&
+                SatisfyQuestBreadcrumbQuest(qInfo, msg) && SatisfyQuestDependentBreadcrumbQuests(qInfo, msg);
         }
 
         public bool SatisfyQuestPreviousQuest(Quest qInfo, bool msg)
@@ -1419,6 +1420,49 @@ namespace Game.Entities
             }
 
             return false;
+        }
+
+        bool SatisfyQuestBreadcrumbQuest(Quest qInfo, bool msg)
+        {
+            uint breadcrumbTargetQuestId = (uint)Math.Abs(qInfo.BreadcrumbForQuestId);
+
+            //If this is not a breadcrumb quest.
+            if (breadcrumbTargetQuestId == 0)
+                return true;
+
+            // If the target quest is not available
+            if (!CanTakeQuest(Global.ObjectMgr.GetQuestTemplate(breadcrumbTargetQuestId), false))
+            {
+                if (msg)
+                {
+                    SendCanTakeQuestResponse(QuestFailedReasons.None);
+                    Log.outDebug(LogFilter.Misc, $"Player.SatisfyQuestBreadcrumbQuest: Sent INVALIDREASON_DONT_HAVE_REQ (QuestID: {qInfo.Id}) because target quest (QuestID: {breadcrumbTargetQuestId}) is not available to player '{GetName()}' ({GetGUID()}).");
+                }
+
+                return false;
+            }
+
+            return true;
+        }
+
+        bool SatisfyQuestDependentBreadcrumbQuests(Quest qInfo, bool msg)
+        {
+            foreach (uint breadcrumbQuestId in qInfo.DependentBreadcrumbQuests)
+            {
+                QuestStatus status = GetQuestStatus(breadcrumbQuestId);
+                // If any of the breadcrumb quests are in the quest log, return false.
+                if (status == QuestStatus.Incomplete || status == QuestStatus.Complete || status == QuestStatus.Failed)
+                {
+                    if (msg)
+                    {
+                        SendCanTakeQuestResponse(QuestFailedReasons.None);
+                        Log.outDebug(LogFilter.Misc, $"Player.SatisfyQuestDependentBreadcrumbQuests: Sent INVALIDREASON_DONT_HAVE_REQ (QuestID: {qInfo.Id}) because player '{GetName()}' ({GetGUID()}) has a breadcrumb quest towards this quest in the quest log.");
+                    }
+
+                    return false;
+                }
+            }
+            return true;
         }
 
         public bool SatisfyQuestClass(Quest qInfo, bool msg)
