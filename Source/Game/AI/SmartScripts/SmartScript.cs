@@ -2438,6 +2438,17 @@ namespace Game.AI
 
                     break;
                 }
+                case SmartActions.PlayCinematic:
+                {
+                    foreach (WorldObject target in targets)
+                    {
+                        if (!IsPlayer(target))
+                            continue;
+
+                        target.ToPlayer().SendCinematicStart(e.Action.cinematic.entry);
+                    }
+                    break;
+                }
                 default:
                     Log.outError(LogFilter.Sql, "SmartScript.ProcessAction: Entry {0} SourceType {1}, Event {2}, Unhandled Action type {3}", e.EntryOrGuid, e.GetScriptType(), e.EventId, e.GetActionType());
                     break;

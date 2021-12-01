@@ -1412,6 +1412,16 @@ namespace Game.AI
                     }
                     break;
                 }
+                case SmartActions.PlayCinematic:
+                {
+                    if (!CliDB.CinematicSequencesStorage.ContainsKey(e.Action.cinematic.entry))
+                    {
+                        Log.outError(LogFilter.Sql, $"SmartAIMgr: SMART_ACTION_PLAY_CINEMATIC {e} uses invalid entry {e.Action.cinematic.entry}, skipped.");
+                        return false;
+                    }
+
+                    break;
+                }
                 case SmartActions.SetMovementSpeed:
                 {
                     if (e.Action.movementSpeed.movementType >= (int)MovementGeneratorType.Max)
@@ -2531,6 +2541,9 @@ namespace Game.AI
         public Scene scene;
 
         [FieldOffset(4)]
+        public Cinematic cinematic;
+
+        [FieldOffset(4)]
         public MovementSpeed movementSpeed;
 
         [FieldOffset(4)]
@@ -3044,6 +3057,10 @@ namespace Game.AI
         public struct Scene
         {
             public uint sceneId;
+        }
+        public struct Cinematic
+        {
+            public uint entry;
         }
         public struct MovementSpeed
         {

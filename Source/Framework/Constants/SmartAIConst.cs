@@ -389,7 +389,7 @@ namespace Framework.Constants
         DespawnSpawngroup = 132,    // Group ID, min secs, max secs, spawnflags
         RespawnBySpawnId = 133,    // spawnType, spawnId
         InvokerCast = 134, // spellID, castFlags
-        PlayCinematic = 135,    // reserved for future uses
+        PlayCinematic = 135,    // entry, cinematic
         SetMovementSpeed = 136,    // movementType, speedInteger, speedFraction
         PlaySpellVisualKit = 137, // spellVisualKitId, kitType (unknown values, copypaste from packet dumps), duration
         CreateConversation = 143, // conversation_template.id
