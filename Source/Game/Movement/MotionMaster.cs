@@ -347,11 +347,7 @@ namespace Game.Movement
                     if (!_generators.Empty())
                     {
                         if (_generators.Contains(movement))
-                        {
-                            bool top = GetCurrentMovementGenerator() == movement;
-                            _generators.Remove(movement);
-                            Delete(movement, top, false);
-                        }
+                            Remove(movement, GetCurrentMovementGenerator() == movement, false);
                     }
                     break;
                 default:
@@ -384,12 +380,7 @@ namespace Game.Movement
                     {
                         var itr = _generators.FirstOrDefault(a => a.GetMovementGeneratorType() == type);
                         if (itr != null)
-                        {
-                            MovementGenerator pointer = itr;
-                            bool top = GetCurrentMovementGenerator() == pointer;
-                            _generators.Remove(pointer);
-                            Delete(pointer, top, false);
-                        }
+                            Remove(itr, GetCurrentMovementGenerator() == itr, false);
                     }
                     break;
                 default:
@@ -982,11 +973,15 @@ namespace Game.Movement
             Add(movement);
         }
 
+        void Remove(MovementGenerator movement, bool active, bool movementInform)
+        {
+            _generators.Remove(movement);
+            Delete(movement, active, movementInform);
+        }
+
         void Pop(bool active, bool movementInform)
         {
-            MovementGenerator pointer = _generators.FirstOrDefault();
-            _generators.Remove(pointer);
-            Delete(pointer, active, movementInform);
+            Remove(_generators.FirstOrDefault(), active, movementInform);
         }
 
         void DirectInitialize()
@@ -1064,8 +1059,6 @@ namespace Game.Movement
  * NOTE: This mimics old behaviour: only one MOTION_SLOT_IDLE, MOTION_SLOT_ACTIVE, MOTION_SLOT_CONTROLLED
  * On future changes support for multiple will be added
  */
-
-
             switch (slot)
             {
                 case MovementSlot.Default:
@@ -1081,23 +1074,17 @@ namespace Game.Movement
                     {
                         if (movement.Priority >= _generators.FirstOrDefault().Priority)
                         {
-                            MovementGenerator pointer = _generators.FirstOrDefault();
-                            if (movement.Priority == pointer.Priority)
-                            {
-                                _generators.Remove(pointer);
-                                Delete(pointer, true, false);
-                            }
+                            var itr = _generators.FirstOrDefault();
+                            if (movement.Priority == itr.Priority)
+                                Remove(itr, true, false);
                             else
-                                pointer.Deactivate(_owner);
+                                itr.Deactivate(_owner);
                         }
                         else
                         {
                             var pointer = _generators.FirstOrDefault(a => a.Priority == movement.Priority);
                             if (pointer != null)
-                            {
-                                _generators.Remove(pointer);
-                                Delete(pointer, false, false);
-                            }
+                                Remove(pointer, false, false);
                         }
                     }
                     else
