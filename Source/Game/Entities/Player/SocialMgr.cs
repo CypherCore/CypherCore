@@ -261,21 +261,31 @@ namespace Game.Entities
             if (!player)
                 return;
 
+            uint friendsCount = 0;
+            uint ignoredCount = 0;
+
             ContactList contactList = new();
             contactList.Flags = flags;
 
             foreach (var v in PlayerSocialMap)
             {
-                if (!v.Value.Flags.HasAnyFlag(flags))
+                SocialFlag contactFlags = v.Value.Flags;
+                if (!contactFlags.HasAnyFlag(flags))
                     continue;
+
+                // Check client limit for friends list
+                if (contactFlags.HasFlag(SocialFlag.Friend))
+                    if (++friendsCount > SocialManager.FriendLimit)
+                        continue;
+
+                // Check client limit for ignore list
+                if (contactFlags.HasFlag(SocialFlag.Ignored))
+                    if (++ignoredCount > SocialManager.IgnoreLimit)
+                        continue;
 
                 Global.SocialMgr.GetFriendInfo(player, v.Key, v.Value);
 
                 contactList.Contacts.Add(new ContactInfo(v.Key, v.Value));
-
-                // client's friends list and ignore list limit
-                if (contactList.Contacts.Count >= (((flags & SocialFlag.Friend) != 0) ? SocialManager.FriendLimit : SocialManager.IgnoreLimit))
-                    break;
             }
 
             player.SendPacket(contactList);
