@@ -98,9 +98,12 @@ namespace Framework.Constants
         HideModel = 0x02,
         Activate = 0x04,
         Animate = 0x08,
-        NoInteract = 0x10,
+        Depleted = 0x10,
         Sparkle = 0x20,
-        Stopped = 0x40
+        Stopped = 0x40,
+        NoInterract = 0x80,
+        InvertedMovement = 0x100,
+        Highlight = 0x200
     }
 
     public enum GameObjectFlags
@@ -115,8 +118,14 @@ namespace Framework.Constants
         FreezeAnimation = 0x80,
         Damaged = 0x200,
         Destroyed = 0x400,
+
+        IgnoreCurrentStateForUseSpell = 0x4000, // Allows casting use spell without checking current state (opening open gameobjects, unlocking unlocked gameobjects and closing closed gameobjects)
+        InteractDistanceIgnoresModel = 0x8000, // Client completely ignores model bounds for interaction distance check
+        IgnoreCurrentStateForUseSpellExceptUnlocked = 0x40000, // Allows casting use spell without checking current state except unlocking unlocked gamobjets (opening open gameobjects and closing closed gameobjects)
         InteractDistanceUsesTemplateModel = 0x80000, // client checks interaction distance from model sent in SMSG_QUERY_GAMEOBJECT_RESPONSE instead of GAMEOBJECT_DISPLAYID
-        MapObject = 0x00100000                    // pre-7.0 model loading used to be controlled by file extension (wmo vs m2)
+        MapObject = 0x100000, // pre-7.0 model loading used to be controlled by file extension (wmo vs m2)
+        InMultiUse = 0x200000, // GO_FLAG_IN_USE equivalent for objects usable by multiple players
+        LowPrioritySelection = 0x4000000, // client will give lower cursor priority to this object when multiple objects overlap
     }
 
     public enum LootState

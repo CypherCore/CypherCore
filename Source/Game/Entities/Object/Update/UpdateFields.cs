@@ -117,13 +117,13 @@ namespace Game.Entities
                         case GameObjectTypes.Chest:
                         case GameObjectTypes.Goober:
                             if (gameObject.ActivateToQuest(receiver))
-                                dynFlags |= GameObjectDynamicLowFlags.Activate | GameObjectDynamicLowFlags.Sparkle;
+                                dynFlags |= GameObjectDynamicLowFlags.Activate | GameObjectDynamicLowFlags.Sparkle | GameObjectDynamicLowFlags.Highlight;
                             else if (receiver.IsGameMaster())
                                 dynFlags |= GameObjectDynamicLowFlags.Activate;
                             break;
                         case GameObjectTypes.Generic:
                             if (gameObject.ActivateToQuest(receiver))
-                                dynFlags |= GameObjectDynamicLowFlags.Sparkle;
+                                dynFlags |= GameObjectDynamicLowFlags.Sparkle | GameObjectDynamicLowFlags.Highlight;
                             break;
                         case GameObjectTypes.Transport:
                         case GameObjectTypes.MapObjTransport:
